@@ -22,7 +22,7 @@ Expr <RefId "b" test.lkt:2:45-2:46>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <BinOp test.lkt:2:41-2:46>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "a" test.lkt:2:52-2:53>
      references <FunArgDecl "a" test.lkt:2:15-2:21>

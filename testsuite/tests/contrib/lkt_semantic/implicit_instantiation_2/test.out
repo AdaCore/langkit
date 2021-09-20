@@ -22,7 +22,7 @@ Id   <RefId "T" test.lkt:13:32-13:33>
      references <GenericFormalTypeDecl "T" test.lkt:13:10-13:11>
 
 Id   <RefId "Array" test.lkt:13:36-13:41>
-     references <GenericDecl "Array" __prelude:18:10-20:2>
+     references <GenericDecl "Array" __prelude:20:10-22:2>
 
 Id   <RefId "T" test.lkt:13:42-13:43>
      references <GenericFormalTypeDecl "T" test.lkt:13:10-13:11>
@@ -40,31 +40,31 @@ Id   <RefId "T" test.lkt:14:45-14:46>
      references <GenericFormalTypeDecl "T" test.lkt:14:10-14:11>
 
 Id   <RefId "Array" test.lkt:17:20-17:25>
-     references <GenericDecl "Array" __prelude:18:10-20:2>
+     references <GenericDecl "Array" __prelude:20:10-22:2>
 
 Id   <RefId "Int" test.lkt:17:26-17:29>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:17:33-17:38>
-     references <GenericDecl "Array" __prelude:18:10-20:2>
+     references <GenericDecl "Array" __prelude:20:10-22:2>
 
 Id   <RefId "String" test.lkt:17:39-17:45>
-     references <StructDecl "String" __prelude:24:10-26:2>
+     references <StructDecl "String" __prelude:26:10-28:2>
 
 Id   <RefId "ints" test.lkt:17:49-17:53>
      references <FunArgDecl "ints" test.lkt:17:14-17:30>
 
 Expr <RefId "ints" test.lkt:17:49-17:53>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
 
 Id   <RefId "map" test.lkt:17:54-17:57>
-     references <GenericDecl "map" __prelude:15:14-15:61>
+     references <GenericDecl "map" __prelude:17:14-17:61>
 
 Id   <RefId "convert_int" test.lkt:17:65-17:76>
      references <GenericDecl "convert_int" test.lkt:11:1-11:41>
 
 Id   <RefId "String" test.lkt:17:77-17:83>
-     references <StructDecl "String" __prelude:24:10-26:2>
+     references <StructDecl "String" __prelude:26:10-28:2>
 
 Expr <GenericInstantiation test.lkt:17:65-17:84>
      has type <FunctionType "(Int) -> String" __prelude>
@@ -76,40 +76,40 @@ Expr <RefId "i" test.lkt:17:85-17:86>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:17:65-17:87>
-     has type <StructDecl "String" __prelude:24:10-26:2>
+     has type <StructDecl "String" __prelude:26:10-28:2>
 
 Expr <LambdaExpr test.lkt:17:58-17:87>
      has type <FunctionType "(Int) -> String" __prelude>
 
 Expr <CallExpr test.lkt:17:49-17:88>
-     has type <InstantiatedGenericType "Array[String]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[String]" __prelude:20:10-22:2>
 
 Id   <RefId "Array" test.lkt:20:26-20:31>
-     references <GenericDecl "Array" __prelude:18:10-20:2>
+     references <GenericDecl "Array" __prelude:20:10-22:2>
 
 Id   <RefId "Int" test.lkt:20:32-20:35>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:20:39-20:44>
-     references <GenericDecl "Array" __prelude:18:10-20:2>
+     references <GenericDecl "Array" __prelude:20:10-22:2>
 
 Id   <RefId "String" test.lkt:20:45-20:51>
-     references <StructDecl "String" __prelude:24:10-26:2>
+     references <StructDecl "String" __prelude:26:10-28:2>
 
 Id   <RefId "ints" test.lkt:21:5-21:9>
      references <FunArgDecl "ints" test.lkt:20:20-20:36>
 
 Expr <RefId "ints" test.lkt:21:5-21:9>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
 
 Id   <RefId "filtermap" test.lkt:21:10-21:19>
-     references <GenericDecl "filtermap" __prelude:16:14-16:97>
+     references <GenericDecl "filtermap" __prelude:18:14-18:97>
 
 Id   <RefId "convert_int" test.lkt:22:16-22:27>
      references <GenericDecl "convert_int" test.lkt:11:1-11:41>
 
 Id   <RefId "String" test.lkt:22:28-22:34>
-     references <StructDecl "String" __prelude:24:10-26:2>
+     references <StructDecl "String" __prelude:26:10-28:2>
 
 Expr <GenericInstantiation test.lkt:22:16-22:35>
      has type <FunctionType "(Int) -> String" __prelude>
@@ -121,7 +121,7 @@ Expr <RefId "i" test.lkt:22:36-22:37>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:22:16-22:38>
-     has type <StructDecl "String" __prelude:24:10-26:2>
+     has type <StructDecl "String" __prelude:26:10-28:2>
 
 Expr <LambdaExpr test.lkt:22:9-22:38>
      has type <FunctionType "(Int) -> String" __prelude>
@@ -136,13 +136,13 @@ Expr <NumLit test.lkt:23:20-23:21>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <BinOp test.lkt:23:16-23:21>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Expr <LambdaExpr test.lkt:23:9-23:21>
      has type <FunctionType "(Int) -> Bool" __prelude>
 
 Expr <CallExpr test.lkt:21:5-24:6>
-     has type <InstantiatedGenericType "Array[String]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[String]" __prelude:20:10-22:2>
 
 test.lkt:27:41: error: Cannot find entity `A` in this scope
 26 | @invalid fun test_handle_ce_error(arg : A): Int = arg.method_doesnt_exist()
@@ -173,7 +173,7 @@ Id   <RefId "Int" test.lkt:32:47-32:50>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Bool" test.lkt:32:52-32:56>
-     references <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     references <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 test.lkt:32:60: error: Instantiation error: conflicting actual types for formal `T`: `Int` and `Bool`
 31 | @invalid fun test_conflicting_actuals(): Pair[Int, Bool] = mkPair(1)
