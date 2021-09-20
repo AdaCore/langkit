@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class Block : FooNode {
@@ -24,6 +24,6 @@ class Ref : FooNode {
     @export fun referenced (): FooNode =
     node.referenced_env().env_node.as_bare_entity
 
-    @memoized fun referenced_env (): LexicalEnv =
+    @memoized fun referenced_env (): LexicalEnv[FooNode] =
     node.node_env().get(node.name.symbol)?(0).children_env()
 }

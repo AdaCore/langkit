@@ -1,4 +1,4 @@
-class RootNode : Node {}
+class RootNode implements Node[RootNode] {}
 class ChildNode : RootNode {}
 
 a : RootNode

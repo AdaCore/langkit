@@ -9,7 +9,7 @@ enum Color {
     case red, green, blue
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class Example : FooNode {

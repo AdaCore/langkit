@@ -1,26 +1,28 @@
-class Name : Node implements TokenNode {
+@abstract class RootNode implements Node[RootNode] {}
 
-    fun parent_node (): Node = node.parent
+class Name : RootNode implements TokenNode {
 
-    fun parent_env (): LexicalEnv = node.parent.node_env()
-    fun parent_env (): LexicalEnv = node.parent_node().node_env()
+    fun parent_node (): RootNode = node.parent
 
-    fun parent_env_node (): Node = node.parent.node_env().get(node.symbol)?(0)
-    fun parent_env_node (): Node = node.parent_env().get(node.symbol)?(0)
+    fun parent_env (): LexicalEnv[RootNode] = node.parent.node_env()
+    fun parent_env (): LexicalEnv[RootNode] = node.parent_node().node_env()
 
-    fun analysis_unit_node (): Node = node.unit().root
+    fun parent_env_node (): RootNode = node.parent.node_env().get(node.symbol)?(0)
+    fun parent_env_node (): RootNode = node.parent_env().get(node.symbol)?(0)
 
-    fun first_node (): Node = node.node_env().get_first(node.symbol)
+    fun analysis_unit_node (): RootNode = node.unit().root
 
-    fun env_node (): Node = node.node_env().env_node()
+    fun first_node (): RootNode = node.node_env().get_first(node.symbol)
 
-    fun children_env (): LexicalEnv = node.children_env()
+    fun env_node (): RootNode = node.node_env().env_node()
+
+    fun children_env (): LexicalEnv[RootNode] = node.children_env()
 
     fun to_symbol (s : String): Symbol = s.to_symbol
 
-    fun parent_nodes (): Array[Node] = node.parents()
-    fun parent_nodes (): Array[Node] = node.parents(with_self=false)
+    fun parent_nodes (): Array[RootNode] = node.parents()
+    fun parent_nodes (): Array[RootNode] = node.parents(with_self=false)
 
-    fun node_iterator (): Iterator[Node] = node.parents().to_iterator
+    fun node_iterator (): Iterator[RootNode] = node.parents().to_iterator
 
 }

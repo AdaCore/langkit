@@ -9,7 +9,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 @abstract class Name : FooNode {
@@ -26,7 +26,7 @@ grammar foo_grammar {
 
     @abstract fun referenced_name (): Symbol
 
-    @abstract fun referenced_scope (): LexicalEnv
+    @abstract fun referenced_scope (): LexicalEnv[FooNode]
 }
 
 class DottedName : Name {
@@ -35,9 +35,10 @@ class DottedName : Name {
 
     fun referenced_name (): Symbol = node.suffix.referenced_name()
 
-    fun referenced_parent_scope (): LexicalEnv = node.prefix.referenced_scope()
+    fun referenced_parent_scope (): LexicalEnv[FooNode] =
+    node.prefix.referenced_scope()
 
-    fun referenced_scope (): LexicalEnv =
+    fun referenced_scope (): LexicalEnv[FooNode] =
     node.suffix.resolve_scope(node.referenced_parent_scope())
 }
 
@@ -45,7 +46,8 @@ class Identifier : Name implements TokenNode {
 
     fun referenced_name (): Symbol = node.symbol
 
-    fun resolve_scope (from_env : LexicalEnv): LexicalEnv = {
+    fun resolve_scope (from_env : LexicalEnv[FooNode]): LexicalEnv[FooNode] =
+    {
         val env = from_env.do(
             (e) => e, default_val=node.referenced_parent_scope()
         );
@@ -53,9 +55,10 @@ class Identifier : Name implements TokenNode {
         env.get(node.symbol)?(0).children_env()
     }
 
-    fun referenced_parent_scope (): LexicalEnv = node.unit().root.children_env()
+    fun referenced_parent_scope (): LexicalEnv[FooNode] =
+    node.unit().root.children_env()
 
-    fun referenced_scope (): LexicalEnv = node.resolve_scope(_)
+    fun referenced_scope (): LexicalEnv[FooNode] = node.resolve_scope(_)
 }
 
 class Ref : FooNode {

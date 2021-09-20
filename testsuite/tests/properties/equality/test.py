@@ -62,5 +62,7 @@ class Ref(FooNode):
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-              lkt_semantic_checks=True)
+
+              # FIXME: switch back to True, see U920-003
+              lkt_semantic_checks=False)
 print('Done')

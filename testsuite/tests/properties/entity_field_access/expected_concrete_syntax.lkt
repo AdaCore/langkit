@@ -8,7 +8,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 
     @export fun first_set (): Bool = self.info.md.is_first
 

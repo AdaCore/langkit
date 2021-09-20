@@ -15,7 +15,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class Block : FooNode {
@@ -33,7 +33,7 @@ class Name : FooNode implements TokenNode {
 
     fun ambiant_entity (): FooNode = env.get(node)?(0)
 
-    fun designated_env (): LexicalEnv =
+    fun designated_env (): LexicalEnv[FooNode] =
     node.unit().root.node_env().get(node)?(0).children_env()
 
     @export fun entity (): FooNode = {

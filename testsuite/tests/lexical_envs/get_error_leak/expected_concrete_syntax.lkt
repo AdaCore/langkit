@@ -11,12 +11,13 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class ErrorUseClause : FooNode {
 
-    fun resolve (): LexicalEnv = raise PropertyError("unconditionally raised")
+    fun resolve (): LexicalEnv[FooNode] =
+    raise PropertyError("unconditionally raised")
 }
 
 class Id : FooNode implements TokenNode {
@@ -38,6 +39,6 @@ class Scope : FooNode {
 class UseClause : FooNode {
     @parse_field name : Id
 
-    fun resolve (): LexicalEnv =
+    fun resolve (): LexicalEnv[FooNode] =
     node.name.resolve().map((n) => n.children_env()).env_group()
 }

@@ -5,7 +5,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class RootNode : Node {
+@abstract class RootNode implements Node[RootNode] {
 }
 
 class ExampleNode : RootNode {

@@ -13,7 +13,7 @@ enum E2 {
     case x, y, z
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class Example : FooNode {

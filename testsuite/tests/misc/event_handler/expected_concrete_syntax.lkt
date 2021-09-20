@@ -5,9 +5,9 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 
-    @export @abstract fun get_unit (name : Symbol): AnalysisUnit
+    @export @abstract fun get_unit (name : Symbol): AnalysisUnit[FooNode]
 }
 
 class Example : FooNode implements TokenNode {

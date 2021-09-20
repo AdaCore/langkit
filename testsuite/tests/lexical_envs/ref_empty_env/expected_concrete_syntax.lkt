@@ -21,7 +21,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class Block : FooNode {
@@ -44,7 +44,7 @@ class Decl : Item {
 class Open : Item {
     @parse_field name : Identifier
 
-    fun resolve (): LexicalEnv = {
+    fun resolve (): LexicalEnv[FooNode] = {
         val n = node.name.resolve();
 
         n.do(

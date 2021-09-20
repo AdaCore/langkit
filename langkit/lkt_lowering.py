@@ -53,7 +53,7 @@ def get_trait(decl: L.TypeDecl, trait_name: str) -> Optional[L.TypeDecl]:
     """
     for trait in decl.f_traits:
         trait_decl: L.TypeDecl = trait.p_designated_type
-        if trait_decl.f_syn_name.text == trait_name:
+        if trait_decl.p_name == trait_name:
             return trait_decl
     return None
 
@@ -1710,31 +1710,14 @@ class LktTypesLoader:
 
         # Resolve the base node (if any)
         base_type: Optional[ASTNodeType]
-        check_source_language(
-            decl.f_base_type is not None,
-            'Missing mandatory base class'
-        )
-        base_type_decl = decl.f_base_type.p_designated_type
-        if base_type_decl == base_type_decl.p_node_type:
-            base_type = None
-        else:
-            base_type = cast(ASTNodeType,
-                             self.lower_type_decl(base_type_decl))
 
-        check_source_language(
-            base_type is None or not base_type.is_enum_node,
-            'Inheritting from an enum node is forbidden'
-        )
-
-        # Make sure the Node trait is used exactly once, on the root node
-        if base_type is None:
+        # Root node case
+        if decl.f_base_type is None:
             check_source_language(
-                # The only case in which base_type can be None is if
-                # base_type_decl is not (and hence is the root node type, see
-                # above).
-                base_type_decl is not None,
-                'The root node should derive from Node'
+                get_trait(decl, "Node") is not None,
+                'The root node must implement the Node trait'
             )
+
             if CompiledTypeRepo.root_grammar_class is not None:
                 check_source_language(
                     False,
@@ -1743,10 +1726,23 @@ class LktTypesLoader:
                     )
                 )
 
-        # This is a token node if either the TokenNode trait is implemented or
-        # if the base node is a token node itself. Likewise for ErrorNode.
-        is_token_node = get_trait(decl, "TokenNode") is not None
-        is_error_node = get_trait(decl, "ErrorNode") is not None
+            base_type = None
+            is_token_node = is_error_node = False
+        else:
+            base_type_decl = decl.f_base_type.p_designated_type
+            base_type = cast(ASTNodeType,
+                             self.lower_type_decl(base_type_decl))
+
+            # This is a token node if either the TokenNode trait is implemented
+            # or if the base node is a token node itself. Likewise for
+            # ErrorNode.
+            is_token_node = get_trait(decl, "TokenNode") is not None
+            is_error_node = get_trait(decl, "ErrorNode") is not None
+
+            check_source_language(
+                base_type is not base_type.is_enum_node,
+                'Inheritting from an enum node is forbidden'
+            )
 
         # Lower fields. Regular nodes can hold all types of fields, but token
         # nodes and enum nodes can hold only user field and properties.

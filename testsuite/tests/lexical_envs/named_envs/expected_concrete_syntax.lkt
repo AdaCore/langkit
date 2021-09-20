@@ -67,7 +67,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 
     ## Return whether this node is in the top-level decl list.
     fun is_toplevel (): Bool =
@@ -188,18 +188,19 @@ class IncompleteTypeDecl : FooNode {
 
     ## Innermost scope for this name. The lookup starts from the given
     ## environment.
-    fun scope (from_env : LexicalEnv): LexicalEnv =
+    fun scope (from_env : LexicalEnv[FooNode]): LexicalEnv[FooNode] =
     node.resolve(from_env).children_env()
 
     ## Return the scope that contains the declaration that this name defines.
-    fun parent_scope (from_env : LexicalEnv): LexicalEnv = match node {
+    fun parent_scope (from_env : LexicalEnv[FooNode]): LexicalEnv[FooNode] =
+    match node {
         case _ : Identifier => from_env
         case dn : DottedName => dn.prefix.scope(from_env)
     }
 
     ## Return the list of declarations that define this name. The lookup
     ## starts from the given environment.
-    fun resolve (from_env : LexicalEnv): FooNode =
+    fun resolve (from_env : LexicalEnv[FooNode]): FooNode =
     node.parent_scope(from_env).get_first(node.base_name().to_symbol)
 }
 
@@ -219,7 +220,7 @@ class PackageBody : FooNode {
 
     ## Assuming this PackageBody is not in the top-level list, return the
     ## environment of its PackageDecl that it should reference.
-    fun body_decl_scope (): LexicalEnv = {
+    fun body_decl_scope (): LexicalEnv[FooNode] = {
         val pkg_decl = node.lookup_decl_part();
 
         if (pkg_decl.private_part.is_null) then pkg_decl.children_env() else pkg_decl.private_part.children_env()
