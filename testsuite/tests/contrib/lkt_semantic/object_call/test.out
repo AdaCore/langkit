@@ -4,7 +4,7 @@ Id   <RefId "Int" test.lkt:4:17-4:20>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:4:23-4:28>
-     references <GenericDecl "Array" __prelude:18:10-20:2>
+     references <GenericDecl "Array" __prelude:20:10-22:2>
 
 Id   <RefId "Int" test.lkt:4:29-4:32>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -22,7 +22,7 @@ Expr <NumLit test.lkt:5:19-5:21>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:5:15-5:22>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
 
 Expr <NumLit test.lkt:5:23-5:24>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -43,7 +43,7 @@ Expr <NumLit test.lkt:7:43-7:45>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:7:39-7:46>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
 
 test.lkt:7:47: error: Mismatched types: expected `Int`, got a string literal
 6 | @incorrect val incorrect_call : Int = arr(12)("a")
@@ -69,7 +69,7 @@ Expr <NumLit test.lkt:8:45-8:47>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:8:41-8:48>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
 
 Expr <CallExpr test.lkt:8:41-8:50>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -91,7 +91,7 @@ Expr <NumLit test.lkt:9:45-9:47>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:9:41-9:48>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
 
 Expr <NumLit test.lkt:9:49-9:50>
      has type <StructDecl "Int" __prelude:1:10-1:23>

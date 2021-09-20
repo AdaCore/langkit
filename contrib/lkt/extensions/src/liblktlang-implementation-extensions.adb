@@ -9,7 +9,9 @@ package body Liblktlang.Implementation.Extensions is
 
    Prelude_Content : constant String :=
      "@builtin struct Int {}" & ASCII.LF &
-     "@builtin struct BigInt {}" & ASCII.LF &
+     "@builtin struct BigInt {" & ASCII.LF &
+     "    @builtin fun as_int(): Int" & ASCII.LF &
+     "}" & ASCII.LF &
      "@builtin struct Symbol {}" & ASCII.LF &
      "@builtin struct Regexp {}" & ASCII.LF &
      "@builtin @open enum Bool {" & ASCII.LF &

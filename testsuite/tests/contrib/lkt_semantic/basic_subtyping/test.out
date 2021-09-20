@@ -31,7 +31,7 @@ Id   <RefId "Baseclass" test.lkt:15:40-15:49>
      references <ClassDecl "Baseclass" test.lkt:4:1-6:2>
 
 Id   <RefId "Bool" test.lkt:15:52-15:56>
-     references <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     references <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "a" test.lkt:15:60-15:61>
      references <FunArgDecl "a" test.lkt:15:23-15:35>
@@ -46,10 +46,10 @@ Expr <RefId "b" test.lkt:15:64-15:65>
      has type <ClassDecl "Baseclass" test.lkt:4:1-6:2>
 
 Expr <BinOp test.lkt:15:60-15:65>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Expr <ParenExpr test.lkt:15:59-15:66>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "Baseclass" test.lkt:16:27-16:36>
      references <ClassDecl "Baseclass" test.lkt:4:1-6:2>
@@ -58,7 +58,7 @@ Id   <RefId "Subsubclass" test.lkt:16:41-16:52>
      references <ClassDecl "Subsubclass" test.lkt:10:1-10:32>
 
 Id   <RefId "Bool" test.lkt:16:55-16:59>
-     references <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     references <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "test_subtyping_2" test.lkt:17:3-17:19>
      references <FunDecl "test_subtyping_2" test.lkt:15:1-15:66>
@@ -79,7 +79,7 @@ Expr <RefId "b" test.lkt:17:23-17:24>
      has type <ClassDecl "Baseclass" test.lkt:4:1-6:2>
 
 Expr <CallExpr test.lkt:17:3-17:25>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "Subclass" test.lkt:18:36-18:44>
      references <ClassDecl "Subclass" test.lkt:8:1-8:30>

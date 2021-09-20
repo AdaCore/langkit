@@ -80,34 +80,34 @@ Expr <BinOp test.lkt:14:39-14:48>
      has type <ClassDecl "A" test.lkt:1:12-26:2>
 
 Id   <RefId "Regexp" test.lkt:16:26-16:32>
-     references <StructDecl "Regexp" __prelude:4:10-4:26>
+     references <StructDecl "Regexp" __prelude:6:10-6:26>
 
 Expr <StringLit test.lkt:16:35-16:43>
-     has type <StructDecl "Regexp" __prelude:4:10-4:26>
+     has type <StructDecl "Regexp" __prelude:6:10-6:26>
 
 Id   <RefId "Regexp" test.lkt:18:26-18:32>
-     references <StructDecl "Regexp" __prelude:4:10-4:26>
+     references <StructDecl "Regexp" __prelude:6:10-6:26>
 
 Expr <StringLit test.lkt:19:18-19:26>
-     has type <StructDecl "Regexp" __prelude:4:10-4:26>
+     has type <StructDecl "Regexp" __prelude:6:10-6:26>
 
 Id   <RefId "rg" test.lkt:20:9-20:11>
      references <ValDecl "rg" test.lkt:19:9-19:26>
 
 Expr <RefId "rg" test.lkt:20:9-20:11>
-     has type <StructDecl "Regexp" __prelude:4:10-4:26>
+     has type <StructDecl "Regexp" __prelude:6:10-6:26>
 
 Expr <BlockExpr test.lkt:18:35-21:6>
-     has type <StructDecl "Regexp" __prelude:4:10-4:26>
+     has type <StructDecl "Regexp" __prelude:6:10-6:26>
 
 Id   <RefId "Int" test.lkt:23:22-23:25>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "true" test.lkt:23:31-23:35>
-     references <EnumLitDecl "true" __prelude:6:17-6:21>
+     references <EnumLitDecl "true" __prelude:8:17-8:21>
 
 Expr <RefId "true" test.lkt:23:31-23:35>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Expr <NumLit test.lkt:23:41-23:42>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -122,10 +122,10 @@ Id   <RefId "Int" test.lkt:25:30-25:33>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "true" test.lkt:25:39-25:43>
-     references <EnumLitDecl "true" __prelude:6:17-6:21>
+     references <EnumLitDecl "true" __prelude:8:17-8:21>
 
 Expr <RefId "true" test.lkt:25:39-25:43>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Expr <NumLit test.lkt:25:49-25:50>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -235,7 +235,7 @@ test.lkt:43:50: error: Mismatched types: expected `Pair[Int]`, got `Int`
    |                                                  ^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "Bool" test.lkt:44:44-44:48>
-     references <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     references <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "Tuple2" test.lkt:44:51-44:57>
      references <GenericDecl "Tuple2" test.lkt:33:1-38:2>
@@ -244,16 +244,16 @@ Id   <RefId "Int" test.lkt:44:58-44:61>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Bool" test.lkt:44:63-44:67>
-     references <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     references <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Expr <NumLit test.lkt:44:69-44:71>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "true" test.lkt:44:73-44:77>
-     references <EnumLitDecl "true" __prelude:6:17-6:21>
+     references <EnumLitDecl "true" __prelude:8:17-8:21>
 
 Expr <RefId "true" test.lkt:44:73-44:77>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Expr <CallExpr test.lkt:44:51-44:78>
      has type <InstantiatedGenericType "Tuple2[Int, Bool]" test.lkt:33:1-38:2>
@@ -262,10 +262,10 @@ Id   <RefId "b" test.lkt:44:79-44:80>
      references <FieldDecl "b" test.lkt:35:5-35:10>
 
 Expr <RefId "b" test.lkt:44:79-44:80>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Expr <DotExpr test.lkt:44:51-44:80>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "Tuple2" test.lkt:45:40-45:46>
      references <GenericDecl "Tuple2" test.lkt:33:1-38:2>
@@ -274,10 +274,10 @@ Id   <RefId "Int" test.lkt:45:47-45:50>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Bool" test.lkt:45:52-45:56>
-     references <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     references <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "true" test.lkt:45:60-45:64>
-     references <EnumLitDecl "true" __prelude:6:17-6:21>
+     references <EnumLitDecl "true" __prelude:8:17-8:21>
 
 test.lkt:45:60: error: Mismatched types: expected `Tuple2[Int, Bool]`, got `Bool`
 44 |     fun test_invalid_generic_type_2(): Tuple2[Int, Bool] = true
@@ -314,7 +314,7 @@ Id   <RefId "Int" test.lkt:47:37-47:40>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Bool" test.lkt:47:42-47:46>
-     references <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     references <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "Int" test.lkt:47:50-47:53>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -338,7 +338,7 @@ Expr <CallExpr test.lkt:47:56-47:66>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:48:34-48:39>
-     references <GenericDecl "Array" __prelude:18:10-20:2>
+     references <GenericDecl "Array" __prelude:20:10-22:2>
 
 Id   <RefId "Int" test.lkt:48:40-48:43>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -350,7 +350,7 @@ Id   <RefId "arg" test.lkt:48:53-48:56>
      references <FunArgDecl "arg" test.lkt:48:29-48:44>
 
 Expr <RefId "arg" test.lkt:48:53-48:56>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
 
 Expr <NumLit test.lkt:48:58-48:60>
      has type <StructDecl "Int" __prelude:1:10-1:23>

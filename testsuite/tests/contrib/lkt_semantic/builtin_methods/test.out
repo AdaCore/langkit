@@ -1,13 +1,13 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Node" test.lkt:1:14-1:18>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "TokenNode" test.lkt:1:30-1:39>
-     references <TraitDecl "TokenNode" __prelude:47:10-49:2>
+     references <TraitDecl "TokenNode" __prelude:49:10-51:2>
 
 Id   <RefId "Node" test.lkt:3:25-3:29>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node" test.lkt:3:32-3:36>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -16,16 +16,16 @@ Expr <RefId "node" test.lkt:3:32-3:36>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "parent" test.lkt:3:37-3:43>
-     references <FunDecl "parent" __prelude:41:24-41:42>
+     references <FunDecl "parent" __prelude:43:24-43:42>
 
 Expr <RefId "parent" test.lkt:3:37-3:43>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Expr <DotExpr test.lkt:3:32-3:43>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "LexicalEnv" test.lkt:5:24-5:34>
-     references <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     references <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "node" test.lkt:5:37-5:41>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -34,16 +34,16 @@ Expr <RefId "node" test.lkt:5:37-5:41>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "parent" test.lkt:5:42-5:48>
-     references <FunDecl "parent" __prelude:41:24-41:42>
+     references <FunDecl "parent" __prelude:43:24-43:42>
 
 Expr <RefId "parent" test.lkt:5:42-5:48>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Expr <DotExpr test.lkt:5:37-5:48>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node_env" test.lkt:5:49-5:57>
-     references <FunDecl "node_env" __prelude:42:14-42:40>
+     references <FunDecl "node_env" __prelude:44:14-44:40>
 
 Expr <RefId "node_env" test.lkt:5:49-5:57>
      has type <FunctionType "() -> LexicalEnv" __prelude>
@@ -52,10 +52,10 @@ Expr <DotExpr test.lkt:5:37-5:57>
      has type <FunctionType "() -> LexicalEnv" __prelude>
 
 Expr <CallExpr test.lkt:5:37-5:59>
-     has type <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     has type <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "LexicalEnv" test.lkt:6:24-6:34>
-     references <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     references <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "node" test.lkt:6:37-6:41>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -73,10 +73,10 @@ Expr <DotExpr test.lkt:6:37-6:53>
      has type <FunctionType "() -> Node" __prelude>
 
 Expr <CallExpr test.lkt:6:37-6:55>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node_env" test.lkt:6:56-6:64>
-     references <FunDecl "node_env" __prelude:42:14-42:40>
+     references <FunDecl "node_env" __prelude:44:14-44:40>
 
 Expr <RefId "node_env" test.lkt:6:56-6:64>
      has type <FunctionType "() -> LexicalEnv" __prelude>
@@ -85,10 +85,10 @@ Expr <DotExpr test.lkt:6:37-6:64>
      has type <FunctionType "() -> LexicalEnv" __prelude>
 
 Expr <CallExpr test.lkt:6:37-6:66>
-     has type <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     has type <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "Node" test.lkt:8:29-8:33>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node" test.lkt:8:36-8:40>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -97,16 +97,16 @@ Expr <RefId "node" test.lkt:8:36-8:40>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "parent" test.lkt:8:41-8:47>
-     references <FunDecl "parent" __prelude:41:24-41:42>
+     references <FunDecl "parent" __prelude:43:24-43:42>
 
 Expr <RefId "parent" test.lkt:8:41-8:47>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Expr <DotExpr test.lkt:8:36-8:47>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node_env" test.lkt:8:48-8:56>
-     references <FunDecl "node_env" __prelude:42:14-42:40>
+     references <FunDecl "node_env" __prelude:44:14-44:40>
 
 Expr <RefId "node_env" test.lkt:8:48-8:56>
      has type <FunctionType "() -> LexicalEnv" __prelude>
@@ -115,10 +115,10 @@ Expr <DotExpr test.lkt:8:36-8:56>
      has type <FunctionType "() -> LexicalEnv" __prelude>
 
 Expr <CallExpr test.lkt:8:36-8:58>
-     has type <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     has type <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "get" test.lkt:8:59-8:62>
-     references <FunDecl "get" __prelude:32:14-32:51>
+     references <FunDecl "get" __prelude:34:14-34:51>
 
 Expr <RefId "get" test.lkt:8:59-8:62>
      has type <FunctionType "(Symbol) -> Array[Node]" __prelude>
@@ -133,25 +133,25 @@ Expr <RefId "node" test.lkt:8:63-8:67>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "symbol" test.lkt:8:68-8:74>
-     references <FunDecl "symbol" __prelude:48:24-48:44>
+     references <FunDecl "symbol" __prelude:50:24-50:44>
 
 Expr <RefId "symbol" test.lkt:8:68-8:74>
-     has type <StructDecl "Symbol" __prelude:3:10-3:26>
+     has type <StructDecl "Symbol" __prelude:5:10-5:26>
 
 Expr <DotExpr test.lkt:8:63-8:74>
-     has type <StructDecl "Symbol" __prelude:3:10-3:26>
+     has type <StructDecl "Symbol" __prelude:5:10-5:26>
 
 Expr <CallExpr test.lkt:8:36-8:75>
-     has type <InstantiatedGenericType "Array[Node]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Node]" __prelude:20:10-22:2>
 
 Expr <NumLit test.lkt:8:77-8:78>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <NullCondCallExpr test.lkt:8:36-8:79>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "Node" test.lkt:9:29-9:33>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node" test.lkt:9:36-9:40>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -169,10 +169,10 @@ Expr <DotExpr test.lkt:9:36-9:51>
      has type <FunctionType "() -> LexicalEnv" __prelude>
 
 Expr <CallExpr test.lkt:9:36-9:53>
-     has type <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     has type <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "get" test.lkt:9:54-9:57>
-     references <FunDecl "get" __prelude:32:14-32:51>
+     references <FunDecl "get" __prelude:34:14-34:51>
 
 Expr <RefId "get" test.lkt:9:54-9:57>
      has type <FunctionType "(Symbol) -> Array[Node]" __prelude>
@@ -187,25 +187,25 @@ Expr <RefId "node" test.lkt:9:58-9:62>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "symbol" test.lkt:9:63-9:69>
-     references <FunDecl "symbol" __prelude:48:24-48:44>
+     references <FunDecl "symbol" __prelude:50:24-50:44>
 
 Expr <RefId "symbol" test.lkt:9:63-9:69>
-     has type <StructDecl "Symbol" __prelude:3:10-3:26>
+     has type <StructDecl "Symbol" __prelude:5:10-5:26>
 
 Expr <DotExpr test.lkt:9:58-9:69>
-     has type <StructDecl "Symbol" __prelude:3:10-3:26>
+     has type <StructDecl "Symbol" __prelude:5:10-5:26>
 
 Expr <CallExpr test.lkt:9:36-9:70>
-     has type <InstantiatedGenericType "Array[Node]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Node]" __prelude:20:10-22:2>
 
 Expr <NumLit test.lkt:9:72-9:73>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <NullCondCallExpr test.lkt:9:36-9:74>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "Node" test.lkt:11:32-11:36>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node" test.lkt:11:39-11:43>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -214,7 +214,7 @@ Expr <RefId "node" test.lkt:11:39-11:43>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "unit" test.lkt:11:44-11:48>
-     references <FunDecl "unit" __prelude:44:14-44:38>
+     references <FunDecl "unit" __prelude:46:14-46:38>
 
 Expr <RefId "unit" test.lkt:11:44-11:48>
      has type <FunctionType "() -> AnalysisUnit" __prelude>
@@ -223,19 +223,19 @@ Expr <DotExpr test.lkt:11:39-11:48>
      has type <FunctionType "() -> AnalysisUnit" __prelude>
 
 Expr <CallExpr test.lkt:11:39-11:50>
-     has type <ClassDecl "AnalysisUnit" __prelude:37:10-39:2>
+     has type <ClassDecl "AnalysisUnit" __prelude:39:10-41:2>
 
 Id   <RefId "root" test.lkt:11:51-11:55>
-     references <FunDecl "root" __prelude:38:24-38:40>
+     references <FunDecl "root" __prelude:40:24-40:40>
 
 Expr <RefId "root" test.lkt:11:51-11:55>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Expr <DotExpr test.lkt:11:39-11:55>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "Node" test.lkt:13:24-13:28>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node" test.lkt:13:31-13:35>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -244,7 +244,7 @@ Expr <RefId "node" test.lkt:13:31-13:35>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "node_env" test.lkt:13:36-13:44>
-     references <FunDecl "node_env" __prelude:42:14-42:40>
+     references <FunDecl "node_env" __prelude:44:14-44:40>
 
 Expr <RefId "node_env" test.lkt:13:36-13:44>
      has type <FunctionType "() -> LexicalEnv" __prelude>
@@ -253,10 +253,10 @@ Expr <DotExpr test.lkt:13:31-13:44>
      has type <FunctionType "() -> LexicalEnv" __prelude>
 
 Expr <CallExpr test.lkt:13:31-13:46>
-     has type <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     has type <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "get_first" test.lkt:13:47-13:56>
-     references <FunDecl "get_first" __prelude:33:14-33:50>
+     references <FunDecl "get_first" __prelude:35:14-35:50>
 
 Expr <RefId "get_first" test.lkt:13:47-13:56>
      has type <FunctionType "(Symbol) -> Node" __prelude>
@@ -271,19 +271,19 @@ Expr <RefId "node" test.lkt:13:57-13:61>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "symbol" test.lkt:13:62-13:68>
-     references <FunDecl "symbol" __prelude:48:24-48:44>
+     references <FunDecl "symbol" __prelude:50:24-50:44>
 
 Expr <RefId "symbol" test.lkt:13:62-13:68>
-     has type <StructDecl "Symbol" __prelude:3:10-3:26>
+     has type <StructDecl "Symbol" __prelude:5:10-5:26>
 
 Expr <DotExpr test.lkt:13:57-13:68>
-     has type <StructDecl "Symbol" __prelude:3:10-3:26>
+     has type <StructDecl "Symbol" __prelude:5:10-5:26>
 
 Expr <CallExpr test.lkt:13:31-13:69>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "Node" test.lkt:15:22-15:26>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node" test.lkt:15:29-15:33>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -292,7 +292,7 @@ Expr <RefId "node" test.lkt:15:29-15:33>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "node_env" test.lkt:15:34-15:42>
-     references <FunDecl "node_env" __prelude:42:14-42:40>
+     references <FunDecl "node_env" __prelude:44:14-44:40>
 
 Expr <RefId "node_env" test.lkt:15:34-15:42>
      has type <FunctionType "() -> LexicalEnv" __prelude>
@@ -301,10 +301,10 @@ Expr <DotExpr test.lkt:15:29-15:42>
      has type <FunctionType "() -> LexicalEnv" __prelude>
 
 Expr <CallExpr test.lkt:15:29-15:44>
-     has type <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     has type <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "env_node" test.lkt:15:45-15:53>
-     references <FunDecl "env_node" __prelude:34:14-34:34>
+     references <FunDecl "env_node" __prelude:36:14-36:34>
 
 Expr <RefId "env_node" test.lkt:15:45-15:53>
      has type <FunctionType "() -> Node" __prelude>
@@ -313,10 +313,10 @@ Expr <DotExpr test.lkt:15:29-15:53>
      has type <FunctionType "() -> Node" __prelude>
 
 Expr <CallExpr test.lkt:15:29-15:55>
-     has type <ClassDecl "Node" __prelude:40:10-46:2>
+     has type <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "LexicalEnv" test.lkt:17:26-17:36>
-     references <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     references <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "node" test.lkt:17:39-17:43>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -334,34 +334,34 @@ Expr <DotExpr test.lkt:17:39-17:56>
      has type <FunctionType "() -> LexicalEnv" __prelude>
 
 Expr <CallExpr test.lkt:17:39-17:58>
-     has type <ClassDecl "LexicalEnv" __prelude:31:10-36:2>
+     has type <ClassDecl "LexicalEnv" __prelude:33:10-38:2>
 
 Id   <RefId "String" test.lkt:19:24-19:30>
-     references <StructDecl "String" __prelude:24:10-26:2>
+     references <StructDecl "String" __prelude:26:10-28:2>
 
 Id   <RefId "Symbol" test.lkt:19:33-19:39>
-     references <StructDecl "Symbol" __prelude:3:10-3:26>
+     references <StructDecl "Symbol" __prelude:5:10-5:26>
 
 Id   <RefId "s" test.lkt:19:42-19:43>
      references <FunArgDecl "s" test.lkt:19:20-19:30>
 
 Expr <RefId "s" test.lkt:19:42-19:43>
-     has type <StructDecl "String" __prelude:24:10-26:2>
+     has type <StructDecl "String" __prelude:26:10-28:2>
 
 Id   <RefId "to_symbol" test.lkt:19:44-19:53>
-     references <FunDecl "to_symbol" __prelude:25:24-25:47>
+     references <FunDecl "to_symbol" __prelude:27:24-27:47>
 
 Expr <RefId "to_symbol" test.lkt:19:44-19:53>
-     has type <StructDecl "Symbol" __prelude:3:10-3:26>
+     has type <StructDecl "Symbol" __prelude:5:10-5:26>
 
 Expr <DotExpr test.lkt:19:42-19:53>
-     has type <StructDecl "Symbol" __prelude:3:10-3:26>
+     has type <StructDecl "Symbol" __prelude:5:10-5:26>
 
 Id   <RefId "Array" test.lkt:21:26-21:31>
-     references <GenericDecl "Array" __prelude:18:10-20:2>
+     references <GenericDecl "Array" __prelude:20:10-22:2>
 
 Id   <RefId "Node" test.lkt:21:32-21:36>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node" test.lkt:21:40-21:44>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -370,7 +370,7 @@ Expr <RefId "node" test.lkt:21:40-21:44>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "parents" test.lkt:21:45-21:52>
-     references <FunDecl "parents" __prelude:45:14-45:63>
+     references <FunDecl "parents" __prelude:47:14-47:63>
 
 Expr <RefId "parents" test.lkt:21:45-21:52>
      has type <FunctionType "(Bool) -> Array[Node]" __prelude>
@@ -379,13 +379,13 @@ Expr <DotExpr test.lkt:21:40-21:52>
      has type <FunctionType "(Bool) -> Array[Node]" __prelude>
 
 Expr <CallExpr test.lkt:21:40-21:54>
-     has type <InstantiatedGenericType "Array[Node]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Node]" __prelude:20:10-22:2>
 
 Id   <RefId "Array" test.lkt:22:26-22:31>
-     references <GenericDecl "Array" __prelude:18:10-20:2>
+     references <GenericDecl "Array" __prelude:20:10-22:2>
 
 Id   <RefId "Node" test.lkt:22:32-22:36>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node" test.lkt:22:40-22:44>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -394,7 +394,7 @@ Expr <RefId "node" test.lkt:22:40-22:44>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "parents" test.lkt:22:45-22:52>
-     references <FunDecl "parents" __prelude:45:14-45:63>
+     references <FunDecl "parents" __prelude:47:14-47:63>
 
 Expr <RefId "parents" test.lkt:22:45-22:52>
      has type <FunctionType "(Bool) -> Array[Node]" __prelude>
@@ -403,25 +403,25 @@ Expr <DotExpr test.lkt:22:40-22:52>
      has type <FunctionType "(Bool) -> Array[Node]" __prelude>
 
 Id   <RefId "with_self" test.lkt:22:53-22:62>
-     references <FunArgDecl "with_self" __prelude:45:26-45:49>
+     references <FunArgDecl "with_self" __prelude:47:26-47:49>
 
 Expr <RefId "with_self" test.lkt:22:53-22:62>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Id   <RefId "false" test.lkt:22:63-22:68>
-     references <EnumLitDecl "false" __prelude:6:10-6:15>
+     references <EnumLitDecl "false" __prelude:8:10-8:15>
 
 Expr <RefId "false" test.lkt:22:63-22:68>
-     has type <EnumTypeDecl "Bool" __prelude:5:16-7:2>
+     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
 
 Expr <CallExpr test.lkt:22:40-22:69>
-     has type <InstantiatedGenericType "Array[Node]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Node]" __prelude:20:10-22:2>
 
 Id   <RefId "Iterator" test.lkt:24:27-24:35>
-     references <GenericDecl "Iterator" __prelude:14:10-17:2>
+     references <GenericDecl "Iterator" __prelude:16:10-19:2>
 
 Id   <RefId "Node" test.lkt:24:36-24:40>
-     references <ClassDecl "Node" __prelude:40:10-46:2>
+     references <ClassDecl "Node" __prelude:42:10-48:2>
 
 Id   <RefId "node" test.lkt:24:44-24:48>
      references <NodeDecl "node" test.lkt:1:1-26:2>
@@ -430,7 +430,7 @@ Expr <RefId "node" test.lkt:24:44-24:48>
      has type <ClassDecl "Name" test.lkt:1:1-26:2>
 
 Id   <RefId "parents" test.lkt:24:49-24:56>
-     references <FunDecl "parents" __prelude:45:14-45:63>
+     references <FunDecl "parents" __prelude:47:14-47:63>
 
 Expr <RefId "parents" test.lkt:24:49-24:56>
      has type <FunctionType "(Bool) -> Array[Node]" __prelude>
@@ -439,14 +439,14 @@ Expr <DotExpr test.lkt:24:44-24:56>
      has type <FunctionType "(Bool) -> Array[Node]" __prelude>
 
 Expr <CallExpr test.lkt:24:44-24:58>
-     has type <InstantiatedGenericType "Array[Node]" __prelude:18:10-20:2>
+     has type <InstantiatedGenericType "Array[Node]" __prelude:20:10-22:2>
 
 Id   <RefId "to_iterator" test.lkt:24:59-24:70>
-     references <FunDecl "to_iterator" __prelude:19:24-19:54>
+     references <FunDecl "to_iterator" __prelude:21:24-21:54>
 
 Expr <RefId "to_iterator" test.lkt:24:59-24:70>
-     has type <InstantiatedGenericType "Iterator[Node]" __prelude:14:10-17:2>
+     has type <InstantiatedGenericType "Iterator[Node]" __prelude:16:10-19:2>
 
 Expr <DotExpr test.lkt:24:44-24:70>
-     has type <InstantiatedGenericType "Iterator[Node]" __prelude:14:10-17:2>
+     has type <InstantiatedGenericType "Iterator[Node]" __prelude:16:10-19:2>
 

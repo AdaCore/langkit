@@ -1,29 +1,29 @@
 Resolving test.lkt
 ==================
 Id   <RefId "String" test.lkt:1:9-1:15>
-     references <StructDecl "String" __prelude:24:10-26:2>
+     references <StructDecl "String" __prelude:26:10-28:2>
 
 Expr <StringLit test.lkt:1:18-1:23>
-     has type <StructDecl "String" __prelude:24:10-26:2>
+     has type <StructDecl "String" __prelude:26:10-28:2>
 
 Id   <RefId "Char" test.lkt:2:9-2:13>
-     references <StructDecl "Char" __prelude:23:10-23:24>
+     references <StructDecl "Char" __prelude:25:10-25:24>
 
 Expr <CharLit test.lkt:2:16-2:19>
-     has type <StructDecl "Char" __prelude:23:10-23:24>
+     has type <StructDecl "Char" __prelude:25:10-25:24>
 
 Id   <RefId "Char" test.lkt:3:9-3:13>
-     references <StructDecl "Char" __prelude:23:10-23:24>
+     references <StructDecl "Char" __prelude:25:10-25:24>
 
 Id   <RefId "a" test.lkt:3:16-3:17>
      references <ValDecl "a" test.lkt:1:1-1:23>
 
 Expr <RefId "a" test.lkt:3:16-3:17>
-     has type <StructDecl "String" __prelude:24:10-26:2>
+     has type <StructDecl "String" __prelude:26:10-28:2>
 
 Expr <NumLit test.lkt:3:19-3:20>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:3:16-3:21>
-     has type <StructDecl "Char" __prelude:23:10-23:24>
+     has type <StructDecl "Char" __prelude:25:10-25:24>
 
