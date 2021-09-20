@@ -157,10 +157,37 @@ def add_to_env_kv(key: AbstractExpression,
     )
 
 
-def add_to_env_by_name(key: AbstractExpression,
-                       val: AbstractExpression,
+def add_to_env_by_name(mappings: AbstractExpression,
                        name: AbstractExpression,
                        fallback_env: AbstractExpression) -> AddToEnv:
+    """Add several entries to a potentially foreign lexical env.
+
+    The target lexical environment is:
+
+    * If ``name`` returns a non-null env name, the environment that has this
+      name (according to precedence rules).
+
+    * Otherwise, the environment that the ``fallback_env`` expression returns.
+      In that case, the environment cannot be foreign.
+
+    :param mappings: One or several mappings of key to value to add to the
+        environment. Must be either of type T.env_assoc, or T.env_assoc.array.
+        All values must belong to the same unit as the node that owns this
+        EnvSpec. See langkit.expressions.envs.new_env_assoc for more precision
+        on how to create an env assoc.
+    """
+    return AddToEnv(
+        mappings=mappings,
+        resolver=None,
+        name_expr=name,
+        fallback_env_expr=fallback_env,
+    )
+
+
+def add_to_env_by_name_kv(key: AbstractExpression,
+                          val: AbstractExpression,
+                          name: AbstractExpression,
+                          fallback_env: AbstractExpression) -> AddToEnv:
     """Add an entry to a potentially foreign lexical env.
 
     The target lexical environment is:

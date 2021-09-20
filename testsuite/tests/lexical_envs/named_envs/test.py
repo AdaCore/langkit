@@ -22,7 +22,7 @@ units loading.
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import (
-    EnvSpec, RefKind, add_env, add_to_env_by_name, add_to_env_kv, reference,
+    EnvSpec, RefKind, add_env, add_to_env_by_name_kv, add_to_env_kv, reference,
     set_initial_env_by_name,
 )
 from langkit.expressions import (AbstractKind, If, Let, No, Not, Self, String,
@@ -348,7 +348,7 @@ class PackageBody(FooNode):
             Self.parent.children_env,
         ),
 
-        add_to_env_by_name(
+        add_to_env_by_name_kv(
             '__nextpart',
             Self,
             If(Self.can_have_name,
