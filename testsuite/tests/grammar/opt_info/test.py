@@ -48,7 +48,7 @@ fields = [
 
 for field in fields:
     print("Field {} is {}".format(
-        field,
+        field.qualname,
         "optional" if field.is_optional else "not optional"
     ))
 
