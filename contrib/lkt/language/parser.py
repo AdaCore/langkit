@@ -137,15 +137,16 @@ class LKNode(ASTNode):
 
     @langkit_property(return_type=T.Decl.entity)
     def root_get(entity_name=T.Symbol):
-        return Self.unit.root.node_env.get_first(entity_name).cast(T.Decl)
+        return Self.unit.root.node_env.get_first(
+            entity_name).cast_or_raise(T.Decl)
 
     @langkit_property(return_type=T.TypeDecl.entity)
     def get_builtin_type(entity_name=T.Symbol):
-        return Self.root_get(entity_name).cast(T.TypeDecl)
+        return Self.root_get(entity_name).cast_or_raise(T.TypeDecl)
 
     @langkit_property(return_type=T.GenericDecl.entity)
     def get_builtin_gen_decl(entity_name=T.Symbol):
-        return Self.root_get(entity_name).cast(T.GenericDecl)
+        return Self.root_get(entity_name).cast_or_raise(T.GenericDecl)
 
     node_type = Property(
         Self.get_builtin_type('Node'), public=True,
