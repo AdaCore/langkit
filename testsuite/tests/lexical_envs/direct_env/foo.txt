@@ -1,0 +1,11 @@
+# Self is added to the parent env (the one of the root list)
+a {}
+
+# Self is not added anywhere (null_env and or_current=False)
+b {null_env}
+
+# Self is added to the parent env (the one of the root list)
+c {or_current}
+
+# Self added to the current env (Self's own)
+d {null_env or_current}

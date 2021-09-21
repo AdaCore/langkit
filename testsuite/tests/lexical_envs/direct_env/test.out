@@ -1,0 +1,17 @@
+main.py: Running...
+
+Env for <ToplevelList foo.txt:2:1-11:24>:
+  a {}
+  c {or_current}
+
+Env for <Example foo.txt:2:1-2:5>:
+
+Env for <Example foo.txt:5:1-5:13>:
+
+Env for <Example foo.txt:8:1-8:15>:
+
+Env for <Example foo.txt:11:1-11:24>:
+  d {null_env or_current}
+
+main.py: Done.
+Done

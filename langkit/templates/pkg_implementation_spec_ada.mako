@@ -975,15 +975,14 @@ private package ${ada_lib_name}.Implementation is
    --  environment, or use the current environment if there is no resolver.
 
    procedure Add_To_Env
-     (Self              : ${T.root_node.name};
-      State             : PLE_Node_State;
-      Key               : Symbol_Type;
-      Value             : ${T.root_node.name};
-      MD                : ${T.env_md.name};
-      Resolver          : Entity_Resolver;
-      Dest_Env_Name     : ${T.Symbol.name};
-      Dest_Env_Fallback : Lexical_Env;
-      DSL_Location      : String);
+     (Self         : ${T.root_node.name};
+      State        : PLE_Node_State;
+      Key          : Symbol_Type;
+      Value        : ${T.root_node.name};
+      MD           : ${T.env_md.name};
+      Resolver     : Entity_Resolver;
+      Dest_Env     : ${T.DesignatedEnv.name};
+      DSL_Location : String);
    --  Helper for Populate_Lexical_Env: insert the Key/Value/MD/Resolver entry
    --  in the appropriate lexical env.
    --

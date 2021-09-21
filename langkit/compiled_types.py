@@ -2206,10 +2206,15 @@ class BaseStructType(CompiledType):
     Base class to share common behavior between StructType and ASTNodeType.
     """
 
-    def __init__(self, name, location, doc, **kwargs):
+    def __init__(self, name, location, doc, is_builtin_type=False, **kwargs):
         """
-        See CompiledType.__init__ for a description of arguments.
+        :param is_builtin_type: Whether this type is built-in. If it is,
+            dsl_unparse.py should skip it.
+
+        See CompiledType.__init__ for a description of other arguments.
         """
+        self.is_builtin_type = is_builtin_type
+
         kwargs.setdefault('type_repo_name', name.camel)
         if is_keyword(name):
             name = name + names.Name('Node')
@@ -4383,6 +4388,46 @@ def create_builtin_types():
                  api_name='CharacterType',
                  hashable=True)
 
+    EnumType(name="DesignatedEnvKind",
+             location=None,
+             doc="""Discriminant for DesignatedEnv structures.""",
+             value_names=[names.Name("None"),
+                          names.Name("Current_Env"),
+                          names.Name("Named_Env"),
+                          names.Name("Direct_Env")],
+             default_val_name=names.Name("None"),
+             is_builtin_type=True)
+    StructType(
+        name=names.Name("DesignatedEnv"),
+        location=None,
+        doc="""
+            Designate an environment for an env spec action.
+
+            The designated environment can be either, depending on the ``Kind``
+            field:
+
+            * If ``Kind`` is ``None``, no environment is designated.
+
+            * If ``Kind`` is ``Current_Env``, designate the current environment
+              at this point during PLE.
+
+            * If ``Kind`` is ``Named_Env``, designate the environment which
+              has precedence for the ``Env_Name`` environment name. If
+              ``Env_Name`` is null, this designates to environment.
+
+            * If ``Kind`` is ``Direct_Env``, the direct value for the
+              designated environment. That environment must be a primary one
+              and cannot be foreign to the node currently processed by PLE. If
+              it is the empty environment, do nothing.
+        """,
+        fields=[
+            ("kind", UserField(type=T.DesignatedEnvKind)),
+            ("env_name", UserField(type=T.Symbol)),
+            ("direct_env", UserField(type=T.LexicalEnv)),
+        ],
+        is_builtin_type=True,
+    )
+
 
 class TypeRepo:
     """
@@ -4571,7 +4616,7 @@ class TypeRepo:
             names.Name('Env_Assoc'), None, None,
             [('key', UserField(type=T.Symbol)),
              ('val', UserField(type=self.defer_root_node)),
-             ('dest_env', UserField(type=T.LexicalEnv)),
+             ('dest_env', UserField(type=T.DesignatedEnv)),
              ('metadata', UserField(type=self.defer_env_md))]
         )
 

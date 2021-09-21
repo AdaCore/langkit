@@ -1,0 +1,19 @@
+main.py: Running...
+
+Env for <ToplevelList foo.txt:1:1-13:37>:
+
+Env for <Example foo.txt:1:1-1:14>:
+  a +dest_scope {}
+  c +dest_scope {or_current}
+
+Env for <Example foo.txt:4:1-4:17>:
+
+Env for <Example foo.txt:7:1-7:26>:
+
+Env for <Example foo.txt:10:1-10:27>:
+
+Env for <Example foo.txt:13:1-13:37>:
+  d +dest_scope {null_name or_current}
+
+main.py: Done.
+Done

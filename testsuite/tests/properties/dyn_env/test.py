@@ -4,8 +4,10 @@ Check that the DynamicLexicalEnv expression works as expected.
 
 from langkit.dsl import ASTNode, Field, StructType, T, abstract
 from langkit.envs import EnvSpec, add_to_env
-from langkit.expressions import (DynamicLexicalEnv, Entity, No, Self, Var,
-                                 langkit_property, lazy_field)
+from langkit.expressions import (
+    DynamicLexicalEnv, Entity, No, Self, Var, current_env,
+    langkit_property, lazy_field
+)
 
 from utils import build_and_run
 
@@ -30,7 +32,7 @@ class ConsDecl(FooNode):
         add_to_env(T.env_assoc.new(
             key=Self.name.symbol,
             val=Self,
-            dest_env=No(T.LexicalEnv),
+            dest_env=current_env(),
             metadata=No(T.Metadata),
         ))
     )
@@ -49,7 +51,7 @@ class FunDecl(FooNode):
         add_to_env(T.env_assoc.new(
             key=Self.name.symbol,
             val=Self,
-            dest_env=No(T.LexicalEnv),
+            dest_env=current_env(),
             metadata=No(T.Metadata),
         ))
     )

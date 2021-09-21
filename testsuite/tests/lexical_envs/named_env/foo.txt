@@ -1,0 +1,13 @@
+dest_scope {}
+
+# Self is added to dest_scope's env
+a +dest_scope {}
+
+# Self is not added anywhere (null_name and or_current=False)
+b +dest_scope {null_name}
+
+# Self is added to dest_scope's env (the one of the root list)
+c +dest_scope {or_current}
+
+# Self is added to the current env (Self's own)
+d +dest_scope {null_name or_current}

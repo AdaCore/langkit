@@ -22,11 +22,11 @@ units loading.
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import (
-    EnvSpec, RefKind, add_env, add_to_env_by_name, add_to_env_kv, reference,
+    EnvSpec, RefKind, add_env, add_to_env_kv, reference,
     set_initial_env_by_name,
 )
 from langkit.expressions import (AbstractKind, If, Let, No, Not, Self, String,
-                                 Var, langkit_property)
+                                 Var, direct_env, langkit_property, named_env)
 
 from utils import build_and_run, unparse_all_script
 
@@ -348,13 +348,14 @@ class PackageBody(FooNode):
             Self.parent.children_env,
         ),
 
-        add_to_env_by_name(
+        add_to_env_kv(
             '__nextpart',
             Self,
             If(Self.can_have_name,
-               Self.suffixed_full_name(String('__privatepart')).to_symbol,
-               No(T.Symbol)),
-            Self.body_decl_scope,
+                named_env(
+                    Self.suffixed_full_name(String('__privatepart')).to_symbol
+                ),
+                direct_env(Self.body_decl_scope))
         ),
 
         add_env(names=[Self.suffixed_full_name(String('__body')).to_symbol]),

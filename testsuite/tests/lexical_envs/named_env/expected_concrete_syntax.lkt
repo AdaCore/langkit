@@ -1,0 +1,29 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ToplevelList*(example)
+    example <- Example(id ?pick("+" id) "{" list*(id) "}")
+    id <- Id(@identifier)
+
+}
+
+@abstract class FooNode implements Node[FooNode] {
+
+    @export fun dump_env (): Array[FooNode] = node.children_env().get(null)
+}
+
+@has_abstract_list class Example : FooNode {
+    @parse_field name : Id
+    @parse_field dest_scope : Id
+    @parse_field content : ASTList[Id]
+
+    ## Return whether "content" contains the ``kw`` keyword.
+    fun has_kw (kw : Symbol): Bool =
+    node.content.map((c) => c.symbol).contains(kw)
+}
+
+class ToplevelList : ASTList[Example] {
+}
+
+class Id : FooNode implements TokenNode {
+}
