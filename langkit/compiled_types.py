@@ -4046,27 +4046,27 @@ class EnumType(CompiledType):
     Ada-like enumeration type.
     """
 
-    def __init__(self, name, location, doc,
-                 value_names,
-                 default_val_name=None, is_builtin_type=False):
-        """
-        :type value_names: list[name.Names]
-        """
-        self.values = [EnumValue(self, vn, i)
-                       for i, vn in enumerate(value_names)]
+    def __init__(self,
+                 name: Union[str, names.Name],
+                 location: Opt[Location],
+                 doc: str,
+                 value_names: List[names.Name],
+                 default_val_name: Opt[names.Name] = None,
+                 is_builtin_type: bool = False):
+        self.values: List[EnumValue] = [
+            EnumValue(self, vn, i) for i, vn in enumerate(value_names)
+        ]
 
-        self.values_dict = {v.name: v for v in self.values}
+        self.values_dict: Dict[names.Name, EnumValue] = {
+            v.name: v for v in self.values
+        }
         """
         Lookup dictionnary for enumeration values, by name.
-
-        :type: dict[names.Name: EnumValue]
         """
 
         self.default_val_name = default_val_name
         """
         Name of the default value for this enum, if any.
-
-        :type: names.Name|None
         """
 
         CompiledTypeRepo.enum_types.append(self)
@@ -4075,8 +4075,6 @@ class EnumType(CompiledType):
         """
         Whether Langkit automatically created this enum type. This is thus
         False for all enum types defined in the user language specification.
-
-        :type: bool
         """
 
         super().__init__(
@@ -4090,21 +4088,18 @@ class EnumType(CompiledType):
         )
 
     @property
-    def py_helper(self):
+    def py_helper(self) -> str:
         """
         Name of the class helper in the Python binding layer to convert values
         for this enumeration back and forth between C and Python-level values.
-
-        :rtype: str
         """
         return self.api_name.camel
 
-    def resolve_value(self, value_name):
+    def resolve_value(self, value_name: str) -> AbstractExpression:
         """
         Return an abstract expression corresponding to the given value name.
 
-        :param str value_name: Lower-case name of the value to process.
-        :rtype: langkit.expressions.AbstractExpression
+        :param value_name: Lower-case name of the value to process.
         """
         return (self.values_dict[names.Name.from_lower(value_name)]
                 .to_abstract_expr)
@@ -4115,63 +4110,50 @@ class EnumValue:
     Possible value for an enumeration type.
     """
 
-    def __init__(self, enum_type, name, index):
+    def __init__(self, enum_type: EnumType, name: names.Name, index: int):
         self.type = enum_type
         """
         Enumeration type that owns this enumeration value.
-
-        :type: EnumType
         """
 
         self.name = name
         """
         Name for this enumeration value.
-
-        :type: names.Name
         """
 
         self.index = index
         """
         Index for this enumeration value. Each enumeration values in a given
         enumeration type are assigned an index, incrementing from 0.
-
-        :type: int
         """
 
     @property
-    def dsl_name(self):
+    def dsl_name(self) -> str:
         """
         Return the DSL name for this enumeration value.
-
-        :rtype: str
         """
         return '{}.{}'.format(self.type.dsl_name, self.name.lower)
 
     @property
-    def ada_name(self):
+    def ada_name(self) -> str:
         """
         Return the identifier used in Ada to designate this value.
-
-        :rtype: str
         """
         return self.name.camel_with_underscores
 
-    def c_name(self, c_api_settings):
+    def c_name(self, c_api_settings: CAPISettings) -> str:
         """
         Return the identifier used in C to designate this value.
 
-        :param CAPISettings c_api_settings: The settings for the C API.
-        :rtype: str
+        :param c_api_settings: The settings for the C API.
         """
         return '{}_{}'.format(c_api_settings.symbol_prefix.upper(),
                               (self.type.name + self.name).upper)
 
     @property
-    def to_abstract_expr(self):
+    def to_abstract_expr(self) -> AbstractExpression:
         """
         Create an abstract expression wrapping this enumeration value.
-
-        :rtype: langkit.expressions.AbstractExpression
         """
         from langkit.expressions import EnumLiteral
         return EnumLiteral(self)
