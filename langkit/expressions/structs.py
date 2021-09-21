@@ -428,8 +428,8 @@ class New(AbstractExpression):
         for field, expr in field_values.items():
             check_source_language(
                 expr.type.matches(field.type),
-                'Wrong type for field {}: expected {}, got {}'
-                .format(field.name, field.type.dsl_name, expr.type.dsl_name)
+                f"Wrong type for field {field.qualname}:"
+                f" expected {field.type.dsl_name}, got {expr.type.dsl_name}"
             )
 
             # Annotate parsing/synthetic fields with precise type information
@@ -1505,8 +1505,8 @@ class StructUpdate(AbstractExpression):
             assocs[field] = construct(
                 field_expr,
                 fields[name].type,
-                'Wrong type for field {}:'
-                ' expected {{expected}}, got {{expr_type}}'.format(name)
+                f"Wrong type for field {fields[name].qualname}:"
+                f" expected {{expected}}, got {{expr_type}}"
             )
 
         return StructUpdate.Expr(expr, assocs, abstract_expr=self)

@@ -5,7 +5,7 @@ Code generation was successful
 test.py:XXX: error: Values are missing for MyStruct fields: b
 
 == Incorrect new 2 ==
-test.py:XXX: error: Wrong type for field B: expected Int, got FooNode
+test.py:XXX: error: Wrong type for field MyStruct.b: expected Int, got FooNode
 
 == Incorrect new 1 ==
 test.py:XXX: error: Extraneous fields for MyStruct: c

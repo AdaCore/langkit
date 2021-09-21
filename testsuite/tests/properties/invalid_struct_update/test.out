@@ -5,6 +5,6 @@ test.py:XXX: error: Struct expected, got BigInt
 test.py:XXX: error: Invalid KV field: nosuchfield
 
 == Invalid type ==
-test.py:XXX: error: Wrong type for field key: expected Character.array, got BigInt
+test.py:XXX: error: Wrong type for field KV.key: expected Character.array, got BigInt
 
 Done
