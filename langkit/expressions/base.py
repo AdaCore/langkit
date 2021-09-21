@@ -232,7 +232,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
     :param custom_msg: A string for the error messages. It can contain the
         format-like template holes {expected} and {expr_type}, which will be
         substituted with the expected type, and the obtained expression type
-        respectively.If expected_type_or_pred is a predicate, only {expr_type}
+        respectively. If expected_type_or_pred is a predicate, only {expr_type}
         will be provided, and putting an {expected} template hole will result
         in an error.
 
