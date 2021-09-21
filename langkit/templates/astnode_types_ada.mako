@@ -300,18 +300,7 @@
       ## to the lexical environment.
 
       declare
-         Dest_Env_Name : constant ${T.Symbol.name} :=
-            ${(call_prop(exprs.name_prop)
-               if exprs.name_prop
-               else 'null')};
-         % if exprs.fallback_env_expr:
-         Fallback_Env : constant Lexical_Env :=
-           (if Dest_Env_Name = null
-            then ${call_prop(exprs.fallback_env_prop)}
-            else Empty_Env);
-         % endif
-
-         Resolver      : constant Entity_Resolver :=
+         Resolver : constant Entity_Resolver :=
             ${("{}'Access".format(exprs.resolver.name)
                if exprs.resolver else 'null')};
 
@@ -339,10 +328,7 @@
             Mapping.Val,
             Mapping.Metadata,
             Resolver,
-            Dest_Env_Name,
-            ${("Fallback_Env"
-               if exprs.fallback_env_expr
-               else "Mapping.Dest_Env")},
+            Mapping.Dest_Env,
             DSL_Location => ${string_repr(exprs.str_location)});
          % if not is_array:
          Dec_Ref (Mapping.Dest_Env);

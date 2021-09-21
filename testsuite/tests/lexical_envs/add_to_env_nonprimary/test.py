@@ -5,7 +5,7 @@ used to crash with a Constraint_Error.
 
 from langkit.dsl import ASTNode
 from langkit.envs import EnvSpec, add_env, add_to_env
-from langkit.expressions import Self, new_env_assoc
+from langkit.expressions import Self, direct_env, new_env_assoc
 
 from utils import build_and_run
 
@@ -23,7 +23,7 @@ class Example(FooNode):
             new_env_assoc(
                 key="foo",
                 val=Self,
-                dest_env=Self.children_env.env_orphan
+                dest_env=direct_env(Self.children_env.env_orphan),
             )
         )
     )

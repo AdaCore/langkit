@@ -43,7 +43,7 @@ from langkit.envs import (
 from langkit.expressions import (
     AbstractKind, AbstractProperty, And, ArrayLiteral as Array,
     CharacterLiteral, Cond, EmptyEnv, Entity, If, Let, No, Not, Or, Property,
-    PropertyError, Self, String as S, Try as _Try, Var, ignore,
+    PropertyError, Self, String as S, Try as _Try, Var, direct_env, ignore,
     langkit_property, new_env_assoc
 )
 from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
@@ -921,7 +921,7 @@ class LexerDecl(Decl):
             new_env_assoc(
                 key=sym,
                 val=SyntheticLexerDecl.new(sym=sym),
-                dest_env=Self.children_env
+                dest_env=direct_env(Self.children_env)
             ),
         )
 
@@ -1753,7 +1753,9 @@ class EnumTypeDecl(NamedTypeDecl):
         handle_children(),
         # Add enum literals to the DeclBlock env
         add_to_env(Entity.literals.map(lambda lit: new_env_assoc(
-                key=lit.name, val=lit.node, dest_env=Self.decls.children_env
+                key=lit.name,
+                val=lit.node,
+                dest_env=direct_env(Self.decls.children_env),
         ))),
 
         # If the enum is marked as @open, add enum literals to the enum type's
@@ -1761,7 +1763,9 @@ class EnumTypeDecl(NamedTypeDecl):
         add_to_env(If(
             Entity.full_decl.has_annotation('open'),
             Entity.literals.map(lambda lit: new_env_assoc(
-                key=lit.name, val=lit.node, dest_env=Self.node_env
+                key=lit.name,
+                val=lit.node,
+                dest_env=direct_env(Self.node_env),
             )),
             No(T.env_assoc.array)
         ))
@@ -1841,7 +1845,9 @@ class EnumClassDecl(BasicClassDecl):
         add_to_env_kv(Entity.name, Self),
         handle_children(),
         add_to_env(Entity.alts.map(lambda alt: new_env_assoc(
-            key=alt.name, val=alt.node, dest_env=Self.decls.children_env
+            key=alt.name,
+            val=alt.node,
+            dest_env=direct_env(Self.decls.children_env),
         )))
     )
 

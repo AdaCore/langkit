@@ -6,7 +6,8 @@ or metadata field) are properly rejected.
 from langkit.dsl import (ASTNode, Field, Struct, T, UserField, abstract,
                          env_metadata, synthetic)
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
-from langkit.expressions import AbstractKind, If, New, Self, langkit_property
+from langkit.expressions import (AbstractKind, If, New, Self, direct_env,
+                                 langkit_property)
 
 from utils import build_and_run
 
@@ -91,12 +92,12 @@ class ForeignDecl(FooNode):
     env_spec = EnvSpec(
         add_to_env_kv(
             key=Self.id.simple_name.symbol, val=Self.node_for_env,
-            dest_env=Self.id.match(
+            dest_env=direct_env(Self.id.match(
                 lambda simple=T.SimpleId:
                     simple.node_env,
                 lambda scoped=T.ScopedId:
                     scoped.resolve(Self.node_env).children_env,
-            ),
+            )),
         )
     )
 

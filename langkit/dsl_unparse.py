@@ -1743,7 +1743,8 @@ def unparse_nodes(ctx, f):
                   if not t.is_builtin_type]
 
     types = keep(emit_node_type(t)
-                 for t in ctx.astnode_types + ctx._struct_types)
+                 for t in ctx.astnode_types + ctx._struct_types
+                 if not t.is_builtin_type)
 
     template = """
     % for t in enum_types:

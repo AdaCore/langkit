@@ -6,7 +6,8 @@ environment without the unsafe=True flag raise an error.
 from langkit.dsl import (ASTNode, Field, Struct, T, UserField, abstract,
                          env_metadata)
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
-from langkit.expressions import AbstractKind, Self, langkit_property
+from langkit.expressions import (AbstractKind, Self, direct_env,
+                                 langkit_property)
 
 from utils import build_and_run
 
@@ -63,8 +64,9 @@ class ForeignDecl(FooNode):
         add_to_env_kv(
             key=Self.decl_id.symbol,
             val=Self,
-            dest_env=(Self.dest_scope.resolve(Self.parent.children_env)
-                      .children_env)
+            dest_env=direct_env(
+                Self.dest_scope.resolve(Self.parent.children_env).children_env
+            ),
         )
     )
 

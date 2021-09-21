@@ -6,7 +6,8 @@ environments.
 from langkit.dsl import (ASTNode, Field, LookupKind, Struct, T, UserField,
                          env_metadata)
 from langkit.envs import EnvSpec, add_env, add_to_env, handle_children
-from langkit.expressions import Self, langkit_property, new_env_assoc
+from langkit.expressions import (Self, direct_env, langkit_property,
+                                 new_env_assoc)
 
 from utils import build_and_run
 
@@ -32,10 +33,10 @@ class Scope(FooNode):
                 lambda r: new_env_assoc(
                     key="Scope",
                     val=Self,
-                    dest_env=r.match(
+                    dest_env=direct_env(r.match(
                         lambda s=T.Scope: s.name.children_env,
                         lambda _: r.children_env
-                    )
+                    )),
                 )
             )
         ),

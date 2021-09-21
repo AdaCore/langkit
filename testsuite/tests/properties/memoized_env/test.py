@@ -1,6 +1,6 @@
 from langkit.dsl import ASTNode, Field
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
-from langkit.expressions import Self, langkit_property
+from langkit.expressions import Self, direct_env, langkit_property
 
 from utils import build_and_run
 
@@ -32,7 +32,7 @@ class Block(FooNode):
     env_spec = EnvSpec(
         add_env(),
         add_to_env_kv(key=Self.name.symbol, val=Self,
-                      dest_env=Self.node_env),
+                      dest_env=direct_env(Self.node_env)),
     )
 
 
