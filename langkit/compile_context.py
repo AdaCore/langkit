@@ -1688,6 +1688,7 @@ class CompileCtx:
         explicit_passes_triggers: Dict[str, bool] = {},
         default_max_call_depth: int = 1000,
         plugin_passes: List[Union[str, AbstractPass]] = [],
+        extra_code_emission_passes: List[AbstractPass] = [],
         **kwargs
     ) -> None:
         """
@@ -1727,6 +1728,9 @@ class CompileCtx:
             allowed in property calls. This is used as a mitigation against
             infinite recursions.
 
+        :param extra_code_emission_passes: See
+            ``CompileCtx.code_emission_passes``.
+
         See ``langkit.emitter.Emitter``'s constructor for other supported
         keyword arguments.
         """
@@ -1758,7 +1762,9 @@ class CompileCtx:
             self.all_passes.append(
                 self.prepare_code_emission_pass(lib_root, **kwargs))
 
-            self.all_passes.extend(self.code_emission_passes())
+            self.all_passes.extend(
+                self.code_emission_passes(extra_code_emission_passes)
+            )
 
             # Run plugin passes at the end of the pipeline
             self.all_passes.extend(loaded_plugin_passes)
@@ -2049,9 +2055,15 @@ class CompileCtx:
                        self.unparsers.finalize),
         ]
 
-    def code_emission_passes(self):
+    def code_emission_passes(
+        self, extra_passes: List[AbstractPass]
+    ) -> List[AbstractPass]:
         """
         Return the list of passes to emit sources for the generated library.
+
+        :param extra_passes: List of passes to run before generating right
+            before the library project file. This allows manage scripts to
+            generate extra Ada sources.
         """
         from langkit.emitter import Emitter
         from langkit.expressions import PropertyDef
@@ -2095,6 +2107,7 @@ class CompileCtx:
                         Emitter.emit_python_playground),
             EmitterPass('emit GDB helpers', Emitter.emit_gdb_helpers),
             EmitterPass('emit OCaml API', Emitter.emit_ocaml_api),
+        ] + extra_passes + [
             EmitterPass('emit library project file',
                         Emitter.emit_lib_project_file),
             EmitterPass('instrument for code coverage',

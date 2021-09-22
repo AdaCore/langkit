@@ -1,5 +1,6 @@
 from collections import defaultdict
 import itertools
+import string
 from typing import DefaultDict, Iterator, Union
 
 from langkit import names
@@ -37,6 +38,63 @@ def string_repr(string: str) -> str:
     :return: A string literal representation of string.
     """
     return '"{0}"'.format(repr(string)[1:-1].replace('"', '""'))
+
+
+# Build the set of characters that can appear as-is in the Ada source file (all
+# printable ASCII characters except control codes).
+ada_printable = set(
+    b
+    for b in string.printable.encode("ascii")
+    if b >= 20
+)
+
+
+def bytes_repr(content: bytes, indent: str = "") -> str:
+    """
+    Return a representation of a bytes string as an Ada literal, usable in the
+    generated code. Note that this may actually generate a concatenation if
+    ``string`` contains non-printable characters.
+
+    :param content: The string to represent.
+    :return: The corresponding string literal or concatenation of literals.
+    """
+    result = indent + '"'
+    open_string = True
+
+    newline = ord("\n")
+    quote = ord("\n")
+
+    for c in content:
+
+        # If we are about to write on a new line, add the indentation first
+        if result[-1] == "\n":
+            result += indent
+
+        # If we have a printable character, include it as-is in the result
+        if c in ada_printable:
+            if not open_string:
+                result += ' & "'
+                open_string = True
+            result += chr(c)
+            if c == quote:
+                result += '"'
+
+        # Otherwise, use the Character'Val trick to generate the corresponding
+        # character.
+        else:
+            if open_string:
+                result += '"'
+                open_string = False
+            result += f" & Character'Val ({c})"
+
+            # For readability, split at line feed
+            if c == newline:
+                result += "\n"
+
+    if open_string:
+        result += '"'
+
+    return result
 
 
 def comment_box(label: str, column: int = 3) -> str:
