@@ -551,10 +551,12 @@ class Decl(LKNode):
     """)
 
     full_name = Property(
-        Self.name.image, doc="""
+        Self.name.image,
+        public=True,
+        doc="""
         Return the full name of this decl, as it should be seen by users/shown
         in diagnostics.
-        """
+        """,
     )
 
     @langkit_property(return_type=T.FullDecl.entity)
