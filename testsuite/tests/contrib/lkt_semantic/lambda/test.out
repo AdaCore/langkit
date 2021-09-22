@@ -1,70 +1,70 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Int" test.lkt:5:29-5:32>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:5:39-5:42>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:5:44-5:47>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:5:52-5:55>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:5:58-5:61>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:8:22-8:25>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "lambda_test_helper" test.lkt:8:28-8:46>
      references <FunDecl "lambda_test_helper" test.lkt:5:1-5:61>
 
 Expr <RefId "lambda_test_helper" test.lkt:8:28-8:46>
-     has type <FunctionType "(Int, (Int, Int) -> Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, (Int, Int) -> Int) -> Int">
 
 Expr <NumLit test.lkt:8:47-8:49>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "x" test.lkt:8:61-8:62>
      references <LambdaArgDecl "x" test.lkt:8:52-8:53>
 
 Expr <RefId "x" test.lkt:8:61-8:62>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "y" test.lkt:8:65-8:66>
      references <LambdaArgDecl "y" test.lkt:8:55-8:56>
 
 Expr <RefId "y" test.lkt:8:65-8:66>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:8:69-8:70>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <BinOp test.lkt:8:65-8:70>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <BinOp test.lkt:8:61-8:70>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <LambdaExpr test.lkt:8:51-8:70>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Expr <CallExpr test.lkt:8:28-8:71>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:11:41-11:44>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "lambda_test_helper" test.lkt:12:5-12:23>
      references <FunDecl "lambda_test_helper" test.lkt:5:1-5:61>
 
 Expr <RefId "lambda_test_helper" test.lkt:12:5-12:23>
-     has type <FunctionType "(Int, (Int, Int) -> Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, (Int, Int) -> Int) -> Int">
 
 Expr <NumLit test.lkt:12:24-12:26>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 test.lkt:12:29: error: Invalid type annotations for lambda parameters.
 Annotate either all or no params
@@ -72,63 +72,63 @@ Annotate either all or no params
    |                             ^^^^^^^^^^               
 
 Id   <RefId "Int" test.lkt:12:33-12:36>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "x" test.lkt:12:44-12:45>
      references <LambdaArgDecl "x" test.lkt:12:29-12:36>
 
 Expr <RefId "x" test.lkt:12:44-12:45>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "y" test.lkt:12:48-12:49>
      references <LambdaArgDecl "y" test.lkt:12:38-12:39>
 
 Expr <RefId "y" test.lkt:12:48-12:49>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:12:52-12:53>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <BinOp test.lkt:12:48-12:53>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <BinOp test.lkt:12:44-12:53>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <LambdaExpr test.lkt:12:28-12:53>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Expr <CallExpr test.lkt:12:5-12:54>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:15:41-15:44>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "lambda_test_helper" test.lkt:16:5-16:23>
      references <FunDecl "lambda_test_helper" test.lkt:5:1-5:61>
 
 Expr <RefId "lambda_test_helper" test.lkt:16:5-16:23>
-     has type <FunctionType "(Int, (Int, Int) -> Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, (Int, Int) -> Int) -> Int">
 
 Expr <NumLit test.lkt:16:24-16:26>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "String" test.lkt:16:33-16:39>
-     references <StructDecl "String" __prelude:26:10-28:2>
+     references <StructDecl prelude: "String">
 
 Id   <RefId "String" test.lkt:16:45-16:51>
-     references <StructDecl "String" __prelude:26:10-28:2>
+     references <StructDecl prelude: "String">
 
 Id   <RefId "Int" test.lkt:16:54-16:57>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:16:61-16:63>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 test.lkt:16:28: error: Mismatched types: expected `(Int, Int) -> Int`, got `(String, String) -> Int`
 15 |     lambda_test_helper(12, (x : String, y : String): Int => 12)
    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 
 Expr <CallExpr test.lkt:16:5-16:64>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 

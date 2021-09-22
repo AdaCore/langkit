@@ -1,41 +1,41 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Int" test.lkt:2:18-2:21>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:2:26-2:29>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:2:32-2:35>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "a" test.lkt:2:41-2:42>
      references <FunArgDecl "a" test.lkt:2:15-2:21>
 
 Expr <RefId "a" test.lkt:2:41-2:42>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "b" test.lkt:2:45-2:46>
      references <FunArgDecl "b" test.lkt:2:23-2:29>
 
 Expr <RefId "b" test.lkt:2:45-2:46>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <BinOp test.lkt:2:41-2:46>
-     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
+     has type <EnumTypeDecl prelude: "Bool">
 
 Id   <RefId "a" test.lkt:2:52-2:53>
      references <FunArgDecl "a" test.lkt:2:15-2:21>
 
 Expr <RefId "a" test.lkt:2:52-2:53>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "b" test.lkt:2:59-2:60>
      references <FunArgDecl "b" test.lkt:2:23-2:29>
 
 Expr <RefId "b" test.lkt:2:59-2:60>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <IfExpr test.lkt:2:38-2:60>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 

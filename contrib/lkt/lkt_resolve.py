@@ -24,6 +24,19 @@ class Resolve(L.App):
         )
         super(Resolve, self).add_arguments()
 
+    def format_node(self, node: L.LKNode) -> str:
+        """
+        Return ``str(node)`` except for declarations from the prelude, to avoid
+        sloc variability when the prelude changes.
+        """
+        if (
+            isinstance(node, L.Decl)
+            and P.basename(node.unit.filename) == "__prelude"
+        ):
+            return f'<{node.kind_name} prelude: "{node.p_full_name}">'
+        else:
+            return str(node)
+
     def main(self) -> None:
         for unit_name, unit in self.units.items():
             if unit.diagnostics:
@@ -57,12 +70,14 @@ class Resolve(L.App):
                     if result.error_message:
                         print_error_from_sem_result(result)
                     elif result.result_type is not None:
-                        print("Expr {}".format(result.node))
-                        print("     has type {}".format(result.result_type))
+                        print("Expr {}".format(self.format_node(result.node)))
+                        print("     has type {}"
+                              .format(self.format_node(result.result_type)))
                         print()
                     elif result.result_ref is not None:
-                        print("Id   {}".format(result.node))
-                        res = "     references {}".format(result.result_ref)
+                        print("Id   {}".format(self.format_node(result.node)))
+                        res = ("     references {}"
+                               .format(self.format_node(result.result_ref)))
                         print(col(res, Colors.RED)
                               if result.result_ref is None else res)
                         print()

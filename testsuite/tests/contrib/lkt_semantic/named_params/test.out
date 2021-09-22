@@ -1,35 +1,35 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Int" test.lkt:3:30-3:33>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:3:36-3:39>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "a" test.lkt:3:42-3:43>
      references <FunArgDecl "a" test.lkt:3:27-3:33>
 
 Expr <RefId "a" test.lkt:3:42-3:43>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:4:10-4:13>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "test_named_parameters" test.lkt:4:16-4:37>
      references <FunDecl "test_named_parameters" test.lkt:3:1-3:43>
 
 Expr <RefId "test_named_parameters" test.lkt:4:16-4:37>
-     has type <FunctionType "(Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int) -> Int">
 
 Id   <RefId "a" test.lkt:4:38-4:39>
      references <FunArgDecl "a" test.lkt:3:27-3:33>
 
 Expr <RefId "a" test.lkt:4:38-4:39>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:4:40-4:42>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:4:16-4:43>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 

@@ -1,59 +1,59 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Int" test.lkt:4:17-4:20>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Array" test.lkt:4:23-4:28>
-     references <GenericDecl "Array" __prelude:20:10-22:2>
+     references <GenericDecl prelude: "Array">
 
 Id   <RefId "Int" test.lkt:4:29-4:32>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:5:9-5:12>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "arr" test.lkt:5:15-5:18>
      references <FunDecl "arr" test.lkt:4:1-4:33>
 
 Expr <RefId "arr" test.lkt:5:15-5:18>
-     has type <FunctionType "(Int) -> Array[Int]" __prelude>
+     has type <FunctionType prelude: "(Int) -> Array[Int]">
 
 Expr <NumLit test.lkt:5:19-5:21>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:5:15-5:22>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
 
 Expr <NumLit test.lkt:5:23-5:24>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:5:15-5:25>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:7:33-7:36>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "arr" test.lkt:7:39-7:42>
      references <FunDecl "arr" test.lkt:4:1-4:33>
 
 Expr <RefId "arr" test.lkt:7:39-7:42>
-     has type <FunctionType "(Int) -> Array[Int]" __prelude>
+     has type <FunctionType prelude: "(Int) -> Array[Int]">
 
 Expr <NumLit test.lkt:7:43-7:45>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:7:39-7:46>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
 
 test.lkt:7:47: error: Mismatched types: expected `Int`, got a string literal
 6 | @incorrect val incorrect_call : Int = arr(12)("a")
   |                                               ^^^ 
 
 Expr <CallExpr test.lkt:7:39-7:51>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:8:35-8:38>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 test.lkt:8:41: error: No value for parameter
 7 | @incorrect val incorrect_call_1 : Int = arr(12)()
@@ -63,19 +63,19 @@ Id   <RefId "arr" test.lkt:8:41-8:44>
      references <FunDecl "arr" test.lkt:4:1-4:33>
 
 Expr <RefId "arr" test.lkt:8:41-8:44>
-     has type <FunctionType "(Int) -> Array[Int]" __prelude>
+     has type <FunctionType prelude: "(Int) -> Array[Int]">
 
 Expr <NumLit test.lkt:8:45-8:47>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:8:41-8:48>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
 
 Expr <CallExpr test.lkt:8:41-8:50>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:9:35-9:38>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 test.lkt:9:52: error: Unmatched actual
 8 | @incorrect val incorrect_call_2 : Int = arr(12)(1, 2)
@@ -85,69 +85,69 @@ Id   <RefId "arr" test.lkt:9:41-9:44>
      references <FunDecl "arr" test.lkt:4:1-4:33>
 
 Expr <RefId "arr" test.lkt:9:41-9:44>
-     has type <FunctionType "(Int) -> Array[Int]" __prelude>
+     has type <FunctionType prelude: "(Int) -> Array[Int]">
 
 Expr <NumLit test.lkt:9:45-9:47>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:9:41-9:48>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:20:10-22:2>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
 
 Expr <NumLit test.lkt:9:49-9:50>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:9:41-9:54>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:11:21-11:24>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:11:26-11:29>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:11:34-11:37>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:13:9-13:12>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "return_func" test.lkt:13:15-13:26>
      references <FunDecl "return_func" test.lkt:11:1-11:37>
 
 Expr <RefId "return_func" test.lkt:13:15-13:26>
-     has type <FunctionType "() -> (Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "() -> (Int, Int) -> Int">
 
 Expr <CallExpr test.lkt:13:15-13:28>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Expr <NumLit test.lkt:13:29-13:30>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:13:32-13:33>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:13:15-13:34>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:14:20-14:23>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "return_func" test.lkt:14:26-14:37>
      references <FunDecl "return_func" test.lkt:11:1-11:37>
 
 Expr <RefId "return_func" test.lkt:14:26-14:37>
-     has type <FunctionType "() -> (Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "() -> (Int, Int) -> Int">
 
 Expr <CallExpr test.lkt:14:26-14:39>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Expr <NumLit test.lkt:14:40-14:41>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 test.lkt:14:43: error: Mismatched types: expected `Int`, got a character literal
 13 | @incorrect val b : Int = return_func()(1, '2')
    |                                           ^^^ 
 
 Expr <CallExpr test.lkt:14:26-14:47>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 

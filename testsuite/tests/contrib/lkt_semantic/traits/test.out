@@ -1,10 +1,10 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Int" test.lkt:5:28-5:31>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:9:35-9:38>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "T" test.lkt:9:41-9:42>
      references <GenericFormalTypeDecl "T" test.lkt:8:10-8:11>
@@ -22,13 +22,13 @@ Id   <RefId "Vec" test.lkt:15:11-15:14>
      references <GenericDecl "Vec" test.lkt:12:1-13:2>
 
 Id   <RefId "String" test.lkt:15:15-15:21>
-     references <StructDecl "String" __prelude:26:10-28:2>
+     references <StructDecl prelude: "String">
 
 Expr <NullLit test.lkt:15:25-15:29>
      has type <InstantiatedGenericType "Vec[String]" test.lkt:12:1-13:2>
 
 Id   <RefId "Int" test.lkt:16:18-16:21>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "vec" test.lkt:16:24-16:27>
      references <ValDecl "vec" test.lkt:15:1-15:29>
@@ -40,16 +40,16 @@ Id   <RefId "length" test.lkt:16:28-16:34>
      references <FunDecl "length" test.lkt:5:14-5:31>
 
 Expr <RefId "length" test.lkt:16:28-16:34>
-     has type <FunctionType "() -> Int" __prelude>
+     has type <FunctionType prelude: "() -> Int">
 
 Expr <DotExpr test.lkt:16:24-16:34>
-     has type <FunctionType "() -> Int" __prelude>
+     has type <FunctionType prelude: "() -> Int">
 
 Expr <CallExpr test.lkt:16:24-16:36>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "String" test.lkt:19:16-19:22>
-     references <StructDecl "String" __prelude:26:10-28:2>
+     references <StructDecl prelude: "String">
 
 Id   <RefId "vec" test.lkt:19:25-19:28>
      references <ValDecl "vec" test.lkt:15:1-15:29>
@@ -58,8 +58,8 @@ Expr <RefId "vec" test.lkt:19:25-19:28>
      has type <InstantiatedGenericType "Vec[String]" test.lkt:12:1-13:2>
 
 Expr <NumLit test.lkt:19:29-19:30>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:19:25-19:31>
-     has type <StructDecl "String" __prelude:26:10-28:2>
+     has type <StructDecl prelude: "String">
 
