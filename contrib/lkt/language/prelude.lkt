@@ -1,53 +1,81 @@
-@builtin struct Int {}
+@builtin struct Int {
+}
+
 @builtin struct BigInt {
     @builtin fun as_int(): Int
 }
-@builtin struct Symbol {}
-@builtin struct Regexp {}
+
+@builtin struct Symbol {
+}
+
+@builtin struct Regexp {
+}
+
 @builtin @open enum Bool {
     case false, true
 }
+
 @builtin trait Sized {
     @builtin fun length(): Int
 }
-@builtin generic[T] trait Indexable {
-    @builtin fun __call__(index : Int): T
+
+@builtin generic[T]
+trait Indexable {
+    @builtin fun __call__(index: Int): T
 }
-@builtin generic[T] trait Iterator {
-    @builtin generic [U] fun map(map_fn: (T) -> U): Array[U]
-    @builtin generic [U] fun filtermap      (map_fn: (T) -> U, filter_fn: (T) -> Bool): Array[U]
+
+@builtin generic[T]
+trait Iterator {
+    @builtin generic[U]
+    fun map(map_fn: (T) -> U): Array[U]
+
+    @builtin generic[U]
+    fun filtermap(map_fn: (T) -> U, filter_fn: (T) -> Bool): Array[U]
 }
-@builtin generic[T] struct Array implements Sized, Indexable[T], Iterator[T] {
+
+@builtin generic[T]
+struct Array implements Sized, Indexable[T], Iterator[T] {
     @builtin @property fun to_iterator(): Iterator[T]
 }
-@builtin generic[T] struct ASTList implements Sized, Indexable[T], Iterator[T] {
+
+@builtin generic[T]
+struct ASTList implements Sized, Indexable[T], Iterator[T] {
 }
-@builtin struct Char {}
+
+@builtin struct Char {
+}
 @builtin struct String implements Sized, Indexable[Char], Iterator[Char] {
     @builtin @property fun to_symbol(): Symbol
 }
+
 @builtin class LogicalVar {
 }
+
 @builtin class Equation {
 }
+
 @builtin class LexicalEnv {
-    @builtin fun get(symbol : Symbol): Array[Node]
-    @builtin fun get_first(symbol : Symbol): Node
+    @builtin fun get(symbol: Symbol): Array[Node]
+    @builtin fun get_first(symbol: Symbol): Node
     @builtin fun env_node(): Node
     @builtin fun env_orphan(): LexicalEnv
 }
+
 @builtin class AnalysisUnit {
     @builtin @property fun root(): Node
 }
+
 @builtin class Node {
     @builtin @property fun parent(): Node
     @builtin fun node_env(): LexicalEnv
     @builtin fun children_env(): LexicalEnv
     @builtin fun unit(): AnalysisUnit
-    @builtin fun parents(with_self : Bool = true): Array[Node]
+    @builtin fun parents(with_self: Bool = true): Array[Node]
 }
+
 @builtin trait TokenNode {
     @builtin @property fun symbol(): Symbol
 }
+
 @builtin trait ErrorNode {
 }
