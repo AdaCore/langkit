@@ -1,59 +1,59 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Int" test.lkt:2:9-2:12>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:2:15-2:16>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:3:9-3:12>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:3:15-3:16>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Bool" test.lkt:4:9-4:13>
-     references <EnumTypeDecl "Bool" __prelude:7:16-9:2>
+     references <EnumTypeDecl prelude: "Bool">
 
 Id   <RefId "a" test.lkt:4:18-4:19>
      references <ValDecl "a" test.lkt:2:1-2:16>
 
 Expr <RefId "a" test.lkt:4:18-4:19>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <ParenExpr test.lkt:4:17-4:20>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "b" test.lkt:4:23-4:24>
      references <ValDecl "b" test.lkt:3:1-3:16>
 
 Expr <RefId "b" test.lkt:4:23-4:24>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <BinOp test.lkt:4:17-4:24>
-     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
+     has type <EnumTypeDecl prelude: "Bool">
 
 Expr <ParenExpr test.lkt:4:16-4:25>
-     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
+     has type <EnumTypeDecl prelude: "Bool">
 
 Id   <RefId "a" test.lkt:4:29-4:30>
      references <ValDecl "a" test.lkt:2:1-2:16>
 
 Expr <RefId "a" test.lkt:4:29-4:30>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "b" test.lkt:4:33-4:34>
      references <ValDecl "b" test.lkt:3:1-3:16>
 
 Expr <RefId "b" test.lkt:4:33-4:34>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <BinOp test.lkt:4:29-4:34>
-     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
+     has type <EnumTypeDecl prelude: "Bool">
 
 Expr <ParenExpr test.lkt:4:28-4:35>
-     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
+     has type <EnumTypeDecl prelude: "Bool">
 
 Expr <BinOp test.lkt:4:16-4:35>
-     has type <EnumTypeDecl "Bool" __prelude:7:16-9:2>
+     has type <EnumTypeDecl prelude: "Bool">
 

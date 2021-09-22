@@ -1,18 +1,18 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Int" test.lkt:1:14-1:17>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 test.lkt:1:20: error: Cannot find entity `Cls` in this scope
 0 | fun test(a : Int): Cls
   |                    ^^^
 
 Id   <RefId "Int" test.lkt:3:9-3:12>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "test" test.lkt:3:15-3:19>
      references <FunDecl "test" test.lkt:1:1-1:23>
 
 Expr <NumLit test.lkt:3:20-3:22>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 

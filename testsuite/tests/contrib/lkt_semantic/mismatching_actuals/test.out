@@ -1,49 +1,49 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Int" test.lkt:3:13-3:16>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:3:21-3:24>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:3:27-3:30>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "a" test.lkt:3:33-3:34>
      references <FunArgDecl "a" test.lkt:3:10-3:16>
 
 Expr <RefId "a" test.lkt:3:33-3:34>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "b" test.lkt:3:37-3:38>
      references <FunArgDecl "b" test.lkt:3:18-3:24>
 
 Expr <RefId "b" test.lkt:3:37-3:38>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <BinOp test.lkt:3:33-3:38>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:5:9-5:12>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "test" test.lkt:5:15-5:19>
      references <FunDecl "test" test.lkt:3:1-3:38>
 
 Expr <RefId "test" test.lkt:5:15-5:19>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Expr <NumLit test.lkt:5:20-5:22>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:5:24-5:26>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:5:15-5:27>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:6:18-6:21>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 test.lkt:6:24: error: No value for parameter `b` in call to `test`
 5 | @invalid val u : Int = test(12) # Missing params
@@ -53,16 +53,16 @@ Id   <RefId "test" test.lkt:6:24-6:28>
      references <FunDecl "test" test.lkt:3:1-3:38>
 
 Expr <RefId "test" test.lkt:6:24-6:28>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Expr <NumLit test.lkt:6:29-6:31>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:6:24-6:32>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:7:18-7:21>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 test.lkt:7:24: error: No value for parameter `a` in call to `test`
 6 | @invalid val v : Int = test(b=12) # Missing params in call with kwargs
@@ -72,22 +72,22 @@ Id   <RefId "test" test.lkt:7:24-7:28>
      references <FunDecl "test" test.lkt:3:1-3:38>
 
 Expr <RefId "test" test.lkt:7:24-7:28>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Id   <RefId "b" test.lkt:7:29-7:30>
      references <FunArgDecl "b" test.lkt:3:18-3:24>
 
 Expr <RefId "b" test.lkt:7:29-7:30>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:7:31-7:33>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:7:24-7:34>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:8:18-8:21>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 test.lkt:8:37: error: Unmatched actual in call to `test`
 7 | @invalid val x : Int = test(12, 15, 17) # Too many params
@@ -97,19 +97,19 @@ Id   <RefId "test" test.lkt:8:24-8:28>
      references <FunDecl "test" test.lkt:3:1-3:38>
 
 Expr <RefId "test" test.lkt:8:24-8:28>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Expr <NumLit test.lkt:8:29-8:31>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:8:33-8:35>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:8:24-8:40>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:9:18-9:21>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 test.lkt:9:40: error: Unmatched actual in call to `test`
 8 | @invalid val y : Int = test(a=1, b=12, c=15) # Too many params kwargs
@@ -119,31 +119,31 @@ Id   <RefId "test" test.lkt:9:24-9:28>
      references <FunDecl "test" test.lkt:3:1-3:38>
 
 Expr <RefId "test" test.lkt:9:24-9:28>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Id   <RefId "a" test.lkt:9:29-9:30>
      references <FunArgDecl "a" test.lkt:3:10-3:16>
 
 Expr <RefId "a" test.lkt:9:29-9:30>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:9:31-9:32>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "b" test.lkt:9:34-9:35>
      references <FunArgDecl "b" test.lkt:3:18-3:24>
 
 Expr <RefId "b" test.lkt:9:34-9:35>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:9:36-9:38>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <CallExpr test.lkt:9:24-9:45>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:10:18-10:21>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 test.lkt:10:40: error: Unmatched actual in call to `test`
  9 | @invalid val z : Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check that there is an error message for the expr
@@ -153,30 +153,30 @@ Id   <RefId "test" test.lkt:10:24-10:28>
      references <FunDecl "test" test.lkt:3:1-3:38>
 
 Expr <RefId "test" test.lkt:10:24-10:28>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
+     has type <FunctionType prelude: "(Int, Int) -> Int">
 
 Id   <RefId "a" test.lkt:10:29-10:30>
      references <FunArgDecl "a" test.lkt:3:10-3:16>
 
 Expr <RefId "a" test.lkt:10:29-10:30>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:10:31-10:32>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "b" test.lkt:10:34-10:35>
      references <FunArgDecl "b" test.lkt:3:18-3:24>
 
 Expr <RefId "b" test.lkt:10:34-10:35>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:10:36-10:38>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
 test.lkt:10:42: error: Cannot find entity `foo` in this scope
  9 | @invalid val z : Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check that there is an error message for the expr
    |                                          ^^^                                                                                     
 
 Expr <CallExpr test.lkt:10:24-10:46>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 

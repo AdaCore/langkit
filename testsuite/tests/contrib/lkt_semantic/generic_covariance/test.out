@@ -4,7 +4,7 @@ Id   <RefId "T" test.lkt:2:12-2:13>
      references <GenericFormalTypeDecl "T" test.lkt:1:15-1:16>
 
 Id   <RefId "Int" test.lkt:3:13-3:16>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "TestNode" test.lkt:7:14-7:22>
      references <ClassDecl "TestNode" test.lkt:6:1-6:18>

@@ -1,7 +1,7 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Int" test.lkt:6:16-6:19>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "Foo1" test.lkt:9:13-9:17>
      references <ClassDecl "Foo1" test.lkt:5:1-7:2>
@@ -10,7 +10,7 @@ Id   <RefId "Baz" test.lkt:11:33-11:36>
      references <ClassDecl "Baz" test.lkt:9:1-9:20>
 
 Id   <RefId "Int" test.lkt:11:39-11:42>
-     references <StructDecl "Int" __prelude:1:10-1:23>
+     references <StructDecl prelude: "Int">
 
 Id   <RefId "arg" test.lkt:11:45-11:48>
      references <FunArgDecl "arg" test.lkt:11:28-11:36>
@@ -22,11 +22,11 @@ Id   <RefId "bar" test.lkt:11:49-11:52>
      references <FunDecl "bar" test.lkt:6:5-6:19>
 
 Expr <RefId "bar" test.lkt:11:49-11:52>
-     has type <FunctionType "() -> Int" __prelude>
+     has type <FunctionType prelude: "() -> Int">
 
 Expr <DotExpr test.lkt:11:45-11:52>
-     has type <FunctionType "() -> Int" __prelude>
+     has type <FunctionType prelude: "() -> Int">
 
 Expr <CallExpr test.lkt:11:45-11:54>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+     has type <StructDecl prelude: "Int">
 
