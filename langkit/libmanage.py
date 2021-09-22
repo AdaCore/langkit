@@ -32,6 +32,7 @@ from langkit.utils import (
 
 if TYPE_CHECKING:
     from langkit.compile_context import CompileCtx
+    from langkit.passes import AbstractPass
     from types import TracebackType
 
 
@@ -737,6 +738,16 @@ class ManageScript:
             "extensions"
         )
 
+    @property
+    def extra_code_emission_passes(self) -> List[AbstractPass]:
+        """
+        Return passes to forward to ``CompileCtx.code_emission_passes``.
+
+        ``ManageScript`` subclasses can override this to add the generation of
+        extra Ada source files.
+        """
+        return []
+
     def prepare_generation(self, args: argparse.Namespace) -> None:
         """
         Prepare generation of the DSL code (initialize the compilation context
@@ -775,6 +786,7 @@ class ManageScript:
             relative_project=args.relative_project,
             unparse_script=args.unparse_script,
             explicit_passes_triggers=explicit_passes_triggers,
+            extra_code_emission_passes=self.extra_code_emission_passes,
         )
 
     def gnatpp(self, project_file: str, glob_pattern: str) -> None:

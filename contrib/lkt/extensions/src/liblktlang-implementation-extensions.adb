@@ -3,71 +3,10 @@ with Ada.Directories;
 with Ada.Text_IO; use Ada.Text_IO;
 
 with Liblktlang.Analysis;          use Liblktlang.Analysis;
+with Liblktlang.Prelude;
 with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
 
 package body Liblktlang.Implementation.Extensions is
-
-   Prelude_Content : constant String :=
-     "@builtin struct Int {}" & ASCII.LF &
-     "@builtin struct BigInt {" & ASCII.LF &
-     "    @builtin fun as_int(): Int" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin struct Symbol {}" & ASCII.LF &
-     "@builtin struct Regexp {}" & ASCII.LF &
-     "@builtin @open enum Bool {" & ASCII.LF &
-     "    case false, true" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin trait Sized {" & ASCII.LF &
-     "    @builtin fun length(): Int" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin generic[T] trait Indexable {" & ASCII.LF &
-     "    @builtin fun __call__(index : Int): T" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin generic[T] trait Iterator {" & ASCII.LF &
-     "    @builtin generic [U] fun map(map_fn: (T) -> U): Array[U]"
-     & ASCII.LF &
-     "    @builtin generic [U] fun filtermap" &
-     "      (map_fn: (T) -> U, filter_fn: (T) -> Bool): Array[U]" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin generic[T] struct Array " &
-     "implements Sized, Indexable[T], Iterator[T] {" & ASCII.LF &
-     "    @builtin @property fun to_iterator(): Iterator[T]" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin generic[T] struct ASTList " &
-     "implements Sized, Indexable[T], Iterator[T] {" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin struct Char {}" & ASCII.LF &
-     "@builtin struct String " &
-     "implements Sized, Indexable[Char], Iterator[Char] {" & ASCII.LF &
-     "    @builtin @property fun to_symbol(): Symbol" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin class LogicalVar {" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin class Equation {" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin class LexicalEnv {" & ASCII.LF &
-     "    @builtin fun get(symbol : Symbol): Array[Node]" & ASCII.LF &
-     "    @builtin fun get_first(symbol : Symbol): Node" & ASCII.LF &
-     "    @builtin fun env_node(): Node" & ASCII.LF &
-     "    @builtin fun env_orphan(): LexicalEnv" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin class AnalysisUnit {" & ASCII.LF &
-     "    @builtin @property fun root(): Node" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin class Node {" & ASCII.LF &
-     "    @builtin @property fun parent(): Node" & ASCII.LF &
-     "    @builtin fun node_env(): LexicalEnv" & ASCII.LF &
-     "    @builtin fun children_env(): LexicalEnv" & ASCII.LF &
-     "    @builtin fun unit(): AnalysisUnit" & ASCII.LF &
-     "    @builtin fun parents(with_self : Bool = true): Array[Node]" &
-     ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin trait TokenNode {" & ASCII.LF &
-     "    @builtin @property fun symbol(): Symbol" & ASCII.LF &
-     "}" & ASCII.LF &
-     "@builtin trait ErrorNode {" & ASCII.LF &
-     "}" & ASCII.LF &
-     "";
 
    ----------------------------------
    -- Langkit_Root_P_Fetch_Prelude --
@@ -82,7 +21,7 @@ package body Liblktlang.Implementation.Extensions is
       Prelude := Ctx.Get_From_File ("__prelude");
       if Prelude.Root = No_LK_Node then
          Prelude := Ctx.Get_From_Buffer
-           ("__prelude", "ascii", Prelude_Content);
+           ("__prelude", "ascii", Liblktlang.Prelude.Content);
 
          --  Check if we have syntactic or semantic errors in the prelude. If
          --  we do, raise an assertion error.
