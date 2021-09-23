@@ -81,7 +81,7 @@ package body Liblktlang.Implementation.Extensions is
         --  Don't show the sloc for function types, because it will be the root
         --  node's sloc, and thus will always change when we add stuff to the
         --  file, which is not helpful nor practical for tests.
-        & (if Node.Kind = lkt_Function_Type
+        & (if Node.Kind = Lkt_Function_Type
            then ""
            else ":" & To_Text (Image (Sloc_Range (Node)))) & ">";
    end Decl_Short_Image;
@@ -134,7 +134,7 @@ package body Liblktlang.Implementation.Extensions is
       Tok_Kind : constant Token_Kind :=
          Kind (Data (Token (Node, Node.Token_Start_Index)));
    begin
-      return Tok_Kind = lkt_P_String;
+      return Tok_Kind = Lkt_P_String;
    end String_Lit_P_Is_Prefixed_String;
 
    -------------------------
