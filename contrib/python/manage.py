@@ -13,7 +13,7 @@ class Manage(ManageScript):
         from language.lexer import python_lexer
         from language.parser import python_grammar
 
-        return CompileCtx(lang_name='python',
+        return CompileCtx(lang_name='Python',
                           lexer=python_lexer,
                           grammar=python_grammar)
 
