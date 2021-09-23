@@ -1,0 +1,16 @@
+a {
+   b {
+      # Create enough results for "c" so that the Local_Results small vector
+      # (small size = 2) has a dynamic memory allocation at the time the
+      # Property_Error is raised during the env lookup.
+      c {}
+      c {}
+      c {}
+   }
+   d {
+      +b
+      +error
+      c {}
+      =c
+   }
+}

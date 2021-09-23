@@ -1376,6 +1376,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       end if;
 
+   exception
+      when Property_Error =>
+         Local_Results.Destroy;
+         raise;
    end Get_Internal_Impl;
 
    function Get
