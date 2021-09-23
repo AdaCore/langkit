@@ -1,0 +1,5 @@
+main.adb: Starting...
+<Ref foo.txt:14:7-14:9> resolves to:
+   ... got a Property_Error: unconditionally raised
+main.adb: Done.
+Done

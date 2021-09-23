@@ -1,0 +1,43 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(scope)
+    scope <- Scope(id "{" scope_content "}")
+    scope_content <- list*(or(scope | use_clause | error_use_clause | ref))
+    id <- Id(@identifier)
+    use_clause <- UseClause("+" id)
+    error_use_clause <- ErrorUseClause("+" "error")
+    ref <- Ref("=" id)
+
+}
+
+@abstract class FooNode : Node {
+}
+
+class ErrorUseClause : FooNode {
+
+    fun resolve (): LexicalEnv = raise PropertyError("unconditionally raised")
+}
+
+class Id : FooNode implements TokenNode {
+
+    fun resolve (): Array[FooNode] = node.node_env().get(node.symbol)
+}
+
+class Ref : FooNode {
+    @parse_field name : Id
+
+    @export fun resolve (): Array[FooNode] = node.name.resolve()
+}
+
+class Scope : FooNode {
+    @parse_field name : Id
+    @parse_field content : ASTList[FooNode]
+}
+
+class UseClause : FooNode {
+    @parse_field name : Id
+
+    fun resolve (): LexicalEnv =
+    node.name.resolve().map((n) => n.children_env()).env_group()
+}
