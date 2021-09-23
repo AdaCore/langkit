@@ -5,7 +5,6 @@ Test token-related primitives.
 import sys
 
 import libfoolang
-from libfoolang import _py2to3
 
 
 print('main.py: Running...')
@@ -38,7 +37,7 @@ for t in tokens:
 print('')
 
 # Print the whole text buffer
-print('Input source buffer:\n   {}'.format(_py2to3.text_repr(u.text)))
+print('Input source buffer:\n   {}'.format(repr(u.text)))
 print('')
 
 # Test Token's comparison operations
@@ -79,8 +78,7 @@ for t1, t2 in [(tokens[1], tokens[0]),
                (tokens[0], tokens[1]),
                (tokens[1], tokens[4])]:
     print('Token.text_range({}, {}):\n   {}'
-          .format(t1, t2,
-                  _py2to3.text_repr(libfoolang.Token.text_range(t1, t2))))
+          .format(t1, t2, repr(libfoolang.Token.text_range(t1, t2))))
 print('')
 
 # Ordering operations and .range_until must raise an error when working on

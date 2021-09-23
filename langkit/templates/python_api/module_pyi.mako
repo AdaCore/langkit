@@ -22,7 +22,7 @@ from typing import (
 
 
 % for enum_type in ctx.enum_types:
-class ${enum_type.py_helper}(object):
+class ${enum_type.py_helper}:
     ${py_doc(enum_type, 4)}
     % for v in enum_type.values:
     ${v.name.lower}: str
@@ -42,7 +42,7 @@ class ${e.name.camel}(Exception):
 ${exts.include_extension(ctx.ext('python_api', 'mypy_exceptions'))}
 
 
-class AnalysisContext(object):
+class AnalysisContext:
     ${py_doc('langkit.analysis_context_type', 4)}
 
     def __init__(self,
@@ -87,10 +87,10 @@ class AnalysisContext(object):
         ${py_doc('langkit.context_discard_errors_in_populate_lexical_env', 8,
                  or_pass=True)}
 
-class AnalysisUnit(object):
+class AnalysisUnit:
     ${py_doc('langkit.analysis_unit_type', 4)}
 
-    class TokenIterator(object):
+    class TokenIterator:
         ${py_doc('langkit.python.AnalysisUnit.TokenIterator', 8)}
 
         def __init__(self, first: Token) -> None: ...
@@ -156,7 +156,7 @@ class AnalysisUnit(object):
     def __repr__(self) -> str: ...
 
 
-class Sloc(object):
+class Sloc:
     ${py_doc('langkit.sloc_type', 4)}
 
     line: int
@@ -164,7 +164,6 @@ class Sloc(object):
 
     def __init__(self, line: int, column: int) -> None: ...
     def __bool__(self) -> bool: ...
-    def __nonzero__(self) -> bool: ...
     def __lt__(self, other: Sloc) -> bool: ...
     def __eq__(self, other: Any) -> bool: ...
     def __hash__(self) -> int: ...
@@ -172,7 +171,7 @@ class Sloc(object):
     def __repr__(self) -> str: ...
 
 
-class SlocRange(object):
+class SlocRange:
     ${py_doc('langkit.sloc_range_type', 4)}
 
     start: Sloc
@@ -180,7 +179,6 @@ class SlocRange(object):
 
     def __init__(self, start: Sloc, end: Sloc) -> None: ...
     def __bool__(self) -> bool: ...
-    def __nonzero__(self) -> bool: ...
     def __lt__(self, other: SlocRange) -> bool: ...
     def __eq__(self, other: Any) -> bool: ...
     def __hash__(self) -> int: ...
@@ -188,7 +186,7 @@ class SlocRange(object):
     def __repr__(self) -> str: ...
 
 
-class Diagnostic(object):
+class Diagnostic:
     ${py_doc('langkit.diagnostic_type', 4)}
 
     sloc_range: SlocRange
@@ -203,7 +201,7 @@ class Diagnostic(object):
     def __repr__(self) -> str: ...
 
 
-class Token(object):
+class Token:
     ${py_doc('langkit.token_reference_type', 4)}
 
     @property
@@ -261,7 +259,7 @@ class Token(object):
         ${py_doc('langkit.python.Token.to_data', 8, or_pass=True)}
 
 
-class FileReader(object):
+class FileReader:
     ${py_doc('langkit.file_reader_type', 4)}
 
     def __init__(self, c_value: Any) -> None:
@@ -272,7 +270,7 @@ ${exts.include_extension(
 )}
 
 
-class UnitProvider(object):
+class UnitProvider:
     ${py_doc('langkit.unit_provider_type', 4)}
 
     def __init__(self, c_value: Any) -> None:
@@ -283,7 +281,7 @@ ${exts.include_extension(
 )}
 
 
-class ${root_astnode_name}(object):
+class ${root_astnode_name}:
     ${py_doc(T.root_node, 4)}
 
     is_list_type: ClassVar[bool]
@@ -328,8 +326,6 @@ class ${root_astnode_name}(object):
 
     def __bool__(self) -> bool:
         ${py_doc('langkit.python.root_node.__bool__', 8, or_pass=True)}
-
-    def __nonzero__(self) -> bool: ...
 
     def __iter__(self) -> Iterator[${root_astnode_name}]:
         ${py_doc('langkit.python.root_node.__iter__', 8, or_pass=True)}
@@ -430,7 +426,7 @@ build_date: str
 ${exts.include_extension(ctx.ext('mypy_python'))}
 
 
-class App(object):
+class App:
     parser: argparse.ArgumentParser
     args: argparse.Namespace
     u: AnalysisUnit

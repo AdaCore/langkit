@@ -13,7 +13,7 @@ print("")
 
 print("Token range:")
 text_range = libfoolang.Token.text_range(u.first_token, u.last_token)
-print(libfoolang._py2to3.text_repr(text_range))
+print(repr(text_range))
 print("")
 
 print('main.py: Done.')

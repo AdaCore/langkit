@@ -2,7 +2,7 @@
 
 <%def name="base_decl()">
 
-class _BaseIterator(object):
+class _BaseIterator:
     ${py_doc('langkit.iterator_type')}
 
     _c_element_type = None
@@ -93,7 +93,7 @@ class ${cls.api_name.camel}(_BaseIterator):
 
 <%def name="mypy_decl(cls)">
 
-class ${pyapi.type_public_name(cls)}(object):
+class ${pyapi.type_public_name(cls)}:
     ${py_doc(cls, 4)}
 
     def __iter__(self) -> Iterator[${cls.element_type.mypy_type_hint}]: ...

@@ -17,7 +17,7 @@
 
 <%def name="base_decls()">
 
-class _BaseStruct(object):
+class _BaseStruct:
     """
     Mixin for Ada struct wrappers.
     """
@@ -94,7 +94,7 @@ class ${public_name}(_BaseStruct):
     class _c_type(ctypes.Structure):
         _fields_ = ${ctype_fields(cls)}
 
-    class _Holder(object):
+    class _Holder:
         def __init__(self, c_value):
             self.c_value = c_value
 
@@ -172,7 +172,7 @@ class ${public_name}(_BaseStruct):
 
 <%def name="mypy_decl(cls)">
 
-class ${pyapi.type_public_name(cls)}(object):
+class ${pyapi.type_public_name(cls)}:
     ${py_doc(cls, 4)}
 
     def __init__(

@@ -1,31 +1,31 @@
 main.py: Running...
 == get_from_buffer ==
 
-  buffer='example # H\xe9llo', charset=None: 'example # H\xe9llo'
-  buffer='example # H\xeallo', charset='': 'example # H\xeallo'
-  buffer='example # H\xebllo', charset='utf-8': TypeError: `charset` must be null when the buffer is Unicode
-  buffer=b'example # H\xe9llo', charset=None: 'example # H\xe9llo'
-  buffer=b'example # H\xeallo', charset='': 'example # H\xeallo'
-  buffer=b'example # H\xebllo', charset='iso-8859-1': 'example # H\xebllo'
+  buffer='example # Héllo', charset=None: 'example # Héllo'
+  buffer='example # Hêllo', charset='': 'example # Hêllo'
+  buffer='example # Hëllo', charset='utf-8': TypeError: `charset` must be null when the buffer is Unicode
+  buffer=b'example # H\xe9llo', charset=None: 'example # Héllo'
+  buffer=b'example # H\xeallo', charset='': 'example # Hêllo'
+  buffer=b'example # H\xebllo', charset='iso-8859-1': 'example # Hëllo'
   buffer=b'example # H\xecllo', charset='utf-8': diagnostics:
     Could not decode source as "utf-8"
   buffer=b'example # H\xecllo', charset='unknown-charset': diagnostics:
     Unknown charset "unknown-charset"
-  buffer=b'example # H\xc3\xa9llo', charset='utf-8': 'example # H\xe9llo'
-  buffer=b'example # H\xc3\xa9llo', charset=None: 'example # H\xc3\xa9llo'
+  buffer=b'example # H\xc3\xa9llo', charset='utf-8': 'example # Héllo'
+  buffer=b'example # H\xc3\xa9llo', charset=None: 'example # HÃ©llo'
 == reparse ==
 
-  buffer='example # H\xe9llo', charset=None: 'example # H\xe9llo'
-  buffer='example # H\xeallo', charset='': 'example # H\xeallo'
-  buffer='example # H\xebllo', charset='utf-8': TypeError: `charset` must be null when the buffer is Unicode
-  buffer=b'example # H\xe9llo', charset=None: 'example # H\xe9llo'
-  buffer=b'example # H\xeallo', charset='': 'example # H\xeallo'
-  buffer=b'example # H\xebllo', charset='iso-8859-1': 'example # H\xebllo'
+  buffer='example # Héllo', charset=None: 'example # Héllo'
+  buffer='example # Hêllo', charset='': 'example # Hêllo'
+  buffer='example # Hëllo', charset='utf-8': TypeError: `charset` must be null when the buffer is Unicode
+  buffer=b'example # H\xe9llo', charset=None: 'example # Héllo'
+  buffer=b'example # H\xeallo', charset='': 'example # Hêllo'
+  buffer=b'example # H\xebllo', charset='iso-8859-1': 'example # Hëllo'
   buffer=b'example # H\xecllo', charset='utf-8': diagnostics:
     Could not decode source as "utf-8"
   buffer=b'example # H\xecllo', charset='unknown-charset': diagnostics:
     Unknown charset "unknown-charset"
-  buffer=b'example # H\xc3\xa9llo', charset='utf-8': 'example # H\xe9llo'
-  buffer=b'example # H\xc3\xa9llo', charset=None: 'example # H\xc3\xa9llo'
+  buffer=b'example # H\xc3\xa9llo', charset='utf-8': 'example # Héllo'
+  buffer=b'example # H\xc3\xa9llo', charset=None: 'example # HÃ©llo'
 main.py: Done.
 Done

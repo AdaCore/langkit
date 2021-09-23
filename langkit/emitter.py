@@ -607,20 +607,12 @@ class Emitter:
             pyapi=ctx.python_api_settings,
             module_name=ctx.python_api_settings.module_name
         )
-        render_python_template(
-            os.path.join(self.python_pkg_dir, '_py2to3.py'),
-            'python_api/py2to3_py'
-        )
 
         # Emit stub files for Mypy (type hints)
         render_python_template(
             os.path.join(self.python_pkg_dir, '__init__.pyi'),
             'python_api/module_pyi',
             pyapi=ctx.python_api_settings,
-        )
-        render_python_template(
-            os.path.join(self.python_pkg_dir, '_py2to3.pyi'),
-            'python_api/py2to3_pyi'
         )
 
         # Emit the setup.py script to easily install the Python binding
