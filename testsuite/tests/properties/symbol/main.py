@@ -14,7 +14,7 @@ if u.diagnostics:
 
 for n in (None, u.root):
     try:
-        result = libfoolang._py2to3.text_repr(u.root.p_prop(n))
+        result = repr(u.root.p_prop(n))
     except libfoolang.PropertyError as exc:
         result = '<{}: {}>'.format(type(exc).__name__, exc)
     print('p_prop({}) = {}'.format(n, result))

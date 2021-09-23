@@ -1,7 +1,6 @@
 import sys
 
 import libfoolang
-from libfoolang import _py2to3
 
 
 ctx = libfoolang.AnalysisContext()
@@ -13,5 +12,5 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-print('Evaluating {}'.format(_py2to3.bytes_repr(text)))
+print('Evaluating {}'.format(repr(text)))
 print('result = {}'.format(u.root.p_result))

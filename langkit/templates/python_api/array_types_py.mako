@@ -2,7 +2,7 @@
 
 <%def name="base_decl()">
 
-class _BaseArray(object):
+class _BaseArray:
     """
     Base class for Ada arrays bindings.
     """

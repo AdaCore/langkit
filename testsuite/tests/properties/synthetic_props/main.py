@@ -1,7 +1,6 @@
 import sys
 
 import libfoolang
-from libfoolang import _py2to3
 
 
 print('main.py: Running...')
@@ -23,9 +22,7 @@ for prop in ['is_synthetic', 'text', 'sloc_range']:
     except Exception as exc:
         result = '<{}: {}>'.format(type(exc).__name__, exc)
     else:
-        result = (_py2to3.text_repr(value)
-                  if isinstance(value, _py2to3.text_type) else
-                  repr(value))
+        result = repr(value)
     print('{} = {}'.format(prop, result))
 
 print('main.py: Done.')

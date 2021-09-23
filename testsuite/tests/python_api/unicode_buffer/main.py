@@ -1,19 +1,12 @@
 from collections import namedtuple
 
 import libfoolang
-from libfoolang import _py2to3
 
 
 print('main.py: Running...')
 
 ctx = libfoolang.AnalysisContext('iso-8859-1')
 u = ctx.get_from_buffer('foo.txt', b'')
-
-
-def unirepr(value):
-    return (_py2to3.text_repr(value)
-            if isinstance(value, _py2to3.text_type) else
-            _py2to3.bytes_repr(value))
 
 
 def get_from_buffer(buffer, charset):
@@ -67,10 +60,10 @@ for method in (get_from_buffer, reparse):
                                    ['    {}'.format(d)
                                     for d in u.diagnostics])
             else:
-                result = _py2to3.text_repr(u.text)
+                result = repr(u.text)
 
         print('  buffer={}, charset={}: {}'.format(
-            unirepr(tc.buffer), repr(tc.charset), result,
+            repr(tc.buffer), repr(tc.charset), result,
         ))
 
 print('main.py: Done.')

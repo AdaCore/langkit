@@ -14,8 +14,6 @@ if u.diagnostics:
 
 
 print("p_root1 = {}".format(u.root.p_root1))
-print("p_root2('3', '4') = {}".format(
-    libfoolang._py2to3.text_repr(u.root.p_root2(u"3", u"4"))
-))
+print("p_root2('3', '4') = {}".format(repr(u.root.p_root2(u"3", u"4"))))
 
 print('main.py: Done.')

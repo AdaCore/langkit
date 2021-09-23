@@ -22,7 +22,7 @@ def dump(u):
         for d in u.diagnostics:
             print("  {}".format(d))
     else:
-        print("Success: {}".format(libfoolang._py2to3.text_repr(u.text)))
+        print("Success: {}".format(repr(u.text)))
 
 
 def parse(filename, charset):

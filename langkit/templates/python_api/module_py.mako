@@ -14,7 +14,7 @@ directly.
 <%namespace name="struct_types"   file="struct_types_py.mako" />
 <%namespace name="exts"           file="/extensions.mako" />
 
-from __future__ import absolute_import, division, print_function
+from __future__ import annotations
 
 
 <%
@@ -29,12 +29,11 @@ from __future__ import absolute_import, division, print_function
 import argparse
 import collections
 import ctypes
+import io
 import json
 import os
 import sys
 import weakref
-
-import ${pyapi.module_name}._py2to3 as _py2to3
 
 
 #
@@ -127,13 +126,10 @@ class _Exception(ctypes.Structure):
                 ('information', ctypes.c_char_p)]
 
     def _wrap(self):
-        # In Python3, turn information into native strings, i.e. decode bytes.
-        # These strings are only informative, so do not raise an error if
-        # decoding fails: do best effort decoding instead to be as helpful as
-        # possible.
-        info = self.information
-        if not _py2to3.python2:
-            info = info.decode(errors='replace')
+        # Turn information into native strings, i.e. decode bytes.  These
+        # strings are only informative, so do not raise an error if decoding
+        # fails: do best effort decoding instead to be as helpful as possible.
+        info = self.information.decode(errors='replace')
         return _exception_kind_to_type[self.kind](info)
 
 
@@ -198,6 +194,30 @@ def _hashable_c_pointer(pointed_type=None):
     return _c_type
 
 
+def _unwrap_filename(filename):
+    """Turn filename into a suitable C value for filenames."""
+    if filename is None:
+        return None
+    elif isinstance(filename, str):
+        return filename.encode()
+    elif not isinstance(filename, bytes):
+        raise ValueError(f"invalid filename: {filename}")
+    else:
+        return filename
+
+
+def _unwrap_charset(charset):
+    """Turn charset into a suitable C value for charsets."""
+    if charset is None:
+        return None
+    elif isinstance(charset, str):
+        return charset.encode()
+    elif not isinstance(charset, bytes):
+        raise ValueError(f"invalid charset: {charset}")
+    else:
+        return charset
+
+
 class _text(ctypes.Structure):
     """
     C value for unicode strings. This object is the owner of the underlying
@@ -250,9 +270,9 @@ class _text(ctypes.Structure):
         Try to cast ``value`` into an unicode object. Raise a TypeError, or
         raise a string decoding error when this is not possible.
         """
-        if isinstance(value, _py2to3.bytes_type):
+        if isinstance(value, bytes):
             return value.decode('ascii')
-        elif not isinstance(value, _py2to3.text_type):
+        elif not isinstance(value, str):
             _raise_type_error('text string', value)
         else:
             return value
@@ -287,7 +307,7 @@ class _symbol_type(ctypes.Structure):
         return result
 
 
-class _big_integer(object):
+class _big_integer:
 
     class c_type(ctypes.c_void_p):
         pass
@@ -297,7 +317,7 @@ class _big_integer(object):
 
     @classmethod
     def unwrap(cls, value):
-        if not _py2to3.is_int(value):
+        if not isinstance(value, int):
             _raise_type_error('int or long', value)
 
         text = _text._unwrap(str(value))
@@ -332,7 +352,7 @@ class _big_integer(object):
     ))
 
 
-class _Enum(object):
+class _Enum:
 
     _name = None
     """
@@ -357,7 +377,7 @@ class _Enum(object):
         if not isinstance(py_value, str):
             _raise_type_error('str', py_value)
         try:
-            return _py2to3.text_to_bytes(cls._py_to_c[py_value])
+            return cls._py_to_c[py_value]
         except KeyError:
             raise ValueError('Invalid {}: {}'.format(cls._name, py_value))
 
@@ -393,13 +413,13 @@ _event_handler = _hashable_c_pointer()
 
 def _canonicalize_buffer(buffer, charset):
     """Canonicalize source buffers to be bytes buffers."""
-    if isinstance(buffer, _py2to3.text_type):
+    if isinstance(buffer, str):
         if charset:
             raise TypeError('`charset` must be null when the buffer is'
                             ' Unicode')
         buffer = buffer.encode('utf-8')
         charset = b'utf-8'
-    elif not isinstance(buffer, _py2to3.bytes_type):
+    elif not isinstance(buffer, bytes):
         raise TypeError('`buffer` must be a string')
     return (buffer, charset)
 
@@ -426,7 +446,7 @@ ${exts.include_extension(
 )}
 
 
-class AnalysisContext(object):
+class AnalysisContext:
     ${py_doc('langkit.analysis_context_type', 4)}
 
     __slots__ = ('_c_value', '_unit_provider', '_serial_number', '_unit_cache',
@@ -458,7 +478,7 @@ class AnalysisContext(object):
         self._c_value = None
 
         if _c_value is None:
-            charset = _py2to3.text_to_bytes(charset)
+            charset = _unwrap_charset(charset)
             if not isinstance(tab_stop, int) or tab_stop < 1:
                 raise ValueError(
                     'Invalid tab_stop (positive integer expected)')
@@ -505,8 +525,8 @@ class AnalysisContext(object):
     def get_from_file(self, filename, charset=None, reparse=False,
                       rule=default_grammar_rule):
         ${py_doc('langkit.get_unit_from_file', 8)}
-        filename = _py2to3.text_to_bytes(filename)
-        charset = _py2to3.text_to_bytes(charset or '')
+        filename = _unwrap_filename(filename)
+        charset = _unwrap_charset(charset)
         c_value = _get_analysis_unit_from_file(self._c_value, filename,
                                                charset, reparse,
                                                GrammarRule._unwrap(rule))
@@ -515,8 +535,8 @@ class AnalysisContext(object):
     def get_from_buffer(self, filename, buffer, charset=None, reparse=False,
                         rule=default_grammar_rule):
         ${py_doc('langkit.get_unit_from_buffer', 8)}
-        filename = _py2to3.text_to_bytes(filename)
-        charset = _py2to3.text_to_bytes(charset or '')
+        filename = _unwrap_filename(filename)
+        charset = _unwrap_charset(charset)
         buffer, charset = _canonicalize_buffer(buffer, charset)
         c_value = _get_analysis_unit_from_buffer(self._c_value, filename,
                                                  charset,
@@ -526,8 +546,9 @@ class AnalysisContext(object):
 
     def get_from_provider(self, name, kind, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
-        name = _py2to3.bytes_to_text(name)
-        charset = _py2to3.text_to_bytes(charset or '')
+        if isinstance(name, bytes):
+            name = name.decode()
+        charset = _unwrap_charset(charset)
 
         _name = _text._unwrap(name)
         _kind = ${pyapi.unwrap_value('kind', T.AnalysisUnitKind, None)}
@@ -566,13 +587,13 @@ class AnalysisContext(object):
             self._serial_number = serial_number
 
 
-class AnalysisUnit(object):
+class AnalysisUnit:
     ${py_doc('langkit.analysis_unit_type', 4)}
 
     __slots__ = ('_c_value', '_context_link', '_cache_version_number',
                  '_node_cache')
 
-    class TokenIterator(object):
+    class TokenIterator:
         ${py_doc('langkit.python.AnalysisUnit.TokenIterator', 8)}
 
         def __init__(self, first):
@@ -638,7 +659,7 @@ class AnalysisUnit(object):
 
     def reparse(self, buffer=None, charset=None):
         ${py_doc('langkit.unit_reparse_generic', 8)}
-        charset = _py2to3.text_to_bytes(charset or '')
+        charset = _unwrap_charset(charset)
         if buffer is None:
             _unit_reparse_from_file(self._c_value, charset)
         else:
@@ -773,7 +794,7 @@ class AnalysisUnit(object):
             self._cache_version_number = self._unit_version
 
 
-class Sloc(object):
+class Sloc:
     ${py_doc('langkit.sloc_type', 4)}
 
     def __init__(self, line, column):
@@ -783,7 +804,6 @@ class Sloc(object):
 
     def __bool__(self):
         return bool(self.line or self.column)
-    __nonzero__ = __bool__
 
     def __lt__(self, other):
         # First compare line numbers...
@@ -821,7 +841,7 @@ class Sloc(object):
             return cls(sloc.line, sloc.column)
 
 
-class SlocRange(object):
+class SlocRange:
     ${py_doc('langkit.sloc_range_type', 4)}
 
     def __init__(self, start, end):
@@ -830,7 +850,6 @@ class SlocRange(object):
 
     def __bool__(self):
         return bool(self.start or self.end)
-    __nonzero__ = __bool__
 
     def __lt__(self, other):
         raise NotImplementedError('SlocRange comparison not supported')
@@ -859,7 +878,7 @@ class SlocRange(object):
             return SlocRange(self.start._wrap(), self.end._wrap())
 
 
-class Diagnostic(object):
+class Diagnostic:
     ${py_doc('langkit.diagnostic_type', 4)}
 
     def __init__(self, sloc_range, message):
@@ -873,10 +892,7 @@ class Diagnostic(object):
                 self.message)
 
     def __str__(self):
-        result = self.as_text
-        if _py2to3.python2:
-            result = result.encode('ascii', errors='replace')
-        return result
+        return self.as_text
 
     def __repr__(self):
         return '<Diagnostic {}>'.format(self)
@@ -1009,7 +1025,7 @@ class Token(ctypes.Structure):
     def __repr__(self):
         return '<Token {}{} at {}>'.format(
             self.kind,
-            ' {}'.format(_py2to3.text_repr(self.text)) if self.text else '',
+            ' {}'.format(repr(self.text)) if self.text else '',
             self.sloc_range
         )
 
@@ -1050,7 +1066,7 @@ class Token(ctypes.Structure):
 
 ## TODO: if needed one day, also bind create_file_provider to allow Python
 ## users to implement their own file readers.
-class FileReader(object):
+class FileReader:
     ${py_doc('langkit.file_reader_type', 4)}
 
     def __init__(self, c_value):
@@ -1067,7 +1083,7 @@ ${exts.include_extension(
 
 ## TODO: if this is needed some day, also bind create_unit_provider to allow
 ## Python users to create their own unit providers.
-class UnitProvider(object):
+class UnitProvider:
     ${py_doc('langkit.unit_provider_type', 4)}
 
     def __init__(self, c_value):
@@ -1082,7 +1098,7 @@ ${exts.include_extension(
 )}
 
 
-class ${root_astnode_name}(object):
+class ${root_astnode_name}:
     ${py_doc(T.root_node, 4)}
 
     is_list_type = False
@@ -1214,7 +1230,6 @@ class ${root_astnode_name}(object):
     def __bool__(self):
         ${py_doc('langkit.python.root_node.__bool__', 8)}
         return True
-    __nonzero__ = __bool__
 
     def __iter__(self):
         ${py_doc('langkit.python.root_node.__iter__', 8)}
@@ -1260,7 +1275,7 @@ class ${root_astnode_name}(object):
 
     def dump_str(self):
         ${py_doc('langkit.python.root_node.dump_str', 8)}
-        output = _py2to3.StringIO()
+        output = io.StringIO()
         self.dump(file=output)
         ret = output.getvalue()
         output.close()
@@ -1845,7 +1860,7 @@ def _unwrap_str(c_char_p_value):
     """
     result = ctypes.c_char_p(ctypes.addressof(c_char_p_value.contents)).value
     _free(c_char_p_value)
-    return _py2to3.bytes_to_text(result)
+    return result.decode()
 
 
 _kind_to_astnode_cls = {
@@ -1884,8 +1899,8 @@ def _extract_versions():
     v_ptr = ctypes.c_char_p()
     bd_ptr = ctypes.c_char_p()
     _get_versions(ctypes.byref(v_ptr), ctypes.byref(bd_ptr))
-    version = _py2to3.bytes_to_text(v_ptr.value)
-    build_version = _py2to3.bytes_to_text(bd_ptr.value)
+    version = v_ptr.value.decode()
+    build_version = bd_ptr.value.decode()
     _free(v_ptr)
     _free(bd_ptr)
     return version, build_version
@@ -1903,7 +1918,7 @@ ${exts.include_extension(ctx.ext("python"))}
 # App base class
 #
 
-class App(object):
+class App:
     """
     Base class to regroup logic for an app. We use a class so that
     specific languages implementations can add specific arguments and
