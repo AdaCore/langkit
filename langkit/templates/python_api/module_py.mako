@@ -544,6 +544,7 @@ class AnalysisContext:
                                                  GrammarRule._unwrap(rule))
         return AnalysisUnit._wrap(c_value)
 
+% if ctx.default_unit_provider:
     def get_from_provider(self, name, kind, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
         if isinstance(name, bytes):
@@ -561,6 +562,7 @@ class AnalysisContext:
             raise InvalidUnitNameError('Invalid unit name: {} ({})'.format(
                 repr(name), kind
             ))
+% endif
 
     def discard_errors_in_populate_lexical_env(self, discard):
         ${py_doc('langkit.context_discard_errors_in_populate_lexical_env', 8)}
