@@ -608,13 +608,6 @@ class Emitter:
             module_name=ctx.python_api_settings.module_name
         )
 
-        # Emit stub files for Mypy (type hints)
-        render_python_template(
-            os.path.join(self.python_pkg_dir, '__init__.pyi'),
-            'python_api/module_pyi',
-            pyapi=ctx.python_api_settings,
-        )
-
         # Emit the setup.py script to easily install the Python binding
         setup_py_file = os.path.join(self.lib_root, 'python', 'setup.py')
         write_source_file(

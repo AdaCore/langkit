@@ -56,18 +56,19 @@
 
     % for field in cls.fields_with_accessors():
     <%
-        arg_list = ['self'] + [
-            (a.name.lower
-             if a.default_value is None else
-             '{}={}'.format(a.name.lower,
-                            a.default_value.render_python_constant()))
-            for a in field.arguments
-        ]
+        arg_list = ['self']
+        for a in field.arguments:
+            arg = '{}: {}'.format(a.name.lower, a.type.mypy_type_hint)
+            if a.default_value is not None:
+                arg += ' = {}'.format(a.default_value.render_python_constant())
+            arg_list.append(arg)
     %>
     % if not field.arguments:
     @property
     % endif
-    def ${field.api_name.lower}(${', '.join(arg_list)}):
+    def ${field.api_name.lower}(
+        ${', '.join(arg_list)}
+    ) -> ${field.type.mypy_type_hint}:
         ${py_doc(field, 8,
                  argtypes=[(a.name.lower, a.type) for a in field.arguments],
                  rtype=field.type)}
@@ -90,66 +91,26 @@
 
     % if cls.is_list_type:
     is_list_type = True
-    % endif
-</%def>
-
-<%def name="mypy_field_decls(cls, or_pass=True)">
-    <%
-        fields = cls.fields_with_accessors()
-        is_list = cls.is_list_type
-    %>
-
-    ## Type hints for field accessors
-    % for field in fields:
-    <%
-        arg_list = ['self'] + [
-            (
-                '{}: {}'.format(a.name.lower, a.type.mypy_type_hint)
-                if a.default_value is None else
-                '{}: {} = {}'.format(
-                    a.name.lower,
-                    a.type.mypy_type_hint,
-                    a.default_value.render_python_constant()
-                )
-            )
-            for a in field.arguments
-        ]
-    %>
-    % if not field.arguments:
-    @property
-    % endif
-    def ${field.api_name.lower}(
-        ${', '.join(arg_list)}
-    ) -> ${field.type.mypy_type_hint}:
-        ${py_doc(field, 8, or_pass=True)}
-    % endfor
 
     ## __iter__ and __getitem__ refinements for more precise list element types
-    % if is_list:
-    def __iter__(self) -> Iterator[${cls.element_type.mypy_type_hint}]: ...
-    def __getitem__(self,
-                    index: int) -> ${cls.element_type.mypy_type_hint}: ...
+    def __iter__(
+        self
+    ) -> Iterator[${cls.element_type.mypy_type_hint}]:
+        return super().__iter__()  # type: ignore
+
+    def __getitem__(
+        self,
+        index: int
+    ) -> ${cls.element_type.mypy_type_hint}:
+        return super().__getitem__(index)  # type: ignore
     % endif
-
-    ## "pass" when needed to keep the class declaration syntax valid
-    % if or_pass and not (fields or is_list):
-    pass
-    % endif
-
-</%def>
-
-<%def name="mypy_decl(cls)">
-class ${pyapi.type_public_name(cls)}(${pyapi.type_public_name(cls.base)}):
-    ${py_doc(cls, 4)}
-${mypy_field_decls(cls)}
-
 </%def>
 
 <%def name="decl(cls)">
 
 class ${pyapi.type_public_name(cls)}(${pyapi.type_public_name(cls.base)}):
     ${py_doc(cls, 4)}
-    __slots__ = []
+    __slots__ : Tuple[str, ...] = ()
 ${subclass_decls(cls)}
 
 </%def>

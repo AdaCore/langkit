@@ -2,35 +2,37 @@
 
 <%def name="base_decl()">
 
-class _BaseIterator:
+_IteratedType = TypeVar("_IteratedType")
+
+class _BaseIterator(Generic[_IteratedType]):
     ${py_doc('langkit.iterator_type')}
 
-    _c_element_type = None
+    _c_element_type: ClassVar[Any]
     """
     Ctype class for iterator elements.
     """
 
     __slots__ = ('_c_value',)
 
-    def __init__(self, c_value):
+    def __init__(self, c_value: Any):
         self._c_value = c_value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<{}>'.format(type(self).__name__)
 
-    def _clear(self):
+    def _clear(self) -> None:
         self._c_value = None
 
-    def __del__(self):
+    def __del__(self) -> None:
         self._dec_ref(self._c_value)
         self._clear()
 
     @classmethod
-    def _wrap(cls, c_value):
+    def _wrap(cls, c_value: Any) -> Opt[_BaseIterator]:
         return cls(c_value) if c_value else None
 
     @classmethod
-    def unwrap(cls, value):
+    def unwrap(cls, value: Opt[_BaseIterator]) -> Any:
         if value is None:
             return None
         elif not isinstance(value, cls):
@@ -38,11 +40,11 @@ class _BaseIterator:
         else:
             return value._c_value
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[_IteratedType]:
         return self
 
-    def __next__(self):
-        ${py_doc('langkit.iterator_next')}
+    def __next__(self) -> _IteratedType:
+        ${py_doc('langkit.iterator_next', 6)}
         x = self._c_element_type()
         if self._get_next(self._c_value, ctypes.byref(x)):
             return self._wrap_item(x)
@@ -50,6 +52,24 @@ class _BaseIterator:
 
     # For Python2 compatibility
     next = __next__
+
+    # The following methods are just for type hints: subclasses override them
+
+    @staticmethod
+    def _get_next(c_value: Any, item_ptr: Any) -> Any:
+        pass
+
+    @staticmethod
+    def _inc_ref(c_value: Any) -> None:
+        pass
+
+    @staticmethod
+    def _dec_ref(c_value: Any) -> None:
+        pass
+
+    @staticmethod
+    def _wrap_item(item: Any) -> _IteratedType:
+        pass
 
 </%def>
 
@@ -60,7 +80,7 @@ class _BaseIterator:
     c_element_type = pyapi.c_type(element_type)
 %>
 
-class ${cls.api_name.camel}(_BaseIterator):
+class ${cls.api_name.camel}(_BaseIterator[${element_type.mypy_type_hint}]):
     """
     Iterator over ${cls.element_type.name}.
 
@@ -88,21 +108,5 @@ class ${cls.api_name.camel}(_BaseIterator):
         '${cls.c_inc_ref(capi)}', [_c_type], None))
     _dec_ref = staticmethod(_import_func(
         '${cls.c_dec_ref(capi)}', [_c_type], None))
-
-</%def>
-
-<%def name="mypy_decl(cls)">
-
-class ${pyapi.type_public_name(cls)}:
-    ${py_doc(cls, 4)}
-
-    def __iter__(self) -> Iterator[${cls.element_type.mypy_type_hint}]: ...
-    def __next__(self) -> ${cls.element_type.mypy_type_hint}: ...
-
-    % for f in cls.get_fields():
-    @property
-    def ${f.name.lower}(self) -> ${f.type.mypy_type_hint}:
-        ${py_doc(f, 8, or_pass=True)}
-    % endfor
 
 </%def>
