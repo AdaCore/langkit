@@ -16,6 +16,7 @@ Contents:
    extension_points
    api_documentation
    properties_dsl
+   lexical_envs
    internals/index
 
 
