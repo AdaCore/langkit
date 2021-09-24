@@ -7,7 +7,7 @@ class _BaseArray:
     Base class for Ada arrays bindings.
     """
 
-    c_element_type = None
+    c_element_type: ClassVar[Any]
     """
     Ctype class for array elements.
     """

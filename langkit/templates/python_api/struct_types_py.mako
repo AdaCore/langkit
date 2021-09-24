@@ -23,22 +23,22 @@ class _BaseStruct:
     """
 
     # Subclasses will override this to a subclass of ctypes.Structure
-    _c_type = None
+    _c_type: ClassVar[ctypes.Structure]
 
-    def __getitem__(self, key):
-      if not isinstance(key, int):
-         raise TypeError('Tuples items are indexed by integers, not {}'.format(
-            type(key)
-         ))
+    def __getitem__(self, key: int) -> Any:
+        if not isinstance(key, int):
+            raise TypeError(
+               'Tuples items are indexed by integers, not {}'.format(type(key))
+            )
 
-      fields = self._c_type._fields_
-      if 0 <= key < len(fields):
-         field_name, _ = fields[key]
-         return getattr(self, field_name)
-      else:
-         raise IndexError('There is no {}th field'.format(key))
+        fields = self._c_type._fields_
+        if 0 <= key < len(fields):
+            field_name, _ = fields[key]
+            return getattr(self, field_name)
+        else:
+            raise IndexError('There is no {}th field'.format(key))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         field_names = [name for name, _ in self._c_type._fields_]
         return '<{} {}>'.format(
             type(self).__name__,
@@ -47,17 +47,17 @@ class _BaseStruct:
         )
 
     @property
-    def as_tuple(self):
+    def as_tuple(self) -> tuple:
         return tuple(getattr(self, f) for f, _ in self._c_type._fields_)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return (isinstance(other, type(self)) and
                 self.as_tuple == other.as_tuple)
 
-    def __ne__(self, other):
+    def __ne__(self, other: Any) -> bool:
         return not (self == other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.as_tuple)
 
 
@@ -75,7 +75,12 @@ class ${public_name}(_BaseStruct):
     __slots__ = (${', '.join(repr('_' + f) for f in field_names)}${(
         ', ' if len(field_names) == 1 else '')})
 
-    def __init__(self, ${', '.join(field_names)}):
+    def __init__(
+        self,
+        % for f in cls.get_fields():
+        ${f.name.lower}: ${f.type.mypy_type_hint},
+        % endfor
+    ):
         % for f in field_names:
         self._${f} = ${f}
         % endfor
@@ -86,7 +91,7 @@ class ${public_name}(_BaseStruct):
     % for field in cls.get_fields():
 
     @property
-    def ${field.name.lower}(self):
+    def ${field.name.lower}(self) -> ${field.type.mypy_type_hint}:
         ${py_doc(field, 8)}
         return self._${field.name.lower}
     % endfor

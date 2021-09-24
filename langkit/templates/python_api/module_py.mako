@@ -33,6 +33,10 @@ import io
 import json
 import os
 import sys
+from typing import (
+    Any, AnyStr, Callable, ClassVar, Dict, Generic, IO, Iterator, List,
+    Optional as Opt, TYPE_CHECKING, Tuple, Type, TypeVar, Union
+)
 import weakref
 
 
@@ -133,7 +137,7 @@ class _Exception(ctypes.Structure):
         return _exception_kind_to_type[self.kind](info)
 
 
-def _type_fullname(t):
+def _type_fullname(t: type) -> str:
     """
     Return the fully qualified name for the given `t` type.
     """
@@ -144,7 +148,7 @@ def _type_fullname(t):
             '{}.{}'.format(module, name))
 
 
-def _raise_type_error(expected_type_name, actual_value):
+def _raise_type_error(expected_type_name: str, actual_value: Any) -> Any:
     raise TypeError('{} instance expected, got {} instead'.format(
         expected_type_name, _type_fullname(type(actual_value))
     ))
@@ -194,7 +198,7 @@ def _hashable_c_pointer(pointed_type=None):
     return _c_type
 
 
-def _unwrap_filename(filename):
+def _unwrap_filename(filename: Opt[AnyStr]) -> Opt[bytes]:
     """Turn filename into a suitable C value for filenames."""
     if filename is None:
         return None
@@ -206,7 +210,7 @@ def _unwrap_filename(filename):
         return filename
 
 
-def _unwrap_charset(charset):
+def _unwrap_charset(charset: Opt[AnyStr]) -> Opt[bytes]:
     """Turn charset into a suitable C value for charsets."""
     if charset is None:
         return None
@@ -242,30 +246,30 @@ class _text(ctypes.Structure):
     text_buffer = None
 
     @classmethod
-    def _unwrap(cls, value):
-        value = cls.cast(value)
+    def _unwrap(cls, value: AnyStr) -> _text:
+        v = cls.cast(value)
 
-        text = value.encode(cls.encoding)
+        text = v.encode(cls.encoding)
         text_buffer = ctypes.create_string_buffer(text)
         text_buffer_ptr = ctypes.cast(
             ctypes.pointer(text_buffer),
             ctypes.POINTER(ctypes.c_char)
         )
-        result = _text(text_buffer_ptr, len(value))
+        result = _text(text_buffer_ptr, len(v))
         result.text_buffer = text_buffer
         return result
 
-    def _wrap(self):
+    def _wrap(self) -> str:
         if self.length > 0:
             # self.length tells how much UTF-32 chars there are in self.chars
             # but self.chars is a char* so we have to fetch 4 times more bytes
             # than characters.
             return self.chars[:4 * self.length].decode(self.encoding)
         else:
-            return u''
+            return ''
 
     @classmethod
-    def cast(cls, value):
+    def cast(cls, value: AnyStr) -> str:
         """
         Try to cast ``value`` into an unicode object. Raise a TypeError, or
         raise a string decoding error when this is not possible.
@@ -277,7 +281,7 @@ class _text(ctypes.Structure):
         else:
             return value
 
-    def __del__(self):
+    def __del__(self) -> None:
         _destroy_text(ctypes.byref(self))
 
 
@@ -286,7 +290,7 @@ class _symbol_type(ctypes.Structure):
                 ('bounds', ctypes.c_void_p)]
 
     @classmethod
-    def wrap(cls, c_value):
+    def wrap(cls, c_value: Any) -> str:
         # First extract the text associated to this symbol in "text"
         text = _text()
         _symbol_text(ctypes.byref(c_value), ctypes.byref(text))
@@ -295,7 +299,7 @@ class _symbol_type(ctypes.Structure):
         return text._wrap()
 
     @classmethod
-    def unwrap(cls, py_value, context):
+    def unwrap(cls, py_value: AnyStr, context: Any) -> _symbol_type:
         # First turn the given symbol into a low-level text object
         text = _text._unwrap(py_value)
 
@@ -312,11 +316,11 @@ class _big_integer:
     class c_type(ctypes.c_void_p):
         pass
 
-    def __init__(self, c_value):
+    def __init__(self, c_value: Any):
         self.c_value = c_value
 
     @classmethod
-    def unwrap(cls, value):
+    def unwrap(cls, value: int) -> _big_integer:
         if not isinstance(value, int):
             _raise_type_error('int or long', value)
 
@@ -325,16 +329,16 @@ class _big_integer:
         return cls(c_value)
 
     @classmethod
-    def wrap(cls, c_value):
+    def wrap(cls, c_value: Any) -> int:
         helper = cls(c_value)
         text = _text()
         cls.text(helper.c_value, ctypes.byref(text))
         return int(text._wrap())
 
-    def clear(self):
+    def clear(self) -> None:
         self.c_value = None
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.decref(self.c_value)
         self.clear()
 
@@ -352,28 +356,29 @@ class _big_integer:
     ))
 
 
+if TYPE_CHECKING:
+    _EnumType = TypeVar("_EnumType", bound=_Enum)
+
+
 class _Enum:
 
-    _name = None
+    _name: ClassVar[str]
     """
     Name for this enumeration type.
-    :type: str
     """
 
-    _c_to_py = None
+    _c_to_py: ClassVar[List[str]]
     """
     Mapping from C values to user-level Python values.
-    :type: list[str]
     """
 
-    _py_to_c = None
+    _py_to_c: ClassVar[Dict[str, int]]
     """
     Mapping from user-level Python values to C values.
-    :type: dict[str, int]
     """
 
     @classmethod
-    def _unwrap(cls, py_value):
+    def _unwrap(cls, py_value: str) -> int:
         if not isinstance(py_value, str):
             _raise_type_error('str', py_value)
         try:
@@ -382,7 +387,7 @@ class _Enum:
             raise ValueError('Invalid {}: {}'.format(cls._name, py_value))
 
     @classmethod
-    def _wrap(cls, c_value):
+    def _wrap(cls: Type[_EnumType], c_value: Any) -> _EnumType:
         if isinstance(c_value, ctypes.c_int):
             c_value = c_value.value
         return cls._c_to_py[c_value]
@@ -411,17 +416,18 @@ _unit_provider = _hashable_c_pointer()
 _event_handler = _hashable_c_pointer()
 
 
-def _canonicalize_buffer(buffer, charset):
+def _canonicalize_buffer(buffer: AnyStr,
+                         charset: Opt[bytes]) -> Tuple[bytes, Opt[bytes]]:
     """Canonicalize source buffers to be bytes buffers."""
     if isinstance(buffer, str):
         if charset:
             raise TypeError('`charset` must be null when the buffer is'
                             ' Unicode')
-        buffer = buffer.encode('utf-8')
-        charset = b'utf-8'
+        return (buffer.encode('utf-8'), b'utf-8')
     elif not isinstance(buffer, bytes):
         raise TypeError('`buffer` must be a string')
-    return (buffer, charset)
+    else:
+        return (buffer, charset)
 
 
 #
@@ -452,7 +458,9 @@ class AnalysisContext:
     __slots__ = ('_c_value', '_unit_provider', '_serial_number', '_unit_cache',
                  '__weakref__')
 
-    _context_cache = weakref.WeakValueDictionary()
+    _context_cache: weakref.WeakValueDictionary[Any, AnalysisContext] = (
+        weakref.WeakValueDictionary()
+    )
     """
     Cache for analysis context wrappers. Indexed by analysis context addresses,
     which are known to stay valid forever (and re-used).
@@ -460,17 +468,16 @@ class AnalysisContext:
     Unlike unit and node caches, this one should contain weak references so
     that analysis contexts (and their units/nodes) can be free'd when user code
     does not reference them anymore.
-
-    :type: dict[AnalysisContext._c_type, AnalysisContext]
     """
 
     def __init__(self,
-                 charset=None,
-                 file_reader=None,
-                 unit_provider=None,
-                 with_trivia=True,
-                 tab_stop=${ctx.default_tab_stop},
-                 _c_value=None):
+                 charset: Opt[str] = None,
+                 file_reader: Opt[FileReader] = None,
+                 unit_provider: Opt[UnitProvider] = None,
+                 with_trivia: bool = True,
+                 tab_stop: int = ${ctx.default_tab_stop},
+                 *,
+                 _c_value: Any = None) -> None:
         ${py_doc('langkit.create_context', 8)}
 
         # Initialize this field in case we raise an exception during
@@ -478,14 +485,14 @@ class AnalysisContext:
         self._c_value = None
 
         if _c_value is None:
-            charset = _unwrap_charset(charset)
+            _charset = _unwrap_charset(charset)
             if not isinstance(tab_stop, int) or tab_stop < 1:
                 raise ValueError(
                     'Invalid tab_stop (positive integer expected)')
             c_file_reader = file_reader._c_value if file_reader else None
             c_unit_provider = unit_provider._c_value if unit_provider else None
             self._c_value = _create_analysis_context(
-                charset,
+                _charset,
                 c_file_reader,
                 c_unit_provider,
                 None, # TODO: bind the event handler API to Python
@@ -501,60 +508,73 @@ class AnalysisContext:
         # long as the analysis context is live.
         self._unit_provider = unit_provider
 
-        self._serial_number = None
-        self._unit_cache = {}
+        self._serial_number: Opt[int] = None
+        self._unit_cache: Dict[str, AnalysisUnit] = {}
         """
         Cache for AnalysisUnit wrappers, indexed by analysis unit addresses,
         which are known to stay valid as long as the context is alive.
-
-        :type: dict[str, AnalysisUnit]
         """
 
         self._check_unit_cache()
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self._c_value:
             _context_decref(self._c_value)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return self._c_value == other._c_value
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self._c_value)
 
-    def get_from_file(self, filename, charset=None, reparse=False,
-                      rule=default_grammar_rule):
+    def get_from_file(self,
+                      filename: AnyStr,
+                      charset: Opt[str] = None,
+                      reparse: bool = False,
+                      rule: str = default_grammar_rule) -> AnalysisUnit:
         ${py_doc('langkit.get_unit_from_file', 8)}
-        filename = _unwrap_filename(filename)
-        charset = _unwrap_charset(charset)
-        c_value = _get_analysis_unit_from_file(self._c_value, filename,
-                                               charset, reparse,
+        _filename = _unwrap_filename(filename)
+        _charset = _unwrap_charset(charset)
+        c_value = _get_analysis_unit_from_file(self._c_value, _filename,
+                                               _charset, reparse,
                                                GrammarRule._unwrap(rule))
         return AnalysisUnit._wrap(c_value)
 
-    def get_from_buffer(self, filename, buffer, charset=None, reparse=False,
-                        rule=default_grammar_rule):
+    def get_from_buffer(self,
+                        filename: AnyStr,
+                        buffer: AnyStr,
+                        charset: Opt[str] = None,
+                        reparse: bool = False,
+                        rule: str = default_grammar_rule) -> AnalysisUnit:
         ${py_doc('langkit.get_unit_from_buffer', 8)}
-        filename = _unwrap_filename(filename)
-        charset = _unwrap_charset(charset)
-        buffer, charset = _canonicalize_buffer(buffer, charset)
-        c_value = _get_analysis_unit_from_buffer(self._c_value, filename,
-                                                 charset,
-                                                 buffer, len(buffer),
+        _filename = _unwrap_filename(filename)
+        _charset = _unwrap_charset(charset)
+        _buffer, _charset = _canonicalize_buffer(buffer, _charset)
+        c_value = _get_analysis_unit_from_buffer(self._c_value, _filename,
+                                                 _charset,
+                                                 _buffer, len(_buffer),
                                                  GrammarRule._unwrap(rule))
         return AnalysisUnit._wrap(c_value)
 
 % if ctx.default_unit_provider:
-    def get_from_provider(self, name, kind, charset=None, reparse=False):
+    def get_from_provider(
+        self,
+        name: AnyStr,
+        kind: str,
+        charset: Opt[str] = None,
+        reparse: bool = False
+    ) -> AnalysisUnit:
         ${py_doc('langkit.get_unit_from_provider', 8)}
         if isinstance(name, bytes):
-            name = name.decode()
-        charset = _unwrap_charset(charset)
+            text_name = name.decode()
+        else:
+            text_name = name
+        _charset = _unwrap_charset(charset)
 
-        _name = _text._unwrap(name)
+        _name = _text._unwrap(text_name)
         _kind = ${pyapi.unwrap_value('kind', T.AnalysisUnitKind, None)}
         c_value = _get_analysis_unit_from_provider(
-            self._c_value, ctypes.byref(_name), _kind, charset, reparse
+            self._c_value, ctypes.byref(_name), _kind, _charset, reparse
         )
         if c_value:
             return AnalysisUnit._wrap(c_value)
@@ -564,7 +584,8 @@ class AnalysisContext:
             ))
 % endif
 
-    def discard_errors_in_populate_lexical_env(self, discard):
+    def discard_errors_in_populate_lexical_env(self,
+                                               discard: bool) -> None:
         ${py_doc('langkit.context_discard_errors_in_populate_lexical_env', 8)}
         _discard_errors_in_populate_lexical_env(self._c_value, bool(discard))
 
@@ -598,13 +619,13 @@ class AnalysisUnit:
     class TokenIterator:
         ${py_doc('langkit.python.AnalysisUnit.TokenIterator', 8)}
 
-        def __init__(self, first):
-            self.first = first
+        def __init__(self, first: Opt[Token]):
+            self.first: Opt[Token] = first
 
-        def __iter__(self):
+        def __iter__(self) -> AnalysisUnit.TokenIterator:
             return self
 
-        def __next__(self):
+        def __next__(self) -> Token:
             if not self.first:
                 raise StopIteration()
             result = self.first
@@ -612,7 +633,7 @@ class AnalysisUnit:
             return result
         next = __next__
 
-    def __init__(self, context, c_value):
+    def __init__(self, context: AnalysisContext, c_value: Any) -> None:
         """
         This constructor is an implementation detail, and is not meant to be
         used directly. Please use AnalysisContext.get_from_* methods to create
@@ -628,89 +649,91 @@ class AnalysisUnit:
         assert c_value not in context._unit_cache
         context._unit_cache[c_value] = self
 
-        self._cache_version_number = None
+        self._cache_version_number: Opt[int] = None
         """
         Last version number we saw for this analysis unit wrapper. If it's
         different from `self._unit_version`, it means that the unit was
         reparsed: in this case we need to clear the node cache below (see the
         `_check_node_cache` method).
-
-        :type: int
         """
 
-        self._node_cache = {}
+        self._node_cache: Dict[Tuple[Any, Any, Any], ${root_astnode_name}] = {}
         """
         Cache for all node wrappers in this unit. Indexed by couples:
         (c_value, metadata, rebindings).
-
-        :type: dict[T, ${root_astnode_name}]
         """
 
         self._check_node_cache()
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return self._c_value == other._c_value
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self._c_value)
 
     @property
-    def context(self):
+    def context(self) -> AnalysisContext:
         ${py_doc('langkit.unit_context', 8)}
         return self._context_link
 
-    def reparse(self, buffer=None, charset=None):
+    def reparse(self,
+                buffer: Opt[AnyStr] = None,
+                charset: Opt[str] = None) -> None:
         ${py_doc('langkit.unit_reparse_generic', 8)}
-        charset = _unwrap_charset(charset)
+        _charset = _unwrap_charset(charset)
         if buffer is None:
-            _unit_reparse_from_file(self._c_value, charset)
+            _unit_reparse_from_file(self._c_value, _charset)
         else:
-            buffer, charset = _canonicalize_buffer(buffer, charset)
-            _unit_reparse_from_buffer(self._c_value, charset, buffer,
-                                      len(buffer))
+            _buffer, _charset = _canonicalize_buffer(buffer, _charset)
+            _unit_reparse_from_buffer(self._c_value, _charset, _buffer,
+                                      len(_buffer))
 
-    def populate_lexical_env(self):
+    def populate_lexical_env(self) -> None:
         ${py_doc('langkit.unit_populate_lexical_env', 8)}
         if not _unit_populate_lexical_env(self._c_value):
             raise PropertyError()
 
     @property
-    def root(self):
+    def root(self) -> ${root_astnode_name}:
         ${py_doc('langkit.unit_root', 8, rtype=T.root_node)}
         result = ${c_entity}()
         _unit_root(self._c_value, ctypes.byref(result))
         return ${root_astnode_name}._wrap(result)
 
     @property
-    def first_token(self):
+    def first_token(self) -> Opt[Token]:
         ${py_doc('langkit.unit_first_token', 8)}
         result = Token()
         _unit_first_token(self._c_value, ctypes.byref(result))
         return result._wrap()
 
     @property
-    def last_token(self):
+    def last_token(self) -> Opt[Token]:
         ${py_doc('langkit.unit_last_token', 8)}
         result = Token()
         _unit_last_token(self._c_value, ctypes.byref(result))
         return result._wrap()
 
     @property
-    def text(self):
+    def text(self) -> str:
         ${py_doc('langkit.unit_text', 8)}
-        return Token.text_range(self.first_token, self.last_token)
+        if self.first_token:
+            assert self.last_token
+            return Token.text_range(self.first_token, self.last_token)
+        else:
+            return ""
 
     @property
-    def token_count(self):
+    def token_count(self) -> int:
         ${py_doc('langkit.unit_token_count', 8)}
         return _unit_token_count(self._c_value)
 
     @property
-    def trivia_count(self):
+    def trivia_count(self) -> int:
         ${py_doc('langkit.unit_trivia_count', 8)}
         return _unit_trivia_count(self._c_value)
 
-    def lookup_token(self, sloc):
+    def lookup_token(self, sloc: Sloc) -> Opt[Token]:
         ${py_doc('langkit.unit_lookup_token', 8)}
         unit = AnalysisUnit._unwrap(self)
         _sloc = Sloc._c_type._unwrap(sloc)
@@ -718,23 +741,23 @@ class AnalysisUnit:
         _unit_lookup_token(unit, ctypes.byref(_sloc), ctypes.byref(tok))
         return tok._wrap()
 
-    def _dump_lexical_env(self):
+    def _dump_lexical_env(self) -> None:
         ${py_doc('langkit.unit_dump_lexical_env', 8)}
         unit = AnalysisUnit._unwrap(self)
         _unit_dump_lexical_env(unit)
 
-    def iter_tokens(self):
+    def iter_tokens(self) -> AnalysisUnit.TokenIterator:
         ${py_doc('langkit.python.AnalysisUnit.iter_tokens', 8)}
         return self.TokenIterator(self.first_token)
 
     @property
-    def filename(self):
+    def filename(self) -> str:
         ${py_doc('langkit.unit_filename', 8)}
         filename = _unit_filename(self._c_value)
         return _unwrap_str(filename)
 
     @property
-    def diagnostics(self):
+    def diagnostics(self) -> List[Diagnostic]:
         ${py_doc('langkit.python.AnalysisUnit.diagnostics', 8)}
         count = _unit_diagnostic_count(self._c_value)
         result = []
@@ -745,7 +768,7 @@ class AnalysisUnit:
             result.append(diag._wrap())
         return result
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<AnalysisUnit {}>'.format(repr(
             os.path.basename(self.filename)
         ))
@@ -779,15 +802,15 @@ class AnalysisUnit:
             return value._c_value
 
     @classmethod
-    def _context(cls, c_value):
+    def _context(cls, c_value) -> AnalysisContext:
         ctx = _unit_context(c_value)
         return AnalysisContext._wrap(ctx)
 
     @property
-    def _unit_version(self):
+    def _unit_version(self) -> int:
         return self._c_value.contents.unit_version
 
-    def _check_node_cache(self):
+    def _check_node_cache(self) -> None:
         """
         If this unit has been reparsed, invalidate its node cache.
         """
@@ -799,15 +822,15 @@ class AnalysisUnit:
 class Sloc:
     ${py_doc('langkit.sloc_type', 4)}
 
-    def __init__(self, line, column):
+    def __init__(self, line: int, column: int):
         assert line >= 0 and column >= 0
         self.line = line
         self.column = column
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.line or self.column)
 
-    def __lt__(self, other):
+    def __lt__(self, other: Sloc) -> bool:
         # First compare line numbers...
         if self.line < other.line:
             return True
@@ -819,84 +842,83 @@ class Sloc:
         else:
             return self.column < other.column
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return self.line == other.line and self.column == other.column
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.line, self.column))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}:{}'.format(self.line, self.column)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<Sloc {} at {:#x}>'.format(self, id(self))
 
     class _c_type(ctypes.Structure):
         _fields_ = [("line", ctypes.c_uint32),
                     ("column", ctypes.c_uint16)]
 
-        def _wrap(self):
+        def _wrap(self) -> Sloc:
             return Sloc(self.line, self.column)
 
         @classmethod
-        def _unwrap(cls, sloc):
+        def _unwrap(cls, sloc: Sloc) -> Sloc._c_type:
             return cls(sloc.line, sloc.column)
 
 
 class SlocRange:
     ${py_doc('langkit.sloc_range_type', 4)}
 
-    def __init__(self, start, end):
+    def __init__(self, start: Sloc, end: Sloc):
         self.start = start
         self.end = end
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.start or self.end)
 
-    def __lt__(self, other):
+    def __lt__(self, other: SlocRange) -> bool:
         raise NotImplementedError('SlocRange comparison not supported')
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return self.start == other.start and self.end == other.end
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.start, self.end))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}-{}'.format(self.start, self.end)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<SlocRange {}:{}-{}:{}>".format(
             self.start.line, self.start.column,
             self.end.line, self.end.column
         )
 
-
     class _c_type(ctypes.Structure):
         _fields_ = [("start", Sloc._c_type),
                     ("end", Sloc._c_type)]
 
-        def _wrap(self):
+        def _wrap(self) -> SlocRange:
             return SlocRange(self.start._wrap(), self.end._wrap())
 
 
 class Diagnostic:
     ${py_doc('langkit.diagnostic_type', 4)}
 
-    def __init__(self, sloc_range, message):
+    def __init__(self, sloc_range: SlocRange, message: str):
         self.sloc_range = sloc_range
         self.message = message
 
     @property
-    def as_text(self):
+    def as_text(self) -> str:
         return (u'{}: {}'.format(self.sloc_range, self.message)
                 if self.sloc_range else
                 self.message)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.as_text
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<Diagnostic {}>'.format(self)
 
 
@@ -904,7 +926,7 @@ class Diagnostic:
         _fields_ = [('sloc_range', SlocRange._c_type),
                     ('message', _text)]
 
-        def _wrap(self):
+        def _wrap(self) -> Diagnostic:
             return Diagnostic(self.sloc_range._wrap(), self.message._wrap())
 
 
@@ -920,34 +942,34 @@ class Token(ctypes.Structure):
                 ('_text',         _text),
                 ('_sloc_range',   SlocRange._c_type)]
 
-    def _wrap(self):
+    def _wrap(self) -> Opt[Token]:
         return self if self._token_data else None
 
     @staticmethod
-    def _check_token(value):
+    def _check_token(value: Any) -> None:
         if not isinstance(value, Token):
             raise TypeError('invalid token: {}'.format(value))
 
-    def _check_same_unit(self, other):
+    def _check_same_unit(self, other: Token) -> None:
         if self._token_data != other._token_data:
             raise ValueError('{} and {} come from different analysis units'
                              .format(self, other))
 
     @property
-    def next(self):
+    def next(self) -> Opt[Token]:
         ${py_doc('langkit.token_next', 8)}
         t = Token()
         _token_next(ctypes.byref(self), ctypes.byref(t))
         return t._wrap()
 
     @property
-    def previous(self):
+    def previous(self) -> Opt[Token]:
         ${py_doc('langkit.token_previous', 8)}
         t = Token()
         _token_previous(ctypes.byref(self), ctypes.byref(t))
         return t._wrap()
 
-    def range_until(self, other):
+    def range_until(self, other: Token) -> Iterator[Token]:
         ${py_doc('langkit.token_range_until', 8)}
         self._check_token(other)
         self._check_same_unit(other)
@@ -955,18 +977,20 @@ class Token(ctypes.Structure):
         # Keep the generator as a nested function so that the above checks are
         # executed when the generator is created, instead of only when its
         # first item is requested.
-        def generator():
+        def generator() -> Iterator[Token]:
             if other < self:
                 return
 
             yield self
             current = self
             while current < other:
-                current = current.next
-                yield current
+                next = current.next
+                assert next is not None
+                yield next
+                current = next
         return generator()
 
-    def is_equivalent(self, other):
+    def is_equivalent(self, other: Token) -> bool:
         ${py_doc('langkit.token_is_equivalent', 8)}
         self._check_token(other)
         return bool(_token_is_equivalent(
@@ -974,7 +998,7 @@ class Token(ctypes.Structure):
         )
 
     @property
-    def kind(self):
+    def kind(self) -> str:
         ${py_doc('langkit.token_kind', 8)}
         name = _token_kind_name(self._kind)
         # The _token_kind_name wrapper is already supposed to handle exceptions
@@ -983,24 +1007,24 @@ class Token(ctypes.Structure):
         return _unwrap_str(name)
 
     @property
-    def is_trivia(self):
+    def is_trivia(self) -> bool:
         ${py_doc('langkit.token_is_trivia', 8)}
         return self._trivia_index != 0
 
     @property
-    def index(self):
+    def index(self) -> int:
         ${py_doc('langkit.token_index', 8)}
         return (self._token_index - 1
                 if self._trivia_index == 0 else
                 self._trivia_index - 1)
 
     @property
-    def text(self):
+    def text(self) -> str:
         ${py_doc('langkit.token_text', 8)}
         return self._text._wrap()
 
     @classmethod
-    def text_range(cls, first, last):
+    def text_range(cls, first: Token, last: Token) -> str:
         ${py_doc('langkit.token_range_text', 8)}
         cls._check_token(first)
         cls._check_token(last)
@@ -1012,26 +1036,26 @@ class Token(ctypes.Structure):
         return result._wrap() or u''
 
     @property
-    def sloc_range(self):
+    def sloc_range(self) -> SlocRange:
         ${py_doc('langkit.token_sloc_range', 8)}
         return self._sloc_range._wrap()
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         ${py_doc('langkit.python.Token.__eq__', 8)}
         return (isinstance(other, Token)
                 and self._identity_tuple == other._identity_tuple)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self._identity_tuple)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<Token {}{} at {}>'.format(
             self.kind,
             ' {}'.format(repr(self.text)) if self.text else '',
             self.sloc_range
         )
 
-    def __lt__(self, other):
+    def __lt__(self, other: Opt[Token]):
         ${py_doc('langkit.python.Token.__lt__', 8)}
 
         # None always comes first
@@ -1042,21 +1066,21 @@ class Token(ctypes.Structure):
         self._check_same_unit(other)
         return self._identity_tuple < other._identity_tuple
 
-    def __le__(self, other):
+    def __le__(self, other: Opt[Token]) -> bool:
         return self == other or self < other
 
-    def __gt__(self, other):
+    def __gt__(self, other: Opt[Token]) -> bool:
         return not (self <= other)
 
-    def __ge__(self, other):
+    def __ge__(self, other: Opt[Token]) -> bool:
         return not (self < other)
 
-    def to_data(self):
+    def to_data(self) -> dict:
         ${py_doc('langkit.python.Token.to_data', 8)}
         return {"kind": "Token", "token_kind": self.kind, "text": self.text}
 
     @property
-    def _identity_tuple(self):
+    def _identity_tuple(self) -> Tuple[Any, int, int]:
         """
         Return a tuple that return a tuple that contains "identity" information
         for this token. Think of it as a database primary key.
@@ -1071,11 +1095,11 @@ class Token(ctypes.Structure):
 class FileReader:
     ${py_doc('langkit.file_reader_type', 4)}
 
-    def __init__(self, c_value):
+    def __init__(self, c_value: Any):
         ${py_doc('langkit.python.FileReader.__init__', 8)}
         self._c_value = c_value
 
-    def __del__(self):
+    def __del__(self) -> None:
         _dec_ref_file_reader(self._c_value)
 
 ${exts.include_extension(
@@ -1088,11 +1112,11 @@ ${exts.include_extension(
 class UnitProvider:
     ${py_doc('langkit.unit_provider_type', 4)}
 
-    def __init__(self, c_value):
+    def __init__(self, c_value: Any):
         ${py_doc('langkit.python.UnitProvider.__init__', 8)}
         self._c_value = c_value
 
-    def __del__(self):
+    def __del__(self) -> None:
         _dec_ref_unit_provider(self._c_value)
 
 ${exts.include_extension(
@@ -1108,9 +1132,16 @@ class ${root_astnode_name}:
                  '_rebindings', '_unprotected_getitem_cache', '_unit',
                  '_unit_version', '_rebindings_version')
 
+    _kind_name: str
+    _field_names: Tuple[str, ...]
+
     ${astnode_types.subclass_decls(T.root_node)}
 
-    def __init__(self, c_value, node_c_value, metadata, rebindings):
+    def __init__(self,
+                 c_value: Any,
+                 node_c_value: Any,
+                 metadata: Any,
+                 rebindings: Any):
         """
         This constructor is an implementation detail, and is not meant to be
         used directly. For now, the creation of AST nodes can happen only as
@@ -1126,11 +1157,10 @@ class ${root_astnode_name}:
         self._rebindings = rebindings
         self._metadata = metadata
 
-        self._unprotected_getitem_cache = {}
+        self._unprotected_getitem_cache: Dict[int,
+                                              Opt[${root_astnode_name}]] = {}
         """
         Cache for the __getitem__ override.
-
-        :type: dict[int, ${root_astnode_name}]
         """
 
         # Information to check before accessing node data that it is still
@@ -1141,7 +1171,7 @@ class ${root_astnode_name}:
             rebindings.contents.version if rebindings else None
         )
 
-    def _check_stale_reference(self):
+    def _check_stale_reference(self) -> None:
         # We have a reference to the owning unit, so there is no need to
         # check that the unit and the context are still valid. Just check that
         # the unit has not been reparsed.
@@ -1156,48 +1186,48 @@ class ${root_astnode_name}:
             raise StaleReferenceError("related unit was reparsed")
 
     @property
-    def _c_value(self):
+    def _c_value(self) -> Any:
         self._check_stale_reference()
         return self._unprotected_c_value
 
     @property
-    def _getitem_cache(self):
+    def _getitem_cache(self) -> Dict[int, Opt[${root_astnode_name}]]:
         self._check_stale_reference()
         return self._unprotected_getitem_cache
 
     @property
-    def _id_tuple(self):
+    def _id_tuple(self) -> Tuple[Any, Any]:
         return (self._node_c_value, self._rebindings)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return (isinstance(other, ${root_astnode_name}) and
                 self._id_tuple == other._id_tuple)
 
-    def __ne__(self, other):
+    def __ne__(self, other: Any) -> bool:
         return not (self == other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self._id_tuple)
 
     @property
-    def kind_name(self):
+    def kind_name(self) -> str:
         ${py_doc('langkit.node_kind', 8)}
         return self._kind_name
 
     @property
-    def is_token_node(self):
+    def is_token_node(self) -> bool:
         ${py_doc('langkit.node_is_token_node', 8)}
         node = self._unwrap(self)
         return bool(_node_is_token_node(ctypes.byref(node)))
 
     @property
-    def is_synthetic(self):
+    def is_synthetic(self) -> bool:
         ${py_doc('langkit.node_is_synthetic', 8)}
         node = self._unwrap(self)
         return bool(_node_is_synthetic(ctypes.byref(node)))
 
     @property
-    def sloc_range(self):
+    def sloc_range(self) -> SlocRange:
         ${py_doc('langkit.node_sloc_range', 8)}
         node = self._unwrap(self)
         result = SlocRange._c_type()
@@ -1205,7 +1235,7 @@ class ${root_astnode_name}:
         return result._wrap()
 
     @property
-    def text(self):
+    def text(self) -> str:
         ${py_doc('langkit.node_text', 8)}
         node = self._unwrap(self)
         result = _text()
@@ -1213,14 +1243,14 @@ class ${root_astnode_name}:
         return result._wrap()
 
     @property
-    def image(self):
+    def image(self) -> str:
         ${py_doc('langkit.node_image', 8)}
         c_node = self._unwrap(self)
         c_result = _text()
         _node_image(ctypes.byref(c_node), ctypes.byref(c_result))
         return c_result._wrap()
 
-    def lookup(self, sloc):
+    def lookup(self, sloc: Sloc) -> Opt[${root_astnode_name}]:
         ${py_doc('langkit.lookup_in_node', 8)}
         node = self._unwrap(self)
         c_sloc = Sloc._c_type._unwrap(sloc)
@@ -1229,21 +1259,21 @@ class ${root_astnode_name}:
                         ctypes.byref(result))
         return ${root_astnode_name}._wrap(result)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         ${py_doc('langkit.python.root_node.__bool__', 8)}
         return True
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Opt[${root_astnode_name}]]:
         ${py_doc('langkit.python.root_node.__iter__', 8)}
         for i in range(len(self)):
             yield self[i]
 
-    def __len__(self):
+    def __len__(self) -> int:
         ${py_doc('langkit.python.root_node.__len__', 8)}
         node = self._unwrap(self)
         return _node_children_count(ctypes.byref(node))
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int) -> Opt[${root_astnode_name}]:
         ${py_doc('langkit.python.root_node.__getitem__', 8)}
         if not isinstance(key, int):
             msg = ('${root_astnode_name} children are integer-indexed'
@@ -1257,16 +1287,18 @@ class ${root_astnode_name}:
             return self._getitem_cache[key]
 
         node = self._unwrap(self)
-        result = ${c_entity}()
-        success = _node_child(ctypes.byref(node), key, ctypes.byref(result))
+        result_struct = ${c_entity}()
+        success = _node_child(
+            ctypes.byref(node), key, ctypes.byref(result_struct)
+        )
         if not success:
             raise IndexError('child index out of range')
         else:
-            result = ${root_astnode_name}._wrap(result)
+            result = ${root_astnode_name}._wrap(result_struct)
             self._getitem_cache[key] = result
             return result
 
-    def iter_fields(self):
+    def iter_fields(self) -> Iterator[Tuple[str, Opt[${root_astnode_name}]]]:
         ${py_doc('langkit.python.root_node.iter_fields', 8)}
         if self.is_list_type:
             for i, value in enumerate(self):
@@ -1275,7 +1307,7 @@ class ${root_astnode_name}:
             for field_name in self._field_names:
                 yield (field_name, getattr(self, '{}'.format(field_name)))
 
-    def dump_str(self):
+    def dump_str(self) -> str:
         ${py_doc('langkit.python.root_node.dump_str', 8)}
         output = io.StringIO()
         self.dump(file=output)
@@ -1283,7 +1315,7 @@ class ${root_astnode_name}:
         output.close()
         return ret
 
-    def dump(self, indent='', file=sys.stdout):
+    def dump(self, indent: str = '', file: IO[str] = sys.stdout) -> None:
         ${py_doc('langkit.python.root_node.dump', 8)}
 
         def print_node(name, value):
@@ -1308,18 +1340,33 @@ class ${root_astnode_name}:
                 # dumper.
                 print_node(name[2:], value)
 
-    def findall(self, ast_type_or_pred, **kwargs):
+    def findall(
+        self,
+        ast_type_or_pred: Union[Type[${root_astnode_name}],
+                                Callable[[${root_astnode_name}], bool]],
+        **kwargs: Any
+    ) -> List[${root_astnode_name}]:
         ${py_doc('langkit.python.root_node.findall', 8)}
         return list(self.finditer(ast_type_or_pred, **kwargs))
 
-    def find(self, ast_type_or_pred, **kwargs):
+    def find(
+        self,
+        ast_type_or_pred: Union[Type[${root_astnode_name}],
+                                Callable[[${root_astnode_name}], bool]],
+        **kwargs: Any
+    ) -> Opt[${root_astnode_name}]:
         ${py_doc('langkit.python.root_node.find', 8)}
         try:
             return next(self.finditer(ast_type_or_pred, **kwargs))
         except StopIteration:
             return None
 
-    def finditer(self, ast_type_or_pred, **kwargs):
+    def finditer(
+        self,
+        ast_type_or_pred: Union[Type[${root_astnode_name}],
+                                Callable[[${root_astnode_name}], bool]],
+        **kwargs: Any
+    ) -> Iterator[${root_astnode_name}]:
         ${py_doc('langkit.python.root_node.finditer', 8)}
         # Create a "pred" function to use as the node filter during the
         # traversal.
@@ -1360,7 +1407,7 @@ class ${root_astnode_name}:
         return helper(self)
 
     @property
-    def parent_chain(self):
+    def parent_chain(self) -> List[${root_astnode_name}]:
         ${py_doc('langkit.python.root_node.parent_chain', 8)}
         def _parent_chain(node):
             yield node
@@ -1370,27 +1417,29 @@ class ${root_astnode_name}:
 
         return list(_parent_chain(self))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.image
 
     @property
-    def entity_repr(self):
+    def entity_repr(self) -> str:
         c_value = self._unwrap(self)
         c_result = _text()
         _entity_image(ctypes.byref(c_value), ctypes.byref(c_result))
         return c_result._wrap()
 
     @property
-    def tokens(self):
+    def tokens(self) -> Iterator[Token]:
         ${py_doc('langkit.python.root_node.tokens', 8)}
         start = self.token_start
         end = self.token_end
         while not start == end:
             yield start
-            start = start.next
+            next = start.next
+            assert next is not None
+            start = next
         yield end
 
-    def to_data(self):
+    def to_data(self) -> Union[list, dict]:
         ${py_doc('langkit.python.root_node.to_data', 8)}
         if self.is_list_type:
             return [i.to_data() for i in self if i is not None]
@@ -1399,20 +1448,23 @@ class ${root_astnode_name}:
                     for n, v in self.iter_fields()
                     if v is not None}
 
-    def to_json(self):
+    def to_json(self) -> str:
         """
         Return a JSON representation of this node.
         """
         return json.dumps(self.to_data())
 
-    def is_a(self, *types):
+    def is_a(self, *types: Type[${root_astnode_name}]) -> bool:
         """
         Shortcut for isinstance(self, types).
         :rtype: bool
         """
         return isinstance(self, tuple(types))
 
-    def cast(self, typ):
+    if TYPE_CHECKING:
+        T = TypeVar('T', bound=${root_astnode_name})
+
+    def cast(self, typ: Type[T]) -> T:
         """
         Fluent interface style method. Return ``self``, raise an error if self
         is not of type ``typ``.
@@ -1455,11 +1507,11 @@ class ${root_astnode_name}:
         return result
 
     @classmethod
-    def _wrap_bare_node(cls, c_value):
+    def _wrap_bare_node(cls, c_value: Any) -> Opt[${root_astnode_name}]:
         return cls._wrap(${c_entity}.from_bare_node(c_value))
 
     @classmethod
-    def _unwrap(cls, py_value):
+    def _unwrap(cls, py_value: Opt[${root_astnode_name}]) -> Any:
         """
         Internal helper to unwrap a high-level ASTNode instance into a
         low-level value. Raise a TypeError if the input value has unexpected
@@ -1477,11 +1529,11 @@ class ${root_astnode_name}:
         return self._c_value.info
 
     @classmethod
-    def _fetch_unit(cls, c_value):
+    def _fetch_unit(cls, c_value: Any) -> AnalysisUnit:
         return ${pyapi.wrap_value('_node_unit(ctypes.byref(c_value))',
                                   T.AnalysisUnit)}
 
-    def _eval_field(self, c_result, c_accessor, *c_args):
+    def _eval_field(self, c_result: Any, c_accessor: Any, *c_args: Any) -> Any:
         """
         Internal helper to evaluate low-level field accessors/properties.
 
@@ -1494,7 +1546,7 @@ class ${root_astnode_name}:
             raise PropertyError()
         return c_result
 
-    def _eval_astnode_field(self, c_accessor):
+    def _eval_astnode_field(self, c_accessor: Any) -> Any:
         """
         Internal helper. Wrapper around _eval_field for fields that return an
         AST node and that accept no explicit argument. This is useful as it's
@@ -1529,7 +1581,10 @@ ${struct_types.base_decls()}
     % if struct_type.is_entity_type:
         % if struct_type is root_entity:
 class ${c_entity}(ctypes.Structure):
-    _fields_ = ${struct_types.ctype_fields(struct_type)}
+    _fields_: ClassVar[List[Tuple[str, Any]]] = (
+        ${struct_types.ctype_fields(struct_type)}
+    )
+    _null_value: ClassVar[${c_entity}]
 
     @classmethod
     def from_bare_node(cls, node_c_value):
@@ -1538,11 +1593,17 @@ class ${c_entity}(ctypes.Structure):
     ## Likewise for entity info structures: they will never be wrapped
     % elif struct_type is T.entity_info:
 class ${c_entity_info}(ctypes.Structure):
-    _fields_ = ${struct_types.ctype_fields(struct_type)}
+    _fields_: ClassVar[List[Tuple[str, Any]]] = (
+        ${struct_types.ctype_fields(struct_type)}
+    )
+    _null_value: ClassVar[${c_entity_info}]
     ## Likewise for metadata structures
     % elif struct_type is T.env_md:
 class ${c_metadata}(ctypes.Structure):
-    _fields_ = ${struct_types.ctype_fields(struct_type)}
+    _fields_: ClassVar[List[Tuple[str, Any]]] = (
+        ${struct_types.ctype_fields(struct_type)}
+    )
+    _null_value: ClassVar[${c_metadata}]
 
     @property
     def as_tuple(self):
@@ -1855,14 +1916,14 @@ _entity_image = _import_func(
 # Layering helpers
 #
 
-def _unwrap_str(c_char_p_value):
+def _unwrap_str(c_char_p_value: Any) -> str:
     """
     Assuming c_char_p_value is a valid char*, convert it to a native Python
     string and free the C pointer.
     """
     result = ctypes.c_char_p(ctypes.addressof(c_char_p_value.contents)).value
     _free(c_char_p_value)
-    return result.decode()
+    return (result or b'').decode()
 
 
 _kind_to_astnode_cls = {
@@ -1874,7 +1935,7 @@ _kind_to_astnode_cls = {
 }
 
 
-def _field_address(struct, field_name):
+def _field_address(struct: ctypes.Structure, field_name: str) -> int:
     """
     Get the address of a structure field from a structure value.
 
@@ -1890,21 +1951,30 @@ def _field_address(struct, field_name):
     struct_addr = ctypes.addressof(struct)
     field = getattr(struct_type, field_name)
     field_type = None
-    for f_name, f_type in struct_type._fields_:
+    for field_desc in struct_type._fields_:
+        f_name = field_desc[0]
+        f_type = field_desc[1]
         if f_name == field_name:
             field_type = f_type
             break
     assert field_type is not None
     return struct_addr + field.offset
 
-def _extract_versions():
+def _extract_versions() -> Tuple[str, str]:
     v_ptr = ctypes.c_char_p()
     bd_ptr = ctypes.c_char_p()
     _get_versions(ctypes.byref(v_ptr), ctypes.byref(bd_ptr))
-    version = v_ptr.value.decode()
-    build_version = bd_ptr.value.decode()
+
+    _version = v_ptr.value
+    assert isinstance(_version, bytes)
+    version = _version.decode()
     _free(v_ptr)
+
+    _build_version = bd_ptr.value
+    assert isinstance(_build_version, bytes)
+    build_version = _build_version.decode()
     _free(bd_ptr)
+
     return version, build_version
 
 version, build_date = _extract_versions()
@@ -1960,14 +2030,20 @@ class App:
         ExampleApp.run()
     """
 
+    parser: argparse.ArgumentParser
+    args: argparse.Namespace
+    u: AnalysisUnit
+    units: Dict[str, AnalysisUnit]
+    ctx: AnalysisContext
+
     @property
-    def description(self):
+    def description(self) -> str:
         """
         Description for this app. Empty by default.
         """
         return ""
 
-    def __init__(self, args=None):
+    def __init__(self, args: Opt[List[str]] = None):
         self.parser = argparse.ArgumentParser(description=self.description)
         self.parser.add_argument('files', nargs='*', help='Files')
         self.add_arguments()
@@ -1987,21 +2063,21 @@ class App:
             self.units[file_name] = self.u
 
 
-    def add_arguments(self):
+    def add_arguments(self) -> None:
         """
         Hook for subclasses to add arguments to self.parser. Default
         implementation does nothing.
         """
         pass
 
-    def create_unit_provider(self):
+    def create_unit_provider(self) -> Opt[UnitProvider]:
         """
         Hook for subclasses to return a custom unit provider.
         Default implementation returns None.
         """
         return None
 
-    def main(self):
+    def main(self) -> None:
         """
         Default implementation for App.main: just iterates on every units and
         call ``process_unit`` on it.
@@ -2009,7 +2085,7 @@ class App:
         for u in sorted(self.units.values(), key=lambda u: u.filename):
             self.process_unit(u)
 
-    def process_unit(self, unit):
+    def process_unit(self, unit: AnalysisUnit) -> None:
         """
         Abstract method that processes one unit. Needs to be subclassed by
         implementors.
@@ -2017,7 +2093,7 @@ class App:
         raise NotImplementedError()
 
     @classmethod
-    def run(cls, args=None):
+    def run(cls, args: Opt[List[str]]=None) -> None:
         """
         Instantiate and run this application.
         """

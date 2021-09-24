@@ -1242,7 +1242,7 @@ class ManageScript:
         add_path("DYLD_LIBRARY_PATH", shared_dir)
         add_path("PATH", shared_dir)
 
-        # Make the Python bindings and the associated Mypy type hints available
+        # Make the Python bindings available to Python interpreters and to Mypy
         add_path("PYTHONPATH", P("python"))
         add_path("MYPYPATH", P("python"))
 
