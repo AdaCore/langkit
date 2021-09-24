@@ -1,20 +1,9 @@
 """
-This module contains the public API and the implementation for lexical
-environments specifications.
+This modules provides an API to specify the lexical environments to build for
+each node ("env specs").
 
-At a high level, the user adds environment specifications to node types the
-following way::
-
-
-    class MyNode(RootNode):
-        ...
-
-        env_spec = EnvSpec([
-            list_of_actions
-        ], other_options)
-
-
-Read the documentation below for more details.
+See the "Lexical environment" section in Langkit's Sphinx doc for an
+introduction to their usage.
 """
 
 from __future__ import annotations
@@ -39,11 +28,13 @@ from langkit.expressions import (AbstractExpression, FieldAccess, PropertyDef,
 def add_env(no_parent: bool = False,
             transitive_parent: bool = False,
             names: Optional[AbstractExpression] = None) -> AddEnv:
-    """
-    Add an environment linked to the current node. This env action must be
-    called as a pre action. The only actions that can precede this one in pre
-    actions are add_to_env actions with the current env as a destination. Also,
-    there can be only one add_env action per EnvSpec.
+    """Create a new lexical environment.
+
+    This action creates an environment related to this node. Using this action
+    has restrictions:
+
+    * there can be only one such action per env spec;
+    * it must be a pre action.
 
     :param no_parent: If passed, the new env will be created with no parent
         env.
@@ -115,9 +106,9 @@ def add_to_env(mappings: AbstractExpression,
     """
     Specify elements to add to the lexical environment.
 
-    :param mappings: One or several mappings of key to value to add to the
+    :param mappings: One or several mappings of key to node to add to the
         environment. Must be either of type T.env_assoc, or T.env_assoc.array.
-        All values must belong to the same unit as the node that owns this
+        All nodes must belong to the same unit as the node that owns this
         EnvSpec. See langkit.expressions.envs.new_env_assoc for more precision
         on how to create an env assoc.
 
