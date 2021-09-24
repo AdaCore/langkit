@@ -93,7 +93,7 @@ class AnalysisUnit:
     class TokenIterator:
         ${py_doc('langkit.python.AnalysisUnit.TokenIterator', 8)}
 
-        def __init__(self, first: Token) -> None: ...
+        def __init__(self, first: Opt[Token]) -> None: ...
         def __iter__(self) -> AnalysisUnit.TokenIterator: ...
         def __next__(self) -> Token: ...
         def next(self) -> Token: ...
@@ -120,11 +120,11 @@ class AnalysisUnit:
         ${py_doc('langkit.unit_root', 8, rtype=T.root_node, or_pass=True)}
 
     @property
-    def first_token(self) -> Token:
+    def first_token(self) -> Opt[Token]:
         ${py_doc('langkit.unit_first_token', 8, or_pass=True)}
 
     @property
-    def last_token(self) -> Token:
+    def last_token(self) -> Opt[Token]:
         ${py_doc('langkit.unit_last_token', 8, or_pass=True)}
 
     @property
@@ -139,7 +139,7 @@ class AnalysisUnit:
     def trivia_count(self) -> int:
         ${py_doc('langkit.unit_trivia_count', 8, or_pass=True)}
 
-    def lookup_token(self, sloc: Sloc) -> Token:
+    def lookup_token(self, sloc: Sloc) -> Opt[Token]:
         ${py_doc('langkit.unit_lookup_token', 8, or_pass=True)}
 
     def iter_tokens(self) -> AnalysisUnit.TokenIterator:
