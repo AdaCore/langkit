@@ -2579,6 +2579,23 @@ class CallExpr(Expr):
             ),
             # If not a generic decl, fall back on the initially found decl
             default_val=called_decl
+        )._.match(
+            # Here, if we found a declaration but it's not one of the
+            # statically callable declarations (FunDecl or TypeDecl), we
+            # return nothing, even though we might be able to statically
+            # determine a declaration, like in the example below::
+            #
+            #    val a: (Int) -> Int = null
+            #    val b: Int = a(12)
+            #
+            # That's because in language semantic terms, the actual called
+            # function is determined dynamically in the above case.
+            #
+            # TODO: Maybe introduce a base class for statically callable
+            # declarations, so we don't have to do this ugly match.
+            lambda t=TypeDecl: t,
+            lambda f=FunDecl: f,
+            lambda _: No(T.Decl.entity)
         )
 
     @langkit_property()
