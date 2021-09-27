@@ -23,6 +23,6 @@ class Name : RootNode implements TokenNode {
     fun parent_nodes (): Array[RootNode] = node.parents()
     fun parent_nodes (): Array[RootNode] = node.parents(with_self=false)
 
-    fun node_iterator (): Iterator[RootNode] = node.parents().to_iterator
+    fun node_iterator (): Iterator[RootNode] = node.parents().to_iterator()
 
 }

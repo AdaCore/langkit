@@ -35,7 +35,7 @@ trait Iterator {
 
 @builtin generic[T]
 struct Array implements Sized, Indexable[T], Iterator[T] {
-    @builtin @property fun to_iterator(): Iterator[T]
+    @builtin fun to_iterator(): Iterator[T]
 }
 
 @builtin generic[T]

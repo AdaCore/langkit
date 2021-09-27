@@ -460,8 +460,11 @@ Id   <RefId "to_iterator" test.lkt:26:63-26:74>
      references <FunDecl prelude: "to_iterator">
 
 Expr <RefId "to_iterator" test.lkt:26:63-26:74>
-     has type <InstantiatedGenericType prelude: "Iterator[RootNode]">
+     has type <FunctionType prelude: "() -> Iterator[RootNode]">
 
 Expr <DotExpr test.lkt:26:48-26:74>
+     has type <FunctionType prelude: "() -> Iterator[RootNode]">
+
+Expr <CallExpr test.lkt:26:48-26:76>
      has type <InstantiatedGenericType prelude: "Iterator[RootNode]">
 
