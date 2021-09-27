@@ -2098,11 +2098,17 @@ class SimpleTypeRef(TypeRef):
 
     @langkit_property(return_type=T.SemanticResult.array)
     def check_correctness_pre():
+
         d = Var(Entity.type_name.referenced_decl)
+
         return d.result_ref.then(
-            lambda d: d.cast(T.TypeDecl).then(
-                lambda _: No(T.SemanticResult.array),
-                default_val=Entity.error(S("Invalid type reference")).singleton
+            lambda d: d.match(
+                # The type ref references a type decl: return no error
+                lambda _=T.TypeDecl: No(T.SemanticResult.array),
+
+                # Not a type decl: return an error that the type reference is
+                # invalid.
+                lambda _: [Entity.error(S("Invalid type reference"))]
             )
         )
 
