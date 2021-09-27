@@ -1014,14 +1014,13 @@ private package ${ada_lib_name}.Implementation is
       State             : in out PLE_Node_State;
       No_Parent         : Boolean;
       Transitive_Parent : Boolean;
-      Resolver          : Lexical_Env_Resolver;
       Names             : in out ${T.Symbol.array.name});
    --  Helper for Populate_Lexical_Env: create a new environment for Self, and
    --  update State accordingly.
    --
-   --  State/No_Parent/Resolver all participate to the computation of the
-   --  parent for this new environment. Transitive_Parent is directly forwarded
-   --  to the lexical environment constructor.
+   --  State and No_Parent participate to the computation of the parent for
+   --  this new environment. Transitive_Parent is directly forwarded to the
+   --  lexical environment constructor.
    --
    --  If Names is not null, this also registers the new environment as a named
    --  env for all the given names. For PLE code brevity, Add_Env takes care of

@@ -393,12 +393,10 @@
             ${'True' if add_env.no_parent else 'False'};
          Transitive_Parent : constant Boolean :=
             ${call_prop(add_env.transitive_parent_prop)};
-         Resolver          : constant Lexical_Env_Resolver :=
-            ${"{}'Access".format(env_getter) if has_dyn_env else 'null'};
          Names             : ${T.Symbol.array.name} :=
             ${call_prop(add_env.names_prop) if add_env.names_prop else 'null'};
       begin
-         Add_Env (Self, State, No_Parent, Transitive_Parent, Resolver, Names);
+         Add_Env (Self, State, No_Parent, Transitive_Parent, Names);
       end;
    </%def>
 
