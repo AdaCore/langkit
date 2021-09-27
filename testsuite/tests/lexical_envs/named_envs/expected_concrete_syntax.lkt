@@ -136,6 +136,16 @@ grammar foo_grammar {
         ).to_symbol
     ) else (null)
 
+    fun initial_env (): DesignatedEnv = node.decl_parent_scope_name().do(
+        (name) => DesignatedEnv(
+            kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null
+        ), default_val=(
+            DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env, env_name=null, direct_env=node.parent.children_env()
+            )
+        )
+    )
+
     ## Assuming this node can define a named environment (see
     ## ``can_have_name``), return its syntactic name.
     @not_implemented fun self_name (): Name

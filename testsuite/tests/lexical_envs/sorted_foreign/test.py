@@ -5,10 +5,9 @@ envs were populated by cross units.
 """
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import (EnvSpec, add_env, add_to_env_kv,
-                          set_initial_env_by_name)
+from langkit.envs import EnvSpec, add_env, add_to_env_kv, set_initial_env
 from langkit.expressions import (AbstractKind, EmptyEnv, No, Self, String, Var,
-                                 langkit_property)
+                                 direct_env, langkit_property, named_env)
 
 from utils import build_and_run
 
@@ -89,9 +88,11 @@ class Scope(FooNode):
     content = Field()
 
     env_spec = EnvSpec(
-        set_initial_env_by_name(
-            Self.name.scope_fqn.then(lambda s: s.to_symbol, No(T.Symbol)),
-            Self.parent.children_env,
+        set_initial_env(
+            Self.name.scope_fqn.then(
+                lambda s: named_env(s.to_symbol),
+                default_val=direct_env(Self.parent.children_env),
+            ),
         ),
         add_to_env_kv(key=Self.name.referenced_name, val=Self),
         add_env(names=[Self.name.fqn.to_symbol])

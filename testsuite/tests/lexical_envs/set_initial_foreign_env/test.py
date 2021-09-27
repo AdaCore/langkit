@@ -6,7 +6,8 @@ unsafe=True flag raise an error.
 from langkit.dsl import (ASTNode, Field, Struct, T, UserField, abstract,
                          env_metadata)
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, set_initial_env
-from langkit.expressions import AbstractKind, Self, langkit_property
+from langkit.expressions import (AbstractKind, Self, direct_env,
+                                 langkit_property)
 
 from utils import build_and_run
 
@@ -25,7 +26,9 @@ class Scope(FooNode):
     content = Field()
 
     env_spec = EnvSpec(
-        set_initial_env(Self.name.designated_scope(Self.parent.children_env)),
+        set_initial_env(
+            direct_env(Self.name.designated_scope(Self.parent.children_env))
+        ),
         add_to_env_kv(key=Self.name.designated_symbol, val=Self),
         add_env(),
     )

@@ -161,27 +161,11 @@ def set_initial_env(env: AbstractExpression) -> SetInitialEnv:
     Action that sets the initial env in which the rest of the environment
     actions are evaluated. Except for Do() hooks, this action must be first in
     the list of actions.
-    """
-    return SetInitialEnv(None, env)
 
-
-def set_initial_env_by_name(name: AbstractExpression,
-                            fallback_env: AbstractExpression) -> SetInitialEnv:
+    :param env: Expression that returns a ``DesignatedEnv`` struct, for the
+        environment that must become the initial one.
     """
-    Action that sets the initial env in which the rest of the environment
-    actions are evaluated. Except for Do() hooks, this action must be first in
-    the list of actions (if present).
-
-    :param name: Expression that returns an env name (symbol). If it evaluates
-        to a non-null symbol, look for the environment that has this name (it
-        will be updated every time another environment related to this name
-        takes precedence). If it evaluates to a null symbol, use
-        ``fallback_env`` to get the initial environment.
-    :param fallback_env: Expression that returns the initial env if there is no
-        named env lookup. Note that except if it's the empty env or the root
-        scope, this environment must not be foreign to Self.
-    """
-    return SetInitialEnv(name, fallback_env)
+    return SetInitialEnv(env)
 
 
 def do(expr: AbstractExpression) -> Do:
@@ -388,22 +372,12 @@ class EnvSpec:
             ).render_expr()
 
     @property
-    def initial_env_name_expr(self) -> str:
-        """
-        The initial environment name expression.
-        """
-        assert self.initial_env
-        assert self.initial_env.name_expr
-        assert self.initial_env.name_prop
-        return self._render_field_access(self.initial_env.name_prop)
-
-    @property
     def initial_env_expr(self) -> str:
         """
         The initial environment expression.
         """
         assert self.initial_env
-        return self._render_field_access(self.initial_env.fallback_env_prop)
+        return self._render_field_access(self.initial_env.env_prop)
 
 
 class EnvAction:
@@ -639,19 +613,13 @@ class HandleChildren(EnvAction):
 
 
 class SetInitialEnv(EnvAction):
-    def __init__(self,
-                 name_expr: Optional[AbstractExpression],
-                 fallback_env_expr: AbstractExpression) -> None:
+    def __init__(self, env_expr: AbstractExpression):
         super().__init__()
-        self.name_expr = name_expr
-        self.fallback_env_expr = fallback_env_expr
+        self.env_expr = env_expr
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
-        self.name_prop = env_spec.create_internal_property(
-            'Initial_Env_Name', self.name_expr, T.Symbol
-        )
-        self.fallback_env_prop = env_spec.create_internal_property(
-            'Initial_Env', self.fallback_env_expr, T.LexicalEnv
+        self.env_prop = env_spec.create_internal_property(
+            'Initial_Env', self.env_expr, T.DesignatedEnv
         )
 
 

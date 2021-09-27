@@ -4,11 +4,9 @@ that 2) semantic analysis still works after that.
 """
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import (
-    EnvSpec, add_env, add_to_env_kv, do, set_initial_env_by_name
-)
+from langkit.envs import EnvSpec, add_env, add_to_env_kv, do, set_initial_env
 from langkit.expressions import (
-    AbstractProperty, No, Self, String, langkit_property
+    AbstractProperty, No, Self, String, direct_env, langkit_property, named_env
 )
 
 from utils import build_and_run
@@ -80,9 +78,11 @@ class Scope(FooNode):
     defs = Field()
 
     env_spec = EnvSpec(
-        set_initial_env_by_name(
-            Self.name.scope_fqn.then(lambda s: s.to_symbol, No(T.Symbol)),
-            Self.parent.children_env,
+        set_initial_env(
+            Self.name.scope_fqn.then(
+                lambda s: named_env(s.to_symbol),
+                direct_env(Self.parent.children_env),
+            ),
         ),
         add_to_env_kv(key=Self.name.suffix_symbol, val=Self),
         add_env(names=[Self.name.fqn.to_symbol]),
