@@ -5,7 +5,7 @@ Property_Error.
 
 from langkit.dsl import ASTNode
 from langkit.envs import EnvSpec, set_initial_env
-from langkit.expressions import Self
+from langkit.expressions import Self, direct_env
 
 from utils import build_and_run
 
@@ -18,7 +18,7 @@ class Example(FooNode):
     token_node = True
 
     env_spec = EnvSpec(
-        set_initial_env(Self.parent.children_env.env_orphan),
+        set_initial_env(direct_env(Self.parent.children_env.env_orphan)),
     )
 
 

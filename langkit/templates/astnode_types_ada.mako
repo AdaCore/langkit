@@ -273,25 +273,18 @@
 
    % if cls.env_spec and cls.env_spec.actions:
 
-   <%
-      call_prop = cls.env_spec._render_field_access
-
-      # Whether the initial env for this node is dynamic
-      has_dyn_env = cls.env_spec.initial_env is not None
-
-      # Name of the function to call in order to get the initial lexical env
-      # for this node. Useful only when the initial env is dynamic.
-      env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name)
-   %>
+   <% call_prop = cls.env_spec._render_field_access %>
 
    <%def name="emit_set_initial_env(sie)">
       declare
-         Name_Result : ${T.Symbol.name} :=
-            ${(cls.env_spec.initial_env_name_expr
-               if sie.name_prop
-               else 'null')};
+         Env : constant ${T.DesignatedEnv.name} :=
+           ${cls.env_spec.initial_env_expr};
       begin
-         Set_Initial_Env (Self, State, Name_Result, ${env_getter}'Access);
+         Set_Initial_Env
+           (Self,
+            State,
+            Env,
+            DSL_Location => ${string_repr(sie.str_location)});
       end;
    </%def>
 
@@ -425,44 +418,6 @@
       "RefEnvs":       emit_ref_env,
       "Do":            emit_do}[env_action.__class__.__name__](env_action)}
    </%def>
-
-   % if has_dyn_env:
-   ---------------------------
-   -- Initial_Env_Getter_Fn --
-   ---------------------------
-
-   function ${env_getter} (E : Entity) return Lexical_Env is
-      Self : constant ${cls.name} := E.Node;
-
-      ## Define this constant so that the expressions below, which are expanded
-      ## into property calls, can reference it as the currently bound
-      ## environment.
-      Bound_Env : constant Lexical_Env :=
-        (if Self.Parent /= null
-         then Self.Parent.Self_Env
-         else Self.Self_Env);
-
-      Initial_Env : Lexical_Env := Bound_Env;
-   begin
-      Initial_Env := ${cls.env_spec.initial_env_expr};
-
-      if Initial_Env.Kind /= Static_Primary then
-         raise Property_Error with
-            "Cannot set an env that is not static-primary as the initial env";
-      end if;
-
-      ## Having a parent environment that is foreign is unsound, except for the
-      ## empty/root environments, as no relocation is needed for them.
-      if Is_Foreign_Strict (Initial_Env, Self) then
-         raise Property_Error with
-            "unsound foreign environment in SetInitialEnv ("
-            & "${cls.env_spec.initial_env.str_location}" & ")";
-      end if;
-
-      return Initial_Env;
-   end ${env_getter};
-
-   % endif
 
    ## Emit procedures for pre/post actions when needed
 

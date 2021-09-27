@@ -22,8 +22,7 @@ units loading.
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import (
-    EnvSpec, RefKind, add_env, add_to_env_kv, reference,
-    set_initial_env_by_name,
+    EnvSpec, RefKind, add_env, add_to_env_kv, reference, set_initial_env
 )
 from langkit.expressions import (AbstractKind, If, Let, No, Not, Self, String,
                                  Var, direct_env, langkit_property, named_env)
@@ -135,6 +134,13 @@ class FooNode(ASTNode):
             ).to_symbol,
 
             No(T.Symbol)
+        )
+
+    @langkit_property(return_type=T.DesignatedEnv)
+    def initial_env():
+        return Self.decl_parent_scope_name.then(
+            lambda name: named_env(name),
+            default_val=direct_env(Self.parent.children_env)
         )
 
 
@@ -280,13 +286,15 @@ class PackageDecl(FooNode):
         )
 
     env_spec = EnvSpec(
-        set_initial_env_by_name(
+        set_initial_env(
             If(
                 Self.is_toplevel,
                 Self.decl_parent_scope_name,
                 No(T.Symbol),
-            ),
-            Self.parent.children_env
+            ).then(
+                lambda name: named_env(name),
+                default_val=direct_env(Self.parent.children_env),
+            )
         ),
         add_to_env_kv(Self.name.base_name.to_symbol, Self),
         add_env(names=Self.new_env_names)
@@ -339,13 +347,14 @@ class PackageBody(FooNode):
         # The initial environment for package bodies is the private part of the
         # corresponding package specs (or the public part if there is no
         # private part).
-        set_initial_env_by_name(
+        set_initial_env(
             If(
                 Self.is_toplevel,
-                Self.suffixed_full_name(String('__privatepart')).to_symbol,
-                No(T.Symbol),
+                named_env(
+                    Self.suffixed_full_name(String('__privatepart')).to_symbol
+                ),
+                direct_env(Self.parent.children_env),
             ),
-            Self.parent.children_env,
         ),
 
         add_to_env_kv(
@@ -397,8 +406,7 @@ class SubpDecl(FooNode):
         return Self.name
 
     env_spec = EnvSpec(
-        set_initial_env_by_name(Self.decl_parent_scope_name,
-                                Self.parent.children_env),
+        set_initial_env(Self.initial_env),
         add_to_env_kv(Self.name.base_name.to_symbol, Self),
     )
 
@@ -413,8 +421,7 @@ class SubpBody(FooNode):
         return Self.name
 
     env_spec = EnvSpec(
-        set_initial_env_by_name(Self.decl_parent_scope_name,
-                                Self.parent.children_env),
+        set_initial_env(Self.initial_env),
         # TODO: add __nextpart to the spec
     )
 

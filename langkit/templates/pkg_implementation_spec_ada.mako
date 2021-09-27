@@ -961,18 +961,12 @@ private package ${ada_lib_name}.Implementation is
    --  environment looked up with Name.
 
    procedure Set_Initial_Env
-     (Self     : ${T.root_node.name};
-      State    : in out PLE_Node_State;
-      Name     : Symbol_Type;
-      Resolver : Lexical_Env_Resolver);
-   --  Helper for Populate_Lexical_Env: fetch the initial environment for Self
-   --  and update State accordingly.
-   --
-   --  Name is for the requested named environment, or null if none is
-   --  requested.
-   --
-   --  If Name is null or an empty array, use Resolver to fetch the initial
-   --  environment, or use the current environment if there is no resolver.
+     (Self         : ${T.root_node.name};
+      State        : in out PLE_Node_State;
+      Env          : ${T.DesignatedEnv.name};
+      DSL_Location : String);
+   --  Helper for ``Populate_Lexical_Env``: fetch the initial environment for
+   --  ``Self`` according to ``Env`` and update ``State`` accordingly.
 
    procedure Add_To_Env
      (Self         : ${T.root_node.name};

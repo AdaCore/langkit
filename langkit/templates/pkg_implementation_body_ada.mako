@@ -1341,21 +1341,38 @@ package body ${ada_lib_name}.Implementation is
    ---------------------
 
    procedure Set_Initial_Env
-     (Self     : ${T.root_node.name};
-      State    : in out PLE_Node_State;
-      Name     : Symbol_Type;
-      Resolver : Lexical_Env_Resolver) is
+     (Self         : ${T.root_node.name};
+      State        : in out PLE_Node_State;
+      Env          : ${T.DesignatedEnv.name};
+      DSL_Location : String) is
    begin
-      --  An empty name is the way for the expression to say to fallback on the
-      --  direct initial environment computation.
-      if Name /= null then
-         Use_Named_Env (State, Self.Unit.Context, Name);
+      case Env.Kind is
+         when None =>
+            Use_Direct_Env (State, Empty_Env);
 
-      else
-         Use_Direct_Env
-           (State,
-            Resolver ((Node => Self, Info => ${T.entity_info.nullexpr})));
-      end if;
+         when Current_Env =>
+            null;
+
+         when Named_Env =>
+            Use_Named_Env (State, Self.Unit.Context, Env.Env_Name);
+
+         when Direct_Env =>
+
+            --  Sanitize this environment value: make sure it's a non-foreign
+            --  and primary environment.
+
+            if Env.Direct_Env.Kind /= Static_Primary then
+               raise Property_Error with
+                  "Cannot set an env that is not static-primary as the"
+                  & " initial env";
+
+            elsif Is_Foreign_Strict (Env.Direct_Env, Self) then
+               raise Property_Error with
+                  "unsound foreign environment in SetInitialEnv ("
+                  & DSL_Location & ")";
+            end if;
+            Use_Direct_Env (State, Env.Direct_Env);
+      end case;
    end Set_Initial_Env;
 
    ----------------

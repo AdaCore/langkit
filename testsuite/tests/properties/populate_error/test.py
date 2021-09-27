@@ -1,6 +1,6 @@
 from langkit.dsl import ASTNode
 from langkit.envs import EnvSpec, set_initial_env
-from langkit.expressions import Self
+from langkit.expressions import Self, direct_env
 
 from utils import build_and_run
 
@@ -11,7 +11,7 @@ class FooNode(ASTNode):
 
 class Example(FooNode):
     env_spec = EnvSpec(
-        set_initial_env(Self.parent.parent.children_env)
+        set_initial_env(direct_env(Self.parent.parent.children_env))
     )
 
 
