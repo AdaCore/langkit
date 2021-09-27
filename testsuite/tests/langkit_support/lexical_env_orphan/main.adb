@@ -16,15 +16,15 @@ procedure Main is
    Key_B   : constant Symbol_Type := Find (Symbols, "B");
 
    Old_Env : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'O', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'O', Owner => No_Generic_Unit);
    New_Env : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'N', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'N', Owner => No_Generic_Unit);
    Rebindings : Env_Rebindings := Append (null, Old_Env, New_Env);
 
    Root     : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'R', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'R', Owner => No_Generic_Unit);
    Child    : Lexical_Env := Create_Lexical_Env
-     (Simple_Env_Getter (Root), 'C', Owner => No_Generic_Unit);
+     (Root, 'C', Owner => No_Generic_Unit);
    Orphaned : Lexical_Env := Orphan (Child);
 begin
    Add (Root, Key_A, '1');
@@ -44,7 +44,7 @@ begin
 
    declare
       Transitive_Child : Lexical_Env := Create_Lexical_Env
-        (Simple_Env_Getter (Root), 'C', True, No_Generic_Unit);
+        (Root, 'C', True, No_Generic_Unit);
 
       Grouped    : Lexical_Env := Group ((Root, Child));
       Rebound_TC : Lexical_Env := Rebind_Env (Transitive_Child, Rebindings);

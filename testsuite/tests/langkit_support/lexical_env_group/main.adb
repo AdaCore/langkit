@@ -13,11 +13,11 @@ procedure Main is
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
 
    A_Parent : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'P', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'P', Owner => No_Generic_Unit);
    A        : Lexical_Env := Create_Lexical_Env
-     (Simple_Env_Getter (A_Parent), 'A', Owner => No_Generic_Unit);
+     (A_Parent, 'A', Owner => No_Generic_Unit);
    B        : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'B', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'B', Owner => No_Generic_Unit);
 
    Grouped : Lexical_Env := Group ((A, B));
 begin

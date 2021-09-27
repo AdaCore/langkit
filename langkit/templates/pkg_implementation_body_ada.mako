@@ -394,7 +394,7 @@ package body ${ada_lib_name}.Implementation is
       Context.Tab_Stop := Tab_Stop;
       Context.With_Trivia := With_Trivia;
       Context.Root_Scope := Create_Static_Lexical_Env
-        (Parent => AST_Envs.No_Env_Getter,
+        (Parent => Null_Lexical_Env,
          Node   => null);
 
       --  Create a new ownership share for Event_Handler so that it lives at
@@ -1047,15 +1047,8 @@ package body ${ada_lib_name}.Implementation is
       Root_Env : constant Lexical_Env := Unit.Context.Root_Scope;
       State    : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
 
-      ----------------
-      -- Get_Parent --
-      ----------------
-
-      function Get_Parent (Env : Lexical_Env) return Lexical_Env is
-         E : constant Lexical_Env_Access := Unwrap (Env);
-      begin
-         return Get_Env (E.Parent, No_Entity_Info);
-      end Get_Parent;
+      function Get_Parent (Env : Lexical_Env) return Lexical_Env
+      is (Unwrap (Env).Parent);
 
       --------------------------
       -- Explore_Parent_Chain --
@@ -1564,20 +1557,20 @@ package body ${ada_lib_name}.Implementation is
       Parent_From_Name : constant Boolean := State.Current_NED /= null;
       --  Does the parent environment comes from a named environment lookup?
 
-      --  Determine how to get the parent of this new environment:
+      --  Determine the parent of this new environment:
       --
       --  (1) no parent if requested;
       --  (2) the current environment as the static parent if it comes from a
       --      named env lookup or if it is not foreign (or is the empty/root
       --      environment).
-      Parent_Getter : constant Env_Getter :=
+      Parent : constant Lexical_Env :=
         (if No_Parent
-         then AST_Envs.No_Env_Getter
-         else AST_Envs.Simple_Env_Getter (State.Current_Env));
+         then Null_Lexical_Env
+         else State.Current_Env);
    begin
       --  Create the environment itself
       Self.Self_Env := Create_Static_Lexical_Env
-        (Parent            => Parent_Getter,
+        (Parent            => Parent,
          Node              => Self,
          Transitive_Parent => Transitive_Parent);
 
@@ -2581,7 +2574,7 @@ package body ${ada_lib_name}.Implementation is
                   Env : Lexical_Env_Record renames
                      Unwrap (Sorted_Env_Maps.Element (Cur)).all;
                begin
-                  Env.Parent := Simple_Env_Getter (New_Env);
+                  Env.Parent := New_Env;
                end;
             end loop;
 
@@ -3410,7 +3403,7 @@ package body ${ada_lib_name}.Implementation is
    -------------------------------
 
    function Create_Static_Lexical_Env
-     (Parent            : Env_Getter;
+     (Parent            : Lexical_Env;
       Node              : ${T.root_node.name};
       Transitive_Parent : Boolean := False) return Lexical_Env
    is
@@ -3771,7 +3764,7 @@ package body ${ada_lib_name}.Implementation is
       end if;
 
       return Result : constant Lexical_Env := Create_Dynamic_Lexical_Env
-        (Parent            => No_Env_Getter,
+        (Parent            => Null_Lexical_Env,
          Node              => Self,
          Transitive_Parent => Transitive_Parent,
          Owner             => Convert_Unit (Unit),

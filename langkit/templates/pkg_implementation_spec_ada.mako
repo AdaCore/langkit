@@ -1104,7 +1104,7 @@ private package ${ada_lib_name}.Implementation is
    --------------------------------------
 
    function Create_Static_Lexical_Env
-     (Parent            : Env_Getter;
+     (Parent            : Lexical_Env;
       Node              : ${T.root_node.name};
       Transitive_Parent : Boolean := False) return Lexical_Env;
    --  Wrapper around AST_Envs.Create_Lexical_Env. Create the environment and,

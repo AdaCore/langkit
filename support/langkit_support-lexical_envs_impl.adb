@@ -550,12 +550,12 @@ package body Langkit_Support.Lexical_Envs_Impl is
    ------------------------
 
    function Create_Lexical_Env
-     (Parent            : Env_Getter;
+     (Parent            : Lexical_Env;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Generic_Unit_Ptr) return Lexical_Env is
    begin
-      if Parent /= No_Env_Getter then
+      if Parent /= Null_Lexical_Env then
          Inc_Ref (Parent);
       end if;
       return Wrap
@@ -578,14 +578,14 @@ package body Langkit_Support.Lexical_Envs_Impl is
    --------------------------------
 
    function Create_Dynamic_Lexical_Env
-     (Parent            : Env_Getter;
+     (Parent            : Lexical_Env;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Generic_Unit_Ptr;
       Assocs_Getter     : Inner_Env_Assocs_Resolver;
       Assoc_Resolver    : Entity_Resolver := null) return Lexical_Env is
    begin
-      if Parent /= No_Env_Getter then
+      if Parent /= Null_Lexical_Env then
          Inc_Ref (Parent);
       end if;
       return Wrap
@@ -2418,12 +2418,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
    begin
       case Self.Kind is
          when Primary_Kind =>
-            declare
-               Ret : constant Lexical_Env :=
-                 Get_Env (Env.Parent, No_Entity_Info);
-            begin
-               return (if Ret = Null_Lexical_Env then Empty_Env else Ret);
-            end;
+            return (if Env.Parent = Null_Lexical_Env
+                    then Empty_Env
+                    else Env.Parent);
          when Orphaned =>
             return Parent (Env.Orphaned_Env);
          when Grouped =>
