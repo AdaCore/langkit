@@ -1,8 +1,8 @@
 main.py: Running...
 .get_a() = 'a'
-.get_eacute() = 'é'
+.get_eacute() = '\xe9'
 .identity(b'a') = 'a'
-.identity('π') = 'π'
+.identity('\u03c0') = '\u03c0'
 Trying to evaluate .identity(1)
    ... got a TypeError: ord() expected string of length 1, but int found
 Trying to evaluate .identity(b'aa')
@@ -10,11 +10,11 @@ Trying to evaluate .identity(b'aa')
 Trying to evaluate .identity('aa')
    ... got a TypeError: ord() expected a character, but string of length 2 found
 .double(u'a') = 'aa'
-.double(u'\u03c0') = 'ππ'
+.double(u'\u03c0') = '\u03c0\u03c0'
 .text_identity(1) = <TypeError: text string instance expected, got int instead>
 .text_identity(b'foo') = 'foo'
 .text_identity([b'a', b'b']) = 'ab'
-.text_identity('héllo') = 'héllo'
+.text_identity('h\xe9llo') = 'h\xe9llo'
 .text_identity(b'h\xe9llo') = <UnicodeDecodeError: 'ascii' codec can't decode byte 0xe9 in position 1: ordinal not in range(128)>
 .text_identity([b'a', 1]) = <TypeError: ord() expected string of length 1, but int found>
 main.py: Done.
