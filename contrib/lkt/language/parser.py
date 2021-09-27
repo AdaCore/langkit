@@ -2260,21 +2260,36 @@ class CallExpr(Expr):
             rd.has_error | et.has_error,
             No(T.SemanticResult.array),
 
-            If(
-                # We have a call to an object (either __call__ able object or
-                # function type object).
-                rd.is_null,
-                No(T.SemanticResult.array),
+            # First, check for generic instantiation errors. Before this, we
+            # cannot call ``Entity.called_decl``, because it assumes that
+            # generic instantiation errors have been checked beforehand.
+            rd.result_ref.cast(T.GenericDecl).then(
+                lambda generic_decl: Entity.infer_actuals(
+                    generic_decl,
+                    Entity.expected_type
+                ).then(lambda iir: iir.error.then(lambda e: e.singleton)),
 
-                # Generic instantiation errors
-                rd.result_ref.cast(T.GenericDecl).then(
-                    lambda generic_decl: Entity.infer_actuals(
-                        generic_decl,
-                        Entity.expected_type
-                    ).then(lambda iir: iir.error.then(lambda e: e.singleton))
-                )
-            )._or(
-                # Arity errors
+            )
+
+            # Handle errors for when we have a call that we can't statically
+            # resolve to a declaration, so we need to rely on the object_type,
+            # and the object type is non callable.
+            ._or(
+                If(
+                    Entity.called_decl.is_null
+                    & Entity.called_object_type.is_null,
+
+                    Entity.name.error(
+                        S("Object of type `")
+                        .concat(et.result_type.full_name)
+                        .concat(S("` is not callable"))
+                    ).singleton,
+
+                    No(T.SemanticResult.array)
+                ),
+            )
+            # Lastly, handle formals <-> actuals matching errors
+            ._or(
                 Entity.match_params().filter(lambda pm: Not(pm.has_matched))
                 .mapcat(
                     lambda pm: If(
@@ -2488,7 +2503,7 @@ class CallExpr(Expr):
         exp_type = Var(Entity.name.check_expr_type)
         return exp_type.match(
             lambda fun_type=T.FunctionType: fun_type,
-            lambda t: t.get_fun('__call__').get_type,
+            lambda t: t.get_fun('__call__')._.get_type,
         )
 
     @langkit_property(public=True)
