@@ -1559,31 +1559,21 @@ package body ${ada_lib_name}.Implementation is
       State             : in out PLE_Node_State;
       No_Parent         : Boolean;
       Transitive_Parent : Boolean;
-      Resolver          : Lexical_Env_Resolver;
       Names             : in out ${T.Symbol.array.name})
    is
       Parent_From_Name : constant Boolean := State.Current_NED /= null;
       --  Does the parent environment comes from a named environment lookup?
-
-      Parent_Foreign : constant Boolean :=
-         Is_Foreign_Strict (State.Current_Env, Self);
 
       --  Determine how to get the parent of this new environment:
       --
       --  (1) no parent if requested;
       --  (2) the current environment as the static parent if it comes from a
       --      named env lookup or if it is not foreign (or is the empty/root
-      --      environment);
-      --  (3) a dynamic parent in all other cases (the current environment is
-      --      foreign and not fetched as a named environment.
+      --      environment).
       Parent_Getter : constant Env_Getter :=
         (if No_Parent
          then AST_Envs.No_Env_Getter
-
-         elsif Parent_From_Name or else not Parent_Foreign
-         then AST_Envs.Simple_Env_Getter (State.Current_Env)
-
-         else AST_Envs.Dyn_Env_Getter (Resolver, Self));
+         else AST_Envs.Simple_Env_Getter (State.Current_Env));
    begin
       --  Create the environment itself
       Self.Self_Env := Create_Static_Lexical_Env
