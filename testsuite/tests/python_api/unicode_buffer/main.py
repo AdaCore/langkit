@@ -60,10 +60,10 @@ for method in (get_from_buffer, reparse):
                                    ['    {}'.format(d)
                                     for d in u.diagnostics])
             else:
-                result = repr(u.text)
+                result = ascii(u.text)
 
         print('  buffer={}, charset={}: {}'.format(
-            repr(tc.buffer), repr(tc.charset), result,
+            ascii(tc.buffer), ascii(tc.charset), result,
         ))
 
 print('main.py: Done.')
