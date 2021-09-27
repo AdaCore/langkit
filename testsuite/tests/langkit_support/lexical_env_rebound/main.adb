@@ -15,14 +15,14 @@ procedure Main is
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
 
    New_Env : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'N', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'N', Owner => No_Generic_Unit);
 
    Root  : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'R', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'R', Owner => No_Generic_Unit);
    Child : Lexical_Env := Create_Lexical_Env
-     (Simple_Env_Getter (Root), 'R', Owner => No_Generic_Unit);
+     (Root, 'R', Owner => No_Generic_Unit);
    Grandchild : Lexical_Env := Create_Lexical_Env
-     (Simple_Env_Getter (Child), 'O', Owner => No_Generic_Unit);
+     (Child, 'O', Owner => No_Generic_Unit);
 
    Rebindings : Env_Rebindings := Append (null, Child, New_Env);
    Rebound    : Lexical_Env := Rebind_Env (Grandchild, Rebindings);

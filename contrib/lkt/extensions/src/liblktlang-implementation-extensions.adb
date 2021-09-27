@@ -95,7 +95,7 @@ package body Liblktlang.Implementation.Extensions is
       Vals : Internal_EnvKV_Array_Access) return Lexical_Env
    is
       Ret : constant Lexical_Env :=
-         Create_Static_Lexical_Env (No_Env_Getter, Node);
+         Create_Static_Lexical_Env (Null_Lexical_Env, Node);
    begin
 
       for El of Vals.Items loop

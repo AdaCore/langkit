@@ -332,7 +332,7 @@ package Langkit_Support.Lexical_Envs_Impl is
    --  represent missing scopes from erroneous trees.
 
    function Create_Lexical_Env
-     (Parent            : Env_Getter;
+     (Parent            : Lexical_Env;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Generic_Unit_Ptr) return Lexical_Env
@@ -340,7 +340,7 @@ package Langkit_Support.Lexical_Envs_Impl is
    --  Create a new static-primary lexical env
 
    function Create_Dynamic_Lexical_Env
-     (Parent            : Env_Getter;
+     (Parent            : Lexical_Env;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Generic_Unit_Ptr;
@@ -652,7 +652,7 @@ package Langkit_Support.Lexical_Envs_Impl is
    with record
       case Kind is
          when Primary_Kind =>
-            Parent : Env_Getter := No_Env_Getter;
+            Parent : Lexical_Env := Null_Lexical_Env;
             --  Parent environment for this env. Null by default.
 
             Transitive_Parent : Boolean := False;
@@ -819,7 +819,7 @@ private
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Record :=
      (Kind                     => Static_Primary,
-      Parent                   => No_Env_Getter,
+      Parent                   => Null_Lexical_Env,
       Transitive_Parent        => False,
       Node                     => No_Node,
       Referenced_Envs          => <>,

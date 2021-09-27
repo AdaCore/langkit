@@ -28,21 +28,21 @@ procedure Main is
    Key_Y   : constant Symbol_Type := Find (Symbols, "Y");
 
    Old_Env_1 : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, Name_Old_Env_1, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_Old_Env_1, Owner => No_Generic_Unit);
    New_Env_1 : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, Name_New_Env_1, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_New_Env_1, Owner => No_Generic_Unit);
    Old_Env_2 : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, Name_Old_Env_2, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_Old_Env_2, Owner => No_Generic_Unit);
    New_Env_2 : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, Name_New_Env_2, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_New_Env_2, Owner => No_Generic_Unit);
 
    R1 : Env_Rebindings := Append (null, Old_Env_1, New_Env_1);
    R2 : Env_Rebindings := Append (R1, Old_Env_2, New_Env_2);
 
    Prim_A : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, Name_Prim_A, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_Prim_A, Owner => No_Generic_Unit);
    Prim_B : Lexical_Env := Create_Lexical_Env
-     (Simple_Env_Getter (Prim_A), Name_Prim_B, Owner => No_Generic_Unit);
+     (Prim_A, Name_Prim_B, Owner => No_Generic_Unit);
 
    Orphaned_1 : Lexical_Env := Orphan (Prim_B);
    Orphaned_2 : Lexical_Env := Orphan (Orphaned_1);
