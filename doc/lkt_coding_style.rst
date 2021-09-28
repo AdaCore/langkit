@@ -5,17 +5,23 @@ LKT coding style
 This is the current - evolving - coding style for the LKT syntax. For the
 moment this is just organized as a flat list of rules.
 
-Indentation & braces
-====================
+Indentation and parens/braces
+=============================
 
 Indentation is expected to be 4 spaces. The general rule is that everything
-inside of braces should be indented, opening brace should be on the line of the
-preceding logically linked token, and closing brace on its own line.
+inside of braces/parens should be indented, opening brace/paren should be on
+the line of the preceding logically linked token, and closing brace/paren on
+its own line.
 
 .. code-block::
 
-    fun a(b: Int, c: Int): Int = {
+    fun a(b: Int, c: Int): Int = (
         b + c
+    )
+
+    struct Foo {
+        a: Int
+        b: Int
     }
 
 Casing
