@@ -62,7 +62,7 @@ def bytes_repr(content: bytes, indent: str = "") -> str:
     open_string = True
 
     newline = ord("\n")
-    quote = ord("\n")
+    quote = ord('"')
 
     for c in content:
 
