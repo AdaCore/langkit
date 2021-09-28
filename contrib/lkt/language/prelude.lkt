@@ -55,6 +55,10 @@ struct ASTList implements Sized, Indexable[T], Iterator[T] {
 @builtin class Equation {
 }
 
+@builtin struct PropertyError {
+    exception_message: String = "PropertyError exception"
+}
+
 @builtin generic[RootNode] trait LexicalEnv {
     @builtin fun get(symbol: Symbol): Array[RootNode]
     @builtin fun get_first(symbol: Symbol): RootNode
