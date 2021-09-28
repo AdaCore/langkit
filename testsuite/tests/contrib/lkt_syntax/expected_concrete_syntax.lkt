@@ -16,17 +16,17 @@ grammar foo_grammar {
 class Example : FooNode {
 
     ## Test that null conditional + match expr expands correctly.
-    @export fun null_match (): Example = node.do(
+    @export fun null_match(): Example = node.do(
         (_) => match _ {
             case e : Example => e
         }
     )
 
     ## Test that sym literals with quotes in them are properly unparsed.
-    @export fun test_symlit_escape (): Symbol = "\"=\""
+    @export fun test_symlit_escape(): Symbol = "\"=\""
 
     ## Test various valid dotexpr's LHS.
-    @export fun test_dotexpr_lhs (): Int = {
+    @export fun test_dotexpr_lhs(): Int = {
         val a = [1].find((v) => v = 1);
         val b = {
             val b = [1, 2];
@@ -39,17 +39,17 @@ class Example : FooNode {
     }
 
     ## Tests that block delimiter prevents a syntactic ambiguity.
-    @export fun test_1 (): Array[Int] = {
+    @export fun test_1(): Array[Int] = {
         val a = 12;
 
         [a]
     }
 
     ## Tests that reserved names are properly avoided in constructor syntax.
-    @export fun test_2 (): KV = KV(key="hey", value="you")
+    @export fun test_2(): KV = KV(key="hey", value="you")
 }
 
 struct KV {
-    key : Symbol
-    value : Symbol
+    key: Symbol
+    value: Symbol
 }

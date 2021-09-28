@@ -15,19 +15,19 @@ grammar foo_grammar {
 }
 
 class Def : FooNode {
-    @parse_field name : Name
-    @parse_field expr : Expr
+    @parse_field name: Name
+    @parse_field expr: Expr
 }
 
 @abstract class Expr : FooNode {
 
-    @export @abstract fun evaluate_abstract (): Int
+    @export @abstract fun evaluate_abstract(): Int
 
-    @export @abstract fun evaluate_entity (): Int
+    @export @abstract fun evaluate_entity(): Int
 
-    @export @not_implemented fun evaluate_rtcheck (): Int
+    @export @not_implemented fun evaluate_rtcheck(): Int
 
-    @export fun evaluate_concrete (): Int = 1
+    @export fun evaluate_concrete(): Int = 1
 }
 
 @abstract class Atom : Expr {
@@ -35,40 +35,40 @@ class Def : FooNode {
 
 class Lit : Atom implements TokenNode {
 
-    fun evaluate_abstract (): Int = 1
+    fun evaluate_abstract(): Int = 1
 
-    fun evaluate_rtcheck (): Int = 1
+    fun evaluate_rtcheck(): Int = 1
 
-    fun evaluate_entity (): Int = 1
+    fun evaluate_entity(): Int = 1
 }
 
 class Ref : Atom {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    @export fun resolve (): Def =
+    @export fun resolve(): Def =
     node.node_env().get_first(node.name.symbol).as[Def]!
 
-    fun evaluate_abstract (): Int = node.resolve().expr.evaluate_abstract()
+    fun evaluate_abstract(): Int = node.resolve().expr.evaluate_abstract()
 
-    fun evaluate_concrete (): Int = node.resolve().expr.evaluate_concrete()
+    fun evaluate_concrete(): Int = node.resolve().expr.evaluate_concrete()
 
-    fun evaluate_entity (): Int = self.resolve().expr.evaluate_entity()
+    fun evaluate_entity(): Int = self.resolve().expr.evaluate_entity()
 }
 
 class Plus : Expr {
-    @parse_field lhs : Expr
-    @parse_field rhs : Expr
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
 
-    fun evaluate_abstract (): Int =
+    fun evaluate_abstract(): Int =
     node.lhs.evaluate_abstract() + node.rhs.evaluate_abstract()
 
-    fun evaluate_rtcheck (): Int =
+    fun evaluate_rtcheck(): Int =
     node.lhs.evaluate_rtcheck() + node.rhs.evaluate_rtcheck()
 
-    fun evaluate_concrete (): Int =
+    fun evaluate_concrete(): Int =
     node.lhs.evaluate_concrete() + node.rhs.evaluate_concrete()
 
-    fun evaluate_entity (): Int =
+    fun evaluate_entity(): Int =
     self.lhs.evaluate_entity() + self.rhs.evaluate_entity()
 }
 

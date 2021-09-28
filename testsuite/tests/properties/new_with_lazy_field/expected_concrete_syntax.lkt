@@ -10,12 +10,12 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @lazy new_node : SynthNode = SynthNode()
+    @lazy new_node: SynthNode = SynthNode()
 
-    @export fun prop (): Int = node.new_node().lf()
+    @export fun prop(): Int = node.new_node().lf()
 }
 
 class SynthNode : FooNode {
 
-    @lazy lf : Int = 42
+    @lazy lf: Int = 42
 }

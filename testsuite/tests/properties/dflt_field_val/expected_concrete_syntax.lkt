@@ -7,17 +7,16 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun build_1 (key : String): KV = KV(key=key)
+    @export fun build_1(key: String): KV = KV(key=key)
 
-    @export fun build_2 (key : String, value : Int): KV =
-    KV(key=key, value=value)
+    @export fun build_2(key: String, value: Int): KV = KV(key=key, value=value)
 }
 
 class Example : FooNode implements TokenNode {
 }
 
 struct KV {
-    key : String
-    value : Int = 42
-    node : FooNode = null
+    key: String
+    value: Int = 42
+    node: FooNode = null
 }

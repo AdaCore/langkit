@@ -12,15 +12,15 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun b_set (): Bool = self.info.md.b
+    @export fun b_set(): Bool = self.info.md.b
 }
 
 class Decl : FooNode {
-    @parse_field has_plus : HasPlus
-    @parse_field name : Name
-    @parse_field items : ASTList[Ref]
+    @parse_field has_plus: HasPlus
+    @parse_field name: Name
+    @parse_field items: ASTList[Ref]
 
-    @export fun entity_items (): Array[Ref] = node.as_entity.items.map((i) => i)
+    @export fun entity_items(): Array[Ref] = node.as_entity.items.map((i) => i)
 }
 
 @qualifier enum class HasPlus : FooNode {
@@ -30,7 +30,7 @@ class Name : FooNode implements TokenNode {
 }
 
 class Ref : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    @export fun decl (): Decl = node.children_env().get(node.name)?(0).as[Decl]!
+    @export fun decl(): Decl = node.children_env().get(node.name)?(0).as[Decl]!
 }

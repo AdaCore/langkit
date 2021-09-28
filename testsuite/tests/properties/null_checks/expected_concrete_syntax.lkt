@@ -13,21 +13,21 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun null_unit (): AnalysisUnit[FooNode] = null
+    @export fun null_unit(): AnalysisUnit[FooNode] = null
 
-    @export fun null_node (): Expression = null
+    @export fun null_node(): Expression = null
 
-    @export fun deref_null_unit (): FooNode =
+    @export fun deref_null_unit(): FooNode =
     node.null_unit().root.as_bare_entity
 
-    @export fun deref_null_node (): Expression = node.null_node().null_node()
+    @export fun deref_null_node(): Expression = node.null_node().null_node()
 
-    @export fun null_node_unit (): AnalysisUnit[FooNode] =
+    @export fun null_node_unit(): AnalysisUnit[FooNode] =
     node.null_node().unit()
 
-    @export fun cast_null_node (): Name = node.null_node().as[Name]
+    @export fun cast_null_node(): Name = node.null_node().as[Name]
 
-    @export fun match_null_node (): Expression = match node.null_node().node {
+    @export fun match_null_node(): Expression = match node.null_node().node {
         case l : Literal => l
         case n : Name => n
         case others => others
@@ -42,12 +42,11 @@ class Literal : Expression implements TokenNode {
 
 class Name : Expression implements TokenNode {
 
-    fun env_element (): FooNode = node.children_env().get(node.symbol)?(0)
+    fun env_element(): FooNode = node.children_env().get(node.symbol)?(0)
 
-    @export fun deref_env_element (): Expression =
-    node.env_element().null_node()
+    @export fun deref_env_element(): Expression = node.env_element().null_node()
 
-    @export fun match_env_element (): FooNode = match node.env_element() {
+    @export fun match_env_element(): FooNode = match node.env_element() {
         case l : Literal => l
         case n : Name => n
         case others => others
@@ -55,6 +54,6 @@ class Name : Expression implements TokenNode {
 }
 
 class Plus : Expression {
-    @parse_field left : Expression
-    @parse_field right : Expression
+    @parse_field left: Expression
+    @parse_field right: Expression
 }

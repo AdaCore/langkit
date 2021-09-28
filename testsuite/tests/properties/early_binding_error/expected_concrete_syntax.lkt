@@ -9,10 +9,10 @@ grammar foo_grammar {
 }
 
 class Example : FooNode {
-    a : LogicVar
+    a: LogicVar
 
-    fun pred (): Bool = false
+    fun pred(): Bool = false
 
-    @export fun do_solving (): Bool =
+    @export fun do_solving(): Bool =
     %predicate(BareExample.pred, node.a).solve()
 }

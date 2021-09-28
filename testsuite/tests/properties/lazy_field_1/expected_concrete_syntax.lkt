@@ -11,12 +11,12 @@ grammar foo_grammar {
 
 @abstract class Expr : FooNode {
 
-    @export @lazy my_field : Int = 42
+    @export @lazy my_field: Int = 42
 }
 
 class AddExpr : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 }
 
 class IntLit : Expr implements TokenNode {

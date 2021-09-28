@@ -9,22 +9,22 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    fun resolve_ref (): FooNode = match node {
+    fun resolve_ref(): FooNode = match node {
         case r : Ref => r.parent.parent.node_env().get(r.name)?(0)
         case _ => null
     }
 }
 
 class Decl : FooNode {
-    @parse_field name : Name
-    @parse_field refs : ASTList[Ref]
+    @parse_field name: Name
+    @parse_field refs: ASTList[Ref]
 }
 
 class Name : FooNode implements TokenNode {
 }
 
 class Ref : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    @export fun resolve (): FooNode = node.node_env().get(node.name)?(0)
+    @export fun resolve(): FooNode = node.node_env().get(node.name)?(0)
 }

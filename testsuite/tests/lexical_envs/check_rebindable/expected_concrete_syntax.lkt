@@ -23,10 +23,10 @@ class RebindableEnvCreator : BaseEnvCreator {
 }
 
 class Rebinder : FooNode {
-    @parse_field left : BaseEnvCreator
-    @parse_field right : BaseEnvCreator
+    @parse_field left: BaseEnvCreator
+    @parse_field right: BaseEnvCreator
 
-    @export fun rebind (): FooNode = {
+    @export fun rebind(): FooNode = {
         val left_env = node.left.children_env();
         val right_env = node.right.children_env();
         # Depending on whether "left_env" is rebindable, the following will

@@ -7,9 +7,9 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun eval_unit (): Bool = null.prop()
+    @export fun eval_unit(): Bool = null.prop()
 
-    fun prop (): Bool = true
+    fun prop(): Bool = true
 }
 
 class Example : FooNode {

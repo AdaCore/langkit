@@ -8,7 +8,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun prop (empty1 : Bool, empty2 : Bool): Bool = {
+    @export fun prop(empty1: Bool, empty2: Bool): Bool = {
         val arg1 = if empty1 then _ else node.children_env();
         val arg2 = if empty2 then _ else node.children_env();
 

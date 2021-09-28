@@ -14,26 +14,26 @@ grammar foo_grammar {
 }
 
 class Dep : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 }
 
 @abstract class Name : FooNode {
 
-    @export @abstract fun resolve (): FooNode
+    @export @abstract fun resolve(): FooNode
 
-    @export @abstract fun suffix_symbol (): Symbol
+    @export @abstract fun suffix_symbol(): Symbol
 
-    @abstract fun referenced_unit_or_error (or_error : Bool): AnalysisUnit[FooNode]
+    @abstract fun referenced_unit_or_error(or_error: Bool): AnalysisUnit[FooNode]
 
-    @export fun referenced_unit (): AnalysisUnit[FooNode] =
+    @export fun referenced_unit(): AnalysisUnit[FooNode] =
     node.referenced_unit_or_error(false)
 
-    fun scope_fqn (): String = match node {
+    fun scope_fqn(): String = match node {
         case p : Prefix => p.prefix.fqn()
         case _ : Id => null
     }
 
-    fun fqn (): String = match node {
+    fun fqn(): String = match node {
         case p : Prefix => p.prefix.fqn() & ((".") & p.suffix.fqn())
         case i : Id => i.text()
     }
@@ -41,28 +41,28 @@ class Dep : FooNode {
 
 class Id : Name implements TokenNode {
 
-    fun resolve (): FooNode = node.node_env().get_first(node)
+    fun resolve(): FooNode = node.node_env().get_first(node)
 
-    fun suffix_symbol (): Symbol = node.symbol
+    fun suffix_symbol(): Symbol = node.symbol
 }
 
 class Prefix : Name {
-    @parse_field prefix : Name
-    @parse_field suffix : Id
+    @parse_field prefix: Name
+    @parse_field suffix: Id
 
-    fun resolve (): FooNode =
+    fun resolve(): FooNode =
     node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 
-    fun suffix_symbol (): Symbol = node.suffix.symbol
+    fun suffix_symbol(): Symbol = node.suffix.symbol
 }
 
 class Scope : FooNode {
-    @parse_field name : Name
-    @parse_field deps : ASTList[Dep]
-    @parse_field defs : ASTList[FooNode]
+    @parse_field name: Name
+    @parse_field deps: ASTList[Dep]
+    @parse_field defs: ASTList[FooNode]
 }
 
 class Var : FooNode {
-    @parse_field name : Id
-    @parse_field value : Name
+    @parse_field name: Id
+    @parse_field value: Name
 }

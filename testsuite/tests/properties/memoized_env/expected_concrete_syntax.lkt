@@ -11,19 +11,19 @@ grammar foo_grammar {
 }
 
 class Block : FooNode {
-    @parse_field name : Name
-    @parse_field content : ASTList[Ref]
+    @parse_field name: Name
+    @parse_field content: ASTList[Ref]
 }
 
 class Name : FooNode implements TokenNode {
 }
 
 class Ref : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    @export fun referenced (): FooNode =
+    @export fun referenced(): FooNode =
     node.referenced_env().env_node.as_bare_entity
 
-    @memoized fun referenced_env (): LexicalEnv[FooNode] =
+    @memoized fun referenced_env(): LexicalEnv[FooNode] =
     node.node_env().get(node.name.symbol)?(0).children_env()
 }

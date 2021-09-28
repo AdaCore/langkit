@@ -7,9 +7,9 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun before (n : FooNode): Bool = node < n
+    @export fun before(n: FooNode): Bool = node < n
 
-    @export fun before_or_equal (n : Example): Bool = node <= n
+    @export fun before_or_equal(n: Example): Bool = node <= n
 }
 
 class Example : FooNode {

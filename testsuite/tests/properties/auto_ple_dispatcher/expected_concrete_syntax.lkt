@@ -20,29 +20,29 @@ grammar foo_grammar {
 }
 
 class Scope : DefNode {
-    @parse_field name : Id
-    @parse_field defs : ASTList[DefNode]
+    @parse_field name: Id
+    @parse_field defs: ASTList[DefNode]
 }
 
 class Var : DefNode {
-    @parse_field name : Id
-    @parse_field value : Name
+    @parse_field name: Id
+    @parse_field value: Name
 }
 
 @abstract class Name : FooNode {
 
-    @export @abstract fun resolve (): FooNode
+    @export @abstract fun resolve(): FooNode
 }
 
 class Id : Name implements TokenNode {
 
-    fun resolve (): FooNode = node.node_env().get_first(node)
+    fun resolve(): FooNode = node.node_env().get_first(node)
 }
 
 class Prefix : Name {
-    @parse_field prefix : Name
-    @parse_field suffix : Id
+    @parse_field prefix: Name
+    @parse_field suffix: Id
 
-    fun resolve (): FooNode =
+    fun resolve(): FooNode =
     node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 }

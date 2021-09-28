@@ -13,73 +13,73 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun id_bool (id : Bool): Bool = id
+    @export fun id_bool(id: Bool): Bool = id
 
-    @export fun id_int (id : Int): Int = id
+    @export fun id_int(id: Int): Int = id
 
-    @export fun id_bigint (id : BigInt): BigInt = id
+    @export fun id_bigint(id: BigInt): BigInt = id
 
-    @export fun id_char (id : Char): Char = id
+    @export fun id_char(id: Char): Char = id
 
-    @export fun id_token (id : Token): Token = id
+    @export fun id_token(id: Token): Token = id
 
-    @export fun id_sym (id : Symbol): Symbol = id
+    @export fun id_sym(id: Symbol): Symbol = id
 
-    @export fun id_unit (id : AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = id
+    @export fun id_unit(id: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = id
 
-    @export fun id_root_node (id : FooNode): FooNode = id
+    @export fun id_root_node(id: FooNode): FooNode = id
 
-    @export fun id_name (id : Name): Name = id
+    @export fun id_name(id: Name): Name = id
 
-    @export fun id_unit_kind (id : AnalysisUnitKind): AnalysisUnitKind = id
+    @export fun id_unit_kind(id: AnalysisUnitKind): AnalysisUnitKind = id
 
-    @export fun id_node_array (id : Array[FooNode]): Array[FooNode] = id
+    @export fun id_node_array(id: Array[FooNode]): Array[FooNode] = id
 
-    @export fun id_bigint_array (id : Array[BigInt]): Array[BigInt] = id
+    @export fun id_bigint_array(id: Array[BigInt]): Array[BigInt] = id
 }
 
 @abstract class Expr : FooNode {
 
-    @export @abstract fun eval (): Int
+    @export @abstract fun eval(): Int
 
-    @export fun eval_plus (addend : Expr): Int = node.eval() + addend.eval()
+    @export fun eval_plus(addend: Expr): Int = node.eval() + addend.eval()
 }
 
 class Addition : Expr {
-    @parse_field lhs : Expr
-    @parse_field rhs : Expr
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
 
-    fun eval (): Int = node.lhs.eval() + node.rhs.eval()
+    fun eval(): Int = node.lhs.eval() + node.rhs.eval()
 }
 
 class Number : Expr implements TokenNode {
 
-    @abstract fun eval (): Int
+    @abstract fun eval(): Int
 
-    @export fun id_dflt_bool (id : Bool = true): Bool = id
+    @export fun id_dflt_bool(id: Bool = true): Bool = id
 
-    @export fun id_dflt_int (id : Int = 42): Int = id
+    @export fun id_dflt_int(id: Int = 42): Int = id
 
-    @export fun id_dflt_char (id : Char = '\x00'): Char = id
+    @export fun id_dflt_char(id: Char = '\x00'): Char = id
 
-    @export fun id_dflt_root_node (id : FooNode = null): FooNode = id
+    @export fun id_dflt_root_node(id: FooNode = null): FooNode = id
 }
 
 class Ref : Expr {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    @export fun referenced_var_decl (): VarDecl =
+    @export fun referenced_var_decl(): VarDecl =
     node.node_env().get_first(node.name).as[VarDecl]!
 
-    fun eval (): Int = node.referenced_var_decl().eval()
+    fun eval(): Int = node.referenced_var_decl().eval()
 }
 
 class Name : FooNode implements TokenNode {
 }
 
 class VarDecl : FooNode {
-    @parse_field name : Name
-    @parse_field value : Expr
+    @parse_field name: Name
+    @parse_field value: Expr
 
-    @export fun eval (): Int = node.value.eval()
+    @export fun eval(): Int = node.value.eval()
 }

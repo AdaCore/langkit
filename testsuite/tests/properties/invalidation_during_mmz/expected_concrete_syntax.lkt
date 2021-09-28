@@ -10,12 +10,12 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @abstract fun fetch_example_unit (): AnalysisUnit[FooNode]
+    @abstract fun fetch_example_unit(): AnalysisUnit[FooNode]
 
-    @memoized fun internal_mmz_prop (i : Int): Int =
+    @memoized fun internal_mmz_prop(i: Int): Int =
     if (i = 0) then (raise PropertyError()) else i
 
-    @export @memoized fun mmz_prop (i : Int): Int = {
+    @export @memoized fun mmz_prop(i: Int): Int = {
         # Update context version by parsing a new unit
         val _ = node.fetch_example_unit();
 

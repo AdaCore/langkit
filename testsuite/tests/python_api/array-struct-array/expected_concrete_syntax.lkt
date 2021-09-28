@@ -10,10 +10,10 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export fun example_holders (): Array[ExampleHolder] =
+    @export fun example_holders(): Array[ExampleHolder] =
     [ExampleHolder(examples=[self])]
 }
 
 struct ExampleHolder {
-    examples : Array[Example]
+    examples: Array[Example]
 }

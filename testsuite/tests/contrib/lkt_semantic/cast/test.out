@@ -9,56 +9,56 @@ Id   <RefId "RootNode" test.lkt:1:32-1:40>
 Id   <RefId "RootNode" test.lkt:2:19-2:27>
      references <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
-Id   <RefId "RootNode" test.lkt:4:5-4:13>
+Id   <RefId "RootNode" test.lkt:4:4-4:12>
      references <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
-Id   <RefId "ChildNode" test.lkt:5:5-5:14>
+Id   <RefId "ChildNode" test.lkt:5:4-5:13>
      references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
 
-Id   <RefId "a" test.lkt:5:17-5:18>
-     references <FieldDecl "a" test.lkt:4:1-4:13>
+Id   <RefId "a" test.lkt:5:16-5:17>
+     references <FieldDecl "a" test.lkt:4:1-4:12>
 
-Expr <RefId "a" test.lkt:5:17-5:18>
+Expr <RefId "a" test.lkt:5:16-5:17>
      has type <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
-Id   <RefId "ChildNode" test.lkt:5:22-5:31>
+Id   <RefId "ChildNode" test.lkt:5:21-5:30>
      references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
 
-Expr <CastExpr test.lkt:5:17-5:32>
+Expr <CastExpr test.lkt:5:16-5:31>
      has type <ClassDecl "ChildNode" test.lkt:2:1-2:30>
 
-Id   <RefId "Int" test.lkt:6:14-6:17>
+Id   <RefId "Int" test.lkt:6:13-6:16>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "a" test.lkt:6:20-6:21>
-     references <FieldDecl "a" test.lkt:4:1-4:13>
+Id   <RefId "a" test.lkt:6:19-6:20>
+     references <FieldDecl "a" test.lkt:4:1-4:12>
 
-Expr <RefId "a" test.lkt:6:20-6:21>
+Expr <RefId "a" test.lkt:6:19-6:20>
      has type <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
-Id   <RefId "ChildNode" test.lkt:6:25-6:34>
+Id   <RefId "ChildNode" test.lkt:6:24-6:33>
      references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
 
-test.lkt:6:20: error: Mismatched types: expected `Int`, got `ChildNode`
-5 | @invalid c : Int = a.as[ChildNode]
-  |                    ^^^^^^^^^^^^^^^
+test.lkt:6:19: error: Mismatched types: expected `Int`, got `ChildNode`
+5 | @invalid c: Int = a.as[ChildNode]
+  |                   ^^^^^^^^^^^^^^^
 
-Id   <RefId "Int" test.lkt:7:14-7:17>
+Id   <RefId "Int" test.lkt:7:13-7:16>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "a" test.lkt:7:20-7:21>
-     references <FieldDecl "a" test.lkt:4:1-4:13>
+Id   <RefId "a" test.lkt:7:19-7:20>
+     references <FieldDecl "a" test.lkt:4:1-4:12>
 
-Expr <RefId "a" test.lkt:7:20-7:21>
+Expr <RefId "a" test.lkt:7:19-7:20>
      has type <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
-Id   <RefId "Int" test.lkt:7:25-7:28>
+Id   <RefId "Int" test.lkt:7:24-7:27>
      references <StructDecl prelude: "Int">
 
-Expr <CastExpr test.lkt:7:20-7:29>
+Expr <CastExpr test.lkt:7:19-7:28>
      has type <StructDecl prelude: "Int">
 
-test.lkt:7:20: error: Invalid cast: only up/down casting allowed
-6 | @invalid d : Int = a.as[Int]
-  |                    ^^^^^^^^^
+test.lkt:7:19: error: Invalid cast: only up/down casting allowed
+6 | @invalid d: Int = a.as[Int]
+  |                   ^^^^^^^^^
 

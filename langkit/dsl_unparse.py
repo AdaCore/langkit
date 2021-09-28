@@ -1262,7 +1262,7 @@ def emit_prop(prop, walker):
     elif prop.lazy_field:
         quals += "@lazy "
 
-    args = ", ".join("{} : {}{}".format(
+    args = ", ".join("{}: {}{}".format(
         var_name(arg), type_name(arg.type),
         " = {}".format(emit_expr(arg.abstract_default_value))
         if arg.abstract_default_value else ""
@@ -1275,11 +1275,11 @@ def emit_prop(prop, walker):
         res += "$hl{}".format(emit_doc(doc))
 
     if prop.lazy_field:
-        res += "$hl{}{} : {}".format(
+        res += "$hl{}{}: {}".format(
             quals, prop.original_name.lower, type_name(prop.type)
         )
     else:
-        res += "$hl{}fun {} ({}): {}".format(
+        res += "$hl{}fun {}({}): {}".format(
             quals, prop.original_name.lower, args, type_name(prop.type)
         )
 
@@ -1295,7 +1295,7 @@ def emit_field(field):
     from langkit.compiled_types import BaseField, Field, UserField
 
     if isinstance(field, BaseField):
-        result = "{}{}{}{} : {}".format(
+        result = "{}{}{}{}: {}".format(
             "@abstract " if isinstance(field, Field) and field.abstract else "",
             "@parse_field " if isinstance(field, Field) else "",
             "@null_field " if field.null else "",

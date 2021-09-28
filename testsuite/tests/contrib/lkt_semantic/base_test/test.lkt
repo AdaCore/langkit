@@ -25,14 +25,16 @@
     fun test_if_invalid_1(): Int = if true then 1 else "2"
 }
 
-generic [C] struct Pair {
-    a : C
-    b : C
+generic [C]
+struct Pair {
+    a: C
+    b: C
 }
 
-generic [C, D] struct Tuple2 {
-    a : C
-    b : D
+generic [C, D]
+struct Tuple2 {
+    a: C
+    b: D
 
     fun test(): C
 }
@@ -43,12 +45,12 @@ class B : A {
     fun test_invalid_generic_type(): Pair[Int] = Pair[Int](12, 15).a
     fun test_generic_component_access_2(): Bool = Tuple2[Int, Bool](12, true).b
     fun test_invalid_generic_type_2(): Tuple2[Int, Bool] = true
-    fun test_fun_call(arg : A): Int = arg.test_int_add()
+    fun test_fun_call(arg: A): Int = arg.test_int_add()
     fun test_struct_fun(arg: Tuple2[Int, Bool]): Int = arg.test()
-    fun test_array_indexing(arg: Array[Int]): Int = arg (12)
+    fun test_array_indexing(arg: Array[Int]): Int = arg(12)
 }
 
-val a : Int = 12
+val a: Int = 12
 
 struct Foo {
     # Test that you cannot access toplevel declarations from a nested scope.
@@ -61,7 +63,7 @@ enum class C {
 }
 
 # Test function types
-fun add (a : Int, b : Int): Int = a + b
+fun add(a: Int, b: Int): Int = a + b
 fun get_fn(): (Int, Int) -> Int = add
 fun get_method(b_inst: B): () -> Int = b_inst.test_generic_component_access
 @invalid fun get_method_invalid(b_inst: B): (B) -> Int = b_inst.test_fun_call

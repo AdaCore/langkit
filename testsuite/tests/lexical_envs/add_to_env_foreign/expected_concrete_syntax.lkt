@@ -22,46 +22,46 @@ class DummySyntheticNode : FooNode {
 }
 
 class ForeignDecl : FooNode {
-    @parse_field create_synthetic : Synth
-    @parse_field id : Id
+    @parse_field create_synthetic: Synth
+    @parse_field id: Id
 
-    @memoized fun node_for_env (): FooNode =
+    @memoized fun node_for_env(): FooNode =
     if node.create_synthetic.as_bool() then (DummySyntheticNode()) else node
 }
 
 @abstract class Id : FooNode {
 
-    @abstract fun simple_name (): SimpleId
+    @abstract fun simple_name(): SimpleId
 
-    @abstract fun resolve (base_env : LexicalEnv[FooNode]): Scope
+    @abstract fun resolve(base_env: LexicalEnv[FooNode]): Scope
 }
 
 class ScopedId : Id {
-    @parse_field scope : Id
-    @parse_field name : SimpleId
+    @parse_field scope: Id
+    @parse_field name: SimpleId
 
-    fun simple_name (): SimpleId = node.name
+    fun simple_name(): SimpleId = node.name
 
-    fun resolve (base_env : LexicalEnv[FooNode]): Scope =
+    fun resolve(base_env: LexicalEnv[FooNode]): Scope =
     node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
 }
 
 class SimpleId : Id implements TokenNode {
 
-    fun simple_name (): SimpleId = node
+    fun simple_name(): SimpleId = node
 
-    fun resolve (base_env : LexicalEnv[FooNode]): Scope =
+    fun resolve(base_env: LexicalEnv[FooNode]): Scope =
     base_env.get_first(node.symbol).node.as[Scope]
 }
 
 class Scope : FooNode {
-    @parse_field name : SimpleId
-    @parse_field content : ASTList[Scope]
+    @parse_field name: SimpleId
+    @parse_field content: ASTList[Scope]
 }
 
 class SelfDecl : FooNode {
-    @parse_field id : Id
-    @parse_field md_node : Id
+    @parse_field id: Id
+    @parse_field md_node: Id
 }
 
 @qualifier enum class Synth : FooNode {

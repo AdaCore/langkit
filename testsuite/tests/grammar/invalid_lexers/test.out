@@ -75,8 +75,8 @@ pattern_7.lkt:3:5: error: Duplicate pattern name
 
 == pattern_8.lkt ==
 pattern_8.lkt:2:5: error: Patterns must have automatic types in lexers
-1 |     val pat : Int = p"example"
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+1 |     val pat: Int = p"example"
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == pattern_9.lkt ==

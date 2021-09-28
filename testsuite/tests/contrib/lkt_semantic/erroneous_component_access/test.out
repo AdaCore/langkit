@@ -1,18 +1,18 @@
 Resolving test.lkt
 ==================
-Id   <RefId "Int" test.lkt:1:14-1:17>
+Id   <RefId "Int" test.lkt:1:13-1:16>
      references <StructDecl prelude: "Int">
 
-test.lkt:1:20: error: Cannot find entity `Cls` in this scope
-0 | fun test(a : Int): Cls
-  |                    ^^^
+test.lkt:1:19: error: Cannot find entity `Cls` in this scope
+0 | fun test(a: Int): Cls
+  |                   ^^^
 
-Id   <RefId "Int" test.lkt:3:9-3:12>
+Id   <RefId "Int" test.lkt:3:8-3:11>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "test" test.lkt:3:15-3:19>
-     references <FunDecl "test" test.lkt:1:1-1:23>
+Id   <RefId "test" test.lkt:3:14-3:18>
+     references <FunDecl "test" test.lkt:1:1-1:22>
 
-Expr <NumLit test.lkt:3:20-3:22>
+Expr <NumLit test.lkt:3:19-3:21>
      has type <StructDecl prelude: "Int">
 

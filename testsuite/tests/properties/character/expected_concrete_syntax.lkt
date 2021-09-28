@@ -10,13 +10,13 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export fun get_a (c : Char = 'a'): Char = c
+    @export fun get_a(c: Char = 'a'): Char = c
 
-    @export fun get_eacute (c : Char = 'é'): Char = c
+    @export fun get_eacute(c: Char = 'é'): Char = c
 
-    @export fun identity (c : Char): Char = c
+    @export fun identity(c: Char): Char = c
 
-    @export fun double (c : Char): String = [c, c]
+    @export fun double(c: Char): String = [c, c]
 
-    @export fun text_identity (s : String): String = s
+    @export fun text_identity(s: String): String = s
 }

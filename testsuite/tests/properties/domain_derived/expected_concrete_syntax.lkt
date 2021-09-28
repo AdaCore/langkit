@@ -10,18 +10,18 @@ grammar foo_grammar {
 }
 
 class Definition : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 }
 
 class Name : FooNode implements TokenNode {
-    ref_var : LogicVar
+    ref_var: LogicVar
 
-    @export fun resolve (): Bool = {
+    @export fun resolve(): Bool = {
         val candidates = node.node_env().get(node).map((d) => d.as[Definition]);
 
         %domain(node.ref_var, candidates).solve()
     }
 
-    @export fun definition (): Definition =
+    @export fun definition(): Definition =
     node.ref_var.get_value().as[Definition]
 }

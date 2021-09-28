@@ -7,13 +7,13 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun get (): KV = KV(key="So", value="What")
+    @export fun get(): KV = KV(key="So", value="What")
 }
 
 class Example : FooNode {
 }
 
 struct KV {
-    key : String
-    value : String
+    key: String
+    value: String
 }

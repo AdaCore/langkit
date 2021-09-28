@@ -31,28 +31,28 @@ grammar foo_grammar {
 }
 
 class Package : Decl {
-    @parse_field name : Name
-    @parse_field decls : ASTList[Decl]
+    @parse_field name: Name
+    @parse_field decls: ASTList[Decl]
 }
 
 class Ref : Decl {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    @export fun entity (): FooNode = node.as_entity.name.get_ref()
+    @export fun entity(): FooNode = node.as_entity.name.get_ref()
 }
 
 class UseClause : Decl {
-    @parse_field name : Name
+    @parse_field name: Name
 }
 
 class Var : Decl {
-    @parse_field name : Name
+    @parse_field name: Name
 }
 
 class Name : FooNode implements TokenNode {
 
-    fun designated_env (): LexicalEnv[FooNode] =
+    fun designated_env(): LexicalEnv[FooNode] =
     node.node_env().get(node, from=node)?(0).children_env()
 
-    fun get_ref (): FooNode = node.node_env().get(node, from=node)?(0)
+    fun get_ref(): FooNode = node.node_env().get(node, from=node)?(0)
 }

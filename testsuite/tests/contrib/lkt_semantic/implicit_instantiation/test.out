@@ -1,184 +1,184 @@
 Resolving test.lkt
 ==================
-Id   <RefId "C" test.lkt:6:9-6:10>
+Id   <RefId "C" test.lkt:7:8-7:9>
      references <GenericFormalTypeDecl "C" test.lkt:5:10-5:11>
 
-Id   <RefId "C" test.lkt:7:9-7:10>
+Id   <RefId "C" test.lkt:8:8-8:9>
      references <GenericFormalTypeDecl "C" test.lkt:5:10-5:11>
 
-Id   <RefId "Int" test.lkt:11:34-11:37>
+Id   <RefId "Int" test.lkt:13:22-13:25>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "T" test.lkt:11:40-11:41>
-     references <GenericFormalTypeDecl "T" test.lkt:11:10-11:11>
-
-Id   <RefId "T" test.lkt:12:31-12:32>
+Id   <RefId "T" test.lkt:13:28-13:29>
      references <GenericFormalTypeDecl "T" test.lkt:12:10-12:11>
 
-Id   <RefId "T" test.lkt:12:35-12:36>
-     references <GenericFormalTypeDecl "T" test.lkt:12:10-12:11>
+Id   <RefId "T" test.lkt:16:19-16:20>
+     references <GenericFormalTypeDecl "T" test.lkt:15:10-15:11>
 
-Id   <RefId "T" test.lkt:13:32-13:33>
-     references <GenericFormalTypeDecl "T" test.lkt:13:10-13:11>
+Id   <RefId "T" test.lkt:16:23-16:24>
+     references <GenericFormalTypeDecl "T" test.lkt:15:10-15:11>
 
-Id   <RefId "Array" test.lkt:13:36-13:41>
+Id   <RefId "T" test.lkt:19:20-19:21>
+     references <GenericFormalTypeDecl "T" test.lkt:18:10-18:11>
+
+Id   <RefId "Array" test.lkt:19:24-19:29>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "T" test.lkt:13:42-13:43>
-     references <GenericFormalTypeDecl "T" test.lkt:13:10-13:11>
+Id   <RefId "T" test.lkt:19:30-19:31>
+     references <GenericFormalTypeDecl "T" test.lkt:18:10-18:11>
 
-Id   <RefId "T" test.lkt:14:29-14:30>
-     references <GenericFormalTypeDecl "T" test.lkt:14:10-14:11>
+Id   <RefId "T" test.lkt:22:17-22:18>
+     references <GenericFormalTypeDecl "T" test.lkt:21:10-21:11>
 
-Id   <RefId "T" test.lkt:14:35-14:36>
-     references <GenericFormalTypeDecl "T" test.lkt:14:10-14:11>
+Id   <RefId "T" test.lkt:22:23-22:24>
+     references <GenericFormalTypeDecl "T" test.lkt:21:10-21:11>
 
-Id   <RefId "T" test.lkt:14:41-14:42>
-     references <GenericFormalTypeDecl "T" test.lkt:14:10-14:11>
+Id   <RefId "T" test.lkt:22:29-22:30>
+     references <GenericFormalTypeDecl "T" test.lkt:21:10-21:11>
 
-Id   <RefId "T" test.lkt:14:45-14:46>
-     references <GenericFormalTypeDecl "T" test.lkt:14:10-14:11>
+Id   <RefId "T" test.lkt:22:33-22:34>
+     references <GenericFormalTypeDecl "T" test.lkt:21:10-21:11>
 
-Id   <RefId "Array" test.lkt:17:20-17:25>
+Id   <RefId "Array" test.lkt:25:20-25:25>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "Int" test.lkt:17:26-17:29>
+Id   <RefId "Int" test.lkt:25:26-25:29>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Array" test.lkt:17:33-17:38>
+Id   <RefId "Array" test.lkt:25:33-25:38>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "String" test.lkt:17:39-17:45>
+Id   <RefId "String" test.lkt:25:39-25:45>
      references <StructDecl prelude: "String">
 
-Id   <RefId "ints" test.lkt:17:49-17:53>
-     references <FunArgDecl "ints" test.lkt:17:14-17:30>
+Id   <RefId "ints" test.lkt:26:5-26:9>
+     references <FunArgDecl "ints" test.lkt:25:14-25:30>
 
-Expr <RefId "ints" test.lkt:17:49-17:53>
+Expr <RefId "ints" test.lkt:26:5-26:9>
      has type <InstantiatedGenericType prelude: "Array[Int]">
 
-Id   <RefId "map" test.lkt:17:54-17:57>
+Id   <RefId "map" test.lkt:26:10-26:13>
      references <GenericDecl prelude: "map">
 
-Id   <RefId "convert_int" test.lkt:17:65-17:76>
-     references <GenericDecl "convert_int" test.lkt:11:1-11:41>
+Id   <RefId "convert_int" test.lkt:26:21-26:32>
+     references <GenericDecl "convert_int" test.lkt:12:1-13:29>
 
-Id   <RefId "String" test.lkt:17:77-17:83>
+Id   <RefId "String" test.lkt:26:33-26:39>
      references <StructDecl prelude: "String">
 
-Expr <GenericInstantiation test.lkt:17:65-17:84>
+Expr <GenericInstantiation test.lkt:26:21-26:40>
      has type <FunctionType prelude: "(Int) -> String">
 
-Id   <RefId "i" test.lkt:17:85-17:86>
-     references <LambdaArgDecl "i" test.lkt:17:59-17:60>
+Id   <RefId "i" test.lkt:26:41-26:42>
+     references <LambdaArgDecl "i" test.lkt:26:15-26:16>
 
-Expr <RefId "i" test.lkt:17:85-17:86>
+Expr <RefId "i" test.lkt:26:41-26:42>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:17:65-17:87>
+Expr <CallExpr test.lkt:26:21-26:43>
      has type <StructDecl prelude: "String">
 
-Expr <LambdaExpr test.lkt:17:58-17:87>
+Expr <LambdaExpr test.lkt:26:14-26:43>
      has type <FunctionType prelude: "(Int) -> String">
 
-Expr <CallExpr test.lkt:17:49-17:88>
+Expr <CallExpr test.lkt:26:5-26:44>
      has type <InstantiatedGenericType prelude: "Array[String]">
 
-Id   <RefId "Array" test.lkt:20:26-20:31>
+Id   <RefId "Array" test.lkt:29:26-29:31>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "Int" test.lkt:20:32-20:35>
+Id   <RefId "Int" test.lkt:29:32-29:35>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Array" test.lkt:20:39-20:44>
+Id   <RefId "Array" test.lkt:29:39-29:44>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "String" test.lkt:20:45-20:51>
+Id   <RefId "String" test.lkt:29:45-29:51>
      references <StructDecl prelude: "String">
 
-Id   <RefId "ints" test.lkt:21:5-21:9>
-     references <FunArgDecl "ints" test.lkt:20:20-20:36>
+Id   <RefId "ints" test.lkt:30:5-30:9>
+     references <FunArgDecl "ints" test.lkt:29:20-29:36>
 
-Expr <RefId "ints" test.lkt:21:5-21:9>
+Expr <RefId "ints" test.lkt:30:5-30:9>
      has type <InstantiatedGenericType prelude: "Array[Int]">
 
-Id   <RefId "filtermap" test.lkt:21:10-21:19>
+Id   <RefId "filtermap" test.lkt:30:10-30:19>
      references <GenericDecl prelude: "filtermap">
 
-Id   <RefId "convert_int" test.lkt:22:16-22:27>
-     references <GenericDecl "convert_int" test.lkt:11:1-11:41>
+Id   <RefId "convert_int" test.lkt:31:16-31:27>
+     references <GenericDecl "convert_int" test.lkt:12:1-13:29>
 
-Id   <RefId "String" test.lkt:22:28-22:34>
+Id   <RefId "String" test.lkt:31:28-31:34>
      references <StructDecl prelude: "String">
 
-Expr <GenericInstantiation test.lkt:22:16-22:35>
+Expr <GenericInstantiation test.lkt:31:16-31:35>
      has type <FunctionType prelude: "(Int) -> String">
 
-Id   <RefId "i" test.lkt:22:36-22:37>
-     references <LambdaArgDecl "i" test.lkt:22:10-22:11>
+Id   <RefId "i" test.lkt:31:36-31:37>
+     references <LambdaArgDecl "i" test.lkt:31:10-31:11>
 
-Expr <RefId "i" test.lkt:22:36-22:37>
+Expr <RefId "i" test.lkt:31:36-31:37>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:22:16-22:38>
+Expr <CallExpr test.lkt:31:16-31:38>
      has type <StructDecl prelude: "String">
 
-Expr <LambdaExpr test.lkt:22:9-22:38>
+Expr <LambdaExpr test.lkt:31:9-31:38>
      has type <FunctionType prelude: "(Int) -> String">
 
-Id   <RefId "i" test.lkt:23:16-23:17>
-     references <LambdaArgDecl "i" test.lkt:23:10-23:11>
+Id   <RefId "i" test.lkt:32:16-32:17>
+     references <LambdaArgDecl "i" test.lkt:32:10-32:11>
 
-Expr <RefId "i" test.lkt:23:16-23:17>
+Expr <RefId "i" test.lkt:32:16-32:17>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:23:20-23:21>
+Expr <NumLit test.lkt:32:20-32:21>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:23:16-23:21>
+Expr <BinOp test.lkt:32:16-32:21>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <LambdaExpr test.lkt:23:9-23:21>
+Expr <LambdaExpr test.lkt:32:9-32:21>
      has type <FunctionType prelude: "(Int) -> Bool">
 
-Expr <CallExpr test.lkt:21:5-24:6>
+Expr <CallExpr test.lkt:30:5-33:6>
      has type <InstantiatedGenericType prelude: "Array[String]">
 
-test.lkt:27:41: error: Cannot find entity `A` in this scope
-26 | @invalid fun test_handle_ce_error(arg : A): Int = arg.method_doesnt_exist()
-   |                                         ^                                  
+test.lkt:36:40: error: Cannot find entity `A` in this scope
+35 | @invalid fun test_handle_ce_error(arg: A): Int = arg.method_doesnt_exist()
+   |                                        ^                                  
 
-Id   <RefId "Int" test.lkt:27:45-27:48>
+Id   <RefId "Int" test.lkt:36:44-36:47>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "arg" test.lkt:27:51-27:54>
-     references <FunArgDecl "arg" test.lkt:27:35-27:42>
+Id   <RefId "arg" test.lkt:36:50-36:53>
+     references <FunArgDecl "arg" test.lkt:36:35-36:41>
 
-Id   <RefId "T" test.lkt:31:27-31:28>
-     references <GenericFormalTypeDecl "T" test.lkt:31:10-31:11>
+Id   <RefId "T" test.lkt:41:15-41:16>
+     references <GenericFormalTypeDecl "T" test.lkt:40:10-40:11>
 
-Id   <RefId "Pair" test.lkt:31:31-31:35>
-     references <GenericDecl "Pair" test.lkt:5:1-8:2>
+Id   <RefId "Pair" test.lkt:41:19-41:23>
+     references <GenericDecl "Pair" test.lkt:5:1-9:2>
 
-Id   <RefId "T" test.lkt:31:36-31:37>
-     references <GenericFormalTypeDecl "T" test.lkt:31:10-31:11>
+Id   <RefId "T" test.lkt:41:24-41:25>
+     references <GenericFormalTypeDecl "T" test.lkt:40:10-40:11>
 
-Id   <RefId "T" test.lkt:31:39-31:40>
-     references <GenericFormalTypeDecl "T" test.lkt:31:10-31:11>
+Id   <RefId "T" test.lkt:41:27-41:28>
+     references <GenericFormalTypeDecl "T" test.lkt:40:10-40:11>
 
-Id   <RefId "Pair" test.lkt:32:42-32:46>
-     references <GenericDecl "Pair" test.lkt:5:1-8:2>
+Id   <RefId "Pair" test.lkt:43:42-43:46>
+     references <GenericDecl "Pair" test.lkt:5:1-9:2>
 
-Id   <RefId "Int" test.lkt:32:47-32:50>
+Id   <RefId "Int" test.lkt:43:47-43:50>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Bool" test.lkt:32:52-32:56>
+Id   <RefId "Bool" test.lkt:43:52-43:56>
      references <EnumTypeDecl prelude: "Bool">
 
-test.lkt:32:60: error: Instantiation error: conflicting actual types for formal `T`: `Int` and `Bool`
-31 | @invalid fun test_conflicting_actuals(): Pair[Int, Bool] = mkPair(1)
+test.lkt:43:60: error: Instantiation error: conflicting actual types for formal `T`: `Int` and `Bool`
+42 | @invalid fun test_conflicting_actuals(): Pair[Int, Bool] = mkPair(1)
    |                                                            ^^^^^^^^^
 
-Id   <RefId "mkPair" test.lkt:32:60-32:66>
-     references <GenericDecl "mkPair" test.lkt:31:1-31:41>
+Id   <RefId "mkPair" test.lkt:43:60-43:66>
+     references <GenericDecl "mkPair" test.lkt:40:1-41:29>
 

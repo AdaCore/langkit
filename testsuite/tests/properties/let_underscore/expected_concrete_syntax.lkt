@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 class BarNode : FooNode {
 
-    @export fun prop (): FooNode = {
+    @export fun prop(): FooNode = {
         val _ = node.parent;
 
         null

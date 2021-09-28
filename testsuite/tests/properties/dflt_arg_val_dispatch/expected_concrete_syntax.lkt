@@ -12,9 +12,9 @@ grammar foo_grammar {
 }
 
 @abstract class Decl : FooNode {
-    @parse_field name : Identifier
+    @parse_field name: Identifier
 
-    @export fun prop (arg : Bool = false): Bool = arg
+    @export fun prop(arg: Bool = false): Bool = arg
 }
 
 class FunDecl : Decl {
@@ -22,7 +22,7 @@ class FunDecl : Decl {
 
 class VarDecl : Decl {
 
-    fun prop (arg : Bool = false): Bool = not arg
+    fun prop(arg: Bool = false): Bool = not arg
 }
 
 class Identifier : FooNode implements TokenNode {

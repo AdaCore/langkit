@@ -334,31 +334,31 @@ grammar foo_grammar {
 }
 
 class ArgAssoc : Arg {
-    @parse_field name : Expr
-    @parse_field expr : Expr
+    @parse_field name: Expr
+    @parse_field expr: Expr
 }
 
 class ArgGen : Arg {
-    @parse_field expr : Expr
-    @parse_field comprehension : CompFor
+    @parse_field expr: Expr
+    @parse_field comprehension: CompFor
 }
 
 class KwArgs : Arg {
-    @parse_field expr : Expr
+    @parse_field expr: Expr
 }
 
 class VarArgs : Arg {
-    @parse_field expr : Expr
+    @parse_field expr: Expr
 }
 
 class AsNameNode : PythonNode {
-    @parse_field imported : Expr
-    @parse_field as_name : Expr
+    @parse_field imported: Expr
+    @parse_field as_name: Expr
 }
 
 class CompIf : PythonNode {
-    @parse_field test : Expr
-    @parse_field comp : PythonNode
+    @parse_field test: Expr
+    @parse_field comp: PythonNode
 }
 
 enum class CompOpKind : PythonNode {
@@ -371,53 +371,53 @@ enum class CompOpKind : PythonNode {
 }
 
 class CompFor : Comprehension {
-    @parse_field exprs : ASTList[Expr]
-    @parse_field target : Expr
-    @parse_field comp : PythonNode
+    @parse_field exprs: ASTList[Expr]
+    @parse_field target: Expr
+    @parse_field comp: PythonNode
 }
 
 class CompForL : Comprehension {
-    @parse_field exprs : ASTList[Expr]
-    @parse_field target : ASTList[Expr]
-    @parse_field comp : PythonNode
+    @parse_field exprs: ASTList[Expr]
+    @parse_field target: ASTList[Expr]
+    @parse_field comp: PythonNode
 }
 
 class Decorator : PythonNode {
-    @parse_field dec_name : Name
-    @parse_field arg_list : ASTList[Arg]
+    @parse_field dec_name: Name
+    @parse_field arg_list: ASTList[Arg]
 }
 
 class DictAssoc : PythonNode {
-    @parse_field key : Expr
-    @parse_field value : Expr
+    @parse_field key: Expr
+    @parse_field value: Expr
 }
 
 class ElsePart : PythonNode {
-    @parse_field statements : PythonNode
+    @parse_field statements: PythonNode
 }
 
 class ExceptPart : PythonNode {
-    @parse_field as_name : AsNameNode
-    @parse_field statements : PythonNode
+    @parse_field as_name: AsNameNode
+    @parse_field statements: PythonNode
 }
 
 @abstract class Expr : PythonNode {
 }
 
 class AndExpr : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 }
 
 class AndOp : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 }
 
 @abstract class BinOp : Expr {
-    @parse_field left : Expr
-    @parse_field op : Op
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field op: Op
+    @parse_field right: Expr
 }
 
 class ArithExpr : BinOp {
@@ -430,28 +430,28 @@ class Term : BinOp {
 }
 
 class CallExpr : Expr {
-    @parse_field prefix : Expr
-    @parse_field suffix : ASTList[Arg]
+    @parse_field prefix: Expr
+    @parse_field suffix: ASTList[Arg]
 }
 
 class CompOp : Expr {
-    @parse_field left : Expr
-    @parse_field op : CompOpKind
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field op: CompOpKind
+    @parse_field right: Expr
 }
 
 class ConcatStringLit : Expr {
-    @parse_field first_str : StringLit
-    @parse_field subsequent_str : ASTList[StringLit]
+    @parse_field first_str: StringLit
+    @parse_field subsequent_str: ASTList[StringLit]
 }
 
 class DictComp : Expr {
-    @parse_field assoc : DictAssoc
-    @parse_field comprehension : CompFor
+    @parse_field assoc: DictAssoc
+    @parse_field comprehension: CompFor
 }
 
 class DictLit : Expr {
-    @parse_field assocs : ASTList[DictAssoc]
+    @parse_field assocs: ASTList[DictAssoc]
 }
 
 class Dot : Expr {
@@ -461,116 +461,116 @@ class EllipsisExpr : Expr {
 }
 
 class Factor : Expr {
-    @parse_field op : Op
-    @parse_field expr : Expr
+    @parse_field op: Op
+    @parse_field expr: Expr
 }
 
 class IfExpr : Expr {
-    @parse_field expr : Expr
-    @parse_field cond : Expr
-    @parse_field else_expr : Expr
+    @parse_field expr: Expr
+    @parse_field cond: Expr
+    @parse_field else_expr: Expr
 }
 
 class InlineEval : Expr {
-    @parse_field exprs : ASTList[Expr]
+    @parse_field exprs: ASTList[Expr]
 }
 
 class LambdaDef : Expr {
-    @parse_field args : Params
-    @parse_field expr : Expr
+    @parse_field args: Params
+    @parse_field expr: Expr
 }
 
 class ListComp : Expr {
-    @parse_field expr : Expr
-    @parse_field comprehension : CompForL
+    @parse_field expr: Expr
+    @parse_field comprehension: CompForL
 }
 
 class ListGen : Expr {
-    @parse_field expr : Expr
-    @parse_field comprehension : CompForL
+    @parse_field expr: Expr
+    @parse_field comprehension: CompForL
 }
 
 class ListLit : Expr {
-    @parse_field exprs : ASTList[Expr]
+    @parse_field exprs: ASTList[Expr]
 }
 
 @abstract class Name : Expr {
 }
 
 class DottedName : Name {
-    @parse_field prefix : Expr
-    @parse_field suffix : Id
+    @parse_field prefix: Expr
+    @parse_field suffix: Id
 }
 
 class Id : Name implements TokenNode {
 
     ## Shortcut to get the symbol of this node
-    fun sym (): Symbol = node.symbol
+    fun sym(): Symbol = node.symbol
 }
 
 class NotOp : Expr {
-    @parse_field expr : Expr
+    @parse_field expr: Expr
 }
 
 class NumberLit : Expr implements TokenNode {
 }
 
 class OrExpr : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 }
 
 class OrOp : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 }
 
 class Power : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 }
 
 class SetComp : Expr {
-    @parse_field expr : Expr
-    @parse_field comprehension : CompFor
+    @parse_field expr: Expr
+    @parse_field comprehension: CompFor
 }
 
 class SetLit : Expr {
-    @parse_field exprs : ASTList[Expr]
+    @parse_field exprs: ASTList[Expr]
 }
 
 class SliceExpr : Expr {
-    @parse_field first : Expr
-    @parse_field last : Expr
+    @parse_field first: Expr
+    @parse_field last: Expr
 }
 
 class ExtSliceExpr : SliceExpr {
-    @parse_field stride : Expr
+    @parse_field stride: Expr
 }
 
 class StringLit : Expr implements TokenNode {
 }
 
 class SubscriptExpr : Expr {
-    @parse_field prefix : Expr
-    @parse_field suffix : ASTList[Expr]
+    @parse_field prefix: Expr
+    @parse_field suffix: ASTList[Expr]
 }
 
 class TupleLit : Expr {
-    @parse_field exprs : ASTList[Expr]
+    @parse_field exprs: ASTList[Expr]
 }
 
 class XorExpr : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 }
 
 class YieldExpr : Expr {
-    @parse_field exprs : ASTList[Expr]
+    @parse_field exprs: ASTList[Expr]
 }
 
 class FileNode : PythonNode {
-    @parse_field statements : ASTList[PythonNode]
+    @parse_field statements: ASTList[PythonNode]
 }
 
 class ImportStar : PythonNode {
@@ -586,38 +586,38 @@ class Op : PythonNode implements TokenNode {
 }
 
 class Params : PythonNode {
-    @parse_field single_params : ASTList[SingleParam]
+    @parse_field single_params: ASTList[SingleParam]
 }
 
 class RelName : PythonNode {
-    @parse_field dots : ASTList[Dot]
-    @parse_field name : Name
+    @parse_field dots: ASTList[Dot]
+    @parse_field name: Name
 }
 
 class SingleParam : PythonNode {
-    @parse_field is_varargs : VarArgsFlag
-    @parse_field is_kwargs : KwArgsFlag
-    @parse_field name : PythonNode
-    @parse_field default_value : Expr
+    @parse_field is_varargs: VarArgsFlag
+    @parse_field is_kwargs: KwArgsFlag
+    @parse_field name: PythonNode
+    @parse_field default_value: Expr
 }
 
 @abstract class Stmt : PythonNode {
 }
 
 class AssertStmt : Stmt {
-    @parse_field test_expr : Expr
-    @parse_field msg : Expr
+    @parse_field test_expr: Expr
+    @parse_field msg: Expr
 }
 
 class AssignStmt : Stmt {
-    @parse_field l_value : ASTList[Expr]
-    @parse_field r_values : ASTList[PythonNode]
+    @parse_field l_value: ASTList[Expr]
+    @parse_field r_values: ASTList[PythonNode]
 }
 
 class AugAssignStmt : Stmt {
-    @parse_field l_value : ASTList[Expr]
-    @parse_field op : Op
-    @parse_field r_value : PythonNode
+    @parse_field l_value: ASTList[Expr]
+    @parse_field op: Op
+    @parse_field r_value: PythonNode
 }
 
 class BreakStmt : Stmt {
@@ -627,102 +627,102 @@ class ContinueStmt : Stmt {
 }
 
 class Decorated : Stmt {
-    @parse_field decorators : ASTList[Decorator]
-    @parse_field defn : DefStmt
+    @parse_field decorators: ASTList[Decorator]
+    @parse_field defn: DefStmt
 }
 
 @abstract class DefStmt : Stmt {
 }
 
 class ClassDef : DefStmt {
-    @parse_field name : Id
-    @parse_field bases : ASTList[Expr]
-    @parse_field statements : PythonNode
+    @parse_field name: Id
+    @parse_field bases: ASTList[Expr]
+    @parse_field statements: PythonNode
 }
 
 class FuncDef : DefStmt {
-    @parse_field name : Id
-    @parse_field parameters : Params
-    @parse_field body : PythonNode
+    @parse_field name: Id
+    @parse_field parameters: Params
+    @parse_field body: PythonNode
 }
 
 class DelStmt : Stmt {
-    @parse_field exprs : ASTList[Expr]
+    @parse_field exprs: ASTList[Expr]
 }
 
 class ElifBranch : Stmt {
-    @parse_field cond_test : Expr
-    @parse_field statements : PythonNode
+    @parse_field cond_test: Expr
+    @parse_field statements: PythonNode
 }
 
 class ExecStmt : Stmt {
-    @parse_field expr : Expr
-    @parse_field in_list : ASTList[Expr]
+    @parse_field expr: Expr
+    @parse_field in_list: ASTList[Expr]
 }
 
 class ForStmt : Stmt {
-    @parse_field bindings : ASTList[Expr]
-    @parse_field expr : ASTList[Expr]
-    @parse_field statements : PythonNode
-    @parse_field else_part : ElsePart
+    @parse_field bindings: ASTList[Expr]
+    @parse_field expr: ASTList[Expr]
+    @parse_field statements: PythonNode
+    @parse_field else_part: ElsePart
 }
 
 class GlobalStmt : Stmt {
-    @parse_field names : ASTList[Id]
+    @parse_field names: ASTList[Id]
 }
 
 class IfStmt : Stmt {
-    @parse_field cond_test : Expr
-    @parse_field statements : PythonNode
-    @parse_field elif_branchs : ASTList[ElifBranch]
-    @parse_field else_part : ElsePart
+    @parse_field cond_test: Expr
+    @parse_field statements: PythonNode
+    @parse_field elif_branchs: ASTList[ElifBranch]
+    @parse_field else_part: ElsePart
 }
 
 class ImportFrom : Stmt {
-    @parse_field rel_name : PythonNode
-    @parse_field imported : PythonNode
+    @parse_field rel_name: PythonNode
+    @parse_field imported: PythonNode
 }
 
 class ImportName : Stmt {
-    @parse_field imported_names : ASTList[PythonNode]
+    @parse_field imported_names: ASTList[PythonNode]
 }
 
 class PassStmt : Stmt {
 }
 
 class PrintStmt : Stmt {
-    @parse_field exprs : ASTList[Expr]
+    @parse_field exprs: ASTList[Expr]
 }
 
 class RaiseStmt : Stmt {
-    @parse_field exprs : ASTList[Expr]
+    @parse_field exprs: ASTList[Expr]
 }
 
 class ReturnStmt : Stmt {
-    @parse_field exprs : ASTList[Expr]
+    @parse_field exprs: ASTList[Expr]
 }
 
 class StreamPrintStmt : Stmt {
-    @parse_field stream_expr : Expr
-    @parse_field exprs : ASTList[Expr]
+    @parse_field stream_expr: Expr
+    @parse_field exprs: ASTList[Expr]
 }
 
 class TryStmt : Stmt {
-    @parse_field statements : PythonNode
-    @parse_field except_parts : ASTList[ExceptPart]
-    @parse_field else_part : ElsePart
-    @parse_field finally_part : PythonNode
+    @parse_field statements: PythonNode
+    @parse_field except_parts: ASTList[ExceptPart]
+    @parse_field else_part: ElsePart
+    @parse_field finally_part: PythonNode
 }
 
 class WhileStmt : Stmt {
-    @parse_field cond_test : Expr
-    @parse_field statements : PythonNode
-    @parse_field else_part : ElsePart
+    @parse_field cond_test: Expr
+    @parse_field statements: PythonNode
+    @parse_field else_part: ElsePart
 }
 
 class WithStmt : Stmt {
-    @parse_field bindings : ASTList[AsNameNode]
-    @parse_field statements : PythonNode
+    @parse_field bindings: ASTList[AsNameNode]
+    @parse_field statements: PythonNode
 }
 
 @qualifier enum class VarArgsFlag : PythonNode {

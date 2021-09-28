@@ -10,24 +10,24 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    fun to_public (p : PrivatePoint): Point = Point(x=p.x, y=p.y)
+    fun to_public(p: PrivatePoint): Point = Point(x=p.x, y=p.y)
 
-    @export fun prop (p : Point): Point =
+    @export fun prop(p: Point): Point =
     node.to_public(PrivatePoint(x=p.x, y=p.y))
 
-    @export fun result (): NodeResult = NodeResult(n=node)
+    @export fun result(): NodeResult = NodeResult(n=node)
 }
 
 struct NodeResult {
-    n : Example
+    n: Example
 }
 
 struct Point {
-    x : BigInt
-    y : BigInt
+    x: BigInt
+    y: BigInt
 }
 
 struct PrivatePoint {
-    x : BigInt
-    y : BigInt
+    x: BigInt
+    y: BigInt
 }

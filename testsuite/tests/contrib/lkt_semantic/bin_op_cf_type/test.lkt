@@ -1,4 +1,4 @@
 # Test binop context free type
-val a : Int = 1
-val b : Int = 2
-val b : Bool = ((a) = b) = (a = b)
+val a: Int = 1
+val b: Int = 2
+val b: Bool = ((a) = b) = (a = b)

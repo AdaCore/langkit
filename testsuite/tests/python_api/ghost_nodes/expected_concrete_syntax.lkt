@@ -23,9 +23,9 @@ class Name : FooNode implements TokenNode {
 }
 
 class Param : FooNode {
-    @parse_field name : Name
-    @parse_field mode : Enum
-    @parse_field has_plus : PlusQualifier
+    @parse_field name: Name
+    @parse_field mode: Enum
+    @parse_field has_plus: PlusQualifier
 }
 
 @qualifier enum class PlusQualifier : FooNode {

@@ -14,8 +14,8 @@ grammar foo_grammar {
 }
 
 class DefNode : FooNode {
-    @parse_field name : Identifier
-    @parse_field value : Number
+    @parse_field name: Identifier
+    @parse_field value: Number
 }
 
 class ErrorDef : FooNode implements ErrorNode {

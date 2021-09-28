@@ -7,21 +7,21 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export @not_implemented fun prop (): Int
+    @export @not_implemented fun prop(): Int
 }
 
 class Literal : FooNode implements TokenNode {
-    var : LogicVar
+    var: LogicVar
 
-    fun node (): Literal = node.as_entity
+    fun node(): Literal = node.as_entity
 
-    fun b (): Equation = %eq(node.var, node.a(), conv_prop=BareLiteral.node)
+    fun b(): Equation = %eq(node.var, node.a(), conv_prop=BareLiteral.node)
 
-    @export fun public_pro (): Literal = {
+    @export fun public_pro(): Literal = {
         val _ = node.b();
 
         node.as_bare_entity
     }
 
-    @not_implemented fun a (): FooNode
+    @not_implemented fun a(): FooNode
 }

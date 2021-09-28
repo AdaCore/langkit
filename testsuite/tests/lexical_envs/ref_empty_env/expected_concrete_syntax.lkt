@@ -25,26 +25,26 @@ grammar foo_grammar {
 }
 
 class Block : FooNode {
-    @parse_field name : Identifier
-    @parse_field items : ASTList[Item]
+    @parse_field name: Identifier
+    @parse_field items: ASTList[Item]
 }
 
 class Identifier : FooNode implements TokenNode {
 
-    fun resolve (): FooNode = node.children_env().get(node.symbol)?(0)
+    fun resolve(): FooNode = node.children_env().get(node.symbol)?(0)
 }
 
 @abstract class Item : FooNode {
 }
 
 class Decl : Item {
-    @parse_field name : Identifier
+    @parse_field name: Identifier
 }
 
 class Open : Item {
-    @parse_field name : Identifier
+    @parse_field name: Identifier
 
-    fun resolve (): LexicalEnv[FooNode] = {
+    fun resolve(): LexicalEnv[FooNode] = {
         val n = node.name.resolve();
 
         n.do(
@@ -54,7 +54,7 @@ class Open : Item {
 }
 
 class Ref : Item {
-    @parse_field name : Identifier
+    @parse_field name: Identifier
 
-    @export fun resolve (): FooNode = node.name.resolve()
+    @export fun resolve(): FooNode = node.name.resolve()
 }

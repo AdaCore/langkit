@@ -10,6 +10,6 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export fun entities_iterator (): Iterator[Example] =
+    @export fun entities_iterator(): Iterator[Example] =
     [self, self, self].to_iterator()
 }

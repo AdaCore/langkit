@@ -10,15 +10,15 @@ grammar foo_grammar {
 
 class Example : FooNode implements TokenNode {
 
-    @export fun get_struct (): MyStruct = MyStruct(
+    @export fun get_struct(): MyStruct = MyStruct(
         entity_field=node, array_field=[node.as[FooNode].as_bare_entity, node.parent.as_bare_entity], bigint_field=BigInt(10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
     )
 
-    @export fun struct_identity (s : MyStruct): MyStruct = s
+    @export fun struct_identity(s: MyStruct): MyStruct = s
 }
 
 struct MyStruct {
-    entity_field : FooNode
-    array_field : Array[FooNode]
-    bigint_field : BigInt
+    entity_field: FooNode
+    array_field: Array[FooNode]
+    bigint_field: BigInt
 }

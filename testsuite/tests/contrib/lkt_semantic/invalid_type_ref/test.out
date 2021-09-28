@@ -1,16 +1,16 @@
 Resolving test.lkt
 ==================
-test.lkt:4:5: error: Invalid type reference
-3 | a : U
-  |     ^
+test.lkt:5:4: error: Invalid type reference
+4 | a: U
+  |    ^
 
-Id   <RefId "U" test.lkt:4:5-4:6>
-     references <GenericDecl "U" test.lkt:1:1-2:2>
+Id   <RefId "U" test.lkt:5:4-5:5>
+     references <GenericDecl "U" test.lkt:1:1-3:2>
 
-test.lkt:6:11: error: Invalid type reference
-5 | class V : U {
-  |           ^  
+test.lkt:7:10: error: Invalid type reference
+6 | class V: U {
+  |          ^  
 
-Id   <RefId "U" test.lkt:6:11-6:12>
-     references <GenericDecl "U" test.lkt:1:1-2:2>
+Id   <RefId "U" test.lkt:7:10-7:11>
+     references <GenericDecl "U" test.lkt:1:1-3:2>
 

@@ -11,10 +11,10 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun get_as_array (): Array[FooNode] =
+    @export fun get_as_array(): Array[FooNode] =
     node.children_env().get("example")
 
-    @export fun get_as_iterator (): Iterator[FooNode] =
+    @export fun get_as_iterator(): Iterator[FooNode] =
     node.get_as_array().to_iterator()
 }
 

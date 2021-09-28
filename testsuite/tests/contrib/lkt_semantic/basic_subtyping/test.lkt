@@ -11,8 +11,8 @@ class Subsubclass : Subclass {}
 
 class Subclass2 : Baseclass {}
 
-fun test_subtyping_1 (a : Subclass): Baseclass = a
-fun test_subtyping_2 (a : Subclass, b: Baseclass): Bool = (a = b)
-fun test_subtyping_3 (a : Baseclass, b: Subsubclass): Bool =
+fun test_subtyping_1 (a: Subclass): Baseclass = a
+fun test_subtyping_2 (a: Subclass, b: Baseclass): Bool = (a = b)
+fun test_subtyping_3 (a: Baseclass, b: Subsubclass): Bool =
   test_subtyping_2(b, b)
-@invalid fun test_subtyping_4 (a : Subclass): Subclass2 = a
+@invalid fun test_subtyping_4 (a: Subclass): Subclass2 = a

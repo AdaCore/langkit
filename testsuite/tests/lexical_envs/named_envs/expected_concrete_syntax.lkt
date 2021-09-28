@@ -70,11 +70,11 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 
     ## Return whether this node is in the top-level decl list.
-    fun is_toplevel (): Bool =
+    fun is_toplevel(): Bool =
     (not (node.parent.is_null)) and (node.parent.parent.is_null)
 
     ## Return whether this node can define a named environment.
-    @memoized fun can_have_name (): Bool = if (
+    @memoized fun can_have_name(): Bool = if (
         node is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls
     ) then (
         # All nodes that can define a named environment are supposed to
@@ -87,19 +87,19 @@ grammar foo_grammar {
 
     ## Assuming this node can define a named environment (see
     ## ``can_have_name``), return its fully qualified namem.
-    fun full_name (): String = node.name_parent().do(
+    fun full_name(): String = node.name_parent().do(
         (np) => (np.full_name() & (".")) & (
             node.self_name().as[Identifier].base_name()
         ), default_val=node.self_name().scope_name()
     )
 
-    fun suffixed_full_name (suffix : String): String =
+    fun suffixed_full_name(suffix: String): String =
     node.full_name().do((n) => (n & (".")) & suffix)
 
     ## Assuming this node can define a named environment, return the syntactic
     ## parent node that defines the parent scope for Self. If there is no such
     ## node (because Self is in the root list), return null.
-    fun name_parent (): FooNode = if (
+    fun name_parent(): FooNode = if (
         (
             (
                 (
@@ -129,14 +129,14 @@ grammar foo_grammar {
 
     ## If this node can define a named environment (see ``can_have_name``),
     ## return the name of its parent scope. Return a null symbol otherwise.
-    @memoized fun decl_parent_scope_name (): Symbol =
+    @memoized fun decl_parent_scope_name(): Symbol =
     if node.can_have_name() then (
         node.name_parent().do(
             (np) => np.full_name(), default_val=node.self_name().parent_scope_name()
         ).to_symbol
     ) else (null)
 
-    fun initial_env (): DesignatedEnv = node.decl_parent_scope_name().do(
+    fun initial_env(): DesignatedEnv = node.decl_parent_scope_name().do(
         (name) => DesignatedEnv(
             kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null
         ), default_val=(
@@ -148,11 +148,11 @@ grammar foo_grammar {
 
     ## Assuming this node can define a named environment (see
     ## ``can_have_name``), return its syntactic name.
-    @not_implemented fun self_name (): Name
+    @not_implemented fun self_name(): Name
 }
 
 class DeclarativePart : FooNode {
-    @parse_field decls : ASTList[FooNode]
+    @parse_field decls: ASTList[FooNode]
 }
 
 class PrivatePart : DeclarativePart {
@@ -166,43 +166,43 @@ class SubpBodyDecls : DeclarativePart {
 }
 
 class DeclareBlock : FooNode {
-    @parse_field decls : DeclarativePart
-    @parse_field stmts : ASTList[FooNode]
+    @parse_field decls: DeclarativePart
+    @parse_field stmts: ASTList[FooNode]
 }
 
 class IncompleteTypeDecl : FooNode {
-    @parse_field name : Identifier
+    @parse_field name: Identifier
 }
 
 @abstract class Name : FooNode {
 
     ## Innermost suffix for this name.
-    fun base_name (): String = match node {
+    fun base_name(): String = match node {
         case id : Identifier => id.text()
         case dn : DottedName => dn.suffix.base_name()
     }
 
     ## Absolute name of the scope that this name defines, assuming that
     ## ``prefix`` is the implicit prefix for that name.
-    fun scope_name (): String = match node {
+    fun scope_name(): String = match node {
         case id : Identifier => id.text()
         case dn : DottedName => (dn.prefix.scope_name() & (".")) & dn.suffix.text()
     }
 
     ## Absolute name of the scope that defines this name, assuming that
     ## ``prefix`` is the implicit prefix for that name.
-    fun parent_scope_name (): String = match node {
+    fun parent_scope_name(): String = match node {
         case _ : Identifier => null
         case dn : DottedName => dn.prefix.scope_name()
     }
 
     ## Innermost scope for this name. The lookup starts from the given
     ## environment.
-    fun scope (from_env : LexicalEnv[FooNode]): LexicalEnv[FooNode] =
+    fun scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
     node.resolve(from_env).children_env()
 
     ## Return the scope that contains the declaration that this name defines.
-    fun parent_scope (from_env : LexicalEnv[FooNode]): LexicalEnv[FooNode] =
+    fun parent_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
     match node {
         case _ : Identifier => from_env
         case dn : DottedName => dn.prefix.scope(from_env)
@@ -210,27 +210,27 @@ class IncompleteTypeDecl : FooNode {
 
     ## Return the list of declarations that define this name. The lookup
     ## starts from the given environment.
-    fun resolve (from_env : LexicalEnv[FooNode]): FooNode =
+    fun resolve(from_env: LexicalEnv[FooNode]): FooNode =
     node.parent_scope(from_env).get_first(node.base_name().to_symbol)
 }
 
 class DottedName : Name {
-    @parse_field prefix : Name
-    @parse_field suffix : Identifier
+    @parse_field prefix: Name
+    @parse_field suffix: Identifier
 }
 
 class Identifier : Name implements TokenNode {
 }
 
 class PackageBody : FooNode {
-    @parse_field name : Name
-    @parse_field decls : DeclarativePart
+    @parse_field name: Name
+    @parse_field decls: DeclarativePart
 
-    fun self_name (): Name = node.name
+    fun self_name(): Name = node.name
 
     ## Assuming this PackageBody is not in the top-level list, return the
     ## environment of its PackageDecl that it should reference.
-    fun body_decl_scope (): LexicalEnv[FooNode] = {
+    fun body_decl_scope(): LexicalEnv[FooNode] = {
         val pkg_decl = node.lookup_decl_part();
 
         if (pkg_decl.private_part.is_null) then pkg_decl.children_env() else pkg_decl.private_part.children_env()
@@ -238,11 +238,11 @@ class PackageBody : FooNode {
 
     ## Assuming this PackageBody is not in the top-level list, return the
     ## the corresponding package declaration.
-    fun lookup_decl_part (): PackageDecl =
+    fun lookup_decl_part(): PackageDecl =
     node.parent.children_env().get_first(node.name.base_name().to_symbol).as[PackageDecl].node
 
     ## Return the PackageDecl node corresponding to this PackageBody.
-    @export fun decl_part (): PackageDecl = {
+    @export fun decl_part(): PackageDecl = {
         val env = node.parent.children_env();
 
         node.name.resolve(env).as[PackageDecl]
@@ -250,14 +250,14 @@ class PackageBody : FooNode {
 }
 
 class PackageDecl : FooNode {
-    @parse_field name : Name
-    @parse_field public_part : PublicPart
-    @parse_field private_part : PrivatePart
+    @parse_field name: Name
+    @parse_field public_part: PublicPart
+    @parse_field private_part: PrivatePart
 
-    fun self_name (): Name = node.name
+    fun self_name(): Name = node.name
 
     ## Return the names for the environment that this package creates.
-    fun new_env_names (): Array[Symbol] =
+    fun new_env_names(): Array[Symbol] =
     # Always register the "regular" name for this package
     # If there is a private part, that's all we need. Otherwise, register
     # this environment with the name of the private part as well, so that
@@ -269,30 +269,30 @@ class PackageDecl : FooNode {
     )
 
     ## Return the PackageBody node corresponding to this PackageDecl.
-    @export fun body_part (): PackageBody =
+    @export fun body_part(): PackageBody =
     node.private_part.do((pp) => pp, default_val=node).children_env().get_first("__nextpart").as[PackageBody]
 }
 
 class Ref : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    @export fun resolve (): FooNode = node.name.resolve(node.node_env())
+    @export fun resolve(): FooNode = node.name.resolve(node.node_env())
 }
 
 class SubpBody : FooNode {
-    @parse_field name : Name
-    @parse_field decls : SubpBodyDecls
-    @parse_field stmts : ASTList[FooNode]
+    @parse_field name: Name
+    @parse_field decls: SubpBodyDecls
+    @parse_field stmts: ASTList[FooNode]
 
-    fun self_name (): Name = node.name
+    fun self_name(): Name = node.name
 }
 
 class SubpDecl : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    fun self_name (): Name = node.name
+    fun self_name(): Name = node.name
 }
 
 class TypeDecl : FooNode {
-    @parse_field name : Identifier
+    @parse_field name: Identifier
 }

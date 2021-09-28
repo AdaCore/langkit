@@ -16,28 +16,28 @@ class Literal : FooNode implements TokenNode {
 }
 
 class LiteralSequence : FooNode {
-    @parse_field name : Name
-    @parse_field items : ASTList[Literal]
+    @parse_field name: Name
+    @parse_field items: ASTList[Literal]
 
-    @memoized fun new_node (): SynthNode =
+    @memoized fun new_node(): SynthNode =
     SynthNode(name=node.name, items=node.items)
 
-    @export fun prop (): SynthNode = node.new_node().as_bare_entity
+    @export fun prop(): SynthNode = node.new_node().as_bare_entity
 
-    @lazy new_node2 : SynthNode2 = SynthNode2(name=node.name, items=node.items)
+    @lazy new_node2: SynthNode2 = SynthNode2(name=node.name, items=node.items)
 
-    @export fun prop2 (): SynthNode2 = node.new_node2().as_bare_entity
+    @export fun prop2(): SynthNode2 = node.new_node2().as_bare_entity
 }
 
 class Name : FooNode implements TokenNode {
 }
 
 class SynthNode : FooNode {
-    @parse_field name : Name
-    @parse_field items : ASTList[Literal]
+    @parse_field name: Name
+    @parse_field items: ASTList[Literal]
 }
 
 class SynthNode2 : FooNode {
-    @parse_field name : Name
-    @parse_field items : ASTList[Literal]
+    @parse_field name: Name
+    @parse_field items: ASTList[Literal]
 }

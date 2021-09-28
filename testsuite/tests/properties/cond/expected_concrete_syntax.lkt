@@ -10,22 +10,21 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    fun identity (b : Bool): Bool = b
+    fun identity(b: Bool): Bool = b
 
-    @export fun cond1 (b : Bool): Int = if node.identity(b) then (1)
+    @export fun cond1(b: Bool): Int = if node.identity(b) then (1)
     else (2)
 
-    @export fun cond2 (b1 : Bool, b2 : Bool): Int =
-    if node.identity(b1) then (1)
+    @export fun cond2(b1: Bool, b2: Bool): Int = if node.identity(b1) then (1)
     elif node.identity(b2) then (2)
     else (3)
 
-    @export fun cond3 (b1 : Bool, b2 : Bool, b3 : Bool): Int =
+    @export fun cond3(b1: Bool, b2: Bool, b3: Bool): Int =
     if node.identity(b1) then (1)
     elif node.identity(b2) then (2)
     elif node.identity(b3) then (3)
     else (3)
 
-    @export fun cond_node (b : Bool): FooNode = if node.identity(b) then node
+    @export fun cond_node(b: Bool): FooNode = if node.identity(b) then node
     else (null).as_bare_entity
 }

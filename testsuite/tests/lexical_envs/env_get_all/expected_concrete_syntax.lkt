@@ -10,13 +10,13 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun env_get_all (): Array[FooNode] = node.children_env().get(null)
+    @export fun env_get_all(): Array[FooNode] = node.children_env().get(null)
 }
 
 class Id : FooNode implements TokenNode {
 }
 
 class Program : FooNode {
-    @parse_field name : Id
-    @parse_field program_list : ASTList[Program]
+    @parse_field name: Id
+    @parse_field program_list: ASTList[Program]
 }

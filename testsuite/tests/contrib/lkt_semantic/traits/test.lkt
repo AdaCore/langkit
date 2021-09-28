@@ -5,15 +5,17 @@ trait WithLength {
     @builtin fun length(): Int
 }
 
-generic [T] trait WithIndex {
-    @builtin fun __call__(index : Int): T
+generic [T]
+trait WithIndex {
+    @builtin fun __call__(index: Int): T
 }
 
-generic [T] class Vec implements WithLength, WithIndex[T] {
+generic [T]
+class Vec implements WithLength, WithIndex[T] {
 }
 
-val vec : Vec[String] = null
-val vec_length : Int = vec.length()
+val vec: Vec[String] = null
+val vec_length: Int = vec.length()
 
 # Test __call__ method sugar
-val vec_item : String = vec(1)
+val vec_item: String = vec(1)

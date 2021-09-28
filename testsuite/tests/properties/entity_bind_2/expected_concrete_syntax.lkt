@@ -9,25 +9,25 @@ grammar foo_grammar {
 }
 
 @abstract class RootNode : FooNode {
-    var : LogicVar
+    var: LogicVar
 
-    @abstract fun xref_eq (arg1 : FooNode, arg2 : FooNode): Equation
+    @abstract fun xref_eq(arg1: FooNode, arg2: FooNode): Equation
 
-    @export fun solve_eq (arg1 : FooNode, arg2 : FooNode): Bool =
+    @export fun solve_eq(arg1: FooNode, arg2: FooNode): Bool =
     node.xref_eq(arg1, arg2).solve()
 }
 
 class Identifier : RootNode implements TokenNode {
 
-    fun xref_eq (arg1 : FooNode, arg2 : FooNode): Equation =
+    fun xref_eq(arg1: FooNode, arg2: FooNode): Equation =
     %domain(node.var, [node])
 }
 
 class Literal : RootNode implements TokenNode {
 
-    fun is_eq (other : Literal): Bool = node.as_entity = other
+    fun is_eq(other: Literal): Bool = node.as_entity = other
 
-    fun xref_eq (arg1 : FooNode, arg2 : FooNode): Equation =
+    fun xref_eq(arg1: FooNode, arg2: FooNode): Equation =
     (%domain(node.var, [arg1])) and (
         %eq(node.var, arg2, eq_prop=BareLiteral.is_eq)
     )

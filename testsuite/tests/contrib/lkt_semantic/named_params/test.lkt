@@ -1,4 +1,4 @@
 # Test resolution of named parameters
 
 fun test_named_parameters(a: Int): Int = a
-val ss : Int = test_named_parameters(a=12)
+val ss: Int = test_named_parameters(a=12)

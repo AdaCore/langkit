@@ -1,14 +1,14 @@
 # Test that we can correctly use the call syntax on objects that have no
 # declaration, as for example, objects returned by functions.
 
-fun arr (size : Int): Array[Int]
-val a : Int = arr(12)(1)
+fun arr(size: Int): Array[Int]
+val a: Int = arr(12)(1)
 
-@incorrect val incorrect_call : Int = arr(12)("a")
-@incorrect val incorrect_call_1 : Int = arr(12)()
-@incorrect val incorrect_call_2 : Int = arr(12)(1, 2)
+@incorrect val incorrect_call: Int = arr(12)("a")
+@incorrect val incorrect_call_1: Int = arr(12)()
+@incorrect val incorrect_call_2: Int = arr(12)(1, 2)
 
 fun return_func(): (Int, Int) -> Int
 
-val a : Int = return_func()(1, 2)
-@incorrect val b : Int = return_func()(1, '2')
+val a: Int = return_func()(1, 2)
+@incorrect val b: Int = return_func()(1, '2')
