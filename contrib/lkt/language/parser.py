@@ -402,7 +402,7 @@ class LKNode(ASTNode):
         #
         # This is suboptimal because this doesn't distinguish between expected
         # errors due to erroneous input and unexpected errors due to bugs in
-        # LKT. To handle this correctly we'd need either:
+        # Lkt. To handle this correctly we'd need either:
         #
         # 1. Different exception kinds, so that we can discriminate between
         #    expected an unexpected errors.
@@ -809,21 +809,22 @@ class Expr(LKNode):
     def expr_type_impl(expected_type=T.TypeDecl.entity,
                        raise_if_no_type=(T.Bool, True)):
         """
-        Implementation for Expr.expr_type. This is the core of the current type
-        system for lkt. Default implementation has the following behavior:
+        Implementation for ``Expr.expr_type``. This is the core of the current
+        type system for Lkt. The default implementation has the following
+        behavior:
 
         - If there is a context free type for this expression *and* an expected
           type, then check that they match, if they don't, return an error
-          SemanticResult.
+          ``SemanticResult``.
 
-        - If there is an expected type but no context-free type, check that
-          the expected type is valid by calling the expected_type_predicate
+        - If there is an expected type but no context-free type, check that the
+          expected type is valid by calling the ``expected_type_predicate``
           property and return the expected type, otherwise fail.
 
         - If there is only a context free type but no expected type, return
           the context-free type.
 
-        - If there is none, raise a PropertyError.
+        - If there is none, raise a ``PropertyError``.
 
         Implementing typing for new constructs should be simple:
 
@@ -832,7 +833,7 @@ class Expr(LKNode):
           ``expr_context_free_type``.
 
         - If the construct has no definite type but imposes some constraints on
-          the typing - for example, a string literal will require it's argument
+          the typing - for example, a string literal will require its argument
           to be either a string or a symbol - override
           ``expected_type_predicate`` and ``invalid_expected_type_error_name``.
 
@@ -842,11 +843,11 @@ class Expr(LKNode):
         - If the construct need rules that have not been planned by the above,
           you can still override ``expr_type_impl``. This should not be
           necessary though, and should only be done following a discussion with
-          LKT devs, and altering this comment afterwards.
+          Lkt devs, and altering this comment afterwards.
 
         NOTE: In the absence of a solver based more clever type inference
         system (for now at least), we have to make a decision about the
-        direction types commonly flow in LKT. What follows from the previous
+        direction types commonly flow in Lkt. What follows from the previous
         description is that type commonly flow upwards, from parent nodes to
         leaves.
         """
@@ -1721,7 +1722,7 @@ class TraitDecl(NamedTypeDecl):
     behavior for built-in types. It's not usable as a type-bound since we don't
     have generics, and you cannot implement one either.
 
-    The reason they're added is to lay down the basics of what we want the LKT
+    The reason they're added is to lay down the basics of what we want the Lkt
     type system to be.
 
     TODO: Traits are *not* types. They're treated as such in the grammar for
