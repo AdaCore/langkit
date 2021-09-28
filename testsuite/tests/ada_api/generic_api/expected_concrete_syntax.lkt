@@ -18,21 +18,21 @@ grammar foo_grammar {
 }
 
 class Addition : Expr {
-    @parse_field lhs : Expr
-    @parse_field rhs : Expr
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
 }
 
 class Number : Expr implements TokenNode {
 }
 
 class Ref : Expr {
-    @parse_field name : Name
+    @parse_field name: Name
 }
 
 class Name : FooNode implements TokenNode {
 }
 
 class VarDecl : FooNode {
-    @parse_field name : Name
-    @parse_field value : Expr
+    @parse_field name: Name
+    @parse_field value: Expr
 }

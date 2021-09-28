@@ -1,4 +1,3 @@
-val a : String = "lol"
-val b : Char = 'l'
-val c : Char = a (1)
-
+val a: String = "lol"
+val b: Char = 'l'
+val c: Char = a(1)

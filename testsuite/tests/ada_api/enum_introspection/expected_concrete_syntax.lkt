@@ -18,7 +18,7 @@ enum E2 {
 
 class Example : FooNode {
 
-    @export fun id1 (e : E1): E1 = e
+    @export fun id1(e: E1): E1 = e
 
-    @export fun id2 (e : E2): E2 = e
+    @export fun id2(e: E2): E2 = e
 }

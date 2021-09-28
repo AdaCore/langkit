@@ -16,17 +16,17 @@ grammar foo_grammar {
 
 @abstract class DefNode : FooNode {
 
-    @export @abstract fun name (): Symbol
+    @export @abstract fun name(): Symbol
 }
 
 class Block : DefNode {
-    @parse_field params : Params
-    @parse_field name_field : Name
-    @parse_field vars : ASTList[BlockVar]
+    @parse_field params: Params
+    @parse_field name_field: Name
+    @parse_field vars: ASTList[BlockVar]
 
-    fun name (): Symbol = node.name_field.symbol
+    fun name(): Symbol = node.name_field.symbol
 
-    @export fun rebind (from_block : Block, to_block : Block): Block = {
+    @export fun rebind(from_block: Block, to_block: Block): Block = {
         val rbdng = self.info.rebindings.append_rebinding(
             from_block.params.children_env(), to_block.children_env()
         );
@@ -37,7 +37,7 @@ class Block : DefNode {
         Block(node=node, info=e_info)
     }
 
-    @export fun parent_rebindings (): Block = {
+    @export fun parent_rebindings(): Block = {
         val e_info = EntityInfo(
             md=self.info.md, rebindings=self.info.rebindings.get_parent, from_rebound=false
         );
@@ -45,23 +45,23 @@ class Block : DefNode {
         Block(node=node, info=e_info)
     }
 
-    @export fun new (): FooNode =
+    @export fun new(): FooNode =
     self.info.rebindings.new_env.env_node.as_bare_entity
 
-    @export fun old (): FooNode =
+    @export fun old(): FooNode =
     self.info.rebindings.new_env.env_node.as_bare_entity
 }
 
 class BlockVar : DefNode {
-    @parse_field name_field : Name
+    @parse_field name_field: Name
 
-    fun name (): Symbol = node.name_field.symbol
+    fun name(): Symbol = node.name_field.symbol
 }
 
 @has_abstract_list class Param : DefNode {
-    @parse_field name_field : Name
+    @parse_field name_field: Name
 
-    fun name (): Symbol = node.name_field.symbol
+    fun name(): Symbol = node.name_field.symbol
 }
 
 class Params : ASTList[Param] {

@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 class ExampleNode : RootNode {
 
-    @export fun prop (): Bool = bool_var
+    @export fun prop(): Bool = bool_var
 
-    @export fun prop2 (): Bool = node.prop()
+    @export fun prop2(): Bool = node.prop()
 }

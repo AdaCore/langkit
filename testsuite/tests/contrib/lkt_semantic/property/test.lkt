@@ -1,13 +1,14 @@
 @property fun test(): Int = 12
 
-a : Int = test
+a: Int = test
 
 class BaseClass {
-    @property generic [U] fun convert(): U
+    @property generic [U]
+    fun convert(): U
 }
 
 class D : BaseClass {}
 class E : BaseClass {}
 
-inst : D = D()
-base : BaseClass = inst.convert[BaseClass]
+inst: D = D()
+base: BaseClass = inst.convert[BaseClass]

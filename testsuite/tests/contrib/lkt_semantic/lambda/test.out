@@ -68,37 +68,37 @@ Expr <NumLit test.lkt:12:24-12:26>
 
 test.lkt:12:29: error: Invalid type annotations for lambda parameters.
 Annotate either all or no params
-11 |     lambda_test_helper(12, (x : Int, y) => x + y * 2)
-   |                             ^^^^^^^^^^               
+11 |     lambda_test_helper(12, (x: Int, y) => x + y * 2)
+   |                             ^^^^^^^^^               
 
-Id   <RefId "Int" test.lkt:12:33-12:36>
+Id   <RefId "Int" test.lkt:12:32-12:35>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "x" test.lkt:12:44-12:45>
-     references <LambdaArgDecl "x" test.lkt:12:29-12:36>
+Id   <RefId "x" test.lkt:12:43-12:44>
+     references <LambdaArgDecl "x" test.lkt:12:29-12:35>
 
-Expr <RefId "x" test.lkt:12:44-12:45>
+Expr <RefId "x" test.lkt:12:43-12:44>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "y" test.lkt:12:48-12:49>
-     references <LambdaArgDecl "y" test.lkt:12:38-12:39>
+Id   <RefId "y" test.lkt:12:47-12:48>
+     references <LambdaArgDecl "y" test.lkt:12:37-12:38>
 
-Expr <RefId "y" test.lkt:12:48-12:49>
+Expr <RefId "y" test.lkt:12:47-12:48>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:12:52-12:53>
+Expr <NumLit test.lkt:12:51-12:52>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:12:48-12:53>
+Expr <BinOp test.lkt:12:47-12:52>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:12:44-12:53>
+Expr <BinOp test.lkt:12:43-12:52>
      has type <StructDecl prelude: "Int">
 
-Expr <LambdaExpr test.lkt:12:28-12:53>
+Expr <LambdaExpr test.lkt:12:28-12:52>
      has type <FunctionType prelude: "(Int, Int) -> Int">
 
-Expr <CallExpr test.lkt:12:5-12:54>
+Expr <CallExpr test.lkt:12:5-12:53>
      has type <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:15:41-15:44>
@@ -113,22 +113,22 @@ Expr <RefId "lambda_test_helper" test.lkt:16:5-16:23>
 Expr <NumLit test.lkt:16:24-16:26>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "String" test.lkt:16:33-16:39>
+Id   <RefId "String" test.lkt:16:32-16:38>
      references <StructDecl prelude: "String">
 
-Id   <RefId "String" test.lkt:16:45-16:51>
+Id   <RefId "String" test.lkt:16:43-16:49>
      references <StructDecl prelude: "String">
 
-Id   <RefId "Int" test.lkt:16:54-16:57>
+Id   <RefId "Int" test.lkt:16:52-16:55>
      references <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:16:61-16:63>
+Expr <NumLit test.lkt:16:59-16:61>
      has type <StructDecl prelude: "Int">
 
 test.lkt:16:28: error: Mismatched types: expected `(Int, Int) -> Int`, got `(String, String) -> Int`
-15 |     lambda_test_helper(12, (x : String, y : String): Int => 12)
-   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+15 |     lambda_test_helper(12, (x: String, y: String): Int => 12)
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 
-Expr <CallExpr test.lkt:16:5-16:64>
+Expr <CallExpr test.lkt:16:5-16:62>
      has type <StructDecl prelude: "Int">
 

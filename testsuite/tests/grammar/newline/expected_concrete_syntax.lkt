@@ -31,21 +31,21 @@ grammar foo_grammar {
 }
 
 class CompositeNode : FooNode {
-    @parse_field lit_1 : Literal
-    @parse_field lit_2 : Literal
-    @parse_field lit_3 : Literal
-    @parse_field lit_4 : Literal
+    @parse_field lit_1: Literal
+    @parse_field lit_2: Literal
+    @parse_field lit_3: Literal
+    @parse_field lit_4: Literal
 }
 
 class IndentNode : FooNode {
-    @parse_field lit_1 : Literal
-    @parse_field lit_2 : Literal
+    @parse_field lit_1: Literal
+    @parse_field lit_2: Literal
 }
 
 class Literal : FooNode implements TokenNode {
 }
 
 class NewLineNode : FooNode {
-    @parse_field lit_1 : Literal
-    @parse_field lit_2 : Literal
+    @parse_field lit_1: Literal
+    @parse_field lit_2: Literal
 }

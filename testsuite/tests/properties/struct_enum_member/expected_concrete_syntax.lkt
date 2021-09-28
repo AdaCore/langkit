@@ -23,25 +23,25 @@ enum DeclKind {
 
 @abstract class Decl : FooNode {
 
-    @export @abstract fun decl_kind (): DeclKind
+    @export @abstract fun decl_kind(): DeclKind
 
-    @export fun with_kind (): DeclAndKind =
+    @export fun with_kind(): DeclAndKind =
     DeclAndKind(dcl=node, knd=node.decl_kind())
 }
 
 class FuncDecl : Decl {
-    @parse_field name : Name
-    @parse_field args : ASTList[Name]
-    @parse_field expr : Expression
+    @parse_field name: Name
+    @parse_field args: ASTList[Name]
+    @parse_field expr: Expression
 
-    fun decl_kind (): DeclKind = DeclKind.func
+    fun decl_kind(): DeclKind = DeclKind.func
 }
 
 class VarDecl : Decl {
-    @parse_field name : Name
-    @parse_field expr : Expression
+    @parse_field name: Name
+    @parse_field expr: Expression
 
-    fun decl_kind (): DeclKind = DeclKind.var
+    fun decl_kind(): DeclKind = DeclKind.var
 }
 
 @abstract class Expression : FooNode {
@@ -54,11 +54,11 @@ class Name : Expression implements TokenNode {
 }
 
 class Plus : Expression {
-    @parse_field left : Expression
-    @parse_field right : Expression
+    @parse_field left: Expression
+    @parse_field right: Expression
 }
 
 struct DeclAndKind {
-    dcl : Decl
-    knd : DeclKind
+    dcl: Decl
+    knd: DeclKind
 }

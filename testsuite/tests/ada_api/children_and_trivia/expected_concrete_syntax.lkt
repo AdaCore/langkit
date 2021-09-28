@@ -11,8 +11,8 @@ grammar foo_grammar {
 }
 
 class Decl : FooNode {
-    @parse_field id : Identifier
-    @parse_field error : DeclError
+    @parse_field id: Identifier
+    @parse_field error: DeclError
 }
 
 @qualifier enum class DeclError : FooNode {

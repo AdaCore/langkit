@@ -11,17 +11,17 @@ grammar foo_grammar {
 }
 
 class Decl : FooNode {
-    @parse_field name : Name
-    @parse_field refs : ASTList[Ref]
+    @parse_field name: Name
+    @parse_field refs: ASTList[Ref]
 }
 
 class Name : FooNode implements TokenNode {
 }
 
 class Ref : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    @export fun resolve (): FooNode = {
+    @export fun resolve(): FooNode = {
         bind env = node.parent.parent.node_env();
 
         env.get(node.name.symbol)?(0)

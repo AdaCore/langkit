@@ -17,34 +17,33 @@ enum Color {
 
 @abstract @has_abstract_list class FooNode implements Node[FooNode] {
 
-    @export fun count (seq : Array[Example]): Int = seq.length()
+    @export fun count(seq: Array[Example]): Int = seq.length()
 
-    @export fun get_a (c : Char = 'a'): Char = c
+    @export fun get_a(c: Char = 'a'): Char = c
 
-    @export fun get_eacute (c : Char = 'é'): Char = c
+    @export fun get_eacute(c: Char = 'é'): Char = c
 
-    @export fun identity (c : Char): Char = c
+    @export fun identity(c: Char): Char = c
 
-    @export fun double (c : Char): String = [c, c]
+    @export fun double(c: Char): String = [c, c]
 
-    @export fun same_color (c : Color): Color = c
+    @export fun same_color(c: Color): Color = c
 
-    @export fun same_color_dflt (c : Color = Color.red): Color = c
+    @export fun same_color_dflt(c: Color = Color.red): Color = c
 
-    @export fun int_double (c : BigInt): BigInt = c + c
+    @export fun int_double(c: BigInt): BigInt = c + c
 
-    @export fun me (b : Bool): FooNodeStruct =
+    @export fun me(b: Bool): FooNodeStruct =
     FooNodeStruct(node=if b then self else (null))
 
-    @export fun get_node (node_struct : FooNodeStruct): FooNode =
-    node_struct.node
+    @export fun get_node(node_struct: FooNodeStruct): FooNode = node_struct.node
 
-    @export fun iter_int (): Iterator[Int] = [1, 2, 3].to_iterator()
+    @export fun iter_int(): Iterator[Int] = [1, 2, 3].to_iterator()
 }
 
 class Example : FooNode {
 
-    @export fun singleton (): SomeStruct = SomeStruct(examples=[self])
+    @export fun singleton(): SomeStruct = SomeStruct(examples=[self])
 }
 
 ## This list node can contain one of the following nodes:
@@ -56,16 +55,16 @@ class Example : FooNode {
 ## * ${node_name(T.Var)}
 class Sequence : ASTList[FooNode] {
 
-    @export fun all_items (): Array[FooNode] = self.map((i) => i)
+    @export fun all_items(): Array[FooNode] = self.map((i) => i)
 
-    @export fun example_items (): Array[Example] = self.filtermap(
+    @export fun example_items(): Array[Example] = self.filtermap(
         (i) => i.as[Example]!, (i) => i is Example
     )
 }
 
 class Ident : FooNode implements TokenNode {
 
-    @export fun sym (sym : Symbol): Symbol = sym
+    @export fun sym(sym: Symbol): Symbol = sym
 }
 
 class Null : FooNode {
@@ -75,13 +74,13 @@ class StringLiteral : FooNode {
 }
 
 class Var : FooNode {
-    @parse_field arg : Sequence
+    @parse_field arg: Sequence
 }
 
 struct FooNodeStruct {
-    node : FooNode
+    node: FooNode
 }
 
 struct SomeStruct {
-    examples : Array[Example]
+    examples: Array[Example]
 }

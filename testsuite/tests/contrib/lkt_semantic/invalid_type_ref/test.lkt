@@ -1,7 +1,8 @@
-generic [T] class U {
+generic [T]
+class U {
 }
 
-a : U
+a: U
 
-class V : U {
+class V: U {
 }

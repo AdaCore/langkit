@@ -16,19 +16,19 @@ grammar foo_grammar {
 }
 
 @abstract class Decl : FooNode {
-    @abstract @parse_field name : Name
-    @abstract @parse_field value : Expr
+    @abstract @parse_field name: Name
+    @abstract @parse_field value: Expr
 }
 
 class FunDecl : Decl {
-    @parse_field name : Name
-    @parse_field @null_field value : Expr
+    @parse_field name: Name
+    @parse_field @null_field value: Expr
 }
 
 class VarDecl : Decl {
-    @parse_field var_kw : VarKeyword
-    @parse_field name : Name
-    @parse_field value : Expr
+    @parse_field var_kw: VarKeyword
+    @parse_field name: Name
+    @parse_field value: Expr
 }
 
 @abstract class Expr : FooNode {
@@ -38,7 +38,7 @@ class Number : Expr implements TokenNode {
 }
 
 class Ref : Expr {
-    @parse_field name : Name
+    @parse_field name: Name
 }
 
 class Name : FooNode implements TokenNode {

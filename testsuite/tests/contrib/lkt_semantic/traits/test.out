@@ -3,63 +3,63 @@ Resolving test.lkt
 Id   <RefId "Int" test.lkt:5:28-5:31>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:9:35-9:38>
+Id   <RefId "Int" test.lkt:10:34-10:37>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "T" test.lkt:9:41-9:42>
+Id   <RefId "T" test.lkt:10:40-10:41>
      references <GenericFormalTypeDecl "T" test.lkt:8:10-8:11>
 
-Id   <RefId "WithLength" test.lkt:12:34-12:44>
+Id   <RefId "WithLength" test.lkt:14:22-14:32>
      references <TraitDecl "WithLength" test.lkt:4:1-6:2>
 
-Id   <RefId "WithIndex" test.lkt:12:46-12:55>
-     references <GenericDecl "WithIndex" test.lkt:8:1-10:2>
+Id   <RefId "WithIndex" test.lkt:14:34-14:43>
+     references <GenericDecl "WithIndex" test.lkt:8:1-11:2>
 
-Id   <RefId "T" test.lkt:12:56-12:57>
-     references <GenericFormalTypeDecl "T" test.lkt:12:10-12:11>
+Id   <RefId "T" test.lkt:14:44-14:45>
+     references <GenericFormalTypeDecl "T" test.lkt:13:10-13:11>
 
-Id   <RefId "Vec" test.lkt:15:11-15:14>
-     references <GenericDecl "Vec" test.lkt:12:1-13:2>
+Id   <RefId "Vec" test.lkt:17:10-17:13>
+     references <GenericDecl "Vec" test.lkt:13:1-15:2>
 
-Id   <RefId "String" test.lkt:15:15-15:21>
+Id   <RefId "String" test.lkt:17:14-17:20>
      references <StructDecl prelude: "String">
 
-Expr <NullLit test.lkt:15:25-15:29>
-     has type <InstantiatedGenericType "Vec[String]" test.lkt:12:1-13:2>
+Expr <NullLit test.lkt:17:24-17:28>
+     has type <InstantiatedGenericType "Vec[String]" test.lkt:13:1-15:2>
 
-Id   <RefId "Int" test.lkt:16:18-16:21>
+Id   <RefId "Int" test.lkt:18:17-18:20>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "vec" test.lkt:16:24-16:27>
-     references <ValDecl "vec" test.lkt:15:1-15:29>
+Id   <RefId "vec" test.lkt:18:23-18:26>
+     references <ValDecl "vec" test.lkt:17:1-17:28>
 
-Expr <RefId "vec" test.lkt:16:24-16:27>
-     has type <InstantiatedGenericType "Vec[String]" test.lkt:12:1-13:2>
+Expr <RefId "vec" test.lkt:18:23-18:26>
+     has type <InstantiatedGenericType "Vec[String]" test.lkt:13:1-15:2>
 
-Id   <RefId "length" test.lkt:16:28-16:34>
+Id   <RefId "length" test.lkt:18:27-18:33>
      references <FunDecl "length" test.lkt:5:14-5:31>
 
-Expr <RefId "length" test.lkt:16:28-16:34>
+Expr <RefId "length" test.lkt:18:27-18:33>
      has type <FunctionType prelude: "() -> Int">
 
-Expr <DotExpr test.lkt:16:24-16:34>
+Expr <DotExpr test.lkt:18:23-18:33>
      has type <FunctionType prelude: "() -> Int">
 
-Expr <CallExpr test.lkt:16:24-16:36>
+Expr <CallExpr test.lkt:18:23-18:35>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "String" test.lkt:19:16-19:22>
+Id   <RefId "String" test.lkt:21:15-21:21>
      references <StructDecl prelude: "String">
 
-Id   <RefId "vec" test.lkt:19:25-19:28>
-     references <ValDecl "vec" test.lkt:15:1-15:29>
+Id   <RefId "vec" test.lkt:21:24-21:27>
+     references <ValDecl "vec" test.lkt:17:1-17:28>
 
-Expr <RefId "vec" test.lkt:19:25-19:28>
-     has type <InstantiatedGenericType "Vec[String]" test.lkt:12:1-13:2>
+Expr <RefId "vec" test.lkt:21:24-21:27>
+     has type <InstantiatedGenericType "Vec[String]" test.lkt:13:1-15:2>
 
-Expr <NumLit test.lkt:19:29-19:30>
+Expr <NumLit test.lkt:21:28-21:29>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:19:25-19:31>
+Expr <CallExpr test.lkt:21:24-21:30>
      has type <StructDecl prelude: "String">
 

@@ -1,6 +1,7 @@
-generic [@out T] struct TestEntity {
-    node : T
-    other : Int
+generic [@out T]
+struct TestEntity {
+    node: T
+    other: Int
 }
 
 class TestNode {}
@@ -8,6 +9,6 @@ class Expr : TestNode {}
 class Statement : TestNode {}
 class Lit : Expr {}
 
-A : TestEntity[Lit]
-B : TestEntity[TestNode] = A
-@invalid C : TestEntity[Statement] = A
+A: TestEntity[Lit]
+B: TestEntity[TestNode] = A
+@invalid C: TestEntity[Statement] = A

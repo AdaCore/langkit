@@ -19,24 +19,24 @@ grammar foo_grammar {
 }
 
 class Block : FooNode {
-    @parse_field name : Name
-    @parse_field decls : ASTList[Decl]
-    @parse_field usings : ASTList[Using]
-    @parse_field refs : ASTList[Ref]
+    @parse_field name: Name
+    @parse_field decls: ASTList[Decl]
+    @parse_field usings: ASTList[Using]
+    @parse_field refs: ASTList[Ref]
 }
 
 class Decl : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 }
 
 class Name : FooNode implements TokenNode {
 
-    fun ambiant_entity (): FooNode = env.get(node)?(0)
+    fun ambiant_entity(): FooNode = env.get(node)?(0)
 
-    fun designated_env (): LexicalEnv[FooNode] =
+    fun designated_env(): LexicalEnv[FooNode] =
     node.unit().root.node_env().get(node)?(0).children_env()
 
-    @export fun entity (): FooNode = {
+    @export fun entity(): FooNode = {
         bind env = node.node_env();
 
         node.ambiant_entity()
@@ -44,11 +44,11 @@ class Name : FooNode implements TokenNode {
 }
 
 class Ref : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 
-    @export fun entity (): FooNode = node.as_entity.name.entity()
+    @export fun entity(): FooNode = node.as_entity.name.entity()
 }
 
 class Using : FooNode {
-    @parse_field name : Name
+    @parse_field name: Name
 }

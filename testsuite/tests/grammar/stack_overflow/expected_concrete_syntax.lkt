@@ -14,5 +14,5 @@ class Example : FooNode implements TokenNode {
 }
 
 class Paren : FooNode {
-    @parse_field contents : FooNode
+    @parse_field contents: FooNode
 }

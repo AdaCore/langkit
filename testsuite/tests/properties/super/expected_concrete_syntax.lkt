@@ -7,21 +7,21 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun root1 (): Array[Int] = [1]
+    @export fun root1(): Array[Int] = [1]
 
-    @export fun root2 (a : String, b : String): String = (a & (" + ")) & b
+    @export fun root2(a: String, b: String): String = (a & (" + ")) & b
 }
 
 @abstract class Expr : FooNode {
 
-    fun root1 (): Array[Int] = super() & ([2])
+    fun root1(): Array[Int] = super() & ([2])
 }
 
 class Name : Expr implements TokenNode {
 
-    fun root1 (): Array[Int] = super() & ([3])
+    fun root1(): Array[Int] = super() & ([3])
 
-    fun root2 (a : String, b : String): String = (
+    fun root2(a: String, b: String): String = (
         ("<") & (
             super((("[") & a) & ("]"), b=(("{") & b) & ("}"))
         )

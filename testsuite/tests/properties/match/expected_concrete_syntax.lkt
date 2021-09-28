@@ -13,7 +13,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun find_atoms (): Array[Atom] = (
+    @export fun find_atoms(): Array[Atom] = (
         match self {
             # This should match Lit .. Ref
             case a : Atom => [a]
@@ -25,7 +25,7 @@ grammar foo_grammar {
         self.children.mapcat((c) => c.find_atoms())
     )
 
-    @export fun find_atoms_or_exprs (): Array[Expr] = (
+    @export fun find_atoms_or_exprs(): Array[Expr] = (
         match self {
             # This should match Lit .. Ref
             case a : Atom => [a.as[Expr]]
@@ -40,7 +40,7 @@ grammar foo_grammar {
         self.children.mapcat((c) => c.find_atoms_or_exprs())
     )
 
-    @export fun find_exprs (): Array[Expr] = (
+    @export fun find_exprs(): Array[Expr] = (
         match self {
             # This should match Lit .. Plus
             case e : Expr => [e]
@@ -58,13 +58,13 @@ grammar foo_grammar {
 }
 
 class Def : FooNode {
-    @parse_field name : Name
-    @parse_field expr : Expr
+    @parse_field name: Name
+    @parse_field expr: Expr
 }
 
 @abstract class Expr : FooNode {
 
-    @export fun find_refs (): Array[Ref] = (
+    @export fun find_refs(): Array[Ref] = (
         match self {
             # This should match Ref
             case r : Ref => [r]
@@ -87,8 +87,8 @@ class Ref : Atom implements TokenNode {
 }
 
 class Plus : Expr {
-    @parse_field lhs : Expr
-    @parse_field rhs : Expr
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
 }
 
 class Name : FooNode implements TokenNode {

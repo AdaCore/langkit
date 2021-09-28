@@ -13,10 +13,10 @@ grammar foo_grammar {
 
 class Id : FooNode implements TokenNode {
 
-    @export fun get_scope (): FooNode = node.children_env().get_first("Scope")
+    @export fun get_scope(): FooNode = node.children_env().get_first("Scope")
 }
 
 class Scope : FooNode {
-    @parse_field name : Id
-    @parse_field content : ASTList[FooNode]
+    @parse_field name: Id
+    @parse_field content: ASTList[FooNode]
 }

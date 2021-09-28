@@ -10,6 +10,6 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export @memoized fun unit_root_node (unit : AnalysisUnit[FooNode]): FooNode =
+    @export @memoized fun unit_root_node(unit: AnalysisUnit[FooNode]): FooNode =
     unit.root.as_bare_entity
 }

@@ -19,62 +19,62 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun identity (value : BigInt): BigInt = value
+    @export fun identity(value: BigInt): BigInt = value
 }
 
 class Decl : FooNode {
-    @parse_field name : Identifier
-    @parse_field expr_tree : Expr
+    @parse_field name: Identifier
+    @parse_field expr_tree: Expr
 }
 
 @abstract class Expr : FooNode {
 
-    @export @abstract fun evaluate (): BigInt
+    @export @abstract fun evaluate(): BigInt
 
-    @export fun evaluate_as_int (): Int = node.evaluate().as_int()
+    @export fun evaluate_as_int(): Int = node.evaluate().as_int()
 }
 
 class Equal : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 
-    fun evaluate (): BigInt = BigInt(if (
+    fun evaluate(): BigInt = BigInt(if (
         node.left.evaluate() = node.right.evaluate()
     ) then (1) else (0))
 }
 
 class LessThan : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 
-    fun evaluate (): BigInt = BigInt(if (
+    fun evaluate(): BigInt = BigInt(if (
         node.left.evaluate() < node.right.evaluate()
     ) then (1) else (0))
 }
 
 class Literal : Expr implements TokenNode {
 
-    @abstract fun evaluate (): BigInt
+    @abstract fun evaluate(): BigInt
 }
 
 class Minus : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 
-    fun evaluate (): BigInt = node.left.evaluate() - node.right.evaluate()
+    fun evaluate(): BigInt = node.left.evaluate() - node.right.evaluate()
 }
 
 class Plus : Expr {
-    @parse_field left : Expr
-    @parse_field right : Expr
+    @parse_field left: Expr
+    @parse_field right: Expr
 
-    fun evaluate (): BigInt = node.left.evaluate() + node.right.evaluate()
+    fun evaluate(): BigInt = node.left.evaluate() + node.right.evaluate()
 }
 
 class Ref : Expr {
-    @parse_field name : Identifier
+    @parse_field name: Identifier
 
-    fun evaluate (): BigInt =
+    fun evaluate(): BigInt =
     node.node_env().get_first(node.name.symbol).as[Decl].expr_tree.evaluate()
 }
 

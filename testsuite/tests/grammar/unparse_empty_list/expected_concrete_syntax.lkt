@@ -13,8 +13,8 @@ grammar foo_grammar {
 }
 
 class DefNode : FooNode {
-    @parse_field name : Identifier
-    @parse_field values : ASTList[DefNode]
+    @parse_field name: Identifier
+    @parse_field values: ASTList[DefNode]
 }
 
 class Identifier : FooNode implements TokenNode {

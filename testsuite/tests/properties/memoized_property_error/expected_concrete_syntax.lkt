@@ -10,12 +10,12 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export @memoized fun prop1 (): Bool = {
+    @export @memoized fun prop1(): Bool = {
         val _ = [node];
 
         raise PropertyError("Explicit error 1")
     }
 
-    @export @memoized fun prop2 (): Bool =
+    @export @memoized fun prop2(): Bool =
     raise PropertyError("Explicit error 2")
 }

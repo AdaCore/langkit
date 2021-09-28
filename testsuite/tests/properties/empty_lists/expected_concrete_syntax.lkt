@@ -10,33 +10,33 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export fun test_contains (): Bool = null.contains(node)
+    @export fun test_contains(): Bool = null.contains(node)
 
-    @export fun test_filter (): Array[Example] =
+    @export fun test_filter(): Array[Example] =
     null.filter((n) => n.is_null).map((n) => n.as_bare_entity)
 
-    @export fun test_filtermap (): Array[Example] = null.filtermap(
+    @export fun test_filtermap(): Array[Example] = null.filtermap(
         (n) => n.as_bare_entity, (n) => n.is_null
     )
 
-    @export fun test_map (): Array[Example] = null.map((n) => n.as_bare_entity)
+    @export fun test_map(): Array[Example] = null.map((n) => n.as_bare_entity)
 
-    @export fun test_mapcat (): Array[Example] =
+    @export fun test_mapcat(): Array[Example] =
     null.mapcat((n) => [n.as_bare_entity])
 
-    @export fun test_takewhile (): Array[Example] =
+    @export fun test_takewhile(): Array[Example] =
     null.take_while((n) => n.is_null).map((n) => n.as_bare_entity)
 
-    @export fun test_as_array (): Array[Example] =
+    @export fun test_as_array(): Array[Example] =
     null.as_array().map((n) => n.as_bare_entity)
 
-    @export fun test_all (): Bool = null.all((n) => n.is_null)
+    @export fun test_all(): Bool = null.all((n) => n.is_null)
 
-    @export fun test_any (): Bool = null.any((n) => n.is_null)
+    @export fun test_any(): Bool = null.any((n) => n.is_null)
 
-    @export fun test_at (): Example = null?(0).as_bare_entity
+    @export fun test_at(): Example = null?(0).as_bare_entity
 
-    @export fun test_at_or_raise (): Example = null(0).as_bare_entity
+    @export fun test_at_or_raise(): Example = null(0).as_bare_entity
 
-    @export fun test_length (): Int = null.length()
+    @export fun test_length(): Int = null.length()
 }

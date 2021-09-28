@@ -1,394 +1,394 @@
 Resolving test.lkt
 ==================
-Id   <RefId "Int" test.lkt:7:34-7:37>
+Id   <RefId "Int" test.lkt:8:22-8:25>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "T" test.lkt:7:40-7:41>
+Id   <RefId "T" test.lkt:8:28-8:29>
      references <GenericFormalTypeDecl "T" test.lkt:7:10-7:11>
 
-Id   <RefId "T" test.lkt:8:31-8:32>
-     references <GenericFormalTypeDecl "T" test.lkt:8:10-8:11>
+Id   <RefId "T" test.lkt:11:19-11:20>
+     references <GenericFormalTypeDecl "T" test.lkt:10:10-10:11>
 
-Id   <RefId "T" test.lkt:8:35-8:36>
-     references <GenericFormalTypeDecl "T" test.lkt:8:10-8:11>
+Id   <RefId "T" test.lkt:11:23-11:24>
+     references <GenericFormalTypeDecl "T" test.lkt:10:10-10:11>
 
-Id   <RefId "T" test.lkt:9:32-9:33>
-     references <GenericFormalTypeDecl "T" test.lkt:9:10-9:11>
+Id   <RefId "T" test.lkt:14:20-14:21>
+     references <GenericFormalTypeDecl "T" test.lkt:13:10-13:11>
 
-Id   <RefId "Array" test.lkt:9:36-9:41>
+Id   <RefId "Array" test.lkt:14:24-14:29>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "T" test.lkt:9:42-9:43>
-     references <GenericFormalTypeDecl "T" test.lkt:9:10-9:11>
+Id   <RefId "T" test.lkt:14:30-14:31>
+     references <GenericFormalTypeDecl "T" test.lkt:13:10-13:11>
 
-Id   <RefId "T" test.lkt:10:29-10:30>
-     references <GenericFormalTypeDecl "T" test.lkt:10:10-10:11>
+Id   <RefId "T" test.lkt:17:17-17:18>
+     references <GenericFormalTypeDecl "T" test.lkt:16:10-16:11>
 
-Id   <RefId "T" test.lkt:10:35-10:36>
-     references <GenericFormalTypeDecl "T" test.lkt:10:10-10:11>
+Id   <RefId "T" test.lkt:17:23-17:24>
+     references <GenericFormalTypeDecl "T" test.lkt:16:10-16:11>
 
-Id   <RefId "T" test.lkt:10:41-10:42>
-     references <GenericFormalTypeDecl "T" test.lkt:10:10-10:11>
+Id   <RefId "T" test.lkt:17:29-17:30>
+     references <GenericFormalTypeDecl "T" test.lkt:16:10-16:11>
 
-Id   <RefId "T" test.lkt:10:45-10:46>
-     references <GenericFormalTypeDecl "T" test.lkt:10:10-10:11>
+Id   <RefId "T" test.lkt:17:33-17:34>
+     references <GenericFormalTypeDecl "T" test.lkt:16:10-16:11>
 
-Id   <RefId "String" test.lkt:13:29-13:35>
+Id   <RefId "String" test.lkt:20:29-20:35>
      references <StructDecl prelude: "String">
 
-Id   <RefId "convert_int" test.lkt:13:38-13:49>
-     references <GenericDecl "convert_int" test.lkt:7:1-7:41>
+Id   <RefId "convert_int" test.lkt:20:38-20:49>
+     references <GenericDecl "convert_int" test.lkt:7:1-8:29>
 
-Id   <RefId "String" test.lkt:13:50-13:56>
+Id   <RefId "String" test.lkt:20:50-20:56>
      references <StructDecl prelude: "String">
 
-Expr <GenericInstantiation test.lkt:13:38-13:57>
+Expr <GenericInstantiation test.lkt:20:38-20:57>
      has type <FunctionType prelude: "(Int) -> String">
 
-Expr <NumLit test.lkt:13:58-13:60>
+Expr <NumLit test.lkt:20:58-20:60>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:13:38-13:61>
+Expr <CallExpr test.lkt:20:38-20:61>
      has type <StructDecl prelude: "String">
 
-Id   <RefId "Int" test.lkt:14:31-14:34>
+Id   <RefId "Int" test.lkt:21:31-21:34>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "identity" test.lkt:14:37-14:45>
-     references <GenericDecl "identity" test.lkt:8:1-8:36>
+Id   <RefId "identity" test.lkt:21:37-21:45>
+     references <GenericDecl "identity" test.lkt:10:1-11:24>
 
-Id   <RefId "Int" test.lkt:14:46-14:49>
+Id   <RefId "Int" test.lkt:21:46-21:49>
      references <StructDecl prelude: "Int">
 
-Expr <GenericInstantiation test.lkt:14:37-14:50>
+Expr <GenericInstantiation test.lkt:21:37-21:50>
      has type <FunctionType prelude: "(Int) -> Int">
 
-Expr <NumLit test.lkt:14:51-14:53>
+Expr <NumLit test.lkt:21:51-21:53>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:14:37-14:54>
+Expr <CallExpr test.lkt:21:37-21:54>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Array" test.lkt:15:32-15:37>
+Id   <RefId "Array" test.lkt:22:32-22:37>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "Int" test.lkt:15:38-15:41>
+Id   <RefId "Int" test.lkt:22:38-22:41>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "singleton" test.lkt:15:45-15:54>
-     references <GenericDecl "singleton" test.lkt:9:1-9:44>
+Id   <RefId "singleton" test.lkt:22:45-22:54>
+     references <GenericDecl "singleton" test.lkt:13:1-14:32>
 
-Id   <RefId "Int" test.lkt:15:55-15:58>
+Id   <RefId "Int" test.lkt:22:55-22:58>
      references <StructDecl prelude: "Int">
 
-Expr <GenericInstantiation test.lkt:15:45-15:59>
+Expr <GenericInstantiation test.lkt:22:45-22:59>
      has type <FunctionType prelude: "(Int) -> Array[Int]">
 
-Expr <NumLit test.lkt:15:60-15:62>
+Expr <NumLit test.lkt:22:60-22:62>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:15:45-15:63>
+Expr <CallExpr test.lkt:22:45-22:63>
      has type <InstantiatedGenericType prelude: "Array[Int]">
 
-Id   <RefId "Int" test.lkt:18:18-18:21>
+Id   <RefId "Int" test.lkt:25:18-25:21>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:18:24-18:27>
+Id   <RefId "Int" test.lkt:25:24-25:27>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "arg" test.lkt:18:30-18:33>
-     references <FunArgDecl "arg" test.lkt:18:13-18:21>
+Id   <RefId "arg" test.lkt:25:30-25:33>
+     references <FunArgDecl "arg" test.lkt:25:13-25:21>
 
-Expr <RefId "arg" test.lkt:18:30-18:33>
+Expr <RefId "arg" test.lkt:25:30-25:33>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:18:36-18:37>
+Expr <NumLit test.lkt:25:36-25:37>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:18:30-18:37>
+Expr <BinOp test.lkt:25:30-25:37>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:19:19-19:22>
+Id   <RefId "Int" test.lkt:26:19-26:22>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "apply" test.lkt:19:25-19:30>
-     references <GenericDecl "apply" test.lkt:10:1-10:46>
+Id   <RefId "apply" test.lkt:26:25-26:30>
+     references <GenericDecl "apply" test.lkt:16:1-17:34>
 
-Id   <RefId "Int" test.lkt:19:31-19:34>
+Id   <RefId "Int" test.lkt:26:31-26:34>
      references <StructDecl prelude: "Int">
 
-Expr <GenericInstantiation test.lkt:19:25-19:35>
+Expr <GenericInstantiation test.lkt:26:25-26:35>
      has type <FunctionType prelude: "((Int) -> Int, Int) -> Int">
 
-Id   <RefId "double" test.lkt:19:36-19:42>
-     references <FunDecl "double" test.lkt:18:1-18:37>
+Id   <RefId "double" test.lkt:26:36-26:42>
+     references <FunDecl "double" test.lkt:25:1-25:37>
 
-Expr <RefId "double" test.lkt:19:36-19:42>
+Expr <RefId "double" test.lkt:26:36-26:42>
      has type <FunctionType prelude: "(Int) -> Int">
 
-Expr <NumLit test.lkt:19:44-19:46>
+Expr <NumLit test.lkt:26:44-26:46>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:19:25-19:47>
+Expr <CallExpr test.lkt:26:25-26:47>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:22:24-22:27>
+Id   <RefId "Int" test.lkt:29:24-29:27>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "true" test.lkt:22:34-22:38>
+Id   <RefId "true" test.lkt:29:34-29:38>
      references <EnumLitDecl prelude: "true">
 
-Expr <RefId "true" test.lkt:22:34-22:38>
+Expr <RefId "true" test.lkt:29:34-29:38>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <NumLit test.lkt:22:44-22:46>
+Expr <NumLit test.lkt:29:44-29:46>
      has type <StructDecl prelude: "Int">
 
-Expr <NullLit test.lkt:22:52-22:56>
+Expr <NullLit test.lkt:29:52-29:56>
      has type <StructDecl prelude: "Int">
 
-Expr <IfExpr test.lkt:22:31-22:56>
+Expr <IfExpr test.lkt:29:31-29:56>
      has type <StructDecl prelude: "Int">
 
-Expr <ParenExpr test.lkt:22:30-22:57>
+Expr <ParenExpr test.lkt:29:30-29:57>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:25:28-25:31>
+Id   <RefId "Int" test.lkt:32:28-32:31>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "true" test.lkt:25:38-25:42>
+Id   <RefId "true" test.lkt:32:38-32:42>
      references <EnumLitDecl prelude: "true">
 
-Expr <RefId "true" test.lkt:25:38-25:42>
+Expr <RefId "true" test.lkt:32:38-32:42>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <NumLit test.lkt:25:48-25:50>
+Expr <NumLit test.lkt:32:48-32:50>
      has type <StructDecl prelude: "Int">
 
-Expr <NullLit test.lkt:25:56-25:60>
+Expr <NullLit test.lkt:32:56-32:60>
      has type <StructDecl prelude: "Int">
 
-Expr <IfExpr test.lkt:25:35-25:60>
+Expr <IfExpr test.lkt:32:35-32:60>
      has type <StructDecl prelude: "Int">
 
-Expr <ParenExpr test.lkt:25:34-25:61>
+Expr <ParenExpr test.lkt:32:34-32:61>
      has type <StructDecl prelude: "Int">
 
-Expr <ErrorOnNull test.lkt:25:34-25:62>
+Expr <ErrorOnNull test.lkt:32:34-32:62>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "String" test.lkt:31:20-31:26>
+Id   <RefId "String" test.lkt:38:20-38:26>
      references <StructDecl prelude: "String">
 
-Id   <RefId "convert_int" test.lkt:31:29-31:40>
-     references <GenericDecl "convert_int" test.lkt:7:1-7:41>
+Id   <RefId "convert_int" test.lkt:38:29-38:40>
+     references <GenericDecl "convert_int" test.lkt:7:1-8:29>
 
-Expr <NumLit test.lkt:31:41-31:43>
+Expr <NumLit test.lkt:38:41-38:43>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:31:29-31:44>
+Expr <CallExpr test.lkt:38:29-38:44>
      has type <StructDecl prelude: "String">
 
-Id   <RefId "Int" test.lkt:36:22-36:25>
+Id   <RefId "Int" test.lkt:43:22-43:25>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "identity" test.lkt:36:28-36:36>
-     references <GenericDecl "identity" test.lkt:8:1-8:36>
+Id   <RefId "identity" test.lkt:43:28-43:36>
+     references <GenericDecl "identity" test.lkt:10:1-11:24>
 
-Expr <NumLit test.lkt:36:37-36:39>
+Expr <NumLit test.lkt:43:37-43:39>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:36:28-36:40>
+Expr <CallExpr test.lkt:43:28-43:40>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Array" test.lkt:40:23-40:28>
+Id   <RefId "Array" test.lkt:47:23-47:28>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "Int" test.lkt:40:29-40:32>
+Id   <RefId "Int" test.lkt:47:29-47:32>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "singleton" test.lkt:40:36-40:45>
-     references <GenericDecl "singleton" test.lkt:9:1-9:44>
+Id   <RefId "singleton" test.lkt:47:36-47:45>
+     references <GenericDecl "singleton" test.lkt:13:1-14:32>
 
-Expr <NumLit test.lkt:40:46-40:48>
+Expr <NumLit test.lkt:47:46-47:48>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:40:36-40:49>
+Expr <CallExpr test.lkt:47:36-47:49>
      has type <InstantiatedGenericType prelude: "Array[Int]">
 
-Id   <RefId "Int" test.lkt:43:28-43:31>
+Id   <RefId "Int" test.lkt:50:28-50:31>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "apply" test.lkt:43:34-43:39>
-     references <GenericDecl "apply" test.lkt:10:1-10:46>
+Id   <RefId "apply" test.lkt:50:34-50:39>
+     references <GenericDecl "apply" test.lkt:16:1-17:34>
 
-Id   <RefId "double" test.lkt:43:40-43:46>
-     references <FunDecl "double" test.lkt:18:1-18:37>
+Id   <RefId "double" test.lkt:50:40-50:46>
+     references <FunDecl "double" test.lkt:25:1-25:37>
 
-Expr <RefId "double" test.lkt:43:40-43:46>
+Expr <RefId "double" test.lkt:50:40-50:46>
      has type <FunctionType prelude: "(Int) -> Int">
 
-Expr <NumLit test.lkt:43:48-43:50>
+Expr <NumLit test.lkt:50:48-50:50>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:43:34-43:51>
+Expr <CallExpr test.lkt:50:34-50:51>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "T" test.lkt:46:25-46:26>
-     references <GenericFormalTypeDecl "T" test.lkt:46:10-46:11>
+Id   <RefId "T" test.lkt:54:13-54:14>
+     references <GenericFormalTypeDecl "T" test.lkt:53:10-53:11>
 
-Id   <RefId "T" test.lkt:46:31-46:32>
-     references <GenericFormalTypeDecl "T" test.lkt:46:10-46:11>
+Id   <RefId "T" test.lkt:54:19-54:20>
+     references <GenericFormalTypeDecl "T" test.lkt:53:10-53:11>
 
-Id   <RefId "Int" test.lkt:46:35-46:38>
+Id   <RefId "Int" test.lkt:54:23-54:26>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:47:54-47:57>
+Id   <RefId "Int" test.lkt:56:54-56:57>
      references <StructDecl prelude: "Int">
 
-test.lkt:47:60: error: Not enough information to infer instantiation of generic callee
-46 | @invalid fun test_ambiguous_generic_instantiation(): Int = fooz(1, "lol")
+test.lkt:56:60: error: Not enough information to infer instantiation of generic callee
+55 | @invalid fun test_ambiguous_generic_instantiation(): Int = fooz(1, "lol")
    |                                                            ^^^^^^^^^^^^^^
 
-Id   <RefId "fooz" test.lkt:47:60-47:64>
-     references <GenericDecl "fooz" test.lkt:46:1-46:38>
+Id   <RefId "fooz" test.lkt:56:60-56:64>
+     references <GenericDecl "fooz" test.lkt:53:1-54:26>
 
-Id   <RefId "Array" test.lkt:50:40-50:45>
+Id   <RefId "Array" test.lkt:59:40-59:45>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "Int" test.lkt:50:46-50:49>
+Id   <RefId "Int" test.lkt:59:46-59:49>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "singleton" test.lkt:50:53-50:62>
-     references <GenericDecl "singleton" test.lkt:9:1-9:44>
+Id   <RefId "singleton" test.lkt:59:53-59:62>
+     references <GenericDecl "singleton" test.lkt:13:1-14:32>
 
-test.lkt:50:63: error: Mismatched types: expected `Int`, got a string literal
-49 | @invalid fun test_invalid_singleton(): Array[Int] = singleton("lol")
+test.lkt:59:63: error: Mismatched types: expected `Int`, got a string literal
+58 | @invalid fun test_invalid_singleton(): Array[Int] = singleton("lol")
    |                                                               ^^^^^ 
 
-Expr <CallExpr test.lkt:50:53-50:69>
+Expr <CallExpr test.lkt:59:53-59:69>
      has type <InstantiatedGenericType prelude: "Array[Int]">
 
-Id   <RefId "Int" test.lkt:53:42-53:45>
+Id   <RefId "Int" test.lkt:62:42-62:45>
      references <StructDecl prelude: "Int">
 
-test.lkt:53:48: error: Cannot instantiate callee: cannot unify `Array[T]` with `Int`
-52 | @invalid fun test_invalid_singleton_2(): Int = singleton("lol")
+test.lkt:62:48: error: Cannot instantiate callee: cannot unify `Array[T]` with `Int`
+61 | @invalid fun test_invalid_singleton_2(): Int = singleton("lol")
    |                                                ^^^^^^^^^^^^^^^^
 
-Id   <RefId "singleton" test.lkt:53:48-53:57>
-     references <GenericDecl "singleton" test.lkt:9:1-9:44>
+Id   <RefId "singleton" test.lkt:62:48-62:57>
+     references <GenericDecl "singleton" test.lkt:13:1-14:32>
 
-Id   <RefId "Dummy" test.lkt:58:42-58:47>
-     references <GenericDecl "Dummy" test.lkt:55:1-55:31>
+Id   <RefId "Dummy" test.lkt:68:42-68:47>
+     references <GenericDecl "Dummy" test.lkt:64:1-65:16>
 
-Id   <RefId "Int" test.lkt:58:48-58:51>
+Id   <RefId "Int" test.lkt:68:48-68:51>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "String" test.lkt:58:53-58:59>
+Id   <RefId "String" test.lkt:68:53-68:59>
      references <StructDecl prelude: "String">
 
-test.lkt:58:63: error: Cannot instantiate callee: cannot unify `Array[T]` with `Dummy[Int, String]`
-57 | @invalid fun test_invalid_singleton_3(): Dummy[Int, String] = singleton("lol")
+test.lkt:68:63: error: Cannot instantiate callee: cannot unify `Array[T]` with `Dummy[Int, String]`
+67 | @invalid fun test_invalid_singleton_3(): Dummy[Int, String] = singleton("lol")
    |                                                               ^^^^^^^^^^^^^^^^
 
-Id   <RefId "singleton" test.lkt:58:63-58:72>
-     references <GenericDecl "singleton" test.lkt:9:1-9:44>
+Id   <RefId "singleton" test.lkt:68:63-68:72>
+     references <GenericDecl "singleton" test.lkt:13:1-14:32>
 
-Id   <RefId "Int" test.lkt:61:18-61:21>
+Id   <RefId "Int" test.lkt:71:17-71:20>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Bool" test.lkt:61:24-61:28>
+Id   <RefId "Bool" test.lkt:71:23-71:27>
      references <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "a" test.lkt:61:32-61:33>
-     references <FunArgDecl "a" test.lkt:61:14-61:21>
+Id   <RefId "a" test.lkt:71:31-71:32>
+     references <FunArgDecl "a" test.lkt:71:14-71:20>
 
-Expr <RefId "a" test.lkt:61:32-61:33>
+Expr <RefId "a" test.lkt:71:31-71:32>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:61:36-61:38>
+Expr <NumLit test.lkt:71:35-71:37>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:61:32-61:38>
+Expr <BinOp test.lkt:71:31-71:37>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <ParenExpr test.lkt:61:31-61:39>
+Expr <ParenExpr test.lkt:71:30-71:38>
      has type <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "a" test.lkt:61:44-61:45>
-     references <FunArgDecl "a" test.lkt:61:14-61:21>
+Id   <RefId "a" test.lkt:71:43-71:44>
+     references <FunArgDecl "a" test.lkt:71:14-71:20>
 
-Expr <RefId "a" test.lkt:61:44-61:45>
+Expr <RefId "a" test.lkt:71:43-71:44>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:61:48-61:50>
+Expr <NumLit test.lkt:71:47-71:49>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:61:44-61:50>
+Expr <BinOp test.lkt:71:43-71:49>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <ParenExpr test.lkt:61:43-61:51>
+Expr <ParenExpr test.lkt:71:42-71:50>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <BinOp test.lkt:61:31-61:51>
+Expr <BinOp test.lkt:71:30-71:50>
      has type <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "Int" test.lkt:64:34-64:37>
+Id   <RefId "Int" test.lkt:74:34-74:37>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:64:42-64:45>
+Id   <RefId "Int" test.lkt:74:42-74:45>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:64:51-64:54>
+Id   <RefId "Int" test.lkt:74:51-74:54>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:64:59-64:62>
+Id   <RefId "Int" test.lkt:74:59-74:62>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:64:65-64:68>
+Id   <RefId "Int" test.lkt:74:65-74:68>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:65:34-65:37>
+Id   <RefId "Int" test.lkt:75:34-75:37>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "test_lambda_leak_support" test.lkt:66:5-66:29>
-     references <FunDecl "test_lambda_leak_support" test.lkt:64:1-64:68>
+Id   <RefId "test_lambda_leak_support" test.lkt:76:5-76:29>
+     references <FunDecl "test_lambda_leak_support" test.lkt:74:1-74:68>
 
-Expr <RefId "test_lambda_leak_support" test.lkt:66:5-66:29>
+Expr <RefId "test_lambda_leak_support" test.lkt:76:5-76:29>
      has type <FunctionType prelude: "((Int) -> Int, (Int) -> Int) -> Int">
 
-Id   <RefId "xxx" test.lkt:67:18-67:21>
-     references <LambdaArgDecl "xxx" test.lkt:67:10-67:13>
+Id   <RefId "xxx" test.lkt:77:18-77:21>
+     references <LambdaArgDecl "xxx" test.lkt:77:10-77:13>
 
-Expr <RefId "xxx" test.lkt:67:18-67:21>
+Expr <RefId "xxx" test.lkt:77:18-77:21>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:67:24-67:25>
+Expr <NumLit test.lkt:77:24-77:25>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:67:18-67:25>
+Expr <BinOp test.lkt:77:18-77:25>
      has type <StructDecl prelude: "Int">
 
-Expr <LambdaExpr test.lkt:67:9-67:25>
+Expr <LambdaExpr test.lkt:77:9-77:25>
      has type <FunctionType prelude: "(Int) -> Int">
 
-test.lkt:68:18: error: Cannot find entity `xxx` in this scope
-67 |         (yyy) => xxx * yyy
+test.lkt:78:18: error: Cannot find entity `xxx` in this scope
+77 |         (yyy) => xxx * yyy
    |                  ^^^      
 
-Id   <RefId "yyy" test.lkt:68:24-68:27>
-     references <LambdaArgDecl "yyy" test.lkt:68:10-68:13>
+Id   <RefId "yyy" test.lkt:78:24-78:27>
+     references <LambdaArgDecl "yyy" test.lkt:78:10-78:13>
 
-Expr <RefId "yyy" test.lkt:68:24-68:27>
+Expr <RefId "yyy" test.lkt:78:24-78:27>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:68:18-68:27>
+Expr <BinOp test.lkt:78:18-78:27>
      has type <StructDecl prelude: "Int">
 
-Expr <LambdaExpr test.lkt:68:9-68:27>
+Expr <LambdaExpr test.lkt:78:9-78:27>
      has type <FunctionType prelude: "(Int) -> Int">
 
-Expr <CallExpr test.lkt:66:5-70:6>
+Expr <CallExpr test.lkt:76:5-80:6>
      has type <StructDecl prelude: "Int">
 

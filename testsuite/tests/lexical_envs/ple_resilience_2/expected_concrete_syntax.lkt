@@ -9,7 +9,7 @@ grammar foo_grammar {
 }
 
 class Def : FooNode {
-    @parse_field example : Example
+    @parse_field example: Example
 }
 
 class Example : FooNode {

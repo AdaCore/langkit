@@ -11,13 +11,13 @@ grammar foo_grammar {
 }
 
 class Def : FooNode {
-    @parse_field name : Name
-    @parse_field ref : Name
+    @parse_field name: Name
+    @parse_field ref: Name
 }
 
 class Name : FooNode implements TokenNode {
 
-    fun sym (): Symbol = node.symbol
+    fun sym(): Symbol = node.symbol
 
-    fun resolve (): FooNode = node.parent.node_env().get(node.sym())?(0)
+    fun resolve(): FooNode = node.parent.node_env().get(node.sym())?(0)
 }

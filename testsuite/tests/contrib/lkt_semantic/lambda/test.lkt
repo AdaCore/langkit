@@ -9,8 +9,8 @@ fun lambda_test_1(): Int = lambda_test_helper(12, (x, y) => x + y * 2)
 
 # Test 2: test that either all or no lambda params have type annotations
 @invalid fun lambda_test_incorrect_1(): Int =
-    lambda_test_helper(12, (x : Int, y) => x + y * 2)
+    lambda_test_helper(12, (x: Int, y) => x + y * 2)
 
 # Test 3: Errors on mismatching lambda type
 @invalid fun lambda_test_incorrect_2(): Int =
-    lambda_test_helper(12, (x : String, y : String): Int => 12)
+    lambda_test_helper(12, (x: String, y: String): Int => 12)

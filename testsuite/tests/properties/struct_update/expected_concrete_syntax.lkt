@@ -7,13 +7,13 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun increment (kv : KV): KV = kv.update(value=kv.value + BigInt(1))
+    @export fun increment(kv: KV): KV = kv.update(value=kv.value + BigInt(1))
 }
 
 class Example : FooNode implements TokenNode {
 }
 
 struct KV {
-    key : String
-    value : BigInt
+    key: String
+    value: BigInt
 }

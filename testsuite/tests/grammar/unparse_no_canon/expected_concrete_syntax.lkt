@@ -24,6 +24,6 @@ class Number : FooNode implements TokenNode {
 }
 
 class RootNode : FooNode {
-    @parse_field ident : Identifier
-    @parse_field number : Number
+    @parse_field ident: Identifier
+    @parse_field number: Number
 }

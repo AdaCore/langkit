@@ -13,11 +13,11 @@ class BarNode : FooNode {
 
 class Literal : FooNode implements TokenNode {
 
-    fun b (): BarNode = node.a().as[BarNode]
+    fun b(): BarNode = node.a().as[BarNode]
 
-    @export fun c (): BarNode = node.b()
+    @export fun c(): BarNode = node.b()
 
-    @export fun d (): BarNode = node.a().as[BarNode]
+    @export fun d(): BarNode = node.a().as[BarNode]
 
-    @not_implemented fun a (): FooNode
+    @not_implemented fun a(): FooNode
 }

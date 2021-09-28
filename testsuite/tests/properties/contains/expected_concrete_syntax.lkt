@@ -9,9 +9,9 @@ grammar foo_grammar {
 }
 
 class ListNode : FooNode {
-    @parse_field nb_list : ASTList[NumberNode]
+    @parse_field nb_list: ASTList[NumberNode]
 
-    @export fun prop (): Bool = node.nb_list.map((_, i) => i).contains(1)
+    @export fun prop(): Bool = node.nb_list.map((_, i) => i).contains(1)
 }
 
 class NumberNode : FooNode implements TokenNode {

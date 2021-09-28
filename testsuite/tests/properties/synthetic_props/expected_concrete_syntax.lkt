@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 class Example : FooNode implements TokenNode {
 
-    @export @memoized fun get (): SynthNode = SynthNode()
+    @export @memoized fun get(): SynthNode = SynthNode()
 }
 
 class SynthNode : FooNode {
