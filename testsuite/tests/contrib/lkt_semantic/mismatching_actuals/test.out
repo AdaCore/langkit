@@ -105,6 +105,10 @@ Expr <NumLit test.lkt:8:29-8:31>
 Expr <NumLit test.lkt:8:33-8:35>
      has type <StructDecl prelude: "Int">
 
+test.lkt:8:37: error: ambiguous type for expression
+7 | @invalid val x : Int = test(12, 15, 17) # Too many params
+  |                                     ^^                   
+
 Expr <CallExpr test.lkt:8:24-8:40>
      has type <StructDecl prelude: "Int">
 
@@ -138,6 +142,10 @@ Expr <RefId "b" test.lkt:9:34-9:35>
 
 Expr <NumLit test.lkt:9:36-9:38>
      has type <StructDecl prelude: "Int">
+
+test.lkt:9:42: error: ambiguous type for expression
+8 | @invalid val y : Int = test(a=1, b=12, c=15) # Too many params kwargs
+  |                                          ^^                          
 
 Expr <CallExpr test.lkt:9:24-9:45>
      has type <StructDecl prelude: "Int">

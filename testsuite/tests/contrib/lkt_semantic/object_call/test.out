@@ -96,6 +96,10 @@ Expr <CallExpr test.lkt:9:41-9:48>
 Expr <NumLit test.lkt:9:49-9:50>
      has type <StructDecl prelude: "Int">
 
+test.lkt:9:52: error: ambiguous type for expression
+8 | @incorrect val incorrect_call_2 : Int = arr(12)(1, 2)
+  |                                                    ^ 
+
 Expr <CallExpr test.lkt:9:41-9:54>
      has type <StructDecl prelude: "Int">
 

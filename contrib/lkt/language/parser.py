@@ -674,7 +674,7 @@ class Expr(LKNode):
                                Op.alt_eq),
 
                 If(Entity == bin_op.left, bin_op.right, bin_op.left)
-                .expr_type_impl(No(T.TypeDecl.entity), False)
+                .expr_type_impl(No(T.TypeDecl.entity))
                 .result_type._.root_type,
 
                 # For other operators, the return type is the same as the type
@@ -760,20 +760,6 @@ class Expr(LKNode):
             PropertyError(T.TypeDecl.entity, "non regular expression")
         )
 
-    @langkit_property(return_type=T.TypeDecl.entity)
-    def check_type(typ=T.TypeDecl.entity, raise_if_no_type=(T.Bool, True)):
-        """
-        Check that there is an expected type, return it, or raise an error
-        otherwise.
-        """
-        return typ.then(
-            lambda et: et,
-            default_val=If(raise_if_no_type,
-                           PropertyError(T.TypeDecl.entity, "no type"),
-                           typ),
-            # TODO: Enhance diagnostics quality ...
-        )
-
     @langkit_property(return_type=T.TypeDecl.entity, public=True)
     def expr_context_free_type():
         """
@@ -806,8 +792,7 @@ class Expr(LKNode):
         return S("<not implemented>")
 
     @langkit_property(return_type=SemanticResult)
-    def expr_type_impl(expected_type=T.TypeDecl.entity,
-                       raise_if_no_type=(T.Bool, True)):
+    def expr_type_impl(expected_type=T.TypeDecl.entity):
         """
         Implementation for ``Expr.expr_type``. This is the core of the current
         type system for Lkt. The default implementation has the following
@@ -884,9 +869,11 @@ class Expr(LKNode):
 
             # We don't have an expected type: Check that there is a context
             # free type and return it.
-            SemanticResult.new(result_type=Entity.check_type(
-                cf_type, raise_if_no_type
-            ), node=Self),
+            cf_type.then(
+                lambda cf_type:
+                SemanticResult.new(result_type=cf_type, node=Self),
+                default_val=Entity.error(S("ambiguous type for expression"))
+            )
         )
 
     @langkit_property(return_type=SemanticResult, public=True)
