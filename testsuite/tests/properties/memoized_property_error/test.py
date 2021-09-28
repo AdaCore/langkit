@@ -28,5 +28,9 @@ class Example(FooNode):
         return PropertyError(Bool, 'Explicit error 2')
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb',
+
+              # TODO: internal errors without diagnostics when set to True, see
+              # U928-029.
+              lkt_semantic_checks=False)
 print('Done')
