@@ -327,8 +327,7 @@ class ManageScript:
             elif unknown_args:
                 print(
                     f"{sys.argv[0]}: error: unrecognized arguments:"
-                    f" {' '.join(unknown_args)}",
-                    file=sys.stderr,
+                    f" {' '.join(unknown_args)}"
                 )
                 sys.exit(1)
             else:
@@ -690,7 +689,7 @@ class ManageScript:
                 raise
             if parsed_args.verbosity.debug or parsed_args.full_error_traces:
                 traceback.print_exc()
-            print(col('Errors, exiting', Colors.FAIL), file=sys.stderr)
+            print(col('Errors, exiting', Colors.FAIL))
             return 1
 
         except Exception as e:
@@ -715,7 +714,7 @@ class ManageScript:
             if parsed_args.verbosity.debug or parsed_args.full_error_traces:
                 traceback.print_exc()
 
-            print(col('Internal error! Exiting', Colors.FAIL), file=sys.stderr)
+            print(col('Internal error! Exiting', Colors.FAIL))
             return 1
 
         finally:
