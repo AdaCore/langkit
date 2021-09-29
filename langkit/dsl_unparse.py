@@ -307,6 +307,16 @@ class DSLWalker:
 
         return self._with_current_node(binop_node)
 
+    def is_call_to(self, names):
+        """
+        Return whether the cursor is currently on a call to a function of one
+        of the given names.
+
+        :type names: list[str]
+        """
+        return (self.current_node.is_a(lpl.CallExpr)
+                and self.current_node.f_prefix.text in names)
+
     def self_arg(self):
         """
         If the cursor is on a method call, moves the cursor to the prefix
@@ -982,6 +992,23 @@ def emit_expr(expr, **ctx):
             return emit_final_call(
                 self_expr, "e", "e", fallback_expr
             )
+
+        def handle_designated_env_macro():
+            self_expr = ee_pexpr(expr.expr)
+
+            then_expr = ee(expr.then_expr)
+
+            if expr.default_val is not None:
+                default_expr = ee_pexpr(expr.default_val)
+            else:
+                default_expr = None
+
+            return emit_final_call(
+                self_expr, var_name(expr.var_expr), then_expr, default_expr
+            )
+
+        if walker.is_call_to(["named_env", "direct_env"]):
+            return handle_designated_env_macro()
 
         return walker.first_method_call({
             'then': handle_then_call,
