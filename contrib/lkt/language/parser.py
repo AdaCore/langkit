@@ -864,16 +864,13 @@ class Expr(LKNode):
                 )
             ),
 
+            # We don't have an expected type: Check that there is a context
+            # free type and return it.
             Not(cf_type.is_null),
             SemanticResult.new(result_type=cf_type, node=Self),
 
-            # We don't have an expected type: Check that there is a context
-            # free type and return it.
-            cf_type.then(
-                lambda cf_type:
-                SemanticResult.new(result_type=cf_type, node=Self),
-                default_val=Entity.error(S("ambiguous type for expression"))
-            )
+            # We have neither: emit an error
+            Entity.error(S("ambiguous type for expression"))
         )
 
     @langkit_property(return_type=SemanticResult, public=True)
