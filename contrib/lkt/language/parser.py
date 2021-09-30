@@ -648,6 +648,26 @@ class Expr(LKNode):
         )
 
     @langkit_property(return_type=T.TypeDecl.entity)
+    def array_element_type():
+        """
+        If this expression computes an array, return the type of its elements.
+        Return a null ``TypeDecl`` otherwise.
+        """
+        # As the generic Array class has only one type parameter,
+        # ``get_actuals.at(0)`` is the element type.
+        return Entity.expected_type.cast(T.InstantiatedGenericType).then(
+            lambda etype: Cond(
+                etype.get_inner_type.as_entity == Entity.array_gen_type,
+                etype.get_actuals.at_or_raise(0),
+
+                # TODO: emit proper diagnostic
+                No(T.TypeDecl.entity)
+            ),
+            # No expected type found
+            default_val=No(T.TypeDecl.entity)
+        )
+
+    @langkit_property(return_type=T.TypeDecl.entity)
     def expected_type():
         return Entity.parent.match(
             lambda fun_decl=T.FunDecl: fun_decl.return_type.designated_type,
@@ -705,6 +725,12 @@ class Expr(LKNode):
 
             lambda val_decl=T.BaseValDecl: val_decl.get_type(
                 no_inference=True
+            ),
+
+            lambda expr_list=T.ExprList: expr_list.parent.match(
+                lambda array=T.ArrayLiteral: array.array_element_type,
+                # TODO: do not treat other cases as errors
+                lambda _: No(T.TypeDecl.entity)
             ),
 
             lambda _: No(T.TypeDecl.entity)

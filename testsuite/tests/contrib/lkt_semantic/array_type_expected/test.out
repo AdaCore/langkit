@@ -1,0 +1,314 @@
+Resolving test.lkt
+==================
+Id   <RefId "Array" test.lkt:1:9-1:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:1:15-1:18>
+     references <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:1:22-1:24>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "Array" test.lkt:2:9-2:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:2:15-2:18>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:2:23-2:24>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:2:22-2:25>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "Array" test.lkt:3:9-3:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:3:15-3:18>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:3:23-3:24>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:3:26-3:27>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:3:29-3:30>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:3:22-3:31>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+test.lkt:7:19: error: ambiguous type for expression
+6 | @invalid val a2 = []
+  |                   ^^
+
+test.lkt:9:20: error: ambiguous type for expression
+8 | @invalid val a3 = [1]
+  |                    ^ 
+
+test.lkt:9:19: error: ambiguous type for expression
+8 | @invalid val a3 = [1]
+  |                   ^^^
+
+Id   <RefId "Array" test.lkt:11:9-11:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "String" test.lkt:11:15-11:21>
+     references <StructDecl prelude: "String">
+
+Expr <ArrayLiteral test.lkt:11:25-11:27>
+     has type <InstantiatedGenericType prelude: "Array[String]">
+
+Id   <RefId "Array" test.lkt:12:9-12:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "String" test.lkt:12:15-12:21>
+     references <StructDecl prelude: "String">
+
+Expr <StringLit test.lkt:12:26-12:29>
+     has type <StructDecl prelude: "String">
+
+Expr <ArrayLiteral test.lkt:12:25-12:30>
+     has type <InstantiatedGenericType prelude: "Array[String]">
+
+Id   <RefId "Array" test.lkt:13:9-13:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "String" test.lkt:13:15-13:21>
+     references <StructDecl prelude: "String">
+
+Expr <StringLit test.lkt:13:26-13:29>
+     has type <StructDecl prelude: "String">
+
+Expr <StringLit test.lkt:13:31-13:34>
+     has type <StructDecl prelude: "String">
+
+Expr <StringLit test.lkt:13:36-13:39>
+     has type <StructDecl prelude: "String">
+
+Expr <ArrayLiteral test.lkt:13:25-13:40>
+     has type <InstantiatedGenericType prelude: "Array[String]">
+
+Id   <RefId "Array" test.lkt:16:18-16:23>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:16:24-16:27>
+     references <StructDecl prelude: "Int">
+
+test.lkt:16:32: error: Mismatched types: expected `Int`, got a character literal
+15 | @invalid val a5: Array[Int] = ['!']
+   |                                ^^^ 
+
+Expr <ArrayLiteral test.lkt:16:31-16:36>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "Array" test.lkt:18:9-18:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:18:15-18:20>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:18:21-18:24>
+     references <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:18:30-18:32>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:18:29-18:33>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
+Id   <RefId "Array" test.lkt:19:9-19:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:19:15-19:20>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:19:21-19:24>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:19:31-19:32>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:19:30-19:33>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:19:29-19:34>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
+Id   <RefId "Array" test.lkt:20:9-20:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:20:15-20:20>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:20:21-20:24>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:20:31-20:32>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:20:34-20:35>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:20:37-20:38>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:20:30-20:39>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:20:29-20:40>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
+Id   <RefId "Array" test.lkt:22:9-22:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:22:15-22:20>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:22:21-22:24>
+     references <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:22:30-22:32>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:22:34-22:36>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:22:29-22:37>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
+Id   <RefId "Array" test.lkt:23:9-23:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:23:15-23:20>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:23:21-23:24>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:23:31-23:32>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:23:30-23:33>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <NumLit test.lkt:23:36-23:37>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:23:35-23:38>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:23:29-23:39>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
+Id   <RefId "Array" test.lkt:24:9-24:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:24:15-24:20>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:24:21-24:24>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:24:31-24:32>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:24:34-24:35>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:24:37-24:38>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:24:30-24:39>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <NumLit test.lkt:24:42-24:43>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:24:45-24:46>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:24:48-24:49>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:24:41-24:50>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:24:29-24:51>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
+Id   <RefId "Array" test.lkt:26:9-26:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:26:15-26:20>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:26:21-26:26>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:26:27-26:32>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:26:33-26:36>
+     references <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:26:46-26:48>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:26:49-26:51>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:26:45-26:52>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
+Expr <ArrayLiteral test.lkt:26:53-26:55>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
+Expr <ArrayLiteral test.lkt:26:44-26:56>
+     has type <InstantiatedGenericType prelude: "Array[Array[Array[Int]]]">
+
+Expr <ArrayLiteral test.lkt:26:57-26:59>
+     has type <InstantiatedGenericType prelude: "Array[Array[Array[Int]]]">
+
+Expr <ArrayLiteral test.lkt:26:43-26:60>
+     has type <InstantiatedGenericType prelude: "Array[Array[Array[Array[Int]]]]">
+
+Id   <RefId "Array" test.lkt:29:18-29:23>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:29:24-29:29>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:29:30-29:33>
+     references <StructDecl prelude: "Int">
+
+test.lkt:29:39: error: Mismatched types: expected `Array[Int]`, got a number literal
+28 | @invalid val a9: Array[Array[Int]] = [1]
+   |                                       ^ 
+
+Expr <ArrayLiteral test.lkt:29:38-29:41>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
+Id   <RefId "Array" test.lkt:30:19-30:24>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Array" test.lkt:30:25-30:30>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:30:31-30:34>
+     references <StructDecl prelude: "Int">
+
+test.lkt:30:42: error: ambiguous type for expression
+29 | @invalid val a10: Array[Array[Int]] = [[[1]]]
+   |                                          ^   
+
+Expr <ArrayLiteral test.lkt:30:41-30:44>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:30:40-30:45>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <ArrayLiteral test.lkt:30:39-30:46>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
+
