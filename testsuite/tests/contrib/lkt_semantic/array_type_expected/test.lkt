@@ -1,0 +1,33 @@
+val a1: Array[Int] = []
+val b2: Array[Int] = [1]
+val c3: Array[Int] = [1, 2, 3]
+
+# Should be an instantiated type of Array, not LexicalEnv or other
+@invalid val foo: LexicalEnv[Int] = [1]
+
+# It is impossible to infer the element type of an empty array literal, without
+# the help of type info from the context.
+@invalid val a2 = []
+# Same as above since numerical literals can be an Int or a BigInt
+@invalid val a3 = [1]
+
+val a4: Array[String] = []
+val b4: Array[String] = ["1"]
+val c4: Array[String] = ["1", "2", "3"]
+
+# '!' is not of type Int
+@invalid val a5: Array[Int] = ['!']
+
+val a6: Array[Array[Int]] = [[]]
+val b6: Array[Array[Int]] = [[1]]
+val c6: Array[Array[Int]] = [[1, 2, 3]]
+
+val a7: Array[Array[Int]] = [[], []]
+val b7: Array[Array[Int]] = [[1], [1]]
+val c7: Array[Array[Int]] = [[1, 2, 3], [1, 2, 3]]
+
+val a8: Array[Array[Array[Array[Int]]]] = [[[[],[]],[]],[]]
+
+# These statements are invalid because types don't match
+@invalid val a9: Array[Array[Int]] = [1]
+@invalid val a10: Array[Array[Int]] = [[[1]]]

@@ -653,6 +653,15 @@ class Expr(LKNode):
             default_val=Entity.check_expr_type.type_scope
         )
 
+    @langkit_property()
+    def get_array_type(elt_type=T.TypeDecl):
+        """
+        Return an Array instantiated from type ``elt_type``.
+        """
+        return Self.array_gen_type.get_instantiated_type(
+            [elt_type]
+        ).as_entity
+
     @langkit_property(return_type=T.TypeDecl.entity)
     def expected_type():
         return Entity.parent.match(
@@ -711,6 +720,20 @@ class Expr(LKNode):
 
             lambda val_decl=T.BaseValDecl: val_decl.get_type(
                 no_inference=True
+            ),
+
+            lambda expr_list=T.ExprList: expr_list.parent.match(
+                lambda array=T.ArrayLiteral:
+                array.first_elt_context_free_type.then(
+                    # The first context-free type is the expected type of all
+                    # other elements in the array literal.
+                    lambda t: t,
+                    # When no element has a context-free type, infer the array
+                    # type from the array literal's expected type (i.e. from
+                    # the context).
+                    default_val=array.expected_type.array_element_type
+                ),
+                lambda _: No(T.TypeDecl.entity)
             ),
 
             lambda _: No(T.TypeDecl.entity)
@@ -1485,6 +1508,22 @@ class TypeDecl(Decl):
         doc="Returns whether this type is an instantiated generic type."
     )
 
+    @langkit_property()
+    def array_element_type():
+        """
+        Return the element type if Entity is an array, or No(TypeDecl.entity)
+        if it is not an array type.
+        """
+        # As the generic Array class has only one type parameter,
+        # ``get_actuals.at(0)`` is the element type.
+        return Entity.cast(T.InstantiatedGenericType).then(
+            lambda array: If(
+                array.get_inner_type == Entity.array_type.assert_bare,
+                array.get_actuals.at(0),
+                No(TypeDecl.entity)
+            )
+        )
+
 
 @synthetic
 class FunctionType(TypeDecl):
@@ -2158,6 +2197,61 @@ class ArrayLiteral(Expr):
     Literal for an array value.
     """
     exprs = Field(type=T.Expr.list)
+
+    @langkit_property()
+    def expected_type_predicate(expected_type=T.TypeDecl.entity):
+        # Check that ``expected_type`` is an array type, and that all
+        # expressions in this array literal are compatible with the element
+        # type.
+        return expected_type.then(
+            lambda t: t.array_element_type.then(
+                lambda elt_type: Self.all_elements_match(elt_type)
+            )
+        )
+
+    @langkit_property()
+    def invalid_expected_type_error_name():
+        return S("an array")
+
+    @langkit_property()
+    def all_elements_match(elt_type=T.TypeDecl.entity):
+        """
+        Check that all elements of this array literal match the ``elt_type``
+        type.
+        """
+        return Self.exprs.all(lambda e: e.expected_type_predicate(elt_type))
+
+    @langkit_property()
+    def first_elt_context_free_type():
+        """
+        Return the first context-free type for the exprs list, or null if there
+        is none.
+        """
+        # Get all non-null context-free type of exprs list
+        return Self.exprs.filtermap(
+            lambda e: e.as_entity.expr_context_free_type,
+            lambda e: Not(e.as_entity.expr_context_free_type.is_null)
+        ).then(
+            # Return the first one if it exists
+            lambda l: l.at(0)
+        )
+
+    @langkit_property()
+    def expr_context_free_type():
+        elt_type = Var(Entity.first_elt_context_free_type)
+
+        # If we have an element context-free type and that all elements matches
+        # it, we have a context-free array type.
+        return If(
+            And(
+                Not(elt_type.is_null),
+                Self.all_elements_match(elt_type)
+            ),
+
+            Entity.get_array_type(elt_type.assert_bare.cast(T.TypeDecl)),
+
+            No(T.TypeDecl.entity)
+        )
 
 
 class NotExpr(Expr):
