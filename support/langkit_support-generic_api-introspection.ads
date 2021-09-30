@@ -21,30 +21,43 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
-with Langkit_Support.Text;        use Langkit_Support.Text;
+--  This package provides a generic API so that programs can work with the
+--  $.Introspection packages of all Langkit-generated libraries.
+--
+--  Note that it is experimental at this stage, and thus not officially
+--  supported.
 
---  This package and its children provide common implementation details for
---  Langkit-generated libraries. Even though it is not private (to allow
---  Langkit-generated libraries to use it), it is not meant to be used beyond
---  this. As such, this API is considered unsafe and unstable.
+package Langkit_Support.Generic_API.Introspection is
 
-package Langkit_Support.Internal is
+   ------------------------
+   -- Polymorphic values --
+   ------------------------
 
-   type Text_Access is not null access constant Text_Type;
-   --  Reference to a static Unicode string. Used in descriptor tables whenever
-   --  we need to provide a name.
+   type Any_Value_Type is new Natural;
+   --  Generic type to designate the type of a polymorphic value: boolean,
+   --  integer, character, ...
+   --
+   --  A given language defines types for the ``1 .. Last_Value_Type
+   --  (Language)`` range: see the ``Last_Value_Type`` function below. All the
+   --  subprograms below raise a ``Precondition_Failure`` exception if passed a
+   --  value type index that is not in range for the given language.
 
-   type Debug_String_Access is not null access constant String;
-   --  Reference to a statically allocated String. Used in descriptor tables
-   --  whenever we need to provide string for debug (compatible with
-   --  Ada.Text_IO).
+   No_Value_Type : constant Any_Value_Type;
+   --  Special ``Any_Value_Type`` to mean: no reference to a type
 
-   --  Descriptors for grammar rules
+   subtype Value_Type is Any_Value_Type range 1 .. Any_Value_Type'Last;
 
-   type Grammar_Rule_Name_Array is
-     array (Grammar_Rule_Index range <>) of Text_Access;
-   type Grammar_Rule_Name_Array_Access is
-     not null access constant Grammar_Rule_Name_Array;
+   type Value_Type_Array is array (Positive range <>) of Value_Type;
 
-end Langkit_Support.Internal;
+   function Last_Value_Type (Id : Language_Id) return Value_Type;
+   --  Return the last type index that is valid for the given language
+
+   function Debug_Name (Id : Language_Id; T : Value_Type) return String;
+   --  Return the free-form name of this type for debug purposes, according to
+   --  the given language.
+
+private
+
+   No_Value_Type : constant Any_Value_Type := 0;
+
+end Langkit_Support.Generic_API.Introspection;

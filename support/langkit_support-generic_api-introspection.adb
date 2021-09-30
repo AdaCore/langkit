@@ -21,30 +21,50 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
-with Langkit_Support.Text;        use Langkit_Support.Text;
+with Langkit_Support.Errors; use Langkit_Support.Errors;
+with Langkit_Support.Internal.Descriptor;
+use Langkit_Support.Internal.Descriptor;
 
---  This package and its children provide common implementation details for
---  Langkit-generated libraries. Even though it is not private (to allow
---  Langkit-generated libraries to use it), it is not meant to be used beyond
---  this. As such, this API is considered unsafe and unstable.
+--  Even though we don't directly use entities from the Internal.Descriptor
+--  package, we still need to import it to get visibility over the
+--  Language_Descriptor type (and access its components).
 
-package Langkit_Support.Internal is
+pragma Unreferenced (Langkit_Support.Internal.Descriptor);
 
-   type Text_Access is not null access constant Text_Type;
-   --  Reference to a static Unicode string. Used in descriptor tables whenever
-   --  we need to provide a name.
+package body Langkit_Support.Generic_API.Introspection is
 
-   type Debug_String_Access is not null access constant String;
-   --  Reference to a statically allocated String. Used in descriptor tables
-   --  whenever we need to provide string for debug (compatible with
-   --  Ada.Text_IO).
+   procedure Check_Value_Type (Id : Language_Id; T : Value_Type);
+   --  If ``T`` is not a valid value type for the given language, raise a
+   --  ``Precondition_Failure`` exception.
 
-   --  Descriptors for grammar rules
+   ---------------------
+   -- Last_Value_Type --
+   ---------------------
 
-   type Grammar_Rule_Name_Array is
-     array (Grammar_Rule_Index range <>) of Text_Access;
-   type Grammar_Rule_Name_Array_Access is
-     not null access constant Grammar_Rule_Name_Array;
+   function Last_Value_Type (Id : Language_Id) return Value_Type is
+   begin
+      return Id.Value_Types.all'Last;
+   end Last_Value_Type;
 
-end Langkit_Support.Internal;
+   ----------------------
+   -- Check_Value_Type --
+   ----------------------
+
+   procedure Check_Value_Type (Id : Language_Id; T : Value_Type) is
+   begin
+      if T > Last_Value_Type (Id) then
+         raise Precondition_Failure with "invalid value type";
+      end if;
+   end Check_Value_Type;
+
+   ----------------
+   -- Debug_Name --
+   ----------------
+
+   function Debug_Name (Id : Language_Id; T : Value_Type) return String is
+   begin
+      Check_Value_Type (Id, T);
+      return Id.Value_Types (T).Debug_Name.all;
+   end Debug_Name;
+
+end Langkit_Support.Generic_API.Introspection;

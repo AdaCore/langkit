@@ -1,4 +1,4 @@
-main.adb: Starting...
+== analysis.adb ==
 
 Language name: Foo
 
@@ -52,5 +52,27 @@ Root.Children:
 Use of stale node reference:
 Got a Stale_Reference_Error exception: unit was reparsed
 
-main.adb: Done
+
+== introspection.adb ==
+
+All types:
+
+AnalysisUnitKind
+LookupKind
+DesignatedEnvKind
+GrammarRule
+FooNode.entity.array
+FooNode.entity
+Expr.entity
+Addition.entity
+Number.entity
+Ref.entity
+FooNodeBaseList.entity
+VarDecl.list.entity
+Name.entity
+VarDecl.entity
+
+Trying to get the debug name of an invalid type...
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+
 Done

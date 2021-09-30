@@ -10,14 +10,13 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with Libfoolang.Generic_API;
 
-procedure Main is
+procedure Analysis is
    Id : Language_Id renames Libfoolang.Generic_API.Id;
 
    Ctx : Lk_Context;
    U   : Lk_Unit;
    N   : Lk_Node;
 begin
-   Put_Line ("main.adb: Starting...");
    New_Line;
 
    Put_Line
@@ -158,6 +157,4 @@ begin
                    & Exception_Message (Exc));
    end;
    New_Line;
-
-   Put_Line ("main.adb: Done");
-end Main;
+end Analysis;
