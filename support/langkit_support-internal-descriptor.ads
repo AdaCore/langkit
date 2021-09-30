@@ -23,6 +23,8 @@
 
 with Langkit_Support.File_Readers;      use Langkit_Support.File_Readers;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Internal.Introspection;
+use Langkit_Support.Internal.Introspection;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 
 --  This package provides common implementation details for Langkit-generated
@@ -99,6 +101,10 @@ package Langkit_Support.Internal.Descriptor is
 
       Default_Grammar_Rule : Grammar_Rule_Index;
       Grammar_Rule_Names   : Grammar_Rule_Name_Array_Access;
+
+      --  Descriptors for introspection capabilities
+
+      Value_Types : Value_Type_Descriptor_Array_Access;
 
       --  Implementation for generic operations
 

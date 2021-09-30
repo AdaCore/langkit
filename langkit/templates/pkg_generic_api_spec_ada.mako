@@ -10,6 +10,7 @@ private with Langkit_Support.Text;
 private with Langkit_Support.Types;
 
 private with ${ada_lib_name}.Implementation;
+private with ${ada_lib_name}.Generic_Introspection;
 
 package ${ada_lib_name}.Generic_API is
 
@@ -106,6 +107,8 @@ private
 
       Default_Grammar_Rule => ${main_rule_id},
       Grammar_Rule_Names   => Grammar_Rule_Names'Access,
+
+      Value_Types => Generic_Introspection.Value_Types'Access,
 
       Create_Context        => Create_Context'Access,
       Context_Inc_Ref       => Context_Inc_Ref'Access,

@@ -36,5 +36,8 @@ class Ref(Expr):
     name = Field()
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main=['main.adb'])
-print('Done')
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    ada_main=["analysis.adb", "introspection.adb"]
+)
+print("Done")

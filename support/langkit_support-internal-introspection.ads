@@ -21,30 +21,30 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
-with Langkit_Support.Text;        use Langkit_Support.Text;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 
---  This package and its children provide common implementation details for
---  Langkit-generated libraries. Even though it is not private (to allow
---  Langkit-generated libraries to use it), it is not meant to be used beyond
---  this. As such, this API is considered unsafe and unstable.
+--  This package provides common implementation details for Langkit-generated
+--  libraries. Even though it is not private (to allow Langkit-generated
+--  libraries to use it), it is not meant to be used beyond this. As such, this
+--  API is considered unsafe and unstable.
 
-package Langkit_Support.Internal is
+package Langkit_Support.Internal.Introspection is
 
-   type Text_Access is not null access constant Text_Type;
-   --  Reference to a static Unicode string. Used in descriptor tables whenever
-   --  we need to provide a name.
+   ----------------------------
+   -- Value type descriptors --
+   ----------------------------
 
-   type Debug_String_Access is not null access constant String;
-   --  Reference to a statically allocated String. Used in descriptor tables
-   --  whenever we need to provide string for debug (compatible with
-   --  Ada.Text_IO).
+   type Value_Type_Descriptor is record
+      Debug_Name : Debug_String_Access;
+      --  Free-form name of this type for debug purposes
+   end record;
 
-   --  Descriptors for grammar rules
+   type Value_Type_Descriptor_Access is
+      not null access constant Value_Type_Descriptor;
+   type Value_Type_Descriptor_Array is
+      array (Value_Type range <>) of Value_Type_Descriptor_Access;
+   type Value_Type_Descriptor_Array_Access is
+      not null access constant Value_Type_Descriptor_Array;
 
-   type Grammar_Rule_Name_Array is
-     array (Grammar_Rule_Index range <>) of Text_Access;
-   type Grammar_Rule_Name_Array_Access is
-     not null access constant Grammar_Rule_Name_Array;
-
-end Langkit_Support.Internal;
+end Langkit_Support.Internal.Introspection;
