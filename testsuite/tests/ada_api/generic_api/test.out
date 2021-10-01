@@ -55,24 +55,136 @@ Got a Stale_Reference_Error exception: unit was reparsed
 
 == introspection.adb ==
 
-All types:
+All types
+=========
 
-AnalysisUnitKind
-LookupKind
-DesignatedEnvKind
-GrammarRule
-FooNode.entity.array
-FooNode.entity
-Expr.entity
-Addition.entity
-Number.entity
-Ref.entity
-FooNodeBaseList.entity
-VarDecl.list.entity
-Name.entity
-VarDecl.entity
+* AnalysisUnitKind
+* LookupKind
+* DesignatedEnvKind
+* GrammarRule
+* FooNode.entity.array
+* FooNode.entity
+  is a node
+* Expr.entity
+  is a node
+* Addition.entity
+  is a node
+* Number.entity
+  is a node
+* Ref.entity
+  is a node
+* FooNodeBaseList.entity
+  is a node
+* VarDecl.list.entity
+  is a node
+* Name.entity
+  is a node
+* VarDecl.entity
+  is a node
 
 Trying to get the debug name of an invalid type...
 LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+
+Nodes
+=====
+
+Foo_Node ( 6)
+  is abstract
+  base = Bad_Type_Error: trying to get base type of root node
+  last derivation = Var_Decl ( 14)
+  derivations:
+    Expr ( 7)
+    Foo_Node_Base_List ( 11)
+    Name ( 13)
+    Var_Decl ( 14)
+
+Expr ( 7)
+  is abstract
+  base = Foo_Node ( 6)
+  last derivation = Ref ( 10)
+  derivations:
+    Addition ( 8)
+    Number ( 9)
+    Ref ( 10)
+
+Addition ( 8)
+  base = Expr ( 7)
+  last derivation = Addition ( 8)
+  derivations:
+    <none>
+
+Number ( 9)
+  base = Expr ( 7)
+  last derivation = Number ( 9)
+  derivations:
+    <none>
+
+Ref ( 10)
+  base = Expr ( 7)
+  last derivation = Ref ( 10)
+  derivations:
+    <none>
+
+Foo_Node_Base_List ( 11)
+  is abstract
+  base = Foo_Node ( 6)
+  last derivation = Var_Decl_List ( 12)
+  derivations:
+    Var_Decl_List ( 12)
+
+Var_Decl_List ( 12)
+  base = Foo_Node_Base_List ( 11)
+  last derivation = Var_Decl_List ( 12)
+  derivations:
+    <none>
+
+Name ( 13)
+  base = Foo_Node ( 6)
+  last derivation = Name ( 13)
+  derivations:
+    <none>
+
+Var_Decl ( 14)
+  base = Foo_Node ( 6)
+  last derivation = Var_Decl ( 14)
+  derivations:
+    <none>
+
+Is_Node_Type: Invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+
+Invalid args for Node_Type_Name:
+Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
+
+Invalid args for Is_Abstract:
+Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
+
+Invalid args for Is_Concrete:
+Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
+
+Invalid args for Base_Type:
+Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
+Root Node argument: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.BAD_TYPE_ERROR: trying to get base type of root node
+
+Invalid args for Derived_Types:
+Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
+
+Invalid args for Last_Derived_Type:
+Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
+
+Check Is_Derived_From:
+Checking: root derives from root
+Checking: expr derives from root
+Checking: addition derives from root
+Checking: ref does not derive from number
+Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
+Invalid Parent argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-node Parent argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 
 Done

@@ -5,15 +5,44 @@ with Langkit_Support.Errors;      use Langkit_Support.Errors;
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Names;       use Langkit_Support.Names;
+with Langkit_Support.Names.Maps;
+with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with Libfoolang.Generic_API;
 
 procedure Introspection is
 
+   use Langkit_Support.Errors.Introspection;
+
    Id : Language_Id renames Libfoolang.Generic_API.Id;
+
+   procedure Put_Title (Label : String);
+   --  Print a section title
 
    procedure Put_Exc (Exc : Exception_Occurrence);
    --  Print info about the given exception occurence
+
+   package Node_Type_Maps is new Langkit_Support.Names.Maps (Value_Type);
+   Node_Types : Node_Type_Maps.Map (Camel);
+   --  Mapping from node type names to node type indexes
+
+   function Node_Repr (Node : Value_Type) return String
+   is (Image (Format_Name (Node_Type_Name (Id, Node), Camel_With_Underscores))
+       & " (" & Node'Image & ")");
+
+   procedure Assert (Predicate : Boolean; Message : String);
+   --  Print Message and raise a Program_Error if Predicate is false
+
+   ---------------
+   -- Put_Title --
+   ---------------
+
+   procedure Put_Title (Label : String) is
+   begin
+      Put_Line (Label);
+      Put_Line ((Label'Range => '='));
+   end Put_Title;
 
    -------------
    -- Put_Exc --
@@ -24,20 +53,55 @@ procedure Introspection is
       Put_Line (Exception_Name (Exc) & ": " & Exception_Message (Exc));
    end Put_Exc;
 
+   ------------
+   -- Assert --
+   ------------
+
+   procedure Assert (Predicate : Boolean; Message : String) is
+   begin
+      Put_Line ("Checking: " & Message);
+      if not Predicate then
+         Put_Line ("Error: " & Message);
+         raise Program_Error;
+      end if;
+   end Assert;
+
+   First_Node, Last_Node : Any_Value_Type := No_Value_Type;
+
+   Invalid_Type : constant Value_Type := Last_Value_Type (Id) + 1;
+   Invalid_Node : Value_Type;
+
+   Dummy_Bool : Boolean;
+   Dummy_Name : Name_Type;
+   Dummy_Type : Any_Value_Type;
+
 begin
    New_Line;
 
-   Put_Line ("All types:");
+   -----------------------------
+   -- Generic type primitives --
+   -----------------------------
+
+   Put_Title ("All types");
    New_Line;
    for T in Value_Type'First .. Last_Value_Type (Id) loop
-      Put_Line (Debug_Name (Id, T));
+      Put_Line ("* " & Debug_Name (Id, T));
+
+      if Is_Node_Type (Id, T) then
+         Put_Line ("  is a node");
+         if First_Node = No_Value_Type then
+            First_Node := T;
+         end if;
+         Last_Node := T;
+      end if;
    end loop;
    New_Line;
+   Invalid_Node := First_Node - 1;
 
    Put_Line ("Trying to get the debug name of an invalid type...");
    begin
       declare
-         Dummy : constant String := Debug_Name (Id, Last_Value_Type (Id) + 1);
+         Dummy : constant String := Debug_Name (Id, Invalid_Type);
       begin
          raise Program_Error;
       end;
@@ -46,4 +110,247 @@ begin
          Put_Exc (Exc);
    end;
    New_Line;
+
+   --------------------------
+   -- Node type primitives --
+   --------------------------
+
+   Put_Title ("Nodes");
+   New_Line;
+   for Node in First_Node .. Last_Node loop
+      Put_Line (Node_Repr (Node));
+      Node_Type_Maps.Insert (Node_Types, Node_Type_Name (Id, Node), Node);
+
+      if Is_Abstract (Id, Node) then
+         Put_Line ("  is abstract");
+      end if;
+
+      Put ("  base = ");
+      declare
+         Base : Value_Type;
+      begin
+         Base := Base_Type (Id, Node);
+         Put_Line (Node_Repr (Base));
+      exception
+         when Exc : Bad_Type_Error =>
+            Put_Line ("Bad_Type_Error: " & Exception_Message (Exc));
+      end;
+
+      Put_Line
+        ("  last derivation = " & Node_Repr (Last_Derived_Type (Id, Node)));
+
+      Put_Line ("  derivations:");
+      declare
+         Derivations : constant Value_Type_Array := Derived_Types (Id, Node);
+      begin
+         if Derivations'Length = 0 then
+            Put_Line ("    <none>");
+         else
+            for D of Derivations loop
+               Put_Line ("    " & Node_Repr (D));
+            end loop;
+         end if;
+      end;
+      New_Line;
+   end loop;
+
+   Put ("Is_Node_Type: Invalid T argument: ");
+   begin
+      Dummy_Bool := Is_Node_Type (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Node_Type_Name:");
+   Put ("Invalid Node argument: ");
+   begin
+      Dummy_Name := Node_Type_Name (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-node Node argument: ");
+   begin
+      Dummy_Name := Node_Type_Name (Id, Invalid_Node);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Is_Abstract:");
+   Put ("Invalid Node argument: ");
+   begin
+      Dummy_Bool := Is_Abstract (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-node Node argument: ");
+   begin
+      Dummy_Bool := Is_Abstract (Id, Invalid_Node);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Is_Concrete:");
+   Put ("Invalid Node argument: ");
+   begin
+      Dummy_Bool := Is_Concrete (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-node Node argument: ");
+   begin
+      Dummy_Bool := Is_Concrete (Id, Invalid_Node);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Base_Type:");
+   Put ("Invalid Node argument: ");
+   begin
+      Dummy_Type := Base_Type (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-node Node argument: ");
+   begin
+      Dummy_Type := Base_Type (Id, Invalid_Node);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Root Node argument: ");
+   begin
+      Dummy_Type := Base_Type (Id, Root_Node_Type (Id));
+      raise Program_Error;
+   exception
+      when Exc : Bad_Type_Error =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Derived_Types:");
+   Put ("Invalid Node argument: ");
+   begin
+      Dummy_Bool := Derived_Types (Id, Invalid_Type)'Length = 0;
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-node Node argument: ");
+   begin
+      Dummy_Bool := Derived_Types (Id, Invalid_Node)'Length = 0;
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Last_Derived_Type:");
+   Put ("Invalid Node argument: ");
+   begin
+      Dummy_Type := Last_Derived_Type (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-node Node argument: ");
+   begin
+      Dummy_Type := Last_Derived_Type (Id, Invalid_Node);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Check Is_Derived_From:");
+   declare
+      Foo_Node      : constant Value_Type := Node_Types.Get ("FooNode");
+      Expr_Node     : constant Value_Type := Node_Types.Get ("Expr");
+      Addition_Node : constant Value_Type := Node_Types.Get ("Addition");
+      Number_Node   : constant Value_Type := Node_Types.Get ("Number");
+      Ref_Node      : constant Value_Type := Node_Types.Get ("Ref");
+   begin
+      Assert (Is_Derived_From (Id, Foo_Node, Foo_Node),
+              "root derives from root");
+
+      Assert (Is_Derived_From (Id, Expr_Node, Foo_Node),
+              "expr derives from root");
+
+      Assert (Is_Derived_From (Id, Addition_Node, Foo_Node),
+              "addition derives from root");
+
+      Assert (not Is_Derived_From (Id, Ref_Node, Number_Node),
+              "ref does not derive from number");
+
+      Put ("Invalid Node argument: ");
+      begin
+         Dummy_Bool :=
+            Is_Derived_From (Id, Invalid_Type, Foo_Node);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+
+      Put ("Non-node Node argument: ");
+      begin
+         Dummy_Bool := Is_Derived_From (Id, Invalid_Node, Foo_Node);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+
+      Put ("Invalid Parent argument: ");
+      begin
+         Dummy_Bool :=
+            Is_Derived_From (Id, Foo_Node, Invalid_Type);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+
+      Put ("Non-node Parent argument: ");
+      begin
+         Dummy_Bool := Is_Derived_From (Id, Foo_Node, Invalid_Node);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+   end;
+   New_Line;
+
 end Introspection;
