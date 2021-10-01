@@ -56,6 +56,52 @@ package Langkit_Support.Generic_API.Introspection is
    --  Return the free-form name of this type for debug purposes, according to
    --  the given language.
 
+   ----------------
+   -- Node types --
+   ----------------
+
+   function Is_Node_Type (Id : Language_Id; T : Value_Type) return Boolean;
+   --  Return whether ``T`` references a node type for the given language.
+   --
+   --  All functions below will raise a ``Precondition_Failure`` if passed
+   --  a type which does not satisfy this predicate as ``Node``/``Parent``
+   --  formals.
+
+   function Root_Node_Type (Id : Language_Id) return Value_Type;
+   --  Return the type for the root node in the given language
+
+   function Node_Type_Name
+     (Id : Language_Id; Node : Value_Type) return Name_Type;
+   --  Return the name for the given node type according to the given language
+
+   function Is_Abstract
+     (Id : Language_Id; Node : Value_Type) return Boolean;
+   --  Return whether ``Node`` designates an abstract node
+
+   function Is_Concrete
+     (Id : Language_Id; Node : Value_Type) return Boolean
+   is (not Is_Abstract (Id, Node));
+
+   function Base_Type
+     (Id : Language_Id; Node : Value_Type) return Value_Type;
+   --  If ``Node`` is the root node type, raise a ``Bad_Type_Error`` exception.
+   --  Otherwise, return ``Node``'s base type.
+
+   function Derived_Types
+     (Id : Language_Id; Node : Value_Type) return Value_Type_Array;
+   --  Return type references for all direct derivations for ``Node``
+
+   function Last_Derived_Type
+     (Id : Language_Id; Node : Value_Type) return Value_Type;
+   --  Return the ``Result`` type so that the ``Node .. Result`` range contains
+   --  exactly all node types that derive (directly or indirectly) from
+   --  ``Node``.
+
+   function Is_Derived_From
+     (Id : Language_Id; Node, Parent : Value_Type) return Boolean;
+   --  Return whether the ``Node`` node type derives (directly or indirectly)
+   --  from ``Parent``.
+
 private
 
    No_Value_Type : constant Any_Value_Type := 0;

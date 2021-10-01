@@ -109,6 +109,7 @@ private
       Grammar_Rule_Names   => Grammar_Rule_Names'Access,
 
       Value_Types => Generic_Introspection.Value_Types'Access,
+      Node_Types  => Generic_Introspection.Node_Types'Access,
 
       Create_Context        => Create_Context'Access,
       Context_Inc_Ref       => Context_Inc_Ref'Access,

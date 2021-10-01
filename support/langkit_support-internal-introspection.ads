@@ -47,4 +47,30 @@ package Langkit_Support.Internal.Introspection is
    type Value_Type_Descriptor_Array_Access is
       not null access constant Value_Type_Descriptor_Array;
 
+   ---------------------------
+   -- Node type descriptors --
+   ---------------------------
+
+   type Node_Type_Descriptor (Derivations_Count : Natural) is record
+      Base_Type : Any_Value_Type;
+      --  Reference to the node type from which this derives
+
+      Is_Abstract : Boolean;
+      --  Whether this node type is abstract
+
+      Name : Text_Access;
+      --  Name for this type in camel-with-undercores convention
+
+      Derivations : Value_Type_Array (1 .. Derivations_Count);
+      --  Sorted list (by index) of node types for all node types that directly
+      --  derives from this node.
+   end record;
+
+   type Node_Type_Descriptor_Access is
+     not null access constant Node_Type_Descriptor;
+   type Node_Type_Descriptor_Array is
+     array (Value_Type range <>) of Node_Type_Descriptor_Access;
+   type Node_Type_Descriptor_Array_Access is
+     not null access constant Node_Type_Descriptor_Array;
+
 end Langkit_Support.Internal.Introspection;
