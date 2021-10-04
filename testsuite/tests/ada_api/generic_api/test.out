@@ -77,6 +77,7 @@ All types
 * GrammarRule
   is an enum
 * FooNode.entity.array
+  is an array
 * FooNode.entity
   is a node
 * Expr.entity
@@ -152,6 +153,18 @@ Invalid args for Enum_Value_Name:
 Invalid Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
 Non-enum Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum type
 Out-of-bounds Index argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum value index
+
+Arrays
+======
+
+FooNode.entity.array
+Array of FooNode.entity
+
+Is_Array_Type: invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+
+Invalid args for Array_Element_Type:
+Invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-array T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid array type
 
 Nodes
 =====

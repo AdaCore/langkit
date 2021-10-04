@@ -119,6 +119,20 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${",\n".join(enum_type_descs)}
    );
 
+   ----------------------------
+   -- Array type descriptors --
+   ----------------------------
+
+   <%
+      array_type_descs = [
+         f"{type_index(t)} => (Element_Type => {type_index(t.element_type)})"
+         for t in array_types
+      ]
+   %>
+   Array_Types : aliased constant Array_Type_Descriptor_Array := (
+      ${",\n".join(array_type_descs)}
+   );
+
    ---------------------------
    -- Node type descriptors --
    ---------------------------

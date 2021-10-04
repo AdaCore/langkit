@@ -68,12 +68,14 @@ procedure Introspection is
       end if;
    end Assert;
 
-   First_Node, Last_Node : Any_Value_Type := No_Value_Type;
-   First_Enum, Last_Enum : Any_Value_Type := No_Value_Type;
+   First_Node, Last_Node   : Any_Value_Type := No_Value_Type;
+   First_Enum, Last_Enum   : Any_Value_Type := No_Value_Type;
+   First_Array, Last_Array : Any_Value_Type := No_Value_Type;
 
-   Invalid_Type : constant Value_Type := Last_Value_Type (Id) + 1;
-   Invalid_Node : Value_Type;
-   Invalid_Enum : Value_Type;
+   Invalid_Type  : constant Value_Type := Last_Value_Type (Id) + 1;
+   Invalid_Node  : Value_Type;
+   Invalid_Enum  : Value_Type;
+   Invalid_Array : Value_Type;
 
    Dummy_Bool       : Boolean;
    Dummy_Name       : Name_Type;
@@ -101,6 +103,13 @@ begin
          end if;
          Last_Enum := T;
 
+      elsif Is_Array_Type (Id, T) then
+         Put_Line ("  is an array");
+         if First_Array = No_Value_Type then
+            First_Array := T;
+         end if;
+         Last_Array := T;
+
       elsif Is_Node_Type (Id, T) then
          Put_Line ("  is a node");
          if First_Node = No_Value_Type then
@@ -112,6 +121,7 @@ begin
    New_Line;
    Invalid_Node := First_Node - 1;
    Invalid_Enum := First_Node;
+   Invalid_Array := First_Node;
 
    Put_Line ("Trying to get the debug name of an invalid type...");
    begin
@@ -235,6 +245,48 @@ begin
    Put ("Out-of-bounds Index argument: ");
    begin
       Dummy_Name := Enum_Value_Name (Id, First_Enum, 100);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   ---------------------------
+   -- Array type primitives --
+   ---------------------------
+
+   Put_Title ("Arrays");
+   New_Line;
+   for T in First_Array .. Last_Array loop
+      Put_Line (Debug_Name (Id, T));
+      Put_Line ("Array of " & Debug_Name (Id, Array_Element_Type (Id, T)));
+      New_Line;
+   end loop;
+
+   Put ("Is_Array_Type: invalid T argument: ");
+   begin
+      Dummy_Bool := Is_Array_Type (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Array_Element_Type:");
+   Put ("Invalid T argument: ");
+   begin
+      Dummy_Type := Array_Element_Type (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-array T argument: ");
+   begin
+      Dummy_Type := Array_Element_Type (Id, Invalid_Array);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
