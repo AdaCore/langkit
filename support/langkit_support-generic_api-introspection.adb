@@ -51,6 +51,10 @@ package body Langkit_Support.Generic_API.Introspection is
    --  ``Index`` is not a valid value for that type, raise a
    --  ``Precondition_Failure`` exception.
 
+   procedure Check_Array_Type (Id : Language_Id; T : Value_Type);
+   --  If ``T`` is not a valid array type for the given language, raise a
+   --  ``Precondition_Failure`` exception.
+
    procedure Check_Node_Type (Id : Language_Id; Node : Value_Type);
    --  If ``Node`` is not a valid node type for the given language, raise a
    --  ``Precondition_Failure`` exception.
@@ -167,6 +171,38 @@ package body Langkit_Support.Generic_API.Introspection is
       Check_Enum_Value (Id, Enum, Index);
       return Create_Name (Id.Enum_Types.all (Enum).Value_Names (Index).all);
    end Enum_Value_Name;
+
+   -------------------
+   -- Is_Array_Type --
+   -------------------
+
+   function Is_Array_Type (Id : Language_Id; T : Value_Type) return Boolean is
+   begin
+      Check_Value_Type (Id, T);
+      return T in Id.Array_Types.all'Range;
+   end Is_Array_Type;
+
+   ----------------------
+   -- Check_Array_Type --
+   ----------------------
+
+   procedure Check_Array_Type (Id : Language_Id; T : Value_Type) is
+   begin
+      if not Is_Array_Type (Id, T) then
+         raise Precondition_Failure with "invalid array type";
+      end if;
+   end Check_Array_Type;
+
+   ------------------------
+   -- Array_Element_Type --
+   ------------------------
+
+   function Array_Element_Type
+     (Id : Language_Id; T : Value_Type) return Value_Type is
+   begin
+      Check_Array_Type (Id, T);
+      return Id.Array_Types.all (T).Element_Type;
+   end Array_Element_Type;
 
    ------------------
    -- Is_Node_Type --

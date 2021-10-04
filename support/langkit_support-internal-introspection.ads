@@ -74,6 +74,20 @@ package Langkit_Support.Internal.Introspection is
    type Enum_Type_Descriptor_Array_Access is
      not null access constant Enum_Type_Descriptor_Array;
 
+   ----------------------------
+   -- Array type descriptors --
+   ----------------------------
+
+   type Array_Type_Descriptor is record
+      Element_Type : Value_Type;
+      --  Type of elements in this array type
+   end record;
+
+   type Array_Type_Descriptor_Array is
+     array (Value_Type range <>) of Array_Type_Descriptor;
+   type Array_Type_Descriptor_Array_Access is
+     not null access constant Array_Type_Descriptor_Array;
+
    ---------------------------
    -- Node type descriptors --
    ---------------------------

@@ -95,6 +95,20 @@ package Langkit_Support.Generic_API.Introspection is
    --  enum type. This raises a ``Out_Of_Bounds_Error`` if ``Index`` is too big
    --  for this enum type.
 
+   -----------------
+   -- Array types --
+   -----------------
+
+   function Is_Array_Type (Id : Language_Id; T : Value_Type) return Boolean;
+   --  Return whether ``T`` references an array type for the given language.
+   --
+   --  All functions below will raise a ``Precondition_Failure`` if passed a
+   --  type which does not satisfy this predicate as ``T`` formals.
+
+   function Array_Element_Type
+     (Id : Language_Id; T : Value_Type) return Value_Type;
+   --  Return the type of elements in ``T`` arrays
+
    ----------------
    -- Node types --
    ----------------
