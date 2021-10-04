@@ -58,6 +58,16 @@ Got a Stale_Reference_Error exception: unit was reparsed
 All types
 =========
 
+* AnalysisUnit
+* BigInt
+* Bool
+* Character
+* EnvRebindings
+* Int
+* SourceLocationRange
+* String
+* Token
+* Symbol
 * AnalysisUnitKind
   is an enum
 * LookupKind
@@ -92,20 +102,20 @@ LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
 Enum types
 ==========
 
-Analysis_Unit_Kind ( 1)
+Analysis_Unit_Kind ( 11)
   Default value: 0
 
   1: Unit_Specification
   2: Unit_Body
 
-Lookup_Kind ( 2)
+Lookup_Kind ( 12)
   Default value: 0
 
   1: Recursive
   2: Flat
   3: Minimal
 
-Designated_Env_Kind ( 3)
+Designated_Env_Kind ( 13)
   Default value: 1
 
   1: None
@@ -113,7 +123,7 @@ Designated_Env_Kind ( 3)
   3: Named_Env
   4: Direct_Env
 
-Grammar_Rule ( 4)
+Grammar_Rule ( 14)
   Default value: 0
 
   1: Main_Rule_Rule
@@ -146,65 +156,65 @@ Out-of-bounds Index argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: inval
 Nodes
 =====
 
-Foo_Node ( 6)
+Foo_Node ( 16)
   is abstract
   base = Bad_Type_Error: trying to get base type of root node
-  last derivation = Var_Decl ( 14)
+  last derivation = Var_Decl ( 24)
   derivations:
-    Expr ( 7)
-    Foo_Node_Base_List ( 11)
-    Name ( 13)
-    Var_Decl ( 14)
+    Expr ( 17)
+    Foo_Node_Base_List ( 21)
+    Name ( 23)
+    Var_Decl ( 24)
 
-Expr ( 7)
+Expr ( 17)
   is abstract
-  base = Foo_Node ( 6)
-  last derivation = Ref ( 10)
+  base = Foo_Node ( 16)
+  last derivation = Ref ( 20)
   derivations:
-    Addition ( 8)
-    Number ( 9)
-    Ref ( 10)
+    Addition ( 18)
+    Number ( 19)
+    Ref ( 20)
 
-Addition ( 8)
-  base = Expr ( 7)
-  last derivation = Addition ( 8)
-  derivations:
-    <none>
-
-Number ( 9)
-  base = Expr ( 7)
-  last derivation = Number ( 9)
+Addition ( 18)
+  base = Expr ( 17)
+  last derivation = Addition ( 18)
   derivations:
     <none>
 
-Ref ( 10)
-  base = Expr ( 7)
-  last derivation = Ref ( 10)
+Number ( 19)
+  base = Expr ( 17)
+  last derivation = Number ( 19)
   derivations:
     <none>
 
-Foo_Node_Base_List ( 11)
+Ref ( 20)
+  base = Expr ( 17)
+  last derivation = Ref ( 20)
+  derivations:
+    <none>
+
+Foo_Node_Base_List ( 21)
   is abstract
-  base = Foo_Node ( 6)
-  last derivation = Var_Decl_List ( 12)
+  base = Foo_Node ( 16)
+  last derivation = Var_Decl_List ( 22)
   derivations:
-    Var_Decl_List ( 12)
+    Var_Decl_List ( 22)
 
-Var_Decl_List ( 12)
-  base = Foo_Node_Base_List ( 11)
-  last derivation = Var_Decl_List ( 12)
-  derivations:
-    <none>
-
-Name ( 13)
-  base = Foo_Node ( 6)
-  last derivation = Name ( 13)
+Var_Decl_List ( 22)
+  base = Foo_Node_Base_List ( 21)
+  last derivation = Var_Decl_List ( 22)
   derivations:
     <none>
 
-Var_Decl ( 14)
-  base = Foo_Node ( 6)
-  last derivation = Var_Decl ( 14)
+Name ( 23)
+  base = Foo_Node ( 16)
+  last derivation = Name ( 23)
+  derivations:
+    <none>
+
+Var_Decl ( 24)
+  base = Foo_Node ( 16)
+  last derivation = Var_Decl ( 24)
   derivations:
     <none>
 

@@ -6,7 +6,7 @@ import difflib
 from itertools import count, takewhile
 import pipes
 from typing import (Callable, Dict, List, Optional as Opt, Sequence, Set,
-                    TYPE_CHECKING, Tuple, Union)
+                    TYPE_CHECKING, Tuple, Union, ValuesView)
 
 from langkit import names
 from langkit.c_api import CAPISettings, CAPIType
@@ -4663,6 +4663,13 @@ class TypeRepo:
              ('val', UserField(type=self.defer_root_node)),
              ('metadata', UserField(type=self.defer_env_md))]
         )
+
+    @property
+    def all_types(self) -> ValuesView[CompiledType]:
+        """
+        Return all compiled types created so far.
+        """
+        return CompiledTypeRepo.type_dict.values()
 
 
 def resolve_type(typeref):
