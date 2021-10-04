@@ -30,6 +30,11 @@ private package ${ada_lib_name}.Generic_Introspection is
 
       all_types = enum_types + array_types + struct_types + entity_types
 
+      # Fetch all exposed types that are not listed above (builtin types)
+      other_types = [t for t in T.all_types
+                     if t.exposed and not t.is_ast_node and t not in all_types]
+      all_types = sorted(other_types, key=lambda t: t.api_name) + all_types
+
       def type_index(t):
          """
          Return the name of the constant for ``t``'s type index, or
