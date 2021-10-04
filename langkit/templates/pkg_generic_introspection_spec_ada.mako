@@ -14,20 +14,21 @@ private package ${ada_lib_name}.Generic_Introspection is
 
    <%
       # Expose through the introspection API...
-      all_types = (
-         # All enum types
-         ctx.enum_types
+      enum_types = ctx.enum_types
 
-         # All exposed array types
-         + [t for t in ctx.array_types if t.exposed]
+      # All exposed array types
+      array_types = [t for t in ctx.array_types if t.exposed]
 
-         # All exposed struct types (except entities for now: see below)
-         + [t for t in ctx.struct_types if t.exposed and not t.is_entity_type]
+      # All exposed struct types (except entities for now: see below)
+      struct_types = [t for t in ctx.struct_types
+                      if t.exposed and not t.is_entity_type]
 
-         # Include all entity types (including abstract ones), in hierarchical
-         # order.
-         + [t.entity for t in ctx.astnode_types]
-      )
+      # Include all entity types (including abstract ones), in hierarchical
+      # order.
+      node_types = ctx.astnode_types
+      entity_types = [t.entity for t in node_types]
+
+      all_types = enum_types + array_types + struct_types + entity_types
 
       def type_index(t):
          """
@@ -76,11 +77,49 @@ private package ${ada_lib_name}.Generic_Introspection is
    );
 
    ---------------------------
+   -- Enum type descriptors --
+   ---------------------------
+
+   <% enum_type_descs = [] %>
+   % for t in enum_types:
+      <%
+         desc_const = f"Enum_Desc_For_{t.name}"
+         name_const = f"Enum_Name_For_{t.name}"
+         values_const = f"Enum_Values_Name_For_{t.name}"
+         enum_type_descs.append(f"{type_index(t)} => {desc_const}'Access")
+      %>
+
+      ## Output descriptors for each enum value
+      % for i, value in enumerate(t.values, 1):
+         ${name_const}_${i} : aliased constant Text_Type :=
+           ${text_repr(value.name.camel_with_underscores)};
+      % endfor
+
+      ## Output descriptors for the enum type itself
+      ${name_const} : aliased constant Text_Type :=
+        ${text_repr(t.api_name.camel_with_underscores)};
+      ${desc_const} : aliased constant Enum_Type_Descriptor := (
+         Last_Value    => ${len(t.values)},
+         Name          => ${name_const}'Access,
+         Default_Value => ${(t.values_dict[t.default_val_name].index + 1
+                             if t.default_val_name
+                             else 0)},
+         Value_Names   => (
+            ${",\n".join(f"{i} => {name_const}_{i}'Access"
+                         for i, value in enumerate(t.values, 1))}
+         )
+      );
+   % endfor
+   Enum_Types : aliased constant Enum_Type_Descriptor_Array := (
+      ${",\n".join(enum_type_descs)}
+   );
+
+   ---------------------------
    -- Node type descriptors --
    ---------------------------
 
    <% node_type_descs = [] %>
-   % for n in ctx.astnode_types:
+   % for n in node_types:
       <%
          desc_const = f"Node_Desc_For_{n.kwless_raw_name}"
          name_const = f"Node_Name_For_{n.kwless_raw_name}"

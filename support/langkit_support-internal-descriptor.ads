@@ -105,6 +105,7 @@ package Langkit_Support.Internal.Descriptor is
       --  Descriptors for introspection capabilities
 
       Value_Types : Value_Type_Descriptor_Array_Access;
+      Enum_Types  : Enum_Type_Descriptor_Array_Access;
       Node_Types  : Node_Type_Descriptor_Array_Access;
 
       --  Implementation for generic operations

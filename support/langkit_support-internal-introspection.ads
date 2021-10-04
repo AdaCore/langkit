@@ -48,6 +48,33 @@ package Langkit_Support.Internal.Introspection is
       not null access constant Value_Type_Descriptor_Array;
 
    ---------------------------
+   -- Enum type descriptors --
+   ---------------------------
+
+   type Enum_Value_Names is array (Enum_Value_Index range <>) of Text_Access;
+   --  Mapping from indexes of enum values to the names (camel-with-undercores)
+   --  of each enum value.
+
+   type Enum_Type_Descriptor (Last_Value : Enum_Value_Index) is record
+      Name : Text_Access;
+      --  Name for this enumeration type in camel-with-underscores convention
+
+      Default_Value : Any_Enum_Value_Index;
+      --  If this enum type has a default value, this contains its index. Zero
+      --  otherwise.
+
+      Value_Names : Enum_Value_Names (1 .. Last_Value);
+      --  Names for each available value for this enum type
+   end record;
+
+   type Enum_Type_Descriptor_Access is
+     not null access constant Enum_Type_Descriptor;
+   type Enum_Type_Descriptor_Array is
+     array (Value_Type range <>) of Enum_Type_Descriptor_Access;
+   type Enum_Type_Descriptor_Array_Access is
+     not null access constant Enum_Type_Descriptor_Array;
+
+   ---------------------------
    -- Node type descriptors --
    ---------------------------
 

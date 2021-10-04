@@ -59,9 +59,13 @@ All types
 =========
 
 * AnalysisUnitKind
+  is an enum
 * LookupKind
+  is an enum
 * DesignatedEnvKind
+  is an enum
 * GrammarRule
+  is an enum
 * FooNode.entity.array
 * FooNode.entity
   is a node
@@ -84,6 +88,60 @@ All types
 
 Trying to get the debug name of an invalid type...
 LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+
+Enum types
+==========
+
+Analysis_Unit_Kind ( 1)
+  Default value: 0
+
+  1: Unit_Specification
+  2: Unit_Body
+
+Lookup_Kind ( 2)
+  Default value: 0
+
+  1: Recursive
+  2: Flat
+  3: Minimal
+
+Designated_Env_Kind ( 3)
+  Default value: 1
+
+  1: None
+  2: Current_Env
+  3: Named_Env
+  4: Direct_Env
+
+Grammar_Rule ( 4)
+  Default value: 0
+
+  1: Main_Rule_Rule
+  2: Var_Decl_Rule
+  3: Expr_Rule
+  4: Atom_Rule
+  5: Number_Rule
+  6: Ref_Rule
+  7: Name_Rule
+
+Is_Enum_Type: invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+
+Invalid args for Enum_Type_Name:
+Invalid Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-enum Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum type
+
+Invalid args for Enum_Last_Value:
+Invalid Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-enum Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum type
+
+Invalid args for Enum_Default_Value:
+Invalid Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-enum Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum type
+
+Invalid args for Enum_Value_Name:
+Invalid Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-enum Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum type
+Out-of-bounds Index argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum value index
 
 Nodes
 =====
