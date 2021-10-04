@@ -57,6 +57,45 @@ package Langkit_Support.Generic_API.Introspection is
    --  the given language.
 
    ----------------
+   -- Enum types --
+   ----------------
+
+   function Is_Enum_Type (Id : Language_Id; T : Value_Type) return Boolean;
+   --  Return  whether ``T`` references an enum type for the given language.
+   --
+   --  All functions below will raise a ``Precondition_Failure`` if passed a
+   --  type which does not satisfy this predicate as ``Enum`` formals.
+
+   type Any_Enum_Value_Index is new Natural;
+   subtype Enum_Value_Index is Any_Enum_Value_Index
+      range 1 .. Any_Enum_Value_Index'Last;
+   --  Index of an enum value for a given enum type
+
+   No_Enum_Value_Index : constant Any_Enum_Value_Index := 0;
+
+   function Enum_Type_Name
+     (Id : Language_Id; Enum : Value_Type) return Name_Type;
+   --  Return the name for the given enum type according to the given language
+
+   function Enum_Last_Value
+     (Id : Language_Id; Enum : Value_Type) return Enum_Value_Index;
+   --  Return the index of the last enum value for the given ``Enum`` enum type
+
+   function Enum_Default_Value
+     (Id : Language_Id; Enum : Value_Type) return Any_Enum_Value_Index;
+   --  Return the index of the default enum value for the given ``Enum`` enum
+   --  type, or ``No_Enum_Value_Index`` if this type does not have a default
+   --  value.
+
+   function Enum_Value_Name
+     (Id    : Language_Id;
+      Enum  : Value_Type;
+      Index : Enum_Value_Index) return Name_Type;
+   --  Return the name corresponding to the ``Index``th value for the ``Enum``
+   --  enum type. This raises a ``Out_Of_Bounds_Error`` if ``Index`` is too big
+   --  for this enum type.
+
+   ----------------
    -- Node types --
    ----------------
 

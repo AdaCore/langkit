@@ -41,6 +41,16 @@ package body Langkit_Support.Generic_API.Introspection is
    --  If ``T`` is not a valid value type for the given language, raise a
    --  ``Precondition_Failure`` exception.
 
+   procedure Check_Enum_Type (Id : Language_Id; Enum : Value_Type);
+   --  If ``Enum`` is not a valid enum type for the given language, raise a
+   --  ``Precondition_Failure`` exception.
+
+   procedure Check_Enum_Value
+     (Id : Language_Id; Enum : Value_Type; Index : Enum_Value_Index);
+   --  If ``Enum`` is not a valid enum type for the given language or if
+   --  ``Index`` is not a valid value for that type, raise a
+   --  ``Precondition_Failure`` exception.
+
    procedure Check_Node_Type (Id : Language_Id; Node : Value_Type);
    --  If ``Node`` is not a valid node type for the given language, raise a
    --  ``Precondition_Failure`` exception.
@@ -74,6 +84,89 @@ package body Langkit_Support.Generic_API.Introspection is
       Check_Value_Type (Id, T);
       return Id.Value_Types (T).Debug_Name.all;
    end Debug_Name;
+
+   ------------------
+   -- Is_Enum_Type --
+   ------------------
+
+   function Is_Enum_Type (Id : Language_Id; T : Value_Type) return Boolean is
+   begin
+      Check_Value_Type (Id, T);
+      return T in Id.Enum_Types.all'Range;
+   end Is_Enum_Type;
+
+   ---------------------
+   -- Check_Enum_Type --
+   ---------------------
+
+   procedure Check_Enum_Type (Id : Language_Id; Enum : Value_Type) is
+   begin
+      if not Is_Enum_Type (Id, Enum) then
+         raise Precondition_Failure with "invalid enum type";
+      end if;
+   end Check_Enum_Type;
+
+   ----------------------
+   -- Check_Enum_Value --
+   ----------------------
+
+   procedure Check_Enum_Value
+     (Id : Language_Id; Enum : Value_Type; Index : Enum_Value_Index)
+   is
+   begin
+      Check_Enum_Type (Id, Enum);
+      if Index > Id.Enum_Types.all (Enum).Last_Value then
+         raise Precondition_Failure with "invalid enum value index";
+      end if;
+   end Check_Enum_Value;
+
+   --------------------
+   -- Enum_Type_Name --
+   --------------------
+
+   function Enum_Type_Name
+     (Id : Language_Id; Enum : Value_Type) return Name_Type is
+   begin
+      Check_Enum_Type (Id, Enum);
+      return Create_Name (Id.Enum_Types.all (Enum).Name.all);
+   end Enum_Type_Name;
+
+   ---------------------
+   -- Enum_Last_Value --
+   ---------------------
+
+   function Enum_Last_Value
+     (Id : Language_Id; Enum : Value_Type) return Enum_Value_Index
+   is
+   begin
+      Check_Enum_Type (Id, Enum);
+      return Id.Enum_Types.all (Enum).Last_Value;
+   end Enum_Last_Value;
+
+   ------------------------
+   -- Enum_Default_Value --
+   ------------------------
+
+   function Enum_Default_Value
+     (Id : Language_Id; Enum : Value_Type) return Any_Enum_Value_Index
+   is
+   begin
+      Check_Enum_Type (Id, Enum);
+      return Id.Enum_Types.all (Enum).Default_Value;
+   end Enum_Default_Value;
+
+   ---------------------
+   -- Enum_Value_Name --
+   ---------------------
+
+   function Enum_Value_Name
+     (Id    : Language_Id;
+      Enum  : Value_Type;
+      Index : Enum_Value_Index) return Name_Type is
+   begin
+      Check_Enum_Value (Id, Enum, Index);
+      return Create_Name (Id.Enum_Types.all (Enum).Value_Names (Index).all);
+   end Enum_Value_Name;
 
    ------------------
    -- Is_Node_Type --
