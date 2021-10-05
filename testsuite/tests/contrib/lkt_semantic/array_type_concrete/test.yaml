@@ -1,3 +1,1 @@
 driver: lkt
-control:
-  - [XFAIL, "True", 'Pending resolution of U930-039, step 2']

@@ -1,17 +1,23 @@
 val i: Int = 1
-# TODO: should infer type from i
 val a1 = [i, 2, 3]
 
 val s: String = "str1"
-# TODO: should infer type from s
 val a2 = [s, "str2"]
 
 fun foo(): Int = 1
-# TODO: should infer type from foo()
 val a3 = [foo(), 2, 3]
 
 fun bar(): String = "str1"
-# TODO: should infer type from bar()
 val a4 = [bar(), "str2", "str3"]
 
+# Invalid expression since foo() and bar() have different types
 @invalid val a5 = [foo(), bar()]
+@invalid val a6 = [1, '2', "3", foo(), bar()]
+
+val a7 = [[foo(), 2, 3]]
+val a8 = [[[[[foo(), 2, 3]]]]]
+
+# Cannot infer type of literals in nested arrays
+@invalid val a9 = [[foo(), 2], []]
+@invalid val a10 = [[foo(), 2], [1, 2]]
+@invalid val a11 = [[bar(), "2"], [1, 2]]

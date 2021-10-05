@@ -2199,6 +2199,41 @@ class ArrayLiteral(Expr):
     """
     exprs = Field(type=T.Expr.list)
 
+    @langkit_property()
+    def expr_context_free_type():
+        """
+        Infer type from array elements context_free_type.
+        """
+        # Get the context_free_type of the array elements if any
+        types = Var(
+            Entity.exprs.filter(
+                # Filter out Lit expressions to avoid infinite recursion
+                lambda e: Not(
+                    Or(e.is_a(T.NumLit),
+                       e.is_a(T.CharLit),
+                       e.is_a(T.StringLit))
+                )
+            ).filtermap(
+                # Keep only elements context_free_types
+                lambda e: e.expr_context_free_type.node,
+                lambda e: Not(e.expr_context_free_type.is_null)
+            )
+        )
+
+        has_cf_type = Var(
+            If(types.length == 0,
+               False,
+               types.all(lambda t: t == types.at(0)))
+        )
+
+        # Return the type of the ArrayLiteral: an Array of elememts
+        # context_free_types if they are identical, no type otherwise.
+        return If(has_cf_type,
+                  Self.array_gen_type.get_instantiated_type(
+                      [types.at(0)]
+                  ),
+                  No(T.TypeDecl)).as_entity
+
 
 class NotExpr(Expr):
     """
@@ -2994,7 +3029,25 @@ class Lit(Expr):
     """
     Base class for literals.
     """
-    pass
+    @langkit_property()
+    def expr_context_free_type_impl():
+        """
+        Infer the context free type of a Lit expression based on the
+        expression list context free types.
+        """
+        # Match parent.parent to infer type from ArrayLiteral's type
+        return Entity.parent.parent.match(
+            lambda t=T.ArrayLiteral: t.expr_context_free_type.then(
+                lambda cft: cft.cast(
+                    T.InstantiatedGenericType).get_actuals.at(0),
+                default_val=No(T.TypeDecl.entity)
+            ),
+            lambda _: No(T.TypeDecl.entity)
+        )
+
+    @langkit_property()
+    def expr_context_free_type():
+        return Entity.expr_context_free_type_impl()
 
 
 class NullLit(Lit):
@@ -3051,6 +3104,11 @@ class StringLit(Lit):
     @langkit_property()
     def expr_context_free_type():
         return Cond(
+            # TODO: get rid of expr_context_free_type_impl,
+            # call Super() instead. Pending on UA04-043.
+            Not(Entity.expr_context_free_type_impl.is_null),
+            Entity.expr_context_free_type_impl,
+
             Self.is_regexp_literal,
             Self.regexp_type,
 
