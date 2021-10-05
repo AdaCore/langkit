@@ -189,20 +189,37 @@ class LKNode(ASTNode):
     )
 
     array_gen_type = Property(
-        Self.get_builtin_gen_decl('Array').decl.cast(T.TypeDecl), public=True,
+        Self.get_builtin_gen_decl('Array'), public=True,
+        doc="Unit method. Return the array builtin generic type."
+    )
+
+    array_type = Property(
+        Self.array_gen_type.decl.cast(T.TypeDecl), public=True,
         doc="Unit method. Return the array builtin type."
     )
 
     astlist_gen_type = Property(
-        Self.get_builtin_gen_decl('ASTList').decl.cast(T.TypeDecl),
+        Self.get_builtin_gen_decl('ASTList'),
         public=True,
         doc="Unit method. Return the ASTList builtin generic type."
     )
 
+    astlist_type = Property(
+        Self.astlist_gen_type.decl.cast(T.TypeDecl),
+        public=True,
+        doc="Unit method. Return the ASTList builtin type."
+    )
+
     iterator_gen_trait = Property(
-        Self.get_builtin_gen_decl('Iterator').decl.cast(T.TraitDecl),
+        Self.get_builtin_gen_decl('Iterator'),
         public=True,
         doc="Unit method. Return the Iterator builtin generic trait."
+    )
+
+    iterator_trait = Property(
+        Self.iterator_gen_trait.decl.cast(T.TraitDecl),
+        public=True,
+        doc="Unit method. Return the Iterator builtin trait."
     )
 
     @langkit_property(external=True,
@@ -657,7 +674,7 @@ class Expr(LKNode):
         # ``get_actuals.at(0)`` is the element type.
         return Entity.expected_type.cast(T.InstantiatedGenericType).then(
             lambda etype: Cond(
-                etype.get_inner_type.as_entity == Entity.array_gen_type,
+                etype.get_inner_type.as_entity == Entity.array_type,
                 etype.get_actuals.at_or_raise(0),
 
                 # TODO: emit proper diagnostic
