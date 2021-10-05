@@ -1157,10 +1157,10 @@ class LktTypesLoader:
 
         # Pre-fetch the declaration of generic types so that resolve_type_decl
         # has an efficient access to them.
-        self.array_gen_type = root.p_array_gen_type
-        self.astlist_gen_type = root.p_astlist_gen_type
-        self.iterator_gen_trait = root.p_iterator_gen_trait
-        self.map_method = get_field(self.iterator_gen_trait, 'map')
+        self.array_type = root.p_array_type
+        self.astlist_type = root.p_astlist_type
+        self.iterator_trait = root.p_iterator_trait
+        self.map_method = get_field(self.iterator_trait, 'map')
 
         # Map Lkt nodes for the declarations of builtin types to the
         # corresponding CompiledType instances.
@@ -1220,11 +1220,11 @@ class LktTypesLoader:
             inner_type = decl.p_get_inner_type
             actuals = decl.p_get_actuals
 
-            if inner_type == self.array_gen_type:
+            if inner_type == self.array_type:
                 assert len(actuals) == 1
                 result = self.resolve_type_decl(actuals[0]).array
 
-            elif inner_type == self.astlist_gen_type:
+            elif inner_type == self.astlist_type:
                 assert len(actuals) == 1
                 node = self.resolve_type_decl(actuals[0])
                 assert isinstance(node, (ASTNodeType, TypeRepo.Defer))
