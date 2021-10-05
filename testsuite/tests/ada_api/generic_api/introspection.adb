@@ -33,6 +33,9 @@ procedure Introspection is
    function Node_Repr (Node : Value_Type) return String
    is (+Node_Type_Name (Id, Node) & " (" & Node'Image & ")");
 
+   function Member_Repr (Member : Struct_Member) return String
+   is (+Member_Name (Id, Member) & " (" & Member'Image & ")");
+
    procedure Assert (Predicate : Boolean; Message : String);
    --  Print Message and raise a Program_Error if Predicate is false
 
@@ -68,14 +71,21 @@ procedure Introspection is
       end if;
    end Assert;
 
-   First_Node, Last_Node   : Any_Value_Type := No_Value_Type;
-   First_Enum, Last_Enum   : Any_Value_Type := No_Value_Type;
-   First_Array, Last_Array : Any_Value_Type := No_Value_Type;
+   First_Node, Last_Node     : Any_Value_Type := No_Value_Type;
+   First_Enum, Last_Enum     : Any_Value_Type := No_Value_Type;
+   First_Array, Last_Array   : Any_Value_Type := No_Value_Type;
+   First_Struct, Last_Struct : Any_Value_Type := No_Value_Type;
 
-   Invalid_Type  : constant Value_Type := Last_Value_Type (Id) + 1;
-   Invalid_Node  : Value_Type;
-   Invalid_Enum  : Value_Type;
-   Invalid_Array : Value_Type;
+   First_Member : constant Struct_Member := Struct_Member'First;
+   Last_Member  : Struct_Member := First_Member;
+
+   Invalid_Type   : constant Value_Type := Last_Value_Type (Id) + 1;
+   Invalid_Node   : Value_Type;
+   Invalid_Enum   : Value_Type;
+   Invalid_Array  : Value_Type;
+   Invalid_Struct : Value_Type;
+
+   Invalid_Member : Struct_Member;
 
    Dummy_Bool       : Boolean;
    Dummy_Name       : Name_Type;
@@ -110,6 +120,13 @@ begin
          end if;
          Last_Array := T;
 
+      elsif Is_Struct_Type (Id, T) then
+         Put_Line ("  is a struct");
+         if First_Struct = No_Value_Type then
+            First_Struct := T;
+         end if;
+         Last_Struct := T;
+
       elsif Is_Node_Type (Id, T) then
          Put_Line ("  is a node");
          if First_Node = No_Value_Type then
@@ -122,6 +139,7 @@ begin
    Invalid_Node := First_Node - 1;
    Invalid_Enum := First_Node;
    Invalid_Array := First_Node;
+   Invalid_Struct := First_Enum;
 
    Put_Line ("Trying to get the debug name of an invalid type...");
    begin
@@ -287,6 +305,47 @@ begin
    Put ("Non-array T argument: ");
    begin
       Dummy_Type := Array_Element_Type (Id, Invalid_Array);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   ----------------------------
+   -- Struct type primitives --
+   ----------------------------
+
+   Put_Title ("Structs");
+   New_Line;
+   for T in First_Struct .. Last_Struct loop
+      Put_Line (+Struct_Type_Name (Id, T));
+      New_Line;
+   end loop;
+
+   Put ("Is_Struct_Type: Invalid T argument: ");
+   begin
+      Dummy_Bool := Is_Struct_Type (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Struct_Type_Name:");
+   Put ("Invalid Struct argument: ");
+   begin
+      Dummy_Name := Struct_Type_Name (Id, Invalid_Type);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-struct Struct argument: ");
+   begin
+      Dummy_Name := Struct_Type_Name (Id, Invalid_Struct);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -535,5 +594,139 @@ begin
       end;
    end;
    New_Line;
+
+   Put_Title ("Members");
+   New_Line;
+   for T in First_Struct .. Last_Node loop
+      Put_Line ("For " & (+Base_Struct_Type_Name (Id, T)));
+      for M of Members (Id, T) loop
+         Last_Member := Struct_Member'Max (Last_Member, M);
+         Put_Line ("  " & Member_Repr (M));
+      end loop;
+      New_Line;
+   end loop;
+   Invalid_Member := Last_Member + 1;
+
+   Put_Title ("Detailed list of members");
+   New_Line;
+   for M in First_Member .. Last_Member loop
+      Put_Line (Member_Repr (M));
+      if Is_Property (Id, M) then
+         Put_Line ("  is a property");
+      end if;
+      Put_Line ("  type: " & Debug_Name (Id, Member_Type (Id, M)));
+
+      if Member_Last_Argument (Id, M) = No_Argument_Index then
+         Put_Line ("  no argument");
+      else
+         Put_Line ("  arguments:");
+         for A in 1 .. Member_Last_Argument (Id, M) loop
+            Put_Line ("    "
+                      & (+Member_Argument_Name (Id, M, A))
+                      & ": "
+                      & Debug_Name (Id, Member_Argument_Type (Id, M, A)));
+         end loop;
+      end if;
+      New_Line;
+   end loop;
+
+   Put ("Is_Property: Invalid Member argument: ");
+   begin
+      Dummy_Bool := Is_Property (Id, Invalid_Member);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Members:");
+   Put ("Invalid Struct argument: ");
+   begin
+      Dummy_Bool := Members (Id, Invalid_Type)'Length = 0;
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-struct Struct argument: ");
+   begin
+      Dummy_Bool := Members (Id, Invalid_Struct)'Length = 0;
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put ("Member_Name: Invalid Member argument: ");
+   begin
+      Dummy_Name := Member_Name (Id, Invalid_Member);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put ("Member_Type: Invalid Member argument: ");
+   begin
+      Dummy_Type := Member_Type (Id, Invalid_Member);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put ("Member_Last_Argument: Invalid Member argument: ");
+   begin
+      Dummy_Bool := Member_Last_Argument (Id, Invalid_Member) = 0;
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Member_Argument_Type:");
+   Put ("Invalid Member argument: ");
+   begin
+      Dummy_Type := Member_Argument_Type (Id, Invalid_Member, 1);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   Put ("Invalid Argument argument: ");
+   begin
+      Dummy_Type := Member_Argument_Type
+        (Id, Last_Member, Member_Last_Argument (Id, Last_Member) + 1);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Member_Argument_Name:");
+   Put ("Invalid Member argument: ");
+   begin
+      Dummy_Name := Member_Argument_Name (Id, Invalid_Member, 1);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   Put ("Invalid Argument argument: ");
+   begin
+      Dummy_Name := Member_Argument_Name
+        (Id, Last_Member, Member_Last_Argument (Id, Last_Member) + 1);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
 
 end Introspection;

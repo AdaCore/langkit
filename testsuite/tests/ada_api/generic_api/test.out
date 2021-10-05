@@ -26,7 +26,7 @@ Has foo.txt? -> FALSE
 Line 2:
   "var b = 1 + a;"
 Traversing its parsing tree...
-<VarDeclList example.txt:1:1-2:15>
+<FooNodeList example.txt:1:1-2:15>
 <VarDecl example.txt:1:1-1:11>
 <Name example.txt:1:5-1:6>
 <Number example.txt:1:9-1:10>
@@ -76,9 +76,17 @@ All types
   is an enum
 * GrammarRule
   is an enum
+* BigInt.array
+  is an array
 * FooNode.entity.array
   is an array
+* NodeResult
+  is a struct
+* Point
+  is a struct
 * FooNode.entity
+  is a node
+* Example.entity
   is a node
 * Expr.entity
   is a node
@@ -90,7 +98,7 @@ All types
   is a node
 * FooNodeBaseList.entity
   is a node
-* VarDecl.list.entity
+* FooNode.list.entity
   is a node
 * Name.entity
   is a node
@@ -157,6 +165,9 @@ Out-of-bounds Index argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: inval
 Arrays
 ======
 
+BigInt.array
+Array of BigInt
+
 FooNode.entity.array
 Array of FooNode.entity
 
@@ -166,68 +177,88 @@ Invalid args for Array_Element_Type:
 Invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
 Non-array T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid array type
 
+Structs
+=======
+
+Node_Result
+
+Point
+
+Is_Struct_Type: Invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+
+Invalid args for Struct_Type_Name:
+Invalid Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-struct Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct type
+
 Nodes
 =====
 
-Foo_Node ( 16)
+Foo_Node ( 19)
   is abstract
   base = Bad_Type_Error: trying to get base type of root node
-  last derivation = Var_Decl ( 24)
+  last derivation = Var_Decl ( 28)
   derivations:
-    Expr ( 17)
-    Foo_Node_Base_List ( 21)
-    Name ( 23)
-    Var_Decl ( 24)
+    Example ( 20)
+    Expr ( 21)
+    Foo_Node_Base_List ( 25)
+    Name ( 27)
+    Var_Decl ( 28)
 
-Expr ( 17)
+Example ( 20)
+  base = Foo_Node ( 19)
+  last derivation = Example ( 20)
+  derivations:
+    <none>
+
+Expr ( 21)
   is abstract
-  base = Foo_Node ( 16)
-  last derivation = Ref ( 20)
+  base = Foo_Node ( 19)
+  last derivation = Ref ( 24)
   derivations:
-    Addition ( 18)
-    Number ( 19)
-    Ref ( 20)
+    Addition ( 22)
+    Number ( 23)
+    Ref ( 24)
 
-Addition ( 18)
-  base = Expr ( 17)
-  last derivation = Addition ( 18)
-  derivations:
-    <none>
-
-Number ( 19)
-  base = Expr ( 17)
-  last derivation = Number ( 19)
+Addition ( 22)
+  base = Expr ( 21)
+  last derivation = Addition ( 22)
   derivations:
     <none>
 
-Ref ( 20)
-  base = Expr ( 17)
-  last derivation = Ref ( 20)
+Number ( 23)
+  base = Expr ( 21)
+  last derivation = Number ( 23)
   derivations:
     <none>
 
-Foo_Node_Base_List ( 21)
+Ref ( 24)
+  base = Expr ( 21)
+  last derivation = Ref ( 24)
+  derivations:
+    <none>
+
+Foo_Node_Base_List ( 25)
   is abstract
-  base = Foo_Node ( 16)
-  last derivation = Var_Decl_List ( 22)
+  base = Foo_Node ( 19)
+  last derivation = Foo_Node_List ( 26)
   derivations:
-    Var_Decl_List ( 22)
+    Foo_Node_List ( 26)
 
-Var_Decl_List ( 22)
-  base = Foo_Node_Base_List ( 21)
-  last derivation = Var_Decl_List ( 22)
-  derivations:
-    <none>
-
-Name ( 23)
-  base = Foo_Node ( 16)
-  last derivation = Name ( 23)
+Foo_Node_List ( 26)
+  base = Foo_Node_Base_List ( 25)
+  last derivation = Foo_Node_List ( 26)
   derivations:
     <none>
 
-Var_Decl ( 24)
-  base = Foo_Node ( 16)
-  last derivation = Var_Decl ( 24)
+Name ( 27)
+  base = Foo_Node ( 19)
+  last derivation = Name ( 27)
+  derivations:
+    <none>
+
+Var_Decl ( 28)
+  base = Foo_Node ( 19)
+  last derivation = Var_Decl ( 28)
   derivations:
     <none>
 
@@ -268,4 +299,384 @@ Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid nod
 Invalid Parent argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
 Non-node Parent argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 
+Members
+=======
+
+For Node_Result
+  N ( 1)
+
+For Point
+  X ( 2)
+  Y ( 3)
+
+For Foo_Node
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+
+For Example
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+  Example_P_Prop ( 20)
+  Example_P_Result ( 21)
+  Example_P_Id_Bool ( 22)
+  Example_P_Id_Int ( 23)
+  Example_P_Id_Bigint ( 24)
+  Example_P_Id_Char ( 25)
+  Example_P_Id_Token ( 26)
+  Example_P_Id_Sym ( 27)
+  Example_P_Id_Unit ( 28)
+  Example_P_Id_Root_Node ( 29)
+  Example_P_Id_Name ( 30)
+  Example_P_Id_Unit_Kind ( 31)
+  Example_P_Id_Node_Array ( 32)
+  Example_P_Id_Bigint_Array ( 33)
+  Example_P_Id_Dflt_Bool ( 34)
+  Example_P_Id_Dflt_Int ( 35)
+  Example_P_Id_Dflt_Char ( 36)
+  Example_P_Id_Dflt_Root_Node ( 37)
+
+For Expr
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+
+For Addition
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+  Addition_F_Lhs ( 4)
+  Addition_F_Rhs ( 5)
+
+For Number
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+
+For Ref
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+  Ref_F_Name ( 6)
+
+For Foo_Node_Base_List
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+
+For Foo_Node_List
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+
+For Name
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+
+For Var_Decl
+  Parent ( 9)
+  Parents ( 10)
+  Children ( 11)
+  Token_Start ( 12)
+  Token_End ( 13)
+  Child_Index ( 14)
+  Previous_Sibling ( 15)
+  Next_Sibling ( 16)
+  Unit ( 17)
+  Is_Ghost ( 18)
+  Full_Sloc_Image ( 19)
+  Var_Decl_F_Name ( 7)
+  Var_Decl_F_Value ( 8)
+
+Detailed list of members
+========================
+
+N ( 1)
+  type: Example.entity
+  no argument
+
+X ( 2)
+  type: BigInt
+  no argument
+
+Y ( 3)
+  type: BigInt
+  no argument
+
+Addition_F_Lhs ( 4)
+  type: Expr.entity
+  no argument
+
+Addition_F_Rhs ( 5)
+  type: Expr.entity
+  no argument
+
+Ref_F_Name ( 6)
+  type: Name.entity
+  no argument
+
+Var_Decl_F_Name ( 7)
+  type: Name.entity
+  no argument
+
+Var_Decl_F_Value ( 8)
+  type: Expr.entity
+  no argument
+
+Parent ( 9)
+  is a property
+  type: FooNode.entity
+  no argument
+
+Parents ( 10)
+  is a property
+  type: FooNode.entity.array
+  arguments:
+    With_Self: Bool
+
+Children ( 11)
+  is a property
+  type: FooNode.entity.array
+  no argument
+
+Token_Start ( 12)
+  is a property
+  type: Token
+  no argument
+
+Token_End ( 13)
+  is a property
+  type: Token
+  no argument
+
+Child_Index ( 14)
+  is a property
+  type: Int
+  no argument
+
+Previous_Sibling ( 15)
+  is a property
+  type: FooNode.entity
+  no argument
+
+Next_Sibling ( 16)
+  is a property
+  type: FooNode.entity
+  no argument
+
+Unit ( 17)
+  is a property
+  type: AnalysisUnit
+  no argument
+
+Is_Ghost ( 18)
+  is a property
+  type: Bool
+  no argument
+
+Full_Sloc_Image ( 19)
+  is a property
+  type: String
+  no argument
+
+Example_P_Prop ( 20)
+  is a property
+  type: Point
+  arguments:
+    P: Point
+
+Example_P_Result ( 21)
+  is a property
+  type: NodeResult
+  no argument
+
+Example_P_Id_Bool ( 22)
+  is a property
+  type: Bool
+  arguments:
+    Id: Bool
+
+Example_P_Id_Int ( 23)
+  is a property
+  type: Int
+  arguments:
+    Id: Int
+
+Example_P_Id_Bigint ( 24)
+  is a property
+  type: BigInt
+  arguments:
+    Id: BigInt
+
+Example_P_Id_Char ( 25)
+  is a property
+  type: Character
+  arguments:
+    Id: Character
+
+Example_P_Id_Token ( 26)
+  is a property
+  type: Token
+  arguments:
+    Id: Token
+
+Example_P_Id_Sym ( 27)
+  is a property
+  type: Symbol
+  arguments:
+    Id: Symbol
+
+Example_P_Id_Unit ( 28)
+  is a property
+  type: AnalysisUnit
+  arguments:
+    Id: AnalysisUnit
+
+Example_P_Id_Root_Node ( 29)
+  is a property
+  type: FooNode.entity
+  arguments:
+    Id: FooNode.entity
+
+Example_P_Id_Name ( 30)
+  is a property
+  type: Name.entity
+  arguments:
+    Id: Name.entity
+
+Example_P_Id_Unit_Kind ( 31)
+  is a property
+  type: AnalysisUnitKind
+  arguments:
+    Id: AnalysisUnitKind
+
+Example_P_Id_Node_Array ( 32)
+  is a property
+  type: FooNode.entity.array
+  arguments:
+    Id: FooNode.entity.array
+
+Example_P_Id_Bigint_Array ( 33)
+  is a property
+  type: BigInt.array
+  arguments:
+    Id: BigInt.array
+
+Example_P_Id_Dflt_Bool ( 34)
+  is a property
+  type: Bool
+  arguments:
+    Id: Bool
+
+Example_P_Id_Dflt_Int ( 35)
+  is a property
+  type: Int
+  arguments:
+    Id: Int
+
+Example_P_Id_Dflt_Char ( 36)
+  is a property
+  type: Character
+  arguments:
+    Id: Character
+
+Example_P_Id_Dflt_Root_Node ( 37)
+  is a property
+  type: FooNode.entity
+  arguments:
+    Id: FooNode.entity
+
+Is_Property: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+
+Invalid args for Members:
+Invalid Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Non-struct Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid base struct type
+
+Member_Name: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+
+Member_Type: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+
+Member_Last_Argument: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+
+Invalid args for Member_Argument_Type:
+Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
+
+Invalid args for Member_Argument_Name:
+Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
 Done

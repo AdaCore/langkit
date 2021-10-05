@@ -35,6 +35,16 @@ private package ${ada_lib_name}.Generic_Introspection is
                      if t.exposed and not t.is_ast_node and t not in all_types]
       all_types = sorted(other_types, key=lambda t: t.api_name) + all_types
 
+      def type_name(t):
+         """
+         Return a short type name for ``t``, to be used in the generation of
+         constants.
+         """
+         if t.is_ast_node:
+            t = t.entity
+
+         return t.api_name.camel_with_underscores
+
       def type_index(t):
          """
          Return the name of the constant for ``t``'s type index, or
@@ -43,13 +53,50 @@ private package ${ada_lib_name}.Generic_Introspection is
          For convenience, also automatically handle bare nodes as entities
          (bare nodes are not exposed).
          """
-         if t is None:
-            return "No_Value_Type"
+         return (
+            "No_Value_Type"
+            if t is None
+            else f"Type_Index_For_{type_name(t)}"
+         )
 
-         if t.is_ast_node:
-            t = t.entity
+      # We also need to expose all base struct members: struct fields, node
+      # syntax fields and properties.
+      all_members = (
+         ctx.sorted_struct_fields
+         + ctx.sorted_parse_fields
+         + ctx.sorted_properties
+      )
 
-         return f"Index_For_{t.name}"
+      def root_member(m):
+         # In the case of overriding node members (abstract syntax fields,
+         # overriding properties), we emit a single member descriptor for the
+         # whole derivation tree, so always refer to the root member.
+         if m.struct.is_ast_node:
+            while True:
+               base = m.base
+               if base is None:
+                  break
+               m = base
+         return m
+
+      def member_name(m):
+         """
+         Return a unique name for the ``m`` struct member.
+         """
+         m = root_member(m)
+         # Node members are already qualified by the node type name, so we need
+         # to add the type name only for structs.
+         return (
+            m.name
+            if m.struct.is_ast_node
+            else f"{type_name(m.struct)}_{m.name}"
+         )
+
+      def member_index(m):
+         """
+         Return the name of the constant for ``m``'s struct member index.
+         """
+         return f"Member_Index_For_{member_name(m)}"
    %>
 
    --------------------------
@@ -58,6 +105,14 @@ private package ${ada_lib_name}.Generic_Introspection is
 
    % for i, t in enumerate(all_types, 1):
       ${type_index(t)} : constant Value_Type := ${i};
+   % endfor
+
+   ----------------------------
+   -- Member index constants --
+   ----------------------------
+
+   % for i, m in enumerate(all_members, 1):
+      ${member_index(m)} : constant Struct_Member := ${i};
    % endfor
 
    ------------------------------------
@@ -133,36 +188,123 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${",\n".join(array_type_descs)}
    );
 
-   ---------------------------
-   -- Node type descriptors --
-   ---------------------------
+   -------------------------------
+   -- Struct member descriptors --
+   -------------------------------
 
-   <% node_type_descs = [] %>
-   % for n in node_types:
+   <%
+      member_descs = []
+      arg_no = 1
+   %>
+   % for m in all_members:
       <%
-         desc_const = f"Node_Desc_For_{n.kwless_raw_name}"
-         name_const = f"Node_Name_For_{n.kwless_raw_name}"
-         node_type_descs.append(f"{type_index(n)} => {desc_const}'Access")
+         name = member_name(m)
+         desc_name = f"Member_Desc_For_{name}"
+         name_const = f"Member_Name_For_{name}"
+         member_descs.append(f"{member_index(m)} => {desc_name}'Access")
+         args = []
+      %>
+
+      % for i, arg in enumerate(m.arguments, 1):
+         Arg_Name_${arg_no} : aliased constant Text_Type :=
+           ${text_repr(arg.name.camel_with_underscores)};
+         <%
+            args.append(
+               f"{arg_no} => (Name => Arg_Name_{arg_no}'Access,"
+               f" Argument_Type => {type_index(arg.type)})"
+            )
+            arg_no += 1
+         %>
+      % endfor
+
+      ${name_const} : aliased constant Text_Type :=
+        ${text_repr(m.name.camel_with_underscores)};
+      ${desc_name} : aliased constant Struct_Member_Descriptor :=
+        (Last_Argument => ${len(args)},
+         Name          => ${name_const}'Access,
+         Member_Type   => ${type_index(m.type)},
+         Arguments     => (
+            % if m.arguments:
+               ${",\n".join(args)}
+            % else:
+               1 .. 0 => <>
+            % endif
+        ));
+
+   % endfor
+
+   Struct_Members : aliased constant Struct_Member_Descriptor_Array := (
+      ${",\n".join(member_descs)}
+   );
+
+   -----------------------------
+   -- Struct type descriptors --
+   -----------------------------
+
+   <% struct_type_descs = [] %>
+   % for t in struct_types + node_types:
+      <%
+         if t.is_ast_node:
+            name = t.kwless_raw_name
+            base = t.base
+            abstract = t.abstract
+            subclasses = t.subclasses
+         else:
+            name = t.api_name
+            base = None
+            abstract = False
+            subclasses = []
+         desc_const = f"Node_Desc_For_{name}"
+         name_const = f"Node_Name_For_{name}"
+         struct_type_descs.append(f"{type_index(t)} => {desc_const}'Access")
+
+         def get_members(include_inherited):
+            result = (
+               t.get_parse_fields(include_inherited=include_inherited)
+               if t.is_ast_node
+               else t.get_fields()
+            )
+            return result + t.get_properties(
+               predicate=lambda p: p.is_public and not p.overriding,
+               include_inherited=include_inherited
+            )
+
+         inherited_members = get_members(True)
+         members = get_members(False)
       %>
       ${name_const} : aliased constant Text_Type :=
-        ${text_repr(n.kwless_raw_name.camel_with_underscores)};
-      ${desc_const} : aliased constant Node_Type_Descriptor :=
-        (Derivations_Count => ${len(n.subclasses)},
-         Base_Type         => ${type_index(n.base)},
-         Is_Abstract       => ${n.abstract},
+        ${text_repr(name.camel_with_underscores)};
+      ${desc_const} : aliased constant Struct_Type_Descriptor :=
+        (Derivations_Count => ${len(subclasses)},
+         Member_Count      => ${len(members)},
+         Base_Type         => ${type_index(base)},
+         Is_Abstract       => ${abstract},
          Name              => ${name_const}'Access,
+         Inherited_Members => ${len(inherited_members)},
          Derivations       => (
-           % if n.subclasses:
-             ${",\n".join(f"{i} => {type_index(n)}"
-                         for i, n in enumerate(n.subclasses, 1))}
+           % if subclasses:
+             ${",\n".join(f"{i} => {type_index(sc)}"
+                         for i, sc in enumerate(subclasses, 1))}
            % else:
              1 .. 0 => <>
            % endif
+         ),
+         Members           => (
+            % if members:
+              ${",\n".join(f"{i} => {member_index(m)}"
+                           for i, m in enumerate(members, 1))}
+            % else:
+              1 .. 0 => <>
+            % endif
          ));
    % endfor
 
-   Node_Types : aliased constant Node_Type_Descriptor_Array := (
-      ${",\n".join(node_type_descs)}
+   Struct_Types : aliased constant Struct_Type_Descriptor_Array := (
+      ${",\n".join(struct_type_descs)}
    );
+
+   First_Node     : constant Value_Type := ${type_index(node_types[0])};
+   First_Property : constant Struct_Member :=
+     ${member_index(ctx.sorted_properties[0])};
 
 end ${ada_lib_name}.Generic_Introspection;

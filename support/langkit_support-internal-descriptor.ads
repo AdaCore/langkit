@@ -25,6 +25,8 @@ with Langkit_Support.File_Readers;      use Langkit_Support.File_Readers;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Introspection;
 use Langkit_Support.Internal.Introspection;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 
 --  This package provides common implementation details for Langkit-generated
@@ -104,10 +106,25 @@ package Langkit_Support.Internal.Descriptor is
 
       --  Descriptors for introspection capabilities
 
-      Value_Types : Value_Type_Descriptor_Array_Access;
-      Enum_Types  : Enum_Type_Descriptor_Array_Access;
-      Array_Types : Array_Type_Descriptor_Array_Access;
-      Node_Types  : Node_Type_Descriptor_Array_Access;
+      Value_Types  : Value_Type_Descriptor_Array_Access;
+      Enum_Types   : Enum_Type_Descriptor_Array_Access;
+      Array_Types  : Array_Type_Descriptor_Array_Access;
+      Struct_Types : Struct_Type_Descriptor_Array_Access;
+
+      First_Node : Value_Type;
+      --  Index of the first node descriptor in ``Struct_Types``. In
+      --  ``Struct_Types``, descriptors from 1 to ``First_Node - 1`` are struct
+      --  types (not nodes), and descriptors from ``First_Node`` to
+      --  ``Struct_Types'Last`` are nodes.
+
+      Struct_Members : Struct_Member_Descriptor_Array_Access;
+      --  Descriptors for struct members: fields and properties. In
+      --  ``Struct_Members``, descriptors from 1 to ``First_Property - 1`` are
+      --  fields, and descriptors from ``First_Property`` to
+      --  ``Struct_Members'Last`` are properties.
+
+      First_Property : Struct_Member;
+      --  Index of the first property descriptor in ``Struct_Members``
 
       --  Implementation for generic operations
 
