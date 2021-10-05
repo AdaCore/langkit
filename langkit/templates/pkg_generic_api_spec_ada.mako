@@ -108,10 +108,13 @@ private
       Default_Grammar_Rule => ${main_rule_id},
       Grammar_Rule_Names   => Grammar_Rule_Names'Access,
 
-      Value_Types => Generic_Introspection.Value_Types'Access,
-      Enum_Types  => Generic_Introspection.Enum_Types'Access,
-      Array_Types => Generic_Introspection.Array_Types'Access,
-      Node_Types  => Generic_Introspection.Node_Types'Access,
+      Value_Types    => Generic_Introspection.Value_Types'Access,
+      Enum_Types     => Generic_Introspection.Enum_Types'Access,
+      Array_Types    => Generic_Introspection.Array_Types'Access,
+      Struct_Types   => Generic_Introspection.Struct_Types'Access,
+      First_Node     => Generic_Introspection.First_Node,
+      Struct_Members => Generic_Introspection.Struct_Members'Access,
+      First_Property => Generic_Introspection.First_Property,
 
       Create_Context        => Create_Context'Access,
       Context_Inc_Ref       => Context_Inc_Ref'Access,

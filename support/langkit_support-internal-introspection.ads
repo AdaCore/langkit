@@ -88,30 +88,77 @@ package Langkit_Support.Internal.Introspection is
    type Array_Type_Descriptor_Array_Access is
      not null access constant Array_Type_Descriptor_Array;
 
-   ---------------------------
-   -- Node type descriptors --
-   ---------------------------
+   -------------------------------
+   -- Struct member descriptors --
+   -------------------------------
 
-   type Node_Type_Descriptor (Derivations_Count : Natural) is record
+   type Argument_Descriptor is record
+      Name : Text_Access;
+      --  Name for this property argument in camel-with-underscores convention
+
+      Argument_Type : Value_Type;
+      --  Expected type for this property argument
+   end record;
+
+   type Argument_Descriptor_Array is
+     array (Argument_Index range <>) of Argument_Descriptor;
+
+   type Struct_Member_Descriptor (Last_Argument : Any_Argument_Index) is record
+      Name : Text_Access;
+      --  Name for this struct member in camel-with-underscores convention
+
+      Member_Type : Value_Type;
+      --  Field type (for struct fields or node syntax fields) or return type
+      --  (for properties).
+
+      Arguments : Argument_Descriptor_Array (1 .. Last_Argument);
+      --  Descriptors for each argument of this property. Empty array for
+      --  fields.
+   end record;
+
+   type Struct_Member_Descriptor_Access is
+     not null access constant Struct_Member_Descriptor;
+   type Struct_Member_Descriptor_Array is
+     array (Struct_Member range <>) of Struct_Member_Descriptor_Access;
+   type Struct_Member_Descriptor_Array_Access is
+     not null access constant Struct_Member_Descriptor_Array;
+
+   -----------------------------
+   -- Struct type descriptors --
+   -----------------------------
+
+   --  Note that this descriptor is common to both actual structs and nodes
+   --  (i.e. it is for all base structs). In the case of structs, we consider
+   --  that there is no base type, only concrete structs and zero derivation.
+
+   type Struct_Type_Descriptor
+     (Derivations_Count : Natural; Member_Count : Natural)
+   is record
       Base_Type : Any_Value_Type;
-      --  Reference to the node type from which this derives
+      --  Reference to the struct type from which this derives
 
       Is_Abstract : Boolean;
-      --  Whether this node type is abstract
+      --  Whether this struct type is abstract
 
       Name : Text_Access;
       --  Name for this type in camel-with-undercores convention
 
+      Inherited_Members : Natural;
+      --  Number of inherited members for this struct (``Members`` included)
+
       Derivations : Value_Type_Array (1 .. Derivations_Count);
-      --  Sorted list (by index) of node types for all node types that directly
-      --  derives from this node.
+      --  Sorted list (by index) of all struct types that directly derives from
+      --  this struct.
+
+      Members : Struct_Member_Array (1 .. Member_Count);
+      --  List of members for this struct ,excluding inherited members
    end record;
 
-   type Node_Type_Descriptor_Access is
-     not null access constant Node_Type_Descriptor;
-   type Node_Type_Descriptor_Array is
-     array (Value_Type range <>) of Node_Type_Descriptor_Access;
-   type Node_Type_Descriptor_Array_Access is
-     not null access constant Node_Type_Descriptor_Array;
+   type Struct_Type_Descriptor_Access is
+     not null access constant Struct_Type_Descriptor;
+   type Struct_Type_Descriptor_Array is
+     array (Value_Type range <>) of Struct_Type_Descriptor_Access;
+   type Struct_Type_Descriptor_Array_Access is
+     not null access constant Struct_Type_Descriptor_Array;
 
 end Langkit_Support.Internal.Introspection;

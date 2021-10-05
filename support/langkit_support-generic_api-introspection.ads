@@ -109,6 +109,37 @@ package Langkit_Support.Generic_API.Introspection is
      (Id : Language_Id; T : Value_Type) return Value_Type;
    --  Return the type of elements in ``T`` arrays
 
+   -----------------------
+   -- Struct/node types --
+   -----------------------
+
+   function Is_Base_Struct_Type
+     (Id : Language_Id; T : Value_Type) return Boolean;
+   --  Return whether ``T`` references a struct or node type for the given
+   --  language.
+   --
+   --  All functions below will raise a ``Precondition_Failure`` if passed a
+   --  type which does not satisfy this predicate as ``T`` formals.
+
+   function Base_Struct_Type_Name
+     (Id : Language_Id; T : Value_Type) return Name_Type;
+   --  Return the name for the given node type according to the given language
+
+   ------------------
+   -- Struct types --
+   ------------------
+
+   function Is_Struct_Type (Id : Language_Id; T : Value_Type) return Boolean;
+   --  Return whether ``T`` references a struct type for the given language.
+   --  This returns False for node types.
+   --
+   --  All functions below will raise a ``Precondition_Failure`` if passed a
+   --  type which does not satisfy this predicate as ``Struct`` formals.
+
+   function Struct_Type_Name
+     (Id : Language_Id; Struct : Value_Type) return Name_Type;
+   --  Return the name for the given node type according to the given language
+
    ----------------
    -- Node types --
    ----------------
@@ -154,6 +185,62 @@ package Langkit_Support.Generic_API.Introspection is
      (Id : Language_Id; Node, Parent : Value_Type) return Boolean;
    --  Return whether the ``Node`` node type derives (directly or indirectly)
    --  from ``Parent``.
+
+   -------------------------
+   -- Struct/node members --
+   -------------------------
+
+   type Any_Struct_Member is new Natural;
+   subtype Struct_Member is
+     Any_Struct_Member range 1 .. Any_Struct_Member'Last;
+   --  Generic type to designate a struct member (field or property)
+
+   No_Struct_Member : constant Any_Struct_Member := 0;
+
+   function Is_Property
+     (Id : Language_Id; Member : Struct_Member) return Boolean;
+   --  Whether ``Member`` is a property according to the given language
+
+   type Struct_Member_Array is array (Positive range <>) of Struct_Member;
+
+   type Any_Argument_Index is new Natural;
+   subtype Argument_Index is
+     Any_Argument_Index range 1 ..  Any_Argument_Index'Last;
+   --  Index of a property argument
+
+   No_Argument_Index : constant Any_Argument_Index := 0;
+
+   function Members
+     (Id : Language_Id; Struct : Value_Type) return Struct_Member_Array;
+   --  Return the list of member that ``Struct`` has according to the given
+   --  language.
+
+   function Member_Name
+     (Id : Language_Id; Member : Struct_Member) return Name_Type;
+   --  Return the name of ``Member`` according to the given language
+
+   function Member_Type
+     (Id : Language_Id; Member : Struct_Member) return Value_Type;
+   --  Return the type of ``Member`` according to the given language
+
+   function Member_Last_Argument
+     (Id : Language_Id; Member : Struct_Member) return Any_Argument_Index;
+   --  Return the index of ``Member``'s last argument according to the given
+   --  language. If it has no argument, return ``No_Argument_Index``.
+
+   function Member_Argument_Type
+     (Id       : Language_Id;
+      Member   : Struct_Member;
+      Argument : Argument_Index) return Value_Type;
+   --  Return the type of ``Member``'s argument ``Argument`` according to the
+   --  given language.
+
+   function Member_Argument_Name
+     (Id       : Language_Id;
+      Member   : Struct_Member;
+      Argument : Argument_Index) return Name_Type;
+   --  Return the name of ``Member's`` argument no ``Argument`` according to
+   --  the given language.
 
 private
 

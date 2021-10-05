@@ -1,7 +1,7 @@
 import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list+(var_decl)
+    @main_rule main_rule <- list+(or(var_decl | Example(@example)))
     var_decl <- VarDecl("var" name "=" expr ";")
     expr <- or(Addition(expr "+" expr) | atom)
     atom <- or(number | ref)
@@ -12,6 +12,48 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
+}
+
+class Example : FooNode {
+
+    fun to_public(p: PrivatePoint): Point = Point(x=p.x, y=p.y)
+
+    @export fun prop(p: Point): Point =
+    node.to_public(PrivatePoint(x=p.x, y=p.y))
+
+    @export fun result(): NodeResult = NodeResult(n=node)
+
+    @export fun id_bool(id: Bool): Bool = id
+
+    @export fun id_int(id: Int): Int = id
+
+    @export fun id_bigint(id: BigInt): BigInt = id
+
+    @export fun id_char(id: Char): Char = id
+
+    @export fun id_token(id: Token): Token = id
+
+    @export fun id_sym(id: Symbol): Symbol = id
+
+    @export fun id_unit(id: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = id
+
+    @export fun id_root_node(id: FooNode): FooNode = id
+
+    @export fun id_name(id: Name): Name = id
+
+    @export fun id_unit_kind(id: AnalysisUnitKind): AnalysisUnitKind = id
+
+    @export fun id_node_array(id: Array[FooNode]): Array[FooNode] = id
+
+    @export fun id_bigint_array(id: Array[BigInt]): Array[BigInt] = id
+
+    @export fun id_dflt_bool(id: Bool = true): Bool = id
+
+    @export fun id_dflt_int(id: Int = 42): Int = id
+
+    @export fun id_dflt_char(id: Char = '\x00'): Char = id
+
+    @export fun id_dflt_root_node(id: FooNode = null): FooNode = id
 }
 
 @abstract class Expr : FooNode {
@@ -35,4 +77,18 @@ class Name : FooNode implements TokenNode {
 class VarDecl : FooNode {
     @parse_field name: Name
     @parse_field value: Expr
+}
+
+struct NodeResult {
+    n: Example
+}
+
+struct Point {
+    x: BigInt
+    y: BigInt
+}
+
+struct PrivatePoint {
+    x: BigInt
+    y: BigInt
 }

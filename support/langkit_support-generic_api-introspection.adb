@@ -55,8 +55,26 @@ package body Langkit_Support.Generic_API.Introspection is
    --  If ``T`` is not a valid array type for the given language, raise a
    --  ``Precondition_Failure`` exception.
 
+   procedure Check_Base_Struct_Type (Id : Language_Id; T : Value_Type);
+   --  If ``T`` is not a valid base struct type for the given language, raise a
+   --  ``Precondition_Failure`` exception.
+
+   procedure Check_Struct_Type (Id : Language_Id; T : Value_Type);
+   --  If ``T`` is not a valid struct type for the given language, raise a
+   --  ``Precondition_Failure`` exception.
+
    procedure Check_Node_Type (Id : Language_Id; Node : Value_Type);
    --  If ``Node`` is not a valid node type for the given language, raise a
+   --  ``Precondition_Failure`` exception.
+
+   procedure Check_Struct_Member (Id : Language_Id; Member : Struct_Member);
+   --  If ``Member`` is not a valid struct member for the given language, raise
+   --  a ``Precondition_Failure`` exception.
+
+   procedure Check_Struct_Member_Argument
+     (Id : Language_Id; Member : Struct_Member; Argument : Argument_Index);
+   --  If ``Member`` is not a valid struct member for the given language or if
+   --  ``Argument`` is not a valid argument for that member, raise a
    --  ``Precondition_Failure`` exception.
 
    ---------------------
@@ -204,6 +222,71 @@ package body Langkit_Support.Generic_API.Introspection is
       return Id.Array_Types.all (T).Element_Type;
    end Array_Element_Type;
 
+   -------------------------
+   -- Is_Base_Struct_Type --
+   -------------------------
+
+   function Is_Base_Struct_Type
+     (Id : Language_Id; T : Value_Type) return Boolean
+   is
+   begin
+      return Is_Struct_Type (Id, T) or else Is_Node_Type (Id, T);
+   end Is_Base_Struct_Type;
+
+   ----------------------------
+   -- Check_Base_Struct_Type --
+   ----------------------------
+
+   procedure Check_Base_Struct_Type (Id : Language_Id; T : Value_Type) is
+   begin
+      if not Is_Base_Struct_Type (Id, T) then
+         raise Precondition_Failure with "invalid base struct type";
+      end if;
+   end Check_Base_Struct_Type;
+
+   ---------------------------
+   -- Base_Struct_Type_Name --
+   ---------------------------
+
+   function Base_Struct_Type_Name
+     (Id : Language_Id; T : Value_Type) return Name_Type is
+   begin
+      Check_Base_Struct_Type (Id, T);
+      return Create_Name (Id.Struct_Types.all (T).Name.all);
+   end Base_Struct_Type_Name;
+
+   --------------------
+   -- Is_Struct_Type --
+   --------------------
+
+   function Is_Struct_Type (Id : Language_Id; T : Value_Type) return Boolean is
+   begin
+      Check_Value_Type (Id, T);
+      return T in Id.Struct_Types.all'First .. Id.First_Node - 1;
+   end Is_Struct_Type;
+
+   -----------------------
+   -- Check_Struct_Type --
+   -----------------------
+
+   procedure Check_Struct_Type (Id : Language_Id; T : Value_Type) is
+   begin
+      if not Is_Struct_Type (Id, T) then
+         raise Precondition_Failure with "invalid struct type";
+      end if;
+   end Check_Struct_Type;
+
+   ----------------------
+   -- Struct_Type_Name --
+   ----------------------
+
+   function Struct_Type_Name
+     (Id : Language_Id; Struct : Value_Type) return Name_Type is
+   begin
+      Check_Struct_Type (Id, Struct);
+      return Create_Name (Id.Struct_Types.all (Struct).Name.all);
+   end Struct_Type_Name;
+
    ------------------
    -- Is_Node_Type --
    ------------------
@@ -211,7 +294,7 @@ package body Langkit_Support.Generic_API.Introspection is
    function Is_Node_Type (Id : Language_Id; T : Value_Type) return Boolean is
    begin
       Check_Value_Type (Id, T);
-      return T in Id.Node_Types.all'Range;
+      return T in Id.First_Node .. Id.Struct_Types.all'Last;
    end Is_Node_Type;
 
    ---------------------
@@ -231,7 +314,7 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function Root_Node_Type (Id : Language_Id) return Value_Type is
    begin
-      return Id.Node_Types.all'First;
+      return Id.First_Node;
    end Root_Node_Type;
 
    --------------------
@@ -242,7 +325,7 @@ package body Langkit_Support.Generic_API.Introspection is
      (Id : Language_Id; Node : Value_Type) return Name_Type is
    begin
       Check_Node_Type (Id, Node);
-      return Create_Name (Id.Node_Types.all (Node).Name.all);
+      return Create_Name (Id.Struct_Types.all (Node).Name.all);
    end Node_Type_Name;
 
    -----------------
@@ -253,7 +336,7 @@ package body Langkit_Support.Generic_API.Introspection is
      (Id : Language_Id; Node : Value_Type) return Boolean is
    begin
       Check_Node_Type (Id, Node);
-      return Id.Node_Types.all (Node).Is_Abstract;
+      return Id.Struct_Types.all (Node).Is_Abstract;
    end Is_Abstract;
 
    ---------------
@@ -267,7 +350,7 @@ package body Langkit_Support.Generic_API.Introspection is
       if Node = Root_Node_Type (Id) then
          raise Bad_Type_Error with "trying to get base type of root node";
       end if;
-      return Id.Node_Types.all (Node).Base_Type;
+      return Id.Struct_Types.all (Node).Base_Type;
    end Base_Type;
 
    -------------------
@@ -278,7 +361,7 @@ package body Langkit_Support.Generic_API.Introspection is
      (Id : Language_Id; Node : Value_Type) return Value_Type_Array is
    begin
       Check_Node_Type (Id, Node);
-      return Id.Node_Types.all (Node).Derivations;
+      return Id.Struct_Types.all (Node).Derivations;
    end Derived_Types;
 
    -----------------------
@@ -296,7 +379,8 @@ package body Langkit_Support.Generic_API.Introspection is
 
       loop
          declare
-            Desc : Node_Type_Descriptor renames Id.Node_Types.all (Result).all;
+            Desc : Struct_Type_Descriptor renames
+              Id.Struct_Types.all (Result).all;
          begin
             exit when Desc.Derivations'Length = 0;
             Result := Desc.Derivations (Desc.Derivations'Last);
@@ -312,8 +396,8 @@ package body Langkit_Support.Generic_API.Introspection is
    function Is_Derived_From
      (Id : Language_Id; Node, Parent : Value_Type) return Boolean
    is
-      Node_Types : Node_Type_Descriptor_Array renames Id.Node_Types.all;
-      Cursor     : Any_Value_Type := Node;
+      Struct_Types : Struct_Type_Descriptor_Array renames Id.Struct_Types.all;
+      Cursor       : Any_Value_Type := Node;
    begin
       Check_Node_Type (Id, Node);
       Check_Node_Type (Id, Parent);
@@ -323,9 +407,139 @@ package body Langkit_Support.Generic_API.Introspection is
             return True;
          end if;
 
-         Cursor := Node_Types (Cursor).Base_Type;
+         Cursor := Struct_Types (Cursor).Base_Type;
       end loop;
       return False;
    end Is_Derived_From;
+
+   -------------------------
+   -- Check_Struct_Member --
+   -------------------------
+
+   procedure Check_Struct_Member (Id : Language_Id; Member : Struct_Member) is
+   begin
+      if Member not in Id.Struct_Members.all'Range then
+         raise Precondition_Failure with "invalid struct member";
+      end if;
+   end Check_Struct_Member;
+
+   ----------------------------------
+   -- Check_Struct_Member_Argument --
+   ----------------------------------
+
+   procedure Check_Struct_Member_Argument
+     (Id : Language_Id; Member : Struct_Member; Argument : Argument_Index)
+   is
+   begin
+      Check_Struct_Member (Id, Member);
+      if Argument not in Id.Struct_Members.all (Member).Arguments'Range then
+         raise Precondition_Failure with "invalid struct member argument";
+      end if;
+   end Check_Struct_Member_Argument;
+
+   -----------------
+   -- Is_Property --
+   -----------------
+
+   function Is_Property
+     (Id : Language_Id; Member : Struct_Member) return Boolean is
+   begin
+      Check_Struct_Member (Id, Member);
+      return Member >= Id.First_Property;
+   end Is_Property;
+
+   -------------
+   -- Members --
+   -------------
+
+   function Members
+     (Id : Language_Id; Struct : Value_Type) return Struct_Member_Array
+   is
+      Current_Struct : Any_Value_Type := Struct;
+      --  Cursor to "climb up" the derivation hierarchy for ``Struct``: we want
+      --  ``Struct``'s own fields, but also the inheritted ones.
+
+      Next : Natural;
+      --  Index in ``Result`` (see below) for the next member to add
+   begin
+      Check_Base_Struct_Type (Id, Struct);
+
+      return Result : Struct_Member_Array
+        (1 .. Id.Struct_Types.all (Struct).Inherited_Members)
+      do
+         --  Go through the derivation chain and collect field in ``Result``.
+         --  Add them in reverse order so that in the end, inherited members
+         --  are first, and are in declaration order.
+
+         Next := Result'Last;
+         while Current_Struct /= No_Value_Type loop
+            for M of reverse Id.Struct_Types.all (Current_Struct).Members loop
+               Result (Next) := M;
+               Next := Next - 1;
+            end loop;
+            Current_Struct := Id.Struct_Types.all (Current_Struct).Base_Type;
+         end loop;
+      end return;
+   end Members;
+
+   -----------------
+   -- Member_Name --
+   -----------------
+
+   function Member_Name
+     (Id : Language_Id; Member : Struct_Member) return Name_Type is
+   begin
+      Check_Struct_Member (Id, Member);
+      return Create_Name (Id.Struct_Members.all (Member).Name.all);
+   end Member_Name;
+
+   -----------------
+   -- Member_Type --
+   -----------------
+
+   function Member_Type
+     (Id : Language_Id; Member : Struct_Member) return Value_Type is
+   begin
+      Check_Struct_Member (Id, Member);
+      return Id.Struct_Members.all (Member).Member_Type;
+   end Member_Type;
+
+   --------------------------
+   -- Member_Last_Argument --
+   --------------------------
+
+   function Member_Last_Argument
+     (Id : Language_Id; Member : Struct_Member) return Any_Argument_Index is
+   begin
+      Check_Struct_Member (Id, Member);
+      return Id.Struct_Members.all (Member).Last_Argument;
+   end Member_Last_Argument;
+
+   --------------------------
+   -- Member_Argument_Type --
+   --------------------------
+
+   function Member_Argument_Type
+     (Id       : Language_Id;
+      Member   : Struct_Member;
+      Argument : Argument_Index) return Value_Type is
+   begin
+      Check_Struct_Member_Argument (Id, Member, Argument);
+      return Id.Struct_Members.all (Member).Arguments (Argument).Argument_Type;
+   end Member_Argument_Type;
+
+   --------------------------
+   -- Member_Argument_Name --
+   --------------------------
+
+   function Member_Argument_Name
+     (Id       : Language_Id;
+      Member   : Struct_Member;
+      Argument : Argument_Index) return Name_Type is
+   begin
+      Check_Struct_Member_Argument (Id, Member, Argument);
+      return Create_Name
+        (Id.Struct_Members.all (Member).Arguments (Argument).Name.all);
+   end Member_Argument_Name;
 
 end Langkit_Support.Generic_API.Introspection;
