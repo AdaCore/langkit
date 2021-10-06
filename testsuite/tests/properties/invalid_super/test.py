@@ -1,9 +1,9 @@
 """
-Check that invalid uses of the Super construct are properly rejected.
+Check that invalid uses of the ".super()" construct are properly rejected.
 """
 
 from langkit.dsl import ASTNode, T
-from langkit.expressions import AbstractKind, Super, langkit_property
+from langkit.expressions import AbstractKind, Entity, Self, langkit_property
 
 from utils import emit_and_print_errors
 
@@ -19,7 +19,7 @@ def test_bad_args():
 
         @langkit_property()
         def p():
-            return Super("foo")
+            return Self.super("foo")
 
     class Number(FooNode):
         token_node = True
@@ -29,7 +29,7 @@ def test_no_overridden():
     class FooNode(ASTNode):
         @langkit_property(public=True, return_type=T.Int)
         def p():
-            return Super() + 1
+            return Self.super() + 1
 
     class Example(FooNode):
         token_node = True
@@ -50,7 +50,7 @@ def test_overridden_abstract():
 
         @langkit_property(public=True, return_type=T.Int)
         def p():
-            return Super() + 1
+            return Self.super() + 1
 
     class Number(FooNode):
         token_node = True
@@ -72,7 +72,45 @@ def test_overridden_abstract_runtime_check():
 
         @langkit_property()
         def p():
-            return Super() + 1
+            return Self.super() + 1
+
+    class Number(FooNode):
+        token_node = True
+
+
+def test_invalid_prefix():
+    class FooNode(ASTNode):
+        @langkit_property(public=True, return_type=T.Int)
+        def p():
+            return 1
+
+    class Example(FooNode):
+        token_node = True
+
+        @langkit_property()
+        def p():
+            return Self.parent.super() + 1
+
+    class Number(FooNode):
+        token_node = True
+
+
+def test_self_prefix():
+    class FooNode(ASTNode):
+        @langkit_property()
+        def p1():
+            return 1
+
+        @langkit_property(public=True, return_type=T.Int)
+        def p2():
+            return Entity.p1
+
+    class Example(FooNode):
+        token_node = True
+
+        @langkit_property()
+        def p2():
+            return Self.super()
 
     class Number(FooNode):
         token_node = True

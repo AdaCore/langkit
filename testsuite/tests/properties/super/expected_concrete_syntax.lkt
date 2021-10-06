@@ -10,6 +10,8 @@ grammar foo_grammar {
     @export fun root1(): Array[Int] = [1]
 
     @export fun root2(a: String, b: String): String = (a & (" + ")) & b
+
+    @export fun root3(): Bool = self.info.rebindings.do((_) => true)
 }
 
 @abstract class Expr : FooNode {
@@ -26,4 +28,6 @@ class Name : Expr implements TokenNode {
             super((("[") & a) & ("]"), b=(("{") & b) & ("}"))
         )
     ) & (">")
+
+    fun root3(): Bool = super()
 }
