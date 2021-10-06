@@ -12,10 +12,10 @@ from langkit.compiled_types import (
 from langkit.diagnostics import Context, Severity, check_source_language, error
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
-    ComputingExpr, DynamicVariable, Let, NullCheckExpr, NullExpr, PropertyDef,
-    ResolvedExpression, SavedExpr, Self, T, attr_call, attr_expr, construct,
-    construct_compile_time_known, dsl_document, gdb_end,
-    gdb_property_call_start, render
+    ComputingExpr, DynamicVariable, Entity, Let, NullCheckExpr, NullExpr,
+    PropertyDef, ResolvedExpression, SavedExpr, Self, T, VariableExpr,
+    attr_call, attr_expr, construct, construct_compile_time_known,
+    dsl_document, gdb_end, gdb_property_call_start, render
 )
 from langkit.expressions.boolean import Eq
 from langkit.expressions.utils import assign_var
@@ -980,7 +980,7 @@ class FieldAccess(AbstractExpression):
                                             '(...)' if self.arguments else '')
 
 
-@dsl_document
+@attr_call("super")
 class Super(AbstractExpression):
     """
     Call the overriden property.
@@ -988,16 +988,17 @@ class Super(AbstractExpression):
     Note that this construct is valid only in an overriding property.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, prefix, *args, **kwargs):
         super().__init__()
+        self.prefix = prefix
         self.arguments = FieldAccess.Arguments(args, kwargs)
 
     def __repr__(self) -> str:
-        return f"<Super {self.arguments}>"
+        return "<Super {self.prefix}({self.arguments})>"
 
-    def construct(self) -> ResolvedExpression:
-        # This calls the property that the current one overrides: get it,
-        # making sure it exists and it is concrete.
+    def construct(self):
+        # This expression calls the property that the current one overrides:
+        # get it, making sure it exists and it is concrete.
         prop = PropertyDef.get().base_property
         if prop is None:
             error("There is no overridden property to call")
@@ -1007,13 +1008,26 @@ class Super(AbstractExpression):
         )
         prop.called_by_super = True
 
-        prefix = construct(Self)
+        # Make sure the prefix is Self or Entity
+        prefix_expr = construct(self.prefix)
+        check_source_language(
+            isinstance(prefix_expr, VariableExpr)
+            and (prefix_expr.abstract_var is Self
+                 or prefix_expr.abstract_var is Entity),
+            ".super() is allowed on Self or Entity only"
+        )
+
+        # If it is Entity, we are calling a property on the corresponding node,
+        # i.e. we are performing an implicit dereference.
+        implicit_deref = prefix_expr.abstract_var is Entity
+
         return FieldAccess.common_construct(
-            prefix=prefix,
+            prefix=prefix_expr,
             node_data=prop,
             actual_node_data=prop,
             arguments=self.arguments,
-            abstract_expr=self
+            implicit_deref=implicit_deref,
+            abstract_expr=self,
         )
 
 

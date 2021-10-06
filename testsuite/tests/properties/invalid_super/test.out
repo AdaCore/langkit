@@ -1,6 +1,9 @@
 == test_bad_args ==
 test.py:XXX: error: The last argument is unexpected
 
+== test_invalid_prefix ==
+test.py:XXX: error: .super() is allowed on Self or Entity only
+
 == test_no_overridden ==
 test.py:XXX: error: There is no overridden property to call
 
@@ -9,5 +12,8 @@ test.py:XXX: error: Cannot call abstract overridden property
 
 == test_overridden_abstract_runtime_check ==
 test.py:XXX: error: Cannot call abstract overridden property
+
+== test_self_prefix ==
+test.py:XXX: error: Call to FooNode.p2 must be done on an entity
 
 Done
