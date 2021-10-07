@@ -139,6 +139,14 @@
    ## Helper getter generated for properties code. Used in CollectionGet's code
    function Concat (L, R : ${cls.name}) return ${cls.name};
 
+   % if cls.element_type.is_string_type:
+      function Join_Strings
+        (Separator : ${T.String.name};
+         Strings   : ${cls.name}) return ${T.String.name};
+      --  Return the concatenation of all strings in ``Strings``, separated by
+      --  ``Separator``.
+   % endif
+
    ## Helper for properties code
    function Length (T : ${cls.name}) return Natural;
 
@@ -230,6 +238,55 @@
       % endif
       return Ret;
    end Concat;
+
+   % if cls.element_type.is_string_type:
+      ------------------
+      -- Join_Strings --
+      ------------------
+
+      function Join_Strings
+        (Separator : ${T.String.name};
+         Strings   : ${cls.name}) return ${T.String.name}
+      is
+         Separator_Length : constant Natural := Separator.N;
+         Length           : Natural := 0;
+         First            : Boolean;
+      begin
+         --  First, compute the length of the result: the sum of all string
+         --  lengths in Strings.
+         First := True;
+         for S of Strings.Items loop
+            if First then
+               First := False;
+            else
+               Length := Length + Separator_Length;
+            end if;
+            Length := Length + S.N;
+         end loop;
+
+         return Result : constant ${T.String.name} :=
+            ${T.String.constructor_name} (Length)
+         do
+            --  Now copy the content of all strings into the result
+            declare
+               Last : Natural := 0;
+            begin
+               First := True;
+               for S of Strings.Items loop
+                  if First then
+                     First := False;
+                  else
+                     Result.Items (Last + 1 .. Last + Separator_Length) :=
+                        Separator.Items;
+                     Last := Last + Separator_Length;
+                  end if;
+                  Result.Items (Last + 1 .. Last + S.N) := S.Items;
+                  Last := Last + S.N;
+               end loop;
+            end;
+         end return;
+      end Join_Strings;
+   % endif
 
    -------------
    -- Inc_Ref --

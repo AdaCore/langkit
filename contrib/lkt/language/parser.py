@@ -218,17 +218,6 @@ class LKNode(ASTNode):
         """
         pass
 
-    @langkit_property(return_type=T.String)
-    def string_join(strns=T.String.array, sep=T.String):
-        """
-        Static method. Return the array of strings joined by separator ``sep``.
-        """
-        arr_len = Var(strns.length)
-
-        return strns.mapcat(lambda i, n: (
-            If(i == arr_len - 1, n, n.concat(sep))
-        ))
-
     @langkit_property(external=True, uses_entity_info=False, uses_envs=False,
                       return_type=T.AnalysisUnit)
     def internal_fetch_referenced_unit(name=T.String):
@@ -1493,9 +1482,7 @@ class FunctionType(TypeDecl):
 
     full_name = Property(
         S("(").concat(
-            Self.string_join(
-                Self.args.map(lambda t: t.full_name), sep=S(", ")
-            )
+            S(", ").join(Self.args.map(lambda t: t.full_name))
         ).concat(S(") -> ")).concat(Self.return_type.full_name)
     )
 
@@ -1653,8 +1640,7 @@ class InstantiatedGenericType(TypeDecl):
 
     full_name = Property(
         Self.name.image.concat(S('[')).concat(
-            Self.string_join(Self.actuals.map(lambda t: t.full_name),
-                             sep=S(", "))
+            S(", ").join(Self.actuals.map(lambda t: t.full_name))
         ).concat(S(']'))
     )
 
