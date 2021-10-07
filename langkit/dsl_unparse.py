@@ -647,7 +647,7 @@ def emit_expr(expr, **ctx):
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
         StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains,
-        PropertyDef, DynamicLexicalEnv, Super
+        PropertyDef, DynamicLexicalEnv, Super, Join
     )
 
     def is_a(*names):
@@ -1223,6 +1223,9 @@ def emit_expr(expr, **ctx):
 
     elif is_a("to_symbol"):
         return "{}.to_symbol".format(ee(expr.expr_0))
+
+    elif isinstance(expr, Join):
+        return "{}.join({})".format(ee(expr.separator), ee(expr.strings))
 
     else:
         # raise NotImplementedError(type(expr))

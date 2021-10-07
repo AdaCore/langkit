@@ -1,0 +1,12 @@
+main.py: Running...
+join([], '') = ''
+join([], '|') = ''
+join([''], '') = ''
+join([''], '|') = ''
+join(['a'], '') = 'a'
+join(['a'], '|') = 'a'
+join(['ab', 'cdef', '', 'g'], '') = 'abcdefg'
+join(['ab', 'cdef', '', 'g'], '|') = 'ab|cdef||g'
+join(['ab', 'cdef', '', 'g'], '<|>') = 'ab<|>cdef<|><|>g'
+main.py: Done.
+Done

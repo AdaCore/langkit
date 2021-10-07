@@ -926,6 +926,25 @@ class Concat(AbstractExpression):
         return '<Concat>'
 
 
+@attr_call("join")
+class Join(AbstractExpression):
+    """
+    Return the concatenation of all strings in an array, with a separator
+    between each.
+    """
+
+    def __init__(self, separator, strings):
+        super().__init__()
+        self.separator = separator
+        self.strings = strings
+
+    def construct(self):
+        separator = construct(self.separator, T.String)
+        strings = construct(self.strings, T.String.array)
+        return CallExpr("Join_Result", "Join_Strings", T.String,
+                        [separator, strings], abstract_expr=self)
+
+
 def make_to_iterator(
     prefix: ResolvedExpression,
     node_data: AbstractNodeData,
