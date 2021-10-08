@@ -58,6 +58,9 @@ procedure Main is
                   Append (Result, "[""" & Character'Pos (C)'Image & """]");
                end if;
             end;
+         when String_Value =>
+            Append
+              (Result, Image (As_String (Value), With_Quotes => True));
          when Token_Value =>
             Append (Result, Image (As_Token (Value)));
          when Unbounded_Text_Value =>
@@ -243,6 +246,7 @@ begin
       Int    : constant Value_Type := Create_Integer (1);
       Bigint : constant Value_Type := Create_Big_Integer (Make ("12"));
       Char   : constant Value_Type := Create_Character ('A');
+      Str    : constant Value_Type := Create_String ("hello world!");
       Token  : constant Value_Type := Create_Token (U.First_Token);
       Sym    : constant Value_Type := Create_Unbounded_Text
         (To_Unbounded_Wide_Wide_String ("a"));
@@ -263,6 +267,7 @@ begin
       Test ("P_Id_Int", Root, Foo_Node_P_Id_Int, Int);
       Test ("P_Id_Bigint", Root, Foo_Node_P_Id_Bigint, Bigint);
       Test ("P_Id_Char", Root, Foo_Node_P_Id_Char, Char);
+      Test ("P_Id_String", Root, Foo_Node_P_Id_String, Str);
       Test ("P_Id_Token", Root, Foo_Node_P_Id_Token, Token);
       Test ("P_Id_Sym", Root, Foo_Node_P_Id_Sym, Sym);
       Test ("P_Id_Unit", Root, Foo_Node_P_Id_Unit, Unit);

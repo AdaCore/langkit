@@ -400,12 +400,25 @@ let test_character () =
   print_exit_if_diags u ;
   let root = root_exn u in
   Format.printf
-    "@[<v>get_a: %S@ get_eacute: %S@ identity %S: %S@ double a: %S@ @]"
+    "@[<v>get_a: %S@ get_eacute: %S@ identity %S: %S@ @]"
     (FooNode.p_get_a root)
     (FooNode.p_get_eacute root)
     "é"
-    (FooNode.p_identity root "é")
-    (FooNode.p_double root "a") ;
+    (FooNode.p_identity root "é") ;
+  Format.printf "@[<v>=======================@ @ @]"
+
+let test_string () =
+  Format.printf "@[<v>=======STRING=======@ @]" ;
+  let ctx = AnalysisContext.create () in
+  let u = AnalysisContext.get_from_buffer ctx "foo.txt" "my_ident" in
+  print_exit_if_diags u ;
+  let root = root_exn u in
+  Format.printf
+    "@[<v>get_str %S: %S@ get_str %S: %S@ @]"
+    ""
+    (FooNode.p_get_str root "")
+    "é"
+    (FooNode.p_get_str root "é") ;
   Format.printf "@[<v>=======================@ @ @]"
 
 let test_enum () =
@@ -479,6 +492,7 @@ let () =
   test_symbol () ;
   test_unicode () ;
   test_character () ;
+  test_string () ;
   test_enum () ;
   test_big_int () ;
   test_struct () ;

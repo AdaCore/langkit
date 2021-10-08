@@ -631,6 +631,28 @@ class RebindingsPrinter(BasePrinter):
         return "<Rebindings {}>".format(self.inner)
 
 
+class StringPrettyPrinter(BasePrinter):
+    """
+    Pretty-printer for strings from properties.
+    """
+
+    name = 'String'
+
+    @property
+    def length(self) -> int:
+        return int(self.value['length'])
+
+    @classmethod
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
+        return (
+            value.type.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_TYPEDEF)
+            and value.type.name == f"{context.analysis_prefix}string_type"
+        )
+
+    def to_string(self) -> str:
+        return self.value["content"].format_string()
+
+
 class ArrayPrettyPrinter(BasePrinter):
     """
     Pretty-printer for array nodes from properties.

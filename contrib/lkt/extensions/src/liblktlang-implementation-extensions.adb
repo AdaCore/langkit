@@ -72,14 +72,12 @@ package body Liblktlang.Implementation.Extensions is
    ----------------------
 
    function Decl_Short_Image (Node : Bare_Decl) return Text_Type is
-      Full_Name_Acc : Character_Type_Array_Access :=
-        Dispatcher_Decl_P_Full_Name (Node);
-      Full_Name     : constant Text_Type := Full_Name_Acc.Items;
+      Full_Name_Acc : String_Type := Dispatcher_Decl_P_Full_Name (Node);
+      Full_Name     : constant Text_Type := Full_Name_Acc.Content;
    begin
       Dec_Ref (Full_Name_Acc);
       return
-        "<" & To_Text (Kind_Name (Node))
-        & " """ & Full_Name & """ "
+        "<" & To_Text (Kind_Name (Node)) & " """ & Full_Name & """ "
         & To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))))
 
         --  Don't show the sloc for function types, because it will be the root
@@ -114,12 +112,11 @@ package body Liblktlang.Implementation.Extensions is
    ----------------------------------------------
 
    function LK_Node_P_Internal_Fetch_Referenced_Unit
-     (Node : Bare_LK_Node;
-      Name : Character_Type_Array_Access) return Internal_Unit
+     (Node : Bare_LK_Node; Name : String_Type) return Internal_Unit
    is
       I : constant Internal_Unit := Get_From_Provider
         (Context => Node.Unit.Context,
-         Name    => Name.Items,
+         Name    => Name.Content,
          Kind    => Unit_Body,
          Charset => "ascii",
          Reparse => False);
@@ -162,13 +159,13 @@ package body Liblktlang.Implementation.Extensions is
    --------------------------------
 
    function String_Lit_P_Denoted_Value
-     (Node : Bare_String_Lit) return Character_Type_Array_Access
+     (Node : Bare_String_Lit) return String_Type
    is
       N_Text : constant Text_Type := Text (Node);
    begin
       --  TODO: handle escape sequences
 
-      return Create_Character_Type_Array
+      return Create_String
         (if String_Lit_P_Is_Prefixed_String (Node) then
             N_Text (N_Text'First + 2 .. N_Text'Last - 1)
          else

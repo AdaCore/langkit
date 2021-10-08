@@ -323,6 +323,7 @@ package ${ada_lib_name}.Common is
       Integer_Value,
       Big_Integer_Value,
       Character_Value,
+      String_Value,
       Token_Value,
       Unbounded_Text_Value,
       Analysis_Unit_Value,

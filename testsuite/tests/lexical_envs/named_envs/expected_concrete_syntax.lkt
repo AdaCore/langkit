@@ -262,7 +262,7 @@ class PackageDecl : FooNode {
     # If there is a private part, that's all we need. Otherwise, register
     # this environment with the name of the private part as well, so that
     # package bodies can assume there is always a private part.
-    if (node.full_name().length() = 0) then (null) else (
+    if (node.full_name() = "") then (null) else (
         if (node.private_part.is_null) then (
             [node.full_name(), node.full_name() & (".__privatepart")]
         ) else ([node.full_name()]).map((s) => s.to_symbol)

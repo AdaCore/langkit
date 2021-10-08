@@ -21,6 +21,8 @@ grammar foo_grammar {
 
     @export fun id_char(id: Char): Char = id
 
+    @export fun id_string(id: String): String = id
+
     @export fun id_token(id: Token): Token = id
 
     @export fun id_sym(id: Symbol): Symbol = id

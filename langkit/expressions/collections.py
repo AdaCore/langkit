@@ -885,7 +885,7 @@ class CollectionSingleton(AbstractExpression):
 class Concat(AbstractExpression):
     """
     Return the concatenation of `array_1` and `array_2`. Both must be arrays of
-    the same type.
+    the same type, or both must be strings.
     """
 
     def __init__(self, array_1, array_2):
@@ -900,6 +900,17 @@ class Concat(AbstractExpression):
     def construct(self):
         array_1 = construct(self.array_1)
         array_2 = construct(self.array_2)
+
+        # Handle strings as a special case
+        if array_1.type.is_string_type:
+            check_source_language(
+                array_2.type.is_string_type,
+                "String type expected, got {}".format(array_2.type.dsl_name)
+            )
+            return CallExpr(
+                "Concat_Result", "Concat_String", T.String, [array_1, array_2],
+                abstract_expr=self,
+            )
 
         def check_array(typ):
             check_source_language(

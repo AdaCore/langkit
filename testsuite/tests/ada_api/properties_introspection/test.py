@@ -15,6 +15,7 @@ class FooNode(ASTNode):
     id_int = Property(lambda id=T.Int: id, public=True)
     id_bigint = Property(lambda id=T.BigInt: id, public=True)
     id_char = Property(lambda id=T.Character: id, public=True)
+    id_string = Property(lambda id=T.String: id, public=True)
     id_token = Property(lambda id=T.Token: id, public=True)
     id_sym = Property(lambda id=T.Symbol: id, public=True)
     id_unit = Property(lambda id=T.AnalysisUnit: id, public=True)
@@ -80,7 +81,8 @@ class Number(Expr):
     id_dflt_int = Property(lambda id=(T.Int, 42): id, public=True)
     id_dflt_char = Property(
         lambda id=(T.Character, CharacterLiteral('\x00')): id,
-        public=True)
+        public=True
+    )
     id_dflt_root_node = Property(lambda id=(T.FooNode, No(T.FooNode)): id,
                                  public=True)
 

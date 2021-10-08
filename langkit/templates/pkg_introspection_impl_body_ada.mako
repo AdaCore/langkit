@@ -35,6 +35,15 @@ package body ${ada_lib_name}.Introspection_Implementation is
       return Self.Character_Value;
    end As_Character;
 
+   ---------------
+   -- As_String --
+   ---------------
+
+   function As_String (Self : Internal_Value) return String_Type is
+   begin
+      return Self.String_Value;
+   end As_String;
+
    -------------
    -- As_Node --
    -------------

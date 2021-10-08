@@ -49,8 +49,8 @@ class FooNode(ASTNode):
         return c
 
     @langkit_property(public=True)
-    def double(c=T.Character):
-        return ArrayLiteral([c, c], T.Character)
+    def get_str(s=T.String):
+        return s
 
     @langkit_property(public=True)
     def same_color(c=Color):

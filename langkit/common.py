@@ -1,7 +1,7 @@
 from collections import defaultdict
 import itertools
 import string
-from typing import DefaultDict, Iterator, Union
+from typing import DefaultDict, Iterator, Set, Union, overload
 
 from langkit import names
 
@@ -42,27 +42,58 @@ def string_repr(string: str) -> str:
 
 # Build the set of characters that can appear as-is in the Ada source file (all
 # printable ASCII characters except control codes).
-ada_printable = set(
+ada_printable_bytes = set(
     b
     for b in string.printable.encode("ascii")
     if b >= 20
 )
+ada_printable_chars = set(chr(b) for b in ada_printable_bytes)
 
 
-def bytes_repr(content: bytes, indent: str = "") -> str:
+@overload
+def common_string_repr(
+    content: bytes,
+    printable_chars: Set[int],
+    newline: int,
+    quote: int,
+    indent: str = "",
+) -> str: ...
+
+
+@overload
+def common_string_repr(
+    content: str,
+    printable_chars: Set[str],
+    newline: str,
+    quote: str,
+    char_type: str,
+    indent: str = "",
+) -> str: ...
+
+
+def common_string_repr(
+    content: Union[str, bytes],
+    printable_chars: Union[Set[str], Set[int]],
+    newline: Union[str, int],
+    quote: Union[str, int],
+    char_type: str,
+    indent: str = "",
+) -> str:
     """
-    Return a representation of a bytes string as an Ada literal, usable in the
-    generated code. Note that this may actually generate a concatenation if
-    ``string`` contains non-printable characters.
+    Helper for ``bytes_repr`` and ``text_repr``.
 
     :param content: The string to represent.
+    :param printable_chars: Set of characters that can be emitted as-is in the
+        generated code.
+    :param newline: Line feed character.
+    :param quote: Double quote character.
+    :param char_type: Name of the Ada character type for the string literal.
+    :param indent: Indentation to include in each line in the generated code,
+        except the first one.
     :return: The corresponding string literal or concatenation of literals.
     """
     result = indent + '"'
     open_string = True
-
-    newline = ord("\n")
-    quote = ord('"')
 
     for c in content:
 
@@ -71,11 +102,11 @@ def bytes_repr(content: bytes, indent: str = "") -> str:
             result += indent
 
         # If we have a printable character, include it as-is in the result
-        if c in ada_printable:
+        if c in printable_chars:
             if not open_string:
                 result += ' & "'
                 open_string = True
-            result += chr(c)
+            result += (chr(c) if isinstance(c, int) else c)
             if c == quote:
                 result += '"'
 
@@ -85,7 +116,8 @@ def bytes_repr(content: bytes, indent: str = "") -> str:
             if open_string:
                 result += '"'
                 open_string = False
-            result += f" & Character'Val ({c})"
+            char_code = c if isinstance(c, int) else ord(c)
+            result += f" & {char_type}'Val ({char_code})"
 
             # For readability, split at line feed
             if c == newline:
@@ -95,6 +127,38 @@ def bytes_repr(content: bytes, indent: str = "") -> str:
         result += '"'
 
     return result
+
+
+def bytes_repr(content: bytes, indent: str = "") -> str:
+    """
+    Return a representation of a bytes string as an Ada literal, usable in the
+    generated code. Note that this may actually generate a concatenation if
+    ``string`` contains non-printable characters.
+
+    :param content: The string to represent.
+    :param indent: Indentation to include in each line in the generated code,
+        except the first one.
+    :return: The corresponding string literal or concatenation of literals.
+    """
+    return common_string_repr(
+        content, ada_printable_bytes, ord("\n"), ord('"'), "Character", indent
+    )
+
+
+def text_repr(content: str, indent: str = "") -> str:
+    """
+    Return a representation of a Unicode string as an Ada literal, usable in
+    the generated code. Note that this may actually generate a concatenation if
+    ``string`` contains non-printable characters.
+
+    :param content: The string to represent.
+    :param indent: Indentation to include in each line in the generated code,
+        except the first one.
+    :return: The corresponding string literal or concatenation of literals.
+    """
+    return common_string_repr(
+        content, ada_printable_chars, "\n", '"', "Character_Type", indent
+    )
 
 
 def comment_box(label: str, column: int = 3) -> str:

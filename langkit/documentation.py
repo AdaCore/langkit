@@ -593,6 +593,18 @@ base_langkit_docs = {
         and put them in Version/Build_Date. Callers are expected to call free()
         on the returned string once done.
     """,
+    'langkit.string_type': """
+        Type to contain Unicode text data.
+    """,
+    'langkit.create_string': """
+        Create a string value from its content (UTF32 with native endianity).
+
+        Note that the CONTENT buffer argument is copied: the returned value
+        does not contain a reference to it.
+    """,
+    'langkit.string_dec_ref': """
+        Decrease the reference count for this string.
+    """,
 
     #
     # Iterators

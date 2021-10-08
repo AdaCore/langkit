@@ -119,6 +119,9 @@ package body ${ada_lib_name}.Introspection is
          when Character_Value =>
             return Impl.Create_Character (As_Character (Value));
 
+         when String_Value =>
+            return Impl.Create_String (Create_String (As_String (Value)));
+
          when Node_Value =>
             return Impl.Create_Node (Unwrap_Entity (As_Node (Value)));
 
@@ -148,6 +151,9 @@ package body ${ada_lib_name}.Introspection is
 
          when Character_Value =>
             return Create_Character (Impl.As_Character (Value));
+
+         when String_Value =>
+            return Create_String (Value.String_Value.Content);
 
          % for enum_type in ctx.enum_types:
             when ${enum_type.introspection_kind} =>
@@ -245,6 +251,26 @@ package body ${ada_lib_name}.Introspection is
          Result.Value.Value.Character_Value := Value;
       end return;
    end Create_Character;
+
+   ---------------
+   -- As_String --
+   ---------------
+
+   function As_String (Self : Value_Type) return Text_Type is
+   begin
+      return To_Text (Self.Value.Value.String_Value);
+   end As_String;
+
+   -------------------
+   -- Create_String --
+   -------------------
+
+   function Create_String (Value : Text_Type) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (String_Value) do
+         Result.Value.Value.String_Value := To_Unbounded_Text (Value);
+      end return;
+   end Create_String;
 
    --------------
    -- As_Token --
@@ -515,8 +541,8 @@ package body ${ada_lib_name}.Introspection is
 
    function DSL_Name (Constraint : Type_Constraint) return Text_Type is
    begin
-      <% basic_types = [T.Bool, T.Int, T.BigInt, T.Character, T.Token,
-                        T.Symbol, T.AnalysisUnit] %>
+      <% basic_types = [T.Bool, T.Int, T.BigInt, T.Character, T.String,
+                        T.Token, T.Symbol, T.AnalysisUnit] %>
       case Constraint.Kind is
          % for t in basic_types + ctx.enum_types + ctx.composite_types:
             % if t.exposed and not t.is_entity_type:
@@ -874,9 +900,10 @@ package body ${ada_lib_name}.Introspection is
                            value = 'As_Node ({})'.format(value)
                            if not ftype.element_type.is_root_node:
                               value = f'{value}.As_{ftype.api_name}'
+                        elif ftype.is_string_type:
+                           value = f"As_String ({value})"
                         else:
-                           value = 'As_{} ({})'.format(ftype.api_name,
-                                                       value)
+                           value = 'As_{} ({})'.format(ftype.api_name, value)
                      %>
                      ## Add a "F_" prefix to helper locals to avoid name
                      ## clashes (for instance, it's commot to have a struct
@@ -970,11 +997,12 @@ package body ${ada_lib_name}.Introspection is
                         struct_value = f"Prefix_Val.{t.introspection_kind}"
                         field_value = f"Analysis.{f.name} ({struct_value})"
                         ftype = f.type.entity if f.type.is_ast_node else f.type
-                        poly_constructor = (
-                           "Create_Node"
-                           if ftype.is_entity_type
-                           else f"Create_{ftype.api_name}"
-                        )
+                        if ftype.is_entity_type:
+                           poly_constructor = "Create_Node"
+                        elif ftype.is_string_type:
+                           poly_constructor = "Create_String"
+                        else:
+                           poly_constructor = f"Create_{ftype.api_name}"
                      %>
                   begin
                      return ${poly_constructor} (${field_value});

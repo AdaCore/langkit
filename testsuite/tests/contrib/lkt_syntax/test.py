@@ -5,8 +5,7 @@ syntax, that were not covered by the existing testsuite.
 
 from langkit.dsl import ASTNode, Struct, T, UserField
 from langkit.expressions import (
-    ArrayLiteral, CharacterLiteral as Char, Let, Self, String, Var, ignore,
-    langkit_property
+    ArrayLiteral, Let, Self, String, Var, ignore, langkit_property
 )
 
 from utils import build_and_run, unparse_all_script
@@ -46,7 +45,7 @@ class Example(FooNode):
         """
         a = Var(ArrayLiteral([1]).find(lambda v: v == 1))
         b = Var(Let(lambda b=[1, 2]: b).find(lambda v: v == 1))
-        c = Var(String("hello").find(lambda c: c == Char('h')))
+        c = Var(String("hello").concat(String(" world")))
         ignore(b)
         ignore(c)
         return a

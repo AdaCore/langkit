@@ -125,27 +125,6 @@ class ${cls.py_converter}(_BaseArray):
         c_value = ${pyapi.extract_c_value('c_holder', element_type)}
         return (c_holder, c_value)
 
-    ## If this is a string type, override wrapping to return native unicode
-    ## instances.
-    % if cls.is_string_type:
-    @classmethod
-    def wrap(cls, c_value, from_field_access):
-        # Reinterpret this array of uint32_t values as the equivalent array of
-        # characters, then decode it using the appropriate UTF-32 encoding.
-        chars = ctypes.cast(ctypes.pointer(c_value.contents.items),
-                            ctypes.POINTER(ctypes.c_char))
-        return chars[:4 * c_value.contents.n].decode(_text.encoding)
-
-    @classmethod
-    def unwrap(cls, value, context=None):
-        # If `value` is not a list, assume it's a string, and convert it to the
-        # expected list.
-        if not isinstance(value, list):
-            value = list(_text.cast(value))
-
-        return super(${cls.py_converter}, cls).unwrap(value, context)
-    % endif
-
     c_element_type = ${c_element_type}
 
     class c_struct(ctypes.Structure):

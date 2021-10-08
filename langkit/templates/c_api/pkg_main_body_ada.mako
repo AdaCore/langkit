@@ -1063,6 +1063,33 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
+   function ${capi.get_name("create_string")}
+     (Content : System.Address; Length : int) return ${string_type}
+   is
+      Value : Text_Type (1 .. Integer (Length))
+        with Import, Address => Content;
+   begin
+      Clear_Last_Exception;
+      return Create_String (Value);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end;
+
+   procedure ${capi.get_name("string_dec_ref")} (Self : ${string_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         Self_Var : String_Type := Self;
+      begin
+         Dec_Ref (Self_Var);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    function ${capi.get_name('create_unit_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};

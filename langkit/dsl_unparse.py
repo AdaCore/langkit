@@ -647,7 +647,7 @@ def emit_expr(expr, **ctx):
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
         StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains,
-        PropertyDef, DynamicLexicalEnv, Super, Join
+        PropertyDef, DynamicLexicalEnv, Super, Join, String
     )
 
     def is_a(*names):
@@ -1178,12 +1178,13 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, ArrayLiteral):
         if not len(expr.elements):
             return '[]'
-        elif isinstance(expr.elements[0], CharacterLiteral):
-            return json.dumps("".join(e.literal for e in expr.elements))
         return "[{}]".format(", ".join(ee(el) for el in expr.elements))
 
     elif isinstance(expr, CharacterLiteral):
-        return repr(expr.literal)
+        return repr(expr.value)
+
+    elif isinstance(expr, String):
+        return json.dumps(expr.value)
 
     elif isinstance(expr, BigIntLiteral):
         return 'BigInt({})'.format(str(expr.expr)
@@ -1332,9 +1333,11 @@ def type_name(type):
             return "ASTList[{}]".format(type_name(type.element_type))
         else:
             return type.raw_name.camel
+    elif type.is_character_type:
+        return "Char"
+    elif type.is_string_type:
+        return "String"
     elif type.is_array_type:
-        if type.is_string_type:
-            return "String"
         return "Array[{}]".format(type_name(type.element_type))
     elif type.is_iterator_type:
         return "Iterator[{}]".format(type_name(type.element_type))
@@ -1344,8 +1347,6 @@ def type_name(type):
         return type.api_name.camel
     elif type.is_ast_node:
         return "{}.node".format(type.dsl_name)
-    elif type.is_character_type:
-        return 'Char'
     elif type.is_lexical_env_type or type.is_analysis_unit_type:
         return "{}[{}]".format(type.dsl_name,
                                type_name(get_context().root_grammar_class))

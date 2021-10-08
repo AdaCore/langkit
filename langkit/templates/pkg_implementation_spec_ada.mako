@@ -155,6 +155,41 @@ private package ${ada_lib_name}.Implementation is
    --  Check that the given iterator safety net is still valid, raising a
    --  Stale_Reference_Error if it is not.
 
+   -----------------
+   -- String type --
+   -----------------
+
+   type String_Record (Length : Natural) is record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
+      Content : Text_Type (1 .. Length);
+   end record;
+
+   type String_Type is access all String_Record;
+
+   Empty_String_Record : aliased String_Record :=
+     (Length => 0, Ref_Count => -1, Content => (others => <>));
+   Empty_String        : constant String_Type := Empty_String_Record'Access;
+
+   procedure Inc_Ref (Self : String_Type);
+   procedure Dec_Ref (Self : in out String_Type);
+   procedure Free is new Ada.Unchecked_Deallocation
+     (String_Record, String_Type);
+
+   function Create_String (Content : Text_Type) return String_Type;
+   function Create_String (Content : Unbounded_Text_Type) return String_Type;
+   --  Create string values from their content. The overload for unbounded
+   --  strings makes it easier for callers to avoid using the secondary stack,
+   --  which can be a problem for big strings.
+
+   function Concat_String (Left, Right : String_Type) return String_Type;
+   --  Return a new string that is the concatenation of ``Left`` and ``Right``
+
+   function Equivalent (Left, Right : String_Type) return Boolean;
+   --  Return whether ``Left`` and ``Right`` contain equal strings
+
    ---------------------------
    -- Environments handling --
    ---------------------------
@@ -312,6 +347,10 @@ private package ${ada_lib_name}.Implementation is
       function Hash (I : Character_Type) return Hash_Type;
    % endif
 
+   % if T.String.requires_hash_function:
+      function Hash (I : String_Type) return Hash_Type;
+   % endif
+
    --------------------------
    -- Big integers wrapper --
    --------------------------
@@ -395,6 +434,8 @@ private package ${ada_lib_name}.Implementation is
       function Trace_Image (B : Boolean) return String;
       function Trace_Image (I : Integer) return String;
       function Trace_Image (S : Symbol_Type) return String;
+      function Trace_Image (C : Character_Type) return String;
+      function Trace_Image (S : String_Type) return String;
       function Trace_Image (Env : Lexical_Env) return String;
       function Trace_Image (R : Env_Rebindings) return String;
       function Trace_Image (Unit : Internal_Unit) return String;

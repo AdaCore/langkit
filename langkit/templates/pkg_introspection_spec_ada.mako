@@ -105,6 +105,10 @@ package ${ada_lib_name}.Introspection is
       with Pre => Kind (Self) = Character_Value;
    function Create_Character (Value : Character_Type) return Value_Type;
 
+   function As_String (Self : Value_Type) return Text_Type
+      with Pre => Kind (Self) = String_Value;
+   function Create_String (Value : Text_Type) return Value_Type;
+
    function As_Token (Self : Value_Type) return Token_Reference
       with Pre => Kind (Self) = Token_Value;
    function Create_Token (Value : Token_Reference) return Value_Type;
@@ -442,6 +446,9 @@ private
 
          when Character_Value =>
             Character_Value : Character_Type;
+
+         when String_Value =>
+            String_Value : Unbounded_Text_Type;
 
          when Token_Value =>
             Token_Value : Token_Reference;

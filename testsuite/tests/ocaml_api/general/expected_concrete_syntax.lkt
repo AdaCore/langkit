@@ -25,7 +25,7 @@ enum Color {
 
     @export fun identity(c: Char): Char = c
 
-    @export fun double(c: Char): String = [c, c]
+    @export fun get_str(s: String): String = s
 
     @export fun same_color(c: Color): Color = c
 
