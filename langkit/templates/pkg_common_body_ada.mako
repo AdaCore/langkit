@@ -90,7 +90,7 @@ package body ${ada_lib_name}.Common is
                last_i = len(sym_items) - 1
             %>
             % for i, (sym, name) in enumerate(sym_items):
-               when ${name} => ${string_repr(sym)}${',' if i < last_i else ''}
+               when ${name} => ${ascii_repr(sym)}${',' if i < last_i else ''}
             % endfor
             );
 

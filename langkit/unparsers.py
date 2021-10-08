@@ -10,7 +10,7 @@ import sys
 
 import funcy
 
-from langkit.common import string_repr
+from langkit.common import text_repr
 from langkit.compiled_types import get_context, resolve_type
 from langkit.diagnostics import WarningSet, check_source_language
 from langkit.lexer import Ignore, LexerToken
@@ -178,13 +178,13 @@ class TokenUnparser(Unparser):
                      self.token.matcher.to_match)
 
     @property
-    def string_repr(self):
+    def text_repr(self):
         """
         Return an Ada string literal for the text to emit this token.
 
         :rtype: str
         """
-        return string_repr(self.dumps())
+        return text_repr(self.dumps())
 
     # Comparing tokens is done through
     # ``TokenSequenceUnparser.check_equivalence``, which is already good at
@@ -952,7 +952,7 @@ class TokenSequenceUnparserPool:
     def finalize(self):
         self.sorted = sorted(
             self.pool.values(),
-            key=lambda tok_seq: tuple(t.string_repr for t in tok_seq.tokens),
+            key=lambda tok_seq: tuple(t.text_repr for t in tok_seq.tokens),
         )
 
         # Assign a unique identification number to token sequences for code

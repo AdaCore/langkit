@@ -284,7 +284,7 @@
            (Self,
             State,
             Env,
-            DSL_Location => ${string_repr(sie.str_location)});
+            DSL_Location => ${ascii_repr(sie.str_location)});
       end;
    </%def>
 
@@ -322,7 +322,7 @@
             Mapping.Metadata,
             Resolver,
             Mapping.Dest_Env,
-            DSL_Location => ${string_repr(exprs.str_location)});
+            DSL_Location => ${ascii_repr(exprs.str_location)});
          % if not is_array:
          Dec_Ref (Mapping.Dest_Env);
          % endif

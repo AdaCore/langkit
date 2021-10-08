@@ -12,12 +12,12 @@ project Mains is
 
    <% all_source_dirs = source_dirs | {'src-mains'} %>
    for Source_Dirs use (
-      ${', '.join(sorted(string_repr(sdir) for sdir in all_source_dirs))}
+      ${', '.join(sorted(ascii_repr(sdir) for sdir in all_source_dirs))}
    );
    for Object_Dir use "obj-mains";
 
    for Main use (
-      ${', '.join(sorted(string_repr('{}.adb'.format(main))
+      ${', '.join(sorted(ascii_repr('{}.adb'.format(main))
                          for main in main_programs))}
    );
 

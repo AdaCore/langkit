@@ -14,7 +14,7 @@ from enum import Enum
 import funcy
 
 from langkit import names
-from langkit.common import string_repr, text_repr
+from langkit.common import ascii_repr, text_repr
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, CompiledType, EnumValue, T,
     TypeRepo, UserField, gdb_helper, get_context, no_compiled_type,
@@ -1484,7 +1484,7 @@ class ErrorExpr(ResolvedExpression):
     def _render_expr(self):
         result = 'raise {}'.format(self.exception_name)
         if self.message:
-            result += ' with {}'.format(string_repr(self.message))
+            result += ' with {}'.format(ascii_repr(self.message))
         return result
 
     def __repr__(self):

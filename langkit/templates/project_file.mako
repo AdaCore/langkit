@@ -72,7 +72,7 @@ library project ${lib_name} is
    ## have to worry about these things to this Mako template and to the
    ## langkit.coverage module.
    Primary_Source_Dirs :=
-     (${', '.join(string_repr(emitter.path_to(d, project_path))
+     (${', '.join(ascii_repr(emitter.path_to(d, project_path))
                   for d in source_dirs if d)});
 
    % if emitter.coverage:

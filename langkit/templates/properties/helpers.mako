@@ -143,8 +143,8 @@
       Convert          => Convert,
       Equals           => Eq_${eprop_uid},
       Convert_Image    =>
-        ${string_repr(conv_prop.qualname if conv_prop else '')},
-      Equals_Image     => ${string_repr(eq_prop.qualname if eq_prop else '')},
+        ${ascii_repr(conv_prop.qualname if conv_prop else '')},
+      Equals_Image     => ${ascii_repr(eq_prop.qualname if eq_prop else '')},
 
       ## We don't support passing converters that works both ways (from left to
       ## right and from right to left value) because it is confusing, so when a
