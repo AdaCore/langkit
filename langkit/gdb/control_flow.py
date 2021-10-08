@@ -5,8 +5,7 @@ from typing import Iterable, List, Optional, cast
 import gdb
 
 from langkit.debug_info import (
-    BaseEvent, ExprDone, ExprStart, MemoizationReturn, Property, PropertyCall,
-    Scope
+    BaseEvent, ExprDone, ExprStart, Property, PropertyCall, Scope
 )
 from langkit.gdb.breakpoints import BreakpointGroup
 from langkit.gdb.context import Context
@@ -37,12 +36,11 @@ def scope_start_line_nos(scope: Scope,
     else:
         candidates.append(line_no)
 
-    # Consider memoization return points for properties
+    # Consider memoization lookup points for properties
     if isinstance(scope, Property):
         lookup_scope = scope.memoization_lookup
         if lookup_scope:
-            ls_events = cast(List[MemoizationReturn], lookup_scope)
-            candidates.extend(m.line_no for m in ls_events)
+            candidates.append(lookup_scope.line_range.first_line)
 
     # Filter candidates if needed with `from_line_no`
     if from_line_no:
