@@ -246,27 +246,46 @@ class _text(ctypes.Structure):
     text_buffer = None
 
     @classmethod
-    def _unwrap(cls, value: AnyStr) -> _text:
-        v = cls.cast(value)
+    def _create_buffer(cls, value: AnyStr) -> Tuple[Any, int]:
+        """
+        Turn `value` into the corresponding UTF-32 string buffer.
 
-        text = v.encode(cls.encoding)
-        text_buffer = ctypes.create_string_buffer(text)
+        Return both the string buffer and the number of codepoints it contains
+        (not the number of bytes!).
+        """
+        string = cls.cast(value)
+        buf = ctypes.create_string_buffer(string.encode(cls.encoding))
+        return (buf, len(string))
+
+    @classmethod
+    def _decode_buffer(cls, buf: Any, length: int) -> str:
+        """
+        Decode the UTF-32 string in `buf`.
+
+        :param buf: String buffer (of type `POINTER(c_char_p)`) to decode.
+        :param length: Number of codepoints in `buf` (not the number of
+            bytes!).
+        """
+        if length > 0:
+            # `length` tells how much UTF-32 chars there are in `buf` but `buf`
+            # is a char* so we have to fetch 4 times more bytes than bytes.
+            return buf[:4 * length].decode(cls.encoding)
+        else:
+            return ""
+
+    @classmethod
+    def _unwrap(cls, value: AnyStr) -> _text:
+        text_buffer, length = cls._create_buffer(value)
         text_buffer_ptr = ctypes.cast(
             ctypes.pointer(text_buffer),
             ctypes.POINTER(ctypes.c_char)
         )
-        result = _text(text_buffer_ptr, len(v))
+        result = _text(text_buffer_ptr, length)
         result.text_buffer = text_buffer
         return result
 
     def _wrap(self) -> str:
-        if self.length > 0:
-            # self.length tells how much UTF-32 chars there are in self.chars
-            # but self.chars is a char* so we have to fetch 4 times more bytes
-            # than characters.
-            return self.chars[:4 * self.length].decode(self.encoding)
-        else:
-            return ''
+        return self._decode_buffer(self.chars, self.length)
 
     @classmethod
     def cast(cls, value: AnyStr) -> str:
@@ -352,6 +371,56 @@ class _big_integer:
     ))
     decref = staticmethod(_import_func(
         '${capi.get_name("big_integer_decref")}',
+        [c_type], None
+    ))
+
+
+class _String:
+    """
+    Helper to wrap/unwrap string values for properties arguments/return types.
+    """
+
+    class c_struct(ctypes.Structure):
+        _fields_ = [("length", ctypes.c_int),
+                    ("ref_count", ctypes.c_int),
+
+                    # See the "chars" field in the _text structure
+                    ("content", ctypes.c_char * 1)]
+    c_type = ctypes.POINTER(c_struct)
+
+    __slots__ = ("c_value", )
+
+    def __init__(self, c_value):
+        self.c_value = c_value
+
+    def __del__(self):
+        self.dec_ref(self.c_value)
+        self.c_value = None
+
+    @classmethod
+    def unwrap(cls, value: AnyStr) -> _String:
+        # Convert "value" into the corresponding UTF-32 string buffer
+        buf, length = _text._create_buffer(value)
+        return cls(cls.create(buf, length))
+
+    @classmethod
+    def wrap(cls, value: Any) -> str:
+        struct = value.contents
+
+        # "struct.content" will get a one-byte copy of the actual string
+        # because of the hack above to handle variable-length struct field. To
+        # get the whole string, compute a pointer to this field fierst.
+        content_addr = _field_address(struct, "content")
+        content = ctypes.pointer(ctypes.c_char.from_address(content_addr))
+
+        return _text._decode_buffer(content, struct.length)
+
+    create = staticmethod(_import_func(
+        '${capi.get_name("create_string")}',
+        [ctypes.POINTER(ctypes.c_char), ctypes.c_int], c_type
+    ))
+    dec_ref = staticmethod(_import_func(
+        '${capi.get_name("string_dec_ref")}',
         [c_type], None
     ))
 

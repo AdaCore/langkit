@@ -14,7 +14,7 @@ from enum import Enum
 import funcy
 
 from langkit import names
-from langkit.common import string_repr
+from langkit.common import string_repr, text_repr
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, CompiledType, EnumValue, T,
     TypeRepo, UserField, gdb_helper, get_context, no_compiled_type,
@@ -4662,34 +4662,46 @@ class Literal(AbstractExpression):
 
 
 @dsl_document
-def String(strn):
-    """
-    Expression for a String literal.
-    """
-    return ArrayLiteral([CharacterLiteral(s) for s in strn],
-                        element_type=T.Character)
-
-
-@dsl_document
 class CharacterLiteral(AbstractExpression):
     """
     Literal for a single Unicode character.
     """
 
-    def __init__(self, literal):
+    def __init__(self, value):
         super().__init__()
-        self.literal = literal
+        self.value = value
         check_source_language(
-            len(self.literal) == 1,
+            len(self.value) == 1,
             'Character literal must be a 1-element string (got {} elements'
-            ' here)'.format(len(self.literal))
+            ' here)'.format(len(self.value))
         )
 
     def construct(self):
-        return CharacterLiteralExpr(self.literal, abstract_expr=self)
+        return CharacterLiteralExpr(self.value, abstract_expr=self)
 
     def __repr__(self):
-        return '<CharacterLiteral {}>'.format(repr(self.literal))
+        return '<CharacterLiteral {}>'.format(repr(self.value))
+
+
+@dsl_document
+class String(AbstractExpression):
+    """
+    Expression for a String literal.
+    """
+
+    def __init__(self, value):
+        super().__init__()
+        self.value = value
+        assert isinstance(value, str)
+
+    def __repr__(self):
+        return f"<String {repr(self.value)}>"
+
+    def construct(self):
+        return CallExpr(
+            "Str", "Create_String", T.String, [text_repr(self.value)],
+            abstract_expr=self
+        )
 
 
 def aggregate_expr(type, assocs):

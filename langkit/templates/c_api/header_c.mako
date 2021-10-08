@@ -54,6 +54,13 @@ typedef struct {
    void *bounds;
 } ${symbol_type};
 
+${c_doc('langkit.string_type')}
+typedef struct {
+   int length;
+   int ref_count;
+   uint32_t content[1];
+} *${string_type};
+
 ${c_doc('langkit.env_rebindings_type')}
 typedef void *${env_rebindings_type};
 
@@ -494,6 +501,14 @@ ${capi.get_name("big_integer_decref")}(${big_integer_type} bigint);
 ${c_doc('langkit.get_versions')}
 extern void
 ${capi.get_name("get_versions")}(char **version, char **build_date);
+
+${c_doc('langkit.create_string')}
+extern ${string_type}
+${capi.get_name("create_string")}(uint32_t *content, int length);
+
+${c_doc('langkit.string_dec_ref')}
+extern void
+${capi.get_name("string_dec_ref")}(${string_type} self);
 
 /*
  * Kind-specific AST node primitives

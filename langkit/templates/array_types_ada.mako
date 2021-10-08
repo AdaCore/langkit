@@ -1,12 +1,8 @@
 ## vim: filetype=makoada
 
 <%def name="public_api_decl(cls)">
-   ## We expose arrays of characters as Langkit_Support.Text.Text_Type, so we
-   ## should not declare another type for them.
-   % if not cls.element_type.is_character_type:
-      type ${cls.api_name} is
-         array (Positive range <>) of ${cls.element_type.api_name};
-   % endif
+   type ${cls.api_name} is
+      array (Positive range <>) of ${cls.element_type.api_name};
 </%def>
 
 <%def name="public_api_private_decl(cls)">
@@ -83,10 +79,8 @@
 
    <% elt_type = cls.element_type.name %>
 
-   % if not cls.element_type.is_character_type:
    type ${cls.array_type_name} is
       array (Positive range <>) of ${cls.element_type.name};
-   % endif
 
    type ${cls.pointed} (N : Natural) is record
       Ref_Count : Integer;
@@ -96,10 +90,10 @@
       Items     : ${cls.array_type_name} (1 .. N);
    end record;
 
-   Empty_${cls.api_name}_Record : aliased ${cls.pointed} :=
+   Empty_${cls.pointed} : aliased ${cls.pointed} :=
      (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
    ${cls.null_constant} : constant ${cls.name} :=
-      Empty_${cls.api_name}_Record'Access;
+      Empty_${cls.pointed}'Access;
 
    ## If we are on the entity type, we need a conversion function
    ## to be able to get element arrays starting from 0 and convert them into
@@ -117,15 +111,6 @@
    function ${cls.constructor_name}
      (Items : ${cls.array_type_name}) return ${cls.name};
    --  Create a new array from an existing collection of elements
-
-   ## For arrays of characters, also emit an unbounded string-based constructor
-   % if cls.element_type.is_character_type:
-      function ${cls.constructor_name}
-        (Items : Unbounded_Text_Type) return ${cls.name};
-      --  Create a new character array from an unbounded string. This is not
-      --  just for convenience: this function avoids using the secondary stack
-      --  to load the string itself, avoiding stack overflows for big strings.
-   % endif
 
    ## Helper getter generated for properties code. Used in CollectionGet's code
    function Get
@@ -248,7 +233,7 @@
         (Separator : ${T.String.name};
          Strings   : ${cls.name}) return ${T.String.name}
       is
-         Separator_Length : constant Natural := Separator.N;
+         Separator_Length : constant Natural := Separator.Length;
          Length           : Natural := 0;
          First            : Boolean;
       begin
@@ -261,12 +246,17 @@
             else
                Length := Length + Separator_Length;
             end if;
-            Length := Length + S.N;
+            Length := Length + S.Length;
          end loop;
 
+         --  Create the result string with the correct length. Do not use our
+         --  constructor and initialize the content in-place, to avoid extra
+         --  copies.
          return Result : constant ${T.String.name} :=
-            ${T.String.constructor_name} (Length)
+            new String_Record (Length)
          do
+            Result.Ref_Count := 1;
+
             --  Now copy the content of all strings into the result
             declare
                Last : Natural := 0;
@@ -276,12 +266,12 @@
                   if First then
                      First := False;
                   else
-                     Result.Items (Last + 1 .. Last + Separator_Length) :=
-                        Separator.Items;
+                     Result.Content (Last + 1 .. Last + Separator_Length) :=
+                        Separator.Content;
                      Last := Last + Separator_Length;
                   end if;
-                  Result.Items (Last + 1 .. Last + S.N) := S.Items;
-                  Last := Last + S.N;
+                  Result.Content (Last + 1 .. Last + S.Length) := S.Content;
+                  Last := Last + S.Length;
                end loop;
             end;
          end return;
@@ -362,21 +352,6 @@
         (N => Items'Length, Ref_Count => 1, Items => Items);
    end;
 
-   % if cls.element_type.is_character_type:
-      function ${cls.constructor_name}
-        (Items : Unbounded_Text_Type) return ${cls.name}
-      is
-         Result : constant ${cls.name} :=
-            ${cls.constructor_name} (Length (Items));
-         S      : Big_Wide_Wide_String_Access;
-         L      : Natural;
-      begin
-         Get_Wide_Wide_String (Items, S, L);
-         Result.Items (1 .. L) := S.all (1 .. L);
-         return Result;
-      end;
-   % endif
-
    ----------------
    -- Equivalent --
    ----------------
@@ -427,22 +402,17 @@
       -----------------
 
       function Trace_Image (A : ${cls.name}) return String is
-         % if cls.is_string_type:
-            begin
-               return Image (A.Items);
-         % else:
-               Result : Unbounded_String;
-            begin
-               Append (Result, "[");
-               for I in A.Items'Range loop
-                  if I > A.Items'First then
-                     Append (Result, ", ");
-                  end if;
-                  Append (Result, Trace_Image (A.Items (I)));
-               end loop;
-               Append (Result, "]");
-               return To_String (Result);
-         % endif
+         Result : Unbounded_String;
+      begin
+         Append (Result, "[");
+         for I in A.Items'Range loop
+            if I > A.Items'First then
+               Append (Result, ", ");
+            end if;
+            Append (Result, Trace_Image (A.Items (I)));
+         end loop;
+         Append (Result, "]");
+         return To_String (Result);
       end Trace_Image;
    % endif
 

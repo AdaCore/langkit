@@ -221,6 +221,59 @@ module Character = struct
   let c_type = view uint32_t ~read:wrap ~write:unwrap
 end
 
+module StringType = struct
+  type t = string
+
+  let c_struct : t structure typ = structure "string"
+  let length_field = field c_struct "length" int
+  let _ = field c_struct "ref_count" int
+  (* Langkit strings are encoded in UTF-32 (native endianity). *)
+  let content_field = field c_struct "content" uint32_t
+  let () = seal c_struct
+
+  let buffer_ptr_type = ptr uint32_t
+  let c_type = ptr c_struct
+
+  let create = foreign ~from:c_lib "${c_api.get_name('create_string')}"
+    (buffer_ptr_type @-> int @-> raisable c_type)
+  let dec_ref = foreign ~from:c_lib "${c_api.get_name('string_dec_ref')}"
+    (c_type @-> raisable void)
+
+  module UCharEncoding = Camomile.CharEncoding.Make (Camomile.UText)
+
+  let wrap c_value_ptr =
+    let open Text in
+    let open Camomile in
+    let c_value = !@ c_value_ptr in
+    let length = getf c_value length_field in
+    let content = c_value @. content_field in
+    (* We use Camomile to encode utf32 strings to an ocaml string *)
+    let f i = UChar.chr_of_uint (Unsigned.UInt32.to_int !@(content +@ i)) in
+    let result =
+      UCS4Encoding.encode CharEncoding.utf8 (UCS4.init length f)
+    in
+    dec_ref c_value_ptr;
+    result
+
+  let unwrap value =
+    let open Text in
+    let open Camomile in
+
+    (* Create a buffer to contain the UTF-32 encoded string. *)
+    let text = UCS4Encoding.decode CharEncoding.utf8 value in
+    let length = UCS4.length text in
+    let buffer = allocate_n uint32_t ~count:length in
+    let i = ref 0 in
+    let f c =
+      buffer +@ !i <-@ (Unsigned.UInt32.of_int (UChar.code c));
+      i := !i + 1
+    in
+    UCS4.iter f text ;
+
+    (* ctypes is supposed to take care of freeing "buffer" before returning. *)
+    create buffer length
+end
+
 module BigInteger = struct
 
   type t = Z.t

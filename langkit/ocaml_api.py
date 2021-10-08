@@ -265,6 +265,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Token, lambda _: 'Token'),
             (T.Symbol, lambda _: 'Symbol'),
             (T.Character, lambda _: 'Character'),
+            (T.String, lambda _: 'StringType'),
             (ct.ArrayType, lambda t: t.api_name.camel),
             (ct.IteratorType, lambda t: t.api_name.camel),
             (ct.StructType, lambda t: t.api_name.camel),
@@ -289,6 +290,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: False),
             (T.Int, lambda _: False),
             (T.Character, lambda _: False),
+            (T.String, lambda _: False),
             (ct.ArrayType, lambda t:
                 self.wrap_requires_context(t.element_type)),
             (ct.IteratorType, lambda t:
@@ -321,6 +323,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: True),
             (T.Int, lambda _: True),
             (T.Character, lambda _: True),
+            (T.String, lambda _: False),
             (ct.ArrayType, lambda _: False),
             (ct.IteratorType, lambda _: False),
             (ct.StructType, lambda _: False),
@@ -496,6 +499,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: False),
             (T.Int, lambda _: False),
             (T.Character, lambda _: False),
+            (T.String, lambda _: True),
             (T.Token, lambda _: True),
             (T.Symbol, lambda _: False),
             (ct.EnumType, lambda _: False),
@@ -533,6 +537,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.ASTNodeType, lambda _: None),
             (ct.EntityType, lambda _: None),
             (T.AnalysisUnit, lambda _: None),
+            (T.String, lambda _: 'StringType.dec_ref'),
             (ct.CompiledType, lambda t: dec_ref(t))
         ])
 
@@ -555,6 +560,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: 'bool'),
             (T.Int, lambda _: 'int'),
             (T.Character, lambda t: '{}.c_type'.format(self.module_name(t))),
+            (T.String, lambda t: '{}.c_type'.format(self.module_name(t))),
             (T.Token, lambda t: '{}.c_type'.format(self.module_name(t))),
             (T.Symbol, lambda t: '{}.c_type'.format(self.module_name(t))),
             (ct.EnumType, lambda t: '{}.c_type'.format(self.module_name(t))),
@@ -587,6 +593,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: 'bool'),
             (T.Int, lambda _: 'int'),
             (T.Character, lambda _: 'string'),
+            (T.String, lambda _: 'string'),
             (T.Token, lambda t:
                 '{}.token structure'.format(self.module_name(t))),
             (T.Symbol, lambda t:
@@ -631,7 +638,6 @@ class OCamlAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.Bool, lambda _: 'bool'),
             (T.Int, lambda _: 'int'),
-            (T.Character, lambda _: 'string'),
             (T.Token, lambda t: from_module_name(t)),
             (T.Symbol, lambda _: 'string'),
             (ct.EnumType, lambda t: from_module_name(t)),
@@ -640,8 +646,9 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.AnalysisUnit, lambda t: t.api_name.lower),
             (T.entity_info, lambda t: t.api_name.lower),
             (T.env_md, lambda t: t.api_name.lower),
+            (T.Character, lambda _: 'string'),
+            (T.String, lambda _: 'string'),
             (ct.ArrayType, lambda t:
-                'string' if t.is_string_type else
                 '{} list'.format(self.type_public_name(type.element_type))),
             (ct.IteratorType, lambda t: 'unit'),
             (ct.StructType, lambda t: from_module_name(t)),

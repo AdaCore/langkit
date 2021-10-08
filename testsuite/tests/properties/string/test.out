@@ -1,0 +1,17 @@
+main.py: Running...
+.identity(1) = <TypeError: text string instance expected, got int instead>
+.identity(b'foo') = 'foo'
+.identity([b'a', b'b']) = <TypeError: text string instance expected, got list instead>
+.identity('h\xe9llo') = 'h\xe9llo'
+.identity(b'h\xe9llo') = <UnicodeDecodeError: 'ascii' codec can't decode byte 0xe9 in position 1: ordinal not in range(128)>
+.identity([b'a', 1]) = <TypeError: text string instance expected, got list instead>
+.extend('bar') = 'barfoo'
+.newline() = 'hello\nworld'
+main.py: Done.
+main.adb: Running...
+.identity("h\xe9llo") = "h\xe9llo"
+.extend("h\xe9llo") = "h\xe9llofoo"
+.newline() = "hello\x0aworld"
+main.adb: Done.
+
+Done

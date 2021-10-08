@@ -82,6 +82,7 @@ def template_extensions(ctx):
         'node_type':             ctx.root_grammar_class.c_type(capi).name,
         'entity_type':           T.entity.c_type(capi).name,
         'symbol_type':           T.Symbol.c_type(capi).name,
+        'string_type':           T.String.c_type(capi).name,
         'env_rebindings_type':   T.EnvRebindings.c_type(capi).name,
         'unit_kind_type':        T.AnalysisUnitKind.c_type(capi).name,
 
@@ -1180,11 +1181,11 @@ class CompiledType:
     @property
     def is_string_type(self):
         """
-        Return whether this is an array of character type.
+        Return whether this is the string type.
 
         :rtype: bool
         """
-        return self.is_array_type and self.element_type.is_character_type
+        return self == T.String
 
     @property
     def is_symbol_type(self):
@@ -3643,6 +3644,43 @@ class EnumNodeAlternative:
         return self.enum_node.raw_name + self.base_name
 
 
+class StringType(CompiledType):
+
+    def __init__(self) -> None:
+        super().__init__(
+            name="StringType",
+            exposed=True,
+            null_allowed=True,
+            is_refcounted=True,
+            nullexpr="Empty_String",
+            py_nullexpr='""',
+            hashable=True,
+            has_equivalent_function=True,
+            type_repo_name="String",
+            api_name="TextType",
+            dsl_name="String",
+            introspection_prefix="String",
+        )
+
+    @property
+    def public_requires_boxing(self):
+        return True
+
+    @property
+    def api_access_name(self) -> names.Name:
+        """
+        Name of the access type for public strings. Used as internals for
+        array struct fields.
+        """
+        return names.Name("Text_Access")
+
+    def to_public_expr(self, internal_expr):
+        return '{}.Content'.format(internal_expr)
+
+    def to_internal_expr(self, public_expr, context):
+        return 'Create_String ({})'.format(public_expr)
+
+
 class ArrayType(CompiledType):
     """
     Base class for array types.
@@ -3664,12 +3702,6 @@ class ArrayType(CompiledType):
             has_equivalent_function=True,
             hashable=element_type.hashable)
         CompiledTypeRepo.array_types.add(self)
-
-        # Text_Type is always defined, since it comes from
-        # Langkit_Support.Text. To avoid discrepancies in code generation,
-        # consider it is always exposed.
-        if self.is_string_type:
-            self.exposed = True
 
         self._requires_unique_function = False
         """
@@ -3700,9 +3732,7 @@ class ArrayType(CompiledType):
         for public types (such as booleans, integers, analysis units, etc.) but
         we have a different one for "wrapped" types, such as entities.
         """
-        return (names.Name('Text_Type')
-                if self.is_string_type else
-                self.element_type.api_name + names.Name('Array'))
+        return self.element_type.api_name + names.Name('Array')
 
     @property
     def api_access_name(self):
@@ -3736,11 +3766,9 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return (self.api_name
-                if self.is_string_type else
-                (names.Name('Internal') +
-                    self.element_type.name +
-                    names.Name('Array')))
+        return (names.Name('Internal')
+                + self.element_type.name
+                + names.Name('Array'))
 
     @property
     def pointed(self):
@@ -4377,6 +4405,7 @@ def create_builtin_types():
     TokenType()
     SymbolType()
     BigIntegerType()
+    StringType()
 
     CompiledType('CharacterType',
                  dsl_name='Character',
@@ -4634,13 +4663,6 @@ class TypeRepo:
              ('val', UserField(type=self.defer_root_node)),
              ('metadata', UserField(type=self.defer_env_md))]
         )
-
-    @property
-    def String(self):
-        """
-        Shortcut for Character.array.
-        """
-        return self.Character.array
 
 
 def resolve_type(typeref):

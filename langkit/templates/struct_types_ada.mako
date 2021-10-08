@@ -112,10 +112,10 @@
       -------------
 
       procedure Release (Self : in out ${cls.public_record_type}) is
-         <% array_fields = [f for f in cls.get_fields()
-                            if f.type.is_array_type] %>
+         <% boxed_fields = [f for f in cls.get_fields()
+                            if f.type.public_requires_boxing] %>
       begin
-         % for f in array_fields:
+         % for f in boxed_fields:
             Free (Self.Internal_${f.name});
          % endfor
       end Release;
@@ -137,7 +137,7 @@
             %>
             % if f.type.is_big_integer_type:
                ${dest_expr}.Set (${convert_expr});
-            % elif f.type.is_array_type:
+            % elif f.type.is_string_type or f.type.is_array_type:
                ${dest_expr} := new ${f.type.api_name}'(${convert_expr});
             % else:
                ${dest_expr} := ${convert_expr};
@@ -160,7 +160,7 @@
                dest_expr = 'Result.{}'.format(f.name)
                convert_expr = f.type.to_internal_expr(
                   'Record_Ref.Internal_{}{}'.format(
-                     f.name, '.all' if f.type.is_array_type else ''
+                     f.name, '.all' if f.type.public_requires_boxing else ''
                   )
                )
             %>
@@ -180,7 +180,7 @@
          <% field_expr = 'Record_Def.Internal_{}'.format(f.name) %>
          % if f.type.is_big_integer_type:
             ${field_expr}.Set (${f.name});
-         % elif f.type.is_array_type:
+         % elif f.type.is_array_type or f.type.is_string_type:
             ${field_expr} := new ${f.type.api_name}'(${f.name});
          % elif f.type.is_entity_type or f.type.is_ast_node:
             ${field_expr} := ${f.name}.As_${f.public_type.api_name};

@@ -20,7 +20,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
    subtype Internal_Value_Kind is Any_Value_Kind
       with Static_Predicate => Internal_Value_Kind in
-         None | Boolean_Value | Integer_Value | Character_Value
+         None | Boolean_Value | Integer_Value | Character_Value | String_Value
       % for enum_type in ctx.enum_types:
        | ${enum_type.introspection_kind}
       % endfor
@@ -39,6 +39,9 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
          when Character_Value =>
             Character_Value : Character_Type;
+
+         when String_Value =>
+            String_Value : String_Type;
 
          % for enum_type in ctx.enum_types:
          when ${enum_type.introspection_kind} =>
@@ -65,6 +68,10 @@ private package ${ada_lib_name}.Introspection_Implementation is
    function As_Character (Self : Internal_Value) return Character_Type;
    function Create_Character (Value : Character_Type) return Internal_Value is
      ((Kind => Character_Value, Character_Value => Value));
+
+   function As_String (Self : Internal_Value) return String_Type;
+   function Create_String (Value : String_Type) return Internal_Value is
+     ((Kind => String_Value, String_Value => Value));
 
    function As_Node (Self : Internal_Value) return ${T.entity.name};
    function Create_Node (Value : ${T.entity.name}) return Internal_Value is

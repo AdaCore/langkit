@@ -275,7 +275,7 @@ class PackageDecl(FooNode):
         # this environment with the name of the private part as well, so that
         # package bodies can assume there is always a private part.
         return If(
-            result.length == 0,
+            result == String(""),
             No(T.Symbol.array),
 
             If(

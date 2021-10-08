@@ -50,6 +50,8 @@ private package ${ada_lib_name}.Implementation.C is
       with Convention => C;
    ${ada_c_doc('langkit.symbol_type', 3)}
 
+   subtype ${string_type} is String_Type;
+
    --  Helper data structures for source location handling
 
    type ${sloc_type} is record
@@ -163,6 +165,17 @@ private package ${ada_lib_name}.Implementation.C is
       with Export, Convention => C,
            External_Name => "${capi.get_name('get_versions')}";
    ${ada_c_doc('langkit.get_versions', 3)}
+
+   function ${capi.get_name("create_string")}
+     (Content : System.Address; Length : int) return ${string_type}
+      with Export, Convention => C,
+           External_Name => "${capi.get_name('create_string')}";
+   ${ada_c_doc('langkit.create_string', 3)}
+
+   procedure ${capi.get_name("string_dec_ref")} (Self : ${string_type})
+      with Export, Convention => C,
+           External_Name => "${capi.get_name('string_dec_ref')}";
+   ${ada_c_doc('langkit.string_dec_ref', 3)}
 
    ------------------
    -- File readers --

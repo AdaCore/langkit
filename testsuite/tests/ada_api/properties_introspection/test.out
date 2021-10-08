@@ -23,6 +23,12 @@ Properties for FOO_ADDITION:
       id: Character
 
 
+   p_id_string
+   return type: String
+   arguments:
+      id: String
+
+
    p_id_token
    return type: Token
    arguments:
@@ -123,7 +129,7 @@ Properties for FOO_ADDITION:
       <none>
 
    full_sloc_image
-   return type: Character.array
+   return type: String
    arguments:
       <none>
 
@@ -164,6 +170,12 @@ Properties for FOO_NUMBER:
       id: Character
 
 
+   p_id_string
+   return type: String
+   arguments:
+      id: String
+
+
    p_id_token
    return type: Token
    arguments:
@@ -264,7 +276,7 @@ Properties for FOO_NUMBER:
       <none>
 
    full_sloc_image
-   return type: Character.array
+   return type: String
    arguments:
       <none>
 
@@ -329,6 +341,12 @@ Properties for FOO_REF:
       id: Character
 
 
+   p_id_string
+   return type: String
+   arguments:
+      id: String
+
+
    p_id_token
    return type: Token
    arguments:
@@ -429,7 +447,7 @@ Properties for FOO_REF:
       <none>
 
    full_sloc_image
-   return type: Character.array
+   return type: String
    arguments:
       <none>
 
@@ -475,6 +493,12 @@ Properties for FOO_VAR_DECL_LIST:
       id: Character
 
 
+   p_id_string
+   return type: String
+   arguments:
+      id: String
+
+
    p_id_token
    return type: Token
    arguments:
@@ -575,7 +599,7 @@ Properties for FOO_VAR_DECL_LIST:
       <none>
 
    full_sloc_image
-   return type: Character.array
+   return type: String
    arguments:
       <none>
 
@@ -605,6 +629,12 @@ Properties for FOO_NAME:
       id: Character
 
 
+   p_id_string
+   return type: String
+   arguments:
+      id: String
+
+
    p_id_token
    return type: Token
    arguments:
@@ -705,7 +735,7 @@ Properties for FOO_NAME:
       <none>
 
    full_sloc_image
-   return type: Character.array
+   return type: String
    arguments:
       <none>
 
@@ -735,6 +765,12 @@ Properties for FOO_VAR_DECL:
       id: Character
 
 
+   p_id_string
+   return type: String
+   arguments:
+      id: String
+
+
    p_id_token
    return type: Token
    arguments:
@@ -835,7 +871,7 @@ Properties for FOO_VAR_DECL:
       <none>
 
    full_sloc_image
-   return type: Character.array
+   return type: String
    arguments:
       <none>
 
@@ -856,6 +892,8 @@ P_Id_Bigint:
   12
 P_Id_Char:
   'A'
+P_Id_String:
+  "hello world!"
 P_Id_Token:
   <Token Kind=Var Text="var">
 P_Id_Sym:

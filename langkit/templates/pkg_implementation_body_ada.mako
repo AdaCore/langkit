@@ -28,9 +28,12 @@ with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 with System;
 
-with GNATCOLL.Traces;
-
+% if T.String.requires_hash_function:
+with GNAT.String_Hash;
+% endif
 with GNAT.Traceback.Symbolic;
+
+with GNATCOLL.Traces;
 
 with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
 with Langkit_Support.Images;  use Langkit_Support.Images;
@@ -232,12 +235,8 @@ package body ${ada_lib_name}.Implementation is
    -----------
 
    function Image (Self : Symbol_Type) return ${T.String.name} is
-      T      : constant Text_Type := Image (Self);
-      Result : constant ${T.String.name} :=
-         ${T.String.constructor_name} (T'Length);
    begin
-      Result.Items := T;
-      return Result;
+      return Create_String (Image (Self));
    end Image;
 
    ------------------
@@ -2423,7 +2422,16 @@ package body ${ada_lib_name}.Implementation is
 
    % if T.Character.requires_hash_function:
       function Hash (I : Character_Type) return Hash_Type
-      is (Hash_Type'Mod (Character_Type'Pos(I)));
+      is (Hash_Type'Mod (Character_Type'Pos (I)));
+   % endif
+
+   % if T.String.requires_hash_function:
+      function Hash (I : String_Type) return Hash_Type is
+         function String_Hash is new GNAT.String_Hash.Hash
+           (Character_Type, Text_Type, Hash_Type);
+      begin
+         return String_Hash (I.Content);
+      end Hash;
    % endif
 
    ------------------------
@@ -3710,11 +3718,8 @@ package body ${ada_lib_name}.Implementation is
           (Ada.Directories.Simple_Name
              (Get_Filename (Unit (Node))))
            & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node)))) & ": ";
-      Result : constant ${T.String.name} :=
-         ${T.String.constructor_name} (Res'Length);
    begin
-      Result.Items := Res;
-      return Result;
+      return Create_String (Res);
    end Full_Sloc_Image;
 
    -----------
@@ -3840,6 +3845,25 @@ package body ${ada_lib_name}.Implementation is
          return (if S = null
                  then "None"
                  else Image (S.all, With_Quotes => True));
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (C : Character_Type) return String is
+         C_Str : constant Text_Type := (1 => C);
+      begin
+         return "'" & Image (C_Str) & "'";
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (S : String_Type) return String is
+      begin
+         return Image (S.Content, With_Quotes => True);
       end Trace_Image;
 
       -----------------
@@ -4745,12 +4769,8 @@ package body ${ada_lib_name}.Implementation is
    ----------
 
    function Text (Node : ${T.root_node.name}) return ${T.String.name} is
-      T      : constant Text_Type := Text (Node);
-      Result : constant ${T.String.name} :=
-         ${T.String.constructor_name} (T'Length);
    begin
-      Result.Items := T;
-      return Result;
+      return Create_String (Text (Node));
    end Text;
 
    ------------------------
@@ -4890,13 +4910,90 @@ package body ${ada_lib_name}.Implementation is
    function String_To_Symbol
      (Context : Internal_Context; S : ${T.String.name}) return Symbol_Type is
    begin
-      return (if S.N > 0
-              then Lookup_Symbol (Context, S.Items)
+      return (if S.Length > 0
+              then Lookup_Symbol (Context, S.Content)
               else null);
    exception
       when Exc : Invalid_Symbol_Error =>
          raise Property_Error with Ada.Exceptions.Exception_Message (Exc);
    end String_To_Symbol;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : String_Type) is
+   begin
+      if Self.Ref_Count >= 0 then
+         Self.Ref_Count := Self.Ref_Count + 1;
+      end if;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out String_Type) is
+   begin
+      if Self = null or else Self.Ref_Count < 0 then
+         return;
+      end if;
+
+      if Self.Ref_Count = 1 then
+         Free (Self);
+      else
+         Self.Ref_Count := Self.Ref_Count - 1;
+         Self := null;
+      end if;
+   end Dec_Ref;
+
+   -------------------
+   -- Create_String --
+   -------------------
+
+   function Create_String (Content : Text_Type) return String_Type is
+   begin
+      return Result : constant String_Type := new String_Record'
+        (Length    => Content'Length,
+         Ref_Count => 1,
+         Content   => Content);
+   end Create_String;
+
+   -------------------
+   -- Create_String --
+   -------------------
+
+   function Create_String (Content : Unbounded_Text_Type) return String_Type is
+      S : Big_Wide_Wide_String_Access;
+      L : Natural;
+   begin
+      Get_Wide_Wide_String (Content, S, L);
+      return Create_String (S.all (1 .. L));
+   end Create_String;
+
+   -------------------
+   -- Concat_String --
+   -------------------
+
+   function Concat_String (Left, Right : String_Type) return String_Type is
+   begin
+      return Result : constant String_Type :=
+        new String_Record (Length => Left.Length + Right.Length)
+      do
+         Result.Ref_Count := 1;
+         Result.Content (1 .. Left.Length) := Left.Content;
+         Result.Content (Left.Length + 1 .. Result.Length) := Right.Content;
+      end return;
+   end Concat_String;
+
+   ----------------
+   -- Equivalent --
+   ----------------
+
+   function Equivalent (Left, Right : String_Type) return Boolean is
+   begin
+      return Left.Content = Right.Content;
+   end Equivalent;
 
 begin
    No_Big_Integer.Value.Set (0);
