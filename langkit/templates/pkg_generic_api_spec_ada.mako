@@ -36,7 +36,7 @@ private
             main_rule_id = i
       %>
       ${name} : aliased constant String :=
-        ${string_repr(names.Name.from_lower(n).camel_with_underscores)};
+        ${ascii_repr(names.Name.from_lower(n).camel_with_underscores)};
    % endfor
    <% assert main_rule_id is not None %>
    Grammar_Rule_Names : aliased constant Grammar_Rule_Name_Array :=
@@ -96,7 +96,7 @@ private
    --  Language descriptor table for ${ada_lib_name}
 
    Language_Name : aliased constant String :=
-     ${string_repr(ctx.lang_name.camel_with_underscores)};
+     ${ascii_repr(ctx.lang_name.camel_with_underscores)};
 
    Desc : aliased constant Language_Descriptor :=
      (Language_Name => Language_Name'Access,

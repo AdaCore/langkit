@@ -29,17 +29,6 @@ ada_keywords = set("""
 """.split())
 
 
-def string_repr(string: str) -> str:
-    """
-    Return a representation of string as a literal, usable in the generated
-    code.
-
-    :param string: The string to represent.
-    :return: A string literal representation of string.
-    """
-    return '"{0}"'.format(repr(string)[1:-1].replace('"', '""'))
-
-
 # Build the set of characters that can appear as-is in the Ada source file (all
 # printable ASCII characters except control codes).
 ada_printable_bytes = set(
@@ -52,20 +41,21 @@ ada_printable_chars = set(chr(b) for b in ada_printable_bytes)
 
 @overload
 def common_string_repr(
-    content: bytes,
-    printable_chars: Set[int],
-    newline: int,
-    quote: int,
+    content: str,
+    printable_chars: Set[str],
+    newline: str,
+    quote: str,
+    char_type: str,
     indent: str = "",
 ) -> str: ...
 
 
 @overload
 def common_string_repr(
-    content: str,
-    printable_chars: Set[str],
-    newline: str,
-    quote: str,
+    content: bytes,
+    printable_chars: Set[int],
+    newline: int,
+    quote: int,
     char_type: str,
     indent: str = "",
 ) -> str: ...
@@ -159,6 +149,20 @@ def text_repr(content: str, indent: str = "") -> str:
     return common_string_repr(
         content, ada_printable_chars, "\n", '"', "Character_Type", indent
     )
+
+
+def ascii_repr(content: str) -> str:
+    """
+    Return a representation of an ASCII string as an Ada literal (String),
+    usable in the generated code. Note that this may actually generate a
+    concatenation if ``string`` contains non-printable characters.
+
+    :param string: The string to represent. It is a Python Unicode string, but
+        must contain only codepoints in the ASCII range, as it targets Ada's
+        String type.
+    :return: The corresponding string literal or concatenation of literals.
+    """
+    return bytes_repr(content.encode("ascii"))
 
 
 def comment_box(label: str, column: int = 3) -> str:

@@ -1608,11 +1608,11 @@ class CompileCtx:
         """
         CompileCtx._template_extensions_frozen = True
 
-        from langkit.common import comment_box, string_repr
+        from langkit.common import ascii_repr, comment_box
         assert self.emitter
         base_env = {
             'comment_box': comment_box,
-            'string_repr': string_repr,
+            'ascii_repr':  ascii_repr,
             'Name':        names.Name,
             'ada_doc':     documentation.ada_doc,
             'c_doc':       documentation.c_doc,

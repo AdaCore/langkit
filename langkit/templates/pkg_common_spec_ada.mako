@@ -34,7 +34,7 @@ package ${ada_lib_name}.Common is
      GNATCOLL.Traces.Create
        ("${ctx.lib_name.upper}.PLE_ERRORS", GNATCOLL.Traces.From_Config);
 
-   Default_Charset : constant String := ${string_repr(ctx.default_charset)};
+   Default_Charset : constant String := ${ascii_repr(ctx.default_charset)};
    --  Default charset to use when creating analysis contexts
 
    subtype Big_Integer is GNATCOLL.GMP.Integers.Big_Integer;

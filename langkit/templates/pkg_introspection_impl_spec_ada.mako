@@ -146,7 +146,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
          Syntax_Field_Descriptor := (
             Name_Length => ${len(name)},
             Field_Type  => ${f.type.introspection_name},
-            Name        => ${string_repr(name)}
+            Name        => ${ascii_repr(name)}
          );
    % endfor
 
@@ -204,7 +204,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
             names.add(arg.name.lower)
    %>
    % for n in sorted(names):
-   Name_For_${n} : aliased constant String := ${string_repr(n)};
+   Name_For_${n} : aliased constant String := ${ascii_repr(n)};
    % endfor
 
    % for p in ctx.sorted_properties:
@@ -214,7 +214,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
             Name_Length => ${len(name)},
             Arity       => ${len(p.arguments)},
 
-            Name => ${string_repr(name)},
+            Name => ${ascii_repr(name)},
 
             Return_Type    => ${p.type.introspection_constraint},
             Argument_Types => (

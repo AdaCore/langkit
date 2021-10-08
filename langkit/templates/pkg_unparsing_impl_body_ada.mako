@@ -911,7 +911,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       % for tok in ctx.unparsers.sorted_token_unparsers:
          ${tok.var_name} : aliased constant Token_Unparser := \
            (${tok.token.ada_name}, \
-            ${("new Text_Type'({})".format(tok.string_repr)
+            ${("new Text_Type'({})".format(tok.text_repr)
                if tok.match_text else 'null')});
       % endfor
 
