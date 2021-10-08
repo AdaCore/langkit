@@ -72,10 +72,14 @@ package body Liblktlang.Implementation.Extensions is
    ----------------------
 
    function Decl_Short_Image (Node : Bare_Decl) return Text_Type is
+      Full_Name_Acc : Character_Type_Array_Access :=
+        Dispatcher_Decl_P_Full_Name (Node);
+      Full_Name     : constant Text_Type := Full_Name_Acc.Items;
    begin
+      Dec_Ref (Full_Name_Acc);
       return
         "<" & To_Text (Kind_Name (Node))
-        & " """ & Dispatcher_Decl_P_Full_Name (Node).Items & """ "
+        & " """ & Full_Name & """ "
         & To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))))
 
         --  Don't show the sloc for function types, because it will be the root
