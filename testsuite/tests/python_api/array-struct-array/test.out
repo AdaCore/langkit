@@ -1,2 +1,7 @@
-[<ExampleHolder examples=[<Example test:1:1-1:8>]>]
+p_example_holder = [<ExampleHolder examples=[<Example test:1:1-1:8>]>]
+p_identity([]) = []
+p_identity([<ExampleHolder examples=[]>]) = [<ExampleHolder examples=[]>]
+p_identity([<ExampleHolder examples=[<Example test:1:1-1:8>]>]) = [<ExampleHolder examples=[<Example test:1:1-1:8>]>]
+p_identity([<ExampleHolder examples=[<Example test:1:1-1:8>, <Example test:1:1-1:8>]>]) = [<ExampleHolder examples=[<Example test:1:1-1:8>, <Example test:1:1-1:8>]>]
+p_identity([<ExampleHolder examples=[<Example test:1:1-1:8>, <Example test:1:1-1:8>]>, <ExampleHolder examples=[<Example test:1:1-1:8>]>, <ExampleHolder examples=[]>]) = [<ExampleHolder examples=[<Example test:1:1-1:8>, <Example test:1:1-1:8>]>, <ExampleHolder examples=[<Example test:1:1-1:8>]>, <ExampleHolder examples=[]>]
 Done

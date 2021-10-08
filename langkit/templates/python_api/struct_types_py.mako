@@ -108,7 +108,8 @@ class ${public_name}(_BaseStruct):
 
         def __del__(self):
             % if cls.is_refcounted:
-            ${public_name}._dec_ref(self.c_value)
+            if self.c_value is not None:
+                ${public_name}._dec_ref(self.c_value)
             % endif
             self.clear()
 
