@@ -41,7 +41,7 @@ package body Liblktlang.Implementation.Extensions is
                for R of Errors loop
                   Put_Line
                     (Image (Analysis.Node (R).Full_Sloc_Image
-                     & Error_Message (R)));
+                            & Error_Message (R)));
                end loop;
                raise Assertion_Error with "Errors in prelude";
             end if;
