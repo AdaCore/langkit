@@ -12,6 +12,8 @@ class Example : FooNode {
 
     @export fun example_holders(): Array[ExampleHolder] =
     [ExampleHolder(examples=[self])]
+
+    @export fun identity(a: Array[ExampleHolder]): Array[ExampleHolder] = a
 }
 
 struct ExampleHolder {
