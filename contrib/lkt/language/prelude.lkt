@@ -47,6 +47,7 @@ struct ASTList implements Sized, Indexable[T], Iterator[T] {
 
 @builtin struct String implements Sized, Indexable[Char], Iterator[Char] {
     @builtin @property fun to_symbol(): Symbol
+    @builtin fun join(strings: Array[String]): String
 }
 
 @builtin class LogicalVar {
