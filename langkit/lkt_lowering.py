@@ -1487,7 +1487,6 @@ class LktTypesLoader:
 
                 else:
                     # Otherwise, this call must be a method invocation
-                    # invocation.
                     callee = lower(expr.f_name)
                     assert isinstance(callee, E.FieldAccess)
                     args, kwargs = lower_args()
