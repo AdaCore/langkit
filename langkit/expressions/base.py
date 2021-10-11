@@ -659,6 +659,13 @@ class AbstractExpression(Frozable):
             return self.composed_attrs().get(attr, FieldAccess(self, attr))
 
     @Frozable.protect
+    def __call__(self, *args, **kwargs):
+        """
+        Abstract root method for typing.
+        """
+        raise NotImplementedError
+
+    @Frozable.protect
     def __or__(self, other):
         """
         Returns a OrExpr expression object when the user uses the binary or
