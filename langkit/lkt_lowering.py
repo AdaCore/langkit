@@ -1486,9 +1486,13 @@ class LktTypesLoader:
                     return result
 
                 else:
-                    # Otherwise, this call must be a method invocation
+                    # Otherwise, this call must be a method invocation. Note
+                    # that not all methods map to actual field access in the
+                    # generated code. For instance, calls to the String.join
+                    # built-in method are turned into Join instances, so the
+                    # "callee" variable below is not necessarily a FieldAccess
+                    # instance.
                     callee = lower(expr.f_name)
-                    assert isinstance(callee, E.FieldAccess)
                     args, kwargs = lower_args()
                     return callee(*args, **kwargs)
 
