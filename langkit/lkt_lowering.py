@@ -1514,21 +1514,25 @@ class LktTypesLoader:
                 return E.CharacterLiteral(denoted_char_lit(expr))
 
             elif isinstance(expr, L.DotExpr):
-                # Depending on its prefix, this syntactic construct can have
-                # different meanings.
-                prefix_decl = check_referenced_decl(expr.f_prefix)
+                # Dotted expressions can designate an enum value or a member
+                # access. Resolving the suffix determines how to process this.
+                suffix_decl = check_referenced_decl(expr.f_suffix)
 
-                if isinstance(prefix_decl, L.EnumTypeDecl):
-                    # This can designate an enum literal, if the prefix
-                    # designates an enum type.
-                    name = names.Name.from_lower(expr.f_suffix.text)
-                    enum_type = self.lower_type_decl(prefix_decl)
+                if isinstance(suffix_decl, L.EnumLitDecl):
+                    # The suffix refers to the declaration of en enum
+                    # value: the prefix must designate the corresponding enum
+                    # type.
+                    enum_type_node = check_referenced_decl(expr.f_prefix)
+                    assert isinstance(enum_type_node, L.EnumTypeDecl)
+                    enum_type = self.lower_type_decl(enum_type_node)
                     assert isinstance(enum_type, EnumType)
+
+                    name = names.Name.from_lower(expr.f_suffix.text)
                     return enum_type.values_dict[name].to_abstract_expr
 
                 else:
-                    # Otherwise, the prefix is an expression that resolves to a
-                    # struct, and this accesses one of its fields.
+                    # Otherwise, the prefix is a regular expression, so this
+                    # dotted expression is an access to a member.
                     prefix = lower(expr.f_prefix)
                     assert isinstance(prefix, E.AbstractExpression)
                     return getattr(prefix, expr.f_suffix.text)
