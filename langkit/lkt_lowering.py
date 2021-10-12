@@ -58,6 +58,20 @@ def get_trait(decl: L.TypeDecl, trait_name: str) -> Optional[L.TypeDecl]:
     return None
 
 
+def check_referenced_decl(expr: L.Expr) -> L.Decl:
+    """
+    Wrapper around ``Expr.p_check_referenced_decl``.
+
+    Since we are supposed to lower Lkt code only when it has no semantic error,
+    this property should never fail. If it does, there is a bug somewhere in
+    Langkit: raise an assertion error that points to the relevant Lkt node.
+    """
+    try:
+        return expr.p_check_referenced_decl
+    except L.PropertyError as exc:
+        assert False, f"Cannot get referenced decl for {expr}: {exc}"
+
+
 def pattern_as_str(str_lit: Union[L.StringLit, L.TokenPatternLit]) -> str:
     """
     Return the regexp string associated to this string literal node.
@@ -360,7 +374,7 @@ class WithLexerAnnotationSpec(AnnotationSpec):
         # TODO: this will raise a PropertyError if semantic resolution fails.
         # Resolving this lexer reference should be done in the check pass so
         # that we never land here in that case.
-        lexer_decl = lexer_ref.p_check_referenced_decl
+        lexer_decl = check_referenced_decl(lexer_ref)
         if not isinstance(lexer_decl, L.LexerDecl):
             error('Lexer expected, got {}'.format(lexer_decl))
 
@@ -1427,7 +1441,7 @@ class LktTypesLoader:
 
             elif isinstance(expr, L.CallExpr):
                 # Depending on its name, a call can have different meanings
-                name_decl = expr.f_name.p_check_referenced_decl
+                name_decl = check_referenced_decl(expr.f_name)
                 call_expr = expr
 
                 def lower_args() -> Tuple[List[AbstractExpression],
@@ -1502,7 +1516,7 @@ class LktTypesLoader:
             elif isinstance(expr, L.DotExpr):
                 # Depending on its prefix, this syntactic construct can have
                 # different meanings.
-                prefix_decl = expr.f_prefix.p_check_referenced_decl
+                prefix_decl = check_referenced_decl(expr.f_prefix)
 
                 if isinstance(prefix_decl, L.EnumTypeDecl):
                     # This can designate an enum literal, if the prefix
@@ -1567,7 +1581,7 @@ class LktTypesLoader:
                 return E.SymbolLiteral(denoted_string_lit(expr))
 
             elif isinstance(expr, L.RefId):
-                decl = expr.p_check_referenced_decl
+                decl = check_referenced_decl(expr)
                 if isinstance(decl, L.NodeDecl):
                     return E.Self
                 elif isinstance(decl, L.SelfDecl):
