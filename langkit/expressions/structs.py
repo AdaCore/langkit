@@ -589,7 +589,7 @@ class FieldAccess(AbstractExpression):
                 case of an entity prefix for an AST node field, return an
                 entity with the same entity info.
 
-            :param unsafe: If true, don't generate the null crheck before doing
+            :param unsafe: If true, don't generate the null check before doing
                 the field access. This is used to avoid noisy and useless null
                 checks in generated code: these checks would fail only because
                 of a bug in the code generator.
