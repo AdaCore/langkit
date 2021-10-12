@@ -132,8 +132,8 @@ def children(self, node):
     return build_field_access(
         node_expr, 'children', [],
         lambda: CallExpr(
-            'Node_Children', 'Children', T.root_node.array, [node_expr],
-            abstract_expr=self
+            'Node_Children', 'Children', T.root_node.array,
+            [NullCheckExpr(node_expr)], abstract_expr=self
         ),
         abstract_expr=self,
     )
