@@ -3482,8 +3482,8 @@ class ASTNodeType(BaseStructType):
 
                 Unlike regular nodes, ghost nodes cover no token in the input
                 source: they are logically located instead between two tokens.
-                The "token_first" of all ghost nodes is the token right after
-                this logical position, while they have no "token_last".
+                The ``token_start`` of all ghost nodes is the token right after
+                this logical position, while they have no ``token_end``.
                 """
             )),
 
