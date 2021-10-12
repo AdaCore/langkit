@@ -14,6 +14,11 @@ procedure Main is
       Buffer   => "");
 
    function Visit (N : Foo_Node'Class) return Visit_Status;
+   --  Callback for Libfoolang.Analysis.Traverse
+
+   -----------
+   -- Visit --
+   -----------
 
    function Visit (N : Foo_Node'Class) return Visit_Status is
    begin

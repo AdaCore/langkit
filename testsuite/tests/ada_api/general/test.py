@@ -1,5 +1,5 @@
 """
-Check that the Children_And_Trivia function works as expected.
+General testing for the public Ada API.
 """
 
 from langkit.dsl import ASTNode, Field
