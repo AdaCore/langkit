@@ -31,5 +31,5 @@ class Example(FooNode):
 build_and_run(lkt_file='expected_concrete_syntax.lkt',
               py_script='main.py',
               ada_main='main.adb',
-              lkt_semantic_checks=True)
+              types_from_lkt=True)
 print('Done')

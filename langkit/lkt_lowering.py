@@ -1224,6 +1224,10 @@ class LktTypesLoader:
                 assert len(actuals) == 1
                 result = self.resolve_type_decl(actuals[0]).array
 
+            elif inner_type == self.iterator_trait:
+                assert len(actuals) == 1
+                result = self.resolve_type_decl(actuals[0]).iterator
+
             elif inner_type == self.astlist_type:
                 assert len(actuals) == 1
                 node = self.resolve_type_decl(actuals[0])
