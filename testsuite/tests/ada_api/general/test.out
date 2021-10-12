@@ -49,5 +49,33 @@ Last child index =  0
 First child = None
 Last child = None
 
+Testing Print method
+====================
+
+On the null node:
+None
+
+On the root node:
+DeclList[1:1-2:8]
+|  Decl[1:1-1:2]
+|  |f_id:
+|  |  Identifier[1:1-1:2]: a
+|  |f_error:
+|  |  DeclErrorAbsent[1:2-1:2]
+|  Decl[2:1-2:8]
+|  |f_id:
+|  |  Identifier[2:1-2:2]: b
+|  |f_error:
+|  |  DeclErrorPresent[2:3-2:8]
+
+
+On a child node:
+Decl[1:1-1:2]
+|f_id:
+|  Identifier[1:1-1:2]: a
+|f_error:
+|  DeclErrorAbsent[1:2-1:2]
+
+
 main.adb: Done.
 Done

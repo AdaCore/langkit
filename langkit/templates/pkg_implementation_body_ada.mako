@@ -2987,11 +2987,17 @@ package body ${ada_lib_name}.Implementation is
       Show_Slocs  : Boolean;
       Line_Prefix : String := "")
    is
-      K               : constant ${T.node_kind} := Node.Kind;
+      K               : ${T.node_kind};
       Attr_Prefix     : constant String := Line_Prefix & "|";
       Children_Prefix : constant String := Line_Prefix & "|  ";
 
    begin
+      if Node = null then
+         Put_Line ("None");
+         return;
+      end if;
+      K := Node.Kind;
+
       Put (Line_Prefix & Kind_Name (Node));
       if Show_Slocs then
          Put ("[" & Image (Sloc_Range (Node)) & "]");

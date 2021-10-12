@@ -38,5 +38,23 @@ begin
    U.Root.Traverse (Visit'Access);
    U2.Root.Traverse (Visit'Access);
 
+   Put_Line ("Testing Print method");
+   Put_Line ("====================");
+   New_Line;
+
+   Put_Line ("On the null node:");
+   No_Foo_Node.Print;
+   New_Line;
+
+   Put_Line ("On the root node:");
+   U.Root.Print;
+   New_Line;
+   New_Line;
+
+   Put_Line ("On a child node:");
+   U.Root.Child (1).Print;
+   New_Line;
+   New_Line;
+
    Put_Line ("main.adb: Done.");
 end Main;
