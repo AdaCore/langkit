@@ -1,0 +1,4 @@
+main.py: Running...
+example.p_foo = <ExampleList main.txt:1:1-1:8>
+main.py: Done.
+Done

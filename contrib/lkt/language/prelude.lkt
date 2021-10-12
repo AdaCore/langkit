@@ -78,6 +78,7 @@ struct ASTList implements Sized, Indexable[T], Iterator[T] {
     @builtin fun children_env(): LexicalEnv[RootNode]
     @builtin fun unit(): AnalysisUnit[RootNode]
     @builtin fun parents(with_self: Bool = true): Array[RootNode]
+    @builtin @property fun children(): Array[RootNode]
 }
 
 @builtin trait TokenNode {
