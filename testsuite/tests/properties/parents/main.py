@@ -27,5 +27,13 @@ for p in (
     print("{} = {}".format(p, getattr(n, p)))
 print("")
 
+for p in ("p_given_node_parents", "p_given_entity_parents"):
+    prop = getattr(n, p)
+    try:
+        result = prop(None)
+    except libfoolang.PropertyError as exc:
+        result = f"<PropertyError: {exc}>"
+    print("{}() = {}".format(p, result))
+print("")
 
 print("main.py: Done.")

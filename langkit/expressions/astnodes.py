@@ -1,10 +1,10 @@
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Sequence, cast
 
 from langkit.compiled_types import AbstractNodeData, T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractExpression, CallExpr, FieldAccessExpr, ResolvedExpression,
-    auto_attr, construct
+    AbstractExpression, CallExpr, FieldAccessExpr, NullCheckExpr,
+    ResolvedExpression, auto_attr, construct
 )
 from langkit.expressions.structs import FieldAccess
 
@@ -21,7 +21,7 @@ def get_builtin_field(name: str) -> AbstractNodeData:
 def build_field_access(
     node_expr: ResolvedExpression,
     builtin_field_name: str,
-    args: List[Optional[ResolvedExpression]],
+    args: Sequence[Optional[ResolvedExpression]],
     bare_node_expr_constructor: Callable[[], ResolvedExpression],
     abstract_expr: Optional[AbstractExpression],
 ) -> ResolvedExpression:
@@ -96,9 +96,9 @@ def parents_access_constructor(
     """
     # We expect exactly one argument: with_self. If not provided, use the
     # default value.
-    with_self, = args
-    with_self = (
-        with_self
+    assert len(args) == 1
+    with_self: ResolvedExpression = (
+        args[0]
         or construct(node_data.natural_arguments[0].abstract_default_value)
     )
 
@@ -108,7 +108,8 @@ def parents_access_constructor(
         prefix, 'parents', cons_args,
         lambda: CallExpr(
             'Node_Parents', 'Parents', T.root_node.array,
-            [prefix] + cons_args, abstract_expr=abstract_expr,
+            [cast(ResolvedExpression, NullCheckExpr(prefix))] + cons_args,
+            abstract_expr=abstract_expr,
         ),
         abstract_expr=abstract_expr,
     )

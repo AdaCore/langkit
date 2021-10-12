@@ -564,7 +564,7 @@ class FieldAccess(AbstractExpression):
         def __init__(self,
                      receiver_expr: ResolvedExpression,
                      node_data: AbstractNodeData,
-                     arguments: List[Optional[ResolvedExpression]],
+                     arguments: Sequence[Optional[ResolvedExpression]],
                      actual_node_data: Optional[AbstractNodeData] = None,
                      implicit_deref: bool = False,
                      unsafe: bool = False,

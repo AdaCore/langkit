@@ -3,7 +3,7 @@ Check that the "parents" builtin property behaves properly both in the DSL and
 in the public API.
 """
 
-from langkit.dsl import ASTNode
+from langkit.dsl import ASTNode, T
 from langkit.expressions import Entity, Self, langkit_property
 
 from utils import build_and_run
@@ -20,12 +20,20 @@ class FooNode(ASTNode):
         return Self.parents(with_self=False).map(lambda n: n.as_bare_entity)
 
     @langkit_property(public=True)
+    def given_node_parents(n=T.FooNode):
+        return n.parents().map(lambda n: n.as_bare_entity)
+
+    @langkit_property(public=True)
     def entity_parents():
         return Entity.parents
 
     @langkit_property(public=True)
     def entity_parents_without_self():
         return Entity.parents(with_self=False)
+
+    @langkit_property(public=True)
+    def given_entity_parents(n=T.FooNode.entity):
+        return n.parents()
 
 
 class Example(FooNode):
