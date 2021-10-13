@@ -105,8 +105,10 @@ All types
 * VarDecl.entity
   is a node
 
-Trying to get the debug name of an invalid type...
-LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Language_For: null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+To_Index: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+From_Index: out of range type index: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid type index
+Debug_Name: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 
 Enum types
 ==========
@@ -143,22 +145,22 @@ Grammar_Rule ( 14)
   6: Ref_Rule
   7: Name_Rule
 
-Is_Enum_Type: invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Is_Enum_Type: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 
 Invalid args for Enum_Type_Name:
-Invalid Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-enum Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum type
 
 Invalid args for Enum_Last_Value:
-Invalid Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-enum Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum type
 
 Invalid args for Enum_Default_Value:
-Invalid Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-enum Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum type
 
 Invalid args for Enum_Value_Name:
-Invalid Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-enum Enum argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum type
 Out-of-bounds Index argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid enum value index
 
@@ -171,10 +173,10 @@ Array of BigInt
 FooNode.entity.array
 Array of FooNode.entity
 
-Is_Array_Type: invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Is_Array_Type: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 
 Invalid args for Array_Element_Type:
-Invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-array T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid array type
 
 Structs
@@ -184,10 +186,10 @@ Node_Result
 
 Point
 
-Is_Struct_Type: Invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Is_Struct_Type: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 
 Invalid args for Struct_Type_Name:
-Invalid Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-struct Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct type
 
 Nodes
@@ -262,31 +264,31 @@ Var_Decl ( 28)
   derivations:
     <none>
 
-Is_Node_Type: Invalid T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Is_Node_Type: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 
 Invalid args for Node_Type_Name:
-Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 
 Invalid args for Is_Abstract:
-Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 
 Invalid args for Is_Concrete:
-Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 
 Invalid args for Base_Type:
-Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 Root Node argument: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.BAD_TYPE_ERROR: trying to get base type of root node
 
 Invalid args for Derived_Types:
-Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 
 Invalid args for Last_Derived_Type:
-Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 
 Check Is_Derived_From:
@@ -294,9 +296,9 @@ Checking: root derives from root
 Checking: expr derives from root
 Checking: addition derives from root
 Checking: ref does not derive from number
-Invalid Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
-Invalid Parent argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Parent argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Parent argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 
 Members
@@ -663,7 +665,7 @@ Example_P_Id_Dflt_Root_Node ( 37)
 Is_Property: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
 
 Invalid args for Members:
-Invalid Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid value type
+Null Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-struct Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid base struct type
 
 Member_Name: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member

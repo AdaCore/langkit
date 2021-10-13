@@ -53,6 +53,25 @@ package body Langkit_Support.Generic_API is
       return Rule.Id;
    end Language_For;
 
+   --------------------------
+   -- Default_Grammar_Rule --
+   --------------------------
+
+   function Default_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Ref
+   is
+   begin
+      return (Id, Id.Default_Grammar_Rule);
+   end Default_Grammar_Rule;
+
+   -----------------------
+   -- Grammar_Rule_Name --
+   -----------------------
+
+   function Grammar_Rule_Name (Rule : Grammar_Rule_Ref) return Name_Type is
+   begin
+      return Create_Name (Rule.Id.Grammar_Rule_Names (Rule.Index).all);
+   end Grammar_Rule_Name;
+
    --------------
    -- To_Index --
    --------------
@@ -82,25 +101,6 @@ package body Langkit_Support.Generic_API is
    begin
       return Id.Grammar_Rule_Names'Last;
    end Last_Grammar_Rule;
-
-   --------------------------
-   -- Default_Grammar_Rule --
-   --------------------------
-
-   function Default_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Ref
-   is
-   begin
-      return (Id, Id.Default_Grammar_Rule);
-   end Default_Grammar_Rule;
-
-   -----------------------
-   -- Grammar_Rule_Name --
-   -----------------------
-
-   function Grammar_Rule_Name (Rule : Grammar_Rule_Ref) return Name_Type is
-   begin
-      return Create_Name (Rule.Id.Grammar_Rule_Names (Rule.Index).all);
-   end Grammar_Rule_Name;
 
    ------------------------
    -- Check_Grammar_Rule --

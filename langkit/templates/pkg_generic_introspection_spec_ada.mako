@@ -48,13 +48,13 @@ private package ${ada_lib_name}.Generic_Introspection is
       def type_index(t):
          """
          Return the name of the constant for ``t``'s type index, or
-         ``No_Value_Type`` if ``t`` is None.
+         ``No_Type_Index`` if ``t`` is None.
 
          For convenience, also automatically handle bare nodes as entities
          (bare nodes are not exposed).
          """
          return (
-            "No_Value_Type"
+            "No_Type_Index"
             if t is None
             else f"Type_Index_For_{type_name(t)}"
          )
@@ -104,7 +104,7 @@ private package ${ada_lib_name}.Generic_Introspection is
    --------------------------
 
    % for i, t in enumerate(all_types, 1):
-      ${type_index(t)} : constant Value_Type := ${i};
+      ${type_index(t)} : constant Type_Index := ${i};
    % endfor
 
    ----------------------------
@@ -119,21 +119,21 @@ private package ${ada_lib_name}.Generic_Introspection is
    -- General value type descriptors --
    ------------------------------------
 
-   <% value_type_descs = [] %>
+   <% type_descs = [] %>
    % for t in all_types:
       <%
          desc_const = f"Desc_For_{t.name}"
          debug_name_const = f"Debug_Name_For_{t.name}"
-         value_type_descs.append(f"{desc_const}'Access")
+         type_descs.append(f"{desc_const}'Access")
       %>
       ${debug_name_const} : aliased constant String :=
         ${ascii_repr(t.dsl_name)};
-      ${desc_const} : aliased constant Value_Type_Descriptor :=
+      ${desc_const} : aliased constant Type_Descriptor :=
         (Debug_Name => ${debug_name_const}'Access);
    % endfor
 
-   Value_Types : aliased constant Value_Type_Descriptor_Array := (
-      ${",\n".join(value_type_descs)}
+   Types : aliased constant Type_Descriptor_Array := (
+      ${",\n".join(type_descs)}
    );
 
    ---------------------------
@@ -303,7 +303,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${",\n".join(struct_type_descs)}
    );
 
-   First_Node     : constant Value_Type := ${type_index(node_types[0])};
+   First_Node     : constant Type_Index := ${type_index(node_types[0])};
    First_Property : constant Struct_Member :=
      ${member_index(ctx.sorted_properties[0])};
 

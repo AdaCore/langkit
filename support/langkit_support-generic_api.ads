@@ -48,6 +48,19 @@ package Langkit_Support.Generic_API is
    No_Grammar_Rule_Ref : constant Grammar_Rule_Ref;
    --  Special value to express no grammar rule reference
 
+   function Language_For (Rule : Grammar_Rule_Ref) return Language_Id;
+   --  Return the language ID corresponding to the given grammar rule. Raise a
+   --  ``Precondition_Failure`` exception if ``Rule`` is
+   --  ``No_Grammar_Rule_Ref``.
+
+   function Default_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Ref;
+   --  Return the default grammar rule for the given language
+
+   function Grammar_Rule_Name (Rule : Grammar_Rule_Ref) return Name_Type;
+   --  Return the name for the given grammar rule. Raise a
+   --  ``Precondition_Failure`` exception if ``Rule`` is
+   --  ``No_Grammar_Rule_Ref``.
+
    type Any_Grammar_Rule_Index is new Natural;
    subtype Grammar_Rule_Index is
      Any_Grammar_Rule_Index range 1 ..  Any_Grammar_Rule_Index'Last;
@@ -58,11 +71,6 @@ package Langkit_Support.Generic_API is
    --  for it are ``1 .. N``. The ``Last_Grammar_Rule`` function below gives
    --  the actual ``N`` for a given language.
 
-   function Language_For (Rule : Grammar_Rule_Ref) return Language_Id;
-   --  Return the language ID corresponding to the given grammar rule. Raise a
-   --  ``Precondition_Failure`` exception if ``Rule`` is
-   --  ``No_Grammar_Rule_Ref``.
-
    function To_Index (Rule : Grammar_Rule_Ref) return Grammar_Rule_Index;
    --  Return the index of the given grammar rule. Raise a
    --  ``Precondition_Failure`` exception if ``Rule`` is
@@ -70,19 +78,12 @@ package Langkit_Support.Generic_API is
 
    function From_Index
      (Id : Language_Id; Rule : Grammar_Rule_Index) return Grammar_Rule_Ref;
-   --  Return the grammar rule for the given language correspnoding to
-   --  the ``Rule`` index.
+   --  Return the grammar rule for the given language corresponding to
+   --  the ``Rule`` index. Raise a ``Precondition_Failure`` exception if
+   --  ``Rule`` is not a valid grammar rule index for the given language.
 
    function Last_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Index;
    --  Return the index of the last grammar rule for the given language
-
-   function Default_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Ref;
-   --  Return the default grammar rule for the given language
-
-   function Grammar_Rule_Name (Rule : Grammar_Rule_Ref) return Name_Type;
-   --  Return the name for the given grammar rule. Raise a
-   --  ``Precondition_Failure`` exception if ``Rule`` is
-   --  ``No_Grammar_Rule_Ref``.
 
 private
 

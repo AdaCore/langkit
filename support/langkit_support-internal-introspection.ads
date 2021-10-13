@@ -31,21 +31,22 @@ use Langkit_Support.Generic_API.Introspection;
 
 package Langkit_Support.Internal.Introspection is
 
-   ----------------------------
-   -- Value type descriptors --
-   ----------------------------
+   type Type_Index_Array is array (Positive range <>) of Type_Index;
 
-   type Value_Type_Descriptor is record
+   ----------------------
+   -- Type descriptors --
+   ----------------------
+
+   type Type_Descriptor is record
       Debug_Name : Debug_String_Access;
       --  Free-form name of this type for debug purposes
    end record;
 
-   type Value_Type_Descriptor_Access is
-      not null access constant Value_Type_Descriptor;
-   type Value_Type_Descriptor_Array is
-      array (Value_Type range <>) of Value_Type_Descriptor_Access;
-   type Value_Type_Descriptor_Array_Access is
-      not null access constant Value_Type_Descriptor_Array;
+   type Type_Descriptor_Access is not null access constant Type_Descriptor;
+   type Type_Descriptor_Array is
+      array (Type_Index range <>) of Type_Descriptor_Access;
+   type Type_Descriptor_Array_Access is
+      not null access constant Type_Descriptor_Array;
 
    ---------------------------
    -- Enum type descriptors --
@@ -70,7 +71,7 @@ package Langkit_Support.Internal.Introspection is
    type Enum_Type_Descriptor_Access is
      not null access constant Enum_Type_Descriptor;
    type Enum_Type_Descriptor_Array is
-     array (Value_Type range <>) of Enum_Type_Descriptor_Access;
+     array (Type_Index range <>) of Enum_Type_Descriptor_Access;
    type Enum_Type_Descriptor_Array_Access is
      not null access constant Enum_Type_Descriptor_Array;
 
@@ -79,12 +80,12 @@ package Langkit_Support.Internal.Introspection is
    ----------------------------
 
    type Array_Type_Descriptor is record
-      Element_Type : Value_Type;
+      Element_Type : Type_Index;
       --  Type of elements in this array type
    end record;
 
    type Array_Type_Descriptor_Array is
-     array (Value_Type range <>) of Array_Type_Descriptor;
+     array (Type_Index range <>) of Array_Type_Descriptor;
    type Array_Type_Descriptor_Array_Access is
      not null access constant Array_Type_Descriptor_Array;
 
@@ -96,7 +97,7 @@ package Langkit_Support.Internal.Introspection is
       Name : Text_Access;
       --  Name for this property argument in camel-with-underscores convention
 
-      Argument_Type : Value_Type;
+      Argument_Type : Type_Index;
       --  Expected type for this property argument
    end record;
 
@@ -107,7 +108,7 @@ package Langkit_Support.Internal.Introspection is
       Name : Text_Access;
       --  Name for this struct member in camel-with-underscores convention
 
-      Member_Type : Value_Type;
+      Member_Type : Type_Index;
       --  Field type (for struct fields or node syntax fields) or return type
       --  (for properties).
 
@@ -134,7 +135,7 @@ package Langkit_Support.Internal.Introspection is
    type Struct_Type_Descriptor
      (Derivations_Count : Natural; Member_Count : Natural)
    is record
-      Base_Type : Any_Value_Type;
+      Base_Type : Any_Type_Index;
       --  Reference to the struct type from which this derives
 
       Is_Abstract : Boolean;
@@ -146,7 +147,7 @@ package Langkit_Support.Internal.Introspection is
       Inherited_Members : Natural;
       --  Number of inherited members for this struct (``Members`` included)
 
-      Derivations : Value_Type_Array (1 .. Derivations_Count);
+      Derivations : Type_Index_Array (1 .. Derivations_Count);
       --  Sorted list (by index) of all struct types that directly derives from
       --  this struct.
 
@@ -157,7 +158,7 @@ package Langkit_Support.Internal.Introspection is
    type Struct_Type_Descriptor_Access is
      not null access constant Struct_Type_Descriptor;
    type Struct_Type_Descriptor_Array is
-     array (Value_Type range <>) of Struct_Type_Descriptor_Access;
+     array (Type_Index range <>) of Struct_Type_Descriptor_Access;
    type Struct_Type_Descriptor_Array_Access is
      not null access constant Struct_Type_Descriptor_Array;
 
