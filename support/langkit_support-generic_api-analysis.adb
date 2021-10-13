@@ -236,8 +236,7 @@ package body Langkit_Support.Generic_API.Analysis is
       Filename : String;
       Charset  : String := "";
       Reparse  : Boolean := False;
-      Rule     : Any_Grammar_Rule_Index := No_Grammar_Rule_Index)
-      return Lk_Unit
+      Rule     : Grammar_Rule_Ref := No_Grammar_Rule_Ref) return Lk_Unit
    is
       Result : Internal_Unit;
    begin
@@ -247,11 +246,10 @@ package body Langkit_Support.Generic_API.Analysis is
          Desc        : Language_Descriptor renames Self.Desc.all;
          Actual_Rule : Grammar_Rule_Index;
       begin
-         if Rule = No_Grammar_Rule_Index then
+         if Rule = No_Grammar_Rule_Ref then
             Actual_Rule := Desc.Default_Grammar_Rule;
          else
-            Check_Grammar_Rule (Desc'Access, Rule);
-            Actual_Rule := Rule;
+            Actual_Rule := To_Index (Rule);
          end if;
 
          Result := Self.Desc.Context_Get_From_File

@@ -15,7 +15,7 @@ procedure Introspection is
 
    use Langkit_Support.Errors.Introspection;
 
-   Id : Language_Id renames Libfoolang.Generic_API.Id;
+   Id : Language_Id renames Libfoolang.Generic_API.Foo_Lang_Id;
 
    procedure Put_Title (Label : String);
    --  Print a section title

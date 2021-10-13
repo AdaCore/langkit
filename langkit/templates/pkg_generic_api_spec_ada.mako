@@ -14,7 +14,9 @@ private with ${ada_lib_name}.Generic_Introspection;
 
 package ${ada_lib_name}.Generic_API is
 
-   Id : constant Language_Id;
+   <% id_const_name = f"{ctx.lang_name}_Lang_Id" %>
+
+   ${id_const_name} : constant Language_Id;
    --  Unique identifier for ${ada_lib_name}
 
 private
@@ -139,6 +141,6 @@ private
 
    function "+" is new Ada.Unchecked_Conversion
      (Language_Descriptor_Access, Language_Id);
-   Id : constant Language_Id := +Desc'Access;
+   ${id_const_name} : constant Language_Id := +Desc'Access;
 
 end ${ada_lib_name}.Generic_API;

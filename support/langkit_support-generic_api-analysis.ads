@@ -103,13 +103,13 @@ package Langkit_Support.Generic_API.Analysis is
       Filename : String;
       Charset  : String := "";
       Reparse  : Boolean := False;
-      Rule     : Any_Grammar_Rule_Index := No_Grammar_Rule_Index)
-      return Lk_Unit;
+      Rule     : Grammar_Rule_Ref := No_Grammar_Rule_Ref) return Lk_Unit;
    --  Create a new analysis unit for ``Filename`` or return the existing one
    --  if any. If ``Reparse`` is true and the analysis unit already exists,
    --  reparse it from ``Filename``.
    --
-   --  ``Rule`` controls which grammar rule is used to parse the unit.
+   --  ``Rule`` controls which grammar rule is used to parse the unit. If
+   --  ``No_Grammar_Rule_Ref``, use the default grammar rule for this language.
    --
    --  Use ``Charset`` in order to decode the source. If ``Charset`` is empty
    --  then use the context's default charset.

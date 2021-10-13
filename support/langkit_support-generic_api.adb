@@ -43,6 +43,37 @@ package body Langkit_Support.Generic_API is
       return Create_Name (Id.Language_Name.all);
    end Language_Name;
 
+   ------------------
+   -- Language_For --
+   ------------------
+
+   function Language_For (Rule : Grammar_Rule_Ref) return Language_Id is
+   begin
+      Check_Grammar_Rule (Rule);
+      return Rule.Id;
+   end Language_For;
+
+   --------------
+   -- To_Index --
+   --------------
+
+   function To_Index (Rule : Grammar_Rule_Ref) return Grammar_Rule_Index is
+   begin
+      Check_Grammar_Rule (Rule);
+      return Rule.Index;
+   end To_Index;
+
+   ----------------
+   -- From_Index --
+   ----------------
+
+   function From_Index
+     (Id : Language_Id; Rule : Grammar_Rule_Index) return Grammar_Rule_Ref is
+   begin
+      Check_Grammar_Rule (Id, Rule);
+      return (Id, Rule);
+   end From_Index;
+
    -----------------------
    -- Last_Grammar_Rule --
    -----------------------
@@ -56,22 +87,31 @@ package body Langkit_Support.Generic_API is
    -- Default_Grammar_Rule --
    --------------------------
 
-   function Default_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Index
+   function Default_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Ref
    is
    begin
-      return Id.Default_Grammar_Rule;
+      return (Id, Id.Default_Grammar_Rule);
    end Default_Grammar_Rule;
 
    -----------------------
    -- Grammar_Rule_Name --
    -----------------------
 
-   function Grammar_Rule_Name
-     (Id : Language_Id; Rule : Grammar_Rule_Index) return Name_Type is
+   function Grammar_Rule_Name (Rule : Grammar_Rule_Ref) return Name_Type is
    begin
-      Check_Grammar_Rule (Id, Rule);
-      return Create_Name (Id.Grammar_Rule_Names (Rule).all);
+      return Create_Name (Rule.Id.Grammar_Rule_Names (Rule.Index).all);
    end Grammar_Rule_Name;
+
+   ------------------------
+   -- Check_Grammar_Rule --
+   ------------------------
+
+   procedure Check_Grammar_Rule (Rule : Grammar_Rule_Ref) is
+   begin
+      if Rule.Id = null then
+         raise Precondition_Failure with "null grammar rule reference";
+      end if;
+   end Check_Grammar_Rule;
 
    ------------------------
    -- Check_Grammar_Rule --
