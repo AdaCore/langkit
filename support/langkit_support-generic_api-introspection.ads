@@ -33,35 +33,52 @@ package Langkit_Support.Generic_API.Introspection is
    -- Polymorphic values --
    ------------------------
 
-   type Any_Value_Type is new Natural;
-   --  Generic type to designate the type of a polymorphic value: boolean,
-   --  integer, character, ...
+   type Type_Ref is private;
+   --  Reference to the type of a polymorphic value: boolean, integer,
+   --  character, ...
+
+   No_Type_Ref : constant Type_Ref;
+   --  Special value to express no type reference
+
+   type Type_Ref_Array is array (Positive range <>) of Type_Ref;
+
+   function Language_For (T : Type_Ref) return Language_Id;
+   --  Return the language ID corresponding to the given type. Raise a
+   --  ``Precondition_Failure`` exception if ``T`` is ``No_Type_Ref``.
+
+   function Debug_Name (T : Type_Ref) return String;
+   --  Return the free-form name of this type for debug purposes. Raise a
+   --  ``Precondition_Failure`` exception if ``T`` is ``No_Type_Ref``.
+
+   type Any_Type_Index is new Natural;
+   --  Language-specific index to designate a type.
    --
-   --  A given language defines types for the ``1 .. Last_Value_Type
-   --  (Language)`` range: see the ``Last_Value_Type`` function below. All the
-   --  subprograms below raise a ``Precondition_Failure`` exception if passed a
-   --  value type index that is not in range for the given language.
+   --  A given language defines types for the ``1 .. Last_Type (Language)``
+   --  range: see the ``Last_Type`` function below.
 
-   No_Value_Type : constant Any_Value_Type;
-   --  Special ``Any_Value_Type`` to mean: no reference to a type
+   No_Type_Index : constant Any_Type_Index := 0;
+   --  Special ``Any_Type_Index`` to mean: no reference to a type
 
-   subtype Value_Type is Any_Value_Type range 1 .. Any_Value_Type'Last;
+   subtype Type_Index is Any_Type_Index range 1 ..  Any_Type_Index'Last;
 
-   type Value_Type_Array is array (Positive range <>) of Value_Type;
+   function To_Index (T : Type_Ref) return Type_Index;
+   --  Return the index of the given type. Raise a ``Precondition_Failure``
+   --  exception if ``T`` is ``No_Type_Ref``.
 
-   function Last_Value_Type (Id : Language_Id) return Value_Type;
+   function From_Index (Id : Language_Id; T : Type_Index) return Type_Ref;
+   --  Return the type for the given language corresponding to the ``T`` index.
+   --  Raise a ``Precondition_Failure`` exception if ``T`` is not a valid type
+   --  index for the given language.
+
+   function Last_Type (Id : Language_Id) return Type_Index;
    --  Return the last type index that is valid for the given language
-
-   function Debug_Name (Id : Language_Id; T : Value_Type) return String;
-   --  Return the free-form name of this type for debug purposes, according to
-   --  the given language.
 
    ----------------
    -- Enum types --
    ----------------
 
-   function Is_Enum_Type (Id : Language_Id; T : Value_Type) return Boolean;
-   --  Return  whether ``T`` references an enum type for the given language.
+   function Is_Enum_Type (T : Type_Ref) return Boolean;
+   --  Return  whether ``T`` references an enum type.
    --
    --  All functions below will raise a ``Precondition_Failure`` if passed a
    --  type which does not satisfy this predicate as ``Enum`` formals.
@@ -73,24 +90,19 @@ package Langkit_Support.Generic_API.Introspection is
 
    No_Enum_Value_Index : constant Any_Enum_Value_Index := 0;
 
-   function Enum_Type_Name
-     (Id : Language_Id; Enum : Value_Type) return Name_Type;
-   --  Return the name for the given enum type according to the given language
+   function Enum_Type_Name (Enum : Type_Ref) return Name_Type;
+   --  Return the name of the given enum type
 
-   function Enum_Last_Value
-     (Id : Language_Id; Enum : Value_Type) return Enum_Value_Index;
+   function Enum_Last_Value (Enum : Type_Ref) return Enum_Value_Index;
    --  Return the index of the last enum value for the given ``Enum`` enum type
 
-   function Enum_Default_Value
-     (Id : Language_Id; Enum : Value_Type) return Any_Enum_Value_Index;
+   function Enum_Default_Value (Enum : Type_Ref) return Any_Enum_Value_Index;
    --  Return the index of the default enum value for the given ``Enum`` enum
    --  type, or ``No_Enum_Value_Index`` if this type does not have a default
    --  value.
 
    function Enum_Value_Name
-     (Id    : Language_Id;
-      Enum  : Value_Type;
-      Index : Enum_Value_Index) return Name_Type;
+     (Enum : Type_Ref; Index : Enum_Value_Index) return Name_Type;
    --  Return the name corresponding to the ``Index``th value for the ``Enum``
    --  enum type. This raises a ``Out_Of_Bounds_Error`` if ``Index`` is too big
    --  for this enum type.
@@ -99,90 +111,77 @@ package Langkit_Support.Generic_API.Introspection is
    -- Array types --
    -----------------
 
-   function Is_Array_Type (Id : Language_Id; T : Value_Type) return Boolean;
-   --  Return whether ``T`` references an array type for the given language.
+   function Is_Array_Type (T : Type_Ref) return Boolean;
+   --  Return whether ``T`` references an array type.
    --
    --  All functions below will raise a ``Precondition_Failure`` if passed a
    --  type which does not satisfy this predicate as ``T`` formals.
 
-   function Array_Element_Type
-     (Id : Language_Id; T : Value_Type) return Value_Type;
+   function Array_Element_Type (T : Type_Ref) return Type_Ref;
    --  Return the type of elements in ``T`` arrays
 
    -----------------------
    -- Struct/node types --
    -----------------------
 
-   function Is_Base_Struct_Type
-     (Id : Language_Id; T : Value_Type) return Boolean;
-   --  Return whether ``T`` references a struct or node type for the given
-   --  language.
+   function Is_Base_Struct_Type (T : Type_Ref) return Boolean;
+   --  Return whether ``T`` references a struct or node type.
    --
    --  All functions below will raise a ``Precondition_Failure`` if passed a
    --  type which does not satisfy this predicate as ``T`` formals.
 
-   function Base_Struct_Type_Name
-     (Id : Language_Id; T : Value_Type) return Name_Type;
-   --  Return the name for the given node type according to the given language
+   function Base_Struct_Type_Name (T : Type_Ref) return Name_Type;
+   --  Return the name for the given struct/node type
 
    ------------------
    -- Struct types --
    ------------------
 
-   function Is_Struct_Type (Id : Language_Id; T : Value_Type) return Boolean;
-   --  Return whether ``T`` references a struct type for the given language.
-   --  This returns False for node types.
+   function Is_Struct_Type (T : Type_Ref) return Boolean;
+   --  Return whether ``T`` references a struct type.
    --
    --  All functions below will raise a ``Precondition_Failure`` if passed a
    --  type which does not satisfy this predicate as ``Struct`` formals.
 
-   function Struct_Type_Name
-     (Id : Language_Id; Struct : Value_Type) return Name_Type;
-   --  Return the name for the given node type according to the given language
+   function Struct_Type_Name (Struct : Type_Ref) return Name_Type;
+   --  Return the name for the given struct type
 
    ----------------
    -- Node types --
    ----------------
 
-   function Is_Node_Type (Id : Language_Id; T : Value_Type) return Boolean;
-   --  Return whether ``T`` references a node type for the given language.
+   function Is_Node_Type (T : Type_Ref) return Boolean;
+   --  Return whether ``T`` references a node type.
    --
    --  All functions below will raise a ``Precondition_Failure`` if passed
    --  a type which does not satisfy this predicate as ``Node``/``Parent``
    --  formals.
 
-   function Root_Node_Type (Id : Language_Id) return Value_Type;
+   function Root_Node_Type (Id : Language_Id) return Type_Ref;
    --  Return the type for the root node in the given language
 
-   function Node_Type_Name
-     (Id : Language_Id; Node : Value_Type) return Name_Type;
-   --  Return the name for the given node type according to the given language
+   function Node_Type_Name (Node : Type_Ref) return Name_Type;
+   --  Return the name for the given node type
 
-   function Is_Abstract
-     (Id : Language_Id; Node : Value_Type) return Boolean;
+   function Is_Abstract (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates an abstract node
 
-   function Is_Concrete
-     (Id : Language_Id; Node : Value_Type) return Boolean
-   is (not Is_Abstract (Id, Node));
+   function Is_Concrete (Node : Type_Ref) return Boolean
+   is (not Is_Abstract (Node));
 
-   function Base_Type
-     (Id : Language_Id; Node : Value_Type) return Value_Type;
+   function Base_Type (Node : Type_Ref) return Type_Ref;
    --  If ``Node`` is the root node type, raise a ``Bad_Type_Error`` exception.
    --  Otherwise, return ``Node``'s base type.
 
-   function Derived_Types
-     (Id : Language_Id; Node : Value_Type) return Value_Type_Array;
+   function Derived_Types (Node : Type_Ref) return Type_Ref_Array;
    --  Return type references for all direct derivations for ``Node``
 
-   function Last_Derived_Type
-     (Id : Language_Id; Node : Value_Type) return Value_Type;
-   --  Return the ``Result`` type so that the ``Node .. Result`` range contains
-   --  exactly all node types that derive (directly or indirectly) from
-   --  ``Node``.
+   function Last_Derived_Type (Node : Type_Ref) return Type_Index;
+   --  Return the index of the ``Result`` type so that the ``Node .. Result``
+   --  range contains exactly all node types that derive (directly or
+   --  indirectly) from ``Node``.
 
-   function Is_Derived_From
-     (Id : Language_Id; Node, Parent : Value_Type) return Boolean;
+   function Is_Derived_From (Node, Parent : Type_Ref) return Boolean;
    --  Return whether the ``Node`` node type derives (directly or indirectly)
    --  from ``Parent``.
 
@@ -210,17 +209,15 @@ package Langkit_Support.Generic_API.Introspection is
 
    No_Argument_Index : constant Any_Argument_Index := 0;
 
-   function Members
-     (Id : Language_Id; Struct : Value_Type) return Struct_Member_Array;
-   --  Return the list of member that ``Struct`` has according to the given
-   --  language.
+   function Members (Struct : Type_Ref) return Struct_Member_Array;
+   --  Return the list of members that ``Struct`` has
 
    function Member_Name
      (Id : Language_Id; Member : Struct_Member) return Name_Type;
    --  Return the name of ``Member`` according to the given language
 
    function Member_Type
-     (Id : Language_Id; Member : Struct_Member) return Value_Type;
+     (Id : Language_Id; Member : Struct_Member) return Type_Ref;
    --  Return the type of ``Member`` according to the given language
 
    function Member_Last_Argument
@@ -231,7 +228,7 @@ package Langkit_Support.Generic_API.Introspection is
    function Member_Argument_Type
      (Id       : Language_Id;
       Member   : Struct_Member;
-      Argument : Argument_Index) return Value_Type;
+      Argument : Argument_Index) return Type_Ref;
    --  Return the type of ``Member``'s argument ``Argument`` according to the
    --  given language.
 
@@ -244,6 +241,14 @@ package Langkit_Support.Generic_API.Introspection is
 
 private
 
-   No_Value_Type : constant Any_Value_Type := 0;
+   type Type_Ref is record
+      Id    : Any_Language_Id;
+      Index : Any_Type_Index;
+      --  Either this is ``No_Type_Ref``, and in that case both members should
+      --  be null/zero, either ``Index`` designates a valid type for the
+      --  language ``Id`` represents.
+   end record;
+
+   No_Type_Ref : constant Type_Ref := (null, 0);
 
 end Langkit_Support.Generic_API.Introspection;

@@ -110,7 +110,7 @@ private
       Default_Grammar_Rule => ${main_rule_id},
       Grammar_Rule_Names   => Grammar_Rule_Names'Access,
 
-      Value_Types    => Generic_Introspection.Value_Types'Access,
+      Types          => Generic_Introspection.Types'Access,
       Enum_Types     => Generic_Introspection.Enum_Types'Access,
       Array_Types    => Generic_Introspection.Array_Types'Access,
       Struct_Types   => Generic_Introspection.Struct_Types'Access,
