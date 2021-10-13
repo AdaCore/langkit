@@ -11,7 +11,7 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with Libfoolang.Generic_API;
 
 procedure Analysis is
-   Id : Language_Id renames Libfoolang.Generic_API.Id;
+   Id : Language_Id renames Libfoolang.Generic_API.Foo_Lang_Id;
 
    Ctx : Lk_Context;
    U   : Lk_Unit;
@@ -26,13 +26,17 @@ begin
 
    Put_Line ("Grammar rules:");
    for I in 1 .. Last_Grammar_Rule (Id) loop
-      Put ("  " & Image (Format_Name (Grammar_Rule_Name (Id, I),
-                                      Camel_With_Underscores)));
-      if I = Default_Grammar_Rule (Id) then
-         Put_Line (" (default)");
-      else
-         New_Line;
-      end if;
+      declare
+         Rule : constant Grammar_Rule_Ref := From_Index (Id, I);
+      begin
+         Put ("  " & Image (Format_Name (Grammar_Rule_Name (Rule),
+                                         Camel_With_Underscores)));
+         if Rule = Default_Grammar_Rule (Id) then
+            Put_Line (" (default)");
+         else
+            New_Line;
+         end if;
+      end;
    end loop;
    New_Line;
 
