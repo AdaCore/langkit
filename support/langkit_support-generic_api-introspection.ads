@@ -83,6 +83,27 @@ package Langkit_Support.Generic_API.Introspection is
    --  All functions below will raise a ``Precondition_Failure`` if passed a
    --  type which does not satisfy this predicate as ``Enum`` formals.
 
+   function Enum_Type_Name (Enum : Type_Ref) return Name_Type;
+   --  Return the name of the given enum type
+
+   type Enum_Value_Ref is private;
+   --  Reference to an enum type value
+
+   No_Enum_Value_Ref : constant Enum_Value_Ref;
+
+   function Enum_For (Value : Enum_Value_Ref) return Type_Ref;
+   --  Return the enum type that owns the given value
+
+   function Enum_Default_Value (Enum : Type_Ref) return Enum_Value_Ref;
+   --  Return the index of the default enum value for the given ``Enum`` enum
+   --  type, or ``No_Enum_Value_Ref`` if this type does not have a default
+   --  value.
+
+   function Enum_Value_Name (Value : Enum_Value_Ref) return Name_Type;
+   --  Return the name corresponding to the ``Index``th value for the ``Enum``
+   --  enum type. This raises a ``Out_Of_Bounds_Error`` if ``Index`` is too big
+   --  for this enum type.
+
    type Any_Enum_Value_Index is new Natural;
    subtype Enum_Value_Index is Any_Enum_Value_Index
       range 1 .. Any_Enum_Value_Index'Last;
@@ -90,22 +111,18 @@ package Langkit_Support.Generic_API.Introspection is
 
    No_Enum_Value_Index : constant Any_Enum_Value_Index := 0;
 
-   function Enum_Type_Name (Enum : Type_Ref) return Name_Type;
-   --  Return the name of the given enum type
+   function To_Index (Value : Enum_Value_Ref) return Enum_Value_Index;
+   --  Return the index of the given type. Raise a ``Precondition_Failure``
+   --  exception if ``Value`` is ``No_Enum_Value_Ref``.
+
+   function From_Index
+     (Enum : Type_Ref; Value : Enum_Value_Index) return Enum_Value_Ref;
+   --  Return the value for the given enum type corresponding to the ``Value``
+   --  index.  Raise a ``Precondition_Failure`` exception if ``Value`` is not a
+   --  valid value index for that enum type.
 
    function Enum_Last_Value (Enum : Type_Ref) return Enum_Value_Index;
    --  Return the index of the last enum value for the given ``Enum`` enum type
-
-   function Enum_Default_Value (Enum : Type_Ref) return Any_Enum_Value_Index;
-   --  Return the index of the default enum value for the given ``Enum`` enum
-   --  type, or ``No_Enum_Value_Index`` if this type does not have a default
-   --  value.
-
-   function Enum_Value_Name
-     (Enum : Type_Ref; Index : Enum_Value_Index) return Name_Type;
-   --  Return the name corresponding to the ``Index``th value for the ``Enum``
-   --  enum type. This raises a ``Out_Of_Bounds_Error`` if ``Index`` is too big
-   --  for this enum type.
 
    -----------------
    -- Array types --
@@ -250,5 +267,15 @@ private
    end record;
 
    No_Type_Ref : constant Type_Ref := (null, 0);
+
+   type Enum_Value_Ref is record
+      Enum : Type_Ref;
+      Index : Any_Enum_Value_Index;
+      --  Either this is ``No_Enum_Value_Ref``, and in that case both members
+      --  should be null/zero, either ``Index`` designates a valid value for
+      --  the enum type ``Enum`` represents.
+   end record;
+
+   No_Enum_Value_Ref : constant Enum_Value_Ref := (No_Type_Ref, 0);
 
 end Langkit_Support.Generic_API.Introspection;

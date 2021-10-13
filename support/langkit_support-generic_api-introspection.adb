@@ -48,6 +48,10 @@ package body Langkit_Support.Generic_API.Introspection is
    --  If ``Enum`` is not a valid enum type, raise a ``Precondition_Failure``
    --  exception.
 
+   procedure Check_Enum_Value (Value : Enum_Value_Ref);
+   --  If ``Value`` is not a valid enum value, raise a ``Precondition_Failure``
+   --  exception.
+
    procedure Check_Enum_Value (Enum : Type_Ref; Index : Enum_Value_Index);
    --  If ``Enum`` is not a valid enum type or if ``Index`` is not a valid
    --  value for that type, raise a ``Precondition_Failure`` exception.
@@ -174,6 +178,17 @@ package body Langkit_Support.Generic_API.Introspection is
    -- Check_Enum_Value --
    ----------------------
 
+   procedure Check_Enum_Value (Value : Enum_Value_Ref) is
+   begin
+      if Value.Enum.Id = null then
+         raise Precondition_Failure with "null enum value reference";
+      end if;
+   end Check_Enum_Value;
+
+   ----------------------
+   -- Check_Enum_Value --
+   ----------------------
+
    procedure Check_Enum_Value (Enum : Type_Ref; Index : Enum_Value_Index) is
    begin
       Check_Enum_Type (Enum);
@@ -192,6 +207,67 @@ package body Langkit_Support.Generic_API.Introspection is
       return Create_Name (Enum.Id.Enum_Types.all (Enum.Index).Name.all);
    end Enum_Type_Name;
 
+   --------------
+   -- Enum_For --
+   --------------
+
+   function Enum_For (Value : Enum_Value_Ref) return Type_Ref is
+   begin
+      return Value.Enum;
+   end Enum_For;
+
+   ------------------------
+   -- Enum_Default_Value --
+   ------------------------
+
+   function Enum_Default_Value (Enum : Type_Ref) return Enum_Value_Ref is
+      Index : Any_Enum_Value_Index;
+   begin
+      Check_Enum_Type (Enum);
+      Index := Enum.Id.Enum_Types.all (Enum.Index).Default_Value;
+      return (if Index = No_Enum_Value_Index
+              then No_Enum_Value_Ref
+              else From_Index (Enum, Index));
+   end Enum_Default_Value;
+
+   ---------------------
+   -- Enum_Value_Name --
+   ---------------------
+
+   function Enum_Value_Name (Value : Enum_Value_Ref) return Name_Type is
+   begin
+      Check_Enum_Value (Value);
+
+      declare
+         Enum : Type_Ref renames Value.Enum;
+         Desc : Enum_Type_Descriptor renames
+           Enum.Id.Enum_Types.all (Enum.Index).all;
+      begin
+         return Create_Name (Desc.Value_Names (Value.Index).all);
+      end;
+   end Enum_Value_Name;
+
+   --------------
+   -- To_Index --
+   --------------
+
+   function To_Index (Value : Enum_Value_Ref) return Enum_Value_Index is
+   begin
+      Check_Enum_Value (Value);
+      return Value.Index;
+   end To_Index;
+
+   ----------------
+   -- From_Index --
+   ----------------
+
+   function From_Index
+     (Enum : Type_Ref; Value : Enum_Value_Index) return Enum_Value_Ref is
+   begin
+      Check_Enum_Value (Enum, Value);
+      return (Enum, Value);
+   end From_Index;
+
    ---------------------
    -- Enum_Last_Value --
    ---------------------
@@ -201,33 +277,6 @@ package body Langkit_Support.Generic_API.Introspection is
       Check_Enum_Type (Enum);
       return Enum.Id.Enum_Types.all (Enum.Index).Last_Value;
    end Enum_Last_Value;
-
-   ------------------------
-   -- Enum_Default_Value --
-   ------------------------
-
-   function Enum_Default_Value (Enum : Type_Ref) return Any_Enum_Value_Index is
-   begin
-      Check_Enum_Type (Enum);
-      return Enum.Id.Enum_Types.all (Enum.Index).Default_Value;
-   end Enum_Default_Value;
-
-   ---------------------
-   -- Enum_Value_Name --
-   ---------------------
-
-   function Enum_Value_Name
-     (Enum : Type_Ref; Index : Enum_Value_Index) return Name_Type is
-   begin
-      Check_Enum_Value (Enum, Index);
-
-      declare
-         Desc : Enum_Type_Descriptor renames
-           Enum.Id.Enum_Types.all (Enum.Index).all;
-      begin
-         return Create_Name (Desc.Value_Names (Index).all);
-      end;
-   end Enum_Value_Name;
 
    -------------------
    -- Is_Array_Type --

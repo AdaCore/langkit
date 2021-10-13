@@ -91,6 +91,7 @@ procedure Introspection is
    Dummy_Type       : Type_Ref;
    Dummy_Type_Index : Any_Type_Index;
    Dummy_Enum_Index : Any_Enum_Value_Index;
+   Dummy_Enum_Value : Enum_Value_Ref;
 
 begin
    New_Line;
@@ -200,10 +201,24 @@ begin
       begin
          Put (+Enum_Type_Name (Enum));
          Put_Line (" (" & Index'Image & ")");
-         Put_Line ("  Default value:" & Enum_Default_Value (Enum)'Image);
+         declare
+            DV : constant Enum_Value_Ref := Enum_Default_Value (Enum);
+         begin
+            Put ("  Default value:");
+            if DV = No_Enum_Value_Ref then
+               Put_Line (" 0");
+            else
+               Put_Line (To_Index (DV)'Image);
+            end if;
+         end;
          New_Line;
-         for V in 1 .. Enum_Last_Value (Enum) loop
-            Put_Line (" " & V'Image & ": " & (+Enum_Value_Name (Enum, V)));
+         for Index in 1 .. Enum_Last_Value (Enum) loop
+            declare
+               Value : constant Enum_Value_Ref := From_Index (Enum, Index);
+            begin
+               Put_Line
+                 (" " & Index'Image & ": " & (+Enum_Value_Name (Value)));
+            end;
          end loop;
          New_Line;
       end;
@@ -262,7 +277,7 @@ begin
    Put_Line ("Invalid args for Enum_Default_Value:");
    Put ("Null Enum argument: ");
    begin
-      Dummy_Enum_Index := Enum_Default_Value (No_Type_Ref);
+      Dummy_Enum_Value := Enum_Default_Value (No_Type_Ref);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -271,7 +286,7 @@ begin
 
    Put ("Non-enum Enum argument: ");
    begin
-      Dummy_Enum_Index := Enum_Default_Value (Invalid_Enum);
+      Dummy_Enum_Value := Enum_Default_Value (Invalid_Enum);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -279,30 +294,30 @@ begin
    end;
    New_Line;
 
-   Put_Line ("Invalid args for Enum_Value_Name:");
-   Put ("Null Enum argument: ");
+   Put ("Enum_Value_Name: Null Value argument: ");
    begin
-      Dummy_Name := Enum_Value_Name (No_Type_Ref, 1);
+      Dummy_Name := Enum_Value_Name (No_Enum_Value_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put ("To_Index: Null Value argument: ");
+   begin
+      Dummy_Enum_Index := To_Index (No_Enum_Value_Ref);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
          Put_Exc (Exc);
    end;
 
-   Put ("Non-enum Enum argument: ");
-   begin
-      Dummy_Name := Enum_Value_Name (Invalid_Enum, 1);
-      raise Program_Error;
-   exception
-      when Exc : Precondition_Failure =>
-         Put_Exc (Exc);
-   end;
-
-   Put ("Out-of-bounds Index argument: ");
+   Put ("From_Index: out of range enum value index: ");
    declare
       Enum : constant Type_Ref := From_Index (Id, First_Enum);
    begin
-      Dummy_Name := Enum_Value_Name (Enum, 100);
+      Dummy_Enum_Value := From_Index (Enum, Enum_Last_Value (Enum) + 1);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
