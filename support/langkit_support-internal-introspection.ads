@@ -32,6 +32,8 @@ use Langkit_Support.Generic_API.Introspection;
 package Langkit_Support.Internal.Introspection is
 
    type Type_Index_Array is array (Positive range <>) of Type_Index;
+   type Struct_Member_Index_Array is
+     array (Positive range <>) of Struct_Member_Index;
 
    ----------------------
    -- Type descriptors --
@@ -120,7 +122,7 @@ package Langkit_Support.Internal.Introspection is
    type Struct_Member_Descriptor_Access is
      not null access constant Struct_Member_Descriptor;
    type Struct_Member_Descriptor_Array is
-     array (Struct_Member range <>) of Struct_Member_Descriptor_Access;
+     array (Struct_Member_Index range <>) of Struct_Member_Descriptor_Access;
    type Struct_Member_Descriptor_Array_Access is
      not null access constant Struct_Member_Descriptor_Array;
 
@@ -151,7 +153,7 @@ package Langkit_Support.Internal.Introspection is
       --  Sorted list (by index) of all struct types that directly derives from
       --  this struct.
 
-      Members : Struct_Member_Array (1 .. Member_Count);
+      Members : Struct_Member_Index_Array (1 .. Member_Count);
       --  List of members for this struct ,excluding inherited members
    end record;
 

@@ -662,23 +662,25 @@ Example_P_Id_Dflt_Root_Node ( 37)
   arguments:
     Id: FooNode.entity
 
-Is_Property: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+Is_Property: Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 
 Invalid args for Members:
 Null Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-struct Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid base struct type
 
-Member_Name: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+Member_Name: Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 
-Member_Type: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+Member_Type: Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 
-Member_Last_Argument: Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+To_Index: Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
+From_Index: out of range member index: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member index
+Member_Last_Argument: Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 
 Invalid args for Member_Argument_Type:
-Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
 
 Invalid args for Member_Argument_Name:
-Invalid Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member
+Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
 Done

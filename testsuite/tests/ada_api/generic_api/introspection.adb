@@ -33,8 +33,8 @@ procedure Introspection is
    function Node_Repr (Node : Type_Ref) return String
    is (+Node_Type_Name (Node) & " (" & To_Index (Node)'Image & ")");
 
-   function Member_Repr (Member : Struct_Member) return String
-   is (+Member_Name (Id, Member) & " (" & Member'Image & ")");
+   function Member_Repr (Member : Struct_Member_Ref) return String
+   is (+Member_Name (Member) & " (" & To_Index (Member)'Image & ")");
 
    procedure Assert (Predicate : Boolean; Message : String);
    --  Print Message and raise a Program_Error if Predicate is false
@@ -76,15 +76,13 @@ procedure Introspection is
    First_Array, Last_Array   : Any_Type_Index := No_Type_Index;
    First_Struct, Last_Struct : Any_Type_Index := No_Type_Index;
 
-   First_Member : constant Struct_Member := Struct_Member'First;
-   Last_Member  : Struct_Member := First_Member;
+   Last_Member : constant Struct_Member_Ref :=
+     From_Index (Id, Last_Struct_Member (Id));
 
    Invalid_Node   : Type_Ref;
    Invalid_Enum   : Type_Ref;
    Invalid_Array  : Type_Ref;
    Invalid_Struct : Type_Ref;
-
-   Invalid_Member : Struct_Member;
 
    Dummy_Bool       : Boolean;
    Dummy_Name       : Name_Type;
@@ -674,40 +672,40 @@ begin
       begin
          Put_Line ("For " & (+Base_Struct_Type_Name (T)));
          for M of Members (T) loop
-            Last_Member := Struct_Member'Max (Last_Member, M);
             Put_Line ("  " & Member_Repr (M));
          end loop;
          New_Line;
       end;
    end loop;
-   Invalid_Member := Last_Member + 1;
 
    Put_Title ("Detailed list of members");
    New_Line;
-   for M in First_Member .. Last_Member loop
-      Put_Line (Member_Repr (M));
-      if Is_Property (Id, M) then
-         Put_Line ("  is a property");
-      end if;
-      Put_Line ("  type: " & Debug_Name (Member_Type (Id, M)));
+   for Index in Struct_Member_Index'First .. Last_Struct_Member (Id) loop
+      declare
+         M : constant Struct_Member_Ref := From_Index (Id, Index);
+      begin
+         Put_Line (Member_Repr (M));
+         if Is_Property (M) then
+            Put_Line ("  is a property");
+         end if;
+         Put_Line ("  type: " & Debug_Name (Member_Type (M)));
 
-      if Member_Last_Argument (Id, M) = No_Argument_Index then
-         Put_Line ("  no argument");
-      else
-         Put_Line ("  arguments:");
-         for A in 1 .. Member_Last_Argument (Id, M) loop
-            Put_Line ("    "
-                      & (+Member_Argument_Name (Id, M, A))
-                      & ": "
-                      & Debug_Name (Member_Argument_Type (Id, M, A)));
-         end loop;
-      end if;
+         if Member_Last_Argument (M) = No_Argument_Index then
+            Put_Line ("  no argument");
+         else
+            Put_Line ("  arguments:");
+            for A in 1 .. Member_Last_Argument (M) loop
+               Put_Line ("    " & (+Member_Argument_Name (M, A))
+                         & ": " & Debug_Name (Member_Argument_Type (M, A)));
+            end loop;
+         end if;
+      end;
       New_Line;
    end loop;
 
-   Put ("Is_Property: Invalid Member argument: ");
+   Put ("Is_Property: Null Member argument: ");
    begin
-      Dummy_Bool := Is_Property (Id, Invalid_Member);
+      Dummy_Bool := Is_Property (No_Struct_Member_Ref);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -735,9 +733,9 @@ begin
    end;
    New_Line;
 
-   Put ("Member_Name: Invalid Member argument: ");
+   Put ("Member_Name: Null Member argument: ");
    begin
-      Dummy_Name := Member_Name (Id, Invalid_Member);
+      Dummy_Name := Member_Name (No_Struct_Member_Ref);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -745,9 +743,9 @@ begin
    end;
    New_Line;
 
-   Put ("Member_Type: Invalid Member argument: ");
+   Put ("Member_Type: Null Member argument: ");
    begin
-      Dummy_Type := Member_Type (Id, Invalid_Member);
+      Dummy_Type := Member_Type (No_Struct_Member_Ref);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -755,9 +753,31 @@ begin
    end;
    New_Line;
 
-   Put ("Member_Last_Argument: Invalid Member argument: ");
+   Put ("To_Index: Null Member argument: ");
+   declare
+      Dummy : Struct_Member_Index;
    begin
-      Dummy_Bool := Member_Last_Argument (Id, Invalid_Member) = 0;
+      Dummy := To_Index (No_Struct_Member_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("From_Index: out of range member index: ");
+   declare
+      Dummy : Struct_Member_Ref;
+   begin
+      Dummy := From_Index (Id, Last_Struct_Member (Id) + 1);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Member_Last_Argument: Null Member argument: ");
+   begin
+      Dummy_Bool := Member_Last_Argument (No_Struct_Member_Ref) = 0;
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -766,9 +786,9 @@ begin
    New_Line;
 
    Put_Line ("Invalid args for Member_Argument_Type:");
-   Put ("Invalid Member argument: ");
+   Put ("Null Member argument: ");
    begin
-      Dummy_Type := Member_Argument_Type (Id, Invalid_Member, 1);
+      Dummy_Type := Member_Argument_Type (No_Struct_Member_Ref, 1);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -777,7 +797,7 @@ begin
    Put ("Invalid Argument argument: ");
    begin
       Dummy_Type := Member_Argument_Type
-        (Id, Last_Member, Member_Last_Argument (Id, Last_Member) + 1);
+        (Last_Member, Member_Last_Argument (Last_Member) + 1);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -786,9 +806,9 @@ begin
    New_Line;
 
    Put_Line ("Invalid args for Member_Argument_Name:");
-   Put ("Invalid Member argument: ");
+   Put ("Null Member argument: ");
    begin
-      Dummy_Name := Member_Argument_Name (Id, Invalid_Member, 1);
+      Dummy_Name := Member_Argument_Name (No_Struct_Member_Ref, 1);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -797,7 +817,7 @@ begin
    Put ("Invalid Argument argument: ");
    begin
       Dummy_Name := Member_Argument_Name
-        (Id, Last_Member, Member_Last_Argument (Id, Last_Member) + 1);
+        (Last_Member, Member_Last_Argument (Last_Member) + 1);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>

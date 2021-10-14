@@ -123,7 +123,7 @@ package Langkit_Support.Internal.Descriptor is
       --  fields, and descriptors from ``First_Property`` to
       --  ``Struct_Members'Last`` are properties.
 
-      First_Property : Struct_Member;
+      First_Property : Struct_Member_Index;
       --  Index of the first property descriptor in ``Struct_Members``
 
       --  Implementation for generic operations
