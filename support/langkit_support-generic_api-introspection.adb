@@ -72,12 +72,17 @@ package body Langkit_Support.Generic_API.Introspection is
    --  If ``Node`` is not a valid node type for the given language, raise a
    --  ``Precondition_Failure`` exception.
 
-   procedure Check_Struct_Member (Id : Language_Id; Member : Struct_Member);
+   procedure Check_Struct_Member (Member : Struct_Member_Ref);
+   --  Raise a ``Precondition_Failure`` if ``Member`` is
+   --  ``No_Struct_Member_Ref``.
+
+   procedure Check_Struct_Member
+     (Id : Language_Id; Member : Struct_Member_Index);
    --  If ``Member`` is not a valid struct member for the given language, raise
    --  a ``Precondition_Failure`` exception.
 
    procedure Check_Struct_Member_Argument
-     (Id : Language_Id; Member : Struct_Member; Argument : Argument_Index);
+     (Member : Struct_Member_Ref; Argument : Argument_Index);
    --  If ``Member`` is not a valid struct member for the given language or if
    --  ``Argument`` is not a valid argument for that member, raise a
    --  ``Precondition_Failure`` exception.
@@ -510,10 +515,22 @@ package body Langkit_Support.Generic_API.Introspection is
    -- Check_Struct_Member --
    -------------------------
 
-   procedure Check_Struct_Member (Id : Language_Id; Member : Struct_Member) is
+   procedure Check_Struct_Member (Member : Struct_Member_Ref) is
+   begin
+      if Member.Id = null then
+         raise Precondition_Failure with "null struct member reference";
+      end if;
+   end Check_Struct_Member;
+
+   -------------------------
+   -- Check_Struct_Member --
+   -------------------------
+
+   procedure Check_Struct_Member
+     (Id : Language_Id; Member : Struct_Member_Index) is
    begin
       if Member not in Id.Struct_Members.all'Range then
-         raise Precondition_Failure with "invalid struct member";
+         raise Precondition_Failure with "invalid struct member index";
       end if;
    end Check_Struct_Member;
 
@@ -522,31 +539,34 @@ package body Langkit_Support.Generic_API.Introspection is
    ----------------------------------
 
    procedure Check_Struct_Member_Argument
-     (Id : Language_Id; Member : Struct_Member; Argument : Argument_Index)
-   is
+     (Member : Struct_Member_Ref; Argument : Argument_Index) is
    begin
-      Check_Struct_Member (Id, Member);
-      if Argument not in Id.Struct_Members.all (Member).Arguments'Range then
-         raise Precondition_Failure with "invalid struct member argument";
-      end if;
+      Check_Struct_Member (Member);
+      declare
+         Desc : Struct_Member_Descriptor renames
+           Member.Id.Struct_Members.all (Member.Index).all;
+      begin
+         if Argument not in Desc.Arguments'Range then
+            raise Precondition_Failure with "invalid struct member argument";
+         end if;
+      end;
    end Check_Struct_Member_Argument;
 
    -----------------
    -- Is_Property --
    -----------------
 
-   function Is_Property
-     (Id : Language_Id; Member : Struct_Member) return Boolean is
+   function Is_Property (Member : Struct_Member_Ref) return Boolean is
    begin
-      Check_Struct_Member (Id, Member);
-      return Member >= Id.First_Property;
+      Check_Struct_Member (Member);
+      return Member.Index >= Member.Id.First_Property;
    end Is_Property;
 
    -------------
    -- Members --
    -------------
 
-   function Members (Struct : Type_Ref) return Struct_Member_Array is
+   function Members (Struct : Type_Ref) return Struct_Member_Ref_Array is
       Id : Language_Id;
 
       Current_Struct : Any_Type_Index := Struct.Index;
@@ -558,7 +578,7 @@ package body Langkit_Support.Generic_API.Introspection is
    begin
       Check_Base_Struct_Type (Struct);
       Id := Struct.Id;
-      return Result : Struct_Member_Array
+      return Result : Struct_Member_Ref_Array
         (1 .. Id.Struct_Types.all (Struct.Index).Inherited_Members)
       do
          --  Go through the derivation chain and collect field in ``Result``.
@@ -568,7 +588,7 @@ package body Langkit_Support.Generic_API.Introspection is
          Next := Result'Last;
          while Current_Struct /= No_Type_Index loop
             for M of reverse Id.Struct_Types.all (Current_Struct).Members loop
-               Result (Next) := M;
+               Result (Next) := From_Index (Id, M);
                Next := Next - 1;
             end loop;
             Current_Struct := Id.Struct_Types.all (Current_Struct).Base_Type;
@@ -580,48 +600,71 @@ package body Langkit_Support.Generic_API.Introspection is
    -- Member_Name --
    -----------------
 
-   function Member_Name
-     (Id : Language_Id; Member : Struct_Member) return Name_Type is
+   function Member_Name (Member : Struct_Member_Ref) return Name_Type is
    begin
-      Check_Struct_Member (Id, Member);
-      return Create_Name (Id.Struct_Members.all (Member).Name.all);
+      Check_Struct_Member (Member);
+      return Create_Name
+        (Member.Id.Struct_Members.all (Member.Index).Name.all);
    end Member_Name;
 
    -----------------
    -- Member_Type --
    -----------------
 
-   function Member_Type
-     (Id : Language_Id; Member : Struct_Member) return Type_Ref is
+   function Member_Type (Member : Struct_Member_Ref) return Type_Ref is
    begin
-      Check_Struct_Member (Id, Member);
-      return From_Index (Id, Id.Struct_Members.all (Member).Member_Type);
+      Check_Struct_Member (Member);
+      return From_Index
+        (Member.Id, Member.Id.Struct_Members.all (Member.Index).Member_Type);
    end Member_Type;
 
-   --------------------------
-   -- Member_Last_Argument --
-   --------------------------
+   --------------
+   -- To_Index --
+   --------------
 
-   function Member_Last_Argument
-     (Id : Language_Id; Member : Struct_Member) return Any_Argument_Index is
+   function To_Index (Member : Struct_Member_Ref) return Struct_Member_Index is
+   begin
+      Check_Struct_Member (Member);
+      return Member.Index;
+   end To_Index;
+
+   ----------------
+   -- From_Index --
+   ----------------
+
+   function From_Index
+     (Id : Language_Id; Member : Struct_Member_Index) return Struct_Member_Ref
+   is
    begin
       Check_Struct_Member (Id, Member);
-      return Id.Struct_Members.all (Member).Last_Argument;
-   end Member_Last_Argument;
+      return (Id, Member);
+   end From_Index;
+
+   ------------------------
+   -- Last_Struct_Member --
+   ------------------------
+
+   function Last_Struct_Member (Id : Language_Id) return Struct_Member_Index is
+   begin
+      return Id.Struct_Members.all'Last;
+   end Last_Struct_Member;
 
    --------------------------
    -- Member_Argument_Type --
    --------------------------
 
    function Member_Argument_Type
-     (Id       : Language_Id;
-      Member   : Struct_Member;
-      Argument : Argument_Index) return Type_Ref is
+     (Member : Struct_Member_Ref; Argument : Argument_Index) return Type_Ref
+   is
+      Id : Language_Id;
    begin
-      Check_Struct_Member_Argument (Id, Member, Argument);
+      Check_Struct_Member (Member);
+      Check_Struct_Member_Argument (Member, Argument);
+      Id := Member.Id;
       return From_Index
         (Id,
-         Id.Struct_Members.all (Member).Arguments (Argument).Argument_Type);
+         Id.Struct_Members.all
+           (Member.Index).Arguments (Argument).Argument_Type);
    end Member_Argument_Type;
 
    --------------------------
@@ -629,13 +672,25 @@ package body Langkit_Support.Generic_API.Introspection is
    --------------------------
 
    function Member_Argument_Name
-     (Id       : Language_Id;
-      Member   : Struct_Member;
-      Argument : Argument_Index) return Name_Type is
+     (Member : Struct_Member_Ref; Argument : Argument_Index) return Name_Type
+   is
    begin
-      Check_Struct_Member_Argument (Id, Member, Argument);
+      Check_Struct_Member (Member);
+      Check_Struct_Member_Argument (Member, Argument);
       return Create_Name
-        (Id.Struct_Members.all (Member).Arguments (Argument).Name.all);
+        (Member.Id.Struct_Members.all
+           (Member.Index).Arguments (Argument).Name.all);
    end Member_Argument_Name;
+
+   --------------------------
+   -- Member_Last_Argument --
+   --------------------------
+
+   function Member_Last_Argument
+     (Member : Struct_Member_Ref) return Any_Argument_Index is
+   begin
+      Check_Struct_Member (Member);
+      return Member.Id.Struct_Members.all (Member.Index).Last_Argument;
+   end Member_Last_Argument;
 
 end Langkit_Support.Generic_API.Introspection;

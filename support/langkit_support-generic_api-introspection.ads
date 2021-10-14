@@ -90,6 +90,7 @@ package Langkit_Support.Generic_API.Introspection is
    --  Reference to an enum type value
 
    No_Enum_Value_Ref : constant Enum_Value_Ref;
+   --  Special value to express no enum value reference
 
    function Enum_For (Value : Enum_Value_Ref) return Type_Ref;
    --  Return the enum type that owns the given value
@@ -110,6 +111,7 @@ package Langkit_Support.Generic_API.Introspection is
    --  Index of an enum value for a given enum type
 
    No_Enum_Value_Index : constant Any_Enum_Value_Index := 0;
+   --  Special ``Any_Enum_Value_Index`` to mean: no reference to a type
 
    function To_Index (Value : Enum_Value_Ref) return Enum_Value_Index;
    --  Return the index of the given type. Raise a ``Precondition_Failure``
@@ -206,18 +208,51 @@ package Langkit_Support.Generic_API.Introspection is
    -- Struct/node members --
    -------------------------
 
-   type Any_Struct_Member is new Natural;
-   subtype Struct_Member is
-     Any_Struct_Member range 1 .. Any_Struct_Member'Last;
-   --  Generic type to designate a struct member (field or property)
+   type Struct_Member_Ref is private;
+   --  Reference to a struct member (field or property)
 
-   No_Struct_Member : constant Any_Struct_Member := 0;
+   No_Struct_Member_Ref : constant Struct_Member_Ref;
+   --  Special value to express no struct member reference
 
-   function Is_Property
-     (Id : Language_Id; Member : Struct_Member) return Boolean;
-   --  Whether ``Member`` is a property according to the given language
+   type Struct_Member_Ref_Array is
+     array (Positive range <>) of Struct_Member_Ref;
 
-   type Struct_Member_Array is array (Positive range <>) of Struct_Member;
+   function Is_Property (Member : Struct_Member_Ref) return Boolean;
+   --  Whether ``Member`` is a property
+
+   function Members (Struct : Type_Ref) return Struct_Member_Ref_Array;
+   --  Return the list of members that ``Struct`` has
+
+   function Member_Name (Member : Struct_Member_Ref) return Name_Type;
+   --  Return the name of ``Member``
+
+   function Member_Type (Member : Struct_Member_Ref) return Type_Ref;
+   --  Return the type of ``Member``
+
+   type Any_Struct_Member_Index is new Natural;
+   subtype Struct_Member_Index is
+     Any_Struct_Member_Index range 1 .. Any_Struct_Member_Index'Last;
+   --  Language-specific index to designate a struct member
+   --
+   --  A given language defines members for the ``1 .. Last_Struct_Member
+   --  (Language)`` range: see the ``Last_Struct_Member`À`À function below.
+
+   No_Struct_Member : constant Any_Struct_Member_Index := 0;
+   --  Special ``Any_Struct_Member_Index`` to mean: no reference to an argument
+
+   function To_Index (Member : Struct_Member_Ref) return Struct_Member_Index;
+   --  Return the index of the given struct member. Raise a
+   --  ``Precondition_Failure`` exception if ``Member`` is
+   --  ``No_Struct_Member``.
+
+   function From_Index
+     (Id : Language_Id; Member : Struct_Member_Index) return Struct_Member_Ref;
+   --  Return the struct member for the given language corresponding to the
+   --  ``Member`` index.  Raise a ``Precondition_Failure`` exception if
+   --  ``Member`` is not a valid member index for the given language.
+
+   function Last_Struct_Member (Id : Language_Id) return Struct_Member_Index;
+   --  Return the last struct member index that is valid for the given language
 
    type Any_Argument_Index is new Natural;
    subtype Argument_Index is
@@ -226,35 +261,18 @@ package Langkit_Support.Generic_API.Introspection is
 
    No_Argument_Index : constant Any_Argument_Index := 0;
 
-   function Members (Struct : Type_Ref) return Struct_Member_Array;
-   --  Return the list of members that ``Struct`` has
-
-   function Member_Name
-     (Id : Language_Id; Member : Struct_Member) return Name_Type;
-   --  Return the name of ``Member`` according to the given language
-
-   function Member_Type
-     (Id : Language_Id; Member : Struct_Member) return Type_Ref;
-   --  Return the type of ``Member`` according to the given language
-
-   function Member_Last_Argument
-     (Id : Language_Id; Member : Struct_Member) return Any_Argument_Index;
-   --  Return the index of ``Member``'s last argument according to the given
-   --  language. If it has no argument, return ``No_Argument_Index``.
-
    function Member_Argument_Type
-     (Id       : Language_Id;
-      Member   : Struct_Member;
-      Argument : Argument_Index) return Type_Ref;
-   --  Return the type of ``Member``'s argument ``Argument`` according to the
-   --  given language.
+     (Member : Struct_Member_Ref; Argument : Argument_Index) return Type_Ref;
+   --  Return the type of the given property argument
 
    function Member_Argument_Name
-     (Id       : Language_Id;
-      Member   : Struct_Member;
-      Argument : Argument_Index) return Name_Type;
-   --  Return the name of ``Member's`` argument no ``Argument`` according to
-   --  the given language.
+     (Member : Struct_Member_Ref; Argument : Argument_Index) return Name_Type;
+   --  Return the name of the given property argument
+
+   function Member_Last_Argument
+     (Member : Struct_Member_Ref) return Any_Argument_Index;
+   --  Return the index of ``Member``'s last argument according to the given
+   --  language. If it has no argument, return ``No_Argument_Index``.
 
 private
 
@@ -277,5 +295,15 @@ private
    end record;
 
    No_Enum_Value_Ref : constant Enum_Value_Ref := (No_Type_Ref, 0);
+
+   type Struct_Member_Ref is record
+      Id    : Any_Language_Id;
+      Index : Any_Struct_Member_Index;
+      --  Either this is ``No_Struct_Member_Ref``, and in that case both
+      --  members should be null/zero, either ``Index`` designates a valid
+      --  member for the language ``Id`` represents.
+   end record;
+
+   No_Struct_Member_Ref : constant Struct_Member_Ref := (null, 0);
 
 end Langkit_Support.Generic_API.Introspection;

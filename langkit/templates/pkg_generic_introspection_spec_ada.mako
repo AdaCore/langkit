@@ -112,7 +112,7 @@ private package ${ada_lib_name}.Generic_Introspection is
    ----------------------------
 
    % for i, m in enumerate(all_members, 1):
-      ${member_index(m)} : constant Struct_Member := ${i};
+      ${member_index(m)} : constant Struct_Member_Index := ${i};
    % endfor
 
    ------------------------------------
@@ -304,7 +304,7 @@ private package ${ada_lib_name}.Generic_Introspection is
    );
 
    First_Node     : constant Type_Index := ${type_index(node_types[0])};
-   First_Property : constant Struct_Member :=
+   First_Property : constant Struct_Member_Index :=
      ${member_index(ctx.sorted_properties[0])};
 
 end ${ada_lib_name}.Generic_Introspection;
