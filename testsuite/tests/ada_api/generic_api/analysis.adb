@@ -1,6 +1,8 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
+with GNATCOLL.VFS; use GNATCOLL.VFS;
+
 with Langkit_Support.Errors;      use Langkit_Support.Errors;
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Analysis;
@@ -102,6 +104,8 @@ begin
    elsif N.Unit /= U then
       raise Program_Error with "wrong node->unit backlink";
    end if;
+
+   Put_Line ("Base filename: " & (+Create (+U.Filename).Base_Name));
 
    declare
       Has_1 : constant Boolean := Ctx.Has_Unit ("example.txt");

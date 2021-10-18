@@ -46,6 +46,7 @@ Use of null node:
 Got a Precondition_Failure exception: null node
 
 Parsing example.txt...
+Base filename: example.txt
 Has example.txt? -> TRUE
 Has foo.txt? -> FALSE
 Line 2:

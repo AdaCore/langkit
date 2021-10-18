@@ -68,6 +68,8 @@ package Langkit_Support.Internal.Descriptor is
 
    type Unit_Version_Type is access function
      (Unit : Internal_Unit) return Version_Number;
+   type Unit_Filename_Type is access function
+     (Unit : Internal_Unit) return String;
    type Unit_Root_Type is access function
      (Unit : Internal_Unit) return Internal_Node;
    type Unit_Get_Line_Type is access function
@@ -141,6 +143,7 @@ package Langkit_Support.Internal.Descriptor is
       Context_Has_Unit      : Context_Has_Unit_Type;
 
       Unit_Version  : Unit_Version_Type;
+      Unit_Filename : Unit_Filename_Type;
       Unit_Root     : Unit_Root_Type;
       Unit_Get_Line : Unit_Get_Line_Type;
 

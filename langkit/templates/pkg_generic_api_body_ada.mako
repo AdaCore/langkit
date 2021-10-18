@@ -100,6 +100,7 @@ package body ${ada_lib_name}.Generic_API is
       Rule              : Grammar_Rule_Index) return Internal_Unit;
 
    function Unit_Version (Unit : Internal_Unit) return Version_Number;
+   function Unit_Filename (Unit : Internal_Unit) return String;
    function Unit_Root (Unit : Internal_Unit) return Internal_Node;
    function Unit_Get_Line
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
@@ -244,6 +245,16 @@ package body ${ada_lib_name}.Generic_API is
       return U.Unit_Version;
    end Unit_Version;
 
+   -------------------
+   -- Unit_Filename --
+   -------------------
+
+   function Unit_Filename (Unit : Internal_Unit) return String is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return Implementation.Get_Filename (U);
+   end Unit_Filename;
+
    ---------------
    -- Unit_Root --
    ---------------
@@ -383,6 +394,7 @@ package body ${ada_lib_name}.Generic_API is
       Context_Get_From_File => Context_Get_From_File'Access,
 
       Unit_Version  => Unit_Version'Access,
+      Unit_Filename => Unit_Filename'Access,
       Unit_Root     => Unit_Root'Access,
       Unit_Get_Line => Unit_Get_Line'Access,
 

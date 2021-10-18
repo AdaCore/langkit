@@ -133,6 +133,9 @@ package Langkit_Support.Generic_API.Analysis is
    function Context (Self : Lk_Unit'Class) return Lk_Context;
    --  Return the context that owns this unit
 
+   function Filename (Self : Lk_Unit'Class) return String;
+   --  Return the filename this unit is associated to
+
    function Root (Self : Lk_Unit'Class) return Lk_Node;
    --  Return the root node for this unit, or ``No_Lk_Node`` if there is
    --  none.
