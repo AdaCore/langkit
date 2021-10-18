@@ -21,16 +21,13 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Unchecked_Conversion;
-
 with Langkit_Support.Errors;       use Langkit_Support.Errors;
+with Langkit_Support.Internal.Descriptor;
+use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Types;        use Langkit_Support.Types;
 
 package body Langkit_Support.Generic_API.Analysis is
-
-   function "+" is new Ada.Unchecked_Conversion
-     (Language_Descriptor_Access, Language_Id);
 
    function Create_Node_Safety_Net
      (Unit       : Lk_Unit'Class;
@@ -82,7 +79,7 @@ package body Langkit_Support.Generic_API.Analysis is
    ----------------------
 
    procedure Check_Safety_Net (Node : Lk_Node'Class) is
-      Desc       : constant Language_Descriptor_Access := Node.Desc;
+      Desc       : constant Any_Language_Id := Node.Desc;
       Entity     : Internal_Entity renames Node.Internal;
       Safety_Net : Node_Safety_Net renames Node.Safety_Net;
    begin
@@ -149,7 +146,7 @@ package body Langkit_Support.Generic_API.Analysis is
    ----------
 
    function Wrap (Node : Internal_Node; Unit : Lk_Unit'Class) return Lk_Node is
-      Desc       : constant Language_Descriptor_Access := Unit.Context.Desc;
+      Desc       : constant Any_Language_Id := Unit.Context.Desc;
       Entity     : constant Internal_Entity :=
         (Node, null, False, No_Internal_Node_Metadata);
       Safety_Net : constant Node_Safety_Net :=
@@ -202,7 +199,7 @@ package body Langkit_Support.Generic_API.Analysis is
         (Charset, File_Reader, With_Trivia, Tab_Stop);
    begin
       return (Ada.Finalization.Controlled with
-              Desc     => Language_Descriptor_Access (Language),
+              Desc     => Language,
               Internal => Result);
    end Create_Context;
 
@@ -213,7 +210,7 @@ package body Langkit_Support.Generic_API.Analysis is
    function Language_For (Self : Lk_Context'Class) return Language_Id is
    begin
       Reject_Null_Context (Self);
-      return +Self.Desc;
+      return Self.Desc;
    end Language_For;
 
    --------------
@@ -308,7 +305,7 @@ package body Langkit_Support.Generic_API.Analysis is
       declare
          Ctx  : constant Internal_Context := Self.Safety_Net.Context;
          U    : constant Internal_Unit := Self.Safety_Net.Unit;
-         Desc : constant Language_Descriptor_Access := Self.Desc;
+         Desc : constant Any_Language_Id := Self.Desc;
       begin
          --  Create an ownership share for the context embedded in the result
          --  before returning.
