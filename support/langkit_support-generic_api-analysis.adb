@@ -277,6 +277,21 @@ package body Langkit_Support.Generic_API.Analysis is
       return Self.Context;
    end Context;
 
+   --------------
+   -- Filename --
+   --------------
+
+   function Filename (Self : Lk_Unit'Class) return String is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc : Language_Descriptor renames Self.Context.Desc.all;
+      begin
+         return Desc.Unit_Filename (Self.Internal);
+      end;
+   end Filename;
+
    ----------
    -- Root --
    ----------
