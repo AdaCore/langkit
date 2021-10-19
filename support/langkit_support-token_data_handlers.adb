@@ -122,7 +122,8 @@ package body Langkit_Support.Token_Data_Handlers is
       Symbols  : Symbol_Table;
       Tab_Stop : Positive := Default_Tab_Stop) is
    begin
-      TDH := (Source_Buffer      => null,
+      TDH := (Version            => 0,
+              Source_Buffer      => null,
               Source_First       => <>,
               Source_Last        => <>,
               Filename           => <>,
@@ -238,7 +239,8 @@ package body Langkit_Support.Token_Data_Handlers is
    procedure Move (Destination, Source : in out Token_Data_Handler) is
    begin
       Destination := Source;
-      Source := (Source_Buffer     => null,
+      Source := (Version           => 0,
+                 Source_Buffer     => null,
                  Source_First      => <>,
                  Source_Last       => <>,
                  Filename          => <>,

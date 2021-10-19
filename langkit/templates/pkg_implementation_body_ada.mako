@@ -992,7 +992,8 @@ package body ${ada_lib_name}.Implementation is
    -----------------
 
    function First_Token (Unit : Internal_Unit) return Token_Reference is
-     (Wrap_Token_Reference (Unit.TDH'Access,
+     (Wrap_Token_Reference (Unit.Context,
+                            Unit.TDH'Access,
                             First_Token_Or_Trivia (Unit.TDH)));
 
    ----------------
@@ -1000,7 +1001,9 @@ package body ${ada_lib_name}.Implementation is
    ----------------
 
    function Last_Token (Unit : Internal_Unit) return Token_Reference is
-     (Wrap_Token_Reference (Unit.TDH'Access, Last_Token_Or_Trivia (Unit.TDH)));
+     (Wrap_Token_Reference (Unit.Context,
+                            Unit.TDH'Access,
+                            Last_Token_Or_Trivia (Unit.TDH)));
 
    -----------------
    -- Token_Count --
@@ -1034,7 +1037,7 @@ package body ${ada_lib_name}.Implementation is
    is
       Result : constant Token_Or_Trivia_Index := Lookup_Token (Unit.TDH, Sloc);
    begin
-      return Wrap_Token_Reference (Unit.TDH'Access, Result);
+      return Wrap_Token_Reference (Unit.Context, Unit.TDH'Access, Result);
    end Lookup_Token;
 
    ----------------------
@@ -3114,6 +3117,7 @@ package body ${ada_lib_name}.Implementation is
       use Children_Vectors;
 
       Ret_Vec : Vector;
+      Ctx     : Internal_Context renames Node.Unit.Context;
       TDH     : Token_Data_Handler renames Node.Unit.TDH;
 
       procedure Append_Trivias (First, Last : Token_Index);
@@ -3136,7 +3140,8 @@ package body ${ada_lib_name}.Implementation is
                Ret_Vec.Append
                  (Bare_Child_Record'
                     (Kind   => Trivia,
-                     Trivia => Wrap_Token_Reference (TDH'Access, (I, D))));
+                     Trivia => Wrap_Token_Reference
+                                 (Ctx, TDH'Access, (I, D))));
             end loop;
          end loop;
       end Append_Trivias;
@@ -3247,7 +3252,12 @@ package body ${ada_lib_name}.Implementation is
      (Node  : ${T.root_node.name};
       Index : Token_Index) return Token_Reference
    is
-     (Wrap_Token_Reference (Token_Data (Node.Unit), (Index, No_Token_Index)));
+      Unit    : constant Internal_Unit := Node.Unit;
+      Context : constant Internal_Context := Unit.Context;
+   begin
+      return Wrap_Token_Reference
+        (Context, Token_Data (Unit), (Index, No_Token_Index));
+   end Token;
 
    ---------
    -- "<" --
@@ -4531,8 +4541,10 @@ package body ${ada_lib_name}.Implementation is
       Reparsed.AST_Mem_Pool := No_Pool;
 
       --  Increment unit version number to invalidate caches and stale node
-      --  reference.
+      --  reference. Also propagate it to the TDH.
       Unit.Unit_Version := Unit.Unit_Version + 1;
+      Unit.TDH.Version := Unit.Unit_Version;
+
 
       --  If Unit had its lexical environments populated, re-populate them
       if not Unit.Is_Env_Populated then

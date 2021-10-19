@@ -26,6 +26,8 @@ Append (Parser.Diagnostics,
         To_Text ("Skipped token ")
         & Common.Text
             (Wrap_Token_Reference
-               (Parser.TDH, (${parser.start_pos}, No_Token_Index))));
+               (Parser.Unit.Context,
+                Parser.TDH,
+                (${parser.start_pos}, No_Token_Index))));
 
 <<${exit_label}>>

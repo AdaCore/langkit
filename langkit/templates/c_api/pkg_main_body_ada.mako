@@ -1493,12 +1493,13 @@ package body ${ada_lib_name}.Implementation.C is
          Last          : Natural;
       begin
          Extract_Token_Text (D, Source_Buffer, First, Last);
-         return (Token_Data   => Get_Token_TDH (Token),
-                 Token_Index  => int (Index.Token),
-                 Trivia_Index => int (Index.Trivia),
-                 Kind         => K'Enum_Rep,
-                 Text         => Wrap (Source_Buffer, First, Last),
-                 Sloc_Range   => Wrap (Sloc_Range (D)));
+         return (Context         => Get_Token_Context (Token),
+                 Token_Data      => Get_Token_TDH (Token),
+                 Token_Index     => int (Index.Token),
+                 Trivia_Index    => int (Index.Trivia),
+                 Kind            => K'Enum_Rep,
+                 Text            => Wrap (Source_Buffer, First, Last),
+                 Sloc_Range      => Wrap (Sloc_Range (D)));
       end;
    end Wrap;
 
@@ -1511,7 +1512,8 @@ package body ${ada_lib_name}.Implementation.C is
       return (if Token.Token_Data = null
               then No_Token
               else Wrap_Token_Reference
-                     (Token.Token_Data,
+                     (Token.Context,
+                      Token.Token_Data,
                       (Token  => Token_Index (Token.Token_Index),
                        Trivia => Token_Index (Token.Trivia_Index))));
    end Unwrap;

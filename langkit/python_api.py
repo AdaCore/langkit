@@ -59,7 +59,7 @@ class PythonAPISettings(AbstractAPISettings):
                 self.type_public_name(ct.T.root_node))),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
-            (T.Token, lambda _: '{}'),
+            (T.Token, lambda _: 'Token._wrap({})'),
             (T.Symbol, lambda _: '_symbol_type.wrap({})'),
             (T.Bool, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.Int, lambda _: '{{}}{}'.format(value_suffix)),
@@ -127,7 +127,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.StructType, lambda _:
                 '{}._unwrap({{value}}{{context}})'
                 .format(self.type_public_name(type))),
-            (T.Token, lambda _: '{value}'),
+            (T.Token, lambda _: 'Token._unwrap({value})'),
             (T.Symbol, lambda _: '_symbol_type.unwrap({value}{context})'),
             (T.BigInt, lambda _: '_big_integer.unwrap({value})'),
         ], exception=TypeError(
@@ -139,15 +139,24 @@ class PythonAPISettings(AbstractAPISettings):
         """
         See ``unwrap_value``.
         """
-        # All ref-counted types except iterators are translated to fully native
-        # Python objects. For them, we need to create a wrapper that owns the C
-        # value during the call to a property. Such wrappers always have a
-        # "c_value" attribute to get the actual value to pass to C APIs.
-        return (
-            value
-            if type.is_iterator_type or not type.is_refcounted
-            else '{}.c_value'.format(value)
-        )
+        if type.is_token_type:
+            # Token._unwrap() returns the C struct, and these are passed by
+            # reference in the C API, so we just have to pass properties a
+            # reference to it.
+            return f"ctypes.byref({value})"
+
+        elif type.is_iterator_type or not type.is_refcounted:
+            # There is no particular processing to do for iterators and all
+            # remaining non-reference counted types.
+            return value
+
+        else:
+            # All remaining ref-counted types are translated to fully native
+            # Python objects. For them, we need to create a wrapper that owns
+            # the C value during the call to a property. Such wrappers always
+            # have a "c_value" attribute to get the actual value to pass to C
+            # APIs.
+            return f"{value}.c_value"
 
     def c_type(self, type: CompiledType) -> str:
         """
@@ -162,7 +171,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: ctype_type('c_uint8')),
             (T.Int, lambda _: ctype_type('c_int')),
             (T.EnvRebindings, lambda _: '_EnvRebindings_c_type'),
-            (T.Token, lambda _: 'Token'),
+            (T.Token, lambda _: 'Token._c_struct'),
             (T.Symbol, lambda _: '_symbol_type'),
             (T.AnalysisUnit, lambda _: 'AnalysisUnit._c_type'),
             (ct.EnumType, lambda _: ctype_type('c_int')),

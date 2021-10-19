@@ -28,6 +28,7 @@ with GNATCOLL.VFS;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Types;   use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
 package Langkit_Support.Token_Data_Handlers is
@@ -110,6 +111,18 @@ package Langkit_Support.Token_Data_Handlers is
    package Index_Vectors is new Langkit_Support.Vectors (Positive);
 
    type Token_Data_Handler is record
+      --  Start of ABI area. In order to perform fast checks from foreign
+      --  languages, we maintain minimal ABI for token data handlers: this
+      --  allows us in language bindings to directly peek in this record rather
+      --  than rely on (slow) calls to getters.
+
+      Version : Version_Number;
+      --  Version number for this token data handler. Incremented each time the
+      --  handler is reset. This allows checking that token references are not
+      --  stale.
+
+      --  End of ABI area
+
       Source_Buffer : Text_Access;
       --  The whole source buffer. It belongs to this token data handler,
       --  and will be deallocated along with it. WARNING: this buffer might

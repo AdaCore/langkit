@@ -1,0 +1,23 @@
+main.py: Running...
+Valid:
+-> <Token Example 'example' at 1:1-1:8>
+
+After reparse:
+Got a StaleReferenceError
+
+After context destruction:
+Got a StaleReferenceError
+
+main.py: Done.
+main.adb: Running...
+Valid:
+-> <Token Kind=Example Text="example">
+
+After reparse:
+Got a Stale_Reference_Error
+
+After context destruction:
+Got a Stale_Reference_Error
+
+main.adb: Done.
+Done

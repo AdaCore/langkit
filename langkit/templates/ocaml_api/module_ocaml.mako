@@ -428,7 +428,13 @@ module TokenData = struct
 end
 
 module Token = struct
+  (* We don't have access to AnalysisContextStruct at this point. We don't need
+     to do anything with the context value except pass it around, so map it as
+     an opaque pointer instead. *)
+  type dummy_context = unit ptr
+
   type t = {
+    context : dummy_context;
     token_data : TokenData.t;
     token_index : int;
     trivia_index : int;
@@ -438,6 +444,7 @@ module Token = struct
   }
 
   let c_struct : t structure typ = structure "token"
+  let context = field c_struct "context" (ptr void)
   let token_data = field c_struct "token_data" (ptr void)
   let token_index = field c_struct "token_index" int
   let trivia_index = field c_struct "trivia_index" int
@@ -447,6 +454,7 @@ module Token = struct
   let () = seal c_struct
 
   let wrap (c_value : t structure) : t = {
+    context = getf c_value context;
     token_data = getf c_value token_data;
     token_index = getf c_value token_index;
     trivia_index = getf c_value trivia_index;
@@ -457,6 +465,7 @@ module Token = struct
 
   let unwrap (value : t) : t structure =
     let c_value = make c_struct in
+    setf c_value context value.context;
     setf c_value token_data value.token_data;
     setf c_value token_index value.token_index;
     setf c_value trivia_index value.trivia_index;

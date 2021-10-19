@@ -772,16 +772,16 @@ class AnalysisUnit:
     @property
     def first_token(self) -> Opt[Token]:
         ${py_doc('langkit.unit_first_token', 8)}
-        result = Token()
+        result = Token._c_struct()
         _unit_first_token(self._c_value, ctypes.byref(result))
-        return result._wrap()
+        return Token._wrap(result)
 
     @property
     def last_token(self) -> Opt[Token]:
         ${py_doc('langkit.unit_last_token', 8)}
-        result = Token()
+        result = Token._c_struct()
         _unit_last_token(self._c_value, ctypes.byref(result))
-        return result._wrap()
+        return Token._wrap(result)
 
     @property
     def text(self) -> str:
@@ -806,9 +806,9 @@ class AnalysisUnit:
         ${py_doc('langkit.unit_lookup_token', 8)}
         unit = AnalysisUnit._unwrap(self)
         _sloc = Sloc._c_type._unwrap(sloc)
-        tok = Token()
-        _unit_lookup_token(unit, ctypes.byref(_sloc), ctypes.byref(tok))
-        return tok._wrap()
+        result = Token._c_struct()
+        _unit_lookup_token(unit, ctypes.byref(_sloc), ctypes.byref(result))
+        return Token._wrap(result)
 
     def _dump_lexical_env(self) -> None:
         ${py_doc('langkit.unit_dump_lexical_env', 8)}
@@ -999,54 +999,99 @@ class Diagnostic:
             return Diagnostic(self.sloc_range._wrap(), self.message._wrap())
 
 
-class Token(ctypes.Structure):
+class _tdh_c_struct(ctypes.Structure):
+    _fields_ = [('version', ctypes.c_uint64)]
+_tdh_c_type = _hashable_c_pointer(_tdh_c_struct)
+
+
+class Token:
     ${py_doc('langkit.token_reference_type', 4)}
 
-    _tdh_c_type = _hashable_c_pointer()
+    __slots__ = ("_c_value", "_context_version", "_tdh_version")
 
-    _fields_ = [('_token_data',   _tdh_c_type),
-                ('_token_index',  ctypes.c_int),
-                ('_trivia_index', ctypes.c_int),
-                ('_kind',         ctypes.c_int),
-                ('_text',         _text),
-                ('_sloc_range',   SlocRange._c_type)]
+    class _c_struct(ctypes.Structure):
+        _fields_ = [('context',      AnalysisContext._c_type),
+                    ('token_data',   _tdh_c_type),
+                    ('token_index',  ctypes.c_int),
+                    ('trivia_index', ctypes.c_int),
+                    ('kind',         ctypes.c_int),
+                    ('text',         _text),
+                    ('sloc_range',   SlocRange._c_type)]
+    _c_type = _hashable_c_pointer(_c_struct)
 
-    def _wrap(self) -> Opt[Token]:
-        return self if self._token_data else None
+    def __init__(self, c_value: Any):
+        """
+        This constructor is an implementation detail and is not meant to be
+        used directly.
+        """
+        self._c_value = c_value
+        self._context_version = c_value.context.contents.serial_number
+        self._tdh_version = c_value.token_data.contents.version
+
+    @classmethod
+    def _wrap(cls, c_value: Any) -> Opt[Token]:
+        return cls(c_value) if c_value.token_data else None
+
+    @classmethod
+    def _unwrap(cls, value):
+        cls._check_token(value)
+        return value._c_value
+
+    def _check_stale_reference(self) -> None:
+        # First, check that the reference to the context is not stale
+        if (
+            self._c_value.context.contents.serial_number
+            != self._context_version
+        ):
+            raise StaleReferenceError("owning context was deallocated")
+
+        # The context is valid, so the token data handler is, too: check that
+        # no reparsing occured.
+        if self._c_value.token_data.contents.version != self._tdh_version:
+            raise StaleReferenceError("owning unit was reparsed")
 
     @staticmethod
     def _check_token(value: Any) -> None:
         if not isinstance(value, Token):
             raise TypeError('invalid token: {}'.format(value))
+        value._check_stale_reference()
 
     def _check_same_unit(self, other: Token) -> None:
-        if self._token_data != other._token_data:
+        if self._c_value.token_data != other._c_value.token_data:
             raise ValueError('{} and {} come from different analysis units'
                              .format(self, other))
 
     @property
     def next(self) -> Opt[Token]:
         ${py_doc('langkit.token_next', 8)}
-        t = Token()
-        _token_next(ctypes.byref(self), ctypes.byref(t))
-        return t._wrap()
+        self._check_stale_reference()
+        result = self._c_struct()
+        _token_next(ctypes.byref(self._c_value), ctypes.byref(result))
+        return self._wrap(result)
 
     @property
     def previous(self) -> Opt[Token]:
         ${py_doc('langkit.token_previous', 8)}
-        t = Token()
-        _token_previous(ctypes.byref(self), ctypes.byref(t))
-        return t._wrap()
+        self._check_stale_reference()
+        result = self._c_struct()
+        _token_previous(ctypes.byref(self._c_value), ctypes.byref(result))
+        return self._wrap(result)
 
     def range_until(self, other: Token) -> Iterator[Token]:
         ${py_doc('langkit.token_range_until', 8)}
+        self._check_stale_reference()
         self._check_token(other)
         self._check_same_unit(other)
 
         # Keep the generator as a nested function so that the above checks are
         # executed when the generator is created, instead of only when its
         # first item is requested.
+        #
+        # Note that, because the execution of a generator stops and resumes,
+        # the tokens may become stale after it resumes: check for stale
+        # references at starting and resuming time.
         def generator() -> Iterator[Token]:
+            self._check_stale_reference()
             if other < self:
                 return
 
@@ -1056,20 +1101,23 @@ class Token(ctypes.Structure):
                 next = current.next
                 assert next is not None
                 yield next
+                self._check_stale_reference()
                 current = next
         return generator()
 
     def is_equivalent(self, other: Token) -> bool:
         ${py_doc('langkit.token_is_equivalent', 8)}
+        self._check_stale_reference()
         self._check_token(other)
         return bool(_token_is_equivalent(
-            ctypes.byref(self), ctypes.byref(other))
+            ctypes.byref(self._c_value), ctypes.byref(other._c_value))
         )
 
     @property
     def kind(self) -> str:
         ${py_doc('langkit.token_kind', 8)}
-        name = _token_kind_name(self._kind)
+        self._check_stale_reference()
+        name = _token_kind_name(self._c_value.kind)
         # The _token_kind_name wrapper is already supposed to handle exceptions
         # so this should always return a non-null value.
         assert name
@@ -1078,19 +1126,22 @@ class Token(ctypes.Structure):
     @property
     def is_trivia(self) -> bool:
         ${py_doc('langkit.token_is_trivia', 8)}
-        return self._trivia_index != 0
+        self._check_stale_reference()
+        return self._c_value.trivia_index != 0
 
     @property
     def index(self) -> int:
         ${py_doc('langkit.token_index', 8)}
-        return (self._token_index - 1
-                if self._trivia_index == 0 else
-                self._trivia_index - 1)
+        self._check_stale_reference()
+        return (self._c_value.token_index - 1
+                if self._c_value.trivia_index == 0 else
+                self._c_value.trivia_index - 1)
 
     @property
     def text(self) -> str:
         ${py_doc('langkit.token_text', 8)}
-        return self._text._wrap()
+        self._check_stale_reference()
+        return self._c_value.text._wrap()
 
     @classmethod
     def text_range(cls, first: Token, last: Token) -> str:
@@ -1099,15 +1150,19 @@ class Token(ctypes.Structure):
         cls._check_token(last)
         first._check_same_unit(last)
         result = _text()
-        success = _token_range_text(ctypes.byref(first), ctypes.byref(last),
-                                    ctypes.byref(result))
+        success = _token_range_text(
+            ctypes.byref(first._c_value),
+            ctypes.byref(last._c_value),
+            ctypes.byref(result),
+        )
         assert success
         return result._wrap() or u''
 
     @property
     def sloc_range(self) -> SlocRange:
         ${py_doc('langkit.token_sloc_range', 8)}
-        return self._sloc_range._wrap()
+        self._check_stale_reference()
+        return self._c_value.sloc_range._wrap()
 
     def __eq__(self, other: Any) -> bool:
         ${py_doc('langkit.python.Token.__eq__', 8)}
@@ -1118,6 +1173,7 @@ class Token(ctypes.Structure):
         return hash(self._identity_tuple)
 
     def __repr__(self) -> str:
+        self._check_stale_reference()
         return '<Token {}{} at {}>'.format(
             self.kind,
             ' {}'.format(repr(self.text)) if self.text else '',
@@ -1126,6 +1182,7 @@ class Token(ctypes.Structure):
 
     def __lt__(self, other: Opt[Token]):
         ${py_doc('langkit.python.Token.__lt__', 8)}
+        self._check_stale_reference()
 
         # None always comes first
         if other is None:
@@ -1156,7 +1213,11 @@ class Token(ctypes.Structure):
 
         This property is for internal use only.
         """
-        return (self._token_data, self._token_index, self._trivia_index)
+        return (
+            self._c_value.token_data,
+            self._c_value.token_index,
+            self._c_value.trivia_index
+        )
 
 
 ## TODO: if needed one day, also bind create_file_provider to allow Python
@@ -1815,11 +1876,11 @@ _unit_root = _import_func(
 )
 _unit_first_token = _import_func(
     "${capi.get_name('unit_first_token')}",
-    [AnalysisUnit._c_type, ctypes.POINTER(Token)], None
+    [AnalysisUnit._c_type, Token._c_type], None
 )
 _unit_last_token = _import_func(
     "${capi.get_name('unit_last_token')}",
-    [AnalysisUnit._c_type, ctypes.POINTER(Token)], None
+    [AnalysisUnit._c_type, Token._c_type], None
 )
 _unit_token_count = _import_func(
     "${capi.get_name('unit_token_count')}",
@@ -1833,7 +1894,7 @@ _unit_lookup_token = _import_func(
     "${capi.get_name('unit_lookup_token')}",
     [AnalysisUnit._c_type,
      ctypes.POINTER(Sloc._c_type),
-     ctypes.POINTER(Token)],
+     Token._c_type],
     None
 )
 _unit_dump_lexical_env = _import_func(
@@ -1965,19 +2026,19 @@ _token_kind_name = _import_func(
 )
 _token_next = _import_func(
     "${capi.get_name('token_next')}",
-    [ctypes.POINTER(Token), ctypes.POINTER(Token)], None
+    [Token._c_type, Token._c_type], None
 )
 _token_is_equivalent = _import_func(
     "${capi.get_name('token_is_equivalent')}",
-    [ctypes.POINTER(Token), ctypes.POINTER(Token)], ctypes.c_int
+    [Token._c_type, Token._c_type], ctypes.c_int
 )
 _token_previous = _import_func(
     "${capi.get_name('token_previous')}",
-    [ctypes.POINTER(Token), ctypes.POINTER(Token)], None
+    [Token._c_type, Token._c_type], None
 )
 _token_range_text = _import_func(
     "${capi.get_name('token_range_text')}",
-    [ctypes.POINTER(Token), ctypes.POINTER(Token), ctypes.POINTER(_text)],
+    [Token._c_type, Token._c_type, ctypes.POINTER(_text)],
     ctypes.c_int
 )
 _entity_image = _import_func(
