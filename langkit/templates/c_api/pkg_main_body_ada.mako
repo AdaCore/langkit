@@ -1474,11 +1474,9 @@ package body ${ada_lib_name}.Implementation.C is
    ----------
 
    function Wrap (Token : Token_Reference) return ${token_type} is
-      function Convert is new Ada.Unchecked_Conversion
-        (Token_Data_Handler_Access, System.Address);
    begin
       if Token = No_Token then
-         return (Token_Data   => System.Null_Address,
+         return (Token_Data   => null,
                  Token_Index  => -1,
                  Trivia_Index => -1,
                  others       => <>);
@@ -1495,7 +1493,7 @@ package body ${ada_lib_name}.Implementation.C is
          Last          : Natural;
       begin
          Extract_Token_Text (D, Source_Buffer, First, Last);
-         return (Token_Data   => Convert (Get_Token_TDH (Token)),
+         return (Token_Data   => Get_Token_TDH (Token),
                  Token_Index  => int (Index.Token),
                  Trivia_Index => int (Index.Trivia),
                  Kind         => K'Enum_Rep,
@@ -1509,27 +1507,11 @@ package body ${ada_lib_name}.Implementation.C is
    ------------
 
    function Unwrap (Token : ${token_type}) return Token_Reference is
-      use System;
-
-      --  The following unchecked conversion makes it possible to restore the
-      --  Ada type of token data handler accesses from the C API. All
-      --  read/writes for the pointed values are made in Ada through values of
-      --  the same access type. Thus, strict aliasing issues should not arise
-      --  for these.
-      --
-      --  See <https://gcc.gnu.org/onlinedocs/gnat_ugn/
-      --       Optimization-and-Strict-Aliasing.html>.
-
-      pragma Warnings (Off, "possible aliasing problem for type");
-      function Convert is new Ada.Unchecked_Conversion
-        (System.Address, Token_Data_Handler_Access);
-      pragma Warnings (On, "possible aliasing problem for type");
-
    begin
-      return (if Token.Token_Data = Null_Address
+      return (if Token.Token_Data = null
               then No_Token
               else Wrap_Token_Reference
-                     (Convert (Token.Token_Data),
+                     (Token.Token_Data,
                       (Token  => Token_Index (Token.Token_Index),
                        Trivia => Token_Index (Token.Trivia_Index))));
    end Unwrap;
