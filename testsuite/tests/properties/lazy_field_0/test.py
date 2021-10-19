@@ -25,5 +25,6 @@ class Example(FooNode):
         return [1, 2]
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb',
+              lkt_semantic_checks=True)
 print('Done')
