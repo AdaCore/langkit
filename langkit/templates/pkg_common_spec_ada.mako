@@ -6,12 +6,12 @@ with GNATCOLL.GMP.Integers;
 with GNATCOLL.Traces;
 
 with Langkit_Support.Errors;
-
+private with Langkit_Support.Internal.Analysis;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Symbols.Precomputed;
-use Langkit_Support.Symbols;
-
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
+with Langkit_Support.Types;   use Langkit_Support.Types;
 
 
 --  This package provides types and functions used in the whole ${ada_lib_name}
@@ -461,15 +461,45 @@ package ${ada_lib_name}.Common is
 
 private
 
+   type Token_Safety_Net is record
+      Context         : Langkit_Support.Internal.Analysis.Internal_Context;
+      Context_Version : Version_Number;
+      --  Analysis context and version number at the time this safety net was
+      --  produced.
+      --
+      --  TODO: it is not possible to refer to
+      --  $.Implementation.Internal_Context from this spec (otherwise we get a
+      --  circular dependency). For now, use the generic pointer from
+      --  Langkit_Support (hack), but in the future the Token_Reference type
+      --  (and this this safety net type) will go to the generic API, so we
+      --  will get rid of this hack.
+
+      TDH_Version : Version_Number;
+      --  Version of the token data handler at the time this safety net was
+      --  produced.
+   end record;
+   --  Information to embed in public APIs with token references, used to check
+   --  before using the references that they are not stale.
+
+   No_Token_Safety_Net : constant Token_Safety_Net :=
+     (Langkit_Support.Internal.Analysis.No_Internal_Context, 0, 0);
+
    type Token_Reference is record
       TDH : Token_Data_Handler_Access;
       --  Token data handler that owns this token
 
       Index : Token_Or_Trivia_Index;
       --  Identifier for the trivia or the token this refers to
+
+      Safety_Net : Token_Safety_Net;
    end record;
 
-   No_Token : constant Token_Reference := (null, No_Token_Or_Trivia_Index);
+   procedure Check_Safety_Net (Self : Token_Reference);
+   --  If ``Self`` is a stale token reference, raise a
+   --  ``Stale_Reference_Error`` error.
+
+   No_Token : constant Token_Reference :=
+     (null, No_Token_Or_Trivia_Index, No_Token_Safety_Net);
 
    type Token_Data_Type is record
       Kind : Token_Kind;

@@ -81,6 +81,7 @@ private package ${ada_lib_name}.Implementation.C is
    ${ada_c_doc('langkit.big_integer_type', 3)}
 
    type ${token_type} is record
+      Context                   : ${analysis_context_type};
       Token_Data                : Token_Data_Handler_Access;
       Token_Index, Trivia_Index : int;
 

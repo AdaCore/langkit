@@ -103,11 +103,17 @@ typedef enum {
    % endfor
 } ${token_kind};
 
+typedef struct
+{
+   uint64_t version;
+} *${tdh_ptr_type};
+
 ${c_doc('langkit.token_reference_type')}
 typedef struct {
-    /* Private data associated to this token or NULL if this designates no
-       token.  */
-    void *token_data;
+    /* Private data associated to this token, including stale reference
+       checking data, or NULL if this designates no token.  */
+    ${analysis_context_type} context;
+    ${tdh_ptr_type} token_data;
 
     /* Internal identifiers for this token.  */
     int token_index, trivia_index;

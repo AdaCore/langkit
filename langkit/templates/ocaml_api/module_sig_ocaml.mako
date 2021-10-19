@@ -78,7 +78,10 @@ end
 module Token : sig
   ${ocaml_doc('langkit.token_reference_type', 1)}
 
+  type dummy_context
+
   type t = {
+    context : dummy_context;
     token_data : TokenData.t;
     token_index : int;
     trivia_index : int;

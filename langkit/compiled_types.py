@@ -109,6 +109,7 @@ def template_extensions(ctx):
             CAPIType(capi,
                      'unit_provider_get_unit_from_name_callback').name,
         'token_kind':            CAPIType(capi, 'token_kind').name,
+        'tdh_ptr_type':          CAPIType(capi, 'token_data_handler').name,
         'token_type':            CAPIType(capi, 'token').name,
         'sloc_type':             CAPIType(capi, 'source_location').name,
         'sloc_range_type':

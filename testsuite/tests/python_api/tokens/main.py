@@ -116,4 +116,10 @@ print('')
 assert not (u.first_token == u2.first_token)
 assert u.first_token != u2.first_token
 
+print('== Test properties returning tokens ==')
+print('token_start:', u.root.token_start)
+print('token_end:', u.root.token_end)
+print('')
+
+
 print('main.py: Done.')

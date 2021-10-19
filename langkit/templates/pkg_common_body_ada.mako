@@ -1,10 +1,12 @@
 ## vim: filetype=makoada
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Unchecked_Conversion;
 
 with GNATCOLL.Iconv;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
+with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
 with ${ada_lib_name}.Private_Converters;
@@ -36,8 +38,11 @@ package body ${ada_lib_name}.Common is
    --  For each node kind, return whether it is an error node
 
    function Wrap_Token_Reference
-     (TDH   : Token_Data_Handler_Access;
-      Index : Token_Or_Trivia_Index) return Token_Reference;
+     (Context : Internal_Context;
+      TDH     : Token_Data_Handler_Access;
+      Index   : Token_Or_Trivia_Index) return Token_Reference;
+   function Get_Token_Context
+     (Token : Token_Reference) return Internal_Context;
    function Get_Token_TDH
      (Token : Token_Reference) return Token_Data_Handler_Access;
    function Get_Token_Index
@@ -48,6 +53,17 @@ package body ${ada_lib_name}.Common is
       First         : out Positive;
       Last          : out Natural);
    --  Implementations for converters soft-links
+
+   function "+" is new Ada.Unchecked_Conversion
+     (Langkit_Support.Internal.Analysis.Internal_Context, Internal_Context);
+   function "+" is new Ada.Unchecked_Conversion
+     (Internal_Context, Langkit_Support.Internal.Analysis.Internal_Context);
+
+   function Rewrap_Token
+     (Origin : Token_Reference;
+      Index  : Token_Or_Trivia_Index) return Token_Reference;
+   --  Create a token reference for ``Index`` using the token data handler
+   --  reference from ``Origin``.
 
    Token_Kind_To_Literals : constant array (Token_Kind) of Text_Access := (
    <% already_seen_set = set() %>
@@ -175,6 +191,35 @@ package body ${ada_lib_name}.Common is
                 'False')};
    end Is_List_Node;
 
+   ------------------
+   -- Rewrap_Token --
+   ------------------
+
+   function Rewrap_Token
+     (Origin : Token_Reference;
+      Index  : Token_Or_Trivia_Index) return Token_Reference is
+   begin
+      return (if Index = No_Token_Or_Trivia_Index
+              then No_Token
+              else (Origin.TDH, Index, Origin.Safety_Net));
+   end Rewrap_Token;
+
+   ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net (Self : Token_Reference) is
+      SN  : Token_Safety_Net renames Self.Safety_Net;
+      Ctx : constant Internal_Context := +SN.Context;
+   begin
+      if Self.TDH /= null
+         and then (Ctx.Serial_Number /= SN.Context_Version
+                   or else Self.TDH.Version /= SN.TDH_Version)
+      then
+         raise Stale_Reference_Error;
+      end if;
+   end Check_Safety_Net;
+
    ---------
    -- "<" --
    ---------
@@ -182,6 +227,8 @@ package body ${ada_lib_name}.Common is
    function "<" (Left, Right : Token_Reference) return Boolean is
       pragma Assert (Left.TDH = Right.TDH);
    begin
+      Check_Safety_Net (Left);
+      Check_Safety_Net (Right);
       if Left.Index.Token < Right.Index.Token then
          return True;
 
@@ -201,11 +248,12 @@ package body ${ada_lib_name}.Common is
      (Token          : Token_Reference;
       Exclude_Trivia : Boolean := False) return Token_Reference is
    begin
+      Check_Safety_Net (Token);
       return (if Token.TDH = null
               then No_Token
-              else Wrap_Token_Reference (Token.TDH,
-                                         Next (Token.Index, Token.TDH.all,
-                                               Exclude_Trivia)));
+              else Rewrap_Token (Token,
+                                 Next (Token.Index, Token.TDH.all,
+                                       Exclude_Trivia)));
    end Next;
 
    --------------
@@ -216,12 +264,12 @@ package body ${ada_lib_name}.Common is
      (Token          : Token_Reference;
       Exclude_Trivia : Boolean := False) return Token_Reference is
    begin
-      return
-        (if Token.TDH = null
-         then No_Token
-         else Wrap_Token_Reference (Token.TDH,
-                                    Previous (Token.Index, Token.TDH.all,
-                                              Exclude_Trivia)));
+      Check_Safety_Net (Token);
+      return (if Token.TDH = null
+              then No_Token
+              else Rewrap_Token (Token,
+                                 Previous (Token.Index, Token.TDH.all,
+                                           Exclude_Trivia)));
    end Previous;
 
    ----------------
@@ -230,6 +278,7 @@ package body ${ada_lib_name}.Common is
 
    function Get_Symbol (Token : Token_Reference) return Symbol_Type is
    begin
+      Check_Safety_Net (Token);
       if Token.TDH = null then
          raise Precondition_Failure with "null token argument";
       end if;
@@ -242,6 +291,7 @@ package body ${ada_lib_name}.Common is
 
    function Data (Token : Token_Reference) return Token_Data_Type is
    begin
+      Check_Safety_Net (Token);
       if Token.TDH = null then
          raise Precondition_Failure with "null token argument";
       end if;
@@ -255,6 +305,7 @@ package body ${ada_lib_name}.Common is
    function Text (Token : Token_Reference) return Text_Type is
       RD : constant Stored_Token_Data := Raw_Data (Token);
    begin
+      Check_Safety_Net (Token);
       if Token.TDH = null then
          raise Precondition_Failure with "null token argument";
       end if;
@@ -266,9 +317,10 @@ package body ${ada_lib_name}.Common is
    ----------
 
    function Text (First, Last : Token_Reference) return Text_Type is
-      FD : constant Token_Data_Type := Data (First);
-      LD : constant Token_Data_Type := Data (Last);
+      FD, LD : Token_Data_Type;
    begin
+      Check_Safety_Net (First);
+      Check_Safety_Net (Last);
       if First.TDH = null then
          raise Precondition_Failure with "null token argument";
       end if;
@@ -276,6 +328,8 @@ package body ${ada_lib_name}.Common is
          raise Precondition_Failure with
             "token arguments must belong to the same source";
       end if;
+      FD := Data (First);
+      LD := Data (Last);
       return FD.Source_Buffer.all (FD.Source_First .. LD.Source_Last);
    end Text;
 
@@ -294,6 +348,7 @@ package body ${ada_lib_name}.Common is
 
    function Is_Trivia (Token : Token_Reference) return Boolean is
    begin
+      Check_Safety_Net (Token);
       return Token.Index.Trivia /= No_Token_Index;
    end Is_Trivia;
 
@@ -312,6 +367,7 @@ package body ${ada_lib_name}.Common is
 
    function Index (Token : Token_Reference) return Token_Index is
    begin
+      Check_Safety_Net (Token);
       return (if Token.Index.Trivia = No_Token_Index
               then Token.Index.Token
               else Token.Index.Trivia);
@@ -343,6 +399,7 @@ package body ${ada_lib_name}.Common is
 
    function Origin_Filename (Token : Token_Reference) return String is
    begin
+      Check_Safety_Net (Token);
       if Token.TDH = null then
          raise Precondition_Failure with "null token argument";
       end if;
@@ -355,6 +412,7 @@ package body ${ada_lib_name}.Common is
 
    function Origin_Charset (Token : Token_Reference) return String is
    begin
+      Check_Safety_Net (Token);
       if Token.TDH = null then
          raise Precondition_Failure with "null token argument";
       end if;
@@ -391,6 +449,7 @@ package body ${ada_lib_name}.Common is
 
    function Raw_Data (T : Token_Reference) return Stored_Token_Data is
    begin
+      Check_Safety_Net (T);
       if T.TDH = null then
          raise Precondition_Failure with "null token argument";
       end if;
@@ -409,6 +468,7 @@ package body ${ada_lib_name}.Common is
       Token    : Token_Reference;
       Raw_Data : Stored_Token_Data) return Token_Data_Type is
    begin
+      Check_Safety_Net (Token);
       return (Kind          => To_Token_Kind (Raw_Data.Kind),
               Is_Trivia     => Token.Index.Trivia /= No_Token_Index,
               Index         => (if Token.Index.Trivia = No_Token_Index
@@ -425,13 +485,33 @@ package body ${ada_lib_name}.Common is
    --------------------------
 
    function Wrap_Token_Reference
-     (TDH   : Token_Data_Handler_Access;
-      Index : Token_Or_Trivia_Index) return Token_Reference is
+     (Context : Internal_Context;
+      TDH     : Token_Data_Handler_Access;
+      Index   : Token_Or_Trivia_Index) return Token_Reference is
    begin
-      return (if Index = No_Token_Or_Trivia_Index
-              then No_Token
-              else (TDH, Index));
+      if Index = No_Token_Or_Trivia_Index then
+         return No_Token;
+      end if;
+
+      declare
+         SN : constant Token_Safety_Net :=
+           (Context         => +Context,
+            Context_Version => Context.Serial_Number,
+            TDH_Version     => TDH.Version);
+      begin
+        return (TDH, Index, SN);
+      end;
    end Wrap_Token_Reference;
+
+   -----------------------
+   -- Get_Token_Context --
+   -----------------------
+
+   function Get_Token_Context
+     (Token : Token_Reference) return Internal_Context is
+   begin
+      return +Token.Safety_Net.Context;
+   end Get_Token_Context;
 
    -------------------
    -- Get_Token_TDH --
@@ -521,6 +601,7 @@ begin
    % endif
 
    Private_Converters.Wrap_Token_Reference := Wrap_Token_Reference'Access;
+   Private_Converters.Get_Token_Context := Get_Token_Context'Access;
    Private_Converters.Get_Token_TDH := Get_Token_TDH'Access;
    Private_Converters.Get_Token_Index := Get_Token_Index'Access;
    Private_Converters.Extract_Token_Text := Extract_Token_Text'Access;
