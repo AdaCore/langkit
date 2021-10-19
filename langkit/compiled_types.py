@@ -1703,9 +1703,13 @@ class EnvRebindingsType(CompiledType):
     """
 
     def __init__(self):
+        # Even though env rebindings are "exposed" through the C API (entities
+        # are structs, and they have an env rebindings field), they are not
+        # meant to be part of any public API: the C API acts only as a common
+        # bindings gateway, not a true public API. So keep env rebindings
+        # "exposed=False" for the DSL.
         super().__init__(
             name='EnvRebindings',
-            exposed=True,
             null_allowed=True,
             nullexpr='null',
             c_type_name='env_rebindings_type',

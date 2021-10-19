@@ -122,7 +122,6 @@ All types
 * BigInt
 * Bool
 * Character
-* EnvRebindings
 * Int
 * SourceLocationRange
 * String
@@ -173,20 +172,20 @@ Debug_Name: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null t
 Enum types
 ==========
 
-Analysis_Unit_Kind ( 11)
+Analysis_Unit_Kind ( 10)
   Default value: 0
 
   1: Unit_Specification
   2: Unit_Body
 
-Lookup_Kind ( 12)
+Lookup_Kind ( 11)
   Default value: 0
 
   1: Recursive
   2: Flat
   3: Minimal
 
-Designated_Env_Kind ( 13)
+Designated_Env_Kind ( 12)
   Default value: 1
 
   1: None
@@ -194,7 +193,7 @@ Designated_Env_Kind ( 13)
   3: Named_Env
   4: Direct_Env
 
-Grammar_Rule ( 14)
+Grammar_Rule ( 13)
   Default value: 0
 
   1: Main_Rule_Rule
@@ -255,72 +254,72 @@ Non-struct Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid
 Nodes
 =====
 
-Foo_Node ( 19)
+Foo_Node ( 18)
   is abstract
   base = Bad_Type_Error: trying to get base type of root node
-  last derivation = Var_Decl ( 28)
+  last derivation = Var_Decl ( 27)
   derivations:
-    Example ( 20)
-    Expr ( 21)
-    Foo_Node_Base_List ( 25)
-    Name ( 27)
-    Var_Decl ( 28)
+    Example ( 19)
+    Expr ( 20)
+    Foo_Node_Base_List ( 24)
+    Name ( 26)
+    Var_Decl ( 27)
 
-Example ( 20)
-  base = Foo_Node ( 19)
-  last derivation = Example ( 20)
+Example ( 19)
+  base = Foo_Node ( 18)
+  last derivation = Example ( 19)
   derivations:
     <none>
 
-Expr ( 21)
+Expr ( 20)
   is abstract
-  base = Foo_Node ( 19)
-  last derivation = Ref ( 24)
+  base = Foo_Node ( 18)
+  last derivation = Ref ( 23)
   derivations:
-    Addition ( 22)
-    Number ( 23)
-    Ref ( 24)
+    Addition ( 21)
+    Number ( 22)
+    Ref ( 23)
 
-Addition ( 22)
-  base = Expr ( 21)
-  last derivation = Addition ( 22)
-  derivations:
-    <none>
-
-Number ( 23)
-  base = Expr ( 21)
-  last derivation = Number ( 23)
+Addition ( 21)
+  base = Expr ( 20)
+  last derivation = Addition ( 21)
   derivations:
     <none>
 
-Ref ( 24)
-  base = Expr ( 21)
-  last derivation = Ref ( 24)
+Number ( 22)
+  base = Expr ( 20)
+  last derivation = Number ( 22)
   derivations:
     <none>
 
-Foo_Node_Base_List ( 25)
+Ref ( 23)
+  base = Expr ( 20)
+  last derivation = Ref ( 23)
+  derivations:
+    <none>
+
+Foo_Node_Base_List ( 24)
   is abstract
-  base = Foo_Node ( 19)
-  last derivation = Foo_Node_List ( 26)
+  base = Foo_Node ( 18)
+  last derivation = Foo_Node_List ( 25)
   derivations:
-    Foo_Node_List ( 26)
+    Foo_Node_List ( 25)
 
-Foo_Node_List ( 26)
-  base = Foo_Node_Base_List ( 25)
-  last derivation = Foo_Node_List ( 26)
-  derivations:
-    <none>
-
-Name ( 27)
-  base = Foo_Node ( 19)
-  last derivation = Name ( 27)
+Foo_Node_List ( 25)
+  base = Foo_Node_Base_List ( 24)
+  last derivation = Foo_Node_List ( 25)
   derivations:
     <none>
 
-Var_Decl ( 28)
-  base = Foo_Node ( 19)
-  last derivation = Var_Decl ( 28)
+Name ( 26)
+  base = Foo_Node ( 18)
+  last derivation = Name ( 26)
+  derivations:
+    <none>
+
+Var_Decl ( 27)
+  base = Foo_Node ( 18)
+  last derivation = Var_Decl ( 27)
   derivations:
     <none>
 
