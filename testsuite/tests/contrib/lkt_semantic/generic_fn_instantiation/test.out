@@ -383,8 +383,9 @@ Id   <RefId "yyy" test.lkt:78:24-78:27>
 Expr <RefId "yyy" test.lkt:78:24-78:27>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:78:18-78:27>
-     has type <StructDecl prelude: "Int">
+test.lkt:78:18: error: Mismatched types: expected `Int`, got an invalid binary expression
+77 |         (yyy) => xxx * yyy
+   |                  ^^^^^^^^^
 
 Expr <LambdaExpr test.lkt:78:9-78:27>
      has type <FunctionType prelude: "(Int) -> Int">

@@ -19,3 +19,10 @@ test.lkt:4:25: error: Cannot find entity `plus` in this scope
 3 | @invalid val b: Int = a.plus(2)
   |                         ^^^^   
 
+test.lkt:4:23: error: ambiguous type for expression
+3 | @invalid val b: Int = a.plus(2)
+  |                       ^^^^^^   
+
+Expr <CallExpr test.lkt:4:23-4:32>
+     has type <StructDecl prelude: "Int">
+

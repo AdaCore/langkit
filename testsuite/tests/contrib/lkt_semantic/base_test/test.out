@@ -44,8 +44,9 @@ test.lkt:10:41: error: Mismatched types: expected `Int`, got a string literal
 Expr <NumLit test.lkt:10:48-10:50>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:10:41-10:50>
-     has type <StructDecl prelude: "Int">
+test.lkt:10:41: error: Mismatched types: expected `Int`, got an invalid binary expression
+ 9 |     fun test_int_add_invalid_1(): Int = "12" + 15
+   |                                         ^^^^^^^^^
 
 Id   <RefId "Int" test.lkt:12:35-12:38>
      references <StructDecl prelude: "Int">
@@ -60,8 +61,9 @@ test.lkt:12:46: error: Mismatched types: expected `Int`, got `A`
 11 |     fun test_int_add_invalid_2(): Int = 15 + self
    |                                              ^^^^
 
-Expr <BinOp test.lkt:12:41-12:50>
-     has type <StructDecl prelude: "Int">
+test.lkt:12:41: error: Mismatched types: expected `Int`, got an invalid binary expression
+11 |     fun test_int_add_invalid_2(): Int = 15 + self
+   |                                         ^^^^^^^^^
 
 Id   <RefId "A" test.lkt:14:35-14:36>
      references <ClassDecl "A" test.lkt:1:12-26:2>
@@ -76,8 +78,9 @@ Id   <RefId "self" test.lkt:14:44-14:48>
 Expr <RefId "self" test.lkt:14:44-14:48>
      has type <ClassDecl "A" test.lkt:1:12-26:2>
 
-Expr <BinOp test.lkt:14:39-14:48>
-     has type <ClassDecl "A" test.lkt:1:12-26:2>
+test.lkt:14:39: error: Mismatched types: expected `A`, got an invalid binary expression
+13 |     fun test_int_add_invalid_3(): A = 15 + self
+   |                                       ^^^^^^^^^
 
 Id   <RefId "Regexp" test.lkt:16:26-16:32>
      references <StructDecl prelude: "Regexp">
@@ -376,6 +379,9 @@ Expr <RefId "self" test.lkt:57:47-57:51>
 test.lkt:57:52: error: Cannot find entity `a` in this scope
 56 |     fun test_identifier_leak_invalid(): Int = self.a
    |                                                    ^
+
+Expr <DotExpr test.lkt:57:47-57:53>
+     has type <StructDecl prelude: "Int">
 
 Id   <RefId "D" test.lkt:62:16-62:17>
      references <EnumClassAltDecl "D" test.lkt:61:10-61:11>

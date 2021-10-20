@@ -1149,9 +1149,18 @@ class RefId(Id):
             )
         )
 
-    expr_context_free_type = Property(
-        Entity.check_referenced_decl.cast_or_raise(T.BaseValDecl).get_type
-    )
+    @langkit_property()
+    def expected_type_predicate(expected_type=T.TypeDecl.entity):
+        return expected_type == Entity.expr_context_free_type
+
+    @langkit_property()
+    def expr_context_free_type():
+        rd = Var(Try(Entity.referenced_decl,
+                     SemanticResult.new(has_error=True)))
+
+        return If(rd.has_error,
+                  No(T.TypeDecl.entity),
+                  rd.result_ref.cast_or_raise(T.BaseValDecl).get_type)
 
     dot_expr_if_suffix = Property(
         Entity.parent.cast(T.DotExpr).then(
@@ -2205,7 +2214,7 @@ class ArrayLiteral(Expr):
         # type.
         return expected_type.then(
             lambda t: t.array_element_type.then(
-                lambda elt_type: Self.all_elements_match(elt_type)
+                lambda elt_type: Entity.all_elements_match(elt_type)
             )
         )
 
@@ -2219,7 +2228,9 @@ class ArrayLiteral(Expr):
         Check that all elements of this array literal match the ``elt_type``
         type.
         """
-        return Self.exprs.all(lambda e: e.expected_type_predicate(elt_type))
+        return Self.exprs.all(
+            lambda e: e.as_entity.expected_type_predicate(elt_type)
+        )
 
     @langkit_property()
     def first_elt_context_free_type():
@@ -2245,7 +2256,7 @@ class ArrayLiteral(Expr):
         return If(
             And(
                 Not(elt_type.is_null),
-                Self.all_elements_match(elt_type)
+                Entity.all_elements_match(elt_type)
             ),
 
             Entity.get_array_type(elt_type.assert_bare.cast(T.TypeDecl)),
@@ -2998,6 +3009,36 @@ class BinOp(Expr):
     right = Field(type=T.Expr)
 
     @langkit_property()
+    def operands_types_compatible():
+        """
+        Return whether operands have compatible types.
+        """
+        left_cft = Var(Self.left.as_entity.expr_context_free_type)
+        right_cft = Var(Self.right.as_entity.expr_context_free_type)
+        return Cond(
+            # If left operand has no type, check compatibility with the right
+            # one.
+            And(left_cft.is_null, Not(right_cft.is_null)),
+            Self.right.as_entity.expected_type_predicate(left_cft),
+            # Else, same for the right operand
+            And(right_cft.is_null, Not(left_cft.is_null)),
+            Self.left.as_entity.expected_type_predicate(right_cft),
+            # In any other cases, just check for type equality
+            left_cft == right_cft
+        )
+
+    @langkit_property()
+    def expected_type_predicate(expected_type=T.TypeDecl.entity):
+        # Return True iff both left and right operands satisfy the predicate
+        return And(
+            Self.left.as_entity.expected_type_predicate(expected_type),
+            Self.right.as_entity.expected_type_predicate(expected_type)
+        )
+
+    invalid_expected_type_error_name = Property(
+        S("an invalid binary expression"))
+
+    @langkit_property()
     def expr_context_free_type():
         return Cond(
             # If op is a relational operator, the cf type is bool
@@ -3006,8 +3047,14 @@ class BinOp(Expr):
 
             Self.bool_type,
 
-            # Else, no idea for the moment. NOTE: we can probably improve that
-            # by forwarding the type of operands.
+            # If the type of operands match, the context-free type is the same
+            Entity.operands_types_compatible,
+
+            Self.left.as_entity.expr_context_free_type.then(
+                lambda t: t,
+                default_val=Self.right.as_entity.expr_context_free_type
+            ),
+
             No(T.TypeDecl.entity)
         )
 

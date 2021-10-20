@@ -1,4 +1,27 @@
 # Test binop context free type
 val a: Int = 1
 val b: Int = 2
-val b: Bool = ((a) = b) = (a = b)
+val c: Bool = ((a) = b) = (a = b)
+
+val x: Array[Int] = [1, 2]
+val y: Array[String] = ["3", "4"]
+
+val z1: Array[Int] = x & x
+val z2 = x & x
+val z3 = x & x & x
+
+# Invalid expressions with incompatible types
+@invalid val z4: Array[Int] = x & y
+@invalid val z5 = x & y
+@invalid val z6 = x & y & y
+
+val i1: Int = 1 - a
+val j1: Int = a - 1
+val i2: Int = 1 - a + 2 * i1 / 4
+val j2: Int = a - 1 + (4 / (a * a))
+
+# Invalid expressions with incompatible types
+@invalid val i3: Int = 1 - c
+@invalid val j3: Int = c - 1
+@invalid val i4: Int = "1" - a + 2 * i1 / 4
+
