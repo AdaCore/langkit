@@ -1746,6 +1746,10 @@ class TokenType(CompiledType):
     def convert_to_storage_expr(self, node_expr, base_expr):
         return 'Stored_Token ({}, {})'.format(node_expr, base_expr)
 
+    @property
+    def mypy_type_hint(self) -> str:
+        return "Opt[Token]"
+
 
 class Argument:
     """
