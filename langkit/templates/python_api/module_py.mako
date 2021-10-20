@@ -1501,6 +1501,11 @@ class ${root_astnode_name}:
         ${py_doc('langkit.python.root_node.tokens', 8)}
         start = self.token_start
         end = self.token_end
+
+        # All nodes have non-null start/end tokens
+        assert start is not None
+        assert end is not None
+
         while not start == end:
             yield start
             next = start.next
