@@ -29,8 +29,5 @@ class Example(FooNode):
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb',
-
-              # TODO: internal errors without diagnostics when set to True, see
-              # U928-029.
-              lkt_semantic_checks=False)
+              lkt_semantic_checks=True)
 print('Done')

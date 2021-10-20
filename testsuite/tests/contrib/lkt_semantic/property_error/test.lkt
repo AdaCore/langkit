@@ -1,0 +1,16 @@
+fun prop1(): Bool = raise PropertyError("error")
+fun prop2(): Bool = (raise PropertyError("error"))
+
+# Invalid because of missing raise keyword
+@invalid val prop3: Bool = PropertyError("error")
+@invalid val prop4: Bool = (PropertyError("error"))
+
+fun prop5(): Bool = {
+   val n: Int = 1;
+
+   raise PropertyError("Explicit error")
+}
+
+# Invalid because only PropertyError can be raised
+val i: Int = 1
+@invalid fun prop6(): Bool = raise i

@@ -183,6 +183,11 @@ class LKNode(ASTNode):
         doc="Unit method. Return the string builtin type."
     )
 
+    property_error_type = Property(
+        Self.get_builtin_type('PropertyError'), public=True,
+        doc="Unit method. Return the property error builtin type."
+    )
+
     regexp_type = Property(
         Self.get_builtin_type('Regexp'), public=True,
         doc="Unit method. Return the regexp builtin type."
@@ -735,6 +740,8 @@ class Expr(LKNode):
                 ),
                 lambda _: No(T.TypeDecl.entity)
             ),
+
+            lambda block_expr=T.BlockExpr: block_expr.expected_type,
 
             lambda _: No(T.TypeDecl.entity)
         )
@@ -2932,6 +2939,24 @@ class RaiseExpr(Expr):
     Raise expression.
     """
     except_expr = Field(type=T.Expr)
+
+    @langkit_property(return_type=T.SemanticResult.array)
+    def check_correctness_pre():
+        except_expr_type = Var(Entity.except_expr.expr_type.result_type)
+        pe_type = Var(Entity.property_error_type)
+        return If(
+            except_expr_type == pe_type,
+
+            No(T.SemanticResult.array),
+
+            Self.except_expr.error(
+                S("raised expression needs to be of type `").concat(
+                    pe_type.full_name
+                ).concat(S("`, got `")).concat(
+                    except_expr_type.full_name
+                ).concat(S("`"))
+            ).singleton
+        )
 
 
 class IfExpr(Expr):

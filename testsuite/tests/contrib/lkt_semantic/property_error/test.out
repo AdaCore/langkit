@@ -1,0 +1,111 @@
+Resolving test.lkt
+==================
+Id   <RefId "Bool" test.lkt:1:14-1:18>
+     references <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "PropertyError" test.lkt:1:27-1:40>
+     references <StructDecl prelude: "PropertyError">
+
+Expr <StringLit test.lkt:1:41-1:48>
+     has type <StructDecl prelude: "String">
+
+Expr <CallExpr test.lkt:1:27-1:49>
+     has type <StructDecl prelude: "PropertyError">
+
+Expr <RaiseExpr test.lkt:1:21-1:49>
+     has type <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "Bool" test.lkt:2:14-2:18>
+     references <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "PropertyError" test.lkt:2:28-2:41>
+     references <StructDecl prelude: "PropertyError">
+
+Expr <StringLit test.lkt:2:42-2:49>
+     has type <StructDecl prelude: "String">
+
+Expr <CallExpr test.lkt:2:28-2:50>
+     has type <StructDecl prelude: "PropertyError">
+
+Expr <RaiseExpr test.lkt:2:22-2:50>
+     has type <EnumTypeDecl prelude: "Bool">
+
+Expr <ParenExpr test.lkt:2:21-2:51>
+     has type <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "Bool" test.lkt:5:21-5:25>
+     references <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "PropertyError" test.lkt:5:28-5:41>
+     references <StructDecl prelude: "PropertyError">
+
+Expr <StringLit test.lkt:5:42-5:49>
+     has type <StructDecl prelude: "String">
+
+test.lkt:5:28: error: Mismatched types: expected `Bool`, got `PropertyError`
+4 | @invalid val prop3: Bool = PropertyError("error")
+  |                            ^^^^^^^^^^^^^^^^^^^^^^
+
+Id   <RefId "Bool" test.lkt:6:21-6:25>
+     references <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "PropertyError" test.lkt:6:29-6:42>
+     references <StructDecl prelude: "PropertyError">
+
+Expr <StringLit test.lkt:6:43-6:50>
+     has type <StructDecl prelude: "String">
+
+test.lkt:6:29: error: Mismatched types: expected `Bool`, got `PropertyError`
+5 | @invalid val prop4: Bool = (PropertyError("error"))
+  |                             ^^^^^^^^^^^^^^^^^^^^^^ 
+
+test.lkt:6:28: error: Mismatched types: expected `Bool`, got `PropertyError`
+5 | @invalid val prop4: Bool = (PropertyError("error"))
+  |                            ^^^^^^^^^^^^^^^^^^^^^^^^
+
+Id   <RefId "Bool" test.lkt:8:14-8:18>
+     references <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "Int" test.lkt:9:11-9:14>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:9:17-9:18>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "PropertyError" test.lkt:11:10-11:23>
+     references <StructDecl prelude: "PropertyError">
+
+Expr <StringLit test.lkt:11:24-11:40>
+     has type <StructDecl prelude: "String">
+
+Expr <CallExpr test.lkt:11:10-11:41>
+     has type <StructDecl prelude: "PropertyError">
+
+Expr <RaiseExpr test.lkt:11:4-11:41>
+     has type <EnumTypeDecl prelude: "Bool">
+
+Expr <BlockExpr test.lkt:8:21-12:2>
+     has type <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "Int" test.lkt:15:8-15:11>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:15:14-15:15>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Bool" test.lkt:16:23-16:27>
+     references <EnumTypeDecl prelude: "Bool">
+
+test.lkt:16:36: error: raised expression needs to be of type `PropertyError`, got `Int`
+15 | @invalid fun prop6(): Bool = raise i
+   |                                    ^
+
+Id   <RefId "i" test.lkt:16:36-16:37>
+     references <ValDecl "i" test.lkt:15:1-15:15>
+
+Expr <RefId "i" test.lkt:16:36-16:37>
+     has type <StructDecl prelude: "Int">
+
+Expr <RaiseExpr test.lkt:16:30-16:37>
+     has type <EnumTypeDecl prelude: "Bool">
+
