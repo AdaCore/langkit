@@ -37,6 +37,10 @@ library project ${lib_name} is
 
    type Boolean is ("false", "true");
 
+   Externally_Built : Boolean := external
+     ("${upper_lib_name}_EXTERNALLY_BUILT", "false");
+   for Externally_Built use Externally_Built;
+
    ## Disable style checks on instrumented code
    % if emitter.coverage:
       Enable_Warnings : Boolean := "false";
