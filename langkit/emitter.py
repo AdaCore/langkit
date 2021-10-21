@@ -285,7 +285,8 @@ class Emitter:
         # Add all additional source files to the list of library interfaces and
         # declare them as such in instrumentation metadata.
         for f in context.additional_source_files:
-            self.add_library_interface(f, generated=False)
+            if f.endswith(".ads"):
+                self.add_library_interface(f, generated=False)
 
         if self.coverage:
             # Add the buffer-list unit from GNATcoverage's instrumentation to
@@ -428,7 +429,7 @@ class Emitter:
         class Unit:
             def __init__(self, template_base_name, rel_qual_name,
                          has_body=True, ada_api=False, unparser=False,
-                         cached_body=False):
+                         cached_body=False, is_interface=True):
                 """
                 :param str template_base_name: Common prefix for the name of
                     the templates to use in order to generate spec/body sources
@@ -449,6 +450,9 @@ class Emitter:
                 :param bool cached_body: If true, only register the body as a
                     library interface, i.e. do not generate it, considering
                     that it is cached.
+
+                :param bool is_interface: Whether to include this module in the
+                    generated library interface.
                 """
                 self.template_base_name = template_base_name
                 self.qual_name = (
@@ -459,6 +463,7 @@ class Emitter:
                 self.unparser = unparser
                 self.has_body = has_body
                 self.cached_body = cached_body
+                self.is_interface = is_interface
 
         for u in [
             # Top (pure) package
@@ -486,12 +491,12 @@ class Emitter:
             Unit('pkg_rewriting', 'Rewriting', ada_api=True, unparser=True),
             # Unit for AST rewriting implementation
             Unit('pkg_rewriting_impl', 'Rewriting_Implementation',
-                 unparser=True),
+                 unparser=True, is_interface=False),
             # Unit for AST unparsing primitives
             Unit('pkg_unparsing', 'Unparsing', ada_api=True, unparser=True),
             # Unit for AST implementation of unparsing primitives
             Unit('pkg_unparsing_impl', 'Unparsing_Implementation',
-                 unparser=True),
+                 unparser=True, is_interface=False),
             # Unit for all parsers
             Unit('parsers/pkg_main', 'Parsers'),
             # Units for the lexer
@@ -504,7 +509,7 @@ class Emitter:
             # Unit for the Ada generic Langkit API
             Unit('pkg_generic_api', 'Generic_API', ada_api=True),
             Unit('pkg_generic_introspection', 'Generic_Introspection',
-                 ada_api=True, has_body=False),
+                 ada_api=True, has_body=False, is_interface=False),
         ]:
             if (
                 (not self.generate_ada_api and u.ada_api) or
@@ -513,7 +518,7 @@ class Emitter:
                 continue
             self.write_ada_module(self.src_dir, u.template_base_name,
                                   u.qual_name, u.has_body, u.cached_body,
-                                  in_library=True)
+                                  in_library=True, is_interface=u.is_interface)
 
     def emit_mains(self, ctx):
         """
@@ -554,10 +559,6 @@ class Emitter:
                 render('c_api/header_c'),
                 self.post_process_cpp
             )
-            if False:
-                self.add_library_interface(
-                    header_filename, generated=True, is_ada=False
-                )
 
         self.write_ada_module(
             self.src_dir, 'c_api/pkg_main',
@@ -732,7 +733,8 @@ class Emitter:
             )
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,
-                         has_body=True, cached_body=False, in_library=False):
+                         has_body=True, cached_body=False, in_library=False,
+                         is_interface=True):
         """
         Write an Ada module (both spec and body) using a standardized scheme
         for finding the corresponding templates.
@@ -752,6 +754,9 @@ class Emitter:
 
         :param bool cached_body: If true, only register the body as a library
             interface, i.e. do not generate it, considering that it is cached.
+
+        :param bool is_interface: Whether to include this module in the
+            generated library interface.
         """
         for kind in [ADA_SPEC] + ([ADA_BODY] if has_body else []):
             qual_name_str = '.'.join(n.camel_with_underscores
@@ -759,8 +764,9 @@ class Emitter:
             with_clauses = self.context.with_clauses[(qual_name_str, kind)]
             full_qual_name = [self.context.lib_name] + qual_name
 
-            # Register library modules as library interfaces
-            if in_library:
+            # When requested, register library module specs as library
+            # interfaces.
+            if is_interface and in_library and kind == ADA_SPEC:
                 self.add_library_interface(ada_file_path(out_dir, kind,
                                                          full_qual_name),
                                            generated=True)
