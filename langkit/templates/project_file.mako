@@ -22,6 +22,8 @@ ${exts.include_extension(ctx.ext('withed_projects'))}
                                for p in ctx.additional_source_files)
 
    source_dirs = ["src", emitter.extensions_src_dir]
+
+   upper_lib_name = lib_name.upper()
 %>
 
 library project ${lib_name} is
@@ -31,7 +33,7 @@ library project ${lib_name} is
 
    type Library_Kind_Type is ("static", "relocatable", "static-pic");
    Library_Kind_Param : Library_Kind_Type := external
-     ("LIBRARY_TYPE", external ("LIBADALANG_LIBRARY_TYPE", "static"));
+     ("LIBRARY_TYPE", external ("${upper_lib_name}_LIBRARY_TYPE", "static"));
 
    type Boolean is ("false", "true");
 
