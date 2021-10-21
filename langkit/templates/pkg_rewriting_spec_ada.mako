@@ -10,7 +10,6 @@ with System;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
-private with ${ada_lib_name}.Rewriting_Implementation;
 
 package ${ada_lib_name}.Rewriting is
 
@@ -242,7 +241,6 @@ package ${ada_lib_name}.Rewriting is
    % endfor
 
 private
-   package Impl renames ${ada_lib_name}.Rewriting_Implementation;
 
    --  Workaround S114-026 by not deriving from Impl.Rewriting_Handle directly.
    --  TODO: Cleanup once S114-026 is fixed.

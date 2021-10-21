@@ -5,8 +5,11 @@ with Ada.Unchecked_Conversion;
 with ${ada_lib_name}.Common;
 
 with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
+with ${ada_lib_name}.Rewriting_Implementation;
 
 package body ${ada_lib_name}.Rewriting is
+
+   package Impl renames ${ada_lib_name}.Rewriting_Implementation;
 
    pragma Warnings (Off, "possible aliasing problem for type");
    function Unwrap_RH is new Ada.Unchecked_Conversion
