@@ -285,8 +285,7 @@ class Emitter:
         # Add all additional source files to the list of library interfaces and
         # declare them as such in instrumentation metadata.
         for f in context.additional_source_files:
-            if f.endswith(".ads"):
-                self.add_library_interface(f, generated=False)
+            self.add_library_interface(f, generated=False)
 
         if self.coverage:
             # Add the buffer-list unit from GNATcoverage's instrumentation to
@@ -764,9 +763,8 @@ class Emitter:
             with_clauses = self.context.with_clauses[(qual_name_str, kind)]
             full_qual_name = [self.context.lib_name] + qual_name
 
-            # When requested, register library module specs as library
-            # interfaces.
-            if is_interface and in_library and kind == ADA_SPEC:
+            # When requested, register library module as library interfaces
+            if is_interface and in_library:
                 self.add_library_interface(ada_file_path(out_dir, kind,
                                                          full_qual_name),
                                            generated=True)
