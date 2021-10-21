@@ -236,26 +236,35 @@ class LexicalEnv:
     Wrapper for Lexical_Env/Lexical_Env_Access values.
     """
 
-    wrapper_matcher = RecordAccessMatcher('ast_envs.lexical_env', None)
-    internal_matcher = RecordAccessMatcher('ast_envs.lexical_env_type',
+    wrapper_type_name = 'langkit_support.lexical_envs.lexical_env'
+    internal_matcher = RecordAccessMatcher('ast_envs.lexical_env_record',
                                            'ast_envs.lexical_env_access')
 
     def __init__(self, value: gdb.Value, context: Context):
         self.context = context
 
         if self.matches_wrapper(value, context):
-            self.value = value['env']
+            inner_record_name = context.implname(
+                self.internal_matcher.record_type_name
+            )
+            inner_record_ptr = gdb.lookup_type(inner_record_name).pointer()
+            self.value = value['env'].cast(inner_record_ptr)
+
+        elif not self.matches_access(self.value, context):
+            raise ValueError('Invalid lexical env: {}'.format(self.value))
+
         else:
             self.value = value
-        if not self.matches_access(self.value, context):
-            raise ValueError('Invalid lexical env: {}'.format(self.value))
 
     @classmethod
     def matches_wrapper(cls, value: gdb.Value, context: Context) -> bool:
         """
         Return whether `value` is a Lexical_Env value.
         """
-        return cls.wrapper_matcher.matches_record(value, context)
+        return (
+            value.type.code == gdb.TYPE_CODE_STRUCT
+            and value.type.name == cls.wrapper_type_name
+        )
 
     @classmethod
     def matches_access(cls, value: gdb.Value, context: Context) -> bool:
@@ -265,27 +274,6 @@ class LexicalEnv:
         :rtype: bool
         """
         return cls.internal_matcher.matches_access(value, context)
-
-    @property
-    def _variant(self) -> gdb.Value:
-        """
-        Return the record variant that applies to this env getter.
-        """
-        # With GNAT encodings, GDB exposes the variant part as a field that is
-        # an union. Sometimes it's half-decoded...
-        try:
-            outer_union = self.value['kind___XVN']
-        except gdb.error:
-            return self.value['S']
-
-        if self.kind == 'primary':
-            return outer_union['S0']
-
-        inner_union = outer_union['O']['kind___XVN']
-        field = {'orphaned': 'S1',
-                 'grouped': 'S2',
-                 'rebound': 'S3'}[self.kind]
-        return inner_union[field]
 
     @property
     def kind(self) -> str:
@@ -300,7 +288,7 @@ class LexicalEnv:
 
     @property
     def node(self) -> gdb.Value:
-        return self._variant['node']
+        return self.value['node']
 
     @property
     def ref_count(self) -> gdb.Value:
@@ -310,12 +298,12 @@ class LexicalEnv:
         if not self.value:
             return 'null'
 
-        if self.kind == 'primary':
+        if self.kind in ('static_primary', 'dynamic_primary'):
             empty_env = gdb.lookup_global_symbol(
                 self.context.implname('ast_envs.empty_env_record')
             )
 
-            if self.value == empty_env.value().address:
+            if self.value.address == empty_env.value().address:
                 return '<LexicalEnv empty>'
             elif self.node:
                 return '<LexicalEnv (primary) for {}>'.format(self.node)
@@ -417,11 +405,11 @@ class LexicalEnvPrinter(BasePrinter):
         env = self.env
         if env.kind == 'orphaned':
             yield ('key', 'orphaned')
-            yield ('value', env._variant['orphaned_env'])
+            yield ('value', env.value['orphaned_env'])
 
         elif env.kind == 'grouped':
             # Manually decode the fat pointer that GDB gives us...
-            grouped_envs = env._variant['grouped_envs']
+            grouped_envs = env.value['grouped_envs']
             lower_bound = int(grouped_envs['P_BOUNDS']['LB0'])
             upper_bound = int(grouped_envs['P_BOUNDS']['UB0'])
             array_ptr = grouped_envs['P_ARRAY'].dereference()
@@ -434,10 +422,10 @@ class LexicalEnvPrinter(BasePrinter):
 
         elif env.kind == 'rebound':
             yield ('key', 'rebindings')
-            yield ('value', env._variant['rebindings'])
+            yield ('value', env.value['rebindings'])
 
             yield ('key', 'rebound_env')
-            yield ('value', env._variant['rebound_env'])
+            yield ('value', env.value['rebound_env'])
 
 
 class EnvGetterPrinter(BasePrinter):
