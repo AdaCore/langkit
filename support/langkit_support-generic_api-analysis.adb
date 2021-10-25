@@ -289,7 +289,7 @@ package body Langkit_Support.Generic_API.Analysis is
       Reject_Null_Unit (Self);
 
       declare
-         Desc : Language_Descriptor renames Self.Context.Desc.all;
+         Desc   : Language_Descriptor renames Self.Context.Desc.all;
          Result : constant Internal_Node := Desc.Unit_Root (Self.Internal);
       begin
          return Wrap (Result, Self);

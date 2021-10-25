@@ -97,7 +97,7 @@ private
    --  ``No_Grammar_Rule_Ref``.
 
    procedure Check_Grammar_Rule (Id : Language_Id; Rule : Grammar_Rule_Index);
-   --  If Rule is not a valid grammar rule for Id, raise a
+   --  If ``Rule`` is not a valid grammar rule for Id, raise a
    --  ``Precondition_Failure`` exception.
 
    type Grammar_Rule_Ref is record
