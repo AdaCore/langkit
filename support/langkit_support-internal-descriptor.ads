@@ -104,6 +104,11 @@ package Langkit_Support.Internal.Descriptor is
       Default_Grammar_Rule : Grammar_Rule_Index;
       Grammar_Rule_Names   : Grammar_Rule_Name_Array_Access;
 
+      --  Descriptors for token kinds. The table for names also defines the
+      --  range of supported kinds for this language.
+
+      Token_Kind_Names : Token_Kind_Name_Array_Access;
+
       --  Descriptors for introspection capabilities
 
       Types        : Type_Descriptor_Array_Access;

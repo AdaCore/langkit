@@ -32,6 +32,10 @@ with Langkit_Support.Names; use Langkit_Support.Names;
 
 package Langkit_Support.Generic_API is
 
+   ------------------
+   -- Language IDs --
+   ------------------
+
    type Any_Language_Id is private;
    No_Language_Id : constant Any_Language_Id;
    subtype Language_Id is Any_Language_Id
@@ -41,6 +45,10 @@ package Langkit_Support.Generic_API is
    function Language_Name (Id : Language_Id) return Name_Type;
    --  Return the name of the language that the library corresponding to ``Id``
    --  analyzes.
+
+   -------------------
+   -- Grammar rules --
+   -------------------
 
    type Grammar_Rule_Ref is private;
    --  Reference to a grammar rule for a given language
@@ -85,12 +93,61 @@ package Langkit_Support.Generic_API is
    function Last_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Index;
    --  Return the index of the last grammar rule for the given language
 
+   -----------------
+   -- Token kinds --
+   -----------------
+
+   type Token_Kind_Ref is private;
+   --  Reference to a token kind for a given language
+
+   No_Token_Kind_Ref : constant Token_Kind_Ref;
+   --  Special value to express no token kind reference
+
+   function Language_For (Kind : Token_Kind_Ref) return Language_Id;
+   --  Return the language ID corresponding to the given token kind. Raise a
+   --  ``Precondition_Failure`` exception if ``Kind`` is ``No_Token_Kind_Ref``.
+
+   function Token_Kind_Name (Kind : Token_Kind_Ref) return Name_Type;
+   --  Return the name for the given token kind. Raise a
+   --  ``Precondition_Failure`` exception if ``Kind`` is ``No_Token_Kind_Ref``.
+
+   type Any_Token_Kind_Index is new Natural;
+   subtype Token_Kind_Index is
+     Any_Token_Kind_Index range 1 ..  Any_Token_Kind_Index'Last;
+   No_Token_Kind_Index : constant Any_Token_Kind_Index := 0;
+   --  Language-specific index to designate a token kind.
+   --
+   --  A given languages accepts ``N`` token kinds, so the only valid indexes
+   --  for it are ``1 .. N``. The ``Last_Token_Kind`` function below gives the
+   --  actual ``N`` for a given language.
+
+   function To_Index (Kind : Token_Kind_Ref) return Token_Kind_Index;
+   --  Return the index of the given token kind. Raise a
+   --  ``Precondition_Failure`` exception if ``Kind`` is ``No_Token_Kind``.
+
+   function From_Index
+     (Id : Language_Id; Kind : Token_Kind_Index) return Token_Kind_Ref;
+   --  Return the token kind for the given language corresponding to the
+   --  ``Kind`` index. Raise a ``Precondition_Failure`` exception if ``Kind``
+   --  is not a valid token kind index for the given language.
+
+   function Last_Token_Kind (Id : Language_Id) return Token_Kind_Index;
+   --  Return the index of the last token kind for the given language
+
 private
+
+   ------------------
+   -- Language IDs --
+   ------------------
 
    type Any_Language_Id is
      access constant Langkit_Support.Internal.Descriptor.Language_Descriptor;
 
    No_Language_Id : constant Any_Language_Id := null;
+
+   -------------------
+   -- Grammar rules --
+   -------------------
 
    procedure Check_Grammar_Rule (Rule : Grammar_Rule_Ref);
    --  Raise a ``Precondition_Failure`` exception if ``Rule`` is
@@ -109,5 +166,27 @@ private
    end record;
 
    No_Grammar_Rule_Ref : constant Grammar_Rule_Ref := (null, 0);
+
+   -----------------
+   -- Token kinds --
+   -----------------
+
+   procedure Check_Token_Kind (Kind : Token_Kind_Ref);
+   --  Raise a ``Precondition_Failure`` exception if ``Kind`` is
+   --  ``No_Token_Kind_Ref``.
+
+   procedure Check_Token_Kind (Id : Language_Id; Kind : Token_Kind_Index);
+   --  If ``Kind`` is not a valid token kind for Id, raise a
+   --  ``Precondition_Failure`` exception.
+
+   type Token_Kind_Ref is record
+      Id    : Any_Language_Id;
+      Index : Any_Token_Kind_Index;
+      --  Either this is ``No_Token_Kind_Ref``, and in that case both members
+      --  should be null/zero, either ``Index`` designates a valid token kind
+      --  for the language ``Id`` represents.
+   end record;
+
+   No_Token_Kind_Ref : constant Token_Kind_Ref := (null, 0);
 
 end Langkit_Support.Generic_API;

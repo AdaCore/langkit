@@ -11,6 +11,31 @@ Grammar rules:
   Ref
   Name
 
+Token kinds:
+  Termination
+  Lexing_Failure
+  Whitespace
+  Def
+  Var
+  Error
+  Example
+  Null_Tok
+  Comma
+  Dot
+  Semicolon
+  L_Par
+  R_Par
+  L_Brace
+  R_Brace
+  Equal
+  Plus
+  Minus
+  Less_Than
+  Number
+  Identifier
+  String
+  Comment
+
 Use of null context:
 Got a Precondition_Failure exception: null context
 

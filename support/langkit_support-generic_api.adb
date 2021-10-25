@@ -126,4 +126,77 @@ package body Langkit_Support.Generic_API is
       end if;
    end Check_Grammar_Rule;
 
+   ------------------
+   -- Language_For --
+   ------------------
+
+   function Language_For (Kind : Token_Kind_Ref) return Language_Id is
+   begin
+      Check_Token_Kind (Kind);
+      return Kind.Id;
+   end Language_For;
+
+   ---------------------
+   -- Token_Kind_Name --
+   ---------------------
+
+   function Token_Kind_Name (Kind : Token_Kind_Ref) return Name_Type is
+   begin
+      return Create_Name (Kind.Id.Token_Kind_Names (Kind.Index).all);
+   end Token_Kind_Name;
+
+   --------------
+   -- To_Index --
+   --------------
+
+   function To_Index (Kind : Token_Kind_Ref) return Token_Kind_Index is
+   begin
+      Check_Token_Kind (Kind);
+      return Kind.Index;
+   end To_Index;
+
+   ----------------
+   -- From_Index --
+   ----------------
+
+   function From_Index
+     (Id : Language_Id; Kind : Token_Kind_Index) return Token_Kind_Ref is
+   begin
+      Check_Token_Kind (Id, Kind);
+      return (Id, Kind);
+   end From_Index;
+
+   ---------------------
+   -- Last_Token_Kind --
+   ---------------------
+
+   function Last_Token_Kind (Id : Language_Id) return Token_Kind_Index is
+   begin
+      return Id.Token_Kind_Names'Last;
+   end Last_Token_Kind;
+
+   ----------------------
+   -- Check_Token_Kind --
+   ----------------------
+
+   procedure Check_Token_Kind (Kind : Token_Kind_Ref) is
+   begin
+      if Kind.Id = null then
+         raise Precondition_Failure with "null token kind reference";
+      end if;
+   end Check_Token_Kind;
+
+   ----------------------
+   -- Check_Token_Kind --
+   ----------------------
+
+   procedure Check_Token_Kind (Id : Language_Id; Kind : Token_Kind_Index)
+   is
+   begin
+      if Kind not in Id.Token_Kind_Names.all'Range then
+         raise Precondition_Failure with
+           "invalid token kind for this language";
+      end if;
+   end Check_Token_Kind;
+
 end Langkit_Support.Generic_API;
