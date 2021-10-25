@@ -21,6 +21,11 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;
+with Ada.Unchecked_Conversion;
+
+with GNATCOLL.VFS;
+
 with Langkit_Support.Errors;       use Langkit_Support.Errors;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
@@ -35,23 +40,58 @@ package body Langkit_Support.Generic_API.Analysis is
    --  Create a safety net for a node, to make sure that later access to that
    --  node does not use a stale unit or stale rebindings.
 
+   function Create_Token_Safety_Net
+     (TDH  : Token_Data_Handler_Access;
+      Unit : Lk_Unit'Class) return Token_Safety_Net;
+   --  Create a safety net for a token, to make sure that later access to that
+   --  token does not use stale data.
+
    procedure Check_Safety_Net (Node : Lk_Node'Class);
    --  Check that the unit and rebindings referenced by Node are not stale.
-   --  Raise a Stale_Reference_Error exception if one of them are stale.
+   --  Raise a ``Stale_Reference_Error`` exception if one of them are stale.
+
+   procedure Check_Safety_Net (Token : Lk_Token'Class);
+   --  Raise a ``Stale_Reference_Error`` exception in ``Token`` is stale
 
    procedure Reject_Null_Context (Context : Lk_Context'Class);
    procedure Reject_Null_Unit (Unit : Lk_Unit'Class);
    procedure Reject_Null_Node (Node : Lk_Node'Class);
-   --  Raise a Precondition_Failure exception if Context/Unit/Node is null
+   procedure Reject_Null_Token (Token : Lk_Token'Class);
+   --  Raise a ``Precondition_Failure`` exception if
+   --  ``Context``/``Unit``/``Node``/``Token`` is null.
+
+   procedure Check_Same_Unit (Left, Right : Lk_Token'Class);
+   --  Raise a ``Precondition_Failure`` exception if ``Left`` and ``Right`` do
+   --  not belong to the same unit.
 
    function Wrap (Node : Internal_Node; Unit : Lk_Unit'Class) return Lk_Node;
-   --  Return a public node to wrap Node, given an existing non-null reference
-   --  to its owning Unit.
+   --  Return a public node to wrap ``Node``, given an existing non-null
+   --  reference to its owning Unit.
 
    function Wrap_Node
      (Node : Internal_Node; Origin_Node : Lk_Node'Class) return Lk_Node;
-   --  Return a public node to wrap Node. Use safety net and entity info from
-   --  Origin_Node.
+   --  Return a public node to wrap ``Node``. Use safety net and entity info
+   --  from ``Origin_Node``.
+
+   function Wrap
+     (Token : Internal_Token; Unit : Lk_Unit'Class) return Lk_Token;
+   --  Return a public token reference to wrap ``Token``. ``Unit`` must own
+   --  the unit that produced this token.
+
+   function Wrap
+     (Token : Internal_Token; Node : Lk_Node'Class) return Lk_Token;
+   --  Return a public token reference to wrap ``Token``. ``Node`` must belong
+   --  to the same analysis unit.
+
+   function Wrap_Token
+     (Token : Internal_Token; Origin_Token : Lk_Token'Class) return Lk_Token;
+   --  Return a public token reference to wrap ``Token``. Use safety net from
+   --  ``Origin Token``.
+
+   function "+" (Kind : Raw_Token_Kind) return Token_Kind_Index
+   is (Token_Kind_Index (Kind) + 1);
+   --  ``Raw_Token_Kind`` is a 0-based index type, whereas ``Token_Kind_Index``
+   --  is a 1-based one.
 
    ----------------------------
    -- Create_Node_Safety_Net --
@@ -73,6 +113,23 @@ package body Langkit_Support.Generic_API.Analysis is
                                 then 0
                                 else Rebindings.Version));
    end Create_Node_Safety_Net;
+
+   -----------------------------
+   -- Create_Token_Safety_Net --
+   -----------------------------
+
+   function Create_Token_Safety_Net
+     (TDH  : Token_Data_Handler_Access;
+      Unit : Lk_Unit'Class) return Token_Safety_Net
+   is
+      Desc    : Language_Descriptor renames Unit.Context.Desc.all;
+      Context : constant Internal_Context := Unit.Context.Internal;
+   begin
+      return
+        (Context         => Context,
+         Context_Version => Desc.Context_Version (Context),
+         TDH_Version     => TDH.Version);
+   end Create_Token_Safety_Net;
 
    ----------------------
    -- Check_Safety_Net --
@@ -108,6 +165,33 @@ package body Langkit_Support.Generic_API.Analysis is
       end if;
    end Check_Safety_Net;
 
+   ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net (Token : Lk_Token'Class) is
+      Desc       : constant Any_Language_Id := Token.Desc;
+      Safety_Net : Token_Safety_Net renames Token.Safety_Net;
+   begin
+      --  Nothing to check if TDH is null. If it is not, we know that the
+      --  context is not null.
+      if Token.TDH = null then
+         return;
+      end if;
+
+      --  Check that the context has not been released since the creation of
+      --  this safety net.
+      if Desc.Context_Version (Safety_Net.Context)
+         /= Safety_Net.Context_Version
+      then
+         raise Stale_Reference_Error with "context was released";
+
+      --  Then check that the TDH version is the same
+      elsif Token.TDH.Version /= Safety_Net.TDH_Version then
+         raise Stale_Reference_Error with "unit was reparsed";
+      end if;
+   end Check_Safety_Net;
+
    -------------------------
    -- Reject_Null_Context --
    -------------------------
@@ -140,6 +224,28 @@ package body Langkit_Support.Generic_API.Analysis is
          raise Precondition_Failure with "null node";
       end if;
    end Reject_Null_Node;
+
+   -----------------------
+   -- Reject_Null_Token --
+   -----------------------
+
+   procedure Reject_Null_Token (Token : Lk_Token'Class) is
+   begin
+      if Token.Desc = null then
+         raise Precondition_Failure with "null token";
+      end if;
+   end Reject_Null_Token;
+
+   ---------------------
+   -- Check_Same_Unit --
+   ---------------------
+
+   procedure Check_Same_Unit (Left, Right : Lk_Token'Class) is
+   begin
+      if Left.TDH /= Right.TDH then
+         raise Precondition_Failure with "tokens from different units";
+      end if;
+   end Check_Same_Unit;
 
    ----------
    -- Wrap --
@@ -183,6 +289,55 @@ package body Langkit_Support.Generic_API.Analysis is
                              Metadata     => E.Metadata),
               Safety_Net => Origin_Node.Safety_Net);
    end Wrap_Node;
+
+   ----------
+   -- Wrap --
+   ----------
+
+   function Wrap
+     (Token : Internal_Token; Unit : Lk_Unit'Class) return Lk_Token is
+   begin
+      --  Null token must always be equal to the dedicated constant
+      if Token.Index = No_Token_Or_Trivia_Index then
+         return No_Lk_Token;
+      end if;
+
+      declare
+         Desc       : constant Any_Language_Id := Unit.Context.Desc;
+         Safety_Net : constant Token_Safety_Net :=
+           Create_Token_Safety_Net (Token.TDH, Unit);
+      begin
+         return (Desc, Token.TDH, Token.Index, Safety_Net);
+      end;
+   end Wrap;
+
+   ----------
+   -- Wrap --
+   ----------
+
+   function Wrap
+     (Token : Internal_Token; Node : Lk_Node'Class) return Lk_Token is
+   begin
+      return Wrap (Token, Node.Unit);
+   end Wrap;
+
+   ----------------
+   -- Wrap_Token --
+   ----------------
+
+   function Wrap_Token
+     (Token : Internal_Token; Origin_Token : Lk_Token'Class) return Lk_Token is
+   begin
+      --  Null token must always be equal to the dedicated constant
+      if Token.Index = No_Token_Or_Trivia_Index then
+         return No_Lk_Token;
+      end if;
+
+      return (Desc       => Origin_Token.Desc,
+              TDH        => Token.TDH,
+              Index      => Token.Index,
+              Safety_Net => Origin_Token.Safety_Net);
+   end Wrap_Token;
 
    --------------------
    -- Create_Context --
@@ -307,6 +462,40 @@ package body Langkit_Support.Generic_API.Analysis is
          return Wrap (Result, Self);
       end;
    end Root;
+
+   -----------------
+   -- First_Token --
+   -----------------
+
+   function First_Token (Self : Lk_Unit'Class) return Lk_Token is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc   : Language_Descriptor renames Self.Context.Desc.all;
+         Result : constant Internal_Token :=
+           Desc.Unit_First_Token (Self.Internal);
+      begin
+         return Wrap (Result, Self);
+      end;
+   end First_Token;
+
+   ----------------
+   -- Last_Token --
+   ----------------
+
+   function Last_Token (Self : Lk_Unit'Class) return Lk_Token is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc   : Language_Descriptor renames Self.Context.Desc.all;
+         Result : constant Internal_Token :=
+           Desc.Unit_Last_Token (Self.Internal);
+      begin
+         return Wrap (Result, Self);
+      end;
+   end Last_Token;
 
    ----------
    -- Unit --
@@ -529,6 +718,234 @@ package body Langkit_Support.Generic_API.Analysis is
    begin
       null;
    end Traverse;
+
+   -----------------
+   -- Token_Start --
+   -----------------
+
+   function Token_Start (Self : Lk_Node'Class) return Lk_Token is
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+
+      declare
+         Desc   : Language_Descriptor renames Self.Desc.all;
+         Result : constant Internal_Token :=
+           Desc.Node_Token_Start (Self.Internal.Node);
+      begin
+         return Wrap (Result, Self);
+      end;
+   end Token_Start;
+
+   ---------------
+   -- Token_End --
+   ---------------
+
+   function Token_End (Self : Lk_Node'Class) return Lk_Token is
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+
+      declare
+         Desc   : Language_Descriptor renames Self.Desc.all;
+         Result : constant Internal_Token :=
+           Desc.Node_Token_End (Self.Internal.Node);
+      begin
+         return Wrap (Result, Self);
+      end;
+   end Token_End;
+
+   -------------
+   -- Is_Null --
+   -------------
+
+   function Is_Null (Self : Lk_Token'Class) return Boolean is
+   begin
+      return Self.Desc = null;
+   end Is_Null;
+
+   ----------
+   -- Kind --
+   ----------
+
+   function Kind (Self : Lk_Token'Class) return Token_Kind_Ref is
+      D : Stored_Token_Data;
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Token (Self);
+
+      D := Data (Self.Index, Self.TDH.all);
+      return From_Index (Self.Desc, +D.Kind);
+   end Kind;
+
+   ---------
+   -- "<" --
+   ---------
+
+   function "<" (Left, Right : Lk_Token'Class) return Boolean is
+   begin
+      Check_Safety_Net (Left);
+      Check_Safety_Net (Right);
+      Check_Same_Unit (Left, Right);
+
+      if Left.Index.Token < Right.Index.Token then
+         return True;
+
+      elsif Left.Index.Token = Right.Index.Token then
+         return Left.Index.Trivia < Right.Index.Trivia;
+
+      else
+         return False;
+      end if;
+   end "<";
+
+   ----------
+   -- Next --
+   ----------
+
+   function Next
+     (Self           : Lk_Token'Class;
+      Exclude_Trivia : Boolean := False) return Lk_Token'Class
+   is
+      Result : Token_Or_Trivia_Index;
+   begin
+      Check_Safety_Net (Self);
+      if Self.Is_Null then
+         return No_Lk_Token;
+      end if;
+
+      Result := Next (Self.Index, Self.TDH.all, Exclude_Trivia);
+      return Wrap_Token ((Self.TDH, Result), Self);
+   end Next;
+
+   --------------
+   -- Previous --
+   --------------
+
+   function Previous
+     (Self           : Lk_Token'Class;
+      Exclude_Trivia : Boolean := False) return Lk_Token'Class
+   is
+      Result : Token_Or_Trivia_Index;
+   begin
+      Check_Safety_Net (Self);
+      if Self.Is_Null then
+         return No_Lk_Token;
+      end if;
+
+      Result := Previous (Self.Index, Self.TDH.all, Exclude_Trivia);
+      return Wrap_Token ((Self.TDH, Result), Self);
+   end Previous;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Self : Lk_Token'Class) return String is
+   begin
+      Check_Safety_Net (Self);
+      if Self.Is_Null then
+         return "<No Token>";
+      end if;
+
+      declare
+         Name : constant Name_Type := Token_Kind_Name (Self.Kind);
+         Text : constant Text_Type := Self.Text;
+      begin
+         return "<Token Kind="
+                & Image (Format_Name (Name, Camel_With_Underscores))
+                & " Text=" & Image (Text, With_Quotes => True) & ">";
+      end;
+   end Image;
+
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Self : Lk_Token'Class) return Text_Type is
+      D : Stored_Token_Data;
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Token (Self);
+
+      D := Data (Self.Index, Self.TDH.all);
+      return Self.TDH.Source_Buffer (D.Source_First .. D.Source_Last);
+   end Text;
+
+   ----------
+   -- Text --
+   ----------
+
+   function Text (First, Last : Lk_Token'Class) return Text_Type is
+      FD, LD : Stored_Token_Data;
+   begin
+      Check_Safety_Net (First);
+      Check_Safety_Net (Last);
+      Check_Same_Unit (First, Last);
+
+      FD := Data (First.Index, First.TDH.all);
+      LD := Data (Last.Index, First.TDH.all);
+      return First.TDH.Source_Buffer (FD.Source_First .. LD.Source_Last);
+   end Text;
+
+   ---------------
+   -- Is_Trivia --
+   ---------------
+
+   function Is_Trivia (Self : Lk_Token'Class) return Boolean is
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Token (Self);
+      return Self.Index.Trivia /= No_Token_Index;
+   end Is_Trivia;
+
+   -----------
+   -- Index --
+   -----------
+
+   function Index (Self : Lk_Token'Class) return Token_Index is
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Token (Self);
+      return (if Self.Index.Trivia = No_Token_Index
+              then Self.Index.Token
+              else Self.Index.Trivia);
+   end Index;
+
+   ----------------
+   -- Sloc_Range --
+   ----------------
+
+   function Sloc_Range (Self : Lk_Token'Class) return Source_Location_Range is
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Token (Self);
+      return Sloc_Range (Self.TDH.all, Data (Self.Index, Self.TDH.all));
+   end Sloc_Range;
+
+   ---------------------
+   -- Origin_Filename --
+   ---------------------
+
+   function Origin_Filename (Self : Lk_Token'Class) return String is
+      use GNATCOLL.VFS;
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Token (Self);
+      return +Self.TDH.Filename.Full_Name;
+   end Origin_Filename;
+
+   --------------------
+   -- Origin_Charset --
+   --------------------
+
+   function Origin_Charset (Self : Lk_Token'Class) return String is
+      use Ada.Strings.Unbounded;
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Token (Self);
+      return To_String (Self.TDH.Charset);
+   end Origin_Charset;
 
    ----------------
    -- Initialize --

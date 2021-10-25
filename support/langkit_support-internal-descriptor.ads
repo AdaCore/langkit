@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Unchecked_Conversion;
+
 with Langkit_Support.File_Readers;      use Langkit_Support.File_Readers;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Introspection;
@@ -72,6 +74,8 @@ package Langkit_Support.Internal.Descriptor is
      (Unit : Internal_Unit) return String;
    type Unit_Root_Type is access function
      (Unit : Internal_Unit) return Internal_Node;
+   type Unit_Token_Getter_Type is access function
+     (Unit : Internal_Unit) return Internal_Token;
    type Unit_Get_Line_Type is access function
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
 
@@ -91,6 +95,9 @@ package Langkit_Support.Internal.Descriptor is
       Result          : out Internal_Node);
    type Node_Fetch_Sibling_Type is access function
      (Node : Internal_Node; Offset : Integer) return Internal_Node;
+
+   type Node_Token_Getter_Type is access function
+     (Node : Internal_Node) return Internal_Token;
 
    type Entity_Image_Type is access function
      (Entity : Internal_Entity) return String;
@@ -142,10 +149,12 @@ package Langkit_Support.Internal.Descriptor is
       Context_Get_From_File : Context_Get_From_File_Type;
       Context_Has_Unit      : Context_Has_Unit_Type;
 
-      Unit_Version  : Unit_Version_Type;
-      Unit_Filename : Unit_Filename_Type;
-      Unit_Root     : Unit_Root_Type;
-      Unit_Get_Line : Unit_Get_Line_Type;
+      Unit_Version     : Unit_Version_Type;
+      Unit_Filename    : Unit_Filename_Type;
+      Unit_Root        : Unit_Root_Type;
+      Unit_First_Token : Unit_Token_Getter_Type;
+      Unit_Last_Token  : Unit_Token_Getter_Type;
+      Unit_Get_Line    : Unit_Get_Line_Type;
 
       Node_Metadata_Inc_Ref : Node_Metadata_Inc_Ref_Type;
       Node_Metadata_Dec_Ref : Node_Metadata_Dec_Ref_Type;
@@ -154,6 +163,8 @@ package Langkit_Support.Internal.Descriptor is
       Node_Children_Count : Node_Children_Count_Type;
       Node_Get_Child      : Node_Get_Child_Type;
       Node_Fetch_Sibling  : Node_Fetch_Sibling_Type;
+      Node_Token_Start    : Node_Token_Getter_Type;
+      Node_Token_End      : Node_Token_Getter_Type;
 
       Entity_Image : Entity_Image_Type;
    end record;
