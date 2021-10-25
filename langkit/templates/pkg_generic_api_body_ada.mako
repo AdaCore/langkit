@@ -17,7 +17,8 @@ with ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Generic_Introspection;
 use ${ada_lib_name}.Generic_Introspection;
-with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
+with ${ada_lib_name}.Private_Converters; use ${ada_lib_name}.Private_Converters;
+with ${ada_lib_name}.Public_Converters;  use ${ada_lib_name}.Public_Converters;
 
 package body ${ada_lib_name}.Generic_API is
 
@@ -45,6 +46,9 @@ package body ${ada_lib_name}.Generic_API is
    is (Common.Grammar_Rule'Val (Rule - 1));
    --  Grammar rules start at 1 in the generic API: rebase the value before
    --  converting it to the native type.
+
+   function "+" (Token : Common.Token_Reference) return Internal_Token
+   is ((Get_Token_TDH (Token), Get_Token_Index (Token)));
 
    --  Descriptors for grammar rules
 
@@ -102,6 +106,8 @@ package body ${ada_lib_name}.Generic_API is
    function Unit_Version (Unit : Internal_Unit) return Version_Number;
    function Unit_Filename (Unit : Internal_Unit) return String;
    function Unit_Root (Unit : Internal_Unit) return Internal_Node;
+   function Unit_First_Token (Unit : Internal_Unit) return Internal_Token;
+   function Unit_Last_Token (Unit : Internal_Unit) return Internal_Token;
    function Unit_Get_Line
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
 
@@ -127,6 +133,8 @@ package body ${ada_lib_name}.Generic_API is
       Result          : out Internal_Node);
    function Node_Fetch_Sibling
      (Node : Internal_Node; Offset : Integer) return Internal_Node;
+   function Node_Token_Start (Node : Internal_Node) return Internal_Token;
+   function Node_Token_End (Node : Internal_Node) return Internal_Token;
 
    function Entity_Image (Entity : Internal_Entity) return String;
 
@@ -265,6 +273,26 @@ package body ${ada_lib_name}.Generic_API is
       return +U.AST_Root;
    end Unit_Root;
 
+   ----------------------
+   -- Unit_First_Token --
+   ----------------------
+
+   function Unit_First_Token (Unit : Internal_Unit) return Internal_Token is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return +Implementation.First_Token (U);
+   end Unit_First_Token;
+
+   ---------------------
+   -- Unit_Last_Token --
+   ---------------------
+
+   function Unit_Last_Token (Unit : Internal_Unit) return Internal_Token is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return +Implementation.Last_Token (U);
+   end Unit_Last_Token;
+
    -------------------
    -- Unit_Get_Line --
    -------------------
@@ -350,6 +378,24 @@ package body ${ada_lib_name}.Generic_API is
       return +Implementation.Fetch_Sibling (+Node, Offset);
    end Node_Fetch_Sibling;
 
+   ----------------------
+   -- Node_Token_Start --
+   ----------------------
+
+   function Node_Token_Start (Node : Internal_Node) return Internal_Token is
+   begin
+      return +Implementation.Token_Start (+Node);
+   end Node_Token_Start;
+
+   --------------------
+   -- Node_Token_End --
+   --------------------
+
+   function Node_Token_End (Node : Internal_Node) return Internal_Token is
+   begin
+      return +Implementation.Token_End (+Node);
+   end Node_Token_End;
+
    ------------------
    -- Entity_Image --
    ------------------
@@ -393,10 +439,12 @@ package body ${ada_lib_name}.Generic_API is
       Context_Has_Unit      => Context_Has_Unit'Access,
       Context_Get_From_File => Context_Get_From_File'Access,
 
-      Unit_Version  => Unit_Version'Access,
-      Unit_Filename => Unit_Filename'Access,
-      Unit_Root     => Unit_Root'Access,
-      Unit_Get_Line => Unit_Get_Line'Access,
+      Unit_Version     => Unit_Version'Access,
+      Unit_Filename    => Unit_Filename'Access,
+      Unit_Root        => Unit_Root'Access,
+      Unit_First_Token => Unit_First_Token'Access,
+      Unit_Last_Token  => Unit_Last_Token'Access,
+      Unit_Get_Line    => Unit_Get_Line'Access,
 
       Node_Metadata_Inc_Ref => Node_Metadata_Inc_Ref'Access,
       Node_Metadata_Dec_Ref => Node_Metadata_Dec_Ref'Access,
@@ -405,6 +453,8 @@ package body ${ada_lib_name}.Generic_API is
       Node_Children_Count => Node_Children_Count'Access,
       Node_Get_Child      => Node_Get_Child'Access,
       Node_Fetch_Sibling  => Node_Fetch_Sibling'Access,
+      Node_Token_Start    => Node_Token_Start'Access,
+      Node_Token_End      => Node_Token_End'Access,
 
       Entity_Image => Entity_Image'Access);
 

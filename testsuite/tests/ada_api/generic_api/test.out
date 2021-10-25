@@ -46,7 +46,6 @@ Use of null node:
 Got a Precondition_Failure exception: null node
 
 Parsing example.txt...
-Base filename: example.txt
 Has example.txt? -> TRUE
 Has foo.txt? -> FALSE
 Line 2:
@@ -74,6 +73,41 @@ Root.Child (2).Previous_Sibling.Image -> <VarDecl example.txt:1:1-1:11>
 Root.Children:
   -> <VarDecl example.txt:1:1-1:11>
   -> <VarDecl example.txt:2:1-2:15>
+
+Testing various token operations:
+No_Lk_Token.Is_Null -> TRUE
+First_Token.Is_Null -> FALSE
+First_Token.Kind -> Var
+First_Token.Image -> <Token Kind=Var Text="var">
+No_Lk_Token.Image -> <No Token>
+First_Token.Text -> "var"
+No_Lk_Token.Text -> Got a Precondition_Failure exception: null token
+No_Lk_Token.Next -> <No Token>
+First_Token.Next -> <Token Kind=Whitespace Text=" ">
+Last_Token.Next -> <No Token>
+No_Lk_Token.Previous -> <No Token>
+First_Token.Previous -> <No Token>
+Last_Token.Previous -> <Token Kind=Whitespace Text="\x0a">
+First_Token.Is_Trivia -> FALSE
+Last_Token.Is_Trivia -> FALSE
+Last_Token.Previous.Is_Trivia -> TRUE
+First_Token.Index -> 1
+
+Testing ordering predicate for various cases:
+First_Token < Last_Token: -> TRUE
+First_Token < No_Lk_Token: -> Got a Precondition_Failure exception: tokens from different units
+No_Lk_Token < Last_Token: -> Got a Precondition_Failure exception: tokens from different units
+First_Token < Other_Unit -> Got a Precondition_Failure exception: tokens from different units
+First_Token < Stale -> Got a Stale_Reference_Error exception: unit was reparsed
+Stale < Last_Token -> Got a Stale_Reference_Error exception: unit was reparsed
+
+Testing text range for various cases:
+First_Token .. Last_Token: -> "var a = 0;\x0avar b = 1 + a;\x0a# Comment\x0a"
+First_Token .. No_Lk_Token: -> Got a Precondition_Failure exception: tokens from different units
+No_Lk_Token .. Last_Token: -> Got a Precondition_Failure exception: tokens from different units
+First_Token .. Other_Unit -> Got a Precondition_Failure exception: tokens from different units
+First_Token .. Stale -> Got a Stale_Reference_Error exception: unit was reparsed
+Stale .. Last_Token -> Got a Stale_Reference_Error exception: unit was reparsed
 
 Use of stale node reference:
 Got a Stale_Reference_Error exception: unit was reparsed

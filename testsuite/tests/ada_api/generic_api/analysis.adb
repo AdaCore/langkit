@@ -1,8 +1,6 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
-with GNATCOLL.VFS; use GNATCOLL.VFS;
-
 with Langkit_Support.Errors;      use Langkit_Support.Errors;
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Analysis;
@@ -105,8 +103,6 @@ begin
       raise Program_Error with "wrong node->unit backlink";
    end if;
 
-   Put_Line ("Base filename: " & (+Create (+U.Filename).Base_Name));
-
    declare
       Has_1 : constant Boolean := Ctx.Has_Unit ("example.txt");
       Has_2 : constant Boolean := Ctx.Has_Unit ("foo.txt");
@@ -163,6 +159,113 @@ begin
    for C of U.Root.Children loop
       Put_Line ("  -> " & C.Image);
    end loop;
+   New_Line;
+
+   Put_Line ("Testing various token operations:");
+   Put_Line ("No_Lk_Token.Is_Null -> " & No_Lk_Token.Is_Null'Image);
+   Put_Line ("First_Token.Is_Null -> " & U.First_Token.Is_Null'Image);
+   Put_Line ("First_Token.Kind -> "
+             & Image (Format_Name (Token_Kind_Name (U.First_Token.Kind),
+                                   Camel_With_Underscores)));
+   Put_Line ("First_Token.Image -> " & U.First_Token.Image);
+   Put_Line ("No_Lk_Token.Image -> " & No_Lk_Token.Image);
+   Put_Line ("First_Token.Text -> "
+             & Image (U.First_Token.Text, With_Quotes => True));
+   Put ("No_Lk_Token.Text -> ");
+   begin
+      Put_Line (Image (No_Lk_Token.Text, With_Quotes => True));
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   Put_Line ("No_Lk_Token.Next -> " & No_Lk_Token.Next.Image);
+   Put_Line ("First_Token.Next -> " & U.First_Token.Next.Image);
+   Put_Line ("Last_Token.Next -> " & U.Last_Token.Next.Image);
+   Put_Line ("No_Lk_Token.Previous -> " & No_Lk_Token.Previous.Image);
+   Put_Line ("First_Token.Previous -> " & U.First_Token.Previous.Image);
+   Put_Line ("Last_Token.Previous -> " & U.Last_Token.Previous.Image);
+   Put_Line ("First_Token.Is_Trivia -> " & U.First_Token.Is_Trivia'Image);
+   Put_Line ("Last_Token.Is_Trivia -> " & U.Last_Token.Is_Trivia'Image);
+   Put_Line ("Last_Token.Previous.Is_Trivia -> "
+             & U.Last_Token.Previous.Is_Trivia'Image);
+   Put_Line ("First_Token.Index ->" & U.First_Token.Index'Image);
+   New_Line;
+
+   Put_Line ("Testing ordering predicate for various cases:");
+   declare
+      FT : constant Lk_Token := U.First_Token;
+      LT : constant Lk_Token := U.Last_Token;
+
+      U2 : constant Lk_Unit := Ctx.Get_From_File ("example2.txt");
+
+      procedure Check (Label : String; Left, Right : Lk_Token);
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check (Label : String; Left, Right : Lk_Token) is
+         Result : Boolean;
+      begin
+         Put (Label & " -> ");
+         Result := Left < Right;
+         Put_Line (Result'Image);
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Line ("Got a Precondition_Failure exception: "
+                      & Exception_Message (Exc));
+         when Exc : Stale_Reference_Error =>
+            Put_Line ("Got a Stale_Reference_Error exception: "
+                      & Exception_Message (Exc));
+      end Check;
+   begin
+      Check ("First_Token < Last_Token:", FT, LT);
+      Check ("First_Token < No_Lk_Token:", FT, No_Lk_Token);
+      Check ("No_Lk_Token < Last_Token:", No_Lk_Token, LT);
+      Check ("First_Token < Other_Unit", FT, U2.Last_Token);
+
+      U := Ctx.Get_From_File ("example.txt", Reparse => True);
+      Check ("First_Token < Stale", U.First_Token, LT);
+      Check ("Stale < Last_Token", FT, U.Last_Token);
+   end;
+   New_Line;
+
+   Put_Line ("Testing text range for various cases:");
+   declare
+      FT : constant Lk_Token := U.First_Token;
+      LT : constant Lk_Token := U.Last_Token;
+
+      U2 : constant Lk_Unit := Ctx.Get_From_File ("example2.txt");
+
+      procedure Check (Label : String; Left, Right : Lk_Token);
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check (Label : String; Left, Right : Lk_Token) is
+      begin
+         Put (Label & " -> ");
+         Put_Line (Image (Text (Left, Right), With_Quotes => True));
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Line ("Got a Precondition_Failure exception: "
+                      & Exception_Message (Exc));
+         when Exc : Stale_Reference_Error =>
+            Put_Line ("Got a Stale_Reference_Error exception: "
+                      & Exception_Message (Exc));
+      end Check;
+   begin
+      Check ("First_Token .. Last_Token:", FT, LT);
+      Check ("First_Token .. No_Lk_Token:", FT, No_Lk_Token);
+      Check ("No_Lk_Token .. Last_Token:", No_Lk_Token, LT);
+      Check ("First_Token .. Other_Unit", FT, U2.Last_Token);
+
+      U := Ctx.Get_From_File ("example.txt", Reparse => True);
+      Check ("First_Token .. Stale", U.First_Token, LT);
+      Check ("Stale .. Last_Token", FT, U.Last_Token);
+   end;
    New_Line;
 
    Put_Line ("Use of stale node reference:");

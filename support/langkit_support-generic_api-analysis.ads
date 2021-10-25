@@ -34,18 +34,23 @@ private with Ada.Finalization;
 
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 private with Langkit_Support.Internal.Analysis;
+with Langkit_Support.Slocs;        use Langkit_Support.Slocs;
 with Langkit_Support.Text;         use Langkit_Support.Text;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 package Langkit_Support.Generic_API.Analysis is
 
    type Lk_Context is tagged private;
    type Lk_Unit is new Langkit_Support.Text.Text_Buffer_Ifc with private;
    type Lk_Node is tagged private;
-   --  Reference types to actual context/unit/node objects. Only ``Lk_Context``
-   --  and ``Lk_Unit`` are strong references (designated object lives as long
-   --  as the reference exists): ``Lk_Node`` is a weak reference (designated
-   --  object may be destroyed even if there are still references to it, but
-   --  usage of such a stale reference is properly rejected).
+   type Lk_Token is tagged private;
+   --  Reference types to actual context/unit/node/token objects. Only
+   --  ``Lk_Context`` and ``Lk_Unit`` are strong references (designated object
+   --  lives as long as the reference exists): ``Lk_Node`` and ``Lk_Token_Ref``
+   --  are weak references (designated object may be destroyed even if there
+   --  are still references to it, but usage of such a stale reference is
+   --  properly rejected).
 
    No_Lk_Context : constant Lk_Context;
    --  Special value to mean the absence of analysis context
@@ -55,6 +60,8 @@ package Langkit_Support.Generic_API.Analysis is
 
    No_Lk_Node : constant Lk_Node;
    --  Special value to mean the absence of analysis node
+
+   No_Lk_Token : constant Lk_Token;
 
    --  TODO: add unit providers handling
 
@@ -139,6 +146,12 @@ package Langkit_Support.Generic_API.Analysis is
    function Root (Self : Lk_Unit'Class) return Lk_Node;
    --  Return the root node for this unit, or ``No_Lk_Node`` if there is
    --  none.
+
+   function First_Token (Self : Lk_Unit'Class) return Lk_Token;
+   --  Return a reference to the first token scanned in this unit
+
+   function Last_Token (Self : Lk_Unit'Class) return Lk_Token;
+   --  Return a reference to the last token scanned in this unit
 
    --  TODO??? Bind all other analysis unit primitives
 
@@ -228,7 +241,76 @@ package Langkit_Support.Generic_API.Analysis is
    --  returned i.e. the ``Traverse`` function is called and the result is
    --  simply discarded.
 
+   function Token_Start (Self : Lk_Node'Class) return Lk_Token;
+   --  Return the first token used to parse this node
+
+   function Token_End (Self : Lk_Node'Class) return Lk_Token;
+   --  Return the last token used to parse this node
+
    --  TODO??? Bind all other node primitives
+
+   ----------------------
+   -- Token operations --
+   ----------------------
+
+   function Is_Null (Self : Lk_Token'Class) return Boolean;
+   --  Return whether ``Self`` is a null token reference
+
+   function Kind (Self : Lk_Token'Class) return Token_Kind_Ref;
+   --  Return the token kind for ``Self``
+
+   function "<" (Left, Right : Lk_Token'Class) return Boolean;
+   --  Assuming ``Left`` and ``Right`` belong to the same analysis unit, return
+   --  whether ``Left`` came before ``Right`` in the source file.
+   --
+   --  Raise a ``Precondition_Failure`` error if they do not belong to the same
+   --  analysis unit.
+
+   function Next
+     (Self           : Lk_Token'Class;
+      Exclude_Trivia : Boolean := False) return Lk_Token'Class;
+   --  Return a reference to the next token in the corresponding analysis unit
+
+   function Previous
+     (Self           : Lk_Token'Class;
+      Exclude_Trivia : Boolean := False) return Lk_Token'Class;
+   --  Return a reference to the previous token in the corresponding analysis
+   --  unit.
+
+   function Image (Self : Lk_Token'Class) return String;
+   --  Debug helper: return a human-readable text to represent a token
+
+   function Text (Self : Lk_Token'Class) return Text_Type;
+   --  Return the text of the token as ``Text_Type``
+
+   function Text (First, Last : Lk_Token'Class) return Text_Type;
+   --  Compute the source buffer slice corresponding to the text that spans
+   --  between the ``First`` and ``Last`` tokens (both included). This yields
+   --  an empty slice if ``Last`` actually appears before ``First``.
+   --
+   --  This raises a ``Precondition_Failure`` if ``First`` and ``Last`` don't
+   --  belong to the same analysis unit.
+
+   function Is_Trivia (Self : Lk_Token'Class) return Boolean;
+   --  Return whether this token is a trivia. If it's not, it's a regular token
+
+   function Index (Self : Lk_Token'Class) return Token_Index;
+   --  One-based index for this token/trivia. Tokens and trivias get their own
+   --  index space.
+
+   function Sloc_Range (Self : Lk_Token'Class) return Source_Location_Range;
+   --  Source location range for this token. Note that the end bound is
+   --  exclusive.
+
+   function Origin_Filename (Self : Lk_Token'Class) return String;
+   --  Return the name of the file whose content was scanned to create Token.
+   --  Return an empty string if the source comes from a memory buffer instead
+   --  of a file.
+
+   function Origin_Charset (Self : Lk_Token'Class) return String;
+   --  Return the charset used to decode the source that was scanned to create
+   --  Token. Return an empty string if the source was already decoded during
+   --  the scan.
 
 private
 
@@ -265,6 +347,13 @@ private
    overriding procedure Adjust (Self : in out Lk_Node);
    overriding procedure Finalize (Self : in out Lk_Node);
 
+   type Lk_Token is tagged record
+      Desc       : Any_Language_Id;
+      TDH        : Token_Data_Handler_Access;
+      Index      : Token_Or_Trivia_Index;
+      Safety_Net : Token_Safety_Net;
+   end record;
+
    No_Lk_Context : constant Lk_Context :=
      (Ada.Finalization.Controlled with
       Desc     => null,
@@ -279,5 +368,8 @@ private
       Desc       => null,
       Internal   => No_Internal_Entity,
       Safety_Net => No_Node_Safety_Net);
+
+   No_Lk_Token : constant Lk_Token :=
+     (null, null, No_Token_Or_Trivia_Index, No_Token_Safety_Net);
 
 end Langkit_Support.Generic_API.Analysis;

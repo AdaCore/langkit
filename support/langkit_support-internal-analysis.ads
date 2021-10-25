@@ -24,6 +24,8 @@
 with System;
 
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;        use Langkit_Support.Types;
 
 --  This package provides common implementation details for Langkit-generated
@@ -72,6 +74,11 @@ package Langkit_Support.Internal.Analysis is
    No_Internal_Entity : constant Internal_Entity :=
      (No_Internal_Node, null, False, No_Internal_Node_Metadata);
 
+   type Internal_Token is record
+      TDH   : Token_Data_Handler_Access;
+      Index : Token_Or_Trivia_Index;
+   end record;
+
    --  Safety nets keep track of information at "public reference value"
    --  creation so that later use can check whether the reference is still
    --  valid (used to ensure memory safety).
@@ -93,5 +100,19 @@ package Langkit_Support.Internal.Analysis is
    end record;
    No_Node_Safety_Net : constant Node_Safety_Net :=
      (No_Internal_Context, 0, No_Internal_Unit, 0, 0);
+
+   type Token_Safety_Net is record
+      Context         : Internal_Context;
+      Context_Version : Version_Number;
+      --  Analysis context and version number at the time this safety net was
+      --  produced.
+
+      TDH_Version : Version_Number;
+      --  Version of the token data handler at the time this safety net was
+      --  produced.
+   end record;
+
+   No_Token_Safety_Net : constant Token_Safety_Net :=
+     (No_Internal_Context, 0, 0);
 
 end Langkit_Support.Internal.Analysis;
