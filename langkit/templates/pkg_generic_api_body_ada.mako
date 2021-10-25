@@ -66,6 +66,20 @@ package body ${ada_lib_name}.Generic_API is
    Grammar_Rule_Names : aliased constant Grammar_Rule_Name_Array :=
      (${", ".join(rule_name_refs)});
 
+   --  Descriptors for toen kinds
+
+   <% kind_refs = [] %>
+   % for i, token in enumerate(ctx.lexer.sorted_tokens, 1):
+      <%
+         name = f"Token_Kind_Name_{i}"
+         kind_refs.append(f"{i} => {name}'Access")
+      %>
+      ${name} : aliased constant Text_Type :=
+        ${text_repr(token.base_name.camel_with_underscores)};
+   % endfor
+   Token_Kind_Names : aliased constant Token_Kind_Name_Array :=
+     (${", ".join(kind_refs)});
+
    --  Implementations for generic operations on analysis types
 
    function Create_Context
@@ -350,6 +364,8 @@ package body ${ada_lib_name}.Generic_API is
 
       Default_Grammar_Rule => ${main_rule_id},
       Grammar_Rule_Names   => Grammar_Rule_Names'Access,
+
+      Token_Kind_Names => Token_Kind_Names'Access,
 
       Types          => Generic_Introspection.Types'Access,
       Enum_Types     => Generic_Introspection.Enum_Types'Access,

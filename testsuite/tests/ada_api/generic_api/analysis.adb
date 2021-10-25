@@ -40,6 +40,17 @@ begin
    end loop;
    New_Line;
 
+   Put_Line ("Token kinds:");
+   for I in 1 .. Last_Token_Kind (Id) loop
+      declare
+         Kind : constant Token_Kind_Ref := From_Index (Id, I);
+      begin
+         Put_Line ("  " & Image (Format_Name (Token_Kind_Name (Kind),
+                                              Camel_With_Underscores)));
+      end;
+   end loop;
+   New_Line;
+
    Put_Line ("Use of null context:");
    declare
       Dummy : Boolean;

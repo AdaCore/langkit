@@ -47,4 +47,11 @@ package Langkit_Support.Internal is
    type Grammar_Rule_Name_Array_Access is
      not null access constant Grammar_Rule_Name_Array;
 
+   --  Descriptors for token types
+
+   type Token_Kind_Name_Array is
+     array (Token_Kind_Index range <>) of Text_Access;
+   type Token_Kind_Name_Array_Access is
+     not null access constant Token_Kind_Name_Array;
+
 end Langkit_Support.Internal;
