@@ -1051,4 +1051,14 @@ package body Langkit_Support.Generic_API.Analysis is
       end if;
    end Finalize;
 
+   -----------------
+   -- Unwrap_Node --
+   -----------------
+
+   function Unwrap_Node (Node : Lk_Node) return Internal_Entity is
+   begin
+      Check_Safety_Net (Node);
+      return Node.Internal;
+   end Unwrap_Node;
+
 end Langkit_Support.Generic_API.Analysis;

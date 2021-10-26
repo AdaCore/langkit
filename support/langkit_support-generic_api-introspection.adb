@@ -22,6 +22,7 @@
 ------------------------------------------------------------------------------
 
 with Langkit_Support.Errors; use Langkit_Support.Errors;
+with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Internal.Introspection;
@@ -157,6 +158,26 @@ package body Langkit_Support.Generic_API.Introspection is
    begin
       return Id.Types.all'Last;
    end Last_Type;
+
+   -------------
+   -- Type_Of --
+   -------------
+
+   function Type_Of (Node : Lk_Node) return Type_Ref is
+   begin
+      if Node = No_Lk_Node then
+         raise Precondition_Failure with "null node";
+      end if;
+
+      declare
+         Id     : constant Language_Id := Language_For (Node);
+         E      : constant Internal.Analysis.Internal_Entity :=
+           Unwrap_Node (Node);
+         Result : constant Type_Index := Id.Node_Kind (E.Node);
+      begin
+         return From_Index (Id, Result);
+      end;
+   end Type_Of;
 
    ------------------
    -- Is_Enum_Type --

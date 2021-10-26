@@ -10,6 +10,8 @@ with Langkit_Support.Internal;          use Langkit_Support.Internal;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Text;              use Langkit_Support.Text;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 
@@ -124,6 +126,7 @@ package body ${ada_lib_name}.Generic_API is
    procedure Node_Metadata_Inc_Ref (Metadata : Internal_Node_Metadata);
    procedure Node_Metadata_Dec_Ref (Metadata : in out Internal_Node_Metadata);
 
+   function Node_Kind (Node : Internal_Node) return Type_Index;
    function Node_Parent (Node : Internal_Node) return Internal_Node;
    function Node_Children_Count (Node : Internal_Node) return Natural;
    procedure Node_Get_Child
@@ -332,6 +335,16 @@ package body ${ada_lib_name}.Generic_API is
       Metadata := No_Internal_Node_Metadata;
    end Node_Metadata_Dec_Ref;
 
+   ---------------
+   -- Node_Kind --
+   ---------------
+
+   function Node_Kind (Node : Internal_Node) return Type_Index is
+      N : constant Implementation.${T.root_node.name} := +Node;
+   begin
+      return Node_Kinds (N.Kind);
+   end Node_Kind;
+
    -----------------
    -- Node_Parent --
    -----------------
@@ -449,6 +462,7 @@ package body ${ada_lib_name}.Generic_API is
       Node_Metadata_Inc_Ref => Node_Metadata_Inc_Ref'Access,
       Node_Metadata_Dec_Ref => Node_Metadata_Dec_Ref'Access,
 
+      Node_Kind           => Node_Kind'Access,
       Node_Parent         => Node_Parent'Access,
       Node_Children_Count => Node_Children_Count'Access,
       Node_Get_Child      => Node_Get_Child'Access,
