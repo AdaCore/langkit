@@ -356,6 +356,10 @@ private
    overriding procedure Adjust (Self : in out Lk_Node);
    overriding procedure Finalize (Self : in out Lk_Node);
 
+   function Unwrap_Node (Node : Lk_Node) return Internal_Entity
+     with Export, External_Name => "lksp__unwrap_node";
+   --  Public/private converters for nodes
+
    type Lk_Token is tagged record
       Desc       : Any_Language_Id;
       TDH        : Token_Data_Handler_Access;

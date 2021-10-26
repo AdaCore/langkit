@@ -6,6 +6,8 @@ with Langkit_Support.Internal.Introspection;
 use Langkit_Support.Internal.Introspection;
 with Langkit_Support.Text; use Langkit_Support.Text;
 
+with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+
 --  This package provides description tables to enable the generic
 --  introspection API in Langkit_Support to work with this Langkit-generated
 --  library.
@@ -306,5 +308,11 @@ private package ${ada_lib_name}.Generic_Introspection is
    First_Node     : constant Type_Index := ${type_index(node_types[0])};
    First_Property : constant Struct_Member_Index :=
      ${member_index(ctx.sorted_properties[0])};
+
+   Node_Kinds : constant array (${T.node_kind}) of Type_Index :=
+     (${", ".join(f"{n.ada_kind_name} => {type_index(n)}"
+                  for n in ctx.astnode_types
+                  if not n.abstract)});
+   --  Associate a type index to each concrete node
 
 end ${ada_lib_name}.Generic_Introspection;

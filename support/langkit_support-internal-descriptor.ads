@@ -73,9 +73,9 @@ package Langkit_Support.Internal.Descriptor is
    type Unit_Filename_Type is access function
      (Unit : Internal_Unit) return String;
    type Unit_Root_Type is access function
-     (Unit : Internal_Unit) return Internal_Node;
+     (Unit : Internal_Unit) return Analysis.Internal_Node;
    type Unit_Token_Getter_Type is access function
-     (Unit : Internal_Unit) return Internal_Token;
+     (Unit : Internal_Unit) return Analysis.Internal_Token;
    type Unit_Get_Line_Type is access function
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
 
@@ -84,20 +84,22 @@ package Langkit_Support.Internal.Descriptor is
    type Node_Metadata_Dec_Ref_Type is access procedure
      (Metadata : in out Internal_Node_Metadata);
 
+   type Node_Kind_Type is access function
+     (Node : Analysis.Internal_Node) return Type_Index;
    type Node_Parent_Type is access function
-     (Node : Internal_Node) return Internal_Node;
+     (Node : Analysis.Internal_Node) return Analysis.Internal_Node;
    type Node_Children_Count_Type is access function
-     (Node : Internal_Node) return Natural;
+     (Node : Analysis.Internal_Node) return Natural;
    type Node_Get_Child_Type is access procedure
-     (Node            : Internal_Node;
+     (Node            : Analysis.Internal_Node;
       Index           : Positive;
       Index_In_Bounds : out Boolean;
-      Result          : out Internal_Node);
+      Result          : out Analysis.Internal_Node);
    type Node_Fetch_Sibling_Type is access function
-     (Node : Internal_Node; Offset : Integer) return Internal_Node;
-
+     (Node   : Analysis.Internal_Node;
+      Offset : Integer) return Analysis.Internal_Node;
    type Node_Token_Getter_Type is access function
-     (Node : Internal_Node) return Internal_Token;
+     (Node : Analysis.Internal_Node) return Analysis.Internal_Token;
 
    type Entity_Image_Type is access function
      (Entity : Internal_Entity) return String;
@@ -159,6 +161,7 @@ package Langkit_Support.Internal.Descriptor is
       Node_Metadata_Inc_Ref : Node_Metadata_Inc_Ref_Type;
       Node_Metadata_Dec_Ref : Node_Metadata_Dec_Ref_Type;
 
+      Node_Kind           : Node_Kind_Type;
       Node_Parent         : Node_Parent_Type;
       Node_Children_Count : Node_Children_Count_Type;
       Node_Get_Child      : Node_Get_Child_Type;

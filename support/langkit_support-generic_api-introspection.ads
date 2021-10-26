@@ -27,6 +27,9 @@
 --  Note that it is experimental at this stage, and thus not officially
 --  supported.
 
+with Langkit_Support.Generic_API.Analysis;
+use Langkit_Support.Generic_API.Analysis;
+
 package Langkit_Support.Generic_API.Introspection is
 
    ------------------------
@@ -72,6 +75,10 @@ package Langkit_Support.Generic_API.Introspection is
 
    function Last_Type (Id : Language_Id) return Type_Index;
    --  Return the last type index that is valid for the given language
+
+   function Type_Of (Node : Lk_Node) return Type_Ref;
+   --  Return the type of ``Node``. Raise a ``Precondition_Failure`` if
+   --  ``Node`` is ``No_Lk_Node``.
 
    ----------------
    -- Enum types --

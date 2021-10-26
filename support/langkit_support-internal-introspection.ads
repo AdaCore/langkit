@@ -21,8 +21,11 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Langkit_Support.Generic_API.Analysis;
+use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 
 --  This package provides common implementation details for Langkit-generated
 --  libraries. Even though it is not private (to allow Langkit-generated
@@ -163,5 +166,10 @@ package Langkit_Support.Internal.Introspection is
      array (Type_Index range <>) of Struct_Type_Descriptor_Access;
    type Struct_Type_Descriptor_Array_Access is
      not null access constant Struct_Type_Descriptor_Array;
+
+   function Unwrap_Node (Node : Lk_Node) return Internal_Entity
+     with Import, External_Name => "lksp__unwrap_node";
+   --  See the corresponding export declaration in
+   --  Langkit_Support.Generic_API.Analysis.
 
 end Langkit_Support.Internal.Introspection;
