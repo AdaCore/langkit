@@ -1,0 +1,48 @@
+# Theses tests ensure that an error is emitted for invalid declarations inside
+# named type declarations.
+
+trait MyTrait {
+   @invalid val i: Int = 1
+   @invalid class MyClass {}
+   @invalid generic[T] class MyGenClass {}
+   @invalid trait InnerTrait {}
+   @invalid field: Int = 1
+
+   fun MyFun(i: Int): Int = i
+   generic[T] fun MyGenFun(i: T): T = i
+}
+
+enum MyEnum {
+   case a, b, c
+
+   @invalid val i: Int = 1
+   @invalid generic[T] class MyGenClass {}
+}
+
+struct MyStrut {
+   @invalid val i: Int = 1
+   @invalid struct InnerStruct {}
+   @invalid generic[T] fun MyGenFun(i: T): T = i
+
+   fun MyFun(i: Int): Int = i
+   field: Int = 1
+}
+
+class MyClass {
+   @invalid val i: Int = 1
+   @invalid class InnerClass {}
+   @invalid generic[T] trait MyTrait {}
+   @invalid generic[T] gen_field: T
+
+   field: Int = 1
+   fun MyFun(i: Int): Int = i
+   generic[T] fun MyGenFun(i: T): T = i
+}
+
+enum class MyEnumClass {
+   @invalid val i: Int = 1
+   @invalid field: Int = 1
+   @invalid generic[T] fun MyGenFun(i: T): T = i
+
+   fun MyFun(i: Int): Int = i
+}

@@ -579,6 +579,14 @@ class Decl(LKNode):
         """,
     )
 
+    decl_type_name = AbstractProperty(
+        type=T.String,
+        doc="""
+        Return the name of the declaration type, as it should be seen by
+        users/shown in diagnostics.
+        """
+    )
+
     @langkit_property(return_type=T.FullDecl.entity)
     def full_decl():
         return Entity.parent.match(
@@ -621,6 +629,13 @@ class Decl(LKNode):
             lambda f=FunDecl: f.return_type.designated_type,
             lambda _: PropertyError(T.TypeDecl.entity, "Should not happen")
         )
+
+    @langkit_property()
+    def is_generic_fun_decl():
+        """
+        Return whether this declaration is a generic function declaration.
+        """
+        return Entity.cast(T.GenericDecl)._.decl.is_a(T.FunDecl)
 
 
 @abstract
@@ -933,6 +948,7 @@ class LexerDecl(Decl):
     """
     syn_name = Field(type=T.DefId)
     rules = Field(type=T.LKNode.list)
+    decl_type_name = Property(S("lexer declaration"))
 
     @langkit_property(return_type=T.env_assoc.array, memoized=True)
     def builtin_decls():
@@ -958,6 +974,7 @@ class LexerFamilyDecl(Decl):
     """
     syn_name = Field(type=T.DefId)
     rules = Field(type=T.FullDecl.list)
+    decl_type_name = Property(S("lexer family declaration"))
 
 
 class LexerCaseRule(LKNode):
@@ -1023,6 +1040,8 @@ class GrammarDecl(BaseGrammarDecl):
     syn_name = Field(type=T.DefId)
     rules = Field(type=T.FullDecl.list)
 
+    decl_type_name = Property(S("grammar declaration"))
+
     @langkit_property(public=True)
     def lexer():
         """
@@ -1051,6 +1070,7 @@ class GrammarRuleDecl(BaseGrammarRuleDecl):
     """
     syn_name = Field(type=T.DefId)
     expr = Field(type=T.GrammarExpr)
+    decl_type_name = Property(S("grammar rule declaration"))
 
 
 @synthetic
@@ -1061,6 +1081,7 @@ class SyntheticLexerDecl(BaseGrammarRuleDecl):
     name = Property(Self.sym)
     syn_name = NullField()
     expr = NullField()
+    decl_type_name = Property(S("synthetic lexer declaration"))
 
 
 @abstract
@@ -1551,6 +1572,8 @@ class FunctionType(TypeDecl):
 
     type_scope = Property(EmptyEnv)
 
+    decl_type_name = Property(S("function type"))
+
 
 class GenericFormalTypeDecl(TypeDecl):
     """
@@ -1564,6 +1587,8 @@ class GenericFormalTypeDecl(TypeDecl):
     generic_decl = Property(
         Entity.parent.parent.parent.cast_or_raise(T.GenericDecl)
     )
+
+    decl_type_name = Property(S("generic formal type declaration"))
 
 
 @abstract
@@ -1579,6 +1604,26 @@ class NamedTypeDecl(TypeDecl):
         lambda d: d.decl.cast_or_raise(T.ComponentDecl),
         lambda d: d.decl.is_a(T.ComponentDecl)
     ))
+
+    @langkit_property(kind=AbstractKind.abstract,
+                      return_type=T.Bool)
+    def is_authorized_decl(decl=T.Decl.entity):
+        """
+        Return true whether ``decl`` declaration is authorized in this named
+        type declaration.
+        """
+        pass
+
+    @langkit_property()
+    def check_correctness_pre():
+        return Entity.decls.filtermap(
+            lambda d: d.error(
+                d.decl.decl_type_name
+                .concat(S(" forbidden in "))
+                .concat(Entity.decl_type_name)
+            ),
+            lambda d: Not(Entity.is_authorized_decl(d.decl))
+        )
 
 
 class GenericParamAssoc(Struct):
@@ -1622,6 +1667,10 @@ class GenericDecl(Decl):
     generic_formals = Property(Entity.generic_formal_decls.map(
         lambda gfd: gfd.decl.cast(T.GenericFormalTypeDecl)
     ))
+
+    decl_type_name = Property(
+        S("generic ").concat(Entity.decl.decl_type_name)
+    )
 
     @langkit_property(return_type=T.Decl.entity)
     def instantiate(actuals=T.TypeDecl.array):
@@ -1711,6 +1760,8 @@ class InstantiatedGenericType(TypeDecl):
         Entity.inner_type_decl.parent.as_entity.cast_or_raise(T.GenericDecl)
     )
 
+    decl_type_name = Property(S("instantiated generic type"))
+
     @langkit_property(public=True)
     def get_inner_type():
         """
@@ -1769,6 +1820,13 @@ class TraitDecl(NamedTypeDecl):
 
     decls = Field(type=DeclBlock)
 
+    decl_type_name = Property(S("trait declaration"))
+
+    @langkit_property()
+    def is_authorized_decl(decl=T.Decl.entity):
+        # FunDecl and generic FunDecl are valid declarations
+        return decl.is_a(T.FunDecl) | decl.is_generic_fun_decl
+
 
 class EnumTypeDecl(NamedTypeDecl):
     """
@@ -1780,6 +1838,8 @@ class EnumTypeDecl(NamedTypeDecl):
     base_type = NullField()
     literals = Field(type=T.EnumLitDecl.list)
     decls = Field(type=DeclBlock)
+
+    decl_type_name = Property(S("enum declaration"))
 
     env_spec = EnvSpec(
         add_to_env_kv(Entity.name, Self),
@@ -1804,6 +1864,12 @@ class EnumTypeDecl(NamedTypeDecl):
         ))
     )
 
+    @langkit_property()
+    def is_authorized_decl(decl=T.Decl.entity):
+        # No declaration allowed in an enum type
+        ignore(decl)
+        return False
+
 
 class StructDecl(NamedTypeDecl):
     """
@@ -1813,6 +1879,12 @@ class StructDecl(NamedTypeDecl):
     traits = Field(type=T.TypeRef.list)
     base_type = NullField()
     decls = Field(type=DeclBlock)
+
+    decl_type_name = Property(S("struct declaration"))
+
+    @langkit_property()
+    def is_authorized_decl(decl=T.Decl.entity):
+        return decl.is_a(T.FunDecl, T.FieldDecl)
 
 
 @abstract
@@ -1832,11 +1904,18 @@ class ClassDecl(BasicClassDecl):
     """
     decls = Field(type=DeclBlock)
 
+    decl_type_name = Property(S("class declaration"))
+
     @langkit_property()
     def is_subtype(potential_base=T.TypeDecl.entity):
         return Not(
             Entity.base_types.find(lambda bt: bt == potential_base).is_null
         )
+
+    @langkit_property()
+    def is_authorized_decl(decl=T.Decl.entity):
+        # FunDecl, FieldDecl, and generic FunDecl declarations are valid
+        return decl.is_a(T.FunDecl, T.FieldDecl) | decl.is_generic_fun_decl
 
 
 class EnumClassAltDecl(TypeDecl):
@@ -1854,6 +1933,8 @@ class EnumClassAltDecl(TypeDecl):
     # Empty env spec: alts are added as part of EnumClassDecl's env_spec
     env_spec = EnvSpec()
 
+    decl_type_name = Property(S("enum class alt declaration"))
+
 
 class EnumClassCase(LKNode):
     """
@@ -1870,6 +1951,8 @@ class EnumClassDecl(BasicClassDecl):
     branches = Field(type=T.EnumClassCase.list)
     decls = Field(type=DeclBlock)
 
+    decl_type_name = Property(S("enum class declaration"))
+
     alts = Property(Entity.branches.mapcat(
         lambda branch: branch.decls.map(lambda d: d)
     ))
@@ -1883,6 +1966,10 @@ class EnumClassDecl(BasicClassDecl):
             dest_env=direct_env(Self.decls.children_env),
         )))
     )
+
+    @langkit_property()
+    def is_authorized_decl(decl=T.Decl.entity):
+        return decl.is_a(T.FunDecl)
 
 
 class DocComment(LKNode):
@@ -1932,6 +2019,8 @@ class SelfDecl(BaseValDecl):
         ignore(no_inference)
         return Entity.parent.cast_or_raise(T.TypeDecl)
 
+    decl_type_name = Property(S("self declaration"))
+
 
 @synthetic
 class NodeDecl(BaseValDecl):
@@ -1947,6 +2036,8 @@ class NodeDecl(BaseValDecl):
     def get_type(no_inference=(T.Bool, False)):
         ignore(no_inference)
         return Entity.parent.cast_or_raise(T.TypeDecl)
+
+    decl_type_name = Property(S("node declaration"))
 
 
 @abstract
@@ -1964,6 +2055,8 @@ class FunDecl(UserValDecl):
     args = Field(type=T.FunArgDecl.list)
     return_type = Field(type=T.TypeRef)
     body = Field(type=T.Expr)
+
+    decl_type_name = Property(S("function declaration"))
 
     owning_type = Property(
         Self.parents.find(lambda t: t.is_a(T.TypeDecl)).cast(T.TypeDecl)
@@ -2033,6 +2126,8 @@ class EnumLitDecl(UserValDecl):
     # Empty env spec: enum lits are added as part of EnumTypeDecl's env_spec
     env_spec = EnvSpec()
 
+    decl_type_name = Property(S("enum literal declaration"))
+
 
 @abstract
 class ExplicitlyTypedDecl(UserValDecl):
@@ -2075,6 +2170,7 @@ class FunArgDecl(ComponentDecl):
     """
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
+    decl_type_name = Property(S("fun arg declaration"))
 
 
 class LambdaArgDecl(ComponentDecl):
@@ -2083,6 +2179,8 @@ class LambdaArgDecl(ComponentDecl):
     """
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
+
+    decl_type_name = Property(S("lambda arg declaration"))
 
     owning_lambda = Property(
         Entity.parents.find(lambda p: p.is_a(LambdaExpr)).cast(T.LambdaExpr)
@@ -2123,6 +2221,7 @@ class FieldDecl(ComponentDecl):
     """
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
+    decl_type_name = Property(S("field declaration"))
 
 
 @abstract
@@ -3012,6 +3111,7 @@ class MatchValDecl(ExplicitlyTypedDecl):
     Value declaration in a match branch.
     """
     decl_type = Field(type=T.TypeRef)
+    decl_type_name = Property(S("match value declaration"))
 
 
 class BinOp(Expr):
@@ -3056,6 +3156,8 @@ class ValDecl(ExplicitlyTypedDecl):
                 Entity.val.check_expr_type
             )
         )
+
+    decl_type_name = Property(S("value declaration"))
 
 
 class Op(LKNode):

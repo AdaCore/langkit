@@ -1,0 +1,223 @@
+Resolving test.lkt
+==================
+test.lkt:5:4: error: value declaration forbidden in trait declaration
+4 |    @invalid val i: Int = 1
+  |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:6:4: error: class declaration forbidden in trait declaration
+5 |    @invalid class MyClass {}
+  |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:7:4: error: generic class declaration forbidden in trait declaration
+6 |    @invalid generic[T] class MyGenClass {}
+  |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:8:4: error: trait declaration forbidden in trait declaration
+7 |    @invalid trait InnerTrait {}
+  |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:9:4: error: field declaration forbidden in trait declaration
+8 |    @invalid field: Int = 1
+  |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+Id   <RefId "Int" test.lkt:5:20-5:23>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:5:26-5:27>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:9:20-9:23>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:9:26-9:27>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:11:17-11:20>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:11:23-11:26>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "i" test.lkt:11:29-11:30>
+     references <FunArgDecl "i" test.lkt:11:14-11:20>
+
+Expr <RefId "i" test.lkt:11:29-11:30>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "T" test.lkt:12:31-12:32>
+     references <GenericFormalTypeDecl "T" test.lkt:12:12-12:13>
+
+Id   <RefId "T" test.lkt:12:35-12:36>
+     references <GenericFormalTypeDecl "T" test.lkt:12:12-12:13>
+
+Id   <RefId "i" test.lkt:12:39-12:40>
+     references <FunArgDecl "i" test.lkt:12:28-12:32>
+
+Expr <RefId "i" test.lkt:12:39-12:40>
+     has type <GenericFormalTypeDecl "T" test.lkt:12:12-12:13>
+
+test.lkt:18:4: error: value declaration forbidden in enum declaration
+17 |    @invalid val i: Int = 1
+   |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:19:4: error: generic class declaration forbidden in enum declaration
+18 |    @invalid generic[T] class MyGenClass {}
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Id   <RefId "Int" test.lkt:18:20-18:23>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:18:26-18:27>
+     has type <StructDecl prelude: "Int">
+
+test.lkt:23:4: error: value declaration forbidden in struct declaration
+22 |    @invalid val i: Int = 1
+   |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:24:4: error: struct declaration forbidden in struct declaration
+23 |    @invalid struct InnerStruct {}
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:25:4: error: generic function declaration forbidden in struct declaration
+24 |    @invalid generic[T] fun MyGenFun(i: T): T = i
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Id   <RefId "Int" test.lkt:23:20-23:23>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:23:26-23:27>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "T" test.lkt:25:40-25:41>
+     references <GenericFormalTypeDecl "T" test.lkt:25:21-25:22>
+
+Id   <RefId "T" test.lkt:25:44-25:45>
+     references <GenericFormalTypeDecl "T" test.lkt:25:21-25:22>
+
+Id   <RefId "i" test.lkt:25:48-25:49>
+     references <FunArgDecl "i" test.lkt:25:37-25:41>
+
+Expr <RefId "i" test.lkt:25:48-25:49>
+     has type <GenericFormalTypeDecl "T" test.lkt:25:21-25:22>
+
+Id   <RefId "Int" test.lkt:27:17-27:20>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:27:23-27:26>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "i" test.lkt:27:29-27:30>
+     references <FunArgDecl "i" test.lkt:27:14-27:20>
+
+Expr <RefId "i" test.lkt:27:29-27:30>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:28:11-28:14>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:28:17-28:18>
+     has type <StructDecl prelude: "Int">
+
+test.lkt:32:4: error: value declaration forbidden in class declaration
+31 |    @invalid val i: Int = 1
+   |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:33:4: error: class declaration forbidden in class declaration
+32 |    @invalid class InnerClass {}
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:34:4: error: generic trait declaration forbidden in class declaration
+33 |    @invalid generic[T] trait MyTrait {}
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:35:4: error: generic field declaration forbidden in class declaration
+34 |    @invalid generic[T] gen_field: T
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Id   <RefId "Int" test.lkt:32:20-32:23>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:32:26-32:27>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "T" test.lkt:35:35-35:36>
+     references <GenericFormalTypeDecl "T" test.lkt:35:21-35:22>
+
+Id   <RefId "Int" test.lkt:37:11-37:14>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:37:17-37:18>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:38:17-38:20>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:38:23-38:26>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "i" test.lkt:38:29-38:30>
+     references <FunArgDecl "i" test.lkt:38:14-38:20>
+
+Expr <RefId "i" test.lkt:38:29-38:30>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "T" test.lkt:39:31-39:32>
+     references <GenericFormalTypeDecl "T" test.lkt:39:12-39:13>
+
+Id   <RefId "T" test.lkt:39:35-39:36>
+     references <GenericFormalTypeDecl "T" test.lkt:39:12-39:13>
+
+Id   <RefId "i" test.lkt:39:39-39:40>
+     references <FunArgDecl "i" test.lkt:39:28-39:32>
+
+Expr <RefId "i" test.lkt:39:39-39:40>
+     has type <GenericFormalTypeDecl "T" test.lkt:39:12-39:13>
+
+test.lkt:43:4: error: value declaration forbidden in enum class declaration
+42 |    @invalid val i: Int = 1
+   |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:44:4: error: field declaration forbidden in enum class declaration
+43 |    @invalid field: Int = 1
+   |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:45:4: error: generic function declaration forbidden in enum class declaration
+44 |    @invalid generic[T] fun MyGenFun(i: T): T = i
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Id   <RefId "Int" test.lkt:43:20-43:23>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:43:26-43:27>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:44:20-44:23>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:44:26-44:27>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "T" test.lkt:45:40-45:41>
+     references <GenericFormalTypeDecl "T" test.lkt:45:21-45:22>
+
+Id   <RefId "T" test.lkt:45:44-45:45>
+     references <GenericFormalTypeDecl "T" test.lkt:45:21-45:22>
+
+Id   <RefId "i" test.lkt:45:48-45:49>
+     references <FunArgDecl "i" test.lkt:45:37-45:41>
+
+Expr <RefId "i" test.lkt:45:48-45:49>
+     has type <GenericFormalTypeDecl "T" test.lkt:45:21-45:22>
+
+Id   <RefId "Int" test.lkt:47:17-47:20>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:47:23-47:26>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "i" test.lkt:47:29-47:30>
+     references <FunArgDecl "i" test.lkt:47:14-47:20>
+
+Expr <RefId "i" test.lkt:47:29-47:30>
+     has type <StructDecl prelude: "Int">
+
