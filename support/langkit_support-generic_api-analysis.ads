@@ -133,6 +133,9 @@ package Langkit_Support.Generic_API.Analysis is
    -- Analysis unit operations --
    ------------------------------
 
+   function Language_For (Self : Lk_Unit'Class) return Language_Id;
+   --  Return the unique identifier corresponding to ``Self``
+
    overriding function Get_Line
      (Self : Lk_Unit; Line_Number : Positive) return Text_Type;
    --  Return the line of text at line number ``Line_Number``
@@ -158,6 +161,9 @@ package Langkit_Support.Generic_API.Analysis is
    -------------------------------
    -- Analysis nodes operations --
    -------------------------------
+
+   function Language_For (Self : Lk_Node'Class) return Language_Id;
+   --  Return the unique identifier corresponding to ``Self``
 
    function Unit (Self : Lk_Node'Class) return Lk_Unit;
    --  Return the unit that owns this node
@@ -252,6 +258,9 @@ package Langkit_Support.Generic_API.Analysis is
    ----------------------
    -- Token operations --
    ----------------------
+
+   function Language_For (Self : Lk_Token'Class) return Language_Id;
+   --  Return the unique identifier corresponding to ``Self``
 
    function Is_Null (Self : Lk_Token'Class) return Boolean;
    --  Return whether ``Self`` is a null token reference
