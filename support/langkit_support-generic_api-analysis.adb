@@ -411,6 +411,16 @@ package body Langkit_Support.Generic_API.Analysis is
       end;
    end Get_From_File;
 
+   ------------------
+   -- Language_For --
+   ------------------
+
+   function Language_For (Self : Lk_Unit'Class) return Language_Id is
+   begin
+      Reject_Null_Unit (Self);
+      return Self.Context.Desc;
+   end Language_For;
+
    --------------
    -- Get_Line --
    --------------
@@ -496,6 +506,18 @@ package body Langkit_Support.Generic_API.Analysis is
          return Wrap (Result, Self);
       end;
    end Last_Token;
+
+   ------------------
+   -- Language_For --
+   ------------------
+
+   function Language_For (Self : Lk_Node'Class) return Language_Id is
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+
+      return Self.Desc;
+   end Language_For;
 
    ----------
    -- Unit --
@@ -754,6 +776,17 @@ package body Langkit_Support.Generic_API.Analysis is
          return Wrap (Result, Self);
       end;
    end Token_End;
+
+   ------------------
+   -- Language_For --
+   ------------------
+
+   function Language_For (Self : Lk_Token'Class) return Language_Id is
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Token (Self);
+      return Self.Desc;
+   end Language_For;
 
    -------------
    -- Is_Null --
