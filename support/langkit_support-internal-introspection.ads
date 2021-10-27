@@ -21,11 +21,14 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with GNATCOLL.GMP.Integers; use GNATCOLL.GMP.Integers;
+
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
 
 --  This package provides common implementation details for Langkit-generated
 --  libraries. Even though it is not private (to allow Langkit-generated
@@ -166,6 +169,195 @@ package Langkit_Support.Internal.Introspection is
      array (Type_Index range <>) of Struct_Type_Descriptor_Access;
    type Struct_Type_Descriptor_Array_Access is
      not null access constant Struct_Type_Descriptor_Array;
+
+   -----------------------------------------------
+   -- Interface to represent polymorphic values --
+   -----------------------------------------------
+
+   type Internal_Value is abstract tagged limited record
+      Ref_Count : Natural;
+      --  Reference count for this record. When it drops to zero, the
+      --  ``Destroy`` primitive must be called.
+
+      Id : Language_Id;
+      --  Language for this value
+   end record;
+
+   procedure Destroy (Value : in out Internal_Value) is null;
+   --  Free resources allocated for this value. Derivations can omit the
+   --  overriding if there is nothing to free manually.
+
+   function Type_Of (Value : Internal_Value) return Type_Index is abstract;
+   --  Return the type of the ``Value`` polymorphic value
+
+   function Type_Matches
+     (Value : Internal_Value; T : Type_Index) return Boolean;
+   --  Return whether ``Value`` is a valid value to be passed as a ``T``
+   --  argument.
+   --
+   --  By default, we check that ``Type_Of (Value) = T`, but derivations can
+   --  override this behavior, which use useful for instance for nodes
+   --  subtyping.
+
+   function Image (Value : Internal_Value) return String is abstract;
+   --  Return a string that represents ``Value``, for logging/debugging
+   --  purposes.
+
+   type Internal_Value_Access is access all Internal_Value;
+
+   --------------------------------------------
+   -- Implementations for some builtin types --
+   --------------------------------------------
+
+   --  Note: we provide here implementations for some builtin types only
+   --  (boolean, integer, string, ...) so that we can provide converters
+   --  between native Ada types and ``Value_Ref`` directly in Langkit_Support.
+   --  We intentionally do not map all builtin types, for instance some enums
+   --  (AnalysisUnitKind) as they exist at the Ada level only in generated
+   --  libraries.
+
+   type Builtin_Types_Record is record
+      Analysis_Unit         : Type_Index;
+      Big_Int               : Type_Index;
+      Bool                  : Type_Index;
+      Char                  : Type_Index;
+      Int                   : Type_Index;
+      Source_Location_Range : Type_Index;
+      String                : Type_Index;
+      Token                 : Type_Index;
+      Symbol                : Type_Index;
+   end record;
+   --  Type indexes of builtin types, for which ``Langkit_Support`` provides
+   --  common polymorphic values implementation code (see
+   --  ``Langkit_Support.Internal.Introspection.Internal_Value``).
+
+   type Builtin_Types_Access is not null access constant Builtin_Types_Record;
+
+   -------------------
+   -- Analysis unit --
+   -------------------
+
+   type Internal_Analysis_Unit is new Internal_Value with record
+      Value : Lk_Unit;
+   end record;
+   type Internal_Analysis_Unit_Access is access all Internal_Analysis_Unit;
+
+   overriding function Type_Of
+     (Value : Internal_Analysis_Unit) return Type_Index;
+   overriding function Image (Value : Internal_Analysis_Unit) return String;
+
+   -----------------
+   -- Big integer --
+   -----------------
+
+   type Internal_Big_Int is new Internal_Value with record
+      Value : Big_Integer;
+   end record;
+   type Internal_Big_Int_Access is access all Internal_Big_Int;
+
+   overriding function Type_Of (Value : Internal_Big_Int) return Type_Index;
+   overriding function Image (Value : Internal_Big_Int) return String;
+
+   -------------
+   -- Boolean --
+   -------------
+
+   type Internal_Bool is new Internal_Value with record
+      Value : Boolean;
+   end record;
+   type Internal_Bool_Access is access all Internal_Bool;
+
+   overriding function Type_Of (Value : Internal_Bool) return Type_Index;
+   overriding function Image (Value : Internal_Bool) return String;
+
+   ----------
+   -- Char --
+   ----------
+
+   type Internal_Char is new Internal_Value with record
+      Value : Character_Type;
+   end record;
+   type Internal_Char_Access is access all Internal_Char;
+
+   overriding function Type_Of (Value : Internal_Char) return Type_Index;
+   overriding function Image (Value : Internal_Char) return String;
+
+   ---------
+   -- Int --
+   ---------
+
+   type Internal_Int is new Internal_Value with record
+      Value : Integer;
+   end record;
+   type Internal_Int_Access is access all Internal_Int;
+
+   overriding function Type_Of (Value : Internal_Int) return Type_Index;
+   overriding function Image (Value : Internal_Int) return String;
+
+   ---------------------------
+   -- Source_Location_Range --
+   ---------------------------
+
+   type Internal_Source_Location_Range is new Internal_Value with record
+      Value : Source_Location_Range;
+   end record;
+   type Internal_Source_Location_Range_Access is
+     access all Internal_Source_Location_Range;
+
+   overriding function Type_Of
+     (Value : Internal_Source_Location_Range) return Type_Index;
+   overriding function Image
+     (Value : Internal_Source_Location_Range) return String;
+
+   ------------
+   -- String --
+   ------------
+
+   type Internal_String is new Internal_Value with record
+      Value : Unbounded_Text_Type;
+   end record;
+   type Internal_String_Access is access all Internal_String;
+
+   overriding function Type_Of (Value : Internal_String) return Type_Index;
+   overriding function Image (Value : Internal_String) return String;
+
+   -----------
+   -- Token --
+   -----------
+
+   type Internal_Token is new Internal_Value with record
+      Value : Lk_Token;
+   end record;
+   type Internal_Token_Access is access all Internal_Token;
+
+   overriding function Type_Of (Value : Internal_Token) return Type_Index;
+   overriding function Image (Value : Internal_Token) return String;
+
+   ------------
+   -- Symbol --
+   ------------
+
+   type Internal_Symbol is new Internal_Value with record
+      Value : Unbounded_Text_Type;
+   end record;
+   type Internal_Symbol_Access is access all Internal_Symbol;
+
+   overriding function Type_Of (Value : Internal_Symbol) return Type_Index;
+   overriding function Image (Value : Internal_Symbol) return String;
+
+   -----------
+   -- Nodes --
+   -----------
+
+   type Internal_Node is new Internal_Value with record
+      Value : Lk_Node;
+   end record;
+   type Internal_Node_Access is access all Internal_Node;
+
+   overriding function Type_Of (Value : Internal_Node) return Type_Index;
+   overriding function Type_Matches
+     (Value : Internal_Node; T : Type_Index) return Boolean;
+   overriding function Image (Value : Internal_Node) return String;
 
    function Unwrap_Node (Node : Lk_Node) return Internal_Entity
      with Import, External_Name => "lksp__unwrap_node";

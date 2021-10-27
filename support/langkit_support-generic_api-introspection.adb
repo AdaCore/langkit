@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Unchecked_Deallocation;
+
 with Langkit_Support.Errors; use Langkit_Support.Errors;
 with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Descriptor;
@@ -38,12 +40,23 @@ package body Langkit_Support.Generic_API.Introspection is
 
    use Langkit_Support.Errors.Introspection;
 
+   procedure Check_Same_Language (Left, Right : Language_Id);
+   --  Raise a ``Precondition_Failure`` exception if ``Left`` and ``Right`` are
+   --  different.
+
    procedure Check_Type (T : Type_Ref);
    --  Raise a ``Precondition_Failure`` if ``T`` is ``No_Type_Ref``
 
    procedure Check_Type (Id : Language_Id; T : Type_Index);
    --  If ``T`` is not a valid type for the given language, raise a
    --  ``Precondition_Failure`` exception.
+
+   procedure Check_Value (Value : Value_Ref);
+   --  Raise a ``Precondition_Failure`` exception if ``Value`` is null
+
+   procedure Check_Value_Type (Value : Value_Ref; T : Type_Index);
+   --  Raise a ``Precondition_Failure`` exception if ``Value`` does not match
+   --  ``T``.
 
    procedure Check_Enum_Type (Enum : Type_Ref);
    --  If ``Enum`` is not a valid enum type, raise a ``Precondition_Failure``
@@ -88,6 +101,22 @@ package body Langkit_Support.Generic_API.Introspection is
    --  ``Argument`` is not a valid argument for that member, raise a
    --  ``Precondition_Failure`` exception.
 
+   function Create_Value
+     (Id : Language_Id; Value : Internal_Value_Access) return Value_Ref;
+   --  Initialize ``Value`` with ``Id``, set it a ref-count of 1 and return it
+   --  wrapped as a ``Value_Ref``.
+
+   -------------------------
+   -- Check_Same_Language --
+   -------------------------
+
+   procedure Check_Same_Language (Left, Right : Language_Id) is
+   begin
+      if Left /= Right then
+         raise Precondition_Failure with "inconsistent languages";
+      end if;
+   end Check_Same_Language;
+
    ----------------
    -- Check_Type --
    ----------------
@@ -116,8 +145,11 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function Debug_Name (T : Type_Ref) return String is
    begin
-      Check_Type (T);
-      return T.Id.Types (T.Index).Debug_Name.all;
+      if T = No_Type_Ref then
+         return "<No_Type_Ref>";
+      else
+         return T.Id.Types (T.Index).Debug_Name.all;
+      end if;
    end Debug_Name;
 
    ------------------
@@ -159,6 +191,375 @@ package body Langkit_Support.Generic_API.Introspection is
       return Id.Types.all'Last;
    end Last_Type;
 
+   -----------------
+   -- Check_Value --
+   -----------------
+
+   procedure Check_Value (Value : Value_Ref) is
+   begin
+      if Value.Value = null then
+         raise Precondition_Failure with "null value reference";
+      end if;
+   end Check_Value;
+
+   ----------------------
+   -- Check_Value_Type --
+   ----------------------
+
+   procedure Check_Value_Type (Value : Value_Ref; T : Type_Index) is
+   begin
+      if not Value.Value.Type_Matches (T) then
+         raise Precondition_Failure with "unexpected value type";
+      end if;
+   end Check_Value_Type;
+
+   ------------------
+   -- Language_For --
+   ------------------
+
+   function Language_For (Value : Value_Ref) return Language_Id is
+   begin
+      Check_Value (Value);
+      return Value.Value.Id;
+   end Language_For;
+
+   -------------
+   -- Type_Of --
+   -------------
+
+   function Type_Of (Value : Value_Ref) return Type_Ref is
+   begin
+      Check_Value (Value);
+      return From_Index (Value.Value.Id, Value.Value.Type_Of);
+   end Type_Of;
+
+   ------------------
+   -- Type_Matches --
+   ------------------
+
+   function Type_Matches (Value : Value_Ref; T : Type_Ref) return Boolean is
+   begin
+      Check_Value (Value);
+      Check_Type (T);
+      if Value.Value.Id /= T.Id then
+         raise Precondition_Failure with "inconsistent language";
+      end if;
+      return Value.Value.Type_Matches (T.Index);
+   end Type_Matches;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Value : Value_Ref) return String is
+   begin
+      if Value.Value = null then
+         return "<No_Value_Ref>";
+      end if;
+      return Value.Value.Image;
+   end Image;
+
+   ------------------
+   -- Create_Value --
+   ------------------
+
+   function Create_Value
+     (Id : Language_Id; Value : Internal_Value_Access) return Value_Ref is
+   begin
+      return Result : Value_Ref do
+         Value.Id := Id;
+         Value.Ref_Count := 1;
+         Result.Value := Value;
+      end return;
+   end Create_Value;
+
+   -----------------
+   -- Create_Unit --
+   -----------------
+
+   function Create_Unit (Id : Language_Id; Value : Lk_Unit) return Value_Ref is
+      Result : Internal_Analysis_Unit_Access;
+   begin
+      if Value /= No_Lk_Unit then
+         Check_Same_Language (Id, Value.Language_For);
+      end if;
+      Result := new Internal_Analysis_Unit;
+      Result.Value := Value;
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_Unit;
+
+   -------------
+   -- As_Unit --
+   -------------
+   function As_Unit (Value : Value_Ref) return Lk_Unit is
+      Id : Language_Id;
+      V  : Internal_Analysis_Unit_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.Analysis_Unit);
+      V := Internal_Analysis_Unit_Access (Value.Value);
+      return V.Value;
+   end As_Unit;
+
+   --------------------
+   -- Create_Big_Int --
+   --------------------
+
+   function Create_Big_Int
+     (Id : Language_Id; Value : Big_Integer) return Value_Ref
+   is
+      Result : constant Internal_Big_Int_Access := new Internal_Big_Int;
+   begin
+      Result.Value.Set (Value);
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_Big_Int;
+
+   ----------------
+   -- As_Big_Int --
+   ----------------
+
+   function As_Big_Int (Value : Value_Ref) return Big_Integer is
+      Id : Language_Id;
+      V  : Internal_Big_Int_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.Big_Int);
+      V := Internal_Big_Int_Access (Value.Value);
+      return Result : Big_Integer do
+         Result.Set (V.Value);
+      end return;
+   end As_Big_Int;
+
+   -----------------
+   -- Create_Bool --
+   -----------------
+
+   function Create_Bool (Id : Language_Id; Value : Boolean) return Value_Ref is
+      Result : constant Internal_Bool_Access := new Internal_Bool;
+   begin
+      Result.Value := Value;
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_Bool;
+
+   -------------
+   -- As_Bool --
+   -------------
+
+   function As_Bool (Value : Value_Ref) return Boolean is
+      Id : Language_Id;
+      V  : Internal_Bool_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.Bool);
+      V := Internal_Bool_Access (Value.Value);
+      return V.Value;
+   end As_Bool;
+
+   -----------------
+   -- Create_Char --
+   -----------------
+
+   function Create_Char
+     (Id : Language_Id; Value : Character_Type) return Value_Ref
+   is
+      Result : constant Internal_Char_Access := new Internal_Char;
+   begin
+      Result.Value := Value;
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_Char;
+
+   -------------
+   -- As_Char --
+   -------------
+
+   function As_Char (Value : Value_Ref) return Character_Type is
+      Id : Language_Id;
+      V  : Internal_Char_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.Char);
+      V := Internal_Char_Access (Value.Value);
+      return V.Value;
+   end As_Char;
+
+   ----------------
+   -- Create_Int --
+   ----------------
+
+   function Create_Int (Id : Language_Id; Value : Integer) return Value_Ref is
+      Result : constant Internal_Int_Access := new Internal_Int;
+   begin
+      Result.Value := Value;
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_Int;
+
+   ------------
+   -- As_Int --
+   ------------
+
+   function As_Int (Value : Value_Ref) return Integer is
+      Id : Language_Id;
+      V  : Internal_Int_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.Int);
+      V := Internal_Int_Access (Value.Value);
+      return V.Value;
+   end As_Int;
+
+   ----------------------------------
+   -- Create_Source_Location_Range --
+   ----------------------------------
+
+   function Create_Source_Location_Range
+     (Id : Language_Id; Value : Source_Location_Range) return Value_Ref
+   is
+      Result : constant Internal_Source_Location_Range_Access :=
+        new Internal_Source_Location_Range;
+   begin
+      Result.Value := Value;
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_Source_Location_Range;
+
+   ------------------------------
+   -- As_Source_Location_Range --
+   ------------------------------
+
+   function As_Source_Location_Range
+     (Value : Value_Ref) return Source_Location_Range
+   is
+      Id : Language_Id;
+      V  : Internal_Source_Location_Range_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.Source_Location_Range);
+      V := Internal_Source_Location_Range_Access (Value.Value);
+      return V.Value;
+   end As_Source_Location_Range;
+
+   -------------------
+   -- Create_String --
+   -------------------
+
+   function Create_String
+     (Id : Language_Id; Value : Text_Type) return Value_Ref
+   is
+      Result : constant Internal_String_Access := new Internal_String;
+   begin
+      Result.Value := To_Unbounded_Text (Value);
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_String;
+
+   ---------------
+   -- As_String --
+   ---------------
+
+   function As_String (Value : Value_Ref) return Text_Type is
+      Id : Language_Id;
+      V  : Internal_String_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.String);
+      V := Internal_String_Access (Value.Value);
+      return To_Text (V.Value);
+   end As_String;
+
+   ------------------
+   -- Create_Token --
+   ------------------
+
+   function Create_Token (Id : Language_Id; Value : Lk_Token) return Value_Ref
+   is
+      Result : Internal_Token_Access;
+   begin
+      if Value /= No_Lk_Token then
+         Check_Same_Language (Id, Value.Language_For);
+      end if;
+      Result := new Internal_Token;
+      Result.Value := Value;
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_Token;
+
+   --------------
+   -- As_Token --
+   --------------
+
+   function As_Token (Value : Value_Ref) return Lk_Token is
+      Id : Language_Id;
+      V  : Internal_Token_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.Token);
+      V := Internal_Token_Access (Value.Value);
+      return V.Value;
+   end As_Token;
+
+   -------------------
+   -- Create_Symbol --
+   -------------------
+
+   function Create_Symbol
+     (Id : Language_Id; Value : Text_Type) return Value_Ref
+   is
+      Result : constant Internal_Symbol_Access := new Internal_Symbol;
+   begin
+      Result.Value := To_Unbounded_Text (Value);
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_Symbol;
+
+   ---------------
+   -- As_Symbol --
+   ---------------
+
+   function As_Symbol (Value : Value_Ref) return Text_Type is
+      Id : Language_Id;
+      V  : Internal_Symbol_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.Symbol);
+      V := Internal_Symbol_Access (Value.Value);
+      return To_Text (V.Value);
+   end As_Symbol;
+
+   -----------------
+   -- Create_Node --
+   -----------------
+
+   function Create_Node (Id : Language_Id; Value : Lk_Node) return Value_Ref is
+      Result : Internal_Node_Access;
+   begin
+      if Value /= No_Lk_Node then
+         Check_Same_Language (Id, Value.Language_For);
+      end if;
+      Result := new Internal_Node;
+      Result.Value := Value;
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end Create_Node;
+
+   -------------
+   -- As_Node --
+   -------------
+
+   function As_Node (Value : Value_Ref) return Lk_Node is
+      Id : Language_Id;
+      V  : Internal_Node_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.First_Node);
+      V := Internal_Node_Access (Value.Value);
+      return V.Value;
+   end As_Node;
+
    -------------
    -- Type_Of --
    -------------
@@ -178,6 +579,36 @@ package body Langkit_Support.Generic_API.Introspection is
          return From_Index (Id, Result);
       end;
    end Type_Of;
+
+   ------------
+   -- Adjust --
+   ------------
+
+   overriding procedure Adjust (Self : in out Value_Ref) is
+   begin
+      if Self.Value /= null then
+         Self.Value.Ref_Count := Self.Value.Ref_Count + 1;
+      end if;
+   end Adjust;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Self : in out Value_Ref) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Internal_Value'Class, Internal_Value_Access);
+   begin
+      if Self.Value /= null then
+         if Self.Value.Ref_Count = 1 then
+            Self.Value.Destroy;
+            Free (Self.Value);
+         else
+            Self.Value.Ref_Count := Self.Value.Ref_Count - 1;
+            Self.Value := null;
+         end if;
+      end if;
+   end Finalize;
 
    ------------------
    -- Is_Enum_Type --

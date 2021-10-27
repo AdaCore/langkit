@@ -1,4 +1,5 @@
 with "gnatcoll";
+with "gnatcoll_gmp";
 with "gnatcoll_iconv";
 
 library project Langkit_Support is

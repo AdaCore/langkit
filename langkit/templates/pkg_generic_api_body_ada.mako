@@ -6,12 +6,12 @@ with Ada.Unchecked_Deallocation;
 with System;
 
 with Langkit_Support.File_Readers;      use Langkit_Support.File_Readers;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal;          use Langkit_Support.Internal;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
-with Langkit_Support.Generic_API.Introspection;
-use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Text;              use Langkit_Support.Text;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 
@@ -441,6 +441,7 @@ package body ${ada_lib_name}.Generic_API is
       Enum_Types     => Generic_Introspection.Enum_Types'Access,
       Array_Types    => Generic_Introspection.Array_Types'Access,
       Struct_Types   => Generic_Introspection.Struct_Types'Access,
+      Builtin_Types  => Generic_Introspection.Builtin_Types'Access,
       First_Node     => Generic_Introspection.First_Node,
       Struct_Members => Generic_Introspection.Struct_Members'Access,
       First_Property => Generic_Introspection.First_Property,

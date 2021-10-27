@@ -27,8 +27,15 @@
 --  Note that it is experimental at this stage, and thus not officially
 --  supported.
 
+private with Ada.Finalization;
+
+with GNATCOLL.GMP.Integers; use GNATCOLL.GMP.Integers;
+
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
+limited private with Langkit_Support.Internal.Introspection;
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
+with Langkit_Support.Text;  use Langkit_Support.Text;
 
 package Langkit_Support.Generic_API.Introspection is
 
@@ -50,8 +57,8 @@ package Langkit_Support.Generic_API.Introspection is
    --  ``Precondition_Failure`` exception if ``T`` is ``No_Type_Ref``.
 
    function Debug_Name (T : Type_Ref) return String;
-   --  Return the free-form name of this type for debug purposes. Raise a
-   --  ``Precondition_Failure`` exception if ``T`` is ``No_Type_Ref``.
+   --  Return the free-form name of this type for debug purposes, or
+   --  "<No_Type_Ref>" if ``T`` is ``No_Type_Ref``.
 
    type Any_Type_Index is new Natural;
    --  Language-specific index to designate a type.
@@ -75,6 +82,76 @@ package Langkit_Support.Generic_API.Introspection is
 
    function Last_Type (Id : Language_Id) return Type_Index;
    --  Return the last type index that is valid for the given language
+
+   type Value_Ref is private;
+   --  Reference to a polymorphic value: boolean, integer, character, ...
+
+   No_Value_Ref : constant Value_Ref;
+   --  Special constant to express no value reference
+
+   function Language_For (Value : Value_Ref) return Language_Id;
+   --  Return the language ID corresponding to the given value. Raise a
+   --  ``Precondition_Failure`` exception if ``Value`` is ``No_Value_Ref``.
+
+   function Type_Of (Value : Value_Ref) return Type_Ref;
+   --  Return the type of the ``Value`` polymorphic value. Raise a
+   --  ``Precondition_Error`` if ``Value`` is ``No_Value_Ref``.
+
+   function Type_Matches (Value : Value_Ref; T : Type_Ref) return Boolean;
+   --  Return whether ``Value`` is a valid value to be passed as a ``T``
+   --  argument.
+   --
+   --  Raise a ``Precondition_Error`` if:
+   --
+   --  * ``Value`` is ``No_Value_Ref``;
+   --  * ``T`` is ``No_Type_Ref``;
+   --  * ``Value`` and ``T`` do not belong to the same language.
+
+   function Image (Value : Value_Ref) return String;
+   --  Return a string that represents ``Value``, for logging/debugging
+   --  purposes. Note that the goal here is to return a short human-readable
+   --  string, not a string that contains all the information in ``Value``.
+   --
+   --  Unlike other ``Value_Ref`` primitives, it is valid to call ``Image`` on
+   --  ``No_Value_Ref``.
+
+   --  Constructors/getters for built in types
+
+   function Create_Unit (Id : Language_Id; Value : Lk_Unit) return Value_Ref;
+   function As_Unit (Value : Value_Ref) return Lk_Unit;
+
+   function Create_Big_Int
+     (Id : Language_Id; Value : Big_Integer) return Value_Ref;
+   function As_Big_Int (Value : Value_Ref) return Big_Integer;
+
+   function Create_Bool (Id : Language_Id; Value : Boolean) return Value_Ref;
+   function As_Bool (Value : Value_Ref) return Boolean;
+
+   function Create_Char
+     (Id : Language_Id; Value : Character_Type) return Value_Ref;
+   function As_Char (Value : Value_Ref) return Character_Type;
+
+   function Create_Int (Id : Language_Id; Value : Integer) return Value_Ref;
+   function As_Int (Value : Value_Ref) return Integer;
+
+   function Create_Source_Location_Range
+     (Id : Language_Id; Value : Source_Location_Range) return Value_Ref;
+   function As_Source_Location_Range
+     (Value : Value_Ref) return Source_Location_Range;
+
+   function Create_String
+     (Id : Language_Id; Value : Text_Type) return Value_Ref;
+   function As_String (Value : Value_Ref) return Text_Type;
+
+   function Create_Token (Id : Language_Id; Value : Lk_Token) return Value_Ref;
+   function As_Token (Value : Value_Ref) return Lk_Token;
+
+   function Create_Symbol
+     (Id : Language_Id; Value : Text_Type) return Value_Ref;
+   function As_Symbol (Value : Value_Ref) return Text_Type;
+
+   function Create_Node (Id : Language_Id; Value : Lk_Node) return Value_Ref;
+   function As_Node (Value : Value_Ref) return Lk_Node;
 
    function Type_Of (Node : Lk_Node) return Type_Ref;
    --  Return the type of ``Node``. Raise a ``Precondition_Failure`` if
@@ -292,6 +369,19 @@ private
    end record;
 
    No_Type_Ref : constant Type_Ref := (null, 0);
+
+   type Internal_Value_Access is
+     access all Langkit_Support.Internal.Introspection.Internal_Value'Class;
+
+   type Value_Ref is new Ada.Finalization.Controlled with record
+      Value : Internal_Value_Access;
+   end record;
+
+   overriding procedure Adjust (Self : in out Value_Ref);
+   overriding procedure Finalize (Self : in out Value_Ref);
+
+   No_Value_Ref : constant Value_Ref :=
+     (Ada.Finalization.Controlled with Value => null);
 
    type Enum_Value_Ref is record
       Enum : Type_Ref;

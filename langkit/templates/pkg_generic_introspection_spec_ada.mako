@@ -309,6 +309,17 @@ private package ${ada_lib_name}.Generic_Introspection is
    First_Property : constant Struct_Member_Index :=
      ${member_index(ctx.sorted_properties[0])};
 
+   Builtin_Types : aliased constant Builtin_Types_Record :=
+     (Analysis_Unit         => ${type_index(T.AnalysisUnit)},
+      Big_Int               => ${type_index(T.BigInt)},
+      Bool                  => ${type_index(T.Bool)},
+      Char                  => ${type_index(T.Character)},
+      Int                   => ${type_index(T.Int)},
+      Source_Location_Range => ${type_index(T.SourceLocationRange)},
+      String                => ${type_index(T.String)},
+      Token                 => ${type_index(T.Token)},
+      Symbol                => ${type_index(T.Symbol)});
+
    Node_Kinds : constant array (${T.node_kind}) of Type_Index :=
      (${", ".join(f"{n.ada_kind_name} => {type_index(n)}"
                   for n in ctx.astnode_types

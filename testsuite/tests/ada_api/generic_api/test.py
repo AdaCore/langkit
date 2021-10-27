@@ -103,6 +103,7 @@ class Ref(Expr):
 
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
-    ada_main=["analysis.adb", "introspection.adb"]
+    ada_main=["analysis.adb", "introspection_types.adb",
+              "introspection_values.adb"]
 )
 print("Done")

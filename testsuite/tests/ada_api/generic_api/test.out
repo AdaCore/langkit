@@ -113,7 +113,7 @@ Use of stale node reference:
 Got a Stale_Reference_Error exception: unit was reparsed
 
 
-== introspection.adb ==
+== introspection_types.adb ==
 
 All types
 =========
@@ -167,8 +167,7 @@ All types
 Language_For: null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 To_Index: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 From_Index: out of range type index: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid type index
-Debug_Name: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
-
+Debug_Name: Null T argument: <No_Type_Ref>
 Enum types
 ==========
 
@@ -742,4 +741,56 @@ Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid 
 Invalid args for Member_Argument_Name:
 Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
+
+== introspection_values.adb ==
+Value constructors/getters
+==========================
+
+Inspect: <No_Value_Ref>
+  Type_Of: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
+Inspect: <No analysis unit>
+  Type_Of: AnalysisUnit
+Inspect: <Unit for example.txt>
+  Type_Of: AnalysisUnit
+Inspect: BigInt(9111111111124567890)
+  Type_Of: BigInt
+Inspect: True
+  Type_Of: Bool
+Inspect: False
+  Type_Of: Bool
+Inspect: 'A'
+  Type_Of: Character
+Inspect: 42
+  Type_Of: Int
+Inspect: 1:2-3:4
+  Type_Of: SourceLocationRange
+Inspect: "hello, world!"
+  Type_Of: String
+Inspect: <Token Kind=Var Text="var">
+  Type_Of: Token
+Inspect: Symbol("foo_bar42")
+  Type_Of: Symbol
+Inspect: <No node>
+  Type_Of: FooNode.entity
+Inspect: <FooNodeList example.txt:1:1-2:15>
+  Type_Of: FooNode.list.entity
+
+Type matching
+=============
+
+Basic cases:
+32 matches Int? True
+32 matches Bool? False
+<FooNodeList example.txt:1:1-2:15> matches Bool? False
+
+Nodes:
+<FooNodeList example.txt:1:1-2:15> matches FooNode.entity? True
+<FooNodeList example.txt:1:1-2:15> matches VarDecl.entity? False
+<No node> matches FooNode.entity? True
+<No node> matches VarDecl.entity? True
+
+Error cases:
+<No_Value_Ref> matches Int? LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
+<No node> matches <No_Type_Ref>? LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+
 Done
