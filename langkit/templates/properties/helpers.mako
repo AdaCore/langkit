@@ -65,12 +65,16 @@
    begin
       ## Here, we just forward the return value from conv_prop to our caller,
       ## so there is nothing to do regarding ref-counting.
-      Ret := ${conv_prop.name}
-        (${conv_prop.self_arg_name} => From.Node,
-         % for dynvar in conv_prop.dynamic_vars:
-            ${dynvar.argument_name} => Self.${dynvar.argument_name},
-         % endfor
-         ${conv_prop.entity_info_name} => From.Info);
+      <%
+         args = [f"{conv_prop.self_arg_name} => From.Node"]
+         for dynvar in conv_prop.dynamic_vars:
+            args.append(
+               f"{dynvar.argument_name} => Self.{dynvar.argument_name}"
+            )
+         if conv_prop.uses_entity_info:
+            args.append(f"{conv_prop.entity_info_name} => From.Info")
+      %>
+      Ret := ${conv_prop.name} (${" ,".join(args)});
 
       return (Node => Ret.Node, Info => Ret.Info);
    end Convert;
