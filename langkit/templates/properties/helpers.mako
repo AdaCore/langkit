@@ -63,6 +63,20 @@
       % endif
       Ret : ${conv_prop.type.name};
    begin
+      ## From can contain any node type: make sure it has a correct type for
+      ## the conversion property before doing the call.
+      ##
+      ## No need to perform the check if there is only one concrete node in the
+      ## whole language, or we get a compilation warning.
+      % if len(T.root_node.concrete_subclasses) > 1:
+         if From.Node /= null
+            and then From.Node.Kind not in
+                     ${conv_prop.struct.ada_kind_range_name}
+         then
+            raise Property_Error with "mismatching node type for conv_prop";
+         end if;
+      % endif
+
       ## Here, we just forward the return value from conv_prop to our caller,
       ## so there is nothing to do regarding ref-counting.
       <%
