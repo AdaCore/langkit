@@ -11,7 +11,7 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with Libfoolang.Generic_API;
 
-procedure Introspection is
+procedure Introspection_Types is
 
    use Langkit_Support.Errors.Introspection;
 
@@ -47,6 +47,7 @@ procedure Introspection is
    begin
       Put_Line (Label);
       Put_Line ((Label'Range => '='));
+      New_Line;
    end Put_Title;
 
    -------------
@@ -99,7 +100,6 @@ begin
    -----------------------------
 
    Put_Title ("All types");
-   New_Line;
    for Index in Type_Index'First .. Last_Type (Id) loop
       declare
          T : constant Type_Ref := From_Index (Id, Index);
@@ -174,25 +174,13 @@ begin
          Put_Exc (Exc);
    end;
 
-   Put ("Debug_Name: Null T argument: ");
-   begin
-      declare
-         Dummy : constant String := Debug_Name (No_Type_Ref);
-      begin
-         raise Program_Error;
-      end;
-   exception
-      when Exc : Precondition_Failure =>
-         Put_Exc (Exc);
-   end;
-   New_Line;
+   Put_Line ("Debug_Name: Null T argument: " & Debug_Name (No_Type_Ref));
 
    --------------------------
    -- Enum type primitives --
    --------------------------
 
    Put_Title ("Enum types");
-   New_Line;
    for Index in First_Enum .. Last_Enum loop
       declare
          Enum : constant Type_Ref := From_Index (Id, Index);
@@ -328,7 +316,6 @@ begin
    ---------------------------
 
    Put_Title ("Arrays");
-   New_Line;
    for Index in First_Array .. Last_Array loop
       declare
          T : constant Type_Ref := From_Index (Id, Index);
@@ -374,7 +361,6 @@ begin
    ----------------------------
 
    Put_Title ("Structs");
-   New_Line;
    for Index in First_Struct .. Last_Struct loop
       declare
          T : constant Type_Ref := From_Index (Id, Index);
@@ -419,7 +405,6 @@ begin
    --------------------------
 
    Put_Title ("Nodes");
-   New_Line;
    for Index in First_Node .. Last_Node loop
       declare
          Node : constant Type_Ref := From_Index (Id, Index);
@@ -665,7 +650,6 @@ begin
    New_Line;
 
    Put_Title ("Members");
-   New_Line;
    for Index in First_Struct .. Last_Node loop
       declare
          T : constant Type_Ref := From_Index (Id, Index);
@@ -679,7 +663,6 @@ begin
    end loop;
 
    Put_Title ("Detailed list of members");
-   New_Line;
    for Index in Struct_Member_Index'First .. Last_Struct_Member (Id) loop
       declare
          M : constant Struct_Member_Ref := From_Index (Id, Index);
@@ -824,4 +807,4 @@ begin
          Put_Exc (Exc);
    end;
 
-end Introspection;
+end Introspection_Types;

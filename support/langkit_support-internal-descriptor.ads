@@ -122,10 +122,11 @@ package Langkit_Support.Internal.Descriptor is
 
       --  Descriptors for introspection capabilities
 
-      Types        : Type_Descriptor_Array_Access;
-      Enum_Types   : Enum_Type_Descriptor_Array_Access;
-      Array_Types  : Array_Type_Descriptor_Array_Access;
-      Struct_Types : Struct_Type_Descriptor_Array_Access;
+      Types         : Type_Descriptor_Array_Access;
+      Enum_Types    : Enum_Type_Descriptor_Array_Access;
+      Array_Types   : Array_Type_Descriptor_Array_Access;
+      Struct_Types  : Struct_Type_Descriptor_Array_Access;
+      Builtin_Types : Builtin_Types_Access;
 
       First_Node : Type_Index;
       --  Index of the first node descriptor in ``Struct_Types``. In
@@ -171,5 +172,8 @@ package Langkit_Support.Internal.Descriptor is
 
       Entity_Image : Entity_Image_Type;
    end record;
+
+   function "+" is new Ada.Unchecked_Conversion
+     (Any_Language_Id, Language_Descriptor_Access);
 
 end Langkit_Support.Internal.Descriptor;
