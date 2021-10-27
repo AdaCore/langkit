@@ -334,7 +334,7 @@ def domain(self, logic_var_expr, domain):
     The ``or`` operator acts like concatenation on domains of logic variable,
     so for example::
 
-        A.domain([1, 2]) or B.Domain([3, 4])
+        A.domain([1, 2]) or A.Domain([3, 4])
 
     is equivalent to (but slower than) ``A.domain([1, 2, 3, 4])``.
 
