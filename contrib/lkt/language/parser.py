@@ -3198,6 +3198,9 @@ class BinOp(Expr):
 
     @langkit_property()
     def expr_context_free_type():
+        left_cft = Var(Self.left.as_entity.expr_context_free_type)
+        right_cft = Var(Self.right.as_entity.expr_context_free_type)
+
         return Cond(
             # If op is a relational operator, the cf type is bool
             Self.op.is_a(Op.alt_and, Op.alt_or, Op.alt_lt, Op.alt_gt,
@@ -3205,8 +3208,11 @@ class BinOp(Expr):
 
             Self.bool_type,
 
-            # Else, no idea for the moment. NOTE: we can probably improve that
-            # by forwarding the type of operands.
+            # If the operands types match, the context-free type is the same
+            left_cft._.matches(right_cft),
+
+            left_cft,
+
             No(T.TypeDecl.entity)
         )
 
