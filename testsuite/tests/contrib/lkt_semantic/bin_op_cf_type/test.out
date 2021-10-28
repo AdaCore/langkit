@@ -57,3 +57,337 @@ Expr <ParenExpr test.lkt:4:27-4:34>
 Expr <BinOp test.lkt:4:15-4:34>
      has type <EnumTypeDecl prelude: "Bool">
 
+Id   <RefId "Array" test.lkt:6:8-6:13>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:6:14-6:17>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:6:22-6:23>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:6:25-6:26>
+     has type <StructDecl prelude: "Int">
+
+Expr <ArrayLiteral test.lkt:6:21-6:27>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "Array" test.lkt:7:8-7:13>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "String" test.lkt:7:14-7:20>
+     references <StructDecl prelude: "String">
+
+Expr <StringLit test.lkt:7:25-7:28>
+     has type <StructDecl prelude: "String">
+
+Expr <StringLit test.lkt:7:30-7:33>
+     has type <StructDecl prelude: "String">
+
+Expr <ArrayLiteral test.lkt:7:24-7:34>
+     has type <InstantiatedGenericType prelude: "Array[String]">
+
+Id   <RefId "Array" test.lkt:9:9-9:14>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:9:15-9:18>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "x" test.lkt:9:22-9:23>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:9:22-9:23>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "x" test.lkt:9:26-9:27>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:9:26-9:27>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <BinOp test.lkt:9:22-9:27>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "x" test.lkt:10:10-10:11>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:10:10-10:11>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "x" test.lkt:10:14-10:15>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:10:14-10:15>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <BinOp test.lkt:10:10-10:15>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "x" test.lkt:11:10-11:11>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:11:10-11:11>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "x" test.lkt:11:14-11:15>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:11:14-11:15>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <BinOp test.lkt:11:10-11:15>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "x" test.lkt:11:18-11:19>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:11:18-11:19>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Expr <BinOp test.lkt:11:10-11:19>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "Array" test.lkt:14:18-14:23>
+     references <GenericDecl prelude: "Array">
+
+Id   <RefId "Int" test.lkt:14:24-14:27>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "x" test.lkt:14:31-14:32>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:14:31-14:32>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "y" test.lkt:14:35-14:36>
+     references <ValDecl "y" test.lkt:7:1-7:34>
+
+test.lkt:14:35: error: Mismatched types: expected `Array[Int]`, got `Array[String]`
+14 | @invalid val z4: Array[Int] = x & y
+   |                                   ^
+
+Expr <BinOp test.lkt:14:31-14:36>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "x" test.lkt:15:19-15:20>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:15:19-15:20>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "y" test.lkt:15:23-15:24>
+     references <ValDecl "y" test.lkt:7:1-7:34>
+
+Expr <RefId "y" test.lkt:15:23-15:24>
+     has type <InstantiatedGenericType prelude: "Array[String]">
+
+test.lkt:15:19: error: ambiguous type for expression
+15 | @invalid val z5 = x & y
+   |                   ^^^^^
+
+Id   <RefId "x" test.lkt:16:19-16:20>
+     references <ValDecl "x" test.lkt:6:1-6:27>
+
+Expr <RefId "x" test.lkt:16:19-16:20>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
+
+Id   <RefId "y" test.lkt:16:23-16:24>
+     references <ValDecl "y" test.lkt:7:1-7:34>
+
+Expr <RefId "y" test.lkt:16:23-16:24>
+     has type <InstantiatedGenericType prelude: "Array[String]">
+
+test.lkt:16:19: error: ambiguous type for expression
+16 | @invalid val z6 = x & y & y
+   |                   ^^^^^
+
+Id   <RefId "y" test.lkt:16:27-16:28>
+     references <ValDecl "y" test.lkt:7:1-7:34>
+
+Expr <RefId "y" test.lkt:16:27-16:28>
+     has type <InstantiatedGenericType prelude: "Array[String]">
+
+test.lkt:16:19: error: ambiguous type for expression
+16 | @invalid val z6 = x & y & y
+   |                   ^^^^^^^^^
+
+Id   <RefId "Int" test.lkt:18:9-18:12>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:18:15-18:16>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "a" test.lkt:18:19-18:20>
+     references <ValDecl "a" test.lkt:2:1-2:15>
+
+Expr <RefId "a" test.lkt:18:19-18:20>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:18:15-18:20>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:19:9-19:12>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "a" test.lkt:19:15-19:16>
+     references <ValDecl "a" test.lkt:2:1-2:15>
+
+Expr <RefId "a" test.lkt:19:15-19:16>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:19:19-19:20>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:19:15-19:20>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:20:9-20:12>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:20:15-20:16>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "a" test.lkt:20:19-20:20>
+     references <ValDecl "a" test.lkt:2:1-2:15>
+
+Expr <RefId "a" test.lkt:20:19-20:20>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:20:15-20:20>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:20:23-20:24>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "i1" test.lkt:20:27-20:29>
+     references <ValDecl "i1" test.lkt:18:1-18:20>
+
+Expr <RefId "i1" test.lkt:20:27-20:29>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:20:23-20:29>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:20:32-20:33>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:20:23-20:33>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:20:15-20:33>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:21:9-21:12>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "a" test.lkt:21:15-21:16>
+     references <ValDecl "a" test.lkt:2:1-2:15>
+
+Expr <RefId "a" test.lkt:21:15-21:16>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:21:19-21:20>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:21:15-21:20>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:21:24-21:25>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "a" test.lkt:21:29-21:30>
+     references <ValDecl "a" test.lkt:2:1-2:15>
+
+Expr <RefId "a" test.lkt:21:29-21:30>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "a" test.lkt:21:33-21:34>
+     references <ValDecl "a" test.lkt:2:1-2:15>
+
+Expr <RefId "a" test.lkt:21:33-21:34>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:21:29-21:34>
+     has type <StructDecl prelude: "Int">
+
+Expr <ParenExpr test.lkt:21:28-21:35>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:21:24-21:35>
+     has type <StructDecl prelude: "Int">
+
+Expr <ParenExpr test.lkt:21:23-21:36>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:21:15-21:36>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:24:18-24:21>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:24:24-24:25>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "c" test.lkt:24:28-24:29>
+     references <ValDecl "c" test.lkt:4:1-4:34>
+
+test.lkt:24:28: error: Mismatched types: expected `Int`, got `Bool`
+24 | @invalid val i3: Int = 1 - c
+   |                            ^
+
+Expr <BinOp test.lkt:24:24-24:29>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:25:18-25:21>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "c" test.lkt:25:24-25:25>
+     references <ValDecl "c" test.lkt:4:1-4:34>
+
+test.lkt:25:24: error: Mismatched types: expected `Int`, got `Bool`
+25 | @invalid val j3: Int = c - 1
+   |                        ^
+
+Expr <NumLit test.lkt:25:28-25:29>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:25:24-25:29>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:26:18-26:21>
+     references <StructDecl prelude: "Int">
+
+test.lkt:26:24: error: Mismatched types: expected `Int`, got a string literal
+26 | @invalid val i4: Int = "1" - a + 2 * i1 / 4
+   |                        ^^^
+
+Id   <RefId "a" test.lkt:26:30-26:31>
+     references <ValDecl "a" test.lkt:2:1-2:15>
+
+Expr <RefId "a" test.lkt:26:30-26:31>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:26:24-26:31>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:26:34-26:35>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "i1" test.lkt:26:38-26:40>
+     references <ValDecl "i1" test.lkt:18:1-18:20>
+
+Expr <RefId "i1" test.lkt:26:38-26:40>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:26:34-26:40>
+     has type <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:26:43-26:44>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:26:34-26:44>
+     has type <StructDecl prelude: "Int">
+
+Expr <BinOp test.lkt:26:24-26:44>
+     has type <StructDecl prelude: "Int">
+
