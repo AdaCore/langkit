@@ -36,6 +36,7 @@ trait Iterator {
 @builtin generic[T]
 struct Array implements Sized, Indexable[T], Iterator[T] {
     @builtin fun to_iterator(): Iterator[T]
+    @builtin fun unique(): Array[T]
 }
 
 @builtin generic[T]
