@@ -15,5 +15,6 @@ class Example(FooNode):
         return unit.root.as_bare_entity
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
+              lkt_semantic_checks=True)
 print('Done')

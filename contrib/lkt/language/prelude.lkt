@@ -72,6 +72,7 @@ struct ASTList implements Sized, Indexable[T], Iterator[T] {
 }
 
 @builtin generic[RootNode] trait Node {
+    @builtin @property fun as_bare_entity(): RootNode
     @builtin @property fun parent(): RootNode
     @builtin fun node_env(): LexicalEnv[RootNode]
     @builtin fun children_env(): LexicalEnv[RootNode]
