@@ -154,8 +154,8 @@ Expr <RefId "bar" test.lkt:17:27-17:30>
      has type <FunctionType prelude: "() -> String">
 
 test.lkt:17:27: error: Mismatched types: expected `Int`, got `String`
-16 | @invalid val a5 = [foo(), bar()]
-   |                           ^^^^^ 
+17 | @invalid val a5 = [foo(), bar()]
+   |                           ^^^^^
 
 Expr <ArrayLiteral test.lkt:17:19-17:33>
      has type <InstantiatedGenericType prelude: "Array[Int]">
@@ -164,12 +164,12 @@ Expr <NumLit test.lkt:18:20-18:21>
      has type <StructDecl prelude: "Int">
 
 test.lkt:18:23: error: Mismatched types: expected `Int`, got a character literal
-17 | @invalid val a6 = [1, '2', "3", foo(), bar()]
-   |                       ^^^                    
+18 | @invalid val a6 = [1, '2', "3", foo(), bar()]
+   |                       ^^^
 
 test.lkt:18:28: error: Mismatched types: expected `Int`, got a string literal
-17 | @invalid val a6 = [1, '2', "3", foo(), bar()]
-   |                            ^^^               
+18 | @invalid val a6 = [1, '2', "3", foo(), bar()]
+   |                            ^^^
 
 Id   <RefId "foo" test.lkt:18:33-18:36>
      references <FunDecl "foo" test.lkt:8:1-8:19>
@@ -187,11 +187,11 @@ Expr <RefId "bar" test.lkt:18:40-18:43>
      has type <FunctionType prelude: "() -> String">
 
 test.lkt:18:40: error: Mismatched types: expected `Int`, got `String`
-17 | @invalid val a6 = [1, '2', "3", foo(), bar()]
-   |                                        ^^^^^ 
+18 | @invalid val a6 = [1, '2', "3", foo(), bar()]
+   |                                        ^^^^^
 
 test.lkt:18:19: error: ambiguous type for expression
-17 | @invalid val a6 = [1, '2', "3", foo(), bar()]
+18 | @invalid val a6 = [1, '2', "3", foo(), bar()]
    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "foo" test.lkt:20:12-20:15>
@@ -408,18 +408,18 @@ Expr <ArrayLiteral test.lkt:31:21-31:33>
      has type <InstantiatedGenericType prelude: "Array[String]">
 
 test.lkt:31:36: error: Mismatched types: expected `String`, got a number literal
-30 | @invalid val a11 = [[bar(), "2"], [1, 2]]
-   |                                    ^     
+31 | @invalid val a11 = [[bar(), "2"], [1, 2]]
+   |                                    ^
 
 test.lkt:31:39: error: Mismatched types: expected `String`, got a number literal
-30 | @invalid val a11 = [[bar(), "2"], [1, 2]]
-   |                                       ^  
+31 | @invalid val a11 = [[bar(), "2"], [1, 2]]
+   |                                       ^
 
 test.lkt:31:35: error: Mismatched types: expected `Array[String]`, got an array
-30 | @invalid val a11 = [[bar(), "2"], [1, 2]]
-   |                                   ^^^^^^ 
+31 | @invalid val a11 = [[bar(), "2"], [1, 2]]
+   |                                   ^^^^^^
 
 test.lkt:31:20: error: ambiguous type for expression
-30 | @invalid val a11 = [[bar(), "2"], [1, 2]]
+31 | @invalid val a11 = [[bar(), "2"], [1, 2]]
    |                    ^^^^^^^^^^^^^^^^^^^^^^
 

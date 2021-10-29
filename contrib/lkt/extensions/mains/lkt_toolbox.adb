@@ -1,5 +1,6 @@
 with Ada.Directories;             use Ada.Directories;
 with Ada.Exceptions;
+with Ada.Strings.Fixed;           use Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;       use Ada.Strings.Unbounded;
 with Ada.Text_IO;                 use Ada.Text_IO;
 
@@ -14,7 +15,7 @@ use Langkit_Support.Diagnostics.Output;
 
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with Liblktlang.Analysis;
+with Liblktlang.Analysis;         use Liblktlang.Analysis;
 with Liblktlang.Common;
 
 procedure Lkt_Toolbox is
@@ -44,6 +45,20 @@ procedure Lkt_Toolbox is
    procedure Print_Semantic_Result
      (S : Analysis.Semantic_Result; Unit : Analysis.Analysis_Unit);
    --  Print a semantic result
+
+   function Format_Node (Decl_Node : Decl'Class) return String;
+   --  Format node for semantic result printing
+
+   -----------------
+   -- Format_Node --
+   -----------------
+
+   function Format_Node (Decl_Node : Decl'Class) return String is
+   begin
+      --  Remove rebindings information as there is no easy way to filter
+      --  out/format rebindings information involving prelude declarations.
+      return Decl_Node.P_As_Bare_Decl.Image;
+   end Format_Node;
 
    ---------------------------
    -- Print_Semantic_Result --
@@ -75,7 +90,7 @@ procedure Lkt_Toolbox is
         and then not Analysis.Result_Ref (S).Is_Null
       then
          Put_Line ("Id   " & Analysis.Node (S).Image);
-         Put_Line ("     references " & Analysis.Result_Ref (S).Image);
+         Put_Line ("     references " & Format_Node (Analysis.Result_Ref (S)));
          New_Line;
       end if;
    end Print_Semantic_Result;
@@ -87,9 +102,15 @@ begin
    if Arg.Parser.Parse then
       for File_Name of Arg.Files.Get loop
          declare
-            Unit : constant Analysis.Analysis_Unit
-              := Ctx.Get_From_File (To_String (File_Name));
+            File_Name_Str : constant String := To_String (File_Name);
+            Unit          : constant Analysis.Analysis_Unit :=
+               Ctx.Get_From_File (File_Name_Str);
          begin
+            if not Arg.Check_Only.Get then
+               Put_Line ("Resolving " & File_Name_Str);
+               Put_Line ((File_Name_Str'Length + 10) * "=");
+            end if;
+
             if Unit.Diagnostics'Length > 0 then
                for Diagnostic of Unit.Diagnostics loop
                   Print_Diagnostic

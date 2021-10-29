@@ -43,6 +43,6 @@ Id   <RefId "A" test.lkt:14:37-14:38>
      references <FieldDecl "A" test.lkt:12:1-12:19>
 
 test.lkt:14:37: error: Mismatched types: expected `TestEntity[Statement]`, got `TestEntity[Lit]`
-13 | @invalid C: TestEntity[Statement] = A
+14 | @invalid C: TestEntity[Statement] = A
    |                                     ^
 

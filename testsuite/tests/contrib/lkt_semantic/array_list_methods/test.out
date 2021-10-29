@@ -85,6 +85,6 @@ Id   <RefId "String" test.lkt:13:57-13:63>
      references <StructDecl prelude: "String">
 
 test.lkt:13:66: error: Cannot find entity `self` in this scope
-12 | @invalid fun test_astlist_indexing(a: ASTList[String]): String = self(12)
-   |                                                                  ^^^^    
+13 | @invalid fun test_astlist_indexing(a: ASTList[String]): String = self(12)
+   |                                                                  ^^^^
 

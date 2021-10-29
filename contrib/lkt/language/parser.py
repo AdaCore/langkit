@@ -620,6 +620,17 @@ class Decl(LKNode):
             PropertyError(T.Decl, "Type decl has rebindings but shouldn't")
         )
 
+    @langkit_property(public=True)
+    def as_bare_decl():
+        """
+        Get this declaration without rebindings information.
+        """
+        # This is used by lkt_toolbox as a simple solution to filter out
+        # rebindings information for the prelude declarations. TODO: improve it
+        # in order to properly show rebindings information for prelude
+        # declarations (i.e. do not show sloc nor unit name).
+        return Entity.node.as_bare_entity
+
     @langkit_property()
     def call_scope():
         """

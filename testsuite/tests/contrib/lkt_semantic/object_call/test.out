@@ -46,8 +46,8 @@ Expr <CallExpr test.lkt:7:38-7:45>
      has type <InstantiatedGenericType prelude: "Array[Int]">
 
 test.lkt:7:46: error: Mismatched types: expected `Int`, got a string literal
-6 | @incorrect val incorrect_call: Int = arr(12)("a")
-  |                                              ^^^ 
+7 | @incorrect val incorrect_call: Int = arr(12)("a")
+  |                                              ^^^
 
 Expr <CallExpr test.lkt:7:38-7:50>
      has type <StructDecl prelude: "Int">
@@ -56,7 +56,7 @@ Id   <RefId "Int" test.lkt:8:34-8:37>
      references <StructDecl prelude: "Int">
 
 test.lkt:8:40: error: No value for parameter
-7 | @incorrect val incorrect_call_1: Int = arr(12)()
+8 | @incorrect val incorrect_call_1: Int = arr(12)()
   |                                        ^^^^^^^^^
 
 Id   <RefId "arr" test.lkt:8:40-8:43>
@@ -78,8 +78,8 @@ Id   <RefId "Int" test.lkt:9:34-9:37>
      references <StructDecl prelude: "Int">
 
 test.lkt:9:51: error: Unmatched actual
-8 | @incorrect val incorrect_call_2: Int = arr(12)(1, 2)
-  |                                                   ^ 
+9 | @incorrect val incorrect_call_2: Int = arr(12)(1, 2)
+  |                                                   ^
 
 Id   <RefId "arr" test.lkt:9:40-9:43>
      references <FunDecl "arr" test.lkt:4:1-4:31>
@@ -97,8 +97,8 @@ Expr <NumLit test.lkt:9:48-9:49>
      has type <StructDecl prelude: "Int">
 
 test.lkt:9:51: error: ambiguous type for expression
-8 | @incorrect val incorrect_call_2: Int = arr(12)(1, 2)
-  |                                                   ^ 
+9 | @incorrect val incorrect_call_2: Int = arr(12)(1, 2)
+  |                                                   ^
 
 Expr <CallExpr test.lkt:9:40-9:53>
      has type <StructDecl prelude: "Int">
@@ -149,8 +149,8 @@ Expr <NumLit test.lkt:14:39-14:40>
      has type <StructDecl prelude: "Int">
 
 test.lkt:14:42: error: Mismatched types: expected `Int`, got a character literal
-13 | @incorrect val b: Int = return_func()(1, '2')
-   |                                          ^^^ 
+14 | @incorrect val b: Int = return_func()(1, '2')
+   |                                          ^^^
 
 Expr <CallExpr test.lkt:14:25-14:46>
      has type <StructDecl prelude: "Int">

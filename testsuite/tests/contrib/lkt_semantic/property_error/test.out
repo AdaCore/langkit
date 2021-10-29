@@ -43,7 +43,7 @@ Expr <StringLit test.lkt:5:42-5:49>
      has type <StructDecl prelude: "String">
 
 test.lkt:5:28: error: Mismatched types: expected `Bool`, got `PropertyError`
-4 | @invalid val prop3: Bool = PropertyError("error")
+5 | @invalid val prop3: Bool = PropertyError("error")
   |                            ^^^^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "Bool" test.lkt:6:21-6:25>
@@ -56,11 +56,11 @@ Expr <StringLit test.lkt:6:43-6:50>
      has type <StructDecl prelude: "String">
 
 test.lkt:6:29: error: Mismatched types: expected `Bool`, got `PropertyError`
-5 | @invalid val prop4: Bool = (PropertyError("error"))
-  |                             ^^^^^^^^^^^^^^^^^^^^^^ 
+6 | @invalid val prop4: Bool = (PropertyError("error"))
+  |                             ^^^^^^^^^^^^^^^^^^^^^^
 
 test.lkt:6:28: error: Mismatched types: expected `Bool`, got `PropertyError`
-5 | @invalid val prop4: Bool = (PropertyError("error"))
+6 | @invalid val prop4: Bool = (PropertyError("error"))
   |                            ^^^^^^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "Bool" test.lkt:8:14-8:18>
@@ -97,7 +97,7 @@ Id   <RefId "Bool" test.lkt:16:23-16:27>
      references <EnumTypeDecl prelude: "Bool">
 
 test.lkt:16:36: error: raised expression needs to be of type `PropertyError`, got `Int`
-15 | @invalid fun prop6(): Bool = raise i
+16 | @invalid fun prop6(): Bool = raise i
    |                                    ^
 
 Id   <RefId "i" test.lkt:16:36-16:37>

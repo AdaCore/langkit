@@ -46,19 +46,19 @@ Id   <RefId "Int" test.lkt:6:30-6:33>
      references <StructDecl prelude: "Int">
 
 test.lkt:6:38: error: ambiguous type for expression
-5 | @invalid val foo: LexicalEnv[Int] = [1]
-  |                                      ^ 
+6 | @invalid val foo: LexicalEnv[Int] = [1]
+  |                                      ^
 
 test.lkt:6:37: error: Mismatched types: expected `LexicalEnv[Int]`, got an array
-5 | @invalid val foo: LexicalEnv[Int] = [1]
+6 | @invalid val foo: LexicalEnv[Int] = [1]
   |                                     ^^^
 
 test.lkt:10:19: error: ambiguous type for expression
- 9 | @invalid val a2 = []
+10 | @invalid val a2 = []
    |                   ^^
 
 test.lkt:12:19: error: ambiguous type for expression
-11 | @invalid val a3 = [1]
+12 | @invalid val a3 = [1]
    |                   ^^^
 
 Id   <RefId "Array" test.lkt:14:9-14:14>
@@ -107,11 +107,11 @@ Id   <RefId "Int" test.lkt:19:24-19:27>
      references <StructDecl prelude: "Int">
 
 test.lkt:19:32: error: Mismatched types: expected `Int`, got a character literal
-18 | @invalid val a5: Array[Int] = ['!']
-   |                                ^^^ 
+19 | @invalid val a5: Array[Int] = ['!']
+   |                                ^^^
 
 test.lkt:19:31: error: Mismatched types: expected `Array[Int]`, got an array
-18 | @invalid val a5: Array[Int] = ['!']
+19 | @invalid val a5: Array[Int] = ['!']
    |                               ^^^^^
 
 Id   <RefId "Array" test.lkt:21:9-21:14>
@@ -295,11 +295,11 @@ Id   <RefId "Int" test.lkt:32:30-32:33>
      references <StructDecl prelude: "Int">
 
 test.lkt:32:39: error: Mismatched types: expected `Array[Int]`, got a number literal
-31 | @invalid val a9: Array[Array[Int]] = [1]
-   |                                       ^ 
+32 | @invalid val a9: Array[Array[Int]] = [1]
+   |                                       ^
 
 test.lkt:32:38: error: Mismatched types: expected `Array[Array[Int]]`, got an array
-31 | @invalid val a9: Array[Array[Int]] = [1]
+32 | @invalid val a9: Array[Array[Int]] = [1]
    |                                      ^^^
 
 Id   <RefId "Array" test.lkt:33:19-33:24>
@@ -312,18 +312,18 @@ Id   <RefId "Int" test.lkt:33:31-33:34>
      references <StructDecl prelude: "Int">
 
 test.lkt:33:42: error: ambiguous type for expression
-32 | @invalid val a10: Array[Array[Int]] = [[[1]]]
-   |                                          ^   
+33 | @invalid val a10: Array[Array[Int]] = [[[1]]]
+   |                                          ^
 
 test.lkt:33:41: error: Mismatched types: expected `Int`, got an array
-32 | @invalid val a10: Array[Array[Int]] = [[[1]]]
-   |                                         ^^^  
+33 | @invalid val a10: Array[Array[Int]] = [[[1]]]
+   |                                         ^^^
 
 test.lkt:33:40: error: Mismatched types: expected `Array[Int]`, got an array
-32 | @invalid val a10: Array[Array[Int]] = [[[1]]]
-   |                                        ^^^^^ 
+33 | @invalid val a10: Array[Array[Int]] = [[[1]]]
+   |                                        ^^^^^
 
 test.lkt:33:39: error: Mismatched types: expected `Array[Array[Int]]`, got an array
-32 | @invalid val a10: Array[Array[Int]] = [[[1]]]
+33 | @invalid val a10: Array[Array[Int]] = [[[1]]]
    |                                       ^^^^^^^
 

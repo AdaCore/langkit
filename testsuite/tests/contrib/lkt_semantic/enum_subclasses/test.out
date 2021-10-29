@@ -16,10 +16,10 @@ Expr <CallExpr test.lkt:8:40-8:59>
      has type <EnumClassAltDecl "SubclassB" test.lkt:5:21-5:30>
 
 test.lkt:10:32: error: Cannot find entity `SubclassB` in this scope
- 9 | @invalid val invalid_en_class: SubclassB = SubclassB()
-   |                                ^^^^^^^^^              
+10 | @invalid val invalid_en_class: SubclassB = SubclassB()
+   |                                ^^^^^^^^^
 
 test.lkt:10:44: error: Cannot find entity `SubclassB` in this scope
- 9 | @invalid val invalid_en_class: SubclassB = SubclassB()
-   |                                            ^^^^^^^^^  
+10 | @invalid val invalid_en_class: SubclassB = SubclassB()
+   |                                            ^^^^^^^^^
 

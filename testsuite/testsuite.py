@@ -17,7 +17,7 @@ import sys
 from e3.testsuite import Testsuite
 
 import drivers.langkit_support_driver
-import drivers.lkt_resolve_driver
+import drivers.lkt_toolbox_driver
 import drivers.python_driver
 
 
@@ -37,7 +37,7 @@ class LangkitTestsuite(Testsuite):
     test_driver_map = {
         'python': drivers.python_driver.PythonDriver,
         'langkit_support': drivers.langkit_support_driver.LangkitSupportDriver,
-        'lkt': drivers.lkt_resolve_driver.LktResolveDriver,
+        'lkt': drivers.lkt_toolbox_driver.LktToolboxDriver,
     }
 
     def add_options(self, parser):

@@ -4,7 +4,7 @@ Id   <RefId "Int" test.lkt:1:13-1:16>
      references <StructDecl prelude: "Int">
 
 test.lkt:1:19: error: Cannot find entity `Cls` in this scope
-0 | fun test(a: Int): Cls
+1 | fun test(a: Int): Cls
   |                   ^^^
 
 Id   <RefId "Int" test.lkt:3:8-3:11>

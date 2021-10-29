@@ -40,7 +40,7 @@ Id   <RefId "ChildNode" test.lkt:6:24-6:33>
      references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
 
 test.lkt:6:19: error: Mismatched types: expected `Int`, got `ChildNode`
-5 | @invalid c: Int = a.as[ChildNode]
+6 | @invalid c: Int = a.as[ChildNode]
   |                   ^^^^^^^^^^^^^^^
 
 Id   <RefId "Int" test.lkt:7:13-7:16>
@@ -59,6 +59,6 @@ Expr <CastExpr test.lkt:7:19-7:28>
      has type <StructDecl prelude: "Int">
 
 test.lkt:7:19: error: Invalid cast: only up/down casting allowed
-6 | @invalid d: Int = a.as[Int]
+7 | @invalid d: Int = a.as[Int]
   |                   ^^^^^^^^^
 

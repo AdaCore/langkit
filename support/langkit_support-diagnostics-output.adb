@@ -66,7 +66,7 @@ package body Langkit_Support.Diagnostics.Output is
 
       Line_Nb      : constant Positive := Positive (Sloc_Range.Start_Line);
       Start_Offset : constant Positive := Positive (Sloc_Range.Start_Column);
-      End_Offset   : constant Positive := Positive (Sloc_Range.End_Column);
+      End_Offset   : constant Positive := Positive (Sloc_Range.End_Column) - 1;
 
       Line_Nb_Width : constant Positive :=
         Positive'Image (Line_Nb + Lines_After)'Length - 1;
@@ -96,7 +96,7 @@ package body Langkit_Support.Diagnostics.Output is
       declare
          Caret_Line : Text_Type (1 .. End_Offset) := (others => ' ');
       begin
-         Caret_Line (Start_Offset .. End_Offset - 1) := (others => '^');
+         Caret_Line (Start_Offset .. End_Offset) := (others => '^');
          Put_Line (Output_File, Caret_Line);
       end;
       Reset_Colors;
