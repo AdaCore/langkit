@@ -74,18 +74,24 @@ package body Liblktlang.Implementation.Extensions is
    function Decl_Short_Image (Node : Bare_Decl) return Text_Type is
       Full_Name_Acc : String_Type := Dispatcher_Decl_P_Full_Name (Node);
       Full_Name     : constant Text_Type := Full_Name_Acc.Content;
+      File_Name     : constant Text_Type :=
+         To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))));
    begin
       Dec_Ref (Full_Name_Acc);
-      return
-        "<" & To_Text (Kind_Name (Node)) & " """ & Full_Name & """ "
-        & To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))))
+      if File_Name = "__prelude" then
+         return "<" & To_Text (Kind_Name (Node))
+           & " prelude: """ & Full_Name & """>";
+      else
+         return "<" & To_Text (Kind_Name (Node)) & " """ & Full_Name & """ "
+           & File_Name
 
-        --  Don't show the sloc for function types, because it will be the root
-        --  node's sloc, and thus will always change when we add stuff to the
-        --  file, which is not helpful nor practical for tests.
-        & (if Node.Kind = Lkt_Function_Type
-           then ""
-           else ":" & To_Text (Image (Sloc_Range (Node)))) & ">";
+           --  Don't show the sloc for function types, because it will be the
+           --  root node's sloc, and thus will always change when we add stuff
+           --  to the file, which is not helpful nor practical for tests.
+           & (if Node.Kind = Lkt_Function_Type
+              then ""
+              else ":" & To_Text (Image (Sloc_Range (Node)))) & ">";
+      end if;
    end Decl_Short_Image;
 
    --------------------------------------

@@ -91,6 +91,6 @@ Id   <RefId "a" test.lkt:18:58-18:59>
      references <FunArgDecl "a" test.lkt:18:32-18:43>
 
 test.lkt:18:58: error: Mismatched types: expected `Subclass2`, got `Subclass`
-17 | @invalid fun test_subtyping_4 (a: Subclass): Subclass2 = a
+18 | @invalid fun test_subtyping_4 (a: Subclass): Subclass2 = a
    |                                                          ^
 

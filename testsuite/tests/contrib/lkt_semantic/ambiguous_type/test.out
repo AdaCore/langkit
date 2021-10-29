@@ -1,6 +1,6 @@
 Resolving test.lkt
 ==================
 test.lkt:4:9: error: ambiguous type for expression
-3 | val a = "hello"
+4 | val a = "hello"
   |         ^^^^^^^
 

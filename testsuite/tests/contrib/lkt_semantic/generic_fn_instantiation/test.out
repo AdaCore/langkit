@@ -247,7 +247,7 @@ Id   <RefId "Int" test.lkt:56:54-56:57>
      references <StructDecl prelude: "Int">
 
 test.lkt:56:60: error: Not enough information to infer instantiation of generic callee
-55 | @invalid fun test_ambiguous_generic_instantiation(): Int = fooz(1, "lol")
+56 | @invalid fun test_ambiguous_generic_instantiation(): Int = fooz(1, "lol")
    |                                                            ^^^^^^^^^^^^^^
 
 Id   <RefId "fooz" test.lkt:56:60-56:64>
@@ -263,8 +263,8 @@ Id   <RefId "singleton" test.lkt:59:53-59:62>
      references <GenericDecl "singleton" test.lkt:13:1-14:32>
 
 test.lkt:59:63: error: Mismatched types: expected `Int`, got a string literal
-58 | @invalid fun test_invalid_singleton(): Array[Int] = singleton("lol")
-   |                                                               ^^^^^ 
+59 | @invalid fun test_invalid_singleton(): Array[Int] = singleton("lol")
+   |                                                               ^^^^^
 
 Expr <CallExpr test.lkt:59:53-59:69>
      has type <InstantiatedGenericType prelude: "Array[Int]">
@@ -273,7 +273,7 @@ Id   <RefId "Int" test.lkt:62:42-62:45>
      references <StructDecl prelude: "Int">
 
 test.lkt:62:48: error: Cannot instantiate callee: cannot unify `Array[T]` with `Int`
-61 | @invalid fun test_invalid_singleton_2(): Int = singleton("lol")
+62 | @invalid fun test_invalid_singleton_2(): Int = singleton("lol")
    |                                                ^^^^^^^^^^^^^^^^
 
 Id   <RefId "singleton" test.lkt:62:48-62:57>
@@ -289,7 +289,7 @@ Id   <RefId "String" test.lkt:68:53-68:59>
      references <StructDecl prelude: "String">
 
 test.lkt:68:63: error: Cannot instantiate callee: cannot unify `Array[T]` with `Dummy[Int, String]`
-67 | @invalid fun test_invalid_singleton_3(): Dummy[Int, String] = singleton("lol")
+68 | @invalid fun test_invalid_singleton_3(): Dummy[Int, String] = singleton("lol")
    |                                                               ^^^^^^^^^^^^^^^^
 
 Id   <RefId "singleton" test.lkt:68:63-68:72>
@@ -374,8 +374,8 @@ Expr <LambdaExpr test.lkt:77:9-77:25>
      has type <FunctionType prelude: "(Int) -> Int">
 
 test.lkt:78:18: error: Cannot find entity `xxx` in this scope
-77 |         (yyy) => xxx * yyy
-   |                  ^^^      
+78 |         (yyy) => xxx * yyy
+   |                  ^^^
 
 Id   <RefId "yyy" test.lkt:78:24-78:27>
      references <LambdaArgDecl "yyy" test.lkt:78:10-78:13>

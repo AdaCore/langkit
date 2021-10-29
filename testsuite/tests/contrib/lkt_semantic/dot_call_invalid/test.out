@@ -16,6 +16,6 @@ Expr <RefId "a" test.lkt:4:23-4:24>
      has type <StructDecl prelude: "Int">
 
 test.lkt:4:25: error: Cannot find entity `plus` in this scope
-3 | @invalid val b: Int = a.plus(2)
-  |                         ^^^^   
+4 | @invalid val b: Int = a.plus(2)
+  |                         ^^^^
 

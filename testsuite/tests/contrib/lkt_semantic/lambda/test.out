@@ -68,8 +68,8 @@ Expr <NumLit test.lkt:12:24-12:26>
 
 test.lkt:12:29: error: Invalid type annotations for lambda parameters.
 Annotate either all or no params
-11 |     lambda_test_helper(12, (x: Int, y) => x + y * 2)
-   |                             ^^^^^^^^^               
+12 |     lambda_test_helper(12, (x: Int, y) => x + y * 2)
+   |                             ^^^^^^^^^
 
 Id   <RefId "Int" test.lkt:12:32-12:35>
      references <StructDecl prelude: "Int">
@@ -126,8 +126,8 @@ Expr <NumLit test.lkt:16:59-16:61>
      has type <StructDecl prelude: "Int">
 
 test.lkt:16:28: error: Mismatched types: expected `(Int, Int) -> Int`, got `(String, String) -> Int`
-15 |     lambda_test_helper(12, (x: String, y: String): Int => 12)
-   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+16 |     lambda_test_helper(12, (x: String, y: String): Int => 12)
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Expr <CallExpr test.lkt:16:5-16:62>
      has type <StructDecl prelude: "Int">

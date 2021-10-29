@@ -145,8 +145,8 @@ Expr <CallExpr test.lkt:30:5-33:6>
      has type <InstantiatedGenericType prelude: "Array[String]">
 
 test.lkt:36:40: error: Cannot find entity `A` in this scope
-35 | @invalid fun test_handle_ce_error(arg: A): Int = arg.method_doesnt_exist()
-   |                                        ^                                  
+36 | @invalid fun test_handle_ce_error(arg: A): Int = arg.method_doesnt_exist()
+   |                                        ^
 
 Id   <RefId "Int" test.lkt:36:44-36:47>
      references <StructDecl prelude: "Int">
@@ -176,7 +176,7 @@ Id   <RefId "Bool" test.lkt:43:52-43:56>
      references <EnumTypeDecl prelude: "Bool">
 
 test.lkt:43:60: error: Instantiation error: conflicting actual types for formal `T`: `Int` and `Bool`
-42 | @invalid fun test_conflicting_actuals(): Pair[Int, Bool] = mkPair(1)
+43 | @invalid fun test_conflicting_actuals(): Pair[Int, Bool] = mkPair(1)
    |                                                            ^^^^^^^^^
 
 Id   <RefId "mkPair" test.lkt:43:60-43:66>
