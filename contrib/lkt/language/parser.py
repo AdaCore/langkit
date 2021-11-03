@@ -459,6 +459,17 @@ class LKNode(ASTNode):
             has_error=results.any(lambda r: r.has_error)
         )
 
+    @langkit_property(return_type=T.LKNode.entity)
+    def first_no_paren_parent():
+        """
+        Return the first parent that is not a ``ParenExpr``.
+        """
+        return If(
+            Entity.parent.is_a(ParenExpr),
+            Entity.parent.first_no_paren_parent(),
+            Entity.parent
+        )
+
 
 class LangkitRoot(LKNode):
     """
@@ -2569,6 +2580,23 @@ class CallExpr(Expr):
                             )
                         ).singleton
                     )
+                )
+            )
+            # In case of PropertyError, check for RaiseExpr
+            ._or(
+                If(
+                    And(
+                        rd.result_ref == Entity.property_error_type,
+                        Not(Entity.first_no_paren_parent.is_a(T.RaiseExpr))
+                    ),
+
+                    Self.error(
+                        S("cannot call ")
+                        .concat(Entity.property_error_type.full_name)
+                        .concat(S(" outside of a raise expression"))
+                    ).singleton,
+
+                    No(T.SemanticResult.array)
                 )
             )
         )
