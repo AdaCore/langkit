@@ -199,7 +199,7 @@ class LKNode(ASTNode):
     )
 
     array_type = Property(
-        Self.array_gen_type.decl.cast(T.TypeDecl), public=True,
+        Self.array_gen_type.decl.cast(T.NamedTypeDecl), public=True,
         doc="Unit method. Return the array builtin type."
     )
 
@@ -210,7 +210,7 @@ class LKNode(ASTNode):
     )
 
     astlist_type = Property(
-        Self.astlist_gen_type.decl.cast(T.TypeDecl),
+        Self.astlist_gen_type.decl.cast(T.NamedTypeDecl),
         public=True,
         doc="Unit method. Return the ASTList builtin type."
     )

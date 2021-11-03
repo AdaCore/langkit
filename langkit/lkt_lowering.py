@@ -72,6 +72,17 @@ def check_referenced_decl(expr: L.Expr) -> L.Decl:
         assert False, f"Cannot get referenced decl for {expr}: {exc}"
 
 
+def same_node(left: L.LKNode, right: L.LKNode) -> bool:
+    """
+    Return whether ``left`` and ``right`` designate the same node, regardless
+    of generic instantiation information.
+
+    .. todo:: This should probably belong to Liblktlang, in one form or
+       another. See use cases.
+    """
+    return left.unit == right.unit and left.sloc_range == right.sloc_range
+
+
 def pattern_as_str(str_lit: Union[L.StringLit, L.TokenPatternLit]) -> str:
     """
     Return the regexp string associated to this string literal node.
@@ -1144,7 +1155,7 @@ class LktTypesLoader:
 
         root = lkt_units[0].root
 
-        def get_field(decl: L.TraitDecl, name: str) -> L.Decl:
+        def get_field(decl: L.NamedTypeDecl, name: str) -> L.Decl:
             """
             Return the (assumed existing and unique) declaration called
             ``name`` nested in ``decl``.
@@ -1160,8 +1171,10 @@ class LktTypesLoader:
         self.array_type = root.p_array_type
         self.astlist_type = root.p_astlist_type
         self.iterator_trait = root.p_iterator_trait
-        self.map_method = get_field(self.iterator_trait, 'map')
         self.analysis_unit_trait = root.p_analysis_unit_trait
+
+        self.map_method = get_field(self.iterator_trait, 'map')
+        self.unique_method = get_field(self.array_type, 'unique')
 
         # Map Lkt nodes for the declarations of builtin types to the
         # corresponding CompiledType instances.
@@ -1475,12 +1488,7 @@ class LktTypesLoader:
                     assert not args
                     return E.New(struct_type, **kwargs)
 
-                # TODO: change liblktlang so that we get an object similar to
-                # InstantiatedGenericType, and have an easy way to check it's
-                # the builtin map function.
-                elif (name_decl.unit, name_decl.sloc_range) == (
-                    self.map_method.unit, self.map_method.sloc_range
-                ):
+                elif same_node(name_decl, self.map_method):
                     # Build variable for iteration variables from the lambda
                     # expression arguments.
                     assert len(call_expr.f_args) == 1
@@ -1506,6 +1514,19 @@ class LktTypesLoader:
                     result = E.Map.create_expanded(coll_expr, inner_expr,
                                                    element_var, index_var)
                     return result
+
+                elif same_node(name_decl, self.unique_method):
+                    # Lower the prefix (the array to copy)
+                    prefix = lower(expr.f_name)
+
+                    # Defensive programming: make sure we have no arguments to
+                    # lower.
+                    args, kwargs = lower_args()
+                    assert not args and not kwargs
+
+                    # ".unique" works with our auto_attr magic: not worth type
+                    # checking until we get rid of the syntax magic.
+                    return prefix.unique  # type: ignore
 
                 else:
                     # Otherwise, this call must be a method invocation. Note
