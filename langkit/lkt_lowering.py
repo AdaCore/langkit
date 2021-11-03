@@ -1161,6 +1161,7 @@ class LktTypesLoader:
         self.astlist_type = root.p_astlist_type
         self.iterator_trait = root.p_iterator_trait
         self.map_method = get_field(self.iterator_trait, 'map')
+        self.analysis_unit_trait = root.p_analysis_unit_trait
 
         # Map Lkt nodes for the declarations of builtin types to the
         # corresponding CompiledType instances.
@@ -1233,6 +1234,9 @@ class LktTypesLoader:
                 node = self.resolve_type_decl(actuals[0])
                 assert isinstance(node, (ASTNodeType, TypeRepo.Defer))
                 result = node.list
+
+            elif inner_type == self.analysis_unit_trait:
+                result = T.AnalysisUnit
 
             else:
                 assert False, (
