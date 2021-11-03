@@ -1544,6 +1544,14 @@ class LktTypesLoader:
                     args, kwargs = lower_args()
                     return callee(*args, **kwargs)
 
+            elif isinstance(expr, L.CastExpr):
+                subexpr = lower(expr.f_expr)
+                excludes_null = expr.f_excludes_null.p_as_bool
+                dest_type = self.resolve_type_decl(
+                    expr.f_dest_type.p_designated_type
+                )
+                return Cast(subexpr, dest_type, do_raise=excludes_null)
+
             elif isinstance(expr, L.CharLit):
                 return E.CharacterLiteral(denoted_char_lit(expr))
 
