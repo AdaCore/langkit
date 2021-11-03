@@ -88,7 +88,7 @@
          if conv_prop.uses_entity_info:
             args.append(f"{conv_prop.entity_info_name} => From.Info")
       %>
-      Ret := ${conv_prop.name} (${" ,".join(args)});
+      Ret := ${conv_prop.name} (${", ".join(args)});
 
       return (Node => Ret.Node, Info => Ret.Info);
    end Convert;
