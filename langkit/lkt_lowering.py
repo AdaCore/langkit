@@ -26,7 +26,7 @@ from langkit.diagnostics import (
 )
 import langkit.expressions as E
 from langkit.expressions import (
-    AbstractExpression, AbstractProperty, AbstractVariable, Property,
+    AbstractExpression, AbstractProperty, AbstractVariable, Cast, Property,
     PropertyDef
 )
 from langkit.lexer import (
@@ -1601,6 +1601,14 @@ class LktTypesLoader:
                     for type_ref in expr.f_dest_type
                 ]
                 return E.IsA(subexpr, *nodes)
+
+            elif isinstance(expr, L.CastExpr):
+                subexpr = lower(expr.f_expr)
+                excludes_null = expr.f_excludes_null.p_as_bool
+                dest_type = self.resolve_type_decl(
+                    expr.f_dest_type.p_designated_type
+                )
+                return Cast(subexpr, dest_type, do_raise=excludes_null)
 
             elif isinstance(expr, L.NotExpr):
                 return E.Not(lower(expr.f_expr))

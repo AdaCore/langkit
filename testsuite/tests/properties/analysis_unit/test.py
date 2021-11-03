@@ -43,5 +43,5 @@ class Plus(Expression):
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-              lkt_semantic_checks=True)
+              types_from_lkt=True)
 print('Done')
