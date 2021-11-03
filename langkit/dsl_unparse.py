@@ -1256,7 +1256,13 @@ def emit_prop(prop, walker):
     if prop_for_walker.is_public:
         quals += "@export "
 
-    if not prop.constructed_expr:
+    if prop.external:
+        quals += "@external "
+        if prop.uses_entity_info:
+            quals += "@uses_entity_info "
+        if prop.uses_envs:
+            quals += "@uses_envs "
+    elif not prop.constructed_expr:
         quals += ("@not_implemented "
                   if prop.abstract_runtime_check
                   else "@abstract ")

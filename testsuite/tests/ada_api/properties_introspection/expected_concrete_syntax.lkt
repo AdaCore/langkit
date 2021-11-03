@@ -56,7 +56,7 @@ class Addition : Expr {
 
 class Number : Expr implements TokenNode {
 
-    @abstract fun eval(): Int
+    @external fun eval(): Int
 
     @export fun id_dflt_bool(id: Bool = true): Bool = id
 

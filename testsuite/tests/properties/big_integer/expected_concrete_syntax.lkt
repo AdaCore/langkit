@@ -54,7 +54,7 @@ class LessThan : Expr {
 
 class Literal : Expr implements TokenNode {
 
-    @abstract fun evaluate(): BigInt
+    @external fun evaluate(): BigInt
 }
 
 class Minus : Expr {

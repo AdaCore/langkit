@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @abstract fun fetch_example_unit(): AnalysisUnit[FooNode]
+    @external fun fetch_example_unit(): AnalysisUnit[FooNode]
 
     @memoized fun internal_mmz_prop(i: Int): Int =
     if (i = 0) then (raise PropertyError()) else i
