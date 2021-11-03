@@ -19,12 +19,12 @@ grammar foo_grammar {
 
 class Literal : Expression implements TokenNode {
 
-    @abstract fun result(): Int
+    @external fun result(): Int
 }
 
 class Name : Expression implements TokenNode {
 
-    @abstract fun designated_unit(): AnalysisUnit[FooNode]
+    @external @uses_envs fun designated_unit(): AnalysisUnit[FooNode]
 
     fun result(): Int = node.designated_unit().root.as[Expression].result()
 }
