@@ -227,6 +227,18 @@ class LKNode(ASTNode):
         doc="Unit method. Return the Iterator builtin trait."
     )
 
+    analysis_unit_gen_trait = Property(
+        Self.get_builtin_gen_decl('AnalysisUnit'),
+        public=True,
+        doc="Unit method. Return the ``AnalysisUnit`` builtin generic trait."
+    )
+
+    analysis_unit_trait = Property(
+        Self.analysis_unit_gen_trait.decl.cast(T.TraitDecl),
+        public=True,
+        doc="Unit method. Return the ``AnalysisUnit`` builtin trait."
+    )
+
     @langkit_property(external=True,
                       uses_entity_info=False,
                       uses_envs=True,
