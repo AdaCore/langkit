@@ -492,10 +492,15 @@ class StructAnnotations(ParsedAnnotations):
 class FunAnnotations(ParsedAnnotations):
     abstract: bool
     export: bool
+    external: bool
+    uses_entity_info: bool
+    uses_envs: bool
     annotations = [
         FlagAnnotationSpec('abstract'),
-
         FlagAnnotationSpec('export'),
+        FlagAnnotationSpec('external'),
+        FlagAnnotationSpec('uses_entity_info'),
+        FlagAnnotationSpec('uses_envs'),
     ]
 
 
@@ -1665,11 +1670,24 @@ class LktTypesLoader:
             env[a] = arg.var
 
         # Lower the expression itself
-        if annotations.abstract:
+        if annotations.abstract or annotations.external:
             assert decl.f_body is None
             expr = None
         else:
             expr = self.lower_expr(decl.f_body, env)
+
+        # If @uses_entity_info and @uses_envs are not present for non-external
+        # properties, use None instead of False, for the validation machinery
+        # in PropertyDef to work properly (we expect False/true for external
+        # properties, and None for non-external ones).
+        uses_entity_info: Optional[bool]
+        uses_envs: Optional[bool]
+        if annotations.external:
+            uses_entity_info = annotations.uses_entity_info
+            uses_envs = annotations.uses_envs
+        else:
+            uses_entity_info = annotations.uses_entity_info or None
+            uses_envs = annotations.uses_envs or None
 
         result = PropertyDef(
             expr=expr,
@@ -1688,9 +1706,9 @@ class LktTypesLoader:
             memoized=False,
             call_memoizable=False,
             memoize_in_populate=False,
-            external=False,
-            uses_entity_info=None,
-            uses_envs=None,
+            external=annotations.external,
+            uses_entity_info=uses_entity_info,
+            uses_envs=uses_envs,
             optional_entity_info=False,
             warn_on_unused=True,
             ignore_warn_on_node=None,
