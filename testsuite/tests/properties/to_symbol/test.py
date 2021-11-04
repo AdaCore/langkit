@@ -26,6 +26,6 @@ build_and_run(
     ada_main='main.adb',
     symbol_canonicalizer=LibraryEntity('Libfoolang.Helpers',
                                        'Canonicalize_Symbol'),
-    lkt_semantic_checks=True
+    types_from_lkt=True,
 )
 print('Done')
