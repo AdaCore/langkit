@@ -523,6 +523,7 @@ class FunAnnotations(ParsedAnnotations):
     export: bool
     external: bool
     memoized: bool
+    trace: bool
     uses_entity_info: bool
     uses_envs: bool
     annotations = [
@@ -530,6 +531,7 @@ class FunAnnotations(ParsedAnnotations):
         FlagAnnotationSpec('export'),
         FlagAnnotationSpec('external'),
         FlagAnnotationSpec('memoized'),
+        FlagAnnotationSpec('trace'),
         FlagAnnotationSpec('uses_entity_info'),
         FlagAnnotationSpec('uses_envs'),
     ]
@@ -1957,7 +1959,7 @@ class LktTypesLoader:
             warn_on_unused=True,
             ignore_warn_on_node=None,
             call_non_memoizable_because=None,
-            activate_tracing=False,
+            activate_tracing=annotations.trace,
             dump_ir=False,
             local_vars=local_vars,
         )
