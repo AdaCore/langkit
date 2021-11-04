@@ -2,7 +2,7 @@ generic [T]
 class U {
 }
 
-a: U
+@invalid a: U
 
-class V: U {
+@invalid class V: U {
 }

@@ -1,1 +1,1 @@
-import invalid_import
+@invalid import invalid_import

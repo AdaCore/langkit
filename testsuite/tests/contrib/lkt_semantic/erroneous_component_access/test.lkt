@@ -1,3 +1,3 @@
-fun test(a: Int): Cls
+@invalid fun test(a: Int): Cls
 
 val a: Int = test(12).a

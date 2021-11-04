@@ -15,12 +15,12 @@ Id   <RefId "Int" test.lkt:4:21-4:24>
 Expr <NumLit test.lkt:4:27-4:29>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "A" test.lkt:6:29-6:30>
+Id   <RefId "A" test.lkt:6:38-6:39>
      references <ClassDecl "A" test.lkt:1:12-26:2>
 
-test.lkt:6:33: error: Mismatched types: expected `A`, got a number literal
-6 |     fun test_int_invalid(): A = 12
-  |                                 ^^
+test.lkt:6:42: error: Mismatched types: expected `A`, got a number literal
+6 |     @invalid fun test_int_invalid(): A = 12
+  |                                          ^^
 
 Id   <RefId "Int" test.lkt:8:25-8:28>
      references <StructDecl prelude: "Int">
@@ -34,49 +34,49 @@ Expr <NumLit test.lkt:8:36-8:38>
 Expr <BinOp test.lkt:8:31-8:38>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:10:35-10:38>
+Id   <RefId "Int" test.lkt:10:44-10:47>
      references <StructDecl prelude: "Int">
 
-test.lkt:10:41: error: Mismatched types: expected `Int`, got a string literal
-10 |     fun test_int_add_invalid_1(): Int = "12" + 15
-   |                                         ^^^^
+test.lkt:10:50: error: Mismatched types: expected `Int`, got a string literal
+10 |     @invalid fun test_int_add_invalid_1(): Int = "12" + 15
+   |                                                  ^^^^
 
-Expr <NumLit test.lkt:10:48-10:50>
+Expr <NumLit test.lkt:10:57-10:59>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:10:41-10:50>
+Expr <BinOp test.lkt:10:50-10:59>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:12:35-12:38>
+Id   <RefId "Int" test.lkt:12:44-12:47>
      references <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:12:41-12:43>
+Expr <NumLit test.lkt:12:50-12:52>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "self" test.lkt:12:46-12:50>
+Id   <RefId "self" test.lkt:12:55-12:59>
      references <SelfDecl "self" test.lkt:1:12-26:2>
 
-test.lkt:12:46: error: Mismatched types: expected `Int`, got `A`
-12 |     fun test_int_add_invalid_2(): Int = 15 + self
-   |                                              ^^^^
+test.lkt:12:55: error: Mismatched types: expected `Int`, got `A`
+12 |     @invalid fun test_int_add_invalid_2(): Int = 15 + self
+   |                                                       ^^^^
 
-Expr <BinOp test.lkt:12:41-12:50>
+Expr <BinOp test.lkt:12:50-12:59>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "A" test.lkt:14:35-14:36>
+Id   <RefId "A" test.lkt:14:44-14:45>
      references <ClassDecl "A" test.lkt:1:12-26:2>
 
-test.lkt:14:39: error: Mismatched types: expected `A`, got a number literal
-14 |     fun test_int_add_invalid_3(): A = 15 + self
-   |                                       ^^
+test.lkt:14:48: error: Mismatched types: expected `A`, got a number literal
+14 |     @invalid fun test_int_add_invalid_3(): A = 15 + self
+   |                                                ^^
 
-Id   <RefId "self" test.lkt:14:44-14:48>
+Id   <RefId "self" test.lkt:14:53-14:57>
      references <SelfDecl "self" test.lkt:1:12-26:2>
 
-Expr <RefId "self" test.lkt:14:44-14:48>
+Expr <RefId "self" test.lkt:14:53-14:57>
      has type <ClassDecl "A" test.lkt:1:12-26:2>
 
-Expr <BinOp test.lkt:14:39-14:48>
+Expr <BinOp test.lkt:14:48-14:57>
      has type <ClassDecl "A" test.lkt:1:12-26:2>
 
 Id   <RefId "Regexp" test.lkt:16:26-16:32>
@@ -118,23 +118,23 @@ Expr <NumLit test.lkt:23:48-23:49>
 Expr <IfExpr test.lkt:23:28-23:49>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:25:30-25:33>
+Id   <RefId "Int" test.lkt:25:39-25:42>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "true" test.lkt:25:39-25:43>
+Id   <RefId "true" test.lkt:25:48-25:52>
      references <EnumLitDecl prelude: "true">
 
-Expr <RefId "true" test.lkt:25:39-25:43>
+Expr <RefId "true" test.lkt:25:48-25:52>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <NumLit test.lkt:25:49-25:50>
+Expr <NumLit test.lkt:25:58-25:59>
      has type <StructDecl prelude: "Int">
 
-test.lkt:25:56: error: Mismatched types: expected `Int`, got a string literal
-25 |     fun test_if_invalid_1(): Int = if true then 1 else "2"
-   |                                                        ^^^
+test.lkt:25:65: error: Mismatched types: expected `Int`, got a string literal
+25 |     @invalid fun test_if_invalid_1(): Int = if true then 1 else "2"
+   |                                                                 ^^^
 
-Expr <IfExpr test.lkt:25:36-25:59>
+Expr <IfExpr test.lkt:25:45-25:68>
      has type <StructDecl prelude: "Int">
 
 Id   <RefId "C" test.lkt:30:8-30:9>
@@ -203,36 +203,36 @@ Expr <RefId "a" test.lkt:44:67-44:68>
 Expr <DotExpr test.lkt:44:48-44:68>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Pair" test.lkt:45:38-45:42>
+Id   <RefId "Pair" test.lkt:45:47-45:51>
      references <GenericDecl "Pair" test.lkt:28:1-32:2>
 
-Id   <RefId "Int" test.lkt:45:43-45:46>
+Id   <RefId "Int" test.lkt:45:52-45:55>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Pair" test.lkt:45:50-45:54>
+Id   <RefId "Pair" test.lkt:45:59-45:63>
      references <GenericDecl "Pair" test.lkt:28:1-32:2>
 
-Id   <RefId "Int" test.lkt:45:55-45:58>
+Id   <RefId "Int" test.lkt:45:64-45:67>
      references <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:45:60-45:62>
+Expr <NumLit test.lkt:45:69-45:71>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:45:64-45:66>
+Expr <NumLit test.lkt:45:73-45:75>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:45:50-45:67>
+Expr <CallExpr test.lkt:45:59-45:76>
      has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-32:2>
 
-Id   <RefId "a" test.lkt:45:68-45:69>
+Id   <RefId "a" test.lkt:45:77-45:78>
      references <FieldDecl "a" test.lkt:30:5-30:9>
 
-Expr <RefId "a" test.lkt:45:68-45:69>
+Expr <RefId "a" test.lkt:45:77-45:78>
      has type <StructDecl prelude: "Int">
 
-test.lkt:45:50: error: Mismatched types: expected `Pair[Int]`, got `Int`
-45 |     fun test_invalid_generic_type(): Pair[Int] = Pair[Int](12, 15).a
-   |                                                  ^^^^^^^^^^^^^^^^^^^
+test.lkt:45:59: error: Mismatched types: expected `Pair[Int]`, got `Int`
+45 |     @invalid fun test_invalid_generic_type(): Pair[Int] = Pair[Int](12, 15).a
+   |                                                           ^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "Bool" test.lkt:46:44-46:48>
      references <EnumTypeDecl prelude: "Bool">
@@ -267,21 +267,21 @@ Expr <RefId "b" test.lkt:46:79-46:80>
 Expr <DotExpr test.lkt:46:51-46:80>
      has type <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "Tuple2" test.lkt:47:40-47:46>
+Id   <RefId "Tuple2" test.lkt:47:49-47:55>
      references <GenericDecl "Tuple2" test.lkt:34:1-40:2>
 
-Id   <RefId "Int" test.lkt:47:47-47:50>
+Id   <RefId "Int" test.lkt:47:56-47:59>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Bool" test.lkt:47:52-47:56>
+Id   <RefId "Bool" test.lkt:47:61-47:65>
      references <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "true" test.lkt:47:60-47:64>
+Id   <RefId "true" test.lkt:47:69-47:73>
      references <EnumLitDecl prelude: "true">
 
-test.lkt:47:60: error: Mismatched types: expected `Tuple2[Int, Bool]`, got `Bool`
-47 |     fun test_invalid_generic_type_2(): Tuple2[Int, Bool] = true
-   |                                                            ^^^^
+test.lkt:47:69: error: Mismatched types: expected `Tuple2[Int, Bool]`, got `Bool`
+47 |     @invalid fun test_invalid_generic_type_2(): Tuple2[Int, Bool] = true
+   |                                                                     ^^^^
 
 Id   <RefId "A" test.lkt:48:28-48:29>
      references <ClassDecl "A" test.lkt:1:12-26:2>
@@ -364,18 +364,18 @@ Id   <RefId "Int" test.lkt:53:8-53:11>
 Expr <NumLit test.lkt:53:14-53:16>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:57:41-57:44>
+Id   <RefId "Int" test.lkt:57:50-57:53>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "self" test.lkt:57:47-57:51>
+Id   <RefId "self" test.lkt:57:56-57:60>
      references <SelfDecl "self" test.lkt:55:1-58:2>
 
-Expr <RefId "self" test.lkt:57:47-57:51>
+Expr <RefId "self" test.lkt:57:56-57:60>
      has type <StructDecl "Foo" test.lkt:55:1-58:2>
 
-test.lkt:57:52: error: Cannot find entity `a` in this scope
-57 |     fun test_identifier_leak_invalid(): Int = self.a
-   |                                                    ^
+test.lkt:57:61: error: Cannot find entity `a` in this scope
+57 |     @invalid fun test_identifier_leak_invalid(): Int = self.a
+   |                                                             ^
 
 Id   <RefId "D" test.lkt:62:16-62:17>
      references <EnumClassAltDecl "D" test.lkt:61:10-61:11>

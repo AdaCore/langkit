@@ -1,4 +1,4 @@
 # Test that an error message is emitted in the case of an ambiguously typed
 # expression.
 
-val a = "hello"
+@invalid val a = "hello"
