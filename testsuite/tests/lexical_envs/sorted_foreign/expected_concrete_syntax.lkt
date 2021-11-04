@@ -46,7 +46,8 @@ class Identifier : Name implements TokenNode {
 
     fun referenced_name(): Symbol = node.symbol
 
-    fun resolve_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] = {
+    @trace fun resolve_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
+    {
         val env = from_env.do(
             (e) => e, default_val=node.referenced_parent_scope()
         );
@@ -54,10 +55,10 @@ class Identifier : Name implements TokenNode {
         env.get(node.symbol)?(0).children_env()
     }
 
-    fun referenced_parent_scope(): LexicalEnv[FooNode] =
+    @trace fun referenced_parent_scope(): LexicalEnv[FooNode] =
     node.unit().root.children_env()
 
-    fun referenced_scope(): LexicalEnv[FooNode] = node.resolve_scope(_)
+    @trace fun referenced_scope(): LexicalEnv[FooNode] = node.resolve_scope(_)
 }
 
 class Ref : FooNode {
