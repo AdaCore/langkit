@@ -522,12 +522,14 @@ class FunAnnotations(ParsedAnnotations):
     abstract: bool
     export: bool
     external: bool
+    memoized: bool
     uses_entity_info: bool
     uses_envs: bool
     annotations = [
         FlagAnnotationSpec('abstract'),
         FlagAnnotationSpec('export'),
         FlagAnnotationSpec('external'),
+        FlagAnnotationSpec('memoized'),
         FlagAnnotationSpec('uses_entity_info'),
         FlagAnnotationSpec('uses_envs'),
     ]
@@ -1945,7 +1947,7 @@ class LktTypesLoader:
             type=return_type,
             abstract_runtime_check=False,
             dynamic_vars=None,
-            memoized=False,
+            memoized=annotations.memoized,
             call_memoizable=False,
             memoize_in_populate=False,
             external=annotations.external,
