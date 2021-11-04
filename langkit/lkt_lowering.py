@@ -10,24 +10,26 @@ from dataclasses import dataclass
 import itertools
 import json
 import os.path
-from typing import (Any, ClassVar, Dict, List, Optional, Set, Tuple, Type,
-                    TypeVar, Union, cast)
+from typing import (
+    Any, Callable, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar,
+    Union, cast
+)
 
 import liblktlang as L
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, Argument, BaseField, CompiledType,
-    CompiledTypeRepo, EnumNodeAlternative, EnumType, Field, StructType, T,
-    TypeRepo, UserField, resolve_type
+    ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeRepo,
+    EnumNodeAlternative, EnumType, Field, StructType, T, TypeRepo, UserField,
+    resolve_type
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, check_source_language, error
 )
 import langkit.expressions as E
 from langkit.expressions import (
-    AbstractExpression, AbstractProperty, AbstractVariable, Cast, Property,
-    PropertyDef, PropertyError
+    AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
+    Property, PropertyDef, PropertyError, create_lazy_field
 )
 from langkit.lexer import (
     Action, Alt, Case, Ignore, Lexer, LexerToken, Literal, Matcher, NoCaseLit,
@@ -471,9 +473,13 @@ class EnumNodeAnnotations(BaseNodeAnnotations):
 @dataclass
 class FieldAnnotations(ParsedAnnotations):
     abstract: bool
+    export: bool
+    lazy: bool
     null_field: bool
     parse_field: bool
     annotations = [FlagAnnotationSpec('abstract'),
+                   FlagAnnotationSpec('export'),
+                   FlagAnnotationSpec('lazy'),
                    FlagAnnotationSpec('null_field'),
                    FlagAnnotationSpec('parse_field')]
 
@@ -1349,9 +1355,9 @@ class LktTypesLoader:
         self,
         full_decl: L.FullDecl,
         allowed_field_types: Tuple[Type[AbstractNodeData], ...]
-    ) -> BaseField:
+    ) -> AbstractNodeData:
         """
-        Lower the BaseField described in ``decl``.
+        Lower the field described in ``decl``.
 
         :param allowed_field_types: Set of types allowed for the fields to
             load.
@@ -1360,35 +1366,81 @@ class LktTypesLoader:
         assert isinstance(decl, L.FieldDecl)
         annotations = parse_annotations(self.ctx, FieldAnnotations, full_decl)
         field_type = self.resolve_type_decl(decl.f_decl_type.p_designated_type)
+        doc = self.ctx.lkt_doc(full_decl)
 
-        cls: Type[BaseField]
-        kwargs: Dict[str, Any]
-        default_value = (self.lower_expr(decl.f_default_val, {})
-                         if decl.f_default_val else None)
+        cls: Type[AbstractNodeData]
+        constructor: Callable[..., AbstractNodeData]
+        kwargs: Dict[str, Any] = {'type': field_type, 'doc': doc}
 
-        if annotations.parse_field:
-            cls = Field
-            kwargs = {'abstract': annotations.abstract,
-                      'null': annotations.null_field}
-            assert default_value is None
+        if annotations.lazy:
+            check_source_language(
+                not annotations.null_field,
+                'Lazy fields cannot be null'
+            )
+            cls = PropertyDef
+            constructor = create_lazy_field
+
+            _, expr = self.lower_property_expr(
+                abstract=annotations.abstract,
+                external=False,
+                arg_decl_list=None,
+                body=decl.f_default_val,
+            )
+
+            kwargs = {
+                'expr': expr,
+                'doc': doc,
+                'public': annotations.export,
+                'return_type': field_type,
+                'kind': (AbstractKind.abstract
+                         if annotations.abstract
+                         else AbstractKind.concrete),
+            }
+
+        elif annotations.parse_field:
+            assert decl.f_default_val is None
+            check_source_language(
+                not annotations.export,
+                'Parse fields are implicitly exported'
+            )
+            check_source_language(
+                not annotations.lazy,
+                'Parse fields cannot be lazy'
+            )
+            cls = constructor = Field
+            kwargs['abstract'] = annotations.abstract
+            kwargs['null'] = annotations.null_field
+
         else:
             check_source_language(
                 not annotations.abstract,
                 'Regular fields cannot be abstract'
             )
             check_source_language(
+                not annotations.export,
+                'Regular fields are implicitly exported'
+            )
+            check_source_language(
+                not annotations.lazy,
+                'Regular fields cannot be lazy'
+            )
+            check_source_language(
                 not annotations.null_field,
                 'Regular fields cannot be null'
             )
-            cls = UserField
-            kwargs = {'default_value': default_value}
+            cls = constructor = UserField
+            kwargs['default_value'] = (
+                self.lower_expr(decl.f_default_val, {})
+                if decl.f_default_val
+                else None
+            )
 
         check_source_language(
             issubclass(cls, allowed_field_types),
             'Invalid field type in this context'
         )
 
-        return cls(type=field_type, doc=self.ctx.lkt_doc(full_decl), **kwargs)
+        return constructor(**kwargs)
 
     def lower_expr(self, expr: L.Expr, env: LocalsEnv) -> AbstractExpression:
         """
@@ -1506,7 +1558,7 @@ class LktTypesLoader:
                     """
                     arg_nodes, kwarg_nodes = extract_call_args(call_expr)
                     args = [lower(v) for v in arg_nodes]
-                    kwarg = {k: lower(v) for k, v in kwarg_nodes.items()}
+                    kwargs = {k: lower(v) for k, v in kwarg_nodes.items()}
                     return args, kwargs
 
                 if isinstance(name_decl, L.StructDecl):
@@ -1707,22 +1759,21 @@ class LktTypesLoader:
 
         return lower(expr)
 
-    def lower_property(self, full_decl: L.FullDecl) -> PropertyDef:
+    def lower_property_expr(
+        self,
+        abstract: bool,
+        external: bool,
+        arg_decl_list: Optional[L.FunArgDeclList],
+        body: Optional[L.Expr]
+    ) -> Tuple[List[Argument], Optional[AbstractExpression]]:
         """
-        Lower the property described in ``decl``.
+        Common code to lower properties and lazy fields.
         """
-        decl = full_decl.f_decl
-        assert isinstance(decl, L.FunDecl)
-        annotations = parse_annotations(self.ctx, FunAnnotations, full_decl)
-        return_type = self.resolve_type_decl(
-            decl.f_return_type.p_designated_type
-        )
-
         env: LocalsEnv = {}
 
         # Lower arguments and register them in the environment
         args: List[Argument] = []
-        for a in decl.f_args:
+        for a in arg_decl_list or []:
             if a.f_default_val is None:
                 default_value = None
             else:
@@ -1738,11 +1789,32 @@ class LktTypesLoader:
             env[a] = arg.var
 
         # Lower the expression itself
-        if annotations.abstract or annotations.external:
-            assert decl.f_body is None
+        if abstract or external:
+            assert body is None
             expr = None
         else:
-            expr = self.lower_expr(decl.f_body, env)
+            assert body is not None
+            expr = self.lower_expr(body, env)
+
+        return args, expr
+
+    def lower_property(self, full_decl: L.FullDecl) -> PropertyDef:
+        """
+        Lower the property described in ``decl``.
+        """
+        decl = full_decl.f_decl
+        assert isinstance(decl, L.FunDecl)
+        annotations = parse_annotations(self.ctx, FunAnnotations, full_decl)
+        return_type = self.resolve_type_decl(
+            decl.f_return_type.p_designated_type
+        )
+
+        args, expr = self.lower_property_expr(
+            annotations.abstract,
+            annotations.external,
+            decl.f_args,
+            decl.f_body,
+        )
 
         # If @uses_entity_info and @uses_envs are not present for non-external
         # properties, use None instead of False, for the validation machinery

@@ -4592,6 +4592,40 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
     return decorator
 
 
+def create_lazy_field(expr: _Any,
+                      doc: str,
+                      public: Opt[bool] = None,
+                      return_type: Opt[CompiledType] = None,
+                      kind: AbstractKind = AbstractKind.concrete,
+                      warn_on_unused: Opt[bool] = None,
+                      ignore_warn_on_node: Opt[bool] = None,
+                      activate_tracing: bool = False,
+                      dump_ir: bool = False) -> PropertyDef:
+    return PropertyDef(
+        expr=expr,
+        prefix=AbstractNodeData.PREFIX_FIELD,
+        public=public,
+        doc=doc,
+        abstract=kind in [AbstractKind.abstract,
+                          AbstractKind.abstract_runtime_check],
+        type=return_type,
+        abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
+        dynamic_vars=None,
+        memoized=False,
+        call_memoizable=True,
+        memoize_in_populate=False,
+        external=False,
+        uses_entity_info=None,
+        uses_envs=None,
+        warn_on_unused=warn_on_unused,
+        ignore_warn_on_node=ignore_warn_on_node,
+        call_non_memoizable_because=None,
+        activate_tracing=activate_tracing,
+        dump_ir=dump_ir,
+        lazy_field=True,
+    )
+
+
 def lazy_field(public: Opt[bool] = None,
                return_type: Opt[CompiledType] = None,
                kind: AbstractKind = AbstractKind.concrete,
@@ -4614,28 +4648,16 @@ def lazy_field(public: Opt[bool] = None,
     See PropertyDef for details about the semantics of arguments.
     """
     def decorator(expr_fn):
-        return PropertyDef(
-            expr=expr_fn,
-            prefix=AbstractNodeData.PREFIX_FIELD,
-            public=public,
-            doc=expr_fn.__doc__,
-            abstract=kind in [AbstractKind.abstract,
-                              AbstractKind.abstract_runtime_check],
-            type=return_type,
-            abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
-            dynamic_vars=None,
-            memoized=False,
-            call_memoizable=True,
-            memoize_in_populate=False,
-            external=False,
-            uses_entity_info=None,
-            uses_envs=None,
-            warn_on_unused=warn_on_unused,
-            ignore_warn_on_node=ignore_warn_on_node,
-            call_non_memoizable_because=None,
-            activate_tracing=activate_tracing,
-            dump_ir=dump_ir,
-            lazy_field=True,
+        return create_lazy_field(
+            expr_fn,
+            expr_fn.__doc__,
+            public,
+            return_type,
+            kind,
+            warn_on_unused,
+            ignore_warn_on_node,
+            activate_tracing,
+            dump_ir,
         )
     return decorator
 
