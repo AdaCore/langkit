@@ -470,6 +470,17 @@ class LKNode(ASTNode):
             Entity.parent
         )
 
+    @langkit_property(public=True)
+    def topmost_invalid_decl():
+        """
+        Return the topmost (from ``Self`` to the root node) FullDecl annotated
+        with ``@invalid``, null otherwise.
+        """
+        return Self.parents().filter(
+            lambda p:
+            p.cast(FullDecl).then(lambda fd: fd.has_annotation("invalid"))
+        ).at(-1)
+
 
 class LangkitRoot(LKNode):
     """
@@ -563,7 +574,7 @@ class FullDecl(LKNode):
     decl_annotations = Field(type=T.DeclAnnotation.list)
     decl = Field(type=T.Decl)
 
-    @langkit_property()
+    @langkit_property(public=True)
     def has_annotation(name=T.Symbol):
         """
         Return whether this node has an annotation with name ``name``.

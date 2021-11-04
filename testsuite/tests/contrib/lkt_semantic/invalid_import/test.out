@@ -1,6 +1,6 @@
 Resolving test.lkt
 ==================
-test.lkt:1:1: error: cannot find invalid_import
-1 | import invalid_import
-  | ^^^^^^^^^^^^^^^^^^^^^
+test.lkt:1:10: error: Expected 'val', got 'import'
+1 | @invalid import invalid_import
+  |          ^^^^^^
 
