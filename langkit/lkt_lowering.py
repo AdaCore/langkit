@@ -1181,13 +1181,15 @@ class LktTypesLoader:
 
         # Pre-fetch the declaration of generic types so that resolve_type_decl
         # has an efficient access to them.
+        self.analysis_unit_trait = root.p_analysis_unit_trait
         self.array_type = root.p_array_type
         self.astlist_type = root.p_astlist_type
         self.iterator_trait = root.p_iterator_trait
-        self.analysis_unit_trait = root.p_analysis_unit_trait
+        self.string_type = root.p_string_type
         self.property_error_type = root.p_property_error_type
 
         self.map_method = get_field(self.iterator_trait, 'map')
+        self.to_symbol_method = get_field(self.string_type, 'to_symbol')
         self.unique_method = get_field(self.array_type, 'unique')
 
         # Map Lkt nodes for the declarations of builtin types to the
@@ -1607,11 +1609,22 @@ class LktTypesLoader:
                                                    element_var, index_var)
                     return result
 
+                elif same_node(name_decl, self.to_symbol_method):
+                    # Lower the prefix (the string to convert)
+                    prefix = lower(expr.f_name)
+
+                    # Defensive programming: make sure we have no argument to
+                    # lower.
+                    args, kwargs = lower_args()
+                    assert not args and not kwargs
+
+                    return prefix.to_string  # type: ignore
+
                 elif same_node(name_decl, self.unique_method):
                     # Lower the prefix (the array to copy)
                     prefix = lower(expr.f_name)
 
-                    # Defensive programming: make sure we have no arguments to
+                    # Defensive programming: make sure we have no argument to
                     # lower.
                     args, kwargs = lower_args()
                     assert not args and not kwargs
