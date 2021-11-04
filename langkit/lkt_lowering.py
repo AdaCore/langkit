@@ -27,7 +27,7 @@ from langkit.diagnostics import (
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractProperty, AbstractVariable, Cast, Property,
-    PropertyDef
+    PropertyDef, PropertyError
 )
 from langkit.lexer import (
     Action, Alt, Case, Ignore, Lexer, LexerToken, Literal, Matcher, NoCaseLit,
@@ -1177,6 +1177,7 @@ class LktTypesLoader:
         self.astlist_type = root.p_astlist_type
         self.iterator_trait = root.p_iterator_trait
         self.analysis_unit_trait = root.p_analysis_unit_trait
+        self.property_error_type = root.p_property_error_type
 
         self.map_method = get_field(self.iterator_trait, 'map')
         self.unique_method = get_field(self.array_type, 'unique')
@@ -1422,6 +1423,21 @@ class LktTypesLoader:
             env[arg] = result
             return result
 
+        def extract_call_args(expr: L.CallExpr) -> Tuple[List[L.Expr],
+                                                         Dict[str, L.Expr]]:
+            """
+            Extract positional and keyword arguments from a call expression.
+            """
+            args = []
+            kwargs = {}
+            for arg in expr.f_args:
+                value = arg.f_value
+                if arg.f_name:
+                    kwargs[arg.f_name.text] = value
+                else:
+                    args.append(value)
+            return args, kwargs
+
         def is_array_expr(expr: L.Expr) -> bool:
             """
             Return whether ``expr`` computes an array.
@@ -1488,14 +1504,9 @@ class LktTypesLoader:
                     """
                     Collect call positional and keyword arguments.
                     """
-                    args = []
-                    kwargs = {}
-                    for arg in call_expr.f_args:
-                        value = lower(arg.f_value)
-                        if arg.f_name:
-                            kwargs[arg.f_name.text] = value
-                        else:
-                            args.append(value)
+                    arg_nodes, kwarg_nodes = extract_call_args(call_expr)
+                    args = [lower(v) for v in arg_nodes]
+                    kwarg = {k: lower(v) for k, v in kwarg_nodes.items()}
                     return args, kwargs
 
                 if isinstance(name_decl, L.StructDecl):
@@ -1643,6 +1654,34 @@ class LktTypesLoader:
 
             elif isinstance(expr, L.ParenExpr):
                 return lower(expr.f_expr)
+
+            elif isinstance(expr, L.RaiseExpr):
+                # A raise expression can only contain a PropertyError struct
+                # constructor.
+                cons_expr = expr.f_except_expr
+                assert isinstance(cons_expr, L.CallExpr)
+                assert (check_referenced_decl(cons_expr.f_name)
+                        == self.property_error_type)
+
+                # Get the exception message argument
+                args_nodes, kwargs_nodes = extract_call_args(cons_expr)
+                msg_expr: Optional[L.Expr] = None
+                if args_nodes:
+                    msg_expr = args_nodes.pop()
+                elif kwargs_nodes:
+                    msg_expr = kwargs_nodes.pop("exception_message")
+                assert not args_nodes
+                assert not kwargs_nodes
+
+                if msg_expr is None:
+                    msg = "PropertyError exception"
+                else:
+                    # TODO (S321-013): handle dynamic error message
+                    assert isinstance(msg_expr, L.StringLit)
+                    msg = msg_expr.p_denoted_value
+
+                expr_type = self.resolve_type_decl(expr.p_check_expr_type)
+                return PropertyError(expr_type, msg)
 
             elif isinstance(expr, L.RefId):
                 decl = check_referenced_decl(expr)
