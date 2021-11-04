@@ -1765,6 +1765,16 @@ class LktTypesLoader:
             elif isinstance(expr, L.StringLit):
                 return E.SymbolLiteral(denoted_string_lit(expr))
 
+            elif isinstance(expr, L.TryExpr):
+                return E.Try(
+                    try_expr=lower(expr.f_try_expr),
+                    else_expr=(
+                        None
+                        if expr.f_or_expr is None
+                        else lower(expr.f_or_expr)
+                    ),
+                )
+
             else:
                 assert False, 'Unhandled expression: {}'.format(expr)
 
