@@ -1631,9 +1631,6 @@ class LktTypesLoader:
             elif isinstance(expr, L.ParenExpr):
                 return lower(expr.f_expr)
 
-            elif isinstance(expr, L.StringLit):
-                return E.SymbolLiteral(denoted_string_lit(expr))
-
             elif isinstance(expr, L.RefId):
                 decl = check_referenced_decl(expr)
                 if isinstance(decl, L.NodeDecl):
@@ -1649,6 +1646,9 @@ class LktTypesLoader:
                 else:
                     assert isinstance(decl, L.BaseValDecl)
                     return env[decl]
+
+            elif isinstance(expr, L.StringLit):
+                return E.SymbolLiteral(denoted_string_lit(expr))
 
             else:
                 assert False, 'Unhandled expression: {}'.format(expr)
