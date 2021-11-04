@@ -3687,7 +3687,7 @@ lkt_grammar.add_rules(
     ),
 
     raise_expr=RaiseExpr("raise", G.expr),
-    try_expr=TryExpr("try", G.expr, Opt("or", G.expr)),
+    try_expr=TryExpr("try", G.expr, Opt("else", G.expr)),
 
     array_literal=ArrayLiteral(
         "[", List(G.expr, sep=",", empty_valid=True), "]"
