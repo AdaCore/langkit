@@ -1048,7 +1048,7 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, Try):
         return "try $sl$i{}$sl$d {}".format(
             ee_pexpr(expr.try_expr),
-            "or {}".format(ee_pexpr(expr.else_expr)) if expr.else_expr is not None else ""
+            "else {}".format(ee_pexpr(expr.else_expr)) if expr.else_expr is not None else ""
         )
 
     elif isinstance(expr, Arithmetic):
