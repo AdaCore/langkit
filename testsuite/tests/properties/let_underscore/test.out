@@ -1,1 +1,6 @@
+BarNode.p_foo: 1
+BarNode.p_foo: 2
+main.py: Running...
+p_prop = 2
+main.py: Done.
 Done
