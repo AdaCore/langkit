@@ -2684,24 +2684,48 @@ class Let(AbstractExpression):
     def __init__(self, lambda_fn):
         """
         :param lambda_fn: Function that take an arbitrary number of arguments
-            with default values (AbstractExpression instances) and that returns
-            another AbstractExpression.
+            with default values (``AbstractExpression`` instances) and that
+            returns another ``AbstractExpression``.
+
+            Can also be a tuple: in that case, the first item is the list of
+            ``AbstractVariable``, the second item is a list of corresponding
+            initialization expressions (``AbstractExpression``), and the third
+            one is the ``AbstractExpression`` that the ``Let`` must return.
         """
         super().__init__()
-        argspec = inspect.getargspec(lambda_fn)
 
-        self.vars = None
-        ":type: list[AbstractVariable]"
+        vars: List[AbstractVariable]
+        var_names: List[str]
+        var_exprs: List[AbstractExpression]
+        expr: AbstractExpression
 
-        self.var_names = argspec.args
+        if isinstance(lambda_fn, tuple):
+            vars, var_exprs, expr = lambda_fn
+            var_names = [v._name.lower for v in vars]
+            lambda_fn = None
 
-        self.var_exprs = argspec.defaults or []
-        ":type: list[AbstractExpression]"
+        else:
+            argspec = inspect.getargspec(lambda_fn)
 
-        self.expr = None
+            var_names = argspec.args
+            var_exprs = argspec.defaults or []
+
+            # Computed during in the "prepare" pass
+            vars = []
+            expr = None
+
+        self.vars = vars
+        self.var_names = var_names
+        self.var_exprs = var_exprs
+        self.expr = expr
         self.lambda_fn = lambda_fn
 
     def do_prepare(self):
+        # Unless we have a lambda function to expand, there is nothing to
+        # prepare.
+        if self.lambda_fn is None:
+            return
+
         argspec = inspect.getargspec(self.lambda_fn)
 
         check_multiple([
@@ -3119,7 +3143,8 @@ class PropertyDef(AbstractNodeData):
                          ],
                          ResolvedExpression,
                      ]
-                 ] = None):
+                 ] = None,
+                 local_vars: Opt[LocalVars] = None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -3238,6 +3263,9 @@ class PropertyDef(AbstractNodeData):
             default to False if this is the root property.
 
         :param access_constructor: See AbstractNodeData's constructor.
+
+        :param local_vars: Local variables for this property. Start from
+            scratch if left to None.
         """
 
         self.prefix = prefix
@@ -3301,8 +3329,7 @@ class PropertyDef(AbstractNodeData):
 
         self.constructed_expr = None
 
-        self.vars = LocalVars()
-        ":type: LocalVars"
+        self.vars = local_vars or LocalVars()
 
         self.expected_type = type
 
@@ -4600,7 +4627,8 @@ def create_lazy_field(expr: _Any,
                       warn_on_unused: Opt[bool] = None,
                       ignore_warn_on_node: Opt[bool] = None,
                       activate_tracing: bool = False,
-                      dump_ir: bool = False) -> PropertyDef:
+                      dump_ir: bool = False,
+                      local_vars: Opt[LocalVars] = None) -> PropertyDef:
     return PropertyDef(
         expr=expr,
         prefix=AbstractNodeData.PREFIX_FIELD,
@@ -4623,6 +4651,7 @@ def create_lazy_field(expr: _Any,
         activate_tracing=activate_tracing,
         dump_ir=dump_ir,
         lazy_field=True,
+        local_vars=local_vars,
     )
 
 

@@ -29,7 +29,7 @@ from langkit.diagnostics import (
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
-    Property, PropertyDef, PropertyError, create_lazy_field
+    Let, LocalVars, Property, PropertyDef, PropertyError, create_lazy_field
 )
 from langkit.lexer import (
     Action, Alt, Case, Ignore, Lexer, LexerToken, Literal, Matcher, NoCaseLit,
@@ -122,6 +122,27 @@ def denoted_string_lit(string_lit: Union[L.StringLit, L.TokenLit]) -> str:
     result = json.loads(string_lit.text)
     assert isinstance(result, str)
     return result
+
+
+def ada_id_for(n: names.Name) -> names.Name:
+    """
+    Turn ``n`` into a valid Ada identifier (for code generation).
+    """
+    result = n.camel_with_underscores
+
+    # Remove all consecutive underscores
+    while '__' in result:
+        result = result.replace('__', '_')
+
+    # Leading and trailing underscores are invalid: remove them
+    result = result.strip('_')
+
+    # If we end up with an empty string, the input was probably the "unused"
+    # identifier ("_").
+    if not result:
+        result = 'ignored'
+
+    return names.Name(result)
 
 
 def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
@@ -1384,7 +1405,7 @@ class LktTypesLoader:
             cls = PropertyDef
             constructor = create_lazy_field
 
-            _, expr = self.lower_property_expr(
+            _, expr, local_vars = self.lower_property_expr(
                 abstract=annotations.abstract,
                 external=False,
                 arg_decl_list=None,
@@ -1400,6 +1421,7 @@ class LktTypesLoader:
                          if annotations.abstract
                          else AbstractKind.concrete),
                 'activate_tracing': annotations.trace,
+                'local_vars': local_vars,
             }
 
         elif annotations.parse_field:
@@ -1443,7 +1465,7 @@ class LktTypesLoader:
             )
             cls = constructor = UserField
             kwargs['default_value'] = (
-                self.lower_expr(decl.f_default_val, {})
+                self.lower_expr(decl.f_default_val, {}, None)
                 if decl.f_default_val
                 else None
             )
@@ -1455,12 +1477,17 @@ class LktTypesLoader:
 
         return constructor(**kwargs)
 
-    def lower_expr(self, expr: L.Expr, env: LocalsEnv) -> AbstractExpression:
+    def lower_expr(self,
+                   expr: L.Expr,
+                   env: LocalsEnv,
+                   local_vars: Optional[LocalVars]) -> AbstractExpression:
         """
         Lower the given expression.
 
         :param expr: Expression to lower.
         :param env: Variable to use when resolving references.
+        :param local_vars: If lowering a property expression, set of local
+            variables for this property.
         """
         # Counter to generate unique names
         counter = itertools.count(0)
@@ -1558,6 +1585,46 @@ class LktTypesLoader:
                         L.OpDiv: '/',
                     }[type(expr.f_op)]
                     return E.Arithmetic(left, right, operator)
+
+            elif isinstance(expr, L.BlockExpr):
+                assert local_vars is not None
+
+                # Lower declarations for this block
+                vars = []
+                var_exprs = []
+
+                for v in expr.f_val_defs:
+                    if isinstance(v, L.ValDecl):
+                        source_name = names.Name.from_lower(v.f_syn_name.text)
+                        v_name = ada_id_for(source_name)
+                        v_type = (
+                            self.resolve_type_decl(
+                                v.f_decl_type.p_designated_type
+                            )
+                            if v.f_decl_type
+                            else None
+                        )
+                        var = AbstractVariable(
+                            v_name, v_type, source_name=source_name
+                        )
+                        vars.append(var)
+                        var_exprs.append(lower(v.f_val))
+
+                        # Make this variable available to the inner expression
+                        # lowering, and register it as a local variable in the
+                        # generated code.
+                        env[v] = var
+                        var.local_var = local_vars.create_scopeless(
+                            v_name, v_type
+                        )
+
+                    else:
+                        assert False, f'Unhandled def in BlockExpr: {v}'
+
+                # Then lower the block main expression
+                inner_expr = lower(expr.f_expr)
+
+                return Let((vars, var_exprs, inner_expr))
 
             elif isinstance(expr, L.CallExpr):
                 # Depending on its name, a call can have different meanings
@@ -1799,11 +1866,12 @@ class LktTypesLoader:
         external: bool,
         arg_decl_list: Optional[L.FunArgDeclList],
         body: Optional[L.Expr]
-    ) -> Tuple[List[Argument], Optional[AbstractExpression]]:
+    ) -> Tuple[List[Argument], Optional[AbstractExpression], LocalVars]:
         """
         Common code to lower properties and lazy fields.
         """
         env: LocalsEnv = {}
+        local_vars = LocalVars()
 
         # Lower arguments and register them in the environment
         args: List[Argument] = []
@@ -1811,7 +1879,7 @@ class LktTypesLoader:
             if a.f_default_val is None:
                 default_value = None
             else:
-                default_value = self.lower_expr(a.f_default_val, env)
+                default_value = self.lower_expr(a.f_default_val, env, None)
                 default_value.prepare()
 
             arg = Argument(
@@ -1828,9 +1896,9 @@ class LktTypesLoader:
             expr = None
         else:
             assert body is not None
-            expr = self.lower_expr(body, env)
+            expr = self.lower_expr(body, env, local_vars)
 
-        return args, expr
+        return args, expr, local_vars
 
     def lower_property(self, full_decl: L.FullDecl) -> PropertyDef:
         """
@@ -1843,7 +1911,7 @@ class LktTypesLoader:
             decl.f_return_type.p_designated_type
         )
 
-        args, expr = self.lower_property_expr(
+        args, expr, local_vars = self.lower_property_expr(
             annotations.abstract,
             annotations.external,
             decl.f_args,
@@ -1888,7 +1956,8 @@ class LktTypesLoader:
             ignore_warn_on_node=None,
             call_non_memoizable_because=None,
             activate_tracing=False,
-            dump_ir=False
+            dump_ir=False,
+            local_vars=local_vars,
         )
         result.arguments.extend(args)
 
