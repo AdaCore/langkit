@@ -477,11 +477,13 @@ class FieldAnnotations(ParsedAnnotations):
     lazy: bool
     null_field: bool
     parse_field: bool
+    trace: bool
     annotations = [FlagAnnotationSpec('abstract'),
                    FlagAnnotationSpec('export'),
                    FlagAnnotationSpec('lazy'),
                    FlagAnnotationSpec('null_field'),
-                   FlagAnnotationSpec('parse_field')]
+                   FlagAnnotationSpec('parse_field'),
+                   FlagAnnotationSpec('trace')]
 
 
 @dataclass
@@ -1395,6 +1397,7 @@ class LktTypesLoader:
                 'kind': (AbstractKind.abstract
                          if annotations.abstract
                          else AbstractKind.concrete),
+                'activate_tracing': annotations.trace,
             }
 
         elif annotations.parse_field:
@@ -1406,6 +1409,10 @@ class LktTypesLoader:
             check_source_language(
                 not annotations.lazy,
                 'Parse fields cannot be lazy'
+            )
+            check_source_language(
+                not annotations.trace,
+                'Parse fields cannot be traced'
             )
             cls = constructor = Field
             kwargs['abstract'] = annotations.abstract
@@ -1427,6 +1434,10 @@ class LktTypesLoader:
             check_source_language(
                 not annotations.null_field,
                 'Regular fields cannot be null'
+            )
+            check_source_language(
+                not annotations.trace,
+                'Regular fields cannot be traced'
             )
             cls = constructor = UserField
             kwargs['default_value'] = (
