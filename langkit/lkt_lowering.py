@@ -1422,6 +1422,12 @@ class LktTypesLoader:
             env[arg] = result
             return result
 
+        def is_array_expr(expr: L.Expr) -> bool:
+            """
+            Return whether ``expr`` computes an array.
+            """
+            return self.resolve_type_decl(expr.p_check_expr_type).is_array_type
+
         def lower(expr: L.Expr) -> AbstractExpression:
             """
             Do the actual expression lowering. Since all recursive calls use
@@ -1452,6 +1458,13 @@ class LktTypesLoader:
                         L.OpGte: E.OrderingTest.GE,
                     }[type(expr.f_op)]
                     return E.OrderingTest(operator, left, right)
+
+                elif (
+                    isinstance(expr.f_op, L.OpAmp)
+                    and is_array_expr(expr.f_left)
+                ):
+                    assert is_array_expr(expr.f_right)
+                    return left.concat(right)  # type: ignore
 
                 else:
                     operator = {

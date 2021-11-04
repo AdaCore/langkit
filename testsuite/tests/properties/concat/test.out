@@ -1,0 +1,13 @@
+main.py: Running...
+p_int_concat([], []) = []
+p_int_concat([1], []) = [1]
+p_int_concat([], [2]) = [2]
+p_int_concat([1], [2]) = [1, 2]
+p_int_concat([1, 2, 3], [4, 5]) = [1, 2, 3, 4, 5]
+p_big_int_concat([], []) = []
+p_big_int_concat([1], []) = [1]
+p_big_int_concat([], [2]) = [2]
+p_big_int_concat([1], [2]) = [1, 2]
+p_big_int_concat([1, 2, 3], [4, 5]) = [1, 2, 3, 4, 5]
+main.py: Done.
+Done
