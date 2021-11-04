@@ -1272,6 +1272,9 @@ def emit_prop(prop, walker):
     elif prop.lazy_field:
         quals += "@lazy "
 
+    if prop.activate_tracing:
+        quals += "@trace "
+
     args = ", ".join("{}: {}{}".format(
         var_name(arg), type_name(arg.type),
         " = {}".format(emit_expr(arg.abstract_default_value))

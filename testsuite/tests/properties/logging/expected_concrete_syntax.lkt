@@ -17,7 +17,8 @@ class Decl : FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[Ref]
 
-    @export fun entity_items(): Array[Ref] = node.as_entity.items.map((i) => i)
+    @export @trace fun entity_items(): Array[Ref] =
+    node.as_entity.items.map((i) => i)
 }
 
 @qualifier enum class HasPlus : FooNode {
