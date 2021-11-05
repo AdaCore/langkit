@@ -1168,7 +1168,7 @@ LocalsEnv = Dict[L.BaseValDecl, AbstractVariable]
 
 class LktTypesLoader:
     """
-    Helper class to instanciate ``CompiledType`` for all types described in
+    Helper class to instantiate ``CompiledType`` for all types described in
     Lkt.
     """
 

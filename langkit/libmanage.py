@@ -20,8 +20,8 @@ from typing import (
 
 from langkit.compile_context import UnparseScript, Verbosity
 from langkit.diagnostics import (
-    Context, DiagnosticError, DiagnosticStyle, Diagnostics, Location,
-    WarningSet, check_source_language, extract_library_location
+    DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet,
+    check_source_language, diagnostic_context, extract_library_location
 )
 from langkit.packaging import Packager
 from langkit.utils import (
@@ -706,7 +706,7 @@ class ManageScript:
             else:
                 loc = cast(Location,
                            extract_library_location(traceback.extract_tb(tb)))
-            with Context(loc):
+            with diagnostic_context(loc):
                 check_source_language(False, str(e), do_raise=False)
 
             # Keep Langkit bug "pretty" for users: display the Python stack

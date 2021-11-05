@@ -3,12 +3,14 @@ from __future__ import annotations
 from collections import defaultdict
 from itertools import count
 import re
-from typing import (Any, Dict, Iterator, List, Optional, Sequence, Set,
-                    TYPE_CHECKING, Tuple, Type, Union, cast)
+from typing import (Any, ContextManager, Dict, Iterator, List, Optional,
+                    Sequence, Set, TYPE_CHECKING, Tuple, Type, Union, cast)
 
 from langkit.compile_context import CompileCtx, get_context
-from langkit.diagnostics import (Context, Location, check_source_language,
-                                 error, extract_library_location)
+from langkit.diagnostics import (
+    Location, check_source_language, diagnostic_context, error,
+    extract_library_location
+)
 from langkit.lexer.regexp import DFACodeGenHolder, NFAState, RegexpCollection
 from langkit.names import Name
 
@@ -317,9 +319,9 @@ class TokenFamily:
                 sorted(t.signature for t in self.tokens))
 
     @property
-    def diagnostic_context(self) -> Context:
+    def diagnostic_context(self) -> ContextManager[None]:
         assert self.location is not None
-        return Context(self.location)
+        return diagnostic_context(self.location)
 
 
 class LexerToken:
@@ -714,7 +716,7 @@ class Lexer:
 
         # Import patterns into regexps
         for name, pattern, loc in self.patterns:
-            with Context(loc):
+            with diagnostic_context(loc):
                 regexps.add_pattern(name, pattern)
 
         # Now turn each rule into a NFA
@@ -743,7 +745,7 @@ class Lexer:
                 check(a.action)
 
             assert a.location is not None
-            with Context(a.location):
+            with diagnostic_context(a.location):
                 nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
             nfas.append(nfa_start)
 

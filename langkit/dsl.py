@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import itertools
-from typing import Any, Dict, List, Tuple, Type, Union
+from typing import Any, ContextManager, Dict, List, Tuple, Type, Union
 
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledTypeRepo, EnumType, Field as _Field,
     StructType, T, UserField as _UserField, resolve_type
 )
 from langkit.diagnostics import (
-    Context, Location, check_source_language, extract_library_location
+    Location, check_source_language, diagnostic_context,
+    extract_library_location
 )
 from langkit.expressions import PropertyDef
 import langkit.names as names
@@ -39,8 +40,8 @@ class DSLType:
                        '{}.array'.format(cls._name.camel))
 
     @classmethod
-    def _diagnostic_context(cls):
-        return Context(cls._location)
+    def _diagnostic_context(cls) -> ContextManager[None]:
+        return diagnostic_context(cls._location)
 
     @staticmethod
     def _import_base_type_info(name, location, dct):
@@ -141,7 +142,7 @@ class BaseStruct(DSLType):
             if f_n.startswith('__') and f_n.endswith('__'):
                 continue
 
-            with Context(location):
+            with diagnostic_context(location):
                 expected_types = (field_cls
                                   if isinstance(field_cls, tuple) else
                                   (field_cls, ))
@@ -181,7 +182,7 @@ def _check_decorator_use(decorator, expected_cls, cls):
     `expected_cls`.
     """
     location = extract_library_location()
-    with Context(location):
+    with diagnostic_context(location):
         check_source_language(
             issubtype(cls, expected_cls),
             'The {} decorator must be called on a {} subclass'
@@ -239,7 +240,7 @@ class _StructMetaclass(type):
     def process_subclass(mcs, name, bases, dct):
         location = extract_library_location()
 
-        with Context(location):
+        with diagnostic_context(location):
             check_source_language(
                 bases == (Struct, ),
                 'Struct subclasses must derive from Struct only',
@@ -436,9 +437,10 @@ class _ASTNodeMetaclass(type):
         is_list_type = issubclass(base, _ASTNodeList)
         is_root_list_type = base is _ASTNodeList
 
-        node_ctx = Context(location)
+        def node_ctx():
+            return diagnostic_context(location)
 
-        with node_ctx:
+        with node_ctx():
             check_source_language(len(bases) == 1,
                                   'ASTNode subclasses must have exactly one'
                                   ' base class')
@@ -468,7 +470,7 @@ class _ASTNodeMetaclass(type):
         only_null_fields = False
 
         # Determine if this is a token node
-        with node_ctx:
+        with node_ctx():
             is_token_node = dct.pop('token_node', None)
             check_source_language(
                 is_token_node is None or isinstance(is_token_node, bool),
@@ -492,7 +494,7 @@ class _ASTNodeMetaclass(type):
                 )
 
         # Determine if this is an error node
-        with node_ctx:
+        with node_ctx():
             is_error_node = dct.pop('error_node', None)
             check_source_language(
                 is_error_node is None or isinstance(is_error_node, bool),
@@ -521,7 +523,7 @@ class _ASTNodeMetaclass(type):
                 )
 
         # Handle enum nodes
-        with node_ctx:
+        with node_ctx():
             # Forbid inheriting from an enum node
             check_source_language(
                 not base._is_enum_node,
@@ -980,7 +982,7 @@ class _EnumMetaclass(type):
             return result
 
         location = extract_library_location()
-        with Context(location):
+        with diagnostic_context(location):
             check_source_language(
                 bases == (Enum, ),
                 'Enumeration types must derive from and only from Enum'
