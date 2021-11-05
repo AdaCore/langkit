@@ -5,8 +5,8 @@ from functools import partial
 import inspect
 from itertools import count
 from typing import (
-    Any as _Any, Callable, Dict, List, Optional as Opt, Sequence, Set, Tuple,
-    Union
+    Any as _Any, Callable, ClassVar, Dict, Iterator, List, Optional as Opt,
+    Sequence, Set, Tuple, Union
 )
 
 
@@ -21,7 +21,7 @@ from langkit.compiled_types import (
     resolve_type
 )
 from langkit.diagnostics import (
-    Context, DiagnosticError, WarningSet, check_multiple,
+    Context, DiagnosticError, Location, WarningSet, check_multiple,
     check_source_language, check_type, extract_library_location
 )
 from langkit.expressions.utils import assign_var
@@ -478,12 +478,34 @@ class AbstractExpression(Frozable):
     attrs_dict: Dict[_Any, _Any] = {}
     constructors: List[_Any] = []
 
+    current_location: ClassVar[Opt[Location]] = None
+    """
+    If ``None``, expressions get the location from
+    ``langkit.diagnostics.extract_library_location``. Otherwise, they get the
+    location from this class attribute.
+    """
+
+    @classmethod
+    @contextmanager
+    def with_location(cls, loc: Opt[Location]) -> Iterator[None]:
+        """
+        Context manager to temporarily set ``cls.current_location``.
+        """
+        old_loc = cls.current_location
+        cls.current_location = loc
+        try:
+            yield
+        finally:
+            cls.current_location = old_loc
+
     @property
     def diagnostic_context(self):
         return Context(self.location)
 
     def __init__(self):
-        self.location = extract_library_location()
+        self.location = (
+            self.current_location or extract_library_location()
+        )
 
     def __hash__(self):
         # AbstractExpression instances appear heavily as memoized functions

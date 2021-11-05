@@ -1542,6 +1542,19 @@ class LktTypesLoader:
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """
+            Wrapper around "_lower" to set the expression location.
+
+            Calling this function instead of ``_lower`` below to lower
+            individual expression nodes is what correctly assigns the Lkt
+            location to each instantiated ``AbstractExpression``.
+            """
+            with AbstractExpression.with_location(
+                Location.from_lkt_node(expr)
+            ):
+                return _lower(expr)
+
+        def _lower(expr: L.Expr) -> AbstractExpression:
+            """
             Do the actual expression lowering. Since all recursive calls use
             the same environment, this helper allows to skip passing it.
             """
