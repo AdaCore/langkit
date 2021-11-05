@@ -14,7 +14,7 @@ from langkit.common import is_keyword
 from langkit.compile_context import (CompileCtx, get_context,
                                      get_context_or_none)
 from langkit.diagnostics import (
-    Context, Location, Severity, WarningSet, check_source_language,
+    Location, Severity, WarningSet, check_source_language, diagnostic_context,
     extract_library_location
 )
 from langkit.utils import issubtype, memoized, not_implemented_error
@@ -377,7 +377,7 @@ class AbstractNodeData:
 
     @property
     def diagnostic_context(self):
-        return Context(self.location)
+        return diagnostic_context(self.location)
 
     @property
     def is_public(self):
@@ -1040,7 +1040,7 @@ class CompiledType:
 
     @property
     def diagnostic_context(self):
-        return Context(self.location)
+        return diagnostic_context(self.location)
 
     @property
     def doc(self):

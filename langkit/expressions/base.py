@@ -21,8 +21,9 @@ from langkit.compiled_types import (
     resolve_type
 )
 from langkit.diagnostics import (
-    Context, DiagnosticError, Location, WarningSet, check_multiple,
-    check_source_language, check_type, extract_library_location
+    DiagnosticError, Location, WarningSet, check_multiple,
+    check_source_language, check_type, diagnostic_context,
+    extract_library_location
 )
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
@@ -500,7 +501,7 @@ class AbstractExpression(Frozable):
 
     @property
     def diagnostic_context(self):
-        return Context(self.location)
+        return diagnostic_context(self.location)
 
     def __init__(self):
         self.location = (

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 import enum
 from functools import lru_cache
@@ -9,7 +10,7 @@ import re
 import sys
 import traceback
 from typing import (
-    Any, List, NoReturn, Optional as Opt, TextIO, Tuple, Type,
+    Any, Iterator, List, NoReturn, Optional as Opt, TextIO, Tuple, Type,
     TypeVar, Union
 )
 
@@ -177,31 +178,22 @@ def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
     return locs[-1] if locs else None
 
 
-context_stack: List[Location] = []
+context_stack: List[Opt[Location]] = []
 
 
-class Context:
+@contextmanager
+def diagnostic_context(location: Opt[Location]) -> Iterator[None]:
     """
-    Add context for diagnostics. For the moment this context is constituted
-    of a message and a location.
+    Context manager to temporarily append a location to the context stack for
+    diagnostics.
+
+    :param location: The location for diagnostics.
     """
-
-    def __init__(self, location: Location):
-        """
-        :param Location location: The location associated to the context.
-        """
-        self.location = location
-
-    def __enter__(self) -> None:
-        context_stack.append(self.location)
-
-    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
-        del traceback
-        del exc_type
+    context_stack.append(location)
+    try:
+        yield
+    finally:
         context_stack.pop()
-
-    def __repr__(self) -> str:
-        return '<diagnostics.Context location={}>'.format(self.location)
 
 
 class DiagnosticError(Exception):
@@ -237,7 +229,7 @@ def get_structured_context() -> List[Location]:
     From the context global structures, return a structured context locations
     list.
     """
-    return list(reversed(context_stack))
+    return list(l for l in reversed(context_stack) if l)
 
 
 def get_current_location() -> Opt[Location]:

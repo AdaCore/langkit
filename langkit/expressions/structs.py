@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import inspect
-from typing import Any as _Any, Dict, List, Optional, Sequence, Tuple
+from typing import (Any as _Any, ContextManager, Dict, List, Optional,
+                    Sequence, Tuple)
 
 import funcy
 
@@ -9,7 +10,8 @@ from langkit import names
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Field, resolve_type
 )
-from langkit.diagnostics import Context, Severity, check_source_language, error
+from langkit.diagnostics import (Severity, check_source_language,
+                                 diagnostic_context, error)
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
     ComputingExpr, DynamicVariable, Entity, Let, NullCheckExpr, NullExpr,
@@ -859,8 +861,8 @@ class FieldAccess(AbstractExpression):
         self.node_data: AbstractNodeData
 
     @property
-    def diagnostic_context(self) -> Context:
-        return Context(self.location)
+    def diagnostic_context(self) -> ContextManager[None]:
+        return diagnostic_context(self.location)
 
     def resolve_field(self) -> AbstractNodeData:
         """

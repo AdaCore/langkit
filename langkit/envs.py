@@ -11,13 +11,13 @@ from __future__ import annotations
 from enum import Enum
 from funcy import lsplit_by
 from itertools import count
-from typing import Dict, List, Optional, Type, cast, overload
+from typing import ContextManager, Dict, List, Optional, Type, cast, overload
 
 from langkit import names
 from langkit.compile_context import CompileCtx, get_context
 from langkit.compiled_types import (ASTNodeType, AbstractNodeData,
                                     CompiledType, T)
-from langkit.diagnostics import (Context, check_source_language,
+from langkit.diagnostics import (check_source_language, diagnostic_context,
                                  extract_library_location)
 from langkit.expressions import (AbstractExpression, FieldAccess, PropertyDef,
                                  Self, resolve_property, unsugar)
@@ -252,12 +252,12 @@ class EnvSpec:
         self.actions = self.pre_actions + self.post_actions
 
     @property
-    def diagnostic_context(self) -> Context:
+    def diagnostic_context(self) -> ContextManager[None]:
         """
         Diagnostic context for env specs.
         """
         assert self.location is not None
-        return Context(self.location)
+        return diagnostic_context(self.location)
 
     @overload
     def create_internal_property(self,

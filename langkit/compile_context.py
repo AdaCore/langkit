@@ -27,8 +27,8 @@ from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
-    Context, DiagnosticError, Location, Severity, WarningSet,
-    check_source_language, context_stack, error, print_error,
+    DiagnosticError, Location, Severity, WarningSet, check_source_language,
+    context_stack, diagnostic_context, error, print_error,
     print_error_from_sem_result
 )
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
@@ -1407,7 +1407,7 @@ class CompileCtx:
         )
         for prop in props_using_einfo:
             for p in prop.property_set():
-                with Context(p.location):
+                with diagnostic_context(p.location):
                     p.set_uses_entity_info()
 
         all_props = list(self.all_properties(include_inherited=False))
@@ -1425,7 +1425,7 @@ class CompileCtx:
                 context_mgr = (
                     expr.abstract_expr.diagnostic_context
                     if expr.abstract_expr else
-                    Context(None)
+                    diagnostic_context(None)
                 )
 
                 with context_mgr:
