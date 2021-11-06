@@ -82,11 +82,11 @@ The developer and user's documentation for Langkit is in `langkit/doc`. You can
 consult it as a text files or you can build it. For instance, to generate HTML
 documents, run from the top directory:
 
-    $ make -C langkit/doc html
+    $ make -C doc html
 
 And then open the following file in your favorite browser:
 
-    langkit/doc/_build/html/index.html
+    doc/_build/html/index.html
 
 Bootstrapping a new language engine
 -----------------------------------
