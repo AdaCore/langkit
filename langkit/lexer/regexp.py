@@ -10,7 +10,6 @@ from typing import (Any, Callable, Dict, Iterable, Iterator, List, Optional,
 
 from langkit.diagnostics import check_source_language
 from langkit.lexer.char_set import CharSet
-from langkit.lexer.unicode_data import unicode_categories_char_sets
 
 
 if TYPE_CHECKING:
@@ -18,7 +17,6 @@ if TYPE_CHECKING:
 
 
 rule_name_re = re.compile('[a-zA-Z][a-zA-Z0-9_]*')
-del unicode_categories_char_sets
 
 
 T = TypeVar("T")
