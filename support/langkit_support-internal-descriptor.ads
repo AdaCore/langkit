@@ -104,6 +104,10 @@ package Langkit_Support.Internal.Descriptor is
    type Entity_Image_Type is access function
      (Entity : Internal_Entity) return String;
 
+   type Create_Enum_Type is access function
+     (Enum_Type   : Type_Index;
+      Value_Index : Enum_Value_Index) return Internal_Value_Access;
+
    type Language_Descriptor is limited record
       Language_Name : Text_Access;
       --  Name of the language that is analyzed (in camel-with-underscores
@@ -171,6 +175,10 @@ package Langkit_Support.Internal.Descriptor is
       Node_Token_End      : Node_Token_Getter_Type;
 
       Entity_Image : Entity_Image_Type;
+
+      --  Operations to build/inspect generic data types
+
+      Create_Enum : Create_Enum_Type;
    end record;
 
    function "+" is new Ada.Unchecked_Conversion

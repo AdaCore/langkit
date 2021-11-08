@@ -18,7 +18,6 @@ private package ${ada_lib_name}.Generic_Introspection is
       G = generic_api
 
       # Expose through the introspection API...
-      enum_types = ctx.enum_types
 
       # All exposed array types
       array_types = [t for t in ctx.array_types if t.exposed]
@@ -32,7 +31,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       node_types = ctx.astnode_types
       entity_types = [t.entity for t in node_types]
 
-      all_types = enum_types + array_types + struct_types + entity_types
+      all_types = G.enum_types + array_types + struct_types + entity_types
 
       # Fetch all exposed types that are not listed above (builtin types)
       other_types = [t for t in T.all_types
@@ -90,7 +89,7 @@ private package ${ada_lib_name}.Generic_Introspection is
    ---------------------------
 
    <% enum_type_descs = [] %>
-   % for t in enum_types:
+   % for t in G.enum_types:
       <%
          desc_const = f"Enum_Desc_For_{t.name}"
          name_const = f"Enum_Name_For_{t.name}"
@@ -122,6 +121,27 @@ private package ${ada_lib_name}.Generic_Introspection is
    Enum_Types : aliased constant Enum_Type_Descriptor_Array := (
       ${",\n".join(enum_type_descs)}
    );
+
+   ------------------------------------
+   -- Introspection values for enums --
+   ------------------------------------
+
+   % for t in G.enum_types:
+      <% vt = G.internal_value_type(t) %>
+      type ${vt} is new Base_Internal_Enum_Value with record
+         Value : ${t.api_name};
+      end record;
+      type ${G.internal_value_access(t)} is access all ${vt};
+
+      overriding function Type_Of (Value : ${vt}) return Type_Index;
+      overriding function Image (Value : ${vt}) return String;
+      overriding function Value_Index (Value : ${vt}) return Enum_Value_Index;
+   % endfor
+
+   function Create_Enum
+     (Enum_Type   : Type_Index;
+      Value_Index : Enum_Value_Index) return Internal_Value_Access;
+   --  Implementation of the Create_Enum operation in the lanugage descriptor
 
    ----------------------------
    -- Array type descriptors --
