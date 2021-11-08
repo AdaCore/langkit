@@ -203,7 +203,7 @@ package Langkit_Support.Internal.Introspection is
    --  Return a string that represents ``Value``, for logging/debugging
    --  purposes.
 
-   type Internal_Value_Access is access all Internal_Value;
+   type Internal_Value_Access is access all Internal_Value'Class;
 
    --------------------------------------------
    -- Implementations for some builtin types --
@@ -363,5 +363,19 @@ package Langkit_Support.Internal.Introspection is
      with Import, External_Name => "lksp__unwrap_node";
    --  See the corresponding export declaration in
    --  Langkit_Support.Generic_API.Analysis.
+
+   ------------------------------------------------------
+   -- Abstract derivations for language-specific types --
+   ------------------------------------------------------
+
+   type Base_Internal_Enum_Value is abstract new Internal_Value
+     with null record;
+
+   type Base_Internal_Enum_Value_Access is
+     access all Base_Internal_Enum_Value'Class;
+
+   function Value_Index
+     (Value : Base_Internal_Enum_Value) return Enum_Value_Index is abstract;
+   --  Return the index of the given enum value
 
 end Langkit_Support.Internal.Introspection;

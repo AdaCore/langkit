@@ -120,11 +120,23 @@ procedure Introspection_Values is
    U   : constant Lk_Unit := Ctx.Get_From_File ("example.txt");
    N   : constant Lk_Node := U.Root;
 
-   Value : Value_Ref;
+   Enum     : Type_Ref;
+   Enum_Val : Enum_Value_Ref;
+   Value    : Value_Ref;
 
    Int_Type, Bool_Type : Type_Ref;
 
 begin
+   --  Look for the first enum type and build an enum value ref for it
+
+   for T in 1 .. Last_Type (Id) loop
+      Enum := From_Index (Id, T);
+      if Is_Enum_Type (Enum) then
+         exit;
+      end if;
+   end loop;
+   Enum_Val := From_Index (Enum, 1);
+
    Put_Title ("Value constructors/getters");
 
    Inspect (No_Value_Ref);
@@ -221,6 +233,25 @@ begin
    if As_Node (Value) /= N then
       raise Program_Error;
    end if;
+   New_Line;
+
+   Put_Title ("Enum values introspection");
+
+   Put ("Create_Enum: null enum value ref: ");
+   begin
+      Value := Create_Enum (No_Enum_Value_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Value := Create_Enum (Enum_Val);
+   Inspect (Value);
+   if As_Enum (Value) /= Enum_Val then
+      raise Program_Error;
+   end if;
+
    New_Line;
 
    Put_Title ("Type matching");

@@ -210,6 +210,14 @@ package Langkit_Support.Generic_API.Introspection is
    function Enum_Last_Value (Enum : Type_Ref) return Enum_Value_Index;
    --  Return the index of the last enum value for the given ``Enum`` enum type
 
+   function Create_Enum (Value : Enum_Value_Ref) return Value_Ref;
+   --  Convert an ``Enum_Value_Ref`` into the corresponding ``Value_Ref``
+
+   function As_Enum (Value : Value_Ref) return Enum_Value_Ref;
+   --  Assuming ``Value`` is an enum value, return the corresponding
+   --  ``Enum_Value_Ref``. Raise a ``Precondition_Failure`` exception if
+   --  ``Value`` is not an enum value.
+
    -----------------
    -- Array types --
    -----------------
@@ -368,8 +376,6 @@ private
       --  language ``Id`` represents.
    end record;
 
-   No_Type_Ref : constant Type_Ref := (null, 0);
-
    type Internal_Value_Access is
      access all Langkit_Support.Internal.Introspection.Internal_Value'Class;
 
@@ -380,9 +386,6 @@ private
    overriding procedure Adjust (Self : in out Value_Ref);
    overriding procedure Finalize (Self : in out Value_Ref);
 
-   No_Value_Ref : constant Value_Ref :=
-     (Ada.Finalization.Controlled with Value => null);
-
    type Enum_Value_Ref is record
       Enum : Type_Ref;
       Index : Any_Enum_Value_Index;
@@ -391,8 +394,6 @@ private
       --  the enum type ``Enum`` represents.
    end record;
 
-   No_Enum_Value_Ref : constant Enum_Value_Ref := (No_Type_Ref, 0);
-
    type Struct_Member_Ref is record
       Id    : Any_Language_Id;
       Index : Any_Struct_Member_Index;
@@ -400,6 +401,13 @@ private
       --  members should be null/zero, either ``Index`` designates a valid
       --  member for the language ``Id`` represents.
    end record;
+
+   No_Type_Ref : constant Type_Ref := (null, 0);
+
+   No_Value_Ref : constant Value_Ref :=
+     (Ada.Finalization.Controlled with Value => null);
+
+   No_Enum_Value_Ref : constant Enum_Value_Ref := (No_Type_Ref, 0);
 
    No_Struct_Member_Ref : constant Struct_Member_Ref := (null, 0);
 

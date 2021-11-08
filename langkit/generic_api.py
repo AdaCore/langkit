@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import List, Optional
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import ASTNodeType, AbstractNodeData, CompiledType
+from langkit.compiled_types import (
+    ASTNodeType, AbstractNodeData, CompiledType, EnumType
+)
 
 
 class GenericAPI:
@@ -16,6 +18,13 @@ class GenericAPI:
 
     def __init__(self, context: CompileCtx):
         self.context = context
+
+    @property
+    def enum_types(self) -> List[EnumType]:
+        """
+        Return the list of enum types for this context.
+        """
+        return self.context.enum_types
 
     def type_name(self, t: CompiledType) -> str:
         """
@@ -78,3 +87,17 @@ class GenericAPI:
         Return the name of the constant for ``m``'s struct member index.
         """
         return f"Member_Index_For_{self.member_name(m)}"
+
+    def internal_value_type(self, t: CompiledType) -> str:
+        """
+        Return the name of the
+        ``Langkit_Support.Internal.Introspection.Internal_Value`` derivation
+        used to represent ``t``.
+        """
+        return f"Internal_Rec_{self.type_name(t)}"
+
+    def internal_value_access(self, t: CompiledType) -> str:
+        """
+        Like ``internal_value_type``, but return the access type instead.
+        """
+        return f"Internal_Acc_{self.type_name(t)}"

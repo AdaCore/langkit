@@ -515,7 +515,7 @@ class Emitter:
             # Unit for the Ada generic Langkit API
             Unit('pkg_generic_api', 'Generic_API', ada_api=True),
             Unit('pkg_generic_introspection', 'Generic_Introspection',
-                 ada_api=True, has_body=False, is_interface=False),
+                 ada_api=True, has_body=True, is_interface=False),
         ]:
             if (
                 (not self.generate_ada_api and u.ada_api) or

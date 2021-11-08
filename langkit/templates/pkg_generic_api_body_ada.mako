@@ -471,7 +471,9 @@ package body ${ada_lib_name}.Generic_API is
       Node_Token_Start    => Node_Token_Start'Access,
       Node_Token_End      => Node_Token_End'Access,
 
-      Entity_Image => Entity_Image'Access);
+      Entity_Image => Entity_Image'Access,
+
+      Create_Enum => Create_Enum'Access);
 
    Desc_Address : constant System.Address := Desc'Address
      with Export, External_Name => "${ada_lib_name}__language_id";

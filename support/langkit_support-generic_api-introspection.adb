@@ -21,6 +21,7 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Errors; use Langkit_Support.Errors;
@@ -39,6 +40,14 @@ pragma Unreferenced (Langkit_Support.Internal.Descriptor);
 package body Langkit_Support.Generic_API.Introspection is
 
    use Langkit_Support.Errors.Introspection;
+
+   --  Conversion helpers between the access types in the Generic API private
+   --  part and in the internal API. We need to have different access types
+   --  because of issues with the Ada privacy rules.
+
+   function "+" is new Ada.Unchecked_Conversion
+     (Langkit_Support.Internal.Introspection.Internal_Value_Access,
+      Langkit_Support.Generic_API.Introspection.Internal_Value_Access);
 
    procedure Check_Same_Language (Left, Right : Language_Id);
    --  Raise a ``Precondition_Failure`` exception if ``Left`` and ``Right`` are
@@ -734,6 +743,38 @@ package body Langkit_Support.Generic_API.Introspection is
       Check_Enum_Type (Enum);
       return Enum.Id.Enum_Types.all (Enum.Index).Last_Value;
    end Enum_Last_Value;
+
+   -----------------
+   -- Create_Enum --
+   -----------------
+
+   function Create_Enum (Value : Enum_Value_Ref) return Value_Ref is
+      Id : Language_Id;
+   begin
+      Check_Enum_Value (Value);
+      Id := Value.Enum.Id;
+      return Create_Value
+        (Id, +Id.Create_Enum (Value.Enum.Index, Value.Index));
+   end Create_Enum;
+
+   -------------
+   -- As_Enum --
+   -------------
+
+   function As_Enum (Value : Value_Ref) return Enum_Value_Ref is
+      Id : Language_Id;
+      T  : Type_Ref;
+      V  : Base_Internal_Enum_Value_Access;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      T := From_Index (Id, Value.Value.Type_Of);
+      if not Is_Enum_Type (T) then
+         raise Precondition_Failure with "non-enum value";
+      end if;
+      V := Base_Internal_Enum_Value_Access (Value.Value);
+      return From_Index (T, V.Value_Index);
+   end As_Enum;
 
    -------------------
    -- Is_Array_Type --
