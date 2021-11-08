@@ -7,16 +7,23 @@ import json
 import os
 from os import path
 import subprocess
+from typing import Any, Dict
 
 from funcy import keep
 
 from langkit.caching import Cache
-from langkit.compile_context import ADA_BODY, ADA_SPEC, get_context
+from langkit.compile_context import ADA_BODY, ADA_SPEC, CompileCtx, get_context
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Severity, check_source_language
+from langkit.generic_api import GenericAPI
 import langkit.names as names
 from langkit.template_utils import add_template_dir
 from langkit.utils import Colors, printcol
+
+
+@CompileCtx.register_template_extensions
+def template_extensions(ctx: CompileCtx) -> Dict[str, Any]:
+    return {"generic_api": GenericAPI(ctx)}
 
 
 def write_source_file(file_path, source, post_process=None):

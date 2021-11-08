@@ -15,6 +15,8 @@ with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 private package ${ada_lib_name}.Generic_Introspection is
 
    <%
+      G = generic_api
+
       # Expose through the introspection API...
       enum_types = ctx.enum_types
 
@@ -37,30 +39,6 @@ private package ${ada_lib_name}.Generic_Introspection is
                      if t.exposed and not t.is_ast_node and t not in all_types]
       all_types = sorted(other_types, key=lambda t: t.api_name) + all_types
 
-      def type_name(t):
-         """
-         Return a short type name for ``t``, to be used in the generation of
-         constants.
-         """
-         if t.is_ast_node:
-            t = t.entity
-
-         return t.api_name.camel_with_underscores
-
-      def type_index(t):
-         """
-         Return the name of the constant for ``t``'s type index, or
-         ``No_Type_Index`` if ``t`` is None.
-
-         For convenience, also automatically handle bare nodes as entities
-         (bare nodes are not exposed).
-         """
-         return (
-            "No_Type_Index"
-            if t is None
-            else f"Type_Index_For_{type_name(t)}"
-         )
-
       # We also need to expose all base struct members: struct fields, node
       # syntax fields and properties.
       all_members = (
@@ -68,37 +46,6 @@ private package ${ada_lib_name}.Generic_Introspection is
          + ctx.sorted_parse_fields
          + ctx.sorted_properties
       )
-
-      def root_member(m):
-         # In the case of overriding node members (abstract syntax fields,
-         # overriding properties), we emit a single member descriptor for the
-         # whole derivation tree, so always refer to the root member.
-         if m.struct.is_ast_node:
-            while True:
-               base = m.base
-               if base is None:
-                  break
-               m = base
-         return m
-
-      def member_name(m):
-         """
-         Return a unique name for the ``m`` struct member.
-         """
-         m = root_member(m)
-         # Node members are already qualified by the node type name, so we need
-         # to add the type name only for structs.
-         return (
-            m.name
-            if m.struct.is_ast_node
-            else f"{type_name(m.struct)}_{m.name}"
-         )
-
-      def member_index(m):
-         """
-         Return the name of the constant for ``m``'s struct member index.
-         """
-         return f"Member_Index_For_{member_name(m)}"
    %>
 
    --------------------------
@@ -106,7 +53,7 @@ private package ${ada_lib_name}.Generic_Introspection is
    --------------------------
 
    % for i, t in enumerate(all_types, 1):
-      ${type_index(t)} : constant Type_Index := ${i};
+      ${G.type_index(t)} : constant Type_Index := ${i};
    % endfor
 
    ----------------------------
@@ -114,7 +61,7 @@ private package ${ada_lib_name}.Generic_Introspection is
    ----------------------------
 
    % for i, m in enumerate(all_members, 1):
-      ${member_index(m)} : constant Struct_Member_Index := ${i};
+      ${G.member_index(m)} : constant Struct_Member_Index := ${i};
    % endfor
 
    ------------------------------------
@@ -148,7 +95,7 @@ private package ${ada_lib_name}.Generic_Introspection is
          desc_const = f"Enum_Desc_For_{t.name}"
          name_const = f"Enum_Name_For_{t.name}"
          values_const = f"Enum_Values_Name_For_{t.name}"
-         enum_type_descs.append(f"{type_index(t)} => {desc_const}'Access")
+         enum_type_descs.append(f"{G.type_index(t)} => {desc_const}'Access")
       %>
 
       ## Output descriptors for each enum value
@@ -182,7 +129,8 @@ private package ${ada_lib_name}.Generic_Introspection is
 
    <%
       array_type_descs = [
-         f"{type_index(t)} => (Element_Type => {type_index(t.element_type)})"
+         f"{G.type_index(t)}"
+         f" => (Element_Type => {G.type_index(t.element_type)})"
          for t in array_types
       ]
    %>
@@ -200,10 +148,10 @@ private package ${ada_lib_name}.Generic_Introspection is
    %>
    % for m in all_members:
       <%
-         name = member_name(m)
+         name = G.member_name(m)
          desc_name = f"Member_Desc_For_{name}"
          name_const = f"Member_Name_For_{name}"
-         member_descs.append(f"{member_index(m)} => {desc_name}'Access")
+         member_descs.append(f"{G.member_index(m)} => {desc_name}'Access")
          args = []
       %>
 
@@ -213,7 +161,7 @@ private package ${ada_lib_name}.Generic_Introspection is
          <%
             args.append(
                f"{arg_no} => (Name => Arg_Name_{arg_no}'Access,"
-               f" Argument_Type => {type_index(arg.type)})"
+               f" Argument_Type => {G.type_index(arg.type)})"
             )
             arg_no += 1
          %>
@@ -224,7 +172,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${desc_name} : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => ${len(args)},
          Name          => ${name_const}'Access,
-         Member_Type   => ${type_index(m.type)},
+         Member_Type   => ${G.type_index(m.type)},
          Arguments     => (
             % if m.arguments:
                ${",\n".join(args)}
@@ -258,7 +206,7 @@ private package ${ada_lib_name}.Generic_Introspection is
             subclasses = []
          desc_const = f"Node_Desc_For_{name}"
          name_const = f"Node_Name_For_{name}"
-         struct_type_descs.append(f"{type_index(t)} => {desc_const}'Access")
+         struct_type_descs.append(f"{G.type_index(t)} => {desc_const}'Access")
 
          def get_members(include_inherited):
             result = (
@@ -279,13 +227,13 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${desc_const} : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => ${len(subclasses)},
          Member_Count      => ${len(members)},
-         Base_Type         => ${type_index(base)},
+         Base_Type         => ${G.type_index(base)},
          Is_Abstract       => ${abstract},
          Name              => ${name_const}'Access,
          Inherited_Members => ${len(inherited_members)},
          Derivations       => (
            % if subclasses:
-             ${",\n".join(f"{i} => {type_index(sc)}"
+             ${",\n".join(f"{i} => {G.type_index(sc)}"
                          for i, sc in enumerate(subclasses, 1))}
            % else:
              1 .. 0 => <>
@@ -293,7 +241,7 @@ private package ${ada_lib_name}.Generic_Introspection is
          ),
          Members           => (
             % if members:
-              ${",\n".join(f"{i} => {member_index(m)}"
+              ${",\n".join(f"{i} => {G.member_index(m)}"
                            for i, m in enumerate(members, 1))}
             % else:
               1 .. 0 => <>
@@ -305,23 +253,23 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${",\n".join(struct_type_descs)}
    );
 
-   First_Node     : constant Type_Index := ${type_index(node_types[0])};
+   First_Node     : constant Type_Index := ${G.type_index(node_types[0])};
    First_Property : constant Struct_Member_Index :=
-     ${member_index(ctx.sorted_properties[0])};
+     ${G.member_index(ctx.sorted_properties[0])};
 
    Builtin_Types : aliased constant Builtin_Types_Record :=
-     (Analysis_Unit         => ${type_index(T.AnalysisUnit)},
-      Big_Int               => ${type_index(T.BigInt)},
-      Bool                  => ${type_index(T.Bool)},
-      Char                  => ${type_index(T.Character)},
-      Int                   => ${type_index(T.Int)},
-      Source_Location_Range => ${type_index(T.SourceLocationRange)},
-      String                => ${type_index(T.String)},
-      Token                 => ${type_index(T.Token)},
-      Symbol                => ${type_index(T.Symbol)});
+     (Analysis_Unit         => ${G.type_index(T.AnalysisUnit)},
+      Big_Int               => ${G.type_index(T.BigInt)},
+      Bool                  => ${G.type_index(T.Bool)},
+      Char                  => ${G.type_index(T.Character)},
+      Int                   => ${G.type_index(T.Int)},
+      Source_Location_Range => ${G.type_index(T.SourceLocationRange)},
+      String                => ${G.type_index(T.String)},
+      Token                 => ${G.type_index(T.Token)},
+      Symbol                => ${G.type_index(T.Symbol)});
 
    Node_Kinds : constant array (${T.node_kind}) of Type_Index :=
-     (${", ".join(f"{n.ada_kind_name} => {type_index(n)}"
+     (${", ".join(f"{n.ada_kind_name} => {G.type_index(n)}"
                   for n in ctx.astnode_types
                   if not n.abstract)});
    --  Associate a type index to each concrete node
