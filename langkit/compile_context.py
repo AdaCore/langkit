@@ -1646,7 +1646,10 @@ class CompileCtx:
         return self.renderer.render(*args, **kwargs)
 
     @classmethod
-    def register_template_extensions(cls, exts_fn):
+    def register_template_extensions(
+        cls,
+        exts_fn: Callable[[CompileCtx], Dict[str, Any]]
+    ) -> None:
         """
         Register a set of mako template env extensions.
 
