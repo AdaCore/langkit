@@ -34,6 +34,9 @@ with Langkit_Support.Types;        use Langkit_Support.Types;
 
 package body Langkit_Support.Generic_API.Analysis is
 
+   function Wrap_Node
+     (Id : Language_Id; Node : Internal_Entity) return Lk_Node
+     with Export, External_Name => "lksp__wrap_node";
    function Unwrap_Node (Node : Lk_Node) return Internal_Entity
      with Export, External_Name => "lksp__unwrap_node";
    --  Public/private converters for nodes
@@ -1054,6 +1057,29 @@ package body Langkit_Support.Generic_API.Analysis is
          Self.Initialize;
       end if;
    end Finalize;
+
+   ---------------
+   -- Wrap_Node --
+   ---------------
+
+   function Wrap_Node
+     (Id : Language_Id; Node : Internal_Entity) return Lk_Node
+   is
+      Context : Internal_Context;
+      Unit    : Internal_Unit;
+   begin
+      if Node = No_Internal_Entity then
+         return No_Lk_Node;
+      end if;
+
+      Unit := Id.Node_Unit (Node.Node);
+      Context := Id.Unit_Context (Unit);
+
+      return (Ada.Finalization.Controlled with
+              Id,
+              Node,
+              Create_Node_Safety_Net (Id, Context, Unit, Node.Rebindings));
+   end Wrap_Node;
 
    -----------------
    -- Unwrap_Node --

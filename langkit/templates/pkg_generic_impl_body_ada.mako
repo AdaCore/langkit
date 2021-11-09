@@ -23,6 +23,28 @@ package body ${ada_lib_name}.Generic_Impl is
                        From_Rebound => Entity.From_Rebound));
    end "+";
 
+   ---------
+   -- "+" --
+   ---------
+
+   function "+"
+     (Entity : Implementation.${root_entity.name}) return Internal_Entity
+   is
+      use ${ada_lib_name}.Implementation;
+
+      MD : constant Internal_Node_Metadata_Access :=
+        (if Entity.Info.MD = Implementation.No_Metadata
+         then null
+         else new Internal_Node_Metadata_Type'
+                    (Ref_Count => 1,
+                     Internal  => Entity.Info.MD));
+   begin
+      return (Node         => +Entity.Node,
+              Rebindings   => Entity.Info.Rebindings,
+              From_Rebound => Entity.Info.From_Rebound,
+              Metadata     => +MD);
+   end "+";
+
    --------------------
    -- Create_Context --
    --------------------
@@ -112,6 +134,16 @@ package body ${ada_lib_name}.Generic_Impl is
    end Context_Get_From_File;
 
    ------------------
+   -- Unit_Context --
+   ------------------
+
+   function Unit_Context (Unit : Internal_Unit) return Internal_Context is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return +U.Context;
+   end Unit_Context;
+
+   ------------------
    -- Unit_Version --
    ------------------
 
@@ -199,6 +231,16 @@ package body ${ada_lib_name}.Generic_Impl is
       end if;
       Metadata := No_Internal_Node_Metadata;
    end Node_Metadata_Dec_Ref;
+
+   ---------------
+   -- Node_Unit --
+   ---------------
+
+   function Node_Unit (Node : Internal_Node) return Internal_Unit is
+      N : constant Implementation.${T.root_node.name} := +Node;
+   begin
+      return +N.Unit;
+   end Node_Unit;
 
    ---------------
    -- Node_Kind --
