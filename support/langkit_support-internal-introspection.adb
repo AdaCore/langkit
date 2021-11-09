@@ -58,7 +58,7 @@ package body Langkit_Support.Internal.Introspection is
    -------------
 
    overriding function Type_Of
-     (Value : Internal_Analysis_Unit) return Type_Index is
+     (Value : Internal_Rec_Analysis_Unit) return Type_Index is
    begin
       return Builtin_Types (Value).Analysis_Unit;
    end Type_Of;
@@ -67,7 +67,8 @@ package body Langkit_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_Analysis_Unit) return String is
+   overriding function Image (Value : Internal_Rec_Analysis_Unit) return String
+   is
    begin
       if Value.Value = No_Lk_Unit then
          return "<No analysis unit>";
@@ -80,7 +81,8 @@ package body Langkit_Support.Internal.Introspection is
    -- Type_Of --
    -------------
 
-   overriding function Type_Of (Value : Internal_Big_Int) return Type_Index is
+   overriding function Type_Of (Value : Internal_Rec_Big_Int) return Type_Index
+   is
    begin
       return Builtin_Types (Value).Big_Int;
    end Type_Of;
@@ -89,7 +91,8 @@ package body Langkit_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_Big_Int) return String is
+   overriding function Image (Value : Internal_Rec_Big_Int) return String
+   is
    begin
       return "BigInt(" & GNATCOLL.GMP.Integers.Image (Value.Value) & ")";
    end Image;
@@ -98,7 +101,8 @@ package body Langkit_Support.Internal.Introspection is
    -- Type_Of --
    -------------
 
-   overriding function Type_Of (Value : Internal_Bool) return Type_Index is
+   overriding function Type_Of (Value : Internal_Rec_Bool) return Type_Index
+   is
    begin
       return Builtin_Types (Value).Bool;
    end Type_Of;
@@ -107,7 +111,7 @@ package body Langkit_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_Bool) return String is
+   overriding function Image (Value : Internal_Rec_Bool) return String is
    begin
       return (if Value.Value then "True" else "False");
    end Image;
@@ -116,7 +120,8 @@ package body Langkit_Support.Internal.Introspection is
    -- Type_Of --
    -------------
 
-   overriding function Type_Of (Value : Internal_Char) return Type_Index is
+   overriding function Type_Of
+     (Value : Internal_Rec_Character) return Type_Index is
    begin
       return Builtin_Types (Value).Char;
    end Type_Of;
@@ -125,7 +130,7 @@ package body Langkit_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_Char) return String is
+   overriding function Image (Value : Internal_Rec_Character) return String is
    begin
       return "'" & Image (Text_Type'(1 => Value.Value)) & "'";
    end Image;
@@ -134,7 +139,7 @@ package body Langkit_Support.Internal.Introspection is
    -- Type_Of --
    -------------
 
-   overriding function Type_Of (Value : Internal_Int) return Type_Index is
+   overriding function Type_Of (Value : Internal_Rec_Int) return Type_Index is
    begin
       return Builtin_Types (Value).Int;
    end Type_Of;
@@ -143,7 +148,7 @@ package body Langkit_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_Int) return String is
+   overriding function Image (Value : Internal_Rec_Int) return String is
       Result : constant String := Value.Value'Image;
    begin
       return (if Result (Result'First) = ' '
@@ -156,7 +161,7 @@ package body Langkit_Support.Internal.Introspection is
    -------------
 
    overriding function Type_Of
-     (Value : Internal_Source_Location_Range) return Type_Index is
+     (Value : Internal_Rec_Source_Location_Range) return Type_Index is
    begin
       return Builtin_Types (Value).Source_Location_Range;
    end Type_Of;
@@ -166,7 +171,7 @@ package body Langkit_Support.Internal.Introspection is
    -----------
 
    overriding function Image
-     (Value : Internal_Source_Location_Range) return String is
+     (Value : Internal_Rec_Source_Location_Range) return String is
    begin
       return Image (Value.Value);
    end Image;
@@ -175,7 +180,8 @@ package body Langkit_Support.Internal.Introspection is
    -- Type_Of --
    -------------
 
-   overriding function Type_Of (Value : Internal_String) return Type_Index is
+   overriding function Type_Of (Value : Internal_Rec_String) return Type_Index
+   is
    begin
       return Builtin_Types (Value).String;
    end Type_Of;
@@ -184,7 +190,7 @@ package body Langkit_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_String) return String is
+   overriding function Image (Value : Internal_Rec_String) return String is
    begin
       return Image (To_Text (Value.Value), With_Quotes => True);
    end Image;
@@ -193,7 +199,8 @@ package body Langkit_Support.Internal.Introspection is
    -- Type_Of --
    -------------
 
-   overriding function Type_Of (Value : Internal_Token) return Type_Index is
+   overriding function Type_Of (Value : Internal_Rec_Token) return Type_Index
+   is
    begin
       return Builtin_Types (Value).Token;
    end Type_Of;
@@ -202,7 +209,7 @@ package body Langkit_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_Token) return String is
+   overriding function Image (Value : Internal_Rec_Token) return String is
    begin
       return Image (Value.Value);
    end Image;
@@ -211,7 +218,8 @@ package body Langkit_Support.Internal.Introspection is
    -- Type_Of --
    -------------
 
-   overriding function Type_Of (Value : Internal_Symbol) return Type_Index is
+   overriding function Type_Of (Value : Internal_Rec_Symbol) return Type_Index
+   is
    begin
       return Builtin_Types (Value).Symbol;
    end Type_Of;
@@ -220,7 +228,7 @@ package body Langkit_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_Symbol) return String is
+   overriding function Image (Value : Internal_Rec_Symbol) return String is
    begin
       return "Symbol(" & Image (To_Text (Value.Value), With_Quotes => True)
              & ")";
@@ -230,7 +238,7 @@ package body Langkit_Support.Internal.Introspection is
    -- Type_Of --
    -------------
 
-   overriding function Type_Of (Value : Internal_Node) return Type_Index is
+   overriding function Type_Of (Value : Internal_Rec_Node) return Type_Index is
       Desc : constant Language_Descriptor_Access := +Value.Id;
    begin
       if Value.Value = No_Lk_Node then
@@ -250,7 +258,7 @@ package body Langkit_Support.Internal.Introspection is
    ------------------
 
    overriding function Type_Matches
-     (Value : Internal_Node; T : Type_Index) return Boolean
+     (Value : Internal_Rec_Node; T : Type_Index) return Boolean
    is
       Expected_Type : constant Type_Ref := From_Index (Value.Id, T);
    begin
@@ -279,7 +287,7 @@ package body Langkit_Support.Internal.Introspection is
    -- Image --
    -----------
 
-   overriding function Image (Value : Internal_Node) return String is
+   overriding function Image (Value : Internal_Rec_Node) return String is
    begin
       if Value.Value = No_Lk_Node then
          return "<No node>";

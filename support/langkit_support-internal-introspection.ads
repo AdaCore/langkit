@@ -237,127 +237,130 @@ package Langkit_Support.Internal.Introspection is
    -- Analysis unit --
    -------------------
 
-   type Internal_Analysis_Unit is new Internal_Value with record
+   type Internal_Rec_Analysis_Unit is new Internal_Value with record
       Value : Lk_Unit;
    end record;
-   type Internal_Analysis_Unit_Access is access all Internal_Analysis_Unit;
+   type Internal_Acc_Analysis_Unit is access all Internal_Rec_Analysis_Unit;
 
    overriding function Type_Of
-     (Value : Internal_Analysis_Unit) return Type_Index;
-   overriding function Image (Value : Internal_Analysis_Unit) return String;
+     (Value : Internal_Rec_Analysis_Unit) return Type_Index;
+   overriding function Image
+     (Value : Internal_Rec_Analysis_Unit) return String;
 
    -----------------
    -- Big integer --
    -----------------
 
-   type Internal_Big_Int is new Internal_Value with record
+   type Internal_Rec_Big_Int is new Internal_Value with record
       Value : Big_Integer;
    end record;
-   type Internal_Big_Int_Access is access all Internal_Big_Int;
+   type Internal_Acc_Big_Int is access all Internal_Rec_Big_Int;
 
-   overriding function Type_Of (Value : Internal_Big_Int) return Type_Index;
-   overriding function Image (Value : Internal_Big_Int) return String;
+   overriding function Type_Of
+     (Value : Internal_Rec_Big_Int) return Type_Index;
+   overriding function Image (Value : Internal_Rec_Big_Int) return String;
 
    -------------
    -- Boolean --
    -------------
 
-   type Internal_Bool is new Internal_Value with record
+   type Internal_Rec_Bool is new Internal_Value with record
       Value : Boolean;
    end record;
-   type Internal_Bool_Access is access all Internal_Bool;
+   type Internal_Acc_Bool is access all Internal_Rec_Bool;
 
-   overriding function Type_Of (Value : Internal_Bool) return Type_Index;
-   overriding function Image (Value : Internal_Bool) return String;
+   overriding function Type_Of (Value : Internal_Rec_Bool) return Type_Index;
+   overriding function Image (Value : Internal_Rec_Bool) return String;
 
    ----------
    -- Char --
    ----------
 
-   type Internal_Char is new Internal_Value with record
+   type Internal_Rec_Character is new Internal_Value with record
       Value : Character_Type;
    end record;
-   type Internal_Char_Access is access all Internal_Char;
+   type Internal_Acc_Character is access all Internal_Rec_Character;
 
-   overriding function Type_Of (Value : Internal_Char) return Type_Index;
-   overriding function Image (Value : Internal_Char) return String;
+   overriding function Type_Of
+     (Value : Internal_Rec_Character) return Type_Index;
+   overriding function Image (Value : Internal_Rec_Character) return String;
 
    ---------
    -- Int --
    ---------
 
-   type Internal_Int is new Internal_Value with record
+   type Internal_Rec_Int is new Internal_Value with record
       Value : Integer;
    end record;
-   type Internal_Int_Access is access all Internal_Int;
+   type Internal_Acc_Int is access all Internal_Rec_Int;
 
-   overriding function Type_Of (Value : Internal_Int) return Type_Index;
-   overriding function Image (Value : Internal_Int) return String;
+   overriding function Type_Of (Value : Internal_Rec_Int) return Type_Index;
+   overriding function Image (Value : Internal_Rec_Int) return String;
 
    ---------------------------
    -- Source_Location_Range --
    ---------------------------
 
-   type Internal_Source_Location_Range is new Internal_Value with record
+   type Internal_Rec_Source_Location_Range is new Internal_Value with record
       Value : Source_Location_Range;
    end record;
-   type Internal_Source_Location_Range_Access is
-     access all Internal_Source_Location_Range;
+   type Internal_Acc_Source_Location_Range is
+     access all Internal_Rec_Source_Location_Range;
 
    overriding function Type_Of
-     (Value : Internal_Source_Location_Range) return Type_Index;
+     (Value : Internal_Rec_Source_Location_Range) return Type_Index;
    overriding function Image
-     (Value : Internal_Source_Location_Range) return String;
+     (Value : Internal_Rec_Source_Location_Range) return String;
 
    ------------
    -- String --
    ------------
 
-   type Internal_String is new Internal_Value with record
+   type Internal_Rec_String is new Internal_Value with record
       Value : Unbounded_Text_Type;
    end record;
-   type Internal_String_Access is access all Internal_String;
+   type Internal_Acc_String is access all Internal_Rec_String;
 
-   overriding function Type_Of (Value : Internal_String) return Type_Index;
-   overriding function Image (Value : Internal_String) return String;
+   overriding function Type_Of (Value : Internal_Rec_String) return Type_Index;
+   overriding function Image (Value : Internal_Rec_String) return String;
 
    -----------
    -- Token --
    -----------
 
-   type Internal_Token is new Internal_Value with record
+   type Internal_Rec_Token is new Internal_Value with record
       Value : Lk_Token;
    end record;
-   type Internal_Token_Access is access all Internal_Token;
+   type Internal_Acc_Token is access all Internal_Rec_Token;
 
-   overriding function Type_Of (Value : Internal_Token) return Type_Index;
-   overriding function Image (Value : Internal_Token) return String;
+   overriding function Type_Of (Value : Internal_Rec_Token) return Type_Index;
+   overriding function Image (Value : Internal_Rec_Token) return String;
 
    ------------
    -- Symbol --
    ------------
 
-   type Internal_Symbol is new Internal_Value with record
+   type Internal_Rec_Symbol is new Internal_Value with record
       Value : Unbounded_Text_Type;
    end record;
-   type Internal_Symbol_Access is access all Internal_Symbol;
+   type Internal_Acc_Symbol is access all Internal_Rec_Symbol;
 
-   overriding function Type_Of (Value : Internal_Symbol) return Type_Index;
-   overriding function Image (Value : Internal_Symbol) return String;
+   overriding function Type_Of (Value : Internal_Rec_Symbol) return Type_Index;
+   overriding function Image (Value : Internal_Rec_Symbol) return String;
 
    -----------
    -- Nodes --
    -----------
 
-   type Internal_Node is new Internal_Value with record
+   type Internal_Rec_Node is new Internal_Value with record
       Value : Lk_Node;
    end record;
-   type Internal_Node_Access is access all Internal_Node;
+   type Internal_Acc_Node is access all Internal_Rec_Node;
 
-   overriding function Type_Of (Value : Internal_Node) return Type_Index;
+   overriding function Type_Of (Value : Internal_Rec_Node) return Type_Index;
    overriding function Type_Matches
-     (Value : Internal_Node; T : Type_Index) return Boolean;
-   overriding function Image (Value : Internal_Node) return String;
+     (Value : Internal_Rec_Node; T : Type_Index) return Boolean;
+   overriding function Image (Value : Internal_Rec_Node) return String;
 
    function Unwrap_Node (Node : Lk_Node) return Internal_Entity
      with Import, External_Name => "lksp__unwrap_node";
