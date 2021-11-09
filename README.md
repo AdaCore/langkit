@@ -56,14 +56,21 @@ the `--library-types` argument.
 Testing
 -------
 
-First, make sure the langkit package is available from the Python interpreter
-(see Install).  Then, in order to run the testsuite, launch the following
-command from the top-level directory:
+Unlike the rest of Langkit, the testsuite framework requires Python 3.8 or
+later versions. Make sure the `langkit` package is available from the Python
+interpreter (see Install).  Then, in order to run the testsuite, launch the
+following command from the top-level directory:
 
     $ python manage.py test
 
 This is just a wrapper passing convenient options to the real testsuite
 driver that is in `testsuite/testsuite.py`.
+
+Note that even though the testsuite framework requires Python 3.8, it is
+possible to run the tests themselves using a different Python interpreter. For
+instance, to run them using Python 3.7, run:
+
+    $ python manage.py test --with-python=python3.7
 
 If you want to learn more about this test driver's options (for instance to run
 tests under Valgrind), add a `-h` flag.
