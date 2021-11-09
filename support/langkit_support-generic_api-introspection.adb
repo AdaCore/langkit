@@ -287,12 +287,12 @@ package body Langkit_Support.Generic_API.Introspection is
    -----------------
 
    function Create_Unit (Id : Language_Id; Value : Lk_Unit) return Value_Ref is
-      Result : Internal_Analysis_Unit_Access;
+      Result : Internal_Acc_Analysis_Unit;
    begin
       if Value /= No_Lk_Unit then
          Check_Same_Language (Id, Value.Language_For);
       end if;
-      Result := new Internal_Analysis_Unit;
+      Result := new Internal_Rec_Analysis_Unit;
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
    end Create_Unit;
@@ -302,12 +302,12 @@ package body Langkit_Support.Generic_API.Introspection is
    -------------
    function As_Unit (Value : Value_Ref) return Lk_Unit is
       Id : Language_Id;
-      V  : Internal_Analysis_Unit_Access;
+      V  : Internal_Acc_Analysis_Unit;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.Analysis_Unit);
-      V := Internal_Analysis_Unit_Access (Value.Value);
+      V := Internal_Acc_Analysis_Unit (Value.Value);
       return V.Value;
    end As_Unit;
 
@@ -318,7 +318,7 @@ package body Langkit_Support.Generic_API.Introspection is
    function Create_Big_Int
      (Id : Language_Id; Value : Big_Integer) return Value_Ref
    is
-      Result : constant Internal_Big_Int_Access := new Internal_Big_Int;
+      Result : constant Internal_Acc_Big_Int := new Internal_Rec_Big_Int;
    begin
       Result.Value.Set (Value);
       return Create_Value (Id, Internal_Value_Access (Result));
@@ -330,12 +330,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function As_Big_Int (Value : Value_Ref) return Big_Integer is
       Id : Language_Id;
-      V  : Internal_Big_Int_Access;
+      V  : Internal_Acc_Big_Int;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.Big_Int);
-      V := Internal_Big_Int_Access (Value.Value);
+      V := Internal_Acc_Big_Int (Value.Value);
       return Result : Big_Integer do
          Result.Set (V.Value);
       end return;
@@ -346,7 +346,7 @@ package body Langkit_Support.Generic_API.Introspection is
    -----------------
 
    function Create_Bool (Id : Language_Id; Value : Boolean) return Value_Ref is
-      Result : constant Internal_Bool_Access := new Internal_Bool;
+      Result : constant Internal_Acc_Bool := new Internal_Rec_Bool;
    begin
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
@@ -358,12 +358,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function As_Bool (Value : Value_Ref) return Boolean is
       Id : Language_Id;
-      V  : Internal_Bool_Access;
+      V  : Internal_Acc_Bool;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.Bool);
-      V := Internal_Bool_Access (Value.Value);
+      V := Internal_Acc_Bool (Value.Value);
       return V.Value;
    end As_Bool;
 
@@ -374,7 +374,7 @@ package body Langkit_Support.Generic_API.Introspection is
    function Create_Char
      (Id : Language_Id; Value : Character_Type) return Value_Ref
    is
-      Result : constant Internal_Char_Access := new Internal_Char;
+      Result : constant Internal_Acc_Character := new Internal_Rec_Character;
    begin
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
@@ -386,12 +386,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function As_Char (Value : Value_Ref) return Character_Type is
       Id : Language_Id;
-      V  : Internal_Char_Access;
+      V  : Internal_Acc_Character;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.Char);
-      V := Internal_Char_Access (Value.Value);
+      V := Internal_Acc_Character (Value.Value);
       return V.Value;
    end As_Char;
 
@@ -400,7 +400,7 @@ package body Langkit_Support.Generic_API.Introspection is
    ----------------
 
    function Create_Int (Id : Language_Id; Value : Integer) return Value_Ref is
-      Result : constant Internal_Int_Access := new Internal_Int;
+      Result : constant Internal_Acc_Int := new Internal_Rec_Int;
    begin
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
@@ -412,12 +412,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function As_Int (Value : Value_Ref) return Integer is
       Id : Language_Id;
-      V  : Internal_Int_Access;
+      V  : Internal_Acc_Int;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.Int);
-      V := Internal_Int_Access (Value.Value);
+      V := Internal_Acc_Int (Value.Value);
       return V.Value;
    end As_Int;
 
@@ -428,8 +428,8 @@ package body Langkit_Support.Generic_API.Introspection is
    function Create_Source_Location_Range
      (Id : Language_Id; Value : Source_Location_Range) return Value_Ref
    is
-      Result : constant Internal_Source_Location_Range_Access :=
-        new Internal_Source_Location_Range;
+      Result : constant Internal_Acc_Source_Location_Range :=
+        new Internal_Rec_Source_Location_Range;
    begin
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
@@ -443,12 +443,12 @@ package body Langkit_Support.Generic_API.Introspection is
      (Value : Value_Ref) return Source_Location_Range
    is
       Id : Language_Id;
-      V  : Internal_Source_Location_Range_Access;
+      V  : Internal_Acc_Source_Location_Range;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.Source_Location_Range);
-      V := Internal_Source_Location_Range_Access (Value.Value);
+      V := Internal_Acc_Source_Location_Range (Value.Value);
       return V.Value;
    end As_Source_Location_Range;
 
@@ -459,7 +459,7 @@ package body Langkit_Support.Generic_API.Introspection is
    function Create_String
      (Id : Language_Id; Value : Text_Type) return Value_Ref
    is
-      Result : constant Internal_String_Access := new Internal_String;
+      Result : constant Internal_Acc_String := new Internal_Rec_String;
    begin
       Result.Value := To_Unbounded_Text (Value);
       return Create_Value (Id, Internal_Value_Access (Result));
@@ -471,12 +471,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function As_String (Value : Value_Ref) return Text_Type is
       Id : Language_Id;
-      V  : Internal_String_Access;
+      V  : Internal_Acc_String;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.String);
-      V := Internal_String_Access (Value.Value);
+      V := Internal_Acc_String (Value.Value);
       return To_Text (V.Value);
    end As_String;
 
@@ -486,12 +486,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function Create_Token (Id : Language_Id; Value : Lk_Token) return Value_Ref
    is
-      Result : Internal_Token_Access;
+      Result : Internal_Acc_Token;
    begin
       if Value /= No_Lk_Token then
          Check_Same_Language (Id, Value.Language_For);
       end if;
-      Result := new Internal_Token;
+      Result := new Internal_Rec_Token;
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
    end Create_Token;
@@ -502,12 +502,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function As_Token (Value : Value_Ref) return Lk_Token is
       Id : Language_Id;
-      V  : Internal_Token_Access;
+      V  : Internal_Acc_Token;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.Token);
-      V := Internal_Token_Access (Value.Value);
+      V := Internal_Acc_Token (Value.Value);
       return V.Value;
    end As_Token;
 
@@ -518,7 +518,7 @@ package body Langkit_Support.Generic_API.Introspection is
    function Create_Symbol
      (Id : Language_Id; Value : Text_Type) return Value_Ref
    is
-      Result : constant Internal_Symbol_Access := new Internal_Symbol;
+      Result : constant Internal_Acc_Symbol := new Internal_Rec_Symbol;
    begin
       Result.Value := To_Unbounded_Text (Value);
       return Create_Value (Id, Internal_Value_Access (Result));
@@ -530,12 +530,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function As_Symbol (Value : Value_Ref) return Text_Type is
       Id : Language_Id;
-      V  : Internal_Symbol_Access;
+      V  : Internal_Acc_Symbol;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.Builtin_Types.Symbol);
-      V := Internal_Symbol_Access (Value.Value);
+      V := Internal_Acc_Symbol (Value.Value);
       return To_Text (V.Value);
    end As_Symbol;
 
@@ -544,12 +544,12 @@ package body Langkit_Support.Generic_API.Introspection is
    -----------------
 
    function Create_Node (Id : Language_Id; Value : Lk_Node) return Value_Ref is
-      Result : Internal_Node_Access;
+      Result : Internal_Acc_Node;
    begin
       if Value /= No_Lk_Node then
          Check_Same_Language (Id, Value.Language_For);
       end if;
-      Result := new Internal_Node;
+      Result := new Internal_Rec_Node;
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
    end Create_Node;
@@ -560,12 +560,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function As_Node (Value : Value_Ref) return Lk_Node is
       Id : Language_Id;
-      V  : Internal_Node_Access;
+      V  : Internal_Acc_Node;
    begin
       Check_Value (Value);
       Id := Value.Value.Id;
       Check_Value_Type (Value, Id.First_Node);
-      V := Internal_Node_Access (Value.Value);
+      V := Internal_Acc_Node (Value.Value);
       return V.Value;
    end As_Node;
 

@@ -4,8 +4,9 @@ from typing import List, Optional
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, CompiledType, EnumType
+    ASTNodeType, AbstractNodeData, ArrayType, CompiledType, EnumType
 )
+import langkit.names as names
 
 
 class GenericAPI:
@@ -34,7 +35,11 @@ class GenericAPI:
         if isinstance(t, ASTNodeType):
             t = t.entity
 
-        return t.api_name.camel_with_underscores
+        return (
+            f"{self.type_name(t.element_type)}_Array"
+            if isinstance(t, ArrayType)
+            else names.Name.from_camel(t.type_repo_name).camel_with_underscores
+        )
 
     def type_index(self, t: Optional[CompiledType]) -> str:
         """
@@ -88,16 +93,26 @@ class GenericAPI:
         """
         return f"Member_Index_For_{self.member_name(m)}"
 
+    def internal_value_typename(self, t: CompiledType) -> str:
+        """
+        Return the name to use for internal value types for ``t``.
+        """
+        return (
+            "Node"
+            if t.is_ast_node or t.is_entity_type
+            else self.type_name(t)
+        )
+
     def internal_value_type(self, t: CompiledType) -> str:
         """
         Return the name of the
         ``Langkit_Support.Internal.Introspection.Internal_Value`` derivation
         used to represent ``t``.
         """
-        return f"Internal_Rec_{self.type_name(t)}"
+        return f"Internal_Rec_{self.internal_value_typename(t)}"
 
     def internal_value_access(self, t: CompiledType) -> str:
         """
         Like ``internal_value_type``, but return the access type instead.
         """
-        return f"Internal_Acc_{self.type_name(t)}"
+        return f"Internal_Acc_{self.internal_value_typename(t)}"
