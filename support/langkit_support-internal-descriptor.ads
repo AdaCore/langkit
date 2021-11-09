@@ -68,6 +68,8 @@ package Langkit_Support.Internal.Descriptor is
       Reparse           : Boolean;
       Rule              : Grammar_Rule_Index) return Internal_Unit;
 
+   type Unit_Context_Type is access function
+     (Unit : Internal_Unit) return Internal_Context;
    type Unit_Version_Type is access function
      (Unit : Internal_Unit) return Version_Number;
    type Unit_Filename_Type is access function
@@ -84,6 +86,8 @@ package Langkit_Support.Internal.Descriptor is
    type Node_Metadata_Dec_Ref_Type is access procedure
      (Metadata : in out Internal_Node_Metadata);
 
+   type Node_Unit_Type is access function
+     (Node : Analysis.Internal_Node) return Internal_Unit;
    type Node_Kind_Type is access function
      (Node : Analysis.Internal_Node) return Type_Index;
    type Node_Parent_Type is access function
@@ -156,6 +160,7 @@ package Langkit_Support.Internal.Descriptor is
       Context_Get_From_File : Context_Get_From_File_Type;
       Context_Has_Unit      : Context_Has_Unit_Type;
 
+      Unit_Context     : Unit_Context_Type;
       Unit_Version     : Unit_Version_Type;
       Unit_Filename    : Unit_Filename_Type;
       Unit_Root        : Unit_Root_Type;
@@ -166,6 +171,7 @@ package Langkit_Support.Internal.Descriptor is
       Node_Metadata_Inc_Ref : Node_Metadata_Inc_Ref_Type;
       Node_Metadata_Dec_Ref : Node_Metadata_Dec_Ref_Type;
 
+      Node_Unit           : Node_Unit_Type;
       Node_Kind           : Node_Kind_Type;
       Node_Parent         : Node_Parent_Type;
       Node_Children_Count : Node_Children_Count_Type;

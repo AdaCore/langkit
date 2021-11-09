@@ -44,6 +44,8 @@ private package ${ada_lib_name}.Generic_Impl is
 
    function "+"
      (Entity : Internal_Entity) return Implementation.${root_entity.name};
+   function "+"
+     (Entity : Implementation.${root_entity.name}) return Internal_Entity;
 
    function "+" (Rule : Grammar_Rule_Index) return Common.Grammar_Rule
    is (Common.Grammar_Rule'Val (Rule - 1));
@@ -106,6 +108,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Reparse           : Boolean;
       Rule              : Grammar_Rule_Index) return Internal_Unit;
 
+   function Unit_Context (Unit : Internal_Unit) return Internal_Context;
    function Unit_Version (Unit : Internal_Unit) return Version_Number;
    function Unit_Filename (Unit : Internal_Unit) return String;
    function Unit_Root (Unit : Internal_Unit) return Internal_Node;
@@ -123,10 +126,13 @@ private package ${ada_lib_name}.Generic_Impl is
 
    function "+" is new Ada.Unchecked_Conversion
      (Internal_Node_Metadata, Internal_Node_Metadata_Access);
+   function "+" is new Ada.Unchecked_Conversion
+     (Internal_Node_Metadata_Access, Internal_Node_Metadata);
 
    procedure Node_Metadata_Inc_Ref (Metadata : Internal_Node_Metadata);
    procedure Node_Metadata_Dec_Ref (Metadata : in out Internal_Node_Metadata);
 
+   function Node_Unit (Node : Internal_Node) return Internal_Unit;
    function Node_Kind (Node : Internal_Node) return Type_Index;
    function Node_Parent (Node : Internal_Node) return Internal_Node;
    function Node_Children_Count (Node : Internal_Node) return Natural;
@@ -177,6 +183,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Context_Has_Unit      => Context_Has_Unit'Access,
       Context_Get_From_File => Context_Get_From_File'Access,
 
+      Unit_Context     => Unit_Context'Access,
       Unit_Version     => Unit_Version'Access,
       Unit_Filename    => Unit_Filename'Access,
       Unit_Root        => Unit_Root'Access,
@@ -187,6 +194,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Node_Metadata_Inc_Ref => Node_Metadata_Inc_Ref'Access,
       Node_Metadata_Dec_Ref => Node_Metadata_Dec_Ref'Access,
 
+      Node_Unit           => Node_Unit'Access,
       Node_Kind           => Node_Kind'Access,
       Node_Parent         => Node_Parent'Access,
       Node_Children_Count => Node_Children_Count'Access,

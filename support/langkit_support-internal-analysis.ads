@@ -101,6 +101,14 @@ package Langkit_Support.Internal.Analysis is
    No_Node_Safety_Net : constant Node_Safety_Net :=
      (No_Internal_Context, 0, No_Internal_Unit, 0, 0);
 
+   function Create_Node_Safety_Net
+     (Id         : Language_Id;
+      Context    : Internal_Context;
+      Unit       : Internal_Unit;
+      Rebindings : Env_Rebindings) return Node_Safety_Net;
+   --  Return the safety net for a node given its owning context and unit, and
+   --  its rebindings.
+
    type Token_Safety_Net is record
       Context         : Internal_Context;
       Context_Version : Version_Number;

@@ -21,32 +21,31 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
---  This package provides common implementation details for Langkit-generated
---  libraries. Even though it is not private (to allow Langkit-generated
---  libraries to use it), it is not meant to be used beyond this. As such, this
---  API is considered unsafe and unstable.
+with Langkit_Support.Internal.Descriptor;
+use Langkit_Support.Internal.Descriptor;
 
-with Langkit_Support.Generic_API.Analysis;
-use Langkit_Support.Generic_API.Analysis;
-with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
+package body Langkit_Support.Internal.Analysis is
 
-package Langkit_Support.Internal.Conversions is
+   ----------------------------
+   -- Create_Node_Safety_Net --
+   ----------------------------
 
-   --  Conversions between public and internal types.
-   --
-   --  These converters need visibility over the implementation details of the
-   --  public types (for instance components of Lk_Node), but we do not want to
-   --  expose them in the Langkit_Support.Generic_API package tree: publish
-   --  here declarations as proxies to the implementations in
-   --  Langkit_Support.Generic_API bodies.
+   function Create_Node_Safety_Net
+     (Id         : Language_Id;
+      Context    : Internal_Context;
+      Unit       : Internal_Unit;
+      Rebindings : Env_Rebindings) return Node_Safety_Net
+   is
+      Desc : constant Language_Descriptor_Access := +Id;
+   begin
+      return
+        (Context            => Context,
+         Context_Version    => Desc.Context_Version (Context),
+         Unit               => Unit,
+         Unit_Version       => Desc.Unit_Version (Unit),
+         Rebindings_Version => (if Rebindings = null
+                                then 0
+                                else Rebindings.Version));
+   end Create_Node_Safety_Net;
 
-   --  Converters for nodes/entities.  See the corresponding export declaration
-   --  in Langkit_Support.Generic_API.Analysis.
-
-   function Wrap_Node
-     (Id : Language_Id; Node : Internal_Entity) return Lk_Node
-     with Import, External_Name => "lksp__wrap_node";
-   function Unwrap_Node (Node : Lk_Node) return Internal_Entity
-      with Import, External_Name => "lksp__unwrap_node";
-
-end Langkit_Support.Internal.Conversions;
+end Langkit_Support.Internal.Analysis;
