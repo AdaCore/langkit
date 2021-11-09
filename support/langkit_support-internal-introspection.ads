@@ -27,8 +27,7 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
-with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
-with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 
 --  This package provides common implementation details for Langkit-generated
 --  libraries. Even though it is not private (to allow Langkit-generated
@@ -361,11 +360,6 @@ package Langkit_Support.Internal.Introspection is
    overriding function Type_Matches
      (Value : Internal_Rec_Node; T : Type_Index) return Boolean;
    overriding function Image (Value : Internal_Rec_Node) return String;
-
-   function Unwrap_Node (Node : Lk_Node) return Internal_Entity
-     with Import, External_Name => "lksp__unwrap_node";
-   --  See the corresponding export declaration in
-   --  Langkit_Support.Generic_API.Analysis.
 
    ------------------------------------------------------
    -- Abstract derivations for language-specific types --

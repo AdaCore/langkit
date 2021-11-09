@@ -24,8 +24,10 @@
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-with Langkit_Support.Errors; use Langkit_Support.Errors;
-with Langkit_Support.Internal.Analysis;
+with Langkit_Support.Errors;            use Langkit_Support.Errors;
+with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Internal.Conversions;
+use Langkit_Support.Internal.Conversions;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Internal.Introspection;
