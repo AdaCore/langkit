@@ -34,6 +34,10 @@ with Langkit_Support.Types;        use Langkit_Support.Types;
 
 package body Langkit_Support.Generic_API.Analysis is
 
+   function Unwrap_Node (Node : Lk_Node) return Internal_Entity
+     with Export, External_Name => "lksp__unwrap_node";
+   --  Public/private converters for nodes
+
    function Create_Node_Safety_Net
      (Unit       : Lk_Unit'Class;
       Rebindings : Env_Rebindings) return Node_Safety_Net;

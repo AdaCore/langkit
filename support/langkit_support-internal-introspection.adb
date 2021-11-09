@@ -21,6 +21,9 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
+with Langkit_Support.Internal.Conversions;
+use Langkit_Support.Internal.Conversions;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 

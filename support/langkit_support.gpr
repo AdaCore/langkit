@@ -50,6 +50,7 @@ library project Langkit_Support is
       "Langkit_Support.Images",
       "Langkit_Support.Internal",
       "Langkit_Support.Internal.Analysis",
+      "Langkit_Support.Internal.Conversions",
       "Langkit_Support.Internal.Descriptor",
       "Langkit_Support.Internal.Introspection",
       "Langkit_Support.Iterators",
