@@ -4,9 +4,7 @@ with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 
 package ${ada_lib_name}.Generic_API is
 
-   <% id_const_name = f"{ctx.lang_name}_Lang_Id" %>
-
-   ${id_const_name} : constant Language_Id
+   ${ctx.lang_name}_Lang_Id : constant Language_Id
      with Import, External_Name => "${ada_lib_name}__language_id";
    --  Unique identifier for ${ada_lib_name}
 
