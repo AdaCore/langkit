@@ -125,6 +125,8 @@ procedure Introspection_Values is
    Value    : Value_Ref;
 
    Int_Type, Bool_Type : Type_Ref;
+   False_Bool          : constant Value_Ref := Create_Bool (Id, False);
+   True_Bool           : constant Value_Ref := Create_Bool (Id, True);
 
 begin
    --  Look for the first enum type and build an enum value ref for it
@@ -136,6 +138,31 @@ begin
       end if;
    end loop;
    Enum_Val := From_Index (Enum, 1);
+
+   Put_Title ("Value comparisons");
+
+   declare
+      type Operands is record
+         Left, Right : Value_Ref;
+      end record;
+
+      Checks : constant array (Positive range <>) of Operands :=
+        ((No_Value_Ref, No_Value_Ref),
+         (No_Value_Ref, False_Bool),
+         (False_Bool, Create_Bool (Id, False)),
+         (True_Bool, False_Bool),
+         (False_Bool, Create_Int (Id, 1)));
+   begin
+      for C of Checks loop
+         declare
+            Equal : constant Boolean := C.Left = C.Right;
+         begin
+            Put_Line (Image (C.Left) & " = " & Image (C.Right)
+                      & " => " & Equal'Image);
+         end;
+      end loop;
+   end;
+   New_Line;
 
    Put_Title ("Value constructors/getters");
 

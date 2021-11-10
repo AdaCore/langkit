@@ -133,6 +133,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       end record;
       type ${G.internal_value_access(t)} is access all ${vt};
 
+      overriding function "=" (Left, Right : ${vt}) return Boolean;
       overriding function Type_Of (Value : ${vt}) return Type_Index;
       overriding function Image (Value : ${vt}) return String;
       overriding function Value_Index (Value : ${vt}) return Enum_Value_Index;

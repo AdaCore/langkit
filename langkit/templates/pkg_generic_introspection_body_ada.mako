@@ -8,6 +8,15 @@ package body ${ada_lib_name}.Generic_Introspection is
 
       <% vt = G.internal_value_type(t) %>
 
+      ---------
+      -- "=" --
+      ---------
+
+      overriding function "=" (Left, Right : ${vt}) return Boolean is
+      begin
+         return Left.Value = Right.Value;
+      end "=";
+
       -------------
       -- Type_Of --
       -------------

@@ -56,6 +56,16 @@ package body Langkit_Support.Internal.Introspection is
       return Internal_Value'Class (Value).Type_Of = T;
    end Type_Matches;
 
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "="
+     (Left, Right : Internal_Rec_Analysis_Unit) return Boolean is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
+
    -------------
    -- Type_Of --
    -------------
@@ -80,6 +90,16 @@ package body Langkit_Support.Internal.Introspection is
       end if;
    end Image;
 
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "=" (Left, Right : Internal_Rec_Big_Int) return Boolean
+   is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
+
    -------------
    -- Type_Of --
    -------------
@@ -100,6 +120,15 @@ package body Langkit_Support.Internal.Introspection is
       return "BigInt(" & GNATCOLL.GMP.Integers.Image (Value.Value) & ")";
    end Image;
 
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "=" (Left, Right : Internal_Rec_Bool) return Boolean is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
+
    -------------
    -- Type_Of --
    -------------
@@ -119,6 +148,16 @@ package body Langkit_Support.Internal.Introspection is
       return (if Value.Value then "True" else "False");
    end Image;
 
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "="
+     (Left, Right : Internal_Rec_Character) return Boolean is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
+
    -------------
    -- Type_Of --
    -------------
@@ -137,6 +176,15 @@ package body Langkit_Support.Internal.Introspection is
    begin
       return "'" & Image (Text_Type'(1 => Value.Value)) & "'";
    end Image;
+
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "=" (Left, Right : Internal_Rec_Int) return Boolean is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
 
    -------------
    -- Type_Of --
@@ -159,6 +207,16 @@ package body Langkit_Support.Internal.Introspection is
               else Result);
    end Image;
 
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "="
+     (Left, Right : Internal_Rec_Source_Location_Range) return Boolean is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
+
    -------------
    -- Type_Of --
    -------------
@@ -179,6 +237,16 @@ package body Langkit_Support.Internal.Introspection is
       return Image (Value.Value);
    end Image;
 
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "=" (Left, Right : Internal_Rec_String) return Boolean
+   is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
+
    -------------
    -- Type_Of --
    -------------
@@ -197,6 +265,14 @@ package body Langkit_Support.Internal.Introspection is
    begin
       return Image (To_Text (Value.Value), With_Quotes => True);
    end Image;
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "=" (Left, Right : Internal_Rec_Token) return Boolean is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
 
    -------------
    -- Type_Of --
@@ -217,6 +293,16 @@ package body Langkit_Support.Internal.Introspection is
       return Image (Value.Value);
    end Image;
 
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "=" (Left, Right : Internal_Rec_Symbol) return Boolean
+   is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
+
    -------------
    -- Type_Of --
    -------------
@@ -236,6 +322,15 @@ package body Langkit_Support.Internal.Introspection is
       return "Symbol(" & Image (To_Text (Value.Value), With_Quotes => True)
              & ")";
    end Image;
+
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "=" (Left, Right : Internal_Rec_Node) return Boolean is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
 
    -------------
    -- Type_Of --

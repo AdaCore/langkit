@@ -89,6 +89,9 @@ package Langkit_Support.Generic_API.Introspection is
    No_Value_Ref : constant Value_Ref;
    --  Special constant to express no value reference
 
+   function "=" (Left, Right : Value_Ref) return Boolean;
+   --  Return whether ``Left`` and ``Right`` are structurally equivalent
+
    function Language_For (Value : Value_Ref) return Language_Id;
    --  Return the language ID corresponding to the given value. Raise a
    --  ``Precondition_Failure`` exception if ``Value`` is ``No_Value_Ref``.

@@ -182,6 +182,8 @@ package Langkit_Support.Internal.Introspection is
       --  Language for this value
    end record;
 
+   function "=" (Left, Right : Internal_Value) return Boolean is abstract;
+
    procedure Destroy (Value : in out Internal_Value) is null;
    --  Free resources allocated for this value. Derivations can omit the
    --  overriding if there is nothing to free manually.
@@ -241,6 +243,8 @@ package Langkit_Support.Internal.Introspection is
    end record;
    type Internal_Acc_Analysis_Unit is access all Internal_Rec_Analysis_Unit;
 
+   overriding function "="
+     (Left, Right : Internal_Rec_Analysis_Unit) return Boolean;
    overriding function Type_Of
      (Value : Internal_Rec_Analysis_Unit) return Type_Index;
    overriding function Image
@@ -255,6 +259,7 @@ package Langkit_Support.Internal.Introspection is
    end record;
    type Internal_Acc_Big_Int is access all Internal_Rec_Big_Int;
 
+   overriding function "=" (Left, Right : Internal_Rec_Big_Int) return Boolean;
    overriding function Type_Of
      (Value : Internal_Rec_Big_Int) return Type_Index;
    overriding function Image (Value : Internal_Rec_Big_Int) return String;
@@ -268,6 +273,7 @@ package Langkit_Support.Internal.Introspection is
    end record;
    type Internal_Acc_Bool is access all Internal_Rec_Bool;
 
+   overriding function "=" (Left, Right : Internal_Rec_Bool) return Boolean;
    overriding function Type_Of (Value : Internal_Rec_Bool) return Type_Index;
    overriding function Image (Value : Internal_Rec_Bool) return String;
 
@@ -280,6 +286,8 @@ package Langkit_Support.Internal.Introspection is
    end record;
    type Internal_Acc_Character is access all Internal_Rec_Character;
 
+   overriding function "="
+     (Left, Right : Internal_Rec_Character) return Boolean;
    overriding function Type_Of
      (Value : Internal_Rec_Character) return Type_Index;
    overriding function Image (Value : Internal_Rec_Character) return String;
@@ -293,6 +301,7 @@ package Langkit_Support.Internal.Introspection is
    end record;
    type Internal_Acc_Int is access all Internal_Rec_Int;
 
+   overriding function "=" (Left, Right : Internal_Rec_Int) return Boolean;
    overriding function Type_Of (Value : Internal_Rec_Int) return Type_Index;
    overriding function Image (Value : Internal_Rec_Int) return String;
 
@@ -306,6 +315,8 @@ package Langkit_Support.Internal.Introspection is
    type Internal_Acc_Source_Location_Range is
      access all Internal_Rec_Source_Location_Range;
 
+   overriding function "="
+     (Left, Right : Internal_Rec_Source_Location_Range) return Boolean;
    overriding function Type_Of
      (Value : Internal_Rec_Source_Location_Range) return Type_Index;
    overriding function Image
@@ -320,6 +331,7 @@ package Langkit_Support.Internal.Introspection is
    end record;
    type Internal_Acc_String is access all Internal_Rec_String;
 
+   overriding function "=" (Left, Right : Internal_Rec_String) return Boolean;
    overriding function Type_Of (Value : Internal_Rec_String) return Type_Index;
    overriding function Image (Value : Internal_Rec_String) return String;
 
@@ -332,6 +344,7 @@ package Langkit_Support.Internal.Introspection is
    end record;
    type Internal_Acc_Token is access all Internal_Rec_Token;
 
+   overriding function "=" (Left, Right : Internal_Rec_Token) return Boolean;
    overriding function Type_Of (Value : Internal_Rec_Token) return Type_Index;
    overriding function Image (Value : Internal_Rec_Token) return String;
 
@@ -344,6 +357,7 @@ package Langkit_Support.Internal.Introspection is
    end record;
    type Internal_Acc_Symbol is access all Internal_Rec_Symbol;
 
+   overriding function "=" (Left, Right : Internal_Rec_Symbol) return Boolean;
    overriding function Type_Of (Value : Internal_Rec_Symbol) return Type_Index;
    overriding function Image (Value : Internal_Rec_Symbol) return String;
 
@@ -356,6 +370,7 @@ package Langkit_Support.Internal.Introspection is
    end record;
    type Internal_Acc_Node is access all Internal_Rec_Node;
 
+   overriding function "=" (Left, Right : Internal_Rec_Node) return Boolean;
    overriding function Type_Of (Value : Internal_Rec_Node) return Type_Index;
    overriding function Type_Matches
      (Value : Internal_Rec_Node; T : Type_Index) return Boolean;
