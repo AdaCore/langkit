@@ -743,6 +743,15 @@ Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct m
 Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
 
 == introspection_values.adb ==
+Value comparisons
+=================
+
+<No_Value_Ref> = <No_Value_Ref> => TRUE
+<No_Value_Ref> = False => FALSE
+False = False => TRUE
+True = False => FALSE
+False = 1 => FALSE
+
 Value constructors/getters
 ==========================
 
@@ -774,6 +783,9 @@ Inspect: <No node>
   Type_Of: FooNode.entity
 Inspect: <FooNodeList example.txt:1:1-2:15>
   Type_Of: FooNode.list.entity
+
+Enum values introspection
+=========================
 
 Create_Enum: null enum value ref: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null enum value reference
 Inspect: Analysis_Unit_Kind(UNIT_SPECIFICATION)

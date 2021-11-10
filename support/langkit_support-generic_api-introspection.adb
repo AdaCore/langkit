@@ -21,6 +21,7 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Tags; use Ada.Tags;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
@@ -223,6 +224,33 @@ package body Langkit_Support.Generic_API.Introspection is
          raise Precondition_Failure with "unexpected value type";
       end if;
    end Check_Value_Type;
+
+   ---------
+   -- "=" --
+   ---------
+
+   function "=" (Left, Right : Value_Ref) return Boolean is
+   begin
+      --  Easy case: Left and Right are not only structurally equivalent, but
+      --  have shallow equality.
+
+      if Left.Value = Right.Value then
+         return True;
+
+      --  We cannot dereference both values without preliminary checks because
+      --  it is legal to get null values. Also make sure we have values of the
+      --  same type (the comparison would raise a Constraint_Error otherwise).
+
+      elsif Left.Value = null
+            or else Right.Value = null
+            or else Left.Value.all'Tag /= Right.Value.all'Tag
+      then
+         return False;
+
+      else
+         return Left.Value.all = Right.Value.all;
+      end if;
+   end "=";
 
    ------------------
    -- Language_For --
