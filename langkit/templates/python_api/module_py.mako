@@ -1503,7 +1503,7 @@ class ${root_astnode_name}:
         if isinstance(ast_type_or_pred, type):
             sought_type = ast_type_or_pred
             pred = lambda node: isinstance(node, sought_type)
-        elif isinstance(ast_type_or_pred, collections.Sequence):
+        elif isinstance(ast_type_or_pred, collections.abc.Sequence):
             sought_types = ast_type_or_pred
             pred = lambda node: isinstance(node, tuple(sought_types))
         else:
