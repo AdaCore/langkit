@@ -3,6 +3,13 @@
 <%def name="public_api_decl(cls)">
    type ${cls.api_name} is
       array (Positive range <>) of ${cls.element_type.api_name};
+
+   ## It seems that arrays of limited types do not automatically get an
+   ## equality operator even when the limited type itself does have one, so we
+   ## need to roll our own.
+   % if cls.element_type.is_big_integer_type:
+      function "=" (Left, Right : ${cls.api_name}) return Boolean;
+   % endif
 </%def>
 
 <%def name="public_api_private_decl(cls)">
@@ -72,6 +79,29 @@
          end loop;
          return Result;
       end;
+   % endif
+</%def>
+
+<%def name="public_body(cls)">
+   % if cls.element_type.is_big_integer_type:
+      ---------
+      -- "=" --
+      ---------
+
+      function "=" (Left, Right : ${cls.api_name}) return Boolean is
+         use GNATCOLL.GMP.Integers;
+      begin
+         if Left'Length /= Right'Length then
+            return False;
+         end if;
+
+         for I in 0 .. Left'Length - 1 loop
+            if Left (Left'First + I) /= Right (Right'First + I) then
+               return False;
+            end if;
+         end loop;
+         return True;
+      end "=";
    % endif
 </%def>
 
