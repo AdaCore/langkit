@@ -75,10 +75,45 @@ Expr <ParenExpr test.lkt:4:27-4:55>
 Expr <RaiseExpr test.lkt:4:21-4:55>
      has type <EnumTypeDecl prelude: "Bool">
 
+test.lkt:8:23: error: `PropertyError` can only be referenced in a raise expression
+8 | @invalid fun prop5(): PropertyError = raise PropertyError()
+  |                       ^^^^^^^^^^^^^
+
+Id   <RefId "PropertyError" test.lkt:8:23-8:36>
+     references <StructDecl prelude: "PropertyError">
+
+Id   <RefId "PropertyError" test.lkt:8:45-8:58>
+     references <StructDecl prelude: "PropertyError">
+
+Expr <CallExpr test.lkt:8:45-8:60>
+     has type <StructDecl prelude: "PropertyError">
+
+Expr <RaiseExpr test.lkt:8:39-8:60>
+     has type <StructDecl prelude: "PropertyError">
+
+Id   <RefId "Bool" test.lkt:9:23-9:27>
+     references <EnumTypeDecl prelude: "Bool">
+
+test.lkt:9:36: error: cannot raise `prop5`, only `PropertyError` can be raised
+9 | @invalid fun prop6(): Bool = raise prop5()
+  |                                    ^^^^^^^
+
+Id   <RefId "prop5" test.lkt:9:36-9:41>
+     references <FunDecl "prop5" test.lkt:8:10-8:60>
+
+Expr <RefId "prop5" test.lkt:9:36-9:41>
+     has type <FunctionType prelude: "() -> PropertyError">
+
+Expr <CallExpr test.lkt:9:36-9:43>
+     has type <StructDecl prelude: "PropertyError">
+
+Expr <RaiseExpr test.lkt:9:30-9:43>
+     has type <EnumTypeDecl prelude: "Bool">
+
 Id   <RefId "Bool" test.lkt:12:21-12:25>
      references <EnumTypeDecl prelude: "Bool">
 
-test.lkt:12:28: error: cannot call PropertyError outside of a raise expression
+test.lkt:12:28: error: cannot call `PropertyError` outside of a raise expression
 12 | @invalid val prop7: Bool = PropertyError("error")
    |                            ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -95,7 +130,7 @@ test.lkt:12:28: error: Mismatched types: expected `Bool`, got `PropertyError`
 Id   <RefId "Bool" test.lkt:13:21-13:25>
      references <EnumTypeDecl prelude: "Bool">
 
-test.lkt:13:29: error: cannot call PropertyError outside of a raise expression
+test.lkt:13:29: error: cannot call `PropertyError` outside of a raise expression
 13 | @invalid val prop8: Bool = (PropertyError("error"))
    |                             ^^^^^^^^^^^^^^^^^^^^^^
 
