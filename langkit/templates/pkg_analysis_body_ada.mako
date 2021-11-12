@@ -15,6 +15,9 @@ with Ada.Strings.Unbounded.Aux; use Ada.Strings.Unbounded.Aux;
 pragma Warnings (On, "is an internal GNAT unit");
 with Ada.Unchecked_Conversion;
 
+% if any(a.element_type.is_big_integer_type for a in ctx.array_types):
+   with GNATCOLL.GMP.Integers;
+% endif
 with GNATCOLL.Traces;
 
 pragma Warnings (Off, "referenced");
@@ -47,6 +50,7 @@ package body ${ada_lib_name}.Analysis is
 
    % for array_type in ctx.array_types:
       ${array_types.ada_api_converters_decl(array_type)}
+      ${array_types.public_body(array_type)}
    % endfor
 
    % for iterator_type in ctx.iterator_types:
