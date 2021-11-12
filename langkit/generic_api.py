@@ -4,7 +4,8 @@ from typing import List, Optional
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, ArrayType, CompiledType, EnumType
+    ASTNodeType, AbstractNodeData, ArrayType, CompiledType, EnumType,
+    StructType
 )
 import langkit.names as names
 
@@ -26,6 +27,24 @@ class GenericAPI:
         Return the list of enum types for this context.
         """
         return self.context.enum_types
+
+    @property
+    def array_types(self) -> List[ArrayType]:
+        """
+        Return the list of public array types for this context.
+        """
+        return [t for t in self.context.array_types if t.exposed]
+
+    @property
+    def struct_types(self) -> List[StructType]:
+        """
+        Return the list of public struct types for this context.
+
+        Note that this omit entity types, as they get a very different handling
+        in code generation.
+        """
+        return [t for t in self.context.struct_types
+                if t.exposed and not t.is_entity_type]
 
     def type_name(self, t: CompiledType) -> str:
         """
@@ -116,3 +135,9 @@ class GenericAPI:
         Like ``internal_value_type``, but return the access type instead.
         """
         return f"Internal_Acc_{self.internal_value_typename(t)}"
+
+    def array_access_type(self, t: ArrayType) -> str:
+        """
+        Return the name of the access type used to store ``t`` values.
+        """
+        return f"Internal_Stored_{self.internal_value_typename(t)}"

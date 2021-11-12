@@ -206,6 +206,9 @@ package Langkit_Support.Internal.Introspection is
 
    type Internal_Value_Access is access all Internal_Value'Class;
 
+   type Internal_Value_Array is
+     array (Positive range <>) of Internal_Value_Access;
+
    --------------------------------------------
    -- Implementations for some builtin types --
    --------------------------------------------
@@ -389,5 +392,28 @@ package Langkit_Support.Internal.Introspection is
    function Value_Index
      (Value : Base_Internal_Enum_Value) return Enum_Value_Index is abstract;
    --  Return the index of the given enum value
+
+   type Base_Internal_Array_Value is abstract new Internal_Value
+     with null record;
+
+   type Base_Internal_Array_Value_Access is
+     access all Base_Internal_Array_Value'Class;
+
+   overriding function Image (Value : Base_Internal_Array_Value) return String;
+
+   function Array_Length (Value : Base_Internal_Array_Value) return Natural
+   is abstract;
+   --  Return the number of items in the ``Value`` array
+
+   type Base_Internal_Struct_Value is abstract new Internal_Value
+     with null record;
+
+   type Base_Internal_Struct_Value_Access is
+     access all Base_Internal_Struct_Value'Class;
+
+   overriding function "="
+     (Left, Right : Base_Internal_Struct_Value) return Boolean;
+   overriding function Image
+     (Value : Base_Internal_Struct_Value) return String;
 
 end Langkit_Support.Internal.Introspection;

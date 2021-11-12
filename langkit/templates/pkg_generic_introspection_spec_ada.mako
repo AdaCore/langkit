@@ -1,12 +1,15 @@
 ## vim: filetype=makoada
 
+with Ada.Unchecked_Deallocation;
+
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal.Introspection;
 use Langkit_Support.Internal.Introspection;
 with Langkit_Support.Text; use Langkit_Support.Text;
 
-with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
 --  This package provides description tables to enable the generic
 --  introspection API in Langkit_Support to work with this Langkit-generated
@@ -19,19 +22,12 @@ private package ${ada_lib_name}.Generic_Introspection is
 
       # Expose through the introspection API...
 
-      # All exposed array types
-      array_types = [t for t in ctx.array_types if t.exposed]
-
-      # All exposed struct types (except entities for now: see below)
-      struct_types = [t for t in ctx.struct_types
-                      if t.exposed and not t.is_entity_type]
-
       # Include all entity types (including abstract ones), in hierarchical
       # order.
       node_types = ctx.astnode_types
       entity_types = [t.entity for t in node_types]
 
-      all_types = G.enum_types + array_types + struct_types + entity_types
+      all_types = G.enum_types + G.array_types + G.struct_types + entity_types
 
       # Fetch all exposed types that are not listed above (builtin types)
       other_types = [t for t in T.all_types
@@ -152,12 +148,51 @@ private package ${ada_lib_name}.Generic_Introspection is
       array_type_descs = [
          f"{G.type_index(t)}"
          f" => (Element_Type => {G.type_index(t.element_type)})"
-         for t in array_types
+         for t in G.array_types
       ]
    %>
    Array_Types : aliased constant Array_Type_Descriptor_Array := (
       ${",\n".join(array_type_descs)}
    );
+
+   -------------------------------------
+   -- Introspection values for arrays --
+   -------------------------------------
+
+   % for t in G.array_types:
+      <%
+         vt = G.internal_value_type(t)
+         at = G.array_access_type(t)
+      %>
+
+      type ${at} is access all ${t.api_name};
+      procedure Free is new Ada.Unchecked_Deallocation (${t.api_name}, ${at});
+
+      type ${vt} is new Base_Internal_Array_Value with record
+         Value : ${at};
+      end record;
+      type ${G.internal_value_access(t)} is access all ${vt};
+
+      overriding function "=" (Left, Right : ${vt}) return Boolean;
+      overriding procedure Destroy (Value : in out ${vt});
+      overriding function Type_Of (Value : ${vt}) return Type_Index;
+      overriding function Array_Length (Value : ${vt}) return Natural;
+   % endfor
+
+   --------------------------------------
+   -- Introspection values for structs --
+   --------------------------------------
+
+   % for t in G.struct_types:
+      <% vt = G.internal_value_type(t) %>
+
+      type ${vt} is new Base_Internal_Struct_Value with record
+         Value : ${t.api_name};
+      end record;
+      type ${G.internal_value_access(t)} is access all ${vt};
+
+      overriding function Type_Of (Value : ${vt}) return Type_Index;
+   % endfor
 
    -------------------------------
    -- Struct member descriptors --
@@ -213,7 +248,7 @@ private package ${ada_lib_name}.Generic_Introspection is
    -----------------------------
 
    <% struct_type_descs = [] %>
-   % for t in struct_types + node_types:
+   % for t in G.struct_types + node_types:
       <%
          if t.is_ast_node:
             name = t.kwless_raw_name
