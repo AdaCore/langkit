@@ -2285,8 +2285,17 @@ class SimpleTypeRef(TypeRef):
 
         return d.result_ref.then(
             lambda d: d.match(
-                # The type ref references a type decl: return no error
-                lambda _=T.TypeDecl: No(T.SemanticResult.array),
+                # The type ref references a type decl: return no error if it
+                # doesn't references a PropertyError.
+                lambda td=T.TypeDecl: If(
+                    td == Entity.property_error_type,
+                    [Entity.error(
+                        S("`").concat(Entity.property_error_type.full_name)
+                        .concat(S("` can only be referenced"))
+                        .concat(S(" in a raise expression"))
+                    )],
+                    No(T.SemanticResult.array)
+                ),
 
                 # Not a type decl: return an error that the type reference is
                 # invalid.
@@ -2582,19 +2591,33 @@ class CallExpr(Expr):
                     )
                 )
             )
-            # In case of PropertyError, check for RaiseExpr
+            # In case of PropertyError, check that this call is the operand of
+            # a raise expression and this is a call to the PropertyError
+            # constructor.
             ._or(
                 If(
-                    And(
-                        rd.result_ref == Entity.property_error_type,
-                        Not(Entity.first_no_paren_parent.is_a(T.RaiseExpr))
-                    ),
+                    Entity.expr_context_free_type
+                    == Entity.property_error_type,
 
-                    Self.error(
-                        S("cannot call ")
-                        .concat(Entity.property_error_type.full_name)
-                        .concat(S(" outside of a raise expression"))
-                    ).singleton,
+                    Cond(
+                        Not(Entity.first_no_paren_parent.is_a(T.RaiseExpr)),
+                        Self.error(
+                            S("cannot call `")
+                            .concat(Entity.property_error_type.full_name)
+                            .concat(S("` outside of a raise expression"))
+                        ).singleton,
+
+                        Entity.called_decl != Entity.property_error_type,
+                        Self.error(
+                            S("cannot raise `")
+                            .concat(Entity.called_decl.full_name)
+                            .concat(S("`, only `"))
+                            .concat(Entity.property_error_type.full_name)
+                            .concat(S("` can be raised"))
+                        ).singleton,
+
+                        No(T.SemanticResult.array)
+                    ),
 
                     No(T.SemanticResult.array)
                 )

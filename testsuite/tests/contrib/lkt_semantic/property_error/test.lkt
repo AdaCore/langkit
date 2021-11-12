@@ -3,10 +3,10 @@ fun prop2(): Bool = (raise PropertyError("error"))
 fun prop3(): Bool = raise (PropertyError("error"))
 fun prop4(): Bool = raise (((PropertyError("error"))))
 
-# TODO: prop5 and prop6 should be rejected (we don't want any PropertyError
+# prop5 and prop6 should be rejected (we don't want any PropertyError
 # value living outside of the exception system).
-# @invalid fun prop5(): PropertyError = raise PropertyError()
-# @invalid fun prop6(): Bool = raise prop5()
+@invalid fun prop5(): PropertyError = raise PropertyError()
+@invalid fun prop6(): Bool = raise prop5()
 
 # Invalid because of missing raise keyword
 @invalid val prop7: Bool = PropertyError("error")
