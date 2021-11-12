@@ -52,16 +52,18 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
          ${quantifier.expr.render_pre()}
 
          ## Depending on the kind of the quantifier, we want to abort as soon
-         ## as the predicate holds or as soon as it does not hold.
+         ## as the predicate holds or as soon as it does not hold. To exit the
+         ## loop, go to the exit label, so that scope finalizers are called
+         ## before actually leaving the loop.
          % if quantifier.kind == ANY:
             if ${quantifier.expr.render_expr()} then
                ${result_var} := True;
-               exit;
+               goto ${quantifier.exit_label};
             end if;
          % else:
             if not (${quantifier.expr.render_expr()}) then
                ${result_var} := False;
-               exit;
+               goto ${quantifier.exit_label};
             end if;
          % endif
 
@@ -69,7 +71,17 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
             ${quantifier.index_var.name} := ${quantifier.index_var.name} + 1;
          % endif
 
+         <<${quantifier.exit_label}>> null;
          ${scopes.finalize_scope(quantifier.iter_scope)}
+
+         ## If we decided after this iteration to exit the loop, we can do it
+         ## now that the iteration scope it finalized.
+         exit when
+            % if quantifier.kind == ALL:
+               not
+            % endif
+            ${result_var}
+         ;
       end loop;
    end;
 </%def>
