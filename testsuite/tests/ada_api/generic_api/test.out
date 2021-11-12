@@ -139,6 +139,10 @@ All types
   is an array
 * FooNode.entity.array
   is an array
+* Expr.entity.array
+  is an array
+* AnalysisUnit.array
+  is an array
 * NodeResult
   is a struct
 * Point
@@ -231,6 +235,12 @@ Array of BigInt
 FooNode.entity.array
 Array of FooNode.entity
 
+Expr.entity.array
+Array of Expr.entity
+
+AnalysisUnit.array
+Array of AnalysisUnit
+
 Is_Array_Type: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 
 Invalid args for Array_Element_Type:
@@ -253,72 +263,72 @@ Non-struct Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid
 Nodes
 =====
 
-Foo_Node ( 18)
+Foo_Node ( 20)
   is abstract
   base = Bad_Type_Error: trying to get base type of root node
-  last derivation = Var_Decl ( 27)
+  last derivation = Var_Decl ( 29)
   derivations:
-    Example ( 19)
-    Expr ( 20)
-    Foo_Node_Base_List ( 24)
-    Name ( 26)
-    Var_Decl ( 27)
+    Example ( 21)
+    Expr ( 22)
+    Foo_Node_Base_List ( 26)
+    Name ( 28)
+    Var_Decl ( 29)
 
-Example ( 19)
-  base = Foo_Node ( 18)
-  last derivation = Example ( 19)
+Example ( 21)
+  base = Foo_Node ( 20)
+  last derivation = Example ( 21)
   derivations:
     <none>
 
-Expr ( 20)
+Expr ( 22)
   is abstract
-  base = Foo_Node ( 18)
-  last derivation = Ref ( 23)
+  base = Foo_Node ( 20)
+  last derivation = Ref ( 25)
   derivations:
-    Addition ( 21)
-    Number ( 22)
-    Ref ( 23)
+    Addition ( 23)
+    Number ( 24)
+    Ref ( 25)
 
-Addition ( 21)
-  base = Expr ( 20)
-  last derivation = Addition ( 21)
-  derivations:
-    <none>
-
-Number ( 22)
-  base = Expr ( 20)
-  last derivation = Number ( 22)
+Addition ( 23)
+  base = Expr ( 22)
+  last derivation = Addition ( 23)
   derivations:
     <none>
 
-Ref ( 23)
-  base = Expr ( 20)
-  last derivation = Ref ( 23)
+Number ( 24)
+  base = Expr ( 22)
+  last derivation = Number ( 24)
   derivations:
     <none>
 
-Foo_Node_Base_List ( 24)
+Ref ( 25)
+  base = Expr ( 22)
+  last derivation = Ref ( 25)
+  derivations:
+    <none>
+
+Foo_Node_Base_List ( 26)
   is abstract
-  base = Foo_Node ( 18)
-  last derivation = Foo_Node_List ( 25)
+  base = Foo_Node ( 20)
+  last derivation = Foo_Node_List ( 27)
   derivations:
-    Foo_Node_List ( 25)
+    Foo_Node_List ( 27)
 
-Foo_Node_List ( 25)
-  base = Foo_Node_Base_List ( 24)
-  last derivation = Foo_Node_List ( 25)
-  derivations:
-    <none>
-
-Name ( 26)
-  base = Foo_Node ( 18)
-  last derivation = Name ( 26)
+Foo_Node_List ( 27)
+  base = Foo_Node_Base_List ( 26)
+  last derivation = Foo_Node_List ( 27)
   derivations:
     <none>
 
-Var_Decl ( 27)
-  base = Foo_Node ( 18)
-  last derivation = Var_Decl ( 27)
+Name ( 28)
+  base = Foo_Node ( 20)
+  last derivation = Name ( 28)
+  derivations:
+    <none>
+
+Var_Decl ( 29)
+  base = Foo_Node ( 20)
+  last derivation = Var_Decl ( 29)
   derivations:
     <none>
 
@@ -407,11 +417,13 @@ For Example
   Example_P_Id_Name ( 30)
   Example_P_Id_Unit_Kind ( 31)
   Example_P_Id_Node_Array ( 32)
-  Example_P_Id_Bigint_Array ( 33)
-  Example_P_Id_Dflt_Bool ( 34)
-  Example_P_Id_Dflt_Int ( 35)
-  Example_P_Id_Dflt_Char ( 36)
-  Example_P_Id_Dflt_Root_Node ( 37)
+  Example_P_Id_Expr_Array ( 33)
+  Example_P_Id_Bigint_Array ( 34)
+  Example_P_Id_Unit_Array ( 35)
+  Example_P_Id_Dflt_Bool ( 36)
+  Example_P_Id_Dflt_Int ( 37)
+  Example_P_Id_Dflt_Char ( 38)
+  Example_P_Id_Dflt_Root_Node ( 39)
 
 For Expr
   Parent ( 9)
@@ -690,31 +702,43 @@ Example_P_Id_Node_Array ( 32)
   arguments:
     Id: FooNode.entity.array
 
-Example_P_Id_Bigint_Array ( 33)
+Example_P_Id_Expr_Array ( 33)
+  is a property
+  type: Expr.entity.array
+  arguments:
+    Id: Expr.entity.array
+
+Example_P_Id_Bigint_Array ( 34)
   is a property
   type: BigInt.array
   arguments:
     Id: BigInt.array
 
-Example_P_Id_Dflt_Bool ( 34)
+Example_P_Id_Unit_Array ( 35)
+  is a property
+  type: AnalysisUnit.array
+  arguments:
+    Id: AnalysisUnit.array
+
+Example_P_Id_Dflt_Bool ( 36)
   is a property
   type: Bool
   arguments:
     Id: Bool
 
-Example_P_Id_Dflt_Int ( 35)
+Example_P_Id_Dflt_Int ( 37)
   is a property
   type: Int
   arguments:
     Id: Int
 
-Example_P_Id_Dflt_Char ( 36)
+Example_P_Id_Dflt_Char ( 38)
   is a property
   type: Character
   arguments:
     Id: Character
 
-Example_P_Id_Dflt_Root_Node ( 37)
+Example_P_Id_Dflt_Root_Node ( 39)
   is a property
   type: FooNode.entity
   arguments:
@@ -790,6 +814,31 @@ Enum values introspection
 Create_Enum: null enum value ref: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null enum value reference
 Inspect: Analysis_Unit_Kind(UNIT_SPECIFICATION)
   Type_Of: AnalysisUnitKind
+
+Array values introspection
+==========================
+
+Create_Array: null array type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+Create_Array: null value reference: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
+Create_Array: value type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: unexpected value type
+Inspect: Array of 0 FooNode.entity elements
+  Type_Of: FooNode.entity.array
+Inspect: Array of 1 FooNode.entity elements
+  Type_Of: FooNode.entity.array
+As_Array: null value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
+As_Array: value type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: non-array value
+Array_Length: null value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
+Array_Length: value type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: non-array value
+Array_Item: null value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
+Array_Item: value type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: non-array value
+
+Array_Item: index checks
+  array: Array of 3 BigInt elements
+  ( 1): BigInt(10)
+  ( 2): BigInt(20)
+  ( 3): BigInt(30)
+  ( 4): LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: out-of-bounds array index
+  ( 5): LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: out-of-bounds array index
 
 Type matching
 =============

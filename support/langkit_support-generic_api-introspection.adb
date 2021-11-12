@@ -51,6 +51,9 @@ package body Langkit_Support.Generic_API.Introspection is
    function "+" is new Ada.Unchecked_Conversion
      (Langkit_Support.Internal.Introspection.Internal_Value_Access,
       Langkit_Support.Generic_API.Introspection.Internal_Value_Access);
+   function "+" is new Ada.Unchecked_Conversion
+     (Langkit_Support.Generic_API.Introspection.Internal_Value_Access,
+      Langkit_Support.Internal.Introspection.Internal_Value_Access);
 
    procedure Check_Same_Language (Left, Right : Language_Id);
    --  Raise a ``Precondition_Failure`` exception if ``Left`` and ``Right`` are
@@ -836,6 +839,79 @@ package body Langkit_Support.Generic_API.Introspection is
       Check_Array_Type (T);
       return From_Index (T.Id, T.Id.Array_Types.all (T.Index).Element_Type);
    end Array_Element_Type;
+
+   ------------------
+   -- Create_Array --
+   ------------------
+
+   function Create_Array
+     (T : Type_Ref; Values : Value_Ref_Array) return Value_Ref
+   is
+      ET              : constant Type_Index :=
+        To_Index (Array_Element_Type (T));
+      Internal_Values : Internal_Value_Array (Values'Range);
+   begin
+      Check_Array_Type (T);
+
+      for I in Values'Range loop
+         declare
+            V : constant Value_Ref := Values (I);
+         begin
+            Check_Value (V);
+            Check_Same_Language (T.Id, V.Language_For);
+            Check_Value_Type (V, ET);
+            Internal_Values (I) := +V.Value;
+         end;
+      end loop;
+
+      return Create_Value
+        (T.Id, +T.Id.Create_Array (To_Index (T), Internal_Values));
+   end Create_Array;
+
+   --------------
+   -- As_Array --
+   --------------
+
+   function As_Array (Value : Value_Ref) return Value_Ref_Array is
+   begin
+      return Result : Value_Ref_Array (1 .. Array_Length (Value)) do
+         for I in Result'Range loop
+            Result (I) := Array_Item (Value, I);
+         end loop;
+      end return;
+   end As_Array;
+
+   ------------------
+   -- Array_Length --
+   ------------------
+
+   function Array_Length (Value : Value_Ref) return Natural is
+      T : Type_Ref;
+      V : Base_Internal_Array_Value_Access;
+   begin
+      Check_Value (Value);
+      T := Value.Type_Of;
+      if not Is_Array_Type (T) then
+         raise Precondition_Failure with "non-array value";
+      end if;
+      V := Base_Internal_Array_Value_Access (Value.Value);
+      return V.Array_Length;
+   end Array_Length;
+
+   ----------------
+   -- Array_Item --
+   ----------------
+
+   function Array_Item (Value : Value_Ref; Index : Positive) return Value_Ref
+   is
+      V : Base_Internal_Array_Value_Access;
+   begin
+      if Index > Array_Length (Value) then
+         raise Precondition_Failure with "out-of-bounds array index";
+      end if;
+      V := Base_Internal_Array_Value_Access (Value.Value);
+      return Create_Value (V.Id, +V.Array_Item (Index));
+   end Array_Item;
 
    -------------------------
    -- Is_Base_Struct_Type --

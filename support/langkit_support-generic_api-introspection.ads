@@ -89,6 +89,8 @@ package Langkit_Support.Generic_API.Introspection is
    No_Value_Ref : constant Value_Ref;
    --  Special constant to express no value reference
 
+   type Value_Ref_Array is array (Positive range <>) of Value_Ref;
+
    function "=" (Left, Right : Value_Ref) return Boolean;
    --  Return whether ``Left`` and ``Right`` are structurally equivalent
 
@@ -233,6 +235,34 @@ package Langkit_Support.Generic_API.Introspection is
 
    function Array_Element_Type (T : Type_Ref) return Type_Ref;
    --  Return the type of elements in ``T`` arrays
+
+   function Create_Array
+     (T : Type_Ref; Values : Value_Ref_Array) return Value_Ref;
+   --  Create an array of the given ``T`` type, with the given ``Values``.
+   --  Raise a ``Precondition_Failure`` if any of the following is true:
+   --
+   --  * ``T`` is null;
+   --  * ``Values`` contains a null value reference;
+   --  * ``Values`` contains a value that does not match ``T``'s element type;
+   --  * one ``Values`` item does not belong to the same language as ``T``.
+
+   function As_Array (Value : Value_Ref) return Value_Ref_Array;
+   --  Return values for all items in the ``Value`` array. Raise a
+   --  ``Precondition_Failure`` if ``Value`` is null or if it does not
+   --  reference an array.
+
+   function Array_Length (Value : Value_Ref) return Natural;
+   --  Return the length of the given ``Value`` array. Raise a
+   --  ``Precondition_Failure`` if ``Value`` is null or if it does not
+   --  reference an array.
+
+   function Array_Item (Value : Value_Ref; Index : Positive) return Value_Ref;
+   --  Return the item at the given ``Index`` in the ``Value`` array. Raise a
+   --  ``Precondition_Failure`` if any of the following is true:
+   --
+   --  * ``Value`` is null;
+   --  * it does not reference an array;
+   --  * ``Index`` is out of bounds for this array value.
 
    -----------------------
    -- Struct/node types --

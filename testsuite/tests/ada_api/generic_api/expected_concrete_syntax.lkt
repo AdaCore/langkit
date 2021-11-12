@@ -45,7 +45,12 @@ class Example : FooNode {
 
     @export fun id_node_array(id: Array[FooNode]): Array[FooNode] = id
 
+    @export fun id_expr_array(id: Array[Expr]): Array[Expr] = id
+
     @export fun id_bigint_array(id: Array[BigInt]): Array[BigInt] = id
+
+    @export fun id_unit_array(id: Array[AnalysisUnit[FooNode]]): Array[AnalysisUnit[FooNode]] =
+    id
 
     @export fun id_dflt_bool(id: Bool = true): Bool = id
 

@@ -405,6 +405,12 @@ package Langkit_Support.Internal.Introspection is
    is abstract;
    --  Return the number of items in the ``Value`` array
 
+   function Array_Item
+     (Value : Base_Internal_Array_Value;
+      Index : Positive) return Internal_Value_Access is abstract;
+   --  Return the array item in ``Value`` at the given ``Index``. The index is
+   --  assumed to be in-bounds.
+
    type Base_Internal_Struct_Value is abstract new Internal_Value
      with null record;
 

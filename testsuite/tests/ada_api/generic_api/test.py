@@ -62,7 +62,9 @@ class Example(FooNode):
 
     # Test for arrays
     id_node_array = Property(lambda id=T.FooNode.entity.array: id, public=True)
+    id_expr_array = Property(lambda id=T.Expr.entity.array: id, public=True)
     id_bigint_array = Property(lambda id=T.BigInt.array: id, public=True)
+    id_unit_array = Property(lambda id=T.AnalysisUnit.array: id, public=True)
 
     # Test for default values
     id_dflt_bool = Property(lambda id=(T.Bool, True): id, public=True)

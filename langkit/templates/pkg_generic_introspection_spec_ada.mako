@@ -2,11 +2,16 @@
 
 with Ada.Unchecked_Deallocation;
 
+with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
+pragma Warnings (Off, "referenced");
+with Langkit_Support.Generic_API.Analysis;
+use Langkit_Support.Generic_API.Analysis;
+pragma Warnings (On, "referenced");
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal.Introspection;
 use Langkit_Support.Internal.Introspection;
-with Langkit_Support.Text; use Langkit_Support.Text;
+with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
@@ -177,7 +182,17 @@ private package ${ada_lib_name}.Generic_Introspection is
       overriding procedure Destroy (Value : in out ${vt});
       overriding function Type_Of (Value : ${vt}) return Type_Index;
       overriding function Array_Length (Value : ${vt}) return Natural;
+      overriding function Array_Item
+        (Value : ${vt}; Index : Positive) return Internal_Value_Access;
+
+      function Create_Array
+        (Values : Internal_Value_Array) return ${G.internal_value_access(t)};
    % endfor
+
+   function Create_Array
+     (Array_Type : Type_Index;
+      Values     : Internal_Value_Array) return Internal_Value_Access;
+   --  Implementation of the Create_Array operation in the language descriptor
 
    --------------------------------------
    -- Introspection values for structs --
@@ -329,5 +344,38 @@ private package ${ada_lib_name}.Generic_Introspection is
                   for n in ctx.astnode_types
                   if not n.abstract)});
    --  Associate a type index to each concrete node
+
+   -----------------------------------------------------
+   --  Getter/setter helpers for introspection values --
+   -----------------------------------------------------
+
+   --  These helpers factorize common code needed in array/struct generic
+   --  access/construction operations.
+
+   procedure Set_Unit
+     (Intr_Value   : ${G.internal_value_access(T.AnalysisUnit)};
+      Actual_Value : ${T.AnalysisUnit.api_name};
+      Id           : Language_Id);
+
+   function Get_Unit
+     (Intr_Value : ${G.internal_value_type(T.AnalysisUnit)})
+      return ${T.AnalysisUnit.api_name};
+
+   procedure Set_Big_Int
+     (Intr_Value   : ${G.internal_value_access(T.BigInt)};
+      Actual_Value : ${T.BigInt.api_name});
+
+   procedure Get_Big_Int
+     (Intr_Value   : ${G.internal_value_type(T.BigInt)};
+      Actual_Value : out ${T.BigInt.api_name});
+
+   procedure Set_Node
+     (Intr_Value   : ${G.internal_value_access(T.entity)};
+      Actual_Value : ${T.entity.api_name}'Class;
+      Id           : Language_Id);
+
+   function Get_Node
+     (Intr_Value : ${G.internal_value_type(T.entity)})
+      return ${T.entity.api_name};
 
 end ${ada_lib_name}.Generic_Introspection;
