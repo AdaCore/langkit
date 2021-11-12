@@ -394,4 +394,48 @@ package body Langkit_Support.Internal.Introspection is
       end if;
    end Image;
 
+   -----------
+   -- Image --
+   -----------
+
+   overriding function Image (Value : Base_Internal_Array_Value) return String
+   is
+      V : Base_Internal_Array_Value'Class renames
+        Base_Internal_Array_Value'Class (Value);
+      T : constant Type_Ref := From_Index (V.Id, V.Type_Of);
+   begin
+      return "Array of" & V.Array_Length'Image & " "
+             & Debug_Name (Array_Element_Type (T)) & " elements";
+   end Image;
+
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "="
+     (Left, Right : Base_Internal_Struct_Value) return Boolean
+   is
+      pragma Unreferenced (Left, Right);
+   begin
+      --  TODO??? Implement once structs are fully implemented
+
+      return False;
+   end "=";
+
+   -----------
+   -- Image --
+   -----------
+
+   overriding function Image
+     (Value : Base_Internal_Struct_Value) return String
+   is
+      V : Base_Internal_Struct_Value'Class renames
+        Base_Internal_Struct_Value'Class (Value);
+      T : constant Type_Ref := From_Index (V.Id, V.Type_Of);
+   begin
+      --  TODO??? Complete once structs are fully implemented
+
+      return Debug_Name (T);
+   end Image;
+
 end Langkit_Support.Internal.Introspection;
