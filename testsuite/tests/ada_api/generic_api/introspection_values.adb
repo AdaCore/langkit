@@ -120,22 +120,33 @@ procedure Introspection_Values is
    U   : constant Lk_Unit := Ctx.Get_From_File ("example.txt");
    N   : constant Lk_Node := U.Root;
 
-   Enum     : Type_Ref;
+   Enum     : Type_Ref := No_Type_Ref;
    Enum_Val : Enum_Value_Ref;
    Value    : Value_Ref;
+
+   Array_Of_Node, Array_Of_Bigint : Type_Ref;
 
    Int_Type, Bool_Type : Type_Ref;
    False_Bool          : constant Value_Ref := Create_Bool (Id, False);
    True_Bool           : constant Value_Ref := Create_Bool (Id, True);
 
 begin
-   --  Look for the first enum type and build an enum value ref for it
+   --  Look for the first enum type (Enum) and build an enum value ref for it
+   --  (Enum_Val). Also initialize Array_Of_Node and Array_Of_Bigint.
 
-   for T in 1 .. Last_Type (Id) loop
-      Enum := From_Index (Id, T);
-      if Is_Enum_Type (Enum) then
-         exit;
-      end if;
+   for TI in 1 .. Last_Type (Id) loop
+      declare
+         T  : constant Type_Ref := From_Index (Id, TI);
+         DN : constant String := Debug_Name (T);
+      begin
+         if DN = "BigInt.array" then
+            Array_Of_Bigint := T;
+         elsif DN = "FooNode.entity.array" then
+            Array_Of_Node := T;
+         elsif Is_Enum_Type (T) and then Enum = No_Type_Ref then
+            Enum := T;
+         end if;
+      end;
    end loop;
    Enum_Val := From_Index (Enum, 1);
 
@@ -278,7 +289,148 @@ begin
    if As_Enum (Value) /= Enum_Val then
       raise Program_Error;
    end if;
+   New_Line;
 
+   Put_Title ("Array values introspection");
+
+   Put ("Create_Array: null array type: ");
+   begin
+      Value := Create_Array (No_Type_Ref, (1 .. 0 => <>));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Create_Array: null value reference: ");
+   begin
+      Value := Create_Array (Array_Of_Node, (1 => No_Value_Ref));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Create_Array: value type mismatch: ");
+   begin
+      Value := Create_Array (Array_Of_Node, (1 => True_Bool));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Value := Create_Array (Array_Of_Node, (1 .. 0 => <>));
+   Inspect (Value);
+   if Array_Length (Value) /= 0
+      or else As_Array (Value)'Length /= 0
+   then
+      raise Program_Error;
+   end if;
+
+   declare
+      N : constant Value_Ref := Create_Node (Id, No_Lk_Node);
+   begin
+      Value := Create_Array (Array_Of_Node, (1 => N));
+      Inspect (Value);
+      if Array_Length (Value) /= 1
+         or else As_Array (Value)'Length /= 1
+         or else Array_Item (Value, 1) /= N
+      then
+         raise Program_Error;
+      end if;
+   end;
+
+   Put ("As_Array: null value: ");
+   declare
+      Dummy : Integer;
+   begin
+      Dummy := As_Array (No_Value_Ref)'Length;
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("As_Array: value type mismatch: ");
+   declare
+      Dummy : Integer;
+   begin
+      Dummy := As_Array (True_Bool)'Length;
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Array_Length: null value: ");
+   declare
+      Dummy : Integer;
+   begin
+      Dummy := Array_Length (No_Value_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Array_Length: value type mismatch: ");
+   declare
+      Dummy : Integer;
+   begin
+      Dummy := Array_Length (True_Bool);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Array_Item: null value: ");
+   begin
+      Value := Array_Item (No_Value_Ref, 1);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Array_Item: value type mismatch: ");
+   begin
+      Value := Array_Item (True_Bool, 1);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Array_Item: index checks");
+   declare
+      I1 : constant Value_Ref := Create_Big_Int (Id, Make ("10"));
+      I2 : constant Value_Ref := Create_Big_Int (Id, Make ("20"));
+      I3 : constant Value_Ref := Create_Big_Int (Id, Make ("30"));
+      A  : constant Value_Ref :=
+        Create_Array (Array_Of_Bigint, (I1, I2, I3));
+
+      Item    : Value_Ref;
+      Success : Boolean;
+   begin
+      Put_Line ("  array: " & Image (A));
+      for I in 1 .. 5 loop
+         Put ("  (" & I'Image & "): ");
+         begin
+            Item := Array_Item (A, I);
+            Success := True;
+         exception
+            when Exc : Precondition_Failure =>
+               Put_Exc (Exc);
+               Success := False;
+         end;
+         if Success then
+            Put_Line (Image (Item));
+         end if;
+      end loop;
+   end;
    New_Line;
 
    Put_Title ("Type matching");

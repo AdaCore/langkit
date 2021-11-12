@@ -111,6 +111,9 @@ package Langkit_Support.Internal.Descriptor is
    type Create_Enum_Type is access function
      (Enum_Type   : Type_Index;
       Value_Index : Enum_Value_Index) return Internal_Value_Access;
+   type Create_Array_Type is access function
+     (Array_Type : Type_Index;
+      Values     : Internal_Value_Array) return Internal_Value_Access;
 
    type Language_Descriptor is limited record
       Language_Name : Text_Access;
@@ -184,7 +187,8 @@ package Langkit_Support.Internal.Descriptor is
 
       --  Operations to build/inspect generic data types
 
-      Create_Enum : Create_Enum_Type;
+      Create_Enum  : Create_Enum_Type;
+      Create_Array : Create_Array_Type;
    end record;
 
    function "+" is new Ada.Unchecked_Conversion

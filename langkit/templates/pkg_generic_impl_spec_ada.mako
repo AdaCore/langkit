@@ -205,6 +205,7 @@ private package ${ada_lib_name}.Generic_Impl is
 
       Entity_Image => Entity_Image'Access,
 
-      Create_Enum => Create_Enum'Access);
+      Create_Enum  => Create_Enum'Access,
+      Create_Array => Create_Array'Access);
 
 end ${ada_lib_name}.Generic_Impl;
