@@ -40,6 +40,15 @@ package Langkit_Support.Internal.Conversions is
    --  here declarations as proxies to the implementations in
    --  Langkit_Support.Generic_API bodies.
 
+   --  Converters for analysis units.  See the corresponding export declaration
+   --  in Langkit_Support.Generic_API.Analysis.
+
+   function Wrap_Unit
+     (Id : Language_Id; Unit : Internal_Unit) return Lk_Unit
+     with Import, External_Name => "lksp__wrap_unit";
+   function Unwrap_Unit (Unit : Lk_Unit) return Internal_Unit
+      with Import, External_Name => "lksp__unwrap_unit";
+
    --  Converters for nodes/entities.  See the corresponding export declaration
    --  in Langkit_Support.Generic_API.Analysis.
 
