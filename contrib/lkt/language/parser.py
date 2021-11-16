@@ -87,7 +87,7 @@ class SemanticResult(Struct):
 
     TODO: Turn this into a real variant record when we have variants.
     """
-    node = UserField(T.LKNode, default_value=No(T.LKNode))
+    node = UserField(T.LktNode, default_value=No(T.LktNode))
 
     result_type = UserField(
         T.TypeDecl.entity, default_value=No(T.TypeDecl.entity)
@@ -117,7 +117,7 @@ class EnvKV(Struct):
     Utility struct that represents a key value pair in a lexical environment.
     """
     key = UserField(T.Symbol)
-    value = UserField(T.LKNode)
+    value = UserField(T.LktNode)
 
 
 class ParamMatch(Struct):
@@ -130,7 +130,7 @@ class ParamMatch(Struct):
 
 
 @abstract
-class LKNode(ASTNode):
+class LktNode(ASTNode):
     """
     Root node class for lkt AST nodes.
     """
@@ -339,7 +339,7 @@ class LKNode(ASTNode):
 
     @langkit_property(return_type=T.TreeSemanticResult)
     def check_sem_internal(
-        exempted_nodes=(T.LKNode.array, No(T.LKNode.array))
+        exempted_nodes=(T.LktNode.array, No(T.LktNode.array))
     ):
         """
         Internal recursive visitor for check_semantic pass.
@@ -459,7 +459,7 @@ class LKNode(ASTNode):
             has_error=results.any(lambda r: r.has_error)
         )
 
-    @langkit_property(return_type=T.LKNode.entity)
+    @langkit_property(return_type=T.LktNode.entity)
     def first_no_paren_parent():
         """
         Return the first parent that is not a ``ParenExpr``.
@@ -482,7 +482,7 @@ class LKNode(ASTNode):
         ).at(-1)
 
 
-class LangkitRoot(LKNode):
+class LangkitRoot(LktNode):
     """
     For the moment, root node of a lkt compilation unit.
     """
@@ -538,7 +538,7 @@ class LangkitRoot(LKNode):
     env_spec = EnvSpec(do(Self.fetch_prelude))
 
 
-class Import(LKNode):
+class Import(LktNode):
     """
     Statement to import another source file.
     """
@@ -565,7 +565,7 @@ class Import(LKNode):
     )
 
 
-class FullDecl(LKNode):
+class FullDecl(LktNode):
     """
     Container for an lkt declaration. Contains the decl node plus the
     documentation and annotations.
@@ -592,7 +592,7 @@ class FullDecl(LKNode):
 
 
 @abstract
-class Decl(LKNode):
+class Decl(LktNode):
     """
     Base class for declarations. Encompasses regular declarations as well as
     special declarations such as grammars, grammar rules, etc.
@@ -684,7 +684,7 @@ class Decl(LKNode):
 
 
 @abstract
-class Expr(LKNode):
+class Expr(LktNode):
     """
     Base class for expressions. Encompasses regular expressions as well as
     special expressions (grammar expressions, etc).
@@ -992,7 +992,7 @@ class LexerDecl(Decl):
     Declaration of a language's lexer.
     """
     syn_name = Field(type=T.DefId)
-    rules = Field(type=T.LKNode.list)
+    rules = Field(type=T.LktNode.list)
     decl_type_name = Property(S("lexer declaration"))
 
     @langkit_property(return_type=T.env_assoc.array, memoized=True)
@@ -1022,7 +1022,7 @@ class LexerFamilyDecl(Decl):
     decl_type_name = Property(S("lexer family declaration"))
 
 
-class LexerCaseRule(LKNode):
+class LexerCaseRule(LktNode):
     """
     Lexer construct to introduce a conditional lexing action.
     """
@@ -1038,7 +1038,7 @@ class LexerCaseRule(LKNode):
 
 
 @abstract
-class BaseLexerCaseRuleAlt(LKNode):
+class BaseLexerCaseRuleAlt(LktNode):
     """
     Base class for the different kind of alternatives allowed in a case rule.
     """
@@ -1062,7 +1062,7 @@ class LexerCaseRuleDefaultAlt(BaseLexerCaseRuleAlt):
     send = Field(type=T.LexerCaseRuleSend)
 
 
-class LexerCaseRuleSend(LKNode):
+class LexerCaseRuleSend(LktNode):
     """
     Lexer construction used by case alternatives to represent the token to send
     if that alternative was chosen.
@@ -1393,7 +1393,7 @@ class GrammarList(GrammarExpr):
     sep = Field(type=T.GrammarExpr)
 
 
-class ListKind(LKNode):
+class ListKind(LktNode):
     """
     Kind for list parser expressions.
     """
@@ -1411,7 +1411,7 @@ class DeclBlock(FullDecl.list):
         # Reference the base type scope, through which will be made
         # visible things such as inherited methods & fields.
         reference(
-            Entity.owning_type._.node.cast(T.LKNode).singleton,
+            Entity.owning_type._.node.cast(T.LktNode).singleton,
             through=T.TypeDecl.type_base_scope,
             kind=RefKind.transitive
         )
@@ -1981,7 +1981,7 @@ class EnumClassAltDecl(TypeDecl):
     decl_type_name = Property(S("enum class alt declaration"))
 
 
-class EnumClassCase(LKNode):
+class EnumClassCase(LktNode):
     """
     Case branch for an enum class declaration.
     """
@@ -2017,14 +2017,14 @@ class EnumClassDecl(BasicClassDecl):
         return decl.is_a(T.FunDecl)
 
 
-class DocComment(LKNode):
+class DocComment(LktNode):
     """
     Node for one line of documentation attached to a node.
     """
     token_node = True
 
 
-class Doc(LKNode):
+class Doc(LktNode):
     """
     Documentation attached to a decl node.
     """
@@ -2270,7 +2270,7 @@ class FieldDecl(ComponentDecl):
 
 
 @abstract
-class TypeRef(LKNode):
+class TypeRef(LktNode):
     """
     Base class for a reference to a type.
     """
@@ -2421,7 +2421,7 @@ class NotExpr(Expr):
     expr = Field(type=T.Expr)
 
 
-class ExcludesNull(LKNode):
+class ExcludesNull(LktNode):
     """
     Whether the containing cast expression will raise on null cast result or
     not.
@@ -2464,7 +2464,7 @@ class Isa(Expr):
     dest_type = Field(type=T.TypeRef.list)
 
 
-class DeclAnnotation(LKNode):
+class DeclAnnotation(LktNode):
     """
     Compile time annotation attached to a declaration.
     """
@@ -2472,7 +2472,7 @@ class DeclAnnotation(LKNode):
     params = Field(type=T.DeclAnnotationParams)
 
 
-class DeclAnnotationParams(LKNode):
+class DeclAnnotationParams(LktNode):
     """
     List of arguments for an annotation with a call syntax. This intermediate
     node is necessary in order to determine after parsing whether there is no
@@ -2481,7 +2481,7 @@ class DeclAnnotationParams(LKNode):
     params = Field(type=T.Param.list)
 
 
-class Param(LKNode):
+class Param(LktNode):
     """
     Parameter for function calls or for annotations.
     """
@@ -3153,7 +3153,7 @@ class IfExpr(Expr):
     else_expr = Field(type=T.Expr)
 
 
-class ElsifBranch(LKNode):
+class ElsifBranch(LktNode):
     """
     Elsif branch of an if expression.
     """
@@ -3165,7 +3165,7 @@ class BlockExpr(Expr):
     """
     Block expression.
     """
-    val_defs = Field(type=T.LKNode.list)
+    val_defs = Field(type=T.LktNode.list)
     expr = Field(type=T.Expr)
 
     env_spec = EnvSpec(add_env())
@@ -3179,7 +3179,7 @@ class MatchExpr(Expr):
     branches = Field(type=T.MatchBranch.list)
 
 
-class MatchBranch(LKNode):
+class MatchBranch(LktNode):
     """
     Branch inside a match expression.
     """
@@ -3251,7 +3251,7 @@ class ValDecl(ExplicitlyTypedDecl):
     decl_type_name = Property(S("value declaration"))
 
 
-class Op(LKNode):
+class Op(LktNode):
     """
     Operator in a binary operator expression.
     """
@@ -3367,7 +3367,7 @@ class NumLit(Lit):
     invalid_expected_type_error_name = Property(S("a number literal"))
 
 
-class VarBind(LKNode):
+class VarBind(LktNode):
     """
     Dynamic var bind expression.
     """

@@ -155,7 +155,7 @@ class Location:
         )
 
     @classmethod
-    def from_lkt_node(cls, node: L.LKNode) -> Location:
+    def from_lkt_node(cls, node: L.LktNode) -> Location:
         """
         Create a Location based on a Lkt node.
         """
@@ -594,7 +594,7 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
 
 
 def print_error(message: str,
-                location: Union[Location, L.LKNode, None],
+                location: Union[Location, L.LktNode, None],
                 severity: Severity = Severity.error) -> None:
     """
     Prints an error.
@@ -614,7 +614,7 @@ def print_error(message: str,
     # If "location" is a node from liblktlang, turn it into a Location
     # instance. Note that this possible only if liblktlang is available, so we
     # know that we'll have a Location instance afterwards.
-    if liblktlang_available and isinstance(location, L.LKNode):
+    if liblktlang_available and isinstance(location, L.LktNode):
         location = Location.from_lkt_node(location)
     assert isinstance(location, Location)
 

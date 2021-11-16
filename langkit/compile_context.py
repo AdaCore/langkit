@@ -818,17 +818,17 @@ class CompileCtx:
         return self.build_date or "undefined"
 
     @contextmanager
-    def lkt_context(self, lkt_node):
+    def lkt_context(self, lkt_node: L.LktNode):
         """
         Context manager to set the diagnostic context to the given node.
 
-        :param liblktlang.LKNode lkt_node: Node to use as a reference for this
-            diagnostic context.
+        :param lkt_node: Node to use as a reference for this diagnostic
+            context.
         """
         # Invalid type passed here will fail much later and only if a
         # check_source_language call fails. To ease debugging, check that
         # "lkt_node" has the right type here.
-        assert isinstance(lkt_node, L.LKNode)
+        assert isinstance(lkt_node, L.LktNode)
 
         context_stack.append(Location.from_lkt_node(lkt_node))
 
