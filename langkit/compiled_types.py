@@ -4400,6 +4400,7 @@ def create_builtin_types():
         exposed=False,
         is_ptr=False,
         nullexpr='System.Null_Address',
+        null_allowed=True,
         external=True,
         hashable=True,
     )
