@@ -74,7 +74,7 @@ def check_referenced_decl(expr: L.Expr) -> L.Decl:
         assert False, f"Cannot get referenced decl for {expr}: {exc}"
 
 
-def same_node(left: L.LKNode, right: L.LKNode) -> bool:
+def same_node(left: L.LktNode, right: L.LktNode) -> bool:
     """
     Return whether ``left`` and ``right`` designate the same node, regardless
     of generic instantiation information.

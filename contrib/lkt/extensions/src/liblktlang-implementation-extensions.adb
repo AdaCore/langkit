@@ -19,7 +19,7 @@ package body Liblktlang.Implementation.Extensions is
       Prelude : Analysis_Unit;
    begin
       Prelude := Ctx.Get_From_File ("__prelude");
-      if Prelude.Root = No_LK_Node then
+      if Prelude.Root = No_Lkt_Node then
          Prelude := Ctx.Get_From_Buffer
            ("__prelude", "ascii", Liblktlang.Prelude.Content);
 
@@ -94,12 +94,12 @@ package body Liblktlang.Implementation.Extensions is
       end if;
    end Decl_Short_Image;
 
-   --------------------------------------
-   -- LK_Node_P_Env_From_Vals_Internal --
-   --------------------------------------
+   ---------------------------------------
+   -- Lkt_Node_P_Env_From_Vals_Internal --
+   ---------------------------------------
 
-   function LK_Node_P_Env_From_Vals_Internal
-     (Node : Bare_LK_Node;
+   function Lkt_Node_P_Env_From_Vals_Internal
+     (Node : Bare_Lkt_Node;
       Vals : Internal_EnvKV_Array_Access) return Lexical_Env
    is
       Ret : constant Lexical_Env :=
@@ -111,14 +111,14 @@ package body Liblktlang.Implementation.Extensions is
       end loop;
 
       return Ret;
-   end LK_Node_P_Env_From_Vals_Internal;
+   end Lkt_Node_P_Env_From_Vals_Internal;
 
-   ----------------------------------------------
-   -- LK_Node_P_Internal_Fetch_Referenced_Unit --
-   ----------------------------------------------
+   -----------------------------------------------
+   -- Lkt_Node_P_Internal_Fetch_Referenced_Unit --
+   -----------------------------------------------
 
-   function LK_Node_P_Internal_Fetch_Referenced_Unit
-     (Node : Bare_LK_Node; Name : String_Type) return Internal_Unit
+   function Lkt_Node_P_Internal_Fetch_Referenced_Unit
+     (Node : Bare_Lkt_Node; Name : String_Type) return Internal_Unit
    is
       I : constant Internal_Unit := Get_From_Provider
         (Context => Node.Unit.Context,
@@ -129,7 +129,7 @@ package body Liblktlang.Implementation.Extensions is
    begin
       Populate_Lexical_Env (Wrap_Unit (I));
       return I;
-   end LK_Node_P_Internal_Fetch_Referenced_Unit;
+   end Lkt_Node_P_Internal_Fetch_Referenced_Unit;
 
    -------------------------------------
    -- String_Lit_P_Is_Prefixed_String --

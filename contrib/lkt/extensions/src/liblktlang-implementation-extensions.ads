@@ -11,12 +11,12 @@ package Liblktlang.Implementation.Extensions is
    --  Custom version of Short_Image for referencing identifiers. Include
    --  the identifier.
 
-   function LK_Node_P_Env_From_Vals_Internal
-     (Node : Bare_LK_Node;
+   function Lkt_Node_P_Env_From_Vals_Internal
+     (Node : Bare_Lkt_Node;
       Vals : Internal_EnvKV_Array_Access) return Lexical_Env;
 
-   function LK_Node_P_Internal_Fetch_Referenced_Unit
-     (Node : Bare_LK_Node; Name : String_Type) return Internal_Unit;
+   function Lkt_Node_P_Internal_Fetch_Referenced_Unit
+     (Node : Bare_Lkt_Node; Name : String_Type) return Internal_Unit;
    --  Return the unit that this name designates. Load it if needed.
 
    function String_Lit_P_Is_Prefixed_String

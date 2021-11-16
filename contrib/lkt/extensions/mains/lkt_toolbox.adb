@@ -46,7 +46,7 @@ procedure Lkt_Toolbox is
    use Liblktlang;
 
    package Invalid_Decl_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Analysis.LK_Node,
+     (Key_Type        => Analysis.Lkt_Node,
       Element_Type    => Boolean,
       Hash            => Analysis.Hash,
       Equivalent_Keys => "=");
@@ -59,12 +59,12 @@ procedure Lkt_Toolbox is
    --  Format node for semantic result printing
 
    procedure Print_Lkt_Toolbox_Diagnostic
-     (Node : LK_Node'Class; Message : Wide_Wide_String);
+     (Node : Lkt_Node'Class; Message : Wide_Wide_String);
    --  Internal wrapper to ``Print_Diagnostic`` used by lkt_toolbox to print
    --  additional diagnostics.
 
    function Populate_Invalid_Decl_Map
-     (Node : Analysis.LK_Node'Class) return Common.Visit_Status;
+     (Node : Analysis.Lkt_Node'Class) return Common.Visit_Status;
    --  Populate ``Invalid_Decl_Map`` and reject declarations with ``@invalid``
    --  annotations that are nested in another declaration annotated with
    --  ``@invalid``.
@@ -92,7 +92,7 @@ procedure Lkt_Toolbox is
    ----------------------------------
 
    procedure Print_Lkt_Toolbox_Diagnostic
-     (Node : LK_Node'Class; Message : Wide_Wide_String)
+     (Node : Lkt_Node'Class; Message : Wide_Wide_String)
    is
       Sloc_Range : constant Source_Location_Range := Node.Sloc_Range;
       Unit       : constant Analysis.Analysis_Unit := Node.Unit;
@@ -108,7 +108,7 @@ procedure Lkt_Toolbox is
    procedure Print_Semantic_Result
      (S : Analysis.Semantic_Result; Unit : Analysis.Analysis_Unit)
    is
-      Node : constant LK_Node'Class := Analysis.Node (S);
+      Node : constant Lkt_Node'Class := Analysis.Node (S);
    begin
       if Analysis.Error_Message (S) /= "" then
          declare
@@ -154,9 +154,9 @@ procedure Lkt_Toolbox is
    -------------------------------
 
    function Populate_Invalid_Decl_Map
-     (Node : Analysis.LK_Node'Class) return Common.Visit_Status
+     (Node : Analysis.Lkt_Node'Class) return Common.Visit_Status
    is
-      use type Common.LK_Node_Kind_Type;
+      use type Common.Lkt_Node_Kind_Type;
    begin
       --  Populate ``Invalid_Decl_Map`` with declarations annotated with
       --  ``@invalid``.
@@ -174,7 +174,7 @@ procedure Lkt_Toolbox is
 
             Print_Lkt_Toolbox_Diagnostic (Node, "nested @invalid declaration");
          else
-            Invalid_Decl_Map.Include (Node.As_LK_Node, False);
+            Invalid_Decl_Map.Include (Node.As_Lkt_Node, False);
          end if;
       end if;
       return Common.Into;
