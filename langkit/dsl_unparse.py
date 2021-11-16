@@ -1262,10 +1262,8 @@ def emit_prop(prop, walker):
             quals += "@uses_entity_info "
         if prop.uses_envs:
             quals += "@uses_envs "
-    elif not prop.constructed_expr:
-        quals += ("@not_implemented "
-                  if prop.abstract_runtime_check
-                  else "@abstract ")
+    elif not prop.constructed_expr and not prop.abstract_runtime_check:
+        quals += "@abstract "
 
     if prop.memoized:
         quals += "@memoized "
@@ -1296,7 +1294,15 @@ def emit_prop(prop, walker):
             quals, prop.original_name.lower, args, type_name(prop.type)
         )
 
-    if prop_for_walker.expr:
+    if prop.abstract_runtime_check:
+        # TODO: include the dynamic type of Self in the error message ("not
+        # implemented on type XXX"). We probably need to extend the DSL for
+        # this.
+        res += (
+            f" = raise PropertyError(\"Property {prop.qualname} not"
+            " implemented\")"
+        )
+    elif prop_for_walker.expr:
         with walker.property(prop_for_walker):
             res += " = $sl{}".format(emit_expr(prop_for_walker.expr,
                                                walker=walker))

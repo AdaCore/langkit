@@ -19,5 +19,5 @@ class Literal : FooNode implements TokenNode {
 
     @export fun d(): BarNode = node.a().as[BarNode]
 
-    @not_implemented fun a(): FooNode
+    fun a(): FooNode = raise PropertyError("Property Literal.a not implemented")
 }

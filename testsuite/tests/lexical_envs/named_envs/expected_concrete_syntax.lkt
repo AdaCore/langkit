@@ -148,7 +148,7 @@ grammar foo_grammar {
 
     ## Assuming this node can define a named environment (see
     ## ``can_have_name``), return its syntactic name.
-    @not_implemented fun self_name(): Name
+    fun self_name(): Name = raise PropertyError("Property FooNode.self_name not implemented")
 }
 
 class DeclarativePart : FooNode {

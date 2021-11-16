@@ -25,7 +25,7 @@ class Def : FooNode {
 
     @export @abstract fun evaluate_entity(): Int
 
-    @export @not_implemented fun evaluate_rtcheck(): Int
+    @export fun evaluate_rtcheck(): Int = raise PropertyError("Property Expr.evaluate_rtcheck not implemented")
 
     @export fun evaluate_concrete(): Int = 1
 }
