@@ -342,6 +342,15 @@ package Langkit_Support.Generic_API.Introspection is
    type Struct_Member_Ref_Array is
      array (Positive range <>) of Struct_Member_Ref;
 
+   function Debug_Name (Member : Struct_Member_Ref) return String;
+   --  Return "X.Y" where X is the type that owns this member and Y is the name
+   --  of this member. Raise a ``Precondition_Failure`` exception if ``Member``
+   --  is ``No_Struct_Member_Ref``.
+
+   function Owner (Member : Struct_Member_Ref) return Type_Ref;
+   --  Return the type that owns this member. Raise a ``Precondition_Failure``
+   --  exception if ``Member`` is ``No_Struct_Member_Ref``.
+
    function Is_Property (Member : Struct_Member_Ref) return Boolean;
    --  Whether ``Member`` is a property
 

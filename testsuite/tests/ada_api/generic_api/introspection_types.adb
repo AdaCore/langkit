@@ -34,7 +34,8 @@ procedure Introspection_Types is
    is (+Node_Type_Name (Node) & " (" & To_Index (Node)'Image & ")");
 
    function Member_Repr (Member : Struct_Member_Ref) return String
-   is (+Member_Name (Member) & " (" & To_Index (Member)'Image & ")");
+   is (+Member_Name (Member) & " (" & Debug_Name (Member) & ":"
+       & To_Index (Member)'Image & ")");
 
    procedure Assert (Predicate : Boolean; Message : String);
    --  Print Message and raise a Program_Error if Predicate is false
@@ -668,6 +669,7 @@ begin
          M : constant Struct_Member_Ref := From_Index (Id, Index);
       begin
          Put_Line (Member_Repr (M));
+         Put_Line ("  owner: " & Debug_Name (Owner (M)));
          if Is_Property (M) then
             Put_Line ("  is a property");
          end if;

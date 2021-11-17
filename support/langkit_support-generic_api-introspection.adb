@@ -1151,6 +1151,27 @@ package body Langkit_Support.Generic_API.Introspection is
       end;
    end Check_Struct_Member_Argument;
 
+   ----------------
+   -- Debug_Name --
+   ----------------
+
+   function Debug_Name (Member : Struct_Member_Ref) return String is
+   begin
+      return Debug_Name (Owner (Member)) & "."
+             & Image (Format_Name (Member_Name (Member), Lower));
+   end Debug_Name;
+
+   -----------
+   -- Owner --
+   -----------
+
+   function Owner (Member : Struct_Member_Ref) return Type_Ref is
+   begin
+      Check_Struct_Member (Member);
+      return From_Index
+        (Member.Id, Member.Id.Struct_Members.all (Member.Index).Owner);
+   end Owner;
+
    -----------------
    -- Is_Property --
    -----------------

@@ -243,6 +243,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${desc_name} : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => ${len(args)},
          Name          => ${name_const}'Access,
+         Owner         => ${G.type_index(m.struct)},
          Member_Type   => ${G.type_index(m.type)},
          Arguments     => (
             % if m.arguments:

@@ -115,6 +115,9 @@ package Langkit_Support.Internal.Introspection is
       Name : Text_Access;
       --  Name for this struct member in camel-with-underscores convention
 
+      Owner : Type_Index;
+      --  Type that owns this member
+
       Member_Type : Type_Index;
       --  Field type (for struct fields or node syntax fields) or return type
       --  (for properties).
