@@ -404,26 +404,26 @@ For Example
   Unit ( 17)
   Is_Ghost ( 18)
   Full_Sloc_Image ( 19)
-  Example_P_Prop ( 20)
-  Example_P_Result ( 21)
-  Example_P_Id_Bool ( 22)
-  Example_P_Id_Int ( 23)
-  Example_P_Id_Bigint ( 24)
-  Example_P_Id_Char ( 25)
-  Example_P_Id_Token ( 26)
-  Example_P_Id_Sym ( 27)
-  Example_P_Id_Unit ( 28)
-  Example_P_Id_Root_Node ( 29)
-  Example_P_Id_Name ( 30)
-  Example_P_Id_Unit_Kind ( 31)
-  Example_P_Id_Node_Array ( 32)
-  Example_P_Id_Expr_Array ( 33)
-  Example_P_Id_Bigint_Array ( 34)
-  Example_P_Id_Unit_Array ( 35)
-  Example_P_Id_Dflt_Bool ( 36)
-  Example_P_Id_Dflt_Int ( 37)
-  Example_P_Id_Dflt_Char ( 38)
-  Example_P_Id_Dflt_Root_Node ( 39)
+  P_Prop ( 20)
+  P_Result ( 21)
+  P_Id_Bool ( 22)
+  P_Id_Int ( 23)
+  P_Id_Bigint ( 24)
+  P_Id_Char ( 25)
+  P_Id_Token ( 26)
+  P_Id_Sym ( 27)
+  P_Id_Unit ( 28)
+  P_Id_Root_Node ( 29)
+  P_Id_Name ( 30)
+  P_Id_Unit_Kind ( 31)
+  P_Id_Node_Array ( 32)
+  P_Id_Expr_Array ( 33)
+  P_Id_Bigint_Array ( 34)
+  P_Id_Unit_Array ( 35)
+  P_Id_Dflt_Bool ( 36)
+  P_Id_Dflt_Int ( 37)
+  P_Id_Dflt_Char ( 38)
+  P_Id_Dflt_Root_Node ( 39)
 
 For Expr
   Parent ( 9)
@@ -450,8 +450,8 @@ For Addition
   Unit ( 17)
   Is_Ghost ( 18)
   Full_Sloc_Image ( 19)
-  Addition_F_Lhs ( 4)
-  Addition_F_Rhs ( 5)
+  F_Lhs ( 4)
+  F_Rhs ( 5)
 
 For Number
   Parent ( 9)
@@ -478,7 +478,7 @@ For Ref
   Unit ( 17)
   Is_Ghost ( 18)
   Full_Sloc_Image ( 19)
-  Ref_F_Name ( 6)
+  F_Name ( 6)
 
 For Foo_Node_Base_List
   Parent ( 9)
@@ -531,8 +531,8 @@ For Var_Decl
   Unit ( 17)
   Is_Ghost ( 18)
   Full_Sloc_Image ( 19)
-  Var_Decl_F_Name ( 7)
-  Var_Decl_F_Value ( 8)
+  F_Name ( 7)
+  F_Value ( 8)
 
 Detailed list of members
 ========================
@@ -549,23 +549,23 @@ Y ( 3)
   type: BigInt
   no argument
 
-Addition_F_Lhs ( 4)
+F_Lhs ( 4)
   type: Expr.entity
   no argument
 
-Addition_F_Rhs ( 5)
+F_Rhs ( 5)
   type: Expr.entity
   no argument
 
-Ref_F_Name ( 6)
+F_Name ( 6)
   type: Name.entity
   no argument
 
-Var_Decl_F_Name ( 7)
+F_Name ( 7)
   type: Name.entity
   no argument
 
-Var_Decl_F_Value ( 8)
+F_Value ( 8)
   type: Expr.entity
   no argument
 
@@ -625,120 +625,120 @@ Full_Sloc_Image ( 19)
   type: String
   no argument
 
-Example_P_Prop ( 20)
+P_Prop ( 20)
   is a property
   type: Point
   arguments:
     P: Point
 
-Example_P_Result ( 21)
+P_Result ( 21)
   is a property
   type: NodeResult
   no argument
 
-Example_P_Id_Bool ( 22)
+P_Id_Bool ( 22)
   is a property
   type: Bool
   arguments:
     Id: Bool
 
-Example_P_Id_Int ( 23)
+P_Id_Int ( 23)
   is a property
   type: Int
   arguments:
     Id: Int
 
-Example_P_Id_Bigint ( 24)
+P_Id_Bigint ( 24)
   is a property
   type: BigInt
   arguments:
     Id: BigInt
 
-Example_P_Id_Char ( 25)
+P_Id_Char ( 25)
   is a property
   type: Character
   arguments:
     Id: Character
 
-Example_P_Id_Token ( 26)
+P_Id_Token ( 26)
   is a property
   type: Token
   arguments:
     Id: Token
 
-Example_P_Id_Sym ( 27)
+P_Id_Sym ( 27)
   is a property
   type: Symbol
   arguments:
     Id: Symbol
 
-Example_P_Id_Unit ( 28)
+P_Id_Unit ( 28)
   is a property
   type: AnalysisUnit
   arguments:
     Id: AnalysisUnit
 
-Example_P_Id_Root_Node ( 29)
+P_Id_Root_Node ( 29)
   is a property
   type: FooNode.entity
   arguments:
     Id: FooNode.entity
 
-Example_P_Id_Name ( 30)
+P_Id_Name ( 30)
   is a property
   type: Name.entity
   arguments:
     Id: Name.entity
 
-Example_P_Id_Unit_Kind ( 31)
+P_Id_Unit_Kind ( 31)
   is a property
   type: AnalysisUnitKind
   arguments:
     Id: AnalysisUnitKind
 
-Example_P_Id_Node_Array ( 32)
+P_Id_Node_Array ( 32)
   is a property
   type: FooNode.entity.array
   arguments:
     Id: FooNode.entity.array
 
-Example_P_Id_Expr_Array ( 33)
+P_Id_Expr_Array ( 33)
   is a property
   type: Expr.entity.array
   arguments:
     Id: Expr.entity.array
 
-Example_P_Id_Bigint_Array ( 34)
+P_Id_Bigint_Array ( 34)
   is a property
   type: BigInt.array
   arguments:
     Id: BigInt.array
 
-Example_P_Id_Unit_Array ( 35)
+P_Id_Unit_Array ( 35)
   is a property
   type: AnalysisUnit.array
   arguments:
     Id: AnalysisUnit.array
 
-Example_P_Id_Dflt_Bool ( 36)
+P_Id_Dflt_Bool ( 36)
   is a property
   type: Bool
   arguments:
     Id: Bool
 
-Example_P_Id_Dflt_Int ( 37)
+P_Id_Dflt_Int ( 37)
   is a property
   type: Int
   arguments:
     Id: Int
 
-Example_P_Id_Dflt_Char ( 38)
+P_Id_Dflt_Char ( 38)
   is a property
   type: Character
   arguments:
     Id: Character
 
-Example_P_Id_Dflt_Root_Node ( 39)
+P_Id_Dflt_Root_Node ( 39)
   is a property
   type: FooNode.entity
   arguments:

@@ -239,7 +239,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       % endfor
 
       ${name_const} : aliased constant Text_Type :=
-        ${text_repr(m.name.camel_with_underscores)};
+        ${text_repr(m.api_name.camel_with_underscores)};
       ${desc_name} : aliased constant Struct_Member_Descriptor :=
         (Last_Argument => ${len(args)},
          Name          => ${name_const}'Access,
