@@ -74,9 +74,19 @@ private package ${ada_lib_name}.Generic_Introspection is
          desc_const = f"Desc_For_{t.name}"
          debug_name_const = f"Debug_Name_For_{t.name}"
          type_descs.append(f"{desc_const}'Access")
+
+         # Do not include ".entity" for entity types, as we do not expose bare
+         # nodes.
+         def debug_name(t):
+            if t.is_entity_type:
+               return debug_name(t.element_type)
+            elif t.is_array_type:
+               return f"{debug_name(t.element_type)}.array"
+            else:
+               return t.dsl_name
       %>
       ${debug_name_const} : aliased constant String :=
-        ${ascii_repr(t.dsl_name)};
+        ${ascii_repr(debug_name(t))};
       ${desc_const} : aliased constant Type_Descriptor :=
         (Debug_Name => ${debug_name_const}'Access);
    % endfor
