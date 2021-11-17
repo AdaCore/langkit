@@ -137,9 +137,9 @@ All types
   is an enum
 * BigInt.array
   is an array
-* FooNode.entity.array
+* FooNode.array
   is an array
-* Expr.entity.array
+* Expr.array
   is an array
 * AnalysisUnit.array
   is an array
@@ -147,25 +147,25 @@ All types
   is a struct
 * Point
   is a struct
-* FooNode.entity
+* FooNode
   is a node
-* Example.entity
+* Example
   is a node
-* Expr.entity
+* Expr
   is a node
-* Addition.entity
+* Addition
   is a node
-* Number.entity
+* Number
   is a node
-* Ref.entity
+* Ref
   is a node
-* FooNodeBaseList.entity
+* FooNodeBaseList
   is a node
-* FooNode.list.entity
+* FooNode.list
   is a node
-* Name.entity
+* Name
   is a node
-* VarDecl.entity
+* VarDecl
   is a node
 
 Language_For: null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
@@ -232,11 +232,11 @@ Arrays
 BigInt.array
 Array of BigInt
 
-FooNode.entity.array
-Array of FooNode.entity
+FooNode.array
+Array of FooNode
 
-Expr.entity.array
-Array of Expr.entity
+Expr.array
+Array of Expr
 
 AnalysisUnit.array
 Array of AnalysisUnit
@@ -380,166 +380,166 @@ For Point
   Y (Point.y: 3)
 
 For Foo_Node
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
 
 For Example
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
-  P_Prop (Example.entity.p_prop: 20)
-  P_Result (Example.entity.p_result: 21)
-  P_Id_Bool (Example.entity.p_id_bool: 22)
-  P_Id_Int (Example.entity.p_id_int: 23)
-  P_Id_Bigint (Example.entity.p_id_bigint: 24)
-  P_Id_Char (Example.entity.p_id_char: 25)
-  P_Id_Token (Example.entity.p_id_token: 26)
-  P_Id_Sym (Example.entity.p_id_sym: 27)
-  P_Id_Unit (Example.entity.p_id_unit: 28)
-  P_Id_Root_Node (Example.entity.p_id_root_node: 29)
-  P_Id_Name (Example.entity.p_id_name: 30)
-  P_Id_Unit_Kind (Example.entity.p_id_unit_kind: 31)
-  P_Id_Node_Array (Example.entity.p_id_node_array: 32)
-  P_Id_Expr_Array (Example.entity.p_id_expr_array: 33)
-  P_Id_Bigint_Array (Example.entity.p_id_bigint_array: 34)
-  P_Id_Unit_Array (Example.entity.p_id_unit_array: 35)
-  P_Id_Dflt_Bool (Example.entity.p_id_dflt_bool: 36)
-  P_Id_Dflt_Int (Example.entity.p_id_dflt_int: 37)
-  P_Id_Dflt_Char (Example.entity.p_id_dflt_char: 38)
-  P_Id_Dflt_Root_Node (Example.entity.p_id_dflt_root_node: 39)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
+  P_Prop (Example.p_prop: 20)
+  P_Result (Example.p_result: 21)
+  P_Id_Bool (Example.p_id_bool: 22)
+  P_Id_Int (Example.p_id_int: 23)
+  P_Id_Bigint (Example.p_id_bigint: 24)
+  P_Id_Char (Example.p_id_char: 25)
+  P_Id_Token (Example.p_id_token: 26)
+  P_Id_Sym (Example.p_id_sym: 27)
+  P_Id_Unit (Example.p_id_unit: 28)
+  P_Id_Root_Node (Example.p_id_root_node: 29)
+  P_Id_Name (Example.p_id_name: 30)
+  P_Id_Unit_Kind (Example.p_id_unit_kind: 31)
+  P_Id_Node_Array (Example.p_id_node_array: 32)
+  P_Id_Expr_Array (Example.p_id_expr_array: 33)
+  P_Id_Bigint_Array (Example.p_id_bigint_array: 34)
+  P_Id_Unit_Array (Example.p_id_unit_array: 35)
+  P_Id_Dflt_Bool (Example.p_id_dflt_bool: 36)
+  P_Id_Dflt_Int (Example.p_id_dflt_int: 37)
+  P_Id_Dflt_Char (Example.p_id_dflt_char: 38)
+  P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 39)
 
 For Expr
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
 
 For Addition
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
-  F_Lhs (Addition.entity.f_lhs: 4)
-  F_Rhs (Addition.entity.f_rhs: 5)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
+  F_Lhs (Addition.f_lhs: 4)
+  F_Rhs (Addition.f_rhs: 5)
 
 For Number
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
 
 For Ref
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
-  F_Name (Ref.entity.f_name: 6)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
+  F_Name (Ref.f_name: 6)
 
 For Foo_Node_Base_List
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
 
 For Foo_Node_List
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
 
 For Name
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
 
 For Var_Decl
-  Parent (FooNode.entity.parent: 9)
-  Parents (FooNode.entity.parents: 10)
-  Children (FooNode.entity.children: 11)
-  Token_Start (FooNode.entity.token_start: 12)
-  Token_End (FooNode.entity.token_end: 13)
-  Child_Index (FooNode.entity.child_index: 14)
-  Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  Next_Sibling (FooNode.entity.next_sibling: 16)
-  Unit (FooNode.entity.unit: 17)
-  Is_Ghost (FooNode.entity.is_ghost: 18)
-  Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
-  F_Name (VarDecl.entity.f_name: 7)
-  F_Value (VarDecl.entity.f_value: 8)
+  Parent (FooNode.parent: 9)
+  Parents (FooNode.parents: 10)
+  Children (FooNode.children: 11)
+  Token_Start (FooNode.token_start: 12)
+  Token_End (FooNode.token_end: 13)
+  Child_Index (FooNode.child_index: 14)
+  Previous_Sibling (FooNode.previous_sibling: 15)
+  Next_Sibling (FooNode.next_sibling: 16)
+  Unit (FooNode.unit: 17)
+  Is_Ghost (FooNode.is_ghost: 18)
+  Full_Sloc_Image (FooNode.full_sloc_image: 19)
+  F_Name (VarDecl.f_name: 7)
+  F_Value (VarDecl.f_value: 8)
 
 Detailed list of members
 ========================
 
 N (NodeResult.n: 1)
   owner: NodeResult
-  type: Example.entity
+  type: Example
   no argument
 
 X (Point.x: 2)
@@ -552,236 +552,236 @@ Y (Point.y: 3)
   type: BigInt
   no argument
 
-F_Lhs (Addition.entity.f_lhs: 4)
-  owner: Addition.entity
-  type: Expr.entity
+F_Lhs (Addition.f_lhs: 4)
+  owner: Addition
+  type: Expr
   no argument
 
-F_Rhs (Addition.entity.f_rhs: 5)
-  owner: Addition.entity
-  type: Expr.entity
+F_Rhs (Addition.f_rhs: 5)
+  owner: Addition
+  type: Expr
   no argument
 
-F_Name (Ref.entity.f_name: 6)
-  owner: Ref.entity
-  type: Name.entity
+F_Name (Ref.f_name: 6)
+  owner: Ref
+  type: Name
   no argument
 
-F_Name (VarDecl.entity.f_name: 7)
-  owner: VarDecl.entity
-  type: Name.entity
+F_Name (VarDecl.f_name: 7)
+  owner: VarDecl
+  type: Name
   no argument
 
-F_Value (VarDecl.entity.f_value: 8)
-  owner: VarDecl.entity
-  type: Expr.entity
+F_Value (VarDecl.f_value: 8)
+  owner: VarDecl
+  type: Expr
   no argument
 
-Parent (FooNode.entity.parent: 9)
-  owner: FooNode.entity
+Parent (FooNode.parent: 9)
+  owner: FooNode
   is a property
-  type: FooNode.entity
+  type: FooNode
   no argument
 
-Parents (FooNode.entity.parents: 10)
-  owner: FooNode.entity
+Parents (FooNode.parents: 10)
+  owner: FooNode
   is a property
-  type: FooNode.entity.array
+  type: FooNode.array
   arguments:
     With_Self: Bool
 
-Children (FooNode.entity.children: 11)
-  owner: FooNode.entity
+Children (FooNode.children: 11)
+  owner: FooNode
   is a property
-  type: FooNode.entity.array
+  type: FooNode.array
   no argument
 
-Token_Start (FooNode.entity.token_start: 12)
-  owner: FooNode.entity
-  is a property
-  type: Token
-  no argument
-
-Token_End (FooNode.entity.token_end: 13)
-  owner: FooNode.entity
+Token_Start (FooNode.token_start: 12)
+  owner: FooNode
   is a property
   type: Token
   no argument
 
-Child_Index (FooNode.entity.child_index: 14)
-  owner: FooNode.entity
+Token_End (FooNode.token_end: 13)
+  owner: FooNode
+  is a property
+  type: Token
+  no argument
+
+Child_Index (FooNode.child_index: 14)
+  owner: FooNode
   is a property
   type: Int
   no argument
 
-Previous_Sibling (FooNode.entity.previous_sibling: 15)
-  owner: FooNode.entity
+Previous_Sibling (FooNode.previous_sibling: 15)
+  owner: FooNode
   is a property
-  type: FooNode.entity
+  type: FooNode
   no argument
 
-Next_Sibling (FooNode.entity.next_sibling: 16)
-  owner: FooNode.entity
+Next_Sibling (FooNode.next_sibling: 16)
+  owner: FooNode
   is a property
-  type: FooNode.entity
+  type: FooNode
   no argument
 
-Unit (FooNode.entity.unit: 17)
-  owner: FooNode.entity
+Unit (FooNode.unit: 17)
+  owner: FooNode
   is a property
   type: AnalysisUnit
   no argument
 
-Is_Ghost (FooNode.entity.is_ghost: 18)
-  owner: FooNode.entity
+Is_Ghost (FooNode.is_ghost: 18)
+  owner: FooNode
   is a property
   type: Bool
   no argument
 
-Full_Sloc_Image (FooNode.entity.full_sloc_image: 19)
-  owner: FooNode.entity
+Full_Sloc_Image (FooNode.full_sloc_image: 19)
+  owner: FooNode
   is a property
   type: String
   no argument
 
-P_Prop (Example.entity.p_prop: 20)
-  owner: Example.entity
+P_Prop (Example.p_prop: 20)
+  owner: Example
   is a property
   type: Point
   arguments:
     P: Point
 
-P_Result (Example.entity.p_result: 21)
-  owner: Example.entity
+P_Result (Example.p_result: 21)
+  owner: Example
   is a property
   type: NodeResult
   no argument
 
-P_Id_Bool (Example.entity.p_id_bool: 22)
-  owner: Example.entity
+P_Id_Bool (Example.p_id_bool: 22)
+  owner: Example
   is a property
   type: Bool
   arguments:
     Id: Bool
 
-P_Id_Int (Example.entity.p_id_int: 23)
-  owner: Example.entity
+P_Id_Int (Example.p_id_int: 23)
+  owner: Example
   is a property
   type: Int
   arguments:
     Id: Int
 
-P_Id_Bigint (Example.entity.p_id_bigint: 24)
-  owner: Example.entity
+P_Id_Bigint (Example.p_id_bigint: 24)
+  owner: Example
   is a property
   type: BigInt
   arguments:
     Id: BigInt
 
-P_Id_Char (Example.entity.p_id_char: 25)
-  owner: Example.entity
+P_Id_Char (Example.p_id_char: 25)
+  owner: Example
   is a property
   type: Character
   arguments:
     Id: Character
 
-P_Id_Token (Example.entity.p_id_token: 26)
-  owner: Example.entity
+P_Id_Token (Example.p_id_token: 26)
+  owner: Example
   is a property
   type: Token
   arguments:
     Id: Token
 
-P_Id_Sym (Example.entity.p_id_sym: 27)
-  owner: Example.entity
+P_Id_Sym (Example.p_id_sym: 27)
+  owner: Example
   is a property
   type: Symbol
   arguments:
     Id: Symbol
 
-P_Id_Unit (Example.entity.p_id_unit: 28)
-  owner: Example.entity
+P_Id_Unit (Example.p_id_unit: 28)
+  owner: Example
   is a property
   type: AnalysisUnit
   arguments:
     Id: AnalysisUnit
 
-P_Id_Root_Node (Example.entity.p_id_root_node: 29)
-  owner: Example.entity
+P_Id_Root_Node (Example.p_id_root_node: 29)
+  owner: Example
   is a property
-  type: FooNode.entity
+  type: FooNode
   arguments:
-    Id: FooNode.entity
+    Id: FooNode
 
-P_Id_Name (Example.entity.p_id_name: 30)
-  owner: Example.entity
+P_Id_Name (Example.p_id_name: 30)
+  owner: Example
   is a property
-  type: Name.entity
+  type: Name
   arguments:
-    Id: Name.entity
+    Id: Name
 
-P_Id_Unit_Kind (Example.entity.p_id_unit_kind: 31)
-  owner: Example.entity
+P_Id_Unit_Kind (Example.p_id_unit_kind: 31)
+  owner: Example
   is a property
   type: AnalysisUnitKind
   arguments:
     Id: AnalysisUnitKind
 
-P_Id_Node_Array (Example.entity.p_id_node_array: 32)
-  owner: Example.entity
+P_Id_Node_Array (Example.p_id_node_array: 32)
+  owner: Example
   is a property
-  type: FooNode.entity.array
+  type: FooNode.array
   arguments:
-    Id: FooNode.entity.array
+    Id: FooNode.array
 
-P_Id_Expr_Array (Example.entity.p_id_expr_array: 33)
-  owner: Example.entity
+P_Id_Expr_Array (Example.p_id_expr_array: 33)
+  owner: Example
   is a property
-  type: Expr.entity.array
+  type: Expr.array
   arguments:
-    Id: Expr.entity.array
+    Id: Expr.array
 
-P_Id_Bigint_Array (Example.entity.p_id_bigint_array: 34)
-  owner: Example.entity
+P_Id_Bigint_Array (Example.p_id_bigint_array: 34)
+  owner: Example
   is a property
   type: BigInt.array
   arguments:
     Id: BigInt.array
 
-P_Id_Unit_Array (Example.entity.p_id_unit_array: 35)
-  owner: Example.entity
+P_Id_Unit_Array (Example.p_id_unit_array: 35)
+  owner: Example
   is a property
   type: AnalysisUnit.array
   arguments:
     Id: AnalysisUnit.array
 
-P_Id_Dflt_Bool (Example.entity.p_id_dflt_bool: 36)
-  owner: Example.entity
+P_Id_Dflt_Bool (Example.p_id_dflt_bool: 36)
+  owner: Example
   is a property
   type: Bool
   arguments:
     Id: Bool
 
-P_Id_Dflt_Int (Example.entity.p_id_dflt_int: 37)
-  owner: Example.entity
+P_Id_Dflt_Int (Example.p_id_dflt_int: 37)
+  owner: Example
   is a property
   type: Int
   arguments:
     Id: Int
 
-P_Id_Dflt_Char (Example.entity.p_id_dflt_char: 38)
-  owner: Example.entity
+P_Id_Dflt_Char (Example.p_id_dflt_char: 38)
+  owner: Example
   is a property
   type: Character
   arguments:
     Id: Character
 
-P_Id_Dflt_Root_Node (Example.entity.p_id_dflt_root_node: 39)
-  owner: Example.entity
+P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 39)
+  owner: Example
   is a property
-  type: FooNode.entity
+  type: FooNode
   arguments:
-    Id: FooNode.entity
+    Id: FooNode
 
 Is_Property: Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 
@@ -843,9 +843,9 @@ Inspect: <Token Kind=Var Text="var">
 Inspect: Symbol("foo_bar42")
   Type_Of: Symbol
 Inspect: <No node>
-  Type_Of: FooNode.entity
+  Type_Of: FooNode
 Inspect: <FooNodeList example.txt:1:1-2:15>
-  Type_Of: FooNode.list.entity
+  Type_Of: FooNode.list
 
 Enum values introspection
 =========================
@@ -860,10 +860,10 @@ Array values introspection
 Create_Array: null array type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Create_Array: null value reference: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
 Create_Array: value type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: unexpected value type
-Inspect: Array of 0 FooNode.entity elements
-  Type_Of: FooNode.entity.array
-Inspect: Array of 1 FooNode.entity elements
-  Type_Of: FooNode.entity.array
+Inspect: Array of 0 FooNode elements
+  Type_Of: FooNode.array
+Inspect: Array of 1 FooNode elements
+  Type_Of: FooNode.array
 As_Array: null value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
 As_Array: value type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: non-array value
 Array_Length: null value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
@@ -888,10 +888,10 @@ Basic cases:
 <FooNodeList example.txt:1:1-2:15> matches Bool? False
 
 Nodes:
-<FooNodeList example.txt:1:1-2:15> matches FooNode.entity? True
-<FooNodeList example.txt:1:1-2:15> matches VarDecl.entity? False
-<No node> matches FooNode.entity? True
-<No node> matches VarDecl.entity? True
+<FooNodeList example.txt:1:1-2:15> matches FooNode? True
+<FooNodeList example.txt:1:1-2:15> matches VarDecl? False
+<No node> matches FooNode? True
+<No node> matches VarDecl? True
 
 Error cases:
 <No_Value_Ref> matches Int? LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference

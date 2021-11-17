@@ -141,7 +141,7 @@ begin
       begin
          if DN = "BigInt.array" then
             Array_Of_Bigint := T;
-         elsif DN = "FooNode.entity.array" then
+         elsif DN = "FooNode.array" then
             Array_Of_Node := T;
          elsif Is_Enum_Type (T) and then Enum = No_Type_Ref then
             Enum := T;
