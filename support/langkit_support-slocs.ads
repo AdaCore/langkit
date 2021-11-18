@@ -126,4 +126,18 @@ package Langkit_Support.Slocs is
    function Value (S : String) return Source_Location_Range
    is (Value (To_Text (S)));
 
+   ---------------------------------
+   -- Sloc computations from text --
+   ---------------------------------
+
+   Default_Tab_Stop : constant Positive := 8;
+   --  Value that will be used for the default tab stop if none is passed
+   --  during the initialization of a ``Token_Data_Handler``.
+
+   function Column_Count
+     (Line     : Text_Type;
+      Tab_Stop : Positive := Default_Tab_Stop) return Column_Number;
+   --  Return the number of columns in ``Line``, according to the given
+   --  ``Tab_Stop`` to expand horizontal tabulations.
+
 end Langkit_Support.Slocs;

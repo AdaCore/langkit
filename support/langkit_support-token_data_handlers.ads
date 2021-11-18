@@ -179,10 +179,6 @@ package Langkit_Support.Token_Data_Handlers is
       Tab_Stop : Positive;
    end record;
 
-   Default_Tab_Stop : constant Positive := 8;
-   --  Value that will be used for the default tab stop if none is passed
-   --  during the initialization of a ``Token_Data_Handler``.
-
    type Token_Data_Handler_Access is access all Token_Data_Handler;
 
    function Initialized (TDH : Token_Data_Handler) return Boolean;
