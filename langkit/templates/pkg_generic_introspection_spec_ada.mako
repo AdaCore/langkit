@@ -216,8 +216,20 @@ private package ${ada_lib_name}.Generic_Introspection is
       end record;
       type ${G.internal_value_access(t)} is access all ${vt};
 
+      overriding function "=" (Left, Right : ${vt}) return Boolean;
       overriding function Type_Of (Value : ${vt}) return Type_Index;
+      overriding function Eval_Member
+        (Value  : ${vt};
+         Member : Struct_Member_Index) return Internal_Value_Access;
+      function Create_Struct
+        (Values : Internal_Value_Array) return ${G.internal_value_access(t)};
    % endfor
+
+   function Create_Struct
+     (Struct_Type : Type_Index;
+      Values      : Internal_Value_Array) return Internal_Value_Access;
+   --  Implementation for the Create_Struct operation in the language
+   --  descriptor.
 
    -------------------------------
    -- Struct member descriptors --

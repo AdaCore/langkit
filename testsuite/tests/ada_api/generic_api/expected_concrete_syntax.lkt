@@ -16,12 +16,13 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    fun to_public(p: PrivatePoint): Point = Point(x=p.x, y=p.y)
+    fun to_public(p: PrivatePoint): Point =
+    Point(label="from private", x=p.x, y=p.y)
 
     @export fun prop(p: Point): Point =
     node.to_public(PrivatePoint(x=p.x, y=p.y))
 
-    @export fun result(): NodeResult = NodeResult(n=node)
+    @export fun result(): NodeResult = NodeResult(n=node, e=self)
 
     @export fun id_bool(id: Bool): Bool = id
 
@@ -86,9 +87,11 @@ class VarDecl : FooNode {
 
 struct NodeResult {
     n: Example
+    e: Example
 }
 
 struct Point {
+    label: String
     x: BigInt
     y: BigInt
 }

@@ -290,6 +290,16 @@ package Langkit_Support.Generic_API.Introspection is
    function Struct_Type_Name (Struct : Type_Ref) return Name_Type;
    --  Return the name for the given struct type
 
+   function Create_Struct
+     (T : Type_Ref; Values : Value_Ref_Array) return Value_Ref;
+   --  Create a struct of the given ``T`` type, with the given ``Values``.
+   --  Raise a ``Precondition_Failure`` if any of the following is true:
+   --
+   --  * ``T`` is null;
+   --  * ``Values`` contains a null value reference;
+   --  * ``Values`` does not match ``T``'s fields, both in number or in types;
+   --  * one ``Values`` item does not belong to the same language as ``T``.
+
    ----------------
    -- Node types --
    ----------------
@@ -407,6 +417,20 @@ package Langkit_Support.Generic_API.Introspection is
      (Member : Struct_Member_Ref) return Any_Argument_Index;
    --  Return the index of ``Member``'s last argument according to the given
    --  language. If it has no argument, return ``No_Argument_Index``.
+
+   function Eval_Member
+     (Value     : Value_Ref;
+      Member    : Struct_Member_Ref;
+      Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
+      return Value_Ref;
+   --  Evaluate the given ``Member`` of ``Value`` with the given ``Arguments``
+   --  and return the result value. Raise a ``Precondition_Failure`` if any of
+   --  the following is true:
+   --
+   --  * ``Value`` is null, or not a struct;
+   --  * ``Member`` is null, does not belong to the same language as ``Value``,
+   --    or not a valid member for ``Value``;
+   --  * ``Arguments`` does not match the arguments that ``Member`` expects.
 
 private
 
