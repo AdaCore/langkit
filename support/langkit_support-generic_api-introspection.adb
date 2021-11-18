@@ -974,6 +974,57 @@ package body Langkit_Support.Generic_API.Introspection is
       return Create_Name (Struct.Id.Struct_Types.all (Struct.Index).Name.all);
    end Struct_Type_Name;
 
+   -------------------
+   -- Create_Struct --
+   -------------------
+
+   function Create_Struct
+     (T : Type_Ref; Values : Value_Ref_Array) return Value_Ref
+   is
+      Members         : constant Struct_Member_Ref_Array :=
+        Introspection.Members (T);
+      Internal_Values : Internal_Value_Array (Values'Range);
+   begin
+      Check_Struct_Type (T);
+
+      --  Check that Values contain valid values for T's language
+
+      for V of Values loop
+         if V = No_Value_Ref then
+            raise Precondition_Failure with "invalid null value";
+         elsif V.Value.Id /= T.Id then
+            raise Precondition_Failure with "inconsistent language";
+         end if;
+      end loop;
+
+      --  Check that Values match T's members
+
+      if Values'Length /= Members'Length then
+         raise Precondition_Failure with
+           Debug_Name (T) & " has" & Natural'Image (Members'Length)
+           & " members but got" & Natural'Image (Values'Length) & " value(s)";
+      end if;
+
+      for I in 0 .. Members'Length - 1 loop
+         declare
+            V : Value_Ref renames Values (Values'First + I);
+            T : constant Type_Ref := Member_Type (Members (Members'First + I));
+         begin
+            if not Type_Matches (V, T) then
+               raise Precondition_Failure with "member type mismatch";
+            end if;
+         end;
+      end loop;
+
+      --  Unpack values for members and actually build the struct
+
+      for I in Values'Range loop
+         Internal_Values (I) := +Values (I).Value;
+      end loop;
+      return Create_Value
+        (T.Id, +T.Id.Create_Struct (To_Index (T), Internal_Values));
+   end Create_Struct;
+
    ------------------
    -- Is_Node_Type --
    ------------------
@@ -1312,5 +1363,80 @@ package body Langkit_Support.Generic_API.Introspection is
       Check_Struct_Member (Member);
       return Member.Id.Struct_Members.all (Member.Index).Last_Argument;
    end Member_Last_Argument;
+
+   -----------------
+   -- Eval_Member --
+   -----------------
+
+   function Eval_Member
+     (Value     : Value_Ref;
+      Member    : Struct_Member_Ref;
+      Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
+      return Value_Ref
+   is
+      Id           : Language_Id;
+      T            : Type_Ref;
+      Member_Found : Boolean;
+      Args_Count   : Any_Argument_Index;
+   begin
+      --  Check that we have a struct value
+
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      T := Type_Of (Value);
+      Check_Struct_Type (T);
+
+      --  Check that we have a valid member for it
+
+      Check_Struct_Member (Member);
+      Check_Same_Language (Id, Member.Id);
+      Member_Found := False;
+      for M of Members (T) loop
+         if M = Member then
+            Member_Found := True;
+         end if;
+      end loop;
+      if not Member_Found then
+         raise Precondition_Failure with
+           Debug_Name (T) & " does not have the " & Debug_Name (Member)
+           & " member";
+      end if;
+
+      --  Check that the arguments match Member
+
+      Args_Count := Member_Last_Argument (Member);
+      if Arguments'Length /= Args_Count then
+         raise Precondition_Failure with
+           Debug_Name (T) & " takes" & Args_Count'Image
+           & " arguments but got" & Natural'Image (Arguments'Length)
+           & " values";
+      end if;
+      for I in 1 .. Args_Count loop
+         declare
+            A : Value_Ref renames
+              Arguments (Arguments'First + Natural (I) - 1);
+            Arg_Type : constant Type_Ref := Member_Argument_Type (Member, I);
+         begin
+            Check_Value (A);
+            Check_Same_Language (Id, A.Value.Id);
+            Check_Value_Type (A, To_Index (Arg_Type));
+         end;
+      end loop;
+
+      --  Finally evaluate the member. TODO??? For now, we only support struct
+      --  members.
+
+      if Value.Value.all in Base_Internal_Struct_Value'Class then
+         pragma Assert (Arguments'Length = 0);
+         declare
+            V : constant Base_Internal_Struct_Value_Access :=
+              Base_Internal_Struct_Value_Access (Value.Value);
+         begin
+            return Create_Value (Id, +V.Eval_Member (Member.Index));
+         end;
+      else
+         raise Program_Error;
+      end if;
+   end Eval_Member;
 
 end Langkit_Support.Generic_API.Introspection;

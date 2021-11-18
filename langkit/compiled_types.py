@@ -3687,7 +3687,7 @@ class StringType(CompiledType):
     def to_public_expr(self, internal_expr):
         return '{}.Content'.format(internal_expr)
 
-    def to_internal_expr(self, public_expr, context):
+    def to_internal_expr(self, public_expr, context=None):
         return 'Create_String ({})'.format(public_expr)
 
 

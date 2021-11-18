@@ -3,9 +3,11 @@
 from langkit.dsl import ASTNode, Field, Struct, T, UserField, abstract
 from langkit.expressions import (
     CharacterLiteral,
+    Entity,
     No,
     Property,
     Self,
+    String,
     langkit_property,
 )
 
@@ -13,12 +15,14 @@ from utils import build_and_run
 
 
 class Point(Struct):
+    label = UserField(type=T.String)
     x = UserField(type=T.BigInt)
     y = UserField(type=T.BigInt)
 
 
 class NodeResult(Struct):
     n = UserField(type=T.Example)
+    e = UserField(type=T.Example.entity)
 
 
 # Create a struct that is not exposed just to check that it does not show up in
@@ -36,7 +40,7 @@ class Example(FooNode):
 
     @langkit_property()
     def to_public(p=T.PrivatePoint):
-        return Point.new(x=p.x, y=p.y)
+        return Point.new(label=String("from private"), x=p.x, y=p.y)
 
     @langkit_property(public=True)
     def prop(p=T.Point):
@@ -44,7 +48,7 @@ class Example(FooNode):
 
     @langkit_property(public=True)
     def result():
-        return T.NodeResult.new(n=Self)
+        return T.NodeResult.new(n=Self, e=Entity)
 
     # Test for primitive types
     id_bool = Property(lambda id=T.Bool: id, public=True)

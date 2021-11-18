@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, ArrayType, CompiledType, EnumType,
-    StructType
+    ASTNodeType, AbstractNodeData, ArrayType, CompiledType, EntityType,
+    EnumType, StructType
 )
 import langkit.names as names
 
@@ -141,3 +141,20 @@ class GenericAPI:
         Return the name of the access type used to store ``t`` values.
         """
         return f"Internal_Stored_{self.internal_value_typename(t)}"
+
+    def to_specific_node(self,
+                         lk_node_expr: str,
+                         node: Union[EntityType, ASTNodeType]) -> str:
+        """
+        Return an expression that converts ``lk_node_expr`` (an expression that
+        computes a generic ``Lk_Node`` value) into the given language-specific
+        public ``node`` type.
+        """
+        if isinstance(node, EntityType):
+            node = node.element_type
+            assert isinstance(node, ASTNodeType)
+
+        result = f"Get_Node ({lk_node_expr})"
+        if not node.is_root_node:
+            result += f".As_{node.entity.api_name}"
+        return result

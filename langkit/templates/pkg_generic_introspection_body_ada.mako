@@ -176,13 +176,10 @@ package body ${ada_lib_name}.Generic_Introspection is
                      Result_Item := Get_Unit (Value);
                   % elif elt_type.is_big_integer_type:
                      Get_Big_Int (Value, Result_Item);
-                  % elif elt_type.is_entity_type:
-                     <%
-                        public_node = "Get_Node (Value)"
-                        if not elt_type.element_type.is_root_node:
-                           public_node += f".As_{elt_type.api_name}"
-                     %>
-                     Result_Item := ${public_node};
+                  % elif elt_type.is_string_type:
+                     Result_Item := To_Unbounded_Text (Value.Value)
+                  % elif elt_type.public_type.is_entity_type:
+                     Result_Item := ${G.to_specific_node("Value", elt_type)};
                   % else:
                      Result_Item := Value.Value;
                   % endif
@@ -222,6 +219,15 @@ package body ${ada_lib_name}.Generic_Introspection is
    % for t in G.struct_types:
       <% vt = G.internal_value_type(t) %>
 
+      ---------
+      -- "=" --
+      ---------
+
+      overriding function "=" (Left, Right : ${vt}) return Boolean is
+      begin
+         return Left.Value = Right.Value;
+      end "=";
+
       -------------
       -- Type_Of --
       -------------
@@ -230,7 +236,138 @@ package body ${ada_lib_name}.Generic_Introspection is
       begin
          return ${G.type_index(t)};
       end Type_Of;
+
+      -------------------
+      -- Create_Struct --
+      -------------------
+
+      function Create_Struct
+        (Values : Internal_Value_Array) return ${G.internal_value_access(t)}
+      is
+         <%
+            fields = t.get_fields()
+            field_indexes = range(1, len(fields) + 1)
+            values = [
+               f"{G.internal_value_access(f.type)} (Values ({i}))"
+               for i, f in zip(field_indexes, fields)
+            ]
+            var_names = []
+         %>
+
+         ## Extract fields into local variables. Do that in the declaration
+         ## when the internal representation is not limited, and do that in
+         ## statements in other cases.
+         % for i, f, val in zip(field_indexes, fields, values):
+            <%
+               var = f"F_{f.name}"
+               var_names.append(var)
+            %>
+            ${var} : ${f.type.public_type.api_name}
+               % if f.type.is_array_type:
+                  := ${val}.Value.all
+               % elif f.type.is_analysis_unit_type:
+                  := Get_Unit (${val}.all)
+               % elif f.type.is_string_type:
+                  := To_Text (${val}.Value)
+               % elif f.type.is_entity_type or f.type.is_ast_node:
+                  := ${G.to_specific_node(f"{val}.all", f.type)}
+               % elif not f.type.is_big_integer_type:
+                  := ${val}.Value
+               % endif
+            ;
+         % endfor
+      begin
+         % for f, var, val in zip(fields, var_names, values):
+            % if f.type.is_big_integer_type:
+               Get_Big_Int (${val}.all, ${var});
+            % endif
+         % endfor
+
+         return Result : constant ${G.internal_value_access(t)} := new ${vt} do
+            Result.Value := Create_${t.api_name} (${", ".join(var_names)});
+         end return;
+      end Create_Struct;
+
+      -----------------
+      -- Eval_Member --
+      -----------------
+
+      overriding function Eval_Member
+        (Value  : ${vt};
+         Member : Struct_Member_Index) return Internal_Value_Access is
+      begin
+         case Member is
+            % for f in t.get_fields():
+               <% public_type = f.type.public_type %>
+               when ${G.member_index(f)} =>
+                  declare
+                     Item : constant ${public_type.api_name}
+                        ## Due to Ada language constraints, public struct field
+                        ## accessors that returns nodes actually return a
+                        ## class-wide type.
+                        % if public_type.is_entity_type:
+                           'Class
+                        % endif
+                     := Analysis.${f.name} (Value.Value);
+
+                     Result : ${G.internal_value_access(f.type)} :=
+                       new ${G.internal_value_type(f.type)};
+                  begin
+                     % if f.type.is_analysis_unit_type:
+                        Set_Unit (Result, Item, Value.Id);
+                     % elif f.type.is_big_integer_type:
+                        Set_Big_Int (Result, Item);
+                     % elif public_type.is_entity_type:
+                        Set_Node (Result, Item, Value.Id);
+                     % elif f.type.is_string_type:
+                        Result.Value := To_Unbounded_Text (Item);
+                     % elif f.type.is_array_type:
+                        Result.Value := new ${f.type.api_name}'(Item);
+                     % else:
+                        Result.Value := Item;
+                     % endif
+                     return Internal_Value_Access (Result);
+                  end;
+            % endfor
+
+            when others =>
+               --  Validation in public wrappers is supposed to prevent calling
+               --  this function on invalid members.
+               raise Program_Error;
+         end case;
+      end Eval_Member;
+
    % endfor
+
+   -------------------
+   -- Create_Struct --
+   -------------------
+
+   function Create_Struct
+     (Struct_Type : Type_Index;
+      Values      : Internal_Value_Array) return Internal_Value_Access is
+   begin
+      % if not G.struct_types:
+         pragma Unreferenced (Values);
+      % endif
+
+      case Struct_Type is
+         % for t in G.struct_types:
+            when ${G.type_index(t)} =>
+               declare
+                  Result : constant ${G.internal_value_access(t)} :=
+                    Create_Struct (Values);
+               begin
+                  return Internal_Value_Access (Result);
+               end;
+         % endfor
+
+         when others =>
+            --  Validation in public wrappers is supposed to prevent calling
+            --  this function on non-array types.
+            return (raise Program_Error);
+      end case;
+   end Create_Struct;
 
    --------------
    -- Set_Unit --

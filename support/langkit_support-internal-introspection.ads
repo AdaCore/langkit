@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Unchecked_Deallocation;
+
 with GNATCOLL.GMP.Integers; use GNATCOLL.GMP.Integers;
 
 with Langkit_Support.Generic_API.Analysis;
@@ -208,6 +210,9 @@ package Langkit_Support.Internal.Introspection is
    --  purposes.
 
    type Internal_Value_Access is access all Internal_Value'Class;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Internal_Value'Class, Internal_Value_Access);
 
    type Internal_Value_Array is
      array (Positive range <>) of Internal_Value_Access;
@@ -420,9 +425,13 @@ package Langkit_Support.Internal.Introspection is
    type Base_Internal_Struct_Value_Access is
      access all Base_Internal_Struct_Value'Class;
 
-   overriding function "="
-     (Left, Right : Base_Internal_Struct_Value) return Boolean;
    overriding function Image
      (Value : Base_Internal_Struct_Value) return String;
+
+   function Eval_Member
+     (Value  : Base_Internal_Struct_Value;
+      Member : Struct_Member_Index) return Internal_Value_Access is abstract;
+   --  Return the struct member in ``Value`` corresponding to the given
+   --  ``Member`` index. The index is assumed to be valid for this struct.
 
 end Langkit_Support.Internal.Introspection;

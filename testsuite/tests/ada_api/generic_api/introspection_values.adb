@@ -124,15 +124,20 @@ procedure Introspection_Values is
    Enum_Val : Enum_Value_Ref;
    Value    : Value_Ref;
 
-   Array_Of_Node, Array_Of_Bigint : Type_Ref;
+   Array_Of_Node, Array_Of_Bigint   : Type_Ref;
+   Point_Struct, Node_Result_Struct : Type_Ref;
+
+   Node_Result_N, Point_Label : Struct_Member_Ref;
 
    Int_Type, Bool_Type : Type_Ref;
    False_Bool          : constant Value_Ref := Create_Bool (Id, False);
    True_Bool           : constant Value_Ref := Create_Bool (Id, True);
+   Point_Struct_Value  : Value_Ref;
 
 begin
    --  Look for the first enum type (Enum) and build an enum value ref for it
-   --  (Enum_Val). Also initialize Array_Of_Node and Array_Of_Bigint.
+   --  (Enum_Val). Also initialize Array_Of_Node, Array_Of_Bigint,
+   --  Point_Struct, Node_Result_Struct and Example_Node.
 
    for TI in 1 .. Last_Type (Id) loop
       declare
@@ -143,12 +148,31 @@ begin
             Array_Of_Bigint := T;
          elsif DN = "FooNode.array" then
             Array_Of_Node := T;
+         elsif DN = "Point" then
+            Point_Struct := T;
+         elsif DN = "NodeResult" then
+            Node_Result_Struct := T;
          elsif Is_Enum_Type (T) and then Enum = No_Type_Ref then
             Enum := T;
          end if;
       end;
    end loop;
    Enum_Val := From_Index (Enum, 1);
+
+   --  Search for the NodeResult.n and Point.label members
+
+   for MI in 1 .. Last_Struct_Member (Id) loop
+      declare
+         M  : constant Struct_Member_Ref := From_Index (Id, MI);
+         DN : constant String := Debug_Name (M);
+      begin
+         if DN = "NodeResult.n" then
+            Node_Result_N := M;
+         elsif DN = "Point.label" then
+            Point_Label := M;
+         end if;
+      end;
+   end loop;
 
    Put_Title ("Value comparisons");
 
@@ -431,6 +455,110 @@ begin
          end if;
       end loop;
    end;
+   New_Line;
+
+   Put_Title ("Struct values introspection");
+
+   Put ("Create_Struct: null struct type: ");
+   begin
+      Value := Create_Struct (No_Type_Ref, (1 .. 0 => <>));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Create_Struct: invalid struct type: ");
+   begin
+      Value := Create_Struct (Root_Node_Type (Id), (1 .. 0 => <>));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Create_Struct: null value reference: ");
+   begin
+      Value := Create_Struct
+        (Node_Result_Struct, (Create_Node (Id, No_Lk_Node), No_Value_Ref));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Create_Struct: value type mismatch: ");
+   begin
+      Value := Create_Struct
+        (Node_Result_Struct, (Create_Node (Id, No_Lk_Node), False_Bool));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Create_Struct: value count mismatch: ");
+   begin
+      Value := Create_Struct
+        (Node_Result_Struct, (1 => Create_Node (Id, No_Lk_Node)));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   declare
+      X, Y : Big_Integer;
+   begin
+      X.Set ("10");
+      Y.Set ("20");
+      Point_Struct_Value := Create_Struct
+        (Point_Struct, (Create_String (Id, "hello world!"),
+                        Create_Big_Int (Id, X),
+                        Create_Big_Int (Id, Y)));
+   end;
+   Inspect (Point_Struct_Value);
+
+   Put ("Eval_Member: null struct type: ");
+   begin
+      Value := Eval_Member (No_Value_Ref, Point_Label);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Eval_Member: invalid struct type: ");
+   begin
+      Value := Eval_Member (True_Bool, Point_Label);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Eval_Member: no such member: ");
+   begin
+      Value := Eval_Member (Point_Struct_Value, Node_Result_N);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Eval_Member: too many arguments: ");
+   begin
+      Value := Eval_Member (Point_Struct_Value, Point_Label, (1 => True_Bool));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put_Line
+     ("Eval_Member: Point_Label on " & Image (Point_Struct_Value) & ":");
+   Value := Eval_Member (Point_Struct_Value, Point_Label);
+   Inspect (Value);
    New_Line;
 
    Put_Title ("Type matching");

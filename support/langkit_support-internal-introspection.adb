@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Conversions;
 use Langkit_Support.Internal.Conversions;
@@ -408,20 +410,6 @@ package body Langkit_Support.Internal.Introspection is
              & Debug_Name (Array_Element_Type (T)) & " elements";
    end Image;
 
-   ---------
-   -- "=" --
-   ---------
-
-   overriding function "="
-     (Left, Right : Base_Internal_Struct_Value) return Boolean
-   is
-      pragma Unreferenced (Left, Right);
-   begin
-      --  TODO??? Implement once structs are fully implemented
-
-      return False;
-   end "=";
-
    -----------
    -- Image --
    -----------
@@ -429,13 +417,32 @@ package body Langkit_Support.Internal.Introspection is
    overriding function Image
      (Value : Base_Internal_Struct_Value) return String
    is
-      V : Base_Internal_Struct_Value'Class renames
+      V      : Base_Internal_Struct_Value'Class renames
         Base_Internal_Struct_Value'Class (Value);
-      T : constant Type_Ref := From_Index (V.Id, V.Type_Of);
-   begin
-      --  TODO??? Complete once structs are fully implemented
+      T      : constant Type_Ref := From_Index (V.Id, V.Type_Of);
+      Fields : constant Struct_Member_Ref_Array := Members (T);
 
-      return Debug_Name (T);
+      Result : Unbounded_String;
+   begin
+      Append (Result, Debug_Name (T));
+      Append (Result, "(");
+
+      for I in Fields'Range loop
+         if I /= Fields'First then
+            Append (Result, ", ");
+         end if;
+         declare
+            F_Value : Internal_Value_Access :=
+              V.Eval_Member (To_Index (Fields (I)));
+         begin
+            Append (Result, F_Value.Image);
+            F_Value.Destroy;
+            Free (F_Value);
+         end;
+      end loop;
+
+      Append (Result, ")");
+      return To_String (Result);
    end Image;
 
 end Langkit_Support.Internal.Introspection;
