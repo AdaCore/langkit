@@ -96,7 +96,7 @@ My_File_Reader.Read:
   Charset: ascii
   Read_BOM: False
 Errors:
-  direct-decoding-error.txt: Could not decode source as "ascii"
+  direct-decoding-error.txt:1:1: Could not decode source as "ascii"
 
 Parsing the internal unit
 =========================

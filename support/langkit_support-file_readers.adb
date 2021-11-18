@@ -31,6 +31,8 @@ with GNAT.Byte_Order_Mark;
 with GNATCOLL.Iconv;
 with GNATCOLL.Mmap;
 
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
+
 package body Langkit_Support.File_Readers is
 
    -------------------
@@ -133,10 +135,58 @@ package body Langkit_Support.File_Readers is
             --  incomplete buffer. The user would get both a diagnostic for the
             --  charset error and a best-effort list of tokens.
 
-            Free (Result);
-            Append (Diagnostics,
-                    Message => To_Text ("Could not decode source as """
-                                        & Charset & """"));
+            declare
+               Line_Offset : Natural := Result.all'First;
+               Sloc        : Source_Location := (1, 0);
+            begin
+               --  Compute the sloc of the codepoint past the last codepoint
+               --  that was successfully decoded, to be used as the sloc for
+               --  the decoding error.
+               --
+               --  First, compute the line number where the error happened
+               --  (i.e. the number of line feed (LF) codepoints that were
+               --  decoded plus 1).  Also keep track of the index of the first
+               --  codepoint that follows a line feed.
+
+               for I in Result.all'First .. Contents.Last loop
+                  if Result.all (I) = Chars.LF then
+                     Sloc.Line := Sloc.Line + 1;
+                     Line_Offset := I + 1;
+                  end if;
+               end loop;
+
+               --  We can then compute the column number at which the error
+               --  occurred (right after the last codepoint that was decoded,
+               --  hence the +1).
+               --
+               --  Note that when no codepoint could be decoded at all,
+               --  ``Output_Index`` (and thus ``Contents.Last``) still contain
+               --  1, while it should be 0 (impossible due to its ``Positive``
+               --  type). Fortunately we can detect this situation thanks to
+               --  ``Input_Index``, which contains the index of the first byte
+               --  of the sequence that could not be decoded. Correctly compute
+               --  the column number in that case.
+
+               if Input_Index = 1 then
+                  Sloc.Column := 1;
+               else
+                  declare
+                     Last_Decoded_Line : Text_Type renames
+                       Result.all (Line_Offset .. Contents.Last);
+                  begin
+                     Sloc.Column := 1 + Column_Count (Last_Decoded_Line);
+                  end;
+               end if;
+
+               --  We no longer need the result buffer: free it and create the
+               --  diagnostic.
+
+               Free (Result);
+               Append
+                 (Diagnostics,
+                  Make_Range (Sloc, Sloc),
+                  To_Text ("Could not decode source as """ & Charset & """"));
+            end;
 
          when Full_Buffer =>
 

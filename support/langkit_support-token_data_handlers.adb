@@ -748,11 +748,6 @@ package body Langkit_Support.Token_Data_Handlers is
       function Get_Line_Index is new Floor (Positive, Index_Vectors);
       --  Return the index of the first character of Line `N` in a given
       --  `TDH.Line_Starts` vector.
-
-      Column : Natural := 0;
-      --  0 based column number
-
-      Tab_Stop : Positive renames TDH.Tab_Stop;
    begin
       --  Allow 0 as an offset because it's a common value when the text buffer
       --  is empty: in that case just return a null source location.
@@ -764,27 +759,22 @@ package body Langkit_Support.Token_Data_Handlers is
          Line_Index  : constant Positive :=
            Get_Line_Index (Index, TDH.Lines_Starts);
          Line_Offset : constant Positive := TDH.Lines_Starts.Get (Line_Index);
+         Line_End    : constant Integer :=
+           Natural'Min (Index, TDH.Source_Last) - 1;
+         Column      : Column_Number;
       begin
          --  Allow a sloc pointing at the EOL char (hence the + 1)
          if Index > TDH.Source_Buffer'Last + 1 then
             raise Constraint_Error with "out of bound access";
          end if;
 
-         --  Make horizontal tabulations move by stride of Tab_Stop columns, as
-         --  usually implemented in code editors.
-         for I in Line_Offset .. Natural'Min (Index, TDH.Source_Last) - 1 loop
-            if TDH.Source_Buffer (I) = Chars.HT then
-               Column := (Column + Tab_Stop) / Tab_Stop * Tab_Stop;
-            else
-               Column := Column + 1;
-            end if;
-         end loop;
+         Column := Column_Count
+           (TDH.Source_Buffer (Line_Offset .. Line_End), TDH.Tab_Stop);
 
          return Source_Location'
            (Line   => Line_Number (Line_Index),
-            Column =>
-              Column_Number
-                (Natural'Max (Column + 1, Index - Line_Offset + 1)));
+            Column => Column_Number'Max
+                        (Column + 1, Column_Number (Index - Line_Offset + 1)));
       end;
    end Get_Sloc;
 

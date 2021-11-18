@@ -123,4 +123,29 @@ package body Langkit_Support.Slocs is
       return Make_Range (Value (Start_Slice), Value (End_Slice));
    end Value;
 
+   ------------------
+   -- Column_Count --
+   ------------------
+
+   function Column_Count
+     (Line     : Text_Type;
+      Tab_Stop : Positive := Default_Tab_Stop) return Column_Number
+   is
+      TS     : constant Column_Number := Column_Number (Tab_Stop);
+      Result : Column_Number := 0;
+   begin
+      --  Make horizontal tabulations move by stride of Tab_Stop columns, as
+      --  usually implemented in code editors.
+
+      for C of Line loop
+         if C = Chars.HT then
+            Result := (Result + TS) / TS * TS;
+         else
+            Result := Result + 1;
+         end if;
+      end loop;
+
+      return Result;
+   end Column_Count;
+
 end Langkit_Support.Slocs;
