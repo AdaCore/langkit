@@ -990,7 +990,7 @@ class LexerDecl(Decl):
             lambda sym:
             new_env_assoc(
                 key=sym,
-                val=SyntheticLexerDecl.new(sym=sym),
+                value=SyntheticLexerDecl.new(sym=sym),
                 dest_env=direct_env(Self.children_env)
             ),
         )
@@ -1881,7 +1881,7 @@ class EnumTypeDecl(NamedTypeDecl):
         # Add enum literals to the DeclBlock env
         add_to_env(Entity.literals.map(lambda lit: new_env_assoc(
                 key=lit.name,
-                val=lit.node,
+                value=lit.node,
                 dest_env=direct_env(Self.decls.children_env),
         ))),
 
@@ -1891,7 +1891,7 @@ class EnumTypeDecl(NamedTypeDecl):
             Entity.full_decl.has_annotation('open'),
             Entity.literals.map(lambda lit: new_env_assoc(
                 key=lit.name,
-                val=lit.node,
+                value=lit.node,
                 dest_env=direct_env(Self.node_env),
             )),
             No(T.env_assoc.array)
@@ -1996,7 +1996,7 @@ class EnumClassDecl(BasicClassDecl):
         handle_children(),
         add_to_env(Entity.alts.map(lambda alt: new_env_assoc(
             key=alt.name,
-            val=alt.node,
+            value=alt.node,
             dest_env=direct_env(Self.decls.children_env),
         )))
     )

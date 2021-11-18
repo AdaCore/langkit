@@ -29,7 +29,7 @@ class Scope(FooNode):
         set_initial_env(
             direct_env(Self.name.designated_scope(Self.parent.children_env))
         ),
-        add_to_env_kv(key=Self.name.designated_symbol, val=Self),
+        add_to_env_kv(key=Self.name.designated_symbol, value=Self),
         add_env(),
     )
 

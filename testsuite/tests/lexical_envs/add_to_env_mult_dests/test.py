@@ -32,7 +32,7 @@ class Scope(FooNode):
             Self.content.children.map(
                 lambda r: new_env_assoc(
                     key="Scope",
-                    val=Self,
+                    value=Self,
                     dest_env=direct_env(r.match(
                         lambda s=T.Scope: s.name.children_env,
                         lambda _: r.children_env

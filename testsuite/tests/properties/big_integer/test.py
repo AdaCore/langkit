@@ -24,7 +24,7 @@ class Decl(FooNode):
     expr_tree = Field(type=T.Expr)
 
     env_spec = EnvSpec(
-        add_to_env_kv(key=Self.name.symbol, val=Self)
+        add_to_env_kv(key=Self.name.symbol, value=Self)
     )
 
 

@@ -94,7 +94,7 @@ class Scope(FooNode):
                 default_val=direct_env(Self.parent.children_env),
             ),
         ),
-        add_to_env_kv(key=Self.name.referenced_name, val=Self),
+        add_to_env_kv(key=Self.name.referenced_name, value=Self),
         add_env(names=[Self.name.fqn.to_symbol])
     )
 

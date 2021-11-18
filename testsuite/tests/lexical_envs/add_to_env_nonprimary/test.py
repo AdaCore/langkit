@@ -22,7 +22,7 @@ class Example(FooNode):
         add_to_env(
             new_env_assoc(
                 key="foo",
-                val=Self,
+                value=Self,
                 dest_env=direct_env(Self.children_env.env_orphan),
             )
         )

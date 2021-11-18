@@ -84,7 +84,7 @@ class Scope(FooNode):
                 direct_env(Self.parent.children_env),
             ),
         ),
-        add_to_env_kv(key=Self.name.suffix_symbol, val=Self),
+        add_to_env_kv(key=Self.name.suffix_symbol, value=Self),
         add_env(names=[Self.name.fqn.to_symbol]),
     )
 
@@ -100,7 +100,7 @@ class Var(FooNode):
     value = Field()
 
     env_spec = EnvSpec(
-        add_to_env_kv(key=Self.name.symbol, val=Self),
+        add_to_env_kv(key=Self.name.symbol, value=Self),
     )
 
 

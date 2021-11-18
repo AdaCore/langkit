@@ -28,7 +28,7 @@ def run(name, prop):
 
         env_spec = EnvSpec(
             add_to_env_kv(
-                key=Self.name.symbol, val=Self
+                key=Self.name.symbol, value=Self
             ),
             add_env()
         )
@@ -37,7 +37,7 @@ def run(name, prop):
         name = Field()
 
         env_spec = EnvSpec(add_to_env_kv(
-            key=Self.name.symbol, val=Self,
+            key=Self.name.symbol, value=Self,
             resolver=FooNode.resolve_ref
         ))
 

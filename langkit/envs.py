@@ -121,7 +121,7 @@ def add_to_env(mappings: AbstractExpression,
 
 
 def add_to_env_kv(key: AbstractExpression,
-                  val: AbstractExpression,
+                  value: AbstractExpression,
                   dest_env: Optional[AbstractExpression] = None,
                   metadata: Optional[AbstractExpression] = None,
                   resolver: Optional[PropertyDef] = None) -> AddToEnv:
@@ -137,7 +137,7 @@ def add_to_env_kv(key: AbstractExpression,
     """
     from langkit.expressions import new_env_assoc
 
-    return add_to_env(new_env_assoc(key, val, dest_env, metadata), resolver)
+    return add_to_env(new_env_assoc(key, value, dest_env, metadata), resolver)
 
 
 def handle_children() -> HandleChildren:

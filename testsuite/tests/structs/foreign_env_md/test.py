@@ -32,7 +32,7 @@ class Def(FooNode):
 
     env_spec = EnvSpec(
         add_to_env_kv(
-            key=Self.name.sym, val=Self,
+            key=Self.name.sym, value=Self,
             metadata=New(Metadata, node=Self.ref.then(
                 lambda r: r.resolve.node,
                 default_val=No(T.FooNode)

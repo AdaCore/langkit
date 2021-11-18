@@ -22,7 +22,7 @@ class Decl(FooNode):
 
     env_spec = EnvSpec(
         add_to_env_kv(
-            key=Self.name.symbol, val=Self
+            key=Self.name.symbol, value=Self
         ),
         add_env()
     )
@@ -33,7 +33,7 @@ class Ref(FooNode):
 
     env_spec = EnvSpec(
         add_to_env_kv(
-            key=Self.name.symbol, val=Self
+            key=Self.name.symbol, value=Self
         )
     )
 
