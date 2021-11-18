@@ -54,10 +54,12 @@ package body ${ada_lib_name}.Common is
       Last          : out Natural);
    --  Implementations for converters soft-links
 
+   pragma Warnings (Off, "possible aliasing problem for type");
    function "+" is new Ada.Unchecked_Conversion
      (Langkit_Support.Internal.Analysis.Internal_Context, Internal_Context);
    function "+" is new Ada.Unchecked_Conversion
      (Internal_Context, Langkit_Support.Internal.Analysis.Internal_Context);
+   pragma Warnings (On, "possible aliasing problem for type");
 
    function Rewrap_Token
      (Origin : Token_Reference;
