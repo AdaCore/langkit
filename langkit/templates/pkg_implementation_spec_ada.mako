@@ -205,7 +205,7 @@ private package ${ada_lib_name}.Implementation is
    is (Self.Key);
    function Get_Node
      (Self : ${T.inner_env_assoc.name}) return ${T.root_node.name}
-   is (Self.Val);
+   is (Self.Value);
    function Get_Metadata
      (Self : ${T.inner_env_assoc.name}) return ${T.env_md.name}
    is (Self.Metadata);

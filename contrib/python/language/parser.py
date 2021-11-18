@@ -65,9 +65,9 @@ class SingleParam(PythonNode):
 
     env_spec = EnvSpec(
         add_to_env(Self.name.match(
-            lambda i=T.Id: new_env_assoc(key=i.sym, val=Self).singleton,
+            lambda i=T.Id: new_env_assoc(key=i.sym, value=Self).singleton,
             lambda l=T.Id.list: l.map(
-                lambda i: new_env_assoc(key=i.sym, val=Self)
+                lambda i: new_env_assoc(key=i.sym, value=Self)
             ),
             lambda _: No(T.env_assoc.array)
         ))
@@ -86,7 +86,7 @@ class AssignStmt(Stmt):
 
     env_spec = EnvSpec(
         add_to_env(Self.l_value.filtermap(
-            lambda e: new_env_assoc(key=e.cast_or_raise(T.Id).sym, val=Self),
+            lambda e: new_env_assoc(key=e.cast_or_raise(T.Id).sym, value=Self),
             lambda e: e.is_a(T.Id),
         ))
     )

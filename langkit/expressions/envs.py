@@ -345,13 +345,13 @@ def env_parent(self, env):
     )
 
 
-def new_env_assoc(key, val, dest_env=None, metadata=None):
+def new_env_assoc(key, value, dest_env=None, metadata=None):
     """
     Create a new env assoc, providing basic defaults when fields are not
     specified.
 
     :param AbstractExpression key: The symbol for which to associate a value.
-    :param AbstractExpression val: The node to associate to the key.
+    :param AbstractExpression value: The node to associate to the key.
     :param AbstractExpression dest_env: The environment in which to insert the
         mapping (a DesignatedEnv struct value). If left to None, use the
         current environment.
@@ -360,7 +360,7 @@ def new_env_assoc(key, val, dest_env=None, metadata=None):
     """
     return T.env_assoc.new(
         key=key,
-        val=val,
+        value=value,
         dest_env=current_env() if dest_env is None else dest_env,
         metadata=No(T.defer_env_md) if metadata is None else metadata
     )

@@ -26,7 +26,7 @@ class Scope(FooNode):
     content = Field()
 
     env_spec = EnvSpec(
-        add_to_env_kv(key=Self.name.symbol, val=Self),
+        add_to_env_kv(key=Self.name.symbol, value=Self),
         add_env()
     )
 
@@ -63,7 +63,7 @@ class ForeignDecl(FooNode):
     env_spec = EnvSpec(
         add_to_env_kv(
             key=Self.decl_id.symbol,
-            val=Self,
+            value=Self,
             dest_env=direct_env(
                 Self.dest_scope.resolve(Self.parent.children_env).children_env
             ),

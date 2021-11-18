@@ -26,7 +26,7 @@ class Scope(FooNode):
     content = Field()
 
     env_spec = EnvSpec(
-        add_to_env_kv(key=Self.name.symbol, val=Self),
+        add_to_env_kv(key=Self.name.symbol, value=Self),
         add_env()
     )
 
@@ -91,7 +91,7 @@ class ForeignDecl(FooNode):
 
     env_spec = EnvSpec(
         add_to_env_kv(
-            key=Self.id.simple_name.symbol, val=Self.node_for_env,
+            key=Self.id.simple_name.symbol, value=Self.node_for_env,
             dest_env=direct_env(Self.id.match(
                 lambda simple=T.SimpleId:
                     simple.node_env,
@@ -109,7 +109,7 @@ class SelfDecl(FooNode):
     env_spec = EnvSpec(
         add_to_env_kv(
             key=Self.id.simple_name.symbol,
-            val=Self.id.resolve(Self.node_env),
+            value=Self.id.resolve(Self.node_env),
             metadata=New(
                 T.Metadata,
                 node=Self.md_node.then(lambda n: n.resolve(Self.node_env))

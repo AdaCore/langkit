@@ -4654,7 +4654,7 @@ class TypeRepo:
         return StructType(
             names.Name('Env_Assoc'), None, None,
             [('key', UserField(type=T.Symbol)),
-             ('val', UserField(type=self.defer_root_node)),
+             ('value', UserField(type=self.defer_root_node)),
              ('dest_env', UserField(type=T.DesignatedEnv)),
              ('metadata', UserField(type=self.defer_env_md))]
         )
@@ -4670,7 +4670,7 @@ class TypeRepo:
         return StructType(
             names.Name('Inner_Env_Assoc'), None, None,
             [('key', UserField(type=T.Symbol)),
-             ('val', UserField(type=self.defer_root_node)),
+             ('value', UserField(type=self.defer_root_node)),
              ('metadata', UserField(type=self.defer_env_md))]
         )
 

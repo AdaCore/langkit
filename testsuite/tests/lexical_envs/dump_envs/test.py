@@ -22,14 +22,14 @@ class Scope(FooNode):
     name = Field(type=Identifier)
     content = Field()
 
-    env_spec = EnvSpec(add_to_env_kv(key=Self.name.symbol, val=Self),
+    env_spec = EnvSpec(add_to_env_kv(key=Self.name.symbol, value=Self),
                        add_env())
 
 
 class Decl(FooNode):
     id = Field(type=Identifier)
 
-    env_spec = EnvSpec(add_to_env_kv(key=Self.id.symbol, val=Self))
+    env_spec = EnvSpec(add_to_env_kv(key=Self.id.symbol, value=Self))
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')

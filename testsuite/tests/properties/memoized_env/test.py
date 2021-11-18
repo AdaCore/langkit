@@ -31,7 +31,7 @@ class Block(FooNode):
 
     env_spec = EnvSpec(
         add_env(),
-        add_to_env_kv(key=Self.name.symbol, val=Self,
+        add_to_env_kv(key=Self.name.symbol, value=Self,
                       dest_env=direct_env(Self.node_env)),
     )
 

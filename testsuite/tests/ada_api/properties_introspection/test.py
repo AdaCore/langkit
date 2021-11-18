@@ -35,7 +35,7 @@ class VarDecl(FooNode):
     value = Field()
 
     env_spec = EnvSpec(add_to_env_kv(
-        key=Self.name.symbol, val=Self
+        key=Self.name.symbol, value=Self
     ))
 
     @langkit_property(public=True)

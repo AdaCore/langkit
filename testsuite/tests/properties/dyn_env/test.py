@@ -31,7 +31,7 @@ class ConsDecl(FooNode):
     env_spec = EnvSpec(
         add_to_env(T.env_assoc.new(
             key=Self.name.symbol,
-            val=Self,
+            value=Self,
             dest_env=current_env(),
             metadata=No(T.Metadata),
         ))
@@ -50,7 +50,7 @@ class FunDecl(FooNode):
     env_spec = EnvSpec(
         add_to_env(T.env_assoc.new(
             key=Self.name.symbol,
-            val=Self,
+            value=Self,
             dest_env=current_env(),
             metadata=No(T.Metadata),
         ))
@@ -82,7 +82,7 @@ class CallExpr(FooNode):
         """
         decl = Var(Self.node_env.get_first(Self.name).cast(T.FunDecl))
         return decl.args.map(lambda i, a: T.inner_env_assoc.new(
-            key=a.name.symbol, val=Self.args.at(i), metadata=No(T.env_md)
+            key=a.name.symbol, value=Self.args.at(i), metadata=No(T.env_md)
         ))
 
     @langkit_property(return_type=T.inner_env_assoc.array)
@@ -92,7 +92,7 @@ class CallExpr(FooNode):
         """
         decl = Var(Self.node_env.get_first(Self.name).cast(T.FunDecl))
         return decl.args.map(lambda a: T.inner_env_assoc.new(
-            key=a.name.symbol, val=a.arg_expr.node, metadata=No(T.env_md)
+            key=a.name.symbol, value=a.arg_expr.node, metadata=No(T.env_md)
         ))
 
     # Entry points for the test program

@@ -39,7 +39,7 @@ class Package(Decl):
     decls = Field()
 
     env_spec = EnvSpec(
-        add_to_env_kv(key=Self.name.symbol, val=Self),
+        add_to_env_kv(key=Self.name.symbol, value=Self),
         add_env()
     )
 
@@ -56,7 +56,7 @@ class Var(Decl):
     name = Field()
 
     env_spec = EnvSpec(
-        add_to_env_kv(key=Self.name.symbol, val=Self)
+        add_to_env_kv(key=Self.name.symbol, value=Self)
     )
 
 

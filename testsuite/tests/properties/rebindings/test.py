@@ -22,7 +22,7 @@ class Name(FooNode):
 class DefNode(FooNode):
     name = AbstractProperty(T.Symbol, public=True)
     env_spec = EnvSpec(
-        add_to_env_kv(key=Self.name, val=Self)
+        add_to_env_kv(key=Self.name, value=Self)
     )
 
 
@@ -66,7 +66,7 @@ class Block(DefNode):
                 .as_bare_entity)
 
     env_spec = EnvSpec(
-        add_to_env_kv(key=Self.name, val=Self),
+        add_to_env_kv(key=Self.name, value=Self),
         add_env()
     )
 

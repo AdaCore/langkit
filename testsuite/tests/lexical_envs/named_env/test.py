@@ -36,7 +36,7 @@ class Example(FooNode):
         add_env(names=[Self.name.symbol]),
         add_to_env_kv(
             key=Self.name.symbol,
-            val=Self,
+            value=Self,
 
             # Check correct behavior when the env argument is null or not (when
             # it's not, add to the parents' env), and when or_current=True is
