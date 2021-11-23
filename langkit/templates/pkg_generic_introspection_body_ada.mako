@@ -43,9 +43,13 @@ package body ${ada_lib_name}.Generic_Introspection is
          # we have access to the actual value underneath.
          expr = f"{G.internal_value_access(t)} ({expr})"
 
+         # For types that do not need a conversion, just do a renaming, saving
+         # the copy.
          init_expr = None
+         renaming = False
          if public_type.is_array_type:
             init_expr = f"{expr}.Value.all"
+            renaming = True
          elif public_type.is_analysis_unit_type:
             init_expr = f"Get_Unit ({expr}.all)"
          elif public_type.is_string_type:
@@ -56,9 +60,12 @@ package body ${ada_lib_name}.Generic_Introspection is
             stmts.append(f"Get_Big_Int ({expr}.all, {var_name});")
          else:
             init_expr = f"{expr}.Value"
+            renaming = True
 
          decl = f"{var_name} : {public_type.api_name}"
-         if init_expr:
+         if renaming:
+            decl += f" renames {init_expr}"
+         elif init_expr:
             decl += " := " + init_expr
          decls.append(decl + ";")
 
@@ -76,6 +83,7 @@ package body ${ada_lib_name}.Generic_Introspection is
             f"{var_name} : {G.internal_value_access(t)} :="
             f"  new {G.internal_value_type(t)};"
          )
+         init_stmt = None
          if public_type.is_analysis_unit_type:
             init_stmt = f"Set_Unit ({var_name}, {expr});"
          elif public_type.is_big_integer_type:
@@ -85,11 +93,26 @@ package body ${ada_lib_name}.Generic_Introspection is
          elif public_type.is_string_type:
             init_stmt = f"{var_name}.Value := To_Unbounded_Text ({expr});"
          elif public_type.is_array_type:
-            init_stmt = f"{var_name}.Value := new {t.api_name}'({expr});"
+            if public_type.element_type.is_big_integer_type:
+               # Big integers are limited types, and arrays of big integers are
+               # limited themselves, so we need to manually copy its elements.
+               pub_var = f"Pub_{var_name}"
+               decls.append(
+                  f"{pub_var} : constant {t.api_name} := {expr};"
+               )
+               stmts.extend([
+                  f"{var_name}.Value := new {t.api_name} ({pub_var}'Range);",
+                  f"for I in {pub_var}'Range loop",
+                  f"  {var_name}.Value.all (I).Set ({pub_var} (I));",
+                  "end loop;",
+               ])
+            else:
+               init_stmt = f"{var_name}.Value := new {t.api_name}'({expr});"
          else:
             init_stmt = f"{var_name}.Value := {expr};"
 
-         stmts.append(init_stmt)
+         if init_stmt:
+            stmts.append(init_stmt)
          return var_name
    %>
 
