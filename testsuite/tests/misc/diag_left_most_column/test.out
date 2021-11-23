@@ -1,0 +1,7 @@
+Printing a diagnostic which ends at column 1 shouldn't crash:
+main.txt:1:1: error: All clear!
+1 | test
+  | 
+
+main.adb: Done.
+Done
