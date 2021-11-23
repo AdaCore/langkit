@@ -12,7 +12,86 @@ pragma Warnings (On, "referenced");
 
 package body ${ada_lib_name}.Generic_Introspection is
 
-   <% G = generic_api %>
+   <%
+      G = generic_api
+
+      def declare_block(decls, stmts):
+         """
+         Code generation helper to create a declare block.
+         """
+         if decls:
+            return ["declare"] + decls + ["begin"] + stmts + ["end;"]
+         else:
+            return stmts
+
+      def value_to_public(var_name, expr, t, decls, stmts):
+         """
+         Code generation helper to convert the ``expr`` internal value
+         (Internal_Value_Access), which is wrapping a ``t`` value, storing it
+         into the ``var_name`` local variable. Return ``var_name`` for
+         convenience.
+
+         ``decls`` and ``stmts`` are respectively a list of declarations and a
+         list of statements, where this appends the declarations/statements
+         required to do the conversion. Note this function takes care of
+         declaring the ``var_name`` local variable.
+         """
+         public_type = t.public_type
+
+         # Convert the generic value access type to the specific one, so that
+         # we have access to the actual value underneath.
+         expr = f"{G.internal_value_access(t)} ({expr})"
+
+         init_expr = None
+         if public_type.is_array_type:
+            init_expr = f"{expr}.Value.all"
+         elif public_type.is_analysis_unit_type:
+            init_expr = f"Get_Unit ({expr}.all)"
+         elif public_type.is_string_type:
+            init_expr = f"To_Text ({expr}.Value)"
+         elif public_type.is_entity_type:
+            init_expr = G.to_specific_node(f"{expr}.all", t)
+         elif public_type.is_big_integer_type:
+            stmts.append(f"Get_Big_Int ({expr}.all, {var_name});")
+         else:
+            init_expr = f"{expr}.Value"
+
+         decl = f"{var_name} : {public_type.api_name}"
+         if init_expr:
+            decl += " := " + init_expr
+         decls.append(decl + ";")
+
+         return var_name
+
+      def public_to_value(var_name, expr, t, id_expr, decls, stmts):
+         """
+         Code generation helper to convert the ``expr`` public value into an
+         internal value. See ``value_to_public`` for the description of the
+         signature. ``id_expr`` is an expression that returns the current
+         language descriptor.
+         """
+         public_type = t.public_type
+
+         decls.append(
+            f"{var_name} : {G.internal_value_access(t)} :="
+            f"  new {G.internal_value_type(t)};"
+         )
+         if public_type.is_analysis_unit_type:
+            init_stmt = f"Set_Unit ({var_name}, {expr}, {id_expr});"
+         elif public_type.is_big_integer_type:
+            init_stmt = f"Set_Big_Int ({var_name}, {expr});"
+         elif public_type.is_entity_type:
+            init_stmt = f"Set_Node ({var_name}, {expr}, {id_expr});"
+         elif public_type.is_string_type:
+            init_stmt = f"{var_name}.Value := To_Unbounded_Text ({expr});"
+         elif public_type.is_array_type:
+            init_stmt = f"{var_name}.Value := new {t.api_name}'({expr});"
+         else:
+            init_stmt = f"{var_name}.Value := {expr};"
+
+         stmts.append(init_stmt)
+         return var_name
+   %>
 
    % for t in G.enum_types:
 
@@ -137,19 +216,22 @@ package body ${ada_lib_name}.Generic_Introspection is
       overriding function Array_Item
         (Value : ${vt}; Index : Positive) return Internal_Value_Access
       is
-         Item   : ${elt_type.api_name} renames Value.Value.all (Index);
-         Result : ${G.internal_value_access(elt_type)} :=
-           new ${G.internal_value_type(elt_type)};
+         Item : ${elt_type.api_name} renames Value.Value.all (Index);
+
+         <%
+            decls = []
+            stmts = []
+            result_var = public_to_value(
+               "Result", "Item", elt_type, "Value.Id", decls, stmts
+            )
+         %>
+         % for d in decls:
+            ${d}
+         % endfor
       begin
-         % if elt_type.is_analysis_unit_type:
-            Set_Unit (Result, Item, Value.Id);
-         % elif elt_type.is_big_integer_type:
-            Set_Big_Int (Result, Item);
-         % elif elt_type.is_entity_type:
-            Set_Node (Result, Item, Value.Id);
-         % else:
-            Result.Value := Item;
-         % endif
+         % for s in stmts:
+            ${s}
+         % endfor
          return Internal_Value_Access (Result);
       end Array_Item;
 
@@ -246,41 +328,22 @@ package body ${ada_lib_name}.Generic_Introspection is
       is
          <%
             fields = t.get_fields()
-            field_indexes = range(1, len(fields) + 1)
-            values = [
-               f"{G.internal_value_access(f.type)} (Values ({i}))"
-               for i, f in zip(field_indexes, fields)
-            ]
             var_names = []
-         %>
+            decls = []
+            stmts = []
 
-         ## Extract fields into local variables. Do that in the declaration
-         ## when the internal representation is not limited, and do that in
-         ## statements in other cases.
-         % for i, f, val in zip(field_indexes, fields, values):
-            <%
-               var = f"F_{f.name}"
-               var_names.append(var)
-            %>
-            ${var} : ${f.type.public_type.api_name}
-               % if f.type.is_array_type:
-                  := ${val}.Value.all
-               % elif f.type.is_analysis_unit_type:
-                  := Get_Unit (${val}.all)
-               % elif f.type.is_string_type:
-                  := To_Text (${val}.Value)
-               % elif f.type.is_entity_type or f.type.is_ast_node:
-                  := ${G.to_specific_node(f"{val}.all", f.type)}
-               % elif not f.type.is_big_integer_type:
-                  := ${val}.Value
-               % endif
-            ;
+            ## Extract fields into local variables
+            for i, f in enumerate(fields, 1):
+               var_names.append(value_to_public(
+                  f"F_{f.name}", f"Values ({i})", f.type, decls, stmts
+               ))
+         %>
+         % for d in decls:
+            ${d}
          % endfor
       begin
-         % for f, var, val in zip(fields, var_names, values):
-            % if f.type.is_big_integer_type:
-               Get_Big_Int (${val}.all, ${var});
-            % endif
+         % for s in stmts:
+            ${s}
          % endfor
 
          return Result : constant ${G.internal_value_access(t)} := new ${vt} do
@@ -310,22 +373,20 @@ package body ${ada_lib_name}.Generic_Introspection is
                         % endif
                      := Analysis.${f.name} (Value.Value);
 
-                     Result : ${G.internal_value_access(f.type)} :=
-                       new ${G.internal_value_type(f.type)};
+                     <%
+                        decls = []
+                        stmts = []
+                        public_to_value("Result", "Item", f.type, "Value.Id",
+                                        decls, stmts)
+                     %>
+
+                     % for d in decls:
+                        ${d}
+                     % endfor
                   begin
-                     % if f.type.is_analysis_unit_type:
-                        Set_Unit (Result, Item, Value.Id);
-                     % elif f.type.is_big_integer_type:
-                        Set_Big_Int (Result, Item);
-                     % elif public_type.is_entity_type:
-                        Set_Node (Result, Item, Value.Id);
-                     % elif f.type.is_string_type:
-                        Result.Value := To_Unbounded_Text (Item);
-                     % elif f.type.is_array_type:
-                        Result.Value := new ${f.type.api_name}'(Item);
-                     % else:
-                        Result.Value := Item;
-                     % endif
+                     % for s in stmts:
+                        ${s}
+                     % endfor
                      return Internal_Value_Access (Result);
                   end;
             % endfor
