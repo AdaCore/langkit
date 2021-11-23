@@ -6,6 +6,7 @@ with Langkit_Support.Internal.Conversions;
 use Langkit_Support.Internal.Conversions;
 
 with ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Generic_API;       use ${ada_lib_name}.Generic_API;
 with ${ada_lib_name}.Generic_Impl;      use ${ada_lib_name}.Generic_Impl;
 with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 pragma Warnings (On, "referenced");
@@ -63,12 +64,11 @@ package body ${ada_lib_name}.Generic_Introspection is
 
          return var_name
 
-      def public_to_value(var_name, expr, t, id_expr, decls, stmts):
+      def public_to_value(var_name, expr, t, decls, stmts):
          """
          Code generation helper to convert the ``expr`` public value into an
          internal value. See ``value_to_public`` for the description of the
-         signature. ``id_expr`` is an expression that returns the current
-         language descriptor.
+         signature.
          """
          public_type = t.public_type
 
@@ -77,11 +77,11 @@ package body ${ada_lib_name}.Generic_Introspection is
             f"  new {G.internal_value_type(t)};"
          )
          if public_type.is_analysis_unit_type:
-            init_stmt = f"Set_Unit ({var_name}, {expr}, {id_expr});"
+            init_stmt = f"Set_Unit ({var_name}, {expr});"
          elif public_type.is_big_integer_type:
             init_stmt = f"Set_Big_Int ({var_name}, {expr});"
          elif public_type.is_entity_type:
-            init_stmt = f"Set_Node ({var_name}, {expr}, {id_expr});"
+            init_stmt = f"Set_Node ({var_name}, {expr});"
          elif public_type.is_string_type:
             init_stmt = f"{var_name}.Value := To_Unbounded_Text ({expr});"
          elif public_type.is_array_type:
@@ -222,7 +222,7 @@ package body ${ada_lib_name}.Generic_Introspection is
             decls = []
             stmts = []
             result_var = public_to_value(
-               "Result", "Item", elt_type, "Value.Id", decls, stmts
+               "Result", "Item", elt_type, decls, stmts
             )
          %>
          % for d in decls:
@@ -376,8 +376,7 @@ package body ${ada_lib_name}.Generic_Introspection is
                      <%
                         decls = []
                         stmts = []
-                        public_to_value("Result", "Item", f.type, "Value.Id",
-                                        decls, stmts)
+                        public_to_value("Result", "Item", f.type, decls, stmts)
                      %>
 
                      % for d in decls:
@@ -436,14 +435,13 @@ package body ${ada_lib_name}.Generic_Introspection is
 
    procedure Set_Unit
      (Intr_Value   : ${G.internal_value_access(T.AnalysisUnit)};
-      Actual_Value : ${T.AnalysisUnit.api_name};
-      Id           : Language_Id)
+      Actual_Value : ${T.AnalysisUnit.api_name})
    is
       U : constant Internal_Unit :=
         +Public_Converters.Unwrap_Unit (Actual_Value);
    begin
       Intr_Value.Value :=
-        Langkit_Support.Internal.Conversions.Wrap_Unit (Id, U);
+        Langkit_Support.Internal.Conversions.Wrap_Unit (Self_Id, U);
    end Set_Unit;
 
    --------------
@@ -489,13 +487,12 @@ package body ${ada_lib_name}.Generic_Introspection is
 
    procedure Set_Node
      (Intr_Value   : ${G.internal_value_access(T.entity)};
-      Actual_Value : ${T.entity.api_name}'Class;
-      Id           : Language_Id)
+      Actual_Value : ${T.entity.api_name}'Class)
    is
       E : constant Internal_Entity := +Unwrap_Entity (Actual_Value);
    begin
       Intr_Value.Value :=
-        Langkit_Support.Internal.Conversions.Wrap_Node (Id, E);
+        Langkit_Support.Internal.Conversions.Wrap_Node (Self_Id, E);
    end Set_Node;
 
    --------------

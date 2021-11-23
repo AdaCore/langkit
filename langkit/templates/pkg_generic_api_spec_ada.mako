@@ -8,6 +8,9 @@ package ${ada_lib_name}.Generic_API is
      with Import, External_Name => "${ada_lib_name}__language_id";
    --  Unique identifier for ${ada_lib_name}
 
+   Self_Id : Language_Id renames ${ctx.lang_name}_Lang_Id;
+   --  Shortcut for convenience in code generation
+
 private
 
    procedure Dummy;
