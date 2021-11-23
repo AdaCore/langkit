@@ -377,8 +377,7 @@ private package ${ada_lib_name}.Generic_Introspection is
 
    procedure Set_Unit
      (Intr_Value   : ${G.internal_value_access(T.AnalysisUnit)};
-      Actual_Value : ${T.AnalysisUnit.api_name};
-      Id           : Language_Id);
+      Actual_Value : ${T.AnalysisUnit.api_name});
 
    function Get_Unit
      (Intr_Value : ${G.internal_value_type(T.AnalysisUnit)})
@@ -394,8 +393,7 @@ private package ${ada_lib_name}.Generic_Introspection is
 
    procedure Set_Node
      (Intr_Value   : ${G.internal_value_access(T.entity)};
-      Actual_Value : ${T.entity.api_name}'Class;
-      Id           : Language_Id);
+      Actual_Value : ${T.entity.api_name}'Class);
 
    function Get_Node
      (Intr_Value : ${G.internal_value_type(T.entity)})
