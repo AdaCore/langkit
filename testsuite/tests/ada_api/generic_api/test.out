@@ -901,7 +901,7 @@ Create_Struct: value type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE:
 Create_Struct: value count mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: NodeResult has 2 members but got 1 value(s)
 Inspect: Point("hello world!", BigInt(10), BigInt(20))
   Type_Of: Point
-Eval_Member: null struct type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
+Eval_Member: null struct value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
 Eval_Member: invalid struct type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct type
 Eval_Member: no such member: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Point does not have the NodeResult.n member
 Eval_Member: too many arguments: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Point takes 0 arguments but got 1 values

@@ -519,7 +519,7 @@ begin
    end;
    Inspect (Point_Struct_Value);
 
-   Put ("Eval_Member: null struct type: ");
+   Put ("Eval_Member: null struct value: ");
    begin
       Value := Eval_Member (No_Value_Ref, Point_Label);
       raise Program_Error;
