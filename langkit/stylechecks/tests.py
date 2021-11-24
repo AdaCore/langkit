@@ -129,15 +129,13 @@ testcases = (
     Testcase('makopython_1.mako', '''
         ## vim: ft=makopython
         import foo
-        import ${blah}
         import bar
-    ''', [(4, 0, 'Imported package "foo" must appear after "bar"')]),
+    ''', [(3, 0, 'Imported package "foo" must appear after "bar"')]),
     Testcase('makoada_1.mako', '''
         ## vim: ft=makoada
         with Foo;
-        with ${blah};
         with Bar;
-    ''', [(4, 0, 'Imported package "Foo" must appear after "Bar"')]),
+    ''', [(3, 0, 'Imported package "Foo" must appear after "Bar"')]),
 
     #
     # Comments testing

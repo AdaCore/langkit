@@ -533,22 +533,21 @@ class PythonLang(LanguageChecker):
                 pcheck.reset()
                 continue
 
-            m = self.import_re.match(line)
-            if m:
-                if m.group('remaining'):
+            import_m = self.import_re.match(line)
+            if import_m:
+                if import_m.group('remaining'):
                     report.add('Import is more complex than'
                                ' "import PACKAGE [as NAME]"')
-                pcheck.add(m.group('name'))
+                pcheck.add(import_m.group('name'))
 
-            m = self.from_import_re.match(line)
-            if m:
-                pcheck.add(m.group('name'))
+            from_import_m = self.from_import_re.match(line)
+            if from_import_m:
+                pcheck.add(from_import_m.group('name'))
 
             # Expect exactly two blank lines between the last import statement
             # and the next statement.
             if (
-                line.startswith('import ') or
-                line.startswith('from ') or
+                import_m or from_import_m or
                 (
                     # Hack to match continuation lines for long ImportFrom
                     # statements.
