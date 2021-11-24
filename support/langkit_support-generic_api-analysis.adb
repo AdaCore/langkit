@@ -48,6 +48,19 @@ package body Langkit_Support.Generic_API.Analysis is
      with Export, External_Name => "lksp__unwrap_node";
    --  Public/private converters for nodes
 
+   function Wrap_Token
+     (Id         : Any_Language_Id;
+      Token      : Internal_Token;
+      Safety_Net : Token_Safety_Net) return Lk_Token
+     with Export, External_Name => "lksp__wrap_token";
+   procedure Unwrap_Token
+     (Token      : Lk_Token;
+      Id         : out Any_Language_Id;
+      Data       : out Internal_Token;
+      Safety_Net : out Token_Safety_Net)
+      with Export, External_Name => "lksp__unwrap_token";
+   --  Public/private converters for tokens
+
    function Create_Node_Safety_Net
      (Unit       : Lk_Unit'Class;
       Rebindings : Env_Rebindings) return Node_Safety_Net;
@@ -1128,5 +1141,32 @@ package body Langkit_Support.Generic_API.Analysis is
       Check_Safety_Net (Node);
       return Node.Internal;
    end Unwrap_Node;
+
+   ----------------
+   -- Wrap_Token --
+   ----------------
+
+   function Wrap_Token
+     (Id         : Any_Language_Id;
+      Token      : Internal_Token;
+      Safety_Net : Token_Safety_Net) return Lk_Token is
+   begin
+      return (Id, Token.TDH, Token.Index, Safety_Net);
+   end Wrap_Token;
+
+   ------------------
+   -- Unwrap_Token --
+   ------------------
+
+   procedure Unwrap_Token
+     (Token      : Lk_Token;
+      Id         : out Any_Language_Id;
+      Data       : out Internal_Token;
+      Safety_Net : out Token_Safety_Net) is
+   begin
+      Id := Token.Desc;
+      Data := (Token.TDH, Token.Index);
+      Safety_Net := Token.Safety_Net;
+   end Unwrap_Token;
 
 end Langkit_Support.Generic_API.Analysis;

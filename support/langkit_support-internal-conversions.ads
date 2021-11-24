@@ -58,4 +58,19 @@ package Langkit_Support.Internal.Conversions is
    function Unwrap_Node (Node : Lk_Node) return Internal_Entity
       with Import, External_Name => "lksp__unwrap_node";
 
+   --  Converters for tokens.  See the corresponding export declaration in
+   --  Langkit_Support.Generic_API.Analysis.
+
+   function Wrap_Token
+     (Id         : Any_Language_Id;
+      Token      : Internal_Token;
+      Safety_Net : Token_Safety_Net) return Lk_Token
+     with Import, External_Name => "lksp__wrap_token";
+   procedure Unwrap_Token
+     (Token      : Lk_Token;
+      Id         : out Any_Language_Id;
+      Data       : out Internal_Token;
+      Safety_Net : out Token_Safety_Net)
+      with Import, External_Name => "lksp__unwrap_token";
+
 end Langkit_Support.Internal.Conversions;

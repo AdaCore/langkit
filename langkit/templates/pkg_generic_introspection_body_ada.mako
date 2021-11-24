@@ -9,6 +9,8 @@ with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Generic_API;       use ${ada_lib_name}.Generic_API;
 with ${ada_lib_name}.Generic_Impl;      use ${ada_lib_name}.Generic_Impl;
 with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
+with ${ada_lib_name}.Private_Converters;
+use ${ada_lib_name}.Private_Converters;
 pragma Warnings (On, "referenced");
 
 package body ${ada_lib_name}.Generic_Introspection is
@@ -58,6 +60,8 @@ package body ${ada_lib_name}.Generic_Introspection is
             init_expr = G.to_specific_node(f"{expr}.all", t)
          elif public_type.is_big_integer_type:
             stmts.append(f"Get_Big_Int ({expr}.all, {var_name});")
+         elif public_type.is_token_type:
+            init_expr = f"From_Generic ({expr}.Value)"
          else:
             init_expr = f"{expr}.Value"
             renaming = True
@@ -108,6 +112,8 @@ package body ${ada_lib_name}.Generic_Introspection is
                ])
             else:
                init_stmt = f"{var_name}.Value := new {t.api_name}'({expr});"
+         elif public_type.is_token_type:
+            init_stmt = f"{var_name}.Value := To_Generic ({expr});"
          else:
             init_stmt = f"{var_name}.Value := {expr};"
 

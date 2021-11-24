@@ -6,6 +6,15 @@ with Ada.Unchecked_Conversion;
 with GNATCOLL.Iconv;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
+with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
+with Langkit_Support.Generic_API.Analysis;
+use Langkit_Support.Generic_API.Analysis;
+with Langkit_Support.Internal.Analysis;
+with Langkit_Support.Internal.Conversions;
+
+% if emitter.generate_ada_api:
+with ${ada_lib_name}.Generic_API;
+% endif
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
@@ -53,6 +62,14 @@ package body ${ada_lib_name}.Common is
       First         : out Positive;
       Last          : out Natural);
    --  Implementations for converters soft-links
+
+% if emitter.generate_ada_api:
+   function From_Generic (Token : Lk_Token) return Common.Token_Reference
+     with Export, External_Name => "${ada_lib_name}__from_generic_token";
+   function To_Generic (Token : Common.Token_Reference) return Lk_Token
+     with Export, External_Name => "${ada_lib_name}__to_generic_token";
+   --  Implementation for converters hard-links in Private_Converters
+% endif
 
    pragma Warnings (Off, "possible aliasing problem for type");
    function "+" is new Ada.Unchecked_Conversion
@@ -481,6 +498,44 @@ package body ${ada_lib_name}.Common is
               Source_Last   => Raw_Data.Source_Last,
               Sloc_Range    => Sloc_Range (TDH, Raw_Data));
    end Convert;
+
+% if emitter.generate_ada_api:
+
+   ------------------
+   -- From_Generic --
+   ------------------
+
+   function From_Generic (Token : Lk_Token) return Common.Token_Reference is
+      use Langkit_Support.Internal.Conversions;
+      Id         : Any_Language_Id;
+      Data       : Langkit_Support.Internal.Analysis.Internal_Token;
+      Safety_Net : Langkit_Support.Internal.Analysis.Token_Safety_Net;
+   begin
+      Unwrap_Token (Token, Id, Data, Safety_Net);
+      pragma Assert (Id = Generic_API.Self_Id);
+      return (Data.TDH,
+              Data.Index,
+              (Safety_Net.Context,
+               Safety_Net.Context_Version,
+               Safety_Net.TDH_Version));
+   end From_Generic;
+
+   ----------------
+   -- To_Generic --
+   ----------------
+
+   function To_Generic (Token : Common.Token_Reference) return Lk_Token is
+      use Langkit_Support.Internal.Conversions;
+   begin
+      return Wrap_Token
+        (Generic_API.Self_Id,
+         (Token.TDH, Token.Index),
+         (Token.Safety_Net.Context,
+          Token.Safety_Net.Context_Version,
+          Token.Safety_Net.TDH_Version));
+   end To_Generic;
+
+% endif
 
    --------------------------
    -- Wrap_Token_Reference --
