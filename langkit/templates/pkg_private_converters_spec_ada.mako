@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+with Langkit_Support.Generic_API.Analysis;
+use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Text; use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
@@ -11,6 +13,12 @@ with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 --  types and implementation ones.
 
 private package ${ada_lib_name}.Private_Converters is
+
+   function From_Generic (Token : Lk_Token) return Common.Token_Reference
+     with Import, External_Name => "${ada_lib_name}__from_generic_token";
+   function To_Generic (Token : Common.Token_Reference) return Lk_Token
+     with Import, External_Name => "${ada_lib_name}__to_generic_token";
+   --  See the corresponding exports in $.Common's body
 
    type Token_Reference_Wrapper is access function
      (Context : Internal_Context;
