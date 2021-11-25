@@ -277,6 +277,11 @@ package Langkit_Support.Generic_API.Introspection is
    function Iterator_Element_Type (T : Type_Ref) return Type_Ref;
    --  Return the type of elements in ``T`` iterators
 
+   function Iterator_Next (Value : Value_Ref) return Value_Ref;
+   --  Return the next item in the ``Value`` iterator, or ``No_Value_Ref`` if
+   --  there is no item left in the iterator. Raise a ``Precondition_Failure``
+   --  if ``Value`` is null or not a reference to an iterator.
+
    -----------------------
    -- Struct/node types --
    -----------------------

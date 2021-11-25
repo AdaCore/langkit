@@ -231,6 +231,19 @@ private package ${ada_lib_name}.Generic_Introspection is
       % endif
    );
 
+   % for t in G.iterator_types:
+      <% vt = G.internal_value_type(t) %>
+
+      type ${vt} is new Base_Internal_Iterator_Value with record
+         Value : ${t.api_name};
+      end record;
+      type ${G.internal_value_access(t)} is access all ${vt};
+
+      overriding function "=" (Left, Right : ${vt}) return Boolean;
+      overriding function Type_Of (Value : ${vt}) return Type_Index;
+      overriding function Next (Value : ${vt}) return Internal_Value_Access;
+   % endfor
+
    --------------------------------------
    -- Introspection values for structs --
    --------------------------------------
