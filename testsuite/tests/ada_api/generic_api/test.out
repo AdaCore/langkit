@@ -143,6 +143,7 @@ All types
   is an array
 * AnalysisUnit.array
   is an array
+* BigInt.iterator
 * NodeResult
   is a struct
 * Point
@@ -263,72 +264,72 @@ Non-struct Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid
 Nodes
 =====
 
-Foo_Node ( 20)
+Foo_Node ( 21)
   is abstract
   base = Bad_Type_Error: trying to get base type of root node
-  last derivation = Var_Decl ( 29)
+  last derivation = Var_Decl ( 30)
   derivations:
-    Example ( 21)
-    Expr ( 22)
-    Foo_Node_Base_List ( 26)
-    Name ( 28)
-    Var_Decl ( 29)
+    Example ( 22)
+    Expr ( 23)
+    Foo_Node_Base_List ( 27)
+    Name ( 29)
+    Var_Decl ( 30)
 
-Example ( 21)
-  base = Foo_Node ( 20)
-  last derivation = Example ( 21)
+Example ( 22)
+  base = Foo_Node ( 21)
+  last derivation = Example ( 22)
   derivations:
     <none>
 
-Expr ( 22)
+Expr ( 23)
   is abstract
-  base = Foo_Node ( 20)
-  last derivation = Ref ( 25)
+  base = Foo_Node ( 21)
+  last derivation = Ref ( 26)
   derivations:
-    Addition ( 23)
-    Number ( 24)
-    Ref ( 25)
+    Addition ( 24)
+    Number ( 25)
+    Ref ( 26)
 
-Addition ( 23)
-  base = Expr ( 22)
-  last derivation = Addition ( 23)
-  derivations:
-    <none>
-
-Number ( 24)
-  base = Expr ( 22)
-  last derivation = Number ( 24)
+Addition ( 24)
+  base = Expr ( 23)
+  last derivation = Addition ( 24)
   derivations:
     <none>
 
-Ref ( 25)
-  base = Expr ( 22)
-  last derivation = Ref ( 25)
+Number ( 25)
+  base = Expr ( 23)
+  last derivation = Number ( 25)
   derivations:
     <none>
 
-Foo_Node_Base_List ( 26)
+Ref ( 26)
+  base = Expr ( 23)
+  last derivation = Ref ( 26)
+  derivations:
+    <none>
+
+Foo_Node_Base_List ( 27)
   is abstract
-  base = Foo_Node ( 20)
-  last derivation = Foo_Node_List ( 27)
+  base = Foo_Node ( 21)
+  last derivation = Foo_Node_List ( 28)
   derivations:
-    Foo_Node_List ( 27)
+    Foo_Node_List ( 28)
 
-Foo_Node_List ( 27)
-  base = Foo_Node_Base_List ( 26)
-  last derivation = Foo_Node_List ( 27)
-  derivations:
-    <none>
-
-Name ( 28)
-  base = Foo_Node ( 20)
-  last derivation = Name ( 28)
+Foo_Node_List ( 28)
+  base = Foo_Node_Base_List ( 27)
+  last derivation = Foo_Node_List ( 28)
   derivations:
     <none>
 
-Var_Decl ( 29)
-  base = Foo_Node ( 20)
-  last derivation = Var_Decl ( 29)
+Name ( 29)
+  base = Foo_Node ( 21)
+  last derivation = Name ( 29)
+  derivations:
+    <none>
+
+Var_Decl ( 30)
+  base = Foo_Node ( 21)
+  last derivation = Var_Decl ( 30)
   derivations:
     <none>
 
@@ -422,10 +423,11 @@ For Example
   P_Id_Expr_Array (Example.p_id_expr_array: 35)
   P_Id_Bigint_Array (Example.p_id_bigint_array: 36)
   P_Id_Unit_Array (Example.p_id_unit_array: 37)
-  P_Id_Dflt_Bool (Example.p_id_dflt_bool: 38)
-  P_Id_Dflt_Int (Example.p_id_dflt_int: 39)
-  P_Id_Dflt_Char (Example.p_id_dflt_char: 40)
-  P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 41)
+  P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 38)
+  P_Id_Dflt_Bool (Example.p_id_dflt_bool: 39)
+  P_Id_Dflt_Int (Example.p_id_dflt_int: 40)
+  P_Id_Dflt_Char (Example.p_id_dflt_char: 41)
+  P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 42)
 
 For Expr
   Parent (FooNode.parent: 11)
@@ -767,28 +769,35 @@ P_Id_Unit_Array (Example.p_id_unit_array: 37)
   arguments:
     Id: AnalysisUnit.array
 
-P_Id_Dflt_Bool (Example.p_id_dflt_bool: 38)
+P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 38)
+  owner: Example
+  is a property
+  type: BigInt.iterator
+  arguments:
+    Id: BigInt.array
+
+P_Id_Dflt_Bool (Example.p_id_dflt_bool: 39)
   owner: Example
   is a property
   type: Bool
   arguments:
     Id: Bool
 
-P_Id_Dflt_Int (Example.p_id_dflt_int: 39)
+P_Id_Dflt_Int (Example.p_id_dflt_int: 40)
   owner: Example
   is a property
   type: Int
   arguments:
     Id: Int
 
-P_Id_Dflt_Char (Example.p_id_dflt_char: 40)
+P_Id_Dflt_Char (Example.p_id_dflt_char: 41)
   owner: Example
   is a property
   type: Character
   arguments:
     Id: Character
 
-P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 41)
+P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 42)
   owner: Example
   is a property
   type: FooNode
