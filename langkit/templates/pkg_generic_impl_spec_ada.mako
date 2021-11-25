@@ -170,6 +170,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Types          => Generic_Introspection.Types'Access,
       Enum_Types     => Generic_Introspection.Enum_Types'Access,
       Array_Types    => Generic_Introspection.Array_Types'Access,
+      Iterator_Types => Generic_Introspection.Iterator_Types'Access,
       Struct_Types   => Generic_Introspection.Struct_Types'Access,
       Builtin_Types  => Generic_Introspection.Builtin_Types'Access,
       First_Node     => Generic_Introspection.First_Node,

@@ -212,6 +212,25 @@ private package ${ada_lib_name}.Generic_Introspection is
       Values     : Internal_Value_Array) return Internal_Value_Access;
    --  Implementation of the Create_Array operation in the language descriptor
 
+   -------------------------------
+   -- Iterator type descriptors --
+   -------------------------------
+
+   <%
+      iterator_type_descs = [
+         f"{G.type_index(t)}"
+         f" => (Element_Type => {G.type_index(t.element_type)})"
+         for t in G.iterator_types
+      ]
+   %>
+   Iterator_Types : aliased constant Iterator_Type_Descriptor_Array := (
+      % if iterator_type_descs:
+         ${",\n".join(iterator_type_descs)}
+      % else:
+         1 .. 0 => <>
+      % endif
+   );
+
    --------------------------------------
    -- Introspection values for structs --
    --------------------------------------
