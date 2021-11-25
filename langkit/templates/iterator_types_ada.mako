@@ -97,11 +97,13 @@
 
       Result := Next (Internal_Iter, Internal_Element);
       if Result then
+      <% expr = cls.element_type.to_public_expr('Internal_Element') %>
       % if cls.element_type.is_entity_type:
-         Item := ${cls.element_type.api_name}'Class
-           (${cls.element_type.to_public_expr('Internal_Element')});
+         Item := ${cls.element_type.api_name}'Class (${expr});
+      % elif cls.element_type.is_big_int_type:
+         Item.Set (${expr});
       % else:
-         Item := ${cls.element_type.to_public_expr('Internal_Element')};
+         Item := ${expr};
       % endif
       end if;
       return Result;

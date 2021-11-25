@@ -16,6 +16,12 @@ class Example : FooNode {
 
     @export fun int_iterator_identity(it: Iterator[Int]): Iterator[Int] = it
 
+    @export fun bigint_array(): Array[BigInt] =
+    [BigInt(1), BigInt(2), BigInt(3)]
+
+    @export fun bigint_iterator(): Iterator[BigInt] =
+    node.bigint_array().to_iterator()
+
     @export fun entities_array(): Array[Example] = [self, self, self]
 
     @export fun entities_iterator(): Iterator[Example] =

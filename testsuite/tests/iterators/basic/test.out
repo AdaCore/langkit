@@ -17,6 +17,18 @@ Identity on a null iterator...
 Identity on a stale iterator...
 ... got no exception
 
+Bigint iterator
+###############
+
+Base array:
+  1
+  2
+  3
+Iteration:
+  1
+  2
+  3
+
 Entity iterator
 ###############
 
@@ -51,6 +63,14 @@ Next on an unintialized (null) iterator...
 
 Identity on a stale iterator...
 ... got a stale reference error
+
+Bigint iterator
+###############
+
+Iteration:
+  1
+  2
+  3
 
 Entity iterator
 ###############

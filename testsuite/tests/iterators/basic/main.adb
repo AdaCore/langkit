@@ -1,5 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
+with GNATCOLL.GMP.Integers; use GNATCOLL.GMP.Integers;
+
 with Langkit_Support.Errors; use Langkit_Support.Errors;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
@@ -87,6 +89,34 @@ begin
    exception
       when Stale_Reference_Error =>
          Put_Line ("... got a stale reference error");
+   end;
+   New_Line;
+
+   Put_Title ("Bigint iterator");
+
+   --  TODO (UB16-045)??? Enable this. Due to a GNAT bug, this currently runs
+   --  invalid generated machine code.
+   if False then
+      Put_Line ("Base array:");
+      declare
+         Items : constant Big_Integer_Array :=
+           U.Root.As_Example.P_Bigint_Array;
+      begin
+         for Elem of Items loop
+            Put_Line ("  " & Image (Elem));
+         end loop;
+      end;
+   end if;
+
+   Put_Line ("Iteration:");
+   declare
+      Iter : constant Big_Integer_Iterator :=
+         U.Root.As_Example.P_Bigint_Iterator;
+      Elem : Big_Integer;
+   begin
+      while Next (Iter, Elem) loop
+         Put_Line ("  " & Image (Elem));
+      end loop;
    end;
    New_Line;
 
