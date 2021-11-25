@@ -327,6 +327,52 @@ package body ${ada_lib_name}.Generic_Introspection is
       end case;
    end Create_Array;
 
+   % for t in G.iterator_types:
+      <% vt = G.internal_value_type(t) %>
+
+      ---------
+      -- "=" --
+      ---------
+
+      overriding function "=" (Left, Right : ${vt}) return Boolean is
+      begin
+         return Left.Value = Right.Value;
+      end "=";
+
+      -------------
+      -- Type_Of --
+      -------------
+
+      overriding function Type_Of (Value : ${vt}) return Type_Index is
+      begin
+         return ${G.type_index(t)};
+      end Type_Of;
+
+      ----------
+      -- Next --
+      ----------
+
+      overriding function Next (Value : ${vt}) return Internal_Value_Access is
+         <% elt_type = t.element_type %>
+         Item : ${t.element_type.api_name};
+      begin
+         if Next (Value.Value, Item) then
+            <%
+               decls = []
+               stmts = []
+               result_var = public_to_value(
+                  "Result", "Item", elt_type, decls, stmts
+               )
+               stmts.append("return Internal_Value_Access (Result);")
+            %>
+            ${"\n".join(declare_block(decls, stmts))}
+         else
+            return null;
+         end if;
+      end Next;
+
+   % endfor
+
    % for t in G.struct_types:
       <% vt = G.internal_value_type(t) %>
 

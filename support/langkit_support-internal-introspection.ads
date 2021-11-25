@@ -430,6 +430,21 @@ package Langkit_Support.Internal.Introspection is
    --  Return the array item in ``Value`` at the given ``Index``. The index is
    --  assumed to be in-bounds.
 
+   type Base_Internal_Iterator_Value is abstract new Internal_Value
+     with null record;
+
+   type Base_Internal_Iterator_Value_Access is
+     access all Base_Internal_Iterator_Value'Class;
+
+   overriding function Image
+     (Value : Base_Internal_Iterator_Value) return String;
+
+   function Next
+     (Value : Base_Internal_Iterator_Value) return Internal_Value_Access
+   is abstract;
+   --  Consume and return the next item in the ``Value`` iterator, if there is
+   --  one, otherwise retur null.
+
    type Base_Internal_Struct_Value is abstract new Internal_Value
      with null record;
 

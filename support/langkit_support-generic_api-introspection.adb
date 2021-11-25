@@ -948,6 +948,29 @@ package body Langkit_Support.Generic_API.Introspection is
       return From_Index (T.Id, T.Id.Iterator_Types.all (T.Index).Element_Type);
    end Iterator_Element_Type;
 
+   -------------------
+   -- Iterator_Next --
+   -------------------
+
+   function Iterator_Next (Value : Value_Ref) return Value_Ref is
+      T : Type_Ref;
+      V : Base_Internal_Iterator_Value_Access;
+      R : Internal_Value_Access;
+   begin
+      Check_Value (Value);
+      T := Value.Type_Of;
+      if not Is_Iterator_Type (T) then
+         raise Precondition_Failure with "non-iterator value";
+      end if;
+      V := Base_Internal_Iterator_Value_Access (Value.Value);
+      R := +V.Next;
+      if R = null then
+         return No_Value_Ref;
+      else
+         return Create_Value (V.Id, R);
+      end if;
+   end Iterator_Next;
+
    -------------------------
    -- Is_Base_Struct_Type --
    -------------------------

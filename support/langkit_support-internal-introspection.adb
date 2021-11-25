@@ -415,6 +415,20 @@ package body Langkit_Support.Internal.Introspection is
    -----------
 
    overriding function Image
+     (Value : Base_Internal_Iterator_Value) return String
+   is
+      V : Base_Internal_Iterator_Value'Class renames
+        Base_Internal_Iterator_Value'Class (Value);
+      T : constant Type_Ref := From_Index (V.Id, V.Type_Of);
+   begin
+      return "Iterator on " & Debug_Name (Iterator_Element_Type (T));
+   end Image;
+
+   -----------
+   -- Image --
+   -----------
+
+   overriding function Image
      (Value : Base_Internal_Struct_Value) return String
    is
       V      : Base_Internal_Struct_Value'Class renames
