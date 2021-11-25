@@ -5,6 +5,20 @@ with Langkit_Support.Errors; use Langkit_Support.Errors;
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 
 procedure Main is
+
+   procedure Put_Title (Label : String);
+
+   ---------------
+   -- Put_Title --
+   ---------------
+
+   procedure Put_Title (Label : String) is
+   begin
+      Put_Line (Label);
+      Put_Line ((1 .. Label'Length => '#'));
+      New_Line;
+   end Put_Title;
+
    Ctx : constant Analysis_Context := Create_Context;
    U   : constant Analysis_Unit := Ctx.Get_From_Buffer
      (Filename => "main.txt",
@@ -17,20 +31,21 @@ begin
    end if;
    Ex := U.Root.As_Example;
 
-   Put_Line ("Iterating through array...");
-   for Elem of U.Root.As_Example.P_Values_Array loop
-      Put_Line (Elem'Image);
-   end loop;
-   New_Line;
+   Put_Title ("Int iterator");
 
-   Put_Line ("Iterating though iterator...");
+   Put_Line ("Base array:");
+   for Elem of U.Root.As_Example.P_Int_Array loop
+      Put_Line ("  " & Elem'Image);
+   end loop;
+
+   Put_Line ("Iteration:");
    declare
-      Iter : Integer_Iterator := Ex.P_Values_Iterator;
+      Iter : Integer_Iterator := Ex.P_Int_Iterator;
       Elem : Integer;
    begin
       while Next (Iter, Elem) loop
-         Iter := Ex.P_Iterator_Identity (Iter);
-         Put_Line (Elem'Image);
+         Iter := Ex.P_Int_Iterator_Identity (Iter);
+         Put_Line ("  " & Elem'Image);
       end loop;
    end;
    New_Line;
@@ -39,7 +54,7 @@ begin
    declare
       Dummy : Integer_Iterator;
    begin
-      Dummy := Ex.P_Iterator_Identity (Dummy);
+      Dummy := Ex.P_Int_Iterator_Identity (Dummy);
       Put_Line ("... got no exception");
    exception
       when Precondition_Failure =>
@@ -63,15 +78,34 @@ begin
 
    Put_Line ("Identity on a stale iterator...");
    declare
-      Iter : Integer_Iterator := Ex.P_Values_Iterator;
+      Iter : Integer_Iterator := Ex.P_Int_Iterator;
    begin
       U.Reparse (Buffer => " example ");
       Ex := U.Root.As_Example;
-      Iter := Ex.P_Iterator_Identity (Iter);
+      Iter := Ex.P_Int_Iterator_Identity (Iter);
       Put_Line ("... got no exception");
    exception
       when Stale_Reference_Error =>
          Put_Line ("... got a stale reference error");
+   end;
+   New_Line;
+
+   Put_Title ("Entity iterator");
+
+   Put_Line ("Base array:");
+   for Elem of U.Root.As_Example.P_Entities_Array loop
+      Put_Line ("  " & Image (Elem));
+   end loop;
+
+   Put_Line ("Iteration:");
+   declare
+      Iter : constant Example_Iterator :=
+         U.Root.As_Example.P_Entities_Iterator;
+      Elem : Example;
+   begin
+      while Next (Iter, Elem) loop
+         Put_Line ("  " & Image (Elem));
+      end loop;
    end;
    New_Line;
 
