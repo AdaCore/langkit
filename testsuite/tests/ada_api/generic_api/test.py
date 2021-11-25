@@ -2,6 +2,8 @@
 
 from langkit.dsl import ASTNode, Field, Struct, T, UserField, abstract
 from langkit.expressions import (
+    ArrayLiteral,
+    BigIntLiteral,
     CharacterLiteral,
     Entity,
     No,
@@ -71,8 +73,12 @@ class Example(FooNode):
     id_unit_array = Property(lambda id=T.AnalysisUnit.array: id, public=True)
 
     # Test for iterators
-    id_bigint_iterator = Property(lambda id=T.BigInt.array: id.to_iterator,
-                                  public=True)
+    create_bigint_iterator = Property(
+        ArrayLiteral([BigIntLiteral(1), BigIntLiteral(2), BigIntLiteral(3)])
+        .to_iterator,
+        public=True
+    )
+    id_bigint_iterator = Property(lambda id=T.BigInt.iterator: id, public=True)
 
     # Test for default values
     id_dflt_bool = Property(lambda id=(T.Bool, True): id, public=True)

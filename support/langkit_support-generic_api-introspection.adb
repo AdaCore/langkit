@@ -69,9 +69,12 @@ package body Langkit_Support.Generic_API.Introspection is
    procedure Check_Value (Value : Value_Ref);
    --  Raise a ``Precondition_Failure`` exception if ``Value`` is null
 
-   procedure Check_Value_Type (Value : Value_Ref; T : Type_Index);
-   --  Raise a ``Precondition_Failure`` exception if ``Value`` does not match
-   --  ``T``.
+   procedure Check_Value_Type
+     (Value   : Value_Ref;
+      T       : Type_Index;
+      Message : String := "unexpected value type");
+   --  Raise a ``Precondition_Failure`` exception with ``Message`` if ``Value``
+   --  does not match ``T``.
 
    procedure Check_Enum_Type (Enum : Type_Ref);
    --  If ``Enum`` is not a valid enum type, raise a ``Precondition_Failure``
@@ -225,10 +228,13 @@ package body Langkit_Support.Generic_API.Introspection is
    -- Check_Value_Type --
    ----------------------
 
-   procedure Check_Value_Type (Value : Value_Ref; T : Type_Index) is
+   procedure Check_Value_Type
+     (Value   : Value_Ref;
+      T       : Type_Index;
+      Message : String := "unexpected value type") is
    begin
       if not Value.Value.Type_Matches (T) then
-         raise Precondition_Failure with "unexpected value type";
+         raise Precondition_Failure with Message;
       end if;
    end Check_Value_Type;
 
@@ -1437,12 +1443,12 @@ package body Langkit_Support.Generic_API.Introspection is
       Member_Found : Boolean;
       Args_Count   : Any_Argument_Index;
    begin
-      --  Check that we have a struct value
+      --  Check that we have a base struct value
 
       Check_Value (Value);
       Id := Value.Value.Id;
       T := Type_Of (Value);
-      Check_Struct_Type (T);
+      Check_Base_Struct_Type (T);
 
       --  Check that we have a valid member for it
 
@@ -1477,12 +1483,14 @@ package body Langkit_Support.Generic_API.Introspection is
          begin
             Check_Value (A);
             Check_Same_Language (Id, A.Value.Id);
-            Check_Value_Type (A, To_Index (Arg_Type));
+            Check_Value_Type
+              (A,
+               To_Index (Arg_Type),
+               "unexpected type for argument" & I'Image);
          end;
       end loop;
 
-      --  Finally evaluate the member. TODO??? For now, we only support struct
-      --  members.
+      --  Finally evaluate the membe
 
       if Value.Value.all in Base_Internal_Struct_Value'Class then
          pragma Assert (Arguments'Length = 0);
@@ -1493,7 +1501,19 @@ package body Langkit_Support.Generic_API.Introspection is
             return Create_Value (Id, +V.Eval_Member (Member.Index));
          end;
       else
-         raise Program_Error;
+         --  Unpack the arguments and evaluate the member
+
+         declare
+            V    : constant Internal_Acc_Node :=
+              Internal_Acc_Node (Value.Value);
+            Args : Internal_Value_Array (1 .. Natural (Args_Count));
+         begin
+            for I in Args'Range loop
+               Args (I) := +Arguments (Arguments'First + I - 1).Value;
+            end loop;
+            return Create_Value
+              (Id, +Id.Eval_Node_Member (V, Member.Index, Args));
+         end;
       end if;
    end Eval_Member;
 

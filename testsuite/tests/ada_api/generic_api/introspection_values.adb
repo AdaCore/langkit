@@ -124,15 +124,40 @@ procedure Introspection_Values is
    Enum_Val : Enum_Value_Ref;
    Value    : Value_Ref;
 
-   Array_Of_Node, Array_Of_Bigint   : Type_Ref;
-   Point_Struct, Node_Result_Struct : Type_Ref;
+   Array_Of_Node, Array_Of_Expr, Array_Of_Bigint : Type_Ref;
+   Point_Struct, Node_Result_Struct              : Type_Ref;
 
    Node_Result_N, Point_Label : Struct_Member_Ref;
+   P_Id_Bool                  : Struct_Member_Ref;
+   P_Id_Int                   : Struct_Member_Ref;
+   P_Id_Bigint                : Struct_Member_Ref;
+   P_Id_Char                  : Struct_Member_Ref;
+   P_Id_Token                 : Struct_Member_Ref;
+   P_Id_Sym                   : Struct_Member_Ref;
+   P_Id_Unit                  : Struct_Member_Ref;
+   P_Id_Root_Node             : Struct_Member_Ref;
+   P_Id_Name                  : Struct_Member_Ref;
+
+   P_Id_Unit_Kind             : Struct_Member_Ref;
+
+   P_Id_Node_Array            : Struct_Member_Ref;
+   P_Id_Expr_Array            : Struct_Member_Ref;
+   P_Id_Bigint_Array          : Struct_Member_Ref;
+
+   P_Create_Bigint_Iterator   : Struct_Member_Ref;
+   P_Id_Bigint_Iterator       : Struct_Member_Ref;
 
    Int_Type, Bool_Type : Type_Ref;
    False_Bool          : constant Value_Ref := Create_Bool (Id, False);
    True_Bool           : constant Value_Ref := Create_Bool (Id, True);
    Point_Struct_Value  : Value_Ref;
+   Example_Value       : constant Value_Ref := Create_Node (Id, Child (N, 1));
+   Name_Value          : constant Value_Ref :=
+     Create_Node (Id, Child (Child (N, 2), 1));
+   Bigint_Array_Value  : Value_Ref;
+
+   function Create_Iterator return Value_Ref
+   is (Eval_Member (Example_Value, P_Create_Bigint_Iterator));
 
 begin
    --  Look for the first enum type (Enum) and build an enum value ref for it
@@ -148,6 +173,8 @@ begin
             Array_Of_Bigint := T;
          elsif DN = "FooNode.array" then
             Array_Of_Node := T;
+         elsif DN = "Expr.array" then
+            Array_Of_Expr := T;
          elsif DN = "Point" then
             Point_Struct := T;
          elsif DN = "NodeResult" then
@@ -170,9 +197,45 @@ begin
             Node_Result_N := M;
          elsif DN = "Point.label" then
             Point_Label := M;
+         elsif DN = "Example.p_id_bool" then
+            P_Id_Bool := M;
+         elsif DN = "Example.p_id_int" then
+            P_Id_Int := M;
+         elsif DN = "Example.p_id_bigint" then
+            P_Id_Bigint := M;
+         elsif DN = "Example.p_id_char" then
+            P_Id_Char := M;
+         elsif DN = "Example.p_id_token" then
+            P_Id_Token := M;
+         elsif DN = "Example.p_id_sym" then
+            P_Id_Sym := M;
+         elsif DN = "Example.p_id_unit" then
+            P_Id_Unit := M;
+         elsif DN = "Example.p_id_root_node" then
+            P_Id_Root_Node := M;
+         elsif DN = "Example.p_id_name" then
+            P_Id_Name := M;
+         elsif DN = "Example.p_id_unit_kind" then
+            P_Id_Unit_Kind := M;
+         elsif DN = "Example.p_id_node_array" then
+            P_Id_Node_Array := M;
+         elsif DN = "Example.p_id_expr_array" then
+            P_Id_Expr_Array := M;
+         elsif DN = "Example.p_id_bigint_array" then
+            P_Id_Bigint_Array := M;
+         elsif DN = "Example.p_create_bigint_iterator" then
+            P_Create_Bigint_Iterator := M;
+         elsif DN = "Example.p_id_bigint_iterator" then
+            P_Id_Bigint_Iterator := M;
          end if;
       end;
    end loop;
+
+   Bigint_Array_Value := Create_Array
+     (Array_Of_Bigint,
+      (Create_Big_Int (Id, Make ("10")),
+       Create_Big_Int (Id, Make ("20")),
+       Create_Big_Int (Id, Make ("30"))));
 
    Put_Title ("Value comparisons");
 
@@ -430,20 +493,14 @@ begin
 
    Put_Line ("Array_Item: index checks");
    declare
-      I1 : constant Value_Ref := Create_Big_Int (Id, Make ("10"));
-      I2 : constant Value_Ref := Create_Big_Int (Id, Make ("20"));
-      I3 : constant Value_Ref := Create_Big_Int (Id, Make ("30"));
-      A  : constant Value_Ref :=
-        Create_Array (Array_Of_Bigint, (I1, I2, I3));
-
       Item    : Value_Ref;
       Success : Boolean;
    begin
-      Put_Line ("  array: " & Image (A));
+      Put_Line ("  array: " & Image (Bigint_Array_Value));
       for I in 1 .. 5 loop
          Put ("  (" & I'Image & "): ");
          begin
-            Item := Array_Item (A, I);
+            Item := Array_Item (Bigint_Array_Value, I);
             Success := True;
          exception
             when Exc : Precondition_Failure =>
@@ -453,6 +510,42 @@ begin
          if Success then
             Put_Line (Image (Item));
          end if;
+      end loop;
+   end;
+   New_Line;
+
+   Put_Title ("Iterator values introspection");
+
+   Put ("Iterator_Next: null value: ");
+   begin
+      Value := Iterator_Next (No_Value_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Iterator_Next: value type mismatch: ");
+   begin
+      Value := Iterator_Next (True_Bool);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Full iteration through Iterator_Next:");
+   declare
+      It  : constant Value_Ref := Create_Iterator;
+      Elt : Value_Ref;
+   begin
+      Inspect (It);
+      New_Line;
+      loop
+         Elt := Iterator_Next (It);
+         exit when Elt = No_Value_Ref;
+         Inspect (Elt);
       end loop;
    end;
    New_Line;
@@ -555,11 +648,75 @@ begin
          Put_Exc (Exc);
    end;
 
+   Put ("Eval_Member: argument type mismatch: ");
+   begin
+      Value := Eval_Member (Example_Value, P_Id_Int, (1 => True_Bool));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Eval_Member: no such node member: ");
+   begin
+      Value := Eval_Member (Create_Node (Id, N), P_Id_Bool, (1 => True_Bool));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
    Put_Line
      ("Eval_Member: Point_Label on " & Image (Point_Struct_Value) & ":");
    Value := Eval_Member (Point_Struct_Value, Point_Label);
    Inspect (Value);
    New_Line;
+
+   declare
+      type Eval_Test is record
+         Member   : Struct_Member_Ref;
+         Input    : Value_Ref;
+         Disabled : Boolean := False;
+      end record;
+
+      Tests : constant array (Positive range <>) of Eval_Test :=
+        ((P_Id_Bool, True_Bool, False),
+         (P_Id_Int, Create_Int (Id, 42), False),
+         (P_Id_Bigint,
+          Create_Big_Int (Id, Make ("1234567890987654321")),
+          False),
+         (P_Id_Char, Create_Char (Id, 'A'), False),
+         (P_Id_Token, Create_Token (Id, N.Token_Start), False),
+         (P_Id_Sym, Create_Symbol (Id, "foobar"), False),
+         (P_Id_Unit, Create_Unit (Id, U), False),
+         (P_Id_Root_Node, Create_Node (Id, N), False),
+         (P_Id_Name, Create_Node (Id, No_Lk_Node), False),
+         (P_Id_Name, Name_Value, False),
+
+         (P_Id_Unit_Kind, Create_Enum (Enum_Val), False),
+
+         (P_Id_Node_Array,
+          Create_Array (Array_Of_Node, (1 => Example_Value)),
+          False),
+         (P_Id_Expr_Array,
+          Create_Array (Array_Of_Expr, (1 => Create_Node (Id, No_Lk_Node))),
+          False),
+
+         --  TODO (UB16-045)??? Enable this. Due to a GNAT bug, this currently
+         --  runs invalid generated machine code.
+         (P_Id_Bigint_Array, Bigint_Array_Value, True),
+
+         (P_Id_Bigint_Iterator, Create_Iterator, False));
+   begin
+      for T of Tests loop
+         if not T.Disabled then
+            Put_Line ("Eval_Member: " & Debug_Name (T.Member) & ":");
+            Value := Eval_Member (Example_Value, T.Member, (1 => T.Input));
+            Inspect (Value);
+            New_Line;
+         end if;
+      end loop;
+   end;
 
    Put_Title ("Type matching");
 

@@ -53,8 +53,10 @@ class Example : FooNode {
     @export fun id_unit_array(id: Array[AnalysisUnit[FooNode]]): Array[AnalysisUnit[FooNode]] =
     id
 
-    @export fun id_bigint_iterator(id: Array[BigInt]): Iterator[BigInt] =
-    id.to_iterator()
+    @export fun create_bigint_iterator(): Iterator[BigInt] =
+    [BigInt(1), BigInt(2), BigInt(3)].to_iterator()
+
+    @export fun id_bigint_iterator(id: Iterator[BigInt]): Iterator[BigInt] = id
 
     @export fun id_dflt_bool(id: Bool = true): Bool = id
 

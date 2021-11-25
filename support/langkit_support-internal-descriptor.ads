@@ -117,6 +117,10 @@ package Langkit_Support.Internal.Descriptor is
    type Create_Struct_Type is access function
      (Struct_Type : Type_Index;
       Values      : Internal_Value_Array) return Internal_Value_Access;
+   type Eval_Node_Member_Type is access function
+     (Node      : Internal_Acc_Node;
+      Member    : Struct_Member_Index;
+      Arguments : Internal_Value_Array) return Internal_Value_Access;
 
    type Language_Descriptor is limited record
       Language_Name : Text_Access;
@@ -191,9 +195,10 @@ package Langkit_Support.Internal.Descriptor is
 
       --  Operations to build/inspect generic data types
 
-      Create_Enum   : Create_Enum_Type;
-      Create_Array  : Create_Array_Type;
-      Create_Struct : Create_Struct_Type;
+      Create_Enum      : Create_Enum_Type;
+      Create_Array     : Create_Array_Type;
+      Create_Struct    : Create_Struct_Type;
+      Eval_Node_Member : Eval_Node_Member_Type;
    end record;
 
    function "+" is new Ada.Unchecked_Conversion
