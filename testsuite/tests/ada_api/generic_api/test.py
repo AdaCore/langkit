@@ -70,6 +70,10 @@ class Example(FooNode):
     id_bigint_array = Property(lambda id=T.BigInt.array: id, public=True)
     id_unit_array = Property(lambda id=T.AnalysisUnit.array: id, public=True)
 
+    # Test for iterators
+    id_bigint_iterator = Property(lambda id=T.BigInt.array: id.to_iterator,
+                                  public=True)
+
     # Test for default values
     id_dflt_bool = Property(lambda id=(T.Bool, True): id, public=True)
     id_dflt_int = Property(lambda id=(T.Int, 42): id, public=True)

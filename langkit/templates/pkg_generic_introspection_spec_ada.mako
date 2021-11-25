@@ -32,7 +32,13 @@ private package ${ada_lib_name}.Generic_Introspection is
       node_types = ctx.astnode_types
       entity_types = [t.entity for t in node_types]
 
-      all_types = G.enum_types + G.array_types + G.struct_types + entity_types
+      all_types = (
+         G.enum_types
+         + G.array_types
+         + G.iterator_types
+         + G.struct_types
+         + entity_types
+      )
 
       # Fetch all exposed types that are not listed above (builtin types)
       other_types = [t for t in T.all_types
@@ -82,6 +88,8 @@ private package ${ada_lib_name}.Generic_Introspection is
                return debug_name(t.element_type)
             elif t.is_array_type:
                return f"{debug_name(t.element_type)}.array"
+            elif t.is_iterator_type:
+               return f"{debug_name(t.element_type)}.iterator"
             else:
                return t.dsl_name
       %>

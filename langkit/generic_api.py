@@ -5,7 +5,7 @@ from typing import List, Optional, Union
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, ArrayType, CompiledType, EntityType,
-    EnumType, StructType
+    EnumType, IteratorType, StructType
 )
 import langkit.names as names
 
@@ -36,6 +36,13 @@ class GenericAPI:
         return [t for t in self.context.array_types if t.exposed]
 
     @property
+    def iterator_types(self) -> List[IteratorType]:
+        """
+        Return the list of public iterator types for this context.
+        """
+        return [t for t in self.context.iterator_types if t.exposed]
+
+    @property
     def struct_types(self) -> List[StructType]:
         """
         Return the list of public struct types for this context.
@@ -54,11 +61,13 @@ class GenericAPI:
         if isinstance(t, ASTNodeType):
             t = t.entity
 
-        return (
-            f"{self.type_name(t.element_type)}_Array"
-            if isinstance(t, ArrayType)
-            else names.Name.from_camel(t.type_repo_name).camel_with_underscores
-        )
+        if isinstance(t, ArrayType):
+            return f"{self.type_name(t.element_type)}_Array"
+        elif isinstance(t, IteratorType):
+            return f"{self.type_name(t.element_type)}_Iterator"
+        else:
+            return (names.Name.from_camel(t.type_repo_name)
+                    .camel_with_underscores)
 
     def type_index(self, t: Optional[CompiledType]) -> str:
         """
