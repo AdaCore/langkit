@@ -264,6 +264,19 @@ package Langkit_Support.Generic_API.Introspection is
    --  * it does not reference an array;
    --  * ``Index`` is out of bounds for this array value.
 
+   --------------------
+   -- Iterator types --
+   --------------------
+
+   function Is_Iterator_Type (T : Type_Ref) return Boolean;
+   --  Return whether ``T`` references an iterator type.
+   --
+   --  All functions below will raise a ``Precondition_Failure`` if passed a
+   --  type which does not satisfy this predicate as ``T`` formals.
+
+   function Iterator_Element_Type (T : Type_Ref) return Type_Ref;
+   --  Return the type of elements in ``T`` iterators
+
    -----------------------
    -- Struct/node types --
    -----------------------

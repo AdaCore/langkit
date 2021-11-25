@@ -76,6 +76,7 @@ procedure Introspection_Types is
    First_Node, Last_Node     : Any_Type_Index := No_Type_Index;
    First_Enum, Last_Enum     : Any_Type_Index := No_Type_Index;
    First_Array, Last_Array   : Any_Type_Index := No_Type_Index;
+   First_Iter, Last_Iter     : Any_Type_Index := No_Type_Index;
    First_Struct, Last_Struct : Any_Type_Index := No_Type_Index;
 
    Last_Member : constant Struct_Member_Ref :=
@@ -84,6 +85,7 @@ procedure Introspection_Types is
    Invalid_Node   : Type_Ref;
    Invalid_Enum   : Type_Ref;
    Invalid_Array  : Type_Ref;
+   Invalid_Iter   : Type_Ref;
    Invalid_Struct : Type_Ref;
 
    Dummy_Bool       : Boolean;
@@ -123,6 +125,13 @@ begin
             end if;
             Last_Array := Index;
 
+         elsif Is_Iterator_Type (T) then
+            Put_Line ("  is an iterator");
+            if First_Iter = No_Type_Index then
+               First_Iter := Index;
+            end if;
+            Last_Iter := Index;
+
          elsif Is_Struct_Type (T) then
             Put_Line ("  is a struct");
             if First_Struct = No_Type_Index then
@@ -143,6 +152,7 @@ begin
    Invalid_Node := From_Index (Id, First_Node - 1);
    Invalid_Enum := From_Index (Id, First_Node);
    Invalid_Array := From_Index (Id, First_Node);
+   Invalid_Iter := From_Index (Id, First_Node);
    Invalid_Struct := From_Index (Id, First_Enum);
 
    Put ("Language_For: null T argument: ");
@@ -350,6 +360,51 @@ begin
    Put ("Non-array T argument: ");
    begin
       Dummy_Type := Array_Element_Type (Invalid_Array);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   ------------------------------
+   -- Iterator type primitives --
+   ------------------------------
+
+   Put_Title ("Iterator types");
+   for Index in First_Iter .. Last_Iter loop
+      declare
+         T : constant Type_Ref := From_Index (Id, Index);
+      begin
+         Put (Debug_Name (T));
+         Put_Line ("Iterator of " & Debug_Name (Iterator_Element_Type (T)));
+         New_Line;
+      end;
+   end loop;
+
+   Put ("Is_Iterator_Type: Null T argument: ");
+   begin
+      Dummy_Bool := Is_Iterator_Type (No_Type_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Iterator_Element_Type:");
+   Put ("Null T argument: ");
+   begin
+      Dummy_Type := Iterator_Element_Type (No_Type_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-iterator T argument: ");
+   begin
+      Dummy_Type := Iterator_Element_Type (Invalid_Iter);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>

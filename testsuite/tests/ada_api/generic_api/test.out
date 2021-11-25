@@ -144,6 +144,7 @@ All types
 * AnalysisUnit.array
   is an array
 * BigInt.iterator
+  is an iterator
 * NodeResult
   is a struct
 * Point
@@ -247,6 +248,17 @@ Is_Array_Type: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: nul
 Invalid args for Array_Element_Type:
 Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-array T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid array type
+
+Iterator types
+==============
+
+BigInt.iteratorIterator of BigInt
+
+Is_Iterator_Type: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+
+Invalid args for Iterator_Element_Type:
+Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+Non-iterator T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid iterator type
 
 Structs
 =======

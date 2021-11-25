@@ -89,6 +89,10 @@ package body Langkit_Support.Generic_API.Introspection is
    --  If ``T`` is not a valid array type for the given language, raise a
    --  ``Precondition_Failure`` exception.
 
+   procedure Check_Iterator_Type (T : Type_Ref);
+   --  If ``T`` is not a valid iterator type for the given language, raise a
+   --  ``Precondition_Failure`` exception.
+
    procedure Check_Base_Struct_Type (T : Type_Ref);
    --  If ``T`` is not a valid base struct type for the given language, raise a
    --  ``Precondition_Failure`` exception.
@@ -912,6 +916,37 @@ package body Langkit_Support.Generic_API.Introspection is
       V := Base_Internal_Array_Value_Access (Value.Value);
       return Create_Value (V.Id, +V.Array_Item (Index));
    end Array_Item;
+
+   ----------------------
+   -- Is_Iterator_Type --
+   ----------------------
+
+   function Is_Iterator_Type (T : Type_Ref) return Boolean is
+   begin
+      Check_Type (T);
+      return T.Index in T.Id.Iterator_Types.all'Range;
+   end Is_Iterator_Type;
+
+   -------------------------
+   -- Check_Iterator_Type --
+   -------------------------
+
+   procedure Check_Iterator_Type (T : Type_Ref) is
+   begin
+      if not Is_Iterator_Type (T) then
+         raise Precondition_Failure with "invalid iterator type";
+      end if;
+   end Check_Iterator_Type;
+
+   ---------------------------
+   -- Iterator_Element_Type --
+   ---------------------------
+
+   function Iterator_Element_Type (T : Type_Ref) return Type_Ref is
+   begin
+      Check_Iterator_Type (T);
+      return From_Index (T.Id, T.Id.Iterator_Types.all (T.Index).Element_Type);
+   end Iterator_Element_Type;
 
    -------------------------
    -- Is_Base_Struct_Type --

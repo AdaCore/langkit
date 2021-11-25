@@ -99,6 +99,17 @@ package Langkit_Support.Internal.Introspection is
      not null access constant Array_Type_Descriptor_Array;
 
    -------------------------------
+   -- Iterator type descriptors --
+   -------------------------------
+
+   --  For now, iterator types have the same characteristics as array types
+
+   subtype Iterator_Type_Descriptor is Array_Type_Descriptor;
+   subtype Iterator_Type_Descriptor_Array is Array_Type_Descriptor_Array;
+   subtype Iterator_Type_Descriptor_Array_Access is
+     Array_Type_Descriptor_Array_Access;
+
+   -------------------------------
    -- Struct member descriptors --
    -------------------------------
 

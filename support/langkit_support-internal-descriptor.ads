@@ -136,11 +136,12 @@ package Langkit_Support.Internal.Descriptor is
 
       --  Descriptors for introspection capabilities
 
-      Types         : Type_Descriptor_Array_Access;
-      Enum_Types    : Enum_Type_Descriptor_Array_Access;
-      Array_Types   : Array_Type_Descriptor_Array_Access;
-      Struct_Types  : Struct_Type_Descriptor_Array_Access;
-      Builtin_Types : Builtin_Types_Access;
+      Types          : Type_Descriptor_Array_Access;
+      Enum_Types     : Enum_Type_Descriptor_Array_Access;
+      Array_Types    : Array_Type_Descriptor_Array_Access;
+      Iterator_Types : Iterator_Type_Descriptor_Array_Access;
+      Struct_Types   : Struct_Type_Descriptor_Array_Access;
+      Builtin_Types  : Builtin_Types_Access;
 
       First_Node : Type_Index;
       --  Index of the first node descriptor in ``Struct_Types``. In
