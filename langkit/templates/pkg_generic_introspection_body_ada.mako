@@ -504,6 +504,90 @@ package body ${ada_lib_name}.Generic_Introspection is
       end case;
    end Create_Struct;
 
+   ----------------------
+   -- Eval_Node_Member --
+   ----------------------
+
+   function Eval_Node_Member
+     (Node      : Internal_Acc_Node;
+      Member    : Struct_Member_Index;
+      Arguments : Internal_Value_Array) return Internal_Value_Access
+   is
+      Int_Entity : constant Implementation.${root_entity.name} :=
+        +Langkit_Support.Internal.Conversions.Unwrap_Node (Node.Value);
+      N          : constant ${root_entity.api_name} :=
+        Public_Converters.Wrap_Node.all (Int_Entity.Node, Int_Entity.Info);
+      Kind       : constant ${T.node_kind} := N.Kind;
+      Result     : Internal_Value_Access;
+   begin
+      <%
+         def add_member_actions(node_expr, m):
+            """
+            Return the code to run in order to evaluate the ``m`` member on
+            ``node_expr``.
+            """
+            public_type = m.type.public_type
+
+            # First unwrap arguments (if any) into local variables
+            arg_vars = []
+            args_decls = []
+            args_stmts = []
+            for i, arg in enumerate(m.arguments, 1):
+               var_name = f"Arg_{arg.name}"
+               arg_vars.append(
+                  value_to_public(
+                     var_name, f"Arguments ({i})", arg.type,
+                     args_decls, args_stmts,
+                  )
+               )
+
+            # Then evaluate the member itself
+            eval_decls = []
+            eval_stmts = []
+            call_args = f" ({', '.join(arg_vars)})" if arg_vars else ""
+            call_expr = f"{node_expr}.{m.api_name}{call_args}"
+            public_to_value("R", call_expr, m.type, eval_decls, eval_stmts)
+            eval_stmts.append("Result := Internal_Value_Access (R);")
+
+            return declare_block(
+               args_decls,
+               args_stmts + declare_block(eval_decls, eval_stmts),
+            )
+
+         def get_actions(node_type, node_expr):
+            """
+            Callback for CompileCtx.generate_actions_for_hierarchy.
+
+            Return the code to run in order to evaluate ``Member`` on the
+            ``node_expr`` node, whose type matches ``node_type``.
+            """
+            result = []
+
+            # Handle all public members (we should have only syntax fields and
+            # properties).
+            members = node_type.get_abstract_node_data(
+               lambda m: m.is_public,
+               include_inherited=False,
+            )
+            if members:
+               result.append("case Member is")
+               for m in members:
+                  result.append(f"when {G.member_index(m)} =>")
+                  result.extend(add_member_actions(node_expr, m))
+
+               result.append("when others => null;")
+               result.append("end case;");
+
+            return "\n".join(result)
+      %>
+
+      ${ctx.generate_actions_for_hierarchy(
+         "N", "Kind", get_actions, public_nodes=True
+      )}
+      pragma Assert (Result /= null);
+      return Result;
+   end Eval_Node_Member;
+
    --------------
    -- Set_Unit --
    --------------

@@ -49,41 +49,43 @@ Parsing example.txt...
 Has example.txt? -> TRUE
 Has foo.txt? -> FALSE
 Line 2:
-  "var b = 1 + a;"
+  "var a = 0;"
 Traversing its parsing tree...
-<FooNodeList example.txt:1:1-2:15>
-<VarDecl example.txt:1:1-1:11>
-<Name example.txt:1:5-1:6>
-<Number example.txt:1:9-1:10>
-<VarDecl example.txt:2:1-2:15>
+<FooNodeList example.txt:1:1-3:15>
+<Example example.txt:1:1-1:8>
+<VarDecl example.txt:2:1-2:11>
 <Name example.txt:2:5-2:6>
-<Addition example.txt:2:9-2:14>
 <Number example.txt:2:9-2:10>
-<Ref example.txt:2:13-2:14>
-<Name example.txt:2:13-2:14>
+<VarDecl example.txt:3:1-3:15>
+<Name example.txt:3:5-3:6>
+<Addition example.txt:3:9-3:14>
+<Number example.txt:3:9-3:10>
+<Ref example.txt:3:13-3:14>
+<Name example.txt:3:13-3:14>
 
 Testing various node operations:
 Root.Is_Null -> FALSE
 Root.Next_Sibling.Image -> None
 Root.Next_Sibling.Is_Null -> TRUE
-Root.Child (2).Image -> <VarDecl example.txt:2:1-2:15>
-Root.Child (2).Previous_Sibling.Image -> <VarDecl example.txt:1:1-1:11>
+Root.Child (2).Image -> <VarDecl example.txt:2:1-2:11>
+Root.Child (2).Previous_Sibling.Image -> <Example example.txt:1:1-1:8>
 [...].Previous_Sibling = [...] -> TRUE
 [...].Previous_Sibling = [...].Previous_Sibling.Next_Sibling -> FALSE
 Root.Children:
-  -> <VarDecl example.txt:1:1-1:11>
-  -> <VarDecl example.txt:2:1-2:15>
+  -> <Example example.txt:1:1-1:8>
+  -> <VarDecl example.txt:2:1-2:11>
+  -> <VarDecl example.txt:3:1-3:15>
 
 Testing various token operations:
 No_Lk_Token.Is_Null -> TRUE
 First_Token.Is_Null -> FALSE
-First_Token.Kind -> Var
-First_Token.Image -> <Token Kind=Var Text="var">
+First_Token.Kind -> Example
+First_Token.Image -> <Token Kind=Example Text="example">
 No_Lk_Token.Image -> <No Token>
-First_Token.Text -> "var"
+First_Token.Text -> "example"
 No_Lk_Token.Text -> Got a Precondition_Failure exception: null token
 No_Lk_Token.Next -> <No Token>
-First_Token.Next -> <Token Kind=Whitespace Text=" ">
+First_Token.Next -> <Token Kind=Whitespace Text="\x0a">
 Last_Token.Next -> <No Token>
 No_Lk_Token.Previous -> <No Token>
 First_Token.Previous -> <No Token>
@@ -102,7 +104,7 @@ First_Token < Stale -> Got a Stale_Reference_Error exception: unit was reparsed
 Stale < Last_Token -> Got a Stale_Reference_Error exception: unit was reparsed
 
 Testing text range for various cases:
-First_Token .. Last_Token: -> "var a = 0;\x0avar b = 1 + a;\x0a# Comment\x0a"
+First_Token .. Last_Token: -> "example\x0avar a = 0;\x0avar b = 1 + a;\x0a# Comment\x0a"
 First_Token .. No_Lk_Token: -> Got a Precondition_Failure exception: tokens from different units
 No_Lk_Token .. Last_Token: -> Got a Precondition_Failure exception: tokens from different units
 First_Token .. Other_Unit -> Got a Precondition_Failure exception: tokens from different units
@@ -435,11 +437,12 @@ For Example
   P_Id_Expr_Array (Example.p_id_expr_array: 35)
   P_Id_Bigint_Array (Example.p_id_bigint_array: 36)
   P_Id_Unit_Array (Example.p_id_unit_array: 37)
-  P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 38)
-  P_Id_Dflt_Bool (Example.p_id_dflt_bool: 39)
-  P_Id_Dflt_Int (Example.p_id_dflt_int: 40)
-  P_Id_Dflt_Char (Example.p_id_dflt_char: 41)
-  P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 42)
+  P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 38)
+  P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 39)
+  P_Id_Dflt_Bool (Example.p_id_dflt_bool: 40)
+  P_Id_Dflt_Int (Example.p_id_dflt_int: 41)
+  P_Id_Dflt_Char (Example.p_id_dflt_char: 42)
+  P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 43)
 
 For Expr
   Parent (FooNode.parent: 11)
@@ -781,35 +784,41 @@ P_Id_Unit_Array (Example.p_id_unit_array: 37)
   arguments:
     Id: AnalysisUnit.array
 
-P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 38)
+P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 38)
+  owner: Example
+  is a property
+  type: BigInt.iterator
+  no argument
+
+P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 39)
   owner: Example
   is a property
   type: BigInt.iterator
   arguments:
-    Id: BigInt.array
+    Id: BigInt.iterator
 
-P_Id_Dflt_Bool (Example.p_id_dflt_bool: 39)
+P_Id_Dflt_Bool (Example.p_id_dflt_bool: 40)
   owner: Example
   is a property
   type: Bool
   arguments:
     Id: Bool
 
-P_Id_Dflt_Int (Example.p_id_dflt_int: 40)
+P_Id_Dflt_Int (Example.p_id_dflt_int: 41)
   owner: Example
   is a property
   type: Int
   arguments:
     Id: Int
 
-P_Id_Dflt_Char (Example.p_id_dflt_char: 41)
+P_Id_Dflt_Char (Example.p_id_dflt_char: 42)
   owner: Example
   is a property
   type: Character
   arguments:
     Id: Character
 
-P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 42)
+P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 43)
   owner: Example
   is a property
   type: FooNode
@@ -871,13 +880,13 @@ Inspect: 1:2-3:4
   Type_Of: SourceLocationRange
 Inspect: "hello, world!"
   Type_Of: String
-Inspect: <Token Kind=Var Text="var">
+Inspect: <Token Kind=Example Text="example">
   Type_Of: Token
 Inspect: Symbol("foo_bar42")
   Type_Of: Symbol
 Inspect: <No node>
   Type_Of: FooNode
-Inspect: <FooNodeList example.txt:1:1-2:15>
+Inspect: <FooNodeList example.txt:1:1-3:15>
   Type_Of: FooNode.list
 
 Enum values introspection
@@ -912,6 +921,23 @@ Array_Item: index checks
   ( 4): LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: out-of-bounds array index
   ( 5): LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: out-of-bounds array index
 
+Iterator values introspection
+=============================
+
+Iterator_Next: null value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
+Iterator_Next: value type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: non-iterator value
+
+Full iteration through Iterator_Next:
+Inspect: Iterator on BigInt
+  Type_Of: BigInt.iterator
+
+Inspect: BigInt(1)
+  Type_Of: BigInt
+Inspect: BigInt(2)
+  Type_Of: BigInt
+Inspect: BigInt(3)
+  Type_Of: BigInt
+
 Struct values introspection
 ===========================
 
@@ -923,12 +949,70 @@ Create_Struct: value count mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE
 Inspect: Point("hello world!", BigInt(10), BigInt(20))
   Type_Of: Point
 Eval_Member: null struct value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
-Eval_Member: invalid struct type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct type
+Eval_Member: invalid struct type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid base struct type
 Eval_Member: no such member: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Point does not have the NodeResult.n member
 Eval_Member: too many arguments: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Point takes 0 arguments but got 1 values
+Eval_Member: argument type mismatch: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: unexpected type for argument 1
+Eval_Member: no such node member: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: FooNode.list does not have the Example.p_id_bool member
 Eval_Member: Point_Label on Point("hello world!", BigInt(10), BigInt(20)):
 Inspect: "hello world!"
   Type_Of: String
+
+Eval_Member: Example.p_id_bool:
+Inspect: True
+  Type_Of: Bool
+
+Eval_Member: Example.p_id_int:
+Inspect: 42
+  Type_Of: Int
+
+Eval_Member: Example.p_id_bigint:
+Inspect: BigInt(1234567890987654321)
+  Type_Of: BigInt
+
+Eval_Member: Example.p_id_char:
+Inspect: 'A'
+  Type_Of: Character
+
+Eval_Member: Example.p_id_token:
+Inspect: <Token Kind=Example Text="example">
+  Type_Of: Token
+
+Eval_Member: Example.p_id_sym:
+Inspect: Symbol("foobar")
+  Type_Of: Symbol
+
+Eval_Member: Example.p_id_unit:
+Inspect: <Unit for example.txt>
+  Type_Of: AnalysisUnit
+
+Eval_Member: Example.p_id_root_node:
+Inspect: <FooNodeList example.txt:1:1-3:15>
+  Type_Of: FooNode.list
+
+Eval_Member: Example.p_id_name:
+Inspect: <No node>
+  Type_Of: FooNode
+
+Eval_Member: Example.p_id_name:
+Inspect: <Name example.txt:2:5-2:6>
+  Type_Of: Name
+
+Eval_Member: Example.p_id_unit_kind:
+Inspect: Analysis_Unit_Kind(UNIT_SPECIFICATION)
+  Type_Of: AnalysisUnitKind
+
+Eval_Member: Example.p_id_node_array:
+Inspect: Array of 1 FooNode elements
+  Type_Of: FooNode.array
+
+Eval_Member: Example.p_id_expr_array:
+Inspect: Array of 1 Expr elements
+  Type_Of: Expr.array
+
+Eval_Member: Example.p_id_bigint_iterator:
+Inspect: Iterator on BigInt
+  Type_Of: BigInt.iterator
 
 Type matching
 =============
@@ -936,11 +1020,11 @@ Type matching
 Basic cases:
 32 matches Int? True
 32 matches Bool? False
-<FooNodeList example.txt:1:1-2:15> matches Bool? False
+<FooNodeList example.txt:1:1-3:15> matches Bool? False
 
 Nodes:
-<FooNodeList example.txt:1:1-2:15> matches FooNode? True
-<FooNodeList example.txt:1:1-2:15> matches VarDecl? False
+<FooNodeList example.txt:1:1-3:15> matches FooNode? True
+<FooNodeList example.txt:1:1-3:15> matches VarDecl? False
 <No node> matches FooNode? True
 <No node> matches VarDecl? True
 

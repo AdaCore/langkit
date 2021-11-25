@@ -391,6 +391,13 @@ private package ${ada_lib_name}.Generic_Introspection is
    First_Property : constant Struct_Member_Index :=
      ${G.member_index(ctx.sorted_properties[0])};
 
+   function Eval_Node_Member
+     (Node      : Internal_Acc_Node;
+      Member    : Struct_Member_Index;
+      Arguments : Internal_Value_Array) return Internal_Value_Access;
+   --  Implementation for the Eval_Node_Member operation in the language
+   --  descriptor.
+
    Builtin_Types : aliased constant Builtin_Types_Record :=
      (Analysis_Unit         => ${G.type_index(T.AnalysisUnit)},
       Big_Int               => ${G.type_index(T.BigInt)},
