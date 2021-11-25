@@ -44,6 +44,17 @@ except libfoolang.StaleReferenceError:
     print("... got a stale reference error")
 print("")
 
+print_title("Bigint iterator")
+
+print("Base array:")
+for x in u.root.p_bigint_array:
+    print(f"  {x}")
+
+print("Iteration:")
+for x in u.root.p_bigint_iterator:
+    print(f"  {x}")
+print("")
+
 print_title("Entity iterator")
 
 print("Base array:")
