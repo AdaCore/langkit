@@ -1082,6 +1082,18 @@ class GrammarDecl(Decl):
         add_env()
     )
 
+    @langkit_property()
+    def check_correctness_pre():
+        # Grammar declarations can only contain grammar rules
+        return Entity.rules.filtermap(
+            lambda r: r.error(
+                r.decl.decl_type_name
+                .concat(S(" forbidden in "))
+                .concat(Entity.decl_type_name)
+            ),
+            lambda r: Not(r.decl.is_a(T.GrammarRuleDecl)),
+        )
+
 
 @abstract
 class BaseGrammarRuleDecl(Decl):

@@ -14,7 +14,7 @@ annotated_grammar_2.lkt:4:1: error: Lexer expected, got <GrammarDecl "foo_gramma
 Code generation was successful
 
 == invalid_decl.lkt ==
-invalid_decl.lkt:6:5: error: grammar rule expected
+invalid_decl.lkt:6:5: error: grammar declaration forbidden in grammar declaration
 5 |     @with_lexer(foo_lexer) grammar unexpected_decl {
   |     ^                                               
 
