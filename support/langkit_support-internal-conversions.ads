@@ -39,6 +39,15 @@ package Langkit_Support.Internal.Conversions is
    --  expose them in the Langkit_Support.Generic_API package tree: publish
    --  here declarations as proxies to the implementations in
    --  Langkit_Support.Generic_API bodies.
+   --
+   --  Converters for analysis contexts.  See the corresponding export
+   --  declaration in Langkit_Support.Generic_API.Analysis.
+
+   function Wrap_Context
+     (Id : Language_Id; Context : Internal_Context) return Lk_Context
+     with Import, External_Name => "lksp__wrap_context";
+   function Unwrap_Context (Context : Lk_Context) return Internal_Context
+      with Import, External_Name => "lksp__unwrap_context";
 
    --  Converters for analysis units.  See the corresponding export declaration
    --  in Langkit_Support.Generic_API.Analysis.

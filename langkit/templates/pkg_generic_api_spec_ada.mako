@@ -1,6 +1,10 @@
 ## vim: filetype=makoada
 
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
+with Langkit_Support.Generic_API.Analysis;
+use Langkit_Support.Generic_API.Analysis;
+
+with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 
 package ${ada_lib_name}.Generic_API is
 
@@ -11,10 +15,15 @@ package ${ada_lib_name}.Generic_API is
    Self_Id : Language_Id renames ${ctx.lang_name}_Lang_Id;
    --  Shortcut for convenience in code generation
 
-private
+   function To_Generic_Context (Context : Analysis_Context) return Lk_Context;
+   --  Convert the given ``Context`` into a value suitable to use in the
+   --  Langkit generic API.
 
-   procedure Dummy;
-   --  Dummy procedure so that this spec is allowed to have a body. See the
-   --  body's hack to provide the Language_Id constant.
+   function From_Generic_Context
+     (Context : Lk_Context) return Analysis_Context;
+   --  Convert the ``Context`` value from the Langkit generic API into the
+   --  ${ada_lib_name}-specific context type. Raise a
+   --  ``Langkit_Support.Errors.Precondition_Failure`` if ``Context`` does not
+   --  belong to ${ada_lib_name}.
 
 end ${ada_lib_name}.Generic_API;

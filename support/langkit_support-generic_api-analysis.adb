@@ -34,6 +34,13 @@ with Langkit_Support.Types;        use Langkit_Support.Types;
 
 package body Langkit_Support.Generic_API.Analysis is
 
+   function Wrap_Context
+     (Id : Language_Id; Context : Internal_Context) return Lk_Context
+     with Export, External_Name => "lksp__wrap_context";
+   function Unwrap_Context (Context : Lk_Context) return Internal_Context
+      with Export, External_Name => "lksp__unwrap_context";
+   --  Public/private converters for contexts
+
    function Wrap_Unit
      (Id : Language_Id; Unit : Internal_Unit) return Lk_Unit
      with Export, External_Name => "lksp__wrap_unit";
@@ -1078,6 +1085,33 @@ package body Langkit_Support.Generic_API.Analysis is
       end if;
    end Finalize;
 
+   ------------------
+   -- Wrap_Context --
+   ------------------
+
+   function Wrap_Context
+     (Id : Language_Id; Context : Internal_Context) return Lk_Context
+   is
+   begin
+      if Context = No_Internal_Context then
+         return No_Lk_Context;
+      end if;
+
+      Id.Context_Inc_Ref (Context);
+      return (Ada.Finalization.Controlled with
+              Desc     => Id,
+              Internal => Context);
+   end Wrap_Context;
+
+   --------------------
+   -- Unwrap_Context --
+   --------------------
+
+   function Unwrap_Context (Context : Lk_Context) return Internal_Context is
+   begin
+      return Context.Internal;
+   end Unwrap_Context;
+
    ---------------
    -- Wrap_Unit --
    ---------------
@@ -1092,12 +1126,7 @@ package body Langkit_Support.Generic_API.Analysis is
       end if;
 
       Context := Id.Unit_Context (Unit);
-      Id.Context_Inc_Ref (Context);
-
-      return (Internal => Unit,
-              Context  => (Ada.Finalization.Controlled with
-                           Desc     => Id,
-                           Internal => Context));
+      return (Internal => Unit, Context => Wrap_Context (Id, Context));
    end Wrap_Unit;
 
    -----------------

@@ -8,7 +8,8 @@ use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Names;       use Langkit_Support.Names;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with Libfoolang.Generic_API;
+with Libfoolang.Analysis;
+with Libfoolang.Generic_API; use Libfoolang.Generic_API;
 
 procedure Analysis is
    Id : Language_Id renames Libfoolang.Generic_API.Foo_Lang_Id;
@@ -277,6 +278,31 @@ begin
       when Exc : Stale_Reference_Error =>
          Put_Line ("Got a Stale_Reference_Error exception: "
                    & Exception_Message (Exc));
+   end;
+   New_Line;
+
+   Put_Line ("Check generic/specific context type converters");
+   declare
+      Gen_Ctx : Lk_Context := Create_Context (Id);
+      Spe_Ctx : Libfoolang.Analysis.Analysis_Context :=
+        From_Generic_Context (Gen_Ctx);
+
+      Dummy_Unit : Libfoolang.Analysis.Analysis_Unit;
+   begin
+      --  Create an analysis unit while the context can only be referenced
+      --  through language-specific types.
+
+      Gen_Ctx := No_Lk_Context;
+      Dummy_Unit :=
+        Spe_Ctx.Get_From_Buffer (Filename => "foo.txt", Buffer => "example");
+      Dummy_Unit := Libfoolang.Analysis.No_Analysis_Unit;
+
+      --  Now switch back to the generic type and make sure the context is
+      --  functional.
+
+      Gen_Ctx := To_Generic_Context (Spe_Ctx);
+      Spe_Ctx := Libfoolang.Analysis.No_Analysis_Context;
+      Put_Line (Gen_Ctx.Get_From_File ("foo.txt").Root.Image);
    end;
    New_Line;
 end Analysis;
