@@ -3,12 +3,12 @@ from __future__ import annotations
 import inspect
 from itertools import count
 import types
-from typing import List, Optional
+from typing import Callable, List, Optional, Union
 
 import funcy
 
 from langkit import names
-from langkit.compiled_types import get_context
+from langkit.compiled_types import CompiledType, get_context
 from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
@@ -159,6 +159,112 @@ class CollectionExpression(AbstractExpression):
         self.requires_index = index_var is not None
         self.index_var = index_var
 
+    def create_iteration_var(
+        self,
+        existing_var: Optional[AbstractVariable],
+        name_prefix: str,
+        source_name: Optional[str] = None,
+        type: Optional[CompiledType] = None
+    ) -> AbstractVariable:
+        """
+        Create (when needed) an iteration variable and assign it (when
+        provided) a source name.
+
+        :param existing_var: Existing iteration variable. If provided, do not
+            create a new variable.
+        :param name_prefix: Prefix for the name of this variable in the
+            generated code.
+        :param source_name: If available, name of this variable in the DSL.
+        :param type: Type for the variable.
+        """
+        if existing_var is None:
+            result = AbstractVariable(
+                names.Name(f"{name_prefix}_{next(self._counter)}"),
+                type=type,
+            )
+        else:
+            assert type == existing_var.type, (
+                    f"Inconsistent type for {existing_var}: {type} and"
+                    f" {existing_var.type}"
+            )
+            result = existing_var
+
+        if result.source_name is None and source_name is not None:
+            result.source_name = names.Name.from_lower(source_name)
+
+        return result
+
+    def prepare_iter_function(
+        self,
+        what: str,
+        expr_fn: Union[Callable[[AbstractExpression], AbstractExpression],
+                       Callable[[AbstractExpression, AbstractExpression],
+                                AbstractExpression]]
+    ) -> AbstractExpression:
+        """
+        Validate an iteration function, whether it only takes the iteration
+        element or also the iteration index.
+
+        Return the abstract expression to evaluate for each iteration.
+
+        :param what: Purpose of this function. Used for diagnostics.
+        :param expr_fn: Function to prepare.
+        """
+        check_type(
+            expr_fn,
+            types.FunctionType,
+            "{what} passed to a collection expression must be a lambda or a"
+            " function"
+        )
+
+        argspec = inspect.getargspec(expr_fn)
+
+        check_multiple([
+            (len(argspec.args) in (1, 2),
+             'Invalid collection iteration lambda: only one'
+             ' or two parameters expected'),
+            (not argspec.varargs and not argspec.keywords,
+             'Invalid collection iteration lambda: no *args or **kwargs'),
+            (not argspec.defaults,
+             'Invalid collection iteration lambda: No default values allowed'
+             ' for arguments')
+        ])
+
+        # Get source names for the iteration variables
+        index_required = False
+        index_varname: Optional[str] = None
+        element_varname: Optional[str] = None
+        if len(argspec.args) == 2:
+            index_required = True
+            self.requires_index = True
+            index_varname = argspec.args[0]
+            element_varname = argspec.args[1]
+        else:
+            element_varname = argspec.args[0]
+
+        # We are interested in names from user sources: disregard names from
+        # the default functions function we define here.
+        if expr_fn in builtin_collection_functions:
+            index_varname = None
+            element_varname = None
+
+        # Make sure we have an iteration element variable
+        self.element_var = self.create_iteration_var(
+            self.element_var, "Item", element_varname
+        )
+
+        # Expand the function. If the index is required, make sure we have an
+        # iteration variable for it.
+        if index_required:
+            self.index_var = self.create_iteration_var(
+                self.index_var, "Index", index_varname, T.Int
+            )
+            expr = expr_fn(self.index_var, self.element_var)  # type: ignore
+        else:
+            expr = expr_fn(self.element_var)  # type: ignore
+
+        return unsugar(expr)
+
     def do_prepare(self):
         # When this expression does not come from our Python DSL (see the
         # initialize method above), the sub-expression is ready to use: do not
@@ -166,48 +272,8 @@ class CollectionExpression(AbstractExpression):
         if self.expr is not None:
             return
 
-        argspec = inspect.getargspec(self.expr_fn)
-
-        check_multiple([
-            (len(argspec.args) in (1, 2),
-             'Invalid collection iteration lambda: only one '
-             'or two parameters expected'),
-            (not argspec.varargs and not argspec.keywords,
-             'Invalid collection iteration lambda: no *args or **kwargs'),
-            (not argspec.defaults,
-             'Invalid collection iteration lambda: No default values allowed '
-             'for arguments')
-        ])
-
-        if len(argspec.args) == 2:
-            self.requires_index = True
-            index_var_pos = 0
-            item_var_pos = 1
-        else:
-            self.requires_index = False
-            index_var_pos = None
-            item_var_pos = 0
-
-        # Get the name of the loop variable from the DSL. But don't when we
-        # have a "default" one, such as for using the ".filter" combinator. In
-        # this case, it's up to ".filter"'s special implementation to get the
-        # name from the filter function.
-        source_name = (None if self.expr_fn == collection_expr_identity else
-                       names.Name.from_lower(argspec.args[item_var_pos]))
-
-        self.element_var = AbstractVariable(
-            names.Name("Item_{}".format(next(CollectionExpression._counter))),
-            source_name=source_name
-        )
-        if self.requires_index:
-            self.index_var = AbstractVariable(
-                names.Name('I'), type=T.Int,
-                source_name=names.Name.from_lower(argspec.args[index_var_pos])
-            )
-            expr = self.expr_fn(self.index_var, self.element_var)
-        else:
-            expr = self.expr_fn(self.element_var)
-        self.expr = unsugar(expr)
+        self.expr = self.prepare_iter_function("mapping expression",
+                                               self.expr_fn)
 
     def construct_common(self):
         """
@@ -511,29 +577,12 @@ class Map(CollectionExpression):
     def do_prepare(self):
         super().do_prepare()
 
-        self.filter_expr = check_type(
-            self.filter_fn, types.FunctionType,
-            "Filter expression passed to a collection expression must be a "
-            "lambda or a function"
-        )(self.element_var)
-
-        self.take_while_expr = check_type(
-            self.take_while_pred, types.FunctionType,
-            "Take while expression passed to a collection expression must be a"
-            " lambda or a function"
-        )(self.element_var)
-
-        # If the element transformation function is actually the built-in
-        # identity function, try instead to get the source name of the loop
-        # variable from the other functions.
-        if self.element_var.source_name is None:
-            for fn in (self.filter_fn, self.take_while_pred):
-                if fn not in builtin_collection_functions:
-                    argspec = inspect.getargspec(fn)
-                    self.element_var.source_name = names.Name.from_lower(
-                        argspec.args[0]
-                    )
-                    break
+        self.filter_expr = self.prepare_iter_function("filter expression",
+                                                      self.filter_fn)
+        self.take_while_expr = self.prepare_iter_function(
+            "take while expression",
+            self.take_while_pred,
+        )
 
     def construct(self):
         """

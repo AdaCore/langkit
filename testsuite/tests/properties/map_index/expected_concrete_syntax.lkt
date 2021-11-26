@@ -6,13 +6,54 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
+
+    fun create(index: Int, number: NumberNode): IndexedNumber =
+    IndexedNumber(index=index, number=number)
 }
 
 class ListNode : FooNode {
     @parse_field nb_list: ASTList[NumberNode]
 
-    @export fun prop(): Array[Int] = node.nb_list.map((_, i) => i)
+    fun nb_list_entities(): Array[NumberNode] =
+    node.nb_list.map((n) => n.as_bare_entity)
+
+    @export fun map_no_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().map((n) => node.create(0, n))
+
+    @export fun map_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().map((n, i) => node.create(i, n))
+
+    @export fun filter_no_idx(): Array[NumberNode] =
+    node.nb_list_entities().filter((n) => n.text() = "2")
+
+    @export fun filter_idx(): Array[NumberNode] =
+    node.nb_list_entities().filter((n, i) => (n.text() = "2") or (i = 0))
+
+    @export fun filtermap_no_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().filtermap(
+        (n) => node.create(0, n), (n) => n.text() = "2"
+    )
+
+    @export fun filtermap_elt_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().filtermap(
+        (n, i) => node.create(i, n), (n, i) => n.text() = "2"
+    )
+
+    @export fun filtermap_filter_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().filtermap(
+        (n, i) => node.create(0, n), (n, i) => (n.text() = "2") or (i = 0)
+    )
+
+    @export fun filtermap_all_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().filtermap(
+        (n, i) => node.create(i, n), (n, i) => (n.text() = "2") or (i = 0)
+    )
 }
 
 class NumberNode : FooNode implements TokenNode {
+}
+
+struct IndexedNumber {
+    index: Int
+    number: NumberNode
 }
