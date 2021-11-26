@@ -1,0 +1,12 @@
+Resolving test.lkt
+==================
+test.lkt:2:5: error: value declaration forbidden in grammar declaration
+2 |     @invalid val i: Int = 0
+  |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+Id   <RefId "Int" test.lkt:2:21-2:24>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:2:27-2:28>
+     has type <StructDecl prelude: "Int">
+

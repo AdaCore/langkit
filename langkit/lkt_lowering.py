@@ -911,9 +911,7 @@ def create_grammar(ctx: CompileCtx,
         with ctx.lkt_context(full_rule):
             r = full_rule.f_decl
 
-            # Make sure we have a grammar rule
-            if not isinstance(r, L.GrammarRuleDecl):
-                error('grammar rule expected')
+            assert isinstance(r, L.GrammarRuleDecl)
             rule_name = r.f_syn_name.text
 
             # Register the main rule if the appropriate annotation is present
