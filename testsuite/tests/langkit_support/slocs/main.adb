@@ -2,7 +2,6 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
-with Langkit_Support.Text;  use Langkit_Support.Text;
 
 procedure Main is
 

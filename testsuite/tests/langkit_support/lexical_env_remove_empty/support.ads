@@ -1,5 +1,4 @@
 with Ada.Containers; use Ada.Containers;
-with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Lexical_Envs_Impl;
@@ -44,16 +43,17 @@ package Support is
 
    type Inner_Env_Assoc is null record;
    function Get_Key
-     (Self : Inner_Env_Assoc) return Langkit_Support.Symbols.Symbol_Type
+     (Dummy : Inner_Env_Assoc) return Langkit_Support.Symbols.Symbol_Type
    is (null);
-   function Get_Node (Self : Inner_Env_Assoc) return Character is (' ');
-   function Get_Metadata (Self : Inner_Env_Assoc) return Metadata
+   function Get_Node (Dummy : Inner_Env_Assoc) return Character is (' ');
+   function Get_Metadata (Dummy : Inner_Env_Assoc) return Metadata
    is (0);
 
    type Inner_Env_Assoc_Array is null record;
-   function Length (Self : Inner_Env_Assoc_Array) return Natural is (0);
+   function Length (Dummy : Inner_Env_Assoc_Array) return Natural is (0);
    function Get
-     (Self : Inner_Env_Assoc_Array; Index : Positive) return Inner_ENv_Assoc
+     (Dummy_Self  : Inner_Env_Assoc_Array;
+      Dummy_Index : Positive) return Inner_ENv_Assoc
    is (raise Program_Error);
    procedure Dec_Ref (Self : in out Inner_Env_Assoc_Array) is null;
 

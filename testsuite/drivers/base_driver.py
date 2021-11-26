@@ -179,7 +179,7 @@ class BaseDriver(DiffTestDriver):
         def format_string_list(strings):
             return ', '.join('"{}"'.format(s) for s in strings)
 
-        cargs = ['-O0', '-g', '-gnata']
+        cargs = ['-O0', '-g', '-gnata', '-gnatwae']
         if self.coverage_enabled:
             cargs += ['-fdump-scos', '-fpreserve-control-flow']
 

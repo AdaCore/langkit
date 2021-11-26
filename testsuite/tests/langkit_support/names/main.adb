@@ -5,9 +5,6 @@ with Langkit_Support.Text;  use Langkit_Support.Text;
 
 procedure Main is
 
-   function "+" (N : Text_Type) return String
-   is (Image (N, With_Quotes => True));
-
    procedure Check (Name : Text_Type; Casing : Casing_Convention);
 
    -----------

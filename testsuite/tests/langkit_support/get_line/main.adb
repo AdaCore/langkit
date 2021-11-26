@@ -2,8 +2,6 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Fixed;
 with Ada.Text_IO;    use Ada.Text_IO;
 
-with Langkit_Support.Diagnostics.Output;
-use Langkit_Support.Diagnostics.Output;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -22,7 +20,7 @@ procedure Main is
    ------------
 
    function Create (Buffer : Text_Type) return Token_Data_Handler is
-      B   : Text_Access := new Text_Type'(Buffer);
+      B   : constant Text_Access := new Text_Type'(Buffer);
       TDH : Token_Data_Handler;
    begin
       Initialize (TDH, Syms);
@@ -43,7 +41,7 @@ procedure Main is
       for I in 1 .. Lines_Count + 2 loop
          begin
             declare
-               L : Text_Type := Get_Line (TDH, I);
+               L : constant Text_Type := Get_Line (TDH, I);
             begin
                Put_Line
                  ("  Line" & I'Image & ": " & Image (L, With_Quotes => True));

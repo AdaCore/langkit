@@ -38,19 +38,19 @@ begin
    Put (V);
 
    declare
-      Tmp : Integer;
+      Dummy : Integer;
    begin
-      Tmp := V.Get (6);
+      Dummy := V.Get (6);
    exception
       when Constraint_Error =>
          Put_Line ("Out of bound access");
    end;
 
    declare
-      Tmp : Integer;
+      Dummy : Integer;
    begin
       for I in 1 .. 6 loop
-         Tmp := V.Pop;
+         Dummy := V.Pop;
       end loop;
    exception
       when System.Assertions.Assert_Failure =>

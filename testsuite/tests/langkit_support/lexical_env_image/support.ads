@@ -11,7 +11,8 @@ package Support is
 
    type String_Access is access all String;
    procedure Destroy is new Ada.Unchecked_Deallocation (String, String_Access);
-   function "<" (Left, Right : String_Access) return Boolean is (False);
+   function "<" (Dummy_Left, Dummy_Right : String_Access) return Boolean
+   is (False);
 
    type Metadata is record
       I : Integer;
@@ -53,16 +54,17 @@ package Support is
 
    type Inner_Env_Assoc is null record;
    function Get_Key
-     (Self : Inner_Env_Assoc) return Langkit_Support.Symbols.Symbol_Type
+     (Dummy : Inner_Env_Assoc) return Langkit_Support.Symbols.Symbol_Type
    is (null);
-   function Get_Node (Self : Inner_Env_Assoc) return String_Access is (null);
-   function Get_Metadata (Self : Inner_Env_Assoc) return Metadata
+   function Get_Node (Dummy : Inner_Env_Assoc) return String_Access is (null);
+   function Get_Metadata (Dummy : Inner_Env_Assoc) return Metadata
    is (Default_MD);
 
    type Inner_Env_Assoc_Array is null record;
-   function Length (Self : Inner_Env_Assoc_Array) return Natural is (0);
+   function Length (Dummy : Inner_Env_Assoc_Array) return Natural is (0);
    function Get
-     (Self : Inner_Env_Assoc_Array; Index : Positive) return Inner_ENv_Assoc
+     (Dummy_Self  : Inner_Env_Assoc_Array;
+      Dummy_Index : Positive) return Inner_ENv_Assoc
    is (raise Program_Error);
    procedure Dec_Ref (Self : in out Inner_Env_Assoc_Array) is null;
 
