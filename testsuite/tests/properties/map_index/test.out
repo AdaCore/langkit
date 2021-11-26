@@ -1,4 +1,37 @@
 main.py: Running...
-root.p_prop = [0, 1, 2, 3]
+
+== p_map_no_idx ==
+0: NumberNode(1)
+0: NumberNode(2)
+0: NumberNode(3)
+0: NumberNode(4)
+
+== p_map_idx ==
+0: NumberNode(1)
+1: NumberNode(2)
+2: NumberNode(3)
+3: NumberNode(4)
+
+== p_filter_no_idx ==
+NumberNode(2)
+
+== p_filter_idx ==
+NumberNode(1)
+NumberNode(2)
+
+== p_filtermap_no_idx ==
+0: NumberNode(2)
+
+== p_filtermap_elt_idx ==
+1: NumberNode(2)
+
+== p_filtermap_filter_idx ==
+0: NumberNode(1)
+0: NumberNode(2)
+
+== p_filtermap_all_idx ==
+0: NumberNode(1)
+1: NumberNode(2)
+
 main.py: Done.
 Done
