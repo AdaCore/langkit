@@ -114,6 +114,9 @@ Stale .. Last_Token -> Got a Stale_Reference_Error exception: unit was reparsed
 Use of stale node reference:
 Got a Stale_Reference_Error exception: unit was reparsed
 
+Check generic/specific context type converters
+<FooNodeList foo.txt:1:1-1:8>
+
 
 == introspection_types.adb ==
 
