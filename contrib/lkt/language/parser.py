@@ -1071,14 +1071,7 @@ class LexerCaseRuleSend(LktNode):
     match_size = Field(type=T.NumLit)
 
 
-@abstract
-class BaseGrammarDecl(Decl):
-    """
-    Base class for all declarations related to grammars.
-    """
-
-
-class GrammarDecl(BaseGrammarDecl):
+class GrammarDecl(Decl):
     """
     Declaration of a language's grammar.
     """
