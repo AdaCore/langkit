@@ -617,7 +617,7 @@ Parents (FooNode.parents: 12)
   is a property
   type: FooNode.array
   arguments:
-    With_Self: Bool
+    With_Self: Bool := True
 
 Children (FooNode.children: 13)
   owner: FooNode
@@ -802,28 +802,28 @@ P_Id_Dflt_Bool (Example.p_id_dflt_bool: 40)
   is a property
   type: Bool
   arguments:
-    Id: Bool
+    Id: Bool := True
 
 P_Id_Dflt_Int (Example.p_id_dflt_int: 41)
   owner: Example
   is a property
   type: Int
   arguments:
-    Id: Int
+    Id: Int := 42
 
 P_Id_Dflt_Char (Example.p_id_dflt_char: 42)
   owner: Example
   is a property
   type: Character
   arguments:
-    Id: Character
+    Id: Character := '\x00'
 
 P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 43)
   owner: Example
   is a property
   type: FooNode
   arguments:
-    Id: FooNode
+    Id: FooNode := <No node>
 
 Is_Property: Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 
@@ -844,6 +844,10 @@ Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct m
 Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
 
 Invalid args for Member_Argument_Name:
+Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
+Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
+
+Invalid args for Member_Argument_Default_Value:
 Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
 

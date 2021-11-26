@@ -113,12 +113,45 @@ package Langkit_Support.Internal.Introspection is
    -- Struct member descriptors --
    -------------------------------
 
+   type Default_Value_Kind is
+     (None,
+      Boolean_Value,
+      Integer_Value,
+      Character_Value,
+      Enum_Value,
+      Null_Node_Value);
+   type Default_Value_Descriptor (Kind : Default_Value_Kind := None) is record
+      case Kind is
+         when None =>
+            null;
+
+         when Boolean_Value =>
+            Boolean_Value : Boolean;
+
+         when Integer_Value =>
+            Integer_Value : Integer;
+
+         when Character_Value =>
+            Character_Value : Character_Type;
+
+         when Enum_Value =>
+            Enum_Type  : Type_Index;
+            Enum_Value : Enum_Value_Index;
+
+         when Null_Node_Value =>
+            null;
+      end case;
+   end record;
+
    type Argument_Descriptor is record
       Name : Text_Access;
       --  Name for this property argument in camel-with-underscores convention
 
       Argument_Type : Type_Index;
       --  Expected type for this property argument
+
+      Default_Value : Default_Value_Descriptor;
+      --  Default value for this argument
    end record;
 
    type Argument_Descriptor_Array is
