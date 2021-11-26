@@ -292,9 +292,39 @@ private package ${ada_lib_name}.Generic_Introspection is
          Arg_Name_${arg_no} : aliased constant Text_Type :=
            ${text_repr(arg.name.camel_with_underscores)};
          <%
+            val = arg.default_value
+            if val is None:
+               val_expr = "(Kind => None)"
+            elif val.type.is_bool_type:
+               val_expr = (
+                  f"(Kind => Boolean_Value, Boolean_Value => {val.value})"
+               )
+            elif val.type.is_int_type:
+               val_expr = (
+                  f"(Kind => Integer_Value, Integer_Value => {val.value})"
+               )
+            elif val.type.is_character_type:
+               val_expr = (
+                  f"(Kind            => Character_Value,"
+                  f" Character_Value => {val.ada_value})"
+               )
+            elif val.type.is_enum_type:
+               # The EnumValue.index field is 0-based, but the introspection
+               # descriptor tables expect 1-based indexes.
+               val_expr = (
+                  f"(Kind       => Enum_Value,"
+                  f" Enum_Type  => {G.type_index(val.type)},"
+                  f" Enum_Value => {val.value.index + 1})"
+               )
+            else:
+               assert val.type.public_type.is_entity_type
+               val_expr = "(Kind => Null_Node_Value)"
+
             args.append(
-               f"{arg_no} => (Name => Arg_Name_{arg_no}'Access,"
-               f" Argument_Type => {G.type_index(arg.type)})"
+               f"{arg_no} =>"
+               f" (Name          => Arg_Name_{arg_no}'Access,"
+               f"  Argument_Type => {G.type_index(arg.type)},"
+               f"  Default_Value => {val_expr})"
             )
             arg_no += 1
          %>

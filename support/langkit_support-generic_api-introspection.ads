@@ -431,6 +431,11 @@ package Langkit_Support.Generic_API.Introspection is
      (Member : Struct_Member_Ref; Argument : Argument_Index) return Name_Type;
    --  Return the name of the given property argument
 
+   function Member_Argument_Default_Value
+     (Member : Struct_Member_Ref; Argument : Argument_Index) return Value_Ref;
+   --  Return the default value for the given property argument, or
+   --  ``No_Value_Ref`` if it has no default value.
+
    function Member_Last_Argument
      (Member : Struct_Member_Ref) return Any_Argument_Index;
    --  Return the index of ``Member``'s last argument according to the given

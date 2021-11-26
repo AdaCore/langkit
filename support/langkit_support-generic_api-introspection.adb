@@ -1402,6 +1402,46 @@ package body Langkit_Support.Generic_API.Introspection is
            (Member.Index).Arguments (Argument).Argument_Type);
    end Member_Argument_Type;
 
+   -----------------------------------
+   -- Member_Argument_Default_Value --
+   -----------------------------------
+
+   function Member_Argument_Default_Value
+     (Member : Struct_Member_Ref; Argument : Argument_Index) return Value_Ref
+   is
+      Id : Language_Id;
+   begin
+      Check_Struct_Member (Member);
+      Check_Struct_Member_Argument (Member, Argument);
+      Id := Member.Id;
+      declare
+         V : Default_Value_Descriptor renames
+           Id.Struct_Members.all (Member.Index)
+           .Arguments (Argument)
+           .Default_Value;
+      begin
+         case V.Kind is
+            when None =>
+               return No_Value_Ref;
+            when Boolean_Value =>
+               return Create_Bool (Id, V.Boolean_Value);
+            when Integer_Value =>
+               return Create_Int (Id, V.Integer_Value);
+            when Character_Value =>
+               return Create_Char (Id, V.Character_Value);
+            when Enum_Value =>
+               declare
+                  T : constant Type_Ref := From_Index (Id, V.Enum_Type);
+                  E : constant Enum_Value_Ref := From_Index (T, V.Enum_Value);
+               begin
+                  return Create_Enum (E);
+               end;
+            when Null_Node_Value =>
+               return Create_Node (Id, No_Lk_Node);
+         end case;
+      end;
+   end Member_Argument_Default_Value;
+
    --------------------------
    -- Member_Argument_Name --
    --------------------------

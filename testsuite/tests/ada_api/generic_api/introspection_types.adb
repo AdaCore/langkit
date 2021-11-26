@@ -94,6 +94,7 @@ procedure Introspection_Types is
    Dummy_Type_Index : Any_Type_Index;
    Dummy_Enum_Index : Any_Enum_Value_Index;
    Dummy_Enum_Value : Enum_Value_Ref;
+   Dummy_Value      : Value_Ref;
 
 begin
    New_Line;
@@ -735,8 +736,18 @@ begin
          else
             Put_Line ("  arguments:");
             for A in 1 .. Member_Last_Argument (M) loop
-               Put_Line ("    " & (+Member_Argument_Name (M, A))
-                         & ": " & Debug_Name (Member_Argument_Type (M, A)));
+               Put ("    " & (+Member_Argument_Name (M, A))
+                    & ": " & Debug_Name (Member_Argument_Type (M, A)));
+               declare
+                  V : constant Value_Ref :=
+                    Member_Argument_Default_Value (M, A);
+               begin
+                  if V = No_Value_Ref then
+                     New_Line;
+                  else
+                     Put_Line (" := " & Image (V));
+                  end if;
+               end;
             end loop;
          end if;
       end;
@@ -857,6 +868,26 @@ begin
    Put ("Invalid Argument argument: ");
    begin
       Dummy_Name := Member_Argument_Name
+        (Last_Member, Member_Last_Argument (Last_Member) + 1);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for Member_Argument_Default_Value:");
+   Put ("Null Member argument: ");
+   begin
+      Dummy_Value := Member_Argument_Default_Value (No_Struct_Member_Ref, 1);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   Put ("Invalid Argument argument: ");
+   begin
+      Dummy_Value := Member_Argument_Default_Value
         (Last_Member, Member_Last_Argument (Last_Member) + 1);
       raise Program_Error;
    exception
