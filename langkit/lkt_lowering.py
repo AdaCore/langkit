@@ -917,16 +917,13 @@ def create_grammar(ctx: CompileCtx,
             # Register the main rule if the appropriate annotation is present
             anns = parse_annotations(ctx, GrammarRuleAnnotations, full_rule)
             if anns.main_rule:
-                check_source_language(main_rule_name is None,
-                                      'only one main rule allowed')
+                assert main_rule_name is None
                 main_rule_name = rule_name
 
             all_rules[rule_name] = r.f_expr
 
-    # Now create the result grammar. We need exactly one main rule for that.
-    with ctx.lkt_context(full_grammar):
-        check_source_language(main_rule_name is not None,
-                              'Missing main rule (@main_rule annotation)')
+    # Now create the result grammar
+    assert main_rule_name is not None
     result = Grammar(main_rule_name, Location.from_lkt_node(full_grammar))
 
     # Translate rules (all_rules) later, as node types are not available yet

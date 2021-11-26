@@ -1,12 +1,24 @@
 Resolving test.lkt
 ==================
 test.lkt:2:5: error: value declaration forbidden in grammar declaration
-2 |     @invalid val i: Int = 0
-  |     ^^^^^^^^^^^^^^^^^^^^^^^
+2 |     val i: Int = 0
+  |     ^^^^^^^^^^^^^^
 
-Id   <RefId "Int" test.lkt:2:21-2:24>
+Id   <RefId "Int" test.lkt:2:12-2:15>
      references <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:2:27-2:28>
+Expr <NumLit test.lkt:2:18-2:19>
      has type <StructDecl prelude: "Int">
+
+test.lkt:10:5: error: only one main rule allowed
+10 |     @main_rule foobar <- "foobar"
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:11:5: error: only one main rule allowed
+11 |     @main_rule baz <- "baz"
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:14:10: error: main rule missing (@main_rule annotation)
+14 | @invalid grammar main_missing {
+   |  
 

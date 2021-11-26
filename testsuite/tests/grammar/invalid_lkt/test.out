@@ -38,9 +38,9 @@ no_grammar.lkt:1:1: error: missing grammar
 
 
 == no_main_rule.lkt ==
-no_main_rule.lkt:4:1: error: Missing main rule (@main_rule annotation)
+no_main_rule.lkt:4:24: error: main rule missing (@main_rule annotation)
 3 | @with_lexer(foo_lexer) grammar foo_grammar {
-  | ^                                           
+  |                                             
 
 
 == several_main_rules.lkt ==

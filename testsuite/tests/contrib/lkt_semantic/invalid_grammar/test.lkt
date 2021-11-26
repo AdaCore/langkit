@@ -1,3 +1,16 @@
-grammar foo {
-    @invalid val i: Int = 0
+@invalid grammar bad_decl {
+    val i: Int = 0
+
+    @main_rule foo <- "foo"
+}
+
+@invalid grammar too_many_mains {
+    @main_rule foo <- "foo"
+    bar <- "bar"
+    @main_rule foobar <- "foobar"
+    @main_rule baz <- "baz"
+}
+
+@invalid grammar main_missing {
+    bar <- "bar"
 }

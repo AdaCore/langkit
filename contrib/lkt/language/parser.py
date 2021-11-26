@@ -1084,15 +1084,35 @@ class GrammarDecl(Decl):
 
     @langkit_property()
     def check_correctness_pre():
+        rules = Var(Entity.rules.filter(
+            lambda d: d.decl.is_a(T.GrammarRuleDecl)
+        ))
+
         # Grammar declarations can only contain grammar rules
-        return Entity.rules.filtermap(
-            lambda r: r.error(
-                r.decl.decl_type_name
+        non_rules = Var(Entity.rules.filtermap(
+            lambda d: d.error(
+                d.decl.decl_type_name
                 .concat(S(" forbidden in "))
                 .concat(Entity.decl_type_name)
             ),
-            lambda r: Not(r.decl.is_a(T.GrammarRuleDecl)),
-        )
+            lambda d: Not(d.decl.is_a(T.GrammarRuleDecl)),
+        ))
+
+        # Expect exactly one main grammar rule
+        main_rules = Var(rules.filter(lambda d: d.has_annotation("main_rule")))
+        extra_mains = Var(main_rules.filtermap(
+            lambda d: d.error(S("only one main rule allowed")),
+            lambda i, _: i > 0,
+        ))
+        missing_main = Var(If(
+            main_rules.empty,
+            [Self.error(S("main rule missing (@main_rule annotation)"))],
+            No(T.SemanticResult.array)
+        ))
+
+        return (non_rules
+                .concat(extra_mains)
+                .concat(missing_main))
 
 
 @abstract
