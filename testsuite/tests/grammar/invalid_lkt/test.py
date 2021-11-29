@@ -10,6 +10,11 @@ from utils import emit_and_print_errors
 
 
 for lkt_file in sorted(glob.glob('*.lkt')):
+
+    # Skip the source that contains common declarations for all tests
+    if lkt_file == "nodes.lkt":
+        continue
+
     print('== {} =='.format(lkt_file))
 
     class FooNode(ASTNode):
@@ -18,7 +23,7 @@ for lkt_file in sorted(glob.glob('*.lkt')):
     class Example(FooNode):
         token_node = True
 
-    emit_and_print_errors(lkt_file=lkt_file)
+    emit_and_print_errors(lkt_file=lkt_file, lkt_semantic_checks=True)
     print('')
 
 print('Done')

@@ -123,7 +123,8 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
                           warning_set=default_warning_set,
                           generate_unparser=False, symbol_canonicalizer=None,
                           unparse_script=None,
-                          explicit_passes_triggers={}):
+                          explicit_passes_triggers={},
+                          lkt_semantic_checks=False):
     """
     Compile and emit code the given set of arguments. Return the compile
     context if this was successful, None otherwise.
@@ -150,7 +151,8 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
 
     try:
         ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
-                              symbol_canonicalizer=symbol_canonicalizer)
+                              symbol_canonicalizer=symbol_canonicalizer,
+                              lkt_semantic_checks=lkt_semantic_checks)
         ctx.create_all_passes(
             'build', generate_unparser=generate_unparser,
             unparse_script=(UnparseScript(unparse_script)
