@@ -34,14 +34,16 @@ package body Liblktlang.Implementation.Extensions is
          end if;
 
          declare
-            Errors : constant Semantic_Result_Array :=
-              Prelude.Root.As_Langkit_Root.P_Check_Legality;
+            Sem_Results : constant Tree_Semantic_Result :=
+              Prelude.Root.As_Langkit_Root.P_Check_Semantic;
          begin
-            if Errors'Length > 0 then
-               for R of Errors loop
-                  Put_Line
-                    (Image (Analysis.Node (R).Full_Sloc_Image
-                            & Error_Message (R)));
+            if Analysis.Has_Error (Sem_Results) then
+               for R of Analysis.Results (Sem_Results) loop
+                  if Analysis.Error_Message (R) /= "" then
+                     Put_Line
+                       (Image (Analysis.Node (R).Full_Sloc_Image
+                               & Error_Message (R)));
+                  end if;
                end loop;
                raise Assertion_Error with "Errors in prelude";
             end if;
