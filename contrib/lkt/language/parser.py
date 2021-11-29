@@ -335,7 +335,29 @@ class LktNode(ASTNode):
         *know* that you can call semantic properties such as `referenced_decl`
         and `expr_type`, and those will never raise.
         """
-        return Entity.check_sem_internal()
+        res = Var(Entity.check_sem_internal())
+
+        # Crude sanity check: since for the moment the Try blocks in
+        # check_sem_internal will catch any exception happening in subcalls to
+        # semantic properties, we want to check that, if we have internal
+        # errors, we also have user errors (i.e. diagnostics). If we have an
+        # internal error and no user errors, then we caught something we were
+        # not supposed to.
+        #
+        # TODO: Assess whether this is still needed when we migrate to a better
+        # error handling mechanism (see check_semantic_impl).
+
+        errs = Var(res.results.filter(lambda r: r.has_error))
+        diags = Var(errs.filter(lambda r: Not(r.error_message.is_null)))
+
+        has_internal_errors = Var(errs.any(lambda r: r.error_message.is_null))
+
+        return If(
+            has_internal_errors & (diags.length == 0),
+            PropertyError(T.TreeSemanticResult,
+                          "ERROR: internal errors without diagnostics"),
+            res
+        )
 
     @langkit_property(return_type=T.TreeSemanticResult)
     def check_sem_internal(
@@ -374,23 +396,20 @@ class LktNode(ASTNode):
             lambda res: res.results
         ))
 
-        # Store whether any children has errors
-        children_have_errors = Var(
-            children_results.any(lambda res: res.has_error)
-        )
-
         own_results = Var(Entity.check_semantic_impl())
 
         post_diagnostics = Var(Entity.check_correctness_post())
 
-        return TreeSemanticResult.new(
-            results=pre_diagnostics.concat(aggregated_results)
+        all_diagnostics = (
+            pre_diagnostics
+            .concat(aggregated_results)
             .concat(own_results.results)
-            .concat(post_diagnostics),
-            has_error=Or(
-                children_have_errors, own_results.has_error,
-                pre_diagnostics.length > 0
-            )
+            .concat(post_diagnostics)
+        )
+
+        return TreeSemanticResult.new(
+            results=all_diagnostics,
+            has_error=all_diagnostics.any(lambda d: d.has_error),
         )
 
     @langkit_property(return_type=T.SemanticResult.array, memoized=True)
@@ -504,36 +523,6 @@ class LangkitRoot(LktNode):
     def function_type_helper(args_types=T.TypeDecl.array,
                              return_type=T.TypeDecl):
         return FunctionType.new(args=args_types, return_type=return_type)
-
-    @langkit_property(return_type=T.SemanticResult.array, public=True)
-    def check_legality():
-        """
-        Run all legality checks on this tree. Return a list of diagnostics (For
-        the moment, pending on real discriminated records, SemanticResults
-        which necessarily have an error_message).
-        """
-        res = Var(Entity.check_sem_internal())
-
-        # Crude sanity check: since for the moment the Try blocks in
-        # check_sem_internal will catch any exception happening in subcalls to
-        # semantic properties, we want to check that, if we have internal
-        # errors, we also have user errors (eg. diagnostics). If we have an
-        # internal error and no user errors, then we caught something we were
-        # not supposed to.
-        # TODO: Assess whether this is still needed when we migrate to a better
-        # error handling mechanism (see check_semantic_impl).
-
-        errs = Var(res.results.filter(lambda r: r.has_error))
-        diags = Var(errs.filter(lambda r: Not(r.error_message.is_null)))
-
-        has_internal_errors = Var(errs.any(lambda r: r.error_message.is_null))
-
-        return If(
-            has_internal_errors & (diags.length == 0),
-            PropertyError(T.SemanticResult.array,
-                          "ERROR: internal errors without diagnostics"),
-            diags
-        )
 
     env_spec = EnvSpec(do(Self.fetch_prelude))
 

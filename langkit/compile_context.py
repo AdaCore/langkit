@@ -1829,10 +1829,11 @@ class CompileCtx:
         # have syntax errors.
         if not errors and self.lkt_semantic_checks:
             for unit in self.lkt_units:
-                diags = cast(L.LangkitRoot, unit.root).p_check_legality
-                for d in diags:
-                    errors = True
-                    print_error_from_sem_result(d)
+                sem_results = cast(L.LangkitRoot, unit.root).p_check_semantic
+                errors = errors or sem_results.has_error
+                for r in sem_results.results:
+                    if r.error_message:
+                        print_error_from_sem_result(r)
 
         if errors:
             check_source_language(
