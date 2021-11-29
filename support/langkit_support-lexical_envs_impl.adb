@@ -275,10 +275,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
       -- Is_Stale --
       --------------
 
-      function Is_Stale (Env : Lexical_Env) return Boolean
-      is
+      function Is_Stale (Env : Lexical_Env) return Boolean is
          E : constant Lexical_Env_Access := Unwrap (Env);
-         L   : Lexical_Env;
+         L : Lexical_Env;
       begin
          --  Take care of the special case of empty environments, which may
          --  differ from ``Empty_Env`` in ``Env.Version`` (see above).
