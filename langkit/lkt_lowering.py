@@ -398,20 +398,11 @@ class WithLexerAnnotationSpec(AnnotationSpec):
                   ctx: CompileCtx,
                   args: List[L.Expr],
                   kwargs: Dict[str, L.Expr]) -> L.LexerDecl:
-        check_source_language(not kwargs, 'No keyword argument allowed')
-        check_source_language(len(args) == 1, 'Exactly one argument expected')
+        assert not kwargs
+        assert len(args) == 1
 
-        lexer_ref = args[0]
-        if not isinstance(lexer_ref, L.RefId):
-            error('Invalid lexer reference')
-
-        # TODO: this will raise a PropertyError if semantic resolution fails.
-        # Resolving this lexer reference should be done in the check pass so
-        # that we never land here in that case.
-        lexer_decl = check_referenced_decl(lexer_ref)
-        if not isinstance(lexer_decl, L.LexerDecl):
-            error('Lexer expected, got {}'.format(lexer_decl))
-
+        lexer_decl = check_referenced_decl(args[0])
+        assert isinstance(lexer_decl, L.LexerDecl)
         return lexer_decl
 
 

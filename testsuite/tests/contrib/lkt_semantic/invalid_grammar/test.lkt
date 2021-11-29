@@ -1,16 +1,18 @@
-@invalid grammar bad_decl {
+import lexer_example
+
+@invalid @with_lexer(foo_lexer) grammar bad_decl {
     val i: Int = 0
 
     @main_rule foo <- "foo"
 }
 
-@invalid grammar too_many_mains {
+@invalid @with_lexer(foo_lexer) grammar too_many_mains {
     @main_rule foo <- "foo"
     bar <- "bar"
     @main_rule foobar <- "foobar"
     @main_rule baz <- "baz"
 }
 
-@invalid grammar main_missing {
+@invalid @with_lexer(foo_lexer) grammar main_missing {
     bar <- "bar"
 }
