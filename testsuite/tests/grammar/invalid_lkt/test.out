@@ -30,11 +30,6 @@ invalid_token.lkt:4:30: error: Cannot find entity `UnknownToken` in this scope
 3 |     @main_rule main_rule <- @UnknownToken
   |                              ^^^^^^^^^^^^
 
-warning: Errors during LKT analysis
-invalid_token.lkt:4:29: error: Unknown token: UnknownToken
-3 |     @main_rule main_rule <- @UnknownToken
-  |                             ^^^^^^^^^^^^^
-
 
 == no_grammar.lkt ==
 no_grammar.lkt:1:1: error: missing grammar
@@ -56,11 +51,6 @@ several_main_rules.lkt:6:5: error: only one main rule allowed
 
 == transform_invalid_node.lkt ==
 transform_invalid_node.lkt:5:29: error: Cannot find entity `NoSuchNode` in this scope
-4 |     @main_rule main_rule <- NoSuchNode("example")
-  |                             ^^^^^^^^^^           
-
-warning: Errors during LKT analysis
-transform_invalid_node.lkt:5:29: error: Unknown node: NoSuchNode
 4 |     @main_rule main_rule <- NoSuchNode("example")
   |                             ^^^^^^^^^^           
 
