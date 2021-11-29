@@ -5,9 +5,9 @@ annotated_grammar_1.lkt:4:24: error: Invalid annotation: foo
 
 
 == annotated_grammar_2.lkt ==
-annotated_grammar_2.lkt:4:1: error: Lexer expected, got <GrammarDecl "foo_grammar" annotated_grammar_2.lkt:4:26-6:2>
+annotated_grammar_2.lkt:4:13: error: reference to a lexer expected
 3 | @with_lexer(foo_grammar) grammar foo_grammar {
-  | ^^^^^^^^^^^^^^^^^^^^^^^^                      
+  |             ^^^^^^^^^^^                       
 
 
 == basic.lkt ==
