@@ -634,7 +634,11 @@ def print_error(message: str,
 
 def print_error_from_sem_result(sem_result: L.SemanticResult) -> None:
     """
-    Prints an error from an lkt semantic result.
+    Emit an error from an Lkt semantic result.
     """
-    print_error(sem_result.error_message,
-                Location.from_lkt_node(sem_result.node))
+    with diagnostic_context(
+        Location.from_lkt_node(sem_result.node)
+    ):
+        check_source_language(False,
+                              sem_result.error_message,
+                              severity=Severity.non_blocking_error)

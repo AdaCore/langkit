@@ -1825,20 +1825,23 @@ class CompileCtx:
                         Location.from_sloc_range(unit, diag.sloc_range)
                     )
 
+        # Then check for semantic errors either because requested
+        # (self.lkt_semantic_checks) or because everything is loaded from Lkt
+        # sources.
+        #
+        # NOTE: we cannot automatically enable semantic checks when
+        # types_from_lkt is false, as in this case Liblktlang may not be able
+        # to handle some property DSL feature.
+        #
         # NOTE: for the moment let's not even try to analyze anything if we
         # have syntax errors.
-        if not errors and self.lkt_semantic_checks:
+        if not errors and (self.lkt_semantic_checks or self.types_from_lkt):
             for unit in self.lkt_units:
                 sem_results = cast(L.LangkitRoot, unit.root).p_check_semantic
                 errors = errors or sem_results.has_error
                 for r in sem_results.results:
                     if r.error_message:
                         print_error_from_sem_result(r)
-
-        if errors:
-            check_source_language(
-                False, "Errors during LKT analysis", severity=Severity.warning
-            )
 
     def prepare_compilation(self):
         """
@@ -1959,6 +1962,7 @@ class CompileCtx:
         return [
             MajorStepPass('Lkt processing'),
             GlobalPass('Lkt semantic analysis', CompileCtx.check_lkt),
+            errors_checkpoint_pass,
             GlobalPass('lower Lkt', CompileCtx.lower_lkt),
             GlobalPass('prepare compilation', CompileCtx.prepare_compilation),
 
