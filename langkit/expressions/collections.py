@@ -1009,6 +1009,9 @@ class Join(AbstractExpression):
         self.separator = separator
         self.strings = strings
 
+    def __repr__(self):
+        return '<Join>'
+
     def construct(self):
         separator = construct(self.separator, T.String)
         strings = construct(self.strings, T.String.array)
