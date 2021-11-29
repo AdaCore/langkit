@@ -1,4 +1,9 @@
 import lexer_example
+import nodes
 
-grammar foo_grammar1 {}
-grammar foo_grammar2 {}
+@with_lexer(foo_lexer) grammar foo_grammar1 {
+    @main_rule main_rule <- Example("example")
+}
+@with_lexer(foo_lexer) grammar foo_grammar2 {
+    @main_rule main_rule <- Example("example")
+}

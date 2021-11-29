@@ -1,6 +1,9 @@
 import lexer_example
+import nodes
 
-grammar foo_grammar {
-    grammar unexpected_decl {
+@with_lexer(foo_lexer) grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+    @with_lexer(foo_lexer) grammar unexpected_decl {
+        @main_rule main_rule <- Example("example")
     }
 }
