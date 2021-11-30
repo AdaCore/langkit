@@ -407,19 +407,16 @@ Expr <StringLit test.lkt:31:29-31:32>
 Expr <ArrayLiteral test.lkt:31:21-31:33>
      has type <InstantiatedGenericType prelude: "Array[String]">
 
-test.lkt:31:36: error: Mismatched types: expected `String`, got a number literal
-31 | @invalid val a11 = [[bar(), "2"], [1, 2]]
-   |                                    ^
+Expr <NumLit test.lkt:31:36-31:37>
+     has type <StructDecl prelude: "Int">
 
-test.lkt:31:39: error: Mismatched types: expected `String`, got a number literal
-31 | @invalid val a11 = [[bar(), "2"], [1, 2]]
-   |                                       ^
+Expr <NumLit test.lkt:31:39-31:40>
+     has type <StructDecl prelude: "Int">
 
-test.lkt:31:35: error: Mismatched types: expected `Array[String]`, got an array
+test.lkt:31:35: error: Mismatched types: expected `Array[String]`, got `Array[Int]`
 31 | @invalid val a11 = [[bar(), "2"], [1, 2]]
    |                                   ^^^^^^
 
-test.lkt:31:20: error: ambiguous type for expression
-31 | @invalid val a11 = [[bar(), "2"], [1, 2]]
-   |                    ^^^^^^^^^^^^^^^^^^^^^^
+Expr <ArrayLiteral test.lkt:31:20-31:42>
+     has type <InstantiatedGenericType prelude: "Array[Array[String]]">
 

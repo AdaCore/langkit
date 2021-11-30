@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun increment(kv: KV): KV = kv.update(value=kv.value + BigInt(1))
+    @export fun increment(kv: KV): KV = kv.update(value=kv.value + 1b)
 }
 
 class Example : FooNode implements TokenNode {

@@ -78,6 +78,7 @@ class Token(LexerToken):
     Char = WithText()
     DocComment = WithText()
     Number = WithText()
+    BigNumber = WithText()
 
 
 lkt_lexer = Lexer(Token)
@@ -163,6 +164,7 @@ lkt_lexer.add_rules(
 
     # Numbers
     (Pattern('[0-9]+'),    Token.Number),
+    (Pattern('[0-9]+b'),   Token.BigNumber),
 
     # Strings & chars
     (Pattern('{STRING_LIT}'),         Token.String),

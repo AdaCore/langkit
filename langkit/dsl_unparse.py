@@ -1187,9 +1187,10 @@ def emit_expr(expr, **ctx):
         return json.dumps(expr.value)
 
     elif isinstance(expr, BigIntLiteral):
-        return 'BigInt({})'.format(str(expr.expr)
-                                   if isinstance(expr.expr, int) else
-                                   ee(expr.expr))
+        if isinstance(expr.expr, int):
+            return f'{expr.expr}b'
+        else:
+            return f'BigInt({ee(expr.expr)})'
     elif isinstance(expr, RefCategories):
         return 'RefCats({})'.format(', '.join(
             '{}={}'.format(name, ee(value))
