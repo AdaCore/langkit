@@ -22,6 +22,8 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
+print(f".p_check_big_literal = {u.root.p_check_big_literal}")
+
 for decl in u.root:
     expr = decl.f_expr_tree
     big_int = expr.p_evaluate

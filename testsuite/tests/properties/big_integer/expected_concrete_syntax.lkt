@@ -20,6 +20,9 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 
     @export fun identity(value: BigInt): BigInt = value
+
+    @export fun check_big_literal(): BigInt =
+    BigInt(99999999999999999999999999999999999999999999)
 }
 
 class Decl : FooNode {
@@ -38,9 +41,9 @@ class Equal : Expr {
     @parse_field left: Expr
     @parse_field right: Expr
 
-    fun evaluate(): BigInt = BigInt(if (
+    fun evaluate(): BigInt = if (
         node.left.evaluate() = node.right.evaluate()
-    ) then (1) else (0))
+    ) then BigInt(1) else BigInt(0)
 }
 
 class LessThan : Expr {

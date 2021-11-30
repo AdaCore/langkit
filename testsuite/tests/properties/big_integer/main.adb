@@ -25,6 +25,8 @@ begin
       raise Program_Error;
    end if;
 
+   Put_Line ("P_Check_Big_Literal: " & U.Root.P_Check_Big_Literal.Image);
+
    for I in 1 .. U.Root.Children_Count loop
       declare
          D  : constant Decl := U.Root.Child (I).As_Decl;
