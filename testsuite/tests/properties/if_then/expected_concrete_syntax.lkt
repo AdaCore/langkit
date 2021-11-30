@@ -11,5 +11,5 @@ grammar foo_grammar {
 class Example : FooNode {
 
     @export fun foo(): Example =
-    (if (true) then node else node).do((s) => s).as_bare_entity
+    (if true then node else node).do((s) => s).as_bare_entity
 }

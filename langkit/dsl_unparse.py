@@ -578,7 +578,7 @@ def needs_parens(expr):
                                      Super)
     return not (
         isinstance(expr, (FieldAccess, Literal, AbstractVariable, BigIntLiteral, EnvGet,
-                          Map, Quantifier, Super))
+                          Map, Quantifier, Super, int))
         or expr_is_a(expr, "as_entity", "as_bare_entity", "children",
               "env_parent", "rebindings_parent", "parents", "parent", "root",
               "append_rebinding", "concat_rebindings", "env_node",

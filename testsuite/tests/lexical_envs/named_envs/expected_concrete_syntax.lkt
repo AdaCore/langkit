@@ -83,7 +83,7 @@ grammar foo_grammar {
         (node.parent is ASTList[FooNode, FooNode]) and (
             (node.parent.parent.is_null) or node.parent.parent.can_have_name()
         )
-    ) else (false)
+    ) else false
 
     ## Assuming this node can define a named environment (see
     ## ``can_have_name``), return its fully qualified namem.
