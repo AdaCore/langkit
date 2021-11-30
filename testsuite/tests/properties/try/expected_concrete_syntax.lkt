@@ -13,7 +13,7 @@ class Example : FooNode {
     fun failing_property(): Bool = raise PropertyError()
 
     @export fun failsafe_property(): Bool =
-    try node.failing_property() else (false)
+    try node.failing_property() else false
 
     @export fun failsafe_property_2(): Bool =
     try node.failing_property()

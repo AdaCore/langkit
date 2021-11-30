@@ -33,7 +33,7 @@ class ExampleNode : TestNode {
     # case 1
     elif (x = 1) then (
         # increment
-        x + (1)
+        x + 1
     )
     # otherwise double
     else (x + x)
@@ -45,10 +45,10 @@ class ExampleNode : TestNode {
 
         # call foo
         # no way!
-        if (true) then (
+        if true then (
             # haha
             # second
-            if (false) then (
+            if false then (
                 # nope
                 12
             ) else (
