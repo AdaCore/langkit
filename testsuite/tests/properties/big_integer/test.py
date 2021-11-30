@@ -18,6 +18,10 @@ class FooNode(ASTNode):
     def identity(value=T.BigInt):
         return value
 
+    @langkit_property(public=True)
+    def check_big_literal():
+        return BigIntLiteral(99999999999999999999999999999999999999999999)
+
 
 class Decl(FooNode):
     name = Field(type=T.Identifier)
@@ -80,8 +84,9 @@ class Equal(Expr):
 
     @langkit_property()
     def evaluate():
-        return BigIntLiteral(If(Self.left.evaluate == Self.right.evaluate,
-                                1, 0))
+        return If(Self.left.evaluate == Self.right.evaluate,
+                  BigIntLiteral(1),
+                  BigIntLiteral(0))
 
 
 class LessThan(Expr):
