@@ -752,8 +752,17 @@ class Expr(LktNode):
 
             ),
 
-            lambda elsif_branch=T.ElsifBranch:
-            elsif_branch.parent.cast_or_raise(T.Expr).expected_type,
+            lambda elsif_branch=T.ElsifBranch: If(
+                # If we are typing the condition expression in the elsif
+                # branch, we know it must be a boolean.
+                Entity == elsif_branch.cond_expr,
+                Self.bool_type,
+
+                # Otherwise, we must be typing the result expression: use type
+                # info from the whole "if" expression.
+                elsif_branch.parent.parent.cast_or_raise(T.IfExpr)
+                .if_expected_type
+            ),
 
             lambda if_expr=T.IfExpr: If(
                 # If we're resolving the type of the condition expression, then
@@ -761,8 +770,9 @@ class Expr(LktNode):
                 Entity == if_expr.cond_expr,
                 Self.bool_type,
 
-                # Else, we're in a branch, use the expected type
-                if_expr.expected_type
+                # Else, we're in a branch: use type info from the whole "if"
+                # expression.
+                if_expr.if_expected_type
             ),
 
             lambda err_on_null=T.ErrorOnNull: err_on_null.expected_type,
@@ -3240,6 +3250,39 @@ class IfExpr(Expr):
     then_expr = Field(type=T.Expr)
     alternatives = Field(type=T.ElsifBranch.list)
     else_expr = Field(type=T.Expr)
+
+    @langkit_property(return_type=T.Expr.entity.array)
+    def result_exprs():
+        """
+        All expressions that compute a result.
+        """
+        return (
+            Entity.then_expr.singleton
+            .concat(Entity.alternatives.map(lambda alt: alt.then_expr))
+            .concat(Entity.else_expr.singleton)
+        )
+
+    @langkit_property()
+    def expr_context_free_type():
+        # Return the context type of the first alternative that has a non-null
+        # one.
+        #
+        # TODO: we should actually get the most-specific common ancestor of all
+        # context free types (for nodes).
+        return (
+            Entity.result_exprs
+            .map(lambda expr: expr.expr_context_free_type)
+            .find(lambda t: Not(t.is_null))
+        )
+
+    @langkit_property(return_type=T.TypeDecl.entity)
+    def if_expected_type():
+        """
+        Helper to handle ``if`` expressions in ``Expr.expected_type``.
+        """
+        # Use the if expression context free type if available, otherwise
+        # fallback on its expected type.
+        return Entity.expr_context_free_type._or(Entity.expected_type)
 
 
 class ElsifBranch(LktNode):
