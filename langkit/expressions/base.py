@@ -5290,6 +5290,11 @@ class BigIntLiteral(AbstractExpression):
     Turn an integer value into a big integer one.
     """
 
+    # TODO: the class name is misleading: this is a literal only if the given
+    # expression is an integer value. When it is a more complex expression,
+    # this is actually a conversion (from the Int type to BigInt). We should
+    # rename this once the transition to Lkt is completed.
+
     class Expr(CallExpr):
         def __init__(self, expr, abstract_expr=None):
             super().__init__(
