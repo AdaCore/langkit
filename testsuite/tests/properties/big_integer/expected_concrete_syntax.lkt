@@ -50,9 +50,11 @@ class LessThan : Expr {
     @parse_field left: Expr
     @parse_field right: Expr
 
-    fun evaluate(): BigInt = BigInt(if (
-        node.left.evaluate() < node.right.evaluate()
-    ) then (1) else (0))
+    fun evaluate(): BigInt = (
+        if (
+            node.left.evaluate() < node.right.evaluate()
+        ) then (1) else (0)
+    ).as_big_int()
 }
 
 class Literal : Expr implements TokenNode {

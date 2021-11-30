@@ -1193,7 +1193,7 @@ def emit_expr(expr, **ctx):
         if isinstance(expr.expr, int):
             return f'{expr.expr}b'
         else:
-            return f'BigInt({ee(expr.expr)})'
+            return f'{ee_pexpr(expr.expr)}.as_big_int()'
     elif isinstance(expr, RefCategories):
         return 'RefCats({})'.format(', '.join(
             '{}={}'.format(name, ee(value))
