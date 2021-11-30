@@ -5297,13 +5297,14 @@ class BigIntLiteral(AbstractExpression):
 
     class Expr(CallExpr):
         def __init__(self, expr, abstract_expr=None):
+            self.bigint_expr = expr
             super().__init__(
                 'Big_Int', 'Create_Big_Integer', T.BigInt,
                 [expr], abstract_expr=abstract_expr
             )
 
         def __repr__(self):
-            return '<BigInteger.Expr {}>'.format(self.expr)
+            return '<BigInteger.Expr {}>'.format(self.bigint_expr)
 
     def __init__(self, expr):
         super().__init__()
