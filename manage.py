@@ -8,7 +8,7 @@ from pathlib import PurePath
 import shutil
 import subprocess
 import sys
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 from langkit.packaging import Packager
 from langkit.utils import (LibraryTypes, add_to_path, format_setenv,
@@ -21,6 +21,24 @@ SUPPORT_GPR = str(SUPPORT_ROOT / "langkit_support.gpr")
 LKT_LIB_ROOT = LANGKIT_ROOT / "contrib" / "lkt"
 PYTHON_LIB_ROOT = LANGKIT_ROOT / "contrib" / "python"
 
+LIB_ROOTS = {"python": PYTHON_LIB_ROOT, "lkt": LKT_LIB_ROOT}
+
+
+def selected_libs(args: Namespace) -> List[str]:
+    """
+    Return the name of the libs on which to operate (--lib command line
+    argument).
+    """
+    return args.lib or ["python", "lkt"]
+
+
+def selected_lib_roots(args: Namespace) -> List[str]:
+    """
+    Return paths to the libraries on which to operate (--lib command line
+    argument).
+    """
+    return [LIB_ROOTS[lib] for lib in selected_libs(args)]
+
 
 def create_subparser(
     subparsers: _SubParsersAction,
@@ -30,6 +48,7 @@ def create_subparser(
     with_no_lksp: bool = False,
     with_gargs: bool = False,
     with_build_dir: bool = False,
+    with_libs: bool = False,
     accept_unknown_args: bool = False,
 ) -> ArgumentParser:
     """
@@ -41,6 +60,7 @@ def create_subparser(
         option.
     :param bool with_gargs: Whether to create the --gargs option.
     :param bool with_build_dir: Whether to create the --build-dir option.
+    :param bool with_libs: Whether to create the --lib option.
     """
     subparser = subparsers.add_parser(
         name=fn.__name__.replace('_', '-'),
@@ -76,6 +96,12 @@ def create_subparser(
             '--build-dir',
             help='Use a non-default build directory. This allows out-of-tree'
                  ' builds.'
+        )
+    if with_libs:
+        subparser.add_argument(
+            "--lib", "-l", choices=("python", "lkt"), action="append",
+            help="Select which libraries on which to operate. By default, work"
+                 " on all libraries."
         )
 
     def wrapper(args: Namespace, rest: List[str]):
@@ -188,7 +214,7 @@ def setenv(args: Namespace) -> None:
     if not args.no_langkit_support:
         setenv_langkit_support(args)
 
-    for cwd in (LKT_LIB_ROOT, PYTHON_LIB_ROOT):
+    for cwd in selected_lib_roots(args):
         subprocess.check_call(
             [sys.executable,
              "./manage.py",
@@ -218,8 +244,9 @@ def make(args: Namespace) -> None:
     #    library from the compiler, preventing langkit to run.
     # 3. Langkit cannot be used to recompile libpythonlang and liblktlang to
     #    newer versions.
-    shutil.rmtree(LKT_LIB_ROOT / 'build', ignore_errors=True)
-    shutil.rmtree(PYTHON_LIB_ROOT / 'build', ignore_errors=True)
+    if not args.lib:
+        shutil.rmtree(PYTHON_LIB_ROOT / 'build', ignore_errors=True)
+        shutil.rmtree(LKT_LIB_ROOT / 'build', ignore_errors=True)
 
     base_argv = [
         sys.executable, "./manage.py",
@@ -234,15 +261,23 @@ def make(args: Namespace) -> None:
     for gargs in args.gargs or []:
         base_argv.append(f"--gargs={gargs}")
 
-    m1 = subprocess.Popen(
-        base_argv + ["--disable-warning", "undocumented-nodes"],
-        cwd=PYTHON_LIB_ROOT
-    )
-    m2 = subprocess.Popen(base_argv, cwd=LKT_LIB_ROOT)
-    m1.wait()
-    m2.wait()
-    assert m1.returncode == 0
-    assert m2.returncode == 0
+    libs = selected_libs(args)
+    m1: Optional[subprocess.Popen] = None
+    m2: Optional[subprocess.Popen] = None
+    if "python" in libs:
+        m1 = subprocess.Popen(
+            base_argv + ["--disable-warning", "undocumented-nodes"],
+            cwd=PYTHON_LIB_ROOT
+        )
+    if "lkt" in libs:
+        m2 = subprocess.Popen(base_argv, cwd=LKT_LIB_ROOT)
+
+    if m1:
+        m1.wait()
+        assert m1.returncode == 0
+    if m2:
+        m2.wait()
+        assert m2.returncode == 0
 
 
 def test(args: Namespace, remaining_args: List[str]) -> None:
@@ -283,10 +318,12 @@ if __name__ == '__main__':
                      with_jobs=True,
                      with_no_lksp=True,
                      with_gargs=True,
-                     with_build_dir=True)
+                     with_build_dir=True,
+                     with_libs=True)
     create_subparser(subparsers, setenv,
                      with_no_lksp=True,
-                     with_build_dir=True)
+                     with_build_dir=True,
+                     with_libs=True)
 
     create_subparser(subparsers, test, accept_unknown_args=True)
 
