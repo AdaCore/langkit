@@ -1,4 +1,5 @@
 @builtin struct Int {
+    @builtin fun as_big_int(): BigInt
 }
 
 @builtin struct BigInt {

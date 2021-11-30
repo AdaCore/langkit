@@ -1,0 +1,100 @@
+Resolving test.lkt
+==================
+Id   <RefId "Int" test.lkt:3:13-3:16>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "BigInt" test.lkt:3:19-3:25>
+     references <StructDecl prelude: "BigInt">
+
+Id   <RefId "i" test.lkt:3:28-3:29>
+     references <FunArgDecl "i" test.lkt:3:10-3:16>
+
+Expr <RefId "i" test.lkt:3:28-3:29>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "as_big_int" test.lkt:3:30-3:40>
+     references <FunDecl prelude: "as_big_int">
+
+Expr <RefId "as_big_int" test.lkt:3:30-3:40>
+     has type <FunctionType prelude: "() -> BigInt">
+
+Expr <DotExpr test.lkt:3:28-3:40>
+     has type <FunctionType prelude: "() -> BigInt">
+
+Expr <CallExpr test.lkt:3:28-3:42>
+     has type <StructDecl prelude: "BigInt">
+
+Id   <RefId "BigInt" test.lkt:4:13-4:19>
+     references <StructDecl prelude: "BigInt">
+
+Id   <RefId "Int" test.lkt:4:22-4:25>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "i" test.lkt:4:28-4:29>
+     references <FunArgDecl "i" test.lkt:4:10-4:19>
+
+Expr <RefId "i" test.lkt:4:28-4:29>
+     has type <StructDecl prelude: "BigInt">
+
+Id   <RefId "as_int" test.lkt:4:30-4:36>
+     references <FunDecl prelude: "as_int">
+
+Expr <RefId "as_int" test.lkt:4:30-4:36>
+     has type <FunctionType prelude: "() -> Int">
+
+Expr <DotExpr test.lkt:4:28-4:36>
+     has type <FunctionType prelude: "() -> Int">
+
+Expr <CallExpr test.lkt:4:28-4:38>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "itob" test.lkt:6:10-6:14>
+     references <FunDecl "itob" test.lkt:3:1-3:42>
+
+Expr <RefId "itob" test.lkt:6:10-6:14>
+     has type <FunctionType prelude: "(Int) -> BigInt">
+
+Expr <NumLit test.lkt:6:15-6:16>
+     has type <StructDecl prelude: "Int">
+
+Expr <CallExpr test.lkt:6:10-6:17>
+     has type <StructDecl prelude: "BigInt">
+
+Id   <RefId "itob" test.lkt:7:19-7:23>
+     references <FunDecl "itob" test.lkt:3:1-3:42>
+
+Expr <RefId "itob" test.lkt:7:19-7:23>
+     has type <FunctionType prelude: "(Int) -> BigInt">
+
+test.lkt:7:24: error: Mismatched types: expected `Int`, got `BigInt`
+7 | @invalid val v2 = itob(1b)
+  |                        ^^
+
+Expr <CallExpr test.lkt:7:19-7:27>
+     has type <StructDecl prelude: "BigInt">
+
+Id   <RefId "btoi" test.lkt:8:10-8:14>
+     references <FunDecl "btoi" test.lkt:4:1-4:38>
+
+Expr <RefId "btoi" test.lkt:8:10-8:14>
+     has type <FunctionType prelude: "(BigInt) -> Int">
+
+Expr <BigNumLit test.lkt:8:15-8:17>
+     has type <StructDecl prelude: "BigInt">
+
+Expr <CallExpr test.lkt:8:10-8:18>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "btoi" test.lkt:9:19-9:23>
+     references <FunDecl "btoi" test.lkt:4:1-4:38>
+
+Expr <RefId "btoi" test.lkt:9:19-9:23>
+     has type <FunctionType prelude: "(BigInt) -> Int">
+
+test.lkt:9:24: error: Mismatched types: expected `BigInt`, got `Int`
+9 | @invalid val v4 = btoi(1)
+  |                        ^
+
+Expr <CallExpr test.lkt:9:19-9:26>
+     has type <StructDecl prelude: "Int">
+
