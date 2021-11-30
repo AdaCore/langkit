@@ -45,11 +45,10 @@ Id   <RefId "LexicalEnv" test.lkt:6:19-6:29>
 Id   <RefId "Int" test.lkt:6:30-6:33>
      references <StructDecl prelude: "Int">
 
-test.lkt:6:38: error: ambiguous type for expression
-6 | @invalid val foo: LexicalEnv[Int] = [1]
-  |                                      ^
+Expr <NumLit test.lkt:6:38-6:39>
+     has type <StructDecl prelude: "Int">
 
-test.lkt:6:37: error: Mismatched types: expected `LexicalEnv[Int]`, got an array
+test.lkt:6:37: error: Mismatched types: expected `LexicalEnv[Int]`, got `Array[Int]`
 6 | @invalid val foo: LexicalEnv[Int] = [1]
   |                                     ^^^
 
@@ -58,8 +57,8 @@ test.lkt:10:19: error: ambiguous type for expression
    |                   ^^
 
 test.lkt:12:19: error: ambiguous type for expression
-12 | @invalid val a3 = [1]
-   |                   ^^^
+12 | @invalid val a3 = ["foo"]
+   |                   ^^^^^^^
 
 Id   <RefId "Array" test.lkt:14:9-14:14>
      references <GenericDecl prelude: "Array">
@@ -294,11 +293,10 @@ Id   <RefId "Array" test.lkt:32:24-32:29>
 Id   <RefId "Int" test.lkt:32:30-32:33>
      references <StructDecl prelude: "Int">
 
-test.lkt:32:39: error: Mismatched types: expected `Array[Int]`, got a number literal
-32 | @invalid val a9: Array[Array[Int]] = [1]
-   |                                       ^
+Expr <NumLit test.lkt:32:39-32:40>
+     has type <StructDecl prelude: "Int">
 
-test.lkt:32:38: error: Mismatched types: expected `Array[Array[Int]]`, got an array
+test.lkt:32:38: error: Mismatched types: expected `Array[Array[Int]]`, got `Array[Int]`
 32 | @invalid val a9: Array[Array[Int]] = [1]
    |                                      ^^^
 
@@ -311,19 +309,16 @@ Id   <RefId "Array" test.lkt:33:25-33:30>
 Id   <RefId "Int" test.lkt:33:31-33:34>
      references <StructDecl prelude: "Int">
 
-test.lkt:33:42: error: ambiguous type for expression
-33 | @invalid val a10: Array[Array[Int]] = [[[1]]]
-   |                                          ^
+Expr <NumLit test.lkt:33:42-33:43>
+     has type <StructDecl prelude: "Int">
 
-test.lkt:33:41: error: Mismatched types: expected `Int`, got an array
-33 | @invalid val a10: Array[Array[Int]] = [[[1]]]
-   |                                         ^^^
+Expr <ArrayLiteral test.lkt:33:41-33:44>
+     has type <InstantiatedGenericType prelude: "Array[Int]">
 
-test.lkt:33:40: error: Mismatched types: expected `Array[Int]`, got an array
-33 | @invalid val a10: Array[Array[Int]] = [[[1]]]
-   |                                        ^^^^^
+Expr <ArrayLiteral test.lkt:33:40-33:45>
+     has type <InstantiatedGenericType prelude: "Array[Array[Int]]">
 
-test.lkt:33:39: error: Mismatched types: expected `Array[Array[Int]]`, got an array
+test.lkt:33:39: error: Mismatched types: expected `Array[Array[Int]]`, got `Array[Array[Array[Int]]]`
 33 | @invalid val a10: Array[Array[Int]] = [[[1]]]
    |                                       ^^^^^^^
 

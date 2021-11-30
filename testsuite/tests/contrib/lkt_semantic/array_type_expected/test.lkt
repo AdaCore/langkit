@@ -8,8 +8,8 @@ val c3: Array[Int] = [1, 2, 3]
 # It is impossible to infer the element type of an empty array literal, without
 # the help of type info from the context.
 @invalid val a2 = []
-# Same as above since numerical literals can be an Int or a BigInt
-@invalid val a3 = [1]
+# Same as above since string literals can be strings or symbols
+@invalid val a3 = ["foo"]
 
 val a4: Array[String] = []
 val b4: Array[String] = ["1"]

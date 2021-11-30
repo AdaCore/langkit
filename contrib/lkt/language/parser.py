@@ -3503,11 +3503,23 @@ class NumLit(Lit):
     token_node = True
 
     @langkit_property()
-    def expected_type_predicate(expected_type=T.TypeDecl.entity):
-        return Or(expected_type == Self.int_type,
-                  expected_type == Self.bigint_type)
+    def expr_context_free_type():
+        return Self.int_type
 
     invalid_expected_type_error_name = Property(S("a number literal"))
+
+
+class BigNumLit(Lit):
+    """
+    Big number literal expression.
+    """
+    token_node = True
+
+    @langkit_property()
+    def expr_context_free_type():
+        return Self.bigint_type
+
+    invalid_expected_type_error_name = Property(S("a big number literal"))
 
 
 class VarBind(LktNode):
@@ -3860,6 +3872,7 @@ lkt_grammar.add_rules(
     ),
 
     num_lit=NumLit(Lex.Number),
+    big_num_lit=BigNumLit(Lex.BigNumber),
     string_lit=StringLit(GOr(Lex.String, Lex.PString)),
     char_lit=CharLit(Lex.Char),
 
@@ -3904,6 +3917,7 @@ lkt_grammar.add_rules(
         G.ref_id,
         G.block,
         G.num_lit,
+        G.big_num_lit,
         G.string_lit,
         G.char_lit,
         G.array_literal,
