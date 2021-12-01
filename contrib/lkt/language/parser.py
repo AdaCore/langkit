@@ -296,6 +296,13 @@ class LktNode(ASTNode):
         )
 
     @langkit_property()
+    def internal_error():
+        """
+        Convenience function to return an internal error from Self.
+        """
+        return Self.error(S(""))
+
+    @langkit_property()
     def expected_type_error(expected=T.TypeDecl.entity, got=T.String):
         """
         Return an error of the form::
@@ -455,7 +462,7 @@ class LktNode(ASTNode):
         #    tedious and error prone, and is considered not worth it at this
         #    stage).
 
-        err = Var(SemanticResult.new(has_error=True))
+        err = Var(Self.internal_error)
 
         # Compute the results (resolve names + resolve types)
         results = Var(Entity.match(
@@ -621,7 +628,10 @@ class Decl(LktNode):
 
     quoted_name = Property(S("`").concat(Self.full_name).concat(S("`")))
 
-    env_spec = EnvSpec(add_to_env_kv(Entity.name, Self))
+    env_spec = EnvSpec(add_to_env_kv(
+        Entity.name,
+        Self
+    ))
 
     @langkit_property(return_type=T.Decl)
     def assert_bare():
@@ -2634,11 +2644,9 @@ class CallExpr(Expr):
     def check_correctness_pre():
 
         rd = Var(Try(Entity.name.referenced_decl,
-                     SemanticResult.new(has_error=True)))
+                     Self.name.internal_error))
 
-        et = Var(Try(
-            Entity.name.expr_type, SemanticResult.new(has_error=True)
-        ))
+        et = Var(Try(Entity.name.expr_type, Self.name.internal_error))
 
         return If(
             rd.has_error | et.has_error,
@@ -2788,9 +2796,7 @@ class CallExpr(Expr):
                     # Ensure that the instantiated generic types are the same,
                     # return an error if they're not.
                     (inst.inner_type_decl != etype.inner_type_decl),
-                    InferInstantiation.new(
-                        error=SemanticResult.new(has_error=True)
-                    ),
+                    InferInstantiation.new(error=Self.internal_error),
 
                     # If they're the same, iterate on the actuals of both
                     # types, and call ``infer_actuals_impl`` recursively,
@@ -2815,9 +2821,7 @@ class CallExpr(Expr):
                 ),
 
                 # If the expected_type is not a generic, error
-                default_val=InferInstantiation.new(
-                    error=SemanticResult.new(has_error=True)
-                ),
+                default_val=InferInstantiation.new(error=Self.internal_error),
             ),
 
             # General case: the gen type is neither a generic formal nor an
