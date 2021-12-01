@@ -1199,6 +1199,7 @@ class LktTypesLoader:
         self.string_type = root.p_string_type
         self.property_error_type = root.p_property_error_type
 
+        self.find_method = get_field(self.iterator_trait, 'find')
         self.map_method = get_field(self.iterator_trait, 'map')
         self.to_symbol_method = get_field(self.string_type, 'to_symbol')
         self.unique_method = get_field(self.array_type, 'unique')
@@ -1651,6 +1652,30 @@ class LktTypesLoader:
                     args, kwargs = lower_args()
                     assert not args
                     return E.New(struct_type, **kwargs)
+
+                elif same_node(name_decl, self.find_method):
+                    # Build variable for the iteration variable from the lambda
+                    # expression arguments.
+                    assert len(call_expr.f_args) == 1
+                    lambda_expr = call_expr.f_args[0].f_value
+                    assert isinstance(lambda_expr, L.LambdaExpr)
+                    lambda_args = lambda_expr.f_params
+
+                    # We expect excatly one argument: the collection element
+                    elt_arg, = lambda_args
+                    elt_var = var_for_lambda_arg(elt_arg, 'item')
+
+                    # Lower the collection expression
+                    assert isinstance(call_expr.f_name, L.DotExpr)
+                    coll_expr = lower(call_expr.f_name.f_prefix)
+                    filter_expr = lower(lambda_expr.f_body)
+                    filtered_expr = E.Map.create_expanded(
+                        collection=coll_expr,
+                        expr=elt_var,
+                        element_var=elt_var,
+                        filter_expr=filter_expr,
+                    )
+                    return filtered_expr.at(0)  # type: ignore
 
                 elif same_node(name_decl, self.map_method):
                     # Build variable for iteration variables from the lambda

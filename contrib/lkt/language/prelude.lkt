@@ -31,6 +31,8 @@ trait Iterator {
 
     @builtin generic[U]
     fun filtermap(map_fn: (T) -> U, filter_fn: (T) -> Bool): Array[U]
+
+    @builtin fun find(filter_fn: (T) -> Bool): T
 }
 
 @builtin generic[T]
