@@ -17,7 +17,7 @@ grammar foo_grammar {
 
 class Decl : FooNode {
     @parse_field name: Name
-    @parse_field refs: ASTList[Ref]
+    @parse_field refs: ASTList[FooNode, Ref]
 }
 
 class Name : FooNode implements TokenNode {

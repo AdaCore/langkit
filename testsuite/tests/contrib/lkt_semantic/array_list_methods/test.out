@@ -1,90 +1,111 @@
 Resolving test.lkt
 ==================
-Id   <RefId "ASTList" test.lkt:3:28-3:35>
+Id   <RefId "Node" test.lkt:3:36-3:40>
+     references <GenericDecl prelude: "Node">
+
+Id   <RefId "FooNode" test.lkt:3:41-3:48>
+     references <ClassDecl "FooNode" test.lkt:3:11-3:52>
+
+Id   <RefId "FooNode" test.lkt:4:17-4:24>
+     references <ClassDecl "FooNode" test.lkt:3:11-3:52>
+
+Id   <RefId "TokenNode" test.lkt:4:36-4:45>
+     references <TraitDecl prelude: "TokenNode">
+
+Id   <RefId "ASTList" test.lkt:6:28-6:35>
      references <GenericDecl prelude: "ASTList">
 
-Id   <RefId "String" test.lkt:3:36-3:42>
-     references <StructDecl prelude: "String">
+Id   <RefId "FooNode" test.lkt:6:36-6:43>
+     references <ClassDecl "FooNode" test.lkt:3:11-3:52>
 
-Id   <RefId "Int" test.lkt:3:46-3:49>
+Id   <RefId "Example" test.lkt:6:45-6:52>
+     references <ClassDecl "Example" test.lkt:4:1-4:48>
+
+Id   <RefId "Int" test.lkt:6:56-6:59>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "self" test.lkt:3:52-3:56>
-     references <FunArgDecl "self" test.lkt:3:22-3:43>
+Id   <RefId "self" test.lkt:6:62-6:66>
+     references <FunArgDecl "self" test.lkt:6:22-6:53>
 
-Expr <RefId "self" test.lkt:3:52-3:56>
-     has type <InstantiatedGenericType prelude: "ASTList[String]">
+Expr <RefId "self" test.lkt:6:62-6:66>
+     has type <InstantiatedGenericType prelude: "ASTList[FooNode, Example]">
 
-Id   <RefId "length" test.lkt:3:57-3:63>
+Id   <RefId "length" test.lkt:6:67-6:73>
      references <FunDecl prelude: "length">
 
-Expr <RefId "length" test.lkt:3:57-3:63>
+Expr <RefId "length" test.lkt:6:67-6:73>
      has type <FunctionType prelude: "() -> Int">
 
-Expr <DotExpr test.lkt:3:52-3:63>
+Expr <DotExpr test.lkt:6:62-6:73>
      has type <FunctionType prelude: "() -> Int">
 
-Expr <CallExpr test.lkt:3:52-3:65>
+Expr <CallExpr test.lkt:6:62-6:75>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Array" test.lkt:4:26-4:31>
+Id   <RefId "Array" test.lkt:7:26-7:31>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "String" test.lkt:4:32-4:38>
-     references <StructDecl prelude: "String">
+Id   <RefId "Example" test.lkt:7:32-7:39>
+     references <ClassDecl "Example" test.lkt:4:1-4:48>
 
-Id   <RefId "Int" test.lkt:4:42-4:45>
+Id   <RefId "Int" test.lkt:7:43-7:46>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "self" test.lkt:4:48-4:52>
-     references <FunArgDecl "self" test.lkt:4:20-4:39>
+Id   <RefId "self" test.lkt:7:49-7:53>
+     references <FunArgDecl "self" test.lkt:7:20-7:40>
 
-Expr <RefId "self" test.lkt:4:48-4:52>
-     has type <InstantiatedGenericType prelude: "Array[String]">
+Expr <RefId "self" test.lkt:7:49-7:53>
+     has type <InstantiatedGenericType prelude: "Array[Example]">
 
-Id   <RefId "length" test.lkt:4:53-4:59>
+Id   <RefId "length" test.lkt:7:54-7:60>
      references <FunDecl prelude: "length">
 
-Expr <RefId "length" test.lkt:4:53-4:59>
+Expr <RefId "length" test.lkt:7:54-7:60>
      has type <FunctionType prelude: "() -> Int">
 
-Expr <DotExpr test.lkt:4:48-4:59>
+Expr <DotExpr test.lkt:7:49-7:60>
      has type <FunctionType prelude: "() -> Int">
 
-Expr <CallExpr test.lkt:4:48-4:61>
+Expr <CallExpr test.lkt:7:49-7:62>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "ASTList" test.lkt:5:33-5:40>
+Id   <RefId "ASTList" test.lkt:8:33-8:40>
      references <GenericDecl prelude: "ASTList">
 
-Id   <RefId "String" test.lkt:5:41-5:47>
-     references <StructDecl prelude: "String">
+Id   <RefId "FooNode" test.lkt:8:41-8:48>
+     references <ClassDecl "FooNode" test.lkt:3:11-3:52>
 
-Id   <RefId "String" test.lkt:5:51-5:57>
-     references <StructDecl prelude: "String">
+Id   <RefId "Example" test.lkt:8:50-8:57>
+     references <ClassDecl "Example" test.lkt:4:1-4:48>
 
-Id   <RefId "self" test.lkt:5:60-5:64>
-     references <FunArgDecl "self" test.lkt:5:27-5:48>
+Id   <RefId "Example" test.lkt:8:61-8:68>
+     references <ClassDecl "Example" test.lkt:4:1-4:48>
 
-Expr <RefId "self" test.lkt:5:60-5:64>
-     has type <InstantiatedGenericType prelude: "ASTList[String]">
+Id   <RefId "self" test.lkt:8:71-8:75>
+     references <FunArgDecl "self" test.lkt:8:27-8:58>
 
-Expr <NumLit test.lkt:5:65-5:67>
+Expr <RefId "self" test.lkt:8:71-8:75>
+     has type <InstantiatedGenericType prelude: "ASTList[FooNode, Example]">
+
+Expr <NumLit test.lkt:8:76-8:78>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:5:60-5:68>
-     has type <StructDecl prelude: "String">
+Expr <CallExpr test.lkt:8:71-8:79>
+     has type <ClassDecl "Example" test.lkt:4:1-4:48>
 
-Id   <RefId "ASTList" test.lkt:13:39-13:46>
+Id   <RefId "ASTList" test.lkt:16:39-16:46>
      references <GenericDecl prelude: "ASTList">
 
-Id   <RefId "String" test.lkt:13:47-13:53>
+Id   <RefId "FooNode" test.lkt:16:47-16:54>
+     references <ClassDecl "FooNode" test.lkt:3:11-3:52>
+
+Id   <RefId "Example" test.lkt:16:56-16:63>
+     references <ClassDecl "Example" test.lkt:4:1-4:48>
+
+Id   <RefId "String" test.lkt:16:67-16:73>
      references <StructDecl prelude: "String">
 
-Id   <RefId "String" test.lkt:13:57-13:63>
-     references <StructDecl prelude: "String">
-
-test.lkt:13:66: error: Cannot find entity `self` in this scope
-13 | @invalid fun test_astlist_indexing(a: ASTList[String]): String = self(12)
-   |                                                                  ^^^^
+test.lkt:17:5: error: Cannot find entity `self` in this scope
+17 |     self(12)
+   |     ^^^^
 

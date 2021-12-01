@@ -12,7 +12,7 @@ grammar foo_grammar {
     (node.as[Name]).do((n) => n.unit())
 }
 
-class Scope : ASTList[Name] {
+class Scope : ASTList[FooNode, Name] {
 }
 
 @has_abstract_list class Name : FooNode implements TokenNode {

@@ -31,7 +31,7 @@ enum DeclKind {
 
 class FuncDecl : Decl {
     @parse_field name: Name
-    @parse_field args: ASTList[Name]
+    @parse_field args: ASTList[FooNode, Name]
     @parse_field expr: Expression
 
     fun decl_kind(): DeclKind = DeclKind.func

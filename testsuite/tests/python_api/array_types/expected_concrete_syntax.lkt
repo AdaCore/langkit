@@ -20,7 +20,7 @@ class Example : FooNode {
 ##
 ## * ${node_name(T.Example)}
 ## * ${node_name(T.NullNode)}
-class Sequence : ASTList[FooNode] {
+class Sequence : ASTList[FooNode, FooNode] {
 
     @export fun all_items(): Array[FooNode] = self.map((i) => i)
 

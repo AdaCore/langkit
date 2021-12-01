@@ -438,6 +438,12 @@ def sf(strn):
     return t.render(**dict(frame.f_locals, **frame.f_globals))
 
 
+def root_list_name(node):
+    from langkit.compiled_types import T
+    assert node.is_root_list_type
+    return f"ASTList[{node_name(T.root_node)}, {node_name(node.element_type)}]"
+
+
 def node_name(node):
     from langkit.compiled_types import ASTNodeType, T
     from langkit.dsl import ASTNode
@@ -453,10 +459,7 @@ def node_name(node):
         'Unexpected node type: {}'.format(repr(node))
     )
 
-    if node.is_root_list_type:
-        return 'ASTList[{}]'.format(node_name(node.element_type))
-
-    return node.dsl_name
+    return root_list_name(node) if node.is_root_list_type else node.dsl_name
 
 
 def emit_rule(rule, top_level=False):
@@ -1343,11 +1346,7 @@ def type_name(type):
             t = t.base
 
     if isinstance(type, ASTNodeType):
-        if (type.is_list_type
-                and not any(t.is_generic_list_type for t in bases(type.base))):
-            return "ASTList[{}]".format(type_name(type.element_type))
-        else:
-            return type.raw_name.camel
+        return node_name(type)
     elif type.is_character_type:
         return "Char"
     elif type.is_string_type:

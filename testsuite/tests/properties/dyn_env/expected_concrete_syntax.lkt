@@ -22,7 +22,7 @@ class ArgSpec : FooNode {
 
 class CallExpr : FooNode {
     @parse_field name: Identifier
-    @parse_field args: ASTList[Expr]
+    @parse_field args: ASTList[FooNode, Expr]
 
     @lazy args_env: LexicalEnv[FooNode] =
     DynamicLexicalEnv(BareCallExpr.args_assocs_getter)
@@ -82,7 +82,7 @@ class Ref : Expr {
 
 class FunDecl : FooNode {
     @parse_field name: Identifier
-    @parse_field args: ASTList[ArgSpec]
+    @parse_field args: ASTList[FooNode, ArgSpec]
 }
 
 class Identifier : FooNode implements TokenNode {

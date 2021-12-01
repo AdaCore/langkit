@@ -58,8 +58,8 @@ class Prefix : Name {
 
 class Scope : FooNode {
     @parse_field name: Name
-    @parse_field deps: ASTList[Dep]
-    @parse_field defs: ASTList[FooNode]
+    @parse_field deps: ASTList[FooNode, Dep]
+    @parse_field defs: ASTList[FooNode, FooNode]
 }
 
 class Var : FooNode {

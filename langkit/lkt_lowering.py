@@ -998,10 +998,13 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
 
             params = node_ref.f_params
             check_source_language(
-                len(params) == 1,
-                '1 type argument expected, got {}'.format(len(params))
+                len(params) == 2,
+                '2 type argument expected, got {}'.format(len(params))
             )
-            return resolve_node_ref(cast(NodeRefTypes, params[0])).list
+            node_params = [resolve_node_ref(cast(NodeRefTypes, p))
+                           for p in params]
+            assert node_params[0] == T.root_node
+            return node_params[1].list
 
         elif isinstance(node_ref, L.SimpleTypeRef):
             return resolve_node_ref(cast(NodeRefTypes, node_ref.f_type_name))
@@ -1270,8 +1273,10 @@ class LktTypesLoader:
                 result = self.resolve_type_decl(actuals[0]).iterator
 
             elif inner_type == self.astlist_type:
-                assert len(actuals) == 1
-                node = self.resolve_type_decl(actuals[0])
+                assert len(actuals) == 2
+                root_node = self.resolve_type_decl(actuals[0])
+                node = self.resolve_type_decl(actuals[1])
+                assert root_node == T.root_node
                 assert isinstance(node, (ASTNodeType, TypeRepo.Defer))
                 result = node.list
 

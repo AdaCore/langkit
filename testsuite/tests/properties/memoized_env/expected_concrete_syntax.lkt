@@ -12,7 +12,7 @@ grammar foo_grammar {
 
 class Block : FooNode {
     @parse_field name: Name
-    @parse_field content: ASTList[Ref]
+    @parse_field content: ASTList[FooNode, Ref]
 }
 
 class Name : FooNode implements TokenNode {

@@ -371,20 +371,20 @@ enum class CompOpKind : PythonNode {
 }
 
 class CompFor : Comprehension {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
     @parse_field target: Expr
     @parse_field comp: PythonNode
 }
 
 class CompForL : Comprehension {
-    @parse_field exprs: ASTList[Expr]
-    @parse_field target: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
+    @parse_field target: ASTList[PythonNode, Expr]
     @parse_field comp: PythonNode
 }
 
 class Decorator : PythonNode {
     @parse_field dec_name: Name
-    @parse_field arg_list: ASTList[Arg]
+    @parse_field arg_list: ASTList[PythonNode, Arg]
 }
 
 class DictAssoc : PythonNode {
@@ -431,7 +431,7 @@ class Term : BinOp {
 
 class CallExpr : Expr {
     @parse_field prefix: Expr
-    @parse_field suffix: ASTList[Arg]
+    @parse_field suffix: ASTList[PythonNode, Arg]
 }
 
 class CompOp : Expr {
@@ -442,7 +442,7 @@ class CompOp : Expr {
 
 class ConcatStringLit : Expr {
     @parse_field first_str: StringLit
-    @parse_field subsequent_str: ASTList[StringLit]
+    @parse_field subsequent_str: ASTList[PythonNode, StringLit]
 }
 
 class DictComp : Expr {
@@ -451,7 +451,7 @@ class DictComp : Expr {
 }
 
 class DictLit : Expr {
-    @parse_field assocs: ASTList[DictAssoc]
+    @parse_field assocs: ASTList[PythonNode, DictAssoc]
 }
 
 class Dot : Expr {
@@ -472,7 +472,7 @@ class IfExpr : Expr {
 }
 
 class InlineEval : Expr {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 class LambdaDef : Expr {
@@ -491,7 +491,7 @@ class ListGen : Expr {
 }
 
 class ListLit : Expr {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 @abstract class Name : Expr {
@@ -536,7 +536,7 @@ class SetComp : Expr {
 }
 
 class SetLit : Expr {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 class SliceExpr : Expr {
@@ -553,11 +553,11 @@ class StringLit : Expr implements TokenNode {
 
 class SubscriptExpr : Expr {
     @parse_field prefix: Expr
-    @parse_field suffix: ASTList[Expr]
+    @parse_field suffix: ASTList[PythonNode, Expr]
 }
 
 class TupleLit : Expr {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 class XorExpr : Expr {
@@ -566,11 +566,11 @@ class XorExpr : Expr {
 }
 
 class YieldExpr : Expr {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 class FileNode : PythonNode {
-    @parse_field statements: ASTList[PythonNode]
+    @parse_field statements: ASTList[PythonNode, PythonNode]
 }
 
 class ImportStar : PythonNode {
@@ -586,11 +586,11 @@ class Op : PythonNode implements TokenNode {
 }
 
 class Params : PythonNode {
-    @parse_field single_params: ASTList[SingleParam]
+    @parse_field single_params: ASTList[PythonNode, SingleParam]
 }
 
 class RelName : PythonNode {
-    @parse_field dots: ASTList[Dot]
+    @parse_field dots: ASTList[PythonNode, Dot]
     @parse_field name: Name
 }
 
@@ -610,12 +610,12 @@ class AssertStmt : Stmt {
 }
 
 class AssignStmt : Stmt {
-    @parse_field l_value: ASTList[Expr]
-    @parse_field r_values: ASTList[PythonNode]
+    @parse_field l_value: ASTList[PythonNode, Expr]
+    @parse_field r_values: ASTList[PythonNode, PythonNode]
 }
 
 class AugAssignStmt : Stmt {
-    @parse_field l_value: ASTList[Expr]
+    @parse_field l_value: ASTList[PythonNode, Expr]
     @parse_field op: Op
     @parse_field r_value: PythonNode
 }
@@ -627,7 +627,7 @@ class ContinueStmt : Stmt {
 }
 
 class Decorated : Stmt {
-    @parse_field decorators: ASTList[Decorator]
+    @parse_field decorators: ASTList[PythonNode, Decorator]
     @parse_field defn: DefStmt
 }
 
@@ -636,7 +636,7 @@ class Decorated : Stmt {
 
 class ClassDef : DefStmt {
     @parse_field name: Id
-    @parse_field bases: ASTList[Expr]
+    @parse_field bases: ASTList[PythonNode, Expr]
     @parse_field statements: PythonNode
 }
 
@@ -647,7 +647,7 @@ class FuncDef : DefStmt {
 }
 
 class DelStmt : Stmt {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 class ElifBranch : Stmt {
@@ -657,24 +657,24 @@ class ElifBranch : Stmt {
 
 class ExecStmt : Stmt {
     @parse_field expr: Expr
-    @parse_field in_list: ASTList[Expr]
+    @parse_field in_list: ASTList[PythonNode, Expr]
 }
 
 class ForStmt : Stmt {
-    @parse_field bindings: ASTList[Expr]
-    @parse_field expr: ASTList[Expr]
+    @parse_field bindings: ASTList[PythonNode, Expr]
+    @parse_field expr: ASTList[PythonNode, Expr]
     @parse_field statements: PythonNode
     @parse_field else_part: ElsePart
 }
 
 class GlobalStmt : Stmt {
-    @parse_field names: ASTList[Id]
+    @parse_field names: ASTList[PythonNode, Id]
 }
 
 class IfStmt : Stmt {
     @parse_field cond_test: Expr
     @parse_field statements: PythonNode
-    @parse_field elif_branchs: ASTList[ElifBranch]
+    @parse_field elif_branchs: ASTList[PythonNode, ElifBranch]
     @parse_field else_part: ElsePart
 }
 
@@ -684,32 +684,32 @@ class ImportFrom : Stmt {
 }
 
 class ImportName : Stmt {
-    @parse_field imported_names: ASTList[PythonNode]
+    @parse_field imported_names: ASTList[PythonNode, PythonNode]
 }
 
 class PassStmt : Stmt {
 }
 
 class PrintStmt : Stmt {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 class RaiseStmt : Stmt {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 class ReturnStmt : Stmt {
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 class StreamPrintStmt : Stmt {
     @parse_field stream_expr: Expr
-    @parse_field exprs: ASTList[Expr]
+    @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
 class TryStmt : Stmt {
     @parse_field statements: PythonNode
-    @parse_field except_parts: ASTList[ExceptPart]
+    @parse_field except_parts: ASTList[PythonNode, ExceptPart]
     @parse_field else_part: ElsePart
     @parse_field finally_part: PythonNode
 }
@@ -721,7 +721,7 @@ class WhileStmt : Stmt {
 }
 
 class WithStmt : Stmt {
-    @parse_field bindings: ASTList[AsNameNode]
+    @parse_field bindings: ASTList[PythonNode, AsNameNode]
     @parse_field statements: PythonNode
 }
 

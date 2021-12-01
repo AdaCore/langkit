@@ -23,8 +23,8 @@ grammar foo_grammar {
 
 class Def : FooNode {
     @parse_field name: Name
-    @parse_field imports: ASTList[DerivedRef]
-    @parse_field vars: ASTList[Var]
+    @parse_field imports: ASTList[FooNode, DerivedRef]
+    @parse_field vars: ASTList[FooNode, Var]
     @parse_field expr: Expr
 }
 

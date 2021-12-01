@@ -11,9 +11,9 @@ invalid-list-cls.lkt:4:29: error: Bad generic type name: only ASTList is valid i
 
 
 == Invalid ASTList ==
-invalid-astlist.lkt:4:29: error: 1 type argument expected, got 2
-3 |     @main_rule main_rule <- ASTList[Example, Example]+(Example("example"))
-  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+invalid-astlist.lkt:5:7: error: 2 type argument expected, got 3
+4 |       ASTList[FooNode, Example, Example]+(Example("example"))
+  |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == Non-list list_cls ==
@@ -24,8 +24,8 @@ non-list-cls.lkt:5:29: error: Invalid list type for List parser: ListNode. Not a
 
 == Invalid element type in list_cls ==
 invalid-element-type.lkt:7:9: error: Invalid list type for List parser: sub-parser produces Num nodes while Example.list accepts only Example nodes
-6 |         ASTList[Example]*(num)
-  |         ^^^^^^^^^^^^^^^^^^^^^^
+6 |         ASTList[FooNode, Example]*(num)
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Done

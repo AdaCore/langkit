@@ -20,7 +20,7 @@ grammar foo_grammar {
 
 class Def : FooNode {
     @parse_field name: Name
-    @parse_field args: ASTList[Name]
+    @parse_field args: ASTList[FooNode, Name]
     @parse_field expr: Expr
 }
 
