@@ -1,10 +1,10 @@
 Resolving test.lkt
 ==================
-Id   <RefId "C" test.lkt:7:8-7:9>
-     references <GenericFormalTypeDecl "C" test.lkt:5:10-5:11>
+Id   <RefId "T" test.lkt:7:8-7:9>
+     references <GenericFormalTypeDecl "T" test.lkt:5:10-5:11>
 
-Id   <RefId "C" test.lkt:8:8-8:9>
-     references <GenericFormalTypeDecl "C" test.lkt:5:10-5:11>
+Id   <RefId "U" test.lkt:8:8-8:9>
+     references <GenericFormalTypeDecl "U" test.lkt:5:13-5:14>
 
 Id   <RefId "Int" test.lkt:13:22-13:25>
      references <StructDecl prelude: "Int">

@@ -1,0 +1,81 @@
+Resolving test.lkt
+==================
+Id   <RefId "T" test.lkt:4:10-4:11>
+     references <GenericFormalTypeDecl "T" test.lkt:3:18-3:19>
+
+Id   <RefId "U" test.lkt:4:14-4:15>
+     references <GenericFormalTypeDecl "U" test.lkt:3:21-3:22>
+
+Id   <RefId "Char" test.lkt:6:19-6:23>
+     references <StructDecl prelude: "Char">
+
+Id   <RefId "Int" test.lkt:6:26-6:29>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:9:18-9:21>
+     references <StructDecl prelude: "Int">
+
+test.lkt:9:24: error: invalid reference to a generic
+9 | @invalid val v1: Int = no_such_func[Char, Int]('a')
+  |                        ^^^^^^^^^^^^
+
+test.lkt:9:24: error: Cannot find entity `no_such_func` in this scope
+9 | @invalid val v1: Int = no_such_func[Char, Int]('a')
+  |                        ^^^^^^^^^^^^
+
+Id   <RefId "Char" test.lkt:9:37-9:41>
+     references <StructDecl prelude: "Char">
+
+Id   <RefId "Int" test.lkt:9:43-9:46>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:12:18-12:21>
+     references <StructDecl prelude: "Int">
+
+test.lkt:12:24: error: invalid reference to a generic
+12 | @invalid val v2: Int = g[Char]('a')
+   |                        ^
+
+Id   <RefId "g" test.lkt:12:24-12:25>
+     references <FunDecl "g" test.lkt:6:10-6:29>
+
+Expr <RefId "g" test.lkt:12:24-12:25>
+     has type <FunctionType prelude: "(Char) -> Int">
+
+Id   <RefId "Char" test.lkt:12:26-12:30>
+     references <StructDecl prelude: "Char">
+
+Id   <RefId "Int" test.lkt:15:18-15:21>
+     references <StructDecl prelude: "Int">
+
+test.lkt:15:24: error: invalid number of generic parameters
+15 | @invalid val v3: Int = f[Char]('a')
+   |                        ^^^^^^^
+
+Id   <RefId "f" test.lkt:15:24-15:25>
+     references <GenericDecl "f" test.lkt:3:10-4:15>
+
+Id   <RefId "Char" test.lkt:15:26-15:30>
+     references <StructDecl prelude: "Char">
+
+Id   <RefId "Int" test.lkt:17:9-17:12>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "f" test.lkt:17:15-17:16>
+     references <GenericDecl "f" test.lkt:3:10-4:15>
+
+Id   <RefId "Char" test.lkt:17:17-17:21>
+     references <StructDecl prelude: "Char">
+
+Id   <RefId "Int" test.lkt:17:23-17:26>
+     references <StructDecl prelude: "Int">
+
+Expr <GenericInstantiation test.lkt:17:15-17:27>
+     has type <FunctionType prelude: "(Char) -> Int">
+
+Expr <CharLit test.lkt:17:28-17:31>
+     has type <StructDecl prelude: "Char">
+
+Expr <CallExpr test.lkt:17:15-17:32>
+     has type <StructDecl prelude: "Int">
+

@@ -507,6 +507,41 @@ class LktNode(ASTNode):
             p.cast(FullDecl).then(lambda fd: fd.has_annotation("invalid"))
         ).at(-1)
 
+    @langkit_property(return_type=T.SemanticResult.array)
+    def check_generic_inst_correctness_pre(
+        prefix=T.Expr.entity, params=T.TypeRef.list.entity
+    ):
+        """
+        Check that the generic instantiation for the given ``prefix`` with the
+        given ``params`` is valid.
+        """
+        # Make sure that "prefix" refers to a generic declaration
+        prefix_decl = Var(prefix.referenced_decl.result_ref)
+        gen_decl = Var(prefix_decl.cast(T.GenericDecl))
+        invalid_decl = Var(gen_decl.then(
+            lambda _: No(T.SemanticResult.array),
+            default_val=(
+                prefix.error(S("invalid reference to a generic")).singleton
+            )
+        ))
+
+        # Make sure that we have the number of type parameters required.
+        # Checking that they all are valid type references happens in
+        # the check_correctness_pre of each TypeRef.
+        invalid_params = Var(
+            If(
+                Not(gen_decl.is_null)
+                & (params.length != gen_decl.generic_formal_decls.length),
+
+                Entity.error(S("invalid number of generic parameters"))
+                .singleton,
+
+                No(T.SemanticResult.array),
+            )
+        )
+
+        return invalid_decl.concat(invalid_params)
+
 
 class LangkitRoot(LktNode):
     """
@@ -2432,6 +2467,12 @@ class GenericTypeRef(TypeRef):
             )
         ).as_bare_entity
 
+    @langkit_property()
+    def check_correctness_pre():
+        return Entity.check_generic_inst_correctness_pre(
+            Entity.type_name, Entity.params
+        )
+
 
 class FunctionTypeRef(TypeRef):
     """
@@ -3124,6 +3165,12 @@ class GenericInstantiation(Expr):
                 lambda p: p.designated_type.assert_bare
                 .cast_or_raise(T.TypeDecl)
             )
+        )
+
+    @langkit_property()
+    def check_correctness_pre():
+        return Entity.check_generic_inst_correctness_pre(
+            Entity.name, Entity.args
         )
 
     referenced_decl = Property(

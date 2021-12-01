@@ -2,10 +2,10 @@
 # Implicit instantiations 2
 #
 
-generic [C]
+generic [T, U]
 struct Pair {
-    a: C
-    b: C
+    a: T
+    b: U
 }
 
 # Support generics

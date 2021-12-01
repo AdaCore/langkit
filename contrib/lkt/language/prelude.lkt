@@ -65,7 +65,7 @@ struct ASTList implements Sized, Indexable[T], Iterator[T] {
     @builtin fun get(symbol: Symbol): Array[RootNode]
     @builtin fun get_first(symbol: Symbol): RootNode
     @builtin fun env_node(): RootNode
-    @builtin fun env_orphan(): LexicalEnv[RootNode]
+    @builtin fun env_orphan(): LexicalEnv
 }
 
 @builtin generic[RootNode] trait AnalysisUnit {

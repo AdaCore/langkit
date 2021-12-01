@@ -1,0 +1,17 @@
+# Check basic generic instantiation capabilities and validation
+
+@builtin generic[T, U]
+fun f(t: T): U
+
+@builtin fun g(c: Char): Int
+
+# No such entity
+@invalid val v1: Int = no_such_func[Char, Int]('a')
+
+# The referenced entity is not generic
+@invalid val v2: Int = g[Char]('a')
+
+# The generic is not instantiated with the correct number of arguments
+@invalid val v3: Int = f[Char]('a')
+
+val v4: Int = f[Char, Int]('a')
