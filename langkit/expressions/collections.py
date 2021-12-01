@@ -565,24 +565,30 @@ class Map(CollectionExpression):
         self.take_while_expr = None
 
     @classmethod
-    def create_expanded(cls,
-                        collection: AbstractExpression,
-                        expr: AbstractExpression,
-                        element_var: AbstractVariable,
-                        index_var: Optional[AbstractVariable]) -> Map:
+    def create_expanded(
+        cls,
+        collection: AbstractExpression,
+        expr: AbstractExpression,
+        element_var: AbstractVariable,
+        index_var: Optional[AbstractVariable] = None,
+        filter_expr: Optional[AbstractExpression] = None,
+    ) -> Map:
         result = cls(collection, None)
         result.initialize(expr, element_var, index_var)
+        result.filter_expr = filter_expr
         return result
 
     def do_prepare(self):
         super().do_prepare()
 
-        self.filter_expr = self.prepare_iter_function("filter expression",
-                                                      self.filter_fn)
-        self.take_while_expr = self.prepare_iter_function(
-            "take while expression",
-            self.take_while_pred,
-        )
+        if self.filter_expr is None:
+            self.filter_expr = self.prepare_iter_function("filter expression",
+                                                          self.filter_fn)
+        if self.take_while_expr is None:
+            self.take_while_expr = self.prepare_iter_function(
+                "take while expression",
+                self.take_while_pred,
+            )
 
     def construct(self):
         """

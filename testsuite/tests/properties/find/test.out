@@ -1,0 +1,7 @@
+main.py: Running...
+
+p_find_above([], 6) = 0
+p_find_above([0], 6) = 0
+p_find_above([1, 10, 5, 11], 6) = 10
+main.py: Done.
+Done
