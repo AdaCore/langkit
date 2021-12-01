@@ -17,7 +17,7 @@ class Literal : FooNode implements TokenNode {
 
 class LiteralSequence : FooNode {
     @parse_field name: Name
-    @parse_field items: ASTList[Literal]
+    @parse_field items: ASTList[FooNode, Literal]
 
     @memoized fun new_node(): SynthNode =
     SynthNode(name=node.name, items=node.items)
@@ -34,10 +34,10 @@ class Name : FooNode implements TokenNode {
 
 class SynthNode : FooNode {
     @parse_field name: Name
-    @parse_field items: ASTList[Literal]
+    @parse_field items: ASTList[FooNode, Literal]
 }
 
 class SynthNode2 : FooNode {
     @parse_field name: Name
-    @parse_field items: ASTList[Literal]
+    @parse_field items: ASTList[FooNode, Literal]
 }

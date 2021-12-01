@@ -22,7 +22,7 @@ grammar foo_grammar {
 class Decl : FooNode {
     @parse_field has_plus: HasPlus
     @parse_field name: Name
-    @parse_field items: ASTList[Ref]
+    @parse_field items: ASTList[FooNode, Ref]
 
     @export fun test_env(other: FooNode): Bool =
     node.children_env().env_orphan() = other.children_env().env_orphan()

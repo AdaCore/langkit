@@ -4,7 +4,7 @@ grammar foo_grammar {
     example <- Example(@example)
     num <- Num(@number)
     @main_rule main_rule <- or(
-        ASTList[Example]*(num)
+        ASTList[FooNode, Example]*(num)
         | ListNode(example)
     )
 }

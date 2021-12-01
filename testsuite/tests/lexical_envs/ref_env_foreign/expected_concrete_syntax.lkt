@@ -42,5 +42,5 @@ class RefClause : FooNode {
 
 class Scope : FooNode {
     @parse_field name: SimpleId
-    @parse_field content: ASTList[FooNode]
+    @parse_field content: ASTList[FooNode, FooNode]
 }

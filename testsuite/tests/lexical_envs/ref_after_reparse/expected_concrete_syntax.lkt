@@ -20,9 +20,9 @@ grammar foo_grammar {
 
 class Block : FooNode {
     @parse_field name: Name
-    @parse_field decls: ASTList[Decl]
-    @parse_field usings: ASTList[Using]
-    @parse_field refs: ASTList[Ref]
+    @parse_field decls: ASTList[FooNode, Decl]
+    @parse_field usings: ASTList[FooNode, Using]
+    @parse_field refs: ASTList[FooNode, Ref]
 }
 
 class Decl : FooNode {

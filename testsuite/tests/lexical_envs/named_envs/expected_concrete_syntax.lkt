@@ -80,7 +80,7 @@ grammar foo_grammar {
         # All nodes that can define a named environment are supposed to
         # live in lists, so use Self.parent.parent to get the node that
         # owns that list.
-        (node.parent is ASTList[FooNode]) and (
+        (node.parent is ASTList[FooNode, FooNode]) and (
             (node.parent.parent.is_null) or node.parent.parent.can_have_name()
         )
     ) else (false)
@@ -103,7 +103,9 @@ grammar foo_grammar {
         (
             (
                 (
-                    (node.parent.is_null) or (not (node.parent is ASTList[FooNode]))
+                    (node.parent.is_null) or (
+                        not (node.parent is ASTList[FooNode, FooNode])
+                    )
                 ) or (node.parent.parent.is_null)
             ) or (
                 not (node.parent.parent is DeclarativePart)
@@ -152,7 +154,7 @@ grammar foo_grammar {
 }
 
 class DeclarativePart : FooNode {
-    @parse_field decls: ASTList[FooNode]
+    @parse_field decls: ASTList[FooNode, FooNode]
 }
 
 class PrivatePart : DeclarativePart {
@@ -167,7 +169,7 @@ class SubpBodyDecls : DeclarativePart {
 
 class DeclareBlock : FooNode {
     @parse_field decls: DeclarativePart
-    @parse_field stmts: ASTList[FooNode]
+    @parse_field stmts: ASTList[FooNode, FooNode]
 }
 
 class IncompleteTypeDecl : FooNode {
@@ -282,7 +284,7 @@ class Ref : FooNode {
 class SubpBody : FooNode {
     @parse_field name: Name
     @parse_field decls: SubpBodyDecls
-    @parse_field stmts: ASTList[FooNode]
+    @parse_field stmts: ASTList[FooNode, FooNode]
 
     fun self_name(): Name = node.name
 }

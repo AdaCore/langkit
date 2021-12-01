@@ -35,5 +35,5 @@ class Name : FooNode implements TokenNode {
 }
 
 class RootNode : FooNode {
-    @parse_field decls: ASTList[BaseDecl]
+    @parse_field decls: ASTList[FooNode, BaseDecl]
 }

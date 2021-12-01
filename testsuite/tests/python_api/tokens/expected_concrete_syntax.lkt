@@ -14,5 +14,5 @@ grammar foo_grammar {
 class Atom : FooNode implements TokenNode {
 }
 
-class Sequence : ASTList[FooNode] {
+class Sequence : ASTList[FooNode, FooNode] {
 }

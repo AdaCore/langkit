@@ -37,19 +37,19 @@ grammar foo_grammar {
 
 class Call : FooNode {
     @parse_field name: Identifier
-    @parse_field args: ASTList[Call]
+    @parse_field args: ASTList[FooNode, Call]
 }
 
 class Def : FooNode {
     @parse_field name: Identifier
-    @parse_field stmts: ASTList[Indented]
+    @parse_field stmts: ASTList[FooNode, Indented]
 }
 
 class Identifier : FooNode implements TokenNode {
 }
 
 class Indented : FooNode {
-    @parse_field inner: ASTList[FooNode]
+    @parse_field inner: ASTList[FooNode, FooNode]
 }
 
 class Newline : FooNode implements TokenNode {

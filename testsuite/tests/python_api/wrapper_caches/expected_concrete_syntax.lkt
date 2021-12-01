@@ -11,5 +11,5 @@ grammar foo_grammar {
 }
 
 class Example : FooNode {
-    @parse_field examples: ASTList[Example]
+    @parse_field examples: ASTList[FooNode, Example]
 }

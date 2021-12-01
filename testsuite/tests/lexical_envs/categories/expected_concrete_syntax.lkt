@@ -16,11 +16,11 @@ grammar foo_grammar {
 }
 
 class Cat1 : FooNode {
-    @parse_field decls: ASTList[Var]
+    @parse_field decls: ASTList[FooNode, Var]
 }
 
 class Cat2 : FooNode {
-    @parse_field decls: ASTList[Var]
+    @parse_field decls: ASTList[FooNode, Var]
 }
 
 class Def : FooNode {

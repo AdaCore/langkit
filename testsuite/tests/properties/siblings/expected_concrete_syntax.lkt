@@ -14,5 +14,5 @@ class Name : FooNode implements TokenNode {
 
 class Tuple : FooNode {
     @parse_field id: Name
-    @parse_field nodes: ASTList[Tuple]
+    @parse_field nodes: ASTList[FooNode, Tuple]
 }

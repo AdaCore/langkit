@@ -69,5 +69,5 @@ class Ref : FooNode {
 
 class Scope : FooNode {
     @parse_field name: Name
-    @parse_field content: ASTList[FooNode]
+    @parse_field content: ASTList[FooNode, FooNode]
 }

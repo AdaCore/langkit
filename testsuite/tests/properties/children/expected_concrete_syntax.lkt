@@ -23,5 +23,5 @@ class Example : FooNode implements TokenNode {
 }
 
 class Sequence : FooNode {
-    @parse_field items: ASTList[Example]
+    @parse_field items: ASTList[FooNode, Example]
 }

@@ -18,7 +18,7 @@ grammar foo_grammar {
 class Decl : FooNode {
     @parse_field has_plus: HasPlus
     @parse_field name: Name
-    @parse_field items: ASTList[Ref]
+    @parse_field items: ASTList[FooNode, Ref]
 
     @export fun entity_items(): Array[Ref] = node.as_entity.items.map((i) => i)
 }

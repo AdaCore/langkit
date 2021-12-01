@@ -12,7 +12,7 @@ grammar foo_grammar {
 }
 
 class ListNode : FooNode {
-    @parse_field nb_list: ASTList[NumberNode]
+    @parse_field nb_list: ASTList[FooNode, NumberNode]
 
     fun nb_list_entities(): Array[NumberNode] =
     node.nb_list.map((n) => n.as_bare_entity)

@@ -53,7 +53,7 @@ class Example : FooNode {
 ## * ${node_name(T.Null)}
 ## * ${node_name(T.StringLiteral)}
 ## * ${node_name(T.Var)}
-class Sequence : ASTList[FooNode] {
+class Sequence : ASTList[FooNode, FooNode] {
 
     @export fun all_items(): Array[FooNode] = self.map((i) => i)
 

@@ -32,7 +32,7 @@ grammar foo_grammar {
 
 class Package : Decl {
     @parse_field name: Name
-    @parse_field decls: ASTList[Decl]
+    @parse_field decls: ASTList[FooNode, Decl]
 }
 
 class Ref : Decl {

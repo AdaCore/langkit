@@ -24,7 +24,7 @@ grammar foo_grammar {
 class Scope : DefNode {
     @parse_field error: HasError
     @parse_field name: Id
-    @parse_field defs: ASTList[DefNode]
+    @parse_field defs: ASTList[FooNode, DefNode]
 }
 
 class Var : DefNode {

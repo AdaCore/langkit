@@ -1,5 +1,6 @@
 import lexer_example
 
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[Example, Example]+(Example("example"))
+    @main_rule main_rule <-
+      ASTList[FooNode, Example, Example]+(Example("example"))
 }

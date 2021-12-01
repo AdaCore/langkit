@@ -41,5 +41,5 @@ class SimpleId : Id implements TokenNode {
 
 class Scope : FooNode {
     @parse_field name: SimpleId
-    @parse_field content: ASTList[Scope]
+    @parse_field content: ASTList[FooNode, Scope]
 }
