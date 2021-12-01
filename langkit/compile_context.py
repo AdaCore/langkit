@@ -2228,9 +2228,10 @@ class CompileCtx:
                 tmp_1
             )
 
-            # Remove leading/trailing underscores, and add 'Precomputed_Symbol'
-            # prefix.
-            candidate_name = (names.Name('Precomputed_Symbol') +
+            # Remove leading/trailing underscores, and add 'Precomputed_Sym'
+            # prefix (not 'Precomputed_Symbol' to avoid conflicts with other
+            # 'Precomputed_Symbol_*' entities in the generated code).
+            candidate_name = (names.Name('Precomputed_Sym') +
                               names.Name.from_lower(tmp_2.strip('_')))
 
             # If the candidate is already used, add an unique number
