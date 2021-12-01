@@ -2026,7 +2026,7 @@ class LktTypesLoader:
         base_type: Optional[ASTNodeType]
 
         # Root node case
-        if decl.f_base_type is None:
+        if decl.p_base_type is None:
             check_source_language(
                 get_trait(decl, "Node") is not None,
                 'The root node must implement the Node trait'
@@ -2043,7 +2043,7 @@ class LktTypesLoader:
             base_type = None
             is_token_node = is_error_node = False
         else:
-            base_type_decl = decl.f_base_type.p_designated_type
+            base_type_decl = decl.p_base_type.p_designated_type
             base_type = cast(ASTNodeType,
                              self.lower_type_decl(base_type_decl))
 

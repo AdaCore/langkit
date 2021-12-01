@@ -1,0 +1,17 @@
+# Check that class derivation in a generic class works as expected. To check
+# that it is accepted, try to perform a downcast, which is valid only when the
+# source type is a base type of the destination type.
+
+class RootType {}
+
+generic[T]
+class GenDerivedType : T {}
+
+class FinalType : GenDerivedType[RootType] {}
+
+class OtherType : RootType {}
+
+r: RootType
+d: GenDerivedType[RootType] = r.as[GenDerivedType[RootType]]
+f: FinalType = r.as[FinalType]
+@invalid o: OtherType = f.as[OtherType]

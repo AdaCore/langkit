@@ -1612,7 +1612,14 @@ class TypeDecl(Decl):
             )
         )
 
-    base_type = AbstractField(T.TypeRef)
+    syn_base_type = AbstractField(T.TypeRef)
+
+    @langkit_property(return_type=T.TypeRef.entity, public=True)
+    def base_type():
+        """
+        Return the base type for this node, if any.
+        """
+        return Entity.syn_base_type
 
     @langkit_property(memoized=True, return_type=T.TypeDecl.entity.array,
                       public=True)
@@ -1696,7 +1703,7 @@ class FunctionType(TypeDecl):
     return_type = UserField(T.TypeDecl, public=False)
     syn_name = NullField()
     traits = NullField()
-    base_type = NullField()
+    syn_base_type = NullField()
 
     full_name = Property(
         S("(").concat(
@@ -1715,7 +1722,7 @@ class GenericFormalTypeDecl(TypeDecl):
     """
     syn_name = Field(T.TypeDefId)
     traits = NullField()
-    base_type = NullField()
+    syn_base_type = NullField()
     type_scope = Property(EmptyEnv)
 
     generic_decl = Property(
@@ -1881,7 +1888,7 @@ class InstantiatedGenericType(TypeDecl):
     actuals = UserField(type=T.TypeDecl.array, public=False)
     syn_name = NullField()
     traits = NullField()
-    base_type = NullField()
+    syn_base_type = NullField()
     name = Property(Self.inner_type_decl.name)
 
     full_name = Property(
@@ -1895,6 +1902,10 @@ class InstantiatedGenericType(TypeDecl):
     )
 
     decl_type_name = Property(S("instantiated generic type"))
+
+    @langkit_property()
+    def base_type():
+        return Entity.get_instantiated_type.base_type
 
     @langkit_property(public=True)
     def get_inner_type():
@@ -1950,7 +1961,7 @@ class TraitDecl(NamedTypeDecl):
 
     syn_name = Field(type=T.DefId)
     traits = NullField()
-    base_type = NullField()
+    syn_base_type = NullField()
 
     decls = Field(type=DeclBlock)
 
@@ -1969,7 +1980,7 @@ class EnumTypeDecl(NamedTypeDecl):
 
     syn_name = Field(type=T.DefId)
     traits = Field(type=T.TypeRef.list)
-    base_type = NullField()
+    syn_base_type = NullField()
     literals = Field(type=T.EnumLitDecl.list)
     decls = Field(type=DeclBlock)
 
@@ -2011,7 +2022,7 @@ class StructDecl(NamedTypeDecl):
     """
     syn_name = Field(type=T.DefId)
     traits = Field(type=T.TypeRef.list)
-    base_type = NullField()
+    syn_base_type = NullField()
     decls = Field(type=DeclBlock)
 
     decl_type_name = Property(S("struct declaration"))
@@ -2027,7 +2038,7 @@ class BasicClassDecl(NamedTypeDecl):
     Common ancestor for declarations of regular classes and enum classes.
     """
     syn_name = Field(type=T.DefId)
-    base_type = Field(type=T.TypeRef)
+    syn_base_type = Field(type=T.TypeRef)
     traits = Field(type=T.TypeRef.list)
 
 
@@ -2058,7 +2069,7 @@ class EnumClassAltDecl(TypeDecl):
     """
     syn_name = Field(T.DefId)
     traits = NullField()
-    base_type = NullField()
+    syn_base_type = NullField()
 
     parent_type = Property(Entity.parent.parent.cast_or_raise(T.TypeDecl))
 
