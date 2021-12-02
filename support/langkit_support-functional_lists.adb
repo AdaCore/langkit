@@ -45,26 +45,24 @@ package body Langkit_Support.Functional_Lists is
    begin
       Self.Length := 0;
       Self.First := null;
-      --  TODO: this implementation is leaking, because we don't reuse the now
-      --  useless pages of memory already allocated.
    end Clear;
 
    ---------
    -- "&" --
    ---------
 
-   function "&" (L : T; R : List) return List is
-      Tmp : Node_Ptr;
-      Ls : constant List := (if R = No_List then Create else R);
+   function "&" (Head : T; Tail : List) return List is
+      Actual_Tail : constant List := (if Tail = No_List then Create else Tail);
    begin
+      --  Create a list that uses the same pool as the tail, point it to the
+      --  head and link it to the tail's elements.
 
-      return Ret : List do
-         Ret := Ls;
-         Ret.Length := Ls.Length + 1;
-         Tmp := Ls.First;
-         Ret.First := Alloc_List.Alloc (Ls.Pool);
-         Ret.First.El := L;
-         Ret.First.Next := Tmp;
+      return Ret : constant List :=
+        (Pool   => Actual_Tail.Pool,
+         First  => Alloc_List.Alloc (Actual_Tail.Pool),
+         Length => Actual_Tail.Length + 1)
+      do
+         Ret.First.all := (Head, Actual_Tail.First);
       end return;
    end "&";
 
@@ -110,17 +108,14 @@ package body Langkit_Support.Functional_Lists is
    --------------
 
    function To_Array (Self : List) return T_Array is
-      Ret : T_Array (1 .. Self.Length);
-      I : Positive := 1;
       Current : List := Self;
    begin
-      while Has_Element (Current) loop
-         Ret (I) := Head (Current);
-         Current := Tail (Current);
-         I := I + 1;
-      end loop;
-      return Ret;
-
+      return Result : T_Array (1 .. Self.Length) do
+         for I in Result'Range loop
+            Result (I) := Head (Current);
+            Current := Tail (Current);
+         end loop;
+      end return;
    end To_Array;
 
 end Langkit_Support.Functional_Lists;

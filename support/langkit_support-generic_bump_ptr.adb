@@ -274,7 +274,8 @@ package body Langkit_Support.Generic_Bump_Ptr is
      (Pool : in out Ada_Bump_Ptr_Pool)
       return not null Subpool_Handle
    is
-      Subpool : constant Subpool_Handle := Subpool_Handle (Create);
+      Res     : constant Bump_Ptr_Pool := Create;
+      Subpool : constant Subpool_Handle := Subpool_Handle (Res);
    begin
       Set_Pool_Of_Subpool (Subpool, Pool);
       return Subpool;
