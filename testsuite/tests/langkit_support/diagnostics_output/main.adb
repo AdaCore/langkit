@@ -24,7 +24,7 @@ procedure Main is
       return To_Text (Self.Lines (Line_Number));
    end;
 
-   B : Simple_Buffer :=
+   B : constant Simple_Buffer :=
      (Size  => 1,
       Lines => (1 => To_Unbounded_Text ("A simple line")));
 
