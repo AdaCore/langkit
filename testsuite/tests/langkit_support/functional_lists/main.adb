@@ -5,6 +5,8 @@ with Support;
 procedure Main is
    use Support.Int_Lists;
 
+   procedure Print_List (S : List);
+
    A : List := Create;
    --  This list is init with Create, so will contain a pool
 
@@ -25,17 +27,17 @@ procedure Main is
    procedure Print_List (S : List) is
       Tmp : List := S;
    begin
-      if not Has_Element (S) then
-         Put_Line ("<empty>");
-
-      else
+      if Has_Element (S) then
          while Has_Element (Tmp) loop
             Put (Head (Tmp)'Image);
             Tmp := Tail (Tmp);
          end loop;
          New_Line;
+      else
+         Put_Line ("<empty>");
       end if;
    end Print_List;
+
 begin
    Print_List (A);
    Print_List (1 & (2 & (3 & A)));
