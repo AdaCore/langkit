@@ -58,8 +58,16 @@ Testing
 
 Unlike the rest of Langkit, the testsuite framework requires Python 3.8 or
 later versions. Make sure the `langkit` package is available from the Python
-interpreter (see Install).  Then, in order to run the testsuite, launch the
-following command from the top-level directory:
+interpreter (see Install), then build the Libpythonlang/Liblktlang projects:
+
+    $ python manage.py make
+
+You can then make them available to the environment:
+
+    $ eval `python manage.py setenv`
+
+Finally, in order to run the testsuite, launch the following command from the
+top-level directory:
 
     $ python manage.py test
 
