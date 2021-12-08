@@ -381,6 +381,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
             ))
         run('gprbuild', '-Pgen', '-q', '-p',
             '-XLIBRARY_TYPE=static',
+            '-XGNATCOLL_GMP_BUILD=static',
             '-XXMLADA_BUILD=static')
 
         for i, m in enumerate(ada_main):
