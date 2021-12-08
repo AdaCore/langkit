@@ -42,15 +42,16 @@ package Langkit_Support.Adalog.Symbolic_Solver is
    --  depth. Solving a relation will assign values to every logic variable
    --  involved in the relation or fail.
    --
-   --  A relation is manually ref-counted, and owns every sub-relation. When
-   --  the ref-count reaches 0, every sub-relation is destroyed.
+   --  A relation is manually ref-counted, and has an ownership share of every
+   --  sub-relation. When the ref-count of a root relation, reaches 0, the
+   --  ownership share of each of its sub-relations is destroyed.
 
    procedure Inc_Ref (Self : Relation);
-   --  Increments the reference count of Self
+   --  Increment the reference count of Self
 
    procedure Dec_Ref (Self : in out Relation);
-   --  Decrements the reference count of Self. If no reference left, deallocate
-   --  ``Self.all`` and sets ``Self`` to ``null``.
+   --  Decrement the reference count of Self. If no reference is left,
+   --  deallocate ``Self.all`` and set ``Self`` to ``null``.
 
    procedure Solve
      (Self              : Relation;
@@ -301,12 +302,9 @@ private
    type Relation_Kind is (Atomic, Compound);
 
    type Relation_Type (Kind : Relation_Kind := Atomic) is record
-      Ref_Count  : Integer range -1 .. Integer'Last := 1;
+      Ref_Count  : Natural;
       --  Number of ownership shares for this relation. When it drops to zero,
       --  it must be deallocated.
-      --
-      --  The special -1 value disables ref-counting, making the allocation
-      --  manually handled.
 
       Debug_Info : Ada.Strings.Unbounded.String_Access := null;
       case Kind is

@@ -486,7 +486,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
    procedure Inc_Ref (Self : Relation) is
    begin
-      if Self.Ref_Count /= -1 then
+      if Self /= null then
          Self.Ref_Count := Self.Ref_Count + 1;
       end if;
    end Inc_Ref;
@@ -499,7 +499,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       procedure Unchecked_Free is new Ada.Unchecked_Deallocation
         (Relation_Type, Relation);
    begin
-      if Self = null or else Self.Ref_Count = -1 then
+      if Self = null then
          return;
       elsif Self.Ref_Count = 1 then
          Destroy (Self);
