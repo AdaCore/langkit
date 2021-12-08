@@ -92,8 +92,8 @@ package Langkit_Support.Adalog.Solver is
       Pred         : Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation;
    --  Create a Predicate relation. A Predicate relation will solve
-   --  successfully if the ``Predicate`` applied to the value of
-   --  ``Logic_Var`` yields ``True``.
+   --  successfully if the ``Predicate`` applied to the value of ``Logic_Var``
+   --  yields ``True``.
 
    function Create_N_Predicate
      (Logic_Vars   : Variable_Array;
@@ -181,9 +181,8 @@ package Langkit_Support.Adalog.Solver is
    --  Set the kind of the solver
 
 private
-   package Sym_Solve
-   is new Langkit_Support.Adalog.Symbolic_Solver (Solver_Ifc);
-
+   package Sym_Solve is new Langkit_Support.Adalog.Symbolic_Solver
+     (Solver_Ifc);
    package SSM_Solve is new Langkit_Support.Adalog.Eq_Same (Solver_Ifc);
 
    use Ada.Strings;

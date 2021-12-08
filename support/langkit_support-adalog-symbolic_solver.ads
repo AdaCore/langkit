@@ -81,16 +81,15 @@ package Langkit_Support.Adalog.Symbolic_Solver is
 
    package Relation_Vectors is new Langkit_Support.Vectors (Relation);
    subtype Relation_Array is Relation_Vectors.Elements_Array;
-   No_Relation_Array : Relation_Array
-     renames Relation_Vectors.Empty_Array;
+   No_Relation_Array : Relation_Array renames Relation_Vectors.Empty_Array;
 
    function Create_Predicate
      (Logic_Var    : Var;
       Pred         : Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation;
    --  Create a Predicate relation. A Predicate relation will solve
-   --  successfully if the ``Predicate`` applied to the value of
-   --  ``Logic_Var`` yields ``True``.
+   --  successfully if the ``Predicate`` applied to the value of ``Logic_Var``
+   --  yields ``True``.
 
    function Create_N_Predicate
      (Logic_Vars   : Variable_Array;
@@ -119,8 +118,8 @@ package Langkit_Support.Adalog.Symbolic_Solver is
       Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation;
    --  Create a Propagate relation. A Propagate relation will solve
-   --  successfully if the assignment of ``From.Value`` to ``To`` is
-   --  successful.
+      --  successfully if the assignment of ``From.Value`` to ``To`` is
+      --  successful.
 
    function Create_Domain
      (Logic_Var    : Var;
@@ -166,17 +165,16 @@ private
    type Predicate_Access is access all Predicate_Type'Class;
    type N_Predicate_Access is access all N_Predicate_Type'Class;
 
-   procedure Free is new
-     Ada.Unchecked_Deallocation (Comparer_Type'Class, Comparer_Access);
-   procedure Free is new
-     Ada.Unchecked_Deallocation (Converter_Type'Class, Converter_Access);
-   procedure Free is new
-     Ada.Unchecked_Deallocation (Predicate_Type'Class, Predicate_Access);
-   procedure Free is new
-     Ada.Unchecked_Deallocation (N_Predicate_Type'Class, N_Predicate_Access);
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Comparer_Type'Class, Comparer_Access);
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Converter_Type'Class, Converter_Access);
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Predicate_Type'Class, Predicate_Access);
+   procedure Free is new Ada.Unchecked_Deallocation
+     (N_Predicate_Type'Class, N_Predicate_Access);
 
-   package Logic_Var_Vectors
-   is new Langkit_Support.Vectors (Var);
+   package Logic_Var_Vectors is new Langkit_Support.Vectors (Var);
    subtype Logic_Var_Vector is Logic_Var_Vectors.Vector;
    type Logic_Var_Vector_Access is access Logic_Var_Vector;
 
@@ -194,37 +192,40 @@ private
 
       case Kind is
          when Assign | Propagate =>
-            Conv     : Converter_Access := null;
+            Conv : Converter_Access := null;
             --  An access to the projection co nverter, if there is one
 
             Can_Fail : Boolean := False;
 
             case Kind is
                when Assign =>
-                  Val      : Value_Type;
+                  Val : Value_Type;
                   --  The value we want to assign to ``Target``
 
                when Propagate =>
-                  From     : Logic_Vars.Var;
+                  From : Logic_Vars.Var;
                   --  The variable from which we want to propagate
 
                when others => null;
             end case;
+
          when Predicate =>
-            Pred     : Predicate_Access;
+            Pred : Predicate_Access;
             --  The predicate that will be applied as part of this relation
+
          when N_Predicate =>
-            Vars     : Logic_Var_Vector;
-            N_Pred   : N_Predicate_Access;
+            Vars   : Logic_Var_Vector;
+            N_Pred : N_Predicate_Access;
             --  The predicate that will be applied as part of this relation
 
          when Unify =>
             Unify_From : Logic_Vars.Var;
+
          when True | False => null;
       end case;
    end record;
-   --  An atomic relation is a relation that has no children. When we get
-   --  to solve a specific solution, we expect to have a set of only atomic
+   --  An atomic relation is a relation that has no children. When we get to
+   --  solve a specific solution, we expect to have a set of only atomic
    --  relations.
    --
    --  Atomic relations can be either Assign, ``Propagate, or ``Predicate``.
@@ -247,15 +248,15 @@ private
    --  dependencies between atomic relations. This is what will allow us to:
    --
    --  1. Sort a list of atomic relations topologically, so that they form an
-   --  executable list of instructions.
+   --     executable list of instructions.
    --
    --  2. Define a map from vars to atomic rels where for every var `V`, the
-   --  map maps `V -> [R1, R2, R3, ...]` where `Used_Var (RN) = V`. This map
-   --  will allow us cut some branches of the solution tree early.
+   --     map maps `V -> [R1, R2, R3, ...]` where `Used_Var (RN) = V`. This map
+   --     will allow us cut some branches of the solution tree early.
 
    type Var_Or_Null (Exists : Boolean := False) is record
       case Exists is
-         when True => Logic_Var : Var;
+         when True  => Logic_Var : Var;
          when False => null;
       end case;
    end record;
@@ -287,6 +288,7 @@ private
    end record;
 
    procedure Destroy (Self : in out Compound_Relation);
+
    function Image
      (Self         : Compound_Relation;
       Level        : Natural := 0;
@@ -300,6 +302,12 @@ private
 
    type Relation_Type (Kind : Relation_Kind := Atomic) is record
       Ref_Count  : Integer range -1 .. Integer'Last := 1;
+      --  Number of ownership shares for this relation. When it drops to zero,
+      --  it must be deallocated.
+      --
+      --  The special -1 value disables ref-counting, making the allocation
+      --  manually handled.
+
       Debug_Info : Ada.Strings.Unbounded.String_Access := null;
       case Kind is
          when Atomic   => Atomic_Rel   : Atomic_Relation;
