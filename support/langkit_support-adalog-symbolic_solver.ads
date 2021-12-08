@@ -60,14 +60,21 @@ package Langkit_Support.Adalog.Symbolic_Solver is
       Solution_Callback : access function
         (Vars : Logic_Var_Array) return Boolean;
       Solve_Options     : Solve_Options_Type := Default_Options);
-   --  Tries to solve ``Self``. For every solution, ``Solution_Callback`` will
-   --  be called. If ``Solution_Callback`` returns False, stop solving.
+   --  Run the solver on the ``Self`` relation. For every solution found, call
+   --  ``Solution_Callback`` with the variables involved in ``Self``, and
+   --  continue looking for other solutions iff it returns True. See
+   --  ``Solve_Options Type`` for the available way to configure the resolution
+   --  process.
 
    function Solve_First
      (Self          : Relation;
       Solve_Options : Solve_Options_Type := Default_Options) return Boolean;
-   --  Tries to solve ``Self``. If there is at least one valid solution to the
-   --  relation, stops solving and return True. Else, return False.
+   --  Run the solver on the ``Self`` relation. Return whether there is at
+   --  least one valid solution. See ``Solve_Options Type`` for the available
+   --  way to configure the resolution process.
+
+   function Image (Self : Relation) return String;
+   --  Return a textual representation of ``Self`` as a multi-line string
 
    ---------------------------
    -- Relation constructors --
@@ -77,18 +84,24 @@ package Langkit_Support.Adalog.Symbolic_Solver is
    subtype Relation_Array is Relation_Vectors.Elements_Array;
    No_Relation_Array : Relation_Array renames Relation_Vectors.Empty_Array;
 
+   --  In all constructor functions below, ``Debug_String`` is an optional
+   --  string attached to the returned relation, to be used in the result of
+   --  the ``Image`` function. Relations do not manage their lifetimes: it is
+   --  up to users to free them when appropriate.
+
    function Create_Predicate
      (Logic_Var    : Var;
       Pred         : Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation;
-   --  Create a Predicate relation. A Predicate relation will solve
-   --  successfully if the ``Predicate`` applied to the value of ``Logic_Var``
-   --  yields ``True``.
+   --  Create a relation that will solve successfully when calling ``Pred`` on
+   --  the value of ``Logic_Var`` returns ``True``.
 
    function Create_N_Predicate
      (Logic_Vars   : Variable_Array;
       Pred         : N_Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation;
+   --  Create a relation that will solve successfully when calling ``Pred`` on
+   --  the values of all variables in ``Logic_Vars`` returns ``True``.
 
    function Create_Assign
      (Logic_Var    : Var;
@@ -96,45 +109,60 @@ package Langkit_Support.Adalog.Symbolic_Solver is
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation;
-   --  Create an Assign relation. An Assign relation will solve successfully if
-   --  we can assign the value ``Value`` to ``Logic_Var``.
+   --  Create a relation that will solve successfully if it is possible to
+   --  assign the given ``Value`` to ``Logic_Var``. Two attempts to assign
+   --  different values to the same logic variable will make the relation
+   --  always fail.
+   --
+   --  If ``Conv`` is provided, the actually assigned value is the result of
+   --  ``Conv`` when called on ``Value``.
+   --
+   --  If ``Eq`` is provided, it is used instead of ``Value_Type``'s default
+   --  equality operator to check if two values are the same when dealing with
+   --  concurrent assignments to ``Logic_Var``.
 
    function Create_Unify
-     (From, To     : Var;
+     (Left, Right  : Var;
       Debug_String : String_Access := null) return Relation;
-   --  Create an Unify relation. An Unify relation will solve successfully if
-   --  either the assignment of ``From.Value`` to ``To`` is successful, either
-   --  the opposite assignment is successful.
+   --  Create a relation that will solve successfully if ``Left`` and ``Right``
+   --  can be assigned the same value.
 
    function Create_Propagate
      (From, To     : Var;
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation;
-   --  Create a Propagate relation. A Propagate relation will solve
-      --  successfully if the assignment of ``From.Value`` to ``To`` is
-      --  successful.
+   --  Create a relation that will solve successfully if it is possible to
+   --  assign the value in ``From`` to the ``To`` variable.
+   --
+   --  If ``Conv`` is provided, the actually assigned value is the result of
+   --  ``Conv`` when called on ``From``'s value.
+   --
+   --  If ``Eq`` is provided, it is used instead of ``Value_Type``'s default
+   --  equality operator to check if two values are the same when dealing with
+   --  concurrent assignments to ``To``.
 
    function Create_Domain
      (Logic_Var    : Var;
       Domain       : Value_Array;
       Debug_String : String_Access := null) return Relation;
-   --  Create a Domain relation. A Domain relation is a shortcut such that:
+   --  Create a relation that will solve successfully if it is possible to
+   --  assign one value in ``Domain`` to ``Logic_Var``.
    --
-   --  ``Domain (Var, (A, B, ...))`` is equivalent to
+   --  This is a shortcut: ``Domain (Var, (A, B, ...))`` is equivalent to
    --  ``Any (Assign (Var, A), Assign (Var, B), ...)``.
 
    function Create_Any
      (Relations    : Relation_Array;
       Debug_String : String_Access := null) return Relation;
-   --  Create an Any relation. An Any relation solves successfully if any of
-   --  its sub-relations solves successfully.
+   --  Create a relation that will solve successfully when at least one of the
+   --  the relations in ``Relations`` solves successfully.
 
    function Create_All
      (Relations    : Relation_Array;
       Debug_String : String_Access := null) return Relation;
-   --  Create an All relation. An All relation solves successfully if all of
-   --  its sub-relation solves successfully.
+   --  Create a relation that will solve successfully when all of the the
+   --  relations in ``Relations`` solves successfully.
 
    function Create_Or
      (L, R         : Relation;
@@ -147,10 +175,11 @@ package Langkit_Support.Adalog.Symbolic_Solver is
    is (Create_All ((L, R), Debug_String));
 
    function Create_True (Debug_String : String_Access := null) return Relation;
+   --  Return a relation that always solves successfully
+
    function Create_False
      (Debug_String : String_Access := null) return Relation;
-
-   function Image (Self : Relation) return String;
+   --  Return a relation that never solves successfully
 
 private
 
@@ -181,15 +210,18 @@ private
 
    type Atomic_Relation (Kind : Atomic_Kind := Propagate) is record
       Target : Logic_Vars.Var;
-      --  Every atomic relation has a target. Depending on the relation, it
-      --  will be *used* or *defined*.
+      --  What is the Target and whether it is considered as a "used" or
+      --  "defined" logic variable depends on the kind of relation.  See the
+      --  "Atomic relations dependency graph" section for more information.
 
       case Kind is
          when Assign | Propagate =>
             Conv : Converter_Access := null;
-            --  An access to the projection co nverter, if there is one
+            --  Conversion function for the value to assign/propagate. If left
+            --  to null, use the value itself.
 
             Can_Fail : Boolean := False;
+            --  TODO???
 
             case Kind is
                when Assign =>
@@ -198,7 +230,8 @@ private
 
                when Propagate =>
                   From : Logic_Vars.Var;
-                  --  The variable from which we want to propagate
+                  --  The variable from which we want to propagate to
+                  --  ``Target``.
 
                when others => null;
             end case;
@@ -208,28 +241,32 @@ private
             --  The predicate that will be applied as part of this relation
 
          when N_Predicate =>
-            Vars   : Logic_Var_Vector;
+            Vars : Logic_Var_Vector;
+            --  List of logic variables used by the predicate
+
             N_Pred : N_Predicate_Access;
             --  The predicate that will be applied as part of this relation
 
          when Unify =>
             Unify_From : Logic_Vars.Var;
 
-         when True | False => null;
+         when True | False =>
+            null;
       end case;
    end record;
    --  An atomic relation is a relation that has no children. When we get to
    --  solve a specific solution, we expect to have a set of only atomic
    --  relations.
    --
-   --  Atomic relations can be either Assign, ``Propagate, or ``Predicate``.
-   --  Semantics of those are defined in the public, in the list of relation
-   --  constructors.
+   --  Atomic relations can be either ``Assign``, ``Propagate, or
+   --  ``Predicate``. Their semantics are defined in the corresponding public
+   --  relation constructors.
 
    function Solve_Atomic (Self : Atomic_Relation) return Boolean;
-   --  Solve this atomic relation
+   --  Solve this atomic relation, return if we have found a valid solution
 
    function Image (Self : Atomic_Relation) return String;
+   --  Helper for the ``Image`` primitive of ``Relation``
 
    procedure Destroy (Self : in out Atomic_Relation);
    --  Destroy this atomic relation
@@ -244,9 +281,20 @@ private
    --  1. Sort a list of atomic relations topologically, so that they form an
    --     executable list of instructions.
    --
-   --  2. Define a map from vars to atomic rels where for every var `V`, the
-   --     map maps `V -> [R1, R2, R3, ...]` where `Used_Var (RN) = V`. This map
-   --     will allow us cut some branches of the solution tree early.
+   --  2. Define a map from vars to atomic rels where for every logic variable
+   --     ``V``, the map maps ``V -> [R1, R2, R3, ...]`` where
+   --     ``Used_Var (Rn) = V``. This map will allow us to cut some branches of
+   --     the solution tree early.
+   --
+   --  To compute dependencies, we consider for each relation which variable it
+   --  defines (sets a value: see the ``Defined_Var`` function below) or which
+   --  variable it uses (copies/checks the value associated to this variable:
+   --  see the ``Used_Var`` below).
+   --
+   --  TODO??? Some relations actually use multiple logic variables
+   --  (N_Predicate), while Unify does not really use/define any, but actually
+   --  treats both variables as aliases. This dataflow analysis probably
+   --  deserves a refactoring to clarify this.
 
    type Var_Or_Null (Exists : Boolean := False) is record
       case Exists is
@@ -254,8 +302,8 @@ private
          when False => null;
       end case;
    end record;
-   --  Option type for a Var. Used to express dependencies from an atomic
-   --  relation to a logic variable.
+   --  Option type for a logic variable. Used to express dependencies from an
+   --  atomic relation to a logic variable.
 
    Null_Var : constant Var_Or_Null := (Exists => False);
 

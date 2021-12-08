@@ -144,6 +144,8 @@ package Langkit_Support.Adalog.Solver_Interface is
 
    type Solve_Options_Type is record
       Cut_Dead_Branches : Boolean := True;
+      --  Whether to enable an optimization that will cut branches that
+      --  necessarily contain falsy solutions.
    end record;
 
    Default_Options : constant Solve_Options_Type := (others => <>);
