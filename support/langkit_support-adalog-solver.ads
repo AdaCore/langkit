@@ -45,8 +45,9 @@ package Langkit_Support.Adalog.Solver is
    --  depth. Solving a relation will assign values to every logic variable
    --  involved in the relation or fail.
    --
-   --  A relation is manually ref-counted, and owns every sub-relation. When
-   --  the ref-count reaches 0, every sub-relation is destroyed.
+   --  A relation is manually ref-counted, and has an ownership share of every
+   --  sub-relation. When the ref-count of a root relation reaches 0, the
+   --  ownership share of each of its sub-relations is destroyed.
 
    No_Relation : constant Relation;
 
