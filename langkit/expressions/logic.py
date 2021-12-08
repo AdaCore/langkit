@@ -393,7 +393,6 @@ class Predicate(AbstractExpression):
             self.pred_property = pred_property
             self.pred_id = pred_id
             self.logic_var_exprs = logic_var_exprs
-            self.predicate_expr = predicate_expr
 
             super().__init__(
                 'Pred', '{}_Pred.Create'.format(pred_id),
@@ -405,8 +404,7 @@ class Predicate(AbstractExpression):
         def subexprs(self):
             return {'pred': self.pred_property,
                     'pred_id': self.pred_id,
-                    'logic_var_exprs': self.logic_var_exprs,
-                    'predicate_expr': self.predicate_expr}
+                    'logic_var_exprs': self.logic_var_exprs}
 
         def __repr__(self):
             return '<Predicate.Expr {}>'.format(self.pred_id)
