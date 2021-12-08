@@ -31,9 +31,17 @@ with Langkit_Support.Adalog.Solver_Interface;
 private with Langkit_Support.Adalog.Symbolic_Solver;
 
 generic
+
    with package Solver_Ifc
      is new Langkit_Support.Adalog.Solver_Interface (<>);
+
    Debug : Boolean := False;
+   --  Whether to keep track of logic variables in state machine mode (i.e.
+   --  with the old solver). This is necessary in order to use the Solve
+   --  subprogram in that mode.
+   --
+   --  TODO??? Remove this once we get rid of the old solver.
+
 package Langkit_Support.Adalog.Solver is
 
    use Solver_Ifc;
@@ -65,14 +73,18 @@ package Langkit_Support.Adalog.Solver is
       Solution_Callback : access function
         (Vars : Logic_Var_Array) return Boolean;
       Solve_Options     : Solve_Options_Type := Default_Options);
-   --  Tries to solve ``Self``. For every solution, ``Solution_Callback`` will
-   --  be called.
+   --  Run the solver on the ``Self`` relation. For every solution found, call
+   --  ``Solution_Callback`` with the variables involved in ``Self``, and
+   --  continue looking for other solutions iff it returns True. See
+   --  ``Solve_Options Type`` for the available way to configure the resolution
+   --  process.
 
    function Solve_First
      (Self          : Relation;
       Solve_Options : Solve_Options_Type := Default_Options) return Boolean;
-   --  Tries to solve ``Self``. If there is at least one valid solution to the
-   --  relation, stops solving and return True. Else, return False.
+   --  Run the solver on the ``Self`` relation. Return whether there is at
+   --  least one valid solution. See ``Solve_Options Type`` for the available
+   --  way to configure the resolution process.
 
    ---------------------------
    -- Relation constructors --
@@ -80,6 +92,11 @@ package Langkit_Support.Adalog.Solver is
 
    type Relation_Array is array (Positive range <>) of Relation;
    No_Relation_Array : constant Relation_Array;
+
+   --  In all constructor functions below, ``Debug_String`` is an optional
+   --  string attached to the returned relation, to be used in the result of
+   --  the ``Image`` function. Relations do not manage their lifetimes: it is
+   --  up to users to free them when appropriate.
 
    function Create_Predicate
      (Logic_Var    : Var;
