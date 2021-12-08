@@ -2,28 +2,28 @@ Solving with new solver
 =======================
 
 Solving relation:
-All: 
-    Any: 
-        All: 
+All:
+    Any:
+        All:
             12 -> %X
             15 -> %Y
 
-        All: 
+        All:
             18 -> %X
             %X <-> %Y
 
-        All: 
+        All:
             2 -> %X
             3 -> %Y
             %X <-> %Y
 
 
-    Any: 
-        15 -> %Y 
-        16 -> %Y 
-        16 -> %Y 
-        18 -> %Y 
-        19 -> %Y 
+    Any:
+        15 -> %Y
+        16 -> %Y
+        16 -> %Y
+        18 -> %Y
+        19 -> %Y
 
 
 Solution: [%Y = 15, %X = 12]

@@ -2,7 +2,7 @@ Solving with new solver
 =======================
 
 Solving relation:
-Is_Even?(%X) 
+Is_Even?(%X)
 Invalid equation Is_Even?(%X): depends on undefined var %X
 
 Solving with old solver

@@ -2,7 +2,7 @@ Solving with new solver
 =======================
 
 Solving relation:
-All: 
+All:
     %X <-> %Y
     %Y <-> %Z
     %A <-> %Z
@@ -18,7 +18,7 @@ Solving with old solver
 =======================
 
 Solving relation:
-<All> :
+<All>:
 | | Bind %X <=> %Y
 | | Bind %Y <=> %Z
 | | Bind %A <=> %Z

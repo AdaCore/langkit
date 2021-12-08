@@ -4,12 +4,12 @@ Solving with new solver
 ========================================================================
 
 Solving relation:
-All: 
+All:
     %X <-> %Y
-    Any: 
-        1 -> %X 
-        2 -> %X 
-        3 -> %X 
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
 
 
 Solution: [%Y = 1, %X = 1]
@@ -18,22 +18,22 @@ Solution: [%Y = 3, %X = 3]
 ========================================================================
 
 Solving relation:
-All: 
-    Any: 
-        1 -> %X 
-        2 -> %X 
-        3 -> %X 
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
 
-    Any: 
-        10 -> %X 
-        20 -> %X 
-        Is_Even?(%Y) 
+    Any:
+        10 -> %X
+        20 -> %X
+        Is_Even?(%Y)
 
-    Any: 
-        1 -> %Y 
-        3 -> %Y 
-        5 -> %Y 
-        10 -> %Y 
+    Any:
+        1 -> %Y
+        3 -> %Y
+        5 -> %Y
+        10 -> %Y
 
 
 Solution: [%Y = 10, %X = 1]
@@ -42,63 +42,63 @@ Solution: [%Y = 10, %X = 3]
 ========================================================================
 
 Solving relation:
-All: 
-    Is_Even?(%Y) 
-    Any: 
-        1 -> %X 
-        2 -> %X 
-        3 -> %X 
+All:
+    Is_Even?(%Y)
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
 
 
 ========================================================================
 
 Solving relation:
-All: 
-    Is_Even?(%Y) 
-    Is_Even?(%X) 
+All:
+    Is_Even?(%Y)
+    Is_Even?(%X)
 
 ========================================================================
 
 Solving relation:
-Any: 
-    Is_Even?(%Y) 
-    1 -> %X 
-    2 -> %X 
+Any:
+    Is_Even?(%Y)
+    1 -> %X
+    2 -> %X
 
 Solution: [%Y = <undefined>, %X = 1]
 Solution: [%Y = <undefined>, %X = 2]
 ========================================================================
 
 Solving relation:
-Any: 
-    Is_Even?(%X) 
-    Is_Even?(%Y) 
+Any:
+    Is_Even?(%X)
+    Is_Even?(%Y)
 
 ========================================================================
 
 Solving relation:
-Any: 
-    Is_Even?(%X) 
-    All: 
-        Any: 
-            1 -> %X 
-            2 -> %X 
-            3 -> %X 
+Any:
+    Is_Even?(%X)
+    All:
+        Any:
+            1 -> %X
+            2 -> %X
+            3 -> %X
 
-        Is_Even?(%Y) 
+        Is_Even?(%Y)
 
 
 ========================================================================
 
 Solving relation:
-All: 
-    Any: 
-        1 -> %X 
-        2 -> %X 
-        3 -> %X 
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
 
-    Is_Even?(%Y) 
-    2 -> %X 
+    Is_Even?(%Y)
+    2 -> %X
     %X <-> %Y
 
 Solution: [%Y = 2, %X = 2]

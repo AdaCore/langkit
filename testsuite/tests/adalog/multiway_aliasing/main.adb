@@ -22,7 +22,7 @@ procedure Main is
    E : constant Raw_Var := Create("E");
 
    R : constant Relation :=
-       R_All ((X = Y, 
+       R_All ((X = Y,
                Y = Z,
                A = Z,
                E = A,

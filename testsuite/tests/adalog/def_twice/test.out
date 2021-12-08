@@ -2,17 +2,17 @@ Solving with new solver
 =======================
 
 Solving relation:
-All: 
-    Any: 
-        1 -> %X 
-        2 -> %X 
-        3 -> %X 
-        4 -> %X 
-        5 -> %X 
-        6 -> %X 
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+        4 -> %X
+        5 -> %X
+        6 -> %X
 
-    1 -> %X 
-    Is_Odd?(%X) 
+    1 -> %X
+    Is_Odd?(%X)
 
 Solution: [%X = 1]
 
@@ -20,9 +20,9 @@ Solving with old solver
 =======================
 
 Solving relation:
-<All> :
+<All>:
 | | Member %X {1, 2, 3, 4, 5, 6}
-| | Unify %X <= 1 
+| | Unify %X <= 1
 | | Predicate Is_Odd on %X
 Solution: [%X = 1]
 

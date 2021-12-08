@@ -1632,17 +1632,18 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       function Prop_Image
         (Left, Right : String; Can_Fail : Boolean := False) return String
       is
-        (Left_Image (Left) & " -" & (if Can_Fail then "?" else "")
-         & "> " & Right);
+        (Left_Image (Left) & (if Can_Fail then " -?> " else " -> ") & Right);
    begin
       case Self.Kind is
          when Propagate =>
             return Prop_Image
               (Image (Self.From), Image (Self.Target), Self.Can_Fail);
+
          when Assign =>
             return Prop_Image
               (Logic_Vars.Element_Image (Self.Val), Image (Self.Target),
                Self.Can_Fail);
+
          when Predicate =>
             declare
                Full_Img : constant String :=
@@ -1652,6 +1653,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                  (if Full_Img /= "" then Full_Img
                   else Self.Pred.Image & "?(" & Image (Self.Target) & ")");
             end;
+
          when N_Predicate =>
             declare
                Full_Img : constant String :=
@@ -1667,11 +1669,15 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                return Self.N_Pred.Image
                  & "?(" & To_XString (", ").Join (Vars_Image).To_String & ")";
             end;
-         when True => return "True";
-         when False => return "False";
+
+         when True =>
+            return "True";
+
+         when False =>
+            return "False";
+
          when Unify =>
-            return Image (Self.Unify_From)
-              & " <-> " & Image (Self.Target);
+            return Image (Self.Unify_From) & " <-> " & Image (Self.Target);
       end case;
    end Image;
 
@@ -1715,9 +1721,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    begin
       Ret.Append
         ((case Self.Kind is
-            when Kind_All => "All: ",
-            when Kind_Any => "Any: ")
-         & (if Debug_String /= null then Debug_String.all else "") & ASCII.LF);
+            when Kind_All => "All:",
+            when Kind_Any => "Any:")
+         & (if Debug_String /= null and then Debug_String.all /= ""
+            then " " & Debug_String.all
+            else "")
+         & ASCII.LF);
 
       for Rel of Self.Rels loop
          Ret.Append ((1 .. Level + 4 => ' ')
@@ -1739,7 +1748,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             return Image (Self.Compound_Rel, Level, Self.Debug_Info);
          when Atomic => return
               Image (Self.Atomic_Rel)
-              & (if Self.Debug_Info /= null
+              & (if Self.Debug_Info /= null and then Self.Debug_Info.all /= ""
                  then " " & Self.Debug_Info.all
                  else "");
       end case;

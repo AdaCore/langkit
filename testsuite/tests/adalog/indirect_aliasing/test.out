@@ -2,7 +2,7 @@ Solving with new solver
 =======================
 
 Solving relation:
-All: 
+All:
     %X <-> %Y
     2 -> %Y_Ind
     %Y <-> %Y_Ind
@@ -14,7 +14,7 @@ Solving with old solver
 =======================
 
 Solving relation:
-<All> :
+<All>:
 | | Bind %X <=> %Y
 | | Unify %Y_Ind <= 2
 | | Bind %Y <=> %Y_Ind
