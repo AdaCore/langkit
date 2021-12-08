@@ -897,6 +897,7 @@ class ManageScript:
         result = ['-XBUILD_MODE={}'.format(self.build_mode),
                   '-XLIBRARY_TYPE={}'.format(library_type),
                   '-XGPR_BUILD={}'.format(library_type),
+                  '-XGNATCOLL_GMP_BUILD={}'.format(library_type),
                   '-XXMLADA_BUILD={}'.format(library_type)]
 
         if self.enable_build_warnings:
