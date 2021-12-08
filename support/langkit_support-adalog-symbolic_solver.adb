@@ -1112,30 +1112,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          raise;
    end Solve;
 
-   -----------
-   -- Solve --
-   -----------
-
-   procedure Solve
-     (Self              : Relation;
-      Solution_Callback : access function return Boolean;
-      Solve_Options     : Solve_Options_Type := Default_Options)
-   is
-      function Internal_Callback (Dummy : Var_Array) return Boolean;
-      --  Callback for Solve
-
-      -----------------------
-      -- Internal_Callback --
-      -----------------------
-
-      function Internal_Callback (Dummy : Var_Array) return Boolean is
-      begin
-         return Solution_Callback.all;
-      end Internal_Callback;
-   begin
-      Solve (Self, Internal_Callback'Access, Solve_Options);
-   end Solve;
-
    -----------------
    -- Solve_First --
    -----------------

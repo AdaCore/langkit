@@ -296,30 +296,6 @@ package body Langkit_Support.Adalog.Solver is
 
    procedure Solve
      (Self              : Relation;
-      Solution_Callback : access function return Boolean;
-      Solve_Options     : Solve_Options_Type := Default_Options) is
-   begin
-      case Self.Kind is
-         when Symbolic => Sym_Solve.Solve
-              (Self.Symbolic_Relation, Solution_Callback, Solve_Options);
-         when State_Machine =>
-            while Abstract_Relation.Solve (Self.SSM_Relation) loop
-               declare
-                  Ignore : Boolean := Solution_Callback.all;
-               begin
-                  null;
-               end;
-            end loop;
-         when None => raise Constraint_Error with "Cannot solve No_Relation";
-      end case;
-   end Solve;
-
-   -----------
-   -- Solve --
-   -----------
-
-   procedure Solve
-     (Self              : Relation;
       Solution_Callback : access function
         (Vars : Logic_Var_Array) return Boolean;
       Solve_Options     : Solve_Options_Type := Default_Options) is
