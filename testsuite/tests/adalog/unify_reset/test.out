@@ -2,13 +2,13 @@ Solving with new solver
 =======================
 
 Solving relation:
-Any: 
-    All: 
+Any:
+    All:
         %X <-> %Y
         1 -> %X
         1 -> %Y
 
-    All: 
+    All:
         3 -> %X
         12 -> %Y
 

@@ -2,10 +2,10 @@ Solving with new solver
 =======================
 
 Solving relation:
-Any: 
+Any:
     1 -> %X
-    All: 
-        Is_Even?(%X) 
+    All:
+        Is_Even?(%X)
         1 -> %Y
 
 

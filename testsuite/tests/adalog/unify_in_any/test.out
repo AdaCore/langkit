@@ -2,22 +2,22 @@ Solving with new solver
 =======================
 
 Solving relation:
-All: 
-    Any: 
+All:
+    Any:
         %X <-> %Y
         True
 
-    Any: 
-        1 -> %X 
-        2 -> %X 
+    Any:
+        1 -> %X
+        2 -> %X
         True
 
-    Any: 
-        -1 -> %Y 
-        -2 -> %Y 
+    Any:
+        -1 -> %Y
+        -2 -> %Y
         True
 
-    N_Predicate?(%X, %Y) 
+    N_Predicate?(%X, %Y)
 
 Solution: [%Y = -1, %X = 1]
 Solution: [%Y = -1, %X = -1]
@@ -30,14 +30,14 @@ Solving with old solver
 =======================
 
 Solving relation:
-<All> :
-| | <Any> :
+<All>:
+| | <Any>:
 | | | | Bind %X <=> %Y
 | | | | <True>
-| | <Any> :
+| | <Any>:
 | | | | Member %X {1, 2}
 | | | | <True>
-| | <Any> :
+| | <Any>:
 | | | | Member %Y {-1, -2}
 | | | | <True>
 | | PREDICATE N_Predicate ON %X%Y

@@ -142,7 +142,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
 
          Start_Line (Level);
          Put (R.Custom_Image);
-         if R.Sloc_Info /= null then
+         if R.Sloc_Info /= null and then R.Sloc_Info.all /= "" then
             Put (" " & R.Sloc_Info.all);
          end if;
 

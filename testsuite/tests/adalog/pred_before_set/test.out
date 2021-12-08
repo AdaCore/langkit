@@ -2,11 +2,11 @@ Solving with new solver
 =======================
 
 Solving relation:
-All: 
-    Any: 
-        All: 
+All:
+    Any:
+        All:
             1 -> %Y
-            Is_Even?(%X) 
+            Is_Even?(%X)
 
         1 -> %X
 
