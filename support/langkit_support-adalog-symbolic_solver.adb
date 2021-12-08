@@ -30,8 +30,6 @@ with GNATCOLL.Strings; use GNATCOLL.Strings;
 with Langkit_Support.Functional_Lists;
 with Langkit_Support.Images;
 
-pragma Style_Checks ("-s");
-
 pragma Warnings (Off, "attribute Update");
 --  Attribute update is obsolescent in Ada 2022, but we don't yet want to use
 --  delta aggregates because they won't be supported on old compilers, so just
@@ -43,14 +41,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Supporting types --
    -----------------------
 
-   package Atomic_Relation_Vectors
-   is new Langkit_Support.Vectors (Atomic_Relation);
+   package Atomic_Relation_Vectors is new Langkit_Support.Vectors
+     (Atomic_Relation);
    subtype Atomic_Relation_Vector is Atomic_Relation_Vectors.Vector;
    type Atoms_Vector_Access is access all Atomic_Relation_Vector;
    --  Vectors of atomic relations
 
-   function Image
-   is new Langkit_Support.Images.Array_Image
+   function Image is new Langkit_Support.Images.Array_Image
      (Atomic_Relation,
       Positive,
       Atomic_Relation_Vectors.Elements_Array);
@@ -61,17 +58,18 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Helper subtype. Allows us to check that we only have any relations in
    --  Any_Relation_Vectors.Vector.
 
-   package Any_Relation_Lists
-   is new Langkit_Support.Functional_Lists (Any_Rel);
+   package Any_Relation_Lists is new Langkit_Support.Functional_Lists
+     (Any_Rel);
    subtype Any_Relation_List is Any_Relation_Lists.List;
    --  Vectors of Anys
+
    function Image (Self : Any_Relation_Lists.List) return String;
 
-   package Atomic_Relation_Lists
-   is new Langkit_Support.Functional_Lists (Atomic_Relation);
+   package Atomic_Relation_Lists is new Langkit_Support.Functional_Lists
+     (Atomic_Relation);
 
-   package Var_Ids_To_Atoms_Vectors
-   is new Langkit_Support.Vectors (Atomic_Relation_Lists.List);
+   package Var_Ids_To_Atoms_Vectors is new Langkit_Support.Vectors
+     (Atomic_Relation_Lists.List);
    subtype Var_Ids_To_Atoms is Var_Ids_To_Atoms_Vectors.Vector;
    --  Vector mapping logic var ids to atomic relations
 
@@ -80,7 +78,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --------------------------
 
    procedure Reserve (V : in out Var_Ids_To_Atoms; Size : Positive);
-   --  Reserve ``N`` elements in ``V``. TODO: Add that to vectors.
+   --  Reserve ``N`` elements in ``V``. TODO??? Add that to vectors.
 
    function Create_Propagate
      (From, To     : Var;
@@ -100,7 +98,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Internal image function for a relation
 
    type Callback_Type is access function (Vars : Var_Array) return Boolean;
-   --  Type used to store the callback. TODO: This should make more data
+   --  Type used to store the callback. TODO??? This should make more data
    --  accessible, like the numbers of solutions tried so far.
 
    type Atom_And_Index is record
@@ -110,23 +108,22 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Simple record storing an atom along with its index. Used to construct
    --  the dependency graph during topo sort.
 
-   package Atom_Lists
-   is new Langkit_Support.Functional_Lists (Atom_And_Index);
+   package Atom_Lists is new Langkit_Support.Functional_Lists (Atom_And_Index);
    package Atom_Lists_Vectors is new Langkit_Support.Vectors (Atom_Lists.List);
    --  Vectors of lists of ``Atom_And_Index``. Used to construct the
    --  dependency graph during topo sort.
 
    type Sort_Context_Type is record
-      Using_Atoms :  Atom_Lists_Vectors.Vector;
-      --  Maps var ids to lists of atoms. TODO: we could use a vector rather
+      Using_Atoms : Atom_Lists_Vectors.Vector;
+      --  Maps var ids to lists of atoms. TODO??? we could use a vector rather
       --  than a list as the inner storing type. Would be more efficient.
 
-      Working_Set  : Atom_Lists.List;
+      Working_Set : Atom_Lists.List;
       --  Working set of atoms. Used as a temporary list to store atoms in the
       --  graph that need to be subsequently added.
 
-      N_Preds      : Atom_Lists.List;
-      --  List of N_Predicates, to be applied at the end of solving. TODO: we
+      N_Preds : Atom_Lists.List;
+      --  List of N_Predicates, to be applied at the end of solving. TODO??? we
       --  could apply this policy for all predicates, which would simplify the
       --  code a bit.
    end record;
@@ -134,7 +131,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  complete potential solution. The data is stored in a shared variable
    --  stored in the Solving_Context, so as to spare allocations.
    --
-   --  TODO: Fix Functional_List.Clear, because we're leaking heaps of memory
+   --  TODO??? Fix Functional_List.Clear, because we're leaking heaps of memory
    --  at the moment.
 
    type Sort_Context is access all Sort_Context_Type;
@@ -142,28 +139,29 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    type Nat_Access is access all Natural;
 
    type Solving_Context is record
-      Cb                : Callback_Type;
+      Cb : Callback_Type;
       --  User callback, to be called when a solution is found
 
-      Atoms             : Atoms_Vector_Access;
+      Atoms : Atoms_Vector_Access;
       --  Current flat list of atoms that will at the end of the traversal of a
       --  branch constitute a potential solution.
 
-      Aliases           : Atoms_Vector_Access;
-      --  List of alias relations. TODO: not clear why this is stored in the
+      Aliases : Atoms_Vector_Access;
+      --  List of alias relations. TODO??? not clear why this is stored in the
       --  context, and not as a local variable in Solve_Compound.
 
-      Anys              : Any_Relation_List := Any_Relation_Lists.No_List;
+      Anys : Any_Relation_List := Any_Relation_Lists.No_List;
       --  Remaining list of Any relations to traverse
 
-      Vars              : Logic_Var_Vector_Access;
-      --  Set of all variables. TODO: Store an array rt. a vector by traversing
-      --  the equation first.
+      Vars : Logic_Var_Vector_Access;
+      --  Set of all variables. TODO??? Store an array rt. a vector by
+      --  traversing the equation first.
 
-      Vars_To_Atoms     : Var_Ids_To_Atoms;
+      Vars_To_Atoms : Var_Ids_To_Atoms;
       --  Stores a mapping of variables to atoms, used for exponential
       --  resolution optimization.
-      --  TODO:
+      --
+      --  TODO???
       --
       --  1. Store an array rt. a vector (traversing the equation first to find
       --  out all variables).
@@ -177,12 +175,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  Optimization that will cut branches that necessarily contain falsy
       --  solutions.
 
-      Sort_Ctx          : Sort_Context;
+      Sort_Ctx : Sort_Context;
       --  Context used for the topological sort, when reaching a complete
       --  potential solution. Stored once in the context to save ourselves
       --  from reallocating data structures everytime.
 
-      Tried_Solutions   : Nat_Access := null;
+      Tried_Solutions : Nat_Access;
       --  Number of tried solutions. Stored for analytics purpose, and
       --  potentially for timeout.
    end record;
@@ -198,11 +196,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    procedure Destroy (Ctx : in out Solving_Context);
    --  Destroy a solving context, and associated data
 
-   function Get_Id
-     (Ctx : Solving_Context; Logic_Var : Var) return Positive;
+   function Get_Id (Ctx : Solving_Context; Logic_Var : Var) return Positive;
    --  Get the id of variable ``Logic_Var`` in ``Ctx``.
    --
-   --  TODO: Due to Aliasing, a logic variable can have several ids.
+   --  TODO??? Due to Aliasing, a logic variable can have several ids.
    --  Consequently, things like exponential resolution optimization are
    --  not complete.
 
@@ -212,56 +209,76 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    procedure Reset_Vars (Ctx : Solving_Context; Reset_Ids : Boolean := False);
    --  Reset all logic variables. If Reset_Ids is true, only reset ids.
    --
-   --  TODO: Should really be two separate procedures.
+   --  TODO??? Should really be two separate procedures.
 
    ----------------------------
    --  Comparer pred wrapper --
    ----------------------------
 
    type Comparer_N_Pred is new N_Predicate_Type with record
-      Conv     : Converter_Access;
-      Eq       : Comparer_Access;
+      Conv : Converter_Access;
+      Eq   : Comparer_Access;
    end record;
    --  This is a wrapper type, constructed when we have a propagate
    --  with an ``Eq`` predicate.
 
-   function Call (Self : Comparer_N_Pred; Vals : Value_Array) return Boolean
+   overriding procedure Destroy (Self : in out Comparer_N_Pred);
+
+   overriding function Call
+     (Self : Comparer_N_Pred; Vals : Value_Array) return Boolean
    is
      (Self.Eq.Compare ((if Self.Conv /= null
                         then Self.Conv.Convert (Vals (1))
                         else Vals (1)), Vals (2)));
 
-   function Full_Image (Self : Comparer_N_Pred; Vars : Var_Array) return String
+   overriding function Full_Image
+     (Self : Comparer_N_Pred; Vars : Var_Array) return String
    is (Self.Eq.Image & "?("
        & (if Self.Conv /= null
           then Self.Conv.Image & "(" & Image (Vars (1)) & ")"
           else Image (Vars (1)))
        & ", " & Image (Vars (2)) & ")");
 
-   overriding procedure Destroy (Self : in out Comparer_N_Pred) is
-   begin
-      Free (Self.Eq);
-   end Destroy;
-
    type Comparer_Pred is new Predicate_Type with record
-      Eq       : Comparer_Access;
-      Conv     : Converter_Access;
-      Val      : Value_Type;
+      Eq   : Comparer_Access;
+      Conv : Converter_Access;
+      Val  : Value_Type;
    end record;
    --  This is a wrapper type, constructed when we have an assign
    --  with an ``Eq`` predicate.
 
-   function Call (Self : Comparer_Pred; Val : Value_Type) return Boolean
+   overriding procedure Destroy (Self : in out Comparer_Pred);
+
+   overriding function Call
+     (Self : Comparer_Pred; Val : Value_Type) return Boolean
    is
      (Self.Eq.Compare (Val, (if Self.Conv /= null
                              then Self.Conv.Convert (Self.Val)
                              else Self.Val)));
 
-   function Full_Image (Self : Comparer_Pred; Logic_Var : Var) return String
+   overriding function Full_Image
+     (Self : Comparer_Pred; Logic_Var : Var) return String
    is (Self.Eq.Image & "?("
        & (if Self.Conv /= null
           then Self.Conv.Image & "(" & Element_Image (Self.Val) & ")"
           else Element_Image (Self.Val)) & ", " & Image (Logic_Var) & ")");
+
+   function Solve_Compound
+     (Self : Compound_Relation; Ctx : Solving_Context) return Boolean;
+   --  TODO???
+
+   -------------
+   -- Destroy --
+   -------------
+
+   overriding procedure Destroy (Self : in out Comparer_N_Pred) is
+   begin
+      Free (Self.Eq);
+   end Destroy;
+
+   -------------
+   -- Destroy --
+   -------------
 
    overriding procedure Destroy (Self : in out Comparer_Pred) is
    begin
@@ -276,8 +293,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    begin
       Atom_Lists.Clear (Sort_Ctx.N_Preds);
       Atom_Lists.Clear (Sort_Ctx.Working_Set);
-      for I in  Sort_Ctx.Using_Atoms.First_Index ..
-        Sort_Ctx.Using_Atoms.Last_Index
+      for I in Sort_Ctx.Using_Atoms.First_Index
+               .. Sort_Ctx.Using_Atoms.Last_Index
       loop
          Atom_Lists.Clear (Sort_Ctx.Using_Atoms.Get_Access (I).all);
       end loop;
@@ -287,9 +304,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -- Reset_Vars --
    ----------------
 
-   procedure Reset_Vars
-     (Ctx       : Solving_Context;
-      Reset_Ids : Boolean := False)
+   procedure Reset_Vars (Ctx : Solving_Context; Reset_Ids : Boolean := False)
    is
    begin
       for V of Ctx.Vars.all loop
@@ -328,7 +343,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       procedure Free is new Ada.Unchecked_Deallocation
         (Natural, Nat_Access);
    begin
-
       Ctx.Aliases.Destroy;
       Ctx.Atoms.Destroy;
       Any_Relation_Lists.Destroy (Ctx.Anys);
@@ -350,10 +364,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Free (Ctx.Sort_Ctx);
    end Destroy;
 
-   function Solve_Compound
-     (Self : Compound_Relation;
-      Ctx  : Solving_Context) return Boolean;
-
    -------------
    -- Reserve --
    -------------
@@ -369,12 +379,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -- Get_Id --
    ------------
 
-   function Get_Id
-     (Ctx : Solving_Context; Logic_Var : Var) return Positive
-   is
+   function Get_Id (Ctx : Solving_Context; Logic_Var : Var) return Positive is
    begin
       if Id (Logic_Var) = 0 then
-
          if Verbose_Trace.Is_Active then
             Verbose_Trace.Trace ("No id for logic var " & Image (Logic_Var));
          end if;
@@ -391,23 +398,29 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    ----------------
 
    procedure Assign_Ids (Ctx : Solving_Context; Atom : Atomic_Relation) is
-      procedure Assign_Id (Ctx : Solving_Context; Var : Var_Or_Null);
-      procedure Assign_Id (Ctx : Solving_Context; Var : Var_Or_Null) is
-         Dummy : Positive;
+      procedure Assign_Id (Var : Var_Or_Null);
+      --  Helper to assign the Ids on the given variable
+
+      ---------------
+      -- Assign_Id --
+      ---------------
+
+      procedure Assign_Id (Var : Var_Or_Null) is
+         Id : Positive;
       begin
          if Var.Exists then
-            Dummy := Get_Id (Ctx, Var.Logic_Var);
+            Id := Get_Id (Ctx, Var.Logic_Var);
 
             if Verbose_Trace.Is_Active then
-               Verbose_Trace.Trace ("Assigning Id " & Dummy'Image
+               Verbose_Trace.Trace ("Assigning Id " & Id'Image
                                     & " to var " & Image (Var.Logic_Var));
             end if;
-
          end if;
       end Assign_Id;
+
    begin
-      Assign_Id (Ctx, Defined_Var (Atom));
-      Assign_Id (Ctx, Used_Var (Atom));
+      Assign_Id (Defined_Var (Atom));
+      Assign_Id (Used_Var (Atom));
    end Assign_Ids;
 
    --------------
@@ -436,7 +449,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  the list of variables of the equation. TODO??? Might be cleaner to
       --  have a separate function to return all variables a relation uses?
      (case Self.Kind is
-         when Assign | Propagate | Unify => (True, Self.Target),
+         when Assign | Propagate | Unify             => (True, Self.Target),
          when Predicate | True | False | N_Predicate => Null_Var);
 
    -----------------
@@ -483,17 +496,16 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -------------
 
    procedure Dec_Ref (Self : in out Relation) is
-      procedure Unchecked_Free
-      is new Ada.Unchecked_Deallocation (Relation_Type, Relation);
+      procedure Unchecked_Free is new Ada.Unchecked_Deallocation
+        (Relation_Type, Relation);
    begin
       if Self = null or else Self.Ref_Count = -1 then
          return;
-      end if;
-
-      Self.Ref_Count := Self.Ref_Count - 1;
-      if Self.Ref_Count = 0 then
+      elsif Self.Ref_Count = 1 then
          Destroy (Self);
          Unchecked_Free (Self);
+      else
+         Self.Ref_Count := Self.Ref_Count - 1;
       end if;
       Self := null;
    end Dec_Ref;
@@ -503,8 +515,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --------------------
 
    function Solve_Compound
-     (Self : Compound_Relation;
-      Ctx  : Solving_Context) return Boolean
+     (Self : Compound_Relation; Ctx : Solving_Context) return Boolean
    is
       function Topo_Sort
         (Atoms : Atomic_Relation_Vector; Error : out Boolean)
@@ -526,6 +537,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  whether we should abort current path or not, in the case of an All
       --  relation.
 
+      function Cleanup (Val : Boolean) return Boolean;
+      --  Cleanup helper to call before exitting Solve_Compound
+
+      procedure Branch_Cleanup;
+      --  TODO???
+
       use Any_Relation_Lists;
       use Atomic_Relation_Lists;
 
@@ -537,36 +554,41 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
         (Atoms : Atomic_Relation_Vector; Error : out Boolean)
          return Atomic_Relation_Vectors.Elements_Array
       is
-
-         Sorted_Atoms      : Atomic_Relation_Vectors.Elements_Array
+         Sorted_Atoms    : Atomic_Relation_Vectors.Elements_Array
            (Atoms.First_Index .. Atoms.Last_Index);
+         Last_Atom_Index : Natural := 0;
 
-         Current_Index     : Positive := 1;
+         procedure Append (Atom : Atomic_Relation);
+         --  Append Atom to Sorted_Atoms
 
-         procedure Append (Atom : Atomic_Relation) is
-         begin
-            Sorted_Atoms (Current_Index) := Atom;
-            Current_Index := Current_Index + 1;
-         end Append;
+         Appended : array (Sorted_Atoms'Range) of Boolean := (others => False);
+         --  TODO???
 
-         Appended       : array (Sorted_Atoms'Range) of Boolean
-           := (others => False);
-
-         Current_Atom : Atomic_Relation;
          use Atom_Lists;
 
-         function Id (S : Var_Or_Null) return Natural is
-           (if S.Exists then Get_Id (Ctx, S.Logic_Var) else 0);
+         function Id (S : Var_Or_Null) return Natural
+         is (if S.Exists then Get_Id (Ctx, S.Logic_Var) else 0);
+         --  TODO???
 
          function Defined (S : Atomic_Relation) return Natural
          is (Id (Defined_Var (S)));
+         --  TODO???
 
-         Using_Atoms : constant Atom_Lists_Vectors.Vector
-           := Ctx.Sort_Ctx.Using_Atoms;
+         ------------
+         -- Append --
+         ------------
+
+         procedure Append (Atom : Atomic_Relation) is
+         begin
+            Last_Atom_Index := Last_Atom_Index + 1;
+            Sorted_Atoms (Last_Atom_Index) := Atom;
+         end Append;
+
+         Using_Atoms : constant Atom_Lists_Vectors.Vector :=
+           Ctx.Sort_Ctx.Using_Atoms;
          N_Preds     : Atom_Lists.List := Ctx.Sort_Ctx.N_Preds;
          Working_Set : Atom_Lists.List := Ctx.Sort_Ctx.Working_Set;
       begin
-
          Error := False;
 
          --  Step 1: create:
@@ -577,18 +599,18 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          --       atoms with no dependencies.
 
          for I in reverse Atoms.First_Index .. Atoms.Last_Index loop
-            Current_Atom := Atoms.Get (I);
-
             declare
+               Current_Atom : constant Atomic_Relation := Atoms.Get (I);
+
                --  Resolve the Id of the var used. If the var aliases to
                --  another var, resolve to the aliased var's Id.
                Used_Logic_Var : constant Var_Or_Null :=
                  Used_Var (Current_Atom);
                Used_Id        : constant Natural :=
-                 (if Used_Logic_Var.Exists then
-                    (if Get_Alias (Used_Logic_Var.Logic_Var) /= No_Var
-                     then Get_Id (Ctx, Get_Alias (Used_Logic_Var.Logic_Var))
-                     else Get_Id (Ctx, Used_Logic_Var.Logic_Var))
+                 (if Used_Logic_Var.Exists
+                  then (if Get_Alias (Used_Logic_Var.Logic_Var) /= No_Var
+                        then Get_Id (Ctx, Get_Alias (Used_Logic_Var.Logic_Var))
+                        else Get_Id (Ctx, Used_Logic_Var.Logic_Var))
                   else 0);
             begin
                if Current_Atom.Kind = Unify then
@@ -603,26 +625,32 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   N_Preds := (Current_Atom, I) & N_Preds;
 
                elsif Used_Id = 0 then
-
                   --  Put atoms with no dependency in the working set
 
                   Working_Set := (Current_Atom, I) & Working_Set;
-               else
 
+               else
                   --  For other atoms, put them in the using atoms map, which
                   --  represent the edges of the dependency graph.
-                  Using_Atoms.Get_Access (Used_Id).all :=
-                    (Current_Atom, I) & Using_Atoms.Get (Used_Id);
+
+                  declare
+                     L : Atom_Lists.List renames
+                       Using_Atoms.Get_Access (Used_Id).all;
+                  begin
+                     L := (Current_Atom, I) & L;
+                  end;
                end if;
             end;
          end loop;
 
          --  Step 2: Do the topo sort
+
          while Has_Element (Working_Set) loop
             --  Take items from the working set in order. In the beginning, it
             --  will only contain atoms with no dependencies.
             declare
-               Atom : constant Atom_And_Index := Head (Working_Set);
+               Atom    : constant Atom_And_Index := Head (Working_Set);
+               Defd_Id : constant Natural := Defined (Atom.Atom);
             begin
                Working_Set := Tail (Working_Set);
 
@@ -631,20 +659,15 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
                --  If the atom defines a variable that is used by other atoms,
                --  put those other atoms in the working set.
-               declare
-                  Defd_Id : Natural renames Defined (Atom.Atom);
-               begin
+               if Defd_Id /= 0 then
+                  for El of Using_Atoms.Get (Defd_Id) loop
+                     Working_Set := El & Working_Set;
+                  end loop;
 
-                  if Defd_Id /= 0 and then Using_Atoms.Length >= Defd_Id then
-                     for El of Using_Atoms.Get (Defd_Id) loop
-                        Working_Set := El & Working_Set;
-                     end loop;
-
-                     --  Remove items from Using_Atoms, so that they're not
-                     --  appended again to the working set.
-                     Clear (Using_Atoms.Get_Access (Defd_Id).all);
-                  end if;
-               end;
+                  --  Remove items from Using_Atoms, so that they're not
+                  --  appended again to the working set.
+                  Clear (Using_Atoms.Get_Access (Defd_Id).all);
+               end if;
             end;
          end loop;
 
@@ -654,7 +677,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             Appended (N_Pred.Atom_Index) := True;
          end loop;
 
-         --  Verify that every atom has been appended. TODO: This feels like
+         --  Verify that every atom has been appended. TODO??? This feels like
          --  an inefficient way to handle this problem, but I haven't found a
          --  better way yet.
          for I in Appended'Range loop
@@ -673,21 +696,29 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Clear (Working_Set);
          Clear (N_Preds);
 
-         return Sorted_Atoms (1 .. Current_Index - 1);
-
+         return Sorted_Atoms (1 .. Last_Atom_Index);
       end Topo_Sort;
 
       ------------------
       -- Try_Solution --
       ------------------
 
-      function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean
-      is
-         function Cleanup (Val : Boolean) return Boolean with Inline_Always
-         is begin
+      function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean is
+
+         function Cleanup (Val : Boolean) return Boolean;
+         --  Helper for early abort: cancel the indentation increase in
+         --  Solv_Trace and return Val.
+
+         -------------
+         -- Cleanup --
+         -------------
+
+         function Cleanup (Val : Boolean) return Boolean is
+         begin
             Solv_Trace.Decrease_Indent;
             return Val;
          end Cleanup;
+
       begin
          if Solv_Trace.Is_Active then
             Solv_Trace.Increase_Indent ("In try solution");
@@ -703,18 +734,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          declare
             use Atomic_Relation_Vectors;
             Sorting_Error : Boolean;
-            Sorted_Atoms : constant Elements_Array
-              := Topo_Sort (Atoms, Sorting_Error);
+            Sorted_Atoms  : constant Elements_Array :=
+              Topo_Sort (Atoms, Sorting_Error);
          begin
             --  There was an error in the topo sort. Continue to next potential
             --  solution.
             if Sorting_Error then
                return Cleanup (True);
-            end if;
-
-            --  An empty array is a valid solution
-            if Sorted_Atoms = Empty_Array then
-               return Cleanup (Ctx.Cb (Var_Array (Ctx.Vars.To_Array)));
             end if;
 
             if Solv_Trace.Is_Active then
@@ -726,7 +752,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             --  every relation in order. Abort if one doesn't solve.
             for Atom of Sorted_Atoms loop
                if not Solve_Atomic (Atom) then
-
                   if Solv_Trace.Is_Active then
                      Solv_Trace.Trace ("Failed on " & Image (Atom));
                   end if;
@@ -745,16 +770,19 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end;
       end Try_Solution;
 
-      V                      : Var_Or_Null;
-      Ignore                 : Boolean;
       Vars_To_Atoms          : Var_Ids_To_Atoms := Ctx.Vars_To_Atoms.Copy;
       Anys                   : Any_Relation_List := Ctx.Anys;
       Initial_Atoms_Length   : Natural renames Ctx.Atoms.Last_Index;
       Initial_Aliases_Length : Natural renames Ctx.Aliases.Last_Index;
 
+      --------------------
+      -- Branch_Cleanup --
+      --------------------
+
       procedure Branch_Cleanup is
       begin
          Ctx.Atoms.Cut (Initial_Atoms_Length);
+
          --  Unalias every var that was aliased
          for I in Initial_Aliases_Length + 1 .. Ctx.Aliases.Last_Index loop
             if Verbose_Trace.Is_Active then
@@ -762,16 +790,19 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                  ("Unaliasing "
                   & Image (Ctx.Aliases.Get_Access (I).Unify_From));
             end if;
-
             Unalias (Ctx.Aliases.Get_Access (I).Unify_From);
          end loop;
+
          Ctx.Aliases.Cut (Initial_Aliases_Length);
          Vars_To_Atoms.Destroy;
          Vars_To_Atoms := Ctx.Vars_To_Atoms.Copy;
       end Branch_Cleanup;
 
-      function Cleanup (Val : Boolean) return Boolean with Inline_Always
-      is
+      -------------
+      -- Cleanup --
+      -------------
+
+      function Cleanup (Val : Boolean) return Boolean is
       begin
          Branch_Cleanup;
          Vars_To_Atoms.Destroy;
@@ -779,14 +810,16 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          return Val;
       end Cleanup;
 
+      ------------------
+      -- Process_Atom --
+      ------------------
+
       function Process_Atom (Atom : Atomic_Relation) return Boolean is
          Id : Positive;
       begin
          Assign_Ids (Ctx, Atom);
 
-         if Atom.Kind = Unify
-           and then Atom.Unify_From /= Atom.Target
-         then
+         if Atom.Kind = Unify and then Atom.Unify_From /= Atom.Target then
             if Verbose_Trace.Is_Active then
                Verbose_Trace.Trace
                  ("Aliasing var " & Image (Atom.Unify_From)
@@ -796,40 +829,39 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             Id := Get_Id (Ctx, Atom.Unify_From);
             Reserve (Vars_To_Atoms, Id);
             Ctx.Aliases.Append (Atom);
-
             return True;
+
          elsif Atom.Kind = True then
             return True;
+
          elsif Atom.Kind = False then
             return False;
          end if;
 
          Ctx.Atoms.Append (Atom);
 
-         if Ctx.Cut_Dead_Branches then
-            --  Exponential resolution optimization: If relevant, add
-            --  atomic relation to the mappings of vars to atoms.
-            case Atom.Kind is
-               when Predicate | Assign =>
-                  V := (if Atom.Kind = Predicate
-                        then Used_Var (Atom)
-                        else Defined_Var (Atom));
-                  Id := Get_Id (Ctx, V.Logic_Var);
-                  Reserve (Vars_To_Atoms, Id);
+         --  Exponential resolution optimization: if relevant, add the atomic
+         --  relation to the mappings of vars to atoms.
+         if Ctx.Cut_Dead_Branches and then Atom.Kind in Predicate | Assign then
+            if Solv_Trace.Is_Active then
+               Solv_Trace.Trace
+                 ("== Appending " & Image (Atom) & " to Vars_To_Atoms");
+            end if;
 
-                  if Solv_Trace.Is_Active then
-                     Solv_Trace.Trace
-                       ("== Appending " & Image (Atom) & " to Vars_To_Atoms");
-                  end if;
-
-                  Vars_To_Atoms.Get_Access (Id).all
-                    := Atom & Vars_To_Atoms.Get (Id);
-               when others => null;
-            end case;
+            declare
+               V : constant Var_Or_Null := (if Atom.Kind = Predicate
+                                            then Used_Var (Atom)
+                                            else Defined_Var (Atom));
+            begin
+               Id := Get_Id (Ctx, V.Logic_Var);
+            end;
+            Reserve (Vars_To_Atoms, Id);
+            Vars_To_Atoms.Get_Access (Id).all := Atom & Vars_To_Atoms.Get (Id);
          end if;
 
          return True;
       end Process_Atom;
+
    begin
       Trav_Trace.Increase_Indent ("In Solve_Compound " & Self.Kind'Image);
 
@@ -883,13 +915,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             for Atom of Ctx.Atoms.all loop
                if Atom.Kind = Assign then
                   declare
-                     Id : Positive;
+                     V : constant Var_Or_Null := Defined_Var (Atom);
+
+                     --  TODO??? with aliasing, a variable can have several ids
+                     Id : constant Positive := Get_Id (Ctx, V.Logic_Var);
                   begin
-                     V := Defined_Var (Atom);
-
-                     --  TODO: with aliasing, a variable can have several ids
-                     Id := Get_Id (Ctx, V.Logic_Var);
-
                      Reset (V.Logic_Var);
 
                      pragma Assert (Vars_To_Atoms.Length >= Id);
@@ -900,7 +930,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                         --  Call the assign atom, then see if the relations
                         --  solve.
 
-                        Ignore := Solve_Atomic (Atom);
+                        declare
+                           Dummy : constant Boolean := Solve_Atomic (Atom);
+                        begin
+                           null;
+                        end;
                         for User of Vars_To_Atoms.Get (Id) loop
 
                            --  If applying a predicate fails, then we exit the
@@ -934,6 +968,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             --  We don't have any Any relation left: We have a complete
             --  potential solution. Try to solve it.
             return Cleanup (Try_Solution (Ctx.Atoms.all));
+
          else
             if Trav_Trace.Is_Active then
                Trav_Trace.Trace ("Before recursing in solve All");
@@ -941,19 +976,16 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                Trav_Trace.Trace (Image (Anys));
             end if;
 
-            return Cleanup
-              (Solve_Compound
-                 (Head (Anys),
-                  Ctx'Update
-                    (Anys => Tail (Anys),
-                     Vars_To_Atoms => Vars_To_Atoms)));
+            return Cleanup (Solve_Compound
+                              (Head (Anys),
+                               Ctx'Update (Anys          => Tail (Anys),
+                                           Vars_To_Atoms => Vars_To_Atoms)));
          end if;
 
       when Kind_Any =>
          for Sub_Rel of Self.Rels loop
             case Sub_Rel.Kind is
                when Atomic =>
-
                   pragma Assert (Sub_Rel.Atomic_Rel.Kind /= False);
 
                   declare
@@ -964,9 +996,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
                   if Length (Ctx.Anys) > 0 then
                      if not Solve_Compound
-                       (Head (Anys), Ctx'Update
-                        (Anys          => Tail (Anys),
-                         Vars_To_Atoms => Vars_To_Atoms))
+                       (Head (Anys),
+                        Ctx'Update (Anys          => Tail (Anys),
+                                    Vars_To_Atoms => Vars_To_Atoms))
                      then
                         return Cleanup (False);
                      end if;
@@ -1013,6 +1045,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Ctx    : Solving_Context := Create;
       Ignore : Boolean;
 
+      procedure Cleanup;
+      --  Cleanup helper to call before exitting Solve
+
+      -------------
+      -- Cleanup --
+      -------------
+
       procedure Cleanup is
       begin
          Reset_Vars (Ctx, Reset_Ids => True);
@@ -1034,14 +1073,15 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       case Self.Kind is
          when Compound =>
             Ignore := Solve_Compound (Self.Compound_Rel, Ctx);
+
          when Atomic =>
             --  If we're trying to eval a singleton relation that doesn't
             --  define anything, then it's an early binding error.
             if Used_Var (Self.Atomic_Rel).Exists then
-               --  TODO: This is incomplete or N_Preds, since they depend on
+               --  TODO??? This is incomplete or N_Preds, since they depend on
                --  more than one var. Not very important.
-               raise Early_Binding_Error
-                 with "Invalid equation " & Image (Self.Atomic_Rel)
+               raise Early_Binding_Error with
+                 "Invalid equation " & Image (Self.Atomic_Rel)
                  & ": depends on undefined var "
                  & Image (Used_Var (Self.Atomic_Rel).Logic_Var);
             end if;
@@ -1054,8 +1094,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                     ((1 => Defined_Var (Self.Atomic_Rel).Logic_Var));
                end if;
             elsif Solve_Atomic (Self.Atomic_Rel) then
-               --  Solve with empty vars array. TODO: Maybe try to factor that
-               --  code?
+               --  Solve with empty vars array. TODO??? Maybe try to factor
+               --  that code?
                Ignore := Solution_Callback ((1 .. 0 => <>));
             end if;
 
@@ -1081,12 +1121,19 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Solution_Callback : access function return Boolean;
       Solve_Options     : Solve_Options_Type := Default_Options)
    is
+      function Internal_Callback (Dummy : Var_Array) return Boolean;
+      --  Callback for Solve
+
+      -----------------------
+      -- Internal_Callback --
+      -----------------------
+
       function Internal_Callback (Dummy : Var_Array) return Boolean is
       begin
          return Solution_Callback.all;
       end Internal_Callback;
    begin
-      Solve (Self, Internal_Callback'Unrestricted_Access, Solve_Options);
+      Solve (Self, Internal_Callback'Access, Solve_Options);
    end Solve;
 
    -----------------
@@ -1095,8 +1142,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
    function Solve_First
      (Self          : Relation;
-      Solve_Options : Solve_Options_Type := Default_Options) return Boolean is
-
+      Solve_Options : Solve_Options_Type := Default_Options) return Boolean
+   is
       Ret : Boolean := False;
 
       function Callback (Vars : Logic_Var_Array) return Boolean;
@@ -1127,6 +1174,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end loop;
          return False;
       end Callback;
+
    begin
       Solve (Self, Callback'Access, Solve_Options);
       if Last_Vars /= null then
@@ -1181,7 +1229,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Pred         : N_Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation
    is
-      Vars_Vec : Logic_Var_Vector;
+      Vars_Vec : Logic_Var_Vector := Logic_Var_Vectors.Empty_Vector;
    begin
       Vars_Vec.Concat (Logic_Var_Vectors.Elements_Array (Logic_Vars));
       return To_Relation
@@ -1239,8 +1287,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                                                Val       => Value),
                                 Debug_String);
             Ret    : constant Relation :=
-              Create_All
-                ((Ass, N_Pred), Debug_String => Debug_String);
+              Create_All ((Ass, N_Pred), Debug_String => Debug_String);
          begin
             Ass.Debug_Info := Debug_String;
             Ass.Atomic_Rel.Can_Fail := True;
@@ -1262,8 +1309,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Debug_String : String_Access := null) return Relation is
    begin
       return To_Relation
-        (Atomic_Relation'
-           (Kind => Unify, Target => To, Unify_From => From),
+        (Atomic_Relation'(Kind => Unify, Target => To, Unify_From => From),
          Debug_String => Debug_String);
    end Create_Unify;
 
@@ -1323,7 +1369,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Eq_Ptr   : Comparer_Access := null;
    begin
       if Conv /= No_Converter then
-         Conv_Ptr :=  new Converter_Type'Class'(Conv);
+         Conv_Ptr := new Converter_Type'Class'(Conv);
       end if;
       if Eq /= No_Comparer then
          Eq_Ptr := new Comparer_Type'Class'(Eq);
@@ -1405,6 +1451,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             Rels.Append (R);
          end if;
       end Append;
+
    begin
       for El of Relations loop
          Append (El);
@@ -1458,10 +1505,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          when Predicate =>
             Destroy (Self.Pred.all);
             Free (Self.Pred);
+
          when N_Predicate =>
             Self.Vars.Destroy;
             Destroy (Self.N_Pred.all);
             Free (Self.N_Pred);
+
          when True | False | Unify =>
             null;
       end case;
@@ -1490,7 +1539,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    procedure Destroy (Self : Relation) is
    begin
       case Self.Kind is
-         when Atomic => Destroy (Self.Atomic_Rel);
+         when Atomic   => Destroy (Self.Atomic_Rel);
          when Compound => Destroy (Self.Compound_Rel);
       end case;
    end Destroy;
@@ -1505,17 +1554,18 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  ``Self.Target`` already has a value compatible with ``Val``, or if
       --  it had no value and the assignment succeeded.
 
+      ----------------
+      -- Assign_Val --
+      ----------------
+
       function Assign_Val (Val : Value_Type) return Boolean is
          Conv_Val : constant Value_Type :=
-           (if Self.Conv /= null then Self.Conv.Convert (Val)
+           (if Self.Conv /= null
+            then Self.Conv.Convert (Val)
             else Val);
       begin
          if Is_Defined (Self.Target) then
-            declare
-               Var_Val : Value_Type renames Get_Value (Self.Target);
-            begin
-               return Conv_Val = Var_Val;
-            end;
+            return Conv_Val = Get_Value (Self.Target);
          else
             Set_Value (Self.Target, Conv_Val);
             return True;
@@ -1524,7 +1574,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Ret : Boolean;
    begin
-
       --  If the value for self is not defined, raise an error.
       --  TODO??? This is a bit strange because it will never happen when
       --  called from ``Solve_Compound``, which will do a topological sort
@@ -1533,7 +1582,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  those two mechanisms, and most importantly make them fail in the same
       --  way.
       if not Is_Defined_Or_Null (Used_Var (Self)) then
-         raise Early_Binding_Error with "Relation " & Image (Self)
+         raise Early_Binding_Error with
+           "Relation " & Image (Self)
            & " needs var " & Image (Used_Var (Self).Logic_Var)
            & " to be defined";
       end if;
@@ -1578,7 +1628,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                Ret := Self.N_Pred.Call (Vals);
             end;
 
-         when True => Ret := True;
+         when True  => Ret := True;
          when False => Ret := False;
 
          when Unify => raise Assertion_Error with "Should never happen";
@@ -1589,19 +1639,20 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end if;
 
       return Ret;
-
    end Solve_Atomic;
 
    -----------
    -- Image --
    -----------
 
-   function Image (Self : Atomic_Relation) return String
-   is
-      function Left_Image (Left : String) return String is
+   function Image (Self : Atomic_Relation) return String is
+
+      function Left_Image (Left : String) return String
+      is
         (if Self.Conv /= null
-            then Self.Conv.Image & "(" & Left & ")"
+         then Self.Conv.Image & "(" & Left & ")"
          else Left);
+
       function Prop_Image
         (Left, Right : String; Can_Fail : Boolean := False) return String
       is
@@ -1665,8 +1716,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       function Img (Rel : Any_Rel) return String is
         (Image (Rel));
-      function Anys_Array_Image
-      is new Langkit_Support.Images.Array_Image
+
+      function Anys_Array_Image is new Langkit_Support.Images.Array_Image
         (Any_Rel,
          Positive,
          Any_Relation_Lists.T_Array,
@@ -1722,6 +1773,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -- Relation_Image --
    --------------------
 
-   function Image (Self : Relation) return String is (Internal_Image (Self));
+   function Image (Self : Relation) return String
+   is
+     (Internal_Image (Self));
 
 end Langkit_Support.Adalog.Symbolic_Solver;
