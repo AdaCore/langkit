@@ -53,13 +53,6 @@ package Langkit_Support.Adalog.Symbolic_Solver is
    --  Decrement the reference count of Self. If no reference is left,
    --  deallocate ``Self.all`` and set ``Self`` to ``null``.
 
-   procedure Solve
-     (Self              : Relation;
-      Solution_Callback : access function return Boolean;
-      Solve_Options     : Solve_Options_Type := Default_Options);
-   --  Tries to solve ``Self``. For every solution, ``Solution_Callback`` will
-   --  be called.
-
    subtype Logic_Var_Array is Var_Array;
 
    procedure Solve
