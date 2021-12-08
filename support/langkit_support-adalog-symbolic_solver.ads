@@ -257,7 +257,7 @@ private
    --  Option type for a Var. Used to express dependencies from an atomic
    --  relation to a logic variable.
 
-   Null_Var : Var_Or_Null := (Exists => False);
+   Null_Var : constant Var_Or_Null := (Exists => False);
 
    function Is_Defined_Or_Null (Logic_Var : Var_Or_Null) return Boolean
    is
