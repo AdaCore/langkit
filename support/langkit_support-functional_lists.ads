@@ -131,6 +131,13 @@ package Langkit_Support.Functional_Lists is
    function Length (Self : List) return Natural;
    --  Return the number of elements in ``Self``
 
+   procedure Push (Self : in out List; Head : T);
+   --  Shortcut for ``Self := Head & Self``
+
+   function Pop (Self : in out List) return T;
+   --  Return the head of ``Self`` and replace it with its tail (i.e. remove
+   --  its head). Raise a ``Constraint_Error`` if ``Self`` is an empty list.
+
    type T_Array is array (Positive range <>) of T;
    function To_Array (Self : List) return T_Array;
    --  Convert ``Self`` in the corresponding array. The head is the first array
