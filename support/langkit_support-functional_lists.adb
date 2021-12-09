@@ -103,6 +103,26 @@ package body Langkit_Support.Functional_Lists is
 
    function Length (Self : List) return Natural is (Self.Length);
 
+   ----------
+   -- Push --
+   ----------
+
+   procedure Push (Self : in out List; Head : T) is
+   begin
+      Self := Head & Self;
+   end Push;
+
+   ---------
+   -- Pop --
+   ---------
+
+   function Pop (Self : in out List) return T is
+   begin
+      return Result : constant T := Head (Self) do
+         Self := Tail (Self);
+      end return;
+   end Pop;
+
    --------------
    -- To_Array --
    --------------

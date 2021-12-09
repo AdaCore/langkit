@@ -633,12 +633,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   --  For other atoms, put them in the using atoms map, which
                   --  represent the edges of the dependency graph.
 
-                  declare
-                     L : Atom_Lists.List renames
-                       Using_Atoms.Get_Access (Used_Id).all;
-                  begin
-                     L := (Current_Atom, I) & L;
-                  end;
+                  Push (Using_Atoms.Get_Access (Used_Id).all,
+                        (Current_Atom, I));
                end if;
             end;
          end loop;
@@ -649,11 +645,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             --  Take items from the working set in order. In the beginning, it
             --  will only contain atoms with no dependencies.
             declare
-               Atom    : constant Atom_And_Index := Head (Working_Set);
+               Atom    : constant Atom_And_Index := Pop (Working_Set);
                Defd_Id : constant Natural := Defined (Atom.Atom);
             begin
-               Working_Set := Tail (Working_Set);
-
                Append (Atom.Atom);
                Appended (Atom.Atom_Index) := True;
 
@@ -856,7 +850,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                Id := Get_Id (Ctx, V.Logic_Var);
             end;
             Reserve (Vars_To_Atoms, Id);
-            Vars_To_Atoms.Get_Access (Id).all := Atom & Vars_To_Atoms.Get (Id);
+            Push (Vars_To_Atoms.Get_Access (Id).all, Atom);
          end if;
 
          return True;
