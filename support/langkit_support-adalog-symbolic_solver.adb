@@ -558,6 +558,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
            (Atoms.First_Index .. Atoms.Last_Index);
          Last_Atom_Index : Natural := 0;
 
+         Expected_Atom_Count : Natural := 0;
+         --  Number of atoms from ``Atoms`` that we are supposed to append to
+         --  ``Sorted_Atoms``. If there are orphans (atoms that use a variable
+         --  that is not defined by any atom), ``Sorted_Atoms`` will get fewer
+         --  items. In that case we know the set of atoms is unsound: we will
+         --  return an error.
+
          procedure Append (Atom : Atomic_Relation);
          --  Append Atom to Sorted_Atoms
 
@@ -623,11 +630,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   --  N_Predicates are appended at the end separately
 
                   N_Preds := (Current_Atom, I) & N_Preds;
+                  Expected_Atom_Count := Expected_Atom_Count + 1;
 
                elsif Used_Id = 0 then
                   --  Put atoms with no dependency in the working set
 
                   Working_Set := (Current_Atom, I) & Working_Set;
+                  Expected_Atom_Count := Expected_Atom_Count + 1;
 
                else
                   --  For other atoms, put them in the using atoms map, which
@@ -635,6 +644,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
                   Push (Using_Atoms.Get_Access (Used_Id).all,
                         (Current_Atom, I));
+                  Expected_Atom_Count := Expected_Atom_Count + 1;
                end if;
             end;
          end loop;
@@ -671,21 +681,23 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             Appended (N_Pred.Atom_Index) := True;
          end loop;
 
-         --  Verify that every atom has been appended. TODO??? This feels like
-         --  an inefficient way to handle this problem, but I haven't found a
-         --  better way yet.
-         for I in Appended'Range loop
-            if not Appended (I) then
-               Error := True;
+         --  Check that all expected atoms are in the result. If not, we have
+         --  orphans, and thus the topo sort failed.
+         if Last_Atom_Index /= Expected_Atom_Count then
 
-               if Solv_Trace.Is_Active then
-                  Solv_Trace.Trace
-                    ("Orphan relation: " & Image (Atoms.Get (I)));
-               end if;
-
-               return Atomic_Relation_Vectors.Empty_Array;
+            --  If requested, log all orphan atoms
+            if Solv_Trace.Is_Active then
+               for I in Appended'Range loop
+                  if not Appended (I) then
+                     Solv_Trace.Trace
+                       ("Orphan relation: " & Image (Atoms.Get (I)));
+                  end if;
+               end loop;
             end if;
-         end loop;
+
+            Error := True;
+            return Atomic_Relation_Vectors.Empty_Array;
+         end if;
 
          Clear (Working_Set);
          Clear (N_Preds);
