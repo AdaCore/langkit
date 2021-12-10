@@ -35,7 +35,8 @@ class AdalogDriver(BaseDriver):
         with open(self.working_dir(main), "w") as f:
             f.write(
                 f"""
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Exceptions; use Ada.Exceptions;
+with Ada.Text_IO;    use Ada.Text_IO;
 
 with Langkit_Support.Adalog; use Langkit_Support.Adalog;
 
@@ -51,7 +52,12 @@ begin
     Put_Line ("Solving with new solver");
     Put_Line ("=======================");
     Put_Line ("");
-    Main;
+    begin
+        Main;
+    exception
+        when Exc : Unsupported_Error =>
+            Put_Line (Exception_Name (Exc) & ": " & Exception_Message (Exc));
+    end;
     New_Line;
 
     begin

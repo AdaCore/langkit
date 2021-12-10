@@ -42,6 +42,10 @@ package Langkit_Support.Adalog is
    subtype Valid_Solver_Kind is Solver_Kind range State_Machine .. Symbolic;
    --  Kind subtype for valid solver kinds.
 
+   Unsupported_Error : exception;
+   --  Exception raised when trying to use a feature that is not supported by
+   --  the current solver.
+
    Solver_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER", Default => GNATCOLL.Traces.From_Config);
 
