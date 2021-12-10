@@ -184,12 +184,9 @@ package Langkit_Support.Adalog.Symbolic_Solver is
 private
 
    type Converter_Access is access all Converter_Type'Class;
-   type Comparer_Access is access all Comparer_Type'Class;
    type Predicate_Access is access all Predicate_Type'Class;
    type N_Predicate_Access is access all N_Predicate_Type'Class;
 
-   procedure Free is new Ada.Unchecked_Deallocation
-     (Comparer_Type'Class, Comparer_Access);
    procedure Free is new Ada.Unchecked_Deallocation
      (Converter_Type'Class, Converter_Access);
    procedure Free is new Ada.Unchecked_Deallocation
@@ -219,9 +216,6 @@ private
             Conv : Converter_Access := null;
             --  Conversion function for the value to assign/propagate. If left
             --  to null, use the value itself.
-
-            Can_Fail : Boolean := False;
-            --  TODO???
 
             case Kind is
                when Assign =>

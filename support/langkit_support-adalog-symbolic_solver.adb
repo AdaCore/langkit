@@ -87,7 +87,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Create_Propagate
      (From, To     : Var;
       Conv         : Converter_Access := null;
-      Eq           : Comparer_Access := null;
       Debug_String : String_Access := null) return Relation;
    --  Helper function to create a Propagate relation
 
@@ -226,80 +225,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --
    --  TODO??? Should really be two separate procedures.
 
-   ----------------------------
-   --  Comparer pred wrapper --
-   ----------------------------
-
-   type Comparer_N_Pred is new N_Predicate_Type with record
-      Conv : Converter_Access;
-      Eq   : Comparer_Access;
-   end record;
-   --  This is a wrapper type, constructed when we have a ``Propagate``
-   --  relation with an ``Eq`` predicate.
-
-   overriding procedure Destroy (Self : in out Comparer_N_Pred);
-
-   overriding function Call
-     (Self : Comparer_N_Pred; Vals : Value_Array) return Boolean
-   is
-     (Self.Eq.Compare ((if Self.Conv /= null
-                        then Self.Conv.Convert (Vals (1))
-                        else Vals (1)), Vals (2)));
-
-   overriding function Full_Image
-     (Self : Comparer_N_Pred; Vars : Var_Array) return String
-   is (Self.Eq.Image & "?("
-       & (if Self.Conv /= null
-          then Self.Conv.Image & "(" & Image (Vars (1)) & ")"
-          else Image (Vars (1)))
-       & ", " & Image (Vars (2)) & ")");
-
-   type Comparer_Pred is new Predicate_Type with record
-      Eq   : Comparer_Access;
-      Conv : Converter_Access;
-      Val  : Value_Type;
-   end record;
-   --  This is a wrapper type, constructed when we have an ``Assign`` relation
-   --  with an ``Eq`` predicate.
-
-   overriding procedure Destroy (Self : in out Comparer_Pred);
-
-   overriding function Call
-     (Self : Comparer_Pred; Val : Value_Type) return Boolean
-   is
-     (Self.Eq.Compare (Val, (if Self.Conv /= null
-                             then Self.Conv.Convert (Self.Val)
-                             else Self.Val)));
-
-   overriding function Full_Image
-     (Self : Comparer_Pred; Logic_Var : Var) return String
-   is (Self.Eq.Image & "?("
-       & (if Self.Conv /= null
-          then Self.Conv.Image & "(" & Element_Image (Self.Val) & ")"
-          else Element_Image (Self.Val)) & ", " & Image (Logic_Var) & ")");
-
    function Solve_Compound
      (Self : Compound_Relation; Ctx : Solving_Context) return Boolean;
    --  Look for valid solutions in ``Self`` & ``Ctx``. Return whether to
    --  continue looking for other solutions.
-
-   -------------
-   -- Destroy --
-   -------------
-
-   overriding procedure Destroy (Self : in out Comparer_N_Pred) is
-   begin
-      Free (Self.Eq);
-   end Destroy;
-
-   -------------
-   -- Destroy --
-   -------------
-
-   overriding procedure Destroy (Self : in out Comparer_Pred) is
-   begin
-      Free (Self.Eq);
-   end Destroy;
 
    -----------
    -- Clear --
@@ -1320,51 +1249,23 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Debug_String : String_Access := null) return Relation
    is
       Conv_Ptr : Converter_Access := null;
-      Eq_Ptr   : Comparer_Access := null;
-      Ass      : Relation;
    begin
+      if Eq /= No_Comparer then
+         raise Unsupported_Error with
+           "Comparer_Type not supported with the symbolic solver";
+      end if;
+
       if Conv /= No_Converter then
          Conv_Ptr := new Converter_Type'Class'(Conv);
       end if;
 
-      if Eq /= No_Comparer then
-         Eq_Ptr := new Comparer_Type'Class'(Eq);
-      end if;
-
-      Ass := To_Relation
+      return To_Relation
         (Atomic_Relation'
            (Kind     => Assign,
-            Can_Fail => False,
             Conv     => Conv_Ptr,
             Val      => Value,
             Target   => Logic_Var),
          Debug_String => Debug_String);
-
-      if Eq_Ptr /= null then
-         --  Here, the ownership shares we have for Conv_Ptr and Eq_Ptr are
-         --  transferred to N_Pred, so there is nothing else to do ref-counting
-         --  wise.
-
-         declare
-            N_Pred : Relation :=
-              Create_Predicate (Logic_Var,
-                                Comparer_Pred'(Ref_Count => 1,
-                                               Eq        => Eq_Ptr,
-                                               Conv      => Conv_Ptr,
-                                               Val       => Value),
-                                Debug_String);
-            Ret    : constant Relation :=
-              Create_All ((Ass, N_Pred), Debug_String => Debug_String);
-         begin
-            Ass.Debug_Info := Debug_String;
-            Ass.Atomic_Rel.Can_Fail := True;
-            Dec_Ref (N_Pred);
-            Dec_Ref (Ass);
-            return Ret;
-         end;
-      else
-         return Ass;
-      end if;
    end Create_Assign;
 
    ------------------
@@ -1387,39 +1288,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Create_Propagate
      (From, To     : Var;
       Conv         : Converter_Access := null;
-      Eq           : Comparer_Access := null;
-      Debug_String : String_Access := null) return Relation
-   is
-      Propag : Relation :=
-        To_Relation
-          (Atomic_Relation'
-             (Kind     => Propagate,
-              Can_Fail => False,
-              Conv     => Conv,
-              From     => From,
-              Target   => To),
-         Debug_String => Debug_String);
+      Debug_String : String_Access := null) return Relation is
    begin
-      if Eq /= null then
-         declare
-            N_Pred : Relation :=
-              Create_N_Predicate ((From, To),
-                                  Comparer_N_Pred'(Ref_Count => 1,
-                                                   Eq        => Eq,
-                                                   Conv      => Conv),
-                                  Debug_String);
-            Ret    : constant Relation := Create_All
-              ((Propag, N_Pred), Debug_String => Debug_String);
-         begin
-            Propag.Debug_Info := Debug_String;
-            Propag.Atomic_Rel.Can_Fail := True;
-            Dec_Ref (N_Pred);
-            Dec_Ref (Propag);
-            return Ret;
-         end;
-      else
-         return Propag;
-      end if;
+      return (To_Relation (Atomic_Relation'(Kind   => Propagate,
+                                            Conv   => Conv,
+                                            From   => From,
+                                            Target => To),
+                           Debug_String => Debug_String));
    end Create_Propagate;
 
    ----------------------
@@ -1433,17 +1308,18 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Debug_String : String_Access := null) return Relation
    is
       Conv_Ptr : Converter_Access := null;
-      Eq_Ptr   : Comparer_Access := null;
    begin
+      if Eq /= No_Comparer then
+         raise Unsupported_Error with
+           "Comparer_Type not supported with the symbolic solver";
+      end if;
+
       if Conv /= No_Converter then
          Conv_Ptr := new Converter_Type'Class'(Conv);
       end if;
-      if Eq /= No_Comparer then
-         Eq_Ptr := new Comparer_Type'Class'(Eq);
-      end if;
 
       return Create_Propagate
-        (From, To, Conv_Ptr, Eq_Ptr, Debug_String => Debug_String);
+        (From, To, Conv_Ptr, Debug_String => Debug_String);
    end Create_Propagate;
 
    -------------------
@@ -1667,12 +1543,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       case Self.Kind is
          when Assign =>
             Ret := Assign_Val (Self.Val);
-            Ret := Ret or else Self.Can_Fail;
 
          when Propagate =>
             pragma Assert (Is_Defined (Self.From));
             Ret := Assign_Val (Get_Value (Self.From));
-            Ret := Ret or else Self.Can_Fail;
 
          when Predicate =>
             pragma Assert (Is_Defined (Self.Target));
@@ -1729,20 +1603,17 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          then Self.Conv.Image & "(" & Left & ")"
          else Left);
 
-      function Prop_Image
-        (Left, Right : String; Can_Fail : Boolean := False) return String
+      function Prop_Image (Left, Right : String) return String
       is
-        (Left_Image (Left) & (if Can_Fail then " -?> " else " -> ") & Right);
+        (Left_Image (Left) & " -> " & Right);
    begin
       case Self.Kind is
          when Propagate =>
-            return Prop_Image
-              (Image (Self.From), Image (Self.Target), Self.Can_Fail);
+            return Prop_Image (Image (Self.From), Image (Self.Target));
 
          when Assign =>
             return Prop_Image
-              (Logic_Vars.Element_Image (Self.Val), Image (Self.Target),
-               Self.Can_Fail);
+              (Logic_Vars.Element_Image (Self.Val), Image (Self.Target));
 
          when Predicate =>
             declare
