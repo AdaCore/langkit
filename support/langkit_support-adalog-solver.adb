@@ -232,7 +232,7 @@ package body Langkit_Support.Adalog.Solver is
       end if;
    end Append_Var;
 
-   Global_Kind : Valid_Solver_Kind := Default_Solver_Kind;
+   Global_Kind : Valid_Solver_Kind := State_Machine;
 
    --------------
    -- Set_Kind --
@@ -242,6 +242,12 @@ package body Langkit_Support.Adalog.Solver is
    begin
       Global_Kind := Kind;
    end Set_Kind;
+
+   ----------
+   -- Kind --
+   ----------
+
+   function Kind return Valid_Solver_Kind is (Global_Kind);
 
    -------------
    -- Inc_Ref --

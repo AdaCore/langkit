@@ -16,7 +16,12 @@ All:
     Square(3) -> %X
     Square(4) -> %Y
 
+... without optimizations:
 Solution: [%X = 9, %Y = 16]
+
+... cut dead branches:
+Solution: [%X = 9, %Y = 16]
+
 ========================================================================
 
 Solving relation:
@@ -27,8 +32,14 @@ All:
 
     Square(4) -> %X
 
+... without optimizations:
 Solution: [%X = 16, %Y = 2]
 Solution: [%X = 16, %Y = 3]
+
+... cut dead branches:
+Solution: [%X = 16, %Y = 2]
+Solution: [%X = 16, %Y = 3]
+
 ========================================================================
 
 Solving relation:
@@ -36,6 +47,10 @@ All:
     Is_Even?(%X)
     Square(3) -> %X
     Square(%X) -> %Y
+
+... without optimizations:
+
+... cut dead branches:
 
 ========================================================================
 
@@ -53,6 +68,7 @@ All:
 
     Square(%X) -> %Y
 
+... without optimizations:
 Solution: [%Y = 1, %X = 1]
 Solution: [%Y = 4, %X = 2]
 Solution: [%Y = 9, %X = 3]
@@ -61,6 +77,17 @@ Solution: [%Y = 25, %X = 5]
 Solution: [%Y = 36, %X = 6]
 Solution: [%Y = 49, %X = 7]
 Solution: [%Y = 64, %X = 8]
+
+... cut dead branches:
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 4, %X = 2]
+Solution: [%Y = 9, %X = 3]
+Solution: [%Y = 16, %X = 4]
+Solution: [%Y = 25, %X = 5]
+Solution: [%Y = 36, %X = 6]
+Solution: [%Y = 49, %X = 7]
+Solution: [%Y = 64, %X = 8]
+
 
 Solving with old solver
 =======================
@@ -74,6 +101,7 @@ Solving relation:
 | | Unify %X <= 3 (convert: Square)
 | | Unify %Y <= 4 (convert: Square)
 Solution: [%X = 9, %Y = 16]
+
 ========================================================================
 
 Solving relation:
@@ -82,6 +110,7 @@ Solving relation:
 | | Unify %X <= 4 (convert: Square)
 Solution: [%X = 16, %Y = 2]
 Solution: [%X = 16, %Y = 3]
+
 ========================================================================
 
 Solving relation:
@@ -89,6 +118,7 @@ Solving relation:
 | | Predicate Is_Even on %X
 | | Unify %X <= 3 (convert: Square)
 | | Bind %X <=> %Y (convert: Square)
+
 ========================================================================
 
 Solving relation:

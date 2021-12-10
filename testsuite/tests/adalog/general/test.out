@@ -18,8 +18,14 @@ All:
         18 -> %Y
 
 
+... without optimizations:
 Solution: [%Y = 12, %X = 4]
 Solution: [%Y = 18, %X = 6]
+
+... cut dead branches:
+Solution: [%Y = 12, %X = 4]
+Solution: [%Y = 18, %X = 6]
+
 
 Solving with old solver
 =======================

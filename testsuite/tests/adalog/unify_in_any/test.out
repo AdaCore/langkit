@@ -19,12 +19,22 @@ All:
 
     N_Predicate?(%X, %Y)
 
+... without optimizations:
 Solution: [%Y = -1, %X = 1]
 Solution: [%Y = -1, %X = -1]
 Solution: [%Y = -2, %X = 2]
 Solution: [%Y = -2, %X = -2]
 Solution: [%Y = 1, %X = 1]
 Solution: [%Y = 2, %X = 2]
+
+... cut dead branches:
+Solution: [%Y = -1, %X = 1]
+Solution: [%Y = -1, %X = -1]
+Solution: [%Y = -2, %X = 2]
+Solution: [%Y = -2, %X = -2]
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 2, %X = 2]
+
 
 Solving with old solver
 =======================

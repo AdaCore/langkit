@@ -9,7 +9,12 @@ Any:
         1 -> %Y
 
 
+... without optimizations:
 Solution: [%X = 1]
+
+... cut dead branches:
+Solution: [%X = 1]
+
 
 Solving with old solver
 =======================

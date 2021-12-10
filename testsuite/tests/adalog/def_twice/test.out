@@ -14,7 +14,12 @@ All:
     1 -> %X
     Is_Odd?(%X)
 
+... without optimizations:
 Solution: [%X = 1]
+
+... cut dead branches:
+Solution: [%X = 1]
+
 
 Solving with old solver
 =======================
