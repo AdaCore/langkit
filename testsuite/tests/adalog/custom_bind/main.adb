@@ -19,8 +19,8 @@ procedure Main is
        and Propagate (X, Y, Converter (Square'Access, "Square")))
       and Y = 36);
 begin
-   Solve_All (R, Show_Relation => True);
-   Solve_All (R2, Show_Relation => True);
+   Solve_All (R);
+   Solve_All (R2);
 end Main;
 
 

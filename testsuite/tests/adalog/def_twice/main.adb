@@ -15,5 +15,5 @@ procedure Main is
        Assign (X, 1),
        Predicate (X, Predicate (Is_Odd'Access, "Is_Odd"))));
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

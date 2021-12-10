@@ -113,7 +113,7 @@ package Langkit_Support.Adalog.Generic_Main_Support is
    function Logic_False return Relation is (+Create_False);
    function Logic_True return Relation is (+Create_True);
 
-   procedure Solve_All (Rel : Relation; Show_Relation : Boolean := False);
+   procedure Solve_All (Rel : Relation);
 
    procedure Setup_Traces;
    procedure Finalize;

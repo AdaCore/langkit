@@ -21,5 +21,5 @@ procedure Main is
        N_Predicate ((X, Y), N_Predicate (Abs_Equal'Access))));
 begin
    GNATCOLL.Traces.Parse_Config_File;
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

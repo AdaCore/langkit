@@ -22,6 +22,6 @@ begin
                     and Y = 1)));
 
    begin
-      Solve_All (R, Show_Relation => True);
+      Solve_All (R);
    end;
 end Main;

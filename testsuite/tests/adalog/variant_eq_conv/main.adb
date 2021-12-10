@@ -45,5 +45,5 @@ procedure Main is
                   Comparer (Eq_Str_Lower'Access, "eq_str_lower")),
        Predicate (X, Predicate (Is_Odd'Access, "is_odd"))));
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

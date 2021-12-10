@@ -29,6 +29,6 @@ begin
    for R of Relations loop
       Put_Line ((1 .. 72 => '='));
       New_Line;
-      Solve_All (R, Show_Relation => True);
+      Solve_All (R);
    end loop;
 end Main;

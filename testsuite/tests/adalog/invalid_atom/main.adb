@@ -16,7 +16,7 @@ procedure Main is
    R : constant Relation :=
      (Predicate (X, Predicate(Is_Even'Access, "Is_Even")));
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 exception
    when E : others =>
       Put_Line (Exception_Message (E));

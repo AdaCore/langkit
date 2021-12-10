@@ -66,7 +66,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
    -- Solve_All --
    ---------------
 
-   procedure Solve_All (Rel : Relation; Show_Relation : Boolean := False) is
+   procedure Solve_All (Rel : Relation) is
       function Solution_Callback (Vars : Var_Array) return Boolean;
 
       function Image (L : Refs.Raw_Var) return String
@@ -86,10 +86,8 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
       end Solution_Callback;
 
    begin
-      if Show_Relation then
-         Put_Line ("Solving relation:");
-         Print_Relation (Rel);
-      end if;
+      Put_Line ("Solving relation:");
+      Print_Relation (Rel);
       Solve
         (Rel,
          Solution_Callback'Unrestricted_Access,

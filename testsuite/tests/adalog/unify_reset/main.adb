@@ -14,5 +14,5 @@ procedure Main is
      (X = Y and X = 1 and Y = 1)
      or (X = 3 and Y = 12);
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

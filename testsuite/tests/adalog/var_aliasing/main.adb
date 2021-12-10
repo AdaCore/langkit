@@ -20,6 +20,6 @@ begin
          or (X = 2 and Y = 3 and X = Y))
         and Domain (Y, (15, 16, 16, 18, 19));
    begin
-      Solve_All (R, Show_Relation => True);
+      Solve_All (R);
    end;
 end Main;
