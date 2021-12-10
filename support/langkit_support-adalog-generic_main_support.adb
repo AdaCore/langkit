@@ -88,10 +88,21 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
    begin
       Put_Line ("Solving relation:");
       Print_Relation (Rel);
-      Solve
-        (Rel,
-         Solution_Callback'Unrestricted_Access,
-         (Cut_Dead_Branches => True));
+
+      case Kind is
+      when Symbolic =>
+         Put_Line ("... without optimizations:");
+         Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => False));
+         New_Line;
+
+         Put_Line ("... cut dead branches:");
+         Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
+         New_Line;
+
+      when State_Machine =>
+         Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
+         New_Line;
+      end case;
    end Solve_All;
 
    ---------

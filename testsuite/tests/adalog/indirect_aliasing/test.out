@@ -9,6 +9,10 @@ All:
     1 -> %Expr
     %X <-> %Expr
 
+... without optimizations:
+
+... cut dead branches:
+
 
 Solving with old solver
 =======================

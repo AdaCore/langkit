@@ -3,7 +3,12 @@ Solving with new solver
 
 Solving relation:
 12 -> %X
+... without optimizations:
 Solution: [%X = 12]
+
+... cut dead branches:
+Solution: [%X = 12]
+
 
 Solving with old solver
 =======================

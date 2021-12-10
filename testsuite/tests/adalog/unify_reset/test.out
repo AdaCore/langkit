@@ -13,8 +13,13 @@ Any:
         12 -> %Y
 
 
+... without optimizations:
 Solution: [%Y = 1, %X = 1]
 Solution: [%Y = 12, %X = 3]
+
+... cut dead branches:
+Solution: [%Y = 12, %X = 3]
+
 
 Solving with old solver
 =======================

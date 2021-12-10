@@ -185,11 +185,14 @@ package Langkit_Support.Adalog.Solver is
    procedure Print_Relation (Self : Relation);
    --  Print the relation
 
-   Default_Solver_Kind : Valid_Solver_Kind := State_Machine;
+   Default_Solver_Kind : constant Valid_Solver_Kind := State_Machine;
    --  Global variable that defines the default solver kind
 
    procedure Set_Kind (Kind : Solver_Kind);
    --  Set the kind of the solver
+
+   function Kind return Valid_Solver_Kind;
+   --  Return the selected solver kind
 
 private
    package Sym_Solve is new Langkit_Support.Adalog.Symbolic_Solver

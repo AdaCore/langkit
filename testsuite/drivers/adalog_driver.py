@@ -66,7 +66,6 @@ begin
         Put_Line ("=======================");
         Put_Line ("");
         Main;
-        New_Line;
     exception
         when Langkit_Support.Adalog.Early_Binding_Error =>
             Put_Line ("Resolution failed with Early_Binding_Error");

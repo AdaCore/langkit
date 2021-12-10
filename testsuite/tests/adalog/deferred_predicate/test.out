@@ -13,9 +13,16 @@ All:
         6 -> %X
 
 
+... without optimizations:
 Solution: [%X = 2]
 Solution: [%X = 4]
 Solution: [%X = 6]
+
+... cut dead branches:
+Solution: [%X = 2]
+Solution: [%X = 4]
+Solution: [%X = 6]
+
 
 Solving with old solver
 =======================

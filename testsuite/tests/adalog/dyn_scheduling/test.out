@@ -12,9 +12,16 @@ All:
         3 -> %X
 
 
+... without optimizations:
 Solution: [%Y = 1, %X = 1]
 Solution: [%Y = 2, %X = 2]
 Solution: [%Y = 3, %X = 3]
+
+... cut dead branches:
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 2, %X = 2]
+Solution: [%Y = 3, %X = 3]
+
 ========================================================================
 
 Solving relation:
@@ -36,9 +43,16 @@ All:
         10 -> %Y
 
 
+... without optimizations:
 Solution: [%Y = 10, %X = 1]
 Solution: [%Y = 10, %X = 2]
 Solution: [%Y = 10, %X = 3]
+
+... cut dead branches:
+Solution: [%Y = 10, %X = 1]
+Solution: [%Y = 10, %X = 2]
+Solution: [%Y = 10, %X = 3]
+
 ========================================================================
 
 Solving relation:
@@ -50,12 +64,20 @@ All:
         3 -> %X
 
 
+... without optimizations:
+
+... cut dead branches:
+
 ========================================================================
 
 Solving relation:
 All:
     Is_Even?(%Y)
     Is_Even?(%X)
+
+... without optimizations:
+
+... cut dead branches:
 
 ========================================================================
 
@@ -65,14 +87,24 @@ Any:
     1 -> %X
     2 -> %X
 
+... without optimizations:
 Solution: [%Y = <undefined>, %X = 1]
 Solution: [%Y = <undefined>, %X = 2]
+
+... cut dead branches:
+Solution: [%Y = <undefined>, %X = 1]
+Solution: [%Y = <undefined>, %X = 2]
+
 ========================================================================
 
 Solving relation:
 Any:
     Is_Even?(%X)
     Is_Even?(%Y)
+
+... without optimizations:
+
+... cut dead branches:
 
 ========================================================================
 
@@ -88,6 +120,10 @@ Any:
         Is_Even?(%Y)
 
 
+... without optimizations:
+
+... cut dead branches:
+
 ========================================================================
 
 Solving relation:
@@ -101,7 +137,12 @@ All:
     2 -> %X
     %X <-> %Y
 
+... without optimizations:
 Solution: [%Y = 2, %X = 2]
+
+... cut dead branches:
+Solution: [%Y = 2, %X = 2]
+
 
 Solving with old solver
 =======================
@@ -115,6 +156,7 @@ Solving relation:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]
+
 ========================================================================
 
 Solving relation:
@@ -127,6 +169,7 @@ Solving relation:
 Solution: [%X = 1, %Y = 10]
 Solution: [%X = 2, %Y = 10]
 Solution: [%X = 3, %Y = 10]
+
 ========================================================================
 
 Solving relation:

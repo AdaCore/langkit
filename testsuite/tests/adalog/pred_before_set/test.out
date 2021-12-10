@@ -12,7 +12,12 @@ All:
 
     2 -> %X
 
+... without optimizations:
 Solution: [%X = 2, %Y = 1]
+
+... cut dead branches:
+Solution: [%X = 2, %Y = 1]
+
 
 Solving with old solver
 =======================

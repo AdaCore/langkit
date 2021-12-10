@@ -7,7 +7,12 @@ All:
     1 -> %Y
     Is_Double_Of?(%X, %Y)
 
+... without optimizations:
 Solution: [%X = 2, %Y = 1]
+
+... cut dead branches:
+Solution: [%X = 2, %Y = 1]
+
 
 Solving with old solver
 =======================

@@ -7,7 +7,12 @@ All:
     1 -> %X
     1 -> %Y
 
+... without optimizations:
 Solution: [%X = 1, %Y = 1]
+
+... cut dead branches:
+Solution: [%X = 1, %Y = 1]
+
 
 Solving with old solver
 =======================

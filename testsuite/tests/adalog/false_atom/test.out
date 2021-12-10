@@ -3,6 +3,10 @@ Solving with new solver
 
 Solving relation:
 False
+... without optimizations:
+
+... cut dead branches:
+
 
 Solving with old solver
 =======================

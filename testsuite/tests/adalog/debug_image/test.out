@@ -12,9 +12,16 @@ All:
         3 -> %X main.adb:30
 
 
+... without optimizations:
 Solution: [%Y = 1, %X = 1]
 Solution: [%Y = 2, %X = 2]
 Solution: [%Y = 3, %X = 3]
+
+... cut dead branches:
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 2, %X = 2]
+Solution: [%Y = 3, %X = 3]
+
 ========================================================================
 
 Solving relation:
@@ -36,9 +43,16 @@ All: main.adb:36
         10 -> %Y main.adb:36
 
 
+... without optimizations:
 Solution: [%Y = 10, %X = 1]
 Solution: [%Y = 10, %X = 2]
 Solution: [%Y = 10, %X = 3]
+
+... cut dead branches:
+Solution: [%Y = 10, %X = 1]
+Solution: [%Y = 10, %X = 2]
+Solution: [%Y = 10, %X = 3]
+
 ========================================================================
 
 Solving relation:
@@ -50,12 +64,20 @@ All: main.adb:40
         3 -> %X main.adb:40
 
 
+... without optimizations:
+
+... cut dead branches:
+
 ========================================================================
 
 Solving relation:
 All: main.adb:44
     Is_Even?(%Y) main.adb:44
     Is_Even?(%X) main.adb:44
+
+... without optimizations:
+
+... cut dead branches:
 
 ========================================================================
 
@@ -65,14 +87,24 @@ Any: main.adb:47
     1 -> %X main.adb:47
     2 -> %X main.adb:47
 
+... without optimizations:
 Solution: [%Y = <undefined>, %X = 1]
 Solution: [%Y = <undefined>, %X = 2]
+
+... cut dead branches:
+Solution: [%Y = <undefined>, %X = 1]
+Solution: [%Y = <undefined>, %X = 2]
+
 ========================================================================
 
 Solving relation:
 Any: main.adb:50
     Is_Even?(%X) main.adb:50
     Is_Even?(%Y) main.adb:50
+
+... without optimizations:
+
+... cut dead branches:
 
 ========================================================================
 
@@ -88,6 +120,10 @@ Any: main.adb:53
         Is_Even?(%Y) main.adb:53
 
 
+... without optimizations:
+
+... cut dead branches:
+
 ========================================================================
 
 Solving relation:
@@ -101,7 +137,12 @@ All: main.adb:58
     2 -> %X main.adb:57
     %X <-> %Y main.adb:58
 
+... without optimizations:
 Solution: [%Y = 2, %X = 2]
+
+... cut dead branches:
+Solution: [%Y = 2, %X = 2]
+
 
 Solving with old solver
 =======================
@@ -115,6 +156,7 @@ Solving relation:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]
+
 ========================================================================
 
 Solving relation:
@@ -127,6 +169,7 @@ Solving relation:
 Solution: [%X = 1, %Y = 10]
 Solution: [%X = 2, %Y = 10]
 Solution: [%X = 3, %Y = 10]
+
 ========================================================================
 
 Solving relation:
