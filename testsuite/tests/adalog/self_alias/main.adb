@@ -11,5 +11,5 @@ procedure Main is
    Y : constant Raw_Var := Create ("Y");
    R : constant Relation := X = X and X = 1 and Y = 1;
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

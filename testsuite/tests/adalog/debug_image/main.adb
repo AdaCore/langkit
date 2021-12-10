@@ -70,6 +70,6 @@ begin
       New_Line;
       Reset (X);
       Reset (Y);
-      Solve_All (R, Show_Relation => True);
+      Solve_All (R);
    end loop;
 end Main;

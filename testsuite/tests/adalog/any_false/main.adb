@@ -12,5 +12,5 @@ procedure Main is
    X : constant Refs.Raw_Var := Create ("X");
    R : constant Relation := R_Any ((Logic_False, X = 12));
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

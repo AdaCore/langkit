@@ -26,6 +26,6 @@ procedure Main is
      and Predicate (X, Predicate (Is_Odd'Access, "is_odd"));
 begin
    GNATCOLL.Traces.Parse_Config_File;
-   Solve_All (R, Show_Relation => True);
-   Solve_All (R2, Show_Relation => True);
+   Solve_All (R);
+   Solve_All (R2);
 end Main;

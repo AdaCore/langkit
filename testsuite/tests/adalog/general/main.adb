@@ -24,5 +24,5 @@ procedure Main is
      and Domain (Y, (12, 18));
 
 begin
-   Solve_All (R3, Show_Relation => True);
+   Solve_All (R3);
 end Main;

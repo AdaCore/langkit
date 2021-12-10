@@ -15,5 +15,5 @@ procedure Main is
    R3 : constant Relation :=
      R_All ((X = 2, Y = 1, +Create_N_Predicate ((X, Y), Pred_Singleton)));
 begin
-   Solve_All (R3, Show_Relation => True);
+   Solve_All (R3);
 end Main;

@@ -20,5 +20,5 @@ procedure Main is
               "and" (R_Any ((1 => Logic_True)),
                 R_All ((1 => Logic_True)))));
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

@@ -1,6 +1,17 @@
 Solving with new solver
 =======================
 
+Solving relation:
+Any:
+    1 -> %X
+    2 -> %X
+    3 -> %X
+    4 -> %X
+    5 -> %X
+    6 -> %X
+    7 -> %X
+    8 -> %X
+
 Solution: [%X = 1]
 Solution: [%X = 2]
 Solution: [%X = 3]
@@ -9,6 +20,23 @@ Solution: [%X = 5]
 Solution: [%X = 6]
 Solution: [%X = 7]
 Solution: [%X = 8]
+Solving relation:
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+        4 -> %X
+        5 -> %X
+        6 -> %X
+
+    %X <-> %Y
+    Any:
+        3 -> %Y
+        2 -> %Y
+        1 -> %Y
+
+
 Solution: [%Y = 3, %X = 3]
 Solution: [%Y = 2, %X = 2]
 Solution: [%Y = 1, %X = 1]
@@ -16,6 +44,11 @@ Solution: [%Y = 1, %X = 1]
 Solving with old solver
 =======================
 
+Solving relation:
+<Any>:
+| | Member %X {1, 2, 3, 4, 5, 6}
+| | Unify %X <= 7
+| | Unify %X <= 8
 Solution: [%X = 1]
 Solution: [%X = 2]
 Solution: [%X = 3]
@@ -24,6 +57,20 @@ Solution: [%X = 5]
 Solution: [%X = 6]
 Solution: [%X = 7]
 Solution: [%X = 8]
+Solving relation:
+<All>:
+| | <Any>:
+| | | | Unify %X <= 1
+| | | | Unify %X <= 2
+| | | | Unify %X <= 3
+| | | | Unify %X <= 4
+| | | | Unify %X <= 5
+| | | | Unify %X <= 6
+| | Bind %X <=> %Y
+| | <Any>:
+| | | | Unify %Y <= 3
+| | | | Unify %Y <= 2
+| | | | Unify %Y <= 1
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]

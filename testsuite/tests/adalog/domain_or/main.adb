@@ -12,5 +12,5 @@ procedure Main is
    R : constant Relation :=
      "or" (Domain (X, (1, 2, 3)), Domain (X, (4, 5, 6)));
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

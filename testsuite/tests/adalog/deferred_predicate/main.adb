@@ -18,5 +18,5 @@ procedure Main is
       and Domain (X, (1, 2, 3, 4, 5, 6)));
 
 begin
-   Solve_All (R3, Show_Relation => True);
+   Solve_All (R3);
 end Main;

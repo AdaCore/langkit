@@ -20,5 +20,5 @@ procedure Main is
       and X = 2);
 
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

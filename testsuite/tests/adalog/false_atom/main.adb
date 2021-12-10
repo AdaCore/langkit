@@ -7,5 +7,5 @@ procedure Main is
    use T_Solver;
    R : constant Relation := Logic_False;
 begin
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 end Main;

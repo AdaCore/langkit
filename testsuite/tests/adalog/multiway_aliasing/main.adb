@@ -32,7 +32,7 @@ procedure Main is
                X = 1));
 begin
    GNATCOLL.Traces.Parse_Config_File;
-   Solve_All (R, Show_Relation => True);
+   Solve_All (R);
 exception
    when E : others =>
       Put_Line (Exception_Message (E));
