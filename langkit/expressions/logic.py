@@ -1,6 +1,5 @@
-
 from itertools import zip_longest
-
+from typing import List, Optional, Union
 
 import funcy
 
@@ -60,29 +59,33 @@ class Bind(AbstractExpression):
     """
 
     class Expr(CallExpr):
-        def __init__(self, conv_prop, eq_prop, lhs, rhs, abstract_expr=None):
+        def __init__(self,
+                     conv_prop: PropertyDef,
+                     eq_prop: PropertyDef,
+                     lhs: ResolvedExpression,
+                     rhs: ResolvedExpression,
+                     abstract_expr: Optional[AbstractExpression] = None):
             self.conv_prop = conv_prop
             self.eq_prop = eq_prop
             self.lhs = lhs
             self.rhs = rhs
 
-            constructor_args = [lhs, rhs]
+            constructor_args: List[Union[str, ResolvedExpression]] = [lhs, rhs]
 
             if conv_prop:
                 constructor_args.append(self.functor_expr(
-                    self.conv_prop,
-                    'Conv => Logic_Converter_{}'.format(self.conv_prop.uid)
+                    conv_prop, f"Conv => Logic_Converter_{self.conv_prop.uid}"
                 ))
 
             if eq_prop:
                 constructor_args.append(self.functor_expr(
-                    eq_prop,
-                    'Eq => Comparer_{}'.format(self.eq_prop.uid)
+                    eq_prop, f"Eq => Comparer_{self.eq_prop.uid}"
                 ))
 
-            constructor_args.append('Debug_String => {}'.format(
-                sloc_info_arg(abstract_expr.location)
-            ))
+            if abstract_expr:
+                constructor_args.append(
+                    f"Debug_String => {sloc_info_arg(abstract_expr.location)}"
+                )
 
             if rhs.type.matches(T.root_node.entity):
                 fn_name = 'Solver.Create_Assign'
@@ -347,7 +350,7 @@ def domain(self, logic_var_expr, domain):
     return DomainExpr(
         construct(domain, lambda d: d.is_collection, "Type given "
                   "to LogicVar must be collection type, got {expr_type}"),
-        construct(logic_var_expr, T.LogicVar),
+        ResetLogicVar(construct(logic_var_expr, T.LogicVar)),
         abstract_expr=self,
     )
 
@@ -457,6 +460,9 @@ class Predicate(AbstractExpression):
             ' and should not appear after non logic variable expressions'
         )
 
+        # Make sure this predicate will work on clean logic variables
+        logic_var_exprs = [ResetLogicVar(expr) for expr in logic_var_exprs]
+
         # Compute the list of arguments to pass to the property (Self
         # included).
         args = ([Argument(names.Name('Self'),
@@ -518,12 +524,10 @@ class Predicate(AbstractExpression):
         )
 
         args = " ({})".format(
-            ', '.join(['{}' for _ in range(len(closure_exprs))])
+            ', '.join(["{}" for _ in range(len(closure_exprs))])
         ) if closure_exprs else ""
         predicate_expr = untyped_literal_expr(
-            'Create_{}_Predicate{}'.format(
-                pred_id, args
-            ), operands=closure_exprs
+            f"Create_{pred_id}_Predicate{args}", operands=closure_exprs
         )
 
         return Predicate.Expr(self.pred_property, pred_id,
@@ -616,7 +620,7 @@ class LogicBooleanOp(AbstractExpression):
         )
 
         return CallExpr(
-            'Logic_Boolean_Op', 'Solver.Create_{}'.format(self.kind_name),
+            "Logic_Boolean_Op", f"Solver.Create_{self.kind_name}",
             T.Equation,
             [relation_array, sloc_info_arg(self.location)],
             abstract_expr=self

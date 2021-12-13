@@ -36,8 +36,8 @@ with GNAT.Traceback.Symbolic;
 with GNATCOLL.Traces;
 
 with Langkit_Support.Adalog.Debug;
-with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
-with Langkit_Support.Images;  use Langkit_Support.Images;
+with Langkit_Support.Hashes; use Langkit_Support.Hashes;
+with Langkit_Support.Images; use Langkit_Support.Images;
 with Langkit_Support.Relative_Get;
 
 with ${ada_lib_name}.Private_Converters;
@@ -3670,12 +3670,11 @@ package body ${ada_lib_name}.Implementation is
    begin
       <%
           def get_actions(astnode, node_expr):
-              return '\n'.join(
-                  'Assign ({node}, {node}.{field}, "{field_name}");'
-                  .format(node=node_expr,
-                          field=field.name, field_name=field.original_name)
-                  for field in astnode.get_user_fields(
-                      include_inherited=False)
+              return "\n".join(
+                  f"Assign ({node_expr},"
+                  f"        {node_expr}.{field.name},"
+                  f"        {ascii_repr(str(field.original_name))});"
+                  for field in astnode.get_user_fields(include_inherited=False)
                   if field.type.is_logic_var_type
               )
       %>
