@@ -30,13 +30,13 @@
 
 <%def name="logic_converter(conv_prop)">
    <%
-   type_name = "Logic_Converter_{}".format(conv_prop.uid)
-   entity = T.entity.name
+      type_name = f"Logic_Converter_{conv_prop.uid}"
+      entity = T.entity.name
    %>
 
    ${dynamic_vars_holder_decl(
          type_name, "Solver_Ifc.Converter_Type", conv_prop.dynamic_vars
-     )}
+   )}
 
    overriding function Convert
      (Self : ${type_name}; From : ${entity}) return ${entity}
@@ -49,7 +49,7 @@
    -------------
 
    overriding function Convert
-     (Self : ${type_name}; From : ${entity}) return ${entity} 
+     (Self : ${type_name}; From : ${entity}) return ${entity}
    is
       % if not conv_prop.dynamic_vars:
          pragma Unreferenced (Self);
@@ -92,7 +92,7 @@
 
    overriding function Image (Self : ${type_name}) return String is
    begin
-      return ("${conv_prop.qualname}");
+      return (${ascii_repr(conv_prop.qualname)});
    end Image;
 </%def>
 
@@ -110,14 +110,22 @@
    overriding function Compare
      (Self : ${type_name}; L, R : ${T.entity.name}) return Boolean;
 
-   overriding function Image (Self : ${type_name}) return String
-   is
+   -----------
+   -- Image --
+   -----------
+
+   overriding function Image (Self : ${type_name}) return String is
    begin
       return ("${eq_prop.qualname}");
    end Image;
 
+   -------------
+   -- Compare --
+   -------------
+
    overriding function Compare
-     (Self : ${type_name}; L, R : ${T.entity.name}) return Boolean is
+     (Self : ${type_name}; L, R : ${T.entity.name}) return Boolean
+   is
      % if not eq_prop.dynamic_vars:
         pragma Unreferenced (Self);
      % endif
@@ -158,8 +166,8 @@
    % for (args_types, default_passed_args, pred_id) in prop.logic_predicates:
 
    <%
-      type_name = "{}_Predicate".format(pred_id)
-      package_name = "{}_Pred".format(pred_id)
+      type_name = f"{pred_id}_Predicate"
+      package_name = f"{pred_id}_Pred"
       formal_node_types = prop.get_concrete_node_types(args_types,
                                                        default_passed_args)
       arity = len(formal_node_types)
@@ -169,12 +177,12 @@
 
    <%def name="call_profile()">
       overriding function Call
-        (Self       : ${type_name};
-        % if arity == 1:
-        Entity  : Solver_Ifc.Value_Type
-        % else:
-        Entities : Solver_Ifc.Value_Array
-        % endif
+        (Self : ${type_name};
+         % if arity == 1:
+            Entity : Solver_Ifc.Value_Type
+         % else:
+            Entities : Solver_Ifc.Value_Array
+         % endif
         ) return Boolean
    </%def>
 
@@ -185,14 +193,14 @@
          Field_${i} : ${arg_type.name};
       % endfor
       % if not args:
-      null;
+         null;
       % endif
    end record;
 
    ${call_profile()};
    overriding function Image (Self : ${type_name}) return String;
    % if refcounted_args_types:
-   overriding procedure Destroy (Self : in out ${type_name});
+      overriding procedure Destroy (Self : in out ${type_name});
    % endif
 
    function Create_${pred_id}_Predicate
@@ -203,7 +211,7 @@
       % endfor
    )
    % endif
-   return ${type_name} is
+      return ${type_name} is
    begin
       <% components = ["Ref_Count => 1"] %>
       % for i, arg_type in args:
@@ -226,7 +234,7 @@
       % endif
 
       % if arity > 1:
-      Entity : Solver_Ifc.Value_Type := Entities (1);
+         Entity : Solver_Ifc.Value_Type := Entities (1);
       % endif
       <% node0_type = formal_node_types[0] %>
       Node : constant ${node0_type.name} := Entity.Node;
@@ -241,18 +249,17 @@
         end if;
       % endif
 
+      ## Pass the "prefix" node (the one that owns the property to call) using
+      ## the conventional bare node/entity_info arguments. Pass the other node
+      ## arguments as entities directly.
       <%
          args = ['Node'] + [
-            '(Node => {}, Info => Entities ({}).Info)'.format(
-                'Entities ({}).Node'.format(i + 1),
-                i + 1
-            ) for i, formal_type in enumerate(formal_node_types[1:], 1)
-      ] + [
-            'Self.Field_{}'.format(i)
-            for i, _ in enumerate(args_types)
-         ]
+            f"(Node => Entities ({i + 1}).Node,"
+            f" Info => Entities ({i + 1}).Info)"
+            for i, formal_type in enumerate(formal_node_types[1:], 1)
+      ] + [f"Self.Field_{i}" for i, _ in enumerate(args_types)]
          if prop.uses_entity_info:
-            args.append('{} => Entity.Info'.format(prop.entity_info_name))
+            args.append(f"{prop.entity_info_name} => Entity.Info")
          args_fmt = '({})'.format(', '.join(args)) if args else ''
       %>
       return ${prop.name} ${args_fmt};
@@ -264,21 +271,21 @@
 
    overriding function Image (Self : ${type_name}) return String is
    begin
-      return "${prop.qualname}";
+      return ${ascii_repr(prop.qualname)};
    end Image;
 
-   ----------
-   -- Free --
-   ----------
-
    % if refcounted_args_types:
-   overriding procedure Destroy (Self : in out ${type_name}) is
-   begin
-      % for i, arg_type in enumerate(refcounted_args_types):
-      Dec_Ref (Self.Field_${i});
-      % endfor
-      null;
-   end Destroy;
+      -------------
+      -- Destroy --
+      -------------
+
+      overriding procedure Destroy (Self : in out ${type_name}) is
+      begin
+         % for i, arg_type in enumerate(refcounted_args_types):
+            Dec_Ref (Self.Field_${i});
+         % endfor
+         null;
+      end Destroy;
    % endif
 
    % endfor

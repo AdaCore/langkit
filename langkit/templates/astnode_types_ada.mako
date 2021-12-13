@@ -5,23 +5,21 @@
 
 
 <%def name="logic_helpers()">
-
-   ## Generate logic/predicate binders for the properties which require it.
+   ## Generate predicate, converter and comparer functors, which wrap
+   ## properties to be used in logic equations.
+   ##
    ## Note that we need to generate them before the properties bodies, because
    ## they'll be used in the bodies.
-
    % for cls in ctx.astnode_types:
       % for prop in cls.get_properties(include_inherited=False):
          ${prop_helpers.logic_predicates(prop)}
       % endfor
    % endfor
-
-   ## Generate logic converters, equality predicates, and binders
    % for conv_prop in ctx.sorted_logic_converters:
       ${prop_helpers.logic_converter(conv_prop)}
    % endfor
    % for eq_prop in ctx.sorted_logic_comparers:
-   ${prop_helpers.logic_equal(eq_prop)}
+      ${prop_helpers.logic_equal(eq_prop)}
    % endfor
 </%def>
 

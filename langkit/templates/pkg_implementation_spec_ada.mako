@@ -420,7 +420,7 @@ private package ${ada_lib_name}.Implementation is
    ${ada_doc('langkit.entity_image', 3)}
 
    package Entity_Vars is new Langkit_Support.Adalog.Logic_Ref
-     (${T.entity.name}, Element_Image => Image);
+     (Element_Type => ${T.entity.name}, Element_Image => Image);
    package Solver_Ifc is new Langkit_Support.Adalog.Solver_Interface
      (Entity_Vars.Raw_Logic_Var);
    package Solver is new Langkit_Support.Adalog.Solver (Solver_Ifc);

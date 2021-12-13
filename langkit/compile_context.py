@@ -661,7 +661,14 @@ class CompileCtx:
         """
 
         self.logic_converter_props: Set[PropertyDef] = set()
+        """
+        Set of properties used as converters in logic equations.
+        """
+
         self.logic_comparer_props: Set[PropertyDef] = set()
+        """
+        Set of properties used as comparers in logic equations.
+        """
 
         self.default_unit_provider = default_unit_provider
         self.case_insensitive = case_insensitive
