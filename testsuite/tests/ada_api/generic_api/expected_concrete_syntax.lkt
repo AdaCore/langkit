@@ -54,7 +54,7 @@ class Example : FooNode {
     id
 
     @export fun create_bigint_iterator(): Iterator[BigInt] =
-    [BigInt(1), BigInt(2), BigInt(3)].to_iterator()
+    [1b, 2b, 3b].to_iterator()
 
     @export fun id_bigint_iterator(id: Iterator[BigInt]): Iterator[BigInt] = id
 
