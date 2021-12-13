@@ -357,6 +357,9 @@ package ${ada_lib_name}.Common is
 
    ## When there is no public struct type, generate a type that has no valid
    ## value.
+   % if not ctx.sorted_public_structs:
+      pragma Warnings (Off, "null range");
+   % endif
    subtype Struct_Value_Kind is Value_Kind
       % if ctx.sorted_public_structs:
          with Static_Predicate =>
@@ -366,6 +369,9 @@ package ${ada_lib_name}.Common is
          range Any_Value_Kind'Last .. Any_Value_Kind'First
       % endif
    ;
+   % if not ctx.sorted_public_structs:
+      pragma Warnings (On, "null range");
+   % endif
    --  Subrange for all struct types
 
    type Type_Constraint (Kind : Value_Kind := Value_Kind'First) is record
@@ -408,6 +414,9 @@ package ${ada_lib_name}.Common is
    type Member_Reference_Array is
       array (Positive range <>) of Member_Reference;
 
+   % if not ctx.sorted_struct_fields:
+      pragma Warnings (Off, "null range");
+   % endif
    subtype Struct_Field_Reference is Member_Reference range
       % if ctx.sorted_struct_fields:
          <%
@@ -423,12 +432,18 @@ package ${ada_lib_name}.Common is
       ${first.introspection_enum_literal}
       .. ${last.introspection_enum_literal}
    ;
+   % if not ctx.sorted_struct_fields:
+      pragma Warnings (On, "null range");
+   % endif
 
    type Struct_Field_Reference_Array is
       array (Positive range <>) of Struct_Field_Reference;
 
    ## In a lot of testcases, there is a single concrete node that has no
    ## field. For these, generate a type that has no valid value.
+   % if not ctx.sorted_parse_fields:
+      pragma Warnings (Off, "null range");
+   % endif
    subtype Syntax_Field_Reference is Member_Reference range
       % if ctx.sorted_parse_fields:
          <%
@@ -444,6 +459,9 @@ package ${ada_lib_name}.Common is
       ${first.introspection_enum_literal}
       .. ${last.introspection_enum_literal}
    ;
+   % if not ctx.sorted_parse_fields:
+      pragma Warnings (On, "null range");
+   % endif
    --  Enumeration of all syntax fields for regular nodes
 
    type Syntax_Field_Reference_Array is
