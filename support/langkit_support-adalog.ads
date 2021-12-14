@@ -48,17 +48,36 @@ package Langkit_Support.Adalog is
 
    Solver_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER", Default => GNATCOLL.Traces.From_Config);
+   --  Trace whose only purpose is to show when we start solving an equation,
+   --  and show when solving aborts because of an exception.
 
    Verbose_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER.VERBOSE", Default => GNATCOLL.Traces.From_Config);
+   --  Trace to show when:
+   --
+   --  * a variable gets assigned a value;
+   --  * a variable gets assigned an Id;
+   --  * a variable gets (un)aliased.
 
    Trav_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER.TRAVERSAL", Default => GNATCOLL.Traces.From_Config);
+   --  Trace to show when starting the processing of a compound relation in the
+   --  symbolic solver.
 
    Solv_Trace  : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER.SOLVE", Default => GNATCOLL.Traces.From_Config);
+   --  Trace to show:
+   --
+   --  * the progress of solving a sequence of atoms (both in the symbolic
+   --    solver's Try_Solution and in the dead branch cut optimization);
+   --
+   --  * the progress of solving individual atoms.
 
    Sol_Trace  : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER.SOLUTION", Default => GNATCOLL.Traces.From_Config);
+   --  Trace to show:
+   --
+   --  * the number of tried solutions;
+   --  * valid solutions found.
 
 end Langkit_Support.Adalog;
