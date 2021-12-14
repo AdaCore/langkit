@@ -26,7 +26,7 @@
 with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-with Langkit_Support.Adalog.Logic_Ref;
+with Langkit_Support.Adalog.Logic_Var;
 with Langkit_Support.Adalog.Solver;
 with Langkit_Support.Adalog.Solver_Interface;
 
@@ -35,15 +35,15 @@ generic
    with function Image (I : T) return String is <>;
 package Langkit_Support.Adalog.Generic_Main_Support is
 
-   package Refs is new Langkit_Support.Adalog.Logic_Ref
-     (T, Element_Image => Image);
-   function Create (Name : String) return Refs.Raw_Var;
+   package Refs is new Langkit_Support.Adalog.Logic_Var
+     (T, Value_Image => Image);
+   function Create (Name : String) return Refs.Logic_Var;
 
-   package Solver_Ifc is new Solver_Interface (Refs.Raw_Logic_Var);
+   package Solver_Ifc is new Solver_Interface (Refs);
 
    package T_Solver is new Langkit_Support.Adalog.Solver (Solver_Ifc, True);
 
-   use Solver_Ifc, T_Solver;
+   use Solver_Ifc, T_Solver, Refs;
 
    function "+" (R : Relation) return Relation;
    --  Register R and return it. This is used to keep track of allocated
@@ -64,19 +64,19 @@ package Langkit_Support.Adalog.Generic_Main_Support is
    function "or" (L, R : Relation) return Relation is (+Create_Any ((L, R)));
    function "and" (L, R : Relation) return Relation is (+Create_All ((L, R)));
 
-   function Domain (Var        : Refs.Raw_Var;
+   function Domain (Var        : Refs.Logic_Var;
                     Rels       : Value_Array;
                     Dbg_String : String := "") return Relation
    is (+Create_Domain (Var, Rels, -Dbg_String));
 
-   function "=" (Var  : Refs.Raw_Var; Val : T) return Relation
+   function "=" (Var  : Refs.Logic_Var; Val : T) return Relation
    is (+Create_Assign (Var, Val));
 
-   function "=" (L, R : Refs.Raw_Var) return Relation
+   function "=" (L, R : Refs.Logic_Var) return Relation
    is (+Create_Unify (L, R));
 
    function Propagate
-     (L, R       : Refs.Raw_Var;
+     (L, R       : Refs.Logic_Var;
       Conv       : Converter_Type'Class := No_Converter;
       Eq         : Comparer_Type'Class := No_Comparer;
       Dbg_String : String := "") return Relation
@@ -84,11 +84,11 @@ package Langkit_Support.Adalog.Generic_Main_Support is
      (+Create_Propagate (L, R, Conv, Eq, -Dbg_String));
 
    function Unify
-     (L, R : Refs.Raw_Var; Dbg_String : String := "") return Relation
+     (L, R : Refs.Logic_Var; Dbg_String : String := "") return Relation
    is (+Create_Unify (L, R, -Dbg_String));
 
    function Assign
-     (L          : Refs.Raw_Var;
+     (L          : Refs.Logic_Var;
       R          : T;
       Conv       : Converter_Type'Class := No_Converter;
       Eq         : Comparer_Type'Class := No_Comparer;
@@ -97,14 +97,14 @@ package Langkit_Support.Adalog.Generic_Main_Support is
      (+Create_Assign (L, R, Conv, Eq, -Dbg_String));
 
    function Predicate
-     (L          : Refs.Raw_Var;
+     (L          : Refs.Logic_Var;
       P          : Predicate_Type'Class;
       Dbg_String : String := "") return Relation
    is
      (+Create_Predicate (L, P, -Dbg_String));
 
    function N_Predicate
-     (Vars       : Variable_Array;
+     (Vars       : Logic_Var_Array;
       P          : N_Predicate_Type'Class;
       Dbg_String : String := "") return Relation
    is
@@ -123,7 +123,7 @@ private
      (Positive, Relation);
 
    package Variable_Vectors is new Ada.Containers.Vectors
-     (Positive, Refs.Raw_Var, Refs."=");
+     (Positive, Refs.Logic_Var, Refs."=");
 
    package String_Access_Vectors is new Ada.Containers.Vectors
      (Positive, String_Access);

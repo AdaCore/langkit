@@ -29,7 +29,7 @@ with System; use System;
 with GNATCOLL.GMP.Integers;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
-with Langkit_Support.Adalog.Logic_Ref;
+with Langkit_Support.Adalog.Logic_Var;
 with Langkit_Support.Adalog.Solver;
 with Langkit_Support.Adalog.Solver_Interface;
 
@@ -419,14 +419,14 @@ private package ${ada_lib_name}.Implementation is
    function Image (Ent : ${T.entity.name}) return String;
    ${ada_doc('langkit.entity_image', 3)}
 
-   package Entity_Vars is new Langkit_Support.Adalog.Logic_Ref
-     (Element_Type => ${T.entity.name}, Element_Image => Image);
+   package Entity_Vars is new Langkit_Support.Adalog.Logic_Var
+     (Value_Type => ${T.entity.name}, Value_Image => Image);
    package Solver_Ifc is new Langkit_Support.Adalog.Solver_Interface
-     (Entity_Vars.Raw_Logic_Var);
+     (Entity_Vars);
    package Solver is new Langkit_Support.Adalog.Solver (Solver_Ifc);
 
-   subtype Logic_Var is Entity_Vars.Raw_Var;
-   subtype Logic_Var_Record is Entity_Vars.Var;
+   subtype Logic_Var is Entity_Vars.Logic_Var;
+   subtype Logic_Var_Record is Entity_Vars.Logic_Var_Record;
    Null_Var : constant Logic_Var := null;
    Null_Var_Record : constant Logic_Var_Record := (Reset => True, others => <>);
 

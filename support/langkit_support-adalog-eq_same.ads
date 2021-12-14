@@ -44,7 +44,8 @@ generic
 package Langkit_Support.Adalog.Eq_Same is
 
    use Solver_Ifc;
-   use type Value_Type;
+   subtype Value_Type is Solver_Ifc.Logic_Vars.Value_Type;
+   use type Solver_Ifc.Logic_Vars.Value_Type;
 
    type Dummy_Convert_Data is null record;
    No_Data : constant Dummy_Convert_Data := (null record);
@@ -166,7 +167,7 @@ package Langkit_Support.Adalog.Eq_Same is
          One_Side_Convert     => One_Side_Convert);
 
       function Create
-        (L, R      : Logic_Vars.Var;
+        (L, R      : Logic_Vars.Logic_Var;
          Data      : Converter;
          Eq_Data   : Equals_Data;
          Sloc_Info : String_Access := null) return Relation
@@ -174,7 +175,7 @@ package Langkit_Support.Adalog.Eq_Same is
         (Impl.Equals (L, R, Data, Data, Eq_Data, Sloc_Info));
 
       function Create
-        (L         : Logic_Vars.Var;
+        (L         : Logic_Vars.Logic_Var;
          R         : Value_Type;
          Data      : Converter;
          Eq_Data   : Equals_Data;
@@ -184,7 +185,7 @@ package Langkit_Support.Adalog.Eq_Same is
 
       function Create
         (L         : Value_Type;
-         R         : Logic_Vars.Var;
+         R         : Logic_Vars.Logic_Var;
          Data      : Converter;
          Eq_Data   : Equals_Data;
          Sloc_Info : String_Access := null) return Relation

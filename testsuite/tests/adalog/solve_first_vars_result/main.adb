@@ -12,9 +12,9 @@ procedure Main is
 
    procedure Solve (R : Relation);
 
-   X : constant Raw_Var := Create ("X");
-   Y : constant Raw_Var := Create ("Y");
-   Z : constant Raw_Var := Create ("Z");
+   X : constant Refs.Logic_Var := Create ("X");
+   Y : constant Refs.Logic_Var := Create ("Y");
+   Z : constant Refs.Logic_Var := Create ("Z");
 
    R  : constant Relation :=
      (X = 1 and Y = 1)
@@ -29,7 +29,7 @@ procedure Main is
    procedure Solve (R : Relation) is
    begin
       if Solve_First (R) then
-         for V of Raw_Logic_Var.Var_Array'(X, Y, Z) loop
+         for V of Logic_Var_Array'(X, Y, Z) loop
             Put_Line
               (Image (V) & " = "
                & (if Is_Defined (V)

@@ -4039,7 +4039,7 @@ package body ${ada_lib_name}.Implementation is
       procedure Reset_Logic_Var (LV : in out Logic_Var_Record) is
       begin
          LV.Value := No_Entity;
-         Entity_Vars.Reset (LV);
+         Entity_Vars.Reset (LV'Unrestricted_Access);
          Entity_Vars.Destroy (LV);
       end Reset_Logic_Var;
 

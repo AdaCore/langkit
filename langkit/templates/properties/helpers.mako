@@ -179,9 +179,9 @@
       overriding function Call
         (Self : ${type_name};
          % if arity == 1:
-            Entity : Solver_Ifc.Value_Type
+            Entity : ${T.entity.name}
          % else:
-            Entities : Solver_Ifc.Value_Array
+            Entities : Entity_Vars.Value_Array
          % endif
         ) return Boolean
    </%def>
@@ -234,7 +234,7 @@
       % endif
 
       % if arity > 1:
-         Entity : Solver_Ifc.Value_Type := Entities (1);
+         Entity : ${T.entity.name} := Entities (1);
       % endif
       <% node0_type = formal_node_types[0] %>
       Node : constant ${node0_type.name} := Entity.Node;

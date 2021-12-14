@@ -17,19 +17,19 @@ package Support is
 
    Squarer_Singleton : constant Squarer := (Ref_Count => 1);
 
-   function Square (X, Y : Refs.Raw_Var) return Relation
+   function Square (X, Y : Refs.Logic_Var) return Relation
    is (Propagate (X, Y, Conv => Squarer_Singleton));
 
-   function Square (X : Refs.Raw_Var; Y : Integer) return Relation
+   function Square (X : Refs.Logic_Var; Y : Integer) return Relation
    is (Assign (X, Y, Conv => Squarer_Singleton));
 
-   function Square (X : Integer; Y : Refs.Raw_Var) return Relation
+   function Square (X : Integer; Y : Refs.Logic_Var) return Relation
    is (Square (Y, X));
 
    function Is_Even (V : Integer) return Boolean is (V mod 2 = 0);
 
    function Is_Even
-     (Var : Refs.Raw_Var) return Relation
+     (Var : Refs.Logic_Var) return Relation
    is (Predicate (Var, Predicate (Is_Even'Access, "Is_Even")));
 
 end Support;

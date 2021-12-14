@@ -30,13 +30,17 @@ with Langkit_Support.Vectors;
 
 package body Langkit_Support.Adalog.Generic_Main_Support is
 
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Logic_Var_Record, Refs.Logic_Var);
+
    ------------
    -- Create --
    ------------
 
-   function Create (Name : String) return Refs.Raw_Var is
+   function Create (Name : String) return Refs.Logic_Var is
    begin
-      return R : constant Refs.Raw_Var := Refs.Create do
+      return R : constant Refs.Logic_Var := new Logic_Var_Record do
+         Reset (R);
          R.Dbg_Name := new String'(Name);
          Variables.Append (R);
       end return;
@@ -59,7 +63,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
    procedure Solve_All (Rel : Relation) is
 
       type Var_And_Val is record
-         Var     : Refs.Raw_Var;
+         Var     : Refs.Logic_Var;
          Defined : Boolean;
          Val     : T;
       end record;
@@ -163,7 +167,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
       begin
          for I in Vars'Range loop
             declare
-               V : Refs.Raw_Var renames Vars (I);
+               V : Refs.Logic_Var renames Vars (I);
             begin
                S (I) := (Var     => V,
                          Defined => Refs.Is_Defined (V),
@@ -264,7 +268,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
       for V of Variables loop
          Refs.Destroy (V.all);
-         Refs.Free (V);
+         Free (V);
       end loop;
 
       for S of Strings loop

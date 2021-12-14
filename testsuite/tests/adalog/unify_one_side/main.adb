@@ -8,8 +8,8 @@ with Support; use Support;
 procedure Main is
    use T_Solver, Refs;
 
-   X : constant Raw_Var := Create ("X");
-   Y : constant Raw_Var := Create ("Y");
+   X : constant Refs.Logic_Var := Create ("X");
+   Y : constant Refs.Logic_Var := Create ("Y");
 
    Relations : constant array (Positive range <>) of Relation :=
      (R_All ((Domain (X, (6, 9)),

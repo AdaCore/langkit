@@ -6,8 +6,8 @@ use Langkit_Support.Adalog.Main_Support;
 procedure Main is
    use T_Solver, Refs, Solver_Ifc;
 
-   X : constant Raw_Var := Create ("X");
-   Y : constant Raw_Var := Create ("Y");
+   X : constant Refs.Logic_Var := Create ("X");
+   Y : constant Refs.Logic_Var := Create ("Y");
 
    function Square (S : Integer) return Integer is (S ** 2);
    R : constant Relation :=

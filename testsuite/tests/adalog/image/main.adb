@@ -4,8 +4,8 @@ use Langkit_Support.Adalog.Main_Support;
 procedure Main is
    use T_Solver, Refs;
 
-   X : constant Raw_Var := Create ("X");
-   Y : constant Raw_Var := Create ("Y");
+   X : constant Refs.Logic_Var := Create ("X");
+   Y : constant Refs.Logic_Var := Create ("Y");
 
    Ors : constant Relation :=
       "or" (Domain (X, (1, 2, 3, 4, 5, 6)),

@@ -10,8 +10,8 @@ procedure Main is
 
    use T_Solver, Refs, Solver_Ifc;
 
-   X  : constant Raw_Var := Create ("X");
-   Y  : constant Raw_Var := Create ("Y");
+   X  : constant Refs.Logic_Var := Create ("X");
+   Y  : constant Refs.Logic_Var := Create ("Y");
    R3 : constant Relation :=
      R_All ((X = 2, Y = 1, +Create_N_Predicate ((X, Y), Pred_Singleton)));
 begin

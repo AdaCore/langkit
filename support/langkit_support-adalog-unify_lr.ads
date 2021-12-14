@@ -50,10 +50,10 @@ generic
      (C_Data : Equals_Data) return String is <>;
 
    with package Left_Var is new Adalog.Logic_Var
-     (Element_Type => L_Type, others => <>);
+     (Value_Type => L_Type, others => <>);
 
    with package Right_Var is new Logic_Var
-     (Element_Type => R_Type, others => <>);
+     (Value_Type => R_Type, others => <>);
 
    with procedure Left_C_Data_Inc_Ref (Self : Left_C_Data);
    with procedure Right_C_Data_Inc_Ref (Self : Right_C_Data);
@@ -75,8 +75,8 @@ package Langkit_Support.Adalog.Unify_LR is
 
    type LR_State is (No_Change, Left_Changed, Right_Changed);
    type Unify_LR is record
-      Left    : Left_Var.Var;
-      Right   : Right_Var.Var;
+      Left    : Left_Var.Logic_Var;
+      Right   : Right_Var.Logic_Var;
       L_Data  : Left_C_Data;
       R_Data  : Right_C_Data;
       Eq_Data : Equals_Data;
@@ -88,8 +88,8 @@ package Langkit_Support.Adalog.Unify_LR is
    procedure Free (Self : in out Unify_LR);
 
    function Create
-     (Left    : Left_Var.Var;
-      Right   : Right_Var.Var;
+     (Left    : Left_Var.Logic_Var;
+      Right   : Right_Var.Logic_Var;
       L_Data  : Left_C_Data;
       R_Data  : Right_C_Data;
       Eq_Data : Equals_Data) return Unify_LR;
@@ -99,8 +99,8 @@ package Langkit_Support.Adalog.Unify_LR is
    package Unify_LR_Rel is new Relations.Stateful_Relation (Unify_LR);
 
    function Create
-     (Left    : Left_Var.Var;
-      Right   : Right_Var.Var;
+     (Left    : Left_Var.Logic_Var;
+      Right   : Right_Var.Logic_Var;
       L_Data  : Left_C_Data;
       R_Data  : Right_C_Data;
       Eq_Data : Equals_Data) return Relation

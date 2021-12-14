@@ -31,8 +31,8 @@ package body Langkit_Support.Adalog.Unify_LR is
    ------------
 
    function Create
-     (Left    : Left_Var.Var;
-      Right   : Right_Var.Var;
+     (Left    : Left_Var.Logic_Var;
+      Right   : Right_Var.Logic_Var;
       L_Data  : Left_C_Data;
       R_Data  : Right_C_Data;
       Eq_Data : Equals_Data) return Unify_LR is
@@ -72,8 +72,8 @@ package body Langkit_Support.Adalog.Unify_LR is
             R := Get_Value (Self.Right);
             Result := +Equals (Self.Eq_Data, LC, R);
             if Debug.Debug then
-               Trace ("In Unify_LR, Left value is : " & Element_Image (L));
-               Trace ("In Unify_LR, Right value is : " & Element_Image (R));
+               Trace ("In Unify_LR, Left value is : " & Value_Image (L));
+               Trace ("In Unify_LR, Right value is : " & Value_Image (R));
                Trace ("In Unify_LR, both defined, returning " & Result'Image);
             end if;
 
@@ -89,8 +89,8 @@ package body Langkit_Support.Adalog.Unify_LR is
                Trace ("In Unify_LR, propagating right, from "
                       & Image (Self.Left) & " to "
                       & Image (Self.Right));
-               Trace ("In Unify_LR, From value is : " & Element_Image (L));
-               Trace ("In Unify_LR, New to value is : " & Element_Image (LC));
+               Trace ("In Unify_LR, From value is : " & Value_Image (L));
+               Trace ("In Unify_LR, New to value is : " & Value_Image (LC));
             end if;
          end if;
 

@@ -10,8 +10,8 @@ procedure Main is
    function Abs_Equal (Vals : Value_Array) return Boolean is
      (abs Vals (1) = abs Vals (2));
 
-   X : constant Refs.Raw_Var := Create ("X");
-   Y : constant Refs.Raw_Var := Create ("Y");
+   X : constant Refs.Logic_Var := Create ("X");
+   Y : constant Refs.Logic_Var := Create ("Y");
    R : constant Relation := R_All
      ((R_Any ((X = Y, Logic_True)),
        R_Any ((Domain (X, (1, 2)), Logic_True)),

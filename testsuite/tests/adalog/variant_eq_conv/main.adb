@@ -17,8 +17,8 @@ procedure Main is
    function S (V : String) return Val_Type
    is (Val_Type'(K => Str, String_Val => -V));
 
-   X : constant Raw_Var := Create ("x");
-   Y : constant Raw_Var := Create ("y");
+   X : constant Refs.Logic_Var := Create ("x");
+   Y : constant Refs.Logic_Var := Create ("y");
 
    function To_Str (V : Val_Type) return Val_Type is
      (S (case V.Int_Val is

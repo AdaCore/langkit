@@ -59,7 +59,7 @@ generic
 
    with function Image (Data : Equals_Data) return String;
 
-   with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
+   with package Var is new Logic_Var (Value_Type => L_Type, others => <>);
    --  Logic variable formal package
 
    with function R_Image (Self : R_Type) return String is <>;
@@ -93,7 +93,7 @@ package Langkit_Support.Adalog.Unify_One_Side is
 
    type Unify is new Base_Relation with private;
    function Create
-     (Left      : Var.Var;
+     (Left      : Var.Logic_Var;
       Right     : R_Type;
       R_Data    : R_Convert_Data;
       Eq_Data   : Equals_Data;
@@ -113,7 +113,7 @@ package Langkit_Support.Adalog.Unify_One_Side is
    type Member_T is new Base_Relation with private;
 
    function Member
-     (R      : Var.Var;
+     (R      : Var.Logic_Var;
       Vals   : R_Type_Array;
       R_Data : R_Convert_Data;
       Eq_Data : Equals_Data) return Relation;
@@ -132,7 +132,7 @@ private
    -----------
 
    type Unify_Rec is record
-      Left    : Var.Var;
+      Left    : Var.Logic_Var;
       Right   : R_Type;
       Changed : Boolean := False;
       R_Data  : R_Convert_Data;
@@ -149,7 +149,7 @@ private
    type Unify is new Rel.Rel with null record;
 
    type Member_T is new Base_Relation with record
-      Left           : Var.Var;
+      Left           : Var.Logic_Var;
       --  Logic variable that must be one of the given values
 
       Values         : R_Type_Array_Access;

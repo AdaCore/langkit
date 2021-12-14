@@ -30,7 +30,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    use Var;
 
    function Create
-     (Left    : Var.Var;
+     (Left    : Var.Logic_Var;
       Right   : R_Type;
       R_Data  : R_Convert_Data;
       Eq_Data : Equals_Data) return Unify_Rec;
@@ -214,7 +214,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    ------------
 
    function Create
-     (Left    : Var.Var;
+     (Left    : Var.Logic_Var;
       Right   : R_Type;
       R_Data  : R_Convert_Data;
       Eq_Data : Equals_Data) return Unify_Rec is
@@ -230,7 +230,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    end Create;
 
    function Create
-     (Left      : Var.Var;
+     (Left      : Var.Logic_Var;
       Right     : R_Type;
       R_Data    : R_Convert_Data;
       Eq_Data   : Equals_Data;
@@ -249,7 +249,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    ------------
 
    function Member
-     (R       : Var.Var;
+     (R       : Var.Logic_Var;
       Vals    : R_Type_Array;
       R_Data  : R_Convert_Data;
       Eq_Data : Equals_Data) return Relation is

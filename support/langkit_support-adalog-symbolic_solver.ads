@@ -53,8 +53,6 @@ package Langkit_Support.Adalog.Symbolic_Solver is
    --  Decrement the reference count of Self. If no reference is left,
    --  deallocate ``Self.all`` and set ``Self`` to ``null``.
 
-   subtype Logic_Var_Array is Var_Array;
-
    procedure Solve
      (Self              : Relation;
       Solution_Callback : access function
@@ -90,21 +88,21 @@ package Langkit_Support.Adalog.Symbolic_Solver is
    --  up to users to free them when appropriate.
 
    function Create_Predicate
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Pred         : Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully when calling ``Pred`` on
    --  the value of ``Logic_Var`` returns ``True``.
 
    function Create_N_Predicate
-     (Logic_Vars   : Variable_Array;
+     (Logic_Vars   : Logic_Var_Array;
       Pred         : N_Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully when calling ``Pred`` on
    --  the values of all variables in ``Logic_Vars`` returns ``True``.
 
    function Create_Assign
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Value        : Value_Type;
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class := No_Comparer;
@@ -122,13 +120,13 @@ package Langkit_Support.Adalog.Symbolic_Solver is
    --  concurrent assignments to ``Logic_Var``.
 
    function Create_Unify
-     (Left, Right  : Var;
+     (Left, Right  : Logic_Vars.Logic_Var;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully if ``Left`` and ``Right``
    --  can be assigned the same value.
 
    function Create_Propagate
-     (From, To     : Var;
+     (From, To     : Logic_Vars.Logic_Var;
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation;
@@ -143,7 +141,7 @@ package Langkit_Support.Adalog.Symbolic_Solver is
    --  concurrent assignments to ``To``.
 
    function Create_Domain
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Domain       : Value_Array;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully if it is possible to
@@ -194,7 +192,7 @@ private
    procedure Free is new Ada.Unchecked_Deallocation
      (N_Predicate_Type'Class, N_Predicate_Access);
 
-   package Logic_Var_Vectors is new Langkit_Support.Vectors (Var);
+   package Logic_Var_Vectors is new Langkit_Support.Vectors (Logic_Var);
    subtype Logic_Var_Vector is Logic_Var_Vectors.Vector;
    type Logic_Var_Vector_Access is access Logic_Var_Vector;
 
@@ -206,7 +204,7 @@ private
                         N_Predicate, True, False);
 
    type Atomic_Relation (Kind : Atomic_Kind := Propagate) is record
-      Target : Logic_Vars.Var;
+      Target : Logic_Var;
       --  What is the Target and whether it is considered as a "used" or
       --  "defined" logic variable depends on the kind of relation.  See the
       --  "Atomic relations dependency graph" section for more information.
@@ -223,7 +221,7 @@ private
                   --  The value we want to assign to ``Target``
 
                when Propagate =>
-                  From : Logic_Vars.Var;
+                  From : Logic_Var;
                   --  The variable from which we want to propagate to
                   --  ``Target``.
 
@@ -242,7 +240,7 @@ private
             --  The predicate that will be applied as part of this relation
 
          when Unify =>
-            Unify_From : Logic_Vars.Var;
+            Unify_From : Logic_Var;
 
          when True | False =>
             null;
@@ -292,7 +290,7 @@ private
 
    type Var_Or_Null (Exists : Boolean := False) is record
       case Exists is
-         when True  => Logic_Var : Var;
+         when True  => Logic_Var : Logic_Vars.Logic_Var;
          when False => null;
       end case;
    end record;
