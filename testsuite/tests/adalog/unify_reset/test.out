@@ -20,6 +20,8 @@ Solution: [%Y = 12, %X = 3]
 ... cut dead branches:
 Solution: [%Y = 12, %X = 3]
 
+ERROR: solutions are not the same
+
 
 Solving with old solver
 =======================
