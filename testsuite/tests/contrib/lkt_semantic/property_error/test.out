@@ -33,164 +33,169 @@ Expr <RaiseExpr test.lkt:2:22-2:50>
 Expr <ParenExpr test.lkt:2:21-2:51>
      has type <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "Bool" test.lkt:3:14-3:18>
+Id   <RefId "Bool" test.lkt:3:23-3:27>
      references <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "PropertyError" test.lkt:3:28-3:41>
+Id   <RefId "PropertyError" test.lkt:3:37-3:50>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:3:42-3:49>
+Expr <StringLit test.lkt:3:51-3:58>
      has type <StructDecl prelude: "String">
 
-Expr <CallExpr test.lkt:3:28-3:50>
+Expr <CallExpr test.lkt:3:37-3:59>
      has type <StructDecl prelude: "PropertyError">
 
-Expr <ParenExpr test.lkt:3:27-3:51>
+Expr <ParenExpr test.lkt:3:36-3:60>
      has type <StructDecl prelude: "PropertyError">
 
-Expr <RaiseExpr test.lkt:3:21-3:51>
+Expr <RaiseExpr test.lkt:3:30-3:60>
      has type <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "Bool" test.lkt:4:14-4:18>
-     references <EnumTypeDecl prelude: "Bool">
+test.lkt:3:30: error: raised expression needs to be a `PropertyError` constructor call
+3 | @invalid fun prop3(): Bool = raise (PropertyError("error"))
+  |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Id   <RefId "PropertyError" test.lkt:4:30-4:43>
+Id   <RefId "PropertyError" test.lkt:7:23-7:36>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:4:44-4:51>
-     has type <StructDecl prelude: "String">
+Id   <RefId "PropertyError" test.lkt:7:45-7:58>
+     references <StructDecl prelude: "PropertyError">
 
-Expr <CallExpr test.lkt:4:30-4:52>
+Expr <CallExpr test.lkt:7:45-7:60>
      has type <StructDecl prelude: "PropertyError">
 
-Expr <ParenExpr test.lkt:4:29-4:53>
+Expr <RaiseExpr test.lkt:7:39-7:60>
      has type <StructDecl prelude: "PropertyError">
 
-Expr <ParenExpr test.lkt:4:28-4:54>
-     has type <StructDecl prelude: "PropertyError">
-
-Expr <ParenExpr test.lkt:4:27-4:55>
-     has type <StructDecl prelude: "PropertyError">
-
-Expr <RaiseExpr test.lkt:4:21-4:55>
-     has type <EnumTypeDecl prelude: "Bool">
-
-test.lkt:8:23: error: `PropertyError` can only be referenced in a raise expression
-8 | @invalid fun prop5(): PropertyError = raise PropertyError()
+test.lkt:7:23: error: Cannot reference `PropertyError` outside of a raise expression
+7 | @invalid fun prop5(): PropertyError = raise PropertyError()
   |                       ^^^^^^^^^^^^^
 
-Id   <RefId "PropertyError" test.lkt:8:23-8:36>
-     references <StructDecl prelude: "PropertyError">
-
-Id   <RefId "PropertyError" test.lkt:8:45-8:58>
-     references <StructDecl prelude: "PropertyError">
-
-Expr <CallExpr test.lkt:8:45-8:60>
-     has type <StructDecl prelude: "PropertyError">
-
-Expr <RaiseExpr test.lkt:8:39-8:60>
-     has type <StructDecl prelude: "PropertyError">
-
-Id   <RefId "Bool" test.lkt:9:23-9:27>
+Id   <RefId "Bool" test.lkt:8:23-8:27>
      references <EnumTypeDecl prelude: "Bool">
 
-test.lkt:9:36: error: cannot raise `prop5`, only `PropertyError` can be raised
-9 | @invalid fun prop6(): Bool = raise prop5()
-  |                                    ^^^^^^^
+Id   <RefId "prop5" test.lkt:8:36-8:41>
+     references <FunDecl "prop5" test.lkt:7:10-7:60>
 
-Id   <RefId "prop5" test.lkt:9:36-9:41>
-     references <FunDecl "prop5" test.lkt:8:10-8:60>
-
-Expr <RefId "prop5" test.lkt:9:36-9:41>
+Expr <RefId "prop5" test.lkt:8:36-8:41>
      has type <FunctionType prelude: "() -> PropertyError">
 
-Expr <CallExpr test.lkt:9:36-9:43>
+Expr <CallExpr test.lkt:8:36-8:43>
      has type <StructDecl prelude: "PropertyError">
 
-Expr <RaiseExpr test.lkt:9:30-9:43>
+Expr <RaiseExpr test.lkt:8:30-8:43>
      has type <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "Bool" test.lkt:12:21-12:25>
-     references <EnumTypeDecl prelude: "Bool">
+test.lkt:8:30: error: raised expression needs to be a `PropertyError` constructor call
+8 | @invalid fun prop6(): Bool = raise prop5()
+  |                              ^^^^^^^^^^^^^
 
-test.lkt:12:28: error: cannot call `PropertyError` outside of a raise expression
-12 | @invalid val prop7: Bool = PropertyError("error")
-   |                            ^^^^^^^^^^^^^^^^^^^^^^
-
-Id   <RefId "PropertyError" test.lkt:12:28-12:41>
+Id   <RefId "PropertyError" test.lkt:11:22-11:35>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:12:42-12:49>
+Expr <StringLit test.lkt:11:36-11:43>
      has type <StructDecl prelude: "String">
 
-test.lkt:12:28: error: Mismatched types: expected `Bool`, got `PropertyError`
-12 | @invalid val prop7: Bool = PropertyError("error")
-   |                            ^^^^^^^^^^^^^^^^^^^^^^
-
-Id   <RefId "Bool" test.lkt:13:21-13:25>
-     references <EnumTypeDecl prelude: "Bool">
-
-test.lkt:13:29: error: cannot call `PropertyError` outside of a raise expression
-13 | @invalid val prop8: Bool = (PropertyError("error"))
-   |                             ^^^^^^^^^^^^^^^^^^^^^^
-
-Id   <RefId "PropertyError" test.lkt:13:29-13:42>
-     references <StructDecl prelude: "PropertyError">
-
-Expr <StringLit test.lkt:13:43-13:50>
-     has type <StructDecl prelude: "String">
-
-test.lkt:13:29: error: Mismatched types: expected `Bool`, got `PropertyError`
-13 | @invalid val prop8: Bool = (PropertyError("error"))
-   |                             ^^^^^^^^^^^^^^^^^^^^^^
-
-test.lkt:13:28: error: Mismatched types: expected `Bool`, got `PropertyError`
-13 | @invalid val prop8: Bool = (PropertyError("error"))
-   |                            ^^^^^^^^^^^^^^^^^^^^^^^^
-
-Id   <RefId "Bool" test.lkt:15:14-15:18>
-     references <EnumTypeDecl prelude: "Bool">
-
-Id   <RefId "Int" test.lkt:16:11-16:14>
-     references <StructDecl prelude: "Int">
-
-Expr <NumLit test.lkt:16:17-16:18>
-     has type <StructDecl prelude: "Int">
-
-Id   <RefId "PropertyError" test.lkt:18:10-18:23>
-     references <StructDecl prelude: "PropertyError">
-
-Expr <StringLit test.lkt:18:24-18:40>
-     has type <StructDecl prelude: "String">
-
-Expr <CallExpr test.lkt:18:10-18:41>
+Expr <CallExpr test.lkt:11:22-11:44>
      has type <StructDecl prelude: "PropertyError">
 
-Expr <RaiseExpr test.lkt:18:4-18:41>
-     has type <EnumTypeDecl prelude: "Bool">
+test.lkt:11:22: error: Cannot reference `PropertyError` outside of a raise expression
+11 | @invalid val prop7 = PropertyError("error")
+   |                      ^^^^^^^^^^^^^
 
-Expr <BlockExpr test.lkt:15:21-19:2>
-     has type <EnumTypeDecl prelude: "Bool">
+Id   <RefId "PropertyError" test.lkt:12:23-12:36>
+     references <StructDecl prelude: "PropertyError">
 
-Id   <RefId "Int" test.lkt:22:8-22:11>
-     references <StructDecl prelude: "Int">
+Expr <StringLit test.lkt:12:37-12:44>
+     has type <StructDecl prelude: "String">
 
-Expr <NumLit test.lkt:22:14-22:15>
-     has type <StructDecl prelude: "Int">
+Expr <CallExpr test.lkt:12:23-12:45>
+     has type <StructDecl prelude: "PropertyError">
 
-Id   <RefId "Bool" test.lkt:23:24-23:28>
+Expr <ParenExpr test.lkt:12:22-12:46>
+     has type <StructDecl prelude: "PropertyError">
+
+test.lkt:12:23: error: Cannot reference `PropertyError` outside of a raise expression
+12 | @invalid val prop8 = (PropertyError("error"))
+   |                       ^^^^^^^^^^^^^
+
+Id   <RefId "Bool" test.lkt:14:14-14:18>
      references <EnumTypeDecl prelude: "Bool">
 
-test.lkt:23:37: error: raised expression needs to be of type `PropertyError`, got `Int`
-23 | @invalid fun prop10(): Bool = raise i
-   |                                     ^
+Id   <RefId "Int" test.lkt:15:11-15:14>
+     references <StructDecl prelude: "Int">
 
-Id   <RefId "i" test.lkt:23:37-23:38>
-     references <ValDecl "i" test.lkt:22:1-22:15>
-
-Expr <RefId "i" test.lkt:23:37-23:38>
+Expr <NumLit test.lkt:15:17-15:18>
      has type <StructDecl prelude: "Int">
 
-Expr <RaiseExpr test.lkt:23:31-23:38>
+Id   <RefId "PropertyError" test.lkt:17:10-17:23>
+     references <StructDecl prelude: "PropertyError">
+
+Expr <StringLit test.lkt:17:24-17:40>
+     has type <StructDecl prelude: "String">
+
+Expr <CallExpr test.lkt:17:10-17:41>
+     has type <StructDecl prelude: "PropertyError">
+
+Expr <RaiseExpr test.lkt:17:4-17:41>
      has type <EnumTypeDecl prelude: "Bool">
+
+Expr <BlockExpr test.lkt:14:21-18:2>
+     has type <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "Int" test.lkt:21:8-21:11>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:21:14-21:15>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Bool" test.lkt:22:24-22:28>
+     references <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "i" test.lkt:22:37-22:38>
+     references <ValDecl "i" test.lkt:21:1-21:15>
+
+Expr <RefId "i" test.lkt:22:37-22:38>
+     has type <StructDecl prelude: "Int">
+
+Expr <RaiseExpr test.lkt:22:31-22:38>
+     has type <EnumTypeDecl prelude: "Bool">
+
+test.lkt:22:31: error: raised expression needs to be a `PropertyError` constructor call
+22 | @invalid fun prop10(): Bool = raise i
+   |                               ^^^^^^^
+
+Id   <RefId "Bool" test.lkt:24:18-24:22>
+     references <EnumTypeDecl prelude: "Bool">
+
+Id   <RefId "PropertyError" test.lkt:24:31-24:44>
+     references <StructDecl prelude: "PropertyError">
+
+Id   <RefId "PropertyError" test.lkt:24:45-24:58>
+     references <StructDecl prelude: "PropertyError">
+
+Expr <StringLit test.lkt:24:59-24:64>
+     has type <StructDecl prelude: "String">
+
+Expr <CallExpr test.lkt:24:45-24:65>
+     has type <StructDecl prelude: "PropertyError">
+
+Id   <RefId "exception_message" test.lkt:24:66-24:83>
+     references <FieldDecl prelude: "exception_message">
+
+Expr <RefId "exception_message" test.lkt:24:66-24:83>
+     has type <StructDecl prelude: "String">
+
+Expr <DotExpr test.lkt:24:45-24:83>
+     has type <StructDecl prelude: "String">
+
+Expr <CallExpr test.lkt:24:31-24:84>
+     has type <StructDecl prelude: "PropertyError">
+
+Expr <RaiseExpr test.lkt:24:25-24:84>
+     has type <EnumTypeDecl prelude: "Bool">
+
+test.lkt:24:25: error: raised expression needs to be a `PropertyError` constructor call
+24 | @invalid val p : Bool = raise PropertyError(PropertyError("lol").exception_message)
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

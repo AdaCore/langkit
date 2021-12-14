@@ -1,7 +1,6 @@
 fun prop1(): Bool = raise PropertyError("error")
 fun prop2(): Bool = (raise PropertyError("error"))
-fun prop3(): Bool = raise (PropertyError("error"))
-fun prop4(): Bool = raise (((PropertyError("error"))))
+@invalid fun prop3(): Bool = raise (PropertyError("error"))
 
 # prop5 and prop6 should be rejected (we don't want any PropertyError
 # value living outside of the exception system).
@@ -9,8 +8,8 @@ fun prop4(): Bool = raise (((PropertyError("error"))))
 @invalid fun prop6(): Bool = raise prop5()
 
 # Invalid because of missing raise keyword
-@invalid val prop7: Bool = PropertyError("error")
-@invalid val prop8: Bool = (PropertyError("error"))
+@invalid val prop7 = PropertyError("error")
+@invalid val prop8 = (PropertyError("error"))
 
 fun prop9(): Bool = {
    val n: Int = 1;
@@ -21,3 +20,5 @@ fun prop9(): Bool = {
 # Invalid because only PropertyError can be raised
 val i: Int = 1
 @invalid fun prop10(): Bool = raise i
+
+@invalid val p : Bool = raise PropertyError(PropertyError("lol").exception_message)

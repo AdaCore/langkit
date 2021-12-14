@@ -158,7 +158,7 @@ class LktNode(ASTNode):
         return Self.unit.root.node_env.get_first(
             entity_name).cast_or_raise(T.Decl)
 
-    @langkit_property(return_type=T.NamedTypeDecl.entity)
+    @langkit_property(return_type=T.NamedTypeDecl.entity, memoized=True)
     def get_builtin_type(entity_name=T.Symbol):
         return Self.root_get(entity_name).cast_or_raise(T.NamedTypeDecl)
 
@@ -474,17 +474,6 @@ class LktNode(ASTNode):
         ))
 
         return Entity.new_tree_semantic_result(results)
-
-    @langkit_property(return_type=T.LktNode.entity)
-    def first_no_paren_parent():
-        """
-        Return the first parent that is not a ``ParenExpr``.
-        """
-        return If(
-            Entity.parent.is_a(ParenExpr),
-            Entity.parent.first_no_paren_parent(),
-            Entity.parent
-        )
 
     @langkit_property(public=True)
     def topmost_invalid_decl():
@@ -1475,6 +1464,28 @@ class RefId(Id):
         return Self.error(
             S("Cannot find entity `")
             .concat(Self.text).concat(S("` in this scope")),
+        )
+
+    @langkit_property(return_type=T.SemanticResult.array)
+    def check_legality():
+        error_type = Var(Entity.property_error_type)
+
+        return If(
+            # Check that we don't reference the error type (PropertyError)
+            # outside of a raise expression.
+            #
+            # NOTE: This means that we lookup the property error type for every
+            # RefId in the code. That might be too costly, so we might want to
+            # have a first level of textual filter if this ever becomes a
+            # problem.
+            And(Entity.referenced_decl.result_ref == error_type,
+                Not(Entity.parents.any(lambda r: r.is_a(T.RaiseExpr)))),
+
+            Self.error(S("Cannot reference `").concat(error_type.full_name)
+                       .concat(S("` outside of a raise expression")))
+            .singleton,
+
+            No(T.SemanticResult.array)
         )
 
 
@@ -2516,22 +2527,9 @@ class SimpleTypeRef(TypeRef):
         d = Var(Entity.type_name.referenced_decl)
 
         return d.result_ref.then(
-            lambda d: d.match(
-                # The type ref references a type decl: return no error if it
-                # doesn't reference a PropertyError.
-                lambda td=T.TypeDecl: If(
-                    td == Entity.property_error_type,
-                    [Entity.error(
-                        S("`").concat(Entity.property_error_type.full_name)
-                        .concat(S("` can only be referenced"))
-                        .concat(S(" in a raise expression"))
-                    )],
-                    No(T.SemanticResult.array)
-                ),
-
-                # Not a type decl: return an error that the type reference is
-                # invalid.
-                lambda _: [Entity.error(S("Invalid type reference"))]
+            lambda d: d.cast(T.TypeDecl).then(
+                lambda _: No(T.SemanticResult.array),
+                default_val=[Entity.error(S("Invalid type reference"))]
             )
         )
 
@@ -2825,37 +2823,6 @@ class CallExpr(Expr):
                             )
                         ).singleton
                     )
-                )
-            )
-            # In case of PropertyError, check that this call is the operand of
-            # a raise expression and this is a call to the PropertyError
-            # constructor.
-            ._or(
-                If(
-                    Entity.expr_context_free_type
-                    == Entity.property_error_type,
-
-                    Cond(
-                        Not(Entity.first_no_paren_parent.is_a(T.RaiseExpr)),
-                        Self.error(
-                            S("cannot call `")
-                            .concat(Entity.property_error_type.full_name)
-                            .concat(S("` outside of a raise expression"))
-                        ).singleton,
-
-                        Entity.called_decl != Entity.property_error_type,
-                        Self.error(
-                            S("cannot raise `")
-                            .concat(Entity.called_decl.full_name)
-                            .concat(S("`, only `"))
-                            .concat(Entity.property_error_type.full_name)
-                            .concat(S("` can be raised"))
-                        ).singleton,
-
-                        No(T.SemanticResult.array)
-                    ),
-
-                    No(T.SemanticResult.array)
                 )
             )
         )
@@ -3352,20 +3319,24 @@ class RaiseExpr(Expr):
     except_expr = Field(type=T.Expr)
 
     @langkit_property(return_type=T.SemanticResult.array)
-    def check_correctness_pre():
-        except_expr_type = Var(Entity.except_expr.expr_type.result_type)
-        pe_type = Var(Entity.property_error_type)
-        return If(
-            except_expr_type == pe_type,
+    def check_legality():
+        # Reject all calls but the ones to the PropertyError constructor whose
+        # argument is a string literal.
+        error_type = Var(Entity.property_error_type)
 
-            No(T.SemanticResult.array),
-
-            Self.except_expr.error(
-                S("raised expression needs to be of type `").concat(
-                    pe_type.full_name
-                ).concat(S("`, got `")).concat(
-                    except_expr_type.full_name
-                ).concat(S("`"))
+        return Entity.except_expr.cast(T.CallExpr).then(
+            lambda ce:
+            (ce.name.check_referenced_decl == error_type)
+            & ce.match_params().at(0).then(
+                # The argument is optional, but if it is present, it must be a
+                # static string expression.
+                lambda p: p.actual.value.is_a(StringLit), default_val=True
+            )
+        ).then(
+            lambda _: No(T.SemanticResult.array),
+            default_val=Self.error(
+                S("raised expression needs to be a `")
+                .concat(error_type.full_name).concat(S("` constructor call"))
             ).singleton
         )
 
