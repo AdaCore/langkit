@@ -72,19 +72,29 @@ package Langkit_Support.Adalog.Solver is
      (Self              : Relation;
       Solution_Callback : access function
         (Vars : Logic_Var_Array) return Boolean;
-      Solve_Options     : Solve_Options_Type := Default_Options);
+      Solve_Options     : Solve_Options_Type := Default_Options;
+      Timeout           : Natural := 0);
    --  Run the solver on the ``Self`` relation. For every solution found, call
    --  ``Solution_Callback`` with the variables involved in ``Self``, and
    --  continue looking for other solutions iff it returns True. See
    --  ``Solve_Options Type`` for the available way to configure the resolution
    --  process.
+   --
+   --  For the state machine solver, ``Timeout`` determines the maximum number
+   --  of solving step to run before aborting the solver. If left to 0 or for
+   --  the symbolic solver, no timeout applies.
 
    function Solve_First
      (Self          : Relation;
-      Solve_Options : Solve_Options_Type := Default_Options) return Boolean;
+      Solve_Options : Solve_Options_Type := Default_Options;
+      Timeout       : Integer := 0) return Boolean;
    --  Run the solver on the ``Self`` relation. Return whether there is at
    --  least one valid solution. See ``Solve_Options Type`` for the available
    --  way to configure the resolution process.
+   --
+   --  For the state machine solver, ``Timeout`` determines the maximum number
+   --  of solving step to run before aborting the solver. If left to 0 or for
+   --  the symbolic solver, no timeout applies.
 
    ---------------------------
    -- Relation constructors --
