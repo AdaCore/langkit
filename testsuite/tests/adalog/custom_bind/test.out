@@ -4,14 +4,14 @@ Solving with new solver
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
-        4 -> %X
-        5 -> %X
-        6 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
+        %X <- 4
+        %X <- 5
+        %X <- 6
 
-    Square(%X) -> %Y
+    %Y <- Square(%X)
 
 ... without optimizations:
 Solution: [%Y = 1, %X = 1]
@@ -32,15 +32,15 @@ Solution: [%Y = 36, %X = 6]
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
-        4 -> %X
-        5 -> %X
-        6 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
+        %X <- 4
+        %X <- 5
+        %X <- 6
 
-    Square(%X) -> %Y
-    36 -> %Y
+    %Y <- Square(%X)
+    %Y <- 36
 
 ... without optimizations:
 Solution: [%Y = 36, %X = 6]

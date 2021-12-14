@@ -3,10 +3,10 @@ Solving with new solver
 
 Solving relation:
 Any:
-    1 -> %X
+    %X <- 1
     All:
         Is_Even?(%X)
-        1 -> %Y
+        %Y <- 1
 
 
 ... without optimizations:

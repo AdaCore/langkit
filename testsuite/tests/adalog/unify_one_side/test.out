@@ -6,15 +6,15 @@ Solving with new solver
 Solving relation:
 All:
     Any:
-        6 -> %X
-        9 -> %X
+        %X <- 6
+        %X <- 9
 
     Any:
-        9 -> %Y
-        16 -> %Y
+        %Y <- 9
+        %Y <- 16
 
-    Square(3) -> %X
-    Square(4) -> %Y
+    %X <- Square(3)
+    %Y <- Square(4)
 
 ... without optimizations:
 Solution: [%X = 9, %Y = 16]
@@ -27,10 +27,10 @@ Solution: [%X = 9, %Y = 16]
 Solving relation:
 All:
     Any:
-        2 -> %Y
-        3 -> %Y
+        %Y <- 2
+        %Y <- 3
 
-    Square(4) -> %X
+    %X <- Square(4)
 
 ... without optimizations:
 Solution: [%X = 16, %Y = 2]
@@ -45,8 +45,8 @@ Solution: [%X = 16, %Y = 3]
 Solving relation:
 All:
     Is_Even?(%X)
-    Square(3) -> %X
-    Square(%X) -> %Y
+    %X <- Square(3)
+    %Y <- Square(%X)
 
 ... without optimizations:
 
@@ -57,16 +57,16 @@ All:
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
-        4 -> %X
-        5 -> %X
-        6 -> %X
-        7 -> %X
-        8 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
+        %X <- 4
+        %X <- 5
+        %X <- 6
+        %X <- 7
+        %X <- 8
 
-    Square(%X) -> %Y
+    %Y <- Square(%X)
 
 ... without optimizations:
 Solution: [%Y = 1, %X = 1]

@@ -1597,23 +1597,23 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
    function Image (Self : Atomic_Relation) return String is
 
-      function Left_Image (Left : String) return String
+      function Right_Image (Right : String) return String
       is
         (if Self.Conv /= null
-         then Self.Conv.Image & "(" & Left & ")"
-         else Left);
+         then Self.Conv.Image & "(" & Right & ")"
+         else Right);
 
       function Prop_Image (Left, Right : String) return String
       is
-        (Left_Image (Left) & " -> " & Right);
+        (Left & " <- " & Right_Image (Right));
    begin
       case Self.Kind is
          when Propagate =>
-            return Prop_Image (Image (Self.From), Image (Self.Target));
+            return Prop_Image (Image (Self.Target), Image (Self.From));
 
          when Assign =>
             return Prop_Image
-              (Logic_Vars.Element_Image (Self.Val), Image (Self.Target));
+              (Image (Self.Target), Logic_Vars.Element_Image (Self.Val));
 
          when Predicate =>
             declare

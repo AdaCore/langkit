@@ -4,8 +4,8 @@ Solving with new solver
 Solving relation:
 All:
     %X <-> %X
-    1 -> %X
-    1 -> %Y
+    %X <- 1
+    %Y <- 1
 
 ... without optimizations:
 Solution: [%X = 1, %Y = 1]
