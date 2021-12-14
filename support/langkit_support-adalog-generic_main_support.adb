@@ -23,8 +23,10 @@
 
 with Ada.Environment_Variables;
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Images;
+with Langkit_Support.Vectors;
 
 package body Langkit_Support.Adalog.Generic_Main_Support is
 
@@ -50,38 +52,127 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
       return R;
    end "+";
 
-   --------------------
-   -- Safe_Get_Value --
-   --------------------
-
-   use Refs;
-   use Refs.Raw_Logic_Var;
-
-   function Safe_Get_Value (V : Refs.Raw_Var) return String is
-     ((if Refs.Is_Defined (V)
-       then Image (Refs.Get_Value (V))
-       else "<undefined>"));
-
    ---------------
    -- Solve_All --
    ---------------
 
    procedure Solve_All (Rel : Relation) is
-      function Solution_Callback (Vars : Var_Array) return Boolean;
 
-      function Image (L : Refs.Raw_Var) return String
-      is (Refs.Image (L) & " = " & Safe_Get_Value (L));
+      type Var_And_Val is record
+         Var     : Refs.Raw_Var;
+         Defined : Boolean;
+         Val     : T;
+      end record;
+      --  We want to keep track of the various solutions found. Since solution
+      --  values are stored in variables, this means that we need to save the
+      --  values when a solution is found, as the next solution will override
+      --  them in variables.
 
-      function Vars_Image is new Langkit_Support.Images.Array_Image
-        (Raw_Var, Positive, Var_Array);
+      function Image (Self : Var_And_Val) return String
+      is
+        (Refs.Image (Self.Var) & " = "
+         & (if Self.Defined
+            then Image (Self.Val)
+            else "<undefined>"));
+
+      type Solution is array (Positive range <>) of Var_And_Val;
+      type Solution_Access is access all Solution;
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Solution, Solution_Access);
+
+      package Solution_Vectors is new Langkit_Support.Vectors
+        (Solution_Access);
+      procedure Free (Self : in out Solution_Vectors.Vector);
+      --  Free all solutions in Self and destroy the vector
+
+      function Equivalent
+        (Left, Right : Solution_Vectors.Vector) return Boolean;
+      --  Return whether the two vectors of solutions are equal
+
+      Solutions              : Solution_Vectors.Vector;
+      Solutions_Without_Opts : Solution_Vectors.Vector;
+
+      function Solution_Callback (Vars : Logic_Var_Array) return Boolean;
+      --  Callback for ``Solve``. Print the given solution and append it to
+      --  ``Solutions``, then return True to continue looking for other
+      --  solutions.
+
+      function Image is new Langkit_Support.Images.Array_Image
+        (Var_And_Val, Positive, Solution);
+
+      ----------
+      -- Free --
+      ----------
+
+      procedure Free (Self : in out Solution_Vectors.Vector) is
+         S_Mut : Solution_Access;
+      begin
+         for S of Self loop
+            S_Mut := S;
+            Free (S_Mut);
+         end loop;
+         Self.Destroy;
+      end Free;
+
+      ----------------
+      -- Equivalent --
+      ----------------
+
+      function Equivalent
+        (Left, Right : Solution_Vectors.Vector) return Boolean
+      is
+      begin
+         if Left.Length /= Right.Length then
+            return False;
+         end if;
+
+         for I in 1 .. Left.Length loop
+            declare
+               S_L : Solution renames Left.Get (I).all;
+               S_R : Solution renames Right.Get (I).all;
+            begin
+               if S_L'Length /= S_R'Length then
+                  return False;
+               end if;
+
+               for J in S_L'Range loop
+                  declare
+                     L : Var_And_Val renames S_L (J);
+                     R : Var_And_Val renames S_R (J);
+                  begin
+                     if Refs."/=" (L.Var, R.Var)
+                        or else L.Defined /= R.Defined
+                        or else (L.Defined and then L.Val /= R.Val)
+                     then
+                        return False;
+                     end if;
+                  end;
+               end loop;
+            end;
+         end loop;
+
+         return True;
+      end Equivalent;
 
       -----------------------
       -- Solution_Callback --
       -----------------------
 
-      function Solution_Callback (Vars : Var_Array) return Boolean is
+      function Solution_Callback (Vars : Logic_Var_Array) return Boolean is
+         S : constant Solution_Access := new Solution (Vars'Range);
       begin
-         Put_Line ("Solution: " & Vars_Image (Vars));
+         for I in Vars'Range loop
+            declare
+               V : Refs.Raw_Var renames Vars (I);
+            begin
+               S (I) := (Var     => V,
+                         Defined => Refs.Is_Defined (V),
+                         Val     => Refs.Get_Value (V));
+            end;
+         end loop;
+         Solutions.Append (S);
+
+         Put_Line ("Solution: " & Image (S.all));
          return True;
       end Solution_Callback;
 
@@ -91,18 +182,41 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
       case Kind is
       when Symbolic =>
+         --  Solve both without and with optimizations
+
          Put_Line ("... without optimizations:");
          Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => False));
          New_Line;
+         Solutions_Without_Opts := Solutions;
+         Solutions := Solution_Vectors.Empty_Vector;
 
          Put_Line ("... cut dead branches:");
          Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
          New_Line;
 
+         --  Check that we had the same results in both cases
+
+         if not Equivalent (Solutions_Without_Opts, Solutions) then
+            Put_Line ("ERROR: solutions are not the same");
+            New_Line;
+         end if;
+
+         --  Clean up, we are done
+
+         Free (Solutions_Without_Opts);
+         Free (Solutions);
+
       when State_Machine =>
          Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
+         Free (Solutions);
          New_Line;
       end case;
+
+   exception
+      when others =>
+         Free (Solutions_Without_Opts);
+         Free (Solutions);
+         raise;
    end Solve_All;
 
    ---------
