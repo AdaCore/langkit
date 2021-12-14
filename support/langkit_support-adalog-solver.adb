@@ -304,13 +304,14 @@ package body Langkit_Support.Adalog.Solver is
      (Self              : Relation;
       Solution_Callback : access function
         (Vars : Logic_Var_Array) return Boolean;
-      Solve_Options     : Solve_Options_Type := Default_Options) is
+      Solve_Options     : Solve_Options_Type := Default_Options;
+      Timeout           : Natural := 0) is
    begin
       case Self.Kind is
          when Symbolic => Sym_Solve.Solve
               (Self.Symbolic_Relation, Solution_Callback, Solve_Options);
          when State_Machine =>
-            while Abstract_Relation.Solve (Self.SSM_Relation) loop
+            while Abstract_Relation.Solve (Self.SSM_Relation, Timeout) loop
                declare
                   Var_Count : constant Positive :=
                     Positive (Self.Vars.Vars.Length);
@@ -339,15 +340,16 @@ package body Langkit_Support.Adalog.Solver is
    -----------------
 
    function Solve_First
-     (Self : Relation; Solve_Options : Solve_Options_Type := Default_Options)
-      return Boolean is
+     (Self          : Relation;
+      Solve_Options : Solve_Options_Type := Default_Options;
+      Timeout       : Integer := 0) return Boolean is
    begin
       case Self.Kind is
          when Symbolic =>
             return Sym_Solve.Solve_First
               (Self.Symbolic_Relation, Solve_Options);
          when State_Machine =>
-            return Abstract_Relation.Solve (Self.SSM_Relation);
+            return Abstract_Relation.Solve (Self.SSM_Relation, Timeout);
          when None => raise Constraint_Error with "Cannot solve No_Relation";
       end case;
    end Solve_First;

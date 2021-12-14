@@ -1259,7 +1259,8 @@ package body ${ada_lib_name}.Implementation is
       end if;
 
       begin
-         return Solver.Solve_First (R);
+         return Solver.Solve_First
+           (R, Timeout => Context_Node.Unit.Context.Logic_Resolution_Timeout);
       exception
          when Langkit_Support.Adalog.Early_Binding_Error =>
             raise Property_Error with "invalid equation for logic resolution";
