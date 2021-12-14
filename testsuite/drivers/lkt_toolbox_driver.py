@@ -8,5 +8,7 @@ class LktToolboxDriver(BaseDriver):
     """
 
     def run(self):
-        self.run_and_check(['lkt_toolbox', 'test.lkt'],
-                           memcheck=True, for_coverage=True)
+        self.run_and_check(
+            ['lkt_toolbox', '--check-invalid-decls', 'test.lkt'],
+            memcheck=True, for_coverage=True
+        )

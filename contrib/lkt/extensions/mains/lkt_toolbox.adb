@@ -41,6 +41,13 @@ procedure Lkt_Toolbox is
          Long   => "--check-only",
          Help   => "Only output the errors");
 
+      package Flag_Invalid is new Parse_Flag
+        (Parser => Parser,
+         Short  => "-I",
+         Long   => "--check-invalid-decls",
+         Help   => "Flag decls that generate errors that are not annotated"
+                   & " with the @invalid annotation. Also flag decls"
+                   & " annotated with @invalid that don't trigger any errors");
    end Arg;
 
    use Liblktlang;
@@ -116,17 +123,19 @@ procedure Lkt_Toolbox is
               (Node.Sloc_Range,
                To_Unbounded_Text (Analysis.Error_Message (S)));
          begin
-            --  Emit an error if the declaration including ``Node`` has no
-            --  ``@invalid`` annotation. Update ``Invalid_Decl_Map`` otherwise.
+            if Arg.Flag_Invalid.Get then
+               --  Emit an error if the declaration including ``Node`` has no
+               --  ``@invalid`` annotation. Update ``Invalid_Decl_Map``
+               --  otherwise.
+               if Node.P_Topmost_Invalid_Decl.Is_Null then
+                  Set_Exit_Status (1);
 
-            if Node.P_Topmost_Invalid_Decl.Is_Null then
-               Set_Exit_Status (1);
-
-               Print_Lkt_Toolbox_Diagnostic
-                 (Node,
-                  "unexpected diagnostic, is @invalid annotation missing?");
-            else
-               Invalid_Decl_Map (Node.P_Topmost_Invalid_Decl) := True;
+                  Print_Lkt_Toolbox_Diagnostic
+                    (Node,
+                     "unexpected diagnostic, is @invalid annotation missing?");
+               else
+                  Invalid_Decl_Map (Node.P_Topmost_Invalid_Decl) := True;
+               end if;
             end if;
 
             Print_Diagnostic
@@ -204,7 +213,9 @@ begin
                return;
             end if;
 
-            Unit.Root.Traverse (Populate_Invalid_Decl_Map'Access);
+            if Arg.Flag_Invalid.Get then
+               Unit.Root.Traverse (Populate_Invalid_Decl_Map'Access);
+            end if;
 
             declare
                Diags : constant Analysis.Tree_Semantic_Result :=
@@ -215,18 +226,22 @@ begin
                end loop;
             end;
 
-            --  Ensure that all ``@invalid`` declarations in the map have been
-            --  reported. Print a diagnostic otherwise.
+            if Arg.Flag_Invalid.Get then
 
-            for E in Invalid_Decl_Map.Iterate loop
-               if not Invalid_Decl_Maps.Element (E) then
-                  Set_Exit_Status (1);
+               --  Ensure that all ``@invalid`` declarations in the map have
+               --  corresponding diagnostics. Otherwise, emit an error.
 
-                  Print_Lkt_Toolbox_Diagnostic
-                    (Invalid_Decl_Maps.Key (E),
-                     "@invalid declaration without diagnostic");
-               end if;
-            end loop;
+               for E in Invalid_Decl_Map.Iterate loop
+                  if not Invalid_Decl_Maps.Element (E) then
+                     Set_Exit_Status (1);
+
+                     Print_Lkt_Toolbox_Diagnostic
+                       (Invalid_Decl_Maps.Key (E),
+                        "@invalid declaration without diagnostic");
+                  end if;
+               end loop;
+
+            end if;
 
          end;
       end loop;
