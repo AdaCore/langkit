@@ -422,7 +422,7 @@ class LktNode(ASTNode):
     @langkit_property(return_type=T.SemanticResult.array, memoized=True)
     def check_correctness_post():
         """
-        Custom hook to implement legality checks for a given node that can
+        Custom hook to implement checks for a given node that can
         run after type resolution. If no errors, returns a null array.
         """
         return No(T.SemanticResult.array)
@@ -430,11 +430,15 @@ class LktNode(ASTNode):
     @langkit_property(return_type=T.SemanticResult.array, memoized=True)
     def check_correctness_pre():
         """
-        Custom hook to implement legality checks for a given node that need to
-        run *before* type resolution. If no errors, returns a null array.
+        Custom hook to implement checks for a given node that need to run
+        *before* type resolution. If no errors, returns a null array.
 
-        .. WARNING: This must *not* raise exceptions, so must make sure that
+        .. WARNING:: This must *not* raise exceptions, so must make sure that
             any queried semantic results are queried in a safe fashion.
+
+            In general **ONLY USE THIS FOR CHECKS THAT SHOULD RUN BEFORE NAME
+            AND TYPE RESOLUTION**, i.e. checks that if they're not made will
+            make type resolution crash.
         """
         return No(T.SemanticResult.array)
 
@@ -2454,7 +2458,7 @@ class SimpleTypeRef(TypeRef):
         return d.result_ref.then(
             lambda d: d.match(
                 # The type ref references a type decl: return no error if it
-                # doesn't references a PropertyError.
+                # doesn't reference a PropertyError.
                 lambda td=T.TypeDecl: If(
                     td == Entity.property_error_type,
                     [Entity.error(
