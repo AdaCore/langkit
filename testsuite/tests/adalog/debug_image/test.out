@@ -5,11 +5,11 @@ Solving with new solver
 
 Solving relation:
 All:
-    %X <-> %Y main.adb:30
-    Any: main.adb:30
-        1 -> %X main.adb:30
-        2 -> %X main.adb:30
-        3 -> %X main.adb:30
+    %X <-> %Y main.adb:28
+    Any: main.adb:28
+        1 -> %X main.adb:28
+        2 -> %X main.adb:28
+        3 -> %X main.adb:28
 
 
 ... without optimizations:
@@ -25,22 +25,22 @@ Solution: [%Y = 3, %X = 3]
 ========================================================================
 
 Solving relation:
-All: main.adb:36
-    Any: main.adb:34
-        1 -> %X main.adb:34
-        2 -> %X main.adb:34
-        3 -> %X main.adb:34
+All: main.adb:34
+    Any: main.adb:32
+        1 -> %X main.adb:32
+        2 -> %X main.adb:32
+        3 -> %X main.adb:32
 
-    Any: main.adb:35
+    Any: main.adb:33
         10 -> %X
         20 -> %X
-        Is_Even?(%Y) main.adb:35
+        Is_Even?(%Y) main.adb:33
 
-    Any: main.adb:36
-        1 -> %Y main.adb:36
-        3 -> %Y main.adb:36
-        5 -> %Y main.adb:36
-        10 -> %Y main.adb:36
+    Any: main.adb:34
+        1 -> %Y main.adb:34
+        3 -> %Y main.adb:34
+        5 -> %Y main.adb:34
+        10 -> %Y main.adb:34
 
 
 ... without optimizations:
@@ -56,12 +56,12 @@ Solution: [%Y = 10, %X = 3]
 ========================================================================
 
 Solving relation:
-All: main.adb:40
-    Is_Even?(%Y) main.adb:40
-    Any: main.adb:40
-        1 -> %X main.adb:40
-        2 -> %X main.adb:40
-        3 -> %X main.adb:40
+All: main.adb:38
+    Is_Even?(%Y) main.adb:38
+    Any: main.adb:38
+        1 -> %X main.adb:38
+        2 -> %X main.adb:38
+        3 -> %X main.adb:38
 
 
 ... without optimizations:
@@ -71,9 +71,9 @@ All: main.adb:40
 ========================================================================
 
 Solving relation:
-All: main.adb:44
-    Is_Even?(%Y) main.adb:44
-    Is_Even?(%X) main.adb:44
+All: main.adb:42
+    Is_Even?(%Y) main.adb:42
+    Is_Even?(%X) main.adb:42
 
 ... without optimizations:
 
@@ -82,10 +82,10 @@ All: main.adb:44
 ========================================================================
 
 Solving relation:
-Any: main.adb:47
-    Is_Even?(%Y) main.adb:47
-    1 -> %X main.adb:47
-    2 -> %X main.adb:47
+Any: main.adb:45
+    Is_Even?(%Y) main.adb:45
+    1 -> %X main.adb:45
+    2 -> %X main.adb:45
 
 ... without optimizations:
 Solution: [%Y = <undefined>, %X = 1]
@@ -98,26 +98,26 @@ Solution: [%Y = <undefined>, %X = 2]
 ========================================================================
 
 Solving relation:
-Any: main.adb:50
+Any: main.adb:48
+    Is_Even?(%X) main.adb:48
+    Is_Even?(%Y) main.adb:48
+
+... without optimizations:
+
+... cut dead branches:
+
+========================================================================
+
+Solving relation:
+Any: main.adb:51
     Is_Even?(%X) main.adb:50
-    Is_Even?(%Y) main.adb:50
+    All: main.adb:51
+        Any: main.adb:51
+            1 -> %X main.adb:51
+            2 -> %X main.adb:51
+            3 -> %X main.adb:51
 
-... without optimizations:
-
-... cut dead branches:
-
-========================================================================
-
-Solving relation:
-Any: main.adb:53
-    Is_Even?(%X) main.adb:52
-    All: main.adb:53
-        Any: main.adb:53
-            1 -> %X main.adb:53
-            2 -> %X main.adb:53
-            3 -> %X main.adb:53
-
-        Is_Even?(%Y) main.adb:53
+        Is_Even?(%Y) main.adb:51
 
 
 ... without optimizations:
@@ -127,15 +127,15 @@ Any: main.adb:53
 ========================================================================
 
 Solving relation:
-All: main.adb:58
-    Any: main.adb:55
-        1 -> %X main.adb:55
-        2 -> %X main.adb:55
-        3 -> %X main.adb:55
+All: main.adb:56
+    Any: main.adb:53
+        1 -> %X main.adb:53
+        2 -> %X main.adb:53
+        3 -> %X main.adb:53
 
-    Is_Even?(%Y) main.adb:56
-    2 -> %X main.adb:57
-    %X <-> %Y main.adb:58
+    Is_Even?(%Y) main.adb:54
+    2 -> %X main.adb:55
+    %X <-> %Y main.adb:56
 
 ... without optimizations:
 Solution: [%Y = 2, %X = 2]
@@ -151,7 +151,7 @@ Solving with old solver
 
 Solving relation:
 <All>:
-| | Bind %X <=> %Y main.adb:30
+| | Bind %X <=> %Y main.adb:28
 | | Member %X {1, 2, 3}
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
@@ -160,9 +160,9 @@ Solution: [%X = 3, %Y = 3]
 ========================================================================
 
 Solving relation:
-<All> main.adb:36:
+<All> main.adb:34:
 | | Member %X {1, 2, 3}
-| | <Any> main.adb:35:
+| | <Any> main.adb:33:
 | | | | Member %X {10, 20}
 | | | | Predicate Is_Even on %Y
 | | Member %Y {1, 3, 5, 10}
@@ -173,7 +173,7 @@ Solution: [%X = 3, %Y = 10]
 ========================================================================
 
 Solving relation:
-<All> main.adb:40:
+<All> main.adb:38:
 | | Predicate Is_Even on %Y
 | | Member %X {1, 2, 3}
 Resolution failed with Early_Binding_Error
