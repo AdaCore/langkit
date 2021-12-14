@@ -868,6 +868,10 @@ class Expr(LktNode):
             Entity.is_a(T.DefId),
             Entity.in_decl_annotation,
             Entity.in_grammar_rule,
+
+            # Module references are not runtime expressions
+            Entity.is_a(T.ModuleRefId),
+
             # TODO: Implement function types
             Entity.referenced_decl.result_ref.is_a(T.TypeDecl, T.GenericDecl)
         ))
@@ -1410,15 +1414,13 @@ class RefId(Id):
         )
 
 
-class ModuleRefId(RefId):
+class ModuleRefId(Id):
     """
     Id referencing a langkit module.
     """
     # TODO: Being able to cross-reference modules seems like a good ability,
     # but for the moment they don't fit in the framework, because they're not
     # decls.
-    referenced_decl = Property(No(SemanticResult))
-    expr_type = Property(No(SemanticResult))
 
 
 class TokenLit(GrammarExpr):
