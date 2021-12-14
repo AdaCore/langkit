@@ -86,23 +86,22 @@ Id   <RefId "Children" test.lkt:9:20-9:28>
 Expr <CastExpr test.lkt:9:15-9:29>
      has type <ClassDecl "Children" test.lkt:3:1-3:49>
 
-Id   <RefId "Int" test.lkt:10:13-10:16>
-     references <StructDecl prelude: "Int">
-
-Id   <RefId "b" test.lkt:10:19-10:20>
-     references <FieldDecl "b" test.lkt:6:1-6:31>
-
-Expr <RefId "b" test.lkt:10:19-10:20>
-     has type <ClassDecl "ChildNode" test.lkt:2:1-2:30>
-
-Id   <RefId "Children" test.lkt:10:24-10:32>
+Id   <RefId "Children" test.lkt:10:13-10:21>
      references <ClassDecl "Children" test.lkt:3:1-3:49>
 
-test.lkt:10:19: error: Mismatched types: expected `Int`, got `Children`
-10 | @invalid f: Int = b.as[Children]
-   |                   ^^^^^^^^^^^^^^
+Id   <RefId "b" test.lkt:10:24-10:25>
+     references <FieldDecl "b" test.lkt:6:1-6:31>
 
-test.lkt:10:19: error: Invalid cast: only up/down casting allowed
-10 | @invalid f: Int = b.as[Children]
-   |                   ^^^^^^^^^^^^^^
+Expr <RefId "b" test.lkt:10:24-10:25>
+     has type <ClassDecl "ChildNode" test.lkt:2:1-2:30>
+
+Id   <RefId "Children" test.lkt:10:29-10:37>
+     references <ClassDecl "Children" test.lkt:3:1-3:49>
+
+Expr <CastExpr test.lkt:10:24-10:38>
+     has type <ClassDecl "Children" test.lkt:3:1-3:49>
+
+test.lkt:10:24: error: Invalid cast: only up/down casting allowed
+10 | @invalid f: Children = b.as[Children]
+   |                        ^^^^^^^^^^^^^^
 

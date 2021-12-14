@@ -219,7 +219,7 @@ begin
 
             declare
                Diags : constant Analysis.Tree_Semantic_Result :=
-                 Unit.Root.P_Check_Semantic;
+                 Unit.Root.As_Langkit_Root.P_Check_Semantic;
             begin
                for D of Analysis.Results (Diags) loop
                   Print_Semantic_Result (D, Unit);

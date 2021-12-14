@@ -135,6 +135,24 @@ class LktNode(ASTNode):
     Root node class for lkt AST nodes.
     """
 
+    @langkit_property()
+    def concat_tree_semantic_results(res=T.TreeSemanticResult.array):
+        """
+        Static method. Concatenate an array of ``TreeSemanticResult``s into a
+        new ``TreeSemanticResult``.
+        """
+        return T.TreeSemanticResult.new(
+            results=res.mapcat(lambda r: r.results),
+            has_error=res.any(lambda r: r.has_error)
+        )
+
+    @langkit_property()
+    def new_tree_semantic_result(elements=T.SemanticResult.array):
+        return T.TreeSemanticResult.new(
+            results=elements,
+            has_error=elements.any(lambda e: e.has_error)
+        )
+
     @langkit_property(return_type=T.Decl.entity)
     def root_get(entity_name=T.Symbol):
         return Self.unit.root.node_env.get_first(
@@ -332,42 +350,19 @@ class LktNode(ASTNode):
             S("`").concat(got.full_name).concat(S("`"))
         )
 
-    @langkit_property(return_type=T.TreeSemanticResult, public=True)
-    def check_semantic():
+    @langkit_property(return_type=T.SemanticResult.array)
+    def check_legality_visitor():
         """
-        Run name and type resolution on all relevant entities in this subtree,
-        aggregating and returning the results.
-
-        If you ran this and the result's `has_error` flag is false, then you
-        *know* that you can call semantic properties such as `referenced_decl`
-        and `expr_type`, and those will never raise.
+        Recursively visit this subtree, calling check_legality on each node and
+        accumulating the results.
         """
-        res = Var(Entity.check_sem_internal())
-
-        # Crude sanity check: since for the moment the Try blocks in
-        # check_sem_internal will catch any exception happening in subcalls to
-        # semantic properties, we want to check that, if we have internal
-        # errors, we also have user errors (i.e. diagnostics). If we have an
-        # internal error and no user errors, then we caught something we were
-        # not supposed to.
-        #
-        # TODO: Assess whether this is still needed when we migrate to a better
-        # error handling mechanism (see check_semantic_impl).
-
-        errs = Var(res.results.filter(lambda r: r.has_error))
-        diags = Var(errs.filter(lambda r: Not(r.error_message.is_null)))
-
-        has_internal_errors = Var(errs.any(lambda r: r.error_message.is_null))
-
-        return If(
-            has_internal_errors & (diags.length == 0),
-            PropertyError(T.TreeSemanticResult,
-                          "ERROR: internal errors without diagnostics"),
-            res
+        own_results = Var(Entity.check_legality())
+        return own_results.concat(
+            Entity.children.mapcat(lambda c: c._.check_legality_visitor())
         )
 
     @langkit_property(return_type=T.TreeSemanticResult)
-    def check_sem_internal(
+    def check_sem_recursive(
         exempted_nodes=(T.LktNode.array, No(T.LktNode.array))
     ):
         """
@@ -393,37 +388,33 @@ class LktNode(ASTNode):
                 # rely on the fact that the set of diagnostics is probably
                 # small. To be verified.
                 exemptions.find(lambda n: n == child.node).is_null,
-                child._.check_sem_internal(exemptions),
+                child._.check_sem_recursive(exemptions),
                 No(T.TreeSemanticResult)
             ))
-        ))
-
-        # Aggregate the arrays of results for every child of this node
-        aggregated_results = Var(children_results.mapcat(
-            lambda res: res.results
-        ))
+        ).mapcat(lambda res: res.results))
 
         own_results = Var(Entity.check_semantic_impl())
 
-        post_diagnostics = Var(Entity.check_correctness_post())
-
         all_diagnostics = (
             pre_diagnostics
-            .concat(aggregated_results)
+            .concat(children_results)
             .concat(own_results.results)
-            .concat(post_diagnostics)
         )
 
-        return TreeSemanticResult.new(
-            results=all_diagnostics,
-            has_error=all_diagnostics.any(lambda d: d.has_error),
-        )
+        return Entity.new_tree_semantic_result(all_diagnostics)
 
     @langkit_property(return_type=T.SemanticResult.array, memoized=True)
-    def check_correctness_post():
+    def check_legality():
         """
-        Custom hook to implement checks for a given node that can
-        run after type resolution. If no errors, returns a null array.
+        Method meant to be overriden in subclasses, that will run legality
+        checks for this node. Legality checks are checks that will be ran
+        *after* name and type resolution, and that:
+
+        1. Generally assume name and type resolution ran well.
+        2. Check higher level legality rules/invariants.
+
+        .. ATTENTION: By default, always try to put new checks in
+            ``check_legality``.
         """
         return No(T.SemanticResult.array)
 
@@ -482,12 +473,7 @@ class LktNode(ASTNode):
             lambda _: No(T.SemanticResult.array)
         ))
 
-        return TreeSemanticResult.new(
-            results=results,
-            # If there is an error in any of the results, has_error will be
-            # true.
-            has_error=results.any(lambda r: r.has_error)
-        )
+        return Entity.new_tree_semantic_result(results)
 
     @langkit_property(return_type=T.LktNode.entity)
     def first_no_paren_parent():
@@ -572,6 +558,56 @@ class LangkitRoot(LktNode):
 
     env_spec = EnvSpec(do(Self.fetch_prelude))
 
+    @langkit_property(return_type=T.TreeSemanticResult, public=True)
+    def check_semantic():
+        """
+        Check the semantics for this Langkit compilation unit.
+
+        Practically this will:
+
+        * Check imports (load their sources and verify that they exist)
+        * Run name and type resolution (+ legality checks if those completed
+          successfully) on all declarations, aggregating and returning the
+          results.
+
+        If you ran this property on this unit, and the result's ``has_error``
+        flag is false, then you know that you can call semantic properties such
+        as ``referenced_decl`` and ``expr_type``, and those will never raise.
+        """
+        res = Var(Entity.concat_tree_semantic_results(
+            Entity.decls.map(lambda d: d.check_decl).concat([
+                Entity.new_tree_semantic_result(
+                    Entity.imports.map(lambda i: i.check_import)
+                )
+            ])
+        ))
+
+        # Crude sanity check: since for the moment the Try blocks in
+        # check_sem_recursive will catch any exception happening in subcalls to
+        # semantic properties, we want to check that, if we have internal
+        # errors, we also have user errors (i.e. diagnostics). If we have an
+        # internal error and no user errors, then we caught something we were
+        # not supposed to.
+        #
+        # TODO: Assess whether this is still needed when we migrate to a better
+        # error handling mechanism (see check_semantic_impl).
+
+        errs = Var(res.results.filter(lambda r: r.has_error))
+        diags = Var(errs.filter(lambda r: Not(r.error_message.is_null)))
+
+        has_internal_errors = Var(errs.any(lambda r: r.error_message.is_null))
+
+        return If(
+
+            # If we have internal errors but no diagnostics, raise an error to
+            # the toplevel.
+            has_internal_errors & (diags.length == 0),
+            PropertyError(T.TreeSemanticResult,
+                          "ERROR: internal errors without diagnostics"),
+
+            res,
+        )
+
 
 class Import(LktNode):
     """
@@ -587,12 +623,12 @@ class Import(LktNode):
         """
         return Self.internal_fetch_referenced_unit(Self.name.text)
 
-    @langkit_property(return_type=T.SemanticResult.array)
-    def check_correctness_pre():
+    @langkit_property(return_type=T.SemanticResult)
+    def check_import():
         return If(
             Self.referenced_unit.root.is_null,
-            Entity.error(S("cannot find ").concat(Self.name.text)).singleton,
-            No(T.SemanticResult.array)
+            Entity.error(S("cannot find ").concat(Self.name.text)),
+            No(T.SemanticResult)
         )
 
     env_spec = EnvSpec(
@@ -623,6 +659,30 @@ class FullDecl(LktNode):
         """
         return Self.decl_annotations.find(
             lambda ann: ann.name.symbol == name
+        )
+
+    @langkit_property(return_type=T.TreeSemanticResult, public=True)
+    def check_decl():
+        """
+        Run name and type resolution on all relevant entities in this decl,
+        aggregating and returning the results. If there were no errors in name
+        and type resolution, then also run legality checks.
+        """
+        res = Var(Entity.check_sem_recursive())
+
+        return If(
+            # If we have errors, return the current results
+            res.has_error,
+            res,
+
+            # If we have only correct results, we can run the legality checking
+            # phase.
+            Entity.concat_tree_semantic_results([
+                res,
+                Entity.new_tree_semantic_result(
+                    Entity.check_legality_visitor()
+                )
+            ])
         )
 
 
@@ -2608,7 +2668,7 @@ class CastExpr(Expr):
     expr_context_free_type = Property(Entity.dest_type.designated_type)
 
     @langkit_property(return_type=T.SemanticResult.array)
-    def check_correctness_post():
+    def check_legality():
         expr_type = Var(Entity.expr.check_expr_type)
         dest_type = Var(Entity.expr_context_free_type)
         return If(
