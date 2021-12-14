@@ -7,9 +7,9 @@ Solving relation:
 All:
     %X <-> %Y main.adb:28
     Any: main.adb:28
-        1 -> %X main.adb:28
-        2 -> %X main.adb:28
-        3 -> %X main.adb:28
+        %X <- 1 main.adb:28
+        %X <- 2 main.adb:28
+        %X <- 3 main.adb:28
 
 
 ... without optimizations:
@@ -27,20 +27,20 @@ Solution: [%Y = 3, %X = 3]
 Solving relation:
 All: main.adb:34
     Any: main.adb:32
-        1 -> %X main.adb:32
-        2 -> %X main.adb:32
-        3 -> %X main.adb:32
+        %X <- 1 main.adb:32
+        %X <- 2 main.adb:32
+        %X <- 3 main.adb:32
 
     Any: main.adb:33
-        10 -> %X
-        20 -> %X
+        %X <- 10
+        %X <- 20
         Is_Even?(%Y) main.adb:33
 
     Any: main.adb:34
-        1 -> %Y main.adb:34
-        3 -> %Y main.adb:34
-        5 -> %Y main.adb:34
-        10 -> %Y main.adb:34
+        %Y <- 1 main.adb:34
+        %Y <- 3 main.adb:34
+        %Y <- 5 main.adb:34
+        %Y <- 10 main.adb:34
 
 
 ... without optimizations:
@@ -59,9 +59,9 @@ Solving relation:
 All: main.adb:38
     Is_Even?(%Y) main.adb:38
     Any: main.adb:38
-        1 -> %X main.adb:38
-        2 -> %X main.adb:38
-        3 -> %X main.adb:38
+        %X <- 1 main.adb:38
+        %X <- 2 main.adb:38
+        %X <- 3 main.adb:38
 
 
 ... without optimizations:
@@ -84,8 +84,8 @@ All: main.adb:42
 Solving relation:
 Any: main.adb:45
     Is_Even?(%Y) main.adb:45
-    1 -> %X main.adb:45
-    2 -> %X main.adb:45
+    %X <- 1 main.adb:45
+    %X <- 2 main.adb:45
 
 ... without optimizations:
 Solution: [%Y = <undefined>, %X = 1]
@@ -113,9 +113,9 @@ Any: main.adb:51
     Is_Even?(%X) main.adb:50
     All: main.adb:51
         Any: main.adb:51
-            1 -> %X main.adb:51
-            2 -> %X main.adb:51
-            3 -> %X main.adb:51
+            %X <- 1 main.adb:51
+            %X <- 2 main.adb:51
+            %X <- 3 main.adb:51
 
         Is_Even?(%Y) main.adb:51
 
@@ -129,12 +129,12 @@ Any: main.adb:51
 Solving relation:
 All: main.adb:56
     Any: main.adb:53
-        1 -> %X main.adb:53
-        2 -> %X main.adb:53
-        3 -> %X main.adb:53
+        %X <- 1 main.adb:53
+        %X <- 2 main.adb:53
+        %X <- 3 main.adb:53
 
     Is_Even?(%Y) main.adb:54
-    2 -> %X main.adb:55
+    %X <- 2 main.adb:55
     %X <-> %Y main.adb:56
 
 ... without optimizations:

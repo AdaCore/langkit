@@ -4,18 +4,18 @@ Solving with new solver
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
-        4 -> %X
-        5 -> %X
-        6 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
+        %X <- 4
+        %X <- 5
+        %X <- 6
 
-    *3(%X) -> %Y
+    %Y <- *3(%X)
     Is_Even?(%X)
     Any:
-        12 -> %Y
-        18 -> %Y
+        %Y <- 12
+        %Y <- 18
 
 
 ... without optimizations:

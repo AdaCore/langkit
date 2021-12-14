@@ -5,20 +5,20 @@ Solving relation:
 All:
     Double_Of?(%X, %Y)
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
-        4 -> %X
-        5 -> %X
-        6 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
+        %X <- 4
+        %X <- 5
+        %X <- 6
 
     Any:
-        1 -> %Y
-        2 -> %Y
-        3 -> %Y
-        4 -> %Y
-        5 -> %Y
-        6 -> %Y
+        %Y <- 1
+        %Y <- 2
+        %Y <- 3
+        %Y <- 4
+        %Y <- 5
+        %Y <- 6
 
 
 ... without optimizations:

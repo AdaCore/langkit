@@ -3,14 +3,14 @@ Solving with new solver
 
 Solving relation:
 Any:
-    1 -> %X
-    2 -> %X
-    3 -> %X
-    4 -> %X
-    5 -> %X
-    6 -> %X
-    7 -> %X
-    8 -> %X
+    %X <- 1
+    %X <- 2
+    %X <- 3
+    %X <- 4
+    %X <- 5
+    %X <- 6
+    %X <- 7
+    %X <- 8
 
 ... without optimizations:
 Solution: [%X = 1]
@@ -35,18 +35,18 @@ Solution: [%X = 8]
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
-        4 -> %X
-        5 -> %X
-        6 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
+        %X <- 4
+        %X <- 5
+        %X <- 6
 
     %X <-> %Y
     Any:
-        3 -> %Y
-        2 -> %Y
-        1 -> %Y
+        %Y <- 3
+        %Y <- 2
+        %Y <- 1
 
 
 ... without optimizations:

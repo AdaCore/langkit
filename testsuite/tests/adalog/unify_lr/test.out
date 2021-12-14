@@ -6,12 +6,12 @@ Solving with new solver
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
+        %X <- 1
+        %X <- 2
 
     Any:
-        2 -> %Y
-        3 -> %Y
+        %Y <- 2
+        %Y <- 3
 
     %X <-> %Y
 
@@ -26,8 +26,8 @@ Solution: [%Y = 2, %X = 2]
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
+        %X <- 1
+        %X <- 2
 
     %X <-> %Y
 
@@ -44,8 +44,8 @@ Solution: [%Y = 2, %X = 2]
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
+        %X <- 1
+        %X <- 2
 
     %Y <-> %X
 
@@ -62,8 +62,8 @@ Solution: [%X = 2, %Y = 2]
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
+        %X <- 1
+        %X <- 2
 
     Is_Even?(%Y)
     %X <-> %Y
@@ -79,8 +79,8 @@ Solution: [%Y = 2, %X = 2]
 Solving relation:
 All:
     Any:
-        1 -> %Y
-        2 -> %Y
+        %Y <- 1
+        %Y <- 2
 
     Is_Even?(%X)
     %X <-> %Y

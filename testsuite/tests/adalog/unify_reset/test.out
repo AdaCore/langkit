@@ -5,12 +5,12 @@ Solving relation:
 Any:
     All:
         %X <-> %Y
-        1 -> %X
-        1 -> %Y
+        %X <- 1
+        %Y <- 1
 
     All:
-        3 -> %X
-        12 -> %Y
+        %X <- 3
+        %Y <- 12
 
 
 ... without optimizations:

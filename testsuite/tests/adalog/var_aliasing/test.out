@@ -5,25 +5,25 @@ Solving relation:
 All:
     Any:
         All:
-            12 -> %X
-            15 -> %Y
+            %X <- 12
+            %Y <- 15
 
         All:
-            18 -> %X
+            %X <- 18
             %X <-> %Y
 
         All:
-            2 -> %X
-            3 -> %Y
+            %X <- 2
+            %Y <- 3
             %X <-> %Y
 
 
     Any:
-        15 -> %Y
-        16 -> %Y
-        16 -> %Y
-        18 -> %Y
-        19 -> %Y
+        %Y <- 15
+        %Y <- 16
+        %Y <- 16
+        %Y <- 18
+        %Y <- 19
 
 
 ... without optimizations:

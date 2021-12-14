@@ -3,8 +3,8 @@ Solving with new solver
 
 Solving relation:
 All:
-    2 -> %X
-    1 -> %Y
+    %X <- 2
+    %Y <- 1
     Is_Double_Of?(%X, %Y)
 
 ... without optimizations:

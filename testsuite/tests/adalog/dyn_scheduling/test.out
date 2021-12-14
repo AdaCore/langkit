@@ -7,9 +7,9 @@ Solving relation:
 All:
     %X <-> %Y
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
 
 
 ... without optimizations:
@@ -27,20 +27,20 @@ Solution: [%Y = 3, %X = 3]
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
 
     Any:
-        10 -> %X
-        20 -> %X
+        %X <- 10
+        %X <- 20
         Is_Even?(%Y)
 
     Any:
-        1 -> %Y
-        3 -> %Y
-        5 -> %Y
-        10 -> %Y
+        %Y <- 1
+        %Y <- 3
+        %Y <- 5
+        %Y <- 10
 
 
 ... without optimizations:
@@ -59,9 +59,9 @@ Solving relation:
 All:
     Is_Even?(%Y)
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
 
 
 ... without optimizations:
@@ -84,8 +84,8 @@ All:
 Solving relation:
 Any:
     Is_Even?(%Y)
-    1 -> %X
-    2 -> %X
+    %X <- 1
+    %X <- 2
 
 ... without optimizations:
 Solution: [%Y = <undefined>, %X = 1]
@@ -113,9 +113,9 @@ Any:
     Is_Even?(%X)
     All:
         Any:
-            1 -> %X
-            2 -> %X
-            3 -> %X
+            %X <- 1
+            %X <- 2
+            %X <- 3
 
         Is_Even?(%Y)
 
@@ -129,12 +129,12 @@ Any:
 Solving relation:
 All:
     Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
+        %X <- 1
+        %X <- 2
+        %X <- 3
 
     Is_Even?(%Y)
-    2 -> %X
+    %X <- 2
     %X <-> %Y
 
 ... without optimizations:

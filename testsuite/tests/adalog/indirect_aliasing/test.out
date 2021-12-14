@@ -4,9 +4,9 @@ Solving with new solver
 Solving relation:
 All:
     %X <-> %Y
-    2 -> %Y_Ind
+    %Y_Ind <- 2
     %Y <-> %Y_Ind
-    1 -> %Expr
+    %Expr <- 1
     %X <-> %Expr
 
 ... without optimizations:
