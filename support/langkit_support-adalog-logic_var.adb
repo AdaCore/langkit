@@ -21,17 +21,17 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Unchecked_Deallocation;
+
 with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
-package body Langkit_Support.Adalog.Logic_Ref is
-
-   pragma Warnings (Off, "always False");
+package body Langkit_Support.Adalog.Logic_Var is
 
    -----------
    -- Reset --
    -----------
 
-   procedure Reset (Self : in out Var) is
+   procedure Reset (Self : Logic_Var) is
    begin
       Dec_Ref (Self.Value);
       Self.Reset := True;
@@ -41,21 +41,28 @@ package body Langkit_Support.Adalog.Logic_Ref is
    -- Is_Defined --
    ----------------
 
-   function Is_Defined (Self : Var) return Boolean is
+   function Is_Defined (Self : Logic_Var) return Boolean is
    begin
-      return not Self.Reset;
+      return (if Self.Aliased_To /= null
+              then Is_Defined (Self.Aliased_To)
+              else not Self.Reset);
    end Is_Defined;
 
    ---------------
    -- Set_Value --
    ---------------
 
-   procedure Set_Value (Self : in out Var; Data : Element_Type) is
+   procedure Set_Value (Self : Logic_Var; Data : Value_Type) is
    begin
+      if Self.Aliased_To /= null then
+         Set_Value (Self.Aliased_To, Data);
+         return;
+      end if;
+
       if Debug.Debug then
          Verbose_Trace.Trace ("Setting the value of " & Image (Self) & " to "
-                & Element_Image (Data));
-         Verbose_Trace.Trace ("Old value is " & Element_Image (Self.Value));
+                & Value_Image (Data));
+         Verbose_Trace.Trace ("Old value is " & Value_Image (Self.Value));
       end if;
 
       Dec_Ref (Self.Value);
@@ -68,68 +75,49 @@ package body Langkit_Support.Adalog.Logic_Ref is
    -- Get_Value --
    ---------------
 
-   function Get_Value (Self : Var) return Element_Type is
-   begin
-      Inc_Ref (Self.Value);
-      --  TODO??? We removed an assert about Self.Reset being False, because
-      --  we want to be able to access the variable even if the element is
-      --  unset, eg. null. However, we need to have a definite null value for
-      --  elements, which could even replace the Reset flag altogether maybe.
-      return Self.Value;
-   end Get_Value;
-
-   -----------
-   -- Reset --
-   -----------
-
-   procedure Reset (Self : Raw_Var) is
-   begin
-      Reset (Self.all);
-   end Reset;
-
-   ----------------
-   -- Is_Defined --
-   ----------------
-
-   function Is_Defined (Self : Raw_Var) return Boolean is
-   begin
-      --  TODO: This logic seems to be in the wrong place, this should be in
-      --  Is_Defined on Refs.
-      if Self.Aliased_To /= null then
-         return Is_Defined (Self.Aliased_To);
-      end if;
-      return Is_Defined (Self.all);
-   end Is_Defined;
-
-   ---------------
-   -- Set_Value --
-   ---------------
-
-   procedure Set_Value (Self : Raw_Var; Data : Element_Type) is
-   begin
-      if Self.Aliased_To /= null then
-         Set_Value (Self.Aliased_To, Data);
-      end if;
-      Set_Value (Self.all, Data);
-   end Set_Value;
-
-   ---------------
-   -- Get_Value --
-   ---------------
-
-   function Get_Value (Self : Raw_Var) return Element_Type is
+   function Get_Value (Self : Logic_Var) return Value_Type is
    begin
       if Self.Aliased_To /= null then
          return Get_Value (Self.Aliased_To);
       end if;
-      return Get_Value (Self.all);
+
+      Inc_Ref (Self.Value);
+
+      --  TODO??? We removed an assert about Self.Reset being False, because
+      --  we want to be able to access the variable even if the element is
+      --  unset, i.e. null. However, we need to have a definite null value for
+      --  elements, which could even replace the Reset flag altogether maybe.
+      return Self.Value;
    end Get_Value;
+
+   --------
+   -- Id --
+   --------
+
+   function Id (Self : Logic_Var) return Natural
+   is
+     (if Self.Aliased_To /= null then Id (Self.Aliased_To) else Self.Id);
+
+   ------------
+   -- Set_Id --
+   ------------
+
+   procedure Set_Id (Self : Logic_Var; Id : Natural)
+   is
+   begin
+      if Id = 0 then
+         Self.Aliased_To := null;
+      elsif Self.Aliased_To /= null then
+         Set_Id (Self.Aliased_To, Id);
+      end if;
+      Self.Id := Id;
+   end Set_Id;
 
    -----------
    -- Alias --
    -----------
 
-   procedure Alias (Self, To : Raw_Var) is
+   procedure Alias (Self, To : Logic_Var) is
    begin
       if To = Self or else To.Aliased_To = Self then
          return;
@@ -144,7 +132,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
    -- Unalias --
    -------------
 
-   procedure Unalias (Self : Raw_Var) is
+   procedure Unalias (Self : Logic_Var) is
    begin
       Self.Aliased_To := null;
    end Unalias;
@@ -153,53 +141,20 @@ package body Langkit_Support.Adalog.Logic_Ref is
    -- Alias --
    -----------
 
-   function Get_Alias (Self : Raw_Var) return Raw_Var is
+   function Get_Alias (Self : Logic_Var) return Logic_Var is
    begin
       return Self.Aliased_To;
    end Get_Alias;
-
-   ------------
-   -- Create --
-   ------------
-
-   function Create return Raw_Var is
-   begin
-      return new Var'(Reset => True, others => <>);
-   end Create;
-
-   --------
-   -- Id --
-   --------
-
-   function Id (Self : Raw_Var) return Natural
-   is
-     (if Self.Aliased_To /= null then Id (Self.Aliased_To) else Self.Id);
-
-   ------------
-   -- Set_Id --
-   ------------
-
-   procedure Set_Id (Self : Raw_Var; Id : Natural)
-   is
-   begin
-      if Id = 0 then
-         Self.Aliased_To := null;
-      elsif Self.Aliased_To /= null then
-         Set_Id (Self.Aliased_To, Id);
-      end if;
-      Self.Id := Id;
-   end Set_Id;
 
    -------------
    -- Destroy --
    -------------
 
-   procedure Destroy (Self : in out Var) is
-      procedure Destroy is new Ada.Unchecked_Deallocation
-        (String, String_Access);
+   procedure Destroy (Self : in out Logic_Var_Record) is
+      procedure Free is new Ada.Unchecked_Deallocation (String, String_Access);
    begin
       Dec_Ref (Self.Value);
-      Destroy (Self.Dbg_Name);
+      Free (Self.Dbg_Name);
    end Destroy;
 
-end Langkit_Support.Adalog.Logic_Ref;
+end Langkit_Support.Adalog.Logic_Var;

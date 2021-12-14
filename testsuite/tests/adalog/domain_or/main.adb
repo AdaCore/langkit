@@ -8,7 +8,7 @@ use Langkit_Support.Adalog.Main_Support;
 procedure Main is
    use T_Solver; use Refs;
 
-   X : constant Raw_Var := Create ("X");
+   X : constant Refs.Logic_Var := Create ("X");
    R : constant Relation :=
      "or" (Domain (X, (1, 2, 3)), Domain (X, (4, 5, 6)));
 begin

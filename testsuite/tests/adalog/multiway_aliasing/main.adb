@@ -7,14 +7,14 @@ procedure Main is
    use T_Solver;
    use Refs;
 
-   X : constant Raw_Var := Create("X");
-   Y : constant Raw_Var := Create("Y");
-   Z : constant Raw_Var := Create("Z");
-   A : constant Raw_Var := Create("A");
-   B : constant Raw_Var := Create("B");
-   C : constant Raw_Var := Create("C");
-   D : constant Raw_Var := Create("D");
-   E : constant Raw_Var := Create("E");
+   X : constant Refs.Logic_Var := Create("X");
+   Y : constant Refs.Logic_Var := Create("Y");
+   Z : constant Refs.Logic_Var := Create("Z");
+   A : constant Refs.Logic_Var := Create("A");
+   B : constant Refs.Logic_Var := Create("B");
+   C : constant Refs.Logic_Var := Create("C");
+   D : constant Refs.Logic_Var := Create("D");
+   E : constant Refs.Logic_Var := Create("E");
 
    R : constant Relation :=
        R_All ((X = Y,

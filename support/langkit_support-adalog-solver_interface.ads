@@ -27,12 +27,7 @@ generic
    with package Logic_Vars is new Langkit_Support.Adalog.Logic_Var (<>);
 package Langkit_Support.Adalog.Solver_Interface is
 
-   subtype Value_Type is Logic_Vars.Element_Type;
-
    use Logic_Vars;
-
-   subtype Value_Array is Logic_Vars.Val_Array;
-   subtype Variable_Array is Logic_Vars.Var_Array;
 
    -------------------
    -- Functor types --
@@ -61,7 +56,8 @@ package Langkit_Support.Adalog.Solver_Interface is
    function Call
      (Self : Predicate_Type; Val : Value_Type) return Boolean is abstract;
    function Image (Self : Predicate_Type) return String is ("");
-   function Full_Image (Self : Predicate_Type; Dummy_Var : Var) return String
+   function Full_Image
+     (Self : Predicate_Type; Dummy_Var : Logic_Vars.Logic_Var) return String
    is ("");
    --  A predicate encapsulates the logic of applying a boolean predicate to a
    --  value, returning whether the predicate succeeds.
@@ -72,11 +68,11 @@ package Langkit_Support.Adalog.Solver_Interface is
 
    type N_Predicate_Type is abstract new Base_Functor_Type with null record;
    function Call
-     (Self : N_Predicate_Type; Vals : Logic_Vars.Val_Array) return Boolean
+     (Self : N_Predicate_Type; Vals : Logic_Vars.Value_Array) return Boolean
    is abstract;
    function Image (Self : N_Predicate_Type) return String is ("");
    function Full_Image
-     (Self : N_Predicate_Type; Dummy_Vars : Var_Array) return String
+     (Self : N_Predicate_Type; Dummy_Vars : Logic_Var_Array) return String
    is ("");
    --  A predicate encapsulates the logic of applying a boolean predicate to a
    --  list of values, returning whether the predicate succeeds.

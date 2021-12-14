@@ -16,12 +16,12 @@ procedure Main is
 
    function Is_Even (Val : Integer) return Boolean is (Val mod 2 = 0);
 
-   function Is_Even (Var : Refs.Raw_Var; Dbg_String : String) return Relation
+   function Is_Even (Var : Refs.Logic_Var; Dbg_String : String) return Relation
    is (Predicate
         (Var, Predicate (Is_Even'Access, "Is_Even"), Dbg_String));
 
-   X : constant Refs.Raw_Var := Create ("X");
-   Y : constant Refs.Raw_Var := Create ("Y");
+   X : constant Refs.Logic_Var := Create ("X");
+   Y : constant Refs.Logic_Var := Create ("Y");
 
    Relations : constant array (Positive range <>) of Relation :=
 

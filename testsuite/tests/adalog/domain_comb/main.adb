@@ -8,7 +8,7 @@ procedure Main is
    use T_Solver;
    use Refs;
 
-   X : constant Refs.Raw_Var := Create ("X");
+   X : constant Refs.Logic_Var := Create ("X");
    R : constant Relation :=
      Domain (X, (1, 2, 3, 4, 5, 6)) and Domain (X, (3, 4, 5));
 begin

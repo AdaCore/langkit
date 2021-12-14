@@ -30,7 +30,9 @@ with Langkit_Support.Adalog.Pure_Relations;
 
 package body Langkit_Support.Adalog.Solver is
 
-   procedure Append_Var (Self : in out Relation; V : Var);
+   subtype Value_Type is Logic_Vars.Value_Type;
+
+   procedure Append_Var (Self : in out Relation; V : Logic_Var);
 
    type Default_Converter is null record;
    function Convert
@@ -143,7 +145,7 @@ package body Langkit_Support.Adalog.Solver is
 
    type N_Predicate_Access is access all Solver_Ifc.N_Predicate_Type'Class;
 
-   function Call (Self : N_Predicate_Access; Vals : Val_Array) return Boolean
+   function Call (Self : N_Predicate_Access; Vals : Value_Array) return Boolean
    is (Self.Call (Vals));
 
    function Image (Self : N_Predicate_Access) return String
@@ -222,7 +224,7 @@ package body Langkit_Support.Adalog.Solver is
    -- Append_Var --
    ----------------
 
-   procedure Append_Var (Self : in out Relation; V : Var) is
+   procedure Append_Var (Self : in out Relation; V : Logic_Var) is
    begin
       if Debug then
          if Self.Vars = null then
@@ -359,7 +361,7 @@ package body Langkit_Support.Adalog.Solver is
    ----------------------
 
    function Create_Predicate
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Pred         : Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation is
    begin
@@ -385,7 +387,7 @@ package body Langkit_Support.Adalog.Solver is
    ------------------------
 
    function Create_N_Predicate
-     (Logic_Vars   : Variable_Array;
+     (Logic_Vars   : Logic_Var_Array;
       Pred         : N_Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation
    is
@@ -414,7 +416,7 @@ package body Langkit_Support.Adalog.Solver is
    -------------------
 
    function Create_Assign
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Value        : Value_Type;
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class  := No_Comparer;
@@ -468,8 +470,8 @@ package body Langkit_Support.Adalog.Solver is
    ------------------
 
    function Create_Unify
-     (From, To : Var; Debug_String : String_Access := null) return Relation
-   is
+     (From, To     : Logic_Var;
+      Debug_String : String_Access := null) return Relation is
    begin
       case Global_Kind is
          when Symbolic =>
@@ -493,7 +495,7 @@ package body Langkit_Support.Adalog.Solver is
    ----------------------
 
    function Create_Propagate
-     (From, To     : Var;
+     (From, To     : Logic_Var;
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access       := null) return Relation
@@ -559,7 +561,8 @@ package body Langkit_Support.Adalog.Solver is
    -------------------
 
    function Create_Domain
-     (Logic_Var    : Var; Domain : Value_Array;
+     (Logic_Var    : Logic_Vars.Logic_Var;
+      Domain       : Value_Array;
       Debug_String : String_Access := null) return Relation is
    begin
       case Global_Kind is

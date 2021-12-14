@@ -8,11 +8,11 @@ procedure Main is
 
    use T_Solver, Refs, Solver_Ifc;
 
-   function Double_Of (Vals : Solver_Ifc.Value_Array) return Boolean
+   function Double_Of (Vals : Value_Array) return Boolean
    is (Vals (1) = Vals (2) * 2);
 
-   X : constant Raw_Var := Create ("X");
-   Y : constant Raw_Var := Create ("Y");
+   X : constant Refs.Logic_Var := Create ("X");
+   Y : constant Refs.Logic_Var := Create ("Y");
 
    R3   : constant Relation :=
      "and" (+Create_N_Predicate

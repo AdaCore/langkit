@@ -708,7 +708,7 @@ class ResetLogicVar(ResolvedExpression):
         return '\n'.join([
             '{pre}',
             '{var}.Value := No_Entity;',
-            'Entity_Vars.Reset ({var}.all);',
+            'Entity_Vars.Reset ({var});',
         ]).format(pre=self.logic_var_expr.render_pre(),
                   var=self.logic_var_expr.render_expr())
 

@@ -23,7 +23,7 @@ package Support is
       Image          => Image);
 
    function Is_Even
-     (Var : Eq_Int.Refs.Raw_Var) return access Base_Relation'Class
+     (Var : Eq_Int.Refs.Logic_Var) return access Base_Relation'Class
    is (Is_Even_Predicate.Create (Var, Is_Even_Pred));
 
 end Support;

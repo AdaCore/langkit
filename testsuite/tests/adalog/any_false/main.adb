@@ -9,7 +9,7 @@ procedure Main is
    use T_Solver;
    use Refs;
 
-   X : constant Refs.Raw_Var := Create ("X");
+   X : constant Refs.Logic_Var := Create ("X");
    R : constant Relation := R_Any ((Logic_False, X = 12));
 begin
    Solve_All (R);

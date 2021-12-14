@@ -9,7 +9,7 @@ procedure Main is
 
    use T_Solver, Refs, Solver_Ifc;
 
-   X : constant Raw_Var := Create ("X");
+   X : constant Refs.Logic_Var := Create ("X");
 
    function Is_Even (Val : Integer) return Boolean is (Val mod 2 = 0);
 

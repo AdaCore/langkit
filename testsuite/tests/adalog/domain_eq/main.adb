@@ -8,7 +8,7 @@ procedure Main is
    use Refs;
 begin
    declare
-      X : constant Raw_Var := Create ("X");
+      X : constant Refs.Logic_Var := Create ("X");
       R : constant Relation :=
         (Domain (X, (1, 2, 3, 4, 5, 6)) or X = 7 or X = 8);
    begin
@@ -16,8 +16,8 @@ begin
    end;
 
    declare
-      X : constant Raw_Var := Create ("X");
-      Y : constant Raw_Var := Create ("Y");
+      X : constant Refs.Logic_Var := Create ("X");
+      Y : constant Refs.Logic_Var := Create ("Y");
 
       X_Constraint : constant Relation :=
         X = 1 or X = 2 or X = 3 or X = 4 or X = 5 or X = 6;

@@ -9,7 +9,7 @@ use Langkit_Support.Adalog.Main_Support;
 procedure Main is
    use T_Solver; use Refs; use Solver_Ifc;
 
-   X : constant Raw_Var := Create ("X");
+   X : constant Refs.Logic_Var := Create ("X");
 
    function Is_Even (V : Integer) return Boolean is (V mod 2 = 0);
 

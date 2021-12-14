@@ -9,8 +9,8 @@ use Langkit_Support.Adalog.Main_Support;
 procedure Main is
    use T_Solver, Refs, Solver_Ifc;
 
-   X : constant Raw_Var := Create ("X");
-   Y : constant Raw_Var := Create ("Y");
+   X : constant Refs.Logic_Var := Create ("X");
+   Y : constant Refs.Logic_Var := Create ("Y");
 
    function Is_Even (V : Integer) return Boolean is (V mod 2 = 0);
    function Convert (I : Integer) return Integer is (I * 3);

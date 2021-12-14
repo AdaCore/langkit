@@ -85,7 +85,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Reserve ``N`` elements in ``V``, creating new lists for each new item
 
    function Create_Propagate
-     (From, To     : Var;
+     (From, To     : Logic_Var;
       Conv         : Converter_Access := null;
       Debug_String : String_Access := null) return Relation;
    --  Helper function to create a Propagate relation
@@ -100,7 +100,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
      (Self : Relation; Level : Natural := 0) return String;
    --  Internal image function for a relation
 
-   type Callback_Type is access function (Vars : Var_Array) return Boolean;
+   type Callback_Type is
+     access function (Vars : Logic_Var_Array) return Boolean;
    --  Callback to invoke when a valid solution has been found. Takes the logic
    --  variables involved in the relation in arguments, returns whether to
    --  continue the exploration of valid solutions.
@@ -210,7 +211,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    procedure Destroy (Ctx : in out Solving_Context);
    --  Destroy a solving context, and associated data
 
-   function Get_Id (Ctx : Solving_Context; Logic_Var : Var) return Positive;
+   function Get_Id
+     (Ctx : Solving_Context; Logic_Var : Logic_Vars.Logic_Var) return Positive;
    --  Get the id of variable ``Logic_Var`` in ``Ctx``.
    --
    --  TODO??? Due to Aliasing, a logic variable can have several ids.
@@ -324,7 +326,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -- Get_Id --
    ------------
 
-   function Get_Id (Ctx : Solving_Context; Logic_Var : Var) return Positive is
+   function Get_Id
+     (Ctx : Solving_Context; Logic_Var : Logic_Vars.Logic_Var) return Positive
+   is
    begin
       if Id (Logic_Var) = 0 then
          if Verbose_Trace.Is_Active then
@@ -572,7 +576,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                  Used_Var (Current_Atom);
                Used_Id        : constant Natural :=
                  (if Used_Logic_Var.Exists
-                  then (if Get_Alias (Used_Logic_Var.Logic_Var) /= No_Var
+                  then (if Get_Alias (Used_Logic_Var.Logic_Var) /= No_Logic_Var
                         then Get_Id (Ctx, Get_Alias (Used_Logic_Var.Logic_Var))
                         else Get_Id (Ctx, Used_Logic_Var.Logic_Var))
                   else 0);
@@ -734,7 +738,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             --  All atoms have correctly solved: we have found a solution: let
             --  the user defined callback know and decide if we should continue
             --  exploring the solution space.
-            return Cleanup (Ctx.Cb (Var_Array (Ctx.Vars.To_Array)));
+            return Cleanup (Ctx.Cb (Logic_Var_Array (Ctx.Vars.To_Array)));
          end;
       end Try_Solution;
 
@@ -1145,16 +1149,16 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       function Callback (Vars : Logic_Var_Array) return Boolean;
       --  Simple callback that will stop on first solution
 
-      type Var_Array_Access is access all Var_Array;
-      type Val_Array_Access is access all Val_Array;
+      type Var_Array_Access is access all Logic_Var_Array;
+      type Val_Array_Access is access all Value_Array;
 
       Last_Vars : Var_Array_Access := null;
       Last_Vals : Val_Array_Access := null;
 
       procedure Free is new Ada.Unchecked_Deallocation
-        (Var_Array, Var_Array_Access);
+        (Logic_Var_Array, Var_Array_Access);
       procedure Free is new Ada.Unchecked_Deallocation
-        (Val_Array, Val_Array_Access);
+        (Value_Array, Val_Array_Access);
 
       --------------
       -- Callback --
@@ -1163,8 +1167,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       function Callback (Vars : Logic_Var_Array) return Boolean is
       begin
          Ret := True;
-         Last_Vals := new Val_Array (Vars'Range);
-         Last_Vars := new Var_Array'(Vars);
+         Last_Vals := new Value_Array (Vars'Range);
+         Last_Vars := new Logic_Var_Array'(Vars);
          for I in  Vars'Range loop
             Last_Vals (I) := Get_Value (Vars (I));
          end loop;
@@ -1204,7 +1208,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    ----------------------
 
    function Create_Predicate
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Pred         : Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation is
    begin
@@ -1221,7 +1225,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    ----------------------
 
    function Create_N_Predicate
-     (Logic_Vars   : Variable_Array;
+     (Logic_Vars   : Logic_Var_Array;
       Pred         : N_Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation
    is
@@ -1242,7 +1246,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -------------------
 
    function Create_Assign
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Value        : Value_Type;
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class := No_Comparer;
@@ -1273,7 +1277,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    ------------------
 
    function Create_Unify
-     (Left, Right  : Var;
+     (Left, Right  : Logic_Var;
       Debug_String : String_Access := null) return Relation is
    begin
       return To_Relation
@@ -1286,7 +1290,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    ----------------------
 
    function Create_Propagate
-     (From, To     : Var;
+     (From, To     : Logic_Var;
       Conv         : Converter_Access := null;
       Debug_String : String_Access := null) return Relation is
    begin
@@ -1302,7 +1306,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    ----------------------
 
    function Create_Propagate
-     (From, To     : Var;
+     (From, To     : Logic_Var;
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation
@@ -1327,7 +1331,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -------------------
 
    function Create_Domain
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Domain       : Value_Array;
       Debug_String : String_Access := null) return Relation
    is
@@ -1564,12 +1568,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   return False;
                end if;
                if Solv_Trace.Active then
-                  Solv_Trace.Trace ("Var = " & Element_Image (Get_Value (V)));
+                  Solv_Trace.Trace ("Var = " & Value_Image (Get_Value (V)));
                end if;
             end loop;
 
             declare
-               Vals : Val_Array (1 .. Self.Vars.Length);
+               Vals : Value_Array (1 .. Self.Vars.Length);
             begin
                for I in Self.Vars.First_Index .. Self.Vars.Last_Index loop
                   Vals (I) := Get_Value (Self.Vars.Get (I));
@@ -1613,7 +1617,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
          when Assign =>
             return Prop_Image
-              (Image (Self.Target), Logic_Vars.Element_Image (Self.Val));
+              (Image (Self.Target), Logic_Vars.Value_Image (Self.Val));
 
          when Predicate =>
             declare
@@ -1628,7 +1632,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          when N_Predicate =>
             declare
                Full_Img : constant String :=
-                 Self.N_Pred.Full_Image (Var_Array (Self.Vars.To_Array));
+                 Self.N_Pred.Full_Image (Logic_Var_Array (Self.Vars.To_Array));
                Vars_Image : XString_Array (1 .. Self.Vars.Length);
             begin
                if Full_Img /= "" then

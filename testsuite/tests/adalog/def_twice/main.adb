@@ -9,7 +9,7 @@ procedure Main is
 
    function Is_Odd (V : Integer) return Boolean is (V mod 2 = 1);
 
-   X : constant Raw_Var := Create ("X");
+   X : constant Refs.Logic_Var := Create ("X");
    R : constant Relation := R_All
      ((Domain (X, (1, 2, 3, 4, 5, 6)),
        Assign (X, 1),

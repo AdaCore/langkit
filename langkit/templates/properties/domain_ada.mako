@@ -5,7 +5,7 @@ ${expr.logic_var_expr.render_pre()}
 
 declare
    Dom : ${expr.domain.type.name} := ${expr.domain.render_expr()};
-   A   : Solver_Ifc.Value_Array (1 .. Length (Dom));
+   A   : Entity_Vars.Value_Array (1 .. Length (Dom));
 begin
    for J in 0 .. Length (Dom) - 1 loop
       declare

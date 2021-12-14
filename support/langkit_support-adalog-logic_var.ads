@@ -21,83 +21,97 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-pragma Warnings (Off);
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
-
---  This package is meant to be used as a generic formal package, representing
---  the interface to a logic variable. It is used so that the interface and the
---  implementation of a logic variable can be decoupled. In practice this is
---  only used so we can have two different implementations that vary only in
---  terms of memory management:
---
---  - One is a refcounted, controlled-object based logic variable, so its
---  memory management is automatic.
---
---  - The other is a naked access, so memory management is left to the user.
---
---  As many things in Adalog, this choices hinges on the hypothesis that Adalog
---  could be used directly, and not in a code generation context, which is
---  still unclear.
+--  This package provides data types to create logic variables, i.e. variables
+--  that logic equation must associate to set of values.
 
 generic
-   type Logic_Var_Type is private;
-   type Element_Type is private;
+   type Value_Type is private;
+   --  Type of the values associated to variables, assumed to have by-reference
+   --  semantics.
 
-   with procedure Inc_Ref (E : Element_Type);
-   with procedure Dec_Ref (E : in out Element_Type);
+   with procedure Inc_Ref (E : Value_Type) is null;
+   with procedure Dec_Ref (E : in out Value_Type) is null;
+   --  Associated ref-counting primitives
 
-   with procedure Reset (Self : Logic_Var_Type) is <>;
+   with function Value_Image (E : Value_Type) return String is <>;
+   --  Image of values, for debugging purposes
+
+package Langkit_Support.Adalog.Logic_Var is
+
+   type Logic_Var_Record;
+   --  Storage for a logic variable. Equations only deal with reference to them
+   --  (see ``Logic_Var`` access type below).
+
+   type Logic_Var is access all Logic_Var_Record;
+   --  Reference to a logic variable
+
+   No_Logic_Var : constant Logic_Var := null;
+
+   type Logic_Var_Record is record
+      Reset : Boolean := True;
+      --  Whether this variable is reset, i.e. whether it has no value
+
+      Value : Value_Type;
+      --  The value of this logic variable, when it is set (see the ``Reset``
+      --  component).
+
+      Dbg_Name : String_Access;
+      --  Access to a string representing the name of this variable, for
+      --  debugging purposes.
+
+      Id : Natural := 0;
+
+      Aliased_To : Logic_Var := null;
+   end record;
+
+   procedure Reset (Self : Logic_Var);
    --  Reset the logic variable to an undefined state with no value
 
-   with function Is_Defined (Self : Logic_Var_Type) return Boolean is <>;
-   --  Checks whether the logic variable has a value or not
+   function Is_Defined (Self : Logic_Var) return Boolean;
+   --  Return whether the logic variable has a value
 
-   with procedure Set_Value
-     (Self : Logic_Var_Type; Data : Element_Type) is <>;
-   --  Set the value of the logic variable to Data. Low level function, not for
-   --  use by clients.
+   procedure Set_Value (Self : Logic_Var; Data : Value_Type);
+   --  Set the value of the logic variable to ``Data``. Only the solver is
+   --  supposed to use this.
 
-   with function Get_Value
-     (Self : Logic_Var_Type) return Element_Type is <>;
-   --  Get the value stored in Self
+   function Get_Value (Self : Logic_Var) return Value_Type;
+   --  Assuming this variable has an associated value, return it, along with a
+   --  new ownership share: the caller must call ``Dec_Ref`` on the result when
+   --  done with it.
 
-   with function Create return Logic_Var_Type is <>;
-   --  Return a new logic variable
+   function Image (Self : Logic_Var) return String is
+     (if Self.Dbg_Name /= null
+      then "%" &  Self.Dbg_Name.all
+      else "%<unnamed>");
 
-   with function Image (Self : Logic_Var_Type) return String is <>;
-   --  Return a string image of Self
+   function Id (Self : Logic_Var) return Natural;
+   --  Return the Id of this variable.
+   --
+   --  Variables have a null Id by default, and the solver assigns it a
+   --  positive Id during resolution. Handling integers instead of pointers
+   --  makes it easier to create collections of variables.
 
-   with function Element_Image (Self : Element_Type) return String is <>;
-   --  Return a string image of Self
+   procedure Set_Id (Self : Logic_Var; Id : Natural);
+   --  Set the Id for this logic variable. If 0, reset its Id and unalias the
+   --  variable, if it was aliased.
 
-   with function Id (Self : Logic_Var_Type) return Natural is <>;
-   --  Return the Id of this variable. Variables have an Id of 0 by default, >
-   --  0 when set by the solver.
+   procedure Alias (Self, To : Logic_Var);
+   --  Alias this variable to another variable
 
-   with procedure Set_Id (Self : Logic_Var_Type; Id : Natural) is <>;
-   --  Set the Id for logic variable. If 0, resets the Id of logic variable.
-   --  Setting to 0 will also unalias the variable, if it was aliased.
+   procedure Unalias (Self : Logic_Var);
+   --  Remove alias information for this variable
 
-   with procedure Alias (Self, Other : Logic_Var_Type) is <>;
-   --  Alias this variable to another variable. This
-
-   with procedure Unalias (Self : Logic_Var_Type) is <>;
-
-   with function Get_Alias (Self : Logic_Var_Type) return Logic_Var_Type is <>;
+   function Get_Alias (Self : Logic_Var) return Logic_Var;
    --  Get the alias for this logic variable, if there is one
 
-   No_Var : Logic_Var_Type;
-package Langkit_Support.Adalog.Logic_Var is
-   subtype Var is Logic_Var_Type;
-   --  Subtype so that the variable type is visible from the outside, since
-   --  formals are not visible.
+   procedure Destroy (Self : in out Logic_Var_Record);
+   --  Release resources associated with this logic variable
 
-   type Var_Array is array (Positive range <>) of Var;
-   type Val_Array is array (Positive range <>) of Element_Type;
-   --  Array types for array of variables and array of values of this variable,
-   --  for convenience. To be used in other generic packages taking a formal
-   --  Logic_Var package as argument.
+   type Logic_Var_Array is array (Positive range <>) of Logic_Var;
+   type Value_Array is array (Positive range <>) of Value_Type;
+   --  Array of values of this variable, for convenience. To be used in other
+   --  generic packages taking a formal Logic_Var package as argument.
 
 end Langkit_Support.Adalog.Logic_Var;

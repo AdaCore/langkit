@@ -3,6 +3,7 @@ with Langkit_Support.Adalog.Main_Support;
 package Support is
 
    use Langkit_Support.Adalog.Main_Support.Solver_Ifc;
+   use Langkit_Support.Adalog.Main_Support.Refs;
 
    type Pred is new N_Predicate_Type with null record;
 

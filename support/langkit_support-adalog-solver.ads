@@ -66,8 +66,6 @@ package Langkit_Support.Adalog.Solver is
    --  Decrements the reference count of Self. If no reference left, deallocate
    --  ``Self.all`` and sets ``Self`` to ``null``.
 
-   subtype Logic_Var_Array is Var_Array;
-
    procedure Solve
      (Self              : Relation;
       Solution_Callback : access function
@@ -109,7 +107,7 @@ package Langkit_Support.Adalog.Solver is
    --  up to users to free them when appropriate.
 
    function Create_Predicate
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Pred         : Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation;
    --  Create a Predicate relation. A Predicate relation will solve
@@ -117,12 +115,12 @@ package Langkit_Support.Adalog.Solver is
    --  yields ``True``.
 
    function Create_N_Predicate
-     (Logic_Vars   : Variable_Array;
+     (Logic_Vars   : Logic_Var_Array;
       Pred         : N_Predicate_Type'Class;
       Debug_String : String_Access := null) return Relation;
 
    function Create_Assign
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Value        : Value_Type;
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class := No_Comparer;
@@ -131,14 +129,14 @@ package Langkit_Support.Adalog.Solver is
    --  we can assign the value ``Value`` to ``Logic_Var``.
 
    function Create_Unify
-     (From, To     : Var;
+     (From, To     : Logic_Var;
       Debug_String : String_Access := null) return Relation;
    --  Create an Unify relation. An Unify relation will solve successfully if
    --  either the assignment of ``From.Value`` to ``To`` is successful, either
    --  the opposite assignment is successful.
 
    function Create_Propagate
-     (From, To     : Var;
+     (From, To     : Logic_Var;
       Conv         : Converter_Type'Class := No_Converter;
       Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation;
@@ -147,7 +145,7 @@ package Langkit_Support.Adalog.Solver is
    --  successful.
 
    function Create_Domain
-     (Logic_Var    : Var;
+     (Logic_Var    : Logic_Vars.Logic_Var;
       Domain       : Value_Array;
       Debug_String : String_Access := null) return Relation;
    --  Create a Domain relation. A Domain relation is a shortcut such that:
@@ -212,7 +210,7 @@ private
    use Ada.Strings;
 
    package Var_Sets is new Ada.Containers.Indefinite_Hashed_Maps
-     (String, Var, Hash, "=", "=");
+     (String, Logic_Var, Hash, "=", "=");
    type Ref_Counted_Var_Set is record
       Vars      : Var_Sets.Map;
       Ref_Count : Natural;

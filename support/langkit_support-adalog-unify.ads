@@ -67,11 +67,10 @@ generic
 
    with function Image (Data : Equals_Data) return String is <>;
 
-   with package Left_Var is new Logic_Var
-     (Element_Type => L_Type, others => <>);
+   with package Left_Var is new Logic_Var (Value_Type => L_Type, others => <>);
 
    with package Right_Var is new Logic_Var
-     (Element_Type => R_Type, others => <>);
+     (Value_Type => R_Type, others => <>);
 
    with procedure L_Inc_Ref (Self : L_Type);
    with procedure R_Inc_Ref (Self : R_Type);
@@ -111,7 +110,7 @@ package Langkit_Support.Adalog.Unify is
      (L_Type, R_Type,
       Right_C_Data, Convert, Image,
       Equals_Data, Equals, Image,
-      Left_Var, Right_Var.Element_Image, Left_Var.Element_Image,
+      Left_Var, Right_Var.Value_Image, Left_Var.Value_Image,
       Invert_Equals          => False,
       R_Inc_Ref              => R_Inc_Ref,
       R_Convert_Data_Inc_Ref => Right_C_Data_Inc_Ref,
@@ -125,7 +124,7 @@ package Langkit_Support.Adalog.Unify is
      (R_Type, L_Type,
       Left_C_Data, Convert, Image,
       Equals_Data, Equals, Image,
-      Right_Var, Left_Var.Element_Image, Right_Var.Element_Image,
+      Right_Var, Left_Var.Value_Image, Right_Var.Value_Image,
       Invert_Equals => True,
       R_Inc_Ref              => L_Inc_Ref,
       R_Convert_Data_Inc_Ref => Left_C_Data_Inc_Ref,
@@ -140,8 +139,8 @@ package Langkit_Support.Adalog.Unify is
    ------------------
 
    function Equals
-     (L         : Left_Var.Var;
-      R         : Right_Var.Var;
+     (L         : Left_Var.Logic_Var;
+      R         : Right_Var.Logic_Var;
       L_Data    : Left_C_Data := No_L_Data;
       R_Data    : Right_C_Data := No_R_Data;
       Eq_Data   : Equals_Data := No_Equals_Data;
@@ -154,7 +153,7 @@ package Langkit_Support.Adalog.Unify is
       with Inline;
 
    function Equals
-     (L         : Left_Var.Var;
+     (L         : Left_Var.Logic_Var;
       R         : R_Type;
       R_Data    : Right_C_Data := No_R_Data;
       Eq_Data   : Equals_Data := No_Equals_Data;
@@ -166,7 +165,7 @@ package Langkit_Support.Adalog.Unify is
 
    function Equals
      (L         : L_Type;
-      R         : Right_Var.Var;
+      R         : Right_Var.Logic_Var;
       L_Data    : Left_C_Data := No_L_Data;
       Eq_Data   : Equals_Data := No_Equals_Data;
       Sloc_Info : String_Access := null)
@@ -180,7 +179,7 @@ package Langkit_Support.Adalog.Unify is
    ------------
 
    function Member
-     (R       : Left_Var.Var;
+     (R       : Left_Var.Logic_Var;
       Vals    : Unify_Left.R_Type_Array;
       R_Data  : Right_C_Data := No_R_Data;
       Eq_Data : Equals_Data := No_Equals_Data) return Relation

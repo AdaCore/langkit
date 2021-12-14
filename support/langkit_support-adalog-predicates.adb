@@ -111,7 +111,7 @@ package body Langkit_Support.Adalog.Predicates is
 
          Trace ("In N_Predicate apply, calling predicate");
          declare
-            Vals : Val_Array (1 .. Self.Arity);
+            Vals : Value_Array (1 .. Self.Arity);
          begin
             for I in Self.Refs'Range loop
                Vals (I) := Get_Value (Self.Refs (I));
@@ -148,7 +148,7 @@ package body Langkit_Support.Adalog.Predicates is
       ------------
 
       function Create
-        (L, R : Var.Var; Pred : Predicate_Type) return Relation
+        (L, R : Var.Logic_Var; Pred : Predicate_Type) return Relation
       is
       begin
          return Predicate_2_Internal.Create

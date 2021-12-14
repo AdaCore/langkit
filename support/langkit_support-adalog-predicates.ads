@@ -45,7 +45,7 @@ package Langkit_Support.Adalog.Predicates is
    generic
       type El_Type is private;
       with package Var is new Logic_Var
-        (Element_Type => El_Type, others => <>);
+        (Value_Type => El_Type, others => <>);
 
       type Predicate_Type is private;
 
@@ -59,7 +59,7 @@ package Langkit_Support.Adalog.Predicates is
    package Predicate is
 
       function Create
-        (R : Var.Var; Pred : Predicate_Type) return Relation;
+        (R : Var.Logic_Var; Pred : Predicate_Type) return Relation;
       --  Return a predicate relation, where Pred is the actual implementation
       --  of the predicate logic. Pred will be called on the value of R when
       --  appropriate.
@@ -69,7 +69,7 @@ package Langkit_Support.Adalog.Predicates is
       use Var;
 
       type Predicate_Logic is record
-         Ref  : Var.Var;
+         Ref  : Var.Logic_Var;
          Pred : Predicate_Type;
       end record;
       --  This is the internal predicate type, that will be stored along the
@@ -93,7 +93,7 @@ package Langkit_Support.Adalog.Predicates is
       --  only once, until it is reverted.
 
       function Create
-        (R : Var.Var; Pred : Predicate_Type) return Relation
+        (R : Var.Logic_Var; Pred : Predicate_Type) return Relation
       is (new Impl.Rel'
             (Rel    => Predicate_Logic'(Ref => R, Pred => Pred),
              others => <>));
@@ -110,11 +110,11 @@ package Langkit_Support.Adalog.Predicates is
    generic
       type El_Type is private;
       with package Var is new Logic_Var
-        (Element_Type => El_Type, others => <>);
+        (Value_Type => El_Type, others => <>);
    package Dyn_Predicate is
 
       function Create
-        (R    : Var.Var;
+        (R    : Var.Logic_Var;
          Pred : access function (L : El_Type) return Boolean) return Relation;
 
    private
@@ -131,8 +131,8 @@ package Langkit_Support.Adalog.Predicates is
       package Internal_Pred is new Predicate (El_Type, Var, Predicate_Holder);
 
       function Create
-        (R : Var.Var; Pred : access function (L : El_Type) return Boolean)
-         return Relation
+        (R    : Var.Logic_Var;
+         Pred : access function (L : El_Type) return Boolean) return Relation
       is (Internal_Pred.Create (R, (Pred => Pred'Unrestricted_Access.all)));
 
    end Dyn_Predicate;
@@ -150,12 +150,12 @@ package Langkit_Support.Adalog.Predicates is
    generic
       type El_Type is private;
       with package Var is new Logic_Var
-        (Element_Type => El_Type, others => <>);
+        (Value_Type => El_Type, others => <>);
 
       type Predicate_Type is private;
 
       with function Call
-        (Self : Predicate_Type; Vals : Var.Val_Array) return Boolean is <>;
+        (Self : Predicate_Type; Vals : Var.Value_Array) return Boolean is <>;
 
       with function Image (Self : Predicate_Type) return String is <>;
 
@@ -164,7 +164,7 @@ package Langkit_Support.Adalog.Predicates is
    package N_Predicate is
 
       function Create
-        (R    : Var.Var_Array;
+        (R    : Var.Logic_Var_Array;
          Pred : Predicate_Type) return Relation;
       --  Return a predicate relation, where Pred is the actual implementation
       --  of the predicate logic. Pred will be called on the value of R when
@@ -180,7 +180,7 @@ package Langkit_Support.Adalog.Predicates is
       subtype Arity_Type is Positive range 1 .. 4;
 
       type Predicate_Logic (Arity : Arity_Type := 4) is record
-         Refs  : Var_Array (1 .. Arity);
+         Refs  : Logic_Var_Array (1 .. Arity);
          Pred  : Predicate_Type;
       end record;
       --  This is the internal predicate type, that will be stored along the
@@ -193,7 +193,7 @@ package Langkit_Support.Adalog.Predicates is
       procedure Revert (Self : in out Predicate_Logic);
       procedure Free (Self : in out Predicate_Logic);
 
-      function Img (Refs : Var_Array) return String
+      function Img (Refs : Logic_Var_Array) return String
       is
         (Var.Image (Refs (Refs'First))
          & (if Refs'Length > 1
@@ -210,7 +210,8 @@ package Langkit_Support.Adalog.Predicates is
       --  Stateful_Relation, that will return evaluation of the predicate
       --  only once, until it is reverted.
 
-      function Create (R : Var_Array; Pred : Predicate_Type) return Relation
+      function Create
+        (R : Logic_Var_Array; Pred : Predicate_Type) return Relation
       is (new Impl.Rel'
             (Rel    => Predicate_Logic'
                (Arity => R'Last,
@@ -228,7 +229,7 @@ package Langkit_Support.Adalog.Predicates is
    generic
       type El_Type is private;
       with package Var is new Logic_Var
-        (Element_Type => El_Type, others => <>);
+        (Value_Type => El_Type, others => <>);
 
       type Predicate_Type is private;
 
@@ -242,7 +243,7 @@ package Langkit_Support.Adalog.Predicates is
    package Predicate_2 is
 
       function Create
-        (L, R : Var.Var; Pred : Predicate_Type) return Relation;
+        (L, R : Var.Logic_Var; Pred : Predicate_Type) return Relation;
       --  Return a predicate relation, where Pred is the actual implementation
       --  of the predicate logic. Pred will be called on the value of L and R
       --  when appropriate.
@@ -251,11 +252,11 @@ package Langkit_Support.Adalog.Predicates is
 
       type Predicate_Wrapper is record
          T    : Predicate_Type;
-         L, R : Var.Var;
+         L, R : Var.Logic_Var;
       end record;
 
       function Call
-        (P : Predicate_Wrapper; Vals : Var.Val_Array) return Boolean
+        (P : Predicate_Wrapper; Vals : Var.Value_Array) return Boolean
       is (Call (P.T, Vals (1), Vals (2)));
 
       function Image (Self : Predicate_Wrapper) return String
