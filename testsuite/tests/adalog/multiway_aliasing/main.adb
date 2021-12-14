@@ -1,8 +1,3 @@
-with Ada.Exceptions; use Ada.Exceptions;
-with Ada.Text_IO; use Ada.Text_IO;
-
-with GNATCOLL.Traces;
-
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
@@ -31,9 +26,5 @@ procedure Main is
                D = X,
                X = 1));
 begin
-   GNATCOLL.Traces.Parse_Config_File;
    Solve_All (R);
-exception
-   when E : others =>
-      Put_Line (Exception_Message (E));
 end Main;

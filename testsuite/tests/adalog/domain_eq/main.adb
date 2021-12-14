@@ -1,5 +1,3 @@
-with GNATCOLL.Traces;
-
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
@@ -9,7 +7,6 @@ procedure Main is
    use T_Solver;
    use Refs;
 begin
-   GNATCOLL.Traces.Parse_Config_File;
    declare
       X : constant Raw_Var := Create ("X");
       R : constant Relation :=
@@ -33,5 +30,4 @@ begin
    begin
       Solve_All (R);
    end;
-
 end Main;

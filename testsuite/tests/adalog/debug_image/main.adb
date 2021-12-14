@@ -2,8 +2,6 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with GNAT.Source_Info;
 
-with GNATCOLL.Traces;
-
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
@@ -63,8 +61,6 @@ procedure Main is
      );
 
 begin
-   GNATCOLL.Traces.Parse_Config_File;
-
    for R of Relations loop
       Put_Line ((1 .. 72 => '='));
       New_Line;

@@ -1,5 +1,3 @@
-with GNATCOLL.Traces;
-
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
@@ -25,7 +23,6 @@ procedure Main is
      and Domain (Y, (-1, -2, -3, -4, -5, -6))
      and Predicate (X, Predicate (Is_Odd'Access, "is_odd"));
 begin
-   GNATCOLL.Traces.Parse_Config_File;
    Solve_All (R);
    Solve_All (R2);
 end Main;

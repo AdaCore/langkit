@@ -1,7 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
-with GNATCOLL.Traces;
-
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
@@ -25,7 +23,6 @@ procedure Main is
       "and" (Domain (Y, (1, 2)),
               "and" (Is_Even (X), X = Y)));
 begin
-   GNATCOLL.Traces.Parse_Config_File;
    for R of Relations loop
       Put_Line ((1 .. 72 => '='));
       New_Line;

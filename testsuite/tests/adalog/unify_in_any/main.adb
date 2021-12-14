@@ -1,5 +1,3 @@
-with GNATCOLL.Traces;
-
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
@@ -20,6 +18,5 @@ procedure Main is
        R_Any ((Domain (Y, (-1, -2)), Logic_True)),
        N_Predicate ((X, Y), N_Predicate (Abs_Equal'Access))));
 begin
-   GNATCOLL.Traces.Parse_Config_File;
    Solve_All (R);
 end Main;
