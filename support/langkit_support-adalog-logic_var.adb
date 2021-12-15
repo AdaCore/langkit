@@ -123,6 +123,9 @@ package body Langkit_Support.Adalog.Logic_Var is
 
    procedure Alias (Self, To : Logic_Var) is
    begin
+      pragma Assert (not Is_Defined (Self));
+      pragma Assert (not Is_Defined (To));
+
       if To = Self or else To.Aliased_To = Self then
          return;
       elsif Self.Aliased_To = null then

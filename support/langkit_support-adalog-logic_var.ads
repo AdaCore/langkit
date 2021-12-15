@@ -98,7 +98,12 @@ package Langkit_Support.Adalog.Logic_Var is
    --  variable, if it was aliased.
 
    procedure Alias (Self, To : Logic_Var);
-   --  Alias this variable to another variable
+   --  Alias this variable to another variable.
+   --
+   --  Note that this operation is valid only if both variables are still
+   --  reset, i.e. before variable assignments. This way, aliasing two
+   --  variables can never fail (we would need to perform value consistency
+   --  checking otherwise).
 
    procedure Unalias (Self : Logic_Var);
    --  Remove alias information for this variable
