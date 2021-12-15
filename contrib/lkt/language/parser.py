@@ -1196,109 +1196,74 @@ class GrammarDecl(Decl):
 
     @langkit_property()
     def check_correctness_pre():
-        # All grammars must have an associated lexer. First check that the
-        # @with_lexer annotation is present.
+        # Compute intermediate data needed for checks
+
+        # @with_lexer annotation
         lexer_annot = Var(Entity.full_decl.get_annotation("with_lexer"))
-        lexer_annot_missing = Var(
-            lexer_annot.then(
-                lambda _: No(T.SemanticResult.array),
-                default_val=Self.error(
-                    S('missing mandatory "@with_lexer" annotation')
-                ).singleton
-            )
-        )
+        lexer_annot_params = Var(lexer_annot._.params._.params)
+        lexer_arg = Var(lexer_annot_params.at(0))
 
-        # Check has expected arguments (exactly one, positional)
-        params = Var(lexer_annot._.params.params)
-        lexer_arg = Var(
-            If(
-                Not(params.is_null)
-                & (params.children.length == 1)
-                & params.at(0).name.is_null,
-                params.at(0).value,
-                No(T.Expr)
-            )
-        )
-        invalid_args = Var(
-            If(
-                Not(params.is_null) & lexer_arg.is_null,
-                lexer_annot.error(
-                    S("exactly 1 positional argument expected")
-                ).singleton,
-                No(T.SemanticResult.array),
-            )
-        )
-
-        # Check that it is a valid reference to a lexer
-        lexer_ref = Var(lexer_arg.cast(T.RefId))
-        invalid_lexer_ref = Var(
-            If(
-                Not(lexer_arg.is_null) & lexer_ref.is_null,
-                lexer_arg.error(
-                    S("reference to a lexer expected")
-                ).singleton,
-                No(T.SemanticResult.array),
-            )
-        )
-        refd_lexer = Var(lexer_ref._.as_entity.referenced_decl)
-        lexer_not_found = Var(
-            If(
-                refd_lexer.has_error,
-                refd_lexer.singleton,
-                No(T.SemanticResult.array),
-            )
-        )
-        lexer_decl = Var(
-            If(
-                refd_lexer.has_error,
-                No(T.LexerDecl.entity),
-                refd_lexer.result_ref.cast(T.LexerDecl)
-            )
-        )
-        invalid_lexer_decl = Var(
-            If(
-                Not(lexer_ref.is_null) & lexer_decl.is_null,
-                lexer_ref.error(S("reference to a lexer expected")).singleton,
-                No(T.SemanticResult.array)
-            )
-        )
-
-        # Now check the grammar rules themselves
-        rules = Var(Entity.rules.filter(
-            lambda d: d.decl.is_a(T.GrammarRuleDecl)
-        ))
-
-        # Grammar declarations can only contain grammar rules
-        non_rules = Var(Entity.rules.filtermap(
-            lambda d: d.error(
-                d.decl.decl_type_name
-                .concat(S(" forbidden in "))
-                .concat(Entity.decl_type_name)
-            ),
-            lambda d: Not(d.decl.is_a(T.GrammarRuleDecl)),
-        ))
-
-        # Expect exactly one main grammar rule
-        main_rules = Var(rules.filter(lambda d: d.has_annotation("main_rule")))
-        extra_mains = Var(main_rules.filtermap(
-            lambda d: d.error(S("only one main rule allowed")),
-            lambda i, _: i > 0,
-        ))
-        missing_main = Var(If(
-            main_rules.empty,
-            [Self.error(S("main rule missing (@main_rule annotation)"))],
-            No(T.SemanticResult.array)
-        ))
+        # Lexer decl
+        lexer_decl = Var(lexer_arg._.value.cast(T.RefId)._.as_entity
+                         .referenced_decl.result_ref.cast(T.LexerDecl))
 
         return (
-            lexer_annot_missing
-            .concat(invalid_args)
-            .concat(invalid_lexer_ref)
-            .concat(lexer_not_found)
-            .concat(invalid_lexer_decl)
-            .concat(non_rules)
-            .concat(extra_mains)
-            .concat(missing_main)
+            # All grammars must have an associated lexer. First check that the
+            # @with_lexer annotation is present.
+            lexer_annot.is_null.then(
+                lambda _:
+                Self.error(S('missing mandatory "@with_lexer" annotation'))
+                .singleton
+            )
+
+            # Then check that the associated arguments are correct
+            .concat(
+                Or(lexer_annot_params._.children.length != 1,
+                   Not(lexer_arg._.name.is_null),
+                   lexer_arg._.value.is_null)
+
+                .then(
+                    lambda _: lexer_annot
+                    .error(S("exactly 1 positional argument expected"))
+                    .singleton,
+                )
+                # Check that it is a valid reference to a lexer
+                ._or(lexer_decl.is_null.then(
+                    lambda _:
+                    lexer_arg.error(S("reference to a lexer expected"))
+                    .singleton,
+                ))
+            )
+        )
+
+    @langkit_property()
+    def check_legality():
+        # Grammar rules
+        main_rules = Var(Entity.rules.filter(lambda d: And(
+            d.decl.is_a(T.GrammarRuleDecl), d.has_annotation("main_rule")
+        )))
+
+        return (
+            # Grammar declarations can only contain grammar rules
+            Entity.rules.filtermap(
+                lambda d: d.error(
+                    d.decl.decl_type_name.concat(S(" forbidden in "))
+                    .concat(Entity.decl_type_name)
+                ),
+                lambda d: Not(d.decl.is_a(T.GrammarRuleDecl)),
+            )
+
+            # Expect at least one main grammar rule
+            .concat(main_rules.empty.then(
+                lambda _:
+                [Self.error(S("main rule missing (@main_rule annotation)"))],
+            ))
+
+            # Expect at most one main grammar rule
+            .concat(main_rules.filtermap(
+                lambda d: d.error(S("only one main rule allowed")),
+                lambda i, _: i > 0,
+            ))
         )
 
 

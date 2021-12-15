@@ -16,3 +16,6 @@ import lexer_example
 @invalid @with_lexer(foo_lexer) grammar main_missing {
     bar <- "bar"
 }
+
+@invalid @with_lexer grammar invalid_with_lexer {
+}
