@@ -84,6 +84,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    procedure Reserve (V : in out Var_Ids_To_Atoms; Size : Positive);
    --  Reserve ``N`` elements in ``V``, creating new lists for each new item
 
+   procedure Merge_Vars
+     (Self : in out Var_Ids_To_Atoms; From : Natural; To : Positive);
+   --  Transfer the list of atoms in ``Self`` corresponding to the ``From``
+   --  variable to the list of atoms corresponding to the ``To`` variable. For
+   --  convenience, a null Id for ``From`` is accepted: in this case, this is a
+   --  no-op.
+
    function Create_Propagate
      (From, To     : Logic_Var;
       Conv         : Converter_Access := null;
@@ -170,15 +177,17 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  variables to the user callback and to reset aliasing information when
       --  leaving a branch.
 
+      Unifies : Atoms_Vector_Access;
+      --  Accumulator in ``Solve_Compound`` to hold the current list of
+      --  ``Unify`` in the recursive relation traversal: for each relation
+      --  leaf, ``Unifies`` will contain all the ``Unify`` atoms necessary to
+      --  use in order to interpret the remaining ``Atoms``.
+
       Atoms : Atoms_Vector_Access;
       --  Accumulator in ``Solve_Compound`` to hold the current list of atoms
-      --  in the recursive relation traversal: for each relation leaf,
-      --  ``Atoms`` will contain an autonomous relation to solve (this is a
-      --  solver "branch").
-
-      Aliases : Atoms_Vector_Access;
-      --  List of alias relations. TODO??? not clear why this is stored in the
-      --  context, and not as a local variable in Solve_Compound.
+      --  (minus ``Unify`` atoms) in the recursive relation traversal: for each
+      --  relation leaf, ``Unifies`` + ``Atoms`` will contain an autonomous
+      --  relation to solve (this is a solver "branch").
 
       Anys : Any_Relation_List := Any_Relation_Lists.No_List;
       --  Remaining list of ``Any`` relations to traverse
@@ -361,12 +370,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       procedure Free is new Ada.Unchecked_Deallocation
         (Natural, Nat_Access);
    begin
-      Ctx.Aliases.Destroy;
+      Ctx.Unifies.Destroy;
       Ctx.Atoms.Destroy;
       Any_Relation_Lists.Destroy (Ctx.Anys);
       Ctx.Vars_To_Atoms.Destroy;
+      Free (Ctx.Unifies);
       Free (Ctx.Atoms);
-      Free (Ctx.Aliases);
       Free (Ctx.Tried_Solutions);
 
       Atom_Lists.Destroy (Ctx.Sort_Ctx.N_Preds);
@@ -378,12 +387,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end loop;
       Ctx.Sort_Ctx.Using_Atoms.Destroy;
 
-      --  Cleanup logic vars for future solver runs using them
+      --  Cleanup logic vars for future solver runs using them. Note that no
+      --  aliasing information is supposed to be left at this stage.
 
       for V of Ctx.Vars.all loop
          Reset (V);
          Set_Id (V, 0);
-         Unalias (V);
       end loop;
       Free (Ctx.Vars);
 
@@ -400,6 +409,42 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          V.Append (Atomic_Relation_Lists.Create);
       end loop;
    end Reserve;
+
+   ----------------
+   -- Merge_Vars --
+   ----------------
+
+   procedure Merge_Vars
+     (Self : in out Var_Ids_To_Atoms; From : Natural; To : Positive)
+   is
+      use Atomic_Relation_Lists;
+   begin
+      --  If the source list is conceptually empty, there is nothing to do
+
+      if From = 0 or else From > Self.Length then
+         return;
+      end if;
+
+      --  Since ``Self`` is resized on demand, it is possible to have a
+      --  non-empty list for ``From`` but have no list allocated for ``To``
+      --  yet: make sure the vector is big enough to hold the destination list.
+
+      Reserve (Self, To);
+
+      --  Finally do the merge: just pop all items from ``From`` and push them
+      --  to ``To``.
+
+      declare
+         From_List : Atomic_Relation_Lists.List renames
+           Self.Get_Access (From).all;
+         To_List   : Atomic_Relation_Lists.List renames
+           Self.Get_Access (To).all;
+      begin
+         while Has_Element (From_List) loop
+            Push (To_List, Pop (From_List));
+         end loop;
+      end;
+   end Merge_Vars;
 
    --------------
    -- Used_Var --
@@ -523,6 +568,14 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  Cleanup helper to call after having processed an ``Any``
       --  sub-relation.
 
+      procedure Create_Aliases;
+      --  Create alias information for variables according to Unify relations
+      --  in ``Ctx.Unifies``. Also reset all variables, so that we are ready to
+      --  evaluate a sequence of atoms.
+
+      procedure Cleanup_Aliases;
+      --  Remove alias information for all variables
+
       use Any_Relation_Lists;
       use Atomic_Relation_Lists;
 
@@ -534,19 +587,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
         (Atoms : Atomic_Relation_Vector; Error : out Boolean)
          return Atomic_Relation_Vectors.Elements_Array
       is
-         Last_Atom_Index : Natural := 0;
          Sorted_Atoms    : Atomic_Relation_Vectors.Elements_Array
            (1 .. Atoms.Length);
-         --  Array of topo-sorted atoms (i.e. the result). Initialized to hold
-         --  up to ``Atoms.Length`` items, only the ``1 ..  Last_Atom_Index``
-         --  slice is valid.
+         --  Array of topo-sorted atoms (i.e. the result). All items in
+         --  ``Atoms`` should be eventually transferred to ``Sorted_Atoms``.
 
-         Expected_Atom_Count : Natural := 0;
-         --  Number of atoms from ``Atoms`` that we are supposed to append to
-         --  ``Sorted_Atoms``. If there are orphans (atoms that use a variable
-         --  that is not defined by any atom), ``Sorted_Atoms`` will get fewer
-         --  items. In that case we know the set of atoms is unsound: we will
-         --  return an error.
+         Last_Atom_Index : Natural := 0;
+         --  Index of the last atom appended to ``Sorted_Atoms``
 
          procedure Append (Atom : Atomic_Relation);
          --  Append Atom to Sorted_Atoms
@@ -610,31 +657,29 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                         else Id (Used_Logic_Var.Logic_Var))
                   else 0);
             begin
-               if Current_Atom.Kind = Unify then
-                  --  Unifys are handled by aliasing before. We don't need to
-                  --  ever explicitly solve them. Mark them as appended.
-
-                  Appended (I) := True;
-
-               elsif Current_Atom.Kind = N_Predicate then
+               if Current_Atom.Kind = N_Predicate then
                   --  N_Predicates are appended at the end separately
 
                   N_Preds := (Current_Atom, I) & N_Preds;
-                  Expected_Atom_Count := Expected_Atom_Count + 1;
 
                elsif Used_Id = 0 then
                   --  Put atoms with no dependency in the working set
 
                   Working_Set := (Current_Atom, I) & Working_Set;
-                  Expected_Atom_Count := Expected_Atom_Count + 1;
 
-               else
+               elsif Current_Atom.Kind /= Unify then
                   --  For other atoms, put them in the ``Using_Atoms`` map,
                   --  which represents the edges of the dependency graph.
 
                   Push (Using_Atoms.Get_Access (Used_Id).all,
                         (Current_Atom, I));
-                  Expected_Atom_Count := Expected_Atom_Count + 1;
+
+               else
+                  --  Unifys are handled by aliasing processing in
+                  --  ``Solve_Compound`` and should be filtered out of
+                  --  ``Atoms``.
+
+                  raise Program_Error with "unreachable code";
                end if;
             end;
          end loop;
@@ -674,9 +719,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             Appended (N_Pred.Atom_Index) := True;
          end loop;
 
-         --  Check that all expected atoms are in the result. If not, we have
-         --  orphans, and thus the topo sort failed.
-         if Last_Atom_Index /= Expected_Atom_Count then
+         --  Check that all atoms are in the result. If not, we have orphans,
+         --  and thus the topo sort failed.
+         if Last_Atom_Index /= Sorted_Atoms'Last then
 
             --  If requested, log all orphan atoms
             if Solv_Trace.Is_Active then
@@ -695,7 +740,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Clear (Working_Set);
          Clear (N_Preds);
 
-         return Sorted_Atoms (1 .. Last_Atom_Index);
+         return Sorted_Atoms;
       end Topo_Sort;
 
       ------------------
@@ -724,10 +769,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             Solv_Trace.Trace (Image (Atoms));
          end if;
          Clear (Ctx.Sort_Ctx);
-
-         for V of Ctx.Vars.all loop
-            Reset (V);
-         end loop;
 
          Ctx.Tried_Solutions.all := Ctx.Tried_Solutions.all + 1;
 
@@ -776,7 +817,57 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Vars_To_Atoms          : Var_Ids_To_Atoms := Ctx.Vars_To_Atoms.Copy;
       Initial_Atoms_Length   : Natural renames Ctx.Atoms.Last_Index;
-      Initial_Aliases_Length : Natural renames Ctx.Aliases.Last_Index;
+      Initial_Unifies_Length : Natural renames Ctx.Unifies.Last_Index;
+
+      --------------------
+      -- Create_Aliases --
+      --------------------
+
+      procedure Create_Aliases is
+         Old_Unify_From_Id, Old_Target_Id : Positive;
+      begin
+         for V of Ctx.Vars.all loop
+            Reset (V);
+         end loop;
+
+         for U of Ctx.Unifies.all loop
+            if Verbose_Trace.Active then
+               Verbose_Trace.Trace
+                 ("Aliasing var " & Image (U.Unify_From)
+                  & " to " & Image (U.Target));
+            end if;
+
+            if Ctx.Cut_Dead_Branches then
+               Old_Unify_From_Id := Id (U.Unify_From);
+               Old_Target_Id := Id (U.Target);
+            end if;
+
+            Alias (U.Unify_From, U.Target);
+
+            if Ctx.Cut_Dead_Branches then
+               --  After the aliasing, either the Id of ``U.Unify_From`` has
+               --  changed, either it's the ID of ``U.Target``. Update the
+               --  ``Var_Ids_To_Atoms`` map accordingly.
+
+               if Id (U.Unify_From) /= Old_Unify_From_Id then
+                  Merge_Vars (Vars_To_Atoms, Old_Unify_From_Id, Old_Target_Id);
+               elsif Id (U.Target) /= Old_Target_Id then
+                  Merge_Vars (Vars_To_Atoms, Old_Target_Id, Old_Unify_From_Id);
+               end if;
+            end if;
+         end loop;
+      end Create_Aliases;
+
+      ---------------------
+      -- Cleanup_Aliases --
+      ---------------------
+
+      procedure Cleanup_Aliases is
+      begin
+         for V of Ctx.Vars.all loop
+            Unalias (V);
+         end loop;
+      end Cleanup_Aliases;
 
       --------------------
       -- Branch_Cleanup --
@@ -785,18 +876,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       procedure Branch_Cleanup is
       begin
          Ctx.Atoms.Cut (Initial_Atoms_Length);
+         Ctx.Unifies.Cut (Initial_Unifies_Length);
 
-         --  Unalias every var that was aliased
-         for I in Initial_Aliases_Length + 1 .. Ctx.Aliases.Last_Index loop
-            if Verbose_Trace.Is_Active then
-               Verbose_Trace.Trace
-                 ("Unaliasing "
-                  & Image (Ctx.Aliases.Get_Access (I).Unify_From));
-            end if;
-            Unalias (Ctx.Aliases.Get_Access (I).Unify_From);
-         end loop;
-
-         Ctx.Aliases.Cut (Initial_Aliases_Length);
          Vars_To_Atoms.Destroy;
          Vars_To_Atoms := Ctx.Vars_To_Atoms.Copy;
       end Branch_Cleanup;
@@ -807,6 +888,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       function Cleanup (Val : Boolean) return Boolean is
       begin
+         --  Unalias every var that was aliased
+         Cleanup_Aliases;
+
          Branch_Cleanup;
          Vars_To_Atoms.Destroy;
          Trav_Trace.Decrease_Indent;
@@ -819,15 +903,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       function Process_Atom (Atom : Atomic_Relation) return Boolean is
       begin
-         if Atom.Kind = Unify and then Atom.Unify_From /= Atom.Target then
-            if Verbose_Trace.Is_Active then
-               Verbose_Trace.Trace
-                 ("Aliasing var " & Image (Atom.Unify_From)
-                  & " to " & Image (Atom.Target));
+         if Atom.Kind = Unify then
+            if Atom.Unify_From /= Atom.Target then
+               Reserve (Vars_To_Atoms, Id (Atom.Unify_From));
+               Ctx.Unifies.Append (Atom);
             end if;
-            Alias (Atom.Unify_From, Atom.Target);
-            Reserve (Vars_To_Atoms, Id (Atom.Unify_From));
-            Ctx.Aliases.Append (Atom);
             return True;
 
          elsif Atom.Kind = True then
@@ -931,6 +1011,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                --     completeness. But maybe there is a way. Investigate
                --     later.
 
+               Create_Aliases;
                for Atom of Ctx.Atoms.all loop
                   if Atom.Kind = Assign then
                      declare
@@ -942,8 +1023,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
                         Dummy : Boolean;
                      begin
-                        Reset (V.Logic_Var);
-
                         pragma Assert (Vars_To_Atoms.Length >= V_Id);
 
                         --  If there are atomic relations which use this
@@ -977,6 +1056,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                      end;
                   end if;
                end loop;
+               Cleanup_Aliases;
             end if;
 
             if Has_Element (Anys) then
@@ -1008,6 +1088,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             else
                --  We don't have any Any relation left, so we have a flat list
                --  of atoms to solve.
+               Create_Aliases;
                return Cleanup (Try_Solution (Ctx.Atoms.all));
             end if;
          end;
@@ -1052,9 +1133,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   else
                      --  We are currently exploring only one alternative: just
                      --  look for a solution in ``Ctx.Atoms``.
+                     Create_Aliases;
                      if not Try_Solution (Ctx.Atoms.all) then
                         return Cleanup (False);
                      end if;
+                     Cleanup_Aliases;
                   end if;
 
                when Compound =>
@@ -1120,7 +1203,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Ctx.Cb := Solution_Callback'Unrestricted_Access.all;
       Ctx.Vars := Find_All_Vars (Self);
       Ctx.Atoms := new Atomic_Relation_Vector;
-      Ctx.Aliases := new Atomic_Relation_Vector;
+      Ctx.Unifies := new Atomic_Relation_Vector;
 
       --  Initialize the ``Using_Atoms`` vector of lists for topo sort to have
       --  one entry per variable.

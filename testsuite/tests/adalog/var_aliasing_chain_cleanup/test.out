@@ -1,0 +1,43 @@
+Solving with new solver
+=======================
+
+Solving relation:
+All:
+    %X <-> %Y
+    Any:
+        All:
+            %X <-> %Z
+            %Z <- 1
+
+        All:
+            %X <- 10
+            %Z <- 11
+
+
+
+... without optimizations:
+Solution: [%X = 1, %Y = 1, %Z = 1]
+Solution: [%X = 10, %Y = 10, %Z = 11]
+
+... cut dead branches:
+Solution: [%X = 1, %Y = 1, %Z = 1]
+Solution: [%X = 10, %Y = 10, %Z = 11]
+
+
+Solving with old solver
+=======================
+
+Solving relation:
+<All>:
+| | Bind %X <=> %Y
+| | <Any>:
+| | | | <All>:
+| | | | | | Bind %X <=> %Z
+| | | | | | Unify %Z <= 1
+| | | | <All>:
+| | | | | | Unify %X <= 10
+| | | | | | Unify %Z <= 11
+Solution: [%X = 1, %Y = 1, %Z = 1]
+Solution: [%X = 10, %Y = 10, %Z = 11]
+
+Done.
