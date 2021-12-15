@@ -1,25 +1,5 @@
 Resolving test.lkt
 ==================
-test.lkt:5:4: error: value declaration forbidden in trait declaration
-5 |    @invalid val i: Int = 1
-  |    ^^^^^^^^^^^^^^^^^^^^^^^
-
-test.lkt:6:4: error: class declaration forbidden in trait declaration
-6 |    @invalid class MyClass {}
-  |    ^^^^^^^^^^^^^^^^^^^^^^^^^
-
-test.lkt:7:4: error: generic class declaration forbidden in trait declaration
-7 |    @invalid generic[T] class MyGenClass {}
-  |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-test.lkt:8:4: error: trait declaration forbidden in trait declaration
-8 |    @invalid trait InnerTrait {}
-  |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-test.lkt:9:4: error: field declaration forbidden in trait declaration
-9 |    @invalid field: Int = 1
-  |    ^^^^^^^^^^^^^^^^^^^^^^^
-
 Id   <RefId "Int" test.lkt:5:20-5:23>
      references <StructDecl prelude: "Int">
 
@@ -56,13 +36,25 @@ Id   <RefId "i" test.lkt:12:39-12:40>
 Expr <RefId "i" test.lkt:12:39-12:40>
      has type <GenericFormalTypeDecl "T" test.lkt:12:12-12:13>
 
-test.lkt:18:4: error: value declaration forbidden in enum declaration
-18 |    @invalid val i: Int = 1
-   |    ^^^^^^^^^^^^^^^^^^^^^^^
+test.lkt:5:4: error: value declaration forbidden in trait declaration
+5 |    @invalid val i: Int = 1
+  |    ^^^^^^^^^^^^^^^^^^^^^^^
 
-test.lkt:19:4: error: generic class declaration forbidden in enum declaration
-19 |    @invalid generic[T] class MyGenClass {}
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test.lkt:6:4: error: class declaration forbidden in trait declaration
+6 |    @invalid class MyClass {}
+  |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:7:4: error: generic class declaration forbidden in trait declaration
+7 |    @invalid generic[T] class MyGenClass {}
+  |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:8:4: error: trait declaration forbidden in trait declaration
+8 |    @invalid trait InnerTrait {}
+  |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:9:4: error: field declaration forbidden in trait declaration
+9 |    @invalid field: Int = 1
+  |    ^^^^^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "Int" test.lkt:18:20-18:23>
      references <StructDecl prelude: "Int">
@@ -70,17 +62,13 @@ Id   <RefId "Int" test.lkt:18:20-18:23>
 Expr <NumLit test.lkt:18:26-18:27>
      has type <StructDecl prelude: "Int">
 
-test.lkt:23:4: error: value declaration forbidden in struct declaration
-23 |    @invalid val i: Int = 1
+test.lkt:18:4: error: value declaration forbidden in enum declaration
+18 |    @invalid val i: Int = 1
    |    ^^^^^^^^^^^^^^^^^^^^^^^
 
-test.lkt:24:4: error: struct declaration forbidden in struct declaration
-24 |    @invalid struct InnerStruct {}
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-test.lkt:25:4: error: generic function declaration forbidden in struct declaration
-25 |    @invalid generic[T] fun MyGenFun(i: T): T = i
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test.lkt:19:4: error: generic class declaration forbidden in enum declaration
+19 |    @invalid generic[T] class MyGenClass {}
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "Int" test.lkt:23:20-23:23>
      references <StructDecl prelude: "Int">
@@ -118,21 +106,17 @@ Id   <RefId "Int" test.lkt:28:11-28:14>
 Expr <NumLit test.lkt:28:17-28:18>
      has type <StructDecl prelude: "Int">
 
-test.lkt:32:4: error: value declaration forbidden in class declaration
-32 |    @invalid val i: Int = 1
+test.lkt:23:4: error: value declaration forbidden in struct declaration
+23 |    @invalid val i: Int = 1
    |    ^^^^^^^^^^^^^^^^^^^^^^^
 
-test.lkt:33:4: error: class declaration forbidden in class declaration
-33 |    @invalid class InnerClass {}
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test.lkt:24:4: error: struct declaration forbidden in struct declaration
+24 |    @invalid struct InnerStruct {}
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test.lkt:34:4: error: generic trait declaration forbidden in class declaration
-34 |    @invalid generic[T] trait MyTrait {}
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-test.lkt:35:4: error: generic field declaration forbidden in class declaration
-35 |    @invalid generic[T] gen_field: T
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test.lkt:25:4: error: generic function declaration forbidden in struct declaration
+25 |    @invalid generic[T] fun MyGenFun(i: T): T = i
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "Int" test.lkt:32:20-32:23>
      references <StructDecl prelude: "Int">
@@ -173,17 +157,21 @@ Id   <RefId "i" test.lkt:39:39-39:40>
 Expr <RefId "i" test.lkt:39:39-39:40>
      has type <GenericFormalTypeDecl "T" test.lkt:39:12-39:13>
 
-test.lkt:43:4: error: value declaration forbidden in enum class declaration
-43 |    @invalid val i: Int = 1
+test.lkt:32:4: error: value declaration forbidden in class declaration
+32 |    @invalid val i: Int = 1
    |    ^^^^^^^^^^^^^^^^^^^^^^^
 
-test.lkt:44:4: error: field declaration forbidden in enum class declaration
-44 |    @invalid field: Int = 1
-   |    ^^^^^^^^^^^^^^^^^^^^^^^
+test.lkt:33:4: error: class declaration forbidden in class declaration
+33 |    @invalid class InnerClass {}
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test.lkt:45:4: error: generic function declaration forbidden in enum class declaration
-45 |    @invalid generic[T] fun MyGenFun(i: T): T = i
-   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test.lkt:34:4: error: generic trait declaration forbidden in class declaration
+34 |    @invalid generic[T] trait MyTrait {}
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:35:4: error: generic field declaration forbidden in class declaration
+35 |    @invalid generic[T] gen_field: T
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "Int" test.lkt:43:20-43:23>
      references <StructDecl prelude: "Int">
@@ -220,4 +208,16 @@ Id   <RefId "i" test.lkt:47:29-47:30>
 
 Expr <RefId "i" test.lkt:47:29-47:30>
      has type <StructDecl prelude: "Int">
+
+test.lkt:43:4: error: value declaration forbidden in enum class declaration
+43 |    @invalid val i: Int = 1
+   |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:44:4: error: field declaration forbidden in enum class declaration
+44 |    @invalid field: Int = 1
+   |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:45:4: error: generic function declaration forbidden in enum class declaration
+45 |    @invalid generic[T] fun MyGenFun(i: T): T = i
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
