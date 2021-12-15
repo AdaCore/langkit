@@ -4,7 +4,9 @@ Solving with new solver
 Solving relation:
 Is_Even?(%X)
 ... without optimizations:
-Invalid equation Is_Even?(%X): depends on undefined var %X
+
+... cut dead branches:
+
 
 Solving with old solver
 =======================
