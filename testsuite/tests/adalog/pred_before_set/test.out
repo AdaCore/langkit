@@ -13,10 +13,10 @@ All:
     %X <- 2
 
 ... without optimizations:
-Solution: [%X = 2, %Y = 1]
+Solution: [%Y = 1, %X = 2]
 
 ... cut dead branches:
-Solution: [%X = 2, %Y = 1]
+Solution: [%Y = 1, %X = 2]
 
 
 Solving with old solver

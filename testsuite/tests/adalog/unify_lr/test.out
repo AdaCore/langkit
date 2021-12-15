@@ -16,10 +16,10 @@ All:
     %X <-> %Y
 
 ... without optimizations:
-Solution: [%Y = 2, %X = 2]
+Solution: [%X = 2, %Y = 2]
 
 ... cut dead branches:
-Solution: [%Y = 2, %X = 2]
+Solution: [%X = 2, %Y = 2]
 
 ========================================================================
 
@@ -32,12 +32,12 @@ All:
     %X <-> %Y
 
 ... without optimizations:
-Solution: [%Y = 1, %X = 1]
-Solution: [%Y = 2, %X = 2]
+Solution: [%X = 1, %Y = 1]
+Solution: [%X = 2, %Y = 2]
 
 ... cut dead branches:
-Solution: [%Y = 1, %X = 1]
-Solution: [%Y = 2, %X = 2]
+Solution: [%X = 1, %Y = 1]
+Solution: [%X = 2, %Y = 2]
 
 ========================================================================
 
@@ -69,10 +69,10 @@ All:
     %X <-> %Y
 
 ... without optimizations:
-Solution: [%Y = 2, %X = 2]
+Solution: [%X = 2, %Y = 2]
 
 ... cut dead branches:
-Solution: [%Y = 2, %X = 2]
+Solution: [%X = 2, %Y = 2]
 
 ========================================================================
 
@@ -86,10 +86,10 @@ All:
     %X <-> %Y
 
 ... without optimizations:
-Solution: [%X = 2, %Y = 2]
+Solution: [%Y = 2, %X = 2]
 
 ... cut dead branches:
-Solution: [%X = 2, %Y = 2]
+Solution: [%Y = 2, %X = 2]
 
 
 Solving with old solver

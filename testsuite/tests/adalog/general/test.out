@@ -19,12 +19,12 @@ All:
 
 
 ... without optimizations:
-Solution: [%Y = 12, %X = 4]
-Solution: [%Y = 18, %X = 6]
+Solution: [%X = 4, %Y = 12]
+Solution: [%X = 6, %Y = 18]
 
 ... cut dead branches:
-Solution: [%Y = 12, %X = 4]
-Solution: [%Y = 18, %X = 6]
+Solution: [%X = 4, %Y = 12]
+Solution: [%X = 6, %Y = 18]
 
 
 Solving with old solver

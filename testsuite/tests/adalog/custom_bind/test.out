@@ -14,20 +14,20 @@ All:
     %Y <- Square(%X)
 
 ... without optimizations:
-Solution: [%Y = 1, %X = 1]
-Solution: [%Y = 4, %X = 2]
-Solution: [%Y = 9, %X = 3]
-Solution: [%Y = 16, %X = 4]
-Solution: [%Y = 25, %X = 5]
-Solution: [%Y = 36, %X = 6]
+Solution: [%X = 1, %Y = 1]
+Solution: [%X = 2, %Y = 4]
+Solution: [%X = 3, %Y = 9]
+Solution: [%X = 4, %Y = 16]
+Solution: [%X = 5, %Y = 25]
+Solution: [%X = 6, %Y = 36]
 
 ... cut dead branches:
-Solution: [%Y = 1, %X = 1]
-Solution: [%Y = 4, %X = 2]
-Solution: [%Y = 9, %X = 3]
-Solution: [%Y = 16, %X = 4]
-Solution: [%Y = 25, %X = 5]
-Solution: [%Y = 36, %X = 6]
+Solution: [%X = 1, %Y = 1]
+Solution: [%X = 2, %Y = 4]
+Solution: [%X = 3, %Y = 9]
+Solution: [%X = 4, %Y = 16]
+Solution: [%X = 5, %Y = 25]
+Solution: [%X = 6, %Y = 36]
 
 Solving relation:
 All:
@@ -43,10 +43,10 @@ All:
     %Y <- 36
 
 ... without optimizations:
-Solution: [%Y = 36, %X = 6]
+Solution: [%X = 6, %Y = 36]
 
 ... cut dead branches:
-Solution: [%Y = 36, %X = 6]
+Solution: [%X = 6, %Y = 36]
 
 
 Solving with old solver
