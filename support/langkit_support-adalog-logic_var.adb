@@ -33,8 +33,15 @@ package body Langkit_Support.Adalog.Logic_Var is
 
    procedure Reset (Self : Logic_Var) is
    begin
-      Dec_Ref (Self.Value);
-      Self.Reset := True;
+      --  Just like for other Logic_Var primitives, when ``Self`` is an alias
+      --  for another variable, redirect the primitive to the aliased variable.
+
+      if Self.Aliased_To /= null then
+         Reset (Self.Aliased_To);
+      else
+         Dec_Ref (Self.Value);
+         Self.Reset := True;
+      end if;
    end Reset;
 
    ----------------
