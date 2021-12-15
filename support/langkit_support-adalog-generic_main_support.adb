@@ -21,6 +21,7 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Command_Line;
 with Ada.Environment_Variables;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
@@ -222,6 +223,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
          then
             Put_Line ("ERROR: solutions are not the same");
             New_Line;
+            Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
          end if;
 
          --  Clean up, we are done
