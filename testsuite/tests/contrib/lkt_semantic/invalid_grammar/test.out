@@ -3,15 +3,15 @@ Resolving test.lkt
 Id   <RefId "foo_lexer" test.lkt:3:22-3:31>
      references <LexerDecl "foo_lexer" lexer_example.lkt:1:1-49:2>
 
-test.lkt:4:5: error: value declaration forbidden in grammar declaration
-4 |     val i: Int = 0
-  |     ^^^^^^^^^^^^^^
-
 Id   <RefId "Int" test.lkt:4:12-4:15>
      references <StructDecl prelude: "Int">
 
 Expr <NumLit test.lkt:4:18-4:19>
      has type <StructDecl prelude: "Int">
+
+test.lkt:4:5: error: value declaration forbidden in grammar declaration
+4 |     val i: Int = 0
+  |     ^^^^^^^^^^^^^^
 
 Id   <RefId "foo_lexer" test.lkt:9:22-9:31>
      references <LexerDecl "foo_lexer" lexer_example.lkt:1:1-49:2>

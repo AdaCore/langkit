@@ -1853,7 +1853,17 @@ class NamedTypeDecl(TypeDecl):
         pass
 
     @langkit_property()
-    def check_correctness_pre():
+    def check_legality():
+
+        # TODO: This implementation implies that we'll run full checking for
+        # all decls, even if they're in a context where we don't want to have
+        # them. Is that a good idea?
+        #
+        # If we run this check (which is essentially a syntax check but done
+        # via legality checks) in check_correctness_pre, we could possibly
+        # exempt the given nodes from further analysis, which might produce
+        # less noise in terms of error messages. To be investigated.
+
         return Entity.decls.filtermap(
             lambda d: d.error(
                 d.decl.decl_type_name
@@ -2488,9 +2498,7 @@ class SimpleTypeRef(TypeRef):
 
     @langkit_property(return_type=T.SemanticResult.array)
     def check_correctness_pre():
-
         d = Var(Entity.type_name.referenced_decl)
-
         return d.result_ref.then(
             lambda d: d.cast(T.TypeDecl).then(
                 lambda _: No(T.SemanticResult.array),
