@@ -30,6 +30,15 @@ with Langkit_Support.Vectors;
 
 package body Langkit_Support.Adalog.Generic_Main_Support is
 
+   --  The following booleans determine which solver configurations to run in
+   --  tests. The ``Setup_Traces`` procedure initializes them with default
+   --  values, possibly modified depending on environment variables, for
+   --  convenience when debugging tests.
+
+   Run_Sym_Without_Opts : Boolean;
+   Run_Sym_With_Opts    : Boolean;
+   Run_State_Machine    : Boolean;
+
    procedure Free is new Ada.Unchecked_Deallocation
      (Logic_Var_Record, Refs.Logic_Var);
 
@@ -93,8 +102,10 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
         (Left, Right : Solution_Vectors.Vector) return Boolean;
       --  Return whether the two vectors of solutions are equal
 
-      Solutions              : Solution_Vectors.Vector;
-      Solutions_Without_Opts : Solution_Vectors.Vector;
+      Solutions              : Solution_Vectors.Vector :=
+        Solution_Vectors.Empty_Vector;
+      Solutions_Without_Opts : Solution_Vectors.Vector :=
+        Solution_Vectors.Empty_Vector;
 
       function Solution_Callback (Vars : Logic_Var_Array) return Boolean;
       --  Callback for ``Solve``. Print the given solution and append it to
@@ -188,19 +199,27 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
       when Symbolic =>
          --  Solve both without and with optimizations
 
-         Put_Line ("... without optimizations:");
-         Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => False));
-         New_Line;
-         Solutions_Without_Opts := Solutions;
-         Solutions := Solution_Vectors.Empty_Vector;
+         if Run_Sym_Without_Opts then
+            Put_Line ("... without optimizations:");
+            Solve
+              (Rel, Solution_Callback'Access, (Cut_Dead_Branches => False));
+            New_Line;
+            Solutions_Without_Opts := Solutions;
+            Solutions := Solution_Vectors.Empty_Vector;
+         end if;
 
-         Put_Line ("... cut dead branches:");
-         Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
-         New_Line;
+         if Run_Sym_With_Opts then
+            Put_Line ("... cut dead branches:");
+            Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
+            New_Line;
+         end if;
 
          --  Check that we had the same results in both cases
 
-         if not Equivalent (Solutions_Without_Opts, Solutions) then
+         if Run_Sym_Without_Opts
+            and then Run_Sym_With_Opts
+            and then not Equivalent (Solutions_Without_Opts, Solutions)
+         then
             Put_Line ("ERROR: solutions are not the same");
             New_Line;
          end if;
@@ -211,9 +230,11 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
          Free (Solutions);
 
       when State_Machine =>
-         Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
-         Free (Solutions);
-         New_Line;
+         if Run_State_Machine then
+            Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
+            Free (Solutions);
+            New_Line;
+         end if;
       end case;
 
    exception
@@ -240,17 +261,28 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
    procedure Setup_Traces is
       package Env renames Ada.Environment_Variables;
+      Var_Name : constant String := "ADALOG_SOLVER_CFG";
+      Cfg      : constant String := Env.Value (Var_Name, Default => "");
    begin
       GNATCOLL.Traces.Parse_Config_File;
-      if Env.Exists ("ADALOG_SOLVER_KIND") then
-         if Env.Value ("ADALOG_SOLVER_KIND") = "SYM" then
-            T_Solver.Set_Kind (Symbolic);
-         elsif Env.Value ("ADALOG_SOLVER_KIND") = "SSM" then
-            T_Solver.Set_Kind (State_Machine);
-         else
-            raise Program_Error
-              with "Invalid value for env var ""ADALOG_SOLVER_KIND""";
-         end if;
+
+      Run_Sym_Without_Opts := False;
+      Run_Sym_With_Opts := False;
+      Run_State_Machine := False;
+
+      if Cfg = "" then
+         Run_Sym_Without_Opts := True;
+         Run_Sym_With_Opts := True;
+         Run_State_Machine := True;
+      elsif Cfg = "sym" then
+         Run_Sym_Without_Opts := True;
+      elsif Cfg = "sym-opts" then
+         Run_Sym_With_Opts := True;
+      elsif Cfg = "sm" then
+         Run_State_Machine := True;
+      else
+         raise Program_Error
+           with "Invalid value for env var """ & Var_Name & """";
       end if;
    end Setup_Traces;
 
