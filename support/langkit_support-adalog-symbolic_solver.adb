@@ -1099,30 +1099,21 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             Ignore := Solve_Compound (Self.Compound_Rel, Ctx);
 
          when Atomic =>
-            --  If we're trying to eval a singleton relation that doesn't
-            --  define anything, then it's an early binding error.
-            if Used_Var (Self.Atomic_Rel).Exists then
-               --  TODO??? This is incomplete for N_Preds, since they depend on
-               --  more than one var. Not very important.
-               raise Early_Binding_Error with
-                 "Invalid equation " & Image (Self.Atomic_Rel)
-                 & ": depends on undefined var "
-                 & Image (Used_Var (Self.Atomic_Rel).Logic_Var);
-            end if;
+            --  We want to use a single entry point for the solver:
+            --  ``Solve_Compound``. Create a trivial compound relation to wrap
+            --  the given atom.
 
-            if Defined_Var (Self.Atomic_Rel).Exists then
-               --  Reset defined var if it exists, and solve
-               Reset (Defined_Var (Self.Atomic_Rel).Logic_Var);
-               if Solve_Atomic (Self.Atomic_Rel) then
-                  Ignore := Solution_Callback
-                    ((1 => Defined_Var (Self.Atomic_Rel).Logic_Var));
-               end if;
-            elsif Solve_Atomic (Self.Atomic_Rel) then
-               --  Solve with empty vars array. TODO??? Maybe try to factor
-               --  that code?
-               Ignore := Solution_Callback ((1 .. 0 => <>));
-            end if;
-
+            declare
+               C : Compound_Relation := (Kind => Kind_All, Rels => <>);
+            begin
+               C.Rels.Append (Self);
+               Ignore := Solve_Compound (C, Ctx);
+               C.Rels.Destroy;
+            exception
+               when others =>
+                  C.Rels.Destroy;
+                  raise;
+            end;
       end case;
 
       Cleanup;
