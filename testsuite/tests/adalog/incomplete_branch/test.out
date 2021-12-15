@@ -10,10 +10,10 @@ Any:
 
 
 ... without optimizations:
-Solution: [%X = 1]
+Solution: [%X = 1, %Y = <undefined>]
 
 ... cut dead branches:
-Solution: [%X = 1]
+Solution: [%X = 1, %Y = <undefined>]
 
 
 Solving with old solver

@@ -14,12 +14,12 @@ Any:
 
 
 ... without optimizations:
-Solution: [%Y = 1, %X = 1]
-Solution: [%Y = 12, %X = 3]
+Solution: [%X = 1, %Y = 1]
+Solution: [%X = 3, %Y = 12]
 
 ... cut dead branches:
-Solution: [%Y = 1, %X = 1]
-Solution: [%Y = 12, %X = 3]
+Solution: [%X = 1, %Y = 1]
+Solution: [%X = 3, %Y = 12]
 
 
 Solving with old solver
