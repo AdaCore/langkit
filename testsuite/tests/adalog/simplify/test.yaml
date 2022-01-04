@@ -1,0 +1,5 @@
+driver: adalog
+
+# The complexity of the equation requires the simplify optimization to solve it
+# in a reasonable time, so there is no point testing other configurations.
+solver-cfg: sym-opts

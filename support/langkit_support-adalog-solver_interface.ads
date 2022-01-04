@@ -139,6 +139,10 @@ package Langkit_Support.Adalog.Solver_Interface is
    --------------------------
 
    type Solve_Options_Type is record
+      Simplify : Boolean := True;
+      --  Try to split Any relations in ``Self`` looking for contradictions in
+      --  its atoms through a depth first traversal.
+
       Cut_Dead_Branches : Boolean := True;
       --  Whether to enable an optimization that will cut branches that
       --  necessarily contain falsy solutions.

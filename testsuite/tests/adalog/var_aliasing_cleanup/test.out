@@ -30,7 +30,7 @@ All:
 Solution: [%X = 12, %Y = 15]
 Solution: [%X = 18, %Y = 18]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 12, %Y = 15]
 Solution: [%X = 18, %Y = 18]
 

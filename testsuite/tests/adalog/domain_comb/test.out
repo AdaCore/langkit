@@ -22,7 +22,7 @@ Solution: [%X = 3]
 Solution: [%X = 4]
 Solution: [%X = 5]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 3]
 Solution: [%X = 4]
 Solution: [%X = 5]

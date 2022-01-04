@@ -17,7 +17,7 @@ Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]
@@ -48,7 +48,7 @@ Solution: [%X = 1, %Y = 10]
 Solution: [%X = 2, %Y = 10]
 Solution: [%X = 3, %Y = 10]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 1, %Y = 10]
 Solution: [%X = 2, %Y = 10]
 Solution: [%X = 3, %Y = 10]
@@ -66,7 +66,7 @@ All: main.adb:38
 
 ... without optimizations:
 
-... cut dead branches:
+... with all optimizations:
 
 ========================================================================
 
@@ -77,7 +77,7 @@ All: main.adb:42
 
 ... without optimizations:
 
-... cut dead branches:
+... with all optimizations:
 
 ========================================================================
 
@@ -91,7 +91,7 @@ Any: main.adb:45
 Solution: [%Y = <undefined>, %X = 1]
 Solution: [%Y = <undefined>, %X = 2]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%Y = <undefined>, %X = 1]
 Solution: [%Y = <undefined>, %X = 2]
 
@@ -104,7 +104,7 @@ Any: main.adb:48
 
 ... without optimizations:
 
-... cut dead branches:
+... with all optimizations:
 
 ========================================================================
 
@@ -122,7 +122,7 @@ Any: main.adb:51
 
 ... without optimizations:
 
-... cut dead branches:
+... with all optimizations:
 
 ========================================================================
 
@@ -142,7 +142,7 @@ All: main.adb:56
 ... without optimizations:
 Solution: [%X = 2, %Y = 2]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 2, %Y = 2]
 
 

@@ -86,4 +86,9 @@ package Langkit_Support.Adalog is
    --  Trace to show the result of relation constant folding pass done during
    --  the preparation stage in the symbolic solver.
 
+   Simplify_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.SOLVER.SIMPLIFY",
+      Default => GNATCOLL.Traces.From_Config);
+   --  Trace to show the progress of simplifying a relation before solving it
+
 end Langkit_Support.Adalog;

@@ -18,7 +18,7 @@ All:
 ... without optimizations:
 Solution: [%X = 2, %Y = 2]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 2, %Y = 2]
 
 ========================================================================
@@ -35,7 +35,7 @@ All:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 
@@ -53,7 +53,7 @@ All:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 
@@ -71,7 +71,7 @@ All:
 ... without optimizations:
 Solution: [%X = 2, %Y = 2]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 2, %Y = 2]
 
 ========================================================================
@@ -88,7 +88,7 @@ All:
 ... without optimizations:
 Solution: [%Y = 2, %X = 2]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%Y = 2, %X = 2]
 
 

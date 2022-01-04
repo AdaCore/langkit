@@ -12,7 +12,7 @@ Any:
 ... without optimizations:
 Solution: [%X = 1, %Y = <undefined>]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 1, %Y = <undefined>]
 
 

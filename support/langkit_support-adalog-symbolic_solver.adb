@@ -159,7 +159,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Relation that is prepared for solving (see the ``Prepare_Relation``
    --  function below).
 
-   function Prepare_Relation (Self : Relation) return Prepared_Relation;
+   function Prepare_Relation
+     (Self : Relation; Opts : Solve_Options_Type) return Prepared_Relation;
    --  Prepare a relation for the solver: simplify it and create a list of all
    --  the logic variables it references, assigning an Id to each.
    --
@@ -209,6 +210,22 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  return whether they are all satisfied: if they are, the logic variables
    --  are assigned values, so it is possible to invoke the user callback for
    --  solutions.
+
+   function Simplify
+     (Self     : Relation;
+      Vars     : Logic_Var_Array;
+      Sort_Ctx : Sort_Context) return Relation;
+   --  Try to split Any relations in ``Self`` looking for contradictions in its
+   --  atoms through a depth first traversal. Return the simplified relation.
+
+   function Has_Contradiction
+     (Atoms, Unifies : Atomic_Relation_Vector;
+      Vars           : Logic_Var_Array;
+      Sort_Ctx       : Sort_Context) return Boolean;
+   --  Return whether the given sequence of atoms contains a contradiction,
+   --  i.e. if two or more of its atoms make each other unsatisfied. This
+   --  function works even for incomplete sequences, for instance when one atom
+   --  uses a variable that no atom defines.
 
    type Solving_Context is record
       Cb : Callback_Type;
@@ -273,10 +290,19 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    end record;
    --  Context for the solving of a compound relation
 
+   function Create (Vars : Logic_Var_Array) return Sort_Context;
+   --  Create a new sorting context. Use ``Destroy`` to free allocated
+   --  resources.
+
    procedure Clear (Sort_Ctx : Sort_Context);
    --  Clear the data of the sorting context
 
-   function Create return Solving_Context;
+   procedure Destroy (Sort_Ctx : in out Sort_Context);
+   --  Free resources for the sorting context
+
+   function Create
+     (Cb   : Callback_Type;
+      Vars : Logic_Var_Array_Access) return Solving_Context;
    --  Create a new instance of a solving context. The data will be cleaned up
    --  and deallocated by a call to ``Destroy``.
 
@@ -287,6 +313,23 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
      (Self : Compound_Relation; Ctx : Solving_Context) return Boolean;
    --  Look for valid solutions in ``Self`` & ``Ctx``. Return whether to
    --  continue looking for other solutions.
+
+   ------------
+   -- Create --
+   ------------
+
+   function Create (Vars : Logic_Var_Array) return Sort_Context is
+   begin
+      return Result : constant Sort_Context := new Sort_Context_Type do
+
+         --  Initialize the ``Using_Atoms`` vector of lists for topo sort to
+         --  have one entry per variable.
+
+         for Dummy in Vars'Range loop
+            Result.Using_Atoms.Append (Atom_Lists.Create);
+         end loop;
+      end return;
+   end Create;
 
    -----------
    -- Clear --
@@ -307,10 +350,16 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -- Create --
    ------------
 
-   function Create return Solving_Context is
+   function Create
+     (Cb   : Callback_Type;
+      Vars : Logic_Var_Array_Access) return Solving_Context is
    begin
       return Ret : Solving_Context do
-         Ret.Sort_Ctx := new Sort_Context_Type;
+         Ret.Cb := Cb;
+         Ret.Vars := Vars;
+         Ret.Atoms := new Atomic_Relation_Vector;
+         Ret.Unifies := new Atomic_Relation_Vector;
+         Ret.Sort_Ctx := Create (Vars.all);
          Ret.Tried_Solutions := new Natural'(0);
       end return;
    end Create;
@@ -319,7 +368,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -- Prepare_Relation --
    ----------------------
 
-   function Prepare_Relation (Self : Relation) return Prepared_Relation is
+   function Prepare_Relation
+     (Self : Relation; Opts : Solve_Options_Type) return Prepared_Relation
+   is
       --  For determinism, collect variables in the order in which they appear
       --  in the equation.
       Vec : Logic_Var_Vectors.Vector;
@@ -333,10 +384,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       procedure Process_Atom (Self : Atomic_Relation_Type);
       --  Collect variables from ``Self``
 
-      function Process (Self : Relation) return Relation;
-      --  Return a relation (with its dedicated ownership share) that is
-      --  possibly a simplified version of ``Self``. Add to ``Vec`` the
-      --  variables reference in ``Self`` during the traversal.
+      function Fold_And_Track_Vars (Self : Relation) return Relation;
+      --  Return a relation (with its dedicated ownership share) with
+      --  True/False relations folded. Add to ``Vec`` the variables reference
+      --  in ``Self`` during the traversal.
 
       ---------
       -- Add --
@@ -373,11 +424,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end case;
       end Process_Atom;
 
-      -------------
-      -- Process --
-      -------------
+      -------------------------
+      -- Fold_And_Track_Vars --
+      -------------------------
 
-      function Process (Self : Relation) return Relation is
+      function Fold_And_Track_Vars (Self : Relation) return Relation is
       begin
          --  For atomic relations, just add the vars it contains. For compound
          --  relations, just recurse over sub-relations.
@@ -425,7 +476,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             begin
                for R of Self.Compound_Rel.Rels loop
                   Last_Rel := Last_Rel + 1;
-                  Rels (Last_Rel) := Process (R);
+                  Rels (Last_Rel) := Fold_And_Track_Vars (R);
 
                   --  If we got a neutral or absorbing relation, simplify the
                   --  returned compound.
@@ -511,35 +562,50 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                end if;
             end;
          end case;
-      end Process;
+      end Fold_And_Track_Vars;
 
-      --  Simplify the input relation and add all variables to ``Vars`` in the
-      --  same pass.
+      --  Fold True/False atoms in the input relation and add all variables to
+      --  ``Vars`` in the same pass.
 
-      Simplified_Relation : constant Relation := Process (Self);
+      Result          : Prepared_Relation;
+      Folded_Relation : Relation := Fold_And_Track_Vars (Self);
    begin
       if Cst_Folding_Trace.Is_Active then
          Cst_Folding_Trace.Trace ("After constant folding:");
-         Cst_Folding_Trace.Trace (Image (Simplified_Relation));
+         Cst_Folding_Trace.Trace (Image (Folded_Relation));
       end if;
 
-      return Result : constant Prepared_Relation :=
-        (Rel  => Simplified_Relation,
-         Vars => new Logic_Var_Array (1 .. Vec.Length))
-      do
-         --  Convert the ``Vars`` vector into the ``Result.Vars`` array and
-         --  assign Ids to all variables.
+      --  Convert the ``Vars`` vector into the ``Result.Vars`` array and
+      --  assign Ids to all variables.
 
-         for I in Result.Vars.all'Range loop
-            declare
-               V : Logic_Var renames Result.Vars.all (I);
-            begin
-               V := Vec.Get (I);
-               Set_Id (V, I);
-            end;
-         end loop;
-         Vec.Destroy;
-      end return;
+      Result.Vars := new Logic_Var_Array (1 .. Vec.Length);
+      for I in Result.Vars.all'Range loop
+         declare
+            V : Logic_Var renames Result.Vars.all (I);
+         begin
+            V := Vec.Get (I);
+            Set_Id (V, I);
+         end;
+      end loop;
+      Vec.Destroy;
+
+      --  If requested, simplify the relation, trying to find contradictions
+      --  between related atoms with a recursive search.
+
+      if Opts.Simplify then
+         declare
+            Sort_Ctx : Sort_Context := Create (Result.Vars.all);
+         begin
+            Result.Rel :=
+              Simplify (Folded_Relation, Result.Vars.all, Sort_Ctx);
+            Dec_Ref (Folded_Relation);
+            Destroy (Sort_Ctx);
+         end;
+      else
+         Result.Rel := Folded_Relation;
+      end if;
+
+      return Result;
    end Prepare_Relation;
 
    --------------------
@@ -801,6 +867,517 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       return True;
    end Evaluate_Atoms;
 
+   --------------
+   -- Simplify --
+   --------------
+
+   function Simplify
+     (Self     : Relation;
+      Vars     : Logic_Var_Array;
+      Sort_Ctx : Sort_Context) return Relation
+   is
+      Iter_Count : Natural := 0;
+      --  Number of times we went through the loop in ``Simplify.Process``, for
+      --  logging purposes.
+
+      Atoms, Unifies : Atomic_Relation_Vector :=
+        Atomic_Relation_Vectors.Empty_Vector;
+      --  Non-Unify and Unify atoms that must be considered in ``Process`` when
+      --  looking for contradictions in ``Self``.
+
+      procedure Cut_Atoms (Atoms_Mark, Unifies_Mark : Natural);
+      --  Remove items in ``Atoms`` past the ``Atoms_Mark`` index and in
+      --  ``Unifies`` past the ``Unifies_Mark`` index. Destroy the
+      --  corresponding ownership shares.
+
+      function Process (Self : Relation) return Relation
+        with Pre => Self.Kind = Compound
+                    and then Self.Compound_Rel.Kind = Kind_All;
+      --  Try to simplify ``Self``, and return a new relation (or ``Self`` with
+      --  a new ownership share). Set ``Continue`` to True if at least one
+      --  simplification occurred.
+
+      ---------------
+      -- Cut_Atoms --
+      ---------------
+
+      procedure Cut_Atoms (Atoms_Mark, Unifies_Mark : Natural) is
+      begin
+         for Dummy in reverse Atoms_Mark + 1 .. Atoms.Length loop
+            declare
+               R : Relation := Atoms.Pop;
+            begin
+               Dec_Ref (R);
+            end;
+         end loop;
+
+         for Dummy in reverse Unifies_Mark + 1 .. Unifies.Length loop
+            declare
+               R : Relation := Unifies.Pop;
+            begin
+               Dec_Ref (R);
+            end;
+         end loop;
+      end Cut_Atoms;
+
+      -------------
+      -- Process --
+      -------------
+
+      function Process (Self : Relation) return Relation is
+         Atoms_Mark   : constant Natural := Atoms.Length;
+         Unifies_Mark : constant Natural := Unifies.Length;
+         --  Length for these vectors at the point of this call to ``Process``.
+         --  This call and its recursions may append atoms to these vectors, so
+         --  we must restore their original length before returning to our
+         --  caller.
+
+         Anys : Relation_Vectors.Vector;
+         --  List of Any to consider as direct sub-relations in ``Self``
+
+         Atoms_Changed : Boolean := True;
+         --  We run a fixpoint algorithm: as long as atoms (including Unify
+         --  ones) keeps growing, look for new contradictions in ``Anys``.
+         --  Everytime the simplification of an ``Any`` relation adds items to
+         --  ``Atoms`` or ``Unifies``, new opportunities to find contradictions
+         --  in ``Anys` may aride. This boolean keeps track of whether
+         --  ``Atoms`` or ``Unifies`` growed since the last iteration.
+
+         procedure Add
+           (Self : Relation; Update_Atoms_Changed : Boolean := True);
+         --  Append ``Self`` to ``Anys`` if it is an Any relation, to
+         --  ``Unifies`` if it is a Unify relation, or to ``Atoms`` otherwise.
+         --
+         --  Set ``Atoms_Changed`` to True if 1) ``Update_Atoms_Changed`` is
+         --  True and 2) this modifies ``Atoms`` or ``Unifies``.
+         --
+         --  Calling this on an All relation is invalid.
+
+         procedure Cleanup;
+         --  Restore the ``Atoms`` and ``Unifies`` vectors, plus free the
+         --  ``Anys`` vector.
+
+         ---------
+         -- Add --
+         ---------
+
+         procedure Add
+           (Self : Relation; Update_Atoms_Changed : Boolean := True) is
+         begin
+            if Self.Kind = Compound then
+               case Self.Compound_Rel.Kind is
+                  when Kind_Any =>
+                     Inc_Ref (Self);
+                     Anys.Append (Self);
+                  when Kind_All =>
+                     for R of Self.Compound_Rel.Rels loop
+                        Add (R);
+                     end loop;
+               end case;
+
+            elsif Self.Atomic_Rel.Kind = Unify then
+               Inc_Ref (Self);
+               Unifies.Append (Self);
+               if Update_Atoms_Changed then
+                  Atoms_Changed := True;
+               end if;
+
+            else
+               Inc_Ref (Self);
+               Atoms.Append (Self);
+               if Update_Atoms_Changed then
+                  Atoms_Changed := True;
+               end if;
+            end if;
+         end Add;
+
+         -------------
+         -- Cleanup --
+         -------------
+
+         procedure Cleanup is
+         begin
+            --  Remove the atoms/unifies we have added in this instance of
+            --  ``Process``, and destroy the ownership share we have for them.
+
+            Cut_Atoms (Atoms_Mark, Unifies_Mark);
+
+            --  Likewise, free the Any relations we tracked
+
+            for A of Anys loop
+               declare
+                  R : Relation := A;
+               begin
+                  Dec_Ref (R);
+               end;
+            end loop;
+            Anys.Destroy;
+
+            if Simplify_Trace.Is_Active then
+               Simplify_Trace.Decrease_Indent;
+            end if;
+         end Cleanup;
+
+      begin
+         if Simplify_Trace.Is_Active then
+            Simplify_Trace.Increase_Indent ("Running on:");
+            Simplify_Trace.Trace (Image (Self));
+         end if;
+
+         --  Decompose ``Self`` into atoms, Unify and Any nodes
+
+         declare
+            Subrels : Relation_Vectors.Vector renames Self.Compound_Rel.Rels;
+         begin
+            for I in 1 .. Subrels.Length loop
+               Add (Subrels.Get (I));
+            end loop;
+         end;
+
+         --  Now run our fixpoint
+
+         while Atoms_Changed loop
+            Atoms_Changed := False;
+            Iter_Count := Iter_Count + 1;
+            if Simplify_Trace.Is_Active then
+               Simplify_Trace.Trace ("Iteration count:" & Iter_Count'Image);
+            end if;
+
+            --  If can find a contradiction just looking at the atoms that are
+            --  direct sub-relations of ``Self``, we can replace ``Self`` with
+            --  a logic False.
+
+            if Has_Contradiction (Atoms, Unifies, Vars, Sort_Ctx) then
+               Cleanup;
+               return Create_False;
+            end if;
+
+            --  Go through all alternatives in all Any relations and try to
+            --  find contradictions there to simplify/remove these Any
+            --  relations.
+            --
+            --  For both iterations, go through relations in reverse order so
+            --  that we can remove the item being processing from its vector
+            --  without breaking the iteration.
+
+            for Any_Idx in reverse 1 .. Anys.Length loop
+               declare
+                  Any         : Relation := Anys.Get (Any_Idx);
+                  Any_Subrels : Relation_Vectors.Vector renames
+                    Any.Compound_Rel.Rels;
+
+                  function Any_Img return String
+                  is (if Any.Debug_Info = null
+                         or else Any.Debug_Info.all = ""
+                      then "Any" & Any_Idx'Image
+                      else "Any [" & Any.Debug_Info.all & "]");
+               begin
+                  if Simplify_Trace.Is_Active then
+                     Simplify_Trace.Trace ("Trying to simplify " & Any_Img);
+                  end if;
+
+                  for Alt_Idx in reverse 1 .. Any_Subrels.Length loop
+                     declare
+                        Alt : Relation := Any_Subrels.Get (Alt_Idx);
+
+                        function Alt_Img return String
+                        is ((if Alt.Debug_Info = null
+                                or else Alt.Debug_Info.all = ""
+                             then "alt" & Alt_Idx'Image
+                             else "alt [" & Alt.Debug_Info.all & "]")
+                            & " of " & Any_Img);
+                     begin
+                        if Simplify_Trace.Is_Active then
+                           Simplify_Trace.Trace
+                             ("Trying to simplify " & Alt_Img);
+                        end if;
+
+                        if Alt.Kind = Compound then
+
+                           --  The only compound relations that Any relations
+                           --  can have are All relations.
+
+                           pragma Assert (Alt.Compound_Rel.Kind = Kind_All);
+
+                           Alt := Process (Alt);
+
+                        else
+                           --  Look for a contradiction with this ``Alt`` atom.
+                           --  To do this, we must add ``Alt`` to our knowledge
+                           --  base just the time to check for contradictions,
+                           --  and rollback the knowledge base right after
+                           --  that. This is why we must not update
+                           --  ``Atoms_Changed``: this operation should not
+                           --  trigger another inner loop iteration.
+
+                           declare
+                              Atoms_Mark   : constant Natural := Atoms.Length;
+                              Unifies_Mark : constant Natural :=
+                                Unifies.Length;
+                           begin
+                              Add (Alt, Update_Atoms_Changed => False);
+
+                              if Has_Contradiction
+                                (Atoms, Unifies, Vars, Sort_Ctx)
+                              then
+                                 Alt := Create_False;
+                              else
+                                 --  Increase ``Alt``'s reference count so that
+                                 --  we have always have a new ownership share
+                                 --  for ``Alt`` in the code below: other
+                                 --  branches contain assignments to ``Alt``
+                                 --  which also create an ownership share.
+
+                                 Inc_Ref (Alt);
+                              end if;
+
+                              Cut_Atoms (Atoms_Mark, Unifies_Mark);
+                           end;
+                        end if;
+
+                        --  Destroy the ownership share that ``Any`` has on
+                        --  this alternative, as we are going to replace it
+                        --  with ``Alt`` (or even remove it).
+
+                        declare
+                           R : Relation := Any_Subrels.Get (Alt_Idx);
+                        begin
+                           Dec_Ref (R);
+                        end;
+
+                        --  If this alternative leads to a contradiction, we
+                        --  can remove it from the ``Any`` relation we are
+                        --  currently processing.
+
+                        if Alt.Kind = Atomic
+                           and then Alt.Atomic_Rel.Kind = False
+                        then
+                           Dec_Ref (Alt);
+                           Any_Subrels.Remove_At (Alt_Idx);
+
+                           --  Moreover, if there is only one alternative left
+                           --  in this ``Any``, we can get rid of it and
+                           --  migrate its only alternative to
+                           --  ``Atoms``/``Unifies``/``Anys``.
+
+                           if Any_Subrels.Length = 1 then
+                              Add (Any.Compound_Rel.Rels.Get (1));
+                              Dec_Ref (Any);
+                              Anys.Remove_At (Any_Idx);
+                           end if;
+
+                        elsif Alt.Kind = Compound
+                              and then Alt.Compound_Rel.Kind = Kind_Any
+                        then
+                           --  Simplification replaced an All relation with an
+                           --  Any one, however we cannot have an Any relation
+                           --  in another Any relation: inline the former into
+                           --  the latter.
+
+                           declare
+                              Nested_Subrels : Relation_Vectors.Vector renames
+                                Alt.Compound_Rel.Rels;
+                           begin
+                              --  Move ``Alt`` sub-relations to ``Any`` (so no
+                              --  ownership share modification) and get rid of
+                              --  ``Alt``.
+
+                              for R of Nested_Subrels loop
+                                 Any_Subrels.Append (R);
+                              end loop;
+                              Nested_Subrels.Clear;
+
+                              Dec_Ref (Alt);
+                              Any_Subrels.Remove_At (Alt_Idx);
+
+                              --  TODO??? In principle there should not be
+                              --  empty Any relations hanging around, so given
+                              --  that we appended at least one relations to
+                              --  ``Any_Subrels``, that vector should not be
+                              --  empty after the call to ``Remove_At``.
+
+                              pragma Assert (Any_Subrels.Length /= 0);
+                           end;
+
+                        else
+                           --  We could not split this alternative, but at
+                           --  least we can use its simplified version.
+
+                           Any_Subrels.Set (Alt_Idx, Alt);
+                        end if;
+                     end;
+                  end loop;
+               end;
+            end loop;
+         end loop;
+
+         --  Build the result from ``Anys`` plus all items in
+         --  ``Atoms``/``Unifies`` which we added during this call.
+
+         return Result : Relation do
+            declare
+               Count : constant Positive :=
+                 (Atoms.Length - Atoms_Mark)
+                 + (Unifies.Length - Unifies_Mark)
+                 + Anys.Length;
+
+               Items : Relation_Array (1 .. Count);
+               Last  : Natural := 0;
+            begin
+               --  The ``Items`` array just borrows relations: we just create
+               --  one ownership share for ``Result`` at the end, and the call
+               --  to ``Cleanup`` will then destroy the shares assigned to
+               --  ``Atoms``, ``Unifies`` and ``Anys``.
+
+               for I in Atoms_Mark + 1 .. Atoms.Length loop
+                  Last := Last + 1;
+                  Items (Last) := Atoms.Get (I);
+               end loop;
+
+               for I in Unifies_Mark + 1 .. Unifies.Length loop
+                  Last := Last + 1;
+                  Items (Last) := Unifies.Get (I);
+               end loop;
+
+               for A of Anys loop
+                  Last := Last + 1;
+                  Items (Last) := A;
+               end loop;
+
+               if Count = 1 then
+                  Result := Items (1);
+                  Inc_Ref (Result);
+               else
+                  Result := Create_All (Items, Self.Debug_Info);
+               end if;
+            end;
+
+            Cleanup;
+         end return;
+      end Process;
+
+      Result : Relation;
+   begin
+      --  We can only simplify compound relations, so return atoms unchanged
+
+      if Self.Kind = Atomic then
+         Inc_Ref (Self);
+         return Self;
+
+      elsif Self.Compound_Rel.Kind = Kind_Any then
+
+         --  Simplify each alternative separately: there can be no interaction
+         --  between alternatives of a root conjuction.
+
+         declare
+            Subrels : Relation_Vectors.Vector renames Self.Compound_Rel.Rels;
+            Alt     : Relation;
+         begin
+            for I in 1 .. Subrels.Length loop
+               Alt := Subrels.Get (I);
+               Subrels.Set (I, Simplify (Alt, Vars, Sort_Ctx));
+               Dec_Ref (Alt);
+            end loop;
+
+            Inc_Ref (Self);
+            return Self;
+         end;
+      end if;
+
+      --  At this point, we know we are dealing with an All relation.  Create
+      --  an ownership share for the tentative result: the input All relation
+      --  itself.
+
+      Result := Self;
+      Inc_Ref (Result);
+
+      declare
+         New_Result : constant Relation := Process (Result);
+      begin
+         Dec_Ref (Result);
+         Result := New_Result;
+      end;
+
+      if Simplify_Trace.Is_Active then
+         Simplify_Trace.Trace ("Simplification completed");
+         Simplify_Trace.Trace (Image (Result));
+         Simplify_Trace.Trace ("Iterations:" & Iter_Count'Image);
+      end if;
+
+      Atoms.Destroy;
+      Unifies.Destroy;
+      return Result;
+   end Simplify;
+
+   -----------------------
+   -- Has_Contradiction --
+   -----------------------
+
+   function Has_Contradiction
+     (Atoms, Unifies : Atomic_Relation_Vector;
+      Vars           : Logic_Var_Array;
+      Sort_Ctx       : Sort_Context) return Boolean is
+   begin
+      if Simplify_Trace.Is_Active then
+         Simplify_Trace.Increase_Indent ("Looking for a contradiction");
+         Simplify_Trace.Trace (Image (Atoms));
+      end if;
+
+      declare
+         use Atomic_Relation_Vectors;
+         Dummy        : Boolean;
+         Sorted_Atoms : constant Elements_Array :=
+           Topo_Sort (Atoms, Unifies, Vars, Sort_Ctx, Dummy);
+      begin
+         if Simplify_Trace.Is_Active then
+            Simplify_Trace.Trace ("After partial topo sort");
+            Simplify_Trace.Trace (Image (Sorted_Atoms));
+         end if;
+
+         --  Once the partial topological sort has been done, we can just
+         --  run the linear evaluator to check if there is a contradiction.
+
+         return Result : constant Boolean := not Evaluate_Atoms (Sorted_Atoms)
+         do
+            if Simplify_Trace.Is_Active then
+               if Result then
+                  Simplify_Trace.Trace ("Contradiction found");
+               else
+                  Simplify_Trace.Trace ("No contradiction found");
+               end if;
+            end if;
+
+            if Simplify_Trace.Is_Active then
+               Simplify_Trace.Decrease_Indent;
+            end if;
+
+            Cleanup_Aliases (Vars);
+            Clear (Sort_Ctx);
+         end return;
+      end;
+   end Has_Contradiction;
+
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Sort_Ctx : in out Sort_Context) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Sort_Context_Type, Sort_Context);
+   begin
+
+      Atom_Lists.Destroy (Sort_Ctx.N_Preds);
+      Atom_Lists.Destroy (Sort_Ctx.Working_Set);
+      for I in Sort_Ctx.Using_Atoms.First_Index
+               .. Sort_Ctx.Using_Atoms.Last_Index
+      loop
+         Atom_Lists.Destroy (Sort_Ctx.Using_Atoms.Get_Access (I).all);
+      end loop;
+      Sort_Ctx.Using_Atoms.Destroy;
+
+      Free (Sort_Ctx);
+   end Destroy;
+
    -------------
    -- Destroy --
    -------------
@@ -808,8 +1385,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    procedure Destroy (Ctx : in out Solving_Context) is
       procedure Free is new Ada.Unchecked_Deallocation
         (Atomic_Relation_Vector, Atoms_Vector_Access);
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Sort_Context_Type, Sort_Context);
       procedure Free is new Ada.Unchecked_Deallocation
         (Natural, Nat_Access);
    begin
@@ -820,15 +1395,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Free (Ctx.Unifies);
       Free (Ctx.Atoms);
       Free (Ctx.Tried_Solutions);
-
-      Atom_Lists.Destroy (Ctx.Sort_Ctx.N_Preds);
-      Atom_Lists.Destroy (Ctx.Sort_Ctx.Working_Set);
-      for I in  Ctx.Sort_Ctx.Using_Atoms.First_Index ..
-        Ctx.Sort_Ctx.Using_Atoms.Last_Index
-      loop
-         Atom_Lists.Destroy (Ctx.Sort_Ctx.Using_Atoms.Get_Access (I).all);
-      end loop;
-      Ctx.Sort_Ctx.Using_Atoms.Destroy;
+      Destroy (Ctx.Sort_Ctx);
 
       --  Cleanup logic vars for future solver runs using them. Note that no
       --  aliasing information is supposed to be left at this stage.
@@ -838,8 +1405,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Set_Id (V, 0);
       end loop;
       Free (Ctx.Vars);
-
-      Free (Ctx.Sort_Ctx);
    end Destroy;
 
    -------------
@@ -1416,7 +1981,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    is
       PRel   : Prepared_Relation;
       Rel    : Relation renames PRel.Rel;
-      Ctx    : Solving_Context := Create;
+      Ctx    : Solving_Context;
       Ignore : Boolean;
 
       procedure Cleanup;
@@ -1433,26 +1998,14 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end Cleanup;
 
    begin
-      Ctx.Cut_Dead_Branches := Solve_Options.Cut_Dead_Branches;
-
       if Solver_Trace.Is_Active then
          Solver_Trace.Trace ("Solving equation:");
          Solver_Trace.Trace (Image (Self));
       end if;
 
-      PRel := Prepare_Relation (Self);
-
-      Ctx.Cb := Solution_Callback'Unrestricted_Access.all;
-      Ctx.Vars := PRel.Vars;
-      Ctx.Atoms := new Atomic_Relation_Vector;
-      Ctx.Unifies := new Atomic_Relation_Vector;
-
-      --  Initialize the ``Using_Atoms`` vector of lists for topo sort to have
-      --  one entry per variable.
-
-      for Dummy in Ctx.Vars.all'Range loop
-         Ctx.Sort_Ctx.Using_Atoms.Append (Atom_Lists.Create);
-      end loop;
+      PRel := Prepare_Relation (Self, Solve_Options);
+      Ctx := Create (Solution_Callback'Unrestricted_Access.all, PRel.Vars);
+      Ctx.Cut_Dead_Branches := Solve_Options.Cut_Dead_Branches;
 
       case Rel.Kind is
          when Compound =>
