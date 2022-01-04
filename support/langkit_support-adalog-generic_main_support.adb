@@ -204,15 +204,15 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
          if Run_Sym_Without_Opts then
             Put_Line ("... without optimizations:");
             Solve
-              (Rel, Solution_Callback'Access, (Cut_Dead_Branches => False));
+              (Rel, Solution_Callback'Access, (others => False));
             New_Line;
             Solutions_Without_Opts := Solutions;
             Solutions := Solution_Vectors.Empty_Vector;
          end if;
 
          if Run_Sym_With_Opts then
-            Put_Line ("... cut dead branches:");
-            Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
+            Put_Line ("... with all optimizations:");
+            Solve (Rel, Solution_Callback'Access, (others => True));
             New_Line;
          end if;
 
@@ -234,7 +234,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
       when State_Machine =>
          if Run_State_Machine then
-            Solve (Rel, Solution_Callback'Access, (Cut_Dead_Branches => True));
+            Solve (Rel, Solution_Callback'Access, (others => True));
             Free (Solutions);
             New_Line;
          end if;

@@ -33,7 +33,7 @@ Solution: [%X = 10, %Y = 10]
 Solution: [%X = 11, %Y = 11]
 Solution: [%X = <undefined>, %Y = <undefined>]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]

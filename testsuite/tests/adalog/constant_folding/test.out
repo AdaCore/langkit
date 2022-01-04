@@ -11,7 +11,7 @@ Any: neutral-any-1
 [LANGKIT.SOLVER.CONSTANT_FOLDING] %X <- 1
 Solution: [%X = 1]
 
-... cut dead branches:
+... with all optimizations:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] %X <- 1
 Solution: [%X = 1]
@@ -25,7 +25,7 @@ Any: neutral-any-2
 [LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] False neutral-any-2
 
-... cut dead branches:
+... with all optimizations:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] False neutral-any-2
 
@@ -39,7 +39,7 @@ All: neutral-all-1
 [LANGKIT.SOLVER.CONSTANT_FOLDING] %X <- 1
 Solution: [%X = 1]
 
-... cut dead branches:
+... with all optimizations:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] %X <- 1
 Solution: [%X = 1]
@@ -57,7 +57,7 @@ Any: neutral-all-2
 [LANGKIT.SOLVER.CONSTANT_FOLDING] True
 Solution: []
 
-... cut dead branches:
+... with all optimizations:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] True
 Solution: []
@@ -78,7 +78,7 @@ Solution: [%X = 2]
 Solution: [%X = <undefined>]
 Solution: [%X = 1]
 
-... cut dead branches:
+... with all optimizations:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] Any: absorb-any
 _LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 2
@@ -98,7 +98,7 @@ All: absorb-all
 [LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] False
 
-... cut dead branches:
+... with all optimizations:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] False
 

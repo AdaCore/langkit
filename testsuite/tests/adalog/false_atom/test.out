@@ -5,7 +5,7 @@ Solving relation:
 False
 ... without optimizations:
 
-... cut dead branches:
+... with all optimizations:
 
 
 Using the state machine solver

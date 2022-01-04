@@ -21,7 +21,7 @@ Solution: [%X = 4, %Y = 16]
 Solution: [%X = 5, %Y = 25]
 Solution: [%X = 6, %Y = 36]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 4]
 Solution: [%X = 3, %Y = 9]
@@ -45,7 +45,7 @@ All:
 ... without optimizations:
 Solution: [%X = 6, %Y = 36]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 6, %Y = 36]
 
 

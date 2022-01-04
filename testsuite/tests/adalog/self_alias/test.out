@@ -10,7 +10,7 @@ All:
 ... without optimizations:
 Solution: [%X = 1, %Y = 1]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 
 

@@ -17,7 +17,7 @@ Any:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 3, %Y = 12]
 
-... cut dead branches:
+... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 3, %Y = 12]
 
