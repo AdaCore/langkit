@@ -173,6 +173,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Vars : Logic_Var_Array_Access;
       --  List of all logic variables referenced in the top-level relation.
+      --
+      --  Indexes in this array are the same as Ids for the corresponding
+      --  variables, i.e. ``for all I in Vars.all => I = Id (Vars.all (I))``
+      --
       --  Computed once (before starting the solver), used to pass all
       --  variables to the user callback and to reset aliasing information when
       --  leaving a branch.
@@ -541,7 +545,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
      (Self : Compound_Relation; Ctx : Solving_Context) return Boolean
    is
       function Topo_Sort
-        (Atoms : Atomic_Relation_Vector; Error : out Boolean)
+        (Atoms : Atomic_Relation_Vector; Has_Orphan : out Boolean)
          return Atomic_Relation_Vectors.Elements_Array;
       --  Do a topological sort of the atomic relations in ``Atoms``. Atoms
       --  with no dependencies will come first. Then, atoms will be sorted
@@ -549,8 +553,15 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  last, because they have multiple dependencies but nothing can depend
       --  on them.
       --
-      --  ``Error`` is set to whether at least one atom is an "orphan", that is
-      --  to say it is not part of the resulting sorted collection.
+      --  ``Has_Orphan`` is set to whether at least one atom is an "orphan",
+      --  that is to say it is not part of the resulting sorted collection.
+
+      function Evaluate_Atoms
+        (Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean;
+      --  Evaluate the given sequence of sorted atoms (see ``Topo_Sort``) and
+      --  return whether they are all satisfied: if they are, the logic
+      --  variables are assigned values, so it is possible to invoke the user
+      --  callback for solutions (``Ctx.Cb``).
 
       function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean;
       --  Try to solve the given sequence of atoms. Return whether no valid
@@ -584,16 +595,21 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       ---------------
 
       function Topo_Sort
-        (Atoms : Atomic_Relation_Vector; Error : out Boolean)
+        (Atoms : Atomic_Relation_Vector; Has_Orphan : out Boolean)
          return Atomic_Relation_Vectors.Elements_Array
       is
-         Sorted_Atoms    : Atomic_Relation_Vectors.Elements_Array
+         Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array
            (1 .. Atoms.Length);
          --  Array of topo-sorted atoms (i.e. the result). All items in
          --  ``Atoms`` should be eventually transferred to ``Sorted_Atoms``.
 
          Last_Atom_Index : Natural := 0;
          --  Index of the last atom appended to ``Sorted_Atoms``
+
+         Defined_Vars : array (Ctx.Vars.all'Range) of Boolean :=
+           (others => False);
+         --  For each logic variable, whether at least one atom in
+         --  ``Sorted_Atoms`` defines it.
 
          procedure Append (Atom : Atomic_Relation);
          --  Append Atom to Sorted_Atoms
@@ -633,7 +649,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          N_Preds     : Atom_Lists.List := Ctx.Sort_Ctx.N_Preds;
          Working_Set : Atom_Lists.List := Ctx.Sort_Ctx.Working_Set;
       begin
-         Error := False;
+         Has_Orphan := False;
 
          --  Step 1: create:
          --
@@ -709,14 +725,19 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   --  Remove items from Using_Atoms, so that they're not
                   --  appended again to the working set.
                   Clear (Using_Atoms.Get_Access (Defd_Id).all);
+
+                  Defined_Vars (Defd_Id) := True;
                end if;
             end;
          end loop;
 
-         --  Append N_Predicates at the end
+         --  Append at the end all N_Predicates for which all input variables
+         --  are defined.
          for N_Pred of N_Preds loop
-            Append (N_Pred.Atom);
-            Appended (N_Pred.Atom_Index) := True;
+            if (for all V of N_Pred.Atom.Vars => Defined_Vars (Id (V))) then
+               Append (N_Pred.Atom);
+               Appended (N_Pred.Atom_Index) := True;
+            end if;
          end loop;
 
          --  Check that all atoms are in the result. If not, we have orphans,
@@ -733,15 +754,35 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                end loop;
             end if;
 
-            Error := True;
-            return Atomic_Relation_Vectors.Empty_Array;
+            Has_Orphan := True;
          end if;
 
          Clear (Working_Set);
          Clear (N_Preds);
 
-         return Sorted_Atoms;
+         return Sorted_Atoms (1 .. Last_Atom_Index);
       end Topo_Sort;
+
+      --------------------
+      -- Evaluate_Atoms --
+      --------------------
+
+      function Evaluate_Atoms
+        (Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean
+      is
+      begin
+         for Atom of Sorted_Atoms loop
+            if not Solve_Atomic (Atom) then
+               if Solv_Trace.Is_Active then
+                  Solv_Trace.Trace ("Failed on " & Image (Atom));
+               end if;
+
+               return False;
+            end if;
+         end loop;
+
+         return True;
+      end Evaluate_Atoms;
 
       ------------------
       -- Try_Solution --
@@ -793,15 +834,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
             --  Once the topological sort has been done, we just have to solve
             --  every relation in order. Abort if one doesn't solve.
-            for Atom of Sorted_Atoms loop
-               if not Solve_Atomic (Atom) then
-                  if Solv_Trace.Is_Active then
-                     Solv_Trace.Trace ("Failed on " & Image (Atom));
-                  end if;
-
-                  return Cleanup (True);
-               end if;
-            end loop;
+            if not Evaluate_Atoms (Sorted_Atoms) then
+               return Cleanup (True);
+            end if;
 
             if Sol_Trace.Is_Active then
                Sol_Trace.Trace ("Valid solution");
