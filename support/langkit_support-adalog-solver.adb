@@ -315,20 +315,25 @@ package body Langkit_Support.Adalog.Solver is
          when State_Machine =>
             while Abstract_Relation.Solve (Self.SSM_Relation, Timeout) loop
                declare
-                  Var_Count : constant Positive :=
-                    Positive (Self.Vars.Vars.Length);
-                  Vars      : Logic_Var_Array (1 .. Var_Count);
-                  Ignore    : Boolean;
+                  Var_Count : constant Natural :=
+                    (if Self.Vars = null
+                     then 0
+                     else Natural (Self.Vars.Vars.Length));
+
+                  Vars   : Logic_Var_Array (1 .. Var_Count);
+                  Ignore : Boolean;
 
                   --  Call the callback with the vars that we accumulated in
                   --  the wrapper during the building of the relation.
                   use Var_Sets;
                   I : Positive := 1;
                begin
-                  for El in Self.Vars.Vars.Iterate loop
-                     Vars (I) := Element (El);
-                     I := I + 1;
-                  end loop;
+                  if Self.Vars /= null then
+                     for El in Self.Vars.Vars.Iterate loop
+                        Vars (I) := Element (El);
+                        I := I + 1;
+                     end loop;
+                  end if;
 
                   Ignore := Solution_Callback (Vars);
                end;
