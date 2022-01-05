@@ -1,0 +1,139 @@
+Using the symbolic solver
+=========================
+
+Solving relation:
+Any: neutral-any-1
+    False
+    %X <- 1
+
+... without optimizations:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] %X <- 1
+Solution: [%X = 1]
+
+... cut dead branches:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] %X <- 1
+Solution: [%X = 1]
+
+Solving relation:
+Any: neutral-any-2
+    False
+    False
+
+... without optimizations:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] False neutral-any-2
+
+... cut dead branches:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] False neutral-any-2
+
+Solving relation:
+All: neutral-all-1
+    True
+    %X <- 1
+
+... without optimizations:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] %X <- 1
+Solution: [%X = 1]
+
+... cut dead branches:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] %X <- 1
+Solution: [%X = 1]
+
+Solving relation:
+Any: neutral-all-2
+    False
+    All:
+        True
+        True
+
+
+... without optimizations:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] True
+Solution: []
+
+... cut dead branches:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] True
+Solution: []
+
+Solving relation:
+Any: absorb-any
+    %X <- 2
+    True
+    %X <- 1
+
+... without optimizations:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] Any: absorb-any
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 2
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     True
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 1
+Solution: [%X = 2]
+Solution: [%X = <undefined>]
+Solution: [%X = 1]
+
+... cut dead branches:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] Any: absorb-any
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 2
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     True
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 1
+Solution: [%X = 2]
+Solution: [%X = <undefined>]
+Solution: [%X = 1]
+
+Solving relation:
+All: absorb-all
+    %X <- 2
+    False
+    %X <- 1
+
+... without optimizations:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] False
+
+... cut dead branches:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] False
+
+
+Using the state machine solver
+==============================
+
+Solving relation:
+Unify %X <= 1
+Solution: [%X = 1]
+
+Solving relation:
+<False> neutral-any-2
+
+Solving relation:
+Unify %X <= 1
+Solution: [%X = 1]
+
+Solving relation:
+<True>
+Solution: []
+
+Solving relation:
+<Any> absorb-any:
+| | Unify %X <= 2
+| | <True>
+| | Unify %X <= 1
+Solution: [%X = 2]
+Solution: [%X = <undefined>]
+Solution: [%X = 1]
+
+Solving relation:
+<All> absorb-all:
+| | Unify %X <= 2
+| | <False>
+| | Unify %X <= 1
+
+Done.

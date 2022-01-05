@@ -2,7 +2,10 @@ Using the symbolic solver
 =========================
 
 Solving relation:
-%X <- 12
+Any:
+    False
+    %X <- 12
+
 ... without optimizations:
 Solution: [%X = 12]
 

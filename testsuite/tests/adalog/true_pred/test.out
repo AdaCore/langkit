@@ -2,13 +2,16 @@ Using the symbolic solver
 =========================
 
 Solving relation:
-Any:
-    %X <- 1
-    %X <- 2
-    %X <- 3
-    %X <- 4
-    %X <- 5
-    %X <- 6
+All:
+    Any:
+        %X <- 1
+        %X <- 2
+        %X <- 3
+        %X <- 4
+        %X <- 5
+        %X <- 6
+
+    True
 
 ... without optimizations:
 Solution: [%X = 1]

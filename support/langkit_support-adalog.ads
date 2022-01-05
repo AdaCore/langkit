@@ -80,4 +80,10 @@ package Langkit_Support.Adalog is
    --  * the number of tried solutions;
    --  * valid solutions found.
 
+   Cst_Folding_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.SOLVER.CONSTANT_FOLDING",
+      Default => GNATCOLL.Traces.From_Config);
+   --  Trace to show the result of relation constant folding pass done during
+   --  the preparation stage in the symbolic solver.
+
 end Langkit_Support.Adalog;
