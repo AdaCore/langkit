@@ -186,15 +186,18 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Remove alias information for all variables in ``Vars``
 
    function Topo_Sort
-     (Atoms      : Atomic_Relation_Vector;
-      Vars       : Logic_Var_Array;
-      Sort_Ctx   : Sort_Context;
-      Has_Orphan : out Boolean)
+     (Atoms, Unifies : Atomic_Relation_Vector;
+      Vars           : Logic_Var_Array;
+      Sort_Ctx       : Sort_Context;
+      Has_Orphan     : out Boolean)
       return Atomic_Relation_Vectors.Elements_Array;
    --  Do a topological sort of the atomic relations in ``Atoms``. Atoms with
    --  no dependencies will come first. Then, atoms will be sorted according to
    --  their dependencies. Finally, ``N_Predicate``s will come last, because
    --  they have multiple dependencies but nothing can depend on them.
+   --
+   --  ``Unifies`` must be the ``Unify`` atoms to consider for variables
+   --  aliasing. ``Atoms`` must not contain any ``Unify`` atom.
    --
    --  ``Vars`` must be the array of all variable referenced in the relation we
    --  are trying to solve.
@@ -605,10 +608,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    ---------------
 
    function Topo_Sort
-     (Atoms      : Atomic_Relation_Vector;
-      Vars       : Logic_Var_Array;
-      Sort_Ctx   : Sort_Context;
-      Has_Orphan : out Boolean)
+     (Atoms, Unifies : Atomic_Relation_Vector;
+      Vars           : Logic_Var_Array;
+      Sort_Ctx       : Sort_Context;
+      Has_Orphan     : out Boolean)
       return Atomic_Relation_Vectors.Elements_Array
    is
       Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array
@@ -662,7 +665,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    begin
       Has_Orphan := False;
 
-      --  Step 1: create:
+      --  Step 1, process Unify atoms so that the processing of other atoms
+      --  correctly handles aliased variables.
+
+      Create_Aliases (Vars, Unifies);
+
+      --  Step 2: create:
       --
       --    1. A map of vars to all atoms that use them.
       --
@@ -710,7 +718,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end;
       end loop;
 
-      --  Step 2: Do the topo sort
+      --  Step 3: Do the topo sort
 
       while Has_Element (Working_Set) loop
          --  The dependencies of all atoms in the working set are already in
@@ -1035,7 +1043,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             use Atomic_Relation_Vectors;
             Sorting_Error : Boolean;
             Sorted_Atoms  : constant Elements_Array :=
-              Topo_Sort (Atoms, Ctx.Vars.all, Ctx.Sort_Ctx, Sorting_Error);
+              Topo_Sort (Atoms,
+                         Ctx.Unifies.all,
+                         Ctx.Vars.all,
+                         Ctx.Sort_Ctx,
+                         Sorting_Error);
          begin
             --  There was an error in the topo sort: continue to next potential
             --  solution.
@@ -1311,7 +1323,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             else
                --  We don't have any Any relation left, so we have a flat list
                --  of atoms to solve.
-               Create_Aliases;
                return Cleanup (Try_Solution (Ctx.Atoms.all));
             end if;
          end;
@@ -1356,7 +1367,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   else
                      --  We are currently exploring only one alternative: just
                      --  look for a solution in ``Ctx.Atoms``.
-                     Create_Aliases;
                      if not Try_Solution (Ctx.Atoms.all) then
                         return Cleanup (False);
                      end if;
