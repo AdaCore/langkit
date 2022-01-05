@@ -134,7 +134,9 @@ All:
         %X <- 3
 
     Is_Even?(%Y)
-    %X <- 2
+    Any:
+        %X <- 2
+
     %X <-> %Y
 
 ... without optimizations:

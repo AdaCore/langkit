@@ -157,14 +157,19 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    procedure Free is new Ada.Unchecked_Deallocation
      (Logic_Var_Array, Logic_Var_Array_Access);
 
-   function Find_All_Vars
-     (Self : Relation) return Logic_Var_Array_Access;
-   --  Create a list of all logic variables referenced in ``Self``, and assign
-   --  an Id to all of them and return the list.
+   type Prepared_Relation is record
+      Rel  : Relation;
+      Vars : Logic_Var_Array_Access;
+   end record;
+   --  Relation that is prepared for solving (see the ``Prepare_Relation``
+   --  function below).
+
+   function Prepare_Relation (Self : Relation) return Prepared_Relation;
+   --  Prepare a relation for the solver: simplify it and create a list of all
+   --  the logic variables it references, assigning an Id to each.
    --
    --  TODO??? Due to Aliasing, a logic variable can have several ids.
-   --  Consequently, things like exponential resolution optimization are
-   --  not complete.
+   --  Consequently, the exponential resolution optimization is not complete.
 
    type Solving_Context is record
       Cb : Callback_Type;
@@ -271,16 +276,17 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end return;
    end Create;
 
-   -------------------
-   -- Find_All_Vars --
-   -------------------
+   ----------------------
+   -- Prepare_Relation --
+   ----------------------
 
-   function Find_All_Vars
-     (Self : Relation) return Logic_Var_Array_Access
-   is
+   function Prepare_Relation (Self : Relation) return Prepared_Relation is
       --  For determinism, collect variables in the order in which they appear
       --  in the equation.
       Vec : Logic_Var_Vectors.Vector;
+
+      function Is_Atom (Self : Relation; Kind : Atomic_Kind) return Boolean
+      is (Self.Kind = Atomic and then Self.Atomic_Rel.Kind = Kind);
 
       procedure Add (Var : Logic_Var);
       --  Add ``Var`` to ``Vec``/``Set``
@@ -288,8 +294,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       procedure Process_Atom (Self : Atomic_Relation);
       --  Collect variables from ``Self``
 
-      procedure Process (Self : Relation);
-      --  Collect variables from ``Self`` (recursive helper)
+      function Process (Self : Relation) return Relation;
+      --  Return a relation (with its dedicated ownership share) that is
+      --  possibly a simplified version of ``Self``. Add to ``Vec`` the
+      --  variables reference in ``Self`` during the traversal.
 
       ---------
       -- Add --
@@ -330,7 +338,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       -- Process --
       -------------
 
-      procedure Process (Self : Relation) is
+      function Process (Self : Relation) return Relation is
       begin
          --  For atomic relations, just add the vars it contains. For compound
          --  relations, just recurse over sub-relations.
@@ -338,29 +346,162 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          case Self.Kind is
          when Atomic =>
             Process_Atom (Self.Atomic_Rel);
+            Inc_Ref (Self);
+            return Self;
 
          when Compound =>
-            for R of Self.Compound_Rel.Rels loop
-               Process (R);
-            end loop;
+            declare
+               Comp_Kind : constant Compound_Kind := Self.Compound_Rel.Kind;
+
+               Rels     : Relation_Array (1 .. Self.Compound_Rel.Rels.Length);
+               Last_Rel : Natural := 0;
+               --  Vector of subrelations for the returned compound
+
+               Is_Different : Boolean := False;
+               --  Whether the compound relation we are about to return is
+               --  different from ``Self``. Used for a small optimization: do
+               --  not create a new relation when we can just return the
+               --  existing one.
+
+               Neutral : constant Atomic_Kind :=
+                 (case Comp_Kind is
+                  when Kind_All => True,
+                  when Kind_Any => False);
+               --  Neutral element for this compound relation, i.e. element
+               --  which can just be removed without changing the semantics.
+
+               Absorbing : constant Atomic_Kind := False;
+               --  Absorbing element for this compound relation, i.e. element
+               --  which, when present as an item in the compound relation, can
+               --  replace the whole compound relation without changing the
+               --  semantics.
+               --
+               --  Note that we don't consider True as absorbing for Any
+               --  relations on purpose (i.e. we will not fold ``Any (X = 1,
+               --  True)`` into ``True``). The reason for this is that we
+               --  support solutions with undefined variables. In the example
+               --  above, this means that we need to give two solutions: ``X =
+               --  1`` and ``X is undefined``, thus we need to refrain from
+               --  folding absorbing elements in Any relations.
+            begin
+               for R of Self.Compound_Rel.Rels loop
+                  Last_Rel := Last_Rel + 1;
+                  Rels (Last_Rel) := Process (R);
+
+                  --  If we got a neutral or absorbing relation, simplify the
+                  --  returned compound.
+
+                  if Is_Atom (Rels (Last_Rel), Neutral) then
+
+                     --  No need to add the neutral element to the result, and
+                     --  thus the result will necessarily be different from
+                     --  ``Self``.
+
+                     Dec_Ref (Rels (Last_Rel));
+                     Last_Rel := Last_Rel - 1;
+                     Is_Different := True;
+
+                  elsif Comp_Kind = Kind_All
+                        and then Is_Atom (Rels (Last_Rel), Absorbing)
+                  then
+
+                     --  The whole compound can be replaced with the absorbing
+                     --  relation: cleanup our temporary vector and return
+                     --  that.
+
+                     for R of Rels (1 .. Last_Rel - 1) loop
+                        Dec_Ref (R);
+                     end loop;
+                     return Rels (Last_Rel);
+
+                  --  Past here, we just add this sub-relation to the result.
+                  --  Just make sure we update ``Is_Different`` when
+                  --  appropriate.
+
+                  elsif Rels (Last_Rel) /= R then
+                     Is_Different := True;
+                  end if;
+               end loop;
+
+               --  Now that we have processed each sub-relation, prepare the
+               --  result.
+
+               if Last_Rel = 0 then
+
+                  --  All sub-relations were simplified to neutral elements: we
+                  --  can replace the whole compound relation with the neutral
+                  --  element itself.
+
+                  return (if Neutral = True
+                          then Create_True (Self.Debug_Info)
+                          else Create_False (Self.Debug_Info));
+
+               elsif Last_Rel = 1 then
+
+                  --  Only one sub-relation is left: it already has a new
+                  --  ownership share, so just return it.
+
+                  return Rels (Last_Rel);
+
+               elsif Is_Different then
+
+                  --  We have more than one sub-relation, and the set of
+                  --  sub-relations is different than the one in ``Self``, so
+                  --  return a new compound relation.
+
+                  return Result : constant Relation := new Relation_Type'
+                    (Kind         => Compound,
+                     Ref_Count    => 1,
+                     Debug_Info   => Self.Debug_Info,
+                     Compound_Rel => (Kind => Self.Compound_Rel.Kind,
+                                      Rels => Relation_Vectors.Empty_Vector))
+                  do
+                     Result.Compound_Rel.Rels.Concat (Rels (1 .. Last_Rel));
+                  end return;
+
+               else
+                  --  We are returning ``Self``: destroy the sub-relation
+                  --  owership shares created for ``Rels`` as we do not create
+                  --  a new compound relation.
+
+                  for R of Rels loop
+                     Dec_Ref (R);
+                  end loop;
+                  Inc_Ref (Self);
+                  return Self;
+               end if;
+            end;
          end case;
       end Process;
 
+      --  Simplify the input relation and add all variables to ``Vars`` in the
+      --  same pass.
+
+      Simplified_Relation : constant Relation := Process (Self);
    begin
-      Process (Self);
+      if Cst_Folding_Trace.Is_Active then
+         Cst_Folding_Trace.Trace ("After constant folding:");
+         Cst_Folding_Trace.Trace (Image (Simplified_Relation));
+      end if;
 
-      --  Convert the vector into the array result and assign Ids
-
-      return Result : constant Logic_Var_Array_Access :=
-        new Logic_Var_Array (1 .. Vec.Length)
+      return Result : constant Prepared_Relation :=
+        (Rel  => Simplified_Relation,
+         Vars => new Logic_Var_Array (1 .. Vec.Length))
       do
-         for I in Result'Range loop
-            Result (I) := Vec.Get (I);
-            Set_Id (Result (I), I);
+         --  Convert the ``Vars`` vector into the ``Result.Vars`` array and
+         --  assign Ids to all variables.
+
+         for I in Result.Vars.all'Range loop
+            declare
+               V : Logic_Var renames Result.Vars.all (I);
+            begin
+               V := Vec.Get (I);
+               Set_Id (V, I);
+            end;
          end loop;
          Vec.Destroy;
       end return;
-   end Find_All_Vars;
+   end Prepare_Relation;
 
    -------------
    -- Destroy --
@@ -1212,6 +1353,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
         (Vars : Logic_Var_Array) return Boolean;
       Solve_Options     : Solve_Options_Type := Default_Options)
    is
+      PRel   : Prepared_Relation;
+      Rel    : Relation renames PRel.Rel;
       Ctx    : Solving_Context := Create;
       Ignore : Boolean;
 
@@ -1225,6 +1368,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       procedure Cleanup is
       begin
          Destroy (Ctx);
+         Dec_Ref (Rel);
       end Cleanup;
 
    begin
@@ -1235,8 +1379,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Solver_Trace.Trace (Image (Self));
       end if;
 
+      PRel := Prepare_Relation (Self);
+
       Ctx.Cb := Solution_Callback'Unrestricted_Access.all;
-      Ctx.Vars := Find_All_Vars (Self);
+      Ctx.Vars := PRel.Vars;
       Ctx.Atoms := new Atomic_Relation_Vector;
       Ctx.Unifies := new Atomic_Relation_Vector;
 
@@ -1247,9 +1393,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Ctx.Sort_Ctx.Using_Atoms.Append (Atom_Lists.Create);
       end loop;
 
-      case Self.Kind is
+      case Rel.Kind is
          when Compound =>
-            Ignore := Solve_Compound (Self.Compound_Rel, Ctx);
+            Ignore := Solve_Compound (Rel.Compound_Rel, Ctx);
 
          when Atomic =>
             --  We want to use a single entry point for the solver:
@@ -1259,7 +1405,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             declare
                C : Compound_Relation := (Kind => Kind_All, Rels => <>);
             begin
-               C.Rels.Append (Self);
+               C.Rels.Append (Rel);
                Ignore := Solve_Compound (C, Ctx);
                C.Rels.Destroy;
             exception
@@ -1522,20 +1668,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                Append (El);
             end loop;
 
-         elsif Cmp_Kind = Kind_All
-               and then R.Kind = Atomic
-               and then R.Atomic_Rel.Kind = True
-         then
-            --  Remove True relations from Alls
-            null;
-
-         elsif Cmp_Kind = Kind_Any
-               and then R.Kind = Atomic
-               and then R.Atomic_Rel.Kind = False
-         then
-            --  Remove False relations from Anys
-            null;
-
          else
             --  Create an ownership share for every relation added to Rels
             Inc_Ref (R);
@@ -1547,14 +1679,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       for El of Relations loop
          Append (El);
       end loop;
-
-      --  If this is a compound relation with only one sub-relation, then it's
-      --  equivalent to the sub-relation. Inline the sub-relation.
-      if Rels.Length = 1 then
-         return Ret : constant Relation := Rels.Get (1) do
-            Rels.Destroy;
-         end return;
-      end if;
 
       return To_Relation
         (Compound_Relation'(Cmp_Kind, Rels), Debug_String => Debug_String);

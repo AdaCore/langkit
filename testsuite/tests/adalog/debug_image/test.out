@@ -134,7 +134,9 @@ All: main.adb:56
         %X <- 3 main.adb:53
 
     Is_Even?(%Y) main.adb:54
-    %X <- 2 main.adb:55
+    Any: main.adb:55
+        %X <- 2 main.adb:55
+
     %X <-> %Y main.adb:56
 
 ... without optimizations:

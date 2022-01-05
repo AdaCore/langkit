@@ -12,10 +12,15 @@ All:
         %X <- 6
         %Y <- 10
         %Y <- 11
+        False
         All:
 
 
     %X <-> %Y
+    Any:
+        True
+
+    True
 
 ... without optimizations:
 Solution: [%X = 1, %Y = 1]
