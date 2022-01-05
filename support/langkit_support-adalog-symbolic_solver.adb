@@ -171,6 +171,47 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  TODO??? Due to Aliasing, a logic variable can have several ids.
    --  Consequently, the exponential resolution optimization is not complete.
 
+   procedure Create_Aliases
+     (Vars          : Logic_Var_Array;
+      Unifies       : Atomic_Relation_Vector;
+      Vars_To_Atoms : access Var_Ids_To_Atoms := null);
+   --  Create alias information for variables in ``Vars`` according to Unify
+   --  relations in ``Unifies``. Also reset all variables, so that we are ready
+   --  to evaluate a sequence of atoms.
+   --
+   --  If ``Vars_To_Atoms`` is not null, also merge the lists of atoms for the
+   --  canonical variable and the aliased variable.
+
+   procedure Cleanup_Aliases (Vars : Logic_Var_Array);
+   --  Remove alias information for all variables in ``Vars``
+
+   function Topo_Sort
+     (Atoms      : Atomic_Relation_Vector;
+      Vars       : Logic_Var_Array;
+      Sort_Ctx   : Sort_Context;
+      Has_Orphan : out Boolean)
+      return Atomic_Relation_Vectors.Elements_Array;
+   --  Do a topological sort of the atomic relations in ``Atoms``. Atoms with
+   --  no dependencies will come first. Then, atoms will be sorted according to
+   --  their dependencies. Finally, ``N_Predicate``s will come last, because
+   --  they have multiple dependencies but nothing can depend on them.
+   --
+   --  ``Vars`` must be the array of all variable referenced in the relation we
+   --  are trying to solve.
+   --
+   --  ``Sort_Ctx`` is a cache for the data structure used to run the topo
+   --  sort.
+   --
+   --  ``Has_Orphan`` is set to whether at least one atom is an "orphan", that
+   --  is to say it is not part of the resulting sorted collection.
+
+   function Evaluate_Atoms
+     (Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean;
+   --  Evaluate the given sequence of sorted atoms (see ``Topo_Sort``) and
+   --  return whether they are all satisfied: if they are, the logic variables
+   --  are assigned values, so it is possible to invoke the user callback for
+   --  solutions.
+
    type Solving_Context is record
       Cb : Callback_Type;
       --  User callback, to be called when a solution is found. Returns whether
@@ -503,6 +544,255 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end return;
    end Prepare_Relation;
 
+   --------------------
+   -- Create_Aliases --
+   --------------------
+
+   procedure Create_Aliases
+     (Vars          : Logic_Var_Array;
+      Unifies       : Atomic_Relation_Vector;
+      Vars_To_Atoms : access Var_Ids_To_Atoms := null)
+   is
+      Old_Unify_From_Id, Old_Target_Id : Positive;
+   begin
+      for V of Vars loop
+         Reset (V);
+      end loop;
+
+      for U of Unifies loop
+         if Verbose_Trace.Active then
+            Verbose_Trace.Trace
+              ("Aliasing var " & Image (U.Unify_From)
+               & " to " & Image (U.Target));
+         end if;
+
+         if Vars_To_Atoms /= null then
+            Old_Unify_From_Id := Id (U.Unify_From);
+            Old_Target_Id := Id (U.Target);
+         end if;
+
+         Alias (U.Unify_From, U.Target);
+
+         if Vars_To_Atoms /= null then
+            --  After the aliasing, either the Id of ``U.Unify_From`` has
+            --  changed, either it's the ID of ``U.Target``. Update the
+            --  ``Var_Ids_To_Atoms`` map accordingly.
+
+            if Id (U.Unify_From) /= Old_Unify_From_Id then
+               Merge_Vars
+                 (Vars_To_Atoms.all, Old_Unify_From_Id, Old_Target_Id);
+            elsif Id (U.Target) /= Old_Target_Id then
+               Merge_Vars
+                 (Vars_To_Atoms.all, Old_Target_Id, Old_Unify_From_Id);
+            end if;
+         end if;
+      end loop;
+   end Create_Aliases;
+
+   ---------------------
+   -- Cleanup_Aliases --
+   ---------------------
+
+   procedure Cleanup_Aliases (Vars : Logic_Var_Array) is
+   begin
+      for V of Vars loop
+         Unalias (V);
+      end loop;
+   end Cleanup_Aliases;
+
+   ---------------
+   -- Topo_Sort --
+   ---------------
+
+   function Topo_Sort
+     (Atoms      : Atomic_Relation_Vector;
+      Vars       : Logic_Var_Array;
+      Sort_Ctx   : Sort_Context;
+      Has_Orphan : out Boolean)
+      return Atomic_Relation_Vectors.Elements_Array
+   is
+      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array
+        (1 .. Atoms.Length);
+      --  Array of topo-sorted atoms (i.e. the result). All items in ``Atoms``
+      --  should be eventually transferred to ``Sorted_Atoms``.
+
+      Last_Atom_Index : Natural := 0;
+      --  Index of the last atom appended to ``Sorted_Atoms``
+
+      Defined_Vars : array (Vars'Range) of Boolean := (others => False);
+      --  For each logic variable, whether at least one atom in
+      --  ``Sorted_Atoms`` defines it.
+
+      procedure Append (Atom : Atomic_Relation);
+      --  Append Atom to Sorted_Atoms
+
+      Appended : array (Sorted_Atoms'Range) of Boolean := (others => False);
+      --  ``Appended (I)`` indicates whether the ``Atoms (I)`` atom was
+      --  appended to ``Sorted_Atoms``.
+      --
+      --  TODO??? It actually says that the atom does not need to be appended
+      --  to the result (for instance it's true for ``Unify`` atoms even though
+      --  these are not to be part of the result). We should probably rename
+      --  this.
+
+      use Atom_Lists;
+
+      function Id (S : Var_Or_Null) return Natural
+      is (if S.Exists then Id (S.Logic_Var) else 0);
+      --  Return the Id for the ``S`` variable, or 0 if there is no variable
+
+      function Defined (S : Atomic_Relation) return Natural
+      is (Id (Defined_Var (S)));
+      --  Return the Id for the variable that ``S`` defines, or 0 if it
+      --  contains no definition.
+
+      ------------
+      -- Append --
+      ------------
+
+      procedure Append (Atom : Atomic_Relation) is
+      begin
+         Last_Atom_Index := Last_Atom_Index + 1;
+         Sorted_Atoms (Last_Atom_Index) := Atom;
+      end Append;
+
+      Using_Atoms : constant Atom_Lists_Vectors.Vector := Sort_Ctx.Using_Atoms;
+      N_Preds     : Atom_Lists.List := Sort_Ctx.N_Preds;
+      Working_Set : Atom_Lists.List := Sort_Ctx.Working_Set;
+   begin
+      Has_Orphan := False;
+
+      --  Step 1: create:
+      --
+      --    1. A map of vars to all atoms that use them.
+      --
+      --    2. The base working set for the topo sort, constituted of all atoms
+      --       with no dependencies.
+
+      for I in reverse Atoms.First_Index .. Atoms.Last_Index loop
+         declare
+            Current_Atom : constant Atomic_Relation := Atoms.Get (I);
+
+            --  Resolve the Id of the var used. If the var aliases to another
+            --  var, resolve to the aliased var's Id.
+            Used_Logic_Var : constant Var_Or_Null :=
+              Used_Var (Current_Atom);
+            Used_Id        : constant Natural :=
+              (if Used_Logic_Var.Exists
+               then (if Get_Alias (Used_Logic_Var.Logic_Var) /= No_Logic_Var
+                     then Id (Get_Alias (Used_Logic_Var.Logic_Var))
+                     else Id (Used_Logic_Var.Logic_Var))
+               else 0);
+         begin
+            if Current_Atom.Kind = N_Predicate then
+               --  N_Predicates are appended at the end separately
+
+               N_Preds := (Current_Atom, I) & N_Preds;
+
+            elsif Used_Id = 0 then
+               --  Put atoms with no dependency in the working set
+
+               Working_Set := (Current_Atom, I) & Working_Set;
+
+            elsif Current_Atom.Kind /= Unify then
+               --  For other atoms, put them in the ``Using_Atoms`` map, which
+               --  represents the edges of the dependency graph.
+
+               Push (Using_Atoms.Get_Access (Used_Id).all,
+                     (Current_Atom, I));
+
+            else
+               --  Aliasing processing prior to the topo sort is supposed to
+               --  take care of Unifys, which should not appear in ``Atoms``.
+
+               raise Program_Error with "unreachable code";
+            end if;
+         end;
+      end loop;
+
+      --  Step 2: Do the topo sort
+
+      while Has_Element (Working_Set) loop
+         --  The dependencies of all atoms in the working set are already in
+         --  the topo sort result (this is the invariant of
+         --  ``Sort_Context_Type.Working_Set``): we can just take the first one
+         --  and put it in the result too.
+         declare
+            Atom    : constant Atom_And_Index := Pop (Working_Set);
+            Defd_Id : constant Natural := Defined (Atom.Atom);
+         begin
+            Append (Atom.Atom);
+            Appended (Atom.Atom_Index) := True;
+
+            --  If this atom defines a variable, put all the atoms that use
+            --  this variable in the working set, as their dependencies are now
+            --  satisfied.
+            if Defd_Id /= 0 then
+               for El of Using_Atoms.Get (Defd_Id) loop
+                  Working_Set := El & Working_Set;
+               end loop;
+
+               --  Remove items from Using_Atoms, so that they're not appended
+               --  again to the working set.
+               Clear (Using_Atoms.Get_Access (Defd_Id).all);
+
+               Defined_Vars (Defd_Id) := True;
+            end if;
+         end;
+      end loop;
+
+      --  Append at the end all N_Predicates for which all input variables are
+      --  defined.
+      for N_Pred of N_Preds loop
+         if (for all V of N_Pred.Atom.Vars => Defined_Vars (Id (V))) then
+            Append (N_Pred.Atom);
+            Appended (N_Pred.Atom_Index) := True;
+         end if;
+      end loop;
+
+      --  Check that all atoms are in the result. If not, we have orphans, and
+      --  thus the topo sort failed.
+      if Last_Atom_Index /= Sorted_Atoms'Last then
+
+         --  If requested, log all orphan atoms
+         if Solv_Trace.Is_Active then
+            for I in Appended'Range loop
+               if not Appended (I) then
+                  Solv_Trace.Trace
+                    ("Orphan relation: " & Image (Atoms.Get (I)));
+               end if;
+            end loop;
+         end if;
+
+         Has_Orphan := True;
+      end if;
+
+      Clear (Working_Set);
+      Clear (N_Preds);
+
+      return Sorted_Atoms (1 .. Last_Atom_Index);
+   end Topo_Sort;
+
+   --------------------
+   -- Evaluate_Atoms --
+   --------------------
+
+   function Evaluate_Atoms
+     (Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean is
+   begin
+      for Atom of Sorted_Atoms loop
+         if not Solve_Atomic (Atom) then
+            if Solv_Trace.Is_Active then
+               Solv_Trace.Trace ("Failed on " & Image (Atom));
+            end if;
+
+            return False;
+         end if;
+      end loop;
+
+      return True;
+   end Evaluate_Atoms;
+
    -------------
    -- Destroy --
    -------------
@@ -685,25 +975,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Solve_Compound
      (Self : Compound_Relation; Ctx : Solving_Context) return Boolean
    is
-      function Topo_Sort
-        (Atoms : Atomic_Relation_Vector; Has_Orphan : out Boolean)
-         return Atomic_Relation_Vectors.Elements_Array;
-      --  Do a topological sort of the atomic relations in ``Atoms``. Atoms
-      --  with no dependencies will come first. Then, atoms will be sorted
-      --  according to their dependencies. Finally, ``N_Predicate``s will come
-      --  last, because they have multiple dependencies but nothing can depend
-      --  on them.
-      --
-      --  ``Has_Orphan`` is set to whether at least one atom is an "orphan",
-      --  that is to say it is not part of the resulting sorted collection.
-
-      function Evaluate_Atoms
-        (Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean;
-      --  Evaluate the given sequence of sorted atoms (see ``Topo_Sort``) and
-      --  return whether they are all satisfied: if they are, the logic
-      --  variables are assigned values, so it is possible to invoke the user
-      --  callback for solutions (``Ctx.Cb``).
-
       function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean;
       --  Try to solve the given sequence of atoms. Return whether no valid
       --  solution was found (so return False on success).
@@ -721,209 +992,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  sub-relation.
 
       procedure Create_Aliases;
-      --  Create alias information for variables according to Unify relations
-      --  in ``Ctx.Unifies``. Also reset all variables, so that we are ready to
-      --  evaluate a sequence of atoms.
+      --  Shortcut to create aliases from ``Ctx.Unifies``
 
       procedure Cleanup_Aliases;
-      --  Remove alias information for all variables
+      --  Shortcut to cleanup aliases in ``Ctx.Vars``
 
       use Any_Relation_Lists;
       use Atomic_Relation_Lists;
-
-      ---------------
-      -- Topo_Sort --
-      ---------------
-
-      function Topo_Sort
-        (Atoms : Atomic_Relation_Vector; Has_Orphan : out Boolean)
-         return Atomic_Relation_Vectors.Elements_Array
-      is
-         Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array
-           (1 .. Atoms.Length);
-         --  Array of topo-sorted atoms (i.e. the result). All items in
-         --  ``Atoms`` should be eventually transferred to ``Sorted_Atoms``.
-
-         Last_Atom_Index : Natural := 0;
-         --  Index of the last atom appended to ``Sorted_Atoms``
-
-         Defined_Vars : array (Ctx.Vars.all'Range) of Boolean :=
-           (others => False);
-         --  For each logic variable, whether at least one atom in
-         --  ``Sorted_Atoms`` defines it.
-
-         procedure Append (Atom : Atomic_Relation);
-         --  Append Atom to Sorted_Atoms
-
-         Appended : array (Sorted_Atoms'Range) of Boolean := (others => False);
-         --  ``Appended (I)`` indicates whether the ``Atoms (I)`` atom was
-         --  appended to ``Sorted_Atoms``.
-         --
-         --  TODO??? It actually says that the atom does not need to be
-         --  appended to the result (for instance it's true for ``Unify`` atoms
-         --  even though these are not to be part of the result). We should
-         --  probably rename this.
-
-         use Atom_Lists;
-
-         function Id (S : Var_Or_Null) return Natural
-         is (if S.Exists then Id (S.Logic_Var) else 0);
-         --  Return the Id for the ``S`` variable, or 0 if there is no variable
-
-         function Defined (S : Atomic_Relation) return Natural
-         is (Id (Defined_Var (S)));
-         --  Return the Id for the variable that ``S`` defines, or 0 if it
-         --  contains no definition.
-
-         ------------
-         -- Append --
-         ------------
-
-         procedure Append (Atom : Atomic_Relation) is
-         begin
-            Last_Atom_Index := Last_Atom_Index + 1;
-            Sorted_Atoms (Last_Atom_Index) := Atom;
-         end Append;
-
-         Using_Atoms : constant Atom_Lists_Vectors.Vector :=
-           Ctx.Sort_Ctx.Using_Atoms;
-         N_Preds     : Atom_Lists.List := Ctx.Sort_Ctx.N_Preds;
-         Working_Set : Atom_Lists.List := Ctx.Sort_Ctx.Working_Set;
-      begin
-         Has_Orphan := False;
-
-         --  Step 1: create:
-         --
-         --    1. A map of vars to all atoms that use them.
-         --
-         --    2. The base working set for the topo sort, constituted of all
-         --       atoms with no dependencies.
-
-         for I in reverse Atoms.First_Index .. Atoms.Last_Index loop
-            declare
-               Current_Atom : constant Atomic_Relation := Atoms.Get (I);
-
-               --  Resolve the Id of the var used. If the var aliases to
-               --  another var, resolve to the aliased var's Id.
-               Used_Logic_Var : constant Var_Or_Null :=
-                 Used_Var (Current_Atom);
-               Used_Id        : constant Natural :=
-                 (if Used_Logic_Var.Exists
-                  then (if Get_Alias (Used_Logic_Var.Logic_Var) /= No_Logic_Var
-                        then Id (Get_Alias (Used_Logic_Var.Logic_Var))
-                        else Id (Used_Logic_Var.Logic_Var))
-                  else 0);
-            begin
-               if Current_Atom.Kind = N_Predicate then
-                  --  N_Predicates are appended at the end separately
-
-                  N_Preds := (Current_Atom, I) & N_Preds;
-
-               elsif Used_Id = 0 then
-                  --  Put atoms with no dependency in the working set
-
-                  Working_Set := (Current_Atom, I) & Working_Set;
-
-               elsif Current_Atom.Kind /= Unify then
-                  --  For other atoms, put them in the ``Using_Atoms`` map,
-                  --  which represents the edges of the dependency graph.
-
-                  Push (Using_Atoms.Get_Access (Used_Id).all,
-                        (Current_Atom, I));
-
-               else
-                  --  Unifys are handled by aliasing processing in
-                  --  ``Solve_Compound`` and should be filtered out of
-                  --  ``Atoms``.
-
-                  raise Program_Error with "unreachable code";
-               end if;
-            end;
-         end loop;
-
-         --  Step 2: Do the topo sort
-
-         while Has_Element (Working_Set) loop
-            --  The dependencies of all atoms in the working set are already in
-            --  the topo sort result (this is the invariant of
-            --  ``Sort_Context_Type.Working_Set``): we can just take the first
-            --  one and put it in the result too.
-            declare
-               Atom    : constant Atom_And_Index := Pop (Working_Set);
-               Defd_Id : constant Natural := Defined (Atom.Atom);
-            begin
-               Append (Atom.Atom);
-               Appended (Atom.Atom_Index) := True;
-
-               --  If this atom defines a variable, put all the atoms that
-               --  use this variable in the working set, as their dependencies
-               --  are now satisfied.
-               if Defd_Id /= 0 then
-                  for El of Using_Atoms.Get (Defd_Id) loop
-                     Working_Set := El & Working_Set;
-                  end loop;
-
-                  --  Remove items from Using_Atoms, so that they're not
-                  --  appended again to the working set.
-                  Clear (Using_Atoms.Get_Access (Defd_Id).all);
-
-                  Defined_Vars (Defd_Id) := True;
-               end if;
-            end;
-         end loop;
-
-         --  Append at the end all N_Predicates for which all input variables
-         --  are defined.
-         for N_Pred of N_Preds loop
-            if (for all V of N_Pred.Atom.Vars => Defined_Vars (Id (V))) then
-               Append (N_Pred.Atom);
-               Appended (N_Pred.Atom_Index) := True;
-            end if;
-         end loop;
-
-         --  Check that all atoms are in the result. If not, we have orphans,
-         --  and thus the topo sort failed.
-         if Last_Atom_Index /= Sorted_Atoms'Last then
-
-            --  If requested, log all orphan atoms
-            if Solv_Trace.Is_Active then
-               for I in Appended'Range loop
-                  if not Appended (I) then
-                     Solv_Trace.Trace
-                       ("Orphan relation: " & Image (Atoms.Get (I)));
-                  end if;
-               end loop;
-            end if;
-
-            Has_Orphan := True;
-         end if;
-
-         Clear (Working_Set);
-         Clear (N_Preds);
-
-         return Sorted_Atoms (1 .. Last_Atom_Index);
-      end Topo_Sort;
-
-      --------------------
-      -- Evaluate_Atoms --
-      --------------------
-
-      function Evaluate_Atoms
-        (Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean
-      is
-      begin
-         for Atom of Sorted_Atoms loop
-            if not Solve_Atomic (Atom) then
-               if Solv_Trace.Is_Active then
-                  Solv_Trace.Trace ("Failed on " & Image (Atom));
-               end if;
-
-               return False;
-            end if;
-         end loop;
-
-         return True;
-      end Evaluate_Atoms;
 
       ------------------
       -- Try_Solution --
@@ -960,7 +1035,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             use Atomic_Relation_Vectors;
             Sorting_Error : Boolean;
             Sorted_Atoms  : constant Elements_Array :=
-              Topo_Sort (Atoms, Sorting_Error);
+              Topo_Sort (Atoms, Ctx.Vars.all, Ctx.Sort_Ctx, Sorting_Error);
          begin
             --  There was an error in the topo sort: continue to next potential
             --  solution.
@@ -991,7 +1066,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end;
       end Try_Solution;
 
-      Vars_To_Atoms          : Var_Ids_To_Atoms := Ctx.Vars_To_Atoms.Copy;
+      Vars_To_Atoms          : aliased Var_Ids_To_Atoms :=
+        Ctx.Vars_To_Atoms.Copy;
       Initial_Atoms_Length   : Natural renames Ctx.Atoms.Last_Index;
       Initial_Unifies_Length : Natural renames Ctx.Unifies.Last_Index;
 
@@ -1000,38 +1076,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --------------------
 
       procedure Create_Aliases is
-         Old_Unify_From_Id, Old_Target_Id : Positive;
       begin
-         for V of Ctx.Vars.all loop
-            Reset (V);
-         end loop;
-
-         for U of Ctx.Unifies.all loop
-            if Verbose_Trace.Active then
-               Verbose_Trace.Trace
-                 ("Aliasing var " & Image (U.Unify_From)
-                  & " to " & Image (U.Target));
-            end if;
-
-            if Ctx.Cut_Dead_Branches then
-               Old_Unify_From_Id := Id (U.Unify_From);
-               Old_Target_Id := Id (U.Target);
-            end if;
-
-            Alias (U.Unify_From, U.Target);
-
-            if Ctx.Cut_Dead_Branches then
-               --  After the aliasing, either the Id of ``U.Unify_From`` has
-               --  changed, either it's the ID of ``U.Target``. Update the
-               --  ``Var_Ids_To_Atoms`` map accordingly.
-
-               if Id (U.Unify_From) /= Old_Unify_From_Id then
-                  Merge_Vars (Vars_To_Atoms, Old_Unify_From_Id, Old_Target_Id);
-               elsif Id (U.Target) /= Old_Target_Id then
-                  Merge_Vars (Vars_To_Atoms, Old_Target_Id, Old_Unify_From_Id);
-               end if;
-            end if;
-         end loop;
+         Create_Aliases
+           (Ctx.Vars.all,
+            Ctx.Unifies.all,
+            (if Ctx.Cut_Dead_Branches then Vars_To_Atoms'Access else null));
       end Create_Aliases;
 
       ---------------------
@@ -1040,9 +1089,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       procedure Cleanup_Aliases is
       begin
-         for V of Ctx.Vars.all loop
-            Unalias (V);
-         end loop;
+         Cleanup_Aliases (Ctx.Vars.all);
       end Cleanup_Aliases;
 
       --------------------
