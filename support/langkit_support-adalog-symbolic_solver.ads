@@ -35,7 +35,7 @@ package Langkit_Support.Adalog.Symbolic_Solver is
    use Solver_Ifc;
    use Logic_Vars;
 
-   type Relation_Type is private;
+   type Relation_Type (<>) is private;
    type Relation is access all Relation_Type;
    --  Type for a relation. A relation is either an atomic relation, or a
    --  compound relation, which can represent a tree of relations of unbounded
@@ -203,7 +203,7 @@ private
    type Atomic_Kind is (Propagate, Unify, Assign, Predicate,
                         N_Predicate, True, False);
 
-   type Atomic_Relation (Kind : Atomic_Kind := Propagate) is record
+   type Atomic_Relation_Type (Kind : Atomic_Kind := Propagate) is record
       Target : Logic_Var;
       --  What is the Target and whether it is considered as a "used" or
       --  "defined" logic variable depends on the kind of relation.  See the
@@ -254,13 +254,10 @@ private
    --  ``Predicate``. Their semantics are defined in the corresponding public
    --  relation constructors.
 
-   function Solve_Atomic (Self : Atomic_Relation) return Boolean;
-   --  Solve this atomic relation, return if we have found a valid solution
-
-   function Image (Self : Atomic_Relation) return String;
+   function Image (Self : Atomic_Relation_Type) return String;
    --  Helper for the ``Image`` primitive of ``Relation``
 
-   procedure Destroy (Self : in out Atomic_Relation);
+   procedure Destroy (Self : in out Atomic_Relation_Type);
    --  Destroy this atomic relation
 
    ----------------------------------------
@@ -304,10 +301,10 @@ private
      ((not Logic_Var.Exists) or else Is_Defined (Logic_Var.Logic_Var));
    --  Shortcut predicate. Returns whether a variable is defined or is null
 
-   function Used_Var (Self : Atomic_Relation) return Var_Or_Null;
+   function Used_Var (Self : Atomic_Relation_Type) return Var_Or_Null;
    --  Return the variable that this atomic relation uses, if there is one
 
-   function Defined_Var (Self : Atomic_Relation) return Var_Or_Null;
+   function Defined_Var (Self : Atomic_Relation_Type) return Var_Or_Null;
    --  Return the variable that this atomic relation defines, if there is one
 
    -----------------------
@@ -316,15 +313,15 @@ private
 
    type Compound_Kind is (Kind_All, Kind_Any);
 
-   type Compound_Relation is record
+   type Compound_Relation_Type is record
       Kind : Compound_Kind;
       Rels : Relation_Vectors.Vector;
    end record;
 
-   procedure Destroy (Self : in out Compound_Relation);
+   procedure Destroy (Self : in out Compound_Relation_Type);
 
    function Image
-     (Self         : Compound_Relation;
+     (Self         : Compound_Relation_Type;
       Level        : Natural := 0;
       Debug_String : String_Access := null) return String;
 
@@ -334,18 +331,40 @@ private
 
    type Relation_Kind is (Atomic, Compound);
 
-   type Relation_Type (Kind : Relation_Kind := Atomic) is record
+   type Relation_Type (Kind : Relation_Kind) is record
       Ref_Count  : Natural;
       --  Number of ownership shares for this relation. When it drops to zero,
       --  it must be deallocated.
 
       Debug_Info : Ada.Strings.Unbounded.String_Access := null;
       case Kind is
-         when Atomic   => Atomic_Rel   : Atomic_Relation;
-         when Compound => Compound_Rel : Compound_Relation;
+         when Atomic   => Atomic_Rel   : Atomic_Relation_Type;
+         when Compound => Compound_Rel : Compound_Relation_Type;
       end case;
    end record;
 
    procedure Destroy (Self : Relation);
+
+   --  TODO??? Use predicates once the GNAT bug is fixed.
+   --
+   --  .. code::
+   --
+   --     subtype Atomic_Relation is Relation
+   --       with Predicate => Atomic_Relation = null
+   --                         or else Atomic_Relation.Kind = Atomic;
+   --
+   --     subtype Compound_Relation is Relation
+   --       with Predicate => Compound_Relation = null
+   --                         or else Compound_Relation.Kind = Compound;
+   --
+   --     subtype Any_Rel is Compound_Relation
+   --       with Predicate => Any_Rel.Compound_Rel.Kind = Kind_Any;
+
+   subtype Atomic_Relation is Relation;
+   subtype Compound_Relation is Relation;
+   subtype Any_Rel is Relation;
+
+   function Solve_Atomic (Self : Atomic_Relation) return Boolean;
+   --  Solve this atomic relation, return if we have found a valid solution
 
 end Langkit_Support.Adalog.Symbolic_Solver;
