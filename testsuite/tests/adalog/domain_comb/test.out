@@ -1,5 +1,5 @@
-Solving with new solver
-=======================
+Using the symbolic solver
+=========================
 
 Solving relation:
 All:
@@ -28,8 +28,8 @@ Solution: [%X = 4]
 Solution: [%X = 5]
 
 
-Solving with old solver
-=======================
+Using the state machine solver
+==============================
 
 Solving relation:
 <All>:

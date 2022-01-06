@@ -1,5 +1,5 @@
-Solving with new solver
-=======================
+Using the symbolic solver
+=========================
 
 Solving relation:
 False
@@ -8,8 +8,8 @@ False
 ... cut dead branches:
 
 
-Solving with old solver
-=======================
+Using the state machine solver
+==============================
 
 Solving relation:
 <False>

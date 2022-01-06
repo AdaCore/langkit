@@ -115,8 +115,10 @@ package Langkit_Support.Adalog.Generic_Main_Support is
 
    procedure Solve_All (Rel : Relation);
 
+   procedure Run_Main (Main : access procedure);
    procedure Setup_Traces;
    procedure Finalize;
+
 private
 
    package Relation_Vectors is new Ada.Containers.Vectors

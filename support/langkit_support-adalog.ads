@@ -35,12 +35,12 @@ package Langkit_Support.Adalog is
 
    Default_Timeout_Ticks_Number : constant := 200_000;
 
-   type Solver_Kind is (State_Machine, Symbolic, None);
+   type Solver_Kind is (None, Symbolic, State_Machine);
    --  Different kind of solvers available in Adalog. ``None`` is for no
    --  solver.
 
-   subtype Valid_Solver_Kind is Solver_Kind range State_Machine .. Symbolic;
-   --  Kind subtype for valid solver kinds.
+   subtype Valid_Solver_Kind is Solver_Kind range Symbolic .. State_Machine;
+   --  Kind subtype for valid solver kinds
 
    Unsupported_Error : exception;
    --  Exception raised when trying to use a feature that is not supported by

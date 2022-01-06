@@ -1,5 +1,5 @@
-Solving with new solver
-=======================
+Using the symbolic solver
+=========================
 
 Solving relation:
 Is_Even?(%X)
@@ -8,8 +8,8 @@ Is_Even?(%X)
 ... cut dead branches:
 
 
-Solving with old solver
-=======================
+Using the state machine solver
+==============================
 
 Solving relation:
 Predicate Is_Even on %X

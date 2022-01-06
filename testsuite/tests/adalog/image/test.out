@@ -1,5 +1,5 @@
-Solving with new solver
-=======================
+Using the symbolic solver
+=========================
 
 Solving relation:
 All:
@@ -40,8 +40,8 @@ Solution: [%X = 11, %Y = 11]
 Solution: [%X = <undefined>, %Y = <undefined>]
 
 
-Solving with old solver
-=======================
+Using the state machine solver
+==============================
 
 Solving relation:
 <All>:

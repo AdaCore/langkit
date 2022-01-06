@@ -1,10 +1,10 @@
-Solving with new solver
-=======================
+Using the symbolic solver
+=========================
 
 LANGKIT_SUPPORT.ADALOG.UNSUPPORTED_ERROR: Comparer_Type not supported with the symbolic solver
 
-Solving with old solver
-=======================
+Using the state machine solver
+==============================
 
 Solving relation:
 <All>:

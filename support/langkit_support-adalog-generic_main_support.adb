@@ -23,13 +23,17 @@
 
 with Ada.Command_Line;
 with Ada.Environment_Variables;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Exceptions; use Ada.Exceptions;
+with Ada.Text_IO;    use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Images;
 with Langkit_Support.Vectors;
 
 package body Langkit_Support.Adalog.Generic_Main_Support is
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Logic_Var_Record, Refs.Logic_Var);
 
    --  The following booleans determine which solver configurations to run in
    --  tests. The ``Setup_Traces`` procedure initializes them with default
@@ -39,9 +43,6 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
    Run_Sym_Without_Opts : Boolean;
    Run_Sym_With_Opts    : Boolean;
    Run_State_Machine    : Boolean;
-
-   procedure Free is new Ada.Unchecked_Deallocation
-     (Logic_Var_Record, Refs.Logic_Var);
 
    ------------
    -- Create --
@@ -256,6 +257,52 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
          Strings.Append (Result);
       end return;
    end "-";
+
+   --------------
+   -- Run_Main --
+   --------------
+
+   procedure Run_Main (Main : access procedure) is
+      Enabled : array (Valid_Solver_Kind) of Boolean;
+      First   : Boolean := True;
+   begin
+      Setup_Traces;
+      Enabled :=
+        (Symbolic      => Run_Sym_Without_Opts or else Run_Sym_With_Opts,
+         State_Machine => Run_State_Machine);
+
+      for K in Enabled'Range loop
+         if Enabled (K) then
+            if First then
+               First := False;
+            else
+               New_Line;
+            end if;
+            declare
+               Title : constant String :=
+                 "Using the "
+                 & (case K is
+                    when Symbolic => "symbolic",
+                    when State_Machine => "state machine")
+                 & " solver";
+            begin
+               Set_Kind (K);
+               Put_Line (Title);
+               Put_Line ((Title'Range => '='));
+               New_Line;
+               Main.all;
+            exception
+               when Exc : Unsupported_Error =>
+                  Put_Line
+                    (Exception_Name (Exc) & ": " & Exception_Message (Exc));
+               when Early_Binding_Error =>
+                  Put_Line ("Resolution failed with Early_Binding_Error");
+            end;
+         end if;
+      end loop;
+
+      Finalize;
+   end Run_Main;
 
    ------------------
    -- Setup_Traces --
