@@ -1,10 +1,10 @@
-Solving with new solver
-=======================
+Using the symbolic solver
+=========================
 
 FAILED!
 
-Solving with old solver
-=======================
+Using the state machine solver
+==============================
 
 FAILED!
 Done.

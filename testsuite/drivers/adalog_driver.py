@@ -1,3 +1,5 @@
+import os
+
 from drivers.base_driver import BaseDriver
 
 
@@ -15,11 +17,19 @@ class AdalogDriver(BaseDriver):
     Langkit_Support.Adalog.Main_Support package. If they need to use their own
     Generic_Main_Support instantiation, they must add their fully qualified
     name as the "main_support_name" key in their "test.yaml".
+
+    The "solver-cfg" key in "test.yaml" controls which solver is exercized, and
+    with which optimization. It is a string (considered empty if omitted), see
+    the Langkit_Support.Adalog.Generic_Main_Support package for its usage.
     """
 
     default_process_timeout = 300
 
     def run(self):
+        solver_cfg = self.test_env.get("solver-cfg", "")
+        env = dict(os.environ)
+        env["ADALOG_SOLVER_CFG"] = solver_cfg
+
         self.create_project_file("p.gpr", ["adalog_main.adb"])
         main = "adalog_main.adb"
 
@@ -35,48 +45,19 @@ class AdalogDriver(BaseDriver):
         with open(self.working_dir(main), "w") as f:
             f.write(
                 f"""
-with Ada.Exceptions; use Ada.Exceptions;
-with Ada.Text_IO;    use Ada.Text_IO;
-
-with Langkit_Support.Adalog; use Langkit_Support.Adalog;
-
 with Main;
 {solver_with_clause}
 
 procedure Adalog_Main is
-    use {main_support_name}.T_Solver;
 begin
-    {main_support_name}.Setup_Traces;
-
-    {main_support_name}.T_Solver.Set_Kind (Symbolic);
-    Put_Line ("Solving with new solver");
-    Put_Line ("=======================");
-    Put_Line ("");
-    begin
-        Main;
-    exception
-        when Exc : Unsupported_Error =>
-            Put_Line (Exception_Name (Exc) & ": " & Exception_Message (Exc));
-    end;
-    New_Line;
-
-    begin
-        Set_Kind (State_Machine);
-        Put_Line ("Solving with old solver");
-        Put_Line ("=======================");
-        Put_Line ("");
-        Main;
-    exception
-        when Langkit_Support.Adalog.Early_Binding_Error =>
-            Put_Line ("Resolution failed with Early_Binding_Error");
-    end;
-    {main_support_name}.Finalize;
+    {main_support_name}.Run_Main (Main'Access);
 end Adalog_Main;
                 """
             )
         self.gprbuild("p.gpr")
         self.run_and_check(
             [self.program_path(main)],
+            env=env,
             for_coverage=True,
             memcheck=True,
         )

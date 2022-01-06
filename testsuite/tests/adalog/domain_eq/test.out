@@ -1,5 +1,5 @@
-Solving with new solver
-=======================
+Using the symbolic solver
+=========================
 
 Solving relation:
 Any:
@@ -60,8 +60,8 @@ Solution: [%X = 2, %Y = 2]
 Solution: [%X = 1, %Y = 1]
 
 
-Solving with old solver
-=======================
+Using the state machine solver
+==============================
 
 Solving relation:
 <Any>:

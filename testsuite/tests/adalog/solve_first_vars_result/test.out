@@ -1,5 +1,5 @@
-Solving with new solver
-=======================
+Using the symbolic solver
+=========================
 
 %X = 1
 %Y = 1
@@ -11,8 +11,8 @@ Solving with new solver
 %Y = 2
 %Z = 2
 
-Solving with old solver
-=======================
+Using the state machine solver
+==============================
 
 %X = 1
 %Y = 1

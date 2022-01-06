@@ -1,5 +1,5 @@
-Solving with new solver
-=======================
+Using the symbolic solver
+=========================
 
 Solving relation:
 %X <- 12
@@ -10,8 +10,8 @@ Solution: [%X = 12]
 Solution: [%X = 12]
 
 
-Solving with old solver
-=======================
+Using the state machine solver
+==============================
 
 Solving relation:
 Unify %X <= 12
