@@ -117,6 +117,10 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
       function Image is new Langkit_Support.Images.Array_Image
         (Var_And_Val, Positive, Solution);
 
+      procedure Run_Solve (Opts : Solve_Options_Type);
+      --  Wrapper around the ``Solve`` procedure, to catch and display uncaught
+      --  exceptions.
+
       ----------
       -- Free --
       ----------
@@ -193,6 +197,21 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
          return True;
       end Solution_Callback;
 
+      ---------------
+      -- Run_Solve --
+      ---------------
+
+      procedure Run_Solve (Opts : Solve_Options_Type) is
+      begin
+         Solve (Rel, Solution_Callback'Access, Opts);
+      exception
+         when Early_Binding_Error =>
+            Put_Line ("Resolution failed with Early_Binding_Error");
+         when Exc : others =>
+            Put_Line ("  -> " & Exception_Name (Exc)
+                      & ": " & Exception_Message (Exc));
+      end Run_Solve;
+
    begin
       Put_Line ("Solving relation:");
       Print_Relation (Rel);
@@ -203,8 +222,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
          if Run_Sym_Without_Opts then
             Put_Line ("... without optimizations:");
-            Solve
-              (Rel, Solution_Callback'Access, (others => False));
+            Run_Solve ((others => False));
             New_Line;
             Solutions_Without_Opts := Solutions;
             Solutions := Solution_Vectors.Empty_Vector;
@@ -212,7 +230,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
          if Run_Sym_With_Opts then
             Put_Line ("... with all optimizations:");
-            Solve (Rel, Solution_Callback'Access, (others => True));
+            Run_Solve ((others => True));
             New_Line;
          end if;
 
@@ -234,7 +252,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
       when State_Machine =>
          if Run_State_Machine then
-            Solve (Rel, Solution_Callback'Access, (others => True));
+            Run_Solve ((others => True));
             Free (Solutions);
             New_Line;
          end if;
@@ -295,8 +313,6 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
                when Exc : Unsupported_Error =>
                   Put_Line
                     (Exception_Name (Exc) & ": " & Exception_Message (Exc));
-               when Early_Binding_Error =>
-                  Put_Line ("Resolution failed with Early_Binding_Error");
             end;
          end if;
       end loop;

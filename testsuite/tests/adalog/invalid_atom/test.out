@@ -13,5 +13,6 @@ Using the state machine solver
 
 Solving relation:
 Predicate Is_Even on %X
-langkit_support-adalog-abstract_relation.adb:185
+Resolution failed with Early_Binding_Error
+
 Done.
