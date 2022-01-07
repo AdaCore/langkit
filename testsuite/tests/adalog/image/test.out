@@ -64,4 +64,5 @@ Solution: [%X = 6, %Y = 6]
 Solution: [%X = 10, %Y = 10]
 Solution: [%X = 11, %Y = 11]
 Resolution failed with Early_Binding_Error
+
 Done.

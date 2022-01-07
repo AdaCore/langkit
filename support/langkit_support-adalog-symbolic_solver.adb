@@ -22,6 +22,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Assertions; use Ada.Assertions;
+with Ada.Exceptions; use Ada.Exceptions;
 
 with GNAT.Traceback.Symbolic; use GNAT.Traceback.Symbolic;
 
@@ -1316,7 +1317,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Has_Contradiction
      (Atoms, Unifies : Atomic_Relation_Vector;
       Vars           : Logic_Var_Array;
-      Sort_Ctx       : Sort_Context) return Boolean is
+      Sort_Ctx       : Sort_Context) return Boolean
+   is
+      Had_Exception : Boolean := False;
+      Exc           : Exception_Occurrence;
+
+      Result : Boolean;
    begin
       if Simplify_Trace.Is_Active then
          Simplify_Trace.Increase_Indent ("Looking for a contradiction");
@@ -1336,24 +1342,45 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
          --  Once the partial topological sort has been done, we can just
          --  run the linear evaluator to check if there is a contradiction.
+         --
+         --  Note that we must catch and hide here all exceptions that
+         --  predicates/converters might raise during the evaluation: while it
+         --  is ok during the relation solving to let them abort the
+         --  resolution, ``Has_Contradiction`` is used to simplify the
+         --  relation: we do not want to abort the simplification process. In
+         --  this case, even though we know that the solver will later fail
+         --  evaluating the same atom, we cannot optimize it out to preserve
+         --  the order in which the solver finds solutions.
 
-         return Result : constant Boolean := not Evaluate_Atoms (Sorted_Atoms)
-         do
-            if Simplify_Trace.Is_Active then
-               if Result then
-                  Simplify_Trace.Trace ("Contradiction found");
-               else
-                  Simplify_Trace.Trace ("No contradiction found");
-               end if;
+         begin
+            Result := not Evaluate_Atoms (Sorted_Atoms);
+         exception
+            when E : others =>
+               Save_Occurrence (Exc, E);
+               Had_Exception := True;
+               Result := False;
+         end;
+
+         if Simplify_Trace.Is_Active then
+            if Had_Exception then
+               Simplify_Trace.Trace
+                 (Exc,
+                  "Got an exception, considering no contradiction was found:"
+                  & ASCII.LF);
+            elsif Result then
+               Simplify_Trace.Trace ("Contradiction found");
+            else
+               Simplify_Trace.Trace ("No contradiction found");
             end if;
+         end if;
 
-            if Simplify_Trace.Is_Active then
-               Simplify_Trace.Decrease_Indent;
-            end if;
+         if Simplify_Trace.Is_Active then
+            Simplify_Trace.Decrease_Indent;
+         end if;
 
-            Cleanup_Aliases (Vars);
-            Clear (Sort_Ctx);
-         end return;
+         Cleanup_Aliases (Vars);
+         Clear (Sort_Ctx);
+         return Result;
       end;
    end Has_Contradiction;
 
@@ -2035,7 +2062,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          if Verbose_Trace.Is_Active then
             Verbose_Trace.Trace (Symbolic_Traceback (E));
          end if;
-         Cleanup;
+
+         --  There is nothing to clean up if we do not have a prepared relation
+         --  yet, as we build a context only after getting one.
+
+         if PRel.Rel /= null then
+            Cleanup;
+         end if;
          raise;
    end Solve;
 

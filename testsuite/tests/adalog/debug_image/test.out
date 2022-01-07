@@ -179,4 +179,49 @@ Solving relation:
 | | Predicate Is_Even on %Y
 | | Member %X {1, 2, 3}
 Resolution failed with Early_Binding_Error
+
+========================================================================
+
+Solving relation:
+<All> main.adb:42:
+| | Predicate Is_Even on %Y
+| | Predicate Is_Even on %X
+Resolution failed with Early_Binding_Error
+
+========================================================================
+
+Solving relation:
+<Any> main.adb:45:
+| | Predicate Is_Even on %Y
+| | Member %X {1, 2}
+Resolution failed with Early_Binding_Error
+
+========================================================================
+
+Solving relation:
+<Any> main.adb:48:
+| | Predicate Is_Even on %X
+| | Predicate Is_Even on %Y
+Resolution failed with Early_Binding_Error
+
+========================================================================
+
+Solving relation:
+<Any> main.adb:51:
+| | Predicate Is_Even on %X
+| | <All> main.adb:51:
+| | | | Member %X {1, 2, 3}
+| | | | Predicate Is_Even on %Y
+Resolution failed with Early_Binding_Error
+
+========================================================================
+
+Solving relation:
+<All> main.adb:56:
+| | Member %X {1, 2, 3}
+| | Predicate Is_Even on %Y
+| | Member %X {2}
+| | Bind %X <=> %Y main.adb:56
+Solution: [%X = 2, %Y = 2]
+
 Done.
