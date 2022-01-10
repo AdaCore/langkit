@@ -1039,4 +1039,8 @@ Error cases:
 <No_Value_Ref> matches Int? LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
 <No node> matches <No_Type_Ref>? LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 
+
+== hash.adb ==
+hash.adb: no error
+
 Done

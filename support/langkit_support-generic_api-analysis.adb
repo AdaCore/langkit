@@ -27,6 +27,7 @@ with Ada.Unchecked_Conversion;
 with GNATCOLL.VFS;
 
 with Langkit_Support.Errors;       use Langkit_Support.Errors;
+with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
@@ -402,6 +403,15 @@ package body Langkit_Support.Generic_API.Analysis is
       return Self.Desc;
    end Language_For;
 
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Self : Lk_Context) return Hash_Type is
+   begin
+      return Hash (Self.Internal);
+   end Hash;
+
    --------------
    -- Has_Unit --
    --------------
@@ -454,6 +464,15 @@ package body Langkit_Support.Generic_API.Analysis is
       Reject_Null_Unit (Self);
       return Self.Context.Desc;
    end Language_For;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Self : Lk_Unit) return Hash_Type is
+   begin
+      return Hash (Self.Internal);
+   end Hash;
 
    --------------
    -- Get_Line --
@@ -552,6 +571,16 @@ package body Langkit_Support.Generic_API.Analysis is
 
       return Self.Desc;
    end Language_For;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Self : Lk_Node) return Hash_Type is
+   begin
+      return Combine
+        (Hash (Self.Internal.Node), Hash (Self.Internal.Rebindings));
+   end Hash;
 
    ----------
    -- Unit --
@@ -821,6 +850,18 @@ package body Langkit_Support.Generic_API.Analysis is
       Reject_Null_Token (Self);
       return Self.Desc;
    end Language_For;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Self : Lk_Token) return Hash_Type is
+   begin
+      return Combine
+        ((Hash (Self.TDH),
+          Hash_Type (Self.Index.Token),
+          Hash_Type (Self.Index.Trivia)));
+   end Hash;
 
    -------------
    -- Is_Null --
