@@ -1,0 +1,35 @@
+Using the symbolic solver
+=========================
+
+Solving relation:
+All:
+    Any:
+        %X <- -1
+        %X <- 0
+        %X <- 27
+        %X <- 100
+
+    is_positive?(%X)
+    lt-100?(%X)
+
+... without optimizations:
+Solution: [%X = 27]
+Solution: [%X = 100]
+
+... with all optimizations:
+Solution: [%X = 27]
+Solution: [%X = 100]
+
+
+Using the state machine solver
+==============================
+
+Solving relation:
+<All>:
+| | Member %X {-1, 0, 27, 100}
+| | Predicate is_positive on %X
+| | Predicate lt-100 on %X
+Solution: [%X = 27]
+Solution: [%X = 100]
+
+Done.
