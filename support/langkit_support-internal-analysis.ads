@@ -21,8 +21,10 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Containers; use Ada.Containers;
 with System;
 
+with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
@@ -122,5 +124,30 @@ package Langkit_Support.Internal.Analysis is
 
    No_Token_Safety_Net : constant Token_Safety_Net :=
      (No_Internal_Context, 0, 0);
+
+   --  Contexts, units and token data handlers are implementing with big
+   --  records, at least 256 bytes long, so we can ignore the 8 least
+   --  significant bits of their addresses.  Nodes can be much smaller, but
+   --  they are still at least 32 bytes long, so ignore the 5 least significant
+   --  bits of their addresses.
+
+   function Hash_Context is new Hash_Address (8);
+   function Hash_Unit is new Hash_Address (8);
+   function Hash_Node is new Hash_Address (5);
+   function Hash_TDH is new Hash_Address (8);
+
+   function Hash (Self : Internal_Context) return Hash_Type
+   is (Hash_Context (System.Address (Self)));
+
+   function Hash (Self : Internal_Unit) return Hash_Type
+   is (Hash_Unit (System.Address (Self)));
+
+   function Hash (Self : Internal_Node) return Hash_Type
+   is (Hash_Node (System.Address (Self)));
+
+   function Hash (Self : Token_Data_Handler_Access) return Hash_Type
+   is (Hash_TDH (if Self = null
+                 then System.Null_Address
+                 else Self.all'Address));
 
 end Langkit_Support.Internal.Analysis;

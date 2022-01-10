@@ -30,6 +30,7 @@
 --  TODO??? Create a language-agnostic documentation for all the concepts
 --  referenced here (context, unit, node, token, trivia, ...).
 
+with Ada.Containers; use Ada.Containers;
 private with Ada.Finalization;
 
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
@@ -99,6 +100,9 @@ package Langkit_Support.Generic_API.Analysis is
    --  Return the unique identifier for the Langkit-generated library that
    --  implements ``Context``.
 
+   function Hash (Self : Lk_Context) return Hash_Type;
+   --  Hash function to use ``Lk_Context`` in hashed containers
+
    function Has_Unit
      (Self : Lk_Context'Class; Unit_Filename : String) return Boolean;
    --  Return whether ``Context`` contains a unit correponding to
@@ -136,6 +140,9 @@ package Langkit_Support.Generic_API.Analysis is
    function Language_For (Self : Lk_Unit'Class) return Language_Id;
    --  Return the unique identifier corresponding to ``Self``
 
+   function Hash (Self : Lk_Unit) return Hash_Type;
+   --  Hash function to use ``Lk_Unit`` in hashed containers
+
    overriding function Get_Line
      (Self : Lk_Unit; Line_Number : Positive) return Text_Type;
    --  Return the line of text at line number ``Line_Number``
@@ -164,6 +171,9 @@ package Langkit_Support.Generic_API.Analysis is
 
    function Language_For (Self : Lk_Node'Class) return Language_Id;
    --  Return the unique identifier corresponding to ``Self``
+
+   function Hash (Self : Lk_Node) return Hash_Type;
+   --  Hash function to use ``Lk_Node`` in hashed containers
 
    function Unit (Self : Lk_Node'Class) return Lk_Unit;
    --  Return the unit that owns this node
@@ -261,6 +271,9 @@ package Langkit_Support.Generic_API.Analysis is
 
    function Language_For (Self : Lk_Token'Class) return Language_Id;
    --  Return the unique identifier corresponding to ``Self``
+
+   function Hash (Self : Lk_Token) return Hash_Type;
+   --  Hash function to use ``Lk_Token`` in hashed containers
 
    function Is_Null (Self : Lk_Token'Class) return Boolean;
    --  Return whether ``Self`` is a null token reference
