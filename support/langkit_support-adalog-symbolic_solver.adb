@@ -121,15 +121,16 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  ``Topo_Sort.Atoms`` where ``Atom`` lives.
 
    package Atom_Lists is new Langkit_Support.Functional_Lists (Atom_And_Index);
-   package Atom_Lists_Vectors is new Langkit_Support.Vectors (Atom_Lists.List);
-   --  Vectors of lists of ``Atom_And_Index``. Used to construct the
-   --  dependency graph during topo sort.
+
+   package Atom_Vectors is new Langkit_Support.Vectors (Atom_And_Index);
+   type Atom_Vector_Array is array (Positive range <>) of Atom_Vectors.Vector;
+   type Atom_Vector_Array_Access is access all Atom_Vector_Array;
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Atom_Vector_Array, Atom_Vector_Array_Access);
 
    type Sort_Context_Type is record
-      Using_Atoms : Atom_Lists_Vectors.Vector;
-      --  Map each logic var Id to the list of atoms that use that variable.
-      --  TODO??? we could use a vector rather than a list as the inner storing
-      --  type. Would be more efficient.
+      Using_Atoms : Atom_Vector_Array_Access;
+      --  Map each logic var Id to the list of atoms that use that variable
 
       Working_Set : Atom_Lists.List;
       --  Working set of atoms. Used as a temporary list to store atoms in the
@@ -322,13 +323,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Create (Vars : Logic_Var_Array) return Sort_Context is
    begin
       return Result : constant Sort_Context := new Sort_Context_Type do
-
-         --  Initialize the ``Using_Atoms`` vector of lists for topo sort to
-         --  have one entry per variable.
-
-         for Dummy in Vars'Range loop
-            Result.Using_Atoms.Append (Atom_Lists.Create);
-         end loop;
+         Result.Using_Atoms := new Atom_Vector_Array'
+           (Vars'Range => Atom_Vectors.Empty_Vector);
       end return;
    end Create;
 
@@ -340,10 +336,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    begin
       Atom_Lists.Clear (Sort_Ctx.N_Preds);
       Atom_Lists.Clear (Sort_Ctx.Working_Set);
-      for I in Sort_Ctx.Using_Atoms.First_Index
-               .. Sort_Ctx.Using_Atoms.Last_Index
-      loop
-         Atom_Lists.Clear (Sort_Ctx.Using_Atoms.Get_Access (I).all);
+      for Atoms of Sort_Ctx.Using_Atoms.all loop
+         Atoms.Clear;
       end loop;
    end Clear;
 
@@ -725,7 +719,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Sorted_Atoms (Last_Atom_Index) := Atom;
       end Append;
 
-      Using_Atoms : constant Atom_Lists_Vectors.Vector := Sort_Ctx.Using_Atoms;
+      Using_Atoms : Atom_Vector_Array renames Sort_Ctx.Using_Atoms.all;
       N_Preds     : Atom_Lists.List := Sort_Ctx.N_Preds;
       Working_Set : Atom_Lists.List := Sort_Ctx.Working_Set;
    begin
@@ -773,7 +767,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                --  For other atoms, put them in the ``Using_Atoms`` map, which
                --  represents the edges of the dependency graph.
 
-               Push (Using_Atoms.Get_Access (Used_Id).all, (Current_Rel, I));
+               Using_Atoms (Used_Id).Append ((Current_Rel, I));
 
             else
                --  Aliasing processing prior to the topo sort is supposed to
@@ -802,13 +796,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             --  this variable in the working set, as their dependencies are now
             --  satisfied.
             if Defd_Id /= 0 then
-               for El of Using_Atoms.Get (Defd_Id) loop
+               for El of Using_Atoms (Defd_Id) loop
                   Working_Set := El & Working_Set;
                end loop;
 
                --  Remove items from Using_Atoms, so that they're not appended
                --  again to the working set.
-               Clear (Using_Atoms.Get_Access (Defd_Id).all);
+               Using_Atoms (Defd_Id).Clear;
 
                Defined_Vars (Defd_Id) := True;
             end if;
@@ -1413,12 +1407,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Atom_Lists.Destroy (Sort_Ctx.N_Preds);
       Atom_Lists.Destroy (Sort_Ctx.Working_Set);
-      for I in Sort_Ctx.Using_Atoms.First_Index
-               .. Sort_Ctx.Using_Atoms.Last_Index
-      loop
-         Atom_Lists.Destroy (Sort_Ctx.Using_Atoms.Get_Access (I).all);
+      for Atoms of Sort_Ctx.Using_Atoms.all loop
+         Atoms.Destroy;
       end loop;
-      Sort_Ctx.Using_Atoms.Destroy;
+      Free (Sort_Ctx.Using_Atoms);
 
       Free (Sort_Ctx);
    end Destroy;
