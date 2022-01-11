@@ -1,0 +1,52 @@
+Using the symbolic solver
+=========================
+
+Solving relation:
+All:
+    %X <- 12
+    Is_Even?(%X)
+
+... with all optimizations:
+Solution: [%X = 12]
+
+Solving relation:
+All:
+    Any:
+        %X <- 1
+        %X <- 2
+        %X <- 3
+
+    Is_Even?(%X)
+
+... with all optimizations:
+Solution: [%X = 2]
+
+Solving relation:
+All:
+    Any:
+        %X <- 1
+        %X <- 2
+        %X <- 3
+        %X <- 4
+
+    Is_Even?(%X)
+
+... with all optimizations:
+[LANGKIT.SOLVER.ANY_LEFT] Non-root Any relations left before solving
+Solution: [%X = 2]
+Solution: [%X = 4]
+
+Solving relation:
+Any:
+    %X <- 1
+    %X <- 2
+    %X <- 3
+    %X <- 4
+
+... with all optimizations:
+Solution: [%X = 1]
+Solution: [%X = 2]
+Solution: [%X = 3]
+Solution: [%X = 4]
+
+Done.
