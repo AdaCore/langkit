@@ -7,6 +7,7 @@ with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Names;       use Langkit_Support.Names;
 with Langkit_Support.Names.Maps;
+with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with Libfoolang.Generic_API;
@@ -906,5 +907,201 @@ begin
    Put_Line ("Debug_Name: Null Member argument: "
              & Debug_Name (No_Struct_Member_Ref));
    New_Line;
+
+   Put_Title ("Name maps");
+   declare
+      procedure Check
+        (Enum_Types     : Casing_Convention := Lower;
+         Enum_Values    : Casing_Convention := Lower;
+         Struct_Types   : Casing_Convention := Lower;
+         Struct_Members : Casing_Convention := Lower);
+      --  Create a name map using the given casing conventions and perform
+      --  several lookups.
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check
+        (Enum_Types     : Casing_Convention := Lower;
+         Enum_Values    : Casing_Convention := Lower;
+         Struct_Types   : Casing_Convention := Lower;
+         Struct_Members : Casing_Convention := Lower)
+      is
+         Symbols : Symbol_Table := Create_Symbol_Table;
+         Map     : constant Name_Map := Create_Name_Map
+           (Id, Symbols, Enum_Types, Enum_Values, Struct_Types,
+            Struct_Members);
+
+         Valid, Invalid : Symbol_Type;
+         ET, ST         : Type_Ref;
+         EV             : Enum_Value_Ref;
+         SM             : Struct_Member_Ref;
+      begin
+         if Enum_Types /= Lower then
+            Put_Line ("Enum types as " & Enum_Types'Image);
+         end if;
+         if Enum_Values /= Lower then
+            Put_Line ("Enum values as " & Enum_Values'Image);
+         end if;
+         if Struct_Types /= Lower then
+            Put_Line ("Struct types as " & Struct_Types'Image);
+         end if;
+         if Struct_Members /= Lower then
+            Put_Line ("Struct members as " & Struct_Members'Image);
+         end if;
+
+         --  Try to look up an enum type
+
+         if Enum_Types = Lower then
+            Valid := Find (Symbols, "analysis_unit_kind");
+            Invalid := Find (Symbols, "ANALYSIS_UNIT_KIND");
+         else
+            Valid := Find (Symbols, "ANALYSIS_UNIT_KIND");
+            Invalid := Find (Symbols, "analysis_unit_kind");
+         end if;
+         ET := Lookup_Type (Map, Invalid);
+         Put_Line (Image (Invalid) & " => " & Debug_Name (ET));
+         ET := Lookup_Type (Map, Valid);
+         Put_Line (Image (Valid) & " => " & Debug_Name (ET));
+
+         --  Try to look up an enum value
+
+         if Enum_Values = Lower then
+            Valid := Find (Symbols, "unit_body");
+            Invalid := Find (Symbols, "UNIT_BODY");
+         else
+            Valid := Find (Symbols, "UNIT_BODY");
+            Invalid := Find (Symbols, "unit_body");
+         end if;
+         EV := Lookup_Enum_Value (Map, ET, Invalid);
+         Put_Line (Image (Invalid) & " => " & Debug_Name (EV));
+         EV := Lookup_Enum_Value (Map, ET, Valid);
+         Put_Line (Image (Valid) & " => " & Debug_Name (EV));
+
+         --  Try to look up a struct type
+
+         if Struct_Types = Lower then
+            Valid := Find (Symbols, "var_decl");
+            Invalid := Find (Symbols, "VAR_DECL");
+         else
+            Valid := Find (Symbols, "VAR_DECL");
+            Invalid := Find (Symbols, "var_decl");
+         end if;
+         ST := Lookup_Type (Map, Invalid);
+         Put_Line (Image (Invalid) & " => " & Debug_Name (ST));
+         ST := Lookup_Type (Map, Valid);
+         Put_Line (Image (Valid) & " => " & Debug_Name (ST));
+
+         --  Try to look up a struct member
+
+         if Struct_Members = Lower then
+            Valid := Find (Symbols, "f_name");
+            Invalid := Find (Symbols, "F_NAME");
+         else
+            Valid := Find (Symbols, "F_NAME");
+            Invalid := Find (Symbols, "f_name");
+         end if;
+         SM := Lookup_Struct_Member (Map, ST, Invalid);
+         Put_Line (Image (Invalid) & " => " & Debug_Name (SM));
+         SM := Lookup_Struct_Member (Map, ST, Valid);
+         Put_Line (Image (Valid) & " => " & Debug_Name (SM));
+
+         New_Line;
+         Destroy (Symbols);
+      end Check;
+
+   begin
+      Check (Enum_Types => Upper);
+      Check (Enum_Values => Upper);
+      Check (Struct_Types => Upper);
+      Check (Struct_Members => Upper);
+   end;
+
+   declare
+      Symbols    : Symbol_Table := Create_Symbol_Table;
+      S          : constant Symbol_Type := Find (Symbols, "foo");
+      Map        : constant Name_Map := Create_Name_Map
+        (Id, Symbols, Lower, Lower, Lower, Lower);
+      Uninit_Map : Name_Map;
+      Enum       : constant Type_Ref := From_Index (Id, First_Enum);
+      Struct     : constant Type_Ref := From_Index (Id, First_Struct);
+
+      Dummy_Struct_Member : Struct_Member_Ref;
+   begin
+      Put_Line ("Invalid args for Lookup_Type");
+      Put ("Uninitialized name map: ");
+      begin
+         Dummy_Type := Lookup_Type (Uninit_Map, S);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+      Put ("Null symbol: ");
+      begin
+         Dummy_Type := Lookup_Type (Map, null);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+      New_Line;
+
+      Put_Line ("Invalid args for Lookup_Enum_Value");
+      Put ("Uninitialized name map: ");
+      begin
+         Dummy_Enum_Value := Lookup_Enum_Value (Uninit_Map, Enum, S);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+      Put ("Null enum type: ");
+      begin
+         Dummy_Enum_Value := Lookup_Enum_Value (Map, No_Type_Ref, S);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+      Put ("Null symbol: ");
+      begin
+         Dummy_Enum_Value := Lookup_Enum_Value (Map, Enum, null);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+      New_Line;
+
+      Put_Line ("Invalid args for Lookup_Struct_Member");
+      Put ("Uninitialized name map: ");
+      begin
+         Dummy_Struct_Member := Lookup_Struct_Member (Uninit_Map, Struct, S);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+      Put ("Null struct type: ");
+      begin
+         Dummy_Struct_Member := Lookup_Struct_Member (Map, No_Type_Ref, S);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+      Put ("Null symbol: ");
+      begin
+         Dummy_Struct_Member := Lookup_Struct_Member (Map, Struct, null);
+         raise Program_Error;
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Exc (Exc);
+      end;
+
+      Destroy (Symbols);
+   end;
 
 end Introspection_Types;

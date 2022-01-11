@@ -887,6 +887,62 @@ Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid 
 
 Debug_Name: Null Member argument: <No_Struct_Member_Ref>
 
+Name maps
+=========
+
+Enum types as UPPER
+analysis_unit_kind => <No_Type_Ref>
+ANALYSIS_UNIT_KIND => AnalysisUnitKind
+UNIT_BODY => <No_Enum_Value_Ref>
+unit_body => AnalysisUnitKind.unit_body
+VAR_DECL => <No_Type_Ref>
+var_decl => VarDecl
+F_NAME => <No_Struct_Member_Ref>
+f_name => VarDecl.f_name
+
+Enum values as UPPER
+ANALYSIS_UNIT_KIND => <No_Type_Ref>
+analysis_unit_kind => AnalysisUnitKind
+unit_body => <No_Enum_Value_Ref>
+UNIT_BODY => AnalysisUnitKind.unit_body
+VAR_DECL => <No_Type_Ref>
+var_decl => VarDecl
+F_NAME => <No_Struct_Member_Ref>
+f_name => VarDecl.f_name
+
+Struct types as UPPER
+ANALYSIS_UNIT_KIND => <No_Type_Ref>
+analysis_unit_kind => AnalysisUnitKind
+UNIT_BODY => <No_Enum_Value_Ref>
+unit_body => AnalysisUnitKind.unit_body
+var_decl => <No_Type_Ref>
+VAR_DECL => VarDecl
+F_NAME => <No_Struct_Member_Ref>
+f_name => VarDecl.f_name
+
+Struct members as UPPER
+ANALYSIS_UNIT_KIND => <No_Type_Ref>
+analysis_unit_kind => AnalysisUnitKind
+UNIT_BODY => <No_Enum_Value_Ref>
+unit_body => AnalysisUnitKind.unit_body
+VAR_DECL => <No_Type_Ref>
+var_decl => VarDecl
+f_name => <No_Struct_Member_Ref>
+F_NAME => VarDecl.f_name
+
+Invalid args for Lookup_Type
+Uninitialized name map: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: uninitialized name map
+Null symbol: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null symbol
+
+Invalid args for Lookup_Enum_Value
+Uninitialized name map: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: uninitialized name map
+Null enum type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+Null symbol: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null symbol
+
+Invalid args for Lookup_Struct_Member
+Uninitialized name map: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: uninitialized name map
+Null struct type: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+Null symbol: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null symbol
 
 == introspection_values.adb ==
 Value comparisons
