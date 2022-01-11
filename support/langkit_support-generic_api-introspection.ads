@@ -455,6 +455,13 @@ package Langkit_Support.Generic_API.Introspection is
    --    or not a valid member for ``Value``;
    --  * ``Arguments`` does not match the arguments that ``Member`` expects.
 
+   function Eval_Node_Member
+     (Value     : Lk_Node;
+      Member    : Struct_Member_Ref;
+      Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
+      return Value_Ref;
+   --  Shortcut for ``Eval_Member``, working directly on a node
+
 private
 
    type Type_Ref is record
