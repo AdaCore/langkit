@@ -316,6 +316,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Look for valid solutions in ``Self`` & ``Ctx``. Return whether to
    --  continue looking for other solutions.
 
+   procedure Any_Left_Warn (Self : Relation);
+   --  If ``Self`` contains a non-root ``Any`` relation, warn about it on
+   --  ``Any_Left_Trace``.
+
    ------------
    -- Create --
    ------------
@@ -2006,6 +2010,51 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end;
    end Solve_Compound;
 
+   -------------------
+   -- Any_Left_Warn --
+   -------------------
+
+   procedure Any_Left_Warn (Self : Relation) is
+
+      function Contains_Any (Self : Relation) return Boolean;
+      --  Return whether ``Self`` is an Any relation or if one of its
+      --  sub-relations contains an Any relation.
+
+      function Contains_Any_Subrel
+        (Self : Compound_Relation_Type) return Boolean;
+      --  Return whether one of ``Self``'s sub-relations contains an Any
+      --  relation.
+
+      -------------------------
+      -- Contains_Any_Subrel --
+      -------------------------
+
+      function Contains_Any_Subrel
+        (Self : Compound_Relation_Type) return Boolean
+      is
+        (for some Subrel of Self.Rels => Contains_Any (Subrel));
+
+      ------------------
+      -- Contains_Any --
+      ------------------
+
+      function Contains_Any (Self : Relation) return Boolean
+      is
+        (Self.Kind = Compound
+         and then (Self.Compound_Rel.Kind = Kind_Any
+                   or else Contains_Any_Subrel (Self.Compound_Rel)));
+
+      Has_Any : constant Boolean :=
+        (if Self.Kind = Compound and then Self.Compound_Rel.Kind = Kind_Any
+         then Contains_Any_Subrel (Self.Compound_Rel)
+         else Contains_Any (Self));
+
+   begin
+      if Has_Any then
+         Any_Left_Trace.Trace ("Non-root Any relations left before solving");
+      end if;
+   end Any_Left_Warn;
+
    -----------
    -- Solve --
    -----------
@@ -2043,6 +2092,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       PRel := Prepare_Relation (Self, Solve_Options);
       Ctx := Create (Solution_Callback'Unrestricted_Access.all, PRel.Vars);
       Ctx.Cut_Dead_Branches := Solve_Options.Cut_Dead_Branches;
+
+      if Any_Left_Trace.Is_Active then
+         Any_Left_Warn (PRel.Rel);
+      end if;
 
       case Rel.Kind is
          when Compound =>
