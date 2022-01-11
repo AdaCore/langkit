@@ -1273,15 +1273,31 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
          --  Simplify each alternative separately: there can be no interaction
          --  between alternatives of a root conjuction.
+         --
+         --  As usual, process alternatives in the reverse order so that we can
+         --  remove the current element without breaking the iteration.
 
          declare
             Subrels : Relation_Vectors.Vector renames Self.Compound_Rel.Rels;
             Alt     : Relation;
+            New_Alt : Relation;
          begin
-            for I in 1 .. Subrels.Length loop
+            for I in reverse 1 .. Subrels.Length loop
                Alt := Subrels.Get (I);
-               Subrels.Set (I, Simplify (Alt, Vars, Sort_Ctx));
+               New_Alt := Simplify (Alt, Vars, Sort_Ctx);
                Dec_Ref (Alt);
+
+               --  Remove alternatives that are simplified to a False atom, to
+               --  maintain the solver input invariants.
+
+               if New_Alt.Kind = Atomic
+                  and then New_Alt.Atomic_Rel.Kind = False
+               then
+                  Subrels.Remove_At (I);
+                  Dec_Ref (New_Alt);
+               else
+                  Subrels.Set (I, New_Alt);
+               end if;
             end loop;
 
             Inc_Ref (Self);
