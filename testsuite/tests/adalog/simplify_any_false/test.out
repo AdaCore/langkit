@@ -1,0 +1,30 @@
+Using the symbolic solver
+=========================
+
+Solving relation:
+Any:
+    All:
+        %X <- 120
+        lt-100?(%X)
+
+    True
+
+... without optimizations:
+Solution: [%X = <undefined>]
+
+... with all optimizations:
+Solution: [%X = <undefined>]
+
+
+Using the state machine solver
+==============================
+
+Solving relation:
+<Any>:
+| | <All>:
+| | | | Unify %X <= 120
+| | | | Predicate lt-100 on %X
+| | <True>
+Solution: [%X = <undefined>]
+
+Done.
