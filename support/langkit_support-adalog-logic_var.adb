@@ -132,7 +132,11 @@ package body Langkit_Support.Adalog.Logic_Var is
       if To = Self or else To.Aliased_To = Self then
          return;
       elsif Self.Aliased_To = null then
-         Self.Aliased_To := To;
+         if To.Aliased_To = null then
+            Self.Aliased_To := To;
+         else
+            Alias (Self, To.Aliased_To);
+         end if;
       else
          Alias (Self.Aliased_To, To);
       end if;
