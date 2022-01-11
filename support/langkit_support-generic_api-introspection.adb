@@ -1557,4 +1557,24 @@ package body Langkit_Support.Generic_API.Introspection is
       end if;
    end Eval_Member;
 
+   ----------------------
+   -- Eval_Node_Member --
+   ----------------------
+
+   function Eval_Node_Member
+     (Value     : Lk_Node;
+      Member    : Struct_Member_Ref;
+      Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
+      return Value_Ref
+   is
+      Node : Value_Ref;
+   begin
+      if Value = No_Lk_Node then
+         raise Precondition_Failure with "the null node has no member";
+      end if;
+
+      Node := Create_Node (Value.Language_For, Value);
+      return Eval_Member (Node, Member, Arguments);
+   end Eval_Node_Member;
+
 end Langkit_Support.Generic_API.Introspection;

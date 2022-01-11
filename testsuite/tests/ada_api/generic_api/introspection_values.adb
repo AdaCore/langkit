@@ -718,6 +718,19 @@ begin
       end loop;
    end;
 
+   Put ("Eval_Node_Member: null node value: ");
+   begin
+      Value := Eval_Node_Member (No_Lk_Node, P_Id_Bool, (1 => True_Bool));
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   Put_Line ("Eval_Node_Member: P_Id_bool:");
+   Value := Eval_Node_Member
+     (As_Node (Example_Value), P_Id_Bool, (1 => True_Bool));
+   Inspect (Value);
+   New_Line;
+
    Put_Title ("Type matching");
 
    Put_Line ("Basic cases:");
