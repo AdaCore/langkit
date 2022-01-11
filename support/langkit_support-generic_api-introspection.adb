@@ -23,7 +23,6 @@
 
 with Ada.Tags; use Ada.Tags;
 with Ada.Unchecked_Conversion;
-with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Errors;            use Langkit_Support.Errors;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
@@ -122,6 +121,9 @@ package body Langkit_Support.Generic_API.Introspection is
    --  If ``Member`` is not a valid struct member for the given language or if
    --  ``Argument`` is not a valid argument for that member, raise a
    --  ``Precondition_Failure`` exception.
+
+   procedure Check_Symbol (Symbol : Symbol_Type);
+   --  If ``Symbol`` is null, raise a ``Precondition_Failure`` exception
 
    function Create_Value
      (Id : Language_Id; Value : Internal_Value_Access) return Value_Ref;
@@ -248,6 +250,17 @@ package body Langkit_Support.Generic_API.Introspection is
       end if;
    end Check_Value_Type;
 
+   ------------------
+   -- Check_Symbol --
+   ------------------
+
+   procedure Check_Symbol (Symbol : Symbol_Type) is
+   begin
+      if Symbol = null then
+         raise Precondition_Failure with "null symbol";
+      end if;
+   end Check_Symbol;
+
    ---------
    -- "=" --
    ---------
@@ -353,6 +366,7 @@ package body Langkit_Support.Generic_API.Introspection is
    -------------
    -- As_Unit --
    -------------
+
    function As_Unit (Value : Value_Ref) return Lk_Unit is
       Id : Language_Id;
       V  : Internal_Acc_Analysis_Unit;
@@ -1604,5 +1618,179 @@ package body Langkit_Support.Generic_API.Introspection is
       Node := Create_Node (Value.Language_For, Value);
       return Eval_Member (Node, Member, Arguments);
    end Eval_Node_Member;
+
+   ---------------------
+   -- Create_Name_Map --
+   ---------------------
+
+   function Create_Name_Map
+     (Id             : Language_Id;
+      Symbols        : Symbol_Table;
+      Enum_Types     : Casing_Convention;
+      Enum_Values    : Casing_Convention;
+      Struct_Types   : Casing_Convention;
+      Struct_Members : Casing_Convention) return Name_Map
+   is
+      function Format_Name
+        (Name       : Name_Type;
+         Convention : Casing_Convention) return Symbol_Type
+      is (Find (Symbols, Format_Name (Name, Convention)));
+   begin
+      if Id = null then
+         raise Precondition_Failure with "null language id";
+      elsif Symbols = null then
+         raise Precondition_Failure with "null symbol table";
+      end if;
+
+      return Result : Name_Map do
+         Result.Id := Id;
+
+         --  Register enum types and their values
+
+         Result.Enum_Value_Maps :=
+           new Enum_Value_Map_Array (Id.Enum_Types.all'Range);
+         for Enum_Index in Id.Enum_Types.all'Range loop
+            declare
+               T      : constant Type_Ref := From_Index (Id, Enum_Index);
+               Values : Enum_Value_Maps.Map renames
+                 Result.Enum_Value_Maps.all (Enum_Index);
+               V      : Enum_Value_Ref;
+            begin
+               Result.Type_Map.Insert
+                 (Format_Name (Enum_Type_Name (T), Enum_Types), T);
+               for Value_Index in 1 .. Enum_Last_Value (T) loop
+                  V := From_Index (T, Value_Index);
+                  Values.Insert
+                    (Format_Name (Enum_Value_Name (V), Enum_Values), V);
+               end loop;
+            end;
+         end loop;
+
+         --  Register struct types
+
+         for I in Id.Struct_Types.all'Range loop
+            declare
+               T : constant Type_Ref := From_Index (Id, I);
+            begin
+               Result.Type_Map.Insert
+                 (Format_Name (Base_Struct_Type_Name (T), Struct_Types), T);
+            end;
+         end loop;
+
+         --  Precompute casing for struct members
+
+         Result.Struct_Member_Names :=
+           new Struct_Member_Name_Array (1 .. Last_Struct_Member (Id));
+         for I in Result.Struct_Member_Names.all'Range loop
+            Result.Struct_Member_Names.all (I) :=
+              Format_Name (Member_Name (From_Index (Id, I)), Struct_Members);
+         end loop;
+      end return;
+   end Create_Name_Map;
+
+   -----------------
+   -- Lookup_Type --
+   -----------------
+
+   function Lookup_Type (Self : Name_Map; Name : Symbol_Type) return Type_Ref
+   is
+      use Named_Type_Maps;
+
+      Pos : Cursor;
+   begin
+      Check_Name_Map (Self);
+      Check_Symbol (Name);
+      Pos := Self.Type_Map.Find (Name);
+      return (if Has_Element (Pos)
+              then Element (Pos)
+              else No_Type_Ref);
+   end Lookup_Type;
+
+   -----------------------
+   -- Lookup_Enum_Value --
+   -----------------------
+
+   function Lookup_Enum_Value
+     (Self : Name_Map;
+      Enum : Type_Ref;
+      Name : Symbol_Type) return Enum_Value_Ref is
+   begin
+      Check_Name_Map (Self);
+      Check_Enum_Type (Enum);
+      Check_Same_Language (Self.Id, Enum.Id);
+      Check_Symbol (Name);
+
+      declare
+         use Enum_Value_Maps;
+
+         Value_Map : Map renames Self.Enum_Value_Maps.all (Enum.Index);
+         Pos       : constant Cursor := Value_Map.Find (Name);
+      begin
+         return (if Has_Element (Pos)
+                 then Element (Pos)
+                 else No_Enum_Value_Ref);
+      end;
+   end Lookup_Enum_Value;
+
+   --------------------------
+   -- Lookup_Struct_Member --
+   --------------------------
+
+   function Lookup_Struct_Member
+     (Self   : Name_Map;
+      Struct : Type_Ref;
+      Name   : Symbol_Type) return Struct_Member_Ref
+   is
+      All_Members : constant Struct_Member_Ref_Array := Members (Struct);
+   begin
+      Check_Name_Map (Self);
+      Check_Same_Language (Self.Id, Struct.Id);
+      Check_Symbol (Name);
+
+      for M of All_Members loop
+         if Self.Struct_Member_Names.all (To_Index (M)) = Name then
+            return M;
+         end if;
+      end loop;
+
+      return No_Struct_Member_Ref;
+   end Lookup_Struct_Member;
+
+   ------------
+   -- Adjust --
+   ------------
+
+   overriding procedure Adjust (Self : in out Name_Map) is
+   begin
+      if Self.Enum_Value_Maps = null then
+         return;
+      end if;
+
+      Self.Enum_Value_Maps :=
+        new Enum_Value_Map_Array'(Self.Enum_Value_Maps.all);
+      Self.Struct_Member_Names :=
+        new Struct_Member_Name_Array'(Self.Struct_Member_Names.all);
+   end Adjust;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Self : in out Name_Map) is
+   begin
+      Free (Self.Enum_Value_Maps);
+      Free (Self.Struct_Member_Names);
+   end Finalize;
+
+   --------------------
+   -- Check_Name_Map --
+   --------------------
+
+   procedure Check_Name_Map (Self : Name_Map) is
+   begin
+      if Self.Id = null then
+         raise Precondition_Failure with "uninitialized name map";
+      end if;
+   end Check_Name_Map;
 
 end Langkit_Support.Generic_API.Introspection;

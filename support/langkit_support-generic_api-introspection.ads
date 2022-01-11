@@ -27,15 +27,18 @@
 --  Note that it is experimental at this stage, and thus not officially
 --  supported.
 
+private with Ada.Containers.Hashed_Maps;
 private with Ada.Finalization;
+private with Ada.Unchecked_Deallocation;
 
 with GNATCOLL.GMP.Integers; use GNATCOLL.GMP.Integers;
 
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 limited private with Langkit_Support.Internal.Introspection;
-with Langkit_Support.Slocs; use Langkit_Support.Slocs;
-with Langkit_Support.Text;  use Langkit_Support.Text;
+with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Text;    use Langkit_Support.Text;
 
 package Langkit_Support.Generic_API.Introspection is
 
@@ -486,6 +489,50 @@ package Langkit_Support.Generic_API.Introspection is
       return Value_Ref;
    --  Shortcut for ``Eval_Member``, working directly on a node
 
+   ---------------
+   -- Name maps --
+   ---------------
+
+   type Name_Map is private;
+   --  Map from names to enum types, enum values, struct types and struct
+   --  members for a given casing convention and a given language.
+
+   function Create_Name_Map
+     (Id             : Language_Id;
+      Symbols        : Symbol_Table;
+      Enum_Types     : Casing_Convention;
+      Enum_Values    : Casing_Convention;
+      Struct_Types   : Casing_Convention;
+      Struct_Members : Casing_Convention) return Name_Map;
+   --  Return a map from names to types, values and members for the given
+   --  language. Names are encoded according to the given casing convention for
+   --  each kind of entity, and internalized using the ``Symbols`` symbol
+   --  table.
+
+   function Lookup_Type (Self : Name_Map; Name : Symbol_Type) return Type_Ref;
+   --  Look for an enum/struct type indexed in ``Self`` called ``Name``. Return
+   --  it if there is one, or ``No_Type_Ref`` is no type matches that name.
+   --  The casing convention used for ``Name`` must match with the one used to
+   --  create ``Self``.
+
+   function Lookup_Enum_Value
+     (Self : Name_Map;
+      Enum : Type_Ref;
+      Name : Symbol_Type) return Enum_Value_Ref;
+   --  Look in ``Self`` for the enum value called ``Name`` for the given
+   --  ``Enum`` type. Return it if there is one, or ``No_Enum_Value_Ref`` is no
+   --  value matches that name.  The casing convention used for ``Name`` must
+   --  match with the one used to create ``Self``.
+
+   function Lookup_Struct_Member
+     (Self   : Name_Map;
+      Struct : Type_Ref;
+      Name   : Symbol_Type) return Struct_Member_Ref;
+   --  Look for the ``Struct`` member called ``Name``. Return it if there is
+   --  one, or ``No_Struct_Member_Ref`` if this struct type has no such member.
+   --  The casing convention used for ``Name`` must match with the one used to
+   --  create ``Self``.
+
 private
 
    type Type_Ref is record
@@ -530,5 +577,55 @@ private
    No_Enum_Value_Ref : constant Enum_Value_Ref := (No_Type_Ref, 0);
 
    No_Struct_Member_Ref : constant Struct_Member_Ref := (null, 0);
+
+   package Named_Type_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Symbol_Type,
+      Element_Type    => Type_Ref,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
+
+   package Enum_Value_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Symbol_Type,
+      Element_Type    => Enum_Value_Ref,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
+
+   type Enum_Value_Map_Array is
+     array (Type_Index range <>) of Enum_Value_Maps.Map;
+   type Enum_Value_Maps_Access is access Enum_Value_Map_Array;
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Enum_Value_Map_Array, Enum_Value_Maps_Access);
+
+   type Struct_Member_Name_Array is
+     array (Struct_Member_Index range <>) of Symbol_Type;
+   type Struct_Member_Names_Access is access Struct_Member_Name_Array;
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Struct_Member_Name_Array, Struct_Member_Names_Access);
+
+   type Name_Map is new Ada.Finalization.Controlled with record
+      Id : Language_Id;
+      --  Language for which this map was created.
+      --
+      --  Since this member is automatically initialized to null and creating a
+      --  name map always assigns it a non-null value, we can compare this
+      --  member to null to check if the name map has been created.
+
+      Type_Map : Named_Type_Maps.Map;
+      --  Map enum/struct type names to type references
+
+      Enum_Value_Maps : Enum_Value_Maps_Access;
+      --  For each enum type, map from enum value names to enum value
+      --  references.
+
+      Struct_Member_Names : Struct_Member_Names_Access;
+      --  Names for all struct members
+   end record;
+
+   overriding procedure Adjust (Self : in out Name_Map);
+   overriding procedure Finalize (Self : in out Name_Map);
+
+   procedure Check_Name_Map (Self : Name_Map);
+   --  Raise a ``Precondition_Failure`` exception if ``Self`` is not
+   --  initialized.
 
 end Langkit_Support.Generic_API.Introspection;
