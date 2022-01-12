@@ -894,5 +894,10 @@ begin
       when Exc : Precondition_Failure =>
          Put_Exc (Exc);
    end;
+   New_Line;
+
+   Put_Line ("Debug_Name: Null Member argument: "
+             & Debug_Name (No_Struct_Member_Ref));
+   New_Line;
 
 end Introspection_Types;
