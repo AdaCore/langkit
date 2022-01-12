@@ -2166,16 +2166,17 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       function Callback (Vars : Logic_Var_Array) return Boolean;
       --  Simple callback that will stop on first solution
 
-      type Var_Array_Access is access all Logic_Var_Array;
-      type Val_Array_Access is access all Value_Array;
-
-      Last_Vars : Var_Array_Access := null;
-      Last_Vals : Val_Array_Access := null;
-
+      type Tracked_Var is record
+         Var     : Logic_Var;
+         Defined : Boolean;
+         Value   : Value_Type;
+      end record;
+      type Tracked_Var_Array is array (Positive range <>) of Tracked_Var;
+      type Tracked_Vars_Access is access all Tracked_Var_Array;
       procedure Free is new Ada.Unchecked_Deallocation
-        (Logic_Var_Array, Var_Array_Access);
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Value_Array, Val_Array_Access);
+        (Tracked_Var_Array, Tracked_Vars_Access);
+      Tracked_Vars : Tracked_Vars_Access;
+      --  Track variables and their state at the point ``Callback`` is invoked
 
       --------------
       -- Callback --
@@ -2184,23 +2185,35 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       function Callback (Vars : Logic_Var_Array) return Boolean is
       begin
          Ret := True;
-         Last_Vals := new Value_Array (Vars'Range);
-         Last_Vars := new Logic_Var_Array'(Vars);
-         for I in  Vars'Range loop
-            Last_Vals (I) := Get_Value (Vars (I));
+         Tracked_Vars := new Tracked_Var_Array (Vars'Range);
+         for I in Vars'Range loop
+            declare
+               TV      : Tracked_Var renames Tracked_Vars (I);
+               V       : Logic_Var renames Vars (I);
+               Defined : constant Boolean := Is_Defined (V);
+            begin
+               TV.Var := V;
+               TV.Defined := Defined;
+               if Defined then
+                  TV.Value := Get_Value (Vars (I));
+               end if;
+            end;
          end loop;
          return False;
       end Callback;
 
    begin
       Solve (Self, Callback'Access, Solve_Options);
-      if Last_Vars /= null then
-         for I in Last_Vars'Range loop
-            Set_Value (Last_Vars (I), Last_Vals (I));
+      if Tracked_Vars /= null then
+         for TV of Tracked_Vars.all loop
+            if TV.Defined then
+               Set_Value (TV.Var, TV.Value);
+            else
+               Reset (TV.Var);
+            end if;
          end loop;
+         Free (Tracked_Vars);
       end if;
-      Free (Last_Vars);
-      Free (Last_Vals);
       return Ret;
    end Solve_First;
 
