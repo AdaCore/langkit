@@ -1041,7 +1041,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
          --  Now run our fixed-point
 
-         while Atoms_Changed loop
+         Fixedpoint_Loop : while Atoms_Changed loop
             Atoms_Changed := False;
             Inner_Count := Inner_Count + 1;
             if Simplify_Trace.Is_Active then
@@ -1065,7 +1065,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             --  that we can remove the item being processing from its vector
             --  without breaking the iteration.
 
-            for Any_Idx in reverse 1 .. Anys.Length loop
+            Any_Loop : for Any_Idx in reverse 1 .. Anys.Length loop
                declare
                   Any         : Relation := Anys.Get (Any_Idx);
                   Any_Subrels : Relation_Vectors.Vector renames
@@ -1081,7 +1081,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                      Simplify_Trace.Trace ("Trying to simplify " & Any_Img);
                   end if;
 
-                  for Alt_Idx in reverse 1 .. Any_Subrels.Length loop
+                  Alt_Loop : for Alt_Idx in reverse 1 .. Any_Subrels.Length
+                  loop
                      declare
                         Alt : Relation := Any_Subrels.Get (Alt_Idx);
 
@@ -1169,6 +1170,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                               Add (Any.Compound_Rel.Rels.Get (1));
                               Dec_Ref (Any);
                               Anys.Remove_At (Any_Idx);
+                              exit Alt_Loop;
                            end if;
 
                         elsif Alt.Kind = Compound
@@ -1211,10 +1213,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                            Any_Subrels.Set (Alt_Idx, Alt);
                         end if;
                      end;
-                  end loop;
+                  end loop Alt_Loop;
                end;
-            end loop;
-         end loop;
+            end loop Any_Loop;
+         end loop Fixedpoint_Loop;
 
          --  Build the result from ``Anys`` plus all items in
          --  ``Atoms``/``Unifies`` which we added during this call.
