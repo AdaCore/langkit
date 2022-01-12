@@ -756,6 +756,20 @@ package body Langkit_Support.Generic_API.Introspection is
       end;
    end Enum_Value_Name;
 
+   ----------------
+   -- Debug_Name --
+   ----------------
+
+   function Debug_Name (Value : Enum_Value_Ref) return String is
+   begin
+      if Value = No_Enum_Value_Ref then
+         return "<No_Enum_Value_Ref>";
+      else
+         return Debug_Name (Enum_For (Value))
+                & "." & Image (Format_Name (Enum_Value_Name (Value), Lower));
+      end if;
+   end Debug_Name;
+
    --------------
    -- To_Index --
    --------------

@@ -183,20 +183,20 @@ Enum types
 ==========
 
 Analysis_Unit_Kind ( 10)
-  Default value: 0
+  Default value: <No_Enum_Value_Ref>
 
   1: Unit_Specification
   2: Unit_Body
 
 Lookup_Kind ( 11)
-  Default value: 0
+  Default value: <No_Enum_Value_Ref>
 
   1: Recursive
   2: Flat
   3: Minimal
 
 Designated_Env_Kind ( 12)
-  Default value: 1
+  Default value: DesignatedEnvKind.none
 
   1: None
   2: Current_Env
@@ -204,7 +204,7 @@ Designated_Env_Kind ( 12)
   4: Direct_Env
 
 Grammar_Rule ( 13)
-  Default value: 0
+  Default value: <No_Enum_Value_Ref>
 
   1: Main_Rule_Rule
   2: Var_Decl_Rule

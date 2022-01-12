@@ -202,12 +202,7 @@ begin
          declare
             DV : constant Enum_Value_Ref := Enum_Default_Value (Enum);
          begin
-            Put ("  Default value:");
-            if DV = No_Enum_Value_Ref then
-               Put_Line (" 0");
-            else
-               Put_Line (To_Index (DV)'Image);
-            end if;
+            Put_Line ("  Default value: " & Debug_Name (DV));
          end;
          New_Line;
          for Index in 1 .. Enum_Last_Value (Enum) loop
