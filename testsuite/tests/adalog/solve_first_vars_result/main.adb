@@ -1,14 +1,14 @@
+--  Check that vars are either defined (in which case they have correct values)
+--  or undefined when expected after Solve_First.
+
 with Ada.Text_IO; use Ada.Text_IO;
 
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
-
 with Langkit_Support.Images; use Langkit_Support.Images;
 
---  Check that vars are defined and have correct values after Solve_First
-
 procedure Main is
-   use T_Solver; use Refs;
+   use T_Solver, Refs;
 
    procedure Solve (R : Relation);
 
@@ -16,9 +16,9 @@ procedure Main is
    Y : constant Refs.Logic_Var := Create ("Y");
    Z : constant Refs.Logic_Var := Create ("Z");
 
-   R  : constant Relation :=
-     (X = 1 and Y = 1)
-     or (X = 3 and Y = 12);
+   Vars : constant Logic_Var_Array := (X, Y, Z);
+
+   R  : constant Relation := (X = 1 and Y = 2) or (Y = 3 and Z = 4);
    R2 : constant Relation := Y = 3;
    R3 : constant Relation := Y = Z and Y = 2;
 
@@ -28,14 +28,19 @@ procedure Main is
 
    procedure Solve (R : Relation) is
    begin
+      for V of Vars loop
+         Reset (V);
+      end loop;
+
       if Solve_First (R) then
-         for V of Logic_Var_Array'(X, Y, Z) loop
+         for V of Vars loop
             Put_Line
               (Image (V) & " = "
                & (if Is_Defined (V)
                  then Stripped_Image (Get_Value (V))
                  else "<undefined>"));
          end loop;
+         New_Line;
       end if;
    end Solve;
 begin
