@@ -1075,7 +1075,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                      Simplify_Trace.Trace ("Trying to simplify " & Any_Img);
                   end if;
 
-                  for Alt_Idx in reverse 1 .. Any_Subrels.Length loop
+                  Alt_Loop : for Alt_Idx in reverse 1 .. Any_Subrels.Length
+                  loop
                      declare
                         Alt : Relation := Any_Subrels.Get (Alt_Idx);
 
@@ -1163,6 +1164,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                               Add (Any.Compound_Rel.Rels.Get (1));
                               Dec_Ref (Any);
                               Anys.Remove_At (Any_Idx);
+                              exit Alt_Loop;
                            end if;
 
                         elsif Alt.Kind = Compound
@@ -1205,7 +1207,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                            Any_Subrels.Set (Alt_Idx, Alt);
                         end if;
                      end;
-                  end loop;
+                  end loop Alt_Loop;
                end;
             end loop;
          end loop;
