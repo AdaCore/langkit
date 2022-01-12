@@ -1272,8 +1272,12 @@ package body Langkit_Support.Generic_API.Introspection is
 
    function Debug_Name (Member : Struct_Member_Ref) return String is
    begin
-      return Debug_Name (Owner (Member)) & "."
-             & Image (Format_Name (Member_Name (Member), Lower));
+      if Member = No_Struct_Member_Ref then
+         return "<No_Struct_Member_Ref>";
+      else
+         return Debug_Name (Owner (Member)) & "."
+                & Image (Format_Name (Member_Name (Member), Lower));
+      end if;
    end Debug_Name;
 
    -----------

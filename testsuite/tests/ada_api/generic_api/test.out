@@ -854,6 +854,9 @@ Invalid args for Member_Argument_Default_Value:
 Null Member argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null struct member reference
 Invalid Argument argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid struct member argument
 
+Debug_Name: Null Member argument: <No_Struct_Member_Ref>
+
+
 == introspection_values.adb ==
 Value comparisons
 =================
