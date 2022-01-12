@@ -142,6 +142,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  List of N_Predicates, to be applied at the end of solving. TODO??? we
       --  could apply this policy for all predicates, which would simplify the
       --  code a bit.
+
+      Has_Contradiction_Counter : Natural;
+      --  During the Simplify optimization, number of times
+      --  ``Has_Contradiction`` was called. Used for logging/debugging
+      --  purposes.
    end record;
    --  Data used when doing a topological sort (used only in
    --  Solving_Context.Sort_Ctx), when we reach a complete potential solution.
@@ -329,6 +334,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       return Result : constant Sort_Context := new Sort_Context_Type do
          Result.Using_Atoms := new Atom_Vector_Array'
            (Vars'Range => Atom_Vectors.Empty_Vector);
+         Result.Has_Contradiction_Counter := 0;
       end return;
    end Create;
 
@@ -1340,8 +1346,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Result : Boolean;
    begin
+      Sort_Ctx.Has_Contradiction_Counter :=
+        Sort_Ctx.Has_Contradiction_Counter + 1;
+
       if Simplify_Trace.Is_Active then
-         Simplify_Trace.Increase_Indent ("Looking for a contradiction");
+         Simplify_Trace.Increase_Indent
+           ("Looking for a contradiction (number"
+            & Sort_Ctx.Has_Contradiction_Counter'Image & ")");
          Simplify_Trace.Trace (Image (Atoms));
       end if;
 
