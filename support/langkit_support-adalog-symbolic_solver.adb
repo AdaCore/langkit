@@ -2549,7 +2549,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   return False;
                end if;
                if Solv_Trace.Active then
-                  Solv_Trace.Trace ("Var = " & Value_Image (Get_Value (V)));
+                  Solv_Trace.Trace
+                    (Image (V) & " = " & Value_Image (Get_Value (V)));
                end if;
             end loop;
 
