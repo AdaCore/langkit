@@ -20,12 +20,15 @@ declared for if_stmt, and for the `expression` and `statements` rule, that are
 not defined in the example, but relied on explicitly.
 """
 
+from __future__ import annotations
+
 from collections import OrderedDict
 from contextlib import contextmanager
 import difflib
 from funcy import keep
 import inspect
 from itertools import count
+from typing import Callable
 
 import funcy
 
@@ -299,13 +302,19 @@ class Grammar:
             )
         return self.rules[rule_name]
 
+    def rule_resolver(self, rule_name: str) -> Callable[[], Parser]:
+        """
+        Return a callable that returns the rule designated by ``rule_name``.
+        """
+        return lambda: self.get_rule(rule_name)
+
     def __getattr__(self, rule_name):
         """
         Build and return a Defer parser that references the above rule.
 
         :param str rule_name: The name of the rule.
         """
-        return Defer(rule_name, lambda: self.get_rule(rule_name))
+        return Defer(rule_name, self.rule_resolver(rule_name))
 
     def get_unreferenced_rules(self):
         """
