@@ -37,9 +37,9 @@ from langkit.lexer import (
     WithTrivia
 )
 import langkit.names as names
-from langkit.parsers import (Discard, DontSkip, Grammar, List as PList, Null,
-                             Opt, Or, Parser, Pick, Predicate, Skip, _Row,
-                             _Token, _Transform)
+from langkit.parsers import (Defer, Discard, DontSkip, Grammar, List as PList,
+                             Null, Opt, Or, Parser, Pick, Predicate, Skip,
+                             _Row, _Token, _Transform)
 
 
 CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]
@@ -1095,7 +1095,11 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                             location=loc)
 
             elif isinstance(rule, L.GrammarRuleRef):
-                return getattr(grammar, rule.f_node_name.text)
+                assert grammar is not None
+                rule_name = rule.f_node_name.text
+                return Defer(rule_name,
+                             grammar.rule_resolver(rule_name),
+                             location=loc)
 
             elif isinstance(rule, L.GrammarOrExpr):
                 return Or(*[lower(subparser)
