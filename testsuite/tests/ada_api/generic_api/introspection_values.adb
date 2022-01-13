@@ -725,7 +725,7 @@ begin
       when Exc : Precondition_Failure =>
          Put_Exc (Exc);
    end;
-   Put_Line ("Eval_Node_Member: P_Id_bool:");
+   Put_Line ("Eval_Node_Member: P_Id_Bool:");
    Value := Eval_Node_Member
      (As_Node (Example_Value), P_Id_Bool, (1 => True_Bool));
    Inspect (Value);
