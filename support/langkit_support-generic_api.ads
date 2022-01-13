@@ -54,7 +54,7 @@ package Langkit_Support.Generic_API is
    --  library-sensitive arguments, for instance they accept ``No_Lk_Node`` for
    --  their ``Lk_Node`` argument. The special ``No_Lk_Node`` value contains no
    --  reference to a particular Langkit-generated library. So even though such
-   --  subprograms takte a ``Lk_Node`` argument, they also need to take a
+   --  subprograms take a ``Lk_Node`` argument, they also need to take a
    --  ``Language_Id`` argument to receive the language Id information in all
    --  cases.
 
