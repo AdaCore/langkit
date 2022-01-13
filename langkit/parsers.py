@@ -28,7 +28,7 @@ import difflib
 from funcy import keep
 import inspect
 from itertools import count
-from typing import Callable
+from typing import Callable, List as _List, Set, Tuple
 
 import funcy
 
@@ -316,47 +316,61 @@ class Grammar:
         """
         return Defer(rule_name, self.rule_resolver(rule_name))
 
-    def get_unreferenced_rules(self):
+    def get_unreferenced_rules(self) -> Set[str]:
         """
         Return a set of names for all rules that are not transitively
         referenced by the main rule.
-
-        :rtype: set[str]
         """
         # We'll first build the set of rules that are referenced, then we'll
         # know the ones not referenced.
-        referenced_rules = set()
+        referenced_rules: Set[str] = set()
 
-        def visit_parser(parser):
+        rule_stack: _List[Tuple[str, Parser]] = [
+            (self.main_rule_name, self.get_rule(self.main_rule_name)),
+        ]
+        """
+        List of couples names/parser for the rules still to visit.
+
+        We use a stack to visit the main rule closure avoiding too deep
+        recursion.
+        """
+
+        def visit_parser(parser: Parser) -> None:
             """
             Visit all subparsers in "parser" and call "visit_rule" for Defer
             parsers.
 
-            :param Parser parser: Parser to visit.
+            :param parser: Parser to visit.
             """
-            if isinstance(parser, Defer):
-                visit_rule(parser.name)
+            if (
+                isinstance(parser, Defer)
+                and parser.name not in referenced_rules
+            ):
+                with parser.diagnostic_context:
+                    rule_stack.append(
+                        (parser.name, self.get_rule(parser.name))
+                    )
 
             for sub_parser in parser.children:
                 visit_parser(sub_parser)
 
-        def visit_rule(rule_name):
+        def visit_rule(rule_name: str, parser: Parser) -> None:
             """
             Register "rule_name" as referenced and call "visit_parser" on the
             root parser that implements it. Do nothing if "rule_name" is
             already registered to avoid infinite recursion.
 
-            :param str rule_name: Name for the rule to visit.
+            :param rule_name: Name for the rule to visit.
+            :param parser: Parser to visit.
             """
             if rule_name in referenced_rules:
                 return
             referenced_rules.add(rule_name)
-            rule_parser = self.get_rule(rule_name)
-            with rule_parser.diagnostic_context:
-                visit_parser(rule_parser)
+            visit_parser(parser)
 
         # The following will fill "referenced_rules" thanks to recursion
-        visit_rule(self.main_rule_name)
+        while rule_stack:
+            visit_rule(*rule_stack.pop())
 
         return set(self.rules) - referenced_rules
 
@@ -755,17 +769,13 @@ class Parser:
         """
         pass
 
-    def render_parser(self):
+    def render_parser(self, context: CompileCtx):
         """
         Emit code for this parser as a function into the global context.
 
         :param langkit.compile_context.CompileCtx context: Global context.
         """
-        context = get_context()
-
-        # Don't emit code twice for the same parser
-        if self in context.fns:
-            return
+        assert self not in context.fns
         context.fns.add(self)
 
         with add_var_context() as var_context:
@@ -1796,12 +1806,7 @@ class Defer(Parser):
         self.init_vars()
 
     def generate_code(self):
-        # The call to compile will add the declaration and the definition
-        # (body) of the function to the compile context.
-        self.parser.render_parser()
-
-        # Generate a call to the previously compiled function, and return
-        # the context corresponding to this call.
+        # Generate a call to the function implementing the deferred parser
         return self.render('fn_call_ada')
 
 
