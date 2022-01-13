@@ -1,5 +1,5 @@
-foo.lkt:4:29: error: Wrong rule name: 'sec_rules'. 
+foo.lkt:4:41: error: Wrong rule name: 'sec_rules'. 
 3 |     @main_rule main_rule <- ExampleNode(sec_rules)
-  |                             ^^^^^^^^^^^^^^^^^^^^^^
+  |                                         ^^^^^^^^^ 
 
 Done

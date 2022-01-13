@@ -2093,7 +2093,8 @@ class CompileCtx:
             GlobalPass('finalize symbol literals',
                        CompileCtx.finalize_symbol_literals),
 
-            GrammarRulePass('render parsers code', Parser.render_parser),
+            GrammarRulePass('render parsers code',
+                            lambda p: Parser.render_parser(p, self)),
             PropertyPass('render property', PropertyDef.render_property),
             GlobalPass('annotate fields types',
                        CompileCtx.annotate_fields_types).optional(
