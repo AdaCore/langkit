@@ -196,7 +196,7 @@ package Langkit_Support.Generic_API.Introspection is
 
    function Debug_Name (Value : Enum_Value_Ref) return String;
    --  Return "X.Y" where X is the enum type and Y is the name of this value,
-   --   or "<No_Enum_Value_Ref>" if ``Value`` is null.
+   --  or "<No_Enum_Value_Ref>" if ``Value`` is null.
 
    type Any_Enum_Value_Index is new Natural;
    subtype Enum_Value_Index is Any_Enum_Value_Index
