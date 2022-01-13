@@ -1025,7 +1025,7 @@ Inspect: Iterator on BigInt
   Type_Of: BigInt.iterator
 
 Eval_Node_Member: null node value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: the null node has no member
-Eval_Node_Member: P_Id_bool:
+Eval_Node_Member: P_Id_Bool:
 Inspect: True
   Type_Of: Bool
 
