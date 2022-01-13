@@ -41,6 +41,22 @@ package Langkit_Support.Generic_API is
    subtype Language_Id is Any_Language_Id
      with Dynamic_Predicate => Language_Id /= No_Language_Id;
    --  Unique identifier for a Langkit-generated library
+   --
+   --  All operations done using the generic API are done in the context of a
+   --  Langkit-generated library. Because of this, all subprograms in the
+   --  ``Langkit_Support.Generic_API`` take, in one way or another, an argument
+   --  that contains a reference to the language Id for that library: a
+   --  ``Language_Id`` argument directly, or for instance a ``Lk_Node``
+   --  argument (analysis contexts/units/nodes contain references to the
+   --  language Id).
+   --
+   --  Note however that some subprograms accept null values for
+   --  library-sensitive arguments, for instance they accept ``No_Lk_Node`` for
+   --  their ``Lk_Node`` argument. The special ``No_Lk_Node`` value contains no
+   --  reference to a particular Langkit-generated library. So even though such
+   --  subprograms takte a ``Lk_Node`` argument, they also need to take a
+   --  ``Language_Id`` argument to receive the language Id information in all
+   --  cases.
 
    function Language_Name (Id : Language_Id) return Name_Type;
    --  Return the name of the language that the library corresponding to ``Id``
