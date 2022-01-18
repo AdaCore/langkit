@@ -419,7 +419,7 @@ package Langkit_Support.Generic_API.Introspection is
    function Last_Struct_Member (Id : Language_Id) return Struct_Member_Index;
    --  Return the last struct member index that is valid for the given language
 
-   type Any_Argument_Index is new Natural;
+   subtype Any_Argument_Index is Natural;
    subtype Argument_Index is
      Any_Argument_Index range 1 ..  Any_Argument_Index'Last;
    --  Index of a property argument
