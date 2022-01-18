@@ -83,6 +83,27 @@ package Langkit_Support.Generic_API.Introspection is
    function Last_Type (Id : Language_Id) return Type_Index;
    --  Return the last type index that is valid for the given language
 
+   type Type_Category is
+     (Analysis_Unit_Category,
+      Big_Int_Category,
+      Bool_Category,
+      Char_Category,
+      Int_Category,
+      Source_Location_Range_Category,
+      String_Category,
+      Token_Category,
+      Symbol_Category,
+      Enum_Category,
+      Array_Category,
+      Iterator_Category,
+      Struct_Category);
+   --  Each type has a category, which determines the kind of operation that
+   --  can be performed on that type: for instance one can get the length of
+   --  ``Array_Category``-typed values.
+
+   function Category (T : Type_Ref) return Type_Category;
+   --  Return the category of the given type
+
    type Value_Ref is private;
    --  Reference to a polymorphic value: boolean, integer, character, ...
 

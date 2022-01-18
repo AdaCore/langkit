@@ -92,11 +92,42 @@ private package ${ada_lib_name}.Generic_Introspection is
                return f"{debug_name(t.element_type)}.iterator"
             else:
                return t.dsl_name
+
+         def category(t):
+            if t.is_analysis_unit_type:
+               return "Analysis_Unit_Category"
+            elif t.is_big_int_type:
+               return "Big_Int_Category"
+            elif t.is_bool_type:
+               return "Bool_Category"
+            elif t.is_character_type:
+               return "Char_Category"
+            elif t.is_int_type:
+               return "Int_Category"
+            elif t == T.SourceLocationRange:
+               return "Source_Location_Range_Category"
+            elif t.is_string_type:
+               return "String_Category"
+            elif t.is_token_type:
+               return "Token_Category"
+            elif t.is_symbol_type:
+               return "Symbol_Category"
+            elif t.is_enum_type:
+               return "Enum_Category"
+            elif t.is_array_type:
+               return "Array_Category"
+            elif t.is_iterator_type:
+               return "Iterator_Category"
+            elif t.is_base_struct_type:
+               return "Struct_Category"
+            else:
+               assert False, f"unhandled type: {t}"
       %>
       ${debug_name_const} : aliased constant String :=
         ${ascii_repr(debug_name(t))};
       ${desc_const} : aliased constant Type_Descriptor :=
-        (Debug_Name => ${debug_name_const}'Access);
+        (Category   => ${category(t)},
+         Debug_Name => ${debug_name_const}'Access);
    % endfor
 
    Types : aliased constant Type_Descriptor_Array := (
