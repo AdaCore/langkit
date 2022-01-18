@@ -213,6 +213,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return Id.Types.all'Last;
    end Last_Type;
 
+   --------------
+   -- Category --
+   --------------
+
+   function Category (T : Type_Ref) return Type_Category is
+   begin
+      Check_Type (T);
+      return T.Id.Types.all (T.Index).Category;
+   end Category;
+
    -----------------
    -- Check_Value --
    -----------------

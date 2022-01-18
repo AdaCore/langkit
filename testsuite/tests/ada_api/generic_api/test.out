@@ -124,61 +124,92 @@ All types
 =========
 
 * AnalysisUnit
+  ANALYSIS_UNIT_CATEGORY
 * BigInt
+  BIG_INT_CATEGORY
 * Bool
+  BOOL_CATEGORY
 * Character
+  CHAR_CATEGORY
 * Int
+  INT_CATEGORY
 * SourceLocationRange
+  SOURCE_LOCATION_RANGE_CATEGORY
 * String
+  STRING_CATEGORY
 * Token
+  TOKEN_CATEGORY
 * Symbol
+  SYMBOL_CATEGORY
 * AnalysisUnitKind
+  ENUM_CATEGORY
   is an enum
 * LookupKind
+  ENUM_CATEGORY
   is an enum
 * DesignatedEnvKind
+  ENUM_CATEGORY
   is an enum
 * GrammarRule
+  ENUM_CATEGORY
   is an enum
 * BigInt.array
+  ARRAY_CATEGORY
   is an array
 * FooNode.array
+  ARRAY_CATEGORY
   is an array
 * Expr.array
+  ARRAY_CATEGORY
   is an array
 * AnalysisUnit.array
+  ARRAY_CATEGORY
   is an array
 * BigInt.iterator
+  ITERATOR_CATEGORY
   is an iterator
 * NodeResult
+  STRUCT_CATEGORY
   is a struct
 * Point
+  STRUCT_CATEGORY
   is a struct
 * FooNode
+  STRUCT_CATEGORY
   is a node
 * Example
+  STRUCT_CATEGORY
   is a node
 * Expr
+  STRUCT_CATEGORY
   is a node
 * Addition
+  STRUCT_CATEGORY
   is a node
 * Number
+  STRUCT_CATEGORY
   is a node
 * Ref
+  STRUCT_CATEGORY
   is a node
 * FooNodeBaseList
+  STRUCT_CATEGORY
   is a node
 * FooNode.list
+  STRUCT_CATEGORY
   is a node
 * Name
+  STRUCT_CATEGORY
   is a node
 * VarDecl
+  STRUCT_CATEGORY
   is a node
 
 Language_For: null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 To_Index: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 From_Index: out of range type index: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid type index
 Debug_Name: Null T argument: <No_Type_Ref>
+Category: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Enum types
 ==========
 

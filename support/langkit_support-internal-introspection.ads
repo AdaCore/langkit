@@ -47,6 +47,9 @@ package Langkit_Support.Internal.Introspection is
    ----------------------
 
    type Type_Descriptor is record
+      Category : Type_Category;
+      --  Category for this type
+
       Debug_Name : Debug_String_Access;
       --  Free-form name of this type for debug purposes
    end record;

@@ -109,6 +109,7 @@ begin
          T : constant Type_Ref := From_Index (Id, Index);
       begin
          Put_Line ("* " & Debug_Name (T));
+         Put_Line ("  " & Type_Category'Image (Category (T)));
 
          --  Check the specific kind of type T is
 
@@ -187,6 +188,17 @@ begin
    end;
 
    Put_Line ("Debug_Name: Null T argument: " & Debug_Name (No_Type_Ref));
+
+   Put ("Category: Null T argument: ");
+   declare
+      Dummy : Type_Category;
+   begin
+      Dummy := Category (No_Type_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
 
    --------------------------
    -- Enum type primitives --
