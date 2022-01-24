@@ -297,8 +297,8 @@ class AbstractNodeData:
         self.location = extract_library_location()
 
         self._name = name
-        self._original_name = name
         self._indexing_name = name.lower if name else None
+        self._original_name = self._indexing_name
 
         assert internal_name is None or isinstance(internal_name, names.Name)
         self._internal_name = internal_name
@@ -350,7 +350,7 @@ class AbstractNodeData:
 
         # Look for a potential field which has the same name as `self` in the
         # base struct.
-        name_key = self._original_name.lower
+        name_key = self._original_name
         parent_cls = self.struct.base
         parent_fields = (parent_cls.get_abstract_node_data_dict()
                          if parent_cls else {})
@@ -478,11 +478,13 @@ class AbstractNodeData:
             return self.name
 
     @property
-    def original_name(self):
+    def original_name(self) -> str:
         """
         Name for this property as specified in the DSL.
 
-        :rtype: names.Name
+        For internal properties, we generally use impossible syntax (brackets,
+        leading underscore, ...) to avoid name clashes with user-defined
+        properties.
         """
         assert self._original_name
         return self._original_name
@@ -527,7 +529,12 @@ class AbstractNodeData:
         """
         assert self.is_public
         assert self._original_name
-        return self._prefixed_name(self.original_name)
+
+        # Unlike internal fields, we know that public fields have valid
+        # original names, so it is safe to use them with Name.
+        original_name = names.Name.from_lower(self.original_name)
+
+        return self._prefixed_name(original_name)
 
     @property
     def qualname(self):
@@ -543,8 +550,9 @@ class AbstractNodeData:
         """
         return '{}.{}'.format(
             self.struct.dsl_name if self.struct else '<unresolved>',
-            (self.original_name.lower
-             if self._original_name else '<unresolved>')
+            (self.original_name
+             if self._original_name
+             else '<unresolved>')
         )
 
     def __repr__(self):
@@ -1471,20 +1479,26 @@ class CompiledType:
             in this list.
         """
         for f_n, f_v in fields:
+            if isinstance(f_n, str):
+                name = names.Name.from_lower(f_n)
+                str_name = f_n
+            else:
+                name = f_n
+                str_name = f_n.lower
+
             # Remember the original name for public APIs
-            f_v._original_name = (f_n if isinstance(f_n, names.Name) else
-                                  names.Name.from_lower(f_n))
-            f_v._indexing_name = f_v.original_name.lower
+            f_v._original_name = str_name
+            f_v._indexing_name = f_v.original_name
 
             # In nodes, use a qualified name for code generation to avoid name
             # conflicts between homonym properties. There is one exception:
             # built-in properties (those with no prefix) must not be decorated
             # for convenience in template code.
             f_v._name = (
-                f_v._original_name
+                name
                 if (not self.is_ast_node or
                     (f_v.is_property and f_v.prefix is None)) else
-                self.kwless_raw_name + f_v._prefixed_name(f_v.original_name)
+                self.kwless_raw_name + f_v._prefixed_name(name)
             )
 
             self.add_field(f_v)
@@ -2266,7 +2280,7 @@ class BaseStructType(CompiledType):
             else:
                 return isinstance(f, UserField)
 
-        return {f.original_name.lower: f
+        return {f.original_name: f
                 for f in self.get_abstract_node_data()
                 if is_required(f)}
 

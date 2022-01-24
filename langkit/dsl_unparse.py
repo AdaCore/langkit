@@ -18,7 +18,7 @@ templates: Dict[str, str] = {}
 
 
 def fqn(prop):
-    return "{}.{}".format(prop.struct.name.camel, prop._original_name.lower)
+    return "{}.{}".format(prop.struct.name.camel, prop._original_name)
 
 
 class DSLWalker:
@@ -561,9 +561,7 @@ def var_name(var_expr, default="_"):
     if isinstance(var_expr, Argument):
         ret = var_expr.name.lower
     else:
-        ret = (
-            var_expr.source_name.lower if var_expr.source_name else default
-        )
+        ret = var_expr.source_name or default
 
     return unparsed_name(ret)
 
@@ -1291,11 +1289,11 @@ def emit_prop(prop, walker):
 
     if prop.lazy_field:
         res += "$hl{}{}: {}".format(
-            quals, prop.original_name.lower, type_name(prop.type)
+            quals, prop.original_name, type_name(prop.type)
         )
     else:
         res += "$hl{}fun {}({}): {}".format(
-            quals, prop.original_name.lower, args, type_name(prop.type)
+            quals, prop.original_name, args, type_name(prop.type)
         )
 
     if prop.abstract_runtime_check:
@@ -1449,7 +1447,7 @@ def emit_node_type(node_type):
         return any(
             builtin_name == prop.name.lower
             for builtin_name, _ in builtin_properties
-        ) or (prop.original_name.lower == "as_bool" and node_type.is_bool_node)
+        ) or (prop.original_name == "as_bool" and node_type.is_bool_node)
 
     def to_emit_dispatcher(prop):
         return prop.is_dispatcher and prop.is_artificial_dispatcher

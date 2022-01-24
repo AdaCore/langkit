@@ -38,7 +38,7 @@ for n in ctx.astnode_types:
         node = n
         break
 
-fields = {f.original_name.lower: f for f in node.get_fields()}
+fields = {f.original_name: f for f in node.get_fields()}
 for _, f in sorted(fields.items()):
     print('== Doc for {} =='.format(f.qualname))
     print(f.doc)

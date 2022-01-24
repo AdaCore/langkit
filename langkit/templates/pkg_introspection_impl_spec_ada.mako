@@ -331,7 +331,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    --  Descriptors for struct types and their fields
 
    % for f in ctx.sorted_struct_fields:
-      <% name = f.original_name.lower %>
+      <% name = f.original_name %>
       Desc_For_${f.introspection_enum_literal} : aliased constant
          Struct_Field_Descriptor := (
             Name_Length => ${len(name)},

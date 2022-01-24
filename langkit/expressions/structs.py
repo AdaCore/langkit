@@ -1493,7 +1493,7 @@ class StructUpdate(AbstractExpression):
         @property
         def subexprs(self):
             return {'expr': self.expr,
-                    'assocs': {f.original_name.lower: f_expr
+                    'assocs': {f.original_name: f_expr
                                for f, f_expr in self.assocs.items()}}
 
         def __repr__(self):

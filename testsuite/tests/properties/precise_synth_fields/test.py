@@ -91,7 +91,7 @@ nodes = {n.dsl_name: n for n in ctx.astnode_types}
 
 for node_name in ['SynthNode', 'AbstractHolder', 'AbstractManyHolder']:
     node = nodes[node_name]
-    fields = {f.original_name.lower: f for f in node.get_fields()}
+    fields = {f.original_name: f for f in node.get_fields()}
     f = fields['f']
 
     if not f.type.is_list_type:

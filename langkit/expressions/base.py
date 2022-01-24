@@ -3693,7 +3693,7 @@ class PropertyDef(AbstractNodeData):
         if self.struct.is_ast_node and self.struct.base:
             result = self.struct.base.get_abstract_node_data_dict(
                 field_class=PropertyDef
-            ).get(self._original_name.lower, None)
+            ).get(self._original_name, None)
 
             if result:
                 check_source_language(
@@ -3885,7 +3885,7 @@ class PropertyDef(AbstractNodeData):
                 not concrete_types_not_overriding,
                 'Abstract property {} is not overriden in all subclasses.'
                 ' Missing overriding properties on classes: {}'.format(
-                    self.original_name.lower, ", ".join([
+                    self.original_name, ", ".join([
                         t.dsl_name for t in concrete_types_not_overriding])
                 )
             )
@@ -4107,7 +4107,7 @@ class PropertyDef(AbstractNodeData):
             # fields.
             if self.base_property is None:
                 self.lazy_present_field = self.struct.add_internal_user_field(
-                    name=names.Name('LF_Present') + self.original_name,
+                    name=names.Name(f"LF_Present_{self.original_name}"),
                     type=T.Bool,
                     default_value=Literal(True),
                     doc=f'Whether the {self.qualname} lazy field was'
@@ -4117,7 +4117,7 @@ class PropertyDef(AbstractNodeData):
                 # Access to the storage field is guarded by the "present flag"
                 # field, so it is fine to leave it uninitialized.
                 self.lazy_storage_field = self.struct.add_internal_user_field(
-                    name=names.Name('LF_Stg') + self.original_name,
+                    name=names.Name(f"LF_Stg_{self.original_name}"),
                     type=self.type,
                     default_value=None,
                     doc=f'Storage for the {self.qualname} lazy field',
