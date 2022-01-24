@@ -7,7 +7,7 @@ import json
 import os
 from os import path
 import subprocess
-from typing import Any, Dict
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from funcy import keep
 
@@ -16,6 +16,7 @@ from langkit.compile_context import ADA_BODY, ADA_SPEC, CompileCtx, get_context
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Severity, check_source_language
 from langkit.generic_api import GenericAPI
+from langkit.lexer.regexp import DFACodeGenHolder
 import langkit.names as names
 from langkit.template_utils import add_template_dir
 from langkit.utils import Colors, printcol
@@ -26,21 +27,24 @@ def template_extensions(ctx: CompileCtx) -> Dict[str, Any]:
     return {"generic_api": GenericAPI(ctx)}
 
 
-def write_source_file(file_path, source, post_process=None):
+PostProcessFn = Optional[Callable[[str], str]]
+
+
+def write_source_file(file_path: str,
+                      source: str,
+                      post_process: PostProcessFn = None) -> bool:
     """
     Helper to write a source file.
 
     Return whether the file has been updated.
 
-    :param str file_path: Path of the file to write.
-    :param str source: Content of the file to write.
+    :param file_path: Path of the file to write.
+    :param source: Content of the file to write.
     :param post_process: If provided, callable used to transform the source
         file content just before writing it.
-    :type post_process: None | (str) -> str
-
-    :rtype: bool
     """
     context = get_context()
+    assert context.emitter
     if post_process:
         source = post_process(source)
     if (not os.path.exists(file_path) or
@@ -56,40 +60,46 @@ def write_source_file(file_path, source, post_process=None):
     return False
 
 
-def write_cpp_file(file_path, source, post_process=None):
+def write_cpp_file(file_path: str,
+                   source: str,
+                   post_process: PostProcessFn = None) -> None:
     """
     Helper to write a C/C++ source file.
 
-    :param str file_path: Path of the file to write.
-    :param str source: Content of the file to write.
+    :param file_path: Path of the file to write.
+    :param source: Content of the file to write.
     """
     if write_source_file(file_path, source, post_process):
         if find_executable('clang-format'):
             subprocess.check_call(['clang-format', '-i', file_path])
 
 
-def write_ocaml_file(file_path, source, post_process=None):
+def write_ocaml_file(file_path: str,
+                     source: str,
+                     post_process: PostProcessFn = None) -> None:
     """
     Helper to write a OCaml source file.
 
-    :param str file_path: Path of the file to write.
-    :param str source: Content of the file to write.
+    :param file_path: Path of the file to write.
+    :param source: Content of the file to write.
     """
     if write_source_file(file_path, source, post_process):
         if find_executable('ocamlformat'):
             subprocess.check_call(['ocamlformat', '-i', file_path])
 
 
-def ada_file_path(out_dir, source_kind, qual_name):
+def ada_file_path(out_dir: str,
+                  source_kind: str,
+                  qual_name: List[names.Name]) -> str:
     """
     Return the name of the Ada file for the given unit name/kind.
 
-    :param str out_dir: The complete path to the directory in which we want to
+    :param out_dir: The complete path to the directory in which we want to
         write the file.
-    :param str source_kind: One of the constants ADA_SPEC or ADA_BODY,
-        determining whether the source is a spec or a body.
-    :param list[names.Name] qual_name: The qualified name of the Ada spec/body,
-        as a list of Name components.
+    :param source_kind: One of the constants ADA_SPEC or ADA_BODY, determining
+        whether the source is a spec or a body.
+    :param qual_name: The qualified name of the Ada spec/body, as a list of
+        Name components.
     """
     assert source_kind in (ADA_SPEC, ADA_BODY)
     file_name = '{}.{}'.format('-'.join(n.lower for n in qual_name),
@@ -97,15 +107,18 @@ def ada_file_path(out_dir, source_kind, qual_name):
     return os.path.join(out_dir, file_name)
 
 
-def write_ada_file(out_dir, source_kind, qual_name, content,
-                   post_process=None):
+def write_ada_file(out_dir: str,
+                   source_kind: str,
+                   qual_name: List[names.Name],
+                   content: str,
+                   post_process: PostProcessFn = None) -> None:
     """
     Helper to write an Ada file.
 
     :param out_dir: See ada_file_path.
     :param source_kind: See ada_file_path.
     :param qual_name: See ada_file_path.
-    :param str content: The source content to write to the file.
+    :param content: The source content to write to the file.
     """
     file_path = ada_file_path(out_dir, source_kind, qual_name)
 
@@ -124,66 +137,69 @@ class Emitter:
     Code and data holder for code emission.
     """
 
-    def __init__(self, context, lib_root, extensions_dir,
-                 main_source_dirs=set(), main_programs=set(),
-                 no_property_checks=False, generate_ada_api=True,
-                 generate_gdb_hook=True, pretty_print=False,
-                 post_process_ada=None, post_process_cpp=None,
-                 post_process_python=None, post_process_ocaml=None,
-                 coverage=False, relative_project=False, unparse_script=None):
+    def __init__(self,
+                 context: CompileCtx,
+                 lib_root: str,
+                 extensions_dir: Optional[str],
+                 main_source_dirs: Set[str] = set(),
+                 main_programs: Set[str] = set(),
+                 no_property_checks: bool = False,
+                 generate_ada_api: bool = True,
+                 generate_gdb_hook: bool = True,
+                 pretty_print: bool = False,
+                 post_process_ada: PostProcessFn = None,
+                 post_process_cpp: PostProcessFn = None,
+                 post_process_python: PostProcessFn = None,
+                 post_process_ocaml: PostProcessFn = None,
+                 coverage: bool = False,
+                 relative_project: bool = False,
+                 unparse_script: Optional[str] = None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
 
-        :param str lib_root: Path of the directory in which the library should
-            be generated.
+        :param lib_root: Path of the directory in which the library should be
+            generated.
 
-        :param str|None extensions_dir: Directory to contain extensions for
-            code generation. If None is provided, assume there is no extension.
+        :param extensions_dir: Directory to contain extensions for code
+            generation. If None is provided, assume there is no extension.
 
-        :param set[str] main_source_dirs: List of source directories to use in
-            the project file for mains. Source directories must be relative to
-            the mains project file directory (i.e. $BUILD/src-mains).
+        :param main_source_dirs: List of source directories to use in the
+            project file for mains. Source directories must be relative to the
+            mains project file directory (i.e. $BUILD/src-mains).
 
-        :param set[str] main_programs: List of names for programs to build in
-            addition to the generated library. To each X program, there must be
-            a X.adb source file in the $BUILD/src directory.
+        :param main_programs: List of names for programs to build in addition
+            to the generated library. To each X program, there must be a X.adb
+            source file in the $BUILD/src directory.
 
-        :param bool no_property_checks: If True, do not emit safety checks in
-            the generated code for properties. Namely, this disables null
-            checks on field access.
+        :param no_property_checks: If True, do not emit safety checks in the
+            generated code for properties. Namely, this disables null checks on
+            field access.
 
-        :param bool generate_ada_api: If True, generate the public Ada API. If
-            False and there is no main to generate, do not generate this Ada
-            API.
+        :param generate_ada_api: If True, generate the public Ada API. If False
+            and there is no main to generate, do not generate this Ada API.
 
-        :param bool generate_gdb_hook: Whether to generate the
-            ".debug_gdb_scripts" section. Good for debugging, but better to
-            disable for releases.
+        :param generate_gdb_hook: Whether to generate the ".debug_gdb_scripts"
+            section. Good for debugging, but better to disable for releases.
 
-        :param bool pretty_print: If true, pretty-print the generated sources.
+        :param pretty_print: If true, pretty-print the generated sources.
 
         :param post_process_ada: Optional post-processing for generated Ada
             source code.
-        :type post_process_ada: None|(str) -> str
 
         :param post_process_cpp: Optional post-processing for generated C++
             source code.
-        :type post_process_cpp: None|(str) -> str
 
         :param post_process_python: Optional post-processing for generated
             Python source code.
-        :type post_process_python: None|(str) -> str
 
         :param post_process_ocaml: Optional post-processing for generated
             OCaml source code.
-        :type post_process_ocaml: None|(str) -> str
 
-        :param bool coverage: Instrument the generated library to compute its
-            code coverage. This requires GNATcoverage.
+        :param coverage: Instrument the generated library to compute its code
+            coverage. This requires GNATcoverage.
 
-        :param bool relative_project: See libmanage's --relative-project
-            option.
+        :param relative_project: See libmanage's --relative-project option.
         """
         self.context = context
         self.verbosity = context.verbosity
@@ -255,14 +271,12 @@ class Emitter:
         self.lib_project = path.join(self.lib_root, f"{self.lib_name_low}.gpr")
         self.mains_project = path.join(self.lib_root, "mains.gpr")
 
-        self.dfa_code = None
+        self.dfa_code: DFACodeGenHolder
         """
         Holder for the data structures used to generate code for the lexer
         state machine (DFA). As an optimization, it is left to None if we
         decide not to generate it (i.e. when the already generated sources are
         up-to-date).
-
-        :type: langkit.lexer.regexp.DFACodeGenHolder
         """
 
         self._project_file_emitted = False
@@ -295,6 +309,7 @@ class Emitter:
             self.add_library_interface(f, generated=False)
 
         if self.coverage:
+            assert self.gnatcov
             # Add the buffer-list unit from GNATcoverage's instrumentation to
             # the list of library interfaces. TODO: hopefully, we should not
             # have to do this anymore after S916-064 is addressed.
@@ -327,13 +342,12 @@ class Emitter:
                     use_clause=True
                 )
 
-    def path_to(self, destination, path_from):
+    def path_to(self, destination: str, path_from: str) -> str:
         """
         Helper to generate absolute or relative paths inside the generated
         project, depending on libmanage's --relative-path.
 
-        :param bool relative_project: Whether to generate relative paths.
-        :param str destination: Path to generate. This argument can be either
+        :param destination: Path to generate. This argument can be either
             relative to ``path_from`` or absolute.
         """
         destination = os.path.abspath(os.path.join(path_from, destination))
@@ -341,7 +355,10 @@ class Emitter:
                 if self.relative_project else
                 destination)
 
-    def add_library_interface(self, filename, generated, is_ada=True):
+    def add_library_interface(self,
+                              filename: str,
+                              generated: bool,
+                              is_ada: bool = True) -> None:
         assert not self._project_file_emitted
 
         filename = os.path.basename(filename)
@@ -358,12 +375,13 @@ class Emitter:
             # interface.  TODO: hopefully, we should not have to do this
             # anymore after S916-064 is addressed.
             if self.coverage:
+                assert self.gnatcov
                 for f in self.gnatcov.buffer_files(filename):
                     self.library_interfaces.add(f)
 
         self.library_interfaces.add(filename)
 
-    def setup_directories(self, ctx):
+    def setup_directories(self, ctx: CompileCtx) -> None:
         """
         Make sure the tree of directories needed for code generation exists.
         """
@@ -381,7 +399,7 @@ class Emitter:
             if not path.exists(d):
                 os.mkdir(d)
 
-    def emit_lib_project_file(self, ctx):
+    def emit_lib_project_file(self, ctx: CompileCtx) -> None:
         """
         Emit a project file for the generated library.
         """
@@ -396,20 +414,23 @@ class Emitter:
             )
         )
 
-    def instrument_for_coverage(self, ctx):
+    def instrument_for_coverage(self, ctx: CompileCtx) -> None:
         """
         If code coverage is enabled, instrument the generated library with
         GNATcoverage.
         """
         if not self.coverage:
             return
+        assert self.gnatcov
         self.gnatcov.instrument(self,
                                 os.path.join(self.lib_root, 'obj', 'instr'))
 
-    def generate_lexer_dfa(self, ctx):
+    def generate_lexer_dfa(self, ctx: CompileCtx) -> None:
         """
         Generate code for the lexer state machine.
         """
+        assert ctx.lexer
+
         # Source file that contains the state machine implementation
         lexer_sm_body = ada_file_path(
             self.src_dir, ADA_BODY,
@@ -427,37 +448,42 @@ class Emitter:
         if not os.path.exists(lexer_sm_body) or stale_lexer_spec:
             self.dfa_code = ctx.lexer.build_dfa_code(ctx)
 
-    def emit_ada_lib(self, ctx):
+    def emit_ada_lib(self, ctx: CompileCtx) -> None:
         """
         Emit Ada sources for the generated library.
         """
 
         class Unit:
-            def __init__(self, template_base_name, rel_qual_name,
-                         has_body=True, ada_api=False, unparser=False,
-                         cached_body=False, is_interface=True):
+            def __init__(self,
+                         template_base_name: str,
+                         rel_qual_name: str,
+                         has_body: bool = True,
+                         ada_api: bool = False,
+                         unparser: bool = False,
+                         cached_body: bool = False,
+                         is_interface: bool = True):
                 """
-                :param str template_base_name: Common prefix for the name of
-                    the templates to use in order to generate spec/body sources
-                    for this unit.
+                :param template_base_name: Common prefix for the name of the
+                    templates to use in order to generate spec/body sources for
+                    this unit.
 
-                :param str rel_qual_name: Qualified name for the unit to
-                    generate, without the top-level library name.
+                :param rel_qual_name: Qualified name for the unit to generate,
+                    without the top-level library name.
 
-                :param bool ada_api: Whether we can avoid generating this unit
-                    if the Ada API is disabled.
+                :param ada_api: Whether we can avoid generating this unit if
+                    the Ada API is disabled.
 
-                :param bool unparser: Whether we can avoid generating this unit
-                    if unparsing is disabled.
+                :param unparser: Whether we can avoid generating this unit if
+                    unparsing is disabled.
 
-                :param bool has_body: Whether this unit has a body (otherwise,
-                    it's just a spec).
+                :param has_body: Whether this unit has a body (otherwise, it's
+                    just a spec).
 
-                :param bool cached_body: If true, only register the body as a
+                :param cached_body: If true, only register the body as a
                     library interface, i.e. do not generate it, considering
                     that it is cached.
 
-                :param bool is_interface: Whether to include this module in the
+                :param is_interface: Whether to include this module in the
                     generated library interface.
                 """
                 self.template_base_name = template_base_name
@@ -509,7 +535,7 @@ class Emitter:
             Unit('pkg_lexer', 'Lexer', ada_api=True),
             Unit('pkg_lexer_impl', 'Lexer_Implementation'),
             Unit('pkg_lexer_state_machine', 'Lexer_State_Machine',
-                 has_body=True, cached_body=self.dfa_code is None),
+                 has_body=True, cached_body=not hasattr(self, "dfa_code")),
             # Unit for debug helpers
             Unit('pkg_debug', 'Debug'),
             # Unit for the Ada generic Langkit API
@@ -528,7 +554,7 @@ class Emitter:
                                   u.qual_name, u.has_body, u.cached_body,
                                   in_library=True, is_interface=u.is_interface)
 
-    def emit_mains(self, ctx):
+    def emit_mains(self, ctx: CompileCtx) -> None:
         """
         Emit sources and the project file for mains.
         """
@@ -550,11 +576,11 @@ class Emitter:
             )
         )
 
-    def emit_c_api(self, ctx):
+    def emit_c_api(self, ctx: CompileCtx) -> None:
         """
         Generate header and binding body for the external C API.
         """
-        def render(template_name):
+        def render(template_name: str) -> str:
             return ctx.render_template(template_name)
 
         with names.lower:
@@ -574,11 +600,11 @@ class Emitter:
             in_library=True
         )
 
-    def emit_python_api(self, ctx):
+    def emit_python_api(self, ctx: CompileCtx) -> None:
         """
         Generate the Python binding module.
         """
-        def pretty_print(code):
+        def pretty_print(code: str) -> str:
             if not self.pretty_print:
                 return code
 
@@ -594,7 +620,9 @@ class Emitter:
                 )
                 return code
 
-        def render_python_template(file_path, *args, **kwargs):
+        def render_python_template(file_path: str,
+                                   *args: Any,
+                                   **kwargs: Any) -> None:
             with names.camel:
                 code = ctx.render_template(*args, **kwargs)
 
@@ -627,7 +655,7 @@ class Emitter:
             self.post_process_python
         )
 
-    def emit_python_playground(self, ctx):
+    def emit_python_playground(self, ctx: CompileCtx) -> None:
         """
         Emit sources for the Python playground script.
         """
@@ -645,7 +673,7 @@ class Emitter:
         )
         os.chmod(playground_file, 0o775)
 
-    def emit_gdb_helpers(self, ctx):
+    def emit_gdb_helpers(self, ctx: CompileCtx) -> None:
         """
         Emit support files for GDB helpers.
         """
@@ -676,7 +704,7 @@ class Emitter:
             )
             self.project_languages.add('C')
 
-    def emit_ocaml_api(self, ctx):
+    def emit_ocaml_api(self, ctx: CompileCtx) -> None:
         """
         Generate binding for the external OCaml API.
         """
@@ -740,31 +768,36 @@ class Emitter:
                 ''
             )
 
-    def write_ada_module(self, out_dir, template_base_name, qual_name,
-                         has_body=True, cached_body=False, in_library=False,
-                         is_interface=True):
+    def write_ada_module(self,
+                         out_dir: str,
+                         template_base_name: str,
+                         qual_name: List[names.Name],
+                         has_body: bool = True,
+                         cached_body: bool = False,
+                         in_library: bool = False,
+                         is_interface: bool = True) -> None:
         """
         Write an Ada module (both spec and body) using a standardized scheme
         for finding the corresponding templates.
 
-        :param str out_dir: The out directory for the generated module.
+        :param out_dir: The out directory for the generated module.
 
-        :param str template_base_name: The base name for the template,
-            basically everything that comes before the _body_ada/_spec_ada
-            component, including the directory.
+        :param template_base_name: The base name for the template, basically
+            everything that comes before the _body_ada/_spec_ada component,
+            including the directory.
 
-        :param list[names.Name] qual_name: Qualified name for the Ada module,
-            as a list of "simple" package names. The base library name is
-            automatically prepended to that list, so every generated module
-            will be a child module of the base library module.
+        :param qual_name: Qualified name for the Ada module, as a list of
+            "simple" package names. The base library name is automatically
+            prepended to that list, so every generated module will be a child
+            module of the base library module.
 
-        :param bool has_body: If true, generate a body for this unit.
+        :param has_body: If true, generate a body for this unit.
 
-        :param bool cached_body: If true, only register the body as a library
+        :param cached_body: If true, only register the body as a library
             interface, i.e. do not generate it, considering that it is cached.
 
-        :param bool is_interface: Whether to include this module in the
-            generated library interface.
+        :param is_interface: Whether to include this module in the generated
+            library interface.
         """
         for kind in [ADA_SPEC] + ([ADA_BODY] if has_body else []):
             qual_name_str = '.'.join(n.camel_with_underscores
