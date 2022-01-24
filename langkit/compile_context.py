@@ -2234,12 +2234,13 @@ class CompileCtx:
             # Remove leading/trailing underscores, and add 'Precomputed_Sym'
             # prefix (not 'Precomputed_Symbol' to avoid conflicts with other
             # 'Precomputed_Symbol_*' entities in the generated code).
-            candidate_name = (names.Name('Precomputed_Sym') +
-                              names.Name.from_lower(tmp_2.strip('_')))
+            candidate_name = names.Name("Precomputed_Sym")
+            if tmp_2.strip("_"):
+                candidate_name += names.Name.from_lower(tmp_2.strip("_"))
 
             # If the candidate is already used, add an unique number
             if candidate_name in self.symbol_literals.values():
-                candidate_name = candidate_name + names.Name(str(i))
+                candidate_name = names.Name(f"{candidate_name.base_name}_{i}")
 
             self.symbol_literals[name] = candidate_name
 

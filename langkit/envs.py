@@ -296,10 +296,10 @@ class EnvSpec:
         expr = unsugar(expr)
         p = PropertyDef(
             expr, AbstractNodeData.PREFIX_INTERNAL,
-            name=names.Name('{}_{}'.format(name, next(self.PROPERTY_COUNT))),
+            name=names.Name.from_lower(f"{name}_{next(self.PROPERTY_COUNT)}"),
             public=False, type=type, ignore_warn_on_node=True
         )
-        p._indexing_name = '_{}'.format(p.original_name.lower)
+        p._indexing_name = '_{}'.format(p.original_name.lower())
         p._original_name = p._indexing_name
         p.location = getattr(expr, 'location') or self.location
         self.ast_node.add_field(p)
@@ -426,10 +426,10 @@ class AddEnv(EnvAction):
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
         self.transitive_parent_prop = env_spec.create_internal_property(
-            'Env_Trans_Parent', unsugar(self.transitive_parent), T.Bool
+            'env_trans_parent', unsugar(self.transitive_parent), T.Bool
         )
         self.names_prop = env_spec.create_internal_property(
-            'Env_Names', self.names, T.Symbol.array
+            'env_names', self.names, T.Symbol.array
         )
 
 
@@ -446,7 +446,7 @@ class AddToEnv(EnvAction):
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
         self.mappings_prop = env_spec.create_internal_property(
-            'Env_Mappings', self.mappings, None
+            'env_mappings', self.mappings, None
         )
 
     def rewrite_property_refs(self,
@@ -553,15 +553,15 @@ class RefEnvs(EnvAction):
         referenced lexical envs.
         """
         self.nodes_property = env_spec.create_internal_property(
-            'Ref_Env_Nodes', self.nodes_expr, T.root_node.array
+            'ref_env_nodes', self.nodes_expr, T.root_node.array
         )
 
         self.dest_env_prop = env_spec.create_internal_property(
-            'Env_Dest', self.dest_env, T.LexicalEnv
+            'env_dest', self.dest_env, T.LexicalEnv
         )
 
         self.cond_prop = env_spec.create_internal_property(
-            'Ref_Cond', self.cond, T.Bool
+            'ref_cond', self.cond, T.Bool
         )
 
     def check(self) -> None:
@@ -610,7 +610,7 @@ class SetInitialEnv(EnvAction):
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
         self.env_prop = env_spec.create_internal_property(
-            'Initial_Env', self.env_expr, T.DesignatedEnv
+            'initial_env', self.env_expr, T.DesignatedEnv
         )
 
 
@@ -620,5 +620,5 @@ class Do(EnvAction):
 
     def create_internal_properties(self, spec: EnvSpec) -> None:
         self.do_property = spec.create_internal_property(
-            'Env_Do', self.expr, None
+            'env_do', self.expr, None
         )

@@ -135,7 +135,7 @@ package Langkit_Support.Lexical_Envs_Impl is
    --------------
 
    type Entity_Info is record
-      MD : Node_Metadata;
+      Md : Node_Metadata;
       --  External metadata for the node
 
       Rebindings : Env_Rebindings := null;
@@ -153,7 +153,7 @@ package Langkit_Support.Lexical_Envs_Impl is
    --  Wrapper structure to contain both the 'real' node that the user wanted
    --  to store, and its associated metadata.
 
-   function Create_Entity (Node : Node_Type; MD : Node_Metadata) return Entity;
+   function Create_Entity (Node : Node_Type; Md : Node_Metadata) return Entity;
    --  Constructor that returns an Entity from an Node_Type and an
    --  Node_Metadata instances.
 
@@ -354,10 +354,10 @@ package Langkit_Support.Lexical_Envs_Impl is
      (Self     : Lexical_Env;
       Key      : Symbol_Type;
       Value    : Node_Type;
-      MD       : Node_Metadata := Empty_Metadata;
+      Md       : Node_Metadata := Empty_Metadata;
       Resolver : Entity_Resolver := null)
       with Pre => Self.Kind = Static_Primary;
-   --  Add Value to the list of values for the key Key, with the metadata MD
+   --  Add Value to the list of values for the key Key, with the metadata Md
 
    procedure Remove (Self : Lexical_Env; Key : Symbol_Type; Value : Node_Type)
       with Pre => Self.Kind = Static_Primary;
@@ -600,7 +600,7 @@ package Langkit_Support.Lexical_Envs_Impl is
       --  return. Otherwise, it is the argument to pass to Resolver in order to
       --  get the result.
 
-      MD : Node_Metadata;
+      Md : Node_Metadata;
       --  Metadata associated to Node
 
       Resolver : Entity_Resolver;
@@ -717,7 +717,7 @@ package Langkit_Support.Lexical_Envs_Impl is
                   Grouped_Envs : Lexical_Env_Array_Access;
                   --  Array of lexical environment that are grouped together
 
-                  Default_MD : Node_Metadata := Empty_Metadata;
+                  Default_Md : Node_Metadata := Empty_Metadata;
                   --  Default metadata to use for lookups
 
                when Rebound =>

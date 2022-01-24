@@ -209,4 +209,4 @@ def gen_name(var_name: Union[str, names.Name]) -> names.Name:
         var_name = names.Name.from_lower(var_name)
 
     var_id = next(__next_ids[var_name.lower])
-    return var_name + names.Name(str(var_id))
+    return names.Name(var_name.camel_with_underscores + str(var_id))

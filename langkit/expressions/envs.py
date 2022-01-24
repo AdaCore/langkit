@@ -685,5 +685,4 @@ class DynamicLexicalEnv(AbstractExpression):
                          abstract_expr=self)
 
 
-EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
-                            type=T.LexicalEnv)
+EmptyEnv = AbstractVariable(names.Name("Empty_Env"), type=T.LexicalEnv)

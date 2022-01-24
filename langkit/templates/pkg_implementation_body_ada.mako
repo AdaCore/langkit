@@ -885,7 +885,7 @@ package body ${ada_lib_name}.Implementation is
             end loop;
          end Internal;
       begin
-         Internal (Unit.AST_Root);
+         Internal (Unit.Ast_Root);
       end Reset_Envs_Caches;
 
    begin
@@ -896,7 +896,7 @@ package body ${ada_lib_name}.Implementation is
       end if;
       Unit.Is_Env_Populated := True;
 
-      if Unit.AST_Root = null then
+      if Unit.Ast_Root = null then
          return;
       end if;
 
@@ -905,7 +905,7 @@ package body ${ada_lib_name}.Implementation is
       GNATCOLL.Traces.Increase_Indent (Main_Trace);
 
       Context.In_Populate_Lexical_Env := True;
-      Has_Errors := Populate_Lexical_Env (Unit.AST_Root);
+      Has_Errors := Populate_Lexical_Env (Unit.Ast_Root);
       Context.In_Populate_Lexical_Env := Saved_In_Populate_Lexical_Env;
 
       GNATCOLL.Traces.Decrease_Indent (Main_Trace);
@@ -985,7 +985,7 @@ package body ${ada_lib_name}.Implementation is
    ----------
 
    function Root (Unit : Internal_Unit) return ${T.root_node.name} is
-     (Unit.AST_Root);
+     (Unit.Ast_Root);
 
    -----------------
    -- First_Token --
@@ -1045,7 +1045,7 @@ package body ${ada_lib_name}.Implementation is
    ----------------------
 
    procedure Dump_Lexical_Env (Unit : Internal_Unit) is
-      Node     : constant ${T.root_node.name} := Unit.AST_Root;
+      Node     : constant ${T.root_node.name} := Unit.Ast_Root;
       Root_Env : constant Lexical_Env := Unit.Context.Root_Scope;
       State    : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
 
@@ -1124,10 +1124,10 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Print (Unit : Internal_Unit; Show_Slocs : Boolean) is
    begin
-      if Unit.AST_Root = null then
+      if Unit.Ast_Root = null then
          Put_Line ("<empty analysis unit>");
       else
-         Print (Unit.AST_Root, Show_Slocs);
+         Print (Unit.Ast_Root, Show_Slocs);
       end if;
    end Print;
 
@@ -1153,7 +1153,7 @@ package body ${ada_lib_name}.Implementation is
          Process (Tok);
       end loop;
 
-      PP_Trivia (Unit.AST_Root);
+      PP_Trivia (Unit.Ast_Root);
 
       for Tok of Get_Trivias (Unit.TDH, Last_Token) loop
          Process (Tok);
@@ -1184,12 +1184,12 @@ package body ${ada_lib_name}.Implementation is
       Destroy_Rebindings (Unit.Rebindings'Access);
       Unit.Rebindings.Destroy;
 
-      if Unit.AST_Root /= null then
-         Destroy (Unit.AST_Root);
+      if Unit.Ast_Root /= null then
+         Destroy (Unit.Ast_Root);
       end if;
 
       Free (Unit.TDH);
-      Free (Unit.AST_Mem_Pool);
+      Free (Unit.Ast_Mem_Pool);
       Destroy_Unit_Destroyables (Unit);
       Destroyable_Vectors.Destroy (Unit.Destroyables);
       ${exts.include_extension(ctx.ext('analysis', 'unit', 'destroy'))}
@@ -1386,7 +1386,7 @@ package body ${ada_lib_name}.Implementation is
       State        : PLE_Node_State;
       Key          : Symbol_Type;
       Value        : ${T.root_node.name};
-      MD           : ${T.env_md.name};
+      Md           : ${T.env_md.name};
       Resolver     : Entity_Resolver;
       Dest_Env     : ${T.DesignatedEnv.name};
       DSL_Location : String)
@@ -1424,7 +1424,7 @@ package body ${ada_lib_name}.Implementation is
          if ${(
             ' or else '.join(
                 ['({n} /= null and then {n}.Unit /= Self.Unit)'.format(
-                    n='MD.{}'.format(f.name)
+                    n='Md.{}'.format(f.name)
                 ) for f in astnode_fields]
             )
          )}
@@ -1494,7 +1494,7 @@ package body ${ada_lib_name}.Implementation is
       --  Now that everything is sanitized, we can proceed with the actual
       --  key/value pair addition. Note that this does nothing if
       --  Actual_Dest_Env ended up empty.
-      Add (Actual_Dest_Env, Key, Value, MD, Resolver);
+      Add (Actual_Dest_Env, Key, Value, Md, Resolver);
 
       --  If we're adding the element to an environment by env name, we must
       --  register this association in two places: in the target named env
@@ -1515,7 +1515,7 @@ package body ${ada_lib_name}.Implementation is
                V : Internal_Map_Node_Vectors.Vector renames
                   FN.Reference (Cur);
             begin
-               V.Append ((Value, MD, Resolver));
+               V.Append ((Value, Md, Resolver));
             end;
          end;
          Value.Unit.Exiled_Entries_In_NED.Append ((Dest_NED, Key, Value));
@@ -2591,7 +2591,7 @@ package body ${ada_lib_name}.Implementation is
                      NE.Foreign_Nodes.Reference (Cur);
                begin
                   for N of Nodes loop
-                     Add (New_Env, Key, N.Node, N.MD, N.Resolver);
+                     Add (New_Env, Key, N.Node, N.Md, N.Resolver);
                   end loop;
                end;
             end loop;
@@ -4110,14 +4110,14 @@ package body ${ada_lib_name}.Implementation is
       Unit : Internal_Unit := new Analysis_Unit_Type'
         (Context                      => Context,
          Is_Internal                  => False,
-         AST_Root                     => null,
+         Ast_Root                     => null,
          Filename                     => Normalized_Filename,
          Charset                      => To_Unbounded_String (Charset),
          TDH                          => <>,
          Diagnostics                  => <>,
          Is_Env_Populated             => False,
          Rule                         => Rule,
-         AST_Mem_Pool                 => No_Pool,
+         Ast_Mem_Pool                 => No_Pool,
          Destroyables                 => Destroyable_Vectors.Empty_Vector,
          Referenced_Units             => <>,
          Exiled_Entries               => Exiled_Entry_Vectors.Empty_Vector,
@@ -4298,10 +4298,10 @@ package body ${ada_lib_name}.Implementation is
 
    begin
       --  First pass will deactivate every referenced envs that Unit possesses
-      Deactivate_Refd_Envs (Unit.AST_Root);
+      Deactivate_Refd_Envs (Unit.Ast_Root);
 
       --  Second pass will recompute the env they are pointing to
-      Recompute_Refd_Envs (Unit.AST_Root);
+      Recompute_Refd_Envs (Unit.Ast_Root);
    end Reset_Envs;
 
    -------------
@@ -4312,8 +4312,8 @@ package body ${ada_lib_name}.Implementation is
    begin
       Free (Reparsed.TDH);
       Reparsed.Diagnostics := Diagnostics_Vectors.Empty_Vector;
-      Free (Reparsed.AST_Mem_Pool);
-      Reparsed.AST_Root := null;
+      Free (Reparsed.Ast_Mem_Pool);
+      Reparsed.Ast_Root := null;
    end Destroy;
 
    --------------
@@ -4421,7 +4421,7 @@ package body ${ada_lib_name}.Implementation is
    begin
       GNATCOLL.Traces.Trace (Main_Trace, "Parsing unit " & Basename (Unit));
 
-      Result.AST_Root := null;
+      Result.Ast_Root := null;
 
       Move (Saved_TDH, Unit_TDH.all);
       Initialize (Unit_TDH.all, Saved_TDH.Symbols,
@@ -4465,9 +4465,9 @@ package body ${ada_lib_name}.Implementation is
       --  If we could run the lexer, run the parser and get the root node
 
       if Unit_TDH.Source_Buffer /= null then
-         Result.AST_Mem_Pool := Create;
-         Unit.Context.Parser.Mem_Pool := Result.AST_Mem_Pool;
-         Result.AST_Root := ${T.root_node.name}
+         Result.Ast_Mem_Pool := Create;
+         Unit.Context.Parser.Mem_Pool := Result.Ast_Mem_Pool;
+         Result.Ast_Root := ${T.root_node.name}
            (Parse (Unit.Context.Parser, Rule => Unit.Rule));
       end if;
 
@@ -4517,7 +4517,7 @@ package body ${ada_lib_name}.Implementation is
       --  As an optimization, invalidate referenced envs cache only if this is
       --  not the first time we parse Unit.
       Invalidate_Caches
-        (Unit.Context, Invalidate_Envs => Unit.AST_Root /= null);
+        (Unit.Context, Invalidate_Envs => Unit.Ast_Root /= null);
 
       --  Likewise for token data
       Free (Unit.TDH);
@@ -4530,15 +4530,15 @@ package body ${ada_lib_name}.Implementation is
       Destroy_Rebindings (Unit.Rebindings'Access);
 
       --  Destroy the old AST node and replace it by the new one
-      if Unit.AST_Root /= null then
-         Destroy (Unit.AST_Root);
+      if Unit.Ast_Root /= null then
+         Destroy (Unit.Ast_Root);
       end if;
-      Unit.AST_Root := Reparsed.AST_Root;
+      Unit.Ast_Root := Reparsed.Ast_Root;
 
       --  Likewise for memory pools
-      Free (Unit.AST_Mem_Pool);
-      Unit.AST_Mem_Pool := Reparsed.AST_Mem_Pool;
-      Reparsed.AST_Mem_Pool := No_Pool;
+      Free (Unit.Ast_Mem_Pool);
+      Unit.Ast_Mem_Pool := Reparsed.Ast_Mem_Pool;
+      Reparsed.Ast_Mem_Pool := No_Pool;
 
       --  Increment unit version number to invalidate caches and stale node
       --  reference. Also propagate it to the TDH.

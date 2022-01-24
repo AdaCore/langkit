@@ -13,7 +13,7 @@ package Liblktlang.Implementation.Extensions is
 
    function Lkt_Node_P_Env_From_Vals_Internal
      (Node : Bare_Lkt_Node;
-      Vals : Internal_EnvKV_Array_Access) return Lexical_Env;
+      Vals : Internal_Env_Kv_Array_Access) return Lexical_Env;
 
    function Lkt_Node_P_Internal_Fetch_Referenced_Unit
      (Node : Bare_Lkt_Node; Name : String_Type) return Internal_Unit;

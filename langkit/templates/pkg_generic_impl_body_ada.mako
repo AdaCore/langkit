@@ -13,12 +13,12 @@ package body ${ada_lib_name}.Generic_Impl is
    function "+"
      (Entity : Internal_Entity) return Implementation.${root_entity.name}
    is
-      MD : constant Internal_Node_Metadata_Access := +Entity.Metadata;
+      Md : constant Internal_Node_Metadata_Access := +Entity.Metadata;
    begin
       return (Node => +Entity.Node,
-              Info => (MD           => (if MD = null
+              Info => (Md           => (if Md = null
                                         then Implementation.No_Metadata
-                                        else MD.Internal),
+                                        else Md.Internal),
                        Rebindings   => Entity.Rebindings,
                        From_Rebound => Entity.From_Rebound));
    end "+";
@@ -32,17 +32,17 @@ package body ${ada_lib_name}.Generic_Impl is
    is
       use ${ada_lib_name}.Implementation;
 
-      MD : constant Internal_Node_Metadata_Access :=
-        (if Entity.Info.MD = Implementation.No_Metadata
+      Md : constant Internal_Node_Metadata_Access :=
+        (if Entity.Info.Md = Implementation.No_Metadata
          then null
          else new Internal_Node_Metadata_Type'
                     (Ref_Count => 1,
-                     Internal  => Entity.Info.MD));
+                     Internal  => Entity.Info.Md));
    begin
       return (Node         => +Entity.Node,
               Rebindings   => Entity.Info.Rebindings,
               From_Rebound => Entity.Info.From_Rebound,
-              Metadata     => +MD);
+              Metadata     => +Md);
    end "+";
 
    --------------------
@@ -170,7 +170,7 @@ package body ${ada_lib_name}.Generic_Impl is
    function Unit_Root (Unit : Internal_Unit) return Internal_Node is
       U : constant Implementation.Internal_Unit := +Unit;
    begin
-      return +U.AST_Root;
+      return +U.Ast_Root;
    end Unit_Root;
 
    ----------------------
@@ -210,9 +210,9 @@ package body ${ada_lib_name}.Generic_Impl is
    ---------------------------
 
    procedure Node_Metadata_Inc_Ref (Metadata : Internal_Node_Metadata) is
-      MD : constant Internal_Node_Metadata_Access := +Metadata;
+      Md : constant Internal_Node_Metadata_Access := +Metadata;
    begin
-      MD.Ref_Count := MD.Ref_Count + 1;
+      Md.Ref_Count := Md.Ref_Count + 1;
    end Node_Metadata_Inc_Ref;
 
    ---------------------------
@@ -223,11 +223,11 @@ package body ${ada_lib_name}.Generic_Impl is
    is
       procedure Destroy is new Ada.Unchecked_Deallocation
         (Internal_Node_Metadata_Type, Internal_Node_Metadata_Access);
-      MD : Internal_Node_Metadata_Access := +Metadata;
+      Md : Internal_Node_Metadata_Access := +Metadata;
    begin
-      MD.Ref_Count := MD.Ref_Count - 1;
-      if MD.Ref_Count = 0 then
-         Destroy (MD);
+      Md.Ref_Count := Md.Ref_Count - 1;
+      if Md.Ref_Count = 0 then
+         Destroy (Md);
       end if;
       Metadata := No_Internal_Node_Metadata;
    end Node_Metadata_Dec_Ref;

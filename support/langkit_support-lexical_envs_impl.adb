@@ -508,12 +508,12 @@ package body Langkit_Support.Lexical_Envs_Impl is
    -- Create_Entity --
    -------------------
 
-   function Create_Entity (Node : Node_Type; MD : Node_Metadata) return Entity
+   function Create_Entity (Node : Node_Type; Md : Node_Metadata) return Entity
    is
    begin
       return Entity'
         (Node => Node,
-         Info => (MD => MD, Rebindings => null, From_Rebound => False));
+         Info => (Md => Md, Rebindings => null, From_Rebound => False));
    end Create_Entity;
 
    ----------------
@@ -522,7 +522,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    function Equivalent (L, R : Entity_Info) return Boolean is
    begin
-      return L.MD = R.MD and then L.Rebindings = R.Rebindings;
+      return L.Md = R.Md and then L.Rebindings = R.Rebindings;
    end Equivalent;
 
    ----------------
@@ -607,13 +607,13 @@ package body Langkit_Support.Lexical_Envs_Impl is
      (Self     : Lexical_Env;
       Key      : Symbol_Type;
       Value    : Node_Type;
-      MD       : Node_Metadata := Empty_Metadata;
+      Md       : Node_Metadata := Empty_Metadata;
       Resolver : Entity_Resolver := null)
    is
       use Internal_Envs;
 
       Env   : constant Lexical_Env_Access := Unwrap (Self);
-      Node  : constant Internal_Map_Node := (Value, MD, Resolver);
+      Node  : constant Internal_Map_Node := (Value, Md, Resolver);
       C     : Cursor;
       Dummy : Boolean;
       Map   : Internal_Envs.Map renames Env.Map.all;
@@ -814,7 +814,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       procedure Append_Result
         (Node         : Internal_Map_Node;
-         MD           : Node_Metadata;
+         Md           : Node_Metadata;
          Rebindings   : Env_Rebindings;
          From_Rebound : Boolean := False);
       --  Add E to results, if it passes the Can_Reach filter. Return whether
@@ -1014,13 +1014,13 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       procedure Append_Result
         (Node         : Internal_Map_Node;
-         MD           : Node_Metadata;
+         Md           : Node_Metadata;
          Rebindings   : Env_Rebindings;
          From_Rebound : Boolean := False)
       is
          E : constant Entity :=
            (Node => Node.Node,
-            Info => (MD         => Combine (Node.MD, MD),
+            Info => (Md         => Combine (Node.Md, Md),
                      Rebindings => Rebindings,
                      From_Rebound => From_Rebound));
       begin
@@ -1177,11 +1177,11 @@ package body Langkit_Support.Lexical_Envs_Impl is
             --  Just concatenate lookups for all grouped environments
             Rec.Increase_Indent;
             declare
-               MD : constant Node_Metadata :=
-                  Combine (Env.Default_MD, Metadata);
+               Md : constant Node_Metadata :=
+                  Combine (Env.Default_Md, Metadata);
             begin
                for E of Env.Grouped_Envs.all loop
-                  Recurse (E, Key, Lookup_Kind, Rebindings, MD,
+                  Recurse (E, Key, Lookup_Kind, Rebindings, Md,
                            Categories, Local_Results);
                end loop;
             end;
@@ -1629,7 +1629,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
             Ref_Count    => <>,
             Grouped_Envs =>
                new Lexical_Env_Array'(Lexical_Env_Array (V.To_Array)),
-            Default_MD   => With_Md))
+            Default_Md   => With_Md))
       do
          Lexical_Env_Vectors.Destroy (V);
       end return;
@@ -1905,7 +1905,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
    function Shed_Rebindings
      (E_Info : Entity_Info; Env : Lexical_Env) return Entity_Info is
    begin
-      return (MD              => E_Info.MD,
+      return (Md              => E_Info.Md,
               Rebindings      => Shed_Rebindings (Env, E_Info.Rebindings),
               From_Rebound => False);
    end Shed_Rebindings;
@@ -2001,7 +2001,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
          when Grouped =>
             return (L.Grouped_Envs'Length = R.Grouped_Envs'Length
-                    and then L.Default_MD = R.Default_MD
+                    and then L.Default_Md = R.Default_Md
                     and then (for all I in L.Grouped_Envs'Range =>
                               Equivalent (L.Grouped_Envs (I),
                                           R.Grouped_Envs (I))));
@@ -2103,7 +2103,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
                for E of Env.Grouped_Envs.all loop
                   Result := Combine (Result, Hash (E));
                end loop;
-               return Combine (Result, Metadata_Hash (Env.Default_MD));
+               return Combine (Result, Metadata_Hash (Env.Default_Md));
             end;
 
          when Rebound =>

@@ -102,7 +102,7 @@ package body Liblktlang.Implementation.Extensions is
 
    function Lkt_Node_P_Env_From_Vals_Internal
      (Node : Bare_Lkt_Node;
-      Vals : Internal_EnvKV_Array_Access) return Lexical_Env
+      Vals : Internal_Env_Kv_Array_Access) return Lexical_Env
    is
       Ret : constant Lexical_Env :=
          Create_Static_Lexical_Env (Null_Lexical_Env, Node);

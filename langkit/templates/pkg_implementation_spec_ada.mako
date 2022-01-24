@@ -1014,7 +1014,7 @@ private package ${ada_lib_name}.Implementation is
       State        : PLE_Node_State;
       Key          : Symbol_Type;
       Value        : ${T.root_node.name};
-      MD           : ${T.env_md.name};
+      Md           : ${T.env_md.name};
       Resolver     : Entity_Resolver;
       Dest_Env     : ${T.DesignatedEnv.name};
       DSL_Location : String);
@@ -1554,7 +1554,7 @@ private package ${ada_lib_name}.Implementation is
       --  to implement language internals and forbid library users to mess with
       --  this unit.
 
-      AST_Root : ${T.root_node.name};
+      Ast_Root : ${T.root_node.name};
 
       Filename : GNATCOLL.VFS.Virtual_File;
       --  The originating name for this analysis unit. This should be set even
@@ -1575,7 +1575,7 @@ private package ${ada_lib_name}.Implementation is
       Rule : Grammar_Rule;
       --  The grammar rule used to parse this unit
 
-      AST_Mem_Pool : Bump_Ptr_Pool;
+      Ast_Mem_Pool : Bump_Ptr_Pool;
       --  This memory pool shall only be used for AST parsing. Stored here
       --  because it is more convenient, but one shall not allocate from it.
 
@@ -1658,8 +1658,8 @@ private package ${ada_lib_name}.Implementation is
    type Reparsed_Unit is record
       TDH          : Token_Data_Handler;
       Diagnostics  : Diagnostics_Vectors.Vector;
-      AST_Mem_Pool : Bump_Ptr_Pool;
-      AST_Root     : ${T.root_node.name};
+      Ast_Mem_Pool : Bump_Ptr_Pool;
+      Ast_Root     : ${T.root_node.name};
    end record;
    --  Holder for fields affected by an analysis unit reparse. This makes it
    --  possible to separate the "reparsing" and the "replace" steps.

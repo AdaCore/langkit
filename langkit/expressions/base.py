@@ -4107,7 +4107,9 @@ class PropertyDef(AbstractNodeData):
             # fields.
             if self.base_property is None:
                 self.lazy_present_field = self.struct.add_internal_user_field(
-                    name=names.Name(f"LF_Present_{self.original_name}"),
+                    name=names.Name.from_lower(
+                        f"lf_present_{self.original_name}"
+                    ),
                     type=T.Bool,
                     default_value=Literal(True),
                     doc=f'Whether the {self.qualname} lazy field was'
@@ -4117,7 +4119,7 @@ class PropertyDef(AbstractNodeData):
                 # Access to the storage field is guarded by the "present flag"
                 # field, so it is fine to leave it uninitialized.
                 self.lazy_storage_field = self.struct.add_internal_user_field(
-                    name=names.Name(f"LF_Stg_{self.original_name}"),
+                    name=names.Name.from_lower(f"lf_stg_{self.original_name}"),
                     type=self.type,
                     default_value=None,
                     doc=f'Storage for the {self.qualname} lazy field',
@@ -5170,10 +5172,10 @@ class LocalVars:
         name = names.Name.get(name)
 
         i = 0
-        orig_name = name
+        orig_name = name.base_name
         while name in self.local_vars:
             i += 1
-            name = orig_name + names.Name(str(i))
+            name = names.Name(f"{orig_name}_{i}")
         ret = LocalVars.LocalVar(self, name, type)
         self.local_vars[name] = ret
         return ret
@@ -5228,12 +5230,12 @@ class CallExpr(BasicExpr):
             called by this expression).
         :param abstract_expr: See ResolvedExpression's constructor.
         """
-        self.name = names.Name.get(name)
+        self.name = (name
+                     if isinstance(name, str)
+                     else name.camel_with_underscores)
 
-        template = ('{name} ({args})' if exprs else '{name}').format(
-            name=self.name.camel_with_underscores,
-            args=', '.join(['{}'] * len(exprs))
-        )
+        args = ', '.join(['{}'] * len(exprs))
+        template = f"{self.name} ({args})" if exprs else f"{self.name}"
 
         self.shadow_args = list(shadow_args)
 

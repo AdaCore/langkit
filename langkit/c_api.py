@@ -41,7 +41,7 @@ class CAPIType:
         # Make private the following in order to avoid accidental use of these
         # instead of the properties.
         self._name = (name if isinstance(name, names.Name) else
-                      names.Name(name))
+                      names.Name.from_lower(name))
 
     @property
     def name(self) -> str:
@@ -125,6 +125,7 @@ class CAPISettings(AbstractAPISettings):
         Wrap `name` as a top-level scope symbol.
         """
         if isinstance(name, str):
-            name = names.Name(name)
-        return names.Name('{}_{}'.format(self.symbol_prefix, name.base_name)
-                          if self.symbol_prefix else name.base_name).lower
+            name = names.Name.from_lower(name)
+        return (f"{self.symbol_prefix}_{name.lower}"
+                if self.symbol_prefix
+                else name.lower)
