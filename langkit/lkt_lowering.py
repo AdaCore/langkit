@@ -19,9 +19,9 @@ import liblktlang as L
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeRepo,
-    EnumNodeAlternative, EnumType, Field, StructType, T, TypeRepo, UserField,
-    resolve_type
+    ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeOrDefer,
+    CompiledTypeRepo, EnumNodeAlternative, EnumType, Field, StructType, T,
+    TypeRepo, UserField, resolve_type
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, check_source_language, error
@@ -40,9 +40,6 @@ import langkit.names as names
 from langkit.parsers import (Defer, Discard, DontSkip, Grammar, List as PList,
                              Null, Opt, Or, Parser, Pick, Predicate, Skip,
                              _Row, _Token, _Transform)
-
-
-CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]
 
 
 # List of annotations that we don't compute here but that we can safely ignore

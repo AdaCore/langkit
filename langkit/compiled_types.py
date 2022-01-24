@@ -4728,3 +4728,5 @@ declaration.
 """
 
 create_builtin_types()
+
+CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]

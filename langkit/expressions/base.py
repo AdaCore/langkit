@@ -6,7 +6,7 @@ import inspect
 from itertools import count
 from typing import (
     Any as _Any, Callable, ClassVar, Dict, Iterator, List, Optional as Opt,
-    Sequence, Set, Tuple, Union
+    Sequence, Set, TYPE_CHECKING, Tuple, Union
 )
 
 
@@ -30,6 +30,10 @@ from langkit.utils import (
     Uninitialized, assert_type, dispatch_on_type, inherited_property, memoized,
     nested, not_implemented_error, self_memoized
 )
+
+
+if TYPE_CHECKING:
+    from langkit.compiled_types import CompiledTypeOrDefer
 
 
 def unsugar(expr, ignore_errors=False):
@@ -2067,17 +2071,21 @@ class AbstractVariable(AbstractExpression):
 
     unused_count = count(1)
 
-    def __init__(self, name, type=None, create_local=False, source_name=None):
+    def __init__(self,
+                 name: names.Name,
+                 type: Opt[CompiledTypeOrDefer] = None,
+                 create_local: bool = False,
+                 source_name: Opt[names.Name] = None):
         """
-        :param names.Name name: The name of the PlaceHolder variable.
-        :param CompiledType type: The type of the variable. Optional for
-            global abstract variables where you will use bind_type. Mandatory
-            if create_local is True.
-        :param bool create_local: Whether to create a corresponding local
-            variable in the current property. If True, the variable is created
+        :param name: The name of the PlaceHolder variable.
+        :param type: The type of the variable. Optional for global abstract
+            variables where you will use bind_type. Mandatory if create_local
+            is True.
+        :param create_local: Whether to create a corresponding local variable
+            in the current property. If True, the variable is created
             scopeless.
-        :param names.Name|None source_name: If this variables comes from the
-            language specification, hold its original name.
+        :param source_name: If this variables comes from the language
+            specification, hold its original name.
         """
         super().__init__()
 
@@ -2094,10 +2102,8 @@ class AbstractVariable(AbstractExpression):
 
         self.source_name = source_name
 
-        self.construct_cache = {}
+        self.construct_cache: Dict[Tuple[str, CompiledType], VariableExpr] = {}
         """
-        :type: dict[(str, CompiledType), VariableExpr]
-
         Cache used to memoize the "construct" method.
         """
 
