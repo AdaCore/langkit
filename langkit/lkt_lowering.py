@@ -121,25 +121,12 @@ def denoted_string_lit(string_lit: Union[L.StringLit, L.TokenLit]) -> str:
     return result
 
 
-def ada_id_for(n: names.Name) -> names.Name:
+def ada_id_for(n: str) -> names.Name:
     """
-    Turn ``n`` into a valid Ada identifier (for code generation).
+    Turn the lower cased name ``n`` into a valid Ada identifier (for code
+    generation).
     """
-    result = n.camel_with_underscores
-
-    # Remove all consecutive underscores
-    while '__' in result:
-        result = result.replace('__', '_')
-
-    # Leading and trailing underscores are invalid: remove them
-    result = result.strip('_')
-
-    # If we end up with an empty string, the input was probably the "unused"
-    # identifier ("_").
-    if not result:
-        result = 'ignored'
-
-    return names.Name(result)
+    return names.Name.check_from_lower("ignored" if n == "_" else n)
 
 
 def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
@@ -647,7 +634,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         """
         with ctx.lkt_context(f):
             # Create the token family, if needed
-            name = names.Name.from_lower(f.f_syn_name.text)
+            name = names.Name.check_from_lower(f.f_syn_name.text)
             token_set = token_family_sets.setdefault(name, set())
 
             for r in f.f_rules:
@@ -703,7 +690,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             # mapping, its token family (if any) and the "newline_after" group
             # if the corresponding annotation is present.
             token_lower_name = r.f_decl.f_syn_name.text
-            token_name = names.Name.from_lower(token_lower_name)
+            token_name = (
+                None
+                if token_lower_name == "_"
+                else names.Name.check_from_lower(token_lower_name)
+            )
 
             check_source_language(
                 token_lower_name not in ('termination', 'lexing_failure'),
@@ -713,7 +704,8 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                                   'Duplicate token name')
 
             token = token_cons(start_ignore_layout, end_ignore_layout)
-            tokens[token_name] = token
+            if token_name is not None:
+                tokens[token_name] = token
             if isinstance(token, TokenAction):
                 if token_set is not None:
                     token_set.add(token)
@@ -740,7 +732,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         decl = full_decl.f_decl
         assert isinstance(decl, L.ValDecl)
         lower_name = decl.f_syn_name.text
-        name = names.Name.from_lower(lower_name)
+        name = names.Name.check_from_lower(lower_name)
 
         with ctx.lkt_context(decl):
             check_source_language(name not in patterns,
@@ -775,7 +767,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         Return the Token that `ref` refers to.
         """
         with ctx.lkt_context(ref):
-            token_name = names.Name.from_lower(ref.text)
+            token_name = names.Name.check_from_lower(ref.text)
             check_source_language(token_name in tokens,
                                   'Unknown token: {}'.format(token_name.lower))
             return tokens[token_name]
@@ -858,7 +850,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
     # Register spacing/newline rules
     for f1_name, f2_ref in spacings:
-        f2_name = names.Name.from_lower(f2_ref.text)
+        f2_name = names.Name.check_from_lower(f2_ref.text)
         with ctx.lkt_context(f2_ref):
             check_source_language(
                 f2_name in token_families,
@@ -1505,7 +1497,7 @@ class LktTypesLoader:
             assert arg not in env
             source_name = arg.f_syn_name.text
             result = AbstractVariable(
-                names.Name.from_lower('{}_{}'.format(prefix, next(counter))),
+                names.Name.check_from_lower(f"{prefix}_{next(counter)}"),
                 source_name=source_name,
                 type=type,
             )
@@ -1606,7 +1598,7 @@ class LktTypesLoader:
                 for v in expr.f_val_defs:
                     if isinstance(v, L.ValDecl):
                         source_name = v.f_syn_name.text
-                        v_name = ada_id_for(names.Name.from_lower(source_name))
+                        v_name = ada_id_for(source_name)
                         v_type = (
                             self.resolve_type_decl(
                                 v.f_decl_type.p_designated_type
@@ -1770,7 +1762,7 @@ class LktTypesLoader:
                     enum_type = self.lower_type_decl(enum_type_node)
                     assert isinstance(enum_type, EnumType)
 
-                    name = names.Name.from_lower(expr.f_suffix.text)
+                    name = names.Name.check_from_lower(expr.f_suffix.text)
                     return enum_type.values_dict[name].to_abstract_expr
 
                 else:
@@ -1917,7 +1909,7 @@ class LktTypesLoader:
                 default_value.prepare()
 
             arg = Argument(
-                name=names.Name.from_lower(a.f_syn_name.text),
+                name=ada_id_for(a.f_syn_name.text),
                 type=self.resolve_type_decl(a.f_decl_type.p_designated_type),
                 default_value=default_value
             )
@@ -2022,7 +2014,7 @@ class LktTypesLoader:
                 name_text.lower() == name_text,
                 'Field names must be lower-case'
             )
-            name = names.Name.from_lower(name_text)
+            name = names.Name.check_from_lower(name_text)
 
             field: AbstractNodeData
 
@@ -2114,7 +2106,7 @@ class LktTypesLoader:
             is_bool_node = True
 
         result = ASTNodeType(
-            names.Name.from_camel(decl.f_syn_name.text),
+            names.Name.check_from_camel(decl.f_syn_name.text),
             location=loc,
             doc=self.ctx.lkt_doc(decl.parent),
             base=base_type,
@@ -2183,10 +2175,12 @@ class LktTypesLoader:
                 'Missing alternatives for this enum node'
             )
             alt_descriptions = [
-                EnumNodeAlternative(names.Name.from_camel(alt.f_syn_name.text),
-                                    enum_node,
-                                    None,
-                                    Location.from_lkt_node(alt))
+                EnumNodeAlternative(
+                    names.Name.check_from_camel(alt.f_syn_name.text),
+                    enum_node,
+                    None,
+                    Location.from_lkt_node(alt)
+                )
                 for alt in alternatives
             ]
 
@@ -2239,10 +2233,10 @@ class LktTypesLoader:
             value_names.append(name)
 
         return EnumType(
-            name=names.Name.from_camel(decl.f_syn_name.text),
+            name=names.Name.check_from_camel(decl.f_syn_name.text),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl.parent),
-            value_names=[names.Name.from_lower(n) for n in value_names],
+            value_names=[names.Name.check_from_lower(n) for n in value_names],
         )
 
     def create_struct(self,
@@ -2255,7 +2249,7 @@ class LktTypesLoader:
         :param annotations: Annotations for this declaration.
         """
         return StructType(
-            name=names.Name.from_camel(decl.f_syn_name.text),
+            name=names.Name.check_from_camel(decl.f_syn_name.text),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl.parent),
             fields=self.lower_fields(decl.f_decls, (UserField, )),
