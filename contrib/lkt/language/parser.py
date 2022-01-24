@@ -112,7 +112,7 @@ class TreeSemanticResult(Struct):
     has_error = UserField(T.Bool)
 
 
-class EnvKV(Struct):
+class EnvKv(Struct):
     """
     Utility struct that represents a key value pair in a lexical environment.
     """
@@ -261,7 +261,7 @@ class LktNode(ASTNode):
                       uses_entity_info=False,
                       uses_envs=True,
                       return_type=T.LexicalEnv)
-    def env_from_vals_internal(vals=EnvKV.array):
+    def env_from_vals_internal(vals=EnvKv.array):
         """
         Internal property that will create a lexical environment from a list of
         key values associations. The lexical environment will not be
@@ -1979,7 +1979,7 @@ class GenericDecl(Decl):
         """
         return Entity.env_from_vals_internal(
             Entity.get_assocs(actuals).map(
-                lambda assoc: EnvKV.new(
+                lambda assoc: EnvKv.new(
                     key=assoc.formal.name, value=assoc.actual
                 )
             )

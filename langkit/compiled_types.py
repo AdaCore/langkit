@@ -3255,7 +3255,7 @@ class ASTNodeType(BaseStructType):
             CompiledTypeRepo.entity_info = StructType(
                 names.Name('Entity_Info'), None, None,
                 [
-                    (names.Name('MD'), BuiltinField(
+                    (names.Name('Md'), BuiltinField(
                         # Use a deferred type so that the language spec. can
                         # reference entity types even before it declared the
                         # metadata class.
@@ -3831,13 +3831,11 @@ class ArrayType(CompiledType):
         pkg_vector_name = self.element_type.name + names.Name('Vectors')
         return '{}.Index_Type'.format(pkg_vector_name.camel_with_underscores)
 
-    def vector(self):
+    def vector(self) -> str:
         """
         Name of the type for vector values.
-
-        :rtype: names.Name
         """
-        return names.Name(self.pkg_vector.camel_with_underscores + '.Vector')
+        return self.pkg_vector.camel_with_underscores + '.Vector'
 
     def c_create(self, capi):
         """
@@ -4255,7 +4253,7 @@ class AnalysisUnitType(CompiledType):
         root_field = BuiltinField(
             T.defer_root_node,
             doc='Return the root node of this unit.',
-            internal_name=names.Name('AST_Root'))
+            internal_name=names.Name('Ast_Root'))
 
         self._init_fields([
             ('root', root_field),
@@ -4452,7 +4450,7 @@ def create_builtin_types():
              default_val_name=names.Name("None"),
              is_builtin_type=True)
     StructType(
-        name=names.Name("DesignatedEnv"),
+        name=names.Name("Designated_Env"),
         location=None,
         doc="""
             Designate an environment for an env spec action.

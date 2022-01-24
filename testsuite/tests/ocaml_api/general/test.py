@@ -16,9 +16,9 @@ from utils import build_and_run
 
 
 class Color(Enum):
-    Red = EnumValue()
-    Green = EnumValue()
-    Blue = EnumValue()
+    red = EnumValue()
+    green = EnumValue()
+    blue = EnumValue()
 
 
 class FooNodeStruct(Struct):
@@ -57,7 +57,7 @@ class FooNode(ASTNode):
         return c
 
     @langkit_property(public=True)
-    def same_color_dflt(c=(Color, Color.Red)):
+    def same_color_dflt(c=(Color, Color.red)):
         return c
 
     @langkit_property(public=True)

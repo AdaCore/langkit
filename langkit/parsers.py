@@ -28,7 +28,7 @@ import difflib
 from funcy import keep
 import inspect
 from itertools import count
-from typing import Callable, List as _List, Set, Tuple
+from typing import Callable, List as _List, Optional, Set, Tuple
 
 import funcy
 
@@ -447,7 +447,7 @@ class Parser:
         self.gen_fn_name = gen_name(self.base_name)
         self.grammar = None
         self.is_root = False
-        self._name = names.Name("")
+        self._name: Optional[names.Name] = None
         self.no_backtrack = None
         """
         :type: VarDef
@@ -1066,7 +1066,7 @@ class Skip(Parser):
         return result
 
     def generate_code(self):
-        return self.render('skip_code_ada', exit_label=gen_name("Exit_Or"))
+        return self.render('skip_code_ada', exit_label=gen_name("exit_or"))
 
     def _precise_types(self):
         return TypeSet([self.type])
@@ -1242,7 +1242,7 @@ class Or(Parser):
         self.init_vars()
 
     def generate_code(self):
-        return self.render('or_code_ada', exit_label=gen_name("Exit_Or"))
+        return self.render('or_code_ada', exit_label=gen_name("exit_or"))
 
     def discard(self):
         return all(p.discard() for p in self.parsers)
@@ -1395,7 +1395,7 @@ class _Row(Parser):
             self.progress_var = VarDef('row_progress', T.Int)
 
     def generate_code(self):
-        return self.render('row_code_ada', exit_label=gen_name("Exit_Row"))
+        return self.render('row_code_ada', exit_label=gen_name("exit_row"))
 
 
 class List(Parser):

@@ -1204,7 +1204,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
          declare
             Result : constant Node_Rewriting_Handle :=
-               Transform (Reparsed.AST_Root, No_Node_Rewriting_Handle);
+               Transform (Reparsed.Ast_Root, No_Node_Rewriting_Handle);
          begin
             Destroy (Reparsed);
             return Result;

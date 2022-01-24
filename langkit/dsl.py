@@ -655,7 +655,7 @@ class _ASTNodeMetaclass(type):
         # Make _EnumNodeAlternative instances available as attributes of the
         # enum node class for a convenient way to create parsers for them.
         for alt in alts:
-            attr_name = (names.Name('alt') + alt.name).lower
+            attr_name = (names.Name('Alt') + alt.name).lower
             dct[attr_name] = alt
 
         if qualifier:
