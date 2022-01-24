@@ -300,7 +300,7 @@ class EnvSpec:
             public=False, type=type, ignore_warn_on_node=True
         )
         p._indexing_name = '_{}'.format(p.original_name.lower)
-        p._original_name = names.Name.from_lower(p._indexing_name)
+        p._original_name = p._indexing_name
         p.location = getattr(expr, 'location') or self.location
         self.ast_node.add_field(p)
         return p
