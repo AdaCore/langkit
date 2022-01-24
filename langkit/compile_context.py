@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from contextlib import contextmanager
+from enum import Enum
 from functools import reduce
 import importlib
 import os
@@ -92,8 +93,9 @@ def global_context(ctx):
     compile_ctx = old_ctx
 
 
-ADA_SPEC = "spec"
-ADA_BODY = "body"
+class AdaSourceKind(Enum):
+    spec = "spec"
+    body = "body"
 
 
 class Verbosity:
@@ -699,7 +701,7 @@ class CompileCtx:
         """
 
         self.with_clauses: Dict[
-            Tuple[str, str],
+            Tuple[str, AdaSourceKind],
             List[Tuple[str, bool, bool]]
         ] = defaultdict(list)
         """
@@ -873,7 +875,7 @@ class CompileCtx:
         if not is_builtin:
             self.add_with_clause(
                 "Implementation.C",
-                ADA_BODY,
+                AdaSourceKind.body,
                 ".".join(n.camel_with_underscores for n in package)
             )
 
@@ -917,7 +919,7 @@ class CompileCtx:
         # Make original exception declarations available to exceptions handlers
         # in the C API.
         self.add_with_clause(
-            "Implementation.C", ADA_BODY, "Langkit_Support.Errors"
+            "Implementation.C", AdaSourceKind.body, "Langkit_Support.Errors"
         )
 
     @property
@@ -957,8 +959,8 @@ class CompileCtx:
         `from_pkg` generated package.
 
         :param str from_pkg: Package to which the WITH clause must be added.
-        :param str source_kind: Kind of source file in which the WITH clause
-            must be added. Must be eiher ADA_SPEC or ADA_BODY.
+        :param AdaSourceKind source_kind: Kind of source file in which the WITH
+            clause must be added.
         :param str to_pkg: Name of the Ada package to WITH.
         :param bool use_clause: Whether to generate the corresponding USE
             clause.

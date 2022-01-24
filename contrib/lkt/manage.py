@@ -3,7 +3,7 @@
 import os.path
 
 from langkit.common import bytes_repr
-from langkit.emitter import ADA_SPEC, ada_file_path, write_ada_file
+from langkit.emitter import AdaSourceKind, ada_file_path, write_ada_file
 from langkit.libmanage import ManageScript
 import langkit.names as names
 from langkit.passes import EmitterPass
@@ -68,13 +68,13 @@ class Manage(ManageScript):
         qual_name = [names.Name("Liblktlang"), names.Name("Prelude")]
         write_ada_file(
             out_dir=emitter.src_dir,
-            source_kind=ADA_SPEC,
+            source_kind=AdaSourceKind.spec,
             qual_name=qual_name,
             content="\n".join(lines),
             post_process=emitter.post_process_ada,
         )
         emitter.add_library_interface(
-            ada_file_path(emitter.src_dir, ADA_SPEC, qual_name),
+            ada_file_path(emitter.src_dir, AdaSourceKind.spec, qual_name),
             generated=True,
         )
 

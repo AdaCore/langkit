@@ -12,7 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, Set
 from funcy import keep
 
 from langkit.caching import Cache
-from langkit.compile_context import ADA_BODY, ADA_SPEC, CompileCtx, get_context
+from langkit.compile_context import AdaSourceKind, CompileCtx, get_context
 from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Severity, check_source_language
 from langkit.generic_api import GenericAPI
@@ -89,26 +89,26 @@ def write_ocaml_file(file_path: str,
 
 
 def ada_file_path(out_dir: str,
-                  source_kind: str,
+                  source_kind: AdaSourceKind,
                   qual_name: List[names.Name]) -> str:
     """
     Return the name of the Ada file for the given unit name/kind.
 
     :param out_dir: The complete path to the directory in which we want to
         write the file.
-    :param source_kind: One of the constants ADA_SPEC or ADA_BODY, determining
-        whether the source is a spec or a body.
+    :param source_kind: Determine whether the source is a spec or a body.
     :param qual_name: The qualified name of the Ada spec/body, as a list of
         Name components.
     """
-    assert source_kind in (ADA_SPEC, ADA_BODY)
-    file_name = '{}.{}'.format('-'.join(n.lower for n in qual_name),
-                               'ads' if source_kind == ADA_SPEC else 'adb')
+    file_name = '{}.{}'.format(
+        '-'.join(n.lower for n in qual_name),
+        'ads' if source_kind == AdaSourceKind.spec else 'adb'
+    )
     return os.path.join(out_dir, file_name)
 
 
 def write_ada_file(out_dir: str,
-                   source_kind: str,
+                   source_kind: AdaSourceKind,
                    qual_name: List[names.Name],
                    content: str,
                    post_process: PostProcessFn = None) -> None:
@@ -336,7 +336,7 @@ class Emitter:
         ):
             for unit in ('Analysis', 'Implementation', 'Implementation.C'):
                 context.add_with_clause(
-                    unit, ADA_BODY,
+                    unit, AdaSourceKind.body,
                     '{}.Implementation.Extensions'
                     .format(context.ada_api_settings.lib_name),
                     use_clause=True
@@ -433,7 +433,7 @@ class Emitter:
 
         # Source file that contains the state machine implementation
         lexer_sm_body = ada_file_path(
-            self.src_dir, ADA_BODY,
+            self.src_dir, AdaSourceKind.body,
             [ctx.lib_name, names.Name('Lexer_State_Machine')])
 
         # Generate the lexer state machine iff the file is missing or its
@@ -561,7 +561,7 @@ class Emitter:
         with names.camel_with_underscores:
             write_ada_file(
                 path.join(self.lib_root, 'src-mains'),
-                ADA_BODY, [names.Name('Parse')],
+                AdaSourceKind.body, [names.Name('Parse')],
                 ctx.render_template('main_parse_ada'),
                 self.post_process_ada
             )
@@ -799,7 +799,11 @@ class Emitter:
         :param is_interface: Whether to include this module in the generated
             library interface.
         """
-        for kind in [ADA_SPEC] + ([ADA_BODY] if has_body else []):
+
+        def do_emit(kind: AdaSourceKind) -> None:
+            """
+            Emit the "kind" source for this module.
+            """
             qual_name_str = '.'.join(n.camel_with_underscores
                                      for n in qual_name)
             with_clauses = self.context.with_clauses[(qual_name_str, kind)]
@@ -812,8 +816,8 @@ class Emitter:
                                            generated=True)
 
             # If asked not to generate the body, skip the rest
-            if kind == ADA_BODY and cached_body:
-                continue
+            if kind == AdaSourceKind.body and cached_body:
+                return
 
             with names.camel_with_underscores:
                 write_ada_file(
@@ -826,9 +830,13 @@ class Emitter:
                             # If the base name ends with a /, we don't
                             # put a "_" separator.
                             ('' if template_base_name.endswith('/') else '_'),
-                            kind
+                            kind.value
                         ),
                         with_clauses=with_clauses,
                     ),
                     post_process=self.post_process_ada
                 )
+
+        do_emit(AdaSourceKind.spec)
+        if has_body:
+            do_emit(AdaSourceKind.body)

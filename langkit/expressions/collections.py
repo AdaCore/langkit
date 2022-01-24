@@ -871,7 +871,7 @@ def unique(self, array):
     """
     Return a copy of `array` with duplicated elements removed.
     """
-    from langkit.compile_context import ADA_BODY
+    from langkit.compile_context import AdaSourceKind
 
     array_expr = construct(array)
     array_type = array_expr.type
@@ -886,7 +886,7 @@ def unique(self, array):
     )
 
     # Enable the generation of the function that does the actual work
-    get_context().add_with_clause('Implementation', ADA_BODY,
+    get_context().add_with_clause('Implementation', AdaSourceKind.body,
                                   'Ada.Containers.Hashed_Sets')
     array_type.require_unique_function()
 
