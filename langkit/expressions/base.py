@@ -178,7 +178,7 @@ def expand_abstract_fn(fn):
         )
 
         try:
-            kw_name = names.Name.from_lower(kw)
+            kw_name = AbstractVariable.decode_name(kw)
         except ValueError as exc:
             check_source_language(False, str(exc))
 
@@ -2075,6 +2075,25 @@ class AbstractVariable(AbstractExpression):
 
     unused_count = count(1)
 
+    @classmethod
+    def create_unused_id(cls) -> names.Name:
+        """
+        Create a unique identifier for an unused abstract variable.
+        """
+        i = next(cls.unused_count)
+        return names.Name(f"Unused_{i}")
+
+    @classmethod
+    def decode_name(cls, name: str) -> names.Name:
+        """
+        Return ``name`` decoded as a lower case identifier, or create a new
+        unused id if ``name`` is '_'.
+        """
+        if name == "_":
+            return cls.create_unused_id()
+        else:
+            return names.Name.check_from_lower(name)
+
     def __init__(self,
                  name: names.Name,
                  type: Opt[CompiledTypeOrDefer] = None,
@@ -2095,8 +2114,7 @@ class AbstractVariable(AbstractExpression):
 
         # Kludge: in DynamicVariable and only there, name can be None
         if name is not None and name.lower == '_':
-            i = next(self.unused_count)
-            name = names.Name('Unused_{}'.format(i))
+            name = self.create_unused_id()
 
         self._type = type
         self.local_var = None
@@ -2774,7 +2792,8 @@ class Let(AbstractExpression):
         # Create the variables this Let expression binds and expand the result
         # expression using them.
         self.vars = [
-            AbstractVariable(names.Name.from_lower(arg), create_local=True,
+            AbstractVariable(AbstractVariable.decode_name(arg),
+                             create_local=True,
                              source_name=arg)
             for arg in self.var_names
         ]

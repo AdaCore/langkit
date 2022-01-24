@@ -2,6 +2,83 @@ from __future__ import annotations
 
 from typing import Any, List, Optional, Type, Union
 
+from langkit.diagnostics import error
+
+
+def check_common(name: str) -> None:
+    """
+    Check than ``name``:
+
+    * does not end nor starts with an underscore;
+    * does not contain consecutive underscores;
+    * contains only ASCII letters and digits.
+    """
+    if not name:
+        raise ValueError("names cannot be empty")
+
+    first_char = name[0].lower()
+    if first_char < "a" or first_char > "z":
+        raise ValueError(f"names must start with a letter: {repr(name)}")
+
+    if name.startswith("_") or name.endswith("_"):
+        raise ValueError(
+            f"name cannot end or start with an underscore: {repr(name)}"
+        )
+
+    if "__" in name:
+        raise ValueError(
+            f"name cannot contain consecutive underscores: {repr(name)}"
+        )
+
+    if any((c < "0" or c > "9") and (c < "a" or c > "z") and c != "_"
+           for c in name.lower()):
+        raise ValueError(f"illegal character in name: {repr(name)}")
+
+
+def check_camel_with_underscores(name: str) -> None:
+    """
+    Check that ``name`` respects the "camel with underscores" convention.
+    """
+    check_common(name)
+    if any(w.capitalize() != w for w in name.split("_")):
+        raise ValueError(
+            "words must start with an upper case character followed by lower"
+            f" case characters: {repr(name)}")
+
+
+def check_camel(name: str) -> None:
+    """
+    Check that ``name`` respects the camel case convention.
+    """
+    check_common(name)
+    if "_" in name:
+        raise ValueError(
+            f"camel case names cannot contain underscores: {repr(name)}"
+        )
+    if name[0].upper() != name[0]:
+        raise ValueError(
+            "first letter of camel case names must be an upper case letter:"
+            f" {repr(name)}"
+        )
+
+
+def check_lower(name: str) -> None:
+    """
+    Check that ``name`` respects the lower case convention.
+    """
+    check_common(name)
+    if name.lower() != name:
+        raise ValueError(f"no upper case allowed: {repr(name)}")
+
+
+def check_upper(name: str) -> None:
+    """
+    Check that ``name`` respects the upper case convention.
+    """
+    check_common(name)
+    if name.upper() != name:
+        raise ValueError(f"no lower case allowed: {repr(name)}")
+
 
 class Name:
     """
@@ -24,6 +101,7 @@ class Name:
         :param mixed_with_underscores: Name in the mixed case and underscore
             format.
         """
+        check_camel_with_underscores(mixed_with_underscores)
         self.base_name = mixed_with_underscores
 
     def __len__(self) -> int:
@@ -108,17 +186,19 @@ class Name:
 
         :param name: The string to create the name from.
         """
-        result = list(name)
-        inserted_underscores = []
-        for i, c in enumerate(result):
-            if i <= 1:
-                continue
-            c_1 = result[i - 1]
-            if c_1 == c_1.upper() and c == c.lower():
-                inserted_underscores.append(i - 1)
-        for index in reversed(inserted_underscores):
-            result.insert(index, '_')
-        return cls(''.join(result))
+        check_camel(name)
+
+        # Split ``name`` into words: each upper case character starts a new
+        # word. Thanks to ``check_camel`` we know that the first character in
+        # ``name`` is an upper case letter.
+        result = []
+        for c in name:
+            if c.isupper():
+                result.append(c)
+            else:
+                result[-1] += c
+
+        return cls("_".join(result))
 
     @classmethod
     def from_lower(cls, name: str) -> Name:
@@ -128,6 +208,7 @@ class Name:
 
         :param name: The string to create the name from.
         """
+        check_lower(name)
         return cls('_'.join(word.lower().capitalize()
                             for word in name.split('_')))
 
@@ -139,8 +220,50 @@ class Name:
 
         :param name: The string to create the name from.
         """
+        check_upper(name)
         return cls('_'.join(word.lower().capitalize()
                             for word in name.split('_')))
+
+    @classmethod
+    def check_from_camel_with_underscores(cls, name: str) -> Name:
+        """
+        Like ``from_camel_with_underscores``, but create a diagnostic error if
+        casing is wrong.
+        """
+        try:
+            return cls.from_camel_with_underscores(name)
+        except ValueError as exc:
+            error(str(exc))
+
+    @classmethod
+    def check_from_camel(cls, name: str) -> Name:
+        """
+        Like ``from_camel``, but create a diagnostic error if casing is wrong.
+        """
+        try:
+            return cls.from_camel(name)
+        except ValueError as exc:
+            error(str(exc))
+
+    @classmethod
+    def check_from_lower(cls, name: str) -> Name:
+        """
+        Like ``from_lower``, but create a diagnostic error if casing is wrong.
+        """
+        try:
+            return cls.from_lower(name)
+        except ValueError as exc:
+            error(str(exc))
+
+    @classmethod
+    def check_from_upper(cls, name: str) -> Name:
+        """
+        Like ``from_upper``, but create a diagnostic error if casing is wrong.
+        """
+        try:
+            return cls.from_upper(name)
+        except ValueError as exc:
+            error(str(exc))
 
     @classmethod
     def get(cls, name_or_str: Union[str, Name]) -> Name:

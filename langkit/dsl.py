@@ -49,7 +49,7 @@ class DSLType:
         Metaclass helper.  Register in `dct` the name, location and doc
         information for the class to be built.
         """
-        dct['_name'] = names.Name.from_camel(name)
+        dct['_name'] = names.Name.check_from_camel(name)
         dct['_location'] = location
         dct['_doc'] = dct.get('__doc__', '')
 
@@ -558,7 +558,7 @@ class _ASTNodeMetaclass(type):
                         ' strings'
                     )
 
-                alts = [_EnumNodeAlternative(names.Name.from_lower(alt))
+                alts = [_EnumNodeAlternative(names.Name.check_from_lower(alt))
                         for alt in alternatives]
 
                 allowed_field_types = (_UserField, PropertyDef)
@@ -1006,7 +1006,7 @@ class _EnumMetaclass(type):
                     'EnumValue instances cannot be used in multiple Enum'
                     ' subclasses (here: {})'.format(key)
                 )
-                value._name = names.Name.from_lower(key)
+                value._name = names.Name.check_from_lower(key)
                 values.append(value)
 
                 # If this is the default value for this enum type, store it
