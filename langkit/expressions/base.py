@@ -628,8 +628,9 @@ class AbstractExpression(Frozable):
                 return obj
 
         ret = self
-        for p, order in passes:
-            ret = expand(ret, p, order)
+        with self.diagnostic_context:
+            for p, order in passes:
+                ret = expand(ret, p, order)
         return ret
 
     def construct(self):
