@@ -190,7 +190,7 @@ class CollectionExpression(AbstractExpression):
             result = existing_var
 
         if result.source_name is None and source_name is not None:
-            result.source_name = names.Name.from_lower(source_name)
+            result.source_name = source_name
 
         return result
 

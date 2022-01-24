@@ -1354,11 +1354,20 @@ class Match(AbstractExpression):
             else:
                 match_type = None
 
+            # We allow only valid identifiers or the wildcard ("_") for match
+            # bindings.
+            var_name = argspec.args[0]
+            if var_name != "_":
+                try:
+                    _ = names.Name.from_lower(var_name)
+                except ValueError as exc:
+                    check_source_language(False, str(exc))
+
             match_var = AbstractVariable(
                 names.Name('Match_{}'.format(i)),
                 type=match_type,
                 create_local=True,
-                source_name=names.Name.from_lower(argspec.args[0])
+                source_name=var_name,
             )
             self.matchers.append((match_type, match_var, match_fn(match_var)))
 

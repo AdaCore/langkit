@@ -1763,7 +1763,7 @@ class Argument:
     """
 
     def __init__(self, name, type, is_artificial=False, default_value=None,
-                 abstract_var=None):
+                 abstract_var=None, source_name=None):
         """
         :param names.Name name: Argument name.
         :param CompiledType type: Argument type.
@@ -1784,7 +1784,7 @@ class Argument:
 
         self.name = name
         self.var = (abstract_var
-                    or AbstractVariable(name, type, source_name=name))
+                    or AbstractVariable(name, type, source_name=source_name))
         self.is_artificial = is_artificial
 
         # Make sure that, if present, the default value is a compile-time known
