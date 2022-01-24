@@ -1503,7 +1503,7 @@ class LktTypesLoader:
                 the generated code.
             """
             assert arg not in env
-            source_name = names.Name.from_lower(arg.f_syn_name.text)
+            source_name = arg.f_syn_name.text
             result = AbstractVariable(
                 names.Name.from_lower('{}_{}'.format(prefix, next(counter))),
                 source_name=source_name,
@@ -1605,8 +1605,8 @@ class LktTypesLoader:
 
                 for v in expr.f_val_defs:
                     if isinstance(v, L.ValDecl):
-                        source_name = names.Name.from_lower(v.f_syn_name.text)
-                        v_name = ada_id_for(source_name)
+                        source_name = v.f_syn_name.text
+                        v_name = ada_id_for(names.Name.from_lower(source_name))
                         v_type = (
                             self.resolve_type_decl(
                                 v.f_decl_type.p_designated_type

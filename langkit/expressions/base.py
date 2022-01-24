@@ -177,6 +177,11 @@ def expand_abstract_fn(fn):
             )
         )
 
+        try:
+            kw_name = names.Name.from_lower(kw)
+        except ValueError as exc:
+            check_source_language(False, str(exc))
+
         # Expect either a single value (the argument type) or a couple (the
         # argument type and an expression for the default value).
         if isinstance(default, tuple) and len(default) == 2:
@@ -196,8 +201,9 @@ def expand_abstract_fn(fn):
             ' (got {})'.format(kw, type_ref)
         )
 
-        fn_arguments.append(Argument(names.Name.from_lower(kw), type_ref,
-                                     default_value=default_value))
+        fn_arguments.append(Argument(kw_name, type_ref,
+                                     default_value=default_value,
+                                     source_name=kw))
 
     # Now that we have placeholder for all arguments, we can expand the lambda
     # into a real AbstractExpression.
@@ -1449,12 +1455,10 @@ class VariableExpr(ResolvedExpression):
         return self.name.camel_with_underscores
 
     @property
-    def source_name(self):
+    def source_name(self) -> Opt[str]:
         """
         If it comes from the language specification, return the original
         source name for this variable. Return None otherwise.
-
-        :rtype: names.Name|None
         """
         return (self.abstract_var.source_name
                 if self.abstract_var and self.abstract_var.source_name else
@@ -1479,8 +1483,8 @@ class VariableExpr(ResolvedExpression):
     def __repr__(self):
         src_name = self.source_name
         return '<VariableExpr {}{}>'.format(
-            self.name.lower,
-            ' ({})'.format(src_name.lower) if src_name else '')
+            self.name.lower, ' ({})'.format(src_name) if src_name else ''
+        )
 
     @property
     def is_self(self):
@@ -1495,7 +1499,7 @@ class VariableExpr(ResolvedExpression):
     def subexprs(self):
         result = {'name': self.name.lower}
         if self.source_name:
-            result['source-name'] = self.source_name.lower
+            result['source-name'] = self.source_name
         return result
 
 
@@ -2019,7 +2023,7 @@ class SequenceExpr(ResolvedExpression):
             ):
                 result.append(gdb_helper(
                     'bind',
-                    self.dest_var.abstract_var.source_name.lower,
+                    self.dest_var.abstract_var.source_name,
                     self.dest_var.name.camel_with_underscores
                 ))
 
@@ -2075,7 +2079,7 @@ class AbstractVariable(AbstractExpression):
                  name: names.Name,
                  type: Opt[CompiledTypeOrDefer] = None,
                  create_local: bool = False,
-                 source_name: Opt[names.Name] = None):
+                 source_name: Opt[str] = None):
         """
         :param name: The name of the PlaceHolder variable.
         :param type: The type of the variable. Optional for global abstract
@@ -2161,13 +2165,13 @@ class AbstractVariable(AbstractExpression):
 
     @property
     def ignored(self):
-        return self._ignored or self.source_name == names.Name.from_lower('_')
+        return self._ignored or self.source_name == "_"
 
     def tag_ignored(self):
         self._ignored = True
 
     def __repr__(self):
-        return "<Var {}>".format(self.source_name.lower
+        return "<Var {}>".format(self.source_name
                                  if self.source_name else
                                  self._name.camel_with_underscores)
 
@@ -2771,7 +2775,7 @@ class Let(AbstractExpression):
         # expression using them.
         self.vars = [
             AbstractVariable(names.Name.from_lower(arg), create_local=True,
-                             source_name=names.Name.from_lower(arg))
+                             source_name=arg)
             for arg in self.var_names
         ]
         self.expr = self.lambda_fn(*self.vars)
@@ -2957,9 +2961,7 @@ class Var(AbstractVariable):
             # If we have multiple local variables that point to self, take the
             # first one in sorted order to keep our output stable across runs.
             if local_names:
-                self.source_name = names.Name.from_lower(
-                    sorted(local_names)[0]
-                )
+                self.source_name = sorted(local_names)[0]
 
             # Let the frame object be reclaimed
             self._creator_stack_frame = None
@@ -3100,8 +3102,7 @@ def gdb_bind_var(var):
     if not (var and var.source_name):
         return ''
 
-    return gdb_bind(var.source_name.lower,
-                    gen_name.camel_with_underscores)
+    return gdb_bind(var.source_name, gen_name.camel_with_underscores)
 
 
 def render(*args, **kwargs):
@@ -4153,7 +4154,7 @@ class PropertyDef(AbstractNodeData):
         """
         assert self._uses_entity_info
         return AbstractVariable(self.entity_info_name, T.entity_info,
-                                source_name=self.entity_info_name)
+                                source_name=self.entity_info_name.lower)
 
     def set_uses_entity_info(self):
         """
@@ -4512,7 +4513,7 @@ class PropertyDef(AbstractNodeData):
 
         def format_list(vars):
             return ', '.join(
-                (var.source_name or var.name).lower
+                var.source_name or var.name.lower
                 for var in vars
             )
 

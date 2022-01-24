@@ -490,8 +490,10 @@ class Then(AbstractExpression):
         )
 
         self.var_expr = AbstractVariable(
-            names.Name("Var_Expr"), create_local=True,
-            source_name=names.Name(argspec.args[0]))
+            names.Name("Var_Expr"),
+            create_local=True,
+            source_name=argspec.args[0]
+        )
         self.then_expr = unsugar(self.then_fn(self.var_expr))
 
     def construct(self):
