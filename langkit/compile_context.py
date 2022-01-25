@@ -350,10 +350,10 @@ class CompileCtx:
             "Lib<lang_name>lang". It is used for the filenames, package names,
             etc.  in the generated library.
 
-        :param short_name: If provided, must be a string (mixed case and
-            underscore: see langkit.names.Name). It will be used where a short
-            name for the library is requested, for instance for the shortcut
-            module name in the generated playground script.
+        :param short_name: If provided, must be a lower case string.  It will
+            be used where a short name for the library is requested, for
+            instance for the shortcut module name in the generated playground
+            script.
 
         :param c_symbol_prefix: Valid C identifier used as a prefix for all
             top-level declarations in the generated C API.  If not provided,
@@ -438,8 +438,8 @@ class CompileCtx:
             if lib_name is None else
             names.Name(lib_name)
         )
-        self.short_name = names.Name(short_name) if short_name else None
-        self.short_name_or_long = self.short_name or self.lib_name
+        self.short_name = short_name
+        self.short_name_or_long = self.short_name or self.lib_name.lower
 
         self.ada_api_settings = AdaAPISettings(self)
         self.c_api_settings = CAPISettings(

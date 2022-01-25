@@ -103,7 +103,7 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     os.mkdir('build')
 
     # Try to emit code
-    ctx = CompileCtx(lang_name='Foo', short_name='Foo', lexer=lexer,
+    ctx = CompileCtx(lang_name='Foo', short_name='foo', lexer=lexer,
                      grammar=grammar,
                      symbol_canonicalizer=symbol_canonicalizer,
                      show_property_logging=show_property_logging,

@@ -31,7 +31,7 @@ class Manage(ManageScript):
 
         return CompileCtx(
             lang_name='Lkt',
-            short_name='Lkt',
+            short_name='lkt',
             lexer=lkt_lexer,
             grammar=lkt_grammar,
             default_unit_provider=LibraryEntity(
