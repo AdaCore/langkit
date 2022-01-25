@@ -443,7 +443,7 @@ class Emitter:
             os.path.join(
                 self.lib_root, 'obj',
                 '{}_lexer_signature.txt'
-                .format(ctx.short_name_or_long.lower)),
+                .format(ctx.short_name_or_long)),
             json.dumps(ctx.lexer.signature, indent=2)
         )
         if not os.path.exists(lexer_sm_body) or stale_lexer_spec:
@@ -661,7 +661,7 @@ class Emitter:
         """
         playground_file = os.path.join(
             self.scripts_dir,
-            '{}_playground'.format(ctx.short_name_or_long.lower)
+            '{}_playground'.format(ctx.short_name_or_long)
         )
         write_source_file(
             playground_file,
@@ -688,7 +688,7 @@ class Emitter:
                 'gdb_py',
                 langkit_path=os.path.dirname(os.path.dirname(__file__)),
                 lib_name=lib_name,
-                prefix=ctx.short_name_or_long.lower,
+                prefix=ctx.short_name_or_long,
             ),
             self.post_process_python
         )

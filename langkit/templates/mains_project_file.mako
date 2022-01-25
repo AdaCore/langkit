@@ -25,7 +25,7 @@ project Mains is
       ## Add a language-specific prefix to the name of the "parse" executable
       ## for convenience, when multiple ones are available.
       % if 'parse' in main_programs:
-         for Executable ("parse") use "${ctx.short_name_or_long.lower}_parse";
+         for Executable ("parse") use "${ctx.short_name_or_long}_parse";
       % endif
    end Builder;
 
