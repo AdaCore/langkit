@@ -251,7 +251,7 @@ class GeneratedException:
 
     def __init__(self,
                  doc_section: str,
-                 package: List[names.Name],
+                 package: List[str],
                  name: names.Name,
                  generate_renaming: bool = True):
         """
@@ -284,8 +284,7 @@ class GeneratedException:
 
         :rtype: str
         """
-        return '{}.{}'.format('.'.join(str(p) for p in self.package),
-                              self.name)
+        return '{}.{}'.format('.'.join(self.package), self.name)
 
     @property
     def kind_name(self) -> names.Name:
@@ -850,7 +849,7 @@ class CompileCtx:
         return '\n'.join(l.text for l in full_decl.f_doc)
 
     def register_exception_type(self,
-                                package: List[names.Name],
+                                package: List[str],
                                 name: names.Name,
                                 doc_section: str,
                                 is_builtin: bool = False):
@@ -876,7 +875,7 @@ class CompileCtx:
             self.add_with_clause(
                 "Implementation.C",
                 AdaSourceKind.body,
-                ".".join(n.camel_with_underscores for n in package)
+                ".".join(package)
             )
 
         self.exception_types[exception_name] = GeneratedException(
@@ -896,18 +895,17 @@ class CompileCtx:
             (None, 'stale_reference_error'),
             (None, 'unknown_charset'),
             (None, 'invalid_input'),
-            ('introspection', 'bad_type_error'),
-            ('introspection', 'out_of_bounds_error'),
-            ('rewriting', 'template_format_error'),
-            ('rewriting', 'template_args_error'),
-            ('rewriting', 'template_instantiation_error')
+            ('Introspection', 'bad_type_error'),
+            ('Introspection', 'out_of_bounds_error'),
+            ('Rewriting', 'template_format_error'),
+            ('Rewriting', 'template_args_error'),
+            ('Rewriting', 'template_instantiation_error')
         ]:
             doc_section = 'langkit'
-            package = [names.Name('Langkit_Support'),
-                       names.Name('Errors')]
+            package = ['Langkit_Support', 'Errors']
             if namespace:
-                doc_section = '{}.{}'.format(doc_section, namespace)
-                package.append(names.Name.from_lower(namespace))
+                doc_section = f"{doc_section}.{namespace.lower()}"
+                package.append(namespace)
 
             self.register_exception_type(
                 package,
