@@ -64,28 +64,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
    function Image (Self : Any_Relation_List) return String;
 
-   package Atomic_Relation_Lists is new Langkit_Support.Functional_Lists
-     (Atomic_Relation);
-   --  Lists of atomic relations
-
-   package Var_Ids_To_Atoms_Vectors is new Langkit_Support.Vectors
-     (Atomic_Relation_Lists.List);
-   subtype Var_Ids_To_Atoms is Var_Ids_To_Atoms_Vectors.Vector;
-   --  Vector mapping logic var ids to atomic relations
-
    --------------------------
    -- Supporting functions --
    --------------------------
-
-   procedure Reserve (V : in out Var_Ids_To_Atoms; Size : Positive);
-   --  Reserve ``N`` elements in ``V``, creating new lists for each new item
-
-   procedure Merge_Vars
-     (Self : in out Var_Ids_To_Atoms; From : Natural; To : Positive);
-   --  Transfer the list of atoms in ``Self`` corresponding to the ``From``
-   --  variable to the list of atoms corresponding to the ``To`` variable. For
-   --  convenience, a null Id for ``From`` is accepted: in this case, this is a
-   --  no-op.
 
    function Create_Propagate
      (From, To     : Logic_Var;
@@ -175,15 +156,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Consequently, the exponential resolution optimization is not complete.
 
    procedure Create_Aliases
-     (Vars          : Logic_Var_Array;
-      Unifies       : Atomic_Relation_Vector;
-      Vars_To_Atoms : access Var_Ids_To_Atoms := null);
+     (Vars : Logic_Var_Array; Unifies : Atomic_Relation_Vector);
    --  Create alias information for variables in ``Vars`` according to Unify
    --  relations in ``Unifies``. Also reset all variables, so that we are ready
    --  to evaluate a sequence of atoms.
-   --
-   --  If ``Vars_To_Atoms`` is not null, also merge the lists of atoms for the
-   --  canonical variable and the aliased variable.
 
    procedure Cleanup_Aliases (Vars : Logic_Var_Array);
    --  Remove alias information for all variables in ``Vars``
@@ -263,24 +239,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Anys : Any_Relation_List := Any_Relation_Lists.No_List;
       --  Remaining list of ``Any`` relations to traverse
-
-      Vars_To_Atoms : Var_Ids_To_Atoms;
-      --  Stores a mapping of variables to:
-      --
-      --  1. ``Predicate`` atoms that use it;
-      --  2. ``Assign`` atoms that set it.
-      --
-      --  Used for exponential resolution optimization.
-      --
-      --  TODO???
-      --
-      --  1. Store an array rather than a vector (traversing the equation first
-      --     to find out all variables).
-      --
-      --  2. Store vectors rather than lists, to have a more bounded memory
-      --     behavior.
-      --
-      --  3. Try to not re-iterate on every atoms in the optimization.
 
       Cut_Dead_Branches : Boolean := False;
       --  Optimization that will cut branches that necessarily contain falsy
@@ -618,11 +576,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --------------------
 
    procedure Create_Aliases
-     (Vars          : Logic_Var_Array;
-      Unifies       : Atomic_Relation_Vector;
-      Vars_To_Atoms : access Var_Ids_To_Atoms := null)
-   is
-      Old_Unify_From_Id, Old_Target_Id : Positive;
+     (Vars : Logic_Var_Array; Unifies : Atomic_Relation_Vector) is
    begin
       for V of Vars loop
          Reset (V);
@@ -638,26 +592,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   & " to " & Image (Atom.Target));
             end if;
 
-            if Vars_To_Atoms /= null then
-               Old_Unify_From_Id := Id (Atom.Unify_From);
-               Old_Target_Id := Id (Atom.Target);
-            end if;
-
             Alias (Atom.Unify_From, Atom.Target);
-
-            if Vars_To_Atoms /= null then
-               --  After the aliasing, either the Id of ``Atom.Unify_From`` has
-               --  changed, either it's the ID of ``Atom.Target``. Update the
-               --  ``Var_Ids_To_Atoms`` map accordingly.
-
-               if Id (Atom.Unify_From) /= Old_Unify_From_Id then
-                  Merge_Vars
-                    (Vars_To_Atoms.all, Old_Unify_From_Id, Old_Target_Id);
-               elsif Id (Atom.Target) /= Old_Target_Id then
-                  Merge_Vars
-                    (Vars_To_Atoms.all, Old_Target_Id, Old_Unify_From_Id);
-               end if;
-            end if;
          end;
       end loop;
    end Create_Aliases;
@@ -1461,7 +1396,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Ctx.Unifies.Destroy;
       Ctx.Atoms.Destroy;
       Any_Relation_Lists.Destroy (Ctx.Anys);
-      Ctx.Vars_To_Atoms.Destroy;
       Free (Ctx.Unifies);
       Free (Ctx.Atoms);
       Free (Ctx.Tried_Solutions);
@@ -1476,53 +1410,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end loop;
       Free (Ctx.Vars);
    end Destroy;
-
-   -------------
-   -- Reserve --
-   -------------
-
-   procedure Reserve (V : in out Var_Ids_To_Atoms; Size : Positive) is
-   begin
-      while V.Length < Size loop
-         V.Append (Atomic_Relation_Lists.Create);
-      end loop;
-   end Reserve;
-
-   ----------------
-   -- Merge_Vars --
-   ----------------
-
-   procedure Merge_Vars
-     (Self : in out Var_Ids_To_Atoms; From : Natural; To : Positive)
-   is
-      use Atomic_Relation_Lists;
-   begin
-      --  If the source list is conceptually empty, there is nothing to do
-
-      if From = 0 or else From > Self.Length then
-         return;
-      end if;
-
-      --  Since ``Self`` is resized on demand, it is possible to have a
-      --  non-empty list for ``From`` but have no list allocated for ``To``
-      --  yet: make sure the vector is big enough to hold the destination list.
-
-      Reserve (Self, To);
-
-      --  Finally do the merge: just pop all items from ``From`` and push them
-      --  to ``To``.
-
-      declare
-         From_List : Atomic_Relation_Lists.List renames
-           Self.Get_Access (From).all;
-         To_List   : Atomic_Relation_Lists.List renames
-           Self.Get_Access (To).all;
-      begin
-         while Has_Element (From_List) loop
-            Push (To_List, Pop (From_List));
-         end loop;
-      end;
-   end Merge_Vars;
 
    --------------
    -- Used_Var --
@@ -1644,7 +1531,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  Shortcut to cleanup aliases in ``Ctx.Vars``
 
       use Any_Relation_Lists;
-      use Atomic_Relation_Lists;
 
       ------------------
       -- Try_Solution --
@@ -1716,8 +1602,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end;
       end Try_Solution;
 
-      Vars_To_Atoms          : aliased Var_Ids_To_Atoms :=
-        Ctx.Vars_To_Atoms.Copy;
       Initial_Atoms_Length   : Natural renames Ctx.Atoms.Last_Index;
       Initial_Unifies_Length : Natural renames Ctx.Unifies.Last_Index;
 
@@ -1727,10 +1611,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       procedure Create_Aliases is
       begin
-         Create_Aliases
-           (Ctx.Vars.all,
-            Ctx.Unifies.all,
-            (if Ctx.Cut_Dead_Branches then Vars_To_Atoms'Access else null));
+         Create_Aliases (Ctx.Vars.all, Ctx.Unifies.all);
       end Create_Aliases;
 
       ---------------------
@@ -1750,9 +1631,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       begin
          Ctx.Atoms.Cut (Initial_Atoms_Length);
          Ctx.Unifies.Cut (Initial_Unifies_Length);
-
-         Vars_To_Atoms.Destroy;
-         Vars_To_Atoms := Ctx.Vars_To_Atoms.Copy;
       end Branch_Cleanup;
 
       -------------
@@ -1765,7 +1643,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Cleanup_Aliases;
 
          Branch_Cleanup;
-         Vars_To_Atoms.Destroy;
          Trav_Trace.Decrease_Indent;
          return Val;
       end Cleanup;
@@ -1779,7 +1656,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       begin
          if Atom.Kind = Unify then
             if Atom.Unify_From /= Atom.Target then
-               Reserve (Vars_To_Atoms, Id (Atom.Unify_From));
                Ctx.Unifies.Append (Self);
             end if;
             return True;
@@ -1792,26 +1668,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end if;
 
          Ctx.Atoms.Append (Self);
-
-         --  Exponential resolution optimization: if relevant, add the atomic
-         --  relation to the mappings of vars to atoms.
-         if Ctx.Cut_Dead_Branches and then Atom.Kind in Predicate | Assign then
-            if Solv_Trace.Is_Active then
-               Solv_Trace.Trace
-                 ("== Appending " & Image (Self) & " to Vars_To_Atoms");
-            end if;
-
-            declare
-               V    : constant Var_Or_Null := (if Atom.Kind = Predicate
-                                               then Used_Var (Atom)
-                                               else Defined_Var (Atom));
-               V_Id : constant Natural := Id (V.Logic_Var);
-            begin
-               Reserve (Vars_To_Atoms, V_Id);
-               Push (Vars_To_Atoms.Get_Access (V_Id).all, Self);
-            end;
-         end if;
-
          return True;
       end Process_Atom;
 
@@ -1868,9 +1724,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             end loop;
 
             if Ctx.Cut_Dead_Branches then
-               --  Exponential resolution optimization: check if any atom
-               --  *defines* the value of a var that is *used* by another atom
-               --  in that solution branch.
+               --  Exponential resolution optimization: check if we have a
+               --  contradiction in the list of atoms we have accumulated so
+               --  far.
                --
                --  TODO??? PROBLEM: While this avoids exponential resolutions,
                --  it also makes the default algorithm quadratic (?), since we
@@ -1886,51 +1742,14 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                --     later.
 
                Create_Aliases;
-               for A of Ctx.Atoms.all loop
-                  if A.Atomic_Rel.Kind = Assign then
-                     declare
-                        V : constant Var_Or_Null := Defined_Var (A.Atomic_Rel);
-
-                        --  TODO??? with aliasing, a variable can have
-                        --  several ids.
-                        V_Id : constant Positive := Id (V.Logic_Var);
-
-                        Dummy : Boolean;
-                     begin
-                        pragma Assert (Vars_To_Atoms.Length >= V_Id);
-
-                        --  If there are atomic relations which use this
-                        --  variable, try to solve them: if at least one
-                        --  fails, then there is no way we can find a valid
-                        --  solution in this branch: we can return early to
-                        --  avoid recursions.
-                        if Length (Vars_To_Atoms.Get (V_Id)) > 0 then
-                           Dummy := Solve_Atomic (A);
-                           for User of Vars_To_Atoms.Get (V_Id) loop
-                              if not Solve_Atomic (User) then
-                                 if Solv_Trace.Active then
-                                    Solv_Trace.Trace
-                                      ("Aborting due to exp res optim");
-                                    Solv_Trace.Trace
-                                      ("Current atoms: "
-                                       & Image (Ctx.Atoms.all));
-                                    Solv_Trace.Trace
-                                      ("Stored atom: " & Image (User));
-                                    Solv_Trace.Trace
-                                      ("Current atom: " & Image (A));
-                                 end if;
-                                 Reset (V.Logic_Var);
-                                 return Cleanup (True);
-                              end if;
-                           end loop;
-
-                           --  Else, reset the value of var for further
-                           --  solving.
-                           Reset (V.Logic_Var);
-                        end if;
-                     end;
+               if Has_Contradiction
+                 (Ctx.Atoms.all, Ctx.Unifies.all, Ctx.Vars.all, Ctx.Sort_Ctx)
+               then
+                  if Solv_Trace.Active then
+                     Solv_Trace.Trace ("Aborting due to exp res optim");
                   end if;
-               end loop;
+                  return Cleanup (True);
+               end if;
                Cleanup_Aliases;
             end if;
 
@@ -1956,9 +1775,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
                return Cleanup
                  (Solve_Compound
-                    (Head (Anys),
-                     Ctx'Update (Anys          => Tail (Anys),
-                                 Vars_To_Atoms => Vars_To_Atoms)));
+                    (Head (Anys), Ctx'Update (Anys => Tail (Anys))));
 
             else
                --  We don't have any Any relation left, so we have a flat list
@@ -1997,9 +1814,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                      --
                      --     Ctx.Atoms & Tail (Ctx.Anys)
                      if not Solve_Compound
-                       (Head (Ctx.Anys),
-                        Ctx'Update (Anys          => Tail (Ctx.Anys),
-                                    Vars_To_Atoms => Vars_To_Atoms))
+                       (Head (Ctx.Anys), Ctx'Update (Anys => Tail (Ctx.Anys)))
                      then
                         return Cleanup (False);
                      end if;
@@ -2018,9 +1833,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   --  section.
                   pragma Assert (Sub_Rel.Compound_Rel.Kind = Kind_All);
 
-                  if not Solve_Compound
-                    (Sub_Rel, Ctx'Update (Vars_To_Atoms => Vars_To_Atoms))
-                  then
+                  if not Solve_Compound (Sub_Rel, Ctx) then
                      return Cleanup (False);
                   end if;
             end case;
