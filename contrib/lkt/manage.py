@@ -5,7 +5,6 @@ import os.path
 from langkit.common import bytes_repr
 from langkit.emitter import AdaSourceKind, ada_file_path, write_ada_file
 from langkit.libmanage import ManageScript
-import langkit.names as names
 from langkit.passes import EmitterPass
 
 
@@ -65,7 +64,7 @@ class Manage(ManageScript):
 
         # Write the source file and register it, so that it is referenced in
         # the generated project file.
-        qual_name = [names.Name("Liblktlang"), names.Name("Prelude")]
+        qual_name = ["Liblktlang", "Prelude"]
         write_ada_file(
             out_dir=emitter.src_dir,
             source_kind=AdaSourceKind.spec,

@@ -90,7 +90,7 @@ def write_ocaml_file(file_path: str,
 
 def ada_file_path(out_dir: str,
                   source_kind: AdaSourceKind,
-                  qual_name: List[names.Name]) -> str:
+                  qual_name: List[str]) -> str:
     """
     Return the name of the Ada file for the given unit name/kind.
 
@@ -98,10 +98,10 @@ def ada_file_path(out_dir: str,
         write the file.
     :param source_kind: Determine whether the source is a spec or a body.
     :param qual_name: The qualified name of the Ada spec/body, as a list of
-        Name components.
+        strings.
     """
     file_name = '{}.{}'.format(
-        '-'.join(n.lower for n in qual_name),
+        '-'.join(n.lower() for n in qual_name),
         'ads' if source_kind == AdaSourceKind.spec else 'adb'
     )
     return os.path.join(out_dir, file_name)
@@ -109,7 +109,7 @@ def ada_file_path(out_dir: str,
 
 def write_ada_file(out_dir: str,
                    source_kind: AdaSourceKind,
-                   qual_name: List[names.Name],
+                   qual_name: List[str],
                    content: str,
                    post_process: PostProcessFn = None) -> None:
     """
@@ -434,7 +434,8 @@ class Emitter:
         # Source file that contains the state machine implementation
         lexer_sm_body = ada_file_path(
             self.src_dir, AdaSourceKind.body,
-            [ctx.lib_name, names.Name('Lexer_State_Machine')])
+            [ctx.lib_name.camel_with_underscores, 'Lexer_State_Machine']
+        )
 
         # Generate the lexer state machine iff the file is missing or its
         # signature has changed since last time.
@@ -487,10 +488,9 @@ class Emitter:
                     generated library interface.
                 """
                 self.template_base_name = template_base_name
-                self.qual_name = (
-                    [names.Name(n) for n in rel_qual_name.split('.')]
-                    if rel_qual_name else []
-                )
+                self.qual_name = (rel_qual_name.split('.')
+                                  if rel_qual_name
+                                  else [])
                 self.ada_api = ada_api
                 self.unparser = unparser
                 self.has_body = has_body
@@ -561,7 +561,7 @@ class Emitter:
         with names.camel_with_underscores:
             write_ada_file(
                 path.join(self.lib_root, 'src-mains'),
-                AdaSourceKind.body, [names.Name('Parse')],
+                AdaSourceKind.body, ['Parse'],
                 ctx.render_template('main_parse_ada'),
                 self.post_process_ada
             )
@@ -596,7 +596,7 @@ class Emitter:
 
         self.write_ada_module(
             self.src_dir, 'c_api/pkg_main',
-            [names.Name(n) for n in 'Implementation.C'.split('.')],
+            ['Implementation', 'C'],
             in_library=True
         )
 
@@ -771,7 +771,7 @@ class Emitter:
     def write_ada_module(self,
                          out_dir: str,
                          template_base_name: str,
-                         qual_name: List[names.Name],
+                         qual_name: List[str],
                          has_body: bool = True,
                          cached_body: bool = False,
                          in_library: bool = False,
@@ -804,10 +804,11 @@ class Emitter:
             """
             Emit the "kind" source for this module.
             """
-            qual_name_str = '.'.join(n.camel_with_underscores
-                                     for n in qual_name)
+            qual_name_str = '.'.join(qual_name)
             with_clauses = self.context.with_clauses[(qual_name_str, kind)]
-            full_qual_name = [self.context.lib_name] + qual_name
+            full_qual_name = [
+                self.context.lib_name.camel_with_underscores
+            ] + qual_name
 
             # When requested, register library module as library interfaces
             if is_interface and in_library:
