@@ -644,6 +644,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Defined_Vars : array (Vars'Range) of Boolean := (others => False);
       --  For each logic variable, whether at least one atom in
       --  ``Sorted_Atoms`` defines it.
+      --
+      --  Note that because of the way aliasing is implemented, this can be
+      --  False for an alias when the aliased variable is actually defined. For
+      --  this reason, use the ``Is_Defined`` function below to check a
+      --  variable (or its alias, if applicable).
 
       procedure Append (Atom : Atomic_Relation);
       --  Append Atom to Sorted_Atoms
@@ -667,6 +672,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       is (Id (Defined_Var (S)));
       --  Return the Id for the variable that ``S`` defines, or 0 if it
       --  contains no definition.
+
+      function Is_Defined (V : Logic_Var) return Boolean
+      is (Defined_Vars (Id (V)));
+      --  Return whether ``V`` is defined according to the atoms collected in
+      --  ``Sorted_Atoms`` so far.
 
       ------------
       -- Append --
@@ -700,6 +710,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          declare
             Current_Rel  : constant Atomic_Relation := Atoms.Get (I);
             Current_Atom : Atomic_Relation_Type renames Current_Rel.Atomic_Rel;
+            Working_Item : constant Atom_And_Index := (Current_Rel, I);
 
             --  Resolve the Id of the var used. If the var aliases to another
             --  var, resolve to the aliased var's Id.
@@ -707,26 +718,24 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
               Used_Var (Current_Atom);
             Used_Id        : constant Natural :=
               (if Used_Logic_Var.Exists
-               then (if Get_Alias (Used_Logic_Var.Logic_Var) /= No_Logic_Var
-                     then Id (Get_Alias (Used_Logic_Var.Logic_Var))
-                     else Id (Used_Logic_Var.Logic_Var))
+               then Id (Used_Logic_Var.Logic_Var)
                else 0);
          begin
             if Current_Atom.Kind = N_Predicate then
                --  N_Predicates are appended at the end separately
 
-               N_Preds := (Current_Rel, I) & N_Preds;
+               N_Preds := Working_Item & N_Preds;
 
             elsif Used_Id = 0 then
                --  Put atoms with no dependency in the working set
 
-               Working_Set := (Current_Rel, I) & Working_Set;
+               Working_Set := Working_Item & Working_Set;
 
             elsif Current_Atom.Kind /= Unify then
                --  For other atoms, put them in the ``Using_Atoms`` map, which
                --  represents the edges of the dependency graph.
 
-               Using_Atoms (Used_Id).Append ((Current_Rel, I));
+               Using_Atoms (Used_Id).Append (Working_Item);
 
             else
                --  Aliasing processing prior to the topo sort is supposed to
@@ -771,7 +780,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  Append at the end all N_Predicates for which all input variables are
       --  defined.
       for N_Pred of N_Preds loop
-         if (for all V of N_Pred.Atom.Atomic_Rel.Vars => Defined_Vars (Id (V)))
+         if (for all V of N_Pred.Atom.Atomic_Rel.Vars => Is_Defined (V))
          then
             Append (N_Pred.Atom);
             Appended (N_Pred.Atom_Index) := True;
