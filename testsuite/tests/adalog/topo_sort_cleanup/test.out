@@ -1,0 +1,19 @@
+Using the symbolic solver
+=========================
+
+Solving relation:
+Any:
+    All:
+        is_positive?(%X)
+        %Y <- 1
+
+    All:
+        is_positive?(%X)
+        %Y <- 2
+        %X <- 3
+
+
+... with all optimizations:
+Solution: [%X = 3, %Y = 2]
+
+Done.
