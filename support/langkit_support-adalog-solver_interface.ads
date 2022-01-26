@@ -134,20 +134,4 @@ package Langkit_Support.Adalog.Solver_Interface is
      (Pred      : access function (V : Value_Type) return Value_Type;
       Pred_Name : String := "Converter") return Converter_Type'Class;
 
-   --------------------------
-   -- Solving options type --
-   --------------------------
-
-   type Solve_Options_Type is record
-      Simplify : Boolean := True;
-      --  Try to split Any relations in ``Self`` looking for contradictions in
-      --  its atoms through a depth first traversal.
-
-      Cut_Dead_Branches : Boolean := True;
-      --  Whether to enable an optimization that will cut branches that
-      --  necessarily contain falsy solutions.
-   end record;
-
-   Default_Options : constant Solve_Options_Type := (others => <>);
-
 end Langkit_Support.Adalog.Solver_Interface;
