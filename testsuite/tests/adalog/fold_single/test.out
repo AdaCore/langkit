@@ -1,0 +1,42 @@
+Using the symbolic solver
+=========================
+
+Solving relation:
+All:
+    Any:
+        All:
+            %X <- 1
+            %Y <- 2
+
+
+    %X <- 3
+
+... without optimizations:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] All:
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 1
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %Y <- 2
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 3
+Solution: [%X = 1, %Y = 2, %X = 3]
+
+Solving relation:
+Any:
+    All:
+        Any:
+            %X <- 1
+            %X <- 2
+
+
+    %X <- 3
+
+... without optimizations:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
+[LANGKIT.SOLVER.CONSTANT_FOLDING] Any:
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 1
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 2
+_LANGKIT.SOLVER.CONSTANT_FOLDING_     %X <- 3
+Solution: [%X = 1]
+Solution: [%X = 2]
+Solution: [%X = 3]
+
+Done.

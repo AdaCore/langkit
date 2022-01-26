@@ -68,6 +68,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -- Supporting functions --
    --------------------------
 
+   procedure Destroy_Rels (Self : in out Relation_Vectors.Vector);
+   --  Delete one ownership share for all relations in ``Self`` and destroy
+   --  the ``Self`` vector itself.
+
    function Create_Propagate
      (From, To     : Logic_Var;
       Conv         : Converter_Access := null;
@@ -283,6 +287,20 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  If ``Self`` contains a non-root ``Any`` relation, warn about it on
    --  ``Any_Left_Trace``.
 
+   ------------------
+   -- Destroy_Rels --
+   ------------------
+
+   procedure Destroy_Rels (Self : in out Relation_Vectors.Vector) is
+      Mutable_R : Relation;
+   begin
+      for R of Self loop
+         Mutable_R := R;
+         Dec_Ref (Mutable_R);
+      end loop;
+      Self.Destroy;
+   end Destroy_Rels;
+
    ------------
    -- Create --
    ------------
@@ -405,9 +423,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          when Compound =>
             declare
                Comp_Kind : constant Compound_Kind := Self.Compound_Rel.Kind;
+               Last_Rel  : Relation;
 
-               Rels     : Relation_Array (1 .. Self.Compound_Rel.Rels.Length);
-               Last_Rel : Natural := 0;
+               Rels : Relation_Vectors.Vector := Relation_Vectors.Empty_Vector;
                --  Vector of subrelations for the returned compound
 
                Is_Different : Boolean := False;
@@ -438,63 +456,76 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                --  folding absorbing elements in Any relations.
             begin
                for R of Self.Compound_Rel.Rels loop
-                  Last_Rel := Last_Rel + 1;
-                  Rels (Last_Rel) := Fold_And_Track_Vars (R);
+                  Last_Rel := Fold_And_Track_Vars (R);
 
                   --  If we got a neutral or absorbing relation, simplify the
                   --  returned compound.
 
-                  if Is_Atom (Rels (Last_Rel), Neutral) then
+                  if Is_Atom (Last_Rel, Neutral) then
 
                      --  No need to add the neutral element to the result, and
                      --  thus the result will necessarily be different from
                      --  ``Self``.
 
-                     Dec_Ref (Rels (Last_Rel));
-                     Last_Rel := Last_Rel - 1;
+                     Dec_Ref (Last_Rel);
                      Is_Different := True;
 
                   elsif Comp_Kind = Kind_All
-                        and then Is_Atom (Rels (Last_Rel), Absorbing)
+                        and then Is_Atom (Last_Rel, Absorbing)
                   then
-
                      --  The whole compound can be replaced with the absorbing
                      --  relation: cleanup our temporary vector and return
                      --  that.
 
-                     for R of Rels (1 .. Last_Rel - 1) loop
-                        Dec_Ref (R);
+                     Destroy_Rels (Rels);
+                     return Last_Rel;
+
+                  elsif Last_Rel.Kind = Compound
+                        and then Last_Rel.Compound_Rel.Kind = Comp_Kind
+                  then
+                     --  The sub-relation has become a compound of the same
+                     --  kind as ``Self``: we must inline it into ``Self`` to
+                     --  preserve our invariants.
+
+                     for R of Last_Rel.Compound_Rel.Rels loop
+                        Rels.Append (R);
+                        Inc_Ref (R);
                      end loop;
-                     return Rels (Last_Rel);
+                     Dec_Ref (Last_Rel);
+                     Is_Different := True;
 
                   --  Past here, we just add this sub-relation to the result.
                   --  Just make sure we update ``Is_Different`` when
                   --  appropriate.
 
-                  elsif Rels (Last_Rel) /= R then
-                     Is_Different := True;
+                  else
+                     Rels.Append (Last_Rel);
+                     Is_Different := Is_Different or else Last_Rel /= R;
                   end if;
                end loop;
 
                --  Now that we have processed each sub-relation, prepare the
                --  result.
 
-               if Last_Rel = 0 then
+               if Rels.Is_Empty then
 
                   --  All sub-relations were simplified to neutral elements: we
                   --  can replace the whole compound relation with the neutral
                   --  element itself.
 
+                  Rels.Destroy;
                   return (if Neutral = True
                           then Create_True (Self.Debug_Info)
                           else Create_False (Self.Debug_Info));
 
-               elsif Last_Rel = 1 then
+               elsif Rels.Length = 1 then
 
                   --  Only one sub-relation is left: it already has a new
                   --  ownership share, so just return it.
 
-                  return Rels (Last_Rel);
+                  Last_Rel := Rels.Get (1);
+                  Rels.Destroy;
+                  return Last_Rel;
 
                elsif Is_Different then
 
@@ -509,7 +540,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                      Compound_Rel => (Kind => Self.Compound_Rel.Kind,
                                       Rels => Relation_Vectors.Empty_Vector))
                   do
-                     Result.Compound_Rel.Rels.Concat (Rels (1 .. Last_Rel));
+                     Result.Compound_Rel.Rels.Concat (Rels);
+                     Rels.Destroy;
                   end return;
 
                else
@@ -517,9 +549,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   --  owership shares created for ``Rels`` as we do not create
                   --  a new compound relation.
 
-                  for R of Rels loop
-                     Dec_Ref (R);
-                  end loop;
+                  Destroy_Rels (Rels);
                   Inc_Ref (Self);
                   return Self;
                end if;
