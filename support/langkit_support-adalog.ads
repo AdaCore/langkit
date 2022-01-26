@@ -25,6 +25,37 @@ with GNATCOLL.Traces;
 
 package Langkit_Support.Adalog is
 
+   type Solver_Kind is (None, Symbolic, State_Machine);
+   --  Different kind of solvers available in Adalog. ``None`` is for no
+   --  solver.
+
+   subtype Valid_Solver_Kind is Solver_Kind range Symbolic .. State_Machine;
+   --  Kind subtype for valid solver kinds
+
+   ---------------------
+   -- Solving options --
+   ---------------------
+
+   type Solve_Options_Type is record
+      Simplify : Boolean := True;
+      --  Try to split Any relations in ``Self`` looking for contradictions in
+      --  its atoms through a depth first traversal.
+
+      Cut_Dead_Branches : Boolean := True;
+      --  Whether to enable an optimization that will cut branches that
+      --  necessarily contain falsy solutions.
+   end record;
+
+   Default_Options : Solve_Options_Type := (others => <>);
+   --  Mutate this to affect the behavior of all calls to the solver which just
+   --  use the default options.
+
+   Default_Timeout_Ticks_Number : constant := 200_000;
+
+   -----------------------
+   -- Adalog exceptions --
+   -----------------------
+
    Early_Binding_Error : exception;
    --  Exception raised when an equation cannot be solved because a logic
    --  variable is referenced but is never assigned a value.
@@ -33,18 +64,13 @@ package Langkit_Support.Adalog is
    --  Exception raised when the resolution of a complex relation exceeded the
    --  number of steps allowed.
 
-   Default_Timeout_Ticks_Number : constant := 200_000;
-
-   type Solver_Kind is (None, Symbolic, State_Machine);
-   --  Different kind of solvers available in Adalog. ``None`` is for no
-   --  solver.
-
-   subtype Valid_Solver_Kind is Solver_Kind range Symbolic .. State_Machine;
-   --  Kind subtype for valid solver kinds
-
    Unsupported_Error : exception;
    --  Exception raised when trying to use a feature that is not supported by
    --  the current solver.
+
+   -------------------
+   -- Adalog traces --
+   -------------------
 
    Solver_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER", Default => GNATCOLL.Traces.From_Config);
