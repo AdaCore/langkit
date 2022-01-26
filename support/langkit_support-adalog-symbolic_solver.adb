@@ -263,9 +263,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Create a new sorting context. Use ``Destroy`` to free allocated
    --  resources.
 
-   procedure Clear (Sort_Ctx : Sort_Context);
-   --  Clear the data of the sorting context
-
    procedure Destroy (Sort_Ctx : in out Sort_Context);
    --  Free resources for the sorting context
 
@@ -313,19 +310,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Result.Has_Contradiction_Counter := 0;
       end return;
    end Create;
-
-   -----------
-   -- Clear --
-   -----------
-
-   procedure Clear (Sort_Ctx : Sort_Context) is
-   begin
-      Atom_Lists.Clear (Sort_Ctx.N_Preds);
-      Atom_Lists.Clear (Sort_Ctx.Working_Set);
-      for Atoms of Sort_Ctx.Using_Atoms.all loop
-         Atoms.Clear;
-      end loop;
-   end Clear;
 
    ------------
    -- Create --
@@ -811,9 +795,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Has_Orphan := True;
       end if;
 
+      for Atoms of Sort_Ctx.Using_Atoms.all loop
+         Atoms.Clear;
+      end loop;
       Clear (Working_Set);
       Clear (N_Preds);
-
       return Sorted_Atoms (1 .. Last_Atom_Index);
    end Topo_Sort;
 
@@ -1371,7 +1357,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end if;
 
          Cleanup_Aliases (Vars);
-         Clear (Sort_Ctx);
          return Result;
       end;
    end Has_Contradiction;
@@ -1569,8 +1554,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             Solv_Trace.Increase_Indent ("In try solution");
             Solv_Trace.Trace (Image (Atoms));
          end if;
-         Clear (Ctx.Sort_Ctx);
-
          Ctx.Tried_Solutions.all := Ctx.Tried_Solutions.all + 1;
 
          Sol_Trace.Trace ("Tried solutions: " & Ctx.Tried_Solutions.all'Image);
