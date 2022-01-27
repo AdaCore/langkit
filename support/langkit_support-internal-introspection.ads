@@ -200,6 +200,12 @@ package Langkit_Support.Internal.Introspection is
       Is_Abstract : Boolean;
       --  Whether this struct type is abstract
 
+      Is_Token_Node : Boolean;
+      --  Whether this is a token node
+
+      Is_List_Node : Boolean;
+      --  Whether this is a list node
+
       Name : Text_Access;
       --  Name for this type in camel-with-undercores convention
 

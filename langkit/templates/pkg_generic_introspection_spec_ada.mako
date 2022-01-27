@@ -393,11 +393,15 @@ private package ${ada_lib_name}.Generic_Introspection is
             name = t.kwless_raw_name
             base = t.base
             abstract = t.abstract
+            token_node = t.is_token_node
+            list_node = t.is_list_type
             subclasses = t.subclasses
          else:
             name = t.api_name
             base = None
             abstract = False
+            token_node = False
+            list_node = False
             subclasses = []
          desc_const = f"Node_Desc_For_{name}"
          name_const = f"Node_Name_For_{name}"
@@ -424,6 +428,8 @@ private package ${ada_lib_name}.Generic_Introspection is
          Member_Count      => ${len(members)},
          Base_Type         => ${G.type_index(base)},
          Is_Abstract       => ${abstract},
+         Is_Token_Node     => ${token_node},
+         Is_List_Node      => ${list_node},
          Name              => ${name_const}'Access,
          Inherited_Members => ${len(inherited_members)},
          Derivations       => (
