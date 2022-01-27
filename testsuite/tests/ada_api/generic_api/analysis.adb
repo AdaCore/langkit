@@ -6,6 +6,7 @@ with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Names;       use Langkit_Support.Names;
+with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with Libfoolang.Analysis;
@@ -168,6 +169,19 @@ begin
       Dummy : Integer;
    begin
       Dummy := No_Lk_Node.Text'Length;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
+   Put_Line ("Root.Sloc_Range -> " & Image (U.Root.Sloc_Range));
+   Put ("No_Lk_Node.Sloc_Range -> ");
+   declare
+      Dummy : Source_Location_Range;
+   begin
+      Dummy := No_Lk_Node.Sloc_Range;
    exception
       when Exc : Precondition_Failure =>
          Put_Line ("Got a Precondition_Failure exception: "

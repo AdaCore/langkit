@@ -269,6 +269,11 @@ package Langkit_Support.Generic_API.Analysis is
    --
    --  Note that this returns the empty string for synthetic nodes.
 
+   function Sloc_Range (Self : Lk_Node'Class) return Source_Location_Range;
+   --  Return the spanning source location range for this node.
+   --
+   --  Note that this returns the sloc of the parent for synthetic nodes.
+
    --  TODO??? Bind all other node primitives
 
    ----------------------
