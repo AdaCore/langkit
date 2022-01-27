@@ -1,10 +1,12 @@
 from collections import defaultdict
 from contextlib import contextmanager
 import json
+import sys
 from typing import Dict
 
 from funcy import keep, lmap
 
+from langkit.diagnostics import print_error, Location
 from langkit.passes import GlobalPass
 from langkit import names
 
@@ -97,6 +99,12 @@ class DSLWalker:
             return DSLWalker.NoOpWalker()
 
         unit = DSLWalker.ctx.get_from_file(loc.file)
+
+        if unit.diagnostics:
+            for diag in unit.diagnostics:
+                print_error(diag.message,
+                            Location.from_sloc_range(unit, diag.sloc_range))
+            sys.exit(1)
 
         class_def = unit.root.lookup(lpl.Sloc(loc.line, 99))
 
