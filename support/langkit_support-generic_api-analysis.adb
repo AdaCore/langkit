@@ -849,6 +849,17 @@ package body Langkit_Support.Generic_API.Analysis is
       return Text (Self.Token_Start, Self.Token_End);
    end Text;
 
+   ----------------
+   -- Sloc_Range --
+   ----------------
+
+   function Sloc_Range (Self : Lk_Node'Class) return Source_Location_Range is
+      Start_SR : constant Source_Location_Range := Self.Token_Start.Sloc_Range;
+      End_SR   : constant Source_Location_Range := Self.Token_End.Sloc_Range;
+   begin
+      return Make_Range (Start_Sloc (Start_SR), End_Sloc (End_SR));
+   end Sloc_Range;
+
    ------------------
    -- Language_For --
    ------------------
