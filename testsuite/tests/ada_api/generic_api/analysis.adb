@@ -135,6 +135,19 @@ begin
    end;
    New_Line;
 
+   Put_Line ("Unit.Text -> " & Image (U.Text, With_Quotes => True));
+   Put ("No_Lk_Unit.Text -> ");
+   declare
+      Dummy : Integer;
+   begin
+      Dummy := No_Lk_Node.Text'Length;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line ("Testing various node operations:");
    Put_Line ("Root.Is_Null -> " & N.Is_Null'Image);
 

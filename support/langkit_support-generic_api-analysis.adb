@@ -560,6 +560,15 @@ package body Langkit_Support.Generic_API.Analysis is
       end;
    end Last_Token;
 
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Self : Lk_Unit'Class) return Text_Type is
+   begin
+      return Text (Self.First_Token, Self.Last_Token);
+   end Text;
+
    ------------------
    -- Language_For --
    ------------------
