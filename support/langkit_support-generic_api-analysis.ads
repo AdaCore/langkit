@@ -301,12 +301,12 @@ package Langkit_Support.Generic_API.Analysis is
 
    function Next
      (Self           : Lk_Token'Class;
-      Exclude_Trivia : Boolean := False) return Lk_Token'Class;
+      Exclude_Trivia : Boolean := False) return Lk_Token;
    --  Return a reference to the next token in the corresponding analysis unit
 
    function Previous
      (Self           : Lk_Token'Class;
-      Exclude_Trivia : Boolean := False) return Lk_Token'Class;
+      Exclude_Trivia : Boolean := False) return Lk_Token;
    --  Return a reference to the previous token in the corresponding analysis
    --  unit.
 
