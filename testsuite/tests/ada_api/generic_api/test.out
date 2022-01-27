@@ -354,6 +354,7 @@ Addition ( 24)
     <none>
 
 Number ( 25)
+  is a token node
   base = Expr ( 23)
   last derivation = Number ( 25)
   derivations:
@@ -373,12 +374,14 @@ Foo_Node_Base_List ( 27)
     Foo_Node_List ( 28)
 
 Foo_Node_List ( 28)
+  is a list node
   base = Foo_Node_Base_List ( 27)
   last derivation = Foo_Node_List ( 28)
   derivations:
     <none>
 
 Name ( 29)
+  is a token node
   base = Foo_Node ( 21)
   last derivation = Name ( 29)
   derivations:

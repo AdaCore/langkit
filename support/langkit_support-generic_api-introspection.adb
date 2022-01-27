@@ -1177,6 +1177,26 @@ package body Langkit_Support.Generic_API.Introspection is
       return Node.Id.Struct_Types.all (Node.Index).Is_Abstract;
    end Is_Abstract;
 
+   -------------------
+   -- Is_Token_Node --
+   -------------------
+
+   function Is_Token_Node (Node : Type_Ref) return Boolean is
+   begin
+      Check_Node_Type (Node);
+      return Node.Id.Struct_Types.all (Node.Index).Is_Token_Node;
+   end Is_Token_Node;
+
+   ------------------
+   -- Is_List_Node --
+   ------------------
+
+   function Is_List_Node (Node : Type_Ref) return Boolean is
+   begin
+      Check_Node_Type (Node);
+      return Node.Id.Struct_Types.all (Node.Index).Is_List_Node;
+   end Is_List_Node;
+
    ---------------
    -- Base_Type --
    ---------------

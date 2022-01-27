@@ -481,6 +481,14 @@ begin
             Put_Line ("  is abstract");
          end if;
 
+         if Is_Token_Node (Node) then
+            Put_Line ("  is a token node");
+         end if;
+
+         if Is_List_Node (Node) then
+            Put_Line ("  is a list node");
+         end if;
+
          Put ("  base = ");
          declare
             Base : Type_Ref;
