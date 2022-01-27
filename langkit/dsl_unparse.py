@@ -8,6 +8,8 @@ from funcy import keep, lmap
 from langkit.passes import GlobalPass
 from langkit import names
 
+import sys
+
 libpythonlang_available = True
 try:
     import libpythonlang as lpl
@@ -20,6 +22,17 @@ templates: Dict[str, str] = {}
 def fqn(prop):
     return "{}.{}".format(prop.struct.name.camel, prop._original_name)
 
+def print_diagnostic(filename, sloc_range, message):
+    line = sloc_range.start.line
+    column = sloc_range.start.column
+    print('In {}, line {}:'.format(filename, line), file=sys.stderr)
+    with open(filename) as f:
+        # Get the corresponding line in the source file and display it
+        for _ in range(sloc_range.start.line - 1):
+            f.readline()
+        print('  {}'.format(f.readline().rstrip()), file=sys.stderr)
+        print('  {}^'.format(' ' * (column - 1)), file=sys.stderr)
+    print('Error: {}'.format(message), file=sys.stderr)
 
 class DSLWalker:
     """
@@ -97,6 +110,11 @@ class DSLWalker:
             return DSLWalker.NoOpWalker()
 
         unit = DSLWalker.ctx.get_from_file(loc.file)
+
+        if unit.diagnostics:
+            for diag in unit.diagnostics:
+                print_diagnostic(loc.file, diag.sloc_range, diag.message)
+                sys.exit(1)
 
         class_def = unit.root.lookup(lpl.Sloc(loc.line, 99))
 
