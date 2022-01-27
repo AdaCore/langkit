@@ -279,6 +279,10 @@ package Langkit_Support.Generic_API.Analysis is
 
    --  TODO??? Bind all other node primitives
 
+   function Is_Incomplete (Self : Lk_Node'Class) return Boolean;
+   --  Return whether this node is incomplete, i.e. whether its parsing
+   --  partially failed.
+
    ----------------------
    -- Token operations --
    ----------------------

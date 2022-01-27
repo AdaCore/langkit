@@ -27,6 +27,8 @@ with Ada.Unchecked_Conversion;
 with GNATCOLL.VFS;
 
 with Langkit_Support.Errors;       use Langkit_Support.Errors;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
@@ -868,6 +870,23 @@ package body Langkit_Support.Generic_API.Analysis is
    begin
       return Make_Range (Start_Sloc (Start_SR), End_Sloc (End_SR));
    end Sloc_Range;
+
+   -------------------
+   -- Is_Incomplete --
+   -------------------
+
+   function Is_Incomplete (Self : Lk_Node'Class) return Boolean is
+      LGC : Lk_Node;
+   begin
+      if Is_List_Node (Type_Of (Lk_Node (Self))) then
+         LGC := (if Self.Children_Count /= 0
+                 then Self.Child (Self.Children_Count)
+                 else No_Lk_Node);
+         return LGC /= No_Lk_Node and then LGC.Is_Incomplete;
+      else
+         return Self.Desc.Node_Last_Attempted_Child (Self.Internal.Node) > -1;
+      end if;
+   end Is_Incomplete;
 
    ------------------
    -- Language_For --
