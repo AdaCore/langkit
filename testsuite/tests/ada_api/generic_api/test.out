@@ -85,6 +85,49 @@ No_Lk_Node.Text -> Got a Precondition_Failure exception: null node
 Root.Sloc_Range -> 1:1-3:15
 No_Lk_Node.Sloc_Range -> Got a Precondition_Failure exception: null node
 
+Root.Is_Incomplete -> FALSE
+No_Lk_Node.Is_Incomplete -> Got a Precondition_Failure exception: null node
+
+Root.Print (without slocs)
+... FooNode.list
+... |  Example
+... |  VarDecl
+... |  |f_name:
+... |  |  Name: a
+... |  |f_value:
+... |  |  Number: 0
+... |  VarDecl
+... |  |f_name:
+... |  |  Name: b
+... |  |f_value:
+... |  |  Addition
+... |  |  |f_lhs:
+... |  |  |  Number: 1
+... |  |  |f_rhs:
+... |  |  |  Ref
+... |  |  |  |f_name:
+... |  |  |  |  Name: a
+Root.Print (with slocs)
+... FooNode.list[1:1-3:15]
+... |  Example[1:1-1:8]
+... |  VarDecl[2:1-2:11]
+... |  |f_name:
+... |  |  Name[2:5-2:6]: a
+... |  |f_value:
+... |  |  Number[2:9-2:10]: 0
+... |  VarDecl[3:1-3:15]
+... |  |f_name:
+... |  |  Name[3:5-3:6]: b
+... |  |f_value:
+... |  |  Addition[3:9-3:14]
+... |  |  |f_lhs:
+... |  |  |  Number[3:9-3:10]: 1
+... |  |  |f_rhs:
+... |  |  |  Ref[3:13-3:14]
+... |  |  |  |f_name:
+... |  |  |  |  Name[3:13-3:14]: a
+No_Lk_Node.Print -> Got a Precondition_Failure exception: null node
+
 Testing various token operations:
 No_Lk_Token.Is_Null -> TRUE
 First_Token.Is_Null -> FALSE
