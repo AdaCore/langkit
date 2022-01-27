@@ -263,6 +263,12 @@ package Langkit_Support.Generic_API.Analysis is
    function Token_End (Self : Lk_Node'Class) return Lk_Token;
    --  Return the last token used to parse this node
 
+   function Text (Self : Lk_Node'Class) return Text_Type;
+   --  Return the source buffer slice corresponding to the text that spans
+   --  between the first and the last tokens of this node.
+   --
+   --  Note that this returns the empty string for synthetic nodes.
+
    --  TODO??? Bind all other node primitives
 
    ----------------------
