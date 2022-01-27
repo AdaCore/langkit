@@ -145,6 +145,7 @@ private package ${ada_lib_name}.Generic_Impl is
      (Node : Internal_Node; Offset : Integer) return Internal_Node;
    function Node_Token_Start (Node : Internal_Node) return Internal_Token;
    function Node_Token_End (Node : Internal_Node) return Internal_Token;
+   function Node_Last_Attempted_Child (Node : Internal_Node) return Integer;
 
    function Entity_Image (Entity : Internal_Entity) return String;
 
@@ -195,14 +196,15 @@ private package ${ada_lib_name}.Generic_Impl is
       Node_Metadata_Inc_Ref => Node_Metadata_Inc_Ref'Access,
       Node_Metadata_Dec_Ref => Node_Metadata_Dec_Ref'Access,
 
-      Node_Unit           => Node_Unit'Access,
-      Node_Kind           => Node_Kind'Access,
-      Node_Parent         => Node_Parent'Access,
-      Node_Children_Count => Node_Children_Count'Access,
-      Node_Get_Child      => Node_Get_Child'Access,
-      Node_Fetch_Sibling  => Node_Fetch_Sibling'Access,
-      Node_Token_Start    => Node_Token_Start'Access,
-      Node_Token_End      => Node_Token_End'Access,
+      Node_Unit                 => Node_Unit'Access,
+      Node_Kind                 => Node_Kind'Access,
+      Node_Parent               => Node_Parent'Access,
+      Node_Children_Count       => Node_Children_Count'Access,
+      Node_Get_Child            => Node_Get_Child'Access,
+      Node_Fetch_Sibling        => Node_Fetch_Sibling'Access,
+      Node_Token_Start          => Node_Token_Start'Access,
+      Node_Token_End            => Node_Token_End'Access,
+      Node_Last_Attempted_Child => Node_Last_Attempted_Child'Access,
 
       Entity_Image => Entity_Image'Access,
 

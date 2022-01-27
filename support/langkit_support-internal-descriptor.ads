@@ -104,6 +104,8 @@ package Langkit_Support.Internal.Descriptor is
       Offset : Integer) return Analysis.Internal_Node;
    type Node_Token_Getter_Type is access function
      (Node : Analysis.Internal_Node) return Analysis.Internal_Token;
+   type Node_Last_Attempted_Child_Type is access function
+     (Node : Analysis.Internal_Node) return Integer;
 
    type Entity_Image_Type is access function
      (Entity : Internal_Entity) return String;
@@ -182,14 +184,15 @@ package Langkit_Support.Internal.Descriptor is
       Node_Metadata_Inc_Ref : Node_Metadata_Inc_Ref_Type;
       Node_Metadata_Dec_Ref : Node_Metadata_Dec_Ref_Type;
 
-      Node_Unit           : Node_Unit_Type;
-      Node_Kind           : Node_Kind_Type;
-      Node_Parent         : Node_Parent_Type;
-      Node_Children_Count : Node_Children_Count_Type;
-      Node_Get_Child      : Node_Get_Child_Type;
-      Node_Fetch_Sibling  : Node_Fetch_Sibling_Type;
-      Node_Token_Start    : Node_Token_Getter_Type;
-      Node_Token_End      : Node_Token_Getter_Type;
+      Node_Unit                 : Node_Unit_Type;
+      Node_Kind                 : Node_Kind_Type;
+      Node_Parent               : Node_Parent_Type;
+      Node_Children_Count       : Node_Children_Count_Type;
+      Node_Get_Child            : Node_Get_Child_Type;
+      Node_Fetch_Sibling        : Node_Fetch_Sibling_Type;
+      Node_Token_Start          : Node_Token_Getter_Type;
+      Node_Token_End            : Node_Token_Getter_Type;
+      Node_Last_Attempted_Child : Node_Last_Attempted_Child_Type;
 
       Entity_Image : Entity_Image_Type;
 

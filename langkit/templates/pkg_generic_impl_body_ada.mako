@@ -316,6 +316,16 @@ package body ${ada_lib_name}.Generic_Impl is
       return +Implementation.Token_End (+Node);
    end Node_Token_End;
 
+   -------------------------------
+   -- Node_Last_Attempted_Child --
+   -------------------------------
+
+   function Node_Last_Attempted_Child (Node : Internal_Node) return Integer is
+      N : Implementation.${T.root_node.name} := +Node;
+   begin
+      return N.Last_Attempted_Child;
+   end Node_Last_Attempted_Child;
+
    ------------------
    -- Entity_Image --
    ------------------
