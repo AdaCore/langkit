@@ -22,6 +22,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Strings.Unbounded;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 
 with GNATCOLL.VFS;
@@ -33,6 +34,7 @@ with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+with Langkit_Support.Names;        use Langkit_Support.Names;
 with Langkit_Support.Types;        use Langkit_Support.Types;
 
 package body Langkit_Support.Generic_API.Analysis is
@@ -650,6 +652,75 @@ package body Langkit_Support.Generic_API.Analysis is
               then "None"
               else Self.Desc.Entity_Image (Self.Internal));
    end Image;
+
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print
+     (Node        : Lk_Node'Class;
+      Show_Slocs  : Boolean := True;
+      Line_Prefix : String := "")
+   is
+      T               : constant Type_Ref := Type_Of (Lk_Node (Node));
+      Attr_Prefix     : constant String := Line_Prefix & "|";
+      Children_Prefix : constant String := Line_Prefix & "|  ";
+   begin
+      if Node = No_Lk_Node then
+         Put_Line (Line_Prefix & "None");
+         return;
+      end if;
+
+      Put (Line_Prefix & Debug_Name (T));
+      if Show_Slocs then
+         Put ("[" & Image (Node.Sloc_Range) & "]");
+      end if;
+
+      if Node.Is_Incomplete then
+         Put (" <<INCOMPLETE>>");
+      end if;
+
+      if Is_Token_Node (T) then
+         Put_Line (": " & Image (Node.Text));
+
+      elsif Is_List_Node (T) then
+         if Node.Children_Count = 0 then
+            Put_Line (": <empty list>");
+            return;
+         end if;
+
+         New_Line;
+         for Child of Node.Children loop
+            if Child /= No_Lk_Node then
+               Child.Print (Show_Slocs, Children_Prefix);
+            end if;
+         end loop;
+         return;
+
+      else
+         --  This is for regular nodes: display each field
+
+         New_Line;
+         for M of Members (T) loop
+            if not Is_Property (M) then
+               declare
+                  Child : constant Lk_Node :=
+                    As_Node (Eval_Node_Member (Lk_Node (Node), M));
+                  Name  : constant String :=
+                    Image (Format_Name (Member_Name (M), Lower));
+               begin
+                  Put (Attr_Prefix & Name & ":");
+                  if Child /= No_Lk_Node then
+                     New_Line;
+                     Child.Print (Show_Slocs, Children_Prefix);
+                  else
+                     Put_Line (" <null>");
+                  end if;
+               end;
+            end if;
+         end loop;
+      end if;
+   end Print;
 
    ------------
    -- Parent --

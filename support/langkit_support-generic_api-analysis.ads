@@ -194,6 +194,17 @@ package Langkit_Support.Generic_API.Analysis is
    --  Return a short string describing ``Node``, or ``"None"`` if
    --  ``Node.Is_Null`` is true.
 
+   procedure Print
+     (Node        : Lk_Node'Class;
+      Show_Slocs  : Boolean := True;
+      Line_Prefix : String := "");
+   --  Debug helper: print to standard output ``Node`` and all its children.
+   --
+   --  If ``Show_Slocs``, include the source location of each node in the
+   --  output.
+   --
+   --  ``Line_Prefix`` is prepended to each output line.
+
    type Lk_Node_Array is array (Positive range <>) of Lk_Node;
 
    function Parent (Self : Lk_Node'Class) return Lk_Node;

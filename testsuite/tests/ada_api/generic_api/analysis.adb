@@ -215,6 +215,20 @@ begin
    end;
    New_Line;
 
+   Put_Line ("Root.Print (without slocs)");
+   U.Root.Print (Show_Slocs => False, Line_Prefix => "... ");
+   Put_Line ("Root.Print (with slocs)");
+   U.Root.Print (Show_Slocs => True, Line_Prefix => "... ");
+   Put ("No_Lk_Node.Print -> ");
+   begin
+      No_Lk_Node.Print;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line ("Testing various token operations:");
    Put_Line ("No_Lk_Token.Is_Null -> " & No_Lk_Token.Is_Null'Image);
    Put_Line ("First_Token.Is_Null -> " & U.First_Token.Is_Null'Image);
