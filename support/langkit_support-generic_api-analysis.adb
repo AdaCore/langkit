@@ -933,7 +933,7 @@ package body Langkit_Support.Generic_API.Analysis is
 
    function Next
      (Self           : Lk_Token'Class;
-      Exclude_Trivia : Boolean := False) return Lk_Token'Class
+      Exclude_Trivia : Boolean := False) return Lk_Token
    is
       Result : Token_Or_Trivia_Index;
    begin
@@ -952,7 +952,7 @@ package body Langkit_Support.Generic_API.Analysis is
 
    function Previous
      (Self           : Lk_Token'Class;
-      Exclude_Trivia : Boolean := False) return Lk_Token'Class
+      Exclude_Trivia : Boolean := False) return Lk_Token
    is
       Result : Token_Or_Trivia_Index;
    begin
