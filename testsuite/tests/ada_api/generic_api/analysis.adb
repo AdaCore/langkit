@@ -162,6 +162,19 @@ begin
    end loop;
    New_Line;
 
+   Put_Line ("Root.Text -> " & Image (U.Root.Text, With_Quotes => True));
+   Put ("No_Lk_Node.Text -> ");
+   declare
+      Dummy : Integer;
+   begin
+      Dummy := No_Lk_Node.Text'Length;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line ("Testing various token operations:");
    Put_Line ("No_Lk_Token.Is_Null -> " & No_Lk_Token.Is_Null'Image);
    Put_Line ("First_Token.Is_Null -> " & U.First_Token.Is_Null'Image);

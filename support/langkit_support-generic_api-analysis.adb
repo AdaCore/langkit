@@ -840,6 +840,15 @@ package body Langkit_Support.Generic_API.Analysis is
       end;
    end Token_End;
 
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Self : Lk_Node'Class) return Text_Type is
+   begin
+      return Text (Self.Token_Start, Self.Token_End);
+   end Text;
+
    ------------------
    -- Language_For --
    ------------------
