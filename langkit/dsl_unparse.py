@@ -22,17 +22,6 @@ templates: Dict[str, str] = {}
 def fqn(prop):
     return "{}.{}".format(prop.struct.name.camel, prop._original_name)
 
-def print_diagnostic(filename, sloc_range, message):
-    line = sloc_range.start.line
-    column = sloc_range.start.column
-    print('In {}, line {}:'.format(filename, line), file=sys.stderr)
-    with open(filename) as f:
-        # Get the corresponding line in the source file and display it
-        for _ in range(sloc_range.start.line - 1):
-            f.readline()
-        print('  {}'.format(f.readline().rstrip()), file=sys.stderr)
-        print('  {}^'.format(' ' * (column - 1)), file=sys.stderr)
-    print('Error: {}'.format(message), file=sys.stderr)
 
 class DSLWalker:
     """
@@ -106,6 +95,8 @@ class DSLWalker:
         :type loc: langkit.diagnostics.Location
         :rtype: DSLWalker
         """
+        from langkit.diagnostics import print_error, Location as L
+
         if not libpythonlang_available or loc is None:
             return DSLWalker.NoOpWalker()
 
@@ -113,7 +104,8 @@ class DSLWalker:
 
         if unit.diagnostics:
             for diag in unit.diagnostics:
-                print_diagnostic(loc.file, diag.sloc_range, diag.message)
+                print_error(diag.message,
+                            L.from_sloc_range(unit, diag.sloc_range))
                 sys.exit(1)
 
         class_def = unit.root.lookup(lpl.Sloc(loc.line, 99))
