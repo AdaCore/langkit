@@ -131,6 +131,8 @@ No_Lk_Node.Print -> Got a Precondition_Failure exception: null node
 Testing various token operations:
 No_Lk_Token.Is_Null -> TRUE
 First_Token.Is_Null -> FALSE
+Checking the Token->Unit backlink...
+No_Lk_Token.Unit -> Got a Precondition_Failure exception: null token
 First_Token.Kind -> Example
 First_Token.Image -> <Token Kind=Example Text="example">
 No_Lk_Token.Image -> <No Token>

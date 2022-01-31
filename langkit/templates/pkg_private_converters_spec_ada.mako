@@ -30,6 +30,10 @@ private package ${ada_lib_name}.Private_Converters is
      (Token : Token_Reference) return Internal_Context;
    Get_Token_Context : Token_Context_Getter;
 
+   type Token_Unit_Getter is access function
+     (Token : Token_Reference) return Internal_Unit;
+   Get_Token_Unit : Token_Unit_Getter;
+
    type Token_TDH_Getter is access function
      (Token : Token_Reference) return Token_Data_Handler_Access;
    Get_Token_TDH : Token_TDH_Getter;

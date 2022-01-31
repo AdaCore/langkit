@@ -23,6 +23,8 @@
 
 with Ada.Strings.Unbounded;
 
+with System;
+
 with GNATCOLL.VFS;
 
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
@@ -177,6 +179,10 @@ package Langkit_Support.Token_Data_Handlers is
       --  starting character for line N is at the Nth position in the vector.
 
       Tab_Stop : Positive;
+
+      Owner : System.Address;
+      --  Untyped reference to the object that owns this token data handler.
+      --  Generated libraries use this to have a backlink to the analysis unit.
    end record;
 
    type Token_Data_Handler_Access is access all Token_Data_Handler;
@@ -191,6 +197,7 @@ package Langkit_Support.Token_Data_Handlers is
    procedure Initialize
      (TDH      : out Token_Data_Handler;
       Symbols  : Symbol_Table;
+      Owner    : System.Address;
       Tab_Stop : Positive := Default_Tab_Stop)
       with Pre  => Symbols /= No_Symbol_Table,
            Post => Initialized (TDH) and then not Has_Source_Buffer (TDH);

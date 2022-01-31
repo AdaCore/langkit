@@ -11,12 +11,15 @@ Got a StaleReferenceError
 main.py: Done.
 main.adb: Running...
 Valid:
--> <Token Kind=Example Text="example">
+  Image: <Token Kind=Example Text="example">
+  Unit: foo.txt
 
 After reparse:
 Got a Stale_Reference_Error
+Got a Stale_Reference_Error
 
 After context destruction:
+Got a Stale_Reference_Error
 Got a Stale_Reference_Error
 
 main.adb: Done.

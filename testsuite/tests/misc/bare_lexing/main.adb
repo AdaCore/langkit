@@ -1,6 +1,8 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 
+with System;
+
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
@@ -24,7 +26,7 @@ procedure Main is
 
 begin
    Symbols := Create_Symbol_Table;
-   Initialize (TDH, Symbols);
+   Initialize (TDH, Symbols, System.Null_Address);
 
    Extract_Tokens
      (Input => (Kind     => Bytes_Buffer,
