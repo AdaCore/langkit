@@ -158,10 +158,10 @@ begin
    Invalid_Iter := From_Index (Id, First_Node);
    Invalid_Struct := From_Index (Id, First_Enum);
 
-   Put ("Language_For: null T argument: ");
+   Put ("Language: null T argument: ");
    begin
       declare
-         Dummy : constant Language_Id := Language_For (No_Type_Ref);
+         Dummy : constant Language_Id := Language (No_Type_Ref);
       begin
          raise Program_Error;
       end;

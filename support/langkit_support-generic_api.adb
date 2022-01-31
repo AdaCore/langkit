@@ -43,15 +43,15 @@ package body Langkit_Support.Generic_API is
       return Create_Name (Id.Language_Name.all);
    end Language_Name;
 
-   ------------------
-   -- Language_For --
-   ------------------
+   --------------
+   -- Language --
+   --------------
 
-   function Language_For (Rule : Grammar_Rule_Ref) return Language_Id is
+   function Language (Rule : Grammar_Rule_Ref) return Language_Id is
    begin
       Check_Grammar_Rule (Rule);
       return Rule.Id;
-   end Language_For;
+   end Language;
 
    --------------------------
    -- Default_Grammar_Rule --
@@ -126,15 +126,15 @@ package body Langkit_Support.Generic_API is
       end if;
    end Check_Grammar_Rule;
 
-   ------------------
-   -- Language_For --
-   ------------------
+   --------------
+   -- Language --
+   --------------
 
-   function Language_For (Kind : Token_Kind_Ref) return Language_Id is
+   function Language (Kind : Token_Kind_Ref) return Language_Id is
    begin
       Check_Token_Kind (Kind);
       return Kind.Id;
-   end Language_For;
+   end Language;
 
    ---------------------
    -- Token_Kind_Name --

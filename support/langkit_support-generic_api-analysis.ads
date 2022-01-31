@@ -96,7 +96,7 @@ package Langkit_Support.Generic_API.Analysis is
    --  ``Tab_Stop`` is a positive number to describe the effect of tabulation
    --  characters on the column number in source files.
 
-   function Language_For (Self : Lk_Context'Class) return Language_Id;
+   function Language (Self : Lk_Context'Class) return Language_Id;
    --  Return the unique identifier for the Langkit-generated library that
    --  implements ``Context``.
 
@@ -137,7 +137,7 @@ package Langkit_Support.Generic_API.Analysis is
    -- Analysis unit operations --
    ------------------------------
 
-   function Language_For (Self : Lk_Unit'Class) return Language_Id;
+   function Language (Self : Lk_Unit'Class) return Language_Id;
    --  Return the unique identifier corresponding to ``Self``
 
    function Hash (Self : Lk_Unit) return Hash_Type;
@@ -172,7 +172,7 @@ package Langkit_Support.Generic_API.Analysis is
    -- Analysis nodes operations --
    -------------------------------
 
-   function Language_For (Self : Lk_Node'Class) return Language_Id;
+   function Language (Self : Lk_Node'Class) return Language_Id;
    --  Return the unique identifier corresponding to ``Self``
 
    function Hash (Self : Lk_Node) return Hash_Type;
@@ -298,7 +298,7 @@ package Langkit_Support.Generic_API.Analysis is
    -- Token operations --
    ----------------------
 
-   function Language_For (Self : Lk_Token'Class) return Language_Id;
+   function Language (Self : Lk_Token'Class) return Language_Id;
    --  Return the unique identifier corresponding to ``Self``
 
    function Hash (Self : Lk_Token) return Hash_Type;

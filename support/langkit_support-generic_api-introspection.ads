@@ -55,7 +55,7 @@ package Langkit_Support.Generic_API.Introspection is
 
    type Type_Ref_Array is array (Positive range <>) of Type_Ref;
 
-   function Language_For (T : Type_Ref) return Language_Id;
+   function Language (T : Type_Ref) return Language_Id;
    --  Return the language ID corresponding to the given type. Raise a
    --  ``Precondition_Failure`` exception if ``T`` is ``No_Type_Ref``.
 
@@ -118,7 +118,7 @@ package Langkit_Support.Generic_API.Introspection is
    function "=" (Left, Right : Value_Ref) return Boolean;
    --  Return whether ``Left`` and ``Right`` are structurally equivalent
 
-   function Language_For (Value : Value_Ref) return Language_Id;
+   function Language (Value : Value_Ref) return Language_Id;
    --  Return the language ID corresponding to the given value. Raise a
    --  ``Precondition_Failure`` exception if ``Value`` is ``No_Value_Ref``.
 
