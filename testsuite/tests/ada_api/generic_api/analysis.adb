@@ -232,6 +232,20 @@ begin
    Put_Line ("Testing various token operations:");
    Put_Line ("No_Lk_Token.Is_Null -> " & No_Lk_Token.Is_Null'Image);
    Put_Line ("First_Token.Is_Null -> " & U.First_Token.Is_Null'Image);
+   Put_Line ("Checking the Token->Unit backlink...");
+   if U.First_Token.Unit /= U then
+      raise Program_Error with "wrong token->unit backlink";
+   end if;
+   Put ("No_Lk_Token.Unit -> ");
+   begin
+      if No_Lk_Token.Unit /= U then
+         raise Program_Error;
+      end if;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
    Put_Line ("First_Token.Kind -> "
              & Image (Format_Name (Token_Kind_Name (U.First_Token.Kind),
                                    Camel_With_Underscores)));

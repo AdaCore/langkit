@@ -2,6 +2,8 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Fixed;
 with Ada.Text_IO;    use Ada.Text_IO;
 
+with System;
+
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -23,7 +25,7 @@ procedure Main is
       B   : constant Text_Access := new Text_Type'(Buffer);
       TDH : Token_Data_Handler;
    begin
-      Initialize (TDH, Syms);
+      Initialize (TDH, Syms, System.Null_Address);
       Reset (TDH, B, Buffer'First, Buffer'Last);
       return TDH;
    end Create;

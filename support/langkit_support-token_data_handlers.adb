@@ -120,6 +120,7 @@ package body Langkit_Support.Token_Data_Handlers is
    procedure Initialize
      (TDH      : out Token_Data_Handler;
       Symbols  : Symbol_Table;
+      Owner    : System.Address;
       Tab_Stop : Positive := Default_Tab_Stop) is
    begin
       TDH := (Version            => 0,
@@ -133,7 +134,8 @@ package body Langkit_Support.Token_Data_Handlers is
               Tokens_To_Trivias  => <>,
               Trivias            => <>,
               Lines_Starts       => <>,
-              Tab_Stop           => Tab_Stop);
+              Tab_Stop           => Tab_Stop,
+              Owner              => Owner);
    end Initialize;
 
    -----------
@@ -250,7 +252,8 @@ package body Langkit_Support.Token_Data_Handlers is
                  Tokens_To_Trivias => <>,
                  Trivias           => <>,
                  Lines_Starts      => <>,
-                 Tab_Stop          => <>);
+                 Tab_Stop          => <>,
+                 Owner             => System.Null_Address);
    end Move;
 
    --------------------------

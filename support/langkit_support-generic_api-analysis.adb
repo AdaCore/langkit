@@ -25,6 +25,8 @@ with Ada.Strings.Unbounded;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 
+with System;
+
 with GNATCOLL.VFS;
 
 with Langkit_Support.Errors;       use Langkit_Support.Errors;
@@ -981,6 +983,33 @@ package body Langkit_Support.Generic_API.Analysis is
           Hash_Type (Self.Index.Token),
           Hash_Type (Self.Index.Trivia)));
    end Hash;
+
+   ----------
+   -- Unit --
+   ----------
+
+   function Unit (Self : Lk_Token'Class) return Lk_Unit is
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Token (Self);
+
+      declare
+         function "+" is new Ada.Unchecked_Conversion
+           (System.Address, Internal_Unit);
+         Ctx  : constant Internal_Context := Self.Safety_Net.Context;
+         U    : constant Internal_Unit := +Self.TDH.Owner;
+         Desc : constant Any_Language_Id := Self.Desc;
+      begin
+         --  Create an ownership share for the context embedded in the result
+         --  before returning.
+
+         Desc.Context_Inc_Ref (Ctx);
+         return (Internal => U,
+                 Context  => (Ada.Finalization.Controlled with
+                              Desc     => Desc,
+                              Internal => Ctx));
+      end;
+   end Unit;
 
    -------------
    -- Is_Null --

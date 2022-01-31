@@ -1,4 +1,5 @@
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Directories; use Ada.Directories;
+with Ada.Text_IO;     use Ada.Text_IO;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
@@ -15,12 +16,21 @@ procedure Main is
    procedure Check (Label : String; T : Token_Reference) is
    begin
       Put_Line (Label & ":");
+
       begin
-         Put_Line ("-> " & Image (T));
+         Put_Line ("  Image: " & Image (T));
       exception
          when Stale_Reference_Error =>
             Put_Line ("Got a Stale_Reference_Error");
       end;
+
+      begin
+         Put_Line ("  Unit: " & Simple_Name (Get_Filename (Unit (T))));
+      exception
+         when Stale_Reference_Error =>
+            Put_Line ("Got a Stale_Reference_Error");
+      end;
+
       New_Line;
    end Check;
 

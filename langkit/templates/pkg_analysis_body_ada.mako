@@ -570,6 +570,15 @@ package body ${ada_lib_name}.Analysis is
    end Trivia_Count;
 
    ----------
+   -- Unit --
+   ----------
+
+   function Unit (Token : Token_Reference) return Analysis_Unit is
+   begin
+      return Wrap_Unit (Get_Token_Unit (Token));
+   end Unit;
+
+   ----------
    -- Text --
    ----------
 

@@ -369,6 +369,9 @@ package ${ada_lib_name}.Analysis is
    function Trivia_Count (Unit : Analysis_Unit'Class) return Natural;
    ${ada_doc('langkit.unit_trivia_count', 3)}
 
+   function Unit (Token : Token_Reference) return Analysis_Unit;
+   --  Return the analysis unit that owns ``Token``
+
    function Text (Unit : Analysis_Unit'Class) return Text_Type;
    ${ada_doc('langkit.unit_text', 3)}
 

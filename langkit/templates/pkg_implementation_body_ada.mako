@@ -4137,8 +4137,8 @@ package body ${ada_lib_name}.Implementation is
          others => <>
       );
    begin
-      Initialize (Unit.TDH, Context.Symbols,
-                  Context.Tab_Stop);
+      Initialize
+        (Unit.TDH, Context.Symbols, Unit.all'Address, Context.Tab_Stop);
       return Unit;
    end Create_Special_Unit;
 
@@ -4424,7 +4424,9 @@ package body ${ada_lib_name}.Implementation is
       Result.Ast_Root := null;
 
       Move (Saved_TDH, Unit_TDH.all);
-      Initialize (Unit_TDH.all, Saved_TDH.Symbols,
+      Initialize (Unit_TDH.all,
+                  Saved_TDH.Symbols,
+                  Unit.all'Address,
                   Unit.Context.Tab_Stop);
 
       --  This is where lexing occurs, so this is where we get most "setup"

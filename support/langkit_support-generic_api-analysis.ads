@@ -304,6 +304,9 @@ package Langkit_Support.Generic_API.Analysis is
    function Hash (Self : Lk_Token) return Hash_Type;
    --  Hash function to use ``Lk_Token`` in hashed containers
 
+   function Unit (Self : Lk_Token'Class) return Lk_Unit;
+   --  Return the unit that owns this token
+
    function Is_Null (Self : Lk_Token'Class) return Boolean;
    --  Return whether ``Self`` is a null token reference
 

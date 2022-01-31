@@ -3,6 +3,8 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
 
+with System;
+
 with GNATCOLL.Iconv;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
@@ -50,8 +52,8 @@ package body ${ada_lib_name}.Common is
      (Context : Internal_Context;
       TDH     : Token_Data_Handler_Access;
       Index   : Token_Or_Trivia_Index) return Token_Reference;
-   function Get_Token_Context
-     (Token : Token_Reference) return Internal_Context;
+   function Get_Token_Context (Token : Token_Reference) return Internal_Context;
+   function Get_Token_Unit (Token : Token_Reference) return Internal_Unit;
    function Get_Token_TDH
      (Token : Token_Reference) return Token_Data_Handler_Access;
    function Get_Token_Index
@@ -560,6 +562,21 @@ package body ${ada_lib_name}.Common is
       end;
    end Wrap_Token_Reference;
 
+   --------------------
+   -- Get_Token_Unit --
+   --------------------
+
+   function Get_Token_Unit (Token : Token_Reference) return Internal_Unit is
+      function "+" is new Ada.Unchecked_Conversion
+        (System.Address, Internal_Unit);
+   begin
+      if Token = No_Token then
+         raise Precondition_Failure with "null token argument";
+      end if;
+      Check_Safety_Net (Token);
+      return +Token.TDH.Owner;
+   end Get_Token_Unit;
+
    -----------------------
    -- Get_Token_Context --
    -----------------------
@@ -659,6 +676,7 @@ begin
 
    Private_Converters.Wrap_Token_Reference := Wrap_Token_Reference'Access;
    Private_Converters.Get_Token_Context := Get_Token_Context'Access;
+   Private_Converters.Get_Token_Unit := Get_Token_Unit'Access;
    Private_Converters.Get_Token_TDH := Get_Token_TDH'Access;
    Private_Converters.Get_Token_Index := Get_Token_Index'Access;
    Private_Converters.Extract_Token_Text := Extract_Token_Text'Access;
