@@ -72,7 +72,7 @@ package Langkit_Support.Generic_API is
    No_Grammar_Rule_Ref : constant Grammar_Rule_Ref;
    --  Special value to express no grammar rule reference
 
-   function Language_For (Rule : Grammar_Rule_Ref) return Language_Id;
+   function Language (Rule : Grammar_Rule_Ref) return Language_Id;
    --  Return the language ID corresponding to the given grammar rule. Raise a
    --  ``Precondition_Failure`` exception if ``Rule`` is
    --  ``No_Grammar_Rule_Ref``.
@@ -119,7 +119,7 @@ package Langkit_Support.Generic_API is
    No_Token_Kind_Ref : constant Token_Kind_Ref;
    --  Special value to express no token kind reference
 
-   function Language_For (Kind : Token_Kind_Ref) return Language_Id;
+   function Language (Kind : Token_Kind_Ref) return Language_Id;
    --  Return the language ID corresponding to the given token kind. Raise a
    --  ``Precondition_Failure`` exception if ``Kind`` is ``No_Token_Kind_Ref``.
 

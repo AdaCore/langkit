@@ -259,7 +259,7 @@ All types
   STRUCT_CATEGORY
   is a node
 
-Language_For: null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+Language: null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 To_Index: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 From_Index: out of range type index: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid type index
 Debug_Name: Null T argument: <No_Type_Ref>

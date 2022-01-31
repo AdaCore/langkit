@@ -53,7 +53,7 @@ package body ${ada_lib_name}.Generic_API is
       Ctx : constant Generic_Internal_Context :=
         Lk_Convs.Unwrap_Context (Context);
    begin
-      if Language_For (Context) /= Self_Id then
+      if Language (Context) /= Self_Id then
          raise Precondition_Failure with "context belongs to another language";
       end if;
       return Wrap_Context.all (+Ctx);

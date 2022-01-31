@@ -399,15 +399,15 @@ package body Langkit_Support.Generic_API.Analysis is
               Internal => Result);
    end Create_Context;
 
-   ------------------
-   -- Language_For --
-   ------------------
+   --------------
+   -- Language --
+   --------------
 
-   function Language_For (Self : Lk_Context'Class) return Language_Id is
+   function Language (Self : Lk_Context'Class) return Language_Id is
    begin
       Reject_Null_Context (Self);
       return Self.Desc;
-   end Language_For;
+   end Language;
 
    ----------
    -- Hash --
@@ -461,15 +461,15 @@ package body Langkit_Support.Generic_API.Analysis is
       end;
    end Get_From_File;
 
-   ------------------
-   -- Language_For --
-   ------------------
+   --------------
+   -- Language --
+   --------------
 
-   function Language_For (Self : Lk_Unit'Class) return Language_Id is
+   function Language (Self : Lk_Unit'Class) return Language_Id is
    begin
       Reject_Null_Unit (Self);
       return Self.Context.Desc;
-   end Language_For;
+   end Language;
 
    ----------
    -- Hash --
@@ -575,17 +575,17 @@ package body Langkit_Support.Generic_API.Analysis is
       return Text (Self.First_Token, Self.Last_Token);
    end Text;
 
-   ------------------
-   -- Language_For --
-   ------------------
+   --------------
+   -- Language --
+   --------------
 
-   function Language_For (Self : Lk_Node'Class) return Language_Id is
+   function Language (Self : Lk_Node'Class) return Language_Id is
    begin
       Check_Safety_Net (Self);
       Reject_Null_Node (Self);
 
       return Self.Desc;
-   end Language_For;
+   end Language;
 
    ----------
    -- Hash --
@@ -961,16 +961,16 @@ package body Langkit_Support.Generic_API.Analysis is
       end if;
    end Is_Incomplete;
 
-   ------------------
-   -- Language_For --
-   ------------------
+   --------------
+   -- Language --
+   --------------
 
-   function Language_For (Self : Lk_Token'Class) return Language_Id is
+   function Language (Self : Lk_Token'Class) return Language_Id is
    begin
       Check_Safety_Net (Self);
       Reject_Null_Token (Self);
       return Self.Desc;
-   end Language_For;
+   end Language;
 
    ----------
    -- Hash --

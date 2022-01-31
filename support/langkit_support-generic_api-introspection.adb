@@ -176,15 +176,15 @@ package body Langkit_Support.Generic_API.Introspection is
       end if;
    end Debug_Name;
 
-   ------------------
-   -- Language_For --
-   ------------------
+   --------------
+   -- Language --
+   --------------
 
-   function Language_For (T : Type_Ref) return Language_Id is
+   function Language (T : Type_Ref) return Language_Id is
    begin
       Check_Type (T);
       return T.Id;
-   end Language_For;
+   end Language;
 
    --------------
    -- To_Index --
@@ -288,15 +288,15 @@ package body Langkit_Support.Generic_API.Introspection is
       end if;
    end "=";
 
-   ------------------
-   -- Language_For --
-   ------------------
+   --------------
+   -- Language --
+   --------------
 
-   function Language_For (Value : Value_Ref) return Language_Id is
+   function Language (Value : Value_Ref) return Language_Id is
    begin
       Check_Value (Value);
       return Value.Value.Id;
-   end Language_For;
+   end Language;
 
    -------------
    -- Type_Of --
@@ -356,7 +356,7 @@ package body Langkit_Support.Generic_API.Introspection is
       Result : Internal_Acc_Analysis_Unit;
    begin
       if Value /= No_Lk_Unit then
-         Check_Same_Language (Id, Value.Language_For);
+         Check_Same_Language (Id, Value.Language);
       end if;
       Result := new Internal_Rec_Analysis_Unit;
       Result.Value := Value;
@@ -556,7 +556,7 @@ package body Langkit_Support.Generic_API.Introspection is
       Result : Internal_Acc_Token;
    begin
       if Value /= No_Lk_Token then
-         Check_Same_Language (Id, Value.Language_For);
+         Check_Same_Language (Id, Value.Language);
       end if;
       Result := new Internal_Rec_Token;
       Result.Value := Value;
@@ -614,7 +614,7 @@ package body Langkit_Support.Generic_API.Introspection is
       Result : Internal_Acc_Node;
    begin
       if Value /= No_Lk_Node then
-         Check_Same_Language (Id, Value.Language_For);
+         Check_Same_Language (Id, Value.Language);
       end if;
       Result := new Internal_Rec_Node;
       Result.Value := Value;
@@ -647,7 +647,7 @@ package body Langkit_Support.Generic_API.Introspection is
       end if;
 
       declare
-         Id     : constant Language_Id := Language_For (Node);
+         Id     : constant Language_Id := Language (Node);
          E      : constant Internal.Analysis.Internal_Entity :=
            Unwrap_Node (Node);
          Result : constant Type_Index := Id.Node_Kind (E.Node);
@@ -906,7 +906,7 @@ package body Langkit_Support.Generic_API.Introspection is
             V : constant Value_Ref := Values (I);
          begin
             Check_Value (V);
-            Check_Same_Language (T.Id, V.Language_For);
+            Check_Same_Language (T.Id, V.Language);
             Check_Value_Type (V, ET);
             Internal_Values (I) := +V.Value;
          end;
@@ -1635,7 +1635,7 @@ package body Langkit_Support.Generic_API.Introspection is
          raise Precondition_Failure with "the null node has no member";
       end if;
 
-      Node := Create_Node (Value.Language_For, Value);
+      Node := Create_Node (Value.Language, Value);
       return Eval_Member (Node, Member, Arguments);
    end Eval_Node_Member;
 
