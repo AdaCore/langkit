@@ -1464,6 +1464,21 @@ package body Langkit_Support.Generic_API.Introspection is
       return Member.Index >= Member.Id.First_Property;
    end Is_Property;
 
+   -----------------
+   -- All_Members --
+   -----------------
+
+   function All_Members (Id : Language_Id) return Struct_Member_Ref_Array is
+   begin
+      return Result : Struct_Member_Ref_Array
+                        (1 .. Positive (Last_Struct_Member (Id)))
+      do
+         for I in Result'Range loop
+            Result (I) := From_Index (Id, Struct_Member_Index (I));
+         end loop;
+      end return;
+   end All_Members;
+
    -------------
    -- Members --
    -------------

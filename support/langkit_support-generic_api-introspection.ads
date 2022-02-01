@@ -441,6 +441,9 @@ package Langkit_Support.Generic_API.Introspection is
    function Is_Property (Member : Struct_Member_Ref) return Boolean;
    --  Whether ``Member`` is a property
 
+   function All_Members (Id : Language_Id) return Struct_Member_Ref_Array;
+   --  Return all struct members that the given language defines
+
    function Members (Struct : Type_Ref) return Struct_Member_Ref_Array;
    --  Return the list of members that ``Struct`` has
 
