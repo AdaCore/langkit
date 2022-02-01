@@ -835,6 +835,21 @@ package body Langkit_Support.Generic_API.Introspection is
       end if;
    end Debug_Name;
 
+   ---------------------
+   -- All_Enum_Values --
+   ---------------------
+
+   function All_Enum_Values (Enum : Type_Ref) return Enum_Value_Ref_Array is
+   begin
+      return Result : Enum_Value_Ref_Array
+                        (1 .. Positive (Enum_Last_Value (Enum)))
+      do
+         for I in Result'Range loop
+            Result (I) := From_Index (Enum, Enum_Value_Index (I));
+         end loop;
+      end return;
+   end All_Enum_Values;
+
    --------------
    -- To_Index --
    --------------

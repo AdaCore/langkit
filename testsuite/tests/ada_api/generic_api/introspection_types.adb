@@ -187,13 +187,9 @@ begin
          Put_Line ("  Default value: " & Debug_Name (DV));
       end;
       New_Line;
-      for Index in 1 .. Enum_Last_Value (Enum) loop
-         declare
-            Value : constant Enum_Value_Ref := From_Index (Enum, Index);
-         begin
-            Put_Line
-              (" " & Index'Image & ": " & (+Enum_Value_Name (Value)));
-         end;
+      for Value of All_Enum_Values (Enum) loop
+         Put_Line
+           (" " & To_Index (Value)'Image & ": " & (+Enum_Value_Name (Value)));
       end loop;
       New_Line;
    end loop;
