@@ -528,7 +528,7 @@ package Langkit_Support.Generic_API.Introspection is
    -- Name maps --
    ---------------
 
-   type Name_Map is private;
+   type Name_Map is tagged private;
    --  Map from names to enum types, enum values, struct types and struct
    --  members for a given casing convention and a given language.
 
