@@ -211,6 +211,8 @@ package Langkit_Support.Generic_API.Introspection is
    No_Enum_Value_Ref : constant Enum_Value_Ref;
    --  Special value to express no enum value reference
 
+   type Enum_Value_Ref_Array is array (Positive range <>) of Enum_Value_Ref;
+
    function Enum_For (Value : Enum_Value_Ref) return Type_Ref;
    --  Return the enum type that owns the given value
 
@@ -227,6 +229,9 @@ package Langkit_Support.Generic_API.Introspection is
    function Debug_Name (Value : Enum_Value_Ref) return String;
    --  Return "X.Y" where X is the enum type and Y is the name of this value,
    --  or "<No_Enum_Value_Ref>" if ``Value`` is null.
+
+   function All_Enum_Values (Enum : Type_Ref) return Enum_Value_Ref_Array;
+   --  Return the list of all enum values for the given enum type
 
    type Any_Enum_Value_Index is new Natural;
    subtype Enum_Value_Index is Any_Enum_Value_Index
