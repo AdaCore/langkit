@@ -647,6 +647,10 @@ class Emitter:
             module_name=ctx.python_api_settings.module_name
         )
 
+        # Emit the empty "py.type" file so that users can easily leverage type
+        # annotations in the generated bindings.
+        write_source_file(os.path.join(self.python_pkg_dir, "py.typed"), "")
+
         # Emit the setup.py script to easily install the Python binding
         setup_py_file = os.path.join(self.lib_root, 'python', 'setup.py')
         write_source_file(

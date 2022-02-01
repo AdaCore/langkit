@@ -1135,6 +1135,7 @@ class ManageScript:
         # Install the remaining miscellaneous files
         for fpath in [
             os.path.join('python', lib_name, '*.py'),
+            os.path.join('python', lib_name, 'py.typed'),
             os.path.join('python', 'setup.py'),
             os.path.join('ocaml', lib_name + '.ml'),
             os.path.join('ocaml', lib_name + '.mli'),
