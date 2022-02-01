@@ -74,20 +74,21 @@ procedure Introspection_Types is
       end if;
    end Assert;
 
-   First_Node, Last_Node     : Any_Type_Index := No_Type_Index;
-   First_Enum, Last_Enum     : Any_Type_Index := No_Type_Index;
-   First_Array, Last_Array   : Any_Type_Index := No_Type_Index;
-   First_Iter, Last_Iter     : Any_Type_Index := No_Type_Index;
-   First_Struct, Last_Struct : Any_Type_Index := No_Type_Index;
+   Enums        : constant Type_Ref_Array := All_Enum_Types (Id);
+   Arrays       : constant Type_Ref_Array := All_Array_Types (Id);
+   Iters        : constant Type_Ref_Array := All_Iterator_Types (Id);
+   Base_Structs : constant Type_Ref_Array := All_Base_Struct_Types (Id);
+   Structs      : constant Type_Ref_Array := All_Struct_Types (Id);
+   Nodes        : constant Type_Ref_Array := All_Node_Types (Id);
 
    Last_Member : constant Struct_Member_Ref :=
      From_Index (Id, Last_Struct_Member (Id));
 
-   Invalid_Node   : Type_Ref;
-   Invalid_Enum   : Type_Ref;
-   Invalid_Array  : Type_Ref;
-   Invalid_Iter   : Type_Ref;
-   Invalid_Struct : Type_Ref;
+   Invalid_Node   : constant Type_Ref := Enums (1);
+   Invalid_Enum   : constant Type_Ref := Arrays (1);
+   Invalid_Array  : constant Type_Ref := Enums (1);
+   Invalid_Iter   : constant Type_Ref := Enums (1);
+   Invalid_Struct : constant Type_Ref := Enums (1);
 
    Dummy_Bool       : Boolean;
    Dummy_Name       : Name_Type;
@@ -105,58 +106,29 @@ begin
    -----------------------------
 
    Put_Title ("All types");
-   for Index in Type_Index'First .. Last_Type (Id) loop
-      declare
-         T : constant Type_Ref := From_Index (Id, Index);
-      begin
-         Put_Line ("* " & Debug_Name (T));
-         Put_Line ("  " & Type_Category'Image (Category (T)));
+   for T of All_Types (Id) loop
+      Put_Line ("* " & Debug_Name (T));
+      Put_Line ("  " & Type_Category'Image (Category (T)));
 
-         --  Check the specific kind of type T is
+      --  Check the specific kind of type T is
 
-         if Is_Enum_Type (T) then
-            Put_Line ("  is an enum");
-            if First_Enum = No_Type_Index then
-               First_Enum := Index;
-            end if;
-            Last_Enum := Index;
+      if Is_Enum_Type (T) then
+         Put_Line ("  is an enum");
 
-         elsif Is_Array_Type (T) then
-            Put_Line ("  is an array");
-            if First_Array = No_Type_Index then
-               First_Array := Index;
-            end if;
-            Last_Array := Index;
+      elsif Is_Array_Type (T) then
+         Put_Line ("  is an array");
 
-         elsif Is_Iterator_Type (T) then
-            Put_Line ("  is an iterator");
-            if First_Iter = No_Type_Index then
-               First_Iter := Index;
-            end if;
-            Last_Iter := Index;
+      elsif Is_Iterator_Type (T) then
+         Put_Line ("  is an iterator");
 
-         elsif Is_Struct_Type (T) then
-            Put_Line ("  is a struct");
-            if First_Struct = No_Type_Index then
-               First_Struct := Index;
-            end if;
-            Last_Struct := Index;
+      elsif Is_Struct_Type (T) then
+         Put_Line ("  is a struct");
 
-         elsif Is_Node_Type (T) then
-            Put_Line ("  is a node");
-            if First_Node = No_Type_Index then
-               First_Node := Index;
-            end if;
-            Last_Node := Index;
-         end if;
-      end;
+      elsif Is_Node_Type (T) then
+         Put_Line ("  is a node");
+      end if;
    end loop;
    New_Line;
-   Invalid_Node := From_Index (Id, First_Node - 1);
-   Invalid_Enum := From_Index (Id, First_Node);
-   Invalid_Array := From_Index (Id, First_Node);
-   Invalid_Iter := From_Index (Id, First_Node);
-   Invalid_Struct := From_Index (Id, First_Enum);
 
    Put ("Language: null T argument: ");
    begin
@@ -206,28 +178,24 @@ begin
    --------------------------
 
    Put_Title ("Enum types");
-   for Index in First_Enum .. Last_Enum loop
+   for Enum of All_Enum_Types (Id) loop
+      Put (+Enum_Type_Name (Enum));
+      Put_Line (" (" & To_Index (Enum)'Image & ")");
       declare
-         Enum : constant Type_Ref := From_Index (Id, Index);
+         DV : constant Enum_Value_Ref := Enum_Default_Value (Enum);
       begin
-         Put (+Enum_Type_Name (Enum));
-         Put_Line (" (" & Index'Image & ")");
-         declare
-            DV : constant Enum_Value_Ref := Enum_Default_Value (Enum);
-         begin
-            Put_Line ("  Default value: " & Debug_Name (DV));
-         end;
-         New_Line;
-         for Index in 1 .. Enum_Last_Value (Enum) loop
-            declare
-               Value : constant Enum_Value_Ref := From_Index (Enum, Index);
-            begin
-               Put_Line
-                 (" " & Index'Image & ": " & (+Enum_Value_Name (Value)));
-            end;
-         end loop;
-         New_Line;
+         Put_Line ("  Default value: " & Debug_Name (DV));
       end;
+      New_Line;
+      for Index in 1 .. Enum_Last_Value (Enum) loop
+         declare
+            Value : constant Enum_Value_Ref := From_Index (Enum, Index);
+         begin
+            Put_Line
+              (" " & Index'Image & ": " & (+Enum_Value_Name (Value)));
+         end;
+      end loop;
+      New_Line;
    end loop;
 
    Put ("Is_Enum_Type: Null T argument: ");
@@ -321,7 +289,7 @@ begin
 
    Put ("From_Index: out of range enum value index: ");
    declare
-      Enum : constant Type_Ref := From_Index (Id, First_Enum);
+      Enum : constant Type_Ref := Enums (1);
    begin
       Dummy_Enum_Value := From_Index (Enum, Enum_Last_Value (Enum) + 1);
       raise Program_Error;
@@ -336,14 +304,10 @@ begin
    ---------------------------
 
    Put_Title ("Arrays");
-   for Index in First_Array .. Last_Array loop
-      declare
-         T : constant Type_Ref := From_Index (Id, Index);
-      begin
-         Put_Line (Debug_Name (T));
-         Put_Line ("Array of " & Debug_Name (Array_Element_Type (T)));
-         New_Line;
-      end;
+   for T of Arrays loop
+      Put_Line (Debug_Name (T));
+      Put_Line ("Array of " & Debug_Name (Array_Element_Type (T)));
+      New_Line;
    end loop;
 
    Put ("Is_Array_Type: Null T argument: ");
@@ -381,14 +345,10 @@ begin
    ------------------------------
 
    Put_Title ("Iterator types");
-   for Index in First_Iter .. Last_Iter loop
-      declare
-         T : constant Type_Ref := From_Index (Id, Index);
-      begin
-         Put (Debug_Name (T));
-         Put_Line ("Iterator of " & Debug_Name (Iterator_Element_Type (T)));
-         New_Line;
-      end;
+   for T of Iters loop
+      Put (Debug_Name (T));
+      Put_Line ("Iterator of " & Debug_Name (Iterator_Element_Type (T)));
+      New_Line;
    end loop;
 
    Put ("Is_Iterator_Type: Null T argument: ");
@@ -426,13 +386,9 @@ begin
    ----------------------------
 
    Put_Title ("Structs");
-   for Index in First_Struct .. Last_Struct loop
-      declare
-         T : constant Type_Ref := From_Index (Id, Index);
-      begin
-         Put_Line (+Struct_Type_Name (T));
-         New_Line;
-      end;
+   for T of Structs loop
+      Put_Line (+Struct_Type_Name (T));
+      New_Line;
    end loop;
 
    Put ("Is_Struct_Type: Null T argument: ");
@@ -470,58 +426,54 @@ begin
    --------------------------
 
    Put_Title ("Nodes");
-   for Index in First_Node .. Last_Node loop
+   for Node of Nodes loop
+      Put_Line (Node_Repr (Node));
+      Node_Type_Maps.Insert (Node_Types, Node_Type_Name (Node), Node);
+
+      if Is_Abstract (Node) then
+         Put_Line ("  is abstract");
+      end if;
+
+      if Is_Token_Node (Node) then
+         Put_Line ("  is a token node");
+      end if;
+
+      if Is_List_Node (Node) then
+         Put_Line ("  is a list node");
+      end if;
+
+      Put ("  base = ");
       declare
-         Node : constant Type_Ref := From_Index (Id, Index);
+         Base : Type_Ref;
       begin
-         Put_Line (Node_Repr (Node));
-         Node_Type_Maps.Insert (Node_Types, Node_Type_Name (Node), Node);
-
-         if Is_Abstract (Node) then
-            Put_Line ("  is abstract");
-         end if;
-
-         if Is_Token_Node (Node) then
-            Put_Line ("  is a token node");
-         end if;
-
-         if Is_List_Node (Node) then
-            Put_Line ("  is a list node");
-         end if;
-
-         Put ("  base = ");
-         declare
-            Base : Type_Ref;
-         begin
-            Base := Base_Type (Node);
-            Put_Line (Node_Repr (Base));
-         exception
-            when Exc : Bad_Type_Error =>
-               Put_Line ("Bad_Type_Error: " & Exception_Message (Exc));
-         end;
-
-         declare
-            LDT : constant Type_Ref :=
-              From_Index (Id, Last_Derived_Type (Node));
-         begin
-            Put_Line ("  last derivation = " & Node_Repr (LDT));
-         end;
-
-         Put_Line ("  derivations:");
-         declare
-            Derivations : constant Type_Ref_Array :=
-              Derived_Types (Node);
-         begin
-            if Derivations'Length = 0 then
-               Put_Line ("    <none>");
-            else
-               for D of Derivations loop
-                  Put_Line ("    " & Node_Repr (D));
-               end loop;
-            end if;
-         end;
-         New_Line;
+         Base := Base_Type (Node);
+         Put_Line (Node_Repr (Base));
+      exception
+         when Exc : Bad_Type_Error =>
+            Put_Line ("Bad_Type_Error: " & Exception_Message (Exc));
       end;
+
+      declare
+         LDT : constant Type_Ref :=
+           From_Index (Id, Last_Derived_Type (Node));
+      begin
+         Put_Line ("  last derivation = " & Node_Repr (LDT));
+      end;
+
+      Put_Line ("  derivations:");
+      declare
+         Derivations : constant Type_Ref_Array :=
+           Derived_Types (Node);
+      begin
+         if Derivations'Length = 0 then
+            Put_Line ("    <none>");
+         else
+            for D of Derivations loop
+               Put_Line ("    " & Node_Repr (D));
+            end loop;
+         end if;
+      end;
+      New_Line;
    end loop;
 
    Put ("Is_Node_Type: Null T argument: ");
@@ -723,16 +675,12 @@ begin
    New_Line;
 
    Put_Title ("Members");
-   for Index in First_Struct .. Last_Node loop
-      declare
-         T : constant Type_Ref := From_Index (Id, Index);
-      begin
-         Put_Line ("For " & (+Base_Struct_Type_Name (T)));
-         for M of Members (T) loop
-            Put_Line ("  " & Member_Repr (M));
-         end loop;
-         New_Line;
-      end;
+   for T of Base_Structs loop
+      Put_Line ("For " & (+Base_Struct_Type_Name (T)));
+      for M of Members (T) loop
+         Put_Line ("  " & Member_Repr (M));
+      end loop;
+      New_Line;
    end loop;
 
    Put_Title ("Detailed list of members");
@@ -1032,8 +980,8 @@ begin
       Map        : constant Name_Map := Create_Name_Map
         (Id, Symbols, Lower, Lower, Lower, Lower);
       Uninit_Map : Name_Map;
-      Enum       : constant Type_Ref := From_Index (Id, First_Enum);
-      Struct     : constant Type_Ref := From_Index (Id, First_Struct);
+      Enum       : constant Type_Ref := Enums (1);
+      Struct     : constant Type_Ref := Structs (1);
 
       Dummy_Struct_Member : Struct_Member_Ref;
    begin
