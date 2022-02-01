@@ -19,7 +19,8 @@ setup(
     packages=[${repr(name)}],
     package_data={
         ${repr(ctx.python_api_settings.module_name)}:
-            ['*.{}'.format(ext) for ext in ('dll', 'so', 'so.*', 'dylib')],
+            ['*.{}'.format(ext) for ext in ('dll', 'so', 'so.*', 'dylib')]
+            + ["py.typed"],
     },
     zip_safe=False,
 )

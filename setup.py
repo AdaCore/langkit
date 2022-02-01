@@ -28,7 +28,7 @@ setup(
               'langkit.utils'],
     package_data={'langkit': [
         'coverage.css', 'support/*.adb', 'support/*.ads', 'support/*.gpr',
-        'templates/*.mako', 'templates/*/*.mako'
+        'templates/*.mako', 'templates/*/*.mako', 'py.typed',
     ]},
     scripts=[os.path.join('scripts', 'create-project.py')]
 )
