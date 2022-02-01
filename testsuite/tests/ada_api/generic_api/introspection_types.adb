@@ -680,37 +680,33 @@ begin
    end loop;
 
    Put_Title ("Detailed list of members");
-   for Index in Struct_Member_Index'First .. Last_Struct_Member (Id) loop
-      declare
-         M : constant Struct_Member_Ref := From_Index (Id, Index);
-      begin
-         Put_Line (Member_Repr (M));
-         Put_Line ("  owner: " & Debug_Name (Owner (M)));
-         if Is_Property (M) then
-            Put_Line ("  is a property");
-         end if;
-         Put_Line ("  type: " & Debug_Name (Member_Type (M)));
+   for M of All_Members (Id) loop
+      Put_Line (Member_Repr (M));
+      Put_Line ("  owner: " & Debug_Name (Owner (M)));
+      if Is_Property (M) then
+         Put_Line ("  is a property");
+      end if;
+      Put_Line ("  type: " & Debug_Name (Member_Type (M)));
 
-         if Member_Last_Argument (M) = No_Argument_Index then
-            Put_Line ("  no argument");
-         else
-            Put_Line ("  arguments:");
-            for A in 1 .. Member_Last_Argument (M) loop
-               Put ("    " & (+Member_Argument_Name (M, A))
-                    & ": " & Debug_Name (Member_Argument_Type (M, A)));
-               declare
-                  V : constant Value_Ref :=
-                    Member_Argument_Default_Value (M, A);
-               begin
-                  if V = No_Value_Ref then
-                     New_Line;
-                  else
-                     Put_Line (" := " & Image (V));
-                  end if;
-               end;
-            end loop;
-         end if;
-      end;
+      if Member_Last_Argument (M) = No_Argument_Index then
+         Put_Line ("  no argument");
+      else
+         Put_Line ("  arguments:");
+         for A in 1 .. Member_Last_Argument (M) loop
+            Put ("    " & (+Member_Argument_Name (M, A))
+                 & ": " & Debug_Name (Member_Argument_Type (M, A)));
+            declare
+               V : constant Value_Ref :=
+                 Member_Argument_Default_Value (M, A);
+            begin
+               if V = No_Value_Ref then
+                  New_Line;
+               else
+                  Put_Line (" := " & Image (V));
+               end if;
+            end;
+         end loop;
+      end if;
       New_Line;
    end loop;
 
