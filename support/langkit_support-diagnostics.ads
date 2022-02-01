@@ -22,6 +22,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Containers.Vectors;
+with Ada.Exceptions;
 
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text; use Langkit_Support.Text;
@@ -55,5 +56,11 @@ package Langkit_Support.Diagnostics is
       Sloc_Range  : Source_Location_Range := No_Source_Location_Range;
       Message     : Wide_Wide_String);
    --  Shortcut to append a diagnostic to a vector
+
+   procedure Append
+     (Diagnostics : in out Diagnostics_Vectors.Vector;
+      Sloc_Range  : Source_Location_Range := No_Source_Location_Range;
+      Exc         : Ada.Exceptions.Exception_Occurrence);
+   --  Shortcut to append an exception message to a vector
 
 end Langkit_Support.Diagnostics;

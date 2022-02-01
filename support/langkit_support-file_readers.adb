@@ -21,7 +21,6 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Exceptions;
 with Ada.IO_Exceptions;
 
 with System;
@@ -226,9 +225,7 @@ package body Langkit_Support.File_Readers is
          File := Open_Read (Filename);
       exception
          when Exc : Ada.IO_Exceptions.Name_Error =>
-            Append
-              (Diagnostics,
-               Message => To_Text (Ada.Exceptions.Exception_Message (Exc)));
+            Append (Diagnostics, Exc => Exc);
             return;
       end;
 

@@ -62,4 +62,18 @@ package body Langkit_Support.Diagnostics is
       Diagnostics.Append (Create (Sloc_Range, Message));
    end Append;
 
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append
+     (Diagnostics : in out Diagnostics_Vectors.Vector;
+      Sloc_Range  : Source_Location_Range := No_Source_Location_Range;
+      Exc         : Ada.Exceptions.Exception_Occurrence)
+   is
+      Msg : constant String := Ada.Exceptions.Exception_Message (Exc);
+   begin
+      Append (Diagnostics, Sloc_Range, To_Text (Msg));
+   end Append;
+
 end Langkit_Support.Diagnostics;
