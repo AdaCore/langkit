@@ -125,6 +125,11 @@ package body Langkit_Support.Generic_API.Introspection is
    procedure Check_Symbol (Symbol : Symbol_Type);
    --  If ``Symbol`` is null, raise a ``Precondition_Failure`` exception
 
+   function Type_Range
+     (Id : Language_Id; First, Last : Any_Type_Index) return Type_Ref_Array;
+   --  Return the array of ``Type_Ref`` objects corresponding to the given
+   --  range of type indexes.
+
    function Create_Value
      (Id : Language_Id; Value : Internal_Value_Access) return Value_Ref;
    --  Initialize ``Value`` with ``Id``, set it a ref-count of 1 and return it
@@ -175,6 +180,32 @@ package body Langkit_Support.Generic_API.Introspection is
          return T.Id.Types (T.Index).Debug_Name.all;
       end if;
    end Debug_Name;
+
+   ----------------
+   -- Type_Range --
+   ----------------
+
+   function Type_Range
+     (Id : Language_Id; First, Last : Any_Type_Index) return Type_Ref_Array
+   is
+      Prev : Natural := 0;
+   begin
+      return Result : Type_Ref_Array (1 .. Natural (Last - First + 1)) do
+         for I in First .. Last loop
+            Prev := Prev + 1;
+            Result (Prev) := From_Index (Id, I);
+         end loop;
+      end return;
+   end Type_Range;
+
+   ---------------
+   -- All_Types --
+   ---------------
+
+   function All_Types (Id : Language_Id) return Type_Ref_Array is
+   begin
+      return Type_Range (Id, 1, Last_Type (Id));
+   end All_Types;
 
    --------------
    -- Language --
@@ -740,6 +771,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return Create_Name (Enum.Id.Enum_Types.all (Enum.Index).Name.all);
    end Enum_Type_Name;
 
+   --------------------
+   -- All_Enum_Types --
+   --------------------
+
+   function All_Enum_Types (Id : Language_Id) return Type_Ref_Array is
+      Enum_Types : Enum_Type_Descriptor_Array renames Id.Enum_Types.all;
+   begin
+      return Type_Range (Id, Enum_Types'First, Enum_Types'Last);
+   end All_Enum_Types;
+
    --------------
    -- Enum_For --
    --------------
@@ -888,6 +929,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return From_Index (T.Id, T.Id.Array_Types.all (T.Index).Element_Type);
    end Array_Element_Type;
 
+   ---------------------
+   -- All_Array_Types --
+   ---------------------
+
+   function All_Array_Types (Id : Language_Id) return Type_Ref_Array is
+      Array_Types : Array_Type_Descriptor_Array renames Id.Array_Types.all;
+   begin
+      return Type_Range (Id, Array_Types'First, Array_Types'Last);
+   end All_Array_Types;
+
    ------------------
    -- Create_Array --
    ------------------
@@ -992,6 +1043,17 @@ package body Langkit_Support.Generic_API.Introspection is
       return From_Index (T.Id, T.Id.Iterator_Types.all (T.Index).Element_Type);
    end Iterator_Element_Type;
 
+   ------------------------
+   -- All_Iterator_Types --
+   ------------------------
+
+   function All_Iterator_Types (Id : Language_Id) return Type_Ref_Array is
+      Iterator_Types : Iterator_Type_Descriptor_Array renames
+        Id.Iterator_Types.all;
+   begin
+      return Type_Range (Id, Iterator_Types'First, Iterator_Types'Last);
+   end All_Iterator_Types;
+
    -------------------
    -- Iterator_Next --
    -------------------
@@ -1045,6 +1107,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return Create_Name (T.Id.Struct_Types.all (T.Index).Name.all);
    end Base_Struct_Type_Name;
 
+   ---------------------------
+   -- All_Base_Struct_Types --
+   ---------------------------
+
+   function All_Base_Struct_Types (Id : Language_Id) return Type_Ref_Array is
+      Struct_Types : Struct_Type_Descriptor_Array renames Id.Struct_Types.all;
+   begin
+      return Type_Range (Id, Struct_Types'First, Struct_Types'Last);
+   end All_Base_Struct_Types;
+
    --------------------
    -- Is_Struct_Type --
    --------------------
@@ -1075,6 +1147,15 @@ package body Langkit_Support.Generic_API.Introspection is
       Check_Struct_Type (Struct);
       return Create_Name (Struct.Id.Struct_Types.all (Struct.Index).Name.all);
    end Struct_Type_Name;
+
+   ----------------------
+   -- All_Struct_Types --
+   ----------------------
+
+   function All_Struct_Types (Id : Language_Id) return Type_Ref_Array is
+   begin
+      return Type_Range (Id, Id.Struct_Types.all'First, Id.First_Node - 1);
+   end All_Struct_Types;
 
    -------------------
    -- Create_Struct --
@@ -1282,6 +1363,15 @@ package body Langkit_Support.Generic_API.Introspection is
          return False;
       end;
    end Is_Derived_From;
+
+   --------------------
+   -- All_Node_Types --
+   --------------------
+
+   function All_Node_Types (Id : Language_Id) return Type_Ref_Array is
+   begin
+      return Type_Range (Id, Id.First_Node, Id.Struct_Types.all'Last);
+   end All_Node_Types;
 
    -------------------------
    -- Check_Struct_Member --

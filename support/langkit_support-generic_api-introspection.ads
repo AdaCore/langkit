@@ -63,6 +63,9 @@ package Langkit_Support.Generic_API.Introspection is
    --  Return the free-form name of this type for debug purposes, or
    --  "<No_Type_Ref>" if ``T`` is ``No_Type_Ref``.
 
+   function All_Types (Id : Language_Id) return Type_Ref_Array;
+   --  Return the list of all types that the given language defines
+
    type Any_Type_Index is new Natural;
    --  Language-specific index to designate a type.
    --
@@ -199,6 +202,9 @@ package Langkit_Support.Generic_API.Introspection is
    function Enum_Type_Name (Enum : Type_Ref) return Name_Type;
    --  Return the name of the given enum type
 
+   function All_Enum_Types (Id : Language_Id) return Type_Ref_Array;
+   --  Return the list of all enum types that the given language defines
+
    type Enum_Value_Ref is private;
    --  Reference to an enum type value
 
@@ -264,6 +270,9 @@ package Langkit_Support.Generic_API.Introspection is
    function Array_Element_Type (T : Type_Ref) return Type_Ref;
    --  Return the type of elements in ``T`` arrays
 
+   function All_Array_Types (Id : Language_Id) return Type_Ref_Array;
+   --  Return the list of all array types that the given language defines
+
    function Create_Array
      (T : Type_Ref; Values : Value_Ref_Array) return Value_Ref;
    --  Create an array of the given ``T`` type, with the given ``Values``.
@@ -305,6 +314,9 @@ package Langkit_Support.Generic_API.Introspection is
    function Iterator_Element_Type (T : Type_Ref) return Type_Ref;
    --  Return the type of elements in ``T`` iterators
 
+   function All_Iterator_Types (Id : Language_Id) return Type_Ref_Array;
+   --  Return the list of all iterator types that the given language defines
+
    function Iterator_Next (Value : Value_Ref) return Value_Ref;
    --  Return the next item in the ``Value`` iterator, or ``No_Value_Ref`` if
    --  there is no item left in the iterator. Raise a ``Precondition_Failure``
@@ -323,6 +335,9 @@ package Langkit_Support.Generic_API.Introspection is
    function Base_Struct_Type_Name (T : Type_Ref) return Name_Type;
    --  Return the name for the given struct/node type
 
+   function All_Base_Struct_Types (Id : Language_Id) return Type_Ref_Array;
+   --  Return the list of all base struct types that the given language defines
+
    ------------------
    -- Struct types --
    ------------------
@@ -335,6 +350,9 @@ package Langkit_Support.Generic_API.Introspection is
 
    function Struct_Type_Name (Struct : Type_Ref) return Name_Type;
    --  Return the name for the given struct type
+
+   function All_Struct_Types (Id : Language_Id) return Type_Ref_Array;
+   --  Return the list of all struct types that the given language defines
 
    function Create_Struct
      (T : Type_Ref; Values : Value_Ref_Array) return Value_Ref;
@@ -390,6 +408,9 @@ package Langkit_Support.Generic_API.Introspection is
    function Is_Derived_From (Node, Parent : Type_Ref) return Boolean;
    --  Return whether the ``Node`` node type derives (directly or indirectly)
    --  from ``Parent``.
+
+   function All_Node_Types (Id : Language_Id) return Type_Ref_Array;
+   --  Return the list of all node types that the given language defines
 
    -------------------------
    -- Struct/node members --
