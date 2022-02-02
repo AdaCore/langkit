@@ -379,11 +379,11 @@ package body Langkit_Support.Generic_API.Introspection is
       end return;
    end Create_Value;
 
-   -----------------
-   -- Create_Unit --
-   -----------------
+   ---------------
+   -- From_Unit --
+   ---------------
 
-   function Create_Unit (Id : Language_Id; Value : Lk_Unit) return Value_Ref is
+   function From_Unit (Id : Language_Id; Value : Lk_Unit) return Value_Ref is
       Result : Internal_Acc_Analysis_Unit;
    begin
       if Value /= No_Lk_Unit then
@@ -392,7 +392,7 @@ package body Langkit_Support.Generic_API.Introspection is
       Result := new Internal_Rec_Analysis_Unit;
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_Unit;
+   end From_Unit;
 
    -------------
    -- As_Unit --
@@ -409,18 +409,18 @@ package body Langkit_Support.Generic_API.Introspection is
       return V.Value;
    end As_Unit;
 
-   --------------------
-   -- Create_Big_Int --
-   --------------------
+   ------------------
+   -- From_Big_Int --
+   ------------------
 
-   function Create_Big_Int
+   function From_Big_Int
      (Id : Language_Id; Value : Big_Integer) return Value_Ref
    is
       Result : constant Internal_Acc_Big_Int := new Internal_Rec_Big_Int;
    begin
       Result.Value.Set (Value);
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_Big_Int;
+   end From_Big_Int;
 
    ----------------
    -- As_Big_Int --
@@ -439,16 +439,16 @@ package body Langkit_Support.Generic_API.Introspection is
       end return;
    end As_Big_Int;
 
-   -----------------
-   -- Create_Bool --
-   -----------------
+   ---------------
+   -- From_Bool --
+   ---------------
 
-   function Create_Bool (Id : Language_Id; Value : Boolean) return Value_Ref is
+   function From_Bool (Id : Language_Id; Value : Boolean) return Value_Ref is
       Result : constant Internal_Acc_Bool := new Internal_Rec_Bool;
    begin
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_Bool;
+   end From_Bool;
 
    -------------
    -- As_Bool --
@@ -465,18 +465,18 @@ package body Langkit_Support.Generic_API.Introspection is
       return V.Value;
    end As_Bool;
 
-   -----------------
-   -- Create_Char --
-   -----------------
+   ---------------
+   -- From_Char --
+   ---------------
 
-   function Create_Char
+   function From_Char
      (Id : Language_Id; Value : Character_Type) return Value_Ref
    is
       Result : constant Internal_Acc_Character := new Internal_Rec_Character;
    begin
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_Char;
+   end From_Char;
 
    -------------
    -- As_Char --
@@ -493,16 +493,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return V.Value;
    end As_Char;
 
-   ----------------
-   -- Create_Int --
-   ----------------
+   --------------
+   -- From_Int --
+   --------------
 
-   function Create_Int (Id : Language_Id; Value : Integer) return Value_Ref is
+   function From_Int (Id : Language_Id; Value : Integer) return Value_Ref is
       Result : constant Internal_Acc_Int := new Internal_Rec_Int;
    begin
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_Int;
+   end From_Int;
 
    ------------
    -- As_Int --
@@ -519,11 +519,11 @@ package body Langkit_Support.Generic_API.Introspection is
       return V.Value;
    end As_Int;
 
-   ----------------------------------
-   -- Create_Source_Location_Range --
-   ----------------------------------
+   --------------------------------
+   -- From_Source_Location_Range --
+   --------------------------------
 
-   function Create_Source_Location_Range
+   function From_Source_Location_Range
      (Id : Language_Id; Value : Source_Location_Range) return Value_Ref
    is
       Result : constant Internal_Acc_Source_Location_Range :=
@@ -531,7 +531,7 @@ package body Langkit_Support.Generic_API.Introspection is
    begin
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_Source_Location_Range;
+   end From_Source_Location_Range;
 
    ------------------------------
    -- As_Source_Location_Range --
@@ -550,18 +550,18 @@ package body Langkit_Support.Generic_API.Introspection is
       return V.Value;
    end As_Source_Location_Range;
 
-   -------------------
-   -- Create_String --
-   -------------------
+   -----------------
+   -- From_String --
+   -----------------
 
-   function Create_String
+   function From_String
      (Id : Language_Id; Value : Text_Type) return Value_Ref
    is
       Result : constant Internal_Acc_String := new Internal_Rec_String;
    begin
       Result.Value := To_Unbounded_Text (Value);
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_String;
+   end From_String;
 
    ---------------
    -- As_String --
@@ -578,11 +578,11 @@ package body Langkit_Support.Generic_API.Introspection is
       return To_Text (V.Value);
    end As_String;
 
-   ------------------
-   -- Create_Token --
-   ------------------
+   ----------------
+   -- From_Token --
+   ----------------
 
-   function Create_Token (Id : Language_Id; Value : Lk_Token) return Value_Ref
+   function From_Token (Id : Language_Id; Value : Lk_Token) return Value_Ref
    is
       Result : Internal_Acc_Token;
    begin
@@ -592,7 +592,7 @@ package body Langkit_Support.Generic_API.Introspection is
       Result := new Internal_Rec_Token;
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_Token;
+   end From_Token;
 
    --------------
    -- As_Token --
@@ -609,18 +609,18 @@ package body Langkit_Support.Generic_API.Introspection is
       return V.Value;
    end As_Token;
 
-   -------------------
-   -- Create_Symbol --
-   -------------------
+   -----------------
+   -- From_Symbol --
+   -----------------
 
-   function Create_Symbol
+   function From_Symbol
      (Id : Language_Id; Value : Text_Type) return Value_Ref
    is
       Result : constant Internal_Acc_Symbol := new Internal_Rec_Symbol;
    begin
       Result.Value := To_Unbounded_Text (Value);
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_Symbol;
+   end From_Symbol;
 
    ---------------
    -- As_Symbol --
@@ -637,11 +637,11 @@ package body Langkit_Support.Generic_API.Introspection is
       return To_Text (V.Value);
    end As_Symbol;
 
-   -----------------
-   -- Create_Node --
-   -----------------
+   ---------------
+   -- From_Node --
+   ---------------
 
-   function Create_Node (Id : Language_Id; Value : Lk_Node) return Value_Ref is
+   function From_Node (Id : Language_Id; Value : Lk_Node) return Value_Ref is
       Result : Internal_Acc_Node;
    begin
       if Value /= No_Lk_Node then
@@ -650,7 +650,7 @@ package body Langkit_Support.Generic_API.Introspection is
       Result := new Internal_Rec_Node;
       Result.Value := Value;
       return Create_Value (Id, Internal_Value_Access (Result));
-   end Create_Node;
+   end From_Node;
 
    -------------
    -- As_Node --
@@ -1606,11 +1606,11 @@ package body Langkit_Support.Generic_API.Introspection is
             when None =>
                return No_Value_Ref;
             when Boolean_Value =>
-               return Create_Bool (Id, V.Boolean_Value);
+               return From_Bool (Id, V.Boolean_Value);
             when Integer_Value =>
-               return Create_Int (Id, V.Integer_Value);
+               return From_Int (Id, V.Integer_Value);
             when Character_Value =>
-               return Create_Char (Id, V.Character_Value);
+               return From_Char (Id, V.Character_Value);
             when Enum_Value =>
                declare
                   T : constant Type_Ref := From_Index (Id, V.Enum_Type);
@@ -1619,7 +1619,7 @@ package body Langkit_Support.Generic_API.Introspection is
                   return Create_Enum (E);
                end;
             when Null_Node_Value =>
-               return Create_Node (Id, No_Lk_Node);
+               return From_Node (Id, No_Lk_Node);
          end case;
       end;
    end Member_Argument_Default_Value;
@@ -1755,7 +1755,7 @@ package body Langkit_Support.Generic_API.Introspection is
          raise Precondition_Failure with "the null node has no member";
       end if;
 
-      Node := Create_Node (Value.Language, Value);
+      Node := From_Node (Value.Language, Value);
       return Eval_Member (Node, Member, Arguments);
    end Eval_Node_Member;
 

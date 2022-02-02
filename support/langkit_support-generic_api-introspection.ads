@@ -149,40 +149,40 @@ package Langkit_Support.Generic_API.Introspection is
 
    --  Constructors/getters for built in types
 
-   function Create_Unit (Id : Language_Id; Value : Lk_Unit) return Value_Ref;
+   function From_Unit (Id : Language_Id; Value : Lk_Unit) return Value_Ref;
    function As_Unit (Value : Value_Ref) return Lk_Unit;
 
-   function Create_Big_Int
+   function From_Big_Int
      (Id : Language_Id; Value : Big_Integer) return Value_Ref;
    function As_Big_Int (Value : Value_Ref) return Big_Integer;
 
-   function Create_Bool (Id : Language_Id; Value : Boolean) return Value_Ref;
+   function From_Bool (Id : Language_Id; Value : Boolean) return Value_Ref;
    function As_Bool (Value : Value_Ref) return Boolean;
 
-   function Create_Char
+   function From_Char
      (Id : Language_Id; Value : Character_Type) return Value_Ref;
    function As_Char (Value : Value_Ref) return Character_Type;
 
-   function Create_Int (Id : Language_Id; Value : Integer) return Value_Ref;
+   function From_Int (Id : Language_Id; Value : Integer) return Value_Ref;
    function As_Int (Value : Value_Ref) return Integer;
 
-   function Create_Source_Location_Range
+   function From_Source_Location_Range
      (Id : Language_Id; Value : Source_Location_Range) return Value_Ref;
    function As_Source_Location_Range
      (Value : Value_Ref) return Source_Location_Range;
 
-   function Create_String
+   function From_String
      (Id : Language_Id; Value : Text_Type) return Value_Ref;
    function As_String (Value : Value_Ref) return Text_Type;
 
-   function Create_Token (Id : Language_Id; Value : Lk_Token) return Value_Ref;
+   function From_Token (Id : Language_Id; Value : Lk_Token) return Value_Ref;
    function As_Token (Value : Value_Ref) return Lk_Token;
 
-   function Create_Symbol
+   function From_Symbol
      (Id : Language_Id; Value : Text_Type) return Value_Ref;
    function As_Symbol (Value : Value_Ref) return Text_Type;
 
-   function Create_Node (Id : Language_Id; Value : Lk_Node) return Value_Ref;
+   function From_Node (Id : Language_Id; Value : Lk_Node) return Value_Ref;
    function As_Node (Value : Value_Ref) return Lk_Node;
 
    function Type_Of (Node : Lk_Node) return Type_Ref;
