@@ -148,12 +148,12 @@ procedure Introspection_Values is
    P_Id_Bigint_Iterator       : Struct_Member_Ref;
 
    Int_Type, Bool_Type : Type_Ref;
-   False_Bool          : constant Value_Ref := Create_Bool (Id, False);
-   True_Bool           : constant Value_Ref := Create_Bool (Id, True);
+   False_Bool          : constant Value_Ref := From_Bool (Id, False);
+   True_Bool           : constant Value_Ref := From_Bool (Id, True);
    Point_Struct_Value  : Value_Ref;
-   Example_Value       : constant Value_Ref := Create_Node (Id, Child (N, 1));
+   Example_Value       : constant Value_Ref := From_Node (Id, Child (N, 1));
    Name_Value          : constant Value_Ref :=
-     Create_Node (Id, Child (Child (N, 2), 1));
+     From_Node (Id, Child (Child (N, 2), 1));
    Bigint_Array_Value  : Value_Ref;
 
    function Create_Iterator return Value_Ref
@@ -233,9 +233,9 @@ begin
 
    Bigint_Array_Value := Create_Array
      (Array_Of_Bigint,
-      (Create_Big_Int (Id, Make ("10")),
-       Create_Big_Int (Id, Make ("20")),
-       Create_Big_Int (Id, Make ("30"))));
+      (From_Big_Int (Id, Make ("10")),
+       From_Big_Int (Id, Make ("20")),
+       From_Big_Int (Id, Make ("30"))));
 
    Put_Title ("Value comparisons");
 
@@ -247,9 +247,9 @@ begin
       Checks : constant array (Positive range <>) of Operands :=
         ((No_Value_Ref, No_Value_Ref),
          (No_Value_Ref, False_Bool),
-         (False_Bool, Create_Bool (Id, False)),
+         (False_Bool, From_Bool (Id, False)),
          (True_Bool, False_Bool),
-         (False_Bool, Create_Int (Id, 1)));
+         (False_Bool, From_Int (Id, 1)));
    begin
       for C of Checks loop
          declare
@@ -266,13 +266,13 @@ begin
 
    Inspect (No_Value_Ref);
 
-   Value := Create_Unit (Id, No_Lk_Unit);
+   Value := From_Unit (Id, No_Lk_Unit);
    Inspect (Value);
    if As_Unit (Value) /= No_Lk_Unit then
       raise Program_Error;
    end if;
 
-   Value := Create_Unit (Id, U);
+   Value := From_Unit (Id, U);
    Inspect (Value);
    if As_Unit (Value) /= U then
       raise Program_Error;
@@ -282,32 +282,32 @@ begin
       BI : Big_Integer;
    begin
       BI.Set ("9111111111124567890");
-      Value := Create_Big_Int (Id, BI);
+      Value := From_Big_Int (Id, BI);
       Inspect (Value);
       if As_Big_Int (Value) /= BI then
          raise Program_Error;
       end if;
    end;
 
-   Value := Create_Bool (Id, True);
+   Value := From_Bool (Id, True);
    Inspect (Value);
    if not As_Bool (Value) then
       raise Program_Error;
    end if;
-   Value := Create_Bool (Id, False);
+   Value := From_Bool (Id, False);
    Inspect (Value);
    if As_Bool (Value) then
       raise Program_Error;
    end if;
    Bool_Type := Type_Of (Value);
 
-   Value := Create_Char (Id, 'A');
+   Value := From_Char (Id, 'A');
    Inspect (Value);
    if As_Char (Value) /= 'A' then
       raise Program_Error;
    end if;
 
-   Value := Create_Int (Id, 42);
+   Value := From_Int (Id, 42);
    Inspect (Value);
    if As_Int (Value) /= 42 then
       raise Program_Error;
@@ -318,14 +318,14 @@ begin
       SR : constant Source_Location_Range :=
         Langkit_Support.Slocs.Value (String'("1:2-3:4"));
    begin
-      Value := Create_Source_Location_Range (Id, SR);
+      Value := From_Source_Location_Range (Id, SR);
       Inspect (Value);
       if As_Source_Location_Range (Value) /= SR then
          raise Program_Error;
       end if;
    end;
 
-   Value := Create_String (Id, "hello, world!");
+   Value := From_String (Id, "hello, world!");
    Inspect (Value);
    if As_String (Value) /= "hello, world!" then
       raise Program_Error;
@@ -334,26 +334,26 @@ begin
    declare
       Token : constant Lk_Token := U.First_Token;
    begin
-      Value := Create_Token (Id, Token);
+      Value := From_Token (Id, Token);
       Inspect (Value);
       if As_Token (Value) /= Token then
          raise Program_Error;
       end if;
    end;
 
-   Value := Create_Symbol (Id, "foo_bar42");
+   Value := From_Symbol (Id, "foo_bar42");
    Inspect (Value);
    if As_Symbol (Value) /= "foo_bar42" then
       raise Program_Error;
    end if;
 
-   Value := Create_Node (Id, No_Lk_Node);
+   Value := From_Node (Id, No_Lk_Node);
    Inspect (Value);
    if As_Node (Value) /= No_Lk_Node then
       raise Program_Error;
    end if;
 
-   Value := Create_Node (Id, N);
+   Value := From_Node (Id, N);
    Inspect (Value);
    if As_Node (Value) /= N then
       raise Program_Error;
@@ -416,7 +416,7 @@ begin
    end if;
 
    declare
-      N : constant Value_Ref := Create_Node (Id, No_Lk_Node);
+      N : constant Value_Ref := From_Node (Id, No_Lk_Node);
    begin
       Value := Create_Array (Array_Of_Node, (1 => N));
       Inspect (Value);
@@ -573,7 +573,7 @@ begin
    Put ("Create_Struct: null value reference: ");
    begin
       Value := Create_Struct
-        (Node_Result_Struct, (Create_Node (Id, No_Lk_Node), No_Value_Ref));
+        (Node_Result_Struct, (From_Node (Id, No_Lk_Node), No_Value_Ref));
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -583,7 +583,7 @@ begin
    Put ("Create_Struct: value type mismatch: ");
    begin
       Value := Create_Struct
-        (Node_Result_Struct, (Create_Node (Id, No_Lk_Node), False_Bool));
+        (Node_Result_Struct, (From_Node (Id, No_Lk_Node), False_Bool));
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -593,7 +593,7 @@ begin
    Put ("Create_Struct: value count mismatch: ");
    begin
       Value := Create_Struct
-        (Node_Result_Struct, (1 => Create_Node (Id, No_Lk_Node)));
+        (Node_Result_Struct, (1 => From_Node (Id, No_Lk_Node)));
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -606,9 +606,9 @@ begin
       X.Set ("10");
       Y.Set ("20");
       Point_Struct_Value := Create_Struct
-        (Point_Struct, (Create_String (Id, "hello world!"),
-                        Create_Big_Int (Id, X),
-                        Create_Big_Int (Id, Y)));
+        (Point_Struct, (From_String (Id, "hello world!"),
+                        From_Big_Int (Id, X),
+                        From_Big_Int (Id, Y)));
    end;
    Inspect (Point_Struct_Value);
 
@@ -659,7 +659,7 @@ begin
 
    Put ("Eval_Member: no such node member: ");
    begin
-      Value := Eval_Member (Create_Node (Id, N), P_Id_Bool, (1 => True_Bool));
+      Value := Eval_Member (From_Node (Id, N), P_Id_Bool, (1 => True_Bool));
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -681,16 +681,16 @@ begin
 
       Tests : constant array (Positive range <>) of Eval_Test :=
         ((P_Id_Bool, True_Bool, False),
-         (P_Id_Int, Create_Int (Id, 42), False),
+         (P_Id_Int, From_Int (Id, 42), False),
          (P_Id_Bigint,
-          Create_Big_Int (Id, Make ("1234567890987654321")),
+          From_Big_Int (Id, Make ("1234567890987654321")),
           False),
-         (P_Id_Char, Create_Char (Id, 'A'), False),
-         (P_Id_Token, Create_Token (Id, N.Token_Start), False),
-         (P_Id_Sym, Create_Symbol (Id, "foobar"), False),
-         (P_Id_Unit, Create_Unit (Id, U), False),
-         (P_Id_Root_Node, Create_Node (Id, N), False),
-         (P_Id_Name, Create_Node (Id, No_Lk_Node), False),
+         (P_Id_Char, From_Char (Id, 'A'), False),
+         (P_Id_Token, From_Token (Id, N.Token_Start), False),
+         (P_Id_Sym, From_Symbol (Id, "foobar"), False),
+         (P_Id_Unit, From_Unit (Id, U), False),
+         (P_Id_Root_Node, From_Node (Id, N), False),
+         (P_Id_Name, From_Node (Id, No_Lk_Node), False),
          (P_Id_Name, Name_Value, False),
 
          (P_Id_Unit_Kind, Create_Enum (Enum_Val), False),
@@ -699,7 +699,7 @@ begin
           Create_Array (Array_Of_Node, (1 => Example_Value)),
           False),
          (P_Id_Expr_Array,
-          Create_Array (Array_Of_Expr, (1 => Create_Node (Id, No_Lk_Node))),
+          Create_Array (Array_Of_Expr, (1 => From_Node (Id, No_Lk_Node))),
           False),
 
          --  TODO (UB16-045)??? Enable this. Due to a GNAT bug, this currently
@@ -734,10 +734,10 @@ begin
    Put_Title ("Type matching");
 
    Put_Line ("Basic cases:");
-   Value := Create_Int (Id, 32);
+   Value := From_Int (Id, 32);
    Check_Match (Value, Int_Type);
    Check_Match (Value, Bool_Type);
-   Value := Create_Node (Id, N);
+   Value := From_Node (Id, N);
    Check_Match (Value, Bool_Type);
    New_Line;
 
@@ -749,7 +749,7 @@ begin
       Check_Match (Value, RT);
       Check_Match (Value, DT);
 
-      Value := Create_Node (Id, No_Lk_Node);
+      Value := From_Node (Id, No_Lk_Node);
       Check_Match (Value, RT);
       Check_Match (Value, DT);
    end;
