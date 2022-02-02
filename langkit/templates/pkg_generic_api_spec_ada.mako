@@ -26,4 +26,14 @@ package ${ada_lib_name}.Generic_API is
    --  ``Langkit_Support.Errors.Precondition_Failure`` if ``Context`` does not
    --  belong to ${ada_lib_name}.
 
+   function To_Generic_Unit (Unit : Analysis_Unit) return Lk_Unit;
+   --  Convert the given ``Unit`` into a value suitable to use in the Langkit
+   --  generic API.
+
+   function From_Generic_Unit (Unit : Lk_Unit) return Analysis_Unit;
+   --  Convert the ``Unit`` value from the Langkit generic API into the
+   --  ${ada_lib_name}-specific unit type. Raise a
+   --  ``Langkit_Support.Errors.Precondition_Failure`` if ``Unit`` does not
+   --  belong to ${ada_lib_name}.
+
 end ${ada_lib_name}.Generic_API;

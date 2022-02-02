@@ -386,4 +386,27 @@ begin
       Put_Line (Gen_Ctx.Get_From_File ("foo.txt").Root.Image);
    end;
    New_Line;
+
+   Put_Line ("Check generic/specific unit type converters");
+   declare
+      Gen_Ctx  : Lk_Context := Create_Context (Id);
+      Gen_Unit : Lk_Unit := Gen_Ctx.Get_From_File ("example.txt");
+      Spe_Unit : constant Libfoolang.Analysis.Analysis_Unit :=
+        From_Generic_Unit (Gen_Unit);
+   begin
+      --  Create an analysis unit while the context can only be referenced
+      --  through language-specific types.
+
+      Gen_Unit := No_Lk_Unit;
+      Gen_Ctx := No_Lk_Context;
+
+      --  At this point, the context/units, created through public APIs, are
+      --  live only through the language-specific unit type in Spe_Unit.  Now
+      --  switch back to the generic type and make sure both are functional.
+
+      Gen_Unit := To_Generic_Unit (Spe_Unit);
+      Gen_Ctx := Gen_Unit.Context;
+      Put_Line (Gen_Ctx.Get_From_File ("example.txt").Root.Image);
+   end;
+   New_Line;
 end Analysis;

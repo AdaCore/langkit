@@ -25,11 +25,21 @@ package body ${ada_lib_name}.Generic_API is
    subtype Specific_Internal_Context is
      ${ada_lib_name}.Implementation.Internal_Context;
 
+   subtype Generic_Internal_Unit is
+     Langkit_Support.Internal.Analysis.Internal_Unit;
+   subtype Specific_Internal_Unit is
+     ${ada_lib_name}.Implementation.Internal_Unit;
+
    pragma Warnings (Off, "possible aliasing problem for type");
    function "+" is new Ada.Unchecked_Conversion
      (Generic_Internal_Context, Specific_Internal_Context);
    function "+" is new Ada.Unchecked_Conversion
      (Specific_Internal_Context, Generic_Internal_Context);
+
+   function "+" is new Ada.Unchecked_Conversion
+     (Generic_Internal_Unit, Specific_Internal_Unit);
+   function "+" is new Ada.Unchecked_Conversion
+     (Specific_Internal_Unit, Generic_Internal_Unit);
    pragma Warnings (On, "possible aliasing problem for type");
 
    ------------------------
@@ -58,5 +68,28 @@ package body ${ada_lib_name}.Generic_API is
       end if;
       return Wrap_Context.all (+Ctx);
    end From_Generic_Context;
+
+   ---------------------
+   -- To_Generic_Unit --
+   ---------------------
+
+   function To_Generic_Unit (Unit : Analysis_Unit) return Lk_Unit is
+      U : constant Specific_Internal_Unit := Unwrap_Unit.all (Unit);
+   begin
+      return Lk_Convs.Wrap_Unit (Self_Id, +U);
+   end To_Generic_Unit;
+
+   -----------------------
+   -- From_Generic_Unit --
+   -----------------------
+
+   function From_Generic_Unit (Unit : Lk_Unit) return Analysis_Unit is
+      U : constant Generic_Internal_Unit := Lk_Convs.Unwrap_Unit (Unit);
+   begin
+      if Language (Unit) /= Self_Id then
+         raise Precondition_Failure with "unit belongs to another language";
+      end if;
+      return Wrap_Unit.all (+U);
+   end From_Generic_Unit;
 
 end ${ada_lib_name}.Generic_API;
