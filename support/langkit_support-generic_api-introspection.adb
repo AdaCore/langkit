@@ -1501,15 +1501,32 @@ package body Langkit_Support.Generic_API.Introspection is
          --  Go through the derivation chain and collect members in ``Result``.
          --  Add them in reverse order so that in the end, inherited members
          --  are first, and are in declaration order.
+         --
+         --  Also make sure that, for each member derivation tree, we add only
+         --  the root member. For instance if struct A defines member M1 and if
+         --  struct B derives from A and overrides member M1 with M2, then we
+         --  should include M1 only once in the result.
 
-         Next := Result'Last;
-         while Current_Struct /= No_Type_Index loop
-            for M of reverse Id.Struct_Types.all (Current_Struct).Members loop
-               Result (Next) := From_Index (Id, M);
-               Next := Next - 1;
+         declare
+            Added_Trees : array (1 .. Id.Struct_Members.all'Last) of Boolean :=
+              (others => False);
+            --  Set of members added to the result so far. Used to avoid adding
+            --  a member because it both a struct and its base has it.
+         begin
+            Next := Result'Last;
+            while Current_Struct /= No_Type_Index loop
+               for M of reverse Id.Struct_Types.all (Current_Struct).Members
+               loop
+                  if not Added_Trees (M) then
+                     Added_Trees (M) := True;
+                     Result (Next) := From_Index (Id, M);
+                     Next := Next - 1;
+                  end if;
+               end loop;
+               Current_Struct :=
+                 Id.Struct_Types.all (Current_Struct).Base_Type;
             end loop;
-            Current_Struct := Id.Struct_Types.all (Current_Struct).Base_Type;
-         end loop;
+         end;
       end return;
    end Members;
 

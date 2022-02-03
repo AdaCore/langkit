@@ -1,6 +1,15 @@
 """Check that the generic Ada API works as expected."""
 
-from langkit.dsl import ASTNode, Field, Struct, T, UserField, abstract
+from langkit.dsl import (
+    ASTNode,
+    AbstractField,
+    Field,
+    NullField,
+    Struct,
+    T,
+    UserField,
+    abstract,
+)
 from langkit.expressions import (
     ArrayLiteral,
     BigIntLiteral,
@@ -38,7 +47,19 @@ class FooNode(ASTNode):
     pass
 
 
-class Example(FooNode):
+@abstract
+class BaseExample(FooNode):
+    # Check for proper member inheritance handling: the introspection API
+    # should list "fld_1" first and "fld_2" for BaseExample, but the opposite
+    # order for Example.
+    fld_1 = AbstractField(type=T.Name)
+    fld_2 = AbstractField(type=FooNode)
+
+
+class Example(BaseExample):
+
+    fld_2 = NullField()
+    fld_1 = Field()
 
     @langkit_property()
     def to_public(p=T.PrivatePoint):

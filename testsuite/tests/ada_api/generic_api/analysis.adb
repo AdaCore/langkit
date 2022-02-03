@@ -374,8 +374,8 @@ begin
       --  through language-specific types.
 
       Gen_Ctx := No_Lk_Context;
-      Dummy_Unit :=
-        Spe_Ctx.Get_From_Buffer (Filename => "foo.txt", Buffer => "example");
+      Dummy_Unit := Spe_Ctx.Get_From_Buffer
+        (Filename => "foo.txt", Buffer => "example bar");
       Dummy_Unit := Libfoolang.Analysis.No_Analysis_Unit;
 
       --  Now switch back to the generic type and make sure the context is

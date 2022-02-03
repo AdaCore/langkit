@@ -1,7 +1,7 @@
 import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list+(or(var_decl | Example(@example)))
+    @main_rule main_rule <- list+(or(var_decl | Example(@example name)))
     var_decl <- VarDecl("var" name "=" expr ";")
     expr <- or(Addition(expr "+" expr) | atom)
     atom <- or(number | ref)
@@ -14,7 +14,14 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode {
+@abstract class BaseExample : FooNode {
+    @abstract @parse_field fld_1: Name
+    @abstract @parse_field fld_2: FooNode
+}
+
+class Example : BaseExample {
+    @parse_field @null_field fld_2: FooNode
+    @parse_field fld_1: Name
 
     fun to_public(p: PrivatePoint): Point =
     Point(label="from private", x=p.x, y=p.y)
