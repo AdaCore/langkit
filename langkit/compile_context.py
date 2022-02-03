@@ -724,7 +724,7 @@ class CompileCtx:
         ``self.sorted_public_structs``. Used to generate the introspection API.
         """
 
-        self.sorted_parse_fields: Optional[Field] = None
+        self.sorted_parse_fields: Optional[List[Field]] = None
         """
         Sorted list of all parsing fields, minus fields that override abstract
         ones. Used to generate the AST node introspection API.
