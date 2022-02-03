@@ -1498,7 +1498,7 @@ package body Langkit_Support.Generic_API.Introspection is
       return Result : Struct_Member_Ref_Array
         (1 .. Id.Struct_Types.all (Struct.Index).Inherited_Members)
       do
-         --  Go through the derivation chain and collect field in ``Result``.
+         --  Go through the derivation chain and collect members in ``Result``.
          --  Add them in reverse order so that in the end, inherited members
          --  are first, and are in declaration order.
 
@@ -1712,7 +1712,7 @@ package body Langkit_Support.Generic_API.Introspection is
          end;
       end loop;
 
-      --  Finally evaluate the membe
+      --  Finally evaluate the member
 
       if Value.Value.all in Base_Internal_Struct_Value'Class then
          pragma Assert (Arguments'Length = 0);
