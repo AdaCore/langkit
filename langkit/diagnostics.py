@@ -22,7 +22,6 @@ except ImportError:
     liblktlang_available = False
 
 
-import langkit.documentation
 from langkit.utils import Colors, assert_type, col
 
 
@@ -464,6 +463,10 @@ class WarningSet:
         :param out: File in which the list is displayed.
         :param width: Width of the message. If None, use os.environ['COLUMNS'].
         """
+        # Do not import this unless necessary: this module is in the closure of
+        # GDB helpers, and we do not want them to transitively import Mako.
+        import langkit.documentation
+
         if width is None:
             try:
                 width = int(os.environ['COLUMNS'])
