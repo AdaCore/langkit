@@ -2575,6 +2575,7 @@ class CompileCtx:
                 # Assign the dispatcher a new name so that it does not conflict
                 # with the root property in the generated code.
                 prop_name = prop.name
+                prop.name_before_dispatcher = prop_name
                 prop._name = names.Name('Dispatcher') + prop.name
 
                 if not prop.abstract or prop.abstract_runtime_check:
