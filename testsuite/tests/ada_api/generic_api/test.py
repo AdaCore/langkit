@@ -11,6 +11,7 @@ from langkit.dsl import (
     abstract,
 )
 from langkit.expressions import (
+    AbstractKind,
     ArrayLiteral,
     BigIntLiteral,
     CharacterLiteral,
@@ -54,6 +55,12 @@ class BaseExample(FooNode):
     # order for Example.
     fld_1 = AbstractField(type=T.Name)
     fld_2 = AbstractField(type=FooNode)
+
+    @langkit_property(return_type=T.Bool,
+                      public=True,
+                      kind=AbstractKind.abstract)
+    def id_bool(id=T.Bool):
+        pass
 
 
 class Example(BaseExample):

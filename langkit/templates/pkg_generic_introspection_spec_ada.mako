@@ -408,15 +408,33 @@ private package ${ada_lib_name}.Generic_Introspection is
          struct_type_descs.append(f"{G.type_index(t)} => {desc_const}'Access")
 
          def get_members(include_inherited):
-            result = (
+            # Include all parse fieds (for node) and regular fields (for
+            # structs): they are all public.
+            fields = (
                t.get_parse_fields(include_inherited=include_inherited)
                if t.is_ast_node
                else t.get_fields()
             )
-            return result + t.get_properties(
-               predicate=lambda p: p.is_public and not p.overriding,
+
+            # For properties, it is a bit more nuanced...
+            all_properties = t.get_properties(
                include_inherited=include_inherited
             )
+            properties = []
+            for p in all_properties:
+               # If "p" is overriding, get its dispatcher, which acts as the
+               # reference property for the whole property derivation tree in
+               # the introspection API.
+               p = p.dispatcher or p
+               if p in properties:
+                  continue
+
+               # Exclude private properties, and also inherited properties if
+               # only t's own members are requested.
+               if p.is_public and (include_inherited or p.struct == t):
+                  properties.append(p)
+
+            return fields + properties
 
          inherited_members = get_members(True)
          members = get_members(False)

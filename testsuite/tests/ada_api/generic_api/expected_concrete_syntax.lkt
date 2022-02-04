@@ -17,6 +17,8 @@ grammar foo_grammar {
 @abstract class BaseExample : FooNode {
     @abstract @parse_field fld_1: Name
     @abstract @parse_field fld_2: FooNode
+
+    @export @abstract fun id_bool(id: Bool): Bool
 }
 
 class Example : BaseExample {
@@ -31,7 +33,7 @@ class Example : BaseExample {
 
     @export fun result(): NodeResult = NodeResult(n=node, e=self)
 
-    @export fun id_bool(id: Bool): Bool = id
+    fun id_bool(id: Bool): Bool = id
 
     @export fun id_int(id: Int): Int = id
 
