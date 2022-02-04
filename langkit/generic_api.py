@@ -107,13 +107,16 @@ class GenericAPI:
         """
         assert m.struct
         m = self.root_member(m)
+
         # Node members are already qualified by the node type name, so we need
-        # to add the type name only for structs.
-        return (
-            m.name
-            if m.struct.is_ast_node
-            else f"{self.type_name(m.struct)}_{m.name}"
-        )
+        # to add the type name only for structs. Also, make sure we get the
+        # original name for properties that have been turned into dispatchers.
+        if m.is_property and m.is_dispatcher:
+            return m.name_before_dispatcher
+        elif m.struct.is_ast_node:
+            return m.name
+        else:
+            return f"{self.type_name(m.struct)}_{m.name}"
 
     def member_index(self, m: AbstractNodeData) -> str:
         """
