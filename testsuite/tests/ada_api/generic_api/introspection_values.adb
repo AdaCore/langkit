@@ -197,7 +197,7 @@ begin
             Node_Result_N := M;
          elsif DN = "Point.label" then
             Point_Label := M;
-         elsif DN = "Example.p_id_bool" then
+         elsif DN = "BaseExample.p_id_bool" then
             P_Id_Bool := M;
          elsif DN = "Example.p_id_int" then
             P_Id_Int := M;
