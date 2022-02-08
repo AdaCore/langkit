@@ -105,8 +105,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  the dependency graph during topo sort: ``Atom_Index`` is the index in
    --  ``Topo_Sort.Atoms`` where ``Atom`` lives.
 
-   package Atom_Lists is new Langkit_Support.Functional_Lists (Atom_And_Index);
-
    package Atom_Vectors is new Langkit_Support.Vectors (Atom_And_Index);
    type Atom_Vector_Array is array (Positive range <>) of Atom_Vectors.Vector;
    type Atom_Vector_Array_Access is access all Atom_Vector_Array;
@@ -117,13 +115,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Using_Atoms : Atom_Vector_Array_Access;
       --  Map each logic var Id to the list of atoms that use that variable
 
-      Working_Set : Atom_Lists.List;
+      Working_Set : Atom_Vectors.Vector;
       --  Working set of atoms. Used as a temporary list to store atoms in the
       --  graph that need to be subsequently added: at all points, the atoms in
       --  the working set have all their dependencies already in the result of
       --  the topo sort.
 
-      N_Preds : Atom_Lists.List;
+      N_Preds : Atom_Vectors.Vector;
       --  List of N_Predicates, to be applied at the end of solving. TODO??? we
       --  could apply this policy for all predicates, which would simplify the
       --  code a bit.
@@ -662,8 +660,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  these are not to be part of the result). We should probably rename
       --  this.
 
-      use Atom_Lists;
-
       function Id (S : Var_Or_Null) return Natural
       is (if S.Exists then Id (S.Logic_Var) else 0);
       --  Return the Id for the ``S`` variable, or 0 if there is no variable
@@ -689,8 +685,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end Append;
 
       Using_Atoms : Atom_Vector_Array renames Sort_Ctx.Using_Atoms.all;
-      N_Preds     : Atom_Lists.List := Sort_Ctx.N_Preds;
-      Working_Set : Atom_Lists.List := Sort_Ctx.Working_Set;
+      N_Preds     : Atom_Vectors.Vector renames Sort_Ctx.N_Preds;
+      Working_Set : Atom_Vectors.Vector renames Sort_Ctx.Working_Set;
    begin
       Has_Orphan := False;
 
@@ -724,12 +720,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             if Current_Atom.Kind = N_Predicate then
                --  N_Predicates are appended at the end separately
 
-               N_Preds := Working_Item & N_Preds;
+               N_Preds.Append (Working_Item);
 
             elsif Used_Id = 0 then
                --  Put atoms with no dependency in the working set
 
-               Working_Set := Working_Item & Working_Set;
+               Working_Set.Append (Working_Item);
 
             elsif Current_Atom.Kind /= Unify then
                --  For other atoms, put them in the ``Using_Atoms`` map, which
@@ -748,13 +744,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       --  Step 3: Do the topo sort
 
-      while Has_Element (Working_Set) loop
+      while not Working_Set.Is_Empty loop
          --  The dependencies of all atoms in the working set are already in
          --  the topo sort result (this is the invariant of
          --  ``Sort_Context_Type.Working_Set``): we can just take the first one
          --  and put it in the result too.
          declare
-            Atom    : constant Atom_And_Index := Pop (Working_Set);
+            Atom    : constant Atom_And_Index := Working_Set.Pop;
             Defd_Id : constant Natural := Defined (Atom.Atom.Atomic_Rel);
          begin
             Append (Atom.Atom);
@@ -765,7 +761,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             --  satisfied.
             if Defd_Id /= 0 then
                for El of Using_Atoms (Defd_Id) loop
-                  Working_Set := El & Working_Set;
+                  Working_Set.Append (El);
                end loop;
 
                --  Remove items from Using_Atoms, so that they're not appended
@@ -807,8 +803,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       for Atoms of Sort_Ctx.Using_Atoms.all loop
          Atoms.Clear;
       end loop;
-      Clear (Working_Set);
-      Clear (N_Preds);
+      Working_Set.Clear;
+      N_Preds.Clear;
       return Sorted_Atoms (1 .. Last_Atom_Index);
    end Topo_Sort;
 
@@ -1379,8 +1375,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
         (Sort_Context_Type, Sort_Context);
    begin
 
-      Atom_Lists.Destroy (Sort_Ctx.N_Preds);
-      Atom_Lists.Destroy (Sort_Ctx.Working_Set);
+      Sort_Ctx.N_Preds.Destroy;
+      Sort_Ctx.Working_Set.Destroy;
       for Atoms of Sort_Ctx.Using_Atoms.all loop
          Atoms.Destroy;
       end loop;
