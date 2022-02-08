@@ -162,6 +162,7 @@ private
 
    type List_Node;
    type Node_Ptr is access all List_Node;
+   pragma No_Strict_Aliasing (Node_Ptr);
 
    type List_Node is record
       El   : T;
