@@ -16,7 +16,7 @@ procedure Main is
      ((R_Any ((X = Y, Logic_True)),
        R_Any ((Domain (X, (1, 2)), Logic_True)),
        R_Any ((Domain (Y, (-1, -2)), Logic_True)),
-       N_Predicate ((X, Y), N_Predicate (Abs_Equal'Access))));
+       N_Predicate ((X, Y), N_Predicate (Abs_Equal'Access, 2))));
 begin
    Solve_All (R);
 end Main;

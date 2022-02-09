@@ -17,7 +17,7 @@ procedure Main is
    R3   : constant Relation :=
      "and" (+Create_N_Predicate
              ((X, Y),
-              N_Predicate (Double_Of'Access, "Double_Of")),
+              N_Predicate (Double_Of'Access, 2, "Double_Of")),
             "and" (Domain (X, (1, 2, 3, 4, 5, 6)),
               Domain (Y, (1, 2, 3, 4, 5, 6))));
 begin

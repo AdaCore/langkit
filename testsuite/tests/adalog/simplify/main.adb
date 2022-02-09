@@ -15,7 +15,7 @@ procedure Main is
    function Is_Next (Values : Value_Array) return Boolean
    is (Values (1) + 1 = Values (2));
    P_Is_Next : constant N_Predicate_Type'Class :=
-     N_Predicate (Is_Next'Access, "Is_Next");
+     N_Predicate (Is_Next'Access, 2, "Is_Next");
 
    X1 : constant Refs.Logic_Var := Create ("X1");
    X2 : constant Refs.Logic_Var := Create ("X2");

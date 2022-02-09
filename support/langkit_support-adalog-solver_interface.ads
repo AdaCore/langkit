@@ -52,9 +52,20 @@ package Langkit_Support.Adalog.Solver_Interface is
    -- Predicate_Type --
    --------------------
 
-   type Predicate_Type is abstract new Base_Functor_Type with null record;
+   type Predicate_Type is abstract new Base_Functor_Type with record
+      Cache_Set   : Boolean;
+      Cache_Key   : Value_Type;
+      Cache_Value : Boolean;
+   end record;
+
    function Call
      (Self : Predicate_Type; Val : Value_Type) return Boolean is abstract;
+   --  Derived types must override this to implement the predicate
+
+   function Call_Wrapper
+     (Self : in out Predicate_Type'Class; Val  : Value_Type) return Boolean;
+   --  Converter users must call this instead of ``Convert`` to use the cache
+
    function Image (Self : Predicate_Type) return String is ("");
    function Full_Image
      (Self : Predicate_Type; Dummy_Var : Logic_Vars.Logic_Var) return String
@@ -66,16 +77,30 @@ package Langkit_Support.Adalog.Solver_Interface is
    -- N_Predicate_Type --
    ----------------------
 
-   type N_Predicate_Type is abstract new Base_Functor_Type with null record;
+   type N_Predicate_Type (N : Positive) is
+     abstract new Base_Functor_Type with
+   record
+      Cache_Set   : Boolean;
+      Cache_Key   : Value_Array (1 .. N);
+      Cache_Value : Boolean;
+   end record;
+   --  A predicate encapsulates the logic of applying a boolean predicate to a
+   --  list of values, returning whether the predicate succeeds.
+
    function Call
      (Self : N_Predicate_Type; Vals : Logic_Vars.Value_Array) return Boolean
    is abstract;
+   --  Derived types must override this to implement the predicate
+
+   function Call_Wrapper
+     (Self : in out N_Predicate_Type'Class;
+      Vals : Logic_Vars.Value_Array) return Boolean;
+   --  Converter users must call this instead of ``Convert`` to use the cache
+
    function Image (Self : N_Predicate_Type) return String is ("");
    function Full_Image
      (Self : N_Predicate_Type; Dummy_Vars : Logic_Var_Array) return String
    is ("");
-   --  A predicate encapsulates the logic of applying a boolean predicate to a
-   --  list of values, returning whether the predicate succeeds.
 
    -------------------
    -- Comparer_Type --
@@ -91,20 +116,36 @@ package Langkit_Support.Adalog.Solver_Interface is
    --  Return a special comparer which considers two values are always
    --  different.
 
+   function Is_No_Comparer (Self : Comparer_Type'Class) return Boolean;
+   --  Return whether ``Self`` comes from ``No_Comparer``
+
    --------------------
    -- Converter_Type --
    --------------------
 
-   type Converter_Type is abstract new Base_Functor_Type with null record;
+   type Converter_Type is abstract new Base_Functor_Type with record
+      Cache_Set              : Boolean;
+      Cache_Key, Cache_Value : Value_Type;
+   end record;
+   --  Type to convert one value to another
+
    function Convert
      (Self : Converter_Type; From : Value_Type) return Value_Type
       is abstract;
+   --  Derived types must override this to implement the conversion
+
+   function Convert_Wrapper
+     (Self : in out Converter_Type; From : Value_Type) return Value_Type;
+   --  Converter users must call this instead of ``Convert`` to use the cache
+
    function Image (Self : Converter_Type) return String is ("");
-   --  Type to convert one value to another
 
    function No_Converter return Converter_Type'Class;
    --  Return a special converter that just raises a ``Program_Error`` when
    --  called.
+
+   function Is_No_Converter (Self : Converter_Type'Class) return Boolean;
+   --  Return whether ``Self`` comes from ``No_Converter``
 
    -------------------------------------
    -- Stateless functors constructors --
@@ -123,8 +164,8 @@ package Langkit_Support.Adalog.Solver_Interface is
 
    function N_Predicate
      (Pred      : access function (V : Value_Array) return Boolean;
-      Pred_Name : String := "N_Predicate")
-      return N_Predicate_Type'Class;
+      Arity     : Positive;
+      Pred_Name : String := "N_Predicate") return N_Predicate_Type'Class;
 
    function Comparer
      (Pred      : access function (L, R : Value_Type) return Boolean;

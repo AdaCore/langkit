@@ -2108,12 +2108,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    is
       Conv_Ptr : Converter_Access := null;
    begin
-      if Eq /= No_Comparer then
+      if not Is_No_Comparer (Eq) then
          raise Unsupported_Error with
            "Comparer_Type not supported with the symbolic solver";
       end if;
 
-      if Conv /= No_Converter then
+      if not Is_No_Converter (Conv) then
          Conv_Ptr := new Converter_Type'Class'(Conv);
       end if;
 
@@ -2169,12 +2169,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    is
       Conv_Ptr : Converter_Access := null;
    begin
-      if Eq /= No_Comparer then
+      if not Is_No_Comparer (Eq) then
          raise Unsupported_Error with
            "Comparer_Type not supported with the symbolic solver";
       end if;
 
-      if Conv /= No_Converter then
+      if not Is_No_Converter (Conv) then
          Conv_Ptr := new Converter_Type'Class'(Conv);
       end if;
 
@@ -2347,7 +2347,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       function Assign_Val (Val : Value_Type) return Boolean is
          Conv_Val : constant Value_Type :=
            (if Atom.Conv /= null
-            then Atom.Conv.Convert (Val)
+            then Atom.Conv.Convert_Wrapper (Val)
             else Val);
       begin
          if Is_Defined (Atom.Target) then
@@ -2390,7 +2390,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
          when Predicate =>
             pragma Assert (Is_Defined (Atom.Target));
-            Ret := Atom.Pred.Call (Get_Value (Atom.Target));
+            Ret := Atom.Pred.Call_Wrapper (Get_Value (Atom.Target));
 
          when N_Predicate =>
 
@@ -2416,7 +2416,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   Vals (I) := Get_Value (Atom.Vars.Get (I));
                end loop;
 
-               Ret := Atom.N_Pred.Call (Vals);
+               Ret := Atom.N_Pred.Call_Wrapper (Vals);
             end;
 
          when True  => Ret := True;

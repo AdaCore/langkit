@@ -439,12 +439,12 @@ package body Langkit_Support.Adalog.Solver is
                C : Converter_Access := null;
                E : Comparer_Access := null;
             begin
-               if Conv /= No_Converter then
+               if not Is_No_Converter (Conv) then
                   C := new Converter_Type'Class'(Conv);
                   C.Ref_Count := 1;
                end if;
 
-               if Eq /= No_Comparer then
+               if not Is_No_Comparer (Eq) then
                   E := new Comparer_Type'Class'(Eq);
                   E.Ref_Count := 1;
                end if;
@@ -502,8 +502,8 @@ package body Langkit_Support.Adalog.Solver is
    function Create_Propagate
      (From, To     : Logic_Var;
       Conv         : Converter_Type'Class := No_Converter;
-      Eq           : Comparer_Type'Class := No_Comparer;
-      Debug_String : String_Access       := null) return Relation
+      Eq           : Comparer_Type'Class  := No_Comparer;
+      Debug_String : String_Access        := null) return Relation
    is
    begin
       case Global_Kind is
@@ -516,12 +516,12 @@ package body Langkit_Support.Adalog.Solver is
                C : Converter_Access := null;
                E : Comparer_Access := null;
             begin
-               if Conv /= No_Converter then
+               if not Is_No_Converter (Conv) then
                   C := new Converter_Type'Class'(Conv);
                   C.Ref_Count := 1;
                end if;
 
-               if Eq /= No_Comparer then
+               if not Is_No_Comparer (Eq) then
                   E := new Comparer_Type'Class'(Eq);
                   E.Ref_Count := 1;
                end if;

@@ -12,6 +12,7 @@ package Support is
 
    overriding function Image (Dummy : Pred) return String is ("Is_Double_Of");
 
-   Pred_Singleton : constant Pred := (Ref_Count => 1);
+   Pred_Singleton : constant Pred :=
+     (N => 2, Cache_Set => False, Ref_Count => 1, others => <>);
 
 end Support;
