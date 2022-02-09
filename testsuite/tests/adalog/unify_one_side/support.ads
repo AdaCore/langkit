@@ -15,7 +15,8 @@ package Support is
 
    overriding function Image (Dummy : Squarer) return String is ("Square");
 
-   Squarer_Singleton : constant Squarer := (Ref_Count => 1);
+   Squarer_Singleton : constant Squarer :=
+     (Cache_Set => False, Ref_Count => 1, others => <>);
 
    function Square (X, Y : Refs.Logic_Var) return Relation
    is (Propagate (X, Y, Conv => Squarer_Singleton));

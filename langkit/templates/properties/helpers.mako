@@ -213,7 +213,17 @@
    % endif
       return ${type_name} is
    begin
-      <% components = ["Ref_Count => 1"] %>
+      <%
+         components = []
+         if arity > 1:
+            components.append(f"N => {arity}")
+         components += [
+            "Cache_Set => False",
+            "Cache_Key => <>",
+            "Cache_Value => <>",
+            "Ref_Count => 1",
+         ]
+      %>
       % for i, arg_type in args:
          % if arg_type.is_refcounted:
             Inc_Ref (Field_${i});

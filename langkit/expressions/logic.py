@@ -1,5 +1,5 @@
 from itertools import zip_longest
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import funcy
 
@@ -74,7 +74,11 @@ class Bind(AbstractExpression):
 
             if conv_prop:
                 constructor_args.append(self.functor_expr(
-                    conv_prop, f"Conv => Logic_Converter_{self.conv_prop.uid}"
+                    conv_prop,
+                    f"Conv => Logic_Converter_{self.conv_prop.uid}",
+                    ("Cache_Set", LiteralExpr("False", None)),
+                    ("Cache_Key", LiteralExpr("<>", None)),
+                    ("Cache_Value", LiteralExpr("<>", None)),
                 ))
 
             if eq_prop:
@@ -101,20 +105,26 @@ class Bind(AbstractExpression):
             )
 
         @staticmethod
-        def functor_expr(prop: PropertyDef, type_name: str) -> LiteralExpr:
+        def functor_expr(prop: PropertyDef,
+                         type_name: str,
+                         *components: Tuple[str, LiteralExpr]) -> LiteralExpr:
             """
             Return an expression to create a functor for ``Prop``.
 
             :param prop: Property called by the functor.
             :param type_name: Name of the functor derived type.
+            :param components: Additional components (component name and
+                initialization expression) for the functor.
             """
-            return aggregate_expr(
-                type_name,
-                [("Ref_Count", IntegerLiteralExpr(1))] + [
-                    (dynvar.argument_name, construct(dynvar))
-                    for dynvar in prop.dynamic_vars
-                ]
+            assocs: List[Tuple[str, LiteralExpr]] = []
+            assocs.append(("Ref_Count", IntegerLiteralExpr(1)))
+            assocs.extend(
+                (dynvar.argument_name, construct(dynvar))
+                for dynvar in prop.dynamic_vars
             )
+            assocs.extend(components)
+
+            return aggregate_expr(type_name, assocs)
 
         @property
         def subexprs(self):
