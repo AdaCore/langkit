@@ -3756,9 +3756,7 @@ package body ${ada_lib_name}.Implementation is
          return True;
       end if;
 
-      return Compare
-        (Start_Sloc (Sloc_Range (El)),
-         Start_Sloc (Sloc_Range (From))) = After;
+      return El.Token_Start_Index < From.Token_Start_Index;
    end Can_Reach;
 
    -----------------
