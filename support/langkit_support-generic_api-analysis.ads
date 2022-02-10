@@ -96,7 +96,7 @@ package Langkit_Support.Generic_API.Analysis is
    --  ``Tab_Stop`` is a positive number to describe the effect of tabulation
    --  characters on the column number in source files.
 
-   function Language (Self : Lk_Context'Class) return Language_Id;
+   function Language (Self : Lk_Context) return Language_Id;
    --  Return the unique identifier for the Langkit-generated library that
    --  implements ``Context``.
 
@@ -104,7 +104,7 @@ package Langkit_Support.Generic_API.Analysis is
    --  Hash function to use ``Lk_Context`` in hashed containers
 
    function Has_Unit
-     (Self : Lk_Context'Class; Unit_Filename : String) return Boolean;
+     (Self : Lk_Context; Unit_Filename : String) return Boolean;
    --  Return whether ``Context`` contains a unit correponding to
    --  ``Unit_Filename``.
 
@@ -137,7 +137,7 @@ package Langkit_Support.Generic_API.Analysis is
    -- Analysis unit operations --
    ------------------------------
 
-   function Language (Self : Lk_Unit'Class) return Language_Id;
+   function Language (Self : Lk_Unit) return Language_Id;
    --  Return the unique identifier corresponding to ``Self``
 
    function Hash (Self : Lk_Unit) return Hash_Type;
@@ -150,7 +150,7 @@ package Langkit_Support.Generic_API.Analysis is
    function Context (Self : Lk_Unit'Class) return Lk_Context;
    --  Return the context that owns this unit
 
-   function Filename (Self : Lk_Unit'Class) return String;
+   function Filename (Self : Lk_Unit) return String;
    --  Return the filename this unit is associated to
 
    function Root (Self : Lk_Unit'Class) return Lk_Node;
@@ -163,7 +163,7 @@ package Langkit_Support.Generic_API.Analysis is
    function Last_Token (Self : Lk_Unit'Class) return Lk_Token;
    --  Return a reference to the last token scanned in this unit
 
-   function Text (Self : Lk_Unit'Class) return Text_Type;
+   function Text (Self : Lk_Unit) return Text_Type;
    --  Return the source buffer associated to this unit.
 
    --  TODO??? Bind all other analysis unit primitives
@@ -172,7 +172,7 @@ package Langkit_Support.Generic_API.Analysis is
    -- Analysis nodes operations --
    -------------------------------
 
-   function Language (Self : Lk_Node'Class) return Language_Id;
+   function Language (Self : Lk_Node) return Language_Id;
    --  Return the unique identifier corresponding to ``Self``
 
    function Hash (Self : Lk_Node) return Hash_Type;
@@ -181,7 +181,7 @@ package Langkit_Support.Generic_API.Analysis is
    function Unit (Self : Lk_Node'Class) return Lk_Unit;
    --  Return the unit that owns this node
 
-   function Is_Null (Self : Lk_Node'Class) return Boolean;
+   function Is_Null (Self : Lk_Node) return Boolean;
    --  Return whether ``Node`` is a null node reference
 
    function "=" (Left, Right : Lk_Node'Class) return Boolean;
@@ -190,12 +190,12 @@ package Langkit_Support.Generic_API.Analysis is
    --  Note that, unlike other operations accepting multiple generic types,
    --  checking equality is allowed for nodes coming from different languages.
 
-   function Image (Self : Lk_Node'Class) return String;
+   function Image (Self : Lk_Node) return String;
    --  Return a short string describing ``Node``, or ``"None"`` if
    --  ``Node.Is_Null`` is true.
 
    procedure Print
-     (Node        : Lk_Node'Class;
+     (Node        : Lk_Node;
       Show_Slocs  : Boolean := True;
       Line_Prefix : String := "");
    --  Debug helper: print to standard output ``Node`` and all its children.
@@ -211,7 +211,7 @@ package Langkit_Support.Generic_API.Analysis is
    --  Return the syntactic parent for ``Node``. Return a null node for the
    --  root one.
 
-   function Children_Count (Self : Lk_Node'Class) return Natural;
+   function Children_Count (Self : Lk_Node) return Natural;
    --  Return the number of children Node has
 
    procedure Get_Child
@@ -229,7 +229,7 @@ package Langkit_Support.Generic_API.Analysis is
    --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has no
    --  such child.
 
-   function Children (Self : Lk_Node'Class) return Lk_Node_Array;
+   function Children (Self : Lk_Node) return Lk_Node_Array;
    --  Return the number of children in ``Node``
 
    function Next_Sibling (Self : Lk_Node'Class) return Lk_Node;
@@ -244,8 +244,8 @@ package Langkit_Support.Generic_API.Analysis is
    --  subprograms below.
 
    function Traverse
-     (Self  : Lk_Node'Class;
-      Visit : access function (Node : Lk_Node'Class) return Visit_Status)
+     (Self  : Lk_Node;
+      Visit : access function (Node : Lk_Node) return Visit_Status)
       return Visit_Status;
    --  Call ``Visit`` on ``Node`` and all its children, transitively. Calls
    --  happen in prefix order (i.e. top-down and left first). The traversal is
@@ -265,8 +265,8 @@ package Langkit_Support.Generic_API.Analysis is
    --     to ``Traverse`` returns ``Stop``.
 
    procedure Traverse
-     (Self  : Lk_Node'Class;
-      Visit : access function (Node : Lk_Node'Class) return Visit_Status);
+     (Self  : Lk_Node;
+      Visit : access function (Node : Lk_Node) return Visit_Status);
    --  This is the same as ``Traverse`` function except that no result is
    --  returned i.e. the ``Traverse`` function is called and the result is
    --  simply discarded.
@@ -277,20 +277,20 @@ package Langkit_Support.Generic_API.Analysis is
    function Token_End (Self : Lk_Node'Class) return Lk_Token;
    --  Return the last token used to parse this node
 
-   function Text (Self : Lk_Node'Class) return Text_Type;
+   function Text (Self : Lk_Node) return Text_Type;
    --  Return the source buffer slice corresponding to the text that spans
    --  between the first and the last tokens of this node.
    --
    --  Note that this returns the empty string for synthetic nodes.
 
-   function Sloc_Range (Self : Lk_Node'Class) return Source_Location_Range;
+   function Sloc_Range (Self : Lk_Node) return Source_Location_Range;
    --  Return the spanning source location range for this node.
    --
    --  Note that this returns the sloc of the parent for synthetic nodes.
 
    --  TODO??? Bind all other node primitives
 
-   function Is_Incomplete (Self : Lk_Node'Class) return Boolean;
+   function Is_Incomplete (Self : Lk_Node) return Boolean;
    --  Return whether this node is incomplete, i.e. whether its parsing
    --  partially failed.
 
@@ -298,7 +298,7 @@ package Langkit_Support.Generic_API.Analysis is
    -- Token operations --
    ----------------------
 
-   function Language (Self : Lk_Token'Class) return Language_Id;
+   function Language (Self : Lk_Token) return Language_Id;
    --  Return the unique identifier corresponding to ``Self``
 
    function Hash (Self : Lk_Token) return Hash_Type;
@@ -307,13 +307,13 @@ package Langkit_Support.Generic_API.Analysis is
    function Unit (Self : Lk_Token'Class) return Lk_Unit;
    --  Return the unit that owns this token
 
-   function Is_Null (Self : Lk_Token'Class) return Boolean;
+   function Is_Null (Self : Lk_Token) return Boolean;
    --  Return whether ``Self`` is a null token reference
 
-   function Kind (Self : Lk_Token'Class) return Token_Kind_Ref;
+   function Kind (Self : Lk_Token) return Token_Kind_Ref;
    --  Return the token kind for ``Self``
 
-   function "<" (Left, Right : Lk_Token'Class) return Boolean;
+   function "<" (Left, Right : Lk_Token) return Boolean;
    --  Assuming ``Left`` and ``Right`` belong to the same analysis unit, return
    --  whether ``Left`` came before ``Right`` in the source file.
    --
@@ -331,13 +331,13 @@ package Langkit_Support.Generic_API.Analysis is
    --  Return a reference to the previous token in the corresponding analysis
    --  unit.
 
-   function Image (Self : Lk_Token'Class) return String;
+   function Image (Self : Lk_Token) return String;
    --  Debug helper: return a human-readable text to represent a token
 
-   function Text (Self : Lk_Token'Class) return Text_Type;
+   function Text (Self : Lk_Token) return Text_Type;
    --  Return the text of the token as ``Text_Type``
 
-   function Text (First, Last : Lk_Token'Class) return Text_Type;
+   function Text (First, Last : Lk_Token) return Text_Type;
    --  Compute the source buffer slice corresponding to the text that spans
    --  between the ``First`` and ``Last`` tokens (both included). This yields
    --  an empty slice if ``Last`` actually appears before ``First``.
@@ -345,23 +345,23 @@ package Langkit_Support.Generic_API.Analysis is
    --  This raises a ``Precondition_Failure`` if ``First`` and ``Last`` don't
    --  belong to the same analysis unit.
 
-   function Is_Trivia (Self : Lk_Token'Class) return Boolean;
+   function Is_Trivia (Self : Lk_Token) return Boolean;
    --  Return whether this token is a trivia. If it's not, it's a regular token
 
-   function Index (Self : Lk_Token'Class) return Token_Index;
+   function Index (Self : Lk_Token) return Token_Index;
    --  One-based index for this token/trivia. Tokens and trivias get their own
    --  index space.
 
-   function Sloc_Range (Self : Lk_Token'Class) return Source_Location_Range;
+   function Sloc_Range (Self : Lk_Token) return Source_Location_Range;
    --  Source location range for this token. Note that the end bound is
    --  exclusive.
 
-   function Origin_Filename (Self : Lk_Token'Class) return String;
+   function Origin_Filename (Self : Lk_Token) return String;
    --  Return the name of the file whose content was scanned to create Token.
    --  Return an empty string if the source comes from a memory buffer instead
    --  of a file.
 
-   function Origin_Charset (Self : Lk_Token'Class) return String;
+   function Origin_Charset (Self : Lk_Token) return String;
    --  Return the charset used to decode the source that was scanned to create
    --  Token. Return an empty string if the source was already decoded during
    --  the scan.
