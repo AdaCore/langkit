@@ -28,7 +28,6 @@ with GNAT.Traceback.Symbolic; use GNAT.Traceback.Symbolic;
 
 with GNATCOLL.Strings; use GNATCOLL.Strings;
 
-with Langkit_Support.Functional_Lists;
 with Langkit_Support.Images;
 
 pragma Warnings (Off, "attribute Update");
@@ -57,12 +56,15 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Atomic_Relation_Vectors.Elements_Array);
    function Image (Self : Atomic_Relation_Vector) return String;
 
-   package Any_Relation_Lists is new Langkit_Support.Functional_Lists
-     (Any_Rel);
-   subtype Any_Relation_List is Any_Relation_Lists.List;
-   --  Lists of ``Any`` relations
+   package Any_Relation_Vectors is new Langkit_Support.Vectors (Any_Rel);
+   subtype Any_Relation_Vector is Any_Relation_Vectors.Vector;
+   type Any_Vector_Access is access all Any_Relation_Vector;
 
-   function Image (Self : Any_Relation_List) return String;
+   function Image is new Langkit_Support.Images.Array_Image
+     (Any_Rel,
+      Positive,
+      Any_Relation_Vectors.Elements_Array);
+   function Image (Self : Any_Relation_Vector) return String;
 
    --------------------------
    -- Supporting functions --
@@ -239,7 +241,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  relation leaf, ``Unifies`` + ``Atoms`` will contain an autonomous
       --  relation to solve (this is a solver "branch").
 
-      Anys : Any_Relation_List := Any_Relation_Lists.No_List;
+      Anys : Any_Vector_Access;
       --  Remaining list of ``Any`` relations to traverse
 
       Cut_Dead_Branches : Boolean := False;
@@ -322,6 +324,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Ret.Vars := Vars;
          Ret.Atoms := new Atomic_Relation_Vector;
          Ret.Unifies := new Atomic_Relation_Vector;
+         Ret.Anys := new Any_Relation_Vector;
          Ret.Sort_Ctx := Create (Vars.all);
          Ret.Tried_Solutions := new Natural'(0);
       end return;
@@ -1411,13 +1414,16 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       procedure Free is new Ada.Unchecked_Deallocation
         (Atomic_Relation_Vector, Atoms_Vector_Access);
       procedure Free is new Ada.Unchecked_Deallocation
+        (Any_Relation_Vector, Any_Vector_Access);
+      procedure Free is new Ada.Unchecked_Deallocation
         (Natural, Nat_Access);
    begin
       Ctx.Unifies.Destroy;
       Ctx.Atoms.Destroy;
-      Any_Relation_Lists.Destroy (Ctx.Anys);
+      Ctx.Anys.Destroy;
       Free (Ctx.Unifies);
       Free (Ctx.Atoms);
+      Free (Ctx.Anys);
       Free (Ctx.Tried_Solutions);
       Destroy (Ctx.Sort_Ctx);
 
@@ -1537,10 +1543,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  Returns whether we should abort current path or not, in the case of
       --  an ``All`` relation.
 
-      function Recurse (Anys : Any_Relation_List) return Boolean;
-      --  If ``Anys`` is empty, just try to evaluate ``Ctx.Atoms`` and return
-      --  the result. Otherwise, recurse on ``Any``'s head,
-      --  keeping the tail for the recursion.
+      function Recurse return Boolean;
+      --  If ``Ctx.Anys`` is empty, just try to evaluate ``Ctx.Atoms`` and
+      --  return the result. Otherwise, recurse on ``Any``'s head, keeping the
+      --  tail for the recursion.
 
       function Cleanup (Val : Boolean) return Boolean;
       --  Cleanup helper to call before exitting ``Solve_Compound``
@@ -1554,8 +1560,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       procedure Cleanup_Aliases;
       --  Shortcut to cleanup aliases in ``Ctx.Vars``
-
-      use Any_Relation_Lists;
 
       ------------------
       -- Try_Solution --
@@ -1627,6 +1631,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Initial_Atoms_Length   : Natural renames Ctx.Atoms.Last_Index;
       Initial_Unifies_Length : Natural renames Ctx.Unifies.Last_Index;
+      Initial_Anys_Length    : Natural renames Ctx.Anys.Last_Index;
 
       --------------------
       -- Create_Aliases --
@@ -1654,6 +1659,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       begin
          Ctx.Atoms.Cut (Initial_Atoms_Length);
          Ctx.Unifies.Cut (Initial_Unifies_Length);
+         Ctx.Anys.Cut (Initial_Anys_Length);
       end Branch_Cleanup;
 
       -------------
@@ -1698,31 +1704,43 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       -- Recurse --
       -------------
 
-      function Recurse (Anys : Any_Relation_List) return Boolean is
+      function Recurse return Boolean is
       begin
          if Trav_Trace.Is_Active then
             Trav_Trace.Trace ("Before recursing in Solve_Recurse");
             Trav_Trace.Trace (Image (Ctx.Atoms.all));
-            Trav_Trace.Trace (Image (Anys));
+            Trav_Trace.Trace (Image (Ctx.Anys.all));
          end if;
 
-         if Has_Element (Anys) then
+         if not Ctx.Anys.Is_Empty then
 
             --  The relation we are trying to solve here is the equivalent of:
             --
-            --     Ctx.Atoms & All (Anys)
+            --     Ctx.Atoms & All (Ctx.Anys)
             --
             --  Exploring solutions for this complex relation is not linear: we
-            --  need recursion. Start with the head of ``Anys``:
+            --  need recursion. Start with the head of ``Ctx.Anys``:
             --
-            --     Ctx.Atoms & Head (Anys)
+            --     Ctx.Atoms & Head (Ctx.Anys)
             --
             --  And leave the rest for later:
             --
-            --     Ctx.Atoms & Tail (Anys)
+            --     Ctx.Atoms & Tail (Ctx.Anys)
 
-            return Solve_Compound
-              (Head (Anys), Ctx'Update (Anys => Tail (Anys)));
+            declare
+               Head : constant Any_Rel := Ctx.Anys.Pop;
+            begin
+               return Result : constant Boolean := Solve_Compound (Head, Ctx)
+               do
+                  --  Just like the above call to ``Solve_Compound`` is
+                  --  supposed to leave upon return ``Ctx.Anys`` as it was at
+                  --  the beginning of the call, we should restore it here
+                  --  before returning to the state it was when ``Recurse`` was
+                  --  called.
+
+                  Ctx.Anys.Append (Head);
+               end return;
+            end;
 
          else
             --  We are currently exploring only one alternative: just
@@ -1757,8 +1775,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          --  vectors (``Anys`` and ``Ctx.Atoms``)
 
          declare
-            Anys : Any_Relation_List := Ctx.Anys;
-            --  List of direct sub-relations of ``Self`` that are ``Any``
+            Anys : Any_Relation_Vector renames Ctx.Anys.all;
          begin
             for Sub_Rel of Comp.Rels loop
                case Sub_Rel.Kind is
@@ -1777,7 +1794,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   --  an ``All`` as well, so it if is compound, it must be an
                   --  ``Any``.
                   pragma Assert (Sub_Rel.Compound_Rel.Kind = Kind_Any);
-                  Anys := Sub_Rel & Anys;
+                  Anys.Append (Sub_Rel);
 
                when Atomic =>
                   if not Process_Atom (Sub_Rel) then
@@ -1816,7 +1833,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                Cleanup_Aliases;
             end if;
 
-            return Cleanup (Recurse (Anys));
+            return Cleanup (Recurse);
          end;
 
       when Kind_Any =>
@@ -1835,7 +1852,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                      null;
                   end;
 
-                  if not Recurse (Ctx.Anys) then
+                  if not Recurse then
                      return Cleanup (False);
                   end if;
 
@@ -2517,18 +2534,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -- Image --
    -----------
 
-   function Image (Self : Any_Relation_List) return String is
-
-      function Img (Rel : Any_Rel) return String is
-        (Image (Rel));
-
-      function Anys_Array_Image is new Langkit_Support.Images.Array_Image
-        (Any_Rel,
-         Positive,
-         Any_Relation_Lists.T_Array,
-         Image => Img);
+   function Image (Self : Any_Relation_Vector) return String is
    begin
-      return Anys_Array_Image (Any_Relation_Lists.To_Array (Self));
+      return Image (Self.To_Array);
    end Image;
 
    -----------
