@@ -1537,6 +1537,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  Returns whether we should abort current path or not, in the case of
       --  an ``All`` relation.
 
+      function Recurse (Anys : Any_Relation_List) return Boolean;
+      --  If ``Anys`` is empty, just try to evaluate ``Ctx.Atoms`` and return
+      --  the result. Otherwise, recurse on ``Any``'s head,
+      --  keeping the tail for the recursion.
+
       function Cleanup (Val : Boolean) return Boolean;
       --  Cleanup helper to call before exitting ``Solve_Compound``
 
@@ -1689,6 +1694,46 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          return True;
       end Process_Atom;
 
+      -------------
+      -- Recurse --
+      -------------
+
+      function Recurse (Anys : Any_Relation_List) return Boolean is
+      begin
+         if Trav_Trace.Is_Active then
+            Trav_Trace.Trace ("Before recursing in Solve_Recurse");
+            Trav_Trace.Trace (Image (Ctx.Atoms.all));
+            Trav_Trace.Trace (Image (Anys));
+         end if;
+
+         if Has_Element (Anys) then
+
+            --  The relation we are trying to solve here is the equivalent of:
+            --
+            --     Ctx.Atoms & All (Anys)
+            --
+            --  Exploring solutions for this complex relation is not linear: we
+            --  need recursion. Start with the head of ``Anys``:
+            --
+            --     Ctx.Atoms & Head (Anys)
+            --
+            --  And leave the rest for later:
+            --
+            --     Ctx.Atoms & Tail (Anys)
+
+            return Solve_Compound
+              (Head (Anys), Ctx'Update (Anys => Tail (Anys)));
+
+         else
+            --  We are currently exploring only one alternative: just
+            --  look for a solution in ``Ctx.Atoms``.
+
+            return Result : constant Boolean := Try_Solution (Ctx.Atoms.all) do
+               Cleanup_Aliases;
+            end return;
+         end if;
+      end Recurse;
+
    begin
       Trav_Trace.Increase_Indent ("In Solve_Compound " & Self.Kind'Image);
 
@@ -1771,35 +1816,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                Cleanup_Aliases;
             end if;
 
-            if Has_Element (Anys) then
-               --  The relation we are trying to solve in this instance of
-               --  ``Solve_Compound`` is the equivalent of:
-               --
-               --     Ctx.Atoms & All (Anys)
-               --
-               --  Exploring solutions for this complex relation is not linear:
-               --  we need recursion. Start with the head of ``Anys``:
-               --
-               --     Ctx.Atoms & Head (Anys)
-               --
-               --  And leave the rest for later:
-               --
-               --     Ctx.Atoms & Tail (Anys)
-               if Trav_Trace.Is_Active then
-                  Trav_Trace.Trace ("Before recursing in solve All");
-                  Trav_Trace.Trace (Image (Ctx.Atoms.all));
-                  Trav_Trace.Trace (Image (Anys));
-               end if;
-
-               return Cleanup
-                 (Solve_Compound
-                    (Head (Anys), Ctx'Update (Anys => Tail (Anys))));
-
-            else
-               --  We don't have any Any relation left, so we have a flat list
-               --  of atoms to solve.
-               return Cleanup (Try_Solution (Ctx.Atoms.all));
-            end if;
+            return Cleanup (Recurse (Anys));
          end;
 
       when Kind_Any =>
@@ -1818,32 +1835,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                      null;
                   end;
 
-                  if Has_Element (Ctx.Anys) then
-                     --  Assuming ``Ctx.Anys`` is not empty, we need to find
-                     --  solutions for:
-                     --
-                     --     Ctx.Atoms & Ctx.Anys
-                     --
-                     --  As usual, try first to solve:
-                     --
-                     --     Ctx.Atoms & Head (Ctx.Anys)
-                     --
-                     --  Leaving the following for the recursion:
-                     --
-                     --     Ctx.Atoms & Tail (Ctx.Anys)
-                     if not Solve_Compound
-                       (Head (Ctx.Anys), Ctx'Update (Anys => Tail (Ctx.Anys)))
-                     then
-                        return Cleanup (False);
-                     end if;
-
-                  else
-                     --  We are currently exploring only one alternative: just
-                     --  look for a solution in ``Ctx.Atoms``.
-                     if not Try_Solution (Ctx.Atoms.all) then
-                        return Cleanup (False);
-                     end if;
-                     Cleanup_Aliases;
+                  if not Recurse (Ctx.Anys) then
+                     return Cleanup (False);
                   end if;
 
                when Compound =>
