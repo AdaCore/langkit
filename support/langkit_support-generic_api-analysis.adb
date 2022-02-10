@@ -403,7 +403,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Language --
    --------------
 
-   function Language (Self : Lk_Context'Class) return Language_Id is
+   function Language (Self : Lk_Context) return Language_Id is
    begin
       Reject_Null_Context (Self);
       return Self.Desc;
@@ -422,8 +422,8 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Has_Unit --
    --------------
 
-   function Has_Unit
-     (Self : Lk_Context'Class; Unit_Filename : String) return Boolean is
+   function Has_Unit (Self : Lk_Context; Unit_Filename : String) return Boolean
+   is
    begin
       Reject_Null_Context (Self);
       return Self.Desc.Context_Has_Unit (Self.Internal, Unit_Filename);
@@ -465,7 +465,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Language --
    --------------
 
-   function Language (Self : Lk_Unit'Class) return Language_Id is
+   function Language (Self : Lk_Unit) return Language_Id is
    begin
       Reject_Null_Unit (Self);
       return Self.Context.Desc;
@@ -505,7 +505,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Filename --
    --------------
 
-   function Filename (Self : Lk_Unit'Class) return String is
+   function Filename (Self : Lk_Unit) return String is
    begin
       Reject_Null_Unit (Self);
 
@@ -570,7 +570,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Text --
    ----------
 
-   function Text (Self : Lk_Unit'Class) return Text_Type is
+   function Text (Self : Lk_Unit) return Text_Type is
    begin
       return Text (Self.First_Token, Self.Last_Token);
    end Text;
@@ -579,7 +579,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Language --
    --------------
 
-   function Language (Self : Lk_Node'Class) return Language_Id is
+   function Language (Self : Lk_Node) return Language_Id is
    begin
       Check_Safety_Net (Self);
       Reject_Null_Node (Self);
@@ -626,7 +626,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Is_Null --
    -------------
 
-   function Is_Null (Self : Lk_Node'Class) return Boolean is
+   function Is_Null (Self : Lk_Node) return Boolean is
    begin
       return Self.Internal.Node = No_Internal_Node;
    end Is_Null;
@@ -647,7 +647,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Image --
    -----------
 
-   function Image (Self : Lk_Node'Class) return String is
+   function Image (Self : Lk_Node) return String is
    begin
       Check_Safety_Net (Self);
       return (if Self.Internal.Node = No_Internal_Node
@@ -660,11 +660,11 @@ package body Langkit_Support.Generic_API.Analysis is
    -----------
 
    procedure Print
-     (Node        : Lk_Node'Class;
+     (Node        : Lk_Node;
       Show_Slocs  : Boolean := True;
       Line_Prefix : String := "")
    is
-      T               : constant Type_Ref := Type_Of (Lk_Node (Node));
+      T               : constant Type_Ref := Type_Of (Node);
       Attr_Prefix     : constant String := Line_Prefix & "|";
       Children_Prefix : constant String := Line_Prefix & "|  ";
    begin
@@ -707,7 +707,7 @@ package body Langkit_Support.Generic_API.Analysis is
             if not Is_Property (M) then
                declare
                   Child : constant Lk_Node :=
-                    As_Node (Eval_Node_Member (Lk_Node (Node), M));
+                    As_Node (Eval_Node_Member (Node, M));
                   Name  : constant String :=
                     Image (Format_Name (Member_Name (M), Lower));
                begin
@@ -739,7 +739,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Children_Count --
    --------------------
 
-   function Children_Count (Self : Lk_Node'Class) return Natural is
+   function Children_Count (Self : Lk_Node) return Natural is
    begin
       Check_Safety_Net (Self);
       Reject_Null_Node (Self);
@@ -783,7 +783,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Children --
    --------------
 
-   function Children (Self : Lk_Node'Class) return Lk_Node_Array is
+   function Children (Self : Lk_Node) return Lk_Node_Array is
       --  The following call to Children_Count below takes care of sanitizing
       --  Self.
       Count : constant Natural := Self.Children_Count;
@@ -822,8 +822,8 @@ package body Langkit_Support.Generic_API.Analysis is
    --------------
 
    function Traverse
-     (Self  : Lk_Node'Class;
-      Visit : access function (Node : Lk_Node'Class) return Visit_Status)
+     (Self  : Lk_Node;
+      Visit : access function (Node : Lk_Node) return Visit_Status)
       return Visit_Status
    is
       Desc : Language_Descriptor renames Self.Desc.all;
@@ -880,8 +880,8 @@ package body Langkit_Support.Generic_API.Analysis is
    --------------
 
    procedure Traverse
-     (Self  : Lk_Node'Class;
-      Visit : access function (Node : Lk_Node'Class) return Visit_Status)
+     (Self  : Lk_Node;
+      Visit : access function (Node : Lk_Node) return Visit_Status)
    is
       Dummy : Visit_Status := Self.Traverse (Visit);
    begin
@@ -928,7 +928,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Text --
    ----------
 
-   function Text (Self : Lk_Node'Class) return Text_Type is
+   function Text (Self : Lk_Node) return Text_Type is
    begin
       return Text (Self.Token_Start, Self.Token_End);
    end Text;
@@ -937,7 +937,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Sloc_Range --
    ----------------
 
-   function Sloc_Range (Self : Lk_Node'Class) return Source_Location_Range is
+   function Sloc_Range (Self : Lk_Node) return Source_Location_Range is
       Start_SR : constant Source_Location_Range := Self.Token_Start.Sloc_Range;
       End_SR   : constant Source_Location_Range := Self.Token_End.Sloc_Range;
    begin
@@ -948,10 +948,10 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Is_Incomplete --
    -------------------
 
-   function Is_Incomplete (Self : Lk_Node'Class) return Boolean is
+   function Is_Incomplete (Self : Lk_Node) return Boolean is
       LGC : Lk_Node;
    begin
-      if Is_List_Node (Type_Of (Lk_Node (Self))) then
+      if Is_List_Node (Type_Of (Self)) then
          LGC := (if Self.Children_Count /= 0
                  then Self.Child (Self.Children_Count)
                  else No_Lk_Node);
@@ -965,7 +965,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Language --
    --------------
 
-   function Language (Self : Lk_Token'Class) return Language_Id is
+   function Language (Self : Lk_Token) return Language_Id is
    begin
       Check_Safety_Net (Self);
       Reject_Null_Token (Self);
@@ -1015,7 +1015,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Is_Null --
    -------------
 
-   function Is_Null (Self : Lk_Token'Class) return Boolean is
+   function Is_Null (Self : Lk_Token) return Boolean is
    begin
       return Self.Desc = null;
    end Is_Null;
@@ -1024,7 +1024,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Kind --
    ----------
 
-   function Kind (Self : Lk_Token'Class) return Token_Kind_Ref is
+   function Kind (Self : Lk_Token) return Token_Kind_Ref is
       D : Stored_Token_Data;
    begin
       Check_Safety_Net (Self);
@@ -1038,7 +1038,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- "<" --
    ---------
 
-   function "<" (Left, Right : Lk_Token'Class) return Boolean is
+   function "<" (Left, Right : Lk_Token) return Boolean is
    begin
       Check_Safety_Net (Left);
       Check_Safety_Net (Right);
@@ -1097,7 +1097,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Image --
    -----------
 
-   function Image (Self : Lk_Token'Class) return String is
+   function Image (Self : Lk_Token) return String is
    begin
       Check_Safety_Net (Self);
       if Self.Is_Null then
@@ -1118,7 +1118,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Text --
    ----------
 
-   function Text (Self : Lk_Token'Class) return Text_Type is
+   function Text (Self : Lk_Token) return Text_Type is
       D : Stored_Token_Data;
    begin
       Check_Safety_Net (Self);
@@ -1132,7 +1132,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Text --
    ----------
 
-   function Text (First, Last : Lk_Token'Class) return Text_Type is
+   function Text (First, Last : Lk_Token) return Text_Type is
       FD, LD : Stored_Token_Data;
    begin
       Check_Safety_Net (First);
@@ -1148,7 +1148,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Is_Trivia --
    ---------------
 
-   function Is_Trivia (Self : Lk_Token'Class) return Boolean is
+   function Is_Trivia (Self : Lk_Token) return Boolean is
    begin
       Check_Safety_Net (Self);
       Reject_Null_Token (Self);
@@ -1159,7 +1159,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Index --
    -----------
 
-   function Index (Self : Lk_Token'Class) return Token_Index is
+   function Index (Self : Lk_Token) return Token_Index is
    begin
       Check_Safety_Net (Self);
       Reject_Null_Token (Self);
@@ -1172,7 +1172,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Sloc_Range --
    ----------------
 
-   function Sloc_Range (Self : Lk_Token'Class) return Source_Location_Range is
+   function Sloc_Range (Self : Lk_Token) return Source_Location_Range is
    begin
       Check_Safety_Net (Self);
       Reject_Null_Token (Self);
@@ -1183,7 +1183,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Origin_Filename --
    ---------------------
 
-   function Origin_Filename (Self : Lk_Token'Class) return String is
+   function Origin_Filename (Self : Lk_Token) return String is
       use GNATCOLL.VFS;
    begin
       Check_Safety_Net (Self);
@@ -1195,7 +1195,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- Origin_Charset --
    --------------------
 
-   function Origin_Charset (Self : Lk_Token'Class) return String is
+   function Origin_Charset (Self : Lk_Token) return String is
       use Ada.Strings.Unbounded;
    begin
       Check_Safety_Net (Self);

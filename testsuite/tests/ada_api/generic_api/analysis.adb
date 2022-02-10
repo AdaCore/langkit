@@ -118,13 +118,13 @@ begin
 
    Put_Line ("Traversing its parsing tree...");
    declare
-      function Visit (N : Lk_Node'Class) return Visit_Status;
+      function Visit (N : Lk_Node) return Visit_Status;
 
       -----------
       -- Visit --
       -----------
 
-      function Visit (N : Lk_Node'Class) return Visit_Status is
+      function Visit (N : Lk_Node) return Visit_Status is
       begin
          Put_Line (N.Image);
          return Into;
