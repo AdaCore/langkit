@@ -47,7 +47,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    package Atomic_Relation_Vectors is new Langkit_Support.Vectors
      (Atomic_Relation);
    subtype Atomic_Relation_Vector is Atomic_Relation_Vectors.Vector;
-   type Atoms_Vector_Access is access all Atomic_Relation_Vector;
    --  Vectors of atomic relations
 
    function Image is new Langkit_Support.Images.Array_Image
@@ -58,7 +57,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
    package Any_Relation_Vectors is new Langkit_Support.Vectors (Any_Rel);
    subtype Any_Relation_Vector is Any_Relation_Vectors.Vector;
-   type Any_Vector_Access is access all Any_Relation_Vector;
+   --  Vectors of Any relations
 
    function Image is new Langkit_Support.Images.Array_Image
      (Any_Rel,
@@ -113,7 +112,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    procedure Free is new Ada.Unchecked_Deallocation
      (Atom_Vector_Array, Atom_Vector_Array_Access);
 
-   type Sort_Context_Type is record
+   type Sort_Context is record
       Using_Atoms : Atom_Vector_Array_Access;
       --  Map each logic var Id to the list of atoms that use that variable
 
@@ -135,10 +134,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    end record;
    --  Data used when doing a topological sort (used only in
    --  Solving_Context.Sort_Ctx), when we reach a complete potential solution.
-
-   type Sort_Context is access all Sort_Context_Type;
-
-   type Nat_Access is access all Natural;
 
    type Logic_Var_Array_Access is access all Logic_Var_Array;
    procedure Free is new Ada.Unchecked_Deallocation
@@ -171,7 +166,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Topo_Sort
      (Atoms, Unifies : Atomic_Relation_Vector;
       Vars           : Logic_Var_Array;
-      Sort_Ctx       : Sort_Context;
+      Sort_Ctx       : in out Sort_Context;
       Has_Orphan     : out Boolean)
       return Atomic_Relation_Vectors.Elements_Array;
    --  Do a topological sort of the atomic relations in ``Atoms``. Atoms with
@@ -201,14 +196,14 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Simplify
      (Self     : Relation;
       Vars     : Logic_Var_Array;
-      Sort_Ctx : Sort_Context) return Relation;
+      Sort_Ctx : in out Sort_Context) return Relation;
    --  Try to split Any relations in ``Self`` looking for contradictions in its
    --  atoms through a depth first traversal. Return the simplified relation.
 
    function Has_Contradiction
      (Atoms, Unifies : Atomic_Relation_Vector;
       Vars           : Logic_Var_Array;
-      Sort_Ctx       : Sort_Context) return Boolean;
+      Sort_Ctx       : in out Sort_Context) return Boolean;
    --  Return whether the given sequence of atoms contains a contradiction,
    --  i.e. if two or more of its atoms make each other unsatisfied. This
    --  function works even for incomplete sequences, for instance when one atom
@@ -229,19 +224,19 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  variables to the user callback and to reset aliasing information when
       --  leaving a branch.
 
-      Unifies : Atoms_Vector_Access;
+      Unifies : Atomic_Relation_Vector;
       --  Accumulator in ``Solve_Compound`` to hold the current list of
       --  ``Unify`` in the recursive relation traversal: for each relation
       --  leaf, ``Unifies`` will contain all the ``Unify`` atoms necessary to
       --  use in order to interpret the remaining ``Atoms``.
 
-      Atoms : Atoms_Vector_Access;
+      Atoms : Atomic_Relation_Vector;
       --  Accumulator in ``Solve_Compound`` to hold the current list of atoms
       --  (minus ``Unify`` atoms) in the recursive relation traversal: for each
       --  relation leaf, ``Unifies`` + ``Atoms`` will contain an autonomous
       --  relation to solve (this is a solver "branch").
 
-      Anys : Any_Vector_Access;
+      Anys : Any_Relation_Vector;
       --  Remaining list of ``Any`` relations to traverse
 
       Cut_Dead_Branches : Boolean := False;
@@ -253,7 +248,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  potential solution. Stored once in the context to save ourselves
       --  from reallocating data structures everytime.
 
-      Tried_Solutions : Nat_Access;
+      Tried_Solutions : Natural;
       --  Number of tried solutions. Stored for analytics purpose, and
       --  potentially for timeout.
    end record;
@@ -276,7 +271,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Destroy a solving context, and associated data
 
    function Solve_Compound
-     (Self : Compound_Relation; Ctx : Solving_Context) return Boolean;
+     (Self : Compound_Relation; Ctx : in out Solving_Context) return Boolean;
    --  Look for valid solutions in ``Self`` & ``Ctx``. Return whether to
    --  continue looking for other solutions.
 
@@ -304,11 +299,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
    function Create (Vars : Logic_Var_Array) return Sort_Context is
    begin
-      return Result : constant Sort_Context := new Sort_Context_Type do
-         Result.Using_Atoms := new Atom_Vector_Array'
-           (Vars'Range => Atom_Vectors.Empty_Vector);
-         Result.Has_Contradiction_Counter := 0;
-      end return;
+      return
+        (Using_Atoms               => new Atom_Vector_Array'
+           (Vars'Range => Atom_Vectors.Empty_Vector),
+         Working_Set               => Atom_Vectors.Empty_Vector,
+         N_Preds                   => Atom_Vectors.Empty_Vector,
+         Has_Contradiction_Counter => 0);
    end Create;
 
    ------------
@@ -322,11 +318,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       return Ret : Solving_Context do
          Ret.Cb := Cb;
          Ret.Vars := Vars;
-         Ret.Atoms := new Atomic_Relation_Vector;
-         Ret.Unifies := new Atomic_Relation_Vector;
-         Ret.Anys := new Any_Relation_Vector;
+         Ret.Atoms := Atomic_Relation_Vectors.Empty_Vector;
+         Ret.Unifies := Atomic_Relation_Vectors.Empty_Vector;
+         Ret.Anys := Any_Relation_Vectors.Empty_Vector;
          Ret.Sort_Ctx := Create (Vars.all);
-         Ret.Tried_Solutions := new Natural'(0);
+         Ret.Tried_Solutions := 0;
       end return;
    end Create;
 
@@ -630,7 +626,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Topo_Sort
      (Atoms, Unifies : Atomic_Relation_Vector;
       Vars           : Logic_Var_Array;
-      Sort_Ctx       : Sort_Context;
+      Sort_Ctx       : in out Sort_Context;
       Has_Orphan     : out Boolean)
       return Atomic_Relation_Vectors.Elements_Array
    is
@@ -838,7 +834,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Simplify
      (Self     : Relation;
       Vars     : Logic_Var_Array;
-      Sort_Ctx : Sort_Context) return Relation
+      Sort_Ctx : in out Sort_Context) return Relation
    is
       Iter_Count : Natural := 0;
       --  Number of times we went through the loop in ``Simplify.Process``, for
@@ -1298,7 +1294,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    function Has_Contradiction
      (Atoms, Unifies : Atomic_Relation_Vector;
       Vars           : Logic_Var_Array;
-      Sort_Ctx       : Sort_Context) return Boolean
+      Sort_Ctx       : in out Sort_Context) return Boolean
    is
       Had_Exception : Boolean := False;
       Exc           : Exception_Occurrence;
@@ -1374,18 +1370,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -------------
 
    procedure Destroy (Sort_Ctx : in out Sort_Context) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Sort_Context_Type, Sort_Context);
    begin
-
       Sort_Ctx.N_Preds.Destroy;
       Sort_Ctx.Working_Set.Destroy;
       for Atoms of Sort_Ctx.Using_Atoms.all loop
          Atoms.Destroy;
       end loop;
       Free (Sort_Ctx.Using_Atoms);
-
-      Free (Sort_Ctx);
    end Destroy;
 
    -------------
@@ -1393,20 +1384,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -------------
 
    procedure Destroy (Ctx : in out Solving_Context) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Atomic_Relation_Vector, Atoms_Vector_Access);
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Any_Relation_Vector, Any_Vector_Access);
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Natural, Nat_Access);
    begin
       Ctx.Unifies.Destroy;
       Ctx.Atoms.Destroy;
       Ctx.Anys.Destroy;
-      Free (Ctx.Unifies);
-      Free (Ctx.Atoms);
-      Free (Ctx.Anys);
-      Free (Ctx.Tried_Solutions);
       Destroy (Ctx.Sort_Ctx);
 
       --  Cleanup logic vars for future solver runs using them. Note that no
@@ -1512,7 +1493,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --------------------
 
    function Solve_Compound
-     (Self : Compound_Relation; Ctx : Solving_Context) return Boolean
+     (Self : Compound_Relation; Ctx : in out Solving_Context) return Boolean
    is
       Comp : Compound_Relation_Type renames Self.Compound_Rel;
 
@@ -1568,16 +1549,16 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             Solv_Trace.Increase_Indent ("In try solution");
             Solv_Trace.Trace (Image (Atoms));
          end if;
-         Ctx.Tried_Solutions.all := Ctx.Tried_Solutions.all + 1;
+         Ctx.Tried_Solutions := Ctx.Tried_Solutions + 1;
 
-         Sol_Trace.Trace ("Tried solutions: " & Ctx.Tried_Solutions.all'Image);
+         Sol_Trace.Trace ("Tried solutions: " & Ctx.Tried_Solutions'Image);
 
          declare
             use Atomic_Relation_Vectors;
             Sorting_Error : Boolean;
             Sorted_Atoms  : constant Elements_Array :=
               Topo_Sort (Atoms,
-                         Ctx.Unifies.all,
+                         Ctx.Unifies,
                          Ctx.Vars.all,
                          Ctx.Sort_Ctx,
                          Sorting_Error);
@@ -1621,7 +1602,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       procedure Create_Aliases is
       begin
-         Create_Aliases (Ctx.Vars.all, Ctx.Unifies.all);
+         Create_Aliases (Ctx.Vars.all, Ctx.Unifies);
       end Create_Aliases;
 
       ---------------------
@@ -1692,8 +1673,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       begin
          if Trav_Trace.Is_Active then
             Trav_Trace.Trace ("Before recursing in Solve_Recurse");
-            Trav_Trace.Trace (Image (Ctx.Atoms.all));
-            Trav_Trace.Trace (Image (Ctx.Anys.all));
+            Trav_Trace.Trace (Image (Ctx.Atoms));
+            Trav_Trace.Trace (Image (Ctx.Anys));
          end if;
 
          if not Ctx.Anys.Is_Empty then
@@ -1729,7 +1710,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             --  look for a solution in ``Ctx.Atoms``.
 
             begin
-               Result := Try_Solution (Ctx.Atoms.all);
+               Result := Try_Solution (Ctx.Atoms);
             exception
                when others =>
                   Cleanup_Aliases;
@@ -1762,67 +1743,61 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          --  First step: gather ``Any`` relations and atoms in their own
          --  vectors (``Anys`` and ``Ctx.Atoms``)
 
-         declare
-            Anys : Any_Relation_Vector renames Ctx.Anys.all;
-         begin
-            for Sub_Rel of Comp.Rels loop
-               case Sub_Rel.Kind is
-               when Compound =>
-                  --  The ``Create_All`` inlines the sub-relations of ``All``
-                  --  relations passed to it in the relation it returns. For
-                  --  instance:
-                  --
-                  --     Create_All ((Create_All ((A, B)), C))
-                  --
-                  --  is equivalent to:
-                  --
-                  --     Create_All ((A, B, C))
-                  --
-                  --  ``Self`` is an ``All`` relation, so ``Sub_Rel`` cannot be
-                  --  an ``All`` as well, so it if is compound, it must be an
-                  --  ``Any``.
-                  pragma Assert (Sub_Rel.Compound_Rel.Kind = Kind_Any);
-                  Anys.Append (Sub_Rel);
-
-               when Atomic =>
-                  if not Process_Atom (Sub_Rel) then
-                     return Cleanup (True);
-                  end if;
-               end case;
-            end loop;
-
-            if Ctx.Cut_Dead_Branches then
-               --  Exponential resolution optimization: check if we have a
-               --  contradiction in the list of atoms we have accumulated so
-               --  far.
+         for Sub_Rel of Comp.Rels loop
+            case Sub_Rel.Kind is
+            when Compound =>
+               --  The ``Create_All`` inlines the sub-relations of ``All``
+               --  relations passed to it in the relation it returns. For
+               --  instance:
                --
-               --  TODO??? PROBLEM: While this avoids exponential resolutions,
-               --  it also makes the default algorithm quadratic (?), since we
-               --  re-iterate on all atoms at every depth of the recursion.
-               --  What we could do is:
+               --     Create_All ((Create_All ((A, B)), C))
                --
-               --  1. Either not activate this opt for certain trees.
+               --  is equivalent to:
                --
-               --  2. Either try to check only for new atoms. This seems
-               --     hard/impossible since new constraints are added at every
-               --     recursion, so old atoms need to be checked again for
-               --     completeness. But maybe there is a way. Investigate
-               --     later.
+               --     Create_All ((A, B, C))
+               --
+               --  ``Self`` is an ``All`` relation, so ``Sub_Rel`` cannot be an
+               --  ``All`` as well, so it if is compound, it must be an
+               --  ``Any``.
+               pragma Assert (Sub_Rel.Compound_Rel.Kind = Kind_Any);
+               Ctx.Anys.Append (Sub_Rel);
 
-               Create_Aliases;
-               if Has_Contradiction
-                 (Ctx.Atoms.all, Ctx.Unifies.all, Ctx.Vars.all, Ctx.Sort_Ctx)
-               then
-                  if Solv_Trace.Active then
-                     Solv_Trace.Trace ("Aborting due to exp res optim");
-                  end if;
+            when Atomic =>
+               if not Process_Atom (Sub_Rel) then
                   return Cleanup (True);
                end if;
-               Cleanup_Aliases;
-            end if;
+            end case;
+         end loop;
 
-            return Cleanup (Recurse);
-         end;
+         if Ctx.Cut_Dead_Branches then
+            --  Exponential resolution optimization: check if we have a
+            --  contradiction in the list of atoms we have accumulated so far.
+            --
+            --  TODO??? PROBLEM: While this avoids exponential resolutions, it
+            --  also makes the default algorithm quadratic (?), since we
+            --  re-iterate on all atoms at every depth of the recursion.  What
+            --  we could do is:
+            --
+            --  1. Either not activate this opt for certain trees.
+            --
+            --  2. Either try to check only for new atoms. This seems
+            --     hard/impossible since new constraints are added at every
+            --     recursion, so old atoms need to be checked again for
+            --     completeness. But maybe there is a way. Investigate later.
+
+            Create_Aliases;
+            if Has_Contradiction
+              (Ctx.Atoms, Ctx.Unifies, Ctx.Vars.all, Ctx.Sort_Ctx)
+            then
+               if Solv_Trace.Active then
+                  Solv_Trace.Trace ("Aborting due to exp res optim");
+               end if;
+               return Cleanup (True);
+            end if;
+            Cleanup_Aliases;
+         end if;
+
+         return Cleanup (Recurse);
 
       when Kind_Any =>
          --  Recurse for each ``Any`` alternative (i.e. sub-relation)
