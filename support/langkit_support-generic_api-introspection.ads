@@ -189,6 +189,10 @@ package Langkit_Support.Generic_API.Introspection is
    --  Return the type of ``Node``. Raise a ``Precondition_Failure`` if
    --  ``Node`` is ``No_Lk_Node``.
 
+   function Type_Matches (Node : Lk_Node; T : Type_Ref) return Boolean;
+   --  Overload of the ``Type_Matches`` function taking a ``Value_Ref``
+   --  argument, for convenience.
+
    ----------------
    -- Enum types --
    ----------------

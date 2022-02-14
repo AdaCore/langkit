@@ -25,6 +25,7 @@ procedure Introspection_Values is
 
    procedure Inspect (Value : Value_Ref);
    procedure Check_Match (Value : Value_Ref; T : Type_Ref);
+   procedure Check_Match (Node : Lk_Node; T : Type_Ref);
    --  Helpers to test value primitives
 
    function Starts_With (S, Prefix : String) return Boolean
@@ -107,6 +108,23 @@ procedure Introspection_Values is
    begin
       Put (Image (Value) & " matches " & Debug_Name (T) & "? ");
       if Type_Matches (Value, T) then
+         Put_Line ("True");
+      else
+         Put_Line ("False");
+      end if;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end Check_Match;
+
+   -----------------
+   -- Check_Match --
+   -----------------
+
+   procedure Check_Match (Node : Lk_Node; T : Type_Ref) is
+   begin
+      Put (Image (Node) & " matches " & Debug_Name (T) & "? ");
+      if Type_Matches (Node, T) then
          Put_Line ("True");
       else
          Put_Line ("False");
@@ -741,19 +759,28 @@ begin
    Check_Match (Value, Bool_Type);
    New_Line;
 
-   Put_Line ("Nodes:");
    declare
       RT : constant Type_Ref := Root_Node_Type (Id);
       DT : constant Type_Ref := From_Index (Id, Last_Derived_Type (RT));
    begin
+      Put_Line ("Nodes:");
+      Put_Line ("... with the Value_Ref API:");
       Check_Match (Value, RT);
       Check_Match (Value, DT);
 
       Value := From_Node (Id, No_Lk_Node);
       Check_Match (Value, RT);
       Check_Match (Value, DT);
+      New_Line;
+
+      Put_Line ("... with the Lk_Node API:");
+      Check_Match (N, RT);
+      Check_Match (N, DT);
+
+      Check_Match (No_Lk_Node, RT);
+      Check_Match (No_Lk_Node, DT);
+      New_Line;
    end;
-   New_Line;
 
    Put_Line ("Error cases:");
    Check_Match (No_Value_Ref, Int_Type);
