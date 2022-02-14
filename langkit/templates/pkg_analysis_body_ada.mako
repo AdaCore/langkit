@@ -13,7 +13,6 @@ with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
 pragma Warnings (Off, "is an internal GNAT unit");
 with Ada.Strings.Unbounded.Aux; use Ada.Strings.Unbounded.Aux;
 pragma Warnings (On, "is an internal GNAT unit");
-with Ada.Unchecked_Conversion;
 
 % if any(a.element_type.is_big_integer_type for a in ctx.array_types):
    with GNATCOLL.GMP.Integers;

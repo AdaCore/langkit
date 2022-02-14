@@ -3,7 +3,6 @@
 <%namespace name="exts" file="extensions.mako" />
 
 with Ada.Text_IO; use Ada.Text_IO;
-with Ada.Unchecked_Conversion;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 

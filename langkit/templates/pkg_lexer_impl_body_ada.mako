@@ -11,8 +11,6 @@
    with_trivia_actions = token_actions('WithTrivia')
 %>
 
-with Ada.Unchecked_Conversion;
-
 with GNATCOLL.VFS;
 
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
