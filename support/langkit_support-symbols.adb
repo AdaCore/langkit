@@ -21,7 +21,6 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 with System;                  use System;
 with System.Storage_Elements; use System.Storage_Elements;
