@@ -130,7 +130,7 @@ package body Langkit_Support.Generic_API.Analysis is
    --  ``Origin Token``.
 
    function "+" (Kind : Raw_Token_Kind) return Token_Kind_Index
-   is (Token_Kind_Index (Kind) + 1);
+   is (Token_Kind_Index (Kind + 1));
    --  ``Raw_Token_Kind`` is a 0-based index type, whereas ``Token_Kind_Index``
    --  is a 1-based one.
 

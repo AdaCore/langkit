@@ -141,9 +141,12 @@ First_Token.Is_Null -> FALSE
 Checking the Token->Unit backlink...
 No_Lk_Token.Unit -> Got a Precondition_Failure exception: null token
 First_Token.Kind -> Example
+Last_Token.Kind -> Termination
 First_Token.Image -> <Token Kind=Example Text="example">
+Last_Token.Image -> <Token Kind=Termination Text="">
 No_Lk_Token.Image -> <No Token>
 First_Token.Text -> "example"
+Last_Token.Text -> ""
 No_Lk_Token.Text -> Got a Precondition_Failure exception: null token
 No_Lk_Token.Next -> <No Token>
 First_Token.Next -> <Token Kind=Whitespace Text=" ">

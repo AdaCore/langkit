@@ -249,10 +249,16 @@ begin
    Put_Line ("First_Token.Kind -> "
              & Image (Format_Name (Token_Kind_Name (U.First_Token.Kind),
                                    Camel_With_Underscores)));
+   Put_Line ("Last_Token.Kind -> "
+             & Image (Format_Name (Token_Kind_Name (U.Last_Token.Kind),
+                                   Camel_With_Underscores)));
    Put_Line ("First_Token.Image -> " & U.First_Token.Image);
+   Put_Line ("Last_Token.Image -> " & U.Last_Token.Image);
    Put_Line ("No_Lk_Token.Image -> " & No_Lk_Token.Image);
    Put_Line ("First_Token.Text -> "
              & Image (U.First_Token.Text, With_Quotes => True));
+   Put_Line ("Last_Token.Text -> "
+             & Image (U.Last_Token.Text, With_Quotes => True));
    Put ("No_Lk_Token.Text -> ");
    begin
       Put_Line (Image (No_Lk_Token.Text, With_Quotes => True));
