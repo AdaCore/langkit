@@ -687,6 +687,15 @@ package body Langkit_Support.Generic_API.Introspection is
       end;
    end Type_Of;
 
+   ------------------
+   -- Type_Matches --
+   ------------------
+
+   function Type_Matches (Node : Lk_Node; T : Type_Ref) return Boolean is
+   begin
+      return From_Node (Language (T), Node).Type_Matches (T);
+   end Type_Matches;
+
    ------------
    -- Adjust --
    ------------

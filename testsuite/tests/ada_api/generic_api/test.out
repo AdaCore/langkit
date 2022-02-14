@@ -1230,10 +1230,17 @@ Basic cases:
 <FooNodeList example.txt:1:1-3:15> matches Bool? False
 
 Nodes:
+... with the Value_Ref API:
 <FooNodeList example.txt:1:1-3:15> matches FooNode? True
 <FooNodeList example.txt:1:1-3:15> matches VarDecl? False
 <No node> matches FooNode? True
 <No node> matches VarDecl? True
+
+... with the Lk_Node API:
+<FooNodeList example.txt:1:1-3:15> matches FooNode? True
+<FooNodeList example.txt:1:1-3:15> matches VarDecl? False
+None matches FooNode? True
+None matches VarDecl? True
 
 Error cases:
 <No_Value_Ref> matches Int? LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
