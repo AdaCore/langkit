@@ -1,0 +1,32 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(or(decl | example))
+    decl <- Decl(@var ?Identifier(@identifier))
+    example <- Example(@example)
+
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Decl : FooNode {
+    @parse_field name: Identifier
+
+    @export fun rebind(from_node: FooNode, to_node: FooNode): Decl = {
+        val rbdng = self.info.rebindings.append_rebinding(
+            from_node.children_env(), to_node.children_env()
+        );
+        val e_info = EntityInfo(
+            md=self.info.md, rebindings=rbdng, from_rebound=false
+        );
+
+        Decl(node=node, info=e_info)
+    }
+}
+
+class Example : FooNode implements TokenNode {
+}
+
+class Identifier : FooNode implements TokenNode {
+}

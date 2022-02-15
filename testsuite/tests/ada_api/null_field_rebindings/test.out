@@ -1,0 +1,12 @@
+== Non-null field==
+<Identifier main.txt:1:21-1:22>
+<| Identifier main.txt:1:21-1:22 [main.txt:1:9] |>
+Equality: FALSE
+
+== Null field==
+None
+None
+Equality: TRUE
+
+main.adb: Done
+Done
