@@ -151,8 +151,12 @@
       Check_Safety_Net (Node);
       Result := Implementation.${field.name} (Node.Internal.Node);
       % if field.type.is_ast_node:
-         return (Internal   => (Result, Node.Internal.Info),
-                 Safety_Net => Node.Safety_Net);
+         if Result = null then
+            return No_${ret_type.api_name};
+         else
+            return (Internal   => (Result, Node.Internal.Info),
+                    Safety_Net => Node.Safety_Net);
+         end if;
       % else:
          return Result;
       % endif
