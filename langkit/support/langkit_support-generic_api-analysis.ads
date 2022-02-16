@@ -368,6 +368,11 @@ package Langkit_Support.Generic_API.Analysis is
    --  Source location range for this token. Note that the end bound is
    --  exclusive.
 
+   function Is_Equivalent (Left, Right : Lk_Token) return Boolean;
+   --  Return whether ``Left`` and ``Right`` are structurally equivalent
+   --  tokens. This means that their position in the stream won't be taken into
+   --  account, only the kind and text of the token.
+
    function Origin_Filename (Self : Lk_Token) return String;
    --  Return the name of the file whose content was scanned to create Token.
    --  Return an empty string if the source comes from a memory buffer instead

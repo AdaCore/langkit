@@ -201,6 +201,17 @@ First_Token .. Other_Unit -> Got a Precondition_Failure exception: tokens from d
 First_Token .. Stale -> Got a Stale_Reference_Error exception: unit was reparsed
 Stale .. Last_Token -> Got a Stale_Reference_Error exception: unit was reparsed
 
+Testing token equivalence for various cases:
+  Non stale references...
+  Is_Equivalent (<Token Kind=Example Text="example">, <Token Kind=Var Text="var">) = FALSE
+  Is_Equivalent (<Token Kind=Var Text="var">, <Token Kind=Var Text="var">) = TRUE
+  Is_Equivalent (<No Token>, <Token Kind=Example Text="example">) = Got a Precondition_Failure exception: null token
+  Is_Equivalent (<Token Kind=Example Text="example">, <No Token>) = Got a Precondition_Failure exception: null token
+
+  Stale references...
+  Got a Stale_Reference_Error exception: unit was reparsed
+  Got a Stale_Reference_Error exception: unit was reparsed
+
 Use of stale node reference:
 Got a Stale_Reference_Error exception: unit was reparsed
 

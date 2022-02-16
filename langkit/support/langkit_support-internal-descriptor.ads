@@ -120,6 +120,10 @@ package Langkit_Support.Internal.Descriptor is
    type Entity_Image_Type is access function
      (Entity : Internal_Entity) return String;
 
+   type Token_Is_Equivalent_Type is access function
+     (Left, Right       : Internal_Token;
+      Left_SN, Right_SN : Token_Safety_Net) return Boolean;
+
    type Create_Enum_Type is access function
      (Enum_Type   : Type_Index;
       Value_Index : Enum_Value_Index) return Internal_Value_Access;
@@ -209,6 +213,8 @@ package Langkit_Support.Internal.Descriptor is
       Node_Last_Attempted_Child : Node_Last_Attempted_Child_Type;
 
       Entity_Image : Entity_Image_Type;
+
+      Token_Is_Equivalent : Token_Is_Equivalent_Type;
 
       --  Operations to build/inspect generic data types
 

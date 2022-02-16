@@ -1216,6 +1216,27 @@ package body Langkit_Support.Generic_API.Analysis is
       return Sloc_Range (Self.TDH.all, Data (Self.Index, Self.TDH.all));
    end Sloc_Range;
 
+   -------------------
+   -- Is_Equivalent --
+   -------------------
+
+   function Is_Equivalent (Left, Right : Lk_Token) return Boolean is
+   begin
+      Check_Safety_Net (Left);
+      Check_Safety_Net (Right);
+      Reject_Null_Token (Left);
+      Reject_Null_Token (Right);
+      if Left.Desc /= Right.Desc then
+         raise Precondition_Failure with "inconsistent languages";
+      end if;
+
+      return Left.Desc.Token_Is_Equivalent.all
+        (Left     => (Left.TDH, Left.Index),
+         Right    => (Right.TDH, Right.Index),
+         Left_SN  => Left.Safety_Net,
+         Right_SN => Right.Safety_Net);
+   end Is_Equivalent;
+
    ---------------------
    -- Origin_Filename --
    ---------------------
