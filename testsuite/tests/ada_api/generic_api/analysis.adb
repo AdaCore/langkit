@@ -356,6 +356,49 @@ begin
    end;
    New_Line;
 
+   Put_Line ("Testing token equivalence for various cases:");
+   declare
+      U2 : constant Lk_Unit := Ctx.Get_From_File ("example2.txt");
+
+      U_Example_Tok : constant Lk_Token := U.First_Token;
+      U_Var_Tok     : constant Lk_Token := U.First_Token.Next.Next.Next.Next;
+      U2_Var_Tok    : constant Lk_Token := U2.First_Token;
+
+      procedure Check (Left, Right : Lk_Token);
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check (Left, Right : Lk_Token) is
+      begin
+         Put ("  ");
+         Put ("Is_Equivalent (" & Image (Left) & ", " & Image (Right)
+              & ") = ");
+         Put_Line (Left.Is_Equivalent (Right)'Image);
+      exception
+         when Exc : Precondition_Failure =>
+            Put_Line ("Got a Precondition_Failure exception: "
+                      & Exception_Message (Exc));
+         when Exc : Stale_Reference_Error =>
+            Put_Line ("Got a Stale_Reference_Error exception: "
+                      & Exception_Message (Exc));
+      end Check;
+   begin
+      Put_Line ("  Non stale references...");
+      Check (U_Example_Tok, U_Var_Tok);
+      Check (U_Var_Tok, U2_Var_Tok);
+      Check (No_Lk_Token, U_Example_Tok);
+      Check (U_Example_Tok, No_Lk_Token);
+      New_Line;
+
+      Put_Line ("  Stale references...");
+      U := Ctx.Get_From_File ("example.txt", Reparse => True);
+      Check (U_Example_Tok, U2_Var_Tok);
+      Check (U2_Var_Tok, U_Example_Tok);
+   end;
+   New_Line;
+
    Put_Line ("Use of stale node reference:");
    U := Ctx.Get_From_File ("example.txt", Reparse => True);
    begin

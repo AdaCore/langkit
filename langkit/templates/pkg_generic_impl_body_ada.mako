@@ -335,5 +335,18 @@ package body ${ada_lib_name}.Generic_Impl is
       return Implementation.Image (+Entity);
    end Entity_Image;
 
+   -------------------------
+   -- Token_Is_Equivalent --
+   -------------------------
+
+   function Token_Is_Equivalent
+     (Left, Right       : Internal_Token;
+      Left_SN, Right_SN : Token_Safety_Net) return Boolean
+   is
+   begin
+      return Common.Is_Equivalent
+        (Wrap_Token (Left_SN.Context, Left),
+         Wrap_Token (Right_SN.Context, Right));
+   end Token_Is_Equivalent;
 
 end ${ada_lib_name}.Generic_Impl;

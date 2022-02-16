@@ -55,6 +55,11 @@ private package ${ada_lib_name}.Generic_Impl is
    function "+" (Token : Common.Token_Reference) return Internal_Token
    is ((Get_Token_TDH (Token), Get_Token_Index (Token)));
 
+   function Wrap_Token
+     (Context : Internal_Context;
+      Token   : Internal_Token) return Common.Token_Reference
+   is (Wrap_Token_Reference (+Context, Token.TDH, Token.Index));
+
    --  Descriptors for grammar rules
 
    <%
@@ -149,6 +154,10 @@ private package ${ada_lib_name}.Generic_Impl is
 
    function Entity_Image (Entity : Internal_Entity) return String;
 
+   function Token_Is_Equivalent
+     (Left, Right       : Internal_Token;
+      Left_SN, Right_SN : Token_Safety_Net) return Boolean;
+
    --  Language descriptor table for ${ada_lib_name}.
    --
    --  We define it here and export its address to avoid making the
@@ -207,6 +216,8 @@ private package ${ada_lib_name}.Generic_Impl is
       Node_Last_Attempted_Child => Node_Last_Attempted_Child'Access,
 
       Entity_Image => Entity_Image'Access,
+
+      Token_Is_Equivalent => Token_Is_Equivalent'Access,
 
       Create_Enum      => Create_Enum'Access,
       Create_Array     => Create_Array'Access,
