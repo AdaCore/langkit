@@ -10,6 +10,7 @@ with Langkit_Support.Internal;          use Langkit_Support.Internal;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
+with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
 with Langkit_Support.Text;              use Langkit_Support.Text;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 
@@ -145,6 +146,9 @@ private package ${ada_lib_name}.Generic_Impl is
      (Node : Internal_Node; Offset : Integer) return Internal_Node;
    function Node_Token_Start (Node : Internal_Node) return Internal_Token;
    function Node_Token_End (Node : Internal_Node) return Internal_Token;
+   function Node_Text (Node : Internal_Node) return Text_Type;
+   function Node_Sloc_Range
+     (Node : Internal_Node) return Source_Location_Range;
    function Node_Last_Attempted_Child (Node : Internal_Node) return Integer;
 
    function Entity_Image (Entity : Internal_Entity) return String;
@@ -204,6 +208,8 @@ private package ${ada_lib_name}.Generic_Impl is
       Node_Fetch_Sibling        => Node_Fetch_Sibling'Access,
       Node_Token_Start          => Node_Token_Start'Access,
       Node_Token_End            => Node_Token_End'Access,
+      Node_Text                 => Node_Text'Access,
+      Node_Sloc_Range           => Node_Sloc_Range'Access,
       Node_Last_Attempted_Child => Node_Last_Attempted_Child'Access,
 
       Entity_Image => Entity_Image'Access,

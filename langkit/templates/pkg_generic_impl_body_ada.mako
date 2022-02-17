@@ -316,6 +316,25 @@ package body ${ada_lib_name}.Generic_Impl is
       return +Implementation.Token_End (+Node);
    end Node_Token_End;
 
+   ---------------
+   -- Node_Text --
+   ---------------
+
+   function Node_Text (Node : Internal_Node) return Text_Type is
+   begin
+      return Implementation.Text (+Node);
+   end Node_Text;
+
+   ---------------------
+   -- Node_Sloc_Range --
+   ---------------------
+
+   function Node_Sloc_Range
+     (Node : Internal_Node) return Source_Location_Range is
+   begin
+      return Implementation.Sloc_Range (+Node);
+   end Node_Sloc_Range;
+
    -------------------------------
    -- Node_Last_Attempted_Child --
    -------------------------------

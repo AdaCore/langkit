@@ -930,7 +930,9 @@ package body Langkit_Support.Generic_API.Analysis is
 
    function Text (Self : Lk_Node) return Text_Type is
    begin
-      return Text (Self.Token_Start, Self.Token_End);
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+      return Self.Desc.Node_Text (Self.Internal.Node);
    end Text;
 
    ----------------
@@ -938,10 +940,10 @@ package body Langkit_Support.Generic_API.Analysis is
    ----------------
 
    function Sloc_Range (Self : Lk_Node) return Source_Location_Range is
-      Start_SR : constant Source_Location_Range := Self.Token_Start.Sloc_Range;
-      End_SR   : constant Source_Location_Range := Self.Token_End.Sloc_Range;
    begin
-      return Make_Range (Start_Sloc (Start_SR), End_Sloc (End_SR));
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+      return Self.Desc.Node_Sloc_Range (Self.Internal.Node);
    end Sloc_Range;
 
    -------------------
