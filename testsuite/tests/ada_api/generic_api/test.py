@@ -118,7 +118,13 @@ class Example(BaseExample):
                                  public=True)
 
 
+class NullQual(FooNode):
+    enum_node = True
+    qualifier = True
+
+
 class VarDecl(FooNode):
+    is_null = Field()
     name = Field()
     value = Field()
 

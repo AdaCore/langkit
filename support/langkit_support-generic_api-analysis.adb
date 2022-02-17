@@ -735,6 +735,30 @@ package body Langkit_Support.Generic_API.Analysis is
       return Wrap_Node (Self.Desc, Self.Desc.Node_Parent (Self.Internal));
    end Parent;
 
+   -------------
+   -- Parents --
+   -------------
+
+   function Parents
+     (Self : Lk_Node; With_Self : Boolean := True) return Lk_Node_Array
+   is
+      Id : Any_Language_Id renames Self.Desc;
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+
+      declare
+         Parents : constant Internal_Entity_Array :=
+           Id.Node_Parents (Self.Internal, With_Self);
+      begin
+         return Result : Lk_Node_Array (Parents'Range) do
+            for I in Parents'Range loop
+               Result (I) := Wrap_Node (Id, Parents (I));
+            end loop;
+         end return;
+      end;
+   end Parents;
+
    --------------------
    -- Children_Count --
    --------------------
@@ -816,6 +840,17 @@ package body Langkit_Support.Generic_API.Analysis is
       return Wrap_Node
         (Self.Desc.Node_Fetch_Sibling (Self.Internal.Node, -1), Self);
    end Previous_Sibling;
+
+   --------------
+   -- Is_Ghost --
+   --------------
+
+   function Is_Ghost (Self : Lk_Node) return Boolean is
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+      return Self.Desc.Node_Is_Ghost (Self.Internal.Node);
+   end Is_Ghost;
 
    --------------
    -- Traverse --

@@ -176,6 +176,42 @@ begin
    end loop;
    New_Line;
 
+   N := U.Root.Child (2).Child (1);
+   for B in Boolean'Range loop
+      Put_Line ("Parents (" & Image (N) & ", With_Self => " & B'Image & "):");
+      for P of N.Parents (With_Self => B) loop
+         Put_Line ("  " & Image (P));
+      end loop;
+   end loop;
+
+   Put ("Parents (No_Lk_Node) = ");
+   declare
+      Length : Natural;
+   begin
+      Length := No_Lk_Node.Parents'Length;
+      Put_Line (Length'Image);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
+   Put_Line ("Is_Ghost (" & Image (U.Root) & ") = " & U.Root.Is_Ghost'Image);
+   Put_Line ("Is_Ghost (" & Image (N) & ") = " & N.Is_Ghost'Image);
+   Put ("Is_Ghost (No_Lk_Node) = ");
+   declare
+      B : Boolean;
+   begin
+      B := No_Lk_Node.Is_Ghost;
+      Put_Line (B'Image);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line ("Root.Text -> " & Image (U.Root.Text, With_Quotes => True));
    Put ("No_Lk_Node.Text -> ");
    declare

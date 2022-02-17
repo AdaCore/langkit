@@ -211,6 +211,11 @@ package Langkit_Support.Generic_API.Analysis is
    --  Return the syntactic parent for ``Node``. Return a null node for the
    --  root one.
 
+   function Parents
+     (Self : Lk_Node; With_Self : Boolean := True) return Lk_Node_Array;
+   --  Return an array that contains the lexical parents, this node included
+   --  iff ``with_self`` is True. Nearer parents are first in the list.
+
    function Children_Count (Self : Lk_Node) return Natural;
    --  Return the number of children Node has
 
@@ -238,6 +243,14 @@ package Langkit_Support.Generic_API.Analysis is
    function Previous_Sibling (Self : Lk_Node'Class) return Lk_Node;
    --  Return the ``Node``'s previous sibling, or null if there is no such
    --  sibling.
+
+   function Is_Ghost (Self : Lk_Node) return Boolean;
+   --  Return whether the node is a ghost.
+   --
+   --  Unlike regular nodes, ghost nodes cover no token in the input source:
+   --  they are logically located instead between two tokens.  Both the
+   --  ``token_start`` and the ``token_end`` of all ghost nodes is the token
+   --  right after this logical position.
 
    type Visit_Status is (Into, Over, Stop);
    --  Helper type to control the node traversal process. See the ``Traverse``

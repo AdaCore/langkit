@@ -76,6 +76,8 @@ package Langkit_Support.Internal.Analysis is
    No_Internal_Entity : constant Internal_Entity :=
      (No_Internal_Node, null, False, No_Internal_Node_Metadata);
 
+   type Internal_Entity_Array is array (Positive range <>) of Internal_Entity;
+
    type Internal_Token is record
       TDH   : Token_Data_Handler_Access;
       Index : Token_Or_Trivia_Index;

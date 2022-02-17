@@ -171,7 +171,7 @@ procedure Introspection_Values is
    Point_Struct_Value  : Value_Ref;
    Example_Value       : constant Value_Ref := From_Node (Id, Child (N, 1));
    Name_Value          : constant Value_Ref :=
-     From_Node (Id, Child (Child (N, 2), 1));
+     From_Node (Id, Child (Child (N, 2), 2));
    Bigint_Array_Value  : Value_Ref;
 
    function Create_Iterator return Value_Ref

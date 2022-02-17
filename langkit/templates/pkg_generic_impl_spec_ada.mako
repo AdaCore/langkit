@@ -136,6 +136,8 @@ private package ${ada_lib_name}.Generic_Impl is
    function Node_Unit (Node : Internal_Node) return Internal_Unit;
    function Node_Kind (Node : Internal_Node) return Type_Index;
    function Node_Parent (Node : Internal_Entity) return Internal_Entity;
+   function Node_Parents
+     (Node : Internal_Entity; With_Self : Boolean) return Internal_Entity_Array;
    function Node_Children_Count (Node : Internal_Node) return Natural;
    procedure Node_Get_Child
      (Node            : Internal_Node;
@@ -144,6 +146,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Result          : out Internal_Node);
    function Node_Fetch_Sibling
      (Node : Internal_Node; Offset : Integer) return Internal_Node;
+   function Node_Is_Ghost (Node : Analysis.Internal_Node) return Boolean;
    function Node_Token_Start (Node : Internal_Node) return Internal_Token;
    function Node_Token_End (Node : Internal_Node) return Internal_Token;
    function Node_Text (Node : Internal_Node) return Text_Type;
@@ -203,9 +206,11 @@ private package ${ada_lib_name}.Generic_Impl is
       Node_Unit                 => Node_Unit'Access,
       Node_Kind                 => Node_Kind'Access,
       Node_Parent               => Node_Parent'Access,
+      Node_Parents              => Node_Parents'Access,
       Node_Children_Count       => Node_Children_Count'Access,
       Node_Get_Child            => Node_Get_Child'Access,
       Node_Fetch_Sibling        => Node_Fetch_Sibling'Access,
+      Node_Is_Ghost             => Node_Is_Ghost'Access,
       Node_Token_Start          => Node_Token_Start'Access,
       Node_Token_End            => Node_Token_End'Access,
       Node_Text                 => Node_Text'Access,

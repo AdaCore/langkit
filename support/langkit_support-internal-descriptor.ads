@@ -93,6 +93,9 @@ package Langkit_Support.Internal.Descriptor is
      (Node : Analysis.Internal_Node) return Type_Index;
    type Node_Parent_Type is access function
      (Node : Analysis.Internal_Entity) return Analysis.Internal_Entity;
+   type Node_Parents_Type is access function
+     (Node      : Analysis.Internal_Entity;
+      With_Self : Boolean) return Analysis.Internal_Entity_Array;
    type Node_Children_Count_Type is access function
      (Node : Analysis.Internal_Node) return Natural;
    type Node_Get_Child_Type is access procedure
@@ -103,6 +106,8 @@ package Langkit_Support.Internal.Descriptor is
    type Node_Fetch_Sibling_Type is access function
      (Node   : Analysis.Internal_Node;
       Offset : Integer) return Analysis.Internal_Node;
+   type Node_Is_Ghost_Type is access function
+     (Node : Analysis.Internal_Node) return Boolean;
    type Node_Token_Getter_Type is access function
      (Node : Analysis.Internal_Node) return Analysis.Internal_Token;
    type Node_Text_Type is access function
@@ -192,9 +197,11 @@ package Langkit_Support.Internal.Descriptor is
       Node_Unit                 : Node_Unit_Type;
       Node_Kind                 : Node_Kind_Type;
       Node_Parent               : Node_Parent_Type;
+      Node_Parents              : Node_Parents_Type;
       Node_Children_Count       : Node_Children_Count_Type;
       Node_Get_Child            : Node_Get_Child_Type;
       Node_Fetch_Sibling        : Node_Fetch_Sibling_Type;
+      Node_Is_Ghost             : Node_Is_Ghost_Type;
       Node_Token_Start          : Node_Token_Getter_Type;
       Node_Token_End            : Node_Token_Getter_Type;
       Node_Text                 : Node_Text_Type;

@@ -264,6 +264,25 @@ package body ${ada_lib_name}.Generic_Impl is
       return +Result;
    end Node_Parent;
 
+   ------------------
+   -- Node_Parents --
+   ------------------
+
+   function Node_Parents
+     (Node : Internal_Entity; With_Self : Boolean) return Internal_Entity_Array
+   is
+      E       : constant Implementation.${root_entity.name} := +Node;
+      Parents : Implementation.${root_entity.array.name} :=
+        Implementation.Parents (E.Node, With_Self, E.Info);
+   begin
+      return Result : Internal_Entity_Array (Parents.Items'Range) do
+         for I in Result'Range loop
+            Result (I) := +Parents.Items (I);
+         end loop;
+         Implementation.Dec_Ref (Parents);
+      end return;
+   end Node_Parents;
+
    -------------------------
    -- Node_Children_Count --
    -------------------------
@@ -299,6 +318,15 @@ package body ${ada_lib_name}.Generic_Impl is
    begin
       return +Implementation.Fetch_Sibling (+Node, Offset);
    end Node_Fetch_Sibling;
+
+   -------------------
+   -- Node_Is_Ghost --
+   -------------------
+
+   function Node_Is_Ghost (Node : Analysis.Internal_Node) return Boolean is
+   begin
+      return Implementation.Is_Ghost (+Node);
+   end Node_Is_Ghost;
 
    ----------------------
    -- Node_Token_Start --
@@ -355,6 +383,5 @@ package body ${ada_lib_name}.Generic_Impl is
    begin
       return Implementation.Image (+Entity);
    end Entity_Image;
-
 
 end ${ada_lib_name}.Generic_Impl;
