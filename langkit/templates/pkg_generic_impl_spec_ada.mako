@@ -135,7 +135,7 @@ private package ${ada_lib_name}.Generic_Impl is
 
    function Node_Unit (Node : Internal_Node) return Internal_Unit;
    function Node_Kind (Node : Internal_Node) return Type_Index;
-   function Node_Parent (Node : Internal_Node) return Internal_Node;
+   function Node_Parent (Node : Internal_Entity) return Internal_Entity;
    function Node_Children_Count (Node : Internal_Node) return Natural;
    procedure Node_Get_Child
      (Node            : Internal_Node;

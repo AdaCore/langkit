@@ -92,7 +92,7 @@ package Langkit_Support.Internal.Descriptor is
    type Node_Kind_Type is access function
      (Node : Analysis.Internal_Node) return Type_Index;
    type Node_Parent_Type is access function
-     (Node : Analysis.Internal_Node) return Analysis.Internal_Node;
+     (Node : Analysis.Internal_Entity) return Analysis.Internal_Entity;
    type Node_Children_Count_Type is access function
      (Node : Analysis.Internal_Node) return Natural;
    type Node_Get_Child_Type is access procedure

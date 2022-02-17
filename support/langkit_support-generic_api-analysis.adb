@@ -732,7 +732,7 @@ package body Langkit_Support.Generic_API.Analysis is
    begin
       Check_Safety_Net (Self);
       Reject_Null_Node (Self);
-      return Wrap_Node (Self.Desc.Node_Parent (Self.Internal.Node), Self);
+      return Wrap_Node (Self.Desc, Self.Desc.Node_Parent (Self.Internal));
    end Parent;
 
    --------------------

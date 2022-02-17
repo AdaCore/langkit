@@ -256,10 +256,12 @@ package body ${ada_lib_name}.Generic_Impl is
    -- Node_Parent --
    -----------------
 
-   function Node_Parent (Node : Internal_Node) return Internal_Node is
-      N : constant Implementation.${T.root_node.name} := +Node;
+   function Node_Parent (Node : Internal_Entity) return Internal_Entity is
+      E      : constant Implementation.${root_entity.name} := +Node;
+      Result : constant Implementation.${root_entity.name} :=
+        Implementation.Parent (E.Node, E.Info);
    begin
-      return +N.Parent;
+      return +Result;
    end Node_Parent;
 
    -------------------------
