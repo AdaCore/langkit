@@ -1141,40 +1141,32 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                               exit Alt_Loop;
                            end if;
 
-                        elsif Alt.Kind = Compound
-                              and then Alt.Compound_Rel.Kind = Kind_Any
-                        then
-                           --  Simplification replaced an All relation with an
-                           --  Any one, however we cannot have an Any relation
-                           --  in another Any relation: inline the former into
-                           --  the latter.
-
-                           declare
-                              Nested_Subrels : Relation_Vectors.Vector renames
-                                Alt.Compound_Rel.Rels;
-                           begin
-                              --  Move ``Alt`` sub-relations to ``Any`` (so no
-                              --  ownership share modification) and get rid of
-                              --  ``Alt``.
-
-                              for R of Nested_Subrels loop
-                                 Any_Subrels.Append (R);
-                              end loop;
-                              Nested_Subrels.Clear;
-
-                              Dec_Ref (Alt);
-                              Any_Subrels.Remove_At (Alt_Idx);
-
-                              --  TODO??? In principle there should not be
-                              --  empty Any relations hanging around, so given
-                              --  that we appended at least one relations to
-                              --  ``Any_Subrels``, that vector should not be
-                              --  empty after the call to ``Remove_At``.
-
-                              pragma Assert (Any_Subrels.Length /= 0);
-                           end;
-
                         else
+                           pragma Assert
+                             (Alt.Kind = Atomic
+                                or else
+                              (Alt.Kind = Compound
+                               and then Alt.Compound_Rel.Kind = Kind_All));
+                           --  It is not possible for an All relation to be
+                           --  simplified to an Any one. This is thanks to two
+                           --  principles:
+                           --
+                           --  * The constant folding pass will automatically
+                           --    inline ``Any(X)`` (i.e. single-alternative Any
+                           --    relations), and likewise for All relations. So
+                           --    all compound relations have at least two
+                           --    sub-relations when Simplify starts.
+                           --
+                           --  * When Simplify removes all but one alternative
+                           --    in an ``Any`` relation, that relation is
+                           --    inlined into its parent too.
+                           --
+                           --  * Simplify never removes subrelations in All
+                           --    relations: either it finds a contradiction,
+                           --    and the whole All relation is replaced with an
+                           --    Any one, either it does not and then the All
+                           --    relation is kept unchanged.
+
                            --  We could not split this alternative, but at
                            --  least we can use its simplified version.
 
