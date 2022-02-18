@@ -22,6 +22,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Assertions; use Ada.Assertions;
+with Ada.Calendar;   use Ada.Calendar;
 with Ada.Exceptions; use Ada.Exceptions;
 
 with GNAT.Traceback.Symbolic; use GNAT.Traceback.Symbolic;
@@ -282,6 +283,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    procedure Any_Left_Warn (Self : Relation);
    --  If ``Self`` contains a non-root ``Any`` relation, warn about it on
    --  ``Any_Left_Trace``.
+
+   procedure Trace_Timing (Label : String; Start : Time);
+   --  Log ``Start .. Clock`` as the time it took to run ``Label``
 
    ------------------
    -- Destroy_Rels --
@@ -553,8 +557,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  ``Vars`` in the same pass.
 
       Result          : Prepared_Relation;
+      Start           : constant Time := Clock;
       Folded_Relation : Relation := Fold_And_Track_Vars (Self);
    begin
+      Trace_Timing ("Constant folding", Start);
       if Cst_Folding_Trace.Is_Active then
          Cst_Folding_Trace.Trace ("After constant folding:");
          Cst_Folding_Trace.Trace (Image (Folded_Relation));
@@ -579,12 +585,14 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       if Opts.Simplify then
          declare
+            Start    : constant Time := Clock;
             Sort_Ctx : Sort_Context := Create (Result.Vars.all);
          begin
             Result.Rel :=
               Simplify (Folded_Relation, Result.Vars.all, Sort_Ctx);
             Dec_Ref (Folded_Relation);
             Destroy (Sort_Ctx);
+            Trace_Timing ("Simplify", Start);
          end;
       else
          Result.Rel := Folded_Relation;
@@ -1896,6 +1904,17 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end if;
    end Any_Left_Warn;
 
+   ------------------
+   -- Trace_Timing --
+   ------------------
+
+   procedure Trace_Timing (Label : String; Start : Time) is
+   begin
+      if Timing_Trace.Is_Active then
+         Timing_Trace.Trace (Label & ":" & Duration'Image (Clock - Start));
+      end if;
+   end Trace_Timing;
+
    -----------
    -- Solve --
    -----------
@@ -1938,26 +1957,32 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Any_Left_Warn (PRel.Rel);
       end if;
 
-      case Rel.Kind is
-         when Compound =>
-            Ignore := Solve_Compound (Rel, Ctx);
+      declare
+         Start : constant Time := Clock;
+      begin
+         case Rel.Kind is
+            when Compound =>
+               Ignore := Solve_Compound (Rel, Ctx);
 
-         when Atomic =>
-            --  We want to use a single entry point for the solver:
-            --  ``Solve_Compound``. Create a trivial compound relation to wrap
-            --  the given atom.
+            when Atomic =>
+               --  We want to use a single entry point for the solver:
+               --  ``Solve_Compound``. Create a trivial compound relation to
+               --  wrap the given atom.
 
-            declare
-               C : Relation := Create_All ((1 => Rel));
-            begin
-               Ignore := Solve_Compound (C, Ctx);
-               Dec_Ref (C);
-            exception
-               when others =>
+               declare
+                  C : Relation := Create_All ((1 => Rel));
+               begin
+                  Ignore := Solve_Compound (C, Ctx);
                   Dec_Ref (C);
-                  raise;
-            end;
-      end case;
+               exception
+                  when others =>
+                     Dec_Ref (C);
+                     raise;
+               end;
+         end case;
+
+         Trace_Timing ("Solver", Start);
+      end;
 
       Cleanup;
    exception
