@@ -121,6 +121,11 @@ package Langkit_Support.Adalog is
       Default => GNATCOLL.Traces.From_Config);
    --  Trace to show the progress of simplifying a relation before solving it
 
+   No_Simplify_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.SOLVER.NO_SIMPLIFY",
+      Default => GNATCOLL.Traces.From_Config);
+   --  Trace which, when active, disables the Simplify optimization
+
    Any_Left_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER.ANY_LEFT",
       Default => GNATCOLL.Traces.From_Config);

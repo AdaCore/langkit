@@ -583,7 +583,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  If requested, simplify the relation, trying to find contradictions
       --  between related atoms with a recursive search.
 
-      if Opts.Simplify then
+      if Opts.Simplify and then not No_Simplify_Trace.Is_Active then
          declare
             Start    : constant Time := Clock;
             Sort_Ctx : Sort_Context := Create (Result.Vars.all);
