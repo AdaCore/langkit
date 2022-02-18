@@ -561,9 +561,47 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Folded_Relation : Relation := Fold_And_Track_Vars (Self);
    begin
       Trace_Timing ("Constant folding", Start);
+
       if Cst_Folding_Trace.Is_Active then
          Cst_Folding_Trace.Trace ("After constant folding:");
          Cst_Folding_Trace.Trace (Image (Folded_Relation));
+      end if;
+
+      if Stats_Trace.Is_Active then
+         declare
+            All_Count, Any_Count, Atoms_Count : Natural := 0;
+
+            procedure Traverse (Self : Relation);
+
+            --------------
+            -- Traverse --
+            --------------
+
+            procedure Traverse (Self : Relation) is
+            begin
+               case Self.Kind is
+                  when Atomic =>
+                     Atoms_Count := Atoms_Count + 1;
+
+                  when Compound =>
+                     case Self.Compound_Rel.Kind is
+                        when Kind_All =>
+                           All_Count := All_Count + 1;
+                        when Kind_Any =>
+                           Any_Count := Any_Count + 1;
+                     end case;
+                     for Sub_R of Self.Compound_Rel.Rels loop
+                        Traverse (Sub_R);
+                     end loop;
+               end case;
+            end Traverse;
+
+         begin
+            Traverse (Self);
+            Stats_Trace.Trace ("All relations:" & All_Count'Image);
+            Stats_Trace.Trace ("Any relations:" & Any_Count'Image);
+            Stats_Trace.Trace ("Atoms:" & Atoms_Count'Image);
+         end;
       end if;
 
       --  Convert the ``Vars`` vector into the ``Result.Vars`` array and

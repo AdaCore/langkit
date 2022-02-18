@@ -77,6 +77,11 @@ package Langkit_Support.Adalog is
    --  Trace whose only purpose is to show when we start solving an equation,
    --  and show when solving aborts because of an exception.
 
+   Stats_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.SOLVER.STATS", Default => GNATCOLL.Traces.From_Config);
+   --  Trace to output statistics about the equation to solve (number of atoms,
+   --  of Any/All relations).
+
    Timing_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER.TIMING", Default => GNATCOLL.Traces.From_Config);
    --  Trace to show the time taken by each equation resolution step
