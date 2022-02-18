@@ -85,9 +85,13 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Debug_String : String_Access := null) return Relation;
    --  Helper to create a compound relationship
 
+   function Image_Header (Self : Relation) return String;
+   --  Return a single-line image for ``Self``
+
    function Internal_Image
      (Self : Relation; Level : Natural := 0) return String;
-   --  Internal image function for a relation
+   --  Return an image of ``Self`` with each line indented with ``Level``
+   --  spaces.
 
    type Callback_Type is
      access function (Vars : Logic_Var_Array) return Boolean;
@@ -337,6 +341,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  in the equation.
       Vec : Logic_Var_Vectors.Vector;
 
+      Next_Id : Positive := 1;
+      --  Id to assign to the next processed relation
+
       function Is_Atom (Self : Relation; Kind : Atomic_Kind) return Boolean
       is (Self.Kind = Atomic and then Self.Atomic_Rel.Kind = Kind);
 
@@ -392,6 +399,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       function Fold_And_Track_Vars (Self : Relation) return Relation is
       begin
+         Self.Id := Next_Id;
+         Next_Id := Next_Id + 1;
+
          --  For atomic relations, just add the vars it contains. For compound
          --  relations, just recurse over sub-relations.
 
@@ -517,6 +527,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   return Result : constant Relation := new Relation_Type'
                     (Kind         => Compound,
                      Ref_Count    => 1,
+                     Id           => Self.Id,
                      Debug_Info   => Self.Debug_Info,
                      Compound_Rel => (Kind => Self.Compound_Rel.Kind,
                                       Rels => Relation_Vectors.Empty_Vector))
@@ -1027,10 +1038,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                     Any.Compound_Rel.Rels;
 
                   function Any_Img return String
-                  is (if Any.Debug_Info = null
-                         or else Any.Debug_Info.all = ""
-                      then "Any" & Any_Idx'Image
-                      else "Any [" & Any.Debug_Info.all & "]");
+                  is (Image_Header (Any) & " [Any" & Any_Idx'Image & "]");
                begin
                   if Simplify_Trace.Is_Active then
                      Simplify_Trace.Trace ("Trying to simplify " & Any_Img);
@@ -1042,11 +1050,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                         Alt : Relation := Any_Subrels.Get (Alt_Idx);
 
                         function Alt_Img return String
-                        is ((if Alt.Debug_Info = null
-                                or else Alt.Debug_Info.all = ""
-                             then "alt" & Alt_Idx'Image
-                             else "alt [" & Alt.Debug_Info.all & "]")
-                            & " of " & Any_Img);
+                        is (Image_Header (Alt)
+                            & " alt" & Alt_Idx'Image & " of " & Any_Img);
                      begin
                         if Simplify_Trace.Is_Active then
                            Simplify_Trace.Trace
@@ -1211,6 +1216,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   Inc_Ref (Result);
                else
                   Result := Create_All (Items, Self.Debug_Info);
+                  Result.Id := Self.Id;
                end if;
             end;
 
@@ -1439,10 +1445,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Debug_String : String_Access := null) return Relation
    is
      (new Relation_Type'
-        (Atomic,
-         Atomic_Rel => Inner,
+        (Kind       => Atomic,
+         Ref_Count  => 1,
+         Id         => 0,
          Debug_Info => Debug_String,
-         Ref_Count  => 1));
+         Atomic_Rel => Inner));
 
    -----------------
    -- To_Relation --
@@ -1453,10 +1460,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Debug_String : String_Access := null) return Relation
    is
      (new Relation_Type'
-        (Compound,
-         Compound_Rel => Inner,
+        (Kind         => Compound,
+         Ref_Count    => 1,
+         Id           => 0,
          Debug_Info   => Debug_String,
-         Ref_Count    => 1));
+         Compound_Rel => Inner));
 
    -------------
    -- Inc_Ref --
@@ -2502,49 +2510,55 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       return Image (Self.To_Array);
    end Image;
 
-   -----------
-   -- Image --
-   -----------
+   ------------------
+   -- Image_Header --
+   ------------------
 
-   function Image
-     (Self         : Compound_Relation_Type;
-      Level        : Natural := 0;
-      Debug_String : String_Access := null) return String
-   is
-      Ret : XString;
+   function Image_Header (Self : Relation) return String is
+      Prefix : constant String :=
+        (if Self.Id = 0
+         then ""
+         else "[" & Langkit_Support.Images.Stripped_Image (Self.Id) & "] ");
+      Suffix : constant String :=
+        (if Self.Debug_Info /= null and then Self.Debug_Info.all /= ""
+         then " " & Self.Debug_Info.all
+         else "");
    begin
-      Ret.Append
-        ((case Self.Kind is
-            when Kind_All => "All:",
-            when Kind_Any => "Any:")
-         & (if Debug_String /= null and then Debug_String.all /= ""
-            then " " & Debug_String.all
-            else "")
-         & ASCII.LF);
+      case Self.Kind is
+         when Compound =>
+            return
+              Prefix
+              & (case Self.Compound_Rel.Kind is
+                 when Kind_All => "All:",
+                 when Kind_Any => "Any:")
+              & Suffix;
 
-      for Rel of Self.Rels loop
-         Ret.Append ((1 .. Level + 4 => ' ')
-                     & Internal_Image (Rel, Level + 4) & ASCII.LF);
-      end loop;
-
-      return Ret.To_String;
-   end Image;
+         when Atomic =>
+            return Prefix & Image (Self.Atomic_Rel) & Suffix;
+      end case;
+   end Image_Header;
 
    -----------
    -- Image --
    -----------
 
    function Internal_Image
-     (Self : Relation; Level : Natural := 0) return String is
+     (Self : Relation; Level : Natural := 0) return String
+   is
+      Result : XString;
    begin
       case Self.Kind is
          when Compound =>
-            return Image (Self.Compound_Rel, Level, Self.Debug_Info);
-         when Atomic => return
-              Image (Self.Atomic_Rel)
-              & (if Self.Debug_Info /= null and then Self.Debug_Info.all /= ""
-                 then " " & Self.Debug_Info.all
-                 else "");
+            Result.Append (Image_Header (Self) & ASCII.LF);
+            for Rel of Self.Compound_Rel.Rels loop
+               Result.Append
+                 ((1 .. Level + 4 => ' ')
+                  & Internal_Image (Rel, Level + 4) & ASCII.LF);
+            end loop;
+            return Result.To_String;
+
+         when Atomic =>
+            return Image_Header (Self);
       end case;
    end Internal_Image;
 

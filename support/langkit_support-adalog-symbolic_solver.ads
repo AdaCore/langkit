@@ -320,11 +320,6 @@ private
 
    procedure Destroy (Self : in out Compound_Relation_Type);
 
-   function Image
-     (Self         : Compound_Relation_Type;
-      Level        : Natural := 0;
-      Debug_String : String_Access := null) return String;
-
    --------------
    -- Relation --
    --------------
@@ -335,6 +330,18 @@ private
       Ref_Count  : Natural;
       --  Number of ownership shares for this relation. When it drops to zero,
       --  it must be deallocated.
+
+      Id : Natural;
+      --  Id for this relation, for debugging purposes: dealing with small
+      --  integers is much easier for humans than dealing with addresses, or
+      --  even with relation images when one wants to quickly know if two
+      --  relations are the same in the logs.
+      --
+      --  Ids are assigned right before starting relation
+      --  simplification/solving, and are as much as possible propagated when
+      --  creating a new relation to replace a previous one.
+      --
+      --  0 means "Id unassigned".
 
       Debug_Info : Ada.Strings.Unbounded.String_Access := null;
       case Kind is
