@@ -895,6 +895,8 @@ class CompileCtx:
             (None, 'stale_reference_error'),
             (None, 'unknown_charset'),
             (None, 'invalid_input'),
+            (None, 'syntax_error'),
+            (None, 'file_read_error'),
             ('Introspection', 'bad_type_error'),
             ('Introspection', 'out_of_bounds_error'),
             ('Rewriting', 'template_format_error'),

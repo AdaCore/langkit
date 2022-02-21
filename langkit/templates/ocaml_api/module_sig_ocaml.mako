@@ -20,11 +20,6 @@ ${exts.include_extension(
    ctx.ext('ocaml_api', 'exceptions')
 )}
 
-(**
- * Raised if a field of a node is null due to a syntax error
- *)
-exception SyntaxError
-
 % for enum_type in ctx.enum_types:
 module ${ocaml_api.module_name(enum_type)} : sig
   ${ocaml_doc(enum_type, 1)}

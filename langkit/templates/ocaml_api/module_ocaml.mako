@@ -24,8 +24,6 @@ ${exts.include_extension(
    ctx.ext('ocaml_api', 'exceptions')
 )}
 
-exception SyntaxError
-
 module Exception = struct
 
   type t = {
@@ -725,7 +723,7 @@ let rec ${ocaml_api.wrap_function_name(T.root_node)} context c_value =
   (* Top level wrap function that dispatch to wrap function of concrete types
      depending on the node kind *)
   if is_null (getf c_value ${ocaml_api.struct_name(root_entity)}.node) then
-    raise SyntaxError
+    raise (SyntaxError "null node")
   else
     let kind = CFunctions.node_kind (addr c_value) in
     match kind with
@@ -1260,7 +1258,7 @@ let ${ocaml_api.field_name(field)}
            ("${ocaml_api.field_name(field)[2:]}"
            , Some (Lazy.force value.${ocaml_api.field_name(field)}
                     :> ${root_entity_type}))
-        with SyntaxError ->
+        with SyntaxError _ ->
           ("${ocaml_api.field_name(field)[2:]}", None) );
                   % endif
                % endfor

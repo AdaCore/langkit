@@ -34,6 +34,8 @@ package Langkit_Support.Errors with Preelaborate is
    Stale_Reference_Error   : exception;
    Unknown_Charset         : exception;
    Invalid_Input           : exception;
+   Syntax_Error            : exception;
+   File_Read_Error         : exception;
 
    package Introspection is
       Bad_Type_Error      : exception;

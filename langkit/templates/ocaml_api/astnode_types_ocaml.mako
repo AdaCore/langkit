@@ -128,7 +128,7 @@
     in
       % endif
     if is_null (getf c_value ${ocaml_api.struct_name(root_entity)}.node) then
-      raise SyntaxError
+      raise (SyntaxError "null node")
     else
       ${ocaml_api.polymorphic_variant_name(astnode)} {
       % for field in ocaml_api.get_parse_fields(astnode):

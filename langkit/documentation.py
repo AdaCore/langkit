@@ -240,6 +240,21 @@ base_langkit_docs = {
         Raised by lexing functions (``${ctx.lib_name}.Lexer``) when the input
         contains an invalid byte sequence.
     """,
+    'langkit.syntax_error': """
+        Subprograms may raise this when they try to parse invalid syntax.
+        % if lang == "ocaml":
+            Also raised if a field in a parsing node is null due to a syntax
+            error.
+        % else:
+            Note that this does *not* concern analysis unit getters, which
+            create diagnostic vectors for such errors.
+        % endif
+    """,
+    'langkit.file_read_error': """
+        Subprograms may raise this when they cannot open a source file. Note
+        that this does *not* concern analysis unit getters, which create
+        diagnostic vectors for such errors.
+    """,
     'langkit.introspection.bad_type_error': """
         Raised when introspection functions (``${ctx.lib_name}.Introspection``)
         are provided mismatching types/values.
