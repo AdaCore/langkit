@@ -114,7 +114,7 @@ class Cast(AbstractExpression):
             exception or return null when the cast is invalid.
         """
         super().__init__()
-        self.expr = node
+        self._expr = node
         self.dest_type = dest_type
         self.do_raise = do_raise
 
@@ -133,7 +133,7 @@ class Cast(AbstractExpression):
 
         :rtype: Cast.Expr
         """
-        expr = construct(self.expr)
+        expr = construct(self._expr)
         t = expr.type
 
         dest_type = (self.dest_type.entity
