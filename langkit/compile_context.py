@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from langkit.lexer.regexp import NFAState
     from langkit.ocaml_api import OCamlAPISettings
     from langkit.passes import AbstractPass
-    from langkit.parsers import GeneratedParser, Grammar, Parser
+    from langkit.parsers import GeneratedParser, Grammar, Parser, VarDef
     from langkit.python_api import PythonAPISettings
 
 
@@ -688,7 +688,7 @@ class CompileCtx:
         document in the generated library.
         """
 
-        self.parsers_varcontext_stack: List[str] = []
+        self.parsers_varcontext_stack: List[List[VarDef]] = []
         """
         Holder for the stack of variables contexts used in parsers code
         emission.

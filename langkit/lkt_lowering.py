@@ -1009,19 +1009,22 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
 
         raise RuntimeError("unreachable code")
 
+    def lower_or_none(
+        rule: Union[None, L.GrammarExpr, L.GrammarExprList]
+    ) -> Optional[Parser]:
+        """
+        Like ``lower``, but also accept null grammar expressions.
+        """
+        return None if rule is None else lower(rule)
+
     def lower(
         rule: Union[L.GrammarExpr, L.GrammarExprList]
-    ) -> Optional[Parser]:
+    ) -> Parser:
         """
         Helper to lower one parser.
 
         :param rule: Grammar rule to lower.
         """
-        # For convenience, accept null input rules, as we generally want to
-        # forward them as-is to the lower level parsing machinery.
-        if rule is None:
-            return None
-
         loc = Location.from_lkt_node(rule)
         with ctx.lkt_context(rule):
             if isinstance(rule, L.ParseNodeExpr):
@@ -1074,7 +1077,7 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                     lower(rule.f_expr),
                     empty_valid=rule.f_kind.text == '*',
                     list_cls=resolve_node_ref_or_none(rule.f_list_type),
-                    sep=lower(rule.f_sep),
+                    sep=lower_or_none(rule.f_sep),
                     location=loc
                 )
 
