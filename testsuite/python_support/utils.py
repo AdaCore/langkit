@@ -390,7 +390,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
             if len(ada_main) > 1:
                 print('== {} =='.format(m))
             sys.stdout.flush()
-            run(P.join('obj', m[:-4]), valgrind=True)
+            run(P.join('obj', m[:-4]),
+                valgrind=True,
+                valgrind_suppressions=['gnat'])
 
     if ocaml_main is not None:
         # Set up a Dune project
