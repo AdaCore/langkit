@@ -1765,13 +1765,22 @@ def unparse_grammar(ctx, f):
         key=lambda assoc: assoc[1]._id,
     )
 
+    def annotations(name: str) -> str:
+        """
+        Return annotations for the given parsing rule.
+        """
+        if name == ctx.grammar.main_rule_name:
+            return "@main_rule "
+        elif name in ctx.grammar.entry_points:
+            return "@entry_point "
+        else:
+            return ""
+
     template = """
     @with_lexer(${ctx.lang_name.lower}_lexer)$hl
     grammar ${ctx.lang_name.lower}_grammar {$i$hl
     % for name, rule in sorted_rules:
-        ${('@main_rule '
-           if name == ctx.grammar.main_rule_name
-           else '')}${name} <- ${emit_rule(rule, True)}$hl
+        ${annotations(name)}${name} <- ${emit_rule(rule, True)}$hl
     % endfor
     $d$hl
     }$hl

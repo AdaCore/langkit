@@ -224,9 +224,25 @@ class Grammar:
 
     def __init__(self,
                  main_rule_name: str,
+                 extra_entry_points: Optional[Set[str]] = None,
                  location: Optional[Location] = None):
+        """
+        :param main_rule_name: Name of the main parsing rule.
+        :param entry_points: Set of rule names for parsing rules that are entry
+            points. Entry points are used as "used roots" for unused rules
+            detection. The main rule is automatically considered as an entry
+            point.
+        """
+
         self.rules: Dict[str, Parser] = {}
-        self.main_rule_name: str = main_rule_name
+        """
+        For each parsing rule, associate its name to its parser.
+        """
+
+        self.main_rule_name = main_rule_name
+        self.entry_points = extra_entry_points or set()
+        self.entry_points.add(main_rule_name)
+
         self.location: Optional[Location] = (
             location or extract_library_location()
         )
@@ -350,19 +366,20 @@ class Grammar:
     def get_unreferenced_rules(self) -> Set[str]:
         """
         Return a set of names for all rules that are not transitively
-        referenced by the main rule.
+        referenced by entry points.
         """
         # We'll first build the set of rules that are referenced, then we'll
         # know the ones not referenced.
         referenced_rules: Set[str] = set()
 
         rule_stack: _List[Tuple[str, Parser]] = [
-            (self.main_rule_name, self.get_rule(self.main_rule_name)),
+            (name, self.get_rule(name))
+            for name in self.entry_points
         ]
         """
         List of couples names/parser for the rules still to visit.
 
-        We use a stack to visit the main rule closure avoiding too deep
+        We use a stack to visit the entry points closures avoiding too deep
         recursion.
         """
 
@@ -419,8 +436,6 @@ class Grammar:
     def warn_unreferenced_parsing_rules(self, context: CompileCtx) -> None:
         """
         Emit a warning for unreferenced parsing rules.
-
-        :type context: langkit.compile_context.CompileCtx
         """
         unreferenced_rules = self.get_unreferenced_rules()
 
@@ -430,27 +445,26 @@ class Grammar:
             severity=Severity.warning
         )
 
-    def check_main_rule(self, context: CompileCtx) -> None:
+    def check_entry_points(self, context: CompileCtx) -> None:
         """
-        Emit an error if the main parsing rule is missing.
-
-        :type context: langkit.compile_context.CompileCtx
+        Emit an error if any of the entry points are missing.
         """
-        if not self.rules.get(self.main_rule_name, None):
-            close_matches = difflib.get_close_matches(
-                self.main_rule_name, self.rules.keys()
-            )
-
-            with self.context():
-                check_source_language(
-                    False,
-                    'Invalid rule name specified for main rule: "{}". '
-                    '{}'.format(
-                        self.main_rule_name,
-                        'Did you mean "{}"?'.format(close_matches[0])
-                        if close_matches else ""
+        with self.context():
+            for name in sorted(self.entry_points):
+                if not self.rules.get(name, None):
+                    close_matches = difflib.get_close_matches(
+                        name, self.rules.keys()
                     )
-                )
+
+                    check_source_language(
+                        False,
+                        'Invalid rule name specified for main rule: "{}". '
+                        '{}'.format(
+                            name,
+                            'Did you mean "{}"?'.format(close_matches[0])
+                            if close_matches else ""
+                        )
+                    )
 
 
 class Parser:

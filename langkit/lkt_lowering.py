@@ -414,7 +414,9 @@ class GrammarAnnotations(ParsedAnnotations):
 @dataclass
 class GrammarRuleAnnotations(ParsedAnnotations):
     main_rule: bool
-    annotations = [FlagAnnotationSpec('main_rule')]
+    entry_point: bool
+    annotations = [FlagAnnotationSpec('main_rule'),
+                   FlagAnnotationSpec('entry_point')]
 
 
 @dataclass
@@ -883,11 +885,12 @@ def create_grammar(ctx: CompileCtx,
     with ctx.lkt_context(full_grammar):
         parse_annotations(ctx, GrammarAnnotations, full_grammar)
 
-    # Get the list of grammar rules. This is where we check that we only have
-    # grammar rules, that their names are unique, and that they have valid
+    # Collect the list of grammar rules. This is where we check that we only
+    # have grammar rules, that their names are unique, and that they have valid
     # annotations.
     all_rules = OrderedDict()
     main_rule_name = None
+    entry_points: Set[str] = set()
     for full_rule in full_grammar.f_decl.f_rules:
         with ctx.lkt_context(full_rule):
             r = full_rule.f_decl
@@ -895,17 +898,22 @@ def create_grammar(ctx: CompileCtx,
             assert isinstance(r, L.GrammarRuleDecl)
             rule_name = r.f_syn_name.text
 
-            # Register the main rule if the appropriate annotation is present
+            # Register this rule as a main rule or an entry point if the
+            # corresponding annotations are present.
             anns = parse_annotations(ctx, GrammarRuleAnnotations, full_rule)
             if anns.main_rule:
                 assert main_rule_name is None
                 main_rule_name = rule_name
+            if anns.main_rule or anns.entry_point:
+                entry_points.add(rule_name)
 
             all_rules[rule_name] = r.f_expr
 
     # Now create the result grammar
     assert main_rule_name is not None
-    result = Grammar(main_rule_name, Location.from_lkt_node(full_grammar))
+    result = Grammar(
+        main_rule_name, entry_points, Location.from_lkt_node(full_grammar)
+    )
 
     # Translate rules (all_rules) later, as node types are not available yet
     result._all_lkt_rules.update(all_rules)

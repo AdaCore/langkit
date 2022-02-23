@@ -1,0 +1,20 @@
+import lexer_example
+
+grammar foo_grammar {
+    @main_rule main_rule <- list+(decl)
+
+    # These are used by the main rule, so we should not warn about them
+    decl <- or(var_decl | fun_decl)
+    var_decl <- VarDecl("var" name ";")
+    fun_decl <- FunDecl("def" name ";")
+    name <- Name(@identifier)
+
+    # Even though it is not used by the main parsing rule, this is an entry
+    # point, so we should not warn about it.
+    @entry_point null_decl <- NullDecl("null")
+
+    # Neither of the following are used from the main rule nor from entry
+    # points, we should warn about them.
+    example <- Example(@identifier number)
+    number <- Number(@number)
+}
