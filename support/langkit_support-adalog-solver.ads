@@ -79,8 +79,10 @@ package Langkit_Support.Adalog.Solver is
    --  process.
    --
    --  For the state machine solver, ``Timeout`` determines the maximum number
-   --  of solving step to run before aborting the solver. If left to 0 or for
-   --  the symbolic solver, no timeout applies.
+   --  of solving step to run before aborting the solver. For the symbolic
+   --  solver, ``Timeout`` determines the maximum of times we evaluate atoms
+   --  before aborting the solver. In both cases, if left to 0, no timeout
+   --  applies.
 
    function Solve_First
      (Self          : Relation;
@@ -91,8 +93,10 @@ package Langkit_Support.Adalog.Solver is
    --  way to configure the resolution process.
    --
    --  For the state machine solver, ``Timeout`` determines the maximum number
-   --  of solving step to run before aborting the solver. If left to 0 or for
-   --  the symbolic solver, no timeout applies.
+   --  of solving step to run before aborting the solver. For the symbolic
+   --  solver, ``Timeout`` determines the maximum of times we evaluate atoms
+   --  before aborting the solver. In both cases, if left to 0, no timeout
+   --  applies.
 
    ---------------------------
    -- Relation constructors --

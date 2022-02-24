@@ -71,7 +71,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
    -- Solve_All --
    ---------------
 
-   procedure Solve_All (Rel : Relation) is
+   procedure Solve_All (Rel : Relation; Timeout : Natural := 0) is
 
       type Var_And_Val is record
          Var     : Refs.Logic_Var;
@@ -203,10 +203,12 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
       procedure Run_Solve (Opts : Solve_Options_Type) is
       begin
-         Solve (Rel, Solution_Callback'Access, Opts);
+         Solve (Rel, Solution_Callback'Access, Opts, Timeout);
       exception
          when Early_Binding_Error =>
             Put_Line ("Resolution failed with Early_Binding_Error");
+         when Timeout_Error =>
+            Put_Line ("Resolution failed with Timeout_Error");
          when Exc : others =>
             Put_Line ("  -> " & Exception_Name (Exc)
                       & ": " & Exception_Message (Exc));

@@ -186,22 +186,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  ``Has_Orphan`` is set to whether at least one atom is an "orphan", that
    --  is to say it is not part of the resulting sorted collection.
 
-   function Evaluate_Atoms
-     (Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean;
-   --  Evaluate the given sequence of sorted atoms (see ``Topo_Sort``) and
-   --  return whether they are all satisfied: if they are, the logic variables
-   --  are assigned values, so it is possible to invoke the user callback for
-   --  solutions.
-
-   function Has_Contradiction
-     (Atoms, Unifies : Atomic_Relation_Vector;
-      Vars           : Logic_Var_Array;
-      Sort_Ctx       : in out Sort_Context) return Boolean;
-   --  Return whether the given sequence of atoms contains a contradiction,
-   --  i.e. if two or more of its atoms make each other unsatisfied. This
-   --  function works even for incomplete sequences, for instance when one atom
-   --  uses a variable that no atom defines.
-
    type Solving_Context is record
       Cb : Callback_Type;
       --  User callback, to be called when a solution is found. Returns whether
@@ -231,6 +215,10 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Anys : Any_Relation_Vector;
       --  Remaining list of ``Any`` relations to traverse
+
+      Timeout : Natural;
+      --  Number of times left we allow ourselves to evaluate an atom before
+      --  aborting the solver. If 0, no timeout applies.
 
       Cut_Dead_Branches : Boolean := False;
       --  Optimization that will cut branches that necessarily contain falsy
@@ -262,6 +250,23 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
    procedure Destroy (Ctx : in out Solving_Context);
    --  Destroy a solving context, and associated data
+
+   function Evaluate_Atoms
+     (Ctx          : in out Solving_Context;
+      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean;
+   --  Evaluate the given sequence of sorted atoms (see ``Topo_Sort``) and
+   --  return whether they are all satisfied: if they are, the logic variables
+   --  are assigned values, so it is possible to invoke the user callback for
+   --  solutions.
+
+   function Has_Contradiction
+     (Atoms, Unifies : Atomic_Relation_Vector;
+      Vars           : Logic_Var_Array;
+      Ctx            : in out Solving_Context) return Boolean;
+   --  Return whether the given sequence of atoms contains a contradiction,
+   --  i.e. if two or more of its atoms make each other unsatisfied. This
+   --  function works even for incomplete sequences, for instance when one atom
+   --  uses a variable that no atom defines.
 
    function Solve_Compound
      (Self : Compound_Relation; Ctx : in out Solving_Context) return Boolean;
@@ -829,104 +834,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       return Sorted_Atoms (1 .. Last_Atom_Index);
    end Topo_Sort;
 
-   --------------------
-   -- Evaluate_Atoms --
-   --------------------
-
-   function Evaluate_Atoms
-     (Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean is
-   begin
-      for Atom of Sorted_Atoms loop
-         if not Solve_Atomic (Atom) then
-            if Solv_Trace.Is_Active then
-               Solv_Trace.Trace ("Failed on " & Image (Atom));
-            end if;
-
-            return False;
-         end if;
-      end loop;
-
-      return True;
-   end Evaluate_Atoms;
-
-   -----------------------
-   -- Has_Contradiction --
-   -----------------------
-
-   function Has_Contradiction
-     (Atoms, Unifies : Atomic_Relation_Vector;
-      Vars           : Logic_Var_Array;
-      Sort_Ctx       : in out Sort_Context) return Boolean
-   is
-      Had_Exception : Boolean := False;
-      Exc           : Exception_Occurrence;
-
-      Result : Boolean;
-   begin
-      Sort_Ctx.Has_Contradiction_Counter :=
-        Sort_Ctx.Has_Contradiction_Counter + 1;
-
-      if Solv_Trace.Is_Active then
-         Solv_Trace.Increase_Indent
-           ("Looking for a contradiction (number"
-            & Sort_Ctx.Has_Contradiction_Counter'Image & ")");
-         Solv_Trace.Trace (Image (Atoms));
-      end if;
-
-      declare
-         use Atomic_Relation_Vectors;
-         Dummy        : Boolean;
-         Sorted_Atoms : constant Elements_Array :=
-           Topo_Sort (Atoms, Unifies, Vars, Sort_Ctx, Dummy);
-      begin
-         if Solv_Trace.Is_Active then
-            Solv_Trace.Trace ("After partial topo sort");
-            Solv_Trace.Trace (Image (Sorted_Atoms));
-         end if;
-
-         --  Once the partial topological sort has been done, we can just
-         --  run the linear evaluator to check if there is a contradiction.
-         --
-         --  Note that we must catch and hide here all exceptions that
-         --  predicates/converters might raise during the evaluation: while it
-         --  is ok during the relation solving to let them abort the
-         --  resolution, ``Has_Contradiction`` is used to simplify the
-         --  relation: we do not want to abort the simplification process. In
-         --  this case, even though we know that the solver will later fail
-         --  evaluating the same atom, we cannot optimize it out to preserve
-         --  the order in which the solver finds solutions.
-
-         begin
-            Result := not Evaluate_Atoms (Sorted_Atoms);
-         exception
-            when E : others =>
-               Save_Occurrence (Exc, E);
-               Had_Exception := True;
-               Result := False;
-         end;
-
-         if Solv_Trace.Is_Active then
-            if Had_Exception then
-               Solv_Trace.Trace
-                 (Exc,
-                  "Got an exception, considering no contradiction was found:"
-                  & ASCII.LF);
-            elsif Result then
-               Solv_Trace.Trace ("Contradiction found");
-            else
-               Solv_Trace.Trace ("No contradiction found");
-            end if;
-         end if;
-
-         if Solv_Trace.Is_Active then
-            Solv_Trace.Decrease_Indent;
-         end if;
-
-         Cleanup_Aliases (Vars);
-         return Result;
-      end;
-   end Has_Contradiction;
-
    -------------
    -- Destroy --
    -------------
@@ -961,6 +868,116 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end loop;
       Free (Ctx.Vars);
    end Destroy;
+
+   --------------------
+   -- Evaluate_Atoms --
+   --------------------
+
+   function Evaluate_Atoms
+     (Ctx          : in out Solving_Context;
+      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean is
+   begin
+      --  If we have a timeout, apply it
+
+      if Ctx.Timeout > 0 then
+         if Sorted_Atoms'Length > Ctx.Timeout then
+            raise Timeout_Error;
+         end if;
+         Ctx.Timeout := Ctx.Timeout - Sorted_Atoms'Length;
+      end if;
+
+      --  Evaluate each individual atom
+
+      for Atom of Sorted_Atoms loop
+         if not Solve_Atomic (Atom) then
+            if Solv_Trace.Is_Active then
+               Solv_Trace.Trace ("Failed on " & Image (Atom));
+            end if;
+
+            return False;
+         end if;
+      end loop;
+
+      return True;
+   end Evaluate_Atoms;
+
+   -----------------------
+   -- Has_Contradiction --
+   -----------------------
+
+   function Has_Contradiction
+     (Atoms, Unifies : Atomic_Relation_Vector;
+      Vars           : Logic_Var_Array;
+      Ctx            : in out Solving_Context) return Boolean
+   is
+      Had_Exception : Boolean := False;
+      Exc           : Exception_Occurrence;
+
+      Result : Boolean;
+   begin
+      Ctx.Sort_Ctx.Has_Contradiction_Counter :=
+        Ctx.Sort_Ctx.Has_Contradiction_Counter + 1;
+
+      if Solv_Trace.Is_Active then
+         Solv_Trace.Increase_Indent
+           ("Looking for a contradiction (number"
+            & Ctx.Sort_Ctx.Has_Contradiction_Counter'Image & ")");
+         Solv_Trace.Trace (Image (Atoms));
+      end if;
+
+      declare
+         use Atomic_Relation_Vectors;
+         Dummy        : Boolean;
+         Sorted_Atoms : constant Elements_Array :=
+           Topo_Sort (Atoms, Unifies, Vars, Ctx.Sort_Ctx, Dummy);
+      begin
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace ("After partial topo sort");
+            Solv_Trace.Trace (Image (Sorted_Atoms));
+         end if;
+
+         --  Once the partial topological sort has been done, we can just
+         --  run the linear evaluator to check if there is a contradiction.
+         --
+         --  Note that we must catch and hide here all exceptions that
+         --  predicates/converters might raise during the evaluation: while it
+         --  is ok during the relation solving to let them abort the
+         --  resolution, ``Has_Contradiction`` is used to simplify the
+         --  relation: we do not want to abort the simplification process. In
+         --  this case, even though we know that the solver will later fail
+         --  evaluating the same atom, we cannot optimize it out to preserve
+         --  the order in which the solver finds solutions.
+
+         begin
+            Result := not Evaluate_Atoms (Ctx, Sorted_Atoms);
+         exception
+            when E : others =>
+               Save_Occurrence (Exc, E);
+               Had_Exception := True;
+               Result := False;
+         end;
+
+         if Solv_Trace.Is_Active then
+            if Had_Exception then
+               Solv_Trace.Trace
+                 (Exc,
+                  "Got an exception, considering no contradiction was found:"
+                  & ASCII.LF);
+            elsif Result then
+               Solv_Trace.Trace ("Contradiction found");
+            else
+               Solv_Trace.Trace ("No contradiction found");
+            end if;
+         end if;
+
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Decrease_Indent;
+         end if;
+
+         Cleanup_Aliases (Vars);
+         return Result;
+      end;
+   end Has_Contradiction;
 
    --------------
    -- Used_Var --
@@ -1140,7 +1157,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
             --  Once the topological sort has been done, we just have to solve
             --  every relation in order. Abort if one doesn't solve.
-            if not Evaluate_Atoms (Sorted_Atoms) then
+            if not Evaluate_Atoms (Ctx, Sorted_Atoms) then
                return Cleanup (True);
             end if;
 
@@ -1351,7 +1368,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
             Create_Aliases;
             if Has_Contradiction
-              (Ctx.Atoms, Ctx.Unifies, Ctx.Vars.all, Ctx.Sort_Ctx)
+              (Ctx.Atoms, Ctx.Unifies, Ctx.Vars.all, Ctx)
             then
                if Solv_Trace.Active then
                   Solv_Trace.Trace ("Aborting due to exp res optim");
@@ -1426,7 +1443,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
      (Self              : Relation;
       Solution_Callback : access function
         (Vars : Logic_Var_Array) return Boolean;
-      Solve_Options     : Solve_Options_Type := Default_Options)
+      Solve_Options     : Solve_Options_Type := Default_Options;
+      Timeout           : Natural)
    is
       PRel   : Prepared_Relation;
       Rel    : Relation renames PRel.Rel;
@@ -1454,6 +1472,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       PRel := Prepare_Relation (Self);
       Ctx := Create (Solution_Callback'Unrestricted_Access.all, PRel.Vars);
+      Ctx.Timeout := Timeout;
       Ctx.Cut_Dead_Branches := Solve_Options.Cut_Dead_Branches;
 
       declare
@@ -1506,7 +1525,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
    function Solve_First
      (Self          : Relation;
-      Solve_Options : Solve_Options_Type := Default_Options) return Boolean
+      Solve_Options : Solve_Options_Type := Default_Options;
+      Timeout       : Natural) return Boolean
    is
       Ret : Boolean := False;
 
@@ -1550,7 +1570,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end Callback;
 
    begin
-      Solve (Self, Callback'Access, Solve_Options);
+      Solve (Self, Callback'Access, Solve_Options, Timeout);
       if Tracked_Vars /= null then
          for TV of Tracked_Vars.all loop
             if TV.Defined then

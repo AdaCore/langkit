@@ -310,8 +310,12 @@ package body Langkit_Support.Adalog.Solver is
       Timeout           : Natural := 0) is
    begin
       case Self.Kind is
-         when Symbolic => Sym_Solve.Solve
-              (Self.Symbolic_Relation, Solution_Callback, Solve_Options);
+         when Symbolic =>
+            Sym_Solve.Solve
+              (Self.Symbolic_Relation,
+               Solution_Callback,
+               Solve_Options,
+               Timeout);
          when State_Machine =>
             while Abstract_Relation.Solve (Self.SSM_Relation, Timeout) loop
                declare
@@ -354,7 +358,7 @@ package body Langkit_Support.Adalog.Solver is
       case Self.Kind is
          when Symbolic =>
             return Sym_Solve.Solve_First
-              (Self.Symbolic_Relation, Solve_Options);
+              (Self.Symbolic_Relation, Solve_Options, Timeout);
          when State_Machine =>
             return Abstract_Relation.Solve (Self.SSM_Relation, Timeout);
          when None => raise Constraint_Error with "Cannot solve No_Relation";

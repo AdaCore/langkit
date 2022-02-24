@@ -57,19 +57,27 @@ package Langkit_Support.Adalog.Symbolic_Solver is
      (Self              : Relation;
       Solution_Callback : access function
         (Vars : Logic_Var_Array) return Boolean;
-      Solve_Options     : Solve_Options_Type := Default_Options);
+      Solve_Options     : Solve_Options_Type := Default_Options;
+      Timeout           : Natural);
    --  Run the solver on the ``Self`` relation. For every solution found, call
    --  ``Solution_Callback`` with the variables involved in ``Self``, and
    --  continue looking for other solutions iff it returns True. See
    --  ``Solve_Options Type`` for the available way to configure the resolution
    --  process.
+   --
+   --  ``Timeout`` determines the maximum of times we evaluate atoms before
+   --  aborting the solver. If left to 0, no timeout applies.
 
    function Solve_First
      (Self          : Relation;
-      Solve_Options : Solve_Options_Type := Default_Options) return Boolean;
+      Solve_Options : Solve_Options_Type := Default_Options;
+      Timeout       : Natural) return Boolean;
    --  Run the solver on the ``Self`` relation. Return whether there is at
    --  least one valid solution. See ``Solve_Options Type`` for the available
    --  way to configure the resolution process.
+   --
+   --  ``Timeout`` determines the maximum of times we evaluate atoms before
+   --  aborting the solver. If left to 0, no timeout applies.
 
    function Image (Self : Relation) return String;
    --  Return a textual representation of ``Self`` as a multi-line string
