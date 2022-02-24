@@ -46,8 +46,7 @@ from langkit.expressions import (
     PropertyError, Self, String as S, Try as _Try, Var, direct_env, ignore,
     langkit_property, new_env_assoc
 )
-from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
-                             Or as GOr, Pick)
+from langkit.parsers import Cut, Grammar, List, Null, Opt, Or as GOr, Pick
 
 
 from language.lexer import lkt_lexer as Lex
@@ -1518,6 +1517,13 @@ class GrammarOrExpr(GrammarExpr):
 class GrammarOpt(GrammarExpr):
     """
     Grammar expression for an optional parsing result.
+    """
+    expr = Field(type=T.GrammarExpr)
+
+
+class GrammarStopCut(GrammarExpr):
+    """
+    Grammar expression for a StopCut.
     """
     expr = Field(type=T.GrammarExpr)
 
@@ -3672,6 +3678,7 @@ lkt_grammar.add_rules(
         G.grammar_skip,
         G.grammar_null,
         G.grammar_token,
+        G.grammar_stopcut,
         G.parse_node_expr,
         G.grammar_opt,
         G.grammar_or_expr,
@@ -3708,6 +3715,9 @@ lkt_grammar.add_rules(
     ),
 
     grammar_cut=GrammarCut("/"),
+    grammar_stopcut=GrammarStopCut(
+        Lex.Identifier("stop_cut"), "(", G.grammar_expr, ")"
+    ),
 
     grammar_or_expr=GrammarOrExpr(
         "or", "(",
@@ -3991,7 +4001,7 @@ lkt_grammar.add_rules(
 
 
     lambda_expr=LambdaExpr("(", G.lambda_arg_list, ")",
-                           Opt(":", G.type_ref), "=>", cut(), G.expr),
+                           Opt(":", G.type_ref), "=>", Cut(), G.expr),
 
     null_lit=NullLit("null"),
 

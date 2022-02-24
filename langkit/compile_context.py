@@ -1144,7 +1144,8 @@ class CompileCtx:
         create a null node.
         """
         from langkit.parsers import (Defer, DontSkip, List, Null, Opt, Or,
-                                     Predicate, Skip, _Extract, _Transform)
+                                     Predicate, Skip, StopCut, _Extract,
+                                     _Transform)
 
         @memoized_with_default(False)
         def can_produce_null(parser):
@@ -1156,7 +1157,7 @@ class CompileCtx:
                 return True
             elif isinstance(parser, Or):
                 return any(can_produce_null(p) for p in parser.parsers)
-            elif isinstance(parser, Defer):
+            elif isinstance(parser, (Defer, StopCut)):
                 return can_produce_null(parser.parser)
             elif isinstance(parser, List):
                 return False

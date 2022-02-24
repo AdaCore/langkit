@@ -1,0 +1,36 @@
+=== valid case 1 ===
+
+FooNodeList <valid case 1>:1:1-1:6
+|item_0:
+|  Def <valid case 1>:1:1-1:6
+|  |id:
+|  |  Id <valid case 1>:1:5-1:6: a
+
+=== invalid case 1: use cut ===
+
+1:7-1:10: Cannot parse <def>
+1:10-1:10: Expected Identifier, got Termination
+FooNodeList <invalid case 1: use cut>:1:1-1:10
+|item_0:
+|  Def <invalid case 1: use cut>:1:1-1:6
+|  |id:
+|  |  Id <invalid case 1: use cut>:1:5-1:6: a
+|item_1:
+|  Def <invalid case 1: use cut>:1:7-1:10
+|  |id: None
+
+=== valid case 2: use stopcut ===
+
+FooNodeList <valid case 2: use stopcut>:1:1-1:20
+|item_0:
+|  Def <valid case 2: use stopcut>:1:1-1:6
+|  |id:
+|  |  Id <valid case 2: use stopcut>:1:5-1:6: a
+|item_1:
+|  Block <valid case 2: use stopcut>:1:7-1:20
+|  |el:
+|  |  VarDef <valid case 2: use stopcut>:1:9-1:18
+|  |  |id:
+|  |  |  Id <valid case 2: use stopcut>:1:17-1:18: b
+
+Done

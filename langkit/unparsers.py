@@ -16,7 +16,7 @@ from langkit.diagnostics import WarningSet, check_source_language
 from langkit.lexer import Ignore, LexerToken
 import langkit.names as names
 from langkit.parsers import (
-    Defer, DontSkip, List, NoBacktrack, Null, Opt, Or, Predicate, Skip,
+    Cut, Defer, DontSkip, List, Null, Opt, Or, Predicate, Skip, StopCut,
     _Extract, _Row, _Token, _Transform
 )
 from langkit.utils import not_implemented_error
@@ -521,7 +521,7 @@ class NodeUnparser(Unparser):
         elif isinstance(parser, Opt) and parser._is_error:
             NodeUnparser._emit_to_token_sequence(parser.parser, token_sequence)
 
-        elif isinstance(parser, (DontSkip, NoBacktrack)):
+        elif isinstance(parser, (DontSkip, Cut)):
             pass
 
         else:
@@ -561,7 +561,7 @@ class NodeUnparser(Unparser):
         # As all fields are nodes, previous validation passes made sure that
         # `parser` yields a parse node (potentially a null one).
 
-        if isinstance(parser, (Defer, List, Null, _Transform)):
+        if isinstance(parser, (Defer, List, Null, _Transform, StopCut)):
             # Field parsing goes directly to node creation, so there is no
             # pre/post sequences of tokens.
             field_unparser.always_absent = (field_unparser.always_absent and
@@ -570,7 +570,7 @@ class NodeUnparser(Unparser):
         elif isinstance(parser, Opt):
             if not parser._booleanize:
                 # Because we are in an Opt parser, we now know that this field
-                # is optionnal, so it can be absent.
+                # is optional, so it can be absent.
                 field_unparser.always_absent = False
                 field_unparser.empty_list_is_absent = parser.type.is_list_type
 

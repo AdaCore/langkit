@@ -404,8 +404,8 @@ private package ${ada_lib_name}.Implementation is
 
    function Is_Incomplete (Node : ${T.root_node.name}) return Boolean;
    --  Return whether this node is incomplete or not.  Incomplete nodes are a
-   --  result of the parsing of a node failing as a result of a NoBacktrack
-   --  parser annotation.
+   --  result of the parsing of a node failing as a result of a Cut parser
+   --  annotation.
 
    function Kind_Name (Node : ${T.root_node.name}) return String;
    --  Return the concrete kind for Node

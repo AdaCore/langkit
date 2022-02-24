@@ -37,9 +37,10 @@ from langkit.lexer import (
     WithTrivia
 )
 import langkit.names as names
-from langkit.parsers import (Defer, Discard, DontSkip, Grammar, List as PList,
-                             Null, Opt, Or, Parser, Pick, Predicate, Skip,
-                             _Row, _Token, _Transform)
+from langkit.parsers import (
+    Cut, Defer, Discard, DontSkip, Grammar, List as PList, Null, Opt,
+    Or, Parser, Pick, Predicate, Skip, StopCut, _Row, _Token, _Transform
+)
 
 
 # List of annotations that we don't compute here but that we can safely ignore
@@ -1122,6 +1123,12 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 return DontSkip(lower(rule.f_expr),
                                 lower(rule.f_dont_skip),
                                 location=loc)
+
+            elif isinstance(rule, L.GrammarCut):
+                return Cut()
+
+            elif isinstance(rule, L.GrammarStopCut):
+                return StopCut(lower(rule.f_expr))
 
             elif isinstance(rule, L.GrammarPredicate):
                 if not isinstance(rule.f_prop_ref, L.DotExpr):

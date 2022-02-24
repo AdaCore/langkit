@@ -8,7 +8,12 @@ ${parser.parser.generate_code()}
 ## recover.
 % if parser.no_backtrack:
 if ${parser.pos_var} = No_Token_Index and then ${parser.no_backtrack} then
+
+   ## Resetting the pos var so that we continue parsing
    ${parser.pos_var} := Parser.Last_Fail.Pos;
+
+   ## Record that parser has failed nonetheless (i.e. that the result will be
+   ## incorrect/incomplete).
    ${parser.has_failed_var} := True;
 end if;
 % endif

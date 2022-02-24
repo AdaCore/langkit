@@ -177,7 +177,6 @@ def template_extensions(ctx: CompileCtx) -> Dict[str, Any]:
         'is_list':      type_check_instance(List),
         'is_opt':       type_check_instance(Opt),
         'is_null':      type_check_instance(Null),
-        'is_nobt':      type_check_instance(NoBacktrack),
         'is_extract':   type_check_instance(_Extract),
         'is_class':     inspect.isclass,
         'is_regular_node_unparser': type_check_instance(RegularNodeUnparser),
@@ -573,7 +572,7 @@ class Parser:
         This method will traverse the parser hierarchy and set the no_backtrack
         variable if necessary, indicating which parsers should not backtrack.
         """
-        if isinstance(self, NoBacktrack):
+        if isinstance(self, Cut):
             if nobt:
                 self.no_backtrack = nobt
             else:
@@ -581,7 +580,7 @@ class Parser:
 
         for c in self.children:
             nobt = c.traverse_nobacktrack(self.no_backtrack)
-            # Or parsers are a stop point for nobacktrack
+            # Or parsers are a stop point for Cut
 
             if nobt and not isinstance(self, Or):
                 self.no_backtrack = nobt
@@ -2125,15 +2124,163 @@ class Predicate(Parser):
         return self.render('predicate_code_ada')
 
 
-class NoBacktrack(Parser):
+class StopCut(Parser):
     """
-    An instance of this parser will indicate that no backtrack should happen in
-    the parser hierarchy from now on. The semantics are similar to those of the
-    cut operator, however, instead of using it to fail early and optimize
-    performance, in this case we use it to provide error recovery.
+    This parser is meant to be used in combination with the ``Cut`` parser,
+    containing its effects, by making sure the parser backtracks, and
+    cancelling eventual error messages that might have been emitted.
 
-    NOTE: It could eventually be used in a special "no error recovery" mode to
-    fail early, if this is ever needed.
+    * If parsing of ``StopCut``'s subparser is successful, nothing happens.
+
+    * If parsing of ``StopCut``'s subparser fails because of a cut (so
+      returning an incomplete node), then the result is discarded, and
+      ``StopCut`` returns a null result and position, forcing the parent parser
+      to backtrack.
+
+    * If parsing of ``StopCut``'s subparser fails completely (so returning
+      null), then we still reset eventual error messages that might have been
+      emitted in nested ``Cut`` parsers.
+
+
+    Here is an example of how to use the ``StopCut`` parser. Imagine you have
+    the two following rules::
+
+        def1=Def("def", Cut(), ..., "end")
+        def2=Var("def", Cut(), ...)
+
+    So far, we imagine it's fine to have cuts in each rule, because they're not
+    used in a context where they can clash. But then at some point you add the
+    following rule to your parser::
+
+        block=Block("{", Or(def1, def2), "}")
+
+    Then it doesn't work, because ``def2`` can't ever be parsed, and you will
+    always get an error node out of ``def1`` in cases where you try to parse
+    ``def2``. If you add a ``StopCut`` parser you can solve that problem::
+
+        block=Block("{", Or(StopCut(def1), def2), "}")
+
+    In this case, the parsing of ``def1`` will fail rather than return an error
+    node, and so the ``Or`` will backtrack on ``def2``.
+    """
+
+    def __init__(self, parser: Parser, location: Optional[Location] = None):
+        Parser.__init__(self, location=location)
+        self.parser = resolve(parser)
+
+    def __repr__(self) -> str:
+        return f"StopCut({self.parser})"
+
+    def _is_left_recursive(self, rule_name: str) -> bool:
+        return self.parser._is_left_recursive(rule_name)
+
+    @property
+    def children(self) -> _List[Parser]:
+        return [self.parser]
+
+    def _eval_type(self) -> Optional[CompiledType]:
+        return self.parser._eval_type()
+
+    def create_vars_after(self, start_pos: VarDef) -> None:
+        self.init_vars(res_var=self.parser.res_var)
+
+    def _precise_types(self) -> TypeSet:
+        return self.parser.precise_types
+
+    def _precise_element_types(self) -> TypeSet:
+        return self.parser.precise_element_types
+
+    def generate_code(self) -> str:
+        return f"""
+        declare
+            Nb_Diags : constant Ada.Containers.Count_Type
+              := Parser.Diagnostics.Length;
+        begin
+            {self.parser.generate_code()}
+
+            if ({self.parser.res_var} /= null
+                and then {self.parser.res_var}.Last_Attempted_Child /= -1)
+
+               --  If the subparser has failed, we still want to reset the
+               --  diagnostics, because parsing might have failed because of
+               --  a cut.
+               or else {self.parser.pos_var} = No_Token_Index
+            then
+                {self.pos_var} := No_Token_Index;
+                Parser.Diagnostics.Set_Length (Nb_Diags);
+            else
+                {self.pos_var} := {self.parser.pos_var};
+            end if;
+        end;
+        """
+
+
+class Cut(Parser):
+    """
+    An instance of this parser will prevent backtracking from the point where
+    the cut is inserted.
+
+    Diagnostics will be emitted (so the resulting analysis unit will
+    necessarily be considered as being erroneous), the parser will return an
+    incomplete error node, *but will not return ``No_Token_Index``*, and hence
+    parsing will continue from the next token.
+
+    Note that in the general case, this behavior (parsing continuing), will
+    just lead to an immediate failure, because the parser will start back from
+    a point that makes no sense. But, combined with the use of ``Skip``
+    parsers, this can allow the user to continue parsing by skipping every
+    token until it finds something that makes sense.
+
+    This parser is used to:
+
+    1. Get better error messages. You are indicating the parser that if
+       something fails past a certain point, it should not backtrack. That
+       allows the parser to generate a specific error message for that branch,
+       instead of a more generic error message later on.
+
+       .. NOTE:: This is only half true for the moment. We can definitely
+           further improve the quality of error messages Cuts produce.
+
+    2. Get better error recovery. So far this is the primary reason the ``Cut``
+       parser is used. Associated with other error recovery primitives in
+       Langkit, such as the ``Skip`` parser, this will allow you to generate
+       more precise incomplete/incorrect nodes.
+
+    Here is an example of how to use the ``Cut`` parser. Let's take the example
+    of a very simple rule like the following::
+
+        fn=Fn("function", name, "is", stmts, "end")
+
+    In this case, if we try to parse the input ``"function end"``, it will fail
+    completely, and not produce any node.
+
+    If we add a cut in the rule like so::
+
+        fn=Fn("function", Cut(), name, "is", stmts, "end")
+
+    Then, parsing the same input will produce an incomplete ``Fn`` node.
+    Parsing will probably fail on the next token (``end``) anyway.
+
+    If you combine that with the use of the ``Skip`` parser, you can get a
+    parser that can recover errors::
+
+        fn=Fn("function", Cut(), name, "is", stmts, "end")
+        typ=Typ("type", Cut(), name, "is", ..., "end")
+        decls=List(Or(fn, typ, Skip(ErrorDecl)))
+
+    With this parser, you can parse incomplete code such as::
+
+
+        type A             --  This will produce an incomplete node thanks to
+                           --  the cut annotation, and parser will start back
+                           --  from the "end" token.
+
+        end                --  This token will be skipped thanks to the
+                           --  ``Skip`` parser.
+
+        function Foo is    --  This function decl will be parsed correctly
+            print("lol")
+        end
     """
 
     def discard(self) -> bool:
@@ -2147,7 +2294,7 @@ class NoBacktrack(Parser):
         return False
 
     def __repr__(self) -> str:
-        return "NoBacktrack"
+        return "Cut"
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.pos_var = start_pos
@@ -2159,7 +2306,7 @@ class NoBacktrack(Parser):
         return '{} := True;'.format(self.no_backtrack)
 
     def _eval_type(self) -> Optional[CompiledType]:
-        # A NoBacktrack parser never yields a concrete result itself
+        # A Cut parser never yields a concrete result itself
         return None
 
 

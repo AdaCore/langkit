@@ -472,7 +472,7 @@ def node_name(node):
 
 def emit_rule(rule, top_level=False):
     from langkit.parsers import (
-        _Transform, _Row, Opt, List, Or, _Token, NoBacktrack,
+        _Transform, _Row, Opt, List, Or, _Token, Cut, StopCut,
         _Extract, DontSkip, Skip, Null, Parser, resolve, Defer, Predicate,
         Discard
     )
@@ -533,8 +533,10 @@ def emit_rule(rule, top_level=False):
                 '("{}")'.format(rule.match_text)
                 if rule.match_text else ""
             )
-    elif isinstance(rule, NoBacktrack):
+    elif isinstance(rule, Cut):
         return "/"
+    elif isinstance(rule, StopCut):
+        return "stop_cut({})".format(emit_rule(rule.parser))
     elif isinstance(rule, Defer):
         return str(rule)
     elif isinstance(rule, Predicate):
