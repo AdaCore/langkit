@@ -37,10 +37,6 @@ package Langkit_Support.Adalog is
    ---------------------
 
    type Solve_Options_Type is record
-      Simplify : Boolean := True;
-      --  Try to split Any relations in ``Self`` looking for contradictions in
-      --  its atoms through a depth first traversal.
-
       Cut_Dead_Branches : Boolean := True;
       --  Whether to enable an optimization that will cut branches that
       --  necessarily contain falsy solutions.
@@ -120,21 +116,5 @@ package Langkit_Support.Adalog is
       Default => GNATCOLL.Traces.From_Config);
    --  Trace to show the result of relation constant folding pass done during
    --  the preparation stage in the symbolic solver.
-
-   Simplify_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.SOLVER.SIMPLIFY",
-      Default => GNATCOLL.Traces.From_Config);
-   --  Trace to show the progress of simplifying a relation before solving it
-
-   No_Simplify_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.SOLVER.NO_SIMPLIFY",
-      Default => GNATCOLL.Traces.From_Config);
-   --  Trace which, when active, disables the Simplify optimization
-
-   Any_Left_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.SOLVER.ANY_LEFT",
-      Default => GNATCOLL.Traces.From_Config);
-   --  Trace to show when there are Any relations left after pre-solving
-   --  optimizations.
 
 end Langkit_Support.Adalog;

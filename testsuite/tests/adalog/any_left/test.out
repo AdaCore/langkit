@@ -32,7 +32,6 @@ All:
     Is_Even?(%X)
 
 ... with all optimizations:
-[LANGKIT.SOLVER.ANY_LEFT] Non-root Any relations left before solving
 Solution: [%X = 2]
 Solution: [%X = 4]
 

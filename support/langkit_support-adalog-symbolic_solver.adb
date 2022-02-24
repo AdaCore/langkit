@@ -133,9 +133,8 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       --  code a bit.
 
       Has_Contradiction_Counter : Natural;
-      --  During the Simplify optimization, number of times
-      --  ``Has_Contradiction`` was called. Used for logging/debugging
-      --  purposes.
+      --  Number of times ``Has_Contradiction`` was called. Used for
+      --  logging/debugging purposes.
    end record;
    --  Data used when doing a topological sort (used only in
    --  Solving_Context.Sort_Ctx), when we reach a complete potential solution.
@@ -151,13 +150,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Relation that is prepared for solving (see the ``Prepare_Relation``
    --  function below).
 
-   function Prepare_Relation
-     (Self : Relation; Opts : Solve_Options_Type) return Prepared_Relation;
+   function Prepare_Relation (Self : Relation) return Prepared_Relation;
    --  Prepare a relation for the solver: simplify it and create a list of all
    --  the logic variables it references, assigning an Id to each.
-   --
-   --  TODO??? Due to Aliasing, a logic variable can have several ids.
-   --  Consequently, the exponential resolution optimization is not complete.
 
    procedure Create_Aliases
      (Vars : Logic_Var_Array; Unifies : Atomic_Relation_Vector);
@@ -197,13 +192,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  return whether they are all satisfied: if they are, the logic variables
    --  are assigned values, so it is possible to invoke the user callback for
    --  solutions.
-
-   function Simplify
-     (Self     : Relation;
-      Vars     : Logic_Var_Array;
-      Sort_Ctx : in out Sort_Context) return Relation;
-   --  Try to split Any relations in ``Self`` looking for contradictions in its
-   --  atoms through a depth first traversal. Return the simplified relation.
 
    function Has_Contradiction
      (Atoms, Unifies : Atomic_Relation_Vector;
@@ -280,10 +268,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    --  Look for valid solutions in ``Self`` & ``Ctx``. Return whether to
    --  continue looking for other solutions.
 
-   procedure Any_Left_Warn (Self : Relation);
-   --  If ``Self`` contains a non-root ``Any`` relation, warn about it on
-   --  ``Any_Left_Trace``.
-
    procedure Trace_Timing (Label : String; Start : Time);
    --  Log ``Start .. Clock`` as the time it took to run ``Label``
 
@@ -338,9 +322,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    -- Prepare_Relation --
    ----------------------
 
-   function Prepare_Relation
-     (Self : Relation; Opts : Solve_Options_Type) return Prepared_Relation
-   is
+   function Prepare_Relation (Self : Relation) return Prepared_Relation is
       --  For determinism, collect variables in the order in which they appear
       --  in the equation.
       Vec : Logic_Var_Vectors.Vector;
@@ -558,7 +540,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Result          : Prepared_Relation;
       Start           : constant Time := Clock;
-      Folded_Relation : Relation := Fold_And_Track_Vars (Self);
+      Folded_Relation : constant Relation := Fold_And_Track_Vars (Self);
    begin
       Trace_Timing ("Constant folding", Start);
 
@@ -618,24 +600,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       end loop;
       Vec.Destroy;
 
-      --  If requested, simplify the relation, trying to find contradictions
-      --  between related atoms with a recursive search.
-
-      if Opts.Simplify and then not No_Simplify_Trace.Is_Active then
-         declare
-            Start    : constant Time := Clock;
-            Sort_Ctx : Sort_Context := Create (Result.Vars.all);
-         begin
-            Result.Rel :=
-              Simplify (Folded_Relation, Result.Vars.all, Sort_Ctx);
-            Dec_Ref (Folded_Relation);
-            Destroy (Sort_Ctx);
-            Trace_Timing ("Simplify", Start);
-         end;
-      else
-         Result.Rel := Folded_Relation;
-      end if;
-
+      Result.Rel := Folded_Relation;
       return Result;
    end Prepare_Relation;
 
@@ -884,453 +849,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       return True;
    end Evaluate_Atoms;
 
-   --------------
-   -- Simplify --
-   --------------
-
-   function Simplify
-     (Self     : Relation;
-      Vars     : Logic_Var_Array;
-      Sort_Ctx : in out Sort_Context) return Relation
-   is
-      Iter_Count : Natural := 0;
-      --  Number of times we went through the loop in ``Simplify.Process``, for
-      --  logging purposes.
-
-      Atoms, Unifies : Atomic_Relation_Vector :=
-        Atomic_Relation_Vectors.Empty_Vector;
-      --  Non-Unify and Unify atoms that must be considered in ``Process`` when
-      --  looking for contradictions in ``Self``.
-
-      procedure Cut_Atoms (Atoms_Mark, Unifies_Mark : Natural);
-      --  Remove items in ``Atoms`` past the ``Atoms_Mark`` index and in
-      --  ``Unifies`` past the ``Unifies_Mark`` index. Destroy the
-      --  corresponding ownership shares.
-
-      function Process (Self : Relation) return Relation
-        with Pre => Self.Kind = Compound
-                    and then Self.Compound_Rel.Kind = Kind_All;
-      --  Try to simplify ``Self``, and return a new relation (or ``Self`` with
-      --  a new ownership share). Set ``Continue`` to True if at least one
-      --  simplification occurred.
-
-      ---------------
-      -- Cut_Atoms --
-      ---------------
-
-      procedure Cut_Atoms (Atoms_Mark, Unifies_Mark : Natural) is
-      begin
-         for Dummy in reverse Atoms_Mark + 1 .. Atoms.Length loop
-            declare
-               R : Relation := Atoms.Pop;
-            begin
-               Dec_Ref (R);
-            end;
-         end loop;
-
-         for Dummy in reverse Unifies_Mark + 1 .. Unifies.Length loop
-            declare
-               R : Relation := Unifies.Pop;
-            begin
-               Dec_Ref (R);
-            end;
-         end loop;
-      end Cut_Atoms;
-
-      -------------
-      -- Process --
-      -------------
-
-      function Process (Self : Relation) return Relation is
-         Atoms_Mark   : constant Natural := Atoms.Length;
-         Unifies_Mark : constant Natural := Unifies.Length;
-         --  Length for these vectors at the point of this call to ``Process``.
-         --  This call and its recursions may append atoms to these vectors, so
-         --  we must restore their original length before returning to our
-         --  caller.
-
-         Anys : Relation_Vectors.Vector;
-         --  List of Any to consider as direct sub-relations in ``Self``
-
-         Atoms_Changed : Boolean := True;
-         --  We run a fixpoint algorithm: as long as atoms (including Unify
-         --  ones) keeps growing, look for new contradictions in ``Anys``.
-         --  Everytime the simplification of an ``Any`` relation adds items to
-         --  ``Atoms`` or ``Unifies``, new opportunities to find contradictions
-         --  in ``Anys` may aride. This boolean keeps track of whether
-         --  ``Atoms`` or ``Unifies`` growed since the last iteration.
-
-         procedure Add
-           (Self : Relation; Update_Atoms_Changed : Boolean := True);
-         --  Append ``Self`` to ``Anys`` if it is an Any relation, to
-         --  ``Unifies`` if it is a Unify relation, or to ``Atoms`` otherwise.
-         --
-         --  Set ``Atoms_Changed`` to True if 1) ``Update_Atoms_Changed`` is
-         --  True and 2) this modifies ``Atoms`` or ``Unifies``.
-         --
-         --  Calling this on an All relation is invalid.
-
-         procedure Cleanup;
-         --  Restore the ``Atoms`` and ``Unifies`` vectors, plus free the
-         --  ``Anys`` vector.
-
-         ---------
-         -- Add --
-         ---------
-
-         procedure Add
-           (Self : Relation; Update_Atoms_Changed : Boolean := True) is
-         begin
-            if Self.Kind = Compound then
-               case Self.Compound_Rel.Kind is
-                  when Kind_Any =>
-                     Inc_Ref (Self);
-                     Anys.Append (Self);
-                  when Kind_All =>
-                     for R of Self.Compound_Rel.Rels loop
-                        Add (R);
-                     end loop;
-               end case;
-
-            elsif Self.Atomic_Rel.Kind = Unify then
-               Inc_Ref (Self);
-               Unifies.Append (Self);
-               if Update_Atoms_Changed then
-                  Atoms_Changed := True;
-               end if;
-
-            else
-               Inc_Ref (Self);
-               Atoms.Append (Self);
-               if Update_Atoms_Changed then
-                  Atoms_Changed := True;
-               end if;
-            end if;
-         end Add;
-
-         -------------
-         -- Cleanup --
-         -------------
-
-         procedure Cleanup is
-         begin
-            --  Remove the atoms/unifies we have added in this instance of
-            --  ``Process``, and destroy the ownership share we have for them.
-
-            Cut_Atoms (Atoms_Mark, Unifies_Mark);
-
-            --  Likewise, free the Any relations we tracked
-
-            for A of Anys loop
-               declare
-                  R : Relation := A;
-               begin
-                  Dec_Ref (R);
-               end;
-            end loop;
-            Anys.Destroy;
-
-            if Simplify_Trace.Is_Active then
-               Simplify_Trace.Decrease_Indent;
-            end if;
-         end Cleanup;
-
-      begin
-         if Simplify_Trace.Is_Active then
-            Simplify_Trace.Increase_Indent ("Running on:");
-            Simplify_Trace.Trace (Image (Self));
-         end if;
-
-         --  Decompose ``Self`` into atoms, Unify and Any nodes
-
-         declare
-            Subrels : Relation_Vectors.Vector renames Self.Compound_Rel.Rels;
-         begin
-            for I in 1 .. Subrels.Length loop
-               Add (Subrels.Get (I));
-            end loop;
-         end;
-
-         --  Now run our fixpoint
-
-         while Atoms_Changed loop
-            Atoms_Changed := False;
-            Iter_Count := Iter_Count + 1;
-            if Simplify_Trace.Is_Active then
-               Simplify_Trace.Trace ("Iteration count:" & Iter_Count'Image);
-            end if;
-
-            --  If can find a contradiction just looking at the atoms that are
-            --  direct sub-relations of ``Self``, we can replace ``Self`` with
-            --  a logic False.
-
-            if Has_Contradiction (Atoms, Unifies, Vars, Sort_Ctx) then
-               Cleanup;
-               return Create_False;
-            end if;
-
-            --  Go through all alternatives in all Any relations and try to
-            --  find contradictions there to simplify/remove these Any
-            --  relations.
-            --
-            --  For both iterations, go through relations in reverse order so
-            --  that we can remove the item being processing from its vector
-            --  without breaking the iteration.
-
-            for Any_Idx in reverse 1 .. Anys.Length loop
-               declare
-                  Any         : Relation := Anys.Get (Any_Idx);
-                  Any_Subrels : Relation_Vectors.Vector renames
-                    Any.Compound_Rel.Rels;
-
-                  function Any_Img return String
-                  is (Image_Header (Any) & " [Any" & Any_Idx'Image & "]");
-               begin
-                  if Simplify_Trace.Is_Active then
-                     Simplify_Trace.Trace ("Trying to simplify " & Any_Img);
-                  end if;
-
-                  Alt_Loop : for Alt_Idx in reverse 1 .. Any_Subrels.Length
-                  loop
-                     declare
-                        Alt : Relation := Any_Subrels.Get (Alt_Idx);
-
-                        function Alt_Img return String
-                        is (Image_Header (Alt)
-                            & " alt" & Alt_Idx'Image & " of " & Any_Img);
-                     begin
-                        if Simplify_Trace.Is_Active then
-                           Simplify_Trace.Trace
-                             ("Trying to simplify " & Alt_Img);
-                        end if;
-
-                        if Alt.Kind = Compound then
-
-                           --  The only compound relations that Any relations
-                           --  can have are All relations.
-
-                           pragma Assert (Alt.Compound_Rel.Kind = Kind_All);
-
-                           Alt := Process (Alt);
-
-                        else
-                           --  Look for a contradiction with this ``Alt`` atom.
-                           --  To do this, we must add ``Alt`` to our knowledge
-                           --  base just the time to check for contradictions,
-                           --  and rollback the knowledge base right after
-                           --  that. This is why we must not update
-                           --  ``Atoms_Changed``: this operation should not
-                           --  trigger another inner loop iteration.
-
-                           declare
-                              Atoms_Mark   : constant Natural := Atoms.Length;
-                              Unifies_Mark : constant Natural :=
-                                Unifies.Length;
-                           begin
-                              Add (Alt, Update_Atoms_Changed => False);
-
-                              if Has_Contradiction
-                                (Atoms, Unifies, Vars, Sort_Ctx)
-                              then
-                                 Alt := Create_False;
-                              else
-                                 --  Increase ``Alt``'s reference count so that
-                                 --  we have always have a new ownership share
-                                 --  for ``Alt`` in the code below: other
-                                 --  branches contain assignments to ``Alt``
-                                 --  which also create an ownership share.
-
-                                 Inc_Ref (Alt);
-                              end if;
-
-                              Cut_Atoms (Atoms_Mark, Unifies_Mark);
-                           end;
-                        end if;
-
-                        --  Destroy the ownership share that ``Any`` has on
-                        --  this alternative, as we are going to replace it
-                        --  with ``Alt`` (or even remove it).
-
-                        declare
-                           R : Relation := Any_Subrels.Get (Alt_Idx);
-                        begin
-                           Dec_Ref (R);
-                        end;
-
-                        --  If this alternative leads to a contradiction, we
-                        --  can remove it from the ``Any`` relation we are
-                        --  currently processing.
-
-                        if Alt.Kind = Atomic
-                           and then Alt.Atomic_Rel.Kind = False
-                        then
-                           Dec_Ref (Alt);
-                           Any_Subrels.Remove_At (Alt_Idx);
-
-                           --  Moreover, if there is only one alternative left
-                           --  in this ``Any``, we can get rid of it and
-                           --  migrate its only alternative to
-                           --  ``Atoms``/``Unifies``/``Anys``.
-
-                           if Any_Subrels.Length = 1 then
-                              Add (Any.Compound_Rel.Rels.Get (1));
-                              Dec_Ref (Any);
-                              Anys.Remove_At (Any_Idx);
-                              exit Alt_Loop;
-                           end if;
-
-                        else
-                           pragma Assert
-                             (Alt.Kind = Atomic
-                                or else
-                              (Alt.Kind = Compound
-                               and then Alt.Compound_Rel.Kind = Kind_All));
-                           --  It is not possible for an All relation to be
-                           --  simplified to an Any one. This is thanks to two
-                           --  principles:
-                           --
-                           --  * The constant folding pass will automatically
-                           --    inline ``Any(X)`` (i.e. single-alternative Any
-                           --    relations), and likewise for All relations. So
-                           --    all compound relations have at least two
-                           --    sub-relations when Simplify starts.
-                           --
-                           --  * When Simplify removes all but one alternative
-                           --    in an ``Any`` relation, that relation is
-                           --    inlined into its parent too.
-                           --
-                           --  * Simplify never removes subrelations in All
-                           --    relations: either it finds a contradiction,
-                           --    and the whole All relation is replaced with an
-                           --    Any one, either it does not and then the All
-                           --    relation is kept unchanged.
-
-                           --  We could not split this alternative, but at
-                           --  least we can use its simplified version.
-
-                           Any_Subrels.Set (Alt_Idx, Alt);
-                        end if;
-                     end;
-                  end loop Alt_Loop;
-               end;
-            end loop;
-         end loop;
-
-         --  Build the result from ``Anys`` plus all items in
-         --  ``Atoms``/``Unifies`` which we added during this call.
-
-         return Result : Relation do
-            declare
-               Count : constant Positive :=
-                 (Atoms.Length - Atoms_Mark)
-                 + (Unifies.Length - Unifies_Mark)
-                 + Anys.Length;
-
-               Items : Relation_Array (1 .. Count);
-               Last  : Natural := 0;
-            begin
-               --  The ``Items`` array just borrows relations: we just create
-               --  one ownership share for ``Result`` at the end, and the call
-               --  to ``Cleanup`` will then destroy the shares assigned to
-               --  ``Atoms``, ``Unifies`` and ``Anys``.
-
-               for I in Atoms_Mark + 1 .. Atoms.Length loop
-                  Last := Last + 1;
-                  Items (Last) := Atoms.Get (I);
-               end loop;
-
-               for I in Unifies_Mark + 1 .. Unifies.Length loop
-                  Last := Last + 1;
-                  Items (Last) := Unifies.Get (I);
-               end loop;
-
-               for A of Anys loop
-                  Last := Last + 1;
-                  Items (Last) := A;
-               end loop;
-
-               if Count = 1 then
-                  Result := Items (1);
-                  Inc_Ref (Result);
-               else
-                  Result := Create_All (Items, Self.Debug_Info);
-                  Result.Id := Self.Id;
-               end if;
-            end;
-
-            Cleanup;
-         end return;
-      end Process;
-
-      Result : Relation;
-   begin
-      --  We can only simplify compound relations, so return atoms unchanged
-
-      if Self.Kind = Atomic then
-         Inc_Ref (Self);
-         return Self;
-
-      elsif Self.Compound_Rel.Kind = Kind_Any then
-
-         --  Simplify each alternative separately: there can be no interaction
-         --  between alternatives of a root conjuction.
-         --
-         --  As usual, process alternatives in the reverse order so that we can
-         --  remove the current element without breaking the iteration.
-
-         declare
-            Subrels : Relation_Vectors.Vector renames Self.Compound_Rel.Rels;
-            Alt     : Relation;
-            New_Alt : Relation;
-         begin
-            for I in reverse 1 .. Subrels.Length loop
-               Alt := Subrels.Get (I);
-               New_Alt := Simplify (Alt, Vars, Sort_Ctx);
-               Dec_Ref (Alt);
-
-               --  Remove alternatives that are simplified to a False atom, to
-               --  maintain the solver input invariants.
-
-               if New_Alt.Kind = Atomic
-                  and then New_Alt.Atomic_Rel.Kind = False
-               then
-                  Subrels.Remove_At (I);
-                  Dec_Ref (New_Alt);
-               else
-                  Subrels.Set (I, New_Alt);
-               end if;
-            end loop;
-
-            Inc_Ref (Self);
-            return Self;
-         end;
-      end if;
-
-      --  At this point, we know we are dealing with an All relation.  Create
-      --  an ownership share for the tentative result: the input All relation
-      --  itself.
-
-      Result := Self;
-      Inc_Ref (Result);
-
-      declare
-         New_Result : constant Relation := Process (Result);
-      begin
-         Dec_Ref (Result);
-         Result := New_Result;
-      end;
-
-      if Simplify_Trace.Is_Active then
-         Simplify_Trace.Trace ("Simplification completed");
-         Simplify_Trace.Trace (Image (Result));
-         Simplify_Trace.Trace ("Iterations:" & Iter_Count'Image);
-      end if;
-
-      Atoms.Destroy;
-      Unifies.Destroy;
-      return Result;
-   end Simplify;
-
    -----------------------
    -- Has_Contradiction --
    -----------------------
@@ -1348,11 +866,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       Sort_Ctx.Has_Contradiction_Counter :=
         Sort_Ctx.Has_Contradiction_Counter + 1;
 
-      if Simplify_Trace.Is_Active then
-         Simplify_Trace.Increase_Indent
+      if Solv_Trace.Is_Active then
+         Solv_Trace.Increase_Indent
            ("Looking for a contradiction (number"
             & Sort_Ctx.Has_Contradiction_Counter'Image & ")");
-         Simplify_Trace.Trace (Image (Atoms));
+         Solv_Trace.Trace (Image (Atoms));
       end if;
 
       declare
@@ -1361,9 +879,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Sorted_Atoms : constant Elements_Array :=
            Topo_Sort (Atoms, Unifies, Vars, Sort_Ctx, Dummy);
       begin
-         if Simplify_Trace.Is_Active then
-            Simplify_Trace.Trace ("After partial topo sort");
-            Simplify_Trace.Trace (Image (Sorted_Atoms));
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace ("After partial topo sort");
+            Solv_Trace.Trace (Image (Sorted_Atoms));
          end if;
 
          --  Once the partial topological sort has been done, we can just
@@ -1387,21 +905,21 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                Result := False;
          end;
 
-         if Simplify_Trace.Is_Active then
+         if Solv_Trace.Is_Active then
             if Had_Exception then
-               Simplify_Trace.Trace
+               Solv_Trace.Trace
                  (Exc,
                   "Got an exception, considering no contradiction was found:"
                   & ASCII.LF);
             elsif Result then
-               Simplify_Trace.Trace ("Contradiction found");
+               Solv_Trace.Trace ("Contradiction found");
             else
-               Simplify_Trace.Trace ("No contradiction found");
+               Solv_Trace.Trace ("No contradiction found");
             end if;
          end if;
 
-         if Simplify_Trace.Is_Active then
-            Simplify_Trace.Decrease_Indent;
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Decrease_Indent;
          end if;
 
          Cleanup_Aliases (Vars);
@@ -1889,51 +1407,6 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          end;
    end Solve_Compound;
 
-   -------------------
-   -- Any_Left_Warn --
-   -------------------
-
-   procedure Any_Left_Warn (Self : Relation) is
-
-      function Contains_Any (Self : Relation) return Boolean;
-      --  Return whether ``Self`` is an Any relation or if one of its
-      --  sub-relations contains an Any relation.
-
-      function Contains_Any_Subrel
-        (Self : Compound_Relation_Type) return Boolean;
-      --  Return whether one of ``Self``'s sub-relations contains an Any
-      --  relation.
-
-      -------------------------
-      -- Contains_Any_Subrel --
-      -------------------------
-
-      function Contains_Any_Subrel
-        (Self : Compound_Relation_Type) return Boolean
-      is
-        (for some Subrel of Self.Rels => Contains_Any (Subrel));
-
-      ------------------
-      -- Contains_Any --
-      ------------------
-
-      function Contains_Any (Self : Relation) return Boolean
-      is
-        (Self.Kind = Compound
-         and then (Self.Compound_Rel.Kind = Kind_Any
-                   or else Contains_Any_Subrel (Self.Compound_Rel)));
-
-      Has_Any : constant Boolean :=
-        (if Self.Kind = Compound and then Self.Compound_Rel.Kind = Kind_Any
-         then Contains_Any_Subrel (Self.Compound_Rel)
-         else Contains_Any (Self));
-
-   begin
-      if Has_Any then
-         Any_Left_Trace.Trace ("Non-root Any relations left before solving");
-      end if;
-   end Any_Left_Warn;
-
    ------------------
    -- Trace_Timing --
    ------------------
@@ -1979,13 +1452,9 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          Solver_Trace.Trace (Image (Self));
       end if;
 
-      PRel := Prepare_Relation (Self, Solve_Options);
+      PRel := Prepare_Relation (Self);
       Ctx := Create (Solution_Callback'Unrestricted_Access.all, PRel.Vars);
       Ctx.Cut_Dead_Branches := Solve_Options.Cut_Dead_Branches;
-
-      if Any_Left_Trace.Is_Active then
-         Any_Left_Warn (PRel.Rel);
-      end if;
 
       declare
          Start : constant Time := Clock;
