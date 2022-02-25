@@ -49,6 +49,7 @@ def create_subparser(
     with_gargs: bool = False,
     with_build_dir: bool = False,
     with_libs: bool = False,
+    with_no_mypy: bool = False,
     accept_unknown_args: bool = False,
 ) -> ArgumentParser:
     """
@@ -61,6 +62,7 @@ def create_subparser(
     :param bool with_gargs: Whether to create the --gargs option.
     :param bool with_build_dir: Whether to create the --build-dir option.
     :param bool with_libs: Whether to create the --lib option.
+    :param bool with_no_mypy: Whether to create the --no-mypy option.
     """
     subparser = subparsers.add_parser(
         name=fn.__name__.replace('_', '-'),
@@ -102,6 +104,11 @@ def create_subparser(
             "--lib", "-l", choices=("python", "lkt"), action="append",
             help="Select which libraries on which to operate. By default, work"
                  " on all libraries."
+        )
+    if with_no_mypy:
+        subparser.add_argument(
+            "--no-mypy", action="store_true",
+            help="Whether to disable type-checking with mypy."
         )
 
     def wrapper(args: Namespace, rest: List[str]):
@@ -279,6 +286,19 @@ def make(args: Namespace) -> None:
         m2.wait()
         assert m2.returncode == 0
 
+    # Unless disabled, run mypy to type check Langkit itself. We need to do
+    # this after building liblktlang and libythonlang as Langkit depend on
+    # them.
+    if not args.no_mypy:
+        run_mypy(args)
+
+
+def run_mypy(args: Namespace) -> None:
+    """
+    Type-check the Langkit Python codebase.
+    """
+    subprocess.check_call(["mypy"], cwd=LANGKIT_ROOT)
+
 
 def test(args: Namespace, remaining_args: List[str]) -> None:
     """
@@ -319,11 +339,14 @@ if __name__ == '__main__':
                      with_no_lksp=True,
                      with_gargs=True,
                      with_build_dir=True,
-                     with_libs=True)
+                     with_libs=True,
+                     with_no_mypy=True)
     create_subparser(subparsers, setenv,
                      with_no_lksp=True,
                      with_build_dir=True,
                      with_libs=True)
+
+    create_subparser(subparsers, run_mypy)
 
     create_subparser(subparsers, test, accept_unknown_args=True)
 
