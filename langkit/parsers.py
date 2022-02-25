@@ -1062,8 +1062,54 @@ class Skip(Parser):
     This recovery parser will skip any token and produce an error node from it,
     generating an error along the way.
 
-    Note that if you use that in any kind of List, this will wreck your parser
-    if you don't use the associated DontSkip parser in a parent parser.
+    A common use of the ``Skip`` parser is to skip as many tokens as necessary
+    for the parent parser to fallback into a state where it is able to parse
+    something successfully.
+
+    An example would be to use it in a list of statements::
+
+        stmt=Or(
+            call,
+            assign,
+            ...,
+        )
+
+        stmts=List(Or(stmt, Skip(ErrorDecl)))
+
+    This way, if the parsing of any of the statements reaches an unexpected
+    token that cannot be parsed by any of the statements, it will eventually be
+    handled by the ``Skip`` parser, and produce an error decl for each
+    unexpected token.
+
+    Note that if you use that in a ``List`` parser like above, and that parser
+    is itself in a parser, you will probably need to use the `DontSkip` parser
+    to signal to the skip parser that it must *not* eat certain tokens. Let's
+    develop the example above::
+
+        stmt=Or(
+            call,
+            assign,
+            ...,
+        )
+
+        stmts=List(Or(stmt, Skip(ErrorDecl)))
+
+        function=Fn("function", name, "is", stmts, "end")
+
+    In the example above, the stmts parser will eat *any* unexpected token,
+    including the eventual "end" token that signals the end of the function,
+    *before* the ``function`` parser has the opportunity to use it. To solve
+    this, we'll use the `DontSkip` parser as such::
+
+        function=Fn("function", name, "is", stmts.dont_skip("end"), "end")
+
+
+    With this modification, the nested ``Skip`` parser will skip anything but
+    the "end" token, making thus sure that the function can be parsed
+    correctly.
+
+    .. note:: As other things in Langkit parsers, those annotations could
+        probably be statically derived from the grammar definition.
     """
 
     def __init__(self,
@@ -1119,6 +1165,9 @@ class DontSkip(Parser):
     This means that in the scope of ``parser``, if a skip parser occurs, it
     will first run ``other_parser``, and if ``other_parser`` is successful,
     then skip will fail (eg. not skip anything).
+
+    For more details about the use of this parser, check the documentation of
+    ``Skip``.
     """
 
     def __init__(self,
