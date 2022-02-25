@@ -1903,24 +1903,17 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
 
       Ret : Boolean;
    begin
-      --  If the logic variable that ``Self`` uses is not defined, raise an
-      --  error.
+      --  Do not even try to evaluate this atom if it uses a variable that is
+      --  not defined at this point.
       --
       --  Note that this cannot happen when called from ``Solve_Compound`` as
       --  the topological sort makes sure all variables are defined before they
       --  are used (and abort the resolution if it is not possible), so the
       --  condition below will succeed only when ``Solve_Atomic`` is called
       --  from ``Solve`` when called on an atom directly.
-      --
-      --  TODO??? Maybe we should always go through ``Solve_Compound`` to avoid
-      --  this redundant check, and more generally have a unique way to solve
-      --  relations, and unique way to deal with errors (return no solution
-      --  or raise ``Early_Binding_Error``.
+
       if not Is_Defined_Or_Null (Used_Var (Atom)) then
-         raise Early_Binding_Error with
-           "Relation " & Image (Atom)
-           & " needs var " & Image (Used_Var (Atom).Logic_Var)
-           & " to be defined";
+         return False;
       end if;
 
       case Atom.Kind is
