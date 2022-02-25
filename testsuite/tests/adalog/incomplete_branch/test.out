@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 Any:
     %X <- 1
@@ -14,18 +11,5 @@ Solution: [%X = 1, %Y = <undefined>]
 
 ... with all optimizations:
 Solution: [%X = 1, %Y = <undefined>]
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<Any>:
-| | Unify %X <= 1
-| | <All>:
-| | | | Predicate Is_Even on %X
-| | | | Unify %Y <= 1
-Solution: [%X = 1, %Y = <undefined>]
-Resolution failed with Early_Binding_Error
 
 Done.

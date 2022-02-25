@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 All:
     Any:
@@ -17,18 +14,5 @@ Solution: [%Y = 1, %X = 2]
 
 ... with all optimizations:
 Solution: [%Y = 1, %X = 2]
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<All>:
-| | <Any>:
-| | | | <All>:
-| | | | | | Unify %Y <= 1
-| | | | | | Predicate Is_Even on %X
-| | | | Unify %X <= 1
-| | Unify %X <= 2
 
 Done.

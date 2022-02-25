@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 ========================================================================
 
 Solving relation:
@@ -143,85 +140,6 @@ All:
 Solution: [%X = 2, %Y = 2]
 
 ... with all optimizations:
-Solution: [%X = 2, %Y = 2]
-
-
-Using the state machine solver
-==============================
-
-========================================================================
-
-Solving relation:
-<All>:
-| | Bind %X <=> %Y
-| | Member %X {1, 2, 3}
-Solution: [%X = 1, %Y = 1]
-Solution: [%X = 2, %Y = 2]
-Solution: [%X = 3, %Y = 3]
-
-========================================================================
-
-Solving relation:
-<All>:
-| | Member %X {1, 2, 3}
-| | <Any>:
-| | | | Member %X {10, 20}
-| | | | Predicate Is_Even on %Y
-| | Member %Y {1, 3, 5, 10}
-Solution: [%X = 1, %Y = 10]
-Solution: [%X = 2, %Y = 10]
-Solution: [%X = 3, %Y = 10]
-
-========================================================================
-
-Solving relation:
-<All>:
-| | Predicate Is_Even on %Y
-| | Member %X {1, 2, 3}
-Resolution failed with Early_Binding_Error
-
-========================================================================
-
-Solving relation:
-<All>:
-| | Predicate Is_Even on %Y
-| | Predicate Is_Even on %X
-Resolution failed with Early_Binding_Error
-
-========================================================================
-
-Solving relation:
-<Any>:
-| | Predicate Is_Even on %Y
-| | Member %X {1, 2}
-Resolution failed with Early_Binding_Error
-
-========================================================================
-
-Solving relation:
-<Any>:
-| | Predicate Is_Even on %X
-| | Predicate Is_Even on %Y
-Resolution failed with Early_Binding_Error
-
-========================================================================
-
-Solving relation:
-<Any>:
-| | Predicate Is_Even on %X
-| | <All>:
-| | | | Member %X {1, 2, 3}
-| | | | Predicate Is_Even on %Y
-Resolution failed with Early_Binding_Error
-
-========================================================================
-
-Solving relation:
-<All>:
-| | Member %X {1, 2, 3}
-| | Predicate Is_Even on %Y
-| | Member %X {2}
-| | Bind %X <=> %Y
 Solution: [%X = 2, %Y = 2]
 
 Done.

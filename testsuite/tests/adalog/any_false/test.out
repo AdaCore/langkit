@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 Any:
     False
@@ -10,14 +7,6 @@ Any:
 Solution: [%X = 12]
 
 ... with all optimizations:
-Solution: [%X = 12]
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-Unify %X <= 12
 Solution: [%X = 12]
 
 Done.

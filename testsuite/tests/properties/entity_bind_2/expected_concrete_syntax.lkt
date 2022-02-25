@@ -25,10 +25,10 @@ class Identifier : RootNode implements TokenNode {
 
 class Literal : RootNode implements TokenNode {
 
-    fun is_eq(other: Literal): Bool = node.as_entity = other
+    fun conv(): Literal = self
 
     fun xref_eq(arg1: FooNode, arg2: FooNode): Equation =
     (%domain(node.var, [arg1])) and (
-        %eq(node.var, arg2, eq_prop=BareLiteral.is_eq)
+        %eq(node.var, arg2, conv_prop=BareLiteral.conv)
     )
 }

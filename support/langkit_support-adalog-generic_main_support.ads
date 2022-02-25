@@ -41,7 +41,7 @@ package Langkit_Support.Adalog.Generic_Main_Support is
 
    package Solver_Ifc is new Solver_Interface (Refs);
 
-   package T_Solver is new Langkit_Support.Adalog.Solver (Solver_Ifc, True);
+   package T_Solver is new Langkit_Support.Adalog.Solver (Solver_Ifc);
 
    use Solver_Ifc, T_Solver, Refs;
 

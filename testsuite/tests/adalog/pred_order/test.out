@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 All:
     Any:
@@ -17,18 +14,6 @@ Solution: [%X = 27]
 Solution: [%X = 100]
 
 ... with all optimizations:
-Solution: [%X = 27]
-Solution: [%X = 100]
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<All>:
-| | Member %X {-1, 0, 27, 100}
-| | Predicate is_positive on %X
-| | Predicate lt-100 on %X
 Solution: [%X = 27]
 Solution: [%X = 100]
 

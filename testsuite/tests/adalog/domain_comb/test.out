@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 All:
     Any:
@@ -23,18 +20,6 @@ Solution: [%X = 4]
 Solution: [%X = 5]
 
 ... with all optimizations:
-Solution: [%X = 3]
-Solution: [%X = 4]
-Solution: [%X = 5]
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<All>:
-| | Member %X {1, 2, 3, 4, 5, 6}
-| | Member %X {3, 4, 5}
 Solution: [%X = 3]
 Solution: [%X = 4]
 Solution: [%X = 5]

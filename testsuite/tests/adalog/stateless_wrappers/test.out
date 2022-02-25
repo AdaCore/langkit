@@ -1,28 +1,2 @@
-Using the symbolic solver
-=========================
-
 LANGKIT_SUPPORT.ADALOG.UNSUPPORTED_ERROR: Comparer_Type not supported with the symbolic solver
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<All>:
-| | Member %x {1, 2, 3, 4, 5, 6}
-| | Bind %x <=> %y (convert: double)
-| | Predicate is_odd on %x
-Solution: [%x = 1, %y = 2]
-Solution: [%x = 3, %y = 6]
-Solution: [%x = 5, %y = 10]
-
-Solving relation:
-<All>:
-| | Bind %x <=> %y (equals: is_eq)
-| | Member %x {1, 2, 3, 4, 5, 6}
-| | Member %y {-1, -2, -3, -4, -5, -6}
-| | Predicate is_odd on %x
-Solution: [%x = 1, %y = -1]
-Solution: [%x = 3, %y = -3]
-Solution: [%x = 5, %y = -5]
-
 Done.

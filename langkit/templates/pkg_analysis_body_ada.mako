@@ -20,17 +20,7 @@ pragma Warnings (On, "is an internal GNAT unit");
 with GNATCOLL.Traces;
 
 pragma Warnings (Off, "referenced");
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
-with Langkit_Support.Adalog.Debug;
-use Langkit_Support.Adalog.Debug;
-with Langkit_Support.Adalog.Operations;
-use Langkit_Support.Adalog.Operations;
-with Langkit_Support.Adalog.Predicates;
-use Langkit_Support.Adalog.Predicates;
-with Langkit_Support.Adalog.Pure_Relations;
-use Langkit_Support.Adalog.Pure_Relations;
-with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 pragma Warnings (On, "referenced");
 
 with Langkit_Support.Types;        use Langkit_Support.Types;
@@ -338,15 +328,6 @@ package body ${ada_lib_name}.Analysis is
 
       Set_Logic_Resolution_Timeout (Unwrap_Context (Context), Timeout);
    end Set_Logic_Resolution_Timeout;
-
-   ---------------------
-   -- Set_Solver_Kind --
-   ---------------------
-
-   procedure Set_Solver_Kind (Kind : Langkit_Support.Adalog.Solver_Kind) is
-   begin
-      Implementation.Solver.Set_Kind (Kind);
-   end Set_Solver_Kind;
 
    ---------------------------
    -- Set_Lookup_Cache_Mode --

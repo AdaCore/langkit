@@ -1,17 +1,7 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 False
 ... without optimizations:
 
 ... with all optimizations:
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<False>
 
 Done.

@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 All:
     %X <- 1
@@ -13,18 +10,6 @@ All:
   -> MAIN.MY_ERROR: main.adb:15
 
 ... with all optimizations:
-  -> MAIN.MY_ERROR: main.adb:15
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<All>:
-| | Unify %X <= 1
-| | <Any>:
-| | | | Unify %X <= 2
-| | | | Predicate Predicate on %X
   -> MAIN.MY_ERROR: main.adb:15
 
 Done.

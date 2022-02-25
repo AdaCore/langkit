@@ -3,8 +3,8 @@ Test that Bind works when binding entities, and using an equality property that
 takes entities.
 """
 
-from langkit.dsl import ASTNode, Bool, LogicVar, T, UserField, abstract
-from langkit.expressions import (AbstractKind, Bind, Self, ignore,
+from langkit.dsl import ASTNode, LogicVar, T, UserField, abstract
+from langkit.expressions import (AbstractKind, Bind, Entity, Self, ignore,
                                  langkit_property)
 
 from utils import build_and_run
@@ -40,14 +40,14 @@ class Identifier(RootNode):
 class Literal(RootNode):
     token_node = True
 
-    @langkit_property(return_type=Bool)
-    def is_eq(other=T.Literal.entity):
-        return Self.as_entity == other
+    @langkit_property(return_type=T.Literal.entity)
+    def conv():
+        return Entity
 
     @langkit_property()
     def xref_eq(arg1=T.FooNode.entity, arg2=T.FooNode.entity):
         return (Self.var.domain([arg1]) &
-                Bind(Self.var, arg2, eq_prop=Self.is_eq))
+                Bind(Self.var, arg2, conv_prop=Self.conv))
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb')

@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 All:
     Any:
@@ -34,25 +31,5 @@ Solution: [%X = 2, %Y = -2]
 Solution: [%X = -2, %Y = -2]
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<All>:
-| | <Any>:
-| | | | Bind %X <=> %Y
-| | | | <True>
-| | <Any>:
-| | | | Member %X {1, 2}
-| | | | <True>
-| | <Any>:
-| | | | Member %Y {-1, -2}
-| | | | <True>
-| | PREDICATE N_Predicate ON %X%Y
-Solution: [%X = 1, %Y = -1]
-Solution: [%X = 1, %Y = 1]
-Resolution failed with Early_Binding_Error
 
 Done.

@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 Any: neutral-any-1
     False
@@ -101,39 +98,5 @@ All: absorb-all
 ... with all optimizations:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] After constant folding:
 [LANGKIT.SOLVER.CONSTANT_FOLDING] [3] False
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-Unify %X <= 1
-Solution: [%X = 1]
-
-Solving relation:
-<False> neutral-any-2
-
-Solving relation:
-Unify %X <= 1
-Solution: [%X = 1]
-
-Solving relation:
-<True>
-Solution: []
-
-Solving relation:
-<Any> absorb-any:
-| | Unify %X <= 2
-| | <True>
-| | Unify %X <= 1
-Solution: [%X = 2]
-Solution: [%X = <undefined>]
-Solution: [%X = 1]
-
-Solving relation:
-<All> absorb-all:
-| | Unify %X <= 2
-| | <False>
-| | Unify %X <= 1
 
 Done.

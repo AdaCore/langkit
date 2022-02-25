@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 All:
     Any:
@@ -31,27 +28,6 @@ Solution: [%X = 12, %Y = 15]
 Solution: [%X = 18, %Y = 18]
 
 ... with all optimizations:
-Solution: [%X = 12, %Y = 15]
-Solution: [%X = 18, %Y = 18]
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<All>:
-| | <Any>:
-| | | | <All>:
-| | | | | | Unify %X <= 12
-| | | | | | Unify %Y <= 15
-| | | | <All>:
-| | | | | | Unify %X <= 18
-| | | | | | Bind %X <=> %Y
-| | | | <All>:
-| | | | | | Unify %X <= 2
-| | | | | | Unify %Y <= 3
-| | | | | | Bind %X <=> %Y
-| | Member %Y {15, 16, 16, 18, 19}
 Solution: [%X = 12, %Y = 15]
 Solution: [%X = 18, %Y = 18]
 

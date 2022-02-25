@@ -42,7 +42,6 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
    Run_Sym_Without_Opts : Boolean;
    Run_Sym_With_Opts    : Boolean;
-   Run_State_Machine    : Boolean;
 
    ------------
    -- Create --
@@ -216,49 +215,39 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
    begin
       Put_Line ("Solving relation:");
-      Print_Relation (Rel);
+      Put_Line (Image (Rel));
 
-      case Kind is
-      when Symbolic =>
-         --  Solve both without and with optimizations
+      --  Solve both without and with optimizations
 
-         if Run_Sym_Without_Opts then
-            Put_Line ("... without optimizations:");
-            Run_Solve ((others => False));
-            New_Line;
-            Solutions_Without_Opts := Solutions;
-            Solutions := Solution_Vectors.Empty_Vector;
-         end if;
+      if Run_Sym_Without_Opts then
+         Put_Line ("... without optimizations:");
+         Run_Solve ((others => False));
+         New_Line;
+         Solutions_Without_Opts := Solutions;
+         Solutions := Solution_Vectors.Empty_Vector;
+      end if;
 
-         if Run_Sym_With_Opts then
-            Put_Line ("... with all optimizations:");
-            Run_Solve ((others => True));
-            New_Line;
-         end if;
+      if Run_Sym_With_Opts then
+         Put_Line ("... with all optimizations:");
+         Run_Solve ((others => True));
+         New_Line;
+      end if;
 
-         --  Check that we had the same results in both cases
+      --  Check that we had the same results in both cases
 
-         if Run_Sym_Without_Opts
-            and then Run_Sym_With_Opts
-            and then not Equivalent (Solutions_Without_Opts, Solutions)
-         then
-            Put_Line ("ERROR: solutions are not the same");
-            New_Line;
-            Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
-         end if;
+      if Run_Sym_Without_Opts
+         and then Run_Sym_With_Opts
+         and then not Equivalent (Solutions_Without_Opts, Solutions)
+      then
+         Put_Line ("ERROR: solutions are not the same");
+         New_Line;
+         Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
+      end if;
 
-         --  Clean up, we are done
+      --  Clean up, we are done
 
-         Free (Solutions_Without_Opts);
-         Free (Solutions);
-
-      when State_Machine =>
-         if Run_State_Machine then
-            Run_Solve ((others => True));
-            Free (Solutions);
-            New_Line;
-         end if;
-      end case;
+      Free (Solutions_Without_Opts);
+      Free (Solutions);
 
    exception
       when others =>
@@ -283,41 +272,16 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
    --------------
 
    procedure Run_Main (Main : access procedure) is
-      Enabled : array (Valid_Solver_Kind) of Boolean;
-      First   : Boolean := True;
    begin
       Setup_Traces;
-      Enabled :=
-        (Symbolic      => Run_Sym_Without_Opts or else Run_Sym_With_Opts,
-         State_Machine => Run_State_Machine);
 
-      for K in Enabled'Range loop
-         if Enabled (K) then
-            if First then
-               First := False;
-            else
-               New_Line;
-            end if;
-            declare
-               Title : constant String :=
-                 "Using the "
-                 & (case K is
-                    when Symbolic => "symbolic",
-                    when State_Machine => "state machine")
-                 & " solver";
-            begin
-               Set_Kind (K);
-               Put_Line (Title);
-               Put_Line ((Title'Range => '='));
-               New_Line;
-               Main.all;
-            exception
-               when Exc : Unsupported_Error =>
-                  Put_Line
-                    (Exception_Name (Exc) & ": " & Exception_Message (Exc));
-            end;
-         end if;
-      end loop;
+      begin
+         Main.all;
+      exception
+         when Exc : Unsupported_Error =>
+            Put_Line
+              (Exception_Name (Exc) & ": " & Exception_Message (Exc));
+      end;
 
       Finalize;
    end Run_Main;
@@ -335,18 +299,14 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
       Run_Sym_Without_Opts := False;
       Run_Sym_With_Opts := False;
-      Run_State_Machine := False;
 
       if Cfg = "" then
          Run_Sym_Without_Opts := True;
          Run_Sym_With_Opts := True;
-         Run_State_Machine := True;
       elsif Cfg = "sym" then
          Run_Sym_Without_Opts := True;
       elsif Cfg = "sym-opts" then
          Run_Sym_With_Opts := True;
-      elsif Cfg = "sm" then
-         Run_State_Machine := True;
       else
          raise Program_Error
            with "Invalid value for env var """ & Var_Name & """";

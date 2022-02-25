@@ -1,18 +1,7 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 Is_Even?(%X)
 ... without optimizations:
 
 ... with all optimizations:
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-Predicate Is_Even on %X
-Resolution failed with Early_Binding_Error
 
 Done.

@@ -1,22 +1,3 @@
-Using the symbolic solver
-=========================
-
-%X = 1
-%Y = 2
-%Z = <undefined>
-
-%X = <undefined>
-%Y = 3
-%Z = <undefined>
-
-%X = <undefined>
-%Y = 2
-%Z = 2
-
-
-Using the state machine solver
-==============================
-
 %X = 1
 %Y = 2
 %Z = <undefined>

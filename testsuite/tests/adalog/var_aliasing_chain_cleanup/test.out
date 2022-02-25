@@ -1,6 +1,3 @@
-Using the symbolic solver
-=========================
-
 Solving relation:
 All:
     %X <-> %Y
@@ -20,23 +17,6 @@ Solution: [%X = 1, %Y = 1, %Z = 1]
 Solution: [%X = 10, %Y = 10, %Z = 11]
 
 ... with all optimizations:
-Solution: [%X = 1, %Y = 1, %Z = 1]
-Solution: [%X = 10, %Y = 10, %Z = 11]
-
-
-Using the state machine solver
-==============================
-
-Solving relation:
-<All>:
-| | Bind %X <=> %Y
-| | <Any>:
-| | | | <All>:
-| | | | | | Bind %X <=> %Z
-| | | | | | Unify %Z <= 1
-| | | | <All>:
-| | | | | | Unify %X <= 10
-| | | | | | Unify %Z <= 11
 Solution: [%X = 1, %Y = 1, %Z = 1]
 Solution: [%X = 10, %Y = 10, %Z = 11]
 
