@@ -36,7 +36,6 @@ package body Langkit_Support.Adalog.Solver_Interface is
    type Predicate_Fn is access function (V : Value_Type) return Boolean;
    type Converter_Fn is access function (V : Value_Type) return Value_Type;
    type N_Predicate_Fn is access function (Vs : Value_Array) return Boolean;
-   type Comparer_Fn is access function (L, R : Value_Type) return Boolean;
 
    type Predicate_Fn_Wrapper is new Predicate_Type with record
       Callback : Predicate_Fn;
@@ -72,18 +71,6 @@ package body Langkit_Support.Adalog.Solver_Interface is
    is (Self.Callback (Val));
 
    overriding function Image (Self : Converter_Wrapper) return String
-   is (Self.Name.To_String);
-
-   type Comparer_Wrapper is new Comparer_Type with record
-      Callback : Comparer_Fn;
-      Name     : XString;
-   end record;
-
-   overriding function Compare
-     (Self : Comparer_Wrapper; L, R : Value_Type) return Boolean
-   is (Self.Callback (L, R));
-
-   overriding function Image (Self : Comparer_Wrapper) return String
    is (Self.Name.To_String);
 
    ------------------
@@ -133,19 +120,6 @@ package body Langkit_Support.Adalog.Solver_Interface is
       return Self.Cache_Value;
    end Convert_Wrapper;
 
-   --------------
-   -- Comparer --
-   --------------
-
-   function Comparer
-     (Pred      : access function (L, R : Value_Type) return Boolean;
-      Pred_Name : String := "Comparer") return Comparer_Type'Class is
-   begin
-      return Comparer_Wrapper'(Ref_Count => 1,
-                               Callback  => Pred'Unrestricted_Access.all,
-                               Name      => To_XString (Pred_Name));
-   end Comparer;
-
    ---------------
    -- Converter --
    ---------------
@@ -166,30 +140,11 @@ package body Langkit_Support.Adalog.Solver_Interface is
    -- Stub implementations --
    --------------------------
 
-   type No_Comparer_Type is new Comparer_Type with null record;
-
-   overriding function Compare
-     (Dummy            : No_Comparer_Type;
-      Dummy_L, Dummy_R : Value_Type) return Boolean
-   is (False);
-
    type No_Converter_Type is new Converter_Type with null record;
 
    overriding function Convert
      (Dummy : No_Converter_Type; Dummy_From : Value_Type) return Value_Type
    is (raise Program_Error);
-
-   function No_Comparer return Comparer_Type'Class
-   is (No_Comparer_Type'(Ref_Count => 1));
-
-   --------------------
-   -- Is_No_Comparer --
-   --------------------
-
-   function Is_No_Comparer (Self : Comparer_Type'Class) return Boolean is
-   begin
-      return Self in No_Comparer_Type'Class;
-   end Is_No_Comparer;
 
    function No_Converter return Converter_Type'Class
    is (No_Converter_Type'(Cache_Set => False, Ref_Count => 1, others => <>));

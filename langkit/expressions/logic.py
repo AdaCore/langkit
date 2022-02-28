@@ -43,12 +43,6 @@ class Bind(AbstractExpression):
     return any ``ASTNode`` subclass. It is used to convert `from_expr` into a
     value to which `to_expr` is compared.
 
-    If provided, `eq_prop` must be a property that takes one ``ASTNode``
-    subclass argument and that compares it to ``Self``. In this case, the
-    argument must be of the same type that the node that owns the property. It
-    is used to compare the two logic variables (after `conv_prop` call, if
-    applicable).
-
     For instance, in order to express the following logical equation::
 
         B = A.some_property()
@@ -61,12 +55,10 @@ class Bind(AbstractExpression):
     class Expr(CallExpr):
         def __init__(self,
                      conv_prop: PropertyDef,
-                     eq_prop: PropertyDef,
                      lhs: ResolvedExpression,
                      rhs: ResolvedExpression,
                      abstract_expr: Optional[AbstractExpression] = None):
             self.conv_prop = conv_prop
-            self.eq_prop = eq_prop
             self.lhs = lhs
             self.rhs = rhs
 
@@ -81,11 +73,6 @@ class Bind(AbstractExpression):
                     ("Cache_Value", LiteralExpr("<>", None)),
                 ))
 
-            if eq_prop:
-                constructor_args.append(self.functor_expr(
-                    eq_prop, f"Eq => Comparer_{self.eq_prop.uid}"
-                ))
-
             if abstract_expr:
                 constructor_args.append(
                     f"Debug_String => {sloc_info_arg(abstract_expr.location)}"
@@ -93,7 +80,7 @@ class Bind(AbstractExpression):
 
             if rhs.type.matches(T.root_node.entity):
                 fn_name = 'Solver.Create_Assign'
-            elif conv_prop or eq_prop:
+            elif conv_prop:
                 fn_name = 'Solver.Create_Propagate'
             else:
                 fn_name = 'Solver.Create_Unify'
@@ -129,14 +116,13 @@ class Bind(AbstractExpression):
         @property
         def subexprs(self):
             return {'conv_prop': self.conv_prop,
-                    'eq_prop':   self.eq_prop,
                     'lhs':       self.lhs,
                     'rhs':       self.rhs}
 
         def __repr__(self):
             return '<Bind.Expr>'
 
-    def __init__(self, from_expr, to_expr, conv_prop=None, eq_prop=None):
+    def __init__(self, from_expr, to_expr, conv_prop=None):
         """
         :param AbstractExpression from_expr: An expression resolving to a
             logical variable that is the source of the bind.
@@ -147,20 +133,11 @@ class Bind(AbstractExpression):
             For convenience, it can be a property on any subclass of the root
             AST node class, and can return any subclass of the root AST node
             class.
-        :param PropertyDef|None eq_prop: The property to use to test for
-            equality between the value of the two expressions. For convenience,
-            it can be a property on a subclass of the root AST node class,
-            however:
-
-            1. It needs to take exactly two parameters, the self parameter and
-               another parameter.
-            2. The two parameters must be of exactly the same type.
         """
         super().__init__()
         self.from_expr = from_expr
         self.to_expr = to_expr
         self.conv_prop = conv_prop
-        self.eq_prop = eq_prop
 
     def resolve_props(self):
         from langkit.expressions import FieldAccess
@@ -181,10 +158,6 @@ class Bind(AbstractExpression):
 
             return prop
 
-        self.eq_prop = resolve('eq_prop', self.eq_prop)
-        if self.eq_prop:
-            self.eq_prop.root_property
-
         self.conv_prop = resolve('conv_prop', self.conv_prop)
         if self.conv_prop:
             self.conv_prop = self.conv_prop.root_property
@@ -193,7 +166,7 @@ class Bind(AbstractExpression):
         from langkit.compile_context import get_context
         self.resolve_props()
 
-        get_context().do_generate_logic_functors(self.conv_prop, self.eq_prop)
+        get_context().do_generate_logic_functors(self.conv_prop)
 
         # We have to wait for the construct pass for the following checks
         # because they rely on type information, which is not supposed to be
@@ -209,45 +182,14 @@ class Bind(AbstractExpression):
                  'Bind property must belong to a subtype of {}'.format(
                      T.root_node.dsl_name
                 )),
+
+                (all(arg.default_value is not None
+                     for arg in self.conv_prop.natural_arguments),
+                 'Bind property can take only optional arguments'),
             ])
 
             DynamicVariable.check_call_bindings(
                 self.conv_prop, "In Bind's conv_prop {prop}"
-            )
-
-        # Those checks are run in construct, because we need the eq_prop to be
-        # prepared already, which is not certain in do_prepare (order
-        # dependent).
-
-        if self.eq_prop:
-            args = self.eq_prop.natural_arguments
-            check_multiple([
-                (self.eq_prop.type == T.Bool,
-                 'Equality property must return boolean'),
-
-                (self.eq_prop.struct.matches(T.root_node),
-                 'Equality property must belong to a subtype of {}'.format(
-                     T.root_node.dsl_name
-                )),
-
-                (len(args) == 1,
-                 'Equality property: expected 1 argument, got {}'.format(
-                     len(args)
-                )),
-            ])
-
-            other_type = args[0].type
-            check_source_language(
-                other_type.is_entity_type,
-                "First arg of equality property should be an entity type"
-            )
-            check_source_language(
-                other_type.element_type == self.eq_prop.struct,
-                "Self and first argument should be of the same type"
-            )
-
-            DynamicVariable.check_call_bindings(
-                self.eq_prop, "In Bind's eq_prop {prop}"
             )
 
         # Left operand must be a logic variable. Make sure the resulting
@@ -282,8 +224,7 @@ class Bind(AbstractExpression):
             from langkit.expressions import Cast
             rhs = Cast.Expr(rhs, T.root_node.entity)
 
-        return Bind.Expr(self.conv_prop, self.eq_prop,
-                         lhs, rhs, abstract_expr=self)
+        return Bind.Expr(self.conv_prop, lhs, rhs, abstract_expr=self)
 
 
 class DomainExpr(ComputingExpr):

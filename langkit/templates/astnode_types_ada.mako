@@ -5,8 +5,8 @@
 
 
 <%def name="logic_helpers()">
-   ## Generate predicate, converter and comparer functors, which wrap
-   ## properties to be used in logic equations.
+   ## Generate predicate and converter functors, which wrap properties to be
+   ## used in logic equations.
    ##
    ## Note that we need to generate them before the properties bodies, because
    ## they'll be used in the bodies.
@@ -17,9 +17,6 @@
    % endfor
    % for conv_prop in ctx.sorted_logic_converters:
       ${prop_helpers.logic_converter(conv_prop)}
-   % endfor
-   % for eq_prop in ctx.sorted_logic_comparers:
-      ${prop_helpers.logic_equal(eq_prop)}
    % endfor
 </%def>
 

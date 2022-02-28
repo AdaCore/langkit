@@ -60,10 +60,6 @@ package Langkit_Support.Adalog is
    --  Exception raised when the resolution of a complex relation exceeded the
    --  number of steps allowed.
 
-   Unsupported_Error : exception;
-   --  Exception raised when trying to use a feature that is not supported by
-   --  the current solver.
-
    -------------------
    -- Adalog traces --
    -------------------

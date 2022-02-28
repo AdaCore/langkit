@@ -1,2 +1,27 @@
-LANGKIT_SUPPORT.ADALOG.UNSUPPORTED_ERROR: Comparer_Type not supported with the symbolic solver
+Solving relation:
+All:
+    Any:
+        %x <- 1
+        %x <- 2
+        %x <- 3
+        %x <- 4
+        %x <- 5
+        %x <- 6
+
+    Any:
+        %y <- one
+        %y <- five
+        %y <- four
+
+    %y <- to_str(%x)
+    is_odd?(%x)
+
+... without optimizations:
+Solution: [%x = 1, %y = one]
+Solution: [%x = 5, %y = five]
+
+... with all optimizations:
+Solution: [%x = 1, %y = one]
+Solution: [%x = 5, %y = five]
+
 Done.

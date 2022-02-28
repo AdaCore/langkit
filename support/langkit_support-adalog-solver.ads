@@ -115,7 +115,6 @@ package Langkit_Support.Adalog.Solver is
      (Logic_Var    : Logic_Vars.Logic_Var;
       Value        : Value_Type;
       Conv         : Converter_Type'Class := No_Converter;
-      Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully if it is possible to
    --  assign the given ``Value`` to ``Logic_Var``. Two attempts to assign
@@ -124,10 +123,6 @@ package Langkit_Support.Adalog.Solver is
    --
    --  If ``Conv`` is provided, the actually assigned value is the result of
    --  ``Conv`` when called on ``Value``.
-   --
-   --  If ``Eq`` is provided, it is used instead of ``Value_Type``'s default
-   --  equality operator to check if two values are the same when dealing with
-   --  concurrent assignments to ``Logic_Var``.
 
    function Create_Unify
      (Left, Right  : Logic_Vars.Logic_Var;
@@ -138,17 +133,12 @@ package Langkit_Support.Adalog.Solver is
    function Create_Propagate
      (From, To     : Logic_Vars.Logic_Var;
       Conv         : Converter_Type'Class := No_Converter;
-      Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully if it is possible to
    --  assign the value in ``From`` to the ``To`` variable.
    --
    --  If ``Conv`` is provided, the actually assigned value is the result of
    --  ``Conv`` when called on ``From``'s value.
-   --
-   --  If ``Eq`` is provided, it is used instead of ``Value_Type``'s default
-   --  equality operator to check if two values are the same when dealing with
-   --  concurrent assignments to ``To``.
 
    function Create_Domain
      (Logic_Var    : Logic_Vars.Logic_Var;

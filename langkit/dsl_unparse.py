@@ -1221,7 +1221,6 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, Bind):
         return "%eq({})".format(", ".join(keep([
             ee(expr.from_expr), ee(expr.to_expr),
-            "eq_prop={}".format(fqn(expr.eq_prop)) if expr.eq_prop else ""
             "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else ""
         ])))
 

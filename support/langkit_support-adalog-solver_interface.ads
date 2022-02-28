@@ -102,23 +102,6 @@ package Langkit_Support.Adalog.Solver_Interface is
      (Self : N_Predicate_Type; Dummy_Vars : Logic_Var_Array) return String
    is ("");
 
-   -------------------
-   -- Comparer_Type --
-   -------------------
-
-   type Comparer_Type is abstract new Base_Functor_Type with null record;
-   function Compare
-     (Self : Comparer_Type; L, R : Value_Type) return Boolean is abstract;
-   function Image (Self : Comparer_Type) return String is ("");
-   --  Type to compare two values, returning whether they are equal
-
-   function No_Comparer return Comparer_Type'Class;
-   --  Return a special comparer which considers two values are always
-   --  different.
-
-   function Is_No_Comparer (Self : Comparer_Type'Class) return Boolean;
-   --  Return whether ``Self`` comes from ``No_Comparer``
-
    --------------------
    -- Converter_Type --
    --------------------
@@ -166,10 +149,6 @@ package Langkit_Support.Adalog.Solver_Interface is
      (Pred      : access function (V : Value_Array) return Boolean;
       Arity     : Positive;
       Pred_Name : String := "N_Predicate") return N_Predicate_Type'Class;
-
-   function Comparer
-     (Pred      : access function (L, R : Value_Type) return Boolean;
-      Pred_Name : String := "Comparer") return Comparer_Type'Class;
 
    function Converter
      (Pred      : access function (V : Value_Type) return Value_Type;

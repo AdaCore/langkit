@@ -78,10 +78,9 @@ package Langkit_Support.Adalog.Generic_Main_Support is
    function Propagate
      (L, R       : Refs.Logic_Var;
       Conv       : Converter_Type'Class := No_Converter;
-      Eq         : Comparer_Type'Class := No_Comparer;
       Dbg_String : String := "") return Relation
    is
-     (+Create_Propagate (L, R, Conv, Eq, -Dbg_String));
+     (+Create_Propagate (L, R, Conv, -Dbg_String));
 
    function Unify
      (L, R : Refs.Logic_Var; Dbg_String : String := "") return Relation
@@ -91,10 +90,9 @@ package Langkit_Support.Adalog.Generic_Main_Support is
      (L          : Refs.Logic_Var;
       R          : T;
       Conv       : Converter_Type'Class := No_Converter;
-      Eq         : Comparer_Type'Class := No_Comparer;
       Dbg_String : String := "") return Relation
    is
-     (+Create_Assign (L, R, Conv, Eq, -Dbg_String));
+     (+Create_Assign (L, R, Conv, -Dbg_String));
 
    function Predicate
      (L          : Refs.Logic_Var;

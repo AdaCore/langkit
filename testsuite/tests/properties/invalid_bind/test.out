@@ -1,19 +1,16 @@
-== Incorrect bind eq_prop 1 ==
-test.py:XXX: error: Equality property must return boolean
+== Bad return type ==
+test.py:XXX: error: Bind property must return a subtype of FooNode.entity
 
-== Incorrect bind eq_prop 2 ==
-test.py:XXX: error: Equality property: expected 1 argument, got 0
+== Bad arity ==
+test.py:XXX: error: Bind property can take only optional arguments
 
-== Incorrect bind eq_prop 3 ==
-test.py:XXX: error: First arg of equality property should be an entity type
+== Unbound dynamic vars ==
+test.py:XXX: error: In Bind's conv_prop BazNode.prop3, some dynamic variables need to be bound: dyn_node2
 
-== Incorrect bind eq_prop 4 ==
-test.py:XXX: error: In Bind's eq_prop BazNode.prop4, some dynamic variables need to be bound: dyn_node
-
-== Correct bind eq_prop A ==
+== Valid default arg ==
 Code generation was successful
 
-== Correct bind eq_prop B ==
+== Valid ==
 Code generation was successful
 
 Done

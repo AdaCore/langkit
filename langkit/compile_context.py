@@ -665,11 +665,6 @@ class CompileCtx:
         Set of properties used as converters in logic equations.
         """
 
-        self.logic_comparer_props: Set[PropertyDef] = set()
-        """
-        Set of properties used as comparers in logic equations.
-        """
-
         self.default_unit_provider = default_unit_provider
         self.case_insensitive = case_insensitive
         self.symbol_canonicalizer = symbol_canonicalizer
@@ -977,11 +972,6 @@ class CompileCtx:
         return sorted(self.logic_converter_props,
                       key=lambda x: x.name.camel)
 
-    @property
-    def sorted_logic_comparers(self):
-        return sorted(self.logic_comparer_props,
-                      key=lambda x: x.name.camel)
-
     def sorted_types(self, type_set):
         """
         Turn "type_set" into a list of types sorted by name.
@@ -1005,8 +995,7 @@ class CompileCtx:
         return sorted(self.exception_types.values(),
                       key=lambda e: e.doc_entity)
 
-    def do_generate_logic_functors(self, convert_property=None,
-                                   eq_property=None):
+    def do_generate_logic_functors(self, convert_property=None):
         """
         Generate a logic binder with the given conversion property.
 
@@ -1014,12 +1003,9 @@ class CompileCtx:
         binder will be generaed.
 
         :param PropertyDef convert_property: The conversion property.
-        :param PropertyDef eq_property: The equality property.
         """
         if convert_property:
             self.logic_converter_props.add(convert_property)
-        if eq_property:
-            self.logic_comparer_props.add(eq_property)
 
     @staticmethod
     def grammar_rule_api_name(rule):

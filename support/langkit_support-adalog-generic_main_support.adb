@@ -274,15 +274,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
    procedure Run_Main (Main : access procedure) is
    begin
       Setup_Traces;
-
-      begin
-         Main.all;
-      exception
-         when Exc : Unsupported_Error =>
-            Put_Line
-              (Exception_Name (Exc) & ": " & Exception_Message (Exc));
-      end;
-
+      Main.all;
       Finalize;
    end Run_Main;
 

@@ -92,8 +92,7 @@ package body ${ada_lib_name}.Parsers is
 
    type Dontskip_Parser_Function is access function
      (Parser : in out Parser_Type;
-      Pos    : Token_Index)
-      return ${ctx.root_grammar_class.storage_type_name};
+      Pos    : Token_Index) return ${ctx.root_grammar_class.storage_type_name};
 
    package Dont_Skip_Fn_Vectors
    is new Ada.Containers.Vectors (Natural, Dontskip_Parser_Function);

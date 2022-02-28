@@ -1650,16 +1650,10 @@ package body Langkit_Support.Adalog.Solver is
      (Logic_Var    : Logic_Vars.Logic_Var;
       Value        : Value_Type;
       Conv         : Converter_Type'Class := No_Converter;
-      Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation
    is
       Conv_Ptr : Converter_Access := null;
    begin
-      if not Is_No_Comparer (Eq) then
-         raise Unsupported_Error with
-           "Comparer_Type not supported with the symbolic solver";
-      end if;
-
       if not Is_No_Converter (Conv) then
          Conv_Ptr := new Converter_Type'Class'(Conv);
       end if;
@@ -1711,16 +1705,10 @@ package body Langkit_Support.Adalog.Solver is
    function Create_Propagate
      (From, To     : Logic_Var;
       Conv         : Converter_Type'Class := No_Converter;
-      Eq           : Comparer_Type'Class := No_Comparer;
       Debug_String : String_Access := null) return Relation
    is
       Conv_Ptr : Converter_Access := null;
    begin
-      if not Is_No_Comparer (Eq) then
-         raise Unsupported_Error with
-           "Comparer_Type not supported with the symbolic solver";
-      end if;
-
       if not Is_No_Converter (Conv) then
          Conv_Ptr := new Converter_Type'Class'(Conv);
       end if;
