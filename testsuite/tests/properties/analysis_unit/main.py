@@ -12,6 +12,9 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
+for unit_arg in (u, None):
+    print(f'id_unit({unit_arg}) = {u.root.p_id_unit(unit_arg)}')
+
 print('result = {}'.format(u.root.p_result))
 
 try:

@@ -10,6 +10,8 @@ grammar foo_grammar {
 
     @export fun eval_unit(u: AnalysisUnit[FooNode]): Int =
     u.root.as[Expression].result()
+
+    @export fun id_unit(u: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = u
 }
 
 @abstract class Expression : FooNode {

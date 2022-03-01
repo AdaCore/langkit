@@ -1347,8 +1347,10 @@ package body ${ada_lib_name}.Analysis is
    ---------------
 
    function Wrap_Unit (Unit : Internal_Unit) return Analysis_Unit
-   is ((Internal => Internal_Unit_Access (Unit),
-        Context  => Wrap_Context (Context (Unit))));
+   is (if Unit = null
+       then No_Analysis_Unit
+       else (Internal => Internal_Unit_Access (Unit),
+             Context  => Wrap_Context (Context (Unit))));
 
    -----------------
    -- Unwrap_Unit --

@@ -14,6 +14,10 @@ class FooNode(ASTNode):
     def eval_unit(u=AnalysisUnit):
         return u.root.cast(T.Expression).result
 
+    @langkit_property(public=True)
+    def id_unit(u=AnalysisUnit):
+        return u
+
 
 @abstract
 class Expression(FooNode):
