@@ -18,6 +18,18 @@ if TYPE_CHECKING:
     from langkit.gdb.context import Context
 
 
+def match_struct_ptr(value: gdb.Value, struct_name: str) -> bool:
+    """
+    Return whether "value" is a pointer to a struct type of the given name.
+    """
+    t = value.type.strip_typedefs()
+    return (
+        t.code == gdb.TYPE_CODE_PTR
+        and t.target().code == gdb.TYPE_CODE_STRUCT
+        and t.target().name == struct_name
+    )
+
+
 class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
     """
     Holder for all pretty printers.
@@ -96,12 +108,7 @@ class AnalysisUnitPrinter(BasePrinter):
 
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
-        return (
-            value.type.code == gdb.TYPE_CODE_PTR
-            and value.type.target().code == gdb.TYPE_CODE_STRUCT
-            and (value.type.target().name ==
-                 context.implname('analysis_unit_type'))
-        )
+        return match_struct_ptr(value, context.implname('analysis_unit_type'))
 
     def to_string(self) -> str:
         if not self.value:
@@ -122,12 +129,7 @@ class ASTNodePrinter(BasePrinter):
 
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
-        t = value.type
-        while t.code == gdb.TYPE_CODE_TYPEDEF:
-            t = t.target()
-        return (t.code == gdb.TYPE_CODE_PTR
-                and t.target().code == gdb.TYPE_CODE_STRUCT
-                and t.target().name == context.node_record)
+        return match_struct_ptr(value, context.node_record)
 
     @property
     def kind(self) -> str:
@@ -224,11 +226,7 @@ class RecordAccessMatcher:
         if typ.code == gdb.TYPE_CODE_TYPEDEF:
             return typ.name == context.implname(self.access_type_name)
 
-        return (
-            typ.code == gdb.TYPE_CODE_PTR
-            and typ.target().code == gdb.TYPE_CODE_STRUCT
-            and typ.target().name == context.implname(self.record_type_name)
-        )
+        return match_struct_ptr(value, context.implname(self.record_type_name))
 
 
 class LexicalEnv:
@@ -578,11 +576,8 @@ class RebindingsPrinter(BasePrinter):
 
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
-        return (
-            value.type.code == gdb.TYPE_CODE_PTR
-            and value.type.target().code == gdb.TYPE_CODE_STRUCT
-            and (value.type.target().name
-                 == context.implname('ast_envs.env_rebindings_type'))
+        return match_struct_ptr(
+            value, context.implname('ast_envs.env_rebindings_type')
         )
 
     @property
@@ -632,9 +627,8 @@ class StringPrettyPrinter(BasePrinter):
 
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
-        return (
-            value.type.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_TYPEDEF)
-            and value.type.name == f"{context.analysis_prefix}string_type"
+        return match_struct_ptr(
+            value, f"{context.analysis_prefix}string_record"
         )
 
     def to_string(self) -> str:
@@ -668,26 +662,40 @@ class ArrayPrettyPrinter(BasePrinter):
         else:
             return None
 
+    @classmethod
+    def value_to_element_typename(
+        cls,
+        value: gdb.Value,
+        context: Context
+    ) -> Optional[str]:
+        """
+        Like ``element_typename``, but working on an array value.
+        """
+        ptr = value.type.strip_typedefs()
+        if (
+            ptr.code != gdb.TYPE_CODE_PTR
+            or ptr.target().code != gdb.TYPE_CODE_STRUCT
+        ):
+            return None
+
+        struct = ptr.target()
+        return (None
+                if struct.name is None
+                else cls.element_typename(struct.name, context))
+
     @property
     def length(self) -> int:
         return int(self.value['n'])
 
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
-        if (value.type.code != gdb.TYPE_CODE_PTR
-                or value.type.target().code != gdb.TYPE_CODE_STRUCT):
-            return False
-
-        struct_typename = value.type.target().name
-        return bool(struct_typename and
-                    cls.element_typename(struct_typename, context))
+        return cls.value_to_element_typename(value, context) is not None
 
     def display_hint(self) -> str:
         return 'array'
 
     def to_string(self) -> str:
-        elt_typename = self.element_typename(self.value.type.target().name,
-                                             self.context)
+        elt_typename = self.value_to_element_typename(self.value, self.context)
         assert elt_typename is not None
         return '{} array of length {}'.format(
             adaify_name(self.context, elt_typename),
