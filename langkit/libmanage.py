@@ -91,7 +91,7 @@ class DisableWarningAction(argparse.Action):
 
 class ManageScript:
 
-    BUILD_MODES = ('dev', 'prod')
+    BUILD_MODES = ('dev', 'prod', 'prof')
 
     build_mode: str
     """

@@ -32,7 +32,7 @@ ${exts.include_extension(ctx.ext('withed_projects'))}
 
 library project ${lib_name} is
 
-   type Build_Mode_Type is ("dev", "prod");
+   type Build_Mode_Type is ("dev", "prod", "prof");
    Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "dev");
 
    type Library_Kind_Type is ("static", "relocatable", "static-pic");
@@ -176,6 +176,11 @@ library project ${lib_name} is
          when "dev" =>
             Mode_Args := ("-g", "-O0");
 
+         when "prof" =>
+            --  Ensure that we have a relatively fast build but with all
+            --  possible stack info & debug info, for profiling.
+            Mode_Args := ("-Og", "-ggdb", "-g3", "-fno-omit-frame-pointer");
+
          when "prod" =>
             --  Debug information is useful even with optimization for
             --  profiling, for instance.
@@ -193,6 +198,9 @@ library project ${lib_name} is
          when "dev" =>
             Ada_Mode_Args := ("-gnatwe", "-gnata");
 
+         when "prof" =>
+            null;
+
          when "prod" =>
             --  Enable aggressive inlining
             Ada_Mode_Args := ("-gnatn2");
@@ -208,6 +216,9 @@ library project ${lib_name} is
       case Build_Mode is
          when "dev" =>
             C_Mode_Args := ("-DDEBUG=1");
+
+         when "prof" =>
+            null;
 
          when "prod" =>
             null;
@@ -225,6 +236,9 @@ library project ${lib_name} is
 
       case Build_Mode is
          when "dev" =>
+            null;
+
+         when "prof" =>
             null;
 
          when "prod" =>

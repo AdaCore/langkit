@@ -4,7 +4,7 @@ with "gnatcoll_iconv";
 
 library project Langkit_Support is
 
-   type Build_Mode_Type is ("dev", "prod");
+   type Build_Mode_Type is ("dev", "prod", "prof");
    Build_Mode : Build_Mode_Type :=
       external ("BUILD_MODE", external ("LANGKIT_SUPPORT_BUILD_MODE", "dev"));
 
@@ -78,6 +78,12 @@ library project Langkit_Support is
             --  profiling, for instance.
             for Default_Switches ("Ada") use
                Common_Ada_Cargs & ("-g", "-Ofast");
+
+         when "prof" =>
+            --  Ensure that we have a relatively fast build but with all
+            --  possible stack info & debug info, for profiling.
+            for Default_Switches ("Ada") use
+               ("-Og", "-ggdb", "-g3", "-fno-omit-frame-pointer");
       end case;
    end Compiler;
 

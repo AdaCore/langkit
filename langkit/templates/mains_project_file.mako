@@ -5,7 +5,7 @@ with "${lib_name.lower()}";
 
 project Mains is
 
-   type Build_Mode_Type is ("dev", "prod");
+   type Build_Mode_Type is ("dev", "prod", "prof");
    Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "dev");
 
    for Languages use ("Ada");
@@ -39,6 +39,12 @@ project Mains is
             --  Debug information is useful even with optimization for
             --  profiling, for instance.
             for Default_Switches ("Ada") use ("-g", "-Ofast");
+
+         when "prof" =>
+            --  Ensure that we have a relatively fast build but with all
+            --  possible stack info & debug info, for profiling.
+            for Default_Switches ("Ada") use
+               ("-Og", "-ggdb", "-g3", "-fno-omit-frame-pointer");
       end case;
 
       --  A version of s-memory may be included for memory monitoring
