@@ -188,14 +188,14 @@ class ASTNodePrinter(BasePrinter):
         return self.value['parent']
 
     def node_to_string(self) -> str:
-        if not self.value:
-            return 'null'
-
         loc = ('synthetic from {}'.format(self.parent)
                if self.synthetic else self.sloc())
         return '{} {}'.format(self.kind, loc)
 
     def to_string(self) -> str:
+        if not self.value:
+            return 'null'
+
         return '<{}>'.format(self.node_to_string())
 
 
