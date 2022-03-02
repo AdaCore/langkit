@@ -441,6 +441,7 @@ private package ${ada_lib_name}.Implementation is
       function Trace_Image (Unit : Internal_Unit) return String;
       function Trace_Image (Eq : Logic_Equation) return String;
       function Trace_Image (Var : Logic_Var) return String;
+      function Trace_Image (T : Token_Reference) return String renames Image;
    % endif
 
    ${exts.include_extension(ctx.ext('analysis', 'implem_decls'))}
