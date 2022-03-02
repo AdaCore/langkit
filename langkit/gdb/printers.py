@@ -318,7 +318,7 @@ class LexicalEnv:
             return '<LexicalEnv (rebound)>'
 
         else:
-            return '<LexicalEnv (corrupted)]'
+            return '<LexicalEnv (corrupted)>'
 
 
 class EnvNamePrinter(BasePrinter):
