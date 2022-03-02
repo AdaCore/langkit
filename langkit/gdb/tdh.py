@@ -131,9 +131,7 @@ class Token:
                      (first - src_buffer['P_BOUNDS']['LB0']))
 
         char = gdb.lookup_type('character').pointer()
-        return (text_addr.cast(char)
-                .string('latin-1', length=4 * length)
-                .decode('utf32'))
+        return text_addr.cast(char).string('utf32', length=4 * length)
 
     def __repr__(self) -> str:
         return '<Token {} {}/{} at {} {}>'.format(
