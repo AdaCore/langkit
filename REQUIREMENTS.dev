@@ -11,3 +11,5 @@ pycodestyle
 mypy==0.800
 flake8
 railroad-diagrams~=1.1.0
+ptyprocess==0.7.0
+pexpect==4.8.0

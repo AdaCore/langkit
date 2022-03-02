@@ -754,6 +754,8 @@ def langkit_main(langkit_root, files=[]):
                 os.path.join('langkit', 'dsl_unparse.py'),
                 'out',
                 os.path.join('stylechecks', 'tests.py'),
+                os.path.join('testsuite', 'python_support', 'expect.py'),
+                os.path.join('testsuite', 'python_support', 'quotemeta.py'),
                 os.path.join('testsuite', 'out')]
     main(langkit_root, files, dirs, excludes)
 

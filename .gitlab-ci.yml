@@ -178,6 +178,10 @@ test:
       - build-job
    script: |
       eval `./manage.py setenv`
-      ./manage.py test --no-auto-path --disable-ocaml --failure-exit-code=1
+      ./manage.py test \
+         --no-auto-path \
+         --disable-ocaml \
+         --disable-gdb \
+         --failure-exit-code=1
 
    cache: *langkit_caches

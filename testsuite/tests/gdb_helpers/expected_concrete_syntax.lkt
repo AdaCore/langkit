@@ -1,0 +1,113 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example(@example))
+
+}
+
+@abstract class FooNode implements Node[FooNode] {
+
+    @export fun id_unit(u: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = u
+
+    @export fun id_node(n: FooNode): FooNode = n
+
+    @export fun test_strings(): Int = {
+        val empty = "";
+        val foo = "foo";
+        val s_quote = "'";
+        val d_quote = "\"";
+        val quote_mix = "\"'";
+        val lf = "\n";
+        val nul = "\u0000";
+        val arr = [empty, foo, s_quote, d_quote, quote_mix, lf, nul];
+
+        arr.length()
+    }
+
+    fun get_rebindings(inverse: Bool): EnvRebindings = {
+        val example_nodes = node.parent.as[ASTList[FooNode, Example]].as_array();
+        val n1 = example_nodes?(if inverse then 1 else 2);
+        val n2 = example_nodes?(if inverse then 2 else 1);
+
+        null.append_rebinding(n1.children_env(), n2.children_env())
+    }
+
+    @export fun test_rebindings(): Int = {
+        val null_var = null;
+        val r1 = node.get_rebindings(false);
+        val r2 = node.get_rebindings(true);
+        val concat = r1.concat_rebindings(r2);
+        val arr = [null_var, r1, r2, concat];
+
+        arr.length()
+    }
+
+    @export fun test_envs(): Int = {
+        val null_var = null;
+        val primary = node.children_env();
+        val orphan = primary.env_orphan();
+        val group = [primary, null_var].env_group();
+        val rebound = primary.rebind_env(node.get_rebindings(false));
+        val arr = [null_var, primary, orphan, group, rebound];
+
+        arr.length()
+    }
+
+    @export fun test_entities(): Int = {
+        val null_root = null;
+        val null_example = null;
+        val ent_root = self;
+        # BREAK:test_state
+        val ent_example = ent_root.as[Example];
+        val rebound = FooNode(
+            node=node, info=EntityInfo(
+                md=null, rebindings=node.get_rebindings(false), from_rebound=false
+            )
+        );
+        val arr = [null_root, null_example.as[FooNode], ent_root, ent_example.as[FooNode], rebound];
+
+        arr.length()
+    }
+
+    @export fun test_arrays(): Int = {
+        val empty = null;
+        val single = [node.as[Example]];
+        val complete = node.parent.as[ASTList[FooNode, Example]].as_array();
+        val arr = (empty & single) & complete;
+
+        arr.length()
+    }
+
+    @export fun test_vectors(): Int = {
+        val arr = node.parents().map((n) => n.children);
+        # BREAK:test_vectors
+
+        arr.length()
+    }
+
+    @export fun test_tokens(): Int = {
+        val null_var = null;
+        val first = node.token_start();
+        val arr = [null_var, first];
+
+        arr.length()
+    }
+
+    fun control_flow_helper(item: Array[FooNode]): Int = item.length() + 1
+
+    @export fun test_control_flow(i: Int): Int = {
+        val nodes = node.parent.children;
+        val arr = nodes.map(
+            (n) => n.parents().length() + {
+                val item = n.children;
+
+                node.control_flow_helper(item)
+            }
+        );
+
+        i + arr.length()
+    }
+}
+
+class Example : FooNode implements TokenNode {
+}

@@ -72,6 +72,12 @@ class LangkitTestsuite(Testsuite):
         )
 
         parser.add_argument(
+            '--disable-gdb', action='store_true',
+            help='Disable testcases that require GDB (they are enabled by'
+                 ' default).'
+        )
+
+        parser.add_argument(
             '--restricted-env', action='store_true',
             help='Skip testcases that cannot run in a restricted environment'
                  ' (need for non-standard Python packages).'
@@ -107,6 +113,7 @@ class LangkitTestsuite(Testsuite):
         self.env.control_condition_env = {
             'restricted_env': args.restricted_env,
             'has_ocaml': not args.disable_ocaml,
+            'has_gdb': not args.disable_gdb,
         }
 
         if args.coverage:

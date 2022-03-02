@@ -1,3 +1,4 @@
+import glob
 import os
 import os.path
 
@@ -16,6 +17,22 @@ class BaseDriver(DiffTestDriver):
     @property
     def test_control_creator(self):
         return YAMLTestControlCreator(self.env.control_condition_env)
+
+    def tear_down(self):
+        # Allow test drivers to create "*.log" files in their working space
+        # just for logging purposes, and so forward them to the test result,
+        # for post-mortem investigation.
+        for log_file in sorted(glob.glob(self.working_dir("*.log"))):
+            with open(log_file) as f:
+                log_content = f.read()
+
+            self.result.log += (
+                f"== Content of {os.path.basename(log_file)} =="
+                f"\n\n{log_content}"
+                "\n\n== END =="
+            )
+
+        super().tear_down()
 
     @property
     def output_refiners(self):

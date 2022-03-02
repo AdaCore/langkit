@@ -419,3 +419,13 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         run('./_build/default/{}.exe'.format(ocaml_main),
             valgrind=True,
             valgrind_suppressions=['ocaml'])
+
+
+def indent(text: str, prefix: str = "  ") -> str:
+    """
+    Indent all lines in `text` with the given prefix.
+
+    :param text: Text to indent.
+    :param prefix: Indentation string.
+    """
+    return "\n".join(prefix + line for line in text.splitlines())
