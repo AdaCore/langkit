@@ -577,7 +577,7 @@ class RebindingsPrinter(BasePrinter):
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
         return match_struct_ptr(
-            value, context.implname('ast_envs.env_rebindings_type')
+            value, "langkit_support.lexical_envs.env_rebindings_type"
         )
 
     @property
