@@ -390,9 +390,6 @@ class Contains(CollectionExpression):
         return Quantifier.Expr(Quantifier.ANY, r.collection_expr, r.inner_expr,
                                r.element_vars, r.index_var, r.inner_scope)
 
-    def __repr__(self):
-        return '<Contains>'
-
 
 @attr_call('filter')
 def _filter(collection, filter):
@@ -633,7 +630,8 @@ class Map(CollectionExpression):
         return 'mapcat' if self.do_concat else 'map'
 
     def __repr__(self):
-        return '<{}>'.format(self.kind)
+        kind = names.Name.from_lower(self.kind)
+        return f"<{kind.camel} at {self.location_repr}>"
 
 
 @auto_attr
@@ -786,7 +784,7 @@ class Quantifier(CollectionExpression):
                                r.element_vars, r.index_var, r.inner_scope)
 
     def __repr__(self):
-        return '<{}Quantifier>'.format(self.kind.capitalize())
+        return f"<{self.kind.capitalize()}Quantifier at {self.location_repr}>"
 
 
 @auto_attr_custom('at', or_null=True)
@@ -943,9 +941,6 @@ class CollectionSingleton(AbstractExpression):
     def construct(self):
         return CollectionSingleton.Expr(construct(self.expr))
 
-    def __repr__(self):
-        return '<CollectionSingleton>'
-
 
 @attr_call('concat')
 class Concat(AbstractExpression):
@@ -999,9 +994,6 @@ class Concat(AbstractExpression):
                         [array_1, array_2],
                         abstract_expr=self)
 
-    def __repr__(self):
-        return '<Concat>'
-
 
 @attr_call("join")
 class Join(AbstractExpression):
@@ -1014,9 +1006,6 @@ class Join(AbstractExpression):
         super().__init__()
         self.separator = separator
         self.strings = strings
-
-    def __repr__(self):
-        return '<Join>'
 
     def construct(self):
         separator = construct(self.separator, T.String)

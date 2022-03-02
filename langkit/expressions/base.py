@@ -518,6 +518,21 @@ class AbstractExpression(Frozable):
             self.current_location or extract_library_location()
         )
 
+    @property
+    def location_repr(self) -> str:
+        """
+        Return the location information for this expression as a string in a
+        format suitable for use in ``__repr__`` methods.
+        """
+        return (
+            "???"
+            if self.location is None
+            else self.location.gnu_style_repr(relative=True)
+        )
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__} at {self.location_repr}>"
+
     def __hash__(self):
         # AbstractExpression instances appear heavily as memoized functions
         # arguments, so we need them to be hashable. There is no need for
@@ -941,13 +956,6 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
         def construct(self):
             return fn(self, *self.sub_expressions, **self.kwargs)
 
-        def __repr__(self):
-            return "<{}{}>".format(
-                self.__class__.__name__,
-                "({})".format(", ".join(str(e) for e in self.sub_expressions))
-                if self.sub_expressions else ""
-            )
-
         nb_args = len(inspect.getargspec(fn).args)
 
         assert nb_args > 1
@@ -959,7 +967,6 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
             (AbstractExpression, ), {
                 'construct': construct,
                 '__init__': __init__,
-                '__repr__': __repr__,
                 'sub_expressions': sub_expressions,
                 '__doc__': fn.__doc__,
                 '_wrapped_function': fn,
@@ -2189,9 +2196,12 @@ class AbstractVariable(AbstractExpression):
         self._ignored = True
 
     def __repr__(self):
-        return "<Var {}>".format(self.source_name
-                                 if self.source_name else
-                                 self._name.camel_with_underscores)
+        return "<Var {} at {}>".format(
+            self.source_name
+            if self.source_name else
+            self._name.camel_with_underscores,
+            self.location_repr,
+        )
 
 
 class DynamicVariable(AbstractVariable):
@@ -2294,7 +2304,10 @@ class DynamicVariable(AbstractVariable):
         return super().construct()
 
     def __repr__(self):
-        return '<DynamicVariable {}>'.format(self.argument_name.lower)
+        return (
+            f"<DynamicVariable {self.argument_name.lower}"
+            f" at {self.location_repr}>"
+        )
 
     @property
     def _id_tuple(self):
@@ -2554,9 +2567,6 @@ class GetSymbol(AbstractExpression):
         return CallExpr('Sym', 'Get_Symbol', T.Symbol, [node_expr],
                         abstract_expr=abstract_expr)
 
-    def __repr__(self):
-        return '<GetSymbol>'
-
 
 @auto_attr
 def to_symbol(self, prefix):
@@ -2606,7 +2616,7 @@ class SymbolLiteral(AbstractExpression):
         return self.Expr(self.name, abstract_expr=self)
 
     def __repr__(self):
-        return '<Symbol {}>'.format(self.name)
+        return f"<Symbol {self.name} at {self.location_repr}>"
 
 
 class BindingScope(ComputingExpr):
@@ -2822,9 +2832,6 @@ class Let(AbstractExpression):
         return Let.Expr(vars, var_exprs, construct(self.expr),
                         abstract_expr=self)
 
-    def __repr__(self):
-        return '<Let {}>'.format(', '.join(self.var_names))
-
 
 class Block(Let):
     """
@@ -2867,9 +2874,6 @@ class Block(Let):
 
     def do_prepare(self):
         pass
-
-    def __repr__(self):
-        return '<Block>'
 
 
 class Try(AbstractExpression):
@@ -2929,9 +2933,6 @@ class Try(AbstractExpression):
             self.try_expr, self.else_expr,
             'Try expression', 'fallback expression')
         return Try.Expr(try_expr, else_expr, abstract_expr=self)
-
-    def __repr__(self):
-        return '<Try>'
 
 
 class Var(AbstractVariable):
@@ -3045,9 +3046,6 @@ class ArrayLiteral(AbstractExpression):
         return self.construct_static(
             resolved_elements, self.array_type, abstract_expr=self
         )
-
-    def __repr__(self):
-        return '<ArrayLiteral>'
 
 
 class EnumLiteral(AbstractExpression):
@@ -4768,7 +4766,9 @@ class Literal(AbstractExpression):
         return cls(self.literal, abstract_expr=self)
 
     def __repr__(self):
-        return '<Literal {}>'.format(self.literal)
+        return (
+            f"<{type(self).__name__} {self.literal} at {self.location_repr}>"
+        )
 
 
 @dsl_document
@@ -4789,9 +4789,6 @@ class CharacterLiteral(AbstractExpression):
     def construct(self):
         return CharacterLiteralExpr(self.value, abstract_expr=self)
 
-    def __repr__(self):
-        return '<CharacterLiteral {}>'.format(repr(self.value))
-
 
 @dsl_document
 class String(AbstractExpression):
@@ -4803,9 +4800,6 @@ class String(AbstractExpression):
         super().__init__()
         self.value = value
         assert isinstance(value, str)
-
-    def __repr__(self):
-        return f"<String {repr(self.value)}>"
 
     def construct(self):
         return CallExpr(
@@ -4938,7 +4932,8 @@ class No(AbstractExpression):
         return NullExpr(resolve_type(self.expr_type), abstract_expr=self)
 
     def __repr__(self):
-        return '<No {}>'.format(resolve_type(self.expr_type).name.camel)
+        t = resolve_type(self.expr_type)
+        return f"<No {t.dsl_name} at {self.location_repr}>"
 
 
 class FieldAccessExpr(BasicExpr):
@@ -5349,7 +5344,7 @@ class BigIntLiteral(AbstractExpression):
         return BigIntLiteral.Expr(expr, abstract_expr=self)
 
     def __repr__(self):
-        return '<BigInteger {}>'.format(self.expr)
+        return f"<BigInteger {self.expr} at {self.location_repr}>"
 
 
 @auto_attr
@@ -5406,7 +5401,7 @@ class Arithmetic(AbstractExpression):
                          requires_incref=False, abstract_expr=self)
 
     def __repr__(self):
-        return '<Op {}>'.format(self.op)
+        return f"<Arithmetic {self.op} at {self.location_repr}>"
 
 
 def ignore(*vars):

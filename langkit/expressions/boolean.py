@@ -86,7 +86,7 @@ class BinaryBooleanOperator(AbstractExpression):
             )
 
     def __repr__(self):
-        return '<{}>'.format(self.kind.capitalize())
+        return f"<{self.kind.capitalize()} at {self.location_repr}>"
 
 
 # noinspection PyPep8Naming
@@ -209,9 +209,6 @@ class Eq(AbstractExpression):
 
         return self.make_expr(lhs, rhs, self)
 
-    def __repr__(self):
-        return '<Eq>'
-
 
 class OrderingTest(AbstractExpression):
     """
@@ -305,7 +302,7 @@ class OrderingTest(AbstractExpression):
         return OrderingTest.Expr(self.operator, lhs, rhs)
 
     def __repr__(self):
-        return '<OrderingTest {}>'.format(repr(self.operator))
+        return f"<OrderingTest {repr(self.operator)} at {self.location_repr}>"
 
 
 @dsl_document
@@ -374,9 +371,6 @@ class If(AbstractExpression):
         return If.Expr(construct(self.cond, T.Bool), then, else_then,
                        abstract_expr=self)
 
-    def __repr__(self):
-        return '<If>'
-
 
 @dsl_document
 class Not(AbstractExpression):
@@ -399,9 +393,6 @@ class Not(AbstractExpression):
     def make_expr(expr, abstract_expr=None):
         return BasicExpr('Not_Val', 'not ({})', T.Bool, [expr],
                          abstract_expr=abstract_expr)
-
-    def __repr__(self):
-        return '<Not>'
 
 
 @attr_call('then')
@@ -522,10 +513,6 @@ class Then(AbstractExpression):
         return Then.Expr(expr, construct(self.var_expr), then_expr,
                          default_expr, then_scope)
 
-    def __repr__(self):
-        return "<Then {}: {} {}>".format(self.expr, self.var_expr,
-                                         self.then_expr)
-
 
 @dsl_document
 class Cond(AbstractExpression):
@@ -634,6 +621,3 @@ class Cond(AbstractExpression):
         result.abstract_expr = self
 
         return result
-
-    def __repr__(self):
-        return '<Cond>'

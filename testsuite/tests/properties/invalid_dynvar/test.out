@@ -1,13 +1,13 @@
-== <EnvGet(<DynamicVariable env>, <FieldAccess .tok>)> ==
+== <EnvGet at test.py:XXX> ==
 test.py:XXX: error: env is not bound in this context: please use the .bind construct to bind it first.
 
-== <FieldAccess .implicit_prop> ==
+== <FieldAccess for implicit_prop at test.py:XXX> ==
 test.py:XXX: error: In call to ExampleNode.implicit_prop, some dynamic variables need to be bound: env
 
-== <bind(<DynamicVariable env>, <FieldAccess .node_env>, <EnvGet(<DynamicVariable env>, <Var Self>)>)> ==
+== <bind at test.py:XXX> ==
 Code generation was successful
 
-== <bind(<DynamicVariable env>, <FieldAccess .node_env>, <FieldAccess .implicit_prop>)> ==
+== <bind at test.py:XXX> ==
 Code generation was successful
 
 Done

@@ -154,7 +154,8 @@ class Cast(AbstractExpression):
                          abstract_expr=self)
 
     def __repr__(self):
-        return '<Cast to {}>'.format(resolve_type(self.dest_type).dsl_name)
+        t = resolve_type(self.dest_type)
+        return f"<Cast to {t.dsl_name} at {self.location_repr}>"
 
 
 @attr_expr("is_null")
@@ -200,9 +201,6 @@ class IsNull(AbstractExpression):
         """
         cexpr = construct(self.expr)
         return self.construct_static(cexpr, abstract_expr=self)
-
-    def __repr__(self):
-        return '<IsNull>'
 
 
 @dsl_document
@@ -449,7 +447,8 @@ class New(AbstractExpression):
         return expr_cls(self.struct_type, field_values, abstract_expr=self)
 
     def __repr__(self):
-        return '<New {}>'.format(resolve_type(self.struct_type).name.camel)
+        t = resolve_type(self.struct_type)
+        return f"<New {t.dsl_name} at {self.location_repr}>"
 
 
 class FieldAccess(AbstractExpression):
@@ -978,8 +977,7 @@ class FieldAccess(AbstractExpression):
                            self.Arguments(args, kwargs))
 
     def __repr__(self) -> str:
-        return "<FieldAccess .{}{}>".format(self.field,
-                                            '(...)' if self.arguments else '')
+        return f"<FieldAccess for {self.field} at {self.location_repr}>"
 
 
 @attr_call("super")
@@ -994,9 +992,6 @@ class Super(AbstractExpression):
         super().__init__()
         self.prefix = prefix
         self.arguments = FieldAccess.Arguments(args, kwargs)
-
-    def __repr__(self) -> str:
-        return "<Super {self.prefix}({self.arguments})>"
 
     def construct(self):
         # This expression calls the property that the current one overrides:
@@ -1125,10 +1120,10 @@ class IsA(AbstractExpression):
         return IsA.Expr(expr, astnodes, abstract_expr=self)
 
     def __repr__(self):
-        return '<IsA {}>'.format(', '.join(
-            resolve_type(n).dsl_name
-            for n in self.astnodes
-        ))
+        return "<IsA {} at {}>".format(
+            ", ".join(resolve_type(n).dsl_name for n in self.astnodes),
+            self.location_repr,
+        )
 
 
 @attr_call('match')
@@ -1464,9 +1459,6 @@ class Match(AbstractExpression):
 
         return Match.Expr(matched_expr, matchers, abstract_expr=self)
 
-    def __repr__(self):
-        return '<Match>'
-
 
 @attr_call('update',
            doc='Create a new struct value, replacing fields with the given'
@@ -1535,6 +1527,3 @@ class StructUpdate(AbstractExpression):
             )
 
         return StructUpdate.Expr(expr, assocs, abstract_expr=self)
-
-    def __repr__(self):
-        return '<StructUpdate>'

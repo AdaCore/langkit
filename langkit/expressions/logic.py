@@ -277,9 +277,6 @@ class Bind(AbstractExpression):
         return Bind.Expr(self.conv_prop, self.eq_prop, cprop_uid, eprop_uid,
                          lhs, rhs, pred_func, abstract_expr=self)
 
-    def __repr__(self):
-        return '<Bind>'
-
 
 class DomainExpr(ComputingExpr):
     static_type = T.Equation
@@ -535,7 +532,10 @@ class Predicate(AbstractExpression):
                               abstract_expr=self)
 
     def __repr__(self):
-        return '<Predicate on {}>'.format(self.pred_property.qualname)
+        return (
+            f"<Predicate on {self.pred_property.qualname}"
+            f" at {self.location_repr}>"
+        )
 
 
 @auto_attr
@@ -627,7 +627,7 @@ class LogicBooleanOp(AbstractExpression):
         )
 
     def __repr__(self):
-        return '<Logic{}>'.format(self.kind_name)
+        return f"<Logic{self.kind_name} at {self.location_repr}>"
 
 
 @dsl_document
@@ -665,9 +665,6 @@ class LogicTrue(AbstractExpression):
         return CallExpr('Logic_True', 'True_Rel', T.Equation,
                         [sloc_info_arg(self.location)])
 
-    def __repr__(self):
-        return '<LogicTrue>'
-
 
 @dsl_document
 class LogicFalse(AbstractExpression):
@@ -681,9 +678,6 @@ class LogicFalse(AbstractExpression):
     def construct(self):
         return CallExpr('Logic_False', 'False_Rel', T.Equation,
                         [sloc_info_arg(self.location)])
-
-    def __repr__(self):
-        return '<LogicFalse>'
 
 
 class ResetLogicVar(ResolvedExpression):

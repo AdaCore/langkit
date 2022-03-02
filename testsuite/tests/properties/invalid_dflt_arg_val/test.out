@@ -35,6 +35,6 @@ test.py:XXX: error: Invalid keyword arguments: c
 test.py:XXX: error: The last 2 arguments are unexpected
 
 == Non-literal argument ==
-test.py:XXX: error: Default value must be a compile-time known constant (got <Eq>)
+test.py:XXX: error: Default value must be a compile-time known constant (got <Eq at test.py:XXX>)
 
 Done

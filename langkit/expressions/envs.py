@@ -252,9 +252,6 @@ class EnvGet(AbstractExpression):
                            from_expr, self.only_first,
                            abstract_expr=self)
 
-    def __repr__(self):
-        return '<EnvGet({}, {})>'.format(self.env, self.symbol)
-
 
 @auto_attr
 def env_orphan(self, env):

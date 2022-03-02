@@ -33,6 +33,7 @@ class BaseDriver(DiffTestDriver):
         return super().output_refiners + [
             PatternSubstitute(r' line \d+, ', ' line XXX, '),
             PatternSubstitute(r'test\.py:\d+\:', 'test.py:XXX:'),
+            PatternSubstitute(r'at test\.py:\d+', 'at test.py:XXX'),
         ]
 
     def read_file(self, filename):
