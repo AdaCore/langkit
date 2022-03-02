@@ -1746,6 +1746,7 @@ class TokenType(CompiledType):
             introspection_prefix='Token',
             exposed=True,
             is_ptr=False,
+            null_allowed=True,
             nullexpr='No_Token',
             is_ada_record=True,
             has_special_storage=True,
