@@ -136,32 +136,29 @@ class StatePrinter:
             prn('About to return a memoized result...')
 
         for scope_state in self.state.scopes:
-            is_first = [True]
 
-            def print_info(strn: str) -> None:
-                if is_first[0]:
-                    prn('')
-                    is_first[0] = False
-                prn(strn)
+            def print_binding_cb(strn: str) -> None:
+                prn(f"  {strn}")
 
             for b in scope_state.bindings:
-                print_binding(print_info, b)
+                print_binding(print_binding_cb, b)
 
             done_exprs, last_started = scope_state.sorted_expressions()
 
             for e in done_exprs:
-                print_info('{}{} -> {}'.format(
+                prn('  {}{} -> {}'.format(
                     expr_repr(e),
                     self.loc_image(e.result_var),
                     self.value_image(e.result_var)
                 ))
 
             if last_started:
-                print_info('Currently evaluating {}'.format(
+                prn('')
+                prn('Currently evaluating {}'.format(
                     expr_repr(last_started)
                 ))
                 if last_started.dsl_sloc:
-                    print_info('from {}'.format(last_started.dsl_sloc))
+                    prn('from {}'.format(last_started.dsl_sloc))
 
     def run(self) -> None:
         """

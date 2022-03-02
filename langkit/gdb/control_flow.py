@@ -128,7 +128,7 @@ def go_next(context: Context) -> None:
     # If we just finished the evaluation of an expression, display its value
     if new_expr and new_expr.is_done:
         assert new_state is not None
-        print('{} evaluated to {}'.format(
+        print('{} evaluated to: {}'.format(
             expr_repr(new_expr),
             new_expr.read(new_state.frame)
         ))
