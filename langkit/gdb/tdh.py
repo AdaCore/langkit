@@ -126,7 +126,12 @@ class Token:
         if length <= 0:
             return u''
 
-        uint32_t = gdb.lookup_type('uint32_t').pointer()
+        # It does not seem possible to get an architecture from a gdb.Value, so
+        # take the architecture for the current selected frame and hope for the
+        # best.
+        uint32_t = gdb.selected_frame().architecture().integer_type(
+            32, signed=False
+        )
         text_addr = (src_buffer['P_ARRAY'].cast(uint32_t) +
                      (first - src_buffer['P_BOUNDS']['LB0']))
 
