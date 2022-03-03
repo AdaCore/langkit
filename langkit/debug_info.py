@@ -288,7 +288,7 @@ class DSLLocation:
             return None
 
         try:
-            filename, line_no = dsl_sloc.split(':', 1)
+            filename, line_no = dsl_sloc.rsplit(':', 1)
         except ValueError:
             raise ValueError('Invalid DSL location: {}'.format(dsl_sloc))
 
