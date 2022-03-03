@@ -9,10 +9,10 @@ inputs = [
 
 ctx = libfoolang.AnalysisContext()
 
-for (name, text) in inputs:
+for name, text in inputs:
     print(f"=== {name} ===")
     print()
-    u = ctx.get_from_buffer(f"<{name}>", buffer=text)
+    u = ctx.get_from_buffer("buffer", buffer=text)
 
     for d in u.diagnostics:
         print(d)
