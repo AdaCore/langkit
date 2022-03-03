@@ -1,28 +1,202 @@
+variables:
+   # The Python virtualenv directory
+   VENV_DIR: $CI_PROJECT_DIR/venv
 
+   # Where we store alire, the alire config, and the toolchain
+   # packages pulled by Alire (gnat, gprbuild)
+   ALIRE_DIR: $CI_PROJECT_DIR/alire
+
+   # Where the dependencies and langkit is installed
+   PREFIX: $CI_PROJECT_DIR/prefix
+
+   # The dependency .gprs live here
+   GPR_PROJECT_PATH: $CI_PROJECT_DIR/prefix/share/gpr
+
+# A GitLab pipeline is divided in several stages.
+# A stage may contain one or more jobs, run potentially in parallel.
+# Stages are run in sequence.
 stages:
-  - setup    # Setup dependencies
+  - setup    # setup
+  - build    # build
+  - test     # build
+
+# These define "macros" used below
+
+.use_python_env: &python_env
+   - source $VENV_DIR/bin/activate
+
+.use_gnat_env: &gnat_env
+   - |
+     for dep in `ls $ALIRE_DIR/cache/dependencies/` ; do
+        export PATH=$ALIRE_DIR/cache/dependencies/$dep/bin/:$PATH
+     done
 
 #########
 # setup #
 #########
 
-setup-python-job:
-  stage: setup
-  script:
-    - pip install -r REQUIREMENTS.dev
-    - pip install .
+# Setup Python and the Python virtualenv
+setup-python:
+   stage: setup
+   script:
+    - |
+      if [ ! -e $VENV_DIR ]; then
+         echo "setting up a virtual env in $VENV_DIR"
+         mkdir $VENV_DIR
+         python3 -m venv $VENV_DIR
+         source $VENV_DIR/bin/activate
+         pip3 install e3-testsuite
+         pip3 install -r REQUIREMENTS.dev
+         pip3 install .
+      fi
+   cache:
+      - key: langkit_venv
+        paths:
+          - $VENV_DIR
 
-grab-gpbruild-job:
-  stage: setup
-  script:
-    - git clone https://github.com/AdaCore/gprbuild
+# Setup the gnat toolchain, and gprbuild, using alire
+setup-gnat:
+   stage: setup
+   script:
+     - |
+       if [ ! -e alire ]; then
+          mkdir alire
+          cd alire
+          wget -q https://github.com/alire-project/alire/releases/download/v1.1.2/alr-1.1.2-bin-x86_64-linux.zip
+          unzip alr-1.1.2-bin-x86_64-linux.zip
+          ./bin/alr -c $ALIRE_DIR toolchain --install gnat_native=11.2.3
+          ./bin/alr -c $ALIRE_DIR toolchain --install gprbuild=22.0.1
+       fi
+   cache:
+      key: alire
+      paths:
+        - alire
 
-grab-gnatcoll-core-job:
-  stage: setup
-  script:
-    - git clone https://github.com/AdaCore/gnatcoll-core
+# Grab source dependencies from GitHub
+setup-dependency-checkouts:
+   stage: setup
+   script: |
+      for dep in xmlada gprbuild gnatcoll-core gnatcoll-bindings ; do
+         if [ -e $dep ]; then
+            (cd $dep ; git pull --rebase)
+         else
+            git clone https://github.com/AdaCore/$dep
+         fi
+      done
+   cache:
+      key: langkit_checkouts
+      paths:
+        - xmlada
+        - gprbuild
+        - gnatcoll-core
+        - gnatcoll-bindings
 
-grab-gnatcoll-bindings-job:
-  stage: setup
-  script:
-    - git clone https://github.com/AdaCore/gnatcoll-bindings
+#########
+# build #
+#########
+
+build-job:
+   stage: build
+   before_script:
+      # Source the env
+      - *python_env
+      - *gnat_env
+      # Checks
+      - python -c "import sys;print('e3' in sys.modules)"
+      - gnatls -v
+   dependencies:
+      - setup-python
+      - setup-gnat
+   script:
+      # Build dependencies
+      - |
+            (cd xmlada ; ./configure --prefix=$PREFIX && make && make install)
+            make -C gprbuild prefix=$PREFIX libgpr.build libgpr.install
+            make -C gnatcoll-core prefix=$PREFIX ENABLE_SHARED=yes build install
+            python gnatcoll-bindings/iconv/setup.py build -j0 \
+                --prefix=$PREFIX --library-types=static,relocatable
+            python gnatcoll-bindings/iconv/setup.py install
+            python gnatcoll-bindings/gmp/setup.py build -j0 \
+                --prefix=$PREFIX --library-types=static,relocatable
+            python gnatcoll-bindings/gmp/setup.py install
+
+      # Build
+
+      # TODO: check how to support removing --no-mypy
+      # TODO: this does not seem to build liblktlang
+      - utils/gh_wrap_errors.py ./manage.py make --no-mypy
+
+      # Run mypy checks
+
+      # TODO: this should be reenabled
+#      - |
+#        eval `./manage.py setenv`
+#        python utils/gh_wrap_errors.py mypy --config-file=mypy.ini
+   cache:
+      - key: langkit_venv
+        paths:
+          - $VENV_DIR
+
+      - key: alire
+        paths:
+           - alire
+
+      - key: langkit_checkouts
+        paths:
+           - xmlada
+           - gprbuild
+           - gnatcoll-core
+           - gnatcoll-bindings
+
+      - key: langkit_build_artifacts
+        paths:
+           - $PREFIX
+           - xmlada/
+           - gprbuild/gpr/libobj
+           - gnatcoll-core/obj
+           - gnatcoll-bindings/gmp/obj
+           - gnatcoll-bindings/iconv/obj
+           - contrib/python/build/obj
+           - contrib/lkt/build/obj
+
+
+########
+# test #
+########
+
+test:
+   stage: test
+   before_script:
+      - *python_env
+      - *gnat_env
+   dependencies:
+      - setup-python
+      - build-job
+   script: |
+      eval `./manage.py setenv`
+      ./manage.py test --no-auto-path --disable-ocaml --failure-exit-code=1
+
+   cache:
+      - key: langkit_venv
+        paths:
+          - $VENV_DIR
+
+      - key: alire
+        paths:
+           - alire
+
+      - key: langkit_checkouts
+        paths:
+           - gprbuild
+           - gnatcoll-bindings
+
+      - key: langkit_build_artifacts
+        paths:
+           - $PREFIX
+           - xmlada/
+           - gprbuild/gpr/libobj
+           - gnatcoll-core/obj
+           - gnatcoll-bindings/gmp/obj
+           - gnatcoll-bindings/iconv/obj
+           - contrib/python/build/obj
+           - contrib/lkt/build/obj
