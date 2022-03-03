@@ -1,0 +1,28 @@
+
+stages:
+  - setup    # Setup dependencies
+
+#########
+# setup #
+#########
+
+setup-python-job:
+  stage: setup
+  script:
+    - pip install -r REQUIREMENTS.dev
+    - pip install .
+
+grab-gpbruild-job:
+  stage: setup
+  script:
+    - git clone https://github.com/AdaCore/gprbuild
+
+grab-gnatcoll-core-job:
+  stage: setup
+  script:
+    - git clone https://github.com/AdaCore/gnatcoll-core
+
+grab-gnatcoll-bindings-job:
+  stage: setup
+  script:
+    - git clone https://github.com/AdaCore/gnatcoll-bindings
