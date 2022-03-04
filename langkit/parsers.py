@@ -1951,6 +1951,13 @@ class _Transform(Parser):
         to keep track of whether the transform has failed or not.
         """
 
+        self.diagnostics_var: Optional[VarDef] = None
+        """
+        Variable used to track the number of diagnostics when starting to run
+        this parser. Used to remove extra diagnostics in case this parser
+        failed and returns a null node.
+        """
+
         self.cached_type: Optional[CompiledType] = None
 
     @property
@@ -2033,6 +2040,9 @@ class _Transform(Parser):
         self.init_vars(self.parser.pos_var)
         if self.no_backtrack:
             self.has_failed_var = VarDef('transform_has_failed', T.Bool)
+        self.diagnostics_var = VarDef(
+            "transform_diags", "Ada.Containers.Count_Type"
+        )
 
     def generate_code(self) -> str:
         subparsers: _List[Tuple[Parser, VarDef]]
