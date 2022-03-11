@@ -3,6 +3,7 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
@@ -377,6 +378,181 @@ begin
    Put_Line ("Node:Kind_Name");
    begin
       Put_Line ("No exception: " & No_Foo_Node.Kind_Name);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Children_Count");
+   begin
+      Put_Line ("No exception: " & No_Foo_Node.Children_Count'Image);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:First_Child_Index");
+   begin
+      Put_Line ("No exception: " & No_Foo_Node.First_Child_Index'Image);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Last_Child_Index");
+   begin
+      Put_Line ("No exception: " & No_Foo_Node.Last_Child_Index'Image);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:First_Child");
+   begin
+      Dummy_Node := No_Foo_Node.First_Child;
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Last_Child");
+   begin
+      Dummy_Node := No_Foo_Node.Last_Child;
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Get_Child");
+   begin
+      No_Foo_Node.Get_Child (1, Dummy_Bool, Dummy_Node);
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Child");
+   begin
+      Dummy_Node := No_Foo_Node.Child (1);
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Sloc_Range");
+   begin
+      Put_Line ("No exception: " & Image (No_Foo_Node.Sloc_Range));
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Compare");
+   begin
+      Put_Line ("No exception: " & No_Foo_Node.Compare ((1, 1))'Image);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Lookup");
+   begin
+      Dummy_Node := No_Foo_Node.Lookup ((1, 1));
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Text");
+   begin
+      Put_Line ("No exception: " & Image (No_Foo_Node.Text));
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Token_Range");
+   declare
+      Dummy : Token_Iterator;
+   begin
+      Dummy := No_Foo_Node.Token_Range;
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Print");
+   declare
+   begin
+      No_Foo_Node.Print;
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:PP_Trivia");
+   declare
+   begin
+      No_Foo_Node.PP_Trivia;
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Traverse");
+   declare
+      function Process (Dummy : Foo_Node'Class) return Visit_Status
+      is (raise Program_Error);
+   begin
+      No_Foo_Node.Traverse (Process'Access);
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Assign_Names_To_Logic_Vars");
+   declare
+   begin
+      No_Foo_Node.Assign_Names_To_Logic_Vars;
+      Put_Line ("No exception");
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Node:Children_And_Trivia");
+   begin
+      declare
+         Dummy : constant Children_Array := No_Foo_Node.Children_And_Trivia;
+      begin
+         Put_Line ("No exception");
+      end;
    exception
       when Exc : Precondition_Failure =>
          Put_Line (Exc);

@@ -923,6 +923,10 @@ package body ${ada_lib_name}.Analysis is
    function Children_Count
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return Children_Count (Node.Internal.Node);
    end Children_Count;
@@ -934,6 +938,10 @@ package body ${ada_lib_name}.Analysis is
    function First_Child_Index
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return First_Child_Index (Node.Internal.Node);
    end First_Child_Index;
@@ -945,6 +953,10 @@ package body ${ada_lib_name}.Analysis is
    function Last_Child_Index
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return Last_Child_Index (Node.Internal.Node);
    end Last_Child_Index;
@@ -956,6 +968,10 @@ package body ${ada_lib_name}.Analysis is
    function First_Child
      (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name} is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
 
       return Node.Child (First_Child_Index (Node.Internal.Node));
@@ -968,6 +984,10 @@ package body ${ada_lib_name}.Analysis is
    function Last_Child
      (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name} is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
 
       return Node.Child (Last_Child_Index (Node.Internal.Node));
@@ -985,6 +1005,10 @@ package body ${ada_lib_name}.Analysis is
    is
       N : ${T.root_node.name};
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       Get_Child (Node.Internal.Node, Index, Index_In_Bounds, N);
       Result := Wrap_Node (N, Node.Internal.Info);
@@ -999,6 +1023,10 @@ package body ${ada_lib_name}.Analysis is
       Index : Positive) return ${root_entity.api_name}
    is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return Wrap_Node (Child (Node.Internal.Node, Index), Node.Internal.Info);
    end Child;
@@ -1010,6 +1038,10 @@ package body ${ada_lib_name}.Analysis is
    function Sloc_Range
      (Node : ${root_entity.api_name}'Class) return Source_Location_Range is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return Sloc_Range (Node.Internal.Node);
    end Sloc_Range;
@@ -1022,6 +1054,10 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class;
       Sloc : Source_Location) return Relative_Position is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return Compare (Node.Internal.Node, Sloc);
    end Compare;
@@ -1034,6 +1070,10 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class;
       Sloc : Source_Location) return ${root_entity.api_name} is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return Wrap_Node (Lookup (Node.Internal.Node, Sloc));
    end Lookup;
@@ -1044,6 +1084,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Text (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return Implementation.Text (Node.Internal.Node);
    end Text;
@@ -1055,6 +1099,10 @@ package body ${ada_lib_name}.Analysis is
    function Token_Range
      (Node : ${root_entity.api_name}'Class) return Token_Iterator is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return Token_Iterator'(Node.As_${T.root_node.kwless_raw_name},
                              Node.Internal.Node.Token_End_Index);
@@ -1109,6 +1157,10 @@ package body ${ada_lib_name}.Analysis is
       end Wrapper;
 
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       return Traverse (Node.Internal.Node, Wrapper'Access);
    end Traverse;
@@ -1135,6 +1187,10 @@ package body ${ada_lib_name}.Analysis is
    procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class)
    is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       Assign_Names_To_Logic_Vars (Node.Internal.Node);
    end Assign_Names_To_Logic_Vars;
@@ -1147,6 +1203,10 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Children_Array
    is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node);
       declare
          Bare_Result : constant Bare_Children_Array :=

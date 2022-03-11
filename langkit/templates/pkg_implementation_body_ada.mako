@@ -2163,6 +2163,10 @@ package body ${ada_lib_name}.Implementation is
    is
       Children_Prefix : constant String := Line_Prefix & "|  ";
    begin
+      if Node = null then
+         Put_Line (Line_Prefix & "None");
+         return;
+      end if;
       Put_Line (Line_Prefix & Kind_Name (Node));
       for C of Children_And_Trivia (Node) loop
          case C.Kind is

@@ -100,6 +100,59 @@ LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
 Node:Kind_Name
 LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
 
+Node:Children_Count
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:First_Child_Index
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Last_Child_Index
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:First_Child
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Last_Child
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Get_Child
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Child
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Sloc_Range
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Compare
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Lookup
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Text
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Token_Range
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Print
+None
+No exception
+
+Node:PP_Trivia
+None
+No exception
+
+Node:Traverse
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Assign_Names_To_Logic_Vars
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Children_And_Trivia
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
 List:List_Child
 LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
 
