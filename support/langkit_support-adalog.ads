@@ -46,7 +46,7 @@ package Langkit_Support.Adalog is
    --  Mutate this to affect the behavior of all calls to the solver which just
    --  use the default options.
 
-   Default_Timeout_Ticks_Number : constant := 200_000;
+   Default_Timeout_Ticks_Number : constant := 50_000_000;
 
    -----------------------
    -- Adalog exceptions --
