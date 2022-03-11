@@ -933,10 +933,16 @@ package body Langkit_Support.Adalog.Solver is
          --  this case, even though we know that the solver will later fail
          --  evaluating the same atom, we cannot optimize it out to preserve
          --  the order in which the solver finds solutions.
+         --
+         --  Do not catch the Timeout_Error exception, as it is not supposed to
+         --  be raised by predicates: it's the solver that aborts solving.
 
          begin
             Result := not Evaluate_Atoms (Ctx, Sorted_Atoms);
          exception
+            when Timeout_Error =>
+               raise;
+
             when E : others =>
                Save_Occurrence (Exc, E);
                Had_Exception := True;
