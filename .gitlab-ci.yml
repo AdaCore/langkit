@@ -31,6 +31,44 @@ stages:
         export PATH=$ALIRE_DIR/cache/dependencies/$dep/bin/:$PATH
      done
 
+.use_langkit_env: &langkit_env
+   - *python_env
+   - *gnat_env
+
+.venv_cache: &venv_cache
+   key: langkit_venv
+   paths:
+     - $VENV_DIR
+
+.alire_cache: &alire_cache
+   key: alire
+   paths:
+      - alire
+
+.deps_checkouts_cache: &deps_checkouts_cache
+   key: deps_checkouts
+   paths:
+     - xmlada
+     - gprbuild
+     - gnatcoll-core
+     - gnatcoll-bindings
+
+
+.langkit_caches: &langkit_caches
+   - *venv_cache
+   - *alire_cache
+   - *deps_checkouts_cache
+   - key: langkit_build_artifacts
+     paths:
+        - $PREFIX
+        - xmlada/
+        - gprbuild/gpr/libobj
+        - gnatcoll-core/obj
+        - gnatcoll-bindings/gmp/obj
+        - gnatcoll-bindings/iconv/obj
+        - contrib/python/build
+        - contrib/lkt/build
+
 #########
 # setup #
 #########
@@ -49,10 +87,7 @@ setup-python:
          pip3 install -r REQUIREMENTS.dev
          pip3 install .
       fi
-   cache:
-      - key: langkit_venv
-        paths:
-          - $VENV_DIR
+   cache: *venv_cache
 
 # Setup the gnat toolchain, and gprbuild, using alire
 setup-gnat:
@@ -67,10 +102,7 @@ setup-gnat:
           ./bin/alr -c $ALIRE_DIR toolchain --install gnat_native=11.2.3
           ./bin/alr -c $ALIRE_DIR toolchain --install gprbuild=22.0.1
        fi
-   cache:
-      key: alire
-      paths:
-        - alire
+   cache: *alire_cache
 
 # Grab source dependencies from GitHub
 setup-dependency-checkouts:
@@ -83,13 +115,7 @@ setup-dependency-checkouts:
             git clone https://github.com/AdaCore/$dep
          fi
       done
-   cache:
-      key: langkit_checkouts
-      paths:
-        - xmlada
-        - gprbuild
-        - gnatcoll-core
-        - gnatcoll-bindings
+   cache: *deps_checkouts_cache
 
 #########
 # build #
@@ -99,8 +125,7 @@ build-job:
    stage: build
    before_script:
       # Source the env
-      - *python_env
-      - *gnat_env
+      - *langkit_env
       # Checks
       - python -c "import sys;print('e3' in sys.modules)"
       - gnatls -v
@@ -132,32 +157,7 @@ build-job:
 #      - |
 #        eval `./manage.py setenv`
 #        python utils/gh_wrap_errors.py mypy --config-file=mypy.ini
-   cache:
-      - key: langkit_venv
-        paths:
-          - $VENV_DIR
-
-      - key: alire
-        paths:
-           - alire
-
-      - key: langkit_checkouts
-        paths:
-           - xmlada
-           - gprbuild
-           - gnatcoll-core
-           - gnatcoll-bindings
-
-      - key: langkit_build_artifacts
-        paths:
-           - $PREFIX
-           - xmlada/
-           - gprbuild/gpr/libobj
-           - gnatcoll-core/obj
-           - gnatcoll-bindings/gmp/obj
-           - gnatcoll-bindings/iconv/obj
-           - contrib/python/build
-           - contrib/lkt/build
+   cache: *langkit_caches
 
 
 ########
@@ -166,9 +166,7 @@ build-job:
 
 test:
    stage: test
-   before_script:
-      - *python_env
-      - *gnat_env
+   before_script: *langkit_env
    dependencies:
       - setup-python
       - build-job
@@ -176,27 +174,4 @@ test:
       eval `./manage.py setenv`
       ./manage.py test --no-auto-path --disable-ocaml --failure-exit-code=1
 
-   cache:
-      - key: langkit_venv
-        paths:
-          - $VENV_DIR
-
-      - key: alire
-        paths:
-           - alire
-
-      - key: langkit_checkouts
-        paths:
-           - gprbuild
-           - gnatcoll-bindings
-
-      - key: langkit_build_artifacts
-        paths:
-           - $PREFIX
-           - xmlada/
-           - gprbuild/gpr/libobj
-           - gnatcoll-core/obj
-           - gnatcoll-bindings/gmp/obj
-           - gnatcoll-bindings/iconv/obj
-           - contrib/python/build
-           - contrib/lkt/build
+   cache: *langkit_caches
