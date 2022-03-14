@@ -147,16 +147,17 @@ build-job:
 
       # Build
 
-      # TODO: check how to support removing --no-mypy
       # TODO: this does not seem to build liblktlang
       - utils/gh_wrap_errors.py ./manage.py make --no-mypy
 
-      # Run mypy checks
+      # Type check the Langkit Python code base with Mypy. This part is
+      # lightweight, so do it right after the build instead of create a
+      # dedicated job, which would pointlessly take time to handle GitLab
+      # caches.
+      - |
+        eval `./manage.py setenv`
+        mypy --config-file=mypy.ini
 
-      # TODO: this should be reenabled
-#      - |
-#        eval `./manage.py setenv`
-#        python utils/gh_wrap_errors.py mypy --config-file=mypy.ini
    cache: *langkit_caches
 
 
