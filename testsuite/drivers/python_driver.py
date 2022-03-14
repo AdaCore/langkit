@@ -42,6 +42,7 @@ class PythonDriver(BaseDriver):
         derived_env['LANGKIT_ROOT_DIR'] = self.langkit_root_dir
         derived_env['LANGKIT_PRETTY_PRINT'] = str(
             int(self.env.options.pretty_print))
+        derived_env['LANGKIT_JOBS'] = str(self.env.inner_jobs)
 
         # Unless this mechanism is specifically disabled, make the Langkit
         # library relative to this testsuite available to tests.

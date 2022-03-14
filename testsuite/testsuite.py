@@ -178,6 +178,23 @@ class LangkitTestsuite(Testsuite):
         # statements.
         os.environ['LKT_PATH'] = os.path.join(self.root_dir, 'python_support')
 
+    def adjust_dag_dependencies(self, dag):
+        # Crude assumption that should do the work.
+        #
+        # If there are more tests than testsuite jobs, assume running tests in
+        # parallel will keep all cores busy most of the time, so disable
+        # parallelism inside each tests. This is necessary to avoid exceeding
+        # our job limit in full testsuite runs.
+        #
+        # Otherwise, assume we are running only a handful of tests, in which
+        # case we want to run them as fast as possible (for dev convenience):
+        # forward testsuite parallelism inside each test.
+        self.env.inner_jobs = (
+            1
+            if len(dag.vertex_data) >= self.main.args.jobs else
+            self.main.args.jobs
+        )
+
     def tear_down(self):
         if self.env.options.coverage:
             # Consolidate coverage data for each testcase and generate both a

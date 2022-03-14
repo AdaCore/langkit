@@ -206,7 +206,9 @@ class BaseDriver(DiffTestDriver):
 
         :param str project_file: Project file name.
         """
-        argv = ['gprbuild', '-P', project_file, '-p']
+        argv = [
+            "gprbuild", f"-P{project_file}", "-p", f"-j{self.env.inner_jobs}",
+        ]
         if self.coverage_enabled:
             argv.append('--subdirs=gnatcov')
         self.run_and_check(argv, analyze_output=False)

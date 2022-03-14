@@ -44,6 +44,7 @@ end Gen;
 
 
 valgrind_enabled = bool(os.environ.get('VALGRIND_ENABLED'))
+jobs = int(os.environ.get('LANGKIT_JOBS', '1'))
 
 
 # Determine where to find the root directory for Langkit sources
@@ -287,7 +288,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         # First build the library. Forward all test.py's arguments to the
         # libmanage call so that manual testcase runs can pass "-g", for
         # instance.
-        argv = ['make'] + sys.argv[1:] + ['-vnone']
+        argv = ['make'] + sys.argv[1:] + ['-vnone', f'-j{jobs}']
         if full_error_traces:
             argv.append("--full-error-traces")
 
