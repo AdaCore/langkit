@@ -156,8 +156,8 @@ build-job:
            - gnatcoll-core/obj
            - gnatcoll-bindings/gmp/obj
            - gnatcoll-bindings/iconv/obj
-           - contrib/python/build/obj
-           - contrib/lkt/build/obj
+           - contrib/python/build
+           - contrib/lkt/build
 
 
 ########
@@ -198,5 +198,5 @@ test:
            - gnatcoll-core/obj
            - gnatcoll-bindings/gmp/obj
            - gnatcoll-bindings/iconv/obj
-           - contrib/python/build/obj
-           - contrib/lkt/build/obj
+           - contrib/python/build
+           - contrib/lkt/build
