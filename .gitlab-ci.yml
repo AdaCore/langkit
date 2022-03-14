@@ -145,10 +145,8 @@ build-job:
                 --prefix=$PREFIX --library-types=static,relocatable
             python gnatcoll-bindings/gmp/setup.py install
 
-      # Build
-
-      # TODO: this does not seem to build liblktlang
-      - utils/gh_wrap_errors.py ./manage.py make --no-mypy
+      # Build langkit_support, libpythonlang and liblktlang
+      - ./manage.py make --no-mypy
 
       # Type check the Langkit Python code base with Mypy. This part is
       # lightweight, so do it right after the build instead of create a
