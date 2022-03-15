@@ -41,12 +41,12 @@ stages:
      - $VENV_DIR
 
 .alire_cache: &alire_cache
-   key: alire
+   key: langkit_alire
    paths:
       - alire
 
 .deps_checkouts_cache: &deps_checkouts_cache
-   key: deps_checkouts
+   key: langkit_deps_checkouts
    paths:
      - xmlada
      - gprbuild
