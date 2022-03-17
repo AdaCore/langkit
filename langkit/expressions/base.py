@@ -1705,6 +1705,15 @@ class BindableLiteralExpr(LiteralExpr):
         """
         raise not_implemented_error(self, self.render_python_constant)
 
+    def render_java_constant(self):
+        """
+        Assuming this expression is a valid constant, return Java code to
+        materialize it in the generated binding.
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.render_java_constant)
+
     def render_introspection_constant(self):
         """
         Assuming this expression is a valid constant, return Ada code to
@@ -1739,6 +1748,9 @@ class BooleanLiteralExpr(BindableLiteralExpr):
     def render_python_constant(self):
         return str(self.value)
 
+    def render_java_constant(self):
+        return str(self.value).lower()
+
     def render_ocaml_constant(self):
         return str(self.value).lower()
 
@@ -1759,6 +1771,9 @@ class IntegerLiteralExpr(BindableLiteralExpr):
         return str(self.value)
 
     def render_python_constant(self):
+        return str(self.value)
+
+    def render_java_constant(self):
         return str(self.value)
 
     def render_ocaml_constant(self):
@@ -1810,6 +1825,9 @@ class CharacterLiteralExpr(BindableLiteralExpr):
 
         return "'{}'".format(char)
 
+    def render_java_constant(self):
+        return f"new Char({format(ord(self.value))})"
+
     def render_ocaml_constant(self):
         # In OCaml bindings, a character is represented as a utf-8 string, not
         # as char since OCaml char cannot represent unicode characters.
@@ -1838,6 +1856,10 @@ class EnumLiteralExpr(BindableLiteralExpr):
     def render_python_constant(self):
         return '{}.{}'.format(self.type.py_helper,
                               self.value.name.lower)
+
+    def render_java_constant(self):
+        return '{}.{}'.format(self.type.api_name.camel,
+                              self.value.name.upper)
 
     def render_ocaml_constant(self):
         ocaml_api = get_context().ocaml_api_settings
@@ -1879,6 +1901,9 @@ class NullExpr(BindableLiteralExpr):
 
     def render_python_constant(self):
         return 'None' if self.type.is_entity_type else self.type.py_nullexpr
+
+    def render_java_constant(self):
+        return 'null' if self.type.is_entity_type else self.type.java_nullexpr
 
     def render_ocaml_constant(self):
         return 'None'

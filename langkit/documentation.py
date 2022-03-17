@@ -1287,12 +1287,14 @@ null_names = {
     'ada':    'null',
     'c':      'NULL',
     'python': 'None',
+    'java':   'null',
     'ocaml':  'None',
 }
 todo_markers = {
     'ada':    '???',
     'c':      'TODO:',
     'python': 'TODO:',
+    'java':   'TODO:',
     'ocaml':  'TODO:',
 }
 
@@ -1929,6 +1931,11 @@ format_python = make_formatter(
                    ctx.python_api_settings.type_public_name(node)),
     type_role_name=':py:class:'
 )
+format_java = make_formatter(
+    prefix='/**', line_prefix=' * ', suffix=' */',
+    get_node_name=(lambda ctx, node:
+                   ctx.java_api_settings.wrapping_type(node))
+)
 format_ocaml = make_formatter(
     prefix='(**', line_prefix=' * ', suffix=' *)',
     get_node_name=(lambda ctx, node:
@@ -1956,6 +1963,9 @@ c_doc = create_doc_printer(
 )
 py_doc = create_doc_printer(
     'python', cast(Formatter, format_python),
+)
+java_doc = create_doc_printer(
+    'java', cast(Formatter, format_java)
 )
 ocaml_doc = create_doc_printer(
     'ocaml', cast(Formatter, format_ocaml),

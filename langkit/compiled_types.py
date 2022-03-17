@@ -621,6 +621,7 @@ class CompiledType:
                  is_refcounted: bool = False,
                  nullexpr: Opt[str] = None,
                  py_nullexpr: Opt[str] = None,
+                 java_nullexpr: Opt[str] = None,
                  element_type: Opt[CompiledType] = None,
                  hashable: bool = False,
                  has_equivalent_function: bool = False,
@@ -684,6 +685,9 @@ class CompiledType:
         :param py_nullexpr: Null expression to use in Python for this type. See
             the "py_nullexpr" method.
 
+        :param java_nullexpr: Null expression to use in Java for this type.
+            See the java_nullexpr method.
+
         :param element_type: If this is a collection type, must be the
             corresponding element type. Must be None otherwise.
 
@@ -730,6 +734,7 @@ class CompiledType:
         self._is_refcounted = is_refcounted
         self._nullexpr = nullexpr
         self._py_nullexpr = py_nullexpr
+        self._java_nullexpr = java_nullexpr
         self._element_type = element_type
         self.hashable = hashable
         self._has_equivalent_function = has_equivalent_function
@@ -1284,6 +1289,20 @@ class CompiledType:
             return self._py_nullexpr
 
     @property
+    def java_nullexpr(self) -> str:
+        """
+        Return a string representing the null expression in generated
+        Java code.
+
+        Must be overridden in subclasses... for which we need the Java null
+        expression.
+        """
+        if self._java_nullexpr is None:
+            raise not_implemented_error(self, type(self).java_nullexpr)
+        else:
+            return self._java_nullexpr
+
+    @property
     def storage_nullexpr(self):
         """
         Return the nullexpr that is used for fields of this type in structs and
@@ -1692,6 +1711,7 @@ class EnvRebindingsType(CompiledType):
             c_type_name='env_rebindings_type',
             is_refcounted=False,
             py_nullexpr='None',
+            java_nullexpr='PointerWrapper.nullPointer()',
             hashable=True,
         )
 
@@ -2711,7 +2731,10 @@ class ASTNodeType(BaseStructType):
 
             is_refcounted=False,
             nullexpr=self.null_constant.camel_with_underscores,
-            py_nullexpr='None', element_type=element_type, hashable=True,
+            py_nullexpr='None',
+            java_nullexpr='null',
+            element_type=element_type,
+            hashable=True,
             type_repo_name=self.raw_name.camel,
 
             dsl_name=dsl_name or self.raw_name.camel,
@@ -3709,6 +3732,7 @@ class StringType(CompiledType):
             is_refcounted=True,
             nullexpr="Empty_String",
             py_nullexpr='""',
+            java_nullexpr='new StringWrapper(PointerWrapper.nullPointer())',
             hashable=True,
             has_equivalent_function=True,
             type_repo_name="String",
@@ -4421,6 +4445,7 @@ def create_builtin_types():
         nullexpr='False',
         null_allowed=True,
         py_nullexpr='False',
+        java_nullexpr='false',
         hashable=True,
 
         # "bool" is not a built-in type in C: we define our own type based on

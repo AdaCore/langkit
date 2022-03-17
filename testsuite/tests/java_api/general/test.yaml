@@ -1,0 +1,3 @@
+driver: python
+control:
+    - [SKIP, "not has_java", "Java support required"]

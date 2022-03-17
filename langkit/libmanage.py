@@ -375,6 +375,21 @@ class ManageScript:
                  ' generation of mains.'
         )
 
+        subparser.add_argument(
+            '--enable-java', action='store_true',
+            help='Enable the Java bindings building/installation.'
+        )
+        subparser.add_argument(
+            '--maven-local-repo',
+            help='Specify the Maven repository to use, default one is the'
+                 " user's repository (~/.m2)."
+        )
+        subparser.add_argument(
+            '--maven-executable',
+            help='Specify the Maven executable to use. The default one is'
+                 ' "mvn".'
+        )
+
         # Don't enable this by default so that errors will not make automated
         # tasks hang.
         subparser.add_argument(
@@ -1068,6 +1083,37 @@ class ManageScript:
         if LibraryType.relocatable in args.library_types:
             run('relocatable')
 
+    def maven_command(self,
+                      goals: list[str],
+                      args: argparse.Namespace) -> None:
+        """
+        Run Maven for the given goals with the given args.
+
+        :param goals: Ordered goals for Maven to execute.
+        :param args: Arguments parsed from the invocation of manage.py.
+            We use them for Maven configuration.
+        """
+        # Get the Maven executable
+        maven_exec = args.maven_executable or 'mvn'
+
+        # Compute the additional Maven arguments
+        maven_args = []
+        if args.maven_local_repo is not None:
+            maven_args.append(f'-Dmaven.repo.local={args.maven_local_repo}')
+
+        if not self.verbosity.debug:
+            maven_args.append('-q')
+
+        # Call Maven on the Java bindings
+        argv = [
+            maven_exec,
+            '-f',
+            self.maven_project,
+            *goals,
+            *maven_args,
+        ]
+        self.check_call('Maven-Command', argv)
+
     @property
     def lib_project(self) -> str:
         """
@@ -1081,6 +1127,13 @@ class ManageScript:
         Path to the project file for the mains.
         """
         return self.dirs.build_dir('mains.gpr')
+
+    @property
+    def maven_project(self) -> str:
+        """
+        Path to the Maven project file for the Java bindings.
+        """
+        return self.dirs.build_dir('java', 'pom.xml')
 
     def do_build(self, args: argparse.Namespace) -> None:
         """
@@ -1108,7 +1161,22 @@ class ManageScript:
                 self.gprbuild(args, self.mains_project,
                               is_library=False, mains=mains)
 
-        self.log_info("Compilation complete!", Colors.OKGREEN)
+        # Build the Java bindings
+        if args.enable_java:
+            self.log_info("Building the Java bindings...", Colors.HEADER)
+
+            # Verify that JAVA_HOME is set
+            if not os.environ.get("JAVA_HOME"):
+                self.log_info(
+                    "Setting the JAVA_HOME environment variable to your "
+                    "JDK installation is mandatory for the Java "
+                    "bindings building",
+                    Colors.FAIL
+                )
+            else:
+                self.maven_command(['clean', 'package'], args)
+
+        self.log_info("Build complete!", Colors.OKGREEN)
 
     def do_make(self, args: argparse.Namespace) -> None:
         """
@@ -1191,6 +1259,20 @@ class ManageScript:
                 shutil.copyfile(
                     f, os.path.join(install_path, os.path.basename(f))
                 )
+
+        # If Java is enabled, install using Maven
+        if args.enable_java:
+            # Install the Java bindings in the Maven repository
+            self.maven_command(['install'], args)
+
+            # Put the bindings JAR in the installation folder
+            jar_name = f'{lib_name}.jar'
+            jar_file = self.dirs.build_dir('java', 'target', jar_name)
+            install_file = self.dirs.install_dir('java', jar_name)
+            install_path = os.path.dirname(install_file)
+            if not path.isdir(install_path):
+                os.makedirs(install_path)
+            shutil.copyfile(jar_file, install_file)
 
     def do_setenv(self, args: argparse.Namespace) -> None:
         """
@@ -1290,6 +1372,7 @@ class ManageScript:
             # Make the shared lib available, regardless of the operating system
             shared_dir = P("lib", "relocatable", build_mode.value)
             add_path("LD_LIBRARY_PATH", shared_dir)
+            add_path("LIBRARY_PATH", shared_dir)
             add_path("DYLD_LIBRARY_PATH", shared_dir)
             add_path("PATH", shared_dir)
 
@@ -1302,6 +1385,13 @@ class ManageScript:
         # TODO (TA20-017: gprinstall bug): remove this (see corresponing TODO
         # in emitter.py.
         add_path("C_INCLUDE_PATH", P())
+
+        # If the Java bindings have been build, set the necessary environment
+        # variables.
+        bindings_jar = P('java', 'target', f'{self.lib_name.lower()}.jar')
+        if os.path.isfile(bindings_jar):
+            add_path("CLASSPATH", bindings_jar)
+            add_path("LD_LIBRARY_PATH", P('java', 'jni'))
 
     def derived_env(self) -> Dict[str, str]:
         """

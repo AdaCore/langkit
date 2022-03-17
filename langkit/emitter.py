@@ -50,6 +50,7 @@ class Emitter:
                  post_process_cpp: PostProcessFn = None,
                  post_process_python: PostProcessFn = None,
                  post_process_ocaml: PostProcessFn = None,
+                 post_process_java: PostProcessFn = None,
                  coverage: bool = False,
                  relative_project: bool = False,
                  unparse_script: Optional[str] = None):
@@ -143,6 +144,7 @@ class Emitter:
         self.post_process_cpp = post_process_cpp
         self.post_process_python = post_process_python
         self.post_process_ocaml = post_process_ocaml
+        self.post_process_java = post_process_java
         self.coverage = coverage
         self.gnatcov = context.gnatcov
         self.relative_project = relative_project
@@ -178,9 +180,22 @@ class Emitter:
         self.scripts_dir = path.join(self.lib_root, "scripts")
         self.python_dir = path.join(self.lib_root, "python")
         self.python_pkg_dir = path.join(
-            self.lib_root, "python", context.python_api_settings.module_name
+            self.python_dir, context.python_api_settings.module_name
         )
         self.ocaml_dir = path.join(self.lib_root, "ocaml")
+
+        self.java_dir = path.join(self.lib_root, "java")
+        self.java_package = path.join(
+            self.java_dir,
+            "src",
+            "main",
+            "java",
+            "com",
+            "adacore",
+            self.lib_name_low
+        )
+        self.java_jni = path.join(self.java_dir, "jni")
+        self.java_native_config = path.join(self.java_dir, "native_image")
 
         self.lib_project = path.join(self.lib_root, f"{self.lib_name_low}.gpr")
         self.mains_project = path.join(self.lib_root, "mains.gpr")
@@ -309,9 +324,13 @@ class Emitter:
             os.path.join(self.lib_root, "obj"),
             self.python_dir,
             self.python_pkg_dir,
+            self.java_dir,
+            self.java_package,
+            self.java_jni,
+            self.java_native_config,
         ]:
             if not path.exists(d):
-                os.mkdir(d)
+                os.makedirs(d)
 
     def merge_library_sources(self,
                               library_dir: str,
@@ -717,6 +736,59 @@ class Emitter:
                 os.path.join(self.ocaml_dir,
                              '{}.opam'.format(ctx.c_api_settings.lib_name)),
                 ''
+            )
+
+    def emit_java_api(self, ctx: CompileCtx) -> None:
+        """
+        Generate the bindings to the Java environment.
+        """
+        for template, export_file, export_dir, post_process in [
+            (
+                "java_api/main_class",
+                f"{ctx.lib_name.camel}.java",
+                self.java_package,
+                self.post_process_java
+            ),
+            (
+                "java_api/pom_xml",
+                "pom.xml",
+                self.java_dir,
+                None
+            ),
+            (
+                "java_api/makefile",
+                "Makefile",
+                self.java_dir,
+                None
+            ),
+            (
+                "java_api/jni_impl_c",
+                "jni_impl.c",
+                self.java_jni,
+                self.post_process_cpp
+            ),
+            (
+                "java_api/reflect_json",
+                "reflect_config.json",
+                self.java_native_config,
+                None
+            ),
+            (
+                "java_api/readme_md",
+                "README.md",
+                self.java_dir,
+                None
+            ),
+        ]:
+            code = ctx.render_template(
+                template,
+                c_api=ctx.c_api_settings,
+                java_api=ctx.java_api_settings,
+            )
+            self.write_source_file(
+                os.path.join(export_dir, export_file),
+                code,
+                post_process
             )
 
     def write_ada_module(self,

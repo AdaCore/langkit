@@ -205,7 +205,7 @@ def build(grammar=None, lexer=None, lkt_file=None,
 
 def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
                   lexer=None, lkt_file=None, types_from_lkt=False,
-                  lkt_semantic_checks=False, ocaml_main=None,
+                  lkt_semantic_checks=False, ocaml_main=None, java_main=None,
                   warning_set=default_warning_set, generate_unparser=False,
                   symbol_canonicalizer=None, mains=False,
                   show_property_logging=False, unparse_script=unparse_script,
@@ -246,6 +246,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
 
     :param None|str ocaml_main: If not None, name of the OCaml source file to
         build and run with the built library available.
+
+    :param None|str java_main: If not None, name of the Java main class to
+        build and run with the Langkit Java lib.
 
     :param WarningSet warning_set: Set of warnings to emit.
 
@@ -293,6 +296,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
 
     build_mode = 'dev'
 
+    maven_exec = os.environ.get('MAVEN_EXECUTABLE')
+    maven_repo = os.environ.get('MAVEN_LOCAL_REPO')
+
     def manage_run(generate_only, types_from_lkt, additional_args):
         ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
                               symbol_canonicalizer=symbol_canonicalizer,
@@ -317,6 +323,22 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         argv = ['make'] + sys.argv[1:] + ['-vnone', f'-j{jobs}']
         if full_error_traces:
             argv.append("--full-error-traces")
+
+        # Generate the public Ada API only when necessary (i.e. if we have
+        # mains that do use this API). This reduces the time it takes to run
+        # tests.
+        if not mains and not ada_main:
+            argv.append('--no-ada-api')
+
+        # If there is a Java main, enable the Java bindings building
+        if java_main is not None:
+            argv.append('--enable-java')
+            if maven_exec:
+                argv.append('--maven-executable')
+                argv.append(maven_exec)
+            if maven_repo:
+                argv.append('--maven-local-repo')
+                argv.append(maven_repo)
 
         argv.append('--build-mode={}'.format(build_mode))
         for w in WarningSet.available_warnings:
@@ -457,6 +479,14 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         run('./_build/default/{}.exe'.format(ocaml_main),
             valgrind=True,
             valgrind_suppressions=['ocaml'])
+
+    if java_main is not None:
+        run(
+            'java',
+            '-Dfile.encoding=UTF-8',
+            f"-Djava.library.path={env.get('LD_LIBRARY_PATH')}",
+            f'{java_main}.java',
+        )
 
 
 def indent(text: str, prefix: str = "  ") -> str:

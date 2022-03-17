@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from langkit.passes import AbstractPass
     from langkit.parsers import GeneratedParser, Grammar, Parser, VarDef
     from langkit.python_api import PythonAPISettings
+    from langkit.java_api import JavaAPISettings
 
 
 compile_ctx: Optional[CompileCtx] = None
@@ -302,6 +303,7 @@ class CompileCtx:
     c_api_settings: CAPISettings
     python_api_settings: PythonAPISettings
     ocaml_api_settings: OCamlAPISettings
+    java_api_settings: JavaAPISettings
 
     all_passes: List[AbstractPass]
     """
@@ -442,6 +444,7 @@ class CompileCtx:
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
+        from langkit.java_api import JavaAPISettings
         from langkit.unparsers import Unparsers
 
         self.lang_name = names.Name(lang_name)
@@ -496,6 +499,8 @@ class CompileCtx:
         self.lkt_semantic_checks = lkt_semantic_checks or types_from_lkt
 
         self.ocaml_api_settings = OCamlAPISettings(self, self.c_api_settings)
+
+        self.java_api_settings = JavaAPISettings(self, self.c_api_settings)
 
         self.fns: Set[Parser] = set()
         """
@@ -754,6 +759,7 @@ class CompileCtx:
         self.post_process_cpp: Optional[Callable[[str], str]] = None
         self.post_process_python: Optional[Callable[[str], str]] = None
         self.post_process_ocaml: Optional[Callable[[str], str]] = None
+        self.post_process_java: Optional[Callable[[str], str]] = None
 
         self.ref_cats = {names.Name.from_lower('nocat')}
         """
@@ -1651,6 +1657,7 @@ class CompileCtx:
             'ada_doc':     documentation.ada_doc,
             'c_doc':       documentation.c_doc,
             'py_doc':      documentation.py_doc,
+            'java_doc':    documentation.java_doc,
             'ocaml_doc':   documentation.ocaml_doc,
             'ada_c_doc':   documentation.ada_c_doc,
             'emitter':     self.emitter,
@@ -1903,6 +1910,7 @@ class CompileCtx:
                 post_process_cpp=self.post_process_cpp,
                 post_process_python=self.post_process_python,
                 post_process_ocaml=self.post_process_ocaml,
+                post_process_java=self.post_process_java,
                 **kwargs
             )
 
@@ -2154,6 +2162,7 @@ class CompileCtx:
                         Emitter.emit_python_playground),
             EmitterPass('emit GDB helpers', Emitter.emit_gdb_helpers),
             EmitterPass('emit OCaml API', Emitter.emit_ocaml_api),
+            EmitterPass('emit Java API', Emitter.emit_java_api),
         ] + extra_passes + [
             EmitterPass('emit library project file',
                         Emitter.emit_lib_project_file),

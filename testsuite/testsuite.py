@@ -78,6 +78,27 @@ class LangkitTestsuite(Testsuite):
         )
 
         parser.add_argument(
+            "--disable-java", action="store_true", default=True,
+            help='Disable testcases that require Java (they are disabled by'
+                 ' default).',
+        )
+        parser.add_argument(
+            "--enable-java", action="store_false", dest="disable_java",
+            help='Enable testcases that require Java (they are disabled by'
+                 ' default).',
+        )
+        parser.add_argument(
+            '--maven-local-repo',
+            help='Specify the Maven repository to use, default one is the'
+                 " user's repository (~/.m2)."
+        )
+        parser.add_argument(
+            '--maven-executable',
+            help='Specify the Maven executable to use. The default one is'
+                 ' "mvn".'
+        )
+
+        parser.add_argument(
             '--disable-gdb', action='store_true',
             help='Disable testcases that require GDB (they are enabled by'
                  ' default).'
@@ -119,6 +140,7 @@ class LangkitTestsuite(Testsuite):
         self.env.control_condition_env = {
             'restricted_env': args.restricted_env,
             'has_ocaml': not args.disable_ocaml,
+            'has_java': not args.disable_java,
             'has_gdb': not args.disable_gdb,
         }
 
@@ -191,10 +213,12 @@ class LangkitTestsuite(Testsuite):
             add_to_path('GPR_PROJECT_PATH',
                         os.path.join(install_prefix, 'share', 'gpr'))
 
-            # On GNU/Linux, the OCaml bindings need to have access to the
-            # sigsegv_handler shared object. Build it and add it to the
-            # environment.
-            if not args.disable_ocaml and self.env.build.os.name == "linux":
+            # On GNU/Linux, the OCaml and Java bindings need to have access
+            # to the sigsegv_handler shared object. Build it and add it to
+            # the environment.
+            if (
+                not args.disable_ocaml or not args.disable_java
+            ) and self.env.build.os.name == "linux":
                 sigsegv_handler_dir = os.path.join(
                     langkit_root_dir, "sigsegv_handler"
                 )
@@ -208,6 +232,13 @@ class LangkitTestsuite(Testsuite):
                 add_to_path(
                     'LD_LIBRARY_PATH', os.path.join(sigsegv_handler_dir, 'lib')
                 )
+
+        # If Java is enabled and there is a Maven local repo, export it
+        if not args.disable_java:
+            if args.maven_executable:
+                os.environ['MAVEN_EXECUTABLE'] = args.maven_executable
+            if args.maven_local_repo:
+                os.environ['MAVEN_LOCAL_REPO'] = args.maven_local_repo
 
         # Make the "python_support" directory available to LKT import
         # statements.
