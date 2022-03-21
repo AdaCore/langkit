@@ -11,7 +11,17 @@
 open Ctypes
 open Foreign
 
-let so_ext = if Sys.win32 || Sys.cygwin then "dll" else "so"
+(* Under Linux, disable GNAT's handling of SIGSEGV, which is incompatible with
+   what the OCaml runtime is already doing. *)
+let () =
+  if Sys.unix then
+    ignore
+      (Dl.dlopen
+        ~filename:"liblangkit_sigsegv_handler.so"
+        ~flags:[Dl.RTLD_NOW]
+        : Dl.library)
+
+let so_ext = if Sys.unix then "so" else "dll"
 let c_lib_name = Format.sprintf "lib${c_api.shared_object_basename}.%s" so_ext
 let c_lib = Dl.dlopen ~filename:c_lib_name ~flags:[Dl.RTLD_NOW]
 

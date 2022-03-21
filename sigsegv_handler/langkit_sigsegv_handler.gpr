@@ -1,0 +1,7 @@
+library Project Langkit_SIGSEGV_Handler is
+  for Object_Dir use "obj";
+  for Library_Dir use "lib";
+  for Library_Name use "langkit_sigsegv_handler";
+  for Library_Kind use "relocatable";
+  for Library_Interface use ("langkit_sigsegv_handler");
+end Langkit_SIGSEGV_Handler;
