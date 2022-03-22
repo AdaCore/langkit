@@ -106,6 +106,7 @@ class LangkitTestsuite(Testsuite):
         self.env.rewrite_baselines = args.rewrite
         self.env.control_condition_env = {
             'restricted_env': args.restricted_env,
+            'has_ocaml': not args.disable_ocaml,
         }
 
         if args.coverage:

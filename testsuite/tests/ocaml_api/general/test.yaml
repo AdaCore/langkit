@@ -1,3 +1,4 @@
 driver: python
-require_ocaml: True
 encoding: utf-8
+control:
+    - [SKIP, "not has_ocaml", "OCaml support required"]
