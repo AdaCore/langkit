@@ -100,12 +100,15 @@ class LangkitTestsuite(Testsuite):
 
     def set_up(self):
         super().set_up()
-        self.env.rewrite_baselines = self.env.options.rewrite
+
+        args = self.main.args
+
+        self.env.rewrite_baselines = args.rewrite
         self.env.control_condition_env = {
-            'restricted_env': self.env.options.restricted_env,
+            'restricted_env': args.restricted_env,
         }
 
-        if self.env.options.coverage:
+        if args.coverage:
             # Create a directory that we'll use to:
             #
             #   1) collect coverage data for each testcase;
@@ -129,7 +132,7 @@ class LangkitTestsuite(Testsuite):
         # in parallel. To achieve this, we build+install it with all library
         # kinds, and then update the environment so that testcases can assume
         # it is installed.
-        if not self.env.options.disable_tear_up_builds:
+        if not args.disable_tear_up_builds:
             self.env.langkit_support_project_file = os.path.join(
                 self.root_dir,
                 '..', 'support', 'langkit_support.gpr'
@@ -140,7 +143,7 @@ class LangkitTestsuite(Testsuite):
 
             gargs = ['-p', '-P', self.env.langkit_support_project_file]
             cargs = ['-cargs', '-O0', '-g', '-gnatwae']
-            if self.env.options.coverage:
+            if args.coverage:
                 gargs.append('--subdirs=gnatcov')
                 cargs.extend(['-fdump-scos', '-fpreserve-control-flow'])
 
@@ -196,7 +199,7 @@ class LangkitTestsuite(Testsuite):
         )
 
     def tear_down(self):
-        if self.env.options.coverage:
+        if self.main.args.coverage:
             # Consolidate coverage data for each testcase and generate both a
             # sumary textual report on the standard output and a detailed HTML
             # report.
