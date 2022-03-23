@@ -128,11 +128,17 @@ class LangkitTestsuite(Testsuite):
             os.mkdir(self.env.coverage_dir)
             os.mkdir(self.env.langkit_support_coverage_dir)
 
-        def report(p, pname):
+        def run(name, args):
+            p = subprocess.run(
+                args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                encoding='utf-8',
+            )
             if p.returncode != 0:
                 raise RuntimeError(
                     '{} build failed (GPRbuild returned {})\n{}'.format(
-                        pname, p.returncode, p.stdout
+                        name, p.returncode, p.stdout
                     )
                 )
 
@@ -141,9 +147,9 @@ class LangkitTestsuite(Testsuite):
         # kinds, and then update the environment so that testcases can assume
         # it is installed.
         if not args.disable_tear_up_builds:
+            langkit_root_dir = os.path.join(self.root_dir, '..')
             self.env.langkit_support_project_file = os.path.join(
-                self.root_dir,
-                '..', 'support', 'langkit_support.gpr'
+                langkit_root_dir, 'support', 'langkit_support.gpr'
             )
             install_prefix = os.path.join(self.working_dir, 'install')
             if os.path.exists(install_prefix):
@@ -156,16 +162,14 @@ class LangkitTestsuite(Testsuite):
                 cargs.extend(['-fdump-scos', '-fpreserve-control-flow'])
 
             for build in ('static', 'relocatable'):
-                p = subprocess.run(
+                run(
+                    f'Langkit support - build {build}',
                     ['gprbuild'] + gargs +
                     ['-XLIBRARY_TYPE={}'.format(build)] + cargs,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    encoding='utf-8',
                 )
-                report(p, 'Langkit support - build {}'.format(build))
 
-                p = subprocess.run(
+                run(
+                    f'Langkit support - install {build}',
                     ['gprinstall',
                      '-P', self.env.langkit_support_project_file,
                      '-p', '--sources-subdir=include/langkit_support',
@@ -173,17 +177,31 @@ class LangkitTestsuite(Testsuite):
                      '--prefix={}'.format(install_prefix),
                      '--build-var=LIBRARY_TYPE',
                      '--build-name={}'.format(build)],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    encoding='utf-8',
                 )
-                report(p, 'Langkit support - install {}'.format(build))
 
             # Make the installed library available to all testcases
             add_to_path('PATH', os.path.join(install_prefix, 'bin'))
             add_to_path('LD_LIBRARY_PATH', os.path.join(install_prefix, 'lib'))
             add_to_path('GPR_PROJECT_PATH',
                         os.path.join(install_prefix, 'share', 'gpr'))
+
+            # On GNU/Linux, the OCaml bindings need to have access to the
+            # sigsegv_handler shared object. Build it and add it to the
+            # environment.
+            if not args.disable_ocaml and self.env.build.os.name == "linux":
+                sigsegv_handler_dir = os.path.join(
+                    langkit_root_dir, "sigsegv_handler"
+                )
+                sigsegv_handler_prj = os.path.join(
+                    sigsegv_handler_dir, "langkit_sigsegv_handler.gpr"
+                )
+                run(
+                    'Langkit_SIGSEGV_Handler',
+                    ["gprbuild", "-p", "-P", sigsegv_handler_prj],
+                )
+                add_to_path(
+                    'LD_LIBRARY_PATH', os.path.join(sigsegv_handler_dir, 'lib')
+                )
 
         # Make the "python_support" directory available to LKT import
         # statements.
