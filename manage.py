@@ -18,6 +18,8 @@ from langkit.utils import (LibraryTypes, add_to_path, format_setenv,
 LANGKIT_ROOT = PurePath(P.dirname(P.realpath(__file__)))
 SUPPORT_ROOT = LANGKIT_ROOT / "support"
 SUPPORT_GPR = str(SUPPORT_ROOT / "langkit_support.gpr")
+SIGSEGV_HANDLER_ROOT = LANGKIT_ROOT / "sigsegv_handler"
+SIGSEGV_HANDLER_GPR = SIGSEGV_HANDLER_ROOT / "langkit_sigsegv_handler.gpr"
 LKT_LIB_ROOT = LANGKIT_ROOT / "contrib" / "lkt"
 PYTHON_LIB_ROOT = LANGKIT_ROOT / "contrib" / "python"
 
@@ -131,13 +133,12 @@ def build_langkit_support(args: Namespace) -> None:
     build_dir = PurePath(args.build_dir) if args.build_dir else SUPPORT_ROOT
 
     base_argv = [
-        "gprbuild", "-P", SUPPORT_GPR, "-p",
-        f"-j{args.jobs}",
-        f"-XBUILD_MODE={args.build_mode}",
+        "gprbuild", "-p", f"-j{args.jobs}", f"-XBUILD_MODE={args.build_mode}",
     ]
     if args.build_dir:
         base_argv.extend([f"--relocate-build-tree={build_dir}"])
-    base_argv.extend(parse_cmdline_args(args.gargs))
+
+    gargs = parse_cmdline_args(args.gargs)
 
     # In order to avoid building the library once per library kind (static,
     # static-pic and relocatable), langkit_support.gpr uses the same object
@@ -149,7 +150,13 @@ def build_langkit_support(args: Namespace) -> None:
     for library_type in args.library_types.names:
         for lexch in glob.glob(lexch_pattern):
             os.remove(lexch)
-        subprocess.check_call(base_argv + [f"-XLIBRARY_TYPE={library_type}"])
+        subprocess.check_call(
+            base_argv
+            + ["-P", SUPPORT_GPR, f"-XLIBRARY_TYPE={library_type}"]
+            + gargs
+        )
+
+    subprocess.check_call(base_argv + ["-P", SIGSEGV_HANDLER_GPR] + gargs)
 
 
 def setenv_langkit_support(args: Namespace) -> None:
@@ -166,6 +173,10 @@ def setenv_langkit_support(args: Namespace) -> None:
     dynamic_lib_dir = str(build_dir / "lib" / "relocatable" / args.build_mode)
     print(format_setenv("PATH", dynamic_lib_dir))
     print(format_setenv("LD_LIBRARY_PATH", dynamic_lib_dir))
+
+    # Make the shared lib for the sigsegv handler available for OCaml on
+    # GNU/Linux.
+    print(format_setenv("LD_LIBRARY_PATH", str(SIGSEGV_HANDLER_ROOT / "lib")))
 
 
 def install_langkit_support(args: Namespace) -> None:
