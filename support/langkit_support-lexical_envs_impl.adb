@@ -1175,7 +1175,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
          when Grouped =>
             --  Just concatenate lookups for all grouped environments
-            Rec.Increase_Indent;
+            if Has_Trace then
+               Rec.Increase_Indent;
+            end if;
+
             declare
                Md : constant Node_Metadata :=
                   Combine (Env.Default_Md, Metadata);
@@ -1185,7 +1188,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
                            Categories, Local_Results);
                end loop;
             end;
-            Rec.Decrease_Indent;
+
+            if Has_Trace then
+               Rec.Decrease_Indent;
+            end if;
 
             return;
 
