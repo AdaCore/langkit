@@ -103,34 +103,17 @@ package body Langkit_Support.Adalog.Solver is
    --  TODO??? This should make more data accessible, like the numbers of
    --  solutions tried so far... But would this be really useful?
 
-   type Atom_And_Index is record
-      Atom       : Atomic_Relation;
-      Atom_Index : Positive;
-   end record;
-   --  Simple record storing an atom along with its index. Used to construct
-   --  the dependency graph during topo sort: ``Atom_Index`` is the index in
-   --  ``Topo_Sort.Atoms`` where ``Atom`` lives.
-
-   package Atom_Vectors is new Langkit_Support.Vectors (Atom_And_Index);
-   type Atom_Vector_Array is array (Positive range <>) of Atom_Vectors.Vector;
-   type Atom_Vector_Array_Access is access all Atom_Vector_Array;
+   package Positive_Vectors is new Langkit_Support.Vectors (Positive);
+   type Positive_Vector_Array is
+     array (Positive range <>) of Positive_Vectors.Vector;
+   type Positive_Vector_Array_Access is access all Positive_Vector_Array;
    procedure Free is new Ada.Unchecked_Deallocation
-     (Atom_Vector_Array, Atom_Vector_Array_Access);
+     (Positive_Vector_Array, Positive_Vector_Array_Access);
 
    type Sort_Context is record
-      Using_Atoms : Atom_Vector_Array_Access;
-      --  Map each logic var Id to the list of atoms that use that variable
-
-      Working_Set : Atom_Vectors.Vector;
-      --  Working set of atoms. Used as a temporary list to store atoms in the
-      --  graph that need to be subsequently added: at all points, the atoms in
-      --  the working set have all their dependencies already in the result of
-      --  the topo sort.
-
-      N_Preds : Atom_Vectors.Vector;
-      --  List of N_Predicates, to be applied at the end of solving. TODO??? we
-      --  could apply this policy for all predicates, which would simplify the
-      --  code a bit.
+      Defining_Atoms : Positive_Vector_Array_Access;
+      --  For each logic variable, list of atoms indexes for atoms that define
+      --  this variable.
 
       Has_Contradiction_Counter : Natural;
       --  Number of times ``Has_Contradiction`` was called. Used for
@@ -297,10 +280,8 @@ package body Langkit_Support.Adalog.Solver is
    function Create (Vars : Logic_Var_Array) return Sort_Context is
    begin
       return
-        (Using_Atoms               => new Atom_Vector_Array'
-           (Vars'Range => Atom_Vectors.Empty_Vector),
-         Working_Set               => Atom_Vectors.Empty_Vector,
-         N_Preds                   => Atom_Vectors.Empty_Vector,
+        (Defining_Atoms            => new Positive_Vector_Array'
+           (Vars'Range => Positive_Vectors.Empty_Vector),
          Has_Contradiction_Counter => 0);
    end Create;
 
@@ -665,17 +646,23 @@ package body Langkit_Support.Adalog.Solver is
       Last_Atom_Index : Natural := 0;
       --  Index of the last atom appended to ``Sorted_Atoms``
 
-      Defined_Vars : array (Vars'Range) of Boolean := (others => False);
-      --  For each logic variable, whether at least one atom in
-      --  ``Sorted_Atoms`` defines it.
-      --
-      --  Note that because of the way aliasing is implemented, this can be
-      --  False for an alias when the aliased variable is actually defined. For
-      --  this reason, use the ``Is_Defined`` function below to check a
-      --  variable (or its alias, if applicable).
+      Defining_Atoms : Positive_Vector_Array renames
+        Sort_Ctx.Defining_Atoms.all;
 
-      procedure Append (Atom : Atomic_Relation);
-      --  Append Atom to Sorted_Atoms
+      function Append_Definition (Var : Logic_Var) return Boolean;
+      --  Try to append an atom that defines ``Var`` instead. This returns
+      --  False if there is no atom that defines ``Var`` or if dependency cyles
+      --  prevent us from appending a sequence of atoms to achieve that.
+      --  Otherwise (on success), return True.
+
+      function Append_Definitions (Vars : Logic_Var_Vector) return Boolean;
+      --  Likewise but try to append definitions for all the given variables.
+      --  Return False if we fail to add a definition for at least one
+      --  variable.
+
+      function Append (Atom_Index : Positive) return Boolean;
+      --  Try to append ``Atoms (Atom_Index)`` (and its dependencies) to
+      --  ``Sorted_Atoms``. Return whether successful.
 
       Appended : array (Sorted_Atoms'Range) of Boolean := (others => False);
       --  ``Appended (I)`` indicates whether the ``Atoms (I)`` atom was
@@ -686,6 +673,15 @@ package body Langkit_Support.Adalog.Solver is
       --  these are not to be part of the result). We should probably rename
       --  this.
 
+      Visiting : array (Sorted_Atoms'Range) of Boolean := (others => False);
+      --  ``Visiting (I)`` indicates whether our recursive traversal of the
+      --  dependency graph of all atoms is currently visiting the ``Atoms (I)``
+      --  atom.
+      --
+      --  If one atom is being visited but not yet appended to the result, i.e.
+      --  if ``Visiting (I) and not Appended (I)``, then we have found a
+      --  dependency cycle.
+
       function Id (S : Var_Or_Null) return Natural
       is (if S.Exists then Id (S.Logic_Var) else 0);
       --  Return the Id for the ``S`` variable, or 0 if there is no variable
@@ -695,24 +691,90 @@ package body Langkit_Support.Adalog.Solver is
       --  Return the Id for the variable that ``S`` defines, or 0 if it
       --  contains no definition.
 
-      function Is_Defined (V : Logic_Var) return Boolean
-      is (Defined_Vars (Id (V)));
-      --  Return whether ``V`` is defined according to the atoms collected in
-      --  ``Sorted_Atoms`` so far.
+      -----------------------
+      -- Append_Definition --
+      -----------------------
+
+      function Append_Definition (Var : Logic_Var) return Boolean is
+      begin
+         for Definition of Defining_Atoms (Id (Var)) loop
+            if Append (Definition) then
+               return True;
+            end if;
+         end loop;
+         return False;
+      end Append_Definition;
+
+      ------------------------
+      -- Append_Definitions --
+      ------------------------
+
+      function Append_Definitions (Vars : Logic_Var_Vector) return Boolean is
+      begin
+         for V of Vars loop
+            if not Append_Definition (V) then
+               return False;
+            end if;
+         end loop;
+         return True;
+      end Append_Definitions;
 
       ------------
       -- Append --
       ------------
 
-      procedure Append (Atom : Atomic_Relation) is
+      function Append (Atom_Index : Positive) return Boolean is
       begin
-         Last_Atom_Index := Last_Atom_Index + 1;
-         Sorted_Atoms (Last_Atom_Index) := Atom;
+         if Appended (Atom_Index) then
+
+            --  If we already appended this atom to the result, there is
+            --  nothing to do.
+
+            return True;
+
+         elsif Visiting (Atom_Index) then
+
+            --  We are trying to append this atom as a consequence of another
+            --  attempt to append this atom: we have found a dependency cycle.
+            --  It is not possible to add this atom right now.
+
+            return False;
+
+         else
+            Visiting (Atom_Index) := True;
+            declare
+               Rel  : constant Atomic_Relation := Atoms.Get (Atom_Index);
+               Atom : Atomic_Relation_Type renames Rel.Atomic_Rel;
+
+               --  Try to satisfy all dependencies for this atom
+
+               Deps_Satisfied : constant Boolean :=
+                 (case Atom.Kind is
+                  when Assign | True | False => True,
+
+                  when Propagate   => Append_Definition (Atom.From),
+                  when Predicate   => Append_Definition (Atom.Target),
+                  when N_Predicate => Append_Definitions (Atom.Vars),
+
+                  --  All Unify relations should be in the Unifies list: no
+                  --  Unify relation should be in Atoms.
+
+                  when Unify => raise Program_Error);
+            begin
+               --  If all dependencies are satisfied, we can append this atom
+
+               if Deps_Satisfied then
+                  Last_Atom_Index := Last_Atom_Index + 1;
+                  Sorted_Atoms (Last_Atom_Index) := Rel;
+                  Appended (Atom_Index) := True;
+               end if;
+
+               Visiting (Atom_Index) := False;
+               return Deps_Satisfied;
+            end;
+         end if;
       end Append;
 
-      Using_Atoms : Atom_Vector_Array renames Sort_Ctx.Using_Atoms.all;
-      N_Preds     : Atom_Vectors.Vector renames Sort_Ctx.N_Preds;
-      Working_Set : Atom_Vectors.Vector renames Sort_Ctx.Working_Set;
    begin
       Has_Orphan := False;
 
@@ -721,116 +783,41 @@ package body Langkit_Support.Adalog.Solver is
 
       Create_Aliases (Vars, Unifies);
 
-      --  Step 2: create:
-      --
-      --    1. A map of vars to all atoms that use them.
-      --
-      --    2. The base working set for the topo sort, constituted of all atoms
-      --       with no dependencies.
+      --  Step 2, create a map of vars to the first atom that defines it
 
-      for I in reverse Atoms.First_Index .. Atoms.Last_Index loop
+      for I in Atoms.First_Index .. Atoms.Last_Index loop
          declare
-            Current_Rel  : constant Atomic_Relation := Atoms.Get (I);
-            Current_Atom : Atomic_Relation_Type renames Current_Rel.Atomic_Rel;
-            Working_Item : constant Atom_And_Index := (Current_Rel, I);
-
-            --  Resolve the Id of the var used. If the var aliases to another
-            --  var, resolve to the aliased var's Id.
-            Used_Logic_Var : constant Var_Or_Null :=
-              Used_Var (Current_Atom);
-            Used_Id        : constant Natural :=
-              (if Used_Logic_Var.Exists
-               then Id (Used_Logic_Var.Logic_Var)
-               else 0);
+            Rel : constant Atomic_Relation := Atoms.Get (I);
+            Def : constant Natural := Defined (Rel.Atomic_Rel);
          begin
-            if Current_Atom.Kind = N_Predicate then
-               --  N_Predicates are appended at the end separately
-
-               N_Preds.Append (Working_Item);
-
-            elsif Used_Id = 0 then
-               --  Put atoms with no dependency in the working set
-
-               Working_Set.Append (Working_Item);
-
-            elsif Current_Atom.Kind /= Unify then
-               --  For other atoms, put them in the ``Using_Atoms`` map, which
-               --  represents the edges of the dependency graph.
-
-               Using_Atoms (Used_Id).Append (Working_Item);
-
-            else
-               --  Aliasing processing prior to the topo sort is supposed to
-               --  take care of Unifys, which should not appear in ``Atoms``.
-
-               raise Program_Error with "unreachable code";
+            if Def /= 0 then
+               Defining_Atoms (Def).Append (I);
             end if;
          end;
       end loop;
 
-      --  Step 3: Do the topo sort
+      --  Step 3, go through all atoms and recurse to add its dependencies and
+      --  the atom itself to the sorted list.
 
-      while not Working_Set.Is_Empty loop
-         --  The dependencies of all atoms in the working set are already in
-         --  the topo sort result (this is the invariant of
-         --  ``Sort_Context_Type.Working_Set``): we can just take the first one
-         --  and put it in the result too.
-         declare
-            Atom    : constant Atom_And_Index := Working_Set.Pop;
-            Defd_Id : constant Natural := Defined (Atom.Atom.Atomic_Rel);
-         begin
-            Append (Atom.Atom);
-            Appended (Atom.Atom_Index) := True;
+      for I in Atoms.First_Index .. Atoms.Last_Index loop
+         if not Append (I) then
+            Has_Orphan := True;
 
-            --  If this atom defines a variable, put all the atoms that use
-            --  this variable in the working set, as their dependencies are now
-            --  satisfied.
-            if Defd_Id /= 0 then
-               for El of Using_Atoms (Defd_Id) loop
-                  Working_Set.Append (El);
-               end loop;
+            --  If requested, log all orphan atoms
 
-               --  Remove items from Using_Atoms, so that they're not appended
-               --  again to the working set.
-               Using_Atoms (Defd_Id).Clear;
-
-               Defined_Vars (Defd_Id) := True;
+            if Solv_Trace.Is_Active then
+               Solv_Trace.Trace ("Orphan relation: " & Image (Atoms.Get (I)));
             end if;
-         end;
-      end loop;
-
-      --  Append at the end all N_Predicates for which all input variables are
-      --  defined.
-      for N_Pred of N_Preds loop
-         if (for all V of N_Pred.Atom.Atomic_Rel.Vars => Is_Defined (V))
-         then
-            Append (N_Pred.Atom);
-            Appended (N_Pred.Atom_Index) := True;
          end if;
       end loop;
 
-      --  Check that all atoms are in the result. If not, we have orphans, and
-      --  thus the topo sort failed.
-      if Last_Atom_Index /= Sorted_Atoms'Last then
+      --  Clean up the Defining_Atoms shared data structure for the next topo
+      --  sort.
 
-         --  If requested, log all orphan atoms
-         if Solv_Trace.Is_Active then
-            for I in Appended'Range loop
-               if not Appended (I) then
-                  Solv_Trace.Trace
-                    ("Orphan relation: " & Image (Atoms.Get (I)));
-               end if;
-            end loop;
-         end if;
-
-         Has_Orphan := True;
-      end if;
-
-      for Atoms of Sort_Ctx.Using_Atoms.all loop
-         Atoms.Clear;
+      for Defs of Defining_Atoms loop
+         Defs.Clear;
       end loop;
-      Working_Set.Clear;
-      N_Preds.Clear;
+
       return Sorted_Atoms (1 .. Last_Atom_Index);
    end Topo_Sort;
 
@@ -840,12 +827,10 @@ package body Langkit_Support.Adalog.Solver is
 
    procedure Destroy (Sort_Ctx : in out Sort_Context) is
    begin
-      Sort_Ctx.N_Preds.Destroy;
-      Sort_Ctx.Working_Set.Destroy;
-      for Atoms of Sort_Ctx.Using_Atoms.all loop
+      for Atoms of Sort_Ctx.Defining_Atoms.all loop
          Atoms.Destroy;
       end loop;
-      Free (Sort_Ctx.Using_Atoms);
+      Free (Sort_Ctx.Defining_Atoms);
    end Destroy;
 
    -------------
@@ -1895,19 +1880,6 @@ package body Langkit_Support.Adalog.Solver is
 
       Ret : Boolean;
    begin
-      --  Do not even try to evaluate this atom if it uses a variable that is
-      --  not defined at this point.
-      --
-      --  Note that this cannot happen when called from ``Solve_Compound`` as
-      --  the topological sort makes sure all variables are defined before they
-      --  are used (and abort the resolution if it is not possible), so the
-      --  condition below will succeed only when ``Solve_Atomic`` is called
-      --  from ``Solve`` when called on an atom directly.
-
-      if not Is_Defined_Or_Null (Used_Var (Atom)) then
-         return False;
-      end if;
-
       case Atom.Kind is
          when Assign =>
             Ret := Assign_Val (Atom.Val);
@@ -1921,22 +1893,6 @@ package body Langkit_Support.Adalog.Solver is
             Ret := Atom.Pred.Call_Wrapper (Get_Value (Atom.Target));
 
          when N_Predicate =>
-
-            for V of Atom.Vars loop
-               if not Is_Defined (V) then
-                  if Solv_Trace.Active then
-                     Solv_Trace.Trace
-                       ("Trying to apply " & Image (Atom)
-                        & ", but " & Image (V) & " is not defined");
-                  end if;
-                  return False;
-               end if;
-               if Solv_Trace.Active then
-                  Solv_Trace.Trace
-                    (Image (V) & " = " & Value_Image (Get_Value (V)));
-               end if;
-            end loop;
-
             declare
                Vals : Value_Array (1 .. Atom.Vars.Length);
             begin

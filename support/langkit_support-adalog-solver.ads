@@ -372,6 +372,8 @@ private
    subtype Any_Rel is Relation;
 
    function Solve_Atomic (Self : Atomic_Relation) return Boolean;
-   --  Solve this atomic relation, return if we have found a valid solution
+   --  Solve this atomic relation, return if we have found a valid solution.
+   --  Note that this assumes that all "input" logic variables in Self are
+   --  already defined.
 
 end Langkit_Support.Adalog.Solver;
