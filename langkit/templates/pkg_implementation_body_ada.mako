@@ -902,16 +902,20 @@ package body ${ada_lib_name}.Implementation is
 
       GNATCOLL.Traces.Trace (Main_Trace, "Populating lexical envs for unit: "
                                          & Basename (Unit));
-      GNATCOLL.Traces.Increase_Indent (Main_Trace);
+      if GNATCOLL.Traces.Active (Main_Trace) then
+         GNATCOLL.Traces.Increase_Indent (Main_Trace);
+      end if;
 
       Context.In_Populate_Lexical_Env := True;
       Has_Errors := Populate_Lexical_Env (Unit.Ast_Root);
       Context.In_Populate_Lexical_Env := Saved_In_Populate_Lexical_Env;
 
-      GNATCOLL.Traces.Decrease_Indent (Main_Trace);
-      GNATCOLL.Traces.Trace
-        (Main_Trace,
-         "Finished populating lexical envs for unit: " & Basename (Unit));
+      if GNATCOLL.Traces.Active (Main_Trace) then
+         GNATCOLL.Traces.Decrease_Indent (Main_Trace);
+         GNATCOLL.Traces.Trace
+           (Main_Trace,
+            "Finished populating lexical envs for unit: " & Basename (Unit));
+      end if;
 
       Reset_Envs_Caches (Unit);
 
