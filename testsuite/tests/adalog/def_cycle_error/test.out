@@ -1,0 +1,11 @@
+Solving relation:
+All:
+    %Y <- %X
+    %Z <- %Y
+    %X <- %Z
+
+... without optimizations:
+
+... with all optimizations:
+
+Done.
