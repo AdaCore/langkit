@@ -1,3 +1,22 @@
+# V328-009: libgnarl has memory leaks when pragma Interrupt_State (SIGSEGV,
+# System) is active.
+{
+   GNAT tasking runtime
+   Memcheck:Leak
+   ...
+   fun:system__interrupts___elabs
+   fun:langkit_sigsegv_handlerinit
+   ...
+}
+{
+   GNAT tasking runtime
+   Memcheck:Leak
+   ...
+   fun:system__interrupts___elabb
+   fun:langkit_sigsegv_handlerinit
+   ...
+}
+
 {
    allocate_n implementation is supposed to free the allocated pointer itself
    Memcheck:Leak
