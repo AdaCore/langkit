@@ -615,16 +615,19 @@ package Langkit_Support.Lexical_Envs_Impl is
    package Internal_Map_Node_Maps is new Ada.Containers.Ordered_Maps
      (Key_Type     => Node_Type,
       Element_Type => Internal_Map_Node);
+   type Internal_Map_Node_Map is access all Internal_Map_Node_Maps.Map;
 
    type Internal_Map_Element is record
       Native_Nodes : Internal_Map_Node_Vectors.Vector;
       --  List of node that belong to the same unit as the lexical env that
       --  owns the map.
 
-      Foreign_Nodes : Internal_Map_Node_Maps.Map;
+      Foreign_Nodes : Internal_Map_Node_Map := null;
       --  List of nodes that belong to other units (as keys), and associated
       --  metadata/resolvers when applicable (as values). Nodes are sorted by
       --  unit filename/sloc range to preserve determinism.
+      --
+      --  NOTE: The list is null if there is no foreign node.
    end record;
    --  Set of nodes associated to a symbol in a lexical environment
 

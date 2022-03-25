@@ -36,6 +36,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    procedure Invalidate_Cache (Env : Lexical_Env_Access);
 
+   procedure Initialize_Foreign_Nodes (El : in out Internal_Map_Element)
+   with Inline_Always;
+   --  Initialize foreign nodes map in ``El``
+
    function Image (E : Entity) return String
    is
      (Image (Node_Text_Image (E.Node, False)));
@@ -599,6 +603,17 @@ package body Langkit_Support.Lexical_Envs_Impl is
          Owner => Owner);
    end Create_Dynamic_Lexical_Env;
 
+   ------------------------------
+   -- Initialize_Foreign_Nodes --
+   ------------------------------
+
+   procedure Initialize_Foreign_Nodes (El : in out Internal_Map_Element) is
+   begin
+      if El.Foreign_Nodes = null then
+         El.Foreign_Nodes := new Internal_Map_Node_Maps.Map;
+      end if;
+   end Initialize_Foreign_Nodes;
+
    ---------
    -- Add --
    ---------
@@ -638,6 +653,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
          --  If Self and Value belong to the same analysis unit, consider Node
          --  as native. In all other cases, it's a foreign node.
          if Is_Foreign (Self, Value) then
+            Initialize_Foreign_Nodes (E);
             E.Foreign_Nodes.Insert (Node.Node, Node);
          else
             E.Native_Nodes.Append (Node);
@@ -904,7 +920,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
             declare
                I_Nodes : constant Internal_Map_Node_Vectors.Vector :=
                   Internal_Envs.Element (C).Native_Nodes;
-               F_Nodes : constant Internal_Map_Node_Maps.Map :=
+               F_Nodes : constant Internal_Map_Node_Map :=
                   Internal_Envs.Element (C).Foreign_Nodes;
             begin
 
@@ -916,12 +932,14 @@ package body Langkit_Support.Lexical_Envs_Impl is
                end loop;
 
                --  Append foreign nodes
-               for C in F_Nodes.Iterate loop
-                  Append_Result
-                    (Internal_Map_Node_Maps.Element (C),
-                     Metadata, Current_Rebindings,
-                     From_Rebound);
-               end loop;
+               if F_Nodes /= null then
+                  for C in F_Nodes.Iterate loop
+                     Append_Result
+                       (Internal_Map_Node_Maps.Element (C),
+                        Metadata, Current_Rebindings,
+                        From_Rebound);
+                  end loop;
+               end if;
             end;
          end loop;
       end Append_All_Nodes;
@@ -968,11 +986,13 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   end loop;
 
                   --  Then add foreign nodes: just iterate on the ordered map
-                  for Pos in E.Foreign_Nodes.Iterate loop
-                     Append_Result
-                       (Internal_Map_Node_Maps.Element (Pos),
-                        Metadata, Current_Rebindings, From_Rebound);
-                  end loop;
+                  if E.Foreign_Nodes /= null then
+                     for Pos in E.Foreign_Nodes.Iterate loop
+                        Append_Result
+                          (Internal_Map_Node_Maps.Element (Pos),
+                           Metadata, Current_Rebindings, From_Rebound);
+                     end loop;
+                  end if;
                end;
                return True;
             end if;
@@ -1687,6 +1707,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
         (Lexical_Env_Record, Lexical_Env_Access);
       procedure Free is new Ada.Unchecked_Deallocation
         (Lexical_Env_Array, Lexical_Env_Array_Access);
+
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Internal_Map_Node_Maps.Map, Internal_Map_Node_Map);
    begin
       if Self in Null_Lexical_Env | Empty_Env then
          return;
@@ -1716,6 +1739,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
                if Env.Map /= null then
                   for Element of Env.Map.all loop
                      Internal_Map_Node_Vectors.Destroy (Element.Native_Nodes);
+                     Free (Element.Foreign_Nodes);
                   end loop;
                   Destroy (Env.Map);
                end if;
@@ -2161,9 +2185,11 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   Vector.Last_Element.all.Value;
             begin
                V.Concat (Element.Native_Nodes);
-               for Node of Element.Foreign_Nodes loop
-                  V.Append (Node);
-               end loop;
+               if Element.Foreign_Nodes /= null then
+                  for Node of Element.Foreign_Nodes.all loop
+                     V.Append (Node);
+                  end loop;
+               end if;
             end;
          end loop;
          Sort (Vector);
