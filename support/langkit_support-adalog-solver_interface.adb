@@ -36,6 +36,7 @@ package body Langkit_Support.Adalog.Solver_Interface is
    type Predicate_Fn is access function (V : Value_Type) return Boolean;
    type Converter_Fn is access function (V : Value_Type) return Value_Type;
    type N_Predicate_Fn is access function (Vs : Value_Array) return Boolean;
+   type Combiner_Fn is access function (Vs : Value_Array) return Value_Type;
 
    type Predicate_Fn_Wrapper is new Predicate_Type with record
       Callback : Predicate_Fn;
@@ -71,6 +72,18 @@ package body Langkit_Support.Adalog.Solver_Interface is
    is (Self.Callback (Val));
 
    overriding function Image (Self : Converter_Wrapper) return String
+   is (Self.Name.To_String);
+
+   type Combiner_Wrapper is new Combiner_Type with record
+      Callback : Combiner_Fn;
+      Name     : XString;
+   end record;
+
+   overriding function Combine
+     (Self : Combiner_Wrapper; Vs : Value_Array) return Value_Type
+   is (Self.Callback (Vs));
+
+   overriding function Image (Self : Combiner_Wrapper) return String
    is (Self.Name.To_String);
 
    ------------------
@@ -119,6 +132,23 @@ package body Langkit_Support.Adalog.Solver_Interface is
       end if;
       return Self.Cache_Value;
    end Convert_Wrapper;
+
+   ---------------------
+   -- Combine_Wrapper --
+   ---------------------
+
+   function Combine_Wrapper
+     (Self : in out Combiner_Type'Class;
+      Vals : Logic_Vars.Value_Array) return Value_Type
+   is
+   begin
+      if not Self.Cache_Set or else Self.Cache_Key /= Vals then
+         Self.Cache_Value := Self.Combine (Vals);
+         Self.Cache_Set := True;
+         Self.Cache_Key := Vals;
+      end if;
+      return Self.Cache_Value;
+   end Combine_Wrapper;
 
    ---------------
    -- Converter --
@@ -193,5 +223,25 @@ package body Langkit_Support.Adalog.Solver_Interface is
          Callback    => Pred'Unrestricted_Access.all,
          Name        => To_XString (Pred_Name));
    end N_Predicate;
+
+   --------------
+   -- Combiner --
+   --------------
+
+   function Combiner
+     (Comb      : access function (V : Value_Array) return Value_Type;
+      Arity     : Positive;
+      Comb_Name : String := "Combiner") return Combiner_Type'Class
+   is
+   begin
+      return Combiner_Wrapper'
+        (N           => Arity,
+         Cache_Set   => False,
+         Cache_Key   => <>,
+         Cache_Value => <>,
+         Ref_Count   => 1,
+         Callback    => Comb'Unrestricted_Access.all,
+         Name        => To_XString (Comb_Name));
+   end Combiner;
 
 end Langkit_Support.Adalog.Solver_Interface;

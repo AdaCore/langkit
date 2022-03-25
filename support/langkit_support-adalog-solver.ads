@@ -140,6 +140,15 @@ package Langkit_Support.Adalog.Solver is
    --  If ``Conv`` is provided, the actually assigned value is the result of
    --  ``Conv`` when called on ``From``'s value.
 
+   function Create_N_Propagate
+     (To           : Logic_Var;
+      Comb         : Combiner_Type'Class;
+      Logic_Vars   : Logic_Var_Array;
+      Debug_String : String_Access := null) return Relation;
+   --  Create a relation that will solve successfully if it is possible to
+   --  assign to ``To`` the value computed by calling ``Comb`` on the given
+   --  ``Logic_Vars``.
+
    function Create_Domain
      (Logic_Var    : Logic_Vars.Logic_Var;
       Domain       : Value_Array;
@@ -182,11 +191,14 @@ package Langkit_Support.Adalog.Solver is
 private
 
    type Converter_Access is access all Converter_Type'Class;
+   type Combiner_Access is access all Combiner_Type'Class;
    type Predicate_Access is access all Predicate_Type'Class;
    type N_Predicate_Access is access all N_Predicate_Type'Class;
 
    procedure Free is new Ada.Unchecked_Deallocation
      (Converter_Type'Class, Converter_Access);
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Combiner_Type'Class, Combiner_Access);
    procedure Free is new Ada.Unchecked_Deallocation
      (Predicate_Type'Class, Predicate_Access);
    procedure Free is new Ada.Unchecked_Deallocation
@@ -200,7 +212,7 @@ private
    -- Atomic_Relation --
    ---------------------
 
-   type Atomic_Kind is (Propagate, Unify, Assign, Predicate,
+   type Atomic_Kind is (Propagate, N_Propagate, Unify, Assign, Predicate,
                         N_Predicate, True, False);
 
    type Atomic_Relation_Type (Kind : Atomic_Kind := Propagate) is record
@@ -227,6 +239,14 @@ private
 
                when others => null;
             end case;
+
+         when N_Propagate =>
+            Comb_Vars : Logic_Var_Vector;
+            --  List of logic variables used by the converter
+
+            Comb : Combiner_Access;
+            --  Combiner function to assign a value to Target that is computed
+            --  from the value of N_Propagate_Vars.
 
          when Predicate =>
             Pred : Predicate_Access;

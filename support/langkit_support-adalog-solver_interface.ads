@@ -130,6 +130,31 @@ package Langkit_Support.Adalog.Solver_Interface is
    function Is_No_Converter (Self : Converter_Type'Class) return Boolean;
    --  Return whether ``Self`` comes from ``No_Converter``
 
+   -------------------
+   -- Combiner_Type --
+   -------------------
+
+   type Combiner_Type (N : Positive) is
+     abstract new Base_Functor_Type with
+   record
+      Cache_Set   : Boolean;
+      Cache_Key   : Value_Array (1 .. N);
+      Cache_Value : Value_Type;
+   end record;
+   --  Type to compute a value from multiple input values
+
+   function Combine
+     (Self : Combiner_Type;
+      Vals : Logic_Vars.Value_Array) return Value_Type is abstract;
+   --  Derived types must overide this to implement the value computation
+
+   function Combine_Wrapper
+     (Self : in out Combiner_Type'Class;
+      Vals : Logic_Vars.Value_Array) return Value_Type;
+   --  Combiner users must call this instead of ``Combine`` to use the cache
+
+   function Image (Self : Combiner_Type) return String is ("");
+
    -------------------------------------
    -- Stateless functors constructors --
    -------------------------------------
@@ -153,5 +178,10 @@ package Langkit_Support.Adalog.Solver_Interface is
    function Converter
      (Pred      : access function (V : Value_Type) return Value_Type;
       Pred_Name : String := "Converter") return Converter_Type'Class;
+
+   function Combiner
+     (Comb      : access function (V : Value_Array) return Value_Type;
+      Arity     : Positive;
+      Comb_Name : String := "Combiner") return Combiner_Type'Class;
 
 end Langkit_Support.Adalog.Solver_Interface;

@@ -82,6 +82,13 @@ package Langkit_Support.Adalog.Generic_Main_Support is
    is
      (+Create_Propagate (L, R, Conv, -Dbg_String));
 
+   function N_Propagate
+     (To   : Refs.Logic_Var;
+      Comb : Combiner_Type'Class;
+      Vars : Logic_Var_Array;
+      Dbg_String : String := "") return Relation
+   is (+Create_N_Propagate (To, Comb, Vars, -Dbg_String));
+
    function Unify
      (L, R : Refs.Logic_Var; Dbg_String : String := "") return Relation
    is (+Create_Unify (L, R, -Dbg_String));

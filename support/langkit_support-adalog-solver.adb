@@ -753,6 +753,7 @@ package body Langkit_Support.Adalog.Solver is
                   when Assign | True | False => True,
 
                   when Propagate   => Append_Definition (Atom.From),
+                  when N_Propagate => Append_Definitions (Atom.Comb_Vars),
                   when Predicate   => Append_Definition (Atom.Target),
                   when N_Predicate => Append_Definitions (Atom.Vars),
 
@@ -972,10 +973,15 @@ package body Langkit_Support.Adalog.Solver is
    is
       --  We handle Unify here, even though it is not strictly treated in the
       --  dependency graph, so that the Unify_From variable is registered in
-      --  the list of variables of the equation. TODO??? Might be cleaner to
-      --  have a separate function to return all variables a relation uses?
+      --  the list of variables of the equation.
+      --
+      --  We also pretend that N_Propagate has no dependency here because it
+      --  depends on multiple variables. Callers should handle it separately.
+      --
+      --  TODO??? Might be cleaner to have a separate function to return all
+      --  variables a relation uses?
      (case Self.Kind is
-         when Assign | True | False | N_Predicate => null,
+         when Assign | N_Propagate | True | False | N_Predicate => null,
          when Propagate => Self.From,
          when Predicate => Self.Target,
          when Unify     => Self.Unify_From);
@@ -991,8 +997,8 @@ package body Langkit_Support.Adalog.Solver is
       --  the list of variables of the equation. TODO??? Might be cleaner to
       --  have a separate function to return all variables a relation defines?
      (case Self.Kind is
-         when Assign | Propagate | Unify             => Self.Target,
-         when Predicate | True | False | N_Predicate => null);
+         when Assign | Propagate | N_Propagate | Unify => Self.Target,
+         when Predicate | True | False | N_Predicate   => null);
 
    -----------------
    -- To_Relation --
@@ -1683,6 +1689,27 @@ package body Langkit_Support.Adalog.Solver is
                           Debug_String => Debug_String);
    end Create_Propagate;
 
+   ------------------------
+   -- Create_N_Propagate --
+   ------------------------
+
+   function Create_N_Propagate
+     (To           : Logic_Var;
+      Comb         : Combiner_Type'Class;
+      Logic_Vars   : Logic_Var_Array;
+      Debug_String : String_Access := null) return Relation
+   is
+      Vars_Vec : Logic_Var_Vector := Logic_Var_Vectors.Empty_Vector;
+   begin
+      Vars_Vec.Concat (Logic_Var_Vectors.Elements_Array (Logic_Vars));
+      return To_Relation
+        (Atomic_Relation_Type'(Kind      => N_Propagate,
+                               Comb_Vars => Vars_Vec,
+                               Comb      => new Combiner_Type'Class'(Comb),
+                               Target    => To),
+         Debug_String => Debug_String);
+   end Create_N_Propagate;
+
    ----------------------
    -- Create_Propagate --
    ----------------------
@@ -1803,6 +1830,10 @@ package body Langkit_Support.Adalog.Solver is
             end if;
             Free (Self.Conv);
 
+         when N_Propagate =>
+            Destroy (Self.Comb.all);
+            Free (Self.Comb);
+
          when Predicate =>
             Destroy (Self.Pred.all);
             Free (Self.Pred);
@@ -1852,6 +1883,14 @@ package body Langkit_Support.Adalog.Solver is
    function Solve_Atomic (Self : Atomic_Relation) return Boolean is
       Atom : Atomic_Relation_Type renames Self.Atomic_Rel;
 
+      function Converted_Val (Val : Value_Type) return Value_Type
+      is
+        (if Atom.Conv /= null
+         then Atom.Conv.Convert_Wrapper (Val)
+         else Val);
+      --  Assuming ``Atom`` is an Assign or Propagate atom, return ``Val``
+      --  transformed by its converter.
+
       function Assign_Val (Val : Value_Type) return Boolean;
       --  Tries to assign ``Val`` to ``Atom.Target`` and return True either if
       --  ``Atom.Target`` already has a value compatible with ``Val``, or if
@@ -1860,33 +1899,56 @@ package body Langkit_Support.Adalog.Solver is
       --  This assumes that ``Self`` is either an ``Assign`` or a `Propagate``
       --  relation.
 
+      procedure Get_Values (Vars : Logic_Var_Vector; Vals : out Value_Array);
+      --  Assign to ``Vals`` the value of the variables in ``Vars``.
+      --
+      --  This assumes that ``Vars`` and ``Vals`` have the same bounds. Note
+      --  that we could turn this into a function that returns the array, but
+      --  this would require secondary stack support and its overhead, whereas
+      --  this is performance critical code.
+
       ----------------
       -- Assign_Val --
       ----------------
 
       function Assign_Val (Val : Value_Type) return Boolean is
-         Conv_Val : constant Value_Type :=
-           (if Atom.Conv /= null
-            then Atom.Conv.Convert_Wrapper (Val)
-            else Val);
       begin
          if Is_Defined (Atom.Target) then
-            return Conv_Val = Get_Value (Atom.Target);
+            return Val = Get_Value (Atom.Target);
          else
-            Set_Value (Atom.Target, Conv_Val);
+            Set_Value (Atom.Target, Val);
             return True;
          end if;
       end Assign_Val;
+
+      ----------------
+      -- Get_Values --
+      ----------------
+
+      procedure Get_Values (Vars : Logic_Var_Vector; Vals : out Value_Array) is
+      begin
+         for I in Vals'Range loop
+            Vals (I) := Get_Value (Vars.Get (I));
+         end loop;
+      end Get_Values;
 
       Ret : Boolean;
    begin
       case Atom.Kind is
          when Assign =>
-            Ret := Assign_Val (Atom.Val);
+            Ret := Assign_Val (Converted_Val (Atom.Val));
 
          when Propagate =>
             pragma Assert (Is_Defined (Atom.From));
-            Ret := Assign_Val (Get_Value (Atom.From));
+            Ret := Assign_Val (Converted_Val (Get_Value (Atom.From)));
+
+         when N_Propagate =>
+            declare
+               Vals : Value_Array (1 .. Atom.Comb_Vars.Length);
+            begin
+               Get_Values (Atom.Comb_Vars, Vals);
+               Ret := Assign_Val (Atom.Comb.Combine_Wrapper (Vals));
+            end;
 
          when Predicate =>
             pragma Assert (Is_Defined (Atom.Target));
@@ -1896,10 +1958,7 @@ package body Langkit_Support.Adalog.Solver is
             declare
                Vals : Value_Array (1 .. Atom.Vars.Length);
             begin
-               for I in Atom.Vars.First_Index .. Atom.Vars.Last_Index loop
-                  Vals (I) := Get_Value (Atom.Vars.Get (I));
-               end loop;
-
+               Get_Values (Atom.Vars, Vals);
                Ret := Atom.N_Pred.Call_Wrapper (Vals);
             end;
 
@@ -1931,6 +1990,22 @@ package body Langkit_Support.Adalog.Solver is
       function Prop_Image (Left, Right : String) return String
       is
         (Left & " <- " & Right_Image (Right));
+
+      function Var_Args_Image (Vars : Logic_Var_Vector) return String;
+
+      --------------------
+      -- Var_Args_Image --
+      --------------------
+
+      function Var_Args_Image (Vars : Logic_Var_Vector) return String is
+         Vars_Image : XString_Array (1 .. Vars.Length);
+      begin
+         for I in Vars_Image'Range loop
+            Vars_Image (I) := To_XString (Image (Vars.Get (I)));
+         end loop;
+         return "(" & To_XString (", ").Join (Vars_Image).To_String & ")";
+      end Var_Args_Image;
+
    begin
       case Self.Kind is
          when Propagate =>
@@ -1939,6 +2014,10 @@ package body Langkit_Support.Adalog.Solver is
          when Assign =>
             return Prop_Image
               (Image (Self.Target), Logic_Vars.Value_Image (Self.Val));
+
+         when N_Propagate =>
+            return Image (Self.Target) & " <- " & Self.Comb.Image
+                   & Var_Args_Image (Self.Comb_Vars);
 
          when Predicate =>
             declare
@@ -1954,16 +2033,11 @@ package body Langkit_Support.Adalog.Solver is
             declare
                Full_Img : constant String :=
                  Self.N_Pred.Full_Image (Logic_Var_Array (Self.Vars.To_Array));
-               Vars_Image : XString_Array (1 .. Self.Vars.Length);
             begin
-               if Full_Img /= "" then
-                  return Full_Img;
-               end if;
-               for I in Vars_Image'Range loop
-                  Vars_Image (I) := To_XString (Image (Self.Vars.Get (I)));
-               end loop;
-               return Self.N_Pred.Image
-                 & "?(" & To_XString (", ").Join (Vars_Image).To_String & ")";
+               return
+                 (if Full_Img /= ""
+                  then Full_Img
+                  else Self.N_Pred.Image & "?" & Var_Args_Image (Self.Vars));
             end;
 
          when True =>
