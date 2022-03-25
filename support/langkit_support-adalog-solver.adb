@@ -682,12 +682,12 @@ package body Langkit_Support.Adalog.Solver is
       --  if ``Visiting (I) and not Appended (I)``, then we have found a
       --  dependency cycle.
 
-      function Id (S : Var_Or_Null) return Natural
-      is (if S.Exists then Id (S.Logic_Var) else 0);
-      --  Return the Id for the ``S`` variable, or 0 if there is no variable
+      function Id_Or_Null (Var : Logic_Var) return Natural
+      is (if Var = null then 0 else Id (Var));
+      --  Return the Id for the ``Var`` variable, or 0 if there is no variable
 
       function Defined (S : Atomic_Relation_Type) return Natural
-      is (Id (Defined_Var (S)));
+      is (Id_Or_Null (Defined_Var (S)));
       --  Return the Id for the variable that ``S`` defines, or 0 if it
       --  contains no definition.
 
@@ -968,31 +968,31 @@ package body Langkit_Support.Adalog.Solver is
    -- Used_Var --
    --------------
 
-   function Used_Var (Self : Atomic_Relation_Type) return Var_Or_Null
+   function Used_Var (Self : Atomic_Relation_Type) return Logic_Var
    is
       --  We handle Unify here, even though it is not strictly treated in the
       --  dependency graph, so that the Unify_From variable is registered in
       --  the list of variables of the equation. TODO??? Might be cleaner to
       --  have a separate function to return all variables a relation uses?
      (case Self.Kind is
-         when Assign | True | False | N_Predicate => Null_Var,
-         when Propagate => (True, Self.From),
-         when Predicate => (True, Self.Target),
-         when Unify     => (True, Self.Unify_From));
+         when Assign | True | False | N_Predicate => null,
+         when Propagate => Self.From,
+         when Predicate => Self.Target,
+         when Unify     => Self.Unify_From);
 
    -----------------
    -- Defined_Var --
    -----------------
 
-   function Defined_Var (Self : Atomic_Relation_Type) return Var_Or_Null
+   function Defined_Var (Self : Atomic_Relation_Type) return Logic_Var
    is
       --  We handle Unify here, even though it is not strictly treated in the
       --  dependency graph, so that the Target variable is registered in
       --  the list of variables of the equation. TODO??? Might be cleaner to
       --  have a separate function to return all variables a relation defines?
      (case Self.Kind is
-         when Assign | Propagate | Unify             => (True, Self.Target),
-         when Predicate | True | False | N_Predicate => Null_Var);
+         when Assign | Propagate | Unify             => Self.Target,
+         when Predicate | True | False | N_Predicate => null);
 
    -----------------
    -- To_Relation --

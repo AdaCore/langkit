@@ -264,11 +264,11 @@ private
    --  Atomic relations dependency graph --
    ----------------------------------------
 
-   --  In this section, we'll define types and operations on the graph of
-   --  dependencies between atomic relations. This is what will allow us to:
+   --  This section defines operations to explore the depenency graph between
+   --  atomic relations. They are used to:
    --
    --  1. Sort a list of atomic relations topologically, so that they form an
-   --     executable list of instructions.
+   --     executable sequence of instructions.
    --
    --  2. Define a map from vars to atomic rels where for every logic variable
    --     ``V``, the map maps ``V -> [R1, R2, R3, ...]`` where
@@ -285,26 +285,15 @@ private
    --  treats both variables as aliases. This dataflow analysis probably
    --  deserves a refactoring to clarify this.
 
-   type Var_Or_Null (Exists : Boolean := False) is record
-      case Exists is
-         when True  => Logic_Var : Logic_Vars.Logic_Var;
-         when False => null;
-      end case;
-   end record;
-   --  Option type for a logic variable. Used to express dependencies from an
-   --  atomic relation to a logic variable.
-
-   Null_Var : constant Var_Or_Null := (Exists => False);
-
-   function Is_Defined_Or_Null (Logic_Var : Var_Or_Null) return Boolean
+   function Is_Defined_Or_Null (Var : Logic_Var) return Boolean
    is
-     ((not Logic_Var.Exists) or else Is_Defined (Logic_Var.Logic_Var));
+     (Var = null or else Is_Defined (Var));
    --  Shortcut predicate. Returns whether a variable is defined or is null
 
-   function Used_Var (Self : Atomic_Relation_Type) return Var_Or_Null;
+   function Used_Var (Self : Atomic_Relation_Type) return Logic_Var;
    --  Return the variable that this atomic relation uses, if there is one
 
-   function Defined_Var (Self : Atomic_Relation_Type) return Var_Or_Null;
+   function Defined_Var (Self : Atomic_Relation_Type) return Logic_Var;
    --  Return the variable that this atomic relation defines, if there is one
 
    -----------------------
