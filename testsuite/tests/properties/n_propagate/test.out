@@ -1,0 +1,8 @@
+main.py: Running...
+p_resolve(<Literal main.txt:1:1-1:2>, <Literal main.txt:1:5-1:6>) = <Literal main.txt:1:1-1:2>
+p_resolve(<Plus main.txt:1:1-1:6>, <Literal main.txt:1:5-1:6>) = <PropertyError: mismatching node type for comb_prop>
+p_resolve(None, <Literal main.txt:1:5-1:6>) = None
+p_resolve(<Literal main.txt:1:1-1:2>, <Plus main.txt:1:1-1:6>) = <PropertyError: mismatching node type for comb_prop>
+p_resolve(<Literal main.txt:1:1-1:2>, None) = <Literal main.txt:1:1-1:2>
+main.py: Done.
+Done

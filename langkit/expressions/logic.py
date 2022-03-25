@@ -1,11 +1,11 @@
 from itertools import zip_longest
-from typing import List, Optional, Tuple, Union
+from typing import Any as _Any, List, Optional, Tuple, Union
 
 import funcy
 
 from langkit import names
 from langkit.compiled_types import Argument, T, no_compiled_type
-from langkit.diagnostics import check_multiple, check_source_language
+from langkit.diagnostics import check_multiple, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable,
     IntegerLiteralExpr, LiteralExpr, NullExpr, PropertyDef, ResolvedExpression,
@@ -64,22 +64,34 @@ class BindExpr(CallExpr):
         )
 
     @staticmethod
-    def functor_expr(type_name: str, prop: PropertyDef) -> LiteralExpr:
+    def functor_expr(type_name: str,
+                     prop: PropertyDef,
+                     arity: Optional[int] = None) -> LiteralExpr:
         """
         Return an expression to create a functor for ``Prop``.
 
         :param type_name: Name of the functor derived type.
         :param prop: Property called by the functor.
+        :param arity: If the functor type handles variadic functions, this
+            should be the number of entity arguments to pass to "prop".
         """
-        assocs: List[Tuple[str, LiteralExpr]] = [
+        assocs: List[Tuple[str, LiteralExpr]] = []
+
+        if arity is not None:
+            assocs.append(("N", IntegerLiteralExpr(arity)))
+
+        assocs.extend([
             ("Ref_Count", IntegerLiteralExpr(1)),
             ("Cache_Set", LiteralExpr("False", None)),
             ("Cache_Key", LiteralExpr("<>", None)),
             ("Cache_Value", LiteralExpr("<>", None)),
-        ] + [
+        ])
+
+        assocs.extend([
             (dynvar.argument_name, construct(dynvar))
             for dynvar in prop.dynamic_vars
-        ]
+        ])
+
         return aggregate_expr(type_name, assocs)
 
 
@@ -100,7 +112,7 @@ class AssignExpr(BindExpr):
         constructor_args: List[Union[str, ResolvedExpression]] = [
             logic_var,
             value,
-            self.functor_expr(f"Logic_Converter_{conv_prop.uid}", conv_prop)
+            self.functor_expr(f"Logic_Functor_{conv_prop.uid}", conv_prop)
             if conv_prop else
             "Solver_Ifc.No_Converter",
         ]
@@ -125,38 +137,55 @@ class AssignExpr(BindExpr):
 
 class PropagateExpr(BindExpr):
     """
-    Resolved expression that creates Propagate equations.
+    Resolved expression that creates Propagate/N_Propagate equations.
     """
 
     def __init__(self,
                  dest_var: ResolvedExpression,
-                 arg_var: ResolvedExpression,
-                 conv_prop: Optional[PropertyDef],
+                 arg_vars: List[ResolvedExpression],
+                 prop: PropertyDef,
                  abstract_expr: Optional[AbstractExpression] = None):
         self.dest_var = dest_var
-        self.arg_var = arg_var
-        self.conv_prop = conv_prop
+        self.arg_vars = arg_vars
+        self.prop = prop
 
-        constructor_args: List[Union[str, ResolvedExpression]] = [
-            dest_var,
-            arg_var,
-            self.functor_expr(f"Logic_Converter_{conv_prop.uid}", conv_prop)
-            if conv_prop else
-            "Solver_Ifc.No_Converter",
-        ]
+        constructor_name: str
+        constructor_args: List[Union[str, ResolvedExpression]]
+
+        if len(arg_vars) == 1:
+            constructor_name = "Solver.Create_Propagate"
+            constructor_args = [
+                dest_var,
+                arg_vars[0],
+                self.functor_expr(f"Logic_Functor_{prop.uid}", prop)
+                if prop else
+                "Solver_Ifc.No_Converter",
+            ]
+        else:
+            constructor_name = "Solver.Create_N_Propagate"
+            constructor_args = [
+                dest_var,
+                self.functor_expr(
+                    f"Logic_Functor_{prop.uid}", prop, len(arg_vars)
+                )
+                if prop else
+                "Solver_Ifc.No_Combiner",
+                aggregate_expr(
+                    type=None,
+                    assocs=[(str(i), v) for i, v in enumerate(arg_vars, 1)],
+                ),
+            ]
 
         super().__init__(
-            "Solver.Create_Propagate",
-            constructor_args,
-            abstract_expr=abstract_expr
+            constructor_name, constructor_args, abstract_expr=abstract_expr
         )
 
     @property
     def subexprs(self):
         return {
             'dest_var': self.dest_var,
-            'arg_var': self.arg_var,
-            'conv_prop': self.conv_prop,
+            'arg_vars': self.arg_vars,
+            'prop': self.prop,
         }
 
     def __repr__(self):
@@ -228,62 +257,112 @@ class Bind(AbstractExpression):
         self.to_expr = to_expr
         self.conv_prop = conv_prop
 
-    def resolve_props(self):
+    @staticmethod
+    def _resolve_property(name: str,
+                          prop_ref: _Any,
+                          arity: int) -> Optional[PropertyDef]:
+        """
+        Resolve the ``prop`` property reference (if any, built in the DSL) to
+        the referenced property. If it is present, check its signature.
+
+        :param name: Name of the property in the DSL construct. Used to format
+            the error message.
+        :param prop_ref: Property reference to resolve.
+        :param arity: Expected number of entity arguments for this property
+            ("Self" included).
+        """
         from langkit.expressions import FieldAccess
 
-        def resolve(name, prop):
-            if not prop:
-                return
-            if isinstance(prop, FieldAccess):
-                prop = prop.resolve_field()
-            elif isinstance(prop, T.Defer):
-                prop = prop.get()
+        # First, resolve the property
 
-            check_source_language(
-                isinstance(prop, PropertyDef),
-                "{} must be either a FieldAccess resolving to a property, or"
-                " a direct reference to a property".format(name)
+        prop: PropertyDef
+
+        if prop_ref is None:
+            return None
+
+        elif isinstance(prop_ref, FieldAccess):
+            node_data = prop_ref.resolve_field()
+            if isinstance(node_data, PropertyDef):
+                prop = node_data
+            else:
+                error(f"{name} must be a property")
+
+        elif isinstance(prop_ref, T.Defer):
+            prop = prop_ref.get()
+
+        elif isinstance(prop_ref, PropertyDef):
+            prop = prop_ref
+
+        else:
+            error(
+                f"{name} must be either a FieldAccess resolving to a property,"
+                " or a direct reference to a property"
             )
 
-            return prop
+        # Second, check its signature
 
-        self.conv_prop = resolve('conv_prop', self.conv_prop)
-        if self.conv_prop:
-            self.conv_prop = self.conv_prop.root_property
+        prop = prop.root_property
+        assert prop.struct
+        check_source_language(
+            prop.struct.matches(T.root_node),
+            f"{name} must belong to a subtype of {T.root_node.dsl_name}",
+        )
+
+        # Check that it takes the expected number of arguments. "Self" counts
+        # as an implicit argument, so we expect at least ``arity - 1`` natural
+        # arguments.
+        n_args = arity - 1
+        entity_args = prop.natural_arguments[:n_args]
+        extra_args = prop.natural_arguments[n_args:]
+        check_source_language(
+            len(entity_args) == n_args
+            and all(arg.type.is_entity_type for arg in entity_args),
+            f"{name} property must accept {n_args} entity arguments (only"
+            f" {len(entity_args)} found)",
+        )
+
+        # The other argumenst must be optional
+        check_source_language(
+            all(arg.default_value is not None for arg in extra_args),
+            f"extra arguments for {name} must be optional",
+        )
+
+        # Check the property return type
+        check_source_language(
+            prop.type.matches(T.root_node.entity),
+            f"{name} must return a subtype of {T.entity.dsl_name}",
+        )
+
+        # Check that all dynamic variables for this property are bound in the
+        # current expression context.
+        DynamicVariable.check_call_bindings(
+            prop, f"In call to {{prop}} as {name}"
+        )
+
+        # Third, generate a functor for this property, so that equations can
+        # refer to it.
+        from langkit.compile_context import get_context
+        get_context().do_generate_logic_functors(prop, arity)
+
+        return prop
+
+    @staticmethod
+    def _construct_logic_var(var_expr) -> ResolvedExpression:
+        """
+        Construct a logic variable expression, making sure it is reset.
+        """
+        return ResetLogicVar(construct(var_expr, T.LogicVar))
 
     def construct(self):
-        from langkit.compile_context import get_context
-        self.resolve_props()
-
-        get_context().do_generate_logic_functors(self.conv_prop)
-
-        # We have to wait for the construct pass for the following checks
-        # because they rely on type information, which is not supposed to be
-        # computed before this pass.
-        if self.conv_prop:
-            check_multiple([
-                (self.conv_prop.type.matches(T.root_node.entity),
-                 'Bind property must return a subtype of {}'.format(
-                     T.root_node.entity.dsl_name
-                )),
-
-                (self.conv_prop.struct.matches(T.root_node),
-                 'Bind property must belong to a subtype of {}'.format(
-                     T.root_node.dsl_name
-                )),
-
-                (all(arg.default_value is not None
-                     for arg in self.conv_prop.natural_arguments),
-                 'Bind property can take only optional arguments'),
-            ])
-
-            DynamicVariable.check_call_bindings(
-                self.conv_prop, "In Bind's conv_prop {prop}"
-            )
+        # Resolve the converter property, make sure it has an acceptable
+        # signature and generate a functor for it.
+        self.conv_prop = self._resolve_property(
+            "Bind's conv_prop", self.conv_prop, 1
+        )
 
         # Left operand must be a logic variable. Make sure the resulting
         # equation will work on a clean logic variable.
-        lhs = ResetLogicVar(construct(self.from_expr, T.LogicVar))
+        lhs = self._construct_logic_var(self.from_expr)
 
         # Second one can be either a logic variable or an entity (or an AST
         # node that is promoted to an entity).
@@ -299,7 +378,7 @@ class Bind(AbstractExpression):
             rhs = ResetLogicVar(rhs)
 
             return (
-                PropagateExpr(lhs, rhs, self.conv_prop, abstract_expr=self)
+                PropagateExpr(lhs, [rhs], self.conv_prop, abstract_expr=self)
                 if self.conv_prop else
                 UnifyExpr(lhs, rhs, abstract_expr=self)
             )
@@ -315,7 +394,7 @@ class Bind(AbstractExpression):
                     rhs.type.matches(T.root_node.entity)
                     or rhs.type.matches(T.LogicVar),
                     "Right operand must be either a logic variable or an"
-                    " entity, got {rhs.type.dsl_name}"
+                    f" entity, got {rhs.type.dsl_name}"
                 )
 
             # Because of Ada OOP typing rules, for code generation to work
@@ -325,6 +404,57 @@ class Bind(AbstractExpression):
                 rhs = Cast.Expr(rhs, T.root_node.entity)
 
             return AssignExpr(lhs, rhs, self.conv_prop, abstract_expr=self)
+
+
+@dsl_document
+class NPropagate(AbstractExpression):
+    """
+    Equation to assign a logic variable to the result of a property when called
+    with the value of other logic variables.
+
+    For instance::
+
+        NPropagate(V1, T.SomeNode.some_property, V2, V3, V4)
+
+    will create the following equation::
+
+        %V1 <- SomeNode.some_property(%V2, %V3, %V4)
+    """
+
+    def __init__(self, dest_var, comb_prop, *arg_vars):
+        """
+        :param dest_var: Logic variable that is assigned the result of the
+            combiner property.
+        :param comb_prop: Combiner property used during the assignment. This
+            property must take N entity arguments (``N = len(arg_vars)``) and
+            return an entity.
+        :param arg_vars: Logic variables whose values are passed as arguments
+            to the combiner property.
+        """
+        super().__init__()
+        self.dest_var = dest_var
+        self.comb_prop = comb_prop
+        self.arg_vars = list(arg_vars)
+
+    def construct(self):
+        # Resolve logic variables
+        dest_var = Bind._construct_logic_var(self.dest_var)
+        arg_vars = [Bind._construct_logic_var(v) for v in self.arg_vars]
+        check_source_language(
+            len(arg_vars) >= 1,
+            "At least one argument logic variable expected"
+        )
+
+        # Resolve the combiner property, make sure it matches the argument
+        # logic variables and generate a functor for it.
+        self.comb_prop = Bind._resolve_property(
+            "NPropagate's comb_prop", self.comb_prop, len(arg_vars)
+        )
+        assert self.comb_prop is not None
+
+        return PropagateExpr(
+            dest_var, arg_vars, self.comb_prop, abstract_expr=self
+        )
 
 
 class DomainExpr(ComputingExpr):

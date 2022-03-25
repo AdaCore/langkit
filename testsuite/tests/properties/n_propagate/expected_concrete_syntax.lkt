@@ -1,0 +1,27 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Plus(literal "+" literal)
+    literal <- Literal(@number)
+
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    v: LogicVar
+}
+
+class Literal : FooNode implements TokenNode {
+
+    fun combiner(other: Literal): Literal = self
+}
+
+class Plus : FooNode {
+    @parse_field lhs: Literal
+    @parse_field rhs: Literal
+
+    @export fun resolve(lhs: FooNode, rhs: FooNode): FooNode = {
+        val eq = [%propagate(node.v, BareLiteral.combiner, node.lhs.v, node.rhs.v), %eq(node.lhs.v, lhs), %eq(node.rhs.v, rhs)];
+
+        if eq.solve() then node.v.get_value() else (raise PropertyError("unreachable"))
+    }
+}

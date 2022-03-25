@@ -28,63 +28,121 @@
    % endif
 </%def>
 
-<%def name="logic_converter(conv_prop)">
+<%def name="logic_functor(prop, arity)">
    <%
-      type_name = f"Logic_Converter_{conv_prop.uid}"
+      type_name = f"Logic_Functor_{prop.uid}"
       entity = T.entity.name
+
+      base_type: str
+      subp_name: str
+      error_name: str
+      if arity == 1:
+         base_type = "Converter_Type"
+         subp_name = "Convert"
+         error_name = "conv_prop"
+      else:
+         base_type = "Combiner_Type"
+         subp_name = "Combine"
+         error_name = "comb_prop"
+
+      args = [f"Self : {type_name}"]
+      args.append(
+         f"From : {entity}"
+         if arity == 1 else
+         f"Vals : Entity_Vars.Value_Array"
+      )
+      subp_spec = (
+         f"overriding function {subp_name} ({'; '.join(args)}) return {entity}"
+      )
    %>
 
    ${dynamic_vars_holder_decl(
-         type_name, "Solver_Ifc.Converter_Type", conv_prop.dynamic_vars
+         type_name, f"Solver_Ifc.{base_type}", prop.dynamic_vars
    )}
 
-   overriding function Convert
-     (Self : ${type_name}; From : ${entity}) return ${entity}
-     with Inline;
-
+   ${subp_spec} with Inline;
    overriding function Image (Self : ${type_name}) return String;
 
-   -------------
-   -- Convert --
-   -------------
-
-   overriding function Convert
-     (Self : ${type_name}; From : ${entity}) return ${entity}
-   is
-      % if not conv_prop.dynamic_vars:
+   ${subp_spec} is
+      % if not prop.dynamic_vars:
          pragma Unreferenced (Self);
       % endif
-      Ret : ${conv_prop.type.name};
+
+      ## If there is no From argument, create a local variable so that code
+      ## generation below can always refer to the controlling argument as
+      ## "From".
+      % if arity > 1:
+         From : constant ${T.entity.name} := Vals (1);
+      % endif
+
+      <%
+         # Range of "Vals" indexes for the entity arguments to pass to the
+         # property in addition to "Self".
+         #
+         # Index 1 is for "Self", so the other entity arguments start at index
+         # 2.
+         extra_entity_args_range = range(2, arity + 1)
+
+         # List of all entity arguments ("Self" included) to pass to the
+         # property, plus their expected types as node kind ranges.
+         typed_entity_args = [
+            ("From", prop.struct.ada_kind_range_name),
+         ] + [
+            (f"Vals ({i})", arg.type.element_type.ada_kind_range_name)
+            for i, arg in zip(extra_entity_args_range, prop.natural_arguments)
+         ]
+      %>
+
+      Ret : ${prop.type.name};
    begin
-      ## From can contain any node type: make sure it has a correct type for
-      ## the conversion property before doing the call.
+      ## Entities passed as arguments can contain any node type: make sure
+      ## their types match the expected types for "prop"'s arguments before
+      ## doing the call so that we can raise a Property_Error exception right
+      ## now instead of letting Ada raise an automatic Constraint_Error.
       ##
       ## No need to perform the check if there is only one concrete node in the
       ## whole language, or we get a compilation warning.
       % if len(T.root_node.concrete_subclasses) > 1:
-         if From.Node /= null
-            and then From.Node.Kind not in
-                     ${conv_prop.struct.ada_kind_range_name}
-         then
-            raise Property_Error with "mismatching node type for conv_prop";
-         end if;
+         % for arg, kind_range in typed_entity_args:
+            if ${arg}.Node /= null
+               and then ${arg}.Node.Kind not in ${kind_range}
+            then
+               raise Property_Error
+                 with "mismatching node type for ${error_name}";
+            end if;
+         % endfor
       % endif
 
-      ## Here, we just forward the return value from conv_prop to our caller,
-      ## so there is nothing to do regarding ref-counting.
+      ## Here, we just forward the return value from prop to our caller, so
+      ## there is nothing to do regarding ref-counting.
       <%
-         args = [f"{conv_prop.self_arg_name} => From.Node"]
-         for dynvar in conv_prop.dynamic_vars:
+         # Pass the property controlling node argument
+         args = [f"{prop.self_arg_name} => From.Node"]
+
+         # Pass other entity arguments. Pass an aggregate as the property may
+         # take a non-root entity type, while "Vals" contains only root
+         # entities.
+         for i, vals_index in enumerate(extra_entity_args_range):
+            args.append(
+               f"{prop.natural_arguments[i].name} =>"
+               f" (Node => Vals ({vals_index}).Node,"
+               f"  Info => Vals ({vals_index}).Info)"
+            )
+
+         # Pass all the required dynamic variables from the closure
+         for dynvar in prop.dynamic_vars:
             args.append(
                f"{dynvar.argument_name} => Self.{dynvar.argument_name}"
             )
-         if conv_prop.uses_entity_info:
-            args.append(f"{conv_prop.entity_info_name} => From.Info")
+
+         # Pass the entity info argument, if the property takes one
+         if prop.uses_entity_info:
+            args.append(f"{prop.entity_info_name} => From.Info")
       %>
-      Ret := ${conv_prop.name} (${", ".join(args)});
+      Ret := ${prop.name} (${", ".join(args)});
 
       return (Node => Ret.Node, Info => Ret.Info);
-   end Convert;
+   end ${subp_name};
 
    -----------
    -- Image --
@@ -92,7 +150,7 @@
 
    overriding function Image (Self : ${type_name}) return String is
    begin
-      return (${ascii_repr(conv_prop.qualname)});
+      return (${ascii_repr(prop.qualname)});
    end Image;
 </%def>
 

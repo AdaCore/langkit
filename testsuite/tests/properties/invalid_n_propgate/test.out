@@ -1,0 +1,19 @@
+== Valid N=1 ==
+Code generation was successful
+
+== Valid N=2 ==
+Code generation was successful
+
+== Valid N=3 ==
+Code generation was successful
+
+== Bad arity (N=1, got 0) ==
+test.py:XXX: error: At least one argument logic variable expected
+
+== Bad arity (N=1, got 2) ==
+test.py:XXX: error: NPropagate's comb_prop property must accept 1 entity arguments (only 0 found)
+
+== Bad arity (N=2, got 1) ==
+test.py:XXX: error: extra arguments for NPropagate's comb_prop must be optional
+
+Done

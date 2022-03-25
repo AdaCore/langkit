@@ -658,7 +658,7 @@ def emit_expr(expr, **ctx):
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
         StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains,
-        PropertyDef, DynamicLexicalEnv, Super, Join, String
+        PropertyDef, DynamicLexicalEnv, Super, Join, String, NPropagate
     )
 
     def is_a(*names):
@@ -1223,6 +1223,12 @@ def emit_expr(expr, **ctx):
             ee(expr.from_expr), ee(expr.to_expr),
             "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else ""
         ])))
+
+    elif isinstance(expr, NPropagate):
+        return "%propagate({})".format(", ".join(keep([
+            ee(expr.dest_var),
+            fqn(expr.comb_prop),
+        ] + [ee(v) for v in expr.arg_vars])))
 
     elif isinstance(expr, DynamicLexicalEnv):
         return "DynamicLexicalEnv({})".format(", ".join(keep([

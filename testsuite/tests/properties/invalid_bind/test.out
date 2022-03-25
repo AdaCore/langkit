@@ -1,11 +1,11 @@
 == Bad return type ==
-test.py:XXX: error: Bind property must return a subtype of FooNode.entity
+test.py:XXX: error: Bind's conv_prop must return a subtype of FooNode.entity
 
 == Bad arity ==
-test.py:XXX: error: Bind property can take only optional arguments
+test.py:XXX: error: extra arguments for Bind's conv_prop must be optional
 
 == Unbound dynamic vars ==
-test.py:XXX: error: In Bind's conv_prop BazNode.prop3, some dynamic variables need to be bound: dyn_node2
+test.py:XXX: error: In call to BazNode.prop3 as Bind's conv_prop, some dynamic variables need to be bound: dyn_node2
 
 == Valid default arg ==
 Code generation was successful

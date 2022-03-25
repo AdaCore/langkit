@@ -15,8 +15,8 @@
          ${prop_helpers.logic_predicates(prop)}
       % endfor
    % endfor
-   % for conv_prop in ctx.sorted_logic_converters:
-      ${prop_helpers.logic_converter(conv_prop)}
+   % for conv_prop, arity in ctx.sorted_logic_functors:
+      ${prop_helpers.logic_functor(conv_prop, arity)}
    % endfor
 </%def>
 

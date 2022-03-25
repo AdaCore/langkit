@@ -660,9 +660,11 @@ class CompileCtx:
         List of path for file names to include in the generated library.
         """
 
-        self.logic_converter_props: Set[PropertyDef] = set()
+        self.logic_functor_props: Set[Tuple[PropertyDef, int]] = set()
         """
-        Set of properties used as converters in logic equations.
+        Set of properties (and the corresponding arity for entity args) used as
+        converters/combiners in logic equations. We generate functors for them,
+        so that equations can refer to them.
         """
 
         self.default_unit_provider = default_unit_provider
@@ -968,9 +970,10 @@ class CompileCtx:
             (to_pkg, use_clause, is_private))
 
     @property
-    def sorted_logic_converters(self):
-        return sorted(self.logic_converter_props,
-                      key=lambda x: x.name.camel)
+    def sorted_logic_functors(self) -> List[Tuple[PropertyDef, int]]:
+        return sorted(
+            self.logic_functor_props, key=lambda x: x[0].name.camel
+        )
 
     def sorted_types(self, type_set):
         """
@@ -995,17 +998,21 @@ class CompileCtx:
         return sorted(self.exception_types.values(),
                       key=lambda e: e.doc_entity)
 
-    def do_generate_logic_functors(self, convert_property=None):
+    def do_generate_logic_functors(self,
+                                   prop: Optional[PropertyDef],
+                                   arity: int) -> None:
         """
-        Generate a logic binder with the given conversion property.
+        Generate a logic binder with the given convert/combine property.
 
         If you call this function several times for the same property, only one
-        binder will be generaed.
+        binder will be generated.
 
-        :param PropertyDef convert_property: The conversion property.
+        :param prop: The convert/combine property.
+        :param arity: Number of entity arguments this property takes ("Self"
+            included).
         """
-        if convert_property:
-            self.logic_converter_props.add(convert_property)
+        if prop:
+            self.logic_functor_props.add((prop, arity))
 
     @staticmethod
     def grammar_rule_api_name(rule):
