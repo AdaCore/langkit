@@ -33,6 +33,165 @@ def untyped_literal_expr(expr_str, operands=[]):
     return LiteralExpr(expr_str, no_compiled_type, operands)
 
 
+class BindExpr(CallExpr):
+    """
+    Base class for resolved expressions that create Assign/Propagate/Unify
+    equations.
+    """
+
+    def __init__(self,
+                 constructor_name: str,
+                 constructor_args: List[Union[str, ResolvedExpression]],
+                 abstract_expr: Optional[AbstractExpression] = None):
+        """
+        :param constructor_name: Name of the function to create the equation.
+        :param constructor_args: Its arguments, exclusing the "Debug_String"
+            one, which we automatically add.
+        :param abstract_expr: Reference to the corresponding abstract
+            expression, if any.
+        """
+        args: List[Union[str, ResolvedExpression]] = list(constructor_args)
+        if abstract_expr:
+            args.append(
+                f"Debug_String => {sloc_info_arg(abstract_expr.location)}"
+            )
+        super().__init__(
+            "Bind_Result",
+            constructor_name,
+            T.Equation,
+            args,
+            abstract_expr=abstract_expr,
+        )
+
+    @staticmethod
+    def functor_expr(type_name: str, prop: PropertyDef) -> LiteralExpr:
+        """
+        Return an expression to create a functor for ``Prop``.
+
+        :param type_name: Name of the functor derived type.
+        :param prop: Property called by the functor.
+        """
+        assocs: List[Tuple[str, LiteralExpr]] = [
+            ("Ref_Count", IntegerLiteralExpr(1)),
+            ("Cache_Set", LiteralExpr("False", None)),
+            ("Cache_Key", LiteralExpr("<>", None)),
+            ("Cache_Value", LiteralExpr("<>", None)),
+        ] + [
+            (dynvar.argument_name, construct(dynvar))
+            for dynvar in prop.dynamic_vars
+        ]
+        return aggregate_expr(type_name, assocs)
+
+
+class AssignExpr(BindExpr):
+    """
+    Resolved expression that creates Unify equations.
+    """
+
+    def __init__(self,
+                 logic_var: ResolvedExpression,
+                 value: ResolvedExpression,
+                 conv_prop: Optional[PropertyDef],
+                 abstract_expr: Optional[AbstractExpression] = None):
+        self.logic_var = logic_var
+        self.value = value
+        self.conv_prop = conv_prop
+
+        constructor_args: List[Union[str, ResolvedExpression]] = [
+            logic_var,
+            value,
+            self.functor_expr(f"Logic_Converter_{conv_prop.uid}", conv_prop)
+            if conv_prop else
+            "Solver_Ifc.No_Converter",
+        ]
+
+        super().__init__(
+            "Solver.Create_Assign",
+            constructor_args,
+            abstract_expr=abstract_expr
+        )
+
+    @property
+    def subexprs(self):
+        return {
+            'logic_var': self.logic_var,
+            'value': self.value,
+            'conv_prop': self.conv_prop,
+        }
+
+    def __repr__(self):
+        return '<AssignExpr>'
+
+
+class PropagateExpr(BindExpr):
+    """
+    Resolved expression that creates Propagate equations.
+    """
+
+    def __init__(self,
+                 dest_var: ResolvedExpression,
+                 arg_var: ResolvedExpression,
+                 conv_prop: Optional[PropertyDef],
+                 abstract_expr: Optional[AbstractExpression] = None):
+        self.dest_var = dest_var
+        self.arg_var = arg_var
+        self.conv_prop = conv_prop
+
+        constructor_args: List[Union[str, ResolvedExpression]] = [
+            dest_var,
+            arg_var,
+            self.functor_expr(f"Logic_Converter_{conv_prop.uid}", conv_prop)
+            if conv_prop else
+            "Solver_Ifc.No_Converter",
+        ]
+
+        super().__init__(
+            "Solver.Create_Propagate",
+            constructor_args,
+            abstract_expr=abstract_expr
+        )
+
+    @property
+    def subexprs(self):
+        return {
+            'dest_var': self.dest_var,
+            'arg_var': self.arg_var,
+            'conv_prop': self.conv_prop,
+        }
+
+    def __repr__(self):
+        return '<PropagateExpr>'
+
+
+class UnifyExpr(BindExpr):
+    """
+    Resolved expression that creates Unify equations.
+    """
+
+    def __init__(self,
+                 left_var: ResolvedExpression,
+                 right_var: ResolvedExpression,
+                 abstract_expr: Optional[AbstractExpression] = None):
+        self.left_var = left_var
+        self.right_var = right_var
+
+        super().__init__(
+            "Solver.Create_Unify",
+            [self.left_var, self.right_var],
+            abstract_expr=abstract_expr
+        )
+
+    @property
+    def subexprs(self):
+        return {
+            'left_var': self.left_var,
+            'right_var': self.right_var,
+        }
+
+    def __repr__(self):
+        return '<UnifyExpr>'
+
+
 @dsl_document
 class Bind(AbstractExpression):
     """
@@ -51,76 +210,6 @@ class Bind(AbstractExpression):
 
         Bind(A, B, conv_prop=T.TypeOfA.some_property)
     """
-
-    class Expr(CallExpr):
-        def __init__(self,
-                     conv_prop: PropertyDef,
-                     lhs: ResolvedExpression,
-                     rhs: ResolvedExpression,
-                     abstract_expr: Optional[AbstractExpression] = None):
-            self.conv_prop = conv_prop
-            self.lhs = lhs
-            self.rhs = rhs
-
-            constructor_args: List[Union[str, ResolvedExpression]] = [lhs, rhs]
-
-            if conv_prop:
-                constructor_args.append(self.functor_expr(
-                    conv_prop,
-                    f"Conv => Logic_Converter_{self.conv_prop.uid}",
-                    ("Cache_Set", LiteralExpr("False", None)),
-                    ("Cache_Key", LiteralExpr("<>", None)),
-                    ("Cache_Value", LiteralExpr("<>", None)),
-                ))
-
-            if abstract_expr:
-                constructor_args.append(
-                    f"Debug_String => {sloc_info_arg(abstract_expr.location)}"
-                )
-
-            if rhs.type.matches(T.root_node.entity):
-                fn_name = 'Solver.Create_Assign'
-            elif conv_prop:
-                fn_name = 'Solver.Create_Propagate'
-            else:
-                fn_name = 'Solver.Create_Unify'
-
-            super().__init__(
-                'Bind_Result', fn_name,
-                T.Equation, constructor_args,
-                abstract_expr=abstract_expr
-            )
-
-        @staticmethod
-        def functor_expr(prop: PropertyDef,
-                         type_name: str,
-                         *components: Tuple[str, LiteralExpr]) -> LiteralExpr:
-            """
-            Return an expression to create a functor for ``Prop``.
-
-            :param prop: Property called by the functor.
-            :param type_name: Name of the functor derived type.
-            :param components: Additional components (component name and
-                initialization expression) for the functor.
-            """
-            assocs: List[Tuple[str, LiteralExpr]] = []
-            assocs.append(("Ref_Count", IntegerLiteralExpr(1)))
-            assocs.extend(
-                (dynvar.argument_name, construct(dynvar))
-                for dynvar in prop.dynamic_vars
-            )
-            assocs.extend(components)
-
-            return aggregate_expr(type_name, assocs)
-
-        @property
-        def subexprs(self):
-            return {'conv_prop': self.conv_prop,
-                    'lhs':       self.lhs,
-                    'rhs':       self.rhs}
-
-        def __repr__(self):
-            return '<Bind.Expr>'
 
     def __init__(self, from_expr, to_expr, conv_prop=None):
         """
@@ -201,30 +290,41 @@ class Bind(AbstractExpression):
         rhs = construct(self.to_expr)
 
         if rhs.type.matches(T.LogicVar):
+            # The second operand is a logic variable: this is a Propagate or a
+            # Unify equation depending on whether we have a conversion
+            # property.
+
             # For this operand too, make sure it will work on a clean logic
             # variable.
             rhs = ResetLogicVar(rhs)
-        elif rhs.type.matches(T.root_node):
-            from langkit.expressions import make_as_entity
-            rhs = make_as_entity(rhs)
-        else:
-            check_source_language(
-                rhs.type.matches(T.root_node.entity)
-                or rhs.type.matches(T.LogicVar),
-                'Right operand must be either a logic variable or an entity,'
-                ' got {}'.format(rhs.type.dsl_name)
+
+            return (
+                PropagateExpr(lhs, rhs, self.conv_prop, abstract_expr=self)
+                if self.conv_prop else
+                UnifyExpr(lhs, rhs, abstract_expr=self)
             )
 
-        # Because of Ada OOP typing rules, for code generation to work
-        # properly, make sure the type of `rhs` is the root node entity.
-        if (
-            rhs.type.matches(T.root_node.entity)
-            and rhs.type is not T.root_node.entity
-        ):
-            from langkit.expressions import Cast
-            rhs = Cast.Expr(rhs, T.root_node.entity)
+        else:
+            # The second operand is a value: this is an Assign equation
 
-        return Bind.Expr(self.conv_prop, lhs, rhs, abstract_expr=self)
+            if rhs.type.matches(T.root_node):
+                from langkit.expressions import make_as_entity
+                rhs = make_as_entity(rhs)
+            else:
+                check_source_language(
+                    rhs.type.matches(T.root_node.entity)
+                    or rhs.type.matches(T.LogicVar),
+                    "Right operand must be either a logic variable or an"
+                    " entity, got {rhs.type.dsl_name}"
+                )
+
+            # Because of Ada OOP typing rules, for code generation to work
+            # properly, make sure the type of `rhs` is the root node entity.
+            if rhs.type is not T.root_node.entity:
+                from langkit.expressions import Cast
+                rhs = Cast.Expr(rhs, T.root_node.entity)
+
+            return AssignExpr(lhs, rhs, self.conv_prop, abstract_expr=self)
 
 
 class DomainExpr(ComputingExpr):
