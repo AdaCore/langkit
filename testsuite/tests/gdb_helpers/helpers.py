@@ -90,7 +90,10 @@ def run_fooout(next_descr: str) -> None:
     Run the "fooout" command, checking that there was a control flow change and
     that the message describing the transition matches ``next_descr``.
     """
-    gdb.test("fooout", f"libfoolang.implementation.@...\n{next_descr}")
+    gdb.test(
+        "fooout",
+        f"@/([New Thread .*])?/libfoolang.implementation.@...\n{next_descr}",
+    )
 
 
 def run_foosi(next_descr: str) -> None:
