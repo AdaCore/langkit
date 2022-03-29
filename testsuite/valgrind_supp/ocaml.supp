@@ -29,7 +29,7 @@
    false positives with camlForeign
    Memcheck:Leak
    fun:malloc
-   fun:caml_stat_alloc_noexc
+   ...
    fun:caml_stat_alloc
    fun:ctypes_prep_callspec
    ...
@@ -38,7 +38,7 @@
    false positives with camlForeign
    Memcheck:Leak
    fun:malloc
-   fun:caml_stat_resize_noexc
+   ...
    fun:caml_stat_resize
    fun:ctypes_add_argument
    ...
@@ -47,6 +47,7 @@
    false positives with caml mutex
    Memcheck:Leak
    fun:malloc
+   ...
    fun:caml_mutex_new
    ...
 }
