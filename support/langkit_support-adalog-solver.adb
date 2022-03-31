@@ -1837,6 +1837,7 @@ package body Langkit_Support.Adalog.Solver is
             Free (Self.Conv);
 
          when N_Propagate =>
+            Self.Comb_Vars.Destroy;
             Destroy (Self.Comb.all);
             Free (Self.Comb);
 
