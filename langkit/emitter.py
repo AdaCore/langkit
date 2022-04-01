@@ -3,6 +3,7 @@ Code emission for Langkit-generated libraries.
 """
 
 from distutils.spawn import find_executable
+import glob
 import json
 import os
 from os import path
@@ -101,6 +102,14 @@ class Emitter:
         """
         self.context = context
         self.verbosity = context.verbosity
+        self.standalone = context.standalone
+
+        self.standalone_support_name = (
+            f"{self.context.ada_api_settings.lib_name}_Support"
+        )
+        """
+        Name of the replacement for Langkit_Support in standalone mode.
+        """
 
         self.lib_root = lib_root
         self.cache = Cache(
@@ -296,6 +305,40 @@ class Emitter:
         ]:
             if not path.exists(d):
                 os.mkdir(d)
+
+    def merge_langkit_support(self, ctx: CompileCtx) -> None:
+        """
+        In standalone mode only, copy all units from Langkit_Support into the
+        generated library. Imported units are renamed to avoid clashes with
+        Langkit_Support itself.
+        """
+        if not self.standalone:
+            return
+
+        support_dir = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "support"
+        )
+        for source_kind, ext in [
+            (AdaSourceKind.spec, "ads"), (AdaSourceKind.body, "adb"),
+        ]:
+            for file in glob.glob(os.path.join(support_dir, f"*.{ext}")):
+                # Build a qualified (Ada) name for the imported unit
+                unit_name, _ = os.path.splitext(os.path.basename(file))
+                qual_name = unit_name.split("-")
+                qual_name[0] = self.standalone_support_name
+
+                # Register the imported unit as an interface in the generated
+                # project.
+                self.add_library_interface(
+                    self.ada_file_path(self.src_dir, source_kind, qual_name),
+                    generated=True,
+                )
+
+                with open(file) as f:
+                    content = f.read()
+                self.write_ada_file(
+                    self.src_dir, source_kind, qual_name, content
+                )
 
     def emit_lib_project_file(self, ctx: CompileCtx) -> None:
         """
@@ -830,6 +873,13 @@ class Emitter:
         :param content: The source content to write to the file.
         """
         file_path = self.ada_file_path(out_dir, source_kind, qual_name)
+
+        # In standalone mode, rename Langkit_Support occurences in the source
+        # code.
+        if self.standalone:
+            content = content.replace(
+                "Langkit_Support", self.standalone_support_name
+            )
 
         # If there are too many lines, which triggers obscure debug info bugs,
         # strip empty lines.

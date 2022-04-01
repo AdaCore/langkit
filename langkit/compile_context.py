@@ -333,7 +333,8 @@ class CompileCtx:
                  types_from_lkt: bool = False,
                  lkt_semantic_checks: bool = False,
                  version: Optional[str] = None,
-                 build_date: Optional[str] = None):
+                 build_date: Optional[str] = None,
+                 standalone: bool = False):
         """Create a new context for code emission.
 
         :param lang_name: string (mixed case and underscore: see
@@ -423,6 +424,17 @@ class CompileCtx:
         :param build_date: String for the generated library build date (where
             "build" includes source generation). This is "undefined" if left to
             None.
+
+        :param standalone: Whether to generate a library that does not depend
+            on Langkit_Support (it will still depend on LibGPR and GNATCOLL).
+
+            Note that since several units from Langkit_Support are used in
+            public APIs, the API of a standalone library is incompatible with
+            the API of the equivalent regular library.
+
+            Because of this, standalone libraries should be used only as
+            an internal implementation helper in a bigger library, and units of
+            the former should not appear in the public API of the latter.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -431,6 +443,7 @@ class CompileCtx:
         self.lang_name = names.Name(lang_name)
         self.version = version
         self.build_date = build_date
+        self.standalone = standalone
 
         self.lib_name = (
             names.Name('Lib{}lang'.format(self.lang_name.lower))
@@ -2109,6 +2122,8 @@ class CompileCtx:
 
             MajorStepPass('Generate library sources'),
             EmitterPass('setup directories', Emitter.setup_directories),
+            EmitterPass('merge Langkit_Support',
+                        Emitter.merge_langkit_support),
             EmitterPass('generate lexer DFA', Emitter.generate_lexer_dfa),
             EmitterPass('emit Ada sources', Emitter.emit_ada_lib),
             EmitterPass('emit mains', Emitter.emit_mains),

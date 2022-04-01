@@ -68,7 +68,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     types_from_lkt=False, lkt_semantic_checks=False,
                     case_insensitive: bool = False,
                     version: Optional[str] = None,
-                    build_date: Optional[str] = None):
+                    build_date: Optional[str] = None,
+                    standalone: bool = False):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -96,6 +97,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     :param version: See CompileCtx's constructor.
 
     :param build_date: See CompileCtx's constructor.
+
+    :param standalone: See CompileCtx's constructor.
     """
 
     # Have a clean build directory
@@ -113,7 +116,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                      lkt_semantic_checks=lkt_semantic_checks,
                      case_insensitive=case_insensitive,
                      version=version,
-                     build_date=build_date)
+                     build_date=build_date,
+                     standalone=standalone)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -197,6 +201,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                   case_insensitive: bool = False,
                   version: str = "undefined",
                   build_date: str = "undefined",
+                  standalone: bool = False,
                   full_error_traces: bool = True,
                   additional_make_args: List[str] = [],
                   python_args: Optional[List[str]] = None):
@@ -248,6 +253,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
 
     :param build_date: See CompileCtx's constructor.
 
+    :param standalone: See CompileCtx's constructor.
+
     :param full_error_traces: Whether to pass a --full-error-traces argument to
         "manage.py make".
 
@@ -277,7 +284,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                               lkt_semantic_checks=lkt_semantic_checks,
                               case_insensitive=case_insensitive,
                               version=version,
-                              build_date=build_date)
+                              build_date=build_date,
+                              standalone=standalone)
 
         m = Manage(ctx)
 
