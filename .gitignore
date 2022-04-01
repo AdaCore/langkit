@@ -2,8 +2,8 @@
 *.py[cod]
 
 # Langkit_Support's Object/Library_Dir
-support/lib
-support/obj
+langkit/support/lib
+langkit/support/obj
 
 # C extensions
 *.so

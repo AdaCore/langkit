@@ -16,7 +16,7 @@ from langkit.utils import (LibraryTypes, add_to_path, format_setenv,
 
 
 LANGKIT_ROOT = PurePath(P.dirname(P.realpath(__file__)))
-SUPPORT_ROOT = LANGKIT_ROOT / "support"
+SUPPORT_ROOT = LANGKIT_ROOT / "langkit" / "support"
 SUPPORT_GPR = str(SUPPORT_ROOT / "langkit_support.gpr")
 SIGSEGV_HANDLER_ROOT = LANGKIT_ROOT / "sigsegv_handler"
 SIGSEGV_HANDLER_GPR = SIGSEGV_HANDLER_ROOT / "langkit_sigsegv_handler.gpr"
