@@ -500,41 +500,12 @@ class Emitter:
         """
         Generate the Python binding module.
         """
-        def pretty_print(code: str) -> str:
-            if not self.pretty_print:
-                return code
-
-            try:
-                from black import FileMode, format_file_contents
-                return format_file_contents(code, fast=True, mode=FileMode())
-            except ImportError:
-                check_source_language(
-                    False,
-                    'Black not available, not pretty-printing Python code',
-                    severity=Severity.warning,
-                    ok_for_codegen=True
-                )
-                return code
-
         def render_python_template(file_path: str,
                                    *args: Any,
                                    **kwargs: Any) -> None:
             with names.camel:
                 code = ctx.render_template(*args, **kwargs)
-
-            # If pretty-printing failed, write the original code anyway in
-            # order to ease debugging.
-            exc = None
-            try:
-                pp_code = pretty_print(code)
-            except SyntaxError:
-                pp_code = code
-
-            self.write_source_file(
-                file_path, pp_code, self.post_process_python
-            )
-            if exc:
-                raise exc
+            self.write_python_file(file_path, code)
 
         # Emit the Python modules themselves
         render_python_template(
@@ -553,10 +524,8 @@ class Emitter:
 
         # Emit the setup.py script to easily install the Python binding
         setup_py_file = os.path.join(self.lib_root, 'python', 'setup.py')
-        self.write_source_file(
-            setup_py_file,
-            ctx.render_template('python_api/setup_py'),
-            self.post_process_python
+        self.write_python_file(
+            setup_py_file, ctx.render_template('python_api/setup_py')
         )
 
     def emit_python_playground(self, ctx: CompileCtx) -> None:
@@ -567,13 +536,12 @@ class Emitter:
             self.scripts_dir,
             '{}_playground'.format(ctx.short_name_or_long)
         )
-        self.write_source_file(
+        self.write_python_file(
             playground_file,
             ctx.render_template(
                 'python_api/playground_py',
                 module_name=ctx.python_api_settings.module_name
             ),
-            self.post_process_python
         )
         os.chmod(playground_file, 0o775)
 
@@ -586,7 +554,7 @@ class Emitter:
         gdb_c_path = os.path.join(self.src_dir, '{}-gdb.c'.format(lib_name))
 
         # Always emit the ".gdbinit.py" GDB script
-        self.write_source_file(
+        self.write_python_file(
             gdbinit_path,
             ctx.render_template(
                 'gdb_py',
@@ -594,7 +562,6 @@ class Emitter:
                 lib_name=lib_name,
                 prefix=ctx.short_name_or_long,
             ),
-            self.post_process_python
         )
 
         # Generate the C file to embed the absolute path to this script in the
@@ -772,6 +739,41 @@ class Emitter:
                 f.write(source)
             return True
         return False
+
+    def write_python_file(self, file_path: str, source: str) -> None:
+        """
+        Helper to write a Python source file.
+
+        :param file_path: Path of the file to write.
+        :param source: Content of the file to write.
+        """
+        # If pretty-printing failed (the generated code has invalid Python
+        # syntax), write the original code anyway, and re-raise the
+        # SyntaxError in order to ease debugging.
+        exc: Optional[Exception] = None
+
+        if self.pretty_print:
+            try:
+                from black import FileMode, format_file_contents
+                source = format_file_contents(
+                    source, fast=True, mode=FileMode()
+                )
+
+            except ImportError:
+                check_source_language(
+                    False,
+                    "Black not available, not pretty-printing Python code",
+                    severity=Severity.warning,
+                    ok_for_codegen=True,
+                )
+
+            except SyntaxError as _exc:
+                exc = _exc
+
+        self.write_source_file(file_path, source, self.post_process_python)
+
+        if exc:
+            raise exc
 
     def write_cpp_file(self, file_path: str, source: str) -> None:
         """
