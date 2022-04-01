@@ -31,14 +31,6 @@ with GNATCOLL.Strings; use GNATCOLL.Strings;
 
 with Langkit_Support.Images;
 
-pragma Warnings (Off, "attribute Update");
---  Attribute update is obsolescent in Ada 2022, but we don't yet want to use
---  delta aggregates because they won't be supported on old compilers, so just
---  silence the warning.
---
---  TODO??? Remove this and consistently use delta aggregates once the oldest
---  GNAT supported decently supports them.
-
 package body Langkit_Support.Adalog.Solver is
 
    ----------------------
