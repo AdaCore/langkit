@@ -30,108 +30,6 @@ def template_extensions(ctx: CompileCtx) -> Dict[str, Any]:
 PostProcessFn = Optional[Callable[[str], str]]
 
 
-def write_source_file(file_path: str,
-                      source: str,
-                      post_process: PostProcessFn = None) -> bool:
-    """
-    Helper to write a source file.
-
-    Return whether the file has been updated.
-
-    :param file_path: Path of the file to write.
-    :param source: Content of the file to write.
-    :param post_process: If provided, callable used to transform the source
-        file content just before writing it.
-    """
-    context = get_context()
-    assert context.emitter
-    if post_process:
-        source = post_process(source)
-    if (not os.path.exists(file_path) or
-            context.emitter.cache.is_stale(file_path, source)):
-        if context.verbosity.debug:
-            printcol('Rewriting stale source: {}'.format(file_path),
-                     Colors.OKBLUE)
-        # Emit all source files as UTF-8 with "\n" line endings, no matter the
-        # current platform.
-        with open(file_path, 'w', encoding='utf-8', newline='') as f:
-            f.write(source)
-        return True
-    return False
-
-
-def write_cpp_file(file_path: str,
-                   source: str,
-                   post_process: PostProcessFn = None) -> None:
-    """
-    Helper to write a C/C++ source file.
-
-    :param file_path: Path of the file to write.
-    :param source: Content of the file to write.
-    """
-    if write_source_file(file_path, source, post_process):
-        if find_executable('clang-format'):
-            subprocess.check_call(['clang-format', '-i', file_path])
-
-
-def write_ocaml_file(file_path: str,
-                     source: str,
-                     post_process: PostProcessFn = None) -> None:
-    """
-    Helper to write a OCaml source file.
-
-    :param file_path: Path of the file to write.
-    :param source: Content of the file to write.
-    """
-    if write_source_file(file_path, source, post_process):
-        if find_executable('ocamlformat'):
-            subprocess.check_call(['ocamlformat', '-i', file_path])
-
-
-def ada_file_path(out_dir: str,
-                  source_kind: AdaSourceKind,
-                  qual_name: List[str]) -> str:
-    """
-    Return the name of the Ada file for the given unit name/kind.
-
-    :param out_dir: The complete path to the directory in which we want to
-        write the file.
-    :param source_kind: Determine whether the source is a spec or a body.
-    :param qual_name: The qualified name of the Ada spec/body, as a list of
-        strings.
-    """
-    file_name = '{}.{}'.format(
-        '-'.join(n.lower() for n in qual_name),
-        'ads' if source_kind == AdaSourceKind.spec else 'adb'
-    )
-    return os.path.join(out_dir, file_name)
-
-
-def write_ada_file(out_dir: str,
-                   source_kind: AdaSourceKind,
-                   qual_name: List[str],
-                   content: str,
-                   post_process: PostProcessFn = None) -> None:
-    """
-    Helper to write an Ada file.
-
-    :param out_dir: See ada_file_path.
-    :param source_kind: See ada_file_path.
-    :param qual_name: See ada_file_path.
-    :param content: The source content to write to the file.
-    """
-    file_path = ada_file_path(out_dir, source_kind, qual_name)
-
-    # If there are too many lines, which triggers obscure debug info bugs,
-    # strip empty lines.
-    lines = content.splitlines()
-    if len(lines) > 200000:
-        content = '\n'.join(l for l in lines if l.strip())
-
-    # TODO: no tool is able to pretty-print a single Ada source file
-    write_source_file(file_path, content, post_process)
-
-
 class Emitter:
     """
     Code and data holder for code emission.
@@ -404,7 +302,7 @@ class Emitter:
         Emit a project file for the generated library.
         """
         self._project_file_emitted = True
-        write_source_file(
+        self.write_source_file(
             self.main_project_file,
             ctx.render_template(
                 'project_file',
@@ -432,14 +330,14 @@ class Emitter:
         assert ctx.lexer
 
         # Source file that contains the state machine implementation
-        lexer_sm_body = ada_file_path(
+        lexer_sm_body = self.ada_file_path(
             self.src_dir, AdaSourceKind.body,
             [ctx.lib_name.camel_with_underscores, 'Lexer_State_Machine']
         )
 
         # Generate the lexer state machine iff the file is missing or its
         # signature has changed since last time.
-        stale_lexer_spec = write_source_file(
+        stale_lexer_spec = self.write_source_file(
             os.path.join(
                 self.lib_root, 'obj',
                 '{}_lexer_signature.txt'
@@ -559,14 +457,13 @@ class Emitter:
         Emit sources and the project file for mains.
         """
         with names.camel_with_underscores:
-            write_ada_file(
+            self.write_ada_file(
                 path.join(self.lib_root, 'src-mains'),
                 AdaSourceKind.body, ['Parse'],
                 ctx.render_template('main_parse_ada'),
-                self.post_process_ada
             )
 
-        write_source_file(
+        self.write_source_file(
             self.mains_project,
             ctx.render_template(
                 'mains_project_file',
@@ -588,10 +485,9 @@ class Emitter:
             # "src" and add it to the library interface (see disabled code
             # below).
             header_filename = '{}.h'.format(ctx.c_api_settings.lib_name)
-            write_cpp_file(
+            self.write_cpp_file(
                 path.join(self.lib_root, header_filename),
                 render('c_api/header_c'),
-                self.post_process_cpp
             )
 
         self.write_ada_module(
@@ -634,7 +530,9 @@ class Emitter:
             except SyntaxError:
                 pp_code = code
 
-            write_source_file(file_path, pp_code, self.post_process_python)
+            self.write_source_file(
+                file_path, pp_code, self.post_process_python
+            )
             if exc:
                 raise exc
 
@@ -649,11 +547,13 @@ class Emitter:
 
         # Emit the empty "py.type" file so that users can easily leverage type
         # annotations in the generated bindings.
-        write_source_file(os.path.join(self.python_pkg_dir, "py.typed"), "")
+        self.write_source_file(
+            os.path.join(self.python_pkg_dir, "py.typed"), ""
+        )
 
         # Emit the setup.py script to easily install the Python binding
         setup_py_file = os.path.join(self.lib_root, 'python', 'setup.py')
-        write_source_file(
+        self.write_source_file(
             setup_py_file,
             ctx.render_template('python_api/setup_py'),
             self.post_process_python
@@ -667,7 +567,7 @@ class Emitter:
             self.scripts_dir,
             '{}_playground'.format(ctx.short_name_or_long)
         )
-        write_source_file(
+        self.write_source_file(
             playground_file,
             ctx.render_template(
                 'python_api/playground_py',
@@ -686,7 +586,7 @@ class Emitter:
         gdb_c_path = os.path.join(self.src_dir, '{}-gdb.c'.format(lib_name))
 
         # Always emit the ".gdbinit.py" GDB script
-        write_source_file(
+        self.write_source_file(
             gdbinit_path,
             ctx.render_template(
                 'gdb_py',
@@ -700,7 +600,7 @@ class Emitter:
         # Generate the C file to embed the absolute path to this script in the
         # generated library only if requested.
         if self.generate_gdb_hook:
-            write_source_file(
+            self.write_source_file(
                 gdb_c_path,
                 ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
                                     os_name=os.name),
@@ -722,7 +622,7 @@ class Emitter:
 
         with names.camel:
             # Write an empty ocamlformat file so we can call ocamlformat
-            write_source_file(
+            self.write_source_file(
                 os.path.join(self.ocaml_dir, '.ocamlformat'),
                 ''
             )
@@ -735,10 +635,8 @@ class Emitter:
             )
 
             ocaml_filename = '{}.ml'.format(ctx.c_api_settings.lib_name)
-            write_ocaml_file(
-                os.path.join(self.ocaml_dir, ocaml_filename),
-                code,
-                self.post_process_ocaml,
+            self.write_ocaml_file(
+                os.path.join(self.ocaml_dir, ocaml_filename), code,
             )
 
             code = ctx.render_template(
@@ -748,10 +646,8 @@ class Emitter:
             )
 
             ocaml_filename = '{}.mli'.format(ctx.c_api_settings.lib_name)
-            write_ocaml_file(
-                os.path.join(self.ocaml_dir, ocaml_filename),
-                code,
-                self.post_process_ocaml,
+            self.write_ocaml_file(
+                os.path.join(self.ocaml_dir, ocaml_filename), code
             )
 
             # Emit dune file to easily compile and install bindings
@@ -761,12 +657,13 @@ class Emitter:
                 ocaml_api=ctx.ocaml_api_settings
             )
 
-            write_source_file(os.path.join(self.ocaml_dir, 'dune'), code)
-            write_source_file(os.path.join(self.ocaml_dir, 'dune-project'),
-                              '(lang dune 1.6)')
+            self.write_source_file(os.path.join(self.ocaml_dir, 'dune'), code)
+            self.write_source_file(
+                os.path.join(self.ocaml_dir, 'dune-project'), '(lang dune 1.6)'
+            )
 
             # Write an empty opam file to install the lib with dune
-            write_source_file(
+            self.write_source_file(
                 os.path.join(self.ocaml_dir,
                              '{}.opam'.format(ctx.c_api_settings.lib_name)),
                 ''
@@ -816,16 +713,17 @@ class Emitter:
 
             # When requested, register library module as library interfaces
             if is_interface and in_library:
-                self.add_library_interface(ada_file_path(out_dir, kind,
-                                                         full_qual_name),
-                                           generated=True)
+                self.add_library_interface(
+                    self.ada_file_path(out_dir, kind, full_qual_name),
+                    generated=True,
+                )
 
             # If asked not to generate the body, skip the rest
             if kind == AdaSourceKind.body and cached_body:
                 return
 
             with names.camel_with_underscores:
-                write_ada_file(
+                self.write_ada_file(
                     out_dir=out_dir,
                     source_kind=kind,
                     qual_name=full_qual_name,
@@ -839,9 +737,103 @@ class Emitter:
                         ),
                         with_clauses=with_clauses,
                     ),
-                    post_process=self.post_process_ada
                 )
 
         do_emit(AdaSourceKind.spec)
         if has_body:
             do_emit(AdaSourceKind.body)
+
+    def write_source_file(self,
+                          file_path: str,
+                          source: str,
+                          post_process: PostProcessFn = None) -> bool:
+        """
+        Helper to write a source file.
+
+        Return whether the file has been updated.
+
+        :param file_path: Path of the file to write.
+        :param source: Content of the file to write.
+        :param post_process: If provided, callable used to transform the source
+            file content just before writing it.
+        """
+        context = get_context()
+        assert context.emitter
+        if post_process:
+            source = post_process(source)
+        if (not os.path.exists(file_path) or
+                context.emitter.cache.is_stale(file_path, source)):
+            if context.verbosity.debug:
+                printcol('Rewriting stale source: {}'.format(file_path),
+                         Colors.OKBLUE)
+            # Emit all source files as UTF-8 with "\n" line endings, no matter
+            # the current platform.
+            with open(file_path, 'w', encoding='utf-8', newline='') as f:
+                f.write(source)
+            return True
+        return False
+
+    def write_cpp_file(self, file_path: str, source: str) -> None:
+        """
+        Helper to write a C/C++ source file.
+
+        :param file_path: Path of the file to write.
+        :param source: Content of the file to write.
+        """
+        if self.write_source_file(file_path, source, self.post_process_cpp):
+            if find_executable('clang-format'):
+                subprocess.check_call(['clang-format', '-i', file_path])
+
+    def write_ocaml_file(self, file_path: str, source: str) -> None:
+        """
+        Helper to write a OCaml source file.
+
+        :param file_path: Path of the file to write.
+        :param source: Content of the file to write.
+        """
+        if self.write_source_file(file_path, source, self.post_process_ocaml):
+            if find_executable('ocamlformat'):
+                subprocess.check_call(['ocamlformat', '-i', file_path])
+
+    def ada_file_path(self,
+                      out_dir: str,
+                      source_kind: AdaSourceKind,
+                      qual_name: List[str]) -> str:
+        """
+        Return the name of the Ada file for the given unit name/kind.
+
+        :param out_dir: The complete path to the directory in which we want to
+            write the file.
+        :param source_kind: Determine whether the source is a spec or a body.
+        :param qual_name: The qualified name of the Ada spec/body, as a list of
+            strings.
+        """
+        file_name = '{}.{}'.format(
+            '-'.join(n.lower() for n in qual_name),
+            'ads' if source_kind == AdaSourceKind.spec else 'adb'
+        )
+        return os.path.join(out_dir, file_name)
+
+    def write_ada_file(self,
+                       out_dir: str,
+                       source_kind: AdaSourceKind,
+                       qual_name: List[str],
+                       content: str) -> None:
+        """
+        Helper to write an Ada file.
+
+        :param out_dir: See ada_file_path.
+        :param source_kind: See ada_file_path.
+        :param qual_name: See ada_file_path.
+        :param content: The source content to write to the file.
+        """
+        file_path = self.ada_file_path(out_dir, source_kind, qual_name)
+
+        # If there are too many lines, which triggers obscure debug info bugs,
+        # strip empty lines.
+        lines = content.splitlines()
+        if len(lines) > 200000:
+            content = '\n'.join(l for l in lines if l.strip())
+
+        # TODO: no tool is able to pretty-print a single Ada source file
+        self.write_source_file(file_path, content, self.post_process_ada)
