@@ -23,10 +23,8 @@ with Ada.Unchecked_Deallocation;
 
 with System; use System;
 
-% if ctx.properties_logging:
-   with GNATCOLL.Traces;
-% endif
 with GNATCOLL.GMP.Integers;
+with GNATCOLL.Traces;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
 with Langkit_Support.Adalog.Logic_Var;
@@ -39,6 +37,7 @@ with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Lexical_Envs_Impl;
 with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
+with Langkit_Support.Symbols.Precomputed;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;        use Langkit_Support.Types;
@@ -57,6 +56,52 @@ ${exts.with_clauses(with_clauses)}
 private package ${ada_lib_name}.Implementation is
 
    use Support.Diagnostics, Support.Slocs, Support.Text;
+
+   ------------
+   -- Traces --
+   ------------
+
+   Main_Trace : constant GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("${ctx.lib_name.upper}.MAIN_TRACE", GNATCOLL.Traces.From_Config);
+
+   PLE_Errors_Trace : constant GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("${ctx.lib_name.upper}.PLE_ERRORS", GNATCOLL.Traces.From_Config);
+
+   -------------------------------------
+   -- Symbols and token data handlers --
+   -------------------------------------
+
+   type Precomputed_Symbol_Index is
+      % if ctx.symbol_literals:
+         (
+            <%
+               sym_items = ctx.sorted_symbol_literals
+               last_i = len(sym_items) - 1
+            %>
+            % for i, (sym, name) in enumerate(sym_items):
+               ${name}${',' if i < last_i else ''} --  ${sym}
+            % endfor
+         )
+      % else:
+         new Integer range 1 .. 0
+      % endif
+   ;
+
+   function Precomputed_Symbol
+     (Index : Precomputed_Symbol_Index) return Text_Type;
+
+   --  GNAT emits an incorrect value not in range in instantiation warning...
+   --  So deactivate them at the instantiation point.
+   pragma Warnings (Off, "value not in range");
+   package Precomputed_Symbols is new Langkit_Support.Symbols.Precomputed
+     (Precomputed_Symbol_Index, Precomputed_Symbol);
+   pragma Warnings (On, "value not in range");
+
+   --------------------
+   -- Analysis types --
+   --------------------
 
    type Analysis_Context_Type;
    type Internal_Context is access all Analysis_Context_Type;

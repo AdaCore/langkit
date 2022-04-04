@@ -14,10 +14,9 @@ pragma Warnings (On, "referenced");
 
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with ${ada_lib_name}.Common;             use ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Precomputed_Symbols;
-
-with ${ada_lib_name}.Implementation;     use ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+use ${ada_lib_name}.Implementation.Precomputed_Symbols;
 
 pragma Warnings (Off, "referenced");
 with ${ada_lib_name}.Private_Converters; use ${ada_lib_name}.Private_Converters;

@@ -47,9 +47,7 @@ procedure Main is
    end Visit;
 
 begin
-   GNATCOLL.Traces.Parse_Config
-     ("Main_Trace=yes >&1");
-   GNATCOLL.Traces.Set_Active (Main_Trace, True);
+   GNATCOLL.Traces.Parse_Config ("LIBFOOLANG.MAIN_TRACE=yes >&1");
 
    declare
       Dummy : constant Visit_Status := Root (U).Traverse (Visit'Access);

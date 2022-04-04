@@ -21,8 +21,8 @@ with Langkit_Support.Symbols;
 use Langkit_Support.Symbols;
 
 with ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Precomputed_Symbols;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+use ${ada_lib_name}.Implementation.Precomputed_Symbols;
 with ${ada_lib_name}.Lexer_State_Machine;
 use ${ada_lib_name}.Lexer_State_Machine;
 

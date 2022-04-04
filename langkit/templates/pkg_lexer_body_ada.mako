@@ -15,6 +15,8 @@ pragma Warnings (Off, "referenced");
 with Langkit_Support.Symbols;
 pragma Warnings (On, "referenced");
 
+${exts.with_clauses(with_clauses)}
+
 package body ${ada_lib_name}.Lexer is
 
    --------------------

@@ -3,12 +3,10 @@
 <%namespace name="exts" file="extensions.mako" />
 
 with GNATCOLL.GMP.Integers;
-with GNATCOLL.Traces;
 
 with Langkit_Support.Errors;
 private with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-with Langkit_Support.Symbols.Precomputed;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;   use Langkit_Support.Types;
@@ -21,55 +19,51 @@ package ${ada_lib_name}.Common is
 
    use Support.Slocs, Support.Text;
 
+   subtype Big_Integer is GNATCOLL.GMP.Integers.Big_Integer;
+   --  Shortcut for ``GNATCOLL.GMP.Integers.Big_Integer``
+
    <%
       lexer = ctx.lexer
       tokens = lexer.sorted_tokens
    %>
 
-   Main_Trace : constant GNATCOLL.Traces.Trace_Handle :=
-     GNATCOLL.Traces.Create
-       ("${ctx.lib_name.upper}.MAIN_TRACE", GNATCOLL.Traces.From_Config);
-
-   PLE_Errors_Trace : constant GNATCOLL.Traces.Trace_Handle :=
-     GNATCOLL.Traces.Create
-       ("${ctx.lib_name.upper}.PLE_ERRORS", GNATCOLL.Traces.From_Config);
-
    Default_Charset : constant String := ${ascii_repr(ctx.default_charset)};
    --  Default charset to use when creating analysis contexts
 
-   subtype Big_Integer is GNATCOLL.GMP.Integers.Big_Integer;
-   --  Shortcut for ``GNATCOLL.GMP.Integers.Big_Integer``
+   ----------------
+   -- Exceptions --
+   ----------------
 
-   -------------------------------------
-   -- Symbols and token data handlers --
-   -------------------------------------
+   ## Emit declarations for all exceptions
+   % for section_name, exceptions in ctx.exceptions_by_section:
+   % if section_name:
+   ${comment_box(section_name, 3)}
 
-   type Precomputed_Symbol_Index is
-      % if ctx.symbol_literals:
-         (
-            <%
-               sym_items = ctx.sorted_symbol_literals
-               last_i = len(sym_items) - 1
-            %>
-            % for i, (sym, name) in enumerate(sym_items):
-               ${name}${',' if i < last_i else ''} --  ${sym}
-            % endfor
-         )
-      % else:
-         new Integer range 1 .. 0
+   % endif
+   % for e in exceptions:
+   ${e.name} : exception renames ${e.qualname};
+   ${ada_doc(e.doc_entity, 3)}
+
+   % endfor
+   % endfor
+
+   ----------------------------
+   -- Misc enumeration types --
+   ----------------------------
+
+   % for enum_type in ctx.enum_types:
+      type ${enum_type.api_name} is
+        (${', '.join(str(v.name) for v in enum_type.values)})
+         with Convention => C;
+      ${ada_doc(enum_type, 6)}
+
+
+      % if ctx.properties_logging:
+      function Trace_Image (Self : ${enum_type.api_name}) return String
+      is (Self'Image);
       % endif
-   ;
 
-   function Precomputed_Symbol
-     (Index : Precomputed_Symbol_Index) return Text_Type;
-
-   --  GNAT emits an incorrect value not in range in instantiation warning...
-   --  So deactivate them at the instantiation point.
-   pragma Warnings (Off, "value not in range");
-   package Precomputed_Symbols
-   is new Langkit_Support.Symbols.Precomputed
-     (Precomputed_Symbol_Index, Precomputed_Symbol);
-   pragma Warnings (On, "value not in range");
+   % endfor
 
    -----------
    -- Nodes --
@@ -115,22 +109,12 @@ package ${ada_lib_name}.Common is
    ;
    ${ada_doc('langkit.synthetic_nodes', 6)}
 
-   % for enum_type in ctx.enum_types:
-      type ${enum_type.api_name} is
-        (${', '.join(str(v.name) for v in enum_type.values)})
-         with Convention => C;
-      ${ada_doc(enum_type, 6)}
-
-
-      % if ctx.properties_logging:
-      function Trace_Image (Self : ${enum_type.api_name}) return String
-      is (Self'Image);
-      % endif
-
-   % endfor
-
    Default_Grammar_Rule : constant Grammar_Rule := ${ctx.main_rule_api_name};
    --  Default grammar rule to use when parsing analysis units
+
+   ------------------
+   -- Lexer inputs --
+   ------------------
 
    type Lexer_Input_Kind is
      (File,
@@ -146,6 +130,10 @@ package ${ada_lib_name}.Common is
 
    subtype Undecoded_Lexer_Input is
       Lexer_Input_Kind range File ..  Bytes_Buffer;
+
+   ------------
+   -- Tokens --
+   ------------
 
    type Token_Kind is (
       ${',\n'.join(t.ada_name for t in tokens)}
@@ -285,19 +273,6 @@ package ${ada_lib_name}.Common is
 
    function Raw_Data (T : Token_Reference) return Stored_Token_Data;
    --  Return the raw token data for ``T``
-
-   ## Emit declarations for all exceptions
-   % for section_name, exceptions in ctx.exceptions_by_section:
-   % if section_name:
-   ${comment_box(section_name, 3)}
-
-   % endif
-   % for e in exceptions:
-   ${e.name} : exception renames ${e.qualname};
-   ${ada_doc(e.doc_entity, 3)}
-
-   % endfor
-   % endfor
 
    -------------------
    -- Introspection --
