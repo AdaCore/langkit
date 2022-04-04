@@ -24,11 +24,11 @@
 with Ada.Unchecked_Conversion;
 
 with Langkit_Support.File_Readers;      use Langkit_Support.File_Readers;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Introspection;
 use Langkit_Support.Internal.Introspection;
-with Langkit_Support.Generic_API.Introspection;
-use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 

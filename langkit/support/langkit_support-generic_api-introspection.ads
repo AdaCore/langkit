@@ -460,10 +460,10 @@ package Langkit_Support.Generic_API.Introspection is
    type Any_Struct_Member_Index is new Natural;
    subtype Struct_Member_Index is
      Any_Struct_Member_Index range 1 .. Any_Struct_Member_Index'Last;
-   --  Language-specific index to designate a struct member
+   --  Language-specific index to designate a struct member.
    --
    --  A given language defines members for the ``1 .. Last_Struct_Member
-   --  (Language)`` range: see the ``Last_Struct_Member`À`À function below.
+   --  (Language)`` range: see the ``Last_Struct_Member`` function below.
 
    No_Struct_Member : constant Any_Struct_Member_Index := 0;
    --  Special ``Any_Struct_Member_Index`` to mean: no reference to an argument

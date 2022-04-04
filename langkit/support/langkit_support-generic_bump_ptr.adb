@@ -68,7 +68,7 @@ package body Langkit_Support.Generic_Bump_Ptr is
          return;
       end if;
 
-      --  Free every page allocated
+      --  Free every page allocated.
       --
       --  TODO: Might be interresting at some point to keep a global cache of
       --  pages ourself, since we always use the same size.

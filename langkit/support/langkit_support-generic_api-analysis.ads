@@ -164,7 +164,7 @@ package Langkit_Support.Generic_API.Analysis is
    --  Return a reference to the last token scanned in this unit
 
    function Text (Self : Lk_Unit) return Text_Type;
-   --  Return the source buffer associated to this unit.
+   --  Return the source buffer associated to this unit
 
    --  TODO??? Bind all other analysis unit primitives
 

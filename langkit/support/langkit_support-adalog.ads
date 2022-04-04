@@ -97,7 +97,6 @@ package Langkit_Support.Adalog is
    --
    --  * the progress of solving a sequence of atoms (both in the symbolic
    --    solver's Try_Solution and in the dead branch cut optimization);
-   --
    --  * the progress of solving individual atoms.
 
    Sol_Trace  : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create

@@ -178,7 +178,7 @@ package body Langkit_Support.Adalog.Solver is
       --  List of all logic variables referenced in the top-level relation.
       --
       --  Indexes in this array are the same as Ids for the corresponding
-      --  variables, i.e. ``for all I in Vars.all => I = Id (Vars.all (I))``
+      --  variables, i.e. ``for all I in Vars.all => I = Id (Vars.all (I))``.
       --
       --  Computed once (before starting the solver), used to pass all
       --  variables to the user callback and to reset aliasing information when
@@ -1257,16 +1257,16 @@ package body Langkit_Support.Adalog.Solver is
 
          if not Ctx.Anys.Is_Empty then
 
-            --  The relation we are trying to solve here is the equivalent of:
+            --  The relation we are trying to solve here is the equivalent of::
             --
             --     Ctx.Atoms & All (Ctx.Anys)
             --
             --  Exploring solutions for this complex relation is not linear: we
-            --  need recursion. Start with the head of ``Ctx.Anys``:
+            --  need recursion. Start with the head of ``Ctx.Anys``::
             --
             --     Ctx.Atoms & Head (Ctx.Anys)
             --
-            --  And leave the rest for later:
+            --  And leave the rest for later:::
             --
             --     Ctx.Atoms & Tail (Ctx.Anys)
 
@@ -1323,18 +1323,18 @@ package body Langkit_Support.Adalog.Solver is
 
       when Kind_All =>
          --  First step: gather ``Any`` relations and atoms in their own
-         --  vectors (``Anys`` and ``Ctx.Atoms``)
+         --  vectors (``Anys`` and ``Ctx.Atoms``).
 
          for Sub_Rel of Comp.Rels loop
             case Sub_Rel.Kind is
             when Compound =>
                --  The ``Create_All`` inlines the sub-relations of ``All``
                --  relations passed to it in the relation it returns. For
-               --  instance:
+               --  instance::
                --
                --     Create_All ((Create_All ((A, B)), C))
                --
-               --  is equivalent to:
+               --  is equivalent to::
                --
                --     Create_All ((A, B, C))
                --

@@ -40,7 +40,7 @@ package Langkit_Support.Generic_API is
    No_Language_Id : constant Any_Language_Id;
    subtype Language_Id is Any_Language_Id
      with Dynamic_Predicate => Language_Id /= No_Language_Id;
-   --  Unique identifier for a Langkit-generated library
+   --  Unique identifier for a Langkit-generated library.
    --
    --  All operations done using the generic API are done in the context of a
    --  Langkit-generated library. Because of this, all subprograms in the
