@@ -22,4 +22,8 @@
 ------------------------------------------------------------------------------
 
 package Langkit_Support with Pure is
+
+   External_Name_Prefix : constant String := "langkit_support__int__";
+   --  Prefix for explicit external names in Langkit_Support
+
 end Langkit_Support;

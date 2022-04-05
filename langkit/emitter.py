@@ -875,11 +875,17 @@ class Emitter:
         file_path = self.ada_file_path(out_dir, source_kind, qual_name)
 
         # In standalone mode, rename Langkit_Support occurences in the source
-        # code.
+        # code. Likewise for ``"langkit_support__int__"``, used to build
+        # external names.
         if self.standalone:
-            content = content.replace(
-                "Langkit_Support", self.standalone_support_name
-            )
+            for pattern, replacement in [
+                ("Langkit_Support", self.standalone_support_name),
+                (
+                    '"langkit_support__int__"',
+                    f'"{self.standalone_support_name.lower()}__int__"',
+                ),
+            ]:
+                content = content.replace(pattern, replacement)
 
         # If there are too many lines, which triggers obscure debug info bugs,
         # strip empty lines.

@@ -45,27 +45,27 @@ package Langkit_Support.Internal.Conversions is
 
    function Wrap_Context
      (Id : Language_Id; Context : Internal_Context) return Lk_Context
-     with Import, External_Name => "lksp__wrap_context";
+     with Import, External_Name => External_Name_Prefix & "wrap_context";
    function Unwrap_Context (Context : Lk_Context) return Internal_Context
-      with Import, External_Name => "lksp__unwrap_context";
+      with Import, External_Name => External_Name_Prefix & "unwrap_context";
 
    --  Converters for analysis units.  See the corresponding export declaration
    --  in Langkit_Support.Generic_API.Analysis.
 
    function Wrap_Unit
      (Id : Language_Id; Unit : Internal_Unit) return Lk_Unit
-     with Import, External_Name => "lksp__wrap_unit";
+     with Import, External_Name => External_Name_Prefix & "wrap_unit";
    function Unwrap_Unit (Unit : Lk_Unit) return Internal_Unit
-      with Import, External_Name => "lksp__unwrap_unit";
+      with Import, External_Name => External_Name_Prefix & "unwrap_unit";
 
    --  Converters for nodes/entities.  See the corresponding export declaration
    --  in Langkit_Support.Generic_API.Analysis.
 
    function Wrap_Node
      (Id : Language_Id; Node : Internal_Entity) return Lk_Node
-     with Import, External_Name => "lksp__wrap_node";
+     with Import, External_Name => External_Name_Prefix & "wrap_node";
    function Unwrap_Node (Node : Lk_Node) return Internal_Entity
-      with Import, External_Name => "lksp__unwrap_node";
+      with Import, External_Name => External_Name_Prefix & "unwrap_node";
 
    --  Converters for tokens.  See the corresponding export declaration in
    --  Langkit_Support.Generic_API.Analysis.
@@ -74,12 +74,12 @@ package Langkit_Support.Internal.Conversions is
      (Id         : Any_Language_Id;
       Token      : Internal_Token;
       Safety_Net : Token_Safety_Net) return Lk_Token
-     with Import, External_Name => "lksp__wrap_token";
+     with Import, External_Name => External_Name_Prefix & "wrap_token";
    procedure Unwrap_Token
      (Token      : Lk_Token;
       Id         : out Any_Language_Id;
       Data       : out Internal_Token;
       Safety_Net : out Token_Safety_Net)
-      with Import, External_Name => "lksp__unwrap_token";
+      with Import, External_Name => External_Name_Prefix & "unwrap_token";
 
 end Langkit_Support.Internal.Conversions;
