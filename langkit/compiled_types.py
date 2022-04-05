@@ -168,7 +168,7 @@ class CompiledTypeRepo:
     Set of all created IteratorType instances.
     """
 
-    root_grammar_class: ASTNodeType
+    root_grammar_class: Opt[ASTNodeType] = None
     """
     The ASTNodeType instances used as a root type. Every other ASTNodeType
     instances must derive directly or indirectly from that class.
@@ -2387,6 +2387,7 @@ class StructType(BaseStructType):
         the "nullexpr" constant, declarations for this type must still be
         emitted (Hash function, ...).
         """
+        assert CompiledTypeRepo.root_grammar_class
         return self in (
             # It's the Langkit_Support.Lexical_Env generic package
             # instantiation that declares entity, entity info and inner env
@@ -2650,11 +2651,13 @@ class ASTNodeType(BaseStructType):
         is_root_list = base is not None and base.is_generic_list_type
         is_list = base is not None and (is_root_list or base.is_list_type)
 
-        self.null_constant: names.Name = (
-            names.Name('No') + name
-            if base is None else
-            CompiledTypeRepo.root_grammar_class.null_constant
-        )
+        if base is None:
+            self.null_constant = names.Name('No') + name
+        else:
+            assert CompiledTypeRepo.root_grammar_class
+            self.null_constant = (
+                CompiledTypeRepo.root_grammar_class.null_constant
+            )
 
         if is_root_list:
             assert element_type is not None and element_type.is_ast_node
