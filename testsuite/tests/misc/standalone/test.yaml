@@ -1,2 +1,4 @@
 driver: python
 input_sources: []
+control:
+    - [XFAIL, "True", "V406-010: link issue due to a gprbuild bug"]
