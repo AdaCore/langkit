@@ -81,19 +81,19 @@ class CollectionExpression(AbstractExpression):
             List of "element" iteration variables, and their initialization
             expression, if any.
 
-            we need a list of "element" iteration variables for code generation
-            purposes. For instance, assuming we iterate on an entity that is an
-            AST list, we need 3 variables::
+            We need a list of "element" iteration variables for code generation
+            purposes. For instance, assuming we iterate on an entity that is a
+            list node, we need 3 variables::
 
-              * one that contains the node whose type is the root one (AST
-                lists contain only root nodes in the generated code);
+              * one that contains the node whose type is the root one (list
+                nodes contain only root nodes in the generated code);
 
               * one that contains the node that is casted to the proper type;
 
               * one that wraps this casted node as an entity.
 
             The first variable is the one used to expand iteration expressions
-            (see the "user_element_var" property.  This is the one that must
+            (see the "user_element_var" property).  This is the one that must
             have a source name. The other ones are mere code generation
             temporaries.
 
