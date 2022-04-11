@@ -877,7 +877,16 @@ def dsl_document(cls):
     return cls
 
 
-def attr_call(name, *args, **kwargs):
+AttrDecoratorType = Callable[[Callable[..., _Any]], Callable[..., _Any]]
+
+ResolvedExprConstructor = Callable[..., "ResolvedExpression"]
+AutoAttrDecoratorType = Callable[
+    [ResolvedExprConstructor],
+    ResolvedExprConstructor,
+]
+
+
+def attr_call(name: str, *args: _Any, **kwargs: _Any) -> AttrDecoratorType:
     """
     Decorator to create an expression accessible through an attribute call on
     an AbstractExpression instance, from an abstract expression class. See
@@ -892,7 +901,7 @@ def attr_call(name, *args, **kwargs):
     return attr_expr_impl(name, args, kwargs)
 
 
-def attr_expr(name, *args, **kwargs):
+def attr_expr(name: str, *args: _Any, **kwargs: _Any) -> AttrDecoratorType:
     """
     Decorator to create an expression accessible through a parameterless
     attribute on an AbstractExpression instance, from an abstract expression
@@ -907,7 +916,10 @@ def attr_expr(name, *args, **kwargs):
     return attr_expr_impl(name, args, kwargs, parameterless=True)
 
 
-def attr_expr_impl(name, args, kwargs, parameterless=False):
+def attr_expr_impl(name: str,
+                   args: Sequence[_Any],
+                   kwargs: Dict[str, _Any],
+                   parameterless: bool = False) -> AttrDecoratorType:
     """
     Implementation for attr_expr and attr_call.
 
@@ -920,7 +932,7 @@ def attr_expr_impl(name, args, kwargs, parameterless=False):
         documentation for this attribute expression.
     """
 
-    def internal(decorated_class):
+    def internal(decorated_class: Callable[..., _Any]) -> Callable[..., _Any]:
         AbstractExpression.attrs_dict[name] = DocumentedExpression(
             True, name, decorated_class, args, kwargs, parameterless,
             kwargs.pop('doc', None)
@@ -930,38 +942,39 @@ def attr_expr_impl(name, args, kwargs, parameterless=False):
     return internal
 
 
-def auto_attr_custom(name, *partial_args, **partial_kwargs):
+def auto_attr_custom(name: Opt[str],
+                     *partial_args: _Any,
+                     **partial_kwargs: _Any) -> AutoAttrDecoratorType:
     """
     Helper decorator, that will automatically register an AbstractExpression
     subclass accessible as an attribute. Exposes more options than auto_attr.
     See auto_attr for more detail.
 
-    :param str|None name: The name of the attribute. If None, the name of the
-        function will be taken.
-    :param str|None doc: If provided, must be a string to use as the
-        documentation for this attribute expression.
-    :param [object] partial_args: Arguments to partially apply to the function.
-    :param [object] partial_kwargs: Keyword arguments to partially apply to the
+    :param name: The name of the attribute. If None, the name of the function
+        will be taken.
+    :param doc: If provided, must be a string to use as the documentation for
+        this attribute expression.
+    :param partial_args: Arguments to partially apply to the function.
+    :param partial_kwargs: Keyword arguments to partially apply to the
         function.
     """
     doc = partial_kwargs.pop('doc', None)
 
-    def internal(fn):
+    def internal(fn: ResolvedExprConstructor) -> ResolvedExprConstructor:
         attr_name = name or fn.__name__
 
-        def __init__(self, *sub_expressions, **kwargs):
+        def __init__(self, *sub_expressions: _Any, **kwargs: _Any) -> None:
             AbstractExpression.__init__(self)
             self.nb_exprs = len(sub_expressions)
             for i, expr in enumerate(sub_expressions):
                 setattr(self, "expr_{}".format(i), expr)
             self.kwargs = kwargs
 
-        @property
-        def sub_expressions(self):
+        def sub_expressions(self: _Any) -> tuple:
             return tuple(getattr(self, "expr_{}".format(i))
                          for i in range(self.nb_exprs))
 
-        def construct(self):
+        def construct(self: _Any) -> ResolvedExpression:
             return fn(self, *self.sub_expressions, **self.kwargs)
 
         # "fn" is supposed to take at least one positional argument: the "self"
@@ -976,7 +989,7 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
             (AbstractExpression, ), {
                 'construct': construct,
                 '__init__': __init__,
-                'sub_expressions': sub_expressions,
+                'sub_expressions': property(sub_expressions),
                 '__doc__': fn.__doc__,
                 '_wrapped_function': fn,
             }
@@ -989,16 +1002,15 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
     return internal
 
 
-def auto_attr(fn):
+def auto_attr(fn: ResolvedExprConstructor) -> ResolvedExprConstructor:
     """
     Helper decorator, that will automatically register an AbstractExpression
     subclass accessible as an attribute, from a function that takes a number of
     abstract expressions. This decorator will automatically infer whether
     it's parameterless or not.
 
-    :param (*[AbstractExpression]) -> ResolvedExpression fn: A function
-        taking a number of abstract expressions as parameters, and returning a
-        resolved expression.
+    :param fn: A function taking a number of abstract expressions as
+        parameters, and returning a resolved expression.
     """
     return auto_attr_custom(None)(fn)
 

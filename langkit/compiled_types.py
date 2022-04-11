@@ -1390,11 +1390,9 @@ class CompiledType:
     # Memoize so that we have only one array type for each element type
     @property  # type: ignore
     @memoized
-    def array(self):
+    def array(self) -> ArrayType:
         """
         Create an array type whose element type is `self`.
-
-        :rtype: ArrayType
         """
         return ArrayType(self)
 
