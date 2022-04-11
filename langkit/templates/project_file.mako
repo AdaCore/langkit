@@ -16,7 +16,7 @@ with "gnatcoll_iconv";
 % endif
 
 % if emitter.coverage:
-   with "gnatcov_rts_full";
+   with "gnatcov_rts";
 % endif
 
 ${exts.include_extension(ctx.ext('withed_projects'))}
