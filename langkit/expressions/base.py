@@ -435,27 +435,35 @@ class DocumentedExpression:
         elif not inspect.isfunction(func):
             return 'expr', ['???']
 
-        args, varargs, keywords, defaults = inspect.getargspec(func)
+        params = list(inspect.signature(func).parameters.values())
+        varargs: Opt[str] = None
+        kwargs: Opt[str] = None
+        if params and params[-1].kind == inspect.Parameter.VAR_KEYWORD:
+            kwargs = params.pop().name
+        if params and params[-1].kind == inspect.Parameter.VAR_POSITIONAL:
+            varargs = params.pop().name
 
         # If present, discard the first argument (self), which is irrelevant
         # for documentation purposes. The second argument is the prefix for the
         # attribute expression.
-        argspec = list(args)
         if first_arg_is_self:
-            argspec.pop(0)
-        prefix_name = argspec.pop(0) if self.is_attribute else None
+            params.pop(0)
+        prefix_name = params.pop(0).name if self.is_attribute else None
 
         # Remove positional and keyword arguments which are already provided by
         # partial evaluation.
-        argspec = argspec[len(self.args):]
+        params = params[len(self.args):]
+        params_dict = {p.name: p for p in params}
         for kw in self.kwargs:
-            argspec.remove(kw)
+            params_dict.pop(kw)
+
+        argspec: Opt[List[str]] = [p.name for p in params_dict.values()]
 
         # Describe variadic constructors as such
         if varargs:
             argspec.append(r'\*' + varargs)
-        if keywords:
-            argspec.append(r'\*\*' + keywords)
+        if kwargs:
+            argspec.append(r'\*\*' + kwargs)
 
         if self.parameterless:
             argspec = None
@@ -956,10 +964,11 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
         def construct(self):
             return fn(self, *self.sub_expressions, **self.kwargs)
 
-        nb_args = len(inspect.getargspec(fn).args)
-
+        # "fn" is supposed to take at least one positional argument: the "self"
+        # expression. If there are more arguments, make it use the call syntax,
+        # otherwise make it an attribute.
+        nb_args = len(inspect.signature(fn).parameters)
         assert nb_args > 1
-
         decorator = (attr_expr if nb_args == 2 else attr_call)
 
         decorator(attr_name, *partial_args, doc=doc, **partial_kwargs)(type(
