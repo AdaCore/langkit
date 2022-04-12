@@ -506,8 +506,7 @@ class Map(CollectionExpression):
             self.static_type = element_type.array
             self.static_type.require_vector()
 
-            with iter_scope.parent.use():
-                super().__init__('Map_Result', abstract_expr=abstract_expr)
+            super().__init__('Map_Result', abstract_expr=abstract_expr)
 
         def __repr__(self) -> str:
             return "<MapExpr {}: {} -> {}{}>".format(
@@ -717,10 +716,7 @@ class Quantifier(CollectionExpression):
             self.iter_scope = iter_scope
             self.static_type = T.Bool
 
-            with iter_scope.parent.use():
-                super().__init__(
-                    'Quantifier_Result', abstract_expr=abstract_expr
-                )
+            super().__init__('Quantifier_Result', abstract_expr=abstract_expr)
 
         def _render_pre(self) -> str:
             return render(
