@@ -18,7 +18,7 @@ Dependencies
 
 To use Langkit, you will need:
 
-* A Python 3.7 (or newer) interpreter. Python2 is no longer supported.
+* A Python 3.9 or Python 3.10 interpreter. Python2 is no longer supported.
 * Some python libraries, including the Mako template system for Python (see
   `REQUIREMENTS.dev` for the full list).
 * A recent version of the GNAT Ada compiler, either from your OS's packages, or
