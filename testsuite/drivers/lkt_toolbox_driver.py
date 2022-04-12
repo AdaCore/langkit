@@ -10,5 +10,11 @@ class LktToolboxDriver(BaseDriver):
     def run(self):
         self.run_and_check(
             ['lkt_toolbox', '--check-invalid-decls', 'test.lkt'],
-            memcheck=True, for_coverage=True
+
+            # We always build Langkit for 64-bit platforms, so when we test it
+            # to target 32-bit, we cannot use Valgrind (32-bit) to memcheck
+            # Langkit binaries (64-bit).
+            memcheck=self.env.build.cpu.bits == 64,
+
+            for_coverage=True,
         )
