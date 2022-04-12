@@ -658,7 +658,7 @@ def emit_expr(expr, **ctx):
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
         StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains,
-        PropertyDef, DynamicLexicalEnv, Super, Join, String, NPropagate
+        PropertyDef, DynamicLexicalEnv, Super, Join, String, NPropagate, Find
     )
 
     def is_a(*names):
@@ -808,7 +808,6 @@ def emit_expr(expr, **ctx):
             'mapcat':     handle_map,
             'logic_all':  handle_map,
             'logic_any':  handle_map,
-            'find':       handle_filter,
             'filter':     handle_filter,
             'filtermap':  handle_filtermap,
             'take_while': handle_take_while
@@ -835,6 +834,13 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, Contains):
         return emit_method_call(ee(expr.collection), "contains", [ee(expr.item)])
+
+    elif isinstance(expr, Find):
+        return emit_method_call(
+            ee(expr.collection),
+            "find",
+            [emit_lambda(expr.expr, [expr.element_var])],
+        )
 
     elif isinstance(expr, If):
         with walker.call('If'):

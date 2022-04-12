@@ -1080,3 +1080,56 @@ def make_to_iterator(
         shadow_args=[node_data],
         abstract_expr=abstract_expr,
     )
+
+
+@attr_call("find")
+class Find(CollectionExpression):
+    """
+    Return the first element in a collection that satisfies the given
+    predicate.
+    """
+
+    class Expr(CollectionExpression.BaseExpr):
+        def __init__(self,
+                     common: CollectionExpression.ConstructCommonResult,
+                     abstract_expr: Optional[AbstractExpression] = None):
+            super().__init__(
+                "Find_Result",
+                common.user_element_var.type,
+                common,
+                abstract_expr=abstract_expr,
+            )
+
+        def __repr__(self) -> str:
+            return "<FindExpr>"
+
+        def _render_pre(self) -> str:
+            return render("properties/find_ada", find=self)
+
+    def __init__(self,
+                 collection: AbstractExpression,
+                 predicate: Any):
+        super().__init__(collection, predicate)
+
+    @classmethod
+    def create_expanded(
+        cls,
+        collection: AbstractExpression,
+        expr: AbstractExpression,
+        element_var: AbstractVariable,
+        index_var: Optional[AbstractVariable] = None,
+    ) -> Find:
+        result = cls(collection, None)
+        result.initialize(expr, element_var, index_var)
+        return result
+
+    def construct(self) -> ResolvedExpression:
+        r = self.construct_common()
+
+        check_source_language(
+            r.inner_expr.type.matches(T.Bool),
+            "Predicate must return a boolean, got"
+            f" {r.inner_expr.type.dsl_name}"
+        )
+
+        return Find.Expr(r, abstract_expr=self)

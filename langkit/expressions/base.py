@@ -688,8 +688,6 @@ class AbstractExpression(Frozable):
             '_or': lambda alt: self.then(lambda e: e, default_val=alt),
             'any_of': lambda *els: Or(*[self == el for el in els]),
             'empty': self.length.equals(0),
-            'find': lambda filter_expr:
-                self.filter(filter_expr).at(0),
             'keep': lambda cls:
                 self.filtermap(lambda e: e.cast(cls),
                                lambda e: e.is_a(cls)),

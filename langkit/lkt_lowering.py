@@ -1681,17 +1681,15 @@ class LktTypesLoader:
                     elt_arg, = lambda_args
                     elt_var = var_for_lambda_arg(elt_arg, 'item')
 
-                    # Lower the collection expression
+                    # Lower the collection expression and the predicate
+                    # expression.
                     assert isinstance(call_expr.f_name, L.DotExpr)
                     coll_expr = lower(call_expr.f_name.f_prefix)
-                    filter_expr = lower(lambda_expr.f_body)
-                    filtered_expr = E.Map.create_expanded(
-                        collection=coll_expr,
-                        expr=elt_var,
-                        element_var=elt_var,
-                        filter_expr=filter_expr,
+                    inner_expr = lower(lambda_expr.f_body)
+
+                    return E.Find.create_expanded(
+                        coll_expr, inner_expr, elt_var, index_var=None,
                     )
-                    return filtered_expr.at(0)  # type: ignore
 
                 elif same_node(name_decl, self.map_method):
                     # Build variable for iteration variables from the lambda
