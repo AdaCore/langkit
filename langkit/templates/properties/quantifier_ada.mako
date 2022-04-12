@@ -1,99 +1,32 @@
 ## vim: filetype=makoada
 
-<%namespace name="scopes" file="scopes_ada.mako" />
+<%namespace name="collection_expr" file="collection_expr_ada.mako" />
+<%namespace name="scopes"          file="scopes_ada.mako" />
 
 <%
-   codegen_element_var = quantifier.element_vars[-1][0].name
-   user_element_var = quantifier.element_vars[0][0]
    result_var = quantifier.result_var.name
+
+   # We want to abort the loop as soon as the predicate returns True for Any
+   # quantifiers, and as soon as it returns False for All predicates.
+   exit_cond = result_var if quantifier.kind == ANY else f"not {result_var}"
 %>
 
-${quantifier.collection.render_pre()}
+<%collection_expr:render expr="${quantifier}" exit_cond="${exit_cond}">
 
-${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
+   <%def name="before_loop()">
+      ${result_var} := ${"False" if quantifier.kind == ANY else "True"};
+   </%def>
 
-<%def name="build_loop()">
-   % if quantifier.index_var:
-      ${quantifier.index_var.name} := 0;
-   % endif
+   <%def name="loop_body()">
+      ${quantifier.expr.render_pre()}
+      ${result_var} := ${quantifier.expr.render_expr()};
+   </%def>
 
-   declare
-      <%
-         coll_expr = quantifier.collection.render_expr()
-         coll_type = quantifier.collection.type
-      %>
-      Collection : constant ${coll_type.name} := ${coll_expr};
-   begin
-      for ${codegen_element_var} of
-         % if quantifier.collection.type.is_list_type:
-            Collection.Nodes (1 .. Children_Count (Collection))
-         % else:
-            Collection.Items
-         % endif
-      loop
-         ## Initialize all element variables
-         % for elt_var, init_expr in reversed(quantifier.element_vars):
-            % if init_expr:
-               ${init_expr.render_pre()}
-               ${assign_var(elt_var, init_expr.render_expr())}
-            % endif
-         % endfor
+   <%def name="empty_list()">
+      null;
+   </%def>
 
-         ${scopes.start_scope(quantifier.iter_scope)}
+   <%def name="after_loop()">
+   </%def>
 
-         ## Bind user iteration variables
-         % if user_element_var.source_name:
-            ${gdb_bind_var(user_element_var)}
-         % endif
-         % if quantifier.index_var:
-            ${gdb_bind_var(quantifier.index_var)}
-         % endif
-
-         ${quantifier.expr.render_pre()}
-
-         ## Depending on the kind of the quantifier, we want to abort as soon
-         ## as the predicate holds or as soon as it does not hold. To exit the
-         ## loop, go to the exit label, so that scope finalizers are called
-         ## before actually leaving the loop.
-         % if quantifier.kind == ANY:
-            if ${quantifier.expr.render_expr()} then
-               ${result_var} := True;
-               goto ${quantifier.exit_label};
-            end if;
-         % else:
-            if not (${quantifier.expr.render_expr()}) then
-               ${result_var} := False;
-               goto ${quantifier.exit_label};
-            end if;
-         % endif
-
-         % if quantifier.index_var:
-            ${quantifier.index_var.name} := ${quantifier.index_var.name} + 1;
-         % endif
-
-         <<${quantifier.exit_label}>> null;
-         ${scopes.finalize_scope(quantifier.iter_scope)}
-
-         ## If we decided after this iteration to exit the loop, we can do it
-         ## now that the iteration scope it finalized.
-         exit when
-            % if quantifier.kind == ALL:
-               not
-            % endif
-            ${result_var}
-         ;
-      end loop;
-   end;
-</%def>
-
-% if quantifier.collection.type.is_list_type:
-   ## Empty lists are null: handle this pecularity here to make it easier
-   ## for property writers.
-
-   if ${quantifier.collection.render_expr()} /= null then
-      ${build_loop()}
-   end if;
-
-% else:
-   ${build_loop()}
-% endif
+</%collection_expr:render>

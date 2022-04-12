@@ -682,12 +682,6 @@ class Quantifier(CollectionExpression):
         static_type = T.Bool
         pretty_class_name = 'Quantifier'
 
-        serial_generator = iter(count(1))
-        """
-        Generator of unique IDs for this expression. Used to create unique
-        labels in the generated code.
-        """
-
         def __init__(self,
                      kind: str,
                      collection: ResolvedExpression,
@@ -722,11 +716,6 @@ class Quantifier(CollectionExpression):
             self.index_var = index_var
             self.iter_scope = iter_scope
             self.static_type = T.Bool
-
-            self.exit_label = f"Exit_{next(self.serial_generator)}"
-            """
-            Exit label for early loop exits in the generated code.
-            """
 
             with iter_scope.parent.use():
                 super().__init__(
