@@ -112,7 +112,8 @@ private package ${ada_lib_name}.Implementation is
    --  recursive calls.
 
    procedure Enter_Call
-     (Context : Internal_Context; Call_Depth : access Natural);
+     (Context : Internal_Context; Call_Depth : access Natural)
+   with Inline_Always;
    --  Increment the call depth in Context. If the depth exceeds Context's
    --  maximum, raise a Property_Error for "stack overflow".
    --
@@ -122,7 +123,8 @@ private package ${ada_lib_name}.Implementation is
    --
    --  Put in Call_Depth the incremented call depth.
 
-   procedure Exit_Call (Context : Internal_Context; Call_Depth : Natural);
+   procedure Exit_Call (Context : Internal_Context; Call_Depth : Natural)
+   with Inline_Always;
    --  Decrement the call depth in Context. If Call_Depth does not match the
    --  current call depth, raise an Unexpected_Call_Depth.
 
