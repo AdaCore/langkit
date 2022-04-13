@@ -18,8 +18,8 @@
    </%def>
 
    <%def name="loop_body()">
-      ${quantifier.expr.render_pre()}
-      ${result_var} := ${quantifier.expr.render_expr()};
+      ${quantifier.inner_expr.render_pre()}
+      ${result_var} := ${quantifier.inner_expr.render_expr()};
    </%def>
 
    <%def name="empty_list()">

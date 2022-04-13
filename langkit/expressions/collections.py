@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 import inspect
 from itertools import count
 import types
-from typing import Any, Callable, List, Optional, Tuple, Union, cast
-
-import funcy
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from langkit import names
 from langkit.compiled_types import CompiledType, get_context
@@ -63,7 +62,13 @@ def canonicalize_list(
     return (coll_expr, element_type)
 
 
-ElementVars = List[Tuple[VariableExpr, Optional[ResolvedExpression]]]
+@dataclass
+class InitializedVar:
+    """
+    Variable with an optional initializer.
+    """
+    var: VariableExpr
+    init_expr: Optional[ResolvedExpression] = None
 
 
 class CollectionExpression(AbstractExpression):
@@ -74,6 +79,42 @@ class CollectionExpression(AbstractExpression):
 
     _counter = count()
 
+    class BaseExpr(ComputingExpr):
+        """
+        Common ancestor for resolved expressions iterating on a collection.
+        """
+
+        def __init__(self,
+                     result_var_name: str,
+                     result_type: CompiledType,
+                     common: CollectionExpression.ConstructCommonResult,
+                     abstract_expr: Optional[AbstractExpression] = None):
+            self.static_type = result_type
+
+            self.collection = common.collection_expr
+
+            self.codegen_element_var = common.codegen_element_var
+            self.user_element_var = common.user_element_var
+            self.index_var = common.index_var
+
+            self.iter_vars = common.iter_vars
+
+            self.inner_expr = common.inner_expr
+            self.inner_scope = common.inner_scope
+
+            super().__init__(result_var_name, abstract_expr=abstract_expr)
+
+        @property
+        def subexprs(self) -> dict:
+            return {
+                'collection': self.collection,
+                'iter-vars-initalizers': [v.init_expr for v in self.iter_vars],
+                'inner_expr': self.inner_expr,
+            }
+
+        def _bindings(self) -> List[VariableExpr]:
+            return [v.var for v in self.iter_vars]
+
     class ConstructCommonResult:
         """
         Holder for the result of the "construct_common" method.
@@ -81,8 +122,10 @@ class CollectionExpression(AbstractExpression):
 
         def __init__(self,
                      collection_expr: ResolvedExpression,
-                     element_vars: ElementVars,
+                     codegen_element_var: VariableExpr,
+                     user_element_var: VariableExpr,
                      index_var: Optional[VariableExpr],
+                     iter_vars: List[InitializedVar],
                      inner_expr: ResolvedExpression,
                      inner_scope: LocalVars.Scope):
             self.collection_expr = collection_expr
@@ -91,30 +134,23 @@ class CollectionExpression(AbstractExpression):
             iteration is done.
             """
 
-            self.element_vars = element_vars
+            self.codegen_element_var = codegen_element_var
             """
-            List of "element" iteration variables, and their initialization
-            expression, if any.
+            Variable which, for each iteration, contains the "raw" collection
+            element that is processed. See the docstring for
+            ``user_element_var``.
+            """
 
-            We need a list of "element" iteration variables for code generation
-            purposes. For instance, assuming we iterate on an entity that is a
-            list node, we need 3 variables::
+            self.user_element_var = user_element_var
+            """
+            Variable which, for each iteration, contains the collection element
+            that as seen by user code.
 
-              * one that contains the node whose type is the root one (list
-                nodes contain only root nodes in the generated code);
-
-              * one that contains the node that is casted to the proper type;
-
-              * one that wraps this casted node as an entity.
-
-            The first variable is the one used to expand iteration expressions
-            (see the "user_element_var" property).  This is the one that must
-            have a source name. The other ones are mere code generation
-            temporaries.
-
-            The last variable is the one that is used as the actual iteration
-            variable in the generated code. This is the only one that will not
-            require explicit initialization.
+            For instance, when iterating over a ``ChildNode.list.entity``,
+            ``codegen_element_var`` contains each child node as a bare root
+            node (all list nodes are implemented that way) while
+            ``user_element_var`` contains each child node as a
+            ``ChildNode.entity`` (which is what user code deals with).
             """
 
             self.index_var = index_var
@@ -130,6 +166,12 @@ class CollectionExpression(AbstractExpression):
             self.inner_scope = inner_scope
             """
             Local variable scope for the body of the iteration.
+            """
+
+            self.iter_vars = iter_vars
+            """
+            List of iteration variables and their initialization expression
+            (when applicable).
             """
 
     def __init__(self, collection: AbstractExpression, expr: Any):
@@ -290,9 +332,18 @@ class CollectionExpression(AbstractExpression):
 
         current_scope = PropertyDef.get_scope()
 
+        # Because of the discrepancy between the storage type in list nodes
+        # (always root nodes) and the element type that user code deals with
+        # (non-root list elements and/or entities), we may need to introduce
+        # variables and initializing expressions. This is what the code below
+        # does.
+
         # First, build the collection expression. From the result, we can
-        # deduce the type of the element variable.
+        # deduce the type of the user element variable.
         collection_expr = construct(self.collection)
+
+        # If the collection is actually an entity, unwrap the bare list node
+        # and save the entity info for later.
         with_entities = collection_expr.type.is_entity_type
         if with_entities:
             saved_entity_coll_expr, collection_expr, entity_info = (
@@ -308,62 +359,85 @@ class CollectionExpression(AbstractExpression):
             )
         )
 
+        # Now that potential entity types are unwrapped, we can look for its
+        # element type.
         elt_type = collection_expr.type.element_type
         if with_entities:
             elt_type = elt_type.entity
         self.element_var.set_type(elt_type)
+        user_element_var = construct(self.element_var)
 
-        # List of "element" iteration variables
-        elt_vars = [construct(self.element_var)]
+        # List of element variables, and the associated initialization
+        # expressions (when applicable).
+        #
+        # Start with the only element variable that exists at this point: the
+        # one that the user code for each iteration uses directly. When
+        # relevant, each step in the code below creates a new variable N and
+        # initialize variable N-1 from it.
+        element_vars: List[InitializedVar] = [InitializedVar(user_element_var)]
 
-        # List of initializing expressions for them
-        elt_var_inits = []
-
+        # Node lists contain bare nodes: if the user code deals with entities,
+        # create a variable to hold a bare node and initialize the user
+        # variable using it.
         if with_entities:
-            entity_var = elt_vars[-1]
+            entity_var = element_vars[-1]
             node_var = AbstractVariable(
                 names.Name('Bare') + self.element_var._name,
                 type=elt_type.element_type
             )
-            elt_var_inits.append(make_as_entity(construct(node_var),
-                                                entity_info=entity_info))
-            elt_vars.append(construct(node_var))
+            entity_var.init_expr = make_as_entity(
+                construct(node_var), entity_info=entity_info
+            )
+            element_vars.append(InitializedVar(construct(node_var)))
 
-        # If we are iterating over an AST list, then we get root grammar typed
-        # values. We need to convert them to the more specific type to get the
-        # rest of the expression machinery work.
-        if collection_expr.type.is_list_type:
-            typed_elt_var = elt_vars[-1]
+        # Node lists contain root nodes: if the user code deals with non-root
+        # nodes, create a variable to hold the root bare node and initialize
+        # the non-root node using it.
+        if (
+            collection_expr.type.is_list_type
+            and not collection_expr.type.is_root_node
+        ):
+            typed_elt_var = element_vars[-1]
             untyped_elt_var = AbstractVariable(
                 names.Name('Untyped') + self.element_var._name,
                 type=get_context().root_grammar_class
             )
-            # Initialize the former last variable with a cast from the new last
-            # variable and push the new last variable.
-            elt_var_inits.append(UncheckedCastExpr(construct(untyped_elt_var),
-                                                   typed_elt_var.type))
-            elt_vars.append(construct(untyped_elt_var))
+            typed_elt_var.init_expr = UncheckedCastExpr(
+                construct(untyped_elt_var), typed_elt_var.var.type
+            )
+            element_vars.append(InitializedVar(construct(untyped_elt_var)))
 
-        # Only then we can build the inner expression
+        # Keep track of the ultimate "codegen" element variable. Unlike all
+        # other iteration variable, it is the only one that will be defined by
+        # the "for" loop in Ada (the other ones must be declared as regular
+        # local variables).
+        codegen_element_var = element_vars[-1].var
+
+        # Create a scope to contain the code that runs during an iteration and
+        # lower the iteration expression.
         with current_scope.new_child() as inner_scope:
             inner_expr = construct(self.expr)
 
-        if with_entities:
-            entity_var.abstract_var.create_local_variable(inner_scope)
-        if collection_expr.type.is_list_type:
-            typed_elt_var.abstract_var.create_local_variable(inner_scope)
-
+        # Build the list of all iteration variables
+        iter_vars = list(element_vars)
+        index_var = None
         if self.index_var:
-            self.index_var.add_to_scope(inner_scope)
+            index_var = construct(self.index_var)
+            iter_vars.append(InitializedVar(index_var))
 
-        elt_var_inits.append(None)
+        # Create local variables for all iteration variables that need it
+        for v in iter_vars:
+            if v.var != codegen_element_var:
+                v.var.abstract_var.create_local_variable(inner_scope)
 
         return self.ConstructCommonResult(
             collection_expr,
-            funcy.lzip(elt_vars, elt_var_inits),
-            construct(self.index_var) if self.index_var else None,
+            codegen_element_var,
+            user_element_var,
+            index_var,
+            iter_vars,
             inner_expr,
-            inner_scope
+            inner_scope,
         )
 
 
@@ -392,8 +466,7 @@ class Contains(CollectionExpression):
 
         # "collection" contains "item" if at least one element in
         # "collection" is equal to "item".
-        return Quantifier.Expr(Quantifier.ANY, r.collection_expr, r.inner_expr,
-                               r.element_vars, r.index_var, r.inner_scope)
+        return Quantifier.Expr(Quantifier.ANY, r, abstract_expr=self)
 
 
 @attr_call('filter')
@@ -473,7 +546,7 @@ class Map(CollectionExpression):
     Abstract expression that is the result of a map expression evaluation.
     """
 
-    class Expr(ComputingExpr):
+    class Expr(CollectionExpression.BaseExpr):
         """
         Resolved expression that represents a map expression in the generated
         code.
@@ -481,38 +554,33 @@ class Map(CollectionExpression):
         pretty_class_name = 'Map'
 
         def __init__(self,
-                     element_vars: ElementVars,
-                     index_var: Optional[VariableExpr],
-                     collection: ResolvedExpression,
-                     expr: ResolvedExpression,
-                     iter_scope: LocalVars.Scope,
+                     common: CollectionExpression.ConstructCommonResult,
                      filter: Optional[ResolvedExpression] = None,
                      do_concat: bool = False,
                      take_while: Optional[ResolvedExpression] = None,
                      abstract_expr: Optional[AbstractExpression] = None):
+            element_type = (common.inner_expr.type.element_type
+                            if do_concat
+                            else common.inner_expr.type)
+            super().__init__(
+                "Map_Result",
+                element_type.array,
+                common,
+                abstract_expr=abstract_expr,
+            )
+
             self.take_while = take_while
-            self.element_vars = element_vars
-            self.index_var = index_var
-            self.collection = collection
-            self.expr = expr
             self.filter = filter
             self.do_concat = do_concat
-            self.iter_scope = iter_scope
 
-            element_type = (self.expr.type.element_type
-                            if self.do_concat else
-                            self.expr.type)
-            assert isinstance(element_type, CompiledType)
-            self.static_type = element_type.array
-            self.static_type.require_vector()
-
-            super().__init__('Map_Result', abstract_expr=abstract_expr)
+            # The generated code for map uses a vector to build the result
+            self.type.require_vector()
 
         def __repr__(self) -> str:
             return "<MapExpr {}: {} -> {}{}>".format(
                 self.collection,
-                self.element_vars[0],
-                self.expr,
+                self.user_element_var,
+                self.inner_expr,
                 " (if {})".format(self.filter) if self.filter else ""
             )
 
@@ -521,25 +589,11 @@ class Map(CollectionExpression):
 
         @property
         def subexprs(self) -> dict:
-            result = {
-                'collection': self.collection,
-                'element-vars-initalizers': [e for _, e in self.element_vars],
-                'expr': self.expr
-            }
+            result = super().subexprs
             if self.take_while:
                 result['take_while'] = self.take_while
             if self.filter:
                 result['filter'] = self.filter
-            return result
-
-        def _bindings(self) -> List[VariableExpr]:
-            result = [
-                cast(VariableExpr, v)
-                for v, _ in self.element_vars
-                if v is not None
-            ]
-            if self.index_var:
-                result.append(self.index_var)
             return result
 
     def __init__(self,
@@ -617,9 +671,13 @@ class Map(CollectionExpression):
             take_while_expr = (construct(self.take_while_expr, T.Bool)
                                if self.take_while_expr else None)
 
-        return Map.Expr(r.element_vars, r.index_var, r.collection_expr,
-                        r.inner_expr, r.inner_scope, filter_expr,
-                        self.do_concat, take_while_expr, abstract_expr=self)
+        return Map.Expr(
+            r,
+            filter_expr,
+            self.do_concat,
+            take_while_expr,
+            abstract_expr=self,
+        )
 
     @property
     def kind(self) -> str:
@@ -677,46 +735,30 @@ class Quantifier(CollectionExpression):
         int_array.all(lambda i: i > 0)
     """
 
-    class Expr(ComputingExpr):
+    class Expr(CollectionExpression.BaseExpr):
         static_type = T.Bool
         pretty_class_name = 'Quantifier'
 
         def __init__(self,
                      kind: str,
-                     collection: ResolvedExpression,
-                     expr: ResolvedExpression,
-                     element_vars: ElementVars,
-                     index_var: Optional[VariableExpr],
-                     iter_scope: LocalVars.Scope,
+                     common: CollectionExpression.ConstructCommonResult,
                      abstract_expr: Optional[AbstractExpression] = None):
             """
             :param kind: Kind for this quantifier expression. 'all' will check
                 that all items in "collection" fullfill "expr" while 'any' will
                 check that at least one of them does.
 
-            :param collection: Collection on which this map operation works.
-
-            :param expr: A boolean expression to evaluate on the collection's
-                items.
-
-            :param Variable to use in "expr".
-
-            :param index_var: Index variable to use in "expr".
-
-            :param iter_scope: Scope for local variables internal to the
-                iteration.
+            :param common: Common iteration expression parameters.
 
             :param abstract_expr: See ResolvedExpression's constructor.
             """
+            super().__init__(
+                "Quantifier_Result",
+                T.Bool,
+                common,
+                abstract_expr=abstract_expr
+            )
             self.kind = kind
-            self.collection = collection
-            self.expr = expr
-            self.element_vars = element_vars
-            self.index_var = index_var
-            self.iter_scope = iter_scope
-            self.static_type = T.Bool
-
-            super().__init__('Quantifier_Result', abstract_expr=abstract_expr)
 
         def _render_pre(self) -> str:
             return render(
@@ -726,21 +768,8 @@ class Quantifier(CollectionExpression):
 
         @property
         def subexprs(self) -> dict:
-            return {
-                'kind': self.kind,
-                'collection': self.collection,
-                'expr': self.expr,
-                'element-vars-initalizers': [e for _, e in self.element_vars],
-            }
-
-        def _bindings(self) -> List[VariableExpr]:
-            result = [
-                cast(VariableExpr, v)
-                for v, _ in self.element_vars
-                if v is not None
-            ]
-            if self.index_var:
-                result.append(self.index_var)
+            result = super().subexprs
+            result["kind"] = self.kind
             return result
 
         def __repr__(self) -> str:
@@ -781,8 +810,7 @@ class Quantifier(CollectionExpression):
             ' got {}'.format(r.inner_expr.type.dsl_name)
         )
 
-        return Quantifier.Expr(self.kind, r.collection_expr, r.inner_expr,
-                               r.element_vars, r.index_var, r.inner_scope)
+        return Quantifier.Expr(self.kind, r, abstract_expr=self)
 
     def __repr__(self) -> str:
         return f"<{self.kind.capitalize()}Quantifier at {self.location_repr}>"

@@ -8,21 +8,8 @@
 ## Generate code to iterate on a collection, i.e. a list node or an array
 ## value.
 ##
-## "expr" must be a ResolvedExpression that computes the iteration (e.g. a
-## "map" expression, or a "quantifier" one). This expression must provide the
-## following attributes:
-##
-## * "collection" (type: ResolvedExpression), for the collection on which to
-##   iterate.
-##
-## * "index_var" (type: Optional[langkit.expressions.collections.ElementVars]),
-##   for the index of the current iteration.
-##
-## * "element_vars" (type: langkit.expressions.collections.ElementVars), for
-##   all the variables defined at the beginning of each iteration.
-##
-## * "iter_scope" (type: langkit.expressions.base.LocalVars.Scope), for the
-##   scope corresponding to one iteration.
+## "expr" must be a CollectionExpression.BaseExpr that computes the iteration
+## (e.g. a "map" expression, or a "quantifier" one).
 ##
 ## If not None, "exit_cond" must be an Ada expression (as a string) to be used
 ## as a boolean expression at the end of each iteration: if it is False, the
@@ -43,11 +30,7 @@
 ##   iteration.
 <%def name="render(expr, exit_cond=None)">
 
-   <%
-      loop_body = caller.loop_body
-      codegen_element_var = expr.element_vars[-1][0].name
-      user_element_var = expr.element_vars[0][0]
-   %>
+   <% loop_body = caller.loop_body %>
 
    ${expr.collection.render_pre()}
 
@@ -65,7 +48,7 @@
          %>
          Collection : constant ${coll_type.name} := ${coll_expr};
       begin
-         for ${codegen_element_var} of
+         for ${expr.codegen_element_var.name} of
             % if expr.collection.type.is_list_type:
                Collection.Nodes (1 .. Children_Count (Collection))
             % else:
@@ -73,18 +56,18 @@
             % endif
          loop
             ## Initialize all element variables
-            % for elt_var, init_expr in reversed(expr.element_vars):
-               % if init_expr:
-                  ${init_expr.render_pre()}
-                  ${assign_var(elt_var, init_expr.render_expr())}
+            % for v in reversed(expr.iter_vars):
+               % if v.init_expr:
+                  ${v.init_expr.render_pre()}
+                  ${assign_var(v.var, v.init_expr.render_expr())}
                % endif
             % endfor
 
-            ${scopes.start_scope(expr.iter_scope)}
+            ${scopes.start_scope(expr.inner_scope)}
 
             ## Bind user iteration variables
-            % if user_element_var.source_name:
-               ${gdb_bind_var(user_element_var)}
+            % if expr.user_element_var.source_name:
+               ${gdb_bind_var(expr.user_element_var)}
             % endif
             % if expr.index_var:
                ${gdb_bind_var(expr.index_var)}
@@ -92,7 +75,7 @@
 
             ${loop_body()}
 
-            ${scopes.finalize_scope(expr.iter_scope)}
+            ${scopes.finalize_scope(expr.inner_scope)}
 
             ## If we decided after this iteration to exit the loop, we can do
             ## it now that the iteration scope it finalized.

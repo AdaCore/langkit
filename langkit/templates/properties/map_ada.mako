@@ -62,12 +62,12 @@
       ## evaluate the "expr" sub-expression and integrate it to the result
       ## according to whether we are doing concatenation mapping or a simple
       ## one.
-      ${map.expr.render_pre()}
-      <% expr = map.expr.render_expr() %>
+      ${map.inner_expr.render_pre()}
+      <% expr = map.inner_expr.render_expr() %>
 
       % if map.do_concat:
          for Item_To_Append of
-            % if map.expr.type.is_list_type:
+            % if map.inner_expr.type.is_list_type:
                ${expr}.Nodes (1 .. Children_Count (${expr})
             % else:
                ${expr}.Items
