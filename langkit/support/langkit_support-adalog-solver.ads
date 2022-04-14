@@ -88,7 +88,8 @@ package Langkit_Support.Adalog.Solver is
    -- Relation constructors --
    ---------------------------
 
-   package Relation_Vectors is new Langkit_Support.Vectors (Relation);
+   package Relation_Vectors is new Langkit_Support.Vectors
+     (Relation, Small_Vector_Capacity => 16);
    subtype Relation_Array is Relation_Vectors.Elements_Array;
    No_Relation_Array : Relation_Array renames Relation_Vectors.Empty_Array;
 
