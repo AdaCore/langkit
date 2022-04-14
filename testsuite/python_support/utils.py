@@ -14,7 +14,10 @@ from langkit.libmanage import ManageScript
 from drivers.valgrind import valgrind_cmd
 
 
-Diagnostics.blacklisted_paths.append(P.dirname(P.abspath(__file__)))
+python_support_dir = P.dirname(P.abspath(__file__))
+
+
+Diagnostics.blacklisted_paths.append(python_support_dir)
 
 
 default_warning_set = WarningSet()
@@ -372,13 +375,19 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         subprocess.check_call(argv, env=env)
 
     if py_script is not None:
-        # Run the Python script. Note that in order to use the generated
-        # library, we have to use the special Python interpreter the testsuite
-        # provides us. See the corresponding code in
-        # testuite_support/python_driver.py.
+        # Run the Python script.
+        #
+        # Note that in order to use the generated library, we have to use the
+        # special Python interpreter the testsuite provides us. See the
+        # corresponding code in testsuite/drivers/python_driver.py.
         args = [os.environ['PYTHON_INTERPRETER']]
         if python_args:
             args.extend(python_args)
+
+        # Also note that since Python 3.8, we need special PATH processing for
+        # DLLs: see the path_wrapper.py script.
+        args.append(P.join(python_support_dir, "path_wrapper.py"))
+
         args.append(py_script)
         run(*args)
 
