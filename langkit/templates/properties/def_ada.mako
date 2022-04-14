@@ -55,7 +55,7 @@ is
       <% all_scopes = property.vars.all_scopes %>
       % for scope in all_scopes:
          % if scope.has_refcounted_vars():
-            procedure ${scope.finalizer_name};
+            procedure ${scope.finalizer_name} with Inline_Always;
          % endif
       % endfor
 
