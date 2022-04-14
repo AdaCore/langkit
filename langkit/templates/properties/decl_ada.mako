@@ -10,5 +10,8 @@ ${"overriding" if property.overriding else ""} function ${property.name}
    % if property.abstract and not property.abstract_runtime_check:
    is abstract
    % endif
+   % if property.is_dispatcher:
+   with Inline_Always
+   % endif
    ;
 ${ada_doc(property, 0)}
