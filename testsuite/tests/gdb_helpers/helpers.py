@@ -92,7 +92,8 @@ def run_fooout(next_descr: str) -> None:
     """
     gdb.test(
         "fooout",
-        f"@/([New Thread .*])?/libfoolang.implementation.@...\n{next_descr}",
+        r"@/(\[New Thread .*\])?/ "
+        f"libfoolang.implementation.@...\n{next_descr}",
     )
 
 
