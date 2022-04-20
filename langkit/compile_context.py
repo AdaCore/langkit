@@ -2728,33 +2728,36 @@ class CompileCtx:
                 for env_action in astnode.env_spec.actions:
                     env_action.rewrite_property_refs(redirected_props)
 
-    def generate_actions_for_hierarchy(self, node_var, kind_var,
-                                       actions_for_astnode,
-                                       public_nodes=False):
+    def generate_actions_for_hierarchy(
+        self,
+        node_var: Optional[str],
+        kind_var: str,
+        actions_for_node: Callable[[ASTNodeType, Optional[str]], str],
+        public_nodes: bool = False
+    ) -> str:
         """
         Generate a sequence of Ada statements/nested CASE blocks to execute
-        some actions on an AST node depending on its kind.
+        some actions on a node depending on its kind.
 
         This method is useful to avoid generating the same statements over and
-        over for multiple AST node kinds. For instance, given a root AST node
-        `A` a field `f` on `A`, and its derivations `B`, `C` and `D`, if one
-        wants to perform clean-up on some AST node fields, there is no need to
-        generate specific code for `B.f`, `C.f` and `D.f` when we could just
-        generate code for `A.f`.
+        over for multiple node kinds. For instance, given a root node ``A`` a
+        field ``f`` on ``A``, and its derivations ``B``, ``C`` and ``D``, if
+        one wants to perform clean-up on some node fields, there is no need to
+        generate specific code for ``B.f``, ``C.f`` and ``D.f`` when we could
+        just generate code for ``A.f``.
 
-        :param str|None node_var: Name of the variable that holds the AST node
-            to process. None if the generated code must work only on the kind.
-        :param str kind_var: Name of the variable that holds the kind of the
-            AST node to process. Holding it in a variables is handy to avoid
-            computing it multiple times.
-        :param (ASTNodeType, str) -> str actions_for_astnode: Function that
-            takes a specific node type to process and the name of the variable
-            to hold the node instance to process. It must return the actions
-            (i.e. Ada statements as a single string) to perform for this node.
-            Note that these actions should be specific to the node type, i.e.
-            they should not overlap with actions for any parent node.
-        :type actions_for_astnode: (ASTNodeType) -> str
-        :param bool public_nodes: Whether `node_var` is a type from the public
+        :param node_var: Name of the variable that holds the node to process.
+            None if the generated code must work only on the kind.
+        :param kind_var: Name of the variable that holds the kind of the node
+            to process. Holding it in a variables is handy to avoid computing
+            it multiple times.
+        :param actions_for_node: Function that takes a specific node type to
+            process and the name of the variable to hold the node instance to
+            process. It must return the actions (i.e. Ada statements as a
+            single string) to perform for this node.  Note that these actions
+            should be specific to the node type, i.e. they should not overlap
+            with actions for any parent node.
+        :param public_nodes: Whether ``node_var`` is a type from the public
             API. Otherwise (the default), assume it is an internal node.
         """
 
@@ -2763,59 +2766,52 @@ class CompileCtx:
             Holder for "when ... =>" clauses in a CASE block.
             """
 
-            def __init__(self, astnode, actions):
-                self.astnode = astnode
+            def __init__(self, node: ASTNodeType, actions: str):
+                self.node = node
                 """
-                AST node that `self` matches.
-                :type: ASTNodeType
+                Node that ``self`` matches.
                 """
 
                 self.actions = actions
                 """
-                List of actions specific to this matched AST node.
-                :type: str
+                List of actions specific to this matched node.
                 """
 
-                self.inner_case = Case(astnode)
+                self.inner_case = Case(node)
                 """
-                Case instance for nodes that are more specific than `astnode`.
-                :type: Case
+                Case instance for nodes that are more specific than ``node``.
                 """
 
             @staticmethod
-            def new_node_var(astnode):
+            def new_node_var(node: ASTNodeType) -> str:
                 """
                 Return the variable name that will hold the casted value for
-                the matched AST node.
-
-                :rtype: names.Name
+                the matched node.
                 """
-                return names.Name('N') + astnode.name
+                return f"N_{node.name}"
 
         class Case:
             """
             Holder for a generated CASE blocks.
             """
 
-            def __init__(self, astnode):
-                self.astnode = astnode
+            def __init__(self, node: ASTNodeType):
+                self.node = node
                 """
                 Most specific type for this CASE block's input expression.
-                :type: ASTNodeType
                 """
 
-                self.matchers = []
+                self.matchers: List[Matcher] = []
                 """
                 List of matchers for this CASE block.
-                :type: list[Matcher]
                 """
 
         root_node = self.root_grammar_class
+        assert root_node is not None
 
-        result = []
+        result: List[str] = []
         """
         List of strings for the sequence of Ada statements to return.
-        :type: list[str]
         """
 
         case_stack = [Case(root_node)]
@@ -2823,91 +2819,83 @@ class CompileCtx:
         Stack of Case instances for the Case tree we are currently building.
         First element is for the top-level CASE node while the last element is
         for the currently inner-most CASE node.
-        :type: list[Case]
         """
 
-        def build_cases(astnode):
+        def build_cases(node: ASTNodeType) -> None:
             """
-            Build the tree of CASE blocks for `astnode` and all its subclasses.
+            Build the tree of CASE blocks for ``node`` and all its subclasses.
             """
             # Don't bother processing classes unless they actually have
             # concrete subclasses, otherwise we would be producing dead code.
-            if not astnode.concrete_subclasses:
+            if not node.concrete_subclasses:
                 return
 
             to_pop = False
 
-            if astnode == root_node:
+            if node == root_node:
                 # As a special case, emit actions for the root node outside of
                 # the top-level CASE block as we don't need to dispatch on
                 # anything for them: they always must be applied.
-                actions = actions_for_astnode(astnode, node_var)
+                actions = actions_for_node(node, node_var)
                 if actions:
                     result.append(actions)
 
             else:
                 # If there are actions for this node, add a matcher for them
                 # and process the subclasses in a nested CASE block.
-                actions = actions_for_astnode(
-                    astnode, Matcher.new_node_var(astnode)
-                )
+                actions = actions_for_node(node, Matcher.new_node_var(node))
                 if actions:
-                    m = Matcher(astnode, actions)
+                    m = Matcher(node, actions)
                     case_stack[-1].matchers.append(m)
                     case_stack.append(m.inner_case)
                     to_pop = True
 
-            for subcls in astnode.subclasses:
+            for subcls in node.subclasses:
                 build_cases(subcls)
 
             if to_pop:
                 case_stack.pop()
 
-        def print_case(case, node_var):
+        def print_case(case: Case, node_var: Optional[str]) -> None:
             """
-            Render a tree of CASE blocks and append them to `result`.
+            Render a tree of CASE blocks and append them to ``result``.
 
-            :param Case case: CASE block to render.
-            :param str node_var: Name of the variable that holds the node on
-                which this CASE must dispatch.
+            :param case: CASE block to render.
+            :param node_var: Name of the variable that holds the node on which
+                this CASE must dispatch.
             """
             if not case.matchers:
                 return
 
-            result.append('case {} ({}) is'.format(
-                case.astnode.ada_kind_range_name, kind_var
-            ))
+            result.append(
+                f"case {case.node.ada_kind_range_name} ({kind_var}) is"
+            )
             for m in case.matchers:
-                result.append(
-                    'when {} =>'.format(m.astnode.ada_kind_range_name)
-                )
+                result.append(f"when {m.node.ada_kind_range_name} =>")
                 if node_var is None:
                     new_node_var = None
                 else:
                     new_node_type = (
-                        m.astnode.entity.api_name.camel_with_underscores
+                        m.node.entity.api_name.camel_with_underscores
                         if public_nodes else
-                        m.astnode.name.camel_with_underscores)
-                    new_node_var = m.new_node_var(m.astnode)
+                        m.node.name.camel_with_underscores)
+                    new_node_var = m.new_node_var(m.node)
 
                     # Declare a new variable to hold the node subtype to
                     # process in this matcher.
-                    new_node_expr = ('{node_var}.As_{new_node_type}'
+                    new_node_expr = (f"{node_var}.As_{new_node_type}"
                                      if public_nodes else
-                                     str(node_var))
+                                     node_var)
                     result.append('declare')
-                    result.append(
-                        ('{new_node_var} : constant'
-                         ' {namespace}{new_node_type} := ' +
-                         new_node_expr + ';').format(
-                            node_var=node_var,
-                            new_node_type=new_node_type,
-                            new_node_var=new_node_var,
 
-                            # Public node names sometimes clash with
-                            # introspection enumerations. Adding namespace
-                            # helps generating correct code.
-                            namespace='Analysis.' if public_nodes else ''))
+                    # Public node names sometimes clash with introspection
+                    # enumerations. Adding namespace helps generating correct
+                    # code.
+                    namespace = "Analysis." if public_nodes else ""
+                    result.append(
+                        f"{new_node_var} : constant"
+                        f" {namespace}{new_node_type} := {new_node_expr};"
+                    )
                     result.append('begin')
 
                 result.append(m.actions)
