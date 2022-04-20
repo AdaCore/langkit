@@ -11,6 +11,12 @@ ${parser.pos_var} := ${parser.start_pos};
 ## Parse the element
 ${subparser.generate_code()}
 
+## Propagate no_backtrack information. If a subparser sets its no_backtrack
+## variable, it should propagate the result to its parent.
+% if subparser.no_backtrack and parser.no_backtrack:
+   ${parser.no_backtrack} := ${subparser.no_backtrack};
+% endif
+
 % if parser.progress_var:
 ${parser.progress_var} := ${num};
 % endif

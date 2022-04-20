@@ -615,6 +615,8 @@ class Parser:
         variable if necessary, indicating which parsers should not backtrack.
         """
         if isinstance(self, Cut):
+            # Do not create a new variable for consecutive Cuts
+
             if nobt:
                 self.no_backtrack = nobt
             else:
@@ -622,10 +624,32 @@ class Parser:
 
         for c in self.children:
             nobt = c.traverse_nobacktrack(self.no_backtrack)
-            # Or parsers are a stop point for Cut
 
-            if nobt and not isinstance(self, Or):
+            # Or and Opt parsers are stop points for Cut:
+            #
+            # * For Or(A, B, ...) parsers, the effect of a Cut in A/B/... must
+            #   stop when parsing returns from A/B/..., so we do not want the
+            #   no_backtrack variable to be propagated from A to B, etc. and
+            #   from A/B/... to the Or parser itself.
+            #
+            # * For Parser(A, Opt(B), Opt(C), ...) parsers, the effect of a Cut
+            #   in A/... must stop when parsing B/C, so we do not want the
+            #   no_backtrack variable to be propagated from A/... to B/C. On
+            #   the other hand, a Cut in B should be propagated to the Parser
+            #   itself, which includes A/... parsers, but not C (i.e. the
+            #   effect of a Cut in B or C must not affect C or B, respectively,
+            #   but only their parent parser Parser).
+
+            if nobt and not isinstance(self, Or) and not isinstance(c, Opt):
                 self.no_backtrack = nobt
+
+            # If c is an Opt parser that contains a Cut, the no_backtrack value
+            # of c will be propagated to self: create a no_backtrack variable
+            # in self to hold the propagated value if no Cut has been defined
+            # at this point in self yet.
+
+            if nobt and not self.no_backtrack and isinstance(c, Opt):
+                self.no_backtrack = VarDef('nobt', T.Bool, reinit=True)
 
         return self.no_backtrack
 
@@ -2385,6 +2409,48 @@ class Cut(Parser):
         function Foo is    --  This function decl will be parsed correctly
             print("lol")
         end
+
+    Still in the perspective of better error recovery, a ``Cut`` parser is also
+    allowed in an ``Opt`` parser in order to prevent backtracking even when an
+    ``Opt`` parser fails. Here is an example of how to use the ``Cut`` parser
+    in an ``Opt`` one::
+
+        body=Body(Opt("scope", identifier), "begin", stmts_list, "end")
+
+    In this case, if we try to parse the input ``"scope begin [stmts] end"``,
+    it will fail because of the missing ``identifier`` field, the ``Opt``
+    parser will backtrack and the ``scope`` keyword will report an error.
+    Nevertheless, it can be improved thanks to a ``Cut``::
+
+        body=Body(Opt("scope", Cut(), identifier), "begin", stmts_list, "end")
+
+    Now, the parser will not backtrack and produce an incomplete node, taking
+    into account the ``Opt`` part. The error will now concern the
+    ``identifier`` field being absent instead of complaining about the
+    ``scope`` keyword. This also means that on the simple input: ``"scope"``,
+    the parser won't backtrack and produce an incomplete ``Body`` node.
+
+    Note that the ``Cut`` parser only applies to the ``Opt`` parser it is
+    defined in, therefore, the parser will backtrack on the following input:
+    ``"begin end"``. Here, the parser will fail because of the missing
+    ``stmts_list`` field. Several ``Cut`` parsers can be used to improve error
+    recovery in that case. Rewriting the rule as::
+
+        body=Body(Opt("scope", Cut(), identifier),
+                  "begin", Cut(), stmts_list, "end")
+
+    will allow the parser to properly parse the incomplete input, reporting the
+    missing ``stmts_list`` field. Moreover, if no ``Cut`` is defined in the
+    ``Opt`` parser::
+
+        body=Body(Opt("scope", identifier), "begin", Cut(), stmts_list, "end")
+
+    The ``Cut`` in the ``Body`` parser has no effect in the ``Opt`` part, which
+    means that the following input: ``"scope begin end"``, will produce a
+    parsing error and won't recover anything from the ``Opt`` parser: the
+    ``identifier`` being absent, the ``Opt`` parser will fail and backtrack,
+    the ``scope`` keyword will be reported as en error, and, the ``begin end``
+    will be incompletely parsed (no backtrack because of the ``Cut``).
     """
 
     def discard(self) -> bool:

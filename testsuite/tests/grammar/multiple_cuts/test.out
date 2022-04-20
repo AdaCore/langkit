@@ -1,0 +1,337 @@
+=== complete case 1: def a ===
+
+FooNodeList buffer:1:1-1:6
+|item_0:
+|  Def buffer:1:1-1:6
+|  |id1:
+|  |  Id buffer:1:5-1:6: a
+|  |id2: None
+|  |id3: None
+
+=== complete case 2: def a (b) ===
+
+FooNodeList buffer:1:1-1:10
+|item_0:
+|  Def buffer:1:1-1:10
+|  |id1:
+|  |  Id buffer:1:5-1:6: a
+|  |id2:
+|  |  Id buffer:1:8-1:9: b
+|  |id3: None
+
+=== complete case 3: def a (b) {c} ===
+
+FooNodeList buffer:1:1-1:14
+|item_0:
+|  Def buffer:1:1-1:14
+|  |id1:
+|  |  Id buffer:1:5-1:6: a
+|  |id2:
+|  |  Id buffer:1:8-1:9: b
+|  |id3:
+|  |  Id buffer:1:12-1:13: c
+
+=== complete case 4: var a ===
+
+FooNodeList buffer:1:1-1:6
+|item_0:
+|  Var buffer:1:1-1:6
+|  |id:
+|  |  Id buffer:1:5-1:6: a
+|  |ids:
+|  |  IdList buffer:1:4-1:4
+
+=== complete case 5: var a (b) ===
+
+FooNodeList buffer:1:1-1:10
+|item_0:
+|  Var buffer:1:1-1:10
+|  |id:
+|  |  Id buffer:1:5-1:6: a
+|  |ids:
+|  |  IdList buffer:1:8-1:9
+|  |  |item_0:
+|  |  |  Id buffer:1:8-1:9: b
+
+=== complete case 6: var a (b, c, d) ===
+
+FooNodeList buffer:1:1-1:16
+|item_0:
+|  Var buffer:1:1-1:16
+|  |id:
+|  |  Id buffer:1:5-1:6: a
+|  |ids:
+|  |  IdList buffer:1:8-1:15
+|  |  |item_0:
+|  |  |  Id buffer:1:8-1:9: b
+|  |  |item_1:
+|  |  |  Id buffer:1:11-1:12: c
+|  |  |item_2:
+|  |  |  Id buffer:1:14-1:15: d
+
+=== complete case 7: . a (b) ===
+
+FooNodeList buffer:1:1-1:8
+|item_0:
+|  Dot buffer:1:1-1:8
+|  |id1:
+|  |  Id buffer:1:3-1:4: a
+|  |id2:
+|  |  Id buffer:1:6-1:7: b
+|  |id3: None
+
+=== complete case 8: . a (b) {c} ===
+
+FooNodeList buffer:1:1-1:12
+|item_0:
+|  Dot buffer:1:1-1:12
+|  |id1:
+|  |  Id buffer:1:3-1:4: a
+|  |id2:
+|  |  Id buffer:1:6-1:7: b
+|  |id3:
+|  |  Id buffer:1:10-1:11: c
+
+=== complete case 9: , a b ===
+
+FooNodeList buffer:1:1-1:6
+|item_0:
+|  Comma buffer:1:1-1:6
+|  |id1: None
+|  |id2:
+|  |  Id buffer:1:3-1:4: a
+|  |id3:
+|  |  Id buffer:1:5-1:6: b
+
+=== complete case 10: (a) , b c ===
+
+FooNodeList buffer:1:1-1:10
+|item_0:
+|  Comma buffer:1:1-1:10
+|  |id1:
+|  |  Id buffer:1:2-1:3: a
+|  |id2:
+|  |  Id buffer:1:7-1:8: b
+|  |id3:
+|  |  Id buffer:1:9-1:10: c
+
+=== incomplete case 1: def ===
+
+1:1-1:4: Cannot parse <def>
+1:4-1:4: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:4
+|item_0:
+|  Def buffer:1:1-1:4
+|  |id1: None
+|  |id2: None
+|  |id3: None
+
+=== incomplete case 2: def a (b ===
+
+1:9-1:9: Cannot parse <def>
+1:9-1:9: Expected ')', got Termination
+FooNodeList buffer:1:1-1:9
+|item_0:
+|  Def buffer:1:1-1:9
+|  |id1:
+|  |  Id buffer:1:5-1:6: a
+|  |id2:
+|  |  Id buffer:1:8-1:9: b
+|  |id3: None
+
+=== incomplete case 3: def a (b) {c ===
+
+1:13-1:13: Cannot parse <def>
+1:13-1:13: Expected '}', got Termination
+FooNodeList buffer:1:1-1:13
+|item_0:
+|  Def buffer:1:1-1:13
+|  |id1:
+|  |  Id buffer:1:5-1:6: a
+|  |id2:
+|  |  Id buffer:1:8-1:9: b
+|  |id3:
+|  |  Id buffer:1:12-1:13: c
+
+=== incomplete case 4: def a ( ===
+
+1:8-1:8: Cannot parse <def>
+1:8-1:8: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:8
+|item_0:
+|  Def buffer:1:1-1:8
+|  |id1:
+|  |  Id buffer:1:5-1:6: a
+|  |id2: None
+|  |id3: None
+
+=== incomplete case 5: def a (b) { ===
+
+1:12-1:12: Cannot parse <def>
+1:12-1:12: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:12
+|item_0:
+|  Def buffer:1:1-1:12
+|  |id1:
+|  |  Id buffer:1:5-1:6: a
+|  |id2:
+|  |  Id buffer:1:8-1:9: b
+|  |id3: None
+
+=== incomplete case 6: def a ( { ===
+
+1:9-1:10: Cannot parse <def>
+1:9-1:10: Expected Identifier, got '{'
+1:10-1:10: Cannot parse <def>
+1:10-1:10: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:10
+|item_0:
+|  Def buffer:1:1-1:10
+|  |id1:
+|  |  Id buffer:1:5-1:6: a
+|  |id2: None
+|  |id3: None
+
+=== incomplete case 7: def a (b {c ===
+
+1:10-1:11: Cannot parse <def>
+1:10-1:11: Expected ')', got '{'
+1:12-1:12: Cannot parse <def>
+1:12-1:12: Expected '}', got Termination
+FooNodeList buffer:1:1-1:12
+|item_0:
+|  Def buffer:1:1-1:12
+|  |id1:
+|  |  Id buffer:1:5-1:6: a
+|  |id2:
+|  |  Id buffer:1:8-1:9: b
+|  |id3:
+|  |  Id buffer:1:11-1:12: c
+
+=== incomplete case 8: var ===
+
+1:1-1:4: Cannot parse <var>
+1:4-1:4: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:4
+|item_0:
+|  Var buffer:1:1-1:4
+|  |id: None
+|  |ids: None
+
+=== incomplete case 9: var a ( ===
+
+1:8-1:8: Cannot parse <var>
+1:8-1:8: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:8
+|item_0:
+|  Var buffer:1:1-1:8
+|  |id:
+|  |  Id buffer:1:5-1:6: a
+|  |ids:
+|  |  IdList buffer:1:8-1:8
+
+=== incomplete case 10: var a () ===
+
+1:8-1:9: Cannot parse <var>
+1:8-1:9: Expected Identifier, got ')'
+1:8-1:9: End of input expected, got "R_Par"
+FooNodeList buffer:1:1-1:8
+|item_0:
+|  Var buffer:1:1-1:8
+|  |id:
+|  |  Id buffer:1:5-1:6: a
+|  |ids:
+|  |  IdList buffer:1:8-1:8
+
+=== incomplete case 11: var a (b, c, d ===
+
+1:15-1:15: Cannot parse <var>
+1:15-1:15: Expected ')', got Termination
+FooNodeList buffer:1:1-1:15
+|item_0:
+|  Var buffer:1:1-1:15
+|  |id:
+|  |  Id buffer:1:5-1:6: a
+|  |ids:
+|  |  IdList buffer:1:8-1:15
+|  |  |item_0:
+|  |  |  Id buffer:1:8-1:9: b
+|  |  |item_1:
+|  |  |  Id buffer:1:11-1:12: c
+|  |  |item_2:
+|  |  |  Id buffer:1:14-1:15: d
+
+=== incomplete case 12: . a (b ===
+
+1:7-1:7: Cannot parse <dot>
+1:7-1:7: Expected ')', got Termination
+FooNodeList buffer:1:1-1:7
+|item_0:
+|  Dot buffer:1:1-1:7
+|  |id1:
+|  |  Id buffer:1:3-1:4: a
+|  |id2:
+|  |  Id buffer:1:6-1:7: b
+|  |id3: None
+
+=== incomplete case 13: . a (b) { ===
+
+1:10-1:10: Cannot parse <dot>
+1:10-1:10: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:10
+|item_0:
+|  Dot buffer:1:1-1:10
+|  |id1:
+|  |  Id buffer:1:3-1:4: a
+|  |id2:
+|  |  Id buffer:1:6-1:7: b
+|  |id3: None
+
+=== incomplete case 14: . a ( { ===
+
+1:7-1:8: Cannot parse <dot>
+1:7-1:8: Expected Identifier, got '{'
+1:8-1:8: Cannot parse <dot>
+1:8-1:8: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:8
+|item_0:
+|  Dot buffer:1:1-1:8
+|  |id1:
+|  |  Id buffer:1:3-1:4: a
+|  |id2: None
+|  |id3: None
+
+=== incomplete case 15: , b ===
+
+1:4-1:4: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:1
+
+=== incomplete case 16: (a) , b ===
+
+1:1-1:2: Cannot parse <comma>
+1:8-1:8: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:8
+|item_0:
+|  Comma buffer:1:1-1:8
+|  |id1:
+|  |  Id buffer:1:2-1:3: a
+|  |id2:
+|  |  Id buffer:1:7-1:8: b
+|  |id3: None
+
+=== incomplete case 17: (a , b ===
+
+1:4-1:5: Cannot parse <comma>
+1:4-1:5: Expected ')', got ','
+1:1-1:2: Cannot parse <comma>
+1:7-1:7: Expected Identifier, got Termination
+FooNodeList buffer:1:1-1:7
+|item_0:
+|  Comma buffer:1:1-1:7
+|  |id1:
+|  |  Id buffer:1:2-1:3: a
+|  |id2:
+|  |  Id buffer:1:6-1:7: b
+|  |id3: None
+
+Done
