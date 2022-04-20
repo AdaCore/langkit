@@ -912,6 +912,9 @@ private package ${ada_lib_name}.Implementation is
    -- Debug helpers --
    -------------------
 
+   function Image (Value : Boolean) return String;
+   --  Image for a Boolean, for debugging/logging purposes
+
    procedure Print
      (Node        : ${T.root_node.name};
       Show_Slocs  : Boolean;

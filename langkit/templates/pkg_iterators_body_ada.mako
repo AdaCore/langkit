@@ -11,7 +11,9 @@ with Ada.Strings.Wide_Wide_Unbounded;
    pred_ref = '{}_Predicate'.format(node)
 %>
 
+% if ctx.sorted_parse_fields:
 with ${ada_lib_name}.Introspection; use ${ada_lib_name}.Introspection;
+% endif
 
 ${exts.with_clauses(with_clauses)}
 
@@ -485,6 +487,7 @@ package body ${ada_lib_name}.Iterators is
          end;
       % else:
          return False;
+         pragma Unreferenced (P);
       % endif
    end Evaluate;
 

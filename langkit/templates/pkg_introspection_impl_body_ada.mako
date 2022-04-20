@@ -449,7 +449,12 @@ package body ${ada_lib_name}.Introspection_Implementation is
 
             return '\n'.join(result)
       %>
-      ${ctx.generate_actions_for_hierarchy('Node', 'Kind', get_actions)}
+      ${ctx.generate_actions_for_hierarchy(
+         node_var='Node',
+         kind_var='Kind',
+         actions_for_node=get_actions,
+         unref_if_empty=["Field"]
+      )}
 
       ## If we haven't matched the requested field on Node, report an error
       return (raise Bad_Type_Error with "no such field on this node");
@@ -483,6 +488,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
          end case;
 
       % else:
+         pragma Unreferenced (Kind, Field);
          return (raise Program_Error);
       % endif
    end Index;
@@ -525,7 +531,12 @@ package body ${ada_lib_name}.Introspection_Implementation is
 
             return '\n'.join(result)
       %>
-      ${ctx.generate_actions_for_hierarchy(None, 'Kind', get_actions)}
+      ${ctx.generate_actions_for_hierarchy(
+         node_var=None,
+         kind_var='Kind',
+         actions_for_node=get_actions,
+         unref_if_empty=["Index"]
+      )}
 
       pragma Warnings (Off, "value not in range of type");
       return (raise Bad_Type_Error with "Index is out of bounds");
@@ -542,6 +553,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
       % if ctx.sorted_parse_fields:
          return Syntax_Fields (Id_For_Kind (Kind), Concrete_Only => True);
       % else:
+         pragma Unreferenced (Kind);
          ${return_program_error()}
       % endif
    end Syntax_Fields;
@@ -618,6 +630,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
 
       % else:
          ${return_program_error()}
+         pragma Unreferenced (Concrete_Only, Cursor, Result, Last);
       % endif
    end Syntax_Fields;
 

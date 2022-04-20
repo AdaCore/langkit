@@ -2733,7 +2733,8 @@ class CompileCtx:
         node_var: Optional[str],
         kind_var: str,
         actions_for_node: Callable[[ASTNodeType, Optional[str]], str],
-        public_nodes: bool = False
+        public_nodes: bool = False,
+        unref_if_empty: Optional[List[str]] = None,
     ) -> str:
         """
         Generate a sequence of Ada statements/nested CASE blocks to execute
@@ -2759,6 +2760,8 @@ class CompileCtx:
             with actions for any parent node.
         :param public_nodes: Whether ``node_var`` is a type from the public
             API. Otherwise (the default), assume it is an internal node.
+        :param unref_if_empty: List of names for which to generate an
+            Unreferenced pragma if there are no action.
         """
 
         class Matcher:
@@ -2819,6 +2822,11 @@ class CompileCtx:
         Stack of Case instances for the Case tree we are currently building.
         First element is for the top-level CASE node while the last element is
         for the currently inner-most CASE node.
+        """
+
+        unref_names: List[str] = []
+        """
+        List of names to include in a "pragma Unreferenced".
         """
 
         def build_cases(node: ASTNodeType) -> None:
@@ -2908,8 +2916,33 @@ class CompileCtx:
 
         with names.camel_with_underscores:
             build_cases(root_node)
+
             assert len(case_stack) == 1
-            print_case(case_stack[0], node_var)
+            root_case = case_stack[0]
+
+            print_case(root_case, node_var)
+
+        # If we have no action or actions for the root node only, we have no
+        # case statement, and thus the variable for the node kind is unused.
+        if (
+            not root_case.matchers
+            or (
+                len(root_case.matchers) == 1
+                and root_case.matchers[0].node == root_node
+            )
+        ):
+            unref_names.append(kind_var)
+
+        # If we have no action at all, mark the requested variables as
+        # empty.
+        if not root_case.matchers and unref_if_empty:
+            unref_names.extend(unref_if_empty)
+
+        # If needed, generate the Unreferenced pragma
+        if unref_names:
+            result.append("pragma Unreferenced ({});".format(
+                ", ".join(unref_names)
+            ))
 
         return '\n'.join(result) or 'null;'
 

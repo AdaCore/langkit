@@ -1,6 +1,6 @@
 """
 Test that the "create-project.py" script creates a valid Langkit project by
-generating it and building it.
+generating it and building it (expecting no warning).
 """
 
 import os.path
@@ -18,6 +18,6 @@ create_project_py = os.path.join(langkit_root, 'scripts', 'create-project.py')
 manage_py = os.path.join('mylang', 'manage.py')
 
 python(create_project_py, 'Mylang')
-python(manage_py, 'make', '-P', '-vnone')
+python(manage_py, 'make', '-P', '-vnone', '--enable-build-warnings')
 
 print('Done')

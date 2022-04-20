@@ -43,7 +43,9 @@ with Langkit_Support.Relative_Get;
 with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
 
+% if ctx.sorted_parse_fields:
 with ${ada_lib_name}.Introspection_Implementation;
+% endif
 
 pragma Warnings (Off, "referenced");
 ${exts.with_clauses(with_clauses + [
@@ -1687,17 +1689,19 @@ package body ${ada_lib_name}.Implementation is
       <%def name="default()"> null; </%def>
       </%self:case_dispatch>
 
+      % if not any( \
+         n.env_spec and n.env_spec.pre_actions for n in ctx.astnode_types \
+      ):
+         pragma Unreferenced (State, Add_To_Env_Only);
+      % endif
    end Pre_Env_Actions;
 
    ----------------------
    -- Post_Env_Actions --
    ----------------------
 
-   pragma Warnings (Off, "referenced");
    procedure Post_Env_Actions
-     (Self : ${T.root_node.name}; State : in out PLE_Node_State)
-   is
-      pragma Warnings (On, "referenced");
+     (Self : ${T.root_node.name}; State : in out PLE_Node_State) is
    begin
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
@@ -1709,6 +1713,12 @@ package body ${ada_lib_name}.Implementation is
       </%def>
       <%def name="default()"> null; </%def>
       </%self:case_dispatch>
+
+      % if not any( \
+         n.env_spec and n.env_spec.post_actions for n in ctx.astnode_types \
+      ):
+         pragma Unreferenced (State);
+      % endif
    end Post_Env_Actions;
 
    ----------------
@@ -3025,7 +3035,12 @@ package body ${ada_lib_name}.Implementation is
 
       Index_In_Bounds := True;
       Result := null;
-      ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
+      ${ctx.generate_actions_for_hierarchy(
+         node_var='Node',
+         kind_var='K',
+         actions_for_node=get_actions,
+         unref_if_empty=["Index"]
+      )}
 
       --  Execution should reach this point iff nothing matched this index, so
       --  we must be out of bounds.
@@ -3041,10 +3056,7 @@ package body ${ada_lib_name}.Implementation is
       Show_Slocs  : Boolean;
       Line_Prefix : String := "")
    is
-      K               : ${T.node_kind};
-      Attr_Prefix     : constant String := Line_Prefix & "|";
-      Children_Prefix : constant String := Line_Prefix & "|  ";
-
+      K : ${T.node_kind};
    begin
       if Node = null then
          Put_Line ("None");
@@ -3093,8 +3105,11 @@ package body ${ada_lib_name}.Implementation is
          --  This is for regular nodes: display each field
          declare
             use ${ada_lib_name}.Introspection_Implementation;
-            Field_List : constant Syntax_Field_Reference_Array :=
-               Syntax_Fields (K);
+
+            Attr_Prefix     : constant String := Line_Prefix & "|";
+            Children_Prefix : constant String := Line_Prefix & "|  ";
+            Field_List      : constant Syntax_Field_Reference_Array :=
+              Syntax_Fields (K);
          begin
             for I in Field_List'Range loop
                declare
@@ -4104,7 +4119,12 @@ package body ${ada_lib_name}.Implementation is
 
               return '\n'.join(result)
       %>
-      ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
+      ${ctx.generate_actions_for_hierarchy(
+         node_var='Node',
+         kind_var='K',
+         actions_for_node=get_actions,
+         unref_if_empty=["Reset_Logic_Var"]
+      )}
    end Free_User_Fields;
 
    ----------------

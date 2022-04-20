@@ -79,15 +79,8 @@ package body ${ada_lib_name}.Parsers is
 
       % endif
    % endfor
-   pragma Warnings (On, "is not referenced");
    pragma Warnings (On, "possible aliasing problem for type");
-
-   procedure Initialize_List
-     (Self   : ${ctx.generic_list_type.name};
-      Parser : Parser_Type;
-      Count  : Natural);
-   --  Helper for parsers, to initialize the list of children in a freshly
-   --  allocated list node.
+   pragma Warnings (On, "is not referenced");
 
    type Dontskip_Parser_Function is access function
      (Parser : in out Parser_Type;
@@ -131,6 +124,8 @@ package body ${ada_lib_name}.Parsers is
    procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type);
    --  Add a diagnostic for the last fail position of the parser
 
+   pragma Warnings (Off, "is not referenced");
+
    function Get_Parse_List (Parser : Parser_Type) return Free_Parse_List;
    --  Get a free parse list, or allocate one if there is no free parse list in
    --  Parser. When done with the result, the caller must invoke
@@ -140,6 +135,15 @@ package body ${ada_lib_name}.Parsers is
      (Parser : Parser_Type; List : in out Free_Parse_List);
    --  Release a parse list, putting it in Parsers' free list. Set List to
    --  null.
+
+   procedure Initialize_List
+     (Self   : ${ctx.generic_list_type.name};
+      Parser : Parser_Type;
+      Count  : Natural);
+   --  Helper for parsers, to initialize the list of children in a freshly
+   --  allocated list node.
+
+   pragma Warnings (On, "is not referenced");
 
    procedure Enter_Call (Parser : Parser_Type; Call_Depth : access Natural);
    procedure Exit_Call (Parser : Parser_Type; Call_Depth : Natural);

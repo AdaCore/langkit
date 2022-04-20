@@ -162,9 +162,14 @@ package body ${ada_lib_name}.Common is
 
    function Is_List_Node (Kind : ${T.node_kind}) return Boolean is
    begin
-      return ${('Kind in {}'.format(ctx.generic_list_type.ada_kind_range_name)
-                if ctx.generic_list_type.concrete_subclasses else
-                'False')};
+      % if ctx.generic_list_type.concrete_subclasses:
+         return ${(
+            'Kind in {}'.format(ctx.generic_list_type.ada_kind_range_name)
+         )};
+      % else:
+         pragma Unreferenced (Kind);
+         return False;
+      % endif
    end Is_List_Node;
 
    ------------------
