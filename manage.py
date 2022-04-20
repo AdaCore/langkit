@@ -11,8 +11,10 @@ import sys
 from typing import Callable, List, Optional
 
 from langkit.packaging import Packager
-from langkit.utils import (LibraryTypes, add_to_path, format_setenv,
-                           get_cpu_count, parse_cmdline_args)
+from langkit.utils import (
+    LibraryType, add_to_path, format_setenv,
+    get_cpu_count, parse_cmdline_args, parse_list_of_choices
+)
 
 
 LANGKIT_ROOT = PurePath(P.dirname(P.realpath(__file__)))
@@ -76,7 +78,12 @@ def create_subparser(
         "--build-mode", "-b", choices=("dev", "prod"), default="dev",
         help="Select a preset for build options."
     )
-    LibraryTypes.add_option(subparser)
+    subparser.add_argument(
+        '--library-types',
+        type=parse_list_of_choices(LibraryType),
+        default=[LibraryType.relocatable],
+    )
+
     if with_jobs:
         subparser.add_argument(
             "--jobs", "-j", type=int, default=get_cpu_count(),
@@ -147,12 +154,12 @@ def build_langkit_support(args: Namespace) -> None:
     # gprbuild.
     lexch_pattern = str(build_dir / "obj" / args.build_mode / "*.lexch")
 
-    for library_type in args.library_types.names:
+    for library_type in args.library_types:
         for lexch in glob.glob(lexch_pattern):
             os.remove(lexch)
         subprocess.check_call(
             base_argv
-            + ["-P", SUPPORT_GPR, f"-XLIBRARY_TYPE={library_type}"]
+            + ["-P", SUPPORT_GPR, f"-XLIBRARY_TYPE={library_type.name}"]
             + gargs
         )
 
@@ -266,11 +273,12 @@ def make(args: Namespace) -> None:
         shutil.rmtree(PYTHON_LIB_ROOT / 'build', ignore_errors=True)
         shutil.rmtree(LKT_LIB_ROOT / 'build', ignore_errors=True)
 
+    lib_types = ",".join(l.name for l in args.library_types)
     base_argv = [
         sys.executable, "./manage.py",
         "make", "-P",
         "-Dgnu-full",
-        f"--library-types={args.library_types}",
+        f"--library-types={lib_types}",
         f"--build-mode={args.build_mode}",
         f"-j{args.jobs}",
     ]

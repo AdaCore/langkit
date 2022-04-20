@@ -14,8 +14,8 @@ import subprocess
 import sys
 import traceback
 from typing import (
-    Any, Callable, Dict, List, Optional, Optional as Opt, Sequence,
-    Set, TYPE_CHECKING, Text, TextIO, Tuple, Type, Union, cast
+    Any, Callable, Dict, List, Optional, Optional as Opt, Sequence, Set,
+    TYPE_CHECKING, Text, TextIO, Tuple, Type, Union, cast
 )
 
 from langkit.compile_context import UnparseScript, Verbosity
@@ -25,12 +25,14 @@ from langkit.diagnostics import (
 )
 from langkit.packaging import Packager
 from langkit.utils import (
-    Colors, LibraryTypes, Log, add_to_path, col, format_setenv, get_cpu_count,
-    parse_cmdline_args, printcol
+    BuildMode, Colors, LibraryType, Log, add_to_path, col, format_setenv,
+    get_cpu_count, parse_choice, parse_cmdline_args, parse_list_of_choices,
+    printcol
 )
 
 
 if TYPE_CHECKING:
+    from enum import Enum
     from langkit.compile_context import CompileCtx
     from langkit.passes import AbstractPass
     from types import TracebackType
@@ -90,12 +92,9 @@ class DisableWarningAction(argparse.Action):
 
 
 class ManageScript:
-
-    BUILD_MODES = ('dev', 'prod', 'prof')
-
-    build_mode: str
+    build_modes: List[BuildMode]
     """
-    Build mode for the project.
+    Build modes to build.
     """
 
     ENABLE_BUILD_WARNINGS_DEFAULT = False
@@ -350,7 +349,17 @@ class ManageScript:
             help='Directory to use for generated source code and binaries. By'
                  ' default, use "build" in the current directory.'
         )
-        LibraryTypes.add_option(subparser)
+
+        subparser.add_argument(
+            '--library-types',
+            type=parse_list_of_choices(LibraryType),
+            default=[LibraryType.relocatable],
+            help="Comma-separated list of library types to build (relocatable,"
+            " static-pic and static). By default, build only shared"
+            " libraries."
+
+        )
+
         subparser.add_argument(
             '--verbosity', '-v', nargs='?',
             type=Verbosity,
@@ -503,10 +512,28 @@ class ManageScript:
         )
 
     def add_build_mode_arg(self, subparser: argparse.ArgumentParser) -> None:
+
+        def parse_choice_into_list(s: str) -> List[Enum]:
+            fn = parse_choice(BuildMode)
+            return [fn(s)]
+
+        # We need to set the default for both build mode arguments, because
+        # else they might conflict and the default value might be none.
+        default = [BuildMode.dev]
+
         subparser.add_argument(
-            '--build-mode', '-b', choices=list(self.BUILD_MODES),
-            default='dev',
-            help='Selects a preset for build options.'
+            '--build-mode',
+            type=parse_choice_into_list,
+            dest="build_modes",
+            default=default,
+            help='Select a build mode. This is a shortcut for --build-modes'
+            ' with a single argument'
+        )
+        subparser.add_argument(
+            '--build-modes',
+            type=parse_list_of_choices(BuildMode),
+            default=default,
+            help='Select a list of build modes'
         )
 
     def add_build_args(self, subparser: argparse.ArgumentParser) -> None:
@@ -515,9 +542,15 @@ class ManageScript:
         """
         subparser.add_argument(
             '--jobs', '-j', type=int, default=get_cpu_count(),
-            help='Number of parallel jobs to spawn in parallel (default: your'
-                 ' number of cpu).'
+            help='Number of jobs to spawn in parallel for calls to builders'
+                 ' (default: your number of cpu).'
         )
+        subparser.add_argument(
+            '--parallel-builds', type=int, default=1,
+            help='Number of builds to run in parallel. Default is 1. Be'
+            ' careful because this is in addition to the number of jobs.'
+        )
+
         self.add_build_mode_arg(subparser)
         subparser.add_argument(
             '--enable-build-warnings',
@@ -639,12 +672,10 @@ class ManageScript:
             parsed_args, "enable_build_warnings", False
         )
 
-        # If there is no build_mode (ie. we're not running a command that
+        # If there is no build_modes (ie. we're not running a command that
         # requires it), we still need one to call gnatpp, so set it to a dummy
         # build mode.
-        self.build_mode = getattr(
-            parsed_args, "build_mode", self.BUILD_MODES[0]
-        )
+        self.build_modes = getattr(parsed_args, 'build_modes', [])
 
         self.no_ada_api = parsed_args.no_ada_api
 
@@ -792,7 +823,6 @@ class ManageScript:
         """
         Helper function to pretty-print files from a GPR project.
         """
-
         # In general, don't abort if we can't find gnatpp or if gnatpp
         # crashes: at worst sources will not be pretty-printed, which is
         # not a big deal. `check_call` will emit warnings in this case.
@@ -850,11 +880,13 @@ class ManageScript:
 
         self.log_info("Generation complete!", Colors.OKGREEN)
 
-    def what_to_build(self,
-                      args: argparse.Namespace,
-                      is_library: bool) -> Tuple[bool, bool, bool]:
+    def what_to_build(
+        self,
+        args: argparse.Namespace,
+        is_library: bool
+    ) -> List[List[Tuple[BuildMode, LibraryType]]]:
         """
-        Determine what kind of build to perform.
+        Determine what kind of builds to perform.
 
         :param args: The arguments parsed from the command line invocation of
             manage.py.
@@ -863,30 +895,25 @@ class ManageScript:
             in `args`). Otherwise, use relocatable if allowed, static-pic
             otherwise and static otherwise.
 
-        :return: Whether to build in 1) shared mode 2) static-pic mode 3)
-            static mode. Only one is True when is_library is False.
-        :rtype: (bool, bool, bool)
+        :return: A list of lists of build configurations to perform. Nested
+            lists contain build configurations that must be built sequentially.
+            The top level list contains builds that can be parallelized.
         """
-        lt = args.library_types
         if is_library:
-            # Build libraries for all requested library types
-            build_shared = lt.relocatable
-            build_static_pic = lt.static_pic
-            build_static = lt.static
+            return [[(b, l) for l in args.library_types]
+                    for b in self.build_modes]
         else:
             # Program are built only once, so build them as relocatable if
             # allowed, otherwise as static-pic if allowed, otherwise as static.
-            build_shared = build_static_pic = build_static = False
-            if lt.relocatable:
-                build_shared = True
-            elif lt.static_pic:
-                build_static_pic = True
-            elif lt.static:
-                build_static = True
-        return (build_shared, build_static_pic, build_static)
+            for l in (LibraryType.relocatable, LibraryType.static_pic,
+                      LibraryType.static):
+                if l in args.library_types:
+                    lib_type = l
+                    break
+            return [[(b, lib_type) for b in self.build_modes]]
 
     def gpr_scenario_vars(
-        self, library_type: str = 'relocatable'
+        self, library_type: str = 'relocatable', build_mode: str = 'dev'
     ) -> List[str]:
         """
         Return the project scenario variables to pass to GPRbuild.
@@ -894,7 +921,7 @@ class ManageScript:
         :param library_type: Library flavor to use. Must be "relocatable" or
             "static".
         """
-        result = ['-XBUILD_MODE={}'.format(self.build_mode),
+        result = ['-XBUILD_MODE={}'.format(build_mode),
                   '-XLIBRARY_TYPE={}'.format(library_type),
                   '-XGPR_BUILD={}'.format(library_type),
                   '-XXMLADA_BUILD={}'.format(library_type)]
@@ -910,8 +937,7 @@ class ManageScript:
                  args: argparse.Namespace,
                  project_file: str,
                  is_library: bool,
-                 mains: Set[str] = set(),
-                 obj_dirs: List[str] = []) -> None:
+                 mains: Set[str] = set()) -> None:
         """
         Run GPRbuild on a project file.
 
@@ -922,24 +948,10 @@ class ManageScript:
 
         :param is_library: See the "what_to_build" method.
 
-        :param obj_dirs: List of paths (relative to the project file directory)
-            to the object directory where gprbuild creates the "*.lexch" files.
-            We will remove all such files before each gprbuild run.
-
-            This allows us to workaround a GPRbuild bug (see SB18-035). Library
-            types share the same object directory, however GPRbuild uses a file
-            in the object directory (*.lexch) to know if the library must be
-            rebuilt. Not removing it will make it skip the "static" build after
-            the "static-pic" was built. So we remove it.
-
         :param mains: If provided, list of main programs to build. By default,
             GPRbuild builds them all, so this arguments makes it possible to
             build only a subset of them.
         """
-        lexch_patterns = [os.path.join(os.path.dirname(project_file),
-                                       obj_dir, '*.lexch')
-                          for obj_dir in obj_dirs]
-
         base_argv = [
             'gprbuild', '-p', '-j{}'.format(args.jobs),
             '-P{}'.format(project_file),
@@ -957,21 +969,40 @@ class ManageScript:
 
         gargs = parse_cmdline_args(getattr(args, 'gargs'))
 
-        def run(library_type: str) -> None:
-            # Remove the "*.lexch" file
-            for pattern in lexch_patterns:
-                files = glob.glob(pattern)
-                for f in files:
-                    self.log_debug('Removing {}'.format(f), Colors.CYAN)
-                    os.remove(f)
-                if not files:
-                    self.log_debug('No *.lexch file to remove from {}'
-                                   .format(pattern), Colors.CYAN)
+        def run(build_mode: BuildMode, library_type: LibraryType) -> None:
+            self.log_info(
+                f"Building for config ({build_mode}, {library_type})",
+                Colors.HEADER
+            )
+            # Workaround a GPRbuild bug (see SB18-035): Library types share the
+            # same object directory, however GPRbuild uses a file in the object
+            # directory (*.lexch) to know if the library must be rebuilt. Not
+            # removing it will make it skip the "static" build after the
+            # "static-pic" was built. So we remove it.
+            #
+            # TODO: We assume the object dir is always "obj" because it is in
+            # the only case that matters (building the library), and in other
+            # cases the globbing will return no files because the dir doesn't
+            # exist. Ideally we shouldn't duplicate this information here and
+            # in the project file.
+            obj_dir = self.dirs.build_dir('obj', build_mode.value)
+            lexch_pattern = os.path.join(os.path.dirname(project_file),
+                                         obj_dir, '*.lexch')
+
+            # Remove the "*.lexch" files
+            files = glob.glob(lexch_pattern)
+            for f in files:
+                self.log_debug('Removing {}'.format(f), Colors.CYAN)
+                os.remove(f)
+            if not files:
+                self.log_debug('No *.lexch file to remove from {}'
+                               .format(lexch_pattern), Colors.CYAN)
 
             argv = list(base_argv)
-            argv.extend(
-                self.gpr_scenario_vars(library_type=library_type)
-            )
+            argv.extend(self.gpr_scenario_vars(
+                library_type=library_type.value,
+                build_mode=build_mode.value
+            ))
             if mains:
                 argv.extend('{}.adb'.format(main) for main in mains)
             if Diagnostics.style == DiagnosticStyle.gnu_full:
@@ -979,14 +1010,19 @@ class ManageScript:
             argv.extend(gargs)
             self.check_call('Build', argv)
 
-        build_shared, build_static_pic, build_static = self.what_to_build(
-            args, is_library)
-        if build_shared:
-            run('relocatable')
-        if build_static_pic:
-            run('static-pic')
-        if build_static:
-            run('static')
+        def build(configs: List[Tuple[BuildMode, LibraryType]]) -> None:
+            """
+            Sequentially build a list of configs.
+            """
+            for c in configs:
+                run(*c)
+
+        from concurrent import futures
+        with futures.ThreadPoolExecutor(
+            max_workers=args.parallel_builds
+        ) as executor:
+            list(executor.map(lambda v: build(v),
+                              self.what_to_build(args, is_library)))
 
     def gprinstall(self,
                    args: argparse.Namespace,
@@ -1032,13 +1068,11 @@ class ManageScript:
 
         # Install the static libraries first, so that in the resulting project
         # files, "static" is the default library type.
-        build_shared, build_static_pic, build_static = self.what_to_build(
-            args, is_library)
-        if build_static:
+        if LibraryType.static in args.library_types:
             run('static')
-        if build_static_pic:
+        if LibraryType.static_pic in args.library_types:
             run('static-pic')
-        if build_shared:
+        if LibraryType.relocatable in args.library_types:
             run('relocatable')
 
     @property
@@ -1066,9 +1100,7 @@ class ManageScript:
         # Build the generated library itself
         self.log_info("Building the generated source code", Colors.HEADER)
 
-        obj_dirs = [self.dirs.build_dir('obj', self.build_mode)]
-        self.gprbuild(args, self.lib_project, is_library=True,
-                      obj_dirs=obj_dirs)
+        self.gprbuild(args, self.lib_project, is_library=True)
 
         # Then build the main programs, if any
         if not self.no_ada_api:
@@ -1224,7 +1256,7 @@ class ManageScript:
 
     def setup_environment(
         self,
-        add_path: Callable[[str, str], None]
+        add_path: Callable[[str, str], None],
     ) -> None:
 
         P = self.dirs.build_dir
@@ -1234,13 +1266,24 @@ class ManageScript:
 
         # Make the scripts and mains available
         add_path("PATH", P("scripts"))
-        add_path("PATH", P("obj-mains"))
 
-        # Make the shared lib available, regardless of the operating system
-        shared_dir = P("lib", "relocatable", self.build_mode)
-        add_path("LD_LIBRARY_PATH", shared_dir)
-        add_path("DYLD_LIBRARY_PATH", shared_dir)
-        add_path("PATH", shared_dir)
+        # If we're in a command that supports the build-mode argument, then set
+        # environment variables that depends on it, such as the bin directory
+        # for programs, and the various dynlib paths.
+
+        if self.build_modes:
+            # setenv only supports one build mode, and for other commands we
+            # don't care about what this changes. TODO: It still feels ugly,
+            # probably decoupling setup_environment so that this is not needed
+            # except for setenv would be better.
+            build_mode = self.build_modes[0]
+            add_path("PATH", P("obj-mains", build_mode.value))
+
+            # Make the shared lib available, regardless of the operating system
+            shared_dir = P("lib", "relocatable", build_mode.value)
+            add_path("LD_LIBRARY_PATH", shared_dir)
+            add_path("DYLD_LIBRARY_PATH", shared_dir)
+            add_path("PATH", shared_dir)
 
         # Make the Python bindings available to Python interpreters and to Mypy
         add_path("PYTHONPATH", P("python"))

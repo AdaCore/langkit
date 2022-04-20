@@ -6,14 +6,26 @@ find in the standard library.
 
 from __future__ import annotations
 
-import argparse
 from contextlib import ExitStack, contextmanager
 from copy import copy
+from enum import Enum
 import os
 import pipes
 import shlex
 import shutil
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Type
+
+
+class LibraryType(Enum):
+    static = "static"
+    static_pic = "static-pic"
+    relocatable = "relocatable"
+
+
+class BuildMode(Enum):
+    dev = "dev"
+    prod = "prod"
+    prof = "prof"
 
 
 def copy_with(obj, **kwargs):
@@ -227,74 +239,43 @@ def format_setenv(name: str, path: str) -> str:
     return f'{name}={quoted_path}"{sep}${name}"; export {name}'
 
 
-class LibraryTypes:
+def parse_choice(choice_enum: Type[Enum]) -> Callable[[str], Enum]:
+    """
+    Helper for argparse. When used as an argument for the ``type`` parameter of
+    argparse options, this allows to parse a string representing an enum member
+    into an enum member.
+    """
 
-    types = {"static", "static-pic", "relocatable"}
+    def convert(s: str) -> Enum:
+        try:
+            return choice_enum[s]
+        except KeyError:
+            raise ValueError(f"Wrong value for {choice_enum.__name__}: {s}")
 
-    def __init__(self,
-                 static: bool = False,
-                 static_pic: bool = False,
-                 relocatable: bool = False) -> None:
-        self.static = static
-        self.static_pic = static_pic
-        self.relocatable = relocatable
+    return convert
 
-    @classmethod
-    def add_option(cls, parser: argparse.ArgumentParser) -> None:
-        """
-        Add a --library-types=... option to ``parser``.
-        """
-        parser.add_argument(
-            "--library-types", default=cls(relocatable=True),
-            type=cls.parse,
-            help="Comma-separated list of library types to build (relocatable,"
-                 " static-pic and static). By default, build only shared"
-                 " libraries."
-        )
 
-    def __str__(self) -> str:
-        return ",".join(
-            name for enabled, name in [(self.static, "static"),
-                                       (self.static_pic, "static-pic"),
-                                       (self.relocatable, "relocatable")]
-            if enabled)
+def parse_list_of_choices(
+    choice_enum: Type[Enum]
+) -> Callable[[str], List[Enum]]:
+    """
+    Helper for argparse. When used as an argument for the ``type`` parameter of
+    argparse options, this allows to parse a list of choices of the form
+    A,B,C,...,Z, and to automatically transform individual elements of the list
+    into ``choice_enum`` members.
+    """
 
-    @property
-    def names(self) -> List[str]:
-        result = []
-        if self.relocatable:
-            result.append("relocatable")
-        if self.static_pic:
-            result.append("static-pic")
-        if self.static:
-            result.append("static")
-        return result
+    convert = parse_choice(choice_enum)
 
-    @classmethod
-    def parse(cls, arg: str) -> LibraryTypes:
-        """
-        Decode the value passed to the --library-types command-line argument.
+    def parse_list(arg: str) -> List[Enum]:
+        ret = [convert(c.strip()) for c in arg.split(",")]
+        if len(ret) != len(set(ret)):
+            raise ValueError(
+                f"Can't have the same value twice for {choice_enum.__name__}"
+            )
+        return ret
 
-        :param str arg: Value to decode.
-        :rtype: LibraryTypes
-        """
-        library_types = arg.split(",")
-        library_type_set = set(library_types)
-
-        # Make sure that all requested library types are supported
-        unsupported = library_type_set - cls.types
-        if unsupported:
-            raise ValueError("Unsupported library types: {}"
-                             .format(", ".join(sorted(unsupported))))
-
-        # Make sure that the given list of library types contains no double
-        # entries.
-        if len(library_types) != len(library_type_set):
-            raise ValueError("Library types cannot be requested twice")
-
-        return cls(static="static" in library_type_set,
-                   static_pic="static-pic" in library_type_set,
-                   relocatable="relocatable" in library_type_set)
+    return parse_list
 
 
 def parse_cmdline_args(args: Optional[List[str]]) -> List[str]:

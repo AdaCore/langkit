@@ -14,7 +14,7 @@ project Mains is
    for Source_Dirs use (
       ${', '.join(sorted(ascii_repr(sdir) for sdir in all_source_dirs))}
    );
-   for Object_Dir use "obj-mains";
+   for Object_Dir use "obj-mains/" & Build_Mode;
 
    for Main use (
       ${', '.join(sorted(ascii_repr('{}.adb'.format(main))
