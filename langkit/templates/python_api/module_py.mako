@@ -764,7 +764,7 @@ class AnalysisUnit:
 
     @property
     def root(self) -> ${root_astnode_name}:
-        ${py_doc('langkit.unit_root', 8, rtype=T.root_node)}
+        ${py_doc('langkit.unit_root', 8)}
         result = ${c_entity}()
         _unit_root(self._c_value, ctypes.byref(result))
         return ${root_astnode_name}._wrap(result)

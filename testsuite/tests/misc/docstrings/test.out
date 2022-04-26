@@ -1,0 +1,132 @@
+Original docstring
+==================
+
+This is a docstring
+
+* This is a bullet point with several lines. Viral schlitz humblebrag, shabby
+  chic pitchfork selfies subway tile live-edge sartorial austin man bun.
+
+* This is a second bullet point with
+  several lines
+
+.. attention:: This is a Sphinx admonition that spans several lines.
+   Cold-pressed scenester lo-fi, cronut asymmetrical vegan kogi heirloom
+   hashtag. 8-bit gluten-free bushwick try-hard taiyaki readymade chartreuse
+   disrupt iceland DIY.
+
+This is a last paragraph which spans several lines. I'm baby truffaut salvia
+VHS shaman, prism gastropub fingerstache forage. Tousled food truck typewriter,
+brunch bushwick dreamcatcher stumptown jianbing. Raw denim cronut kombucha.
+
+
+Output for C
+============
+
+        /*
+         * This is a docstring
+         *
+         * * This is a bullet point with several lines. Viral schlitz
+         *   humblebrag, shabby chic pitchfork selfies subway tile live-edge
+         *   sartorial austin man bun.
+         *
+         * * This is a second bullet point with several lines
+         *
+         * .. attention:: This is a Sphinx admonition that spans several lines.
+         *    Cold-pressed scenester lo-fi, cronut asymmetrical vegan kogi
+         *    heirloom hashtag. 8-bit gluten-free bushwick try-hard taiyaki
+         *    readymade chartreuse disrupt iceland DIY.
+         *
+         * This is a last paragraph which spans several lines. I'm baby
+         * truffaut salvia VHS shaman, prism gastropub fingerstache forage.
+         * Tousled food truck typewriter, brunch bushwick dreamcatcher
+         * stumptown jianbing. Raw denim cronut kombucha.
+         */
+
+Output for Ada
+==============
+
+        --  This is a docstring
+        --
+        --  * This is a bullet point with several lines. Viral schlitz
+        --    humblebrag, shabby chic pitchfork selfies subway tile live-edge
+        --    sartorial austin man bun.
+        --
+        --  * This is a second bullet point with several lines
+        --
+        --  .. attention:: This is a Sphinx admonition that spans several
+        --     lines. Cold-pressed scenester lo-fi, cronut asymmetrical vegan
+        --     kogi heirloom hashtag. 8-bit gluten-free bushwick try-hard
+        --     taiyaki readymade chartreuse disrupt iceland DIY.
+        --
+        --  This is a last paragraph which spans several lines. I'm baby
+        --  truffaut salvia VHS shaman, prism gastropub fingerstache forage.
+        --  Tousled food truck typewriter, brunch bushwick dreamcatcher
+        --  stumptown jianbing. Raw denim cronut kombucha.
+
+Output for Python
+=================
+
+        """
+        This is a docstring
+
+        * This is a bullet point with several lines. Viral schlitz humblebrag,
+          shabby chic pitchfork selfies subway tile live-edge sartorial austin
+          man bun.
+
+        * This is a second bullet point with several lines
+
+        .. attention:: This is a Sphinx admonition that spans several lines.
+           Cold-pressed scenester lo-fi, cronut asymmetrical vegan kogi
+           heirloom hashtag. 8-bit gluten-free bushwick try-hard taiyaki
+           readymade chartreuse disrupt iceland DIY.
+
+        This is a last paragraph which spans several lines. I'm baby truffaut
+        salvia VHS shaman, prism gastropub fingerstache forage. Tousled food
+        truck typewriter, brunch bushwick dreamcatcher stumptown jianbing. Raw
+        denim cronut kombucha.
+        """
+
+Output for Ocaml
+================
+
+        (**
+         * This is a docstring
+         *
+         * * This is a bullet point with several lines. Viral schlitz
+         *   humblebrag, shabby chic pitchfork selfies subway tile live-edge
+         *   sartorial austin man bun.
+         *
+         * * This is a second bullet point with several lines
+         *
+         * .. attention:: This is a Sphinx admonition that spans several lines.
+         *    Cold-pressed scenester lo-fi, cronut asymmetrical vegan kogi
+         *    heirloom hashtag. 8-bit gluten-free bushwick try-hard taiyaki
+         *    readymade chartreuse disrupt iceland DIY.
+         *
+         * This is a last paragraph which spans several lines. I'm baby
+         * truffaut salvia VHS shaman, prism gastropub fingerstache forage.
+         * Tousled food truck typewriter, brunch bushwick dreamcatcher
+         * stumptown jianbing. Raw denim cronut kombucha.
+         *)
+
+Output for Text
+===============
+
+        This is a docstring
+
+        * This is a bullet point with several lines. Viral schlitz humblebrag,
+          shabby chic pitchfork selfies subway tile live-edge sartorial austin
+          man bun.
+
+        * This is a second bullet point with several lines
+
+        .. attention:: This is a Sphinx admonition that spans several lines.
+           Cold-pressed scenester lo-fi, cronut asymmetrical vegan kogi
+           heirloom hashtag. 8-bit gluten-free bushwick try-hard taiyaki
+           readymade chartreuse disrupt iceland DIY.
+
+        This is a last paragraph which spans several lines. I'm baby truffaut
+        salvia VHS shaman, prism gastropub fingerstache forage. Tousled food
+        truck typewriter, brunch bushwick dreamcatcher stumptown jianbing. Raw
+        denim cronut kombucha.
+

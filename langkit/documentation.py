@@ -25,8 +25,9 @@ from __future__ import annotations
 
 import textwrap
 from typing import (Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING,
-                    Tuple, Union, cast)
+                    Union, cast)
 
+from funcy import concat, interpose
 from mako.template import Template
 
 
@@ -1249,6 +1250,20 @@ todo_markers = {
 }
 
 
+def is_bullet(paragraph: str) -> bool:
+    """
+    Whether ``paragraph`` is a bullet point in a bullet list.
+    """
+    return paragraph.startswith(('* ', '- '))
+
+
+def is_admonition(paragraph: str) -> bool:
+    """
+    Whether ``paragraph`` is a Sphinx admonition.
+    """
+    return paragraph.startswith('.. ')
+
+
 def split_paragraphs(text: str) -> List[str]:
     """
     Split arbitrary text into paragraphs.
@@ -1268,10 +1283,10 @@ def split_paragraphs(text: str) -> List[str]:
 
     for line in text.split('\n'):
         line = line.strip()
-        is_bullet = line.startswith('- ') or line.startswith('* ')
-        if line and not is_bullet:
+        is_b = is_bullet(line)
+        if line and not is_b:
             current_paragraph.append(line)
-        elif is_bullet:
+        elif is_b:
             end_paragraph()
             current_paragraph.append(line)
         else:
@@ -1294,176 +1309,85 @@ def get_available_width(indent_level: int, width: Optional[int] = None) -> int:
     return width - indent_level
 
 
-text_wrapper = textwrap.TextWrapper(drop_whitespace=True)
+def wrap(
+    paragraph: str, width: int, indent: str = ''
+) -> List[str]:
 
+    # Preserve specific indentation of specific paragraphs such as bullet
+    # lists/admonitions.
+    if is_bullet(paragraph):
+        subs_indent = '  '
+    elif is_admonition(paragraph):
+        subs_indent = '   '
+    else:
+        subs_indent = ''
 
-def wrap(paragraph: str, width: int) -> List[str]:
-    result = textwrap.wrap(paragraph, width)
-
-    # If this is a Sphinx admonition, preserve its formatting so that it's
-    # still an admonition.
-    if result and result[0].startswith('.. '):
-        first_line, rest = result[0], result[1:]
-        result = [first_line] + [
-            '   ' + line
-            for line in textwrap.wrap('\n'.join(rest), width - 3)
-        ]
+    result = textwrap.wrap(paragraph, width, initial_indent=indent,
+                           subsequent_indent=indent + subs_indent)
 
     return result
 
 
-def format_text(text: str, column: int, width: Optional[int] = None) -> str:
+class Formatter(Protocol):
+    def __call__(self,
+                 text: str,
+                 column: int,
+                 width: int = 79) -> str: ...
+
+
+def make_formatter(
+    prefix: str = '',
+    suffix: str = '',
+    line_prefix: str = '',
+) -> Formatter:
     """
-    Format some text as mere indented text.
+    Create a formatter function which, given a text that contains a list of
+    paragraphs, return a list of lines that are formatted correctly, with
+    wrapped paragraphs, the given prefix for each line, and given ``prefix``
+    and ``suffix``.
 
-    :param text: Text to format.
-    :param column: Indentation level for the result.
-    :param width: See get_available_width.
+    The first line of the outputted text will not be indented, since that's our
+    need in templates.
+
+    The resulting function has the following parameters:
+
+    * ``text``, which is the original text of the docstring.
+
+    * ``column``, which is the starting column at which the resulting docstring
+      must be indented.
+
+    * ``width``, which is an optional parameter which defaults to ``79``,
+      specifying the maximum width the text must be wrapped to.
     """
-    lines = []
-    for i, paragraph in enumerate(split_paragraphs(text)):
-        if i > 0:
-            lines.append('')
-        for line in wrap(paragraph, get_available_width(column, width)):
-            lines.append(' ' * column + line)
 
-    return '\n'.join(lines)
+    def formatter(text: str, column: int, width: int = 79) -> str:
+        whitespace = ' ' * column
+        full_prefix = whitespace + line_prefix
 
+        return "\n".join(
+            # Add the prefix with whitespace (we'll strip the first line at
+            # the end, because it will work in both cases: when there is a
+            # prefix and when there isn't.
+            [whitespace + prefix]
 
-def format_ada(text: str, column: int) -> str:
-    """
-    Format some text as an Ada comment.
+            + list(concat(*list(
+                # Call interpose to add blank lines inbetween paragraphs
+                interpose(
 
-    :param text: Text to format.
-    :param column: Indentation level for the result.
-    """
-    if not text.strip():
-        return ''
+                    # For blank lines, strip whitespace on the right to not
+                    # have any trailing whitespace.
+                    [full_prefix.rstrip()],
 
-    available_width = get_available_width(column)
-    lines = []
-    for i, paragraph in enumerate(split_paragraphs(text)):
-        if i > 0:
-            lines.append('--')
-        for line in wrap(paragraph, available_width - 4):
-            lines.append('--  {}'.format(line))
+                    [wrap(p, width, indent=full_prefix)
+                     for p in split_paragraphs(text)]
+                )
+            )))
 
-    return '\n{}'.format(' ' * column).join(lines)
+            # Add the suffix with whitespace
+            + [whitespace + suffix]
+        ).strip()
 
-
-def format_c(text: str, column: int) -> str:
-    """
-    Format some text as a C multi-line comment.
-
-    :param text: Text to format.
-    :param column: Indentation level for the result.
-    """
-    if not text.strip():
-        return ''
-
-    available_width = get_available_width(column)
-    lines = []
-    for i, paragraph in enumerate(split_paragraphs(text)):
-        if i > 0:
-            lines.append('')
-        for j, line in enumerate(wrap(paragraph, available_width - 3)):
-            prefix = '/* ' if i == 0 and j == 0 else '   '
-            lines.append('{}{}'.format(prefix, line))
-
-    if available_width - len(lines[-1]) >= 4:
-        lines[-1] += '  */'
-    else:
-        line, last_word = lines[-1].rsplit(None, 1)
-        lines[-1] = line
-        lines.append('   {}   */'.format(last_word))
-    return '\n{}'.format(' ' * column).join(lines)
-
-
-def format_python(text: str,
-                  column: int,
-                  argtypes: List[Tuple[str, CompiledType]] = [],
-                  rtype: Optional[CompiledType] = None,
-                  or_pass: bool = False) -> str:
-    """
-    Format some text as Python docstring.
-
-    :param text: Text to format.
-    :param column: Indentation level for the result.
-    :param argtypes: List of argument names and argument types, to be appended
-        as ``:type:`` Sphinx annotations.
-    :param rtype: If non-None, append to the formatted docstring a Sphinx-style
-        ``:rtype:`` annotation, whose type is the given ``rtype``.
-    :param or_pass: Whether to emit the ``pass`` keyword when there is no text
-        to format.
-    """
-    from langkit.compile_context import get_context
-
-    def fmt_type(t: CompiledType) -> str:
-        return get_context().python_api_settings.type_public_name(t)
-
-    # Number of columns for the documentation text itself, per line
-    available_width = get_available_width(column)
-
-    # Identation to prepend to every line, except the first
-    indent = ' ' * column
-
-    lines = []
-
-    # Add the given documentation text
-    if text.strip():
-        for i, paragraph in enumerate(split_paragraphs(text)):
-            if i > 0:
-                lines.append('')
-            for line in textwrap.wrap(paragraph, available_width,
-                                      drop_whitespace=True):
-                lines.append(line)
-        lines.append('')
-
-    # Add types for arguments, if provided. Note that the ":param:" directive
-    # is required in order for the type to appear in the Sphinx autodoc.
-    for argname, argtype in argtypes:
-        lines.append(':param {}:'.format(argname))
-        lines.append(':type {}: {}'.format(argname, fmt_type(argtype)))
-
-    # Add the return type, if provided
-    if rtype:
-        lines.append(':rtype: {}'.format(fmt_type(rtype)))
-
-    # Remove any trailing empty line
-    if lines and not lines[-1]:
-        lines.pop()
-
-    if not lines and or_pass:
-        return 'pass'
-
-    # Append indentation and multi-line string delimiters
-    lines = ['"""'] + [
-        '{}{}'.format(indent, line) if line else ''
-        for line in lines
-    ] + [indent + '"""']
-    return '\n'.join(lines)
-
-
-def format_ocaml(text: str, column: int) -> str:
-    """
-    Format some text as a OCaml multi-line comment.
-
-    :param text: Text to format.
-    :param column: Indentation level for the result.
-    """
-    if not text.strip():
-        return ''
-
-    available_width = get_available_width(column)
-    lines = ['(**']
-    for i, paragraph in enumerate(split_paragraphs(text)):
-        if i > 0:
-            lines.append('')
-        for line in wrap(paragraph, available_width - 3):
-            lines.append(' * {}'.format(line))
-
-    lines.append(' *)')
-    return '\n{}'.format('  ' * column).join(lines)
+    return formatter
 
 
 class DocPrinter(Protocol):
@@ -1471,13 +1395,6 @@ class DocPrinter(Protocol):
                  entity: Union[str, CompiledType],
                  column: int = 0,
                  lang: str = '',
-                 **kwargs: Any) -> str: ...
-
-
-class Formatter(Protocol):
-    def __call__(self,
-                 text: str,
-                 column: int,
                  **kwargs: Any) -> str: ...
 
 
@@ -1537,6 +1454,16 @@ def create_doc_printer(
 
     func.__name__ = '{}_doc'.format(lang)
     return func
+
+
+# The following are functions which return a docstring as formatted text for
+# the given language. See ``make_formatter``'s documentation for the arguments.
+
+format_text = make_formatter()
+format_ada = make_formatter(line_prefix='--  ')
+format_c = make_formatter(prefix='/*', line_prefix=' * ', suffix=' */')
+format_python = make_formatter(prefix='"""', suffix='"""')
+format_ocaml = make_formatter(prefix='(**', line_prefix=' * ', suffix=' *)')
 
 
 # The following are functions which return formatted source code documentation

@@ -69,9 +69,7 @@
     def ${field.api_name.lower}(
         ${', '.join(arg_list)}
     ) -> ${field.type.mypy_type_hint}:
-        ${py_doc(field, 8,
-                 argtypes=[(a.name.lower, a.type) for a in field.arguments],
-                 rtype=field.type)}
+        ${py_doc(field, 8)}
         ${accessor_body(field)}
         return result
     % endfor
