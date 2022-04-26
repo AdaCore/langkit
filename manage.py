@@ -308,7 +308,16 @@ def run_mypy(args: Namespace) -> None:
     """
     Type-check the Langkit Python codebase.
     """
-    subprocess.check_call(["mypy"], cwd=LANGKIT_ROOT)
+    # Make sure mypy can find the type hints for the Libpythonlang/Liblktlang
+    # Python bindings.
+    env = dict(os.environ)
+    for prj in ("python", "lkt"):
+        add_to_path(
+            env,
+            "MYPYPATH",
+            P.join(LANGKIT_ROOT, "contrib", prj, "build", "python")
+        )
+    subprocess.check_call(["mypy"], cwd=LANGKIT_ROOT, env=env)
 
 
 def test(args: Namespace, remaining_args: List[str]) -> None:
