@@ -766,7 +766,8 @@ private package ${ada_lib_name}.Implementation is
    --  precedence for this name, add Name/its named env descriptor to
    --  Named_Envs_Needing_Update.
 
-   procedure Update_Named_Envs (Named_Envs : NED_Maps.Map);
+   procedure Update_Named_Envs
+     (Context : Internal_Context; Named_Envs : NED_Maps.Map);
    --  For each named environment in Named_Envs, update Env_With_Precedence and
    --  do the necessary adjustments: relocate exiled entries, etc.
 

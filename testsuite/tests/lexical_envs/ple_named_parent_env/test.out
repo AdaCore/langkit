@@ -1,0 +1,19 @@
+Performing resolution of a-b.txt without parsing a.txt...
+Starting resolution...
+[LIBFOOLANG.MAIN_TRACE] Populating lexical envs for unit: a-b.txt
+[LIBFOOLANG.MAIN_TRACE] Finished populating lexical envs for unit: a-b.txt
+   <Var a-b.txt:2:4-2:10> -> None
+   <Var a-b.txt:4:7-4:14> -> None
+   <Var a-b.txt:5:7-5:16> -> None
+
+Performing resolution after parsing a.txt...
+[LIBFOOLANG.MAIN_TRACE] Parsing unit a.txt
+[LIBFOOLANG.MAIN_TRACE] Populating lexical envs for unit: a.txt
+[LIBFOOLANG.MAIN_TRACE] Finished populating lexical envs for unit: a.txt
+Starting resolution...
+   <Var a-b.txt:2:4-2:10> -> <Scope a.txt:1:1-3:2>
+   <Var a-b.txt:4:7-4:14> -> <Var a.txt:2:4-2:10>
+   <Var a-b.txt:5:7-5:16> -> <Var a.txt:2:4-2:10>
+
+main.adb: Done.
+Done

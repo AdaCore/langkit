@@ -2347,7 +2347,7 @@ package body ${ada_lib_name}.Implementation is
       return Result : constant Boolean :=
          Populate_Internal (Node, Root_State)
       do
-         Update_Named_Envs (Unit_State.Named_Envs_Needing_Update);
+         Update_Named_Envs (Context, Unit_State.Named_Envs_Needing_Update);
       end return;
    end Populate_Lexical_Env;
 
@@ -2604,7 +2604,10 @@ package body ${ada_lib_name}.Implementation is
    -- Update_Named_Env --
    ----------------------
 
-   procedure Update_Named_Envs (Named_Envs : NED_Maps.Map) is
+   procedure Update_Named_Envs
+     (Context : Internal_Context; Named_Envs : NED_Maps.Map)
+   is
+      Require_Cache_Reset : Boolean := False;
    begin
       for Cur in Named_Envs.Iterate loop
          declare
@@ -2656,6 +2659,12 @@ package body ${ada_lib_name}.Implementation is
                      Unwrap (Sorted_Env_Maps.Element (Cur)).all;
                begin
                   Env.Parent := New_Env;
+
+                  --  We have updated the lexical env hierarchy (e.g. an env
+                  --  which had no parent may have one now), so the cached
+                  --  entries for queries that traveresed the old env hierarchy
+                  --  need to be invalidated.
+                  Require_Cache_Reset := True;
                end;
             end loop;
 
@@ -2665,6 +2674,9 @@ package body ${ada_lib_name}.Implementation is
             end loop;
          end;
       end loop;
+      if Require_Cache_Reset then
+         Invalidate_Caches (Context, Invalidate_Envs => True);
+      end if;
    end Update_Named_Envs;
 
    --------------------------
@@ -4561,7 +4573,7 @@ package body ${ada_lib_name}.Implementation is
          Named_Envs_Needing_Update : NED_Maps.Map;
       begin
          Remove_Named_Envs (Unit, Named_Envs_Needing_Update);
-         Update_Named_Envs (Named_Envs_Needing_Update);
+         Update_Named_Envs (Unit.Context, Named_Envs_Needing_Update);
       end;
 
       --  At this point, envs and nodes that don't belong to this unit no

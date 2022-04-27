@@ -1,0 +1,57 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    defs <- list*(pick(or(scope | var) ";"))
+    @main_rule scope <- list+(Scope(name "{" defs "}"))
+    var <- Var(id "=" name)
+    id <- Id(@identifier)
+    name <- or(Prefix(name "." id) | id)
+
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+@abstract class Name : FooNode {
+
+    @export @abstract fun resolve(): FooNode
+
+    @export @abstract fun suffix_symbol(): Symbol
+
+    fun scope_fqn(): String = match node {
+        case p : Prefix => p.prefix.fqn()
+        case _ : Id => null
+    }
+
+    fun fqn(): String = match node {
+        case p : Prefix => p.prefix.fqn() & ((".") & p.suffix.fqn())
+        case i : Id => i.text()
+    }
+}
+
+class Id : Name implements TokenNode {
+
+    fun resolve(): FooNode = node.node_env().get_first(node)
+
+    fun suffix_symbol(): Symbol = node.symbol
+}
+
+class Prefix : Name {
+    @parse_field prefix: Name
+    @parse_field suffix: Id
+
+    fun resolve(): FooNode =
+    node.prefix.resolve()?.children_env().get_first(node.suffix.symbol)
+
+    fun suffix_symbol(): Symbol = node.suffix.symbol
+}
+
+class Scope : FooNode {
+    @parse_field name: Name
+    @parse_field defs: ASTList[FooNode, FooNode]
+}
+
+class Var : FooNode {
+    @parse_field name: Id
+    @parse_field value: Name
+}
