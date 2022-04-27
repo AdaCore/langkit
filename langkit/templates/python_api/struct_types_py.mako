@@ -175,23 +175,3 @@ class ${public_name}(_BaseStruct):
     % endif
 
 </%def>
-
-<%def name="mypy_decl(cls)">
-
-class ${pyapi.type_public_name(cls)}:
-    ${py_doc(cls, 4)}
-
-    def __init__(
-        self,
-        % for f in cls.get_fields():
-        ${f.name.lower}: ${f.type.mypy_type_hint},
-        % endfor
-    ) -> None: ...
-
-    % for f in cls.get_fields():
-    @property
-    def ${f.name.lower}(self) -> ${f.type.mypy_type_hint}:
-        ${py_doc(f, 8, or_pass=True)}
-    % endfor
-
-</%def>
