@@ -1374,6 +1374,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
             Local_Results := Outer_Results;
 
          else
+            if Has_Trace then
+               Caches_Trace.Trace ("INSERTING CACHE ENTRY " & Log_Id);
+            end if;
+
             Env.Lookup_Cache.Include (Res_Key, (Computed, Local_Results));
             Outer_Results.Concat (Local_Results);
             Local_Results := Outer_Results;
