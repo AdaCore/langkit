@@ -38,6 +38,13 @@ dsl_break_map: Dict[str, int] = {}
 Mapping from breakpoint labels in "test.py" to the corresponding line numbers.
 """
 
+thread_notif_pattern = r"@/(\[New Thread .*\])?/ @/(Thread \d+ hit )?/"
+"""
+"quotemeta" pattern for thread-related messages from GDB after a control-flow
+command has returned.
+"""
+
+
 # Fill ``dsl_break_map``
 with open("test.py") as f:
     for i, line in enumerate(f, 1):
@@ -82,7 +89,7 @@ def run_foonext(next_descr: Optional[str]) -> None:
     """
     if next_descr is None:
         next_descr = "@..."
-    gdb.test("foonext", f"@/(Thread \\d+ hit )?/Breakpoint @...\n{next_descr}")
+    gdb.test("foonext", f"{thread_notif_pattern}Breakpoint @...\n{next_descr}")
 
 
 def run_fooout(next_descr: str) -> None:
@@ -92,7 +99,7 @@ def run_fooout(next_descr: str) -> None:
     """
     gdb.test(
         "fooout",
-        r"@/(\[New Thread .*\])?/ "
+        f"{thread_notif_pattern} "
         f"libfoolang.implementation.@...\n{next_descr}",
     )
 
@@ -102,4 +109,4 @@ def run_foosi(next_descr: str) -> None:
     Run the "foosi" command, checking that the message describing the
     transition matches ``next_descr``.
     """
-    gdb.test("foosi", f"@/(Thread \\d+ hit )?/Breakpoint @...\n{next_descr}")
+    gdb.test("foosi", f"{thread_notif_pattern}Breakpoint @...\n{next_descr}")
