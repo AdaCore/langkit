@@ -535,7 +535,7 @@ package ${ada_lib_name}.Analysis is
 
    function First_Child_Index
      (Node : ${root_entity.api_name}'Class) return Natural;
-   --  Return the index of the first child ``Node` has
+   --  Return the index of the first child ``Node`` has
 
    function Last_Child_Index
      (Node : ${root_entity.api_name}'Class) return Natural;
@@ -563,8 +563,8 @@ package ${ada_lib_name}.Analysis is
 
    function First_Child
      (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name};
-   --  Return the first child ``Node` has, or ``No_${root_entity.api_name}`` if
-   --  there is none.
+   --  Return the first child ``Node`` has, or ``No_${root_entity.api_name}``
+   --  if there is none.
 
    function Last_Child
      (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name};
