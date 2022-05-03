@@ -1575,6 +1575,8 @@ private package ${ada_lib_name}.Implementation is
       --  the node reference is valid regarding its context, we know that the
       --  rebindings pointer is valid, and thus we can just check the rebinding
       --  version number.
+
+      ${exts.include_extension(ctx.ext("analysis", "context", "components"))}
    end record;
 
    package Node_To_Named_Env_Maps is new Ada.Containers.Hashed_Maps
