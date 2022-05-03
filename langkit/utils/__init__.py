@@ -6,6 +6,7 @@ find in the standard library.
 
 from __future__ import annotations
 
+import argparse
 from contextlib import ExitStack, contextmanager
 from copy import copy
 from enum import Enum
@@ -20,6 +21,18 @@ class LibraryType(Enum):
     static = "static"
     static_pic = "static-pic"
     relocatable = "relocatable"
+
+    @classmethod
+    def add_argument(cls, parser: argparse.ArgumentParser):
+        parser.add_argument(
+            '--library-types',
+            type=parse_list_of_choices(cls),
+            default=[cls.relocatable],
+            help="Comma-separated list of library types to build (relocatable,"
+            " static-pic and static). By default, build only shared"
+            " libraries."
+
+        )
 
 
 class BuildMode(Enum):

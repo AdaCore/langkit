@@ -78,11 +78,7 @@ def create_subparser(
         "--build-mode", "-b", choices=("dev", "prod"), default="dev",
         help="Select a preset for build options."
     )
-    subparser.add_argument(
-        '--library-types',
-        type=parse_list_of_choices(LibraryType),
-        default=[LibraryType.relocatable],
-    )
+    LibraryType.add_argument(subparser)
 
     if with_jobs:
         subparser.add_argument(

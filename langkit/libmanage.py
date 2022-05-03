@@ -350,15 +350,7 @@ class ManageScript:
                  ' default, use "build" in the current directory.'
         )
 
-        subparser.add_argument(
-            '--library-types',
-            type=parse_list_of_choices(LibraryType),
-            default=[LibraryType.relocatable],
-            help="Comma-separated list of library types to build (relocatable,"
-            " static-pic and static). By default, build only shared"
-            " libraries."
-
-        )
+        LibraryType.add_argument(subparser)
 
         subparser.add_argument(
             '--verbosity', '-v', nargs='?',
