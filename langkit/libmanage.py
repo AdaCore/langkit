@@ -1027,7 +1027,8 @@ class ManageScript:
     def gprinstall(self,
                    args: argparse.Namespace,
                    project_file: str,
-                   is_library: bool) -> None:
+                   is_library: bool,
+                   build_mode: str) -> None:
         """
         Run GPRinstall on a project file.
 
@@ -1063,7 +1064,7 @@ class ManageScript:
         def run(library_type: str) -> None:
             argv = list(base_argv)
             argv.append('--build-name={}'.format(library_type))
-            argv.extend(self.gpr_scenario_vars(library_type))
+            argv.extend(self.gpr_scenario_vars(library_type, build_mode))
             self.check_call('Install', argv)
 
         # Install the static libraries first, so that in the resulting project
@@ -1134,13 +1135,28 @@ class ManageScript:
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
+        if len(self.build_modes) != 1:
+            print("Exactly one build mode required")
+            raise DiagnosticError
+        build_mode = self.build_modes[0].value
+
         lib_name = self.lib_name.lower()
 
-        self.gprinstall(args, self.lib_project, is_library=True)
+        self.gprinstall(
+            args,
+            self.lib_project,
+            is_library=True,
+            build_mode=build_mode,
+        )
 
         # Install programs if they are all required
         if not args.disable_all_mains:
-            self.gprinstall(args, self.mains_project, is_library=False)
+            self.gprinstall(
+                args,
+                self.mains_project,
+                is_library=False,
+                build_mode=build_mode,
+            )
 
         # Install scripts into "bin"
         scripts = glob.glob(self.dirs.build_dir("scripts", "*"))
