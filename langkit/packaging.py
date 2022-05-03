@@ -6,6 +6,8 @@ import sys
 from e3.env import Env
 from e3.fs import cp, mkdir, sync_tree
 
+from langkit.utils import LibraryType
+
 
 class Packager:
     """
@@ -61,9 +63,9 @@ class Packager:
         self.gnatcoll_iconv_prefix = gnatcoll_iconv_prefix or gnat_prefix
         self.langkit_support_prefix = langkit_support_prefix or gnat_prefix
 
-        self.with_static = (self.library_types.static or
-                            self.library_types.static_pic)
-        self.with_relocatable = self.library_types.relocatable
+        self.with_static = (LibraryType.static_pic in library_types
+                            or LibraryType.static in library_types)
+        self.with_relocatable = LibraryType.relocatable in library_types
 
         if not self.with_static:
             self.static_libdir_name = None
@@ -219,7 +221,7 @@ class Packager:
                 copy_in(item, dyn_libdir)
 
     def assert_with_relocatable(self):
-        assert self.library_types.relocatable, (
+        assert LibraryType.relocatable in self.library_types, (
             'Shared libraries support is disabled'
         )
 

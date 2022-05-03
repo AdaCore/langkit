@@ -248,7 +248,7 @@ def parse_choice(choice_enum: Type[Enum]) -> Callable[[str], Enum]:
 
     def convert(s: str) -> Enum:
         try:
-            return choice_enum[s]
+            return choice_enum(s)
         except KeyError:
             raise ValueError(f"Wrong value for {choice_enum.__name__}: {s}")
 

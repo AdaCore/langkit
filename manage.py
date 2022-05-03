@@ -159,7 +159,7 @@ def build_langkit_support(args: Namespace) -> None:
             os.remove(lexch)
         subprocess.check_call(
             base_argv
-            + ["-P", SUPPORT_GPR, f"-XLIBRARY_TYPE={library_type.name}"]
+            + ["-P", SUPPORT_GPR, f"-XLIBRARY_TYPE={library_type.value}"]
             + gargs
         )
 
@@ -203,7 +203,7 @@ def install_langkit_support(args: Namespace) -> None:
 
     # Install the static libraries first, so that in the resulting project
     # files, "static" is the default library type.
-    lib_types = args.library_types.names
+    lib_types = [l.value for l in args.library_types]
     for library_type in ("static", "static-pic", "relocatable"):
         if library_type in lib_types:
             subprocess.check_call(base_argv + [
