@@ -866,6 +866,28 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     return result
 
 
+def extract_doc(doc: L.Doc) -> str:
+    """
+    Turn a Doc node into the corresponding doc string.
+    """
+    # Extract the text from all doc lines
+    lines: List[str] = []
+    for d_line in doc.f_lines:
+        line = d_line.text
+        assert line.startswith("##")
+        lines.append(line[2:])
+
+    # Remove the biggest common indentation
+    if lines:
+        common_indent = min(
+            len(line) - len(line.lstrip(" "))
+            for line in lines
+        )
+        lines = [line[common_indent:] for line in lines]
+
+    return "\n".join(lines)
+
+
 def create_grammar(ctx: CompileCtx,
                    lkt_units: List[L.AnalysisUnit]) -> Grammar:
     """
@@ -907,7 +929,7 @@ def create_grammar(ctx: CompileCtx,
             if anns.main_rule or anns.entry_point:
                 entry_points.add(rule_name)
 
-            all_rules[rule_name] = r.f_expr
+            all_rules[rule_name] = (full_rule.f_doc, r.f_expr)
 
     # Now create the result grammar
     assert main_rule_name is not None
@@ -1157,8 +1179,8 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
             else:
                 raise NotImplementedError('unhandled parser: {}'.format(rule))
 
-    for name, rule in grammar._all_lkt_rules.items():
-        grammar._add_rule(name, lower(rule))
+    for name, (rule_doc, rule_expr) in grammar._all_lkt_rules.items():
+        grammar._add_rule(name, lower(rule_expr), extract_doc(rule_doc))
 
 
 # Mapping to associate declarations to the corresponding AbstractVariable

@@ -2,10 +2,13 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
+    ## Parser main entry point
     @main_rule main_rule <- list+(or(var_decl | Example(@example name)))
     null_qual <- NullQual("null")
     var_decl <- VarDecl(null_qual "var" name "=" expr ";")
-    expr <- or(Addition(expr "+" expr) | atom)
+    ## Use this to parse
+    ## any kind of expression.
+    @entry_point expr <- or(Addition(expr "+" expr) | atom)
     atom <- or(number | ref)
     number <- Number(@number)
     ref <- Ref(name)

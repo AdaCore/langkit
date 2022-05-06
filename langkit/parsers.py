@@ -243,11 +243,19 @@ class Grammar:
         self.entry_points = extra_entry_points or set()
         self.entry_points.add(main_rule_name)
 
+        self.user_defined_rules_docs: Dict[str, str] = {}
+        """
+        Mapping from rules defined by the language spec to the corresponding
+        documentations.
+        """
+
         self.location: Optional[Location] = (
             location or extract_library_location()
         )
 
-        self._all_lkt_rules: Dict[str, L.GrammarExpr] = OrderedDict()
+        self._all_lkt_rules: Dict[str, Tuple[L.Doc, L.GrammarExpr]] = (
+            OrderedDict()
+        )
         """
         If we loaded a Lkt unit, mapping of all grammar rules it contains.
         """
@@ -255,13 +263,14 @@ class Grammar:
     def context(self) -> ContextManager[None]:
         return diagnostic_context(self.location)
 
-    def _add_rule(self, name: str, parser: Parser) -> None:
+    def _add_rule(self, name: str, parser: Parser, doc: str = "") -> None:
         """
         Add a rule to the grammar. The input parser is expected to have its
         location properly set at this point.
 
         :param name: Name for the new parsing rule.
         :param parser: Root parser for this rule.
+        :param doc: Documentation for this rule.
         """
         parser.set_name(names.Name.from_lower(name))
         parser.set_grammar(self)
@@ -274,6 +283,13 @@ class Grammar:
             )
 
         self.rules[name] = parser
+
+        # If we got a non-empty doc, use it. Otherwise, leave the possibly
+        # predefined one.
+        if doc:
+            self.user_defined_rules_docs[name] = doc
+        else:
+            self.user_defined_rules_docs.setdefault(name, doc)
 
     def add_rules(self, **kwargs: Parser) -> None:
         """

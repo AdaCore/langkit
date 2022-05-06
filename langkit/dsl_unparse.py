@@ -1776,6 +1776,17 @@ def unparse_grammar(ctx, f):
         key=lambda assoc: assoc[1]._id,
     )
 
+    def doc(name: str) -> str:
+        """
+        Return doc for the given parsing rule.
+        """
+        doc = ctx.grammar.user_defined_rules_docs[name]
+        return (
+            "".join(f"## {line}\n$hl" for line in doc.split("\n"))
+            if doc
+            else ""
+        )
+
     def annotations(name: str) -> str:
         """
         Return annotations for the given parsing rule.
@@ -1791,7 +1802,7 @@ def unparse_grammar(ctx, f):
     @with_lexer(${ctx.lang_name.lower}_lexer)$hl
     grammar ${ctx.lang_name.lower}_grammar {$i$hl
     % for name, rule in sorted_rules:
-        ${annotations(name)}${name} <- ${emit_rule(rule, True)}$hl
+        ${doc(name)}${annotations(name)}${name} <- ${emit_rule(rule, True)}$hl
     % endfor
     $d
     }$hl
