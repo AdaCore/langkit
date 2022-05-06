@@ -76,7 +76,7 @@ private package ${ada_lib_name}.Generic_Impl is
    Grammar_Rule_Names : aliased constant Grammar_Rule_Name_Array :=
      (${", ".join(rule_name_refs)});
 
-   --  Descriptors for toen kinds
+   --  Descriptors for token kinds
 
    <% kind_refs = [] %>
    % for i, token in enumerate(ctx.lexer.sorted_tokens, 1):
