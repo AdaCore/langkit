@@ -40,13 +40,6 @@ package Langkit_Support.Internal is
    --  whenever we need to provide string for debug (compatible with
    --  Ada.Text_IO).
 
-   --  Descriptors for grammar rules
-
-   type Grammar_Rule_Name_Array is
-     array (Grammar_Rule_Index range <>) of Text_Access;
-   type Grammar_Rule_Name_Array_Access is
-     not null access constant Grammar_Rule_Name_Array;
-
    --  Descriptors for token types
 
    type Token_Kind_Name_Array is

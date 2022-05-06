@@ -70,6 +70,37 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${G.member_index(m)} : constant Struct_Member_Index := ${i};
    % endfor
 
+   ------------------------------
+   -- Grammar rule descriptors --
+   ------------------------------
+
+   <%
+      rule_descs = []
+      indexes = ctx.grammar.user_defined_rules_indexes
+   %>
+   % for i, name in enumerate(ctx.grammar.user_defined_rules, 1):
+      <%
+         rule = ctx.grammar.rules[name]
+         desc_const = f"Rule_Desc_{i}"
+         name_const = f"Rule_Name_{i}"
+         doc_const = f"Rule_Doc_{i}"
+         rule_descs.append(f"{indexes[name]} => {desc_const}'Access")
+      %>
+      ${name_const} : aliased constant Text_Type :=
+        ${text_repr(names.Name.from_lower(name).camel_with_underscores)};
+      ${doc_const} : aliased constant Text_Type :=
+        ${text_repr(ctx.grammar.user_defined_rules_docs[name])};
+      ${desc_const} : aliased constant Grammar_Rule_Descriptor :=
+        (Name        => ${name_const}'Access,
+         Is_Public   => ${name in ctx.grammar.entry_points},
+         Doc         => ${doc_const}'Access,
+         Return_Type => ${G.type_index(rule.type.entity)});
+   % endfor
+
+   Grammar_Rules : aliased constant Grammar_Rule_Descriptor_Array := (
+      ${",\n".join(rule_descs)}
+   );
+
    ------------------------------------
    -- General value type descriptors --
    ------------------------------------

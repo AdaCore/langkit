@@ -5,6 +5,8 @@ with Langkit_Support.Errors;      use Langkit_Support.Errors;
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Names;       use Langkit_Support.Names;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Text;        use Langkit_Support.Text;
@@ -30,13 +32,23 @@ begin
    for I in 1 .. Last_Grammar_Rule (Id) loop
       declare
          Rule : constant Grammar_Rule_Ref := From_Index (Id, I);
+         Doc  : constant Text_Type := Grammar_Rule_Doc (Rule);
       begin
          Put ("  " & Image (Format_Name (Grammar_Rule_Name (Rule),
                                          Camel_With_Underscores)));
          if Rule = Default_Grammar_Rule (Id) then
-            Put_Line (" (default)");
-         else
-            New_Line;
+            Put (" (default)");
+         end if;
+         if Is_Public (Rule) then
+            Put (" (public)");
+         end if;
+
+         Put_Line
+           (": "
+            & Image (Format_Name (Node_Type_Name (Grammar_Rule_Type (Rule)),
+                                  Camel_With_Underscores)));
+         if Doc /= "" then
+            Put_Line ("    doc: " & Image (Doc, With_Quotes => True));
          end if;
       end;
    end loop;

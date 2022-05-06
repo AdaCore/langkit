@@ -69,8 +69,28 @@ package body Langkit_Support.Generic_API is
 
    function Grammar_Rule_Name (Rule : Grammar_Rule_Ref) return Name_Type is
    begin
-      return Create_Name (Rule.Id.Grammar_Rule_Names (Rule.Index).all);
+      return Create_Name (Rule.Id.Grammar_Rules (Rule.Index).Name.all);
    end Grammar_Rule_Name;
+
+   ---------------
+   -- Is_Public --
+   ---------------
+
+   function Is_Public (Rule : Grammar_Rule_Ref) return Boolean is
+   begin
+      Check_Grammar_Rule (Rule);
+      return Rule.Id.Grammar_Rules (Rule.Index).Is_Public;
+   end Is_Public;
+
+   ----------------------
+   -- Grammar_Rule_Doc --
+   ----------------------
+
+   function Grammar_Rule_Doc (Rule : Grammar_Rule_Ref) return Text_Type is
+   begin
+      Check_Grammar_Rule (Rule);
+      return Rule.Id.Grammar_Rules (Rule.Index).Doc.all;
+   end Grammar_Rule_Doc;
 
    --------------
    -- To_Index --
@@ -99,7 +119,7 @@ package body Langkit_Support.Generic_API is
 
    function Last_Grammar_Rule (Id : Language_Id) return Grammar_Rule_Index is
    begin
-      return Id.Grammar_Rule_Names'Last;
+      return Id.Grammar_Rules'Last;
    end Last_Grammar_Rule;
 
    ------------------------
@@ -120,7 +140,7 @@ package body Langkit_Support.Generic_API is
    procedure Check_Grammar_Rule (Id : Language_Id; Rule : Grammar_Rule_Index)
    is
    begin
-      if Rule not in Id.Grammar_Rule_Names.all'Range then
+      if Rule not in Id.Grammar_Rules.all'Range then
          raise Precondition_Failure with
            "invalid grammar rule for this language";
       end if;

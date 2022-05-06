@@ -243,6 +243,16 @@ class Grammar:
         self.entry_points = extra_entry_points or set()
         self.entry_points.add(main_rule_name)
 
+        self.user_defined_rules: _List[str]
+        """
+        List of rules names defined by the language spec.
+        """
+
+        self.user_defined_rules_indexes: Dict[str, int]
+        """
+        Reverse mapping for ``user_defined_rules``.
+        """
+
         self.user_defined_rules_docs: Dict[str, str] = {}
         """
         Mapping from rules defined by the language spec to the corresponding
@@ -438,16 +448,18 @@ class Grammar:
 
         return set(self.rules) - referenced_rules
 
-    @property
-    def user_defined_rules(self) -> _List[str]:
+    def compute_user_defined_rules(self, context: CompileCtx) -> None:
         """
-        Return the list of rule names defined by the user.
+        Compute the list of rule names defined by the user.
         """
-        return [
-            rule
-            for rule, parser in self.rules.items()
-            if not parser.is_dont_skip_parser
-        ]
+        self.user_defined_rules = []
+        self.user_defined_rules_indexes = {}
+        for rule, parser in self.rules.items():
+            if not parser.is_dont_skip_parser:
+                self.user_defined_rules.append(rule)
+                self.user_defined_rules_indexes[rule] = len(
+                    self.user_defined_rules
+                )
 
     def warn_unreferenced_parsing_rules(self, context: CompileCtx) -> None:
         """

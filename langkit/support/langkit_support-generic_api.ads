@@ -29,6 +29,7 @@
 
 limited private with Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Names; use Langkit_Support.Names;
+with Langkit_Support.Text;  use Langkit_Support.Text;
 
 package Langkit_Support.Generic_API is
 
@@ -82,6 +83,16 @@ package Langkit_Support.Generic_API is
 
    function Grammar_Rule_Name (Rule : Grammar_Rule_Ref) return Name_Type;
    --  Return the name for the given grammar rule. Raise a
+   --  ``Precondition_Failure`` exception if ``Rule`` is
+   --  ``No_Grammar_Rule_Ref``.
+
+   function Is_Public (Rule : Grammar_Rule_Ref) return Boolean;
+   --  Return whether the given grammar rule is public. Raise a
+   --  ``Precondition_Failure`` exception if ``Rule`` is
+   --  ``No_Grammar_Rule_Ref``.
+
+   function Grammar_Rule_Doc (Rule : Grammar_Rule_Ref) return Text_Type;
+   --  Return the doc associated to this grammar rule. Raise a
    --  ``Precondition_Failure`` exception if ``Rule`` is
    --  ``No_Grammar_Rule_Ref``.
 

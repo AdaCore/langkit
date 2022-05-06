@@ -36,7 +36,6 @@ private with Ada.Finalization;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 private with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Slocs;        use Langkit_Support.Slocs;
-with Langkit_Support.Text;         use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 

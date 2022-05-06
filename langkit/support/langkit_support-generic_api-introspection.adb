@@ -1397,6 +1397,17 @@ package body Langkit_Support.Generic_API.Introspection is
       return Type_Range (Id, Id.First_Node, Id.Struct_Types.all'Last);
    end All_Node_Types;
 
+   -----------------------
+   -- Grammar_Rule_Type --
+   -----------------------
+
+   function Grammar_Rule_Type (Rule : Grammar_Rule_Ref) return Type_Ref is
+   begin
+      Check_Grammar_Rule (Rule);
+      return From_Index
+        (Rule.Id, Rule.Id.Grammar_Rules.all (Rule.Index).Return_Type);
+   end Grammar_Rule_Type;
+
    -------------------------
    -- Check_Struct_Member --
    -------------------------

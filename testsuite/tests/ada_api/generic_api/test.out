@@ -3,14 +3,16 @@
 Language name: Foo
 
 Grammar rules:
-  Main_Rule (default)
-  Null_Qual
-  Var_Decl
-  Expr
-  Atom
-  Number
-  Ref
-  Name
+  Main_Rule (default) (public): Foo_Node_List
+    doc: "Parser main entry point"
+  Null_Qual: Null_Qual
+  Var_Decl: Var_Decl
+  Expr (public): Expr
+    doc: "Use this to parse\x0aany kind of expression."
+  Atom: Expr
+  Number: Number
+  Ref: Ref
+  Name: Name
 
 Token kinds:
   Termination

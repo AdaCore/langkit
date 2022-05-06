@@ -1988,6 +1988,8 @@ class CompileCtx:
             GlobalPass('lower Lkt parsing rules', lower_grammar_rules),
             GrammarPass('check grammar entry points',
                         Grammar.check_entry_points),
+            GrammarPass('compute user defined rules',
+                        Grammar.compute_user_defined_rules),
             GrammarPass('warn on unreferenced parsing rules',
                         Grammar.warn_unreferenced_parsing_rules),
             EnvSpecPass('create internal properties for env specs',

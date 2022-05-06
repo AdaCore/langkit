@@ -139,11 +139,11 @@ package Langkit_Support.Internal.Descriptor is
       --  Name of the language that is analyzed (in camel-with-underscores
       --  casing).
 
-      --  Descriptors for grammar rules. The table for names also defines the
-      --  range of supported rules for this language.
+      --  Descriptors for grammar rules. The table also defines the range of
+      --  supported rules for this language.
 
       Default_Grammar_Rule : Grammar_Rule_Index;
-      Grammar_Rule_Names   : Grammar_Rule_Name_Array_Access;
+      Grammar_Rules        : Grammar_Rule_Descriptor_Array_Access;
 
       --  Descriptors for token kinds. The table for names also defines the
       --  range of supported kinds for this language.

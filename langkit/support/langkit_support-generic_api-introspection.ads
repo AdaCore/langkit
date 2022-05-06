@@ -38,7 +38,6 @@ use Langkit_Support.Generic_API.Analysis;
 limited private with Langkit_Support.Internal.Introspection;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-with Langkit_Support.Text;    use Langkit_Support.Text;
 
 package Langkit_Support.Generic_API.Introspection is
 
@@ -420,6 +419,9 @@ package Langkit_Support.Generic_API.Introspection is
 
    function All_Node_Types (Id : Language_Id) return Type_Ref_Array;
    --  Return the list of all node types that the given language defines
+
+   function Grammar_Rule_Type (Rule : Grammar_Rule_Ref) return Type_Ref;
+   --  Return the type for nodes that the given parsing ``Rule`` can create
 
    -------------------------
    -- Struct/node members --

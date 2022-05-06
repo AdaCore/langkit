@@ -42,6 +42,31 @@ package Langkit_Support.Internal.Introspection is
    type Struct_Member_Index_Array is
      array (Positive range <>) of Struct_Member_Index;
 
+   ------------------------------
+   -- Grammar rule descriptors --
+   ------------------------------
+
+   type Grammar_Rule_Descriptor is record
+      Name : Text_Access;
+      --  Name of this grammar rule
+
+      Is_Public : Boolean;
+      --  Whether this grammar rule is public
+
+      Doc : Text_Access;
+      --  Documentation for this grammar rule
+
+      Return_Type : Type_Index;
+      --  Type for the nodes that this grammar rule creates
+   end record;
+
+   type Grammar_Rule_Descriptor_Access is
+     not null access constant Grammar_Rule_Descriptor;
+   type Grammar_Rule_Descriptor_Array is
+     array (Grammar_Rule_Index range <>) of Grammar_Rule_Descriptor_Access;
+   type Grammar_Rule_Descriptor_Array_Access is
+     not null access constant Grammar_Rule_Descriptor_Array;
+
    ----------------------
    -- Type descriptors --
    ----------------------

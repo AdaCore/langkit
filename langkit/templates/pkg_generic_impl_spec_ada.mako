@@ -56,26 +56,6 @@ private package ${ada_lib_name}.Generic_Impl is
    function "+" (Token : Common.Token_Reference) return Internal_Token
    is ((Get_Token_TDH (Token), Get_Token_Index (Token)));
 
-   --  Descriptors for grammar rules
-
-   <%
-      rule_name_refs = []
-      main_rule_id = None
-   %>
-   % for i, n in enumerate(ctx.grammar.user_defined_rules, 1):
-      <%
-         name = f"Rule_Name_{i}"
-         rule_name_refs.append(f"{i} => {name}'Access")
-         if n == ctx.grammar.main_rule_name:
-            main_rule_id = i
-      %>
-      ${name} : aliased constant Text_Type :=
-        ${text_repr(names.Name.from_lower(n).camel_with_underscores)};
-   % endfor
-   <% assert main_rule_id is not None %>
-   Grammar_Rule_Names : aliased constant Grammar_Rule_Name_Array :=
-     (${", ".join(rule_name_refs)});
-
    --  Descriptors for token kinds
 
    <% kind_refs = [] %>
@@ -170,8 +150,10 @@ private package ${ada_lib_name}.Generic_Impl is
    Desc : aliased constant Language_Descriptor :=
      (Language_Name => Language_Name'Access,
 
-      Default_Grammar_Rule => ${main_rule_id},
-      Grammar_Rule_Names   => Grammar_Rule_Names'Access,
+      Default_Grammar_Rule => ${(
+         ctx.grammar.user_defined_rules_indexes[ctx.grammar.main_rule_name]
+      )},
+      Grammar_Rules        => Grammar_Rules'Access,
 
       Token_Kind_Names => Token_Kind_Names'Access,
 
