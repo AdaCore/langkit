@@ -172,6 +172,6 @@ lkt_lexer.add_rules(
     (Pattern('{CHAR_LIT}'),           Token.Char),
 
     # Comments
-    (Pattern(r"#(.?)+"),   Token.Comment),
     (Pattern(r"##(.?)+"),  Token.DocComment),
+    (Pattern(r"#(.?)+"),   Token.Comment),
 )

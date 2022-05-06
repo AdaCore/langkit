@@ -1,0 +1,13 @@
+# No doc for f1
+fun f1(): Int = 1
+## Doc for f2
+fun f2(): Int = 1
+## Multi-line
+## doc for
+## f2
+fun f2(): Int = 1
+## Weird
+# multi-line
+## doc for
+## f3
+fun f3(): Int = 1
