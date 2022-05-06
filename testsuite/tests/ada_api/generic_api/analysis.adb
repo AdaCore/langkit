@@ -12,6 +12,7 @@ with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with Libfoolang.Analysis;
+with Libfoolang.Common;
 with Libfoolang.Generic_API; use Libfoolang.Generic_API;
 
 procedure Analysis is
@@ -461,6 +462,50 @@ begin
       Gen_Unit := To_Generic_Unit (Spe_Unit);
       Gen_Ctx := Gen_Unit.Context;
       Put_Line (Gen_Ctx.Get_From_File ("example.txt").Root.Image);
+   end;
+   New_Line;
+
+   Put_Line ("Check generic/specific grammar rule converters");
+   declare
+      use Libfoolang.Common;
+
+      procedure Check (Rule : Grammar_Rule);
+      --  Check the specific/generic conversion back and forth for Rule
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check (Rule : Grammar_Rule) is
+         R : constant Grammar_Rule_Ref := To_Generic_Grammar_Rule (Rule);
+      begin
+         Put_Line
+           (Rule'Image & " -> "
+            & Image (Format_Name (Grammar_Rule_Name (R),
+                                  Camel_With_Underscores)));
+         if From_Generic_Grammar_Rule (R) /= Rule then
+            raise Program_Error;
+         end if;
+      end Check;
+
+   begin
+      for Rule in Grammar_Rule loop
+         Check (Rule);
+      end loop;
+   end;
+
+   Put ("Check error case... ");
+   declare
+      use Libfoolang.Common;
+
+      Dummy : Grammar_Rule;
+   begin
+      Dummy := From_Generic_Grammar_Rule (No_Grammar_Rule_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Langkit_Support.Errors.Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
    end;
    New_Line;
 end Analysis;

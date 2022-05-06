@@ -4,7 +4,6 @@ with Ada.Unchecked_Conversion;
 
 with System;
 
-with Langkit_Support.Errors; use Langkit_Support.Errors;
 with Langkit_Support.Internal.Analysis;
 use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Conversions;
@@ -91,5 +90,39 @@ package body ${ada_lib_name}.Generic_API is
       end if;
       return Wrap_Unit.all (+U);
    end From_Generic_Unit;
+
+   -----------------------------
+   -- To_Generic_Grammar_Rule --
+   -----------------------------
+
+   function To_Generic_Grammar_Rule
+     (Rule : Grammar_Rule) return Langkit_Support.Generic_API.Grammar_Rule_Ref
+   is
+   begin
+      --  'Pos is 0-based whereas Grammar_Rule_Index is 1-based
+
+      return From_Index (Self_Id, Grammar_Rule'Pos (Rule) + 1);
+   end To_Generic_Grammar_Rule;
+
+   -------------------------------
+   -- From_Generic_Grammar_Rule --
+   -------------------------------
+
+   function From_Generic_Grammar_Rule
+     (Rule : Langkit_Support.Generic_API.Grammar_Rule_Ref) return Grammar_Rule
+   is
+   begin
+      if Rule = Langkit_Support.Generic_API.No_Grammar_Rule_Ref then
+         raise Precondition_Failure
+           with "null grammar rule";
+      elsif Language (Rule) /= Self_Id then
+         raise Precondition_Failure
+           with "grammar rule belongs to another language";
+      end if;
+
+      --  'Pos is 0-based whereas Grammar_Rule_Index is 1-based
+
+      return Grammar_Rule'Val (To_Index (Rule) - 1);
+   end From_Generic_Grammar_Rule;
 
 end ${ada_lib_name}.Generic_API;

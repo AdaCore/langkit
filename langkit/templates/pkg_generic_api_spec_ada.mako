@@ -5,6 +5,7 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
 package ${ada_lib_name}.Generic_API is
 
@@ -35,5 +36,17 @@ package ${ada_lib_name}.Generic_API is
    --  ${ada_lib_name}-specific unit type. Raise a
    --  ``Langkit_Support.Errors.Precondition_Failure`` if ``Unit`` does not
    --  belong to ${ada_lib_name}.
+
+   function To_Generic_Grammar_Rule
+     (Rule : Grammar_Rule) return Langkit_Support.Generic_API.Grammar_Rule_Ref;
+   --  Convert the given ``rule`` into a value suitable to use in the Langkit
+   --  generic API.
+
+   function From_Generic_Grammar_Rule
+     (Rule : Langkit_Support.Generic_API.Grammar_Rule_Ref) return Grammar_Rule;
+   --  Convert the ``Rule`` value from the Langkit generic API into the
+   --  ${ada_lib_name}-specific unit type. Raise a
+   --  ``Langkit_Support.Errors.Precondition_Failure`` if ``Rule`` does not
+   --  belong to ${ada_lib_name} or if it is ``No_Grammar_Rule_Ref``.
 
 end ${ada_lib_name}.Generic_API;
