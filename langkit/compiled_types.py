@@ -3451,10 +3451,9 @@ class ASTNodeType(BaseStructType):
                 Return an array that contains the direct lexical
                 children.
 
-                % if lang == 'ada':
-                .. warning:: This constructs a whole array, and as such is much
-                    less efficient than calling the :ada:ref:`Child` built-in.
-                % endif
+                .. warning:: This constructs a whole array every-time you call
+                    it, and as such is less efficient than calling the
+                    ``Child`` built-in.
                 """
             )),
             ('token_start', PropertyDef(

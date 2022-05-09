@@ -326,7 +326,7 @@ class LktNode(ASTNode):
 
             Mismatched types: expected ``expected.full_name``, got ``got``
 
-        Where `expected` is a type and ``got`` is a string.
+        Where ``expected`` is a type and ``got`` is a string.
         """
         return Self.error(
             S("Mismatched types: expected `")
@@ -412,7 +412,7 @@ class LktNode(ASTNode):
         1. Generally assume name and type resolution ran well.
         2. Check higher level legality rules/invariants.
 
-        .. ATTENTION: By default, always try to put new checks in
+        .. ATTENTION:: By default, always try to put new checks in
             ``check_legality``.
         """
         return No(T.SemanticResult.array)
@@ -960,7 +960,7 @@ class Expr(LktNode):
     def expr_context_free_type():
         """
         If the type of this expression can be determined with no bottom up
-        context, return it. This will be used by `expr_type_impl`'s default
+        context, return it. This will be used by ``expr_type_impl``'s default
         implementation.
         """
         return No(T.TypeDecl.entity)
@@ -1509,7 +1509,7 @@ class TokenRef(GrammarExpr):
 
 class GrammarOrExpr(GrammarExpr):
     """
-    Grammar `Or` expression (disjunctive choice between several grammar
+    Grammar ``Or`` expression (disjunctive choice between several grammar
     options).
     """
     sub_exprs = Field(type=T.GrammarExpr.list.list)

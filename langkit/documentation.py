@@ -190,7 +190,7 @@ base_langkit_docs = {
         for this and all the fields is handled by the library: one just has to
         make sure not to keep references to it.
 
-        .. todo:: For the moment, this structure contains already formatted
+        .. TODO: For the moment, this structure contains already formatted
            information, but depending on possible future Ada runtime
            improvements, this might change.
     """,
@@ -244,11 +244,11 @@ base_langkit_docs = {
     'langkit.syntax_error': """
         Subprograms may raise this when they try to parse invalid syntax.
         % if lang == "ocaml":
-            Also raised if a field in a parsing node is null due to a syntax
-            error.
+        Also raised if a field in a parsing node is null due to a syntax
+        error.
         % else:
-            Note that this does *not* concern analysis unit getters, which
-            create diagnostic vectors for such errors.
+        Note that this does *not* concern analysis unit getters, which
+        create diagnostic vectors for such errors.
         % endif
     """,
     'langkit.file_read_error': """
@@ -289,7 +289,7 @@ base_langkit_docs = {
         to raise an error here. If no charset is provided,
         ``"${ctx.default_charset}"`` is the default.
 
-        .. todo:: Passing an unsupported charset here is not guaranteed to
+        .. TODO: Passing an unsupported charset here is not guaranteed to
            raise an error right here, but this would be really helpful for
            users.
 
@@ -313,7 +313,7 @@ base_langkit_docs = {
     'langkit.context_incref': """
         Increase the reference count to an analysis context.
         % if lang == 'c':
-            Return the reference for convenience.
+        Return the reference for convenience.
         % endif
     """,
     'langkit.context_decref': """
@@ -383,8 +383,8 @@ base_langkit_docs = {
         The ``Name`` and ``Kind`` arguments are forwarded directly to query the
         context's unit provider and get the filename for the returned unit.
         % if lang == 'python':
-            ``Name`` must be a string, while ``Kind`` must be an
-            ``AnalysisUnitKind`` enumeration value.
+        ``Name`` must be a string, while ``Kind`` must be an
+        ``AnalysisUnitKind`` enumeration value.
         % endif
         See the documentation of the relevant unit provider for their exact
         semantics.
@@ -394,11 +394,11 @@ base_langkit_docs = {
 
         If the unit name cannot be tuned into a file name,
         % if lang == 'ada':
-            raise an ``Invalid_Unit_Name_Error`` exception.
+        raise an ``Invalid_Unit_Name_Error`` exception.
         % elif lang == 'python':
-            raise an ``InvalidUnitNameError`` exception.
+        raise an ``InvalidUnitNameError`` exception.
         % else:
-            return ``${null}``.
+        return ``${null}``.
         % endif
         If any other failure occurs, such as file opening, decoding, lexing or
         parsing failure, return an analysis unit anyway: errors are described
@@ -476,16 +476,16 @@ base_langkit_docs = {
         Return the filename this unit is associated to.
 
         % if lang == 'c':
-            The returned string is dynamically allocated and the caller must
-            free it when done with it.
+        The returned string is dynamically allocated and the caller must
+        free it when done with it.
         % endif
     """,
     'langkit.unit_diagnostic_count': """
         Return the number of diagnostics associated to this unit.
     """,
     'langkit.unit_diagnostic': """
-        Get the Nth diagnostic in this unit and store it into *DIAGNOSTIC_P.
-        Return zero on failure (when N is too big).
+        Get the Nth diagnostic in this unit and store it into
+        ``*diagnostic_p``. Return zero on failure (when N is too big).
     """,
     'langkit.unit_has_diagnostics': """
         Return whether this unit has associated diagnostics.
@@ -505,9 +505,9 @@ base_langkit_docs = {
         Depending on whether errors are discarded (see
         ``Discard_Errors_In_Populate_Lexical_Env``),
         % if lang == 'c':
-            return 0 on failure and 1 on success.
+        return ``0`` on failure and ``1`` on success.
         % else:
-            raise a ``Property_Error`` on failure.
+        raise a ``Property_Error`` on failure.
         % endif
     """,
 
@@ -547,7 +547,7 @@ base_langkit_docs = {
     """,
     'langkit.node_child': """
         Return the Nth child for in this node's fields and store it into
-        *CHILD_P.  Return zero on failure (when N is too big).
+        ``*child_p``.  Return zero on failure (when ``N`` is too big).
     """,
     'langkit.node_is_null': """
         Return whether this node is a null node reference.
@@ -702,7 +702,7 @@ base_langkit_docs = {
         reader if there are no shares left.
 
         % if lang == 'ada':
-            Return whether there are no ownership shares left.
+        Return whether there are no ownership shares left.
         % endif
     """,
     'langkit.file_reader_destroy_type': """
@@ -732,8 +732,9 @@ base_langkit_docs = {
         requested.
 
         .. warning:: Please note that the unit requested callback can be called
-        *many* times for the same unit, so in all likeliness, those events
-        should be filtered if they're used to forward diagnostics to the user.
+            *many* times for the same unit, so in all likeliness, those events
+            should be filtered if they're used to forward diagnostics to the
+            user.
 
         ``unit_parsed`` is a callback that will be called when a unit is
         parsed.
@@ -754,7 +755,7 @@ base_langkit_docs = {
         found is an error or not.
 
         .. warning:: The interface of this callback is probably subject to
-        change, so should be treated as experimental.
+            change, so should be treated as experimental.
     """,
     'langkit.event_handler_unit_parsed_type': """
         Callback type for functions that are called when a unit is parsed.
@@ -776,7 +777,7 @@ base_langkit_docs = {
         event handler if there are no shares left.
 
         % if lang == 'ada':
-            Return whether there are no ownership shares left.
+        Return whether there are no ownership shares left.
         % endif
     """,
 
@@ -803,18 +804,18 @@ base_langkit_docs = {
     'langkit.unit_provider_get_unit_filename': """
         Return the filename corresponding to the given unit name/unit kind.
         % if lang == 'ada':
-            Raise a ``Property_Error``
+        Raise a ``Property_Error``
         % else:
-            Return ``${null}``
+        Return ``${null}``
         % endif
         if the given unit name is not valid.
     """,
     'langkit.unit_provider_get_unit_from_name': """
         Fetch and return the analysis unit referenced by the given unit name.
         % if lang == 'ada':
-            Raise a ``Property_Error``
+        Raise a ``Property_Error``
         % else:
-            Return ``${null}``
+        Return ``${null}``
         % endif
         if the given unit name is not valid.
     """,
@@ -901,15 +902,15 @@ base_langkit_docs = {
         Return ${'an iterator on' if lang == 'python' else ''} the list of
         tokens that spans between
         % if lang == 'python':
-            `self` and `other`
+        ``self`` and ``other``
         % else:
-            the two input tokens
+        the two input tokens
         % endif
         (included). This returns an empty list if the first token appears after
         the other one in the source code.
         % if lang == 'python':
-            Raise a ``ValueError`` if both tokens come from different analysis
-            units.
+        Raise a ``ValueError`` if both tokens come from different analysis
+        units.
         % endif
     """,
     'langkit.token_is_equivalent': """
@@ -926,15 +927,15 @@ base_langkit_docs = {
         % endif
 
         % if lang == 'ada':
-            This raises a ``Constraint_Error``
+        This raises a ``Constraint_Error``
         % elif lang == 'c':
-            This returns 0
+        This returns ``0``
         % elif lang == 'python':
-            This raises a ``ValueError``
+        This raises a ``ValueError``
         % endif
         if ``First`` and ``Last`` don't belong to the same analysis unit.
         % if lang == 'c':
-            Return 1 if successful.
+        Return ``1`` if successful.
         % endif
     """,
     'langkit.token_is_trivia': """
@@ -943,9 +944,9 @@ base_langkit_docs = {
     """,
     'langkit.token_index': """
         % if lang == 'ada':
-            One-based
+        One-based
         % else:
-            Zero-based
+        Zero-based
         % endif
         index for this token/trivia. Tokens and trivias get their own index
         space.
@@ -1043,7 +1044,7 @@ base_langkit_docs = {
     """,
     'langkit.rewriting.parent': """
         Return a handle for the node that is the parent of Handle's node. This
-        is No_Rewriting_Handle for a node that is not tied to any tree yet.
+        is ``No_Rewriting_Handle`` for a node that is not tied to any tree yet.
     """,
     'langkit.rewriting.children_count': """
         Return the number of children the node represented by Handle has
@@ -1053,9 +1054,9 @@ base_langkit_docs = {
         Handle represents. Index is 1-based.
     """,
     'langkit.rewriting.set_child': """
-        If Child is No_Rewriting_Node, untie the Handle's Index'th child to
-        this tree, so it can be attached to another one. Otherwise, Child must
-        have no parent as it will be tied to Handle's tree.
+        If Child is ``No_Rewriting_Node``, untie the Handle's ``Index``'th
+        child to this tree, so it can be attached to another one. Otherwise,
+        Child must have no parent as it will be tied to ``Handle``'s tree.
     """,
     'langkit.rewriting.text': """
         Return the text associated to the given token node.
@@ -1199,13 +1200,10 @@ base_langkit_docs = {
             keep only the ones for which it returns True. If supplied with a
             list of subclasses of ${pyapi.root_astnode_name}, it will match all
             instances of any of them.
-        :type ast_type_or_pred:
-            type|((${pyapi.root_astnode_name}) -> bool)|list[type]
 
         :param kwargs: Allows the user to filter on attributes of the node. For
             every key value association, if the node has an attribute of name
             key that has the specified value, then the child is kept.
-        :type kwargs: dict[str, Any]
     """,
     'langkit.python.root_node.parent_chain': """
         Return the parent chain of self. Self will be the first element,
@@ -1343,8 +1341,13 @@ def make_formatter(
     """
     Create a formatter function which, given a text that contains a list of
     paragraphs, return a list of lines that are formatted correctly, with
-    wrapped paragraphs, the given prefix for each line, and given ``prefix``
-    and ``suffix``.
+    wrapped paragraphs, the given ``line_prefix`` for each line, and given
+    ``prefix`` and ``suffix``.
+
+    If the ``:typeref:`` Langkit directive is used in the docstring,
+    ``get_node_name`` will be used to translate the name to the proper name in
+    the given language, and ``type_role_name`` will be used as the name for the
+    type reference role in the given language.
 
     The first line of the outputted text will not be indented, since that's our
     need in templates.
