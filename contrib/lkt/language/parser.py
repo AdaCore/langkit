@@ -1222,14 +1222,15 @@ class GrammarDecl(Decl):
                    lexer_arg._.value.is_null)
 
                 .then(
-                    lambda _: lexer_annot
-                    .error(S("exactly 1 positional argument expected"))
+                    lambda _:
+                    lexer_annot
+                    ._.error(S("exactly 1 positional argument expected"))
                     .singleton,
                 )
                 # Check that it is a valid reference to a lexer
                 ._or(lexer_decl.is_null.then(
                     lambda _:
-                    lexer_arg.error(S("reference to a lexer expected"))
+                    lexer_arg._.error(S("reference to a lexer expected"))
                     .singleton,
                 ))
             )

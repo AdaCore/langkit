@@ -34,3 +34,6 @@ test.lkt:20:10: error: exactly 1 positional argument expected
 20 | @invalid @with_lexer grammar invalid_with_lexer {
    |          ^^^^^^^^^^^
 
+test.lkt:23:10: error: missing mandatory "@with_lexer" annotation
+23 | @invalid grammar with_lexer_missing {
+

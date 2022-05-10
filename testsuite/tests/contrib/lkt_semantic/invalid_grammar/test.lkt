@@ -19,3 +19,6 @@ import lexer_example
 
 @invalid @with_lexer grammar invalid_with_lexer {
 }
+
+@invalid grammar with_lexer_missing {
+}
