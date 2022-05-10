@@ -1,4 +1,5 @@
 import lexer_example
+
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Name(@identifier) |> when(Name.is_not_class_id)

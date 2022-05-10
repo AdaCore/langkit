@@ -1856,7 +1856,7 @@ def unparse_lang(ctx):
                     f.close()
                 f = open(value, 'w', encoding='utf-8')
             elif action == 'import':
-                f.write('import {}\n'.format(value))
+                f.write('import {}\n\n'.format(value))
             elif action == 'nodes':
                 unparse_nodes(ctx, f)
             elif action == 'lexer':
