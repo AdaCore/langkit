@@ -1,7 +1,7 @@
 == bad_rule_1.lkt ==
 bad_rule_1.lkt:2:5: error: Unexpected declaration in lexer
 1 |     lexer bar_lexer {
-  |     ^                
+  |     ^
 
 
 == case_1.lkt ==
@@ -10,25 +10,25 @@ case_1.lkt:3:11-3:12: Expected 'discard', got Number
 == case_2.lkt ==
 case_2.lkt:3:5: error: Invalid case rule topology
 2 |     match p"foo" {
-  |     ^             
+  |     ^
 
 
 == case_3.lkt ==
 case_3.lkt:3:5: error: Invalid case rule topology
 2 |     match p"foo" {
-  |     ^             
+  |     ^
 
 
 == case_4.lkt ==
 case_4.lkt:3:5: error: Invalid case rule topology
 2 |     match p"foo" {
-  |     ^             
+  |     ^
 
 
 == case_5.lkt ==
 case_5.lkt:4:36: error: Unknown token: bar
 3 |         if previous_token is foo | bar then send(foo, 3)
-  |                                    ^^^                  
+  |                                    ^^^
 
 
 == case_6.lkt ==
@@ -37,13 +37,13 @@ case_6.lkt:5:24-5:27: Expected Number, got Identifier
 == case_7.lkt ==
 case_7.lkt:5:19: error: Unknown token: bar
 4 |         else send(bar, 3)
-  |                   ^^^    
+  |                   ^^^
 
 
 == family_1.lkt ==
 family_1.lkt:2:5: error: Only lexer rules allowed in family blocks
 1 |     family keywords {
-  |     ^                
+  |     ^
 
 
 == foo.lkt ==
@@ -100,7 +100,7 @@ rule_2.lkt:2:5: error: lexing_failure is a reserved token name
 == spacing_1.lkt ==
 spacing_1.lkt:2:5: error: Missing "with" argument
 1 |     @unparse_spacing() family ids {
-  |     ^^^^^^^^^^^^^^^^^^             
+  |     ^^^^^^^^^^^^^^^^^^
 
 
 == spacing_2.lkt ==
@@ -112,31 +112,31 @@ spacing_2.lkt:2:5: error: Token family name expected
 == spacing_3.lkt ==
 spacing_3.lkt:2:27: error: Unknown token family: foo
 1 |     @unparse_spacing(with=foo)
-  |                           ^^^ 
+  |                           ^^^
 
 
 == token_action_1.lkt ==
 token_action_1.lkt:2:5: error: Arguments required for this annotation
 1 |     @text example <- "example"
-  |     ^^^^^                     
+  |     ^^^^^
 
 
 == token_action_2.lkt ==
 token_action_2.lkt:2:5: error: No positional argument allowed
 1 |     @text(1) example <- "example"
-  |     ^^^^^^^^                     
+  |     ^^^^^^^^
 
 
 == token_action_3.lkt ==
 token_action_3.lkt:2:5: error: Invalid arguments: bar
 1 |     @text(bar=true) example <- "example"
-  |     ^^^^^^^^^^^^^^^                     
+  |     ^^^^^^^^^^^^^^^
 
 
 == token_action_4.lkt ==
 token_action_4.lkt:2:31: error: Boolean literal expected
 1 |     @text(start_ignore_layout=1) example <- "example"
-  |                               ^                      
+  |                               ^
 
 
 == token_action_5.lkt ==

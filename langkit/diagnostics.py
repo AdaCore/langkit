@@ -581,9 +581,12 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
     append_line(line_nb, source_buffer[line_nb])
 
     # Append the line caretting the sloc in the line above
-    caret_line = "".join("^" if start_offset <= i < end_offset else " "
-                         for i in range(len(source_buffer[line_nb])))
-    append_line("", col(caret_line, Colors.RED + Colors.BOLD))
+    caret_line = "".join(
+        "^" if start_offset <= i < end_offset else " "
+        for i in range(len(source_buffer[line_nb]))
+    ).rstrip()
+    if caret_line:
+        append_line("", col(caret_line, Colors.RED + Colors.BOLD))
 
     # Append following lines up to ``lines_after`` lines
     for line_nb, line in enumerate(

@@ -1,7 +1,7 @@
 == List ==
 list.lkt:4:47: error: Parsers cannot create synthetic nodes
 3 |     @main_rule main_rule <- Example("example" ListSynthExample+("example"))
-  |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+  |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == Null ==
@@ -13,7 +13,7 @@ null.lkt:4:29: error: Parsers cannot create synthetic nodes
 == Skip ==
 skip.lkt:4:52: error: Unknown node: SynthExapmle
 3 |     @main_rule main_rule <- Example("example" skip(SynthExapmle))
-  |                                                    ^^^^^^^^^^^^  
+  |                                                    ^^^^^^^^^^^^
 
 
 == Transform ==

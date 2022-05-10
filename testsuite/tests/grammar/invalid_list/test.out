@@ -1,7 +1,7 @@
 == Token element ==
 token-element.lkt:4:38: error: List parsers only accept subparsers that yield AST nodes (Token provided here)
 3 |     @main_rule main_rule <- ListNode(list+(@number))
-  |                                      ^^^^^^^^^^^^^^ 
+  |                                      ^^^^^^^^^^^^^^
 
 
 == Invalid list_cls ==

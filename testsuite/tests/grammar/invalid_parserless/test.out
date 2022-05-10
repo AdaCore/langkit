@@ -1,19 +1,19 @@
 == null_parser.lkt ==
 null_parser.lkt:14:1: error: This node is not synthetic nor abstract, so at least one parser must create it
 13 | class UnrefNode : FooNode {
-   | ^                          
+   | ^
 
 
 == unref_error_node.lkt ==
 unref_error_node.lkt:14:1: error: This node is not synthetic nor abstract, so at least one parser must create it
 13 | class ParserlessNode : FooNode implements ErrorNode {
-   | ^                                                    
+   | ^
 
 
 == unref_node.lkt ==
 unref_node.lkt:15:1: error: This node is not synthetic nor abstract, so at least one parser must create it
 14 | class ParserlessNode : FooNode {
-   | ^                               
+   | ^
 
 
 Done

@@ -7,7 +7,7 @@ no-dot.lkt:4:29: error: Invalid property reference
 == unknown-node.lkt ==
 unknown-node.lkt:4:56: error: Unknown node: NoSuchNode
 3 |     @main_rule main_rule <- Example("example") |> when(NoSuchNode.no_such_prop)
-  |                                                        ^^^^^^^^^^              
+  |                                                        ^^^^^^^^^^
 
 
 == unknown-prop.lkt ==

@@ -25,7 +25,6 @@ several-2.lkt:6:11: error: The Identifier token node can be associated to only o
 == Pick in List ==
 pick-in-list.lkt:4:29: error: Unparsers generation require list parsers to directly build nodes for each list item
 3 |     @main_rule main_rule <- list+("example" Root(or(
-  |                                                     
 
 
 == Ambiguous lists ==

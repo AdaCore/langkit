@@ -1,13 +1,13 @@
 == bad-token-casing.lkt ==
 bad-token-casing.lkt:4:37: error: Unknown token: Example
 3 |     @main_rule main_rule <- Example(@Example)
-  |                                     ^^^^^^^^ 
+  |                                     ^^^^^^^^
 
 
 == unknown-token.lkt ==
 unknown-token.lkt:4:37: error: Unknown token: no_such_token
 3 |     @main_rule main_rule <- Example(@no_such_token)
-  |                                     ^^^^^^^^^^^^^^ 
+  |                                     ^^^^^^^^^^^^^^
 
 
 Done

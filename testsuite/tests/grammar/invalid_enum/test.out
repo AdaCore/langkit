@@ -7,13 +7,13 @@ no-dot.lkt:4:29: error: Parsers cannot create abstract nodes
 == bad-prefix.lkt ==
 bad-prefix.lkt:4:29: error: Unknown node: NoSuchNode
 3 |     @main_rule main_rule <- NoSuchNode.Example("example")
-  |                             ^^^^^^^^^^                   
+  |                             ^^^^^^^^^^
 
 
 == bad-alt.lkt ==
 bad-alt.lkt:4:37: error: Unknown enum node alternative: NoSuchAlt
 3 |     @main_rule main_rule <- Example.NoSuchAlt("example")
-  |                                     ^^^^^^^^^           
+  |                                     ^^^^^^^^^
 
 
 Done
