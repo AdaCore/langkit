@@ -5,7 +5,6 @@ grammar foo_grammar {
     @main_rule main_rule <- example_list
     example_list <- list+(example)
     example <- Example("example" ?pick("(" example_list ")"))
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

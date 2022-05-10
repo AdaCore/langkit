@@ -10,7 +10,6 @@ grammar foo_grammar {
     ref <- Ref(Null("null") name)
     error_ref <- ErrorRef("error" Null("null") name)
     name <- Name(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

@@ -21,7 +21,6 @@ grammar foo_grammar {
     decl <- or(var | package | use_clause | ref)
     use_clause <- UseClause("use" name)
     ref <- Ref("ref" name)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

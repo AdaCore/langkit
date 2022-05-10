@@ -4,7 +4,6 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- Plus(literal "+" literal)
     literal <- Literal(@number)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

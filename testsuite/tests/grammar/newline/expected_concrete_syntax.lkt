@@ -24,7 +24,6 @@ grammar foo_grammar {
         lit @newline @indent lit @newline @dedent lit
     )
     @main_rule main_rule <- or(comp | ind | nl)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

@@ -5,7 +5,6 @@ grammar foo_grammar {
     @main_rule main_rule <- or(literal | example)
     literal <- Literal(@number)
     example <- Example("example")
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

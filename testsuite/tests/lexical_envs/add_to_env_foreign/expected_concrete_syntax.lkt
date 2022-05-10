@@ -13,7 +13,6 @@ grammar foo_grammar {
     self_decl <- SelfDecl(
         "+" identifier ?pick("(" identifier ")")
     )
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

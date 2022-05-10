@@ -8,7 +8,6 @@ grammar foo_grammar {
     var <- Var(id "=" name)
     id <- Id(@identifier)
     name <- or(Prefix(name "." id) | id)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

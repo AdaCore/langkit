@@ -10,7 +10,6 @@ grammar foo_grammar {
     )
     simple_identifier <- SimpleId(@identifier)
     foreign_decl <- ForeignDecl("+" identifier "+" simple_identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

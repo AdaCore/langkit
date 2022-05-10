@@ -4,7 +4,6 @@ import lexer_example
 grammar foo_grammar {
     name <- Name(@identifier)
     @main_rule main_rule <- list+(or(Definition("def" name) | name), ",")
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

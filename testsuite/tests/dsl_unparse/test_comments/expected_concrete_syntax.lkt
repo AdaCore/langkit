@@ -7,7 +7,6 @@ grammar foo_grammar {
         | NodeType1("def")
         | NodeType2(";")
     )
-
 }
 
 ## Root node class for Test AST nodes.

@@ -9,7 +9,6 @@ grammar foo_grammar {
     use_clause <- UseClause("+" id)
     error_use_clause <- ErrorUseClause("+" "error")
     ref <- Ref("=" id)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

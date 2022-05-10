@@ -1793,7 +1793,7 @@ def unparse_grammar(ctx, f):
     % for name, rule in sorted_rules:
         ${annotations(name)}${name} <- ${emit_rule(rule, True)}$hl
     % endfor
-    $d$hl
+    $d
     }$hl
     """
 

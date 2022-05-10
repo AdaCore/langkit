@@ -15,7 +15,6 @@ grammar foo_grammar {
     ref <- Ref(name)
     name <- Identifier(@identifier)
     literal <- Literal(@number)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

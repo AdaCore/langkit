@@ -11,7 +11,6 @@ grammar foo_grammar {
         | Prefix(name "." Id(@identifier))
         | Id(@identifier)
     )
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

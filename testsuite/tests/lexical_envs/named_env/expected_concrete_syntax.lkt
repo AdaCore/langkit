@@ -5,7 +5,6 @@ grammar foo_grammar {
     @main_rule main_rule <- ToplevelList*(example)
     example <- Example(id ?pick("+" id) "{" list*(id) "}")
     id <- Id(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

@@ -21,7 +21,6 @@ grammar foo_grammar {
     )
     char_lit <- CharLit(@char)
     name <- Name(@id)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

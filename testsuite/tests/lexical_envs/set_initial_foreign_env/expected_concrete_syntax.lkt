@@ -9,7 +9,6 @@ grammar foo_grammar {
         | simple_identifier
     )
     simple_identifier <- SimpleId(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

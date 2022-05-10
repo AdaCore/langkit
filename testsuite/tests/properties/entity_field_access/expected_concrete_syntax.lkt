@@ -6,7 +6,6 @@ grammar foo_grammar {
     item <- or(couple | literal)
     couple <- Couple("(" item "," item ")")
     literal <- Literal(@number)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

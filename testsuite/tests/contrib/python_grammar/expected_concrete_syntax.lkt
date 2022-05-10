@@ -324,7 +324,6 @@ grammar foo_grammar {
         "for" expr_list "in" or_test ?comp_iter
     )
     comp_if <- CompIf("if" test ?comp_iter)
-
 }
 
 @abstract class PythonNode implements Node[PythonNode] {

@@ -10,7 +10,6 @@ grammar foo_grammar {
         | Enum.Default()
     )
     plus <- PlusQualifier("+")
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

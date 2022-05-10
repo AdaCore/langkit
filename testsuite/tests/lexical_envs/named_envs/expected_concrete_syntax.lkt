@@ -64,7 +64,6 @@ grammar foo_grammar {
         "declare" DeclarativePart(decls) "begin" stmts "end" ";"
     )
     ref <- Ref("ref" name ";")
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

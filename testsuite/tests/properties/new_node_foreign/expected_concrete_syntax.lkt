@@ -8,7 +8,6 @@ grammar foo_grammar {
         | RegularBlock(id "{" "}")
     )
     id <- Identifier(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

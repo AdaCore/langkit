@@ -5,7 +5,6 @@ grammar foo_grammar {
     @main_rule expr <- list*(Decl(
         "def" Identifier(@identifier) "=" Number(@number)
     ))
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

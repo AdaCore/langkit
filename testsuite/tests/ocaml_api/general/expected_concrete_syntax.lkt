@@ -9,7 +9,6 @@ grammar foo_grammar {
     var <- Var("var" "(" main_rule ")")
     ident <- Ident(@identifier)
     string <- StringLiteral(@string)
-
 }
 
 enum Color {

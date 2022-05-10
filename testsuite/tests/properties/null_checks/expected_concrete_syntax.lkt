@@ -9,7 +9,6 @@ grammar foo_grammar {
         | atom
     )
     atom <- or(Literal(@number) | Name(@identifier))
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

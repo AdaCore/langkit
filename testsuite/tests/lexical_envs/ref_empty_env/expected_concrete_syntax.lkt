@@ -18,7 +18,6 @@ grammar foo_grammar {
         | Open("open" id)
         | Ref("ref" id)
     )
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

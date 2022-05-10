@@ -6,7 +6,6 @@ grammar foo_grammar {
     decl <- Decl(Name(@identifier) "(" ref_list ")")
     ref_list <- list*(ref)
     ref <- Ref(Name(@identifier))
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

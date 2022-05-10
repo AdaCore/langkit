@@ -16,7 +16,6 @@ grammar foo_grammar {
     ref <- Ref(name)
     derived_ref <- DerivedRef(name)
     plus <- pick("(" Plus(expr "+" expr) ")")
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

@@ -6,7 +6,6 @@ grammar foo_grammar {
     node <- or(example | null_node)
     example <- Example("example")
     null_node <- NullNode("null")
-
 }
 
 @abstract @has_abstract_list class FooNode implements Node[FooNode] {

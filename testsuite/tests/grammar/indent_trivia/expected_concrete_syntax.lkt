@@ -29,7 +29,6 @@ grammar foo_grammar {
     def_node <- Def("def" identifier @newline list+(indented))
     @main_rule main_rule <- list+(pick(discard(list*(newline))
     def_node discard(list*(newline))))
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

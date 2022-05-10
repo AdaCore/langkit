@@ -9,7 +9,6 @@ grammar foo_grammar {
     param <- Param(name)
     vars <- pick("{" list+(var) "}")
     var <- BlockVar(name)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

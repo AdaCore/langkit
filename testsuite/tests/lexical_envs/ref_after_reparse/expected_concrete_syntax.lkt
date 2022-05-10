@@ -13,7 +13,6 @@ grammar foo_grammar {
     decl <- Decl(name)
     using <- Using(name)
     ref <- Ref(name)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

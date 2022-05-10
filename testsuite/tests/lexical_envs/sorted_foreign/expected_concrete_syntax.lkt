@@ -7,7 +7,6 @@ grammar foo_grammar {
     ref <- Ref(name)
     identifier <- Identifier(@identifier)
     name <- or(DottedName(name "." identifier) | identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

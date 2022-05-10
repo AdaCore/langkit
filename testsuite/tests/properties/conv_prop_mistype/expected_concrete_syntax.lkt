@@ -5,7 +5,6 @@ grammar foo_grammar {
     @main_rule main_rule <- Examples(
         RegularExample("example") PlusExample("+" "example")
     )
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

@@ -7,7 +7,6 @@ grammar foo_grammar {
     id <- Id(@identifier)
     def <- Def("def" / id)
     var_def <- VarDef("def" "var" / id)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

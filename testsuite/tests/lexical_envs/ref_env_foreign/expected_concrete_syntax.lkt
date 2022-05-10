@@ -12,7 +12,6 @@ grammar foo_grammar {
     )
     simple_identifier <- SimpleId(@identifier)
     ref_clause <- RefClause("+" identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

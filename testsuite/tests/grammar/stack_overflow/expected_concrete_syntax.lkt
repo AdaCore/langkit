@@ -5,7 +5,6 @@ grammar foo_grammar {
     @main_rule main_rule <- or(example | paren)
     example <- Example("example")
     paren <- Paren("(" main_rule ")")
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

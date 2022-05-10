@@ -10,7 +10,6 @@ grammar foo_grammar {
     call_expr <- CallExpr(id "(" list*(expr) ")")
     expr <- or(Literal(@number) | Ref(id))
     id <- Identifier(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

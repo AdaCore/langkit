@@ -6,7 +6,6 @@ grammar foo_grammar {
         "def" ident ?pick("{" list+(program) "}")
     )
     ident <- Id(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

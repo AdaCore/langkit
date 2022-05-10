@@ -5,7 +5,6 @@ grammar foo_grammar {
     @main_rule main_rule <- list*(decl)
     decl <- Decl(id DeclError("error"))
     id <- Identifier(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

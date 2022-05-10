@@ -7,7 +7,6 @@ grammar foo_grammar {
     ref_list <- list*(ref)
     ref <- Ref(name)
     name <- Name(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

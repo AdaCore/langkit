@@ -7,7 +7,6 @@ grammar foo_grammar {
     scope <- Scope(identifier "{" list*(any_decl) "}")
     decl <- Decl(identifier)
     identifier <- Identifier(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

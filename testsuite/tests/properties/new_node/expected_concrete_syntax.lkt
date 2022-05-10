@@ -7,7 +7,6 @@ grammar foo_grammar {
         "(" Name(@identifier) list+(list_item, ",") ")"
     )
     list_item <- Literal(@number)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

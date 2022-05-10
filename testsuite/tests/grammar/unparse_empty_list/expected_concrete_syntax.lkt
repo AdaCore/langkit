@@ -7,7 +7,6 @@ grammar foo_grammar {
         "(" identifier "," null(ASTList[FooNode, DefNode]) ")"
     )
     identifier <- Identifier(@identifier)
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

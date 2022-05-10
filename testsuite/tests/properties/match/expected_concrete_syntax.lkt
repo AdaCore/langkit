@@ -9,7 +9,6 @@ grammar foo_grammar {
     lit <- Lit(@number)
     ref <- Ref(@identifier)
     plus <- pick("(" Plus(expr "+" expr) ")")
-
 }
 
 @abstract class FooNode implements Node[FooNode] {

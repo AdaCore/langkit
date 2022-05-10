@@ -12,7 +12,6 @@ grammar foo_grammar {
             ?pick("(" Identifier(@identifier) ")") null(Number) ";"
         )
     ))
-
 }
 
 @abstract class FooNode implements Node[FooNode] {
