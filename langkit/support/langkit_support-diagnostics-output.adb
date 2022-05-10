@@ -21,7 +21,7 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Wide_Wide_Text_IO;       use Ada.Wide_Wide_Text_IO;
+with Ada.Wide_Wide_Text_IO; use Ada.Wide_Wide_Text_IO;
 
 with Langkit_Support.Images; use Langkit_Support.Images;
 
@@ -36,7 +36,18 @@ package body Langkit_Support.Diagnostics.Output is
       Lines_After     : Natural := 0;
       Output_File     : WWIO.File_Type := WWIO.Standard_Output;
       Caretting_Color : ANSI_Color);
-   --  Print a source listing
+   --  Print a source listing.
+   --
+   --  ``Sloc_Range`` determines range of source code to print.
+   --
+   --  ``Buffer`` is used to get access to the source code.
+   --
+   --  ``Lines_After`` is unused for now (see the TODO in the procedure body).
+   --
+   --  The source listing is written to ``Output_File``.
+   --
+   --  ``Caretting_Color`` is the style used to display the carets to highlight
+   --  the slice of source code designated by ``Sloc_Range``.
 
    procedure Reset_Colors;
    --  Reset the state of colors for ``Term_Info``
@@ -62,7 +73,9 @@ package body Langkit_Support.Diagnostics.Output is
       Output_File     : WWIO.File_Type := WWIO.Standard_Output;
       Caretting_Color : ANSI_Color)
    is
-      procedure Start_Line (Line_Nb : String := "");
+      procedure Start_Line (Line_Nb : String);
+      --  Print the "NN | " source listing prefix. ``Line_Nb`` is the image of
+      --  the line number (NN).
 
       Line_Nb      : constant Positive := Positive (Sloc_Range.Start_Line);
       Start_Offset : constant Positive := Positive (Sloc_Range.Start_Column);
@@ -70,12 +83,13 @@ package body Langkit_Support.Diagnostics.Output is
 
       Line_Nb_Width : constant Positive :=
         Positive'Image (Line_Nb + Lines_After)'Length - 1;
+      --  Size in bytes of the biggest line number to display
 
-      -----------------
-      -- Append_Line --
-      -----------------
+      ----------------
+      -- Start_Line --
+      ----------------
 
-      procedure Start_Line (Line_Nb : String := "") is
+      procedure Start_Line (Line_Nb : String) is
       begin
          Set_Style (Term_Info, Bright);
          Set_Color (Term_Info, Foreground => Blue);
@@ -86,10 +100,12 @@ package body Langkit_Support.Diagnostics.Output is
       end Start_Line;
    begin
       --  Append the line containing the sloc
+
       Start_Line (Stripped_Image (Line_Nb));
       Put_Line (Output_File, Get_Line (Buffer, Line_Nb));
 
       --  Append the line caretting the sloc in the line above
+
       Start_Line ("");
       Set_Style (Term_Info, Bright);
       Set_Color (Term_Info, Foreground => Caretting_Color);
@@ -123,6 +139,7 @@ package body Langkit_Support.Diagnostics.Output is
       end if;
 
       --  Put `file_name.ext:line:col: error:`
+
       Set_Style (Term_Info, Bright);
       Put (Output_File,
            To_Text
@@ -141,8 +158,10 @@ package body Langkit_Support.Diagnostics.Output is
          In_Lang_Entity : Boolean := False;
       begin
          for C of To_Text (Self.Message) loop
+
             --  Style backtick parts: put everything in `Bright` inbetween
             --  backticks.
+
             if C = '`' then
                if In_Lang_Entity then
                   Reset_Colors;

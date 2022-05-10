@@ -42,6 +42,7 @@
 --      fashion.
 
 with Ada.Wide_Wide_Text_IO;
+
 with GNATCOLL.Terminal; use GNATCOLL.Terminal;
 
 package Langkit_Support.Diagnostics.Output is
@@ -51,6 +52,7 @@ package Langkit_Support.Diagnostics.Output is
    type Diagnostic_Style is record
       Label : Unbounded_Text_Type;
       --  Label for the diagnostic
+
       Color : ANSI_Color;
       --  Color for the diagnostic
    end record;
