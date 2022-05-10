@@ -1,3 +1,5 @@
+import common
+
 lexer foo_lexer {
     ex1 <- p"a"
     ex2 <- p"b"
@@ -6,6 +8,7 @@ lexer foo_lexer {
     ex5 <- p"d"
 }
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }

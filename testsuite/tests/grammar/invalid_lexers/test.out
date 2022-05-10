@@ -1,48 +1,48 @@
 == bad_rule_1.lkt ==
-bad_rule_1.lkt:2:5: error: Unexpected declaration in lexer
-1 |     lexer bar_lexer {
+bad_rule_1.lkt:4:5: error: Unexpected declaration in lexer
+3 |     lexer bar_lexer {
   |     ^
 
 
 == case_1.lkt ==
-case_1.lkt:3:11-3:12: Expected 'discard', got Number
+case_1.lkt:5:11-5:12: Expected 'discard', got Number
 
 == case_2.lkt ==
-case_2.lkt:3:5: error: Invalid case rule topology
-2 |     match p"foo" {
+case_2.lkt:5:5: error: Invalid case rule topology
+4 |     match p"foo" {
   |     ^
 
 
 == case_3.lkt ==
-case_3.lkt:3:5: error: Invalid case rule topology
-2 |     match p"foo" {
+case_3.lkt:5:5: error: Invalid case rule topology
+4 |     match p"foo" {
   |     ^
 
 
 == case_4.lkt ==
-case_4.lkt:3:5: error: Invalid case rule topology
-2 |     match p"foo" {
+case_4.lkt:5:5: error: Invalid case rule topology
+4 |     match p"foo" {
   |     ^
 
 
 == case_5.lkt ==
-case_5.lkt:4:36: error: Unknown token: bar
-3 |         if previous_token is foo | bar then send(foo, 3)
+case_5.lkt:6:36: error: Unknown token: bar
+5 |         if previous_token is foo | bar then send(foo, 3)
   |                                    ^^^
 
 
 == case_6.lkt ==
-case_6.lkt:5:24-5:27: Expected Number, got Identifier
+case_6.lkt:7:24-7:27: Expected Number, got Identifier
 
 == case_7.lkt ==
-case_7.lkt:5:19: error: Unknown token: bar
-4 |         else send(bar, 3)
+case_7.lkt:7:19: error: Unknown token: bar
+6 |         else send(bar, 3)
   |                   ^^^
 
 
 == family_1.lkt ==
-family_1.lkt:2:5: error: Only lexer rules allowed in family blocks
-1 |     family keywords {
+family_1.lkt:4:5: error: Only lexer rules allowed in family blocks
+3 |     family keywords {
   |     ^
 
 
@@ -68,92 +68,92 @@ test.py:XXX: error: nothing to repeat
 test.py:XXX: error: unbalanced parentheses
 
 == pattern_7.lkt ==
-pattern_7.lkt:3:5: error: Duplicate pattern name
-2 |     val pat = p"example"
+pattern_7.lkt:5:5: error: Duplicate pattern name
+4 |     val pat = p"example"
   |     ^^^^^^^^^^^^^^^^^^^^
 
 
 == pattern_8.lkt ==
-pattern_8.lkt:2:5: error: Patterns must have automatic types in lexers
-1 |     val pat: Int = p"example"
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+pattern_8.lkt:4:20: error: Mismatched types: expected `Int`, got `Regexp`
+3 |     val pat: Int = p"example"
+  |                    ^^^^^^^^^^
 
 
 == pattern_9.lkt ==
-pattern_9.lkt:2:5: error: Pattern string literal expected
-1 |     val pat = 1
+pattern_9.lkt:4:5: error: Pattern string literal expected
+3 |     val pat = 1
   |     ^^^^^^^^^^^
 
 
 == rule_1.lkt ==
-rule_1.lkt:2:5: error: termination is a reserved token name
-1 |     termination <- "def"
+rule_1.lkt:4:5: error: termination is a reserved token name
+3 |     termination <- "def"
   |     ^^^^^^^^^^^^^^^^^^^^
 
 
 == rule_2.lkt ==
-rule_2.lkt:2:5: error: lexing_failure is a reserved token name
-1 |     lexing_failure <- "example"
+rule_2.lkt:4:5: error: lexing_failure is a reserved token name
+3 |     lexing_failure <- "example"
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == spacing_1.lkt ==
-spacing_1.lkt:2:5: error: Missing "with" argument
-1 |     @unparse_spacing() family ids {
+spacing_1.lkt:4:5: error: Missing "with" argument
+3 |     @unparse_spacing() family ids {
   |     ^^^^^^^^^^^^^^^^^^
 
 
 == spacing_2.lkt ==
-spacing_2.lkt:2:5: error: Token family name expected
-1 |     @unparse_spacing(with=1)
+spacing_2.lkt:4:5: error: Token family name expected
+3 |     @unparse_spacing(with=1)
   |     ^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == spacing_3.lkt ==
-spacing_3.lkt:2:27: error: Unknown token family: foo
-1 |     @unparse_spacing(with=foo)
+spacing_3.lkt:4:27: error: Cannot find entity `foo` in this scope
+3 |     @unparse_spacing(with=foo)
   |                           ^^^
 
 
 == token_action_1.lkt ==
-token_action_1.lkt:2:5: error: Arguments required for this annotation
-1 |     @text example <- "example"
+token_action_1.lkt:4:5: error: Arguments required for this annotation
+3 |     @text example <- "example"
   |     ^^^^^
 
 
 == token_action_2.lkt ==
-token_action_2.lkt:2:5: error: No positional argument allowed
-1 |     @text(1) example <- "example"
+token_action_2.lkt:4:5: error: No positional argument allowed
+3 |     @text(1) example <- "example"
   |     ^^^^^^^^
 
 
 == token_action_3.lkt ==
-token_action_3.lkt:2:5: error: Invalid arguments: bar
-1 |     @text(bar=true) example <- "example"
+token_action_3.lkt:4:5: error: Invalid arguments: bar
+3 |     @text(bar=true) example <- "example"
   |     ^^^^^^^^^^^^^^^
 
 
 == token_action_4.lkt ==
-token_action_4.lkt:2:31: error: Boolean literal expected
-1 |     @text(start_ignore_layout=1) example <- "example"
+token_action_4.lkt:4:31: error: Boolean literal expected
+3 |     @text(start_ignore_layout=1) example <- "example"
   |                               ^
 
 
 == token_action_5.lkt ==
-token_action_5.lkt:2:5: error: At most one token action allowed
-1 |     @ignore @text() example <- "example"
+token_action_5.lkt:4:5: error: At most one token action allowed
+3 |     @ignore @text() example <- "example"
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == token_matcher.lkt ==
-token_matcher.lkt:2:16: error: Invalid lexing expression
-1 |     example <- Foo()
-  |                ^^^^^
+token_matcher.lkt:4:16: error: Invalid lexing expression
+3 |     example <- /
+  |                ^
 
 
 == token_name.lkt ==
-token_name.lkt:3:5: error: Duplicate token name
-2 |     example <- "null"
+token_name.lkt:5:5: error: Duplicate token name
+4 |     example <- "null"
   |     ^^^^^^^^^^^^^^^^^
 
 

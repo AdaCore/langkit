@@ -1,3 +1,5 @@
+import common
+
 lexer foo_lexer {
     @text(start_ignore_layout=1) example <- "example"
 }
