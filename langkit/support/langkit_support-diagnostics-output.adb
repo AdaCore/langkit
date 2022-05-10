@@ -104,18 +104,21 @@ package body Langkit_Support.Diagnostics.Output is
       Start_Line (Stripped_Image (Line_Nb));
       Put_Line (Output_File, Get_Line (Buffer, Line_Nb));
 
-      --  Append the line caretting the sloc in the line above
+      --  If ``Sloc_Range`` is not empty, append the line caretting the sloc in
+      --  the line above.
 
-      Start_Line ("");
-      Set_Style (Term_Info, Bright);
-      Set_Color (Term_Info, Foreground => Caretting_Color);
-      declare
-         Caret_Line : Text_Type (1 .. End_Offset) := (others => ' ');
-      begin
-         Caret_Line (Start_Offset .. End_Offset) := (others => '^');
-         Put_Line (Output_File, Caret_Line);
-      end;
-      Reset_Colors;
+      if Start_Offset < End_Offset then
+         Start_Line ("");
+         Set_Style (Term_Info, Bright);
+         Set_Color (Term_Info, Foreground => Caretting_Color);
+         declare
+            Caret_Line : Text_Type (1 .. End_Offset) := (others => ' ');
+         begin
+            Caret_Line (Start_Offset .. End_Offset) := (others => '^');
+            Put_Line (Output_File, Caret_Line);
+         end;
+         Reset_Colors;
+      end if;
 
       --  TODO??? Missing the printing of lines after, because so far it was
       --  never used.

@@ -42,4 +42,6 @@ begin
        (Sloc_Range => Source_Location_Range'(1, 1, 1, 1),
         Message    => To_Unbounded_Text ("Test message")),
       B, "main.adb");
+
+   Put_Line ("Done.");
 end Main;

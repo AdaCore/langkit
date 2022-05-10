@@ -44,5 +44,4 @@ Id   <RefId "A" test.lkt:14:37-14:38>
 
 test.lkt:14:37: error: Mismatched types: expected `TestEntity[Statement]`, got `TestEntity[Lit]`
 14 | @invalid C: TestEntity[Statement] = A
-   |                                     ^
 

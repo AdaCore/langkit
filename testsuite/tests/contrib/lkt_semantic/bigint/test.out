@@ -93,7 +93,6 @@ Expr <RefId "btoi" test.lkt:9:19-9:23>
 
 test.lkt:9:24: error: Mismatched types: expected `BigInt`, got `Int`
 9 | @invalid val v4 = btoi(1)
-  |                        ^
 
 Expr <CallExpr test.lkt:9:19-9:26>
      has type <StructDecl prelude: "Int">
