@@ -328,11 +328,17 @@ def test(args: Namespace, remaining_args: List[str]) -> None:
     """
     Run Langkit's testsuite.
     """
-    subprocess.check_call(
-        [sys.executable, str(LANGKIT_ROOT / 'testsuite' / 'testsuite.py'),
-         '-E']
+    # Propagate the return code from the testsuite to our own parent process.
+    # This is useful for scripts (for instance CIs) to easily detect when there
+    # is at least one failure.
+    sys.exit(subprocess.call(
+        [
+            sys.executable,
+            str(LANGKIT_ROOT / 'testsuite' / 'testsuite.py'),
+            '-E',
+        ]
         + remaining_args
-    )
+    ))
 
 
 if __name__ == '__main__':
