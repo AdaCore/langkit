@@ -2047,34 +2047,37 @@ class LktTypesLoader:
         """
         result = []
         for full_decl in decls:
-            decl = full_decl.f_decl
+            with diagnostic_context(Location.from_lkt_node(full_decl)):
+                decl = full_decl.f_decl
 
-            # Check field name conformity
-            name_text = decl.f_syn_name.text
-            check_source_language(
-                not name_text.startswith('_'),
-                'Underscore-prefixed field names are not allowed'
-            )
-            check_source_language(
-                name_text.lower() == name_text,
-                'Field names must be lower-case'
-            )
-            name = names.Name.check_from_lower(name_text)
-
-            field: AbstractNodeData
-
-            if isinstance(decl, L.FunDecl):
+                # Check field name conformity
+                name_text = decl.f_syn_name.text
                 check_source_language(
-                    any(issubclass(PropertyDef, cls)
-                        for cls in allowed_field_types),
-                    'Properties not allowed in this context'
+                    not name_text.startswith('_'),
+                    'Underscore-prefixed field names are not allowed'
                 )
-                field = self.lower_property(full_decl)
-            else:
-                field = self.lower_base_field(full_decl, allowed_field_types)
+                check_source_language(
+                    name_text.lower() == name_text,
+                    'Field names must be lower-case'
+                )
+                name = names.Name.check_from_lower(name_text)
 
-            field.location = Location.from_lkt_node(decl)
-            result.append((name, cast(AbstractNodeData, field)))
+                field: AbstractNodeData
+
+                if isinstance(decl, L.FunDecl):
+                    check_source_language(
+                        any(issubclass(PropertyDef, cls)
+                            for cls in allowed_field_types),
+                        'Properties not allowed in this context'
+                    )
+                    field = self.lower_property(full_decl)
+                else:
+                    field = self.lower_base_field(
+                        full_decl, allowed_field_types
+                    )
+
+                field.location = Location.from_lkt_node(decl)
+                result.append((name, cast(AbstractNodeData, field)))
 
         return result
 
