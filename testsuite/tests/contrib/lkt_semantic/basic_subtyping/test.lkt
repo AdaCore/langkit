@@ -2,7 +2,7 @@
 # Basic subtyping
 #
 class Baseclass {
-    fun foo(): Int
+    @external fun foo(): Int
 }
 
 class Subclass : Baseclass {}

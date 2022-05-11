@@ -1,25 +1,25 @@
 Resolving test.lkt
 ==================
-Id   <RefId "Int" test.lkt:5:29-5:32>
-     references <StructDecl prelude: "Int">
-
 Id   <RefId "Int" test.lkt:5:39-5:42>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:5:44-5:47>
+Id   <RefId "Int" test.lkt:5:49-5:52>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:5:52-5:55>
+Id   <RefId "Int" test.lkt:5:54-5:57>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:5:58-5:61>
+Id   <RefId "Int" test.lkt:5:62-5:65>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:5:68-5:71>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:8:22-8:25>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "lambda_test_helper" test.lkt:8:28-8:46>
-     references <FunDecl "lambda_test_helper" test.lkt:5:1-5:61>
+     references <FunDecl "lambda_test_helper" test.lkt:5:11-5:71>
 
 Expr <RefId "lambda_test_helper" test.lkt:8:28-8:46>
      has type <FunctionType prelude: "(Int, (Int, Int) -> Int) -> Int">
@@ -58,7 +58,7 @@ Id   <RefId "Int" test.lkt:11:41-11:44>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "lambda_test_helper" test.lkt:12:5-12:23>
-     references <FunDecl "lambda_test_helper" test.lkt:5:1-5:61>
+     references <FunDecl "lambda_test_helper" test.lkt:5:11-5:71>
 
 Expr <RefId "lambda_test_helper" test.lkt:12:5-12:23>
      has type <FunctionType prelude: "(Int, (Int, Int) -> Int) -> Int">
@@ -105,7 +105,7 @@ Id   <RefId "Int" test.lkt:15:41-15:44>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "lambda_test_helper" test.lkt:16:5-16:23>
-     references <FunDecl "lambda_test_helper" test.lkt:5:1-5:61>
+     references <FunDecl "lambda_test_helper" test.lkt:5:11-5:71>
 
 Expr <RefId "lambda_test_helper" test.lkt:16:5-16:23>
      has type <FunctionType prelude: "(Int, (Int, Int) -> Int) -> Int">

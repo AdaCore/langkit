@@ -2,7 +2,7 @@
 # Test lambda expressions and parameters
 #
 
-fun lambda_test_helper(int: Int, fn: (Int, Int) -> Int): Int
+@external fun lambda_test_helper(int: Int, fn: (Int, Int) -> Int): Int
 
 # Test 1: test that type of parameters is correctly inferred
 fun lambda_test_1(): Int = lambda_test_helper(12, (x, y) => x + y * 2)

@@ -16,7 +16,7 @@ Expr <RefId "test" test.lkt:3:10-3:14>
      has type <StructDecl prelude: "Int">
 
 Id   <RefId "U" test.lkt:7:20-7:21>
-     references <GenericFormalTypeDecl "U" test.lkt:6:24-6:25>
+     references <GenericFormalTypeDecl "U" test.lkt:6:34-6:35>
 
 Id   <RefId "BaseClass" test.lkt:10:11-10:20>
      references <ClassDecl "BaseClass" test.lkt:5:1-8:2>
@@ -43,7 +43,7 @@ Expr <RefId "inst" test.lkt:14:19-14:23>
      has type <ClassDecl "D" test.lkt:10:1-10:23>
 
 Id   <RefId "convert" test.lkt:14:24-14:31>
-     references <GenericDecl "convert" test.lkt:6:15-7:21>
+     references <GenericDecl "convert" test.lkt:6:25-7:21>
 
 Id   <RefId "BaseClass" test.lkt:14:32-14:41>
      references <ClassDecl "BaseClass" test.lkt:5:1-8:2>

@@ -6,11 +6,23 @@ Id   <RefId "Int" test.lkt:2:21-2:24>
 Id   <RefId "Bool" test.lkt:2:27-2:31>
      references <EnumTypeDecl prelude: "Bool">
 
+Id   <RefId "true" test.lkt:2:34-2:38>
+     references <EnumLitDecl prelude: "true">
+
+Expr <RefId "true" test.lkt:2:34-2:38>
+     has type <EnumTypeDecl prelude: "Bool">
+
 Id   <RefId "Int" test.lkt:6:21-6:24>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "RecursiveCallable" test.lkt:6:27-6:44>
      references <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
+
+Id   <RefId "self" test.lkt:6:47-6:51>
+     references <SelfDecl "self" test.lkt:5:1-7:2>
+
+Expr <RefId "self" test.lkt:6:47-6:51>
+     has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
 Id   <RefId "Int" test.lkt:11:19-11:22>
      references <StructDecl prelude: "Int">
@@ -18,11 +30,23 @@ Id   <RefId "Int" test.lkt:11:19-11:22>
 Id   <RefId "Bool" test.lkt:11:27-11:31>
      references <EnumTypeDecl prelude: "Bool">
 
+Id   <RefId "true" test.lkt:11:41-11:45>
+     references <EnumLitDecl prelude: "true">
+
+Expr <RefId "true" test.lkt:11:41-11:45>
+     has type <EnumTypeDecl prelude: "Bool">
+
+Expr <LambdaExpr test.lkt:11:34-11:45>
+     has type <FunctionType prelude: "(Int) -> Bool">
+
 Id   <RefId "Array" test.lkt:13:27-13:32>
      references <GenericDecl prelude: "Array">
 
 Id   <RefId "MyCallable" test.lkt:13:33-13:43>
      references <ClassDecl "MyCallable" test.lkt:1:1-3:2>
+
+Expr <ArrayLiteral test.lkt:13:47-13:49>
+     has type <InstantiatedGenericType prelude: "Array[MyCallable]">
 
 Id   <RefId "Bool" test.lkt:15:17-15:21>
      references <EnumTypeDecl prelude: "Bool">
@@ -34,7 +58,7 @@ Expr <RefId "self" test.lkt:15:24-15:28>
      has type <ClassDecl "A" test.lkt:9:1-19:2>
 
 Id   <RefId "pouet" test.lkt:15:29-15:34>
-     references <FunDecl "pouet" test.lkt:11:5-11:31>
+     references <FunDecl "pouet" test.lkt:11:5-11:45>
 
 Expr <RefId "pouet" test.lkt:15:29-15:34>
      has type <FunctionType prelude: "(Int) -> Bool">
@@ -73,7 +97,7 @@ Expr <RefId "self" test.lkt:17:25-17:29>
      has type <ClassDecl "A" test.lkt:9:1-19:2>
 
 Id   <RefId "callable_array" test.lkt:17:30-17:44>
-     references <FunDecl "callable_array" test.lkt:13:5-13:44>
+     references <FunDecl "callable_array" test.lkt:13:5-13:49>
 
 Expr <RefId "callable_array" test.lkt:17:30-17:44>
      has type <FunctionType prelude: "() -> Array[MyCallable]">

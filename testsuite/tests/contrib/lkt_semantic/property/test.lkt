@@ -3,7 +3,7 @@
 a: Int = test
 
 class BaseClass {
-    @property generic [U]
+    @external @property generic [U]
     fun convert(): U
 }
 

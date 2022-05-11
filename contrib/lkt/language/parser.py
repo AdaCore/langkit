@@ -2369,6 +2369,39 @@ class FunDecl(UserValDecl):
             ).as_bare_entity,
         )
 
+    @langkit_property()
+    def check_legality():
+        # Abstract, builtin and external functions can have no body, and
+        # non-abstract ones must have one.
+        has_abstract = Var(Entity.full_decl.has_annotation("abstract"))
+        has_builtin = Var(Entity.full_decl.has_annotation("builtin"))
+        has_external = Var(Entity.full_decl.has_annotation("external"))
+        has_body = Var(Not(Entity.body.is_null))
+        return Cond(
+            has_abstract,
+            has_body.then(
+                lambda _:
+                Self.error(S("abstract functions cannot have a body")),
+            ),
+
+            has_builtin,
+            has_body.then(
+                lambda _:
+                Self.error(S("builtin functions cannot have a body")),
+            ),
+
+            has_external,
+            has_body.then(
+                lambda _:
+                Self.error(S("external functions cannot have a body")),
+            ),
+
+            Not(has_body),
+            Self.error(S("regular functions must have a body")),
+
+            No(T.SemanticResult),
+        )._.singleton
+
 
 class EnumLitDecl(UserValDecl):
     """

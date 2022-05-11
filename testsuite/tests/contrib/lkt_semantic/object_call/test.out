@@ -1,19 +1,19 @@
 Resolving test.lkt
 ==================
-Id   <RefId "Int" test.lkt:4:15-4:18>
+Id   <RefId "Int" test.lkt:4:25-4:28>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Array" test.lkt:4:21-4:26>
+Id   <RefId "Array" test.lkt:4:31-4:36>
      references <GenericDecl prelude: "Array">
 
-Id   <RefId "Int" test.lkt:4:27-4:30>
+Id   <RefId "Int" test.lkt:4:37-4:40>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:5:8-5:11>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "arr" test.lkt:5:14-5:17>
-     references <FunDecl "arr" test.lkt:4:1-4:31>
+     references <FunDecl "arr" test.lkt:4:11-4:41>
 
 Expr <RefId "arr" test.lkt:5:14-5:17>
      has type <FunctionType prelude: "(Int) -> Array[Int]">
@@ -34,7 +34,7 @@ Id   <RefId "Int" test.lkt:7:30-7:33>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "arr" test.lkt:7:36-7:39>
-     references <FunDecl "arr" test.lkt:4:1-4:31>
+     references <FunDecl "arr" test.lkt:4:11-4:41>
 
 Expr <RefId "arr" test.lkt:7:36-7:39>
      has type <FunctionType prelude: "(Int) -> Array[Int]">
@@ -60,7 +60,7 @@ test.lkt:8:38: error: No value for parameter
   |                                      ^^^^^^^^^
 
 Id   <RefId "arr" test.lkt:8:38-8:41>
-     references <FunDecl "arr" test.lkt:4:1-4:31>
+     references <FunDecl "arr" test.lkt:4:11-4:41>
 
 Expr <RefId "arr" test.lkt:8:38-8:41>
      has type <FunctionType prelude: "(Int) -> Array[Int]">
@@ -81,7 +81,7 @@ test.lkt:9:49: error: Unmatched actual
 9 | @invalid val incorrect_call_2: Int = arr(12)(1, 2)
 
 Id   <RefId "arr" test.lkt:9:38-9:41>
-     references <FunDecl "arr" test.lkt:4:1-4:31>
+     references <FunDecl "arr" test.lkt:4:11-4:41>
 
 Expr <RefId "arr" test.lkt:9:38-9:41>
      has type <FunctionType prelude: "(Int) -> Array[Int]">
@@ -101,20 +101,20 @@ Expr <NumLit test.lkt:9:49-9:50>
 Expr <CallExpr test.lkt:9:38-9:51>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:11:21-11:24>
+Id   <RefId "Int" test.lkt:11:31-11:34>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:11:26-11:29>
+Id   <RefId "Int" test.lkt:11:36-11:39>
      references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:11:34-11:37>
+Id   <RefId "Int" test.lkt:11:44-11:47>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "Int" test.lkt:13:8-13:11>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "return_func" test.lkt:13:14-13:25>
-     references <FunDecl "return_func" test.lkt:11:1-11:37>
+     references <FunDecl "return_func" test.lkt:11:11-11:47>
 
 Expr <RefId "return_func" test.lkt:13:14-13:25>
      has type <FunctionType prelude: "() -> (Int, Int) -> Int">
@@ -135,7 +135,7 @@ Id   <RefId "Int" test.lkt:14:17-14:20>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "return_func" test.lkt:14:23-14:34>
-     references <FunDecl "return_func" test.lkt:11:1-11:37>
+     references <FunDecl "return_func" test.lkt:11:11-11:47>
 
 Expr <RefId "return_func" test.lkt:14:23-14:34>
      has type <FunctionType prelude: "() -> (Int, Int) -> Int">

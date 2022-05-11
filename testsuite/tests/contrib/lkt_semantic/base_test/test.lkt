@@ -36,7 +36,7 @@ struct Tuple2 {
     a: C
     b: D
 
-    fun test(): C
+    @external fun test(): C
 }
 
 class B : A {
@@ -59,7 +59,7 @@ struct Foo {
 
 enum class C {
     case D, E
-    fun wot(): D
+    @external fun wot(): D
 }
 
 # Test function types

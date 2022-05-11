@@ -9,16 +9,16 @@ struct Pair {
 }
 
 # Support generics
-generic [T]
+@external generic [T]
 fun convert_int(var: Int): T
 
-generic [T]
+@external generic [T]
 fun identity(var: T): T
 
-generic [T]
+@external generic [T]
 fun singleton(var: T): Array[T]
 
-generic [T]
+@external generic [T]
 fun apply (fn: (T) -> T, v: T): T
 
 # Test the built-in map function
@@ -37,7 +37,7 @@ fun test_filtermap(ints: Array[Int]): Array[String] =
 # The method call should emit an error but not crash
 
 # Check that conflicting actuals are correctly flagged
-generic [T] 
+@external generic [T] 
 fun mkPair(x: T): Pair[T, T]
 
 @invalid fun test_conflicting_actuals(): Pair[Int, Bool] = mkPair(1)

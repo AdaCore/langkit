@@ -4,16 +4,16 @@
 
 # Support generics
 
-generic [T]
+@external generic [T]
 fun convert_int(var: Int): T
 
-generic [T]
+@external generic [T]
 fun identity(var: T): T
 
-generic [T]
+@external generic [T]
 fun singleton(var: T): Array[T]
 
-generic [T]
+@external generic [T]
 fun apply (fn: (T) -> T, v: T): T
 
 # Explicit instantiations
@@ -50,7 +50,7 @@ fun test_singleton(): Array[Int] = singleton(12)
 fun test_implicit_apply(): Int = apply(double, 12)
 
 # Ambiguous generic instantiation
-generic [T]
+@external generic [T]
 fun fooz(x: T, y: T): Int
 
 @invalid fun test_ambiguous_generic_instantiation(): Int = fooz(1, "lol")
@@ -71,7 +71,8 @@ struct Dummy {}
 fun test_rel(a: Int): Bool = (a = 15) or (a = 18)
 
 # Test that labda params don't leak in their outside env
-fun test_lambda_leak_support(a: (Int) -> Int, b: (Int) -> Int): Int
+@external fun test_lambda_leak_support(a: (Int) -> Int, b: (Int) -> Int): Int
+
 @invalid fun test_lambda_leak(): Int =
     test_lambda_leak_support(
         (xxx) => xxx * 2,

@@ -149,7 +149,7 @@ Id   <RefId "C" test.lkt:36:8-36:9>
 Id   <RefId "D" test.lkt:37:8-37:9>
      references <GenericFormalTypeDecl "D" test.lkt:34:13-34:14>
 
-Id   <RefId "C" test.lkt:39:17-39:18>
+Id   <RefId "C" test.lkt:39:27-39:28>
      references <GenericFormalTypeDecl "C" test.lkt:34:10-34:11>
 
 Id   <RefId "A" test.lkt:42:11-42:12>
@@ -326,7 +326,7 @@ Expr <RefId "arg" test.lkt:49:56-49:59>
      has type <InstantiatedGenericType "Tuple2[Int, Bool]" test.lkt:34:1-40:2>
 
 Id   <RefId "test" test.lkt:49:60-49:64>
-     references <FunDecl "test" test.lkt:39:5-39:18>
+     references <FunDecl "test" test.lkt:39:15-39:28>
 
 Expr <RefId "test" test.lkt:49:60-49:64>
      has type <FunctionType prelude: "() -> Int">
@@ -376,7 +376,7 @@ Expr <RefId "self" test.lkt:57:56-57:60>
 test.lkt:57:61: error: Cannot find entity `a` in this scope
 57 |     @invalid fun test_identifier_leak_invalid(): Int = self.a
 
-Id   <RefId "D" test.lkt:62:16-62:17>
+Id   <RefId "D" test.lkt:62:26-62:27>
      references <EnumClassAltDecl "D" test.lkt:61:10-61:11>
 
 Id   <RefId "Int" test.lkt:66:12-66:15>

@@ -3,7 +3,7 @@
 #
 
 class Foo1 {
-    fun bar(): Int
+    fun bar(): Int = 0
 }
 
 class Baz : Foo1 {}

@@ -10,34 +10,34 @@ Id   <RefId "Int" test.lkt:13:22-13:25>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "T" test.lkt:13:28-13:29>
-     references <GenericFormalTypeDecl "T" test.lkt:12:10-12:11>
+     references <GenericFormalTypeDecl "T" test.lkt:12:20-12:21>
 
 Id   <RefId "T" test.lkt:16:19-16:20>
-     references <GenericFormalTypeDecl "T" test.lkt:15:10-15:11>
+     references <GenericFormalTypeDecl "T" test.lkt:15:20-15:21>
 
 Id   <RefId "T" test.lkt:16:23-16:24>
-     references <GenericFormalTypeDecl "T" test.lkt:15:10-15:11>
+     references <GenericFormalTypeDecl "T" test.lkt:15:20-15:21>
 
 Id   <RefId "T" test.lkt:19:20-19:21>
-     references <GenericFormalTypeDecl "T" test.lkt:18:10-18:11>
+     references <GenericFormalTypeDecl "T" test.lkt:18:20-18:21>
 
 Id   <RefId "Array" test.lkt:19:24-19:29>
      references <GenericDecl prelude: "Array">
 
 Id   <RefId "T" test.lkt:19:30-19:31>
-     references <GenericFormalTypeDecl "T" test.lkt:18:10-18:11>
+     references <GenericFormalTypeDecl "T" test.lkt:18:20-18:21>
 
 Id   <RefId "T" test.lkt:22:17-22:18>
-     references <GenericFormalTypeDecl "T" test.lkt:21:10-21:11>
+     references <GenericFormalTypeDecl "T" test.lkt:21:20-21:21>
 
 Id   <RefId "T" test.lkt:22:23-22:24>
-     references <GenericFormalTypeDecl "T" test.lkt:21:10-21:11>
+     references <GenericFormalTypeDecl "T" test.lkt:21:20-21:21>
 
 Id   <RefId "T" test.lkt:22:29-22:30>
-     references <GenericFormalTypeDecl "T" test.lkt:21:10-21:11>
+     references <GenericFormalTypeDecl "T" test.lkt:21:20-21:21>
 
 Id   <RefId "T" test.lkt:22:33-22:34>
-     references <GenericFormalTypeDecl "T" test.lkt:21:10-21:11>
+     references <GenericFormalTypeDecl "T" test.lkt:21:20-21:21>
 
 Id   <RefId "Array" test.lkt:25:20-25:25>
      references <GenericDecl prelude: "Array">
@@ -61,7 +61,7 @@ Id   <RefId "map" test.lkt:26:10-26:13>
      references <GenericDecl prelude: "map">
 
 Id   <RefId "convert_int" test.lkt:26:21-26:32>
-     references <GenericDecl "convert_int" test.lkt:12:1-13:29>
+     references <GenericDecl "convert_int" test.lkt:12:11-13:29>
 
 Id   <RefId "String" test.lkt:26:33-26:39>
      references <StructDecl prelude: "String">
@@ -106,7 +106,7 @@ Id   <RefId "filtermap" test.lkt:30:10-30:19>
      references <GenericDecl prelude: "filtermap">
 
 Id   <RefId "convert_int" test.lkt:31:16-31:27>
-     references <GenericDecl "convert_int" test.lkt:12:1-13:29>
+     references <GenericDecl "convert_int" test.lkt:12:11-13:29>
 
 Id   <RefId "String" test.lkt:31:28-31:34>
      references <StructDecl prelude: "String">
@@ -154,16 +154,16 @@ Id   <RefId "arg" test.lkt:36:50-36:53>
      references <FunArgDecl "arg" test.lkt:36:35-36:41>
 
 Id   <RefId "T" test.lkt:41:15-41:16>
-     references <GenericFormalTypeDecl "T" test.lkt:40:10-40:11>
+     references <GenericFormalTypeDecl "T" test.lkt:40:20-40:21>
 
 Id   <RefId "Pair" test.lkt:41:19-41:23>
      references <GenericDecl "Pair" test.lkt:5:1-9:2>
 
 Id   <RefId "T" test.lkt:41:24-41:25>
-     references <GenericFormalTypeDecl "T" test.lkt:40:10-40:11>
+     references <GenericFormalTypeDecl "T" test.lkt:40:20-40:21>
 
 Id   <RefId "T" test.lkt:41:27-41:28>
-     references <GenericFormalTypeDecl "T" test.lkt:40:10-40:11>
+     references <GenericFormalTypeDecl "T" test.lkt:40:20-40:21>
 
 Id   <RefId "Pair" test.lkt:43:42-43:46>
      references <GenericDecl "Pair" test.lkt:5:1-9:2>
@@ -179,5 +179,5 @@ test.lkt:43:60: error: Instantiation error: conflicting actual types for formal 
    |                                                            ^^^^^^^^^
 
 Id   <RefId "mkPair" test.lkt:43:60-43:66>
-     references <GenericDecl "mkPair" test.lkt:40:1-41:29>
+     references <GenericDecl "mkPair" test.lkt:40:11-41:29>
 

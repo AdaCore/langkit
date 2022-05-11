@@ -1,6 +1,6 @@
 Resolving test.lkt
 ==================
-Id   <RefId "Int" test.lkt:5:16-5:19>
+Id   <RefId "Int" test.lkt:5:26-5:29>
      references <StructDecl prelude: "Int">
 
 Id   <RefId "Baseclass" test.lkt:8:18-8:27>

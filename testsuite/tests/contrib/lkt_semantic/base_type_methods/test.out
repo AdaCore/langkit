@@ -3,6 +3,9 @@ Resolving test.lkt
 Id   <RefId "Int" test.lkt:6:16-6:19>
      references <StructDecl prelude: "Int">
 
+Expr <NumLit test.lkt:6:22-6:23>
+     has type <StructDecl prelude: "Int">
+
 Id   <RefId "Foo1" test.lkt:9:13-9:17>
      references <ClassDecl "Foo1" test.lkt:5:1-7:2>
 
@@ -19,7 +22,7 @@ Expr <RefId "arg" test.lkt:11:45-11:48>
      has type <ClassDecl "Baz" test.lkt:9:1-9:20>
 
 Id   <RefId "bar" test.lkt:11:49-11:52>
-     references <FunDecl "bar" test.lkt:6:5-6:19>
+     references <FunDecl "bar" test.lkt:6:5-6:23>
 
 Expr <RefId "bar" test.lkt:11:49-11:52>
      has type <FunctionType prelude: "() -> Int">

@@ -1,0 +1,54 @@
+Resolving test.lkt
+==================
+Id   <RefId "Int" test.lkt:2:18-2:21>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:2:24-2:25>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:3:28-3:31>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:4:27-4:30>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:5:28-5:31>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:7:30-7:33>
+     references <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:8:40-8:43>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:8:46-8:47>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:9:39-9:42>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:9:45-9:46>
+     has type <StructDecl prelude: "Int">
+
+Id   <RefId "Int" test.lkt:10:40-10:43>
+     references <StructDecl prelude: "Int">
+
+Expr <NumLit test.lkt:10:46-10:47>
+     has type <StructDecl prelude: "Int">
+
+test.lkt:7:14: error: regular functions must have a body
+7 |     @invalid fun f_error1(): Int
+  |              ^^^^^^^^^^^^^^^^^^^
+
+test.lkt:8:24: error: abstract functions cannot have a body
+8 |     @invalid @abstract fun f_error2(): Int = 0
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:9:23: error: builtin functions cannot have a body
+9 |     @invalid @builtin fun f_error3(): Int = 0
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^
+
+test.lkt:10:24: error: external functions cannot have a body
+10 |     @invalid @external fun f_error3(): Int = 0
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^
+
