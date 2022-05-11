@@ -1,0 +1,22 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(ExampleNode(@example) | Identifier(@identifier))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @abstract @export fun f1(): Int
+    @export fun f2(): Int = 0
+    @export @final fun f3(): Int = 1
+}
+
+class ExampleNode : FooNode implements TokenNode {
+    @final fun f1(): Int = 2
+    @final fun f2(): Int = 3
+    @export @final fun f4(): Int = 4
+}
+
+class Identifier : FooNode implements TokenNode {
+    fun f1(): Int = 5
+}

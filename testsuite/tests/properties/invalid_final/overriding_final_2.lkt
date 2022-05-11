@@ -1,0 +1,18 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ConcreteNode(@example)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @export fun f(): Int = 0
+}
+
+@abstract class AbstractNode : FooNode {
+    @final fun f(): Int = 1
+}
+
+class ConcreteNode : AbstractNode implements TokenNode {
+    fun f(): Int = 2
+}

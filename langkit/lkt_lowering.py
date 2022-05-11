@@ -474,12 +474,14 @@ class EnumNodeAnnotations(BaseNodeAnnotations):
 class FieldAnnotations(ParsedAnnotations):
     abstract: bool
     export: bool
+    final: bool
     lazy: bool
     null_field: bool
     parse_field: bool
     trace: bool
     annotations = [FlagAnnotationSpec('abstract'),
                    FlagAnnotationSpec('export'),
+                   FlagAnnotationSpec('final'),
                    FlagAnnotationSpec('lazy'),
                    FlagAnnotationSpec('null_field'),
                    FlagAnnotationSpec('parse_field'),
@@ -501,6 +503,7 @@ class FunAnnotations(ParsedAnnotations):
     abstract: bool
     export: bool
     external: bool
+    final: bool
     memoized: bool
     trace: bool
     uses_entity_info: bool
@@ -509,6 +512,7 @@ class FunAnnotations(ParsedAnnotations):
         FlagAnnotationSpec('abstract'),
         FlagAnnotationSpec('export'),
         FlagAnnotationSpec('external'),
+        FlagAnnotationSpec('final'),
         FlagAnnotationSpec('memoized'),
         FlagAnnotationSpec('trace'),
         FlagAnnotationSpec('uses_entity_info'),
@@ -1438,6 +1442,10 @@ class LktTypesLoader:
                 not annotations.null_field,
                 'Lazy fields cannot be null'
             )
+            check_source_language(
+                not annotations.final,
+                'Lazy fields are implicitly final'
+            )
             cls = PropertyDef
             constructor = create_lazy_field
 
@@ -1467,6 +1475,10 @@ class LktTypesLoader:
                 'Parse fields are implicitly exported'
             )
             check_source_language(
+                not annotations.final,
+                'Concrete parse fields are implicitly final'
+            )
+            check_source_language(
                 not annotations.lazy,
                 'Parse fields cannot be lazy'
             )
@@ -1486,6 +1498,10 @@ class LktTypesLoader:
             check_source_language(
                 not annotations.export,
                 'Regular fields are implicitly exported'
+            )
+            check_source_language(
+                not annotations.final,
+                'Regular fields are implicitly final'
             )
             check_source_language(
                 not annotations.lazy,
@@ -2029,6 +2045,7 @@ class LktTypesLoader:
             activate_tracing=annotations.trace,
             dump_ir=False,
             local_vars=local_vars,
+            final=annotations.final,
         )
         result.arguments.extend(args)
 

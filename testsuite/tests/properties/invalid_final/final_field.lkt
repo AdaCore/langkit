@@ -1,0 +1,17 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ExampleNode(@example)
+}
+
+struct MyStruct {
+    @final f: Int
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class ExampleNode : FooNode implements TokenNode {
+    @export fun get_f(s: MyStruct): Int = s.f
+}

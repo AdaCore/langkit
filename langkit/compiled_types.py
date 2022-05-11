@@ -251,7 +251,8 @@ class AbstractNodeData:
                          ResolvedExpression,
                      ]
                  ] = None,
-                 prefix: Opt[names.Name] = None):
+                 prefix: Opt[names.Name] = None,
+                 final: bool = False):
         """
         :param name: Name for this field. Most of the time, this is initially
             unknown at field creation, so it is filled only at struct creation
@@ -278,6 +279,9 @@ class AbstractNodeData:
             ``FieldAccess``.
 
         :param prefix: Optional prefix to the name of a node data.
+
+        :param final: If True, this field/property cannot be overriden. This is
+            possible only for concrete fields/properties.
         """
 
         self._serial = next(self._counter)
@@ -318,6 +322,7 @@ class AbstractNodeData:
         self.access_constructor = access_constructor
 
         self._abstract = False
+        self.final = final
 
     @property
     def abstract(self) -> bool:
@@ -3312,6 +3317,12 @@ class ASTNodeType(BaseStructType):
                 homonym_fld = inherited_fields.get(f_n)
                 if not homonym_fld:
                     continue
+
+                check_source_language(
+                    not homonym_fld.final,
+                    f"{homonym_fld.qualname} is final, overriding it is"
+                    " illegal"
+                )
 
                 if f_v.is_property:
                     check_source_language(
