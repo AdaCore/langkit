@@ -235,19 +235,13 @@ class AbstractNodeData:
     # accessors.
     entity_info_name = names.Name('E_Info')
 
-    prefix: Opt[names.Name] = None
-    """
-    This can be overriden in subclasses of AbstractNodeData to add a prefix to
-    the name of AbstractNodeData instances.
-    """
-
     _abstract = False
 
     def __init__(self,
-                 name=None,
-                 public=True,
-                 access_needs_incref=False,
-                 internal_name=None,
+                 name: Opt[names.Name] = None,
+                 public: bool = True,
+                 access_needs_incref: bool = False,
+                 internal_name: Opt[names.Name] = None,
                  access_constructor: Opt[
                      Callable[
                          [
@@ -258,7 +252,8 @@ class AbstractNodeData:
                          ],
                          ResolvedExpression,
                      ]
-                 ] = None):
+                 ] = None,
+                 prefix: Opt[names.Name] = None):
         """
         :param names.Name|None name: Name for this field. Most of the time,
             this is initially unknown at field creation, so it is filled only
@@ -283,12 +278,15 @@ class AbstractNodeData:
             expression that implements a DSL access to this field. If
             provided, this overrides the default code generation of
             ``FieldAccess``.
+
+        :param prefix: Optional prefix to the name of a node data.
         """
         self._serial = next(self._counter)
         self._is_public = public
 
         self.location = extract_library_location()
 
+        self.prefix: Opt[names.Name] = prefix
         self._name = name
         self._indexing_name = name.lower if name else None
         self._original_name = self._indexing_name
@@ -317,7 +315,7 @@ class AbstractNodeData:
         self._has_self_entity = False
         self.optional_entity_info = False
         self._access_needs_incref = access_needs_incref
-        self.abstract_default_value = None
+        self.abstract_default_value: Opt[AbstractExpression] = None
         self.default_value = None
         self.access_constructor = access_constructor
 
@@ -1849,12 +1847,15 @@ class BaseField(AbstractNodeData):
     of BaseField must put that field to True in their definition.
     """
 
-    prefix: Opt[names.Name] = AbstractNodeData.PREFIX_FIELD
-
     _null = False
 
-    def __init__(self, repr=True, doc='', type=None,
-                 access_needs_incref=False, internal_name=None):
+    def __init__(self,
+                 repr: bool = True,
+                 doc: str = '',
+                 type: Opt[CompiledType] = None,
+                 access_needs_incref: bool = False,
+                 internal_name: Opt[names.Name] = None,
+                 prefix: Opt[names.Name] = AbstractNodeData.PREFIX_FIELD):
         """
         Create an AST node field.
 
@@ -2168,12 +2169,17 @@ class UserField(BaseField):
     Node type, will be ignored by the parsing code.
     """
 
-    prefix = None
     is_user_field = True
 
-    def __init__(self, type, repr=False, doc='', public=True,
-                 default_value=None, access_needs_incref=True,
-                 internal_name=None):
+    def __init__(self,
+                 type: CompiledType,
+                 repr: bool = False,
+                 doc: str = '',
+                 public: bool = True,
+                 default_value: Opt[AbstractExpression] = None,
+                 access_needs_incref: bool = True,
+                 internal_name: Opt[names.Name] = None,
+                 prefix: Opt[names.Name] = None):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -2195,8 +2201,12 @@ class UserField(BaseField):
             field, when omitted from New expressions.
         """
         super().__init__(
-            repr, doc, type, access_needs_incref=access_needs_incref,
-            internal_name=internal_name
+            repr,
+            doc,
+            type,
+            access_needs_incref=access_needs_incref,
+            internal_name=internal_name,
+            prefix=prefix,
         )
         self._is_public = public
 
@@ -2213,10 +2223,8 @@ class BuiltinField(UserField):
     prefix. It is typically used for fields of built-in structs.
     """
 
-    prefix = None
-
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, prefix=None, **kwargs)
         self.should_emit = False
 
 
@@ -2283,7 +2291,7 @@ class BaseStructType(CompiledType):
         name: names.Name,
         type: CompiledType,
         default_value: Opt[AbstractExpression],
-        doc: Opt[str] = None,
+        doc: str = "",
     ) -> UserField:
         """
         Create an internal (not public) UserField for this struct type.

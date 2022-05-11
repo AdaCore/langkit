@@ -3336,11 +3336,10 @@ class PropertyDef(AbstractNodeData):
             scratch if left to None.
         """
 
-        self.prefix = prefix
-
         super().__init__(name=name,
                          public=public,
-                         access_constructor=access_constructor)
+                         access_constructor=access_constructor,
+                         prefix=prefix)
 
         self._original_is_public = None
         """
