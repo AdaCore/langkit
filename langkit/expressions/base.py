@@ -3377,6 +3377,13 @@ class PropertyDef(AbstractNodeData):
         dispatching tree.
         """
 
+        self.name_before_dispatcher: names.Name
+        """
+        For dispatcher properties, name of the property before it has been
+        re-purposed as a dispatcher (see the lower_properties_dispatching
+        pass).
+        """
+
         self.in_type = False
         """
         Recursion guard for the construct pass.
