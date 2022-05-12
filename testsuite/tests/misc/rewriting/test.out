@@ -21,7 +21,7 @@ Apply the rewriting
 main.adb: Done.
 
 == revert.adb ==
-DefList[1:1-5:10]
+FooNodeList[1:1-5:10]
 |  Def[1:1-1:10]
 |  |f_name:
 |  |  Name[1:5-1:6]: a
@@ -98,7 +98,7 @@ Replace the root of unit 2
 Applying the diff...
 
 u1.txt:
-DefList
+FooNodeList
 |  Def
 |  |f_name:
 |  |  Name: d
@@ -168,7 +168,7 @@ DefList
 |  |  |  |  |  |  |  Name: c
 
 u2.txt:
-DefList
+FooNodeList
 |  Def
 |  |f_name:
 |  |  Name: zz
@@ -187,7 +187,7 @@ rewrite.adb: Done.
 
 == rewrite_lists.adb ==
 Applying the diff...
-DefList
+FooNodeList
 |  Def
 |  |f_name:
 |  |  Name: a
@@ -220,7 +220,10 @@ iter_units.adb: Done.
 
 == apply_error.adb ==
 Could not apply diff on the main.txt unit:
-  1:5: Expected Identifier, got Number
+  1:1: Skipped token def
+  1:5: Skipped token 1
+  1:6: Skipped token =
+  1:7: Skipped token a
 def 1=a
 apply_error.adb: Done.
 
@@ -246,7 +249,7 @@ Test various template instantiation errors...
 Use templates to create trees of node rewriting handles...
 
 Applying the diff...
-DefList
+FooNodeList
 |  Def
 |  |f_name:
 |  |  Name: a
@@ -337,7 +340,7 @@ preserve_formatting.adb: Done.
 Applying the diff...
 
 u.txt:
-DefList
+FooNodeList
 |  Def
 |  |f_name:
 |  |  Name: B

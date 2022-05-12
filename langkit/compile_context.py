@@ -2069,6 +2069,8 @@ class CompileCtx:
             GrammarRulePass('compile parsers', Parser.compile),
             GrammarRulePass('compute nodes parsers correspondence',
                             self.unparsers.compute),
+            ASTNodePass('reject parser-less nodes',
+                        self.unparsers.reject_parserless_nodes),
             ASTNodePass('warn imprecise field type annotations',
                         lambda _, astnode:
                         astnode.warn_imprecise_field_type_annotations()),

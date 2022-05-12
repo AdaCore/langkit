@@ -1,7 +1,7 @@
 import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list*(def_rule)
+    @main_rule main_rule <- list*(or(def_rule | skip(ErrorDef)))
     name <- Name(@identifier)
     def_rule <- Def(
         "def" name ?pick("(" list+(name, ",") ")") "=" expr

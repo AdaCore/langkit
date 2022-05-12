@@ -1,0 +1,16 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ExampleNode(null(ParserlessNode))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class ExampleNode : FooNode {
+    @parse_field n: ParserlessNode
+}
+
+class ParserlessNode : FooNode {
+}

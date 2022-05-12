@@ -191,7 +191,7 @@ begin
    Put_Line ("Replace the root of unit 2");
    declare
       New_Root : constant Node_Rewriting_Handle :=
-         Create_Node (RH, Foo_Def_List);
+         Create_Node (RH, Foo_Foo_Node_List);
       Expr_1   : constant Node_Rewriting_Handle :=
          Create_Token_Node (RH, Foo_Literal, "111");
       Expr_2   : constant Node_Rewriting_Handle :=

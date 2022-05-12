@@ -1088,6 +1088,20 @@ class Unparsers:
 
         compute_internal(parser)
 
+    def reject_parserless_nodes(self, context, node):
+        """
+        Check that all concrete non-synthetic nodes have at least one
+        associated parser.
+        """
+        with node.diagnostic_context:
+            check_source_language(
+                self.nodes_to_rules.get(node)
+                or node.abstract
+                or node.synthetic,
+                "This node is not synthetic nor abstract, so at least one"
+                " parser must create it",
+            )
+
     def check_nodes_to_rules(self, ctx):
         """
         Check the results of the compute pass, to see if every node type only
