@@ -31,6 +31,7 @@ with System;
 % if T.String.requires_hash_function:
 with GNAT.String_Hash;
 % endif
+with GNAT.Task_Lock;
 with GNAT.Traceback.Symbolic;
 
 with GNATCOLL.Traces;
@@ -100,7 +101,7 @@ package body ${ada_lib_name}.Implementation is
    overriding procedure Finalize (CD : in out Contexts_Destructor);
    --  Helper to destroy all contexts when terminating the process
 
-   protected Context_Pool is
+   package Context_Pool is
 
       procedure Acquire (Context : out Internal_Context)
          with Post => Context /= null;
@@ -279,7 +280,7 @@ package body ${ada_lib_name}.Implementation is
    -- Context_Pool --
    ------------------
 
-   protected body Context_Pool is
+   package body Context_Pool is
 
       -------------
       -- Acquire --
@@ -287,6 +288,8 @@ package body ${ada_lib_name}.Implementation is
 
       procedure Acquire (Context : out Internal_Context) is
       begin
+         GNAT.Task_Lock.Lock;
+
          if Available.Is_Empty then
             Context := new Analysis_Context_Type;
             Context.Serial_Number := 1;
@@ -294,6 +297,13 @@ package body ${ada_lib_name}.Implementation is
             Context := Available.Last_Element;
             Available.Delete_Last;
          end if;
+
+         GNAT.Task_Lock.Unlock;
+
+      exception
+         when others =>
+            GNAT.Task_Lock.Unlock;
+            raise;
       end Acquire;
 
       -------------
@@ -302,9 +312,18 @@ package body ${ada_lib_name}.Implementation is
 
       procedure Release (Context : in out Internal_Context) is
       begin
+         GNAT.Task_Lock.Lock;
+
          Available.Append (Context);
          Context.Serial_Number := Context.Serial_Number + 1;
          Context := null;
+
+         GNAT.Task_Lock.Unlock;
+
+      exception
+         when others =>
+            GNAT.Task_Lock.Unlock;
+            raise;
       end Release;
 
       ----------
@@ -313,9 +332,18 @@ package body ${ada_lib_name}.Implementation is
 
       procedure Free is
       begin
+         GNAT.Task_Lock.Lock;
+
          for C of Available loop
             Free (C);
          end loop;
+
+         GNAT.Task_Lock.Unlock;
+
+      exception
+         when others =>
+            GNAT.Task_Lock.Unlock;
+            raise;
       end Free;
 
    end Context_Pool;
