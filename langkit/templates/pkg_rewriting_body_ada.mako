@@ -165,6 +165,37 @@ package body ${ada_lib_name}.Rewriting is
       return Wrap_Unit (Impl.Unit (Unwrap_Unit_RH (Handle)));
    end Unit;
 
+   ----------
+   -- Root --
+   ----------
+
+   function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
+   is
+   begin
+      return Wrap_Node_RH (Impl.Root (Unwrap_Unit_RH (Handle)));
+   end Root;
+
+   --------------
+   -- Set_Root --
+   --------------
+
+   procedure Set_Root
+     (Handle : Unit_Rewriting_Handle;
+      Root   : Node_Rewriting_Handle) is
+   begin
+      Impl.Set_Root (Unwrap_Unit_RH (Handle), Unwrap_Node_RH (Root));
+   end Set_Root;
+
+   -------------
+   -- Unparse --
+   -------------
+
+   function Unparse
+     (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type is
+   begin
+      return Impl.Unparse (Unwrap_Unit_RH (Handle));
+   end Unparse;
+
    ------------
    -- Handle --
    ------------
@@ -251,16 +282,6 @@ package body ${ada_lib_name}.Rewriting is
       return Wrap_Node_RH (Impl.Child (Unwrap_Node_RH (Handle), Index));
    end Child;
 
-   ----------
-   -- Root --
-   ----------
-
-   function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
-   is
-   begin
-      return Wrap_Node_RH (Impl.Root (Unwrap_Unit_RH (Handle)));
-   end Root;
-
    ---------------
    -- Set_Child --
    ---------------
@@ -291,27 +312,6 @@ package body ${ada_lib_name}.Rewriting is
    begin
       Impl.Set_Text (Unwrap_Node_RH (Handle), Text);
    end Set_Text;
-
-   --------------
-   -- Set_Root --
-   --------------
-
-   procedure Set_Root
-     (Handle : Unit_Rewriting_Handle;
-      Root   : Node_Rewriting_Handle) is
-   begin
-      Impl.Set_Root (Unwrap_Unit_RH (Handle), Unwrap_Node_RH (Root));
-   end Set_Root;
-
-   -------------
-   -- Unparse --
-   -------------
-
-   function Unparse
-     (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type is
-   begin
-      return Impl.Unparse (Unwrap_Unit_RH (Handle));
-   end Unparse;
 
    -------------
    -- Replace --
