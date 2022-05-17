@@ -80,20 +80,28 @@
    <%
       type_name = field.struct.entity.api_name
       ret_type = field.type.entity if field.type.is_ast_node else field.type
+      doc = ada_doc(field, 3)
    %>
 
    function ${field.api_name}
      (Node : ${type_name}'Class) return ${ret_type.api_name};
-   ${ada_doc(field, 3)}
+   % if doc:
+   ${doc}
+   --% belongs-to: ${field.struct.entity.api_name}
+   % else:
+   --% belongs-to: ${field.struct.entity.api_name}
+   % endif
 
    ## If this field return an enum node, generate a shortcut to get the
    ## symbolic value.
    % if field.type.is_bool_node:
       function ${field.api_name} (Node : ${type_name}'Class) return Boolean;
+      --% belongs-to: ${field.struct.entity.api_name}
 
    % elif field.type.is_enum_node:
       function ${field.api_name}
         (Node : ${type_name}'Class) return ${field.type.ada_kind_name};
+      --% belongs-to: ${field.struct.entity.api_name}
    % endif
 </%def>
 
