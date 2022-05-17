@@ -45,18 +45,11 @@ def gdb_helper(*args):
             if get_context().emitter.generate_gdb_hook else '')
 
 
-def precise_types_doc(label, types):
+def precise_types_doc(types: List[CompiledType]) -> str:
     """
     Helper to format documentation about precise types.
-
-    :param str label: Label for the precise types.
-    :param list[CompiledType] types: List of precise types to describe.
-    :rtype: str
     """
-    return '\n'.join([label, ''] + sorted(
-        '* ${{node_name(T.{})}}'.format(t.dsl_name)
-        for t in types)
-    )
+    return ', '.join(sorted(f':typeref:`{t.type_repo_name}`' for t in types))
 
 
 @CompileCtx.register_template_extensions
@@ -2093,9 +2086,6 @@ class Field(BaseField):
         if self.struct.synthetic:
             return result
 
-        def amended(label, types):
-            return append_paragraph(result, precise_types_doc(label, types))
-
         precise_types = self.precise_types.minimal_matched_types
 
         # If the field always contains a list, and that we know it holds one or
@@ -2108,15 +2098,20 @@ class Field(BaseField):
                 len(precise_element_types) > 1
                 or precise_element_types[0] != self.type.element_type
             ):
-                return amended(
-                    'This field contains a list that itself contains'
-                    ' one of the following nodes:',
-                    precise_element_types)
+
+                return append_paragraph(
+                    result,
+                    'This field contains a list that itself contains one of '
+                    'the following nodes: '
+                    f'{precise_types_doc(precise_element_types)}'
+                )
 
         if len(precise_types) > 1:
-            return amended(
-                'This field can contain one of the following nodes:',
-                precise_types)
+            return append_paragraph(
+                result,
+                'This field can contain one of the following nodes: '
+                f'{precise_types_doc(precise_types)}'
+            )
 
         return result
 
@@ -2876,10 +2871,10 @@ class ASTNodeType(BaseStructType):
                                  .minimal_matched_types)
             if len(precise_types) > 1 or precise_types[0] != self.element_type:
                 addition = indent(
-                    precise_types_doc(
-                        'This list node can contain one of the following'
-                        ' nodes:', precise_types),
-                    first_line_indentation(result))
+                    'This list node can contain one of the following'
+                    f' nodes: {precise_types_doc(precise_types)}',
+                    first_line_indentation(result)
+                )
                 return append_paragraph(result, addition)
 
         return result
