@@ -23,18 +23,36 @@ All templates can use the "lang" parameter, which contains "ada", "c" or
 
 from __future__ import annotations
 
+import inspect
 import textwrap
-from typing import (Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING,
-                    Union, cast)
 
-from funcy import concat, interpose
+from dataclasses import dataclass, replace
+from typing import (
+    Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING, Union, cast
+)
+
+import docutils.frontend
+import docutils.nodes
+import docutils.parsers
+import docutils.parsers.rst
+import docutils.parsers.rst.roles
+import docutils.utils
 from mako.template import Template
+
+from langkit.diagnostics import (
+    Severity, check_source_language,
+    diagnostic_context, get_current_location
+)
+from langkit.utils import memoized
 
 
 if TYPE_CHECKING:
     from typing import Protocol
     from langkit.compile_context import CompileCtx
-    from langkit.compiled_types import ASTNodeType, CompiledType, TypeRepo
+    from langkit.compiled_types import ASTNodeType, CompiledType
+
+    NodeNameGetter = Callable[[CompileCtx, ASTNodeType], str]
+
 else:
     # We want to support Python 3.7, and typing.Protocol was introduced in
     # Python 3.8. Our only use of this, as a base class, is to type-check the
@@ -1248,84 +1266,6 @@ todo_markers = {
 }
 
 
-def is_bullet(paragraph: str) -> bool:
-    """
-    Whether ``paragraph`` is a bullet point in a bullet list.
-    """
-    return paragraph.startswith(('* ', '- '))
-
-
-def is_admonition(paragraph: str) -> bool:
-    """
-    Whether ``paragraph`` is a Sphinx admonition.
-    """
-    return paragraph.startswith('.. ')
-
-
-def split_paragraphs(text: str) -> List[str]:
-    """
-    Split arbitrary text into paragraphs.
-
-    :param text: Text to split. Paragraphs are separated by empty lines.
-    """
-    paragraphs: List[str] = []
-    current_paragraph: List[str] = []
-
-    def end_paragraph() -> None:
-        """Move the current paragraph (if any) to "paragraphs"."""
-        if current_paragraph:
-            paragraphs.append(
-                ' '.join(current_paragraph)
-            )
-            current_paragraph[:] = []
-
-    for line in text.split('\n'):
-        line = line.strip()
-        is_b = is_bullet(line)
-        if line and not is_b:
-            current_paragraph.append(line)
-        elif is_b:
-            end_paragraph()
-            current_paragraph.append(line)
-        else:
-            end_paragraph()
-    end_paragraph()
-
-    return paragraphs
-
-
-def get_available_width(indent_level: int, width: Optional[int] = None) -> int:
-    """
-    Return the number of available columns on source code lines.
-
-    :param indent_level: Identation level of the source code lines.
-    :param width: Total available width on source code lines. By default, use
-        79.
-    """
-    if width is None:
-        width = 79
-    return width - indent_level
-
-
-def wrap(
-    paragraph: str, width: int, indent: str = ''
-) -> List[str]:
-
-    # Preserve specific indentation of specific paragraphs such as bullet
-    # lists/admonitions.
-    if is_bullet(paragraph):
-        subs_indent = '  '
-    elif is_admonition(paragraph):
-        subs_indent = '   '
-    else:
-        subs_indent = ''
-
-    result = textwrap.wrap(paragraph, width, initial_indent=indent,
-                           subsequent_indent=indent + subs_indent)
-
-    return result
-
-
 class Formatter(Protocol):
     def __call__(self,
                  text: str,
@@ -1333,10 +1273,478 @@ class Formatter(Protocol):
                  width: int = 79) -> str: ...
 
 
+def get_line(node: Any) -> Optional[int]:
+    """
+    Utility function to get the closest line for a given rst node (since
+    not all nodes have line information).
+    """
+    if node is None:
+        return None
+    if node.line is not None:
+        return node.line
+    else:
+        return get_line(node.parent)
+
+
+class LangkitTypeRef(docutils.nodes.reference):
+    """
+    Specific langkit node for a reference to a Langkit CompiledType. Meant to
+    be replaced by our visitor by a type ref node that is understandable in the
+    role of the language for which we generate documentation, or if there isn't
+    such a role, a simple text reference.
+    """
+
+    @memoized
+    def get_type(self) -> Optional[CompiledType]:
+        """
+        Return the langkit type this node references.
+        """
+        from langkit.compiled_types import resolve_type
+
+        c = self['compiled_type']
+        if c:
+            return resolve_type(c)
+
+        return None
+
+    @staticmethod
+    def role_fn(
+        name: Any, rawtext: Any, text: Any, lineno: Any,
+        inliner: Any, options: Any = {}, content: Any = []
+    ) -> Any:
+        """
+        Role function to create a ``LangkitTypeRef`` node.
+        """
+        from langkit.compiled_types import T
+        ct = getattr(T, text, None)
+
+        node = LangkitTypeRef(rawtext, text, compiled_type=ct, **options)
+        return [node], []
+
+
+docutils.parsers.rst.roles.register_local_role(
+    "typeref", LangkitTypeRef.role_fn
+)
+
+
+#
+# Global data used by docutils visitors
+#
+
+TAGNAMES_WITH_SURROUNDINGS = {
+    "literal": "``",
+    "emphasis": "*",
+    "strong": "**",
+}
+
+SUPPORTED_ADMONITIONS = [
+    "attention", "caution", "danger", "error", "hint", "important", "note",
+    "tip", "warning", "admonition"
+]
+
+EXPLICITLY_FORBIDDEN_TAGS = ['title_reference']
+
+SUPPORTED_TAGS = [
+    "#text", "comment", "field", "paragraph", "list_item", "literal_block",
+    "enumerated_list", "field_name", "document", "bullet_list",
+    "system_message", "problematic", "warning", "field_list",
+    "field_name", "field_body", "block_quote"
+] + SUPPORTED_ADMONITIONS + list(TAGNAMES_WITH_SURROUNDINGS.keys())
+
+SKIP_CHILDREN = ["field_name", "literal_block"]
+
+
+class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
+    """
+    Visitor that will be run on docstrings to check that they're correct,
+    e.g. that they respect the subset of ReST that we're supposed to use,
+    and the restrictions that we impose on docstrings.
+    """
+
+    def default_visit(self, node: Any) -> None:
+        # Forward error messages from the parser itself
+        if node.tagname in "system_message":
+            self.check(node[0], False, node[0].astext())
+
+        # Forbid title references, because they're useless in docstrings,
+        # and they're a commonly occuring error in our docstrings.
+        elif node.tagname == 'title_reference':
+            self.check(
+                node, False,
+                "title_reference nodes are forbidden in docstrings. You "
+                "probably meant to use double backquotes.",
+            )
+
+        # Warn for all node types that are not explicitly supported
+        elif node.tagname not in SUPPORTED_TAGS:
+            self.check(
+                node, False,
+                f"Unsupported Rst tag: {node.tagname}. Will be excluded "
+                "from output."
+            )
+
+        # Skip children of nodes that need to be skipped, so that we don't
+        # mistakenly encounter an unsupported node that we would have skipped
+        # anyway.
+        if node.tagname in SKIP_CHILDREN:
+            raise docutils.nodes.SkipChildren()
+
+    def unknown_visit(self, node: docutils.nodes.node) -> None:
+
+        if isinstance(node, LangkitTypeRef):
+            ct = node.get_type()
+            self.check(node, ct is not None, "Wrong type reference")
+            raise docutils.nodes.SkipChildren()
+
+    def unknown_departure(self, node: docutils.nodes.node) -> None:
+        pass
+
+    def check(self, node: Any, condition: bool, message: str) -> None:
+        """
+        Utility method, to run a language level langkit check with a proper
+        sloc inside of the rst docstring, if possible.
+        """
+
+        loc = get_current_location()
+
+        if loc is not None:
+            node_line = get_line(node)
+            if node_line is not None:
+                loc = replace(loc, line=loc.line + node_line + 1)
+
+        with diagnostic_context(loc):
+            check_source_language(
+                condition,
+                message,
+                severity=Severity.warning,
+                ok_for_codegen=True
+            )
+
+    @staticmethod
+    def check_doc(doc: Optional[str]) -> None:
+        """
+        Shortcut to run this visitor on a given (potentially ``None``)
+        docstring.
+        """
+        if doc:
+            rst_doc = rst_document(doc)
+            visitor = RstCommentChecker(rst_doc)
+            rst_doc.walk(visitor)
+
+
+class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
+    """
+    Docutils ``NodeVisitor``, meant to output a formatted rst docstring, with
+    text properly wrapped for the given indentation/prefix.
+    """
+
+    @dataclass
+    class BlockContext:
+        node: docutils.nodes.node
+        """
+        The node for the block.
+        """
+
+        initial_prefix: str
+        """
+        The prefix string for the first line of the block.
+        """
+
+        subsequent_prefix: str
+        """
+        The prefix string for the subsequent lines of the block.
+        """
+
+        parts: List[str]
+        """
+        The list of text parts that make up the block, and that will be
+        populated in the visit function.
+        """
+
+    def __init__(
+        self,
+        document: docutils.nodes.document,
+        prefix: str,
+        get_node_name: NodeNameGetter,
+        type_role_name: str = '',
+        width: int = 79
+    ):
+        """
+        Construct a new ``RstCommentFormatter`` visitor.
+
+        :param document: The document this visitor will iterate on.
+
+        :param prefix: The string prefix with which we want to prefix every
+            line of the resulting output. Typically constituted of the
+            whitespace for the desired indentation, plus the prefix for the
+            comment style of the output language.
+
+        :param get_node_name: Callable that will return the formatted name of a
+            langkit node type, in the desired style for the output language.
+
+        :param type_role_name: String that represents the name of the role for
+            type references in the doc for the output language.
+
+        :param width: Maximum width to which to wrap the output.
+        """
+
+        super().__init__(document)
+
+        # Instantiation data, used to parametrize the output
+        self.width = width
+        self.prefix = prefix
+        self.get_node_name = get_node_name
+        self.type_role_name = type_role_name
+
+        # Context variables
+        self.surrounding = ""
+        """
+        For text parts that require to be surrounded (like literal blocks),
+        this will be set to the appropriate surrounding text.
+        """
+
+        self.in_enumerated_list = False
+        self.enumerated_list_item_no = 1
+
+        # State variables for the visitor
+        self.parts: List[str] = []
+        """
+        List of toplevel parts to be concatenated at the end of the visit.
+        """
+
+        self.block_context_stack: List[RstCommentFormatter.BlockContext] = []
+        """
+        Stack of block contexts. Contains what is needed to format a block, in
+        order:
+        """
+
+    @property
+    def current_parts(self) -> List[str]:
+        """
+        Shortcut property to return the list of current parts for the topmost
+        entry on the block context stack.
+        """
+        return self.block_context_stack[-1].parts
+
+    def append_part(self, part: str) -> None:
+        """
+        Append a part to the list of toplevel parts.
+        """
+        if part:
+            self.parts.append(part)
+
+    def append_context(
+        self,
+        node: docutils.nodes.Node,
+        initial_prefix: str = '',
+        subsequent_prefix: str = ''
+    ) -> None:
+        """
+        Append a new block context to the block context stack.
+        """
+        if self.block_context_stack:
+            self.append_part(self.wrap(''.join(self.current_parts)))
+            self.current_parts.clear()
+
+        self.block_context_stack.append(
+            RstCommentFormatter.BlockContext(
+                node, initial_prefix, subsequent_prefix, []
+            )
+        )
+
+    @property
+    def text(self) -> str:
+        """
+        Get the constructed docstring's text out of this visitor.
+        """
+        lines = f"\n{self.prefix}\n".join(self.parts).splitlines()
+        return "\n".join(l.rstrip() for l in lines)
+
+    @property
+    def initial_indent(self) -> str:
+        """
+        Helper property to get the indent text for the first line of a
+        formatted block in the current context.
+        """
+        if self.block_context_stack:
+            return ''.join(
+                t.subsequent_prefix for t in self.block_context_stack[:-1]
+            ) + self.block_context_stack[-1].initial_prefix
+        else:
+            return ''
+
+    @property
+    def subsequent_indent(self) -> str:
+        """
+        Helper property to get the indent text for the subsequent lines of a
+        formatted block in the current context.
+        """
+        return ''.join(t.subsequent_prefix for t in self.block_context_stack)
+
+    def wrap(self, text: str) -> str:
+        """
+        Helper method to wrap text with the desired settings.
+        """
+        return "\n".join(textwrap.wrap(
+            text, self.width,
+            initial_indent=self.prefix + self.initial_indent,
+            subsequent_indent=self.prefix + self.subsequent_indent
+        ))
+
+    def unknown_visit(self, node: docutils.nodes.node) -> None:
+        """
+        Visit function for langkit specific nodes.
+        """
+
+        from langkit.compile_context import get_context
+        from langkit.compiled_types import ASTNodeType
+
+        if isinstance(node, LangkitTypeRef):
+            ct = node.get_type()
+            if not ct:
+                return
+            # TODO: For the moment ``:typeref:`` will only work for AST node
+            # types.
+            assert isinstance(ct, ASTNodeType)
+            type_name = self.get_node_name(get_context(), ct)
+            if self.type_role_name:
+                self.current_parts.append(
+                    f"{self.type_role_name}`{type_name}`"
+                )
+            else:
+                self.current_parts.append(f"``{type_name}``")
+
+            raise docutils.nodes.SkipChildren()
+
+    def unknown_departure(self, node: docutils.nodes.node) -> None:
+        pass
+
+    def default_visit(self, node: docutils.nodes.node) -> None:
+        """
+        Visit function for generic docutils/sphinx nodes.
+        """
+        if node.tagname == "#text":
+            # Text nodes are added to parts, and will be later built via the
+            # builder.
+            self.current_parts.append(
+                f"{self.surrounding}{node.astext()}{self.surrounding}"
+            )
+
+        elif node.tagname == "comment":
+            # Comments are kept, but maybe we should get rid of them?
+            self.append_context(node, ".. ", "   ")
+
+        elif node.tagname == "field":
+            self.append_context(node, f":{node[0].astext()}: ", '   ')
+
+        elif node.tagname == "paragraph":
+            # If a paragraph is not part of a larger block that has a
+            # builder, then add a simple builder for the paragraph that will
+            # simply wrap.
+            if not self.block_context_stack:
+                self.append_context(node, '', '')
+
+        elif node.tagname == "list_item":
+            if self.in_enumerated_list:
+                initial_indent = f'{self.enumerated_list_item_no}. '
+                self.enumerated_list_item_no += 1
+            else:
+                initial_indent = '* '
+            subsequent_indent = ' ' * len(initial_indent)
+            self.append_context(node, initial_indent, subsequent_indent)
+
+        elif node.tagname in SUPPORTED_ADMONITIONS:
+            self.append_context(node, f".. {node.tagname}:: ", '   ')
+
+        elif node.tagname in TAGNAMES_WITH_SURROUNDINGS.keys():
+
+            # If we have a node that will "surround" the text inside with
+            # some special character, set the ``surrounding`` variable,
+            # which will be used when we get to the inside text.
+            # NOTE: Inline tags with surrounding characters are handled via a
+            # separate mechanism than builders, but we might be able to have
+            # a stack of builders and only use builders, if we do some
+            # adjustments.
+            self.surrounding = TAGNAMES_WITH_SURROUNDINGS[node.tagname]
+
+        elif node.tagname == "literal_block":
+            # Literal blocks are code blocks. For those we want to bypass
+            # the mechanism we use for every other block that will wrap the
+            # resulting text, and instead preserve the original formatting.
+            classes = set(node["classes"])
+            classes = classes - {"code"}
+            try:
+                lang = classes.pop()
+            except KeyError:
+                lang = ""
+            self.append_part(
+                f"{self.prefix}{self.subsequent_indent}.. code:: {lang}"
+                .rstrip()
+            )
+
+            self.append_part("\n".join(
+                f"{self.prefix}{self.subsequent_indent}   {l}"
+                for l in node.astext().splitlines()
+            ))
+        elif node.tagname == "enumerated_list":
+            # TODO: Add support for nested enumerated lists
+            self.in_enumerated_list = True
+            self.enumerated_list_item_no = 1
+
+        if node.tagname not in SUPPORTED_TAGS or node.tagname in SKIP_CHILDREN:
+            # Skip nodes that are not supported: we know that we have warned
+            # the user previously, now we can just ignore the content. It
+            # will be stripped from the output.
+            raise docutils.nodes.SkipChildren()
+
+    def default_departure(self, node: Any) -> None:
+        """
+        Departure (post children traversal) visit function for generic
+        docutils/sphinx nodes.
+        """
+        if node.tagname == "enumerated_list":
+            self.in_enumerated_list = False
+        elif node.tagname in [
+            "field", "list_item", "paragraph", "comment"
+        ] + SUPPORTED_ADMONITIONS:
+            if self.block_context_stack[-1].node == node:
+                self.append_part(self.wrap(''.join(self.current_parts)))
+                # Reset data
+                self.block_context_stack.pop()
+        elif node.tagname in TAGNAMES_WITH_SURROUNDINGS:
+            self.surrounding = ""
+
+
+default_settings = docutils.frontend.OptionParser(
+    components=(docutils.parsers.rst.Parser,)
+).get_default_values()
+# Don't emit any report on stdout/stderr
+default_settings.report_level = 4
+
+
+@memoized
+def rst_document(text: str) -> docutils.nodes.document:
+    """
+    From a given docstring, return a docutils document.
+
+    .. note:: This might have large strings as inputs, and as such is maybe
+        not optimal. We will probably be able to get rid of that by directly
+        storing the docutils document in entities at some stage, but this is a
+        good first step solution.
+    """
+
+    document = docutils.utils.new_document("<input>", default_settings)
+    parser = docutils.parsers.rst.Parser()
+    parser.parse(text, document)
+    return document
+
+
 def make_formatter(
     prefix: str = '',
     suffix: str = '',
     line_prefix: str = '',
+    get_node_name: NodeNameGetter = lambda c, n: n.name.lower,
+    type_role_name: str = ''
 ) -> Formatter:
     """
     Create a formatter function which, given a text that contains a list of
@@ -1364,31 +1772,18 @@ def make_formatter(
     """
 
     def formatter(text: str, column: int, width: int = 79) -> str:
-        whitespace = ' ' * column
-        full_prefix = whitespace + line_prefix
+        text = inspect.cleandoc(text)
+        indent = ' ' * column
+        pfx = indent + line_prefix
 
-        return "\n".join(
-            # Add the prefix with whitespace (we'll strip the first line at
-            # the end, because it will work in both cases: when there is a
-            # prefix and when there isn't.
-            [whitespace + prefix]
+        document = rst_document(text)
+        visitor = RstCommentFormatter(
+            document, prefix=pfx, get_node_name=get_node_name,
+            type_role_name=type_role_name
+        )
+        document.walkabout(visitor)
 
-            + list(concat(*list(
-                # Call interpose to add blank lines inbetween paragraphs
-                interpose(
-
-                    # For blank lines, strip whitespace on the right to not
-                    # have any trailing whitespace.
-                    [full_prefix.rstrip()],
-
-                    [wrap(p, width, indent=full_prefix)
-                     for p in split_paragraphs(text)]
-                )
-            )))
-
-            # Add the suffix with whitespace
-            + [whitespace + suffix]
-        ).strip()
+        return "\n".join([prefix, visitor.text, indent + suffix]).strip()
 
     return formatter
 
@@ -1404,7 +1799,6 @@ class DocPrinter(Protocol):
 def create_doc_printer(
     lang: str,
     formatter: Formatter,
-    get_node_name: Callable[[CompileCtx, ASTNodeType], str]
 ) -> DocPrinter:
     """
     Return a function that prints documentation.
@@ -1412,8 +1806,6 @@ def create_doc_printer(
     :param lang: The default language for which we generate documentation.
     :param formatter: Function that formats text into source code
         documentation. See the ``format_*`` functions above.
-    :param get_node_name: Function to turn a node into the corresponding
-        lang-specific name.
     """
 
     def func(entity:
@@ -1428,31 +1820,27 @@ def create_doc_printer(
         :param kwargs: Parameters to be passed to the specific formatter.
         """
         from langkit.compile_context import get_context
-        from langkit.compiled_types import T, resolve_type
+        from langkit.compiled_types import T
 
         ctx = get_context()
 
-        doc: Optional[Template]
+        doc: str
+
         if isinstance(entity, str):
-            doc_template = ctx.documentations[entity]
+            doc = ctx.documentations[entity].render(
+                ctx=get_context(),
+                capi=ctx.c_api_settings,
+                pyapi=ctx.python_api_settings,
+                lang=lang,
+                null=null_names[lang],
+                TODO=todo_markers[lang],
+                T=T,
+            )
         elif entity.doc:
-            doc_template = Template(entity.doc)
+            doc = entity.doc
         else:
-            doc_template = None
+            doc = ""
 
-        def node_name(node: Union[CompiledType, TypeRepo.Defer]) -> str:
-            return get_node_name(ctx, resolve_type(node))
-
-        doc = doc_template.render(
-            ctx=get_context(),
-            capi=ctx.c_api_settings,
-            pyapi=ctx.python_api_settings,
-            lang=lang,
-            null=null_names[lang],
-            TODO=todo_markers[lang],
-            T=T,
-            node_name=node_name
-        ) if doc_template else ''
         return formatter(doc, column, **kwargs)
 
     func.__name__ = '{}_doc'.format(lang)
@@ -1463,10 +1851,31 @@ def create_doc_printer(
 # the given language. See ``make_formatter``'s documentation for the arguments.
 
 format_text = make_formatter()
-format_ada = make_formatter(line_prefix='--  ')
-format_c = make_formatter(prefix='/*', line_prefix=' * ', suffix=' */')
-format_python = make_formatter(prefix='"""', suffix='"""')
-format_ocaml = make_formatter(prefix='(**', line_prefix=' * ', suffix=' *)')
+format_ada = make_formatter(
+    line_prefix='--  ',
+    get_node_name=lambda ctx, node: node.entity.api_name,
+    type_role_name=':ada:ref:'
+)
+format_c = make_formatter(
+    prefix='/*', line_prefix=' * ', suffix=' */',
+
+    # In the C header, there is only one node type, so use kind enumerators
+    # instead.
+    get_node_name=(lambda ctx, node:
+                   ctx.c_api_settings.get_name(node.kwless_raw_name)),
+)
+format_python = make_formatter(
+    prefix='"""', suffix='"""',
+    get_node_name=(lambda ctx, node:
+                   ctx.python_api_settings.type_public_name(node)),
+    type_role_name=':py:class:'
+)
+format_ocaml = make_formatter(
+    prefix='(**', line_prefix=' * ', suffix=' *)',
+    get_node_name=(lambda ctx, node:
+                   ctx.ocaml_api_settings
+                   .type_public_name(node.entity))
+)
 
 
 # The following are functions which return formatted source code documentation
@@ -1482,26 +1891,15 @@ format_ocaml = make_formatter(prefix='(**', line_prefix=' * ', suffix=' *)')
 
 ada_doc = create_doc_printer(
     'ada', cast(Formatter, format_ada),
-    get_node_name=lambda ctx, node: node.entity.api_name
 )
 c_doc = create_doc_printer(
     'c', cast(Formatter, format_c),
-
-    # In the C header, there is only one node type, so use kind enumerators
-    # instead.
-    get_node_name=(lambda ctx, node:
-                   ctx.c_api_settings.get_name(node.kwless_raw_name)),
 )
 py_doc = create_doc_printer(
     'python', cast(Formatter, format_python),
-    get_node_name=(lambda ctx, node:
-                   ctx.python_api_settings.type_public_name(node))
 )
 ocaml_doc = create_doc_printer(
     'ocaml', cast(Formatter, format_ocaml),
-    get_node_name=(lambda ctx, node:
-                   ctx.ocaml_api_settings
-                   .type_public_name(node.entity))
 )
 
 

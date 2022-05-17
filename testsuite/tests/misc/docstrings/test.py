@@ -7,7 +7,8 @@ from langkit import documentation as doc
 
 
 docstring = """
-This is a docstring
+This is a docstring. This is a ``literal``. This is *emphasis*. This is
+**strong emphasis**.
 
 * This is a bullet point with several lines. Viral schlitz humblebrag, shabby
   chic pitchfork selfies subway tile live-edge sartorial austin man bun.
@@ -17,12 +18,47 @@ This is a docstring
 
 .. attention:: This is a Sphinx admonition that spans several lines.
    Cold-pressed scenester lo-fi, cronut asymmetrical vegan kogi heirloom
-   hashtag. 8-bit gluten-free bushwick try-hard taiyaki readymade chartreuse
-   disrupt iceland DIY.
+   hashtag.
+
+.. code-block:: ada
+
+    procedure This_Is_Ada is
+    begin
+        Put_Line ("Woot");
+    end This_Is_Ada;
 
 This is a last paragraph which spans several lines. I'm baby truffaut salvia
-VHS shaman, prism gastropub fingerstache forage. Tousled food truck typewriter,
-brunch bushwick dreamcatcher stumptown jianbing. Raw denim cronut kombucha.
+VHS shaman, prism gastropub fingerstache forage::
+
+    a = "This is a literal block"
+    print(a)
+
+    for c in a:
+        print(c)
+
+1. This is a numbered list woot woot
+2. Second item
+
+:param pouet: This is a last paragraph which spans several lines. I'm baby
+    truffaut salvia VHS shaman, prism gastropub fingerstache forage. Tousled
+    food truck typewriter.
+
+:param foo: Foo foo foo foo
+    foo
+
+.. attention:: Let's test a nested block, by having an admonition that contains
+   a bullet list:
+
+   * This is a bullet point with several lines. Viral schlitz humblebrag,
+     shabby chic pitchfork selfies subway tile live-edge sartorial austin man
+     bun.
+
+   * This is a second bullet point with
+     several lines
+
+   .. code-block:: python
+
+       print("And now a code extract")
 """
 
 print("Original docstring")

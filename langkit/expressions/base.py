@@ -25,6 +25,7 @@ from langkit.diagnostics import (
     check_source_language, check_type, diagnostic_context,
     extract_library_location
 )
+from langkit.documentation import RstCommentChecker
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
     Uninitialized, assert_type, dispatch_on_type, inherited_property, memoized,
@@ -4579,6 +4580,14 @@ class PropertyDef(AbstractNodeData):
     def lazy_field(self) -> bool:
         assert self._lazy_field is not None
         return self._lazy_field
+
+    def check_docstring(self, context):
+        """
+        Property pass function that will check that the docstring for this
+        function is correct.
+        """
+        del context
+        RstCommentChecker.check_doc(self.doc)
 
 
 def ExternalProperty(type=None, doc="", **kwargs):

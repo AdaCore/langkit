@@ -31,6 +31,7 @@ from langkit.diagnostics import (
     DiagnosticError, Location, Severity, WarningSet, check_source_language,
     diagnostic_context, error, print_error, print_error_from_sem_result
 )
+from langkit.documentation import RstCommentChecker
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
@@ -2055,6 +2056,13 @@ class CompileCtx:
                        CompileCtx.lower_properties_dispatching),
             GlobalPass('compute AST node constants',
                        CompileCtx.compute_astnode_constants),
+
+            PropertyPass("Check properties' docstrings",
+                         PropertyDef.check_docstring),
+
+            GlobalPass("Check types' docstrings",
+                       CompileCtx.check_types_docstrings),
+
             errors_checkpoint_pass,
 
             MajorStepPass('Computing precise types'),
@@ -2527,6 +2535,18 @@ class CompileCtx:
         self.sorted_struct_fields = []
         for t in self.sorted_public_structs:
             self.sorted_struct_fields.extend(t.get_fields())
+
+    def check_types_docstrings(self):
+        """
+        Check the docstrings of type definitions.
+        """
+        for astnode in self.astnode_types:
+            with astnode.diagnostic_context:
+                RstCommentChecker.check_doc(astnode._doc)
+
+        for struct in self.struct_types:
+            with struct.diagnostic_context:
+                RstCommentChecker.check_doc(struct._doc)
 
     def lower_properties_dispatching(self):
         """
