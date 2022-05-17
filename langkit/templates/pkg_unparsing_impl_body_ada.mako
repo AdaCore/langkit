@@ -277,7 +277,8 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                if RN.Children.Kind = Unexpanded then
                   return Create_Abstract_Node (Child (RN.Node, Index));
                else
-                  return Create_Abstract_Node (Child (RN, Index));
+                  return Create_Abstract_Node
+                    (RN.Children.Vector.Element (Index));
                end if;
             end;
       end case;
