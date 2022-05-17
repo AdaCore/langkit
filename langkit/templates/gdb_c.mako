@@ -8,7 +8,7 @@
 asm(
 ".pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n"
 ".byte 1 /* Python */\n"
-".asciz \"${gdbinit_path}\"\n"
+".asciz \"${gdbinit_path.replace("\\", "\\\\").replace('"', '\\\\\\"')}\"\n"
 ".popsection\n"
 );
 #endif
