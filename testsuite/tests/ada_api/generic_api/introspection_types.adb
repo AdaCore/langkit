@@ -11,6 +11,8 @@ with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with Libfoolang.Generic_API;
+with Libfoolang.Generic_API.Introspection;
+use Libfoolang.Generic_API.Introspection;
 
 procedure Introspection_Types is
 
@@ -609,6 +611,18 @@ begin
       when Exc : Precondition_Failure =>
          Put_Exc (Exc);
    end;
+   New_Line;
+
+   Put_Line ("Check Type_Ref constants");
+   Assert (Debug_Name (Type_Refs.Foo_Node) = "FooNode", "FooNode type ref");
+   Assert (Debug_Name (Type_Refs.Number) = "Number", "Number type ref");
+   New_Line;
+
+   Put_Line ("Check Struct_Member_Ref constants");
+   Assert (Debug_Name (Member_Refs.Addition_F_Lhs) = "Addition.f_lhs",
+           "Addition.f_lhs member ref");
+   Assert (Debug_Name (Member_Refs.Parent) = "FooNode.parent",
+           "FooNode.parent member ref");
    New_Line;
 
    Put_Line ("Check Is_Derived_From:");

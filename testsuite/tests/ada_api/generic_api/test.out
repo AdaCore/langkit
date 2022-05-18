@@ -556,6 +556,14 @@ Invalid args for Last_Derived_Type:
 Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
 
+Check Type_Ref constants
+Checking: FooNode type ref
+Checking: Number type ref
+
+Check Struct_Member_Ref constants
+Checking: Addition.f_lhs member ref
+Checking: FooNode.parent member ref
+
 Check Is_Derived_From:
 Checking: root derives from root
 Checking: expr derives from root

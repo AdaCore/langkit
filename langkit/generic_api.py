@@ -5,7 +5,7 @@ from typing import List, Optional, Union
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, ArrayType, CompiledType, EntityType,
-    EnumType, IteratorType, StructType
+    EnumType, IteratorType, StructType, T
 )
 import langkit.names as names
 
@@ -20,6 +20,54 @@ class GenericAPI:
 
     def __init__(self, context: CompileCtx):
         self.context = context
+
+    @property
+    def all_types(self) -> List[CompiledType]:
+        """
+        Return the list of all public types for this context.
+        """
+        all_but_builtin_types: List[CompiledType] = []
+        all_but_builtin_types += self.enum_types
+        all_but_builtin_types += self.array_types
+        all_but_builtin_types += self.iterator_types
+        all_but_builtin_types += self.struct_types
+        all_but_builtin_types += self.entity_types
+
+        # Builtin types are all the types that are public (exposed) but not in
+        # all_but_builtin_types.
+        other_types = [
+            t for t in T.all_types
+            if (
+                t.exposed
+                and not t.is_ast_node
+                and t not in all_but_builtin_types
+            )
+        ]
+
+        return (
+            sorted(other_types, key=lambda t: t.api_name)
+            + all_but_builtin_types
+        )
+
+    @property
+    def all_members(self) -> List[AbstractNodeData]:
+        """
+        Return the list of all base struct members: struct fields, node syntax
+        fields and properties.
+        """
+        sf = self.context.sorted_struct_fields
+        pf = self.context.sorted_parse_fields
+        p = self.context.sorted_properties
+
+        assert sf is not None
+        assert pf is not None
+        assert p is not None
+
+        result: List[AbstractNodeData] = []
+        result += sf
+        result += pf
+        result += p
+        return result
 
     @property
     def enum_types(self) -> List[EnumType]:
@@ -52,6 +100,13 @@ class GenericAPI:
         """
         return [t for t in self.context.struct_types
                 if t.exposed and not t.is_entity_type]
+
+    @property
+    def entity_types(self) -> List[EntityType]:
+        """
+        Return the list of entity types for this context.
+        """
+        return [t.entity for t in self.context.astnode_types]
 
     def type_name(self, t: CompiledType) -> str:
         """

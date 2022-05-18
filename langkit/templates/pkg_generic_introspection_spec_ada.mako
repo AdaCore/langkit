@@ -24,34 +24,9 @@ private package ${ada_lib_name}.Generic_Introspection is
 
    <%
       G = generic_api
-
-      # Expose through the introspection API...
-
-      # Include all entity types (including abstract ones), in hierarchical
-      # order.
       node_types = ctx.astnode_types
-      entity_types = [t.entity for t in node_types]
-
-      all_types = (
-         G.enum_types
-         + G.array_types
-         + G.iterator_types
-         + G.struct_types
-         + entity_types
-      )
-
-      # Fetch all exposed types that are not listed above (builtin types)
-      other_types = [t for t in T.all_types
-                     if t.exposed and not t.is_ast_node and t not in all_types]
-      all_types = sorted(other_types, key=lambda t: t.api_name) + all_types
-
-      # We also need to expose all base struct members: struct fields, node
-      # syntax fields and properties.
-      all_members = (
-         ctx.sorted_struct_fields
-         + ctx.sorted_parse_fields
-         + ctx.sorted_properties
-      )
+      all_types = G.all_types
+      all_members = G.all_members
    %>
 
    --------------------------
