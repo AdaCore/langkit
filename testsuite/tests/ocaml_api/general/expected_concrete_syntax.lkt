@@ -46,13 +46,6 @@ class Example : FooNode {
     @export fun singleton(): SomeStruct = SomeStruct(examples=[self])
 }
 
-## This list node can contain one of the following nodes:
-##
-## * ${node_name(T.Example)}
-## * ${node_name(T.Ident)}
-## * ${node_name(T.Null)}
-## * ${node_name(T.StringLiteral)}
-## * ${node_name(T.Var)}
 class Sequence : ASTList[FooNode, FooNode] {
 
     @export fun all_items(): Array[FooNode] = self.map((i) => i)

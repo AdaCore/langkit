@@ -16,10 +16,6 @@ grammar foo_grammar {
 class Example : FooNode {
 }
 
-## This list node can contain one of the following nodes:
-##
-## * ${node_name(T.Example)}
-## * ${node_name(T.NullNode)}
 class Sequence : ASTList[FooNode, FooNode] {
 
     @export fun all_items(): Array[FooNode] = self.map((i) => i)

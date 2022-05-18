@@ -1459,7 +1459,7 @@ def emit_node_type(node_type):
     ]
 
     properties = node_type.get_properties(include_inherited=False)
-    doc = node_type.doc
+    doc = node_type._doc
 
     strbase = ": {} ".format(base_name) if base_name else ""
     strtraits = "implements {} ".format(", ".join(traits)) if traits else ""
