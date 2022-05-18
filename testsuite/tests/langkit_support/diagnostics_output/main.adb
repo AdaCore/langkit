@@ -18,8 +18,14 @@ procedure Main is
    end record;
 
    overriding function Get_Line
-     (Self : Simple_Buffer; Line_Number : Positive) return Text_Type
-   is
+     (Self : Simple_Buffer; Line_Number : Positive) return Text_Type;
+
+   --------------
+   -- Get_Line --
+   --------------
+
+   overriding function Get_Line
+     (Self : Simple_Buffer; Line_Number : Positive) return Text_Type is
    begin
       return To_Text (Self.Lines (Line_Number));
    end;
@@ -33,6 +39,13 @@ begin
    Output.Print_Diagnostic
      (Diagnostic'
        (Sloc_Range => Source_Location_Range'(1, 1, 3, 9),
+        Message    => To_Unbounded_Text ("Test message")),
+      B, "main.adb");
+
+   Put_Line ("Single-character range message");
+   Output.Print_Diagnostic
+     (Diagnostic'
+       (Sloc_Range => Source_Location_Range'(1, 1, 3, 4),
         Message    => To_Unbounded_Text ("Test message")),
       B, "main.adb");
 

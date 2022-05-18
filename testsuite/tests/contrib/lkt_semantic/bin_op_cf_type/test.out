@@ -164,6 +164,7 @@ Id   <RefId "y" test.lkt:14:35-14:36>
 
 test.lkt:14:35: error: Mismatched types: expected `Array[Int]`, got `Array[String]`
 14 | @invalid val z4: Array[Int] = x & y
+   |                                   ^
 
 Expr <BinOp test.lkt:14:31-14:36>
      has type <InstantiatedGenericType prelude: "Array[Int]">
@@ -332,6 +333,7 @@ Id   <RefId "c" test.lkt:24:28-24:29>
 
 test.lkt:24:28: error: Mismatched types: expected `Int`, got `Bool`
 24 | @invalid val i3: Int = 1 - c
+   |                            ^
 
 Expr <BinOp test.lkt:24:24-24:29>
      has type <StructDecl prelude: "Int">
@@ -344,6 +346,7 @@ Id   <RefId "c" test.lkt:25:24-25:25>
 
 test.lkt:25:24: error: Mismatched types: expected `Int`, got `Bool`
 25 | @invalid val j3: Int = c - 1
+   |                        ^
 
 Expr <NumLit test.lkt:25:28-25:29>
      has type <StructDecl prelude: "Int">

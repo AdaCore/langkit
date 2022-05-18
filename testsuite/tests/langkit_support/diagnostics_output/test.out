@@ -3,6 +3,11 @@ main.adb:1:3: error: Test message
 1 | A simple line
   |   ^^^^^^
 
+Single-character range message
+main.adb:1:3: error: Test message
+1 | A simple line
+  |   ^
+
 Beginning of line no range message
 main.adb:1:1: error: Test message
 1 | A simple line

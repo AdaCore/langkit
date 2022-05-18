@@ -375,6 +375,7 @@ Expr <RefId "self" test.lkt:57:56-57:60>
 
 test.lkt:57:61: error: Cannot find entity `a` in this scope
 57 |     @invalid fun test_identifier_leak_invalid(): Int = self.a
+   |                                                             ^
 
 Id   <RefId "D" test.lkt:62:26-62:27>
      references <EnumClassAltDecl "D" test.lkt:61:10-61:11>

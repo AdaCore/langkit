@@ -34,6 +34,7 @@ Id   <RefId "Int" test.lkt:12:18-12:21>
 
 test.lkt:12:24: error: invalid reference to a generic
 12 | @invalid val v2: Int = g[Char]('a')
+   |                        ^
 
 Id   <RefId "g" test.lkt:12:24-12:25>
      references <FunDecl "g" test.lkt:6:10-6:29>

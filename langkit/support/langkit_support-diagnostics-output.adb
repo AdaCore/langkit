@@ -107,7 +107,7 @@ package body Langkit_Support.Diagnostics.Output is
       --  If ``Sloc_Range`` is not empty, append the line caretting the sloc in
       --  the line above.
 
-      if Start_Offset < End_Offset then
+      if Start_Offset <= End_Offset then
          Start_Line ("");
          Set_Style (Term_Info, Bright);
          Set_Color (Term_Info, Foreground => Caretting_Color);

@@ -146,6 +146,7 @@ Expr <CallExpr test.lkt:30:5-33:6>
 
 test.lkt:36:40: error: Cannot find entity `A` in this scope
 36 | @invalid fun test_handle_ce_error(arg: A): Int = arg.method_doesnt_exist()
+   |                                        ^
 
 Id   <RefId "Int" test.lkt:36:44-36:47>
      references <StructDecl prelude: "Int">

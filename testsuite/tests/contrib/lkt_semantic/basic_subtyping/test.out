@@ -92,4 +92,5 @@ Id   <RefId "a" test.lkt:18:58-18:59>
 
 test.lkt:18:58: error: Mismatched types: expected `Subclass2`, got `Subclass`
 18 | @invalid fun test_subtyping_4 (a: Subclass): Subclass2 = a
+   |                                                          ^
 

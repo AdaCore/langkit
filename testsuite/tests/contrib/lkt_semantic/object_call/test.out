@@ -79,6 +79,7 @@ Id   <RefId "Int" test.lkt:9:32-9:35>
 
 test.lkt:9:49: error: Unmatched actual
 9 | @invalid val incorrect_call_2: Int = arr(12)(1, 2)
+  |                                                 ^
 
 Id   <RefId "arr" test.lkt:9:38-9:41>
      references <FunDecl "arr" test.lkt:4:11-4:41>
