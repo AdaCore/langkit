@@ -65,6 +65,11 @@ class GenericAPI:
             return f"{self.type_name(t.element_type)}_Array"
         elif isinstance(t, IteratorType):
             return f"{self.type_name(t.element_type)}_Iterator"
+        elif isinstance(t, EntityType):
+            return (
+                names.Name.from_camel(t.element_type.type_repo_name)
+                .camel_with_underscores
+            )
         else:
             return (names.Name.from_camel(t.type_repo_name)
                     .camel_with_underscores)
