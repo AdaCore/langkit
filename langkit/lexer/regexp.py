@@ -8,7 +8,7 @@ from typing import (Any, Callable, Dict, Iterable, Iterator, List, Optional,
                     Set, TYPE_CHECKING, Tuple, TypeVar)
 
 
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import check_source_language, error
 from langkit.lexer.char_set import CharSet
 
 
@@ -16,7 +16,8 @@ if TYPE_CHECKING:
     from langkit.lexer import RuleAssoc
 
 
-rule_name_re = re.compile('[a-zA-Z][a-zA-Z0-9_]*')
+rule_name_re = re.compile('^[a-zA-Z][a-zA-Z0-9_]*$')
+repeat_re = re.compile("^(?P<low>[0-9]+)(?P<comma>,(?P<high>[0-9]+)?)$")
 
 
 T = TypeVar("T")
@@ -399,7 +400,8 @@ class RegexpCollection:
                 subparsers.append(self._parse_range(stream))
 
             elif stream.next_is('{'):
-                # Parse a reference to a named pattern
+                # Parse a reference to a named pattern (if the next character
+                # is a letter) or repeat the previous subparser otherwise.
                 stream.read()
                 name = ''
                 while not stream.eof and not stream.next_is('}'):
@@ -407,9 +409,59 @@ class RegexpCollection:
                 check_source_language(stream.next_is('}'),
                                       'unbalanced bracket')
                 stream.read()
-                check_source_language(rule_name_re.match(name) is not None,
-                                      'invalid rule name: {}'.format(name))
-                subparsers.append(self.Defer(name))
+
+                check_source_language(bool(name), "invalid empty brackets")
+                if name[0].isalpha():
+                    check_source_language(rule_name_re.match(name) is not None,
+                                          'invalid rule name: {}'.format(name))
+                    subparsers.append(self.Defer(name))
+
+                else:
+                    m = repeat_re.match(name)
+                    if m is None:
+                        error("invalid repetition specification")
+
+                    # "low" is mandatory, then even if there is a comma, high
+                    # is optional (comma = repeat at least "low" times, no
+                    # comma = repeat exactly "low" times).
+                    low = int(m.group("low"))
+                    has_comma = bool(m.group("comma"))
+                    high = (
+                        None
+                        if m.group("high") is None
+                        else int(m.group("high"))
+                    )
+
+                    check_source_language(
+                        high is None or low <= high,
+                        "min repeat greater than max repeat",
+                    )
+
+                    # Subparser to repeat
+                    to_repeat = subparsers.pop()
+
+                    # Resulting sequence of subparsers. In all cases, we must
+                    # repeat at least "low" times.
+                    sequence = [to_repeat] * low
+
+                    # If there is a comma but no high bound: repeat any number
+                    # of times after at least "low" repetitions.
+                    if has_comma and high is None:
+                        sequence.append(self.Repeat(to_repeat))
+
+                    # If there is a high bound, repeat between "low" and "high"
+                    # times (included).
+                    elif high is not None and high > low:
+                        varying_part: RegexpCollection.Parser = self.Opt(
+                            to_repeat
+                        )
+                        for i in range(low, high - 1):
+                            varying_part = self.Sequence(
+                                [to_repeat, self.Opt(varying_part)]
+                            )
+                        sequence.append(varying_part)
+
+                    return self.Sequence(sequence)
 
             elif stream.next_is('*', '+', '?'):
                 # Repeat the previous sequence item

@@ -36,6 +36,22 @@ for regexp in [
     r'[\]]',
     r'[\u1234]',
     r'[\u1234-\u1243]',
+
+    # Invalid named pattern reference
+    r'{}',
+    r'{foo}',
+    r'{a,}',
+
+    # Repetition
+    r'ab{2,5}',
+    r'a{2,}',
+    r'a{2,a}',
+    r'a{2,a}',
+    r'a{0,0}',
+    r'a{0,1}',
+    r'a{1,0}',
+    r'a{1,1}',
+    r'a{2,2}',
 ]:
 
     print('== {} =='.format(regexp))

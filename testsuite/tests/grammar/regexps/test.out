@@ -52,4 +52,40 @@ Or(Seq([\U1234]))
 == [\u1234-\u1243] ==
 Or(Seq([\U1234:\U1243]))
 
+== {} ==
+error: invalid empty brackets
+
+== {foo} ==
+Or(Seq(@foo))
+
+== {a,} ==
+error: invalid rule name: a,
+
+== ab{2,5} ==
+Or(Seq([b], [b], Seq([b], Opt(Seq([b], Opt(Opt([b])))))))
+
+== a{2,} ==
+Or(Seq([a], [a], Repeat([a])))
+
+== a{2,a} ==
+error: invalid repetition specification
+
+== a{2,a} ==
+error: invalid repetition specification
+
+== a{0,0} ==
+Or(Seq())
+
+== a{0,1} ==
+Or(Seq(Opt([a])))
+
+== a{1,0} ==
+error: min repeat greater than max repeat
+
+== a{1,1} ==
+Or(Seq([a]))
+
+== a{2,2} ==
+Or(Seq([a], [a]))
+
 Done
