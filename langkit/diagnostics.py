@@ -101,9 +101,9 @@ class Location:
     Path to the file for this location.
     """
 
-    line: int
+    line: int = field(default=0)
     """
-    Line number (1-based).
+    Line number (1-based). Zero if unspecified.
     """
 
     column: int = field(default=0)
@@ -132,10 +132,12 @@ class Location:
 
         :param relative: When True, the file path will be relative.
         """
-        return ":".join([
-            P.basename(self.file) if relative else self.file,
-            str(self.line),
-        ] + ([str(self.column)] if self.column > 0 else []))
+        parts = [P.basename(self.file) if relative else self.file]
+        if self.line > 0:
+            parts.append(str(self.line))
+        if self.column > 0:
+            parts.append(str(self.column))
+        return ":".join(parts)
 
     @classmethod
     def from_sloc_range(cls,
