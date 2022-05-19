@@ -1,5 +1,5 @@
 import lexer_example
-import nodes
+import common
 
 @with_lexer(foo_lexer) grammar foo_grammar {
     rule1 <- Example("example")
