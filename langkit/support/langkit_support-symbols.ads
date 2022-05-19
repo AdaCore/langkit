@@ -122,6 +122,25 @@ package Langkit_Support.Symbols is
    -- Symbol canonicalization --
    -----------------------------
 
+   --  All languages do not have the same rules to determine whether two
+   --  identifiers are equivalent: some languages, like C, consider that they
+   --  are equivalent when they are strictly equal in sources, whereas other
+   --  languages, like Ada, consider that they are equivalent if the only thing
+   --  that changes is their casing (``foo`` is treated as the same as
+   --  ``Foo``).
+   --
+   --  In the context of symbol tables, what we call here "symbolization" is a
+   --  way to implement these various criteria: symbolization turns an
+   --  identifier into a "canonical symbol", which is then used as the symbol
+   --  for this identifier in symbol tables. Two identifiers can have different
+   --  texts but still have the same canonical symbol: in this case they get
+   --  the same symbol value in a symbol table, and thus refer to the same
+   --  entities in lexical environments.
+   --
+   --  For instance, in Ada, decoding brackets and converting to lower case is
+   --  appropriate, so that the following identifiers all get the same symbol:
+   --  ``Foo`` ``foo`` and ``fo["6f"]``.
+
    type Symbolization_Result (Success : Boolean; Size : Natural) is record
       case Success is
          when True  =>
