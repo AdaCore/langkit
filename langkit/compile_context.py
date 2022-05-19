@@ -18,8 +18,8 @@ from functools import reduce
 import importlib
 import os
 from os import path
-from typing import (Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING,
-                    Tuple, Union, cast)
+from typing import (Any, Callable, ContextManager, Dict, List, Optional, Set,
+                    TYPE_CHECKING, Tuple, Union, cast)
 
 from funcy import lzip
 
@@ -29,8 +29,7 @@ from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
     DiagnosticError, Location, Severity, WarningSet, check_source_language,
-    context_stack, diagnostic_context, error, print_error,
-    print_error_from_sem_result
+    diagnostic_context, error, print_error, print_error_from_sem_result
 )
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
@@ -827,8 +826,7 @@ class CompileCtx:
     def actual_build_date(self) -> str:
         return self.build_date or "undefined"
 
-    @contextmanager
-    def lkt_context(self, lkt_node: L.LktNode):
+    def lkt_context(self, lkt_node: L.LktNode) -> ContextManager[None]:
         """
         Context manager to set the diagnostic context to the given node.
 
@@ -840,12 +838,7 @@ class CompileCtx:
         # "lkt_node" has the right type here.
         assert isinstance(lkt_node, L.LktNode)
 
-        context_stack.append(Location.from_lkt_node(lkt_node))
-
-        try:
-            yield
-        finally:
-            context_stack.pop()
+        return diagnostic_context(Location.from_lkt_node(lkt_node))
 
     @staticmethod
     def lkt_doc(full_decl):
