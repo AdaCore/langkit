@@ -581,15 +581,15 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     with ctx.lkt_context(full_lexer):
         lexer_annot = parse_annotations(ctx, LexerAnnotations, full_lexer)
 
-    patterns: Dict[names.Name, str] = {}
+    patterns: Dict[names.Name, Tuple[str, Location]] = {}
     """
     Mapping from pattern names to the corresponding regular expression.
     """
 
-    token_family_sets: Dict[names.Name, Set[TokenAction]] = {}
+    token_family_sets: Dict[names.Name, Tuple[Set[TokenAction], Location]] = {}
     """
     Mapping from token family names to the corresponding sets of tokens that
-    belong to this family.
+    belong to this family, and the location for the token family declaration.
     """
 
     token_families: Dict[names.Name, TokenFamily] = {}
@@ -638,7 +638,10 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         with ctx.lkt_context(f):
             # Create the token family, if needed
             name = names.Name.check_from_lower(f.f_syn_name.text)
-            token_set = token_family_sets.setdefault(name, set())
+            token_set, _ = token_family_sets.setdefault(
+                name,
+                (set(), Location.from_lkt_node(f)),
+            )
 
             for r in f.f_rules:
                 if not isinstance(r.f_decl, L.GrammarRuleDecl):
@@ -749,19 +752,22 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             ):
                 error('Pattern string literal expected')
             # TODO: use StringLit.p_denoted_value when properly implemented
-            patterns[name] = pattern_as_str(decl.f_val)
+            patterns[name] = (
+                pattern_as_str(decl.f_val), Location.from_lkt_node(decl)
+            )
 
     def lower_matcher(expr: L.GrammarExpr) -> Matcher:
         """
         Lower a token matcher to our internals.
         """
+        loc = Location.from_lkt_node(expr)
         with ctx.lkt_context(expr):
             if isinstance(expr, L.TokenLit):
-                return Literal(json.loads(expr.text))
+                return Literal(json.loads(expr.text), location=loc)
             elif isinstance(expr, L.TokenNoCaseLit):
-                return NoCaseLit(json.loads(expr.text))
+                return NoCaseLit(json.loads(expr.text), location=loc)
             elif isinstance(expr, L.TokenPatternLit):
-                return Pattern(pattern_as_str(expr))
+                return Pattern(pattern_as_str(expr), location=loc)
             else:
                 error('Invalid lexing expression')
 
@@ -837,8 +843,8 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     items: Dict[str, Union[Action, TokenFamily]] = {}
     for name, token in tokens.items():
         items[name.camel] = token
-    for name, token_set in token_family_sets.items():
-        tf = TokenFamily(*list(token_set))
+    for name, (token_set, loc) in token_family_sets.items():
+        tf = TokenFamily(*list(token_set), location=loc)
         token_families[name] = tf
         items[name.camel] = tf
     token_class = type('Token', (LexerToken, ), items)
@@ -847,8 +853,8 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     result = Lexer(token_class,
                    lexer_annot.track_indent,
                    pre_rules)
-    for name, regexp in patterns.items():
-        result.add_patterns((name.lower, regexp))
+    for name, (regexp, loc) in patterns.items():
+        result._add_pattern(name.lower, regexp, location=loc)
     result.add_rules(*rules)
 
     # Register spacing/newline rules

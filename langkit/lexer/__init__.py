@@ -293,8 +293,10 @@ class TokenFamily:
     lexer. They can then be used to define spacing rules for unparsing.
     """
 
-    def __init__(self, *tokens: TokenAction):
-        self.location = extract_library_location()
+    def __init__(self,
+                 *tokens: TokenAction,
+                 location: Optional[Location] = None):
+        self.location = location or extract_library_location()
         self.tokens = set(tokens)
 
         self.name: Optional[Name] = None
@@ -541,7 +543,16 @@ class Lexer:
         for k, v in patterns:
             assert isinstance(k, str)
             assert isinstance(v, str)
-            self.patterns.append((k, v, loc))
+            self._add_pattern(k, v, loc)
+
+    def _add_pattern(self,
+                     name: str,
+                     regexp: str,
+                     location: Location) -> None:
+        """
+        Like ``add_patterns``, but add a single pattern.
+        """
+        self.patterns.append((name, regexp, location))
 
     def add_rules(self,
                   *rules: Union[Tuple[Matcher, Action], RuleAssoc]) -> None:

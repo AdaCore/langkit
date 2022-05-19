@@ -50,22 +50,40 @@ family_1.lkt:4:5: error: Only lexer rules allowed in family blocks
 Code generation was successful
 
 == pattern_1.lkt ==
-test.py:XXX: error: unbalanced square bracket
+pattern_1.lkt:4:16: error: unbalanced square bracket
+3 |     example <- p"["
+  |                ^^^^
+
 
 == pattern_2.lkt ==
-test.py:XXX: error: unknown pattern: no_such_pattern
+pattern_2.lkt:4:16: error: unknown pattern: no_such_pattern
+3 |     example <- p"{no_such_pattern}"
+  |                ^^^^^^^^^^^^^^^^^^^^
+
 
 == pattern_3.lkt ==
-test.py:XXX: error: infinite recursion in pat1
+pattern_3.lkt:6:16: error: infinite recursion in pat1
+5 |     example <- p"{pat1}"
+  |                ^^^^^^^^^
+
 
 == pattern_4.lkt ==
-test.py:XXX: error: unbalanced square bracket
+pattern_4.lkt:4:5: error: unbalanced square bracket
+3 |     val pat = p"["
+  |     ^^^^^^^^^^^^^^
+
 
 == pattern_5.lkt ==
-test.py:XXX: error: nothing to repeat
+pattern_5.lkt:6:12: error: nothing to repeat
+5 |     ex3 <- p"+"
+  |            ^^^^
+
 
 == pattern_6.lkt ==
-test.py:XXX: error: unbalanced parentheses
+pattern_6.lkt:4:16: error: unbalanced parentheses
+3 |     example <- p"a)"
+  |                ^^^^^
+
 
 == pattern_7.lkt ==
 pattern_7.lkt:5:5: error: Duplicate pattern name
