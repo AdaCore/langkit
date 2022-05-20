@@ -1,8 +1,0 @@
-import lexer_example
-
-grammar foo_grammar {
-    @main_rule main_rule <- Root(or(
-        "example" Identifier(@identifier)
-        | Number(@number)
-    ))
-}

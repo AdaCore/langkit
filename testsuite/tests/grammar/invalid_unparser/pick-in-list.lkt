@@ -1,5 +1,6 @@
-import lexer_example
+import common
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+("example" Root(or(
         pick("example" Identifier(@identifier))

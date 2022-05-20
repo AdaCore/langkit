@@ -1,0 +1,14 @@
+import lexer_example
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Root : FooNode {
+    @parse_field f: FooNode
+}
+
+class Identifier : FooNode implements TokenNode {
+}
+
+class Number : FooNode implements TokenNode {
+}

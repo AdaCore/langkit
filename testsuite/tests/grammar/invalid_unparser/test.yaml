@@ -1,1 +1,5 @@
-driver: python
+driver: lkt_compile
+generate_unparser: true
+description: |
+    Test that grammars which are troublesome for the unparsing machinery are
+    properly detected.

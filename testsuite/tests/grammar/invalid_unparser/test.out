@@ -1,33 +1,33 @@
-== Pick in Or ==
-pick-in-or.lkt:5:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Extract(Row(Token(<WithText Example>), Transform(Row(Token(<WithSymbol Identifier>)), Identifier)), 1)
-5 |         pick("example" Identifier(@identifier))
+== ambiguous-lists.lkt ==
+error: Inconsistent separation token for FooNode.list: , and <none>
+
+== pick-in-list.lkt ==
+pick-in-list.lkt:5:29: error: Unparsers generation require list parsers to directly build nodes for each list item
+5 |     @main_rule main_rule <- list+("example" Root(or(
+
+
+== pick-in-or.lkt ==
+pick-in-or.lkt:6:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Extract(Row(Token(<WithText Example>), Transform(Row(Token(<WithSymbol Identifier>)), Identifier)), 1)
+6 |         pick("example" Identifier(@identifier))
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== Toplevel Pick ==
-toplevel-pick.lkt:4:29: error: Top-level information loss prevents unparsers generation
-4 |     @main_rule main_rule <- pick("example" Root(item))
-  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-== Several token kinds for token node (1) ==
-several-1.lkt:5:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Transform(Row(Or(Token(<WithSymbol Identifier>), Token(<WithText Example>))), Identifier)
-5 |         Identifier(or(@identifier | @example))
+== several-1.lkt ==
+several-1.lkt:6:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Transform(Row(Or(Token(<WithSymbol Identifier>), Token(<WithText Example>))), Identifier)
+6 |         Identifier(or(@identifier | @example))
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== Several token kinds for token node (2) ==
-several-2.lkt:6:11: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
-6 |         | Identifier(@example)
+== several-2.lkt ==
+several-2.lkt:7:11: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
+7 |         | Identifier(@example)
   |           ^^^^^^^^^^^^^^^^^^^^
 
 
-== Pick in List ==
-pick-in-list.lkt:4:29: error: Unparsers generation require list parsers to directly build nodes for each list item
-4 |     @main_rule main_rule <- list+("example" Root(or(
+== toplevel-pick.lkt ==
+toplevel-pick.lkt:5:29: error: Top-level information loss prevents unparsers generation
+5 |     @main_rule main_rule <- pick("example" Root(item))
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-== Ambiguous lists ==
-error: Inconsistent separation token for FooNode.list: , and <none>
 
 Done
