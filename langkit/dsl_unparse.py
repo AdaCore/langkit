@@ -1396,13 +1396,11 @@ def emit_node_type(node_type):
 
     walker = DSLWalker.class_from_location(node_type.location)
     base = None
-    qual_node = ""
     enum_members = ""
     builtin_properties = []
     traits = []
-    abstract_qual = ""
+    quals = []
     token_node = ''
-    has_abstract_list = ''
     type_kind = "struct"
     base_name = ""
 
@@ -1416,14 +1414,18 @@ def emit_node_type(node_type):
         if base and base.is_generic_list_type:
             return ""
 
-        qual_node = "@qualifier " if node_type.is_bool_node else ""
+        quals = []
+
+        if node_type.is_bool_node:
+            quals.append("qualifier")
 
         builtin_properties = node_type.builtin_properties()
 
         if node_type.is_root_node:
             traits.append(f'Node[{type_name(node_type)}]')
 
-        abstract_qual = "@abstract " if node_type.abstract else ""
+        if node_type.abstract and not node_type.is_enum_node:
+            quals.append("abstract")
 
         if node_type.is_token_node:
             traits.append('TokenNode')
@@ -1431,14 +1433,12 @@ def emit_node_type(node_type):
         if node_type.is_error_node:
             traits.append('ErrorNode')
 
-        has_abstract_list = (
-            '@has_abstract_list ' if node_type.has_abstract_list else ''
-        )
+        if node_type.has_abstract_list:
+            quals.append("has_abstract_list")
 
         type_kind = "class"
 
         if node_type.is_enum_node:
-            abstract_qual = ""
             type_kind = "enum class"
             if not node_type.is_bool_node:
                 enum_members = (
@@ -1480,7 +1480,7 @@ def emit_node_type(node_type):
     % if doc:
     ${emit_doc(doc)}$hl
     % endif
-    ${abstract_qual}${qual_node}${has_abstract_list}
+    ${''.join(f'@{q} ' for q in quals)}
     ${type_kind} ${type_name(node_type)} ${strbase}${strtraits}{$i$hl
     % if enum_members:
     case ${enum_members}

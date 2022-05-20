@@ -451,7 +451,11 @@ class TokenFamilyAnnotations(ParsedAnnotations):
 @dataclass
 class BaseNodeAnnotations(ParsedAnnotations):
     has_abstract_list: bool
-    annotations = [FlagAnnotationSpec('has_abstract_list')]
+    synthetic: bool
+    annotations = [
+        FlagAnnotationSpec('has_abstract_list'),
+        FlagAnnotationSpec('synthetic'),
+    ]
 
 
 @dataclass
@@ -2180,6 +2184,7 @@ class LktTypesLoader:
                          or annotations.abstract),
             is_token_node=is_token_node,
             is_error_node=is_error_node,
+            is_synthetic=annotations.synthetic,
             has_abstract_list=annotations.has_abstract_list,
             is_enum_node=is_enum_node,
             is_bool_node=is_bool_node,
