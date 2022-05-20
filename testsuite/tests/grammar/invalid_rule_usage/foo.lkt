@@ -1,5 +1,12 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- ExampleNode(sec_rules)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class ExampleNode : FooNode {
 }
