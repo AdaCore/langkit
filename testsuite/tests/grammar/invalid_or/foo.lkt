@@ -1,8 +1,15 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- element
     element <- or(atom | sequence)
     sequence <- Sequence*("(" element ")", ",")
     atom <- @identifier
+}
+
+@abstract @has_abstract_list class Element implements Node[Element] {
+}
+
+class Sequence : ASTList[Element, Element] {
 }
