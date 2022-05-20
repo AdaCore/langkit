@@ -32,10 +32,7 @@ invalid_token.lkt:4:30: error: Cannot find entity `UnknownToken` in this scope
 
 
 == no_grammar.lkt ==
-no_grammar.lkt:1:1: error: missing grammar
-0 | import lexer_example
-  | ^^^^^^^^^^^^
-
+no_grammar.lkt: error: missing grammar
 
 == no_main_rule.lkt ==
 no_main_rule.lkt:4:24: error: main rule missing (@main_rule annotation)

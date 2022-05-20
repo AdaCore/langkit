@@ -24,7 +24,7 @@ from langkit.compiled_types import (
     TypeRepo, UserField, resolve_type
 )
 from langkit.diagnostics import (
-    DiagnosticError, Location, check_source_language, error
+    DiagnosticError, Location, check_source_language, diagnostic_context, error
 )
 import langkit.expressions as E
 from langkit.expressions import (
@@ -203,7 +203,8 @@ def find_toplevel_decl(ctx: CompileCtx,
                     )
                 result = decl
 
-    with ctx.lkt_context(lkt_units[0].root):
+    # Report errors on the entry point Lkt source file (no particular line)
+    with diagnostic_context(Location(file=lkt_units[0].filename)):
         if result is None:
             error('missing {}'.format(label))
 
