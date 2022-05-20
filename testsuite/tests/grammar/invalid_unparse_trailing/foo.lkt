@@ -1,5 +1,6 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(or(decl | assignment))
 
@@ -10,4 +11,26 @@ grammar foo_grammar {
 
     identifier <- Identifier(@identifier)
     number <- Number(@number)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Assignment : FooNode {
+    @parse_field name: Identifier
+    @parse_field value: Number
+}
+
+class Decl : FooNode {
+    @parse_field assignment: Assignment
+    @parse_field example: Example
+}
+
+class Example : FooNode implements TokenNode {
+}
+
+class Identifier : FooNode implements TokenNode {
+}
+
+class Number : FooNode implements TokenNode {
 }

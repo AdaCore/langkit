@@ -1,5 +1,7 @@
+== foo.lkt ==
 error: Inconsistent postfix tokens for Assignment:
       ;
     and:
       <no token>
+
 Done
