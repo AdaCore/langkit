@@ -29,8 +29,9 @@ with GNAT.String_Hash;
 with Langkit_Support.Text; use Langkit_Support.Text;
 with Langkit_Support.Vectors;
 
---  This package provides a symbol table for text (Text_Type) identifiers. This
---  is used in Langkit for the interning of symbols.
+--  This package provides a symbol table for text
+--  (:ada:ref:`Langkit_Support.Text.Text_Type`) identifiers. This is used in
+--  Langkit for the interning of symbols.
 --
 --  The main interest is to:
 --
@@ -54,11 +55,11 @@ package Langkit_Support.Symbols is
    type Symbol_Type is new Text_Cst_Access;
    --  Main symbol type.
    --
-   --  WARNING: For usability reasons, we use the access to the string as a
-   --  symbol type. This is very convenient because you can access the text of
-   --  a symbol without a reference to the symbol table, but is also unsafe,
-   --  because if the symbol table has been freed, the symbol will be a
-   --  dangling pointer.
+   --  .. warning:: For usability reasons, we use the access to the string as a
+   --     symbol type. This is very convenient because you can access the text
+   --     of a symbol without a reference to the symbol table, but is also
+   --     unsafe, because if the symbol table has been freed, the symbol will
+   --     be a dangling pointer.
 
    function Image (S : Symbol_Type) return Text_Type;
    --  Return the text associated to this symbol
@@ -75,17 +76,17 @@ package Langkit_Support.Symbols is
    --  1. It consumes less memory (which is the primary reason it is used in
    --     Langkit).
    --
-   --  2. It is safer, as long as you never store ``Symbol_Type`` instances
-   --     returned by ``Get_Symbol`` you should be safe.
+   --  2. It is safer, as long as you never store :ada:ref:`Symbol_Type`
+   --     instances returned by :ada:ref:`Get_Symbol` you should be safe.
    --
-   --  TODO: See if we can get rid of the intermediate operation that returns a
-   --  ``Symbol_Type``.
+   --  .. TODO: See if we can get rid of the intermediate operation that
+   --     returns a ``Symbol_Type``.
 
    No_Thin_Symbol : constant Thin_Symbol;
 
    function Get_Symbol
      (Self : Symbol_Table; TS : Thin_Symbol) return Symbol_Type;
-   --  Return the Symbol for this ``Thin_Symbol`` instance
+   --  Return the Symbol for this :ada:ref:`Thin_Symbol` instance
 
    function Create_Symbol_Table return Symbol_Table;
    --  Allocate a new symbol table and return it
@@ -94,12 +95,12 @@ package Langkit_Support.Symbols is
      (ST     : Symbol_Table;
       T      : Text_Type;
       Create : Boolean := True) return Thin_Symbol with Inline;
-   --  Look for an entry for the T text in the ST symbol table. If there is
-   --  such an entry, return it. Otherwise, create it and return it if Create
-   --  is true. Elsewise, return null.
+   --  Look for an entry for the ``T`` text in the ``ST`` symbol table. If
+   --  there is such an entry, return it. Otherwise, create it and return it if
+   --  ``Create`` is true. Elsewise, return ``null``.
    --
-   --  Non-null returned accesses are guaranteed to be the same for all equal
-   --  Text_Type.
+   --  Non-null returned accesses are guaranteed to be the same if the text
+   --  passed in was the same.
 
    function Find
      (ST     : Symbol_Table;
@@ -107,7 +108,8 @@ package Langkit_Support.Symbols is
       Create : Boolean := True) return Symbol_Type
    is
       (Get_Symbol (ST, Find (ST, T, Create))) with Inline;
-   --  Overload of ``Find`` which returns a ``Symbol`` directly
+   --  Overload of :ada:ref:`Find` which returns a :ada:ref:`Symbol_Type`
+   --  directly.
 
    procedure Destroy (ST : in out Symbol_Table);
    --  Deallocate a symbol table and all the text returned by the corresponding
@@ -115,8 +117,9 @@ package Langkit_Support.Symbols is
 
    function Hash (ST : Symbol_Type) return Hash_Type;
    --  Default hash function for symbols.
-   --  WARNING: It assumes that you don't mix symbols from different symbol
-   --  tables, but doesn't verify it!
+   --
+   --  .. warning:: It assumes that you don't mix symbols from different symbol
+   --     tables, but doesn't verify it!
 
    -----------------------------
    -- Symbol canonicalization --
@@ -164,7 +167,7 @@ package Langkit_Support.Symbols is
    --  Shortcut to create failed symbolization results
 
    function Fold_Case (Name : Text_Type) return Symbolization_Result;
-   --  Convert Name to lowercase (cannot fail).
+   --  Convert ``Name`` to lowercase (cannot fail).
    --
    --  This is the default symbol canonicalizer when case insensitivity is
    --  enabled.

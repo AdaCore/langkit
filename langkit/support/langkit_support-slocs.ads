@@ -26,6 +26,9 @@ with Ada.Strings.Fixed;
 
 with Langkit_Support.Text; use Langkit_Support.Text;
 
+--  This package provides types and associated operation to handle source
+--  locations.
+
 package Langkit_Support.Slocs is
 
    type Line_Number is mod 2 ** 32;
@@ -37,13 +40,21 @@ package Langkit_Support.Slocs is
 
    type Source_Location is record
       Line   : Line_Number;
+      --  Line for this source location
+
       Column : Column_Number;
+      --  Column for this source location
    end record;
+   --  Type representing a location in the source
 
    type Source_Location_Range is record
       Start_Line, End_Line     : Line_Number;
+      --  Start and end lines for this source location
+
       Start_Column, End_Column : Column_Number;
+      --  Start and end columns for this source location
    end record;
+   --  Type representing a range in the source
 
    No_Source_Location       : constant Source_Location       := (0, 0);
    No_Source_Location_Range : constant Source_Location_Range := (0, 0, 0, 0);

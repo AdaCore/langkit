@@ -21,21 +21,19 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
---  This package supports outputting ``Langkit_Support.Diagnostics.Diagnostic``
---  for a source buffer, in a pretty colorized format akin to GCC's verbose
---  diagnostic format.
+--  This package supports outputting
+--  :ada:ref:`Langkit_Support.Diagnostics.Diagnostic` for a source buffer, in a
+--  pretty colorized format akin to GCC's verbose diagnostic format.
 --
---  .. note::
+--  .. note:: For the moment, this package has a few limitations, namely:
 --
---      For the moment, this package has a few limitations, namely:
---
---      - Only source buffers with LF line endings are handled.
+--      - Only source buffers with ``LF`` line endings are handled.
 --
 --      - Only error messages spanning one line are gracefully handled.
 --        eventually we want to have something more powerful that has a syntax
 --        for error spanning multiple lines.
 --
---  .. todo::
+--  .. todo:
 --
 --      For the moment this is only used in the ``lkt_toolbox`` executable.
 --      Eventually, this should be exposed to generated library users in some
@@ -68,8 +66,8 @@ package Langkit_Support.Diagnostics.Output is
       Path        : String;
       Style       : Diagnostic_Style := Default_Diagnostic_Style;
       Output_File : WWIO.File_Type := WWIO.Standard_Output);
-   --  Pretty-print given diagnostic. Outputs the diagnostic on stdout
-   --  in a form that is developper friendly when used in a command line
+   --  Pretty-print given diagnostic. Outputs the diagnostic on ``stdout`` in a
+   --  form that is developper friendly when used in a command line
    --  application.
    --
    --  Error messages format supports backticked parts that should correspond

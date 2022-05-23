@@ -27,18 +27,25 @@ with Ada.Exceptions;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text; use Langkit_Support.Text;
 
+--  This package provides a data type for diagnostics produced by Langkit
+--  generated libraries.
+
 package Langkit_Support.Diagnostics is
 
    type Diagnostic is record
       Sloc_Range : Source_Location_Range;
-      --  The source location range that the diagnostics message refers to
+      --  The source location range that the diagnostic message refers to
 
       Message    : Unbounded_Text_Type;
-      --  Message for this diagnostics.  Parsers allocates such messages and it
-      --  is up to the user to free them.
+      --  Message for this diagnostic
    end record;
 
    function To_Pretty_String (D : Diagnostic) return String;
+   --  Pretty prints the given diagnostic.
+   --
+   --  .. note:: This is only intended for quick pretty printing in debugging
+   --     for example. If you want more powerful and pretty output of
+   --     diagnostics, use :ada:ref`Langkit_Support.Diagnostics.Output`.
 
    package Diagnostics_Vectors is new Ada.Containers.Vectors
      (Index_Type   => Positive,
