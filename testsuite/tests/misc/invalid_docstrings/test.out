@@ -1,0 +1,6 @@
+test.py:XXX: warning: title_reference nodes are forbidden in docstrings. You probably meant to use double backquotes.
+test.py:XXX: warning: Inline interpreted text or phrase reference start-string without end-string.
+test.py:XXX: warning: Unsupported Rst tag: doctest_block. Will be excluded from output.
+test.py:XXX: warning: title_reference nodes are forbidden in docstrings. You probably meant to use double backquotes.
+Code generation was successful
+Done
