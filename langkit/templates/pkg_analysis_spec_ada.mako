@@ -37,9 +37,29 @@ ${exts.with_clauses(with_clauses)}
 --  This package provides types and primitives to analyze source files as
 --  analysis units.
 --
---  This is the entry point to parse and process a unit: first create an
---  analysis context with ``Create_Context``, then get analysis units out of it
---  using the ``Get_From_*`` functions.
+--  This is the entry point to parse and process a unit:
+--
+--  * First create an analysis context with
+--    :ada:ref:`${ada_lib_name}.Analysis.Create_Context`.
+--
+--  * Then get analysis units out of it using the ``Get_From_*`` functions. The
+--    most used of them is :ada:ref:`${ada_lib_name}.Analysis.Get_From_File`,
+--    which allows you to get an analysis unit out of a file path.
+--
+--  .. code-block:: ada
+--
+--      with Libadalang.Analysis;
+--
+--      procedure Main is
+--         package Lib renames ${ada_lib_name}.Analysis;
+--
+--         Context : constant Lib.Analysis_Context := Lib.Create_Context;
+--         Unit    : constant Lib.Analysis_Unit :=
+--           Context.Get_From_File ("/path/to/source/file");
+--      begin
+--         Unit.Print;
+--      end Main;
+
 
 package ${ada_lib_name}.Analysis is
 
