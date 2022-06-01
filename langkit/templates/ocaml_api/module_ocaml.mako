@@ -451,28 +451,33 @@ module Token = struct
     sloc_range : SlocRange.t;
   }
 
-  let c_struct : t structure typ = structure "token"
-  let context = field c_struct "context" (ptr void)
-  let token_data = field c_struct "token_data" (ptr void)
-  let token_index = field c_struct "token_index" int
-  let trivia_index = field c_struct "trivia_index" int
-  let kind = field c_struct "kind" int
-  let text = field c_struct "text" Text.c_type
-  let sloc_range = field c_struct "sloc_range" SlocRange.c_type
-  let () = seal c_struct
+  let c_type : t structure typ = structure "token"
+  let context = field c_type "context" (ptr void)
+  let token_data = field c_type "token_data" (ptr void)
+  let token_index = field c_type "token_index" int
+  let trivia_index = field c_type "trivia_index" int
+  let kind = field c_type "kind" int
+  let text = field c_type "text" Text.c_type
+  let sloc_range = field c_type "sloc_range" SlocRange.c_type
+  let () = seal c_type
 
-  let wrap (c_value : t structure) : t = {
-    context = getf c_value context;
-    token_data = getf c_value token_data;
-    token_index = getf c_value token_index;
-    trivia_index = getf c_value trivia_index;
-    kind = getf c_value kind;
-    text = getf c_value text;
-    sloc_range = getf c_value sloc_range;
-  }
+  let wrap (c_value : t structure) : t option =
+  let token_data = getf c_value token_data in
+  if is_null token_data then
+    None
+  else
+    Some {
+      context = getf c_value context;
+      token_data;
+      token_index = getf c_value token_index;
+      trivia_index = getf c_value trivia_index;
+      kind = getf c_value kind;
+      text = getf c_value text;
+      sloc_range = getf c_value sloc_range;
+    }
 
   let unwrap (value : t) : t structure =
-    let c_value = make c_struct in
+    let c_value = make c_type in
     setf c_value context value.context;
     setf c_value token_data value.token_data;
     setf c_value token_index value.token_index;
@@ -481,8 +486,6 @@ module Token = struct
     setf c_value text value.text;
     setf c_value sloc_range value.sloc_range;
     c_value
-
-  let c_type = view c_struct ~read:wrap ~write:unwrap
 
   let _token_kind_name = foreign ~from:c_lib
     "${capi.get_name('token_kind_name')}"
@@ -523,8 +526,8 @@ module Token = struct
     let c_result_ptr = allocate_n Text.c_type ~count:1 in
     let res =
       token_range_text
-        (allocate c_type token_first)
-        (allocate c_type token_last)
+        (addr (unwrap token_first))
+        (addr (unwrap token_last))
         c_result_ptr
     in
     if res = 0 then
@@ -536,13 +539,13 @@ module Token = struct
 
   let next token =
     let c_next_token_ptr = allocate_n c_type ~count:1 in
-    token_next (allocate c_type token) c_next_token_ptr ;
-    !@ c_next_token_ptr
+    token_next (addr (unwrap token)) c_next_token_ptr ;
+    wrap (!@ c_next_token_ptr)
 
   let previous token =
     let c_next_token_ptr = allocate_n c_type ~count:1 in
-    token_previous (allocate c_type token) c_next_token_ptr ;
-    !@ c_next_token_ptr
+    token_previous (addr (unwrap token)) c_next_token_ptr ;
+    wrap (!@ c_next_token_ptr)
 
   let is_trivia token =
     token.trivia_index != 0
@@ -576,7 +579,7 @@ module Token = struct
        , token.trivia_index)
 
   let is_equivalent one other =
-    is_equivalent (allocate c_type one) (allocate c_type other)
+    is_equivalent (addr (unwrap one)) (addr (unwrap other))
 
 end
 
@@ -829,13 +832,13 @@ module AnalysisUnit = struct
     let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
     let result_ptr = allocate_n Token.c_type ~count:1 in
     AnalysisUnitStruct.unit_first_token c_unit result_ptr ;
-    !@ result_ptr
+    Token.wrap (!@ result_ptr)
 
   let last_token (unit : t) =
     let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
     let result_ptr = allocate_n Token.c_type ~count:1 in
     AnalysisUnitStruct.unit_last_token c_unit result_ptr ;
-    !@ result_ptr
+    Token.wrap (!@ result_ptr)
 
   let token_count (unit : t) =
     AnalysisUnitStruct.unit_token_count
@@ -1082,7 +1085,11 @@ let ${ocaml_api.field_name(field)}
       % endfor
 
   let text node =
-    Token.text_range (token_start node) (token_end node)
+    match token_start node, token_end node with
+    | Some tok_start, Some tok_end ->
+        Token.text_range tok_start tok_end
+    | _ ->
+        ""
 
   let image node =
     let c_result_ptr = allocate_n Text.c_type ~count:1 in

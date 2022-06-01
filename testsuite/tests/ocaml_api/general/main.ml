@@ -34,17 +34,23 @@ let pp_text fmt node = Format.pp_print_string fmt (FooNode.text node)
 
 let pp_entity fmt node = Format.pp_print_string fmt (FooNode.entity_image node)
 
+let value_exn = function
+  | Some x ->
+      x
+  | None ->
+      raise Not_found
+
 let pp_token_info fmt with_trivia =
   (* read foo.txt and print information, with or without trivia about tokens *)
   let ctx = AnalysisContext.create ~with_trivia () in
   let u = AnalysisContext.get_from_file ~reparse:true ctx "foo.txt" in
   print_exit_if_diags u ;
   let root = root_exn u in
-  let first_token = AnalysisUnit.first_token u in
+  let first_token = AnalysisUnit.first_token u |> value_exn in
   let first_token_kind_name = Token.kind_name first_token in
-  let last_token = AnalysisUnit.last_token u in
-  let token_start = FooNode.token_start root in
-  let token_end = FooNode.token_end root in
+  let last_token = AnalysisUnit.last_token u |> value_exn in
+  let token_start = FooNode.token_start root |> value_exn in
+  let token_end = FooNode.token_end root |> value_exn in
   let token_count = AnalysisUnit.token_count u in
   let trivia_count = AnalysisUnit.trivia_count u in
   Format.fprintf fmt "@[<v>@[<v 2>root text=@ %S@]@ @]" (FooNode.text root) ;
@@ -80,6 +86,15 @@ let test_token () =
   Format.printf
     "@[<v>@[<v 2>With trivia:@ %a@]@ @ @[<v 2>Without trivia:@ %a@]@ @]"
     pp_token_info true pp_token_info false ;
+  let ctx = AnalysisContext.create () in
+  let u = AnalysisContext.get_from_file ~reparse:true ctx "foo.txt" in
+  let start_token = AnalysisUnit.first_token u |> value_exn in
+  let null_token = Token.previous start_token in
+  let pp_token fmt = function
+    | Some tok -> Token.pp fmt tok
+    | None -> Format.pp_print_string fmt "None"
+  in
+  Format.printf "@[<v>Null token: %a@ @]" pp_token null_token ;
   Format.printf "@[<v>=============================@ @ @]" ;
   (* Test Token iterators *)
   Format.printf "@[<v>=======TOKEN ITERATORS=======@ @]" ;

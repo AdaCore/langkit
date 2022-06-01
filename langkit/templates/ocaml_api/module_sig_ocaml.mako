@@ -97,10 +97,10 @@ module Token : sig
   val index : t -> int
   ${ocaml_doc('langkit.token_index', 1)}
 
-  val next : t -> t
+  val next : t -> t option
   ${ocaml_doc('langkit.unit_first_token', 1)}
 
-  val previous : t -> t
+  val previous : t -> t option
   ${ocaml_doc('langkit.unit_last_token', 1)}
 
   val compare : t -> t -> int
@@ -176,10 +176,10 @@ module AnalysisUnit : sig
   val reparse : ?charset:string -> ?buffer:string -> t -> unit
   ${ocaml_doc('langkit.unit_reparse_generic', 1)}
 
-  val first_token : t -> Token.t
+  val first_token : t -> Token.t option
   ${ocaml_doc('langkit.unit_first_token', 1)}
 
-  val last_token : t -> Token.t
+  val last_token : t -> Token.t option
   ${ocaml_doc('langkit.unit_last_token', 1)}
 
   val token_count : t -> int

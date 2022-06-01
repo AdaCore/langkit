@@ -29,6 +29,7 @@ Without trivia:
   token_end = "null"
   token_count = 11
   trivia_count = 0
+Null token: None
 =============================
 
 =======TOKEN ITERATORS=======

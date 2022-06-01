@@ -144,9 +144,9 @@ module AnalysisUnitStruct : sig
   val unit_reparse_from_buffer :
     t -> string -> string -> Unsigned.size_t -> int
 
-  val unit_first_token : t -> Token.t ptr -> unit
+  val unit_first_token : t -> Token.t structure ptr -> unit
 
-  val unit_last_token : t -> Token.t ptr -> unit
+  val unit_last_token : t -> Token.t structure ptr -> unit
 
   val unit_token_count : t -> int
 

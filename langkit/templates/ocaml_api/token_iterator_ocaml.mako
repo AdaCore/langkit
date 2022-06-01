@@ -22,38 +22,56 @@
 
 <%def name="struct(token_start, token_end)">
   let fold_tokens f init node =
-    let tok_start = ${token_start} node in
-    let tok_end = ${token_end} node in
-    let rec aux acc tok_curr =
-      let new_acc = f acc tok_curr in
-      if Token.equal tok_curr tok_end then
-        new_acc
-      else
-        aux new_acc (Token.next tok_curr)
-    in
-    aux init tok_start
+    match ${token_start} node, ${token_end} node with
+    | Some tok_start, Some tok_end ->
+        let rec aux acc tok_curr =
+          let new_acc = f acc tok_curr in
+          if Token.equal tok_curr tok_end then
+            new_acc
+          else (
+            match Token.next tok_curr with
+            | Some tok_next ->
+                aux new_acc tok_next
+            | None ->
+                new_acc )
+        in
+        aux init tok_start
+    | _ ->
+        init
 
   let iter_tokens f node =
-    let tok_start = ${token_start} node in
-    let tok_end = ${token_end} node in
-    let rec aux tok_curr =
-      f tok_curr;
-      if not (Token.equal tok_curr tok_end) then
-        aux (Token.next tok_curr)
-    in
-    aux tok_start
+    match ${token_start} node, ${token_end} node with
+    | Some tok_start, Some tok_end ->
+        let rec aux tok_curr =
+          f tok_curr;
+          if not (Token.equal tok_curr tok_end) then (
+            match Token.next tok_curr with
+            | Some tok_next ->
+                aux tok_next
+            | None ->
+                () )
+        in
+        aux tok_start
+    | _ ->
+        ()
 
   let map_tokens f node =
-    let tok_start = ${token_start} node in
-    let tok_end = ${token_end} node in
-    let rec aux tok_curr =
-      let value = f tok_curr in
-      if Token.equal tok_curr tok_end then
-        [value]
-      else
-        value :: aux (Token.next tok_curr)
-    in
-    aux tok_start
+    match ${token_start} node, ${token_end} node with
+    | Some tok_start, Some tok_end ->
+        let rec aux tok_curr =
+          let value = f tok_curr in
+          if Token.equal tok_curr tok_end then
+            [value]
+          else (
+            match Token.next tok_curr with
+            | Some tok_next ->
+                value :: aux tok_next
+            | None ->
+                [value] )
+        in
+        aux tok_start
+    | _ ->
+        []
 
   let tokens node =
     map_tokens (fun x -> x) node
