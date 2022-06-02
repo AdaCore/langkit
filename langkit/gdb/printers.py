@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os.path
 import re
-from typing import Dict, Iterable, Optional, TYPE_CHECKING, Tuple, Type, Union
+from typing import Dict, Iterator, Optional, TYPE_CHECKING, Tuple, Type, Union
 
 import gdb
 import gdb.printing
@@ -48,6 +48,7 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
         instance of PrettyPrinter tied to this value. Return None otherwise.
         """
         for printer in self.subprinters:
+            assert isinstance(printer, GDBSubprinter)
             if printer.enabled and printer.matches(value):
                 return printer.instantiate(value)
         return None
@@ -94,6 +95,12 @@ class BasePrinter:
         Return whether this pretty-printer matches `value`, a GDB value.
         """
         raise NotImplementedError()
+
+    def display_hint(self) -> str | None:
+        return None
+
+    def children(self) -> Iterator[Tuple[str, Union[str, gdb.Value]]]:
+        return iter([])
 
     def to_string(self) -> str:
         raise NotImplementedError()
@@ -300,6 +307,7 @@ class LexicalEnv:
             empty_env = gdb.lookup_global_symbol(
                 self.context.implname('ast_envs.empty_env_record')
             )
+            assert empty_env is not None
 
             if self.value.address == empty_env.value().address:
                 return '<LexicalEnv empty>'
@@ -399,7 +407,7 @@ class LexicalEnvPrinter(BasePrinter):
     def to_string(self) -> str:
         return self.env.to_string()
 
-    def children(self) -> Iterable[Tuple[str, Union[str, gdb.Value]]]:
+    def children(self) -> Iterator[Tuple[str, Union[str, gdb.Value]]]:
         env = self.env
         if env.kind == 'orphaned':
             yield ('key', 'orphaned')
@@ -702,7 +710,7 @@ class ArrayPrettyPrinter(BasePrinter):
             self.length
         )
 
-    def children(self) -> Iterable[Tuple[str, gdb.Value]]:
+    def children(self) -> Iterator[Tuple[str, gdb.Value]]:
         if self.length <= 0:
             return
 
@@ -741,7 +749,8 @@ class LangkitVectorPrinter(BasePrinter):
         vector record.
         """
         return {f.name: self.value[f.name]
-                for f in self.value.type.fields()}
+                for f in self.value.type.fields()
+                if f.name}
 
     @property
     def element_type(self) -> gdb.Type:
@@ -785,12 +794,13 @@ class LangkitVectorPrinter(BasePrinter):
             self.length
         )
 
-    def children(self) -> Iterable[Tuple[str, gdb.Value]]:
+    def children(self) -> Iterator[Tuple[str, gdb.Value]]:
         if self.length <= 0:
             return
 
         symbol_name = '{}.small_vector_capacity'.format(self.package)
         symbol = gdb.lookup_global_symbol(symbol_name)
+        assert symbol is not None
         small_vector_capacity = int(symbol.value())
 
         if self.length <= small_vector_capacity:
@@ -828,4 +838,6 @@ class TokenReferencePrinter(BasePrinter):
 
         tdh = TDH(self.value['tdh'])
         index = self.value['index']
-        return str(tdh.get(index['token'], index['trivia']))
+        token = int(index['token'])
+        trivia = int(index['trivia'])
+        return str(tdh.get(token, trivia))

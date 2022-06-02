@@ -92,7 +92,7 @@ class Token:
     """
 
     def __init__(self,
-                 tdh: gdb.Value,
+                 tdh: TDH,
                  value: gdb.Value,
                  token_no: int,
                  trivia_no: int):
@@ -133,7 +133,7 @@ class Token:
             32, signed=False
         )
         text_addr = (src_buffer['P_ARRAY'].cast(uint32_t) +
-                     (first - src_buffer['P_BOUNDS']['LB0']))
+                     (first - int(src_buffer['P_BOUNDS']['LB0'])))
 
         char = gdb.lookup_type('character').pointer()
         return text_addr.cast(char).string('utf32', length=4 * length)

@@ -1,11 +1,7 @@
 from contextlib import contextmanager
 import sys
 
-
-try:
-    import gdb
-except ImportError:
-    gdb = None
+from langkit.gdb import has_gdb
 
 
 class Colors:
@@ -41,7 +37,7 @@ class Colors:
 
 # Keep colors when we are running under GDB. Otherwise, disable colors as soon
 # as one of stdout or stderr is not a TTY.
-if not gdb and (not sys.stdout.isatty() or not sys.stderr.isatty()):
+if not has_gdb and (not sys.stdout.isatty() or not sys.stderr.isatty()):
     Colors.disable_colors()
 
 

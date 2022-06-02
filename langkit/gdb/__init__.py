@@ -7,14 +7,16 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
 
+has_gdb: bool = True
 try:
     import gdb
 except ImportError:
-    gdb = None
-
+    has_gdb = False
+else:
+    del gdb
 
 # Import actual GDB helpers only if running inside GDB
-if gdb:
+if has_gdb:
     # pyflakes off
     from langkit.gdb import commands, functions, printers
     from langkit.gdb.context import Context

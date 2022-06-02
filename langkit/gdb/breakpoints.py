@@ -1,8 +1,14 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 
 import gdb
 
 from langkit.gdb.context import Context
+
+
+if TYPE_CHECKING:
+    # TODO (V603-004): gdb.events is automatically imported, but importing it
+    # manually does not work (yet we need it for proper type checking).
+    import gdb.events
 
 
 class BreakpointGroup:

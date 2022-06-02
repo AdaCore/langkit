@@ -23,11 +23,15 @@ class BaseCommand(gdb.Command):
                  basename: str,
                  command_class: int,
                  completer_class: int = gdb.COMPLETE_NONE):
-        kwargs = {'name': '{}{}'.format(context.prefix, basename),
-                  'command_class': command_class}
-        if completer_class is not None:
-            kwargs['completer_class'] = completer_class
-        super().__init__(**kwargs)
+        name = context.prefix + basename
+        if completer_class is None:
+            super().__init__(name=name, command_class=command_class)
+        else:
+            super().__init__(
+                name=name,
+                command_class=command_class,
+                completer_class=completer_class,
+            )
         self.context = context
 
 

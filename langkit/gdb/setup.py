@@ -75,6 +75,7 @@ def handle_new_objfile(objfile: gdb.Objfile,
     if version_symbol is None or version_symbol.symtab.objfile != objfile:
         return
 
+    assert langkit.gdb.gdb_printers is not None
     objfile.pretty_printers.append(langkit.gdb.gdb_printers)
 
     if reparse_debug_info:
