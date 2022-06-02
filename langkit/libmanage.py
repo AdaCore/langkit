@@ -683,7 +683,7 @@ class ManageScript:
 
                 def excepthook(typ: Type[BaseException],
                                value: BaseException,
-                               tb: TracebackType) -> Any:
+                               tb: Optional[TracebackType]) -> Any:
                     traceback.print_exception(typ, value, tb)
                     pdb.post_mortem(tb)
 

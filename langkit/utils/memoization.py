@@ -18,8 +18,9 @@ def memoized(func: F, pre_cache_miss: Optional[F] = None) -> F:
     """
     cache: dict = {}
 
-    all_caches: List[dict] = getattr(memoized, "caches", None)
-    if all_caches is None:
+    try:
+        all_caches: List[dict] = getattr(memoized, "caches")
+    except AttributeError:
         all_caches = []
         setattr(memoized, "caches", all_caches)
 
