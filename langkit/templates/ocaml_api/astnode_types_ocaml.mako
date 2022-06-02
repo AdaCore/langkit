@@ -46,12 +46,17 @@
       % endfor
     *)
    % endif
-  and ${ocaml_api.type_public_name(astnode)} = [
-   % for subclass in astnode.concrete_subclasses:
+  and ${ocaml_api.type_public_name(astnode)} =
+   % if astnode.abstract and subclasses_len == 0:
+    unit
+   % else:
+    [
+     % for subclass in astnode.concrete_subclasses:
     | ${ocaml_api.polymorphic_variant_name(subclass)}
         of ${ocaml_api.fields_name(subclass)}
-   % endfor
-  ]
+     % endfor
+    ]
+   % endif
    % if not astnode.abstract:
   and ${ocaml_api.fields_name(astnode)} = ${field_type(astnode)}
    % endif
@@ -63,14 +68,18 @@
   and ${ocaml_api.wrap_function_name(astnode)} context c_value =
     (* This is an abstract node, call the root wrap function and filter to get
      the desired type *)
+      % if astnode.concrete_subclasses:
     match ${ocaml_api.wrap_value('c_value', root_entity, "context")} with
-      % for tpe in astnode.concrete_subclasses:
+         % for tpe in astnode.concrete_subclasses:
       | ${ocaml_api.polymorphic_variant_name(tpe)} _
-      % endfor
+         % endfor
       as e -> e
       | _ ->
           (* This should not happen if the types are correct *)
           assert false
+      % else:
+      ()
+      % endif
    % else:
 
   and ${ocaml_api.wrap_function_name(astnode)} context c_value
