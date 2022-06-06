@@ -5,10 +5,14 @@ as expected.
 
 from langkit import documentation as doc
 
+from docutils.parsers.rst.roles import register_local_role
+
+
+register_local_role("passthrough", doc.PassthroughNode.role_fn)
 
 docstring = """
 This is a docstring. This is a ``literal``. This is *emphasis*. This is
-**strong emphasis**.
+**strong emphasis**. This is a passthrough plugin role: :passthrough:`5.4`
 
 * This is a bullet point with several lines. Viral schlitz humblebrag, shabby
   chic pitchfork selfies subway tile live-edge sartorial austin man bun.

@@ -1286,6 +1286,29 @@ def get_line(node: Any) -> Optional[int]:
         return get_line(node.parent)
 
 
+class PassthroughNode(docutils.nodes.Element):
+    """
+    This node implements passthrough behavior, so that we re-emit the
+    corresponding text. We use it for roles that we want to propagate to
+    generated doc.
+    """
+
+    def __init__(self, name: str, text: str):
+        self.name = name
+        self.text = text
+        self.children = []
+
+    @staticmethod
+    def role_fn(
+        name: Any, rawtext: Any, text: Any, lineno: Any,
+        inliner: Any, options: Any = {}, content: Any = []
+    ) -> Any:
+        """
+        Role function to create a ``PassthroughNode``.
+        """
+        return [PassthroughNode(name, text)], []
+
+
 class LangkitTypeRef(docutils.nodes.reference):
     """
     Specific langkit node for a reference to a Langkit CompiledType. Meant to
@@ -1325,7 +1348,6 @@ class LangkitTypeRef(docutils.nodes.reference):
 docutils.parsers.rst.roles.register_local_role(
     "typeref", LangkitTypeRef.role_fn
 )
-
 
 #
 # Global data used by docutils visitors
@@ -1615,6 +1637,8 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
                 self.current_parts.append(f"``{type_name}``")
 
             raise docutils.nodes.SkipChildren()
+        elif isinstance(node, PassthroughNode):
+            self.current_parts.append(f":{node.name}:`{node.text}`")
 
     def unknown_departure(self, node: docutils.nodes.node) -> None:
         pass
