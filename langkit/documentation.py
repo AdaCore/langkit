@@ -1370,7 +1370,7 @@ SUPPORTED_TAGS = [
     "#text", "comment", "field", "paragraph", "list_item", "literal_block",
     "enumerated_list", "field_name", "document", "bullet_list",
     "system_message", "problematic", "warning", "field_list",
-    "field_name", "field_body", "block_quote"
+    "field_name", "field_body", "block_quote", "reference", "target"
 ] + SUPPORTED_ADMONITIONS + list(TAGNAMES_WITH_SURROUNDINGS.keys())
 
 SKIP_CHILDREN = ["field_name", "literal_block"]
