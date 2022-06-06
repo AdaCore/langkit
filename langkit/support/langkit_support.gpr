@@ -1,6 +1,7 @@
 with "gnatcoll";
 with "gnatcoll_gmp";
 with "gnatcoll_iconv";
+with "adasat";
 
 library project Langkit_Support is
 

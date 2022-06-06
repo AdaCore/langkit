@@ -5,7 +5,6 @@
 
 with Ada.Assertions; use Ada.Assertions;
 with Ada.Calendar;   use Ada.Calendar;
-with Ada.Exceptions; use Ada.Exceptions;
 
 with GNAT.Traceback.Symbolic; use GNAT.Traceback.Symbolic;
 
@@ -13,8 +12,181 @@ with GNATCOLL.Strings; use GNATCOLL.Strings;
 
 with Langkit_Support.Images;
 
-package body Langkit_Support.Adalog.Solver is
+with AdaSAT.Builders;
+with AdaSAT.DPLL;
+with AdaSAT.Formulas;
+with AdaSAT.Theory;
 
+--  This package implements a solver for Adalog equations. Recall that An
+--  Adalog equation looks like:
+--
+--  .. code::
+--
+--      All:
+--       - x <- 1
+--       - Any:
+--          - y <- 1
+--          - All:
+--             - foo?(x)
+--             - y <- 2
+--       - bar?(y)
+--
+--  So we have conjunctions, disjunctions, binds, predicates, etc. The goal
+--  is to find an assignment for each variable so that the equation is
+--  satisfied. One inuitive way to do that is by expanding the equation into
+--  a disjunctive-normal form, so that each "possibility" can be tested
+--  independently:
+--
+--  .. code::
+--
+--      Any:
+--       - All:
+--          - x <- 1
+--          - y <- 1
+--          - bar?(y)
+--       - All:
+--          - x <- 1
+--          - foo?(x)
+--          - y <- 2
+--          - bar?(y)
+--
+--  However, if we have n Anys one after the other, with each one having 2
+--  branches, we end up with 2^n options to evaluate. Fortunately, various
+--  optimizations can be applied to prune the search space. For example, if we
+--  notice while expanding each possibility that the currently built sub-
+--  equation cannot be satisfied, we can abort early and avoid expanding the
+--  rest of the equation. This is how the previous implementation worked, and
+--  it prevented exponential blowup in most cases. However, this optimization
+--  is obviously order-dependent: if the failing sub-equation appears later in
+--  the expansion, the amount of branches of the search space that we can prune
+--  will be reduced. For this reason, Libadalang (the main user of this
+--  framework) was still facing a few resolution timeouts in various Ada
+--  codebases.
+--
+--  So, this Adalog solver works by first encoding Adalog equations into SAT
+--  problems. This encoding is obviously not equisat, meaning a solution to the
+--  SAT problem is not necessarily a solution to the Adalog problem. That's why
+--  we need to instantiate a DPLL-T solver with our own Adalog theory (of which
+--  the ``Check`` subprogram defined below is the main component) in order to
+--  (in-)validate the models produced by the SAT solver.
+--
+--  To encode a ``Compound_Relation`` we first introduce the notion of
+--  "basic block". A basic block is a sequence of ``Atomic_Relation``s that
+--  always come together. For example in the Adalog relation given above, there
+--  are 3 basic blocks:
+--
+--  1. ``[x <- 1, bar?(y)]`` representing the top-level ``All`` relation.
+--  2. ``[y <- 1`]``         representing the first branch of the ``Any``.
+--  3. ``[foo?(x), y <- 2]`` representing the second branch of the ``Any``.
+--
+--  We encode the presence or absence of a basic block in the SAT problem
+--  using a boolean variable. So if the SAT solver produces a model, say
+--  ``[True, False, True]``, the theory will try to check if the concatenation
+--  of all atomic relations from the basic blocks which are flagged "present"
+--  is a valid solution. In this case, the concatenation produces
+--  ``[`x <- 1`, `bar?(y)`, `foo?(x)`, `y <- 2`]``.
+--
+--  Ideally, we would like the solver to not produce nonsensical models such as
+--  ``[True, True, True]`` (i.e. where both branches of the Any are present).
+--
+--  To see how that's done, let's first call the basic block variables b_1, b_2
+--  and b_3 for our example. We now need to encode the fact that b_2 and b_3
+--  cannot be true at the same time! So, we simply generate the constraint
+--  ``!b_2 | !b_3``.
+--
+--  However, with this sole constraint, the solver may produce the model
+--  ``[True, False, False]``, where none of the branches are taken! So, we must
+--  also add a constraint that at least one of them is chosen as soon as the
+--  parent relation of the ``Any`` is present. Thus we add the constraint
+--  ``b_1 => (b_2 | b_3)``, or as its CNF equivalent, ``!b_1 | b_2 | b_3``.
+--
+--  We now have another problem, nothing prevents the solver from producing
+--  `[False, True, False]`, where one of the branches is taken even though
+--  the parent relation is absent. Indeed, the constraint above is vacuously
+--  True if b_1 is False. So, we must also include the constraints
+--  ``!b_1 => (!b_2 & !b_3)``, or in CNF, ``(b_1 | !b_2) & (b_1 | !b_3)``.
+--
+--  In the end we also explicitly set the top-level basic block to True,
+--  otherwise "all variables set to False" would be a valid solution to the SAT
+--  formula.
+--
+--  So after all this, running the DPLL-T solver on our example above will
+--  first call back the theory with model ``[True, True, False]``, and if the
+--  theory rejects it, call it back with ``[True, False, True]``, correctly
+--  testing the two branches of the Any.
+--
+--  However at this stage this approach might look strictly inferior to a
+--  simple recursive descent approach, since we will also end up checking all
+--  possible combinations of branches from the original problem, but with the
+--  overhead of a SAT solver.
+--
+--  In fact, the power of this approach only shows once we start generating
+--  contradictions for the SAT-produced models. Consider the following
+--  relation:
+--
+--  .. code::
+--
+--      All:
+--       - x <- 1
+--       - Any:
+--          - y <- 1
+--          - y <- 2
+--          - ...
+--          - y <- 1000
+--       - Any:
+--          - (y == 1000)?
+--          - x <- 2
+--
+--
+--  A recursive descent approach would explore the solution space by recursing
+--  on the branches of the ``Any`` relations, populating its current model with
+--  the atoms of each basic block it traverses. In this case, there are 2000
+--  combinations to try in total. The recursive solver will attempt each one of
+--  them and fail on all paths that include `x <- 1` and `x <- 2` thus wasting
+--  time on 1000 combinations.
+--  That's because when encountering such a path for the first time, even
+--  though we can easily extract the fact that these two atoms are in
+--  contradiction, the solver has no way to use the information to adapt it's
+--  subsequent traversals (*).
+--  The SAT solver on the other hand can be updated with a simple clause that
+--  excludes the basic blocks of these atoms from being set at the same time
+--  (for example ``!b_1 | !b_1003``). Internally, a watch is placed on b_1 and
+--  b_1003 so that as soon as one variable becomes True, the other is set to
+--  False. The search space is therefore cut in half at virtually no cost.
+--
+--  Imagine that the first branch of the last ``Any`` is now `x <- 3`. For us
+--  it's easy to see that there is no solution anymore, because any path will
+--  pass through `x <- 1` and either `x <- 2` or `x <- 3`. The recursive solver
+--  will therefore waste time trying 2000 combinations.
+--  The SAT solver will learn the clause ``!b_1 | !b_1002`` on its first try,
+--  and ``!b_1 | !b_1003`` on its second try.
+--  After that, if b_1 is set to true, then that first clause implies that
+--  b_1002 is False, and the second that b_1003 is False. Now remember that in
+--  a previous paragraph we introduced the constraint that if the parent block
+--  of an Any is set, then one of its branches must be set.
+--  In our case, this translates to the clause ``b_1 => (b_1002 | b_1003)``, or
+--  ``!b_1 | b_1002 | b1003``. But it's easy to see now that this clause cannot
+--  be satisfied, because we have b_1 is True, b_1002 is False and b_1003 is
+--  False. Therefore b_1 must be False and that's exactly what the SAT solver
+--  learns internally, thus not wasting any more time on this sub-tree anymore.
+--
+--  We therefore reached the same conclusion with 2 attempts instead of 2000.
+--  Besides, note that if this relation is actually part of a bigger relation,
+--  the recursive solver would possibly need to make those 2000 traversals
+--  several times, whereas the SAT solver has internally learned the fact that
+--  b_1 cannot be true and will never take any path that goes through this
+--  sub-tree.
+--
+--  (*) Actually an attempt was made (but never committed to the project) to
+--  adapt the traversal order by using those same contradictions we are feeding
+--  the SAT solver with. For example, after having seen that the two atoms
+--  `x <- 1` and `x <- 2` are incompatible in the example above, it would have
+--  tried to swap the order of the two ``Any``s so that the path going through
+--  `x <- 1` and `x <- 2` is cut early during the traversal. Unfortunately,
+--  these reordering were based on heuristics and made the whole thing pretty
+--  fragile, improving runtime in some cases but degrading it in others.
+
+package body Langkit_Support.Adalog.Solver is
    ----------------------
    -- Supporting types --
    ----------------------
@@ -24,29 +196,9 @@ package body Langkit_Support.Adalog.Solver is
    subtype Atomic_Relation_Vector is Atomic_Relation_Vectors.Vector;
    --  Vectors of atomic relations
 
-   function Image is new Langkit_Support.Images.Array_Image
-     (Atomic_Relation,
-      Positive,
-      Atomic_Relation_Vectors.Elements_Array);
-   function Image (Self : Atomic_Relation_Vector) return String;
-
-   package Any_Relation_Vectors is new Langkit_Support.Vectors (Any_Rel);
-   subtype Any_Relation_Vector is Any_Relation_Vectors.Vector;
-   --  Vectors of Any relations
-
-   function Image is new Langkit_Support.Images.Array_Image
-     (Any_Rel,
-      Positive,
-      Any_Relation_Vectors.Elements_Array);
-   function Image (Self : Any_Relation_Vector) return String;
-
    --------------------------
    -- Supporting functions --
    --------------------------
-
-   procedure Destroy_Rels (Self : in out Relation_Vectors.Vector);
-   --  Delete one ownership share for all relations in ``Self`` and destroy
-   --  the ``Self`` vector itself.
 
    function Create_Propagate
      (From, To     : Logic_Var;
@@ -84,6 +236,28 @@ package body Langkit_Support.Adalog.Solver is
    procedure Free is new Ada.Unchecked_Deallocation
      (Positive_Vector_Array, Positive_Vector_Array_Access);
 
+   type Atom_Mapping is array (Positive range <>)
+     of AdaSAT.Variable_Or_Null;
+   --  Array type used to map basic block ids to AdaSAT formula variables
+
+   type Atom_Mapping_Access is access Atom_Mapping;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Atom_Mapping, Atom_Mapping_Access);
+
+   package BB_Vectors is new Langkit_Support.Vectors
+     (Atomic_Relation_Vector);
+
+   type Unified_Vars is record
+      First  : Positive;
+      Second : Positive;
+   end record;
+   --  Used to store IDs of pairs of unified variables.
+   --  See ``Explain_Contradiction``.
+
+   package Unified_Vars_Vectors is new Langkit_Support.Vectors
+     (Unified_Vars);
+
    type Sort_Context is record
       Defining_Atoms : Positive_Vector_Array_Access;
       --  For each logic variable, list of atoms indexes for atoms that define
@@ -92,6 +266,10 @@ package body Langkit_Support.Adalog.Solver is
       Has_Contradiction_Counter : Natural;
       --  Number of times ``Has_Contradiction`` was called. Used for
       --  logging/debugging purposes.
+
+      Unset_Vars : Logic_Var_Vector;
+      --  After a call to ``Topo_Sort``, holds the variables which were used
+      --  but never defined. Used to build contradictions for the solver.
    end record;
    --  Data used when doing a topological sort (used only in
    --  Solving_Context.Sort_Ctx), when we reach a complete potential solution.
@@ -107,7 +285,8 @@ package body Langkit_Support.Adalog.Solver is
    --  Relation that is prepared for solving (see the ``Prepare_Relation``
    --  function below).
 
-   function Prepare_Relation (Self : Relation) return Prepared_Relation;
+   function Prepare_Relation
+     (Self : Relation; Max_Id : out Natural) return Prepared_Relation;
    --  Prepare a relation for the solver: simplify it and create a list of all
    --  the logic variables it references, assigning an Id to each.
 
@@ -143,6 +322,8 @@ package body Langkit_Support.Adalog.Solver is
    --  ``Has_Orphan`` is set to whether at least one atom is an "orphan", that
    --  is to say it is not part of the resulting sorted collection.
 
+   type Index_Set is array (Positive range <>) of Boolean;
+
    type Solving_Context is record
       Cb : Callback_Type;
       --  User callback, to be called when a solution is found. Returns whether
@@ -170,16 +351,9 @@ package body Langkit_Support.Adalog.Solver is
       --  relation leaf, ``Unifies`` + ``Atoms`` will contain an autonomous
       --  relation to solve (this is a solver "branch").
 
-      Anys : Any_Relation_Vector;
-      --  Remaining list of ``Any`` relations to traverse
-
       Timeout : Natural;
       --  Number of times left we allow ourselves to evaluate an atom before
       --  aborting the solver. If 0, no timeout applies.
-
-      Cut_Dead_Branches : Boolean := False;
-      --  Optimization that will cut branches that necessarily contain falsy
-      --  solutions.
 
       Sort_Ctx : Sort_Context;
       --  Context used for the topological sort, when reaching a complete
@@ -189,6 +363,18 @@ package body Langkit_Support.Adalog.Solver is
       Tried_Solutions : Natural;
       --  Number of tried solutions. Stored for analytics purpose, and
       --  potentially for timeout.
+
+      Max_Id : Natural;
+      --  The highest Id that a relation is assigned. This allows allocating
+      --  arrays with indices ranging over all relations, in particular
+      --  the Atom_Map below.
+
+      Atom_Map : Atom_Mapping_Access;
+      --  Maps each relation (uniquely determined by its Id) to the SAT
+      --  variable representing the basic block in which it belongs.
+
+      Blocks : BB_Vectors.Vector;
+      --  Holds the list of all relations that compose each basic block
    end record;
    --  Context for the solving of a compound relation
 
@@ -200,52 +386,178 @@ package body Langkit_Support.Adalog.Solver is
    --  Free resources for the sorting context
 
    function Create
-     (Cb   : Callback_Type;
-      Vars : Logic_Var_Array_Access) return Solving_Context;
+     (Cb     : Callback_Type;
+      Vars   : Logic_Var_Array_Access;
+      Max_Id : Natural) return Solving_Context;
    --  Create a new instance of a solving context. The data will be cleaned up
    --  and deallocated by a call to ``Destroy``.
 
    procedure Destroy (Ctx : in out Solving_Context);
    --  Destroy a solving context, and associated data
 
+   type Unification_Graph is array (Positive range <>)
+      of Atomic_Relation_Vector;
+   --  Array type used to map a variable (via its Id) to a list of ``Unify``
+   --  atoms which it is referenced from. This represents the edges of the
+   --  unification graph (see ``Compute_Unification_Graph``).
+
+   type Unification_Graph_Access is access Unification_Graph;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Unification_Graph, Unification_Graph_Access);
+
+   function Compute_Unification_Graph
+     (Ctx : Solving_Context) return Unification_Graph_Access;
+   --  Allocate and populate the array representing the edges of the
+   --  unification graph according to the "Unifies" atoms held in the given
+   --  context. If ``Ctx.Unifies`` is:
+   --
+   --  - ``a <-> b``
+   --  - ``c <-> d``
+   --  - ``d <-> b``.
+   --
+   --  Then the resulting array will be:
+   --
+   --  - ``a -> [b]``
+   --  - ``b -> [a, d]``
+   --  - ``c -> [d]``.
+   --
+   --  This is used by the ``Mark_Unifying_Path`` algorithm inside the
+   --  ``Explain_Contradiction`` subprogram to find out how two given variables
+   --  became unified with each other, i.e. what is the set of Unify relations
+   --  that make them unified.
+
+   procedure Destroy_Unification_Graph
+     (Graph : in out Unification_Graph_Access);
+   --  Deallocate the unification graph
+
    function Evaluate_Atoms
      (Ctx          : in out Solving_Context;
-      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean;
+      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array;
+      Explanation  : in out AdaSAT.Builders.Formula_Builder) return Boolean;
    --  Evaluate the given sequence of sorted atoms (see ``Topo_Sort``) and
    --  return whether they are all satisfied: if they are, the logic variables
    --  are assigned values, so it is possible to invoke the user callback for
-   --  solutions.
+   --  solutions. If not, the ``Explanation`` formula builder is populated with
+   --  one or several clauses explaining the failure.
 
-   function Has_Contradiction
-     (Atoms, Unifies : Atomic_Relation_Vector;
-      Vars           : Logic_Var_Array;
-      Ctx            : in out Solving_Context) return Boolean;
-   --  Return whether the given sequence of atoms contains a contradiction,
-   --  i.e. if two or more of its atoms make each other unsatisfied. This
-   --  function works even for incomplete sequences, for instance when one atom
-   --  uses a variable that no atom defines.
+   function Explain_Contradiction
+     (Ctx          : Solving_Context;
+      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array;
+      Failed_Atom  : Atomic_Relation;
+      Unify_Graph  : in out Unification_Graph_Access;
+      Invalid_Vars : in out Index_Set) return AdaSAT.Clause;
+   --  Given a sequence of sorted atoms (see ``Topo_Sort``) and the atom on
+   --  which evaluation failed (see ``Evaluate_Atoms``), compute the smallest
+   --  set of atoms among that sequence that explains why evaluation failed and
+   --  return it as a new clause for the SAT solver to learn in order not to
+   --  propose this solution again. As an example, consider the following call
+   --  parameters:
+   --
+   --  .. code::
+   --
+   --      Sorted_Atoms:
+   --       1:   x <- 1
+   --       2:   y <- 2
+   --       3:   is_even(x)
+   --
+   --      Failed_Atom: is_even(x)
+   --
+   --
+   --  By analyzing the sorted atoms we can see the reason for which
+   --  ``is_even(x)`` (atom 3) failed is due to ``x <- 1`` (atom 1), therefore
+   --  we can rather teach it ``!1 | !3``. If we had instead teached it the
+   --  simple but naive clause ``!1 | !2 | !3`` it might guess that atom 2 was
+   --  the problem and call back the theory with other candidate solutions
+   --  containing atoms 1 and 3.
+   --
+   --  Note that we must also include all relevant Unify clauses. For example,
+   --  if we instead had this list of atoms:
+   --
+   --  .. code::
+   --
+   --      1:   a <- 1
+   --      2:   y <- 2
+   --      3:   is_even(x)
+   --      4:   a <-> b
+   --      5:   b <-> x
+   --
+   --
+   --  The resulting explanation should contain atom 1 and 3 as before, but
+   --  also 4 and 5, which are needed to explain why ``x`` is assigned ``1``.
+   --  There are cases where there are multiple ways to explain why a given
+   --  variable is assigned a given value. For example if we add the atom
+   --  ``a <-> x`` in the list above, we can now explain the assignment to
+   --  ``x`` via that new atom or via the unification atoms 5 and 6. In those
+   --  cases, ``Explain_Contradiction`` will not try to generate all the
+   --  possible explanations but only one of them. This is generally enough to
+   --  get a completely different solution attempt in the next iteration, and
+   --  if it's not, we will simply end up contradicting each way of explaining
+   --  the assignment until we can't anymore, which is bound to happen because
+   --  the number of possibilities is finite.
+   --
+   --  In order to compute these unification paths, we first compute an
+   --  unification graph (see  ``Compute_Unification_Graph``). This graph has
+   --  an edge between two variables iff there exists an Unify atom that links
+   --  them. Once we have this graph, finding a path between two variables
+   --  is only a matter of executing a search algorithm (the current
+   --  implementation uses a DFS in ``Mark_Unifying_Path``).
+   --
+   --  For performance considerations we do not compute this graph before it's
+   --  necessary. As such, we take it as an initially null "in out" reference.
+   --  ``Explain_Contradiction`` takes care of computing it once it's needed,
+   --  and subsequent calls will be able to reuse it if needed again.
+   --
+   --  The last parameter we have not talked about yet is ``Invalid_Vars``.
+   --  Since ``Explain_Contradiction`` can be called multiple times in a single
+   --  round (i.e. for one given SAT model) to explain several atom failures,
+   --  we want to avoid recomputing the same explanations as much as possible
+   --  as we would not only waste time here but also possibly bloat the SAT
+   --  solver with useless redundant clauses.
+   --
+   --  So, this array is used accross multiple calls and maintains the set of
+   --  logic variables that are part (directly or indirectly) of an
+   --  explanation of why evaluation of an atom failed. After our last example,
+   --  this array would contain "a", "b" and "x". This array is then used
+   --  to avoid computing the explanation for a second failed atom if that
+   --  atoms uses a variable that has already been part of a failure, since
+   --  the original explanation will probably change the outcome for that
+   --  second failure as well. Although that last part is not guaranteed, the
+   --  gains achieved in practice by avoiding cases where it does largely
+   --  compensate the cases where it does not.
 
-   function Solve_Compound
+   function Check
+     (Ctx            : in out Solving_Context;
+      Model          : AdaSAT.Model;
+      Contradictions : in out AdaSAT.Formulas.Formula) return Boolean;
+   --  Check whether the model produced by the SAT solver validates our theory.
+   --  If it does not, populate ``Contradictions`` with clauses that invalidate
+   --  the model and explain in the simplest way possible (with fewest clauses
+   --  containing fewest atoms possible) why the model is not valid. The SAT
+   --  solver will then take these new clauses into account and produce another
+   --  model for the theory to validate, etc.
+
+   function Encode_Relation
+     (Self           : Compound_Relation;
+      Ctx            : in out Solving_Context;
+      Variable_Count : out AdaSAT.Variable_Or_Null)
+      return AdaSAT.Formulas.Formula;
+   --  Encode the given Adalog relation into a SAT problem. See top-level unit
+   --  for a complete description. ``Variable_Count`` will be set to the number
+   --  of variables that must be allocated in a model.
+
+   function Solve_DPLL
      (Self : Compound_Relation; Ctx : in out Solving_Context) return Boolean;
-   --  Look for valid solutions in ``Self`` & ``Ctx``. Return whether to
-   --  continue looking for other solutions.
+   --  Solve the given Adalog relation by encoding it as a SAT problem,
+   --  feeding it to the SAT solver and iteratively invalidating the produced
+   --  model using the ``Check`` subprogram until we find a valid model or
+   --  the SAT solver cannot produce any new model.
+
+   package Adalog_Theory is new AdaSAT.Theory (Solving_Context, Check);
+   package DPLL_Adalog is new AdaSAT.DPLL (Adalog_Theory);
 
    procedure Trace_Timing (Label : String; Start : Time);
    --  Log ``Start .. Clock`` as the time it took to run ``Label``
-
-   ------------------
-   -- Destroy_Rels --
-   ------------------
-
-   procedure Destroy_Rels (Self : in out Relation_Vectors.Vector) is
-      Mutable_R : Relation;
-   begin
-      for R of Self loop
-         Mutable_R := R;
-         Dec_Ref (Mutable_R);
-      end loop;
-      Self.Destroy;
-   end Destroy_Rels;
 
    ------------
    -- Create --
@@ -256,7 +568,8 @@ package body Langkit_Support.Adalog.Solver is
       return
         (Defining_Atoms            => new Positive_Vector_Array'
            (Vars'Range => Positive_Vectors.Empty_Vector),
-         Has_Contradiction_Counter => 0);
+         Has_Contradiction_Counter => 0,
+         Unset_Vars                => Logic_Var_Vectors.Empty_Vector);
    end Create;
 
    ------------
@@ -264,17 +577,19 @@ package body Langkit_Support.Adalog.Solver is
    ------------
 
    function Create
-     (Cb   : Callback_Type;
-      Vars : Logic_Var_Array_Access) return Solving_Context is
+     (Cb     : Callback_Type;
+      Vars   : Logic_Var_Array_Access;
+      Max_Id : Natural) return Solving_Context is
    begin
       return Ret : Solving_Context do
          Ret.Cb := Cb;
          Ret.Vars := Vars;
          Ret.Atoms := Atomic_Relation_Vectors.Empty_Vector;
          Ret.Unifies := Atomic_Relation_Vectors.Empty_Vector;
-         Ret.Anys := Any_Relation_Vectors.Empty_Vector;
          Ret.Sort_Ctx := Create (Vars.all);
          Ret.Tried_Solutions := 0;
+         Ret.Max_Id := Max_Id;
+         Ret.Atom_Map := new Atom_Mapping (1 .. Max_Id);
       end return;
    end Create;
 
@@ -282,7 +597,9 @@ package body Langkit_Support.Adalog.Solver is
    -- Prepare_Relation --
    ----------------------
 
-   function Prepare_Relation (Self : Relation) return Prepared_Relation is
+   function Prepare_Relation
+     (Self : Relation; Max_Id : out Natural) return Prepared_Relation
+   is
       --  For determinism, collect variables in the order in which they appear
       --  in the equation.
       Vec : Logic_Var_Vectors.Vector;
@@ -290,16 +607,13 @@ package body Langkit_Support.Adalog.Solver is
       Next_Id : Positive := 1;
       --  Id to assign to the next processed relation
 
-      function Is_Atom (Self : Relation; Kind : Atomic_Kind) return Boolean
-      is (Self.Kind = Atomic and then Self.Atomic_Rel.Kind = Kind);
-
       procedure Add (Var : Logic_Var);
       --  Add ``Var`` to ``Vec``/``Set``
 
       procedure Process_Atom (Self : Atomic_Relation_Type);
       --  Collect variables from ``Self``
 
-      function Fold_And_Track_Vars (Self : Relation) return Relation;
+      procedure Track_Vars (Self : Relation);
       --  Return a relation (with its dedicated ownership share) with
       --  True/False relations folded. Add to ``Vec`` the variables reference
       --  in ``Self`` during the traversal.
@@ -339,175 +653,34 @@ package body Langkit_Support.Adalog.Solver is
          end case;
       end Process_Atom;
 
-      -------------------------
-      -- Fold_And_Track_Vars --
-      -------------------------
+      ----------------
+      -- Track_Vars --
+      ----------------
 
-      function Fold_And_Track_Vars (Self : Relation) return Relation is
+      procedure Track_Vars (Self : Relation) is
       begin
-         Self.Id := Next_Id;
-         Next_Id := Next_Id + 1;
-
          --  For atomic relations, just add the vars it contains. For compound
          --  relations, just recurse over sub-relations.
 
          case Self.Kind is
          when Atomic =>
             Process_Atom (Self.Atomic_Rel);
-            Inc_Ref (Self);
-            return Self;
+            Self.Id := Next_Id;
+            Next_Id := Next_Id + 1;
 
          when Compound =>
-            declare
-               Comp_Kind : constant Compound_Kind := Self.Compound_Rel.Kind;
-               Last_Rel  : Relation;
-
-               Rels : Relation_Vectors.Vector := Relation_Vectors.Empty_Vector;
-               --  Vector of subrelations for the returned compound
-
-               Is_Different : Boolean := False;
-               --  Whether the compound relation we are about to return is
-               --  different from ``Self``. Used for a small optimization: do
-               --  not create a new relation when we can just return the
-               --  existing one.
-
-               Neutral : constant Atomic_Kind :=
-                 (case Comp_Kind is
-                  when Kind_All => True,
-                  when Kind_Any => False);
-               --  Neutral element for this compound relation, i.e. element
-               --  which can just be removed without changing the semantics.
-
-               Absorbing : constant Atomic_Kind := False;
-               --  Absorbing element for this compound relation, i.e. element
-               --  which, when present as an item in the compound relation, can
-               --  replace the whole compound relation without changing the
-               --  semantics.
-               --
-               --  Note that we don't consider True as absorbing for Any
-               --  relations on purpose (i.e. we will not fold ``Any (X = 1,
-               --  True)`` into ``True``). The reason for this is that we
-               --  support solutions with undefined variables. In the example
-               --  above, this means that we need to give two solutions: ``X =
-               --  1`` and ``X is undefined``, thus we need to refrain from
-               --  folding absorbing elements in Any relations.
-            begin
-               for R of Self.Compound_Rel.Rels loop
-                  Last_Rel := Fold_And_Track_Vars (R);
-
-                  --  If we got a neutral or absorbing relation, simplify the
-                  --  returned compound.
-
-                  if Is_Atom (Last_Rel, Neutral) then
-
-                     --  No need to add the neutral element to the result, and
-                     --  thus the result will necessarily be different from
-                     --  ``Self``.
-
-                     Dec_Ref (Last_Rel);
-                     Is_Different := True;
-
-                  elsif Comp_Kind = Kind_All
-                        and then Is_Atom (Last_Rel, Absorbing)
-                  then
-                     --  The whole compound can be replaced with the absorbing
-                     --  relation: cleanup our temporary vector and return
-                     --  that.
-
-                     Destroy_Rels (Rels);
-                     return Last_Rel;
-
-                  elsif Last_Rel.Kind = Compound
-                        and then Last_Rel.Compound_Rel.Kind = Comp_Kind
-                  then
-                     --  The sub-relation has become a compound of the same
-                     --  kind as ``Self``: we must inline it into ``Self`` to
-                     --  preserve our invariants.
-
-                     for R of Last_Rel.Compound_Rel.Rels loop
-                        Rels.Append (R);
-                        Inc_Ref (R);
-                     end loop;
-                     Dec_Ref (Last_Rel);
-                     Is_Different := True;
-
-                  --  Past here, we just add this sub-relation to the result.
-                  --  Just make sure we update ``Is_Different`` when
-                  --  appropriate.
-
-                  else
-                     Rels.Append (Last_Rel);
-                     Is_Different := Is_Different or else Last_Rel /= R;
-                  end if;
-               end loop;
-
-               --  Now that we have processed each sub-relation, prepare the
-               --  result.
-
-               if Rels.Is_Empty then
-
-                  --  All sub-relations were simplified to neutral elements: we
-                  --  can replace the whole compound relation with the neutral
-                  --  element itself.
-
-                  Rels.Destroy;
-                  return (if Neutral = True
-                          then Create_True (Self.Debug_Info)
-                          else Create_False (Self.Debug_Info));
-
-               elsif Rels.Length = 1 then
-
-                  --  Only one sub-relation is left: it already has a new
-                  --  ownership share, so just return it.
-
-                  Last_Rel := Rels.Get (1);
-                  Rels.Destroy;
-                  return Last_Rel;
-
-               elsif Is_Different then
-
-                  --  We have more than one sub-relation, and the set of
-                  --  sub-relations is different than the one in ``Self``, so
-                  --  return a new compound relation.
-
-                  return Result : constant Relation := new Relation_Type'
-                    (Kind         => Compound,
-                     Ref_Count    => 1,
-                     Id           => Self.Id,
-                     Debug_Info   => Self.Debug_Info,
-                     Compound_Rel => (Kind => Self.Compound_Rel.Kind,
-                                      Rels => Relation_Vectors.Empty_Vector))
-                  do
-                     Result.Compound_Rel.Rels.Concat (Rels);
-                     Rels.Destroy;
-                  end return;
-
-               else
-                  --  We are returning ``Self``: destroy the sub-relation
-                  --  owership shares created for ``Rels`` as we do not create
-                  --  a new compound relation.
-
-                  Destroy_Rels (Rels);
-                  Inc_Ref (Self);
-                  return Self;
-               end if;
-            end;
+            for R of Self.Compound_Rel.Rels loop
+               Track_Vars (R);
+            end loop;
          end case;
-      end Fold_And_Track_Vars;
+      end Track_Vars;
 
       --  Fold True/False atoms in the input relation and add all variables to
       --  ``Vars`` in the same pass.
 
-      Result          : Prepared_Relation;
-      Start           : constant Time := Clock;
-      Folded_Relation : constant Relation := Fold_And_Track_Vars (Self);
+      Result : Prepared_Relation;
    begin
-      Trace_Timing ("Constant folding", Start);
-
-      if Cst_Folding_Trace.Is_Active then
-         Cst_Folding_Trace.Trace ("After constant folding:");
-         Cst_Folding_Trace.Trace (Image (Folded_Relation));
-      end if;
+      Track_Vars (Self);
 
       if Stats_Trace.Is_Active then
          declare
@@ -560,7 +733,8 @@ package body Langkit_Support.Adalog.Solver is
       end loop;
       Vec.Destroy;
 
-      Result.Rel := Folded_Relation;
+      Result.Rel := Self;
+      Max_Id := Next_Id - 1;
       return Result;
    end Prepare_Relation;
 
@@ -623,6 +797,10 @@ package body Langkit_Support.Adalog.Solver is
       Defining_Atoms : Positive_Vector_Array renames
         Sort_Ctx.Defining_Atoms.all;
 
+      Seen_Unset_Vars : Index_Set := (Vars'Range => False);
+      --  Mask used to not include multiple times the same unset variable
+      --  in the ``Sort_Ctx.Unset_Vars`` vector.
+
       function Append_Definition (Var : Logic_Var) return Boolean;
       --  Try to append an atom that defines ``Var`` instead. This returns
       --  False if there is no atom that defines ``Var`` or if dependency cyles
@@ -670,12 +848,20 @@ package body Langkit_Support.Adalog.Solver is
       -----------------------
 
       function Append_Definition (Var : Logic_Var) return Boolean is
+         Var_Id : constant Natural := Id (Var);
       begin
-         for Definition of Defining_Atoms (Id (Var)) loop
+         for Definition of Defining_Atoms (Var_Id) loop
             if Append (Definition) then
                return True;
             end if;
          end loop;
+
+         --  ``Var`` is used but does not have any definition, so add it
+         --  to the ``Unset_Vars`` vector if not already present.
+         if not Seen_Unset_Vars (Var_Id) then
+            Seen_Unset_Vars (Var_Id) := True;
+            Sort_Ctx.Unset_Vars.Append (Var);
+         end if;
          return False;
       end Append_Definition;
 
@@ -743,14 +929,13 @@ package body Langkit_Support.Adalog.Solver is
                   Sorted_Atoms (Last_Atom_Index) := Rel;
                   Appended (Atom_Index) := True;
                end if;
-
                Visiting (Atom_Index) := False;
                return Deps_Satisfied;
             end;
          end if;
       end Append;
-
    begin
+      Sort_Ctx.Unset_Vars.Clear;
       Has_Orphan := False;
 
       --  Step 1, process Unify atoms so that the processing of other atoms
@@ -816,7 +1001,6 @@ package body Langkit_Support.Adalog.Solver is
    begin
       Ctx.Unifies.Destroy;
       Ctx.Atoms.Destroy;
-      Ctx.Anys.Destroy;
       Destroy (Ctx.Sort_Ctx);
 
       --  Cleanup logic vars for future solver runs using them. Note that no
@@ -826,8 +1010,382 @@ package body Langkit_Support.Adalog.Solver is
          Reset (V);
          Set_Id (V, 0);
       end loop;
+
       Free (Ctx.Vars);
+      Free (Ctx.Atom_Map);
+
+      for I in 1 .. Ctx.Blocks.Length loop
+         Ctx.Blocks.Get_Access (I).Destroy;
+      end loop;
+
+      Ctx.Blocks.Destroy;
+      Ctx.Sort_Ctx.Unset_Vars.Destroy;
    end Destroy;
+
+   -------------------------------
+   -- Compute_Unification_Graph --
+   -------------------------------
+
+   function Compute_Unification_Graph
+     (Ctx : Solving_Context) return Unification_Graph_Access
+   is
+      Graph : constant Unification_Graph_Access :=
+         new Unification_Graph (Ctx.Vars'Range);
+   begin
+      for U of Ctx.Unifies loop
+         declare
+            A : constant Logic_Var := U.Atomic_Rel.Target;
+            B : constant Logic_Var := U.Atomic_Rel.Unify_From;
+         begin
+            Graph.all (A.Id).Append (U);
+            Graph.all (B.Id).Append (U);
+         end;
+      end loop;
+      return Graph;
+   end Compute_Unification_Graph;
+
+   -------------------------------
+   -- Destroy_Unification_Graph --
+   -------------------------------
+
+   procedure Destroy_Unification_Graph
+     (Graph : in out Unification_Graph_Access) is
+   begin
+      for E of Graph.all loop
+         E.Destroy;
+      end loop;
+      Free (Graph);
+   end Destroy_Unification_Graph;
+
+   ---------------------------
+   -- Explain_Contradiction --
+   ---------------------------
+
+   function Explain_Contradiction
+     (Ctx          : Solving_Context;
+      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array;
+      Failed_Atom  : Atomic_Relation;
+      Unify_Graph  : in out Unification_Graph_Access;
+      Invalid_Vars : in out Index_Set) return AdaSAT.Clause
+   is
+      use AdaSAT;
+
+      Reason   : AdaSAT.Builders.Clause_Builder;
+      --  The final resulting clause that will be fed back to the SAT solver
+      --  to contradict the current proposed model.
+
+      Conflict : array (1 .. Variable (Ctx.Blocks.Length)) of Boolean :=
+        (1 .. Variable (Ctx.Blocks.Length) => False);
+      --  Mask used to not include the same atom multiple times in the
+      --  resulting clause.
+
+      Unified  : Unified_Vars_Vectors.Vector;
+      --  Contains pairs of variables for which we have already emitted
+      --  unifying paths in the resulting clause (see ``Mark_Unifying_Path``).
+      --  Used by  ``Mark_Assignment`` to avoid duplicating work.
+
+      To_Visit : Logic_Var_Vector;
+      --  Vector that is holds the stack of variables to visit in the
+      --  DFS implementation of ``Mark_Unifying_Path``. This lies here
+      --  instead of directly inside that function so as to not waste cycles
+      --  allocating and freeing its internal array in case we need to call
+      --  ``Mark_Unifying_Path`` multiple times.
+
+      procedure Add_Conflict (Atom : Atomic_Relation);
+      --  Include the given atom in the explanation, if not already present
+
+      procedure Mark_Assignment (Target : Logic_Var);
+      --  Find the atom that assigns a value to the given variable and add
+      --  it to the resulting explanation.
+
+      procedure Mark_Unifying_Path (From, To : Logic_Var);
+      --  Find all the atoms that are used to unify variables ``From`` and
+      --  ``To`` and add them to the resulting explanation. There might be
+      --  multiple possibilities to unify those two, so this computes one
+      --  of the possible paths arbitrarily. For example consider:
+      --
+      --  .. code::
+      --
+      --      All:
+      --         a  <-> b1
+      --         a  <-> b2
+      --         b1 <-> c
+      --         b2 <-> d
+      --         c  <-> d
+      --
+      --
+      --  There are two ways to explain why ``a`` and ``d`` are unified:
+      --
+      --  - ``a <-> b1, b1 <-> c, c <-> d``
+      --  - ``a <-> b2, b2 <-> d``.
+      --
+      --  The algorithm implemented here is a simple DFS and so will return
+      --  the first one. It theory it would be better to return multiple
+      --  clauses for each possible paths, but this would severely complexify
+      --  the implementation and this is not a problem in practice: it only
+      --  means that we might need multiple round-trips between the theory
+      --  and the SAT solver to explain a given failure.
+
+      ------------------
+      -- Add_Conflict --
+      ------------------
+
+      procedure Add_Conflict (Atom : Atomic_Relation) is
+         Index : constant Variable := Ctx.Atom_Map (Atom.Id);
+      begin
+         if Conflict (Index) then
+            return;
+         end if;
+         Conflict (Index) := True;
+         if Index /= 1 then
+            --  Micro-optimization: ``-1`` is always False so no need to add
+            --  it to the resulting clause.
+            Reason.Add (-Index);
+         end if;
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace (Image (Atom));
+         end if;
+      end Add_Conflict;
+
+      ---------------------
+      -- Mark_Assignment --
+      ---------------------
+
+      procedure Mark_Assignment (Target : Logic_Var) is
+         Target_Id : constant Natural := Id (Target);
+         Dummy     : Boolean;
+
+         function Check_Assignment (Atom : Atomic_Relation) return Boolean;
+         --  Check that the given atom actually assigns a value to the given
+         --  target variable. If it's the case, add it to the resulting clause
+         --  and return True, otherwise return False.
+
+         ----------------------
+         -- Check_Assignment --
+         ----------------------
+
+         function Check_Assignment (Atom : Atomic_Relation) return Boolean is
+         begin
+            if Id (Atom.Atomic_Rel.Target) = Target_Id then
+               Add_Conflict (Atom);
+               if Atom.Atomic_Rel.Target.Id /= Target.Id then
+                  --  This atom does not directly assign ``Target` a value,
+                  --  but does so because ``Target`` and its own target are
+                  --  unified. So, we must also include in the explanation the
+                  --  set of atoms that make the two variables unified.
+                  --  First, check if we have not already included in the
+                  --  explanation the reason why these two are unified.
+                  for U of Unified loop
+                     if (U.First = Target.Id and then
+                         U.Second = Atom.Atomic_Rel.Target.Id) or else
+                        (U.First = Atom.Atomic_Rel.Target.Id and then
+                         U.Second = Target.Id)
+                     then
+                        return True;
+                     end if;
+                  end loop;
+
+                  --  We haven't included the reason in the explanation yet,
+                  --  so do it now.
+                  Unified.Append ((Target.Id, Atom.Atomic_Rel.Target.Id));
+                  Mark_Unifying_Path
+                    (Atom.Atomic_Rel.Target, Target);
+               end if;
+               return True;
+            end if;
+            return False;
+         end Check_Assignment;
+      begin
+         Invalid_Vars (Target_Id) := True;
+
+         --  Traverse the atoms in order to find the one that gave a value
+         --  to ``Target``. For the ``Propagate`` or ``N_Propagate`` kinds,
+         --  we recursively find the assignment of the "arguments". The
+         --  rationale is that failure might not necessarily come from the
+         --  propagate atom itself but the value it propagates from.
+         for Atom of Sorted_Atoms loop
+            case Atom.Atomic_Rel.Kind is
+               when Assign =>
+                  exit when Check_Assignment (Atom);
+
+               when Propagate =>
+                  if Check_Assignment (Atom) then
+                     Mark_Assignment (Atom.Atomic_Rel.From);
+                     exit;
+                  end if;
+
+               when N_Propagate =>
+                  if Check_Assignment (Atom) then
+                     for Var of Atom.Atomic_Rel.Comb_Vars loop
+                        Mark_Assignment (Var);
+                     end loop;
+                     exit;
+                  end if;
+
+               when others =>
+                  null;
+            end case;
+         end loop;
+      end Mark_Assignment;
+
+      ------------------------
+      -- Mark_Unifying_Path --
+      ------------------------
+
+      procedure Mark_Unifying_Path (From, To : Logic_Var) is
+         Antecedents : array (Ctx.Vars.all'Range) of Atomic_Relation :=
+           (others => null);
+         --  For each variable that is unified with ``From`` (and therefore
+         --  ``To`` as well), this stores the relation that was used to
+         --  propagate the unification.
+
+         procedure Retrace_Path;
+         --  Builds the final path using the ``Antecedents`` array. So this
+         --  recursively looks up the antecedent of each variable starting from
+         --  ``To``, adding all the ``Unify`` relations along the way into
+         --  the resulting clause.
+
+         procedure Register_Visit
+           (Var : Logic_Var; Origin : Atomic_Relation);
+         --  Sets the antecedent of ``Var`` to be ``Origin`` and add it to
+         --  the list of variables to visit, unless it was already processed.
+
+         ------------------
+         -- Retrace_Path --
+         ------------------
+
+         procedure Retrace_Path is
+            V : Positive := To.Id;
+         begin
+            while V /= From.Id loop
+               declare
+                  R : constant Atomic_Relation := Antecedents (V);
+               begin
+                  Add_Conflict (R);
+                  --  Variable ``V`` is on the path to the unification of
+                  --  ``From`` and ``To``, and ``R`` is the Unify atom that
+                  --  unifies it with another variable on the way. So mark
+                  --  ``R`` as part of the explanation (it is necessary to
+                  --  explain unification of ``From`` and ``To``) and continue
+                  --  the traversal with the other variable, until we reach
+                  --  ``From``.
+                  if R.Atomic_Rel.Target.Id = V then
+                     V := R.Atomic_Rel.Unify_From.Id;
+                  else
+                     V := R.Atomic_Rel.Target.Id;
+                  end if;
+               end;
+            end loop;
+         end Retrace_Path;
+
+         --------------------
+         -- Register_Visit --
+         --------------------
+
+         procedure Register_Visit
+           (Var : Logic_Var; Origin : Atomic_Relation)
+         is
+         begin
+            if Antecedents (Var.Id) = null then
+               Antecedents (Var.Id) := Origin;
+               To_Visit.Append (Var);
+            end if;
+         end Register_Visit;
+      begin
+         --  If not already done, construct the unification graph
+         if Unify_Graph = null then
+            Unify_Graph := Compute_Unification_Graph (Ctx);
+         end if;
+
+         --  Now implement a simple DFS traversal: traverse the unification
+         --  graph computed above and starting from ``From`` until we stumble
+         --  upon the ``To`` variable. At this point, we can retrace the path
+         --  unifying ``From`` and ``To`` using the ``Antecedents`` array.
+
+         To_Visit.Append (From);
+         while not To_Visit.Is_Empty loop
+            declare
+               V : constant Logic_Var := To_Visit.Pop;
+            begin
+               exit when V = To;
+               for U of Unify_Graph.all (V.Id) loop
+                  declare
+                     A  : constant Logic_Var := U.Atomic_Rel.Target;
+                     B  : constant Logic_Var := U.Atomic_Rel.Unify_From;
+                  begin
+                     if V = A then
+                        Register_Visit (B, U);
+                     elsif V = B  then
+                        Register_Visit (A, U);
+                     end if;
+                  end;
+               end loop;
+            end;
+         end loop;
+         To_Visit.Clear;
+         Retrace_Path;
+      end Mark_Unifying_Path;
+   begin
+      if Solv_Trace.Is_Active then
+         Solv_Trace.Trace ("Because of");
+         Solv_Trace.Increase_Indent;
+      end if;
+
+      --  Find out why the given ``Failed_Atom`` failed depending on its kind
+      case Failed_Atom.Atomic_Rel.Kind is
+         when Assign =>
+            --  An ``Assign``atom must have failed because there was already a
+            --  previous assignment to the same variable. So, include that
+            --  previous assignment in the resulting clause using the
+            --  ``Mark_Assignment`` helper.
+            Mark_Assignment (Failed_Atom.Atomic_Rel.Target);
+
+         when Propagate =>
+            --  An ``Propagate`` failed either because the target variable
+            --  was already assigned an incompatible value, or because the
+            --  variable we are propagating from doesn't have the right value.
+            --  Mark the assignments of these two to account for both options.
+            Mark_Assignment (Failed_Atom.Atomic_Rel.From);
+            Mark_Assignment (Failed_Atom.Atomic_Rel.Target);
+
+         when N_Propagate =>
+            --  Same logic as for the ``Propagate`` case, but since we cannot
+            --  know which variable is problematic we must conservatively mark
+            --  all of them.
+            for Var of Failed_Atom.Atomic_Rel.Comb_Vars loop
+               Mark_Assignment (Var);
+            end loop;
+            Mark_Assignment (Failed_Atom.Atomic_Rel.Target);
+
+         when Predicate =>
+            --  A ``Predicate`` most probably failed because the variable
+            --  did not hold the expected value. So, we must prevent the atoms
+            --  that led to this assignment from appearing again in the model.
+            Mark_Assignment (Failed_Atom.Atomic_Rel.Target);
+
+         when N_Predicate =>
+            --  Same logic as for the ``Predicate`` case, but since we cannot
+            --  know which variable is problematic we must conservatively mark
+            --  all of them.
+            for Var of Failed_Atom.Atomic_Rel.Vars loop
+               Mark_Assignment (Var);
+            end loop;
+
+         when others =>
+            --  Other atom kinds cannot happen here
+            raise Program_Error;
+      end case;
+      Add_Conflict (Failed_Atom);
+
+      To_Visit.Destroy;
+      Unified.Destroy;
+
+      if Solv_Trace.Is_Active then
+         Solv_Trace.Decrease_Indent;
+      end if;
+
+      return Reason.Build;
+   end Explain_Contradiction;
 
    --------------------
    -- Evaluate_Atoms --
@@ -835,7 +1393,15 @@ package body Langkit_Support.Adalog.Solver is
 
    function Evaluate_Atoms
      (Ctx          : in out Solving_Context;
-      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array) return Boolean is
+      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array;
+      Explanation  : in out AdaSAT.Builders.Formula_Builder) return Boolean
+   is
+      use AdaSAT;
+
+      Max_Index    : Positive := 1;
+      Unify_Graph  : Unification_Graph_Access := null;
+      Success      : Boolean := True;
+      Invalid_Vars : Index_Set := (Ctx.Vars'Range => False);
    begin
       --  If we have a timeout, apply it
 
@@ -846,104 +1412,58 @@ package body Langkit_Support.Adalog.Solver is
          Ctx.Timeout := Ctx.Timeout - Sorted_Atoms'Length;
       end if;
 
-      --  Evaluate each individual atom
-
+      --  Evaluate each individual atom. Note that we don't stop as soon as
+      --  one failing atom has been found. Ideally, we want to find several
+      --  independent contradictions in a single round to make the most out of
+      --  each SAT model. However, by doing that, we must be careful not to
+      --  do unnecessary computations (e.g. evaluating predicates although we
+      --  know its basic block is already in a contradiction, etc.) and not
+      --  derive the same explanation (or a subset of another explanation)
+      --  multiple times, hence the important use of ``Invalid_Vars``,
+      --  ``Explanation.Is_Feasible`` and ``Add_Simplify`` instead of ``Add``.
       for Atom of Sorted_Atoms loop
-         if not Solve_Atomic (Atom) then
+         if Atom.Atomic_Rel.Kind in Predicate and then
+            (Invalid_Vars (Id (Atom.Atomic_Rel.Target))
+             or else not Explanation.Is_Feasible (+Ctx.Atom_Map (Atom.Id)))
+         then
+            null;
+         elsif
+            Atom.Atomic_Rel.Kind in N_Predicate and then
+            ((for some V of Atom.Atomic_Rel.Vars => Invalid_Vars (Id (V)))
+             or else not Explanation.Is_Feasible (+Ctx.Atom_Map (Atom.Id)))
+         then
+            null;
+         elsif
+            Atom.Atomic_Rel.Kind in Propagate and then
+            (Invalid_Vars (Id (Atom.Atomic_Rel.From))
+             or else not Explanation.Is_Feasible (+Ctx.Atom_Map (Atom.Id)))
+         then
+            Invalid_Vars (Id (Atom.Atomic_Rel.Target)) := True;
+         elsif
+            Atom.Atomic_Rel.Kind in N_Propagate and then
+            ((for some V of Atom.Atomic_Rel.Comb_Vars => Invalid_Vars (Id (V)))
+             or else not Explanation.Is_Feasible (+Ctx.Atom_Map (Atom.Id)))
+         then
+            Invalid_Vars (Id (Atom.Atomic_Rel.Target)) := True;
+         elsif not Solve_Atomic (Atom) then
             if Solv_Trace.Is_Active then
                Solv_Trace.Trace ("Failed on " & Image (Atom));
             end if;
 
-            return False;
+            Success := False;
+            Explanation.Add_Simplify (Explain_Contradiction
+              (Ctx, Sorted_Atoms (1 .. Max_Index - 1), Atom,
+               Unify_Graph, Invalid_Vars));
          end if;
+         Max_Index := Max_Index + 1;
       end loop;
 
-      return True;
-   end Evaluate_Atoms;
-
-   -----------------------
-   -- Has_Contradiction --
-   -----------------------
-
-   function Has_Contradiction
-     (Atoms, Unifies : Atomic_Relation_Vector;
-      Vars           : Logic_Var_Array;
-      Ctx            : in out Solving_Context) return Boolean
-   is
-      Had_Exception : Boolean := False;
-      Exc           : Exception_Occurrence;
-
-      Result : Boolean;
-   begin
-      Ctx.Sort_Ctx.Has_Contradiction_Counter :=
-        Ctx.Sort_Ctx.Has_Contradiction_Counter + 1;
-
-      if Solv_Trace.Is_Active then
-         Solv_Trace.Increase_Indent
-           ("Looking for a contradiction (number"
-            & Ctx.Sort_Ctx.Has_Contradiction_Counter'Image & ")");
-         Solv_Trace.Trace (Image (Atoms));
+      if Unify_Graph /= null then
+         Destroy_Unification_Graph (Unify_Graph);
       end if;
 
-      declare
-         use Atomic_Relation_Vectors;
-         Dummy        : Boolean;
-         Sorted_Atoms : constant Elements_Array :=
-           Topo_Sort (Atoms, Unifies, Vars, Ctx.Sort_Ctx, Dummy);
-      begin
-         if Solv_Trace.Is_Active then
-            Solv_Trace.Trace ("After partial topo sort");
-            Solv_Trace.Trace (Image (Sorted_Atoms));
-         end if;
-
-         --  Once the partial topological sort has been done, we can just
-         --  run the linear evaluator to check if there is a contradiction.
-         --
-         --  Note that we must catch and hide here all exceptions that
-         --  predicates/converters might raise during the evaluation: while it
-         --  is ok during the relation solving to let them abort the
-         --  resolution, ``Has_Contradiction`` is used to simplify the
-         --  relation: we do not want to abort the simplification process. In
-         --  this case, even though we know that the solver will later fail
-         --  evaluating the same atom, we cannot optimize it out to preserve
-         --  the order in which the solver finds solutions.
-         --
-         --  Do not catch the Timeout_Error exception, as it is not supposed to
-         --  be raised by predicates: it's the solver that aborts solving.
-
-         begin
-            Result := not Evaluate_Atoms (Ctx, Sorted_Atoms);
-         exception
-            when Timeout_Error =>
-               raise;
-
-            when E : others =>
-               Save_Occurrence (Exc, E);
-               Had_Exception := True;
-               Result := False;
-         end;
-
-         if Solv_Trace.Is_Active then
-            if Had_Exception then
-               Solv_Trace.Trace
-                 (Exc,
-                  "Got an exception, considering no contradiction was found:"
-                  & ASCII.LF);
-            elsif Result then
-               Solv_Trace.Trace ("Contradiction found");
-            else
-               Solv_Trace.Trace ("No contradiction found");
-            end if;
-         end if;
-
-         if Solv_Trace.Is_Active then
-            Solv_Trace.Decrease_Indent;
-         end if;
-
-         Cleanup_Aliases (Vars);
-         return Result;
-      end;
-   end Has_Contradiction;
+      return Success;
+   end Evaluate_Atoms;
 
    --------------
    -- Used_Var --
@@ -1040,365 +1560,6 @@ package body Langkit_Support.Adalog.Solver is
       Self := null;
    end Dec_Ref;
 
-   --------------------
-   -- Solve_Compound --
-   --------------------
-
-   function Solve_Compound
-     (Self : Compound_Relation; Ctx : in out Solving_Context) return Boolean
-   is
-      Comp : Compound_Relation_Type renames Self.Compound_Rel;
-
-      function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean;
-      --  Try to solve the given sequence of atoms. Return whether no valid
-      --  solution was found (so return False on success).
-
-      function Process_Atom (Self : Atomic_Relation) return Boolean;
-      --  Process one atom, whether we are in an ``All`` or ``Any`` branch.
-      --  Returns whether we should abort current path or not, in the case of
-      --  an ``All`` relation.
-
-      function Recurse return Boolean;
-      --  If ``Ctx.Anys`` is empty, just try to evaluate ``Ctx.Atoms`` and
-      --  return the result. Otherwise, recurse on ``Any``'s head, keeping the
-      --  tail for the recursion.
-
-      function Cleanup (Val : Boolean) return Boolean;
-      --  Cleanup helper to call before exitting ``Solve_Compound``
-
-      procedure Branch_Cleanup;
-      --  Cleanup helper to call after having processed an ``Any``
-      --  sub-relation.
-
-      procedure Create_Aliases;
-      --  Shortcut to create aliases from ``Ctx.Unifies``
-
-      procedure Cleanup_Aliases;
-      --  Shortcut to cleanup aliases in ``Ctx.Vars``
-
-      ------------------
-      -- Try_Solution --
-      ------------------
-
-      function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean is
-
-         function Cleanup (Val : Boolean) return Boolean;
-         --  Helper for early abort: cancel the indentation increase in
-         --  Solv_Trace and return Val.
-
-         -------------
-         -- Cleanup --
-         -------------
-
-         function Cleanup (Val : Boolean) return Boolean is
-         begin
-            Solv_Trace.Decrease_Indent;
-            return Val;
-         end Cleanup;
-
-      begin
-         if Solv_Trace.Is_Active then
-            Solv_Trace.Increase_Indent ("In try solution");
-            Solv_Trace.Trace (Image (Atoms));
-         end if;
-         Ctx.Tried_Solutions := Ctx.Tried_Solutions + 1;
-
-         Sol_Trace.Trace ("Tried solutions: " & Ctx.Tried_Solutions'Image);
-
-         declare
-            use Atomic_Relation_Vectors;
-            Sorting_Error : Boolean;
-            Sorted_Atoms  : constant Elements_Array :=
-              Topo_Sort (Atoms,
-                         Ctx.Unifies,
-                         Ctx.Vars.all,
-                         Ctx.Sort_Ctx,
-                         Sorting_Error);
-         begin
-            --  There was an error in the topo sort: continue to next potential
-            --  solution.
-            if Sorting_Error then
-               return Cleanup (True);
-            end if;
-
-            if Solv_Trace.Is_Active then
-               Solv_Trace.Trace ("After topo sort");
-               Solv_Trace.Trace (Image (Sorted_Atoms));
-            end if;
-
-            --  Once the topological sort has been done, we just have to solve
-            --  every relation in order. Abort if one doesn't solve.
-            if not Evaluate_Atoms (Ctx, Sorted_Atoms) then
-               return Cleanup (True);
-            end if;
-
-            if Sol_Trace.Is_Active then
-               Sol_Trace.Trace ("Valid solution");
-               Sol_Trace.Trace (Image (Sorted_Atoms));
-            end if;
-
-            --  All atoms have correctly solved: we have found a solution: let
-            --  the user defined callback know and decide if we should continue
-            --  exploring the solution space.
-            return Cleanup (Ctx.Cb (Ctx.Vars.all));
-         end;
-      end Try_Solution;
-
-      Initial_Atoms_Length   : Natural renames Ctx.Atoms.Last_Index;
-      Initial_Unifies_Length : Natural renames Ctx.Unifies.Last_Index;
-      Initial_Anys_Length    : Natural renames Ctx.Anys.Last_Index;
-
-      --------------------
-      -- Create_Aliases --
-      --------------------
-
-      procedure Create_Aliases is
-      begin
-         Create_Aliases (Ctx.Vars.all, Ctx.Unifies);
-      end Create_Aliases;
-
-      ---------------------
-      -- Cleanup_Aliases --
-      ---------------------
-
-      procedure Cleanup_Aliases is
-      begin
-         Cleanup_Aliases (Ctx.Vars.all);
-      end Cleanup_Aliases;
-
-      --------------------
-      -- Branch_Cleanup --
-      --------------------
-
-      procedure Branch_Cleanup is
-      begin
-         Ctx.Atoms.Cut (Initial_Atoms_Length);
-         Ctx.Unifies.Cut (Initial_Unifies_Length);
-         Ctx.Anys.Cut (Initial_Anys_Length);
-      end Branch_Cleanup;
-
-      -------------
-      -- Cleanup --
-      -------------
-
-      function Cleanup (Val : Boolean) return Boolean is
-      begin
-         --  Unalias every var that was aliased
-         Cleanup_Aliases;
-
-         Branch_Cleanup;
-         Trav_Trace.Decrease_Indent;
-         return Val;
-      end Cleanup;
-
-      ------------------
-      -- Process_Atom --
-      ------------------
-
-      function Process_Atom (Self : Atomic_Relation) return Boolean is
-         Atom : Atomic_Relation_Type renames Self.Atomic_Rel;
-      begin
-         if Atom.Kind = Unify then
-            if Atom.Unify_From /= Atom.Target then
-               Ctx.Unifies.Append (Self);
-            end if;
-            return True;
-
-         elsif Atom.Kind = True then
-            return True;
-
-         elsif Atom.Kind = False then
-            return False;
-         end if;
-
-         Ctx.Atoms.Append (Self);
-         return True;
-      end Process_Atom;
-
-      -------------
-      -- Recurse --
-      -------------
-
-      function Recurse return Boolean is
-         Head   : Any_Rel;
-         Result : Boolean;
-      begin
-         if Trav_Trace.Is_Active then
-            Trav_Trace.Trace ("Before recursing in Solve_Recurse");
-            Trav_Trace.Trace (Image (Ctx.Atoms));
-            Trav_Trace.Trace (Image (Ctx.Anys));
-         end if;
-
-         if not Ctx.Anys.Is_Empty then
-
-            --  The relation we are trying to solve here is the equivalent of::
-            --
-            --     Ctx.Atoms & All (Ctx.Anys)
-            --
-            --  Exploring solutions for this complex relation is not linear: we
-            --  need recursion. Start with the head of ``Ctx.Anys``::
-            --
-            --     Ctx.Atoms & Head (Ctx.Anys)
-            --
-            --  And leave the rest for later:::
-            --
-            --     Ctx.Atoms & Tail (Ctx.Anys)
-
-            Head := Ctx.Anys.Pop;
-            begin
-               Result := Solve_Compound (Head, Ctx);
-
-               --  Just like the above call to ``Solve_Compound`` is
-               --  supposed to leave upon return ``Ctx.Anys`` as it was at
-               --  the beginning of the call, we should restore it here
-               --  before returning to the state it was when ``Recurse`` was
-               --  called.
-
-            exception
-               when others =>
-                  Ctx.Anys.Append (Head);
-                  raise;
-            end;
-            Ctx.Anys.Append (Head);
-
-         else
-            --  We are currently exploring only one alternative: just
-            --  look for a solution in ``Ctx.Atoms``.
-
-            begin
-               Result := Try_Solution (Ctx.Atoms);
-            exception
-               when others =>
-                  Cleanup_Aliases;
-                  raise;
-            end;
-            Cleanup_Aliases;
-         end if;
-         return Result;
-      end Recurse;
-
-   begin
-      Trav_Trace.Increase_Indent ("In Solve_Compound " & Self.Kind'Image);
-
-      case Comp.Kind is
-
-      --  This is a conjunction: We want to *inline* every possible combination
-      --  of relations contained by disjunctions, to get to every possible
-      --  solution. We're going to do that by:
-      --
-      --  1. Add atoms from this ``All`` relation to our already accumulated
-      --     list of atoms.
-      --
-      --  2. Add disjunctions from this relation to our list of disjunctions
-      --     that we need to explore.
-      --
-      --  Explore every possible alternative created by disjunctions, by
-      --  recursing on them.
-
-      when Kind_All =>
-         --  First step: gather ``Any`` relations and atoms in their own
-         --  vectors (``Anys`` and ``Ctx.Atoms``).
-
-         for Sub_Rel of Comp.Rels loop
-            case Sub_Rel.Kind is
-            when Compound =>
-               --  The ``Create_All`` inlines the sub-relations of ``All``
-               --  relations passed to it in the relation it returns. For
-               --  instance::
-               --
-               --     Create_All ((Create_All ((A, B)), C))
-               --
-               --  is equivalent to::
-               --
-               --     Create_All ((A, B, C))
-               --
-               --  ``Self`` is an ``All`` relation, so ``Sub_Rel`` cannot be an
-               --  ``All`` as well, so it if is compound, it must be an
-               --  ``Any``.
-               pragma Assert (Sub_Rel.Compound_Rel.Kind = Kind_Any);
-               Ctx.Anys.Append (Sub_Rel);
-
-            when Atomic =>
-               if not Process_Atom (Sub_Rel) then
-                  return Cleanup (True);
-               end if;
-            end case;
-         end loop;
-
-         if Ctx.Cut_Dead_Branches then
-            --  Exponential resolution optimization: check if we have a
-            --  contradiction in the list of atoms we have accumulated so far.
-            --
-            --  TODO??? PROBLEM: While this avoids exponential resolutions, it
-            --  also makes the default algorithm quadratic (?), since we
-            --  re-iterate on all atoms at every depth of the recursion.  What
-            --  we could do is:
-            --
-            --  1. Either not activate this opt for certain trees.
-            --
-            --  2. Either try to check only for new atoms. This seems
-            --     hard/impossible since new constraints are added at every
-            --     recursion, so old atoms need to be checked again for
-            --     completeness. But maybe there is a way. Investigate later.
-
-            Create_Aliases;
-            if Has_Contradiction
-              (Ctx.Atoms, Ctx.Unifies, Ctx.Vars.all, Ctx)
-            then
-               if Solv_Trace.Active then
-                  Solv_Trace.Trace ("Aborting due to exp res optim");
-               end if;
-               return Cleanup (True);
-            end if;
-            Cleanup_Aliases;
-         end if;
-
-         return Cleanup (Recurse);
-
-      when Kind_Any =>
-         --  Recurse for each ``Any`` alternative (i.e. sub-relation)
-
-         for Sub_Rel of Comp.Rels loop
-            case Sub_Rel.Kind is
-               when Atomic =>
-                  pragma Assert (Sub_Rel.Atomic_Rel.Kind /= False);
-
-                  --  Add ``Sub_Rel`` to ``Ctx.Atoms``
-
-                  declare
-                     Dummy : Boolean := Process_Atom (Sub_Rel);
-                  begin
-                     null;
-                  end;
-
-                  if not Recurse then
-                     return Cleanup (False);
-                  end if;
-
-               when Compound =>
-                  --  See the corresponding assertion in the ``Kind_All``
-                  --  section.
-                  pragma Assert (Sub_Rel.Compound_Rel.Kind = Kind_All);
-
-                  if not Solve_Compound (Sub_Rel, Ctx) then
-                     return Cleanup (False);
-                  end if;
-            end case;
-
-            Branch_Cleanup;
-         end loop;
-
-         return Cleanup (True);
-      end case;
-   exception
-      when others =>
-         declare
-            Dummy : Boolean := Cleanup (True);
-         begin
-            raise;
-         end;
-   end Solve_Compound;
-
    ------------------
    -- Trace_Timing --
    ------------------
@@ -1411,6 +1572,452 @@ package body Langkit_Support.Adalog.Solver is
    end Trace_Timing;
 
    -----------
+   -- Check --
+   -----------
+
+   function Check
+     (Ctx            : in out Solving_Context;
+      Model          : AdaSAT.Model;
+      Contradictions : in out AdaSAT.Formulas.Formula) return Boolean
+   is
+      use AdaSAT;
+      use AdaSAT.Formulas;
+
+      function Cleanup (Result : Boolean) return Boolean;
+      --  Helper used to deallocate memory or reset relevant data structures
+      --  before returning. Returns the given boolean.
+
+      procedure Fail_Unset_Var;
+      --  Populate ``Contradictions`` by generating clauses that prevent
+      --  subsequent models from containing the variables that were found unset
+      --  during the topological sort (see ``Ctx.Unset_Var``).
+
+      procedure Fail;
+      --  Populate ``Contradictions`` so as to invalidate this exact model
+      --  only.
+
+      -------------
+      -- Cleanup --
+      -------------
+
+      function Cleanup (Result : Boolean) return Boolean is
+      begin
+         Cleanup_Aliases (Ctx.Vars.all);
+         if Solv_Trace.Is_Active then
+            if Contradictions.Length > 0 then
+               Solv_Trace.Trace ("Learning the following clauses:");
+               Solv_Trace.Trace (Image (Contradictions));
+            end if;
+         end if;
+         return Result;
+      end Cleanup;
+
+      --------------------
+      -- Fail_Unset_Var --
+      --------------------
+
+      procedure Fail_Unset_Var is
+         Result : AdaSAT.Builders.Clause_Builder;
+         Added  : Boolean := False;
+      begin
+         --  For a given variable that was used but unset, causing topological
+         --  sort to fail, we want to construct a contradiction roughly saying
+         --  if we want to use this variable, then we need to have at least
+         --  one atom that defines it! More formally, we want to build the
+         --  following equation
+         --  ``u_1 & u_2 & ... & u_m => a_1 | a _2 | ... | a_n``
+         --  or in CNF,
+         --  ``!u_1 | !u_2 | ... | !u_m | a_1 | a_2 | .. | a_n``
+         --  Where: u_i is the i'th atom that unifies this variable with
+         --  another one, and a_j is the j'th atom that assigns a value to that
+         --  variable.
+
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace ("Relevant unifiers:");
+         end if;
+
+         --  So, first include the unifying atoms...
+         for U of Ctx.Unifies loop
+            for V of Ctx.Sort_Ctx.Unset_Vars loop
+               if Id (U.Atomic_Rel.Target) = Id (V) then
+                  if Solv_Trace.Is_Active then
+                     Solv_Trace.Trace (Image (U));
+                  end if;
+
+                  Result.Add_Simplify (-Ctx.Atom_Map (U.Id));
+                  Added := True;
+                  exit;
+               end if;
+            end loop;
+         end loop;
+
+         if not Added then
+            --  If there was no Unify clause, simply revoke the given model
+            --  without explanation.
+            Fail;
+            return;
+         end if;
+
+         --  Then find the atoms that assign a value to those variables
+         for Block_Id in 1 .. Ctx.Blocks.Length loop
+            if Model (Variable (Block_Id)) in False then
+               Test_Block :
+               for R of Ctx.Blocks.Get (Block_Id) loop
+                  declare
+                     Atom : Atomic_Relation_Type renames R.Atomic_Rel;
+                  begin
+                     for V of Ctx.Sort_Ctx.Unset_Vars loop
+                        case Atom.Kind is
+                           when Unify =>
+                              if Id (Atom.Target) = Id (V) or else
+                                 Id (Atom.Unify_From) = Id (V)
+                              then
+                                 Result.Add_Simplify (+Variable (Block_Id));
+                                 exit Test_Block;
+                              end if;
+                           when Assign | Propagate | N_Propagate =>
+                              if Id (Atom.Target) = Id (V) then
+                                 Result.Add_Simplify (+Variable (Block_Id));
+                                 exit Test_Block;
+                              end if;
+                           when others =>
+                              null;
+                        end case;
+                     end loop;
+                  end;
+               end loop Test_Block;
+            end if;
+         end loop;
+
+         Contradictions.Append (Result.Build);
+      end Fail_Unset_Var;
+
+      ----------
+      -- Fail --
+      ----------
+
+      procedure Fail is
+         New_Clause : constant Clause :=
+            new Literal_Array (1 .. Ctx.Blocks.Length);
+      begin
+         for I in New_Clause'Range loop
+            declare
+               V : constant Variable := Variable (I);
+            begin
+               New_Clause (I) := (if Model (V) in True then -V else +V);
+            end;
+         end loop;
+         Contradictions.Append (New_Clause);
+      end Fail;
+   begin
+      Ctx.Unifies.Clear;
+      Ctx.Atoms.Clear;
+
+      if Solv_Trace.Is_Active then
+         Solv_Trace.Trace ("Trying with: " & Image (Model));
+      end if;
+      for Block_Id in 1 .. Ctx.Blocks.Length loop
+         if Model (Variable (Block_Id)) in True then
+            for R of Ctx.Blocks.Get (Block_Id) loop
+               declare
+                  Atom : Atomic_Relation_Type renames R.Atomic_Rel;
+               begin
+                  if Atom.Kind = Unify then
+                     if Atom.Unify_From /= Atom.Target then
+                        Ctx.Unifies.Append (R);
+                     end if;
+                  else
+                     Ctx.Atoms.Append (R);
+                  end if;
+               end;
+            end loop;
+         end if;
+      end loop;
+      if Solv_Trace.Is_Active then
+         for R of Ctx.Atoms loop
+            Solv_Trace.Trace (Image (R));
+         end loop;
+      end if;
+
+      declare
+         use Atomic_Relation_Vectors;
+         Sorting_Error : Boolean;
+         Explanation   : Builders.Formula_Builder;
+         Sorted_Atoms  : constant Elements_Array :=
+           Topo_Sort (Ctx.Atoms,
+                      Ctx.Unifies,
+                      Ctx.Vars.all,
+                      Ctx.Sort_Ctx,
+                      Sorting_Error);
+      begin
+         --  There was an error in the topo sort: continue to next potential
+         --  solution.
+         if Sorting_Error then
+            if Solv_Trace.Is_Active then
+               Solv_Trace.Trace ("Topo fail!");
+            end if;
+            begin
+               if not Evaluate_Atoms (Ctx, Sorted_Atoms, Explanation) then
+                  Contradictions := Explanation.Build;
+                  return Cleanup (False);
+               elsif not Ctx.Sort_Ctx.Unset_Vars.Is_Empty then
+                  Fail_Unset_Var;
+                  return Cleanup (False);
+               end if;
+            exception
+               when Timeout_Error =>
+                  raise;
+               when others =>
+                  null;
+            end;
+            Fail;
+            return Cleanup (False);
+         end if;
+
+         --  Once the topological sort has been done, we just have to solve
+         --  every relation in order. Abort if one doesn't solve.
+         if not Evaluate_Atoms (Ctx, Sorted_Atoms, Explanation) then
+            Contradictions := Explanation.Build;
+            return Cleanup (False);
+         end if;
+
+         --  All atoms have correctly solved: we have found a solution: let
+         --  the user defined callback know and decide if we should continue
+         --  exploring the solution space.
+         if Ctx.Cb (Ctx.Vars.all) then
+            Fail;
+            return Cleanup (False);
+         end if;
+      end;
+      return Cleanup (True);
+   end Check;
+
+   ---------------------
+   -- Encode_Relation --
+   ---------------------
+
+   function Encode_Relation
+     (Self           : Compound_Relation;
+      Ctx            : in out Solving_Context;
+      Variable_Count : out AdaSAT.Variable_Or_Null)
+      return AdaSAT.Formulas.Formula
+   is
+      use AdaSAT;
+
+      Var_Id   : Variable := 1;
+      --  The counter used to assign a unique variable to each basic block
+
+      Problem  : AdaSAT.Builders.Formula_Builder;
+      --  The builder for the resulting formula
+
+      procedure Process_Atom
+        (R : Atomic_Relation; From_Block_Id : Variable);
+      --  Update the necessary data structures to include the given atomic
+      --  relation inside the basic block represented by ``Block_Id``.
+
+      procedure Process_All
+        (R : Compound_Relation; From_Block_Id : Variable);
+      --  Process the given relation (assuming its a compound one) as if it
+      --  was an ``All``. That is, include all its inner atomic relations in
+      --  the given basic block id.
+
+      procedure Process_Any
+        (R : Compound_Relation; From_Block_Id : Variable);
+      --  Process the given relation (assuming its a compound one) as if it
+      --  was an ``Any``. That is allocate new basic blocks for its inner
+      --  branches, populate the SAT formula with constraints implementing
+      --  the semantics of Adalog ``Any``relations, and recursively call
+      --  ``Create_Problem`` for the branches.
+
+      procedure Create_Problem
+        (R : Relation; From_Block_Id : Variable);
+      --  Encode the given relation by populate the ``Problem`` formula builder
+      --  with constraints implementing the semantics of ``All`` and ``Any``
+      --  relations.
+
+      ------------------
+      -- Process_Atom --
+      ------------------
+
+      procedure Process_Atom
+        (R : Atomic_Relation; From_Block_Id : Variable)
+      is
+         Index : constant Natural := Natural (From_Block_Id);
+      begin
+         --  Make sure there is enough room in ``Ctx.Blocks`` to access the
+         --  blocks at the given Id.
+         while Ctx.Blocks.Length < Index loop
+            Ctx.Blocks.Append (Atomic_Relation_Vectors.Empty_Vector);
+         end loop;
+
+         if R.Atomic_Rel.Kind in False then
+            --  If this is a ``False`` relation, simply add the constraint that
+            --  this basic block cannot be part of the solution.
+            Problem.Add (new Literal_Array'(1 => -From_Block_Id));
+         else
+            --  Populate the data structure to account for the fact that the
+            --  given relation belongs to the basic block given by its Id.
+            Ctx.Blocks.Get_Access (Index).Append (R);
+            Ctx.Atom_Map (R.Id) := From_Block_Id;
+         end if;
+      end Process_Atom;
+
+      -----------------
+      -- Process_All --
+      -----------------
+
+      procedure Process_All
+        (R : Compound_Relation; From_Block_Id : Variable)
+      is
+      begin
+         --  TODO: removing ``reverse`` actually improves performance, but
+         --  causes some issues in Libadalang because some equations that
+         --  previously resolved to one of the possible solutions now
+         --  resolve to another one.
+         --  We need to fix equations in LAL to remove ambiguities in legal
+         --  code.
+         for I in reverse 1 .. R.Compound_Rel.Rels.Length loop
+            Create_Problem (R.Compound_Rel.Rels.Get (I), From_Block_Id);
+         end loop;
+      end Process_All;
+
+      -----------------
+      -- Process_Any --
+      -----------------
+
+      procedure Process_Any
+        (R : Relation; From_Block_Id : Variable)
+      is
+         Rels : Relation_Vectors.Vector renames R.Compound_Rel.Rels;
+      begin
+         if Rels.Length = 0 then
+            --  An ``Any`` with 0 relations is a ``False`` relation
+            Problem.Add (new Literal_Array'(1 => -From_Block_Id));
+         elsif Rels.Length = 1 then
+            --  An ``Any`` with 1 relation is the same as its inner relation
+            --  appearing by itself.
+            Create_Problem (Rels.Get (1), From_Block_Id);
+         else
+            declare
+               Cur_Branch_Id : Variable := Var_Id + 1;
+               --  Holds the Id of the branch we are going to handle next
+
+               CB : AdaSAT.Builders.Clause_Builder;
+               --  This builder is used to generate the constraint that if
+               --  ``From_Block_Id`` is True, then at least one of the branches
+               --  of the ``Any`` must be taken.
+            begin
+               CB.Reserve (Rels.Length);
+               Var_Id := Var_Id + Variable (Rels.Length);
+
+               --  Generate the constraint that only one branch can be taken
+               Problem.Add_At_Most_One (Cur_Branch_Id, Var_Id);
+
+               if From_Block_Id /= 1 then
+                  CB.Add (-From_Block_Id);
+               end if;
+
+               for I in 1 .. Rels.Length loop
+                  --  If ``From_Block_Id`` is True, then this branch must be
+                  --  taken as well.
+                  CB.Add (+Cur_Branch_Id);
+
+                  --  Recursively encode the problem of the branch
+                  Create_Problem (Rels.Get (I), Cur_Branch_Id);
+
+                  --  Generate the constraints that no branch should be
+                  --  taken if the ``From_Block_Id`` is not True. There is
+                  --  no need to generate this constraint for the ``Anys``
+                  --  that appear in the top-level relation, since that one
+                  --  is necessarily True.
+                  if From_Block_Id /= 1 then
+                     Problem.Add (new Literal_Array'
+                       ((+From_Block_Id, -Cur_Branch_Id)));
+                  end if;
+
+                  Cur_Branch_Id := Cur_Branch_Id + 1;
+               end loop;
+
+               Problem.Add (CB.Build);
+            end;
+         end if;
+      end Process_Any;
+
+      --------------------
+      -- Create_Problem --
+      --------------------
+
+      procedure Create_Problem
+        (R : Relation; From_Block_Id : Variable)
+      is
+      begin
+         case R.Kind is
+            when Atomic =>
+               Process_Atom (R, From_Block_Id);
+            when Compound =>
+               case R.Compound_Rel.Kind is
+                  when Kind_All =>
+                     Process_All (R, From_Block_Id);
+                  when Kind_Any =>
+                     Process_Any (R, From_Block_Id);
+               end case;
+         end case;
+      end Create_Problem;
+   begin
+      Create_Problem (Self, Var_Id);
+
+      --  Make sure all block ids can be used to access the ``Ctx.Blocks``
+      --  vector.
+      while Ctx.Blocks.Length < Natural (Var_Id) loop
+         Ctx.Blocks.Append (Atomic_Relation_Vectors.Empty_Vector);
+      end loop;
+
+      Variable_Count := Variable_Or_Null (Ctx.Blocks.Length);
+
+      --  Force the top-level relation to be set, if it exists
+      if Variable_Count > 0 then
+         Problem.Add (new Literal_Array'(1 => +1));
+      end if;
+
+      return Problem.Build;
+   end Encode_Relation;
+
+   ----------------
+   -- Solve_DPLL --
+   ----------------
+
+   function Solve_DPLL
+     (Self : Compound_Relation; Ctx : in out Solving_Context) return Boolean
+   is
+      use AdaSAT;
+      use AdaSAT.Formulas;
+
+      Var_Count : Variable_Or_Null;
+      Problem   : constant Formula := Encode_Relation (Self, Ctx, Var_Count);
+      Solution  : Model := (1 .. Var_Count => Unset);
+   begin
+      if Solv_Trace.Is_Active then
+         for I in 1 .. Ctx.Blocks.Length loop
+            Solv_Trace.Trace ("Block" & I'Image);
+            Solv_Trace.Increase_Indent;
+            for R of Ctx.Blocks.Get (I) loop
+               Solv_Trace.Trace (Image (R));
+            end loop;
+            Solv_Trace.Decrease_Indent;
+         end loop;
+         Solv_Trace.Trace (Var_Count'Image & " vs " & Ctx.Blocks.Length'Image);
+         Solv_Trace.Trace ("clauses:" & Problem.Length'Image);
+         Solv_Trace.Trace (Image (Problem));
+      end if;
+
+      return DPLL_Adalog.Solve
+        (Problem,
+         Ctx,
+         Solution,
+         Variable_Or_Null (Ctx.Blocks.Length));
+   end Solve_DPLL;
+
+   -----------
    -- Solve --
    -----------
 
@@ -1421,9 +2028,12 @@ package body Langkit_Support.Adalog.Solver is
       Solve_Options     : Solve_Options_Type := Default_Options;
       Timeout           : Natural := 0)
    is
+      pragma Unreferenced (Solve_Options);
+
       PRel   : Prepared_Relation;
       Rel    : Relation renames PRel.Rel;
       Ctx    : Solving_Context;
+      Max_Id : Natural;
       Ignore : Boolean;
 
       procedure Cleanup;
@@ -1436,44 +2046,22 @@ package body Langkit_Support.Adalog.Solver is
       procedure Cleanup is
       begin
          Destroy (Ctx);
-         Dec_Ref (Rel);
       end Cleanup;
 
    begin
+      PRel := Prepare_Relation (Self, Max_Id);
       if Solver_Trace.Is_Active then
          Solver_Trace.Trace ("Solving equation:");
-         Solver_Trace.Trace (Image (Self));
+         Solver_Trace.Trace (Image (Rel));
       end if;
-
-      PRel := Prepare_Relation (Self);
-      Ctx := Create (Solution_Callback'Unrestricted_Access.all, PRel.Vars);
+      Ctx := Create
+        (Solution_Callback'Unrestricted_Access.all, PRel.Vars, Max_Id);
       Ctx.Timeout := Timeout;
-      Ctx.Cut_Dead_Branches := Solve_Options.Cut_Dead_Branches;
 
       declare
          Start : constant Time := Clock;
       begin
-         case Rel.Kind is
-            when Compound =>
-               Ignore := Solve_Compound (Rel, Ctx);
-
-            when Atomic =>
-               --  We want to use a single entry point for the solver:
-               --  ``Solve_Compound``. Create a trivial compound relation to
-               --  wrap the given atom.
-
-               declare
-                  C : Relation := Create_All ((1 => Rel));
-               begin
-                  Ignore := Solve_Compound (C, Ctx);
-                  Dec_Ref (C);
-               exception
-                  when others =>
-                     Dec_Ref (C);
-                     raise;
-               end;
-         end case;
-
+         Ignore := Solve_DPLL (Rel, Ctx);
          Trace_Timing ("Solver", Start);
       end;
 
@@ -2030,24 +2618,6 @@ package body Langkit_Support.Adalog.Solver is
          when Unify =>
             return Image (Self.Unify_From) & " <-> " & Image (Self.Target);
       end case;
-   end Image;
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Self : Atomic_Relation_Vector) return String is
-   begin
-      return Image (Self.To_Array);
-   end Image;
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Self : Any_Relation_Vector) return String is
-   begin
-      return Image (Self.To_Array);
    end Image;
 
    ------------------
