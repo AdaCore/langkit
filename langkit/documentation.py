@@ -1752,7 +1752,7 @@ def make_formatter(
     wrapped paragraphs, the given ``line_prefix`` for each line, and given
     ``prefix`` and ``suffix``.
 
-    If the ``:typeref:`` Langkit directive is used in the docstring,
+    If the ``:typeref:`` Langkit role is used in the docstring,
     ``get_node_name`` will be used to translate the name to the proper name in
     the given language, and ``type_role_name`` will be used as the name for the
     type reference role in the given language.
