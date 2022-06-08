@@ -912,8 +912,8 @@ class Expr(LktNode):
         * Not part of a declaration annotation.
         * Not a defining identifier.
 
-        TODO: List  to be expanded probably to take into account grammar
-        expressions.
+        .. TODO: List to be expanded probably to take into account grammar
+           expressions.
         """
         return Not(Or(
             Entity.in_type_ref,
