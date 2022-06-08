@@ -591,12 +591,12 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
         append_line("", col(caret_line, Colors.RED + Colors.BOLD))
 
     # Append following lines up to ``lines_after`` lines
-    for line_nb, line in enumerate(
+    for cur_line_nb, cur_line in enumerate(
         source_buffer[line_nb + 1:
                       min(line_nb + lines_after + 1, len(source_buffer))],
         line_nb + 1
     ):
-        append_line(line_nb, line)
+        append_line(cur_line_nb, cur_line)
 
     return "".join(ret)
 
