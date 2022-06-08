@@ -1,5 +1,5 @@
 foo.lkt:5:16: error: Alternatives yield incompatible types: Sequence, Token
-4 |     element <- or(atom | sequence)
+5 |     element <- or(atom | sequence)
   |                ^^^^^^^^^^^^^^^^^^^
 
 Done

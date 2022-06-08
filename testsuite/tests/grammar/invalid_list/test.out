@@ -1,30 +1,30 @@
 == Token element ==
 token-element.lkt:4:38: error: List parsers only accept subparsers that yield AST nodes (Token provided here)
-3 |     @main_rule main_rule <- ListNode(list+(@number))
+4 |     @main_rule main_rule <- ListNode(list+(@number))
   |                                      ^^^^^^^^^^^^^^
 
 
 == Invalid list_cls ==
 invalid-list-cls.lkt:4:29: error: Bad generic type name: only ASTList is valid in this context
-3 |     @main_rule main_rule <- NoSuchGeneric[Example]+(Example("example"))
+4 |     @main_rule main_rule <- NoSuchGeneric[Example]+(Example("example"))
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == Invalid ASTList ==
 invalid-astlist.lkt:5:7: error: 2 type argument expected, got 3
-4 |       ASTList[FooNode, Example, Example]+(Example("example"))
+5 |       ASTList[FooNode, Example, Example]+(Example("example"))
   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == Non-list list_cls ==
 non-list-cls.lkt:5:29: error: Invalid list type for List parser: ListNode. Not a list type
-4 |     @main_rule main_rule <- ListNode+(num)
+5 |     @main_rule main_rule <- ListNode+(num)
   |                             ^^^^^^^^^^^^^^
 
 
 == Invalid element type in list_cls ==
 invalid-element-type.lkt:7:9: error: Invalid list type for List parser: sub-parser produces Num nodes while Example.list accepts only Example nodes
-6 |         ASTList[FooNode, Example]*(num)
+7 |         ASTList[FooNode, Example]*(num)
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 

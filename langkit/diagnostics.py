@@ -560,6 +560,8 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
 
     ret = []
 
+    # These line numbers are 0-based, so that they can be used as indexes in
+    # the list of lines.
     line_nb = highlight_sloc.line - 1
     start_offset = highlight_sloc.column - 1
     end_offset = highlight_sloc.end_column - 1
@@ -570,11 +572,18 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
     # Precompute the format string for the listing left column
     prefix_fmt = "{{: >{}}} | ".format(line_nb_width)
 
-    def append_line(line_nb: Union[int, str], line: str) -> None:
+    def append_line(line_nb: Opt[int], line: str) -> None:
         """
         Append a line to the source listing, given a line number and a line.
+
+        :param line_nb: 0-based line number corresponding to ``line``, or None
+            if no line number must be printed.
         """
-        ret.append(col(prefix_fmt.format(line_nb, line),
+        # Convert the 0-based line number to a 1-based one, which is what users
+        # need to see.
+        displayed_line_nb = "" if line_nb is None else str(line_nb + 1)
+
+        ret.append(col(prefix_fmt.format(displayed_line_nb, line),
                        Colors.BLUE + Colors.BOLD))
         ret.append(line)
         ret.append("\n")
@@ -588,7 +597,7 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
         for i in range(len(source_buffer[line_nb]))
     ).rstrip()
     if caret_line:
-        append_line("", col(caret_line, Colors.RED + Colors.BOLD))
+        append_line(None, col(caret_line, Colors.RED + Colors.BOLD))
 
     # Append following lines up to ``lines_after`` lines
     for cur_line_nb, cur_line in enumerate(

@@ -1,5 +1,5 @@
 test.lkt:4:29: error: Skip parsers can only create error nodes
-3 |     @main_rule main_rule <- skip(Example)
+4 |     @main_rule main_rule <- skip(Example)
   |                             ^^^^^^^^^^^^^
 
 Done

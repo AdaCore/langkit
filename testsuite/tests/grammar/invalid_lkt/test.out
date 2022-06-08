@@ -1,12 +1,12 @@
 == annotated_grammar_1.lkt ==
 annotated_grammar_1.lkt:4:24: error: Invalid annotation: foo
-3 | @with_lexer(foo_lexer) @foo grammar foo_grammar {
+4 | @with_lexer(foo_lexer) @foo grammar foo_grammar {
   |                        ^^^^
 
 
 == annotated_grammar_2.lkt ==
 annotated_grammar_2.lkt:4:13: error: reference to a lexer expected
-3 | @with_lexer(foo_grammar) grammar foo_grammar {
+4 | @with_lexer(foo_grammar) grammar foo_grammar {
   |             ^^^^^^^^^^^
 
 
@@ -15,19 +15,19 @@ Code generation was successful
 
 == invalid_decl.lkt ==
 invalid_decl.lkt:6:5: error: grammar declaration forbidden in grammar declaration
-5 |     @with_lexer(foo_lexer) grammar unexpected_decl {
+6 |     @with_lexer(foo_lexer) grammar unexpected_decl {
   |     ^
 
 
 == invalid_main_rule_annot.lkt ==
 invalid_main_rule_annot.lkt:5:5: error: This annotation accepts no argument
-4 |     @main_rule ("foo") main_rule <- Example("example")
+5 |     @main_rule ("foo") main_rule <- Example("example")
   |     ^^^^^^^^^^^^^^^^^^
 
 
 == invalid_token.lkt ==
 invalid_token.lkt:4:30: error: Cannot find entity `UnknownToken` in this scope
-3 |     @main_rule main_rule <- @UnknownToken
+4 |     @main_rule main_rule <- @UnknownToken
   |                              ^^^^^^^^^^^^
 
 
@@ -36,36 +36,36 @@ no_grammar.lkt: error: missing grammar
 
 == no_main_rule.lkt ==
 no_main_rule.lkt:4:24: error: main rule missing (@main_rule annotation)
-3 | @with_lexer(foo_lexer) grammar foo_grammar {
+4 | @with_lexer(foo_lexer) grammar foo_grammar {
 
 
 == several_main_rules.lkt ==
 several_main_rules.lkt:6:5: error: only one main rule allowed
-5 |     @main_rule main_rule2 <- Example("example")
+6 |     @main_rule main_rule2 <- Example("example")
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == transform_invalid_node.lkt ==
 transform_invalid_node.lkt:5:29: error: Cannot find entity `NoSuchNode` in this scope
-4 |     @main_rule main_rule <- NoSuchNode("example")
+5 |     @main_rule main_rule <- NoSuchNode("example")
   |                             ^^^^^^^^^^
 
 
 == two_grammar_files.lkt ==
 basic.lkt:4:1: error: only one grammar allowed (previous found at two_grammar_files.lkt:4:1)
-3 | @with_lexer(foo_lexer) grammar foo_grammar {
+4 | @with_lexer(foo_lexer) grammar foo_grammar {
   | ^
 
 
 == two_grammars.lkt ==
 two_grammars.lkt:7:1: error: only one grammar allowed (previous found at two_grammars.lkt:4:1)
-6 | @with_lexer(foo_lexer) grammar foo_grammar2 {
+7 | @with_lexer(foo_lexer) grammar foo_grammar2 {
   | ^
 
 
 == unknown_rule_annot.lkt ==
 unknown_rule_annot.lkt:6:5: error: Invalid annotation: foo
-5 |     @foo rule2 <- Example("example")
+6 |     @foo rule2 <- Example("example")
   |     ^^^^
 
 

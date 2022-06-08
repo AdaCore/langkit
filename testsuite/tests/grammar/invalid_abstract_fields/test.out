@@ -10,7 +10,7 @@ test.py:XXX: error: This node is concrete, yet it has abstract fields that are n
 
 == Abstract overriding concrete ==
 abstract-overriding-concrete.lkt:4:29: error: Transform parser generates 1 values, but ExampleHolder has 0 fields
-3 |     @main_rule main_rule <- ExampleHolder(Example("example"))
+4 |     @main_rule main_rule <- ExampleHolder(Example("example"))
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
@@ -19,7 +19,7 @@ test.py:XXX: error: Type of overriding field (FooNode) does not match type of ab
 
 == Free-standing null field ==
 free-standing-null-field.lkt:4:29: error: Transform parser generates 1 values, but ExampleHolder has 0 fields
-3 |     @main_rule main_rule <- ExampleHolder(Example("example"))
+4 |     @main_rule main_rule <- ExampleHolder(Example("example"))
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
