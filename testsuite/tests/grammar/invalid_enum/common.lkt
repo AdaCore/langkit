@@ -1,0 +1,8 @@
+import lexer_example
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+enum class Example : FooNode {
+    case Example1, Example2, Example3
+}
