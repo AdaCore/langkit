@@ -12,9 +12,17 @@ variables:
    # The dependency .gprs live here
    GPR_PROJECT_PATH: $CI_PROJECT_DIR/prefix/share/gpr
 
-# A GitLab pipeline is divided in several stages.
-# A stage may contain one or more jobs, run potentially in parallel.
-# Stages are run in sequence.
+# A GitLab pipeline is divided in several stages. A stage may contain one or
+# more jobs, run potentially in parallel. Stages are run in sequence.
+#
+# TODO: Because of the way stages and caches interact, the test stage of job J2
+# may run after the build stage of job J1. Since we store langkit_support and
+# langkit in caches, this means that test/J2 may actually run on sources from
+# J1, creating spurious errors.
+#
+# For now, just rebuild langkit_suppond and re-install langkit before each
+# stage to avoid this problem. On the longer term, we need to find how to
+# properly use caches.
 stages:
   - setup    # setup
   - build    # build
@@ -132,6 +140,9 @@ build-job:
       - setup-python
       - setup-gnat
    script:
+      # TODO: see the note above about stages and caches
+      - pip3 install .
+
       # Uninstall dependencies, so that gprinstall does not complain when we
       # try to install updates.
       - |
@@ -177,6 +188,10 @@ test:
       - setup-python
       - build-job
    script: |
+      # TODO: see the note above about stages and caches
+      pip install .
+      ./manage.py make --no-mypy
+
       eval `./manage.py setenv`
       ./manage.py test \
          --no-auto-path \
