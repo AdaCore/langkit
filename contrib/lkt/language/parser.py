@@ -1429,19 +1429,23 @@ class RefId(Id):
         return Entity.dot_expr_if_suffix.then(
             # The scope of its prefix if it is the suffix in a dotted name
             lambda de: de.prefix.designated_scope,
-        )._or(Entity.param_if_param_name.then(
-            # The scope of its called declaration if it's a parameter name in
-            # a CallExpr.
-            lambda p: p.call_expr.called_decl.call_scope
-        ))._or(Self.parent.cast(TokenRef).then(
-            # The scope of the grammar's lexer, if this is a RefId inside a
-            # TokenRef.
-            lambda _:
-            Entity.parents.find(lambda n: n.is_a(GrammarDecl))
-            .cast(GrammarDecl).lexer.children_env
-        ))._or(
-            # Its regular environment in other cases
-            Entity.children_env
+
+            default_val=Entity.param_if_param_name.then(
+                # The scope of its called declaration if it's a parameter name
+                # in a CallExpr.
+                lambda p: p.call_expr.called_decl.call_scope,
+
+                default_val=Self.parent.cast(TokenRef).then(
+                    # The scope of the grammar's lexer, if this is a RefId
+                    # inside a TokenRef.
+                    lambda _:
+                    Entity.parents.find(lambda n: n.is_a(GrammarDecl))
+                    .cast(GrammarDecl).lexer.children_env,
+
+                    # Its regular environment in other cases
+                    default_val=Entity.children_env,
+                ),
+            ),
         )
 
     @langkit_property()
