@@ -107,7 +107,18 @@ grammar foo_grammar {
 
         i + arr.length()
     }
+
+    @export fun test_struct(i: Int): Int = {
+        val result = MyStruct(a=i, b=i + 10);
+
+        result.a
+    }
 }
 
 class Example : FooNode implements TokenNode {
+}
+
+struct MyStruct {
+    a: Int
+    b: Int
 }

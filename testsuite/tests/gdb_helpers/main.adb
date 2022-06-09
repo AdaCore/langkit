@@ -44,6 +44,7 @@ begin
       Dummy_Int := N.P_Test_Arrays;
       Dummy_Int := N.P_Test_Vectors;
       Dummy_Int := N.P_Test_Tokens;
+      Dummy_Int := N.P_Test_Struct (1);
 
    elsif Mode = "control_flow" then
       Dummy_Int := N.P_Test_Control_Flow (1);

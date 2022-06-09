@@ -12,13 +12,18 @@ helpers features.
 import subprocess
 import sys
 
-from langkit.dsl import ASTNode, AnalysisUnit, T
+from langkit.dsl import ASTNode, AnalysisUnit, Struct, T, UserField
 from langkit.envs import EnvSpec, add_env
 from langkit.expressions import (
     ArrayLiteral, Entity, If, Let, No, Self, String, Var, langkit_property
 )
 
 from utils import build_and_run
+
+
+class MyStruct(Struct):
+    a = UserField(type=T.Int)
+    b = UserField(type=T.Int)
 
 
 class FooNode(ASTNode):
@@ -157,6 +162,14 @@ class FooNode(ASTNode):
         ))
         return i + arr.length
 
+    @langkit_property(public=True)
+    def test_struct(i=T.Int):
+        result = Var(MyStruct.new(
+            a=i,
+            b=i + 10,
+        ))
+        return result.a  # BREAK:test_struct
+
 
 class Example(FooNode):
     token_node = True
@@ -170,7 +183,7 @@ build_and_run(lkt_file="expected_concrete_syntax.lkt", ada_main="main.adb")
 # Run the test program under GDB to check the helpers. We keep this part in
 # separate scripts to make it convenient, for debugging pruposes, to run these
 # checks without re-building the library/program.
-for script in ["check_printers.py", "check_control_flow.py"]:
+for script in ["check_printers.py", "check_control_flow.py", "check_state.py"]:
     subprocess.check_call([sys.executable, script])
 
 print("Done")

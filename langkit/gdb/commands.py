@@ -11,6 +11,7 @@ from langkit.gdb.control_flow import go_next, go_out, go_step_inside
 from langkit.gdb.state import Binding
 from langkit.gdb.utils import expr_repr, name_repr, prop_repr
 from langkit.utils import no_colors
+from langkit.utils.text import indent
 
 
 class BaseCommand(gdb.Command):
@@ -142,7 +143,7 @@ class StatePrinter:
         for scope_state in self.state.scopes:
 
             def print_binding_cb(strn: str) -> None:
-                prn(f"  {strn}")
+                prn(indent(strn, 2))
 
             for b in scope_state.bindings:
                 print_binding(print_binding_cb, b)
@@ -153,7 +154,7 @@ class StatePrinter:
                 prn('  {}{} -> {}'.format(
                     expr_repr(e),
                     self.loc_image(e.result_var),
-                    self.value_image(e.result_var)
+                    self.value_image(e.result_var, subsequent_indent="  ")
                 ))
 
             if last_started:
@@ -190,18 +191,23 @@ class StatePrinter:
         """
         return ' ({})'.format(var_name) if self.with_locs else ''
 
-    def value_image(self, var_name: str) -> str:
+    def value_image(self, var_name: str, subsequent_indent: str = "") -> str:
         """
         Return the image of the value contained in the `var_name` variable.
 
-        :rtype: str
+        :param subsequent_indent: Prefix for each line in the result except the
+            first one.
         """
         # Switching to lower-case is required since GDB ignores case
         # insentivity for Ada from the Python API.
         value = str(self.frame.read_var(var_name.lower()))
         if self.with_ellipsis and len(value) > self.ellipsis_limit:
             value = '{}...'.format(value[:self.ellipsis_limit])
-        return value
+
+        # Add the requested indentation for all lines except the first one
+        lines = value.splitlines()
+        lines[1:] = [subsequent_indent + line for line in lines[1:]]
+        return "\n".join(lines)
 
 
 class BreakCommand(BaseCommand):

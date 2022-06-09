@@ -83,7 +83,10 @@ class GDBSession:
         """
         return self.test(command, None)
 
-    def test(self, command: str, expected_output: Optional[str]) -> None:
+    def test(self,
+             command: str,
+             expected_output: Optional[str],
+             quotemeta: bool = True) -> None:
         """
         Send the given command to GDB and check its output.
 
@@ -91,15 +94,20 @@ class GDBSession:
         :param expected_output: If None, don't check the command output.
             Otherwise, it must be a quotemeta expression that must match the
             output.
+        :param quotemeta: Whether to interpret ``expected_output`` as a
+            quotemeta expression. If False, expect exactly the given output.
         """
         assert self.alive
         assert self.proc.send(command)
         output = self._read_to_next_prompt().strip().replace("\r", "")
-        matcher = (
-            ""
-            if expected_output is None else
-            convert_expression(expected_output)
-        )
+
+        if expected_output is None:
+            matcher = ""
+        elif quotemeta:
+            matcher = convert_expression(expected_output)
+        else:
+            matcher = re.escape(expected_output)
+
         if (
             expected_output is not None
             and not re.match(matcher, output)
