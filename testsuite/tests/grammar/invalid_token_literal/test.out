@@ -1,4 +1,6 @@
-foo.lkt:4:29: error: '\n' token literal is not part of the valid tokens for this this grammar
-4 |     @main_rule main_rule <- list+(
+== foo.lkt ==
+foo.lkt:7:29: error: '\n' token literal is not part of the valid tokens for this this grammar
+7 |     @main_rule main_rule <- list+(
+
 
 Done
