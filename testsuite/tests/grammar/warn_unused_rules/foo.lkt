@@ -1,5 +1,8 @@
+# Check that the warning for unused parsing rules works as expected
+
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(decl)
 
@@ -17,4 +20,31 @@ grammar foo_grammar {
     # points, we should warn about them.
     example <- Example(@identifier number)
     number <- Number(@number)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+@abstract class Decl : FooNode {
+}
+
+class VarDecl : Decl {
+    @parse_field name: Name
+}
+
+class FunDecl : Decl {
+    @parse_field name: Name
+}
+
+class Name : FooNode implements TokenNode {
+}
+
+class Number : FooNode implements TokenNode {
+}
+
+class Example : FooNode {
+    @parse_field num: Number
+}
+
+class NullDecl : Decl implements TokenNode {
 }
