@@ -1,21 +1,45 @@
-== Not overriden ==
-test.py:XXX: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
+== abstract-overriding-abstract.lkt ==
+abstract-overriding-abstract.lkt:16:28: error: ExampleHolder.f1 cannot override BaseExampleHolder.f1 unless the former is a concrete field and the latter is an abstract one
+16 |     @abstract @parse_field f1: FooNode
+   |                            ^^^^^^^^^^^
 
-== Partly overriden ==
-test.py:XXX: error: This node is concrete, yet it has abstract fields that are not overriden: BaseExampleHolder.f
+abstract-overriding-abstract.lkt:15:1: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
+15 | class ExampleHolder : BaseExampleHolder {
+   | ^
 
-== Abstract overriding abstract ==
-test.py:XXX: error: ExampleHolder.f1 cannot override BaseExampleHolder.f1 unless the former is a concrete field and the latter is an abstract one
-test.py:XXX: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
 
-== Abstract overriding concrete ==
-test.py:XXX: error: ExampleHolder.f cannot override BaseExampleHolder.f unless the former is a concrete field and the latter is an abstract one
-test.py:XXX: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f
+== abstract-overriding-concrete.lkt ==
+abstract-overriding-concrete.lkt:16:28: error: ExampleHolder.f cannot override BaseExampleHolder.f unless the former is a concrete field and the latter is an abstract one
+16 |     @abstract @parse_field f: FooNode
+   |                            ^^^^^^^^^^
 
-== Inconsistent overriding type ==
-test.py:XXX: error: Type of overriding field (FooNode) does not match type of abstract field (Example)
+abstract-overriding-concrete.lkt:15:1: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f
+15 | class ExampleHolder : BaseExampleHolder {
+   | ^
 
-== Free-standing null field ==
-test.py:XXX: error: Null fields can only be used to override abstract fields
+
+== free-standing-null-field.lkt ==
+free-standing-null-field.lkt:12:30: error: Null fields can only be used to override abstract fields
+12 |     @null_field @parse_field f: FooNode
+   |                              ^^^^^^^^^^
+
+
+== inconsistent-overriding-type.lkt ==
+inconsistent-overriding-type.lkt:16:18: error: Type of overriding field (FooNode) does not match type of abstract field (Example)
+16 |     @parse_field f: FooNode
+   |                  ^^^^^^^^^^
+
+
+== not-overriden.lkt ==
+not-overriden.lkt:11:1: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
+11 | class ExampleHolder : FooNode {
+   | ^
+
+
+== partly-overriden.lkt ==
+partly-overriden.lkt:19:1: error: This node is concrete, yet it has abstract fields that are not overriden: BaseExampleHolder.f
+19 | class OtherExampleHolder : BaseExampleHolder {
+   | ^
+
 
 Done
