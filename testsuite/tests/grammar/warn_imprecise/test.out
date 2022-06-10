@@ -1,4 +1,12 @@
-test.py:XXX: warning: Specified type is FooNode, but it could be more specific: Name
-test.py:XXX: warning: Specified type is FooNode, but it could be more specific: VarKeyword
+== foo.lkt ==
+foo.lkt:18:28: warning: Specified type is FooNode, but it could be more specific: Name
+18 |     @abstract @parse_field name: FooNode
+   |                            ^^^^^^^^^^^^^
+
+foo.lkt:22:18: warning: Specified type is FooNode, but it could be more specific: VarKeyword
+22 |     @parse_field var_kw: FooNode
+   |                  ^^^^^^^^^^^^^^^
+
 Code generation was successful
+
 Done

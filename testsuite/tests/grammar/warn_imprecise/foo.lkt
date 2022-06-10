@@ -1,9 +1,34 @@
+# Test that warnings about imprecise type annotations for syntax fields
+
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(decl)
     decl <- or(var_decl | fun_decl)
     var_decl <- VarDecl(VarKeyword("var") name ";")
     fun_decl <- FunDecl("def" name ";")
     name <- Name(@identifier)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+@abstract class Decl : FooNode {
+    @abstract @parse_field name: FooNode
+}
+
+class VarDecl : Decl {
+    @parse_field var_kw: FooNode
+    @parse_field name: Name
+}
+
+class FunDecl : Decl {
+    @parse_field name: Name
+}
+
+class VarKeyword : FooNode implements TokenNode {
+}
+
+class Name : FooNode implements TokenNode {
 }
