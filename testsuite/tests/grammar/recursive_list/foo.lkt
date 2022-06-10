@@ -1,8 +1,20 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule stmt_rule <- list*(
-        or(def_rule | ("{" list*(stmt_rule) "}"))
+        or(def_rule | pick("{" list*(stmt_rule) "}"))
     )
-    def_rule <- Def(@identifier "(" stmt_rule ")")
+    def_rule <- Def(Name(@identifier) "(" stmt_rule ")")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Def : FooNode {
+    @parse_field name: Name
+    @parse_field stmts: ASTList[FooNode, FooNode]
+}
+
+class Name : FooNode implements TokenNode {
 }
