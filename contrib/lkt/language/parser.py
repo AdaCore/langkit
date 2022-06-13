@@ -795,13 +795,22 @@ class Expr(LktNode):
 
     @langkit_property()
     def designated_scope():
-        # If Self is a type, then use the type's scope to lookup operations
-        # directly. TODO: Functions are accessible that way, but we
-        # didn't define a semantic for this kind of calls yet.
-        return Entity.referenced_decl.result_ref.cast(T.TypeDecl).then(
-            lambda td: td.type_scope,
-            # Else, take the type of self, and return the type's scope
-            default_val=Entity.check_expr_type.type_scope
+        # If there is an error while looking for the declaration for this
+        # expression, return no scope, which is our way to let the caller know
+        # that we had an error.
+        decl = Var(Entity.referenced_decl)
+        return If(
+            decl.has_error,
+            No(T.LexicalEnv),
+
+            # If Self is a type, then use the type's scope to lookup operations
+            # directly. TODO: Functions are accessible that way, but we didn't
+            # define a semantic for this kind of calls yet.
+            decl.result_ref.cast(T.TypeDecl).then(
+                lambda td: td.type_scope,
+                # Else, take the type of self, and return the type's scope
+                default_val=Entity.expr_type.result_type._.type_scope
+            )
         )
 
     @langkit_property()
@@ -1376,15 +1385,26 @@ class RefId(Id):
         return If(
             is_annot_param,
             No(T.SemanticResult),
-            Entity.scope.get_first(
-                Self.symbol, lookup=If(
-                    Entity.dot_expr_if_suffix.is_null,
-                    LK.recursive,
-                    LK.flat
+
+            # If we have trouble resolving the scope, just return no sementic
+            # result: checks on the rest of the tree will report the error that
+            # prevents us from getting a scope.
+            Let(
+                lambda scope=Entity.scope:
+                If(
+                    scope == No(T.LexicalEnv),
+                    No(T.SemanticResult),
+                    scope.get_first(
+                        Self.symbol, lookup=If(
+                            Entity.dot_expr_if_suffix.is_null,
+                            LK.recursive,
+                            LK.flat
+                        )
+                    ).cast(T.Decl).then(
+                        lambda d: SemanticResult.new(result_ref=d, node=Self),
+                        default_val=Self.ref_not_found_error
+                    )
                 )
-            ).cast(T.Decl).then(
-                lambda d: SemanticResult.new(result_ref=d, node=Self),
-                default_val=Self.ref_not_found_error
             )
         )
 
@@ -1705,6 +1725,32 @@ class TypeDecl(Decl):
 
     traits = AbstractField(T.TypeRef.list, doc="Traits for this type")
 
+    @langkit_property(return_type=T.TypeDecl.entity)
+    def ultimate_instantiated_type():
+        """
+        Return the ultimate instantiated type.
+
+        For instantiated generic types, this returns the result of the
+        ``get_instantiated_type`` recursively. It returns ``Entity`` for all
+        other types.
+        """
+        return Entity.match(
+            lambda igt=T.InstantiatedGenericType:
+                igt.get_instantiated_type.ultimate_instantiated_type,
+            lambda _: Entity
+        )
+
+    @langkit_property(public=True, return_type=T.Bool)
+    def is_class():
+        """
+        Return whether this type declaration is a class.
+        """
+        return Entity.ultimate_instantiated_type.match(
+            lambda _=T.ClassDecl: True,
+            lambda gft=T.GenericFormalTypeDecl: gft.has_class.as_bool,
+            lambda _: False,
+        )
+
     @langkit_property(public=True, return_type=T.TypeDecl.entity.array)
     def implemented_traits():
         """
@@ -1820,10 +1866,19 @@ class FunctionType(TypeDecl):
     decl_type_name = Property(S("function type"))
 
 
+class ClassQualifier(LktNode):
+    """
+    Whether this generic formal type must be a class.
+    """
+    enum_node = True
+    qualifier = True
+
+
 class GenericFormalTypeDecl(TypeDecl):
     """
     Declaration of a generic formal type in a generic declaration.
     """
+    has_class = Field(T.ClassQualifier)
     syn_name = Field(T.TypeDefId)
     traits = NullField()
     syn_base_type = NullField()
@@ -1833,7 +1888,13 @@ class GenericFormalTypeDecl(TypeDecl):
         Entity.parent.parent.parent.cast_or_raise(T.GenericDecl)
     )
 
-    decl_type_name = Property(S("generic formal type declaration"))
+    @langkit_property()
+    def decl_type_name():
+        return If(
+            Self.has_class.as_bool,
+            S("generic formal class type declaration"),
+            S("generic formal type declaration"),
+        )
 
 
 @abstract
@@ -2154,6 +2215,24 @@ class BasicClassDecl(NamedTypeDecl):
     syn_name = Field(type=T.DefId)
     syn_base_type = Field(type=T.TypeRef)
     traits = Field(type=T.TypeRef.list)
+
+    @langkit_property()
+    def check_legality():
+        base_result = Var(Entity.super())
+
+        # Classes can derive from other classes only
+        base = Var(Entity.syn_base_type._.designated_type)
+        return base_result.concat(base.then(
+            lambda b:
+            If(
+                Not(b.is_class),
+                Self.syn_base_type.error(
+                    S("Classes can derive from classes only, but got ")
+                    .concat(base.ultimate_instantiated_type.decl_type_name)
+                ).singleton,
+                No(T.SemanticResult.array),
+            )
+        ))
 
 
 class ClassDecl(BasicClassDecl):
@@ -3851,7 +3930,7 @@ lkt_grammar.add_rules(
     generic_formal_type=FullDecl(
         G.doc,
         List(G.decl_annotation, empty_valid=True),
-        GenericFormalTypeDecl(G.def_id)
+        GenericFormalTypeDecl(ClassQualifier("class"), G.def_id),
     ),
 
     enum_lit_decl=EnumLitDecl(G.def_id),

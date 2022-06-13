@@ -42,7 +42,7 @@ struct Array implements Sized, Indexable[T], Iterator[T] {
     @builtin fun unique(): Array[T]
 }
 
-@builtin generic[RootNode, T]
+@builtin generic[class RootNode, T]
 class ASTList : RootNode implements Sized, Indexable[T], Iterator[T] {
 }
 

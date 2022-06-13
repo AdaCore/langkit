@@ -4,7 +4,7 @@
 
 class RootType {}
 
-generic[T]
+generic[class T]
 class GenDerivedType : T {}
 
 class FinalType : GenDerivedType[RootType] {}

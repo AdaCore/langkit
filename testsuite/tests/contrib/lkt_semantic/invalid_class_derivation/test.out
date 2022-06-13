@@ -1,0 +1,45 @@
+Resolving test.lkt
+==================
+Id   <RefId "MyTrait" test.lkt:21:21-21:28>
+     references <TraitDecl "MyTrait" test.lkt:4:1-5:2>
+
+test.lkt:21:21: error: Classes can derive from classes only, but got trait declaration
+21 | @invalid class C1 : MyTrait {
+   |                     ^^^^^^^
+
+Id   <RefId "MyStruct" test.lkt:24:21-24:29>
+     references <StructDecl "MyStruct" test.lkt:7:1-8:2>
+
+test.lkt:24:21: error: Classes can derive from classes only, but got struct declaration
+24 | @invalid class C2 : MyStruct {
+   |                     ^^^^^^^^
+
+Id   <RefId "T" test.lkt:27:32-27:33>
+     references <GenericFormalTypeDecl "T" test.lkt:27:18-27:19>
+
+test.lkt:27:32: error: Classes can derive from classes only, but got generic formal type declaration
+27 | @invalid generic[T] class C3 : T {
+   |                                ^
+
+Id   <RefId "T" test.lkt:30:29-30:30>
+     references <GenericFormalTypeDecl "T" test.lkt:30:9-30:16>
+
+Id   <RefId "MyClass" test.lkt:33:12-33:19>
+     references <ClassDecl "MyClass" test.lkt:10:1-11:2>
+
+Id   <RefId "MyGenericStruct" test.lkt:36:21-36:36>
+     references <GenericDecl "MyGenericStruct" test.lkt:13:1-14:2>
+
+Id   <RefId "Int" test.lkt:36:37-36:40>
+     references <StructDecl prelude: "Int">
+
+test.lkt:36:21: error: Classes can derive from classes only, but got struct declaration
+36 | @invalid class C6 : MyGenericStruct[Int] {
+   |                     ^^^^^^^^^^^^^^^^^^^^
+
+Id   <RefId "MyGenericClass" test.lkt:39:12-39:26>
+     references <GenericDecl "MyGenericClass" test.lkt:16:1-17:2>
+
+Id   <RefId "Int" test.lkt:39:27-39:30>
+     references <StructDecl prelude: "Int">
+

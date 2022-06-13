@@ -1,7 +1,7 @@
 Resolving test.lkt
 ==================
 Id   <RefId "T" test.lkt:8:24-8:25>
-     references <GenericFormalTypeDecl "T" test.lkt:7:9-7:10>
+     references <GenericFormalTypeDecl "T" test.lkt:7:9-7:16>
 
 Id   <RefId "GenDerivedType" test.lkt:10:19-10:33>
      references <GenericDecl "GenDerivedType" test.lkt:7:1-8:28>
