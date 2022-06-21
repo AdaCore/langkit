@@ -1,18 +1,18 @@
 == final_field.lkt ==
 final_field.lkt:9:5: error: Regular fields are implicitly final
-8 |     @final f: Int
+9 |     @final f: Int
   |     ^^^^^^^^^^^^^
 
 
 == final_lazy_field.lkt ==
 final_lazy_field.lkt:12:5: error: Lazy fields are implicitly final
-11 |     @export @final @lazy f: Bool = true
+12 |     @export @final @lazy f: Bool = true
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == final_parse_field.lkt ==
 final_parse_field.lkt:15:5: error: Parse fields are implicitly exported
-14 |     @export @final @parse_field f: ExampleNode
+15 |     @export @final @parse_field f: ExampleNode
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
@@ -21,13 +21,13 @@ Code generation was successful
 
 == overriding_final_1.lkt ==
 overriding_final_1.lkt:16:5: error: AbstractNode.f is final, overriding it is illegal
-15 |     fun f(): Int = 1
+16 |     fun f(): Int = 1
    |     ^^^^^^^^^^^^^^^^
 
 
 == overriding_final_2.lkt ==
 overriding_final_2.lkt:17:5: error: AbstractNode.f is final, overriding it is illegal
-16 |     fun f(): Int = 2
+17 |     fun f(): Int = 2
    |     ^^^^^^^^^^^^^^^^
 
 
