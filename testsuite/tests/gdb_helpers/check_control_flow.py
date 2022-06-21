@@ -123,7 +123,7 @@ run_foosi("""\
 <FieldAccess for parents at test.py:@NUMBER> evaluated to:\
  Bare_Foo_Node array of length 2 = {@...
 
-Now evaluating <length at test.py:155>""")
+Now evaluating <length at test.py:@NUMBER>""")
 run_foosi("""\
 <length at test.py:@NUMBER> evaluated to: 2
 
