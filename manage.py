@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 from argparse import ArgumentParser, Namespace, _SubParsersAction
+import json
 import glob
 import os
 import os.path as P
@@ -8,7 +9,7 @@ from pathlib import PurePath
 import shutil
 import subprocess
 import sys
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from langkit.packaging import Packager
 from langkit.utils import (
@@ -162,24 +163,27 @@ def build_langkit_support(args: Namespace) -> None:
     subprocess.check_call(base_argv + ["-P", SIGSEGV_HANDLER_GPR] + gargs)
 
 
-def setenv_langkit_support(args: Namespace) -> None:
+def langkit_support_env_map(args: Namespace, json: bool = False) -> Dict[str, str]:
     """
-    Setenv for Langkit_Support.
+    Helper function. Returns a key-value map for langkit_support's environment.
     """
-    build_dir = PurePath(args.build_dir) if args.build_dir else SUPPORT_ROOT
-
-    # Make the "langkit_support.gpr" available to GPRbuild
-    print(format_setenv("GPR_PROJECT_PATH", str(SUPPORT_ROOT)))
-
     # Make the shared library for Langkit_Support available to the dynamic
     # linker.
+    build_dir = PurePath(args.build_dir) if args.build_dir else SUPPORT_ROOT
     dynamic_lib_dir = str(build_dir / "lib" / "relocatable" / args.build_mode)
-    print(format_setenv("PATH", dynamic_lib_dir))
-    print(format_setenv("LD_LIBRARY_PATH", dynamic_lib_dir))
 
-    # Make the shared lib for the sigsegv handler available for OCaml on
-    # GNU/Linux.
-    print(format_setenv("LD_LIBRARY_PATH", str(SIGSEGV_HANDLER_ROOT / "lib")))
+    return {
+        # Make the "langkit_support.gpr" available to GPRbuild
+        "GPR_PROJECT_PATH": str(SUPPORT_ROOT),
+        "PATH": dynamic_lib_dir,
+        "LD_LIBRARY_PATH": ":".join([
+            dynamic_lib_dir,
+
+            # Make the shared lib for the sigsegv handler available for OCaml
+            # on GNU/Linux.
+            str(SIGSEGV_HANDLER_ROOT / "lib")
+        ])
+    }
 
 
 def install_langkit_support(args: Namespace) -> None:
@@ -232,17 +236,39 @@ def setenv(args: Namespace) -> None:
     Print shell commands to add Libpythonlang and Liblktlang to the
     environment.
     """
+    env = {}
     if not args.no_langkit_support:
-        setenv_langkit_support(args)
+        env = langkit_support_env_map(args)
 
     for cwd in selected_lib_roots(args):
-        subprocess.check_call(
+        d = json.loads(subprocess.check_output(
             [sys.executable,
              "./manage.py",
              "setenv",
-             f"--build-mode={args.build_mode}"],
+             f"--build-mode={args.build_mode}",
+             "-J"],
             cwd=cwd
-        )
+        ))
+
+        for k, v in d.items():
+            if k in env:
+                env[k] = ":".join([env[k], v])
+            else:
+                env[k] = v
+
+    if args.json:
+        print(json.dumps(env))
+    else:
+        for k, v in env.items():
+            print(format_setenv(k, v))
+
+
+def setenv_langkit_support(args: Namespace) -> None:
+    """
+    Setenv for Langkit_Support.
+    """
+    for k, v in langkit_support_env_map(args).items():
+        print(format_setenv(k, v))
 
 
 def make(args: Namespace) -> None:
@@ -371,10 +397,14 @@ if __name__ == '__main__':
                      with_build_dir=True,
                      with_libs=True,
                      with_no_mypy=True)
-    create_subparser(subparsers, setenv,
-                     with_no_lksp=True,
-                     with_build_dir=True,
-                     with_libs=True)
+    setenv_parser = create_subparser(subparsers, setenv,
+                                     with_no_lksp=True,
+                                     with_build_dir=True,
+                                     with_libs=True)
+    setenv_parser.add_argument(
+        '--json', '-J', action='store_true',
+        help='Output necessary env keys to JSON.'
+    )
 
     create_subparser(subparsers, run_mypy)
 
