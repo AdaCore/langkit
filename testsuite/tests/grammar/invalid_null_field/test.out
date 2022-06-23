@@ -1,0 +1,7 @@
+== should_be_null.lkt ==
+should_be_null.lkt:15:18: error: According to the grammar, this field always contain null nodes: please tag it a null field
+15 |     @parse_field f: Holder
+   |                  ^^^^^^^^^
+
+
+Done

@@ -1991,6 +1991,8 @@ class Field(BaseField):
         return self._is_optional
 
     def _compute_precise_types(self) -> None:
+        from langkit.parsers import Null
+
         etypes = None
         is_list = self.type.is_list_type
 
@@ -2027,11 +2029,31 @@ class Field(BaseField):
             types = TypeSet()
             if is_list:
                 etypes = TypeSet()
+            all_null = True
             for p in self.parsers_from_transform:
+                if not isinstance(p, Null):
+                    all_null = False
                 types.update(p.precise_types)
                 if is_list:
                     assert etypes
                     etypes.update(p.precise_element_types)
+
+            # Only null fields are allowed to get only null parsers. Things are
+            # different for fields that are lists, as we do create list nodes
+            # for them.
+            if all_null:
+                if is_list:
+                    # If this field contains list nodes and only null parsers
+                    # build it, just use types from the field declaration.
+                    types.include(self.type)
+                    etypes.include(self.type.element_type)
+                else:
+                    with self.diagnostic_context:
+                        check_source_language(
+                            not all_null,
+                            "According to the grammar, this field always"
+                            " contain null nodes: please tag it a null field"
+                        )
 
             # Due to inheritance, even fields of regular nodes can appear in a
             # synthetic node, so take types from node synthesis into account.

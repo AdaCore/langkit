@@ -2,15 +2,21 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- ExampleNode(null(ParserlessNode))
+    @main_rule main_rule <- or(
+        ExampleNode(null(ParserlessNode))
+        | ExampleNode(Identifier(@identifier))
+    )
 }
 
 @abstract class FooNode implements Node[FooNode] {
 }
 
 class ExampleNode : FooNode {
-    @parse_field n: ParserlessNode
+    @parse_field n: FooNode
 }
 
 class ParserlessNode : FooNode {
+}
+
+class Identifier : FooNode implements TokenNode {
 }

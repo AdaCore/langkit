@@ -1,0 +1,16 @@
+# Check that "non null" parse fields which are built with "null" parsers only
+# are rejected.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Holder(null(Holder))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Holder : FooNode {
+    @parse_field f: Holder
+}

@@ -17,8 +17,8 @@ unref_error_node.lkt:14:1: error: ParserlessNode is not synthetic nor abstract, 
 
 
 == unref_node.lkt ==
-unref_node.lkt:15:1: error: ParserlessNode is not synthetic nor abstract, so at least one parser must create it
-15 | class ParserlessNode : FooNode {
+unref_node.lkt:18:1: error: ParserlessNode is not synthetic nor abstract, so at least one parser must create it
+18 | class ParserlessNode : FooNode {
    | ^
 
 
