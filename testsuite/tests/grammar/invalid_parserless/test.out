@@ -1,17 +1,23 @@
 == null_parser.lkt ==
-null_parser.lkt:14:1: error: This node is not synthetic nor abstract, so at least one parser must create it
+null_parser.lkt:14:1: error: UnrefNode is not synthetic nor abstract, so at least one parser must create it
 14 | class UnrefNode : FooNode {
    | ^
 
 
+== unref_enum_node.lkt ==
+unref_enum_node.lkt:11:1: error: Example.Null is not synthetic nor abstract, so at least one parser must create it
+11 | enum class Example : FooNode {
+   | ^
+
+
 == unref_error_node.lkt ==
-unref_error_node.lkt:14:1: error: This node is not synthetic nor abstract, so at least one parser must create it
+unref_error_node.lkt:14:1: error: ParserlessNode is not synthetic nor abstract, so at least one parser must create it
 14 | class ParserlessNode : FooNode implements ErrorNode {
    | ^
 
 
 == unref_node.lkt ==
-unref_node.lkt:15:1: error: This node is not synthetic nor abstract, so at least one parser must create it
+unref_node.lkt:15:1: error: ParserlessNode is not synthetic nor abstract, so at least one parser must create it
 15 | class ParserlessNode : FooNode {
    | ^
 

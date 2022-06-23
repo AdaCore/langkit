@@ -1098,8 +1098,8 @@ class Unparsers:
                 self.nodes_to_rules.get(node)
                 or node.abstract
                 or node.synthetic,
-                "This node is not synthetic nor abstract, so at least one"
-                " parser must create it",
+                f"{node.dsl_name} is not synthetic nor abstract, so at least"
+                " one parser must create it",
             )
 
     def check_nodes_to_rules(self, ctx):
