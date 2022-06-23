@@ -165,9 +165,24 @@ class LktNode(ASTNode):
     def get_builtin_gen_decl(entity_name=T.Symbol):
         return Self.root_get(entity_name).cast_or_raise(T.GenericDecl)
 
-    node_type = Property(
+    node_gen_trait = Property(
         Self.get_builtin_gen_decl('Node'), public=True,
-        doc="Unit method. Return the Node base class."
+        doc="Unit method. Return the ``Node`` builtin generic trait."
+    )
+
+    node_trait = Property(
+        Self.node_gen_trait.decl.cast(T.TraitDecl), public=True,
+        doc="Unit method. Return the ``Node`` builtin trait."
+    )
+
+    token_node_trait = Property(
+        Self.get_builtin_type('TokenNode'), public=True,
+        doc="Unit method. Return the ``TokenNode`` builtin trait."
+    )
+
+    error_node_trait = Property(
+        Self.get_builtin_type('ErrorNode'), public=True,
+        doc="Unit method. Return the ``ErrorNode`` builtin trait."
     )
 
     char_type = Property(

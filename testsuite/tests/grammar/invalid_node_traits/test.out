@@ -1,0 +1,36 @@
+== derived_node.lkt ==
+derived_node.lkt:11:36: error: Only the root node can implement the Node trait
+11 | class Example : FooNode implements Node[Example] {
+   |                                    ^^^^^^^^^^^^^
+
+
+== non_node.lkt ==
+non_node.lkt:8:36: error: The Node generic trait must be instantiated with the root node (FooNode)
+8 | @abstract class FooNode implements Node[Int] {
+  |                                    ^^^^^^^^^
+
+
+== root_error.lkt ==
+root_error.lkt:8:51: error: The root node cannot be an error node
+8 | @abstract class FooNode implements Node[FooNode], ErrorNode {
+  |                                                   ^^^^^^^^^
+
+
+== root_no_node.lkt ==
+root_no_node.lkt:8:11: error: The root node must implement the Node trait
+8 | @abstract class FooNode {
+
+
+== root_token.lkt ==
+root_token.lkt:8:51: error: The root node cannot be a token node
+8 | @abstract class FooNode implements Node[FooNode], TokenNode {
+  |                                                   ^^^^^^^^^
+
+
+== unknown_trait.lkt ==
+unknown_trait.lkt:11:36: error: Nodes cannot implement this trait
+11 | class Example : FooNode implements AnalysisUnit[FooNode] {
+   |                                    ^^^^^^^^^^^^^^^^^^^^^
+
+
+Done

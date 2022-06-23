@@ -47,17 +47,6 @@ from langkit.parsers import (
 ANNOTATIONS_WHITELIST = ['builtin']
 
 
-def get_trait(decl: L.TypeDecl, trait_name: str) -> Optional[L.TypeDecl]:
-    """
-    Return the trait named ``trait_name`` on declaration ``decl``.
-    """
-    for trait in decl.f_traits:
-        trait_decl: L.TypeDecl = trait.p_designated_type
-        if trait_decl.p_name == trait_name:
-            return trait_decl
-    return None
-
-
 def check_referenced_decl(expr: L.Expr) -> L.Decl:
     """
     Wrapper around ``Expr.p_check_referenced_decl``.
@@ -1246,9 +1235,12 @@ class LktTypesLoader:
         self.analysis_unit_trait = root.p_analysis_unit_trait
         self.array_type = root.p_array_type
         self.astlist_type = root.p_astlist_type
+        self.error_node_trait = root.p_error_node_trait
         self.iterator_trait = root.p_iterator_trait
-        self.string_type = root.p_string_type
+        self.node_trait = root.p_node_trait
         self.property_error_type = root.p_property_error_type
+        self.string_type = root.p_string_type
+        self.token_node_trait = root.p_token_node_trait
 
         self.find_method = get_field(self.iterator_trait, 'find')
         self.map_method = get_field(self.iterator_trait, 'map')
@@ -2068,7 +2060,7 @@ class LktTypesLoader:
         """
         result = []
         for full_decl in decls:
-            with diagnostic_context(Location.from_lkt_node(full_decl)):
+            with self.ctx.lkt_context(full_decl):
                 decl = full_decl.f_decl
 
                 # Check field name conformity
@@ -2117,11 +2109,70 @@ class LktTypesLoader:
         # Resolve the base node (if any)
         base_type: Optional[ASTNodeType]
 
+        # Check the set of traits that this node implements
+        node_trait_ref: Optional[L.LktNode] = None
+        token_node_trait_ref: Optional[L.LktNode] = None
+        error_node_trait_ref: Optional[L.LktNode] = None
+        for trait_ref in decl.f_traits:
+            trait_decl: L.TypeDecl = trait_ref.p_designated_type
+            if (
+                isinstance(trait_decl, L.InstantiatedGenericType)
+                and trait_decl.p_get_inner_type == self.node_trait
+            ):
+                # If this trait is an instantiation of the Node trait, make
+                # sure it is instantiated on the root node itself (i.e.
+                # "decl").
+                actuals = trait_decl.p_get_actuals
+                assert len(actuals) == 1
+                with self.ctx.lkt_context(trait_ref):
+                    check_source_language(
+                        actuals[0] == decl,
+                        "The Node generic trait must be instantiated with the"
+                        f" root node ({decl.f_syn_name.text})"
+                    )
+                node_trait_ref = trait_ref
+
+            elif trait_decl == self.token_node_trait:
+                token_node_trait_ref = trait_ref
+
+            elif trait_decl == self.error_node_trait:
+                error_node_trait_ref = trait_ref
+
+            else:
+                with self.ctx.lkt_context(trait_ref):
+                    error("Nodes cannot implement this trait")
+
+        def check_trait(trait_ref: Optional[L.LktNode],
+                        expected: bool,
+                        message: str) -> None:
+            """
+            If ``expected`` is ``True``, emit an error if ``trait_ref`` is
+            ``None``. If ``expected`` is ``False``, emit an error if
+            ``trait_ref`` is not ``None``. In both cases, use ``message`` as
+            the error message.
+            """
+            if expected:
+                check_source_language(trait_ref is not None, message)
+            elif trait_ref is not None:
+                with self.ctx.lkt_context(trait_ref):
+                    error(message)
+
         # Root node case
         if decl.p_base_type is None:
-            check_source_language(
-                get_trait(decl, "Node") is not None,
-                'The root node must implement the Node trait'
+            check_trait(
+                node_trait_ref,
+                True,
+                "The root node must implement the Node trait"
+            )
+            check_trait(
+                token_node_trait_ref,
+                False,
+                "The root node cannot be a token node"
+            )
+            check_trait(
+                error_node_trait_ref,
+                False,
+                "The root node cannot be an error node"
             )
 
             if CompiledTypeRepo.root_grammar_class is not None:
@@ -2139,11 +2190,17 @@ class LktTypesLoader:
             base_type = cast(ASTNodeType,
                              self.lower_type_decl(base_type_decl))
 
+            check_trait(
+                node_trait_ref,
+                False,
+                "Only the root node can implement the Node trait"
+            )
+
             # This is a token node if either the TokenNode trait is implemented
             # or if the base node is a token node itself. Likewise for
             # ErrorNode.
-            is_token_node = get_trait(decl, "TokenNode") is not None
-            is_error_node = get_trait(decl, "ErrorNode") is not None
+            is_token_node = token_node_trait_ref is not None
+            is_error_node = error_node_trait_ref is not None
 
             check_source_language(
                 base_type is not base_type.is_enum_node,
