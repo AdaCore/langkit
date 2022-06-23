@@ -8,6 +8,7 @@ grammar foo_grammar {
         SpecialList+(a)
         or(SpecialList+(a) | SpecialList+(b))
         or(SpecialList+(or(a | b)))
+        or(a | b | null(Holder))
     )
     a <- A(@identifier("a"))
     b <- B(@identifier("b"))

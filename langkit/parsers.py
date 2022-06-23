@@ -2142,12 +2142,15 @@ class Null(Parser):
         reject_error_node(result)
         return result
 
+    # This parser always return a null node, so it does not contribute to the
+    # list of precise types.
+
     def _precise_types(self) -> TypeSet:
-        return TypeSet([self.type])
+        return TypeSet([])
 
     def _precise_element_types(self) -> TypeSet:
         assert self.type is not None
-        return TypeSet([self.type.element_type])
+        return TypeSet([])
 
 
 _ = Discard
