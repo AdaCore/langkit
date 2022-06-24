@@ -493,15 +493,18 @@ class LktNode(ASTNode):
         Check that the generic instantiation for the given ``prefix`` with the
         given ``params`` is valid.
         """
-        # Make sure that "prefix" refers to a generic declaration
+        # Make sure that "prefix" refers to a generic declaration. If we cannot
+        # resolve it, do not emit an error message: standard typing will
+        # complain about not being able to find the corresponding declaration.
         prefix_decl = Var(prefix.referenced_decl.result_ref)
         gen_decl = Var(prefix_decl.cast(T.GenericDecl))
-        invalid_decl = Var(gen_decl.then(
-            lambda _: No(T.SemanticResult.array),
-            default_val=(
-                prefix.error(S("invalid reference to a generic")).singleton
+        invalid_decl = Var(
+            If(
+                prefix_decl.is_null | Not(gen_decl.is_null),
+                No(T.SemanticResult.array),
+                prefix.error(S("invalid reference to a generic")).singleton,
             )
-        ))
+        )
 
         # Make sure that we have the number of type parameters required.
         # Checking that they all are valid type references happens in
