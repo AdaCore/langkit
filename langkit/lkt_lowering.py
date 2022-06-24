@@ -21,7 +21,7 @@ from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeOrDefer,
     CompiledTypeRepo, EnumNodeAlternative, EnumType, Field, StructType, T,
-    TypeRepo, UserField, resolve_type
+    TypeRepo, UserField
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, check_source_language, diagnostic_context, error
@@ -1354,8 +1354,9 @@ class LktTypesLoader:
             try:
                 t = self.compiled_types[decl]
             except KeyError:
-                # The type is not lowered yet: let's do it
-                pass
+                # The type is not lowered yet: let's do it. Add the sentinel to
+                # reject type inheritance loop during recursion.
+                self.compiled_types[decl] = None
             else:
                 if t is None:
                     error('Type inheritance loop detected')

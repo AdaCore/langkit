@@ -1,0 +1,7 @@
+== test.lkt ==
+test.lkt:11:1: error: Type inheritance loop detected
+11 | class N1 : N2 {
+   | ^
+
+
+Done
