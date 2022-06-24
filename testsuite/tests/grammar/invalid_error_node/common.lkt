@@ -1,0 +1,12 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(Example(@example) | skip(ErrorDecl))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+@has_abstract_list class Example : FooNode implements TokenNode {
+}

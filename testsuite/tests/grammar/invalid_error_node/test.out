@@ -1,22 +1,37 @@
-== test_abstract ==
-test.py:XXX: error: Error nodes cannot be abstract
+== test_abstract.lkt ==
+test_abstract.lkt:3:52: error: Error nodes cannot be abstract
+3 | @abstract class BaseErrorDecl : FooNode implements ErrorNode {
+  |                                                    ^^^^^^^^^
 
-== test_bad_type ==
-test.py:XXX: error: The "error_node" field, when present, must contain a boolean
 
-== test_derived_not_error ==
-test.py:XXX: error: "error_node" annotation inconsistent with inherited node
+== test_error_and_list.lkt ==
+test_error_and_list.lkt:3:56: error: Error nodes cannot be lists
+3 | class ErrorDecl : ASTList[FooNode, Example] implements ErrorNode {
+  |                                                        ^^^^^^^^^
 
-== test_error_and_list ==
-test.py:XXX: error: Error nodes cannot also be lists
 
-== test_error_and_token ==
-test.py:XXX: error: Error nodes cannot also be token nodes
+== test_error_and_token.lkt ==
+test_error_and_token.lkt:3:38: error: Error nodes cannot be token nodes
+3 | class ErrorDecl : FooNode implements ErrorNode, TokenNode {
+  |                                      ^^^^^^^^^
 
-== test_nonnull_field ==
-test.py:XXX: error: Only null fields allowed here
 
-== test_synthetic ==
-test.py:XXX: error: Error nodes cannot be synthetic
+== test_nonnull_field.lkt ==
+test_nonnull_field.lkt:4:18: error: Error nodes can only have null fields
+4 |     @parse_field f: Example
+  |                  ^^^^^^^^^^
+
+
+== test_nonnull_inherited_field.lkt ==
+test_nonnull_inherited_field.lkt:7:1: error: Error nodes can only have null fields: BaseErrorDecl.f is not null
+7 | class ErrorDecl : BaseErrorDecl implements ErrorNode {
+  | ^
+
+
+== test_synthetic.lkt ==
+test_synthetic.lkt:3:49: error: Error nodes cannot be synthetic
+3 | @synthetic class ErrorDecl : FooNode implements ErrorNode {
+  |                                                 ^^^^^^^^^
+
 
 Done

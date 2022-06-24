@@ -18,8 +18,8 @@ from functools import reduce
 import importlib
 import os
 from os import path
-from typing import (Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING,
-                    Tuple, Union, cast)
+from typing import (Any, Callable, Dict, Iterator, List, Optional, Set,
+                    TYPE_CHECKING, Tuple, Union, cast)
 
 from funcy import lzip
 
@@ -853,19 +853,29 @@ class CompileCtx:
         return self.build_date or "undefined"
 
     @staticmethod
-    def lkt_context(lkt_node: L.LktNode) -> AbstractContextManager[None]:
+    def lkt_context(
+        lkt_node: L.LktNode | None
+    ) -> AbstractContextManager[None]:
         """
         Context manager to set the diagnostic context to the given node.
 
         :param lkt_node: Node to use as a reference for this diagnostic
-            context.
+            context. If it is ``None``, leave the diagnostic context unchanged.
         """
-        # Invalid type passed here will fail much later and only if a
-        # check_source_language call fails. To ease debugging, check that
-        # "lkt_node" has the right type here.
-        assert isinstance(lkt_node, L.LktNode)
+        if lkt_node is None:
+            @contextmanager
+            def null_ctx_mgr() -> Iterator[None]:
+                yield
 
-        return diagnostic_context(Location.from_lkt_node(lkt_node))
+            return null_ctx_mgr()
+
+        else:
+            # Invalid type passed here will fail much later and only if a
+            # check_source_language call fails. To ease debugging, check that
+            # "lkt_node" has the right type here.
+            assert isinstance(lkt_node, L.LktNode)
+
+            return diagnostic_context(Location.from_lkt_node(lkt_node))
 
     @staticmethod
     def lkt_doc(full_decl):

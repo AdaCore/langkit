@@ -1,0 +1,7 @@
+import common
+
+@abstract class BaseErrorDecl : FooNode implements ErrorNode {
+}
+
+class ErrorDecl : BaseErrorDecl {
+}
