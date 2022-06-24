@@ -765,11 +765,12 @@ class LangkitVectorPrinter(BasePrinter):
                 and array_access_type.target().code == gdb.TYPE_CODE_PTR)
         array_type = array_access_type.target().target()
 
-        # Peel the typedef and then the array type
-        assert (array_type.code == gdb.TYPE_CODE_TYPEDEF
-                and array_type.name.endswith('.internal_elements_array')
-                and array_type.target().code == gdb.TYPE_CODE_ARRAY)
-        return array_type.target().target()
+        # Peel the optional typedef and then the array type
+        assert array_type.name.endswith('.internal_elements_array')
+        if array_type.code == gdb.TYPE_CODE_TYPEDEF:
+            array_type = array_type.target()
+        assert array_type.code == gdb.TYPE_CODE_ARRAY
+        return array_type.target()
 
     @property
     def package(self) -> str:
