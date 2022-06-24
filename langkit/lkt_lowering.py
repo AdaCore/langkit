@@ -1280,11 +1280,15 @@ class LktTypesLoader:
             assert isinstance(decl.f_decl, L.TypeDecl)
             self.lower_type_decl(decl.f_decl)
 
-    def resolve_type_decl(self, decl: L.TypeDecl) -> CompiledTypeOrDefer:
+    def resolve_type_decl(self,
+                          decl: L.TypeDecl,
+                          force_lowering: bool = False) -> CompiledTypeOrDefer:
         """
         Fetch the CompiledType instance corresponding to the given type
-        declaration. If it's not lowered yet, return an appropriate
-        TypeRepo.Defer instance instead.
+        declaration.
+
+        When ``force_lowering`` is ``False``, if ``decl`` is not lowered yet,
+        return an appropriate TypeRepo.Defer instance instead.
 
         :param decl: Lkt type declaration to resolve.
         """
@@ -1295,29 +1299,49 @@ class LktTypesLoader:
         if result is not None:
             return result
 
-        # Not found: look now for an existing TypeRepo.Defer instance
-        result = self.type_refs.get(decl)
-        if result is not None:
-            return result
+        # Not found: unless lowering is forced, look now for an existing
+        # TypeRepo.Defer instance.
+        if not force_lowering:
+            result = self.type_refs.get(decl)
+            if result is not None:
+                return result
 
-        # Not found neither: create the TypeRepo.Defer instance
+        # If this is an instantiated generic type, try to build the
+        # corresponding CompiledType from the type actuals.
         if isinstance(decl, L.InstantiatedGenericType):
             inner_type = decl.p_get_inner_type
             actuals = decl.p_get_actuals
 
             if inner_type == self.array_type:
                 assert len(actuals) == 1
-                result = self.resolve_type_decl(actuals[0]).array
+                result = self.resolve_type_decl(
+                    actuals[0], force_lowering
+                ).array
 
             elif inner_type == self.iterator_trait:
                 assert len(actuals) == 1
-                result = self.resolve_type_decl(actuals[0]).iterator
+                result = self.resolve_type_decl(
+                    actuals[0], force_lowering
+                ).iterator
 
             elif inner_type == self.astlist_type:
                 assert len(actuals) == 2
-                root_node = self.resolve_type_decl(actuals[0])
-                node = self.resolve_type_decl(actuals[1])
-                assert root_node == T.root_node
+                root_node = actuals[0]
+                node = self.resolve_type_decl(
+                    actuals[1], force_lowering=force_lowering
+                )
+
+                # Make sure that "root_node" is indeed a root node (a class
+                # with no base type). Lkt type checking as already supposed to
+                # make sure that "node" is a class (i.e. a node), and lowering
+                # already checks that there is exactly one node types
+                # hierarchy.
+                check_source_language(
+                    isinstance(root_node, L.ClassDecl)
+                    and root_node.f_syn_base_type is None,
+                    "In ASTList[N1, N2], N1 must be the root node"
+                )
+
                 assert isinstance(node, (ASTNodeType, TypeRepo.Defer))
                 result = node.list
 
@@ -1330,11 +1354,18 @@ class LktTypesLoader:
                     .format(inner_type, decl)
                 )
 
+        # Otherwise, "decl" is not lowered yet: create a Defer object or lower
+        # it depending on "force_lowering".
         else:
             assert isinstance(decl, L.NamedTypeDecl)
-            result = getattr(T, decl.f_syn_name.text)
+            result = (
+                self.lower_type_decl(decl)
+                if force_lowering else
+                getattr(T, decl.f_syn_name.text)
+            )
 
         if isinstance(result, TypeRepo.Defer):
+            assert not force_lowering
             self.type_refs[decl] = result
         else:
             assert isinstance(result, CompiledType)
@@ -1376,9 +1407,11 @@ class LktTypesLoader:
             if isinstance(decl, L.InstantiatedGenericType):
                 # At this stage, the only generic types should come from the
                 # prelude (Array, ASTList), so there is no need to do anything
-                # special for them: just let the resolution mechanism build the
-                # CompiledType through CompiledType attribute access magic.
-                result = resolve_type(self.resolve_type_decl(decl))
+                # special for them. However the type actuals must be lowered so
+                # that we can return a compiled type, and not a Defer object.
+                resolved = self.resolve_type_decl(decl, force_lowering=True)
+                assert isinstance(resolved, CompiledType)
+                result = resolved
             else:
                 full_decl = decl.parent
                 assert isinstance(full_decl, L.FullDecl)
