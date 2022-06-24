@@ -1,5 +1,6 @@
-import lexer_example
+import common
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     example <- Example(@example)
     num <- Num(@number)
@@ -7,4 +8,14 @@ grammar foo_grammar {
         ASTList[FooNode, Example]*(num)
         | ListNode(example)
     )
+}
+
+class ListNode : FooNode {
+    @parse_field items: ASTList[FooNode, FooNode]
+}
+
+class Example : FooNode implements TokenNode {
+}
+
+class Num : FooNode implements TokenNode {
 }

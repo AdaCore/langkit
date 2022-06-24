@@ -1,0 +1,5 @@
+import lexer_example
+
+@abstract
+class FooNode implements Node[FooNode] {
+}

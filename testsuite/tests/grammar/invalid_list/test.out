@@ -1,31 +1,31 @@
-== Token element ==
-token-element.lkt:4:38: error: List parsers only accept subparsers that yield AST nodes (Token provided here)
-4 |     @main_rule main_rule <- ListNode(list+(@number))
-  |                                      ^^^^^^^^^^^^^^
+== invalid-astlist.lkt ==
+invalid-astlist.lkt:6:7: error: invalid number of generic parameters
+6 |       ASTList[FooNode, Example, Example]+(Example("example"))
+  |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== Invalid list_cls ==
-invalid-list-cls.lkt:4:29: error: Bad generic type name: only ASTList is valid in this context
-4 |     @main_rule main_rule <- NoSuchGeneric[Example]+(Example("example"))
-  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+== invalid-element-type.lkt ==
+invalid-element-type.lkt:8:9: error: Invalid list type for List parser: sub-parser produces Num nodes while Example.list accepts only Example nodes
+8 |         ASTList[FooNode, Example]*(num)
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== Invalid ASTList ==
-invalid-astlist.lkt:5:7: error: 2 type argument expected, got 3
-5 |       ASTList[FooNode, Example, Example]+(Example("example"))
-  |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+== invalid-list-cls.lkt ==
+invalid-list-cls.lkt:5:29: error: Cannot find entity `NoSuchGeneric` in this scope
+5 |     @main_rule main_rule <- NoSuchGeneric[Example]+(Example("example"))
+  |                             ^^^^^^^^^^^^^
 
 
-== Non-list list_cls ==
-non-list-cls.lkt:5:29: error: Invalid list type for List parser: ListNode. Not a list type
-5 |     @main_rule main_rule <- ListNode+(num)
+== non-list-cls.lkt ==
+non-list-cls.lkt:6:29: error: Invalid list type for List parser: ListNode. Not a list type
+6 |     @main_rule main_rule <- ListNode+(num)
   |                             ^^^^^^^^^^^^^^
 
 
-== Invalid element type in list_cls ==
-invalid-element-type.lkt:7:9: error: Invalid list type for List parser: sub-parser produces Num nodes while Example.list accepts only Example nodes
-7 |         ASTList[FooNode, Example]*(num)
-  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+== token-element.lkt ==
+token-element.lkt:5:38: error: List parsers only accept subparsers that yield AST nodes (Token provided here)
+5 |     @main_rule main_rule <- ListNode(list+(@number))
+  |                                      ^^^^^^^^^^^^^^
 
 
 Done
