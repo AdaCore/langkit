@@ -635,7 +635,7 @@ package body Langkit_Support.Generic_API.Analysis is
    -- "=" --
    ---------
 
-   function "=" (Left, Right : Lk_Node'Class) return Boolean is
+   function "=" (Left, Right : Lk_Node) return Boolean is
    begin
       Check_Safety_Net (Left);
       Check_Safety_Net (Right);

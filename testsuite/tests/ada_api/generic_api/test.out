@@ -161,6 +161,9 @@ Root.Print (with slocs)
 ... |  |  |  |  Name[3:13-3:14]: a
 No_Lk_Node.Print -> Got a Precondition_Failure exception: null node
 
+Check the equality operator for nodes
+Got a Stale_Reference_Error exception: unit was reparsed
+
 Testing various token operations:
 No_Lk_Token.Is_Null -> TRUE
 First_Token.Is_Null -> FALSE

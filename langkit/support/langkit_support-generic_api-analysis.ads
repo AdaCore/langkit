@@ -183,7 +183,7 @@ package Langkit_Support.Generic_API.Analysis is
    function Is_Null (Self : Lk_Node) return Boolean;
    --  Return whether ``Node`` is a null node reference
 
-   function "=" (Left, Right : Lk_Node'Class) return Boolean;
+   function "=" (Left, Right : Lk_Node) return Boolean;
    --  Return whether ``Left`` and ``Right`` designate the same node.
    --
    --  Note that, unlike other operations accepting multiple generic types,

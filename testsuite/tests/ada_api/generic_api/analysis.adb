@@ -1,3 +1,4 @@
+with Ada.Containers.Vectors;
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
@@ -275,6 +276,32 @@ begin
       when Exc : Precondition_Failure =>
          Put_Line ("Got a Precondition_Failure exception: "
                    & Exception_Message (Exc));
+   end;
+   New_Line;
+
+   Put_Line ("Check the equality operator for nodes");
+   declare
+      --  To check that the expected equality operator is called (i.e. the
+      --  Langkit defined one instead of the builtin one), create a stale node
+      --  reference and make the vector call it: we expect a precondition
+      --  failure, as the equality operator is supposed to raise an error when
+      --  called on stale nodes.
+
+      package Node_Vectors is new Ada.Containers.Vectors (Positive, Lk_Node);
+      V : Node_Vectors.Vector;
+   begin
+      V.Append (U.Root);
+      U := Ctx.Get_From_File ("example.txt", Reparse => True);
+      declare
+         Dummy : Boolean;
+      begin
+         Dummy := V.Contains (U.Root);
+         raise Program_Error with "Stale_Reference_Error expected";
+      exception
+         when Exc : Stale_Reference_Error =>
+            Put_Line ("Got a Stale_Reference_Error exception: "
+                      & Exception_Message (Exc));
+      end;
    end;
    New_Line;
 
