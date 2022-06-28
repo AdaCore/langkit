@@ -698,19 +698,28 @@ def traverse(report, root, excludes):  # pragma: no cover
 
     :param Report report: The report in which diagnostics must be emitted.
     :param str root: Root directory in which the files to stylecheck are looked
-        for.
+        for. Filenames are accepted as well.
     :param [str] excludes: List of path to exclude from the search of files to
         check.
     """
-    for item in sorted(os.listdir(root)):
-        path = os.path.join(root, item)
+    def process(path: str) -> None:
+        """
+        Do nothing if ``path`` must be excluded. Otherwise, traverse it if it
+        is a directory, or run style checks on it if it is a file.
+        """
         if excludes_match(path, excludes):
-            continue
+            return
 
         if os.path.isdir(path):
             traverse(report, path, excludes)
         else:
             check_file(report, os.path.relpath(path))
+
+    if os.path.isdir(root):
+        for item in sorted(os.listdir(root)):
+            process(os.path.join(root, item))
+    else:
+        process(root)
 
 
 def main(src_root, files, dirs, excludes):
@@ -744,7 +753,9 @@ def langkit_main(langkit_root, files=[]):
     dirs = [os.path.join('contrib', 'python'),
             os.path.join('contrib', 'lkt'),
             os.path.join('langkit'),
+            os.path.join('manage.py'),
             os.path.join('scripts'),
+            os.path.join('setup.py'),
             os.path.join('testsuite'),
             os.path.join('utils')]
     excludes = ['__pycache__',

@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
 from argparse import ArgumentParser, Namespace, _SubParsersAction
-import json
 import glob
+import json
 import os
 import os.path as P
 from pathlib import PurePath
@@ -13,8 +13,7 @@ from typing import Callable, Dict, List, Optional
 
 from langkit.packaging import Packager
 from langkit.utils import (
-    LibraryType, add_to_path, format_setenv,
-    get_cpu_count, parse_cmdline_args, parse_list_of_choices
+    LibraryType, add_to_path, format_setenv, get_cpu_count, parse_cmdline_args
 )
 
 
@@ -163,7 +162,8 @@ def build_langkit_support(args: Namespace) -> None:
     subprocess.check_call(base_argv + ["-P", SIGSEGV_HANDLER_GPR] + gargs)
 
 
-def langkit_support_env_map(args: Namespace, json: bool = False) -> Dict[str, str]:
+def langkit_support_env_map(args: Namespace,
+                            json: bool = False) -> Dict[str, str]:
     """
     Helper function. Returns a key-value map for langkit_support's environment.
     """
