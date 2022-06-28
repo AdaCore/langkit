@@ -172,7 +172,7 @@ begin
    Put_Line ("Root.Child (2).Image -> " & N.Image);
 
    declare
-      Prev : constant Lk_Node := N.Previous_Sibling;
+      Prev    : constant Lk_Node := N.Previous_Sibling;
       Equal_1 : constant Boolean := Prev.Next_Sibling = N;
       Equal_2 : constant Boolean := Prev = N;
    begin
