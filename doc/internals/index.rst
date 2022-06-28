@@ -9,4 +9,5 @@ for Langkit developpers.
     :maxdepth: 1
 
     mem_management
+    memoization
     incremental_parsing_design
