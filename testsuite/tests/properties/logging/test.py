@@ -5,7 +5,8 @@ Check that instrumentation properties logging is working property.
 from langkit.dsl import (ASTNode, Bool, Field, Struct, T, UserField,
                          env_metadata)
 from langkit.envs import EnvSpec, add_to_env_kv
-from langkit.expressions import New, Self, langkit_property
+from langkit.expressions import (New, RefCategories, Self, Var, ignore,
+                                 langkit_property)
 
 from utils import build_and_run
 
@@ -38,9 +39,15 @@ class Decl(FooNode):
                       metadata=New(Metadata, b=Self.has_plus.as_bool))
     )
 
+    @langkit_property(activate_tracing=True)
+    def id_ref_cat(cats=T.RefCategories):
+        return cats
+
     @langkit_property(public=True, return_type=T.Ref.entity.array,
                       activate_tracing=True)
     def entity_items():
+        cats = Var(Self.id_ref_cat(RefCategories(default=True)))
+        ignore(cats)
         return Self.as_entity.items.map(lambda i: i)
 
 

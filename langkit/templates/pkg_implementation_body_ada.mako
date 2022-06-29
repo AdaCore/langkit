@@ -4046,6 +4046,29 @@ package body ${ada_lib_name}.Implementation is
          return Analysis_Unit_Kind'Image (K);
       end Trace_Image;
 
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (Self : Ref_Categories) return String is
+         Result : Unbounded_String;
+         First  : Boolean := True;
+      begin
+         Append (Result, "RefCategories(");
+         for C in Ref_Category loop
+            if Self (C) then
+               if First then
+                  First := False;
+               else
+                  Append (Result, ", ");
+               end if;
+               Append (Result, C'Image);
+            end if;
+         end loop;
+         Append (Result, ")");
+         return To_String (Result);
+      end Trace_Image;
+
    % endif
 
    % for struct_type in ctx.struct_types:

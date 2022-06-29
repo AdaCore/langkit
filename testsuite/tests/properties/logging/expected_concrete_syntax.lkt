@@ -17,8 +17,13 @@ class Decl : FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Ref]
 
-    @export @trace fun entity_items(): Array[Ref] =
-    node.as_entity.items.map((i) => i)
+    @trace fun id_ref_cat(cats: RefCategories): RefCategories = cats
+
+    @export @trace fun entity_items(): Array[Ref] = {
+        val cats = node.id_ref_cat(RefCats(others=true));
+
+        node.as_entity.items.map((i) => i)
+    }
 }
 
 @qualifier enum class HasPlus : FooNode {
