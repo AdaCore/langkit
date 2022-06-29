@@ -6,8 +6,20 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
+    v: LogicVar
 
-    @export @memoized fun prop(): Bool = true
+    @memoized fun pred1(): Bool = not (node.is_null)
+
+    @memoized fun pred2(): Bool = not (node.parent.is_null)
+
+    fun create_equation(with_pred1: Bool, n: FooNode): Equation =
+    (%eq(node.v, n)) and (
+        if with_pred1 then (%predicate(BareFooNode.pred1, node.v)) else (%predicate(BareFooNode.pred2, node.v))
+    )
+
+    @export fun p1(n: FooNode): Bool = node.create_equation(true, n).solve()
+
+    @export fun p2(n: FooNode): Bool = node.create_equation(false, n).solve()
 }
 
 class Example : FooNode {

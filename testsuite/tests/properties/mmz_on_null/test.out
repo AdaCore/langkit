@@ -1,3 +1,15 @@
-No exception...
+Calling P_P1 (N)...
+  -> TRUE
+
+Calling P_P1 (No_Foo_Node)...
+  -> FALSE
+
+Calling P_P2 (N)...
+  -> FALSE
+
+Calling P_P2 (No_Foo_Node)...
+   Got an exception!
+   LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: dereferencing a null access
+
 main.adb: Done
 Done

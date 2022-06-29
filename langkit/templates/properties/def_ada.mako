@@ -170,63 +170,64 @@ begin
       end if;
    % endif
 
+   ## The memoization table is attached to the analysis context, which we can
+   ## reach from the node. This means that we cannot make memoization work when
+   ## called on null nodes.
    % if memoized:
-      if Self = null then
-         raise Property_Error with "property called on null node";
-      end if;
+      if Self /= null then
+         ## If memoization is enabled for this property, look for an already
+         ## computed result for this property. See the declaration of
+         ## Analysis_Context_Type.In_Populate_Lexical_Env for the rationale
+         ## about the test that follows.
 
-      ## If memoization is enabled for this property, look for an already
-      ## computed result for this property. See the declaration of
-      ## Analysis_Context_Type.In_Populate_Lexical_Env for the rationale about
-      ## the test that follows.
+         % if not property.memoize_in_populate:
+         if not Self.Unit.Context.In_Populate_Lexical_Env then
+         % endif
 
-      % if not property.memoize_in_populate:
-      if not Self.Unit.Context.In_Populate_Lexical_Env then
-      % endif
+            if Find_Memoized_Value
+              (Self.Unit, Mmz_Handle, Mmz_Val, Create_Mmz_Key'Access)
+            then
+               ${gdb_memoization_lookup()}
 
-         if Find_Memoized_Value
-           (Self.Unit, Mmz_Handle, Mmz_Val, Create_Mmz_Key'Access)
-         then
-            ${gdb_memoization_lookup()}
+               if Mmz_Val.Kind = Mmz_Evaluating then
+                  % if has_logging:
+                     Properties_Traces.Trace
+                       ("Result: infinite recursion");
+                  % endif
+                  ${gdb_memoization_return()}
+                  raise Property_Error with "Infinite recursion detected";
 
-            if Mmz_Val.Kind = Mmz_Evaluating then
-               % if has_logging:
-                  Properties_Traces.Trace
-                    ("Result: infinite recursion");
-               % endif
-               ${gdb_memoization_return()}
-               raise Property_Error with "Infinite recursion detected";
+               elsif Mmz_Val.Kind = Mmz_Property_Error then
+                  % if has_logging:
+                     Properties_Traces.Trace
+                       ("Result: Property_Error");
+                     Properties_Traces.Decrease_Indent;
+                  % endif
+                  ${gdb_memoization_return()}
+                  raise Property_Error with "Memoized error";
 
-            elsif Mmz_Val.Kind = Mmz_Property_Error then
-               % if has_logging:
-                  Properties_Traces.Trace
-                    ("Result: Property_Error");
-                  Properties_Traces.Decrease_Indent;
-               % endif
-               ${gdb_memoization_return()}
-               raise Property_Error with "Memoized error";
+               else
+                  Property_Result := Mmz_Val.As_${property.type.name};
+                  % if property.type.is_refcounted:
+                     Inc_Ref (Property_Result);
+                  % endif
 
-            else
-               Property_Result := Mmz_Val.As_${property.type.name};
-               % if property.type.is_refcounted:
-                  Inc_Ref (Property_Result);
-               % endif
-
-               % if has_logging:
-                  Properties_Traces.Trace
-                    ("Result: " & Trace_Image (Property_Result));
-                  Properties_Traces.Decrease_Indent;
-               % endif
-               ${gdb_memoization_return()}
-               Exit_Call (Self.Unit.Context, Call_Depth);
-               return Property_Result;
+                  % if has_logging:
+                     Properties_Traces.Trace
+                       ("Result: " & Trace_Image (Property_Result));
+                     Properties_Traces.Decrease_Indent;
+                  % endif
+                  ${gdb_memoization_return()}
+                  Exit_Call (Self.Unit.Context, Call_Depth);
+                  return Property_Result;
+               end if;
+               ${gdb_end()}
             end if;
-            ${gdb_end()}
-         end if;
 
-      % if not property.memoize_in_populate:
+         % if not property.memoize_in_populate:
+         end if;
+         % endif
       end if;
-      % endif
    % endif
 
    % if property.is_dispatcher:
@@ -267,25 +268,28 @@ begin
    % endif
 
    % if memoized:
-      ## If memoization is enabled for this property, save the result for later
-      ## re-use. Note that memoization in during PLE is disabled unless
-      ## specifically allowed for this property.
-      % if not property.memoize_in_populate:
-      if not Self.Unit.Context.In_Populate_Lexical_Env then
-      % endif
-
-         Mmz_Val := (Kind => ${property.type.memoization_kind},
-                     As_${property.type.name} => Property_Result);
-         Add_Memoized_Value (Self.Unit, Mmz_Handle, Mmz_Val, Mmz_Stored);
-         % if property.type.is_refcounted:
-            if Mmz_Stored then
-               Inc_Ref (Property_Result);
-            end if;
+      ## See the corresponding check above
+      if Self /= null then
+         ## If memoization is enabled for this property, save the result for
+         ## later re-use. Note that memoization in during PLE is disabled
+         ## unless specifically allowed for this property.
+         % if not property.memoize_in_populate:
+         if not Self.Unit.Context.In_Populate_Lexical_Env then
          % endif
 
-      % if not property.memoize_in_populate:
+            Mmz_Val := (Kind => ${property.type.memoization_kind},
+                        As_${property.type.name} => Property_Result);
+            Add_Memoized_Value (Self.Unit, Mmz_Handle, Mmz_Val, Mmz_Stored);
+            % if property.type.is_refcounted:
+               if Mmz_Stored then
+                  Inc_Ref (Property_Result);
+               end if;
+            % endif
+
+         % if not property.memoize_in_populate:
+         end if;
+         % endif
       end if;
-      % endif
 
    % elif property.lazy_field:
       ## If this property is the initializer for a lazy field, track its result
