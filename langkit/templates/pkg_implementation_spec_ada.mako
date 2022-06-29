@@ -399,6 +399,13 @@ private package ${ada_lib_name}.Implementation is
       function Hash (I : String_Type) return Hash_Type;
    % endif
 
+   ## Also generate hash functions for enum types that need one
+   % for enum_type in ctx.enum_types:
+      % if enum_type.requires_hash_function:
+         function Hash (Self : ${enum_type.name}) return Hash_Type;
+      % endif
+   % endfor
+
    --------------------------
    -- Big integers wrapper --
    --------------------------

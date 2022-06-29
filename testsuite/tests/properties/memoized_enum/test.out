@@ -1,0 +1,15 @@
+main.py: Running...
+== First round ==
+p_id_bool(False) = False
+p_id_bool(True) = True
+p_id_my_enum(a) = a
+p_id_my_enum(b) = b
+
+== Second round ==
+p_id_bool(False) = False
+p_id_bool(True) = True
+p_id_my_enum(a) = a
+p_id_my_enum(b) = b
+
+main.py: Done.
+Done

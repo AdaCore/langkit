@@ -2518,6 +2518,19 @@ package body ${ada_lib_name}.Implementation is
       end Hash;
    % endif
 
+   % for enum_type in ctx.enum_types:
+      % if enum_type.requires_hash_function:
+         ----------
+         -- Hash --
+         ----------
+
+         function Hash (Self : ${enum_type.name}) return Hash_Type is
+         begin
+            return ${enum_type.name}'Pos (Self);
+         end Hash;
+      % endif
+   % endfor
+
    ------------------------
    -- Named environments --
    ------------------------
