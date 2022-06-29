@@ -3966,7 +3966,8 @@ class ArrayType(CompiledType):
             public=False, external=True, uses_entity_info=False,
             uses_envs=False, optional_entity_info=False, dynamic_vars=[],
             doc='Return an iterator on values of this array',
-            access_constructor=make_to_iterator, artificial=True,
+            access_constructor=make_to_iterator, lazy_field=False,
+            artificial=True,
         )
 
         builtins = [('to_iterator', self._to_iterator_property)]
