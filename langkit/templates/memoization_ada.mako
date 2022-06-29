@@ -13,12 +13,23 @@
    default_key = key_types[0].memoization_kind
 %>
 
-type Mmz_Property is
-  (${', '.join(p.memoization_enum for p in memoized_props)});
-type Mmz_Key_Kind is (${', '.join(t.memoization_kind for t in key_types)});
-type Mmz_Value_Kind is
-  (Mmz_Evaluating, Mmz_Property_Error
-   ${(''.join(', ' + t.memoization_kind for t in value_types))});
+type Mmz_Property is (
+   % for i, p in enumerate(memoized_props):
+     ${(", " if i > 0 else "")} ${p.memoization_enum}
+   % endfor
+);
+type Mmz_Key_Kind is (
+   % for i, t in enumerate(key_types):
+     ${(", " if i > 0 else "")} ${t.memoization_kind}
+   % endfor
+);
+type Mmz_Value_Kind is (
+   Mmz_Evaluating,
+   Mmz_Property_Error
+   % for t in value_types:
+      , ${t.memoization_kind}
+   % endfor
+);
 
 type Mmz_Key_Item (Kind : Mmz_Key_Kind := ${default_key}) is record
    case Kind is
