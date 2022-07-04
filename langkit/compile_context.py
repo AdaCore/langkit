@@ -334,7 +334,8 @@ class CompileCtx:
                  lkt_semantic_checks: bool = False,
                  version: Optional[str] = None,
                  build_date: Optional[str] = None,
-                 standalone: bool = False):
+                 standalone: bool = False,
+                 property_exceptions: Set[str] = set()):
         """Create a new context for code emission.
 
         :param lang_name: string (mixed case and underscore: see
@@ -435,6 +436,9 @@ class CompileCtx:
             Because of this, standalone libraries should be used only as
             an internal implementation helper in a bigger library, and units of
             the former should not appear in the public API of the latter.
+
+        :param property_exceptions: In addition to ``Property_Error``, set of
+            names for exceptions that properties are allowed to raise.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -798,6 +802,16 @@ class CompileCtx:
         """
         Mapping from called properties to sets of caller properties. None when
         not yet computed or invalidated.
+        """
+
+        self.property_exceptions: List[str] = sorted(
+            property_exceptions | {"Property_Error"}
+        )
+
+        self.property_exception_matcher = " | ".join(self.property_exceptions)
+        """
+        Helper to generate Ada exception handlers to catch errors that
+        properties are allowed to raise.
         """
 
     def set_versions(self,

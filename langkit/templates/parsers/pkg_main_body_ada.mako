@@ -274,7 +274,7 @@ package body ${ada_lib_name}.Parsers is
       Set_Parents (Result, null);
       return Parsed_Node (Result);
    exception
-      when Exc : Property_Error =>
+      when Exc : ${ctx.property_exception_matcher} =>
          Append
            (Parser.Diagnostics,
             No_Source_Location_Range,

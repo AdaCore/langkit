@@ -1,4 +1,5 @@
 with Ada.Containers; use Ada.Containers;
+with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
@@ -61,6 +62,9 @@ package Support is
       Dummy_Index : Positive) return Inner_Env_Assoc
    is (raise Program_Error);
    procedure Dec_Ref (Self : in out Inner_Env_Assoc_Array) is null;
+
+   function Properties_May_Raise (Dummy : Exception_Occurrence) return Boolean
+   is (False);
 
    package Envs is new Langkit_Support.Lexical_Envs_Impl
      (Get_Unit_Version      => Get_Unit_Version,

@@ -25,7 +25,7 @@ type Mmz_Key_Kind is (
 );
 type Mmz_Value_Kind is (
    Mmz_Evaluating,
-   Mmz_Property_Error
+   Mmz_Error
    % for t in value_types:
       , ${t.memoization_kind}
    % endfor
@@ -49,8 +49,11 @@ end record;
 
 type Mmz_Value (Kind : Mmz_Value_Kind := Mmz_Evaluating) is record
    case Kind is
-      when Mmz_Evaluating | Mmz_Property_Error =>
+      when Mmz_Evaluating =>
          null;
+
+      when Mmz_Error =>
+         Exc_Id : Ada.Exceptions.Exception_Id;
 
       % for t in value_types:
          when ${t.memoization_kind} =>

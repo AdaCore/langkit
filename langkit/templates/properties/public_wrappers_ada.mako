@@ -127,11 +127,10 @@ ${public_prototype(property)} is
          return ${result_expr};
       % endif
 
-   ## Add a Property_Error exception handle to free resources when the property
-   ## fails.
+   ## Free resources when the property fails
    % if needs_refcounting:
       exception
-         when Property_Error =>
+         when ${ctx.property_exception_matcher} =>
             Free_Internal;
             raise;
    % endif

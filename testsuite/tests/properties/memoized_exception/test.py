@@ -1,5 +1,5 @@
 """
-Check that memoized properties that raise a PropertyError work as expected.
+Check that memoized properties that raise an exception work as expected.
 """
 
 from langkit.dsl import ASTNode, Bool
@@ -27,7 +27,22 @@ class Example(FooNode):
     def prop2():
         return PropertyError(Bool, 'Explicit error 2')
 
+    # Check that non-Property_Error are also properly handled
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb',
-              types_from_lkt=True)
+    @langkit_property(public=True, memoized=True, return_type=Bool)
+    def prop3():
+        return Self.raise_error(False)
+
+    @langkit_property(external=True, return_type=Bool, uses_entity_info=False,
+                      uses_envs=False)
+    def raise_error(prop_error=Bool):
+        pass
+
+
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    ada_main='main.adb',
+    property_exceptions={"Precondition_Failure"},
+    types_from_lkt=True,
+)
 print('Done')

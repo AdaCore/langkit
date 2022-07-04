@@ -48,4 +48,17 @@ begin
             Put_Line (Exception_Name (Exc) & ": " & Exception_Message (Exc));
       end;
    end loop;
+
+   Put_Line ("Calling P_Prop3...");
+   for I in 1 .. 3 loop
+      declare
+         Dummy : Boolean;
+      begin
+         Dummy := Example_Node.P_Prop3;
+      exception
+         when Exc : Property_Error | Precondition_Failure =>
+            Put_Line ("Got an exception!");
+            Put_Line (Exception_Name (Exc) & ": " & Exception_Message (Exc));
+      end;
+   end loop;
 end Main;

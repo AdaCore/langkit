@@ -18,4 +18,8 @@ class Example : FooNode {
 
     @export @memoized fun prop2(): Bool =
     raise PropertyError("Explicit error 2")
+
+    @export @memoized fun prop3(): Bool = node.raise_error(false)
+
+    @external fun raise_error(prop_error: Bool): Bool
 }

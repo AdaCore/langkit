@@ -6,6 +6,7 @@
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Ordered_Maps;
+with Ada.Exceptions;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
@@ -98,6 +99,9 @@ generic
      (Self  : Inner_Env_Assoc_Array;
       Index : Positive) return Inner_Env_Assoc is <>;
    with procedure Dec_Ref (Self : in out Inner_Env_Assoc_Array) is <>;
+
+   with function Properties_May_Raise
+     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean is <>;
 
 package Langkit_Support.Lexical_Envs_Impl is
 

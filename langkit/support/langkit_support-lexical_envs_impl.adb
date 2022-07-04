@@ -219,13 +219,20 @@ package body Langkit_Support.Lexical_Envs_Impl is
             null;
       end case;
    exception
-      when Property_Error =>
-         --  Resolution failed. Get_Env took care of invalidating the cache, so
-         --  there is nothing else to do. Note that there is no need to
-         --  propagate the error, as the job of this procedure is just to do
-         --  precomputation for Get_Env. The next call to Get_Env will
-         --  propagate this error, so all is fine.
-         null;
+      when Exc : others =>
+
+         --  Resolution failed. If ``Exc`` is an exception that properties are
+         --  allowed to raise, there is nothing else to do as ``Get_Env`` took
+         --  care of invalidating the cache.
+         --
+         --  Note that in that case there is no need to propagate the error, as
+         --  the job of this procedure is just to do precomputation for
+         --  ``Get_Env``. The next call to ``Get_Env`` will propagate this
+         --  error, so all is fine.
+
+         if not Properties_May_Raise (Exc) then
+            raise;
+         end if;
    end Resolve;
 
    -------------
@@ -1388,8 +1395,17 @@ package body Langkit_Support.Lexical_Envs_Impl is
       end if;
 
    exception
-      when Property_Error =>
-         Local_Results.Destroy;
+      when Exc : others =>
+
+         --  If ``Exc`` is an exception that properties are allowed to raise,
+         --  free the locally allocated resources and propagate the exception.
+         --  All bets are off for other kinds of exceptions: just propagate in
+         --  that case.
+
+         if not Properties_May_Raise (Exc) then
+            Local_Results.Destroy;
+         end if;
+
          raise;
    end Get_Internal_Impl;
 

@@ -3,7 +3,7 @@ import os.path as P
 import shutil
 import subprocess
 import sys
-from typing import List, Optional
+from typing import List, Optional, Set
 
 import langkit
 import langkit.compile_context
@@ -72,7 +72,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     case_insensitive: bool = False,
                     version: Optional[str] = None,
                     build_date: Optional[str] = None,
-                    standalone: bool = False):
+                    standalone: bool = False,
+                    property_exceptions: Set[str] = set()):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -120,7 +121,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                      case_insensitive=case_insensitive,
                      version=version,
                      build_date=build_date,
-                     standalone=standalone)
+                     standalone=standalone,
+                     property_exceptions=property_exceptions)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -158,6 +160,8 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
     :param None|str unparse_script: Script to unparse the language spec.
 
     :param types_from_lkt: See CompileCtx.types_from_lkt.
+
+    :param property_exceptions: See CompileCtx's constructor.
     """
 
     try:
@@ -207,7 +211,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                   standalone: bool = False,
                   full_error_traces: bool = True,
                   additional_make_args: List[str] = [],
-                  python_args: Optional[List[str]] = None):
+                  python_args: Optional[List[str]] = None,
+                  property_exceptions: Set[str] = set()):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -266,6 +271,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
 
     :param python_args: Arguments to pass to the Python interpreter when
         running a Python script.
+
+    :param property_exceptions: See CompileCtx's constructor.
     """
     assert not types_from_lkt or lkt_file is not None
 
@@ -288,7 +295,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                               case_insensitive=case_insensitive,
                               version=version,
                               build_date=build_date,
-                              standalone=standalone)
+                              standalone=standalone,
+                              property_exceptions=property_exceptions)
 
         m = Manage(ctx)
 

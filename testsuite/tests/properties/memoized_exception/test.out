@@ -12,4 +12,11 @@ Got an exception!
 LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Memoized error
 Got an exception!
 LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Memoized error
+Calling P_Prop3...
+Got an exception!
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: This is a Precondition_Failure
+Got an exception!
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Memoized error
+Got an exception!
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Memoized error
 Done

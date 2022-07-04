@@ -16,6 +16,7 @@ with Ada.Containers;              use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Hashed_Sets;
 with Ada.Containers.Ordered_Maps;
+with Ada.Exceptions;
 with Ada.Strings.Unbounded;       use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
 with Ada.Unchecked_Conversion;
@@ -337,6 +338,11 @@ private package ${ada_lib_name}.Implementation is
      (${", ".join(sorted(str(cat) for cat in ctx.ref_cats))});
    type Ref_Categories is array (Ref_Category) of Boolean;
    pragma Pack (Ref_Categories);
+
+   function Properties_May_Raise
+     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean;
+   --  Return if ``Exc`` is one of the exceptions that properties are allowed
+   --  to raise.
 
    package AST_Envs is new Langkit_Support.Lexical_Envs_Impl
      (Get_Unit_Version         => Unit_Version,

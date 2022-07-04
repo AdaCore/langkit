@@ -197,14 +197,15 @@ begin
                   ${gdb_memoization_return()}
                   raise Property_Error with "Infinite recursion detected";
 
-               elsif Mmz_Val.Kind = Mmz_Property_Error then
+               elsif Mmz_Val.Kind = Mmz_Error then
                   % if has_logging:
                      Properties_Traces.Trace
                        ("Result: Property_Error");
                      Properties_Traces.Decrease_Indent;
                   % endif
                   ${gdb_memoization_return()}
-                  raise Property_Error with "Memoized error";
+                  Ada.Exceptions.Raise_Exception
+                    (Mmz_Val.Exc_Id, "Memoized error");
 
                else
                   Property_Result := Mmz_Val.As_${property.type.name};
@@ -320,7 +321,7 @@ exception
           property.vars.root_scope.has_refcounted_vars(True)) or \
      memoized or \
      has_logging:
-   when Property_Error =>
+   when Exc : ${ctx.property_exception_matcher} =>
       % if not property.is_dispatcher:
          % for scope in all_scopes:
             % if scope.has_refcounted_vars():
@@ -338,7 +339,8 @@ exception
                Add_Memoized_Value
                  (Self.Unit,
                   Mmz_Handle,
-                  (Kind => Mmz_Property_Error),
+                  (Kind   => Mmz_Error,
+                   Exc_Id => Ada.Exceptions.Exception_Identity (Exc)),
                   Mmz_Stored);
 
             % if not property.memoize_in_populate:

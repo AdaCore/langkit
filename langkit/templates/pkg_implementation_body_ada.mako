@@ -739,14 +739,15 @@ package body ${ada_lib_name}.Implementation is
             "cannot reparse during tree rewriting";
       end if;
 
-      return Context.Unit_Provider.Get_Unit
-        (Context, Name, Kind, Charset, Reparse);
-
-   exception
-      when Property_Error =>
-         raise Invalid_Unit_Name_Error with
-            "Invalid unit name: " & Image (Name, With_Quotes => True)
-            & " (" & Analysis_Unit_Kind'Image (Kind) & ")";
+      begin
+         return Context.Unit_Provider.Get_Unit
+           (Context, Name, Kind, Charset, Reparse);
+      exception
+         when ${ctx.property_exception_matcher} =>
+            raise Invalid_Unit_Name_Error with
+               "Invalid unit name: " & Image (Name, With_Quotes => True)
+               & " (" & Analysis_Unit_Kind'Image (Kind) & ")";
+      end;
    end Get_From_Provider;
 
    % endif
@@ -2317,7 +2318,7 @@ package body ${ada_lib_name}.Implementation is
 
             Post_Env_Actions (Node, State);
          exception
-            when Exc : Property_Error =>
+            when Exc : ${ctx.property_exception_matcher} =>
                if PLE_Errors_Trace.Is_Active then
                    GNATCOLL.Traces.Trace
                      (PLE_Errors_Trace,
@@ -2362,7 +2363,7 @@ package body ${ada_lib_name}.Implementation is
             Populate_Lexical_Env (Node.Unit);
             return False;
          exception
-            when Property_Error =>
+            when ${ctx.property_exception_matcher} =>
                return True;
          end;
       end if;
@@ -2919,6 +2920,23 @@ package body ${ada_lib_name}.Implementation is
    begin
       return Node.Unit.Context.Cache_Version;
    end Get_Context_Version;
+
+   --------------------------
+   -- Properties_May_Raise --
+   --------------------------
+
+   function Properties_May_Raise
+     (Exc : Ada.Exceptions.Exception_Occurrence) return Boolean is
+   begin
+      return Ada.Exceptions.Exception_Identity (Exc) in
+         % for i, exc in enumerate(ctx.property_exceptions):
+            % if i > 0:
+               |
+            % endif
+            ${exc}'Identity
+         % endfor
+      ;
+   end Properties_May_Raise;
 
    ----------------------
    -- Short_Text_Image --
