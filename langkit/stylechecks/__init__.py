@@ -343,18 +343,37 @@ def check_generic(report, filename, content, lang):
         """
         nonempty_lines = [l for l in comment_block if l.strip()]
         if nonempty_lines:
-            # Remove common indentation for this block of comment
+            # Remove common indentation for this block of comment.  Ignored
+            # lines starting with '%': they are directives for documentation
+            # generators.
             indent = min(len(l) - len(l.lstrip())
                          for l in nonempty_lines)
+            clean_lines = [
+                l[indent:]
+                for l in comment_block
+                if not l.startswith('%')
+            ]
 
-            check_text(report, filename, lang,
-                       comment_first_line,
-
-                       # Ignored lines starting with '%': they are directives
-                       # for documentation generators.
-                       '\n'.join(l[indent:] for l in comment_block
-                                 if not l.startswith('%')),
-                       True)
+            # Copyright notices have a special formatting
+            if (
+                comment_first_line == 1
+                and len(clean_lines) == 4
+                and not clean_lines[0]
+                and not clean_lines[3]
+            ):
+                report.set_context(filename, 1)
+                if not (
+                    clean_lines[1].startswith("Copyright (C) ")
+                    and clean_lines[1].endswith(", AdaCore")
+                ):
+                    report.add("Invalid copyright line")
+                if clean_lines[2] != "SPDX-License-Identifier: Apache-2.0":
+                    report.add("Invalid license")
+            else:
+                check_text(report, filename, lang,
+                           comment_first_line,
+                           '\n'.join(clean_lines),
+                           True)
         comment_block[:] = []
 
     def start_comment():
