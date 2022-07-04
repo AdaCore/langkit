@@ -3,8 +3,9 @@ Check that memoized properties that raise an exception work as expected.
 """
 
 from langkit.dsl import ASTNode, Bool
-from langkit.expressions import (PropertyError, Self, Var, ignore,
-                                 langkit_property)
+from langkit.expressions import (
+    If, PreconditionFailure, PropertyError, Self, Var, ignore, langkit_property
+)
 
 from utils import build_and_run
 
@@ -33,16 +34,19 @@ class Example(FooNode):
     def prop3():
         return Self.raise_error(False)
 
-    @langkit_property(external=True, return_type=Bool, uses_entity_info=False,
-                      uses_envs=False)
+    @langkit_property(return_type=Bool)
     def raise_error(prop_error=Bool):
-        pass
+        return If(
+            prop_error,
+            PropertyError(Bool, "This is a Property_Error"),
+            PreconditionFailure(Bool, "This is a Precondition_Failure"),
+        )
 
 
 build_and_run(
     lkt_file='expected_concrete_syntax.lkt',
     ada_main='main.adb',
     property_exceptions={"Precondition_Failure"},
-    types_from_lkt=True,
+    types_from_lkt=False,
 )
 print('Done')

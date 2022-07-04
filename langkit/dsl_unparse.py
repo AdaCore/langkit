@@ -656,9 +656,10 @@ def emit_expr(expr, **ctx):
         GetSymbol, Match, Eq, BinaryBooleanOperator, Then, OrderingTest,
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
-        ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
-        StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains,
-        PropertyDef, DynamicLexicalEnv, Super, Join, String, NPropagate, Find
+        ArrayLiteral, Arithmetic, BaseRaiseException, CharacterLiteral,
+        Predicate, StructUpdate, BigIntLiteral, RefCategories, Bind, Try,
+        Block, Contains, PropertyDef, DynamicLexicalEnv, Super, Join, String,
+        NPropagate, Find
     )
 
     def is_a(*names):
@@ -719,8 +720,9 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, SymbolLiteral):
         return json.dumps(expr.name)
 
-    elif isinstance(expr, PropertyError):
-        return "raise PropertyError({})".format(
+    elif isinstance(expr, BaseRaiseException):
+        return "raise {}({})".format(
+            expr.exc_name.camel,
             json.dumps(expr.message) if expr.message else ""
         )
 

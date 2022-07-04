@@ -1570,27 +1570,62 @@ class UnreachableExpr(ErrorExpr):
         )
 
 
-@dsl_document
-class PropertyError(AbstractExpression):
+class BaseRaiseException(AbstractExpression):
     """
-    Expression to raise a Property_Error. `expr_type` is the type this
-    expression would have if it computed a value. `message` is an optional
-    error message (it can be left to None).
+    Base class for expressions that raise exceptions.
     """
 
-    def __init__(self, expr_type, message=None):
+    def __init__(self,
+                 expr_type: Union[CompiledType, TypeRepo.Defer],
+                 message: Opt[str] = None):
         self.expr_type = expr_type
         self.message = message
         super().__init__()
 
-    def construct(self):
+    @property
+    def exc_name(self) -> names.Name:
+        """
+        Subclasses must override this to return the name of the exception to
+        raise.
+        """
+        raise NotImplementedError
+
+    def construct(self) -> ResolvedExpression:
         check_source_language(
             self.message is None or isinstance(self.message, str),
             'Invalid error message: {}'.format(repr(self.message))
         )
-        return ErrorExpr(resolve_type(self.expr_type),
-                         names.Name('Property_Error'),
-                         self.message)
+        return ErrorExpr(
+            resolve_type(self.expr_type), self.exc_name, self.message
+        )
+
+
+@dsl_document
+class PropertyError(BaseRaiseException):
+    """
+    Expression to raise a ``Property_Error`` exception.
+
+    ``expr_type`` is the type this expression would have if it computed a
+    value.  `message`` is an optional error message (it can be left to None).
+    """
+
+    @property
+    def exc_name(self) -> names.Name:
+        return names.Name("Property_Error")
+
+
+@dsl_document
+class PreconditionFailure(BaseRaiseException):
+    """
+    Expression to raise a ``Precondition_Failure`` exception.
+
+    ``expr_type`` is the type this expression would have if it computed a
+    value.  `message`` is an optional error message (it can be left to None).
+    """
+
+    @property
+    def exc_name(self) -> names.Name:
+        return names.Name("Precondition_Failure")
 
 
 class LiteralExpr(ResolvedExpression):
