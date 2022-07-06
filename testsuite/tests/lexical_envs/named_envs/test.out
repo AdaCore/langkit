@@ -17,7 +17,7 @@ foo.ads:15: ref Foo.Bar.FB1;: P_Resolve:
 foo.ads:16: ref Foo.No_Such;: P_Resolve:
   <none>
 foo.ads:17: ref No_Such.F1;: P_Resolve:
-  <error: dereferencing a null access>
+  <error: foo.ads:17:9-17:16: dereferencing a null access>
 foo.ads:22: package Bar is: P_Body_Part:
   <none>
 
@@ -36,7 +36,7 @@ foo.adb:6: ref Foo.Bar.FB1;: P_Resolve:
 foo.adb:7: ref Foo.No_Such;: P_Resolve:
   <none>
 foo.adb:8: ref No_Such.F1;: P_Resolve:
-  <error: dereferencing a null access>
+  <error: foo.adb:8:9-8:16: dereferencing a null access>
 foo.adb:9: ref FP1;: P_Resolve:
   foo.ads:19: type FP1 is end;
 foo.adb:10: ref Foo.FP1;: P_Resolve:
@@ -75,7 +75,7 @@ foo.ads:15: ref Foo.Bar.FB1;: P_Resolve:
 foo.ads:16: ref Foo.No_Such;: P_Resolve:
   <none>
 foo.ads:17: ref No_Such.F1;: P_Resolve:
-  <error: dereferencing a null access>
+  <error: foo.ads:17:9-17:16: dereferencing a null access>
 foo.ads:22: package Bar is: P_Body_Part:
   <none>
 
@@ -94,7 +94,7 @@ foo.adb:6: ref Foo.Bar.FB1;: P_Resolve:
 foo.adb:7: ref Foo.No_Such;: P_Resolve:
   <none>
 foo.adb:8: ref No_Such.F1;: P_Resolve:
-  <error: dereferencing a null access>
+  <error: foo.adb:8:9-8:16: dereferencing a null access>
 foo.adb:9: ref FP1;: P_Resolve:
   foo.ads:19: type FP1 is end;
 foo.adb:10: ref Foo.FP1;: P_Resolve:

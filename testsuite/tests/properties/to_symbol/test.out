@@ -1,6 +1,6 @@
 "Hello" = "HELLO": TRUE
 "Foo" = "Bar": FALSE
-"Foo.Bar" = "Foo.Bar": Property_Error: invalid symbol character: .
+"Foo.Bar" = "Foo.Bar": Property_Error: main.txt:1:1-1:8: invalid symbol character: .
 
 main.adb: Done
 Done

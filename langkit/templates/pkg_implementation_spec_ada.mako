@@ -182,6 +182,14 @@ private package ${ada_lib_name}.Implementation is
    function Is_Synthetic (Node : ${T.root_node.name}) return Boolean;
    ${ada_doc('langkit.node_is_synthetic', 3)}
 
+   procedure Raise_Property_Exception
+     (Node    : ${T.root_node.name};
+      Exc     : Ada.Exceptions.Exception_Id;
+      Message : String)
+     with No_Return;
+   --  Raise an exception of the given type and with the given message. Prepend
+   --  the sloc of the given node to the exception message.
+
    ---------------------------
    -- Iterators safety nets --
    ---------------------------
@@ -437,9 +445,12 @@ private package ${ada_lib_name}.Implementation is
      (Value => <>, Ref_Count => -1);
    No_Big_Integer : constant Big_Integer_Type := No_Big_Integer_Record'Access;
 
-   function To_Integer (Big_Int : Big_Integer_Type) return Integer;
-   --  Convert Big_Int into a regular integer, raising a Property_Error if it
-   --  is out of range.
+   function To_Integer
+     (Self    : ${T.root_node.name};
+      Big_Int : Big_Integer_Type) return Integer;
+   --  Convert ``Big_Int`` into a regular integer, raising a ``Property_Error``
+   --  if it is out of range (using ``Self`` to provide context for this
+   --  error).
 
    procedure Inc_Ref (Big_Int : Big_Integer_Type);
    procedure Dec_Ref (Big_Int : in out Big_Integer_Type);
@@ -919,11 +930,12 @@ private package ${ada_lib_name}.Implementation is
    --  it, or null if no such node was found.
 
    function Compare
-     (Left, Right : ${T.root_node.name};
-      Relation    : Comparison_Relation) return Boolean;
-   --  If Left and Right don't belong to the same analysis units or if one of
-   --  them is null, raise a Property_Error. Otherwise, return the comparison
-   --  of their starting source location according to Relation.
+     (Self, Left, Right : ${T.root_node.name};
+      Relation          : Comparison_Relation) return Boolean;
+   --  If ``Left`` and ``Right`` don't belong to the same analysis units or if
+   --  one of them is null, raise a ``Property_Error`` (use ``Self`` to provide
+   --  error context). Otherwise, return the comparison of their starting
+   --  source location according to Relation.
 
    -------------------
    -- Debug helpers --
@@ -1188,11 +1200,15 @@ private package ${ada_lib_name}.Implementation is
       Index : Positive) return ${T.root_node.name} renames Child;
 
    function Get
-     (Node    : ${ctx.generic_list_type.name};
+     (Self    : ${T.root_node.name};
+      Node    : ${ctx.generic_list_type.name};
       Index   : Integer;
       Or_Null : Boolean := False) return ${T.root_node.name};
    --  When Index is positive, return the Index'th element in T. Otherwise,
    --  return the element at index (Size - Index - 1). Index is zero-based.
+   --
+   --  ``Self`` is used to provide context to the ``Property_Error`` that is
+   --  raised when the index is invalid.
 
    procedure Free_User_Fields (Node : ${T.root_node.name});
    --  Free resources associated to user fields in ``Node``
@@ -1216,9 +1232,13 @@ private package ${ada_lib_name}.Implementation is
    --  if Node is not null, register the result for destruction in Node's
    --  analysis unit.
 
-   function Get (A : AST_Envs.Entity_Array; Index : Integer) return Entity;
-   --  Simple getter that raises Property_Error on out-of-bound accesses.
-   --  Useful for code generation.
+   function Get
+     (Self  : ${T.root_node.name};
+      A     : AST_Envs.Entity_Array;
+      Index : Integer) return ${root_entity.name};
+   --  Simple getter that raises a ``Property_Error`` on out-of-bound accesses
+   --  (using ``Self`` to provide context for this error). Useful for code
+   --  generation.
 
    function Group
      (Envs   : ${T.LexicalEnv.array.name};
@@ -1229,11 +1249,14 @@ private package ${ada_lib_name}.Implementation is
       new Langkit_Support.Vectors (${T.root_node.name});
 
    function Is_Visible_From
-     (Referenced_Env, Base_Env : Lexical_Env) return Boolean;
-   --  Return whether the unit that Referenced_Env belongs to is visible from
-   --  the unit that Base_Env belongs to. If at least one of these two lexical
-   --  environments does not belong to a particular analysis unit, this raises
-   --  a Property_Error.
+     (Self                     : ${T.root_node.name};
+      Referenced_Env, Base_Env : Lexical_Env) return Boolean;
+   --  Return whether the unit that ``Referenced_Env`` belongs to is visible
+   --  from the unit that Base_Env belongs to. If at least one of these two
+   --  lexical environments does not belong to a particular analysis unit, this
+   --  raises a ``Property_Error``.
+   --
+   --  ``Self`` is used to give context to the error in case of failure.
 
    function Populate_Lexical_Env (Node : ${T.root_node.name}) return Boolean;
    --  Populate the lexical environment for node and all its children. Return
@@ -2027,9 +2050,13 @@ private package ${ada_lib_name}.Implementation is
    No_Node_Safety_Net : constant Node_Safety_Net := (null, 0, null, 0, 0);
 
    function String_To_Symbol
-     (Context : Internal_Context; S : ${T.String.name}) return Symbol_Type;
-   --  Convert S into the corresponding symbol, raising a Property_Error if
-   --  symbol canonicalization fails. If S is empty, just return null.
+     (Self    : ${T.root_node.name};
+      Context : Internal_Context;
+      S       : ${T.String.name}) return Symbol_Type;
+   --  Convert ``S`` into the corresponding symbol, raising a
+   --  ``Property_Error`` if symbol canonicalization fails (using ``Self`` to
+   --  provide context for this error). If ``S`` is empty, just return
+   --  ``null``.
 
    function Solve_Wrapper
      (R            : Solver.Relation;

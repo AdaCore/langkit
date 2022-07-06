@@ -144,7 +144,8 @@
 
    ## Helper getter generated for properties code. Used in CollectionGet's code
    function Get
-     (T       : ${cls.name};
+     (Node    : ${T.root_node.name};
+      T       : ${cls.name};
       Index   : Integer;
       Or_Null : Boolean := False) return ${elt_type};
    --  When Index is positive, return the Index'th element in T. Otherwise,
@@ -208,7 +209,8 @@
    ---------
 
    function Get
-     (T       : ${cls.name};
+     (Node    : ${T.root_node.name};
+      T       : ${cls.name};
       Index   : Integer;
       Or_Null : Boolean := False) return ${elt_type}
    is
@@ -234,7 +236,10 @@
       elsif Or_Null then
          return ${cls.element_type.nullexpr};
       else
-         raise Property_Error with "out-of-bounds array access";
+         Raise_Property_Exception
+           (Node,
+            Property_Error'Identity,
+            "out-of-bounds array access");
       end if;
    end Get;
 

@@ -3,7 +3,7 @@ main.py: Running...
 <Example main.txt:1:1-1:8>.p_test_any = False
 <Example main.txt:1:1-1:8>.p_test_as_array = []
 <Example main.txt:1:1-1:8>.p_test_at = None
-<Example main.txt:1:1-1:8>.p_test_at_or_raise = <PropertyError: dereferencing a null access>
+<Example main.txt:1:1-1:8>.p_test_at_or_raise = <PropertyError: main.txt:1:1-1:8: dereferencing a null access>
 <Example main.txt:1:1-1:8>.p_test_contains = False
 <Example main.txt:1:1-1:8>.p_test_filter = []
 <Example main.txt:1:1-1:8>.p_test_filtermap = []

@@ -10,8 +10,10 @@
 ## relocation mechanism takes care of it, but this incurs extra complexity for
 ## a use case that is not yet proven useful. So just forbid this situation.
 if Is_Foreign_Strict (Self.Self_Env, Self) then
-   raise Property_Error with
-      "synthetic nodes cannot have foreign lexical envs";
+   Raise_Property_Exception
+     (Self,
+      Property_Error'Identity,
+      "synthetic nodes cannot have foreign lexical envs");
 end if;
 
 ${result} := new ${T.root_node.value_type_name}

@@ -30,7 +30,8 @@ ${expr.expr.render_pre()}
       ${generate_cast(operand_expr)}
    else
       % if expr.do_raise:
-         raise Property_Error with "invalid object cast";
+         Raise_Property_Exception
+           (Self, Property_Error'Identity, "invalid object cast");
       % else:
          ${expr.result_var.name} := ${expr.static_type.nullexpr};
       % endif

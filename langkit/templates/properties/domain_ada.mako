@@ -17,7 +17,7 @@ begin
             node_expr = 'Item.Node' if element_type.is_entity_type else 'Item'
             info_expr = 'Item.Info' if element_type.is_entity_type else '<>'
          %>
-         Item : constant ${element_type.name} := Get (Dom, J);
+         Item : constant ${element_type.name} := Get (Self, Dom, J);
       begin
          A (J + 1) := (Node => ${node_expr}, Info => ${info_expr});
       end;

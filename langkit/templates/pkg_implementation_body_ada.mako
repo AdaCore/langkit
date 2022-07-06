@@ -1284,6 +1284,24 @@ package body ${ada_lib_name}.Implementation is
    end Is_Synthetic;
 
    ------------------------------
+   -- Raise_Property_Exception --
+   ------------------------------
+
+   procedure Raise_Property_Exception
+     (Node    : ${T.root_node.name};
+      Exc     : Ada.Exceptions.Exception_Id;
+      Message : String)
+   is
+      Sloc_Prefix : constant String :=
+        (if Node = null
+         then ""
+         else Ada.Directories.Simple_Name (Get_Filename (Unit (Node)))
+              & ":" & Image (Sloc_Range (Node)) & ": ");
+   begin
+      Ada.Exceptions.Raise_Exception (Exc, Sloc_Prefix & Message);
+   end Raise_Property_Exception;
+
+   ------------------------------
    -- Register_Destroyable_Gen --
    ------------------------------
 
@@ -1340,9 +1358,15 @@ package body ${ada_lib_name}.Implementation is
            (R, Timeout => Context_Node.Unit.Context.Logic_Resolution_Timeout);
       exception
          when Langkit_Support.Adalog.Early_Binding_Error =>
-            raise Property_Error with "invalid equation for logic resolution";
+            Raise_Property_Exception
+              (Context_Node,
+               Property_Error'Identity,
+               "invalid equation for logic resolution");
          when Langkit_Support.Adalog.Timeout_Error =>
-            raise Property_Error with "logic resolution timed out";
+            Raise_Property_Exception
+              (Context_Node,
+               Property_Error'Identity,
+               "logic resolution timed out");
       end;
    end Solve_Wrapper;
 
@@ -1434,14 +1458,18 @@ package body ${ada_lib_name}.Implementation is
             --  and primary environment.
 
             if Env.Direct_Env.Kind /= Static_Primary then
-               raise Property_Error with
+               Raise_Property_Exception
+                 (Self,
+                  Property_Error'Identity,
                   "Cannot set an env that is not static-primary as the"
-                  & " initial env";
+                  & " initial env");
 
             elsif Is_Foreign_Strict (Env.Direct_Env, Self) then
-               raise Property_Error with
+               Raise_Property_Exception
+                 (Self,
+                  Property_Error'Identity,
                   "unsound foreign environment in SetInitialEnv ("
-                  & DSL_Location & ")";
+                  & DSL_Location & ")");
             end if;
             Use_Direct_Env (State, Env.Direct_Env);
       end case;
@@ -1483,8 +1511,11 @@ package body ${ada_lib_name}.Implementation is
       end if;
 
       if Value.Unit /= Self.Unit then
-         raise Property_Error with "Cannot add_to_env an AST node that comes"
-                                   & " from another analysis unit";
+         Raise_Property_Exception
+           (Self,
+            Property_Error'Identity,
+            "Cannot add_to_env an AST node that comes from another analysis"
+            & " unit");
       end if;
 
       <% astnode_fields = [f for f in T.env_md.get_fields()
@@ -1499,8 +1530,10 @@ package body ${ada_lib_name}.Implementation is
             )
          )}
          then
-            raise Property_Error
-               with "Cannot add metadata that contains foreign nodes";
+            Raise_Property_Exception
+              (Self,
+               Property_Error'Identity,
+               "Cannot add metadata that contains foreign nodes");
          end if;
       % endif
 
@@ -1530,8 +1563,10 @@ package body ${ada_lib_name}.Implementation is
       --  Sanitize it
 
       if Actual_Dest_Env.Kind /= Static_Primary then
-         raise Property_Error with
-            "Cannot add elements to a lexical env that is not static-primary";
+         Raise_Property_Exception
+           (Self,
+            Property_Error'Identity,
+            "Cannot add elements to a lexical env that is not static-primary");
 
       elsif
          --  Since lexical envs need to sort the foreign nodes they contain,
@@ -1543,9 +1578,11 @@ package body ${ada_lib_name}.Implementation is
          --  units, but also to the root environment.
          Is_Foreign (Actual_Dest_Env, Self) and then Is_Synthetic (Value)
       then
-         raise Property_Error with
+         Raise_Property_Exception
+           (Self,
+            Property_Error'Identity,
             "Cannot add a synthetic node to a lexical env from another"
-            & " analysis unit";
+            & " analysis unit");
 
       elsif
          --  Reject direct references to foreign destination environments.
@@ -1557,8 +1594,10 @@ package body ${ada_lib_name}.Implementation is
          and then Dest_Env.Kind = Direct_Env
          and then Is_Foreign_Strict (Actual_Dest_Env, Self)
       then
-         raise Property_Error with
-            "unsound foreign environment in AddToEnv (" & DSL_Location & ")";
+         Raise_Property_Exception
+           (Self,
+            Property_Error'Identity,
+            "unsound foreign environment in AddToEnv (" & DSL_Location & ")");
       end if;
 
       --  Now that everything is sanitized, we can proceed with the actual
@@ -1623,8 +1662,10 @@ package body ${ada_lib_name}.Implementation is
       for N of Ref_Env_Nodes.Items loop
          if N /= null then
             if N.Unit /= Self.Unit then
-               raise Property_Error with
-                  "attempt to add a referenced environment to a foreign unit";
+               Raise_Property_Exception
+                 (Self,
+                  Property_Error'Identity,
+                  "attempt to add a referenced environment to a foreign unit");
             end if;
             Reference (Dest_Env, N, Resolver, Kind, Cats, Shed_Rebindings);
          end if;
@@ -1758,7 +1799,10 @@ package body ${ada_lib_name}.Implementation is
      (Node : ${T.root_node.name}) return Symbol_Type is
    begin
       if Node = null then
-         raise Property_Error with "cannot get the symbol of a null node";
+         Raise_Property_Exception
+           (Node,
+            Property_Error'Identity,
+            "cannot get the symbol of a null node");
       end if;
       return Get_Symbol (Token (Node, Node.Token_Start_Index));
    end Get_Symbol;
@@ -1772,7 +1816,10 @@ package body ${ada_lib_name}.Implementation is
    is
    begin
       if Node = null then
-         raise Property_Error with "cannot get the text of a null node";
+         Raise_Property_Exception
+           (Node,
+            Property_Error'Identity,
+            "cannot get the text of a null node");
       end if;
 
       declare
@@ -1800,7 +1847,8 @@ package body ${ada_lib_name}.Implementation is
    ---------------------
 
    function Is_Visible_From
-     (Referenced_Env, Base_Env : Lexical_Env) return Boolean
+     (Self                     : ${T.root_node.name};
+      Referenced_Env, Base_Env : Lexical_Env) return Boolean
    is
       Referenced_Unit : constant Internal_Unit :=
          Convert_Unit (Referenced_Env.Owner);
@@ -1808,11 +1856,15 @@ package body ${ada_lib_name}.Implementation is
          Convert_Unit (Base_Env.Owner);
    begin
       if Referenced_Unit = null then
-         raise Property_Error with
-            "referenced environment does not belong to any analysis unit";
+         Raise_Property_Exception
+           (Self,
+            Property_Error'Identity,
+            "referenced environment does not belong to any analysis unit");
       elsif Base_Unit = null then
-         raise Property_Error with
-            "base environment does not belong to any analysis unit";
+         Raise_Property_Exception
+           (Self,
+            Property_Error'Identity,
+            "base environment does not belong to any analysis unit");
       end if;
       return Is_Referenced_From (Referenced_Unit, Base_Unit);
    end Is_Visible_From;
@@ -2144,13 +2196,16 @@ package body ${ada_lib_name}.Implementation is
    -------------
 
    function Compare
-     (Left, Right : ${T.root_node.name};
-      Relation    : Comparison_Relation) return Boolean
+     (Self, Left, Right : ${T.root_node.name};
+      Relation          : Comparison_Relation) return Boolean
    is
       LS, RS : Source_Location;
    begin
       if Left = null or else Right = null or else Left.Unit /= Right.Unit then
-         raise Property_Error with "invalid node comparison";
+         Raise_Property_Exception
+           (Self,
+            Property_Error'Identity,
+            "invalid node comparison");
       end if;
 
       LS := Start_Sloc (Sloc_Range (Left));
@@ -2197,7 +2252,8 @@ package body ${ada_lib_name}.Implementation is
    ---------
 
    function Get
-     (Node    : ${ctx.generic_list_type.name};
+     (Self    : ${T.root_node.name};
+      Node    : ${ctx.generic_list_type.name};
       Index   : Integer;
       Or_Null : Boolean := False) return ${T.root_node.name}
    is
@@ -2227,7 +2283,8 @@ package body ${ada_lib_name}.Implementation is
       elsif Or_Null then
          return null;
       else
-         raise Property_Error with "out-of-bounds AST list access";
+         Raise_Property_Exception
+           (Self, Property_Error'Identity, "out-of-bounds AST list access");
       end if;
    end Get;
 
@@ -2794,13 +2851,17 @@ package body ${ada_lib_name}.Implementation is
    -- To_Integer --
    ----------------
 
-   function To_Integer (Big_Int : Big_Integer_Type) return Integer is
+   function To_Integer
+     (Self    : ${T.root_node.name};
+      Big_Int : Big_Integer_Type) return Integer
+   is
       Image : constant String := Big_Int.Value.Image;
    begin
       return Integer'Value (Image);
    exception
       when Constraint_Error =>
-         raise Property_Error with "out of range big integer";
+         Raise_Property_Exception
+           (Self, Property_Error'Identity, "out of range big integer");
    end To_Integer;
 
    -------------
@@ -3223,12 +3284,16 @@ package body ${ada_lib_name}.Implementation is
       Index : constant Token_Or_Trivia_Index := Get_Token_Index (Token);
    begin
       if Node.Unit.TDH'Access /= Get_Token_TDH (Token) then
-         raise Property_Error with
-           ("Cannot associate a token and a node from different analysis"
+         Raise_Property_Exception
+           (Node,
+            Property_Error'Identity,
+            "Cannot associate a token and a node from different analysis"
             & " units");
       elsif Index.Trivia /= No_Token_Index then
-         raise Property_Error with
-           ("A node cannot hold trivia");
+         Raise_Property_Exception
+           (Node,
+            Property_Error'Identity,
+            "A node cannot hold trivia");
       end if;
 
       return Index.Token;
@@ -3594,7 +3659,8 @@ package body ${ada_lib_name}.Implementation is
    ---------
 
    function Get
-     (A     : AST_Envs.Entity_Array;
+     (Self  : ${T.root_node.name};
+      A     : AST_Envs.Entity_Array;
       Index : Integer) return ${root_entity.name}
    is
       function Length (A : AST_Envs.Entity_Array) return Natural
@@ -3615,7 +3681,8 @@ package body ${ada_lib_name}.Implementation is
       if Relative_Get (A, Index, Result) then
          return Result;
       else
-         raise Property_Error with "out-of-bounds array access";
+         Raise_Property_Exception
+           (Self, Property_Error'Identity, "out-of-bounds array access");
       end if;
    end Get;
 
@@ -3922,8 +3989,10 @@ package body ${ada_lib_name}.Implementation is
       --  This restriction is necessary to avoid relocation issues when
       --  Self.Self_Env is terminated.
       if Is_Foreign_Strict (Self.Self_Env, Self) then
-         raise Property_Error with
-           ("cannot create a dynamic lexical env when Self.Self_Env is"
+         Raise_Property_Exception
+           (Self,
+            Property_Error'Identity,
+            "cannot create a dynamic lexical env when Self.Self_Env is"
             & " foreign");
       end if;
 
@@ -5076,14 +5145,19 @@ package body ${ada_lib_name}.Implementation is
    ----------------------
 
    function String_To_Symbol
-     (Context : Internal_Context; S : ${T.String.name}) return Symbol_Type is
+     (Self    : ${T.root_node.name};
+      Context : Internal_Context;
+      S       : ${T.String.name}) return Symbol_Type is
    begin
       return (if S.Length > 0
               then Lookup_Symbol (Context, S.Content)
               else null);
    exception
       when Exc : Invalid_Symbol_Error =>
-         raise Property_Error with Ada.Exceptions.Exception_Message (Exc);
+         Raise_Property_Exception
+           (Self,
+            Property_Error'Identity,
+            Ada.Exceptions.Exception_Message (Exc));
    end String_To_Symbol;
 
    -------------

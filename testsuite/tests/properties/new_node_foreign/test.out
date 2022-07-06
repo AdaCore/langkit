@@ -1,5 +1,5 @@
 main.py: Running...
 Evaluating .f_synth...
-Got a property error: synthetic nodes cannot have foreign lexical envs
+Got a property error: foo.txt:1:1-1:8: synthetic nodes cannot have foreign lexical envs
 main.py: Done.
 Done

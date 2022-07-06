@@ -195,7 +195,10 @@ begin
                        ("Result: infinite recursion");
                   % endif
                   ${gdb_memoization_return()}
-                  raise Property_Error with "Infinite recursion detected";
+                  Raise_Property_Exception
+                    (Self,
+                     Property_Error'Identity,
+                     "Infinite recursion detected");
 
                elsif Mmz_Val.Kind = Mmz_Error then
                   % if has_logging:
@@ -233,7 +236,8 @@ begin
 
    % if property.is_dispatcher:
       if Self = null then
-         raise Property_Error with "dispatching on null node";
+         Raise_Property_Exception
+           (Self, Property_Error'Identity, "dispatching on null node");
       end if;
 
       ## If this property is a dispatcher, it has no expression: just

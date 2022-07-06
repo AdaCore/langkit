@@ -14,7 +14,7 @@ from langkit.diagnostics import (
 from langkit.expressions.base import (
     AbstractExpression, AbstractNodeData, AbstractVariable, CallExpr,
     ComputingExpr, FieldAccessExpr, LocalVars, NullCheckExpr, PropertyDef,
-    ResolvedExpression, SequenceExpr, T, UncheckedCastExpr, VariableExpr,
+    ResolvedExpression, Self, SequenceExpr, T, UncheckedCastExpr, VariableExpr,
     attr_call, attr_expr, auto_attr, auto_attr_custom, construct, render,
     unsugar
 )
@@ -865,7 +865,7 @@ def collection_get(self: AbstractExpression,
     or_null_expr = construct(or_null)
     result: ResolvedExpression = CallExpr(
         'Get_Result', 'Get', element_type,
-        [coll_expr, index_expr, or_null_expr]
+        [construct(Self), coll_expr, index_expr, or_null_expr]
     )
 
     if as_entity:

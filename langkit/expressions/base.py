@@ -2630,7 +2630,7 @@ def to_symbol(self, prefix):
     """
     prefix_expr = construct(prefix, T.String)
     return CallExpr('Sym', 'String_To_Symbol', T.Symbol,
-                    ['Self.Unit.Context', prefix_expr],
+                    [construct(Self), 'Self.Unit.Context', prefix_expr],
                     abstract_expr=self)
 
 
@@ -5434,8 +5434,13 @@ def as_int(self, expr):
     if the big integer is out of range.
     """
     big_int_expr = construct(expr, T.BigInt)
-    return CallExpr('Small_Int', 'To_Integer', T.Int, [big_int_expr],
-                    abstract_expr=self)
+    return CallExpr(
+        'Small_Int',
+        'To_Integer',
+        T.Int,
+        [construct(Self), big_int_expr],
+        abstract_expr=self,
+    )
 
 
 class Arithmetic(AbstractExpression):

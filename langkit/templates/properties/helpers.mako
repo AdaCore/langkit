@@ -107,8 +107,10 @@
             if ${arg}.Node /= null
                and then ${arg}.Node.Kind not in ${kind_range}
             then
-               raise Property_Error
-                 with "mismatching node type for ${error_name}";
+               Raise_Property_Exception
+                 (From.Node,
+                  Property_Error'Identity,
+                  "mismatching node type for ${error_name}");
             end if;
          % endfor
       % endif
@@ -246,8 +248,10 @@
       ## handle null however he wants.
       % if prop.dispatching and not ctx.no_property_checks:
          if Node_0.Node = null then
-            raise Property_Error
-              with "In predicate, calling dispatching property on a null node";
+            Raise_Property_Exception
+              (Node_0.Node,
+               Property_Erro'Identity,
+               "In predicate, calling dispatching property on a null node");
         end if;
       % endif
 

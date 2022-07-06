@@ -329,9 +329,11 @@
                ## it's fine for the empty/root environments, as they don't
                ## trigger relocations.
                if Is_Foreign_Strict (Env, Self) then
-                  raise Property_Error with
+                  Raise_Property_Exception
+                    (Self,
+                     Property_Error'Identity,
                      "unsound foreign environment in RefEnvs ("
-                     & "${ref_env.str_location})";
+                     & "${ref_env.str_location})");
                end if;
             % endif
 

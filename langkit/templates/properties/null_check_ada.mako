@@ -18,7 +18,8 @@ ${operand.render_pre()}
 
    % if operand_expr:
       if ${operand_expr} = null then
-         raise Property_Error with "dereferencing a null access";
+         Raise_Property_Exception
+           (Self, Property_Error'Identity, "dereferencing a null access");
       end if;
    % endif
 

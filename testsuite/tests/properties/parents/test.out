@@ -8,8 +8,8 @@ p_node_parents_without_self = [<ExampleList main.txt:1:1-1:8>]
 p_entity_parents = [<Example main.txt:1:1-1:8>, <ExampleList main.txt:1:1-1:8>]
 p_entity_parents_without_self = [<ExampleList main.txt:1:1-1:8>]
 
-p_given_node_parents() = <PropertyError: dereferencing a null access>
-p_given_entity_parents() = <PropertyError: dereferencing a null access>
+p_given_node_parents() = <PropertyError: main.txt:1:1-1:8: dereferencing a null access>
+p_given_entity_parents() = <PropertyError: main.txt:1:1-1:8: dereferencing a null access>
 
 main.py: Done.
 Done

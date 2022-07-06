@@ -308,8 +308,11 @@ class IsVisibleFromExpr(CallExpr):
     def __init__(self, referenced_env, base_env, abstract_expr=None):
         super().__init__(
             'Is_Visible', 'Is_Visible_From', T.Bool,
-            [construct(referenced_env, T.LexicalEnv),
-             construct(base_env, T.LexicalEnv)],
+            [
+                construct(Self),
+                construct(referenced_env, T.LexicalEnv),
+                construct(base_env, T.LexicalEnv),
+            ],
             abstract_expr=abstract_expr
         )
 

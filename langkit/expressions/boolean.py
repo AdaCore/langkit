@@ -7,7 +7,7 @@ from langkit.compiled_types import T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
-    ComputingExpr, LiteralExpr, PropertyDef, attr_call, construct,
+    ComputingExpr, LiteralExpr, PropertyDef, Self, attr_call, construct,
     dsl_document, expr_or_null, render, sloc_info_arg, unsugar
 )
 
@@ -289,8 +289,13 @@ class OrderingTest(AbstractExpression):
                         self.LE: 'Less_Or_Equal',
                         self.GT: 'Greater_Than',
                         self.GE: 'Greater_Or_Equal'}[self.operator]
-            return CallExpr('Node_Comp', 'Compare', T.Bool,
-                            [lhs, rhs, relation], abstract_expr=self)
+            return CallExpr(
+                'Node_Comp',
+                'Compare',
+                T.Bool,
+                [construct(Self), lhs, rhs, relation],
+                abstract_expr=self,
+            )
 
         # Otherwise, expect strict equality for both operands and use the
         # native comparison operator for code generation.
