@@ -232,6 +232,8 @@ begin
       end if;
    % endif
 
+   ## If this property is just a dispatcher to concrete properties, implement
+   ## the type dispatching logic.
    % if property.is_dispatcher:
       if Self = null then
          Raise_Property_Exception
@@ -259,17 +261,63 @@ begin
          % endfor
       end case;
 
+   ## Otherwise, this is a regular property: evaluate its root expression
    % else:
-      ${scopes.start_scope(property.vars.root_scope)}
-      ${property.constructed_expr.render_pre()}
+      begin
+         ${scopes.start_scope(property.vars.root_scope)}
+         ${property.constructed_expr.render_pre()}
 
-      Property_Result := ${property.constructed_expr.render_expr()};
-      % if property.type.is_refcounted:
-         Inc_Ref (Property_Result);
-      % endif
-      ${scopes.finalize_scope(property.vars.root_scope)}
+         Property_Result := ${property.constructed_expr.render_expr()};
+         % if property.type.is_refcounted:
+            Inc_Ref (Property_Result);
+         % endif
+         ${scopes.finalize_scope(property.vars.root_scope)}
+
+      exception
+         when Exc : ${ctx.property_exception_matcher} =>
+            ## For managed exceptions, free property expression resources
+            ## before letting the exception propagate.
+            % if property.vars.root_scope.has_refcounted_vars(True):
+               % for scope in all_scopes:
+                  % if scope.has_refcounted_vars():
+                     ${scope.finalizer_name};
+                  % endif
+               % endfor
+            % endif
+
+            ## If this property is memoized, take a note that it raises an
+            ## exception for these arguments.
+            % if memoized:
+               if Self /= null then
+                  % if not property.memoize_in_populate:
+                  if not Self.Unit.Context.In_Populate_Lexical_Env then
+                  % endif
+
+                     Add_Memoized_Value
+                       (Self.Unit,
+                        Mmz_Handle,
+                        (Kind   => Mmz_Error,
+                         Exc_Id => Ada.Exceptions.Exception_Identity (Exc)),
+                        Mmz_Stored);
+
+                  % if not property.memoize_in_populate:
+                  end if;
+                  % endif
+               end if;
+            % endif
+
+            % if has_logging:
+               Properties_Traces.Trace ("Result: Properties_Error");
+               Properties_Traces.Decrease_Indent;
+            % endif
+
+            ## Let the exception propagate to the caller
+            raise;
+      end;
    % endif
 
+   ## If this property is memoized, save its result for later calls. Likewise
+   ## if it is the initializer of a lazy field.
    % if memoized:
       ## See the corresponding check above
       if Self /= null then
@@ -316,51 +364,6 @@ begin
    return Property_Result;
 
 exception
-
-## Install an exception handler for Property_Error only if we have specific
-## actions to do in this case.
-% if (not property.is_dispatcher and \
-          property.vars.root_scope.has_refcounted_vars(True)) or \
-     memoized or \
-     has_logging:
-   when Exc : ${ctx.property_exception_matcher} =>
-      % if not property.is_dispatcher:
-         % for scope in all_scopes:
-            % if scope.has_refcounted_vars():
-               ${scope.finalizer_name};
-            % endif
-         % endfor
-      % endif
-
-      % if memoized:
-         if Self /= null then
-            % if not property.memoize_in_populate:
-            if not Self.Unit.Context.In_Populate_Lexical_Env then
-            % endif
-
-               Add_Memoized_Value
-                 (Self.Unit,
-                  Mmz_Handle,
-                  (Kind   => Mmz_Error,
-                   Exc_Id => Ada.Exceptions.Exception_Identity (Exc)),
-                  Mmz_Stored);
-
-            % if not property.memoize_in_populate:
-            end if;
-            % endif
-         end if;
-      % endif
-
-      % if has_logging:
-         Properties_Traces.Trace ("Result: Properties_Error");
-         Properties_Traces.Decrease_Indent;
-      % endif
-
-      if Self /= null then
-         Exit_Call (Self.Unit.Context, Call_Depth);
-      end if;
-      raise;
-% endif
 
    when others =>
       if Self /= null then
