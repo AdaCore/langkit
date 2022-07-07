@@ -6,7 +6,6 @@ from typing import Dict, Iterator, Optional, TYPE_CHECKING, Tuple, Type, Union
 
 import gdb
 import gdb.printing
-from gnatdbg.strings import StringAccess
 
 from langkit.gdb.tdh import TDH
 from langkit.gdb.units import AnalysisUnit

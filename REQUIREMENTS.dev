@@ -1,5 +1,6 @@
 -e git+https://github.com/AdaCore/e3-core.git#egg=e3-core
 -e git+https://github.com/AdaCore/e3-testsuite.git#egg=e3-testsuite
+-e git+https://github.com/AdaCore/gnat-gdb-scripts.git#egg=gnat-gdb-scripts
 Mako==1.1.2
 Pygments==2.6.1
 autopep8==1.5.2
@@ -14,4 +15,5 @@ pycodestyle
 railroad-diagrams~=1.1.0
 sphinx-rtd-theme==0.4.3
 types-docutils==0.18.3
+types-gdb==12.1.2
 yapf==0.30.0
