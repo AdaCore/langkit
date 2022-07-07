@@ -191,8 +191,7 @@ begin
 
                if Mmz_Val.Kind = Mmz_Evaluating then
                   % if has_logging:
-                     Properties_Traces.Trace
-                       ("Result: infinite recursion");
+                     Properties_Traces.Trace ("Result: infinite recursion");
                   % endif
                   ${gdb_memoization_return()}
                   Raise_Property_Exception
@@ -202,8 +201,7 @@ begin
 
                elsif Mmz_Val.Kind = Mmz_Error then
                   % if has_logging:
-                     Properties_Traces.Trace
-                       ("Result: Property_Error");
+                     Properties_Traces.Trace ("Result: Property_Error");
                      Properties_Traces.Decrease_Indent;
                   % endif
                   ${gdb_memoization_return()}
