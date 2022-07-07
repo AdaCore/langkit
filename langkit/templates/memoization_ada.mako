@@ -53,7 +53,8 @@ type Mmz_Value (Kind : Mmz_Value_Kind := Mmz_Evaluating) is record
          null;
 
       when Mmz_Error =>
-         Exc_Id : Ada.Exceptions.Exception_Id;
+         Exc_Id  : Ada.Exceptions.Exception_Id;
+         Exc_Msg : Unbounded_String;
 
       % for t in value_types:
          when ${t.memoization_kind} =>

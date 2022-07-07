@@ -2,21 +2,21 @@ Calling P_Prop1...
 Got an exception!
 LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Explicit error 1
 Got an exception!
-LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Memoized error
+LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Explicit error 1 (memoized)
 Got an exception!
-LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Memoized error
+LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Explicit error 1 (memoized)
 Calling P_Prop2...
 Got an exception!
 LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Explicit error 2
 Got an exception!
-LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Memoized error
+LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Explicit error 2 (memoized)
 Got an exception!
-LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Memoized error
+LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: Explicit error 2 (memoized)
 Calling P_Prop3...
 Got an exception!
 LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: This is a Precondition_Failure
 Got an exception!
-LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Memoized error
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: This is a Precondition_Failure (memoized)
 Got an exception!
-LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Memoized error
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: This is a Precondition_Failure (memoized)
 Done
