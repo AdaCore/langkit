@@ -1949,8 +1949,8 @@ class Field(BaseField):
 
         self._is_optional: Opt[bool] = None
         """
-        Whether this field is ever produced by a parser in the user grammar
-        which is allowed to return null nodes, meaning this field is optional.
+        See the ``is_optional`` property. This field is computed in a dedicated
+        compilation pass.
         """
 
         self._index: Opt[int] = None
@@ -1983,9 +1983,10 @@ class Field(BaseField):
     @property
     def is_optional(self) -> bool:
         """
-        Return whether this field is ever produced by a parser in the user
-        grammar which is allowed to return null nodes, meaning this field is
-        optional.
+        Return whether it is possible for this field, when there is no parsing
+        error, to contain a null node. Note that this is always ``False`` for
+        fields that contain list nodes, as parsers always create an empty list
+        instead of null list nodes.
         """
         assert self._is_optional is not None
         return self._is_optional

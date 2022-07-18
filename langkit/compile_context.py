@@ -1170,6 +1170,12 @@ class CompileCtx:
 
         @memoized_with_default(False)
         def can_produce_null(parser):
+
+            # Parsers for list types never return null nodes: they create empty
+            # list nodes instead.
+            if parser.type.is_list_type:
+                return False
+
             if isinstance(parser, Opt):
                 # If parser is an Opt parser and is not set to produce an enum
                 # alternative, it means that field is optional.

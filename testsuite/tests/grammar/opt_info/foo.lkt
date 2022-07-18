@@ -11,6 +11,10 @@ grammar foo_grammar {
         null(Example)
         ?(Example("example")).dont_skip(sub_rule)
 
+        ?pick("(" list+(Example("example")) ")")
+        null(ASTList[FooNode, Example])
+        or(Example("example") | null(ASTList[FooNode, Example]))
+
         HasExample(Example("example"))
         Example("example")
     )
@@ -21,6 +25,10 @@ grammar foo_grammar {
         Example("example")
         Example("example")
         Example("example")
+
+        pick("(" list+(Example("example")) ")")
+        pick("(" list+(Example("example")) ")")
+        pick("(" list+(Example("example")) ")")
 
         HasExample("example")
         Example("example")
@@ -42,6 +50,11 @@ class ExampleWrapper : FooNode {
     @parse_field field_defer: Example
     @parse_field field_null: Example
     @parse_field field_dont_skip: Example
+
+    # Optional fields that return a list node
+    @parse_field field_list_opt: ASTList[FooNode, Example]
+    @parse_field field_list_null: ASTList[FooNode, Example]
+    @parse_field field_list_or: FooNode
 
     # Non optional fields
     @parse_field field_opt_bool: HasExample
