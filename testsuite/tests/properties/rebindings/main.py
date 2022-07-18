@@ -41,21 +41,42 @@ ctx = libfoolang.AnalysisContext()
 u = ctx.get_from_buffer('main.txt', b"""
 def foo
 
-def old_bar
-def new_bar
+def old_a
+def new_a
 
-def old_baz
-def new_baz
+def old_b
+def new_b
+
+def old_c
+def new_c
+
+def old_d
+def new_d
 """)
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
     sys.exit(1)
 
-foo, old_bar, new_bar, old_baz, new_baz = u.root
-rebound_once = foo.p_rebind(old_bar, new_bar)
-rebound_twice = rebound_once.p_rebind(old_baz, new_baz)
+foo, old_a, new_a, old_b, new_b, old_c, new_c, old_d, new_d = u.root
+rebound_twice = foo.p_rebind(old_b, new_b).p_rebind(old_a, new_a)
 
+print("After appending rebindings one by one:")
+print("-" * 50)
+print()
 print_rebindings(rebound_twice)
+
+other_rebound = foo.p_rebind(old_d, new_d).p_rebind(old_c, new_c)
+concat_test = other_rebound.p_concat_rebindings(rebound_twice)
+
+# Rebindings concatenation used to reverse to ordering of rebindings
+# from the RHS. This tests that the order is well-preserved.
+# So in the output, `old_a` should appear before `old_b` and `old_c`
+# before `old_d`.
+print()
+print("After concatenating rebindings:")
+print("-" * 50)
+print()
+print_rebindings(concat_test)
 
 print('main.py: Done.')

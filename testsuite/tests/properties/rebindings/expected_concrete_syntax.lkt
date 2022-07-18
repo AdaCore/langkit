@@ -29,6 +29,10 @@ class Block : FooNode {
         )
     )
 
+    @export fun concat_rebindings(other: Block): Block = self.create_entity(
+        self.info.rebindings.concat_rebindings(other.info.rebindings)
+    )
+
     @export fun parent_rebindings(): Block =
     self.create_entity(self.info.rebindings.get_parent)
 

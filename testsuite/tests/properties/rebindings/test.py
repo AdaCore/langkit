@@ -46,8 +46,13 @@ class Block(FooNode):
             )
         )
 
-    # Accessors so that main.py can explore the rebindings chain
+    @langkit_property(public=True)
+    def concat_rebindings(other=T.Block.entity):
+        return Entity.create_entity(Entity.info.rebindings.concat_rebindings(
+            other.info.rebindings
+        ))
 
+    # Accessors so that main.py can explore the rebindings chain
     @langkit_property(public=True)
     def parent_rebindings():
         return Entity.create_entity(Entity.info.rebindings.get_parent)

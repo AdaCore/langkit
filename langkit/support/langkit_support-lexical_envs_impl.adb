@@ -409,23 +409,29 @@ package body Langkit_Support.Lexical_Envs_Impl is
    -------------
 
    function Combine (L, R : Env_Rebindings) return Env_Rebindings is
-      Result, Cur : Env_Rebindings;
+      function Append_All (Cur : Env_Rebindings) return Env_Rebindings;
+      --  Given Cur = C1 -> C2 .. -> Cn, return C1 -> C2 .. -> Cn -> L
+
+      ----------------
+      -- Append_All --
+      ----------------
+
+      function Append_All (Cur : Env_Rebindings) return Env_Rebindings is
+      begin
+         if Cur = null then
+            return L;
+         end if;
+         return Append (Append_All (Cur.Parent), Cur.Old_Env, Cur.New_Env);
+      end Append_All;
    begin
       if L = null then
          return R;
       elsif R = null then
          return L;
       end if;
-
-      Result := L;
-      Cur := R;
-      while Cur /= null loop
-         Result := Append (Result, Cur.Old_Env, Cur.New_Env);
-         Cur := Cur.Parent;
-      end loop;
-
-      Check_Rebindings_Unicity (Result);
-      return Result;
+      return Result : constant Env_Rebindings := Append_All (R) do
+         Check_Rebindings_Unicity (Result);
+      end return;
    end Combine;
 
    ------------

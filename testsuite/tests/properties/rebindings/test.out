@@ -1,9 +1,32 @@
+After appending rebindings one by one:
+--------------------------------------------------
+
 <Block foo>:
-  new = <Block new_baz>
-  old = <Block old_baz>
+  new = <Block new_a>
+  old = <Block old_a>
 <Block foo>:
-  new = <Block new_bar>
-  old = <Block old_bar>
+  new = <Block new_b>
+  old = <Block old_b>
+<Block foo>:
+  new = <PropertyError: dereferencing a null access>
+  old = <PropertyError: dereferencing a null access>
+  no parent: <PropertyError: dereferencing a null access>
+
+After concatenating rebindings:
+--------------------------------------------------
+
+<Block foo>:
+  new = <Block new_a>
+  old = <Block old_a>
+<Block foo>:
+  new = <Block new_b>
+  old = <Block old_b>
+<Block foo>:
+  new = <Block new_c>
+  old = <Block old_c>
+<Block foo>:
+  new = <Block new_d>
+  old = <Block old_d>
 <Block foo>:
   new = <PropertyError: dereferencing a null access>
   old = <PropertyError: dereferencing a null access>
