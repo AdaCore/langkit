@@ -13,7 +13,8 @@ from typing import Callable, Dict, List, Optional
 
 from langkit.packaging import Packager
 from langkit.utils import (
-    LibraryType, add_to_path, format_setenv, get_cpu_count, parse_cmdline_args
+    LibraryType, add_to_path, format_path, format_setenv, get_cpu_count,
+    parse_cmdline_args
 )
 
 
@@ -176,13 +177,16 @@ def langkit_support_env_map(args: Namespace,
         # Make the "langkit_support.gpr" available to GPRbuild
         "GPR_PROJECT_PATH": str(SUPPORT_ROOT),
         "PATH": dynamic_lib_dir,
-        "LD_LIBRARY_PATH": ":".join([
-            dynamic_lib_dir,
+        "LD_LIBRARY_PATH": format_path(
+            "LD_LIBRARY_PATH",
+            [
+                dynamic_lib_dir,
 
-            # Make the shared lib for the sigsegv handler available for OCaml
-            # on GNU/Linux.
-            str(SIGSEGV_HANDLER_ROOT / "lib")
-        ])
+                # Make the shared lib for the sigsegv handler available for
+                # OCaml on GNU/Linux.
+                str(SIGSEGV_HANDLER_ROOT / "lib")
+            ],
+        ),
     }
 
 
@@ -252,7 +256,7 @@ def setenv(args: Namespace) -> None:
 
         for k, v in d.items():
             if k in env:
-                env[k] = ":".join([env[k], v])
+                env[k] = format_path(k, [env[k], v])
             else:
                 env[k] = v
 
