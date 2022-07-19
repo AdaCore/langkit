@@ -3,46 +3,49 @@ import sys
 import libfoolang
 
 
-def def_repr(n):
-    return '<{} {} {}>'.format(
-        type(n).__name__,
-        n.p_name,
-        n.sloc_range
-    )
+def block_repr(n):
+    return f"<{type(n).__name__} {n.f_name.text}>"
 
 
-libfoolang.DefNode.__repr__ = def_repr
+libfoolang.Block.__repr__ = block_repr
 
 
-def process(index, n):
+def exc_repr(exc):
+    return f"<{type(exc).__name__}: {exc}>"
+
+
+def print_rebindings(n):
+
     def wrapped_eval(lambda_fn):
         try:
             return lambda_fn()
         except libfoolang.PropertyError as exc:
-            return '<{}: {}>'.format(type(exc).__name__, exc)
+            return exc_repr(exc)
 
-    print('Processing {} ({})'.format(n, index))
-    parent = wrapped_eval(lambda: n.p_parent_rebindings)
-    new = wrapped_eval(lambda: n.p_new)
-    old = wrapped_eval(lambda: n.p_old)
-    print('  parent = {}'.format(parent))
-    print('  new = {}'.format(new))
-    print('  old = {}'.format(old))
+    # Print each element of the rebindings chain in "n"
+    while True:
+        print(f"{n}:")
+        new = wrapped_eval(lambda: n.p_new)
+        old = wrapped_eval(lambda: n.p_old)
+        print(f"  new = {new}")
+        print(f"  old = {old}")
 
-    # Computing "parent" raised a PropertyError => "parent" is a string
-    if not isinstance(parent, str):
-        process(index + 1, parent)
+        try:
+            n = n.p_parent_rebindings
+        except libfoolang.PropertyError as exc:
+            print(f"  no parent: {exc_repr(exc)}")
+            break
 
 
 ctx = libfoolang.AnalysisContext()
 u = ctx.get_from_buffer('main.txt', b"""
-(T) foo { a b }
+def foo
 
-(T U) old_bar { c d }
-(T U) new_bar { e f }
+def old_bar
+def new_bar
 
-(V) old_baz { g }
-(V) new_baz { h }
+def old_baz
+def new_baz
 """)
 if u.diagnostics:
     for d in u.diagnostics:
@@ -53,6 +56,6 @@ foo, old_bar, new_bar, old_baz, new_baz = u.root
 rebound_once = foo.p_rebind(old_bar, new_bar)
 rebound_twice = rebound_once.p_rebind(old_baz, new_baz)
 
-process(0, rebound_twice)
+print_rebindings(rebound_twice)
 
 print('main.py: Done.')

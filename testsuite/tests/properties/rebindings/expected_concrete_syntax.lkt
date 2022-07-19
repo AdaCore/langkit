@@ -3,33 +3,18 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(block)
-    name <- Name(@identifier)
-    block <- Block(params name vars)
-    params <- pick("(" Params+(param) ")")
-    param <- Param(name)
-    vars <- pick("{" list+(var) "}")
-    var <- BlockVar(name)
+    block <- Block("def" Name(@identifier))
 }
 
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class DefNode : FooNode {
+class Block : FooNode {
+    @parse_field name: Name
 
-    @export @abstract fun name(): Symbol
-}
-
-class Block : DefNode {
-    @parse_field params: Params
-    @parse_field name_field: Name
-    @parse_field vars: ASTList[FooNode, BlockVar]
-
-    fun name(): Symbol = node.name_field.symbol
-
-    @export fun rebind(from_block: Block, to_block: Block): Block = {
-        val rbdng = self.info.rebindings.append_rebinding(
-            from_block.params.children_env(), to_block.children_env()
-        );
+    ## Helper to create a new entity from ``Entity`` but with the given
+    ## rebindings.
+    fun create_entity(rbdng: EnvRebindings): Block = {
         val e_info = EntityInfo(
             md=self.info.md, rebindings=rbdng, from_rebound=false
         );
@@ -37,34 +22,21 @@ class Block : DefNode {
         Block(node=node, info=e_info)
     }
 
-    @export fun parent_rebindings(): Block = {
-        val e_info = EntityInfo(
-            md=self.info.md, rebindings=self.info.rebindings.get_parent, from_rebound=false
-        );
+    @export fun rebind(from_block: Block, to_block: Block): Block =
+    self.create_entity(
+        self.info.rebindings.append_rebinding(
+            from_block.children_env(), to_block.children_env()
+        )
+    )
 
-        Block(node=node, info=e_info)
-    }
+    @export fun parent_rebindings(): Block =
+    self.create_entity(self.info.rebindings.get_parent)
 
     @export fun new(): FooNode =
     self.info.rebindings.new_env.env_node.as_bare_entity
 
     @export fun old(): FooNode =
-    self.info.rebindings.new_env.env_node.as_bare_entity
-}
-
-class BlockVar : DefNode {
-    @parse_field name_field: Name
-
-    fun name(): Symbol = node.name_field.symbol
-}
-
-@has_abstract_list class Param : DefNode {
-    @parse_field name_field: Name
-
-    fun name(): Symbol = node.name_field.symbol
-}
-
-class Params : ASTList[FooNode, Param] {
+    self.info.rebindings.old_env.env_node.as_bare_entity
 }
 
 class Name : FooNode implements TokenNode {

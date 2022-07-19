@@ -1,14 +1,12 @@
-Processing <Block foo 2:1-2:16> (0)
-  parent = <Block foo 2:1-2:16>
-  new = <Block new_baz 8:1-8:18>
-  old = <Block new_baz 8:1-8:18>
-Processing <Block foo 2:1-2:16> (1)
-  parent = <Block foo 2:1-2:16>
-  new = <Block new_bar 5:1-5:22>
-  old = <Block new_bar 5:1-5:22>
-Processing <Block foo 2:1-2:16> (2)
-  parent = <PropertyError: dereferencing a null access>
+<Block foo>:
+  new = <Block new_baz>
+  old = <Block old_baz>
+<Block foo>:
+  new = <Block new_bar>
+  old = <Block old_bar>
+<Block foo>:
   new = <PropertyError: dereferencing a null access>
   old = <PropertyError: dereferencing a null access>
+  no parent: <PropertyError: dereferencing a null access>
 main.py: Done.
 Done
