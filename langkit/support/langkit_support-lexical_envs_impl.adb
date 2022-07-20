@@ -1408,7 +1408,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
          --  All bets are off for other kinds of exceptions: just propagate in
          --  that case.
 
-         if not Properties_May_Raise (Exc) then
+         if Properties_May_Raise (Exc) then
             Local_Results.Destroy;
          end if;
 
