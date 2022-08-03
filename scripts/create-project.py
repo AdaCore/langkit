@@ -55,7 +55,8 @@ class Manage(ManageScript):
 
         return CompileCtx(lang_name={lang_name_repr},
                           lexer={lang_name_slug}_lexer,
-                          grammar={lang_name_slug}_grammar)
+                          grammar={lang_name_slug}_grammar,
+                          verbosity=args.verbosity)
 
 if __name__ == '__main__':
     Manage().run()
