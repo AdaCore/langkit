@@ -3542,13 +3542,9 @@ package body ${ada_lib_name}.Implementation is
    -------------------------
 
    function Children_And_Trivia
-     (Node : ${T.root_node.name}) return Bare_Children_Array
+     (Node : ${T.root_node.name}) return Bare_Children_Vector
    is
-      package Children_Vectors is new Ada.Containers.Vectors
-        (Positive, Bare_Child_Record);
-      use Children_Vectors;
-
-      Ret_Vec : Vector;
+      Ret_Vec : Bare_Children_Vector;
       Ctx     : Internal_Context renames Node.Unit.Context;
       TDH     : Token_Data_Handler renames Node.Unit.TDH;
 
@@ -3624,14 +3620,7 @@ package body ${ada_lib_name}.Implementation is
          end if;
       end loop;
 
-      declare
-         A : Bare_Children_Array (1 .. Natural (Ret_Vec.Length));
-      begin
-         for I in A'Range loop
-            A (I) := Ret_Vec.Element (I);
-         end loop;
-         return A;
-      end;
+      return Ret_Vec;
    end Children_And_Trivia;
 
    --------------
