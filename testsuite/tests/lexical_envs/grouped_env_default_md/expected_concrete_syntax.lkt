@@ -1,0 +1,38 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(decl)
+    decl <- Decl(Name(@identifier) "(" list*(ref) ")")
+    ref <- Ref(Name(@identifier))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+
+    @memoized fun env_with_md(foo_node: FooNode, bar_node: FooNode): LexicalEnv[FooNode] =
+    {
+        val md1 = Metadata(foo_node=foo_node, bar_node=null);
+        val md2 = Metadata(foo_node=null, bar_node=bar_node);
+
+        [[node.node_env()].env_group()].env_group()
+    }
+
+    @export fun get_with_md(name: Symbol, foo_node: FooNode, bar_node: FooNode): FooNode =
+    self.env_with_md(foo_node, bar_node).get_first(name)
+
+    @export fun get_foo_metadata(): FooNode = self.info.md.foo_node
+
+    @export fun get_bar_metadata(): FooNode = self.info.md.bar_node
+}
+
+class Decl : FooNode {
+    @parse_field name: Name
+    @parse_field refs: ASTList[FooNode, Ref]
+}
+
+class Name : FooNode implements TokenNode {
+}
+
+class Ref : FooNode {
+    @parse_field name: Name
+}

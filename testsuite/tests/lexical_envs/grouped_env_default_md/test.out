@@ -1,0 +1,6 @@
+main.py: Running...
+baz has the following metadata:
+  - foo_node: foo
+  - bar_node: bar
+main.py: Done.
+Done

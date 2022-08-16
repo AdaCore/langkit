@@ -1635,18 +1635,18 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       procedure Append_Envs (E : Lexical_Env) is
       begin
-         case E.Kind is
-            --  Flatten grouped envs
-            when Grouped =>
-               for C of Unwrap (E).Grouped_Envs.all loop
-                  Append_Envs (C);
-               end loop;
-            when others =>
-               if not Already_Has (E) then
-                  Inc_Ref (E);
-                  V.Append (E);
-               end if;
-         end case;
+         --  Flatten grouped envs only when we don't lose the `default_md`
+         --  field of a nested grouped env.
+         if E.Kind in Grouped
+            and then Unwrap (E).Default_Md in Empty_Metadata | With_Md
+         then
+            for C of Unwrap (E).Grouped_Envs.all loop
+               Append_Envs (C);
+            end loop;
+         elsif not Already_Has (E) then
+            Inc_Ref (E);
+            V.Append (E);
+         end if;
       end Append_Envs;
    begin
       if Envs'Length = 0 then
