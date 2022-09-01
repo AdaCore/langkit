@@ -2,7 +2,7 @@
 Check that map expressions on entity types work properly.
 """
 
-from langkit.dsl import (ASTNode, Bool, Field, Struct, T, UserField,
+from langkit.dsl import (ASTNode, Bool, Field, MetadataField, Struct, T,
                          env_metadata)
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import Entity, New, Self, langkit_property
@@ -12,7 +12,7 @@ from utils import build_and_run
 
 @env_metadata
 class Metadata(Struct):
-    b = UserField(type=Bool)
+    b = MetadataField(type=Bool, use_in_eq=True)
 
 
 class FooNode(ASTNode):

@@ -1267,11 +1267,7 @@ class ${root_astnode_name}:
 
     ${astnode_types.subclass_decls(T.root_node)}
 
-    def __init__(self,
-                 c_value: Any,
-                 node_c_value: Any,
-                 metadata: Any,
-                 rebindings: Any):
+    def __init__(self, c_value: Any, node_c_value: Any, rebindings: Any):
         """
         This constructor is an implementation detail, and is not meant to be
         used directly. For now, the creation of AST nodes can happen only as
@@ -1285,7 +1281,6 @@ class ${root_astnode_name}:
         # used outside of hashing/equality use cases.
         self._node_c_value = node_c_value
         self._rebindings = rebindings
-        self._metadata = metadata
 
         self._unprotected_getitem_cache: Dict[int,
                                               Opt[${root_astnode_name}]] = {}
@@ -1325,19 +1320,22 @@ class ${root_astnode_name}:
         self._check_stale_reference()
         return self._unprotected_getitem_cache
 
-    @property
-    def _id_tuple(self) -> Tuple[Any, Any]:
-        return (self._node_c_value, self._rebindings)
-
     def __eq__(self, other: Any) -> bool:
-        return (isinstance(other, ${root_astnode_name}) and
-                self._id_tuple == other._id_tuple)
+        return (
+            isinstance(other, ${root_astnode_name})
+            and bool(
+                _node_is_equivalent(
+                    ctypes.byref(self._unsafe_unwrap),
+                    ctypes.byref(other._unsafe_unwrap)
+                )
+            )
+        )
 
     def __ne__(self, other: Any) -> bool:
         return not (self == other)
 
     def __hash__(self) -> int:
-        return hash(self._id_tuple)
+        return _node_hash(ctypes.byref(self._unsafe_unwrap))
 
     @property
     def kind_name(self) -> str:
@@ -1636,8 +1634,7 @@ class ${root_astnode_name}:
 
         # Pick the right subclass to materialize this node in Python
         kind = _node_kind(ctypes.byref(c_value))
-        result = _kind_to_astnode_cls[kind](c_value, node_c_value, metadata,
-                                            rebindings)
+        result = _kind_to_astnode_cls[kind](c_value, node_c_value, rebindings)
         unit._node_cache[cache_key] = result
         return result
 
@@ -1658,6 +1655,14 @@ class ${root_astnode_name}:
             _raise_type_error(${repr(root_astnode_name)}, py_value)
         else:
             return py_value._c_value
+
+    @property
+    def _unsafe_unwrap(self) -> Any:
+        """
+        Unsafe version of _unwrap, meant for internal uses where we don't want
+        to check whether the reference is stale or not.
+        """
+        return self._unprotected_c_value
 
     @property
     def _unwrap_einfo(self):
@@ -1938,6 +1943,17 @@ _unit_populate_lexical_env = _import_func(
 )
 
 # General AST node primitives
+_node_hash = _import_func(
+    '${capi.get_name("node_hash")}',
+    [ctypes.POINTER(${c_entity})], ctypes.c_uint32
+)
+
+_node_is_equivalent = _import_func(
+    '${capi.get_name("node_is_equivalent")}',
+    [ctypes.POINTER(${c_entity}),
+     ctypes.POINTER(${c_entity})], ctypes.c_uint8
+)
+
 _node_kind = _import_func(
     '${capi.get_name("node_kind")}',
     [ctypes.POINTER(${c_entity})], ctypes.c_int

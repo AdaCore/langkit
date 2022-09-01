@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import itertools
-from typing import Any, ContextManager, Dict, List, Tuple, Type, Union
+from typing import (
+    Any, ContextManager, Dict, List, Optional as Opt, TYPE_CHECKING, Tuple,
+    Type, Union
+)
 
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledTypeRepo, EnumType, Field as _Field,
-    StructType, T, UserField as _UserField, resolve_type
+    MetadataField as _MetadataField, StructType, T, UserField as _UserField,
+    resolve_type
 )
 from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context,
@@ -14,6 +18,11 @@ from langkit.diagnostics import (
 from langkit.expressions import PropertyDef
 import langkit.names as names
 from langkit.utils import classproperty, inherited_property, issubtype
+
+
+if TYPE_CHECKING:
+    from langkit.expressions import AbstractExpression
+    from langkit.compiled_types import CompiledType
 
 
 class DSLType:
@@ -937,22 +946,60 @@ def NullField():
     return _Field(null=True)
 
 
-def UserField(type, repr=False, doc='', public=True, default_value=None):
+def MetadataField(
+    type: CompiledType,
+    use_in_eq: bool,
+    repr: bool = False,
+    doc: str = '',
+    public: bool = True,
+    default_value: Opt[AbstractExpression] = None
+):
+    """
+    Specific type of field that is meant to be used in the definition of the
+    ``env_metadata`` structure. This is used to force users to specify whether
+    the field should be used when processing identity related properties.
+
+    :param type: DSLType or CompiledType subclass for
+        values this field holds.
+
+    :param use_in_eq: Whether this metadata field should be used when computing
+        metadata equality.
+
+    :param repr: Whether the field will be displayed when pretty-printing
+        the embedding AST node.
+
+    :param doc: User documentation for this field.
+
+    :param public: Whether this field is public in the generated APIs.
+
+    :param default_value: Default value for this field,
+        when omitted from New expressions.
+    """
+    return _MetadataField(type, use_in_eq, repr, doc, public, default_value)
+
+
+def UserField(
+    type: CompiledType,
+    repr: bool = False,
+    doc: str = '',
+    public: bool = True,
+    default_value: Opt[AbstractExpression] = None
+):
     """
     Create a field that is not meant to store parsing results. Both AST nodes
     and Struct can hold such types.
 
-    :param DSLType|CompiledType type: DSLType or CompiledType subclass for
+    :param type: DSLType or CompiledType subclass for
         values this field holds.
 
-    :param bool repr: Whether the field will be displayed when pretty-printing
+    :param repr: Whether the field will be displayed when pretty-printing
         the embedding AST node.
 
-    :param str doc: User documentation for this field.
+    :param doc: User documentation for this field.
 
-    :param bool is_public: Whether this field is public in the generated APIs.
+    :param public: Whether this field is public in the generated APIs.
 
-    :param None|AbstractExpression default_value: Default value for this field,
+    :param default_value: Default value for this field,
         when omitted from New expressions.
     """
     return _UserField(type, repr, doc, public, default_value)

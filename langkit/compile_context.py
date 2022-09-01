@@ -39,7 +39,7 @@ from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
 if TYPE_CHECKING:
     from langkit.compiled_types import (
         ASTNodeType, ArrayType, CompiledType, EntityType, EnumType, Field,
-        IteratorType, StructType, UserField,
+        IteratorType, StructType, UserField
     )
     from langkit.emitter import Emitter
     from langkit.expressions import PropertyDef
@@ -1237,7 +1237,7 @@ class CompileCtx:
 
         :param StructType cls: Environment metadata struct type.
         """
-        from langkit.compiled_types import resolve_type
+        from langkit.compiled_types import MetadataField, resolve_type
 
         with cls.diagnostic_context:
             name = cls.dsl_name
@@ -1254,6 +1254,11 @@ class CompileCtx:
                     typ.is_bool_type or typ.is_ast_node,
                     'Environment metadata fields can be only booleans or AST'
                     ' nodes'
+                )
+                check_source_language(
+                    isinstance(field, MetadataField),
+                    'You need to use MetadataField instances for environment'
+                    ' metadata fields'
                 )
 
     def all_properties(self, *args, **kwargs):

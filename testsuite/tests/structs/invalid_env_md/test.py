@@ -4,7 +4,7 @@ Test that invalid environment metadata structs are properly rejected.
 
 import langkit
 from langkit.diagnostics import DiagnosticError
-from langkit.dsl import ASTNode, Struct, T, UserField, env_metadata
+from langkit.dsl import ASTNode, MetadataField, Struct, T, env_metadata
 
 from utils import emit_and_print_errors
 
@@ -59,7 +59,7 @@ def bad_name():
 def bad_type():
     @env_metadata
     class Metadata(Struct):
-        fld = UserField(type=T.AnalysisUnit)
+        fld = MetadataField(type=T.AnalysisUnit, use_in_eq=True)
 
 
 run(not_a_struct)

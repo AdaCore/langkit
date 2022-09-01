@@ -1,4 +1,4 @@
-from langkit.dsl import ASTNode, Struct, T, UserField, env_metadata
+from langkit.dsl import ASTNode, MetadataField, Struct, T, env_metadata
 from langkit.expressions import Entity, Self, langkit_property, lazy_field
 
 from utils import emit_and_print_errors
@@ -65,7 +65,7 @@ def test4_entity_info():
 
     @env_metadata
     class Metadata(Struct):
-        flag = UserField(type=T.Bool)
+        flag = MetadataField(type=T.Bool, use_in_eq=True)
 
     class Example(FooNode):
         @lazy_field(public=True)
@@ -79,7 +79,7 @@ def test4_entity_info():
 def test5_entity_info():
     @env_metadata
     class Metadata(Struct):
-        flag = UserField(type=T.Bool)
+        flag = MetadataField(type=T.Bool, use_in_eq=True)
 
     class FooNode(ASTNode):
         @langkit_property(return_type=T.Bool)

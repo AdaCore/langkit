@@ -3,7 +3,7 @@ Check that add_to_env actions that try to add an entry to a foreign
 environment without the unsafe=True flag raise an error.
 """
 
-from langkit.dsl import (ASTNode, Field, Struct, T, UserField, abstract,
+from langkit.dsl import (ASTNode, Field, MetadataField, Struct, T, abstract,
                          env_metadata)
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import (AbstractKind, Self, direct_env,
@@ -14,7 +14,7 @@ from utils import build_and_run
 
 @env_metadata
 class Metadata(Struct):
-    node = UserField(T.FooNode)
+    node = MetadataField(T.FooNode, use_in_eq=True)
 
 
 class FooNode(ASTNode):

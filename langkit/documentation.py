@@ -570,6 +570,12 @@ base_langkit_docs = {
     'langkit.node_is_null': """
         Return whether this node is a null node reference.
     """,
+    'langkit.node_is_equivalent': """
+        Return whether the two nodes are equivalent.
+    """,
+    'langkit.node_hash': """
+        Return a hash for the given node.
+    """,
     'langkit.node_is_token_node': """
         Return whether this node is a node that contains only a single token.
     """,

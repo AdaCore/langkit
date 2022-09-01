@@ -170,6 +170,9 @@ package body ${ada_lib_name}.Implementation is
    --  If E is known, return its unique Id from State. Otherwise, assign it a
    --  new unique Id and return it.
 
+   function Compare_Metadata (L, R : ${T.env_md.name}) return Boolean;
+   --  Compare metadata ``L`` and ``R`` for public entity comparison
+
    ------------------------
    -- Precomputed_Symbol --
    ------------------------
@@ -3604,6 +3607,47 @@ package body ${ada_lib_name}.Implementation is
 
    ## Env metadata's body
 
+   ----------------------
+   -- Compare_Metadata --
+   ----------------------
+
+   --  Deactivate "not referenced" warnings because if the metadata struct has
+   --  no fields, formals and temporaries won't be referenced in the two
+   --  following functions.
+   pragma Warnings (Off, "referenced");
+   function Compare_Metadata (L, R : ${T.env_md.name}) return Boolean is
+   begin
+      % for field in T.env_md.get_fields():
+         % if field.use_in_equality:
+            if L.${field.name} /= R.${field.name} then
+               return False;
+            end if;
+         % endif
+      % endfor
+      return True;
+   end Compare_Metadata;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Self : ${T.env_md.name}) return Hash_Type is
+      Ret : Hash_Type := Langkit_Support.Hashes.Initial_Hash;
+   begin
+      % for field in T.env_md.get_fields():
+         % if field.use_in_equality:
+            % if field.type.is_bool_type:
+               Ret := Combine
+                 (Ret, Hash_Type (Boolean'Pos (Self.${field.name})));
+            % else:
+               Ret := Combine (Ret, Hash (Self.${field.name}));
+            % endif
+         % endif
+      % endfor
+      return Ret;
+   end Hash;
+   pragma Warnings (On, "referenced");
+
    -------------
    -- Combine --
    -------------
@@ -3960,7 +4004,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Hash_Entity (Self : ${root_entity.name}) return Hash_Type is
    begin
-      return Combine (Hash (Self.Node), Hash (Self.Info.Rebindings));
+      return Combine
+        ((Hash (Self.Node), Hash (Self.Info.Rebindings), Hash (Self.Info.Md)));
    end Hash_Entity;
 
    --------------------
@@ -3970,8 +4015,9 @@ package body ${ada_lib_name}.Implementation is
    function Compare_Entity (Left, Right : ${root_entity.name}) return Boolean
    is
    begin
-      return (Left.Node = Right.Node
-              and then Left.Info.Rebindings = Right.Info.Rebindings);
+      return Left.Node = Right.Node
+             and then Left.Info.Rebindings = Right.Info.Rebindings
+             and then Compare_Metadata (Left.Info.Md, Right.Info.Md);
    end Compare_Entity;
 
    --------------------------------

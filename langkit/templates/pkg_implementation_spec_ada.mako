@@ -255,6 +255,10 @@ private package ${ada_lib_name}.Implementation is
    ${struct_types.decl(T.env_md, incomplete_nullexpr=False)}
    ${struct_types.nullexpr_decl(T.env_md)}
 
+   ## Special case for the env metadata struct, where the Hash function is
+   ## explicitly declared because it has specific logic.
+   function Hash (Self : ${T.env_md.name}) return Hash_Type;
+
    ${struct_types.incomplete_decl(T.inner_env_assoc)}
    ${struct_types.decl(T.inner_env_assoc, incomplete_nullexpr=False)}
    ${struct_types.nullexpr_decl(T.inner_env_assoc)}

@@ -3,7 +3,7 @@ Test that nested grouped envs with non-null default metadata behave as
 expected.
 """
 
-from langkit.dsl import ASTNode, Field, Struct, T, UserField, env_metadata
+from langkit.dsl import ASTNode, Field, MetadataField, Struct, T, env_metadata
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import Entity, No, Self, Var, langkit_property
 
@@ -12,8 +12,8 @@ from utils import build_and_run
 
 @env_metadata
 class Metadata(Struct):
-    foo_node = UserField(T.FooNode)
-    bar_node = UserField(T.FooNode)
+    foo_node = MetadataField(T.FooNode, use_in_eq=True)
+    bar_node = MetadataField(T.FooNode, use_in_eq=True)
 
 
 class FooNode(ASTNode):
