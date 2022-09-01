@@ -568,6 +568,30 @@ package body ${ada_lib_name}.Implementation.C is
          return null;
    end;
 
+   function ${capi.get_name('is_equivalent')}
+     (L, R : ${entity_type}_Ptr) return ${bool_type}
+   is
+   begin
+      Clear_Last_Exception;
+      return ${bool_type} (Boolean'Pos (Compare_Entity (L.all, R.all)));
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end;
+
+   function ${capi.get_name('hash')}
+     (Node : ${entity_type}_Ptr) return uint32_t
+   is
+   begin
+      Clear_Last_Exception;
+      return uint32_t (Hash_Entity (Node.all));
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end;
+
    function ${capi.get_name('is_token_node')}
      (Node : ${entity_type}_Ptr) return int is
    begin

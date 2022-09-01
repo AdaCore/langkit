@@ -460,6 +460,20 @@ private package ${ada_lib_name}.Implementation.C is
    -- General AST node primitives --
    ---------------------------------
 
+   function ${capi.get_name('is_equivalent')}
+     (L, R : ${entity_type}_Ptr) return ${bool_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('node_is_equivalent')}";
+   ${ada_c_doc('langkit.node_is_equivalent', 3)}
+
+   function ${capi.get_name('hash')}
+     (Node : ${entity_type}_Ptr) return uint32_t
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('node_hash')}";
+   ${ada_c_doc('langkit.node_hash', 3)}
+
    function ${capi.get_name('node_kind')}
      (Node : ${entity_type}_Ptr) return ${node_kind_type}
       with Export        => True,

@@ -3,7 +3,7 @@ Check that entity info is propagated when retuning the value of a lazy field.
 """
 
 from langkit.compiled_types import T
-from langkit.dsl import ASTNode, Struct, UserField, env_metadata, synthetic
+from langkit.dsl import ASTNode, MetadataField, Struct, env_metadata, synthetic
 from langkit.expressions import Entity, Self, langkit_property, lazy_field
 
 from utils import build_and_run
@@ -11,7 +11,7 @@ from utils import build_and_run
 
 @env_metadata
 class Metadata(Struct):
-    flag = UserField(type=T.Bool)
+    flag = MetadataField(type=T.Bool, use_in_eq=True)
 
 
 class FooNode(ASTNode):

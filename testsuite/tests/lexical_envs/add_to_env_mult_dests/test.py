@@ -3,7 +3,7 @@ Test add_to_env with multiple env_assoc having different destination
 environments.
 """
 
-from langkit.dsl import (ASTNode, Field, LookupKind, Struct, T, UserField,
+from langkit.dsl import (ASTNode, Field, LookupKind, MetadataField, Struct, T,
                          env_metadata)
 from langkit.envs import EnvSpec, add_env, add_to_env, handle_children
 from langkit.expressions import (Self, direct_env, langkit_property,
@@ -14,7 +14,7 @@ from utils import build_and_run
 
 @env_metadata
 class Metadata(Struct):
-    node = UserField(T.FooNode)
+    node = MetadataField(T.FooNode, use_in_eq=True)
 
 
 class FooNode(ASTNode):

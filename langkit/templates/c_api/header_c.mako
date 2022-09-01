@@ -435,6 +435,14 @@ extern int
 ${capi.get_name("node_unit")}(${entity_type} *node,
                               ${analysis_unit_type} *unit_p);
 
+${c_doc('langkit.node_hash')}
+extern uint32_t
+${capi.get_name("node_hash")}(${entity_type} *node);
+
+${c_doc('langkit.node_is_equivalent')}
+extern ${bool_type}
+${capi.get_name("node_is_equivalent")}(${entity_type} *l, ${entity_type} *r);
+
 ${c_doc('langkit.node_is_token_node')}
 extern int
 ${capi.get_name("node_is_token_node")}(${entity_type} *node);

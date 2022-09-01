@@ -2,7 +2,7 @@
 Test that foreign nodes in environment metadata are properly rejected.
 """
 
-from langkit.dsl import ASTNode, Field, Struct, T, UserField, env_metadata
+from langkit.dsl import ASTNode, Field, MetadataField, Struct, T, env_metadata
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import New, No, Property, Self
 
@@ -15,7 +15,7 @@ class FooNode(ASTNode):
 
 @env_metadata
 class Metadata(Struct):
-    node = UserField(type=FooNode)
+    node = MetadataField(type=FooNode, use_in_eq=True)
 
 
 class Name(FooNode):

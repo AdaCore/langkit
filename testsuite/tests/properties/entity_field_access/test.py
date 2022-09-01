@@ -8,8 +8,8 @@ Test that:
     info.
 """
 
-from langkit.dsl import (ASTNode, Bool, EnvRebindings, Field, Struct, T,
-                         UserField, env_metadata)
+from langkit.dsl import (ASTNode, Bool, EnvRebindings, Field, MetadataField,
+                         Struct, T, env_metadata)
 from langkit.expressions import Entity, New, No, Self, langkit_property
 
 from utils import build_and_run
@@ -41,8 +41,8 @@ class FooNode(ASTNode):
 
 @env_metadata
 class Metadata(Struct):
-    is_first = UserField(Bool)
-    is_second = UserField(Bool)
+    is_first = MetadataField(Bool, use_in_eq=True)
+    is_second = MetadataField(Bool, use_in_eq=True)
 
 
 class Literal(FooNode):

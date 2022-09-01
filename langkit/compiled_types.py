@@ -843,7 +843,7 @@ class CompiledType:
 
         :rtype: bool
         """
-        return self._requires_hash_function
+        return self != T.env_md and self._requires_hash_function
 
     def require_hash_function(self):
         """
@@ -2194,6 +2194,32 @@ class UserField(BaseField):
         # We cannot construct the default value yet, as not all types are
         # known. Do this in CompileCtx.compute_types instead.
         self.abstract_default_value = default_value
+
+
+class MetadataField(UserField):
+    """
+    Field for metadata struct. Can be used only there, and requires the user to
+    specify whether the field shall be taken into account when processing
+    identity related properties.
+    """
+
+    def __init__(
+        self,
+        type: CompiledType,
+        use_in_equality: bool,
+        repr: bool = False,
+        doc: str = '',
+        public: bool = True,
+        default_value: Opt[AbstractExpression] = None,
+        access_needs_incref: bool = True,
+        internal_name: Opt[names.Name] = None,
+        prefix: Opt[names.Name] = None
+    ):
+        self.use_in_equality = use_in_equality
+        super().__init__(
+            type, repr, doc, public, default_value, access_needs_incref,
+            internal_name, prefix
+        )
 
 
 class BuiltinField(UserField):
