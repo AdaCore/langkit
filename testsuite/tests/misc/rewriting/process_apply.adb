@@ -3,6 +3,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Errors;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 with Libfoolang.Analysis;         use Libfoolang.Analysis;
 
@@ -23,7 +24,14 @@ begin
          for D of Result.Diagnostics loop
             Put_Line ("  " & To_Pretty_String (D));
          end loop;
-         Put_Line (Image (Unparse (Root (Unit))));
+
+         begin
+            Put_Line (Image (Unparse (Root (Unit))));
+         exception
+            when Langkit_Support.Errors.Unparsing.Malformed_Tree_Error =>
+               Put_Line ("Cannot unparse the rewritten tree");
+         end;
+
          if Abort_On_Error then
             raise Program_Error;
          end if;

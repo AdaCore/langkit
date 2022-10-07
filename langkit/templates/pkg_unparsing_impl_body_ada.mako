@@ -758,21 +758,29 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       Unparser            : List_Node_Unparser;
       Rewritten_Node      : ${T.root_node.name};
       Preserve_Formatting : Boolean;
-      Result              : in out Unparsing_Buffer) is
+      Result              : in out Unparsing_Buffer)
+   is
+      AN_Child : Abstract_Node;
    begin
       for I in 1 .. Children_Count (Node) loop
+         AN_Child := Child (Node, I);
+         if Is_Null (AN_Child) then
+            raise Malformed_Tree_Error with "null node found in a list";
+         end if;
+
          --  For all elements but the first one, emit the separator. If
          --  possible, preserve original formatting for the corresponding
          --  separator in the original source.
+
          if I > 1 and then Unparser.Has_Separator then
             if Rewritten_Node /= null
                and then Children_Count (Rewritten_Node) >= I
             then
                declare
-                  R_Child : constant ${T.root_node.name} :=
+                  BN_Child : constant ${T.root_node.name} :=
                      Child (Rewritten_Node, I);
                   Tok : constant Token_Reference :=
-                     Relative_Token (Token_Start (R_Child), -1);
+                     Relative_Token (Token_Start (BN_Child), -1);
                begin
                   Append_Tokens (Result, Tok, Tok);
                end;
@@ -781,7 +789,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
             end if;
          end if;
 
-         Unparse_Node (Child (Node, I), Preserve_Formatting, Result);
+         Unparse_Node (AN_Child, Preserve_Formatting, Result);
       end loop;
    end Unparse_List_Node;
 

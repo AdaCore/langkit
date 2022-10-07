@@ -24,6 +24,10 @@ package Langkit_Support.Errors with Preelaborate is
       Out_Of_Bounds_Error : exception;
    end Introspection;
 
+   package Unparsing is
+      Malformed_Tree_Error : exception;
+   end Unparsing;
+
    package Rewriting is
       Template_Format_Error        : exception;
       Template_Args_Error          : exception;

@@ -1,9 +1,11 @@
 ## vim: filetype=makoada
 
+with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 with System;
 
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
@@ -284,15 +286,28 @@ package body ${ada_lib_name}.Rewriting_Implementation is
                Bytes       => System.Null_Address,
                Bytes_Count => 0);
             Bytes : String_Access;
+
+            function Error_Result return Apply_Result
+            is ((Success => False, Unit => PU.Unit, Diagnostics => <>));
          begin
             Units.Append (PU);
 
             --  Reparse (i.e. unparse and then parse) this rewritten unit
-            Bytes := Unparse
-              (Create_Abstract_Node (Unit_Handle.Root),
-               PU.Unit,
-               Preserve_Formatting => True,
-               As_Unit             => True);
+            begin
+               Bytes := Unparse
+                 (Create_Abstract_Node (Unit_Handle.Root),
+                  PU.Unit,
+                  Preserve_Formatting => True,
+                  As_Unit             => True);
+            exception
+               when Exc : Malformed_Tree_Error =>
+                  Result := Error_Result;
+                  Append
+                    (Result.Diagnostics,
+                     No_Source_Location_Range,
+                     To_Text (Exception_Message (Exc)));
+                  exit;
+            end;
             Input.Charset := Unit_Handle.Unit.Charset;
             Input.Bytes := Bytes.all'Address;
             Input.Bytes_Count := Bytes.all'Length;
@@ -301,9 +316,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
             --  If there is a parsing error, abort the rewriting process
             if not PU.New_Data.Diagnostics.Is_Empty then
-               Result := (Success     => False,
-                          Unit        => PU.Unit,
-                          Diagnostics => <>);
+               Result := Error_Result;
                Result.Diagnostics.Move (PU.New_Data.Diagnostics);
                Destroy (PU.New_Data);
                exit;

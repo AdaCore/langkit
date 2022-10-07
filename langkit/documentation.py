@@ -282,6 +282,10 @@ base_langkit_docs = {
         Raised when introspection functions (``${ctx.lib_name}.Introspection``)
         are passed an out of bounds index.
     """,
+    'langkit.unparsing.malformed_tree_error': """
+        Raised when unparsing functions working on rewritten trees
+        (``${ctx.lib_name}.Rewriting``) are called on malformed trees.
+    """,
     'langkit.rewriting.template_format_error': """
         Exception raised when a template has an invalid syntax, such as badly
         formatted placeholders.
