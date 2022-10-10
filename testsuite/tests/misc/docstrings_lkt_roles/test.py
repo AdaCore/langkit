@@ -34,9 +34,9 @@ for path in [
     "build/python/libfoolang/__init__.py",
 ]:
     with open(path) as f:
-        lines = f.readlines()
-        for line in lines:
+        for line in f.readlines():
             if 'Log this docstring' in line:
-                print(path, line)
+                print(f"{path}:")
+                print(f"  {line.strip()}")
 
 print('Done')
