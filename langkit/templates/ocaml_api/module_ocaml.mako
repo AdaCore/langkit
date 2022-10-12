@@ -605,6 +605,10 @@ module Rebindings = struct
   type t = unit ptr
 end
 
+${exts.include_extension(
+   ctx.ext('ocaml_api', 'module_struct')
+)}
+
 <%
    ## Register array and struct types to generate them in topogical ordering
    for struct_type in ctx.struct_types:
