@@ -137,6 +137,10 @@ module UnitProvider : sig
   )}
 end
 
+${exts.include_extension(
+   ctx.ext('ocaml_api', 'module_sig')
+)}
+
 type analysis_context
 
 and ${ocaml_api.type_public_name(T.AnalysisUnit)}
