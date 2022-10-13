@@ -1,202 +1,114 @@
 variables:
-   # The Python virtualenv directory
-   VENV_DIR: $CI_PROJECT_DIR/venv
+  PACKAGE: $CI_PROJECT_DIR/langkit.tar.gz
+  CI_FRAGMENTS: ci_fragments
+  CI_FRAGMENTS_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/setton/$CI_FRAGMENTS
 
-   # Where we store alire, the alire config, and the toolchain
-   # packages pulled by Alire (gnat, gprbuild)
-   ALIRE_DIR: $CI_PROJECT_DIR/alire
-
-   # Where the dependencies and langkit is installed
-   PREFIX: $CI_PROJECT_DIR/prefix
-
-   # The dependency .gprs live here
-   GPR_PROJECT_PATH: $CI_PROJECT_DIR/prefix/share/gpr
-
-# A GitLab pipeline is divided in several stages. A stage may contain one or
-# more jobs, run potentially in parallel. Stages are run in sequence.
-#
-# TODO: Because of the way stages and caches interact, the test stage of job J2
-# may run after the build stage of job J1. Since we store langkit_support and
-# langkit in caches, this means that test/J2 may actually run on sources from
-# J1, creating spurious errors.
-#
-# For now, just rebuild langkit_suppond and re-install langkit before each
-# stage to avoid this problem. On the longer term, we need to find how to
-# properly use caches.
 stages:
-  - setup    # setup
-  - build    # build
-  - test     # build
-
-# These define "macros" used below
-
-.use_python_env: &python_env
-   - source $VENV_DIR/bin/activate
-
-.use_gnat_env: &gnat_env
-   - |
-     for dep in `ls $ALIRE_DIR/cache/dependencies/` ; do
-        export PATH=$ALIRE_DIR/cache/dependencies/$dep/bin/:$PATH
-     done
-
-.use_langkit_env: &langkit_env
-   - *python_env
-   - *gnat_env
-
-.venv_cache: &venv_cache
-   key: langkit_venv
-   paths:
-     - $VENV_DIR
-
-.alire_cache: &alire_cache
-   key: langkit_alire
-   paths:
-      - alire
-
-.deps_checkouts_cache: &deps_checkouts_cache
-   key: langkit_deps_checkouts
-   paths:
-     - xmlada
-     - gprbuild
-     - gnatcoll-core
-     - gnatcoll-bindings
-
-
-.langkit_caches: &langkit_caches
-   - *venv_cache
-   - *alire_cache
-   - *deps_checkouts_cache
-   - key: langkit_build_artifacts
-     paths:
-        - $PREFIX
-        - xmlada/
-        - gprbuild/gpr/libobj
-        - gnatcoll-core/obj
-        - gnatcoll-bindings/gmp/obj
-        - gnatcoll-bindings/iconv/obj
-        - contrib/python/build
-        - contrib/lkt/build
+  - build
+  - test
+  - package
 
 #########
-# setup #
+# BUILD #
 #########
 
-# Setup Python and the Python virtualenv
-setup-python:
-   stage: setup
-   script:
-    - |
-      if [ ! -e $VENV_DIR ]; then
-         echo "setting up a virtual env in $VENV_DIR"
-         mkdir $VENV_DIR
-         python3 -m venv $VENV_DIR
-      fi
-      source $VENV_DIR/bin/activate
-      pip3 install -r REQUIREMENTS.dev
-      pip3 install .
-   cache: *venv_cache
+langkit_build:
+  services:
+     - image:libadalang
+     - cpu:8
+     - mem:16
+  stage: build
+  rules:
+    # Triggers on a push or pipeline
+    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push")
+  script:
+    - export PATH=/it/e3/bin:$PATH
+    - cd /it/wave
 
-# Setup the gnat toolchain, and gprbuild, using alire
-setup-gnat:
-   stage: setup
-   script:
-     - |
-       if [ ! -e alire ]; then
-          mkdir alire
-          cd alire
-          wget -q https://github.com/alire-project/alire/releases/download/v1.1.2/alr-1.1.2-bin-x86_64-linux.zip
-          unzip alr-1.1.2-bin-x86_64-linux.zip
-          ./bin/alr -c $ALIRE_DIR toolchain --install gnat_native=11.2.3
-          ./bin/alr -c $ALIRE_DIR toolchain --install gprbuild=22.0.1
-       fi
-   cache: *alire_cache
+    # Build using anod
+    - anod vcs --add-repo langkit $CI_PROJECT_DIR
+    - anod build --minimal --disable-cathod langkit
 
-# Grab source dependencies from GitHub
-setup-dependency-checkouts:
-   stage: setup
-   script: |
-      for dep in xmlada gprbuild gnatcoll-core gnatcoll-bindings ; do
-         if [ -e $dep ]; then
-            (cd $dep ; git pull --rebase)
-         else
-            git clone https://github.com/AdaCore/$dep
-         fi
-      done
-   cache: *deps_checkouts_cache
+    # Create the langkit package
+    - (cd / ; tar czf $PACKAGE it/wave/x86_64-linux/langkit/install)
 
-#########
-# build #
-#########
-
-build-job:
-   stage: build
-   before_script:
-      # Source the env
-      - *langkit_env
-      # Checks
-      - python -c "import sys;print('e3' in sys.modules)"
-      - gnatls -v
-   dependencies:
-      - setup-python
-      - setup-gnat
-   script:
-      # TODO: see the note above about stages and caches
-      - pip3 install .
-
-      # Uninstall dependencies, so that gprinstall does not complain when we
-      # try to install updates.
-      - |
-        for project in xmlada gnatcoll gnatcoll_iconv gnatcoll_gmp
-        do
-          gprinstall --uninstall $project --prefix=$PREFIX || true
-        done
-
-      # Build dependencies
-      - |
-            (cd xmlada ; ./configure --prefix=$PREFIX && make && make install)
-            make -C gprbuild prefix=$PREFIX libgpr.build libgpr.install
-            make -C gnatcoll-core prefix=$PREFIX ENABLE_SHARED=yes build install
-            python gnatcoll-bindings/iconv/setup.py build -j0 \
-                --prefix=$PREFIX --library-types=static,relocatable
-            python gnatcoll-bindings/iconv/setup.py install
-            python gnatcoll-bindings/gmp/setup.py build -j0 \
-                --prefix=$PREFIX --library-types=static,relocatable
-            python gnatcoll-bindings/gmp/setup.py install
-
-      # Build langkit_support, libpythonlang and liblktlang
-      - ./manage.py make --no-mypy
-
-      # Type check the Langkit Python code base with Mypy. This part is
-      # lightweight, so do it right after the build instead of create a
-      # dedicated job, which would pointlessly take time to handle GitLab
-      # caches.
-      - |
-        eval `./manage.py setenv`
-        mypy --config-file=mypy.ini
-
-   cache: *langkit_caches
-
+  artifacts:
+    paths:
+      - $PACKAGE
 
 ########
-# test #
+# TEST #
 ########
 
-test:
-   stage: test
-   before_script: *langkit_env
-   dependencies:
-      - setup-python
-      - build-job
-   script: |
-      # TODO: see the note above about stages and caches
-      pip install .
-      ./manage.py make --no-mypy
+langkit_test:
+  services:
+     - image:libadalang
+     - cpu:8
+     - mem:16
+  stage: test
+  rules:
+    # Triggers on a push or pipeline
+    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push")
+  script:
+    - export PATH=/it/e3/bin:$PATH
+    - cd /it/wave
 
-      eval `./manage.py setenv`
-      ./manage.py test \
-         --no-auto-path \
-         --disable-ocaml \
-         --disable-gdb \
-         --failure-exit-code=1
+    # Unpack langkit
+    - (cd / ; tar zxf $PACKAGE)
 
-   cache: *langkit_caches
+    # Remove the artefact from CI_PROJECT_DIR: this is to make sure
+    # anod doesn't think there's a local modification in the git clone
+    # that would warrant a rebuild
+    - rm $PACKAGE
+
+    # Run the testsuite
+    - anod test --minimal --disable-cathod langkit
+
+    # This call to e3-testsuite-report raise an error if there is one failure
+    - e3-testsuite-report --failure-exit-code 1 --xunit-output xunit_output.xml x86_64-linux/langkit-test/results/new/
+    - cp xunit_output.xml $CI_PROJECT_DIR
+
+  artifacts:
+    paths:
+      - xunit_output.xml
+    reports:
+      junit: xunit_output.xml
+
+# The following is commented until libadalang has a pipeline definition
+
+# The internal testsuite: this triggers a downstream pipeline
+#trigger_libadalang_tests:
+#  stage: test
+#  rules:
+#    # Triggers on a push or pipeline, but not on the master branch.
+#    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push") && $CI_COMMIT_BRANCH != "master"
+#  variables:
+#     ARTIFACTS_DOWNLOAD_REF: $CI_COMMIT_BRANCH
+#  trigger:
+#     # The downstream project
+#     project: eng/libadalang/libadalang
+#
+#     # This says that this pipeline should fail when the downstream
+#     # pipeline fails.
+#     strategy: depend
+
+###########
+# PACKAGE #
+###########
+
+# This job uploads the package to the package registry.
+package:
+  services:
+     - image:libadalang
+     - cpu:8
+     - mem:16
+  stage: package
+  rules:
+     # This triggers only after a push on the master branch, or from an upstream pipeline
+     - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push") && $CI_COMMIT_BRANCH == "master"
+  script:
+    - export PATH=/it/e3/bin:$PATH
+
+    # Upload the package
+    - git clone $CI_FRAGMENTS_GIT
+    - GITLAB_TOKEN=$GITLAB_RW_TOKEN ./$CI_FRAGMENTS/upload_generic_package $CI_PROJECT_PATH $PACKAGE
