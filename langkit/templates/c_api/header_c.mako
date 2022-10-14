@@ -634,6 +634,8 @@ ${c_doc('langkit.entity_image')}
 extern void
 ${capi.get_name('entity_image')}(${entity_type} ent, ${text_type} *result);
 
+${exts.include_extension(ctx.ext('analysis', 'c_api', 'header'))}
+
 #ifdef __cplusplus
 }
 #endif
