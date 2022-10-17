@@ -1,3 +1,15 @@
+# This bit is used to make sure we don't run too many pipelines:
+# run on a triggered pipeline, on a merge request, or on a push to a branch,
+# but do not run in reaction to a push to a branch if there is also
+# a merge request for it.
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
 variables:
   PACKAGE: $CI_PROJECT_DIR/langkit.tar.gz
   CI_FRAGMENTS: ci_fragments
@@ -6,7 +18,6 @@ variables:
 stages:
   - build
   - test
-  - package
 
 #########
 # BUILD #
@@ -51,17 +62,15 @@ langkit_test:
     - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push")
   script:
     - export PATH=/it/e3/bin:$PATH
-    - cd /it/wave
 
     # Unpack langkit
     - (cd / ; tar zxf $PACKAGE)
-
-    # Remove the artefact from CI_PROJECT_DIR: this is to make sure
-    # anod doesn't think there's a local modification in the git clone
-    # that would warrant a rebuild
     - rm $PACKAGE
 
     # Run the testsuite
+    - cd /it/wave
+    - anod vcs --add-repo langkit $CI_PROJECT_DIR
+    - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
     - anod test --minimal --disable-cathod langkit
 
     # This call to e3-testsuite-report raise an error if there is one failure
@@ -74,35 +83,40 @@ langkit_test:
     reports:
       junit: xunit_output.xml
 
-# The following is commented until libadalang has a pipeline definition
+###############################
+# Trigger Libadalang Pipeline #
+###############################
 
 # The internal testsuite: this triggers a downstream pipeline
-#trigger_libadalang_tests:
-#  stage: test
-#  rules:
-#    # Triggers on a push or pipeline, but not on the master branch.
-#    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push") && $CI_COMMIT_BRANCH != "master"
-#  variables:
-#     ARTIFACTS_DOWNLOAD_REF: $CI_COMMIT_BRANCH
-#  trigger:
-#     # The downstream project
-#     project: eng/libadalang/libadalang
-#
-#     # This says that this pipeline should fail when the downstream
-#     # pipeline fails.
-#     strategy: depend
+trigger_libadalang:
+  stage: test
+  rules:
+    # Triggers on a push or pipeline, but not on the master branch.
+    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push") && $CI_COMMIT_BRANCH != "master"
+  variables:
+     ARTIFACTS_DOWNLOAD_REF: $CI_COMMIT_BRANCH
+  trigger:
+     # The downstream project
+     project: eng/libadalang/libadalang
+
+     # This says that this pipeline should fail when the downstream
+     # pipeline fails.
+     strategy: depend
 
 ###########
 # PACKAGE #
 ###########
 
 # This job uploads the package to the package registry.
+# This is launched on a push on the master branch.
+# We put this in the "test" stage so that it gets triggered systematically
+# after a push on the main branch, not waiting for tests to pass.
 package:
   services:
      - image:libadalang
      - cpu:8
      - mem:16
-  stage: package
+  stage: test
   rules:
      # This triggers only after a push on the master branch, or from an upstream pipeline
      - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push") && $CI_COMMIT_BRANCH == "master"
