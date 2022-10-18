@@ -14,10 +14,11 @@ variables:
   PACKAGE: $CI_PROJECT_DIR/langkit.tar.gz
   CI_FRAGMENTS: ci_fragments
   CI_FRAGMENTS_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/setton/$CI_FRAGMENTS
+  LIBADALANG_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/eng/libadalang/libadalang
 
 stages:
-  - build
-  - test
+  - stage1  # langkit_build
+  - stage2  # langkit_test,  libadalang_build_and_test,  package
 
 #########
 # BUILD #
@@ -28,7 +29,7 @@ langkit_build:
      - image:libadalang
      - cpu:8
      - mem:16
-  stage: build
+  stage: stage1
   rules:
     # Triggers on a push or pipeline
     - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push")
@@ -56,7 +57,7 @@ langkit_test:
      - image:libadalang
      - cpu:8
      - mem:16
-  stage: test
+  stage: stage2
   rules:
     # Triggers on a push or pipeline
     - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push")
@@ -83,25 +84,52 @@ langkit_test:
     reports:
       junit: xunit_output.xml
 
-###############################
-# Trigger Libadalang Pipeline #
-###############################
+#############################
+# LIBADALANG BUILD AND TEST #
+#############################
 
-# The internal testsuite: this triggers a downstream pipeline
-trigger_libadalang:
-  stage: test
+libadalang_build_and_test:
+  services:
+     - image:libadalang
+     - cpu:8
+     - mem:16
+  stage: stage2
   rules:
-    # Triggers on a push or pipeline, but not on the master branch.
-    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push") && $CI_COMMIT_BRANCH != "master"
-  variables:
-     ARTIFACTS_DOWNLOAD_REF: $CI_COMMIT_BRANCH
-  trigger:
-     # The downstream project
-     project: eng/libadalang/libadalang
+    # Triggers on a push or pipeline
+    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push")
+  script:
+    - export PATH=/it/e3/bin:$PATH
 
-     # This says that this pipeline should fail when the downstream
-     # pipeline fails.
-     strategy: depend
+    # Unpack langkit
+    - (cd / ; tar zxf $PACKAGE)
+    - rm $PACKAGE
+
+    # Get libadalang. Use this branch if it's a "/sync/" branch.
+    - cd /tmp
+    - LAL_BRANCH=master
+    - if [[ $CI_COMMIT_BRANCH =~ ^/sync/* ]]; then
+         LAL_BRANCH=$CI_COMMIT_BRANCH;
+      elif [[ $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ ^/sync/* ]]; then
+         LAL_BRANCH=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME;
+      fi
+    - git clone $LIBADALANG_GIT -b $LAL_BRANCH
+
+    # Build and test libadalang
+    - cd /it/wave
+    - anod vcs --add-repo libadalang /tmp/libadalang
+    - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
+    - anod build --minimal --disable-cathod libadalang
+    - anod test  --minimal --disable-cathod libadalang
+
+    # This call to e3-testsuite-report raise an error if there is one failure
+    - e3-testsuite-report --failure-exit-code 1 --xunit-output xunit_output.xml x86_64-linux/libadalang-test/results/new/
+    - cp xunit_output.xml $CI_PROJECT_DIR
+
+  artifacts:
+    paths:
+      - xunit_output.xml
+    reports:
+      junit: xunit_output.xml
 
 ###########
 # PACKAGE #
@@ -116,7 +144,7 @@ package:
      - image:libadalang
      - cpu:8
      - mem:16
-  stage: test
+  stage: stage2
   rules:
      # This triggers only after a push on the master branch, or from an upstream pipeline
      - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push") && $CI_COMMIT_BRANCH == "master"
