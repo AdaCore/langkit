@@ -12,6 +12,7 @@ workflow:
 
 variables:
   PACKAGE: $CI_PROJECT_DIR/langkit.tar.gz
+  PACKAGE_REPOSITORY_PROJECT: eng/libadalang/ci-packages
   CI_FRAGMENTS: ci_fragments
   CI_FRAGMENTS_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/setton/$CI_FRAGMENTS
   LIBADALANG_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/eng/libadalang/libadalang
@@ -141,9 +142,7 @@ libadalang_build_and_test:
 # after a push on the main branch, not waiting for tests to pass.
 package:
   services:
-     - image:libadalang
-     - cpu:8
-     - mem:16
+     - image:e3
   stage: stage2
   rules:
      # This triggers only after a push on the master branch, or from an upstream pipeline
@@ -153,4 +152,4 @@ package:
 
     # Upload the package
     - git clone $CI_FRAGMENTS_GIT
-    - GITLAB_TOKEN=$GITLAB_RW_TOKEN ./$CI_FRAGMENTS/upload_generic_package $CI_PROJECT_PATH $PACKAGE
+    - ./$CI_FRAGMENTS/upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE
