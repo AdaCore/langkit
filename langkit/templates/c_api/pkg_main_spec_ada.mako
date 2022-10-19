@@ -684,6 +684,11 @@ private package ${ada_lib_name}.Implementation.C is
           External_Name => "${capi.get_name('get_last_exception')}";
    ${ada_c_doc('langkit.get_last_exception', 3)}
 
+   function ${capi.get_name('exception_name')}
+     (Kind : ${exception_kind_type}) return chars_ptr
+      with Export, Convention => C;
+   ${ada_c_doc('langkit.exception_name', 3)}
+
    procedure Clear_Last_Exception;
    --  Free the information contained in Last_Exception
 

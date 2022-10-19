@@ -849,6 +849,12 @@ package body ${ada_lib_name}.Implementation.C is
       end if;
    end;
 
+   function ${capi.get_name('exception_name')}
+     (Kind : ${exception_kind_type}) return chars_ptr is
+   begin
+      return New_String (Kind'Image);
+   end;
+
    function ${capi.get_name('token_kind_name')} (Kind : int) return chars_ptr
    is
       K : Token_Kind;
