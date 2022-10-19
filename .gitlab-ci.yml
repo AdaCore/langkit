@@ -43,7 +43,7 @@ langkit_build:
     - anod build --minimal --disable-cathod langkit
 
     # Create the langkit package
-    - (cd / ; tar czf $PACKAGE it/wave/x86_64-linux/langkit/install)
+    - tar czf $PACKAGE -C / it/wave/x86_64-linux/langkit_support/install
 
   artifacts:
     paths:
@@ -66,7 +66,7 @@ langkit_test:
     - export PATH=/it/e3/bin:$PATH
 
     # Unpack langkit
-    - (cd / ; tar zxf $PACKAGE)
+    - tar zxf $PACKAGE -C /
     - rm $PACKAGE
 
     # Run the testsuite
@@ -102,7 +102,7 @@ libadalang_build_and_test:
     - export PATH=/it/e3/bin:$PATH
 
     # Unpack langkit
-    - (cd / ; tar zxf $PACKAGE)
+    - tar zxf $PACKAGE -C /
     - rm $PACKAGE
 
     # Get libadalang. Use this branch if it's a "/sync/" branch.
