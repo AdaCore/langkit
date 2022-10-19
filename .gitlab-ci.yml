@@ -40,10 +40,13 @@ langkit_build:
 
     # Build using anod
     - anod vcs --add-repo langkit $CI_PROJECT_DIR
+    - anod build --minimal --disable-cathod langkit_support
     - anod build --minimal --disable-cathod langkit
 
     # Create the langkit package
-    - tar czf $PACKAGE -C / it/wave/x86_64-linux/langkit_support/install
+    - tar czf $PACKAGE -C /
+        it/wave/x86_64-linux/langkit_support/install
+        it/wave/x86_64-linux/langkit/install
 
   artifacts:
     paths:
@@ -72,6 +75,7 @@ langkit_test:
     # Run the testsuite
     - cd /it/wave
     - anod vcs --add-repo langkit $CI_PROJECT_DIR
+    - touch fingerprints/x86_64-linux.langkit_support.build.json.assume-unchanged
     - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
     - anod test --minimal --disable-cathod langkit
 
@@ -118,6 +122,7 @@ libadalang_build_and_test:
     # Build and test libadalang
     - cd /it/wave
     - anod vcs --add-repo libadalang /tmp/libadalang
+    - touch fingerprints/x86_64-linux.langkit_support.build.json.assume-unchanged
     - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
     - anod build --minimal --disable-cathod libadalang
     - anod test  --minimal --disable-cathod libadalang
