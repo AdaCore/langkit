@@ -25,6 +25,11 @@ package Langkit_Support.File_Readers is
    --  addition to Ada's Buffer'First/'Last attributes because source buffers
    --  may be oversized.
 
+   function Create_Decoded_File_Contents
+     (Buffer : Text_Type) return Decoded_File_Contents;
+   --  Create a ``Decoded_File_Contents`` value that contains a copy of
+   --  ``Buffer``.
+
    type File_Reader_Interface is interface;
    --  Interface to override how source files are fetched and decoded
 
@@ -39,10 +44,10 @@ package Langkit_Support.File_Readers is
    --  Charset and decoding the byte order mark if Read_BOM is True.
    --
    --  If there is an error during this process, append an error message to
-   --  Diagnostics. In that case, Contents is considered uninitialized.
+   --  Diagnostics.
    --
-   --  Otherwise, allocate a Text_Type buffer, fill it and initialize Contents
-   --  to refer to it.
+   --  Whether there are errors or not, allocate a Text_Type buffer, fill it
+   --  and initialize Contents to refer to it.
 
    procedure Decode_Buffer
      (Buffer      : String;
