@@ -896,6 +896,10 @@ base_langkit_docs = {
         current thread. Will be automatically allocated on error and free'd on
         the next error.
     """,
+    'langkit.exception_name': """
+        Return the name of the given exception kind. Callers are responsible
+        for free'ing the result.
+    """,
     'langkit.synthetic_nodes': """
         Set of nodes that are synthetic.
 

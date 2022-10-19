@@ -605,6 +605,10 @@ ${c_doc('langkit.get_last_exception')}
 extern const ${exception_type} *
 ${capi.get_name('get_last_exception')}(void);
 
+${c_doc('langkit.exception_name')}
+extern char *
+${capi.get_name('exception_name')}(${exception_kind_type} kind);
+
 ${c_doc('langkit.token_kind_name')}
 extern char *
 ${capi.get_name('token_kind_name')}(${token_kind} kind);

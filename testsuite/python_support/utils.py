@@ -33,7 +33,7 @@ project_template = """
 with "libfoolang";
 
 project Gen is
-    for Languages use ("Ada");
+    for Languages use ("Ada", "C");
     for Source_Dirs use (".");
     for Object_Dir use "obj";
     for Main use ({main_sources});
@@ -41,6 +41,7 @@ project Gen is
     package Compiler is
         for Default_Switches ("Ada") use
           ("-g", "-O0", "-gnata", "-gnatwae", "-gnatyg");
+        for Default_Switches ("C") use ("-g", "-O0", "-Wall", "-W", "-Werror");
     end Compiler;
 end Gen;
 """
