@@ -33,7 +33,7 @@ project_template = """
 with "libfoolang";
 
 project Gen is
-    for Languages use ("Ada", "C");
+    for Languages use ({languages});
     for Source_Dirs use (".");
     for Object_Dir use "obj";
     for Main use ({main_sources});
@@ -200,8 +200,8 @@ def build(grammar=None, lexer=None, lkt_file=None,
                   warning_set=warning_set)
 
 
-def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
-                  lkt_file=None, types_from_lkt=False,
+def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
+                  lexer=None, lkt_file=None, types_from_lkt=False,
                   lkt_semantic_checks=False, ocaml_main=None,
                   warning_set=default_warning_set, generate_unparser=False,
                   symbol_canonicalizer=None, mains=False,
@@ -237,6 +237,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         source files for Ada programs to build and run with the generated
         library. If the input is a single string, consider it's a single mail
         source file.
+
+    :param bool with_c: Whether to add "C" to the languages of the generated
+        project.
 
     :param None|str ocaml_main: If not None, name of the OCaml source file to
         build and run with the built library available.
@@ -404,11 +407,16 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         if isinstance(ada_main, str):
             ada_main = [ada_main]
 
+        langs = ["Ada"]
+        if with_c:
+            langs.append("C")
+
         # Generate a project file to build the given Ada main and then run
         # the program. Do a static build to improve the debugging experience.
         with open('gen.gpr', 'w') as f:
             f.write(project_template.format(
-                main_sources=', '.join('"{}"'.format(m) for m in ada_main)
+                languages=", ".join(f'"{l}"' for l in langs),
+                main_sources=', '.join('"{}"'.format(m) for m in ada_main),
             ))
         run('gprbuild', '-Pgen', '-q', '-p',
             '-XLIBRARY_TYPE=static',
