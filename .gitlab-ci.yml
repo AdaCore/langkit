@@ -125,6 +125,7 @@ libadalang_build_and_test:
     - touch fingerprints/x86_64-linux.langkit_support.build.json.assume-unchanged
     - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
     - anod build --minimal --disable-cathod libadalang
+    - anod build --minimal --disable-cathod libadalang_for_customers
     - anod test  --minimal --disable-cathod libadalang
 
     # This call to e3-testsuite-report raise an error if there is one failure
