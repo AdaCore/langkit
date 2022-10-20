@@ -84,6 +84,7 @@ langkit_test:
     - cp xunit_output.xml $CI_PROJECT_DIR
 
   artifacts:
+    when: always
     paths:
       - xunit_output.xml
     reports:
@@ -135,6 +136,7 @@ libadalang_build_and_test:
         x86_64-linux/libadalang-test/results/new/;
 
   artifacts:
+    when: always
     paths:
       - xunit_output.xml
     reports:
