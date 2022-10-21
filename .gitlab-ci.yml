@@ -82,10 +82,9 @@ langkit_test:
     # Produce a XUnit report for GitLab
     - e3-testsuite-report
         --failure-exit-code 1
-        --xunit-output xunit_output.xml
+        --xunit-output $CI_PROJECT_DIR/xunit_output.xml
         --xunit-name Langkit
         x86_64-linux/langkit-test/results/new/
-    - cp xunit_output.xml $CI_PROJECT_DIR
 
   artifacts:
     when: always
