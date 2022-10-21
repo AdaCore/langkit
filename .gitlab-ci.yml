@@ -117,9 +117,9 @@ libadalang_build_and_test:
     # Get libadalang. Use this branch if it's a "/sync/" branch.
     - cd /tmp
     - LAL_BRANCH=master
-    - if [[ $CI_COMMIT_BRANCH =~ ^/sync/* ]]; then
+    - if [[ $CI_COMMIT_BRANCH =~ ^sync/ ]]; then
          LAL_BRANCH=$CI_COMMIT_BRANCH;
-      elif [[ $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ ^/sync/* ]]; then
+      elif [[ $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ ^sync/ ]]; then
          LAL_BRANCH=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME;
       fi
     - git clone $LIBADALANG_GIT -b $LAL_BRANCH
