@@ -79,8 +79,12 @@ langkit_test:
     - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
     - anod test --minimal --disable-cathod langkit
 
-    # This call to e3-testsuite-report raise an error if there is one failure
-    - e3-testsuite-report --failure-exit-code 1 --xunit-output xunit_output.xml x86_64-linux/langkit-test/results/new/
+    # Produce a XUnit report for GitLab
+    - e3-testsuite-report
+        --failure-exit-code 1
+        --xunit-output xunit_output.xml
+        --xunit-name Langkit
+        x86_64-linux/langkit-test/results/new/
     - cp xunit_output.xml $CI_PROJECT_DIR
 
   artifacts:
@@ -133,6 +137,7 @@ libadalang_build_and_test:
     - e3-testsuite-report
         --failure-exit-code 1
         --xunit-output $CI_PROJECT_DIR/xunit_output.xml
+        --xunit-name Libadalang
         x86_64-linux/libadalang-test/results/new/;
 
   artifacts:
