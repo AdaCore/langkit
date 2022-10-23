@@ -31,7 +31,7 @@ package Langkit_Support.Names is
    --  know from ``HTML_DOCUMENT_ROOT`` (an ``Upper`` formatted name) whether
    --  its ``Camel_With_Underscores`` format is ``HTML_Document_ROOT``,
    --  ``Html_Document_Root`` or any other casing variation, while the
-   --  reciprocical is true.
+   --  reciprocal is true.
    --
    --  Because of this, different names can have different formattings in some
    --  conventions and same formattings in other conventions.

@@ -79,7 +79,7 @@ package Langkit_Support.Symbols is
       Create : Boolean := True) return Thin_Symbol with Inline;
    --  Look for an entry for the ``T`` text in the ``ST`` symbol table. If
    --  there is such an entry, return it. Otherwise, create it and return it if
-   --  ``Create`` is true. Elsewise, return ``null``.
+   --  ``Create`` is true. Otherwise, return ``null``.
    --
    --  Non-null returned accesses are guaranteed to be the same if the text
    --  passed in was the same.
@@ -137,7 +137,7 @@ package Langkit_Support.Symbols is
             --  Message describing why symbolization failed
       end case;
    end record;
-   --  Holder for results of the symbolization process, conditionned by whether
+   --  Holder for results of the symbolization process, conditioned by whether
    --  this process was successful.
 
    function Create_Symbol (Name : Text_Type) return Symbolization_Result is

@@ -1490,7 +1490,7 @@ package body Langkit_Support.Generic_API.Introspection is
 
       Current_Struct : Any_Type_Index := Struct.Index;
       --  Cursor to "climb up" the derivation hierarchy for ``Struct``: we want
-      --  ``Struct``'s own fields, but also the inheritted ones.
+      --  ``Struct``'s own fields, but also the inherited ones.
 
       Next : Natural;
       --  Index in ``Result`` (see below) for the next member to add

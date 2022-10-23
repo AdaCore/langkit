@@ -159,7 +159,7 @@ package body Langkit_Support.Token_Data_Handlers is
         (Buffer    : Text_Type;
          Char      : Wide_Wide_Character;
          Start_Pos : Positive) return Natural;
-      --  Helper function. Return the index of the first occurence of ``Char``
+      --  Helper function. Return the index of the first occurrence of ``Char``
       --  in ``Buffer (Start_Pos .. End_Pos)``, or ``0`` if not found.
 
       -----------

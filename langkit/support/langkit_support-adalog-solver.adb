@@ -484,8 +484,8 @@ package body Langkit_Support.Adalog.Solver is
 
                else
                   --  We are returning ``Self``: destroy the sub-relation
-                  --  owership shares created for ``Rels`` as we do not create
-                  --  a new compound relation.
+                  --  ownership shares created for ``Rels`` as we do not
+                  --  create a new compound relation.
 
                   Destroy_Rels (Rels);
                   Inc_Ref (Self);
@@ -625,9 +625,9 @@ package body Langkit_Support.Adalog.Solver is
 
       function Append_Definition (Var : Logic_Var) return Boolean;
       --  Try to append an atom that defines ``Var`` instead. This returns
-      --  False if there is no atom that defines ``Var`` or if dependency cyles
-      --  prevent us from appending a sequence of atoms to achieve that.
-      --  Otherwise (on success), return True.
+      --  False if there is no atom that defines ``Var`` or if dependency
+      --  cycles prevent us from appending a sequence of atoms to achieve
+      --  that. Otherwise (on success), return True.
 
       function Append_Definitions (Vars : Logic_Var_Vector) return Boolean;
       --  Likewise but try to append definitions for all the given variables.
@@ -1064,7 +1064,7 @@ package body Langkit_Support.Adalog.Solver is
       --  tail for the recursion.
 
       function Cleanup (Val : Boolean) return Boolean;
-      --  Cleanup helper to call before exitting ``Solve_Compound``
+      --  Cleanup helper to call before exiting ``Solve_Compound``
 
       procedure Branch_Cleanup;
       --  Cleanup helper to call after having processed an ``Any``
@@ -1427,7 +1427,7 @@ package body Langkit_Support.Adalog.Solver is
       Ignore : Boolean;
 
       procedure Cleanup;
-      --  Cleanup helper to call before exitting Solve
+      --  Cleanup helper to call before exiting Solve
 
       -------------
       -- Cleanup --
@@ -1877,8 +1877,8 @@ package body Langkit_Support.Adalog.Solver is
       --  ``Atom.Target`` already has a value compatible with ``Val``, or if
       --  it had no value and the assignment succeeded.
       --
-      --  This assumes that ``Self`` is either an ``Assign`` or a `Propagate``
-      --  relation.
+      --  This assumes that ``Self`` is either an ``Assign`` or a
+      --  ``Propagate`` relation.
 
       procedure Get_Values (Vars : Logic_Var_Vector; Vals : out Value_Array);
       --  Assign to ``Vals`` the value of the variables in ``Vars``.

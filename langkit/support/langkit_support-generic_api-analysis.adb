@@ -859,8 +859,8 @@ package body Langkit_Support.Generic_API.Analysis is
 
             --  Skip processing the child nodes if the returned status is Over
             --  or Stop. In the former case the previous call to Visit has
-            --  taken care of processing the needed childs, and in the latter
-            --  case we must immediately stop processing the tree.
+            --  taken care of processing the needed children, and in the
+            --  latter case we must immediately stop processing the tree.
 
             if Status = Into then
                for I in 1 .. Desc.Node_Children_Count (N) loop

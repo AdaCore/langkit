@@ -86,7 +86,7 @@ package Langkit_Support.Generic_API.Analysis is
 
    function Has_Unit
      (Self : Lk_Context; Unit_Filename : String) return Boolean;
-   --  Return whether ``Context`` contains a unit correponding to
+   --  Return whether ``Context`` contains a unit corresponding to
    --  ``Unit_Filename``.
 
    function Get_From_File
@@ -383,7 +383,7 @@ private
       --  Note that this is a System.Address derivation, not an access type, so
       --  it is not automatically initialized. We want to consider
       --  uninitialized Lk_Unit objects as null ones, so null checks must be
-      --  done on the Context compoment instead.
+      --  done on the Context component instead.
 
       Context : Lk_Context;
       --  Keep a reference to the owning context so that the context lives as

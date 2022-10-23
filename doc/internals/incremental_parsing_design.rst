@@ -32,7 +32,7 @@ Additional error recovery
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In a lot of cases, we can keep a lot of the original tree in case of
-syntax error, just ketting rid of overlapping nodes in case of an edit
+syntax error, just getting rid of overlapping nodes in case of an edit
 that deletes content. In cases of insertions, nothing needs to be done
 in case of syntax error (I know you can do better than that, but that's
 still a good start)
@@ -202,7 +202,7 @@ The paper does not completely solve "node persistence"
 In the paper, when you make an edit, you will invalidate all affected
 nodes in the packrat tables. The problem is that this does not only
 include directly affected nodes - nodes that are found overlapping with
-the edit - but also any parent of thoses, for obvious reasons.
+the edit - but also any parent of those, for obvious reasons.
 
 Ideally, we would like to keep those nodes, but only modify their
 contents.
@@ -245,7 +245,7 @@ before we go any further.
 Tokens
 ''''''
 
-Token stream should be iterated and tokens locations propertly
+Token stream should be iterated and tokens locations properly
 re-offseted. Since sloc ranges for nodes are computed via tokens, that
 should be enough.
 

@@ -82,7 +82,7 @@ package Langkit_Support.Internal.Analysis is
 
       Rebindings_Version : Version_Number;
       --  Version of the associated rebinding at the time this safety net was
-      --  procuded.
+      --  produced.
    end record;
    No_Node_Safety_Net : constant Node_Safety_Net :=
      (No_Internal_Context, 0, No_Internal_Unit, 0, 0);

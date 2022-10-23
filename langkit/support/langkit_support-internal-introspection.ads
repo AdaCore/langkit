@@ -72,8 +72,8 @@ package Langkit_Support.Internal.Introspection is
    ---------------------------
 
    type Enum_Value_Names is array (Enum_Value_Index range <>) of Text_Access;
-   --  Mapping from indexes of enum values to the names (camel-with-undercores)
-   --  of each enum value.
+   --  Mapping from indexes of enum values to the names
+   --  (camel-with-underscores) of each enum value.
 
    type Enum_Type_Descriptor (Last_Value : Enum_Value_Index) is record
       Name : Text_Access;
@@ -214,7 +214,7 @@ package Langkit_Support.Internal.Introspection is
       --  Whether this is a list node
 
       Name : Text_Access;
-      --  Name for this type in camel-with-undercores convention
+      --  Name for this type in camel-with-underscores convention
 
       Inherited_Members : Natural;
       --  Number of inherited members for this struct (``Members`` included)
@@ -261,7 +261,7 @@ package Langkit_Support.Internal.Introspection is
    --  Return whether ``Value`` is a valid value to be passed as a ``T``
    --  argument.
    --
-   --  By default, we check that ``Type_Of (Value) = T`, but derivations can
+   --  By default, we check that ``Type_Of (Value) = T``, but derivations can
    --  override this behavior, which use useful for instance for nodes
    --  subtyping.
 
@@ -492,7 +492,7 @@ package Langkit_Support.Internal.Introspection is
      (Value : Base_Internal_Iterator_Value) return Internal_Value_Access
    is abstract;
    --  Consume and return the next item in the ``Value`` iterator, if there is
-   --  one, otherwise retur null.
+   --  one, otherwise return null.
 
    type Base_Internal_Struct_Value is abstract new Internal_Value
      with null record;

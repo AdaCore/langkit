@@ -26,7 +26,7 @@ To use Langkit, you will need:
 * The [gnatcoll-core](https://github.com/AdaCore/gnatcoll-core) library.
 * Ada bindings for GMP and Libiconv, from
   [gnatcoll-bindings](https://github.com/AdaCore/gnatcoll-bindings).
-* Clang-format, optionally, if you want C/C++ files to be formated.
+* Clang-format, optionally, if you want C/C++ files to be formatted.
 
 Install
 -------

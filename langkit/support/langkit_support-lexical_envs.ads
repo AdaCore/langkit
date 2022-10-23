@@ -154,7 +154,7 @@ package Langkit_Support.Lexical_Envs is
    function Has_Lookup_Cache (Self : Lexical_Env) return Boolean
    is
      (Self.Kind = Static_Primary);
-   --  Whether lookup cache is availab/eenabled for the given lexical
+   --  Whether lookup cache is available/enabled for the given lexical
    --  environment.
 
    function Hash (Env : Lexical_Env) return Hash_Type is (Env.Hash);

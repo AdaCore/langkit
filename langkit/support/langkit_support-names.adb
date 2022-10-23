@@ -148,7 +148,7 @@ package body Langkit_Support.Names is
          when Camel =>
             return Result : Name_Type do
 
-               --  Treat each uppper-case letter as the start of a new word
+               --  Treat each upper-case letter as the start of a new word
 
                for C of N loop
                   case C is

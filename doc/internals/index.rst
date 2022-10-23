@@ -3,7 +3,7 @@ Internals
 *********
 
 This section describes various Langkit implementation details. It is intended
-for Langkit developpers.
+for Langkit developers.
 
 .. toctree::
     :maxdepth: 1

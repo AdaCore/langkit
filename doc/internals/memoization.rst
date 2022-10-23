@@ -60,7 +60,7 @@ call trees. Two kinds of side effects are automatically detected:
   returns True, which is saved for later calls, and most importantly, ``.solve``
   mutates ``Self.logic_var`` to contain the result of the equation resolution.
 
-  The second time ``p2` is called, ``p1`` is not evaluated, thanks to a
+  The second time ``p2`` is called, ``p1`` is not evaluated, thanks to a
   memoization hit, so ``.solve`` is not called, and thus ``Self.logic_var`` is
   left with whatever value it contains. So ``p2`` may return an obsolete value
   in this case.
@@ -109,7 +109,7 @@ Consider for instance the following example:
     @langkit_property(memoized=True)
     def p():
         return If(
-            Self.equtaion.solve,
+            Self.equation.solve,
             Self.logic_var.get_value,
             No(FooNode)
         )

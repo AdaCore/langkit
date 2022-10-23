@@ -6,7 +6,7 @@ with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
 --  Copy of the dyn_scheduling test. The interest is to see that debug
---  information in relation printing works correclty, i.e. that it is correctly
+--  information in relation printing works correctly, i.e. that it is correctly
 --  shown when printing a relation.
 
 procedure Main is

@@ -108,7 +108,7 @@ package body Langkit_Support.Bump_Ptr_Vectors is
       --  and that 2) the I index is inside this chunk, return the element
       --  corresponding to I.
    begin
-      --  As the size of chunks double for each appened chunk, the element we
+      --  As the size of chunks double for each appended chunk, the element we
       --  are looking for should be in the current chunk more than half of the
       --  times (assuming equiprobable accesses). So let's just check if it's
       --  the case.
