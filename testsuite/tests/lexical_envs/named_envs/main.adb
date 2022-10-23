@@ -123,7 +123,7 @@ procedure Main is
       end loop;
 
       --  Clear both analysis units for the next run. This is necessary to
-      --  exercize the full relocation cycle.
+      --  exercise the full relocation cycle.
       for UR in Unit_Ref loop
          Units (UR).Reparse (Buffer => "");
       end loop;

@@ -58,7 +58,7 @@ refine the property definition. For instance, the ``public`` boolean argument
 (false by default) makes it possible to make the property available to the
 users of the generated library.
 
-Reguarding user documentation, you can either pass a ``doc`` string argument to
+Regarding user documentation, you can either pass a ``doc`` string argument to
 ``Property`` or provide a docstring to the function under ``langkit_property``:
 it will be passed to code generation.
 

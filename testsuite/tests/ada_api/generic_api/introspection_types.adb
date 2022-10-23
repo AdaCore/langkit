@@ -24,7 +24,7 @@ procedure Introspection_Types is
    --  Print a section title
 
    procedure Put_Exc (Exc : Exception_Occurrence);
-   --  Print info about the given exception occurence
+   --  Print info about the given exception occurrence
 
    package Node_Type_Maps is new Langkit_Support.Names.Maps (Type_Ref);
    Node_Types : Node_Type_Maps.Map (Camel);

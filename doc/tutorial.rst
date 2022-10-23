@@ -241,7 +241,7 @@ right you have what should be done with it:
   emit the corresponding token kinds.
 
 * Then, the eight last ``Literal`` matchers act as the firsts
-  ``Literal`` ones and match language ponctuation and operators.
+  ``Literal`` ones and match language punctuation and operators.
 
 Only exact input strings trigger ``Literal`` matchers while the input is
 matched against a regular expression with ``Pattern`` matchers. Note that the

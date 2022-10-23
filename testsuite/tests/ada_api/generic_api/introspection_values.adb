@@ -21,7 +21,7 @@ procedure Introspection_Values is
    --  Print a section title
 
    procedure Put_Exc (Exc : Exception_Occurrence);
-   --  Print info about the given exception occurence
+   --  Print info about the given exception occurrence
 
    procedure Inspect (Value : Value_Ref);
    procedure Check_Match (Value : Value_Ref; T : Type_Ref);

@@ -128,7 +128,7 @@ package Langkit_Support.Adalog.Solver_Interface is
    function Combine
      (Self : Combiner_Type;
       Vals : Logic_Vars.Value_Array) return Value_Type is abstract;
-   --  Derived types must overide this to implement the value computation
+   --  Derived types must override this to implement the value computation
 
    function Combine_Wrapper
      (Self : in out Combiner_Type'Class;

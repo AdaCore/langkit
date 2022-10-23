@@ -49,7 +49,7 @@ package Langkit_Support.Diagnostics.Output is
       Style       : Diagnostic_Style := Default_Diagnostic_Style;
       Output_File : WWIO.File_Type := WWIO.Standard_Output);
    --  Pretty-print given diagnostic. Outputs the diagnostic on ``stdout`` in a
-   --  form that is developper friendly when used in a command line
+   --  form that is developer friendly when used in a command line
    --  application.
    --
    --  Error messages format supports backticked parts that should correspond

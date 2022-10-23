@@ -534,7 +534,7 @@ package Langkit_Support.Lexical_Envs_Impl is
       Categories : Ref_Categories := All_Cats;
    end record;
    --  Key in environment lookup caches. Basically the parameters for the Get
-   --  functiont that are relevant for caching.
+   --  functions that are relevant for caching.
 
    type Lookup_Cache_Entry_State is (Computing, Computed, None);
    --  Status of an entry in lexical environment lookup caches.

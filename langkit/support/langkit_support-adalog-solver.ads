@@ -151,8 +151,8 @@ package Langkit_Support.Adalog.Solver is
    function Create_All
      (Relations    : Relation_Array;
       Debug_String : String_Access := null) return Relation;
-   --  Create a relation that will solve successfully when all of the the
-   --  relations in ``Relations`` solves successfully.
+   --  Create a relation that will solve successfully when all of the
+   --  relations in ``Relations`` solve successfully.
 
    function Create_Or
      (L, R         : Relation;
@@ -267,7 +267,7 @@ private
    --  Atomic relations dependency graph --
    ----------------------------------------
 
-   --  This section defines operations to explore the depenency graph between
+   --  This section defines operations to explore the dependency graph between
    --  atomic relations. They are used to:
    --
    --  1. Sort a list of atomic relations topologically, so that they form an

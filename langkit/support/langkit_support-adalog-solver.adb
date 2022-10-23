@@ -803,9 +803,9 @@ package body Langkit_Support.Adalog.Solver is
 
       function Append_Definition (Var : Logic_Var) return Boolean;
       --  Try to append an atom that defines ``Var`` instead. This returns
-      --  False if there is no atom that defines ``Var`` or if dependency cyles
-      --  prevent us from appending a sequence of atoms to achieve that.
-      --  Otherwise (on success), return True.
+      --  False if there is no atom that defines ``Var`` or if dependency
+      --  cycles prevent us from appending a sequence of atoms to achieve
+      --  that. Otherwise (on success), return True.
 
       function Append_Definitions (Vars : Logic_Var_Vector) return Boolean;
       --  Likewise but try to append definitions for all the given variables.
@@ -2031,7 +2031,7 @@ package body Langkit_Support.Adalog.Solver is
       Ignore : Boolean;
 
       procedure Cleanup;
-      --  Cleanup helper to call before exitting Solve
+      --  Cleanup helper to call before exiting Solve
 
       -------------
       -- Cleanup --
@@ -2459,8 +2459,8 @@ package body Langkit_Support.Adalog.Solver is
       --  ``Atom.Target`` already has a value compatible with ``Val``, or if
       --  it had no value and the assignment succeeded.
       --
-      --  This assumes that ``Self`` is either an ``Assign`` or a `Propagate``
-      --  relation.
+      --  This assumes that ``Self`` is either an ``Assign`` or a
+      --  ``Propagate`` relation.
 
       procedure Get_Values (Vars : Logic_Var_Vector; Vals : out Value_Array);
       --  Assign to ``Vals`` the value of the variables in ``Vars``.

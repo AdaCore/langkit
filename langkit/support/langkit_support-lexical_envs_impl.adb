@@ -69,7 +69,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
    --  Shed env rebindings that are not in the parent chain for From_Env
 
    procedure Check_Rebindings_Unicity (Self : Env_Rebindings);
-   --  Perform a unicity check on the various rebindings in Self. In
+   --  Perform a uniqueness check on the various rebindings in Self. In
    --  particular, check that there are no two identical Old_Env and no two
    --  identical New_Env in the set of rebindings. If there are, raise a
    --  property error.
@@ -247,7 +247,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       --  Note: in this whole function, we take special care for empty
       --  environments: while these are represented using the ``Empty_Env``
-      --  constant through the whole codebase, here rules are sligtly twisted
+      --  constant through the whole codebase, here rules are slightly twisted
       --  for performance and appropriate cache invalidation (see documentation
       --  for the ``Env_Getter.Env`` field).
       --

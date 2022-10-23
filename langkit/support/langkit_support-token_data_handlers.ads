@@ -153,7 +153,7 @@ package Langkit_Support.Token_Data_Handlers is
       --  the first token, and so on.
 
       Symbols : Symbol_Table;
-      --  Symbol table for this handler. Note that this can be shared accross
+      --  Symbol table for this handler. Note that this can be shared across
       --  multiple Token_Data_Handlers.
 
       Lines_Starts : Index_Vectors.Vector;
@@ -208,7 +208,7 @@ package Langkit_Support.Token_Data_Handlers is
       with Pre  => Initialized (Source) and then not Initialized (Destination),
            Post => Initialized (Destination) and then not Initialized (Source);
    --  Move data from the Source handler to the Destination one. All data in
-   --  Destination is overriden, so call Free on it first. Source is reset to
+   --  Destination is overridden, so call Free on it first. Source is reset to
    --  null.
 
    function Get_Token

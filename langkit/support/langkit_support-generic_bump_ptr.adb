@@ -52,7 +52,7 @@ package body Langkit_Support.Generic_Bump_Ptr is
 
       --  Free every page allocated.
       --
-      --  TODO: Might be interresting at some point to keep a global cache of
+      --  TODO: Might be interesting at some point to keep a global cache of
       --  pages ourself, since we always use the same size.
 
       for PI in First_Index (Pool.Pages) .. Last_Index (Pool.Pages) loop

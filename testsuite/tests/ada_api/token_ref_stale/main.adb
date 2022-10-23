@@ -40,7 +40,7 @@ begin
    Put_Line ("main.adb: Running...");
 
    --  Create an analysis unit and get a reference to one of its tokens. Then
-   --  perform the only legitimate use of this token referenc.
+   --  perform the only legitimate use of this token reference.
 
    U := Create_Context.Get_From_Buffer
      (Filename => "foo.txt",
