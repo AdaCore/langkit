@@ -62,9 +62,9 @@ langkit_test:
      - mem:16
   stage: stage2
   rules:
-    # We are not interested in running tests in the scheduled CI that
-    # rebuilds the artifact
-    - if: $CI_PIPELINE_SOURCE == "schedule" && $SCHEDULED_CI_REBUILD_ARTIFACT
+    # We are not interested in running tests in CIs that just
+    # rebuild the artifact
+    - if: $CI_REBUILD_ARTIFACT
       when: never
     - when: always
   script:
@@ -108,7 +108,7 @@ libadalang_build_and_test:
   rules:
     # Same as above, no point in doing running if we only want
     # to rebuild the artifact
-    - if: $CI_PIPELINE_SOURCE == "schedule" && $SCHEDULED_CI_REBUILD_ARTIFACT
+    - if: $CI_REBUILD_ARTIFACT
       when: never
     - when: always      
   script:
