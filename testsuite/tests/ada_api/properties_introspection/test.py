@@ -85,6 +85,8 @@ class Number(Expr):
     )
     id_dflt_root_node = Property(lambda id=(T.FooNode, No(T.FooNode)): id,
                                  public=True)
+    id_dflt_derived_node = Property(lambda id=(T.Expr, No(T.Expr)): id,
+                                    public=True)
 
 
 class Ref(Expr):

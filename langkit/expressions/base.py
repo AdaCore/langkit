@@ -1908,10 +1908,8 @@ class NullExpr(BindableLiteralExpr):
         return 'None'
 
     def render_introspection_constant(self):
-        entity_type = (self.type
-                       if self.type.is_entity_type else
-                       self.type.entity)
-        return 'Create_Node ({})'.format(entity_type.nullexpr)
+        # Create_Node takes the internal root entity type
+        return 'Create_Node ({})'.format(T.root_node.entity.nullexpr)
 
 
 class UncheckedCastExpr(ResolvedExpression):
