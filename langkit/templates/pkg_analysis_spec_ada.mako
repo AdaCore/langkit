@@ -98,6 +98,15 @@ package ${ada_lib_name}.Analysis is
       ;
       % endif
       ${ada_doc(e.astnode, 6)}
+
+      % if e.is_root_type:
+      function Equals (L, R : ${e.api_name}) return Boolean;
+      --  Comparison function, meant to compare two nodes.
+      --
+      --  .. note: For complex reasons, we cannot expose this function as the
+      --     ``"="`` operator. This is the function you need to use as the
+      --     equality function for containers instantiations.
+      % endif
    % endfor
 
    % for e in ctx.entity_types:
