@@ -23,15 +23,21 @@ class Testcase:
     """
     File content to pass to the style checker.
 
-    For layout convenience, "content" is assumed to be a string whose first
-    line is empty. This first line is then stripped, as well as the maximum
-    common indentation. See "reindent_content".
+    For layout convenience: if ``reindent_content`` is True, "content" is
+    assumed to be a string whose first line is empty. This first line is then
+    stripped, as well as the maximum common indentation. See
+    "reindent_content".
     """
 
     records: List[Tuple[int, str]]
     """
     List of expected diagnostics from the style checker when working on
     ``content``.
+    """
+
+    reindent_content: bool = True
+    """
+    See ``content``.
     """
 
 
@@ -49,6 +55,13 @@ testcases = (
     Testcase('line_wrap_3.py', '''
         print("http://{}")
     '''.format('a' * 81), []),
+    Testcase("line_wrap_4.py", "", [], reindent_content=False),
+    Testcase(
+        "line_wrap_5.py",
+        "foo\nbar",
+        [(2, 0, "No newline at end of file")],
+        reindent_content=False,
+    ),
 
     #
     # ASCII testing
@@ -530,6 +543,8 @@ def reindent_content(tc):
             'Badly indented line {} for {}'.format(i, tc.filename)
         )
         result.append(line[len(indent):])
+    if result:
+        result.append("")
     return '\n'.join(result)
 
 
@@ -539,7 +554,7 @@ def create_testcase(tc):
     def test():
         # Pre-process content
         report = Report(enable_colors=False)
-        content = reindent_content(tc)
+        content = reindent_content(tc) if tc.reindent_content else tc.content
         check_file_content(report, tc.filename, content)
         records = [
             (tc.filename, ) + rec

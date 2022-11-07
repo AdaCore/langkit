@@ -325,6 +325,15 @@ def check_generic(report, filename, content, lang):
     :param LanguageChecker lang: language checker corresponding to "text".
     :param str content: Text on which the checks must be performed.
     """
+    if content and not content.endswith('\n'):
+        report.set_context(filename, 1 + content.count("\n"))
+        report.add(
+            "No newline at end of file",
+            filename=filename,
+            line=1 + content.count("\n"),
+            col=0,
+        )
+
     # Line list for the current block of comments
     comment_block = []
 
