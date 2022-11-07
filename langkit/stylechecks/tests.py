@@ -3,21 +3,36 @@ Nose-based testcases to make sure the stylechecker works as intended. It is
 also a way to make it explicit how it is intended to work...
 """
 
-from collections import namedtuple
+import dataclasses
 import os
+from typing import List, Tuple
 
 from langkit.stylechecks import Report, check_file_content
 
 
-# Type to instantiate for each testcase.
-#
-# "filename" and "content" are passed to the checkers as-is. "records" is a
-# list of (line no., text) for each expected emitted diagnostic.
-#
-# For layout convenience, "content" is assumed to be a string whose first line
-# is empty. This first line is then stripped, as well as the maximum common
-# indentation. See "reindent_content".
-Testcase = namedtuple('Testcase', 'filename content records')
+@dataclasses.dataclass
+class Testcase:
+    """Type to instantiate for each testcase."""
+
+    filename: str
+    """
+    Filename passed to the style checker.
+    """
+
+    content: str
+    """
+    File content to pass to the style checker.
+
+    For layout convenience, "content" is assumed to be a string whose first
+    line is empty. This first line is then stripped, as well as the maximum
+    common indentation. See "reindent_content".
+    """
+
+    records: List[Tuple[int, str]]
+    """
+    List of expected diagnostics from the style checker when working on
+    ``content``.
+    """
 
 
 testcases = (
