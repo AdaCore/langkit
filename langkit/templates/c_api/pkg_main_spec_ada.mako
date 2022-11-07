@@ -734,13 +734,6 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('token_is_equivalent')}";
    ${ada_c_doc('langkit.token_is_equivalent', 3)}
 
-   procedure ${capi.get_name('entity_image')}
-     (Ent : ${entity_type}_Ptr; Result : access ${text_type})
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('entity_image')}";
-   ${ada_c_doc('langkit.entity_image', 3)}
-
    ---------------------------------------
    -- Kind-specific AST node primitives --
    ---------------------------------------

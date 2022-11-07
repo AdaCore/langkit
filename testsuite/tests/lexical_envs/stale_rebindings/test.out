@@ -1,8 +1,8 @@
 main.py: Starting...
 original:
-   <Example foo1.txt:1:1-1:8>
+   <| Example foo1.txt:1:1-1:8 [foo2.txt:1:9] |>
 After U3 reload:
-   <Example foo1.txt:1:1-1:8>
+   <| Example foo1.txt:1:1-1:8 [foo2.txt:1:9] |>
 After U2 reload:
    got a StaleReferenceError: related unit was reparsed
 After U1 reload:

@@ -589,9 +589,6 @@ base_langkit_docs = {
     'langkit.node_image': """
         Return a representation of this node as a string.
     """,
-    'langkit.entity_image': """
-        Return a representation of this entity as a string.
-    """,
 
     'langkit.token_text': """
         Return the text of the given token.

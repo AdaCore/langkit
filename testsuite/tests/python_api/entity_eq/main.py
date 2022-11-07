@@ -28,7 +28,7 @@ for e1, e2 in [
     (rebound1, rebound2),
     (rebound1, rebound3),
 ]:
-    print('{} vs. {}'.format(e1.entity_repr, e2.entity_repr))
+    print('{} vs. {}'.format(e1, e2))
     print('  identity check:   {}'.format(e1 is e2))
     print('  equality check:   {}'.format(e1 == e2))
     print('  inequality check: {}'.format(e1 != e2))

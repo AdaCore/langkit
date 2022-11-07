@@ -1453,9 +1453,9 @@ class ${root_astnode_name}:
             else:
                 print('{}{}: {}'.format(indent, name, value), file=file)
 
-        erepr = self.entity_repr[1:-1]
+        node_repr = str(self)[1:-1]
         print('{}{}{}'.format(
-            indent, erepr,
+            indent, node_repr,
             ': {}'.format(self.text) if self.is_token_node else ''
         ), file=file)
         indent = indent + '|'
@@ -1547,13 +1547,6 @@ class ${root_astnode_name}:
 
     def __repr__(self) -> str:
         return self.image
-
-    @property
-    def entity_repr(self) -> str:
-        c_value = self._unwrap(self)
-        c_result = _text()
-        _entity_image(ctypes.byref(c_value), ctypes.byref(c_result))
-        return c_result._wrap()
 
     @property
     def tokens(self) -> Iterator[Token]:
@@ -2056,10 +2049,6 @@ _token_range_text = _import_func(
     "${capi.get_name('token_range_text')}",
     [Token._c_type, Token._c_type, ctypes.POINTER(_text)],
     ctypes.c_int
-)
-_entity_image = _import_func(
-    "${capi.get_name('entity_image')}",
-    [ctypes.POINTER(${c_entity}), ctypes.POINTER(_text)], None
 )
 
 

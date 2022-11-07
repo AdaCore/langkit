@@ -492,7 +492,7 @@ private package ${ada_lib_name}.Implementation is
 
    function Text_Image (Ent : ${T.entity.name}) return Text_Type;
    function Image (Ent : ${T.entity.name}) return String;
-   ${ada_doc('langkit.entity_image', 3)}
+   ${ada_doc('langkit.node_image', 3)}
 
    package Entity_Vars is new Langkit_Support.Adalog.Logic_Var
      (Value_Type => ${T.entity.name}, Value_Image => Image);

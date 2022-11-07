@@ -683,12 +683,6 @@ module CFunctions = struct
      @-> ptr ${ocaml_api.c_type(root_entity)}
      @-> raisable void)
 
-  let entity_image = foreign ~from:c_lib
-    "${capi.get_name('entity_image')}"
-    (ptr ${ocaml_api.c_type(root_entity)}
-     @-> ptr Text.c_type
-     @-> raisable void)
-
   let node_is_token_node = foreign ~from:c_lib
     "${capi.get_name('node_is_token_node')}"
     (ptr ${ocaml_api.c_type(root_entity)}
@@ -1121,12 +1115,6 @@ let ${ocaml_api.field_name(field)}
       c_result_ptr;
     !@ c_result_ptr
 
-  let entity_image node =
-    let c_result_ptr = allocate_n Text.c_type ~count:1 in
-    let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
-    CFunctions.entity_image (addr node_c_value) c_result_ptr;
-    !@ c_result_ptr
-
   let is_token_node node =
     let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
     CFunctions.node_is_token_node (addr node_c_value)
@@ -1323,7 +1311,7 @@ let ${ocaml_api.field_name(field)}
           Format.fprintf fmt "@ @[<v>%a@]"
             (Format.pp_print_list pp_node_field) l
     and pp_node fmt node =
-      let repr = entity_image node in
+      let repr = image node in
       let len = String.length repr in
       let erepr = String.sub repr 1 (len - 2) in
       Format.fprintf fmt "@[<v 2>%s%s%a@]"

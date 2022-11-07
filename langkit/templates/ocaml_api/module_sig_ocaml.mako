@@ -302,8 +302,6 @@ module ${ocaml_api.node_name(astnode)} : sig
 
   ${token_iterator.sig('[< {}]'.format(root_entity_type))}
 
-  val entity_image : [< ${root_entity_type} ] -> string
-
   val children_opt : [< ${root_entity_type} ] -> ${root_entity_type} option list
   (**
    * Return an optional list of nodes which are the children of the given node.

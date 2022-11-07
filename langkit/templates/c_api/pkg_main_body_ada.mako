@@ -619,7 +619,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
       declare
-         Img : constant Text_Type := Short_Text_Image (Node.Node);
+         Img : constant Text_Type := Text_Image (Node.all);
       begin
          Result.all := Wrap_Alloc (Img);
       end;
@@ -950,20 +950,6 @@ package body ${ada_lib_name}.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end;
-
-   procedure ${capi.get_name('entity_image')}
-     (Ent : ${entity_type}_Ptr; Result : access ${text_type}) is
-   begin
-      Clear_Last_Exception;
-      declare
-         Img : constant Text_Type := Text_Image (Ent.all);
-      begin
-         Result.all := Wrap_Alloc (Img);
-      end;
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
    end;
 
    ----------------

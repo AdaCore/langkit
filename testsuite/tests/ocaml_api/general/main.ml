@@ -32,7 +32,7 @@ let pp_image_opt fmt = function
 
 let pp_text fmt node = Format.pp_print_string fmt (FooNode.text node)
 
-let pp_entity fmt node = Format.pp_print_string fmt (FooNode.entity_image node)
+let pp_entity fmt node = Format.pp_print_string fmt (FooNode.image node)
 
 let value_exn = function
   | Some x ->
