@@ -621,7 +621,10 @@ package body ${ada_lib_name}.Implementation is
       end if;
 
       if Context.Event_Handler /= null then
-         Context.Event_Handler.Unit_Parsed_Callback (Context, Unit, Reparse);
+         Context.Event_Handler.Unit_Parsed_Callback
+           (Context  => Context,
+            Unit     => Unit,
+            Reparsed => not Created and then Reparse);
       end if;
 
       return Unit;
