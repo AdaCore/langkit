@@ -4,7 +4,7 @@ main.adb: Starting...
 
 MyEH: Unit_Parsed_Callback
   Unit: <AnalysisUnit main.txt>
-  Reparsed: TRUE
+  Reparsed: FALSE
 
 MyEH: Unit_Parsed_Callback
   Unit: <AnalysisUnit main.txt>
