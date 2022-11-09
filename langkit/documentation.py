@@ -328,6 +328,9 @@ base_langkit_docs = {
         that corresponds to a unit reference during semantic analysis. If
         it is ``${null}``, the default one is used instead.
 
+        If provided, ``Event_Handler`` will be notified when various events
+        happen.
+
         ``Tab_Stop`` is a positive number to describe the effect of tabulation
         characters on the column number in source files.
     """,
