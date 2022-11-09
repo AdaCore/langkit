@@ -1,0 +1,36 @@
+main.c: Starting...
+
+== unit parsed ==
+
+MyEH: eh_unit_requested
+  unit: <AnalysisUnit main.txt>
+  reparsed: 0
+
+MyEH: eh_unit_requested
+  unit: <AnalysisUnit main.txt>
+  reparsed: 1
+
+== unit requested ==
+
+MyEH: eh_unit_requested
+  name: "foo_1"
+  from: <AnalysisUnit main.txt>
+  found: 1
+  is_not_found_error: 0
+
+MyEH: eh_unit_requested
+  name: "foo_2"
+  from: <AnalysisUnit main.txt>
+  found: 0
+  is_not_found_error: 0
+
+MyEH: eh_unit_requested
+  name: "foo_2"
+  from: <AnalysisUnit main.txt>
+  found: 0
+  is_not_found_error: 1
+
+MyEH: eh_destroy
+
+main.c: Done.
+Done
