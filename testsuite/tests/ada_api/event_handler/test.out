@@ -1,14 +1,36 @@
 main.adb: Starting...
-In Event_Handler.Unit_Parsed_Callback
-Success: "example # This is an actual file\x0a"
 
-Out of Event_Handler.Unit_Parsed_Callback
-In Event_Handler.Unit_Parsed_Callback
-Success: "example # This is an actual file\x0a"
+== unit parsed ==
 
-Out of Event_Handler.Unit_Parsed_Callback
-In Event_Handler.Unit_Requested_Callback
-Name: pouet, From: direct-ok.txt, Found: TRUE
+MyEH: Unit_Parsed_Callback
+  Unit: <AnalysisUnit main.txt>
+  Reparsed: TRUE
+
+MyEH: Unit_Parsed_Callback
+  Unit: <AnalysisUnit main.txt>
+  Reparsed: TRUE
+
+== unit requested ==
+
+MyEH: Unit_Requested_Callback
+  Name: foo_1
+  From: <AnalysisUnit main.txt>
+  Found: TRUE
+  Is_Not_Found_Error: FALSE
+
+MyEH: Unit_Requested_Callback
+  Name: foo_2
+  From: <AnalysisUnit main.txt>
+  Found: FALSE
+  Is_Not_Found_Error: FALSE
+
+MyEH: Unit_Requested_Callback
+  Name: foo_3
+  From: <AnalysisUnit main.txt>
+  Found: FALSE
+  Is_Not_Found_Error: TRUE
+
 main.adb: Done.
-In Event_Handler.Release
+MyEH: Release
+
 Done

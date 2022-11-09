@@ -1,10 +1,14 @@
-with Langkit_Support.Text;         use Langkit_Support.Text;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 
 package Support is
+
    type Event_Handler is new Libfoolang.Analysis.Event_Handler_Interface
    with record
-      null;
+      Label : Unbounded_String;
    end record;
 
    overriding procedure Unit_Requested_Callback
@@ -23,5 +27,9 @@ package Support is
 
    overriding procedure Release (Self : in out Event_Handler);
 
-   procedure Dump (Unit : Analysis_Unit);
+   function Create_Event_Handler
+     (Label : String) return Event_Handler_Reference;
+
+   procedure Log (Self : Event_Handler; Subp : String);
+
 end Support;
