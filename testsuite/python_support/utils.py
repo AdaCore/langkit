@@ -15,6 +15,7 @@ from drivers.valgrind import valgrind_cmd
 
 
 python_support_dir = P.dirname(P.abspath(__file__))
+c_support_dir = P.join(python_support_dir, "..", "c_support")
 
 
 Diagnostics.blacklisted_paths.append(python_support_dir)
@@ -34,7 +35,7 @@ with "libfoolang";
 
 project Gen is
     for Languages use ({languages});
-    for Source_Dirs use (".");
+    for Source_Dirs use ({source_dirs});
     for Object_Dir use "obj";
     for Main use ({main_sources});
 
@@ -408,15 +409,22 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             ada_main = [ada_main]
 
         langs = ["Ada"]
+        source_dirs = ["."]
         if with_c:
             langs.append("C")
+            source_dirs.append(c_support_dir)
 
         # Generate a project file to build the given Ada main and then run
         # the program. Do a static build to improve the debugging experience.
         with open('gen.gpr', 'w') as f:
+
+            def fmt_str_list(strings: List[str]) -> str:
+                return ", ".join(f'"{s}"' for s in strings)
+
             f.write(project_template.format(
-                languages=", ".join(f'"{l}"' for l in langs),
-                main_sources=', '.join('"{}"'.format(m) for m in ada_main),
+                languages=fmt_str_list(langs),
+                source_dirs=fmt_str_list(source_dirs),
+                main_sources=fmt_str_list(ada_main),
             ))
         run('gprbuild', '-Pgen', '-q', '-p',
             '-XLIBRARY_TYPE=static',
