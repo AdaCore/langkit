@@ -2,7 +2,8 @@
 Check that the file reader APIs work as expected.
 """
 
-from langkit.dsl import ASTNode, AnalysisUnit, Symbol
+from langkit.compiled_types import T
+from langkit.dsl import ASTNode
 from langkit.expressions import langkit_property
 
 from utils import build_and_run
@@ -11,13 +12,13 @@ from utils import build_and_run
 class FooNode(ASTNode):
 
     @langkit_property(
-        return_type=AnalysisUnit,
+        return_type=T.Bool,
         external=True,
         uses_entity_info=False,
         uses_envs=False,
         public=True
     )
-    def get_unit(name=Symbol):
+    def trigger_unit_requested(name=T.Symbol, found=T.Bool, error=T.Bool):
         pass
 
 

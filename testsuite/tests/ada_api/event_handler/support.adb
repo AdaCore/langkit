@@ -3,6 +3,19 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 package body Support is
 
+   function Image (Unit : Analysis_Unit'Class) return String
+   is ("<AnalysisUnit " & Ada.Directories.Simple_Name (Unit.Get_Filename)
+       & ">");
+
+   ---------
+   -- Log --
+   ---------
+
+   procedure Log (Self : Event_Handler; Subp : String) is
+   begin
+      Put_Line (To_String (Self.Label) & ": " & Subp);
+   end Log;
+
    -----------------------------
    -- Unit_Requested_Callback --
    -----------------------------
@@ -13,13 +26,14 @@ package body Support is
       Name               : Text_Type;
       From               : Analysis_Unit'Class;
       Found              : Boolean;
-      Is_Not_Found_Error : Boolean)
-   is
+      Is_Not_Found_Error : Boolean) is
    begin
-      Put_Line ("In Event_Handler.Unit_Requested_Callback");
-      Put_Line ("Name: " & Image (Name) & ", From: "
-                & Ada.Directories.Simple_Name (From.Get_Filename)
-                &  ", Found: " & Found'Image);
+      Log (Self, "Unit_Requested_Callback");
+      Put_Line ("  Name: " & Image (Name));
+      Put_Line ("  From: " & Image (From));
+      Put_Line ("  Found: " & Found'Image);
+      Put_Line ("  Is_Not_Found_Error: " & Is_Not_Found_Error'Image);
+      New_Line;
    end Unit_Requested_Callback;
 
    --------------------------
@@ -30,14 +44,12 @@ package body Support is
      (Self     : in out Event_Handler;
       Context  : Analysis_Context'Class;
       Unit     : Analysis_Unit'Class;
-      Reparsed : Boolean)
-   is
+      Reparsed : Boolean) is
    begin
-      Put_Line ("In Event_Handler.Unit_Parsed_Callback");
-
-      Dump (Analysis_Unit (Unit));
-
-      Put_Line ("Out of Event_Handler.Unit_Parsed_Callback");
+      Log (Self, "Unit_Parsed_Callback");
+      Put_Line ("  Unit: " & Image (Unit));
+      Put_Line ("  Reparsed: " & Reparsed'Image);
+      New_Line;
    end Unit_Parsed_Callback;
 
    -------------
@@ -46,24 +58,19 @@ package body Support is
 
    overriding procedure Release (Self : in out Event_Handler) is
    begin
-      Put_Line ("In Event_Handler.Release");
+      Log (Self, "Release");
+      New_Line;
    end Release;
 
-   ----------
-   -- Dump --
-   ----------
+   --------------------------
+   -- Create_Event_Handler --
+   --------------------------
 
-   procedure Dump (Unit : Analysis_Unit) is
+   function Create_Event_Handler
+     (Label : String) return Event_Handler_Reference is
    begin
-      if Unit.Has_Diagnostics then
-         Put_Line ("Errors:");
-         for D of Unit.Diagnostics loop
-            Put_Line ("  " & Unit.Format_GNU_Diagnostic (D));
-         end loop;
-      else
-         Put_Line ("Success: " & Image (Unit.Text, With_Quotes => True));
-      end if;
-      New_Line;
-   end Dump;
+      return Create_Event_Handler_Reference
+        (Event_Handler'(Label => To_Unbounded_String (Label)));
+   end Create_Event_Handler;
 
 end Support;
