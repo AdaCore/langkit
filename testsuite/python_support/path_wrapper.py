@@ -26,8 +26,10 @@ if hasattr(os, "add_dll_directory"):
         if os.path.exists(d):
             os.add_dll_directory(d)
 
-# Now run the script passed as argument
-script = sys.argv[1]
+# Now run the script passed as argument. Remove "path_wrapper.py" from the list
+# of arguments so that the wrapped script sees "sys.argv" as if it was run
+# directly.
+script = sys.argv.pop(1)
 sys.path.insert(0, os.path.dirname(script))
 with open(script, "rb") as f:
     code = f.read()
