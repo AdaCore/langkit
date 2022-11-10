@@ -1,4 +1,5 @@
 import dataclasses
+import os.path
 import subprocess
 import sys
 from typing import List, Type
@@ -28,6 +29,15 @@ class WithDefaultFiles(BasicApp):
         return ["input1", "input2"]
 
 
+class WithEventHandler(BasicApp):
+    class MyEH(libfoolang.EventHandler):
+        def unit_parsed_callback(self, context, unit, reparsed):
+            print(f"> unit {os.path.basename(unit.filename)} parsed")
+
+    def create_event_handler(self):
+        return WithEventHandler.MyEH()
+
+
 tests = [
     # Check the interaction between the "default_get_files" method and source
     # files passed on the command line.
@@ -35,6 +45,9 @@ tests = [
     Testcase("nodefaults_args", BasicApp, ["input3"]),
     Testcase("defaults_noargs", WithDefaultFiles, []),
     Testcase("defaults_args", WithDefaultFiles, ["input3"]),
+
+    # Check that the "create_event_handler" method is used as expected
+    Testcase("event_handler", WithEventHandler, ["input1", "input2"]),
 ]
 
 
