@@ -203,7 +203,7 @@ ${iterator_types.incomplete_decl(T.entity.iterator)}
 ${c_doc('langkit.event_handler_type')}
 typedef void *${event_handler_type};
 
-${c_doc('langkit.event_handler_unit_requested_type')}
+${c_doc('langkit.event_handler_unit_requested_callback')}
 typedef void (*${event_handler_unit_requested_type})(
    void *data,
    ${analysis_context_type} context,
@@ -213,10 +213,10 @@ typedef void (*${event_handler_unit_requested_type})(
    ${bool_type} is_not_found_error
 );
 
-${c_doc('langkit.event_handler_destroy_type')}
+${c_doc('langkit.event_handler_destroy_callback')}
 typedef void (*${event_handler_destroy_type})(void *data);
 
-${c_doc('langkit.event_handler_unit_parsed_type')}
+${c_doc('langkit.event_handler_unit_parsed_callback')}
 typedef void (*${event_handler_unit_parsed_type})(
    void *data,
    ${analysis_context_type} context,

@@ -769,30 +769,32 @@ base_langkit_docs = {
     'langkit.event_handler_type': """
         Interface to handle events sent by the analysis context.
     """,
-    'langkit.event_handler_unit_requested_type': """
-        Callback type for functions that are called when a unit is requested.
+    'langkit.event_handler_unit_requested_callback': """
+        Callback that will be called when a unit is requested from the context
+        ``Context``.
 
-        ``name`` is the name of the requested unit.
+        ``Name`` is the name of the requested unit.
 
-        ``from`` is the unit from which the unit was requested.
+        ``From`` is the unit from which the unit was requested.
 
-        ``found`` indicates whether the requested unit was found or not.
+        ``Found`` indicates whether the requested unit was found or not.
 
-        ``is_not_found_error`` indicates whether the fact that the unit was not
+        ``Is_Not_Found_Error`` indicates whether the fact that the unit was not
         found is an error or not.
 
         .. warning:: The interface of this callback is probably subject to
             change, so should be treated as experimental.
     """,
-    'langkit.event_handler_unit_parsed_type': """
-        Callback type for functions that are called when a unit is parsed.
+    'langkit.event_handler_unit_parsed_callback': """
+        Callback that will be called when any unit is parsed from the context
+        ``Context``.
 
-        ``unit`` is the resulting unit.
+        ``Unit`` is the resulting unit.
 
-        ``reparsed`` indicates whether the unit was reparsed, or whether it was
+        ``Reparsed`` indicates whether the unit was reparsed, or whether it was
         the first parse.
     """,
-    'langkit.event_handler_destroy_type': """
+    'langkit.event_handler_destroy_callback': """
         Callback type for functions that are called when destroying an event
         handler.
     """,

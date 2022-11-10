@@ -152,30 +152,14 @@ package ${ada_lib_name}.Analysis is
       From               : Analysis_Unit'Class;
       Found              : Boolean;
       Is_Not_Found_Error : Boolean) is null;
-   --  Callback that will be called when a unit is requested from the context
-   --  ``Context``.
-   --
-   --  ``Name`` is the name of the requested unit.
-   --
-   --  ``From`` is the unit from which the unit was requested.
-   --
-   --  ``Found`` indicates whether the requested unit was found or not.
-   --
-   --  ``Is_Not_Found_Error`` indicates whether the fact that the unit was not
-   --  found is an error or not.
+   ${ada_doc('langkit.event_handler_unit_requested_callback', 3)}
 
    procedure Unit_Parsed_Callback
      (Self     : in out Event_Handler_Interface;
       Context  : Analysis_Context'Class;
       Unit     : Analysis_Unit'Class;
       Reparsed : Boolean) is null;
-   --  Callback that will be called when any unit is parsed from the context
-   --  ``Context``.
-   --
-   --  ``Unit`` is the resulting unit.
-   --
-   --  ``Reparsed`` indicates whether the unit was reparsed, or whether it was
-   --  the first parse.
+   ${ada_doc('langkit.event_handler_unit_parsed_callback', 3)}
 
    procedure Release (Self : in out Event_Handler_Interface) is abstract;
    --  Actions to perform when releasing resources associated to Self
