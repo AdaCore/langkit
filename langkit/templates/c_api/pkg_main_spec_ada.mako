@@ -210,12 +210,12 @@ private package ${ada_lib_name}.Implementation.C is
    type ${event_handler_unit_requested_type} is access procedure
      (Data               : System.Address;
       Context            : ${analysis_context_type};
-      Name               : ${text_type};
+      Name               : access constant ${text_type};
       From               : ${analysis_unit_type};
       Found              : ${bool_type};
       Is_Not_Found_Error : ${bool_type})
       with Convention => C;
-   ${ada_c_doc('langkit.event_handler_unit_requested_type', 3)}
+   ${ada_c_doc('langkit.event_handler_unit_requested_callback', 3)}
 
    type ${event_handler_unit_parsed_type} is access procedure
      (Data     : System.Address;
@@ -223,12 +223,12 @@ private package ${ada_lib_name}.Implementation.C is
       Unit     : ${analysis_unit_type};
       Reparsed : ${bool_type})
       with Convention => C;
-   ${ada_c_doc('langkit.event_handler_unit_parsed_type', 3)}
+   ${ada_c_doc('langkit.event_handler_unit_parsed_callback', 3)}
 
    type ${event_handler_destroy_type} is access procedure
      (Data : System.Address)
       with Convention => C;
-   ${ada_c_doc('langkit.event_handler_destroy_type', 3)}
+   ${ada_c_doc('langkit.event_handler_destroy_callback', 3)}
 
    --------------------
    -- Unit providers --

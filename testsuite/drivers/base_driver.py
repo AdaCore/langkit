@@ -36,12 +36,18 @@ class BaseDriver(DiffTestDriver):
 
     @property
     def output_refiners(self):
-        # RA22-015: Line numbers for Python DSL diagnostics vary depending on
-        # Python versions, so hide actual line numbers.
         return super().output_refiners + [
+            # RA22-015: Line numbers for Python DSL diagnostics vary depending
+            # on Python versions, so hide actual line numbers.
             PatternSubstitute(r' line \d+, ', ' line XXX, '),
             PatternSubstitute(r'test\.py:\d+\:', 'test.py:XXX:'),
             PatternSubstitute(r'at test\.py:\d+', 'at test.py:XXX'),
+
+            # Also hide platform-spefici details from Python traceback
+            PatternSubstitute(
+                r'File "[^"]*[/\\]([^"/\\]+)"',
+                r'File ".../\1"',
+            ),
         ]
 
     def read_file(self, filename):

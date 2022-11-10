@@ -1366,13 +1366,13 @@ package body ${ada_lib_name}.Implementation.C is
       Found              : Boolean;
       Is_Not_Found_Error : Boolean)
    is
-      Name_Access : constant Text_Cst_Access
-        := Name'Unrestricted_Access;
+      Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
+      C_Name      : aliased constant ${text_type} := Wrap (Name_Access);
    begin
       Self.Unit_Requested_Func
         (Self.Data,
          Context,
-         Wrap (Name_Access),
+         C_Name'Access,
          From,
          (if Found then 1 else 0),
          (if Is_Not_Found_Error then 1 else 0));

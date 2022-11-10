@@ -33,9 +33,10 @@ import io
 import json
 import os
 import sys
+import traceback
 from typing import (
     Any, AnyStr, Callable, ClassVar, Dict, Generic, IO, Iterator, List,
-    Optional as Opt, TYPE_CHECKING, Tuple, Type, TypeVar, Union
+    Optional as Opt, Protocol, TYPE_CHECKING, Tuple, Type, TypeVar, Union
 )
 import weakref
 
@@ -152,6 +153,17 @@ def _raise_type_error(expected_type_name: str, actual_value: Any) -> Any:
     raise TypeError('{} instance expected, got {} instead'.format(
         expected_type_name, _type_fullname(type(actual_value))
     ))
+
+
+def _log_uncaught_error(context):
+    """
+    Log an uncaught exception on stderr.
+
+    Useful to warn users about an exception that occurs in a Python function
+    used as a C callback: we cannot let the exception propagate in this case.
+    """
+    print(f"Uncaught exception in {context}:", file=sys.stderr)
+    traceback.print_exc()
 
 
 _get_last_exception = _import_func(
@@ -485,6 +497,107 @@ _unit_provider = _hashable_c_pointer()
 _event_handler = _hashable_c_pointer()
 
 
+class _EventHandlerWrapper:
+    """
+    Wrapper for EventHandler instances, responsible to create the low-level
+    event handler value and hold its callbacks.
+    """
+
+    __slots__ = (
+        "event_handler",
+        "c_value",
+        "destroy_callback",
+        "unit_requested_callback",
+        "unit_parsed_callback",
+    )
+
+    def __init__(self, event_handler: EventHandler):
+        self.event_handler = event_handler
+
+        # Create the C callbacks (wrappers around the _EventHandlerWrapper
+        # static method) and keep references to them in "self" so that they
+        # survive at least as long as "self".
+        self.destroy_callback = _event_handler_destroy_func(
+            _EventHandlerWrapper.destroy_func
+        )
+        self.unit_requested_callback = _event_handler_unit_requested_func(
+            _EventHandlerWrapper.unit_requested_func
+        )
+        self.unit_parsed_callback = _event_handler_unit_parsed_func(
+            _EventHandlerWrapper.unit_parsed_func
+        )
+
+        # Create the C-level event handler, which keeps a reference to "self"
+        # and uses _EventHandlerWrapper's static methods as callbacks.
+        self.c_value = _create_event_handler(
+            ctypes.py_object(self),
+            self.destroy_callback,
+            self.unit_requested_callback,
+            self.unit_parsed_callback,
+        )
+
+    def __del__(self) -> None:
+        _dec_ref_event_handler(self.c_value)
+        self.c_value = None
+
+    @classmethod
+    def create(
+        cls,
+        event_handler: Opt[EventHandler]
+    ) -> Tuple[Opt[_EventHandlerWrapper], Opt[object]]:
+        """
+        Helper to wrap an EventHandler instance. Return also the C value that
+        is created for that event handler. For convenience, just return None
+        for both if ``event_handler`` is None.
+        """
+        if event_handler is None:
+            return None, None
+        else:
+            eh = cls(event_handler)
+            return eh, eh.c_value
+
+    @staticmethod
+    def destroy_func(self: _EventHandlerWrapper) -> None:
+        pass
+
+    @staticmethod
+    def unit_requested_func(self: _EventHandlerWrapper,
+                            context: object,
+                            name: _text,
+                            from_unit: object,
+                            found: ctypes.c_uint8,
+                            is_not_found_error: ctypes.c_uint8) -> None:
+        py_context = AnalysisContext._wrap(context)
+        py_name = name.contents._wrap()
+        py_from_unit = AnalysisUnit._wrap(from_unit)
+        try:
+            self.event_handler.unit_requested_callback(
+                py_context,
+                py_name,
+                py_from_unit,
+                bool(found),
+                bool(is_not_found_error),
+            )
+        except BaseException as exc:
+            _log_uncaught_error("EventHandler.unit_requested_callback")
+
+    @staticmethod
+    def unit_parsed_func(self: _EventHandlerWrapper,
+                         context: object,
+                         unit: object,
+                         reparsed: ctypes.c_uint8) -> None:
+        py_context = AnalysisContext._wrap(context)
+        py_unit = AnalysisUnit._wrap(unit)
+        try:
+            self.event_handler.unit_parsed_callback(
+                py_context,
+                py_unit,
+                bool(reparsed),
+            )
+        except BaseException as exc:
+            _log_uncaught_error("EventHandler.unit_parsed_callback")
+
+
 def _canonicalize_buffer(buffer: AnyStr,
                          charset: Opt[bytes]) -> Tuple[bytes, Opt[bytes]]:
     """Canonicalize source buffers to be bytes buffers."""
@@ -521,11 +634,31 @@ ${exts.include_extension(
 )}
 
 
+class EventHandler(Protocol):
+    ${py_doc('langkit.event_handler_type', 4)}
+
+    def unit_requested_callback(self,
+                                context: AnalysisContext,
+                                name: str,
+                                from_unit: AnalysisUnit,
+                                found: bool,
+                                is_not_found_error: bool) -> None:
+        ${py_doc('langkit.event_handler_unit_requested_callback', 8)}
+        pass
+
+    def unit_parsed_callback(self,
+                             context: AnalysisContext,
+                             unit: AnalysisUnit,
+                             reparsed: bool) -> None:
+        ${py_doc('langkit.event_handler_unit_parsed_callback', 8)}
+        pass
+
+
 class AnalysisContext:
     ${py_doc('langkit.analysis_context_type', 4)}
 
-    __slots__ = ('_c_value', '_unit_provider', '_serial_number', '_unit_cache',
-                 '__weakref__')
+    __slots__ = ('_c_value', '_unit_provider', '_event_handler_wrapper',
+                 '_serial_number', '_unit_cache', '__weakref__')
 
     _context_cache: weakref.WeakValueDictionary[Any, AnalysisContext] = (
         weakref.WeakValueDictionary()
@@ -543,6 +676,7 @@ class AnalysisContext:
                  charset: Opt[str] = None,
                  file_reader: Opt[FileReader] = None,
                  unit_provider: Opt[UnitProvider] = None,
+                 event_handler: Opt[EventHandler] = None,
                  with_trivia: bool = True,
                  tab_stop: int = ${ctx.default_tab_stop},
                  *,
@@ -560,11 +694,14 @@ class AnalysisContext:
                     'Invalid tab_stop (positive integer expected)')
             c_file_reader = file_reader._c_value if file_reader else None
             c_unit_provider = unit_provider._c_value if unit_provider else None
+            self._event_handler_wrapper, c_event_handler = (
+                _EventHandlerWrapper.create(event_handler)
+            )
             self._c_value = _create_analysis_context(
                 _charset,
                 c_file_reader,
                 c_unit_provider,
-                None, # TODO: bind the event handler API to Python
+                c_event_handler,
                 with_trivia,
                 tab_stop
             )
@@ -2018,6 +2155,38 @@ _dec_ref_file_reader = _import_func(
 ${exts.include_extension(
    ctx.ext('python_api', 'file_readers', 'low_level_bindings')
 )}
+
+# Event handlers
+_event_handler_destroy_func = ctypes.CFUNCTYPE(None, ctypes.py_object)
+_event_handler_unit_requested_func = ctypes.CFUNCTYPE(
+    None,
+    ctypes.py_object,        # data
+    AnalysisContext._c_type, # context
+    ctypes.POINTER(_text),   # name
+    AnalysisUnit._c_type,    # from
+    ctypes.c_uint8,          # found
+    ctypes.c_uint8,          # is_not_found_error
+)
+_event_handler_unit_parsed_func = ctypes.CFUNCTYPE(
+    None,
+    ctypes.py_object,        # data
+    AnalysisContext._c_type, # context
+    AnalysisUnit._c_type,    # unit
+    ctypes.c_uint8,          # reparsed
+)
+_create_event_handler = _import_func(
+    '${capi.get_name("create_event_handler")}',
+    [
+        ctypes.py_object,
+        _event_handler_destroy_func,
+        _event_handler_unit_requested_func,
+        _event_handler_unit_parsed_func,
+    ],
+    _event_handler,
+)
+_dec_ref_event_handler = _import_func(
+    '${capi.get_name("dec_ref_event_handler")}', [_event_handler], None
+)
 
 # Unit providers
 _dec_ref_unit_provider = _import_func(
