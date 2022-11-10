@@ -1,5 +1,5 @@
 """
-Test python App class.
+Test the App class.
 """
 
 from langkit.dsl import ASTNode
