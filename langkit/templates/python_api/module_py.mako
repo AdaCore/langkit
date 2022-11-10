@@ -2372,8 +2372,10 @@ class App:
         self.args = self.parser.parse_args(args)
 
         self.ctx = AnalysisContext(
-            'utf-8', with_trivia=True,
-            unit_provider=self.create_unit_provider()
+            charset='utf-8',
+            unit_provider=self.create_unit_provider(),
+            event_handler=self.create_event_handler(),
+            with_trivia=True,
         )
 
         files = self.args.files
@@ -2406,6 +2408,13 @@ class App:
         """
         Hook for subclasses to return a custom unit provider.
         Default implementation returns None.
+        """
+        return None
+
+    def create_event_handler(self) -> Opt[EventHandler]:
+        """
+        Hook for subclasses to return a custom event handler. Default
+        implementation returns None.
         """
         return None
 

@@ -16,5 +16,13 @@ Example input2:1:1-1:8: example
 
 Example input3:1:1-1:8: example
 
+== event_handler ==
+
+> unit input1 parsed
+> unit input2 parsed
+Example input1:1:1-1:8: example
+
+Example input2:1:1-1:8: example
+
 main.py: Done.
 Done
