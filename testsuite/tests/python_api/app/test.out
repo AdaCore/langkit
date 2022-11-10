@@ -1,13 +1,20 @@
-Running App1
-Example input1:1:1-1:8: example
-Example input2:1:1-1:8: example
+main.py: Starting...
+
+== nodefaults_noargs ==
+
+== nodefaults_args ==
+
 Example input3:1:1-1:8: example
 
-Running App2
+== defaults_noargs ==
+
 Example input1:1:1-1:8: example
+
 Example input2:1:1-1:8: example
+
+== defaults_args ==
+
 Example input3:1:1-1:8: example
 
-Running App3
-
+main.py: Done.
 Done
