@@ -137,6 +137,14 @@ module UnitProvider : sig
   )}
 end
 
+module FileReader : sig
+  type t
+end
+
+${exts.include_extension(
+   ctx.ext('ocaml_api', 'module_sig')
+)}
+
 type analysis_context
 
 and ${ocaml_api.type_public_name(T.AnalysisUnit)}
@@ -201,6 +209,7 @@ module AnalysisContext : sig
     -> ?with_trivia:bool
     -> ?tab_stop:int
     -> ?unit_provider:UnitProvider.t
+    -> ?file_reader:FileReader.t
     -> unit
     -> t
   ${ocaml_doc('langkit.create_context', 1)}

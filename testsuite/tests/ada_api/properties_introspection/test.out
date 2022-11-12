@@ -315,6 +315,12 @@ Properties for FOO_NUMBER:
       id: FooNode := None
 
 
+   p_id_dflt_derived_node
+   return type: Expr
+   arguments:
+      id: Expr := None
+
+
 
 Properties for FOO_REF:
    p_id_bool

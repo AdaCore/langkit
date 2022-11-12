@@ -16,6 +16,18 @@ with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 
 package body Langkit_Support.File_Readers is
 
+   ----------------------------------
+   -- Create_Decoded_File_Contents --
+   ----------------------------------
+
+   function Create_Decoded_File_Contents
+     (Buffer : Text_Type) return Decoded_File_Contents is
+   begin
+      return (Buffer => new Text_Type'(Buffer),
+              First  => Buffer'First,
+              Last   => Buffer'Last);
+   end Create_Decoded_File_Contents;
+
    -------------------
    -- Decode_Buffer --
    -------------------
@@ -92,6 +104,7 @@ package body Langkit_Support.File_Readers is
       exception
          when Unsupported_Conversion =>
             Free (Result);
+            Contents := Create_Decoded_File_Contents ("");
             Append
               (Diagnostics,
                Message => To_Text ("Unknown charset """ & Charset & """"));
@@ -167,6 +180,7 @@ package body Langkit_Support.File_Readers is
                --  diagnostic.
 
                Free (Result);
+               Contents := Create_Decoded_File_Contents ("");
                Append
                  (Diagnostics,
                   Make_Range (Sloc, Sloc),
@@ -207,6 +221,7 @@ package body Langkit_Support.File_Readers is
          File := Open_Read (Filename);
       exception
          when Exc : Ada.IO_Exceptions.Name_Error =>
+            Contents := Create_Decoded_File_Contents ("");
             Append (Diagnostics, Exc => Exc);
             return;
       end;

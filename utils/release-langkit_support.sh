@@ -2,7 +2,7 @@
 
 set -e
 
-RELEASE=22.0.0
+RELEASE=23.0.0
 SRC_PKG=/tmp/langkit_support-$RELEASE.tar.gz
 
 # Make sure the appropriate Langkit sources are checked out in
@@ -15,7 +15,7 @@ rm -rf $BUILD_DIR
 
 # Generate "langkit_support.gpr", move it to the top directory and import
 # sources. Then adjust source/object/library dirs.
-cp -ar $SRC_DIR/support/ $BUILD_DIR
+cp -ar $SRC_DIR/langkit/support/ $BUILD_DIR
 rm -rf $BUILD_DIR/obj
 rm -rf $BUILD_DIR/lib
 

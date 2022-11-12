@@ -1,11 +1,12 @@
 # This bit is used to make sure we don't run too many pipelines:
-# run on a triggered pipeline, on a merge request, or on a push to a branch,
+# run on a triggered or scheduled pipeline, on a merge request, or on a push to a branch,
 # but do not run in reaction to a push to a branch if there is also
 # a merge request for it.
 workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
       when: never
     - if: '$CI_COMMIT_BRANCH'
@@ -19,7 +20,8 @@ variables:
 
 stages:
   - stage1  # langkit_build
-  - stage2  # langkit_test,  libadalang_build_and_test,  package
+  - stage2  # langkit_test,  libadalang_build_and_test
+  - stage3  # package, executed regardless of testing
 
 #########
 # BUILD #
@@ -31,9 +33,6 @@ langkit_build:
      - cpu:8
      - mem:16
   stage: stage1
-  rules:
-    # Triggers on a push or pipeline
-    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push")
   script:
     - export PATH=/it/e3/bin:$PATH
     - cd /it/wave
@@ -63,8 +62,11 @@ langkit_test:
      - mem:16
   stage: stage2
   rules:
-    # Triggers on a push or pipeline
-    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push")
+    # We are not interested in running tests in CIs that just
+    # rebuild the artifact
+    - if: $CI_REBUILD_ARTIFACT
+      when: never
+    - when: always
   script:
     - export PATH=/it/e3/bin:$PATH
 
@@ -104,8 +106,11 @@ libadalang_build_and_test:
      - mem:16
   stage: stage2
   rules:
-    # Triggers on a push or pipeline
-    - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push")
+    # Same as above, no point in doing running if we only want
+    # to rebuild the artifact
+    - if: $CI_REBUILD_ARTIFACT
+      when: never
+    - when: always      
   script:
     - export PATH=/it/e3/bin:$PATH
 
@@ -151,16 +156,15 @@ libadalang_build_and_test:
 ###########
 
 # This job uploads the package to the package registry.
-# This is launched on a push on the master branch.
-# We put this in the "test" stage so that it gets triggered systematically
-# after a push on the main branch, not waiting for tests to pass.
+# This is launched only for CIs on the master branch.
 package:
   services:
      - image:e3
-  stage: stage2
+  stage: stage3
+  needs: [langkit_build] # Do not wait for jobs in stage2 (i.e. tests)
   rules:
-     # This triggers only after a push on the master branch, or from an upstream pipeline
-     - if: ($CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "push") && $CI_COMMIT_BRANCH == "master"
+     # Store the artifact only for the master branch
+     - if: ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule") && $CI_COMMIT_REF_NAME == "master"
   script:
     - export PATH=/it/e3/bin:$PATH
 

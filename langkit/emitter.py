@@ -625,9 +625,6 @@ class Emitter:
         """
         Generate binding for the external OCaml API.
         """
-        if not ctx.ocaml_api_settings:
-            return
-
         ctx.ocaml_api_settings.init_type_graph()
 
         if not os.path.isdir(self.ocaml_dir):

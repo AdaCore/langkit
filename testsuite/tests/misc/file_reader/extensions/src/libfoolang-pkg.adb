@@ -36,6 +36,7 @@ package body Libfoolang.Pkg is
          Append (Diagnostics,
                  Sloc_Range => (1, 2, 3, 4),
                  Message    => "this is an error message");
+         Contents := Create_Decoded_File_Contents ("");
 
       elsif Fn'Length > 7 and then Fn (Fn'First .. Fn'First + 6) = "direct-"
       then

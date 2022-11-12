@@ -605,6 +605,28 @@ module Rebindings = struct
   type t = unit ptr
 end
 
+module FileReader = struct
+  (* Use a pointer to pointer to register a finaliser when creating a value of
+     this type. *)
+  type t = unit ptr ptr
+
+  let dec_ref =
+    foreign ~from:c_lib "${capi.get_name('dec_ref_file_reader')}"
+      (ptr void @-> raisable void)
+
+  let read v =
+    let finalise arg =
+      dec_ref (!@ arg)
+    in
+    allocate (ptr void) ~finalise v
+
+  let c_type = view (ptr void) ~read ~write:(!@)
+end
+
+${exts.include_extension(
+   ctx.ext('ocaml_api', 'module_struct')
+)}
+
 <%
    ## Register array and struct types to generate them in topogical ordering
    for struct_type in ctx.struct_types:
@@ -858,13 +880,14 @@ module AnalysisContext = struct
     ?charset:(charset="")
     ?with_trivia:(with_trivia=true)
     ?tab_stop:(tab_stop=${ctx.default_tab_stop})
-    ?unit_provider:(unit_provider=UnitProvider.null) () : t =
+    ?unit_provider:(unit_provider=UnitProvider.null)
+    ?file_reader () : t =
     if tab_stop < 1 then
       raise (Invalid_argument "Invalid tab_stop (positive integer expected)") ;
     let c_context =
        AnalysisContextStruct.create_analysis_context
          charset
-         Ctypes.null (* TODO: bind the file readers API to OCaml *)
+         (match file_reader with Some v -> !@v | None -> null)
          (!@unit_provider)
          Ctypes.null (* TODO: bind the event handlers API to OCaml *)
          with_trivia

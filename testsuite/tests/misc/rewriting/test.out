@@ -219,12 +219,19 @@ Rewritten unit b.txt: def b = 22
 iter_units.adb: Done.
 
 == apply_error.adb ==
+# Put an integer literal instead of an indentifier
 Could not apply diff on the main.txt unit:
   1:1: Skipped token def
   1:5: Skipped token 1
   1:6: Skipped token =
   1:7: Skipped token a
 def 1=a
+
+# Put a null child in a list node
+Could not apply diff on the main.txt unit:
+  null node found in a list
+Cannot unparse the rewritten tree
+
 apply_error.adb: Done.
 
 == templates.adb ==

@@ -916,6 +916,7 @@ class CompileCtx:
             (None, 'file_read_error'),
             ('Introspection', 'bad_type_error'),
             ('Introspection', 'out_of_bounds_error'),
+            ('Unparsing', 'malformed_tree_error'),
             ('Rewriting', 'template_format_error'),
             ('Rewriting', 'template_args_error'),
             ('Rewriting', 'template_instantiation_error')

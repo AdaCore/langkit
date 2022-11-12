@@ -408,12 +408,10 @@ package body ${ada_lib_name}.Lexer_Implementation is
                end if;
             end;
 
-            if Diagnostics.Is_Empty then
-               Extract_Tokens_From_Text_Buffer
-                 (Contents, With_Trivia, TDH, Diagnostics);
-               TDH.Filename := Input.Filename;
-               TDH.Charset := Input.Charset;
-            end if;
+            Extract_Tokens_From_Text_Buffer
+              (Contents, With_Trivia, TDH, Diagnostics);
+            TDH.Filename := Input.Filename;
+            TDH.Charset := Input.Charset;
 
          when Bytes_Buffer =>
             declare
@@ -424,12 +422,10 @@ package body ${ada_lib_name}.Lexer_Implementation is
                  (Bytes, To_String (Input.Charset), Input.Read_BOM, Contents,
                   Diagnostics);
             end;
-            if Diagnostics.Is_Empty then
-               Extract_Tokens_From_Text_Buffer
-                 (Contents, With_Trivia, TDH, Diagnostics);
-               TDH.Filename := GNATCOLL.VFS.No_File;
-               TDH.Charset := Input.Charset;
-            end if;
+            Extract_Tokens_From_Text_Buffer
+              (Contents, With_Trivia, TDH, Diagnostics);
+            TDH.Filename := GNATCOLL.VFS.No_File;
+            TDH.Charset := Input.Charset;
 
          when Text_Buffer =>
             Contents.Buffer := new Text_Type (1 .. Input.Text_Count);

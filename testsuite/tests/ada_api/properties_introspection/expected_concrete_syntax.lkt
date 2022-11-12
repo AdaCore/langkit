@@ -65,6 +65,8 @@ class Number : Expr implements TokenNode {
     @export fun id_dflt_char(id: Char = '\x00'): Char = id
 
     @export fun id_dflt_root_node(id: FooNode = null): FooNode = id
+
+    @export fun id_dflt_derived_node(id: Expr = null): Expr = id
 }
 
 class Ref : Expr {

@@ -2207,12 +2207,24 @@ class App:
             unit_provider=self.create_unit_provider()
         )
 
+        files = self.args.files
+        if not files:
+            files = self.default_get_files()
+
         # Parse files
         self.units = {}
-        for file_name in self.args.files:
+        for file_name in files:
             self.u = self.ctx.get_from_file(file_name)
             self.units[file_name] = self.u
 
+    def default_get_files(self) -> List[str]:
+        """
+        When no files are passed by the user on the command line, this method
+        will be used. By default, it returns an empty list, but Langkit
+        libraries can overload it to customize the behavior to adapt it to the
+        specific language and toolchain.
+        """
+        return []
 
     def add_arguments(self) -> None:
         """
