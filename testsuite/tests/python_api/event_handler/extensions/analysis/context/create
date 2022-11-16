@@ -1,0 +1,19 @@
+## vim: ft=makoada
+
+declare
+   Buffer : constant String := "example";
+   U      : Internal_Unit := Get_Unit
+     (Context     => Context,
+      Filename    => "__prelude",
+      Charset     => "ascii",
+      Reparse     => True,
+      Input       => (Kind        => Bytes_Buffer,
+                      Charset     => To_Unbounded_String ("ascii"),
+                      Read_BOM    => False,
+                      Bytes       => Buffer'Address,
+                      Bytes_Count => Buffer'Length),
+      Rule        => Default_Grammar_Rule,
+      Is_Internal => True);
+begin
+   Populate_Lexical_Env (U);
+end;

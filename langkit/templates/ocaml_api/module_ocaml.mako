@@ -884,15 +884,15 @@ module AnalysisContext = struct
     ?file_reader () : t =
     if tab_stop < 1 then
       raise (Invalid_argument "Invalid tab_stop (positive integer expected)") ;
-    let c_context =
-       AnalysisContextStruct.create_analysis_context
-         charset
-         (match file_reader with Some v -> !@v | None -> null)
-         (!@unit_provider)
-         Ctypes.null (* TODO: bind the event handlers API to OCaml *)
-         with_trivia
-         tab_stop
-    in
+    let c_context = AnalysisContextStruct.allocate_analysis_context () in
+    AnalysisContextStruct.initialize_analysis_context
+      c_context
+      charset
+      (match file_reader with Some v -> !@v | None -> null)
+      (!@unit_provider)
+      Ctypes.null (* TODO: bind the event handlers API to OCaml *)
+      with_trivia
+      tab_stop ;
     { c_value= c_context
       ; unit_provider= unit_provider }
 

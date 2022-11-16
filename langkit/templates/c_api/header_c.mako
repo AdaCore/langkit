@@ -290,9 +290,14 @@ typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
  * Analysis primitives
  */
 
-${c_doc('langkit.create_context')}
+${c_doc('langkit.allocate_context')}
 extern ${analysis_context_type}
-${capi.get_name("create_analysis_context")}(
+${capi.get_name("allocate_analysis_context")} (void);
+
+${c_doc('langkit.initialize_context')}
+extern void
+${capi.get_name("initialize_analysis_context")}(
+   ${analysis_context_type} context,
    const char *charset,
    ${file_reader_type} file_reader,
    ${unit_provider_type} unit_provider,

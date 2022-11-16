@@ -1,5 +1,11 @@
 main.py: Starting...
 
+== create context ==
+
+MyEH: unit_parsed_callback
+  unit: <AnalysisUnit '__prelude'>
+  reparsed: False
+
 == unit parsed ==
 
 MyEH: unit_parsed_callback

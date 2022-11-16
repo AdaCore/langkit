@@ -86,11 +86,17 @@ c_main (void)
 
   /* Create an analysis unit context with our event  handler.  */
 
+  puts ("== create context ==\n");
+
   eh = foo_create_event_handler (eh_data, eh_destroy, eh_unit_requested,
 				 eh_unit_parsed);
   abort_on_exception ();
 
-  ctx = foo_create_analysis_context (
+  ctx = foo_allocate_analysis_context ();
+  abort_on_exception ();
+
+  foo_initialize_analysis_context (
+    /* context= */ ctx,
     /* charset= */ NULL,
     /* file_reader= */ NULL,
     /* unit_provider= */ NULL,

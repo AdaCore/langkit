@@ -330,6 +330,18 @@ base_langkit_docs = {
         ``Tab_Stop`` is a positive number to describe the effect of tabulation
         characters on the column number in source files.
     """,
+    'langkit.allocate_context': """
+        Allocate a new analysis context.
+    """,
+    'langkit.initialize_context': """
+        Initialize an analysis context. Must be called right after
+        ``Allocate_Context`` on its result.
+
+        Having separate primitives for allocation/initialization allows library
+        bindings to have a context wrapper (created between the two calls)
+        ready when callbacks that happen during context initialization (for
+        instance "unit parsed" events).
+    """,
 
     'langkit.context_incref': """
         Increase the reference count to an analysis context.

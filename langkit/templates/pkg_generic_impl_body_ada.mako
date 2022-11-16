@@ -69,15 +69,17 @@ package body ${ada_lib_name}.Generic_Impl is
          else Tab_Stop);
 
       Result : constant Implementation.Internal_Context :=
-        Implementation.Create_Context
-          (Charset        => Charset,
-           File_Reader    => FR,
-           Event_Handler  => null,
-           Unit_Provider  => null,
-           With_Trivia    => With_Trivia,
-           Tab_Stop       => Actual_Tab_Stop,
-           Max_Call_Depth => ${ctx.default_max_call_depth});
+        Implementation.Allocate_Context;
    begin
+      Implementation.Initialize_Context
+        (Context        => Result,
+         Charset        => Charset,
+         File_Reader    => FR,
+         Event_Handler  => null,
+         Unit_Provider  => null,
+         With_Trivia    => With_Trivia,
+         Tab_Stop       => Actual_Tab_Stop,
+         Max_Call_Depth => ${ctx.default_max_call_depth});
       return +Result;
    end Create_Context;
 
