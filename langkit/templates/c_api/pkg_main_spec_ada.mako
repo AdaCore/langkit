@@ -263,17 +263,25 @@ private package ${ada_lib_name}.Implementation.C is
    -- Analysis primitives --
    -------------------------
 
-   function ${capi.get_name("create_analysis_context")}
-     (Charset       : chars_ptr;
+   function ${capi.get_name("allocate_analysis_context")}
+     return ${analysis_context_type}
+     with Export,
+          Convention    => C,
+          External_name => "${capi.get_name('allocate_analysis_context')}";
+   ${ada_c_doc('langkit.allocate_context', 3)}
+
+   procedure ${capi.get_name("initialize_analysis_context")}
+     (Context       : ${analysis_context_type};
+      Charset       : chars_ptr;
       File_Reader   : ${file_reader_type};
       Unit_Provider : ${unit_provider_type};
       Event_Handler : ${event_handler_type};
       With_Trivia   : int;
-      Tab_Stop      : int) return ${analysis_context_type}
-      with Export        => True,
+      Tab_Stop      : int)
+      with Export,
            Convention    => C,
-           External_name => "${capi.get_name('create_analysis_context')}";
-   ${ada_c_doc('langkit.create_context', 3)}
+           External_name => "${capi.get_name('initialize_analysis_context')}";
+   ${ada_c_doc('langkit.initialize_context', 3)}
 
    function ${capi.get_name('context_incref')}
      (Context : ${analysis_context_type})

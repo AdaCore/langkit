@@ -48,6 +48,8 @@ class EventHandler(libfoolang.EventHandler):
 
 
 # Create an analysis context with our event handler
+print("== create context ==")
+print("")
 ctx = libfoolang.AnalysisContext(event_handler=EventHandler("MyEH"))
 
 # Trigger the "unit parsed" event twice: once for the initial parsing, and once

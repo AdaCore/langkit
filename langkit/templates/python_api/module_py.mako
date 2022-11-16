@@ -687,6 +687,8 @@ class AnalysisContext:
         # construction, so that the destructor can run later on.
         self._c_value = None
 
+        # Create the analysis context if requested, otherwise increase the
+        # refcount of the existing context.
         if _c_value is None:
             _charset = _unwrap_charset(charset)
             if not isinstance(tab_stop, int) or tab_stop < 1:
@@ -697,23 +699,16 @@ class AnalysisContext:
             self._event_handler_wrapper, c_event_handler = (
                 _EventHandlerWrapper.create(event_handler)
             )
-            self._c_value = _create_analysis_context(
-                _charset,
-                c_file_reader,
-                c_unit_provider,
-                c_event_handler,
-                with_trivia,
-                tab_stop
-            )
+            self._c_value = _allocate_analysis_context()
         else:
             self._c_value = _context_incref(_c_value)
+
+        # Register the context in our cache so that wrapping the context in the
+        # future always yields the same instance.
         assert self._c_value not in self._context_cache
         self._context_cache[self._c_value] = self
 
-        # Keep a reference to the unit provider so that it is live at least as
-        # long as the analysis context is live.
-        self._unit_provider = unit_provider
-
+        # Initialize the serial number and the unit cache
         self._serial_number: Opt[int] = None
         self._unit_cache: Dict[str, AnalysisUnit] = {}
         """
@@ -722,6 +717,23 @@ class AnalysisContext:
         """
 
         self._check_unit_cache()
+
+        # Now that we have an AnalysisContext wrapper registered, if we just
+        # created the analysis context, also initialize it.
+        if _c_value is None:
+            _initialize_analysis_context(
+                self._c_value,
+                _charset,
+                c_file_reader,
+                c_unit_provider,
+                c_event_handler,
+                with_trivia,
+                tab_stop
+            )
+
+        # Keep a reference to the unit provider so that it is live at least as
+        # long as the analysis context is live.
+        self._unit_provider = unit_provider
 
     def __del__(self) -> None:
         if self._c_value:
@@ -1947,15 +1959,21 @@ _get_versions = _import_func(
 )
 
 # Analysis primitives
-_create_analysis_context = _import_func(
-    '${capi.get_name("create_analysis_context")}',
-    [ctypes.c_char_p, # charset
-     _file_reader,    # file_reader
-     _unit_provider,  # unit_provider
-     _event_handler,  # event_handler
-     ctypes.c_int,    # with_trivia
-     ctypes.c_int],   # tab_stop
-    AnalysisContext._c_type
+_allocate_analysis_context = _import_func(
+    '${capi.get_name("allocate_analysis_context")}',
+    [],
+    AnalysisContext._c_type,
+)
+_initialize_analysis_context = _import_func(
+    '${capi.get_name("initialize_analysis_context")}',
+    [AnalysisContext._c_type, # context
+     ctypes.c_char_p,         # charset
+     _file_reader,            # file_reader
+     _unit_provider,          # unit_provider
+     _event_handler,          # event_handler
+     ctypes.c_int,            # with_trivia
+     ctypes.c_int],           # tab_stop
+    None,
 )
 _context_incref = _import_func(
     '${capi.get_name("context_incref")}',

@@ -117,9 +117,10 @@ package body ${ada_lib_name}.Analysis is
          Wrap_Public_Provider (Unit_Provider);
       EH     : Internal_Event_Handler_Access :=
          Wrap_Public_Event_Handler (Event_Handler);
-      Result : Internal_Context := Create_Context
-        (Charset, FR, UP, EH, With_Trivia, Tab_Stop);
+      Result : Internal_Context := Allocate_Context;
    begin
+      Initialize_Context (Result, Charset, FR, UP, EH, With_Trivia, Tab_Stop);
+
       --  Create_Context created ownership shares for itself, so don't forget
       --  to remove the shares on FR and UP.
       Dec_Ref (FR);

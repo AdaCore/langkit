@@ -152,13 +152,27 @@ package body ${ada_lib_name}.Implementation.C is
    -- Analysis primitives --
    -------------------------
 
-   function ${capi.get_name("create_analysis_context")}
-     (Charset       : chars_ptr;
+   function ${capi.get_name("allocate_analysis_context")}
+     return ${analysis_context_type} is
+   begin
+      Clear_Last_Exception;
+      begin
+         return Allocate_Context;
+      exception
+         when Exc : others =>
+            Set_Last_Exception (Exc);
+            return null;
+      end;
+   end;
+
+   procedure ${capi.get_name("initialize_analysis_context")}
+     (Context       : ${analysis_context_type};
+      Charset       : chars_ptr;
       File_Reader   : ${file_reader_type};
       Unit_Provider : ${unit_provider_type};
       Event_Handler : ${event_handler_type};
       With_Trivia   : int;
-      Tab_Stop      : int) return ${analysis_context_type} is
+      Tab_Stop      : int) is
    begin
       Clear_Last_Exception;
 
@@ -168,8 +182,9 @@ package body ${ada_lib_name}.Implementation.C is
             then ${ascii_repr(ctx.default_charset)}
             else Value (Charset));
       begin
-         return Create_Context
-            (Charset       => C,
+         Initialize_Context
+            (Context       => Context,
+             Charset       => C,
              File_Reader   => Unwrap_Private_File_Reader (File_Reader),
              Unit_Provider => Unwrap_Private_Provider (Unit_Provider),
              Event_Handler => Unwrap_Private_Event_Handler (Event_Handler),
@@ -179,7 +194,6 @@ package body ${ada_lib_name}.Implementation.C is
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return null;
    end;
 
    function ${capi.get_name('context_incref')}

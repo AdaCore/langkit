@@ -433,28 +433,37 @@ package body ${ada_lib_name}.Implementation is
      (Lookup_Kind_Type'Val (Lookup_Kind'Pos (K)));
    pragma Warnings (On, "referenced");
 
-   --------------------
-   -- Create_Context --
-   --------------------
+   ----------------------
+   -- Allocate_Context --
+   ----------------------
 
-   function Create_Context
-     (Charset        : String;
+   function Allocate_Context return Internal_Context is
+   begin
+      return Context : Internal_Context do
+         Context_Pool.Acquire (Context);
+         Context.Ref_Count := 1;
+      end return;
+   end Allocate_Context;
+
+   ------------------------
+   -- Initialize_Context --
+   ------------------------
+
+   procedure Initialize_Context
+     (Context        : Internal_Context;
+      Charset        : String;
       File_Reader    : Internal_File_Reader_Access;
       Unit_Provider  : Internal_Unit_Provider_Access;
       Event_Handler  : Internal_Event_Handler_Access;
       With_Trivia    : Boolean;
       Tab_Stop       : Positive;
       Max_Call_Depth : Natural := ${ctx.default_max_call_depth})
-      return Internal_Context
    is
       Actual_Charset : constant String :=
         (if Charset = "" then Default_Charset else Charset);
       Symbols        : constant Precomputed_Symbol_Table
         := Create_Symbol_Table;
-      Context        : Internal_Context;
    begin
-      Context_Pool.Acquire (Context);
-      Context.Ref_Count := 1;
       Context.Symbols := Symbol_Table (Symbols);
       Context.Charset := To_Unbounded_String (Actual_Charset);
       Context.Tab_Stop := Tab_Stop;
@@ -507,9 +516,7 @@ package body ${ada_lib_name}.Implementation is
       Context.Available_Rebindings := Env_Rebindings_Vectors.Empty_Vector;
 
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
-
-      return Context;
-   end Create_Context;
+   end Initialize_Context;
 
    -----------------
    -- Create_Unit --

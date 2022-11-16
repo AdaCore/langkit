@@ -1773,16 +1773,27 @@ private package ${ada_lib_name}.Implementation is
    -- Implementation for analysis context primitives --
    ----------------------------------------------------
 
-   function Create_Context
-     (Charset        : String;
+   function Allocate_Context return Internal_Context;
+   ${ada_doc('langkit.allocate_context', 3)}
+
+   procedure Initialize_Context
+     (Context        : Internal_Context;
+      Charset        : String;
       File_Reader    : Internal_File_Reader_Access;
       Unit_Provider  : Internal_Unit_Provider_Access;
       Event_Handler  : Internal_Event_Handler_Access;
       With_Trivia    : Boolean;
       Tab_Stop       : Positive;
-      Max_Call_Depth : Natural := ${ctx.default_max_call_depth})
-      return Internal_Context;
-   --  Implementation for Analysis.Create_Context
+      Max_Call_Depth : Natural := ${ctx.default_max_call_depth});
+   ${ada_doc('langkit.initialize_context', 3)}
+   --  Implementation for ``Analysis.Create_Context``: call
+   --  ``Allocate_Context`` to allocate an ``Internal_Context`` value, then
+   --  call ``Initialize_Context`` to initialize it.
+   --
+   --  Having separate primitives for allocation/initialization allows library
+   --  bindings to have a context wrapper (created between the two calls) ready
+   --  when callbacks that happen during context initialization (for instance
+   --  "unit parsed" events).
 
    function Create_Unit
      (Context             : Internal_Context;

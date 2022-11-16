@@ -44,6 +44,15 @@
    ...
 }
 {
+   false positives with camlForeign
+   Memcheck:Leak
+   fun:realloc
+   ...
+   fun:caml_stat_resize
+   fun:ctypes_add_argument
+   ...
+}
+{
    false positives with caml mutex
    Memcheck:Leak
    fun:malloc
