@@ -7,6 +7,8 @@ import dataclasses
 import os
 from typing import List, Tuple
 
+import pytest
+
 from langkit.stylechecks import Report, check_file_content
 
 
@@ -29,7 +31,7 @@ class Testcase:
     "reindent_content".
     """
 
-    records: List[Tuple[int, str]]
+    records: List[Tuple[int, int, str]]
     """
     List of expected diagnostics from the style checker when working on
     ``content``.
@@ -548,52 +550,33 @@ def reindent_content(tc):
     return '\n'.join(result)
 
 
-def create_testcase(tc):
-    """Return a test function for "tc"."""
+@pytest.mark.parametrize("tc", testcases)
+def test_all(tc: Testcase):
+    # Pre-process content
+    report = Report(enable_colors=False)
+    content = reindent_content(tc) if tc.reindent_content else tc.content
+    check_file_content(report, tc.filename, content)
+    records = [(tc.filename, ) + rec for rec in tc.records]
 
-    def test():
-        # Pre-process content
-        report = Report(enable_colors=False)
-        content = reindent_content(tc) if tc.reindent_content else tc.content
-        check_file_content(report, tc.filename, content)
-        records = [
-            (tc.filename, ) + rec
-            for rec in tc.records
-        ]
-
-        def fmt_records(records):
-            return (
-                '\n'.join('  {}:{}:{}: {}'.format(*rec) for rec in records)
-                if records else
-                '  <no report>'
-            )
-
-        assert report.records == records, (
-            'For the following source:\n'
-            '{}\n'
-            'Got the following report:\n'
-            '{}\n'
-            'But the following was expected instead:\n'
-            '{}'.format(
-                '\n'.join('    {}'.format(line)
-                          for line in content.split('\n')),
-                fmt_records(report.records), fmt_records(records)
-            )
+    def fmt_records(records):
+        return (
+            '\n'.join('  {}:{}:{}: {}'.format(*rec) for rec in records)
+            if records else
+            '  <no report>'
         )
 
-    test.__name__ = tc.filename
-    test.description = tc.filename
-    return test
-setattr(create_testcase, '__test__', False)
-
-
-def test_generator():
-    for tc in testcases:
-        # For convenience, allow create_testcase to return None (when tests are
-        # disabled).
-        result = create_testcase(tc)
-        if result:
-            yield result
+    assert report.records == records, (
+        'For the following source:\n'
+        '{}\n'
+        'Got the following report:\n'
+        '{}\n'
+        'But the following was expected instead:\n'
+        '{}'.format(
+            '\n'.join('    {}'.format(line)
+                      for line in content.split('\n')),
+            fmt_records(report.records), fmt_records(records)
+        )
+    )
 
 
 def test_report_output():
