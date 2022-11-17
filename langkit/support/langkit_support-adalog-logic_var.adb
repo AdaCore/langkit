@@ -9,6 +9,28 @@ with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
 package body Langkit_Support.Adalog.Logic_Var is
 
+   function Ultimate_Alias (Self : Logic_Var) return Logic_Var;
+   --  Recursively traverse the chain of aliasing, starting from the given
+   --  logic variable until we find a variable that is not further aliased,
+   --  and return it. For each variable that we recursed on during the
+   --  traversal, update its aliasing information to point directly on the
+   --  ultimate variable, so that subsequent invocations do not require a
+   --  traversal anymore.
+
+   --------------------
+   -- Ultimate_Alias --
+   --------------------
+
+   function Ultimate_Alias (Self : Logic_Var) return Logic_Var is
+   begin
+      if Self.Aliased_To /= null then
+         Self.Aliased_To := Ultimate_Alias (Self.Aliased_To);
+         return Self.Aliased_To;
+      else
+         return Self;
+      end if;
+   end Ultimate_Alias;
+
    -----------
    -- Reset --
    -----------
@@ -32,9 +54,7 @@ package body Langkit_Support.Adalog.Logic_Var is
 
    function Is_Defined (Self : Logic_Var) return Boolean is
    begin
-      return (if Self.Aliased_To /= null
-              then Is_Defined (Self.Aliased_To)
-              else not Self.Reset);
+      return not Ultimate_Alias (Self).Reset;
    end Is_Defined;
 
    ---------------
@@ -42,22 +62,18 @@ package body Langkit_Support.Adalog.Logic_Var is
    ---------------
 
    procedure Set_Value (Self : Logic_Var; Data : Value_Type) is
+      V : constant Logic_Var := Ultimate_Alias (Self);
    begin
-      if Self.Aliased_To /= null then
-         Set_Value (Self.Aliased_To, Data);
-         return;
-      end if;
-
       if Debug.Debug then
-         Verbose_Trace.Trace ("Setting the value of " & Image (Self) & " to "
+         Verbose_Trace.Trace ("Setting the value of " & Image (V) & " to "
                 & Value_Image (Data));
-         Verbose_Trace.Trace ("Old value is " & Value_Image (Self.Value));
+         Verbose_Trace.Trace ("Old value is " & Value_Image (V.Value));
       end if;
 
-      Dec_Ref (Self.Value);
-      Self.Value := Data;
-      Inc_Ref (Self.Value);
-      Self.Reset := False;
+      Dec_Ref (V.Value);
+      V.Value := Data;
+      Inc_Ref (V.Value);
+      V.Reset := False;
    end Set_Value;
 
    ---------------
@@ -65,27 +81,23 @@ package body Langkit_Support.Adalog.Logic_Var is
    ---------------
 
    function Get_Value (Self : Logic_Var) return Value_Type is
+      V : constant Logic_Var := Ultimate_Alias (Self);
    begin
-      if Self.Aliased_To /= null then
-         return Get_Value (Self.Aliased_To);
-      end if;
-
-      Inc_Ref (Self.Value);
+      Inc_Ref (V.Value);
 
       --  TODO??? We removed an assert about Self.Reset being False, because
       --  we want to be able to access the variable even if the element is
       --  unset, i.e. null. However, we need to have a definite null value for
       --  elements, which could even replace the Reset flag altogether maybe.
-      return Self.Value;
+      return V.Value;
    end Get_Value;
 
    --------
    -- Id --
    --------
 
-   function Id (Self : Logic_Var) return Natural
-   is
-     (if Self.Aliased_To /= null then Id (Self.Aliased_To) else Self.Id);
+   function Id (Self : Logic_Var) return Natural is
+     (Ultimate_Alias (Self).Id);
 
    ------------
    -- Set_Id --
