@@ -25,6 +25,11 @@ let so_ext = if Sys.unix then "so" else "dll"
 let c_lib_name = Format.sprintf "lib${c_api.shared_object_basename}.%s" so_ext
 let c_lib = Dl.dlopen ~filename:c_lib_name ~flags:[Dl.RTLD_NOW]
 
+let add_gc_link ~from ~to_ =
+  let r = ref (Some (Obj.repr to_)) in
+  let finaliser _ = r := None in
+  Gc.finalise finaliser from
+
 % for e in ctx.sorted_exception_types:
 exception ${e.name} of string
 
@@ -33,6 +38,12 @@ exception ${e.name} of string
 ${exts.include_extension(
    ctx.ext('ocaml_api', 'exceptions')
 )}
+
+let char_ptr_of_string str =
+  coerce string (ptr char) str
+
+let string_of_char_ptr str =
+  coerce (ptr char) string str
 
 module Exception = struct
 
@@ -43,7 +54,7 @@ module Exception = struct
 
   let c_struct : t structure typ = structure "exception"
   let kind = field c_struct "kind" int
-  let information = field c_struct "information" string
+  let information = field c_struct "information" (ptr char)
   let () = seal c_struct
 
   let wrap c_value_ptr =
@@ -53,7 +64,7 @@ module Exception = struct
       let c_value = !@ c_value_ptr in
       Some {
         kind = getf c_value kind;
-        information = getf c_value information;
+        information = string_of_char_ptr (getf c_value information);
       }
 
   let unwrap value =
@@ -62,8 +73,10 @@ module Exception = struct
         from_voidp c_struct null
     | Some value ->
         let c_value = make c_struct in
+        let c_information = char_ptr_of_string value.information in
         setf c_value kind value.kind;
-        setf c_value information value.information;
+        add_gc_link ~from:c_value ~to_:c_information;
+        setf c_value information c_information;
         allocate c_struct c_value
 
   let c_type = view (ptr c_struct) ~read:wrap ~write:unwrap
@@ -192,6 +205,7 @@ module Text = struct
     UCS4.iter f text ;
     let c_value = make c_struct in
     setf c_value length struct_length ;
+    add_gc_link ~from:c_value ~to_:struct_chars;
     setf c_value chars struct_chars ;
     setf c_value is_allocated false ;
     (* We don't need to care about calling destroy_text here since we
@@ -414,18 +428,24 @@ module Diagnostic = struct
 
   let c_struct : t structure typ = structure "diagnostic"
   let sloc_range = field c_struct "sloc_range" SlocRange.c_type
-  let message = field c_struct "message" Text.c_type
+  let message = field c_struct "message" Text.c_struct
   let () = seal c_struct
 
   let wrap (c_value : t structure) : t = {
     sloc_range = getf c_value sloc_range;
-    message = getf c_value message;
+    message = Text.wrap (getf c_value message);
   }
 
   let unwrap (value : t) : t structure =
     let c_value = make c_struct in
+    (* sloc_range is not a pointer, thus we have a copy here which is safe. *)
     setf c_value sloc_range value.sloc_range;
-    setf c_value message value.message;
+    (* message is not a pointer, thus we have a copy here which is safe.
+       HOWEVER, there is a link from value.message to another pointer which can
+       be freed by the GC if we don't propagate this link. *)
+    let c_value_message = Text.unwrap value.message in
+    add_gc_link ~from:c_value ~to_:c_value_message;
+    setf c_value message c_value_message;
     c_value
 
   let c_type = view c_struct ~read:wrap ~write:unwrap
@@ -457,7 +477,7 @@ module Token = struct
   let token_index = field c_type "token_index" int
   let trivia_index = field c_type "trivia_index" int
   let kind = field c_type "kind" int
-  let text = field c_type "text" Text.c_type
+  let text = field c_type "text" Text.c_struct
   let sloc_range = field c_type "sloc_range" SlocRange.c_type
   let () = seal c_type
 
@@ -472,7 +492,7 @@ module Token = struct
       token_index = getf c_value token_index;
       trivia_index = getf c_value trivia_index;
       kind = getf c_value kind;
-      text = getf c_value text;
+      text = Text.wrap (getf c_value text);
       sloc_range = getf c_value sloc_range;
     }
 
@@ -483,7 +503,9 @@ module Token = struct
     setf c_value token_index value.token_index;
     setf c_value trivia_index value.trivia_index;
     setf c_value kind value.kind;
-    setf c_value text value.text;
+    let c_value_text = Text.unwrap value.text in
+    add_gc_link ~from:c_value ~to_:c_value_text;
+    setf c_value text c_value_text;
     setf c_value sloc_range value.sloc_range;
     c_value
 

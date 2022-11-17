@@ -87,10 +87,16 @@ end
       % endif
     let c_value = make ${ocaml_api.c_type(cls)} in
       % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
+    let field_c_value =
+      ${ocaml_api.unwrap_value('value.{}'.format(ocaml_api.field_name(f)),
+                               f.type, 'context', check_for_none=True)}
+    in
+      ## We don't know if the actual unwrapped value needs a gc link. To be
+      ## safe, always add one.
+    add_gc_link ~from:c_value ~to_:field_c_value;
     setf c_value
       ${ocaml_api.struct_name(cls)}.${ocaml_api.field_name(f)}
-      (${ocaml_api.unwrap_value('value.{}'.format(ocaml_api.field_name(f)),
-                                f.type, 'context', check_for_none=True)});
+      field_c_value;
       % endfor
     c_value
    % endif
