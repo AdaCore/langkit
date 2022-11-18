@@ -68,6 +68,8 @@ package Langkit_Support.Internal.Descriptor is
      (Metadata : Internal_Node_Metadata);
    type Node_Metadata_Dec_Ref_Type is access procedure
      (Metadata : in out Internal_Node_Metadata);
+   type Node_Metadata_Compare_Type is access function
+     (L, R : Analysis.Internal_Node_Metadata) return Boolean;
 
    type Node_Unit_Type is access function
      (Node : Analysis.Internal_Node) return Internal_Unit;
@@ -179,6 +181,8 @@ package Langkit_Support.Internal.Descriptor is
 
       Node_Metadata_Inc_Ref : Node_Metadata_Inc_Ref_Type;
       Node_Metadata_Dec_Ref : Node_Metadata_Dec_Ref_Type;
+      Node_Metadata_Compare : Node_Metadata_Compare_Type;
+      Null_Metadata         : Internal_Node_Metadata;
 
       Node_Unit                 : Node_Unit_Type;
       Node_Kind                 : Node_Kind_Type;

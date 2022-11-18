@@ -170,9 +170,6 @@ package body ${ada_lib_name}.Implementation is
    --  If E is known, return its unique Id from State. Otherwise, assign it a
    --  new unique Id and return it.
 
-   function Compare_Metadata (L, R : ${T.env_md.name}) return Boolean;
-   --  Compare metadata ``L`` and ``R`` for public entity comparison
-
    ------------------------
    -- Precomputed_Symbol --
    ------------------------

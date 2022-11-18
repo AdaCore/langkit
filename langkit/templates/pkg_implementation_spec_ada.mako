@@ -385,12 +385,15 @@ private package ${ada_lib_name}.Implementation is
      (null, ${T.entity_info.nullexpr});
 
    function Hash_Entity (Self : ${root_entity.name}) return Hash_Type;
-   --  Hash function to use in the public API. It's like the regular one, but
-   --  disregards metadata.
+   --  Hash function to use in the public API. It is like the regular one, but
+   --  compares metadata according to the user specification in the DSL.
 
    function Compare_Entity (Left, Right : ${root_entity.name}) return Boolean;
-   --  Equality function to use in the public API. It's like the regular one,
-   --  but disregards metadata.
+   --  Equality function to use in the public API. It is like the regular one,
+   --  but compares metadata according to the user specification in the DSL.
+
+   function Compare_Metadata (L, R : ${T.env_md.name}) return Boolean;
+   --  Compare metadata ``L`` and ``R`` for public entity comparison
 
    function Create_Dynamic_Lexical_Env
      (Self              : ${T.root_node.name};

@@ -1,8 +1,11 @@
 ## vim: filetype=makoada
 
+with System;
+
 with Ada.Unchecked_Deallocation;
 
 with ${ada_lib_name}.Public_Converters;  use ${ada_lib_name}.Public_Converters;
+with ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.Generic_Impl is
 
@@ -16,6 +19,8 @@ package body ${ada_lib_name}.Generic_Impl is
       Md : constant Internal_Node_Metadata_Access := +Entity.Metadata;
    begin
       return (Node => +Entity.Node,
+              --  Metadata can be a null pointer, if it's coming from the
+              --  generic ``No_Lk_Node`` value.
               Info => (Md           => (if Md = null
                                         then Implementation.No_Metadata
                                         else Md.Internal),
@@ -32,9 +37,9 @@ package body ${ada_lib_name}.Generic_Impl is
    is
       use ${ada_lib_name}.Implementation;
 
-      Md : constant Internal_Node_Metadata_Access :=
+      Md : Internal_Node_Metadata_Access :=
         (if Entity.Info.Md = Implementation.No_Metadata
-         then null
+         then No_Metadata
          else new Internal_Node_Metadata_Type'
                     (Ref_Count => 1,
                      Internal  => Entity.Info.Md));
@@ -212,6 +217,10 @@ package body ${ada_lib_name}.Generic_Impl is
    procedure Node_Metadata_Inc_Ref (Metadata : Internal_Node_Metadata) is
       Md : constant Internal_Node_Metadata_Access := +Metadata;
    begin
+
+      pragma Assert (Md /= null);
+      pragma Assert (Md /= No_Metadata);
+
       Md.Ref_Count := Md.Ref_Count + 1;
    end Node_Metadata_Inc_Ref;
 
@@ -225,12 +234,40 @@ package body ${ada_lib_name}.Generic_Impl is
         (Internal_Node_Metadata_Type, Internal_Node_Metadata_Access);
       Md : Internal_Node_Metadata_Access := +Metadata;
    begin
+
+      pragma Assert (Md /= null);
+      pragma Assert (Md /= No_Metadata);
+
       Md.Ref_Count := Md.Ref_Count - 1;
       if Md.Ref_Count = 0 then
          Destroy (Md);
       end if;
-      Metadata := No_Internal_Node_Metadata;
+      Metadata := Internal_Node_Metadata (System.Null_Address);
    end Node_Metadata_Dec_Ref;
+
+   ---------------------------
+   -- Node_Metadata_Compare --
+   ---------------------------
+
+   function Node_Metadata_Compare
+      (L, R : Internal_Node_Metadata) return Boolean
+   is
+      Left  : Internal_Node_Metadata_Access := +L;
+      Right : Internal_Node_Metadata_Access := +R;
+      use ${ada_lib_name}.Implementation;
+   begin
+      --  Compare metadata with the generated ``Compare_Metadata`` function, if
+      --  applicable.
+      if Left = null then
+         Left := No_Metadata;
+      end if;
+
+      if Right = null then
+         Right := No_Metadata;
+      end if;
+
+      return Compare_Metadata (Left.Internal, Right.Internal);
+   end Node_Metadata_Compare;
 
    ---------------
    -- Node_Unit --

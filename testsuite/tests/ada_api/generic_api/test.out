@@ -235,6 +235,10 @@ REF_RULE -> Ref
 NAME_RULE -> Name
 Check error case... Got a Precondition_Failure exception: null grammar rule
 
+Check that equality takes metadata into account
+N = N2 (same metadata): TRUE
+N = N2 (/= metadata, field not used in eq): TRUE
+N = N2 (/= metadata, field used in eq): FALSE
 
 == introspection_types.adb ==
 
@@ -665,6 +669,7 @@ For Example
   P_Id_Dflt_Int (Example.p_id_dflt_int: 44)
   P_Id_Dflt_Char (Example.p_id_dflt_char: 45)
   P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 46)
+  P_With_Md (Example.p_with_md: 47)
 
 For Expr
   Parent (FooNode.parent: 14)
@@ -772,7 +777,7 @@ For Null_Qual
   Unit (FooNode.unit: 22)
   Is_Ghost (FooNode.is_ghost: 23)
   Full_Sloc_Image (FooNode.full_sloc_image: 24)
-  P_As_Bool (NullQual.p_as_bool: 47)
+  P_As_Bool (NullQual.p_as_bool: 48)
 
 For Null_Qual_Absent
   Parent (FooNode.parent: 14)
@@ -786,7 +791,7 @@ For Null_Qual_Absent
   Unit (FooNode.unit: 22)
   Is_Ghost (FooNode.is_ghost: 23)
   Full_Sloc_Image (FooNode.full_sloc_image: 24)
-  P_As_Bool (NullQual.p_as_bool: 47)
+  P_As_Bool (NullQual.p_as_bool: 48)
 
 For Null_Qual_Present
   Parent (FooNode.parent: 14)
@@ -800,7 +805,7 @@ For Null_Qual_Present
   Unit (FooNode.unit: 22)
   Is_Ghost (FooNode.is_ghost: 23)
   Full_Sloc_Image (FooNode.full_sloc_image: 24)
-  P_As_Bool (NullQual.p_as_bool: 47)
+  P_As_Bool (NullQual.p_as_bool: 48)
 
 For Var_Decl
   Parent (FooNode.parent: 14)
@@ -1105,7 +1110,15 @@ P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 46)
   arguments:
     Id: FooNode := <No node>
 
-P_As_Bool (NullQual.p_as_bool: 47)
+P_With_Md (Example.p_with_md: 47)
+  owner: Example
+  is a property
+  type: Example
+  arguments:
+    Md1: Bool
+    Md2: Bool
+
+P_As_Bool (NullQual.p_as_bool: 48)
   owner: NullQual
   is a property
   type: Bool
