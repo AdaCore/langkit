@@ -78,6 +78,12 @@ class Example : BaseExample {
     @export fun id_dflt_char(id: Char = '\x00'): Char = id
 
     @export fun id_dflt_root_node(id: FooNode = null): FooNode = id
+
+    @export fun with_md(md1: Bool, md2: Bool): Example = Example(
+        node=self.node, info=EntityInfo(
+            md=Metadata(md1=md1, md2=md2), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
+        )
+    )
 }
 
 @abstract class Expr : FooNode {

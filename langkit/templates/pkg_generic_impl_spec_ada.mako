@@ -117,6 +117,8 @@ private package ${ada_lib_name}.Generic_Impl is
 
    procedure Node_Metadata_Inc_Ref (Metadata : Internal_Node_Metadata);
    procedure Node_Metadata_Dec_Ref (Metadata : in out Internal_Node_Metadata);
+   function Node_Metadata_Compare
+     (L, R : Internal_Node_Metadata) return Boolean;
 
    function Node_Unit (Node : Internal_Node) return Internal_Unit;
    function Node_Kind (Node : Internal_Node) return Type_Index;
@@ -156,6 +158,11 @@ private package ${ada_lib_name}.Generic_Impl is
    Language_Name : aliased constant Text_Type :=
      ${text_repr(ctx.lang_name.camel_with_underscores)};
 
+   No_Metadata_Value : aliased Internal_Node_Metadata_Type :=
+     (0, Implementation.No_Metadata);
+   No_Metadata       : Internal_Node_Metadata_Access
+     := No_Metadata_Value'Access;
+
    Desc : aliased constant Language_Descriptor :=
      (Language_Name => Language_Name'Access,
 
@@ -193,6 +200,8 @@ private package ${ada_lib_name}.Generic_Impl is
 
       Node_Metadata_Inc_Ref => Node_Metadata_Inc_Ref'Access,
       Node_Metadata_Dec_Ref => Node_Metadata_Dec_Ref'Access,
+      Node_Metadata_Compare => Node_Metadata_Compare'Access,
+      Null_Metadata         => +No_Metadata,
 
       Node_Unit                 => Node_Unit'Access,
       Node_Kind                 => Node_Kind'Access,

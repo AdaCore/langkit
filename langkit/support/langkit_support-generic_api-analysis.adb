@@ -87,10 +87,6 @@ package body Langkit_Support.Generic_API.Analysis is
    --  Raise a ``Precondition_Failure`` exception if ``Left`` and ``Right`` do
    --  not belong to the same unit.
 
-   function Wrap (Node : Internal_Node; Unit : Lk_Unit'Class) return Lk_Node;
-   --  Return a public node to wrap ``Node``, given an existing non-null
-   --  reference to its owning Unit.
-
    function Wrap_Node
      (Node : Internal_Node; Origin_Node : Lk_Node'Class) return Lk_Node;
    --  Return a public node to wrap ``Node``. Use safety net and entity info
@@ -270,21 +266,6 @@ package body Langkit_Support.Generic_API.Analysis is
       end if;
    end Check_Same_Unit;
 
-   ----------
-   -- Wrap --
-   ----------
-
-   function Wrap (Node : Internal_Node; Unit : Lk_Unit'Class) return Lk_Node is
-      Desc       : constant Any_Language_Id := Unit.Context.Desc;
-      Entity     : constant Internal_Entity :=
-        (Node, null, False, No_Internal_Node_Metadata);
-      Safety_Net : constant Node_Safety_Net :=
-        Create_Node_Safety_Net (Unit, null);
-   begin
-      return (Ada.Finalization.Controlled with
-              Desc, Entity, Safety_Net);
-   end Wrap;
-
    ---------------
    -- Wrap_Node --
    ---------------
@@ -300,7 +281,7 @@ package body Langkit_Support.Generic_API.Analysis is
       end if;
 
       --  Create a new metadata ownership share for the result
-      if E.Metadata /= No_Internal_Node_Metadata then
+      if E.Metadata /= Origin_Node.Desc.Null_Metadata then
          Origin_Node.Desc.Node_Metadata_Inc_Ref (E.Metadata);
       end if;
 
@@ -503,6 +484,28 @@ package body Langkit_Support.Generic_API.Analysis is
    ----------
 
    function Root (Self : Lk_Unit'Class) return Lk_Node is
+
+      function Wrap (Node : Internal_Node; Unit : Lk_Unit'Class) return Lk_Node
+      with Inline_Always;
+      --  Return a public node to wrap ``Node``, given an existing non-null
+      --  reference to its owning Unit.
+
+      ----------
+      -- Wrap --
+      ----------
+
+      function Wrap (Node : Internal_Node; Unit : Lk_Unit'Class) return Lk_Node
+      is
+         Desc       : constant Any_Language_Id := Unit.Context.Desc;
+         Entity     : constant Internal_Entity :=
+           (Node, null, False, Desc.Null_Metadata);
+         Safety_Net : constant Node_Safety_Net :=
+           Create_Node_Safety_Net (Unit, null);
+      begin
+         return (Ada.Finalization.Controlled with
+                 Desc, Entity, Safety_Net);
+      end Wrap;
+
    begin
       Reject_Null_Unit (Self);
 
@@ -621,8 +624,23 @@ package body Langkit_Support.Generic_API.Analysis is
    begin
       Check_Safety_Net (Left);
       Check_Safety_Net (Right);
+
+      --  We only want to take the node into account when determining whether a
+      --  node is null or not, not the rest of the entity info. In particular,
+      --  for a null node, metadata might not be null (because it's a pointer
+      --  to the null metadata of the specific language).
+      if Left.Internal.Node = No_Internal_Node
+         or else Right.Internal.Node = No_Internal_Node
+      then
+         return Left.Internal.Node = Right.Internal.Node;
+      end if;
+
       return (Left.Internal.Node = Right.Internal.Node
-              and then Left.Internal.Rebindings = Right.Internal.Rebindings);
+              and then Left.Internal.Rebindings = Right.Internal.Rebindings
+              and then
+                --  Check that metadata values are the same
+                Left.Desc.Node_Metadata_Compare
+                  (Left.Internal.Metadata, Right.Internal.Metadata));
    end "=";
 
    -----------
@@ -1294,7 +1312,7 @@ package body Langkit_Support.Generic_API.Analysis is
    overriding procedure Adjust (Self : in out Lk_Node) is
    begin
       if Self.Internal.Node /= No_Internal_Node
-         and then Self.Internal.Metadata /= No_Internal_Node_Metadata
+         and then Self.Internal.Metadata /= Self.Desc.Null_Metadata
       then
          Self.Desc.Node_Metadata_Inc_Ref (Self.Internal.Metadata);
       end if;
@@ -1307,7 +1325,7 @@ package body Langkit_Support.Generic_API.Analysis is
    overriding procedure Finalize (Self : in out Lk_Node) is
    begin
       if Self.Internal.Node /= No_Internal_Node then
-         if Self.Internal.Metadata /= No_Internal_Node_Metadata then
+         if Self.Internal.Metadata /= Self.Desc.Null_Metadata then
             Self.Desc.Node_Metadata_Dec_Ref (Self.Internal.Metadata);
          end if;
          Self.Initialize;
@@ -1377,7 +1395,7 @@ package body Langkit_Support.Generic_API.Analysis is
       Context : Internal_Context;
       Unit    : Internal_Unit;
    begin
-      if Node = No_Internal_Entity then
+      if Node.Node = No_Internal_Node then
          return No_Lk_Node;
       end if;
 

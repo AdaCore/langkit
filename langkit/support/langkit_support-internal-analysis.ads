@@ -40,9 +40,6 @@ package Langkit_Support.Internal.Analysis is
    --  addresses mean "default metadata", and the language descriptor table
    --  provides ref-counting primitives.
 
-   No_Internal_Node_Metadata : constant Internal_Node_Metadata :=
-     Internal_Node_Metadata (System.Null_Address);
-
    --  As everywhere else, entities are made up of bare nodes and entity
    --  information, with regular types from Langkit_Support.Lexical_Envs. The
    --  metadata has a special representation: see above (Internal_Node_Metadata
@@ -55,8 +52,15 @@ package Langkit_Support.Internal.Analysis is
       Metadata     : Internal_Node_Metadata;
    end record;
 
+   function "=" (L, R : Internal_Entity) return Boolean is abstract;
+   --  We hide the equal operator on internal entities, because since null
+   --  metadata can be either null or a pointer to language specific null
+   --  metadata, we generally don't want our implementation to compare the
+   --  whole Internal_Entity, but rather individual fields.
+
    No_Internal_Entity : constant Internal_Entity :=
-     (No_Internal_Node, null, False, No_Internal_Node_Metadata);
+     (No_Internal_Node, null, False,
+      Internal_Node_Metadata (System.Null_Address));
 
    type Internal_Entity_Array is array (Positive range <>) of Internal_Entity;
 

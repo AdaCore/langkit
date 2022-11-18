@@ -15,6 +15,8 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with Libfoolang.Analysis;
 with Libfoolang.Common;
 with Libfoolang.Generic_API; use Libfoolang.Generic_API;
+with Libfoolang.Generic_API.Introspection;
+use Libfoolang.Generic_API.Introspection;
 
 procedure Analysis is
    Id : Language_Id renames Libfoolang.Generic_API.Foo_Lang_Id;
@@ -578,4 +580,40 @@ begin
                    & Exception_Message (Exc));
    end;
    New_Line;
+
+   Put_Line ("Check that equality takes metadata into account");
+   declare
+      N2 : Lk_Node;
+   begin
+      U := Ctx.Get_From_File ("example.txt");
+      N := U.Root.Child (1);
+
+      N2 := As_Node
+        (Eval_Member
+          (From_Node (Id, N),
+           Member_Refs.Example_P_With_Md,
+           (From_Bool (Id, False), From_Bool (Id, False))));
+
+      Put_Line ("N = N2 (same metadata): "
+                & Boolean'Image (N = N2));
+
+      N2 := As_Node
+        (Eval_Member
+          (From_Node (Id, N),
+           Member_Refs.Example_P_With_Md,
+           (From_Bool (Id, False), From_Bool (Id, True))));
+
+      Put_Line ("N = N2 (/= metadata, field not used in eq): "
+                & Boolean'Image (N = N2));
+
+      N2 := As_Node
+        (Eval_Member
+          (From_Node (Id, N),
+           Member_Refs.Example_P_With_Md,
+           (From_Bool (Id, True), From_Bool (Id, False))));
+
+      Put_Line ("N = N2 (/= metadata, field used in eq): "
+                & Boolean'Image (N = N2));
+   end;
+
 end Analysis;
