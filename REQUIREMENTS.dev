@@ -12,6 +12,7 @@ mypy==0.800
 pexpect==4.8.0
 ptyprocess==0.7.0
 pycodestyle
+pytest==6.2.5
 railroad-diagrams~=1.1.0
 sphinx-rtd-theme==0.4.3
 types-docutils==0.18.3
