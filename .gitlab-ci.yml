@@ -12,7 +12,8 @@ workflow:
     - if: '$CI_COMMIT_BRANCH'
 
 variables:
-  PACKAGE: $CI_PROJECT_DIR/langkit.tar.gz
+  PACKAGE_BASENAME: langkit.tar.gz
+  PACKAGE_ABSOLUTE_NAME: $CI_PROJECT_DIR/$PACKAGE_BASENAME
   PACKAGE_REPOSITORY_PROJECT: eng/libadalang/ci-packages
   CI_FRAGMENTS: ci_fragments
   CI_FRAGMENTS_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/setton/$CI_FRAGMENTS
@@ -43,13 +44,13 @@ langkit_build:
     - anod build --minimal --disable-cathod langkit
 
     # Create the langkit package
-    - tar czf $PACKAGE -C /
+    - tar czf $PACKAGE_ABSOLUTE_NAME -C /
         it/wave/x86_64-linux/langkit_support/install
         it/wave/x86_64-linux/langkit/install
 
   artifacts:
     paths:
-      - $PACKAGE
+      - $PACKAGE_BASENAME
 
 ########
 # TEST #
@@ -71,8 +72,8 @@ langkit_test:
     - export PATH=/it/e3/bin:$PATH
 
     # Unpack langkit
-    - tar zxf $PACKAGE -C /
-    - rm $PACKAGE
+    - tar zxf $PACKAGE_ABSOLUTE_NAME -C /
+    - rm $PACKAGE_ABSOLUTE_NAME
 
     # Run the testsuite
     - cd /it/wave
@@ -115,8 +116,8 @@ libadalang_build_and_test:
     - export PATH=/it/e3/bin:$PATH
 
     # Unpack langkit
-    - tar zxf $PACKAGE -C /
-    - rm $PACKAGE
+    - tar zxf $PACKAGE_ABSOLUTE_NAME -C /
+    - rm $PACKAGE_ABSOLUTE_NAME
 
     # Get libadalang. Use this branch if it's a "/sync/" branch.
     - cd /tmp
@@ -170,4 +171,4 @@ package:
 
     # Upload the package
     - git clone $CI_FRAGMENTS_GIT
-    - ./$CI_FRAGMENTS/upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE
+    - ./$CI_FRAGMENTS/upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
