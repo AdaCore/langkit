@@ -17,19 +17,19 @@ All:
     N_Predicate?(%X, %Y)
 
 ... without optimizations:
-Solution: [%X = 1, %Y = -1]
-Solution: [%X = -1, %Y = -1]
-Solution: [%X = 2, %Y = -2]
-Solution: [%X = -2, %Y = -2]
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
+Solution: [%X = -1, %Y = -1]
+Solution: [%X = -2, %Y = -2]
+Solution: [%X = 1, %Y = -1]
+Solution: [%X = 2, %Y = -2]
 
 ... with all optimizations:
-Solution: [%X = 1, %Y = -1]
-Solution: [%X = -1, %Y = -1]
-Solution: [%X = 2, %Y = -2]
-Solution: [%X = -2, %Y = -2]
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
+Solution: [%X = -1, %Y = -1]
+Solution: [%X = -2, %Y = -2]
+Solution: [%X = 1, %Y = -1]
+Solution: [%X = 2, %Y = -2]
 
 Done.

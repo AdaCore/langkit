@@ -10,9 +10,11 @@ All:
     lt-100?(%X)
 
 ... without optimizations:
-  -> CONSTRAINT_ERROR: main.adb:14 divide by zero
+Solution: [%X = 27]
+Solution: [%X = 100]
 
 ... with all optimizations:
-  -> CONSTRAINT_ERROR: main.adb:14 divide by zero
+Solution: [%X = 27]
+Solution: [%X = 100]
 
 Done.

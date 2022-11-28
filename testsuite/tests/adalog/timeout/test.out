@@ -256,9 +256,11 @@ All:
 
 
 ... without optimizations:
+Solution: [%X1 = 10, %X2 = 11, %X3 = 20, %X4 = 17, %X5 = 18, %X6 = 19, %X7 = 20, %X8 = 21, %X9 = 22]
 Resolution failed with Timeout_Error
 
 ... with all optimizations:
+Solution: [%X1 = 10, %X2 = 11, %X3 = 20, %X4 = 17, %X5 = 18, %X6 = 19, %X7 = 20, %X8 = 21, %X9 = 22]
 Resolution failed with Timeout_Error
 
 Solving relation:

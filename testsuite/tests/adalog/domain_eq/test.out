@@ -47,13 +47,13 @@ All:
 
 
 ... without optimizations:
-Solution: [%X = 3, %Y = 3]
-Solution: [%X = 2, %Y = 2]
 Solution: [%X = 1, %Y = 1]
+Solution: [%X = 2, %Y = 2]
+Solution: [%X = 3, %Y = 3]
 
 ... with all optimizations:
-Solution: [%X = 3, %Y = 3]
-Solution: [%X = 2, %Y = 2]
 Solution: [%X = 1, %Y = 1]
+Solution: [%X = 2, %Y = 2]
+Solution: [%X = 3, %Y = 3]
 
 Done.

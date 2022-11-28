@@ -1870,13 +1870,7 @@ package body Langkit_Support.Adalog.Solver is
         (R : Compound_Relation; From_Block_Id : Variable)
       is
       begin
-         --  TODO: removing ``reverse`` actually improves performance, but
-         --  causes some issues in Libadalang because some equations that
-         --  previously resolved to one of the possible solutions now
-         --  resolve to another one.
-         --  We need to fix equations in LAL to remove ambiguities in legal
-         --  code.
-         for I in reverse 1 .. R.Compound_Rel.Rels.Length loop
+         for I in 1 .. R.Compound_Rel.Rels.Length loop
             Create_Problem (R.Compound_Rel.Rels.Get (I), From_Block_Id);
          end loop;
       end Process_All;
