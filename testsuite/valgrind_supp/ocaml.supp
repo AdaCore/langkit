@@ -69,13 +69,11 @@
    ...
 }
 {
-   false positive when calling Gc.compact
+   caml is managing the memory, suppress caml_alloc_for_heap calls
    Memcheck:Leak
    fun:malloc
    fun:caml_stat_alloc_aligned_noexc
    fun:caml_alloc_for_heap
-   fun:caml_compact_heap
-   fun:caml_gc_compaction
    ...
 }
 {
