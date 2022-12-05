@@ -1,4 +1,5 @@
 import dataclasses
+import os
 import os.path
 import subprocess
 import sys
@@ -52,15 +53,20 @@ tests = [
 
 
 if len(sys.argv) == 1:
+    # If we ran this script through our path wrapper helper for Windows, run
+    # the subprocess under this wrapper, too.
+    path_wrapper = os.environ.get("PATH_WRAPPER")
+
     print("main.py: Starting...")
     print("")
     for t in tests:
         print(f"== {t.label} ==")
         print("")
         sys.stdout.flush()
-        subprocess.check_call(
-            [sys.executable, __file__, t.cls.__name__] + t.args
-        )
+        argv = [sys.executable, __file__, t.cls.__name__] + t.args
+        if path_wrapper:
+            argv.insert(1, path_wrapper)
+        subprocess.check_call(argv)
     print("main.py: Done.")
 
 else:
