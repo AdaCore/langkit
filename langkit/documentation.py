@@ -1033,13 +1033,16 @@ base_langkit_docs = {
         already has a living rewriting session.
     """,
     'langkit.rewriting.abort_rewriting': """
-        Discard all modifications registered in Handle and close Handle
+        Discard all modifications registered in Handle and close Handle. This
+        invalidates all related unit/node handles.
     """,
     'langkit.rewriting.apply': """
         Apply all modifications to Handle's analysis context. If that worked,
         close Handle and return (Success => True). Otherwise, reparsing did not
         work, so keep Handle and its Context unchanged and return details about
         the error that happened.
+
+        Note that on success, this invalidates all related unit/node handles.
     """,
     'langkit.rewriting.unit_handles': """
         Return the list of unit rewriting handles in the given context handle
