@@ -205,9 +205,7 @@ begin
                      Properties_Traces.Decrease_Indent;
                   % endif
                   ${gdb_memoization_return()}
-                  Ada.Exceptions.Raise_Exception
-                    (Mmz_Val.Exc_Id,
-                     To_String (Mmz_Val.Exc_Msg) & " (memoized)");
+                  Reraise_Memoized_Error (Mmz_Val);
 
                else
                   Property_Result := Mmz_Val.As_${property.type.name};
@@ -291,20 +289,13 @@ begin
             % if memoized:
                if Self /= null then
                   % if not property.memoize_in_populate:
-                  if not Self.Unit.Context.In_Populate_Lexical_Env then
-                  % endif
-
-                     Add_Memoized_Value
-                       (Self.Unit,
-                        Mmz_Handle,
-                        (Kind    => Mmz_Error,
-                         Exc_Id  => Ada.Exceptions.Exception_Identity (Exc),
-                         Exc_Msg => To_Unbounded_String
-                           (Ada.Exceptions.Exception_Message (Exc))),
-                        Mmz_Stored);
-
-                  % if not property.memoize_in_populate:
-                  end if;
+                     if not Self.Unit.Context.In_Populate_Lexical_Env then
+                        Add_Memoized_Error
+                          (Self.Unit, Mmz_Handle, Exc, Mmz_Stored);
+                     end if;
+                  % else:
+                     Add_Memoized_Error
+                       (Self.Unit, Mmz_Handle, Exc, Mmz_Stored);
                   % endif
                end if;
             % endif

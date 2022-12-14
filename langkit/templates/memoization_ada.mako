@@ -54,7 +54,7 @@ type Mmz_Value (Kind : Mmz_Value_Kind := Mmz_Evaluating) is record
 
       when Mmz_Error =>
          Exc_Id  : Ada.Exceptions.Exception_Id;
-         Exc_Msg : Unbounded_String;
+         Exc_Msg : String_Access;
 
       % for t in value_types:
          when ${t.memoization_kind} =>
@@ -108,6 +108,18 @@ procedure Add_Memoized_Value
 --  previous entry, if present). Set Stored to whether the key/value entry was
 --  actually stored: it's not when Handle is stale, i.e. caches where reset
 --  since Handle was created).
+
+procedure Add_Memoized_Error
+  (Unit   : Internal_Unit;
+   Handle : in out Memoization_Handle;
+   Exc    : Ada.Exceptions.Exception_Occurrence;
+   Stored : out Boolean);
+--  Wrapper for ``Add_Memoized_Value`` specifically for memoizing an exception
+
+procedure Reraise_Memoized_Error (Value : Mmz_Value)
+with No_Return,
+     Pre => Value.Kind = Mmz_Error;
+--  Re-raise the exception memoized in ``Value``
 
 </%def>
 
@@ -238,18 +250,19 @@ begin
    end loop;
 
    <% refcounted_value_types = [t for t in value_types if t.is_refcounted] %>
-   % if refcounted_value_types:
-      for V of Values.all loop
-         case V.Kind is
-            % for t in refcounted_value_types:
-               when ${t.memoization_kind} =>
-                  Dec_Ref (V.As_${t.name});
-            % endfor
+   for V of Values.all loop
+      case V.Kind is
+         when Mmz_Error =>
+            Free (V.Exc_Msg);
 
-            when others => null;
-         end case;
-      end loop;
-   % endif
+         % for t in refcounted_value_types:
+            when ${t.memoization_kind} =>
+               Dec_Ref (V.As_${t.name});
+         % endfor
+
+         when others => null;
+      end case;
+   end loop;
 
    Free (Keys);
    Free (Values);
@@ -333,5 +346,39 @@ begin
       Unit.Memoization_Map.Replace_Element (Handle.Cur, Value);
    end if;
 end Add_Memoized_Value;
+
+------------------------
+-- Add_Memoized_Error --
+------------------------
+
+procedure Add_Memoized_Error
+  (Unit   : Internal_Unit;
+   Handle : in out Memoization_Handle;
+   Exc    : Ada.Exceptions.Exception_Occurrence;
+   Stored : out Boolean)
+is
+   Msg : String_Access := new String'(Ada.Exceptions.Exception_Message (Exc));
+begin
+   Add_Memoized_Value
+     (Unit,
+      Handle,
+      (Kind    => Mmz_Error,
+       Exc_Id  => Ada.Exceptions.Exception_Identity (Exc),
+       Exc_Msg => Msg),
+      Stored);
+   if not Stored then
+      Free (Msg);
+   end if;
+end Add_Memoized_Error;
+
+----------------------------
+-- Reraise_Memoized_Error --
+----------------------------
+
+procedure Reraise_Memoized_Error (Value : Mmz_Value) is
+begin
+   Ada.Exceptions.Raise_Exception
+     (Value.Exc_Id, Value.Exc_Msg.all & " (memoized)");
+end Reraise_Memoized_Error;
 
 </%def>
