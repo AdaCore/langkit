@@ -107,28 +107,6 @@ private package ${ada_lib_name}.Implementation is
    type Analysis_Context_Type;
    type Internal_Context is access all Analysis_Context_Type;
 
-   Unexpected_Call_Depth : exception;
-   --  Raised when the Call_Depth for two matching calls to Enter_Call and
-   --  Exit_Call don't match, i.e. when there is a bug in the counting of
-   --  recursive calls.
-
-   procedure Enter_Call
-     (Context : Internal_Context; Call_Depth : access Natural)
-   with Inline_Always;
-   --  Increment the call depth in Context. If the depth exceeds Context's
-   --  maximum, raise a Property_Error for "stack overflow".
-   --
-   --  Note that in the case of an exception, the depth is still incremented.
-   --  This means that all calls to Enter_Call must be wrapped in an exception
-   --  handler which calls Exit_Call on exception.
-   --
-   --  Put in Call_Depth the incremented call depth.
-
-   procedure Exit_Call (Context : Internal_Context; Call_Depth : Natural)
-   with Inline_Always;
-   --  Decrement the call depth in Context. If Call_Depth does not match the
-   --  current call depth, raise an Unexpected_Call_Depth.
-
    type Analysis_Unit_Type;
    type Internal_Unit is access all Analysis_Unit_Type;
 
@@ -1591,20 +1569,6 @@ private package ${ada_lib_name}.Implementation is
       --  Special analysis unit used only as a containing unit to parse
       --  templates in the context of tree rewriting.
 
-      Current_Call_Depth : Natural := 0;
-      --  Number of recursive calls currently running. This counter is
-      --  used as a mitigation against infinite recursions. The calls
-      --  considered here include:
-      --
-      --  * parsing functions;
-      --  * properties calls.
-
-      Call_Depth_High_Water_Mark : Natural := 0;
-      --  Maximum number of recursive calls seen in this context so far
-
-      Max_Call_Depth : Natural := 0;
-      --  Maximum number of recursive calls allowed
-
       Available_Rebindings : Env_Rebindings_Vectors.Vector;
       --  List of allocated-but-unused Env_Rebinding_Type records.
       --
@@ -1786,8 +1750,7 @@ private package ${ada_lib_name}.Implementation is
       Unit_Provider  : Internal_Unit_Provider_Access;
       Event_Handler  : Internal_Event_Handler_Access;
       With_Trivia    : Boolean;
-      Tab_Stop       : Positive;
-      Max_Call_Depth : Natural := ${ctx.default_max_call_depth});
+      Tab_Stop       : Positive);
    ${ada_doc('langkit.initialize_context', 3)}
    --  Implementation for ``Analysis.Create_Context``: call
    --  ``Allocate_Context`` to allocate an ``Internal_Context`` value, then

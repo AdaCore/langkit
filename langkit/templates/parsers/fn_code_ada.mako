@@ -11,8 +11,6 @@ function ${parser.gen_fn_name}
 is
    use ${ret_type}_Memos;
 
-   Call_Depth : aliased Natural;
-
    % for name, typ in var_context:
       ${name} :
          % if isinstance(typ, str):
@@ -33,16 +31,12 @@ is
    M : Memo_Entry := Get (${memo}, Pos);
 
 begin
-   Enter_Call (Parser, Call_Depth'Access);
-
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
       ${parser.res_var} := M.Instance;
-      Exit_Call (Parser, Call_Depth);
       return ${parser.res_var};
    elsif M.State = Failure then
       Parser.Current_Pos := No_Token_Index;
-      Exit_Call (Parser, Call_Depth);
       return ${parser.res_var};
    end if;
 
@@ -102,11 +96,5 @@ begin
 
    Parser.Current_Pos := ${parser.pos_var};
 
-   Exit_Call (Parser, Call_Depth);
    return ${parser.res_var};
-
-exception
-   when others =>
-      Exit_Call (Parser, Call_Depth);
-      raise;
 end ${parser.gen_fn_name};

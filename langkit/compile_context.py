@@ -1723,7 +1723,6 @@ class CompileCtx:
         warnings: Optional[WarningSet] = None,
         generate_unparser: bool = False,
         explicit_passes_triggers: Dict[str, bool] = {},
-        default_max_call_depth: int = 1000,
         plugin_passes: List[Union[str, AbstractPass]] = [],
         extra_code_emission_passes: List[AbstractPass] = [],
         **kwargs
@@ -1746,10 +1745,6 @@ class CompileCtx:
         :param explicit_passes_triggers: Dict of optional passes names to flags
             (on/off) to trigger activation/deactivation of the passes.
 
-        :param int max_call_depth: Default maximum number of recursive calls
-            allowed in properties calls. This is used as a mitigation against
-            infinite recursions.
-
         :param plugin_passes: List of passes to add as plugins to the
             compilation pass manager. List items must be either:
 
@@ -1760,10 +1755,6 @@ class CompileCtx:
               ``CALLABLE`` is the name of a callable inside the module to
               import. This callable must accept no argument and return an
               instance of a ``AbstractPass`` subclass.
-
-        :param max_call_depth: Default maximum number of recursive calls
-            allowed in property calls. This is used as a mitigation against
-            infinite recursions.
 
         :param extra_code_emission_passes: See
             ``CompileCtx.code_emission_passes``.
@@ -1778,7 +1769,6 @@ class CompileCtx:
             self.warnings = warnings
 
         self.generate_unparser = generate_unparser
-        self.default_max_call_depth = default_max_call_depth
 
         self.check_only = check_only
 

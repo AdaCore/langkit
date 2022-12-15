@@ -145,11 +145,6 @@ package body ${ada_lib_name}.Parsers is
 
    pragma Warnings (On, "is not referenced");
 
-   procedure Enter_Call (Parser : Parser_Type; Call_Depth : access Natural);
-   procedure Exit_Call (Parser : Parser_Type; Call_Depth : Natural);
-   --  Shortcuts to forward Parser's context to the eponym procedures in
-   --  the Implementation package.
-
    ---------------------
    -- Initialize_List --
    ---------------------
@@ -375,23 +370,5 @@ package body ${ada_lib_name}.Parsers is
       Lists := List;
       List := null;
    end Release_Parse_List;
-
-   ----------------
-   -- Enter_Call --
-   ----------------
-
-   procedure Enter_Call (Parser : Parser_Type; Call_Depth : access Natural) is
-   begin
-      Enter_Call (Parser.Unit.Context, Call_Depth);
-   end Enter_Call;
-
-   ---------------
-   -- Exit_Call --
-   ---------------
-
-   procedure Exit_Call (Parser : Parser_Type; Call_Depth : Natural) is
-   begin
-      Exit_Call (Parser.Unit.Context, Call_Depth);
-   end Exit_Call;
 
 end ${ada_lib_name}.Parsers;

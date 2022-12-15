@@ -234,39 +234,6 @@ package body ${ada_lib_name}.Implementation is
       return Ret;
    end Construct_Entity_Array;
 
-   ----------------
-   -- Enter_Call --
-   ----------------
-
-   procedure Enter_Call
-     (Context : Internal_Context; Call_Depth : access Natural)
-   is
-      Max             : Natural renames Context.Max_Call_Depth;
-      Current         : Natural renames Context.Current_Call_Depth;
-      High_Water_Mark : Natural renames Context.Call_Depth_High_Water_Mark;
-   begin
-      Current := Current + 1;
-      High_Water_Mark := Natural'Max (High_Water_Mark, Current);
-      Call_Depth.all := Current;
-      if Current > Max then
-         raise Property_Error with "stack overflow";
-      end if;
-   end Enter_Call;
-
-   ---------------
-   -- Exit_Call --
-   ---------------
-
-   procedure Exit_Call (Context : Internal_Context; Call_Depth : Natural) is
-      Current : Natural renames Context.Current_Call_Depth;
-   begin
-      if Call_Depth /= Current then
-         raise Unexpected_Call_Depth with
-            "Langkit code generation bug for call depth handling detected";
-      end if;
-      Current := Current - 1;
-   end Exit_Call;
-
    -----------
    -- Image --
    -----------
@@ -453,8 +420,7 @@ package body ${ada_lib_name}.Implementation is
       Unit_Provider  : Internal_Unit_Provider_Access;
       Event_Handler  : Internal_Event_Handler_Access;
       With_Trivia    : Boolean;
-      Tab_Stop       : Positive;
-      Max_Call_Depth : Natural := ${ctx.default_max_call_depth})
+      Tab_Stop       : Positive)
    is
       Actual_Charset : constant String :=
         (if Charset = "" then Default_Charset else Charset);
@@ -507,8 +473,6 @@ package body ${ada_lib_name}.Implementation is
 
       Context.Rewriting_Handle := No_Rewriting_Handle_Pointer;
       Context.Templates_Unit := No_Analysis_Unit;
-
-      Context.Max_Call_Depth := Max_Call_Depth;
 
       Context.Available_Rebindings := Env_Rebindings_Vectors.Empty_Vector;
 

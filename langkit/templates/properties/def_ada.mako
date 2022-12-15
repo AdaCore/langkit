@@ -25,22 +25,21 @@ ${"overriding" if property.overriding else ""} function ${property.name}
    return ${property.type.name}
 is
    ## We declare a variable Self, that has the named class wide access type
-   ## that we can use to dispatch on other properties and all.
-   Self : ${Self.type.name} := ${Self.type.name} (${property.self_arg_name});
-
-   Call_Depth : aliased Natural;
+   ## that we can use to dispatch on other properties and all. Also declare the
+   ## variable Entity if this property works on entities. Bind Self *or* Entity
+   ## depending on what makes sense for this property.
+   Self : ${Self.type.name}  := ${Self.type.name} (${property.self_arg_name});
+   % if property._has_self_entity:
+     Ent : ${Self.type.entity.name} :=
+       ${Self.type.entity.name}'(Node => Self, Info => E_Info);
+      ${gdb_bind('entity', 'Ent')}
+   % else:
+      ${gdb_bind('self', 'Self')}
+   % endif
 
    ## Dispatchers must not memoize because it will be done at the static
    ## property level: we do not want to do it twice.
    <% memoized = property.memoized and not property.is_dispatcher %>
-
-   % if property._has_self_entity:
-   Ent : ${Self.type.entity.name} :=
-     ${Self.type.entity.name}'(Node => Self, Info => E_Info);
-   ${gdb_bind('entity', 'Ent')}
-   % else:
-   ${gdb_bind('self', 'Self')}
-   % endif
 
    % for arg in property.arguments:
    ${gdb_bind(arg.name.lower, arg.name.camel_with_underscores)}
@@ -123,6 +122,11 @@ is
 begin
    ${gdb_property_body_start()}
 
+   ## Dummy statement to offer a convenient place to break from GDB: after the
+   ## declaration part, but before memoization code and expression evaluation.
+   ## This dummy statement will be optimized away at high optimization levels.
+   pragma Assert (Self = ${property.self_arg_name});
+
    ## If this is a lazy field, return it when it has already been evaluated
    ## once.
    % if property.lazy_field:
@@ -134,12 +138,6 @@ begin
          return Property_Result;
       end if;
    % endif
-
-   ## Because they can be used this way in equation solving, properties must
-   ## not crash when called on a null node.
-   if Self /= null then
-      Enter_Call (Self.Unit.Context, Call_Depth'Access);
-   end if;
 
    % if has_logging:
       Properties_Traces.Trace
@@ -219,7 +217,6 @@ begin
                      Properties_Traces.Decrease_Indent;
                   % endif
                   ${gdb_memoization_return()}
-                  Exit_Call (Self.Unit.Context, Call_Depth);
                   return Property_Result;
                end if;
                ${gdb_end()}
@@ -352,19 +349,7 @@ begin
       Properties_Traces.Decrease_Indent;
    % endif
 
-   if Self /= null then
-      Exit_Call (Self.Unit.Context, Call_Depth);
-   end if;
    return Property_Result;
-
-exception
-
-   when others =>
-      if Self /= null then
-         Exit_Call (Self.Unit.Context, Call_Depth);
-      end if;
-      raise;
-
 end ${property.name};
 ${gdb_end()}
 % endif
