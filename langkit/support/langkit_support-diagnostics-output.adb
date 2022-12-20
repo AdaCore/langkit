@@ -15,7 +15,6 @@ package body Langkit_Support.Diagnostics.Output is
    procedure Print_Source_Listing
      (Sloc_Range      : Source_Location_Range;
       Buffer          : Text_Buffer_Ifc'Class;
-      Lines_After     : Natural := 0;
       Output_File     : WWIO.File_Type := WWIO.Standard_Output;
       Caretting_Color : ANSI_Color);
    --  Print a source listing.
@@ -23,8 +22,6 @@ package body Langkit_Support.Diagnostics.Output is
    --  ``Sloc_Range`` determines range of source code to print.
    --
    --  ``Buffer`` is used to get access to the source code.
-   --
-   --  ``Lines_After`` is unused for now (see the TODO in the procedure body).
    --
    --  The source listing is written to ``Output_File``.
    --
@@ -51,59 +48,101 @@ package body Langkit_Support.Diagnostics.Output is
    procedure Print_Source_Listing
      (Sloc_Range      : Source_Location_Range;
       Buffer          : Text_Buffer_Ifc'Class;
-      Lines_After     : Natural := 0;
       Output_File     : WWIO.File_Type := WWIO.Standard_Output;
       Caretting_Color : ANSI_Color)
    is
-      procedure Start_Line (Line_Nb : String);
-      --  Print the "NN | " source listing prefix. ``Line_Nb`` is the image of
-      --  the line number (NN).
+      procedure Line_Starting (Line_Nb : Natural);
+      --  Print the "NN |" source listing prefix. ``Line_Nb`` is the line
+      --  number in a natural integer. If ``Line_Nb`` is 0 then the line
+      --  number "NN" is blank.
 
-      Line_Nb      : constant Positive := Positive (Sloc_Range.Start_Line);
-      Start_Offset : constant Positive := Positive (Sloc_Range.Start_Column);
-      End_Offset   : constant Natural  := Natural (Sloc_Range.End_Column) - 1;
-
-      Line_Nb_Width : constant Positive :=
-        Positive'Image (Line_Nb + Lines_After)'Length - 1;
-      --  Size in bytes of the biggest line number to display
+      Start_Line : constant Natural := Natural (Sloc_Range.Start_Line);
+      Start_Col  : constant Natural := Natural (Sloc_Range.Start_Column);
+      End_Line   : constant Natural := Natural (Sloc_Range.End_Line);
+      End_Col    : constant Natural := Natural (Sloc_Range.End_Column);
+      Line_Nb    : constant Natural := End_Line - Start_Line + 1;
+      Col_Size   : constant Natural :=
+         To_Text (Stripped_Image (End_Line))'Length;
 
       ----------------
       -- Start_Line --
       ----------------
 
-      procedure Start_Line (Line_Nb : String) is
+      procedure Line_Starting (Line_Nb : Natural) is
+         Num_Col : Text_Type (1 .. Col_Size) := (others => ' ');
       begin
-         Set_Style (Term_Info, Bright);
          Set_Color (Term_Info, Foreground => Blue);
-         Put (Output_File, To_Text (Line_Nb));
-         Put (Output_File, (1 .. Line_Nb_Width - Line_Nb'Length => ' '));
-         Put (Output_File, " | ");
+
+         if Line_Nb >= 1 then
+            declare
+               Line_Nb_Img : constant Wide_Wide_String :=
+                  To_Text (Stripped_Image (Line_Nb));
+            begin
+               Num_Col (1 .. Line_Nb_Img'Length) := Line_Nb_Img;
+            end;
+         end if;
+
+         Put (Output_File, Num_Col);
+         Put (Output_File, " |");
          Reset_Colors;
-      end Start_Line;
+      end Line_Starting;
    begin
-      --  Append the line containing the sloc
+      Set_Style (Term_Info, Bright);
 
-      Start_Line (Stripped_Image (Line_Nb));
-      Put_Line (Output_File, Get_Line (Buffer, Line_Nb));
-
-      --  If ``Sloc_Range`` is not empty, append the line caretting the sloc in
-      --  the line above.
-
-      if Start_Offset <= End_Offset then
-         Start_Line ("");
-         Set_Style (Term_Info, Bright);
-         Set_Color (Term_Info, Foreground => Caretting_Color);
+      --  If the number of line in the source is 1
+      if Line_Nb = 1 then
          declare
-            Caret_Line : Text_Type (1 .. End_Offset) := (others => ' ');
+            Caret_Line : Text_Type (1 .. End_Col - 1) := (others => ' ');
          begin
-            Caret_Line (Start_Offset .. End_Offset) := (others => '^');
-            Put_Line (Output_File, Caret_Line);
+            Caret_Line (Start_Col .. End_Col - 1) := (others => '^');
+            Line_Starting (Start_Line);
+            Put_Line (Output_File, " " & Get_Line (Buffer, Start_Line));
+            Line_Starting (0);
+            Set_Color (Term_Info, Foreground => Caretting_Color);
+            Put_Line (Output_File, " " & Caret_Line);
+            Reset_Colors;
          end;
-         Reset_Colors;
-      end if;
 
-      --  TODO??? Missing the printing of lines after, because so far it was
-      --  never used.
+      --  Else display the multiline style
+      else
+         declare
+            Diff            : constant Natural := Line_Nb - 2;
+            Start_Underline : constant Text_Type
+               (1 .. Start_Col) := (others => '_');
+            End_Undeline    : constant Text_Type
+               (1 .. Integer'Max (End_Col - 1, 1)) := (others => '_');
+         begin
+            Line_Starting (Start_Line);
+            Put_Line (Output_File, "  " & Get_Line (Buffer, Start_Line));
+            Line_Starting (0);
+            Set_Color (Term_Info, Foreground => Caretting_Color);
+            Put_Line (Output_File, " " & Start_Underline & "^");
+
+            if Diff > 0 then
+               Line_Starting (0);
+               Set_Color (Term_Info, Foreground => Caretting_Color);
+               Put_Line (Output_File, "|");
+               Line_Starting (0);
+               Set_Color (Term_Info, Foreground => Caretting_Color);
+               Put (Output_File, "|");
+               Put_Line (Output_File,
+                         " ~~~ " & To_Text (Stripped_Image (Diff))
+                         & " other lines ~~~");
+               Line_Starting (0);
+               Set_Color (Term_Info, Foreground => Caretting_Color);
+               Put_Line (Output_File, "|");
+            end if;
+
+            Line_Starting (End_Line);
+            Set_Color (Term_Info, Foreground => Caretting_Color);
+            Put (Output_File, "|");
+            Reset_Colors;
+            Put_Line (Output_File, " " & Get_Line (Buffer, End_Line));
+            Line_Starting (0);
+            Set_Color (Term_Info, Foreground => Caretting_Color);
+            Put_Line (Output_File, "|" & End_Undeline & "^");
+         end;
+      end if;
    end Print_Source_Listing;
 
    ----------------------
@@ -160,6 +199,9 @@ package body Langkit_Support.Diagnostics.Output is
          end loop;
       end;
       New_Line (Output_File);
+
+      --  Put the source sample
+
       Print_Source_Listing (Self.Sloc_Range, Buffer,
                             Output_File     => Output_File,
                             Caretting_Color => Style.Color);

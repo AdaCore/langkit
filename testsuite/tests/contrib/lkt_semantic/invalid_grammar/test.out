@@ -28,12 +28,21 @@ Id   <RefId "foo_lexer" test.lkt:16:22-16:31>
      references <LexerDecl "foo_lexer" lexer_example.lkt:1:1-49:2>
 
 test.lkt:16:33: error: main rule missing (@main_rule annotation)
-16 | @invalid @with_lexer(foo_lexer) grammar main_missing {
+16 |  @invalid @with_lexer(foo_lexer) grammar main_missing {
+   | _________________________________^
+   ||
+   || ~~~ 1 other lines ~~~
+   ||
+18 || }
+   ||_^
 
 test.lkt:20:10: error: exactly 1 positional argument expected
 20 | @invalid @with_lexer grammar invalid_with_lexer {
    |          ^^^^^^^^^^^
 
 test.lkt:23:10: error: missing mandatory "@with_lexer" annotation
-23 | @invalid grammar with_lexer_missing {
+23 |  @invalid grammar with_lexer_missing {
+   | __________^
+24 || }
+   ||_^
 
