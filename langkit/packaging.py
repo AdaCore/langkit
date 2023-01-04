@@ -24,6 +24,7 @@ class Packager:
         gnatcoll_core_prefix=None,
         gnatcoll_gmp_prefix=None,
         gnatcoll_iconv_prefix=None,
+        adasat_prefix=None,
         langkit_support_prefix=None
     ):
         """
@@ -48,6 +49,8 @@ class Packager:
         :param None|str gnatcoll_iconv_prefix: Directory in which
             gnatcoll-bindings(iconv) is installed. By default, use ``gnat
             prefix``.
+        :param None|str adasat_prefix: Directory in which adasat is installed.
+            By default, use ``gnat_prefix``.
         :param None|str langkit_support_prefix: Directory in which
             Langkit_Support is installed. By default, use ``gnat prefix``.
         """
@@ -61,6 +64,7 @@ class Packager:
         self.gnatcoll_core_prefix = gnatcoll_core_prefix or gnat_prefix
         self.gnatcoll_gmp_prefix = gnatcoll_gmp_prefix or gnat_prefix
         self.gnatcoll_iconv_prefix = gnatcoll_iconv_prefix or gnat_prefix
+        self.adasat_prefix = adasat_prefix or gnat_prefix
         self.langkit_support_prefix = langkit_support_prefix or gnat_prefix
 
         self.with_static = (LibraryType.static_pic in library_types
@@ -97,7 +101,7 @@ class Packager:
         """
         for name in ('gnat', 'gmp', 'libiconv', 'xmlada', 'libgpr',
                      'gnatcoll-core', 'gnatcoll-gmp', 'gnatcoll-iconv',
-                     'langkit-support'):
+                     'adasat', 'langkit-support'):
             parser.add_argument(
                 '--with-{}'.format(name),
                 help='Installation directory for {}'.format(name)
@@ -125,7 +129,7 @@ class Packager:
     @classmethod
     def from_args(cls, args):
         """
-        Instanciate Packager from command-line arguments.
+        Instantiate Packager from command-line arguments.
         """
         return cls(
             cls.args_to_env(args),
@@ -138,6 +142,7 @@ class Packager:
             args.with_gnatcoll_core,
             args.with_gnatcoll_gmp,
             args.with_gnatcoll_iconv,
+            args.with_adasat,
             args.with_langkit_support
         )
 
@@ -219,6 +224,9 @@ class Packager:
                 'libiconv*' + self.dllext + '*'
             )):
                 copy_in(item, dyn_libdir)
+
+        # Ship AdaSAT as well. We can simply copy the whole package
+        sync_tree(self.adasat_prefix, package_dir, delete=False)
 
     def assert_with_relocatable(self):
         assert LibraryType.relocatable in self.library_types, (
@@ -331,13 +339,17 @@ class Packager:
             self.std_path(self.gnatcoll_gmp_prefix, 'gnatcoll_gmp',
                           'libgnatcoll_gmp')]
 
+        # AdaSAT
+        adasat_lib = [self.std_path(self.adasat_prefix, 'adasat', 'libadasat')]
+
         # Finally, do the copy
         for libpath in (gnat_runtime_libs +
                         xmlada_libs +
                         gpr_libs +
                         libiconv_libs +
                         gnatcoll_core_libs +
-                        gnatcoll_bindings_libs):
+                        gnatcoll_bindings_libs +
+                        adasat_lib):
             self.copy_shared_lib(libpath, package_dir)
 
     def package_std_dyn(self, prefix, lib_subdir, libname, package_dir):
