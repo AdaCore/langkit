@@ -92,8 +92,7 @@ package Langkit_Support.Text is
      (S : Ada.Strings.UTF_Encoding.UTF_8_String) return Text_Type;
    --  Decode the given UTF-8 string into text
 
-   function To_Lower (C : Character_Type) return Character_Type
-      with Inline;
+   function To_Lower (C : Character_Type) return Character_Type with Inline;
    --  Wrapper around :ada:ref:`Ada.Wide_Wide_Characters.Handling.To_Lower` to
    --  be fast on the ASCII subset.
    --
@@ -102,6 +101,10 @@ package Langkit_Support.Text is
    --  Since we expect most sources to contain mostly codepoints in the ASCII
    --  subset, this function will be a faster alternative to
    --  :ada:ref:`Ada.Wide_Wide_Characters.Handling.To_Lower`.
+
+   function To_Lower (Text : Text_Type) return Text_Type with Inline;
+   --  Run ``To_Lower`` on each character of a copy of ``Text`` and return the
+   --  result.
 
    type Text_Access is access all Text_Type;
    type Text_Cst_Access is access constant Text_Type;

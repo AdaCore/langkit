@@ -206,4 +206,17 @@ package body Langkit_Support.Text is
       end if;
    end To_Lower;
 
+   --------------
+   -- To_Lower --
+   --------------
+
+   function To_Lower (Text : Text_Type) return Text_Type is
+   begin
+      return Result : Text_Type := Text do
+         for C of Result loop
+            C := To_Lower (C);
+         end loop;
+      end return;
+   end To_Lower;
+
 end Langkit_Support.Text;
