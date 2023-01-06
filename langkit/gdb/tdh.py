@@ -132,7 +132,7 @@ class Token:
         uint32_t = gdb.selected_frame().architecture().integer_type(
             32, signed=False
         )
-        text_addr = (src_buffer['P_ARRAY'].cast(uint32_t) +
+        text_addr = (src_buffer['P_ARRAY'].cast(uint32_t.pointer()) +
                      (first - int(src_buffer['P_BOUNDS']['LB0'])))
 
         char = gdb.lookup_type('character').pointer()
