@@ -789,6 +789,7 @@ def langkit_main(langkit_root, files=[]):
     excludes = ['__pycache__',
                 os.path.join('contrib', 'python', 'build'),
                 os.path.join('contrib', 'lkt', 'build'),
+                os.path.join('langkit', 'adasat'),
                 os.path.join('langkit', 'support', 'obj'),
                 os.path.join('langkit', 'dsl_unparse.py'),
                 'out',

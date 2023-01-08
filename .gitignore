@@ -67,3 +67,6 @@ contrib/lkt/build
 
 # Build artifacts
 b__*.ad?
+
+# AdaSAT
+langkit/adasat

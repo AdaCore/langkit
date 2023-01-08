@@ -111,6 +111,13 @@ class Emitter:
         Name of the replacement for Langkit_Support in standalone mode.
         """
 
+        self.standalone_adasat_name = (
+            f"{self.context.ada_api_settings.lib_name}_AdaSAT"
+        )
+        """
+        Name of the replacement for AdaSAT in standalone mode.
+        """
+
         self.lib_root = lib_root
         self.cache = Cache(
             os.path.join(self.lib_root, 'obj', 'langkit_cache')
@@ -306,26 +313,20 @@ class Emitter:
             if not path.exists(d):
                 os.mkdir(d)
 
-    def merge_langkit_support(self, ctx: CompileCtx) -> None:
+    def merge_library_sources(self, library_dir: str, merged_name: str):
         """
-        In standalone mode only, copy all units from Langkit_Support into the
-        generated library. Imported units are renamed to avoid clashes with
-        Langkit_Support itself.
+        Merge all source files from ``library_dir`` to the generated library's
+        source directory, and avoid conflicts with original unit names by
+        renaming the base name to ``merged_name``.
         """
-        if not self.standalone:
-            return
-
-        support_dir = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "support"
-        )
         for source_kind, ext in [
             (AdaSourceKind.spec, "ads"), (AdaSourceKind.body, "adb"),
         ]:
-            for file in glob.glob(os.path.join(support_dir, f"*.{ext}")):
+            for file in glob.glob(os.path.join(library_dir, f"*.{ext}")):
                 # Build a qualified (Ada) name for the imported unit
                 unit_name, _ = os.path.splitext(os.path.basename(file))
                 qual_name = unit_name.split("-")
-                qual_name[0] = self.standalone_support_name
+                qual_name[0] = merged_name
 
                 # Register the imported unit as an interface in the generated
                 # project.
@@ -339,6 +340,34 @@ class Emitter:
                 self.write_ada_file(
                     self.src_dir, source_kind, qual_name, content
                 )
+
+    def merge_support_libraries(self, ctx: CompileCtx) -> None:
+        """
+        In standalone mode only, copy all units from Langkit_Support and AdaSAT
+        into the generated library. Imported units are renamed to avoid clashes
+        with Langkit_Support and AdaSAT themselves.
+        """
+        if not self.standalone:
+            return
+
+        support_dir = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "support"
+        )
+
+        # We expect AdaSAT checkout to be at <langkit_root>/langkit/adasat
+        adasat_dir = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "adasat", "src"
+        )
+        check_source_language(
+            os.path.exists(adasat_dir),
+            "AdaSAT must be checked out at '<langkit_root>/langkit/adasat'"
+            " in order to build a standalone library.",
+            severity=Severity.error,
+            ok_for_codegen=True
+        )
+
+        self.merge_library_sources(support_dir, self.standalone_support_name)
+        self.merge_library_sources(adasat_dir, self.standalone_adasat_name)
 
     def emit_lib_project_file(self, ctx: CompileCtx) -> None:
         """
@@ -884,6 +913,7 @@ class Emitter:
                     '"langkit_support__int__"',
                     f'"{self.standalone_support_name.lower()}__int__"',
                 ),
+                ("AdaSAT", self.standalone_adasat_name)
             ]:
                 content = content.replace(pattern, replacement)
 

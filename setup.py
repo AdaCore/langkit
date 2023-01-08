@@ -29,6 +29,7 @@ setup(
     package_data={'langkit': [
         'coverage.css', 'support/*.adb', 'support/*.ads', 'support/*.gpr',
         'templates/*.mako', 'templates/*/*.mako', 'py.typed',
+        'adasat/src/*.ads', 'adasat/src/*.adb'
     ]},
     scripts=[os.path.join('scripts', 'create-project.py')]
 )

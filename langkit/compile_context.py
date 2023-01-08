@@ -2143,8 +2143,8 @@ class CompileCtx:
 
             MajorStepPass('Generate library sources'),
             EmitterPass('setup directories', Emitter.setup_directories),
-            EmitterPass('merge Langkit_Support',
-                        Emitter.merge_langkit_support),
+            EmitterPass('merge support libraries',
+                        Emitter.merge_support_libraries),
             EmitterPass('generate lexer DFA', Emitter.generate_lexer_dfa),
             EmitterPass('emit Ada sources', Emitter.emit_ada_lib),
             EmitterPass('emit mains', Emitter.emit_mains),
