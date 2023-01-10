@@ -49,4 +49,15 @@ package ${ada_lib_name}.Generic_API is
    --  ``Langkit_Support.Errors.Precondition_Failure`` if ``Rule`` does not
    --  belong to ${ada_lib_name} or if it is ``No_Grammar_Rule_Ref``.
 
+   function To_Generic_Node
+     (Node : ${root_entity.api_name}'Class) return Lk_Node;
+   --  Convert the given ``Node`` into a value suitable to use in the Langkit
+   --  generic API.
+
+   function From_Generic_Node (Node : Lk_Node) return ${root_entity.api_name};
+   --  Convert the ``Node`` value from the Langkit generic API into the
+   --  ${ada_lib_name}-specific unit type. Raise a
+   --  ``Langkit_Support.Errors.Precondition_Failure`` if ``Node`` does not
+   --  belong to ${ada_lib_name}.
+
 end ${ada_lib_name}.Generic_API;

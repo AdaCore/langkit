@@ -537,6 +537,21 @@ begin
    end;
    New_Line;
 
+   Put_Line ("Check generic/specific node type converters");
+   declare
+      Gen_Ctx  : constant Lk_Context := Create_Context (Id);
+      Gen_Unit : Lk_Unit := Gen_Ctx.Get_From_File ("example.txt");
+      Gen_Node : Lk_Node := Gen_Unit.Root;
+      Spe_Node : constant Libfoolang.Analysis.Foo_Node :=
+        From_Generic_Node (Gen_Node);
+   begin
+      Put_Line ("Root from specific: " & Spe_Node.Image);
+      Gen_Node := To_Generic_Node (Spe_Node);
+      Gen_Unit := Gen_Node.Unit;
+      Put_Line ("Root from generic: " & Gen_Unit.Root.Image);
+   end;
+   New_Line;
+
    Put_Line ("Check generic/specific grammar rule converters");
    declare
       use Libfoolang.Common;

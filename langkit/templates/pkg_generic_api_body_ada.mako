@@ -123,4 +123,34 @@ package body ${ada_lib_name}.Generic_API is
       return Grammar_Rule'Val (To_Index (Rule) - 1);
    end From_Generic_Grammar_Rule;
 
+   ---------------------
+   -- To_Generic_Node --
+   ---------------------
+
+   function To_Generic_Node
+     (Node : ${root_entity.api_name}'Class) return Lk_Node
+   is
+      E : constant Implementation.${root_entity.name} :=
+        Unwrap_Entity.all (Node);
+   begin
+      return Lk_Convs.Wrap_Node (Self_Id, +E);
+   end To_Generic_Node;
+
+   -----------------------
+   -- From_Generic_Node --
+   -----------------------
+
+   function From_Generic_Node (Node : Lk_Node) return ${root_entity.api_name}
+   is
+      N : Langkit_Support.Internal.Analysis.Internal_Entity;
+      E : Implementation.${root_entity.name};
+   begin
+      if Language (Node) /= Self_Id then
+         raise Precondition_Failure with "node belongs to another language";
+      end if;
+      N := Lk_Convs.Unwrap_Node (Node);
+      E := +N;
+      return Wrap_Node.all (E.Node, E.Info);
+   end From_Generic_Node;
+
 end ${ada_lib_name}.Generic_API;
