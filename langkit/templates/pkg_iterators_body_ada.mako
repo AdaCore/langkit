@@ -5,15 +5,17 @@
 with Ada.Containers.Vectors;
 with Ada.Strings.Wide_Wide_Unbounded;
 
+with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
+with Langkit_Support.Generic_API.Analysis;
+use Langkit_Support.Generic_API.Analysis;
+
+with ${ada_lib_name}.Generic_API; use ${ada_lib_name}.Generic_API;
+
 <%
    node = root_entity.api_name
    pred_iface = '{}_Predicate_Interface'.format(node)
    pred_ref = '{}_Predicate'.format(node)
 %>
-
-% if ctx.sorted_parse_fields:
-with ${ada_lib_name}.Introspection; use ${ada_lib_name}.Introspection;
-% endif
 
 ${exts.with_clauses(with_clauses)}
 
@@ -176,20 +178,24 @@ package body ${ada_lib_name}.Iterators is
    ----------------
 
    function Child_With
-     (Field     : Syntax_Field_Reference;
-      Predicate : ${pred_ref}) return ${pred_ref} is
+     (Field     : Struct_Member_Ref;
+      Predicate : ${pred_ref}) return ${pred_ref}
+   is
+      T : constant Langkit_Support.Generic_API.Introspection.Type_Ref :=
+        Owner (Field);
    begin
-      % if ctx.sorted_parse_fields:
-         return Result : ${pred_ref} do
-            Result.Set (Child_With_Predicate'
-              (${pred_iface} with
-               Field     => Field,
-               Predicate => Predicate));
-         end return;
-      % else:
-         pragma Unreferenced (Field, Predicate);
-         return (raise Program_Error);
-      % endif
+      if Language (T) /= Self_Id then
+         raise Precondition_Failure with "unexpected language";
+      elsif not Is_Node_Type (T) or else Is_Property (Field) then
+         raise Precondition_Failure with "node field reference expected";
+      end if;
+
+      return Result : ${pred_ref} do
+         Result.Set (Child_With_Predicate'
+           (${pred_iface} with
+            Field     => Field,
+            Predicate => Predicate));
+      end return;
    end Child_With;
 
    -------------
@@ -465,30 +471,25 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    overriding function Evaluate
-     (P : in out Child_With_Predicate; N : ${node}) return Boolean is
+     (P : in out Child_With_Predicate; N : ${node}) return Boolean
+   is
+      Lk_N, Field : Lk_Node;
    begin
       if N.Is_Null then
          return False;
       end if;
 
-      % if ctx.sorted_parse_fields:
-         declare
-            Field_Index : Positive;
-         begin
-            --  First check that N has the requested field
-            begin
-               Field_Index := Index (N.Kind, P.Field);
-            exception
-               when Bad_Type_Error =>
-                  return False;
-            end;
+      --  The predicates accepts ``N`` if both ``N`` has the expected type
+      --  (i.e. can own the requested syntax field) and ``N`` does have that
+      --  field.
 
-            return P.Predicate.Unchecked_Get.Evaluate (N.Child (Field_Index));
-         end;
-      % else:
+      Lk_N := To_Generic_Node (N);
+      if not Is_Derived_From (Type_Of (Lk_N), Owner (P.Field)) then
          return False;
-         pragma Unreferenced (P);
-      % endif
+      end if;
+
+      Field := As_Node (Eval_Node_Member (Lk_N, P.Field));
+      return P.Predicate.Unchecked_Get.Evaluate (From_Generic_Node (Field));
    end Evaluate;
 
    --------------

@@ -4,6 +4,8 @@
 
 with GNATCOLL.Refcount;
 
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Iterators;
 private with Langkit_Support.Tree_Traversal_Iterator;
 
@@ -141,11 +143,14 @@ package ${ada_lib_name}.Iterators is
    --% belongs-to: ${pred_ref}
 
    function Child_With
-     (Field     : Syntax_Field_Reference;
+     (Field     : Struct_Member_Ref;
       Predicate : ${pred_ref}) return ${pred_ref};
    --  Return a predicate that accepts only nodes which have a child
    --  corresponding to the given field reference and for which this child is
    --  accepted by the given predicate.
+   --
+   --  Raise a ``Precondition_Failure`` if ``Field`` is not a valid node field
+   --  reference.
    --
    --% belongs-to: ${pred_ref}
 
@@ -290,7 +295,7 @@ private
      (P : in out For_Some_Children_Predicate; N : ${node}) return Boolean;
 
    type Child_With_Predicate is new ${pred_iface} with record
-      Field     : Syntax_Field_Reference;
+      Field     : Struct_Member_Ref;
       Predicate : ${pred_ref};
    end record;
 
