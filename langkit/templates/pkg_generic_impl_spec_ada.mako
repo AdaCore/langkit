@@ -158,8 +158,8 @@ private package ${ada_lib_name}.Generic_Impl is
 
    No_Metadata_Value : aliased Internal_Node_Metadata_Type :=
      (0, Implementation.No_Metadata);
-   No_Metadata       : Internal_Node_Metadata_Access
-     := No_Metadata_Value'Access;
+   No_Metadata       : Internal_Node_Metadata_Access :=
+     No_Metadata_Value'Access;
 
    Desc : aliased constant Language_Descriptor :=
      (Language_Name => Language_Name'Access,
