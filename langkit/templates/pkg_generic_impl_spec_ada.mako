@@ -42,9 +42,13 @@ private package ${ada_lib_name}.Generic_Impl is
      (Implementation.${T.root_node.name}, Internal_Node);
 
    function "+"
-     (Entity : Internal_Entity) return Implementation.${root_entity.name};
+     (Entity : Internal_Entity) return Implementation.${root_entity.name}
+     with Export,
+          External_Name => "${ada_lib_name}__from_generic_internal_entity";
    function "+"
-     (Entity : Implementation.${root_entity.name}) return Internal_Entity;
+     (Entity : Implementation.${root_entity.name}) return Internal_Entity
+     with Export,
+          External_Name => "${ada_lib_name}__to_generic_internal_entity";
 
    function "+" (Rule : Grammar_Rule_Index) return Common.Grammar_Rule
    is (Common.Grammar_Rule'Val (Rule - 1));

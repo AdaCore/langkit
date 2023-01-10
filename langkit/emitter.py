@@ -518,7 +518,7 @@ class Emitter:
             Unit('pkg_public_converters', 'Public_Converters', has_body=True,
                  ada_api=True),
             Unit('pkg_private_converters', 'Private_Converters',
-                 has_body=False),
+                 has_body=True),
             # Unit for AST rewriting primitives
             Unit('pkg_rewriting', 'Rewriting', ada_api=True, unparser=True),
             # Unit for AST rewriting implementation

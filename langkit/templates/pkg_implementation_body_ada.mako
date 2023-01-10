@@ -37,16 +37,15 @@ with GNAT.Traceback.Symbolic;
 with GNATCOLL.Traces;
 
 with Langkit_Support.Adalog.Debug;
+with Langkit_Support.Generic_API.Analysis;
+with Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Hashes; use Langkit_Support.Hashes;
 with Langkit_Support.Images; use Langkit_Support.Images;
+with Langkit_Support.Names;  use Langkit_Support.Names;
 with Langkit_Support.Relative_Get;
 
 with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
-
-% if ctx.sorted_parse_fields:
-with ${ada_lib_name}.Introspection_Implementation;
-% endif
 
 pragma Warnings (Off, "referenced");
 ${exts.with_clauses(with_clauses + [
@@ -169,6 +168,12 @@ package body ${ada_lib_name}.Implementation is
      (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String;
    --  If E is known, return its unique Id from State. Otherwise, assign it a
    --  new unique Id and return it.
+
+   procedure Print
+     (Node        : Langkit_Support.Generic_API.Analysis.Lk_Node;
+      Show_Slocs  : Boolean;
+      Line_Prefix : String := "");
+   --  Helper for the public overload, but working on the generic API node type
 
    ------------------------
    -- Precomputed_Symbol --
@@ -3158,84 +3163,95 @@ package body ${ada_lib_name}.Implementation is
    -----------
 
    procedure Print
+     (Node        : Langkit_Support.Generic_API.Analysis.Lk_Node;
+      Show_Slocs  : Boolean;
+      Line_Prefix : String := "")
+   is
+      use Langkit_Support.Generic_API.Analysis;
+      use Langkit_Support.Generic_API.Introspection;
+
+      T : Type_Ref;
+   begin
+      if Node.Is_Null then
+         Put_Line ("None");
+         return;
+      end if;
+
+      T := Type_Of (Node);
+      Put (Line_Prefix & Image (Node_Type_Repr_Name (T)));
+      if Show_Slocs then
+         Put ("[" & Image (Node.Sloc_Range) & "]");
+      end if;
+
+      if Node.Is_Incomplete then
+         Put (" <<INCOMPLETE>>");
+      end if;
+
+      if Node.Is_Token_Node then
+         Put_Line (": " & Image (Node.Text));
+
+      elsif Is_List_Node (Node) then
+
+         --  List nodes are displayed in a special way (they have no field)
+
+         declare
+            Count : constant Natural := Node.Children_Count;
+            Child : Lk_Node;
+         begin
+            if Count = 0 then
+               Put_Line (": <empty list>");
+               return;
+            end if;
+            New_Line;
+
+            for I in 1 .. Count loop
+               Child := Node.Child (I);
+               if not Child.Is_Null then
+                  Print (Child, Show_Slocs, Line_Prefix & "|  ");
+               end if;
+            end loop;
+         end;
+
+      else
+         --  This is for regular nodes: display each syntax field (i.e.
+         --  non-property member).
+
+         declare
+            Attr_Prefix     : constant String := Line_Prefix & "|";
+            Children_Prefix : constant String := Line_Prefix & "|  ";
+            M_List          : constant Struct_Member_Ref_Array := Members (T);
+            Child           : Lk_Node;
+         begin
+            New_Line;
+            for M of M_List loop
+               if not Is_Property (M) and then not Is_Null_For (M, T) then
+                  Child := As_Node (Eval_Node_Member (Node, M));
+                  Put (Attr_Prefix
+                       & Image (Format_Name (Member_Name (M), Lower)) & ":");
+                  if Child.Is_Null then
+                     Put_Line (" <null>");
+                  else
+                     New_Line;
+                     Print (Child, Show_Slocs, Children_Prefix);
+                  end if;
+               end if;
+            end loop;
+         end;
+      end if;
+   end Print;
+
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print
      (Node        : ${T.root_node.name};
       Show_Slocs  : Boolean;
       Line_Prefix : String := "")
    is
-      K : ${T.node_kind};
+      Entity : constant ${T.entity.name} := (Node, No_Entity_Info);
    begin
-      if Node = null then
-         Put_Line ("None");
-         return;
-      end if;
-      K := Node.Kind;
-
-      Put (Line_Prefix & Kind_Name (Node));
-      if Show_Slocs then
-         Put ("[" & Image (Sloc_Range (Node)) & "]");
-      end if;
-
-      if Is_Incomplete (Node) then
-         Put (" <<INCOMPLETE>>");
-      end if;
-
-      if Is_Token_Node (Node.Kind) then
-         Put_Line (": " & Image (Text (Node)));
-
-      % if ctx.generic_list_type.concrete_subclasses:
-      elsif Node.Kind not in ${ctx.generic_list_type.ada_kind_range_name} then
-         New_Line;
-      % endif
-
-      end if;
-
-      % if ctx.generic_list_type.concrete_subclasses:
-         --  List nodes are displayed in a special way (they have no field)
-         if K in ${ctx.generic_list_type.ada_kind_range_name} then
-            if Node.Count = 0 then
-               Put_Line (": <empty list>");
-               return;
-            end if;
-
-            New_Line;
-            for Child of Node.Nodes (1 .. Node.Count) loop
-               if Child /= null then
-                  Print (Child, Show_Slocs, Line_Prefix & "|  ");
-               end if;
-            end loop;
-            return;
-         end if;
-      % endif
-
-      % if ctx.sorted_parse_fields:
-         --  This is for regular nodes: display each field
-         declare
-            use ${ada_lib_name}.Introspection_Implementation;
-
-            Attr_Prefix     : constant String := Line_Prefix & "|";
-            Children_Prefix : constant String := Line_Prefix & "|  ";
-            Field_List      : constant Syntax_Field_Reference_Array :=
-              Syntax_Fields (K);
-         begin
-            for I in Field_List'Range loop
-               declare
-                  Child : constant ${T.root_node.name} :=
-                     Implementation.Child (Node, I);
-               begin
-                  Put
-                    (Attr_Prefix
-                     & Image (Syntax_Field_Name (Field_List (I)))
-                     & ":");
-                  if Child /= null then
-                     New_Line;
-                     Print (Child, Show_Slocs, Children_Prefix);
-                  else
-                     Put_Line (" <null>");
-                  end if;
-               end;
-            end loop;
-         end;
-      % endif
+      Print (To_Generic_Node (Entity), Show_Slocs, Line_Prefix);
    end Print;
 
    ------------
