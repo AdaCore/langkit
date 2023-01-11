@@ -371,6 +371,10 @@ package Langkit_Support.Generic_API.Introspection is
    function Node_Type_Name (Node : Type_Ref) return Name_Type;
    --  Return the name for the given node type
 
+   function Node_Type_Repr_Name (Node : Type_Ref) return Text_Type;
+   --  Return the "representation" name (i.e. name used in text dumps) for the
+   --  given node type.
+
    function Is_Abstract (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates an abstract node
 

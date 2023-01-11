@@ -14,6 +14,7 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 package Langkit_Support.Internal is
 
    type Text_Access is not null access constant Text_Type;
+   type Text_Access_Or_Null is access constant Text_Type;
    --  Reference to a static Unicode string. Used in descriptor tables whenever
    --  we need to provide a name.
 

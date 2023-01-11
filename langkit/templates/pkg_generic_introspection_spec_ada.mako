@@ -397,6 +397,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       <%
          if t.is_ast_node:
             name = t.kwless_raw_name
+            repr_name = t.repr_name()
             base = t.base
             abstract = t.abstract
             token_node = t.is_token_node
@@ -404,6 +405,7 @@ private package ${ada_lib_name}.Generic_Introspection is
             subclasses = t.subclasses
          else:
             name = t.api_name
+            repr_name = None
             base = None
             abstract = False
             token_node = False
@@ -411,6 +413,9 @@ private package ${ada_lib_name}.Generic_Introspection is
             subclasses = []
          desc_const = f"Node_Desc_For_{name}"
          name_const = f"Node_Name_For_{name}"
+         repr_name_const = (
+            None if repr_name is None else f"Node_Repr_Name_For_{name}"
+         )
          struct_type_descs.append(f"{G.type_index(t)} => {desc_const}'Access")
 
          def get_members(include_inherited):
@@ -447,6 +452,10 @@ private package ${ada_lib_name}.Generic_Introspection is
       %>
       ${name_const} : aliased constant Text_Type :=
         ${text_repr(name.camel_with_underscores)};
+      % if repr_name is not None:
+         ${repr_name_const} : aliased constant Text_Type :=
+           ${text_repr(repr_name)};
+      % endif
       ${desc_const} : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => ${len(subclasses)},
          Member_Count      => ${len(members)},
@@ -455,6 +464,9 @@ private package ${ada_lib_name}.Generic_Introspection is
          Is_Token_Node     => ${token_node},
          Is_List_Node      => ${list_node},
          Name              => ${name_const}'Access,
+         Repr_Name         => ${(
+            "null" if repr_name is None else f"{repr_name_const}'Access"
+         )},
          Inherited_Members => ${len(inherited_members)},
          Derivations       => (
            % if subclasses:

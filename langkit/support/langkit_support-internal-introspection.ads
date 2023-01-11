@@ -216,6 +216,10 @@ package Langkit_Support.Internal.Introspection is
       Name : Text_Access;
       --  Name for this type in camel-with-underscores convention
 
+      Repr_Name : Text_Access_Or_Null;
+      --  "Representation" name (i.e. name used in text dumps) for this type.
+      --  Null for all but node types.
+
       Inherited_Members : Natural;
       --  Number of inherited members for this struct (``Members`` included)
 

@@ -1254,6 +1254,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return Create_Name (Node.Id.Struct_Types.all (Node.Index).Name.all);
    end Node_Type_Name;
 
+   -------------------------
+   -- Node_Type_Repr_Name --
+   -------------------------
+
+   function Node_Type_Repr_Name (Node : Type_Ref) return Text_Type is
+   begin
+      Check_Node_Type (Node);
+      return Node.Id.Struct_Types.all (Node.Index).Repr_Name.all;
+   end Node_Type_Repr_Name;
+
    -----------------
    -- Is_Abstract --
    -----------------
