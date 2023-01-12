@@ -313,7 +313,9 @@ class Emitter:
             if not path.exists(d):
                 os.mkdir(d)
 
-    def merge_library_sources(self, library_dir: str, merged_name: str):
+    def merge_library_sources(self,
+                              library_dir: str,
+                              merged_name: str) -> None:
         """
         Merge all source files from ``library_dir`` to the generated library's
         source directory, and avoid conflicts with original unit names by
