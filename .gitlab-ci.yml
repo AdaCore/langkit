@@ -30,18 +30,19 @@ stages:
 
 langkit_build:
   services:
-     - image:libadalang
+     - image:sandbox
      - cpu:8
      - mem:16
   stage: stage1
   script:
     - export PATH=/it/e3/bin:$PATH
+    - . ~/.aws_container_credentials
     - cd /it/wave
 
     # Build using anod
     - anod vcs --add-repo langkit $CI_PROJECT_DIR
-    - anod build --minimal --disable-cathod langkit_support
-    - anod build --minimal --disable-cathod langkit
+    - anod build --minimal langkit_support
+    - anod build --minimal langkit
 
     # Create the langkit package
     - tar czf $PACKAGE_ABSOLUTE_NAME -C /
@@ -58,7 +59,7 @@ langkit_build:
 
 langkit_test:
   services:
-     - image:libadalang
+     - image:sandbox
      - cpu:8
      - mem:16
   stage: stage2
@@ -70,6 +71,7 @@ langkit_test:
     - when: always
   script:
     - export PATH=/it/e3/bin:$PATH
+    - . ~/.aws_container_credentials
 
     # Unpack langkit
     - tar zxf $PACKAGE_ABSOLUTE_NAME -C /
@@ -77,10 +79,11 @@ langkit_test:
 
     # Run the testsuite
     - cd /it/wave
+    - mkdir -p fingerprints
     - anod vcs --add-repo langkit $CI_PROJECT_DIR
     - touch fingerprints/x86_64-linux.langkit_support.build.json.assume-unchanged
     - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
-    - anod test --minimal --disable-cathod langkit
+    - anod test --minimal langkit
 
     # Produce a XUnit report for GitLab
     - e3-testsuite-report
@@ -102,7 +105,7 @@ langkit_test:
 
 libadalang_build_and_test:
   services:
-     - image:libadalang
+     - image:sandbox
      - cpu:8
      - mem:16
   stage: stage2
@@ -114,6 +117,7 @@ libadalang_build_and_test:
     - when: always      
   script:
     - export PATH=/it/e3/bin:$PATH
+    - . ~/.aws_container_credentials
 
     # Unpack langkit
     - tar zxf $PACKAGE_ABSOLUTE_NAME -C /
@@ -131,12 +135,13 @@ libadalang_build_and_test:
 
     # Build and test libadalang
     - cd /it/wave
-    - anod vcs --add-repo libadalang /tmp/libadalang
+    - mkdir -p fingerprints    
+    - anod vcs --add-repo libadalang /tmp/libadalang    
     - touch fingerprints/x86_64-linux.langkit_support.build.json.assume-unchanged
     - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
-    - anod build --minimal --disable-cathod libadalang
-    - anod build --minimal --disable-cathod libadalang_for_customers
-    - anod test  --minimal --disable-cathod libadalang
+    - anod build --minimal libadalang
+    - anod build --minimal libadalang_for_customers
+    - anod test  --minimal libadalang
 
     # Produce a XUnit report for GitLab
     - e3-testsuite-report
