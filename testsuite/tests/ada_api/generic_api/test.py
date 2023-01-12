@@ -59,8 +59,8 @@ class FooNode(ASTNode):
 @abstract
 class BaseExample(FooNode):
     # Check for proper member inheritance handling: the introspection API
-    # should list "fld_1" first and "fld_2" for BaseExample, but the opposite
-    # order for Example.
+    # should list "fld_1" first and "fld_2" for BaseExample, but in the
+    # opposite order for Example.
     fld_1 = AbstractField(type=T.Name)
     fld_2 = AbstractField(type=FooNode)
 
