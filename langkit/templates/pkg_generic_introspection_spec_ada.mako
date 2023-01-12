@@ -367,6 +367,48 @@ private package ${ada_lib_name}.Generic_Introspection is
          %>
       % endfor
 
+      ## If this member is a syntax field that is always null for some owning
+      ## node, emit a table that describes when it is null.
+      <%
+         # Name for the constant array that describes the null fields, or None
+         # if there are no null fields.
+         null_for_const = None
+
+         # If we generate such an array, associations to initialize it
+         null_for_assocs = {}
+
+         # Determine the set of null fields in m's derivations. Note that only
+         # derived fields can be null, so if m is concrete, we know that it is
+         # never null.
+         null_fields = set()
+         if isinstance(m, Field) and m.abstract:
+            null_fields = {f for f in m.concrete_fields if f.null}
+
+         # If there is at least one null field, generate the array that
+         # describes them.
+         if null_fields:
+            null_for_const = f"Null_For_{name}"
+
+            # Initialize null_for_assocs for all nodes that have the "f" field
+            def add(node):
+               null_for_assocs[node] = False
+               for child in node.subclasses:
+                  add(child)
+            add(m.struct)
+
+            # Set the flag to True for all concrete node for which this field
+            # is null.
+            for f in null_fields:
+               for t in TypeSet(types={f.struct}).matched_types:
+                  null_for_assocs[t] = True
+      %>
+      % if null_for_const:
+         ${null_for_const} : aliased constant Type_Flags := (${",\n".join(
+            f"{G.type_index(node)} => {value}"
+            for node, value in null_for_assocs.items()
+         )});
+      % endif
+
       ${name_const} : aliased constant Text_Type :=
         ${text_repr(m.api_name.camel_with_underscores)};
       ${desc_name} : aliased constant Struct_Member_Descriptor :=
@@ -374,6 +416,9 @@ private package ${ada_lib_name}.Generic_Introspection is
          Name          => ${name_const}'Access,
          Owner         => ${G.type_index(m.struct)},
          Member_Type   => ${G.type_index(m.type)},
+         Null_For      => ${(
+            "null" if null_for_const is None else f"{null_for_const}'Access"
+         )},
          Arguments     => (
             % if m.arguments:
                ${",\n".join(args)}

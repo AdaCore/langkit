@@ -123,6 +123,9 @@ package Langkit_Support.Internal.Introspection is
    -- Struct member descriptors --
    -------------------------------
 
+   type Type_Flags is array (Type_Index range <>) of Boolean;
+   type Type_Flags_Access is access constant Type_Flags;
+
    type Default_Value_Kind is
      (None,
       Boolean_Value,
@@ -177,6 +180,14 @@ package Langkit_Support.Internal.Introspection is
       Member_Type : Type_Index;
       --  Field type (for struct fields or node syntax fields) or return type
       --  (for properties).
+
+      Null_For : Type_Flags_Access;
+      --  This component is null for all members that are not syntax fields or
+      --  for syntax fields that are never defined as "null" for a node.
+      --
+      --  For others, this component points to an array that maps all node
+      --  types that have this member to whether this member is defined as
+      --  "null" for that node type.
 
       Arguments : Argument_Descriptor_Array (1 .. Last_Argument);
       --  Descriptors for each argument of this property. Empty array for

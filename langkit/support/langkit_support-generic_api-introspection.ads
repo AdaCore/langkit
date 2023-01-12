@@ -433,6 +433,11 @@ package Langkit_Support.Generic_API.Introspection is
    function Is_Property (Member : Struct_Member_Ref) return Boolean;
    --  Whether ``Member`` is a property
 
+   function Is_Null_For
+     (Member : Struct_Member_Ref; Node : Type_Ref) return Boolean;
+   --  Return whether ``Member`` is a syntax field that is always null for
+   --  ``Node``.
+
    function All_Members (Id : Language_Id) return Struct_Member_Ref_Array;
    --  Return all struct members that the given language defines
 
