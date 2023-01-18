@@ -1380,6 +1380,13 @@ Eval_Member: Example.p_id_bigint_iterator:
 Inspect: Iterator on BigInt
   Type_Of: BigInt.iterator
 
+Eval_Node_Member: abstract field with null derivation:
+Inspect: <Name example.txt:1:9-1:12>
+  Type_Of: Name
+
+Eval_Node_Member: abstract field with concrete derivation:
+Inspect: <No node>
+  Type_Of: FooNode
 Eval_Node_Member: null node value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: the null node has no member
 Eval_Node_Member: P_Id_Bool:
 Inspect: True
