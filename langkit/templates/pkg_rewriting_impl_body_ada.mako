@@ -19,16 +19,10 @@ use ${ada_lib_name}.Unparsing_Implementation;
 
 package body ${ada_lib_name}.Rewriting_Implementation is
 
-   --  Access to rewriting handle data is always done through Rewriting_Handle,
-   --  values (never through Rewriting_Handle_Pointer, except after calling
-   --  Convert), so there is no aliasing problem possible.
-
-   pragma Warnings (Off, "possible aliasing problem for type");
    function Convert is new Ada.Unchecked_Conversion
      (Rewriting_Handle, Rewriting_Handle_Pointer);
    function Convert is new Ada.Unchecked_Conversion
      (Rewriting_Handle_Pointer, Rewriting_Handle);
-   pragma Warnings (On, "possible aliasing problem for type");
 
    procedure Pre_Check (Value : Boolean; Msg : String);
    --  Raise a Precondition_Failure exception with the given message

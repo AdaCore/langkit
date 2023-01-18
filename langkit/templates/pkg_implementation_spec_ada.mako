@@ -115,6 +115,10 @@ private package ${ada_lib_name}.Implementation is
    ${T.root_node.null_constant} : constant ${T.root_node.name} := null;
    --  Most generic AST node type
 
+   pragma No_Strict_Aliasing (Internal_Context);
+   pragma No_Strict_Aliasing (Internal_Unit);
+   pragma No_Strict_Aliasing (${T.root_node.name});
+
    function "<" (Left, Right : ${T.root_node.name}) return Boolean;
    --  Abritrary but deterministic ordering criteria for parsing nodes. This
    --  handles null nodes as well. Raise a Property_Error for synthetic nodes.
@@ -417,6 +421,7 @@ private package ${ada_lib_name}.Implementation is
    end record;
 
    type Big_Integer_Type is access all Big_Integer_Record;
+   pragma No_Strict_Aliasing (Big_Integer_Type);
 
    function Create_Big_Integer
      (Image : String; Base : Integer := 10) return Big_Integer_Type;
@@ -1394,6 +1399,7 @@ private package ${ada_lib_name}.Implementation is
 
    type Internal_File_Reader is limited interface;
    type Internal_File_Reader_Access is access all Internal_File_Reader'Class;
+   pragma No_Strict_Aliasing (Internal_File_Reader_Access);
 
    procedure Inc_Ref (Self : in out Internal_File_Reader) is abstract;
    ${ada_doc('langkit.file_reader_inc_ref', 3)}
@@ -1422,6 +1428,7 @@ private package ${ada_lib_name}.Implementation is
    type Internal_Unit_Provider is limited interface;
    type Internal_Unit_Provider_Access is
       access all Internal_Unit_Provider'Class;
+   pragma No_Strict_Aliasing (Internal_Unit_Provider_Access);
 
    procedure Inc_Ref (Provider : in out Internal_Unit_Provider) is abstract;
    ${ada_doc('langkit.unit_provider_inc_ref', 3)}
@@ -1454,6 +1461,7 @@ private package ${ada_lib_name}.Implementation is
    type Internal_Event_Handler is limited interface;
    type Internal_Event_Handler_Access is
       access all Internal_Event_Handler'Class;
+   pragma No_Strict_Aliasing (Internal_Event_Handler_Access);
 
    procedure Inc_Ref (Self : in out Internal_Event_Handler) is abstract;
    ${ada_doc('langkit.event_handler_inc_ref', 3)}

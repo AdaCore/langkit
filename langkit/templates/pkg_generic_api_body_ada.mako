@@ -29,7 +29,6 @@ package body ${ada_lib_name}.Generic_API is
    subtype Specific_Internal_Unit is
      ${ada_lib_name}.Implementation.Internal_Unit;
 
-   pragma Warnings (Off, "possible aliasing problem for type");
    function "+" is new Ada.Unchecked_Conversion
      (Generic_Internal_Context, Specific_Internal_Context);
    function "+" is new Ada.Unchecked_Conversion
@@ -39,7 +38,6 @@ package body ${ada_lib_name}.Generic_API is
      (Generic_Internal_Unit, Specific_Internal_Unit);
    function "+" is new Ada.Unchecked_Conversion
      (Specific_Internal_Unit, Generic_Internal_Unit);
-   pragma Warnings (On, "possible aliasing problem for type");
 
    ------------------------
    -- To_Generic_Context --

@@ -26,12 +26,10 @@ with ${ada_lib_name}.Common;
 
 private package ${ada_lib_name}.Generic_Impl is
 
-   pragma Warnings (Off, "possible aliasing problem for type");
    function "+" is new Ada.Unchecked_Conversion
      (Internal_Context, Implementation.Internal_Context);
    function "+" is new Ada.Unchecked_Conversion
      (Implementation.Internal_Context, Internal_Context);
-   pragma Warnings (On, "possible aliasing problem for type");
 
    function "+" is new Ada.Unchecked_Conversion
      (Internal_Unit, Implementation.Internal_Unit);

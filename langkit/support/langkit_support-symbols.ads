@@ -43,6 +43,8 @@ package Langkit_Support.Symbols is
    --     unsafe, because if the symbol table has been freed, the symbol will
    --     be a dangling pointer.
 
+   pragma No_Strict_Aliasing (Symbol_Type);
+
    function Image (S : Symbol_Type) return Text_Type;
    --  Return the text associated to this symbol
 

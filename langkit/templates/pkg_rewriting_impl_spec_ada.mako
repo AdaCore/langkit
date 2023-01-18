@@ -32,6 +32,10 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    type Node_Rewriting_Handle is access Node_Rewriting_Handle_Type;
    --  Internal handle for the process of rewriting an analysis unit
 
+   pragma No_Strict_Aliasing (Rewriting_Handle);
+   pragma No_Strict_Aliasing (Unit_Rewriting_Handle);
+   pragma No_Strict_Aliasing (Node_Rewriting_Handle);
+
    package Unit_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Unbounded_String,
       Element_Type    => Unit_Rewriting_Handle,

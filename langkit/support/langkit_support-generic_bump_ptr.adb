@@ -117,8 +117,13 @@ package body Langkit_Support.Generic_Bump_Ptr is
 
    package body Alloc is
 
+      --  All reads/writes on allocated objects will happen through
+      --  Element_Access, so there should be no issue with strict aliasing.
+
+      pragma Warnings (Off, "possible aliasing problem for type");
       function To_Pointer is new Ada.Unchecked_Conversion
         (System.Address, Element_Access);
+      pragma Warnings (On, "possible aliasing problem for type");
 
       -----------
       -- Alloc --

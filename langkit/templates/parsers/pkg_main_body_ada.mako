@@ -32,18 +32,8 @@ package body ${ada_lib_name}.Parsers is
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists). Likewise for bump ptr. allocators, except
    --  we need them only for non-abstract AST nodes.
-   --
-   --  In the Alloc instanciations, there are unchecked conversions to wrap
-   --  System.Address values from a low-level allocator. All read/writes for
-   --  the pointed values are made through values of the same access types
-   --  (i.e. AST node access). Thus, strict aliasing issues should not arise
-   --  for these.
-   --
-   --  See <https://gcc.gnu.org/onlinedocs/gnat_ugn/
-   --       Optimization-and-Strict-Aliasing.html>.
 
    pragma Warnings (Off, "is not referenced");
-   pragma Warnings (Off, "possible aliasing problem for type");
    % for cls in ctx.astnode_types:
       package ${cls.name}_Memos is new Langkit_Support.Packrat
         (${cls.name}, Token_Index);
@@ -56,6 +46,7 @@ package body ${ada_lib_name}.Parsers is
          subtype ${subtype} is
             ${T.root_node.value_type_name} (${cls.ada_kind_name});
          type ${access} is access all ${subtype};
+         pragma No_Strict_Aliasing (${access});
          package ${cls.name}_Alloc is new Alloc
            (${subtype}, ${access});
 
@@ -79,7 +70,6 @@ package body ${ada_lib_name}.Parsers is
 
       % endif
    % endfor
-   pragma Warnings (On, "possible aliasing problem for type");
    pragma Warnings (On, "is not referenced");
 
    type Dontskip_Parser_Function is access function

@@ -792,26 +792,23 @@ private package ${ada_lib_name}.Implementation.C is
    function Wrap (T : Text_Access) return ${text_type} is
      (Wrap (Text_Cst_Access (T)));
 
-   --  The following conversions are used only at the interface between Ada and
-   --  C (i.e. as parameters and return types for C entry points) for access
-   --  types.  All read/writes for the pointed values are made through the
-   --  access values and never through the System.Address values.  Thus, strict
-   --  aliasing issues should not arise for these.
-   --
-   --  See <https://gcc.gnu.org/onlinedocs/gnat_ugn/
-   --       Optimization-and-Strict-Aliasing.html>.
-
-   pragma Warnings (Off, "possible aliasing problem for type");
-
    function Wrap_Big_Integer is new Ada.Unchecked_Conversion
      (Big_Integer_Type, ${big_integer_type});
    function Unwrap_Big_Integer is new Ada.Unchecked_Conversion
      (${big_integer_type}, Big_Integer_Type);
 
+   --  Probably because the following conversions involve fat pointers, using
+   --  the No_Strict_Aliasing pragma here has no effect. Silence the warning,
+   --  since all read/writes for the pointed values are made through the "real"
+   --  fat pointer (Symbol_Type) and not the fake one (${symbol_type}): strict
+   --  aliasing issues should not happen.
+
+   pragma Warnings (Off, "possible aliasing problem for type");
    function Wrap_Symbol is new Ada.Unchecked_Conversion
      (Symbol_Type, ${symbol_type});
    function Unwrap_Symbol is new Ada.Unchecked_Conversion
      (${symbol_type}, Symbol_Type);
+   pragma Warnings (On, "possible aliasing problem for type");
 
    function Wrap is new Ada.Unchecked_Conversion
      (${T.root_node.name}, ${node_type});
@@ -857,7 +854,5 @@ private package ${ada_lib_name}.Implementation.C is
            (${iterator_type.name}, ${T.entity.iterator.name});
       % endif
    % endfor
-
-   pragma Warnings (On, "possible aliasing problem for type");
 
 end ${ada_lib_name}.Implementation.C;
