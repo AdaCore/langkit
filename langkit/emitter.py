@@ -498,10 +498,6 @@ class Emitter:
             Unit('pkg_c', 'C'),
             # Unit for implementation of analysis primitives
             Unit('pkg_implementation', 'Implementation'),
-            # Unit for AST introspection public API
-            Unit('pkg_introspection', 'Introspection', ada_api=True),
-            # Unit for AST introspection internal API
-            Unit('pkg_introspection_impl', 'Introspection_Implementation'),
             # Unit for AST node iteration primitives
             Unit('pkg_iterators', 'Iterators'),
             # Unit for converters between public and implementation types
