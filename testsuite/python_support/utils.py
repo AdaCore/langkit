@@ -318,12 +318,6 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         if full_error_traces:
             argv.append("--full-error-traces")
 
-        # Generate the public Ada API only when necessary (i.e. if we have
-        # mains that do use this API). This reduces the time it takes to run
-        # tests.
-        if not mains and not ada_main:
-            argv.append('--no-ada-api')
-
         argv.append('--build-mode={}'.format(build_mode))
         for w in WarningSet.available_warnings:
             argv.append(
