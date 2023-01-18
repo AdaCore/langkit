@@ -580,6 +580,33 @@ package body ${ada_lib_name}.Common is
       Last := Token.Source_Last;
    end Extract_Token_Text;
 
+   ---------------------
+   -- Token_Node_Kind --
+   ---------------------
+
+   function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind is
+      <% token_nodes = [n for n in ctx.astnode_types
+                        if not n.abstract and n.is_token_node] %>
+   begin
+      % if ctx.generate_unparser:
+         case Kind is
+            % for n in token_nodes:
+               when ${n.ada_kind_name} =>
+                  return ${n.token_kind.ada_name};
+            % endfor
+
+            when others =>
+               --  Kind is not a token node, and thus the precondition does not
+               --  hold.
+               return (raise Program_Error);
+         end case;
+
+      % else:
+         pragma Unreferenced (Kind);
+         return (raise Program_Error);
+      % endif
+   end Token_Node_Kind;
+
    % if emitter.coverage:
       type Atexit_Callback is access procedure with Convention => C;
 

@@ -384,19 +384,6 @@ package ${ada_lib_name}.Introspection is
    function Properties (Id : Node_Type_Id) return Property_Reference_Array;
    --  Likewise, but taking a reference to a node type instead
 
-   ------------
-   -- Tokens --
-   ------------
-
-   function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind
-      with Pre => Is_Token_Node (Kind);
-   --  Return the token kind corresponding to the given token node kind
-   % if not ctx.generate_unparser:
-   --
-   --  As unparser are not generated, this always raises a ``Program_Error``
-   --  exception.
-   % endif
-
 private
 
    type Value_Record;

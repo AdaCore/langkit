@@ -629,11 +629,4 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
    % endif
 
-   ------------
-   -- Tokens --
-   ------------
-
-   function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind;
-   --  Implementation for Introspection.Token_Node_Kind
-
 end ${ada_lib_name}.Introspection_Implementation;

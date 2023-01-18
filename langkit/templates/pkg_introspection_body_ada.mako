@@ -1312,13 +1312,4 @@ package body ${ada_lib_name}.Introspection is
       return Impl.Properties (Id);
    end Properties;
 
-   ---------------------
-   -- Token_Node_Kind --
-   ---------------------
-
-   function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind is
-   begin
-      return Impl.Token_Node_Kind (Kind);
-   end Token_Node_Kind;
-
 end ${ada_lib_name}.Introspection;

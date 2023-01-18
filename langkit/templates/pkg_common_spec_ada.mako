@@ -274,6 +274,15 @@ package ${ada_lib_name}.Common is
    function Raw_Data (T : Token_Reference) return Stored_Token_Data;
    --  Return the raw token data for ``T``
 
+   function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind
+      with Pre => Is_Token_Node (Kind);
+   --  Return the token kind corresponding to the given token node kind
+   % if not ctx.generate_unparser:
+   --
+   --  As unparser are not generated, this always raises a ``Program_Error``
+   --  exception.
+   % endif
+
    -------------------
    -- Introspection --
    -------------------
