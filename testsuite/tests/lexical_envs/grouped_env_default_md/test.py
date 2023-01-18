@@ -12,42 +12,32 @@ from utils import build_and_run
 
 @env_metadata
 class Metadata(Struct):
-    foo_node = MetadataField(T.FooNode, use_in_eq=True)
-    bar_node = MetadataField(T.FooNode, use_in_eq=True)
+    n1 = MetadataField(T.FooNode, use_in_eq=True)
+    n2 = MetadataField(T.FooNode, use_in_eq=True)
 
 
 class FooNode(ASTNode):
     @langkit_property(memoized=True)
-    def env_with_md(foo_node=T.FooNode, bar_node=T.FooNode):
-        md1 = Var(Metadata.new(
-            foo_node=foo_node,
-            bar_node=No(T.FooNode)
-        ))
-        md2 = Var(Metadata.new(
-            foo_node=No(T.FooNode),
-            bar_node=bar_node
-        ))
-        return Self.node_env.singleton.env_group(
-            with_md=md1
-        ).singleton.env_group(
-            with_md=md2
+    def env_with_md(n1=T.FooNode, n2=T.FooNode):
+        md1 = Var(Metadata.new(n1=n1, n2=No(T.FooNode)))
+        md2 = Var(Metadata.new(n1=No(T.FooNode), n2=n2))
+        return (
+            Self.node_env.singleton
+            .env_group(with_md=md1).singleton
+            .env_group(with_md=md2)
         )
 
     @langkit_property(return_type=T.FooNode.entity, public=True)
-    def get_with_md(
-            name=T.Symbol,
-            foo_node=T.FooNode,
-            bar_node=T.FooNode
-    ):
-        return Entity.env_with_md(foo_node, bar_node).get_first(name)
+    def get_with_md(name=T.Symbol, n1=T.FooNode, n2=T.FooNode):
+        return Entity.env_with_md(n1, n2).get_first(name)
 
     @langkit_property(return_type=T.FooNode, public=True)
     def get_foo_metadata():
-        return Entity.info.md.foo_node
+        return Entity.info.md.n1
 
     @langkit_property(return_type=T.FooNode, public=True)
     def get_bar_metadata():
-        return Entity.info.md.bar_node
+        return Entity.info.md.n2
 
 
 class Name(FooNode):

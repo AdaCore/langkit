@@ -9,20 +9,20 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @memoized fun env_with_md(foo_node: FooNode, bar_node: FooNode): LexicalEnv[FooNode] =
+    @memoized fun env_with_md(n1: FooNode, n2: FooNode): LexicalEnv[FooNode] =
     {
-        val md1 = Metadata(foo_node=foo_node, bar_node=null);
-        val md2 = Metadata(foo_node=null, bar_node=bar_node);
+        val md1 = Metadata(n1=n1, n2=null);
+        val md2 = Metadata(n1=null, n2=n2);
 
         [[node.node_env()].env_group()].env_group()
     }
 
-    @export fun get_with_md(name: Symbol, foo_node: FooNode, bar_node: FooNode): FooNode =
-    self.env_with_md(foo_node, bar_node).get_first(name)
+    @export fun get_with_md(name: Symbol, n1: FooNode, n2: FooNode): FooNode =
+    self.env_with_md(n1, n2).get_first(name)
 
-    @export fun get_foo_metadata(): FooNode = self.info.md.foo_node
+    @export fun get_foo_metadata(): FooNode = self.info.md.n1
 
-    @export fun get_bar_metadata(): FooNode = self.info.md.bar_node
+    @export fun get_bar_metadata(): FooNode = self.info.md.n2
 }
 
 class Decl : FooNode {
