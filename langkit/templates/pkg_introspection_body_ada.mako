@@ -902,6 +902,8 @@ package body ${ada_lib_name}.Introspection is
                               value = f'{value}.As_{ftype.api_name}'
                         elif ftype.is_string_type:
                            value = f"As_String ({value})"
+                        elif ftype.is_symbol_type:
+                           value = f"As_Unbounded_Text ({value})"
                         else:
                            value = 'As_{} ({})'.format(ftype.api_name, value)
                      %>
@@ -1001,6 +1003,8 @@ package body ${ada_lib_name}.Introspection is
                            poly_constructor = "Create_Node"
                         elif ftype.is_string_type:
                            poly_constructor = "Create_String"
+                        elif ftype.is_symbol_type:
+                           poly_constructor = "Create_Unbounded_Text"
                         else:
                            poly_constructor = f"Create_{ftype.api_name}"
                      %>

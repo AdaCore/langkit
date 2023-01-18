@@ -15,6 +15,7 @@ class Point(Struct):
 
 class NodeResult(Struct):
     n = UserField(type=T.Example)
+    name = UserField(type=T.Symbol)
 
 
 # Create a struct that is not exposed just to check that it does not show up in
@@ -29,6 +30,8 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
+    token_node = True
+
     to_public = Property(lambda p=T.PrivatePoint: Point.new(x=p.x, y=p.y))
 
     prop = Property(
@@ -36,7 +39,7 @@ class Example(FooNode):
         public=True,
     )
 
-    result = Property(T.NodeResult.new(n=Self), public=True)
+    result = Property(T.NodeResult.new(n=Self, name=Self.symbol), public=True)
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main=['main.adb'])
