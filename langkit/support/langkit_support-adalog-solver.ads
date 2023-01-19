@@ -293,9 +293,6 @@ private
      (Var = null or else Is_Defined (Var));
    --  Shortcut predicate. Returns whether a variable is defined or is null
 
-   function Used_Var (Self : Atomic_Relation_Type) return Logic_Var;
-   --  Return the variable that this atomic relation uses, if there is one
-
    function Defined_Var (Self : Atomic_Relation_Type) return Logic_Var;
    --  Return the variable that this atomic relation defines, if there is one
 

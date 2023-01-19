@@ -406,6 +406,12 @@ package body Langkit_Support.Adalog.Solver is
    procedure Free is new Ada.Unchecked_Deallocation
      (Unification_Graph, Unification_Graph_Access);
 
+   function Uses_Var
+     (Self : Atomic_Relation_Type; V : Logic_Var) return Boolean;
+   --  Return whether the given variable is in a "use" position inside this
+   --  atom. For example in ``x <- foo(y)``, ``y`` is "used" whereas ``x`` is
+   --  "defined".
+
    function Compute_Unification_Graph
      (Ctx : Solving_Context) return Unification_Graph_Access;
    --  Allocate and populate the array representing the edges of the
@@ -525,6 +531,14 @@ package body Langkit_Support.Adalog.Solver is
    --  second failure as well. Although that last part is not guaranteed, the
    --  gains achieved in practice by avoiding cases where it does largely
    --  compensate the cases where it does not.
+
+   procedure Explain_Topo_Sort_Failure
+     (Ctx          : in out Solving_Context;
+      Model        : AdaSAT.Model;
+      Explanation  : in out AdaSAT.Builders.Formula_Builder);
+   --  Populate ``Explanation`` by generating clauses that prevent
+   --  subsequent models from containing the variables that were found unset
+   --  during the topological sort (see ``Ctx.Unset_Var``).
 
    function Check
      (Ctx            : in out Solving_Context;
@@ -1466,25 +1480,29 @@ package body Langkit_Support.Adalog.Solver is
    end Evaluate_Atoms;
 
    --------------
-   -- Used_Var --
+   -- Uses_Var --
    --------------
 
-   function Used_Var (Self : Atomic_Relation_Type) return Logic_Var
+   function Uses_Var
+     (Self : Atomic_Relation_Type; V : Logic_Var) return Boolean
    is
-      --  We handle Unify here, even though it is not strictly treated in the
-      --  dependency graph, so that the Unify_From variable is registered in
-      --  the list of variables of the equation.
-      --
-      --  We also pretend that N_Propagate has no dependency here because it
-      --  depends on multiple variables. Callers should handle it separately.
-      --
-      --  TODO??? Might be cleaner to have a separate function to return all
-      --  variables a relation uses?
-     (case Self.Kind is
-         when Assign | N_Propagate | True | False | N_Predicate => null,
-         when Propagate => Self.From,
-         when Predicate => Self.Target,
-         when Unify     => Self.Unify_From);
+      V_Id : constant Natural := Id (V);
+   begin
+      case Self.Kind is
+         when Assign | True | False =>
+            return False;
+         when Predicate =>
+            return Id (Self.Target) = V_Id;
+         when Propagate =>
+            return Id (Self.From) = V_Id;
+         when N_Predicate =>
+            return (for some W of Self.Vars => Id (W) = V_Id);
+         when N_Propagate =>
+            return (for some W of Self.Comb_Vars => Id (W) = V_Id);
+         when Unify =>
+            return Id (Self.Target) = V_Id or else Id (Self.Unify_From) = V_Id;
+      end case;
+   end Uses_Var;
 
    -----------------
    -- Defined_Var --
@@ -1499,6 +1517,337 @@ package body Langkit_Support.Adalog.Solver is
      (case Self.Kind is
          when Assign | Propagate | N_Propagate | Unify => Self.Target,
          when Predicate | True | False | N_Predicate   => null);
+
+   -------------------
+   -- Image_With_Id --
+   -------------------
+
+   function Image_With_Id (V : Logic_Var) return String is
+     (Image (V) & " (ID:" & Natural'Image (Id (V)) & ")");
+
+   -------------------------------
+   -- Explain_Topo_Sort_Failure --
+   -------------------------------
+
+   procedure Explain_Topo_Sort_Failure
+     (Ctx          : in out Solving_Context;
+      Model        : AdaSAT.Model;
+      Explanation  : in out AdaSAT.Builders.Formula_Builder)
+   is
+      --  For a given variable that was used but unset, causing topological
+      --  sort to fail, we want to construct a contradiction roughly saying
+      --  if we want to use this variable, then we need to have at least
+      --  one atom that defines it! So in the simplest case, we simply collect
+      --  all the atoms of the current solution that use that variable, then
+      --  we collect all the atoms *not* in the solution that define it, and
+      --  we emit a clause to force that each "using" atom implies at least one
+      --  "defining" atom. This is exactly what ``Contradict_Unset_Var`` does.
+      --
+      --  But now assume that that two variable ``x`` and ``y`` are found to
+      --  be unset during toposort, and that the equations that involve them
+      --  in the current solution are:
+      --
+      --  .. code::
+      --
+      --     bar?(y)
+      --     x <- foo(y)
+      --
+      --  Here, we can see that indeed ``y`` is never set and thefore we can
+      --  call ``Contradict_Unset_Var`` on it. However, ``x`` is unset only
+      --  because ``y`` is unset: if ``y`` was set, the atom ``x <- foo(y)``
+      --  would assign a value to ``x``. In such cases, it would be incorrect
+      --  to call ``Contradict_Unset_Var`` on ``x``, because it would generate
+      --  a clause that basically says that the atoms of the current solution
+      --  cannot ever give a value to ``x``, which is wrong because in another
+      --  context the atom ``x <- foo(y)`` could do it.
+      --
+      --  Instead, we can simply ignore those kinds of unset variables: it
+      --  suffices to contradict the root cause of the problem, that is, the
+      --  ultimate variable which really has no defining atom in the current
+      --  solution: in the next round, that variable will be set and therefore
+      --  all variables that depended on it will be set as well.
+      --  So in order to detect and ignore those variables, we generate a
+      --  dependency graph, which has an edge from ``x`` to ``y`` for each
+      --  variable ``x`` that would be set if variable ``y`` was set. This
+      --  graph is built through successive calls to ``Populate_Dependencies``
+      --  on each variable found unset during toposort.
+      --  Then, we populate the ``Atomic_Unset_Vars`` vector with actual unset
+      --  variables by only adding those that have no edge in the dependency
+      --  graph.
+      --
+      --  There is one last problem that we haven't mentionned yet: cyclic
+      --  dependencies. Assume the following Adalog equation:
+      --
+      --  .. code::
+      --
+      --     x <- foo(y)
+      --     y <- bar(z)
+      --     z <- baz(x)
+      --
+      --  If we execute the algorithm as we have presented it so far on this
+      --  example, we will not be able to generate an explanation, since there
+      --  is no "root" variable: all of them have a dependency.
+      --
+      --  For such a cycle, we would like to emit a clause that says "any atom
+      --  in the current solution that uses any of those variables needs at
+      --  least one atom *not* in the current solution that defines any of
+      --  those variable" (since defining any of those will automatically
+      --  define the rest of them). The insight here is that if all variables
+      --  of the cycle were unified, then we could generate this clause using
+      --  ``Contradict_Unset_Var`` on a single one of those variable directly,
+      --  because then, fetching atoms that use or define that variable will
+      --  contain all the atoms that use or define any of the variables of the
+      --  cycle.
+      --
+      --  So, this is exactly what we implement in ``Alias_Cycle``: we detect
+      --  cycles in the dependency graph and unify all variables that are part
+      --  of a cycle. Once a cycle is found, we populate ``Atomic_Unset_Vars``
+      --  with a single member of that cycle, which allows the subsequent call
+      --  to ``Contradict_Unset_Var`` to contradict the whole cycle.
+
+      use AdaSAT;
+
+      type Dependency_Graph is array (Positive range <>)
+         of Logic_Var_Vector;
+
+      Dependencies      : Dependency_Graph := (Ctx.Vars'Range => <>);
+      Atomic_Unset_Vars : Logic_Var_Vector;
+
+      procedure Populate_Dependencies (V : Logic_Var);
+      --  Analyze the atoms of the current solution and add as dependency of
+      --  ``V`` any variable ``W`` such that if ``W`` was set, then an atom of
+      --  the current solution would define ``V``.
+
+      procedure Alias_Cycle (V : Logic_Var);
+      --  Find cycles in the dependency graph and unify all variables that are
+      --  part of a cycle together. Also, popupate the ``Atomic_Unset_Vars``
+      --  vector with ``V`` if ``V`` has no dependency or if ``V`` is part
+      --  of a cycle and a representent of that cycle is not already present in
+      --  the vector.
+
+      procedure Contradict_Unset_Var (V : Logic_Var);
+      --  Assuming ``V`` is used but undefined in the current solution, build
+      --  a clause that contradicts the current solution by ensuring that
+      --  ``V`` must be defined if we want to use it.
+
+      ---------------------------
+      -- Populate_Dependencies --
+      ---------------------------
+
+      procedure Populate_Dependencies (V : Logic_Var) is
+         V_Id : constant Natural := Id (V);
+      begin
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace
+              ("Dependencies of unset var " & Image_With_Id (V));
+         end if;
+
+         for R of Ctx.Atoms loop
+            declare
+               Atom : Atomic_Relation_Type renames R.Atomic_Rel;
+            begin
+               --  Only propagation atoms can create dependencies between
+               --  variables.
+               case Atom.Kind is
+                  when Propagate =>
+                     --  Create the dependency only if the variable we are
+                     --  propagating from is not ourself.
+
+                     if Id (Atom.Target) = V_Id and then
+                        Id (Atom.From) /= V_Id
+                     then
+                        Dependencies (V_Id).Append (Atom.From);
+                        if Solv_Trace.Is_Active then
+                           Solv_Trace.Trace
+                             (" - " & Image_With_Id (Atom.From));
+                        end if;
+                     end if;
+
+                  when N_Propagate =>
+                     --  Right now, the meaning of ``X`` depends on ``A, B, C``
+                     --  is: ``X`` would be defined if any of ``A, B, C`` is
+                     --  defined. So, what we do here is not optimal: we are
+                     --  basically saying that ``V`` would be set if any of the
+                     --  variables of the ``N_Propagate`` is defined, but we
+                     --  should rather say when *all* of them are.
+                     --  We cannot express this right now but it is okay: it
+                     --  simply means that we might need multiple rounds of
+                     --  of toposort contradictions to converge. Since this is
+                     --  not an issue for now, we let it be handled that way.
+
+                     if Id (Atom.Target) = V_Id then
+                        for W of Atom.Comb_Vars loop
+                           if Id (W) /= V_Id then
+                              Dependencies (V_Id).Append (W);
+                              if Solv_Trace.Is_Active then
+                                 Solv_Trace.Trace
+                                   (" - " & Image_With_Id (W));
+                              end if;
+                           end if;
+                        end loop;
+                     end if;
+
+                  when others =>
+                     null;
+               end case;
+            end;
+         end loop;
+      end Populate_Dependencies;
+
+      -------------------
+      -- Is_Atomic_Var --
+      -------------------
+
+      function Is_Atomic_Var (V : Logic_Var) return Boolean is
+        (for some W of Atomic_Unset_Vars => Id (V) = Id (W));
+      --  Return whether the given variable is contained in the
+      --  ``Atomic_Unset_Vars`` vector.
+
+      -----------------
+      -- Alias_Cycle --
+      -----------------
+
+      procedure Alias_Cycle (V : Logic_Var) is
+         V_Id    : constant Natural := Id (V);
+         Visited : Index_Set := (Ctx.Vars'Range => False);
+
+         function DFS (W : Logic_Var) return Boolean;
+         --  Implement a basic depth-first search in the dependency graph
+         --  in order to find out whether there is a cycle that involves
+         --  variable ``V``. If it's the case, unify all variables that
+         --  are part of that cycle.
+
+         ---------
+         -- DFS --
+         ---------
+
+         function DFS (W : Logic_Var) return Boolean is
+            W_Id : constant Natural := Id (W);
+         begin
+            if Visited (W_Id) then
+               return False;
+            end if;
+
+            Visited (W_Id) := True;
+
+            for Dep of Dependencies (W_Id) loop
+               if Id (Dep) = V_Id or else DFS (Dep) then
+                  if Solv_Trace.Is_Active then
+                     Solv_Trace.Trace (" - New alias " & Image_With_Id (W));
+                  end if;
+                  Alias (W, V);
+                  return True;
+               end if;
+            end loop;
+
+            return False;
+         end DFS;
+      begin
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace ("Aliasing var " & Image_With_Id (V));
+         end if;
+
+         --  Avoid adding the same variable twice in ``Atomic_Unset_Vars``
+         if Is_Atomic_Var (V) then
+            return;
+         end if;
+
+         --  If this variable has no dependency, it is atomic
+         if Dependencies (V_Id).Is_Empty then
+            Atomic_Unset_Vars.Append (V);
+            return;
+         end if;
+
+         --  Otherwise, check if it is part of a cycle. Note that we check
+         --  again if ``Atomic_Unset_Vars`` contains it after the DFS run,
+         --  as it may have been aliased to another variable during the
+         --  search.
+         if DFS (V) and then not Is_Atomic_Var (V) then
+            Atomic_Unset_Vars.Append (V);
+         end if;
+      end Alias_Cycle;
+
+      --------------------------
+      -- Contradict_Unset_Var --
+      --------------------------
+
+      procedure Contradict_Unset_Var (V : Logic_Var) is
+         V_Id   : constant Natural := Id (V);
+         Result : AdaSAT.Builders.Clause_Builder;
+      begin
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace ("Orphan rels for unset var " & Image (V) & ":");
+         end if;
+
+         --  First gather all equations that use V. First include all unifying
+         --  atoms.
+         for U of Ctx.Unifies loop
+            if Id (U.Atomic_Rel.Target) = V_Id then
+               if Solv_Trace.Is_Active then
+                  Solv_Trace.Trace (Image (U));
+               end if;
+
+               Result.Add_Simplify (-Ctx.Atom_Map (U.Id));
+            end if;
+         end loop;
+
+         --  And then also include the rest of the atoms
+         for R of Ctx.Atoms loop
+            if Uses_Var (R.Atomic_Rel, V) then
+               if Solv_Trace.Is_Active then
+                  Solv_Trace.Trace (Image (R));
+               end if;
+               Result.Add_Simplify (-Ctx.Atom_Map (R.Id));
+            end if;
+         end loop;
+
+         Solv_Trace.Trace ("Candidate defining rels:");
+
+         for Block_Id in 1 .. Ctx.Blocks.Length loop
+            if Model (Variable (Block_Id)) in False then
+               for R of Ctx.Blocks.Get (Block_Id) loop
+                  declare
+                     W : constant Logic_Var := Defined_Var (R.Atomic_Rel);
+                  begin
+                     if W /= null and then Id (W) = V_Id then
+                        if Solv_Trace.Is_Active then
+                           Solv_Trace.Trace (Image (R));
+                        end if;
+                        Result.Add_Simplify (+Variable (Block_Id));
+                        exit;
+                     end if;
+                  end;
+               end loop;
+            end if;
+         end loop;
+
+         Explanation.Add (Result.Build);
+      end Contradict_Unset_Var;
+   begin
+      --  Stage 1: build the dependency graph
+      for V of Ctx.Sort_Ctx.Unset_Vars loop
+         Populate_Dependencies (V);
+      end loop;
+
+      --  Stage 2: extract unset variables that are "atomic" (i.e. that have
+      --  no dependencies), and detect cycles in the graph.
+      for V of Ctx.Sort_Ctx.Unset_Vars loop
+         Alias_Cycle (V);
+      end loop;
+
+      pragma Assert (not Atomic_Unset_Vars.Is_Empty);
+
+      --  Stage 3: contradict atomic variables
+      for V of Atomic_Unset_Vars loop
+         Contradict_Unset_Var (V);
+      end loop;
+
+      --  Stage 4: free everything
+      for Deps of Dependencies loop
+         Deps.Destroy;
+      end loop;
+      Atomic_Unset_Vars.Destroy;
+   end Explain_Topo_Sort_Failure;
 
    -----------------
    -- To_Relation --
@@ -1587,11 +1936,6 @@ package body Langkit_Support.Adalog.Solver is
       --  Helper used to deallocate memory or reset relevant data structures
       --  before returning. Returns the given boolean.
 
-      procedure Fail_Unset_Var;
-      --  Populate ``Contradictions`` by generating clauses that prevent
-      --  subsequent models from containing the variables that were found unset
-      --  during the topological sort (see ``Ctx.Unset_Var``).
-
       procedure Fail;
       --  Populate ``Contradictions`` so as to invalidate this exact model
       --  only.
@@ -1611,86 +1955,6 @@ package body Langkit_Support.Adalog.Solver is
          end if;
          return Result;
       end Cleanup;
-
-      --------------------
-      -- Fail_Unset_Var --
-      --------------------
-
-      procedure Fail_Unset_Var is
-         Result : AdaSAT.Builders.Clause_Builder;
-         Added  : Boolean := False;
-      begin
-         --  For a given variable that was used but unset, causing topological
-         --  sort to fail, we want to construct a contradiction roughly saying
-         --  if we want to use this variable, then we need to have at least
-         --  one atom that defines it! More formally, we want to build the
-         --  following equation
-         --  ``u_1 & u_2 & ... & u_m => a_1 | a _2 | ... | a_n``
-         --  or in CNF,
-         --  ``!u_1 | !u_2 | ... | !u_m | a_1 | a_2 | .. | a_n``
-         --  Where: u_i is the i'th atom that unifies this variable with
-         --  another one, and a_j is the j'th atom that assigns a value to that
-         --  variable.
-
-         if Solv_Trace.Is_Active then
-            Solv_Trace.Trace ("Relevant unifiers:");
-         end if;
-
-         --  So, first include the unifying atoms...
-         for U of Ctx.Unifies loop
-            for V of Ctx.Sort_Ctx.Unset_Vars loop
-               if Id (U.Atomic_Rel.Target) = Id (V) then
-                  if Solv_Trace.Is_Active then
-                     Solv_Trace.Trace (Image (U));
-                  end if;
-
-                  Result.Add_Simplify (-Ctx.Atom_Map (U.Id));
-                  Added := True;
-                  exit;
-               end if;
-            end loop;
-         end loop;
-
-         if not Added then
-            --  If there was no Unify clause, simply revoke the given model
-            --  without explanation.
-            Fail;
-            return;
-         end if;
-
-         --  Then find the atoms that assign a value to those variables
-         for Block_Id in 1 .. Ctx.Blocks.Length loop
-            if Model (Variable (Block_Id)) in False then
-               Test_Block :
-               for R of Ctx.Blocks.Get (Block_Id) loop
-                  declare
-                     Atom : Atomic_Relation_Type renames R.Atomic_Rel;
-                  begin
-                     for V of Ctx.Sort_Ctx.Unset_Vars loop
-                        case Atom.Kind is
-                           when Unify =>
-                              if Id (Atom.Target) = Id (V) or else
-                                 Id (Atom.Unify_From) = Id (V)
-                              then
-                                 Result.Add_Simplify (+Variable (Block_Id));
-                                 exit Test_Block;
-                              end if;
-                           when Assign | Propagate | N_Propagate =>
-                              if Id (Atom.Target) = Id (V) then
-                                 Result.Add_Simplify (+Variable (Block_Id));
-                                 exit Test_Block;
-                              end if;
-                           when others =>
-                              null;
-                        end case;
-                     end loop;
-                  end;
-               end loop Test_Block;
-            end if;
-         end loop;
-
-         Contradictions.Append (Result.Build);
-      end Fail_Unset_Var;
 
       ----------
       -- Fail --
@@ -1757,13 +2021,22 @@ package body Langkit_Support.Adalog.Solver is
                Solv_Trace.Trace ("Topo fail!");
             end if;
             begin
-               if not Evaluate_Atoms (Ctx, Sorted_Atoms, Explanation) then
-                  Contradictions := Explanation.Build;
-                  return Cleanup (False);
-               elsif not Ctx.Sort_Ctx.Unset_Vars.Is_Empty then
-                  Fail_Unset_Var;
-                  return Cleanup (False);
+               --  First try to revoke this partial solution by finding
+               --  contradictions in the sorted subset of atoms.
+               if Evaluate_Atoms (Ctx, Sorted_Atoms, Explanation) then
+                  --  If evaluation was successful, we need to revoke this
+                  --  partial solution in another manner: we explain that
+                  --  this solution is not feasible because some atoms are
+                  --  orphans.
+                  pragma Assert (not Ctx.Sort_Ctx.Unset_Vars.Is_Empty);
+                  Explain_Topo_Sort_Failure (Ctx, Model, Explanation);
                end if;
+
+               --  Explanation must be filled at this stage, either by
+               --  ``Evaluate_Atoms`` or by ``Explain_Topo_Sort_Failure``.
+               Contradictions := Explanation.Build;
+               pragma Assert (not Contradictions.Is_Empty);
+               return Cleanup (False);
             exception
                when Timeout_Error =>
                   raise;
