@@ -68,7 +68,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
      with Inline;
    --  Shed env rebindings that are not in the parent chain for From_Env
 
-   procedure Check_Rebindings_Unicity (Self : Env_Rebindings);
+   procedure Check_Rebindings_Uniqueness (Self : Env_Rebindings);
    --  Perform a uniqueness check on the various rebindings in Self. In
    --  particular, check that there are no two identical Old_Env and no two
    --  identical New_Env in the set of rebindings. If there are, raise a
@@ -430,7 +430,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
          return L;
       end if;
       return Result : constant Env_Rebindings := Append_All (R) do
-         Check_Rebindings_Unicity (Result);
+         Check_Rebindings_Uniqueness (Result);
       end return;
    end Combine;
 
@@ -482,7 +482,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
          Register_Rebinding (Env_Node (Old_Env), Result);
          Register_Rebinding (Env_Node (New_Env), Result);
-         Check_Rebindings_Unicity (Result);
+         Check_Rebindings_Uniqueness (Result);
          return Result;
       end;
    end Append;
@@ -1948,11 +1948,11 @@ package body Langkit_Support.Lexical_Envs_Impl is
               From_Rebound => False);
    end Shed_Rebindings;
 
-   ------------------------------
-   -- Check_Rebindings_Unicity --
-   ------------------------------
+   ---------------------------------
+   -- Check_Rebindings_Uniqueness --
+   ---------------------------------
 
-   procedure Check_Rebindings_Unicity (Self : Env_Rebindings) is
+   procedure Check_Rebindings_Uniqueness (Self : Env_Rebindings) is
       L, R : Env_Rebindings := Self;
    begin
       while L /= null loop
@@ -1969,7 +1969,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
          end loop;
          L := L.Parent;
       end loop;
-   end Check_Rebindings_Unicity;
+   end Check_Rebindings_Uniqueness;
 
    ----------------
    -- Text_Image --
