@@ -351,7 +351,7 @@ package body Langkit_Support.Adalog.Solver is
       --  relation leaf, ``Unifies`` + ``Atoms`` will contain an autonomous
       --  relation to solve (this is a solver "branch").
 
-      Timeout : Natural;
+      Remaining_Time : Natural;
       --  Number of times left we allow ourselves to evaluate an atom before
       --  aborting the solver. If 0, no timeout applies.
 
@@ -411,6 +411,13 @@ package body Langkit_Support.Adalog.Solver is
    --  Return whether the given variable is in a "use" position inside this
    --  atom. For example in ``x <- foo(y)``, ``y`` is "used" whereas ``x`` is
    --  "defined".
+
+   procedure Decrease_Remaining_Time
+     (Ctx    : in out Solving_Context;
+      Amount : Natural);
+   --  If the timeout mechanism is enabled, decrease ``Ctx.Remaining_Time`` by
+   --  the given amount. If that operation makes it go below 0, raise a
+   --  ``Timeout_Error`` instead.
 
    function Compute_Unification_Graph
      (Ctx : Solving_Context) return Unification_Graph_Access;
@@ -1036,6 +1043,23 @@ package body Langkit_Support.Adalog.Solver is
       Ctx.Sort_Ctx.Unset_Vars.Destroy;
    end Destroy;
 
+   -----------------------------
+   -- Decrease_Remaining_Time --
+   -----------------------------
+
+   procedure Decrease_Remaining_Time
+     (Ctx    : in out Solving_Context;
+      Amount : Natural)
+   is
+   begin
+      if Ctx.Remaining_Time > 0 then
+         if Amount > Ctx.Remaining_Time then
+            raise Timeout_Error;
+         end if;
+         Ctx.Remaining_Time := Ctx.Remaining_Time - Amount;
+      end if;
+   end Decrease_Remaining_Time;
+
    -------------------------------
    -- Compute_Unification_Graph --
    -------------------------------
@@ -1418,13 +1442,7 @@ package body Langkit_Support.Adalog.Solver is
       Invalid_Vars : Index_Set := (Ctx.Vars'Range => False);
    begin
       --  If we have a timeout, apply it
-
-      if Ctx.Timeout > 0 then
-         if Sorted_Atoms'Length > Ctx.Timeout then
-            raise Timeout_Error;
-         end if;
-         Ctx.Timeout := Ctx.Timeout - Sorted_Atoms'Length;
-      end if;
+      Decrease_Remaining_Time (Ctx, Sorted_Atoms'Length);
 
       --  Evaluate each individual atom. Note that we don't stop as soon as
       --  one failing atom has been found. Ideally, we want to find several
@@ -1824,6 +1842,10 @@ package body Langkit_Support.Adalog.Solver is
          Explanation.Add (Result.Build);
       end Contradict_Unset_Var;
    begin
+      --  Take into account the amount of work that we need to do here in our
+      --  timeout estimation.
+      Decrease_Remaining_Time (Ctx, Ctx.Atoms.Length);
+
       --  Stage 1: build the dependency graph
       for V of Ctx.Sort_Ctx.Unset_Vars loop
          Populate_Dependencies (V);
@@ -2323,7 +2345,7 @@ package body Langkit_Support.Adalog.Solver is
       end if;
       Ctx := Create
         (Solution_Callback'Unrestricted_Access.all, PRel.Vars, Max_Id);
-      Ctx.Timeout := Timeout;
+      Ctx.Remaining_Time := Timeout;
 
       declare
          Start : constant Time := Clock;

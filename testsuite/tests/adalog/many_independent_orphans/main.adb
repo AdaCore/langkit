@@ -10,6 +10,25 @@ use Langkit_Support.Adalog.Main_Support;
 procedure Main is
    use T_Solver, Refs, Solver_Ifc;
 
+   procedure Solve_First (Rel : Relation; Timeout : Natural := 0);
+   --  Wrapper around ``Langkit_Support.Adalog.Solve_First``
+
+   -----------------
+   -- Solve_First --
+   -----------------
+
+   procedure Solve_First (Rel : Relation; Timeout : Natural := 0) is
+   begin
+      if Solve_First (Rel, Timeout => Timeout) then
+         Put_Line ("Solved!");
+      else
+         Put_Line ("Failed to solve!");
+      end if;
+   exception
+      when Langkit_Support.Adalog.Timeout_Error =>
+         Put_Line ("Failed to solve! (timeout error)");
+   end Solve_First;
+
    function Square (S : Integer) return Integer is (S ** 2);
 
    Square_Conv : constant Converter_Type'Class :=
@@ -78,10 +97,7 @@ procedure Main is
    R : constant Relation :=
       A1 and A2 and A3 and A4 and A5 and A6 and A7 and A8 and A9;
 begin
-   if Solve_First (R) then
-      Put_Line ("Solved!");
-   else
-      Put_Line ("Failed to solve!");
-   end if;
+   Solve_First (R);
+   Solve_First (R, Timeout => 10);
 end Main;
 
