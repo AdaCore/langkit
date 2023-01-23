@@ -121,6 +121,20 @@ with No_Return,
      Pre => Value.Kind = Mmz_Error;
 --  Re-raise the exception memoized in ``Value``
 
+procedure Store_Memoized_Error
+  (Exc     : Ada.Exceptions.Exception_Occurrence;
+   Exc_Id  : out Ada.Exceptions.Exception_Id;
+   Exc_Msg : out String_Access);
+procedure Free_Memoized_Error
+  (Exc_Id  : in out Ada.Exceptions.Exception_Id;
+   Exc_Msg : in out String_Access);
+procedure Reraise_Memoized_Error
+  (Exc_Id  : Ada.Exceptions.Exception_Id;
+   Exc_Msg : String_Access)
+with No_Return;
+--  Lower level routines that language spec extensions can use when dealing
+--  with memoization manually.
+
 </%def>
 
 <%def name="body()">
@@ -253,7 +267,7 @@ begin
    for V of Values.all loop
       case V.Kind is
          when Mmz_Error =>
-            Free (V.Exc_Msg);
+            Free_Memoized_Error (V.Exc_Id, V.Exc_Msg);
 
          % for t in refcounted_value_types:
             when ${t.memoization_kind} =>
@@ -357,17 +371,12 @@ procedure Add_Memoized_Error
    Exc    : Ada.Exceptions.Exception_Occurrence;
    Stored : out Boolean)
 is
-   Msg : String_Access := new String'(Ada.Exceptions.Exception_Message (Exc));
+   Value : Mmz_Value (Kind => Mmz_Error);
 begin
-   Add_Memoized_Value
-     (Unit,
-      Handle,
-      (Kind    => Mmz_Error,
-       Exc_Id  => Ada.Exceptions.Exception_Identity (Exc),
-       Exc_Msg => Msg),
-      Stored);
+   Store_Memoized_Error (Exc, Value.Exc_Id, Value.Exc_Msg);
+   Add_Memoized_Value (Unit, Handle, Value, Stored);
    if not Stored then
-      Free (Msg);
+      Free_Memoized_Error (Value.Exc_Id, Value.Exc_Msg);
    end if;
 end Add_Memoized_Error;
 
@@ -377,8 +386,44 @@ end Add_Memoized_Error;
 
 procedure Reraise_Memoized_Error (Value : Mmz_Value) is
 begin
-   Ada.Exceptions.Raise_Exception
-     (Value.Exc_Id, Value.Exc_Msg.all & " (memoized)");
+   Reraise_Memoized_Error (Value.Exc_Id, Value.Exc_Msg);
+end Reraise_Memoized_Error;
+
+--------------------------
+-- Store_Memoized_Error --
+--------------------------
+
+procedure Store_Memoized_Error
+  (Exc     : Ada.Exceptions.Exception_Occurrence;
+   Exc_Id  : out Ada.Exceptions.Exception_Id;
+   Exc_Msg : out String_Access) is
+begin
+   Exc_Id := Ada.Exceptions.Exception_Identity (Exc);
+   Exc_Msg := new String'(Ada.Exceptions.Exception_Message (Exc));
+end Store_Memoized_Error;
+
+-------------------------
+-- Free_Memoized_Error --
+-------------------------
+
+procedure Free_Memoized_Error
+  (Exc_Id  : in out Ada.Exceptions.Exception_Id;
+   Exc_Msg : in out String_Access)
+is
+   pragma Unreferenced (Exc_Id);
+begin
+   Free (Exc_Msg);
+end Free_Memoized_Error;
+
+----------------------------
+-- Reraise_Memoized_Error --
+----------------------------
+
+procedure Reraise_Memoized_Error
+  (Exc_Id  : Ada.Exceptions.Exception_Id;
+   Exc_Msg : String_Access) is
+begin
+   Ada.Exceptions.Raise_Exception (Exc_Id, Exc_Msg.all & " (memoized)");
 end Reraise_Memoized_Error;
 
 </%def>
