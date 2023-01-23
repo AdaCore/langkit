@@ -81,8 +81,8 @@ langkit_test:
     - cd /it/wave
     - mkdir -p fingerprints
     - anod vcs --add-repo langkit $CI_PROJECT_DIR
-    - touch fingerprints/x86_64-linux.langkit_support.build.json.assume-unchanged
-    - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
+    - touch fingerprints/x86_64-linux.langkit_support.install.json.assume-unchanged
+    - touch fingerprints/x86_64-linux.langkit.install.json.assume-unchanged
     - anod test --minimal langkit
 
     # Produce a XUnit report for GitLab
@@ -137,8 +137,8 @@ libadalang_build_and_test:
     - cd /it/wave
     - mkdir -p fingerprints
     - anod vcs --add-repo libadalang /tmp/libadalang
-    - touch fingerprints/x86_64-linux.langkit_support.build.json.assume-unchanged
-    - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
+    - touch fingerprints/x86_64-linux.langkit_support.install.json.assume-unchanged
+    - touch fingerprints/x86_64-linux.langkit.install.json.assume-unchanged
     - anod build --minimal libadalang
     - anod build --minimal libadalang_for_customers
     - anod test  --minimal libadalang
