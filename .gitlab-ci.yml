@@ -114,7 +114,7 @@ libadalang_build_and_test:
     # to rebuild the artifact
     - if: $CI_REBUILD_ARTIFACT
       when: never
-    - when: always      
+    - when: always
   script:
     - export PATH=/it/e3/bin:$PATH
     - . ~/.aws_container_credentials
@@ -135,8 +135,8 @@ libadalang_build_and_test:
 
     # Build and test libadalang
     - cd /it/wave
-    - mkdir -p fingerprints    
-    - anod vcs --add-repo libadalang /tmp/libadalang    
+    - mkdir -p fingerprints
+    - anod vcs --add-repo libadalang /tmp/libadalang
     - touch fingerprints/x86_64-linux.langkit_support.build.json.assume-unchanged
     - touch fingerprints/x86_64-linux.langkit.build.json.assume-unchanged
     - anod build --minimal libadalang
