@@ -1,0 +1,7 @@
+"ExampleList"
+Root children count = 2
+Child 1 of root = "Example"
+Child 2 of root = "Example"
+Start token of the 1 child = "Example"
+Start token of the 2 child = "Example"
+Done

@@ -436,9 +436,8 @@ extern void
 ${capi.get_name("kind_name")}(${node_kind_type} kind, ${text_type} *result);
 
 ${c_doc('langkit.node_unit')}
-extern int
-${capi.get_name("node_unit")}(${entity_type} *node,
-                              ${analysis_unit_type} *unit_p);
+extern ${analysis_unit_type}
+${capi.get_name("node_unit")}(${entity_type} *node);
 
 ${c_doc('langkit.node_hash')}
 extern uint32_t
@@ -635,7 +634,7 @@ ${capi.get_name('token_range_text')}(${token_type} *first,
                                      ${text_type} *result);
 
 ${c_doc('langkit.token_is_equivalent')}
-extern void
+extern ${bool_type}
 ${capi.get_name('token_is_equivalent')}(${token_type} *left,
                                         ${token_type} *right);
 
