@@ -1657,33 +1657,6 @@ class LiteralExpr(ResolvedExpression):
     def _render_expr(self):
         return self.template.format(*[o.render_expr() for o in self.operands])
 
-    def render_python_constant(self):
-        """
-        Assuming this expression is a valid constant, return Python code to
-        materialize it in the generated binding.
-
-        :rtype: str
-        """
-        raise not_implemented_error(self, self.render_python_constant)
-
-    def render_introspection_constant(self):
-        """
-        Assuming this expression is a valid constant, return Ada code to
-        materialize it in the introspection API.
-
-        :rtype: str
-        """
-        raise not_implemented_error(self, self.render_introspection_constant)
-
-    def render_ocaml_constant(self):
-        """
-        Assuming this expression is a valid constant, return ocaml code to
-        materialize it in the generated binding.
-
-        :rtype: str
-        """
-        raise not_implemented_error(self, self.render_ocaml_constant)
-
     @property
     def subexprs(self):
         return {'0-type': self.static_type,
