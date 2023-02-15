@@ -1145,6 +1145,13 @@ class CompiledType:
         return self == T.BigInt
 
     @property
+    def is_root_node(self) -> bool:
+        """
+        Return whether this is the root node.
+        """
+        return isinstance(self, ASTNodeType) and self._is_root_node
+
+    @property
     def element_type(self):
         """
         Assuming this is a collection type (array, iterator, list) or an
@@ -2696,7 +2703,7 @@ class ASTNodeType(BaseStructType):
 
             dsl_name=dsl_name or self.raw_name.camel,
         )
-        self.is_root_node = is_root
+        self._is_root_node = is_root
         self.is_generic_list_type: bool = is_generic_list_type
         self.is_root_list_type = is_root_list
         self.is_list = is_list

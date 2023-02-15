@@ -557,7 +557,7 @@ class CompileCtx:
         the grammar.
         """
 
-        self.generic_list_type: Optional[ASTNodeType] = None
+        self.generic_list_type: ASTNodeType
         """
         The root gammar class subclass that is the base class for all
         automatically generated root list types.

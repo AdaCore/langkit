@@ -6,7 +6,7 @@ import inspect
 from itertools import count
 from typing import (
     Any as _Any, Callable, ClassVar, Dict, Iterator, List, Optional as Opt,
-    Sequence, Set, TYPE_CHECKING, Tuple, Union
+    Sequence, Set, TYPE_CHECKING, Tuple, Union, overload
 )
 
 
@@ -22,7 +22,7 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, WarningSet, check_multiple,
-    check_source_language, check_type, diagnostic_context,
+    check_source_language, check_type, diagnostic_context, error,
     extract_library_location
 )
 from langkit.documentation import RstCommentChecker
@@ -33,22 +33,18 @@ from langkit.utils import (
 )
 
 
-if TYPE_CHECKING:
-    from langkit.compiled_types import CompiledTypeOrDefer
+@overload
+def unsugar(expr: None) -> None: ...
+@overload
+def unsugar(expr: SugaredExpression) -> AbstractExpression: ...
 
 
-def unsugar(expr, ignore_errors=False):
+def unsugar(expr: SugaredExpression | None) -> AbstractExpression | None:
     """
     Given a Python expession that can be unsugared to an AbstractExpression,
     return a valid AbstractExpression.
 
     :param expr: The expression to unsugar.
-    :type expr: None|AbstractExpression|bool|int|() -> AbstractExpression
-
-    :param bool ignore_errors: If True, invalid abstract expressions are
-        returned as-is. Raise a diagnostic error for them otherwise.
-
-    :rtype: AbstractExpression
     """
     import langkit.dsl
 
@@ -71,10 +67,8 @@ def unsugar(expr, ignore_errors=False):
     elif isinstance(expr, langkit.dsl.EnumValue):
         expr = expr._value.to_abstract_expr
 
-    check_source_language(
-        ignore_errors or isinstance(expr, AbstractExpression),
-        'Invalid abstract expression: {}'.format(expr)
-    )
+    if not isinstance(expr, AbstractExpression):
+        error(f"Invalid abstract expression: {expr}")
 
     return expr
 
@@ -229,20 +223,26 @@ def expand_abstract_fn(fn):
     return (fn_arguments, fn_expr)
 
 
-def construct(expr, expected_type_or_pred=None, custom_msg=None,
-              downcast=True):
+TypePredicate = Callable[[CompiledType], bool]
+
+
+def construct(
+    expr: SugaredExpression,
+    expected_type_or_pred: CompiledType | TypePredicate | None = None,
+    custom_msg: str | None = None,
+    downcast: bool = True,
+) -> ResolvedExpression:
     """
     Construct a ResolvedExpression from an object that is a valid expression in
     the Property DSL.
+
+    :param expr: The expression to resolve.
 
     :param expected_type_or_pred: A type or a predicate. If a type, it will
         be checked against the ResolvedExpression's type to see if it
         corresponds. If a predicate, expects the type of the
         ResolvedExpression as a parameter, and returns a boolean, to allow
         checking properties of the type.
-    :type expected_type_or_pred: CompiledType|(CompiledType) -> bool
-
-    :param AbstractExpression|bool|int expr: The expression to resolve.
 
     :param custom_msg: A string for the error messages. It can contain the
         format-like template holes {expected} and {expr_type}, which will be
@@ -251,13 +251,11 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
         will be provided, and putting an {expected} template hole will result
         in an error.
 
-    :param bool downcast: If the type of expr is a subtype of the passed
+    :param downcast: If the type of expr is a subtype of the passed
         expected_type, and this param is True, then generate a downcast.
-
-    :rtype: ResolvedExpression
     """
-
     expr = unsugar(expr)
+    assert expr is not None
     with expr.diagnostic_context:
 
         ret = expr.construct()
@@ -292,6 +290,13 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
                 ))
 
         return ret
+
+
+def construct_var(expr: AbstractVariable) -> VariableExpr:
+    """Type-constrained ``construct`` for variable expressions."""
+    result = construct(expr)
+    assert isinstance(result, VariableExpr)
+    return result
 
 
 class Frozable:
@@ -1047,20 +1052,21 @@ class ResolvedExpression:
     render_pre.
     """
 
-    def __init__(self, result_var_name=None, skippable_refcount=False,
-                 abstract_expr=None):
+    def __init__(self,
+                 result_var_name: str | None = None,
+                 skippable_refcount: bool = False,
+                 abstract_expr: AbstractExpression | None = None):
         """
         Create a resolved expression.
 
-        :param None|str result_var_name: If provided, create a local variable
-            using this as a base name to hold the result of this expression.
-            In this case, the "type" property must be ready.
-        :param bool skippable_refcount: If True, this resolved expression can
-            omit having a result variable even though its result is
-            ref-counted. This makes it possible to simplify the generated code.
-        :param AbstractExpression|None abstract_expr: For resolved expressions
-            that implement an abstract expression, this must be the original
-            abstract expression.
+        :param result_var_name: If provided, create a local variable using this
+            as a base name to hold the result of this expression.  In this
+            case, the "type" property must be ready.
+        :param skippable_refcount: If True, this resolved expression can omit
+            having a result variable even though its result is ref-counted.
+            This makes it possible to simplify the generated code.
+        :param abstract_expr: For resolved expressions that implement an
+            abstract expression, this must be the original abstract expression.
         """
         if result_var_name:
             self._result_var = PropertyDef.get().vars.create(result_var_name,
@@ -1081,24 +1087,21 @@ class ResolvedExpression:
         """
 
     @property
-    def result_var(self):
+    def result_var(self) -> LocalVars.LocalVar | None:
         """
         Return the local variable used to store the result of this expression,
         if any. Note that if the result is not null, the caller can assume that
         the "render_expr" method only returns the result variable name.
-
-        :rtype: LocalVars.LocalVar|None
         """
         return self._result_var
 
-    def create_result_var(self, name):
+    def create_result_var(self, name: str) -> VariableExpr:
         """
         If this property already has a result variable, return it as a resolved
         expression. Otherwise, create one and return it.
 
-        :param str name: Camel with underscores-formatted name for the result
+        :param name: Camel with underscores-formatted name for the result
             variable.
-        :rtype: VariableExpr
         """
         assert not self._render_pre_called, (
             'Trying to create a result variable while the expression has been'
@@ -1114,13 +1117,13 @@ class ResolvedExpression:
         elif not self._result_var:
             self._result_var = PropertyDef.get().vars.create(name, self.type)
 
-        return self.result_var.ref_expr
+        result_var = self.result_var
+        assert result_var is not None
+        return result_var.ref_expr
 
-    def render_pre(self):
+    def render_pre(self) -> str:
         """
         Render initial statements that might be needed to the expression.
-
-        :rtype: str
         """
         assert not self._render_pre_called, (
             '{}.render_pre can be called only once'.format(type(self).__name__)
@@ -1174,38 +1177,32 @@ class ResolvedExpression:
 
         return result
 
-    def render_expr(self):
+    def render_expr(self) -> str:
         """
         Render the expression itself.
-
-        :rtype: str
         """
         return (self.result_var.name.camel_with_underscores
                 if self.result_var else
                 self._render_expr())
 
-    def _render_pre(self):
+    def _render_pre(self) -> str:
         """
         Per-expression kind implementation for render_pre. The default
         implementation returns no statement.
-
-        :rtype: str
         """
         return ''
 
-    def _render_expr(self):
+    def _render_expr(self) -> str:
         """
         Per-expression kind implementation for render_expr. To be overriden in
         subclasses.
 
         Note that the returned expression must be idempotent: each evaluation
         must return the exact same result for the exact same context.
-
-        :rtype: str
         """
         raise NotImplementedError()
 
-    def render(self):
+    def render(self) -> str:
         """
         Render both the initial statements and the expression itself. This is
         basically a wrapper that calls render_pre and render_expr in turn.
@@ -1215,11 +1212,9 @@ class ResolvedExpression:
         return "{}\n{}".format(self.render_pre(), self.render_expr())
 
     @property
-    def type(self):
+    def type(self) -> CompiledType:
         """
         Returns the type of the resolved expression.
-
-        :rtype: langkit.compiled_types.CompiledType
         """
         if not self.static_type:
             raise NotImplementedError(
@@ -1229,7 +1224,7 @@ class ResolvedExpression:
         return resolve_type(self.static_type)
 
     @property
-    def ir_dump(self):
+    def ir_dump(self) -> str:
         """
         Return a textual representation of this resolved expression tree.
 
@@ -1238,11 +1233,9 @@ class ResolvedExpression:
         return '\n'.join(self._ir_dump(self.subexprs))
 
     @classmethod
-    def _ir_dump(cls, json_like):
+    def _ir_dump(cls, json_like: object) -> List[str]:
         """
         Helper for "ir_dump". Return text representation as a list of lines.
-
-        :rtype: list[str]
         """
         max_cols = 72
         result = []
@@ -1339,7 +1332,7 @@ class ResolvedExpression:
         return result
 
     @property
-    def subexprs(self):
+    def subexprs(self) -> object:
         """
         A JSON-like datastructure to describe this expression.
 
@@ -1353,8 +1346,11 @@ class ResolvedExpression:
         return []
 
     def flat_subexprs(
-        self, filter=lambda expr: isinstance(expr, ResolvedExpression)
-    ):
+        self,
+        filter: Callable[[object], bool] = lambda expr: isinstance(
+            expr, ResolvedExpression
+        ),
+    ) -> List[ResolvedExpression]:
         """
         Wrapper around "subexprs" to return a flat list of items matching
         "filter". By default, get all ResolvedExpressions.
@@ -1380,13 +1376,11 @@ class ResolvedExpression:
         return explore(self.subexprs)
 
     @property
-    def bindings(self):
+    def bindings(self) -> List[VariableExpr]:
         """
         Return the list of variables defined in "self", including in subexprs.
 
         Subclasses must override the "_bindings" method.
-
-        :rtype: list[VariableExpr]
         """
         # Do a copy to avoid mutating the expression own's data structures
         result = list(self._bindings())
@@ -1394,17 +1388,17 @@ class ResolvedExpression:
             result.extend(expr.bindings)
         return result
 
-    def _bindings(self):
+    def _bindings(self) -> List[VariableExpr]:
         """
         Return the list of variables "self" defines.
 
         Subclasses must override this method if they define variables.
-
-        :rtype: list[VariableExpr]
         """
         return []
 
-    def destructure_entity(self):
+    def destructure_entity(
+        self
+    ) -> Tuple[SavedExpr, FieldAccess.Expr, FieldAccess.Expr]:
         """
         Must be called only on expressions that evaluate to entities.  Return
         3 expressions:
@@ -1429,16 +1423,19 @@ class ResolvedExpression:
             FieldAccess.Expr(saved.result_var_expr, fields['info'], []),
         )
 
-    def unify(self, expr, context_name):
+    def unify(
+        self,
+        expr: ResolvedExpression,
+        context_name: str,
+    ) -> Tuple[ResolvedExpression, ResolvedExpression]:
         """
         Try to unify the type of `self` and of `expr`, and return a couple of
         expressions for both that convert their results to this type. Emit a
         user diagnostic using `context_name` if both have mismatching types.
 
-        :param ResolvedExpression expr: Expression to convert with `self`.
-        :param str context_name: User for error message. Name of the expression
+        :param expr: Expression to convert with `self`.
+        :param context_name: User for error message. Name of the expression
             that uses `self` and `expr`.
-        :rtype: (ResolvedExpression, ResolvedExpression)
         """
         from langkit.expressions import Cast
 
@@ -1963,6 +1960,15 @@ class ComputingExpr(ResolvedExpression):
     def __init__(self, result_var_name, abstract_expr=None):
         super().__init__(result_var_name, abstract_expr=abstract_expr)
 
+    # ComputingExpr always define a result variable: override result_var so
+    # that typing can assume that is the case.
+
+    @property
+    def result_var(self) -> LocalVars.LocalVar:
+        result = super().result_var
+        assert result is not None
+        return result
+
     def _render_expr(self):
         return self.result_var.name.camel_with_underscores
 
@@ -2159,7 +2165,7 @@ class AbstractVariable(AbstractExpression):
             return names.Name.check_from_lower(name)
 
     def __init__(self,
-                 name: names.Name,
+                 name: names.Name | None,
                  type: Opt[CompiledTypeOrDefer] = None,
                  create_local: bool = False,
                  source_name: Opt[str] = None):
@@ -2266,14 +2272,14 @@ class DynamicVariable(AbstractVariable):
     Reference to a dynamic property variable.
     """
 
-    def __init__(self, name, type, doc=None):
+    def __init__(self, name: str, type: CompiledType, doc: str | None = None):
         """
         Create a dynamic variable.
 
         These are implemented as optional arguments in properties.
 
-        :param str name: Lower-case name for this variable.
-        :param CompiledType type: Variable type.
+        :param name: Lower-case name for this variable.
+        :param type: Variable type.
         :param doc: User documentation for this variable.
         """
         self.argument_name = names.Name.from_lower(name)
@@ -5540,3 +5546,22 @@ def sloc_info_arg(loc):
     return ('(if Langkit_Support.Adalog.Debug.Debug'
             ' then New_Unit_String (Node.Unit, "{}")'
             ' else null)'.format(loc.gnu_style_repr()))
+
+
+if TYPE_CHECKING:
+    from langkit.compiled_types import CompiledTypeOrDefer
+    import langkit.dsl
+    from langkit.expressions.structs import FieldAccess
+
+    SugaredExpression = Union[
+        bool,
+        int,
+        str,
+        TypeRepo.Defer,
+        list,
+        tuple,
+        langkit.dsl._BuiltinValue,
+        EnumValue,
+        langkit.dsl.EnumValue,
+        AbstractExpression,
+    ]
