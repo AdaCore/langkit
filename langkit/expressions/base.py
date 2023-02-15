@@ -2235,7 +2235,7 @@ class DynamicVariable(AbstractVariable):
     Reference to a dynamic property variable.
     """
 
-    def __init__(self, name, type):
+    def __init__(self, name, type, doc=None):
         """
         Create a dynamic variable.
 
@@ -2243,8 +2243,10 @@ class DynamicVariable(AbstractVariable):
 
         :param str name: Lower-case name for this variable.
         :param CompiledType type: Variable type.
+        :param doc: User documentation for this variable.
         """
         self.argument_name = names.Name.from_lower(name)
+        self.doc = doc
         super().__init__(None, type)
 
     @property
@@ -4185,6 +4187,18 @@ class PropertyDef(AbstractNodeData):
             else:
                 self.lazy_present_field = self.base_property.lazy_present_field
                 self.lazy_storage_field = self.base_property.lazy_storage_field
+
+        # Now that all dynamic variables are known for this property, extend
+        # its documentation using the docs of its dynamic variables.
+        dyn_var_docs = []
+        for dyn_var in self._dynamic_vars or []:
+            if dyn_var.doc:
+                name = dyn_var.argument_name.camel_with_underscores
+                dyn_var_docs.append(f"``{name}``: {dyn_var.doc}")
+        if dyn_var_docs:
+            self._doc = (self._doc or "") + "".join(
+                f"\n\n{doc}" for doc in dyn_var_docs
+            )
 
     @property
     def original_is_public(self):
