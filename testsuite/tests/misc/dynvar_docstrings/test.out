@@ -1,0 +1,33 @@
+Code generation was successful
+Reading property docs in generated code...
+
+== Doc for P_P1 ==
+
+--  This is the doc for the property itself.
+--
+--  ``V_Oneline``: One line doc.
+--
+--  ``V_Multiline``: Doc that contains multiple lines.
+--
+--  ``V_Multiparag``: This is a very complicated doc.
+--
+--  So complicated that it requires several paragraphs to be decently
+--  described.
+--
+--  * It even has to contain...
+--
+--  * Bullet points!
+--
+--  * But...
+--
+--  .. attention:: This is just an example.
+--% belongs-to: Foo_Node
+
+== Doc for P_P2 ==
+
+--  This is the doc for the property itself.
+--% belongs-to: Foo_Node
+
+== Doc for P_P3 ==
+
+Done

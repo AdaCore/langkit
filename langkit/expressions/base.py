@@ -4194,7 +4194,8 @@ class PropertyDef(AbstractNodeData):
         for dyn_var in self._dynamic_vars or []:
             if dyn_var.doc:
                 name = dyn_var.argument_name.camel_with_underscores
-                dyn_var_docs.append(f"``{name}``: {dyn_var.doc}")
+                doc = inspect.cleandoc(dyn_var.doc)
+                dyn_var_docs.append(f"``{name}``: {doc}")
         if dyn_var_docs:
             self._doc = (self._doc or "") + "".join(
                 f"\n\n{doc}" for doc in dyn_var_docs
