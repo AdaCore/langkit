@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import os.path as P
 import shutil
@@ -208,8 +210,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
                   symbol_canonicalizer=None, mains=False,
                   show_property_logging=False, unparse_script=unparse_script,
                   case_insensitive: bool = False,
-                  version: str = "undefined",
-                  build_date: str = "undefined",
+                  version: str | None = None,
+                  build_date: str | None = None,
                   standalone: bool = False,
                   full_error_traces: bool = True,
                   additional_make_args: List[str] = [],
