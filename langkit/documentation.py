@@ -1379,6 +1379,9 @@ class LangkitTypeRef(docutils.nodes.reference):
 docutils.parsers.rst.roles.register_local_role(
     "typeref", LangkitTypeRef.role_fn
 )
+docutils.parsers.rst.roles.register_local_role(
+    "ref", PassthroughNode.role_fn
+)
 
 #
 # Global data used by docutils visitors
@@ -1741,6 +1744,7 @@ class RstCommentFormatter(docutils.nodes.GenericNodeVisitor):
                 f"{self.prefix}{self.subsequent_indent}   {l}"
                 for l in node.astext().splitlines()
             ))
+
         elif node.tagname == "enumerated_list":
             # TODO: Add support for nested enumerated lists
             self.in_enumerated_list = True
