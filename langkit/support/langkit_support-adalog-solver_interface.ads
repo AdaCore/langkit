@@ -39,6 +39,8 @@ package Langkit_Support.Adalog.Solver_Interface is
       Cache_Key   : Value_Type;
       Cache_Value : Boolean;
    end record;
+   --  A predicate encapsulates the logic of applying a boolean predicate to a
+   --  value, returning whether the predicate succeeds.
 
    function Call
      (Self : Predicate_Type; Val : Value_Type) return Boolean is abstract;
@@ -46,14 +48,12 @@ package Langkit_Support.Adalog.Solver_Interface is
 
    function Call_Wrapper
      (Self : in out Predicate_Type'Class; Val  : Value_Type) return Boolean;
-   --  Converter users must call this instead of ``Convert`` to use the cache
+   --  Predicate users must call this instead of ``Call`` to use the cache
 
    function Image (Self : Predicate_Type) return String is ("");
    function Full_Image
      (Self : Predicate_Type; Dummy_Var : Logic_Vars.Logic_Var) return String
    is ("");
-   --  A predicate encapsulates the logic of applying a boolean predicate to a
-   --  value, returning whether the predicate succeeds.
 
    ----------------------
    -- N_Predicate_Type --
@@ -77,7 +77,7 @@ package Langkit_Support.Adalog.Solver_Interface is
    function Call_Wrapper
      (Self : in out N_Predicate_Type'Class;
       Vals : Logic_Vars.Value_Array) return Boolean;
-   --  Converter users must call this instead of ``Convert`` to use the cache
+   --  Predicate users must call this instead of ``Call`` to use the cache
 
    function Image (Self : N_Predicate_Type) return String is ("");
    function Full_Image
