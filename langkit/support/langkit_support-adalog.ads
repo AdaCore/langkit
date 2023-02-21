@@ -18,9 +18,18 @@ package Langkit_Support.Adalog is
    -- Solving options --
    ---------------------
 
-   type Solve_Options_Type is null record;
+   type Solve_Options_Type is record
+      Report_Errors : Boolean;
+      --  If set the True, the solver will generate diagnostics explaining
+      --  which each attempted solution was rejected: it will call the
+      --  ``Failed`` primitive of the atom which evaluation failed (if
+      --  it is supported; see ``Langkit_Support.Adalog.Solver_Interface``),
+      --  together with the logic contexts that are relevant for the failure,
+      --  that is, the contexts attached to the atoms that are part of the
+      --  explanation for the failure).
+   end record;
 
-   Default_Options : Solve_Options_Type;
+   Default_Options : Solve_Options_Type := (Report_Errors => False);
    --  Mutate this to affect the behavior of all calls to the solver which just
    --  use the default options.
 
@@ -83,5 +92,13 @@ package Langkit_Support.Adalog is
    --
    --  * the number of tried solutions;
    --  * valid solutions found.
+
+   Diags_Trace  : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.SOLVER.DIAGNOSTICS", Default => GNATCOLL.Traces.From_Config);
+   --  Trace to show:
+   --
+   --  * internal diagnostics emitted during solving;
+   --  * what happens during the diagnostic filtering process (see the
+   --    ``Langkit_Support.Adalog.Solver.Diagnostics`` package).
 
 end Langkit_Support.Adalog;

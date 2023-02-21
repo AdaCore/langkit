@@ -31,6 +31,7 @@ library project Langkit_Support is
       "Langkit_Support.Adalog.Generic_Main_Support",
       "Langkit_Support.Adalog.Solver_Interface",
       "Langkit_Support.Adalog.Solver",
+      "Langkit_Support.Adalog.Solver.Diagnostics",
       "Langkit_Support.Array_Utils",
       "Langkit_Support.Boxes",
       "Langkit_Support.Generic_Bump_Ptr",

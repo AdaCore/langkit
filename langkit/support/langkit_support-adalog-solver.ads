@@ -42,6 +42,7 @@ package Langkit_Support.Adalog.Solver is
       Solution_Callback : access function
         (Vars : Logic_Var_Array) return Boolean;
       Solve_Options     : Solve_Options_Type := Default_Options;
+      Diag_Emitter      : Diagnostic_Emitter := null;
       Timeout           : Natural := 0);
    --  Run the solver on the ``Self`` relation. For every solution found, call
    --  ``Solution_Callback`` with the variables involved in ``Self``, and
@@ -55,6 +56,7 @@ package Langkit_Support.Adalog.Solver is
    function Solve_First
      (Self          : Relation;
       Solve_Options : Solve_Options_Type := Default_Options;
+      Diag_Emitter  : Diagnostic_Emitter := null;
       Timeout       : Natural := 0) return Boolean;
    --  Run the solver on the ``Self`` relation. Return whether there is at
    --  least one valid solution. See ``Solve_Options Type`` for the available
@@ -98,6 +100,7 @@ package Langkit_Support.Adalog.Solver is
      (Logic_Var    : Logic_Vars.Logic_Var;
       Value        : Value_Type;
       Conv         : Converter_Type'Class := No_Converter;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully if it is possible to
    --  assign the given ``Value`` to ``Logic_Var``. Two attempts to assign
@@ -109,6 +112,7 @@ package Langkit_Support.Adalog.Solver is
 
    function Create_Unify
      (Left, Right  : Logic_Vars.Logic_Var;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully if ``Left`` and ``Right``
    --  can be assigned the same value.
@@ -116,6 +120,7 @@ package Langkit_Support.Adalog.Solver is
    function Create_Propagate
      (From, To     : Logic_Vars.Logic_Var;
       Conv         : Converter_Type'Class := No_Converter;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully if it is possible to
    --  assign the value in ``From`` to the ``To`` variable.
@@ -127,6 +132,7 @@ package Langkit_Support.Adalog.Solver is
      (To           : Logic_Var;
       Comb         : Combiner_Type'Class;
       Logic_Vars   : Logic_Var_Array;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation;
    --  Create a relation that will solve successfully if it is possible to
    --  assign to ``To`` the value computed by calling ``Comb`` on the given
@@ -191,6 +197,14 @@ private
    subtype Logic_Var_Vector is Logic_Var_Vectors.Vector;
    type Logic_Var_Vector_Access is access Logic_Var_Vector;
 
+   procedure Get_Values (Vars : Logic_Var_Vector; Vals : out Value_Array);
+   --  Assign to ``Vals`` the value of the variables in ``Vars``.
+   --
+   --  This assumes that ``Vars`` and ``Vals`` have the same bounds. Note
+   --  that we could turn this into a function that returns the array, but
+   --  this would require secondary stack support and its overhead, whereas
+   --  this is performance critical code.
+
    ---------------------
    -- Atomic_Relation --
    ---------------------
@@ -205,32 +219,44 @@ private
       --  "Atomic relations dependency graph" section for more information.
 
       case Kind is
-         when Assign | Propagate =>
-            Conv : Converter_Access := null;
-            --  Conversion function for the value to assign/propagate. If left
-            --  to null, use the value itself.
+         when Assign | Propagate | N_Propagate | Unify =>
+            Ctx  : Solver_Ifc.Logic_Context_Access := null;
 
             case Kind is
-               when Assign =>
-                  Val : Value_Type;
-                  --  The value we want to assign to ``Target``
+               when Assign | Propagate =>
 
-               when Propagate =>
-                  From : Logic_Var;
-                  --  The variable from which we want to propagate to
-                  --  ``Target``.
+                  Conv : Converter_Access := null;
+                  --  Conversion function for the value to assign/propagate.
+                  --  If left to null, use the value itself.
 
-               when others => null;
+                  case Kind is
+                     when Assign =>
+                        Val : Value_Type;
+                        --  The value we want to assign to ``Target``
+
+                     when Propagate =>
+                        From : Logic_Var;
+                        --  The variable from which we want to propagate to
+                        --  ``Target``.
+
+                     when others =>
+                        null;
+                  end case;
+
+               when N_Propagate =>
+                  Comb_Vars : Logic_Var_Vector;
+                  --  List of logic variables used by the converter
+
+                  Comb : Combiner_Access;
+                  --  Combiner function to assign a value to Target that is
+                  --  computed from the value of N_Propagate_Vars.
+
+               when Unify =>
+                  Unify_From : Logic_Var;
+
+               when others =>
+                  null;
             end case;
-
-         when N_Propagate =>
-            Comb_Vars : Logic_Var_Vector;
-            --  List of logic variables used by the converter
-
-            Comb : Combiner_Access;
-            --  Combiner function to assign a value to Target that is computed
-            --  from the value of N_Propagate_Vars.
-
          when Predicate =>
             Pred : Predicate_Access;
             --  The predicate that will be applied as part of this relation
@@ -241,9 +267,6 @@ private
 
             N_Pred : N_Predicate_Access;
             --  The predicate that will be applied as part of this relation
-
-         when Unify =>
-            Unify_From : Logic_Var;
 
          when True | False =>
             null;

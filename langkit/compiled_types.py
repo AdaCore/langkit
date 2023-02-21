@@ -4628,6 +4628,88 @@ def create_builtin_types():
         is_builtin_type=True,
     )
 
+    logic_context = StructType(
+        name=names.Name("Logic_Context"),
+        location=None,
+        doc="""
+            Describes an interpretation of a reference. Can be attached
+            to logic atoms (e.g. Binds) to indicate under which interpretation
+            this particular atom was produced, which can in turn be used to
+            produce informative diagnostics for resolution failures.
+        """,
+        fields=[
+            ("ref_node", UserField(type=T.defer_root_node.entity)),
+            ("decl_node", UserField(type=T.defer_root_node.entity))
+        ],
+        is_builtin_type=True
+    )
+
+    CompiledType(
+        'InternalLogicContextAccess',
+        exposed=False,
+        nullexpr='null',
+        null_allowed=True,
+        is_refcounted=False,
+    )
+
+    solver_diagnostic = StructType(
+        name=names.Name("Solver_Diagnostic"),
+        location=None,
+        doc="""
+            A raw diagnostic produced by a solver resolution failure.
+            This contains as much information as possible to allow formatters
+            down the chain to filter/choose which diagnostics to show among
+            a set of diagnostics produced for a single equation.
+
+            * ``Template`` is a string explaining the error, which may contain
+              holes reprsented by the ``{}`` characters.
+
+            * ``Args`` is an array of nodes, which are to be plugged in the
+              holes of the template in the same order (i.e. the first argument
+              goes into the first hole of the template, etc.).
+
+            * ``Location`` is a node which indicates the location of the error.
+
+            * ``Contexts`` is the array of contexts that were deemed relevant
+              for this error.
+
+            * ``Round`` is the solver round during which this diagnostic was
+              emitted.
+        """,
+        fields=[
+            ("template", UserField(type=T.String)),
+            ("args", UserField(type=T.defer_root_node.entity.array)),
+            ("location", UserField(type=T.defer_root_node)),
+            ("contexts", UserField(type=logic_context.array)),
+            ("round", UserField(type=T.Int))
+        ],
+        is_builtin_type=True
+    )
+
+    from langkit.expressions.base import No
+    StructType(
+        name=names.Name("Solver_Result"),
+        location=None,
+        doc="""
+            A pair returned by the ``Solve_With_Diagnostic`` primitive,
+            consisting of:
+
+            * A ``Success`` field indicating whether resolution was successful
+              or not.
+
+            * A ``Diagnostics`` field containing an array of diagnostics which
+              may be non-empty if ``Success`` is ``False``.
+        """,
+        fields=[
+            ("success", UserField(type=T.Bool)),
+            ("diagnostics", UserField(
+                type=solver_diagnostic.array,
+                default_value=No(solver_diagnostic.array)
+            ))
+        ],
+        is_builtin_type=True
+    )
+
     T.env_assoc
     T.inner_env_assoc
 

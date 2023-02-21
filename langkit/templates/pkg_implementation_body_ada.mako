@@ -1587,6 +1587,46 @@ package body ${ada_lib_name}.Implementation is
       ${memoization.body()}
    % endif
 
+   package Solver_Diagnostic_Vectors is new Langkit_Support.Vectors
+     (Internal_Solver_Diagnostic);
+
+   ----------------------------
+   -- Allocate_Logic_Context --
+   ----------------------------
+
+   function Allocate_Logic_Context
+     (Ctx : Internal_Logic_Context) return Internal_Logic_Context_Access
+   is (new Internal_Logic_Context'(Ctx));
+
+   -------------------------
+   -- Trace_Logic_Context --
+   -------------------------
+
+   function Trace_Logic_Context
+     (Ctx : Internal_Logic_Context_Access) return String
+   is (Trace_Image (Ctx.all));
+
+   -----------------
+   -- Deep_Equals --
+   -----------------
+
+   function Deep_Equals
+     (X, Y : Internal_Logic_Context_Access) return Boolean
+   is (X.all = Y.all);
+
+   ------------------------
+   -- Free_Logic_Context --
+   ------------------------
+
+   procedure Free_Logic_Context
+     (Ctx : in out Internal_Logic_Context_Access)
+   is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Internal_Logic_Context, Internal_Logic_Context_Access);
+   begin
+      Free (Ctx);
+   end Free_Logic_Context;
+
    -------------------
    -- Solve_Wrapper --
    -------------------
@@ -1615,6 +1655,43 @@ package body ${ada_lib_name}.Implementation is
                "logic resolution timed out");
       end;
    end Solve_Wrapper;
+
+   ----------------------------
+   -- Solve_With_Diagnostics --
+   ----------------------------
+
+   function Solve_With_Diagnostics
+     (R            : Solver.Relation;
+      Context_Node : ${T.root_node.name}) return Internal_Solver_Result
+   is
+      Ret : Internal_Solver_Result :=
+        (True, No_Internal_Solver_Diagnostic_Array_Type);
+
+      Acc : Solver_Diagnostic_Vectors.Vector;
+      --  Vectors that will accumulate diagnostic emitted during resolution
+
+      procedure Emit_Diagnostic (Diag : Internal_Solver_Diagnostic) is
+      begin
+         Acc.Append (Diag);
+      end Emit_Diagnostic;
+   begin
+      Ret.Success := Solve_Wrapper (R, Context_Node);
+
+      if not Ret.Success then
+         Ret.Success := Solver.Solve_First
+           (R,
+            Solve_Options => (Report_Errors => True),
+            Diag_Emitter => Emit_Diagnostic'Unrestricted_Access,
+            Timeout => Context_Node.Unit.Context.Logic_Resolution_Timeout);
+         Ret.Diagnostics := Create_Internal_Solver_Diagnostic_Array
+           (Acc.Length);
+         for I in 1 .. Acc.Length loop
+            Ret.Diagnostics.Items (I) := Acc.Get (I);
+         end loop;
+         Acc.Destroy;
+      end if;
+      return Ret;
+   end Solve_With_Diagnostics;
 
    -------------
    -- Destroy --

@@ -67,7 +67,9 @@ package Langkit_Support.Vectors is
    --  Make sure that Self has enough room to contain Capacity elements in
    --  total.
 
-   procedure Remove_At (Self : in out Vector; Index : Index_Type);
+   procedure Remove_At
+     (Self : in out Vector; Index : Index_Type; Count : Positive := 1)
+     with Pre => Index + Count <= Self.Last_Index + 1;
 
    function Get
      (Self : Vector; Index : Iteration_Index_Type) return Element_Type

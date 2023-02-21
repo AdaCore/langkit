@@ -21,7 +21,16 @@ package Langkit_Support.Adalog.Generic_Main_Support is
      (T, Value_Image => Image);
    function Create (Name : String) return Refs.Logic_Var;
 
-   package Solver_Ifc is new Solver_Interface (Refs);
+   type Dummy_Context is null record;
+   type Dummy_Context_Access is access Dummy_Context;
+   type Dummy_Diagnostic is null record;
+
+   function Image (Dummy_Ctx : Dummy_Context_Access) return String is ("");
+   procedure Free_Ctx (Ctx : in out Dummy_Context_Access) is null;
+
+   package Solver_Ifc is new Solver_Interface
+     (Refs, Dummy_Context, Dummy_Context_Access, Image, "=",
+      Free_Ctx, Dummy_Diagnostic);
 
    package T_Solver is new Langkit_Support.Adalog.Solver (Solver_Ifc);
 
@@ -62,18 +71,19 @@ package Langkit_Support.Adalog.Generic_Main_Support is
       Conv       : Converter_Type'Class := No_Converter;
       Dbg_String : String := "") return Relation
    is
-     (+Create_Propagate (L, R, Conv, -Dbg_String));
+     (+Create_Propagate (L, R, Conv, null, -Dbg_String));
 
    function N_Propagate
-     (To   : Refs.Logic_Var;
-      Comb : Combiner_Type'Class;
-      Vars : Logic_Var_Array;
+     (To         : Refs.Logic_Var;
+      Comb       : Combiner_Type'Class;
+      Vars       : Logic_Var_Array;
       Dbg_String : String := "") return Relation
-   is (+Create_N_Propagate (To, Comb, Vars, -Dbg_String));
+   is (+Create_N_Propagate (To, Comb, Vars, null, -Dbg_String));
 
    function Unify
-     (L, R : Refs.Logic_Var; Dbg_String : String := "") return Relation
-   is (+Create_Unify (L, R, -Dbg_String));
+     (L, R       : Refs.Logic_Var;
+      Dbg_String : String := "") return Relation
+   is (+Create_Unify (L, R, null, -Dbg_String));
 
    function Assign
      (L          : Refs.Logic_Var;
@@ -81,7 +91,7 @@ package Langkit_Support.Adalog.Generic_Main_Support is
       Conv       : Converter_Type'Class := No_Converter;
       Dbg_String : String := "") return Relation
    is
-     (+Create_Assign (L, R, Conv, -Dbg_String));
+     (+Create_Assign (L, R, Conv, null, -Dbg_String));
 
    function Predicate
      (L          : Refs.Logic_Var;

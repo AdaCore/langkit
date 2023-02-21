@@ -127,7 +127,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
       procedure Run_Solve (Opts : Solve_Options_Type) is
       begin
-         Solve (Rel, Solution_Callback'Access, Opts, Timeout);
+         Solve (Rel, Solution_Callback'Access, Opts, null, Timeout);
       exception
          when Early_Binding_Error =>
             Put_Line ("Resolution failed with Early_Binding_Error");

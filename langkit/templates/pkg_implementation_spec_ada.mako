@@ -73,6 +73,10 @@ private package ${ada_lib_name}.Implementation is
      GNATCOLL.Traces.Create
        ("${ctx.lib_name.upper}.PLE_ERRORS", GNATCOLL.Traces.From_Config);
 
+   All_Diags_Trace : constant GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("${ctx.lib_name.upper}.ALL_SEM_DIAGS", GNATCOLL.Traces.From_Config);
+
    -------------------------------------
    -- Symbols and token data handlers --
    -------------------------------------
@@ -476,46 +480,6 @@ private package ${ada_lib_name}.Implementation is
    function Kind_Name (Node : ${T.root_node.name}) return String;
    --  Return the concrete kind for Node
 
-   ---------------------------
-   -- Adalog instantiations --
-   ---------------------------
-
-   function Text_Image (Ent : ${T.entity.name}) return Text_Type;
-   function Image (Ent : ${T.entity.name}) return String;
-   ${ada_doc('langkit.node_image', 3)}
-
-   package Entity_Vars is new Langkit_Support.Adalog.Logic_Var
-     (Value_Type => ${T.entity.name}, Value_Image => Image);
-   package Solver_Ifc is new Langkit_Support.Adalog.Solver_Interface
-     (Entity_Vars);
-   package Solver is new Langkit_Support.Adalog.Solver (Solver_Ifc);
-
-   subtype Logic_Var is Entity_Vars.Logic_Var;
-   subtype Logic_Var_Record is Entity_Vars.Logic_Var_Record;
-   Null_Var : constant Logic_Var := null;
-   Null_Var_Record : constant Logic_Var_Record := (Reset => True, others => <>);
-
-   subtype Logic_Equation is Solver.Relation;
-   Null_Logic_Equation : constant Logic_Equation := Solver.No_Relation;
-
-   % if ctx.properties_logging:
-      function Trace_Image (K : Analysis_Unit_Kind) return String;
-      function Trace_Image (B : Boolean) return String;
-      function Trace_Image (I : Integer) return String;
-      function Trace_Image (S : Symbol_Type) return String;
-      function Trace_Image (C : Character_Type) return String;
-      function Trace_Image (S : String_Type) return String;
-      function Trace_Image (Env : Lexical_Env) return String;
-      function Trace_Image (R : Env_Rebindings) return String;
-      function Trace_Image (Unit : Internal_Unit) return String;
-      function Trace_Image (Eq : Logic_Equation) return String;
-      function Trace_Image (Var : Logic_Var) return String;
-      function Trace_Image (T : Token_Reference) return String renames Image;
-      function Trace_Image (Self : Ref_Categories) return String;
-   % endif
-
-   ${exts.include_extension(ctx.ext('analysis', 'implem_decls'))}
-
    -----------------------------------------------
    -- Structure types (incomplete declarations) --
    -----------------------------------------------
@@ -545,6 +509,65 @@ private package ${ada_lib_name}.Implementation is
          ${iterator_types.incomplete_decl(iterator_type)}
       % endif
    % endfor
+
+   ---------------------------
+   -- Adalog instantiations --
+   ---------------------------
+
+   function Text_Image (Ent : ${T.entity.name}) return Text_Type;
+   function Image (Ent : ${T.entity.name}) return String;
+   ${ada_doc('langkit.node_image', 3)}
+
+   type Internal_Logic_Context_Access is access Internal_Logic_Context;
+
+   function Allocate_Logic_Context
+     (Ctx : Internal_Logic_Context) return Internal_Logic_Context_Access;
+   --  Return an access on a heap allocated copy of the given context
+
+   function Trace_Logic_Context
+     (Ctx : Internal_Logic_Context_Access) return String;
+   --  Return a trace representation of the context after dereference
+
+   function Deep_Equals
+     (X, Y : Internal_Logic_Context_Access) return Boolean;
+   --  Return whether the two logic contexts after dereference are equal
+
+   procedure Free_Logic_Context
+     (Ctx : in out Internal_Logic_Context_Access);
+   --  Release memory allocated by ``Allocate_Logic_Context``
+
+   package Entity_Vars is new Langkit_Support.Adalog.Logic_Var
+     (Value_Type => ${T.entity.name}, Value_Image => Image);
+   package Solver_Ifc is new Langkit_Support.Adalog.Solver_Interface
+     (Entity_Vars,
+      Internal_Logic_Context, Internal_Logic_Context_Access,
+      Trace_Logic_Context, Deep_Equals,
+      Free_Logic_Context, Internal_Solver_Diagnostic);
+   package Solver is new Langkit_Support.Adalog.Solver (Solver_Ifc);
+
+   subtype Logic_Var is Entity_Vars.Logic_Var;
+   subtype Logic_Var_Record is Entity_Vars.Logic_Var_Record;
+   Null_Var : constant Logic_Var := null;
+   Null_Var_Record : constant Logic_Var_Record := (Reset => True, others => <>);
+
+   subtype Logic_Equation is Solver.Relation;
+   Null_Logic_Equation : constant Logic_Equation := Solver.No_Relation;
+
+   % if ctx.properties_logging:
+      function Trace_Image (K : Analysis_Unit_Kind) return String;
+      function Trace_Image (B : Boolean) return String;
+      function Trace_Image (I : Integer) return String;
+      function Trace_Image (S : Symbol_Type) return String;
+      function Trace_Image (C : Character_Type) return String;
+      function Trace_Image (S : String_Type) return String;
+      function Trace_Image (Env : Lexical_Env) return String;
+      function Trace_Image (R : Env_Rebindings) return String;
+      function Trace_Image (Unit : Internal_Unit) return String;
+      function Trace_Image (Eq : Logic_Equation) return String;
+      function Trace_Image (Var : Logic_Var) return String;
+      function Trace_Image (T : Token_Reference) return String renames Image;
+      function Trace_Image (Self : Ref_Categories) return String;
+   % endif
 
    -----------------------------------------
    -- Structure types (full declarations) --
@@ -578,6 +601,12 @@ private package ${ada_lib_name}.Implementation is
          ${iterator_types.decl(iterator_type)}
       % endif
    % endfor
+
+   ---------------------
+   -- Extension specs --
+   ---------------------
+
+   ${exts.include_extension(ctx.ext('analysis', 'implem_decls'))}
 
    ------------------------
    -- Named environments --
@@ -2157,6 +2186,12 @@ private package ${ada_lib_name}.Implementation is
       Context_Node : ${T.root_node.name}) return Boolean;
    --  Wrapper for Langkit_Support.Adalog.Solve; will handle setting the debug
    --  strings in the equation if in debug mode.
+
+   function Solve_With_Diagnostics
+     (R            : Solver.Relation;
+      Context_Node : ${T.root_node.name}) return Internal_Solver_Result;
+   --  Like ``Solve_Wrapper``, but returns a ``Internal_Solver_Result`` which
+   --  contains solver diagnostics in case of resolution failure.
 
    generic
       type T (<>) is limited private;
