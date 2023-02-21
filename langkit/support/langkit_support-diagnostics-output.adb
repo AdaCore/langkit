@@ -89,7 +89,7 @@ package body Langkit_Support.Diagnostics.Output is
    begin
       Set_Style (Term_Info, Bright);
 
-      --  If the number of line in the source is 1
+      --  If the number of line to display is 1
       if Line_Nb = 1 then
          declare
             Caret_Line : Text_Type (1 .. End_Col - 1) := (others => ' ');
@@ -97,9 +97,11 @@ package body Langkit_Support.Diagnostics.Output is
             Caret_Line (Start_Col .. End_Col - 1) := (others => '^');
             Line_Starting (Start_Line);
             Put_Line (Output_File, " " & Get_Line (Buffer, Start_Line));
-            Line_Starting (0);
-            Set_Color (Term_Info, Foreground => Caretting_Color);
-            Put_Line (Output_File, " " & Caret_Line);
+            if Start_Col /= End_Col then
+               Line_Starting (0);
+               Set_Color (Term_Info, Foreground => Caretting_Color);
+               Put_Line (Output_File, " " & Caret_Line);
+            end if;
             Reset_Colors;
          end;
 
