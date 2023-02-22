@@ -9,17 +9,6 @@ Any:
     %X <- 7
     %X <- 8
 
-... without optimizations:
-Solution: [%X = 1]
-Solution: [%X = 2]
-Solution: [%X = 3]
-Solution: [%X = 4]
-Solution: [%X = 5]
-Solution: [%X = 6]
-Solution: [%X = 7]
-Solution: [%X = 8]
-
-... with all optimizations:
 Solution: [%X = 1]
 Solution: [%X = 2]
 Solution: [%X = 3]
@@ -46,12 +35,6 @@ All:
         %Y <- 1
 
 
-... without optimizations:
-Solution: [%X = 1, %Y = 1]
-Solution: [%X = 2, %Y = 2]
-Solution: [%X = 3, %Y = 3]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]

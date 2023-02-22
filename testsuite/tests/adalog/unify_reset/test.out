@@ -10,11 +10,6 @@ Any:
         %Y <- 12
 
 
-... without optimizations:
-Solution: [%X = 1, %Y = 1]
-Solution: [%X = 3, %Y = 12]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 3, %Y = 12]
 

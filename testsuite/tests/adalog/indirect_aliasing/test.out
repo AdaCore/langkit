@@ -6,8 +6,5 @@ All:
     %Expr <- 1
     %X <-> %Expr
 
-... without optimizations:
-
-... with all optimizations:
 
 Done.

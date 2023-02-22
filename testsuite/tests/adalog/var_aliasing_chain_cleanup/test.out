@@ -12,11 +12,6 @@ All:
 
 
 
-... without optimizations:
-Solution: [%X = 1, %Y = 1, %Z = 1]
-Solution: [%X = 10, %Y = 10, %Z = 11]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 1, %Z = 1]
 Solution: [%X = 10, %Y = 10, %Z = 11]
 

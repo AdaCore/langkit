@@ -16,11 +16,6 @@ All:
     %y <- to_str(%x)
     is_odd?(%x)
 
-... without optimizations:
-Solution: [%x = 1, %y = one]
-Solution: [%x = 5, %y = five]
-
-... with all optimizations:
 Solution: [%x = 1, %y = one]
 Solution: [%x = 5, %y = five]
 

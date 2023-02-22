@@ -103,7 +103,6 @@ package Langkit_Support.Adalog.Generic_Main_Support is
    procedure Solve_All (Rel : Relation; Timeout : Natural := 0);
 
    procedure Run_Main (Main : access procedure);
-   procedure Setup_Traces;
    procedure Finalize;
 
 private

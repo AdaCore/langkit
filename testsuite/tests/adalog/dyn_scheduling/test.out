@@ -9,12 +9,6 @@ All:
         %X <- 3
 
 
-... without optimizations:
-Solution: [%X = 1, %Y = 1]
-Solution: [%X = 2, %Y = 2]
-Solution: [%X = 3, %Y = 3]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]
@@ -40,12 +34,6 @@ All:
         %Y <- 10
 
 
-... without optimizations:
-Solution: [%X = 1, %Y = 10]
-Solution: [%X = 2, %Y = 10]
-Solution: [%X = 3, %Y = 10]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 10]
 Solution: [%X = 2, %Y = 10]
 Solution: [%X = 3, %Y = 10]
@@ -61,9 +49,6 @@ All:
         %X <- 3
 
 
-... without optimizations:
-
-... with all optimizations:
 
 ========================================================================
 
@@ -72,9 +57,6 @@ All:
     Is_Even?(%Y)
     Is_Even?(%X)
 
-... without optimizations:
-
-... with all optimizations:
 
 ========================================================================
 
@@ -84,11 +66,6 @@ Any:
     %X <- 1
     %X <- 2
 
-... without optimizations:
-Solution: [%Y = <undefined>, %X = 1]
-Solution: [%Y = <undefined>, %X = 2]
-
-... with all optimizations:
 Solution: [%Y = <undefined>, %X = 1]
 Solution: [%Y = <undefined>, %X = 2]
 
@@ -99,9 +76,6 @@ Any:
     Is_Even?(%X)
     Is_Even?(%Y)
 
-... without optimizations:
-
-... with all optimizations:
 
 ========================================================================
 
@@ -117,9 +91,6 @@ Any:
         Is_Even?(%Y)
 
 
-... without optimizations:
-
-... with all optimizations:
 
 ========================================================================
 
@@ -136,10 +107,6 @@ All:
 
     %X <-> %Y
 
-... without optimizations:
-Solution: [%X = 2, %Y = 2]
-
-... with all optimizations:
 Solution: [%X = 2, %Y = 2]
 
 Done.

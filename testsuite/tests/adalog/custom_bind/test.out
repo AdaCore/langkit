@@ -10,15 +10,6 @@ All:
 
     %Y <- Square(%X)
 
-... without optimizations:
-Solution: [%X = 1, %Y = 1]
-Solution: [%X = 2, %Y = 4]
-Solution: [%X = 3, %Y = 9]
-Solution: [%X = 4, %Y = 16]
-Solution: [%X = 5, %Y = 25]
-Solution: [%X = 6, %Y = 36]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 4]
 Solution: [%X = 3, %Y = 9]
@@ -39,10 +30,6 @@ All:
     %Y <- Square(%X)
     %Y <- 36
 
-... without optimizations:
-Solution: [%X = 6, %Y = 36]
-
-... with all optimizations:
 Solution: [%X = 6, %Y = 36]
 
 Done.

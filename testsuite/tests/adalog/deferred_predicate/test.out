@@ -10,12 +10,6 @@ All:
         %X <- 6
 
 
-... without optimizations:
-Solution: [%X = 2]
-Solution: [%X = 4]
-Solution: [%X = 6]
-
-... with all optimizations:
 Solution: [%X = 2]
 Solution: [%X = 4]
 Solution: [%X = 6]

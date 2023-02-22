@@ -4,10 +4,6 @@ All:
     %Y <- 1
     Is_Double_Of?(%X, %Y)
 
-... without optimizations:
-Solution: [%X = 2, %Y = 1]
-
-... with all optimizations:
 Solution: [%X = 2, %Y = 1]
 
 Done.

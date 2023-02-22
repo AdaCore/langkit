@@ -9,11 +9,6 @@ All:
     is_positive?(%X)
     lt-100?(%X)
 
-... without optimizations:
-Solution: [%X = 27]
-Solution: [%X = 100]
-
-... with all optimizations:
 Solution: [%X = 27]
 Solution: [%X = 100]
 

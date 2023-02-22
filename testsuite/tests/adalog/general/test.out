@@ -15,11 +15,6 @@ All:
         %Y <- 18
 
 
-... without optimizations:
-Solution: [%X = 4, %Y = 12]
-Solution: [%X = 6, %Y = 18]
-
-... with all optimizations:
 Solution: [%X = 4, %Y = 12]
 Solution: [%X = 6, %Y = 18]
 

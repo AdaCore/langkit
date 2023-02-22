@@ -10,7 +10,6 @@ Any:
         %X <- 3
 
 
-... with all optimizations:
 Solution: [%X = 3, %Y = 2]
 
 Done.

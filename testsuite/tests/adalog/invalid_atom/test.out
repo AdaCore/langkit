@@ -1,7 +1,4 @@
 Solving relation:
 Is_Even?(%X)
-... without optimizations:
-
-... with all optimizations:
 
 Done.

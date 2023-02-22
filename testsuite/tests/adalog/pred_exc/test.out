@@ -6,10 +6,6 @@ All:
         Predicate?(%X)
 
 
-... without optimizations:
-  -> MAIN.MY_ERROR: main.adb:15
-
-... with all optimizations:
   -> MAIN.MY_ERROR: main.adb:15
 
 Done.

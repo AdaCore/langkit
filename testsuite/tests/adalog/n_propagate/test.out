@@ -4,10 +4,6 @@ All:
     %X <- 1
     %Y <- 2
 
-... without optimizations:
-Solution: [%Z = 3, %X = 1, %Y = 2]
-
-... with all optimizations:
 Solution: [%Z = 3, %X = 1, %Y = 2]
 
 Solving relation:
@@ -17,10 +13,6 @@ All:
     %Z <- 1
     %X <- 0
 
-... without optimizations:
-Solution: [%Z = 1, %Y = 1, %X = 0]
-
-... with all optimizations:
 Solution: [%Z = 1, %Y = 1, %X = 0]
 
 Done.

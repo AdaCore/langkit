@@ -4,10 +4,6 @@ All:
     %X <- 1
     %Y <- 1
 
-... without optimizations:
-Solution: [%X = 1, %Y = 1]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 
 Done.

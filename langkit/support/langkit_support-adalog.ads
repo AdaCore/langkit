@@ -18,13 +18,9 @@ package Langkit_Support.Adalog is
    -- Solving options --
    ---------------------
 
-   type Solve_Options_Type is record
-      Cut_Dead_Branches : Boolean := True;
-      --  Whether to enable an optimization that will cut branches that
-      --  necessarily contain falsy solutions.
-   end record;
+   type Solve_Options_Type is null record;
 
-   Default_Options : Solve_Options_Type := (others => <>);
+   Default_Options : Solve_Options_Type;
    --  Mutate this to affect the behavior of all calls to the solver which just
    --  use the default options.
 
@@ -87,11 +83,5 @@ package Langkit_Support.Adalog is
    --
    --  * the number of tried solutions;
    --  * valid solutions found.
-
-   Cst_Folding_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.SOLVER.CONSTANT_FOLDING",
-      Default => GNATCOLL.Traces.From_Config);
-   --  Trace to show the result of relation constant folding pass done during
-   --  the preparation stage in the symbolic solver.
 
 end Langkit_Support.Adalog;
