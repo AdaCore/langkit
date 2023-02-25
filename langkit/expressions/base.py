@@ -158,15 +158,18 @@ def expand_abstract_fn(fn):
     fn_arguments = []
     fn_expr = None
 
-    argspec = inspect.getargspec(fn)
+    argspec = inspect.getfullargspec(fn)
     defaults = argspec.defaults or []
 
     check_multiple([
-        (not argspec.varargs or not argspec.keywords, 'Invalid'
-         ' function signature: no *args nor **kwargs allowed'),
-
-        (len(argspec.args) == len(defaults), 'All parameters '
-         'must have an associated type as a default value')
+        (
+            not argspec.varargs or not argspec.varkw,
+            "Invalid function signature: no *args nor **kwargs allowed",
+        ),
+        (
+            len(argspec.args) == len(defaults),
+            "All parameters must have an associated type as a default value",
+        ),
     ])
 
     # Check that all parameters have declared types in default arguments
@@ -2795,7 +2798,7 @@ class Let(AbstractExpression):
             lambda_fn = None
 
         else:
-            argspec = inspect.getargspec(lambda_fn)
+            argspec = inspect.getfullargspec(lambda_fn)
 
             var_names = argspec.args
             var_exprs = argspec.defaults or []
@@ -2816,10 +2819,10 @@ class Let(AbstractExpression):
         if self.lambda_fn is None:
             return
 
-        argspec = inspect.getargspec(self.lambda_fn)
+        argspec = inspect.getfullargspec(self.lambda_fn)
 
         check_multiple([
-            (not argspec.varargs and not argspec.keywords,
+            (not argspec.varargs and not argspec.varkw,
              'Invalid function for Let expression (*args and **kwargs '
              'not accepted)'),
 

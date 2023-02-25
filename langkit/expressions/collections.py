@@ -265,13 +265,13 @@ class CollectionExpression(AbstractExpression):
             " function"
         )
 
-        argspec = inspect.getargspec(expr_fn)
+        argspec = inspect.getfullargspec(expr_fn)
 
         check_multiple([
             (len(argspec.args) in (1, 2),
              'Invalid collection iteration lambda: only one'
              ' or two parameters expected'),
-            (not argspec.varargs and not argspec.keywords,
+            (not argspec.varargs and not argspec.varkw,
              'Invalid collection iteration lambda: no *args or **kwargs'),
             (not argspec.defaults,
              'Invalid collection iteration lambda: No default values allowed'

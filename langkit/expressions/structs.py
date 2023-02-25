@@ -1327,11 +1327,11 @@ class Match(AbstractExpression):
         self.matchers = []
 
         for i, match_fn in enumerate(self.matchers_functions):
-            argspec = inspect.getargspec(match_fn)
+            argspec = inspect.getfullargspec(match_fn)
             check_source_language(
                 len(argspec.args) == 1 and
                 not argspec.varargs and
-                not argspec.keywords and
+                not argspec.varkw and
                 (not argspec.defaults or len(argspec.defaults) < 2),
                 'Invalid matcher lambda'
             )

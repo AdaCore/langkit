@@ -475,11 +475,11 @@ class Then(AbstractExpression):
         if self.then_expr:
             return
 
-        argspec = inspect.getargspec(self.then_fn)
+        argspec = inspect.getfullargspec(self.then_fn)
         check_source_language(
             len(argspec.args) == 1
             and not argspec.varargs
-            and not argspec.keywords
+            and not argspec.varkw
             and not argspec.defaults,
             'Invalid lambda for Then expression: exactly one parameter is'
             ' required, without a default value'
