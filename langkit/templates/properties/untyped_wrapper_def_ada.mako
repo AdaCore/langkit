@@ -18,13 +18,30 @@ is
          Shed_Rebindings (E.Info, Node_Env (E.Node));
       <% args.append('E_Info') %>
    % endif
-
-   Result : constant ${property.type.name} :=
-      ${property.name} (${', '.join(args)});
 begin
-   % if property.type.is_entity_type:
-      return (Node => Result.Node, Info => Result.Info);
-   % else:
-      return Result;
+   ## If it is possible for the caller to pass an entity whose type mismatches
+   ## what this property excepts (i.e. if we accept less than the root node and
+   ## if there is more than one concrete node), reject it explicitly.
+   <% expected_type = property.struct %>
+   % if not expected_type.is_root_node and len(ctx.kind_constant_to_node) > 1:
+      if E.Node /= null
+         and then E.Node.Kind not in ${property.struct.ada_kind_range_name}
+      then
+         Raise_Property_Exception
+           (E.Node,
+            Property_Error'Identity,
+            "mismatching node type");
+      end if;
    % endif
+
+   declare
+      Result : constant ${property.type.name} :=
+         ${property.name} (${', '.join(args)});
+   begin
+      % if property.type.is_entity_type:
+         return (Node => Result.Node, Info => Result.Info);
+      % else:
+         return Result;
+      % endif
+   end;
 end;

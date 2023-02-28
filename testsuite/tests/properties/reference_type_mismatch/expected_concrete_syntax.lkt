@@ -1,0 +1,21 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule scope <- Scope("{" list*(decl) "}")
+    decl <- Decl(@identifier)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Decl : FooNode implements TokenNode {
+
+    fun refd_env(): LexicalEnv[FooNode] = null
+
+    @export fun lookup(name: Symbol): Array[FooNode] = node.node_env().get(name)
+}
+
+class Scope : FooNode {
+    @parse_field decls: ASTList[FooNode, Decl]
+}
