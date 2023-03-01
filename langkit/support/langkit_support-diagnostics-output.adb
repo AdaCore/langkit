@@ -102,7 +102,6 @@ package body Langkit_Support.Diagnostics.Output is
                Set_Color (Term_Info, Foreground => Caretting_Color);
                Put_Line (Output_File, " " & Caret_Line);
             end if;
-            Reset_Colors;
          end;
 
       --  Else display the multiline style
@@ -145,6 +144,7 @@ package body Langkit_Support.Diagnostics.Output is
             Put_Line (Output_File, "|" & End_Undeline & "^");
          end;
       end if;
+      Reset_Colors;
    end Print_Source_Listing;
 
    ----------------------
