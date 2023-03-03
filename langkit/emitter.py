@@ -340,7 +340,16 @@ class Emitter:
                 with open(file) as f:
                     content = f.read()
                 self.write_ada_file(
-                    self.src_dir, source_kind, qual_name, content
+                    self.src_dir,
+                    source_kind,
+                    qual_name,
+                    content,
+
+                    # We are creating copies of existing sources. These sources
+                    # already have attributes that post processors are supposed
+                    # to add (e.g. license headers), so we should not run post
+                    # processors for them.
+                    no_post_processing=True,
                 )
 
     def merge_support_libraries(self, ctx: CompileCtx) -> None:
@@ -894,7 +903,8 @@ class Emitter:
                        out_dir: str,
                        source_kind: AdaSourceKind,
                        qual_name: List[str],
-                       content: str) -> None:
+                       content: str,
+                       no_post_processing: bool = False) -> None:
         """
         Helper to write an Ada file.
 
@@ -902,6 +912,8 @@ class Emitter:
         :param source_kind: See ada_file_path.
         :param qual_name: See ada_file_path.
         :param content: The source content to write to the file.
+        :param no_post_processing: Whether to disable the source post
+            processing when writing this file.
         """
         file_path = self.ada_file_path(out_dir, source_kind, qual_name)
 
@@ -926,4 +938,8 @@ class Emitter:
             content = '\n'.join(l for l in lines if l.strip())
 
         # TODO: no tool is able to pretty-print a single Ada source file
-        self.write_source_file(file_path, content, self.post_process_ada)
+        self.write_source_file(
+            file_path,
+            content,
+            post_process=None if no_post_processing else self.post_process_ada,
+        )

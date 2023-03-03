@@ -15,6 +15,13 @@ from langkit.utils import add_to_path
 from utils import jobs
 
 
+HEADER = "--  CUSTOM HEADER\n"
+
+
+def post_process_ada(source):
+    return HEADER + source
+
+
 def manage(name: str, standalone: bool) -> ManageScript:
     name_low = name.lower()
 
@@ -25,7 +32,7 @@ def manage(name: str, standalone: bool) -> ManageScript:
             super().__init__()
 
         def create_context(self, args):
-            return CompileCtx(
+            result = CompileCtx(
                 lang_name=name,
                 lexer=None,
                 grammar=None,
@@ -33,6 +40,8 @@ def manage(name: str, standalone: bool) -> ManageScript:
                 types_from_lkt=True,
                 standalone=standalone,
             )
+            result.post_process_ada = post_process_ada
+            return result
 
     return Manage()
 
@@ -40,13 +49,36 @@ def manage(name: str, standalone: bool) -> ManageScript:
 # Generate code for both libraries
 manages = [manage("Foo", standalone=True), manage("Bar", standalone=False)]
 for m in manages:
+    lib_short_name = m._lib_name
+    lib_name = f"lib{lib_short_name}lang"
+    build_dir = f"build-{lib_short_name}"
     m.run([
         "generate",
         "-vnone",
         "-wundocumented-nodes",
-        f"--build-dir=build-{m._lib_name}"
+        f"--build-dir={build_dir}"
     ])
     langkit.reset()
+
+    print(f"Check the presence of our custom header for {lib_name}")
+    for filename in [
+        f"{lib_name}.ads",
+        f"{lib_name}_support.ads",
+        f"{lib_name}_adasat.ads",
+    ]:
+        fullname = os.path.join(build_dir, "src", filename)
+        if os.path.exists(fullname):
+            with open(fullname, encoding="utf-8") as f:
+                content = f.read()
+            msg = (
+                "custom header found"
+                if content.startswith(HEADER) else
+                "no match"
+            )
+        else:
+            msg = "no such file"
+        print(f"{filename}: {msg}")
+    print("")
 
 # Write a "setenv" script to make investigation easier
 with open("setenv.sh", "w") as f:

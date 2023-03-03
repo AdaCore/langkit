@@ -6,4 +6,14 @@ Libbarlang:
 Success: "example"
 
 main.adb: Done.
+Check the presence of our custom header for libfoolang
+libfoolang.ads: custom header found
+libfoolang_support.ads: no match
+libfoolang_adasat.ads: no match
+
+Check the presence of our custom header for libbarlang
+libbarlang.ads: custom header found
+libbarlang_support.ads: no such file
+libbarlang_adasat.ads: no such file
+
 Done
