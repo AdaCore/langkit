@@ -3,11 +3,14 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Text; use Langkit_Support.Text;
 
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
 with Libfoolang.Common;        use Libfoolang.Common;
-with Libfoolang.Introspection; use Libfoolang.Introspection;
+with Libfoolang.Generic_API.Introspection;
+use Libfoolang.Generic_API.Introspection;
 with Libfoolang.Rewriting;     use Libfoolang.Rewriting;
 
 with Process_Apply;
@@ -92,7 +95,9 @@ begin
       Second_Child : constant Node_Rewriting_Handle := Child (N, 2);
    begin
       Set_Child
-        (Second_Child, Index (Kind (Second_Child), Def_F_Expr), Full_Expr);
+        (Second_Child,
+         Syntax_Field_Index (Member_Refs.Def_F_Expr, Type_Refs.Def),
+         Full_Expr);
    end;
 
    New_Line;

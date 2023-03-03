@@ -126,6 +126,9 @@ package Langkit_Support.Internal.Introspection is
    type Type_Flags is array (Type_Index range <>) of Boolean;
    type Type_Flags_Access is access constant Type_Flags;
 
+   type Syntax_Field_Indexes is array (Type_Index range <>) of Natural;
+   type Syntax_Field_Indexes_Access is access constant Syntax_Field_Indexes;
+
    type Default_Value_Kind is
      (None,
       Boolean_Value,
@@ -188,6 +191,14 @@ package Langkit_Support.Internal.Introspection is
       --  For others, this component points to an array that maps all node
       --  types that have this member to whether this member is defined as
       --  "null" for that node type.
+
+      Indexes : Syntax_Field_Indexes_Access;
+      --  This compoment is null for all members that are not syntax fields.
+      --
+      --  For others, this component points to an array that maps all node
+      --  types that have this member to the 1-based index of this member in
+      --  that node, or 0 if the syntax field is null or abstract for this
+      --  node.
 
       Arguments : Argument_Descriptor_Array (1 .. Last_Argument);
       --  Descriptors for each argument of this property. Empty array for

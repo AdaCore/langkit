@@ -433,10 +433,27 @@ package Langkit_Support.Generic_API.Introspection is
    function Is_Property (Member : Struct_Member_Ref) return Boolean;
    --  Whether ``Member`` is a property
 
+   function Is_Field (Member : Struct_Member_Ref) return Boolean
+   is (not Is_Property (Member));
+   --  Whether ``Member`` is a field (simple field for structs, syntax field
+   --  for nodes).
+
    function Is_Null_For
      (Member : Struct_Member_Ref; Node : Type_Ref) return Boolean;
    --  Return whether ``Member`` is a syntax field that is always null for
    --  ``Node``.
+
+   function Syntax_Field_Index
+     (Member : Struct_Member_Ref; Node : Type_Ref) return Positive;
+   --  Return the 1-based index corresponding to the given ``Member`` in the
+   --  given ``Node`` type.
+   --
+   --  Raise a ``Precondition_Failure`` exception if:
+   --
+   --  * ``Node`` is not a valid node type;
+   --  * ``Node`` is not a concrete node type;
+   --  * ``Member`` is not a syntax field for ``Node``;
+   --  * ``Member`` is a null syntax field for ``Node``.
 
    function All_Members (Id : Language_Id) return Struct_Member_Ref_Array;
    --  Return all struct members that the given language defines

@@ -1526,6 +1526,40 @@ package body Langkit_Support.Generic_API.Introspection is
       end;
    end Is_Null_For;
 
+   ------------------------
+   -- Syntax_Field_Index --
+   ------------------------
+
+   function Syntax_Field_Index
+     (Member : Struct_Member_Ref; Node : Type_Ref) return Positive is
+   begin
+      Check_Node_Type (Node);
+      if Is_Abstract (Node) then
+         raise Precondition_Failure with "node is abstract";
+      end if;
+
+      Check_Struct_Member (Member);
+      Check_Same_Language (Member.Id, Node.Id);
+      Check_Struct_Owns_Member (Node, Member);
+      if not Is_Field (Member) then
+         raise Precondition_Failure with "member is not a syntax field";
+      elsif Is_Null_For (Member, Node) then
+         raise Precondition_Failure with "syntax field is null for this node";
+      end if;
+
+      declare
+         M     : Struct_Member_Descriptor renames
+           Member.Id.Struct_Members.all (Member.Index).all;
+
+         --  Thanks to the checks above, we should never be in a case where
+         --  ``M.Indexes`` is null or ``Index`` is zero.
+
+         Index : Natural renames M.Indexes.all (Node.Index);
+      begin
+         return Index;
+      end;
+   end Syntax_Field_Index;
+
    -----------------
    -- All_Members --
    -----------------

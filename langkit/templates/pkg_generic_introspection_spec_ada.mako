@@ -409,6 +409,56 @@ private package ${ada_lib_name}.Generic_Introspection is
          )});
       % endif
 
+      ## If this member is a syntax field, emit a table that provides its index
+      ## for each node that has it as a concrete and non-null field.
+      <%
+         # Name for the constant array, or None if this is not a syntax field
+         indexes_const = None
+
+         # Mapping from node types that have this field to the corresponding
+         # indexes, or to 0 if this field is abstract or null.
+         index_assocs = {}
+
+         if isinstance(m, Field):
+            indexes_const = f"Indexes_For_{name}"
+            for t in m.struct.type_set:
+               # Determine the index for the "m" syntax field in the "t"
+               # concrete node.
+               index = 0
+               if not t.abstract:
+                  t_fields = t.get_parse_fields(include_inherited=True)
+                  current_index = 0
+                  found = False
+                  for f in t_fields:
+                     # "t" is a concrete node, so it should not have any
+                     # abstract syntax field.
+                     assert not f.abstract
+
+                     # Since null fields do not have an index, we must skip
+                     # them for index computation.
+                     if not f.null:
+                        current_index += 1
+
+                     if f.root == m:
+                        found = True
+                        break
+
+                  # "t" is a concrete node, so it should not have any abstract
+                  # syntax field.
+                  assert found
+                  if not f.null:
+                     index = current_index
+
+               index_assocs[t] = index
+      %>
+      % if indexes_const:
+         ${indexes_const} : aliased constant Syntax_Field_Indexes :=
+           (${",\n".join(
+              f"{G.type_index(node)} => {value}"
+              for node, value in index_assocs.items()
+           )});
+      % endif
+
       ${name_const} : aliased constant Text_Type :=
         ${text_repr(m.api_name.camel_with_underscores)};
       ${desc_name} : aliased constant Struct_Member_Descriptor :=
@@ -418,6 +468,9 @@ private package ${ada_lib_name}.Generic_Introspection is
          Member_Type   => ${G.type_index(m.type)},
          Null_For      => ${(
             "null" if null_for_const is None else f"{null_for_const}'Access"
+         )},
+         Indexes       => ${(
+            "null" if indexes_const is None else f"{indexes_const}'Access"
          )},
          Arguments     => (
             % if m.arguments:

@@ -352,6 +352,20 @@ class AbstractNodeData:
         return parent_fields.get(name_key, None)
 
     @property
+    def root(self) -> AbstractNodeData:
+        """
+        Return the ultimate field that ``self`` inherits.
+
+        This returns ``self`` itself if it is not overriding.
+        """
+        cursor = self
+        while True:
+            base = cursor.base
+            if base is None:
+                return cursor
+            cursor = base
+
+    @property
     def is_overriding(self) -> bool:
         """
         Return whether this field overrides an inheritted one in a base class.
@@ -3102,21 +3116,27 @@ class ASTNodeType(BaseStructType):
 
     @property  # type: ignore
     @memoized
-    def concrete_subclasses(self):
+    def concrete_subclasses(self) -> list[ASTNodeType]:
         """
         Return the list of all (direct or indirect) subclass types for `self`
         that are not abstract, sorted by hierarchical name. If `self` is not
         abstract, it is included.
-
-        :rtype: list[ASTNodeType]
         """
-        result = [] if self.abstract else [self]
+        return [t for t in self.type_set if not t.abstract]
+
+    @property
+    def type_set(self) -> List[ASTNodeType]:
+        """
+        Return the list of all (direct or indirect) subclasses for ``self``,
+        including ``self`` as well, sorted by hierarchical name.
+        """
+        result = [self]
 
         sorted_direct_subclasses = sorted(
             self.subclasses, key=lambda subcls: subcls.hierarchical_name
         )
         for subcls in sorted_direct_subclasses:
-            result.extend(subcls.concrete_subclasses)
+            result.extend(subcls.type_set)
 
         return result
 
