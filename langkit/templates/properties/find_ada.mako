@@ -20,7 +20,7 @@
    <%def name="loop_body()">
       ${find.inner_expr.render_pre()}
       if ${find.inner_expr.render_expr()} then
-         ${result_var} := ${find.user_element_var.name};
+         ${assign_var(find.result_var, find.user_element_var.name)}
       end if;
    </%def>
 

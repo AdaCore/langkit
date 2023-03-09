@@ -1,0 +1,21 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example(@example))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+
+    fun resolve_own(): MyRecord = MyRecord(value=1b)
+
+    @export fun resolve(): MyRecord =
+    node.children.map((c) => c.resolve_own()).find((c) => c.value = 1b)
+}
+
+class Example : FooNode implements TokenNode {
+}
+
+struct MyRecord {
+    value: BigInt
+}
