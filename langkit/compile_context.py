@@ -1799,7 +1799,7 @@ class CompileCtx:
         for p in self.all_passes:
             if p.is_optional and p.name in explicit_passes_triggers.keys():
                 trig = explicit_passes_triggers.pop(p.name)
-                p.disabled = not(trig)
+                p.disabled = not trig
 
         for n in explicit_passes_triggers.keys():
             error(f"No optional pass with name {n}")

@@ -3881,7 +3881,7 @@ class PropertyDef(AbstractNodeData):
                 for arg in fn_arguments:
                     self.arguments.append(arg)
 
-        elif not(callable(self.expr)):
+        elif not callable(self.expr):
             self.expr = unsugar(self.expr)
 
         if self.expr:

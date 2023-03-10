@@ -6,12 +6,14 @@ Pygments==2.6.1
 autopep8==1.5.2
 coverage==5.1
 docutils==0.16
-flake8
+flake8==6.0.0
 funcy==1.14
+mccabe==0.7.0
 mypy==0.800
 pexpect==4.8.0
 ptyprocess==0.7.0
-pycodestyle
+pycodestyle==2.10.0
+pyflakes==3.0.1
 pytest==6.2.5
 railroad-diagrams~=1.1.0
 sphinx-rtd-theme==0.4.3

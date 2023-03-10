@@ -1545,7 +1545,7 @@ class List(Parser):
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         res = self.parser._is_left_recursive(rule_name)
-        assert not(
+        assert not (
             res and (self.empty_valid or not always_make_progress(self.parser))
         )
         return res
