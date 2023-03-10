@@ -36,9 +36,16 @@ import sys
 import traceback
 from typing import (
     Any, AnyStr, Callable, ClassVar, Dict, Generic, IO, Iterator, List,
-    Optional as Opt, Protocol, TYPE_CHECKING, Tuple, Type, TypeVar, Union
+    Optional as Opt, TYPE_CHECKING, Tuple, Type, TypeVar, Union
 )
 import weakref
+
+
+# Protocol was added to "typing" in Python 3.8
+if TYPE_CHECKING:
+    from typing import Protocol
+else:
+    Protocol = object
 
 
 #
