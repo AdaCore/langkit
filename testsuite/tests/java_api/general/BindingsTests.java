@@ -223,9 +223,6 @@ public final class BindingsTests {
             System.out.println(
                 "Node hash equality = " + (var.hashCode() == var2.hashCode())
             );
-
-            items.close();
-            argItems.close();
         }
 
         // Display the footer
@@ -297,7 +294,6 @@ public final class BindingsTests {
                     item.nextSibling()
                 );
             }
-            items.close();
         }
 
         // Display the footer
@@ -327,8 +323,6 @@ public final class BindingsTests {
             }
             FooNodeArray eqItems = root.pAllItems();
             System.out.println("Array equality = " + items.equals(eqItems));
-            items.close();
-            eqItems.close();
         }
 
         // Display the footer

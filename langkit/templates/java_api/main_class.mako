@@ -901,11 +901,13 @@ public class ${ctx.lib_name.camel} {
             PointerWrapper bigIntRef
         ) {
 
+            /*
             if(ImageInfo.inImageCode()) {
                 NI_LIB.${nat("big_integer_decref")}(bigIntRef.ni());
             } else {
                 JNI_LIB.${nat("big_integer_decref")}(bigIntRef.jni());
             }
+            */
 
         }
 
@@ -1211,11 +1213,13 @@ public class ${ctx.lib_name.camel} {
             PointerWrapper stringRef
         ) {
 
+            /*
             if(ImageInfo.inImageCode()) {
                 NI_LIB.${nat("string_dec_ref")}(stringRef.ni());
             } else {
                 JNI_LIB.${nat("string_dec_ref")}(stringRef.jni());
             }
+            */
 
         }
 
@@ -1516,6 +1520,7 @@ public class ${ctx.lib_name.camel} {
             boolean isOwner
         ) {
 
+            /*
             if(ImageInfo.inImageCode()) {
                 if(isOwner) {
                     UnmanagedMemory.free(textBuffer.ni());
@@ -1534,6 +1539,7 @@ public class ${ctx.lib_name.camel} {
                     isOwner
                 );
             }
+            */
 
         }
 
@@ -2029,6 +2035,7 @@ public class ${ctx.lib_name.camel} {
             PointerWrapper providerRef
         ) {
 
+            /*
             if(ImageInfo.inImageCode()) {
                 NI_LIB.${nat("dec_ref_unit_provider")}(
                     providerRef.ni()
@@ -2038,6 +2045,7 @@ public class ${ctx.lib_name.camel} {
                     providerRef.jni()
                 );
             }
+            */
 
         }
 
@@ -3133,32 +3141,23 @@ public class ${ctx.lib_name.camel} {
     /**
      * This class is the base of all array wrapping class.
      */
-    public static abstract class ArrayBase<T>
-    implements Iterable<T>, AutoCloseable {
+    public static abstract class ArrayBase<T> implements Iterable<T> {
 
         // ----- Attributes -----
 
-        /** The reference to the native array. */
-        protected final PointerWrapper reference;
+        /** The content of the array. */
+        protected final T[] content;
 
         // ----- Constructors -----
 
         /**
-         * Create the array base with the reference.
-         *
-         * @param reference The reference to the native array.
+         * Protected constructor.
          */
         protected ArrayBase(
-            PointerWrapper reference
+            T[] content
         ) {
-            this.reference = reference;
+            this.content = content;
         }
-
-        // ----- Cleaning methods/classes -----
-
-        /** @see java.lang.AutoCloseable#close() */
-        @Override
-        public abstract void close();
 
         // ----- Instance methods -----
 
@@ -3167,21 +3166,39 @@ public class ${ctx.lib_name.camel} {
          *
          * @return The size of the native array.
          */
-        public abstract int size();
+        public int size() {
+            return this.content.length;
+        }
 
         /**
          * Get the element at the given place in the array.
          *
          * @param i The index of the element to get.
          * @return The element at the given index.
-         * @throws IndexOutOfBoundsException If the requested index is.
+         * @throws ArrayIndexOutOfBoundsException If the requested index is
          * out of bounds.
          */
-        public abstract T get(int i);
+        public T get(int i) {
+            return this.content[i];
+        }
+
+        /**
+         * Set the element at the given index.
+         *
+         * @param i The index of the element to set.
+         * @param elem The element to place in the array.
+         * @throws ArrayIndexOutOfBoundsException If the requested index is
+         * out of bounds.
+         */
+        public void set(int i, T elem) {
+            this.content[i] = elem;
+        }
 
         /** @see java.lang.Iterable#iterator() */
         @Override
-        public abstract Iterator<T> iterator();
+        public Iterator<T> iterator() {
+            return new LangkitArrayIterator<T>(this);
+        }
 
         // ----- Override methods -----
 
@@ -3194,6 +3211,51 @@ public class ${ctx.lib_name.camel} {
             }
             res.append(']');
             return res.toString();
+        }
+
+        // ----- Inner classes -----
+
+        /**
+         * The iterator class for the langkit arrays
+         */
+        protected static class LangkitArrayIterator<U> implements Iterator<U> {
+
+            // ----- Attributes -----
+
+            /** The array to iterate on. */
+            private final ArrayBase<U> array;
+
+            /** The current index. */
+            private int index;
+
+            // ----- Constructors -----
+
+            /**
+             * Create a new array iterator.
+             *
+             * @param array The array to iterate on.
+             */
+            LangkitArrayIterator(
+                ArrayBase<U> array
+            ) {
+                this.array = array;
+                this.index = 0;
+            }
+
+            // ----- Instance methods -----
+
+            /** @see java.util.Iterator#hasNext() */
+            @Override
+            public boolean hasNext() {
+                return this.index < this.array.size();
+            }
+
+            /** @see java.util.Iterator#next() */
+            @Override
+            public U next() {
+                return this.array.get(this.index++);
+            }
+
         }
 
     }

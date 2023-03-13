@@ -1,15 +1,16 @@
 <%def name="wrapping_class(cls)">
     <%
-    nat = c_api.get_name
     api = java_api
-    class_name = api.wrapping_type(cls)
-    base_name = api.wrapping_type(cls.base)
-    c_name = cls.c_type(capi).name
+    nat = c_api.get_name
+
+    java_type = api.wrapping_type(cls)
+
+    base_type = api.wrapping_type(cls.base)
     %>
 
     ${java_doc(cls, 4)}
     public static ${"abstract" if cls.abstract else ""}
-    class ${class_name} extends ${base_name} {
+    class ${java_type} extends ${base_type} {
 
         // ----- Static -----
 
@@ -17,39 +18,39 @@
 
         // ----- Constructors -----
 
-        protected ${class_name}(
+        protected ${java_type}(
             Entity entity
         ) {
             super(entity);
         }
 
-        public static ${class_name} fromEntity(
+        public static ${java_type} fromEntity(
             Entity entity
         ) {
-            return (${class_name}) ${base_name}.fromEntity(entity);
+            return (${java_type}) ${base_type}.fromEntity(entity);
         }
 
         // ----- Instance methods -----
 
         @Override
         public String getKindName() {
-            return ${class_name}.kindName;
+            return ${java_type}.kindName;
         }
 
         @Override
         public String[] getFieldNames() {
-            return ${class_name}.fieldNames;
+            return ${java_type}.fieldNames;
         }
 
         @Override
         public boolean isListType() {
-            return ${class_name}.isListType;
+            return ${java_type}.isListType;
         }
 
         @Override
         @CompilerDirectives.TruffleBoundary
         public ${ctx.lib_name.camel}Field getFieldDescription(String name) {
-            return ${class_name}.fieldDescriptions.getOrDefault(name, null);
+            return ${java_type}.fieldDescriptions.getOrDefault(name, null);
         }
 
         % if not cls.abstract:
@@ -76,13 +77,15 @@
 <%def name="static_decl(cls)">
     <%
     api = java_api
-    class_name = api.wrapping_type(cls)
-    base_name = api.wrapping_type(cls.base) if cls.base else None
+
+    java_type = api.wrapping_type(cls)
+    base_type = api.wrapping_type(cls.base) if cls.base else None
+
     field_names = api.get_node_formatted_fields(cls)
     %>
 
         /** The name of the node kind */
-        public static final String kindName = "${class_name}";
+        public static final String kindName = "${java_type}";
 
         /** The names of the fields associated to the node */
         public static final String[] fieldNames = {
@@ -96,7 +99,7 @@
         /** The map containing the node's fields description. */
         public static final Map<String, ${ctx.lib_name.camel}Field>
         fieldDescriptions = new HashMap<>(
-            ${f"{base_name}.fieldDescriptions" if base_name else ""}
+            ${f"{base_type}.fieldDescriptions" if base_type else ""}
         );
 
         // Initialisation of the method map
@@ -114,7 +117,7 @@
                 % if not method.name in api.excluded_fields:
                 {
                     // Get the Java method of the field
-                    Method method = ${class_name}.class.getMethod(
+                    Method method = ${java_type}.class.getMethod(
                         "${method.name}",
                         new Class[]{${",".join(param_classes)}}
                     );
@@ -155,11 +158,19 @@
     <%
     api = java_api
     nat = c_api.get_name
+
     method = api.get_java_method(field)
     native_function = nat(field.accessor_basename.lower)
+
     return_type = api.wrapping_type(method.public_type)
-    return_jni = api.java_jni_type(method.public_type)
-    ref_ni = api.ni_reference_type(method.public_type)
+    return_unw_type = api.wrapping_type(method.public_type, False)
+    return_ni_ref_type = api.ni_reference_type(method.public_type)
+
+    need_unit = api.field_need_context(field) or api.field_need_unit(field)
+    need_context = api.field_need_context(field)
+
+    wrap_release = []
+    unwrap_release = []
     %>
 
         % if not method.name in api.excluded_fields:
@@ -171,14 +182,28 @@
             ])}
         ) {
 
+            // Verify that arguments are not null
+            % for param in method.params:
+                % if api.is_java_nullable(param.public_type):
+            if(${param.name} == null) throw new NullPointerException(
+                "Argument ${param.name} cannot be 'null'"
+            );
+                % endif
+            % endfor
+
             if(ImageInfo.inImageCode()) {
                 // Unwrap the current node
                 EntityNative thisNative = StackValue.get(EntityNative.class);
                 this.entity.unwrap(thisNative);
 
-                % if api.field_need_context(field):
+                % if need_unit:
+                // Get the node unit
+                AnalysisUnit currentUnit = this.getUnit();
+                % endif
+
+                % if need_context:
                 // Get the node context
-                AnalysisContext currentContext = this.getUnit().getContext();
+                AnalysisContext currentContext = currentUnit.getContext();
                 % endif
 
                 // Unwrap the arguments
@@ -186,12 +211,14 @@
                 ${api.ni_unwrap(
                     param.public_type,
                     param.name,
-                    f"{param.name}Native"
-                )};
+                    f"{param.name}Native",
+                    unwrap_release
+                )}
                 % endfor
 
                 // Create the result native
-                ${ref_ni} resNative = ${api.ni_new_value(field.public_type)};
+                ${return_ni_ref_type} resNative =
+                    ${api.ni_stack_value(field.public_type)};
 
                 // Call the native function
                 NI_LIB.${native_function}(
@@ -213,11 +240,30 @@
                 currentContext.close();
                 % endif
 
-                // Wrap and return the result
-                return ${api.ni_wrap(field.public_type, "resNative")};
+                // Wrap the result
+                ${return_type} res = ${api.ni_wrap(
+                    field.public_type,
+                    "resNative",
+                    wrap_release
+                )};
+
+                // Release the allocated ressources
+                % for to_release in unwrap_release:
+                ${api.wrapping_type(to_release.public_type)}.release(
+                    ${to_release.name}
+                );
+                % endfor
+                % for to_release in wrap_release:
+                ${api.wrapping_type(to_release.public_type)}.release(
+                    ${to_release.name}
+                );
+                % endfor
+
+                // Return the result
+                return res;
             } else {
                 // Call the native function
-                ${return_jni} res = JNI_LIB.${native_function}(
+                ${return_unw_type} res = JNI_LIB.${native_function}(
                     % for param in method.params:
                     ${api.java_jni_unwrap(param.public_type, param.name)},
                     % endfor
@@ -252,7 +298,7 @@
             arg_list = []
             for arg in field.arguments:
                 arg_list.append(
-                    f"{api.java_ni_type(arg.public_type)} {arg.name.lower}"
+                    f"{api.ni_type(arg.public_type)} {arg.name.lower}"
                 )
             %>
 
@@ -280,7 +326,7 @@
         % for field in cls.fields_with_accessors():
             <%
             native_function = nat(field.accessor_basename.lower)
-            jni_type = api.java_jni_type(field.public_type)
+            jni_type = api.wrapping_type(field.public_type, False)
             %>
 
         % if not field.accessor_basename.lower in api.excluded_fields:
@@ -288,7 +334,7 @@
         @CompilerDirectives.TruffleBoundary
         public static native ${jni_type} ${native_function}(
             % for arg in field.arguments:
-            ${api.java_jni_type(arg.public_type)} ${arg.name.lower},
+            ${api.wrapping_type(arg.public_type, False)} ${arg.name.lower},
             % endfor
             Entity node
         );
@@ -300,12 +346,16 @@
     <%
     api = java_api
     nat = c_api.get_name
+
     c_type = field.c_type_or_error(capi).name
-    jni_type = api.java_jni_type(field.public_type)
+    return_type = api.jni_c_type(field.public_type)
+
     func_sig = api.jni_func_sig(
         field.accessor_basename.lower,
         api.jni_c_type(field.public_type)
     )
+
+    release_list = []
     %>
 
 % if not field.accessor_basename.lower in api.excluded_fields:
@@ -313,44 +363,66 @@ ${func_sig}(
     JNIEnv *env,
     jclass jni_lib,
     % for arg in field.arguments:
-    ${api.jni_c_type(arg.public_type)} ${arg.name.lower}_j,
+    ${api.jni_c_type(arg.public_type)} ${arg.name.lower}_java,
     % endfor
     jobject entity
 ) {
     // Unwrap the node
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
+
+    % if api.field_need_context(field) or api.field_need_unit(field):
+    // Get the node unit
+    ${analysis_unit_type} unit_native = ${nat("node_unit")}(&entity_native);
+    % endif
 
     % if api.field_need_context(field):
     // Get the node context
-    ${analysis_unit_type} unit_native = ${nat("node_unit")}(&native_entity);
     ${analysis_context_type} context_native =
         ${nat("unit_context")}(unit_native);
     % endif
 
     // Unwrap the arguments
     % for arg in field.arguments:
-    const ${arg.public_type.c_type(capi).name} ${arg.name.lower}_n =
-        ${api.jni_unwrap(arg.public_type, f"{arg.name.lower}_j")};
+    ${api.jni_unwrap(
+        arg.public_type,
+        f"{arg.name.lower}_java",
+        f"{arg.name.lower}_native",
+        release_list
+    )}
     % endfor
 
     // Prepare the result structure
-    ${c_type} res = ${api.jni_new_value(field.public_type)};
+    ${c_type} res_native = ${api.jni_new_value(field.public_type)};
 
     // Call the native function
     ${nat(field.accessor_basename.lower)}(
-        &native_entity,
+        &entity_native,
         % for arg in field.arguments:
             % if arg.public_type.is_ada_record:
-        &${arg.name.lower}_n,
+        &${arg.name.lower}_native,
             % else:
-        ${arg.name.lower}_n,
+        ${arg.name.lower}_native,
             % endif
         % endfor
-        &res
+        &res_native
     );
 
     // Return the wrapped value
-    return ${api.jni_wrap(field.public_type, "res")};
+    ${return_type} res = ${api.jni_wrap(
+        field.public_type,
+        "res_native",
+        release_list
+    )};
+
+    // Release the memory
+    % for to_release in release_list:
+    ${api.wrapping_type(to_release.public_type, False)}_release(
+        ${to_release.name}
+    );
+    % endfor
+
+    // Return the result
+    return res;
 }
 % endif
 </%def>

@@ -225,14 +225,6 @@
             int n
         );
 
-        // ----- Array functions -----
-
-        % for array_type in ctx.array_types:
-            % if array_type.exposed and array_type.emit_c_type:
-        ${array.jni_funcs(array_type)}
-            % endif
-        % endfor
-
         // ----- Node functions -----
 
         /** Get the node kind */

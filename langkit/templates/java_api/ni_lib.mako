@@ -569,6 +569,27 @@
             % endif
         % endfor
 
+        // ----- Structure functions -----
+
+        % for struct_type in ctx.struct_types:
+            % if struct_type.is_entity_type:
+                % if struct_type is root_entity:
+        ${struct.ni_funcs(struct_type)}
+                % endif
+            % else:
+            <%
+            emit_struct = (
+                struct_type is T.entity_info
+                or struct_type is T.env_md
+                or struct_type.exposed
+            )
+            %>
+                % if emit_struct:
+        ${struct.ni_funcs(struct_type)}
+                % endif
+            % endif
+        % endfor
+
         // ----- Node functions -----
 
         /** Get the type of a node */
