@@ -4,9 +4,35 @@ import os.path
 
 from e3.testsuite.control import YAMLTestControlCreator
 from e3.testsuite.driver.classic import TestAbortWithError
-from e3.testsuite.driver.diff import DiffTestDriver, PatternSubstitute
+from e3.testsuite.driver.diff import (
+    DiffTestDriver,
+    OutputRefiner,
+    PatternSubstitute,
+)
 
 from drivers.valgrind import valgrind_cmd
+
+
+class PythonTracebackCollapser(OutputRefiner[str]):
+    """Remove quoted lines of code from Python tracebacks.
+
+    This is useful to cope with variations depending on Python interpreter
+    versions.
+    """
+
+    def refine(self, output: str) -> str:
+        result = []
+        in_traceback = False
+        for l in output.splitlines():
+            if l.startswith("Traceback (most recent call last):"):
+                in_traceback = True
+            elif in_traceback:
+                if l.startswith("    "):
+                    l = "     <source code>"
+                elif not l.startswith("  "):
+                    in_traceback = False
+            result.append(l + "\n")
+        return "".join(result)
 
 
 class BaseDriver(DiffTestDriver):
@@ -36,14 +62,20 @@ class BaseDriver(DiffTestDriver):
 
     @property
     def output_refiners(self):
-        return super().output_refiners + [
+        result = super().output_refiners
+
+        # If requested, collapse Python tracebacks
+        if self.test_env.get("collapse_python_tracebacks"):
+            result.append(PythonTracebackCollapser())
+
+        return result + [
             # RA22-015: Line numbers for Python DSL diagnostics vary depending
             # on Python versions, so hide actual line numbers.
             PatternSubstitute(r' line \d+, ', ' line XXX, '),
             PatternSubstitute(r'test\.py:\d+\:', 'test.py:XXX:'),
             PatternSubstitute(r'at test\.py:\d+', 'at test.py:XXX'),
 
-            # Also hide platform-spefici details from Python traceback
+            # Also hide platform-specific details from Python traceback
             PatternSubstitute(
                 r'File "[^"]*[/\\]([^"/\\]+)"',
                 r'File ".../\1"',

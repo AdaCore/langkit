@@ -19,7 +19,7 @@ MyEH: unit_parsed_callback
 Uncaught exception in EventHandler.unit_parsed_callback:
 Traceback (most recent call last):
   File ".../__init__.py", line XXX, in unit_parsed_func
-    self.event_handler.unit_parsed_callback(
+     <source code>
   File "<string>", line XXX, in unit_parsed_callback
   File "<string>", line XXX, in maybe_raise
 ValueError: artificial exception
@@ -48,7 +48,7 @@ MyEH: unit_requested_callback
 Uncaught exception in EventHandler.unit_requested_callback:
 Traceback (most recent call last):
   File ".../__init__.py", line XXX, in unit_requested_func
-    self.event_handler.unit_requested_callback(
+     <source code>
   File "<string>", line XXX, in unit_requested_callback
   File "<string>", line XXX, in maybe_raise
 ValueError: artificial exception
