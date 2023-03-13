@@ -8,13 +8,17 @@ print("main.py: Starting...")
 print("")
 
 
+def flush():
+    sys.stdout.flush()
+    sys.stderr.flush()
+
+
 class ExceptionManager:
     enabled = False
 
     @classmethod
     @contextmanager
     def enable(cls):
-        sys.stdout.flush()
         cls.enabled = True
         yield
         cls.enabled = False
@@ -32,6 +36,7 @@ class EventHandler(libfoolang.EventHandler):
     def unit_requested_callback(self, context, name, from_unit, found,
                                 is_not_found_error):
         print(f"{self.label}: unit_requested_callback")
+        flush()
         ExceptionManager.maybe_raise()
         print(f"  name: {name}")
         print(f"  from_unit: {from_unit}")
@@ -41,6 +46,7 @@ class EventHandler(libfoolang.EventHandler):
 
     def unit_parsed_callback(self, context, unit, reparsed):
         print(f"{self.label}: unit_parsed_callback")
+        flush()
         ExceptionManager.maybe_raise()
         print(f"  unit: {unit}")
         print(f"  reparsed: {reparsed}")
@@ -61,6 +67,7 @@ u = ctx.get_from_buffer(filename="main.txt", buffer="example\n")
 
 with ExceptionManager.enable():
     u = ctx.get_from_buffer(filename="main.txt", buffer="example\n")
+    flush()
     print("")
 
 # Trigger the "unit requested" event with various parameters
@@ -72,6 +79,7 @@ n.p_trigger_unit_requested("foo_2", found=False, error=False)
 n.p_trigger_unit_requested("foo_3", found=False, error=True)
 with ExceptionManager.enable():
     n.p_trigger_unit_requested("foo_4", found=False, error=False)
+    flush()
     print("")
 
 print("main.py: Done.")
