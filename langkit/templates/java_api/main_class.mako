@@ -9,6 +9,7 @@
 <%
 api = java_api
 nat = c_api.get_name
+
 root_node_type = api.wrapping_type(T.root_node)
 %>
 
@@ -25,8 +26,7 @@ import java.lang.StringBuilder;
 import java.lang.Iterable;
 import java.lang.reflect.Method;
 
-import java.lang.ref.Cleaner;
-import java.lang.ref.WeakReference;
+import java.math.BigInteger;
 
 import java.io.File;
 import java.nio.ByteOrder;
@@ -77,9 +77,6 @@ public class ${ctx.lib_name.camel} {
     public static final Map<String, Class<? extends ${root_node_type}>>
         NODE_CLASS_MAP = new HashMap<>();
 
-    /** The cleaning manager. */
-    public static final Cleaner CLEANER = Cleaner.create();
-
     static {
         // Populate the node class map
         % for node_class in ctx.astnode_types:
@@ -102,7 +99,7 @@ public class ${ctx.lib_name.camel} {
      */
     @CompilerDirectives.TruffleBoundary
     private static CCharPointer toCString(
-        String jString
+        final String jString
     ) {
         UnsignedWord size = WordFactory.unsigned(jString.length() + 1);
         CCharPointer res = UnmanagedMemory.calloc(size);
@@ -124,10 +121,10 @@ public class ${ctx.lib_name.camel} {
      * @return The native C char pointer. This pointer MUST be freed.
      */
     private static CCharPointer toCBytes(
-        byte[] bytes
+        final byte[] bytes
     ) {
-        UnsignedWord size = WordFactory.unsigned(bytes.length);
-        CCharPointer res = UnmanagedMemory.malloc(size);
+        final UnsignedWord size = WordFactory.unsigned(bytes.length);
+        final CCharPointer res = UnmanagedMemory.malloc(size);
         for(int i = 0 ; i < bytes.length ; i++) {
             res.write(i, bytes[i]);
         }
@@ -142,7 +139,7 @@ public class ${ctx.lib_name.camel} {
      */
     @CompilerDirectives.TruffleBoundary
     private static String toJString(
-        CCharPointer pointer
+        final CCharPointer pointer
     ) {
         return CTypeConversion.toJavaString(pointer);
     }
@@ -155,8 +152,10 @@ public class ${ctx.lib_name.camel} {
      * @return The resulting string.
      */
     @CompilerDirectives.TruffleBoundary
-    private static String decodeUTF32(int[] chars) {
-        byte[] realContent = new byte[chars.length];
+    private static String decodeUTF32(
+        final int[] chars
+    ) {
+        final byte[] realContent = new byte[chars.length];
         for(int i = 0 ; i < chars.length ; i++) {
             realContent[i] = (byte) (chars[i] & 0xFF);
         }
@@ -171,9 +170,11 @@ public class ${ctx.lib_name.camel} {
      * @return The encoded string in an int array.
      */
     @CompilerDirectives.TruffleBoundary
-    private static int[] encodeUTF32(String toEncode) {
-        byte[] src = toEncode.getBytes();
-        int[] res = new int[src.length];
+    private static int[] encodeUTF32(
+        final String toEncode
+    ) {
+        final byte[] src = toEncode.getBytes();
+        final int[] res = new int[src.length];
         for(int i = 0 ; i < src.length ; i++) {
             res[i] = (int) src[i];
         }
@@ -186,10 +187,12 @@ public class ${ctx.lib_name.camel} {
      * @param intArray The integer array to translate.
      * @return The byte array.
      */
-    private static byte[] intToByteArray(int[] intArray) {
-        byte[] res = new byte[intArray.length * 4];
+    private static byte[] intToByteArray(
+        final int[] intArray
+    ) {
+        final byte[] res = new byte[intArray.length * 4];
         for(int i = 0 ; i < res.length ; i+=4) {
-            int currentInt = intArray[i / 4];
+            final int currentInt = intArray[i / 4];
             if(BIG_ENDIAN) {
                 res[i] = (byte) ((currentInt >> 24) & 0xFF);
                 res[i + 1] = (byte) ((currentInt >> 16) & 0xFF);
@@ -215,7 +218,7 @@ public class ${ctx.lib_name.camel} {
         LangkitException res = null;
 
         if(ImageInfo.inImageCode()) {
-            LangkitExceptionNative exceptionNative =
+            final LangkitExceptionNative exceptionNative =
                 NI_LIB.${nat("get_last_exception")}();
             if(exceptionNative.isNonNull()) {
                 res = new LangkitException(
@@ -283,7 +286,7 @@ public class ${ctx.lib_name.camel} {
          * @param niPointer The pointer based value.
          */
         PointerWrapper(
-            PointerBase niPointer
+            final PointerBase niPointer
         ) {
             this.ni = niPointer;
             this.jni = -1;
@@ -295,7 +298,7 @@ public class ${ctx.lib_name.camel} {
          * @param jniPointer The pointer in a long value.
          */
         PointerWrapper(
-            long jniPointer
+            final long jniPointer
         ) {
             this.jni = jniPointer;
         }
@@ -307,7 +310,7 @@ public class ${ctx.lib_name.camel} {
          * @return The wrapped pointer.
          */
         static PointerWrapper wrap(
-            PointerBase niPointer
+            final PointerBase niPointer
         ) {
             return new PointerWrapper(niPointer);
         }
@@ -383,7 +386,7 @@ public class ${ctx.lib_name.camel} {
         public boolean equals(Object o) {
             if(o == this) return true;
             if(!(o instanceof PointerWrapper)) return false;
-            PointerWrapper other = (PointerWrapper) o;
+            final PointerWrapper other = (PointerWrapper) o;
             if(ImageInfo.inImageCode()) {
                 return this.ni.equal(other.ni);
             } else {
@@ -415,8 +418,8 @@ public class ${ctx.lib_name.camel} {
          * @param params The parameters of the field call.
          */
         public ${ctx.lib_name.camel}Field(
-            Method javaMethod,
-            List<Param> params
+            final Method javaMethod,
+            final List<Param> params
         ) {
             this.javaMethod = javaMethod;
             this.params = params;
@@ -446,8 +449,8 @@ public class ${ctx.lib_name.camel} {
          * @param name The name of the parameter.
          */
         public Param(
-            Class<?> type,
-            String name
+            final Class<?> type,
+            final String name
         ) {
             this.type = type;
             this.name = name;
@@ -476,9 +479,9 @@ public class ${ctx.lib_name.camel} {
          * @param defaultValue The default value of the parameter.
          */
         public ParamWithDefaultValue(
-            Class<?> type,
-            String name,
-            Object defaultValue
+            final Class<?> type,
+            final String name,
+            final Object defaultValue
         ) {
             super(type, name);
             this.defaultValue = defaultValue;
@@ -511,17 +514,23 @@ public class ${ctx.lib_name.camel} {
     /**
      * This class represents exception during symbol manipulation.
      */
-    public static class SymbolException extends RuntimeException {
-        public SymbolException(String msg) {
-            super("Invalid symbol : '" + msg + "'");
+    public static final class SymbolException extends RuntimeException {
+        public SymbolException(
+            final String symbol
+        ) {
+            super("Invalid symbol : '" + symbol + "'");
         }
     }
 
     /**
      * This class reprsents exception during enum manipulation.
      */
-    public static class EnumException extends RuntimeException {
-        public EnumException(String msg) { super(msg); }
+    public static final class EnumException extends RuntimeException {
+        public EnumException(
+            final String msg
+        ) {
+            super(msg);
+        }
     }
 
     /**
@@ -532,7 +541,7 @@ public class ${ctx.lib_name.camel} {
         // ----- Attributes -----
 
         /** The kind of the langkit exception. */
-        private final ExceptionKind kind;
+        public final ExceptionKind kind;
 
         // ----- Constructors -----
 
@@ -544,17 +553,11 @@ public class ${ctx.lib_name.camel} {
          * @param message The message of the exception.
          */
         public LangkitException(
-            int kind,
-            String message
+            final int kind,
+            final String message
         ) {
             super(message);
             this.kind = ExceptionKind.fromC(kind);
-        }
-
-        // ----- Getters methods -----
-
-        public ExceptionKind getKind() {
-            return this.kind;
         }
 
     }
@@ -594,7 +597,9 @@ public class ${ctx.lib_name.camel} {
         }
 
         /** Private constructor. */
-        private TokenKind(int value) {
+        private TokenKind(
+            final int value
+        ) {
             this.value = value;
         }
 
@@ -608,7 +613,9 @@ public class ${ctx.lib_name.camel} {
          * @throws EnumException When the int value doesn't map to any enum
          * instance.
          */
-        public static TokenKind fromC(int cValue) throws EnumException {
+        public static TokenKind fromC(
+            final int cValue
+        ) throws EnumException {
             if(!map.containsKey(cValue))
                 throw new EnumException(
                     "Cannot get TokenKind from " + cValue
@@ -621,7 +628,9 @@ public class ${ctx.lib_name.camel} {
          *
          * @return The int C value of the enum instance.
          */
-        public int toC() { return this.value; }
+        public int toC() {
+            return this.value;
+        }
 
     }
 
@@ -654,7 +663,9 @@ public class ${ctx.lib_name.camel} {
         }
 
         /** Private constructor. */
-        private ExceptionKind(int value) {
+        private ExceptionKind(
+            final int value
+        ) {
             this.value = value;
         }
 
@@ -668,7 +679,9 @@ public class ${ctx.lib_name.camel} {
          * @throws EnumException When the int value doesn't map to any enum
          * instance.
          */
-        public static ExceptionKind fromC(int cValue) throws EnumException {
+        public static ExceptionKind fromC(
+            final int cValue
+        ) throws EnumException {
             if(!map.containsKey(cValue))
                 throw new EnumException(
                     "Cannot get ExceptionKind from " + cValue
@@ -681,7 +694,9 @@ public class ${ctx.lib_name.camel} {
          *
          * @return The int C value of the enum instance.
          */
-        public int toC() { return this.value; }
+        public int toC() {
+            return this.value;
+        }
 
     }
 
@@ -692,7 +707,7 @@ public class ${ctx.lib_name.camel} {
     % endfor
 
     // ==========
-    // Structure wrapping classes
+    // Java wrapping classes
     // ==========
 
     // ===== Constant structure wrapping classes =====
@@ -716,7 +731,7 @@ public class ${ctx.lib_name.camel} {
          * @param value The value of the character.
          */
         Char(
-            int value
+            final int value
         ) {
             this.value = value;
         }
@@ -728,7 +743,7 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created character.
          */
         public static Char create(
-            int value
+            final int value
         ) {
             return new Char(value);
         }
@@ -740,12 +755,12 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created character.
          */
         public static Char create(
-            char value
+            final char value
         ) {
             return new Char((int) value);
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
 
         /**
          * Wrap the given NI pointer in a Java class.
@@ -754,10 +769,9 @@ public class ${ctx.lib_name.camel} {
          * @return The wrapped character.
          */
         static Char wrap(
-            CIntPointer niPointer
+            final CIntPointer niPointer
         ) {
-            if(niPointer.isNull()) return null;
-            else return new Char(niPointer.read());
+            return wrap(niPointer.read());
         }
 
         /**
@@ -767,9 +781,20 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created character.
          */
         static Char wrap(
-            int value
+            final int value
         ) {
             return new Char(value);
+        }
+
+        /**
+         * Unwrap the character in the given int pointer.
+         *
+         * @param pointer The pointer to unwrap the character in.
+         */
+        void unwrap(
+            final CIntPointer pointer
+        ) {
+            pointer.write(this.value);
         }
 
         // ----- Instance methods -----
@@ -793,208 +818,129 @@ public class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.big_integer_type', 4)}
-    public static final class BigInteger implements AutoCloseable {
+    static final class BigIntegerWrapper {
 
-        // ----- Attributes -----
-
-        /** The pointer to the native big integer. */
-        public final PointerWrapper reference;
-
-        /** The string representation of the integer. */
-        private String representation;
-
-        /** The cleanable object. */
-        private final Cleaner.Cleanable cleanable;
-
-        // ----- Constructors -----
+        // ----- Graal C API methods -----
 
         /**
-         * Create a new big integer from a custom pointer.
+         * Wrap a pointer which points to a native big integer.
          *
-         * @param reference The pointer to the native big integer value.
+         * @param pointer The pointer to the native big integer.
+         * @return The Java big integer.
          */
-        BigInteger(
-            PointerWrapper reference
+        static BigInteger wrap(
+            final Pointer pointer
         ) {
-            this.reference = reference;
-            this.representation = null;
-            this.cleanable = CLEANER.register(
-                this,
-                new ReleaseTask(reference)
-            );
+            return wrap((BigIntegerNative) pointer.readWord(0));
         }
 
         /**
-         * Create a big integer from its string representation.
+         * Wrap the given native big integer in a Java big integer.
          *
-         * @param representation The representation of the integer.
-         * @return The newly created big intgeer.
+         * @param bigIntegerNative The big integer native value.
+         * @return The Java big integer.
          */
-        public static BigInteger create(
-            String representation
+        static BigInteger wrap(
+            final BigIntegerNative bigIntegerNative
         ) {
-            // Prepare the result
-            BigInteger res;
+            final String representation = getRepresentation(bigIntegerNative);
+            return new BigInteger(representation);
+        }
 
-            // Create the big integer text as an autocloseable
-            try (Text bigIntegerText = Text.create(representation)) {
+        /**
+         * Unwrap the given big integer in the given pointer as a native
+         * big integer.
+         *
+         * @param bigInteger The big integer to unwrap.
+         * @param pointer The pointer to place the big integer in.
+         */
+        static void unwrap(
+            final BigInteger bigInteger,
+            final Pointer pointer
+        ) {
+            final BigIntegerNative bigIntegerNative = unwrap(bigInteger);
+            pointer.writeWord(0, bigIntegerNative);
+        }
 
-                if(ImageInfo.inImageCode()) {
-                    TextNative textNative = StackValue.get(TextNative.class);
-                    bigIntegerText.unwrap(textNative);
-                    res = wrap(NI_LIB.${nat("create_big_integer")}(
-                        textNative
-                    ));
-                } else {
-                    res = JNI_LIB.${nat("create_big_integer")}(
-                        bigIntegerText
-                    );
-                }
+        /**
+         * Unwrap the given big integer.
+         *
+         * @param bigInteger The big integer to unwrap.
+         * @return The native big integer newly allocated.
+         */
+        static BigIntegerNative unwrap(
+            final BigInteger bigInteger
+        ) {
+            // Create the representation of the big integer
+            final String representation = bigInteger.toString();
+            final Text bigIntegerText = Text.create(representation);
+            TextNative bigIntegerTextNative = StackValue.get(
+                TextNative.class
+            );
+            bigIntegerText.unwrap(bigIntegerTextNative);
 
-            }
+            // Create the big intger by calling the native function
+            final BigIntegerNative res = NI_LIB.${nat("create_big_integer")}(
+                bigIntegerTextNative
+            );
 
-            // Return the big integer
+            // Close the text
+            bigIntegerText.close();
+
+            // Return the result
             return res;
         }
 
-        // ----- Cleaning methods/classes -----
-
         /**
-         * The task to release a big integer.
-         */
-        private static final class ReleaseTask implements Runnable {
-
-            // ----- Attributes -----
-
-            /** The reference to the big integer to release. */
-            private final PointerWrapper bigIntRef;
-
-            // ----- Constructors -----
-
-            /**
-             * Create a new release task for a big integer.
-             *
-             * @pararm bigIntRef The big integer to release.
-             */
-            ReleaseTask(
-                PointerWrapper bigIntRef
-            ) {
-                this.bigIntRef = bigIntRef;
-            }
-
-            // ----- Instance methods -----
-
-            /** @see java.lang.Runnable#run() */
-            @Override
-            public void run() {
-                BigInteger.release(this.bigIntRef);
-            }
-
-        }
-
-        /**
-         * Release the given big integer reference.
+         * Release the big integer pointed by the given pointer.
          *
-         * @param bigIntRef The big integer to release.
+         * @param pointer The pointer to the big integer to release.
          */
-        private static void release(
-            PointerWrapper bigIntRef
+        static void release(
+            final Pointer pointer
         ) {
-
-            /*
-            if(ImageInfo.inImageCode()) {
-                NI_LIB.${nat("big_integer_decref")}(bigIntRef.ni());
-            } else {
-                JNI_LIB.${nat("big_integer_decref")}(bigIntRef.jni());
-            }
-            */
-
+            release((BigIntegerNative) pointer.readWord(0));
         }
 
-        /** @see java.lang.AutoCloseable#close() */
-        @Override
-        public void close() {
-            this.cleanable.clean();
+        /**
+         * Release the given native big integer.
+         *
+         * @param bigIntegerNative The native big integer to release.
+         */
+        static void release(
+            final BigIntegerNative bigIntegerNative
+        ) {
+            NI_LIB.${nat("big_integer_decref")}(bigIntegerNative);
         }
 
         // ----- Class methods -----
 
         /**
-         * Wrap an NI pointer that points to a langkit big integer.
+         * Get the string representation of the given native big integer.
          *
-         * @param niPointer The pointer to the big integer.
-         * @return The newly created big integer or null if the given
-         * pointer is null.
+         * @param bigIntegerNative The native big integer to get the
+         * representation from.
          */
-        static BigInteger wrap(
-            Pointer niPointer
+        private static String getRepresentation(
+            final BigIntegerNative bigIntegerNative
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((BigIntegerNative) niPointer.readWord(0));
-        }
-
-        /**
-         * Wrap a big integer native value (which is a pointer) in the
-         * Java class.
-         *
-         * @param bigIntegerNative The big integer NI native value.
-         * @return The newly created big integer or null if the big integer
-         * value is null.
-         */
-        static BigInteger wrap(
-            BigIntegerNative bigIntegerNative
-        ) {
-            if(((PointerBase) bigIntegerNative).isNull()) return null;
-            else return new BigInteger(
-                new PointerWrapper(bigIntegerNative)
+            // Allocate the stack value for the text
+            final TextNative bigIntegerTextNative = StackValue.get(
+                TextNative.class
             );
-        }
+            Text.defaultValue(bigIntegerTextNative);
 
-        // ----- Instance methods -----
+            // Call the native function
+            NI_LIB.${nat("big_integer_text")}(
+                bigIntegerNative,
+                bigIntegerTextNative
+            );
 
-        /**
-         * Get the string representation of the big integer.
-         *
-         * @return The string representing the big integer.
-         */
-        public String getRepresentation() {
-            if(this.representation == null) {
-                Text bigIntegerText;
-
-                if(ImageInfo.inImageCode()) {
-                    TextNative textNative = StackValue.get(TextNative.class);
-                    Text.defaultValue(textNative);
-                    NI_LIB.${nat("big_integer_text")}(
-                        this.reference.ni(),
-                        textNative
-                    );
-                    bigIntegerText = Text.wrap(textNative);
-                } else {
-                    bigIntegerText = JNI_LIB.${nat("big_integer_text")}(
-                        this
-                    );
-                }
-
-                this.representation = bigIntegerText.getContent();
-                bigIntegerText.close();
-            }
-            return this.representation;
-        }
-
-        /**
-         * Unwrap the big integer in the given pointer.
-         *
-         * @param pointer The pointer to unwrap the big integer in.
-         */
-        void unwrap(Pointer pointer) {
-            pointer.writeWord(0, this.reference.ni());
-        }
-
-        // ----- Override methods -----
-
-        @Override
-        public String toString() {
-            return this.getRepresentation();
+            // Wrap the text and return the result
+            final Text bigIntegerText = Text.wrap(bigIntegerTextNative);
+            final String res = bigIntegerText.getContent();
+            bigIntegerText.close();
+            return res;
         }
 
     }
@@ -1115,9 +1061,6 @@ public class ${ctx.lib_name.camel} {
         /** The content of the string. */
         private String content;
 
-        /** The cleanable object. */
-        private final Cleaner.Cleanable cleanable;
-
         // ----- Constructors -----
 
         /**
@@ -1149,10 +1092,6 @@ public class ${ctx.lib_name.camel} {
             this.reference = reference;
             this.contentArray = contentArray;
             this.content = null;
-            this.cleanable = CLEANER.register(
-                this,
-                new ReleaseTask(reference)
-            );
         }
 
         /**
@@ -1183,39 +1122,6 @@ public class ${ctx.lib_name.camel} {
         // ----- Cleaning methods/classes -----
 
         /**
-         * The task to release a string reference.
-         */
-        private static final class ReleaseTask implements Runnable {
-
-            // ----- Attributes -----
-
-            /** The reference to the string to release. */
-            private final PointerWrapper stringRef;
-
-            // ----- Constructors -----
-
-            /**
-             * Create a new release task for a string wrapper reference.
-             *
-             * @param stringRef The reference to release.
-             */
-            ReleaseTask(
-                PointerWrapper stringRef
-            ) {
-                this.stringRef = stringRef;
-            }
-
-            // ----- Instance methods -----
-
-            /** @see java.lang.Runnable#run() */
-            @Override
-            public void run() {
-                StringWrapper.release(this.stringRef);
-            }
-
-        }
-
-        /**
          * Release the given string reference.
          *
          * @param stringRef The reference to the string to release.
@@ -1237,7 +1143,7 @@ public class ${ctx.lib_name.camel} {
         /** @see java.lang.AutoCloseable#close() */
         @Override
         public void close() {
-            this.cleanable.clean();
+            // DO NOTHING FOR NOW
         }
 
         // ----- Class methods -----
@@ -1346,9 +1252,6 @@ public class ${ctx.lib_name.camel} {
         /** The content of the text in a Java array. */
         public final int[] contentArray;
 
-        /** The cleanable object. */
-        private final Cleaner.Cleanable cleanable;
-
         /** The content of the text in a Java string. */
         private String content;
 
@@ -1421,15 +1324,6 @@ public class ${ctx.lib_name.camel} {
             this.isAllocated = isAllocated;
             this.isOwner = isOwner;
             this.contentArray = contentArray;
-            this.cleanable = CLEANER.register(
-                this,
-                new ReleaseTask(
-                    charPointer,
-                    length,
-                    isAllocated,
-                    isOwner
-                )
-            );
 
             this.content = null;
         }
@@ -1462,62 +1356,6 @@ public class ${ctx.lib_name.camel} {
         }
 
         // ----- Cleaning methods/classes -----
-
-        /**
-         * A task to release a text buffer.
-         */
-        private static final class ReleaseTask implements Runnable {
-
-            // ----- Attributes -----
-
-            /** The text buffer. */
-            private final PointerWrapper textBuffer;
-
-            /** The size of the buffer. */
-            private final long length;
-
-            /** If the text owns its buffer. */
-            private final boolean isAllocated;
-
-            /** If the object owns the buffer. */
-            private final boolean isOwner;
-
-            // ----- Constructors -----
-
-            /**
-             * Create a new release task for the given text buffer.
-             *
-             * @param textBuffer The text buffer to release.
-             * @param length The length of the buffer.
-             * @param isAllocated If the buffer was allocated by the lib.
-             * @param isOwner If the Java object if the buffer owner.
-             */
-            ReleaseTask(
-                PointerWrapper textBuffer,
-                long length,
-                boolean isAllocated,
-                boolean isOwner
-            ) {
-                this.textBuffer = textBuffer;
-                this.length = length;
-                this.isAllocated = isAllocated;
-                this.isOwner = isOwner;
-            }
-
-            // ----- Instance methods -----
-
-            /** @see java.lang.Runnable#run() */
-            @Override
-            public void run() {
-                Text.release(
-                    this.textBuffer,
-                    this.length,
-                    this.isAllocated,
-                    this.isOwner
-                );
-            }
-
-        }
 
         /**
          * Release the given text buffer.
@@ -1557,7 +1395,7 @@ public class ${ctx.lib_name.camel} {
         /** @see java.lang.AutoCloseable#close() */
         @Override
         public void close() {
-            this.cleanable.clean();
+            // DO NOTHING FOR NOW
         }
 
         // ----- Class methods -----
@@ -1989,19 +1827,12 @@ public class ${ctx.lib_name.camel} {
         /** The reference to the unit provider */
         public final PointerWrapper reference;
 
-        /** The cleanable object */
-        private final Cleaner.Cleanable cleanable;
-
         // ----- Constructors -----
 
         UnitProvider(
             PointerWrapper reference
         ) {
             this.reference = reference;
-            this.cleanable = CLEANER.register(
-                this,
-                new ReleaseTask(reference)
-            );
         }
 
         static UnitProvider wrap(
@@ -2014,40 +1845,6 @@ public class ${ctx.lib_name.camel} {
         }
 
         // ----- Cleaning methods/classes -----
-
-        /**
-         * The release task for the unit provider.
-         */
-        private static final class ReleaseTask implements Runnable {
-
-            // ----- Attributes -----
-
-            /** The reference to the unit provider to release */
-            private final PointerWrapper providerRef;
-
-            // ----- Constructors -----
-
-            /**
-             * Create a new release task with the reference to the
-             * unit provider.
-             *
-             * @param providerRef The reference to the provider
-             */
-            ReleaseTask(
-                PointerWrapper providerRef
-            ) {
-                this.providerRef = providerRef;
-            }
-
-            // ----- Instance methods -----
-
-            /** @see java.lang.Runnable#run() */
-            @Override
-            public void run() {
-                UnitProvider.release(this.providerRef);
-            }
-
-        }
 
         /**
          * Release the native resource
@@ -2072,7 +1869,7 @@ public class ${ctx.lib_name.camel} {
 
         /** @see java.lang.AutoCloseable#close() */
         public void close() {
-            this.cleanable.clean();
+            // DO NOTHING FOR NOW
         }
 
     }

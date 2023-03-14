@@ -47,6 +47,7 @@ uint32_t Char_unwrap(JNIEnv *, jobject);
 ${big_integer_type} BigInteger_new_value();
 jobject BigInteger_wrap(JNIEnv *, ${big_integer_type});
 ${big_integer_type} BigInteger_unwrap(JNIEnv *, jobject);
+void BigInteger_release(${big_integer_type});
 
 ${symbol_type} Symbol_new_value();
 jobject Symbol_wrap(JNIEnv *, ${symbol_type});
@@ -435,18 +436,29 @@ jobject BigInteger_wrap(
     JNIEnv *env,
     ${big_integer_type} big_int_native
 ) {
-    // Check the nullity
-    if(big_int_native == NULL) return NULL;
+    // Get the representation of the big integer
+    ${text_type} representation_native = Text_new_value();
+    ${nat("big_integer_text")}(
+        big_int_native,
+        &representation_native
+    );
+    jobject representation_text = Text_wrap(env, representation_native);
+    jstring representation = get_text_content(env, representation_text);
+
+    // Destroy the representation text
+    ${nat("destroy_text")}(
+        &representation_native
+    );
 
     // Get the big integer class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$BigInteger");
+    jclass clazz = (*env)->FindClass(env, "java/math/BigInteger");
 
     // Get the object constructor
     jmethodID constructor = (*env)->GetMethodID(
         env,
         clazz,
         "<init>",
-        "(L${ptr_sig};)V"
+        "(Ljava/lang/String;)V"
     );
 
     // Return the new big integer
@@ -454,7 +466,7 @@ jobject BigInteger_wrap(
         env,
         clazz,
         constructor,
-        PointerWrapper_wrap(env, (void *) big_int_native)
+        representation
     );
 }
 
@@ -463,54 +475,55 @@ ${big_integer_type} BigInteger_unwrap(
     JNIEnv *env,
     jobject big_integer
 ) {
-    return (${big_integer_type}) get_reference(env, big_integer);
-}
+    // Get the big integer class
+    jclass clazz = (*env)->GetObjectClass(env, big_integer);
 
-// Create a big integer from its text
-${api.jni_func_sig("create_big_integer", "jobject")}(
-    JNIEnv *env,
-    jclass jni_lib,
-    jobject text
-) {
-    // Get the native text
-    ${text_type} text_native = Text_unwrap(env, text);
+    // Get the representation of the big integer
+    jmethodID to_string_method = (*env)->GetMethodID(
+        env,
+        clazz,
+        "toString",
+        "()Ljava/lang/String;"
+    );
+    jstring representation = (*env)->CallObjectMethod(
+        env,
+        big_integer,
+        to_string_method
+    );
 
-    // Call the native function
+    // Create a text from the representations
+    jclass text_clazz = (*env)->FindClass(env, "${sig_base}$Text");
+    jmethodID create_method = (*env)->GetStaticMethodID(
+        env,
+        text_clazz,
+        "create",
+        "(Ljava/lang/String;)L${sig_base}$Text;"
+    );
+    jobject representation_text = (*env)->CallStaticObjectMethod(
+        env,
+        text_clazz,
+        create_method,
+        representation
+    );
+    ${text_type} representation_native = Text_unwrap(env, representation_text);
+
+    // Create a bit integer from the text
     ${big_integer_type} res = ${nat("create_big_integer")}(
-        &text_native
+        &representation_native
     );
 
-    // Return the big integer
-    return BigInteger_wrap(env, res);
+    // Destroy the text
+    free(representation_native.chars);
+
+    // Return the result
+    return res;
 }
 
-// Get the text from a big integer
-${api.jni_func_sig("big_integer_text", "jobject")} (
-    JNIEnv *env,
-    jclass jni_lib,
-    jobject big_integer
+// Release the given native big integer
+void BigInteger_release(
+    ${big_integer_type} big_int_native
 ) {
-    // Create the text result struct
-    ${text_type} res_struct = Text_new_value();
-
-    // Call the native function
-    ${nat("big_integer_text")}(
-        BigInteger_unwrap(env, big_integer),
-        &res_struct
-    );
-
-    // Return the text Java object
-    return Text_wrap(env, res_struct);
-}
-
-// Decrease the reference of a big integer
-${api.jni_func_sig("big_integer_decref", "void")} (
-    JNIEnv *env,
-    jclass jni_lib,
-    jlong big_integer
-) {
-    // Just call the native function with the reference
-    ${nat("big_integer_decref")}((${big_integer_type}) big_integer);
+    ${nat("big_integer_decref")}(big_int_native);
 }
 
 // ==========

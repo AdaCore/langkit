@@ -249,12 +249,12 @@
 
                 // Release the allocated ressources
                 % for to_release in unwrap_release:
-                ${api.wrapping_type(to_release.public_type)}.release(
+                ${api.wrapper_class(to_release.public_type)}.release(
                     ${to_release.name}
                 );
                 % endfor
                 % for to_release in wrap_release:
-                ${api.wrapping_type(to_release.public_type)}.release(
+                ${api.wrapper_class(to_release.public_type)}.release(
                     ${to_release.name}
                 );
                 % endfor

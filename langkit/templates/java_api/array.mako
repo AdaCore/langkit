@@ -39,7 +39,7 @@
         private static ${java_type} jniCreate(
             ${elem_java_unw_type}[] jniContent
         ) {
-            ${elem_java_type}[] content =
+            final ${elem_java_type}[] content =
                 new ${elem_java_type}[jniContent.length];
             for(int i = 0 ; i < content.length ; i++) {
                 content[i] =
@@ -70,8 +70,8 @@
          *
          * @return The content unwrapped.
          */
-        private ${elem_java_unw_type}[] getJniContent() {
-            ${elem_java_unw_type}[] res =
+        private ${elem_java_unw_type}[] jniContent() {
+            final ${elem_java_unw_type}[] res =
                 new ${elem_java_unw_type}[this.content.length];
             for(int i = 0 ; i < res.length ; i++) {
                 res[i] = ${api.java_jni_unwrap(
@@ -93,8 +93,7 @@
         static ${java_type} wrap(
             Pointer pointer
         ) {
-            if(pointer.isNull()) return null;
-            else return wrap((${ni_type}) pointer.readWord(0));
+            return wrap((${ni_type}) pointer.readWord(0));
         }
 
         /**
@@ -107,29 +106,26 @@
         static ${java_type} wrap(
             ${ni_type} nativeArray
         ) {
-            if(((PointerBase) nativeArray).isNull()) return null;
-            else {
-                // Get the size and prepare the working variables
-                final int size = nativeArray.get_n();
-                final ${elem_java_type}[] content = new ${elem_java_type}[size];
-                final Pointer nativeItems = nativeArray.address_items();
-                Pointer nativeItem;
-                ${elem_ni_ref_type} toRead;
+            // Get the size and prepare the working variables
+            final int size = nativeArray.get_n();
+            final ${elem_java_type}[] content = new ${elem_java_type}[size];
+            final Pointer nativeItems = nativeArray.address_items();
+            Pointer nativeItem;
+            ${elem_ni_ref_type} toRead;
 
-                // Iterate over all array elements
-                for(int i = 0 ; i < size ; i++) {
-                    nativeItem = nativeItems.add(
-                        i * SizeOf.get(${elem_ni_type}.class)
-                    );
-                    toRead = WordFactory.unsigned(nativeItem.rawValue());
-                    content[i] = ${
-                        api.ni_wrap(cls.element_type, "toRead", [])
-                    };
-                }
-
-                // Return the new langkit array
-                return new ${java_type}(content);
+            // Iterate over all array elements
+            for(int i = 0 ; i < size ; i++) {
+                nativeItem = nativeItems.add(
+                    i * SizeOf.get(${elem_ni_type}.class)
+                );
+                toRead = WordFactory.unsigned(nativeItem.rawValue());
+                content[i] = ${
+                    api.ni_wrap(cls.element_type, "toRead", [])
+                };
             }
+
+            // Return the new langkit array
+            return new ${java_type}(content);
         }
 
         /**
@@ -239,7 +235,8 @@
     public interface ${ni_type} extends PointerBase {
         @CField("n") public int get_n();
         @CField("ref_count") public int get_ref_count();
-        @CFieldAddress("items") public Pointer address_items();
+        @CFieldAddress("items")
+        public <T extends PointerBase> T address_items();
     }
 </%def>
 
@@ -317,9 +314,6 @@ jobject ${java_type}_wrap(
     JNIEnv *env,
     ${c_type} array_native
 ) {
-    // Verify the nullity of the native value
-    if(array_native == NULL) return NULL;
-
     // Get the size of the array
     int array_size = array_native->n;
 
@@ -392,7 +386,7 @@ ${c_type} ${java_type}_unwrap(
     jmethodID get_jni_content_method = (*env)->GetMethodID(
         env,
         clazz,
-        "getJniContent",
+        "jniContent",
         "()[${elem_sig}"
     );
     jobjectArray content = (jobjectArray) (*env)->CallObjectMethod(

@@ -426,10 +426,8 @@ class JavaAPISettings(AbstractAPISettings):
         :param var: The variable to eventually release.
         """
         dispatch_on_type(the_type, [
-            (
-                ct.ArrayType, lambda _:
-                    release_list.append(ToRelease(var, the_type))
-            ),
+            (T.BigInt, lambda t: release_list.append(ToRelease(var, t))),
+            (ct.ArrayType, lambda t: release_list.append(ToRelease(var, t))),
             (
                 ct.StructType, lambda t:
                     release_list.append(ToRelease(var, the_type))
@@ -454,15 +452,15 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: "boolean"),
             (T.Int, lambda _: "int"),
             (T.Character, lambda _: "Char"),
-            (T.EnvRebindings, lambda _: "PointerWrapper"),
-            (ct.EnumType, lambda t: t.api_name.camel),
             (T.BigInt, lambda _: "BigInteger"),
+            (ct.EnumType, lambda t: t.api_name.camel),
             (T.Symbol, lambda _: "Symbol"),
             (T.String, lambda _: "StringWrapper"),
             (T.Text, lambda _: "Text"),
             (T.SourceLocation, lambda _: "SourceLocation"),
             (T.SourceLocationRange, lambda _: "SourceLocationRange"),
             (T.Diagnostic, lambda _: "Diagnostic"),
+            (T.EnvRebindings, lambda _: "PointerWrapper"),
             (T.FileReader, lambda _: "FileReader"),
             (T.UnitProvider, lambda _: "UnitProvider"),
             (T.EventHandler, lambda _: "EventHandler"),
@@ -484,6 +482,18 @@ class JavaAPISettings(AbstractAPISettings):
             (ct.StructType, lambda t: t.api_name.camel),
             (ct.ArrayType, lambda t: self.array_wrapping_type(t)),
             (ct.IteratorType, lambda t: t.api_name.camel),
+        ])
+
+    def wrapper_class(self, the_type: CompiledType) -> str:
+        """
+        Return the name of the class which contains the wrapping operation for
+        the given type.
+
+        :param the_type: Type to get the class for.
+        """
+        return dispatch_on_type(the_type, [
+            (T.BigInt, lambda _: "BigIntegerWrapper"),
+            (object, lambda t: self.wrapping_type(t))
         ])
 
     def array_wrapping_type(self, array_type: ArrayType) -> str:
@@ -520,15 +530,15 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: "byte"),
             (T.Int, lambda _: "int"),
             (T.Character, lambda _: "int"),
-            (T.EnvRebindings, lambda _: "Pointer"),
-            (ct.EnumType, lambda _: "int"),
             (T.BigInt, lambda _: "BigIntegerNative"),
+            (ct.EnumType, lambda _: "int"),
             (T.Symbol, lambda _: "SymbolNative"),
             (T.String, lambda _: "StringNative"),
             (T.Text, lambda _: "TextNative"),
             (T.SourceLocation, lambda _: "SourceLocationNative"),
             (T.SourceLocationRange, lambda _: "SourceLocationRangeNative"),
             (T.Diagnostic, lambda _: "DiagnosticNative"),
+            (T.EnvRebindings, lambda _: "Pointer"),
             (T.FileReader, lambda _: "FileReaderNative"),
             (T.UnitProvider, lambda _: "UnitProviderNative"),
             (T.EventHandler, lambda _: "EventHandlerNative"),
@@ -555,8 +565,8 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: "CCharPointer"),
             (T.Int, lambda _: "CIntPointer"),
             (T.Character, lambda _: "CIntPointer"),
-            (T.String, lambda _: "Pointer"),
             (T.BigInt, lambda _: "Pointer"),
+            (T.String, lambda _: "Pointer"),
             (T.AnalysisUnit, lambda _: "Pointer"),
             (T.AnalysisContext, lambda _: "Pointer"),
             (ct.ArrayType, lambda _: "Pointer"),
@@ -623,7 +633,7 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Int, lambda _: f"{expr}.read()"),
             (
                 ct.EnumType, lambda t:
-                    f"{self.wrapping_type(t)}.fromC({expr}.read())"
+                    f"{self.wrapper_class(t)}.fromC({expr}.read())"
             ),
             (T.Token, lambda _: f"Token.wrap({expr}, currentUnit)"),
             (
@@ -632,11 +642,11 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 ct.EntityType, lambda t: (
-                    f"{self.wrapping_type(t)}.fromEntity"
+                    f"{self.wrapper_class(t)}.fromEntity"
                     f"(Entity.wrap({expr}))"
                 )
             ),
-            (object, lambda t: f"{self.wrapping_type(t)}.wrap({expr})"),
+            (object, lambda t: f"{self.wrapper_class(t)}.wrap({expr})"),
         ])
 
     def ni_unwrap(self,
@@ -659,9 +669,7 @@ class JavaAPISettings(AbstractAPISettings):
         # Return the unwrapping statement
         ni_type = self.ni_type(the_type)
 
-        res: str = (
-            f"{ni_type} {export} = "
-        )
+        res = f"{ni_type} {export} = "
 
         res += dispatch_on_type(the_type, [
             (
@@ -670,6 +678,12 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (T.Int, lambda _: f"{expr};"),
             (T.Character, lambda _: f"{expr}.value;"),
+            (
+                T.BigInt, lambda t: (
+                    f"{self.ni_stack_value(t)};"
+                    f"BigIntegerWrapper.unwrap({expr}, {export});"
+                )
+            ),
             (ct.EnumType, lambda _: f"{expr}.toC();"),
             (
                 ct.ASTNodeType, lambda t:
@@ -761,13 +775,13 @@ class JavaAPISettings(AbstractAPISettings):
                 T.Symbol, lambda _:
                     f"{source}.unwrap({pointer}, currentContext);"
             ),
+            (
+                T.BigInt, lambda _:
+                    f"BigIntegerWrapper.unwrap({source}, {pointer});"
+            ),
             (ct.EnumType, lambda _: f"{pointer}.write({source}.toC());"),
             (
                 T.String, lambda _:
-                    f"{pointer}.writeWord(0, {source}.reference.ni());"
-            ),
-            (
-                T.BigInt, lambda _:
                     f"{pointer}.writeWord(0, {source}.reference.ni());"
             ),
             (

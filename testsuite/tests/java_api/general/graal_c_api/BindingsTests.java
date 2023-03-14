@@ -3,6 +3,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import java.math.BigInteger;
+
 import com.adacore.libfoolang.Libfoolang.*;
 
 public final class BindingsTests {
@@ -473,8 +475,8 @@ public final class BindingsTests {
             FooNode root = unit.getRoot();
 
             // Test the big integer manipulation
-            BigInteger ft = BigInteger.create("42");
-            BigInteger big = BigInteger.create(
+            BigInteger ft = new BigInteger("42");
+            BigInteger big = new BigInteger(
                 "100000000000000000000000000000000000000000000000" +
                 "00000000000000000000000000000000000000000000000000000"
             );
@@ -482,18 +484,14 @@ public final class BindingsTests {
             BigInteger bigDouble = root.pIntDouble(big);
             System.out.println(
                 "Double of " +
-                ft.getRepresentation() +
+                ft.toString() +
                 " = " +
-                ftDouble.getRepresentation()
+                ftDouble.toString()
             );
             System.out.println(
                 "Double of 10**100 = " +
-                bigDouble.getRepresentation()
+                bigDouble.toString()
             );
-            ft.close();
-            big.close();
-            ftDouble.close();
-            bigDouble.close();
         }
 
         // Display the footer

@@ -33,26 +33,6 @@
         @CompilerDirectives.TruffleBoundary
         public static native LangkitException ${nat("get_last_exception")}();
 
-        // ----- Big integer functions -----
-
-        /** Create a new big integer from a text */
-        @CompilerDirectives.TruffleBoundary
-        public static native BigInteger ${nat("create_big_integer")}(
-            Text text
-        );
-
-        /** Get the text representation of a big integer */
-        @CompilerDirectives.TruffleBoundary
-        public static native Text ${nat("big_integer_text")}(
-            BigInteger bigInteger
-        );
-
-        /** Decrease the reference counter of the big integer */
-        @CompilerDirectives.TruffleBoundary
-        public static native void ${nat("big_integer_decref")}(
-            long bigInteger
-        );
-
         // ----- String functions -----
 
         /** Create a new string wrapper in langkit */
