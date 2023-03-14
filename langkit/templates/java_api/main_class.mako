@@ -963,6 +963,7 @@ public class ${ctx.lib_name.camel} {
 
                 if(ImageInfo.inImageCode()) {
                     TextNative textNative = StackValue.get(TextNative.class);
+                    Text.defaultValue(textNative);
                     NI_LIB.${nat("big_integer_text")}(
                         this.reference.ni(),
                         textNative
@@ -978,6 +979,15 @@ public class ${ctx.lib_name.camel} {
                 bigIntegerText.close();
             }
             return this.representation;
+        }
+
+        /**
+         * Unwrap the big integer in the given pointer.
+         *
+         * @param pointer The pointer to unwrap the big integer in.
+         */
+        void unwrap(Pointer pointer) {
+            pointer.writeWord(0, this.reference.ni());
         }
 
         // ----- Override methods -----
@@ -1030,6 +1040,7 @@ public class ${ctx.lib_name.camel} {
         static Symbol wrap(SymbolNative symbolNative) {
             // Get the symbol text
             TextNative textNative = StackValue.get(TextNative.class);
+            Text.defaultValue(textNative);
             NI_LIB.${nat("symbol_text")}(
                 symbolNative,
                 textNative
@@ -1562,7 +1573,6 @@ public class ${ctx.lib_name.camel} {
             TextNative textNative
         ) {
             if(((PointerBase) textNative).isNull()) return null;
-            else if(textNative.get_chars().isNull()) return null;
             else return new Text(
                 new PointerWrapper(textNative.get_chars()),
                 textNative.get_length(),
@@ -1603,10 +1613,21 @@ public class ${ctx.lib_name.camel} {
          *
          * @param textNative The NI pointer to the native text structure.
          */
-        public void unwrap(TextNative textNative) {
+        void unwrap(TextNative textNative) {
             textNative.set_chars(this.charPointer.ni());
             textNative.set_length(this.length);
             textNative.set_is_allocated(this.isAllocated ? 1 : 0);
+        }
+
+        /**
+         * Set the given text native structure at the text default value.
+         *
+         * @param textNative The native structure to fill.
+         */
+        static void defaultValue(TextNative textNative) {
+            textNative.set_chars(WordFactory.nullPointer());
+            textNative.set_length(0);
+            textNative.set_is_allocated(0);
         }
 
         // ----- Override methods -----
@@ -2221,9 +2242,12 @@ public class ${ctx.lib_name.camel} {
             if(ImageInfo.inImageCode()) {
                 TokenNative startNative = StackValue.get(TokenNative.class);
                 start.unwrap(startNative);
+
                 TokenNative endNative = StackValue.get(TokenNative.class);
                 end.unwrap(endNative);
+
                 TextNative textNative = StackValue.get(TextNative.class);
+                Text.defaultValue(textNative);
                 NI_LIB.${nat("token_range_text")}(
                     startNative,
                     endNative,
@@ -3485,6 +3509,7 @@ public class ${ctx.lib_name.camel} {
                 EntityNative thisNative = StackValue.get(EntityNative.class);
                 this.entity.unwrap(thisNative);
                 TextNative resNative = StackValue.get(TextNative.class);
+                Text.defaultValue(resNative);
                 NI_LIB.${nat("node_text")}(
                     thisNative,
                     resNative
@@ -3516,6 +3541,7 @@ public class ${ctx.lib_name.camel} {
                     );
                     this.entity.unwrap(thisNative);
                     TextNative resNative = StackValue.get(TextNative.class);
+                    Text.defaultValue(resNative);
                     NI_LIB.${nat("node_image")}(
                         thisNative,
                         resNative

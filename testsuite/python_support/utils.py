@@ -206,8 +206,8 @@ def build(grammar=None, lexer=None, lkt_file=None,
 def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
                   lexer=None, lkt_file=None, types_from_lkt=False,
                   lkt_semantic_checks=False, ocaml_main=None, java_main=None,
-                  warning_set=default_warning_set, generate_unparser=False,
-                  symbol_canonicalizer=None, mains=False,
+                  ni_main=None, mains=False, warning_set=default_warning_set,
+                  generate_unparser=False, symbol_canonicalizer=None,
                   show_property_logging=False, unparse_script=unparse_script,
                   case_insensitive: bool = False,
                   version: str | None = None,
@@ -331,7 +331,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             argv.append('--no-ada-api')
 
         # If there is a Java main, enable the Java bindings building
-        if java_main is not None:
+        if java_main is not None or ni_main is not None:
             argv.append('--enable-java')
             if maven_exec:
                 argv.append('--maven-executable')
@@ -484,9 +484,37 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         run(
             'java',
             '-Dfile.encoding=UTF-8',
-            f"-Djava.library.path={env.get('LD_LIBRARY_PATH')}",
+            f"-Djava.library.path={env['LD_LIBRARY_PATH']}",
             f'{java_main}.java',
         )
+
+    if ni_main is not None:
+        # Compile the Java tests
+        run(
+            'javac',
+            f'{ni_main}.java',
+        )
+
+        # Run native-image to compile the tests
+        ni_exec = P.realpath(P.join(
+            os.environ["GRAAL_HOME"],
+            'bin',
+            'native-image'
+        ))
+        class_path = os.path.pathsep.join([
+            P.realpath('.'),
+            env.get('CLASSPATH', ''),
+        ])
+        run(
+            ni_exec,
+            '-cp', class_path,
+            '-H:+BuildOutputSilent',
+            f'{ni_main}',
+            'main',
+        )
+
+        # Run the newly created main
+        run(P.realpath('main'))
 
 
 def indent(text: str, prefix: str = "  ") -> str:

@@ -676,9 +676,10 @@ class JavaAPISettings(AbstractAPISettings):
                     self.ni_unwrap(t.entity, expr, export, release_list)
             ),
             (
-                ct.EntityType, lambda _:
-                    f"StackValue.get(EntityNative.class);"
+                ct.EntityType, lambda _: (
+                    "StackValue.get(EntityNative.class);"
                     f"{expr}.entity.unwrap({export});"
+                )
             ),
             (
                 ct.ArrayType, lambda t:
@@ -724,10 +725,16 @@ class JavaAPISettings(AbstractAPISettings):
                 )
 
         else:
-            res = (
-                f"({expr} != null ? {expr}.reference.ni() "
-                f": WordFactory.nullPointer());"
-            )
+            if the_type.is_ada_record:
+                res = (
+                    f"{self.ni_stack_value(the_type)};"
+                    f"{expr}.unwrap({export});"
+                )
+            else:
+                res = (
+                    f"({expr} != null ? {expr}.reference.ni() "
+                    f": WordFactory.nullPointer());"
+                )
 
         return res
 
