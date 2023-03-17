@@ -855,22 +855,17 @@ public class ${ctx.lib_name.camel} {
         ) {
             // Create the representation of the big integer
             final String representation = bigInteger.toString();
-            final Text bigIntegerText = Text.create(representation);
-            TextNative bigIntegerTextNative = StackValue.get(
-                TextNative.class
-            );
-            bigIntegerText.unwrap(bigIntegerTextNative);
+            try(final Text bigIntegerText = Text.create(representation)) {
+                TextNative bigIntegerTextNative = StackValue.get(
+                    TextNative.class
+                );
+                bigIntegerText.unwrap(bigIntegerTextNative);
 
-            // Create the big intger by calling the native function
-            final BigIntegerNative res = NI_LIB.${nat("create_big_integer")}(
-                bigIntegerTextNative
-            );
-
-            // Close the text
-            bigIntegerText.close();
-
-            // Return the result
-            return res;
+                // Create the big intger by calling the native function
+                return NI_LIB.${nat("create_big_integer")}(
+                    bigIntegerTextNative
+                );
+            }
         }
 
         /**
@@ -919,10 +914,9 @@ public class ${ctx.lib_name.camel} {
             );
 
             // Wrap the text and return the result
-            final Text bigIntegerText = Text.wrap(bigIntegerTextNative);
-            final String res = bigIntegerText.getContent();
-            bigIntegerText.close();
-            return res;
+            try(final Text bigIntegerText = Text.wrap(bigIntegerTextNative)) {
+                return bigIntegerText.getContent();
+            }
         }
 
     }
@@ -1176,19 +1170,16 @@ public class ${ctx.lib_name.camel} {
         // ----- Attributes -----
 
         /** The pointer to the characters. */
-        public final PointerWrapper charPointer;
+        private final PointerWrapper charPointer;
 
         /** The size of the text. */
-        public final long length;
+        private final long length;
 
         /** If the text is allocated. */
-        public final boolean isAllocated;
+        private final boolean isAllocated;
 
         /** If the text object is the owner of its buffer. */
         private final boolean isOwner;
-
-        /** The content of the text in a Java array. */
-        public final byte[] contentArray;
 
         /** The content of the text in a Java string. */
         private String content;
@@ -1203,9 +1194,9 @@ public class ${ctx.lib_name.camel} {
          * @param isAllocated If the text is allocated in the memory.
          */
         Text(
-            PointerWrapper charPointer,
-            long length,
-            boolean isAllocated
+            final PointerWrapper charPointer,
+            final long length,
+            final boolean isAllocated
         ) {
             this(
                 charPointer,
@@ -1222,14 +1213,13 @@ public class ${ctx.lib_name.camel} {
          * @param charPointer The pointer to the characters of the text.
          * @param length The length of the text in character.
          * @param isAllocated If the text is allocated in the memory.
-         * @param contentArray The characters of the text
-         * (as strings, this is only used in JNI mode).
+         * @param contentArray The characters of the text (for JNI)
          */
         Text(
-            PointerWrapper charPointer,
-            long length,
-            boolean isAllocated,
-            byte[] contentArray
+            final PointerWrapper charPointer,
+            final long length,
+            final boolean isAllocated,
+            final byte[] contentArray
         ) {
             this(
                 charPointer,
@@ -1251,19 +1241,22 @@ public class ${ctx.lib_name.camel} {
          * (as strings, this is only used in JNI mode).
          */
         private Text(
-            PointerWrapper charPointer,
-            long length,
-            boolean isAllocated,
-            boolean isOwner,
-            byte[] contentArray
+            final PointerWrapper charPointer,
+            final long length,
+            final boolean isAllocated,
+            final boolean isOwner,
+            final byte[] contentArray
         ) {
             this.charPointer = charPointer;
             this.length = length;
             this.isAllocated = isAllocated;
             this.isOwner = isOwner;
-            this.contentArray = contentArray;
 
-            this.content = null;
+            if(contentArray != null) {
+                this.content = decodeUTF32(contentArray);
+            } else {
+                this.content = null;
+            }
         }
 
         /**
@@ -1273,12 +1266,12 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created text.
          */
         public static Text create(
-            String content
+            final String content
         ) {
-            byte[] contentArray = encodeUTF32(content);
+            final byte[] contentArray = encodeUTF32(content);
 
             if(ImageInfo.inImageCode()) {
-                PointerWrapper charPointer = new PointerWrapper(
+                final PointerWrapper charPointer = new PointerWrapper(
                     toCBytes(contentArray)
                 );
                 return new Text(
@@ -1286,7 +1279,7 @@ public class ${ctx.lib_name.camel} {
                     (long) content.length(),
                     false,
                     true,
-                    null
+                    contentArray
                 );
             } else {
                 return JNI_LIB.${nat("create_text")}(contentArray);
@@ -1295,48 +1288,37 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Cleaning methods/classes -----
 
-        /**
-         * Release the given text buffer.
-         *
-         * @param textBuffer The buffer to free.
-         */
-        private static void release(
-            PointerWrapper textBuffer,
-            long length,
-            boolean isAllocated,
-            boolean isOwner
-        ) {
-
-            /*
-            if(ImageInfo.inImageCode()) {
-                if(isOwner) {
-                    UnmanagedMemory.free(textBuffer.ni());
-                } else {
-                    TextNative textNative = StackValue.get(TextNative.class);
-                    textNative.set_chars(textBuffer.ni());
-                    textNative.set_length(length);
-                    textNative.set_is_allocated(isAllocated ? 1 : 0);
-                    NI_LIB.${nat("destroy_text")}(textNative);
-                }
-            } else {
-                JNI_LIB.${nat("destroy_text")}(
-                    textBuffer.jni(),
-                    length,
-                    isAllocated,
-                    isOwner
-                );
-            }
-            */
-
-        }
-
         /** @see java.lang.AutoCloseable#close() */
         @Override
         public void close() {
-            // DO NOTHING FOR NOW
+
+            if(ImageInfo.inImageCode()) {
+                if(this.isOwner) {
+                    UnmanagedMemory.free(this.charPointer.ni());
+                } else {
+                    final TextNative textNative = StackValue.get(TextNative.class);
+                    this.unwrap(textNative);
+                    NI_LIB.${nat("destroy_text")}(textNative);
+                }
+            } else {
+                JNI_LIB.${nat("destroy_text")}(this);
+            }
+
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
+
+        /**
+         * Wrap the native text pointed by the given pointer.
+         *
+         * @param pointer The pointer to the native text to wrap.
+         * @return The wrapped text.
+         */
+        static Text wrap(
+            final Pointer pointer
+        ) {
+            return wrap((TextNative) pointer.readWord(0));
+        }
 
         /**
          * Wrap a text native value in the Java class.
@@ -1346,42 +1328,13 @@ public class ${ctx.lib_name.camel} {
          * is null.
          */
         static Text wrap(
-            TextNative textNative
+            final TextNative textNative
         ) {
-            if(((PointerBase) textNative).isNull()) return null;
-            else return new Text(
+            return new Text(
                 new PointerWrapper(textNative.get_chars()),
                 textNative.get_length(),
                 textNative.get_is_allocated() != 0
             );
-        }
-
-        // ----- Instance methods -----
-
-        /**
-         * Get the content of the text in a Java string.
-         *
-         * @return the content of the text.
-         */
-        public String getContent() {
-            if(this.content == null) {
-                byte[] contentArray;
-
-                if(ImageInfo.inImageCode()) {
-                    contentArray = new byte[(int) this.length * 4];
-                    for(int i = 0 ; i < contentArray.length ; i++) {
-                        contentArray[i] = (
-                            (CCharPointer) this.charPointer.ni()
-                        ).read(i);
-                    }
-                } else {
-                    contentArray = this.contentArray != null ?
-                        this.contentArray :
-                        new byte[0];
-                }
-                this.content = decodeUTF32(contentArray);
-            }
-            return this.content;
         }
 
         /**
@@ -1389,7 +1342,9 @@ public class ${ctx.lib_name.camel} {
          *
          * @param textNative The NI pointer to the native text structure.
          */
-        void unwrap(TextNative textNative) {
+        void unwrap(
+            final TextNative textNative
+        ) {
             textNative.set_chars(this.charPointer.ni());
             textNative.set_length(this.length);
             textNative.set_is_allocated(this.isAllocated ? 1 : 0);
@@ -1400,10 +1355,34 @@ public class ${ctx.lib_name.camel} {
          *
          * @param textNative The native structure to fill.
          */
-        static void defaultValue(TextNative textNative) {
+        static void defaultValue(
+            final TextNative textNative
+        ) {
             textNative.set_chars(WordFactory.nullPointer());
             textNative.set_length(0);
             textNative.set_is_allocated(0);
+        }
+
+        // ----- Instance methods -----
+
+        /**
+         * Get the content of the text in a Java string.
+         *
+         * @return the content of the text.
+         */
+        public String getContent() {
+            // Content is null only when using the Graal C API.
+            if(this.content == null) {
+                final byte[] contentArray = new byte[(int) this.length * 4];
+                for(int i = 0 ; i < contentArray.length ; i++) {
+                    contentArray[i] = (
+                        (CCharPointer) this.charPointer.ni()
+                    ).read(i);
+                }
+                this.content = decodeUTF32(contentArray);
+            }
+
+            return this.content;
         }
 
         // ----- Override methods -----
@@ -1972,7 +1951,6 @@ public class ${ctx.lib_name.camel} {
          */
         @CompilerDirectives.TruffleBoundary
         public static String textRange(Token start, Token end) {
-            Text resText;
 
             if(ImageInfo.inImageCode()) {
                 TokenNative startNative = StackValue.get(TokenNative.class);
@@ -1988,14 +1966,20 @@ public class ${ctx.lib_name.camel} {
                     endNative,
                     textNative
                 );
-                resText = Text.wrap(textNative);
+                try(final Text resText = Text.wrap(textNative)) {
+                    return resText.getContent();
+                }
             } else {
-                resText = JNI_LIB.${nat("token_range_text")}(start, end);
+                try(
+                    final Text resText = JNI_LIB.${nat("token_range_text")}(
+                        start,
+                        end
+                    )
+                ) {
+                    return resText.getContent();
+                }
             }
 
-            String res = resText.getContent();
-            resText.close();
-            return res;
         }
 
         // ----- Instance methods -----
@@ -3238,7 +3222,6 @@ public class ${ctx.lib_name.camel} {
          * @return The text of the node.
          */
         public String getText() {
-            Text resText;
 
             if(ImageInfo.inImageCode()) {
                 EntityNative thisNative = StackValue.get(EntityNative.class);
@@ -3249,16 +3232,19 @@ public class ${ctx.lib_name.camel} {
                     thisNative,
                     resNative
                 );
-                resText = Text.wrap(resNative);
+                try(final Text resText = Text.wrap(resNative)) {
+                    return resText.getContent();
+                }
             } else {
-                resText = JNI_LIB.${nat("node_text")}(
-                    this.entity
-                );
+                try(
+                    final Text resText = JNI_LIB.${nat("node_text")}(
+                        this.entity
+                    );
+                ) {
+                    return resText.getContent();
+                }
             }
 
-            String res = resText.toString();
-            resText.close();
-            return res;
         }
 
         /**
@@ -3268,7 +3254,6 @@ public class ${ctx.lib_name.camel} {
          */
         public String getImage() {
             if(this.image == null) {
-                Text resText;
 
                 if(ImageInfo.inImageCode()) {
                     EntityNative thisNative = StackValue.get(
@@ -3281,14 +3266,21 @@ public class ${ctx.lib_name.camel} {
                         thisNative,
                         resNative
                     );
-                    resText = Text.wrap(resNative);
+                    try(final Text resText = Text.wrap(resNative)) {
+                        this.image = resText.getContent();
+                    }
                 } else {
-                    resText = JNI_LIB.${nat("node_image")}(this.entity);
+                    try(
+                        final Text resText = JNI_LIB.${nat("node_image")}(
+                            this.entity
+                        )
+                    ) {
+                        this.image = resText.getContent();
+                    }
                 }
 
-                this.image = resText.toString();
-                resText.close();
             }
+
             return this.image;
         }
 

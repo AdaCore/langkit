@@ -1009,27 +1009,31 @@ ${api.jni_func_sig("create_text", "jobject")} (
 ${api.jni_func_sig("destroy_text", "void")} (
     JNIEnv *env,
     jclass jni_lib,
-    jlong text_buffer,
-    jlong length,
-    jboolean is_allocated,
-    jboolean is_owner
+    jobject text
 ) {
-    // If the object is the buffer owner
+    // Get if the text is the owner of its buffer
+    jclass clazz = (*env)->GetObjectClass(env, text);
+    jfieldID is_owner_field = (*env)->GetFieldID(
+        env,
+        clazz,
+        "isOwner",
+        "Z"
+    );
+    jboolean is_owner = (*env)->GetBooleanField(
+        env,
+        text,
+        is_owner_field
+    );
+
+    // Unwrap the text
+    ${text_type} text_native = Text_unwrap(env, text);
+
+    // If the object is the buffer owner just free the chars
     if(is_owner) {
-        free((void *) text_buffer);
+        free((void *) text_native.chars);
     } else {
-        // Create the new text structure
-        ${text_type} text_native = Text_new_value();
-        text_native.chars = (uint32_t *) text_buffer;
-        text_native.length = (long) length;
-        text_native.is_allocated = (int) is_allocated;
-
-        // Call the destry function
-        ${nat("destroy_text")}(
-            &text_native
-        );
+        ${nat("destroy_text")}(&text_native);
     }
-
 }
 
 // ==========

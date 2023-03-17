@@ -44,10 +44,7 @@
         /** Destroy the given text */
         @CompilerDirectives.TruffleBoundary
         public static native void ${nat("destroy_text")}(
-            long textBuffer,
-            long length,
-            boolean isAllocated,
-            boolean isOwner
+            Text text
         );
 
         // ----- Unit provider functions -----
