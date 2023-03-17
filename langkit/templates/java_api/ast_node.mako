@@ -185,8 +185,9 @@
             // Verify that arguments are not null
             % for param in method.params:
                 % if api.is_java_nullable(param.public_type):
-            if(${param.name} == null) throw new NullPointerException(
-                "Argument ${param.name} cannot be 'null'"
+            if(${param.name} == null) throw new IllegalArgumentException(
+                "Argument '${param.name}' of type " +
+                "${api.wrapping_type(param.public_type)} cannot be null"
             );
                 % endif
             % endfor

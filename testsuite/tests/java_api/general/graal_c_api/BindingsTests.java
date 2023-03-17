@@ -433,28 +433,24 @@ public final class BindingsTests {
             FooNode root = unit.getRoot();
 
             // Try creating and passing strings
-            StringWrapper source = StringWrapper.create("Hello!");
-            StringWrapper emptySource = StringWrapper.create("");
-            StringWrapper identity = root.pGetStr(source);
-            StringWrapper emptyIdentity = root.pGetStr(emptySource);
+            String source = "Hello!";
+            String emptySource = "";
+            String identity = root.pGetStr(source);
+            String emptyIdentity = root.pGetStr(emptySource);
             System.out.println(
                 "Source = \"" +
-                source.getContent() +
+                source +
                 "\" | Identity = \"" +
-                identity.getContent() +
+                identity +
                 "\""
             );
             System.out.println(
                 "Empty source = \"" +
-                emptySource.getContent() +
+                emptySource +
                 "\" | Empty identity = \"" +
-                emptyIdentity.getContent() +
+                emptyIdentity +
                 "\""
             );
-            source.close();
-            emptySource.close();
-            identity.close();
-            emptyIdentity.close();
         }
 
         // Display the footer

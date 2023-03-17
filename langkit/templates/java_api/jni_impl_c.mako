@@ -54,9 +54,10 @@ jobject Symbol_wrap(JNIEnv *, ${symbol_type});
 ${symbol_type} Symbol_unwrap(JNIEnv *, jobject, ${analysis_context_type});
 jthrowable new_symbol_exception(JNIEnv *, jstring);
 
-${string_type} StringWrapper_new_value();
-jobject StringWrapper_wrap(JNIEnv *, ${string_type});
-${string_type} StringWrapper_unwrap(JNIEnv *, jobject);
+${string_type} String_new_value();
+jobject String_wrap(JNIEnv *, ${string_type});
+${string_type} String_unwrap(JNIEnv *, jobject);
+void String_release(${string_type});
 
 ${text_type} Text_new_value();
 jobject Text_wrap(JNIEnv *, ${text_type});
@@ -169,12 +170,106 @@ const char * to_c_string(
     return (*env)->GetStringUTFChars(env, j_string, NULL);
 }
 
+// Release the given C string assocaited with the given Java string
+void release_c_string(
+    JNIEnv *env,
+    jstring j_string,
+    const char *c_string
+) {
+    (*env)->ReleaseStringUTFChars(env, j_string, c_string);
+}
+
 // Create a Java string from a C char pointer
 jstring to_j_string(
     JNIEnv *env,
     const char *c_string
 ) {
     return (*env)->NewStringUTF(env, c_string);
+}
+
+// Decode an UTF 32 buffer in a Java string
+jstring decode_utf_32(
+    JNIEnv *env,
+    size_t length,
+    uint32_t *to_decode
+) {
+    // Get the main class
+    jclass clazz = (*env)->FindClass(env, "${sig_base}");
+
+    // Get the conversion method
+    jmethodID decode_method = (*env)->GetStaticMethodID(
+        env,
+        clazz,
+        "decodeUTF32",
+        "([B)Ljava/lang/String;"
+    );
+
+    // Create a byte array from the buffer to decode
+    const jbyte *byte_buffer = (jbyte *) to_decode;
+    jsize byte_length = (jsize) (length * 4);
+    jbyteArray byte_array = (*env)->NewByteArray(
+        env,
+        byte_length
+    );
+    (*env)->SetByteArrayRegion(
+        env,
+        byte_array,
+        0,
+        byte_length,
+        byte_buffer
+    );
+
+    // Call the Java method and return the result
+    return (jstring) (*env)->CallStaticObjectMethod(
+        env,
+        clazz,
+        decode_method,
+        byte_array
+    );
+}
+
+// Encode a Java string in a native buffer
+void encode_utf_32(
+    JNIEnv *env,
+    jstring string,
+    size_t *length_ref,
+    uint32_t **buffer_ref
+) {
+    // Get the main class
+    jclass clazz = (*env)->FindClass(env, "${sig_base}");
+
+    // Get the conversion method
+    jmethodID encode_method = (*env)->GetStaticMethodID(
+        env,
+        clazz,
+        "encodeUTF32",
+        "(Ljava/lang/String;)[B"
+    );
+
+    // Call the Java method to get the byte array
+    jbyteArray byte_array = (jbyteArray) (*env)->CallStaticObjectMethod(
+        env,
+        clazz,
+        encode_method,
+        string
+    );
+    size_t byte_length = (size_t) (*env)->GetArrayLength(
+        env,
+        byte_array
+    );
+
+    // Allocate the memory for the native buffer
+    *buffer_ref = (uint32_t *) malloc(byte_length);
+
+    // Write the native buffer and the length
+    *length_ref = byte_length / 4;
+    (*env)->GetByteArrayRegion(
+        env,
+        byte_array,
+        0,
+        byte_length,
+        (jbyte *) *buffer_ref
+    );
 }
 
 // ==========
@@ -655,96 +750,55 @@ jthrowable new_symbol_exception(
 // ==========
 
 // Create a new value for a langkit string
-${string_type} StringWrapper_new_value() {
+${string_type} String_new_value() {
     return NULL;
 }
 
-// Wrap a native langkit string in the Java wrapper class
-jobject StringWrapper_wrap(
+// Wrap a native langkit string in the Java class
+jstring String_wrap(
     JNIEnv *env,
     ${string_type} string_native
 ) {
-    // Get the string wrapper class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$StringWrapper");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
+    return decode_utf_32(
         env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};[I)V"
-    );
-
-    // Get the string content
-    jintArray content = (*env)->NewIntArray(
-        env,
-        (jsize) string_native->length
-    );
-    (*env)->SetIntArrayRegion(
-        env,
-        content,
-        0,
-        (jsize) string_native->length,
-        (jint *) string_native->content
-    );
-
-    // Return the new string wrapper
-    return (*env)->NewObject(
-        env,
-        clazz,
-        constructor,
-        PointerWrapper_wrap(env, (void *) string_native),
-        content
+        (size_t) string_native->length,
+        string_native->content
     );
 }
 
 // Get the native langkit string from a Java wrapping instance
-${string_type} StringWrapper_unwrap(
+${string_type} String_unwrap(
     JNIEnv *env,
-    jobject string
+    jstring string
 ) {
-    return (${string_type}) get_reference(env, string);
-}
-
-// Create a new string wrapper
-${api.jni_func_sig("create_string", "jobject")} (
-    JNIEnv *env,
-    jclass jni_lib,
-    jbyteArray content
-) {
-    // Get the content length
-    int length = (int) (*env)->GetArrayLength(env, content) / 4;
-    uint32_t *content_native = (uint32_t *) malloc(
-        length * sizeof(uint32_t)
-    );
-    (*env)->GetByteArrayRegion(
+    // Encode the Java string
+    size_t length;
+    uint32_t *buffer;
+    encode_utf_32(
         env,
-        content,
-        0,
-        length * 4,
-        (jbyte *) content_native
+        string,
+        &length,
+        &buffer
     );
 
-    // Call the native method
-    ${string_type} res_native = ${nat("create_string")}(
-        content_native,
-        length
+    // Create a new native string
+    ${string_type} res = ${nat("create_string")}(
+        buffer,
+        (int) length
     );
 
-    // Free the native array
-    free(content_native);
+    // Free the buffer
+    free(buffer);
 
-    // Wrap the string wrapper
-    return StringWrapper_wrap(env, res_native);
+    // Return the result
+    return res;
 }
 
-// Decrease the reference counting on a string
-${api.jni_func_sig("string_dec_ref", "void")} (
-    JNIEnv *env,
-    jclass jni_lib,
-    jlong string
+// Release the given native string
+void String_release(
+    ${string_type} string_native
 ) {
-    ${nat("string_dec_ref")}((${string_type}) string);
+    ${nat("string_dec_ref")}(string_native);
 }
 
 // ==========
@@ -774,17 +828,20 @@ jobject Text_wrap(
         env,
         clazz,
         "<init>",
-        "(L${ptr_sig};JZ[I)V"
+        "(L${ptr_sig};JZ[B)V"
     );
 
     // Get the int array from the structure and translate it into Java array
-    jintArray content = (*env)->NewIntArray(env, (jsize) text_native.length);
-    (*env)->SetIntArrayRegion(
+    jbyteArray content = (*env)->NewByteArray(
+        env,
+        (jsize) text_native.length * 4
+    );
+    (*env)->SetByteArrayRegion(
         env,
         content,
         0,
-        (jsize) text_native.length,
-        (jint *) text_native.chars
+        (jsize) text_native.length * 4,
+        (jbyte *) text_native.chars
     );
 
     // Return the new text
@@ -932,17 +989,7 @@ ${api.jni_func_sig("create_text", "jobject")} (
         env,
         clazz,
         "<init>",
-        "(L${ptr_sig};JZZ[I)V"
-    );
-
-    // Create the Java array of the content
-    jintArray content = (*env)->NewIntArray(env, (jsize) length);
-    (*env)->SetIntArrayRegion(
-        env,
-        content,
-        0,
-        (jsize) length,
-        (jint *) content_native
+        "(L${ptr_sig};JZZ[B)V"
     );
 
     // Return the new text
@@ -954,7 +1001,7 @@ ${api.jni_func_sig("create_text", "jobject")} (
         (jlong) length,
         (jboolean) 0,
         (jboolean) 1,
-        content
+        content_utf32
     );
 }
 
@@ -1777,7 +1824,7 @@ ${api.jni_func_sig("create_analysis_context", "jobject")}(
 
     // Release the allocated string
     if(charset != NULL)
-        (*env)->ReleaseStringUTFChars(env, charset, charset_native);
+        release_c_string(env, charset, charset_native);
 
     // Return the new custom pointer to the analysis context
     return PointerWrapper_wrap(env, res);
@@ -1874,9 +1921,9 @@ ${api.jni_func_sig("get_analysis_unit_from_file", "jobject")}(
     );
 
     // Release the strings
-    (*env)->ReleaseStringUTFChars(env, filename, filename_native);
+    release_c_string(env, filename, filename_native);
     if(charset != NULL)
-        (*env)->ReleaseStringUTFChars(env, charset, charset_native);
+        release_c_string(env, charset, charset_native);
 
     // Return the new Analysis unit
     return AnalysisUnit_wrap(env, res);
@@ -1895,9 +1942,9 @@ ${api.jni_func_sig("get_analysis_unit_from_buffer", "jobject")}(
 ) {
     // Translate the Java strings
     const char *filename_native = to_c_string(env, filename);
+    const char *buffer_native = to_c_string(env, buffer);
     const char *charset_native = NULL;
     if(charset != NULL) charset_native = to_c_string(env, charset);
-    const char *buffer_native = to_c_string(env, buffer);
 
     // Call the native function
     ${analysis_unit_type} res = ${nat("get_analysis_unit_from_buffer")}(
@@ -1910,10 +1957,10 @@ ${api.jni_func_sig("get_analysis_unit_from_buffer", "jobject")}(
     );
 
     // Release the strings
-    (*env)->ReleaseStringUTFChars(env, filename, filename_native);
+    release_c_string(env, filename, filename_native);
+    release_c_string(env, buffer, buffer_native);
     if(charset != NULL)
-        (*env)->ReleaseStringUTFChars(env, charset, charset_native);
-    (*env)->ReleaseStringUTFChars(env, buffer, buffer_native);
+        release_c_string(env, charset, charset_native);
 
     // Return the new analysis unit
     return AnalysisUnit_wrap(env, res);

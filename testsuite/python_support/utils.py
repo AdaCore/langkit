@@ -508,7 +508,10 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         run(
             ni_exec,
             '-cp', class_path,
+            '--no-fallback',
+            '--macro:truffle',
             '-H:+BuildOutputSilent',
+            '-H:+ReportExceptionStackTraces',
             f'{ni_main}',
             'main',
         )

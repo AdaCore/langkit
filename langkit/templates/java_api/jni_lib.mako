@@ -33,20 +33,6 @@
         @CompilerDirectives.TruffleBoundary
         public static native LangkitException ${nat("get_last_exception")}();
 
-        // ----- String functions -----
-
-        /** Create a new string wrapper in langkit */
-        @CompilerDirectives.TruffleBoundary
-        public static native StringWrapper ${nat("create_string")}(
-            byte[] content
-        );
-
-        /** Decrease the reference counter of the string */
-        @CompilerDirectives.TruffleBoundary
-        public static native void ${nat("string_dec_ref")}(
-            long string
-        );
-
         // ----- Text functions -----
 
         /** Create a new text from its content */

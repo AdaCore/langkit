@@ -427,6 +427,7 @@ class JavaAPISettings(AbstractAPISettings):
         """
         dispatch_on_type(the_type, [
             (T.BigInt, lambda t: release_list.append(ToRelease(var, t))),
+            (T.String, lambda t: release_list.append(ToRelease(var, t))),
             (ct.ArrayType, lambda t: release_list.append(ToRelease(var, t))),
             (
                 ct.StructType, lambda t:
@@ -455,7 +456,7 @@ class JavaAPISettings(AbstractAPISettings):
             (T.BigInt, lambda _: "BigInteger"),
             (ct.EnumType, lambda t: t.api_name.camel),
             (T.Symbol, lambda _: "Symbol"),
-            (T.String, lambda _: "StringWrapper"),
+            (T.String, lambda _: "String"),
             (T.Text, lambda _: "Text"),
             (T.SourceLocation, lambda _: "SourceLocation"),
             (T.SourceLocationRange, lambda _: "SourceLocationRange"),
@@ -484,16 +485,21 @@ class JavaAPISettings(AbstractAPISettings):
             (ct.IteratorType, lambda t: t.api_name.camel),
         ])
 
-    def wrapper_class(self, the_type: CompiledType) -> str:
+    def wrapper_class(self,
+                      the_type: CompiledType,
+                      ast_wrapping: bool = True) -> str:
         """
         Return the name of the class which contains the wrapping operation for
         the given type.
 
         :param the_type: Type to get the class for.
+        :param ast_wrapping: If the AST node should be wrapped in their Java
+            class.
         """
         return dispatch_on_type(the_type, [
             (T.BigInt, lambda _: "BigIntegerWrapper"),
-            (object, lambda t: self.wrapping_type(t))
+            (T.String, lambda _: "StringWrapper"),
+            (object, lambda t: self.wrapping_type(t, ast_wrapping))
         ])
 
     def array_wrapping_type(self, array_type: ArrayType) -> str:
@@ -686,6 +692,10 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (ct.EnumType, lambda _: f"{expr}.toC();"),
             (
+                T.String, lambda t:
+                    f"StringWrapper.unwrap({expr});"
+            ),
+            (
                 ct.ASTNodeType, lambda t:
                     self.ni_unwrap(t.entity, expr, export, release_list)
             ),
@@ -782,7 +792,7 @@ class JavaAPISettings(AbstractAPISettings):
             (ct.EnumType, lambda _: f"{pointer}.write({source}.toC());"),
             (
                 T.String, lambda _:
-                    f"{pointer}.writeWord(0, {source}.reference.ni());"
+                    f"StringWrapper.unwrap({source}, {pointer});"
             ),
             (
                 T.AnalysisUnit, lambda _:
@@ -822,7 +832,8 @@ class JavaAPISettings(AbstractAPISettings):
         # Get the base or an empty list
         base = base or []
 
-        field_type = self.wrapping_type(field.public_type, ast_wrapping=False)
+        field_type = self.wrapping_type(field.public_type, False)
+        wrapper_class = self.wrapper_class(field.public_type, False)
         if field.fields:
             inside = [
                 self.ni_field_wrap(
@@ -840,7 +851,7 @@ class JavaAPISettings(AbstractAPISettings):
                 (T.Int, lambda _: getter),
                 (ct.EnumType, lambda _: f"{field_type}.fromC({getter})"),
                 (
-                    object, lambda t: f"{field_type}.wrap({getter})"
+                    object, lambda t: f"{wrapper_class}.wrap({getter})"
                 ),
             ])
 
@@ -853,6 +864,7 @@ class JavaAPISettings(AbstractAPISettings):
         ref_type = self.ni_reference_type(flat.public_type)
         getter = f"this.{flat.java_access}"
         to_write = f"{flat.native_access}Native"
+
         res = (
             f"{ref_type} {to_write} = "
             f"structNative.address_{flat.native_access}();"
@@ -864,10 +876,18 @@ class JavaAPISettings(AbstractAPISettings):
                     f"{to_write}.write({getter} ? (byte) 1 : (byte) 0);"
             ),
             (T.Int, lambda _: f"{to_write}.write({getter});"),
+            (
+                T.BigInt, lambda _:
+                    f"BigIntegerWrapper.unwrap({getter}, {to_write});"
+            ),
             (T.Character, lambda _: f"{to_write}.write({getter}.value);"),
             (
                 T.EnvRebindings, lambda _:
                     f"{to_write}.writeWord(0, {getter}.ni());"
+            ),
+            (
+                T.String, lambda _:
+                    f"StringWrapper.unwrap({getter}, {to_write});"
             ),
             (ct.EnumType, lambda _: f"{to_write}.write({getter}.toC());"),
             (

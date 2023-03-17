@@ -15,6 +15,7 @@ root_node_type = api.wrapping_type(T.root_node)
 
 package com.adacore.${ctx.lib_name.lower};
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.nio.ByteOrder;
 
 import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.strings.TruffleString;
 
 import org.graalvm.nativeimage.StackValue;
 import org.graalvm.nativeimage.UnmanagedMemory;
@@ -62,16 +64,28 @@ public class ${ctx.lib_name.camel} {
     // ==========
 
     /** The default grammar rule to parse the inputs. */
-    protected static final GrammarRule DEFAULT_GRAMMAR_RULE =
+    private static final GrammarRule DEFAULT_GRAMMAR_RULE =
         GrammarRule.${ctx.main_rule_api_name.upper};
 
     /** The os name in lower case. */
     private static final String OS =
             System.getProperty("os.name").toLowerCase();
 
-    /** If the system is big endian, else it's little endian. */
-    protected static final boolean BIG_ENDIAN =
-        ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN);
+    /** The node to convert a Java string to a truffle string */
+    private static final TruffleString.FromJavaStringNode fromJavaStringNode =
+        TruffleString.FromJavaStringNode.create();
+
+    /** The node to convert a truffle string to a Java string. */
+    private static final TruffleString.ToJavaStringNode toJavaStringNode =
+        TruffleString.ToJavaStringNode.create();
+
+    /** The node to convert a byte array to a truffle string. */
+    private static final TruffleString.FromByteArrayNode fromByteArrayNode =
+        TruffleString.FromByteArrayNode.create();
+
+    /** The node to convert a truffle string to a byte array. */
+    private static final TruffleString.CopyToByteArrayNode toByteArrayNode =
+        TruffleString.CopyToByteArrayNode.create();
 
     /** A map to store the nodes classes from their name. */
     public static final Map<String, Class<? extends ${root_node_type}>>
@@ -101,8 +115,8 @@ public class ${ctx.lib_name.camel} {
     private static CCharPointer toCString(
         final String jString
     ) {
-        UnsignedWord size = WordFactory.unsigned(jString.length() + 1);
-        CCharPointer res = UnmanagedMemory.calloc(size);
+        final UnsignedWord size = WordFactory.unsigned(jString.length() + 1);
+        final CCharPointer res = UnmanagedMemory.calloc(size);
         if(jString.length() > 0) {
             CTypeConversion.toCString(
                 jString,
@@ -153,13 +167,11 @@ public class ${ctx.lib_name.camel} {
      */
     @CompilerDirectives.TruffleBoundary
     private static String decodeUTF32(
-        final int[] chars
+        final byte[] toDecode
     ) {
-        final byte[] realContent = new byte[chars.length];
-        for(int i = 0 ; i < chars.length ; i++) {
-            realContent[i] = (byte) (chars[i] & 0xFF);
-        }
-        return new String(realContent);
+        return toJavaStringNode.execute(
+            fromByteArrayNode.execute(toDecode, TruffleString.Encoding.UTF_32)
+        );
     }
 
     /**
@@ -170,42 +182,13 @@ public class ${ctx.lib_name.camel} {
      * @return The encoded string in an int array.
      */
     @CompilerDirectives.TruffleBoundary
-    private static int[] encodeUTF32(
+    private static byte[] encodeUTF32(
         final String toEncode
     ) {
-        final byte[] src = toEncode.getBytes();
-        final int[] res = new int[src.length];
-        for(int i = 0 ; i < src.length ; i++) {
-            res[i] = (int) src[i];
-        }
-        return res;
-    }
-
-    /**
-     * This function turn an int array to a byte array.
-     *
-     * @param intArray The integer array to translate.
-     * @return The byte array.
-     */
-    private static byte[] intToByteArray(
-        final int[] intArray
-    ) {
-        final byte[] res = new byte[intArray.length * 4];
-        for(int i = 0 ; i < res.length ; i+=4) {
-            final int currentInt = intArray[i / 4];
-            if(BIG_ENDIAN) {
-                res[i] = (byte) ((currentInt >> 24) & 0xFF);
-                res[i + 1] = (byte) ((currentInt >> 16) & 0xFF);
-                res[i + 2] = (byte) ((currentInt >> 8) & 0xFF);
-                res[i + 3] = (byte) (currentInt & 0xFF);
-            } else {
-                res[i + 3] = (byte) ((currentInt >> 24) & 0xFF);
-                res[i + 2] = (byte) ((currentInt >> 16) & 0xFF);
-                res[i + 1] = (byte) ((currentInt >> 8) & 0xFF);
-                res[i] = (byte) (currentInt & 0xFF);
-            }
-        }
-        return res;
+        return toByteArrayNode.execute(
+            fromJavaStringNode.execute(toEncode, TruffleString.Encoding.UTF_32),
+            TruffleString.Encoding.UTF_32
+        );
     }
 
     /**
@@ -858,8 +841,7 @@ public class ${ctx.lib_name.camel} {
             final BigInteger bigInteger,
             final Pointer pointer
         ) {
-            final BigIntegerNative bigIntegerNative = unwrap(bigInteger);
-            pointer.writeWord(0, bigIntegerNative);
+            pointer.writeWord(0, unwrap(bigInteger));
         }
 
         /**
@@ -961,7 +943,7 @@ public class ${ctx.lib_name.camel} {
          * @param text The symbol text.
          */
         Symbol(
-            String text
+            final String text
         ) {
             this.text = text;
         }
@@ -971,11 +953,25 @@ public class ${ctx.lib_name.camel} {
          *
          * @param text The text of the symbol.
          */
-        public static Symbol create(String text) {
+        public static Symbol create(
+            final String text
+        ) {
             return new Symbol(text);
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
+
+        /**
+         * Fill the given NI native value with default values.
+         *
+         * @param symbolNative The NI value to fill.
+         */
+        static void defaultValue(
+            final SymbolNative symbolNative
+        ) {
+            symbolNative.set_data(WordFactory.nullPointer());
+            symbolNative.set_bounds(WordFactory.nullPointer());
+        }
 
         /**
          * Wrap the given symbol native value in a Java value.
@@ -983,9 +979,11 @@ public class ${ctx.lib_name.camel} {
          * @param symbolNative The symbol native value.
          * @return The wrapped symbol.
          */
-        static Symbol wrap(SymbolNative symbolNative) {
+        static Symbol wrap(
+            final SymbolNative symbolNative
+        ) {
             // Get the symbol text
-            TextNative textNative = StackValue.get(TextNative.class);
+            final TextNative textNative = StackValue.get(TextNative.class);
             Text.defaultValue(textNative);
             NI_LIB.${nat("symbol_text")}(
                 symbolNative,
@@ -993,22 +991,10 @@ public class ${ctx.lib_name.camel} {
             );
 
             // Return the new symbol
-            try(Text text = Text.wrap(textNative)) {
+            try(final Text text = Text.wrap(textNative)) {
                 return new Symbol(text.getContent());
             }
         }
-
-        /**
-         * Fill the given NI native value with default values.
-         *
-         * @param symbolNative The NI value to fill.
-         */
-        static void defaultValue(SymbolNative symbolNative) {
-            symbolNative.set_data(WordFactory.nullPointer());
-            symbolNative.set_bounds(WordFactory.nullPointer());
-        }
-
-        // ----- Instance methods -----
 
         /**
          * Unwrap the symbol in the given native structure.
@@ -1016,16 +1002,16 @@ public class ${ctx.lib_name.camel} {
          * @param symbolNative The native structure to unwrap in.
          */
         void unwrap(
-            SymbolNative symbolNative,
-            AnalysisContext context
+            final SymbolNative symbolNative,
+            final AnalysisContext context
         ) {
             // Unwrap the symbol text
             try(Text text = Text.create(this.text)) {
-                TextNative textNative = StackValue.get(TextNative.class);
+                final TextNative textNative = StackValue.get(TextNative.class);
                 text.unwrap(textNative);
 
                 // Call the symbol creation
-                int resCode = NI_LIB.${nat("context_symbol")}(
+                final int resCode = NI_LIB.${nat("context_symbol")}(
                     context.reference.ni(),
                     textNative,
                     symbolNative
@@ -1048,186 +1034,138 @@ public class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.string_type', 4)}
-    public static final class StringWrapper implements AutoCloseable {
+    static final class StringWrapper {
 
-        // ----- Attributes -----
-
-        /** The reference to the native string. */
-        public final PointerWrapper reference;
-
-        /** The array of the string content. */
-        public final int[] contentArray;
-
-        /** The content of the string. */
-        private String content;
-
-        // ----- Constructors -----
+        // ----- Graal C API methods -----
 
         /**
-         * Create a new string wrapper from its reference.
+         * Wrap a pointer that points to a native string.
          *
-         * @param reference The reference to the native string value.
+         * @param pointer The pointer to the native string.
+         * @return The Java string wrapped from the native string.
          */
-        StringWrapper(
-            PointerWrapper reference
+        static String wrap(
+            final Pointer pointer
         ) {
-            this(
-                reference,
-                null
-            );
+            return wrap((StringNative) pointer.readWord(0));
         }
 
         /**
-         * Create a new string wrapper.
+         * Wrap a native string wrapper in a Java string.
          *
-         * @param reference The pointer that represents the native
-         * string value.
-         * @param contentArray The content of the string in an int array
-         * (this param is null in native-image mode).
+         * @param stringNative The native string to wrap.
+         * @return The Java string created from the native one.
          */
-        StringWrapper(
-            PointerWrapper reference,
-            int[] contentArray
+        static String wrap(
+            final StringNative stringNative
         ) {
-            this.reference = reference;
-            this.contentArray = contentArray;
-            this.content = null;
+            return getNativeStringContent(stringNative);
         }
 
         /**
-         * Create a new string wrapper from its content.
+         * Unwrap the string in the given pointer.
          *
-         * @param content The content of the string wrapper.
-         * @return The newly created string wrapper.
+         * @param string The string to unwrap.
+         * @param pointer The pointer to place the native string in.
          */
-        public static StringWrapper create(
-            String content
+        static void unwrap(
+            final String string,
+            final Pointer pointer
         ) {
-            byte[] contentArray = intToByteArray(encodeUTF32(content));
-
-            if(ImageInfo.inImageCode()) {
-                CTypeConversion.CCharPointerHolder holder =
-                    CTypeConversion.toCBytes(contentArray);
-                return StringWrapper.wrap(
-                    NI_LIB.${nat("create_string")}(
-                        (CIntPointer) holder.get(),
-                        content.length()
-                    )
-                );
-            } else {
-                return JNI_LIB.${nat("create_string")}(contentArray);
-            }
+            pointer.writeWord(0, unwrap(string));
         }
-
-        // ----- Cleaning methods/classes -----
 
         /**
-         * Release the given string reference.
+         * Unwrap the given string in a native one.
          *
-         * @param stringRef The reference to the string to release.
+         * @param string The string to unwrap.
+         * @return The native string unwrapped.
          */
-        private static void release(
-            PointerWrapper stringRef
+        static StringNative unwrap(
+            final String string
         ) {
-
-            /*
-            if(ImageInfo.inImageCode()) {
-                NI_LIB.${nat("string_dec_ref")}(stringRef.ni());
-            } else {
-                JNI_LIB.${nat("string_dec_ref")}(stringRef.jni());
-            }
-            */
-
+            return nativeStringFromContent(string);
         }
 
-        /** @see java.lang.AutoCloseable#close() */
-        @Override
-        public void close() {
-            // DO NOTHING FOR NOW
+        /**
+         * Release the native string at the given pointer.
+         *
+         * @param pointer The pointer to the native string.
+         */
+        static void release(
+            final Pointer pointer
+        ) {
+            release((StringNative) pointer.readWord(0));
+        }
+
+        /**
+         * Release the given native string.
+         *
+         * @param stringNative The native string to release.
+         */
+        static void release(
+            final StringNative stringNative
+        ) {
+            NI_LIB.${nat("string_dec_ref")}(stringNative);
         }
 
         // ----- Class methods -----
 
         /**
-         * Wrap a pointer that points to the native string wrapper in
-         * the Java class.
+         * Get the content of the given native string in a Java one.
          *
-         * @param niPointer The pointer that leads to the string NI value.
-         * @return the newly created string wrapper or null if the pointer
-         * or the native string are null.
+         * @param stringNative The native string to get the content from.
+         * @return The Java string.
          */
-        static StringWrapper wrap(
-            Pointer niPointer
+        private static String getNativeStringContent(
+            final StringNative stringNative
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((StringNative) niPointer.readWord(0));
+            // Prepare the working variable
+            final Pointer pointer = (Pointer) stringNative;
+            final int length = pointer.readInt(0);
+            final byte[] contentArray = new byte[length * 4];
+
+            // Get the content from the native string
+            for(int i = 0 ; i < contentArray.length ; i++) {
+                contentArray[i] = pointer.readByte(i + 8);
+            }
+
+            // Return the decoded string
+            return decodeUTF32(contentArray);
         }
 
         /**
-         * Wrap a native string wrapper in the Java class.
+         * Create a native string from a Java string.
          *
-         * @param stringNative The NI string wrapper native value.
-         * @return The newly created string wrapper or null if the value
-         * is null.
+         * @param string The Java string to create the native string from.
+         * @return The native string.
          */
-        static StringWrapper wrap(
-            StringNative stringNative
+        private static StringNative nativeStringFromContent(
+            final String string
         ) {
-            if(((PointerBase) stringNative).isNull()) return null;
-            else return new StringWrapper(
-                new PointerWrapper(stringNative)
+            // Encode the string in UTF-32
+            final byte[] contentArray = encodeUTF32(string);
+            final int length = string.length();
+
+            // Create the native array
+            final Pointer contentArrayNative = UnmanagedMemory.malloc(
+                contentArray.length
             );
-        }
-
-        /**
-         * Get the content of the string in a integer array.
-         * Internal function used for the NI mode.
-         *
-         * @return The content of the string in an integer array.
-         */
-        private static int[] getContentArray(
-            StringNative stringWrapperPointer
-        ) {
-            Pointer niPointer = (Pointer) stringWrapperPointer;
-            int length = niPointer.readInt(0);
-            int[] res = new int[length];
-            for(int i = 0 ; i < length ; i++) {
-                res[i] = niPointer.readInt(
-                    8 + (i * 4)
-                );
+            for(int i = 0 ; i < contentArray.length ; i++) {
+                contentArrayNative.writeByte(i, contentArray[i]);
             }
+
+            // Create the native string
+            final StringNative res = NI_LIB.${nat("create_string")}(
+                (CIntPointer) contentArrayNative,
+                length
+            );
+
+            // Free the memory
+            UnmanagedMemory.free(contentArrayNative);
+
+            // Return the result
             return res;
-        }
-
-        // ----- Instance methods -----
-
-        /**
-         * Get the content of the string.
-         *
-         * @return The content of the langkit string in a Java string.
-         */
-        public String getContent() {
-            if(this.content == null) {
-                int[] contentArray;
-
-                if(ImageInfo.inImageCode()) {
-                    contentArray = getContentArray(this.reference.ni());
-                } else {
-                    contentArray = this.contentArray != null ?
-                        this.contentArray :
-                        new int[0];
-                }
-
-                this.content = decodeUTF32(contentArray);
-            }
-            return this.content;
-        }
-
-        // ----- Override methods -----
-
-        @Override
-        public String toString() {
-            return this.getContent();
         }
 
     }
@@ -1250,7 +1188,7 @@ public class ${ctx.lib_name.camel} {
         private final boolean isOwner;
 
         /** The content of the text in a Java array. */
-        public final int[] contentArray;
+        public final byte[] contentArray;
 
         /** The content of the text in a Java string. */
         private String content;
@@ -1291,7 +1229,7 @@ public class ${ctx.lib_name.camel} {
             PointerWrapper charPointer,
             long length,
             boolean isAllocated,
-            int[] contentArray
+            byte[] contentArray
         ) {
             this(
                 charPointer,
@@ -1317,7 +1255,7 @@ public class ${ctx.lib_name.camel} {
             long length,
             boolean isAllocated,
             boolean isOwner,
-            int[] contentArray
+            byte[] contentArray
         ) {
             this.charPointer = charPointer;
             this.length = length;
@@ -1337,7 +1275,7 @@ public class ${ctx.lib_name.camel} {
         public static Text create(
             String content
         ) {
-            byte[] contentArray = intToByteArray(encodeUTF32(content));
+            byte[] contentArray = encodeUTF32(content);
 
             if(ImageInfo.inImageCode()) {
                 PointerWrapper charPointer = new PointerWrapper(
@@ -1427,19 +1365,19 @@ public class ${ctx.lib_name.camel} {
          */
         public String getContent() {
             if(this.content == null) {
-                int[] contentArray;
+                byte[] contentArray;
 
                 if(ImageInfo.inImageCode()) {
-                    contentArray = new int[(int) this.length];
-                    for(int i = 0 ; i < this.length ; i++) {
+                    contentArray = new byte[(int) this.length * 4];
+                    for(int i = 0 ; i < contentArray.length ; i++) {
                         contentArray[i] = (
-                            (CIntPointer) this.charPointer.ni()
+                            (CCharPointer) this.charPointer.ni()
                         ).read(i);
                     }
                 } else {
                     contentArray = this.contentArray != null ?
                         this.contentArray :
-                        new int[0];
+                        new byte[0];
                 }
                 this.content = decodeUTF32(contentArray);
             }
