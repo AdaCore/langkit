@@ -155,10 +155,10 @@ public final class BindingsTests {
                 "foo.txt"
             );
             Token current = eqUnit.getFirstToken();
-            while(!(current instanceof NoToken)) {
+            while(!(current.isNone())) {
                 Token other = current.next();
                 if(!current.isTrivia()) {
-                    while(!(other instanceof NoToken)) {
+                    while(!(other.isNone())) {
                         if(current.isEquivalent(other))
                             System.out.println(
                                 "Equivalent tokens : " +
@@ -253,12 +253,12 @@ public final class BindingsTests {
                 System.out.println(
                     "Node " + current.toString() + " | Parents :"
                 );
-                while(parent != null) {
+                while(!parent.isNone()) {
                     System.out.println("  " + parent.toString());
                     parent = parent.parent();
                 }
                 for(FooNode child : current.children()) {
-                    if(child != null) visitList.add(child);
+                    if(!child.isNone()) visitList.add(child);
                 }
                 System.out.println("");
             }

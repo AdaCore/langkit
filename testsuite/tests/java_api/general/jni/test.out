@@ -102,11 +102,11 @@ proposition (for all node n. for fields fields f of n. parent f = n) is true
 -----------------
 
 --- Siblings ---
-<NullNode foo.txt:1:1-1:5> | previous = null | next = <Example foo.txt:1:6-1:13>
+<NullNode foo.txt:1:1-1:5> | previous = None | next = <Example foo.txt:1:6-1:13>
 <Example foo.txt:1:6-1:13> | previous = <NullNode foo.txt:1:1-1:5> | next = <Var foo.txt:1:14-1:37>
 <Var foo.txt:1:14-1:37> | previous = <Example foo.txt:1:6-1:13> | next = <Example foo.txt:1:38-1:45>
 <Example foo.txt:1:38-1:45> | previous = <Var foo.txt:1:14-1:37> | next = <NullNode foo.txt:1:46-1:50>
-<NullNode foo.txt:1:46-1:50> | previous = <Example foo.txt:1:38-1:45> | next = null
+<NullNode foo.txt:1:46-1:50> | previous = <Example foo.txt:1:38-1:45> | next = None
 ----------------
 
 --- Arrays ---
@@ -144,7 +144,7 @@ Double of 10**100 = 200000000000000000000000000000000000000000000000000000000000
 -------------------
 
 --- Struct ---
-me false = null
+me false = None
 me true = <Sequence foo.txt:1:1-1:50>
 --------------
 

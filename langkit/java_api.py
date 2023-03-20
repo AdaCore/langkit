@@ -438,6 +438,18 @@ class JavaAPISettings(AbstractAPISettings):
             (object, lambda _: None),
         ])
 
+    def mangle_enum(self, name: str) -> str:
+        """
+        Mangle the given enum name to avoid reserved names.
+
+        :param name: The name to mangle.
+        """
+        return (
+            name
+            if name != "NONE" else
+            "NONE_ENUM"
+        )
+
     # ----- Typing methods -----
 
     def wrapping_type(self,
@@ -485,6 +497,16 @@ class JavaAPISettings(AbstractAPISettings):
             (ct.IteratorType, lambda t: t.api_name.camel),
         ])
 
+    def array_wrapping_type(self, array_type: ArrayType) -> str:
+        """
+        Get the array type in Java for the wanted compiled type.
+        """
+        return (
+            ct.T.entity.array
+            if array_type.element_type.is_entity_type else
+            array_type
+        ).api_name.camel
+
     def wrapper_class(self,
                       the_type: CompiledType,
                       ast_wrapping: bool = True) -> str:
@@ -502,15 +524,33 @@ class JavaAPISettings(AbstractAPISettings):
             (object, lambda t: self.wrapping_type(t, ast_wrapping))
         ])
 
-    def array_wrapping_type(self, array_type: ArrayType) -> str:
+    def none_value(self,
+                   the_type: CompiledType,
+                   ast_wrapping: bool = True) -> str:
         """
-        Get the array type in Java for the wanted compiled type.
+        Return the none (default) value Java expression for the given type.
+
+        :param the_type: The type of the expression to get the none for.
+        :param ast_wrapping: If the AST node should be wrapped.
         """
-        return (
-            ct.T.entity.array
-            if array_type.element_type.is_entity_type else
-            array_type
-        ).api_name.camel
+        return dispatch_on_type(the_type, [
+            (T.Bool, lambda _: "false"),
+            (T.Int, lambda _: "0"),
+            (T.EnvRebindings, lambda _: "PointerWrapper.nullPointer()"),
+            (
+                ct.ASTNodeType, lambda t:
+                self.none_value(t.entity, ast_wrapping)
+                if ast_wrapping else
+                "PointerWrapper.nullPointer()"
+            ),
+            (
+                ct.EntityType, lambda t:
+                f"{t.astnode.kwless_raw_name.camel}.NONE"
+                if ast_wrapping else
+                "Entity.NONE"
+            ),
+            (object, lambda t: f"{self.wrapper_class(t, ast_wrapping)}.NONE"),
+        ])
 
     def is_java_nullable(self, the_type: CompiledType) -> bool:
         """

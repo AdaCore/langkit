@@ -17,6 +17,10 @@
      */
     public static class ${java_type} extends ArrayBase<${elem_java_type}> {
 
+        public static final ${java_type} NONE = new ${java_type}(
+            new ${elem_java_type}[0]
+        );
+
         // ----- Constructors -----
 
         /**
@@ -88,7 +92,7 @@
          * Wrap a pointer to an array native value in the Java class.
          *
          * @param pointer The pointer to the array NI native value.
-         * @return The newly created array or null if the pointer is null.
+         * @return The newly wrapped array.
          */
         static ${java_type} wrap(
             Pointer pointer
@@ -100,8 +104,7 @@
          * Wrap an array native value in the Java class.
          *
          * @param nativeArray The NI array native value to wrap.
-         * @return The newly created array or null of the given native
-         * value is null.
+         * @return The newly wrapped array.
          */
         static ${java_type} wrap(
             ${ni_type} nativeArray

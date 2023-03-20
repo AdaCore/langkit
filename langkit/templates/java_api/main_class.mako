@@ -564,6 +564,9 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none token kind. */
+        public static final TokenKind NONE = NO_TOKEN;
+
         /** The value of the enum instance. */
         private final int value;
 
@@ -628,6 +631,10 @@ public class ${ctx.lib_name.camel} {
         ;
 
         // ----- Attributes -----
+
+        /** Singleton that represents the none expcetion kind. */
+        public static final ExceptionKind NONE =
+            ${ctx.sorted_exception_types[0].kind_name.upper};
 
         /** The value of the enum instance. */
         private final int value;
@@ -701,6 +708,9 @@ public class ${ctx.lib_name.camel} {
     public static final class Char {
 
         // ----- Attributes -----
+
+        /** Singleton that represents the none char. */
+        public static final Char NONE = new Char(0);
 
         /** The value of the character. */
         public final int value;
@@ -802,6 +812,11 @@ public class ${ctx.lib_name.camel} {
 
     ${java_doc('langkit.big_integer_type', 4)}
     static final class BigIntegerWrapper {
+
+        // ----- Attributes -----
+
+        /** Singleton that represents the none big integer. */
+        public static final BigInteger NONE = BigInteger.ZERO;
 
         // ----- Graal C API methods -----
 
@@ -926,6 +941,9 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none symbol. */
+        public static final Symbol NONE = new Symbol("");
+
         /** The text of the symbol. */
         public final String text;
 
@@ -1029,6 +1047,11 @@ public class ${ctx.lib_name.camel} {
 
     ${java_doc('langkit.string_type', 4)}
     static final class StringWrapper {
+
+        // ----- Attributes -----
+
+        /** Singleton that represents the none string. */
+        public static final String NONE = "";
 
         // ----- Graal C API methods -----
 
@@ -1169,6 +1192,13 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none text. */
+        public static final Text NONE = new Text(
+            PointerWrapper.nullPointer(),
+            0,
+            false
+        );
+
         /** The pointer to the characters. */
         private final PointerWrapper charPointer;
 
@@ -1296,7 +1326,9 @@ public class ${ctx.lib_name.camel} {
                 if(this.isOwner) {
                     UnmanagedMemory.free(this.charPointer.ni());
                 } else {
-                    final TextNative textNative = StackValue.get(TextNative.class);
+                    final TextNative textNative = StackValue.get(
+                        TextNative.class
+                    );
                     this.unwrap(textNative);
                     NI_LIB.${nat("destroy_text")}(textNative);
                 }
@@ -1324,8 +1356,7 @@ public class ${ctx.lib_name.camel} {
          * Wrap a text native value in the Java class.
          *
          * @param textNative The text native NI value.
-         * @return The newly created text or null if the text value
-         * is null.
+         * @return The newly wrapped text.
          */
         static Text wrap(
             final TextNative textNative
@@ -1399,9 +1430,11 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
-        /** The location instance for null source location */
-        public static final SourceLocation NULL_LOCATION =
-            new SourceLocation(0, (short) 0);
+        /** Singleton that represents the none source location. */
+        public static final SourceLocation NONE = new SourceLocation(
+            0,
+            (short) 0
+        );
 
         /** The line of the source location. */
         public final int line;
@@ -1448,14 +1481,12 @@ public class ${ctx.lib_name.camel} {
          * Wrap a source location native value in the Java class.
          *
          * @param sourceLocationNative The source location NI native value.
-         * @return The newly created source location or null if the native
-         * value is null.
+         * @return The newly wrapped source location.
          */
         static SourceLocation wrap(
             SourceLocationNative sourceLocationNative
         ) {
-            if(((PointerBase) sourceLocationNative).isNull()) return null;
-            else return new SourceLocation(
+            return new SourceLocation(
                 sourceLocationNative.get_line(),
                 sourceLocationNative.get_column()
             );
@@ -1488,11 +1519,11 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
-        /** The location range instance for null source location range */
-        public static final SourceLocationRange NULL_LOCATION_RANGE =
+        /** Singleton that represents the none source location range. */
+        public static final SourceLocationRange NONE =
             new SourceLocationRange(
-                SourceLocation.NULL_LOCATION,
-                SourceLocation.NULL_LOCATION
+                SourceLocation.NONE,
+                SourceLocation.NONE
             );
 
         /** The start of the range. */
@@ -1541,14 +1572,12 @@ public class ${ctx.lib_name.camel} {
          *
          * @param sourceLocationRangeNative The source location range NI
          * native value.
-         * @return The newly created source location range or null if the
-         * native value is null.
+         * @return The newly wrapped source location range.
          */
         static SourceLocationRange wrap(
             SourceLocationRangeNative sourceLocationRangeNative
         ) {
-            if(((PointerBase) sourceLocationRangeNative).isNull()) return null;
-            else return new SourceLocationRange(
+            return new SourceLocationRange(
                 new SourceLocation(
                     sourceLocationRangeNative.get_start_line(),
                     sourceLocationRangeNative.get_start_column()
@@ -1590,6 +1619,12 @@ public class ${ctx.lib_name.camel} {
     public static final class Diagnostic {
 
         // ----- Attributes -----
+
+        /** Singleton that represents the none diagnositc. */
+        public static final Diagnostic NONE = new Diagnostic(
+            SourceLocationRange.NONE,
+            Text.NONE
+        );
 
         /** The source location range of the diagnostic. */
         public final SourceLocationRange sourceLocationRange;
@@ -1637,14 +1672,12 @@ public class ${ctx.lib_name.camel} {
          * Wrap a diagnostic native value in the Java class.
          *
          * @param diagnosticNative The diagnostic NI native value.
-         * @return The newly created diagnostic or null if the native value
-         * is null.
+         * @return The newly wrapped diagnositc.
          */
         static Diagnostic wrap(
             DiagnosticNative diagnosticNative
         ) {
-            if(((PointerBase) diagnosticNative).isNull()) return null;
-            else return new Diagnostic(
+            return new Diagnostic(
                 new SourceLocationRange(
                     new SourceLocation(
                         diagnosticNative.get_start_line(),
@@ -1712,6 +1745,11 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none file reader. */
+        public static final FileReader NONE = new FileReader(
+            PointerWrapper.nullPointer()
+        );
+
         /** The reference to the file reader */
         public final PointerWrapper reference;
 
@@ -1728,8 +1766,7 @@ public class ${ctx.lib_name.camel} {
         static FileReader wrap(
             FileReaderNative fileReaderNative
         ) {
-            if(((PointerBase) fileReaderNative).isNull()) return null;
-            else return new FileReader(
+            return new FileReader(
                 new PointerWrapper(fileReaderNative)
             );
         }
@@ -1740,6 +1777,11 @@ public class ${ctx.lib_name.camel} {
     public static final class UnitProvider implements AutoCloseable {
 
         // ----- Attributes -----
+
+        /** Singleton that represents the none unit provider. */
+        public static final UnitProvider NONE = new UnitProvider(
+            PointerWrapper.nullPointer()
+        );
 
         /** The reference to the unit provider */
         public final PointerWrapper reference;
@@ -1755,8 +1797,7 @@ public class ${ctx.lib_name.camel} {
         static UnitProvider wrap(
             UnitProviderNative unitProviderNative
         ) {
-            if(((PointerBase) unitProviderNative).isNull()) return null;
-            else return new UnitProvider(
+            return new UnitProvider(
                 new PointerWrapper(unitProviderNative)
             );
         }
@@ -1796,6 +1837,11 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none event handler. */
+        public static final EventHandler NONE = new EventHandler(
+            PointerWrapper.nullPointer()
+        );
+
         /** The reference to the event handler */
         public final PointerWrapper reference;
 
@@ -1812,8 +1858,7 @@ public class ${ctx.lib_name.camel} {
         static EventHandler wrap(
             EventHandlerNative eventHandlerNative
         ) {
-            if(((PointerBase) eventHandlerNative).isNull()) return null;
-            else return new EventHandler(
+            return new EventHandler(
                 new PointerWrapper(eventHandlerNative)
             );
         }
@@ -1827,7 +1872,7 @@ public class ${ctx.lib_name.camel} {
 
         /**
          * We only store the reference to the context to avoid ref-count
-         * problems. To access token context go throught the analysis unit.
+         * problems. To access otken context go throught the analysis unit.
          */
         protected final PointerWrapper contextRef;
 
@@ -1835,7 +1880,7 @@ public class ${ctx.lib_name.camel} {
         public final AnalysisUnit unit;
 
         /** The pointer to the token data handler. */
-        public final PointerWrapper tokenDataHandler;
+        protected final PointerWrapper tokenDataHandler;
 
         /** The index of the token. */
         public final int tokenIndex;
@@ -1847,7 +1892,7 @@ public class ${ctx.lib_name.camel} {
         public final TokenKind kind;
 
         /** The text of the token. */
-        public final Text text;
+        protected final Text text;
 
         /** The source location range of the token. */
         public final SourceLocationRange sourceLocationRange;
@@ -1888,10 +1933,6 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Getters -----
 
-        public TokenKind getKind() {
-            return this.kind;
-        }
-
         public String getText() {
             return this.text.getContent();
         }
@@ -1903,20 +1944,31 @@ public class ${ctx.lib_name.camel} {
         // ----- Class methods -----
 
         /**
+         * Get a none token for the given unit.
+         *
+         * @param unit The unit to get a none token for.
+         * @return The none token for the given unit.
+         */
+        public static Token NONE(
+            AnalysisUnit unit
+        ) {
+            return NoToken.getInstance(unit);
+        }
+
+        /**
          * Wrap a native token value in the Java class.
          *
          * @param tokenNative The native NI token value.
          * @param unit The analysis unit that owns the token.
-         * @return The newly created token or null if the native value
-         * is null.
+         * @return The newly wrapped token or a none value if the token data
+         * handler is null.
          */
         static Token wrap(
             TokenNative tokenNative,
             AnalysisUnit unit
         ) {
-            if(((PointerBase) tokenNative).isNull()) return null;
-            else if(tokenNative.get_data().isNull())
-                return NoToken.getInstance(unit);
+            if(tokenNative.get_data().isNull())
+                return NONE(unit);
             else return new Token(
                 new PointerWrapper(tokenNative.get_context()),
                 unit,
@@ -1950,7 +2002,10 @@ public class ${ctx.lib_name.camel} {
          * @return The text between the two tokens.
          */
         @CompilerDirectives.TruffleBoundary
-        public static String textRange(Token start, Token end) {
+        public static String textRange(
+            Token start,
+            Token end
+        ) {
 
             if(ImageInfo.inImageCode()) {
                 TokenNative startNative = StackValue.get(TokenNative.class);
@@ -2035,7 +2090,9 @@ public class ${ctx.lib_name.camel} {
          *
          * @param other The other token to compare with.
          */
-        public boolean isEquivalent(Token other) {
+        public boolean isEquivalent(
+            Token other
+        ) {
 
             if(ImageInfo.inImageCode()) {
                 TokenNative leftNative = StackValue.get(TokenNative.class);
@@ -2053,12 +2110,23 @@ public class ${ctx.lib_name.camel} {
         }
 
         /**
+         * Get if the token is a none one.
+         *
+         * @return True if the token is a none token, false else.
+         */
+        public boolean isNone() {
+            return false;
+        }
+
+        /**
          * Unwrap the token in the given NI pointer.
          *
          * @param tokenNative The NI pointer to the native structure to
          * fill.
          */
-        public void unwrap(TokenNative tokenNative) {
+        public void unwrap(
+            TokenNative tokenNative
+        ) {
             tokenNative.set_context(this.contextRef.ni());
             tokenNative.set_data(this.tokenDataHandler.ni());
             tokenNative.set_token_index(this.tokenIndex);
@@ -2081,7 +2149,7 @@ public class ${ctx.lib_name.camel} {
         @CompilerDirectives.TruffleBoundary
         public String toString() {
             return "<Token "
-                + this.getKind().toString()
+                + this.kind.toString()
                 + " "
                 + this.sourceLocationRange.toString()
                 + " text=\""
@@ -2090,7 +2158,9 @@ public class ${ctx.lib_name.camel} {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(
+            Object o
+        ) {
             if(o == this) return true;
             if(!(o instanceof Token)) return false;
             Token other = (Token) o;
@@ -2099,140 +2169,137 @@ public class ${ctx.lib_name.camel} {
                     other.triviaIndex == this.triviaIndex;
         }
 
-    }
-
-    /**
-     * This class represents the absence of token.
-     */
-    public static final class NoToken extends Token {
-
-        // ----- Attributes -----
-
-        /** The map of the no token instances */
-        private static final Map<AnalysisUnit, NoToken> instances
-            = new HashMap<>();
-
-        // ----- Constructors -----
+        // ----- Inner classes -----
 
         /**
-         * Create a new no token for the given analysis unit.
-         * The constructor is private to avoid too many instances.
-         *
-         * @param unit The analysis unit to create the no token for.
-         */
-        private NoToken(
-            PointerWrapper contextRef,
-            AnalysisUnit unit
-        ) {
-            super(
-                contextRef,
-                unit,
-                PointerWrapper.nullPointer(),
-                0,
-                0,
-                TokenKind.fromC(-1),
-                null,
-                SourceLocationRange.NULL_LOCATION_RANGE
-            );
-        }
+        * This class represents the absence of token.
+        */
+        private static final class NoToken extends Token {
 
-        /**
-         * Get the no token instance for the given analysis unit.
-         *
-         * @param unit The unit to get the no token instance for.
-         * @return The no token instance.
-         */
-        static NoToken getInstance(AnalysisUnit unit) {
-            if(!instances.containsKey(unit)) {
-                try(AnalysisContext context = unit.getContext()) {
-                    instances.put(
-                        unit,
-                        new NoToken(context.reference, unit)
-                    );
-                }
+            // ----- Attributes -----
+
+            /** The map of the no token instances */
+            private static final Map<AnalysisUnit, NoToken> instances
+                = new HashMap<>();
+
+            // ----- Constructors -----
+
+            /**
+            * Create a new no token for the given analysis unit.
+            * The constructor is private to avoid too many instances.
+            *
+            * @param unit The analysis unit to create the no token for.
+            */
+            private NoToken(
+                PointerWrapper contextRef,
+                AnalysisUnit unit
+            ) {
+                super(
+                    contextRef,
+                    unit,
+                    PointerWrapper.nullPointer(),
+                    0,
+                    0,
+                    TokenKind.fromC(-1),
+                    null,
+                    SourceLocationRange.NONE
+                );
             }
-            return instances.get(unit);
-        }
 
-        // ----- Getters -----
+            /**
+            * Get the no token instance for the given analysis unit.
+            *
+            * @param unit The unit to get the no token instance for.
+            * @return The no token instance.
+            */
+            static NoToken getInstance(
+                AnalysisUnit unit
+            ) {
+                if(!instances.containsKey(unit)) {
+                    try(AnalysisContext context = unit.getContext()) {
+                        instances.put(
+                            unit,
+                            new NoToken(context.reference, unit)
+                        );
+                    }
+                }
+                return instances.get(unit);
+            }
 
-        @Override
-        public String getText() {
-            return "";
-        }
+            // ----- Getters -----
 
-        // ----- Instance methods -----
+            @Override
+            public String getText() {
+                return "";
+            }
 
-        /**
-         * Get the next token. In other words, the same no token.
-         *
-         * @return The instance.
-         */
-         @Override
-        public Token next() {
-            return this;
-        }
+            // ----- Instance methods -----
 
-        /**
-         * Get the previous token. In other words, the same no token.
-         *
-         * @return The instance.
-         */
-        public Token previous() {
-            return this;
-        }
+            @Override
+            public Token next() {
+                return this;
+            }
 
-        /**
-         * Check of the token is equivalent to the other one.
-         *
-         * @param other The other token to compare with.
-         */
-        public boolean isEquivalent(Token other) {
-            return other instanceof NoToken;
-        }
+            @Override
+            public Token previous() {
+                return this;
+            }
 
-        /**
-         * Unwrap the token in the given NI pointer.
-         *
-         * @param tokenNative The NI pointer to the native structure to
-         * fill.
-         */
-        public void unwrap(TokenNative tokenNative) {
-            tokenNative.set_context(this.contextRef.ni());
-            tokenNative.set_data(this.tokenDataHandler.ni());
-            tokenNative.set_token_index(this.tokenIndex);
-            tokenNative.set_trivia_index(this.triviaIndex);
-            tokenNative.set_kind(0);
-            tokenNative.set_text_chars(
-                (CIntPointer) WordFactory.nullPointer()
-            );
-            tokenNative.set_text_length(0);
-            tokenNative.set_text_is_allocated(0);
-            tokenNative.set_start_line(this.sourceLocationRange.start.line);
-            tokenNative.set_start_column(
-                this.sourceLocationRange.start.column
-            );
-            tokenNative.set_end_line(this.sourceLocationRange.end.line);
-            tokenNative.set_end_column(this.sourceLocationRange.end.column);
-        }
+            @Override
+            public boolean isEquivalent(
+                Token other
+            ) {
+                return other instanceof NoToken;
+            }
 
-        // ----- Override methods -----
+            @Override
+            public boolean isNone() {
+                return true;
+            }
 
-        @Override
-        @CompilerDirectives.TruffleBoundary
-        public String toString() {
-            return "<Token "
-                + this.getKind().toString()
-                + " "
-                + this.sourceLocationRange.toString()
-                + " text=\""
-                + this.getText()
-                + "\">";
-        }
+            @Override
+            public void unwrap(
+                TokenNative tokenNative
+            ) {
+                tokenNative.set_context(this.contextRef.ni());
+                tokenNative.set_data(this.tokenDataHandler.ni());
+                tokenNative.set_token_index(this.tokenIndex);
+                tokenNative.set_trivia_index(this.triviaIndex);
+                tokenNative.set_kind(0);
+                tokenNative.set_text_chars(
+                    (CIntPointer) WordFactory.nullPointer()
+                );
+                tokenNative.set_text_length(0);
+                tokenNative.set_text_is_allocated(0);
+                tokenNative.set_start_line(this.sourceLocationRange.start.line);
+                tokenNative.set_start_column(
+                    this.sourceLocationRange.start.column
+                );
+                tokenNative.set_end_line(this.sourceLocationRange.end.line);
+                tokenNative.set_end_column(this.sourceLocationRange.end.column);
+            }
 
-        @Override
-        public boolean equals(Object o) {
-            return o == this;
+            // ----- Override methods -----
+
+            @Override
+            @CompilerDirectives.TruffleBoundary
+            public String toString() {
+                return "<Token "
+                    + this.kind.toString()
+                    + " "
+                    + this.sourceLocationRange.toString()
+                    + " text=\""
+                    + this.getText()
+                    + "\">";
+            }
+
+            @Override
+            public boolean equals(
+                Object o
+            ) {
+                return o == this;
+            }
+
         }
 
     }
@@ -2242,11 +2309,14 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none analysis context. */
+        public static final AnalysisContext NONE = new AnalysisContext(
+            PointerWrapper.nullPointer(),
+            false
+        );
+
         /** The reference to the native analysis context. */
         public final PointerWrapper reference;
-
-        /** If the context has been closed. */
-        private boolean closed;
 
         // ----- Constructors -----
 
@@ -2259,13 +2329,29 @@ public class ${ctx.lib_name.camel} {
         AnalysisContext(
             PointerWrapper reference
         ) {
-            this.reference = reference;
-            this.closed = false;
+            this(reference, true);
+        }
 
-            if(ImageInfo.inImageCode()) {
-                NI_LIB.${nat("context_incref")}(this.reference.ni());
-            } else {
-                JNI_LIB.${nat("context_incref")}(this.reference.jni());
+        /**
+         * Create a new analysis unit from its reference.
+         *
+         * @param reference The native analysis context.
+         * @param increaseRefeferenceCounter If the context reference counter
+         * should be increased.
+         */
+        private AnalysisContext(
+            PointerWrapper reference,
+            boolean increaseRefeferenceCounter
+        ) {
+            this.reference = reference;
+
+            // Increase the context reference counter if needed.
+            if(increaseRefeferenceCounter) {
+                if(ImageInfo.inImageCode()) {
+                    NI_LIB.${nat("context_incref")}(this.reference.ni());
+                } else {
+                    JNI_LIB.${nat("context_incref")}(this.reference.jni());
+                }
             }
         }
 
@@ -2320,16 +2406,21 @@ public class ${ctx.lib_name.camel} {
             } else {
                 reference = JNI_LIB.${nat("create_analysis_context")}(
                     charset,
-                    fileReader,
-                    unitProvider,
-                    eventHandler,
+                    (fileReader == null ?
+                        FileReader.NONE :
+                        fileReader),
+                    (unitProvider == null ?
+                        UnitProvider.NONE :
+                        unitProvider),
+                    (eventHandler == null ?
+                        EventHandler.NONE :
+                        eventHandler),
                     withTrivia,
                     tabStop
                 );
             }
 
             this.reference = reference;
-            this.closed = false;
         }
 
         /**
@@ -2386,13 +2477,10 @@ public class ${ctx.lib_name.camel} {
         @Override
         public void close() {
 
-            if(!this.closed) {
-                if(ImageInfo.inImageCode()) {
-                    NI_LIB.${nat("context_decref")}(this.reference.ni());
-                } else {
-                    JNI_LIB.${nat("context_decref")}(this.reference.jni());
-                }
-                this.closed = true;
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("context_decref")}(this.reference.ni());
+            } else {
+                JNI_LIB.${nat("context_decref")}(this.reference.jni());
             }
 
         }
@@ -2405,28 +2493,24 @@ public class ${ctx.lib_name.camel} {
          *
          * @param niPointer The pointer to the NI analysis context
          * native value.
-         * @return The newly created analysis context or null if the given
-         * pointer is null.
+         * @return The newly wrapped analysis context.
          */
         static AnalysisContext wrap(
             Pointer niPointer
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((AnalysisContextNative) niPointer.readWord(0));
+            return wrap((AnalysisContextNative) niPointer.readWord(0));
         }
 
         /**
          * Wrap an analysis context native value in the Java class.
          *
          * @param analysisContextNative The NI analysis context native value.
-         * @return The newly created analysis context or null if the native
-         * is null.
+         * @return The newly wrapped analysis context.
          */
         static AnalysisContext wrap(
             AnalysisContextNative analysisContextNative
         ) {
-            if(((PointerBase) analysisContextNative).isNull()) return null;
-            else return new AnalysisContext(
+            return new AnalysisContext(
                 new PointerWrapper(analysisContextNative)
             );
         }
@@ -2574,6 +2658,11 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none analysis unit. */
+        public static final AnalysisUnit NONE = new AnalysisUnit(
+            PointerWrapper.nullPointer()
+        );
+
         /** The reference to the native analysis unit. */
         public final PointerWrapper reference;
 
@@ -2597,30 +2686,24 @@ public class ${ctx.lib_name.camel} {
          * Wrap a pointer to the native analysis unit in the Java class.
          *
          * @param niPointer The pointer the native analysis unit value.
-         * @return The newly created analysis unit or null if the given
-         * pointer is null.
+         * @return The newly wrapped analysis unit.
          */
         static AnalysisUnit wrap(
             Pointer niPointer
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((AnalysisUnitNative) niPointer.readWord(0));
+            return wrap((AnalysisUnitNative) niPointer.readWord(0));
         }
 
         /**
          * Wrap a NI analysis unit native value in the Java class.
          *
          * @param analysisUnitNative The NI analysis unit native value.
-         * @return The newly created analysis unit or null if the given
-         * native value is null.
+         * @return The newly wrapped analysis unit.
          */
         static AnalysisUnit wrap(
             AnalysisUnitNative analysisUnitNative
         ) {
-            if(((PointerBase) analysisUnitNative).isNull()) return null;
-            else return new AnalysisUnit(
-                new PointerWrapper(analysisUnitNative)
-            );
+            return new AnalysisUnit(new PointerWrapper(analysisUnitNative));
         }
 
         // ----- Instance methods -----
@@ -3028,14 +3111,17 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none node. */
+        public static final ${root_node_type} NONE = new NoneNode();
+
         /** The entity of the node. */
         public final Entity entity;
 
         /** The analysis unit that owns the node. */
-        private AnalysisUnit unit;
+        protected AnalysisUnit unit;
 
         /** The cache for the image of the node. */
-        private String image;
+        protected String image;
 
         // ----- Constructors -----
 
@@ -3061,11 +3147,9 @@ public class ${ctx.lib_name.camel} {
         public static ${root_node_type} fromEntity(
             Entity entity
         ) {
-            if(entity == null || entity.node.isNull()) {
-                return null;
-            } else {
-                return dispatchNodeCreation(entity);
-            }
+            return entity.node.isNull() ?
+                ${root_node_type}.NONE :
+                dispatchNodeCreation(entity);
         }
 
         /**
@@ -3094,7 +3178,9 @@ public class ${ctx.lib_name.camel} {
                 % for subclass in ctx.astnode_types:
                     % if not subclass.abstract:
                 case ${ctx.node_kind_constants[subclass]}:
-                    return new ${api.wrapping_type(subclass)}(entity);
+                    return entity.node.isNull() ?
+                        ${api.wrapping_type(subclass)}.NONE :
+                        new ${api.wrapping_type(subclass)}(entity);
                     % endif
                 % endfor
                 default:
@@ -3134,6 +3220,10 @@ public class ${ctx.lib_name.camel} {
 
         }
 
+        public boolean isNone() {
+            return this.entity.node.isNull();
+        }
+
         // ----- Instance methods -----
 
         /**
@@ -3169,7 +3259,7 @@ public class ${ctx.lib_name.camel} {
          */
         @CompilerDirectives.TruffleBoundary
         public ${ctx.lib_name.camel}Field getFieldDescription(String name) {
-            return ${root_node_type}.fieldDescriptions.getOrDefault(name, null);
+            return ${root_node_type}.fieldDescriptions.get(name);
         }
 
         /**
@@ -3193,7 +3283,7 @@ public class ${ctx.lib_name.camel} {
          * Get the child at the given position.
          *
          * @param n The index of the child to get.
-         * @return The child at the given index or null.
+         * @return The child at the given index.
          */
         public ${root_node_type} getChild(int n) {
 
@@ -3379,7 +3469,7 @@ public class ${ctx.lib_name.camel} {
                         Method fieldGetter = this.getClass().getMethod(field);
                         ${root_node_type} node =
                             (${root_node_type}) fieldGetter.invoke(this);
-                        if(node != null) {
+                        if(!node.isNone()) {
                             builder.append("\n");
                             indent(builder, indent);
                             builder.append("|-").append(field).append("\n");
@@ -3465,6 +3555,21 @@ public class ${ctx.lib_name.camel} {
                     this.entity.node.jni(),
                     this.entity.info.rebindings.jni()
                 );
+            }
+
+        }
+
+        // ----- Inner classes -----
+
+        /**
+         * This class represents the none node without any concrete type.
+         */
+        private static final class NoneNode extends ${root_node_type} {
+
+            // ----- Constructors -----
+
+            NoneNode() {
+                super(Entity.NONE);
             }
 
         }

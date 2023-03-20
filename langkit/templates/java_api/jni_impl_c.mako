@@ -143,9 +143,6 @@ void * get_reference(
     JNIEnv *env,
     jobject object
 ) {
-    // Null protection
-    if(object == NULL) return NULL;
-
     // Get the object class
     jclass clazz = (*env)->GetObjectClass(env, object);
 
@@ -315,9 +312,6 @@ void * PointerWrapper_unwrap(
     JNIEnv *env,
     jobject custom_pointer
 ) {
-    // Null protection
-    if(custom_pointer == NULL) return NULL;
-
     // Get the custom pointer class
     jclass clazz = (*env)->GetObjectClass(env, custom_pointer);
 
@@ -1467,7 +1461,7 @@ ${token_type} Token_unwrap(
     ${token_type} res = Token_new_value();
 
     // Get if the token is instance of no token
-    jclass nt_clazz = (*env)->FindClass(env, "${sig_base}$NoToken");
+    jclass nt_clazz = (*env)->FindClass(env, "${sig_base}$Token$NoToken");
     if((*env)->IsInstanceOf(env, token, nt_clazz)) {
 
         // Get the field ids
@@ -1649,21 +1643,21 @@ jobject NoToken_wrap(
     jobject analysis_unit
 ) {
     // Get the no token class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$NoToken");
+    jclass clazz = (*env)->FindClass(env, "${sig_base}$Token");
 
     // Get the instance getting method
-    jmethodID instance_getter = (*env)->GetStaticMethodID(
+    jmethodID none_getter = (*env)->GetStaticMethodID(
         env,
         clazz,
-        "getInstance",
-        "(L${sig_base}$AnalysisUnit;)L${sig_base}$NoToken;"
+        "NONE",
+        "(L${sig_base}$AnalysisUnit;)L${sig_base}$Token;"
     );
 
     // Call the instance getter and return the result
     return (*env)->CallStaticObjectMethod(
         env,
         clazz,
-        instance_getter,
+        none_getter,
         analysis_unit
     );
 }

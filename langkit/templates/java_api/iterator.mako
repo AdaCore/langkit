@@ -1,6 +1,7 @@
 <%def name="wrapping_class(cls)">
     <%
     api = java_api
+
     class_name = api.wrapping_type(cls)
     ni_name = api.ni_type(cls)
     c_name = cls.c_type(capi).name

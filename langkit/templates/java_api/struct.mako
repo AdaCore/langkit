@@ -16,6 +16,14 @@
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none value for the structure. */
+        public static final ${java_type} NONE = new ${java_type}(
+            ${','.join([
+                api.none_value(field.public_type, False)
+                for field in fields
+            ])}
+        );
+
         % for field in fields:
         public final
         ${api.wrapping_type(field.public_type, ast_wrapping=False)}
@@ -60,28 +68,24 @@
          * Wrap a pointer to the native structure value in the Java class.
          *
          * @param niPointer The pointer to the NI structure native value.
-         * @return The newly created structure or null if the given pointer
-         * is null.
+         * @return The newly wrapped structure.
          */
         static ${java_type} wrap(
             Pointer niPointer
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((${ni_type}) niPointer.readWord(0));
+            return wrap((${ni_type}) niPointer.readWord(0));
         }
 
         /**
          * Wrap the given structure native value in the Java class.
          *
          * @param structNative The NI structure native value.
-         * @return The newly created structure or null if the given native
-         * value is null.
+         * @return The newly wrapped structure.
          */
         static ${java_type} wrap(
             ${ni_type} structNative
         ) {
-            if(((PointerBase) structNative).isNull()) return null;
-            else return new ${java_type}(
+            return new ${java_type}(
                 ${','.join([
                     api.ni_field_wrap(field)
                     for field in fields
@@ -270,11 +274,6 @@ ${c_type} ${java_type}_unwrap(
 ) {
     // Prepare the result structure
     ${c_type} res = ${java_type}_new_value();
-
-    // Check the the Java object is not null
-    if(object == NULL) {
-        return res;
-    }
 
     // Get the class
     jclass clazz = (*env)->GetObjectClass(env, object);

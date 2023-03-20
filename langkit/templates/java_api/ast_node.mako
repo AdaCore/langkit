@@ -6,6 +6,7 @@
     java_type = api.wrapping_type(cls)
 
     base_type = api.wrapping_type(cls.base)
+    root_node_type = api.wrapping_type(T.root_node)
     %>
 
     ${java_doc(cls, 4)}
@@ -16,6 +17,15 @@
 
         ${static_decl(cls)}
 
+        // ----- Attributes -----
+
+        % if not cls.abstract:
+        /** Singleton that represents the none node. */
+        public static final ${java_type} NONE = new ${java_type}(
+            Entity.NONE
+        );
+        % endif
+
         // ----- Constructors -----
 
         protected ${java_type}(
@@ -24,11 +34,23 @@
             super(entity);
         }
 
+        % if not cls.abstract:
         public static ${java_type} fromEntity(
             Entity entity
         ) {
-            return (${java_type}) ${base_type}.fromEntity(entity);
+            return entity.node.isNull() ?
+                ${java_type}.NONE :
+                new ${java_type}(entity);
         }
+        % else:
+        public static ${java_type} fromEntity(
+            Entity entity
+        ) {
+            return (${java_type}) ${root_node_type}.dispatchNodeCreation(
+                entity
+            );
+        }
+        % endif
 
         // ----- Instance methods -----
 

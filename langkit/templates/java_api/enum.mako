@@ -11,11 +11,15 @@
         // ----- Enum values -----
 
         % for i in range(len(cls.values)):
-        ${cls.values[i].name.upper}(${i}),
+        ${api.mangle_enum(cls.values[i].name.upper)}(${i}),
         % endfor
         ;
 
         // ----- Attributes -----
+
+        /** Singleton that represents the none enum value. */
+        public static final ${java_type} NONE =
+            ${api.mangle_enum(cls.values[0].name.upper)};
 
         /** The value of the enum instance. */
         private final int value;
@@ -56,7 +60,7 @@
                 throw new EnumException(
                     "Cannot get ${java_type} from " + cValue
                 );
-            return (${java_type}) map.getOrDefault(cValue, null);
+            return (${java_type}) map.get(cValue);
         }
 
         /**
