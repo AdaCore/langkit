@@ -481,17 +481,26 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             valgrind_suppressions=['ocaml'])
 
     if java_main is not None:
-        run(
+        cmd = [
             'java',
             '-Dfile.encoding=UTF-8',
             f"-Djava.library.path={env['LD_LIBRARY_PATH']}",
+        ]
+        if 'graalvm' in env.get("JAVA_HOME", ''):
+            cmd.append((
+                '--add-opens=org.graalvm.truffle/com.oracle.truffle.api.'
+                'strings=ALL-UNNAMED'
+            ))
+        cmd += [
             f'{java_main}.java',
-        )
+        ]
+        run(*cmd)
 
     if ni_main is not None:
         # Compile the Java tests
         run(
             'javac',
+            '-encoding', 'utf8',
             f'{ni_main}.java',
         )
 
