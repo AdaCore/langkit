@@ -385,7 +385,7 @@ class JavaAPISettings(AbstractAPISettings):
 
         return JavaMethod(field.api_name.lower, field.public_type, params)
 
-    def field_need_unit(self, field: BaseField) -> bool:
+    def field_needs_unit(self, field: BaseField) -> bool:
         """
         Return if the field needs the analysis unit of the node to wrap/
         unwrap its argument and return value.
@@ -399,7 +399,7 @@ class JavaAPISettings(AbstractAPISettings):
         # Default result
         return False
 
-    def field_need_context(self, field: BaseField) -> bool:
+    def field_needs_context(self, field: BaseField) -> bool:
         """
         Return if the field needs the analysis context to wrap/unwrap its
         arguments and return value.
@@ -539,15 +539,15 @@ class JavaAPISettings(AbstractAPISettings):
             (T.EnvRebindings, lambda _: "PointerWrapper.nullPointer()"),
             (
                 ct.ASTNodeType, lambda t:
-                self.none_value(t.entity, ast_wrapping)
-                if ast_wrapping else
-                "PointerWrapper.nullPointer()"
+                    self.none_value(t.entity, ast_wrapping)
+                    if ast_wrapping else
+                    "PointerWrapper.nullPointer()"
             ),
             (
                 ct.EntityType, lambda t:
-                f"{t.astnode.kwless_raw_name.camel}.NONE"
-                if ast_wrapping else
-                "Entity.NONE"
+                    f"{t.astnode.kwless_raw_name.camel}.NONE"
+                    if ast_wrapping else
+                    "Entity.NONE"
             ),
             (object, lambda t: f"{self.wrapper_class(t, ast_wrapping)}.NONE"),
         ])
@@ -621,31 +621,6 @@ class JavaAPISettings(AbstractAPISettings):
             (object, lambda t: self.ni_type(t))
         ])
 
-    def ni_default_value(self, the_type: CompiledType) -> str:
-        """
-        Return the Java expression of the default value of the given type.
-
-        :param the_type: The type to get the empty value for.
-        """
-        return dispatch_on_type(the_type, [
-            (T.Bool, lambda _: "(byte) 0"),
-            (T.Int, lambda _: "0"),
-            (T.Character, lambda _: "0"),
-            (T.EnvRebindings, lambda _: "WordFactory.nullPointer()"),
-            (ct.EnumType, lambda _: "0"),
-            (T.BigInt, lambda _: "WordFactory.nullPointer()"),
-            (T.Symbol, lambda _: "Symbol.createEmpty()"),
-            (T.String, lambda _: "WordFactory.nullPointer()"),
-            (T.FileReader, lambda _: "WordFactory.nullPointer()"),
-            (T.UnitProvider, lambda _: "WordFactory.nullPointer()"),
-            (T.EventHandler, lambda _: "WordFactory.nullPointer()"),
-            (T.AnalysisUnit, lambda _: "WordFactory.nullPointer()"),
-            (T.AnalysisContext, lambda _: "WordFactory.nullPointer()"),
-            (ct.ASTNodeType, lambda _: "WordFactory.nullPointer()"),
-            (ct.ArrayType, lambda _: "WordFactory.nullPointer()"),
-            (ct.IteratorType, lambda _: "WordFactory.nullPointer()"),
-        ])
-
     def ni_stack_value(self, the_type: CompiledType) -> str:
         """
         Return the Java expression of a new stack value for the given type.
@@ -660,51 +635,51 @@ class JavaAPISettings(AbstractAPISettings):
 
     def ni_wrap(self,
                 the_type: CompiledType,
-                expr: str,
+                source: str,
                 release_list: list[ToRelease]) -> str:
         """
         Get the Java expression to wrap the given pointer expression.
 
         :param the_type: The type of the expression to wrap.
-        :param expr: The expression to wrap.
+        :param source: The Java expression to wrap.
         :param release_list: The list of the element to release after the
             wrapping.
         """
         # Extends the release list
-        self.extend_release_list(release_list, the_type, expr)
+        self.extend_release_list(release_list, the_type, source)
 
         # Return the wrapping expression
         return dispatch_on_type(the_type, [
-            (T.Bool, lambda _: f"({expr}.read() != 0)"),
-            (T.Int, lambda _: f"{expr}.read()"),
+            (T.Bool, lambda _: f"({source}.read() != 0)"),
+            (T.Int, lambda _: f"{source}.read()"),
             (
                 ct.EnumType, lambda t:
-                    f"{self.wrapper_class(t)}.fromC({expr}.read())"
+                    f"{self.wrapper_class(t)}.fromC({source}.read())"
             ),
-            (T.Token, lambda _: f"Token.wrap({expr}, currentUnit)"),
+            (T.Token, lambda _: f"Token.wrap({source}, currentUnit)"),
             (
                 ct.ASTNodeType, lambda t:
-                    self.ni_wrap(t.entity, expr, release_list)
+                    self.ni_wrap(t.entity, source, release_list)
             ),
             (
                 ct.EntityType, lambda t: (
                     f"{self.wrapper_class(t)}.fromEntity"
-                    f"(Entity.wrap({expr}))"
+                    f"(Entity.wrap({source}))"
                 )
             ),
-            (object, lambda t: f"{self.wrapper_class(t)}.wrap({expr})"),
+            (object, lambda t: f"{self.wrapper_class(t)}.wrap({source})"),
         ])
 
     def ni_unwrap(self,
                   the_type: CompiledType,
-                  expr: str,
+                  source: str,
                   export: str,
                   release_list: list[ToRelease]) -> str:
         """
         Get the Java unwrap operation to get a NI value from the expression.
 
         :param the_type: The type of the expression to unwrap.
-        :param expr: The expression to unwrap.
+        :param source: The expression to unwrap.
         :param export: The name of the variable to place the result in.
         :param release_list: The list of the element to release because the
             unwrapping caused allocation.
@@ -720,40 +695,46 @@ class JavaAPISettings(AbstractAPISettings):
         res += dispatch_on_type(the_type, [
             (
                 T.Bool, lambda _:
-                    f"({expr} ? (byte) 1 : (byte) 0);"
+                    f"({source} ? (byte) 1 : (byte) 0);"
             ),
-            (T.Int, lambda _: f"{expr};"),
-            (T.Character, lambda _: f"{expr}.value;"),
+            (T.Int, lambda _: f"{source};"),
+            (T.Character, lambda _: f"{source}.value;"),
             (
                 T.BigInt, lambda t: (
                     f"{self.ni_stack_value(t)};"
-                    f"BigIntegerWrapper.unwrap({expr}, {export});"
+                    f"BigIntegerWrapper.unwrap({source}, {export});"
                 )
             ),
-            (ct.EnumType, lambda _: f"{expr}.toC();"),
+            (ct.EnumType, lambda _: f"{source}.toC();"),
+            (
+                T.Symbol, lambda _: (
+                    f"StackValue.get(SymbolNative.class);"
+                    f"{source}.unwrap({export}, currentContext);"
+                )
+            ),
             (
                 T.String, lambda t:
-                    f"StringWrapper.unwrap({expr});"
+                    f"StringWrapper.unwrap({source});"
             ),
             (
                 ct.ASTNodeType, lambda t:
-                    self.ni_unwrap(t.entity, expr, export, release_list)
+                    self.ni_unwrap(t.entity, source, export, release_list)
             ),
             (
                 ct.EntityType, lambda _: (
                     "StackValue.get(EntityNative.class);"
-                    f"{expr}.entity.unwrap({export});"
+                    f"{source}.entity.unwrap({export});"
                 )
             ),
             (
                 ct.ArrayType, lambda t:
-                    f"{expr}.unwrap(currentContext);"
+                    f"{source}.unwrap(currentContext);"
                     if t.element_type.is_symbol_type else
-                    f"{expr}.unwrap();"
+                    f"{source}.unwrap();"
             ),
             (
                 object, lambda _:
-                    self.object_unwrap(the_type, expr, export)
+                    self.object_unwrap(the_type, source, export)
             ),
         ])
 
@@ -761,44 +742,31 @@ class JavaAPISettings(AbstractAPISettings):
 
     def object_unwrap(self,
                       the_type: CompiledType,
-                      expr: str,
+                      source: str,
                       export: str) -> str:
         """
         Unwrap an object for the native image C API.
 
         :param the_type: The type of the expression to unwrap.
-        :param expr: The expression to unwrap.
+        :param source: The expression to unwrap.
         :param export: The name to place the unwrapped result in.
         """
         ref_type = self.ni_reference_type(the_type)
-        wrap_type = self.wrapping_type(the_type)
-        ni_type = self.ni_type(the_type)
 
         if ref_type not in self.ni_pointer_types:
-            res = f"{self.ni_stack_value(the_type)}; if({expr} != null)"
-            if the_type.is_symbol_type:
-                res += f"{expr}.unwrap({export}, currentContext);"
-            else:
-                res += f"{expr}.unwrap({export});"
-
-            if the_type.is_ada_record:
-                res += f"else {wrap_type}.defaultValue({export});"
-            else:
-                res += (
-                    f"else {export} = ({ni_type}) WordFactory.nullPointer();"
-                )
+            res = (
+                f"{self.ni_stack_value(the_type)};"
+                f"{source}.unwrap({export});"
+            )
 
         else:
             if the_type.is_ada_record:
                 res = (
                     f"{self.ni_stack_value(the_type)};"
-                    f"{expr}.unwrap({export});"
+                    f"{source}.unwrap({export});"
                 )
             else:
-                res = (
-                    f"({expr} != null ? {expr}.reference.ni() "
-                    f": WordFactory.nullPointer());"
-                )
+                res = f"{source}.unwrap();"
 
         return res
 
@@ -835,22 +803,22 @@ class JavaAPISettings(AbstractAPISettings):
                     f"StringWrapper.unwrap({source}, {pointer});"
             ),
             (
-                T.AnalysisUnit, lambda _:
-                    f"{pointer}.writeWord(0, {source}.reference.ni());"
+                T.AnalysisContext, lambda _:
+                f"{pointer}.writeWord(0, {source}.unwrap());"
             ),
             (
-                T.AnalysisContext, lambda _:
-                    f"{pointer}.writeWord(0, {source}.reference.ni());"
+                T.AnalysisUnit, lambda _:
+                    f"{pointer}.writeWord(0, {source}.unwrap());"
             ),
             (
                 ct.IteratorType, lambda _:
-                    f"{pointer}.writeWord(0, {source}.reference.ni());"
+                    f"{pointer}.writeWord(0, {source}.unwrap());"
             ),
             (
                 ct.ArrayType, lambda t:
-                f"{source}.unwrap({pointer}, currentContext);"
-                if t.element_type.is_symbol_type else
-                f"{source}.unwrap({pointer});"
+                    f"{source}.unwrap({pointer}, currentContext);"
+                    if t.element_type.is_symbol_type else
+                    f"{source}.unwrap({pointer});"
             ),
             (
                 ct.ASTNodeType, lambda t:
@@ -937,7 +905,7 @@ class JavaAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda t: f"{getter}.unwrap({to_write});"),
             (
                 object, lambda t:
-                    f"{to_write}.writeWord(0, {getter}.reference.ni());"
+                    f"{to_write}.writeWord(0, {getter}.unwrap());"
             ),
         ])
 

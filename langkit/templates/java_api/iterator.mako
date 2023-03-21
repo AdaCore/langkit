@@ -8,7 +8,7 @@
     %>
 
     ${java_doc(cls, 4)}
-    public static class ${class_name} {
+    public static final class ${class_name} implements AutoCloseable {
 
         // ----- Attributes -----
 
@@ -56,6 +56,13 @@
             else return new ${class_name}(
                 new PointerWrapper(iteratorNative)
             );
+        }
+
+        // ----- Instance methods -----
+
+        /** @see java/lang/AutoCloseable#close() */
+        public void close() {
+            System.err.println("HANDLE THE ITERATOR CLOSING !!!");
         }
 
     }

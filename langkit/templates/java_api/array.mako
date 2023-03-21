@@ -15,8 +15,12 @@
     /**
      * This class represents the ${c_type} Java wrapping class
      */
-    public static class ${java_type} extends ArrayBase<${elem_java_type}> {
+    public static final class
+    ${java_type} extends ArrayBase<${elem_java_type}> {
 
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none array. */
         public static final ${java_type} NONE = new ${java_type}(
             new ${elem_java_type}[0]
         );
@@ -29,19 +33,18 @@
          * @param content The content of the array.
          */
         ${java_type}(
-            ${elem_java_type}[] content
+            final ${elem_java_type}[] content
         ) {
             super(content);
         }
 
-        % if elem_java_type != elem_java_unw_type:
         /**
          * Create a new array from the JNI stub.
          *
          * @param content The unwrapped JNI content.
          */
         private static ${java_type} jniCreate(
-            ${elem_java_unw_type}[] jniContent
+            final ${elem_java_unw_type}[] jniContent
         ) {
             final ${elem_java_type}[] content =
                 new ${elem_java_type}[jniContent.length];
@@ -51,7 +54,6 @@
             }
             return new ${java_type}(content);
         }
-        % endif
 
         /**
          * Create a sized array.
@@ -60,30 +62,11 @@
          * @return The newly created array.
          */
         public static ${java_type} create(
-            int size
+            final int size
         ) {
             return new ${java_type}(
                 new ${elem_java_type}[size]
             );
-        }
-
-        // ----- Getters -----
-
-        /**
-         * Get the content in an array unwrapped for the JNI stubs.
-         *
-         * @return The content unwrapped.
-         */
-        private ${elem_java_unw_type}[] jniContent() {
-            final ${elem_java_unw_type}[] res =
-                new ${elem_java_unw_type}[this.content.length];
-            for(int i = 0 ; i < res.length ; i++) {
-                res[i] = ${api.java_jni_unwrap(
-                    cls.element_type,
-                    "this.content[i]"
-                )};
-            }
-            return res;
         }
 
         // ----- Graal C API methods -----
@@ -95,7 +78,7 @@
          * @return The newly wrapped array.
          */
         static ${java_type} wrap(
-            Pointer pointer
+            final Pointer pointer
         ) {
             return wrap((${ni_type}) pointer.readWord(0));
         }
@@ -107,7 +90,7 @@
          * @return The newly wrapped array.
          */
         static ${java_type} wrap(
-            ${ni_type} nativeArray
+            final ${ni_type} nativeArray
         ) {
             // Get the size and prepare the working variables
             final int size = nativeArray.get_n();
@@ -138,15 +121,15 @@
          * in.
          */
         void unwrap(
-            Pointer pointer
+            final Pointer pointer
             ${(
-                ", AnalysisContext currentContext"
+                ", final AnalysisContext currentContext"
                 if cls.element_type.is_symbol_type else
                 ""
             )}
         ) {
             // Create a new native array with the size
-            ${ni_type} resNative = this.unwrap(
+            final ${ni_type} resNative = this.unwrap(
                 ${(
                     "currentContext"
                     if cls.element_type.is_symbol_type else
@@ -165,13 +148,15 @@
          */
         ${ni_type} unwrap(
             ${(
-                "AnalysisContext currentContext"
+                "final AnalysisContext currentContext"
                 if cls.element_type.is_symbol_type else
                 ""
             )}
         ) {
             // Create a new native array with the size
-            ${ni_type} res = NI_LIB.${cls.c_create(capi)}(this.content.length);
+            final ${ni_type} res = NI_LIB.${cls.c_create(capi)}(
+                this.content.length
+            );
 
             // Prepare the working vars
             final Pointer nativeItems = res.address_items();
@@ -202,7 +187,9 @@
          *
          * @param The pointer to the array to release.
          */
-        static void release(Pointer pointer) {
+        static void release(
+            final Pointer pointer
+        ) {
             release((${ni_type}) pointer.readWord(0));
         }
 
@@ -211,8 +198,29 @@
          *
          * @param arrayNative The native array to release.
          */
-        static void release(${ni_type} arrayNative) {
+        static void release(
+            final ${ni_type} arrayNative
+        ) {
             NI_LIB.${cls.c_dec_ref(c_api)}(arrayNative);
+        }
+
+        // ----- Getters -----
+
+        /**
+         * Get the content in an array unwrapped for the JNI stubs.
+         *
+         * @return The content unwrapped.
+         */
+        private ${elem_java_unw_type}[] jniContent() {
+            final ${elem_java_unw_type}[] res =
+                new ${elem_java_unw_type}[this.content.length];
+            for(int i = 0 ; i < res.length ; i++) {
+                res[i] = ${api.java_jni_unwrap(
+                    cls.element_type,
+                    "this.content[i]"
+                )};
+            }
+            return res;
         }
 
     }

@@ -12,9 +12,9 @@
 
     % if len(cls.get_fields()) > 0:
     ${java_doc(cls, 4)}
-    public static class ${java_type} {
+    public static final class ${java_type} {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
 
         /** Singleton that represents the none value for the structure. */
         public static final ${java_type} NONE = new ${java_type}(
@@ -23,6 +23,8 @@
                 for field in fields
             ])}
         );
+
+        // ----- Instance attributes -----
 
         % for field in fields:
         public final
@@ -37,6 +39,7 @@
          */
         ${java_type}(
             ${','.join([
+                f"final "
                 f"{api.wrapping_type(field.public_type, ast_wrapping=False)}"
                 f" {field.name}"
                 for field in fields
@@ -52,6 +55,7 @@
          */
         public static ${java_type} create(
             ${','.join([
+                f"final "
                 f"{api.wrapping_type(field.public_type, ast_wrapping=False)}"
                 f" {field.name}"
                 for field in fields
@@ -71,7 +75,7 @@
          * @return The newly wrapped structure.
          */
         static ${java_type} wrap(
-            Pointer niPointer
+            final Pointer niPointer
         ) {
             return wrap((${ni_type}) niPointer.readWord(0));
         }
@@ -83,7 +87,7 @@
          * @return The newly wrapped structure.
          */
         static ${java_type} wrap(
-            ${ni_type} structNative
+            final ${ni_type} structNative
         ) {
             return new ${java_type}(
                 ${','.join([
@@ -98,26 +102,13 @@
          *
          * @param structNative The NI structure native value to fill.
          */
-        void unwrap(${ni_type} structNative) {
+        void unwrap(
+            final ${ni_type} structNative
+        ) {
             % for flat in flatten_fields:
             ${api.ni_field_unwrap(flat)}
             % endfor
         }
-
-        % if cls.is_ada_record:
-        /**
-         * Get an empty value for the structure.
-         *
-         * @param structNative The NI structure native value to initialize.
-         */
-        static void defaultValue(${ni_type} structNative) {
-            % for flat in flatten_fields:
-            structNative.set_${flat.native_access}(
-                ${api.ni_default_value(flat.public_type)}
-            );
-            % endfor
-        }
-        % endif
 
         % if cls.is_refcounted:
         /**

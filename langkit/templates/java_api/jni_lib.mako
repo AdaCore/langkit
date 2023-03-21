@@ -47,12 +47,28 @@
             Text text
         );
 
+        // ----- File reader functions -----
+
+        /** Decrease the reference counter of the given file reader */
+        @CompilerDirectives.TruffleBoundary
+        public static native void ${nat("dec_ref_file_reader")}(
+            FileReader fileReader
+        );
+
         // ----- Unit provider functions -----
 
         /** Decrease the ref counter of the unit provider */
         @CompilerDirectives.TruffleBoundary
         public static native void ${nat("dec_ref_unit_provider")}(
-            long providerRef
+            UnitProvider unitProvider
+        );
+
+        // ----- Event handler functions -----
+
+        /** Decrease the ref counter of the event handler */
+        @CompilerDirectives.TruffleBoundary
+        public static native void ${nat("dec_ref_event_handler")}(
+            EventHandler eventHandler
         );
 
         // ----- Token functions -----

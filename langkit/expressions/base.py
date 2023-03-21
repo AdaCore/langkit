@@ -1903,7 +1903,10 @@ class NullExpr(BindableLiteralExpr):
         return 'None' if self.type.is_entity_type else self.type.py_nullexpr
 
     def render_java_constant(self):
-        return 'null' if self.type.is_entity_type else self.type.java_nullexpr
+        t = self.type
+        if t.is_ast_node:
+            t = t.entity
+        return f'{t.astnode.kwless_raw_name.camel}.NONE'
 
     def render_ocaml_constant(self):
         return 'None'

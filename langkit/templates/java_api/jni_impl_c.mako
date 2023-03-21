@@ -1306,6 +1306,15 @@ ${file_reader_type} FileReader_unwrap(
     return (${file_reader_type}) get_reference(env, file_reader);
 }
 
+// Decrease the reference counter of the given file reader
+${api.jni_func_sig("dec_ref_file_reader", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject file_reader
+) {
+    ${nat("dec_ref_file_reader")}(FileReader_unwrap(env, file_reader));
+}
+
 // ==========
 // Unit provider functions
 // ==========
@@ -1351,9 +1360,9 @@ ${unit_provider_type} UnitProvider_unwrap(
 ${api.jni_func_sig("dec_ref_unit_provider", "void")}(
     JNIEnv *env,
     jclass jni_lib,
-    jlong provider_ref
+    jobject unit_provider
 ) {
-    ${nat("dec_ref_unit_provider")}((${unit_provider_type}) provider_ref);
+    ${nat("dec_ref_unit_provider")}(UnitProvider_unwrap(env, unit_provider));
 }
 
 // ==========
@@ -1396,6 +1405,15 @@ ${event_handler_type} EventHandler_unwrap(
     jobject event_handler
 ) {
     return (${event_handler_type}) get_reference(env, event_handler);
+}
+
+// Decrease the reference counter of an event handler
+${api.jni_func_sig("dec_ref_event_handler", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject event_handler
+) {
+    ${nat("dec_ref_event_handler")}(EventHandler_unwrap(env, event_handler));
 }
 
 // ==========

@@ -386,6 +386,15 @@
             TextNative text
         );
 
+        // ----- File reader functions -----
+
+        /** Decrease the reference counter of the given file reader */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("dec_ref_file_reader")}(
+            FileReaderNative fileReader
+        );
+
         // ----- Unit provider functions -----
 
         /** Decrease the ref counter of the unit provider */
@@ -393,6 +402,15 @@
         @CFunction
         public static native void ${nat("dec_ref_unit_provider")}(
             UnitProviderNative unitProvider
+        );
+
+        // ----- Event handler functions -----
+
+        /** Decrease the ref counter of the event handler */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("dec_ref_event_handler")}(
+            EventHandlerNative eventHandler
         );
 
         // ----- Token functions -----

@@ -19,38 +19,36 @@
 
         // ----- Attributes -----
 
-        % if not cls.abstract:
         /** Singleton that represents the none node. */
-        public static final ${java_type} NONE = new ${java_type}(
-            Entity.NONE
-        );
+        public static final ${java_type} NONE =
+        % if cls.abstract:
+            new ${java_type}None();
+        % else:
+            new ${java_type}(
+                Entity.NONE
+            );
         % endif
 
         // ----- Constructors -----
 
         protected ${java_type}(
-            Entity entity
+            final Entity entity
         ) {
             super(entity);
         }
 
-        % if not cls.abstract:
         public static ${java_type} fromEntity(
-            Entity entity
+            final Entity entity
         ) {
             return entity.node.isNull() ?
                 ${java_type}.NONE :
+
+                % if cls.abstract:
+                (${java_type}) ${root_node_type}.dispatchNodeCreation(entity);
+                % else:
                 new ${java_type}(entity);
+                % endif
         }
-        % else:
-        public static ${java_type} fromEntity(
-            Entity entity
-        ) {
-            return (${java_type}) ${root_node_type}.dispatchNodeCreation(
-                entity
-            );
-        }
-        % endif
 
         // ----- Instance methods -----
 
@@ -71,7 +69,9 @@
 
         @Override
         @CompilerDirectives.TruffleBoundary
-        public ${ctx.lib_name.camel}Field getFieldDescription(String name) {
+        public ${ctx.lib_name.camel}Field getFieldDescription(
+            final String name
+        ) {
             return ${java_type}.fieldDescriptions.getOrDefault(name, null);
         }
 
@@ -92,6 +92,19 @@
         % for field in cls.fields_with_accessors():
         ${field_accessor(field)}
         % endfor
+
+        // ----- Inner classes -----
+
+        % if cls.abstract:
+        /**
+         * This class represents the none value of the abstract node
+         * ${java_type}.
+         */
+        private static final class ${java_type}None extends ${java_type} {
+            ${java_type}None() {super(Entity.NONE);}
+        }
+        % endif
+
     }
 
 </%def>
@@ -188,8 +201,8 @@
     return_unw_type = api.wrapping_type(method.public_type, False)
     return_ni_ref_type = api.ni_reference_type(method.public_type)
 
-    need_unit = api.field_need_context(field) or api.field_need_unit(field)
-    need_context = api.field_need_context(field)
+    need_unit = api.field_needs_context(field) or api.field_needs_unit(field)
+    need_context = api.field_needs_context(field)
 
     wrap_release = []
     unwrap_release = []
@@ -199,7 +212,7 @@
         ${java_doc(field, 8)}
         public ${return_type} ${method.name}(
             ${','.join([
-                f"{api.wrapping_type(param.public_type)} {param.name}"
+                f"final {api.wrapping_type(param.public_type)} {param.name}"
                 for param in method.params
             ])}
         ) {
@@ -216,17 +229,20 @@
 
             if(ImageInfo.inImageCode()) {
                 // Unwrap the current node
-                EntityNative thisNative = StackValue.get(EntityNative.class);
+                final EntityNative thisNative = StackValue.get(
+                    EntityNative.class
+                );
                 this.entity.unwrap(thisNative);
 
                 % if need_unit:
                 // Get the node unit
-                AnalysisUnit currentUnit = this.getUnit();
+                final AnalysisUnit currentUnit = this.getUnit();
                 % endif
 
                 % if need_context:
                 // Get the node context
-                AnalysisContext currentContext = currentUnit.getContext();
+                final AnalysisContext currentContext =
+                    currentUnit.getContext();
                 % endif
 
                 // Unwrap the arguments
@@ -240,7 +256,7 @@
                 % endfor
 
                 // Create the result native
-                ${return_ni_ref_type} resNative =
+                final ${return_ni_ref_type} resNative =
                     ${api.ni_stack_value(field.public_type)};
 
                 // Call the native function
@@ -253,18 +269,15 @@
                 );
 
                 // Check the langkit exceptions
-                LangkitException exception = checkException();
-                if(exception != null) {
-                    throw exception;
-                }
+                checkException();
 
-                % if api.field_need_context(field):
+                % if api.field_needs_context(field):
                 // Close the context
                 currentContext.close();
                 % endif
 
                 // Wrap the result
-                ${return_type} res = ${api.ni_wrap(
+                final ${return_type} res = ${api.ni_wrap(
                     field.public_type,
                     "resNative",
                     wrap_release
@@ -286,7 +299,7 @@
                 return res;
             } else {
                 // Call the native function
-                ${return_unw_type} res = JNI_LIB.${native_function}(
+                final ${return_unw_type} res = JNI_LIB.${native_function}(
                     % for param in method.params:
                     ${api.java_jni_unwrap(param.public_type, param.name)},
                     % endfor
@@ -294,10 +307,7 @@
                 );
 
                 // Check the langkit exceptions
-                LangkitException exception = checkException();
-                if(exception != null) {
-                    throw exception;
-                }
+                checkException();
 
                 // Wrap and return the result
                 return ${api.java_jni_wrap(field.public_type, "res")};
@@ -393,12 +403,12 @@ ${func_sig}(
     // Unwrap the node
     ${entity_type} entity_native = Entity_unwrap(env, entity);
 
-    % if api.field_need_context(field) or api.field_need_unit(field):
+    % if api.field_needs_context(field) or api.field_needs_unit(field):
     // Get the node unit
     ${analysis_unit_type} unit_native = ${nat("node_unit")}(&entity_native);
     % endif
 
-    % if api.field_need_context(field):
+    % if api.field_needs_context(field):
     // Get the node context
     ${analysis_context_type} context_native =
         ${nat("unit_context")}(unit_native);

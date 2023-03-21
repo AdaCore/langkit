@@ -407,7 +407,7 @@ public final class BindingsTests {
                 ).defaultValue
             );
             Char cIdent = root.pIdentity(Char.create('é'));
-            System.out.println("The 'a' char = " + c1.toChar());
+            System.out.println("The 'a' char = " + c1.toString());
             System.out.println("The eacute char = " + String.valueOf(c2.value));
             System.out.println("Identity of eacute = " + String.valueOf(cIdent.value));
         }

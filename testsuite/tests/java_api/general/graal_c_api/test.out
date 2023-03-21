@@ -13,32 +13,32 @@ Unit for the file foo.txt
 --- Token info without trivia
   unit_text =
     null example var (null example null) example null
-  first_token = <Token FOO_NULL_TOK 1:1-1:5 text="null">
+  first_token = <Token Kind=Null_Tok Text="null">
   first_text = null
-  last_token = <Token FOO_TERMINATION 2:1-2:1 text="">
+  last_token = <Token Kind=Termination Text="">
   last_text = 
   root_node = <Sequence foo.txt:1:1-1:50>
-  root_start = <Token FOO_NULL_TOK 1:1-1:5 text="null">
-  root_end = <Token FOO_NULL_TOK 1:46-1:50 text="null">
+  root_start = <Token Kind=Null_Tok Text="null">
+  root_end = <Token Kind=Null_Tok Text="null">
   token_count = 11
   trivia_count = 0
 --- Token info with trivia
   unit_text =
     null example var (null example null) example null
-  first_token = <Token FOO_NULL_TOK 1:1-1:5 text="null">
+  first_token = <Token Kind=Null_Tok Text="null">
   first_text = null
-  last_token = <Token FOO_TERMINATION 2:1-2:1 text="">
+  last_token = <Token Kind=Termination Text="">
   last_text = 
   root_node = <Sequence foo.txt:1:1-1:50>
-  root_start = <Token FOO_NULL_TOK 1:1-1:5 text="null">
-  root_end = <Token FOO_NULL_TOK 1:46-1:50 text="null">
+  root_start = <Token Kind=Null_Tok Text="null">
+  root_end = <Token Kind=Null_Tok Text="null">
   token_count = 11
   trivia_count = 8
 
-The NO_TOKEN = <Token NO_TOKEN 0:0-0:0 text="">
+The NO_TOKEN = <Token Kind=No_Token Text="">
 Text range with a NO_TOKEN = 
-Equivalent tokens : <Token FOO_IDENTIFIER 1:6-1:16 text="identifier"> and <Token FOO_IDENTIFIER 1:25-1:35 text="identifier">
-Equivalent tokens : <Token FOO_EXAMPLE 1:17-1:24 text="example"> and <Token FOO_EXAMPLE 1:36-1:43 text="example">
+Equivalent tokens : <Token Kind=Identifier Text="identifier"> and <Token Kind=Identifier Text="identifier">
+Equivalent tokens : <Token Kind=Example Text="example"> and <Token Kind=Example Text="example">
 --------------
 
 --- Nodes ---
