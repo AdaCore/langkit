@@ -78,13 +78,8 @@ class LangkitTestsuite(Testsuite):
         )
 
         parser.add_argument(
-            "--disable-java", action="store_true", default=True,
-            help='Disable testcases that require Java (they are disabled by'
-                 ' default).',
-        )
-        parser.add_argument(
-            "--enable-java", action="store_false", dest="disable_java",
-            help='Enable testcases that require Java (they are disabled by'
+            "--disable-java", action="store_true",
+            help='Disable testcases that require Java (they are enabled by'
                  ' default).',
         )
         parser.add_argument(

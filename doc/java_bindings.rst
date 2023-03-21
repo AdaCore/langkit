@@ -60,21 +60,6 @@ bindings in.
 
     ./manage.py install my_install_dir --enable-java [--maven-local-repo my/repo/path]
 
-Test Java bindings
-==================
-
-To test the Java bindings generation, building and usage you can run the
-Langkit testsuite with the ``--enable-java`` flag.
-
-.. attention::
-
-    Requirements for the Java tests running are the same as to build the Java
-    bindings.
-
-.. code-block::
-
-    $[langkit/testsuite]> ./testsuite.py java_api --enable-java
-
 Usage example
 =============
 
