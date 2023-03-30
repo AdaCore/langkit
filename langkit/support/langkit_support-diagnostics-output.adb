@@ -3,8 +3,6 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
-with Ada.Wide_Wide_Text_IO; use Ada.Wide_Wide_Text_IO;
-
 with Langkit_Support.Images; use Langkit_Support.Images;
 
 package body Langkit_Support.Diagnostics.Output is
@@ -15,7 +13,7 @@ package body Langkit_Support.Diagnostics.Output is
    procedure Print_Source_Listing
      (Sloc_Range      : Source_Location_Range;
       Buffer          : Text_Buffer_Ifc'Class;
-      Output_File     : WWIO.File_Type := WWIO.Standard_Output;
+      Output_File     : File_Type := Standard_Output;
       Caretting_Color : ANSI_Color);
    --  Print a source listing.
    --
@@ -48,7 +46,7 @@ package body Langkit_Support.Diagnostics.Output is
    procedure Print_Source_Listing
      (Sloc_Range      : Source_Location_Range;
       Buffer          : Text_Buffer_Ifc'Class;
-      Output_File     : WWIO.File_Type := WWIO.Standard_Output;
+      Output_File     : File_Type := Standard_Output;
       Caretting_Color : ANSI_Color)
    is
       procedure Line_Starting (Line_Nb : Natural);
@@ -69,14 +67,13 @@ package body Langkit_Support.Diagnostics.Output is
       ----------------
 
       procedure Line_Starting (Line_Nb : Natural) is
-         Num_Col : Text_Type (1 .. Col_Size) := (others => ' ');
+         Num_Col : String (1 .. Col_Size) := (others => ' ');
       begin
          Set_Color (Term_Info, Foreground => Blue);
 
          if Line_Nb >= 1 then
             declare
-               Line_Nb_Img : constant Wide_Wide_String :=
-                  To_Text (Stripped_Image (Line_Nb));
+               Line_Nb_Img : constant String := Stripped_Image (Line_Nb);
             begin
                Num_Col (1 .. Line_Nb_Img'Length) := Line_Nb_Img;
             end;
@@ -92,11 +89,12 @@ package body Langkit_Support.Diagnostics.Output is
       --  If the number of line to display is 1
       if Line_Nb = 1 then
          declare
-            Caret_Line : Text_Type (1 .. End_Col - 1) := (others => ' ');
+            Caret_Line : String (1 .. End_Col - 1) := (others => ' ');
          begin
             Caret_Line (Start_Col .. End_Col - 1) := (others => '^');
             Line_Starting (Start_Line);
-            Put_Line (Output_File, " " & Get_Line (Buffer, Start_Line));
+            Put_Line
+              (Output_File, " " & To_UTF8 (Get_Line (Buffer, Start_Line)));
             if Start_Col /= End_Col then
                Line_Starting (0);
                Set_Color (Term_Info, Foreground => Caretting_Color);
@@ -108,13 +106,15 @@ package body Langkit_Support.Diagnostics.Output is
       else
          declare
             Diff            : constant Natural := Line_Nb - 2;
-            Start_Underline : constant Text_Type
+            Start_Underline : constant String
                (1 .. Start_Col) := (others => '_');
-            End_Undeline    : constant Text_Type
+            End_Undeline    : constant String
                (1 .. Integer'Max (End_Col - 1, 1)) := (others => '_');
          begin
             Line_Starting (Start_Line);
-            Put_Line (Output_File, "  " & Get_Line (Buffer, Start_Line));
+            Put_Line
+              (Output_File,
+               "  " & To_UTF8 (Get_Line (Buffer, Start_Line)));
             Line_Starting (0);
             Set_Color (Term_Info, Foreground => Caretting_Color);
             Put_Line (Output_File, " " & Start_Underline & "^");
@@ -127,7 +127,7 @@ package body Langkit_Support.Diagnostics.Output is
                Set_Color (Term_Info, Foreground => Caretting_Color);
                Put (Output_File, "|");
                Put_Line (Output_File,
-                         " ~~~ " & To_Text (Stripped_Image (Diff))
+                         " ~~~ " & Stripped_Image (Diff)
                          & " other lines ~~~");
                Line_Starting (0);
                Set_Color (Term_Info, Foreground => Caretting_Color);
@@ -138,7 +138,9 @@ package body Langkit_Support.Diagnostics.Output is
             Set_Color (Term_Info, Foreground => Caretting_Color);
             Put (Output_File, "|");
             Reset_Colors;
-            Put_Line (Output_File, " " & Get_Line (Buffer, End_Line));
+            Put_Line
+              (Output_File,
+               " " & To_UTF8 (Get_Line (Buffer, End_Line)));
             Line_Starting (0);
             Set_Color (Term_Info, Foreground => Caretting_Color);
             Put_Line (Output_File, "|" & End_Undeline & "^");
@@ -156,7 +158,7 @@ package body Langkit_Support.Diagnostics.Output is
       Buffer      : Text_Buffer_Ifc'Class;
       Path        : String;
       Style       : Diagnostic_Style := Default_Diagnostic_Style;
-      Output_File : WWIO.File_Type := WWIO.Standard_Output)
+      Output_File : File_Type := Standard_Output)
    is
    begin
       if not Colors_Init then
@@ -168,14 +170,13 @@ package body Langkit_Support.Diagnostics.Output is
 
       Set_Style (Term_Info, Bright);
       Put (Output_File,
-           To_Text
-             (Path & ":"
-              & Stripped_Image (Integer (Self.Sloc_Range.Start_Line)) & ":"
-              & Stripped_Image
-                (Integer (Self.Sloc_Range.Start_Column)) & ":"));
+           Path & ":"
+           & Stripped_Image (Integer (Self.Sloc_Range.Start_Line)) & ":"
+           & Stripped_Image
+             (Integer (Self.Sloc_Range.Start_Column)) & ":");
 
       Set_Color (Term_Info, Foreground => Style.Color);
-      Put (Output_File, " " & To_Text (Style.Label) & ": ");
+      Put (Output_File, " " & To_UTF8 (To_Text (Style.Label)) & ": ");
       Reset_Colors;
 
       --  Put the error message
@@ -183,7 +184,7 @@ package body Langkit_Support.Diagnostics.Output is
       declare
          In_Lang_Entity : Boolean := False;
       begin
-         for C of To_Text (Self.Message) loop
+         for C of To_UTF8 (To_Text (Self.Message)) loop
 
             --  Style backtick parts: put everything in `Bright` inbetween
             --  backticks.
@@ -197,7 +198,7 @@ package body Langkit_Support.Diagnostics.Output is
                end if;
                In_Lang_Entity := not In_Lang_Entity;
             end if;
-            Put (C);
+            Put (Output_File, C);
          end loop;
       end;
       New_Line (Output_File);

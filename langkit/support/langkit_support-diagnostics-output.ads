@@ -21,13 +21,11 @@
 --      Eventually, this should be exposed to generated library users in some
 --      fashion.
 
-with Ada.Wide_Wide_Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 
 with GNATCOLL.Terminal; use GNATCOLL.Terminal;
 
 package Langkit_Support.Diagnostics.Output is
-
-   package WWIO renames Ada.Wide_Wide_Text_IO;
 
    type Diagnostic_Style is record
       Label : Unbounded_Text_Type;
@@ -47,7 +45,7 @@ package Langkit_Support.Diagnostics.Output is
       Buffer      : Text_Buffer_Ifc'Class;
       Path        : String;
       Style       : Diagnostic_Style := Default_Diagnostic_Style;
-      Output_File : WWIO.File_Type := WWIO.Standard_Output);
+      Output_File : File_Type := Standard_Output);
    --  Pretty-print given diagnostic. Outputs the diagnostic on ``stdout`` in a
    --  form that is developer friendly when used in a command line
    --  application.
