@@ -3,10 +3,14 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
-with Langkit_Support.Text;     use Langkit_Support.Text;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
 with Libfoolang.Common;        use Libfoolang.Common;
-with Libfoolang.Introspection; use Libfoolang.Introspection;
+with Libfoolang.Generic_API.Introspection;
+use Libfoolang.Generic_API.Introspection;
 with Libfoolang.Rewriting;     use Libfoolang.Rewriting;
 
 procedure Iter_Units is
@@ -27,10 +31,14 @@ procedure Iter_Units is
    DA : constant Node_Rewriting_Handle := Handle (Root (Unit_A).Child (1));
    DB : constant Node_Rewriting_Handle := Handle (Root (Unit_B).Child (1));
 begin
-   Set_Child (DA, Index (Kind (DA), Def_F_Expr),
-              Create_Token_Node (RH, Foo_Literal, "11"));
-   Set_Child (DB, Index (Kind (DB), Def_F_Expr),
-              Create_Token_Node (RH, Foo_Literal, "22"));
+   Set_Child
+     (DA,
+      Syntax_Field_Index (Member_Refs.Def_F_Expr, Type_Refs.Def),
+      Create_Token_Node (RH, Foo_Literal, "11"));
+   Set_Child
+     (DB,
+      Syntax_Field_Index (Member_Refs.Def_F_Expr, Type_Refs.Def),
+      Create_Token_Node (RH, Foo_Literal, "22"));
 
    declare
       function Is_Before (Left, Right : Unit_Rewriting_Handle) return Boolean;

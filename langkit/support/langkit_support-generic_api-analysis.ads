@@ -233,6 +233,12 @@ package Langkit_Support.Generic_API.Analysis is
    --  ``token_start`` and the ``token_end`` of all ghost nodes is the token
    --  right after this logical position.
 
+   function Is_Token_Node (Self : Lk_Node'Class) return Boolean;
+   --  Shortcut for ``Is_Token_Node (Type_Of (Self))``
+
+   function Is_List_Node (Self : Lk_Node'Class) return Boolean;
+   --  Shortcut for ``Is_List_Node (Type_Of (Self))``
+
    type Visit_Status is (Into, Over, Stop);
    --  Helper type to control the node traversal process. See the ``Traverse``
    --  subprograms below.

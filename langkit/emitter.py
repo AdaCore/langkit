@@ -43,7 +43,6 @@ class Emitter:
                  main_source_dirs: Set[str] = set(),
                  main_programs: Set[str] = set(),
                  no_property_checks: bool = False,
-                 generate_ada_api: bool = True,
                  generate_gdb_hook: bool = True,
                  pretty_print: bool = False,
                  post_process_ada: PostProcessFn = None,
@@ -75,9 +74,6 @@ class Emitter:
         :param no_property_checks: If True, do not emit safety checks in the
             generated code for properties. Namely, this disables null checks on
             field access.
-
-        :param generate_ada_api: If True, generate the public Ada API. If False
-            and there is no main to generate, do not generate this Ada API.
 
         :param generate_gdb_hook: Whether to generate the ".debug_gdb_scripts"
             section. Good for debugging, but better to disable for releases.
@@ -136,7 +132,6 @@ class Emitter:
             add_template_dir(dirpath)
 
         self.no_property_checks = no_property_checks
-        self.generate_ada_api = generate_ada_api or bool(main_programs)
         self.generate_gdb_hook = generate_gdb_hook
         self.generate_unparser = context.generate_unparser
         self.pretty_print = pretty_print
@@ -459,7 +454,6 @@ class Emitter:
                          template_base_name: str,
                          rel_qual_name: str,
                          has_body: bool = True,
-                         ada_api: bool = False,
                          unparser: bool = False,
                          cached_body: bool = False,
                          is_interface: bool = True):
@@ -470,9 +464,6 @@ class Emitter:
 
                 :param rel_qual_name: Qualified name for the unit to generate,
                     without the top-level library name.
-
-                :param ada_api: Whether we can avoid generating this unit if
-                    the Ada API is disabled.
 
                 :param unparser: Whether we can avoid generating this unit if
                     unparsing is disabled.
@@ -491,7 +482,6 @@ class Emitter:
                 self.qual_name = (rel_qual_name.split('.')
                                   if rel_qual_name
                                   else [])
-                self.ada_api = ada_api
                 self.unparser = unparser
                 self.has_body = has_body
                 self.cached_body = cached_body
@@ -503,55 +493,45 @@ class Emitter:
             # Unit for declarations used by Analysis and Implementation
             Unit('pkg_common', 'Common'),
             # Unit for public analysis primitives
-            Unit('pkg_analysis', 'Analysis', ada_api=True),
+            Unit('pkg_analysis', 'Analysis'),
             # Unit for converters between public Ada types and C API-level ones
-            Unit('pkg_c', 'C', ada_api=True),
+            Unit('pkg_c', 'C'),
             # Unit for implementation of analysis primitives
             Unit('pkg_implementation', 'Implementation'),
-            # Unit for AST introspection public API
-            Unit('pkg_introspection', 'Introspection', ada_api=True),
-            # Unit for AST introspection internal API
-            Unit('pkg_introspection_impl', 'Introspection_Implementation'),
             # Unit for AST node iteration primitives
-            Unit('pkg_iterators', 'Iterators', ada_api=True),
+            Unit('pkg_iterators', 'Iterators'),
             # Unit for converters between public and implementation types
-            Unit('pkg_public_converters', 'Public_Converters', has_body=True,
-                 ada_api=True),
+            Unit('pkg_public_converters', 'Public_Converters', has_body=True),
             Unit('pkg_private_converters', 'Private_Converters',
-                 has_body=False),
+                 has_body=True),
             # Unit for AST rewriting primitives
-            Unit('pkg_rewriting', 'Rewriting', ada_api=True, unparser=True),
+            Unit('pkg_rewriting', 'Rewriting', unparser=True),
             # Unit for AST rewriting implementation
             Unit('pkg_rewriting_impl', 'Rewriting_Implementation',
                  unparser=True, is_interface=False),
             # Unit for AST unparsing primitives
-            Unit('pkg_unparsing', 'Unparsing', ada_api=True, unparser=True),
+            Unit('pkg_unparsing', 'Unparsing', unparser=True),
             # Unit for AST implementation of unparsing primitives
             Unit('pkg_unparsing_impl', 'Unparsing_Implementation',
                  unparser=True, is_interface=False),
             # Unit for all parsers
             Unit('parsers/pkg_main', 'Parsers'),
             # Units for the lexer
-            Unit('pkg_lexer', 'Lexer', ada_api=True),
+            Unit('pkg_lexer', 'Lexer'),
             Unit('pkg_lexer_impl', 'Lexer_Implementation'),
             Unit('pkg_lexer_state_machine', 'Lexer_State_Machine',
                  has_body=True, cached_body=not hasattr(self, "dfa_code")),
             # Unit for debug helpers
             Unit('pkg_debug', 'Debug'),
             # Unit for the Ada generic Langkit API
-            Unit('pkg_generic_api', 'Generic_API', ada_api=True),
+            Unit('pkg_generic_api', 'Generic_API'),
             Unit('pkg_generic_api_introspection',
-                 'Generic_API.Introspection',
-                 has_body=False, ada_api=True),
-            Unit('pkg_generic_impl', 'Generic_Impl',
-                 ada_api=True, is_interface=False),
+                 'Generic_API.Introspection', has_body=False),
+            Unit('pkg_generic_impl', 'Generic_Impl', is_interface=False),
             Unit('pkg_generic_introspection', 'Generic_Introspection',
-                 ada_api=True, is_interface=False),
+                 is_interface=False),
         ]:
-            if (
-                (not self.generate_ada_api and u.ada_api) or
-                (not self.generate_unparser and u.unparser)
-            ):
+            if not self.generate_unparser and u.unparser:
                 continue
             self.write_ada_module(self.src_dir, u.template_base_name,
                                   u.qual_name, u.has_body, u.cached_body,

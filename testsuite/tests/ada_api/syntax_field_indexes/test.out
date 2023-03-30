@@ -1,0 +1,35 @@
+Syntax_Field_Index table:
+FooNode.f_fld_1: A1B1( 2) A2B1( 1) A2B2( 1)
+FooNode.f_fld_2: A2B1( 2) A2B2( 3)
+FooNode.f_fld_3: A1B1( 1) A1B2( 1) A2B1( 3) A2B2( 2)
+
+Calling on a null member:
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE:
+  null struct member reference
+
+Calling on a null type:
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE:
+  null type reference
+
+Calling on a member that is not a syntax field
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE:
+  member is not a syntax field
+
+Calling on a non-node type ref:
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE:
+  invalid node type
+
+Calling on an abstract node:
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE:
+  node is abstract
+
+Calling on a member not owned by the node
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE:
+  A2B1 does not have the A1.f_only_on_a1 member
+
+Calling on a member that is null for a node
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE:
+  syntax field is null for this node
+
+main.adb: Done.
+Done

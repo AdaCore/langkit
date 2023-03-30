@@ -1,9 +1,12 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Libfoolang.Analysis;      use Libfoolang.Analysis;
-with Libfoolang.Common;        use Libfoolang.Common;
-with Libfoolang.Introspection; use Libfoolang.Introspection;
-with Libfoolang.Rewriting;     use Libfoolang.Rewriting;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
+
+with Libfoolang.Analysis;  use Libfoolang.Analysis;
+with Libfoolang.Generic_API.Introspection;
+use Libfoolang.Generic_API.Introspection;
+with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 
 procedure Revert is
    Buffer : constant String :=
@@ -24,7 +27,9 @@ begin
    --  Alter the tree so that rewriting will fail and so that the resulting
    --  list of tokens it much smaller.
    Set_Child
-     (Def_A, Index (Kind (Def_A), Def_F_Name), No_Node_Rewriting_Handle);
+     (Def_A,
+      Syntax_Field_Index (Member_Refs.Def_F_Name, Type_Refs.Def),
+      No_Node_Rewriting_Handle);
    Remove_Child (Def_List, 5);
    Remove_Child (Def_List, 4);
 

@@ -93,6 +93,11 @@ package body Langkit_Support.Generic_API.Introspection is
    --  Raise a ``Precondition_Failure`` if ``Member`` is
    --  ``No_Struct_Member_Ref``.
 
+   procedure Check_Struct_Owns_Member
+     (Struct : Type_Ref; Member : Struct_Member_Ref);
+   --  Raise a ``Precondition_Failure`` if ``Member`` is not a member of
+   --  ``Struct``.
+
    procedure Check_Struct_Member
      (Id : Language_Id; Member : Struct_Member_Index);
    --  If ``Member`` is not a valid struct member for the given language, raise
@@ -1254,6 +1259,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return Create_Name (Node.Id.Struct_Types.all (Node.Index).Name.all);
    end Node_Type_Name;
 
+   -------------------------
+   -- Node_Type_Repr_Name --
+   -------------------------
+
+   function Node_Type_Repr_Name (Node : Type_Ref) return Text_Type is
+   begin
+      Check_Node_Type (Node);
+      return Node.Id.Struct_Types.all (Node.Index).Repr_Name.all;
+   end Node_Type_Repr_Name;
+
    -----------------
    -- Is_Abstract --
    -----------------
@@ -1413,6 +1428,27 @@ package body Langkit_Support.Generic_API.Introspection is
       end if;
    end Check_Struct_Member;
 
+   ------------------------------
+   -- Check_Struct_Owns_Member --
+   ------------------------------
+
+   procedure Check_Struct_Owns_Member
+     (Struct : Type_Ref; Member : Struct_Member_Ref)
+   is
+      Member_Found : Boolean := False;
+   begin
+      for M of Members (Struct) loop
+         if M = Member then
+            Member_Found := True;
+         end if;
+      end loop;
+      if not Member_Found then
+         raise Precondition_Failure with
+           Debug_Name (Struct) & " does not have the " & Debug_Name (Member)
+           & " member";
+      end if;
+   end Check_Struct_Owns_Member;
+
    ----------------------------------
    -- Check_Struct_Member_Argument --
    ----------------------------------
@@ -1465,6 +1501,64 @@ package body Langkit_Support.Generic_API.Introspection is
       Check_Struct_Member (Member);
       return Member.Index >= Member.Id.First_Property;
    end Is_Property;
+
+   -----------------
+   -- Is_Null_For --
+   -----------------
+
+   function Is_Null_For
+     (Member : Struct_Member_Ref; Node : Type_Ref) return Boolean
+   is
+   begin
+      Check_Struct_Member (Member);
+      Check_Node_Type (Node);
+      Check_Same_Language (Member.Id, Node.Id);
+      Check_Struct_Owns_Member (Node, Member);
+
+      declare
+         M : Struct_Member_Descriptor renames
+           Member.Id.Struct_Members.all (Member.Index).all;
+      begin
+         return
+           M.Null_For /= null
+           and then Node.Index in M.Null_For.all'Range
+           and then M.Null_For.all (Node.Index);
+      end;
+   end Is_Null_For;
+
+   ------------------------
+   -- Syntax_Field_Index --
+   ------------------------
+
+   function Syntax_Field_Index
+     (Member : Struct_Member_Ref; Node : Type_Ref) return Positive is
+   begin
+      Check_Node_Type (Node);
+      if Is_Abstract (Node) then
+         raise Precondition_Failure with "node is abstract";
+      end if;
+
+      Check_Struct_Member (Member);
+      Check_Same_Language (Member.Id, Node.Id);
+      Check_Struct_Owns_Member (Node, Member);
+      if not Is_Field (Member) then
+         raise Precondition_Failure with "member is not a syntax field";
+      elsif Is_Null_For (Member, Node) then
+         raise Precondition_Failure with "syntax field is null for this node";
+      end if;
+
+      declare
+         M     : Struct_Member_Descriptor renames
+           Member.Id.Struct_Members.all (Member.Index).all;
+
+         --  Thanks to the checks above, we should never be in a case where
+         --  ``M.Indexes`` is null or ``Index`` is zero.
+
+         Index : Natural renames M.Indexes.all (Node.Index);
+      begin
+         return Index;
+      end;
+   end Syntax_Field_Index;
 
    -----------------
    -- All_Members --
@@ -1681,7 +1775,6 @@ package body Langkit_Support.Generic_API.Introspection is
    is
       Id           : Language_Id;
       T            : Type_Ref;
-      Member_Found : Boolean;
       Args_Count   : Any_Argument_Index;
    begin
       --  Check that we have a base struct value
@@ -1695,17 +1788,7 @@ package body Langkit_Support.Generic_API.Introspection is
 
       Check_Struct_Member (Member);
       Check_Same_Language (Id, Member.Id);
-      Member_Found := False;
-      for M of Members (T) loop
-         if M = Member then
-            Member_Found := True;
-         end if;
-      end loop;
-      if not Member_Found then
-         raise Precondition_Failure with
-           Debug_Name (T) & " does not have the " & Debug_Name (Member)
-           & " member";
-      end if;
+      Check_Struct_Owns_Member (T, Member);
 
       --  Check that the arguments match Member
 

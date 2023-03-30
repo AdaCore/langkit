@@ -1,10 +1,14 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Langkit_Support.Text;     use Langkit_Support.Text;
-with Libfoolang.Analysis;      use Libfoolang.Analysis;
-with Libfoolang.Common;        use Libfoolang.Common;
-with Libfoolang.Introspection; use Libfoolang.Introspection;
-with Libfoolang.Rewriting;     use Libfoolang.Rewriting;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Text; use Langkit_Support.Text;
+
+with Libfoolang.Analysis;  use Libfoolang.Analysis;
+with Libfoolang.Common;    use Libfoolang.Common;
+with Libfoolang.Generic_API.Introspection;
+use Libfoolang.Generic_API.Introspection;
+with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 
 with Process_Apply;
 
@@ -183,7 +187,7 @@ begin
    begin
       Set_Child
         (Fifth_Child,
-         Index (Kind (Fifth_Child), Def_F_Expr),
+         Syntax_Field_Index (Member_Refs.Def_F_Expr, Type_Refs.Def),
          Top_Expr);
    end;
 

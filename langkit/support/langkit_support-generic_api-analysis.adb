@@ -852,6 +852,24 @@ package body Langkit_Support.Generic_API.Analysis is
       return Self.Desc.Node_Is_Ghost (Self.Internal.Node);
    end Is_Ghost;
 
+   ------------------
+   -- Is_List_Node --
+   ------------------
+
+   function Is_List_Node (Self : Lk_Node'Class) return Boolean is
+   begin
+      return Is_List_Node (Type_Of (Lk_Node (Self)));
+   end Is_List_Node;
+
+   -------------------
+   -- Is_Token_Node --
+   -------------------
+
+   function Is_Token_Node (Self : Lk_Node'Class) return Boolean is
+   begin
+      return Is_Token_Node (Type_Of (Lk_Node (Self)));
+   end Is_Token_Node;
+
    --------------
    -- Traverse --
    --------------

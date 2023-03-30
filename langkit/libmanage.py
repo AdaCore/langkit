@@ -684,8 +684,6 @@ class ManageScript:
         # build mode.
         self.build_modes = getattr(parsed_args, 'build_modes', [])
 
-        self.no_ada_api = parsed_args.no_ada_api
-
         # If asked to, setup the exception hook as a last-chance handler to
         # invoke a debugger in case of uncaught exception.
         if parsed_args.debug:
@@ -802,19 +800,16 @@ class ManageScript:
             for sdir in self.main_source_dirs
         }
 
-        main_programs = ([] if self.no_ada_api else self.main_programs)
-
         explicit_passes_triggers = {p: True for p in args.pass_on}
         explicit_passes_triggers.update({p: False for p in args.pass_off})
 
         self.context.create_all_passes(
             lib_root=self.dirs.build_dir(),
             main_source_dirs=main_source_dirs,
-            main_programs=main_programs,
+            main_programs=self.main_programs,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
             no_property_checks=args.no_property_checks,
-            generate_ada_api=not args.no_ada_api,
             generate_unparser=args.generate_unparser,
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
@@ -1148,18 +1143,17 @@ class ManageScript:
 
         self.gprbuild(args, self.lib_project, is_library=True)
 
-        # Then build the main programs, if any
-        if not self.no_ada_api:
-            disabled_mains: Set[str] = reduce(
-                set.union, args.disable_mains, set()
-            )
-            mains = (set()
-                     if args.disable_all_mains else
-                     self.main_programs - disabled_mains)
-            if mains:
-                self.log_info("Building the main programs...", Colors.HEADER)
-                self.gprbuild(args, self.mains_project,
-                              is_library=False, mains=mains)
+        # Then build the main programs
+        disabled_mains: Set[str] = reduce(
+            set.union, args.disable_mains, set()
+        )
+        mains = (set()
+                 if args.disable_all_mains else
+                 self.main_programs - disabled_mains)
+        if mains:
+            self.log_info("Building the main programs...", Colors.HEADER)
+            self.gprbuild(args, self.mains_project,
+                          is_library=False, mains=mains)
 
         # Build the Java bindings
         if args.enable_java:

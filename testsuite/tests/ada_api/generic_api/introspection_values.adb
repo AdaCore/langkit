@@ -165,6 +165,8 @@ procedure Introspection_Values is
    P_Create_Bigint_Iterator   : Struct_Member_Ref;
    P_Id_Bigint_Iterator       : Struct_Member_Ref;
 
+   F_Fld_1, F_Fld_2 : Struct_Member_Ref;
+
    Int_Type, Bool_Type : Type_Ref;
    False_Bool          : constant Value_Ref := From_Bool (Id, False);
    True_Bool           : constant Value_Ref := From_Bool (Id, True);
@@ -217,6 +219,10 @@ begin
             Point_Label := M;
          elsif DN = "BaseExample.p_id_bool" then
             P_Id_Bool := M;
+         elsif DN = "BaseExample.f_fld_1" then
+            F_Fld_1 := M;
+         elsif DN = "BaseExample.f_fld_2" then
+            F_Fld_2 := M;
          elsif DN = "Example.p_id_int" then
             P_Id_Int := M;
          elsif DN = "Example.p_id_bigint" then
@@ -734,6 +740,25 @@ begin
             New_Line;
          end if;
       end loop;
+   end;
+
+   Put_Line ("Eval_Node_Member: abstract field with null derivation:");
+   begin
+      Value := Eval_Node_Member (As_Node (Example_Value), F_Fld_1);
+      Inspect (Value);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Eval_Node_Member: abstract field with concrete derivation:");
+   begin
+      Value := Eval_Node_Member (As_Node (Example_Value), F_Fld_2);
+      Inspect (Value);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
    end;
 
    Put ("Eval_Node_Member: null node value: ");

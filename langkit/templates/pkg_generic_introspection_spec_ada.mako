@@ -367,6 +367,98 @@ private package ${ada_lib_name}.Generic_Introspection is
          %>
       % endfor
 
+      ## If this member is a syntax field that is always null for some owning
+      ## node, emit a table that describes when it is null.
+      <%
+         # Name for the constant array that describes the null fields, or None
+         # if there are no null fields.
+         null_for_const = None
+
+         # If we generate such an array, associations to initialize it
+         null_for_assocs = {}
+
+         # Determine the set of null fields in m's derivations. Note that only
+         # derived fields can be null, so if m is concrete, we know that it is
+         # never null.
+         null_fields = set()
+         if isinstance(m, Field) and m.abstract:
+            null_fields = {f for f in m.concrete_fields if f.null}
+
+         # If there is at least one null field, generate the array that
+         # describes them.
+         if null_fields:
+            null_for_const = f"Null_For_{name}"
+
+            # Initialize null_for_assocs for all nodes that have the "f" field
+            def add(node):
+               null_for_assocs[node] = False
+               for child in node.subclasses:
+                  add(child)
+            add(m.struct)
+
+            # Set the flag to True for all concrete node for which this field
+            # is null.
+            for f in null_fields:
+               for t in TypeSet(types={f.struct}).matched_types:
+                  null_for_assocs[t] = True
+      %>
+      % if null_for_const:
+         ${null_for_const} : aliased constant Type_Flags := (${",\n".join(
+            f"{G.type_index(node)} => {value}"
+            for node, value in null_for_assocs.items()
+         )});
+      % endif
+
+      ## If this member is a syntax field, emit a table that provides its index
+      ## for each node that has it as a concrete and non-null field.
+      <%
+         # Name for the constant array, or None if this is not a syntax field
+         indexes_const = None
+
+         # Mapping from node types that have this field to the corresponding
+         # indexes, or to 0 if this field is abstract or null.
+         index_assocs = {}
+
+         if isinstance(m, Field):
+            indexes_const = f"Indexes_For_{name}"
+            for t in m.struct.type_set:
+               # Determine the index for the "m" syntax field in the "t"
+               # concrete node.
+               index = 0
+               if not t.abstract:
+                  t_fields = t.get_parse_fields(include_inherited=True)
+                  current_index = 0
+                  found = False
+                  for f in t_fields:
+                     # "t" is a concrete node, so it should not have any
+                     # abstract syntax field.
+                     assert not f.abstract
+
+                     # Since null fields do not have an index, we must skip
+                     # them for index computation.
+                     if not f.null:
+                        current_index += 1
+
+                     if f.root == m:
+                        found = True
+                        break
+
+                  # "t" is a concrete node, so it should not have any abstract
+                  # syntax field.
+                  assert found
+                  if not f.null:
+                     index = current_index
+
+               index_assocs[t] = index
+      %>
+      % if indexes_const:
+         ${indexes_const} : aliased constant Syntax_Field_Indexes :=
+           (${",\n".join(
+              f"{G.type_index(node)} => {value}"
+              for node, value in index_assocs.items()
+           )});
+      % endif
+
       ${name_const} : aliased constant Text_Type :=
         ${text_repr(m.api_name.camel_with_underscores)};
       ${desc_name} : aliased constant Struct_Member_Descriptor :=
@@ -374,6 +466,12 @@ private package ${ada_lib_name}.Generic_Introspection is
          Name          => ${name_const}'Access,
          Owner         => ${G.type_index(m.struct)},
          Member_Type   => ${G.type_index(m.type)},
+         Null_For      => ${(
+            "null" if null_for_const is None else f"{null_for_const}'Access"
+         )},
+         Indexes       => ${(
+            "null" if indexes_const is None else f"{indexes_const}'Access"
+         )},
          Arguments     => (
             % if m.arguments:
                ${",\n".join(args)}
@@ -397,6 +495,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       <%
          if t.is_ast_node:
             name = t.kwless_raw_name
+            repr_name = t.repr_name()
             base = t.base
             abstract = t.abstract
             token_node = t.is_token_node
@@ -404,6 +503,7 @@ private package ${ada_lib_name}.Generic_Introspection is
             subclasses = t.subclasses
          else:
             name = t.api_name
+            repr_name = None
             base = None
             abstract = False
             token_node = False
@@ -411,6 +511,9 @@ private package ${ada_lib_name}.Generic_Introspection is
             subclasses = []
          desc_const = f"Node_Desc_For_{name}"
          name_const = f"Node_Name_For_{name}"
+         repr_name_const = (
+            None if repr_name is None else f"Node_Repr_Name_For_{name}"
+         )
          struct_type_descs.append(f"{G.type_index(t)} => {desc_const}'Access")
 
          def get_members(include_inherited):
@@ -447,6 +550,10 @@ private package ${ada_lib_name}.Generic_Introspection is
       %>
       ${name_const} : aliased constant Text_Type :=
         ${text_repr(name.camel_with_underscores)};
+      % if repr_name is not None:
+         ${repr_name_const} : aliased constant Text_Type :=
+           ${text_repr(repr_name)};
+      % endif
       ${desc_const} : aliased constant Struct_Type_Descriptor :=
         (Derivations_Count => ${len(subclasses)},
          Member_Count      => ${len(members)},
@@ -455,6 +562,9 @@ private package ${ada_lib_name}.Generic_Introspection is
          Is_Token_Node     => ${token_node},
          Is_List_Node      => ${list_node},
          Name              => ${name_const}'Access,
+         Repr_Name         => ${(
+            "null" if repr_name is None else f"{repr_name_const}'Access"
+         )},
          Inherited_Members => ${len(inherited_members)},
          Derivations       => (
            % if subclasses:
