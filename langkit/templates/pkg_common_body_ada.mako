@@ -14,9 +14,7 @@ use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Conversions;
 
-% if emitter.generate_ada_api:
 with ${ada_lib_name}.Generic_API;
-% endif
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
@@ -61,13 +59,11 @@ package body ${ada_lib_name}.Common is
       Last          : out Natural);
    --  Implementations for converters soft-links
 
-% if emitter.generate_ada_api:
    function From_Generic (Token : Lk_Token) return Common.Token_Reference
      with Export, External_Name => "${ada_lib_name}__from_generic_token";
    function To_Generic (Token : Common.Token_Reference) return Lk_Token
      with Export, External_Name => "${ada_lib_name}__to_generic_token";
    --  Implementation for converters hard-links in Private_Converters
-% endif
 
    function "+" is new Ada.Unchecked_Conversion
      (Langkit_Support.Internal.Analysis.Internal_Context, Internal_Context);
@@ -459,8 +455,6 @@ package body ${ada_lib_name}.Common is
               Sloc_Range    => Sloc_Range (TDH, Raw_Data));
    end Convert;
 
-% if emitter.generate_ada_api:
-
    ------------------
    -- From_Generic --
    ------------------
@@ -494,8 +488,6 @@ package body ${ada_lib_name}.Common is
           Token.Safety_Net.Context_Version,
           Token.Safety_Net.TDH_Version));
    end To_Generic;
-
-% endif
 
    --------------------------
    -- Wrap_Token_Reference --
