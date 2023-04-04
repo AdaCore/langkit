@@ -2077,7 +2077,7 @@ class _Transform(Parser):
         nb_fields = len(self.parse_fields)
         check_source_language(
             nb_transform_values == nb_fields,
-            'Transform parser generates {} values, but {} has {} fields'
+            'Transform parser gets {} values, but {} has {} fields'
             .format(nb_transform_values, result.dsl_name, nb_fields)
         )
 
