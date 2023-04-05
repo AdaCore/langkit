@@ -60,9 +60,21 @@ generic
    with function Combine (L, R : Node_Metadata) return Node_Metadata;
 
    with function Can_Reach (Node, From : Node_Type) return Boolean is <>;
-   --  Function that will allow filtering nodes depending on the origin node of
-   --  the request. In practice, this is used to implement sequential semantics
-   --  for lexical envs, as-in, node declared after another is not yet visible.
+   --  Return whether ``Node`` can be reached from ``From``.
+   --
+   --  This function is used to filter the result of a lexical env lookup: for
+   --  a lookup triggered on node ``From`` (formal ``From`` in
+   --  ``Get``/``Get_First`` functions), nodes ``Node`` for which ``Can_Reach
+   --  (Node, From)`` returns False are excluded from the result.
+   --
+   --  This is used to implement sequential semantics: in the following
+   --  example, looking for ``D`` from the second line should return the
+   --  definition in the first line (``E`` can reach ``D`` line 1), but not the
+   --  one in the third line (``E`` cannot reach ``D`` line 3)::
+   --
+   --     def D = 1
+   --     def E = D
+   --     def D = 2
 
    with function Is_Rebindable (Node : Node_Type) return Boolean is <>;
    --  Return whether a lexical environment whose node is Node can be rebound
