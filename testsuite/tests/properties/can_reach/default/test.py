@@ -1,5 +1,5 @@
 """
-Test the handling of analysis units in the properties DSL.
+Check that the "can_reach" expression works as expected.
 """
 
 from langkit.dsl import ASTNode, T
