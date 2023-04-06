@@ -481,12 +481,17 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             valgrind_suppressions=['ocaml'])
 
     if java_main is not None:
+        java_exec = P.realpath(P.join(
+            env['JAVA_HOME'],
+            'bin',
+            'java'
+        ))
         cmd = [
-            'java',
+            java_exec,
             '-Dfile.encoding=UTF-8',
             f"-Djava.library.path={env['LD_LIBRARY_PATH']}",
         ]
-        if 'graalvm' in env.get("JAVA_HOME", ''):
+        if 'graalvm' in env['JAVA_HOME']:
             cmd.append((
                 '--add-opens=org.graalvm.truffle/com.oracle.truffle.api.'
                 'strings=ALL-UNNAMED'
@@ -498,21 +503,26 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
 
     if ni_main is not None:
         # Compile the Java tests
+        javac_exec = P.realpath(P.join(
+            env['JAVA_HOME'],
+            'bin',
+            'javac'
+        ))
         run(
-            'javac',
+            javac_exec,
             '-encoding', 'utf8',
             f'{ni_main}.java',
         )
 
         # Run native-image to compile the tests
         ni_exec = P.realpath(P.join(
-            os.environ["GRAAL_HOME"],
+            os.environ['GRAAL_HOME'],
             'bin',
             'native-image'
         ))
         class_path = os.path.pathsep.join([
             P.realpath('.'),
-            env.get('CLASSPATH', ''),
+            env['CLASSPATH'],
         ])
         run(
             ni_exec,
