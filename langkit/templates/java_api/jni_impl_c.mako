@@ -47,15 +47,17 @@ uint32_t Char_unwrap(JNIEnv *, jobject);
 ${big_integer_type} BigInteger_new_value();
 jobject BigInteger_wrap(JNIEnv *, ${big_integer_type});
 ${big_integer_type} BigInteger_unwrap(JNIEnv *, jobject);
+void BigInteger_release(${big_integer_type});
 
 ${symbol_type} Symbol_new_value();
 jobject Symbol_wrap(JNIEnv *, ${symbol_type});
 ${symbol_type} Symbol_unwrap(JNIEnv *, jobject, ${analysis_context_type});
 jthrowable new_symbol_exception(JNIEnv *, jstring);
 
-${string_type} StringWrapper_new_value();
-jobject StringWrapper_wrap(JNIEnv *, ${string_type});
-${string_type} StringWrapper_unwrap(JNIEnv *, jobject);
+${string_type} String_new_value();
+jobject String_wrap(JNIEnv *, ${string_type});
+${string_type} String_unwrap(JNIEnv *, jobject);
+void String_release(${string_type});
 
 ${text_type} Text_new_value();
 jobject Text_wrap(JNIEnv *, ${text_type});
@@ -141,9 +143,6 @@ void * get_reference(
     JNIEnv *env,
     jobject object
 ) {
-    // Null protection
-    if(object == NULL) return NULL;
-
     // Get the object class
     jclass clazz = (*env)->GetObjectClass(env, object);
 
@@ -160,23 +159,6 @@ void * get_reference(
     return PointerWrapper_unwrap(env, reference);
 }
 
-// Get the analysis unit of the given node
-jobject get_node_unit(
-    JNIEnv *env,
-    jobject entity
-) {
-    // Unwrap the entity
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
-
-    // Call the native function
-    ${analysis_unit_type} native_unit = ${nat("node_unit")}(
-        &native_entity
-    );
-
-    // Return the wrapped analysis unit
-    return AnalysisUnit_wrap(env, native_unit);
-}
-
 // Translate a Java string to a C char pointer with the UTF-8 encoding
 const char * to_c_string(
     JNIEnv *env,
@@ -185,12 +167,106 @@ const char * to_c_string(
     return (*env)->GetStringUTFChars(env, j_string, NULL);
 }
 
+// Release the given C string assocaited with the given Java string
+void release_c_string(
+    JNIEnv *env,
+    jstring j_string,
+    const char *c_string
+) {
+    (*env)->ReleaseStringUTFChars(env, j_string, c_string);
+}
+
 // Create a Java string from a C char pointer
 jstring to_j_string(
     JNIEnv *env,
     const char *c_string
 ) {
     return (*env)->NewStringUTF(env, c_string);
+}
+
+// Decode an UTF 32 buffer in a Java string
+jstring decode_utf_32(
+    JNIEnv *env,
+    size_t length,
+    uint32_t *to_decode
+) {
+    // Get the main class
+    jclass clazz = (*env)->FindClass(env, "${sig_base}");
+
+    // Get the conversion method
+    jmethodID decode_method = (*env)->GetStaticMethodID(
+        env,
+        clazz,
+        "decodeUTF32",
+        "([B)Ljava/lang/String;"
+    );
+
+    // Create a byte array from the buffer to decode
+    const jbyte *byte_buffer = (jbyte *) to_decode;
+    jsize byte_length = (jsize) (length * 4);
+    jbyteArray byte_array = (*env)->NewByteArray(
+        env,
+        byte_length
+    );
+    (*env)->SetByteArrayRegion(
+        env,
+        byte_array,
+        0,
+        byte_length,
+        byte_buffer
+    );
+
+    // Call the Java method and return the result
+    return (jstring) (*env)->CallStaticObjectMethod(
+        env,
+        clazz,
+        decode_method,
+        byte_array
+    );
+}
+
+// Encode a Java string in a native buffer
+void encode_utf_32(
+    JNIEnv *env,
+    jstring string,
+    size_t *length_ref,
+    uint32_t **buffer_ref
+) {
+    // Get the main class
+    jclass clazz = (*env)->FindClass(env, "${sig_base}");
+
+    // Get the conversion method
+    jmethodID encode_method = (*env)->GetStaticMethodID(
+        env,
+        clazz,
+        "encodeUTF32",
+        "(Ljava/lang/String;)[B"
+    );
+
+    // Call the Java method to get the byte array
+    jbyteArray byte_array = (jbyteArray) (*env)->CallStaticObjectMethod(
+        env,
+        clazz,
+        encode_method,
+        string
+    );
+    size_t byte_length = (size_t) (*env)->GetArrayLength(
+        env,
+        byte_array
+    );
+
+    // Allocate the memory for the native buffer
+    *buffer_ref = (uint32_t *) malloc(byte_length);
+
+    // Write the native buffer and the length
+    *length_ref = byte_length / 4;
+    (*env)->GetByteArrayRegion(
+        env,
+        byte_array,
+        0,
+        byte_length,
+        (jbyte *) *buffer_ref
+    );
 }
 
 // ==========
@@ -236,9 +312,6 @@ void * PointerWrapper_unwrap(
     JNIEnv *env,
     jobject custom_pointer
 ) {
-    // Null protection
-    if(custom_pointer == NULL) return NULL;
-
     // Get the custom pointer class
     jclass clazz = (*env)->GetObjectClass(env, custom_pointer);
 
@@ -392,7 +465,7 @@ uint32_t Char_new_value() {
 // Wrap a native character in the Java wrapping class
 jobject Char_wrap(
     JNIEnv *env,
-    uint32_t native_character
+    uint32_t char_native
 ) {
     // Get the char class
     jclass clazz = (*env)->FindClass(env, "${sig_base}$Char");
@@ -410,7 +483,7 @@ jobject Char_wrap(
         env,
         clazz,
         constructor,
-        native_character
+        char_native
     );
 }
 
@@ -450,20 +523,31 @@ ${big_integer_type} BigInteger_new_value() {
 // Wrap a native big integer in the Java class
 jobject BigInteger_wrap(
     JNIEnv *env,
-    ${big_integer_type} native_bi
+    ${big_integer_type} big_int_native
 ) {
-    // Check the nullity
-    if(native_bi == NULL) return NULL;
+    // Get the representation of the big integer
+    ${text_type} representation_native = Text_new_value();
+    ${nat("big_integer_text")}(
+        big_int_native,
+        &representation_native
+    );
+    jobject representation_text = Text_wrap(env, representation_native);
+    jstring representation = get_text_content(env, representation_text);
+
+    // Destroy the representation text
+    ${nat("destroy_text")}(
+        &representation_native
+    );
 
     // Get the big integer class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$BigInteger");
+    jclass clazz = (*env)->FindClass(env, "java/math/BigInteger");
 
     // Get the object constructor
     jmethodID constructor = (*env)->GetMethodID(
         env,
         clazz,
         "<init>",
-        "(L${ptr_sig};)V"
+        "(Ljava/lang/String;)V"
     );
 
     // Return the new big integer
@@ -471,7 +555,7 @@ jobject BigInteger_wrap(
         env,
         clazz,
         constructor,
-        PointerWrapper_wrap(env, (void *) native_bi)
+        representation
     );
 }
 
@@ -480,54 +564,55 @@ ${big_integer_type} BigInteger_unwrap(
     JNIEnv *env,
     jobject big_integer
 ) {
-    return (${big_integer_type}) get_reference(env, big_integer);
-}
+    // Get the big integer class
+    jclass clazz = (*env)->GetObjectClass(env, big_integer);
 
-// Create a big integer from its text
-${api.jni_func_sig("create_big_integer", "jobject")}(
-    JNIEnv *env,
-    jclass jni_lib,
-    jobject text
-) {
-    // Get the native text
-    ${text_type} native_text = Text_unwrap(env, text);
+    // Get the representation of the big integer
+    jmethodID to_string_method = (*env)->GetMethodID(
+        env,
+        clazz,
+        "toString",
+        "()Ljava/lang/String;"
+    );
+    jstring representation = (*env)->CallObjectMethod(
+        env,
+        big_integer,
+        to_string_method
+    );
 
-    // Call the native function
+    // Create a text from the representations
+    jclass text_clazz = (*env)->FindClass(env, "${sig_base}$Text");
+    jmethodID create_method = (*env)->GetStaticMethodID(
+        env,
+        text_clazz,
+        "create",
+        "(Ljava/lang/String;)L${sig_base}$Text;"
+    );
+    jobject representation_text = (*env)->CallStaticObjectMethod(
+        env,
+        text_clazz,
+        create_method,
+        representation
+    );
+    ${text_type} representation_native = Text_unwrap(env, representation_text);
+
+    // Create a bit integer from the text
     ${big_integer_type} res = ${nat("create_big_integer")}(
-        &native_text
+        &representation_native
     );
 
-    // Return the big integer
-    return BigInteger_wrap(env, res);
+    // Destroy the text
+    free(representation_native.chars);
+
+    // Return the result
+    return res;
 }
 
-// Get the text from a big integer
-${api.jni_func_sig("big_integer_text", "jobject")} (
-    JNIEnv *env,
-    jclass jni_lib,
-    jobject big_integer
+// Release the given native big integer
+void BigInteger_release(
+    ${big_integer_type} big_int_native
 ) {
-    // Create the text result struct
-    ${text_type} res_struct = Text_new_value();
-
-    // Call the native function
-    ${nat("big_integer_text")}(
-        BigInteger_unwrap(env, big_integer),
-        &res_struct
-    );
-
-    // Return the text Java object
-    return Text_wrap(env, res_struct);
-}
-
-// Decrease the reference of a big integer
-${api.jni_func_sig("big_integer_decref", "void")} (
-    JNIEnv *env,
-    jclass jni_lib,
-    jlong big_integer
-) {
-    // Just call the native function with the reference
-    ${nat("big_integer_decref")}((${big_integer_type}) big_integer);
+    ${nat("big_integer_decref")}(big_int_native);
 }
 
 // ==========
@@ -546,7 +631,7 @@ ${symbol_type} Symbol_new_value() {
 // Wrap a native symbol in the Java class
 jobject Symbol_wrap(
     JNIEnv *env,
-    ${symbol_type} native_symbol
+    ${symbol_type} symbol_native
 ) {
     // Get the symbol class
     jclass clazz = (*env)->FindClass(env, "${sig_base}$Symbol");
@@ -562,7 +647,7 @@ jobject Symbol_wrap(
     // Get the text of the symbol
     ${text_type} text_native = Text_new_value();
     ${nat("symbol_text")}(
-        &native_symbol,
+        &symbol_native,
         &text_native
     );
     jobject text = Text_wrap(env, text_native);
@@ -659,96 +744,55 @@ jthrowable new_symbol_exception(
 // ==========
 
 // Create a new value for a langkit string
-${string_type} StringWrapper_new_value() {
+${string_type} String_new_value() {
     return NULL;
 }
 
-// Wrap a native langkit string in the Java wrapper class
-jobject StringWrapper_wrap(
+// Wrap a native langkit string in the Java class
+jstring String_wrap(
     JNIEnv *env,
-    ${string_type} native_string
+    ${string_type} string_native
 ) {
-    // Get the string wrapper class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$StringWrapper");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
+    return decode_utf_32(
         env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};[I)V"
-    );
-
-    // Get the string content
-    jintArray content = (*env)->NewIntArray(
-        env,
-        (jsize) native_string->length
-    );
-    (*env)->SetIntArrayRegion(
-        env,
-        content,
-        0,
-        (jsize) native_string->length,
-        (jint *) native_string->content
-    );
-
-    // Return the new string wrapper
-    return (*env)->NewObject(
-        env,
-        clazz,
-        constructor,
-        PointerWrapper_wrap(env, (void *) native_string),
-        content
+        (size_t) string_native->length,
+        string_native->content
     );
 }
 
 // Get the native langkit string from a Java wrapping instance
-${string_type} StringWrapper_unwrap(
+${string_type} String_unwrap(
     JNIEnv *env,
-    jobject string
+    jstring string
 ) {
-    return (${string_type}) get_reference(env, string);
-}
-
-// Create a new string wrapper
-${api.jni_func_sig("create_string", "jobject")} (
-    JNIEnv *env,
-    jclass jni_lib,
-    jbyteArray content
-) {
-    // Get the content length
-    int length = (int) (*env)->GetArrayLength(env, content) / 4;
-    uint32_t *native_content = (uint32_t *) malloc(
-        length * sizeof(uint32_t)
-    );
-    (*env)->GetByteArrayRegion(
+    // Encode the Java string
+    size_t length;
+    uint32_t *buffer;
+    encode_utf_32(
         env,
-        content,
-        0,
-        length * 4,
-        (jbyte *) native_content
+        string,
+        &length,
+        &buffer
     );
 
-    // Call the native method
-    ${string_type} res_native = ${nat("create_string")}(
-        native_content,
-        length
+    // Create a new native string
+    ${string_type} res = ${nat("create_string")}(
+        buffer,
+        (int) length
     );
 
-    // Free the native array
-    free(native_content);
+    // Free the buffer
+    free(buffer);
 
-    // Wrap the string wrapper
-    return StringWrapper_wrap(env, res_native);
+    // Return the result
+    return res;
 }
 
-// Decrease the reference counting on a string
-${api.jni_func_sig("string_dec_ref", "void")} (
-    JNIEnv *env,
-    jclass jni_lib,
-    jlong string
+// Release the given native string
+void String_release(
+    ${string_type} string_native
 ) {
-    ${nat("string_dec_ref")}((${string_type}) string);
+    ${nat("string_dec_ref")}(string_native);
 }
 
 // ==========
@@ -778,17 +822,20 @@ jobject Text_wrap(
         env,
         clazz,
         "<init>",
-        "(L${ptr_sig};JZ[I)V"
+        "(L${ptr_sig};JZ[B)V"
     );
 
     // Get the int array from the structure and translate it into Java array
-    jintArray content = (*env)->NewIntArray(env, (jsize) text_native.length);
-    (*env)->SetIntArrayRegion(
+    jbyteArray content = (*env)->NewByteArray(
+        env,
+        (jsize) text_native.length * 4
+    );
+    (*env)->SetByteArrayRegion(
         env,
         content,
         0,
-        (jsize) text_native.length,
-        (jint *) text_native.chars
+        (jsize) text_native.length * 4,
+        (jbyte *) text_native.chars
     );
 
     // Return the new text
@@ -936,17 +983,7 @@ ${api.jni_func_sig("create_text", "jobject")} (
         env,
         clazz,
         "<init>",
-        "(L${ptr_sig};JZZ[I)V"
-    );
-
-    // Create the Java array of the content
-    jintArray content = (*env)->NewIntArray(env, (jsize) length);
-    (*env)->SetIntArrayRegion(
-        env,
-        content,
-        0,
-        (jsize) length,
-        (jint *) content_native
+        "(L${ptr_sig};JZZ[B)V"
     );
 
     // Return the new text
@@ -958,7 +995,7 @@ ${api.jni_func_sig("create_text", "jobject")} (
         (jlong) length,
         (jboolean) 0,
         (jboolean) 1,
-        content
+        content_utf32
     );
 }
 
@@ -966,27 +1003,31 @@ ${api.jni_func_sig("create_text", "jobject")} (
 ${api.jni_func_sig("destroy_text", "void")} (
     JNIEnv *env,
     jclass jni_lib,
-    jlong text_buffer,
-    jlong length,
-    jboolean is_allocated,
-    jboolean is_owner
+    jobject text
 ) {
-    // If the object is the buffer owner
+    // Get if the text is the owner of its buffer
+    jclass clazz = (*env)->GetObjectClass(env, text);
+    jfieldID is_owner_field = (*env)->GetFieldID(
+        env,
+        clazz,
+        "isOwner",
+        "Z"
+    );
+    jboolean is_owner = (*env)->GetBooleanField(
+        env,
+        text,
+        is_owner_field
+    );
+
+    // Unwrap the text
+    ${text_type} text_native = Text_unwrap(env, text);
+
+    // If the object is the buffer owner just free the chars
     if(is_owner) {
-        free((void *) text_buffer);
+        free((void *) text_native.chars);
     } else {
-        // Create the new text structure
-        ${text_type} text_native = Text_new_value();
-        text_native.chars = (uint32_t *) text_buffer;
-        text_native.length = (long) length;
-        text_native.is_allocated = (int) is_allocated;
-
-        // Call the destry function
-        ${nat("destroy_text")}(
-            &text_native
-        );
+        ${nat("destroy_text")}(&text_native);
     }
-
 }
 
 // ==========
@@ -1071,7 +1112,7 @@ ${sloc_range_type} SourceLocationRange_new_value() {
 // Wrap a native source location range in the Java wrapping class
 jobject SourceLocationRange_wrap(
     JNIEnv *env,
-    ${sloc_range_type} native_slocr
+    ${sloc_range_type} slocr_native
 ) {
     // Get the source location range class
     jclass clazz = (*env)->FindClass(env, "${sig_base}$SourceLocationRange");
@@ -1089,8 +1130,8 @@ jobject SourceLocationRange_wrap(
         env,
         clazz,
         constructor,
-        SourceLocation_wrap(env, native_slocr.start),
-        SourceLocation_wrap(env, native_slocr.end)
+        SourceLocation_wrap(env, slocr_native.start),
+        SourceLocation_wrap(env, slocr_native.end)
     );
 }
 
@@ -1155,7 +1196,7 @@ ${diagnostic_type} Diagnostic_new_value() {
 // Wrap a native diagnostic in the Java wrapping class
 jobject Diagnostic_wrap(
     JNIEnv *env,
-    ${diagnostic_type} native_diagnostic
+    ${diagnostic_type} diag_native
 ) {
     // Get the diagnostic class
     jclass clazz = (*env)->FindClass(env, "${sig_base}$Diagnostic");
@@ -1173,8 +1214,8 @@ jobject Diagnostic_wrap(
         env,
         clazz,
         constructor,
-        SourceLocationRange_wrap(env, native_diagnostic.sloc_range),
-        Text_wrap(env, native_diagnostic.message)
+        SourceLocationRange_wrap(env, diag_native.sloc_range),
+        Text_wrap(env, diag_native.message)
     );
 }
 
@@ -1235,7 +1276,7 @@ ${file_reader_type} FileReader_new_value() {
 // Wrap a native file reader in the Java wrapping class
 jobject FileReader_wrap(
     JNIEnv *env,
-    ${file_reader_type} native_fr
+    ${file_reader_type} file_reader_native
 ) {
     // Get the file reader class
     jclass clazz = (*env)->FindClass(env, "${sig_base}$FileReader");
@@ -1253,7 +1294,7 @@ jobject FileReader_wrap(
         env,
         clazz,
         constructor,
-        PointerWrapper_wrap(env, (void *) native_fr)
+        PointerWrapper_wrap(env, (void *) file_reader_native)
     );
 }
 
@@ -1263,6 +1304,15 @@ ${file_reader_type} FileReader_unwrap(
     jobject file_reader
 ) {
     return (${file_reader_type}) get_reference(env, file_reader);
+}
+
+// Decrease the reference counter of the given file reader
+${api.jni_func_sig("dec_ref_file_reader", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject file_reader
+) {
+    ${nat("dec_ref_file_reader")}(FileReader_unwrap(env, file_reader));
 }
 
 // ==========
@@ -1277,7 +1327,7 @@ ${unit_provider_type} UnitProvider_new_value() {
 // Wrap a native unit provider in the Java wrapping class
 jobject UnitProvider_wrap(
     JNIEnv *env,
-    ${unit_provider_type} native_up
+    ${unit_provider_type} unit_prov_native
 ) {
     // Get the unit provider class
     jclass clazz = (*env)->FindClass(env, "${sig_base}$UnitProvider");
@@ -1295,7 +1345,7 @@ jobject UnitProvider_wrap(
         env,
         clazz,
         constructor,
-        PointerWrapper_wrap(env, (void *) native_up)
+        PointerWrapper_wrap(env, (void *) unit_prov_native)
     );
 }
 
@@ -1310,9 +1360,9 @@ ${unit_provider_type} UnitProvider_unwrap(
 ${api.jni_func_sig("dec_ref_unit_provider", "void")}(
     JNIEnv *env,
     jclass jni_lib,
-    jlong provider_ref
+    jobject unit_provider
 ) {
-    ${nat("dec_ref_unit_provider")}((${unit_provider_type}) provider_ref);
+    ${nat("dec_ref_unit_provider")}(UnitProvider_unwrap(env, unit_provider));
 }
 
 // ==========
@@ -1327,7 +1377,7 @@ ${event_handler_type} EventHandler_new_value() {
 // Wrap a native event handler in the Java wrapping class
 jobject EventHandler_wrap(
     JNIEnv *env,
-    ${event_handler_type} native_eh
+    ${event_handler_type} event_handler_native
 ) {
     // Get the event handler class
     jclass clazz = (*env)->FindClass(env, "${sig_base}$EventHandler");
@@ -1345,7 +1395,7 @@ jobject EventHandler_wrap(
         env,
         clazz,
         constructor,
-        PointerWrapper_wrap(env, (void *) native_eh)
+        PointerWrapper_wrap(env, (void *) event_handler_native)
     );
 }
 
@@ -1355,6 +1405,15 @@ ${event_handler_type} EventHandler_unwrap(
     jobject event_handler
 ) {
     return (${event_handler_type}) get_reference(env, event_handler);
+}
+
+// Decrease the reference counter of an event handler
+${api.jni_func_sig("dec_ref_event_handler", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject event_handler
+) {
+    ${nat("dec_ref_event_handler")}(EventHandler_unwrap(env, event_handler));
 }
 
 // ==========
@@ -1378,11 +1437,11 @@ ${token_type} Token_new_value() {
 // Wrap a native token in the Java wrapping class
 jobject Token_wrap(
     JNIEnv *env,
-    ${token_type} native_token,
+    ${token_type} token_native,
     jobject analysis_unit
 ) {
     // Handle the no tokens
-    if(native_token.token_data == NULL) {
+    if(token_native.token_data == NULL) {
         return NoToken_wrap(env, analysis_unit);
     }
 
@@ -1400,14 +1459,14 @@ jobject Token_wrap(
     );
 
     return (*env)->NewObject(env, clazz, constructor,
-        PointerWrapper_wrap(env, native_token.context),
+        PointerWrapper_wrap(env, token_native.context),
         analysis_unit,
-        PointerWrapper_wrap(env, native_token.token_data),
-        (jint) native_token.token_index,
-        (jint) native_token.trivia_index,
-        TokenKind_wrap(env, native_token.kind),
-        Text_wrap(env, native_token.text),
-        SourceLocationRange_wrap(env, native_token.sloc_range)
+        PointerWrapper_wrap(env, token_native.token_data),
+        (jint) token_native.token_index,
+        (jint) token_native.trivia_index,
+        TokenKind_wrap(env, token_native.kind),
+        Text_wrap(env, token_native.text),
+        SourceLocationRange_wrap(env, token_native.sloc_range)
     );
 }
 
@@ -1420,7 +1479,7 @@ ${token_type} Token_unwrap(
     ${token_type} res = Token_new_value();
 
     // Get if the token is instance of no token
-    jclass nt_clazz = (*env)->FindClass(env, "${sig_base}$NoToken");
+    jclass nt_clazz = (*env)->FindClass(env, "${sig_base}$Token$NoToken");
     if((*env)->IsInstanceOf(env, token, nt_clazz)) {
 
         // Get the field ids
@@ -1602,21 +1661,21 @@ jobject NoToken_wrap(
     jobject analysis_unit
 ) {
     // Get the no token class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$NoToken");
+    jclass clazz = (*env)->FindClass(env, "${sig_base}$Token");
 
     // Get the instance getting method
-    jmethodID instance_getter = (*env)->GetStaticMethodID(
+    jmethodID none_getter = (*env)->GetStaticMethodID(
         env,
         clazz,
-        "getInstance",
-        "(L${sig_base}$AnalysisUnit;)L${sig_base}$NoToken;"
+        "NONE",
+        "(L${sig_base}$AnalysisUnit;)L${sig_base}$Token;"
     );
 
     // Call the instance getter and return the result
     return (*env)->CallStaticObjectMethod(
         env,
         clazz,
-        instance_getter,
+        none_getter,
         analysis_unit
     );
 }
@@ -1628,14 +1687,14 @@ ${api.jni_func_sig("token_next", "jobject")}(
     jobject token
 ) {
     // Get the token native value
-    ${token_type} native_token = Token_unwrap(env, token);
+    ${token_type} token_native = Token_unwrap(env, token);
 
     // Prepare the result
     ${token_type} res = Token_new_value();
 
     // Call the native function
     ${nat("token_next")}(
-        &native_token,
+        &token_native,
         &res
     );
 
@@ -1650,14 +1709,14 @@ ${api.jni_func_sig("token_previous", "jobject")}(
     jobject token
 ) {
     // Get the token native value
-    ${token_type} native_token = Token_unwrap(env, token);
+    ${token_type} token_native = Token_unwrap(env, token);
 
     // Prepare the result
     ${token_type} res = Token_new_value();
 
     // Call the native function
     ${nat("token_previous")}(
-        &native_token,
+        &token_native,
         &res
     );
 
@@ -1673,13 +1732,13 @@ ${api.jni_func_sig("token_is_equivalent", "jboolean")}(
     jobject right
 ) {
     // Get the token native values
-    ${token_type} native_left = Token_unwrap(env, left);
-    ${token_type} native_right = Token_unwrap(env, right);
+    ${token_type} left_native = Token_unwrap(env, left);
+    ${token_type} right_native = Token_unwrap(env, right);
 
     // Return the result of the native call
     return (jboolean) ${nat("token_is_equivalent")}(
-        &native_left,
-        &native_right
+        &left_native,
+        &right_native
     );
 }
 
@@ -1691,16 +1750,16 @@ ${api.jni_func_sig("token_range_text", "jobject")}(
     jobject end
 ) {
     // Get the token native values
-    ${token_type} native_start = Token_unwrap(env, start);
-    ${token_type} native_end = Token_unwrap(env, end);
+    ${token_type} start_native = Token_unwrap(env, start);
+    ${token_type} end_native = Token_unwrap(env, end);
 
     // Prepare the result
     ${text_type} res = Text_new_value();
 
     // Call the native function
     ${nat("token_range_text")}(
-        &native_start,
-        &native_end,
+        &start_native,
+        &end_native,
         &res
     );
 
@@ -1720,7 +1779,7 @@ ${analysis_context_type} AnalysisContext_new_value() {
 // Wrap a native analysis context in the Java wrapping class
 jobject AnalysisContext_wrap(
     JNIEnv *env,
-    ${analysis_context_type} native_context
+    ${analysis_context_type} context_native
 ) {
     // Get the analysis context class
     jclass clazz = (*env)->FindClass(env, "${sig_base}$AnalysisContext");
@@ -1738,7 +1797,7 @@ jobject AnalysisContext_wrap(
         env,
         clazz,
         constructor,
-        PointerWrapper_wrap(env, (void *) native_context)
+        PointerWrapper_wrap(env, (void *) context_native)
     );
 }
 
@@ -1762,8 +1821,8 @@ ${api.jni_func_sig("create_analysis_context", "jobject")}(
     jint tab_stop
 ) {
     // Translate the charset string
-    const char* native_charset = NULL;
-    if(charset != NULL) native_charset = to_c_string(env, charset);
+    const char* charset_native = NULL;
+    if(charset != NULL) charset_native = to_c_string(env, charset);
 
     // Allocate the analysis context
     ${analysis_context_type} res = ${nat("allocate_analysis_context")}();
@@ -1771,7 +1830,7 @@ ${api.jni_func_sig("create_analysis_context", "jobject")}(
     // Call the native function
     ${nat("initialize_analysis_context")}(
         res,
-        native_charset,
+        charset_native,
         FileReader_unwrap(env, file_reader),
         UnitProvider_unwrap(env, unit_provider),
         EventHandler_unwrap(env, event_handler),
@@ -1781,7 +1840,7 @@ ${api.jni_func_sig("create_analysis_context", "jobject")}(
 
     // Release the allocated string
     if(charset != NULL)
-        (*env)->ReleaseStringUTFChars(env, charset, native_charset);
+        release_c_string(env, charset, charset_native);
 
     // Return the new custom pointer to the analysis context
     return PointerWrapper_wrap(env, res);
@@ -1823,7 +1882,7 @@ ${analysis_unit_type} AnalysisUnit_new_value() {
 // Wrap a native analysis unit in the Java wrapping class
 jobject AnalysisUnit_wrap(
     JNIEnv *env,
-    ${analysis_unit_type} native_unit
+    ${analysis_unit_type} unit_native
 ) {
     // Get the analysis unit class
     jclass clazz = (*env)->FindClass(env, "${sig_base}$AnalysisUnit");
@@ -1841,7 +1900,7 @@ jobject AnalysisUnit_wrap(
         env,
         clazz,
         constructor,
-        PointerWrapper_wrap(env, (void *) native_unit)
+        PointerWrapper_wrap(env, (void *) unit_native)
     );
 }
 
@@ -1864,23 +1923,23 @@ ${api.jni_func_sig("get_analysis_unit_from_file", "jobject")}(
     jint grammar_rule
 ) {
     // Translate the Java strings
-    const char *native_filename = to_c_string(env, filename);
-    const char *native_charset = NULL;
-    if(charset != NULL) native_charset = to_c_string(env, charset);
+    const char *filename_native = to_c_string(env, filename);
+    const char *charset_native = NULL;
+    if(charset != NULL) charset_native = to_c_string(env, charset);
 
     // Call the native function
     ${analysis_unit_type} res = ${nat("get_analysis_unit_from_file")}(
         AnalysisContext_unwrap(env, analysis_context),
-        native_filename,
-        native_charset,
+        filename_native,
+        charset_native,
         (int) reparse,
         (int) grammar_rule
     );
 
     // Release the strings
-    (*env)->ReleaseStringUTFChars(env, filename, native_filename);
+    release_c_string(env, filename, filename_native);
     if(charset != NULL)
-        (*env)->ReleaseStringUTFChars(env, charset, native_charset);
+        release_c_string(env, charset, charset_native);
 
     // Return the new Analysis unit
     return AnalysisUnit_wrap(env, res);
@@ -1898,26 +1957,26 @@ ${api.jni_func_sig("get_analysis_unit_from_buffer", "jobject")}(
     jint grammar_rule
 ) {
     // Translate the Java strings
-    const char *native_filename = to_c_string(env, filename);
-    const char *native_charset = NULL;
-    if(charset != NULL) native_charset = to_c_string(env, charset);
-    const char *native_buffer = to_c_string(env, buffer);
+    const char *filename_native = to_c_string(env, filename);
+    const char *buffer_native = to_c_string(env, buffer);
+    const char *charset_native = NULL;
+    if(charset != NULL) charset_native = to_c_string(env, charset);
 
     // Call the native function
     ${analysis_unit_type} res = ${nat("get_analysis_unit_from_buffer")}(
         AnalysisContext_unwrap(env, analysis_context),
-        native_filename,
-        native_charset,
-        native_buffer,
+        filename_native,
+        charset_native,
+        buffer_native,
         (long) buffer_size,
         (int) grammar_rule
     );
 
     // Release the strings
-    (*env)->ReleaseStringUTFChars(env, filename, native_filename);
+    release_c_string(env, filename, filename_native);
+    release_c_string(env, buffer, buffer_native);
     if(charset != NULL)
-        (*env)->ReleaseStringUTFChars(env, charset, native_charset);
-    (*env)->ReleaseStringUTFChars(env, buffer, native_buffer);
+        release_c_string(env, charset, charset_native);
 
     // Return the new analysis unit
     return AnalysisUnit_wrap(env, res);
@@ -2124,11 +2183,11 @@ ${api.jni_func_sig("node_kind", "jint")}(
     jobject entity
 ) {
     // Unwrap the node
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
 
     // Call the native function
     return (jint) ${nat("node_kind")}(
-        &native_entity
+        &entity_native
     );
 }
 
@@ -2139,14 +2198,14 @@ ${api.jni_func_sig("node_text", "jobject")}(
     jobject entity
 ) {
     // Unwrap the node
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
 
     // Prepare the result
     ${text_type} res = Text_new_value();
 
     // Call the native function
     ${nat("node_text")}(
-        &native_entity,
+        &entity_native,
         &res
     );
 
@@ -2161,14 +2220,14 @@ ${api.jni_func_sig("node_sloc_range", "jobject")}(
     jobject entity
 ) {
     // Unwrap the node
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
 
     // Prepare the result
     ${sloc_range_type} res = SourceLocationRange_new_value();
 
     // Call the native function
     ${nat("node_sloc_range")}(
-        &native_entity,
+        &entity_native,
         &res
     );
 
@@ -2183,11 +2242,11 @@ ${api.jni_func_sig("node_children_count", "jint")}(
     jobject entity
 ) {
     // Unwrap the node
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
 
     // Call the native function
     return (jint) ${nat("node_children_count")}(
-        &native_entity
+        &entity_native
     );
 }
 
@@ -2199,14 +2258,14 @@ ${api.jni_func_sig("node_child", "jobject")}(
     jint n
 ) {
     // Unwrap the node
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
 
     // Preapre the result
     ${entity_type} res = Entity_new_value();
 
     // Call the native function
     ${nat("node_child")}(
-        &native_entity,
+        &entity_native,
         (unsigned) n,
         &res
     );
@@ -2222,11 +2281,11 @@ ${api.jni_func_sig("node_is_token_node", "jboolean")}(
     jobject entity
 ) {
     // Unwrap the node
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
 
     // Call the native function
     return (jboolean) ${nat("node_is_token_node")}(
-        &native_entity
+        &entity_native
     );
 }
 
@@ -2237,11 +2296,11 @@ ${api.jni_func_sig("node_unit", "jobject")}(
     jobject entity
 ) {
     // Unwrap the node
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
 
     // Call the native function
     ${analysis_unit_type} res_native = ${nat("node_unit")}(
-        &native_entity
+        &entity_native
     );
 
     // Return the result
@@ -2255,14 +2314,14 @@ ${api.jni_func_sig("node_image", "jobject")}(
     jobject entity
 ) {
     // Unwrap the node
-    ${entity_type} native_entity = Entity_unwrap(env, entity);
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
 
     // Prepare the result
     ${text_type} res = Text_new_value();
 
     // Call the native function
     ${nat("node_image")}(
-        &native_entity,
+        &entity_native,
         &res
     );
 

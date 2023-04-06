@@ -16,8 +16,6 @@
     <version>${version}</version>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -33,8 +31,8 @@
                         <arg>-h</arg>
                         <arg>${"${project.basedir}${file.separator}"}jni</arg>
                     </compilerArgs>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
 

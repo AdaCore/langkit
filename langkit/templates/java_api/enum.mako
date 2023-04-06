@@ -1,38 +1,45 @@
 <%def name="decl(cls)">
     <%
     api = java_api
-    enum_name = api.wrapping_type(cls)
+
+    java_type = api.wrapping_type(cls)
     %>
 
     ${java_doc(cls, 4)}
-    public enum ${enum_name} {
+    public enum ${java_type} {
 
         // ----- Enum values -----
 
         % for i in range(len(cls.values)):
-        ${cls.values[i].name.upper}(${i}),
+        ${api.mangle_enum(cls.values[i].name.upper)}(${i}),
         % endfor
         ;
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none enum value. */
+        public static final ${java_type} NONE =
+            ${api.mangle_enum(cls.values[0].name.upper)};
+
         /** The value of the enum instance. */
         private final int value;
 
         /** The map from int to enum values. */
-        private static final Map<Integer, ${enum_name}> map = new HashMap<>();
+        private static final Map<Integer, ${java_type}> map = new HashMap<>();
 
         // ----- Constructors -----
 
         static {
             // Initialise the lookup map
-            for(${enum_name} elem : ${enum_name}.values()) {
+            for(${java_type} elem : ${java_type}.values()) {
                 map.put(elem.value, elem);
             }
         }
 
         /** Private constructor. */
-        private ${enum_name}(int value) {
+        private ${java_type}(
+            final int value
+        ) {
             this.value = value;
         }
 
@@ -46,12 +53,14 @@
          * @throws EnumException When the int value doesn't map to any enum
          * instance.
          */
-        public static ${enum_name} fromC(int cValue) throws EnumException {
+        public static ${java_type} fromC(
+            final int cValue
+        ) throws EnumException {
             if(!map.containsKey(cValue))
                 throw new EnumException(
-                    "Cannot get ${enum_name} from " + cValue
+                    "Cannot get ${java_type} from " + cValue
                 );
-            return (${enum_name}) map.getOrDefault(cValue, null);
+            return (${java_type}) map.get(cValue);
         }
 
         /**
@@ -59,7 +68,9 @@
          *
          * @return The int C value of the enum instance.
          */
-        public int toC() { return this.value; }
+        public int toC() {
+            return this.value;
+        }
 
     }
 </%def>
@@ -67,43 +78,45 @@
 <%def name="jni_c_decl(cls)">
     <%
     api = java_api
-    enum_name = api.wrapping_type(cls)
-    c_name = cls.c_type(capi).name
+
+    java_type = api.wrapping_type(cls)
+    c_type = cls.c_type(capi).name
     %>
 
-${c_name} ${enum_name}_new_value();
-jobject ${enum_name}_wrap(JNIEnv *, ${c_name});
-${c_name} ${enum_name}_unwrap(JNIEnv *, jobject);
+${c_type} ${java_type}_new_value();
+jobject ${java_type}_wrap(JNIEnv *, ${c_type});
+${c_type} ${java_type}_unwrap(JNIEnv *, jobject);
 </%def>
 
 <%def name="jni_c_impl(cls)">
     <%
     api = java_api
-    enum_name = api.wrapping_type(cls)
-    c_name = cls.c_type(capi).name
 
     sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
+
+    java_type = api.wrapping_type(cls)
+    c_type = cls.c_type(capi).name
     %>
 
 // Get a new value for the enumeration
-${c_name} ${enum_name}_new_value() {
+${c_type} ${java_type}_new_value() {
     return 0;
 }
 
 // Wrap the native enum value in a Java class
-jobject ${enum_name}_wrap(
+jobject ${java_type}_wrap(
     JNIEnv *env,
-    ${c_name} enum_value_native
+    ${c_type} enum_value_native
 ) {
     // Get the enum class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$${enum_name}");
+    jclass clazz = (*env)->FindClass(env, "${sig_base}$${java_type}");
 
     // Get the constructing static method
     jmethodID from_c_method = (*env)->GetStaticMethodID(
         env,
         clazz,
         "fromC",
-        "(I)L${sig_base}$${enum_name};"
+        "(I)L${sig_base}$${java_type};"
     );
 
     // Call the static method
@@ -116,7 +129,7 @@ jobject ${enum_name}_wrap(
 }
 
 // Unwrap a Java enum object in a native enum value
-${c_name} ${enum_name}_unwrap(
+${c_type} ${java_type}_unwrap(
     JNIEnv *env,
     jobject enum_value
 ) {
@@ -132,7 +145,7 @@ ${c_name} ${enum_name}_unwrap(
     );
 
     // Call the Java method
-    return (${c_name}) (*env)->CallIntMethod(
+    return (${c_type}) (*env)->CallIntMethod(
         env,
         enum_value,
         to_c_method

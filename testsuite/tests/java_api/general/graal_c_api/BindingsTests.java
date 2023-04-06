@@ -3,6 +3,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import java.math.BigInteger;
+
 import com.adacore.libfoolang.Libfoolang.*;
 
 public final class BindingsTests {
@@ -153,10 +155,10 @@ public final class BindingsTests {
                 "foo.txt"
             );
             Token current = eqUnit.getFirstToken();
-            while(!(current instanceof NoToken)) {
+            while(!(current.isNone())) {
                 Token other = current.next();
                 if(!current.isTrivia()) {
-                    while(!(other instanceof NoToken)) {
+                    while(!(other.isNone())) {
                         if(current.isEquivalent(other))
                             System.out.println(
                                 "Equivalent tokens : " +
@@ -223,9 +225,6 @@ public final class BindingsTests {
             System.out.println(
                 "Node hash equality = " + (var.hashCode() == var2.hashCode())
             );
-
-            items.close();
-            argItems.close();
         }
 
         // Display the footer
@@ -254,12 +253,12 @@ public final class BindingsTests {
                 System.out.println(
                     "Node " + current.toString() + " | Parents :"
                 );
-                while(parent != null) {
+                while(!parent.isNone()) {
                     System.out.println("  " + parent.toString());
                     parent = parent.parent();
                 }
                 for(FooNode child : current.children()) {
-                    if(child != null) visitList.add(child);
+                    if(!child.isNone()) visitList.add(child);
                 }
                 System.out.println("");
             }
@@ -297,7 +296,6 @@ public final class BindingsTests {
                     item.nextSibling()
                 );
             }
-            items.close();
         }
 
         // Display the footer
@@ -327,8 +325,6 @@ public final class BindingsTests {
             }
             FooNodeArray eqItems = root.pAllItems();
             System.out.println("Array equality = " + items.equals(eqItems));
-            items.close();
-            eqItems.close();
         }
 
         // Display the footer
@@ -411,7 +407,7 @@ public final class BindingsTests {
                 ).defaultValue
             );
             Char cIdent = root.pIdentity(Char.create('é'));
-            System.out.println("The 'a' char = " + c1.toChar());
+            System.out.println("The 'a' char = " + c1.toString());
             System.out.println("The eacute char = " + String.valueOf(c2.value));
             System.out.println("Identity of eacute = " + String.valueOf(cIdent.value));
         }
@@ -437,28 +433,24 @@ public final class BindingsTests {
             FooNode root = unit.getRoot();
 
             // Try creating and passing strings
-            StringWrapper source = StringWrapper.create("Hello!");
-            StringWrapper emptySource = StringWrapper.create("");
-            StringWrapper identity = root.pGetStr(source);
-            StringWrapper emptyIdentity = root.pGetStr(emptySource);
+            String source = "Hello!";
+            String emptySource = "";
+            String identity = root.pGetStr(source);
+            String emptyIdentity = root.pGetStr(emptySource);
             System.out.println(
                 "Source = \"" +
-                source.getContent() +
+                source +
                 "\" | Identity = \"" +
-                identity.getContent() +
+                identity +
                 "\""
             );
             System.out.println(
                 "Empty source = \"" +
-                emptySource.getContent() +
+                emptySource +
                 "\" | Empty identity = \"" +
-                emptyIdentity.getContent() +
+                emptyIdentity +
                 "\""
             );
-            source.close();
-            emptySource.close();
-            identity.close();
-            emptyIdentity.close();
         }
 
         // Display the footer
@@ -479,8 +471,8 @@ public final class BindingsTests {
             FooNode root = unit.getRoot();
 
             // Test the big integer manipulation
-            BigInteger ft = BigInteger.create("42");
-            BigInteger big = BigInteger.create(
+            BigInteger ft = new BigInteger("42");
+            BigInteger big = new BigInteger(
                 "100000000000000000000000000000000000000000000000" +
                 "00000000000000000000000000000000000000000000000000000"
             );
@@ -488,18 +480,14 @@ public final class BindingsTests {
             BigInteger bigDouble = root.pIntDouble(big);
             System.out.println(
                 "Double of " +
-                ft.getRepresentation() +
+                ft.toString() +
                 " = " +
-                ftDouble.getRepresentation()
+                ftDouble.toString()
             );
             System.out.println(
                 "Double of 10**100 = " +
-                bigDouble.getRepresentation()
+                bigDouble.toString()
             );
-            ft.close();
-            big.close();
-            ftDouble.close();
-            bigDouble.close();
         }
 
         // Display the footer

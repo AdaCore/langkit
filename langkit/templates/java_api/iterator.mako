@@ -1,13 +1,14 @@
 <%def name="wrapping_class(cls)">
     <%
     api = java_api
+
     class_name = api.wrapping_type(cls)
-    ni_name = api.java_ni_type(cls)
+    ni_name = api.ni_type(cls)
     c_name = cls.c_type(capi).name
     %>
 
     ${java_doc(cls, 4)}
-    public static class ${class_name} {
+    public static final class ${class_name} implements AutoCloseable {
 
         // ----- Attributes -----
 
@@ -57,13 +58,20 @@
             );
         }
 
+        // ----- Instance methods -----
+
+        /** @see java/lang/AutoCloseable#close() */
+        public void close() {
+            System.err.println("HANDLE THE ITERATOR CLOSING !!!");
+        }
+
     }
 </%def>
 
 <%def name="ni_def(cls)">
     <%
     api = java_api
-    ni_name = api.java_ni_type(cls)
+    ni_name = api.ni_type(cls)
     c_name = cls.c_type(capi).name
     %>
 
@@ -74,7 +82,7 @@
 <%def name="jni_c_decl(cls)">
     <%
     api = java_api
-    j_name = api.java_jni_type(cls)
+    j_name = api.wrapping_type(cls, False)
     c_name = cls.c_type(capi).name
     %>
 
@@ -86,7 +94,7 @@ ${c_name} ${j_name}_unwrap(JNIEnv *, jobject);
 <%def name="jni_c_impl(cls)">
     <%
     api = java_api
-    j_name = api.java_jni_type(cls)
+    j_name = api.wrapping_type(cls, False)
     c_name = cls.c_type(capi).name
 
     sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
@@ -101,10 +109,10 @@ ${c_name} ${j_name}_new_value() {
 // Wrap a native ${c_name} in the Java wrapping class
 jobject ${j_name}_wrap(
     JNIEnv *env,
-    ${c_name} native_struct
+    ${c_name} struct_native
 ) {
     // Verify the iterator nullity
-    if(native_struct == NULL) return NULL;
+    if(struct_native == NULL) return NULL;
 
     // Get the class
     jclass clazz = (*env)->FindClass(
@@ -125,7 +133,7 @@ jobject ${j_name}_wrap(
         env,
         clazz,
         constructor,
-        PointerWrapper_wrap(env, (void *) native_struct)
+        PointerWrapper_wrap(env, (void *) struct_native)
     );
 }
 

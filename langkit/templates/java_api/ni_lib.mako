@@ -386,6 +386,15 @@
             TextNative text
         );
 
+        // ----- File reader functions -----
+
+        /** Decrease the reference counter of the given file reader */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("dec_ref_file_reader")}(
+            FileReaderNative fileReader
+        );
+
         // ----- Unit provider functions -----
 
         /** Decrease the ref counter of the unit provider */
@@ -393,6 +402,15 @@
         @CFunction
         public static native void ${nat("dec_ref_unit_provider")}(
             UnitProviderNative unitProvider
+        );
+
+        // ----- Event handler functions -----
+
+        /** Decrease the ref counter of the event handler */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("dec_ref_event_handler")}(
+            EventHandlerNative eventHandler
         );
 
         // ----- Token functions -----
@@ -566,6 +584,27 @@
         % for array_type in ctx.array_types:
             % if array_type.exposed and array_type.emit_c_type:
         ${array.ni_funcs(array_type)}
+            % endif
+        % endfor
+
+        // ----- Structure functions -----
+
+        % for struct_type in ctx.struct_types:
+            % if struct_type.is_entity_type:
+                % if struct_type is root_entity:
+        ${struct.ni_funcs(struct_type)}
+                % endif
+            % else:
+            <%
+            emit_struct = (
+                struct_type is T.entity_info
+                or struct_type is T.env_md
+                or struct_type.exposed
+            )
+            %>
+                % if emit_struct:
+        ${struct.ni_funcs(struct_type)}
+                % endif
             % endif
         % endfor
 

@@ -1,0 +1,152 @@
+===== Start the Java tests =====
+
+--- Diagnostics ---
+Cannot read unknown at <0:0-0:0>
+Expected '(', got Identifier at <1:5-1:15>
+-------------------
+
+--- Unit Filename ---
+Unit for the file foo.txt
+---------------------
+
+--- Tokens ---
+--- Token info without trivia
+  unit_text =
+    null example var (null example null) example null
+  first_token = <Token Kind=Null_Tok Text="null">
+  first_text = null
+  last_token = <Token Kind=Termination Text="">
+  last_text = 
+  root_node = <Sequence foo.txt:1:1-1:50>
+  root_start = <Token Kind=Null_Tok Text="null">
+  root_end = <Token Kind=Null_Tok Text="null">
+  token_count = 11
+  trivia_count = 0
+--- Token info with trivia
+  unit_text =
+    null example var (null example null) example null
+  first_token = <Token Kind=Null_Tok Text="null">
+  first_text = null
+  last_token = <Token Kind=Termination Text="">
+  last_text = 
+  root_node = <Sequence foo.txt:1:1-1:50>
+  root_start = <Token Kind=Null_Tok Text="null">
+  root_end = <Token Kind=Null_Tok Text="null">
+  token_count = 11
+  trivia_count = 8
+
+The NO_TOKEN = <Token Kind=No_Token Text="">
+Text range with a NO_TOKEN = 
+Equivalent tokens : <Token Kind=Identifier Text="identifier"> and <Token Kind=Identifier Text="identifier">
+Equivalent tokens : <Token Kind=Example Text="example"> and <Token Kind=Example Text="example">
+--------------
+
+--- Nodes ---
+Unit = <AnalysisUnit "foo.txt">
+Unit root = <Sequence foo.txt:1:1-1:50>
+Unit root kind = Sequence
+Unit root children count = 5
+Unit root children = [<NullNode foo.txt:1:1-1:5>, <Example foo.txt:1:6-1:13>, <Var foo.txt:1:14-1:37>, <Example foo.txt:1:38-1:45>, <NullNode foo.txt:1:46-1:50>]
+Unit root is a list node = true
+Unit root is a token node = false
+Unit root image = <Sequence foo.txt:1:1-1:50>
+Unit root text = null example var (null example null) example null
+Root "p_all_items" = [<NullNode foo.txt:1:1-1:5>, <Example foo.txt:1:6-1:13>, <Var foo.txt:1:14-1:37>, <Example foo.txt:1:38-1:45>, <NullNode foo.txt:1:46-1:50>]
+Var (3rd child) = <Var foo.txt:1:14-1:37>
+Var image = <Var foo.txt:1:14-1:37>
+Var fields = [fArg]
+Var arg = <Sequence foo.txt:1:19-1:36>
+Var content = [<NullNode foo.txt:1:19-1:23>, <Example foo.txt:1:24-1:31>, <NullNode foo.txt:1:32-1:36>]
+Node equality = true
+Node hash equality = true
+-------------
+
+--- Parent(s) ---
+Node <Sequence foo.txt:1:1-1:50> | Parents :
+
+Node <NullNode foo.txt:1:1-1:5> | Parents :
+  <Sequence foo.txt:1:1-1:50>
+
+Node <Example foo.txt:1:6-1:13> | Parents :
+  <Sequence foo.txt:1:1-1:50>
+
+Node <Var foo.txt:1:14-1:37> | Parents :
+  <Sequence foo.txt:1:1-1:50>
+
+Node <Example foo.txt:1:38-1:45> | Parents :
+  <Sequence foo.txt:1:1-1:50>
+
+Node <NullNode foo.txt:1:46-1:50> | Parents :
+  <Sequence foo.txt:1:1-1:50>
+
+Node <Sequence foo.txt:1:19-1:36> | Parents :
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:1-1:50>
+
+Node <NullNode foo.txt:1:19-1:23> | Parents :
+  <Sequence foo.txt:1:19-1:36>
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:1-1:50>
+
+Node <Example foo.txt:1:24-1:31> | Parents :
+  <Sequence foo.txt:1:19-1:36>
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:1-1:50>
+
+Node <NullNode foo.txt:1:32-1:36> | Parents :
+  <Sequence foo.txt:1:19-1:36>
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:1-1:50>
+
+proposition (for all node n. for fields fields f of n. parent f = n) is true
+-----------------
+
+--- Siblings ---
+<NullNode foo.txt:1:1-1:5> | previous = None | next = <Example foo.txt:1:6-1:13>
+<Example foo.txt:1:6-1:13> | previous = <NullNode foo.txt:1:1-1:5> | next = <Var foo.txt:1:14-1:37>
+<Var foo.txt:1:14-1:37> | previous = <Example foo.txt:1:6-1:13> | next = <Example foo.txt:1:38-1:45>
+<Example foo.txt:1:38-1:45> | previous = <Var foo.txt:1:14-1:37> | next = <NullNode foo.txt:1:46-1:50>
+<NullNode foo.txt:1:46-1:50> | previous = <Example foo.txt:1:38-1:45> | next = None
+----------------
+
+--- Arrays ---
+Sequence size = 5
+Sequence content :
+  <Example foo.txt:1:1-1:8>
+  <NullNode foo.txt:1:9-1:13>
+  <NullNode foo.txt:1:14-1:18>
+  <Example foo.txt:1:19-1:26>
+  <Var foo.txt:1:27-1:53>
+Array equality = false
+--------------
+
+--- Symbols ---
+source = my_ident | symbol = my_ident
+source = MY_IDENT | symbol = my_ident
+source = no_such_symbol | symbol = no_such_symbol
+source = invalid_symbol0 | exception = Invalid symbol : 'invalid_symbol0'
+---------------
+
+--- Character ---
+The 'a' char = a
+The eacute char = 233
+Identity of eacute = 233
+-----------------
+
+--- String ---
+Source = "Hello!" | Identity = "Hello!"
+Empty source = "" | Empty identity = ""
+--------------
+
+--- Big Integer ---
+Double of 42 = 84
+Double of 10**100 = 20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+-------------------
+
+--- Struct ---
+me false = None
+me true = <Sequence foo.txt:1:1-1:50>
+--------------
+
+===== End of the Java tests =====
+Done

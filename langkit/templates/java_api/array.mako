@@ -1,61 +1,58 @@
 <%def name="wrapping_class(cls)">
     <%
     api = java_api
-    nat = c_api.get_name
 
-    class_name = api.wrapping_type(cls)
-    ni_name = api.java_ni_type(cls)
+    java_type = api.wrapping_type(cls)
+    ni_type = api.ni_type(cls)
+    c_type = cls.c_type(capi).name
 
-    elem_class_name = api.wrapping_type(cls.element_type)
-    elem_ni_name = api.java_ni_type(cls.element_type)
-    elem_ni_ref_name = api.ni_reference_type(cls.element_type)
-    elem_jni_name = api.java_jni_type(cls.element_type)
-
-    c_name = cls.c_type(capi).name
+    elem_java_type = api.wrapping_type(cls.element_type)
+    elem_java_unw_type = api.wrapping_type(cls.element_type, False)
+    elem_ni_type = api.ni_type(cls.element_type)
+    elem_ni_ref_type = api.ni_reference_type(cls.element_type)
     %>
 
-    ${java_doc(cls, 4)}
-    public static final class ${class_name}
-    extends ArrayBase<${elem_class_name}> {
+    /**
+     * This class represents the ${c_type} Java wrapping class
+     */
+    public static final class
+    ${java_type} extends ArrayBase<${elem_java_type}> {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
 
-        /** The content of the array. */
-        protected final ${elem_jni_name}[] content;
-
-        /** The cleanable instance. */
-        private final Cleaner.Cleanable cleanable;
+        /** Singleton that represents the none array. */
+        public static final ${java_type} NONE = new ${java_type}(
+            new ${elem_java_type}[0]
+        );
 
         // ----- Constructors -----
 
         /**
-         * Create a new array wrapper from a pointer.
+         * Create a new array with the given content.
          *
-         * @param reference The pointer to the native structure.
+         * @param content The content of the array.
          */
-        private ${class_name}(
-            PointerWrapper reference
+        ${java_type}(
+            final ${elem_java_type}[] content
         ) {
-            this(reference, null);
+            super(content);
         }
 
         /**
-         * Create a new array wrapper from its pointer and its cached
-         * content. This constructor is only used by JNI bindings.
+         * Create a new array from the JNI stub.
          *
-         * @param reference The pointer to the native structure.
-         * @param content The content of the array.
+         * @param content The unwrapped JNI content.
          */
-        private ${class_name}(
-            PointerWrapper reference,
-            ${elem_jni_name}[] content
+        private static ${java_type} jniCreate(
+            final ${elem_java_unw_type}[] jniContent
         ) {
-            super(reference);
-            this.content = content;
-            this.cleanable = CLEANER.register(
-                this,
-                new ReleaseTask(reference)
-            );
+            final ${elem_java_type}[] content =
+                new ${elem_java_type}[jniContent.length];
+            for(int i = 0 ; i < content.length ; i++) {
+                content[i] =
+                    ${api.java_jni_wrap(cls.element_type, "jniContent[i]")};
+            }
+            return new ${java_type}(content);
         }
 
         /**
@@ -64,273 +61,166 @@
          * @param size The size of the array you want to create.
          * @return The newly created array.
          */
-        public static ${class_name} create(int size) {
-
-            if(ImageInfo.inImageCode()) {
-                return ${class_name}.wrap(
-                    NI_LIB.${cls.c_create(capi)}(size)
-                );
-            } else {
-                return JNI_LIB.${cls.c_create(capi)}(size);
-            }
-
-        }
-
-        // ----- Cleaning methods/classes -----
-
-        /**
-         * The release task for the array
-         */
-        private static final class ReleaseTask implements Runnable {
-
-            // ----- Attributes -----
-
-            /** The reference to the array */
-            private final PointerWrapper arrayRef;
-
-            // ----- Constructors -----
-
-            /**
-             * Create a new release task for an array.
-             *
-             * @param arrayRef The referenc to the array.
-             */
-            ReleaseTask(
-                PointerWrapper arrayRef
-            ) {
-                this.arrayRef = arrayRef;
-            }
-
-            // ----- Instance methods -----
-
-            /** @see java.lang.Runnable#run() */
-            @Override
-            public void run() {
-                ${class_name}.release(this.arrayRef);
-            }
-
-        }
-
-        /**
-         * Release the given array reference.
-         *
-         * @pararm arrayRef The reference to the array to release.
-         */
-        public static void release(
-            PointerWrapper arrayRef
+        public static ${java_type} create(
+            final int size
         ) {
-
-            if(ImageInfo.inImageCode()) {
-                NI_LIB.${cls.c_dec_ref(c_api)}(arrayRef.ni());
-            } else {
-                JNI_LIB.${cls.c_dec_ref(c_api)}(arrayRef.jni());
-            }
-
+            return new ${java_type}(
+                new ${elem_java_type}[size]
+            );
         }
 
-        /** @see java.lang.AutoCloseable#close() */
-        @Override
-        public void close() {
-            this.cleanable.clean();
-        }
-
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
 
         /**
          * Wrap a pointer to an array native value in the Java class.
          *
-         * @param niPointer The pointer to the array NI native value.
-         * @return The newly created array or null if the pointer is null.
+         * @param pointer The pointer to the array NI native value.
+         * @return The newly wrapped array.
          */
-        static ${class_name} wrap(
-            Pointer niPointer
+        static ${java_type} wrap(
+            final Pointer pointer
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((${ni_name}) niPointer.readWord(0));
+            return wrap((${ni_type}) pointer.readWord(0));
         }
 
         /**
          * Wrap an array native value in the Java class.
          *
-         * @param arrayNative The NI array native value to wrap.
-         * @return The newly created array or null of the given native
-         * value is null.
+         * @param nativeArray The NI array native value to wrap.
+         * @return The newly wrapped array.
          */
-        static ${class_name} wrap(
-            ${ni_name} arrayNative
+        static ${java_type} wrap(
+            final ${ni_type} nativeArray
         ) {
-            if(((PointerBase) arrayNative).isNull()) return null;
-            else return new ${class_name}(
-                new PointerWrapper(arrayNative)
-            );
-        }
+            // Get the size and prepare the working variables
+            final int size = nativeArray.get_n();
+            final ${elem_java_type}[] content = new ${elem_java_type}[size];
+            final Pointer nativeItems = nativeArray.address_items();
+            Pointer nativeItem;
+            ${elem_ni_ref_type} toRead;
 
-        // ----- Instance methods -----
-
-        /** @see ArrayBase#size() */
-        @Override
-        public int size() {
-
-            if(ImageInfo.inImageCode()) {
-                return ((${ni_name}) this.reference.ni()).get_n();
-            } else {
-                return this.content.length;
-            }
-
-        }
-
-        /** @see ArrayBase#get(int) */
-        @Override
-        public ${elem_class_name} get(int i) {
-
-            if(i < this.size() && i >= 0) {
-
-                if(ImageInfo.inImageCode()) {
-                    ${ni_name} nativeArray = this.reference.ni();
-                    Pointer toNativeRes = nativeArray.addressOfItems().add(
-                        i * SizeOf.get(${elem_ni_name}.class)
-                    );
-                    ${elem_ni_ref_name} nativeRes = WordFactory.unsigned(
-                        toNativeRes.rawValue()
-                    );
-                    return ${
-                        api.ni_wrap(cls.element_type, "nativeRes")
-                    };
-                } else {
-                    ${elem_jni_name} res = this.content[i];
-                    return ${api.java_jni_wrap(cls.element_type, "res")};
-                }
-
-            } else {
-                throw new IndexOutOfBoundsException(
-                    "Index " + i + " is invalid for array of size "
-                        + this.size()
+            // Iterate over all array elements
+            for(int i = 0 ; i < size ; i++) {
+                nativeItem = nativeItems.add(
+                    i * SizeOf.get(${elem_ni_type}.class)
                 );
+                toRead = WordFactory.unsigned(nativeItem.rawValue());
+                content[i] = ${
+                    api.ni_wrap(cls.element_type, "toRead", [])
+                };
             }
 
+            // Return the new langkit array
+            return new ${java_type}(content);
         }
 
         /**
-         * Set the given element at the given place.
+         * Unwrap the array in the given pointer
          *
-         * @param i The index to put the element at.
-         * @param elem The element to place in the array.
+         * @param pointer The pointer to place the native array pointer
+         * in.
          */
-        public void set(
-            int i,
-            ${elem_class_name} elem
+        void unwrap(
+            final Pointer pointer
             ${(
-                ", AnalysisContext currentContext"
+                ", final AnalysisContext currentContext"
                 if cls.element_type.is_symbol_type else
                 ""
             )}
         ) {
+            // Create a new native array with the size
+            final ${ni_type} resNative = this.unwrap(
+                ${(
+                    "currentContext"
+                    if cls.element_type.is_symbol_type else
+                    ""
+                )}
+            );
 
-            if(i < this.size() && i >= 0) {
-
-                if(ImageInfo.inImageCode()) {
-                    ${ni_name} nativeArray = this.reference.ni();
-                    Pointer toNativeRes = nativeArray.addressOfItems().add(
-                        i * SizeOf.get(${elem_ni_name}.class)
-                    );
-                    ${elem_ni_ref_name} nativeRes = WordFactory.unsigned(
-                        toNativeRes.rawValue()
-                    );
-                    ${api.java_ni_write(
-                        cls.element_type,
-                        "elem",
-                        "nativeRes"
-                    )};
-                } else {
-                    ${elem_jni_name} elemJni =
-                        ${api.java_jni_unwrap(cls.element_type, "elem")};
-                    this.content[i] = elemJni;
-                    JNI_LIB.${nat(f"{c_name}_set")}(
-                        this,
-                        i,
-                        elemJni
-                        ${(
-                            ", currentContext"
-                            if cls.element_type.is_symbol_type else
-                            ""
-                        )}
-                    );
-                }
-
-            } else {
-                throw new IndexOutOfBoundsException(
-                    "Index "
-                    + i
-                    + " is invalid for array of size "
-                    + this.size()
-                );
-            }
-
+            // Place the result in the pointer
+            pointer.writeWord(0, resNative);
         }
-
-        /** @see java.util.Iterable#iterator() */
-        @Override
-        public Iterator<${elem_class_name}> iterator() {
-            return new ${class_name}Iterator(this);
-        }
-
-        // ----- Inner classes -----
 
         /**
-         * The iterator class for the array.
+         * Allocate a new native array and unwrap inside.
+         *
+         * @return The newly allocated unwraped array.
          */
-        private static final class ${class_name}Iterator
-        implements Iterator<${elem_class_name}> {
+        ${ni_type} unwrap(
+            ${(
+                "final AnalysisContext currentContext"
+                if cls.element_type.is_symbol_type else
+                ""
+            )}
+        ) {
+            // Create a new native array with the size
+            final ${ni_type} res = NI_LIB.${cls.c_create(capi)}(
+                this.content.length
+            );
 
-            // ----- Attributes -----
+            // Prepare the working vars
+            final Pointer nativeItems = res.address_items();
+            Pointer nativeItem;
+            ${elem_ni_ref_type} toWrite;
 
-            /** The array to iterate on. */
-            private final ${class_name} array;
-
-            /** The current index. */
-            private int index;
-
-            // ----- Constructors -----
-
-            /**
-             * Create an iterator class for the given array.
-             *
-             * @param array The array to create the iterator for.
-             */
-            public ${class_name}Iterator(
-                ${class_name} array
-            ) {
-                this.array = array;
-                this.index = 0;
+            // Place all elements in the native array
+            for(int i = 0 ; i < this.content.length ; i++) {
+                nativeItem = nativeItems.add(
+                    i * SizeOf.get(${elem_ni_type}.class)
+                );
+                toWrite = WordFactory.unsigned(
+                    nativeItem.rawValue()
+                );
+                ${api.ni_write(
+                    cls.element_type,
+                    "this.content[i]",
+                    "toWrite"
+                )}
             }
 
-            // ----- Instance methods -----
+            // Return the result
+            return res;
+        }
 
-            @Override
-            public boolean hasNext() {
-                return this.index < this.array.size();
+        /**
+         * Release native array pointer by the given pointer.
+         *
+         * @param The pointer to the array to release.
+         */
+        static void release(
+            final Pointer pointer
+        ) {
+            release((${ni_type}) pointer.readWord(0));
+        }
+
+        /**
+         * Release the given native array.
+         *
+         * @param arrayNative The native array to release.
+         */
+        static void release(
+            final ${ni_type} arrayNative
+        ) {
+            NI_LIB.${cls.c_dec_ref(c_api)}(arrayNative);
+        }
+
+        // ----- Getters -----
+
+        /**
+         * Get the content in an array unwrapped for the JNI stubs.
+         *
+         * @return The content unwrapped.
+         */
+        private ${elem_java_unw_type}[] jniContent() {
+            final ${elem_java_unw_type}[] res =
+                new ${elem_java_unw_type}[this.content.length];
+            for(int i = 0 ; i < res.length ; i++) {
+                res[i] = ${api.java_jni_unwrap(
+                    cls.element_type,
+                    "this.content[i]"
+                )};
             }
-
-            @Override
-            public ${elem_class_name} next() {
-
-                if(ImageInfo.inImageCode()) {
-                    ${ni_name} nativeArray = this.array.reference.ni();
-                    Pointer toNativeRes = nativeArray.addressOfItems().add(
-                        this.index * SizeOf.get(${elem_ni_name}.class)
-                    );
-                    ${elem_ni_name} nativeRes = WordFactory.unsigned(
-                        toNativeRes.rawValue()
-                    );
-                    this.index += 1;
-                    return ${api.ni_wrap(cls.element_type, "nativeRes")};
-                } else {
-                    ${elem_jni_name} res = this.array.content[this.index++];
-                    return ${api.java_jni_wrap(cls.element_type, "res")};
-                }
-
-            }
-
+            return res;
         }
 
     }
@@ -339,40 +229,34 @@
 <%def name="ni_def(cls)">
     <%
     api = java_api
-    ni_name = api.java_ni_type(cls)
-    c_name = cls.c_type(capi).name
+
+    ni_type = api.ni_type(cls)
+    c_type = cls.c_type(capi).name
     %>
 
     /**
-     * The native structure of the ${c_name} langkit array.
+     * The native structure of the ${c_type} langkit array.
      */
     @CContext(LibDirectives.class)
     @CStruct(
-        value = "${c_name}_record",
+        value = "${c_type}_record",
         addStructKeyword = true,
         isIncomplete = true
     )
-    public interface ${ni_name} extends PointerBase {
+    public interface ${ni_type} extends PointerBase {
         @CField("n") public int get_n();
         @CField("ref_count") public int get_ref_count();
-        @CFieldAddress("items") public Pointer addressOfItems();
+        @CFieldAddress("items")
+        public <T extends PointerBase> T address_items();
     }
 </%def>
 
 <%def name="ni_funcs(cls)">
     <%
     api = java_api
-    ni_name = api.java_ni_type(cls)
-    %>
 
-        /**
-         * Decrease reference counter of the given array
-         *
-         * @param array The array to decrease the reference counter.
-         */
-        @CompilerDirectives.TruffleBoundary
-        @CFunction
-        public static native void ${cls.c_dec_ref(c_api)}(${ni_name} array);
+    ni_type = api.ni_type(cls)
+    %>
 
         /**
          * Create a new sized array.
@@ -382,108 +266,74 @@
          */
         @CompilerDirectives.TruffleBoundary
         @CFunction
-        public static native ${ni_name} ${cls.c_create(capi)}(int size);
-</%def>
-
-<%def name="jni_funcs(cls)">
-    <%
-    api = java_api
-    nat = c_api.get_name
-
-    c_name = cls.c_type(capi).name
-    class_name = api.wrapping_type(cls)
-    elem_jni_name = api.java_jni_type(cls.element_type)
-    %>
+        public static native ${ni_type} ${cls.c_create(capi)}(int size);
 
         /**
-         * Decrease reference counter of the given array.
+         * Decrease reference counter of the given array
          *
-         * @param array The array to decrease the reference counter from
+         * @param array The array to decrease the reference counter.
          */
         @CompilerDirectives.TruffleBoundary
-        public static native void ${cls.c_dec_ref(c_api)}(
-            long arrayRef
-        );
-
-        /**
-         * Create a new sized array.
-         *
-         * @param size The size of the array to create.
-         * @return The newly created array.
-         */
-        @CompilerDirectives.TruffleBoundary
-        public static native ${class_name} ${cls.c_create(capi)}(
-            int size
-        );
-
-        /**
-         * Set the wanted element of the array.
-         *
-         * @param array The array to set the element in.
-         * @param i The index of the element to set.
-         * @param elem The element to place in the array.
-         */
-        @CompilerDirectives.TruffleBoundary
-        public static native void ${nat(f"{c_name}_set")}(
-            ${class_name} array,
-            int i,
-            ${elem_jni_name} elem
-            ${(
-                ", AnalysisContext context"
-                if cls.element_type.is_symbol_type else
-                ""
-            )}
-        );
+        @CFunction
+        public static native void ${cls.c_dec_ref(c_api)}(${ni_type} array);
 </%def>
 
 <%def name="jni_c_decl(cls)">
     <%
     api = java_api
 
-    c_name = cls.c_type(capi).name
-    j_name = api.wrapping_type(cls)
+    c_type = cls.c_type(capi).name
+    java_type = api.wrapping_type(cls)
     %>
 
-${c_name} ${j_name}_new_value();
-jobject ${j_name}_wrap(JNIEnv *, ${c_name});
-${c_name} ${j_name}_unwrap(JNIEnv *, jobject);
+${c_type} ${java_type}_new_value();
+jobject ${java_type}_wrap(JNIEnv *, ${c_type});
+${c_type} ${java_type}_unwrap(
+    JNIEnv *,
+    jobject
+    ${(
+        ", jobject"
+        if cls.element_type.is_symbol_type else
+        ""
+    )});
+void ${java_type}_release(${c_type});
 </%def>
 
 <%def name="jni_c_impl(cls)">
     <%
     api = java_api
-    c_name = cls.c_type(capi).name
-    j_name = api.java_jni_type(cls)
-
-    elem_c_name = cls.element_type.c_type(capi).name
-    elem_j_name = api.java_jni_type(cls.element_type)
 
     sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
     ptr_sig = f"{sig_base}$PointerWrapper"
+
+    c_type = cls.c_type(capi).name
+    java_type = api.wrapping_type(cls)
+    sig = f"L{sig_base}${java_type};"
+
+    elem_c_type = cls.element_type.c_type(capi).name
+    elem_java_type = api.wrapping_type(cls.element_type, False)
+    elem_sig = f"L{sig_base}${elem_java_type};"
     %>
 
-// Create a new value for a ${c_name}
-${c_name} ${j_name}_new_value() {
+// Create a new value for a ${c_type}
+${c_type} ${java_type}_new_value() {
     return NULL;
 }
 
-// Wrap a native ${c_name} in the Java wrapping class
-jobject ${j_name}_wrap(
+// Wrap a native ${c_type} in the Java wrapping class
+jobject ${java_type}_wrap(
     JNIEnv *env,
-    ${c_name} native_struct
+    ${c_type} array_native
 ) {
-    // Verify the nullity of the native value
-    if(native_struct == NULL) return NULL;
-
     // Get the size of the array
-    int array_size = native_struct->n;
+    int array_size = array_native->n;
 
     // Create a new Java array of object of the element type
     jclass element_clazz = (*env)->FindClass(
         env,
-        "${sig_base}$${elem_j_name}"
+        "${elem_sig}"
     );
-    jobjectArray result_array = (*env)->NewObjectArray(
+    jobjectArray array_content = (*env)->NewObjectArray(
         env,
         (jsize) array_size,
         element_clazz,
@@ -492,86 +342,100 @@ jobject ${j_name}_wrap(
 
     // Put the elements in the Java array
     for(int i = 0 ; i < array_size ; i++) {
-        ${elem_c_name} elem = native_struct->items[i];
+        ${elem_c_type} elem = array_native->items[i];
         (*env)->SetObjectArrayElement(
             env,
-            result_array,
+            array_content,
             (jsize) i,
-            ${elem_j_name}_wrap(env, elem)
+            ${api.jni_wrap(cls.element_type, "elem", [])}
         );
     }
 
     // Get the array class
     jclass clazz = (*env)->FindClass(
         env,
-        "${sig_base}$${j_name}"
+        "${sig}"
     );
 
     // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
+    jmethodID constructor = (*env)->GetStaticMethodID(
         env,
         clazz,
-        "<init>",
-        "(L${ptr_sig};[L${sig_base}$${elem_j_name};)V"
+        "jniCreate",
+        "([${elem_sig})${sig}"
     );
 
     // Return the new array
-    return (*env)->NewObject(
+    return (*env)->CallStaticObjectMethod(
         env,
         clazz,
         constructor,
-        PointerWrapper_wrap(env, (void *) native_struct),
-        result_array
+        array_content
     );
 }
 
-// Get a native ${c_name} from a Java wrapping instance
-${c_name} ${j_name}_unwrap(
+// Get a native ${c_type} from a Java wrapping instance
+${c_type} ${java_type}_unwrap(
     JNIEnv *env,
-    jobject object
-) {
-    return (${c_name}) get_reference(env, object);
-}
-
-// Decrease the reference counter of an array
-${api.jni_func_sig(cls.c_dec_ref(c_api), "void", do_nat=False)}(
-    JNIEnv *env,
-    jclass jni_lib,
-    jlong array_ref
-) {
-    ${cls.c_dec_ref(c_api)}((${c_name}) array_ref);
-}
-
-// Create a new sized array
-${api.jni_func_sig(cls.c_create(capi), "jobject", do_nat=False)}(
-    JNIEnv *env,
-    jclass jni_lib,
-    jint size
-) {
-    ${c_name} res = ${cls.c_create(capi)}(
-        (int) size
-    );
-    return ${j_name}_wrap(env, res);
-}
-
-// Set the element of an array
-${api.jni_func_sig(f"{c_name}_set", "void")}(
-    JNIEnv *env,
-    jclass jni_lib,
-    jobject array,
-    jint i,
-    jobject elem
+    jobject array
     ${(
         ", jobject context"
         if cls.element_type.is_symbol_type else
         ""
     )}
 ) {
-    ${c_name} array_native = ${j_name}_unwrap(env, array);
     % if cls.element_type.is_symbol_type:
+    // Unwrap the analysis context
     ${analysis_context_type} context_native =
         AnalysisContext_unwrap(env, context);
     % endif
-    array_native->items[i] = ${api.jni_unwrap(cls.element_type, "elem")};
+
+    // Get the Java array class
+    jclass clazz = (*env)->GetObjectClass(env, array);
+
+    // Get the method to get the content of the array
+    jmethodID get_jni_content_method = (*env)->GetMethodID(
+        env,
+        clazz,
+        "jniContent",
+        "()[${elem_sig}"
+    );
+    jobjectArray content = (jobjectArray) (*env)->CallObjectMethod(
+        env,
+        array,
+        get_jni_content_method
+    );
+
+    // Get the content size
+    int size = (int) (*env)->GetArrayLength(env, content);
+
+    // Create a new native array
+    ${c_type} res = ${cls.c_create(capi)}(size);
+
+    // Fill the new native array
+    for(int i = 0 ; i < size ; i++) {
+        jobject elem = (*env)->GetObjectArrayElement(
+            env,
+            content,
+            (jsize) i
+        );
+        ${api.jni_unwrap(
+            cls.element_type,
+            "elem",
+            "elem_native",
+            []
+        )}
+        res->items[i] = elem_native;
+    }
+
+    // Return the array
+    return res;
+}
+
+// Release the given native array
+void ${java_type}_release(
+    ${c_type} array_native
+) {
+    ${cls.c_dec_ref(c_api)}(array_native);
 }
 </%def>

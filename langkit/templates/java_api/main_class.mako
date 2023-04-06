@@ -9,11 +9,13 @@
 <%
 api = java_api
 nat = c_api.get_name
+
 root_node_type = api.wrapping_type(T.root_node)
 %>
 
 package com.adacore.${ctx.lib_name.lower};
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,13 +27,15 @@ import java.lang.StringBuilder;
 import java.lang.Iterable;
 import java.lang.reflect.Method;
 
-import java.lang.ref.Cleaner;
-import java.lang.ref.WeakReference;
+import java.math.BigInteger;
 
 import java.io.File;
 import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.strings.TruffleString;
 
 import org.graalvm.nativeimage.StackValue;
 import org.graalvm.nativeimage.UnmanagedMemory;
@@ -62,23 +66,35 @@ public class ${ctx.lib_name.camel} {
     // ==========
 
     /** The default grammar rule to parse the inputs. */
-    protected static final GrammarRule DEFAULT_GRAMMAR_RULE =
+    private static final GrammarRule DEFAULT_GRAMMAR_RULE =
         GrammarRule.${ctx.main_rule_api_name.upper};
 
     /** The os name in lower case. */
     private static final String OS =
             System.getProperty("os.name").toLowerCase();
 
-    /** If the system is big endian, else it's little endian. */
-    protected static final boolean BIG_ENDIAN =
-        ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN);
+    /** The byte order of the system. */
+    private static final ByteOrder BYTE_ORDER = ByteOrder.nativeOrder();
+
+    /** The node to convert a Java string to a truffle string */
+    private static final TruffleString.FromJavaStringNode fromJavaStringNode =
+        TruffleString.FromJavaStringNode.create();
+
+    /** The node to convert a truffle string to a Java string. */
+    private static final TruffleString.ToJavaStringNode toJavaStringNode =
+        TruffleString.ToJavaStringNode.create();
+
+    /** The node to convert a byte array to a truffle string. */
+    private static final TruffleString.FromByteArrayNode fromByteArrayNode =
+        TruffleString.FromByteArrayNode.create();
+
+    /** The node to convert a truffle string to a byte array. */
+    private static final TruffleString.CopyToByteArrayNode toByteArrayNode =
+        TruffleString.CopyToByteArrayNode.create();
 
     /** A map to store the nodes classes from their name. */
     public static final Map<String, Class<? extends ${root_node_type}>>
         NODE_CLASS_MAP = new HashMap<>();
-
-    /** The cleaning manager. */
-    public static final Cleaner CLEANER = Cleaner.create();
 
     static {
         // Populate the node class map
@@ -102,13 +118,14 @@ public class ${ctx.lib_name.camel} {
      */
     @CompilerDirectives.TruffleBoundary
     private static CCharPointer toCString(
-        String jString
+        final String jString
     ) {
-        UnsignedWord size = WordFactory.unsigned(jString.length() + 1);
-        CCharPointer res = UnmanagedMemory.calloc(size);
+        final UnsignedWord size = WordFactory.unsigned(jString.length() + 1);
+        final CCharPointer res = UnmanagedMemory.calloc(size);
         if(jString.length() > 0) {
             CTypeConversion.toCString(
                 jString,
+                StandardCharsets.UTF_8,
                 res,
                 size
             );
@@ -124,10 +141,10 @@ public class ${ctx.lib_name.camel} {
      * @return The native C char pointer. This pointer MUST be freed.
      */
     private static CCharPointer toCBytes(
-        byte[] bytes
+        final byte[] bytes
     ) {
-        UnsignedWord size = WordFactory.unsigned(bytes.length);
-        CCharPointer res = UnmanagedMemory.malloc(size);
+        final UnsignedWord size = WordFactory.unsigned(bytes.length);
+        final CCharPointer res = UnmanagedMemory.malloc(size);
         for(int i = 0 ; i < bytes.length ; i++) {
             res.write(i, bytes[i]);
         }
@@ -142,7 +159,7 @@ public class ${ctx.lib_name.camel} {
      */
     @CompilerDirectives.TruffleBoundary
     private static String toJString(
-        CCharPointer pointer
+        final CCharPointer pointer
     ) {
         return CTypeConversion.toJavaString(pointer);
     }
@@ -155,12 +172,12 @@ public class ${ctx.lib_name.camel} {
      * @return The resulting string.
      */
     @CompilerDirectives.TruffleBoundary
-    private static String decodeUTF32(int[] chars) {
-        byte[] realContent = new byte[chars.length];
-        for(int i = 0 ; i < chars.length ; i++) {
-            realContent[i] = (byte) (chars[i] & 0xFF);
-        }
-        return new String(realContent);
+    private static String decodeUTF32(
+        final byte[] toDecode
+    ) {
+        return toJavaStringNode.execute(
+            fromByteArrayNode.execute(toDecode, TruffleString.Encoding.UTF_32)
+        );
     }
 
     /**
@@ -171,63 +188,55 @@ public class ${ctx.lib_name.camel} {
      * @return The encoded string in an int array.
      */
     @CompilerDirectives.TruffleBoundary
-    private static int[] encodeUTF32(String toEncode) {
-        byte[] src = toEncode.getBytes();
-        int[] res = new int[src.length];
-        for(int i = 0 ; i < src.length ; i++) {
-            res[i] = (int) src[i];
-        }
-        return res;
+    private static byte[] encodeUTF32(
+        final String toEncode
+    ) {
+        return toByteArrayNode.execute(
+            fromJavaStringNode.execute(
+                toEncode,
+                TruffleString.Encoding.UTF_32
+            ),
+            TruffleString.Encoding.UTF_32
+        );
     }
 
     /**
-     * This function turn an int array to a byte array.
+     * Get the string representation of the given string.
+     * This function escaped needed chars and format the string.
      *
-     * @param intArray The integer array to translate.
-     * @return The byte array.
+     * @param source The source string to get the representation for.
+     * @return The representation of the string.
      */
-    private static byte[] intToByteArray(int[] intArray) {
-        byte[] res = new byte[intArray.length * 4];
-        for(int i = 0 ; i < res.length ; i+=4) {
-            int currentInt = intArray[i / 4];
-            if(BIG_ENDIAN) {
-                res[i] = (byte) ((currentInt >> 24) & 0xFF);
-                res[i + 1] = (byte) ((currentInt >> 16) & 0xFF);
-                res[i + 2] = (byte) ((currentInt >> 8) & 0xFF);
-                res[i + 3] = (byte) (currentInt & 0xFF);
-            } else {
-                res[i + 3] = (byte) ((currentInt >> 24) & 0xFF);
-                res[i + 2] = (byte) ((currentInt >> 16) & 0xFF);
-                res[i + 1] = (byte) ((currentInt >> 8) & 0xFF);
-                res[i] = (byte) (currentInt & 0xFF);
-            }
-        }
-        return res;
+    private static String stringRepresentation(
+        final String source
+    ) {
+        return source
+            .replace("\"", "\\\"")
+            .replace("\n", "\\x0a");
     }
 
     /**
-     * Check the last exception raised by langkit.
+     * Check the last exception raised by langkit and throw it.
      *
-     * @return The last exception wrapped in the LangkitException class
-     * if there is an exception, null if there is none.
+     * @throws The last langkit exception if there is one.
      */
-    private static LangkitException checkException() {
-        LangkitException res = null;
+    private static void checkException() throws LangkitException {
 
         if(ImageInfo.inImageCode()) {
-            LangkitExceptionNative exceptionNative =
+            final LangkitExceptionNative exceptionNative =
                 NI_LIB.${nat("get_last_exception")}();
             if(exceptionNative.isNonNull()) {
-                res = new LangkitException(
+                throw new LangkitException(
                     exceptionNative.get_kind(),
                     toJString(exceptionNative.get_information())
                 );
             }
         } else {
-            res = JNI_LIB.${nat("get_last_exception")}();
+            final LangkitException lastException =
+                JNI_LIB.${nat("get_last_exception")}();
+            if(lastException != null) throw lastException;
         }
 
-        return res;
     }
 
     // ==========
@@ -267,7 +276,7 @@ public class ${ctx.lib_name.camel} {
      */
     public static final class PointerWrapper {
 
-        // ----- Attributes -----
+        // ----- Instance attributes -----
 
         /** The pointer NI value. */
         private PointerBase ni;
@@ -283,7 +292,7 @@ public class ${ctx.lib_name.camel} {
          * @param niPointer The pointer based value.
          */
         PointerWrapper(
-            PointerBase niPointer
+            final PointerBase niPointer
         ) {
             this.ni = niPointer;
             this.jni = -1;
@@ -295,7 +304,7 @@ public class ${ctx.lib_name.camel} {
          * @param jniPointer The pointer in a long value.
          */
         PointerWrapper(
-            long jniPointer
+            final long jniPointer
         ) {
             this.jni = jniPointer;
         }
@@ -307,7 +316,7 @@ public class ${ctx.lib_name.camel} {
          * @return The wrapped pointer.
          */
         static PointerWrapper wrap(
-            PointerBase niPointer
+            final PointerBase niPointer
         ) {
             return new PointerWrapper(niPointer);
         }
@@ -383,7 +392,7 @@ public class ${ctx.lib_name.camel} {
         public boolean equals(Object o) {
             if(o == this) return true;
             if(!(o instanceof PointerWrapper)) return false;
-            PointerWrapper other = (PointerWrapper) o;
+            final PointerWrapper other = (PointerWrapper) o;
             if(ImageInfo.inImageCode()) {
                 return this.ni.equal(other.ni);
             } else {
@@ -398,7 +407,7 @@ public class ${ctx.lib_name.camel} {
      */
     public static final class ${ctx.lib_name.camel}Field {
 
-        // ----- Attributes -----
+        // ----- Instance attributes -----
 
         /** The Java method for the field */
         public final Method javaMethod;
@@ -415,8 +424,8 @@ public class ${ctx.lib_name.camel} {
          * @param params The parameters of the field call.
          */
         public ${ctx.lib_name.camel}Field(
-            Method javaMethod,
-            List<Param> params
+            final Method javaMethod,
+            final List<Param> params
         ) {
             this.javaMethod = javaMethod;
             this.params = params;
@@ -429,7 +438,7 @@ public class ${ctx.lib_name.camel} {
      */
     public static class Param {
 
-        // ----- Attributes -----
+        // ----- Instance attributes -----
 
         /** The type of the argument */
         public final Class<?> type;
@@ -446,8 +455,8 @@ public class ${ctx.lib_name.camel} {
          * @param name The name of the parameter.
          */
         public Param(
-            Class<?> type,
-            String name
+            final Class<?> type,
+            final String name
         ) {
             this.type = type;
             this.name = name;
@@ -461,7 +470,7 @@ public class ${ctx.lib_name.camel} {
      */
     public static final class ParamWithDefaultValue extends Param {
 
-        // ----- Attributes -----
+        // ----- Instance attributes -----
 
         /** The default value of the parameter */
         public final Object defaultValue;
@@ -476,9 +485,9 @@ public class ${ctx.lib_name.camel} {
          * @param defaultValue The default value of the parameter.
          */
         public ParamWithDefaultValue(
-            Class<?> type,
-            String name,
-            Object defaultValue
+            final Class<?> type,
+            final String name,
+            final Object defaultValue
         ) {
             super(type, name);
             this.defaultValue = defaultValue;
@@ -511,17 +520,23 @@ public class ${ctx.lib_name.camel} {
     /**
      * This class represents exception during symbol manipulation.
      */
-    public static class SymbolException extends RuntimeException {
-        public SymbolException(String msg) {
-            super("Invalid symbol : '" + msg + "'");
+    public static final class SymbolException extends RuntimeException {
+        public SymbolException(
+            final String symbol
+        ) {
+            super("Invalid symbol : '" + symbol + "'");
         }
     }
 
     /**
      * This class reprsents exception during enum manipulation.
      */
-    public static class EnumException extends RuntimeException {
-        public EnumException(String msg) { super(msg); }
+    public static final class EnumException extends RuntimeException {
+        public EnumException(
+            final String msg
+        ) {
+            super(msg);
+        }
     }
 
     /**
@@ -529,10 +544,10 @@ public class ${ctx.lib_name.camel} {
      */
     public static class LangkitException extends RuntimeException {
 
-        // ----- Attributes -----
+        // ----- Instance attributes -----
 
         /** The kind of the langkit exception. */
-        private final ExceptionKind kind;
+        public final ExceptionKind kind;
 
         // ----- Constructors -----
 
@@ -544,17 +559,11 @@ public class ${ctx.lib_name.camel} {
          * @param message The message of the exception.
          */
         public LangkitException(
-            int kind,
-            String message
+            final int kind,
+            final String message
         ) {
             super(message);
             this.kind = ExceptionKind.fromC(kind);
-        }
-
-        // ----- Getters methods -----
-
-        public ExceptionKind getKind() {
-            return this.kind;
         }
 
     }
@@ -570,19 +579,27 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Enum values -----
 
-        NO_TOKEN(-1),
+        NO_TOKEN(-1, "No_Token"),
         % for i, t in enumerate(ctx.lexer.sorted_tokens):
-        ${t.c_name}(${t.value}),
+        ${t.c_name}(${t.value}, "${t.name}"),
         % endfor
         ;
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none token kind. */
+        public static final TokenKind NONE = NO_TOKEN;
+
+        /** The map from int to enum values. */
+        private static final Map<Integer, TokenKind> map = new HashMap<>();
+
+        // ----- Instance attributes -----
 
         /** The value of the enum instance. */
         private final int value;
 
-        /** The map from int to enum values. */
-        private static final Map<Integer, TokenKind> map = new HashMap<>();
+        /** The name of the enum instance in the Langkit DSL. */
+        public final String name;
 
         // ----- Constructors -----
 
@@ -594,8 +611,12 @@ public class ${ctx.lib_name.camel} {
         }
 
         /** Private constructor. */
-        private TokenKind(int value) {
+        private TokenKind(
+            final int value,
+            final String name
+        ) {
             this.value = value;
+            this.name = name;
         }
 
         // ----- Enum methods -----
@@ -608,7 +629,9 @@ public class ${ctx.lib_name.camel} {
          * @throws EnumException When the int value doesn't map to any enum
          * instance.
          */
-        public static TokenKind fromC(int cValue) throws EnumException {
+        public static TokenKind fromC(
+            final int cValue
+        ) throws EnumException {
             if(!map.containsKey(cValue))
                 throw new EnumException(
                     "Cannot get TokenKind from " + cValue
@@ -621,7 +644,9 @@ public class ${ctx.lib_name.camel} {
          *
          * @return The int C value of the enum instance.
          */
-        public int toC() { return this.value; }
+        public int toC() {
+            return this.value;
+        }
 
     }
 
@@ -635,14 +660,20 @@ public class ${ctx.lib_name.camel} {
         % endfor
         ;
 
-        // ----- Attributes -----
+        // ----- Class attributes
 
-        /** The value of the enum instance. */
-        private final int value;
+        /** Singleton that represents the none expcetion kind. */
+        public static final ExceptionKind NONE =
+            ${ctx.sorted_exception_types[0].kind_name.upper};
 
         /** The map from int to enum values. */
         private static final Map<Integer, ExceptionKind> map =
             new HashMap<>();
+
+        // ----- Instance ttributes -----
+
+        /** The value of the enum instance. */
+        private final int value;
 
         // ----- Constructors -----
 
@@ -654,7 +685,9 @@ public class ${ctx.lib_name.camel} {
         }
 
         /** Private constructor. */
-        private ExceptionKind(int value) {
+        private ExceptionKind(
+            final int value
+        ) {
             this.value = value;
         }
 
@@ -668,7 +701,9 @@ public class ${ctx.lib_name.camel} {
          * @throws EnumException When the int value doesn't map to any enum
          * instance.
          */
-        public static ExceptionKind fromC(int cValue) throws EnumException {
+        public static ExceptionKind fromC(
+            final int cValue
+        ) throws EnumException {
             if(!map.containsKey(cValue))
                 throw new EnumException(
                     "Cannot get ExceptionKind from " + cValue
@@ -681,7 +716,9 @@ public class ${ctx.lib_name.camel} {
          *
          * @return The int C value of the enum instance.
          */
-        public int toC() { return this.value; }
+        public int toC() {
+            return this.value;
+        }
 
     }
 
@@ -692,7 +729,7 @@ public class ${ctx.lib_name.camel} {
     % endfor
 
     // ==========
-    // Structure wrapping classes
+    // Java wrapping classes
     // ==========
 
     // ===== Constant structure wrapping classes =====
@@ -702,7 +739,12 @@ public class ${ctx.lib_name.camel} {
      */
     public static final class Char {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none char. */
+        public static final Char NONE = new Char(0);
+
+        // ----- Instance attributes -----
 
         /** The value of the character. */
         public final int value;
@@ -716,7 +758,7 @@ public class ${ctx.lib_name.camel} {
          * @param value The value of the character.
          */
         Char(
-            int value
+            final int value
         ) {
             this.value = value;
         }
@@ -728,7 +770,7 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created character.
          */
         public static Char create(
-            int value
+            final int value
         ) {
             return new Char(value);
         }
@@ -740,24 +782,23 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created character.
          */
         public static Char create(
-            char value
+            final char value
         ) {
             return new Char((int) value);
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
 
         /**
          * Wrap the given NI pointer in a Java class.
          *
-         * @param niPointer The NI pointer to wrap.
+         * @param pointer The NI pointer to wrap.
          * @return The wrapped character.
          */
         static Char wrap(
-            CIntPointer niPointer
+            final CIntPointer pointer
         ) {
-            if(niPointer.isNull()) return null;
-            else return new Char(niPointer.read());
+            return wrap(pointer.read());
         }
 
         /**
@@ -767,222 +808,165 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created character.
          */
         static Char wrap(
-            int value
+            final int value
         ) {
             return new Char(value);
         }
 
-        // ----- Instance methods -----
+        /**
+         * Unwrap the character in the given int pointer.
+         *
+         * @param pointer The pointer to unwrap the character in.
+         */
+        void unwrap(
+            final CIntPointer pointer
+        ) {
+            pointer.write(this.value);
+        }
 
         /**
-         * Return the value as a Java character.
+         * Unwrap the character in a Java integer.
          *
-         * @return The character value as a Java char.
+         * @return The character value in a Java integer.
          */
-        public char toChar() {
-            return (char) this.value;
+        int unwrap() {
+            return this.value;
         }
 
         // ----- Override methods -----
 
         @Override
         public String toString() {
-            return new String(new char[]{this.toChar()});
+            final ByteBuffer buffer = ByteBuffer.allocate(4);
+            buffer.order(BYTE_ORDER);
+            buffer.putInt(this.value);
+            return decodeUTF32(buffer.array());
         }
 
     }
 
     ${java_doc('langkit.big_integer_type', 4)}
-    public static final class BigInteger implements AutoCloseable {
+    static final class BigIntegerWrapper {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
 
-        /** The pointer to the native big integer. */
-        public final PointerWrapper reference;
+        /** Singleton that represents the none big integer. */
+        public static final BigInteger NONE = BigInteger.ZERO;
 
-        /** The string representation of the integer. */
-        private String representation;
-
-        /** The cleanable object. */
-        private final Cleaner.Cleanable cleanable;
-
-        // ----- Constructors -----
+        // ----- Graal C API methods -----
 
         /**
-         * Create a new big integer from a custom pointer.
+         * Wrap a pointer which points to a native big integer.
          *
-         * @param reference The pointer to the native big integer value.
+         * @param pointer The pointer to the native big integer.
+         * @return The Java big integer.
          */
-        BigInteger(
-            PointerWrapper reference
+        static BigInteger wrap(
+            final Pointer pointer
         ) {
-            this.reference = reference;
-            this.representation = null;
-            this.cleanable = CLEANER.register(
-                this,
-                new ReleaseTask(reference)
-            );
+            return wrap((BigIntegerNative) pointer.readWord(0));
         }
 
         /**
-         * Create a big integer from its string representation.
+         * Wrap the given native big integer in a Java big integer.
          *
-         * @param representation The representation of the integer.
-         * @return The newly created big intgeer.
+         * @param bigIntegerNative The big integer native value.
+         * @return The Java big integer.
          */
-        public static BigInteger create(
-            String representation
+        static BigInteger wrap(
+            final BigIntegerNative bigIntegerNative
         ) {
-            // Prepare the result
-            BigInteger res;
-
-            // Create the big integer text as an autocloseable
-            try (Text bigIntegerText = Text.create(representation)) {
-
-                if(ImageInfo.inImageCode()) {
-                    TextNative textNative = StackValue.get(TextNative.class);
-                    bigIntegerText.unwrap(textNative);
-                    res = wrap(NI_LIB.${nat("create_big_integer")}(
-                        textNative
-                    ));
-                } else {
-                    res = JNI_LIB.${nat("create_big_integer")}(
-                        bigIntegerText
-                    );
-                }
-
-            }
-
-            // Return the big integer
-            return res;
-        }
-
-        // ----- Cleaning methods/classes -----
-
-        /**
-         * The task to release a big integer.
-         */
-        private static final class ReleaseTask implements Runnable {
-
-            // ----- Attributes -----
-
-            /** The reference to the big integer to release. */
-            private final PointerWrapper bigIntRef;
-
-            // ----- Constructors -----
-
-            /**
-             * Create a new release task for a big integer.
-             *
-             * @pararm bigIntRef The big integer to release.
-             */
-            ReleaseTask(
-                PointerWrapper bigIntRef
-            ) {
-                this.bigIntRef = bigIntRef;
-            }
-
-            // ----- Instance methods -----
-
-            /** @see java.lang.Runnable#run() */
-            @Override
-            public void run() {
-                BigInteger.release(this.bigIntRef);
-            }
-
+            final String representation = getRepresentation(bigIntegerNative);
+            return new BigInteger(representation);
         }
 
         /**
-         * Release the given big integer reference.
+         * Unwrap the given big integer in the given pointer as a native
+         * big integer.
          *
-         * @param bigIntRef The big integer to release.
+         * @param bigInteger The big integer to unwrap.
+         * @param pointer The pointer to place the big integer in.
          */
-        private static void release(
-            PointerWrapper bigIntRef
+        static void unwrap(
+            final BigInteger bigInteger,
+            final Pointer pointer
         ) {
-
-            if(ImageInfo.inImageCode()) {
-                NI_LIB.${nat("big_integer_decref")}(bigIntRef.ni());
-            } else {
-                JNI_LIB.${nat("big_integer_decref")}(bigIntRef.jni());
-            }
-
+            pointer.writeWord(0, unwrap(bigInteger));
         }
 
-        /** @see java.lang.AutoCloseable#close() */
-        @Override
-        public void close() {
-            this.cleanable.clean();
+        /**
+         * Unwrap the given big integer.
+         *
+         * @param bigInteger The big integer to unwrap.
+         * @return The native big integer newly allocated.
+         */
+        static BigIntegerNative unwrap(
+            final BigInteger bigInteger
+        ) {
+            // Create the representation of the big integer
+            final String representation = bigInteger.toString();
+            try(final Text bigIntegerText = Text.create(representation)) {
+                TextNative bigIntegerTextNative = StackValue.get(
+                    TextNative.class
+                );
+                bigIntegerText.unwrap(bigIntegerTextNative);
+
+                // Create the big intger by calling the native function
+                return NI_LIB.${nat("create_big_integer")}(
+                    bigIntegerTextNative
+                );
+            }
+        }
+
+        /**
+         * Release the big integer pointed by the given pointer.
+         *
+         * @param pointer The pointer to the big integer to release.
+         */
+        static void release(
+            final Pointer pointer
+        ) {
+            release((BigIntegerNative) pointer.readWord(0));
+        }
+
+        /**
+         * Release the given native big integer.
+         *
+         * @param bigIntegerNative The native big integer to release.
+         */
+        static void release(
+            final BigIntegerNative bigIntegerNative
+        ) {
+            NI_LIB.${nat("big_integer_decref")}(bigIntegerNative);
         }
 
         // ----- Class methods -----
 
         /**
-         * Wrap an NI pointer that points to a langkit big integer.
+         * Get the string representation of the given native big integer.
          *
-         * @param niPointer The pointer to the big integer.
-         * @return The newly created big integer or null if the given
-         * pointer is null.
+         * @param bigIntegerNative The native big integer to get the
+         * representation from.
          */
-        static BigInteger wrap(
-            Pointer niPointer
+        private static String getRepresentation(
+            final BigIntegerNative bigIntegerNative
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((BigIntegerNative) niPointer.readWord(0));
-        }
-
-        /**
-         * Wrap a big integer native value (which is a pointer) in the
-         * Java class.
-         *
-         * @param bigIntegerNative The big integer NI native value.
-         * @return The newly created big integer or null if the big integer
-         * value is null.
-         */
-        static BigInteger wrap(
-            BigIntegerNative bigIntegerNative
-        ) {
-            if(((PointerBase) bigIntegerNative).isNull()) return null;
-            else return new BigInteger(
-                new PointerWrapper(bigIntegerNative)
+            // Allocate the stack value for the text
+            final TextNative bigIntegerTextNative = StackValue.get(
+                TextNative.class
             );
-        }
+            Text.NONE.unwrap(bigIntegerTextNative);
 
-        // ----- Instance methods -----
+            // Call the native function
+            NI_LIB.${nat("big_integer_text")}(
+                bigIntegerNative,
+                bigIntegerTextNative
+            );
 
-        /**
-         * Get the string representation of the big integer.
-         *
-         * @return The string representing the big integer.
-         */
-        public String getRepresentation() {
-            if(this.representation == null) {
-                Text bigIntegerText;
-
-                if(ImageInfo.inImageCode()) {
-                    TextNative textNative = StackValue.get(TextNative.class);
-                    NI_LIB.${nat("big_integer_text")}(
-                        this.reference.ni(),
-                        textNative
-                    );
-                    bigIntegerText = Text.wrap(textNative);
-                } else {
-                    bigIntegerText = JNI_LIB.${nat("big_integer_text")}(
-                        this
-                    );
-                }
-
-                this.representation = bigIntegerText.getContent();
-                bigIntegerText.close();
+            // Wrap the text and return the result
+            try(final Text bigIntegerText = Text.wrap(bigIntegerTextNative)) {
+                return bigIntegerText.getContent();
             }
-            return this.representation;
-        }
-
-        // ----- Override methods -----
-
-        @Override
-        public String toString() {
-            return this.getRepresentation();
         }
 
     }
@@ -990,7 +974,12 @@ public class ${ctx.lib_name.camel} {
     ${java_doc('langkit.symbol_type', 4)}
     public static final class Symbol {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none symbol. */
+        public static final Symbol NONE = new Symbol("");
+
+        // ----- Instance attributes
 
         /** The text of the symbol. */
         public final String text;
@@ -1003,7 +992,7 @@ public class ${ctx.lib_name.camel} {
          * @param text The symbol text.
          */
         Symbol(
-            String text
+            final String text
         ) {
             this.text = text;
         }
@@ -1013,11 +1002,25 @@ public class ${ctx.lib_name.camel} {
          *
          * @param text The text of the symbol.
          */
-        public static Symbol create(String text) {
+        public static Symbol create(
+            final String text
+        ) {
             return new Symbol(text);
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
+
+        /**
+         * Wrap the given pointer to a native symbol.
+         *
+         * @param pointer The pointer to the native symbol.
+         * @return The wrapped symbol.
+         */
+        static Symbol wrap(
+            final Pointer pointer
+        ) {
+            return wrap((SymbolNative) pointer.readWord(0));
+        }
 
         /**
          * Wrap the given symbol native value in a Java value.
@@ -1025,31 +1028,22 @@ public class ${ctx.lib_name.camel} {
          * @param symbolNative The symbol native value.
          * @return The wrapped symbol.
          */
-        static Symbol wrap(SymbolNative symbolNative) {
+        static Symbol wrap(
+            final SymbolNative symbolNative
+        ) {
             // Get the symbol text
-            TextNative textNative = StackValue.get(TextNative.class);
+            final TextNative textNative = StackValue.get(TextNative.class);
+            Text.NONE.unwrap(textNative);
             NI_LIB.${nat("symbol_text")}(
                 symbolNative,
                 textNative
             );
 
             // Return the new symbol
-            try(Text text = Text.wrap(textNative)) {
+            try(final Text text = Text.wrap(textNative)) {
                 return new Symbol(text.getContent());
             }
         }
-
-        /**
-         * Fill the given NI native value with default values.
-         *
-         * @param symbolNative The NI value to fill.
-         */
-        static void defaultValue(SymbolNative symbolNative) {
-            symbolNative.set_data(WordFactory.nullPointer());
-            symbolNative.set_bounds(WordFactory.nullPointer());
-        }
-
-        // ----- Instance methods -----
 
         /**
          * Unwrap the symbol in the given native structure.
@@ -1057,16 +1051,18 @@ public class ${ctx.lib_name.camel} {
          * @param symbolNative The native structure to unwrap in.
          */
         void unwrap(
-            SymbolNative symbolNative,
-            AnalysisContext context
+            final SymbolNative symbolNative,
+            final AnalysisContext context
         ) {
             // Unwrap the symbol text
             try(Text text = Text.create(this.text)) {
-                TextNative textNative = StackValue.get(TextNative.class);
+                final TextNative textNative = StackValue.get(
+                    TextNative.class
+                );
                 text.unwrap(textNative);
 
                 // Call the symbol creation
-                int resCode = NI_LIB.${nat("context_symbol")}(
+                final int resCode = NI_LIB.${nat("context_symbol")}(
                     context.reference.ni(),
                     textNative,
                     symbolNative
@@ -1089,224 +1085,143 @@ public class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.string_type', 4)}
-    public static final class StringWrapper implements AutoCloseable {
+    static final class StringWrapper {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
 
-        /** The reference to the native string. */
-        public final PointerWrapper reference;
+        /** Singleton that represents the none string. */
+        public static final String NONE = "";
 
-        /** The array of the string content. */
-        public final int[] contentArray;
-
-        /** The content of the string. */
-        private String content;
-
-        /** The cleanable object. */
-        private final Cleaner.Cleanable cleanable;
-
-        // ----- Constructors -----
+        // ----- Graal C API methods -----
 
         /**
-         * Create a new string wrapper from its reference.
+         * Wrap a pointer that points to a native string.
          *
-         * @param reference The reference to the native string value.
+         * @param pointer The pointer to the native string.
+         * @return The Java string wrapped from the native string.
          */
-        StringWrapper(
-            PointerWrapper reference
+        static String wrap(
+            final Pointer pointer
         ) {
-            this(
-                reference,
-                null
-            );
+            return wrap((StringNative) pointer.readWord(0));
         }
 
         /**
-         * Create a new string wrapper.
+         * Wrap a native string wrapper in a Java string.
          *
-         * @param reference The pointer that represents the native
-         * string value.
-         * @param contentArray The content of the string in an int array
-         * (this param is null in native-image mode).
+         * @param stringNative The native string to wrap.
+         * @return The Java string created from the native one.
          */
-        StringWrapper(
-            PointerWrapper reference,
-            int[] contentArray
+        static String wrap(
+            final StringNative stringNative
         ) {
-            this.reference = reference;
-            this.contentArray = contentArray;
-            this.content = null;
-            this.cleanable = CLEANER.register(
-                this,
-                new ReleaseTask(reference)
-            );
+            return getNativeStringContent(stringNative);
         }
 
         /**
-         * Create a new string wrapper from its content.
+         * Unwrap the string in the given pointer.
          *
-         * @param content The content of the string wrapper.
-         * @return The newly created string wrapper.
+         * @param string The string to unwrap.
+         * @param pointer The pointer to place the native string in.
          */
-        public static StringWrapper create(
-            String content
+        static void unwrap(
+            final String string,
+            final Pointer pointer
         ) {
-            byte[] contentArray = intToByteArray(encodeUTF32(content));
-
-            if(ImageInfo.inImageCode()) {
-                CTypeConversion.CCharPointerHolder holder =
-                    CTypeConversion.toCBytes(contentArray);
-                return StringWrapper.wrap(
-                    NI_LIB.${nat("create_string")}(
-                        (CIntPointer) holder.get(),
-                        content.length()
-                    )
-                );
-            } else {
-                return JNI_LIB.${nat("create_string")}(contentArray);
-            }
-        }
-
-        // ----- Cleaning methods/classes -----
-
-        /**
-         * The task to release a string reference.
-         */
-        private static final class ReleaseTask implements Runnable {
-
-            // ----- Attributes -----
-
-            /** The reference to the string to release. */
-            private final PointerWrapper stringRef;
-
-            // ----- Constructors -----
-
-            /**
-             * Create a new release task for a string wrapper reference.
-             *
-             * @param stringRef The reference to release.
-             */
-            ReleaseTask(
-                PointerWrapper stringRef
-            ) {
-                this.stringRef = stringRef;
-            }
-
-            // ----- Instance methods -----
-
-            /** @see java.lang.Runnable#run() */
-            @Override
-            public void run() {
-                StringWrapper.release(this.stringRef);
-            }
-
+            pointer.writeWord(0, unwrap(string));
         }
 
         /**
-         * Release the given string reference.
+         * Unwrap the given string in a native one.
          *
-         * @param stringRef The reference to the string to release.
+         * @param string The string to unwrap.
+         * @return The native string unwrapped.
          */
-        private static void release(
-            PointerWrapper stringRef
+        static StringNative unwrap(
+            final String string
         ) {
-
-            if(ImageInfo.inImageCode()) {
-                NI_LIB.${nat("string_dec_ref")}(stringRef.ni());
-            } else {
-                JNI_LIB.${nat("string_dec_ref")}(stringRef.jni());
-            }
-
+            return nativeStringFromContent(string);
         }
 
-        /** @see java.lang.AutoCloseable#close() */
-        @Override
-        public void close() {
-            this.cleanable.clean();
+        /**
+         * Release the native string at the given pointer.
+         *
+         * @param pointer The pointer to the native string.
+         */
+        static void release(
+            final Pointer pointer
+        ) {
+            release((StringNative) pointer.readWord(0));
+        }
+
+        /**
+         * Release the given native string.
+         *
+         * @param stringNative The native string to release.
+         */
+        static void release(
+            final StringNative stringNative
+        ) {
+            NI_LIB.${nat("string_dec_ref")}(stringNative);
         }
 
         // ----- Class methods -----
 
         /**
-         * Wrap a pointer that points to the native string wrapper in
-         * the Java class.
+         * Get the content of the given native string in a Java one.
          *
-         * @param niPointer The pointer that leads to the string NI value.
-         * @return the newly created string wrapper or null if the pointer
-         * or the native string are null.
+         * @param stringNative The native string to get the content from.
+         * @return The Java string.
          */
-        static StringWrapper wrap(
-            Pointer niPointer
+        private static String getNativeStringContent(
+            final StringNative stringNative
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((StringNative) niPointer.readWord(0));
+            // Prepare the working variable
+            final Pointer pointer = (Pointer) stringNative;
+            final int length = pointer.readInt(0);
+            final byte[] contentArray = new byte[length * 4];
+
+            // Get the content from the native string
+            for(int i = 0 ; i < contentArray.length ; i++) {
+                contentArray[i] = pointer.readByte(i + 8);
+            }
+
+            // Return the decoded string
+            return decodeUTF32(contentArray);
         }
 
         /**
-         * Wrap a native string wrapper in the Java class.
+         * Create a native string from a Java string.
          *
-         * @param stringNative The NI string wrapper native value.
-         * @return The newly created string wrapper or null if the value
-         * is null.
+         * @param string The Java string to create the native string from.
+         * @return The native string.
          */
-        static StringWrapper wrap(
-            StringNative stringNative
+        private static StringNative nativeStringFromContent(
+            final String string
         ) {
-            if(((PointerBase) stringNative).isNull()) return null;
-            else return new StringWrapper(
-                new PointerWrapper(stringNative)
+            // Encode the string in UTF-32
+            final byte[] contentArray = encodeUTF32(string);
+            final int length = string.length();
+
+            // Create the native array
+            final Pointer contentArrayNative = UnmanagedMemory.malloc(
+                contentArray.length
             );
-        }
-
-        /**
-         * Get the content of the string in a integer array.
-         * Internal function used for the NI mode.
-         *
-         * @return The content of the string in an integer array.
-         */
-        private static int[] getContentArray(
-            StringNative stringWrapperPointer
-        ) {
-            Pointer niPointer = (Pointer) stringWrapperPointer;
-            int length = niPointer.readInt(0);
-            int[] res = new int[length];
-            for(int i = 0 ; i < length ; i++) {
-                res[i] = niPointer.readInt(
-                    8 + (i * 4)
-                );
+            for(int i = 0 ; i < contentArray.length ; i++) {
+                contentArrayNative.writeByte(i, contentArray[i]);
             }
+
+            // Create the native string
+            final StringNative res = NI_LIB.${nat("create_string")}(
+                (CIntPointer) contentArrayNative,
+                length
+            );
+
+            // Free the memory
+            UnmanagedMemory.free(contentArrayNative);
+
+            // Return the result
             return res;
-        }
-
-        // ----- Instance methods -----
-
-        /**
-         * Get the content of the string.
-         *
-         * @return The content of the langkit string in a Java string.
-         */
-        public String getContent() {
-            if(this.content == null) {
-                int[] contentArray;
-
-                if(ImageInfo.inImageCode()) {
-                    contentArray = getContentArray(this.reference.ni());
-                } else {
-                    contentArray = this.contentArray != null ?
-                        this.contentArray :
-                        new int[0];
-                }
-
-                this.content = decodeUTF32(contentArray);
-            }
-            return this.content;
-        }
-
-        // ----- Override methods -----
-
-        @Override
-        public String toString() {
-            return this.getContent();
         }
 
     }
@@ -1314,25 +1229,28 @@ public class ${ctx.lib_name.camel} {
     ${java_doc('langkit.text_type', 4)}
     public static final class Text implements AutoCloseable {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none text. */
+        public static final Text NONE = new Text(
+            PointerWrapper.nullPointer(),
+            0,
+            false
+        );
+
+        // ----- Instance attributes -----
 
         /** The pointer to the characters. */
-        public final PointerWrapper charPointer;
+        private final PointerWrapper charPointer;
 
         /** The size of the text. */
-        public final long length;
+        private final long length;
 
         /** If the text is allocated. */
-        public final boolean isAllocated;
+        private final boolean isAllocated;
 
         /** If the text object is the owner of its buffer. */
         private final boolean isOwner;
-
-        /** The content of the text in a Java array. */
-        public final int[] contentArray;
-
-        /** The cleanable object. */
-        private final Cleaner.Cleanable cleanable;
 
         /** The content of the text in a Java string. */
         private String content;
@@ -1347,9 +1265,9 @@ public class ${ctx.lib_name.camel} {
          * @param isAllocated If the text is allocated in the memory.
          */
         Text(
-            PointerWrapper charPointer,
-            long length,
-            boolean isAllocated
+            final PointerWrapper charPointer,
+            final long length,
+            final boolean isAllocated
         ) {
             this(
                 charPointer,
@@ -1366,14 +1284,13 @@ public class ${ctx.lib_name.camel} {
          * @param charPointer The pointer to the characters of the text.
          * @param length The length of the text in character.
          * @param isAllocated If the text is allocated in the memory.
-         * @param contentArray The characters of the text
-         * (as strings, this is only used in JNI mode).
+         * @param contentArray The characters of the text (for JNI)
          */
         Text(
-            PointerWrapper charPointer,
-            long length,
-            boolean isAllocated,
-            int[] contentArray
+            final PointerWrapper charPointer,
+            final long length,
+            final boolean isAllocated,
+            final byte[] contentArray
         ) {
             this(
                 charPointer,
@@ -1395,28 +1312,22 @@ public class ${ctx.lib_name.camel} {
          * (as strings, this is only used in JNI mode).
          */
         private Text(
-            PointerWrapper charPointer,
-            long length,
-            boolean isAllocated,
-            boolean isOwner,
-            int[] contentArray
+            final PointerWrapper charPointer,
+            final long length,
+            final boolean isAllocated,
+            final boolean isOwner,
+            final byte[] contentArray
         ) {
             this.charPointer = charPointer;
             this.length = length;
             this.isAllocated = isAllocated;
             this.isOwner = isOwner;
-            this.contentArray = contentArray;
-            this.cleanable = CLEANER.register(
-                this,
-                new ReleaseTask(
-                    charPointer,
-                    length,
-                    isAllocated,
-                    isOwner
-                )
-            );
 
-            this.content = null;
+            if(contentArray != null) {
+                this.content = decodeUTF32(contentArray);
+            } else {
+                this.content = null;
+            }
         }
 
         /**
@@ -1426,12 +1337,12 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created text.
          */
         public static Text create(
-            String content
+            final String content
         ) {
-            byte[] contentArray = intToByteArray(encodeUTF32(content));
+            final byte[] contentArray = encodeUTF32(content);
 
             if(ImageInfo.inImageCode()) {
-                PointerWrapper charPointer = new PointerWrapper(
+                final PointerWrapper charPointer = new PointerWrapper(
                     toCBytes(contentArray)
                 );
                 return new Text(
@@ -1439,129 +1350,54 @@ public class ${ctx.lib_name.camel} {
                     (long) content.length(),
                     false,
                     true,
-                    null
+                    contentArray
                 );
             } else {
                 return JNI_LIB.${nat("create_text")}(contentArray);
             }
         }
 
-        // ----- Cleaning methods/classes -----
+        // ----- Graal C API methods -----
 
         /**
-         * A task to release a text buffer.
-         */
-        private static final class ReleaseTask implements Runnable {
-
-            // ----- Attributes -----
-
-            /** The text buffer. */
-            private final PointerWrapper textBuffer;
-
-            /** The size of the buffer. */
-            private final long length;
-
-            /** If the text owns its buffer. */
-            private final boolean isAllocated;
-
-            /** If the object owns the buffer. */
-            private final boolean isOwner;
-
-            // ----- Constructors -----
-
-            /**
-             * Create a new release task for the given text buffer.
-             *
-             * @param textBuffer The text buffer to release.
-             * @param length The length of the buffer.
-             * @param isAllocated If the buffer was allocated by the lib.
-             * @param isOwner If the Java object if the buffer owner.
-             */
-            ReleaseTask(
-                PointerWrapper textBuffer,
-                long length,
-                boolean isAllocated,
-                boolean isOwner
-            ) {
-                this.textBuffer = textBuffer;
-                this.length = length;
-                this.isAllocated = isAllocated;
-                this.isOwner = isOwner;
-            }
-
-            // ----- Instance methods -----
-
-            /** @see java.lang.Runnable#run() */
-            @Override
-            public void run() {
-                Text.release(
-                    this.textBuffer,
-                    this.length,
-                    this.isAllocated,
-                    this.isOwner
-                );
-            }
-
-        }
-
-        /**
-         * Release the given text buffer.
+         * Wrap the native text pointed by the given pointer.
          *
-         * @param textBuffer The buffer to free.
+         * @param pointer The pointer to the native text to wrap.
+         * @return The wrapped text.
          */
-        private static void release(
-            PointerWrapper textBuffer,
-            long length,
-            boolean isAllocated,
-            boolean isOwner
+        static Text wrap(
+            final Pointer pointer
         ) {
-
-            if(ImageInfo.inImageCode()) {
-                if(isOwner) {
-                    UnmanagedMemory.free(textBuffer.ni());
-                } else {
-                    TextNative textNative = StackValue.get(TextNative.class);
-                    textNative.set_chars(textBuffer.ni());
-                    textNative.set_length(length);
-                    textNative.set_is_allocated(isAllocated ? 1 : 0);
-                    NI_LIB.${nat("destroy_text")}(textNative);
-                }
-            } else {
-                JNI_LIB.${nat("destroy_text")}(
-                    textBuffer.jni(),
-                    length,
-                    isAllocated,
-                    isOwner
-                );
-            }
-
+            return wrap((TextNative) pointer.readWord(0));
         }
-
-        /** @see java.lang.AutoCloseable#close() */
-        @Override
-        public void close() {
-            this.cleanable.clean();
-        }
-
-        // ----- Class methods -----
 
         /**
          * Wrap a text native value in the Java class.
          *
          * @param textNative The text native NI value.
-         * @return The newly created text or null if the text value
-         * is null.
+         * @return The newly wrapped text.
          */
         static Text wrap(
-            TextNative textNative
+            final TextNative textNative
         ) {
-            if(((PointerBase) textNative).isNull()) return null;
-            else if(textNative.get_chars().isNull()) return null;
-            else return new Text(
+            return new Text(
                 new PointerWrapper(textNative.get_chars()),
                 textNative.get_length(),
                 textNative.get_is_allocated() != 0
             );
+        }
+
+        /**
+         * Unwrap the text in the given NI pointer.
+         *
+         * @param textNative The NI pointer to the native text structure.
+         */
+        void unwrap(
+            final TextNative textNative
+        ) {
+            textNative.set_chars(this.charPointer.ni());
+            textNative.set_length(this.length);
+            textNative.set_is_allocated(this.isAllocated ? 1 : 0);
         }
 
         // ----- Instance methods -----
@@ -1572,35 +1408,38 @@ public class ${ctx.lib_name.camel} {
          * @return the content of the text.
          */
         public String getContent() {
+            // Content is null only when using the Graal C API.
             if(this.content == null) {
-                int[] contentArray;
-
-                if(ImageInfo.inImageCode()) {
-                    contentArray = new int[(int) this.length];
-                    for(int i = 0 ; i < this.length ; i++) {
-                        contentArray[i] = (
-                            (CIntPointer) this.charPointer.ni()
-                        ).read(i);
-                    }
-                } else {
-                    contentArray = this.contentArray != null ?
-                        this.contentArray :
-                        new int[0];
+                final byte[] contentArray = new byte[(int) this.length * 4];
+                for(int i = 0 ; i < contentArray.length ; i++) {
+                    contentArray[i] = (
+                        (CCharPointer) this.charPointer.ni()
+                    ).read(i);
                 }
                 this.content = decodeUTF32(contentArray);
             }
+
             return this.content;
         }
 
-        /**
-         * Unwrap the text in the given NI pointer.
-         *
-         * @param textNative The NI pointer to the native text structure.
-         */
-        public void unwrap(TextNative textNative) {
-            textNative.set_chars(this.charPointer.ni());
-            textNative.set_length(this.length);
-            textNative.set_is_allocated(this.isAllocated ? 1 : 0);
+        /** @see java.lang.AutoCloseable#close() */
+        @Override
+        public void close() {
+
+            if(ImageInfo.inImageCode()) {
+                if(this.isOwner) {
+                    UnmanagedMemory.free(this.charPointer.ni());
+                } else {
+                    final TextNative textNative = StackValue.get(
+                        TextNative.class
+                    );
+                    this.unwrap(textNative);
+                    NI_LIB.${nat("destroy_text")}(textNative);
+                }
+            } else {
+                JNI_LIB.${nat("destroy_text")}(this);
+            }
+
         }
 
         // ----- Override methods -----
@@ -1615,11 +1454,15 @@ public class ${ctx.lib_name.camel} {
     ${java_doc('langkit.sloc_type', 4)}
     public static final class SourceLocation {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
 
-        /** The location instance for null source location */
-        public static final SourceLocation NULL_LOCATION =
-            new SourceLocation(0, (short) 0);
+        /** Singleton that represents the none source location. */
+        public static final SourceLocation NONE = new SourceLocation(
+            0,
+            (short) 0
+        );
+
+        // ----- Instance attributes -----
 
         /** The line of the source location. */
         public final int line;
@@ -1636,8 +1479,8 @@ public class ${ctx.lib_name.camel} {
          * @param column The column of the source location.
          */
         SourceLocation(
-            int line,
-            short column
+            final int line,
+            final short column
         ) {
             this.line = line;
             this.column = column;
@@ -1651,8 +1494,8 @@ public class ${ctx.lib_name.camel} {
          * @return The newly create source location.
          */
         public static SourceLocation create(
-            int line,
-            short column
+            final int line,
+            final short column
         ) {
             return new SourceLocation(
                 line,
@@ -1660,26 +1503,34 @@ public class ${ctx.lib_name.camel} {
             );
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
+
+        /**
+         * Wrap the given source location in the Java class.
+         *
+         * @param pointer Pointer to the native source location.
+         * @return The newly wrapper source location.
+         */
+        static SourceLocation wrap(
+            final Pointer pointer
+        ) {
+            return wrap((SourceLocationNative) pointer.readWord(0));
+        }
 
         /**
          * Wrap a source location native value in the Java class.
          *
          * @param sourceLocationNative The source location NI native value.
-         * @return The newly created source location or null if the native
-         * value is null.
+         * @return The newly wrapped source location.
          */
         static SourceLocation wrap(
-            SourceLocationNative sourceLocationNative
+            final SourceLocationNative sourceLocationNative
         ) {
-            if(((PointerBase) sourceLocationNative).isNull()) return null;
-            else return new SourceLocation(
+            return new SourceLocation(
                 sourceLocationNative.get_line(),
                 sourceLocationNative.get_column()
             );
         }
-
-        // ----- Instance methods -----
 
         /**
          * Uwrap the source location in the given NI pointer.
@@ -1687,7 +1538,9 @@ public class ${ctx.lib_name.camel} {
          * @param sourceLocationNative The NI pointer to the native structure
          *  to fill.
          */
-        public void unwrap(SourceLocationNative sourceLocationNative) {
+        public void unwrap(
+            final SourceLocationNative sourceLocationNative
+        ) {
             sourceLocationNative.set_line(this.line);
             sourceLocationNative.set_column(this.column);
         }
@@ -1704,14 +1557,16 @@ public class ${ctx.lib_name.camel} {
     ${java_doc('langkit.sloc_range_type', 4)}
     public static final class SourceLocationRange {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
 
-        /** The location range instance for null source location range */
-        public static final SourceLocationRange NULL_LOCATION_RANGE =
+        /** Singleton that represents the none source location range. */
+        public static final SourceLocationRange NONE =
             new SourceLocationRange(
-                SourceLocation.NULL_LOCATION,
-                SourceLocation.NULL_LOCATION
+                SourceLocation.NONE,
+                SourceLocation.NONE
             );
+
+        // ----- Instance attributes -----
 
         /** The start of the range. */
         public final SourceLocation start;
@@ -1728,8 +1583,8 @@ public class ${ctx.lib_name.camel} {
          * @param end The end of the range.
          */
         SourceLocationRange(
-            SourceLocation start,
-            SourceLocation end
+            final SourceLocation start,
+            final SourceLocation end
         ) {
             this.start = start;
             this.end = end;
@@ -1743,8 +1598,8 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created source location range.
          */
         public static SourceLocationRange create(
-            SourceLocation start,
-            SourceLocation end
+            final SourceLocation start,
+            final SourceLocation end
         ) {
             return new SourceLocationRange(
                 start,
@@ -1752,21 +1607,31 @@ public class ${ctx.lib_name.camel} {
             );
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
+
+        /**
+         * Wrap the given source location range in the Java class.*
+         *
+         * @param pointer The pointer to the native source location range.
+         * @return The newly wrapped source location range.
+         */
+        static SourceLocationRange wrap(
+            final Pointer pointer
+        ) {
+            return wrap((SourceLocationRangeNative) pointer.readWord(0));
+        }
 
         /**
          * Wrap a source location range native value in the Java class.
          *
          * @param sourceLocationRangeNative The source location range NI
          * native value.
-         * @return The newly created source location range or null if the
-         * native value is null.
+         * @return The newly wrapped source location range.
          */
         static SourceLocationRange wrap(
-            SourceLocationRangeNative sourceLocationRangeNative
+            final SourceLocationRangeNative sourceLocationRangeNative
         ) {
-            if(((PointerBase) sourceLocationRangeNative).isNull()) return null;
-            else return new SourceLocationRange(
+            return new SourceLocationRange(
                 new SourceLocation(
                     sourceLocationRangeNative.get_start_line(),
                     sourceLocationRangeNative.get_start_column()
@@ -1778,16 +1643,14 @@ public class ${ctx.lib_name.camel} {
             );
         }
 
-        // ----- Instance methods -----
-
         /**
          * Uwrap the source location range in the given NI pointer.
          *
          * @param sourceLocationRangeNative The NI pointer to the native
          * structure to fill.
          */
-        public void unwrap(
-            SourceLocationRangeNative sourceLocationRangeNative
+        void unwrap(
+            final SourceLocationRangeNative sourceLocationRangeNative
         ) {
             sourceLocationRangeNative.set_start_line(this.start.line);
             sourceLocationRangeNative.set_start_column(this.start.column);
@@ -1807,7 +1670,15 @@ public class ${ctx.lib_name.camel} {
     ${java_doc('langkit.diagnostic_type', 4)}
     public static final class Diagnostic {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none diagnositc. */
+        public static final Diagnostic NONE = new Diagnostic(
+            SourceLocationRange.NONE,
+            Text.NONE
+        );
+
+        // ----- Instance attributes -----
 
         /** The source location range of the diagnostic. */
         public final SourceLocationRange sourceLocationRange;
@@ -1824,8 +1695,8 @@ public class ${ctx.lib_name.camel} {
          * @param message The message of the diagnostic.
          */
         Diagnostic(
-            SourceLocationRange sourceLocationRange,
-            Text message
+            final SourceLocationRange sourceLocationRange,
+            final Text message
         ) {
             this.sourceLocationRange = sourceLocationRange;
             this.message = message;
@@ -1840,8 +1711,8 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created diagnostic
          */
         public static Diagnostic create(
-            SourceLocationRange sourceLocationRange,
-            Text message
+            final SourceLocationRange sourceLocationRange,
+            final Text message
         ) {
             return new Diagnostic(
                 sourceLocationRange,
@@ -1849,20 +1720,30 @@ public class ${ctx.lib_name.camel} {
             );
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
+
+        /**
+         * Wrap a pointer to a native diagnostic.
+         *
+         * @param pointer The pointer to the native diagnositc.
+         * @return The wrapped diagnositc.
+         */
+        static Diagnostic wrap(
+            final Pointer pointer
+        ) {
+            return wrap((DiagnosticNative) pointer.readWord(0));
+        }
 
         /**
          * Wrap a diagnostic native value in the Java class.
          *
          * @param diagnosticNative The diagnostic NI native value.
-         * @return The newly created diagnostic or null if the native value
-         * is null.
+         * @return The newly wrapped diagnositc.
          */
         static Diagnostic wrap(
-            DiagnosticNative diagnosticNative
+            final DiagnosticNative diagnosticNative
         ) {
-            if(((PointerBase) diagnosticNative).isNull()) return null;
-            else return new Diagnostic(
+            return new Diagnostic(
                 new SourceLocationRange(
                     new SourceLocation(
                         diagnosticNative.get_start_line(),
@@ -1881,15 +1762,15 @@ public class ${ctx.lib_name.camel} {
             );
         }
 
-        // ----- Instance methods -----
-
         /**
          * Unwrap the diagnostic in the given NI pointer.
          *
          * @param diagnosticNative The pointer to the native structure to
          * fill.
          */
-        public void unwrap(DiagnosticNative diagnosticNative) {
+        public void unwrap(
+            final DiagnosticNative diagnosticNative
+        ) {
             diagnosticNative.set_start_line(
                 this.sourceLocationRange.start.line
             );
@@ -1926,30 +1807,95 @@ public class ${ctx.lib_name.camel} {
     }
 
     ${java_doc('langkit.file_reader_type', 4)}
-    public static final class FileReader {
+    public static final class FileReader implements AutoCloseable {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none file reader. */
+        public static final FileReader NONE = new FileReader(
+            PointerWrapper.nullPointer()
+        );
+
+        // ----- Instance attributes -----
 
         /** The reference to the file reader */
-        public final PointerWrapper reference;
+        private final PointerWrapper reference;
 
         // ----- Constructors -----
 
+        /**
+         * Create a new file reader from its native reference.
+         *
+         * @param reference The reference to the native file reader.
+         */
         FileReader(
-            PointerWrapper reference
+            final PointerWrapper reference
         ) {
             this.reference = reference;
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
 
+        /**
+         * Wrap a pointer to a native file reader.
+         *
+         * @param pointer The pointer to the native file reader.
+         * @return The newly wrapped file reader.
+         */
         static FileReader wrap(
-            FileReaderNative fileReaderNative
+            final Pointer pointer
         ) {
-            if(((PointerBase) fileReaderNative).isNull()) return null;
-            else return new FileReader(
+            return wrap((FileReaderNative) pointer.readWord(0));
+        }
+
+        /**
+         * Wrap the given file reader in the Java class.
+         *
+         * @param fileReaderNative The native file reader to wrap.
+         * @return The wrapped file reader.
+         */
+        static FileReader wrap(
+            final FileReaderNative fileReaderNative
+        ) {
+            return new FileReader(
                 new PointerWrapper(fileReaderNative)
             );
+        }
+
+        /**
+         * Unwrap the file reader in the given pointer.
+         *
+         * @param pointer The pointer to unwrap the file reader in.
+         */
+        void unwrap(
+            final Pointer pointer
+        ) {
+            pointer.writeWord(0, this.unwrap());
+        }
+
+        /**
+         * Get the unwrapped file reader.
+         *
+         * @return The unwrapped native file reader.
+         */
+        FileReaderNative unwrap() {
+            return (FileReaderNative) this.reference.ni();
+        }
+
+        // ----- Instance methods -----
+
+        /** @see java.lang.AutoCloseable#close() */
+        @Override
+        public void close() {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("dec_ref_file_reader")}(
+                    this.reference.ni()
+                );
+            } else {
+                JNI_LIB.${nat("dec_ref_file_reader")}(this);
+            }
+
         }
 
     }
@@ -1957,122 +1903,181 @@ public class ${ctx.lib_name.camel} {
     ${c_doc('langkit.unit_provider_type')}
     public static final class UnitProvider implements AutoCloseable {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none unit provider. */
+        public static final UnitProvider NONE = new UnitProvider(
+            PointerWrapper.nullPointer()
+        );
+
+        // ----- Instance attributes -----
 
         /** The reference to the unit provider */
-        public final PointerWrapper reference;
-
-        /** The cleanable object */
-        private final Cleaner.Cleanable cleanable;
+        private final PointerWrapper reference;
 
         // ----- Constructors -----
 
+        /**
+         * Create a new unit provider with the reference to the native one.
+         *
+         * @param reference The reference to the native unit provider.
+         */
         UnitProvider(
-            PointerWrapper reference
+            final PointerWrapper reference
         ) {
             this.reference = reference;
-            this.cleanable = CLEANER.register(
-                this,
-                new ReleaseTask(reference)
-            );
         }
 
+        // ----- Graal C API methods -----
+
+        /**
+         * Wrap the given pointer to a native unit provider.
+         *
+         * @param pointer The pointer to the native unit provider.
+         * @return The wrapped unit provider.
+         */
         static UnitProvider wrap(
-            UnitProviderNative unitProviderNative
+            final Pointer pointer
         ) {
-            if(((PointerBase) unitProviderNative).isNull()) return null;
-            else return new UnitProvider(
+            return wrap((UnitProviderNative) pointer.readWord(0));
+        }
+
+        /**
+         * Wrap the given native unit provider.
+         *
+         * @param unitProviderNative The native unit provider.
+         * @return The wrapped unit provider.
+         */
+        static UnitProvider wrap(
+            final UnitProviderNative unitProviderNative
+        ) {
+            return new UnitProvider(
                 new PointerWrapper(unitProviderNative)
             );
         }
 
-        // ----- Cleaning methods/classes -----
-
         /**
-         * The release task for the unit provider.
+         * Unwrap the unit provider in the given native pointer.
+         *
+         * @param pointer The pointer to place the native unit provider in.
          */
-        private static final class ReleaseTask implements Runnable {
-
-            // ----- Attributes -----
-
-            /** The reference to the unit provider to release */
-            private final PointerWrapper providerRef;
-
-            // ----- Constructors -----
-
-            /**
-             * Create a new release task with the reference to the
-             * unit provider.
-             *
-             * @param providerRef The reference to the provider
-             */
-            ReleaseTask(
-                PointerWrapper providerRef
-            ) {
-                this.providerRef = providerRef;
-            }
-
-            // ----- Instance methods -----
-
-            /** @see java.lang.Runnable#run() */
-            @Override
-            public void run() {
-                UnitProvider.release(this.providerRef);
-            }
-
-        }
-
-        /**
-         * Release the native resource
-         */
-        private static void release(
-            PointerWrapper providerRef
+        void unwrap(
+            final Pointer pointer
         ) {
-
-            if(ImageInfo.inImageCode()) {
-                NI_LIB.${nat("dec_ref_unit_provider")}(
-                    providerRef.ni()
-                );
-            } else {
-                JNI_LIB.${nat("dec_ref_unit_provider")}(
-                    providerRef.jni()
-                );
-            }
-
+            pointer.writeWord(0, this.unwrap());
         }
+
+        /**
+         * Get the native unit provider.
+         *
+         * @return The native unit provider.
+         */
+        UnitProviderNative unwrap() {
+            return (UnitProviderNative) this.reference.ni();
+        }
+
+        // ----- Instance methods -----
 
         /** @see java.lang.AutoCloseable#close() */
         public void close() {
-            this.cleanable.clean();
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("dec_ref_unit_provider")}(this.reference.ni());
+            } else {
+                JNI_LIB.${nat("dec_ref_unit_provider")}(this);
+            }
+
         }
 
     }
 
     ${java_doc('langkit.event_handler_type')}
-    public static final class EventHandler {
+    public static final class EventHandler implements AutoCloseable {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none event handler. */
+        public static final EventHandler NONE = new EventHandler(
+            PointerWrapper.nullPointer()
+        );
+
+        // ----- Instance attributes -----
 
         /** The reference to the event handler */
-        public final PointerWrapper reference;
+        private final PointerWrapper reference;
 
         // ----- Constructors -----
 
+        /**
+         * Create a new event handler from its native reference.
+         *
+         * @param reference The reference to the native event handler.
+         */
         EventHandler(
-            PointerWrapper reference
+            final PointerWrapper reference
         ) {
             this.reference = reference;
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
 
+        /**
+         * Wrap the given pointer to a native event handler.
+         *
+         * @param pointer The pointer to the native event handler.
+         * @return The wrapped event handler.
+         */
         static EventHandler wrap(
-            EventHandlerNative eventHandlerNative
+            final Pointer pointer
         ) {
-            if(((PointerBase) eventHandlerNative).isNull()) return null;
-            else return new EventHandler(
+            return wrap(pointer.readWord(0));
+        }
+
+        /**
+         * Wrap the given native event handler.
+         *
+         * @param eventHandlerNative The native event handler to wrap.
+         * @return The wrapped event handler.
+         */
+        static EventHandler wrap(
+            final EventHandlerNative eventHandlerNative
+        ) {
+            return new EventHandler(
                 new PointerWrapper(eventHandlerNative)
             );
+        }
+
+        /**
+         * Unwrap the event handler in the given native pointer.
+         *
+         * @param pointer The pointer to place the native event handler.
+         */
+        void unwrap(
+            final Pointer pointer
+        ) {
+            pointer.writeWord(0, this.unwrap());
+        }
+
+        /**
+         * Unwrap the event handler to a native value.
+         *
+         * @return The native value of the event handler.
+         */
+        EventHandlerNative unwrap() {
+            return (EventHandlerNative) this.reference.ni();
+        }
+
+        // ----- Instance methods -----
+
+        /** @see java.lang.AutoCloseable#close() */
+        public void close() {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("dec_ref_event_handler")}(this.reference.ni());
+            } else {
+                JNI_LIB.${nat("dec_ref_event_handler")}(this);
+            }
+
         }
 
     }
@@ -2080,11 +2085,12 @@ public class ${ctx.lib_name.camel} {
     ${java_doc('langkit.token_reference_type', 4)}
     public static class Token {
 
-        // ----- Attributes -----
+        // ----- Instance attributes -----
 
         /**
          * We only store the reference to the context to avoid ref-count
-         * problems. To access token context go throught the analysis unit.
+         * problems. To access the token context go throught the
+         * analysis unit.
          */
         protected final PointerWrapper contextRef;
 
@@ -2092,7 +2098,7 @@ public class ${ctx.lib_name.camel} {
         public final AnalysisUnit unit;
 
         /** The pointer to the token data handler. */
-        public final PointerWrapper tokenDataHandler;
+        protected final PointerWrapper tokenDataHandler;
 
         /** The index of the token. */
         public final int tokenIndex;
@@ -2104,7 +2110,7 @@ public class ${ctx.lib_name.camel} {
         public final TokenKind kind;
 
         /** The text of the token. */
-        public final Text text;
+        protected final Text text;
 
         /** The source location range of the token. */
         public final SourceLocationRange sourceLocationRange;
@@ -2124,14 +2130,14 @@ public class ${ctx.lib_name.camel} {
          * @param sourceLocationRange The location of the token.
          */
         Token(
-            PointerWrapper contextRef,
-            AnalysisUnit unit,
-            PointerWrapper tokenDataHandler,
-            int tokenIndex,
-            int triviaIndex,
-            TokenKind kind,
-            Text text,
-            SourceLocationRange sourceLocationRange
+            final PointerWrapper contextRef,
+            final AnalysisUnit unit,
+            final PointerWrapper tokenDataHandler,
+            final int tokenIndex,
+            final int triviaIndex,
+            final TokenKind kind,
+            final Text text,
+            final SourceLocationRange sourceLocationRange
         ) {
             this.contextRef = contextRef;
             this.unit = unit;
@@ -2143,37 +2149,40 @@ public class ${ctx.lib_name.camel} {
             this.sourceLocationRange = sourceLocationRange;
         }
 
-        // ----- Getters -----
+        // ----- Graal C API methods -----
 
-        public TokenKind getKind() {
-            return this.kind;
+        /**
+         * Wrap the pointer to a native token.
+         *
+         * @param pointer The pointer to the native token.
+         * @param unit The analysis unit which owns the token.
+         * @return The wrapped token or a none value if the token is a none
+         * one.
+         */
+        static Token wrap(
+            final Pointer pointer,
+            final AnalysisUnit unit
+        ) {
+            return wrap(
+                (TokenNative) pointer.readWord(0),
+                unit
+            );
         }
-
-        public String getText() {
-            return this.text.getContent();
-        }
-
-        public boolean isTrivia() {
-            return this.triviaIndex != 0;
-        }
-
-        // ----- Class methods -----
 
         /**
          * Wrap a native token value in the Java class.
          *
          * @param tokenNative The native NI token value.
          * @param unit The analysis unit that owns the token.
-         * @return The newly created token or null if the native value
-         * is null.
+         * @return The wrapped token or a none value if the token data
+         * handler is null.
          */
         static Token wrap(
-            TokenNative tokenNative,
-            AnalysisUnit unit
+            final TokenNative tokenNative,
+            final AnalysisUnit unit
         ) {
-            if(((PointerBase) tokenNative).isNull()) return null;
-            else if(tokenNative.get_data().isNull())
-                return NoToken.getInstance(unit);
+            if(tokenNative.get_data().isNull())
+                return NONE(unit);
             else return new Token(
                 new PointerWrapper(tokenNative.get_context()),
                 unit,
@@ -2200,6 +2209,59 @@ public class ${ctx.lib_name.camel} {
         }
 
         /**
+         * Unwrap the token in the given NI pointer.
+         *
+         * @param tokenNative The NI pointer to the native structure to
+         * fill.
+         */
+        public void unwrap(
+            final TokenNative tokenNative
+        ) {
+            tokenNative.set_context(this.contextRef.ni());
+            tokenNative.set_data(this.tokenDataHandler.ni());
+            tokenNative.set_token_index(this.tokenIndex);
+            tokenNative.set_trivia_index(this.triviaIndex);
+            tokenNative.set_kind(this.kind.toC());
+            tokenNative.set_text_chars(this.text.charPointer.ni());
+            tokenNative.set_text_length(this.text.length);
+            tokenNative.set_text_is_allocated(this.text.isAllocated ? 1 : 0);
+            tokenNative.set_start_line(this.sourceLocationRange.start.line);
+            tokenNative.set_start_column(
+                this.sourceLocationRange.start.column
+            );
+            tokenNative.set_end_line(this.sourceLocationRange.end.line);
+            tokenNative.set_end_column(this.sourceLocationRange.end.column);
+        }
+
+        // ----- Getters -----
+
+        public String getText() {
+            return this.text.getContent();
+        }
+
+        public boolean isTrivia() {
+            return this.triviaIndex != 0;
+        }
+
+        public boolean isNone() {
+            return false;
+        }
+
+        // ----- Class methods -----
+
+        /**
+         * Get a none token for the given unit.
+         *
+         * @param unit The unit to get a none token for.
+         * @return The none token for the given unit.
+         */
+        public static Token NONE(
+            final AnalysisUnit unit
+        ) {
+            return NoToken.getInstance(unit);
+        }
+
+        /**
          * Get the text from the start token to the end token.
          *
          * @param start The start token.
@@ -2207,28 +2269,45 @@ public class ${ctx.lib_name.camel} {
          * @return The text between the two tokens.
          */
         @CompilerDirectives.TruffleBoundary
-        public static String textRange(Token start, Token end) {
-            Text resText;
+        public static String textRange(
+            final Token start,
+            final Token end
+        ) {
 
             if(ImageInfo.inImageCode()) {
-                TokenNative startNative = StackValue.get(TokenNative.class);
+                final TokenNative startNative = StackValue.get(
+                    TokenNative.class
+                );
                 start.unwrap(startNative);
-                TokenNative endNative = StackValue.get(TokenNative.class);
+
+                final TokenNative endNative = StackValue.get(
+                    TokenNative.class
+                );
                 end.unwrap(endNative);
-                TextNative textNative = StackValue.get(TextNative.class);
+
+                final TextNative textNative = StackValue.get(
+                    TextNative.class
+                );
+                Text.NONE.unwrap(textNative);
                 NI_LIB.${nat("token_range_text")}(
                     startNative,
                     endNative,
                     textNative
                 );
-                resText = Text.wrap(textNative);
+                try(final Text resText = Text.wrap(textNative)) {
+                    return resText.getContent();
+                }
             } else {
-                resText = JNI_LIB.${nat("token_range_text")}(start, end);
+                try(
+                    final Text resText = JNI_LIB.${nat("token_range_text")}(
+                        start,
+                        end
+                    )
+                ) {
+                    return resText.getContent();
+                }
             }
 
-            String res = resText.getContent();
-            resText.close();
-            return res;
         }
 
         // ----- Instance methods -----
@@ -2241,9 +2320,14 @@ public class ${ctx.lib_name.camel} {
         public Token next() {
 
             if(ImageInfo.inImageCode()) {
-                TokenNative tokenNative = StackValue.get(TokenNative.class);
+                final TokenNative tokenNative = StackValue.get(
+                    TokenNative.class
+                );
                 this.unwrap(tokenNative);
-                TokenNative nextNative = StackValue.get(TokenNative.class);
+
+                final TokenNative nextNative = StackValue.get(
+                    TokenNative.class
+                );
                 NI_LIB.${nat("token_next")}(
                     tokenNative,
                     nextNative
@@ -2263,9 +2347,12 @@ public class ${ctx.lib_name.camel} {
         public Token previous() {
 
             if(ImageInfo.inImageCode()) {
-                TokenNative tokenNative = StackValue.get(TokenNative.class);
+                final TokenNative tokenNative = StackValue.get(
+                    TokenNative.class
+                );
                 this.unwrap(tokenNative);
-                TokenNative previousNative = StackValue.get(
+
+                final TokenNative previousNative = StackValue.get(
                     TokenNative.class
                 );
                 NI_LIB.${nat("token_previous")}(
@@ -2284,13 +2371,21 @@ public class ${ctx.lib_name.camel} {
          *
          * @param other The other token to compare with.
          */
-        public boolean isEquivalent(Token other) {
+        public boolean isEquivalent(
+            final Token other
+        ) {
 
             if(ImageInfo.inImageCode()) {
-                TokenNative leftNative = StackValue.get(TokenNative.class);
+                final TokenNative leftNative = StackValue.get(
+                    TokenNative.class
+                );
                 this.unwrap(leftNative);
-                TokenNative rightNative = StackValue.get(TokenNative.class);
+
+                final TokenNative rightNative = StackValue.get(
+                    TokenNative.class
+                );
                 other.unwrap(rightNative);
+
                 return NI_LIB.${nat("token_is_equivalent")}(
                     leftNative,
                     rightNative
@@ -2301,187 +2396,161 @@ public class ${ctx.lib_name.camel} {
 
         }
 
-        /**
-         * Unwrap the token in the given NI pointer.
-         *
-         * @param tokenNative The NI pointer to the native structure to
-         * fill.
-         */
-        public void unwrap(TokenNative tokenNative) {
-            tokenNative.set_context(this.contextRef.ni());
-            tokenNative.set_data(this.tokenDataHandler.ni());
-            tokenNative.set_token_index(this.tokenIndex);
-            tokenNative.set_trivia_index(this.triviaIndex);
-            tokenNative.set_kind(this.kind.toC());
-            tokenNative.set_text_chars(this.text.charPointer.ni());
-            tokenNative.set_text_length(this.text.length);
-            tokenNative.set_text_is_allocated(this.text.isAllocated ? 1 : 0);
-            tokenNative.set_start_line(this.sourceLocationRange.start.line);
-            tokenNative.set_start_column(
-                this.sourceLocationRange.start.column
-            );
-            tokenNative.set_end_line(this.sourceLocationRange.end.line);
-            tokenNative.set_end_column(this.sourceLocationRange.end.column);
-        }
-
         // ----- Override methods -----
 
         @Override
         @CompilerDirectives.TruffleBoundary
         public String toString() {
-            return "<Token "
-                + this.getKind().toString()
-                + " "
-                + this.sourceLocationRange.toString()
-                + " text=\""
-                + this.getText()
+            return "<Token Kind="
+                + this.kind.name
+                + " Text=\""
+                + stringRepresentation(this.getText())
                 + "\">";
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(
+            Object o
+        ) {
             if(o == this) return true;
             if(!(o instanceof Token)) return false;
-            Token other = (Token) o;
+            final Token other = (Token) o;
             return other.tokenDataHandler.equals(this.tokenDataHandler) &&
                     other.tokenIndex == this.tokenIndex &&
                     other.triviaIndex == this.triviaIndex;
         }
 
-    }
-
-    /**
-     * This class represents the absence of token.
-     */
-    public static final class NoToken extends Token {
-
-        // ----- Attributes -----
-
-        /** The map of the no token instances */
-        private static final Map<AnalysisUnit, NoToken> instances
-            = new HashMap<>();
-
-        // ----- Constructors -----
+        // ----- Inner classes -----
 
         /**
-         * Create a new no token for the given analysis unit.
-         * The constructor is private to avoid too many instances.
-         *
-         * @param unit The analysis unit to create the no token for.
-         */
-        private NoToken(
-            PointerWrapper contextRef,
-            AnalysisUnit unit
-        ) {
-            super(
-                contextRef,
-                unit,
-                PointerWrapper.nullPointer(),
-                0,
-                0,
-                TokenKind.fromC(-1),
-                null,
-                SourceLocationRange.NULL_LOCATION_RANGE
-            );
-        }
+        * This class represents the absence of token.
+        */
+        private static final class NoToken extends Token {
 
-        /**
-         * Get the no token instance for the given analysis unit.
-         *
-         * @param unit The unit to get the no token instance for.
-         * @return The no token instance.
-         */
-        static NoToken getInstance(AnalysisUnit unit) {
-            if(!instances.containsKey(unit)) {
-                try(AnalysisContext context = unit.getContext()) {
-                    instances.put(
-                        unit,
-                        new NoToken(context.reference, unit)
-                    );
-                }
+            // ----- Class attributes -----
+
+            /** The map of the no token instances */
+            private static final Map<AnalysisUnit, NoToken> instances
+                = new HashMap<>();
+
+            // ----- Constructors -----
+
+            /**
+            * Create a new no token for the given analysis unit.
+            * The constructor is private to avoid too many instances.
+            *
+            * @param unit The analysis unit to create the no token for.
+            */
+            private NoToken(
+                final PointerWrapper contextRef,
+                final AnalysisUnit unit
+            ) {
+                super(
+                    contextRef,
+                    unit,
+                    PointerWrapper.nullPointer(),
+                    0,
+                    0,
+                    TokenKind.fromC(-1),
+                    null,
+                    SourceLocationRange.NONE
+                );
             }
-            return instances.get(unit);
-        }
 
-        // ----- Getters -----
+            /**
+            * Get the no token instance for the given analysis unit.
+            *
+            * @param unit The unit to get the no token instance for.
+            * @return The no token instance.
+            */
+            static NoToken getInstance(
+                final AnalysisUnit unit
+            ) {
+                if(!instances.containsKey(unit)) {
+                    try(AnalysisContext context = unit.getContext()) {
+                        instances.put(
+                            unit,
+                            new NoToken(context.reference, unit)
+                        );
+                    }
+                }
+                return instances.get(unit);
+            }
 
-        @Override
-        public String getText() {
-            return "";
-        }
+            // ----- Getters -----
 
-        // ----- Instance methods -----
+            @Override
+            public String getText() {
+                return "";
+            }
 
-        /**
-         * Get the next token. In other words, the same no token.
-         *
-         * @return The instance.
-         */
-         @Override
-        public Token next() {
-            return this;
-        }
+            // ----- Instance methods -----
 
-        /**
-         * Get the previous token. In other words, the same no token.
-         *
-         * @return The instance.
-         */
-        public Token previous() {
-            return this;
-        }
+            @Override
+            public Token next() {
+                return this;
+            }
 
-        /**
-         * Check of the token is equivalent to the other one.
-         *
-         * @param other The other token to compare with.
-         */
-        public boolean isEquivalent(Token other) {
-            return other instanceof NoToken;
-        }
+            @Override
+            public Token previous() {
+                return this;
+            }
 
-        /**
-         * Unwrap the token in the given NI pointer.
-         *
-         * @param tokenNative The NI pointer to the native structure to
-         * fill.
-         */
-        public void unwrap(TokenNative tokenNative) {
-            tokenNative.set_context(this.contextRef.ni());
-            tokenNative.set_data(this.tokenDataHandler.ni());
-            tokenNative.set_token_index(this.tokenIndex);
-            tokenNative.set_trivia_index(this.triviaIndex);
-            tokenNative.set_kind(0);
-            tokenNative.set_text_chars(
-                (CIntPointer) WordFactory.nullPointer()
-            );
-            tokenNative.set_text_length(0);
-            tokenNative.set_text_is_allocated(0);
-            tokenNative.set_start_line(this.sourceLocationRange.start.line);
-            tokenNative.set_start_column(
-                this.sourceLocationRange.start.column
-            );
-            tokenNative.set_end_line(this.sourceLocationRange.end.line);
-            tokenNative.set_end_column(this.sourceLocationRange.end.column);
-        }
+            @Override
+            public boolean isEquivalent(
+                final Token other
+            ) {
+                return other instanceof NoToken;
+            }
 
-        // ----- Override methods -----
+            @Override
+            public boolean isNone() {
+                return true;
+            }
 
-        @Override
-        @CompilerDirectives.TruffleBoundary
-        public String toString() {
-            return "<Token "
-                + this.getKind().toString()
-                + " "
-                + this.sourceLocationRange.toString()
-                + " text=\""
-                + this.getText()
-                + "\">";
-        }
+            @Override
+            public void unwrap(
+                final TokenNative tokenNative
+            ) {
+                tokenNative.set_context(this.contextRef.ni());
+                tokenNative.set_data(this.tokenDataHandler.ni());
+                tokenNative.set_token_index(this.tokenIndex);
+                tokenNative.set_trivia_index(this.triviaIndex);
+                tokenNative.set_kind(0);
+                tokenNative.set_text_chars(
+                    (CIntPointer) WordFactory.nullPointer()
+                );
+                tokenNative.set_text_length(0);
+                tokenNative.set_text_is_allocated(0);
+                tokenNative.set_start_line(
+                    this.sourceLocationRange.start.line
+                );
+                tokenNative.set_start_column(
+                    this.sourceLocationRange.start.column
+                );
+                tokenNative.set_end_line(this.sourceLocationRange.end.line);
+                tokenNative.set_end_column(
+                    this.sourceLocationRange.end.column
+                );
+            }
 
-        @Override
-        public boolean equals(Object o) {
-            return o == this;
+            // ----- Override methods -----
+
+            @Override
+            @CompilerDirectives.TruffleBoundary
+            public String toString() {
+                return "<Token Kind="
+                    + this.kind.name
+                    + " Text=\"\">";
+            }
+
+            @Override
+            public boolean equals(
+                Object o
+            ) {
+                return o == this;
+            }
+
         }
 
     }
@@ -2489,13 +2558,18 @@ public class ${ctx.lib_name.camel} {
     ${java_doc('langkit.analysis_context_type', 4)}
     public static final class AnalysisContext implements AutoCloseable {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none analysis context. */
+        public static final AnalysisContext NONE = new AnalysisContext(
+            PointerWrapper.nullPointer(),
+            false
+        );
+
+        // ----- Instance attributes -----
 
         /** The reference to the native analysis context. */
-        public final PointerWrapper reference;
-
-        /** If the context has been closed. */
-        private boolean closed;
+        private final PointerWrapper reference;
 
         // ----- Constructors -----
 
@@ -2506,15 +2580,31 @@ public class ${ctx.lib_name.camel} {
          * a pointer wrapper.
          */
         AnalysisContext(
-            PointerWrapper reference
+            final PointerWrapper reference
+        ) {
+            this(reference, true);
+        }
+
+        /**
+         * Create a new analysis unit from its reference.
+         *
+         * @param reference The native analysis context.
+         * @param increaseRefeferenceCounter If the context reference counter
+         * should be increased.
+         */
+        private AnalysisContext(
+            final PointerWrapper reference,
+            final boolean increaseRefeferenceCounter
         ) {
             this.reference = reference;
-            this.closed = false;
 
-            if(ImageInfo.inImageCode()) {
-                NI_LIB.${nat("context_incref")}(this.reference.ni());
-            } else {
-                JNI_LIB.${nat("context_incref")}(this.reference.jni());
+            // Increase the context reference counter if needed.
+            if(increaseRefeferenceCounter) {
+                if(ImageInfo.inImageCode()) {
+                    NI_LIB.${nat("context_incref")}(this.reference.ni());
+                } else {
+                    JNI_LIB.${nat("context_incref")}(this.reference.jni());
+                }
             }
         }
 
@@ -2532,12 +2622,12 @@ public class ${ctx.lib_name.camel} {
          * @param tabStop The effect of the tabulations on the column number.
          */
         private AnalysisContext(
-            String charset,
-            FileReader fileReader,
-            UnitProvider unitProvider,
-            EventHandler eventHandler,
-            boolean withTrivia,
-            int tabStop
+            final String charset,
+            final FileReader fileReader,
+            final UnitProvider unitProvider,
+            final EventHandler eventHandler,
+            final boolean withTrivia,
+            final int tabStop
         ) {
             PointerWrapper reference;
 
@@ -2569,16 +2659,21 @@ public class ${ctx.lib_name.camel} {
             } else {
                 reference = JNI_LIB.${nat("create_analysis_context")}(
                     charset,
-                    fileReader,
-                    unitProvider,
-                    eventHandler,
+                    (fileReader == null ?
+                        FileReader.NONE :
+                        fileReader),
+                    (unitProvider == null ?
+                        UnitProvider.NONE :
+                        unitProvider),
+                    (eventHandler == null ?
+                        EventHandler.NONE :
+                        eventHandler),
                     withTrivia,
                     tabStop
                 );
             }
 
             this.reference = reference;
-            this.closed = false;
         }
 
         /**
@@ -2612,12 +2707,12 @@ public class ${ctx.lib_name.camel} {
          * @return The newly create analysis unit.
          */
         public static AnalysisContext create(
-            String charset,
-            FileReader fileReader,
-            UnitProvider unitProvider,
-            EventHandler eventHandler,
-            boolean withTrivia,
-            int tabStop
+            final String charset,
+            final FileReader fileReader,
+            final UnitProvider unitProvider,
+            final EventHandler eventHandler,
+            final boolean withTrivia,
+            final int tabStop
         ) {
             return new AnalysisContext(
                 charset,
@@ -2629,55 +2724,54 @@ public class ${ctx.lib_name.camel} {
             );
         }
 
-        // ----- Cleaning methods/classes -----
-
-        /** @see java.lang.AutoCloseable#close() */
-        @Override
-        public void close() {
-
-            if(!this.closed) {
-                if(ImageInfo.inImageCode()) {
-                    NI_LIB.${nat("context_decref")}(this.reference.ni());
-                } else {
-                    JNI_LIB.${nat("context_decref")}(this.reference.jni());
-                }
-                this.closed = true;
-            }
-
-        }
-
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
 
         /**
          * Wrap a native pointer to the native analysis context in the
          * Java class.
          *
-         * @param niPointer The pointer to the NI analysis context
+         * @param pointer The pointer to the NI analysis context
          * native value.
-         * @return The newly created analysis context or null if the given
-         * pointer is null.
+         * @return The newly wrapped analysis context.
          */
         static AnalysisContext wrap(
-            Pointer niPointer
+            final Pointer pointer
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((AnalysisContextNative) niPointer.readWord(0));
+            return wrap((AnalysisContextNative) pointer.readWord(0));
         }
 
         /**
          * Wrap an analysis context native value in the Java class.
          *
          * @param analysisContextNative The NI analysis context native value.
-         * @return The newly created analysis context or null if the native
-         * is null.
+         * @return The newly wrapped analysis context.
          */
         static AnalysisContext wrap(
-            AnalysisContextNative analysisContextNative
+            final AnalysisContextNative analysisContextNative
         ) {
-            if(((PointerBase) analysisContextNative).isNull()) return null;
-            else return new AnalysisContext(
+            return new AnalysisContext(
                 new PointerWrapper(analysisContextNative)
             );
+        }
+
+        /**
+         * Unwrap the analysis context in the given native pointer.
+         *
+         * @param pointer The pointer to place the native analysis unit.
+         */
+        void unwrap(
+            final Pointer pointer
+        ) {
+            pointer.writeWord(0, this.unwrap());
+        }
+
+        /**
+         * Get the native value of the analysis context.
+         *
+         * @return The native analysis context.
+         */
+        AnalysisContextNative unwrap() {
+            return (AnalysisContextNative) this.reference.ni();
         }
 
         // ----- Instance methods -----
@@ -2689,7 +2783,7 @@ public class ${ctx.lib_name.camel} {
          * @return The new analysis unit.
          */
         public AnalysisUnit getUnitFromFile(
-            String fileName
+            final String fileName
         ) {
             return this.getUnitFromFile(
                 fileName,
@@ -2710,20 +2804,20 @@ public class ${ctx.lib_name.camel} {
          * @return The new analysis unit.
          */
         public AnalysisUnit getUnitFromFile(
-            String fileName,
-            String charset,
-            boolean reparse,
-            GrammarRule rule
+            final String fileName,
+            final String charset,
+            final boolean reparse,
+            final GrammarRule rule
         ) {
 
             if(ImageInfo.inImageCode()) {
-                CCharPointer fileNameNative = toCString(fileName);
-                CCharPointer charsetNative =
+                final CCharPointer fileNameNative = toCString(fileName);
+                final CCharPointer charsetNative =
                     charset == null ?
                     WordFactory.nullPointer() :
                     toCString(charset);
 
-                AnalysisUnitNative resNative =
+                final AnalysisUnitNative resNative =
                     NI_LIB.${nat("get_analysis_unit_from_file")}(
                     this.reference.ni(),
                     fileNameNative,
@@ -2754,8 +2848,8 @@ public class ${ctx.lib_name.camel} {
          * @return The new analysis unit.
          */
         public AnalysisUnit getUnitFromBuffer(
-            String buffer,
-            String name
+            final String buffer,
+            final String name
         ) {
             return this.getUnitFromBuffer(
                 buffer,
@@ -2776,21 +2870,21 @@ public class ${ctx.lib_name.camel} {
          * @return The new analysis unit.
          */
         public AnalysisUnit getUnitFromBuffer(
-            String buffer,
-            String name,
-            String charset,
-            GrammarRule rule
+            final String buffer,
+            final String name,
+            final String charset,
+            final GrammarRule rule
         ) {
 
             if(ImageInfo.inImageCode()) {
-                CCharPointer bufferNative = toCString(buffer);
-                CCharPointer nameNative = toCString(name);
-                CCharPointer charsetNative =
+                final CCharPointer bufferNative = toCString(buffer);
+                final CCharPointer nameNative = toCString(name);
+                final CCharPointer charsetNative =
                     charset == null ?
                     WordFactory.nullPointer() :
                     toCString(charset);
 
-                AnalysisUnitNative resNative =
+                final AnalysisUnitNative resNative =
                     NI_LIB.${nat("get_analysis_unit_from_buffer")}(
                     this.reference.ni(),
                     nameNative,
@@ -2816,15 +2910,37 @@ public class ${ctx.lib_name.camel} {
 
         }
 
+        /** @see java.lang.AutoCloseable#close() */
+        @Override
+        public void close() {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("context_decref")}(this.reference.ni());
+            } else {
+                JNI_LIB.${nat("context_decref")}(this.reference.jni());
+            }
+
+        }
+
     }
 
     ${java_doc('langkit.analysis_unit_type', 4)}
     public static final class AnalysisUnit {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none analysis unit. */
+        public static final AnalysisUnit NONE = new AnalysisUnit(
+            PointerWrapper.nullPointer()
+        );
+
+        // ----- Instance attributes -----
 
         /** The reference to the native analysis unit. */
-        public final PointerWrapper reference;
+        private final PointerWrapper reference;
+
+        /** The cache for the unit root. */
+        private ${root_node_type} root;
 
         // ----- Constructors -----
 
@@ -2835,41 +2951,55 @@ public class ${ctx.lib_name.camel} {
          * a pointer wrapper.
          */
         AnalysisUnit(
-            PointerWrapper reference
+            final PointerWrapper reference
         ) {
             this.reference = reference;
         }
 
-        // ----- Class methods -----
+        // ----- Graal C API methods -----
 
         /**
          * Wrap a pointer to the native analysis unit in the Java class.
          *
-         * @param niPointer The pointer the native analysis unit value.
-         * @return The newly created analysis unit or null if the given
-         * pointer is null.
+         * @param pointer The pointer the native analysis unit value.
+         * @return The newly wrapped analysis unit.
          */
         static AnalysisUnit wrap(
-            Pointer niPointer
+            final Pointer pointer
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((AnalysisUnitNative) niPointer.readWord(0));
+            return wrap((AnalysisUnitNative) pointer.readWord(0));
         }
 
         /**
          * Wrap a NI analysis unit native value in the Java class.
          *
          * @param analysisUnitNative The NI analysis unit native value.
-         * @return The newly created analysis unit or null if the given
-         * native value is null.
+         * @return The newly wrapped analysis unit.
          */
         static AnalysisUnit wrap(
-            AnalysisUnitNative analysisUnitNative
+            final AnalysisUnitNative analysisUnitNative
         ) {
-            if(((PointerBase) analysisUnitNative).isNull()) return null;
-            else return new AnalysisUnit(
-                new PointerWrapper(analysisUnitNative)
-            );
+            return new AnalysisUnit(new PointerWrapper(analysisUnitNative));
+        }
+
+        /**
+         * Unwrap the analysis unit in the given pointer.
+         *
+         * @param pointer The pointer to place the native analysis unit in.
+         */
+        void unwrap(
+            final Pointer pointer
+        ) {
+            pointer.writeWord(0, this.unwrap());
+        }
+
+        /**
+         * Unwrap the analysis unit as a native value.
+         *
+         * @return The native analysis unit.
+         */
+        AnalysisUnitNative unwrap() {
+            return (AnalysisUnitNative) this.reference.ni();
         }
 
         // ----- Instance methods -----
@@ -2880,24 +3010,27 @@ public class ${ctx.lib_name.camel} {
          * @return The root node.
          */
         public ${root_node_type} getRoot() {
-            Entity entity;
+            if(this.root == null) {
 
-            if(ImageInfo.inImageCode()) {
-                EntityNative entityNative = StackValue.get(
-                    EntityNative.class
-                );
-                NI_LIB.${nat("unit_root")}(
-                    this.reference.ni(),
-                    entityNative
-                );
-                entity = Entity.wrap(entityNative);
-            } else {
-                entity = JNI_LIB.${nat("unit_root")}(
-                    this
-                );
+                if(ImageInfo.inImageCode()) {
+                    final EntityNative entityNative = StackValue.get(
+                        EntityNative.class
+                    );
+                    NI_LIB.${nat("unit_root")}(
+                        this.reference.ni(),
+                        entityNative
+                    );
+                    this.root = ${root_node_type}.fromEntity(
+                        Entity.wrap(entityNative)
+                    );
+                } else {
+                    this.root = ${root_node_type}.fromEntity(
+                        JNI_LIB.${nat("unit_root")}(this)
+                    );
+                }
+
             }
-
-            return ${root_node_type}.fromEntity(entity);
+            return this.root;
         }
 
         /**
@@ -2917,11 +3050,13 @@ public class ${ctx.lib_name.camel} {
          * @return The file name.
          */
         @CompilerDirectives.TruffleBoundary
-        public String getFileName(boolean fullPath) {
-            String absoluteFile;
+        public String getFileName(
+            final boolean fullPath
+        ) {
+            final String absoluteFile;
 
             if(ImageInfo.inImageCode()) {
-                CCharPointer resNative = NI_LIB.${nat("unit_filename")}(
+                final CCharPointer resNative = NI_LIB.${nat("unit_filename")}(
                     this.reference.ni()
                 );
                 absoluteFile = toJString(resNative);
@@ -2930,11 +3065,10 @@ public class ${ctx.lib_name.camel} {
                 absoluteFile = JNI_LIB.${nat("unit_filename")}(this);
             }
 
-            if(!fullPath) {
-                File unitFile = new File(absoluteFile);
-                return unitFile.getName();
-            } else {
+            if(fullPath) {
                 return absoluteFile;
+            } else {
+                return new File(absoluteFile).getName();
             }
         }
 
@@ -2946,13 +3080,9 @@ public class ${ctx.lib_name.camel} {
         public int getTokenCount() {
 
             if(ImageInfo.inImageCode()) {
-                return NI_LIB.${nat("unit_token_count")}(
-                    this.reference.ni()
-                );
+                return NI_LIB.${nat("unit_token_count")}(this.reference.ni());
             } else {
-                return JNI_LIB.${nat("unit_token_count")}(
-                    this
-                );
+                return JNI_LIB.${nat("unit_token_count")}(this);
             }
 
         }
@@ -2969,9 +3099,7 @@ public class ${ctx.lib_name.camel} {
                     this.reference.ni()
                 );
             } else {
-                return JNI_LIB.${nat("unit_trivia_count")}(
-                    this
-                );
+                return JNI_LIB.${nat("unit_trivia_count")}(this);
             }
 
         }
@@ -2984,7 +3112,9 @@ public class ${ctx.lib_name.camel} {
         public Token getFirstToken() {
 
             if(ImageInfo.inImageCode()) {
-                TokenNative tokenNative = StackValue.get(TokenNative.class);
+                final TokenNative tokenNative = StackValue.get(
+                    TokenNative.class
+                );
                 NI_LIB.${nat("unit_first_token")}(
                     this.reference.ni(),
                     tokenNative
@@ -3004,7 +3134,9 @@ public class ${ctx.lib_name.camel} {
         public Token getLastToken() {
 
             if(ImageInfo.inImageCode()) {
-                TokenNative tokenNative = StackValue.get(TokenNative.class);
+                final TokenNative tokenNative = StackValue.get(
+                    TokenNative.class
+                );
                 NI_LIB.${nat("unit_last_token")}(
                     this.reference.ni(),
                     tokenNative
@@ -3022,7 +3154,10 @@ public class ${ctx.lib_name.camel} {
          * @return The text of the analysis unit source.
          */
         public String getText() {
-            return Token.textRange(this.getFirstToken(), this.getLastToken());
+            return Token.textRange(
+                this.getFirstToken(),
+                this.getLastToken()
+            );
         }
 
         /**
@@ -3033,7 +3168,7 @@ public class ${ctx.lib_name.camel} {
         public AnalysisContext getContext() {
 
             if(ImageInfo.inImageCode()) {
-                AnalysisContextNative contextNative =
+                final AnalysisContextNative contextNative =
                     NI_LIB.${nat("unit_context")}(
                     this.reference.ni()
                 );
@@ -3050,7 +3185,7 @@ public class ${ctx.lib_name.camel} {
          * @return The diagnositcs of the unit.
          */
         public List<Diagnostic> getDiagnostics() {
-            int diagnosticCount;
+            final int diagnosticCount;
 
             if(ImageInfo.inImageCode()) {
                 diagnosticCount = NI_LIB.${nat("unit_diagnostic_count")}(
@@ -3062,10 +3197,10 @@ public class ${ctx.lib_name.camel} {
                 );
             }
 
-            List<Diagnostic> res = new ArrayList<>(diagnosticCount);
+            final List<Diagnostic> res = new ArrayList<>(diagnosticCount);
 
             if(ImageInfo.inImageCode()) {
-                DiagnosticNative diagnosticNative = StackValue.get(
+                final DiagnosticNative diagnosticNative = StackValue.get(
                     DiagnosticNative.class
                 );
                 for(int i = 0 ; i < diagnosticCount ; i++) {
@@ -3079,10 +3214,7 @@ public class ${ctx.lib_name.camel} {
             } else {
                 for(int i = 0 ; i < diagnosticCount ; i++) {
                     res.add(
-                        JNI_LIB.${nat("unit_diagnostic")}(
-                            this,
-                            i
-                        )
+                        JNI_LIB.${nat("unit_diagnostic")}(this, i)
                     );
                 }
             }
@@ -3101,7 +3233,7 @@ public class ${ctx.lib_name.camel} {
         public boolean equals(Object o) {
             if(this == o) return true;
             if(!(o instanceof AnalysisUnit)) return false;
-            AnalysisUnit other = (AnalysisUnit) o;
+            final AnalysisUnit other = (AnalysisUnit) o;
             return other.reference.equals(other.reference);
         }
 
@@ -3133,32 +3265,23 @@ public class ${ctx.lib_name.camel} {
     /**
      * This class is the base of all array wrapping class.
      */
-    public static abstract class ArrayBase<T>
-    implements Iterable<T>, AutoCloseable {
+    public static abstract class ArrayBase<T> implements Iterable<T> {
 
         // ----- Attributes -----
 
-        /** The reference to the native array. */
-        protected final PointerWrapper reference;
+        /** The content of the array. */
+        protected final T[] content;
 
         // ----- Constructors -----
 
         /**
-         * Create the array base with the reference.
-         *
-         * @param reference The reference to the native array.
+         * Protected constructor.
          */
         protected ArrayBase(
-            PointerWrapper reference
+            final T[] content
         ) {
-            this.reference = reference;
+            this.content = content;
         }
-
-        // ----- Cleaning methods/classes -----
-
-        /** @see java.lang.AutoCloseable#close() */
-        @Override
-        public abstract void close();
 
         // ----- Instance methods -----
 
@@ -3167,33 +3290,102 @@ public class ${ctx.lib_name.camel} {
          *
          * @return The size of the native array.
          */
-        public abstract int size();
+        public int size() {
+            return this.content.length;
+        }
 
         /**
          * Get the element at the given place in the array.
          *
          * @param i The index of the element to get.
          * @return The element at the given index.
-         * @throws IndexOutOfBoundsException If the requested index is.
+         * @throws ArrayIndexOutOfBoundsException If the requested index is
          * out of bounds.
          */
-        public abstract T get(int i);
+        public T get(
+            final int i
+        ) {
+            return this.content[i];
+        }
+
+        /**
+         * Set the element at the given index.
+         *
+         * @param i The index of the element to set.
+         * @param elem The element to place in the array.
+         * @throws ArrayIndexOutOfBoundsException If the requested index is
+         * out of bounds.
+         */
+        public void set(
+            final int i,
+            final T elem
+        ) {
+            this.content[i] = elem;
+        }
 
         /** @see java.lang.Iterable#iterator() */
         @Override
-        public abstract Iterator<T> iterator();
+        public Iterator<T> iterator() {
+            return new LangkitArrayIterator<T>(this);
+        }
 
         // ----- Override methods -----
 
         @Override
         public String toString() {
-            StringBuilder res = new StringBuilder("[");
+            final StringBuilder res = new StringBuilder("[");
             for(int i = 0 ; i < this.size() ; i++) {
                 res.append(this.get(i).toString());
                 if(i < this.size() - 1) res.append(", ");
             }
             res.append(']');
             return res.toString();
+        }
+
+        // ----- Inner classes -----
+
+        /**
+         * The iterator class for the langkit arrays
+         */
+        protected static class LangkitArrayIterator<U>
+        implements Iterator<U> {
+
+            // ----- Attributes -----
+
+            /** The array to iterate on. */
+            private final ArrayBase<U> array;
+
+            /** The current index. */
+            private int index;
+
+            // ----- Constructors -----
+
+            /**
+             * Create a new array iterator.
+             *
+             * @param array The array to iterate on.
+             */
+            LangkitArrayIterator(
+                final ArrayBase<U> array
+            ) {
+                this.array = array;
+                this.index = 0;
+            }
+
+            // ----- Instance methods -----
+
+            /** @see java.util.Iterator#hasNext() */
+            @Override
+            public boolean hasNext() {
+                return this.index < this.array.size();
+            }
+
+            /** @see java.util.Iterator#next() */
+            @Override
+            public U next() {
+                return this.array.get(this.index++);
+            }
+
         }
 
     }
@@ -3223,14 +3415,17 @@ public class ${ctx.lib_name.camel} {
 
         // ----- Attributes -----
 
+        /** Singleton that represents the none node. */
+        public static final ${root_node_type} NONE = new NoneNode();
+
         /** The entity of the node. */
         public final Entity entity;
 
         /** The analysis unit that owns the node. */
-        private AnalysisUnit unit;
+        protected AnalysisUnit unit;
 
         /** The cache for the image of the node. */
-        private String image;
+        protected String image;
 
         // ----- Constructors -----
 
@@ -3240,7 +3435,7 @@ public class ${ctx.lib_name.camel} {
          * @param entity The node's entity.
          */
         protected ${root_node_type}(
-            Entity entity
+            final Entity entity
         ) {
             this.entity = entity;
             this.unit = null;
@@ -3254,13 +3449,11 @@ public class ${ctx.lib_name.camel} {
          * @return The newly created node.
          */
         public static ${root_node_type} fromEntity(
-            Entity entity
+            final Entity entity
         ) {
-            if(entity == null || entity.node.isNull()) {
-                return null;
-            } else {
-                return dispatchNodeCreation(entity);
-            }
+            return entity.node.isNull() ?
+                ${root_node_type}.NONE :
+                dispatchNodeCreation(entity);
         }
 
         /**
@@ -3271,7 +3464,7 @@ public class ${ctx.lib_name.camel} {
          * @return The wrapped node in the correct class.
          */
         protected static ${root_node_type} dispatchNodeCreation(
-            Entity entity
+            final Entity entity
         ) {
             int nodeKind = -1;
 
@@ -3289,7 +3482,9 @@ public class ${ctx.lib_name.camel} {
                 % for subclass in ctx.astnode_types:
                     % if not subclass.abstract:
                 case ${ctx.node_kind_constants[subclass]}:
-                    return new ${api.wrapping_type(subclass)}(entity);
+                    return entity.node.isNull() ?
+                        ${api.wrapping_type(subclass)}.NONE :
+                        new ${api.wrapping_type(subclass)}(entity);
                     % endif
                 % endfor
                 default:
@@ -3329,6 +3524,10 @@ public class ${ctx.lib_name.camel} {
 
         }
 
+        public boolean isNone() {
+            return this.entity.node.isNull();
+        }
+
         // ----- Instance methods -----
 
         /**
@@ -3340,13 +3539,13 @@ public class ${ctx.lib_name.camel} {
             if(this.unit == null) {
 
                 if(ImageInfo.inImageCode()) {
-                    EntityNative entityNative = StackValue.get(
+                    final EntityNative entityNative = StackValue.get(
                         EntityNative.class
                     );
                     this.entity.unwrap(entityNative);
-                    AnalysisUnitNative unitNative = NI_LIB.${nat("node_unit")}(
-                        entityNative
-                    );
+
+                    final AnalysisUnitNative unitNative =
+                        NI_LIB.${nat("node_unit")}(entityNative);
                     this.unit = AnalysisUnit.wrap(unitNative);
                 } else {
                     this.unit = JNI_LIB.${nat("node_unit")}(this.entity);
@@ -3364,7 +3563,7 @@ public class ${ctx.lib_name.camel} {
          */
         @CompilerDirectives.TruffleBoundary
         public ${ctx.lib_name.camel}Field getFieldDescription(String name) {
-            return ${root_node_type}.fieldDescriptions.getOrDefault(name, null);
+            return ${root_node_type}.fieldDescriptions.get(name);
         }
 
         /**
@@ -3375,8 +3574,11 @@ public class ${ctx.lib_name.camel} {
         public int getChildrenCount() {
 
             if(ImageInfo.inImageCode()) {
-                EntityNative thisNative = StackValue.get(EntityNative.class);
+                final EntityNative thisNative = StackValue.get(
+                    EntityNative.class
+                );
                 this.entity.unwrap(thisNative);
+
                 return NI_LIB.${nat("node_children_count")}(thisNative);
             } else {
                 return JNI_LIB.${nat("node_children_count")}(this.entity);
@@ -3388,19 +3590,27 @@ public class ${ctx.lib_name.camel} {
          * Get the child at the given position.
          *
          * @param n The index of the child to get.
-         * @return The child at the given index or null.
+         * @return The child at the given index.
          */
-        public ${root_node_type} getChild(int n) {
+        public ${root_node_type} getChild(
+            final int n
+        ) {
 
             if(ImageInfo.inImageCode()) {
-                EntityNative thisNative = StackValue.get(EntityNative.class);
+                final EntityNative thisNative = StackValue.get(
+                    EntityNative.class
+                );
                 this.entity.unwrap(thisNative);
-                EntityNative resNative = StackValue.get(EntityNative.class);
+
+                final EntityNative resNative = StackValue.get(
+                    EntityNative.class
+                );
                 NI_LIB.${nat("node_child")}(
                     thisNative,
                     n,
                     resNative
                 );
+
                 return fromEntity(Entity.wrap(resNative));
             } else {
                 return fromEntity(JNI_LIB.${nat("node_child")}(
@@ -3417,26 +3627,33 @@ public class ${ctx.lib_name.camel} {
          * @return The text of the node.
          */
         public String getText() {
-            Text resText;
 
             if(ImageInfo.inImageCode()) {
-                EntityNative thisNative = StackValue.get(EntityNative.class);
+                final EntityNative thisNative = StackValue.get(
+                    EntityNative.class
+                );
                 this.entity.unwrap(thisNative);
-                TextNative resNative = StackValue.get(TextNative.class);
+
+                final TextNative resNative = StackValue.get(TextNative.class);
+                Text.NONE.unwrap(resNative);
                 NI_LIB.${nat("node_text")}(
                     thisNative,
                     resNative
                 );
-                resText = Text.wrap(resNative);
+
+                try(final Text resText = Text.wrap(resNative)) {
+                    return resText.getContent();
+                }
             } else {
-                resText = JNI_LIB.${nat("node_text")}(
-                    this.entity
-                );
+                try(
+                    final Text resText = JNI_LIB.${nat("node_text")}(
+                        this.entity
+                    );
+                ) {
+                    return resText.getContent();
+                }
             }
 
-            String res = resText.toString();
-            resText.close();
-            return res;
         }
 
         /**
@@ -3446,26 +3663,34 @@ public class ${ctx.lib_name.camel} {
          */
         public String getImage() {
             if(this.image == null) {
-                Text resText;
 
                 if(ImageInfo.inImageCode()) {
-                    EntityNative thisNative = StackValue.get(
+                    final EntityNative thisNative = StackValue.get(
                         EntityNative.class
                     );
                     this.entity.unwrap(thisNative);
-                    TextNative resNative = StackValue.get(TextNative.class);
-                    NI_LIB.${nat("node_image")}(
-                        thisNative,
-                        resNative
+
+                    final TextNative resNative = StackValue.get(
+                        TextNative.class
                     );
-                    resText = Text.wrap(resNative);
+                    Text.NONE.unwrap(resNative);
+                    NI_LIB.${nat("node_image")}(thisNative, resNative);
+
+                    try(final Text resText = Text.wrap(resNative)) {
+                        this.image = resText.getContent();
+                    }
                 } else {
-                    resText = JNI_LIB.${nat("node_image")}(this.entity);
+                    try(
+                        final Text resText = JNI_LIB.${nat("node_image")}(
+                            this.entity
+                        )
+                    ) {
+                        this.image = resText.getContent();
+                    }
                 }
 
-                this.image = resText.toString();
-                resText.close();
             }
+
             return this.image;
         }
 
@@ -3477,17 +3702,19 @@ public class ${ctx.lib_name.camel} {
         public SourceLocationRange getSourceLocationRange() {
 
             if(ImageInfo.inImageCode()) {
-                EntityNative thisNative = StackValue.get(
+                final EntityNative thisNative = StackValue.get(
                     EntityNative.class
                 );
                 this.entity.unwrap(thisNative);
-                SourceLocationRangeNative resNative = StackValue.get(
+
+                final SourceLocationRangeNative resNative = StackValue.get(
                     SourceLocationRangeNative.class
                 );
                 NI_LIB.${nat("node_sloc_range")}(
                     thisNative,
                     resNative
                 );
+
                 return SourceLocationRange.wrap(resNative);
             } else {
                 return JNI_LIB.${nat("node_sloc_range")}(this.entity);
@@ -3505,7 +3732,7 @@ public class ${ctx.lib_name.camel} {
          */
         @CompilerDirectives.TruffleBoundary
         public String dump() {
-            StringBuilder builder = new StringBuilder();
+            final StringBuilder builder = new StringBuilder();
             this.dump(builder);
             return builder.toString();
         }
@@ -3516,7 +3743,9 @@ public class ${ctx.lib_name.camel} {
          * @param builder The builder to dump the AST in.
          */
         @CompilerDirectives.TruffleBoundary
-        public void dump(StringBuilder builder) {
+        public void dump(
+            final StringBuilder builder
+        ) {
             this.dump(builder, 0);
         }
 
@@ -3527,7 +3756,10 @@ public class ${ctx.lib_name.camel} {
          * @param indent The starting indent level.
          */
         @CompilerDirectives.TruffleBoundary
-        public void dump(StringBuilder builder, int indent) {
+        public void dump(
+            final StringBuilder builder,
+            final int indent
+        ) {
             // Indent and add the node name and position
             indent(builder, indent);
             builder.append(this.getKindName())
@@ -3543,7 +3775,7 @@ public class ${ctx.lib_name.camel} {
             // If the node is a list type, display all the children
             if(this.isListType()) {
                 builder.append(" [list_node]");
-                int childrenCount = this.getChildrenCount();
+                final int childrenCount = this.getChildrenCount();
                 for(int i = 0 ; i < childrenCount ; i++) {
                     builder.append('\n');
                     indent(builder, indent);
@@ -3561,10 +3793,11 @@ public class ${ctx.lib_name.camel} {
             else {
                 for(String field : this.getFieldNames()) {
                     try {
-                        Method fieldGetter = this.getClass().getMethod(field);
-                        ${root_node_type} node =
+                        final Method fieldGetter =
+                            this.getClass().getMethod(field);
+                        final ${root_node_type} node =
                             (${root_node_type}) fieldGetter.invoke(this);
-                        if(node != null) {
+                        if(!node.isNone()) {
                             builder.append("\n");
                             indent(builder, indent);
                             builder.append("|-").append(field).append("\n");
@@ -3584,7 +3817,10 @@ public class ${ctx.lib_name.camel} {
          * @param builder The string builder to indent.
          * @param level The level of indentation.
          */
-        protected static void indent(StringBuilder builder, int level) {
+        protected static void indent(
+            final StringBuilder builder,
+            final int level
+        ) {
             for(int i = 0 ; i < level * 4 ; i++) {
                 if(i % 4 == 0) builder.append("|"); else builder.append(" ");
             }
@@ -3630,7 +3866,7 @@ public class ${ctx.lib_name.camel} {
         public boolean equals(Object o) {
             if(this == o) return true;
             if(!(o instanceof ${root_node_type})) return false;
-            ${root_node_type} other = (${root_node_type}) o;
+            final ${root_node_type} other = (${root_node_type}) o;
             return this.entity.node.equals(other.entity.node) &&
                 this.entity.info.rebindings.equals(
                     other.entity.info.rebindings
@@ -3652,6 +3888,15 @@ public class ${ctx.lib_name.camel} {
                 );
             }
 
+        }
+
+        // ----- Inner classes -----
+
+        /**
+         * This class represents the none node without any concrete type.
+         */
+        private static final class NoneNode extends ${root_node_type} {
+            NoneNode() {super(Entity.NONE);}
         }
 
     }

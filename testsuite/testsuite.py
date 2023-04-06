@@ -137,6 +137,7 @@ class LangkitTestsuite(Testsuite):
             'has_ocaml': not args.disable_ocaml,
             'has_java': not args.disable_java,
             'has_gdb': not args.disable_gdb,
+            'os': self.env.build.os.name,
         }
 
         if args.coverage:

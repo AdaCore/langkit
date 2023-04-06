@@ -33,40 +33,6 @@
         @CompilerDirectives.TruffleBoundary
         public static native LangkitException ${nat("get_last_exception")}();
 
-        // ----- Big integer functions -----
-
-        /** Create a new big integer from a text */
-        @CompilerDirectives.TruffleBoundary
-        public static native BigInteger ${nat("create_big_integer")}(
-            Text text
-        );
-
-        /** Get the text representation of a big integer */
-        @CompilerDirectives.TruffleBoundary
-        public static native Text ${nat("big_integer_text")}(
-            BigInteger bigInteger
-        );
-
-        /** Decrease the reference counter of the big integer */
-        @CompilerDirectives.TruffleBoundary
-        public static native void ${nat("big_integer_decref")}(
-            long bigInteger
-        );
-
-        // ----- String functions -----
-
-        /** Create a new string wrapper in langkit */
-        @CompilerDirectives.TruffleBoundary
-        public static native StringWrapper ${nat("create_string")}(
-            byte[] content
-        );
-
-        /** Decrease the reference counter of the string */
-        @CompilerDirectives.TruffleBoundary
-        public static native void ${nat("string_dec_ref")}(
-            long string
-        );
-
         // ----- Text functions -----
 
         /** Create a new text from its content */
@@ -78,10 +44,15 @@
         /** Destroy the given text */
         @CompilerDirectives.TruffleBoundary
         public static native void ${nat("destroy_text")}(
-            long textBuffer,
-            long length,
-            boolean isAllocated,
-            boolean isOwner
+            Text text
+        );
+
+        // ----- File reader functions -----
+
+        /** Decrease the reference counter of the given file reader */
+        @CompilerDirectives.TruffleBoundary
+        public static native void ${nat("dec_ref_file_reader")}(
+            FileReader fileReader
         );
 
         // ----- Unit provider functions -----
@@ -89,7 +60,15 @@
         /** Decrease the ref counter of the unit provider */
         @CompilerDirectives.TruffleBoundary
         public static native void ${nat("dec_ref_unit_provider")}(
-            long providerRef
+            UnitProvider unitProvider
+        );
+
+        // ----- Event handler functions -----
+
+        /** Decrease the ref counter of the event handler */
+        @CompilerDirectives.TruffleBoundary
+        public static native void ${nat("dec_ref_event_handler")}(
+            EventHandler eventHandler
         );
 
         // ----- Token functions -----
@@ -224,14 +203,6 @@
             AnalysisUnit unit,
             int n
         );
-
-        // ----- Array functions -----
-
-        % for array_type in ctx.array_types:
-            % if array_type.exposed and array_type.emit_c_type:
-        ${array.jni_funcs(array_type)}
-            % endif
-        % endfor
 
         // ----- Node functions -----
 

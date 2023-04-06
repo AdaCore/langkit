@@ -206,8 +206,8 @@ def build(grammar=None, lexer=None, lkt_file=None,
 def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
                   lexer=None, lkt_file=None, types_from_lkt=False,
                   lkt_semantic_checks=False, ocaml_main=None, java_main=None,
-                  warning_set=default_warning_set, generate_unparser=False,
-                  symbol_canonicalizer=None, mains=False,
+                  ni_main=None, mains=False, warning_set=default_warning_set,
+                  generate_unparser=False, symbol_canonicalizer=None,
                   show_property_logging=False, unparse_script=unparse_script,
                   case_insensitive: bool = False,
                   version: str | None = None,
@@ -331,7 +331,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             argv.append('--no-ada-api')
 
         # If there is a Java main, enable the Java bindings building
-        if java_main is not None:
+        if java_main is not None or ni_main is not None:
             argv.append('--enable-java')
             if maven_exec:
                 argv.append('--maven-executable')
@@ -481,12 +481,62 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             valgrind_suppressions=['ocaml'])
 
     if java_main is not None:
-        run(
-            'java',
+        java_exec = P.realpath(P.join(
+            env['JAVA_HOME'],
+            'bin',
+            'java'
+        ))
+        cmd = [
+            java_exec,
             '-Dfile.encoding=UTF-8',
-            f"-Djava.library.path={env.get('LD_LIBRARY_PATH')}",
+            f"-Djava.library.path={env['LD_LIBRARY_PATH']}",
+        ]
+        if 'graalvm' in env['JAVA_HOME']:
+            cmd.append((
+                '--add-opens=org.graalvm.truffle/com.oracle.truffle.api.'
+                'strings=ALL-UNNAMED'
+            ))
+        cmd += [
             f'{java_main}.java',
+        ]
+        run(*cmd)
+
+    if ni_main is not None:
+        # Compile the Java tests
+        javac_exec = P.realpath(P.join(
+            env['JAVA_HOME'],
+            'bin',
+            'javac'
+        ))
+        run(
+            javac_exec,
+            '-encoding', 'utf8',
+            f'{ni_main}.java',
         )
+
+        # Run native-image to compile the tests
+        ni_exec = P.realpath(P.join(
+            os.environ['GRAAL_HOME'],
+            'bin',
+            'native-image'
+        ))
+        class_path = os.path.pathsep.join([
+            P.realpath('.'),
+            env['CLASSPATH'],
+        ])
+        run(
+            ni_exec,
+            '-cp', class_path,
+            '--no-fallback',
+            '--macro:truffle',
+            '-H:+BuildOutputSilent',
+            '-H:+ReportExceptionStackTraces',
+            f'{ni_main}',
+            'main',
+        )
+
+        # Run the newly created main
+        run(P.realpath('main'))
 
 
 def indent(text: str, prefix: str = "  ") -> str:

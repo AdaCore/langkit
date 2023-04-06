@@ -1,9 +1,10 @@
 <%def name="wrapping_class(cls)">
     <%
     api = java_api
-    class_name = api.wrapping_type(cls, ast_wrapping=False)
-    ni_name = api.java_ni_type(cls)
-    c_name = cls.c_type(capi).name
+
+    java_type = api.wrapping_type(cls, ast_wrapping=False)
+    ni_type = api.ni_type(cls)
+    c_type = cls.c_type(capi).name
 
     fields = api.get_struct_fields(cls)
     flatten_fields = api.flatten_struct_fields(fields)
@@ -11,9 +12,19 @@
 
     % if len(cls.get_fields()) > 0:
     ${java_doc(cls, 4)}
-    public static class ${class_name} {
+    public static final class ${java_type} {
 
-        // ----- Attributes -----
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none value for the structure. */
+        public static final ${java_type} NONE = new ${java_type}(
+            ${','.join([
+                api.none_value(field.public_type, False)
+                for field in fields
+            ])}
+        );
+
+        // ----- Instance attributes -----
 
         % for field in fields:
         public final
@@ -26,8 +37,9 @@
         /**
          * Create a new structure object from the value if its fields.
          */
-        ${class_name}(
+        ${java_type}(
             ${','.join([
+                f"final "
                 f"{api.wrapping_type(field.public_type, ast_wrapping=False)}"
                 f" {field.name}"
                 for field in fields
@@ -39,31 +51,45 @@
         }
 
         /**
+         * Create a new structure with the field values.
+         */
+        public static ${java_type} create(
+            ${','.join([
+                f"final "
+                f"{api.wrapping_type(field.public_type, ast_wrapping=False)}"
+                f" {field.name}"
+                for field in fields
+            ])}
+        ) {
+            return new ${java_type}(
+                ${','.join([field.name for field in fields])}
+            );
+        }
+
+        // ----- Graal C API methods -----
+
+        /**
          * Wrap a pointer to the native structure value in the Java class.
          *
          * @param niPointer The pointer to the NI structure native value.
-         * @return The newly created structure or null if the given pointer
-         * is null.
+         * @return The newly wrapped structure.
          */
-        static ${class_name} wrap(
-            Pointer niPointer
+        static ${java_type} wrap(
+            final Pointer niPointer
         ) {
-            if(niPointer.isNull()) return null;
-            else return wrap((${ni_name}) niPointer.readWord(0));
+            return wrap((${ni_type}) niPointer.readWord(0));
         }
 
         /**
          * Wrap the given structure native value in the Java class.
          *
          * @param structNative The NI structure native value.
-         * @return The newly created structure or null if the given native
-         * value is null.
+         * @return The newly wrapped structure.
          */
-        static ${class_name} wrap(
-            ${ni_name} structNative
+        static ${java_type} wrap(
+            final ${ni_type} structNative
         ) {
-            if(((PointerBase) structNative).isNull()) return null;
-            else return new ${class_name}(
+            return new ${java_type}(
                 ${','.join([
                     api.ni_field_wrap(field)
                     for field in fields
@@ -72,47 +98,26 @@
         }
 
         /**
-         * Create a new structure with the field values.
-         */
-        public static ${class_name} create(
-            ${','.join([
-                f"{api.wrapping_type(field.public_type, ast_wrapping=False)}"
-                f" {field.name}"
-                for field in fields
-            ])}
-        ) {
-            return new ${class_name}(
-                ${','.join([field.name for field in fields])}
-            );
-        }
-
-        // ----- Instance methods -----
-
-        /**
          * Unwrap the structure in the given native value.
          *
          * @param structNative The NI structure native value to fill.
          */
-        public void unwrap(${ni_name} structNative) {
+        void unwrap(
+            final ${ni_type} structNative
+        ) {
             % for flat in flatten_fields:
-            structNative.set_${flat.native_access}(
-                this.${api.ni_field_unwrap(flat)}
-            );
+            ${api.ni_field_unwrap(flat)}
             % endfor
         }
 
-        % if cls.is_ada_record:
+        % if cls.is_refcounted:
         /**
-         * Get an empty value for the structure.
+         * Release the structure.
          *
-         * @param structNative The NI structure native value to initialize.
+         * @param structNative The native structure to release.
          */
-        public static void defaultValue(${ni_name} structNative) {
-            % for flat in flatten_fields:
-            structNative.set_${flat.native_access}(
-                ${api.ni_null_value(flat.public_type)}
-            );
-            % endfor
+        static void release(${ni_type} structNative) {
+            NI_LIB.${cls.c_dec_ref(capi)}(structNative);
         }
         % endif
 
@@ -123,61 +128,93 @@
 <%def name="ni_def(cls)">
     <%
     api = java_api
-    ni_name = api.java_ni_type(cls)
-    c_name = cls.c_type(capi).name
+
+    ni_type = api.ni_type(cls)
+    c_type = cls.c_type(capi).name
+
     flatten_fields = api.flatten_struct_fields(api.get_struct_fields(cls))
     %>
 
     % if len(cls.get_fields()) > 0:
-    /** The structure for the langkit ${c_name} */
+    /** The structure for the langkit ${c_type} */
     @CContext(LibDirectives.class)
-    @CStruct("${c_name}")
-    public interface ${ni_name} extends PointerBase {
+    @CStruct("${c_type}")
+    public interface ${ni_type} extends PointerBase {
         % for field in flatten_fields:
         @CField("${field.custom_access('.')}")
-        public ${api.java_ni_type(field.public_type)} 
+        public ${api.ni_type(field.public_type)}
         get_${field.native_access}();
 
-        @CField("${field.custom_access('.')}") 
-        public void 
+        @CFieldAddress("${field.custom_access('.')}")
+        public <T extends PointerBase> T address_${field.native_access}();
+
+        @CField("${field.custom_access('.')}")
+        public void
         set_${field.native_access}(
-            ${api.java_ni_type(field.public_type)} val
+            ${api.ni_type(field.public_type)} val
         );
         % endfor
     }
     % endif
 </%def>
 
+<%def name="ni_funcs(cls)">
+    <%
+    api = java_api
+
+    ni_type = api.ni_type(cls)
+    %>
+
+        % if cls.is_refcounted:
+        /**
+         * Decreate the reference counter of the given struct.
+         *
+         * @param structNative The structure to decrease the reference counter.
+         */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${cls.c_dec_ref(capi)}(
+            ${ni_type} structNative
+        );
+        % endif
+</%def>
+
 <%def name="jni_c_decl(cls)">
     <%
     api = java_api
-    c_name = cls.c_type(capi).name
-    j_name = api.java_jni_type(cls)
+
+    java_type = api.wrapping_type(cls, False)
+    c_type = cls.c_type(capi).name
     %>
 
-${c_name} ${j_name}_new_value();
+${c_type} ${java_type}_new_value();
 % if len(cls.get_fields()) > 0:
-jobject ${j_name}_wrap(JNIEnv *, ${c_name});
-${c_name} ${j_name}_unwrap(JNIEnv *, jobject);
+jobject ${java_type}_wrap(JNIEnv *, ${c_type});
+${c_type} ${java_type}_unwrap(JNIEnv *, jobject);
+    % if cls.is_refcounted:
+    void ${java_type}_release(${c_type});
+    % endif
 % endif
 </%def>
 
 <%def name="jni_c_impl(cls)">
     <%
     api = java_api
-    c_name = cls.c_type(capi).name
-    j_name = api.java_jni_type(cls)
+
+    sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
+
+    java_type = api.wrapping_type(cls, False)
+    c_type = cls.c_type(capi).name
 
     fields = api.get_struct_fields(cls)
-    sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
     constructor_sig = "".join([
         api.jni_sig_type(field.public_type, sig_base) for field in fields
     ])
     %>
 
-// Create a new value for a langkit ${c_name}
-${c_name} ${j_name}_new_value() {
-    ${c_name} res = {
+// Create a new value for a langkit ${c_type}
+${c_type} ${java_type}_new_value() {
+    ${c_type} res = {
         % for f in cls.get_fields():
         ${api.jni_new_value(f.type)},
         % endfor
@@ -186,15 +223,15 @@ ${c_name} ${j_name}_new_value() {
 }
 
 % if len(cls.get_fields()) > 0:
-// Wrap a native ${c_name} in the Java wrapping class
-jobject ${j_name}_wrap(
+// Wrap a native ${c_type} in the Java wrapping class
+jobject ${java_type}_wrap(
     JNIEnv *env,
-    ${c_name} native_struct
+    ${c_type} native_struct
 ) {
     // Get the Java class
     jclass clazz = (*env)->FindClass(
         env,
-        "${sig_base}$${j_name}"
+        "${sig_base}$${java_type}"
     );
 
     // Get the constructor
@@ -213,25 +250,21 @@ jobject ${j_name}_wrap(
         ${", ".join([
             api.jni_wrap(
                 field.public_type,
-                f"native_struct.{field.native_name}"
+                f"native_struct.{field.native_name}",
+                []
             )
             for field in fields
         ])}
     );
 }
 
-// Get a native ${c_name} from a Java wrapping instance
-${c_name} ${j_name}_unwrap(
+// Get a native ${c_type} from a Java wrapping instance
+${c_type} ${java_type}_unwrap(
     JNIEnv *env,
     jobject object
 ) {
     // Prepare the result structure
-    ${c_name} res = ${j_name}_new_value();
-
-    // Check the the Java object is not null
-    if(object == NULL) {
-        return res;
-    }
+    ${c_type} res = ${java_type}_new_value();
 
     // Get the class
     jclass clazz = (*env)->GetObjectClass(env, object);
@@ -258,12 +291,26 @@ ${c_name} ${j_name}_unwrap(
 
     // Fill the result structure
     % for field in fields:
-    res.${field.native_name} =
-        ${api.jni_unwrap(field.public_type, f"{field.native_name}_value")};
+    ${api.jni_unwrap(
+        field.public_type,
+        f"{field.native_name}_value",
+        f"{field.native_name}_native",
+        []
+    )}
+    res.${field.native_name} = ${field.native_name}_native;
     % endfor
 
     // Return the native result
     return res;
 }
+
+    % if cls.is_refcounted:
+// Decrease the reference counter of the given structure
+void ${java_type}_release(
+    ${c_type} struct_native
+) {
+    ${cls.c_dec_ref(capi)}(&struct_native);
+}
+    % endif
 % endif
 </%def>
