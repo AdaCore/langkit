@@ -273,7 +273,8 @@ private package ${ada_lib_name}.Implementation is
    --  The combine function on environments metadata does a boolean Or on every
    --  boolean component of the env metadata.
 
-   function Can_Reach (El, From : ${T.root_node.name}) return Boolean;
+   function Can_Reach (El, From : ${T.root_node.name}) return Boolean
+     with Inline;
    --  Return whether El can reach From, from a sequential viewpoint. If
    --  elements are declared in different units, it will always return True,
    --  eg this does not handle general visibility issues, just sequentiality of

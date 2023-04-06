@@ -1,0 +1,13 @@
+main.py: Running...
+Looking for foo:
+end
+Looking for bar:
+  def bar
+end
+Looking for baz:
+  def baz
+end
+Looking for unknown:
+end
+main.py: Done.
+Done

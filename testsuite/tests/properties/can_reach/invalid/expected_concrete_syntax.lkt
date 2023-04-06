@@ -2,13 +2,13 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list+(Example("example"))
+    @main_rule main_rule <- Example(@example)
 }
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun can_reach_wrapper(from_node: FooNode): Bool =
-    node.can_reach(from_node.node)
+    @export fun can_reach(n: FooNode, from_node: FooNode): Bool =
+    n.node.can_reach(from_node.node)
 }
 
 class Example : FooNode {

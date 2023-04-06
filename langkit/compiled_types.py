@@ -2632,6 +2632,10 @@ class ASTNodeType(BaseStructType):
         :param dsl_name: Name used to represent this type at the DSL level.
             Useful to format diagnostics.
         """
+        from langkit.expressions import Property
+
+        actual_fields = list(fields)
+
         self.raw_name = name
         self.kwless_raw_name = (self.raw_name + names.Name('Node')
                                 if is_keyword(self.raw_name) else
@@ -2708,17 +2712,44 @@ class ASTNodeType(BaseStructType):
         # Now we have an official root node type, we can create its builtin
         # fields.
         if is_root:
-            fields = self.builtin_properties() + fields
-        self._init_fields(fields)
+            # If the language spec does not define one, create a default
+            # "can_reach" property.
+            if not any(
+                (n if isinstance(n, str) else n.lower) == "can_reach"
+                for n, _ in actual_fields
+            ):
+                from langkit.expressions import No, Self
+                can_reach = Property(
+                    public=False,
+                    type=T.Bool,
+                    expr=(
+                        lambda from_node=T.root_node:
+                        # If there is no from_node node, assume we can access
+                        # everything. Also assume than from_node can reach Self
+                        # if both do not belong to the same unit.
+                        (from_node == No(T.root_node))
+                        | (Self.unit != from_node.unit)  # type: ignore
+                        | (Self < from_node)
+                    ),
+                )
+                # Provide a dummy location for GDB helpers
+                can_reach.location = Location(__file__)
+                can_reach.artificial = True
+                actual_fields.append(("can_reach", can_reach))
+
+            # Always add builtin properties first
+            actual_fields = self.builtin_properties() + actual_fields
+
+        self._init_fields(actual_fields)
 
         # Encode all field names for nodes so that there is no name collision
         # when considering all fields from all nodes.
-        for f in fields:
+        for f in actual_fields:
             if isinstance(f, BaseField):
                 f._internal_name = self.name + f.name
 
         # Make sure that all user fields for nodes are private
-        for _, f_v in fields:
+        for _, f_v in actual_fields:
             with f_v.diagnostic_context:
                 check_source_language(
                     not f_v.is_user_field or
@@ -2756,7 +2787,7 @@ class ASTNodeType(BaseStructType):
         if env_spec:
             env_spec.ast_node = self
 
-        self.env_spec = env_spec
+        self.env_spec: Opt[EnvSpec] = env_spec
         """
         EnvSpec instance corresponding to this node.
         """

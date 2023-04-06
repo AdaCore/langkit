@@ -1492,7 +1492,7 @@ def emit_node_type(node_type):
     ${emit_field(field)}$hl
     % endfor
     % for prop in properties:
-    % if not prop.is_internal and not is_builtin_prop(prop) and not prop.is_artificial_dispatcher:
+    % if not prop.is_internal and not is_builtin_prop(prop) and not prop.is_artificial_dispatcher and not prop.artificial:
     ${emit_prop(prop, walker)}$hl
     % endif
     % endfor

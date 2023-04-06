@@ -36,15 +36,13 @@ for node, from_node in [
     (u1_ex1, u1_ex1),
     (u1_ex1, u1_ex2),
     (u1_ex2, u1_ex1),
-
-    (None, u1_ex1),
     (u1_ex1, None),
-    (None, None),
-
     (u1_ex1, u2_ex),
     (u2_ex, u1_ex1),
 ]:
-    print('can_reach({}, {}) = {}'.format(fmt_node(node), fmt_node(from_node),
-                                          root.p_can_reach(node, from_node)))
+    print(
+        f"can_reach({fmt_node(node)}, {fmt_node(from_node)})"
+        f" = {node.p_can_reach_wrapper(from_node)}"
+    )
 
 print('main.py: Done.')
