@@ -1027,6 +1027,8 @@ class JavaAPISettings(AbstractAPISettings):
         return dispatch_on_type(the_type, [
             (T.Bool, lambda _: "Z"),
             (T.Int, lambda _: "I"),
+            (T.BigInt, lambda _: "Ljava/math/BigInteger;"),
+            (T.String, lambda _: "Ljava/lang/String;"),
             (
                 ct.ASTNodeType, lambda t:
                     f"L{base_class}$PointerWrapper;"
