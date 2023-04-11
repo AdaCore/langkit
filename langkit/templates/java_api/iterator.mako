@@ -89,6 +89,39 @@
 ${c_name} ${j_name}_new_value();
 jobject ${j_name}_wrap(JNIEnv *, ${c_name});
 ${c_name} ${j_name}_unwrap(JNIEnv *, jobject);
+
+jclass ${j_name}_class_ref = NULL;
+jmethodID ${j_name}_constructor_id = NULL;
+jfieldID ${j_name}_reference_field_id = NULL;
+</%def>
+
+<%def name="jni_init_global_refs(cls)">
+    <%
+    api = java_api
+    j_name = api.wrapping_type(cls, False)
+
+    sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
+    ptr_sig = f"{sig_base}$PointerWrapper"
+    %>
+
+    ${j_name}_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$${j_name}")
+    );
+
+    ${j_name}_constructor_id = (*env)->GetMethodID(
+        env,
+        ${j_name}_class_ref,
+        "<init>",
+        "(L${ptr_sig};)V"
+    );
+
+    ${j_name}_reference_field_id = (*env)->GetFieldID(
+        env,
+        ${j_name}_class_ref,
+        "reference",
+        "L${ptr_sig};"
+    );
 </%def>
 
 <%def name="jni_c_impl(cls)">
@@ -96,9 +129,6 @@ ${c_name} ${j_name}_unwrap(JNIEnv *, jobject);
     api = java_api
     j_name = api.wrapping_type(cls, False)
     c_name = cls.c_type(capi).name
-
-    sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
-    ptr_sig = f"{sig_base}$PointerWrapper"
     %>
 
 // Create a new value for a ${c_name}
@@ -114,25 +144,11 @@ jobject ${j_name}_wrap(
     // Verify the iterator nullity
     if(struct_native == NULL) return NULL;
 
-    // Get the class
-    jclass clazz = (*env)->FindClass(
-        env,
-        "${sig_base}$${j_name}"
-    );
-
-    // Get the construtor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};)V"
-    );
-
     // Return the new iterator
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        ${j_name}_class_ref,
+        ${j_name}_constructor_id,
         PointerWrapper_wrap(env, (void *) struct_native)
     );
 }
@@ -142,6 +158,13 @@ ${c_name} ${j_name}_unwrap(
     JNIEnv *env,
     jobject object
 ) {
-    return (${c_name}) get_reference(env, object);
+    return (${c_name}) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            object,
+            ${j_name}_reference_field_id
+        )
+    );
 }
 </%def>

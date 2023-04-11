@@ -29,16 +29,31 @@ ptr_sig = f"{sig_base}$PointerWrapper"
 // Function delcarations
 // ==========
 
+jclass main_class_ref = NULL;
+jmethodID encodeUTF32_method_id = NULL;
+jmethodID decodeUTF32_method_id = NULL;
+
 void * PointerWrapper_new_value();
 jobject PointerWrapper_wrap(JNIEnv *, void *);
 void * PointerWrapper_unwrap(JNIEnv *, jobject);
 
+jclass PointerWrapper_class_ref = NULL;
+jmethodID PointerWrapper_constructor_id = NULL;
+jmethodID PointerWrapper_getter_id = NULL;
+
 ${exception_type} LangkitException_new_value();
 jthrowable LangkitException_wrap(JNIEnv *, ${exception_type});
+
+jclass LangkitException_class_ref = NULL;
+jmethodID LangkitException_constructor_id = NULL;
 
 ${token_kind} TokenKind_new_value();
 jobject TokenKind_wrap(JNIEnv *, ${token_kind});
 ${token_kind} TokenKind_unwrap(JNIEnv *, jobject);
+
+jclass TokenKind_class_ref = NULL;
+jmethodID TokenKind_from_c_method_id = NULL;
+jmethodID TokenKind_to_c_method_id = NULL;
 
 % for enum_type in ctx.enum_types:
 ${enum.jni_c_decl(enum_type)}
@@ -48,15 +63,29 @@ uint32_t Char_new_value();
 jobject Char_wrap(JNIEnv *, uint32_t);
 uint32_t Char_unwrap(JNIEnv *, jobject);
 
+jclass Char_class_ref = NULL;
+jmethodID Char_constructor_id = NULL;
+jfieldID Char_value_field_id = NULL;
+
 ${big_integer_type} BigInteger_new_value();
 jobject BigInteger_wrap(JNIEnv *, ${big_integer_type});
 ${big_integer_type} BigInteger_unwrap(JNIEnv *, jobject);
 void BigInteger_release(${big_integer_type});
 
+jclass BigInteger_class_ref = NULL;
+jmethodID BigInteger_constructor_id = NULL;
+jmethodID BigInteger_to_string_method_id = NULL;
+
 ${symbol_type} Symbol_new_value();
 jobject Symbol_wrap(JNIEnv *, ${symbol_type});
 ${symbol_type} Symbol_unwrap(JNIEnv *, jobject, ${analysis_context_type});
 jthrowable new_symbol_exception(JNIEnv *, jstring);
+
+jclass Symbol_class_ref = NULL;
+jmethodID Symbol_constructor_id = NULL;
+jfieldID Symbol_text_field_id = NULL;
+jclass SymbolException_class_ref = NULL;
+jmethodID SymbolException_constructor_id = NULL;
 
 ${string_type} String_new_value();
 jobject String_wrap(JNIEnv *, ${string_type});
@@ -69,29 +98,66 @@ ${text_type} Text_unwrap(JNIEnv *, jobject);
 jstring get_text_content(JNIEnv *, jobject);
 jobject text_from_content(JNIEnv *, jstring);
 
+jclass Text_class_ref = NULL;
+jmethodID Text_constructor_id = NULL;
+jmethodID Text_extended_constructor_id = NULL;
+jmethodID Text_create_method_id = NULL;
+jmethodID Text_get_content_method_id = NULL;
+jfieldID Text_chars_field_id = NULL;
+jfieldID Text_length_field_id = NULL;
+jfieldID Text_is_allocated_field_id = NULL;
+jfieldID Text_is_owner_field_id = NULL;
+
 ${sloc_type} SourceLocation_new_value();
 jobject SourceLocation_wrap(JNIEnv *, ${sloc_type});
 ${sloc_type} SourceLocation_unwrap(JNIEnv *, jobject);
+
+jclass SourceLocation_class_ref = NULL;
+jmethodID SourceLocation_constructor_id = NULL;
+jfieldID SourceLocation_line_field_id = NULL;
+jfieldID SourceLocation_column_field_id = NULL;
 
 ${sloc_range_type} SourceLocationRange_new_value();
 jobject SourceLocationRange_wrap(JNIEnv *, ${sloc_range_type});
 ${sloc_range_type} SourceLocationRange_unwrap(JNIEnv *, jobject);
 
+jclass SourceLocationRange_class_ref = NULL;
+jmethodID SourceLocationRange_constructor_id = NULL;
+jfieldID SourceLocationRange_start_field_id = NULL;
+jfieldID SourceLocationRange_end_field_id = NULL;
+
 ${diagnostic_type} Diagnostic_new_value();
 jobject Diagnostic_wrap(JNIEnv *, ${diagnostic_type});
 ${diagnostic_type} Diagnostic_unwrap(JNIEnv *, jobject);
+
+jclass Diagnostic_class_ref = NULL;
+jmethodID Diagnostic_constructor_id = NULL;
+jfieldID Diagnostic_sloc_range_field_id = NULL;
+jfieldID Diagnostic_text_field_id = NULL;
 
 ${file_reader_type} FileReader_new_value();
 jobject FileReader_wrap(JNIEnv *, ${file_reader_type});
 ${file_reader_type} FileReader_unwrap(JNIEnv *, jobject);
 
+jclass FileReader_class_ref = NULL;
+jmethodID FileReader_constructor_id = NULL;
+jfieldID FileReader_reference_field_id = NULL;
+
 ${unit_provider_type} UnitProvider_new_value();
 jobject UnitProvider_wrap(JNIEnv *, ${unit_provider_type});
 ${unit_provider_type} UnitProvider_unwrap(JNIEnv *, jobject);
 
+jclass UnitProvider_class_ref = NULL;
+jmethodID UnitProvider_constructor_id = NULL;
+jfieldID UnitProvider_reference_field_id = NULL;
+
 ${event_handler_type} EventHandler_new_value();
 jobject EventHandler_wrap(JNIEnv *, ${event_handler_type});
 ${event_handler_type} EventHandler_unwrap(JNIEnv *, jobject);
+
+jclass EventHandler_class_ref = NULL;
+jmethodID EventHandler_constructor_id = NULL;
+jfieldID EventHandler_reference_field_id = NULL;
 
 ${token_type} Token_new_value();
 jobject Token_wrap(JNIEnv *, ${token_type}, jobject);
@@ -99,13 +165,34 @@ ${token_type} Token_unwrap(JNIEnv *, jobject);
 jobject Token_get_unit(JNIEnv *, jobject);
 jobject NoToken_wrap(JNIEnv *, jobject);
 
+jclass Token_class_ref = NULL;
+jclass NoToken_class_ref = NULL;
+jmethodID Token_constructor_id = NULL;
+jmethodID Token_none_getter_method_id = NULL;
+jfieldID Token_context_field_id = NULL;
+jfieldID Token_tdh_field_id = NULL;
+jfieldID Token_token_index_field_id = NULL;
+jfieldID Token_trivia_index_field_id = NULL;
+jfieldID Token_token_kind_field_id = NULL;
+jfieldID Token_text_field_id = NULL;
+jfieldID Token_sloc_range_field_id = NULL;
+jfieldID Token_unit_field_id = NULL;
+
 ${analysis_context_type} AnalysisContext_new_value();
 jobject AnalysisContext_wrap(JNIEnv *, ${analysis_context_type});
 ${analysis_context_type} AnalysisContext_unwrap(JNIEnv *, jobject);
 
+jclass AnalysisContext_class_ref = NULL;
+jmethodID AnalysisContext_constructor_id = NULL;
+jfieldID AnalysisContext_reference_field_id = NULL;
+
 ${analysis_unit_type} AnalysisUnit_new_value();
 jobject AnalysisUnit_wrap(JNIEnv *, ${analysis_unit_type});
 ${analysis_unit_type} AnalysisUnit_unwrap(JNIEnv *, jobject);
+
+jclass AnalysisUnit_class_ref = NULL;
+jmethodID AnalysisUnit_constructor_id = NULL;
+jfieldID AnalysisUnit_reference_field_id = NULL;
 
 % for struct_type in ctx.struct_types:
     % if api.should_emit_struct(struct_type):
@@ -124,6 +211,488 @@ ${array.jni_c_decl(array_type)}
 ${iterator.jni_c_decl(iterator_type)}
     % endif
 % endfor
+
+${api.jni_func_sig("initialize", "void")}(
+    JNIEnv *env,
+    jclass jni_lib
+) {
+    main_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}")
+    );
+
+    // Get the conversion method
+    encodeUTF32_method_id = (*env)->GetStaticMethodID(
+        env,
+        main_class_ref,
+        "encodeUTF32",
+        "(Ljava/lang/String;)[B"
+    );
+
+    decodeUTF32_method_id = (*env)->GetStaticMethodID(
+        env,
+        main_class_ref,
+        "decodeUTF32",
+        "([B)Ljava/lang/String;"
+    );
+
+    PointerWrapper_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${ptr_sig}")
+    );
+
+    PointerWrapper_constructor_id = (*env)->GetMethodID(
+        env,
+        PointerWrapper_class_ref,
+        "<init>",
+        "(J)V"
+    );
+
+    PointerWrapper_getter_id = (*env)->GetMethodID(
+        env,
+        PointerWrapper_class_ref,
+        "jni",
+        "()J"
+    );
+
+    LangkitException_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$LangkitException")
+    );
+
+    LangkitException_constructor_id = (*env)->GetMethodID(
+        env,
+        LangkitException_class_ref,
+        "<init>",
+        "(ILjava/lang/String;)V"
+    );
+
+    Symbol_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$Symbol")
+    );
+
+    Symbol_constructor_id = (*env)->GetMethodID(
+        env,
+        Symbol_class_ref,
+        "<init>",
+        "(Ljava/lang/String;)V"
+    );
+
+    Symbol_text_field_id = (*env)->GetFieldID(
+        env,
+        Symbol_class_ref,
+        "text",
+        "Ljava/lang/String;"
+    );
+
+    SymbolException_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$SymbolException")
+    );
+
+    SymbolException_constructor_id = (*env)->GetMethodID(
+        env,
+        SymbolException_class_ref,
+        "<init>",
+        "(Ljava/lang/String;)V"
+    );
+
+    Text_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$Text")
+    );
+
+    Text_constructor_id = (*env)->GetMethodID(
+        env,
+        Text_class_ref,
+        "<init>",
+        "(L${ptr_sig};JZ[B)V"
+    );
+
+    Text_extended_constructor_id = (*env)->GetMethodID(
+        env,
+        Text_class_ref,
+        "<init>",
+        "(L${ptr_sig};JZZ[B)V"
+    );
+
+    Text_create_method_id = (*env)->GetStaticMethodID(
+        env,
+        Text_class_ref,
+        "create",
+        "(Ljava/lang/String;)L${sig_base}$Text;"
+    );
+
+    Text_get_content_method_id = (*env)->GetMethodID(
+        env,
+        Text_class_ref,
+        "getContent",
+        "()Ljava/lang/String;"
+    );
+
+    Text_chars_field_id = (*env)->GetFieldID(
+        env,
+        Text_class_ref,
+        "charPointer",
+        "L${sig_base}$PointerWrapper;"
+    );
+
+    Text_length_field_id = (*env)->GetFieldID(
+        env,
+        Text_class_ref,
+        "length",
+        "J"
+    );
+
+    Text_is_allocated_field_id = (*env)->GetFieldID(
+        env,
+        Text_class_ref,
+        "isAllocated",
+        "Z"
+    );
+
+    Text_is_owner_field_id = (*env)->GetFieldID(
+        env,
+        Text_class_ref,
+        "isOwner",
+        "Z"
+    );
+
+    SourceLocation_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$SourceLocation")
+    );
+
+    SourceLocation_constructor_id = (*env)->GetMethodID(
+        env,
+        SourceLocation_class_ref,
+        "<init>",
+        "(IS)V"
+    );
+
+    SourceLocation_line_field_id = (*env)->GetFieldID(
+        env,
+        SourceLocation_class_ref,
+        "line",
+        "I"
+    );
+
+    SourceLocation_column_field_id = (*env)->GetFieldID(
+        env,
+        SourceLocation_class_ref,
+        "column",
+        "S"
+    );
+
+    TokenKind_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$TokenKind")
+    );
+
+    TokenKind_from_c_method_id = (*env)->GetStaticMethodID(
+        env,
+        TokenKind_class_ref,
+        "fromC",
+        "(I)L${sig_base}$TokenKind;"
+    );
+
+    TokenKind_to_c_method_id = (*env)->GetMethodID(
+        env,
+        TokenKind_class_ref,
+        "toC",
+        "()I"
+    );
+
+    Char_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$Char")
+    );
+
+    Char_constructor_id = (*env)->GetMethodID(
+        env,
+        Char_class_ref,
+        "<init>",
+        "(I)V"
+    );
+
+    Char_value_field_id = (*env)->GetFieldID(
+        env,
+        Char_class_ref,
+        "value",
+        "I"
+    );
+
+    BigInteger_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "java/math/BigInteger")
+    );
+
+    BigInteger_constructor_id = (*env)->GetMethodID(
+        env,
+        BigInteger_class_ref,
+        "<init>",
+        "(Ljava/lang/String;)V"
+    );
+
+    BigInteger_to_string_method_id = (*env)->GetMethodID(
+        env,
+        BigInteger_class_ref,
+        "toString",
+        "()Ljava/lang/String;"
+    );
+
+    SourceLocationRange_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$SourceLocationRange")
+    );
+
+    SourceLocationRange_constructor_id = (*env)->GetMethodID(
+        env,
+        SourceLocationRange_class_ref,
+        "<init>",
+        "(L${sig_base}$SourceLocation;L${sig_base}$SourceLocation;)V"
+    );
+
+    SourceLocationRange_start_field_id = (*env)->GetFieldID(
+        env,
+        SourceLocationRange_class_ref,
+        "start",
+        "L${sig_base}$SourceLocation;"
+    );
+
+    SourceLocationRange_end_field_id = (*env)->GetFieldID(
+        env,
+        SourceLocationRange_class_ref,
+        "end",
+        "L${sig_base}$SourceLocation;"
+    );
+
+    Diagnostic_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$Diagnostic")
+    );
+
+    Diagnostic_constructor_id = (*env)->GetMethodID(
+        env,
+        Diagnostic_class_ref,
+        "<init>",
+        "(L${sig_base}$SourceLocationRange;L${sig_base}$Text;)V"
+    );
+
+    Diagnostic_sloc_range_field_id = (*env)->GetFieldID(
+        env,
+        Diagnostic_class_ref,
+        "sourceLocationRange",
+        "L${sig_base}$SourceLocationRange;"
+    );
+
+    Diagnostic_text_field_id = (*env)->GetFieldID(
+        env,
+        Diagnostic_class_ref,
+        "message",
+        "L${sig_base}$Text;"
+    );
+
+    FileReader_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$FileReader")
+    );
+
+    FileReader_constructor_id = (*env)->GetMethodID(
+        env,
+        FileReader_class_ref,
+        "<init>",
+        "(L${ptr_sig};)V"
+    );
+
+    FileReader_reference_field_id = (*env)->GetFieldID(
+        env,
+        FileReader_class_ref,
+        "reference",
+        "L${ptr_sig};"
+    );
+
+    UnitProvider_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$UnitProvider")
+    );
+
+    UnitProvider_constructor_id = (*env)->GetMethodID(
+        env,
+        UnitProvider_class_ref,
+        "<init>",
+        "(L${ptr_sig};)V"
+    );
+
+    UnitProvider_reference_field_id = (*env)->GetFieldID(
+        env,
+        UnitProvider_class_ref,
+        "reference",
+        "L${ptr_sig};"
+    );
+
+    EventHandler_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$EventHandler")
+    );
+
+    EventHandler_constructor_id = (*env)->GetMethodID(
+        env,
+        EventHandler_class_ref,
+        "<init>",
+        "(L${ptr_sig};)V"
+    );
+
+    EventHandler_reference_field_id = (*env)->GetFieldID(
+        env,
+        EventHandler_class_ref,
+        "reference",
+        "L${ptr_sig};"
+    );
+
+    Token_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$Token")
+    );
+
+    NoToken_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$Token$NoToken")
+    );
+
+    Token_constructor_id = (*env)->GetMethodID(
+        env,
+        Token_class_ref,
+        "<init>",
+        "(L${ptr_sig};L${sig_base}$AnalysisUnit;L${ptr_sig};"
+        "IIL${sig_base}$TokenKind;L${sig_base}$Text;"
+        "L${sig_base}$SourceLocationRange;)V"
+    );
+
+    Token_none_getter_method_id = (*env)->GetStaticMethodID(
+        env,
+        Token_class_ref,
+        "NONE",
+        "(L${sig_base}$AnalysisUnit;)L${sig_base}$Token;"
+    );
+
+    Token_context_field_id = (*env)->GetFieldID(
+        env,
+        Token_class_ref,
+        "contextRef",
+        "L${ptr_sig};"
+    );
+
+    Token_tdh_field_id = (*env)->GetFieldID(
+        env,
+        Token_class_ref,
+        "tokenDataHandler",
+        "L${ptr_sig};"
+    );
+
+    Token_token_index_field_id = (*env)->GetFieldID(
+        env,
+        Token_class_ref,
+        "tokenIndex",
+        "I"
+    );
+
+    Token_trivia_index_field_id = (*env)->GetFieldID(
+        env,
+        Token_class_ref,
+        "triviaIndex",
+        "I"
+    );
+
+    Token_token_kind_field_id = (*env)->GetFieldID(
+        env,
+        Token_class_ref,
+        "kind",
+        "L${sig_base}$TokenKind;"
+    );
+
+    Token_text_field_id = (*env)->GetFieldID(
+        env,
+        Token_class_ref,
+        "text",
+        "L${sig_base}$Text;"
+    );
+
+    Token_sloc_range_field_id = (*env)->GetFieldID(
+        env,
+        Token_class_ref,
+        "sourceLocationRange",
+        "L${sig_base}$SourceLocationRange;"
+    );
+
+    Token_unit_field_id = (*env)->GetFieldID(
+        env,
+        Token_class_ref,
+        "unit",
+        "L${sig_base}$AnalysisUnit;"
+    );
+
+    AnalysisContext_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$AnalysisContext")
+    );
+
+    AnalysisContext_constructor_id = (*env)->GetMethodID(
+        env,
+        AnalysisContext_class_ref,
+        "<init>",
+        "(L${ptr_sig};)V"
+    );
+
+    AnalysisContext_reference_field_id = (*env)->GetFieldID(
+        env,
+        AnalysisContext_class_ref,
+        "reference",
+        "L${ptr_sig};"
+    );
+
+    AnalysisUnit_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$AnalysisUnit")
+    );
+
+    AnalysisUnit_constructor_id = (*env)->GetMethodID(
+        env,
+        AnalysisUnit_class_ref,
+        "<init>",
+        "(L${ptr_sig};)V"
+    );
+
+    AnalysisUnit_reference_field_id = (*env)->GetFieldID(
+        env,
+        AnalysisUnit_class_ref,
+        "reference",
+        "L${ptr_sig};"
+    );
+
+% for struct_type in ctx.struct_types:
+    % if api.should_emit_struct(struct_type):
+${struct.jni_init_global_refs(struct_type)}
+    % endif
+% endfor
+
+% for enum_type in ctx.enum_types:
+${enum.jni_init_global_refs(enum_type)}
+% endfor
+
+% for array_type in ctx.array_types:
+    % if array_type.exposed and array_type.emit_c_type:
+${array.jni_init_global_refs(array_type)}
+    % endif
+% endfor
+
+% for iterator_type in ctx.iterator_types:
+    % if iterator_type.exposed and iterator_type.emit_c_type:
+${iterator.jni_init_global_refs(iterator_type)}
+    % endif
+% endfor
+}
 
 // ==========
 // Util functions
@@ -181,17 +750,6 @@ jstring decode_utf_32(
     size_t length,
     uint32_t *to_decode
 ) {
-    // Get the main class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}");
-
-    // Get the conversion method
-    jmethodID decode_method = (*env)->GetStaticMethodID(
-        env,
-        clazz,
-        "decodeUTF32",
-        "([B)Ljava/lang/String;"
-    );
-
     // Create a byte array from the buffer to decode
     const jbyte *byte_buffer = (jbyte *) to_decode;
     jsize byte_length = (jsize) (length * 4);
@@ -210,8 +768,8 @@ jstring decode_utf_32(
     // Call the Java method and return the result
     return (jstring) (*env)->CallStaticObjectMethod(
         env,
-        clazz,
-        decode_method,
+        main_class_ref,
+        decodeUTF32_method_id,
         byte_array
     );
 }
@@ -223,22 +781,11 @@ void encode_utf_32(
     size_t *length_ref,
     uint32_t **buffer_ref
 ) {
-    // Get the main class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}");
-
-    // Get the conversion method
-    jmethodID encode_method = (*env)->GetStaticMethodID(
-        env,
-        clazz,
-        "encodeUTF32",
-        "(Ljava/lang/String;)[B"
-    );
-
     // Call the Java method to get the byte array
     jbyteArray byte_array = (jbyteArray) (*env)->CallStaticObjectMethod(
         env,
-        clazz,
-        encode_method,
+        main_class_ref,
+        encodeUTF32_method_id,
         string
     );
     size_t byte_length = (size_t) (*env)->GetArrayLength(
@@ -280,20 +827,11 @@ jobject PointerWrapper_wrap(
     JNIEnv *env,
     void *pointer
 ) {
-    // Get the custom pointer class
-    jclass clazz = (*env)->FindClass(env, "${ptr_sig}");
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(J)V"
-    );
-
     // Create the new custom pointer
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        PointerWrapper_class_ref,
+        PointerWrapper_constructor_id,
         (jlong) pointer
     );
 }
@@ -303,22 +841,11 @@ void * PointerWrapper_unwrap(
     JNIEnv *env,
     jobject custom_pointer
 ) {
-    // Get the custom pointer class
-    jclass clazz = (*env)->GetObjectClass(env, custom_pointer);
-
-    // Get the getting method
-    jmethodID getter = (*env)->GetMethodID(
-        env,
-        clazz,
-        "jni",
-        "()J"
-    );
-
     // Return the C pointer
     return (void *) (*env)->CallLongMethod(
         env,
         custom_pointer,
-        getter
+        PointerWrapper_getter_id
     );
 }
 
@@ -340,22 +867,11 @@ jthrowable LangkitException_wrap(
     JNIEnv *env,
     ${exception_type} exception
 ) {
-    // Get the langkit exception Java class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$LangkitException");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(ILjava/lang/String;)V"
-    );
-
     // Return the new exception instance
     return (jthrowable) (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        LangkitException_class_ref,
+        LangkitException_constructor_id,
         (jint) exception.kind,
         to_j_string(env, exception.information)
     );
@@ -392,22 +908,11 @@ jobject TokenKind_wrap(
     JNIEnv *env,
     ${token_kind} enum_value_native
 ) {
-    // Get the token kind class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$TokenKind");
-
-    // Get the constructing static method
-    jmethodID from_c_method = (*env)->GetStaticMethodID(
-        env,
-        clazz,
-        "fromC",
-        "(I)L${sig_base}$TokenKind;"
-    );
-
     // Call the static method
     return (*env)->CallStaticObjectMethod(
         env,
-        clazz,
-        from_c_method,
+        TokenKind_class_ref,
+        TokenKind_from_c_method_id,
         (jint) enum_value_native
     );
 }
@@ -417,22 +922,11 @@ ${token_kind} TokenKind_unwrap(
     JNIEnv *env,
     jobject enum_value
 ) {
-    // Get the object class
-    jclass clazz = (*env)->GetObjectClass(env, enum_value);
-
-    // Get the method
-    jmethodID to_c_method = (*env)->GetMethodID(
-        env,
-        clazz,
-        "toC",
-        "()I"
-    );
-
     // Call the Java method
     return (${token_kind}) (*env)->CallIntMethod(
         env,
         enum_value,
-        to_c_method
+        TokenKind_to_c_method_id
     );
 }
 
@@ -458,22 +952,11 @@ jobject Char_wrap(
     JNIEnv *env,
     uint32_t char_native
 ) {
-    // Get the char class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$Char");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(I)V"
-    );
-
     // Return the new object
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        Char_class_ref,
+        Char_constructor_id,
         char_native
     );
 }
@@ -483,22 +966,11 @@ uint32_t Char_unwrap(
     JNIEnv *env,
     jobject character
 ) {
-    // Get the object class
-    jclass clazz = (*env)->GetObjectClass(env, character);
-
-    // Get the value field
-    jfieldID value_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "value",
-        "I"
-    );
-
     // Return the result field
     return (uint32_t) (*env)->GetIntField(
         env,
         character,
-        value_field
+        Char_value_field_id
     );
 }
 
@@ -530,22 +1002,11 @@ jobject BigInteger_wrap(
         &representation_native
     );
 
-    // Get the big integer class
-    jclass clazz = (*env)->FindClass(env, "java/math/BigInteger");
-
-    // Get the object constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(Ljava/lang/String;)V"
-    );
-
     // Return the new big integer
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        BigInteger_class_ref,
+        BigInteger_constructor_id,
         representation
     );
 }
@@ -555,34 +1016,18 @@ ${big_integer_type} BigInteger_unwrap(
     JNIEnv *env,
     jobject big_integer
 ) {
-    // Get the big integer class
-    jclass clazz = (*env)->GetObjectClass(env, big_integer);
-
     // Get the representation of the big integer
-    jmethodID to_string_method = (*env)->GetMethodID(
-        env,
-        clazz,
-        "toString",
-        "()Ljava/lang/String;"
-    );
     jstring representation = (*env)->CallObjectMethod(
         env,
         big_integer,
-        to_string_method
+        BigInteger_to_string_method_id
     );
 
     // Create a text from the representations
-    jclass text_clazz = (*env)->FindClass(env, "${sig_base}$Text");
-    jmethodID create_method = (*env)->GetStaticMethodID(
-        env,
-        text_clazz,
-        "create",
-        "(Ljava/lang/String;)L${sig_base}$Text;"
-    );
     jobject representation_text = (*env)->CallStaticObjectMethod(
         env,
-        text_clazz,
-        create_method,
+        Text_class_ref,
+        Text_create_method_id,
         representation
     );
     ${text_type} representation_native = Text_unwrap(env, representation_text);
@@ -624,17 +1069,6 @@ jobject Symbol_wrap(
     JNIEnv *env,
     ${symbol_type} symbol_native
 ) {
-    // Get the symbol class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$Symbol");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(Ljava/lang/String;)V"
-    );
-
     // Get the text of the symbol
     ${text_type} text_native = Text_new_value();
     ${nat("symbol_text")}(
@@ -652,8 +1086,8 @@ jobject Symbol_wrap(
     // Return the new symbol
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        Symbol_class_ref,
+        Symbol_constructor_id,
         symbol_text
     );
 }
@@ -667,19 +1101,12 @@ ${symbol_type} Symbol_unwrap(
     // Create the result structure
     ${symbol_type} res = Symbol_new_value();
 
-    // Get the object class
-    jclass clazz = (*env)->GetObjectClass(env, symbol);
-
-    // Get the fields id
-    jfieldID text_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "text",
-        "Ljava/lang/String;"
-    );
-
     // Get the fields value
-    jstring str = (jstring) (*env)->GetObjectField(env, symbol, text_field);
+    jstring str = (jstring) (*env)->GetObjectField(
+        env,
+        symbol,
+        Symbol_text_field_id
+    );
 
     // Create a text from the symbol content
     jobject text = text_from_content(env, str);
@@ -707,25 +1134,11 @@ jthrowable new_symbol_exception(
     JNIEnv *env,
     jstring symbol_str
 ) {
-    // Get the symbol exception class
-    jclass clazz = (*env)->FindClass(
-        env,
-        "${sig_base}$SymbolException"
-    );
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(Ljava/lang/String;)V"
-    );
-
     // Return the exception
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        SymbolException_class_ref,
+        SymbolException_constructor_id,
         symbol_str
     );
 }
@@ -805,17 +1218,6 @@ jobject Text_wrap(
     JNIEnv *env,
     ${text_type} text_native
 ) {
-    // Get the text class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$Text");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};JZ[B)V"
-    );
-
     // Get the int array from the structure and translate it into Java array
     jbyteArray content = (*env)->NewByteArray(
         env,
@@ -832,8 +1234,8 @@ jobject Text_wrap(
     // Return the new text
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        Text_class_ref,
+        Text_constructor_id,
         PointerWrapper_wrap(env, text_native.chars),
         (jlong) text_native.length,
         (jboolean) text_native.is_allocated,
@@ -849,44 +1251,21 @@ ${text_type} Text_unwrap(
     // Create the result structure
     ${text_type} res = Text_new_value();
 
-    // Get the object class
-    jclass clazz = (*env)->GetObjectClass(env, text);
-
-    // Get the field ids
-    jfieldID chars_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "charPointer",
-        "L${ptr_sig};"
-    );
-    jfieldID length_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "length",
-        "J"
-    );
-    jfieldID is_allocated_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "isAllocated",
-        "Z"
-    );
-
     // Get the values
     jobject chars = (*env)->GetObjectField(
         env,
         text,
-        chars_field
+        Text_chars_field_id
     );
     jlong length = (*env)->GetLongField(
         env,
         text,
-        length_field
+        Text_length_field_id
     );
     jboolean is_allocated = (*env)->GetBooleanField(
         env,
         text,
-        is_allocated_field
+        Text_is_allocated_field_id
     );
 
     // Fill the structure with the object fields
@@ -903,21 +1282,10 @@ jstring get_text_content(
     JNIEnv *env,
     jobject text
 ) {
-    // Get the text class
-    jclass clazz = (*env)->GetObjectClass(env, text);
-
-    // Get the method
-    jmethodID get_content_method = (*env)->GetMethodID(
-        env,
-        clazz,
-        "getContent",
-        "()Ljava/lang/String;"
-    );
-
     return (jstring) (*env)->CallObjectMethod(
         env,
         text,
-        get_content_method
+        Text_get_content_method_id
     );
 }
 
@@ -926,25 +1294,11 @@ jobject text_from_content(
     JNIEnv *env,
     jstring content
 ) {
-    // Get the text class
-    jclass clazz = (*env)->FindClass(
-        env,
-        "${sig_base}$Text"
-    );
-
-    // Get the creationg method
-    jmethodID create_method = (*env)->GetStaticMethodID(
-        env,
-        clazz,
-        "create",
-        "(Ljava/lang/String;)L${sig_base}$Text;"
-    );
-
     // Call the creating method
     return (*env)->CallStaticObjectMethod(
         env,
-        clazz,
-        create_method,
+        Text_class_ref,
+        Text_create_method_id,
         content
     );
 }
@@ -966,22 +1320,11 @@ ${api.jni_func_sig("create_text", "jobject")} (
         (jbyte *) content_native
     );
 
-    // Get the text class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$Text");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};JZZ[B)V"
-    );
-
     // Return the new text
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        Text_class_ref,
+        Text_extended_constructor_id,
         PointerWrapper_wrap(env, content_native),
         (jlong) length,
         (jboolean) 0,
@@ -997,17 +1340,10 @@ ${api.jni_func_sig("destroy_text", "void")} (
     jobject text
 ) {
     // Get if the text is the owner of its buffer
-    jclass clazz = (*env)->GetObjectClass(env, text);
-    jfieldID is_owner_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "isOwner",
-        "Z"
-    );
     jboolean is_owner = (*env)->GetBooleanField(
         env,
         text,
-        is_owner_field
+        Text_is_owner_field_id
     );
 
     // Unwrap the text
@@ -1039,22 +1375,11 @@ jobject SourceLocation_wrap(
     JNIEnv *env,
     ${sloc_type} sloc_native
 ) {
-    // Get the source location class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$SourceLocation");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(IS)V"
-    );
-
     // Return the new source location
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        SourceLocation_class_ref,
+        SourceLocation_constructor_id,
         (jint) sloc_native.line,
         (jshort) sloc_native.column
     );
@@ -1068,16 +1393,17 @@ ${sloc_type} SourceLocation_unwrap(
     // Create the result structure
     ${sloc_type} res = SourceLocation_new_value();
 
-    // Get the object class
-    jclass clazz = (*env)->GetObjectClass(env, sloc);
-
-    // Get the fields id
-    jfieldID line_field = (*env)->GetFieldID(env, clazz, "line", "I");
-    jfieldID column_field = (*env)->GetFieldID(env, clazz, "column", "S");
-
     // Get the fields value
-    jint line = (*env)->GetIntField(env, sloc, line_field);
-    jshort column = (*env)->GetShortField(env, sloc, column_field);
+    jint line = (*env)->GetIntField(
+        env,
+        sloc,
+        SourceLocation_line_field_id
+    );
+    jshort column = (*env)->GetShortField(
+        env,
+        sloc,
+        SourceLocation_column_field_id
+    );
 
     // Fill the result structure
     res.line = (uint32_t) line;
@@ -1105,22 +1431,11 @@ jobject SourceLocationRange_wrap(
     JNIEnv *env,
     ${sloc_range_type} slocr_native
 ) {
-    // Get the source location range class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$SourceLocationRange");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${sig_base}$SourceLocation;L${sig_base}$SourceLocation;)V"
-    );
-
     // Return the new source location range
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        SourceLocationRange_class_ref,
+        SourceLocationRange_constructor_id,
         SourceLocation_wrap(env, slocr_native.start),
         SourceLocation_wrap(env, slocr_native.end)
     );
@@ -1134,33 +1449,16 @@ ${sloc_range_type} SourceLocationRange_unwrap(
     // Create the result structure
     ${sloc_range_type} res = SourceLocationRange_new_value();
 
-    // Get the object class
-    jclass clazz = (*env)->GetObjectClass(env, slocr);
-
-    // Get the fields id
-    jfieldID start_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "start",
-        "L${sig_base}$SourceLocation;"
-    );
-    jfieldID end_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "end",
-        "L${sig_base}$SourceLocation;"
-    );
-
     // Get the fields value
     jobject start = (*env)->GetObjectField(
         env,
         slocr,
-        start_field
+        SourceLocationRange_start_field_id
     );
     jobject end = (*env)->GetObjectField(
         env,
         slocr,
-        end_field
+        SourceLocationRange_end_field_id
     );
 
     // Fill the result structure
@@ -1189,22 +1487,11 @@ jobject Diagnostic_wrap(
     JNIEnv *env,
     ${diagnostic_type} diag_native
 ) {
-    // Get the diagnostic class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$Diagnostic");
-
-    // Get the class constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${sig_base}$SourceLocationRange;L${sig_base}$Text;)V"
-    );
-
     // Return the new diagnostic
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        Diagnostic_class_ref,
+        Diagnostic_constructor_id,
         SourceLocationRange_wrap(env, diag_native.sloc_range),
         Text_wrap(env, diag_native.message)
     );
@@ -1218,33 +1505,16 @@ ${diagnostic_type} Diagnostic_unwrap(
     // Create the result structure
     ${diagnostic_type} res = Diagnostic_new_value();
 
-    // Get the object class
-    jclass clazz = (*env)->GetObjectClass(env, diagnostic);
-
-    // Get the fields id
-    jfieldID slocr_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "sourceLocationRange",
-        "L${sig_base}$SourceLocationRange;"
-    );
-    jfieldID text_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "message",
-        "L${sig_base}$Text;"
-    );
-
     // Get the fields value
     jobject slocr = (*env)->GetObjectField(
         env,
         diagnostic,
-        slocr_field
+        Diagnostic_sloc_range_field_id
     );
     jobject text = (*env)->GetObjectField(
         env,
         diagnostic,
-        text_field
+        Diagnostic_text_field_id
     );
 
     // Fill the result structure
@@ -1269,22 +1539,11 @@ jobject FileReader_wrap(
     JNIEnv *env,
     ${file_reader_type} file_reader_native
 ) {
-    // Get the file reader class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$FileReader");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};)V"
-    );
-
     // Return the new file reader
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        FileReader_class_ref,
+        FileReader_constructor_id,
         PointerWrapper_wrap(env, (void *) file_reader_native)
     );
 }
@@ -1294,7 +1553,14 @@ ${file_reader_type} FileReader_unwrap(
     JNIEnv *env,
     jobject file_reader
 ) {
-    return (${file_reader_type}) get_reference(env, file_reader);
+    return (${file_reader_type}) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            file_reader,
+            FileReader_reference_field_id
+        )
+    );
 }
 
 // Decrease the reference counter of the given file reader
@@ -1320,22 +1586,11 @@ jobject UnitProvider_wrap(
     JNIEnv *env,
     ${unit_provider_type} unit_prov_native
 ) {
-    // Get the unit provider class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$UnitProvider");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};)V"
-    );
-
     // Return the new unit provider
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        UnitProvider_class_ref,
+        UnitProvider_constructor_id,
         PointerWrapper_wrap(env, (void *) unit_prov_native)
     );
 }
@@ -1345,7 +1600,14 @@ ${unit_provider_type} UnitProvider_unwrap(
     JNIEnv *env,
     jobject unit_provider
 ) {
-    return (${unit_provider_type}) get_reference(env, unit_provider);
+    return (${unit_provider_type}) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            unit_provider,
+            UnitProvider_reference_field_id
+        )
+    );
 }
 
 ${api.jni_func_sig("dec_ref_unit_provider", "void")}(
@@ -1370,22 +1632,11 @@ jobject EventHandler_wrap(
     JNIEnv *env,
     ${event_handler_type} event_handler_native
 ) {
-    // Get the event handler class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$EventHandler");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};)V"
-    );
-
     // Return the new event handler
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        EventHandler_class_ref,
+        EventHandler_constructor_id,
         PointerWrapper_wrap(env, (void *) event_handler_native)
     );
 }
@@ -1395,7 +1646,14 @@ ${event_handler_type} EventHandler_unwrap(
     JNIEnv *env,
     jobject event_handler
 ) {
-    return (${event_handler_type}) get_reference(env, event_handler);
+    return (${event_handler_type}) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            event_handler,
+            EventHandler_reference_field_id
+        )
+    );
 }
 
 // Decrease the reference counter of an event handler
@@ -1436,20 +1694,10 @@ jobject Token_wrap(
         return NoToken_wrap(env, analysis_unit);
     }
 
-    // Get the token class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$Token");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
+    return (*env)->NewObject(
         env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};L${sig_base}$AnalysisUnit;L${ptr_sig};"
-        "IIL${sig_base}$TokenKind;L${sig_base}$Text;"
-        "L${sig_base}$SourceLocationRange;)V"
-    );
-
-    return (*env)->NewObject(env, clazz, constructor,
+        Token_class_ref,
+        Token_constructor_id,
         PointerWrapper_wrap(env, token_native.context),
         analysis_unit,
         PointerWrapper_wrap(env, token_native.token_data),
@@ -1469,34 +1717,18 @@ ${token_type} Token_unwrap(
     // Prepare the result structure
     ${token_type} res = Token_new_value();
 
-    // Get if the token is instance of no token
-    jclass nt_clazz = (*env)->FindClass(env, "${sig_base}$Token$NoToken");
-    if((*env)->IsInstanceOf(env, token, nt_clazz)) {
-
-        // Get the field ids
-        jfieldID context_field = (*env)->GetFieldID(
-            env,
-            nt_clazz,
-            "contextRef",
-            "L${ptr_sig};"
-        );
-        jfieldID tdh_field = (*env)->GetFieldID(
-            env,
-            nt_clazz,
-            "tokenDataHandler",
-            "L${ptr_sig};"
-        );
-
+    // Check if the token is instance of no token
+    if((*env)->IsInstanceOf(env, token, NoToken_class_ref)) {
         // Get the value from the object
         jobject context_value = (*env)->GetObjectField(
             env,
             token,
-            context_field
+            Token_context_field_id
         );
         jobject tdh_value = (*env)->GetObjectField(
             env,
             token,
-            tdh_field
+            Token_tdh_field_id
         );
 
         // Fill the result structure
@@ -1516,89 +1748,41 @@ ${token_type} Token_unwrap(
         return res;
 
     } else {
-
-        // Get the token Java class
-        jclass clazz = (*env)->GetObjectClass(env, token);
-
-        // Get the field ids
-        jfieldID context_field = (*env)->GetFieldID(
-            env,
-            clazz,
-            "contextRef",
-            "L${ptr_sig};"
-        );
-        jfieldID tdh_field = (*env)->GetFieldID(
-            env,
-            clazz,
-            "tokenDataHandler",
-            "L${ptr_sig};"
-        );
-        jfieldID token_index_field = (*env)->GetFieldID(
-            env,
-            clazz,
-            "tokenIndex",
-            "I"
-        );
-        jfieldID trivia_index_field = (*env)->GetFieldID(
-            env,
-            clazz,
-            "triviaIndex",
-            "I"
-        );
-        jfieldID token_kind_field = (*env)->GetFieldID(
-            env,
-            clazz,
-            "kind",
-            "L${sig_base}$TokenKind;"
-        );
-        jfieldID text_field = (*env)->GetFieldID(
-            env,
-            clazz,
-            "text",
-            "L${sig_base}$Text;"
-        );
-        jfieldID sloc_range_field = (*env)->GetFieldID(
-            env,
-            clazz,
-            "sourceLocationRange",
-            "L${sig_base}$SourceLocationRange;"
-        );
-
         // Get the value from the object
         jobject context_value = (*env)->GetObjectField(
             env,
             token,
-            context_field
+            Token_context_field_id
         );
         jobject tdh_value = (*env)->GetObjectField(
             env,
             token,
-            tdh_field
+            Token_tdh_field_id
         );
         jint token_index_value = (*env)->GetIntField(
             env,
             token,
-            token_index_field
+            Token_token_index_field_id
         );
         jint trivia_index_value = (*env)->GetIntField(
             env,
             token,
-            trivia_index_field
+            Token_trivia_index_field_id
         );
         jobject token_kind_value = (*env)->GetObjectField(
             env,
             token,
-            token_kind_field
+            Token_token_kind_field_id
         );
         jobject text_value = (*env)->GetObjectField(
             env,
             token,
-            text_field
+            Token_text_field_id
         );
         jobject sloc_range_value = (*env)->GetObjectField(
             env,
             token,
-            sloc_range_field
+            Token_sloc_range_field_id
         );
 
         // Fill the result structure
@@ -1627,22 +1811,11 @@ jobject Token_get_unit(
     JNIEnv *env,
     jobject token
 ) {
-    // Get the token class
-    jclass clazz = (*env)->GetObjectClass(env, token);
-
-    // Get the field id
-    jfieldID unit_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "unit",
-        "L${sig_base}$AnalysisUnit;"
-    );
-
     // Return the field
     return (*env)->GetObjectField(
         env,
         token,
-        unit_field
+        Token_unit_field_id
     );
 }
 
@@ -1651,22 +1824,11 @@ jobject NoToken_wrap(
     JNIEnv *env,
     jobject analysis_unit
 ) {
-    // Get the no token class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$Token");
-
-    // Get the instance getting method
-    jmethodID none_getter = (*env)->GetStaticMethodID(
-        env,
-        clazz,
-        "NONE",
-        "(L${sig_base}$AnalysisUnit;)L${sig_base}$Token;"
-    );
-
     // Call the instance getter and return the result
     return (*env)->CallStaticObjectMethod(
         env,
-        clazz,
-        none_getter,
+        Token_class_ref,
+        Token_none_getter_method_id,
         analysis_unit
     );
 }
@@ -1772,22 +1934,11 @@ jobject AnalysisContext_wrap(
     JNIEnv *env,
     ${analysis_context_type} context_native
 ) {
-    // Get the analysis context class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$AnalysisContext");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};)V"
-    );
-
     // Return the new analysis context
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        AnalysisContext_class_ref,
+        AnalysisContext_constructor_id,
         PointerWrapper_wrap(env, (void *) context_native)
     );
 }
@@ -1797,7 +1948,14 @@ ${analysis_context_type} AnalysisContext_unwrap(
     JNIEnv *env,
     jobject analysis_context
 ) {
-    return (${analysis_context_type}) get_reference(env, analysis_context);
+    return (${analysis_context_type}) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            analysis_context,
+            AnalysisContext_reference_field_id
+        )
+    );
 }
 
 // Create a new analysis context
@@ -1875,22 +2033,11 @@ jobject AnalysisUnit_wrap(
     JNIEnv *env,
     ${analysis_unit_type} unit_native
 ) {
-    // Get the analysis unit class
-    jclass clazz = (*env)->FindClass(env, "${sig_base}$AnalysisUnit");
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(L${ptr_sig};)V"
-    );
-
     // Return the new analysis unit
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        AnalysisUnit_class_ref,
+        AnalysisUnit_constructor_id,
         PointerWrapper_wrap(env, (void *) unit_native)
     );
 }
@@ -1900,7 +2047,14 @@ ${analysis_unit_type} AnalysisUnit_unwrap(
     JNIEnv *env,
     jobject analysis_unit
 ) {
-    return (${analysis_unit_type}) get_reference(env, analysis_unit);
+    return (${analysis_unit_type}) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            analysis_unit,
+            AnalysisUnit_reference_field_id
+        )
+    );
 }
 
 // Create an analysis unit from a file

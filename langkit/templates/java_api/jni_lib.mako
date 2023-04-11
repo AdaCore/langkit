@@ -20,8 +20,11 @@
                     System.loadLibrary("langkit_sigsegv_handler");
                 }
                 System.loadLibrary("${ctx.lang_name.lower}lang_jni");
+                ${nat("initialize")}();
             }
         }
+
+        public static native void ${nat("initialize")}();
 
         // ----- Language specific functions -----
 

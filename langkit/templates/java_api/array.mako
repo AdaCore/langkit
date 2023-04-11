@@ -297,6 +297,43 @@ ${c_type} ${java_type}_unwrap(
         ""
     )});
 void ${java_type}_release(${c_type});
+
+jclass ${java_type}_class_ref = NULL;
+jmethodID ${java_type}_create_method_id = NULL;
+jmethodID ${java_type}_content_method_id = NULL;
+</%def>
+
+<%def name="jni_init_global_refs(cls)">
+    <%
+    api = java_api
+
+    java_type = api.wrapping_type(cls, False)
+
+    sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
+    sig = f"L{sig_base}${java_type};"
+
+    elem_java_type = api.wrapping_type(cls.element_type, False)
+    elem_sig = f"L{sig_base}${elem_java_type};"
+    %>
+
+    ${java_type}_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig}")
+    );
+
+    ${java_type}_create_method_id = (*env)->GetStaticMethodID(
+        env,
+        ${java_type}_class_ref,
+        "jniCreate",
+        "([${elem_sig})${sig}"
+    );
+
+    ${java_type}_content_method_id = (*env)->GetMethodID(
+        env,
+        ${java_type}_class_ref,
+        "jniContent",
+        "()[${elem_sig}"
+    );
 </%def>
 
 <%def name="jni_c_impl(cls)">
@@ -329,14 +366,10 @@ jobject ${java_type}_wrap(
     int array_size = array_native->n;
 
     // Create a new Java array of object of the element type
-    jclass element_clazz = (*env)->FindClass(
-        env,
-        "${elem_sig}"
-    );
     jobjectArray array_content = (*env)->NewObjectArray(
         env,
         (jsize) array_size,
-        element_clazz,
+        ${elem_java_type}_class_ref,
         NULL
     );
 
@@ -351,25 +384,11 @@ jobject ${java_type}_wrap(
         );
     }
 
-    // Get the array class
-    jclass clazz = (*env)->FindClass(
-        env,
-        "${sig}"
-    );
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetStaticMethodID(
-        env,
-        clazz,
-        "jniCreate",
-        "([${elem_sig})${sig}"
-    );
-
     // Return the new array
     return (*env)->CallStaticObjectMethod(
         env,
-        clazz,
-        constructor,
+        ${java_type}_class_ref,
+        ${java_type}_create_method_id,
         array_content
     );
 }
@@ -390,20 +409,11 @@ ${c_type} ${java_type}_unwrap(
         AnalysisContext_unwrap(env, context);
     % endif
 
-    // Get the Java array class
-    jclass clazz = (*env)->GetObjectClass(env, array);
-
-    // Get the method to get the content of the array
-    jmethodID get_jni_content_method = (*env)->GetMethodID(
-        env,
-        clazz,
-        "jniContent",
-        "()[${elem_sig}"
-    );
+    //  Retrieve the array's content
     jobjectArray content = (jobjectArray) (*env)->CallObjectMethod(
         env,
         array,
-        get_jni_content_method
+        ${java_type}_content_method_id
     );
 
     // Get the content size
