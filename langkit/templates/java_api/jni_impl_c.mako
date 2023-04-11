@@ -104,21 +104,8 @@ jobject AnalysisUnit_wrap(JNIEnv *, ${analysis_unit_type});
 ${analysis_unit_type} AnalysisUnit_unwrap(JNIEnv *, jobject);
 
 % for struct_type in ctx.struct_types:
-    % if struct_type.is_entity_type:
-        % if struct_type is root_entity:
+    % if api.should_emit_struct(struct_type):
 ${struct.jni_c_decl(struct_type)}
-        % endif
-    % else:
-    <%
-    emit_struct = (
-        struct_type is T.entity_info
-        or struct_type is T.env_md
-        or struct_type.exposed
-    )
-    %>
-        % if emit_struct:
-${struct.jni_c_decl(struct_type)}
-        % endif
     % endif
 % endfor
 
@@ -2134,21 +2121,8 @@ ${api.jni_func_sig("unit_diagnostic", "jobject")}(
 // ==========
 
 % for struct_type in ctx.struct_types:
-    % if struct_type.is_entity_type:
-        % if struct_type is root_entity:
+    % if api.should_emit_struct(struct_type):
 ${struct.jni_c_impl(struct_type)}
-        % endif
-    % else:
-    <%
-    emit_struct = (
-        struct_type is T.entity_info
-        or struct_type is T.env_md
-        or struct_type.exposed
-    )
-    %>
-        % if emit_struct:
-${struct.jni_c_impl(struct_type)}
-        % endif
     % endif
 % endfor
 
