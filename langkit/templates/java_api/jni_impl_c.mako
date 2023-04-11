@@ -36,6 +36,10 @@ void * PointerWrapper_unwrap(JNIEnv *, jobject);
 ${exception_type} LangkitException_new_value();
 jthrowable LangkitException_wrap(JNIEnv *, ${exception_type});
 
+${token_kind} TokenKind_new_value();
+jobject TokenKind_wrap(JNIEnv *, ${token_kind});
+${token_kind} TokenKind_unwrap(JNIEnv *, jobject);
+
 % for enum_type in ctx.enum_types:
 ${enum.jni_c_decl(enum_type)}
 % endfor
