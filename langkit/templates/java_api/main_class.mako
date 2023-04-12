@@ -2632,11 +2632,11 @@ public class ${ctx.lib_name.camel} {
             PointerWrapper reference;
 
             if(ImageInfo.inImageCode()) {
-                CCharPointer charsetNative =
+                final CCharPointer charsetNative =
                     charset == null ?
                     WordFactory.nullPointer() :
                     toCString(charset);
-                AnalysisContextNative resNative =
+                final AnalysisContextNative resNative =
                     NI_LIB.${nat("allocate_analysis_context")}();
 
                 NI_LIB.${nat("initialize_analysis_context")}(
@@ -3060,7 +3060,7 @@ public class ${ctx.lib_name.camel} {
                     this.reference.ni()
                 );
                 absoluteFile = toJString(resNative);
-                UnmanagedMemory.free(resNative);
+                NI_LIB.${nat("free")}(resNative);
             } else {
                 absoluteFile = JNI_LIB.${nat("unit_filename")}(this);
             }
