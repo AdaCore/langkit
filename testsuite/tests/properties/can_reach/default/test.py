@@ -1,9 +1,9 @@
 """
-Test the handling of analysis units in the properties DSL.
+Check that the "can_reach" expression works as expected.
 """
 
 from langkit.dsl import ASTNode, T
-from langkit.expressions import langkit_property
+from langkit.expressions import Self, langkit_property
 
 from utils import build_and_run
 
@@ -11,8 +11,8 @@ from utils import build_and_run
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
-    def can_reach(n=T.FooNode.entity, from_node=T.FooNode.entity):
-        return n.node.can_reach(from_node.node)
+    def can_reach_wrapper(from_node=T.FooNode.entity):
+        return Self.can_reach(from_node.node)
 
 
 class Example(FooNode):

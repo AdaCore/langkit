@@ -3974,15 +3974,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Can_Reach (El, From : ${T.root_node.name}) return Boolean is
    begin
-      --  Since this function is only used to implement sequential semantics in
-      --  envs, we consider that elements coming from different units are
-      --  always visible for each other, and let the user implement language
-      --  specific visibility rules in the DSL.
-      if El = null or else From = null or else El.Unit /= From.Unit then
-         return True;
-      end if;
-
-      return El.Token_Start_Index < From.Token_Start_Index;
+      return ${T.root_node.kwless_raw_name}_P_Can_Reach (El, From);
    end Can_Reach;
 
    -----------------

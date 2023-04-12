@@ -1,0 +1,13 @@
+== not a property ==
+test.py:XXX: error: FooNode.can_reach must be a property
+== bad return type ==
+test.py:XXX: error: FooNode.can_reach must return a boolean
+== no argument ==
+test.py:XXX: error: FooNode.can_reach must take one argument: a bare node
+== too many arguments ==
+test.py:XXX: error: FooNode.can_reach must take one argument: a bare node
+== bad arg type ==
+test.py:XXX: error: FooNode.can_reach must take one argument: a bare node
+== use entity info ==
+test.py:XXX: error: FooNode.can_reach cannot use entities
+Done

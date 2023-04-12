@@ -1295,6 +1295,39 @@ class CompileCtx:
         """
         return any(prop.activate_tracing for prop in self.all_properties)
 
+    def check_can_reach_signature(self) -> None:
+        """
+        Check that the root node's "can_reach" signature is conforming.
+        """
+        from langkit.compiled_types import T
+
+        # If the language spec does not create one, the initialisation of the
+        # root node is supposed to create an automatic "can_reach" property.
+        assert self.root_grammar_class is not None
+        fields = self.root_grammar_class.get_abstract_node_data_dict()
+        can_reach = fields["can_reach"]
+
+        qualname = can_reach.qualname
+        args = can_reach.natural_arguments
+
+        with can_reach.diagnostic_context:
+            check_source_language(
+                can_reach.is_property,
+                f"{qualname} must be a property",
+            )
+            check_source_language(
+                can_reach.type.matches(T.Bool),
+                f"{qualname} must return a boolean",
+            )
+            check_source_language(
+                len(args) == 1 and args[0].type.matches(T.root_node),
+                f"{qualname} must take one argument: a bare node",
+            )
+            check_source_language(
+                not can_reach.uses_entity_info,
+                f"{qualname} cannot use entities",
+            )
+
     def compute_properties_callgraphs(self) -> None:
         """
         Compute forwards and backwards properties callgraphs.
@@ -1564,7 +1597,15 @@ class CompileCtx:
             sorted_set = sorted(
                 (p.qualname, p)
                 for p in unused_set
-                if not p.is_internal and not p.artificial
+                if (
+                    # Never warn about implicitly referenced properties:
+                    # internal properties, artificial properties and
+                    # "can_reach" (can come from the language spec but used by
+                    # lexical env lookups).
+                    not p.is_internal
+                    and not p.artificial
+                    and p.indexing_name != "can_reach"
+                )
             )
             for _, p in sorted_set:
                 with p.diagnostic_context:
@@ -2058,6 +2099,8 @@ class CompileCtx:
                        CompileCtx.compute_uses_entity_info_attr),
             GlobalPass('compute uses envs attribute',
                        CompileCtx.compute_uses_envs_attr),
+            GlobalPass('check can_reach signature',
+                       CompileCtx.check_can_reach_signature),
             EnvSpecPass('check env specs', EnvSpec.check_spec),
             GlobalPass('compute is reachable attribute',
                        CompileCtx.compute_is_reachable_attr),
