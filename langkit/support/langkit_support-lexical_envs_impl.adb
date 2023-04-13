@@ -1035,8 +1035,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
       is
          E : constant Entity :=
            (Node => Node.Node,
-            Info => (Md         => Combine (Node.Md, Md),
-                     Rebindings => Rebindings,
+            Info => (Md           => Combine (Node.Md, Md),
+                     Rebindings   => Rebindings,
                      From_Rebound => From_Rebound));
       begin
 
