@@ -1052,6 +1052,14 @@ package body Langkit_Support.Lexical_Envs_Impl is
                then E
                else Node.Resolver.all (E));
          begin
+            --  Silently discard null resolved nodes: we tolerate them as they
+            --  likely come from semantic analysis routines running on invalid
+            --  code.
+
+            if Resolved_Entity.Node = No_Node then
+               return;
+            end if;
+
             Resolved_Entity.Info.From_Rebound := From_Rebound;
             Local_Results.Append
               (Lookup_Result_Item'
