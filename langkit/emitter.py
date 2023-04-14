@@ -190,7 +190,6 @@ class Emitter:
             self.lib_name_low
         )
         self.java_jni = path.join(self.java_dir, "jni")
-        self.java_native_config = path.join(self.java_dir, "native_image")
 
         self.lib_project = path.join(self.lib_root, f"{self.lib_name_low}.gpr")
         self.mains_project = path.join(self.lib_root, "mains.gpr")
@@ -322,7 +321,6 @@ class Emitter:
             self.java_dir,
             self.java_package,
             self.java_jni,
-            self.java_native_config,
         ]:
             if not path.exists(d):
                 os.makedirs(d)
@@ -750,7 +748,7 @@ class Emitter:
             (
                 "java_api/reflect_json",
                 "reflect_config.json",
-                self.java_native_config,
+                self.java_dir,
                 None
             ),
             (

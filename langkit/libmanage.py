@@ -1195,6 +1195,7 @@ class ManageScript:
         build_mode = self.build_modes[0].value
 
         lib_name = self.lib_name.lower()
+        lib_name_camel = lib_name.capitalize()
 
         self.gprinstall(
             args,
@@ -1244,6 +1245,14 @@ class ManageScript:
             os.path.join('ocaml', 'dune'),
             os.path.join('ocaml', 'dune-project'),
             os.path.join('ocaml', lib_name + '.opam'),
+            os.path.join('java', 'Makefile'),
+            os.path.join('java', 'pom.xml'),
+            os.path.join('java', 'reflect_config.json'),
+            os.path.join('java', 'jni',
+                         f'com_adacore_{lib_name}_{lib_name_camel}_NI_LIB.h'),
+            os.path.join('java', 'jni', 'jni_impl.c'),
+            os.path.join('java', 'src', 'main', 'java', 'com', 'adacore',
+                         lib_name, f'{lib_name_camel}.java'),
         ]:
             install_path = os.path.dirname(self.dirs.install_dir(fpath))
             if not path.isdir(install_path):
@@ -1253,20 +1262,6 @@ class ManageScript:
                 shutil.copyfile(
                     f, os.path.join(install_path, os.path.basename(f))
                 )
-
-        # If Java is enabled, install using Maven
-        if args.enable_java:
-            # Install the Java bindings in the Maven repository
-            self.maven_command(['install'], args)
-
-            # Put the bindings JAR in the installation folder
-            jar_name = f'{lib_name}.jar'
-            jar_file = self.dirs.build_dir('java', 'target', jar_name)
-            install_file = self.dirs.install_dir('java', jar_name)
-            install_path = os.path.dirname(install_file)
-            if not path.isdir(install_path):
-                os.makedirs(install_path)
-            shutil.copyfile(jar_file, install_file)
 
     def do_setenv(self, args: argparse.Namespace) -> None:
         """
