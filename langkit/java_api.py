@@ -257,6 +257,17 @@ class JavaAPISettings(AbstractAPISettings):
 
     # ----- Util methods -----
 
+    def should_emit_struct(self, struct_type: ct.StructType) -> bool:
+        """
+        Whether this struct type should be emitted in the Java bindings.
+        """
+        if struct_type.is_entity_type:
+            return struct_type == T.root_node.entity
+        else:
+            return (struct_type is T.entity_info
+                    or struct_type is T.env_md
+                    or struct_type.exposed)
+
     def get_struct_fields(self, struct: ct.StructType) -> list[StructField]:
         """
         Get the structure fields as a list.
@@ -1016,6 +1027,8 @@ class JavaAPISettings(AbstractAPISettings):
         return dispatch_on_type(the_type, [
             (T.Bool, lambda _: "Z"),
             (T.Int, lambda _: "I"),
+            (T.BigInt, lambda _: "Ljava/math/BigInteger;"),
+            (T.String, lambda _: "Ljava/lang/String;"),
             (
                 ct.ASTNodeType, lambda t:
                     f"L{base_class}$PointerWrapper;"

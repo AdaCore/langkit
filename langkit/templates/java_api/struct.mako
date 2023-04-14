@@ -185,6 +185,8 @@
 
     java_type = api.wrapping_type(cls, False)
     c_type = cls.c_type(capi).name
+
+    fields = api.get_struct_fields(cls)
     %>
 
 ${c_type} ${java_type}_new_value();
@@ -194,22 +196,65 @@ ${c_type} ${java_type}_unwrap(JNIEnv *, jobject);
     % if cls.is_refcounted:
     void ${java_type}_release(${c_type});
     % endif
+
+jclass ${java_type}_class_ref = NULL;
+jmethodID ${java_type}_constructor_id = NULL;
+% for field in fields:
+jfieldID ${java_type}_${field.native_name}_field_id = NULL;
+% endfor
 % endif
+
+</%def>
+
+<%def name="jni_init_global_refs(cls)">
+    <%
+    api = java_api
+
+    java_type = api.wrapping_type(cls, False)
+    sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
+
+    fields = api.get_struct_fields(cls)
+
+    constructor_sig = "".join([
+        api.jni_sig_type(field.public_type, sig_base) for field in fields
+    ])
+    %>
+
+    % if len(cls.get_fields()) > 0:
+    ${java_type}_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(
+            env,
+            "${sig_base}$${java_type}"
+        )
+    );
+
+    ${java_type}_constructor_id = (*env)->GetMethodID(
+        env,
+        ${java_type}_class_ref,
+        "<init>",
+        "(${constructor_sig})V"
+    );
+
+    % for field in fields:
+    ${java_type}_${field.native_name}_field_id = (*env)->GetFieldID(
+        env,
+        ${java_type}_class_ref,
+        "${field.name}",
+        "${api.jni_sig_type(field.public_type, sig_base)}"
+    );
+    % endfor
+    % endif
 </%def>
 
 <%def name="jni_c_impl(cls)">
     <%
     api = java_api
 
-    sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
-
     java_type = api.wrapping_type(cls, False)
     c_type = cls.c_type(capi).name
 
     fields = api.get_struct_fields(cls)
-    constructor_sig = "".join([
-        api.jni_sig_type(field.public_type, sig_base) for field in fields
-    ])
     %>
 
 // Create a new value for a langkit ${c_type}
@@ -228,25 +273,11 @@ jobject ${java_type}_wrap(
     JNIEnv *env,
     ${c_type} native_struct
 ) {
-    // Get the Java class
-    jclass clazz = (*env)->FindClass(
-        env,
-        "${sig_base}$${java_type}"
-    );
-
-    // Get the constructor
-    jmethodID constructor = (*env)->GetMethodID(
-        env,
-        clazz,
-        "<init>",
-        "(${constructor_sig})V"
-    );
-
     // Return the new Java instance
     return (*env)->NewObject(
         env,
-        clazz,
-        constructor,
+        ${java_type}_class_ref,
+        ${java_type}_constructor_id,
         ${", ".join([
             api.jni_wrap(
                 field.public_type,
@@ -266,26 +297,13 @@ ${c_type} ${java_type}_unwrap(
     // Prepare the result structure
     ${c_type} res = ${java_type}_new_value();
 
-    // Get the class
-    jclass clazz = (*env)->GetObjectClass(env, object);
-
-    // Get the field ids
-    % for field in fields:
-    jfieldID ${field.native_name}_field = (*env)->GetFieldID(
-        env,
-        clazz,
-        "${field.name}",
-        "${api.jni_sig_type(field.public_type, sig_base)}"
-    );
-    % endfor
-
     // Get the field values
     % for field in fields:
     ${api.jni_c_type(field.public_type)} ${field.native_name}_value =
         (*env)->${api.jni_field_access(field.public_type)}(
         env,
         object,
-        ${field.native_name}_field
+        ${java_type}_${field.native_name}_field_id
     );
     % endfor
 
