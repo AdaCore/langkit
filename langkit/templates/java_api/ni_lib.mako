@@ -309,6 +309,15 @@
 
         ${exts.include_extension(ctx.ext("java_api", "ni_funcs"))}
 
+        // ----- Util functions -----
+
+        /** Util function to free langkit side allocated memory */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("free")}(
+            PointerBase pointer
+        );
+
         // ----- Exception functions -----
 
         /** Get the last exception raised by langkit */

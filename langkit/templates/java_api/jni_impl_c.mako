@@ -2161,7 +2161,7 @@ ${api.jni_func_sig("unit_filename", "jstring")}(
     jstring res = to_j_string(env, res_native);
 
     // Free the native allocated string
-    free((void *) res_native);
+    ${nat("free")}((void *) res_native);
 
     // Return the result
     return res;
