@@ -336,6 +336,9 @@ def check_generic(report, filename, content, lang):
             col=0,
         )
 
+    # Whether non-ASCII characters are allowed
+    non_ascii_allowed = "style: non-ascii" in content
+
     # Line list for the current block of comments
     comment_block = []
 
@@ -399,10 +402,11 @@ def check_generic(report, filename, content, lang):
     for i, line in iter_lines(content):
         report.set_context(filename, i)
 
-        for c in line:
-            if c not in accepted_chars:
-                report.add('Non-ASCII characters')
-                break
+        if not non_ascii_allowed:
+            for c in line:
+                if c not in accepted_chars:
+                    report.add('Non-ASCII characters')
+                    break
 
         if (len(line) > 80 and
                 'http://' not in line and
@@ -437,10 +441,10 @@ def check_generic(report, filename, content, lang):
 class LanguageChecker:
     """Base class for language-specific checkers."""
 
-    # String for single-line comments starters
-    comment_start: str
+    # String for single-line comments starters, if applicable
+    comment_start: str | None
 
-    # Regular expression that matches package imports
+    # Regular expression that matches package imports, if applicable
     with_re: Pattern | None
 
     def check(self, report, filename, content, parse):
