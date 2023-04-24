@@ -9,6 +9,8 @@ algoritms are not decently commented: in order to see what this is supposed to
 handle, have a look at the testsuite in the stylechecks.tests module.
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import os
@@ -334,6 +336,9 @@ def check_generic(report, filename, content, lang):
             col=0,
         )
 
+    # Whether non-ASCII characters are allowed
+    non_ascii_allowed = "style: non-ascii" in content
+
     # Line list for the current block of comments
     comment_block = []
 
@@ -397,48 +402,50 @@ def check_generic(report, filename, content, lang):
     for i, line in iter_lines(content):
         report.set_context(filename, i)
 
-        for c in line:
-            if c not in accepted_chars:
-                report.add('Non-ASCII characters')
-                break
+        if not non_ascii_allowed:
+            for c in line:
+                if c not in accepted_chars:
+                    report.add('Non-ASCII characters')
+                    break
 
         if (len(line) > 80 and
                 'http://' not in line and
                 'https://' not in line):
             report.add('Too long line')
-        comment_start = line.find(lang.comment_start)
 
-        def get_comment_text():
-            """Return the text contained in the comment in "line"."""
-            first = comment_start + len(lang.comment_start)
-            return line[first:]
+        if lang.comment_start:
+            comment_start = line.find(lang.comment_start)
 
-        if comment_start != -1:
-            if not comment_block:
-                comment_column, comment_first_line = start_comment()
-                comment_first_line = i
-            elif (comment_column is None or
-                    comment_start != comment_column):
+            def get_comment_text():
+                """Return the text contained in the comment in "line"."""
+                first = comment_start + len(lang.comment_start)
+                return line[first:]
+
+            if comment_start != -1:
+                if not comment_block:
+                    comment_column, comment_first_line = start_comment()
+                    comment_first_line = i
+                elif (comment_column is None or
+                        comment_start != comment_column):
+                    check_comment()
+                    comment_column, comment_first_line = start_comment()
+                comment_block.append(get_comment_text())
+
+            elif comment_block:
                 check_comment()
-                comment_column, comment_first_line = start_comment()
-            comment_block.append(get_comment_text())
-
-        elif comment_block:
-            check_comment()
 
     if comment_block:
         check_comment()
 
 
 class LanguageChecker:
-
     """Base class for language-specific checkers."""
 
-    # String for single-line comments starters
-    comment_start: str
+    # String for single-line comments starters, if applicable
+    comment_start: str | None
 
-    # Regular expression that matches package imports
-    with_re: Pattern
+    # Regular expression that matches package imports, if applicable
+    with_re: Pattern | None
 
     def check(self, report, filename, content, parse):
         """
@@ -458,6 +465,24 @@ class AdaLang(LanguageChecker):
     with_re = re.compile('^with (?P<name>[a-zA-Z0-9_.]+);.*')
 
     def check(self, report, filename, content, parse):
+        pcheck = PackageChecker(report)
+        for i, line in iter_lines(content):
+            report.set_context(filename, i)
+            if not line.strip():
+                pcheck.reset()
+
+            m = self.with_re.match(line)
+            if m:
+                pcheck.add(m.group('name'))
+
+
+class JavaLang(LanguageChecker):
+    comment_start = None
+    with_re = re.compile('^import (?P<name>[a-zA-Z0-9_.]+);')
+
+    def check(
+        self, report: Report, filename: str, content: str, parse: bool
+    ) -> None:
         pcheck = PackageChecker(report)
         for i, line in iter_lines(content):
             report.set_context(filename, i)
@@ -660,16 +685,30 @@ class MakoLang(LanguageChecker):
             check_generic(report, filename, content, python_lang)
 
 
+class YAMLLang(LanguageChecker):
+    comment_start = "#"
+    with_re = None
+
+    def check(
+        self, report: Report, filename: str, content: str, parse: bool
+    ) -> None:
+        pass
+
+
 ada_lang = AdaLang()
-python_lang = PythonLang()
+java_lang = JavaLang()
 mako_lang = MakoLang()
+python_lang = PythonLang()
+yaml_lang = YAMLLang()
 
 
 langs = {
-    'ads': ada_lang,
     'adb': ada_lang,
-    'py':  python_lang,
+    'ads': ada_lang,
+    'java': java_lang,
     'mako': mako_lang,
+    'py':  python_lang,
+    'yaml': yaml_lang,
 }
 
 

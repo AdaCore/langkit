@@ -72,6 +72,11 @@ testcases = (
     Testcase('ascii_1.py', '''
         # Comment with a special char: \xa0
     ''', [(1, 0, 'Non-ASCII characters')]),
+    Testcase('ascii_2.py', '''
+        # style: non-ascii
+
+        # Comment with a special char: \xa0
+    ''', []),
 
     #
     # Comment box testing

@@ -406,10 +406,12 @@ public final class BindingsTests {
                     (ParamWithDefaultValue) getEacuteField.params.get(0)
                 ).defaultValue
             );
-            Char cIdent = root.pIdentity(Char.create('é'));
+            Char cIdent = root.pIdentity(Char.create('\u00e9'));
             System.out.println("The 'a' char = " + c1.toString());
             System.out.println("The eacute char = " + String.valueOf(c2.value));
-            System.out.println("Identity of eacute = " + String.valueOf(cIdent.value));
+            System.out.println(
+                "Identity of eacute = " + String.valueOf(cIdent.value)
+            );
         }
 
         // Display the footer
