@@ -8,8 +8,13 @@
 
 with System;
 
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
+
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Generic_API.Introspection;
+use ${ada_lib_name}.Generic_API.Introspection;
 
 package ${ada_lib_name}.Rewriting is
 
@@ -112,6 +117,11 @@ package ${ada_lib_name}.Rewriting is
 
    function Kind (Handle : Node_Rewriting_Handle) return ${T.node_kind};
    ${ada_doc('langkit.rewriting.kind', 3)}
+
+   function Type_Of (Handle : Node_Rewriting_Handle) return Type_Ref
+   is (Kind_To_Type (Kind (Handle)));
+   --  Return the introspection type reference corresponding to ``Handle``'s
+   --  node.
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean;
    ${ada_doc('langkit.rewriting.tied', 3)}

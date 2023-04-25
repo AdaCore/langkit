@@ -21,6 +21,16 @@ package ${ada_lib_name}.Generic_API.Introspection is
       % endfor
    end Type_Refs;
 
+   Kind_To_Type : constant array (${T.node_kind}) of G.Type_Ref := (
+      ${(
+         ",\n".join(
+            f"{t.ada_kind_name} => Type_Refs.{t.entity.api_name}"
+            for t in ctx.astnode_types
+            if not t.abstract
+         )
+      )}
+   );
+
    -----------------------
    -- Member references --
    -----------------------

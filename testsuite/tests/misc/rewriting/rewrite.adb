@@ -88,6 +88,9 @@ begin
    RH := Start_Rewriting (Ctx);
    N := Handle (Root (U1));
 
+   Put ("Node type for the root: ");
+   Put_Line (Debug_Name (Type_Of (N)));
+
    declare
       procedure Set_Tied_Child;
       procedure Create_Error_Node;
