@@ -90,6 +90,11 @@ Try creating an error node (Create_Regular_Node)...
 
 Replace the middle definition (b) with a clone of the last definition (c)
 
+Creating a tree from a template:
+  Tree: def foo=1+2
+  F_Name child: foo
+  F_Expr/F_LHS child: 1
+
 Swap first and fourth defs
 
 Replace the expression of the fifth definition

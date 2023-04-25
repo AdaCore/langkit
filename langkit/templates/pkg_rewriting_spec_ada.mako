@@ -133,16 +133,39 @@ package ${ada_lib_name}.Rewriting is
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural;
    ${ada_doc('langkit.rewriting.children_count', 3)}
 
+   function Child_Index
+     (Handle : Node_Rewriting_Handle;
+      Field  : Struct_Member_Ref) return Positive
+   is (Syntax_Field_Index (Field, Type_Of (Handle)));
+   --  Return the index of ``Handle``'s ``Child`` that correspond to the given
+   --  ``Field``.
+
    function Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive) return Node_Rewriting_Handle;
    ${ada_doc('langkit.rewriting.child', 3)}
+
+   function Child
+     (Handle : Node_Rewriting_Handle;
+      Field  : Struct_Member_Ref) return Node_Rewriting_Handle;
+   ${ada_doc('langkit.rewriting.child_by_ref', 3)}
+
+   function Child
+     (Handle : Node_Rewriting_Handle;
+      Fields : Struct_Member_Ref_Array) return Node_Rewriting_Handle;
+   ${ada_doc('langkit.rewriting.child_deep', 3)}
 
    procedure Set_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive;
       Child  : Node_Rewriting_Handle);
    ${ada_doc('langkit.rewriting.set_child', 3)}
+
+   procedure Set_Child
+     (Handle : Node_Rewriting_Handle;
+      Field  : Struct_Member_Ref;
+      Child  : Node_Rewriting_Handle);
+   ${ada_doc('langkit.rewriting.set_child_by_ref', 3)}
 
    function Text (Handle : Node_Rewriting_Handle) return Text_Type;
    ${ada_doc('langkit.rewriting.text', 3)}

@@ -1070,10 +1070,30 @@ base_langkit_docs = {
         Return a handle corresponding to the Index'th child of the node that
         Handle represents. Index is 1-based.
     """,
+    'langkit.rewriting.child_by_ref': """
+        Return the node that is in the syntax ``Field`` for ``Handle``
+    """,
+    'langkit.rewriting.child_deep': """
+        Return a child deep in the tree ``Handle``.
+
+        Assuming ``Fields'Range`` is ``1 .. N``, this is a shortcut for::
+
+          C1 := Child (Handle, Fields (1));
+          C2 := Child (C1, Fields (2));
+          ...
+          CN_1 := Child (CN_2, Fields (N - 1));
+          CN := Child (CN_1, Fields (N));
+    """,
     'langkit.rewriting.set_child': """
         If Child is ``No_Rewriting_Node``, untie the Handle's ``Index``'th
         child to this tree, so it can be attached to another one. Otherwise,
         Child must have no parent as it will be tied to ``Handle``'s tree.
+    """,
+    'langkit.rewriting.set_child_by_ref': """
+        If ``Child`` is ``No_Rewriting_Node``, untie the syntax field in
+        ``Handle`` corresponding to ``Field``, so it can be attached to another
+        one. Otherwise, ``Child`` must have no parent as it will be tied to
+        ``Handle``'s tree.
     """,
     'langkit.rewriting.text': """
         Return the text associated to the given token node.
