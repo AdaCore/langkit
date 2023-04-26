@@ -2059,27 +2059,33 @@ class _Transform(Parser):
             return self.cached_type
 
         result = resolve_type(self.typ)
-        reject_abstract(result)
-        reject_synthetic(result)
-        if self.force_error_node:
-            assert result.is_error_node
-        else:
-            reject_error_node(result)
 
-        self.parse_fields = result.get_parse_fields(
-            predicate=lambda f: not f.abstract and not f.null
-        )
-        assert isinstance(self.parse_fields, list)
+        # Reject invalid configurations
+        with diagnostic_context(self.location):
+            # There are some kinds of nodes that transform parsers cannot
+            # create.
+            reject_abstract(result)
+            reject_synthetic(result)
+            if self.force_error_node:
+                assert result.is_error_node
+            else:
+                reject_error_node(result)
 
-        # Check that the number of values produced by self and the number of
-        # fields in the destination node are the same.
-        nb_transform_values = len(self.fields_parsers)
-        nb_fields = len(self.parse_fields)
-        check_source_language(
-            nb_transform_values == nb_fields,
-            'Transform parser generates {} values, but {} has {} fields'
-            .format(nb_transform_values, result.dsl_name, nb_fields)
-        )
+            # Resolve all node fields that the parser initializes
+            self.parse_fields = result.get_parse_fields(
+                predicate=lambda f: not f.abstract and not f.null
+            )
+            assert isinstance(self.parse_fields, list)
+
+            # Check that the number of values produced by self and the number
+            # of fields in the destination node are the same.
+            nb_transform_values = len(self.fields_parsers)
+            nb_fields = len(self.parse_fields)
+            check_source_language(
+                nb_transform_values == nb_fields,
+                'Transform parser gets {} values, but {} has {} fields'
+                .format(nb_transform_values, result.dsl_name, nb_fields)
+            )
 
         # Register this parser to the constructed type, which will propagate
         # field types.

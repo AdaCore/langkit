@@ -17,9 +17,9 @@ skip.lkt:4:52: error: Unknown node: SynthExapmle
 
 
 == Transform ==
-transform.lkt:4:29: error: Parsers cannot create synthetic nodes
+transform.lkt:4:47: error: Parsers cannot create synthetic nodes
 4 |     @main_rule main_rule <- Example("example" SynthExample())
-  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                               ^^^^^^^^^^^^^^
 
 
 Done

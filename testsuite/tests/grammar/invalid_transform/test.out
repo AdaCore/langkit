@@ -1,0 +1,25 @@
+== abstract_node.lkt ==
+abstract_node.lkt:5:35: error: Parsers cannot create abstract nodes
+5 |     @main_rule stmt_rule <- list*(DerivedNode("def" name))
+  |                                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== error_node.lkt ==
+error_node.lkt:5:56: error: Only Skip parsers can create error nodes
+5 |     @main_rule stmt_rule <- list*(or(Def("def" name) | Error(@identifier)))
+  |                                                        ^^^^^^^^^^^^^^^^^^
+
+
+== synthetic_node.lkt ==
+synthetic_node.lkt:5:56: error: Parsers cannot create synthetic nodes
+5 |     @main_rule stmt_rule <- list*(or(Def("def" name) | SynthNode(name)))
+  |                                                        ^^^^^^^^^^^^^^^
+
+
+== too_many_fields.lkt ==
+too_many_fields.lkt:5:35: error: Transform parser gets 3 values, but Def has 2 fields
+5 |     @main_rule stmt_rule <- list*(Def(name "=" name name))
+  |                                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Done

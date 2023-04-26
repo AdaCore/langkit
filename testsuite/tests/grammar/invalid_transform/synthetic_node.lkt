@@ -1,0 +1,21 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule stmt_rule <- list*(or(Def("def" name) | SynthNode(name)))
+    name <- Name(@identifier)
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Def : FooNode {
+    @parse_field name: Name
+}
+
+class Name : FooNode implements TokenNode {
+}
+
+@synthetic
+class SynthNode : FooNode {
+}
