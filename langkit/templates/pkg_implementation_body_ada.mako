@@ -951,7 +951,27 @@ package body ${ada_lib_name}.Implementation is
       end if;
 
       Context.In_Populate_Lexical_Env := True;
-      Has_Errors := Populate_Lexical_Env (Unit.Ast_Root);
+
+      % if ctx.ple_unit_root:
+         if Unit.Ast_Root /= null then
+            --  If the tree root is a list of PLE units, populate envs for each
+            --  one of them.
+            if Unit.Ast_Root.Kind = ${ctx.ple_unit_root.list.ada_kind_name}
+            then
+               for I in 1 .. Children_Count (Unit.Ast_Root) loop
+                  Has_Errors := Populate_Lexical_Env (Child (Unit.Ast_Root, I))
+                                or else Has_Errors;
+               end loop;
+
+            --  Otherwise, populate envs only if the root is a PLE unit itself
+            elsif Unit.Ast_Root.Kind = ${ctx.ple_unit_root.ada_kind_name} then
+               Has_Errors := Populate_Lexical_Env (Unit.Ast_Root);
+            end if;
+         end if;
+      % else:
+         Has_Errors := Populate_Lexical_Env (Unit.Ast_Root);
+      % endif
+
       Context.In_Populate_Lexical_Env := Saved_In_Populate_Lexical_Env;
 
       if GNATCOLL.Traces.Active (Main_Trace) then
@@ -2386,6 +2406,13 @@ package body ${ada_lib_name}.Implementation is
       end Register_Foreign_Env;
 
    begin
+      % if ctx.ple_unit_root:
+         --  This is intended to be called on PLE unit roots only
+         if Node.Kind /= ${ctx.ple_unit_root.ada_kind_name} then
+            raise Program_Error;
+         end if;
+      % endif
+
       --  This function is meant to be called during an existing PLE pass. If
       --  if is called outside of this context, run the PLE pass on Node's
       --  analysis unit. Likewise, if PLE has not run on the unit that owns
@@ -2404,10 +2431,27 @@ package body ${ada_lib_name}.Implementation is
          end;
       end if;
 
-      --  This is intended to be called on the root node only
-      if Node.Parent /= null then
-         raise Program_Error;
-      end if;
+      % if ctx.ple_unit_root:
+         --  Do nothing if its lexical envs have already been populated for
+         --  this node.
+         declare
+            <% is_env_populated_field = (
+               ctx.ple_unit_root.is_env_populated_field.name
+            ) %>
+            PLE_Unit_Root : constant ${ctx.ple_unit_root.name} := Node;
+         begin
+            if PLE_Unit_Root.${is_env_populated_field} then
+               return False;
+            end if;
+            PLE_Unit_Root.${is_env_populated_field} := True;
+         end;
+
+      % else:
+         --  This is intended to be called on the root node only
+         if Node.Parent /= null then
+            raise Program_Error;
+         end if;
+      % endif
 
       return Result : constant Boolean :=
          Populate_Internal (Node, Root_State)

@@ -754,6 +754,11 @@ class CompileCtx:
         introspection API.
         """
 
+        self.ple_unit_root: Optional[ASTNodeType] = None
+        """
+        Node to be used as the PLE unit root, if any.
+        """
+
         # Optional callbacks to post-process the content of source files
         self.post_process_ada: Optional[Callable[[str], str]] = None
         self.post_process_cpp: Optional[Callable[[str], str]] = None
@@ -1219,6 +1224,80 @@ class CompileCtx:
             for parser in field.parsers_from_transform:
                 if can_produce_null(parser):
                     field._is_optional = True
+
+    def check_ple_unit_root(self):
+        """
+        Check that if the "ple_unit_root" node annotation is used, it is valid.
+
+        If so, add a "is_env_populated" field to it.
+        """
+        from langkit.compiled_types import T
+        from langkit.expressions import Literal
+
+        # Locate the PLE_unit root (if any), checking that we at most one such
+        # node annotation.
+        for n in self.astnode_types:
+            if not n.annotations.ple_unit_root:
+                continue
+
+            with n.diagnostic_context:
+                if self.ple_unit_root:
+                    check_source_language(
+                        False, 'Only one PLE unit root is allowed: {}'
+                               .format(self.ple_unit_root.dsl_name)
+                    )
+                check_source_language(
+                    not n.subclasses,
+                    'No node can derive from PLE unit roots: here we have'
+                    ' {}'.format(', '.join(c.dsl_name for c in n.subclasses))
+                )
+                check_source_language(
+                    not n.synthetic,
+                    'Synthetic nodes cannot be PLE unit roots'
+                )
+                self.ple_unit_root = n
+
+        if self.ple_unit_root is None:
+            return
+
+        check_source_language(
+            self.ple_unit_root in self.list_types,
+            'At least one parser must create lists of PLE unit roots'
+        )
+        ple_unit_root_list = self.ple_unit_root.list
+
+        # Check that there is no subclass for lists of PLE unit roots
+        for subcls in ple_unit_root_list.subclasses:
+            with subcls.diagnostic_context:
+                check_source_language(False, 'Lists of PLE unit roots'
+                                             ' cannot be subclassed')
+
+        # Finally, check that the only way to get a PLE unit root is as a child
+        # of a list node that is itself the root of a tree.
+        for n in self.astnode_types:
+            for f in n.get_parse_fields():
+                with f.diagnostic_context:
+                    check_source_language(
+                        ple_unit_root_list not in f.precise_types,
+                        '{} cannot appear anywhere in trees except as a root'
+                        ' node'.format(ple_unit_root_list.dsl_name)
+                    )
+                    check_source_language(
+                        self.ple_unit_root not in f.precise_types,
+                        '{} cannot appear anywhere in trees except as a child'
+                        ' of {} nodes'.format(self.ple_unit_root.dsl_name,
+                                              ple_unit_root_list.dsl_name)
+                    )
+
+        self.ple_unit_root.is_env_populated_field = (
+            self.ple_unit_root.add_internal_user_field(
+                name=names.Name('Is_Env_Populated'),
+                type=T.Bool,
+                default_value=Literal(False),
+                doc='Whether this PLE unit root was processed by'
+                    ' Populate_Lexical_Env.',
+            )
+        )
 
     def check_concrete_subclasses(self, astnode):
         """
@@ -2135,6 +2214,7 @@ class CompileCtx:
             MajorStepPass('Computing precise types'),
             ASTNodePass('compute precise fields types',
                         lambda _, n: n.compute_precise_fields_types()),
+            GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
 
             GrammarRulePass('compile parsers', Parser.compile),
             GrammarRulePass('compute nodes parsers correspondence',

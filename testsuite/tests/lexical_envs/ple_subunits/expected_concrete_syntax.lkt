@@ -1,0 +1,72 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(scope)
+    deps <- list*(pick(Dep(pick("+" name)) ";"))
+    defs <- list*(pick(or(scope | var) ";"))
+    scope <- Scope(name "{" deps defs "}")
+    var <- Var(id "=" name)
+    id <- Id(@identifier)
+    name <- or(Prefix(name "." id) | id)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Dep : FooNode {
+    @parse_field name: Name
+}
+
+@abstract class Name : FooNode {
+
+    @export @abstract fun resolve(): FooNode
+
+    @export @abstract fun suffix_symbol(): Symbol
+
+    @export @abstract fun symbols(): Array[Symbol]
+
+    @external fun referenced_unit_or_error(or_error: Bool): AnalysisUnit[FooNode]
+
+    @export fun referenced_unit(): AnalysisUnit[FooNode] =
+    node.referenced_unit_or_error(false)
+}
+
+class Id : Name implements TokenNode {
+
+    fun resolve(): FooNode = node.node_env().get_first(node)
+
+    fun suffix_symbol(): Symbol = node.symbol
+
+    fun symbols(): Array[Symbol] = node.symbol?.singleton()
+}
+
+class Prefix : Name {
+    @parse_field prefix: Name
+    @parse_field suffix: Id
+
+    fun resolve(): FooNode =
+    node.prefix.resolve().children_env().get_first(node.suffix.symbol)
+
+    fun suffix_symbol(): Symbol = node.suffix.symbol
+
+    fun symbols(): Array[Symbol] = node.prefix.symbols() & node.suffix.symbols()
+}
+
+class Scope : FooNode {
+    @parse_field name: Name
+    @parse_field deps: ASTList[FooNode, Dep]
+    @parse_field defs: ASTList[FooNode, FooNode]
+
+    fun initial_env(): LexicalEnv[FooNode] = match node.name {
+        case p : Prefix => p.prefix.referenced_unit().root.as[ASTList[FooNode, Scope]]!.filter(
+            (scope) => scope.name.symbols() = p.prefix.symbols()
+        )(0).children_env()
+        case _ => node.children_env()
+    }
+}
+
+class Var : FooNode {
+    @parse_field name: Id
+    @parse_field value: Name
+}
