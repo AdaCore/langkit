@@ -3520,6 +3520,15 @@ class ASTNodeType(BaseStructType):
                 warn_on_unused=False,
                 doc='Return the analysis unit owning this node.'
             )),
+            ('ple_root', PropertyDef(
+                expr=None, prefix=None, type=T.root_node, public=False,
+                external=True, uses_entity_info=False, uses_envs=False,
+                warn_on_unused=False, ignore_warn_on_node=True,
+                doc="""
+                Return the PLE root that owns this node, or the unit root node
+                if this unit has no PLE root.
+                """
+            )),
             ('is_ghost', PropertyDef(
                 expr=None, prefix=None, type=T.Bool, public=True,
                 external=True, uses_entity_info=False, uses_envs=False,

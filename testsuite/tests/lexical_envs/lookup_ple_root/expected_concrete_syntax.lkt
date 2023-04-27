@@ -1,0 +1,31 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(
+        | pick(var @termination)
+        | pick(scope @termination)
+        | pick(list+(scope) @termination)
+    )
+    var <- Var(id "=" id)
+    scope <- Scope("{" items "}")
+    items <- list*(id)
+    id <- Identifier(@identifier)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+
+    @export fun get_ple_root(): FooNode = node.ple_root().as_bare_entity
+}
+
+class Identifier : FooNode implements TokenNode {
+}
+
+class Scope : FooNode {
+    @parse_field items: ASTList[FooNode, Identifier]
+}
+
+class Var : FooNode {
+    @parse_field name: Identifier
+    @parse_field value: Identifier
+}

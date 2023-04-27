@@ -1661,6 +1661,15 @@ private package ${ada_lib_name}.Implementation is
       --  Units that are referenced from this one. Useful for
       --  visibility/computation of the reference graph.
 
+      PLE_Roots_Starting_Token : Token_Index_Vectors.Vector;
+      --  If this unit contains a list of PLE roots, then for each PLE root,
+      --  this vector contains a reference to the first token that is part of
+      --  it. Otherwise, this vector is empty.
+      --
+      --  This table is initialized after each parsing and allows to quickly
+      --  look for the PLE root corresponding to some token, and thus to some
+      --  node in this unit (see the ``Lookup_PLE_Root`` function).
+
       Is_Env_Populated : Boolean;
       --  Whether Populate_Lexical_Env was called on this unit. Used not to
       --  populate multiple times the same unit and hence avoid infinite
@@ -1922,6 +1931,14 @@ private package ${ada_lib_name}.Implementation is
    function Lookup_Token
      (Unit : Internal_Unit; Sloc : Source_Location) return Token_Reference;
    --  Implementation for Analysis.Lookup_Token
+
+   procedure Lookup_PLE_Root
+     (Node  : ${T.root_node.name};
+      Root  : out ${T.root_node.name};
+      Index : out Natural);
+   --  Look for the PLE root that owns this node. If there is one, assign it to
+   --  ``Root`` and assign its index in the list of PLE roots to ``Index``. If
+   --  there is none, set ``Root`` to the unit root node and ``Index`` to 0.
 
    procedure Dump_Lexical_Env (Unit : Internal_Unit);
    --  Implementation for Analysis.Dump_Lexical_Env

@@ -1108,6 +1108,82 @@ package body ${ada_lib_name}.Implementation is
       return Wrap_Token_Reference (Unit.Context, Unit.TDH'Access, Result);
    end Lookup_Token;
 
+   ---------------------
+   -- Lookup_PLE_Root --
+   ---------------------
+
+   procedure Lookup_PLE_Root
+     (Node  : ${T.root_node.name};
+      Root  : out ${T.root_node.name};
+      Index : out Natural)
+   is
+      Unit : constant Internal_Unit := Node.Unit;
+   begin
+      --  If this unit does not contain a list of PLE roots, just return the
+      --  unit root node.
+
+      if Unit.PLE_Roots_Starting_Token.Is_Empty then
+         Root := Unit.Ast_Root;
+         Index := 0;
+         return;
+      end if;
+
+      --  Otherwise, look for the last PLE root whose first token (in
+      --  Unit.PLE_Roots_Starting_Token) appears before Node's (T). This vector
+      --  is sorted by construction, so we can perform a binary search.
+
+      declare
+         T      : constant Token_Index := Node.Token_Start_Index;
+         Tokens : Token_Index_Vectors.Vector renames
+           Unit.PLE_Roots_Starting_Token;
+
+         First : Positive := Tokens.First_Index;
+         Last  : Positive := Tokens.Last_Index;
+         I     : Positive;
+      begin
+         while First < Last loop
+
+            --  Because we look for the "floor" (last element that is <= T), we
+            --  need to look at the value in Last when there are only two
+            --  elements left to look at. If we did not do that, then we would
+            --  go into an infinite loop when Tokens[First] < T.
+
+            I := (if First + 1 = Last
+                  then Last
+                  else (First + Last) / 2);
+            declare
+               I_T : constant Token_Index := Tokens.Get (I);
+            begin
+               if I_T <= T then
+                  First := I;
+               else
+                  Last := I - 1;
+               end if;
+            end;
+         end loop;
+
+         Root := Child (Unit.Ast_Root, First);
+         Index := First;
+      end;
+   end Lookup_PLE_Root;
+
+   --------------
+   -- Ple_Root --
+   --------------
+
+   function Ple_Root
+     (Node : ${T.root_node.name}) return ${T.root_node.name}
+   is
+      Root        : ${T.root_node.name};
+      Dummy_Index : Natural;
+   begin
+      if Node = null then
+         raise Property_Error with "null node dereference";
+      end if;
+      Lookup_PLE_Root (Node, Root, Dummy_Index);
+      return Root;
+   end Ple_Root;
+
    ----------------------
    -- Dump_Lexical_Env --
    ----------------------
@@ -4833,6 +4909,20 @@ package body ${ada_lib_name}.Implementation is
       Unit.Unit_Version := Unit.Unit_Version + 1;
       Unit.TDH.Version := Unit.Unit_Version;
 
+      --  Compute the PLE_Roots_Starting_Token table
+
+      Unit.PLE_Roots_Starting_Token.Clear;
+      % if ctx.ple_unit_root:
+         if Unit.Ast_Root /= null
+            and then Unit.Ast_Root.Kind
+                     = ${ctx.ple_unit_root.list.ada_kind_name}
+         then
+            for I in 1 .. Children_Count (Unit.Ast_Root) loop
+               Unit.PLE_Roots_Starting_Token.Append
+                 (Child (Unit.Ast_Root, I).Token_Start_Index);
+            end loop;
+         end if;
+      % endif
 
       --  If Unit had its lexical environments populated, re-populate them
       if not Unit.Is_Env_Populated then
