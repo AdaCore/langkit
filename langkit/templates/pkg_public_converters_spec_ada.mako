@@ -95,12 +95,12 @@ private package ${ada_lib_name}.Public_Converters is
       Name     : Text_Type;
       Kind     : Analysis_Unit_Kind) return String;
    overriding function Get_Unit
-     (Provider    : Unit_Provider_Wrapper;
-      Context     : Internal_Context;
-      Name        : Text_Type;
-      Kind        : Analysis_Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False) return Internal_Unit;
+     (Provider : Unit_Provider_Wrapper;
+      Context  : Internal_Context;
+      Name     : Text_Type;
+      Kind     : Analysis_Unit_Kind;
+      Charset  : String := "";
+      Reparse  : Boolean := False) return Internal_Unit;
 
    function Wrap_Public_Provider
      (Provider : Unit_Provider_Reference) return Internal_Unit_Provider_Access;

@@ -32,7 +32,7 @@ with Langkit_Support.Adalog.Logic_Var;
 with Langkit_Support.Adalog.Solver;
 with Langkit_Support.Adalog.Solver_Interface;
 
-with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
@@ -1445,12 +1445,12 @@ private package ${ada_lib_name}.Implementation is
    ${ada_doc('langkit.unit_provider_get_unit_filename', 3)}
 
    function Get_Unit
-     (Provider    : Internal_Unit_Provider;
-      Context     : Internal_Context;
-      Name        : Text_Type;
-      Kind        : Analysis_Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False) return Internal_Unit is abstract;
+     (Provider : Internal_Unit_Provider;
+      Context  : Internal_Context;
+      Name     : Text_Type;
+      Kind     : Analysis_Unit_Kind;
+      Charset  : String := "";
+      Reparse  : Boolean := False) return Internal_Unit is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
 
    procedure Dec_Ref (Provider : in out Internal_Unit_Provider_Access);
