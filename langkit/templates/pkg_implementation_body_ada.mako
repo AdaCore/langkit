@@ -911,13 +911,27 @@ package body ${ada_lib_name}.Implementation is
    procedure Populate_Lexical_Env (Unit : Internal_Unit) is
       Context : constant Internal_Context := Unit.Context;
 
+      Saved_In_Populate_Lexical_Env : constant Boolean :=
+        Context.In_Populate_Lexical_Env;
+
       Has_Errors : Boolean := False;
       --  Whether at least one Property_Error occurred during this PLE pass
 
-      Saved_In_Populate_Lexical_Env : constant Boolean :=
-         Unit.Context.In_Populate_Lexical_Env;
+      procedure Reset_Envs_Caches (Unit : Internal_Unit);
+      --  Reset the env caches of all lexical environments created for ``Unit``
+
+      -----------------------
+      -- Reset_Envs_Caches --
+      -----------------------
 
       procedure Reset_Envs_Caches (Unit : Internal_Unit) is
+         procedure Internal (Node : ${T.root_node.name});
+         --  Reset env caches in ``Node`` and then in its children recursively
+
+         --------------
+         -- Internal --
+         --------------
+
          procedure Internal (Node : ${T.root_node.name}) is
          begin
             if Node = null then
