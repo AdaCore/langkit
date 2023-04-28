@@ -1602,6 +1602,8 @@ private package ${ada_lib_name}.Implementation is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
+   package Boolean_Vectors is new Langkit_Support.Vectors (Boolean);
+
    type Analysis_Unit_Type is limited record
       --  Start of ABI area. In order to perform fast checks from foreign
       --  languages, we maintain minimal ABI for analysis context: this allows
@@ -1670,10 +1672,14 @@ private package ${ada_lib_name}.Implementation is
       --  look for the PLE root corresponding to some token, and thus to some
       --  node in this unit (see the ``Lookup_PLE_Root`` function).
 
-      Is_Env_Populated : Boolean;
-      --  Whether Populate_Lexical_Env was called on this unit. Used not to
-      --  populate multiple times the same unit and hence avoid infinite
-      --  populate recursions for circular dependencies.
+      Env_Populated_Roots : Boolean_Vectors.Vector;
+      --  For each PLE root in this unit, indicates whether
+      --  Populate_Lexical_Env was called on it.
+      --
+      --  Note that this vector may contain less or more elements than the
+      --  number of PLE roots in this unit: this allows not to run PLE twice on
+      --  each root, and to keep track on which roots PLE should be run after a
+      --  reparse. "Missing" elements in this vector are considered False.
 
       Exiled_Entries : Exiled_Entry_Vectors.Vector;
       --  Lexical env population for this unit may have added AST nodes it owns

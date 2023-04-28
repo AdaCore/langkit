@@ -7,7 +7,8 @@ package body Libfoolang.Implementation.Extensions is
    function Name_P_Referenced_Unit_Or_Error
      (Node : Bare_Name; Or_Error : Boolean) return Internal_Unit
    is
-      Root           : constant Bare_Foo_Node := Node.Unit.AST_Root;
+      Unit           : constant Internal_Unit := Node.Unit;
+      Root           : constant Bare_Foo_Node := Unit.AST_Root;
       Requested_Name : Symbol_Type_Array_Access :=
          Dispatcher_Name_P_Symbols (Node);
       Has_Errors     : Boolean := False;
@@ -18,8 +19,15 @@ package body Libfoolang.Implementation.Extensions is
             SN   : constant Bare_Name := Scope_F_Name (S);
             Node : Symbol_Type_Array_Access := Dispatcher_Name_P_Symbols (SN);
          begin
+            if Unit.Env_Populated_Roots.Last_Index < I then
+               Unit.Env_Populated_Roots.Append (False);
+            end if;
+
             if Node.Items = Requested_Name.Items then
-               Has_Errors := Populate_Lexical_Env (S) or else Has_Errors;
+               if not Unit.Env_Populated_Roots.Get (I) then
+                  Unit.Env_Populated_Roots.Set (I, True);
+                  Has_Errors := Populate_Lexical_Env (S) or else Has_Errors;
+               end if;
             end if;
             Dec_Ref (Node);
          end;
