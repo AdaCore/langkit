@@ -92,41 +92,6 @@ package body ${ada_lib_name}.Implementation.C is
       Contents    : out Decoded_File_Contents;
       Diagnostics : in out Diagnostics_Vectors.Vector);
 
-   --------------------
-   -- Unit providers --
-   --------------------
-
-   type C_Unit_Provider is limited new
-      Ada.Finalization.Limited_Controlled
-      and Internal_Unit_Provider
-   with record
-      Ref_Count               : Natural;
-      Data                    : System.Address;
-      Destroy_Func            : ${unit_provider_destroy_type};
-      Get_Unit_Filename_Func  : ${unit_provider_get_unit_filename_type};
-      Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type};
-   end record;
-
-   type C_Unit_Provider_Access is access all C_Unit_Provider;
-
-   overriding procedure Finalize (Provider : in out C_Unit_Provider);
-   overriding procedure Inc_Ref (Provider : in out C_Unit_Provider);
-   overriding function Dec_Ref
-     (Provider : in out C_Unit_Provider) return Boolean;
-
-   overriding function Get_Unit_Filename
-     (Provider : C_Unit_Provider;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind) return String;
-
-   overriding function Get_Unit
-     (Provider : C_Unit_Provider;
-      Context  : Internal_Context;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind;
-      Charset  : String := "";
-      Reparse  : Boolean := False) return Internal_Unit;
-
    function Value_Or_Empty (S : chars_ptr) return String
    --  If S is null, return an empty string. Return Value (S) otherwise.
    is (if S = Null_Ptr
@@ -1120,31 +1085,6 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
-   function ${capi.get_name('create_unit_provider')}
-     (Data                    : System.Address;
-      Destroy_Func            : ${unit_provider_destroy_type};
-      Get_Unit_Filename_Func  : ${unit_provider_get_unit_filename_type};
-      Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type})
-      return ${unit_provider_type} is
-   begin
-      Clear_Last_Exception;
-      declare
-         Result : constant C_Unit_Provider_Access := new C_Unit_Provider'
-           (Ada.Finalization.Limited_Controlled with
-            Ref_Count               => 1,
-            Data                    => Data,
-            Destroy_Func            => Destroy_Func,
-            Get_Unit_Filename_Func  => Get_Unit_Filename_Func,
-            Get_Unit_From_Name_Func => Get_Unit_From_Name_Func);
-      begin
-         return Wrap_Private_Provider (Internal_Unit_Provider_Access (Result));
-      end;
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return ${unit_provider_type} (System.Null_Address);
-   end;
-
    procedure ${capi.get_name('dec_ref_unit_provider')}
      (Provider : ${unit_provider_type}) is
    begin
@@ -1406,94 +1346,6 @@ package body ${ada_lib_name}.Implementation.C is
       Self.Unit_Parsed_Func
         (Self.Data, Context, Unit, (if Reparsed then 1 else 0));
    end Unit_Parsed_Callback;
-
-   --------------
-   -- Finalize --
-   --------------
-
-   overriding procedure Finalize (Provider : in out C_Unit_Provider) is
-   begin
-      Provider.Destroy_Func (Provider.Data);
-   end Finalize;
-
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   overriding procedure Inc_Ref (Provider : in out C_Unit_Provider) is
-   begin
-      Provider.Ref_Count := Provider.Ref_Count + 1;
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   overriding function Dec_Ref
-     (Provider : in out C_Unit_Provider) return Boolean is
-   begin
-      Provider.Ref_Count := Provider.Ref_Count - 1;
-      if Provider.Ref_Count = 0 then
-         return True;
-      else
-         return False;
-      end if;
-   end Dec_Ref;
-
-   -----------------------
-   -- Get_Unit_Filename --
-   -----------------------
-
-   overriding function Get_Unit_Filename
-     (Provider : C_Unit_Provider;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind) return String
-   is
-      Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
-
-      C_Result : chars_ptr := Provider.Get_Unit_Filename_Func
-        (Provider.Data, Wrap (Name_Access), Kind);
-   begin
-      if C_Result = Null_Ptr then
-         raise Property_Error with "invalid AST node for unit name";
-      else
-         declare
-            Result : constant String := Value (C_Result);
-         begin
-            Free (C_Result);
-            return Result;
-         end;
-      end if;
-   end Get_Unit_Filename;
-
-   --------------
-   -- Get_Unit --
-   --------------
-
-   overriding function Get_Unit
-     (Provider : C_Unit_Provider;
-      Context  : Internal_Context;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind;
-      Charset  : String := "";
-      Reparse  : Boolean := False) return Internal_Unit
-   is
-      Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
-      C_Charset   : chars_ptr := (if Charset'Length = 0
-                                  then Null_Ptr
-                                  else New_String (Charset));
-   begin
-      return C_Result : constant ${analysis_unit_type} :=
-         Provider.Get_Unit_From_Name_Func
-           (Provider.Data, Context, Wrap (Name_Access), Kind,
-            C_Charset, Boolean'Pos (Reparse))
-      do
-         Free (C_Charset);
-         if C_Result = null then
-            raise Property_Error with "invalid AST node for unit name";
-         end if;
-      end return;
-   end Get_Unit;
 
    ${exts.include_extension(
       ctx.ext('analysis', 'c_api', 'unit_providers', 'body')

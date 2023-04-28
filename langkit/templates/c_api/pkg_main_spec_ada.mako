@@ -237,28 +237,6 @@ private package ${ada_lib_name}.Implementation.C is
    type ${unit_provider_type} is new System.Address;
    ${ada_c_doc('langkit.unit_provider_type', 3)}
 
-   type ${unit_provider_destroy_type} is access procedure
-     (Data : System.Address)
-      with Convention => C;
-   ${ada_c_doc('langkit.unit_provider_destroy_type', 3)}
-
-   type ${unit_provider_get_unit_filename_type} is access function
-     (Data        : System.Address;
-      Name        : ${text_type};
-      Kind        : ${unit_kind_type}) return chars_ptr
-      with Convention => C;
-   ${ada_c_doc('langkit.unit_provider_get_unit_filename_type', 3)}
-
-   type ${unit_provider_get_unit_from_name_type} is access function
-     (Data        : System.Address;
-      Context     : ${analysis_context_type};
-      Name        : ${text_type};
-      Kind        : ${unit_kind_type};
-      Charset     : chars_ptr;
-      Reparse     : int) return ${analysis_unit_type}
-      with Convention => C;
-   ${ada_c_doc('langkit.unit_provider_get_unit_from_name_type', 3)}
-
    -------------------------
    -- Analysis primitives --
    -------------------------
@@ -626,17 +604,6 @@ private package ${ada_lib_name}.Implementation.C is
    --------------------
    -- Unit providers --
    --------------------
-
-   function ${capi.get_name('create_unit_provider')}
-     (Data                    : System.Address;
-      Destroy_Func            : ${unit_provider_destroy_type};
-      Get_Unit_Filename_Func  : ${unit_provider_get_unit_filename_type};
-      Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type})
-      return ${unit_provider_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('create_unit_provider')}";
-   ${ada_c_doc('langkit.create_unit_provider', 3)}
 
    procedure ${capi.get_name('dec_ref_unit_provider')}
      (Provider : ${unit_provider_type})
