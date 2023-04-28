@@ -345,7 +345,12 @@ package ${ada_lib_name}.Analysis is
       Buffer  : String);
    ${ada_doc('langkit.unit_reparse_buffer', 3)}
 
-   procedure Populate_Lexical_Env (Unit : Analysis_Unit'Class);
+   procedure Populate_Lexical_Env
+     (Unit : Analysis_Unit'Class
+      % if ctx.ple_unit_root:
+         ; PLE_Root_Index : Positive := 1
+      % endif
+     );
    ${ada_doc('langkit.unit_populate_lexical_env', 3)}
 
    function Get_Filename (Unit : Analysis_Unit'Class) return String;

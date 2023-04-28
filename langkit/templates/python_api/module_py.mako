@@ -913,9 +913,19 @@ class AnalysisUnit:
             _unit_reparse_from_buffer(self._c_value, _charset, _buffer,
                                       len(_buffer))
 
-    def populate_lexical_env(self) -> None:
+    def populate_lexical_env(
+        self,
+        % if ctx.ple_unit_root:
+            ple_root_index: int,
+        % endif
+    ) -> None:
         ${py_doc('langkit.unit_populate_lexical_env', 8)}
-        if not _unit_populate_lexical_env(self._c_value):
+        if not _unit_populate_lexical_env(
+            self._c_value,
+            % if ctx.ple_unit_root:
+                ple_root_index,
+            % endif
+        ):
             raise PropertyError()
 
     @property
@@ -2092,7 +2102,13 @@ _unit_reparse_from_buffer = _import_func(
 )
 _unit_populate_lexical_env = _import_func(
     '${capi.get_name("unit_populate_lexical_env")}',
-    [AnalysisUnit._c_type], ctypes.c_int
+    [
+        AnalysisUnit._c_type,
+        % if ctx.ple_unit_root:
+            ctypes.c_int,
+        % endif
+    ],
+    ctypes.c_int
 )
 
 # General AST node primitives

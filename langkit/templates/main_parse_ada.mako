@@ -298,7 +298,25 @@ procedure Parse is
          end if;
 
          if Args.Print_Envs.Get then
-            Populate_Lexical_Env (Unit);
+
+            --  Run PLE on all PLE roots
+
+            % if ctx.ple_unit_root:
+               declare
+                  Last : constant Natural :=
+                    (if Unit.Root.Is_Null
+                        or else Unit.Root.Kind
+                                /= ${ctx.ple_unit_root.list.ada_kind_name}
+                     then 1
+                     else Unit.Root.Children_Count);
+               begin
+                  for I in 1 .. Last loop
+                     Unit.Populate_Lexical_Env (I);
+                  end loop;
+               end;
+            % else:
+               Unit.Populate_Lexical_Env;
+            % endif
             Put_Line ("");
             Put_Line ("==== Dumping lexical environments ====");
             Dump_Lexical_Env (Unit);

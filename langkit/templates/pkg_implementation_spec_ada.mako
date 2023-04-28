@@ -1897,8 +1897,22 @@ private package ${ada_lib_name}.Implementation is
      (Unit : Internal_Unit; Charset : String; Buffer  : String);
    --  Implementation for Analysis.Reparse
 
-   procedure Populate_Lexical_Env (Unit : Internal_Unit);
+   procedure Populate_Lexical_Env
+     (Unit           : Internal_Unit;
+      PLE_Root_Index : Positive
+      ## To simplify code generation, generate the PLE_Root_Index argument even
+      ## though we always expect it to be 1 when there are no PLE root for this
+      ## language spec. However, still to simplify code generation, give it a
+      ## default expression in that case.
+      % if not ctx.ple_unit_root:
+         := 1
+      % endif
+      );
    --  Implementation for Analysis.Populate_Lexical_Env
+
+   procedure Populate_Lexical_Env_For_Unit (Node : ${T.root_node.name});
+   --  Populate the lexical environment for the PLE root that owns ``Node``, or
+   --  for the whole unit if there is no PLE root.
 
    function Get_Filename (Unit : Internal_Unit) return String;
    --  Implementation for Analysis.Get_Filename

@@ -163,7 +163,7 @@ begin
          ## And if it is also public, we need to ensure that lexical
          ## environments are populated before executing the property itself.
          % if property.is_public:
-            Populate_Lexical_Env (Self.Unit);
+            Populate_Lexical_Env_For_Unit (Self);
          % endif
       end if;
    % endif

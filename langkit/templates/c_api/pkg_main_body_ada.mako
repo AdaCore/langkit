@@ -479,10 +479,15 @@ package body ${ada_lib_name}.Implementation.C is
    end;
 
    function ${capi.get_name("unit_populate_lexical_env")}
-     (Unit : ${analysis_unit_type}) return int is
+     (Unit : ${analysis_unit_type}
+      % if ctx.ple_unit_root:
+          ; PLE_Root_Index : int
+      % endif
+   ) return int is
    begin
       Clear_Last_Exception;
-      Populate_Lexical_Env (Unit);
+      Populate_Lexical_Env
+        (Unit, ${"Natural (PLE_Root_Index)" if ctx.ple_unit_root else 1});
       return 1;
    exception
       when Exc : others =>
