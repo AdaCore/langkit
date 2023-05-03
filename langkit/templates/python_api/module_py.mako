@@ -1393,8 +1393,6 @@ ${exts.include_extension(
 )}
 
 
-## TODO: if this is needed some day, also bind create_unit_provider to allow
-## Python users to create their own unit providers.
 class UnitProvider:
     ${py_doc('langkit.unit_provider_type', 4)}
 

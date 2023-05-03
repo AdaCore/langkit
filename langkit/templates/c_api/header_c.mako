@@ -251,26 +251,6 @@ typedef void (*${file_reader_read_type})(
 ${c_doc('langkit.unit_provider_type')}
 typedef void *${unit_provider_type};
 
-${c_doc('langkit.unit_provider_destroy_type')}
-typedef void (*${unit_provider_destroy_type})(void *data);
-
-${c_doc('langkit.unit_provider_get_unit_filename_type')}
-typedef char *(*${unit_provider_get_unit_filename_type})(
-   void *data,
-   ${text_type} *name,
-   ${unit_kind_type} kind
-);
-
-${c_doc('langkit.unit_provider_get_unit_from_name_type')}
-typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
-   void *data,
-   ${analysis_context_type} context,
-   ${text_type} *name,
-   ${unit_kind_type} kind,
-   const char *charset,
-   int reparse
-);
-
 /* All the functions below can potentially raise an exception, so
    ${capi.get_name("get_last_exception")} must be checked after them even
    before trying to use the returned value.  */
@@ -583,15 +563,6 @@ ${exts.include_extension(
 /*
  * Unit providers
  */
-
-${c_doc('langkit.create_unit_provider')}
-extern ${unit_provider_type}
-${capi.get_name('create_unit_provider')}(
-   void *data,
-   ${unit_provider_destroy_type} destroy_func,
-   ${unit_provider_get_unit_filename_type} get_unit_filename_func,
-   ${unit_provider_get_unit_from_name_type} get_unit_from_name_func
-);
 
 ${c_doc('langkit.unit_provider_dec_ref')}
 extern void

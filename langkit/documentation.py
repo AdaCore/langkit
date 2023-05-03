@@ -873,38 +873,6 @@ base_langkit_docs = {
         % endif
     """,
 
-    'langkit.create_unit_provider': """
-        Create a unit provider. When done with it, the result must be passed to
-        ``${capi.get_name('destroy_unit_provider')}``.
-
-        Pass as ``data`` a pointer to hold your private data: it will be passed
-        to all callbacks below.
-
-        ``destroy`` is a callback that is called by
-        ``${capi.get_name('destroy_unit_provider')}`` to leave a chance to free
-        resources that ``data`` may hold.
-
-        ``get_unit_from_node`` is a callback. It turns an analysis unit
-        reference represented as a node into an analysis unit. It should return
-        ``${null}`` if the node is not a valid unit name representation.
-
-        ``get_unit_from_name`` is a callback similar to ``get_unit_from_node``
-        except it takes an analysis unit reference represented as a string.
-    """,
-
-    'langkit.unit_provider_destroy_type': """
-        Callback type for functions that are called when destroying a unit file
-        provider type.
-    """,
-    'langkit.unit_provider_get_unit_filename_type': """
-        Callback type for functions that are called to turn a unit reference
-        encoded as a unit name into an analysis unit.
-    """,
-    'langkit.unit_provider_get_unit_from_name_type': """
-        Callback type for functions that are called to turn a unit reference
-        encoded as a unit name into an analysis unit.
-    """,
-
     #
     # Misc
     #
