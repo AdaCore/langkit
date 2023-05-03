@@ -67,6 +67,9 @@ class Directories:
             self.root_lang_source_dir, self.root_build_dir, *args
         )
 
+    def build_lib_dir(self, *args: str) -> str:
+        return self.build_dir("lib", *args)
+
     def install_dir(self, *args: str) -> str:
         assert self.root_install_dir is not None
         return path.join(self.root_install_dir, *args)
@@ -570,6 +573,13 @@ class ManageScript:
         subparser.add_argument(
             '--disable-all-mains', action='store_true',
             help='Do not build any main program.'
+        )
+        subparser.add_argument(
+            '--generate-msvc-lib', action='store_true', default=False,
+            help='Generate a .lib file from the library DLL that MSVC'
+                 ' toolchains need in order to link against the DLL. This is'
+                 ' supported only on Windows, and requires the Visual Studio'
+                 ' Build Tools in the environment.'
         )
         subparser.add_argument(
             '--with-rpath', action='store_true', dest='with_rpath',
@@ -1082,6 +1092,115 @@ class ManageScript:
         if LibraryType.relocatable in args.library_types:
             run('relocatable')
 
+    def generate_lib_file(self, build_mode: BuildMode) -> None:
+        """
+        Run tools to generate a .lib file from the language DLL.
+        """
+        def parse_dumpbin_result(dumpbin_result: str) -> list[str]:
+            """
+            Extract all symbol names from the output of the "dumpbin" command.
+
+            Dumpbin's results are following this format:
+
+            .. code-block::
+
+                Microsoft (R) COFF/PE Dumper Version 14.35.32217.1
+                Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+                Dump of file my_lib.dll
+
+                File Type: DLL
+
+                  Section contains the following exports for my_lib.dll
+
+                    00000000 characteristics
+                    64382B47 time date stamp Thu Apr 13 18:18:15 2023
+                        0.00 version
+                           1 ordinal base
+                        4 number of functions
+                        4 number of names
+
+                    ordinal hint RVA      name
+
+                          1    0 0001BA4E Symbol_1
+                          2    1 001AF008 Symbol_2
+                          3    2 0001BB12 Symbol_3
+                          4    3 0002B19E Symbol_N
+
+                Summary
+
+                    1000 .CRT
+                    6000 .bss
+                    2000 .data
+                ...
+
+            :param dumpbin_result: Result of a "dumpbin /exports" run.
+            :return: A list containing all names.
+            """
+            res = []
+            parse_line = False
+
+            # For each line of the dumpbin result parse it
+            for line in dumpbin_result.splitlines():
+                words = line.split()
+
+                if not parse_line:
+                    # Spot the heading line of the function listing
+                    parse_line = words == ['ordinal', 'hint', 'RVA', 'name']
+
+                else:
+                    # Add the function name
+                    if len(words) == 4:
+                        res.append(words[3])
+
+                    # Spot the ending line
+                    if len(words) != 4 and len(words) != 0:
+                        parse_line = False
+
+            return res
+
+        # Create the file and directory names
+        dll_file = self.dirs.build_lib_dir(
+            "relocatable",
+            build_mode.value,
+            f"{self.lib_name.lower()}.dll"
+        )
+        def_file = self.dirs.build_lib_dir(
+            "windows",
+            f"{self.lib_name.lower()}.def"
+        )
+        lib_file = self.dirs.build_lib_dir(
+            "windows",
+            f"{self.context.lang_name.lower}lang.lib"
+        )
+
+        # Create the windows directory if it doesn't exist
+        if not path.isdir(self.dirs.build_lib_dir("windows")):
+            os.makedirs(self.dirs.build_lib_dir("windows"))
+
+        # Run dumpbin to get the DLL names
+        dumpbin_out = subprocess.check_output([
+            "dumpbin",
+            "/exports",
+            dll_file,
+        ])
+
+        # Write the result of the parsed dumpbin in the .def file
+        with open(def_file, 'w') as f:
+            print("EXPORTS", file=f)
+            for name in parse_dumpbin_result(dumpbin_out.decode()):
+                print(name, file=f)
+
+        # Generate the .lib file from the .def one
+        subprocess.check_call([
+            "lib",
+            f"/def:{def_file}",
+            f"/out:{lib_file}",
+            "/machine:x64",
+            "/nologo",
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
     def maven_command(self,
                       goals: list[str],
                       args: argparse.Namespace) -> None:
@@ -1162,6 +1281,25 @@ class ManageScript:
             self.log_info("Building the main programs...", Colors.HEADER)
             self.gprbuild(args, self.mains_project,
                           is_library=False, mains=mains)
+
+        # If requested, generate the .lib file for MSVC
+        if args.generate_msvc_lib:
+            self.log_info("Generating the .lib file for MSVC", Colors.HEADER)
+
+            # Verify the OS and the library
+            if os.name != 'nt':
+                self.log_info(
+                    ".lib file generation is only available on Windows",
+                    Colors.FAIL
+                )
+            elif LibraryType.relocatable not in args.library_types:
+                self.log_info(
+                    "You need to build a relocatable library to generate"
+                    " the .lib file",
+                    Colors.FAIL
+                )
+            else:
+                self.generate_lib_file(self.build_modes[0])
 
         # Build the Java bindings
         if args.enable_java:
