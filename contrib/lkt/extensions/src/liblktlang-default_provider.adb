@@ -26,17 +26,21 @@ package body Liblktlang.Default_Provider is
    overriding procedure Inc_Ref (Self : in out Default_Unit_Provider);
    overriding function Dec_Ref
      (Self : in out Default_Unit_Provider) return Boolean;
-   overriding function Get_Unit_Filename
-     (Self : Default_Unit_Provider;
-      Name : Text_Type;
-      Kind : Analysis_Unit_Kind) return String;
-   overriding function Get_Unit
-     (Self    : Default_Unit_Provider;
-      Context : Internal_Context;
-      Name    : Text_Type;
-      Kind    : Analysis_Unit_Kind;
-      Charset : String := "";
-      Reparse : Boolean := False) return Internal_Unit;
+   overriding procedure Get_Unit_Location
+     (Self           : Default_Unit_Provider;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out US.Unbounded_String;
+      PLE_Root_Index : out Positive);
+   overriding procedure Get_Unit_And_PLE_Root
+     (Self           : Default_Unit_Provider;
+      Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Charset        : String := "";
+      Reparse        : Boolean := False;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive);
 
    -------------
    -- Inc_Ref --
@@ -59,19 +63,24 @@ package body Liblktlang.Default_Provider is
    end Dec_Ref;
 
    -----------------------
-   -- Get_Unit_Filename --
+   -- Get_Unit_Location --
    -----------------------
 
-   overriding function Get_Unit_Filename
-     (Self : Default_Unit_Provider;
-      Name : Text_Type;
-      Kind : Analysis_Unit_Kind) return String
+   overriding procedure Get_Unit_Location
+     (Self           : Default_Unit_Provider;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out US.Unbounded_String;
+      PLE_Root_Index : out Positive)
    is
       Base_Filename : constant String := Unit_Base_Filename (Name);
    begin
+      PLE_Root_Index := 1;
+
       --  There are only unit bodies in Lkt
       if Kind /= Unit_Body or else Base_Filename = "" then
-         return "";
+         Filename := US.Null_Unbounded_String;
+         return;
       end if;
 
       --  Return the first matching file in the list of directories
@@ -81,40 +90,49 @@ package body Liblktlang.Default_Provider is
               (US.To_String (Dir), Base_Filename);
          begin
             if Dirs.Exists (Full) then
-               return Full;
+               Filename := US.To_Unbounded_String (Full);
+               return;
             end if;
          end;
       end loop;
 
-      return "";
-   end Get_Unit_Filename;
+      Filename := US.Null_Unbounded_String;
+   end Get_Unit_Location;
 
-   --------------
-   -- Get_Unit --
-   --------------
+   ---------------------------
+   -- Get_Unit_And_PLE_Root --
+   ---------------------------
 
-   overriding function Get_Unit
-     (Self    : Default_Unit_Provider;
-      Context : Internal_Context;
-      Name    : Text_Type;
-      Kind    : Analysis_Unit_Kind;
-      Charset : String := "";
-      Reparse : Boolean := False) return Internal_Unit
+   overriding procedure Get_Unit_And_PLE_Root
+     (Self           : Default_Unit_Provider;
+      Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Charset        : String := "";
+      Reparse        : Boolean := False;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive)
    is
-      Filename : constant String := Self.Get_Unit_Filename (Name, Kind);
+      Filename : US.Unbounded_String;
    begin
-      if Filename = "" then
-         return Get_With_Error
+      Self.Get_Unit_Location (Name, Kind, Filename, PLE_Root_Index);
+      pragma Assert (PLE_Root_Index = 1);
+      if US.Length (Filename) = 0 then
+         Unit := Get_With_Error
            (Context,
             Unit_Base_Filename (Name),
             "Cannot open source file",
             Charset,
             Default_Grammar_Rule);
+      else
+         Unit := Get_From_File
+           (Context,
+            US.To_String (Filename),
+            Charset,
+            Reparse,
+            Default_Grammar_Rule);
       end if;
-
-      return Get_From_File
-        (Context, Filename, Charset, Reparse, Default_Grammar_Rule);
-   end Get_Unit;
+   end Get_Unit_And_PLE_Root;
 
    ------------------------
    -- Unit_Base_Filename --

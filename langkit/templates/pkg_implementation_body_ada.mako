@@ -718,9 +718,13 @@ package body ${ada_lib_name}.Implementation is
             "cannot reparse during tree rewriting";
       end if;
 
+      declare
+         Result      : Internal_Unit;
+         Dummy_Index : Positive;
       begin
-         return Context.Unit_Provider.Get_Unit
-           (Context, Name, Kind, Charset, Reparse);
+         Context.Unit_Provider.Get_Unit_And_PLE_Root
+           (Context, Name, Kind, Charset, Reparse, Result, Dummy_Index);
+         return Result;
       exception
          when ${ctx.property_exception_matcher} =>
             raise Invalid_Unit_Name_Error with

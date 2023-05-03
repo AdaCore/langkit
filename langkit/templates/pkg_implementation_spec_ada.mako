@@ -1438,20 +1438,24 @@ private package ${ada_lib_name}.Implementation is
    is abstract;
    ${ada_doc('langkit.unit_provider_dec_ref', 3)}
 
-   function Get_Unit_Filename
-     (Provider : Internal_Unit_Provider;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind) return String is abstract;
-   ${ada_doc('langkit.unit_provider_get_unit_filename', 3)}
+   procedure Get_Unit_Location
+     (Provider       : Internal_Unit_Provider;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out Unbounded_String;
+      PLE_Root_Index : out Positive) is abstract;
+   --  See the public ``Get_Unit_Location`` procedure
 
-   function Get_Unit
-     (Provider : Internal_Unit_Provider;
-      Context  : Internal_Context;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind;
-      Charset  : String := "";
-      Reparse  : Boolean := False) return Internal_Unit is abstract;
-   ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
+   procedure Get_Unit_And_PLE_Root
+     (Provider       : Internal_Unit_Provider;
+      Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Charset        : String := "";
+      Reparse        : Boolean := False;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive) is abstract;
+   --  See the public ``Get_Unit_And_PLE_Root`` procedure
 
    procedure Dec_Ref (Provider : in out Internal_Unit_Provider_Access);
 

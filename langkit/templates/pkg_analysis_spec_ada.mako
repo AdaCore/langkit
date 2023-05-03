@@ -192,6 +192,18 @@ package ${ada_lib_name}.Analysis is
       Kind     : Analysis_Unit_Kind) return String is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_filename', 3)}
 
+   procedure Get_Unit_Location
+     (Provider       : Unit_Provider_Interface;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : in out Ada.Strings.Unbounded.Unbounded_String;
+      PLE_Root_Index : in out Natural) is null;
+   --  Like ``Get_Unit_Filename``, but return both the source file that
+   --  ``Name``/``Kind`` designate (in ``Filename``) and the index of the PLE
+   --  root inside that unit (in ``PLE_Root_Index``). If ``PLE_Root_Index`` is
+   --  left to 0 upon return, discard the result and switch to the PLE root
+   --  unaware ``Get_Unit_Filename`` function.
+
    function Get_Unit
      (Provider : Unit_Provider_Interface;
       Context  : Analysis_Context'Class;
@@ -200,6 +212,21 @@ package ${ada_lib_name}.Analysis is
       Charset  : String := "";
       Reparse  : Boolean := False) return Analysis_Unit'Class is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
+
+   procedure Get_Unit_And_PLE_Root
+     (Provider       : Unit_Provider_Interface;
+      Context        : Analysis_Context'Class;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Charset        : String := "";
+      Reparse        : Boolean := False;
+      Unit           : in out Analysis_Unit'Class;
+      PLE_Root_Index : in out Natural) is null;
+   --  Like ``Get_Unit``, but return both the analysis unit that
+   --  ``Name``/``Kind`` designate (in ``Unit``) and the index of the PLE root
+   --  inside that unit (in ``PLE_Root_Index``). If ``PLE_Root_Index`` is left
+   --  to 0 upon return, discard the result and switch to the PLE root unaware
+   --  ``Get_Unit`` function.
 
    procedure Release (Provider : in out Unit_Provider_Interface) is abstract;
    --  Actions to perform when releasing resources associated to Provider
