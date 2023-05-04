@@ -1389,6 +1389,7 @@ class ManageScript:
             os.path.join('java', 'jni', 'jni_impl.c'),
             os.path.join('java', 'src', 'main', 'java', 'com', 'adacore',
                          lib_name, f'{lib_name_camel}.java'),
+            os.path.join('lib', 'windows', '*'),
         ]:
             install_path = os.path.dirname(self.dirs.install_dir(fpath))
             if not path.isdir(install_path):
