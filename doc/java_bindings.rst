@@ -51,14 +51,8 @@ Once you have built the Java bindings, you can find a JAR file under the
 ``build/java/target`` directory which is named ``libfoolang-X.X.jar``. It
 contains all required Java classes to use the Java bindings in any Java
 project. Additionally you can install the Java bindings in your local Maven
-repository with the ``install`` command of the manage script and the
-``--enable-java`` option. As the ``make`` command, you can use the
-``--maven-local-repo`` option to set the Maven repository to install the
-bindings in.
-
-.. code-block::
-
-    ./manage.py install my_install_dir --enable-java [--maven-local-repo my/repo/path]
+repository with the ``mvn install`` command on the ``build/java/pom.xml``
+file.
 
 Usage example
 =============
