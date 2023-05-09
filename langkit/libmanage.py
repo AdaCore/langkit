@@ -375,21 +375,6 @@ class ManageScript:
                  ' generation of mains.'
         )
 
-        subparser.add_argument(
-            '--enable-java', action='store_true',
-            help='Enable the Java bindings building/installation.'
-        )
-        subparser.add_argument(
-            '--maven-local-repo',
-            help='Specify the Maven repository to use, default one is the'
-                 " user's repository (~/.m2)."
-        )
-        subparser.add_argument(
-            '--maven-executable',
-            help='Specify the Maven executable to use. The default one is'
-                 ' "mvn".'
-        )
-
         # Don't enable this by default so that errors will not make automated
         # tasks hang.
         subparser.add_argument(
@@ -594,6 +579,21 @@ class ManageScript:
         subparser.add_argument(
             '--without-rpath', action='store_false', dest='with_rpath',
             help='Do not build libraries with run path options'
+        )
+
+        subparser.add_argument(
+            '--enable-java', action='store_true',
+            help='Enable the Java bindings building/installation.'
+        )
+        subparser.add_argument(
+            '--maven-local-repo',
+            help='Specify the Maven repository to use, default one is the'
+                 " user's repository (~/.m2)."
+        )
+        subparser.add_argument(
+            '--maven-executable',
+            help='Specify the Maven executable to use. The default one is'
+                 ' "mvn".'
         )
 
     def create_context(self, args: argparse.Namespace) -> 'CompileCtx':
