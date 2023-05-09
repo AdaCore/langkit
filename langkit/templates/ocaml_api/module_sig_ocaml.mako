@@ -127,6 +127,14 @@ module Rebindings : sig
   type t
 end
 
+module FileReader : sig
+  type t
+end
+
+${exts.include_extension(
+   ctx.ext('ocaml_api', 'module_sig')
+)}
+
 module UnitProvider : sig
   ${ocaml_doc('langkit.unit_provider_type', 1)}
 
@@ -136,14 +144,6 @@ module UnitProvider : sig
      ctx.ext('ocaml_api', 'unit_providers', 'module_sig')
   )}
 end
-
-module FileReader : sig
-  type t
-end
-
-${exts.include_extension(
-   ctx.ext('ocaml_api', 'module_sig')
-)}
 
 type analysis_context
 

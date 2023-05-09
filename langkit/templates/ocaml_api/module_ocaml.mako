@@ -605,20 +605,6 @@ module Token = struct
 
 end
 
-module UnitProvider = struct
-  (* The real C type of a context is a void*. But we use a pointer to this
-     type, to be able to allocate a value of t and attach a finalizer to it. *)
-  type t = unit ptr ptr
-
-  let c_type = ptr void
-
-  let null = allocate c_type null
-
-  ${exts.include_extension(
-     ctx.ext('ocaml_api', 'unit_providers', 'module_struct')
-  )}
-end
-
 module BareNode = struct
   type t = unit ptr
 end
@@ -648,6 +634,20 @@ end
 ${exts.include_extension(
    ctx.ext('ocaml_api', 'module_struct')
 )}
+
+module UnitProvider = struct
+  (* The real C type of a context is a void*. But we use a pointer to this
+     type, to be able to allocate a value of t and attach a finalizer to it. *)
+  type t = unit ptr ptr
+
+  let c_type = ptr void
+
+  let null = allocate c_type null
+
+  ${exts.include_extension(
+     ctx.ext('ocaml_api', 'unit_providers', 'module_struct')
+  )}
+end
 
 <%
    ## Register array and struct types to generate them in topogical ordering
