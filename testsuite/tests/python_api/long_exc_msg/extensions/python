@@ -1,0 +1,3 @@
+# !ft=makopython
+
+do_something = _import_func("foo_do_something", [], None)

@@ -671,6 +671,11 @@ private package ${ada_lib_name}.Implementation.C is
    --  Free the information contained in Last_Exception and replace it with
    --  newly allocated information from Exc.
 
+   procedure Set_Last_Exception (Id : Exception_Id; Message : String);
+   --  Likewise, but put destructured exception information. This is useful to
+   --  pass messages that are longer than what the Ada runtime accepts (i.e.
+   --  allows to avoid truncated error messages).
+
    function ${capi.get_name('token_kind_name')} (Kind : int) return chars_ptr
       with Export => True,
            Convention => C,

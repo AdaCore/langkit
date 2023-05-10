@@ -771,6 +771,15 @@ package body ${ada_lib_name}.Implementation.C is
 
    procedure Set_Last_Exception (Exc : Exception_Occurrence) is
    begin
+      Set_Last_Exception (Exception_Identity (Exc), Exception_Message (Exc));
+   end Set_Last_Exception;
+
+   ------------------------
+   -- Set_Last_Exception --
+   ------------------------
+
+   procedure Set_Last_Exception (Id : Exception_Id; Message : String) is
+   begin
       --  If it's the first time, allocate room for the exception information
 
       if Last_Exception = null then
@@ -785,24 +794,17 @@ package body ${ada_lib_name}.Implementation.C is
 
       --  Get the kind corresponding to Exc
 
-      declare
-         Id : constant Exception_Id := Exception_Identity (Exc);
-      begin
-         % for i, e in enumerate(ctx.sorted_exception_types):
-         ${'elsif' if i > 0 else 'if'} Id = ${e.qualname}'Identity then
-            Last_Exception.Kind := ${e.kind_name};
-            Last_Exception.Information :=
-               New_String (Exception_Message (Exc));
-         % endfor
-         else
-            Last_Exception.Kind := ${
-               ctx.exception_types['native_exception'].kind_name
-            };
-            Last_Exception.Information :=
-               New_String (Exception_Information (Exc));
-         end if;
-      end;
-
+      % for i, e in enumerate(ctx.sorted_exception_types):
+      ${'elsif' if i > 0 else 'if'} Id = ${e.qualname}'Identity then
+         Last_Exception.Kind := ${e.kind_name};
+         Last_Exception.Information := New_String (Message);
+      % endfor
+      else
+         Last_Exception.Kind := ${
+            ctx.exception_types['native_exception'].kind_name
+         };
+         Last_Exception.Information := New_String (Message);
+      end if;
    end Set_Last_Exception;
 
    --------------------------
