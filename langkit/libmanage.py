@@ -1522,10 +1522,21 @@ class ManageScript:
         add_path("PYTHONPATH", P("python"))
         add_path("MYPYPATH", P("python"))
 
+        # If the .lib file has been generated, provide path to it and set the
+        # additional required paths.
+        lib_file = P(
+            "lib",
+            "windows",
+            f"{self.context.lang_name.lower}lang.lib"
+        )
+        if path.isfile(lib_file):
+            add_path("LIB", path.dirname(lib_file))
+            add_path("INCLUDE", P())
+
         # If the Java bindings have been build, set the necessary environment
         # variables.
         bindings_jar = P('java', 'target', f'{self.lib_name.lower()}.jar')
-        if os.path.isfile(bindings_jar):
+        if path.isfile(bindings_jar):
             add_path("CLASSPATH", bindings_jar)
             add_path("LD_LIBRARY_PATH", P('java', 'jni'))
 
