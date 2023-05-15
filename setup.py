@@ -14,7 +14,7 @@ if ROOT_DIR != '':
 # Run the setup tools
 setup(
     name='Langkit',
-    version='0.1-dev',
+    version='0.1.0',
     author='AdaCore',
     author_email='report@adacore.com',
     url='https://www.adacore.com',
