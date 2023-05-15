@@ -148,7 +148,9 @@ class ${public_name}(_BaseStruct):
             % for f in cls.get_fields():
             <%
                 field_name = f.name.lower
-                field_value = pyapi.extract_c_value(field_name, f.type)
+                field_value = pyapi.extract_c_value(
+                    field_name, f.type, for_arg=False,
+                )
                 if f.type.is_array_type:
                     field_value = ('ctypes.cast({}, ctypes.c_void_p)'
                                    .format(field_value))

@@ -122,7 +122,9 @@ class ${cls.py_converter}(_BaseArray):
     @staticmethod
     def unwrap_item(item, context=None):
         c_holder = ${pyapi.unwrap_value('item', element_type, 'context')}
-        c_value = ${pyapi.extract_c_value('c_holder', element_type)}
+        c_value = ${(
+            pyapi.extract_c_value('c_holder', element_type, for_arg=False)
+        )}
         return (c_holder, c_value)
 
     c_element_type = ${c_element_type}
