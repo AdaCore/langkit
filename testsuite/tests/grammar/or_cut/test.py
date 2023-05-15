@@ -30,5 +30,5 @@ class Name(FooNode):
     token_node = True
 
 
-build_and_run(lkt_file="foo.lkt", ada_main="main.adb", unparse_script=None)
-print('Done')
+build_and_run(lkt_file="foo.lkt", gpr_mains=["main.adb"], unparse_script=None)
+print("Done")

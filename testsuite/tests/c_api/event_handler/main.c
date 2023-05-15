@@ -55,8 +55,8 @@ eh_unit_parsed (void *data, foo_analysis_context ctx, foo_analysis_unit unit,
   puts ("");
 }
 
-void
-c_main (void)
+int
+main (void)
 {
   const char *buffer = "example\n";
   const size_t buffer_size = strlen (buffer);
@@ -176,4 +176,5 @@ c_main (void)
   abort_on_exception ();
 
   puts ("main.c: Done.");
+  return 0;
 }

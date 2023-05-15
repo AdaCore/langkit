@@ -31,7 +31,10 @@ class Name(FooNode):
         ))
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              ada_main='main.adb', lkt_semantic_checks=False)
-print('')
-print('Done')
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    gpr_mains=["main.adb"],
+    lkt_semantic_checks=False,
+)
+print("")
+print("Done")

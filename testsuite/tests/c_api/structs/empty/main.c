@@ -7,8 +7,8 @@
 #include "utils_exc.h"
 #include "utils_text.h"
 
-void
-c_main (void)
+int
+main (void)
 {
   // Declaring the buffer
   const char *buffer = "example";
@@ -106,4 +106,6 @@ c_main (void)
 
   foo_context_decref (context);
   abort_on_exception ();
+
+  return 0;
 }

@@ -36,7 +36,10 @@ class Example(FooNode):
         return s
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-              ada_main='main.adb')
-print('')
-print('Done')
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    py_script="main.py",
+    gpr_mains=["main.adb"],
+)
+print("")
+print("Done")

@@ -10,7 +10,7 @@ from langkit.expressions import DynamicVariable, Self, langkit_property
 from utils import build_and_run, unparse_all_script
 
 
-Env = DynamicVariable('env', LexicalEnv)
+Env = DynamicVariable("env", LexicalEnv)
 
 
 class FooNode(ASTNode):
@@ -68,6 +68,9 @@ class UseClause(Decl):
     )
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              ada_main="main.adb", unparse_script=unparse_all_script)
-print('Done')
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    gpr_mains=["main.adb"],
+    unparse_script=unparse_all_script,
+)
+print("Done")

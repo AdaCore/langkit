@@ -3,8 +3,8 @@
 
 #include "libfoolang.h"
 
-void
-c_main (void)
+int
+main (void)
 {
   const foo_exception *exc;
   foo_base_entity entity;
@@ -17,4 +17,7 @@ c_main (void)
       printf ("Got %s\n", exc_name);
       free (exc_name);
     }
+
+  puts ("main.c: Done.");
+  return 0;
 }

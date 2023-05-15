@@ -30,5 +30,5 @@ class Scope(FooNode):
     annotations = Annotations(ple_unit_root=True)
 
 
-build_and_run(lkt_file="expected_concrete_syntax.lkt", ada_main="main.adb")
+build_and_run(lkt_file="expected_concrete_syntax.lkt", gpr_mains=["main.adb"])
 print("Done")

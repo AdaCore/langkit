@@ -19,10 +19,12 @@ def run(label, **kwargs):
         token_node = True
 
     try:
-        build_and_run(lkt_file="expected_concrete_syntax.lkt",
-                      version="<version-number>",
-                      build_date="<build-date-number>",
-                      **kwargs)
+        build_and_run(
+            lkt_file="expected_concrete_syntax.lkt",
+            version="<version-number>",
+            build_date="<build-date-number>",
+            **kwargs
+        )
     except DiagnosticError:
         print("DiagnosticError: skipping...")
     langkit.reset()
@@ -35,6 +37,6 @@ run("Conflict on version",
 run("Conflict on build date",
     additional_make_args=["--build-date=something"],
     full_error_traces=False)
-run("Build and run test programs", py_script="main.py", ada_main="main.adb")
+run("Build and run test programs", py_script="main.py", gpr_mains=["main.adb"])
 
 print("Done")

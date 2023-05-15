@@ -21,12 +21,12 @@ class Example(FooNode):
     @langkit_property(public=True, memoized=True, return_type=Bool)
     def prop1():
         ignore(Var(Self.singleton))
-        return PropertyError(Bool, 'Explicit error 1')
+        return PropertyError(Bool, "Explicit error 1")
 
     # Also check with one that does not
     @langkit_property(public=True, memoized=True, return_type=Bool)
     def prop2():
-        return PropertyError(Bool, 'Explicit error 2')
+        return PropertyError(Bool, "Explicit error 2")
 
     # Check that non-Property_Error are also properly handled
 
@@ -44,9 +44,9 @@ class Example(FooNode):
 
 
 build_and_run(
-    lkt_file='expected_concrete_syntax.lkt',
-    ada_main='main.adb',
+    lkt_file="expected_concrete_syntax.lkt",
+    gpr_mains=["main.adb"],
     property_exceptions={"Precondition_Failure"},
     types_from_lkt=False,
 )
-print('Done')
+print("Done")

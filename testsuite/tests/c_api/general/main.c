@@ -7,8 +7,8 @@
 #include "utils_exc.h"
 #include "utils_text.h"
 
-void 
-c_main (void) 
+int
+main (void)
 {
   // Create the source code buffer.
   const char *buffer = "example\nexample\n";
@@ -125,4 +125,7 @@ c_main (void)
   // Free the children and tokens.
   free (children);
   free (tokens);
+
+  puts ("main.c: Done.");
+  return 0;
 }

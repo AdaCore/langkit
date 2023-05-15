@@ -72,5 +72,5 @@ class Ref(Id):
     pass
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb')
-print('Done')
+build_and_run(lkt_file="expected_concrete_syntax.lkt", gpr_mains=["main.adb"])
+print("Done")
