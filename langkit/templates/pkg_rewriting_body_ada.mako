@@ -280,6 +280,33 @@ package body ${ada_lib_name}.Rewriting is
       return Wrap_Node_RH (Impl.Child (Unwrap_Node_RH (Handle), Index));
    end Child;
 
+   -----------
+   -- Child --
+   -----------
+
+   function Child
+     (Handle : Node_Rewriting_Handle;
+      Field  : Struct_Member_Ref) return Node_Rewriting_Handle
+   is
+   begin
+      return Child (Handle, Child_Index (Handle, Field));
+   end Child;
+
+   -----------
+   -- Child --
+   -----------
+
+   function Child
+     (Handle : Node_Rewriting_Handle;
+      Fields : Struct_Member_Ref_Array) return Node_Rewriting_Handle is
+   begin
+      return Result : Node_Rewriting_Handle := Handle do
+         for F of Fields loop
+            Result := Child (Result, F);
+         end loop;
+      end return;
+   end Child;
+
    ---------------
    -- Set_Child --
    ---------------
@@ -291,6 +318,19 @@ package body ${ada_lib_name}.Rewriting is
    is
    begin
       Impl.Set_Child (Unwrap_Node_RH (Handle), Index, Unwrap_Node_RH (Child));
+   end Set_Child;
+
+   ---------------
+   -- Set_Child --
+   ---------------
+
+   procedure Set_Child
+     (Handle : Node_Rewriting_Handle;
+      Field  : Struct_Member_Ref;
+      Child  : Node_Rewriting_Handle)
+   is
+   begin
+      Set_Child (Handle, Child_Index (Handle, Field), Child);
    end Set_Child;
 
    ----------

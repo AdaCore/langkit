@@ -80,6 +80,7 @@ FooNodeList[1:1-5:10]
 revert.adb: Done.
 
 == rewrite.adb ==
+Node type for the root: FooNode.list
 Try assigning a child that is already tied to a tree...
    Got a precondition failure
 Try creating an error node (Create_Node)...
@@ -88,6 +89,11 @@ Try creating an error node (Create_Regular_Node)...
    Got a precondition failure
 
 Replace the middle definition (b) with a clone of the last definition (c)
+
+Creating a tree from a template:
+  Tree: def foo=1+2
+  F_Name child: foo
+  F_Expr/F_LHS child: 1
 
 Swap first and fourth defs
 

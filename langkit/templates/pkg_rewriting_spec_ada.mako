@@ -8,8 +8,13 @@
 
 with System;
 
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
+
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Generic_API.Introspection;
+use ${ada_lib_name}.Generic_API.Introspection;
 
 package ${ada_lib_name}.Rewriting is
 
@@ -113,6 +118,11 @@ package ${ada_lib_name}.Rewriting is
    function Kind (Handle : Node_Rewriting_Handle) return ${T.node_kind};
    ${ada_doc('langkit.rewriting.kind', 3)}
 
+   function Type_Of (Handle : Node_Rewriting_Handle) return Type_Ref
+   is (Kind_To_Type (Kind (Handle)));
+   --  Return the introspection type reference corresponding to ``Handle``'s
+   --  node.
+
    function Tied (Handle : Node_Rewriting_Handle) return Boolean;
    ${ada_doc('langkit.rewriting.tied', 3)}
 
@@ -123,16 +133,39 @@ package ${ada_lib_name}.Rewriting is
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural;
    ${ada_doc('langkit.rewriting.children_count', 3)}
 
+   function Child_Index
+     (Handle : Node_Rewriting_Handle;
+      Field  : Struct_Member_Ref) return Positive
+   is (Syntax_Field_Index (Field, Type_Of (Handle)));
+   --  Return the index of ``Handle``'s ``Child`` that correspond to the given
+   --  ``Field``.
+
    function Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive) return Node_Rewriting_Handle;
    ${ada_doc('langkit.rewriting.child', 3)}
+
+   function Child
+     (Handle : Node_Rewriting_Handle;
+      Field  : Struct_Member_Ref) return Node_Rewriting_Handle;
+   ${ada_doc('langkit.rewriting.child_by_ref', 3)}
+
+   function Child
+     (Handle : Node_Rewriting_Handle;
+      Fields : Struct_Member_Ref_Array) return Node_Rewriting_Handle;
+   ${ada_doc('langkit.rewriting.child_deep', 3)}
 
    procedure Set_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive;
       Child  : Node_Rewriting_Handle);
    ${ada_doc('langkit.rewriting.set_child', 3)}
+
+   procedure Set_Child
+     (Handle : Node_Rewriting_Handle;
+      Field  : Struct_Member_Ref;
+      Child  : Node_Rewriting_Handle);
+   ${ada_doc('langkit.rewriting.set_child_by_ref', 3)}
 
    function Text (Handle : Node_Rewriting_Handle) return Text_Type;
    ${ada_doc('langkit.rewriting.text', 3)}

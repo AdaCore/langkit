@@ -88,6 +88,9 @@ begin
    RH := Start_Rewriting (Ctx);
    N := Handle (Root (U1));
 
+   Put ("Node type for the root: ");
+   Put_Line (Debug_Name (Type_Of (N)));
+
    declare
       procedure Set_Tied_Child;
       procedure Create_Error_Node;
@@ -132,6 +135,26 @@ begin
       Put_Line ("Replace the middle definition (b) with a clone of the last"
                 & " definition (c)");
       Set_Child (N, 2, Clone (Child (N, 3)));
+   end;
+
+   New_Line;
+   Put_Line ("Creating a tree from a template:");
+   declare
+      N : constant Node_Rewriting_Handle :=
+        Create_From_Template
+          (Handle    => RH,
+           Template  => "def foo = 1 + 2",
+           Arguments => (1 .. 0 => <>),
+           Rule      => Def_Rule_Rule);
+
+      function Img (N : Node_Rewriting_Handle) return String
+      is (Image (Unparse (N)));
+   begin
+      Put_Line ("  Tree: " & Img (N));
+      Put_Line ("  F_Name child: " & Img (Child (N, Member_Refs.Def_F_Name)));
+      Put_Line ("  F_Expr/F_LHS child: "
+                & Img (Child (N, (Member_Refs.Def_F_Expr,
+                                  Member_Refs.Plus_F_Lhs))));
    end;
 
    New_Line;
@@ -185,10 +208,7 @@ begin
 
       Fifth_Child : constant Node_Rewriting_Handle := Child (N, 5);
    begin
-      Set_Child
-        (Fifth_Child,
-         Syntax_Field_Index (Member_Refs.Def_F_Expr, Type_Refs.Def),
-         Top_Expr);
+      Set_Child (Fifth_Child, Member_Refs.Def_F_Expr, Top_Expr);
    end;
 
    New_Line;
