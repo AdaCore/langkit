@@ -40,11 +40,17 @@ class _BaseStruct:
 
     def __repr__(self) -> str:
         field_names = [name for name, _ in self._c_type._fields_]
-        return '<{} {}>'.format(
-            type(self).__name__,
-            ' '.join('{}={}'.format(name, getattr(self, name))
-                      for name in field_names)
-        )
+        if field_names:
+            fields_suffix = (
+                " "
+                + " ".join(
+                    "{}={}".format(name, getattr(self, name))
+                    for name in field_names
+                )
+            )
+        else:
+            fields_suffix = ""
+        return "<{}{}>".format(type(self).__name__, fields_suffix)
 
     @property
     def as_tuple(self) -> tuple:

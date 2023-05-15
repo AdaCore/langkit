@@ -3,11 +3,20 @@
 <%namespace name="exts" file="extensions.mako" />
 
 <%def name="create_prototype(cls)">
-   function Create_${cls.api_name} (${'; '.join('{} : {}{}'.format(
-      f.name,
-      f.public_type.api_name,
-      "'Class" if f.public_type.is_entity_type else ''
-   ) for f in cls.get_fields())}) return ${cls.api_name}
+   <%
+      args = []
+      for f in cls.get_fields():
+         arg_name = f.name
+         arg_type = str(f.public_type.api_name)
+         if f.public_type.is_entity_type:
+            arg_type += "'Class"
+         args.append(f"{arg_name} : {arg_type}")
+   %>
+   function Create_${cls.api_name}
+   % if args:
+     (${'; '.join(args)})
+   % endif
+     return ${cls.api_name}
 </%def>
 
 <%def name="accessor_prototype(cls, f)">

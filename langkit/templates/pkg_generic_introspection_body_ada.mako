@@ -374,7 +374,10 @@ package body ${ada_lib_name}.Generic_Introspection is
    % endfor
 
    % for t in G.struct_types:
-      <% vt = G.internal_value_type(t) %>
+      <%
+         vt = G.internal_value_type(t)
+         fields = t.get_fields()
+      %>
 
       ---------
       -- "=" --
@@ -402,7 +405,6 @@ package body ${ada_lib_name}.Generic_Introspection is
         (Values : Internal_Value_Array) return ${G.internal_value_access(t)}
       is
          <%
-            fields = t.get_fields()
             var_names = []
             decls = []
             stmts = []
@@ -422,7 +424,11 @@ package body ${ada_lib_name}.Generic_Introspection is
          % endfor
 
          return Result : constant ${G.internal_value_access(t)} := new ${vt} do
-            Result.Value := Create_${t.api_name} (${", ".join(var_names)});
+            Result.Value := Create_${t.api_name}
+              % if var_names:
+                (${", ".join(var_names)})
+              % endif
+            ;
          end return;
       end Create_Struct;
 
@@ -435,7 +441,7 @@ package body ${ada_lib_name}.Generic_Introspection is
          Member : Struct_Member_Index) return Internal_Value_Access is
       begin
          case Member is
-            % for f in t.get_fields():
+            % for f in fields:
                <% public_type = f.type.public_type %>
                when ${G.member_index(f)} =>
                   declare
@@ -468,7 +474,7 @@ package body ${ada_lib_name}.Generic_Introspection is
             when others =>
                --  Validation in public wrappers is supposed to prevent calling
                --  this function on invalid members.
-               raise Program_Error;
+               return (raise Program_Error);
          end case;
       end Eval_Member;
 
