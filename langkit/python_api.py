@@ -93,11 +93,13 @@ class PythonAPISettings(AbstractAPISettings):
         some types, this does *not* yield a value that can be passed to C
         functions: for instance, arrays will yield an instance of a _BaseArray
         subclass. In order to get the C value, use the ``extract_c_value``
-        method:
+        method::
 
-        >>> py_value_expr = ...
-        >>> c_holder_expr = pyapi.unwrap_value(py_value_expr, my_type, context)
-        >>> c_value_expr = pyapi.extract_c_value(c_holder_expr, my_type)
+           py_value_expr = ...
+           c_holder_expr = pyapi.unwrap_value(py_value_expr, my_type, context)
+           c_value_expr = pyapi.extract_c_value(
+               c_holder_expr, my_type, for_arg=True,
+           )
 
         :param value: Expression yielding a high-level value.
         :param type: Type corresponding to the "value" expression.
@@ -135,15 +137,31 @@ class PythonAPISettings(AbstractAPISettings):
             ' (unwrapping): {}'.format(type)
         )).format(value=value, context=context_arg)
 
-    def extract_c_value(self, value: str, type: CompiledType) -> str:
+    def extract_c_value(
+        self, value: str, type: CompiledType, for_arg: bool,
+    ) -> str:
         """
         See ``unwrap_value``.
+
+        :param value: Expression that yields the wrapped value to extract.
+        :param type: Type for this expression.
+        :param for_arg: Whether the extracted value is to be passed as an
+            argument. Depending on the type, arguments may need to be passed as
+            references.
         """
         if type.is_token_type:
             # Token._unwrap() returns the C struct, and these are passed by
             # reference in the C API, so we just have to pass properties a
             # reference to it.
-            return f"ctypes.byref({value})"
+            return f"ctypes.byref({value})" if for_arg else value
+
+        elif type.is_struct_type and not type.is_entity_type:
+            # _BaseStruct._unwrap() returns a Holder instance that wraps the C
+            # struct.
+            result = f"{value}.c_value"
+
+            # Such struct must be passed to properties by reference
+            return f"ctypes.pointer({result})" if for_arg else result
 
         elif type.is_iterator_type or not type.is_refcounted:
             # There is no particular processing to do for iterators and all

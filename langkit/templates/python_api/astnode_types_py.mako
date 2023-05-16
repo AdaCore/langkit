@@ -27,8 +27,11 @@
 
             # Expression for the C value for field evaluation
             eval_args = [c_result_constructor, c_accessor] + [
-                pyapi.extract_c_value('unwrapped_{}'.format(arg.name.lower),
-                                      arg.type)
+                pyapi.extract_c_value(
+                    'unwrapped_{}'.format(arg.name.lower),
+                    arg.type,
+                    for_arg=True,
+                )
                 for arg in field.arguments
             ]
         %>
