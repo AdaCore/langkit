@@ -658,6 +658,10 @@ class ManageScript:
 
     def run_no_exit(self, argv: Opt[List[str]] = None) -> int:
         parsed_args, unknown_args = self.args_parser.parse_known_args(argv)
+        if getattr(parsed_args, "func", None) is None:
+            print(col("Please provide a subcommand to run", Colors.FAIL))
+            self.args_parser.print_help()
+            return 1
 
         for trace in parsed_args.trace:
             print("Trace {} is activated".format(trace))
