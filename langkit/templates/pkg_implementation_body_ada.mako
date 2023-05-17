@@ -743,6 +743,93 @@ package body ${ada_lib_name}.Implementation is
      (Context : Internal_Context) return Internal_Unit_Provider_Access
    is (Context.Unit_Provider);
 
+   ------------------
+   -- Resolve_Unit --
+   ------------------
+
+   procedure Resolve_Unit
+     (Context : Internal_Context;
+      Name    : Text_Type;
+      Kind    : Analysis_Unit_Kind;
+      Unit    : out Resolved_Unit)
+   is
+      --  Look for the cache entry corresponding to Unit; create one if needed
+
+      Dummy    : Resolved_Unit_Array;
+      Key      : constant Symbol_Type := Find (Context.Symbols, Name);
+      Pos      : Unit_Provider_Cache_Maps.Cursor;
+      Inserted : Boolean;
+   begin
+      Context.Unit_Provider_Cache.Insert (Key, Dummy, Pos, Inserted);
+      declare
+         Units : Resolved_Unit_Array renames
+           Context.Unit_Provider_Cache.Reference (Pos);
+         U     : Resolved_Unit renames Units (Kind);
+      begin
+         --  If the cache entry is not populated for the requested kind, run
+         --  the query and save the result for later requests.
+
+         if U.Filename = null then
+            declare
+               Provider : Internal_Unit_Provider'Class renames
+                 Context.Unit_Provider.all;
+               Filename : Unbounded_String;
+            begin
+               Provider.Get_Unit_Location
+                 (Name           => Name,
+                  Kind           => Kind,
+                  Filename       => Filename,
+                  PLE_Root_Index => U.PLE_Root_Index);
+               Provider.Get_Unit_And_PLE_Root
+                 (Context        => Context,
+                  Name           => Name,
+                  Kind           => Kind,
+                  Unit           => U.Unit,
+                  PLE_Root_Index => U.PLE_Root_Index);
+               U.Filename := new String'(To_String (Filename));
+            end;
+         end if;
+
+         Unit := U;
+      end;
+   end Resolve_Unit;
+
+   -----------------------
+   -- Get_Unit_Location --
+   -----------------------
+
+   procedure Get_Unit_Location
+     (Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out String_Access;
+      PLE_Root_Index : out Positive)
+   is
+      U : Resolved_Unit;
+   begin
+      Resolve_Unit (Context, Name, Kind, U);
+      Filename := U.Filename;
+      PLE_Root_Index := U.PLE_Root_Index;
+   end Get_Unit_Location;
+
+   ---------------------------
+   -- Get_Unit_And_PLE_Root --
+   ---------------------------
+
+   procedure Get_Unit_And_PLE_Root
+     (Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive)
+   is
+      U : Resolved_Unit;
+   begin
+      Resolve_Unit (Context, Name, Kind, U);
+      Unit := U.Unit;
+      PLE_Root_Index := U.PLE_Root_Index;
+   end Get_Unit_And_PLE_Root;
+
    ----------
    -- Hash --
    ----------
@@ -853,6 +940,18 @@ package body ${ada_lib_name}.Implementation is
          end loop;
          AR.Destroy;
       end;
+
+      for Pos in Context.Unit_Provider_Cache.Iterate loop
+         declare
+            Units : Resolved_Unit_Array renames
+              Context.Unit_Provider_Cache.Reference (Pos);
+         begin
+            for U of Units loop
+               Free (U.Filename);
+            end loop;
+         end;
+      end loop;
+      Context.Unit_Provider_Cache.Clear;
 
       Destroy (Context.Templates_Unit);
       AST_Envs.Destroy (Context.Root_Scope);

@@ -1459,6 +1459,23 @@ private package ${ada_lib_name}.Implementation is
 
    procedure Dec_Ref (Provider : in out Internal_Unit_Provider_Access);
 
+   type Resolved_Unit is record
+      Unit           : Internal_Unit;
+      Filename       : String_Access;
+      PLE_Root_Index : Positive;
+   end record;
+   --  Cache entry for requests to unit providers
+
+   type Resolved_Unit_Array is array (Analysis_Unit_Kind) of Resolved_Unit;
+   --  One cache entry per unit kind, i.e. all cache entries needed for a given
+   --  unit name.
+
+   package Unit_Provider_Cache_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Symbol_Type,
+      Element_Type    => Resolved_Unit_Array,
+      Equivalent_Keys => "=",
+      Hash            => Hash);
+
    --------------------------------------
    -- Event handler internal interface --
    --------------------------------------
@@ -1545,6 +1562,9 @@ private package ${ada_lib_name}.Implementation is
 
       Unit_Provider : Internal_Unit_Provider_Access;
       --  Object to translate unit names to file names
+
+      Unit_Provider_Cache : Unit_Provider_Cache_Maps.Map;
+      --  Cache for the Unit_Provider.Get_Unit_And_PLE_Root primitive
 
       Parser : Parser_Type;
       --  Main parser type. TODO: If we want to parse in several tasks, we'll
@@ -1854,6 +1874,30 @@ private package ${ada_lib_name}.Implementation is
    function Unit_Provider
      (Context : Internal_Context) return Internal_Unit_Provider_Access;
    --  Implementation for Analysis.Unit_Provider
+
+   procedure Resolve_Unit
+     (Context : Internal_Context;
+      Name    : Text_Type;
+      Kind    : Analysis_Unit_Kind;
+      Unit    : out Resolved_Unit);
+   --  Completely resolve the requested unit. The result is cached: later calls
+   --  for the same name/kind will have constant complexity.
+
+   procedure Get_Unit_Location
+     (Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out String_Access;
+      PLE_Root_Index : out Positive);
+   --  Caching wrapper around Context.Unit_Provider.Get_Unit_Location
+
+   procedure Get_Unit_And_PLE_Root
+     (Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive);
+   --  Caching wrapper around Context.Unit_Provider.Get_Unit_And_PLE_Root
 
    function Hash (Context : Internal_Context) return Hash_Type;
    --  Implementation for Analysis.Hash
