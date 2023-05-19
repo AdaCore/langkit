@@ -396,6 +396,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
     env = m.derived_env()
 
     def run(*argv, **kwargs):
+        subp_env = kwargs.pop("env", env)
         valgrind = kwargs.pop('valgrind', False)
         suppressions = kwargs.pop('valgrind_suppressions', [])
         assert not kwargs
@@ -403,7 +404,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         if valgrind_enabled and valgrind:
             argv = valgrind_cmd(list(argv), suppressions)
 
-        subprocess.check_call(argv, env=env)
+        subprocess.check_call(argv, env=subp_env)
 
     if py_script is not None:
         # Run the Python script.
@@ -514,7 +515,10 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             f'{ni_main}.java',
         )
 
-        # Run native-image to compile the tests
+        # Run native-image to compile the tests.  Building Java bindings does
+        # not go through GPRbuild, so we must explicitly give access to the
+        # generated C header.
+        java_env = m.derived_env(direct_c_header=True)
         ni_exec = P.realpath(P.join(
             os.environ['GRAAL_HOME'],
             'bin',
@@ -533,6 +537,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             '-H:+ReportExceptionStackTraces',
             f'{ni_main}',
             'main',
+            env=java_env,
         )
 
         # Run the newly created main

@@ -1,7 +1,7 @@
 Code generation was successful
 build/src/libfoolang-analysis.ads:
   --  Log this docstring. This is a typeref: :ada:ref:`Foo_Node`.
-build/libfoolang.h:
+build/src/libfoolang.h:
   * Log this docstring. This is a typeref: ``foo_foo_node``.
 build/ocaml/libfoolang.mli:
   * Log this docstring. This is a typeref: ``foo_node``.

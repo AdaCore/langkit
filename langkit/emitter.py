@@ -564,13 +564,13 @@ class Emitter:
             return ctx.render_template(template_name)
 
         with names.lower:
-            # TODO (TA20-017: gprinstall bug): generate the header in
-            # "src" and add it to the library interface (see disabled code
-            # below).
             header_filename = '{}.h'.format(ctx.c_api_settings.lib_name)
             self.write_cpp_file(
-                path.join(self.lib_root, header_filename),
+                path.join(self.src_dir, header_filename),
                 render('c_api/header_c'),
+            )
+            self.add_library_interface(
+                header_filename, generated=True, is_ada=False
             )
 
         self.write_ada_module(
