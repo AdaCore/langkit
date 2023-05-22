@@ -39,6 +39,10 @@ library project ${lib_name} is
    Library_Kind_Param : Library_Kind_Type := external
      ("LIBRARY_TYPE", external ("${upper_lib_name}_LIBRARY_TYPE", "static"));
 
+   type Library_Standalone_Type is ("standard", "no", "encapsulated");
+   Library_Standalone : Library_Standalone_Type :=external
+     ("STANDALONE", external ("${upper_lib_name}_STANDALONE", "standard"));
+
    type Boolean is ("false", "true");
 
    Externally_Built : Boolean := external
@@ -104,8 +108,14 @@ library project ${lib_name} is
    % endif
 
    for Languages use ${format_str_set(emitter.project_languages)};
-   for Library_Name use "${capi.shared_object_basename}";
-   for Library_Kind use Library_Kind_Param;
+
+   Interfaces := ${format_str_set(emitter.library_interfaces)};
+   case Library_Standalone is
+      when "no" =>
+         Interfaces := ();
+      when "standard" | "encapsulated" =>
+         null;
+   end case;
 
    % if emitter.coverage:
       --  Before "gnatcov instrument" produced instrumented sources, not all
@@ -114,13 +124,15 @@ library project ${lib_name} is
       --  to work, anyway.
       case For_Coverage_Instrumentation is
          when "false" =>
-            for Interfaces use ${format_str_set(emitter.library_interfaces)};
          when "true" =>
+            Interfaces := ();
       end case;
-   % else:
-      for Interfaces use ${format_str_set(emitter.library_interfaces)};
    % endif
 
+   for Library_Name use "${capi.shared_object_basename}";
+   for Library_Kind use Library_Kind_Param;
+   for Library_Standalone use Library_Standalone;
+   for Interfaces use Interfaces;
    for Library_Dir use "lib/" & Library_Kind_Param & "/" & Build_Mode;
    for Object_Dir use "obj/" & Build_Mode;
 

@@ -13,13 +13,15 @@ library project Langkit_Support is
    Library_Kind_Param : Library_Kind_Type := external
      ("LIBRARY_TYPE", external ("LANGKIT_SUPPORT_LIBRARY_TYPE", "static"));
 
+   type Library_Standalone_Type is ("standard", "no", "encapsulated");
+   Library_Standalone : Library_Standalone_Type :=external
+     ("STANDALONE", external ("LANGKIT_SUPPORT_STANDALONE", "standard"));
+
    for Languages use ("Ada");
    for Source_Dirs use (".");
    for Object_Dir use "obj/" & Build_Mode;
 
-   for Library_Name use "langkit_support";
-   for Library_Kind use Library_Kind_Param;
-   for Library_Interface use
+   Library_Interface :=
      ("Langkit_Support",
       "Langkit_Support.Adalog",
       "Langkit_Support.Adalog.Debug",
@@ -64,6 +66,16 @@ library project Langkit_Support is
       "Langkit_Support.Tree_Traversal_Iterator",
       "Langkit_Support.Vectors");
 
+   case Library_Standalone is
+      when "no" =>
+         Library_Interface := ();
+      when "standard" | "encapsulated" =>
+   end case;
+
+   for Library_Name use "langkit_support";
+   for Library_Kind use Library_Kind_Param;
+   for Library_Standalone use Library_Standalone;
+   for Library_Interface use Library_Interface;
    for Library_Dir use "lib/" & Library_Kind_Param & "/" & Build_Mode;
 
    Common_Ada_Cargs := ("-gnatwa", "-gnatyg", "-fPIC");
