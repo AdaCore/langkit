@@ -7,15 +7,15 @@ library project Langkit_Support is
 
    type Build_Mode_Type is ("dev", "prod", "prof");
    Build_Mode : Build_Mode_Type :=
-      external ("BUILD_MODE", external ("LANGKIT_SUPPORT_BUILD_MODE", "dev"));
+     external ("LANGKIT_SUPPORT_BUILD_MODE", external ("BUILD_MODE", "dev"));
 
    type Library_Kind_Type is ("static", "relocatable", "static-pic");
    Library_Kind_Param : Library_Kind_Type := external
-     ("LIBRARY_TYPE", external ("LANGKIT_SUPPORT_LIBRARY_TYPE", "static"));
+     ("LANGKIT_SUPPORT_LIBRARY_TYPE", external ("LIBRARY_TYPE", "static"));
 
    type Library_Standalone_Type is ("standard", "no", "encapsulated");
-   Library_Standalone : Library_Standalone_Type :=external
-     ("STANDALONE", external ("LANGKIT_SUPPORT_STANDALONE", "standard"));
+   Library_Standalone : Library_Standalone_Type := external
+     ("LANGKIT_SUPPORT_STANDALONE", external ("STANDALONE", "standard"));
 
    for Languages use ("Ada");
    for Source_Dirs use (".");

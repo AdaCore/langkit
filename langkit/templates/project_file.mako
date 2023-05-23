@@ -33,20 +33,21 @@ ${exts.include_extension(ctx.ext('withed_projects'))}
 library project ${lib_name} is
 
    type Build_Mode_Type is ("dev", "prod", "prof");
-   Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "dev");
+   Build_Mode : Build_Mode_Type :=
+     external ("${upper_lib_name}_BUILD_MODE", external ("BUILD_MODE", "dev"));
 
    type Library_Kind_Type is ("static", "relocatable", "static-pic");
    Library_Kind_Param : Library_Kind_Type := external
-     ("LIBRARY_TYPE", external ("${upper_lib_name}_LIBRARY_TYPE", "static"));
+     ("${upper_lib_name}_LIBRARY_TYPE", external ("LIBRARY_TYPE", "static"));
 
    type Library_Standalone_Type is ("standard", "no", "encapsulated");
-   Library_Standalone : Library_Standalone_Type :=external
-     ("STANDALONE", external ("${upper_lib_name}_STANDALONE", "standard"));
+   Library_Standalone : Library_Standalone_Type := external
+     ("${upper_lib_name}_STANDALONE", external ("STANDALONE", "standard"));
 
    type Boolean is ("false", "true");
 
-   Externally_Built : Boolean := external
-     ("${upper_lib_name}_EXTERNALLY_BUILT", "false");
+   Externally_Built : Boolean :=
+     external ("${upper_lib_name}_EXTERNALLY_BUILT", "false");
    for Externally_Built use Externally_Built;
 
    ## Disable style checks on instrumented code
@@ -97,8 +98,8 @@ library project ${lib_name} is
    % if emitter.coverage:
       Secondary_Source_Dirs :=
         ("obj/${lib_name.lower()}-gnatcov-instr");
-      For_Coverage_Instrumentation : Boolean := external
-        ("${lib_name.upper()}_COVINSTR", "false");
+      For_Coverage_Instrumentation : Boolean :=
+        external ("${lib_name.upper()}_COVINSTR", "false");
       case For_Coverage_Instrumentation is
          when "false" => for Source_Dirs use Secondary_Source_Dirs;
          when "true" =>  for Source_Dirs use Primary_Source_Dirs;
