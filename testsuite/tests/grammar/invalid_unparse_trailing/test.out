@@ -4,4 +4,4 @@ error: Inconsistent postfix tokens for Assignment:
     and:
       <no token>
 
-Done
+lkt_compile: Done

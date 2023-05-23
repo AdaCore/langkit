@@ -1,4 +1,4 @@
 == foo.lkt ==
 error: Ignore() tokens are incompatible with unparsers. Consider using WithTrivia() instead.
 
-Done
+lkt_compile: Done

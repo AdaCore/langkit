@@ -1,10 +1,14 @@
 """
 Test script to compile all Lkt sources in the current directory up to code
-emission and to print error messages.
+emission and to print error messages (if any). If there is a "test.py" script
+in the test directory, also execute it at the end of the driver execution.
 """
 
 import argparse
 import glob
+import os.path
+import subprocess
+import sys
 
 import langkit
 
@@ -37,4 +41,13 @@ for lkt_file in sorted(tests):
     langkit.reset()
     print("")
 
-print("Done")
+
+# If there is a "test.py" script in the test directory, run it
+if os.path.exists("test.py"):
+    print("== test.py ==")
+    sys.stderr.flush()
+    sys.stdout.flush()
+    subprocess.check_call([sys.executable, "test.py"])
+    print("")
+
+print("lkt_compile: Done")

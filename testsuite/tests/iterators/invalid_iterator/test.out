@@ -4,4 +4,4 @@ foo.lkt:15:5: error: Type Int has no 'to_iterator' field or property
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

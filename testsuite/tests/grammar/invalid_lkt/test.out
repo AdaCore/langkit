@@ -69,4 +69,4 @@ unknown_rule_annot.lkt:6:5: error: Invalid annotation: foo
   |     ^^^^
 
 
-Done
+lkt_compile: Done

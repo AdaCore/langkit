@@ -22,4 +22,4 @@ too_many_fields.lkt:5:35: error: Transform parser gets 3 values, but Def has 2 f
   |                                   ^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

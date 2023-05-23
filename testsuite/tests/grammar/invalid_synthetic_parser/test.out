@@ -22,4 +22,4 @@ transform.lkt:5:47: error: Parsers cannot create synthetic nodes
   |                                               ^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

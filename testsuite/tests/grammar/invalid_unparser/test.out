@@ -30,4 +30,4 @@ toplevel-pick.lkt:5:29: error: Top-level information loss prevents unparsers gen
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

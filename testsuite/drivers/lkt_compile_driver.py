@@ -6,8 +6,9 @@ from drivers.python_driver import PythonDriver
 
 class LktCompileDriver(PythonDriver):
     """
-    Test script to compile all Lkt sources in the current directory up to code
-    emission and to print error messages.
+    Driver that compiles all Lkt sources in the current directory up to code
+    emission and prints error messages (if any). If there is a "test.py" script
+    in the test directory, also execute it at the end of the driver execution.
     """
 
     @property

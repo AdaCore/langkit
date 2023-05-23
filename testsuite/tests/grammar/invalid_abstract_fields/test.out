@@ -40,4 +40,4 @@ unoverriden-abstract.lkt:15:1: error: This node is concrete, yet it has abstract
    | ^
 
 
-Done
+lkt_compile: Done

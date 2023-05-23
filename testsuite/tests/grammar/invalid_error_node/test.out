@@ -34,4 +34,4 @@ test_synthetic.lkt:3:49: error: Error nodes cannot be synthetic
   |                                                 ^^^^^^^^^
 
 
-Done
+lkt_compile: Done
