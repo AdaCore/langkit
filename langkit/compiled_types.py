@@ -2363,6 +2363,10 @@ class StructType(BaseStructType):
         return any(f.type.is_refcounted for f in self._fields.values())
 
     @property
+    def is_empty(self):
+        return len(self.get_fields()) == 0
+
+    @property
     def has_early_decl(self) -> bool:
         # The env metadata and inner env assoc structs are emitted separately
         # as they need to be fully declared before the

@@ -1,20 +1,22 @@
 <%def name="ctype_fields(cls)">
   let c_type : t structure typ = structure "${cls.api_name.lower}"
-   % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
+   % if not cls.is_empty:
+   % for f in cls.get_fields():
   let ${ocaml_api.field_name(f)} =
     field c_type "${ocaml_api.field_name(f)}" ${ocaml_api.c_type(f.type, cls)}
    % endfor
+   % else:
+   let dummy = field c_type "dummy" char
+   % endif
   let () = seal c_type
 </%def>
 
 <%def name="decl_struct(cls)">
-   % if not ocaml_api.is_empty_type(cls):
 module ${ocaml_api.struct_name(cls)} = struct
   type t
 
    ${ctype_fields(cls)}
 end
-   % endif
 </%def>
 
 <%def name="ocaml_fields(cls, rec=False)">
