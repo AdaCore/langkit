@@ -29,7 +29,7 @@ emit_and_print_errors(lkt_file='foo.lkt')
 # Log docstrings
 for path in [
     "build/src/libfoolang-analysis.ads",
-    "build/libfoolang.h",
+    "build/src/libfoolang.h",
     "build/ocaml/libfoolang.mli",
     "build/python/libfoolang/__init__.py",
 ]:

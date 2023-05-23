@@ -1099,6 +1099,10 @@ class ManageScript:
         if not self.verbosity.debug:
             maven_args.append('-q')
 
+        # Building Java bindings does not go through GPRbuild, so we must
+        # explicitly give access to the generated C header.
+        env = self.derived_env(direct_c_header=True)
+
         # Call Maven on the Java bindings
         argv = [
             maven_exec,
@@ -1107,7 +1111,7 @@ class ManageScript:
             *goals,
             *maven_args,
         ]
-        self.check_call('Maven-Command', argv)
+        self.check_call('Maven-Command', argv, env=env)
 
     @property
     def lib_project(self) -> str:
@@ -1225,16 +1229,6 @@ class ManageScript:
                     os.path.join(install_dir, os.path.basename(f))
                 )
 
-        # Install the C header for the generated library in "include".
-        #
-        # TODO (TA20-017: gprinstall bug): remove this (see corresponing TODO
-        # in emitter.py.
-        header_filename = "{}.h".format(self.context.c_api_settings.lib_name)
-        shutil.copyfile(
-            self.dirs.build_dir(header_filename),
-            self.dirs.install_dir("include", header_filename)
-        )
-
         # Install the remaining miscellaneous files
         for fpath in [
             os.path.join('python', lib_name, '*.py'),
@@ -1336,12 +1330,28 @@ class ManageScript:
     def setup_environment(
         self,
         add_path: Callable[[str, str], None],
+        direct_c_header: bool = False,
     ) -> None:
+        """
+        Call ``add_path(varname, dirname)`` for each path environment variable
+        ``varname`` that must be extended to include directory ``dirname``.
+
+        :param add_path: Callback to add a directory to a path environment
+            variable.
+        :param direct_c_header: Whether the environment must be set to give
+            direct access to the C header. This is needed when using a build
+            system other than GPRbuild (for instance when building JNI
+            bindings).
+        """
 
         P = self.dirs.build_dir
 
         # Make the project file available
         add_path("GPR_PROJECT_PATH", P())
+
+        # If requested, also give direct access to the C header
+        if direct_c_header:
+            add_path("C_INCLUDE_PATH", P("src"))
 
         # Make the scripts and mains available
         add_path("PATH", P("scripts"))
@@ -1369,12 +1379,6 @@ class ManageScript:
         add_path("PYTHONPATH", P("python"))
         add_path("MYPYPATH", P("python"))
 
-        # Make the C header available.
-        #
-        # TODO (TA20-017: gprinstall bug): remove this (see corresponing TODO
-        # in emitter.py.
-        add_path("C_INCLUDE_PATH", P())
-
         # If the Java bindings have been build, set the necessary environment
         # variables.
         bindings_jar = P('java', 'target', f'{self.lib_name.lower()}.jar')
@@ -1382,14 +1386,17 @@ class ManageScript:
             add_path("CLASSPATH", bindings_jar)
             add_path("LD_LIBRARY_PATH", P('java', 'jni'))
 
-    def derived_env(self) -> Dict[str, str]:
+    def derived_env(self, direct_c_header: bool = False) -> Dict[str, str]:
         """
         Return a copy of the environment after an update using
         setup_environment.
+
+        :param direct_c_header: See ``setup_environment``.
         """
         env = dict(os.environ)
         self.setup_environment(
-            lambda name, p: add_to_path(env, name, p)
+            lambda name, p: add_to_path(env, name, p),
+            direct_c_header=direct_c_header,
         )
         return env
 
