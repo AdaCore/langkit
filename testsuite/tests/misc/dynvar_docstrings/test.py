@@ -1,6 +1,6 @@
 """
-Test creating an array literal whose element_type is the node type
-defined by the enclosing class.
+Check that docstrings for dynamic variables are correctly propagated to
+properties that take these dynamic variables in the generated library.
 """
 
 from langkit.dsl import ASTNode, T
