@@ -1,0 +1,6 @@
+Creating dummy project...
+Running manage.py script with no argument:
+Status code: 1
+Output: Please provide a subcommand to run
+usage: ...
+Done
