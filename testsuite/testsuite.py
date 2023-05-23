@@ -92,6 +92,11 @@ class LangkitTestsuite(Testsuite):
             help='Specify the Maven executable to use. The default one is'
                  ' "mvn".'
         )
+        parser.add_argument(
+            '--enable-native-image', action="store_true",
+            help="Enable testcases that require native-image (they are"
+                 " disabled by default)."
+        )
 
         parser.add_argument(
             '--disable-gdb', action='store_true',
@@ -136,6 +141,7 @@ class LangkitTestsuite(Testsuite):
             'restricted_env': args.restricted_env,
             'has_ocaml': not args.disable_ocaml,
             'has_java': not args.disable_java,
+            'has_native_image': args.enable_native_image,
             'has_gdb': not args.disable_gdb,
             'os': self.env.build.os.name,
         }
