@@ -30,7 +30,7 @@ endif
 PATHSEP=$(strip $(PATHSEP2))
 
 C_OPT=-fPIC -O3 -Wall -Werror -I$(JAVA_HOME)$(PATHSEP)include \
--I$(JNI_INCLUDE) -I$(CUR_DIR)..$(PATHSEP)
+-I$(JNI_INCLUDE)
 
 LD_OPT=-shared -fPIC \
 -L$(CUR_DIR)..$(PATHSEP)lib$(PATHSEP)relocatable$(PATHSEP)prod \
