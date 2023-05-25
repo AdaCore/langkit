@@ -418,13 +418,19 @@ package body ${ada_lib_name}.Analysis is
    -- Populate_Lexical_Env --
    --------------------------
 
-   procedure Populate_Lexical_Env (Unit : Analysis_Unit'Class) is
+   procedure Populate_Lexical_Env
+     (Unit : Analysis_Unit'Class
+      % if ctx.ple_unit_root:
+         ; PLE_Root_Index : Positive := 1
+      % endif
+     ) is
    begin
       if Unit.Internal = null then
          raise Precondition_Failure with "null unit argument";
       end if;
 
-      Populate_Lexical_Env (Unwrap_Unit (Unit));
+      Populate_Lexical_Env
+        (Unwrap_Unit (Unit), ${"PLE_Root_Index" if ctx.ple_unit_root else 1});
    end Populate_Lexical_Env;
 
    ------------------

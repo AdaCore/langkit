@@ -1,0 +1,29 @@
+== empty ==
+
+  a -> None
+  b -> None
+  c -> None
+  d -> None
+
+== single ==
+
+  a -> <Scope helper.txt:1:1-1:13>
+  b -> <Def helper.txt:1:9-1:10>
+  c -> None
+  d -> None
+
+== complete ==
+
+  a -> <Scope helper.txt:2:1-2:13>
+  b -> <Def helper.txt:2:9-2:10>
+  c -> None
+  d -> None
+
+== complete - PLE all ==
+
+  a -> <Scope helper.txt:1:1-1:15>
+  b -> <Def helper.txt:1:9-1:10>
+  c -> <Def helper.txt:1:11-1:12>
+  d -> None
+
+Done

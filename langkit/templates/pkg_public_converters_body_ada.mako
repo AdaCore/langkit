@@ -91,32 +91,64 @@ package body ${ada_lib_name}.Public_Converters is
    end Dec_Ref;
 
    -----------------------
-   -- Get_Unit_Filename --
+   -- Get_Unit_Location --
    -----------------------
 
-   overriding function Get_Unit_Filename
-     (Provider : Unit_Provider_Wrapper;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind) return String
-   is (Provider.Internal.Get.Get_Unit_Filename (Name, Kind));
-
-   --------------
-   -- Get_Unit --
-   --------------
-
-   overriding function Get_Unit
-     (Provider    : Unit_Provider_Wrapper;
-      Context     : Internal_Context;
-      Name        : Text_Type;
-      Kind        : Analysis_Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False) return Internal_Unit
+   overriding procedure Get_Unit_Location
+     (Provider       : Unit_Provider_Wrapper;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out Unbounded_String;
+      PLE_Root_Index : out Positive)
    is
-      Ctx : constant Analysis_Context := Wrap_Context (Context);
+      --  If Get_Unit_Location is not implemented (Index left to 0), fallback
+      --  to the Get_Unit_Filename primitive.
+
+      Index : Natural := 0;
    begin
-      return Unwrap_Unit (Provider.Internal.Get.Get_Unit
-        (Ctx, Name, Kind, Charset, Reparse));
-   end Get_Unit;
+      Provider.Internal.Get.Get_Unit_Location (Name, Kind, Filename, Index);
+      if Index = 0 then
+         Filename := To_Unbounded_String
+           (Provider.Internal.Get.Get_Unit_Filename (Name, Kind));
+         PLE_Root_Index := 1;
+      else
+         PLE_Root_Index := Index;
+      end if;
+   end Get_Unit_Location;
+
+   ---------------------------
+   -- Get_Unit_And_PLE_Root --
+   ---------------------------
+
+   overriding procedure Get_Unit_And_PLE_Root
+     (Provider       : Unit_Provider_Wrapper;
+      Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Charset        : String := "";
+      Reparse        : Boolean := False;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive)
+   is
+      --  If Get_Unit_And_PLE_Root is not implemented (Index left to 0),
+      --  fallback to the Get_Unit primitive.
+
+      Ctx   : constant Analysis_Context := Wrap_Context (Context);
+      U     : Analysis_Unit := Analysis.No_Analysis_Unit;
+      Index : Natural := 0;
+   begin
+      Provider.Internal.Get.Get_Unit_And_PLE_Root
+        (Ctx, Name, Kind, Charset, Reparse, U, Index);
+      if Index = 0 then
+         U := Analysis_Unit
+           (Provider.Internal.Get.Get_Unit
+              (Ctx, Name, Kind, Charset, Reparse));
+         PLE_Root_Index := 1;
+      else
+         PLE_Root_Index := Index;
+      end if;
+      Unit := Unwrap_Unit (U);
+   end Get_Unit_And_PLE_Root;
 
    -----------------------------
    -- Unit_Requested_Callback --

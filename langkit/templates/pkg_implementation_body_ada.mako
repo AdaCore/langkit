@@ -15,7 +15,7 @@ with Ada.Containers.Vectors;
 with Ada.Directories;
 with Ada.Exceptions;
 with Ada.Finalization;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
 pragma Warnings (Off, "internal");
@@ -718,9 +718,13 @@ package body ${ada_lib_name}.Implementation is
             "cannot reparse during tree rewriting";
       end if;
 
+      declare
+         Result      : Internal_Unit;
+         Dummy_Index : Positive;
       begin
-         return Context.Unit_Provider.Get_Unit
-           (Context, Name, Kind, Charset, Reparse);
+         Context.Unit_Provider.Get_Unit_And_PLE_Root
+           (Context, Name, Kind, Charset, Reparse, Result, Dummy_Index);
+         return Result;
       exception
          when ${ctx.property_exception_matcher} =>
             raise Invalid_Unit_Name_Error with
@@ -738,6 +742,93 @@ package body ${ada_lib_name}.Implementation is
    function Unit_Provider
      (Context : Internal_Context) return Internal_Unit_Provider_Access
    is (Context.Unit_Provider);
+
+   ------------------
+   -- Resolve_Unit --
+   ------------------
+
+   procedure Resolve_Unit
+     (Context : Internal_Context;
+      Name    : Text_Type;
+      Kind    : Analysis_Unit_Kind;
+      Unit    : out Resolved_Unit)
+   is
+      --  Look for the cache entry corresponding to Unit; create one if needed
+
+      Dummy    : Resolved_Unit_Array;
+      Key      : constant Symbol_Type := Find (Context.Symbols, Name);
+      Pos      : Unit_Provider_Cache_Maps.Cursor;
+      Inserted : Boolean;
+   begin
+      Context.Unit_Provider_Cache.Insert (Key, Dummy, Pos, Inserted);
+      declare
+         Units : Resolved_Unit_Array renames
+           Context.Unit_Provider_Cache.Reference (Pos);
+         U     : Resolved_Unit renames Units (Kind);
+      begin
+         --  If the cache entry is not populated for the requested kind, run
+         --  the query and save the result for later requests.
+
+         if U.Filename = null then
+            declare
+               Provider : Internal_Unit_Provider'Class renames
+                 Context.Unit_Provider.all;
+               Filename : Unbounded_String;
+            begin
+               Provider.Get_Unit_Location
+                 (Name           => Name,
+                  Kind           => Kind,
+                  Filename       => Filename,
+                  PLE_Root_Index => U.PLE_Root_Index);
+               Provider.Get_Unit_And_PLE_Root
+                 (Context        => Context,
+                  Name           => Name,
+                  Kind           => Kind,
+                  Unit           => U.Unit,
+                  PLE_Root_Index => U.PLE_Root_Index);
+               U.Filename := new String'(To_String (Filename));
+            end;
+         end if;
+
+         Unit := U;
+      end;
+   end Resolve_Unit;
+
+   -----------------------
+   -- Get_Unit_Location --
+   -----------------------
+
+   procedure Get_Unit_Location
+     (Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out String_Access;
+      PLE_Root_Index : out Positive)
+   is
+      U : Resolved_Unit;
+   begin
+      Resolve_Unit (Context, Name, Kind, U);
+      Filename := U.Filename;
+      PLE_Root_Index := U.PLE_Root_Index;
+   end Get_Unit_Location;
+
+   ---------------------------
+   -- Get_Unit_And_PLE_Root --
+   ---------------------------
+
+   procedure Get_Unit_And_PLE_Root
+     (Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive)
+   is
+      U : Resolved_Unit;
+   begin
+      Resolve_Unit (Context, Name, Kind, U);
+      Unit := U.Unit;
+      PLE_Root_Index := U.PLE_Root_Index;
+   end Get_Unit_And_PLE_Root;
 
    ----------
    -- Hash --
@@ -850,6 +941,18 @@ package body ${ada_lib_name}.Implementation is
          AR.Destroy;
       end;
 
+      for Pos in Context.Unit_Provider_Cache.Iterate loop
+         declare
+            Units : Resolved_Unit_Array renames
+              Context.Unit_Provider_Cache.Reference (Pos);
+         begin
+            for U of Units loop
+               Free (U.Filename);
+            end loop;
+         end;
+      end loop;
+      Context.Unit_Provider_Cache.Clear;
+
       Destroy (Context.Templates_Unit);
       AST_Envs.Destroy (Context.Root_Scope);
       Destroy (Context.Symbols);
@@ -908,16 +1011,40 @@ package body ${ada_lib_name}.Implementation is
    -- Populate_Lexical_Env --
    --------------------------
 
-   procedure Populate_Lexical_Env (Unit : Internal_Unit) is
+   procedure Populate_Lexical_Env
+     (Unit           : Internal_Unit;
+      PLE_Root_Index : Positive
+      ## To simplify code generation, generate the PLE_Root_Index argument even
+      ## though we always expect it to be 1 when there are no PLE root for this
+      ## language spec. However, still to simplify code generation, give it a
+      ## default expression in that case.
+      % if not ctx.ple_unit_root:
+         := 1
+      % endif
+   ) is
       Context : constant Internal_Context := Unit.Context;
+
+      Saved_In_Populate_Lexical_Env : constant Boolean :=
+        Context.In_Populate_Lexical_Env;
 
       Has_Errors : Boolean := False;
       --  Whether at least one Property_Error occurred during this PLE pass
 
-      Saved_In_Populate_Lexical_Env : constant Boolean :=
-         Unit.Context.In_Populate_Lexical_Env;
+      procedure Reset_Envs_Caches (Unit : Internal_Unit);
+      --  Reset the env caches of all lexical environments created for ``Unit``
+
+      -----------------------
+      -- Reset_Envs_Caches --
+      -----------------------
 
       procedure Reset_Envs_Caches (Unit : Internal_Unit) is
+         procedure Internal (Node : ${T.root_node.name});
+         --  Reset env caches in ``Node`` and then in its children recursively
+
+         --------------
+         -- Internal --
+         --------------
+
          procedure Internal (Node : ${T.root_node.name}) is
          begin
             if Node = null then
@@ -935,30 +1062,68 @@ package body ${ada_lib_name}.Implementation is
    begin
       --  TODO??? Handle env invalidation when reparsing a unit and when a
       --  previous call raised a Property_Error.
-      if Unit.Is_Env_Populated then
+
+      --  If we have already run PLE on this root, there is nothing to do.
+      --  Otherwise, keep track of the fact that PLE was requested for it,
+      --  possibly extending the vector if needed.
+
+      if Unit.Env_Populated_Roots.Last_Index >= PLE_Root_Index
+         and then Unit.Env_Populated_Roots.Get (PLE_Root_Index)
+      then
          return;
       end if;
-      Unit.Is_Env_Populated := True;
+      for Dummy in Unit.Env_Populated_Roots.Last_Index + 1 .. PLE_Root_Index
+      loop
+         Unit.Env_Populated_Roots.Append (False);
+      end loop;
+      Unit.Env_Populated_Roots.Set (PLE_Root_Index, True);
 
-      if Unit.Ast_Root = null then
-         return;
-      end if;
-
-      GNATCOLL.Traces.Trace (Main_Trace, "Populating lexical envs for unit: "
-                                         & Basename (Unit));
-      if GNATCOLL.Traces.Active (Main_Trace) then
-         GNATCOLL.Traces.Increase_Indent (Main_Trace);
-      end if;
+      --  Create context for the PLE run: all exit points must call the Cleanup
+      --  procedure above first to clean this context.
 
       Context.In_Populate_Lexical_Env := True;
-      Has_Errors := Populate_Lexical_Env (Unit.Ast_Root);
-      Context.In_Populate_Lexical_Env := Saved_In_Populate_Lexical_Env;
+      if Main_Trace.Active then
+         Main_Trace.Trace
+           ("Populating lexical envs for"
+            % if ctx.ple_unit_root:
+            & " root" & PLE_Root_Index'Image & " of"
+            % endif
+            & " unit: " & Basename (Unit));
+         Main_Trace.Increase_Indent;
+      end if;
 
-      if GNATCOLL.Traces.Active (Main_Trace) then
-         GNATCOLL.Traces.Decrease_Indent (Main_Trace);
-         GNATCOLL.Traces.Trace
-           (Main_Trace,
-            "Finished populating lexical envs for unit: " & Basename (Unit));
+      --  Fetch the node on which to run PLE: it's the unit root node, or one
+      --  of its children if PLE roots are enabled and the unit has a list of
+      --  PLE roots. Then run PLE itself.
+
+      declare
+         PLE_Root : ${T.root_node.name} := Unit.Ast_Root;
+      begin
+         % if ctx.ple_unit_root:
+            if Unit.Ast_Root /= null
+               and then Unit.Ast_Root.Kind
+                        = ${ctx.ple_unit_root.list.ada_kind_name}
+            then
+               PLE_Root := Child (Unit.Ast_Root, PLE_Root_Index);
+            end if;
+         % endif
+
+         if PLE_Root /= null then
+            Has_Errors := Populate_Lexical_Env (PLE_Root);
+         end if;
+      end;
+
+      --  Restore the context for PLE run (undo what was done above)
+
+      Context.In_Populate_Lexical_Env := Saved_In_Populate_Lexical_Env;
+      if Main_Trace.Active then
+         Main_Trace.Decrease_Indent;
+         Main_Trace.Trace
+           ("Finished populating lexical envs for"
+            % if ctx.ple_unit_root:
+            & " root" & PLE_Root_Index'Image & " of"
+            % endif
+            & " unit: " & Basename (Unit));
       end if;
 
       Reset_Envs_Caches (Unit);
@@ -969,6 +1134,21 @@ package body ${ada_lib_name}.Implementation is
             "errors occurred in Populate_Lexical_Env";
       end if;
    end Populate_Lexical_Env;
+
+   -----------------------------------
+   -- Populate_Lexical_Env_For_Unit --
+   -----------------------------------
+
+   procedure Populate_Lexical_Env_For_Unit (Node : ${T.root_node.name}) is
+      Root  : ${T.root_node.name};
+      Index : Natural;
+   begin
+      Lookup_PLE_Root (Node, Root, Index);
+      if Index = 0 then
+         Index := 1;
+      end if;
+      Populate_Lexical_Env (Node.Unit, Index);
+   end Populate_Lexical_Env_For_Unit;
 
    ------------------
    -- Get_Filename --
@@ -1087,6 +1267,82 @@ package body ${ada_lib_name}.Implementation is
    begin
       return Wrap_Token_Reference (Unit.Context, Unit.TDH'Access, Result);
    end Lookup_Token;
+
+   ---------------------
+   -- Lookup_PLE_Root --
+   ---------------------
+
+   procedure Lookup_PLE_Root
+     (Node  : ${T.root_node.name};
+      Root  : out ${T.root_node.name};
+      Index : out Natural)
+   is
+      Unit : constant Internal_Unit := Node.Unit;
+   begin
+      --  If this unit does not contain a list of PLE roots, just return the
+      --  unit root node.
+
+      if Unit.PLE_Roots_Starting_Token.Is_Empty then
+         Root := Unit.Ast_Root;
+         Index := 0;
+         return;
+      end if;
+
+      --  Otherwise, look for the last PLE root whose first token (in
+      --  Unit.PLE_Roots_Starting_Token) appears before Node's (T). This vector
+      --  is sorted by construction, so we can perform a binary search.
+
+      declare
+         T      : constant Token_Index := Node.Token_Start_Index;
+         Tokens : Token_Index_Vectors.Vector renames
+           Unit.PLE_Roots_Starting_Token;
+
+         First : Positive := Tokens.First_Index;
+         Last  : Positive := Tokens.Last_Index;
+         I     : Positive;
+      begin
+         while First < Last loop
+
+            --  Because we look for the "floor" (last element that is <= T), we
+            --  need to look at the value in Last when there are only two
+            --  elements left to look at. If we did not do that, then we would
+            --  go into an infinite loop when Tokens[First] < T.
+
+            I := (if First + 1 = Last
+                  then Last
+                  else (First + Last) / 2);
+            declare
+               I_T : constant Token_Index := Tokens.Get (I);
+            begin
+               if I_T <= T then
+                  First := I;
+               else
+                  Last := I - 1;
+               end if;
+            end;
+         end loop;
+
+         Root := Child (Unit.Ast_Root, First);
+         Index := First;
+      end;
+   end Lookup_PLE_Root;
+
+   --------------
+   -- Ple_Root --
+   --------------
+
+   function Ple_Root
+     (Node : ${T.root_node.name}) return ${T.root_node.name}
+   is
+      Root        : ${T.root_node.name};
+      Dummy_Index : Natural;
+   begin
+      if Node = null then
+         raise Property_Error with "null node dereference";
+      end if;
+      Lookup_PLE_Root (Node, Root, Dummy_Index);
+      return Root;
+   end Ple_Root;
 
    ----------------------
    -- Dump_Lexical_Env --
@@ -1217,6 +1473,8 @@ package body ${ada_lib_name}.Implementation is
       if Unit = No_Analysis_Unit then
          return;
       end if;
+
+      Unit.Env_Populated_Roots.Destroy;
 
       Unit.Exiled_Entries.Destroy;
       Unit.Foreign_Nodes.Destroy;
@@ -2386,26 +2644,15 @@ package body ${ada_lib_name}.Implementation is
       end Register_Foreign_Env;
 
    begin
-      --  This function is meant to be called during an existing PLE pass. If
-      --  if is called outside of this context, run the PLE pass on Node's
-      --  analysis unit. Likewise, if PLE has not run on the unit that owns
-      --  this PLE unit yet, do a full run, which will in the end trigger the
-      --  PLE on this PLE unit.
-      --
-      --  We do this so that as soon as PLE is required on a PLE unit: the
-      --  whole unit end up with its lexical environments populated.
-      if not Context.In_Populate_Lexical_Env then
-         begin
-            Populate_Lexical_Env (Node.Unit);
-            return False;
-         exception
-            when ${ctx.property_exception_matcher} =>
-               return True;
-         end;
-      end if;
-
-      --  This is intended to be called on the root node only
-      if Node.Parent /= null then
+      --  This is intended to be called on the root node only (when there is no
+      --  PLE root) or on a PLE root (child of the root node with a specific
+      --  kind).
+      if
+         Node.Parent /= null
+         % if ctx.ple_unit_root:
+            and then Node.Kind /= ${ctx.ple_unit_root.ada_kind_name}
+         % endif
+      then
          raise Program_Error;
       end if;
 
@@ -4363,7 +4610,6 @@ package body ${ada_lib_name}.Implementation is
          Charset                      => To_Unbounded_String (Charset),
          TDH                          => <>,
          Diagnostics                  => <>,
-         Is_Env_Populated             => False,
          Rule                         => Rule,
          Ast_Mem_Pool                 => No_Pool,
          Destroyables                 => Destroyable_Vectors.Empty_Vector,
@@ -4789,35 +5035,49 @@ package body ${ada_lib_name}.Implementation is
       Unit.Unit_Version := Unit.Unit_Version + 1;
       Unit.TDH.Version := Unit.Unit_Version;
 
+      --  Compute the PLE_Roots_Starting_Token table
 
-      --  If Unit had its lexical environments populated, re-populate them
-      if not Unit.Is_Env_Populated then
-         return;
-      end if;
+      Unit.PLE_Roots_Starting_Token.Clear;
+      % if ctx.ple_unit_root:
+         if Unit.Ast_Root /= null
+            and then Unit.Ast_Root.Kind
+                     = ${ctx.ple_unit_root.list.ada_kind_name}
+         then
+            for I in 1 .. Children_Count (Unit.Ast_Root) loop
+               Unit.PLE_Roots_Starting_Token.Append
+                 (Child (Unit.Ast_Root, I).Token_Start_Index);
+            end loop;
+         end if;
+      % endif
+
+      --  Update all the lexical envs entries affected by the reparse
 
       declare
          Unit_Name     : constant String := +Unit.Filename.Base_Name;
          Context       : constant Internal_Context := Unit.Context;
          Foreign_Nodes : ${T.root_node.name}_Vectors.Vector :=
-            ${T.root_node.name}_Vectors.Empty_Vector;
+           ${T.root_node.name}_Vectors.Empty_Vector;
 
          Saved_In_Populate_Lexical_Env : constant Boolean :=
-            Context.In_Populate_Lexical_Env;
+           Context.In_Populate_Lexical_Env;
+         Saved_Env_Populated_Roots     : constant Boolean_Vectors.Vector :=
+           Unit.Env_Populated_Roots;
       begin
-         GNATCOLL.Traces.Trace
-           (Main_Trace, "Updating lexical envs for " & Unit_Name
-                        & " after reparse");
-         GNATCOLL.Traces.Increase_Indent (Main_Trace);
-
          Context.In_Populate_Lexical_Env := True;
+         if Main_Trace.Active then
+            Main_Trace.Trace
+              ("Updating lexical envs for " & Unit_Name & " after reparse");
+            Main_Trace.Increase_Indent;
+         end if;
 
          --  Collect all nodes that are foreign in this Unit's lexical envs.
          --  Exclude them from the corresponding lists of exiled entries.
          Extract_Foreign_Nodes (Unit, Foreign_Nodes);
 
-         --  Reset the flag so that the call to Populate_Lexical_Env below does
-         --  its work.
-         Unit.Is_Env_Populated := False;
+         --  Temporarily reset Env_Populated_Roots so that Populate_Lexical_Env
+         --  accepts to do its work on reparsed trees.
+
+         Unit.Env_Populated_Roots := Boolean_Vectors.Empty_Vector;
 
          --  Now that Unit has been reparsed, we can destroy all its
          --  destroyables, which refer to the old tree (i.e. dangling
@@ -4837,9 +5097,42 @@ package body ${ada_lib_name}.Implementation is
          end loop;
          Foreign_Nodes.Destroy;
 
-         Populate_Lexical_Env (Unit);
+         --  Re-populate all PLE roots that were requested so far for this
+         --  unit. In the case where the unit has no PLE root, run PLE on the
+         --  whole unit iff it was requested on at least one PLE root.
+
+         declare
+            function At_Least_One_Root_Populated return Boolean
+            is (for some B of Saved_Env_Populated_Roots => B);
+         begin
+            % if ctx.ple_unit_root:
+               if not Unit.PLE_Roots_Starting_Token.Is_Empty then
+                  for I in 1 .. Children_Count (Unit.Ast_Root) loop
+                     if Saved_Env_Populated_Roots.Last_Index >= I
+                        and then Saved_Env_Populated_Roots.Get (I)
+                     then
+                        Populate_Lexical_Env (Unit, I);
+                     end if;
+                  end loop;
+               elsif At_Least_One_Root_Populated then
+                  Populate_Lexical_Env (Unit, 1);
+               end if;
+            % else:
+               if At_Least_One_Root_Populated then
+                  Populate_Lexical_Env (Unit);
+               end if;
+            % endif
+         end;
+
+         --  Restore the unit's original Env_Populated_Roots flags
+
+         Unit.Env_Populated_Roots.Destroy;
+         Unit.Env_Populated_Roots := Saved_Env_Populated_Roots;
+
          Context.In_Populate_Lexical_Env := Saved_In_Populate_Lexical_Env;
-         GNATCOLL.Traces.Decrease_Indent (Main_Trace);
+         if Main_Trace.Is_Active then
+            Main_Trace.Decrease_Indent;
+         end if;
       end;
    end Update_After_Reparse;
 

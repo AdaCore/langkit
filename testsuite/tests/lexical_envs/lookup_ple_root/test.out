@@ -1,0 +1,27 @@
+== No PLE root ==
+
+PLE root for <Var main.txt:1:1-1:6>: <Var main.txt:1:1-1:6>
+PLE root for <Identifier main.txt:1:1-1:2>: <Var main.txt:1:1-1:6>
+PLE root for <Identifier main.txt:1:5-1:6>: <Var main.txt:1:1-1:6>
+
+== Root is PLE root ==
+
+PLE root for <Scope main.txt:1:1-1:4>: <Scope main.txt:1:1-1:4>
+PLE root for <IdentifierList main.txt:1:2-1:3>: <Scope main.txt:1:1-1:4>
+PLE root for <Identifier main.txt:1:2-1:3>: <Scope main.txt:1:1-1:4>
+
+== Several roots ==
+
+PLE root for <ScopeList main.txt:1:1-3:5>: <Scope main.txt:1:1-1:4>
+PLE root for <Scope main.txt:1:1-1:4>: <Scope main.txt:1:1-1:4>
+PLE root for <IdentifierList main.txt:1:2-1:3>: <Scope main.txt:1:1-1:4>
+PLE root for <Identifier main.txt:1:2-1:3>: <Scope main.txt:1:1-1:4>
+PLE root for <Scope main.txt:2:2-2:7>: <Scope main.txt:2:2-2:7>
+PLE root for <IdentifierList main.txt:2:3-2:6>: <Scope main.txt:2:2-2:7>
+PLE root for <Identifier main.txt:2:3-2:4>: <Scope main.txt:2:2-2:7>
+PLE root for <Identifier main.txt:2:5-2:6>: <Scope main.txt:2:2-2:7>
+PLE root for <Scope main.txt:3:2-3:5>: <Scope main.txt:3:2-3:5>
+PLE root for <IdentifierList main.txt:3:3-3:4>: <Scope main.txt:3:2-3:5>
+PLE root for <Identifier main.txt:3:3-3:4>: <Scope main.txt:3:2-3:5>
+
+Done

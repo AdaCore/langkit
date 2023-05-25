@@ -200,7 +200,8 @@
 
    <% elt_type = cls.element_type.name %>
 
-   % if cls.requires_vector and cls.element_type != ctx.root_grammar_class:
+   % if cls.requires_vector \
+        and cls.element_type not in (ctx.root_grammar_class, T.Bool):
       package ${cls.pkg_vector} is new Langkit_Support.Vectors (${elt_type});
    % endif
 

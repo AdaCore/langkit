@@ -395,7 +395,12 @@ ${capi.get_name("unit_reparse_from_buffer")} (${analysis_unit_type} unit,
 
 ${c_doc('langkit.unit_populate_lexical_env')}
 extern int
-${capi.get_name("unit_populate_lexical_env")}(${analysis_unit_type} unit);
+${capi.get_name("unit_populate_lexical_env")}(
+    ${analysis_unit_type} unit
+    % if ctx.ple_unit_root:
+       , int ple_root_index
+    % endif
+);
 
 /*
  * General AST node primitives

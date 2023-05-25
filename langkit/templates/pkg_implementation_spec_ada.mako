@@ -32,7 +32,7 @@ with Langkit_Support.Adalog.Logic_Var;
 with Langkit_Support.Adalog.Solver;
 with Langkit_Support.Adalog.Solver_Interface;
 
-with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
@@ -1438,22 +1438,43 @@ private package ${ada_lib_name}.Implementation is
    is abstract;
    ${ada_doc('langkit.unit_provider_dec_ref', 3)}
 
-   function Get_Unit_Filename
-     (Provider : Internal_Unit_Provider;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind) return String is abstract;
-   ${ada_doc('langkit.unit_provider_get_unit_filename', 3)}
+   procedure Get_Unit_Location
+     (Provider       : Internal_Unit_Provider;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out Unbounded_String;
+      PLE_Root_Index : out Positive) is abstract;
+   --  See the public ``Get_Unit_Location`` procedure
 
-   function Get_Unit
-     (Provider    : Internal_Unit_Provider;
-      Context     : Internal_Context;
-      Name        : Text_Type;
-      Kind        : Analysis_Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False) return Internal_Unit is abstract;
-   ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
+   procedure Get_Unit_And_PLE_Root
+     (Provider       : Internal_Unit_Provider;
+      Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Charset        : String := "";
+      Reparse        : Boolean := False;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive) is abstract;
+   --  See the public ``Get_Unit_And_PLE_Root`` procedure
 
    procedure Dec_Ref (Provider : in out Internal_Unit_Provider_Access);
+
+   type Resolved_Unit is record
+      Unit           : Internal_Unit;
+      Filename       : String_Access;
+      PLE_Root_Index : Positive;
+   end record;
+   --  Cache entry for requests to unit providers
+
+   type Resolved_Unit_Array is array (Analysis_Unit_Kind) of Resolved_Unit;
+   --  One cache entry per unit kind, i.e. all cache entries needed for a given
+   --  unit name.
+
+   package Unit_Provider_Cache_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Symbol_Type,
+      Element_Type    => Resolved_Unit_Array,
+      Equivalent_Keys => "=",
+      Hash            => Hash);
 
    --------------------------------------
    -- Event handler internal interface --
@@ -1542,6 +1563,9 @@ private package ${ada_lib_name}.Implementation is
       Unit_Provider : Internal_Unit_Provider_Access;
       --  Object to translate unit names to file names
 
+      Unit_Provider_Cache : Unit_Provider_Cache_Maps.Map;
+      --  Cache for the Unit_Provider.Get_Unit_And_PLE_Root primitive
+
       Parser : Parser_Type;
       --  Main parser type. TODO: If we want to parse in several tasks, we'll
       --  replace that by an array of parsers.
@@ -1602,6 +1626,8 @@ private package ${ada_lib_name}.Implementation is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
+   package Boolean_Vectors is new Langkit_Support.Vectors (Boolean);
+
    type Analysis_Unit_Type is limited record
       --  Start of ABI area. In order to perform fast checks from foreign
       --  languages, we maintain minimal ABI for analysis context: this allows
@@ -1661,10 +1687,23 @@ private package ${ada_lib_name}.Implementation is
       --  Units that are referenced from this one. Useful for
       --  visibility/computation of the reference graph.
 
-      Is_Env_Populated : Boolean;
-      --  Whether Populate_Lexical_Env was called on this unit. Used not to
-      --  populate multiple times the same unit and hence avoid infinite
-      --  populate recursions for circular dependencies.
+      PLE_Roots_Starting_Token : Token_Index_Vectors.Vector;
+      --  If this unit contains a list of PLE roots, then for each PLE root,
+      --  this vector contains a reference to the first token that is part of
+      --  it. Otherwise, this vector is empty.
+      --
+      --  This table is initialized after each parsing and allows to quickly
+      --  look for the PLE root corresponding to some token, and thus to some
+      --  node in this unit (see the ``Lookup_PLE_Root`` function).
+
+      Env_Populated_Roots : Boolean_Vectors.Vector;
+      --  For each PLE root in this unit, indicates whether
+      --  Populate_Lexical_Env was called on it.
+      --
+      --  Note that this vector may contain less or more elements than the
+      --  number of PLE roots in this unit: this allows not to run PLE twice on
+      --  each root, and to keep track on which roots PLE should be run after a
+      --  reparse. "Missing" elements in this vector are considered False.
 
       Exiled_Entries : Exiled_Entry_Vectors.Vector;
       --  Lexical env population for this unit may have added AST nodes it owns
@@ -1836,6 +1875,30 @@ private package ${ada_lib_name}.Implementation is
      (Context : Internal_Context) return Internal_Unit_Provider_Access;
    --  Implementation for Analysis.Unit_Provider
 
+   procedure Resolve_Unit
+     (Context : Internal_Context;
+      Name    : Text_Type;
+      Kind    : Analysis_Unit_Kind;
+      Unit    : out Resolved_Unit);
+   --  Completely resolve the requested unit. The result is cached: later calls
+   --  for the same name/kind will have constant complexity.
+
+   procedure Get_Unit_Location
+     (Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Filename       : out String_Access;
+      PLE_Root_Index : out Positive);
+   --  Caching wrapper around Context.Unit_Provider.Get_Unit_Location
+
+   procedure Get_Unit_And_PLE_Root
+     (Context        : Internal_Context;
+      Name           : Text_Type;
+      Kind           : Analysis_Unit_Kind;
+      Unit           : out Internal_Unit;
+      PLE_Root_Index : out Positive);
+   --  Caching wrapper around Context.Unit_Provider.Get_Unit_And_PLE_Root
+
    function Hash (Context : Internal_Context) return Hash_Type;
    --  Implementation for Analysis.Hash
 
@@ -1882,8 +1945,22 @@ private package ${ada_lib_name}.Implementation is
      (Unit : Internal_Unit; Charset : String; Buffer  : String);
    --  Implementation for Analysis.Reparse
 
-   procedure Populate_Lexical_Env (Unit : Internal_Unit);
+   procedure Populate_Lexical_Env
+     (Unit           : Internal_Unit;
+      PLE_Root_Index : Positive
+      ## To simplify code generation, generate the PLE_Root_Index argument even
+      ## though we always expect it to be 1 when there are no PLE root for this
+      ## language spec. However, still to simplify code generation, give it a
+      ## default expression in that case.
+      % if not ctx.ple_unit_root:
+         := 1
+      % endif
+      );
    --  Implementation for Analysis.Populate_Lexical_Env
+
+   procedure Populate_Lexical_Env_For_Unit (Node : ${T.root_node.name});
+   --  Populate the lexical environment for the PLE root that owns ``Node``, or
+   --  for the whole unit if there is no PLE root.
 
    function Get_Filename (Unit : Internal_Unit) return String;
    --  Implementation for Analysis.Get_Filename
@@ -1922,6 +1999,14 @@ private package ${ada_lib_name}.Implementation is
    function Lookup_Token
      (Unit : Internal_Unit; Sloc : Source_Location) return Token_Reference;
    --  Implementation for Analysis.Lookup_Token
+
+   procedure Lookup_PLE_Root
+     (Node  : ${T.root_node.name};
+      Root  : out ${T.root_node.name};
+      Index : out Natural);
+   --  Look for the PLE root that owns this node. If there is one, assign it to
+   --  ``Root`` and assign its index in the list of PLE roots to ``Index``. If
+   --  there is none, set ``Root`` to the unit root node and ``Index`` to 0.
 
    procedure Dump_Lexical_Env (Unit : Internal_Unit);
    --  Implementation for Analysis.Dump_Lexical_Env

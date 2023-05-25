@@ -1,0 +1,47 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(
+        | pick(scope @termination)
+        | pick(list*(scope) @termination)
+    )
+    scope <- Scope(id "{" ?deps ?defs refs "}")
+    deps <- pick("+" "{" list*(Dep(@identifier)) "}")
+    defs <- pick("def" "{" list*(Def(id)) "}")
+    refs <- list*(Ref(@identifier))
+    id <- Id(@identifier)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Def : FooNode {
+    @parse_field name: Id
+}
+
+class Id : FooNode implements TokenNode {
+
+    @external fun referenced_scope_or_error(or_error: Bool): Scope
+
+    @export fun referenced_scope(): Scope =
+    node.referenced_scope_or_error(false).as_bare_entity
+
+    fun referenced_env(): LexicalEnv[FooNode] =
+    node.resolve().as[Scope]?.children_env()
+
+    @export fun resolve(): FooNode = node.node_env().get_first(node)
+}
+
+class Dep : Id implements TokenNode {
+}
+
+class Ref : Id implements TokenNode {
+}
+
+class Scope : FooNode {
+    @parse_field name: Id
+    @parse_field deps: ASTList[FooNode, Dep]
+    @parse_field defs: ASTList[FooNode, Def]
+    @parse_field refs: ASTList[FooNode, Ref]
+}

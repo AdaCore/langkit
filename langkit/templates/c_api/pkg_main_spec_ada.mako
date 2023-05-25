@@ -435,8 +435,11 @@ private package ${ada_lib_name}.Implementation.C is
    ${ada_c_doc('langkit.unit_reparse_buffer', 3)}
 
    function ${capi.get_name('unit_populate_lexical_env')}
-     (Unit : ${analysis_unit_type})
-      return int
+     (Unit : ${analysis_unit_type}
+      % if ctx.ple_unit_root:
+          ; PLE_Root_Index : int
+      % endif
+   ) return int
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('unit_populate_lexical_env')}";
