@@ -162,7 +162,11 @@
       is
          Record_Ref : constant Boxed_${cls.api_name}.Element_Access :=
             Internal_Access (Value);
-         Result     : ${cls.name};
+         Result     : ${cls.name}${(
+             f" := {cls.nullexpr};"
+             if cls.is_empty else
+             ";"
+         )}
       begin
          % for f in cls.get_fields():
             <%
@@ -225,7 +229,7 @@
                ${extensions}
             % endfor
          % else:
-            null;
+            Dummy : Character;
          % endif
       end record
         with Convention => C;
@@ -273,7 +277,7 @@
             % endfor
       );
       % else:
-      (null record);
+      (Dummy => Character'Val (0));
       % endif
    % endif
 </%def>
@@ -361,7 +365,7 @@
          % else:
             return
               ("("
-               % if not cls.get_fields():
+               % if cls.is_empty:
                   & "null record"
                % else:
                   % for i, f in enumerate (cls.get_fields()):

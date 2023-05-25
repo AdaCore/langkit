@@ -44,7 +44,8 @@ project Gen is
     package Compiler is
         for Default_Switches ("Ada") use
           ("-g", "-O0", "-gnata", "-gnatwae", "-gnatyg");
-        for Default_Switches ("C") use ("-g", "-O0", "-Wall", "-W", "-Werror");
+        for Default_Switches ("C") use
+          ("-g", "-O0", "-Wall", "-W", "-Werror", "-pedantic");
     end Compiler;
 end Gen;
 """

@@ -664,7 +664,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
         :param typ: The type we want to register in the graph.
         """
-        for f in typ.get_fields(lambda t: not self.is_empty_type(t.type)):
+        for f in typ.get_fields():
             self.add_dep(typ, f.type)
 
     def register_array_type(self, typ: ct.CompiledType) -> None:

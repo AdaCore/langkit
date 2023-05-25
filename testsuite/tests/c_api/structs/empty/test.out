@@ -1,0 +1,4 @@
+ROOT IMAGE = "<Example main.txt:1:1-1:8>"
+BIG INTEGER = "42"
+CHARACTER = 88
+Done

@@ -10,7 +10,7 @@
     flatten_fields = api.flatten_struct_fields(fields)
     %>
 
-    % if len(cls.get_fields()) > 0:
+    % if not cls.is_empty:
     ${java_doc(cls, 4)}
     public static final class ${java_type} {
 
@@ -122,6 +122,63 @@
         % endif
 
     }
+    % else:
+    public static final class ${java_type} {
+
+        // ----- Class attributes -----
+
+        /** Singleton that represents the none value for the structure. */
+        public static final ${java_type} NONE = new ${java_type}();
+
+        // ----- Instance attributes ------
+
+        /** The dummy field is always false (0) */
+        final boolean dummy = false;
+
+        // ----- Constructors -----
+
+        /**
+         * An empty constructor because the structure is empty
+         */
+        ${java_type}() {}
+
+        // ----- Graal C API methods -----
+
+        /**
+         * Wrap a pointer to the native structure value in the Java class.
+         *
+         * @param niPointer The pointer to the NI structure native value.
+         * @return The None instance because the structure is empty.
+         */
+        static ${java_type} wrap(
+            final Pointer niPointer
+        ) {
+            return ${java_type}.NONE;
+        }
+
+        /**
+         * Unwrap the structure in the given native value.
+         *
+         * @param structNative The NI structure native value to fill.
+         */
+        void unwrap(
+            final ${ni_type} structNative
+        ) {
+            // Do nothing because the dummy field is useless
+        }
+
+        % if cls.is_refcounted:
+        /**
+         * Release the structure.
+         *
+         * @param structNative The native structure to release.
+         */
+        static void release(${ni_type} structNative) {
+            NI_LIB.${cls.c_dec_ref(capi)}(structNative);
+        }
+        % endif
+
+    }
     % endif
 </%def>
 
@@ -135,7 +192,7 @@
     flatten_fields = api.flatten_struct_fields(api.get_struct_fields(cls))
     %>
 
-    % if len(cls.get_fields()) > 0:
+    % if not cls.is_empty:
     /** The structure for the langkit ${c_type} */
     @CContext(LibDirectives.class)
     @CStruct("${c_type}")
@@ -145,15 +202,22 @@
         public ${api.ni_type(field.public_type)}
         get_${field.native_access}();
 
-        @CFieldAddress("${field.custom_access('.')}")
-        public <T extends PointerBase> T address_${field.native_access}();
-
         @CField("${field.custom_access('.')}")
         public void
         set_${field.native_access}(
             ${api.ni_type(field.public_type)} val
         );
+
+        @CFieldAddress("${field.custom_access('.')}")
+        public <T extends PointerBase> T address_${field.native_access}();
         % endfor
+    }
+    % else:
+    @CContext(LibDirectives.class)
+    @CStruct("${c_type}")
+    public interface ${ni_type} extends PointerBase {
+        @CField("dummy") public byte get_dummy();
+        @CField("dummy") public void set_dummy(byte dummy);
     }
     % endif
 </%def>
@@ -190,19 +254,22 @@
     %>
 
 ${c_type} ${java_type}_new_value();
-% if len(cls.get_fields()) > 0:
 jobject ${java_type}_wrap(JNIEnv *, ${c_type});
 ${c_type} ${java_type}_unwrap(JNIEnv *, jobject);
-    % if cls.is_refcounted:
-    void ${java_type}_release(${c_type});
-    % endif
+
+% if cls.is_refcounted:
+void ${java_type}_release(${c_type});
+% endif
 
 jclass ${java_type}_class_ref = NULL;
+% if len(fields) > 0:
 jmethodID ${java_type}_constructor_id = NULL;
+% else:
+jfieldID ${java_type}_none_field_id = NULL;
+% endif
 % for field in fields:
 jfieldID ${java_type}_${field.native_name}_field_id = NULL;
 % endfor
-% endif
 
 </%def>
 
@@ -220,7 +287,6 @@ jfieldID ${java_type}_${field.native_name}_field_id = NULL;
     ])
     %>
 
-    % if len(cls.get_fields()) > 0:
     ${java_type}_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(
@@ -229,12 +295,21 @@ jfieldID ${java_type}_${field.native_name}_field_id = NULL;
         )
     );
 
+    % if len(fields) > 0:
     ${java_type}_constructor_id = (*env)->GetMethodID(
         env,
         ${java_type}_class_ref,
         "<init>",
         "(${constructor_sig})V"
     );
+    % else:
+    ${java_type}_none_field_id = (*env)->GetStaticFieldID(
+        env,
+        ${java_type}_class_ref,
+        "NONE",
+        "L${sig_base}$${java_type};"
+    );
+    % endif
 
     % for field in fields:
     ${java_type}_${field.native_name}_field_id = (*env)->GetFieldID(
@@ -244,7 +319,6 @@ jfieldID ${java_type}_${field.native_name}_field_id = NULL;
         "${api.jni_sig_type(field.public_type, sig_base)}"
     );
     % endfor
-    % endif
 </%def>
 
 <%def name="jni_c_impl(cls)">
@@ -259,20 +333,26 @@ jfieldID ${java_type}_${field.native_name}_field_id = NULL;
 
 // Create a new value for a langkit ${c_type}
 ${c_type} ${java_type}_new_value() {
+    % if len(fields) > 0:
     ${c_type} res = {
         % for f in cls.get_fields():
         ${api.jni_new_value(f.type)},
         % endfor
     };
+    % else:
+    ${c_type} res = {
+        0,
+    };
+    % endif
     return res;
 }
 
-% if len(cls.get_fields()) > 0:
 // Wrap a native ${c_type} in the Java wrapping class
 jobject ${java_type}_wrap(
     JNIEnv *env,
     ${c_type} native_struct
 ) {
+    % if len(fields) > 0:
     // Return the new Java instance
     return (*env)->NewObject(
         env,
@@ -287,6 +367,14 @@ jobject ${java_type}_wrap(
             for field in fields
         ])}
     );
+    % else:
+    // Return the None instance because there is no need of new one
+    return (*env)->GetStaticObjectField(
+        env,
+        ${java_type}_class_ref,
+        ${java_type}_none_field_id
+    );
+    % endif
 }
 
 // Get a native ${c_type} from a Java wrapping instance
@@ -322,13 +410,12 @@ ${c_type} ${java_type}_unwrap(
     return res;
 }
 
-    % if cls.is_refcounted:
+% if cls.is_refcounted:
 // Decrease the reference counter of the given structure
 void ${java_type}_release(
     ${c_type} struct_native
 ) {
     ${cls.c_dec_ref(capi)}(&struct_native);
 }
-    % endif
 % endif
 </%def>

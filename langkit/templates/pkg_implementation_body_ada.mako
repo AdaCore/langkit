@@ -3642,7 +3642,7 @@ package body ${ada_lib_name}.Implementation is
    function Combine
      (L, R : ${T.env_md.name}) return ${T.env_md.name}
    is
-      % if not T.env_md.get_fields():
+      % if T.env_md.is_empty:
       pragma Unreferenced (L, R);
       % endif
       Ret : ${T.env_md.name} := ${T.env_md.nullexpr};

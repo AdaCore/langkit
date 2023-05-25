@@ -4,11 +4,15 @@
 
 <% type_name = cls.c_type(capi).name %>
 
-typedef struct {
-    % for f in cls.get_fields():
-        ${f.type.c_type(capi).name} ${f.name};
-    % endfor
-} ${type_name};
+% if cls.is_empty:
+    typedef struct {char dummy;} ${type_name};
+% else:
+    typedef struct {
+        % for f in cls.get_fields():
+            ${f.type.c_type(capi).name} ${f.name};
+        % endfor
+    } ${type_name};
+% endif
 
 % if cls.is_refcounted:
     /* Increment the ref-count of all components in "r".  */

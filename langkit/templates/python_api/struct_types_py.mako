@@ -1,7 +1,8 @@
 ## vim: filetype=makopython
 
 <%def name="ctype_fields(cls)"> [
-    % for field in cls.get_fields():
+    % if not cls.is_empty:
+        % for field in cls.get_fields():
         ('${field.name.lower}',
          ## At this point in the binding, no array type has been emitted
          ## yet, so use a generic pointer: we will do the conversion later
@@ -12,7 +13,10 @@
             ${pyapi.c_type(field.type)}
          % endif
          ),
-    % endfor
+        % endfor
+    % else:
+        ('dummy', ctypes.c_byte),
+    % endif
 ] </%def>
 
 <%def name="base_decls()">
@@ -39,7 +43,11 @@ class _BaseStruct:
             raise IndexError('There is no {}th field'.format(key))
 
     def __repr__(self) -> str:
-        field_names = [name for name, _ in self._c_type._fields_]
+        field_names = [
+            name
+            for name, _ in self._c_type._fields_
+            if hasattr(self, name)
+        ]
         if field_names:
             fields_suffix = (
                 " "

@@ -278,13 +278,12 @@ class JavaAPISettings(AbstractAPISettings):
         res = []
         for field in struct.get_fields():
             if field.type.is_struct_type:
-                if field.type.get_fields():
-                    inner_fields = self.get_struct_fields(field.type)
-                    res.append(StructField(
-                        field.name.lower,
-                        field.type,
-                        inner_fields
-                    ))
+                inner_fields = self.get_struct_fields(field.type)
+                res.append(StructField(
+                    field.name.lower,
+                    field.type,
+                    inner_fields
+                ))
             else:
                 res.append(StructField(field.name.lower, field.type))
         return res
@@ -341,16 +340,22 @@ class JavaAPISettings(AbstractAPISettings):
         # Compute the flat the given field
         res = []
         for field in to_flatten:
-            if field.fields:
+            if field.fields is None:
+                res.append(FlatStructField(
+                    field.lower_name,
+                    field.public_type,
+                    base
+                ))
+            elif field.fields:
                 res.extend(self.flatten_struct_fields(
                     field.fields,
                     base + [field.lower_name]
                 ))
             else:
                 res.append(FlatStructField(
-                    field.lower_name,
-                    field.public_type,
-                    base
+                    "dummy",
+                    T.Bool,
+                    base + [field.lower_name]
                 ))
         return res
 
@@ -853,16 +858,7 @@ class JavaAPISettings(AbstractAPISettings):
 
         field_type = self.wrapping_type(field.public_type, False)
         wrapper_class = self.wrapper_class(field.public_type, False)
-        if field.fields:
-            inside = [
-                self.ni_field_wrap(
-                    inner_field,
-                    base + [field.native_name]
-                )
-                for inner_field in field.fields
-            ]
-            return f"new {field_type}({', '.join(inside)})"
-        else:
+        if field.fields is None:
             field_name = "_".join(base + [field.native_name])
             getter = f"structNative.get_{field_name}()"
             return dispatch_on_type(field.public_type, [
@@ -873,6 +869,17 @@ class JavaAPISettings(AbstractAPISettings):
                     object, lambda t: f"{wrapper_class}.wrap({getter})"
                 ),
             ])
+        elif field.fields:
+            inside = [
+                self.ni_field_wrap(
+                    inner_field,
+                    base + [field.native_name]
+                )
+                for inner_field in field.fields
+            ]
+            return f"new {field_type}({', '.join(inside)})"
+        else:
+            return f"{field_type}.NONE"
 
     def ni_field_unwrap(self, flat: FlatStructField) -> str:
         """
@@ -913,7 +920,8 @@ class JavaAPISettings(AbstractAPISettings):
                 ct.ASTNodeType, lambda _:
                     f"{to_write}.writeWord(0, {getter}.ni());"
             ),
-            (ct.ArrayType, lambda t: f"{getter}.unwrap({to_write});"),
+            (ct.ArrayType, lambda _: f"{getter}.unwrap({to_write});"),
+            (ct.StructType, lambda _: f"{getter}.unwrap({to_write});"),
             (
                 object, lambda t:
                     f"{to_write}.writeWord(0, {getter}.unwrap());"
