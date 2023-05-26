@@ -75,7 +75,7 @@ class BindExpr(CallExpr):
         :param arity: If the functor type handles variadic functions, this
             should be the number of entity arguments to pass to "prop".
         """
-        assocs: List[Tuple[str, LiteralExpr]] = []
+        assocs: List[Tuple[str | names.Name, ResolvedExpression]] = []
 
         if arity is not None:
             assocs.append(("N", IntegerLiteralExpr(arity)))
@@ -87,10 +87,10 @@ class BindExpr(CallExpr):
             ("Cache_Value", LiteralExpr("<>", None)),
         ])
 
-        assocs.extend([
+        assocs.extend(
             (dynvar.argument_name, construct(dynvar))
             for dynvar in prop.dynamic_vars
-        ])
+        )
 
         return aggregate_expr(type_name, assocs)
 

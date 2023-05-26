@@ -7,16 +7,18 @@ import types
 from typing import Any, Callable, List, Optional, Tuple, Union
 
 from langkit import names
-from langkit.compiled_types import CompiledType, get_context
+from langkit.compiled_types import (
+    ASTNodeType, ArrayType, CompiledType, EntityType, get_context,
+)
 from langkit.diagnostics import (
-    check_multiple, check_source_language, check_type
+    check_multiple, check_source_language, check_type, error,
 )
 from langkit.expressions.base import (
     AbstractExpression, AbstractNodeData, AbstractVariable, CallExpr,
     ComputingExpr, FieldAccessExpr, LocalVars, NullCheckExpr, PropertyDef,
     ResolvedExpression, Self, SequenceExpr, T, UncheckedCastExpr, VariableExpr,
-    attr_call, attr_expr, auto_attr, auto_attr_custom, construct, render,
-    unsugar
+    attr_call, attr_expr, auto_attr, auto_attr_custom, construct,
+    construct_var, render, unsugar
 )
 from langkit.expressions.envs import make_as_entity
 
@@ -51,11 +53,12 @@ def canonicalize_list(
     to_root_list=True). Also return the element type for this collection.
     """
     element_type = coll_expr.type.element_type
-    if coll_expr.type.is_ast_node:
+    if isinstance(coll_expr.type, ASTNodeType):
         # Compute the result's type according to to_root_list
         if to_root_list:
             dest_type = coll_expr.type
             while not dest_type.is_root_list_type:
+                assert dest_type.base is not None
                 dest_type = dest_type.base
         else:
             dest_type = get_context().generic_list_type
@@ -187,7 +190,8 @@ class CollectionExpression(AbstractExpression):
         super().__init__()
         self.collection = collection
         self.expr_fn = expr
-        self.expr: Optional[AbstractExpression] = None
+        self.expr: AbstractExpression
+        self.expr_initialized = False
         self.element_var: Optional[AbstractVariable] = None
         self.requires_index: bool = False
         self.index_var: Optional[AbstractVariable] = None
@@ -203,6 +207,7 @@ class CollectionExpression(AbstractExpression):
         outside of our Python DSL.
         """
         self.expr = expr
+        self.expr_initialized = True
         self.element_var = element_var
         self.requires_index = index_var is not None
         self.index_var = index_var
@@ -317,11 +322,12 @@ class CollectionExpression(AbstractExpression):
         # When this expression does not come from our Python DSL (see the
         # initialize method above), the sub-expression is ready to use: do not
         # try to expand the function.
-        if self.expr is not None:
+        if self.expr_initialized:
             return
 
         self.expr = self.prepare_iter_function("mapping expression",
                                                self.expr_fn)
+        self.expr_initialized = True
 
     def construct_common(self) -> CollectionExpression.ConstructCommonResult:
         """
@@ -366,6 +372,7 @@ class CollectionExpression(AbstractExpression):
             elt_type = elt_type.entity
         self.element_var.set_type(elt_type)
         user_element_var = construct(self.element_var)
+        assert isinstance(user_element_var, VariableExpr)
 
         # List of element variables, and the associated initialization
         # expressions (when applicable).
@@ -380,6 +387,7 @@ class CollectionExpression(AbstractExpression):
         # create a variable to hold a bare node and initialize the user
         # variable using it.
         if with_entities:
+            assert self.element_var is not None and self.element_var._name
             entity_var = element_vars[-1]
             node_var = AbstractVariable(
                 names.Name('Bare') + self.element_var._name,
@@ -388,7 +396,7 @@ class CollectionExpression(AbstractExpression):
             entity_var.init_expr = make_as_entity(
                 construct(node_var), entity_info=entity_info
             )
-            element_vars.append(InitializedVar(construct(node_var)))
+            element_vars.append(InitializedVar(construct_var(node_var)))
 
         # Node lists contain root nodes: if the user code deals with non-root
         # nodes, create a variable to hold the root bare node and initialize
@@ -397,6 +405,7 @@ class CollectionExpression(AbstractExpression):
             collection_expr.type.is_list_type
             and not collection_expr.type.is_root_node
         ):
+            assert self.element_var._name is not None
             typed_elt_var = element_vars[-1]
             untyped_elt_var = AbstractVariable(
                 names.Name('Untyped') + self.element_var._name,
@@ -405,7 +414,7 @@ class CollectionExpression(AbstractExpression):
             typed_elt_var.init_expr = UncheckedCastExpr(
                 construct(untyped_elt_var), typed_elt_var.var.type
             )
-            element_vars.append(InitializedVar(construct(untyped_elt_var)))
+            element_vars.append(InitializedVar(construct_var(untyped_elt_var)))
 
         # Keep track of the ultimate "codegen" element variable. Unlike all
         # other iteration variable, it is the only one that will be defined by
@@ -422,7 +431,7 @@ class CollectionExpression(AbstractExpression):
         iter_vars = list(element_vars)
         index_var = None
         if self.index_var:
-            index_var = construct(self.index_var)
+            index_var = construct_var(self.index_var)
             iter_vars.append(InitializedVar(index_var))
 
         # Create local variables for all iteration variables that need it
@@ -574,6 +583,7 @@ class Map(CollectionExpression):
             self.do_concat = do_concat
 
             # The generated code for map uses a vector to build the result
+            assert isinstance(self.type, ArrayType)
             self.type.require_vector()
 
         def __repr__(self) -> str:
@@ -710,6 +720,7 @@ def as_array(self: AbstractExpression,
     abstract_result = Map(ast_list, expr=collection_expr_identity)
     abstract_result.prepare()
     result = construct(abstract_result)
+    assert isinstance(result, Map.Expr)
     check_source_language(
         result.collection.type.is_list_type,
         '.as_array input must be an AST list (here: {})'.format(
@@ -886,7 +897,7 @@ def length(self: AbstractExpression,
     orig_type = coll_expr.type
 
     # Automatically unwrap entities
-    if coll_expr.type.is_entity_type:
+    if isinstance(coll_expr.type, EntityType):
         coll_expr = FieldAccessExpr(coll_expr, 'Node', coll_expr.type.astnode,
                                     do_explicit_incref=False)
 
@@ -908,10 +919,10 @@ def unique(self: AbstractExpression,
 
     array_expr = construct(array)
     array_type = array_expr.type
-    check_source_language(
-        array_type.is_array_type,
-        'Array expected but got {} instead'.format(array_type.dsl_name)
-    )
+    if not isinstance(array_type, ArrayType):
+        error(
+            'Array expected but got {} instead'.format(array_type.dsl_name)
+        )
     element_type = array_type.element_type
     check_source_language(
         element_type.hashable,
@@ -946,12 +957,14 @@ class CollectionSingleton(AbstractExpression):
 
         def _render_pre(self) -> str:
             result_var = self.result_var.name
+            t = self.type
+            assert isinstance(t, ArrayType)
             return self.expr.render_pre() + """
                 {result_var} := {constructor} (Items_Count => 1);
                 {result_var}.Items (1) := {item};
                 {inc_ref}
             """.format(
-                constructor=self.type.constructor_name,
+                constructor=t.constructor_name,
                 result_var=result_var,
                 item=self.expr.render_expr(),
                 inc_ref=('Inc_Ref ({}.Items (1));'.format(result_var)

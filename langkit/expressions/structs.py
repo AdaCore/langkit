@@ -8,7 +8,7 @@ import funcy
 
 from langkit import names
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, Field, resolve_type
+    ASTNodeType, AbstractNodeData, EntityType, Field, resolve_type
 )
 from langkit.diagnostics import (Severity, check_source_language,
                                  diagnostic_context, error)
@@ -754,7 +754,7 @@ class FieldAccess(AbstractExpression):
                 # them along.
                 for formal, actual in zip(self.node_data.dynamic_vars,
                                           self.dynamic_vars):
-                    args.append((formal.argument_name,
+                    args.append((formal.argument_name.camel_with_underscores,
                                  actual.render_expr()))
 
                 # If the called property uses entity information, pass it
@@ -790,6 +790,7 @@ class FieldAccess(AbstractExpression):
                 )
 
             if self.wrap_result_in_entity:
+                assert isinstance(self.type, EntityType)
                 ret = '{} (Node => {}, Info => {})'.format(
                     self.type.constructor_name, ret, self.entity_info_expr
                 )
