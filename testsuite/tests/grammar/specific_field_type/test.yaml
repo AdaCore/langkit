@@ -1,1 +1,4 @@
-driver: python
+driver: lkt_compile
+description: |
+    Test that a warning is emitted when the type of a parsing field is not as
+    specific as it could be.
