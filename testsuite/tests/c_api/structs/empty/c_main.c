@@ -95,4 +95,15 @@ c_main (void)
   abort_on_exception ();
 
   printf ("CHARACTER = %u\n", character);
+
+  // Free allocated resources
+
+  foo_internal_non_empty_struct_dec_ref (&non_empty);
+  abort_on_exception ();
+
+  foo_big_integer_decref (big_integer);
+  abort_on_exception ();
+
+  foo_context_decref (context);
+  abort_on_exception ();
 }
