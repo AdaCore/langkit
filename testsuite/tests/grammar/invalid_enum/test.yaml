@@ -1,1 +1,4 @@
-driver: python
+driver: lkt_compile
+description: |
+    Test that invalid references to enum nodes in grammars are properly
+    rejected.

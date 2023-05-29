@@ -1,24 +1,24 @@
-== List ==
-list.lkt:4:47: error: Parsers cannot create synthetic nodes
-4 |     @main_rule main_rule <- Example("example" ListSynthExample+("example"))
+== list.lkt ==
+list.lkt:5:47: error: Parsers cannot create synthetic nodes
+5 |     @main_rule main_rule <- Example("example" ListSynthExample+("example"))
   |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== Null ==
-null.lkt:4:29: error: Parsers cannot create synthetic nodes
-4 |     @main_rule main_rule <- Example("example" null(SynthExample))
+== null.lkt ==
+null.lkt:5:29: error: Parsers cannot create synthetic nodes
+5 |     @main_rule main_rule <- Example("example" null(SynthExample))
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== Skip ==
-skip.lkt:4:52: error: Unknown node: SynthExapmle
-4 |     @main_rule main_rule <- Example("example" skip(SynthExapmle))
+== skip.lkt ==
+skip.lkt:5:52: error: Cannot find entity `SynthExapmle` in this scope
+5 |     @main_rule main_rule <- Example("example" skip(SynthExapmle))
   |                                                    ^^^^^^^^^^^^
 
 
-== Transform ==
-transform.lkt:4:47: error: Parsers cannot create synthetic nodes
-4 |     @main_rule main_rule <- Example("example" SynthExample())
+== transform.lkt ==
+transform.lkt:5:47: error: Parsers cannot create synthetic nodes
+5 |     @main_rule main_rule <- Example("example" SynthExample())
   |                                               ^^^^^^^^^^^^^^
 
 

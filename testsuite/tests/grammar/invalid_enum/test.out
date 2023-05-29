@@ -1,19 +1,22 @@
-== no-dot.lkt ==
-no-dot.lkt:4:29: error: Parsers cannot create abstract nodes
-4 |     @main_rule main_rule <- Example("example")
-  |                             ^^^^^^^^^^^^^^^^^^
+== bad-alt.lkt ==
+bad-alt.lkt:5:37: error: Cannot find entity `NoSuchAlt` in this scope
+5 |     @main_rule main_rule <- Example.NoSuchAlt("example")
+  |                                     ^^^^^^^^^
 
 
 == bad-prefix.lkt ==
-bad-prefix.lkt:4:29: error: Unknown node: NoSuchNode
-4 |     @main_rule main_rule <- NoSuchNode.Example("example")
+bad-prefix.lkt:5:29: error: Cannot find entity `NoSuchNode` in this scope
+5 |     @main_rule main_rule <- NoSuchNode.Example1("example")
   |                             ^^^^^^^^^^
 
 
-== bad-alt.lkt ==
-bad-alt.lkt:4:37: error: Unknown enum node alternative: NoSuchAlt
-4 |     @main_rule main_rule <- Example.NoSuchAlt("example")
-  |                                     ^^^^^^^^^
+== no-dot.lkt ==
+no-dot.lkt:5:29: error: Parsers cannot create abstract nodes
+5 |     @main_rule main_rule <- Example("example")
+  |                             ^^^^^^^^^^^^^^^^^^
 
+
+== ok.lkt ==
+Code generation was successful
 
 Done

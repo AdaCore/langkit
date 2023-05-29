@@ -1,5 +1,10 @@
-import lexer_example
+import common
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- ListNode(list+(@number))
+}
+
+class ListNode : FooNode {
+    @parse_field items: ASTList[FooNode, FooNode]
 }

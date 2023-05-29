@@ -1,6 +1,10 @@
-import lexer_example
+import common
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <-
       ASTList[FooNode, Example, Example]+(Example("example"))
+}
+
+class Example : FooNode implements TokenNode {
 }

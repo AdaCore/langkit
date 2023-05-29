@@ -1,3 +1,8 @@
-test.py:XXX: warning: Specified type is FooNode, but it could be more specific: Example
+== foo.lkt ==
+foo.lkt:12:18: warning: Specified type is FooNode, but it could be more specific: Example
+12 |     @parse_field example: FooNode
+   |                  ^^^^^^^^^^^^^^^^
+
 Code generation was successful
+
 Done

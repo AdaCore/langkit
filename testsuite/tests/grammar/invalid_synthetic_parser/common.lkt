@@ -1,0 +1,16 @@
+import lexer_example
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example : FooNode {
+    @parse_field f: FooNode
+}
+
+@synthetic
+class SynthExample : FooNode {
+}
+
+@synthetic
+class ListSynthExample : ASTList[FooNode, FooNode] {
+}
