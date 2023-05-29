@@ -1531,7 +1531,7 @@ class ManageScript:
         )
         if path.isfile(lib_file):
             add_path("LIB", path.dirname(lib_file))
-            add_path("INCLUDE", P())
+            add_path("INCLUDE", P("src"))
 
         # If the Java bindings have been build, set the necessary environment
         # variables.

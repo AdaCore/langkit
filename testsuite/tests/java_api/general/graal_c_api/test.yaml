@@ -1,6 +1,4 @@
 driver: python
 control:
-    - [SKIP, "not has_java", "Java support required"]
-    - [SKIP, "os == 'windows'",
-          "Disabled on windows due to the native-image usage." ]
-
+    - [SKIP, "not has_java", "Java tests disabled"]
+    - [SKIP, "not has_native_image", "Native-image tests disabled"]

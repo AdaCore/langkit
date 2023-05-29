@@ -340,6 +340,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             if maven_repo:
                 argv.append('--maven-local-repo')
                 argv.append(maven_repo)
+            if ni_main is not None and os.name == 'nt':
+                argv.append('--generate-msvc-lib')
 
         argv.append('--build-mode={}'.format(build_mode))
         for w in WarningSet.available_warnings:
@@ -523,7 +525,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         ni_exec = P.realpath(P.join(
             os.environ['GRAAL_HOME'],
             'bin',
-            'native-image'
+            ('native-image.cmd' if os.name == 'nt' else 'native-image')
         ))
         class_path = os.path.pathsep.join([
             P.realpath('.'),
