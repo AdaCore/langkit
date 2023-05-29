@@ -1474,6 +1474,7 @@ package body ${ada_lib_name}.Implementation is
          return;
       end if;
 
+      Unit.PLE_Roots_Starting_Token.Destroy;
       Unit.Env_Populated_Roots.Destroy;
 
       Unit.Exiled_Entries.Destroy;
