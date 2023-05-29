@@ -15,7 +15,7 @@ c_main (void)
   const size_t buffer_size = strlen (buffer);
   const char *name = "main.txt";
 
-  // Declaring the working variables.
+  // Declaring the working variables
   foo_analysis_context context;
   foo_analysis_unit unit;
   foo_base_entity root;
@@ -49,8 +49,8 @@ c_main (void)
   foo_unit_root (unit, &root);
   abort_on_exception ();
 
-  // Set the dummy field to an arbitrary value to ensure that it is
-  // being ignored by the Ada implementation.
+  // Set the dummy field to an arbitrary value to ensure that it is being
+  // ignored by the Ada implementation.
   root.info.md.dummy = 42;
 
   // Get the root text
@@ -62,9 +62,9 @@ c_main (void)
   printf ("\n");
   foo_destroy_text (&text);
 
-  // Call the identity function on an empty structure.
-  // This is supposed to be a no-op since it returns an empty result with no
-  // side effect. Do the call to make sure it does not crash.
+  // Call the identity function on an empty structure.  This is supposed to be
+  // a no-op since it returns an empty result with no side effect. Do the call
+  // to make sure it does not crash.
   foo_internal_my_struct source;
   foo_internal_my_struct res;
   foo_example_p_identity (&root, &source, &res);
