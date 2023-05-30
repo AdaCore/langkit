@@ -12,14 +12,14 @@ this is the way it is done for the Ada language::
 from __future__ import annotations
 
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from enum import Enum
 from functools import reduce
 import importlib
 import os
 from os import path
-from typing import (Any, Callable, ContextManager, Dict, List, Optional, Set,
-                    TYPE_CHECKING, Tuple, Union, cast)
+from typing import (Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING,
+                    Tuple, Union, cast)
 
 from funcy import lzip
 
@@ -852,7 +852,7 @@ class CompileCtx:
     def actual_build_date(self) -> str:
         return self.build_date or "undefined"
 
-    def lkt_context(self, lkt_node: L.LktNode) -> ContextManager[None]:
+    def lkt_context(self, lkt_node: L.LktNode) -> AbstractContextManager[None]:
         """
         Context manager to set the diagnostic context to the given node.
 

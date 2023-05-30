@@ -23,14 +23,14 @@ not defined in the example, but relied on explicitly.
 from __future__ import annotations
 
 from collections import OrderedDict
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 import difflib
 from funcy import keep
 import inspect
 from itertools import count
 from typing import (
-    Any, Callable, ContextManager, Dict, Iterator, List as _List, Optional,
-    Sequence, Set, TYPE_CHECKING, Tuple, Type, Union
+    Any, Callable, Dict, Iterator, List as _List, Optional, Sequence, Set,
+    TYPE_CHECKING, Tuple, Type, Union
 )
 
 import funcy
@@ -270,7 +270,7 @@ class Grammar:
         If we loaded a Lkt unit, mapping of all grammar rules it contains.
         """
 
-    def context(self) -> ContextManager[None]:
+    def context(self) -> AbstractContextManager[None]:
         return diagnostic_context(self.location)
 
     def _add_rule(self, name: str, parser: Parser, doc: str = "") -> None:
@@ -762,7 +762,7 @@ class Parser:
             c.set_location(self.location)
 
     @property
-    def diagnostic_context(self) -> ContextManager[None]:
+    def diagnostic_context(self) -> AbstractContextManager[None]:
         """
         Helper that will return a diagnostic context manager with parameters
         set for the grammar definition.

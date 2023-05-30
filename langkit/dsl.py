@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from contextlib import AbstractContextManager
 import itertools
 from typing import (
-    Any, ContextManager, Dict, List, Optional as Opt, TYPE_CHECKING, Tuple,
-    Type, Union
+    Any, Dict, List, Optional as Opt, TYPE_CHECKING, Tuple, Type, Union
 )
 
 from langkit.compiled_types import (
@@ -49,7 +49,7 @@ class DSLType:
                        '{}.array'.format(cls._name.camel))
 
     @classmethod
-    def _diagnostic_context(cls) -> ContextManager[None]:
+    def _diagnostic_context(cls) -> AbstractContextManager[None]:
         return diagnostic_context(cls._location)
 
     @staticmethod

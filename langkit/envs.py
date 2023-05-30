@@ -8,10 +8,11 @@ introduction to their usage.
 
 from __future__ import annotations
 
+from contextlib import AbstractContextManager
 from enum import Enum
 from funcy import lsplit_by
 from itertools import count
-from typing import ContextManager, Dict, List, Optional, Type, cast, overload
+from typing import Dict, List, Optional, Type, cast, overload
 
 from langkit import names
 from langkit.compile_context import CompileCtx, get_context
@@ -252,7 +253,7 @@ class EnvSpec:
         self.actions = self.pre_actions + self.post_actions
 
     @property
-    def diagnostic_context(self) -> ContextManager[None]:
+    def diagnostic_context(self) -> AbstractContextManager[None]:
         """
         Diagnostic context for env specs.
         """
