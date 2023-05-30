@@ -852,7 +852,8 @@ class CompileCtx:
     def actual_build_date(self) -> str:
         return self.build_date or "undefined"
 
-    def lkt_context(self, lkt_node: L.LktNode) -> AbstractContextManager[None]:
+    @staticmethod
+    def lkt_context(lkt_node: L.LktNode) -> AbstractContextManager[None]:
         """
         Context manager to set the diagnostic context to the given node.
 
