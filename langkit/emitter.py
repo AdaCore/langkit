@@ -746,12 +746,6 @@ class Emitter:
                 self.post_process_cpp
             ),
             (
-                "java_api/reflect_json",
-                "reflect_config.json",
-                self.java_dir,
-                None
-            ),
-            (
                 "java_api/readme_md",
                 "README.md",
                 self.java_dir,
