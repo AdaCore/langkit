@@ -150,10 +150,11 @@ procedure Lkt_Toolbox is
          New_Line;
       elsif
       not Arg.Check_Only.Get
-        and then not Analysis.Result_Ref (S).Is_Null
+        and then not Analysis.Result_Decl (S).Is_Null
       then
          Put_Line ("Id   " & Node.Image);
-         Put_Line ("     references " & Format_Node (Analysis.Result_Ref (S)));
+         Put_Line
+           ("     references " & Format_Node (Analysis.Result_Decl (S)));
          New_Line;
       end if;
    end Print_Semantic_Result;
