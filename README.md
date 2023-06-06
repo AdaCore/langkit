@@ -20,7 +20,7 @@ To use Langkit, you will need:
 
 * A Python 3.9 or Python 3.10 interpreter. Python2 is no longer supported.
 * Some python libraries, including the Mako template system for Python (see
-  `REQUIREMENTS.dev` for the full list).
+  `requirements-pypi.txt` and `requirements-github.txt` for the full list).
 * A recent version of the GNAT Ada compiler, either from your OS's packages, or
   from [here](https://www.adacore.com/download).
 * The [gnatcoll-core](https://github.com/AdaCore/gnatcoll-core) library.
