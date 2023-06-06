@@ -4445,8 +4445,9 @@ class SymbolType(CompiledType):
             'SymbolType',
             dsl_name='Symbol',
             exposed=True,
-            nullexpr='null',
+            nullexpr='No_Symbol',
             null_allowed=True,
+            is_ptr=False,
 
             # See below: symbols are represented in the C API as text records
             is_ada_record=True,

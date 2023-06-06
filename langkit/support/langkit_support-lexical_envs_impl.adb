@@ -828,7 +828,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
       --  Return whether to cache a particular request or not
 
       function Log_Id return String is
-        ("env=" & Env_Image (Self) & ", key=" & Image (Key.all));
+        ("env=" & Env_Image (Self) & ", key=" & Image (+Key));
 
       Env : constant Lexical_Env_Access := Unwrap (Self);
 
@@ -910,7 +910,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
            (Natural range <>) of Internal_Envs.Cursor;
 
          function "<" (A, B : Internal_Envs.Cursor) return Boolean is
-           (Internal_Envs.Key (A).all < Internal_Envs.Key (B).all);
+           (+Internal_Envs.Key (A) < +Internal_Envs.Key (B));
 
          procedure Cursor_Array_Sort is new Ada.Containers.Generic_Array_Sort
            (Index_Type   => Natural,
@@ -975,7 +975,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
                --  If Key is null, we want to get every entity stored in the
                --  map regardless of the symbol.
-               if Key = null then
+               if Key = No_Symbol then
                   Append_All_Nodes (Self, From_Rebound);
                   return True;
                end if;
@@ -1022,7 +1022,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   --  For each individual assoc: add it if Key is null, or only
                   --  assocs with matching symbols.
                   A := Get (Assocs, I);
-                  if Key = null or else Key = Get_Key (A) then
+                  if Key = No_Symbol or else Key = Get_Key (A) then
                      declare
                         IMN : constant Internal_Map_Node :=
                           (Get_Node (A), Get_Metadata (A), Env.Assoc_Resolver);
@@ -1516,7 +1516,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   then Image
                     (Node_Text_Image (Lexical_Env_Record (Self.Env.all).Node))
                   else Env_Image (Self))
-               & ", " & Image (Key.all) & ") -> " & Entity_Vectors_Image (FV));
+               & ", " & Image (+Key) & ") -> " & Entity_Vectors_Image (FV));
          end if;
 
          if Has_Trace then
@@ -2195,7 +2195,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
    end record;
 
    function "<" (L, R : Env_Pair) return Boolean
-   is (L.Key.all < R.Key.all);
+   is (+L.Key < +R.Key);
 
    package Env_Pair_Vectors is new Langkit_Support.Vectors (Env_Pair);
    procedure Sort is new Env_Pair_Vectors.Generic_Sort;
@@ -2379,7 +2379,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
                         Append
                           (Result,
                            Sub_Prefix & "  "
-                           & Langkit_Support.Text.Image (Pair.Key.all) & ": "
+                           & Langkit_Support.Text.Image (+Pair.Key) & ": "
                            & Image (Pair.Value)
                            & ASCII.LF);
                         Internal_Map_Node_Vectors.Destroy (Pair.Value);

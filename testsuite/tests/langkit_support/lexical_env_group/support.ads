@@ -50,7 +50,7 @@ package Support is
    type Inner_Env_Assoc is null record;
    function Get_Key
      (Dummy : Inner_Env_Assoc) return Langkit_Support.Symbols.Symbol_Type
-   is (null);
+   is (Langkit_Support.Symbols.No_Symbol);
    function Get_Node (Dummy : Inner_Env_Assoc) return Character is (' ');
    function Get_Metadata (Dummy : Inner_Env_Assoc) return Metadata
    is (Default_MD);

@@ -493,7 +493,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
             end if;
          end;
       end if;
-      return Get_Symbol (TDH.Symbols, T.Symbol);
+      return To_Symbol (TDH.Symbols, T.Symbol);
    end Force_Symbol;
 
 end ${ada_lib_name}.Lexer_Implementation;

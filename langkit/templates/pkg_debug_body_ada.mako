@@ -80,7 +80,7 @@ package body ${ada_lib_name}.Debug is
          % endif
       ;
    begin
-      return Symbol.Success and then Image (S.all) = Image (Symbol.Symbol);
+      return Symbol.Success and then Image (S) = Image (Symbol.Symbol);
    end Sym_Matches;
 
 end ${ada_lib_name}.Debug;

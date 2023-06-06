@@ -274,7 +274,7 @@ package body Langkit_Support.Generic_API.Introspection is
 
    procedure Check_Symbol (Symbol : Symbol_Type) is
    begin
-      if Symbol = null then
+      if Symbol = No_Symbol then
          raise Precondition_Failure with "null symbol";
       end if;
    end Check_Symbol;

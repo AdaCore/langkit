@@ -1055,7 +1055,7 @@ package body ${ada_lib_name}.Implementation.C is
       declare
          Sym    : constant Symbol_Type := Unwrap_Symbol (Symbol.all);
          Result : constant Text_Type :=
-           (if Sym = null then "" else Image (Sym));
+           (if Sym = No_Symbol then "" else Image (Sym));
       begin
          Text.all := Wrap_Alloc (Result);
       end;

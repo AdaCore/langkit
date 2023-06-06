@@ -1837,12 +1837,12 @@ package body ${ada_lib_name}.Implementation is
    begin
       --  Skip the env addition if explicitly requested
 
-      if Key = null
+      if Key = No_Symbol
          or else Value = null
          or else (case Dest_Env.Kind is
                   when None        => True,
                   when Current_Env => False,
-                  when Named_Env   => Dest_Env.Env_Name = null,
+                  when Named_Env   => Dest_Env.Env_Name = No_Symbol,
                   when Direct_Env  => Dest_Env.Direct_Env = Empty_Env)
       then
          return;
@@ -4515,9 +4515,9 @@ package body ${ada_lib_name}.Implementation is
 
       function Trace_Image (S : Symbol_Type) return String is
       begin
-         return (if S = null
+         return (if S = No_Symbol
                  then "None"
-                 else Image (S.all, With_Quotes => True));
+                 else Image (S, With_Quotes => True));
       end Trace_Image;
 
       -----------------
@@ -4781,7 +4781,7 @@ package body ${ada_lib_name}.Implementation is
       ;
    begin
       if Canon_Symbol.Success then
-         return Get_Symbol
+         return To_Symbol
            (Context.Symbols, Find (Context.Symbols, Canon_Symbol.Symbol));
       else
          raise Invalid_Symbol_Error with Image (Canon_Symbol.Error_Message);
@@ -5666,7 +5666,7 @@ package body ${ada_lib_name}.Implementation is
    begin
       return (if S.Length > 0
               then Lookup_Symbol (Context, S.Content)
-              else null);
+              else No_Symbol);
    exception
       when Exc : Invalid_Symbol_Error =>
          Raise_Property_Exception

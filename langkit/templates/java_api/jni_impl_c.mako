@@ -1142,7 +1142,7 @@ void BigInteger_release(
 // Create a new value for a symbol
 ${symbol_type} Symbol_new_value() {
     ${symbol_type} res = {
-        NULL,
+        0,
         NULL
     };
     return res;

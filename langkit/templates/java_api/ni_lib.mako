@@ -57,13 +57,13 @@
     @CContext(LibDirectives.class)
     @CStruct("${symbol_type}")
     public interface SymbolNative extends PointerBase {
-        @CField("data") public VoidPointer get_data();
-        @CField("data") public void set_data(
-            VoidPointer data
+        @CField("thin_sym") public int get_thin_sym();
+        @CField("thin_sym") public void set_thin_sym(
+            int data
         );
 
-        @CField("bounds") public VoidPointer get_bounds();
-        @CField("bounds") public void set_bounds(
+        @CField("table") public VoidPointer get_table();
+        @CField("table") public void set_table(
             VoidPointer bounds
         );
     }

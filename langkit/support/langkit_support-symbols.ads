@@ -34,7 +34,7 @@ package Langkit_Support.Symbols is
    No_Symbol_Table : constant Symbol_Table;
    --  Value to use as a default for unallocated symbol tables
 
-   type Symbol_Type is new Text_Cst_Access;
+   type Symbol_Type is private;
    --  Main symbol type.
    --
    --  .. warning:: For usability reasons, we use the access to the string as a
@@ -43,9 +43,12 @@ package Langkit_Support.Symbols is
    --     unsafe, because if the symbol table has been freed, the symbol will
    --     be a dangling pointer.
 
-   pragma No_Strict_Aliasing (Symbol_Type);
+   No_Symbol : constant Symbol_Type;
 
+   function Get (S : Symbol_Type) return Text_Access;
    function Image (S : Symbol_Type) return Text_Type;
+   function "+" (S : Symbol_Type) return Text_Type renames Image;
+
    --  Return the text associated to this symbol
 
    function Image
@@ -68,9 +71,12 @@ package Langkit_Support.Symbols is
 
    No_Thin_Symbol : constant Thin_Symbol;
 
-   function Get_Symbol
+   function Get
+     (Self : Symbol_Table; TS : Thin_Symbol) return Text_Access;
+   --  Return the text for this :ada:ref:`Thin_Symbol` instance
+
+   function To_Symbol
      (Self : Symbol_Table; TS : Thin_Symbol) return Symbol_Type;
-   --  Return the Symbol for this :ada:ref:`Thin_Symbol` instance
 
    function Create_Symbol_Table return Symbol_Table;
    --  Allocate a new symbol table and return it
@@ -89,9 +95,7 @@ package Langkit_Support.Symbols is
    function Find
      (ST     : Symbol_Table;
       T      : Text_Type;
-      Create : Boolean := True) return Symbol_Type
-   is
-      (Get_Symbol (ST, Find (ST, T, Create))) with Inline;
+      Create : Boolean := True) return Symbol_Type with Inline;
    --  Overload of :ada:ref:`Find` which returns a :ada:ref:`Symbol_Type`
    --  directly.
 
@@ -160,33 +164,41 @@ private
 
    type Thin_Symbol is mod 2 ** 32;
 
+   type Symbol_Type is record
+      TS    : Thin_Symbol;
+      Table : Symbol_Table;
+   end record;
+
    function Hash is new GNAT.String_Hash.Hash
      (Char_Type => Wide_Wide_Character,
       Key_Type  => Text_Type,
       Hash_Type => Ada.Containers.Hash_Type);
 
-   function String_Hash (T : Symbol_Type) return Ada.Containers.Hash_Type is
+   function Key_Hash (T : Text_Access) return Ada.Containers.Hash_Type is
      (Hash (T.all));
 
-   function Key_Equal (L, R : Symbol_Type) return Boolean is (L.all = R.all);
+   function Key_Equal (L, R : Text_Access) return Boolean
+   is (L.all = R.all);
 
    package Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type            => Symbol_Type,
+     (Key_Type            => Text_Access,
       Element_Type        => Thin_Symbol,
-      Hash                => String_Hash,
+      Hash                => Key_Hash,
       Equivalent_Keys     => Key_Equal,
       "="                 => "=");
 
-   package Symbol_Vectors
-   is new Langkit_Support.Vectors (Symbol_Type);
+   package Text_Access_Vectors
+   is new Langkit_Support.Vectors (Text_Access);
 
    type Symbol_Table_Record is tagged record
       Symbols_Map : Maps.Map;
-      Symbols     : Symbol_Vectors.Vector;
+      Symbols     : Text_Access_Vectors.Vector;
    end record;
 
    No_Symbol_Table : constant Symbol_Table := null;
 
    No_Thin_Symbol  : constant Thin_Symbol := 0;
+
+   No_Symbol : constant Symbol_Type := (No_Thin_Symbol, No_Symbol_Table);
 
 end Langkit_Support.Symbols;

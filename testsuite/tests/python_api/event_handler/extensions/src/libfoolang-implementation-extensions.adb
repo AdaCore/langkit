@@ -18,7 +18,7 @@ package body Libfoolang.Implementation.Extensions is
       if EH /= null then
          EH.Unit_Requested_Callback
            (Context            => Node.Unit.Context,
-            Name               => Name.all,
+            Name               => Image (Name),
             From               => Node.Unit,
             Found              => Found,
             Is_Not_Found_Error => Error);
