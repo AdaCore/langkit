@@ -1,0 +1,9 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(undoc_node | doc_node | derived_list_node)
+    undoc_node <- UndocumentedNode("example")
+    doc_node <- DocumentedNode("example")
+    derived_list_node <- DerivedListNode+(doc_node)
+}
