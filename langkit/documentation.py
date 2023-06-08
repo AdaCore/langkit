@@ -1332,7 +1332,7 @@ class PassthroughNode(docutils.nodes.Element):
 
 class LangkitTypeRef(docutils.nodes.reference):
     """
-    Specific langkit node for a reference to a Langkit CompiledType. Meant to
+    Specific Langkit node for a reference to a Langkit CompiledType. Meant to
     be replaced by our visitor by a type ref node that is understandable in the
     role of the language for which we generate documentation, or if there isn't
     such a role, a simple text reference.
