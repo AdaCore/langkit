@@ -1,0 +1,4 @@
+import common
+
+class ErrorDecl : ASTList[FooNode, Example] implements ErrorNode {
+}

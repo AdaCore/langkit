@@ -1,0 +1,4 @@
+import common
+
+class ErrorDecl : FooNode implements ErrorNode, TokenNode {
+}

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from collections import OrderedDict
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 import difflib
 from itertools import count, takewhile
 import pipes
 from typing import (
-    Callable, ClassVar, ContextManager, Dict, Iterator, List, Optional as Opt,
-    Sequence, Set, TYPE_CHECKING, Tuple, Union, ValuesView
+    Callable, ClassVar, Dict, Iterator, List, Optional as Opt, Sequence, Set,
+    TYPE_CHECKING, Tuple, Union, ValuesView
 )
 
 from langkit import names
@@ -381,7 +382,7 @@ class AbstractNodeData:
         return self._uses_entity_info
 
     @property
-    def diagnostic_context(self) -> ContextManager[None]:
+    def diagnostic_context(self) -> AbstractContextManager[None]:
         return diagnostic_context(self.location)
 
     @property

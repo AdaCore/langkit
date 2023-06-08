@@ -12,13 +12,13 @@ this is the way it is done for the Ada language::
 from __future__ import annotations
 
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from enum import Enum
 from functools import reduce
 import importlib
 import os
 from os import path
-from typing import (Any, Callable, ContextManager, Dict, List, Optional, Set,
+from typing import (Any, Callable, Dict, Iterator, List, Optional, Set,
                     TYPE_CHECKING, Tuple, Union, cast)
 
 from funcy import lzip
@@ -852,19 +852,30 @@ class CompileCtx:
     def actual_build_date(self) -> str:
         return self.build_date or "undefined"
 
-    def lkt_context(self, lkt_node: L.LktNode) -> ContextManager[None]:
+    @staticmethod
+    def lkt_context(
+        lkt_node: L.LktNode | None
+    ) -> AbstractContextManager[None]:
         """
         Context manager to set the diagnostic context to the given node.
 
         :param lkt_node: Node to use as a reference for this diagnostic
-            context.
+            context. If it is ``None``, leave the diagnostic context unchanged.
         """
-        # Invalid type passed here will fail much later and only if a
-        # check_source_language call fails. To ease debugging, check that
-        # "lkt_node" has the right type here.
-        assert isinstance(lkt_node, L.LktNode)
+        if lkt_node is None:
+            @contextmanager
+            def null_ctx_mgr() -> Iterator[None]:
+                yield
 
-        return diagnostic_context(Location.from_lkt_node(lkt_node))
+            return null_ctx_mgr()
+
+        else:
+            # Invalid type passed here will fail much later and only if a
+            # check_source_language call fails. To ease debugging, check that
+            # "lkt_node" has the right type here.
+            assert isinstance(lkt_node, L.LktNode)
+
+            return diagnostic_context(Location.from_lkt_node(lkt_node))
 
     @staticmethod
     def lkt_doc(full_decl):

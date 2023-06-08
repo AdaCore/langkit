@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from contextlib import AbstractContextManager
 import inspect
-from typing import (Any as _Any, ContextManager, Dict, List, Optional,
-                    Sequence, Tuple)
+from typing import Any as _Any, Dict, List, Optional, Sequence, Tuple
 
 import funcy
 
@@ -861,7 +861,7 @@ class FieldAccess(AbstractExpression):
         self.node_data: AbstractNodeData
 
     @property
-    def diagnostic_context(self) -> ContextManager[None]:
+    def diagnostic_context(self) -> AbstractContextManager[None]:
         return diagnostic_context(self.location)
 
     def resolve_field(self) -> AbstractNodeData:

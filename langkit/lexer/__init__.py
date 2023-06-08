@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from contextlib import AbstractContextManager
 from itertools import count
 import re
-from typing import (Any, ContextManager, Dict, Iterator, List, Optional,
-                    Sequence, Set, TYPE_CHECKING, Tuple, Type, Union, cast)
+from typing import (Any, Dict, Iterator, List, Optional, Sequence, Set,
+                    TYPE_CHECKING, Tuple, Type, Union, cast)
 
 from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
@@ -321,7 +322,7 @@ class TokenFamily:
                 sorted(t.signature for t in self.tokens))
 
     @property
-    def diagnostic_context(self) -> ContextManager[None]:
+    def diagnostic_context(self) -> AbstractContextManager[None]:
         assert self.location is not None
         return diagnostic_context(self.location)
 

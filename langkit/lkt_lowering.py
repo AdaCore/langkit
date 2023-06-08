@@ -2241,6 +2241,28 @@ class LktTypesLoader:
                 'Inheritting from an enum node is forbidden'
             )
 
+        with self.ctx.lkt_context(error_node_trait_ref):
+            # Determine whether this node is abstract. Remember that base enum
+            # node types are abstract (it is their derivations that are
+            # concrete).
+            is_abstract = (
+                not isinstance(annotations, NodeAnnotations)
+                or annotations.abstract
+            )
+            if is_abstract and is_error_node:
+                error("Error nodes cannot be abstract")
+
+            # Determine whether this node is synthetic
+            is_synthetic = annotations.synthetic
+            if is_synthetic and is_error_node:
+                error("Error nodes cannot be synthetic")
+
+            if base_type and base_type.is_list and is_error_node:
+                error("Error nodes cannot be lists")
+
+            if is_token_node and is_error_node:
+                error("Error nodes cannot be token nodes")
+
         # Lower fields. Regular nodes can hold all types of fields, but token
         # nodes and enum nodes can hold only user field and properties.
         allowed_field_types = (
@@ -2271,11 +2293,10 @@ class LktTypesLoader:
             doc=self.ctx.lkt_doc(decl.parent),
             base=base_type,
             fields=fields,
-            is_abstract=(not isinstance(annotations, NodeAnnotations)
-                         or annotations.abstract),
+            is_abstract=is_abstract,
             is_token_node=is_token_node,
             is_error_node=is_error_node,
-            is_synthetic=annotations.synthetic,
+            is_synthetic=is_synthetic,
             has_abstract_list=annotations.has_abstract_list,
             is_enum_node=is_enum_node,
             is_bool_node=is_bool_node,
@@ -2291,6 +2312,18 @@ class LktTypesLoader:
                 enum_node=result,
                 qualifier=annotations.qualifier
             )
+
+        # Reject non-null fields for error nodes. Non-null fields can come from
+        # this node's own declaration, or they can come from inheritance.
+        if is_error_node:
+            error_msg = "Error nodes can only have null fields"
+            for f in result.get_parse_fields(include_inherited=True):
+                if not (f.null or f.abstract):
+                    if f.struct != result:
+                        error(f"{error_msg}: {f.qualname} is not null")
+                    else:
+                        with f.diagnostic_context:
+                            error(error_msg)
 
         return result
 
