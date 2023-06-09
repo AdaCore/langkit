@@ -3,7 +3,7 @@
 FooNodeList buffer:1:1-1:6
 |item_0:
 |  Def buffer:1:1-1:6
-|  |id:
+|  |f_id:
 |  |  Id buffer:1:5-1:6: a
 
 === invalid case 1: use cut ===
@@ -13,24 +13,24 @@ FooNodeList buffer:1:1-1:6
 FooNodeList buffer:1:1-1:10
 |item_0:
 |  Def buffer:1:1-1:6
-|  |id:
+|  |f_id:
 |  |  Id buffer:1:5-1:6: a
 |item_1:
 |  Def buffer:1:7-1:10
-|  |id: None
+|  |f_id: None
 
 === valid case 2: use stopcut ===
 
 FooNodeList buffer:1:1-1:20
 |item_0:
 |  Def buffer:1:1-1:6
-|  |id:
+|  |f_id:
 |  |  Id buffer:1:5-1:6: a
 |item_1:
 |  Block buffer:1:7-1:20
-|  |el:
+|  |f_el:
 |  |  VarDef buffer:1:9-1:18
-|  |  |id:
+|  |  |f_id:
 |  |  |  Id buffer:1:17-1:18: b
 
 Done

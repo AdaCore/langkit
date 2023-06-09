@@ -1,9 +1,9 @@
 main.py: Running...
 == prop ==
 SynthNode main.txt:1:1-1:15
-|name:
+|f_name:
 |  Name main.txt:1:2-1:6: main
-|items:
+|f_items:
 |  LiteralList main.txt:1:7-1:14
 |  |item_0:
 |  |  Literal main.txt:1:7-1:8: 1
@@ -14,9 +14,9 @@ SynthNode main.txt:1:1-1:15
 
 == prop2 ==
 SynthNode2 main.txt:1:1-1:15
-|name:
+|f_name:
 |  Name main.txt:1:2-1:6: main
-|items:
+|f_items:
 |  LiteralList main.txt:1:7-1:14
 |  |item_0:
 |  |  Literal main.txt:1:7-1:8: 1
