@@ -1288,12 +1288,11 @@ package body ${ada_lib_name}.Analysis is
          Result      : Children_Array;
       begin
          for C of Bare_Result loop
-            case C.Kind is
-               when Child =>
-                  Result.Children.Append ((Child, Wrap_Node (C.Node)));
-               when Trivia =>
-                  Result.Children.Append ((Trivia, C.Trivia));
-            end case;
+            Result.Children.Append
+              (Child_Record'
+                 (case C.Kind is
+                  when Child => (Child, Wrap_Node (C.Node)),
+                  when Trivia => (Trivia, C.Trivia)));
          end loop;
          return Result;
       end;
