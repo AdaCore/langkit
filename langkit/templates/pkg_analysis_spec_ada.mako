@@ -9,6 +9,7 @@
 <%namespace name="struct_types"   file="struct_types_ada.mako" />
 
 with Ada.Containers;
+private with Ada.Containers.Vectors;
 private with Ada.Finalization;
 with Ada.Strings.Unbounded;
 % if any(a.used_in_public_struct for a in ctx.array_types):
@@ -454,7 +455,49 @@ package ${ada_lib_name}.Analysis is
    end record;
    --  Variant that holds either an AST node or a token
 
-   type Children_Array is array (Positive range <>) of Child_Record;
+   subtype Children_Array_Cursor is Positive;
+   type Children_Array is private
+      with Iterable => (First       => First,
+                        Next        => Next,
+                        Has_Element => Has_Element,
+                        Element     => Element,
+                        Last        => Last,
+                        Previous    => Previous);
+   --  This iterable type holds an array of ``Child`` or ``Trivia`` nodes
+
+   function First
+     (Self : Children_Array) return Children_Array_Cursor;
+   --  Return the first child or trivia cursor corresponding to the children
+   --  array. Helper for the ``Iterable`` aspect.
+
+   function Last
+     (Self : Children_Array) return Children_Array_Cursor;
+   --  Return the last child or trivia cursor corresponding to the children
+   --  array. Helper for the ``Iterable`` aspect.
+
+   function Next
+     (Self : Children_Array;
+      Pos  : Children_Array_Cursor) return Children_Array_Cursor;
+   --  Return the child or trivia cursor that follows ``Self`` in the children
+   --  array. Helper for the ``Iterable`` aspect.
+
+   function Previous
+     (Self : Children_Array;
+      Pos  : Children_Array_Cursor) return Children_Array_Cursor;
+   --  Return the child or trivia cursor that follows ``Self`` in the children
+   --  array. Helper for the ``Iterable`` aspect.
+
+   function Has_Element
+     (Self : Children_Array;
+      Pos  : Children_Array_Cursor) return Boolean;
+   --  Return if ``Pos`` is in ``Self``'s iteration range. Helper for the
+   --  ``Iterable`` aspect.
+
+   function Element
+     (Self : Children_Array;
+      Pos  : Children_Array_Cursor) return Child_Record;
+   --  Return the child of trivia node at position ``Pos`` in ``Self``. Helper
+   --  for the ``Iterable`` aspect.
 
    function Children_And_Trivia
      (Node : ${root_entity.api_name}'Class) return Children_Array;
@@ -769,6 +812,14 @@ private
         (Internal   => Implementation.${root_entity.nullexpr},
          Safety_Net => Implementation.No_Node_Safety_Net);
    % endfor
+
+   package Child_Record_Vectors is new Ada.Containers.Vectors
+     (Index_Type   => Children_Array_Cursor,
+      Element_Type => Child_Record);
+
+   type Children_Array is record
+      Children : Child_Record_Vectors.Vector;
+   end record;
 
    procedure Check_Safety_Net (Self : ${T.root_node.entity.api_name}'Class);
    --  Check that Self's node and rebindings are still valid, raising a

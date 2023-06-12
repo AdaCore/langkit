@@ -1203,6 +1203,72 @@ package body ${ada_lib_name}.Analysis is
       Assign_Names_To_Logic_Vars (Node.Internal.Node);
    end Assign_Names_To_Logic_Vars;
 
+   -----------
+   -- First --
+   -----------
+
+   function First
+     (Self : Children_Array) return Children_Array_Cursor is
+   begin
+      return Self.Children.First_Index;
+   end First;
+
+   ----------
+   -- Last --
+   ----------
+
+   function Last
+     (Self : Children_Array) return Children_Array_Cursor is
+   begin
+      return Self.Children.Last_Index;
+   end Last;
+
+   ----------
+   -- Next --
+   ----------
+
+   function Next
+     (Self : Children_Array;
+      Pos  : Children_Array_Cursor) return Children_Array_Cursor is
+   begin
+      pragma Unreferenced (Self);
+      return Pos + 1;
+   end Next;
+
+   --------------
+   -- Previous --
+   --------------
+
+   function Previous
+     (Self : Children_Array;
+      Pos  : Children_Array_Cursor) return Children_Array_Cursor is
+   begin
+      pragma Unreferenced (Self);
+      return Pos - 1;
+   end Previous;
+
+   -----------------
+   -- Has_Element --
+   -----------------
+
+   function Has_Element
+     (Self : Children_Array;
+      Pos  : Children_Array_Cursor) return Boolean is
+   begin
+      return Pos in First (Self) .. Last (Self);
+   end Has_Element;
+
+   -------------
+   -- Element --
+   -------------
+
+   function Element
+     (Self : Children_Array;
+      Pos  : Children_Array_Cursor) return Child_Record is
+   begin
+      return Self.Children (Pos);
+   end Element;
+
    -------------------------
    -- Children_And_Trivia --
    -------------------------
@@ -1217,22 +1283,17 @@ package body ${ada_lib_name}.Analysis is
 
       Check_Safety_Net (Node);
       declare
-         Bare_Result : constant Bare_Children_Array :=
+         Bare_Result : constant Bare_Children_Vector :=
             Children_And_Trivia (Unwrap_Node (Node));
-         Result      : Children_Array (Bare_Result'Range);
+         Result      : Children_Array;
       begin
-         for I in Bare_Result'Range loop
-            declare
-               BR : Bare_Child_Record renames Bare_Result (I);
-               R  : Child_Record renames Result (I);
-            begin
-               case BR.Kind is
-                  when Child =>
-                     R := (Child, Wrap_Node (BR.Node));
-                  when Trivia =>
-                     R := (Trivia, BR.Trivia);
-               end case;
-            end;
+         for C of Bare_Result loop
+            case C.Kind is
+               when Child =>
+                  Result.Children.Append ((Child, Wrap_Node (C.Node)));
+               when Trivia =>
+                  Result.Children.Append ((Trivia, C.Trivia));
+            end case;
          end loop;
          return Result;
       end;

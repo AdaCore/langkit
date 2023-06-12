@@ -16,6 +16,7 @@ with Ada.Containers;              use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Hashed_Sets;
 with Ada.Containers.Ordered_Maps;
+with Ada.Containers.Vectors;
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;       use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
@@ -1281,10 +1282,13 @@ private package ${ada_lib_name}.Implementation is
    end record;
    --  Variant that holds either an node or a token
 
-   type Bare_Children_Array is array (Positive range <>) of Bare_Child_Record;
+   package Bare_Children_Record_Vectors is new Ada.Containers.Vectors
+     (Positive, Bare_Child_Record);
+
+   subtype Bare_Children_Vector is Bare_Children_Record_Vectors.Vector;
 
    function Children_And_Trivia
-     (Node : ${T.root_node.name}) return Bare_Children_Array;
+     (Node : ${T.root_node.name}) return Bare_Children_Vector;
    --  Implementation for Analysis.Children_And_Trivia
 
    % for astnode in ctx.astnode_types:
