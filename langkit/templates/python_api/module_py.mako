@@ -1628,9 +1628,7 @@ class ${root_astnode_name}:
                 print_node("item_{}".format(i), value)
         else:
             for name, value in self.iter_fields():
-                # Remove the f_ prefix to have the same behavior as the Ada
-                # dumper.
-                print_node(name[2:], value)
+                print_node(name, value)
 
     def findall(
         self,

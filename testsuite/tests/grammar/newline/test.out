@@ -1,22 +1,22 @@
 NewLineNode main.txt:1:1-2:2
-|lit_1:
+|f_lit_1:
 |  Literal main.txt:1:1-1:2: 1
-|lit_2:
+|f_lit_2:
 |  Literal main.txt:2:1-2:2: 2
 Found errors:
  1:3-1:4: Expected Newline, got Number
 IndentNode main.txt:1:1-2:5
-|lit_1:
+|f_lit_1:
 |  Literal main.txt:1:1-1:2: 1
-|lit_2:
+|f_lit_2:
 |  Literal main.txt:2:4-2:5: 2
 CompositeNode main.txt:1:1-4:2
-|lit_1:
+|f_lit_1:
 |  Literal main.txt:1:1-1:2: 1
-|lit_2:
+|f_lit_2:
 |  Literal main.txt:2:1-2:2: 2
-|lit_3:
+|f_lit_3:
 |  Literal main.txt:3:4-3:5: 3
-|lit_4:
+|f_lit_4:
 |  Literal main.txt:4:1-4:2: 4
 Done
