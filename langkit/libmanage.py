@@ -372,11 +372,6 @@ class ManageScript:
             '--trace', '-t', action='append', default=[],
             help='Activate given debug trace.'
         )
-        subparser.add_argument(
-            '--no-ada-api', action='store_true',
-            help='Do not generate units to provide an Ada API, and disable the'
-                 ' generation of mains.'
-        )
 
         # Don't enable this by default so that errors will not make automated
         # tasks hang.

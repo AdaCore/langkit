@@ -33,7 +33,9 @@ class Example(FooNode):
     env_spec = EnvSpec(add_env())
 
 
-build_and_run(lkt_file="expected_concrete_syntax.lkt",
-              py_script="main.py",
-              ada_main="main.adb")
-print('Done')
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    py_script="main.py",
+    gpr_mains=["main.adb"],
+)
+print("Done")

@@ -204,10 +204,10 @@ def build(grammar=None, lexer=None, lkt_file=None,
                   warning_set=warning_set)
 
 
-def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
+def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                   lexer=None, lkt_file=None, types_from_lkt=False,
                   lkt_semantic_checks=False, ocaml_main=None, java_main=None,
-                  ni_main=None, mains=False, warning_set=default_warning_set,
+                  ni_main=None, warning_set=default_warning_set,
                   generate_unparser=False, symbol_canonicalizer=None,
                   show_property_logging=False, unparse_script=unparse_script,
                   case_insensitive: bool = False,
@@ -237,13 +237,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
     :param None|str py_script: If not None, name of the Python script to run
         with the built library available.
 
-    :param None|str|list[str] ada_main: If not None, list of name of main
-        source files for Ada programs to build and run with the generated
-        library. If the input is a single string, consider it's a single mail
-        source file.
-
-    :param bool with_c: Whether to add "C" to the languages of the generated
-        project.
+    :param None|list[str] gpr_mains: If not None, list of name of main source
+        files (Ada and/or C) for the generated GPR file, to build and run with
+        the generated library.
 
     :param None|str ocaml_main: If not None, name of the OCaml source file to
         build and run with the built library available.
@@ -257,8 +253,6 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
 
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canonicalizer to use for this context, if any.
-
-    :param bool mains: Whether to build mains.
 
     :param bool show_property_logging: If true, any property that has been
         marked with tracing activated will be traced on stdout by default,
@@ -325,12 +319,6 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         if full_error_traces:
             argv.append("--full-error-traces")
 
-        # Generate the public Ada API only when necessary (i.e. if we have
-        # mains that do use this API). This reduces the time it takes to run
-        # tests.
-        if not mains and not ada_main:
-            argv.append('--no-ada-api')
-
         # If there is a Java main, enable the Java bindings building
         if java_main is not None or ni_main is not None:
             argv.append('--enable-java')
@@ -353,10 +341,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         if generate_unparser:
             argv.append('--generate-unparser')
 
-        # For testsuite performance, do not generate mains unless told
-        # otherwise.
-        if not mains:
-            argv.append('--disable-all-mains')
+        # No testcase uses the generated mains, so save time: never build them
+        argv.append('--disable-all-mains')
 
         argv.extend(additional_args)
         argv.extend(additional_make_args)
@@ -426,19 +412,21 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
         args.append(py_script)
         run(*args)
 
-    if ada_main is not None:
-        if isinstance(ada_main, str):
-            ada_main = [ada_main]
+    if gpr_mains:
+        source_dirs = [".", c_support_dir]
 
-        langs = ["Ada"]
-        source_dirs = ["."]
-        if with_c:
-            langs.append("C")
-            source_dirs.append(c_support_dir)
+        # Detect languages based on the source files present in the test
+        # directory.
+        langs = set()
+        for f in os.listdir("."):
+            if any(f.endswith(ext) for ext in [".c", ".h"]):
+                langs.add("C")
+            if any(f.endswith(ext) for ext in [".adb", ".ads"]):
+                langs.add("Ada")
 
-        # Generate a project file to build the given Ada main and then run
-        # the program. Do a static build to improve the debugging experience.
-        with open('gen.gpr', 'w') as f:
+        # Generate a project file to build the given mains. Do a static build
+        # (the default) to improve the debugging experience.
+        with open("gen.gpr", "w") as f:
 
             def fmt_str_list(strings: List[str]) -> str:
                 return ", ".join(f'"{s}"' for s in strings)
@@ -446,22 +434,23 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, with_c=False,
             f.write(project_template.format(
                 languages=fmt_str_list(langs),
                 source_dirs=fmt_str_list(source_dirs),
-                main_sources=fmt_str_list(ada_main),
+                main_sources=fmt_str_list(gpr_mains),
             ))
-        run('gprbuild', '-Pgen', '-q', '-p',
-            '-XLIBRARY_TYPE=static',
-            '-XXMLADA_BUILD=static')
+        run("gprbuild", "-Pgen", "-q", "-p")
 
-        for i, m in enumerate(ada_main):
-            assert m.endswith('.adb')
+        # Now run all mains. If there are more than one main to run, print a
+        # heading before each one.
+        for i, main in enumerate(gpr_mains):
             if i > 0:
-                print('')
-            if len(ada_main) > 1:
-                print('== {} =='.format(m))
+                print("")
+            if len(gpr_mains) > 1:
+                print(f"== {main} ==")
             sys.stdout.flush()
-            run(P.join('obj', m[:-4]),
+            run(
+                P.join("obj", os.path.splitext(main)[0]),
                 valgrind=True,
-                valgrind_suppressions=['gnat'])
+                valgrind_suppressions=["gnat"],
+            )
 
     if ocaml_main is not None:
         # Set up a Dune project

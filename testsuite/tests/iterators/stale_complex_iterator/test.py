@@ -37,7 +37,10 @@ class Example(FooNode):
         ).to_iterator
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              py_script='main.py', ada_main='main.adb',
-              lkt_semantic_checks=True)
-print('Done')
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    py_script="main.py",
+    gpr_mains=["main.adb"],
+    lkt_semantic_checks=True,
+)
+print("Done")

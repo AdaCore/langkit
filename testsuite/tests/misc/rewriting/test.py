@@ -47,18 +47,22 @@ class Plus(Expr):
     rhs = Field()
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              ada_main=['general_api.adb',
-                        'revert.adb',
-                        'rewrite.adb',
-                        'rewrite_lists.adb',
-                        'rewrite_non_ascii.adb',
-                        'iter_units.adb',
-                        'apply_error.adb',
-                        'templates.adb',
-                        'preserve_formatting.adb',
-                        'preserve_formatting_wrap.adb',
-                        'clone_synthetic.adb'],
-              generate_unparser=True,
-              types_from_lkt=True)
-print('Done')
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    gpr_mains=[
+        "general_api.adb",
+        "revert.adb",
+        "rewrite.adb",
+        "rewrite_lists.adb",
+        "rewrite_non_ascii.adb",
+        "iter_units.adb",
+        "apply_error.adb",
+        "templates.adb",
+        "preserve_formatting.adb",
+        "preserve_formatting_wrap.adb",
+        "clone_synthetic.adb"
+    ],
+    generate_unparser=True,
+    types_from_lkt=True,
+)
+print("Done")

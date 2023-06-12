@@ -178,7 +178,7 @@ class Example(FooNode):
 
 
 # Build the generated library and the Ada test program
-build_and_run(lkt_file="expected_concrete_syntax.lkt", ada_main="main.adb")
+build_and_run(lkt_file="expected_concrete_syntax.lkt", gpr_mains=["main.adb"])
 
 # Run the test program under GDB to check the helpers. We keep this part in
 # separate scripts to make it convenient, for debugging pruposes, to run these

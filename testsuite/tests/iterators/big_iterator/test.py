@@ -30,7 +30,9 @@ class Example(FooNode):
     env_spec = EnvSpec(add_to_env_kv("example", Self))
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              ada_main='main.adb',
-              unparse_script=unparse_all_script)
-print('Done')
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    gpr_mains=["main.adb"],
+    unparse_script=unparse_all_script,
+)
+print("Done")
