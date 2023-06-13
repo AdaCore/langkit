@@ -50,6 +50,12 @@ package body Langkit_Support.Vectors is
             Self.E.all (I) := Self.SV (I);
          end loop;
       else
+         --  We don't want to alloc/realloc any space if ``Capacity`` is
+         --  smaller than the current capacity.
+         if Capacity <= Self.Capacity then
+            return;
+         end if;
+
          if Self.E = null then
             --  E is null: First alloc
             Self.E := To_Pointer (Alloc (Siz));
