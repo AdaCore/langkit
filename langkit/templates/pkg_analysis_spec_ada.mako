@@ -455,7 +455,6 @@ package ${ada_lib_name}.Analysis is
    end record;
    --  Variant that holds either an AST node or a token
 
-   subtype Children_Array_Cursor is Positive;
    type Children_Array is private
       with Iterable => (First       => First,
                         Next        => Next,
@@ -465,37 +464,29 @@ package ${ada_lib_name}.Analysis is
                         Previous    => Previous);
    --  This iterable type holds an array of ``Child`` or ``Trivia`` nodes
 
-   function First
-     (Self : Children_Array) return Children_Array_Cursor;
+   function First (Self : Children_Array) return Natural;
    --  Return the first child or trivia cursor corresponding to the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Last
-     (Self : Children_Array) return Children_Array_Cursor;
+   function Last (Self : Children_Array) return Natural;
    --  Return the last child or trivia cursor corresponding to the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Next
-     (Self : Children_Array;
-      Pos  : Children_Array_Cursor) return Children_Array_Cursor;
+   function Next (Self : Children_Array; Pos  : Natural) return Natural;
    --  Return the child or trivia cursor that follows ``Self`` in the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Previous
-     (Self : Children_Array;
-      Pos  : Children_Array_Cursor) return Children_Array_Cursor;
+   function Previous (Self : Children_Array; Pos  : Natural) return Natural;
    --  Return the child or trivia cursor that follows ``Self`` in the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Has_Element
-     (Self : Children_Array;
-      Pos  : Children_Array_Cursor) return Boolean;
+   function Has_Element (Self : Children_Array; Pos  : Natural) return Boolean;
    --  Return if ``Pos`` is in ``Self``'s iteration range. Helper for the
    --  ``Iterable`` aspect.
 
    function Element
      (Self : Children_Array;
-      Pos  : Children_Array_Cursor) return Child_Record;
+      Pos  : Natural) return Child_Record;
    --  Return the child of trivia node at position ``Pos`` in ``Self``. Helper
    --  for the ``Iterable`` aspect.
 
@@ -814,7 +805,7 @@ private
    % endfor
 
    package Child_Record_Vectors is new Ada.Containers.Vectors
-     (Index_Type   => Children_Array_Cursor,
+     (Index_Type   => Positive,
       Element_Type => Child_Record);
 
    type Children_Array is record
