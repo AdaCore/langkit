@@ -1207,8 +1207,7 @@ package body ${ada_lib_name}.Analysis is
    -- First --
    -----------
 
-   function First
-     (Self : Children_Array) return Children_Array_Cursor is
+   function First (Self : Children_Array) return Natural is
    begin
       return Self.Children.First_Index;
    end First;
@@ -1217,8 +1216,7 @@ package body ${ada_lib_name}.Analysis is
    -- Last --
    ----------
 
-   function Last
-     (Self : Children_Array) return Children_Array_Cursor is
+   function Last (Self : Children_Array) return Natural is
    begin
       return Self.Children.Last_Index;
    end Last;
@@ -1227,9 +1225,7 @@ package body ${ada_lib_name}.Analysis is
    -- Next --
    ----------
 
-   function Next
-     (Self : Children_Array;
-      Pos  : Children_Array_Cursor) return Children_Array_Cursor is
+   function Next (Self : Children_Array; Pos  : Natural) return Natural is
    begin
       pragma Unreferenced (Self);
       return Pos + 1;
@@ -1239,9 +1235,7 @@ package body ${ada_lib_name}.Analysis is
    -- Previous --
    --------------
 
-   function Previous
-     (Self : Children_Array;
-      Pos  : Children_Array_Cursor) return Children_Array_Cursor is
+   function Previous (Self : Children_Array; Pos  : Natural) return Natural is
    begin
       pragma Unreferenced (Self);
       return Pos - 1;
@@ -1253,7 +1247,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Has_Element
      (Self : Children_Array;
-      Pos  : Children_Array_Cursor) return Boolean is
+      Pos  : Natural) return Boolean is
    begin
       return Pos in First (Self) .. Last (Self);
    end Has_Element;
@@ -1264,7 +1258,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Element
      (Self : Children_Array;
-      Pos  : Children_Array_Cursor) return Child_Record is
+      Pos  : Natural) return Child_Record is
    begin
       return Self.Children (Pos);
    end Element;
