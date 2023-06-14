@@ -77,6 +77,12 @@ package Langkit_Support.Symbols is
 
    function To_Symbol
      (Self : Symbol_Table; TS : Thin_Symbol) return Symbol_Type;
+   --  Go from thin symbol + symbol table to fat symbol representation.
+   --
+   --  Note that this is unsafe: You can take a thin symbol originally from
+   --  table ``A`` and pass table ``B`` to this function. If there is a valid
+   --  symbol at the thin symbol's location, it will return it silently, which
+   --  might create unexpected results.
 
    function Thin (S : Symbol_Type) return Thin_Symbol;
    --  Go from fat symbol representation to thin symbol representation
