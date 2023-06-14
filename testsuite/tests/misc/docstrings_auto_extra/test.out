@@ -1,0 +1,39 @@
+Code generation was successful
+
+build/src/libfoolang-analysis.ads:
+
+  --  Docstring for ``FooNode``.
+
+  --  Docstring for ``DerivedListNode``.
+
+  --  Docstring for ``DocumentedNode``.
+
+build/src/libfoolang.h:
+
+  * Docstring for ``FooNode``.
+
+  * Docstring for ``DocumentedNode``.
+
+  * Docstring for ``DerivedListNode``.
+
+build/ocaml/libfoolang.mli:
+
+  * Docstring for ``DerivedListNode``.
+
+  * Docstring for ``DocumentedNode``.
+
+  * Docstring for ``FooNode``.
+
+build/python/libfoolang/__init__.py:
+
+  Docstring for ``FooNode``.
+
+  Subclass of :py:class:`FooNode`.
+  Docstring for ``DocumentedNode``.
+
+  Subclass of :py:class:`FooNodeBaseList`.
+
+  Subclass of :py:class:`DocumentedNodeList`.
+  Docstring for ``DerivedListNode``.
+
+Done

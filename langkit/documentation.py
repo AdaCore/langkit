@@ -1332,7 +1332,7 @@ class PassthroughNode(docutils.nodes.Element):
 
 class LangkitTypeRef(docutils.nodes.reference):
     """
-    Specific langkit node for a reference to a Langkit CompiledType. Meant to
+    Specific Langkit node for a reference to a Langkit CompiledType. Meant to
     be replaced by our visitor by a type ref node that is understandable in the
     role of the language for which we generate documentation, or if there isn't
     such a role, a simple text reference.
@@ -1869,7 +1869,7 @@ def create_doc_printer(
         :param kwargs: Parameters to be passed to the specific formatter.
         """
         from langkit.compile_context import get_context
-        from langkit.compiled_types import T
+        from langkit.compiled_types import ASTNodeType, T
 
         ctx = get_context()
 
@@ -1887,6 +1887,19 @@ def create_doc_printer(
             )
         elif entity.doc:
             doc = entity.doc
+
+            # Sphinx's autodoc feature for Python does not show the base(s) of
+            # documented class. Since materializing the class hierarchy is
+            # important for nodes, automatically append it to the docstring.
+            if (
+                lang == "python"
+                and isinstance(entity, ASTNodeType)
+                and not entity.is_root_node
+            ):
+                doc = (
+                    f"Subclass of :typeref:`{entity.base.type_repo_name}`."
+                    f"\n\n{doc}"
+                )
         else:
             doc = ""
 
