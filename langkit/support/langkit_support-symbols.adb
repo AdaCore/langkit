@@ -147,6 +147,16 @@ package body Langkit_Support.Symbols is
       end if;
    end To_Symbol;
 
+   ----------
+   -- Thin --
+   ----------
+
+   function Thin
+     (S : Symbol_Type) return Thin_Symbol is
+   begin
+      return S.TS;
+   end Thin;
+
    ---------
    -- Get --
    ---------

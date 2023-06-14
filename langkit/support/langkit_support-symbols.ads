@@ -78,6 +78,9 @@ package Langkit_Support.Symbols is
    function To_Symbol
      (Self : Symbol_Table; TS : Thin_Symbol) return Symbol_Type;
 
+   function Thin (S : Symbol_Type) return Thin_Symbol;
+   --  Go from fat symbol representation to thin symbol representation
+
    function Create_Symbol_Table return Symbol_Table;
    --  Allocate a new symbol table and return it
 
