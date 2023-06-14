@@ -1,4 +1,4 @@
-Mako==1.1.2
+Mako==1.2.2
 Pygments==2.6.1
 autopep8==1.5.2
 coverage==5.1
