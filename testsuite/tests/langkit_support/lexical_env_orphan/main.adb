@@ -12,19 +12,27 @@ use Support.Envs;
 
 procedure Main is
    Symbols : Symbol_Table := Create_Symbol_Table;
-   Key_A   : constant Symbol_Type := Find (Symbols, "A");
-   Key_B   : constant Symbol_Type := Find (Symbols, "B");
+   Key_A   : constant Thin_Symbol := Thin (Find (Symbols, "A"));
+   Key_B   : constant Thin_Symbol := Thin (Find (Symbols, "B"));
 
    Old_Env : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, 'O', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'O',
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
    New_Env : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, 'N', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'N',
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
    Rebindings : Env_Rebindings := Append (null, Old_Env, New_Env);
 
    Root     : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, 'R', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'R',
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
    Child    : Lexical_Env := Create_Lexical_Env
-     (Root, 'C', Owner => No_Generic_Unit);
+     (Root, 'C',
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
    Orphaned : Lexical_Env := Orphan (Child);
 begin
    Add (Root, Key_A, '1');
@@ -44,7 +52,7 @@ begin
 
    declare
       Transitive_Child : Lexical_Env := Create_Lexical_Env
-        (Root, 'C', True, No_Generic_Unit);
+        (Root, 'C', True, Owner => No_Generic_Unit, Sym_Table => Symbols);
 
       Grouped    : Lexical_Env := Group ((Root, Child));
       Rebound_TC : Lexical_Env := Rebind_Env (Transitive_Child, Rebindings);

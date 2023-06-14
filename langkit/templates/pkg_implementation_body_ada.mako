@@ -447,8 +447,9 @@ package body ${ada_lib_name}.Implementation is
       Context.Tab_Stop := Tab_Stop;
       Context.With_Trivia := With_Trivia;
       Context.Root_Scope := Create_Static_Lexical_Env
-        (Parent => Null_Lexical_Env,
-         Node   => null);
+        (Parent    => Null_Lexical_Env,
+         Node      => null,
+         Sym_Table => Context.Symbols);
 
       --  Create a new ownership share for Event_Handler so that it lives at
       --  least as long as this analysis context.
@@ -1941,7 +1942,7 @@ package body ${ada_lib_name}.Implementation is
       --  Now that everything is sanitized, we can proceed with the actual
       --  key/value pair addition. Note that this does nothing if
       --  Actual_Dest_Env ended up empty.
-      Add (Actual_Dest_Env, Key, Value, Md, Resolver);
+      Add (Actual_Dest_Env, Thin (Key), Value, Md, Resolver);
 
       --  If we're adding the element to an environment by env name, we must
       --  register this association in two places: in the target named env
@@ -2040,7 +2041,8 @@ package body ${ada_lib_name}.Implementation is
       Self.Self_Env := Create_Static_Lexical_Env
         (Parent            => Parent,
          Node              => Self,
-         Transitive_Parent => Transitive_Parent);
+         Transitive_Parent => Transitive_Parent,
+         Sym_Table         => Self.Unit.Context.Symbols);
 
       --  If the parent of this new environment comes from a named environment
       --  lookup, register this new environment so that its parent is updated
@@ -3160,7 +3162,7 @@ package body ${ada_lib_name}.Implementation is
                         NE.Foreign_Nodes.Reference (Cur);
                   begin
                      for N of Nodes loop
-                        Remove (NE.Env_With_Precedence, Key, N.Node);
+                        Remove (NE.Env_With_Precedence, Thin (Key), N.Node);
                      end loop;
                   end;
                end loop;
@@ -3179,7 +3181,7 @@ package body ${ada_lib_name}.Implementation is
                      NE.Foreign_Nodes.Reference (Cur);
                begin
                   for N of Nodes loop
-                     Add (New_Env, Key, N.Node, N.Md, N.Resolver);
+                     Add (New_Env, Thin (Key), N.Node, N.Md, N.Resolver);
                   end loop;
                end;
             end loop;
@@ -4114,13 +4116,14 @@ package body ${ada_lib_name}.Implementation is
    function Create_Static_Lexical_Env
      (Parent            : Lexical_Env;
       Node              : ${T.root_node.name};
+      Sym_Table         : Symbol_Table;
       Transitive_Parent : Boolean := False) return Lexical_Env
    is
       Unit : constant Internal_Unit :=
         (if Node = null then null else Node.Unit);
    begin
       return Result : Lexical_Env := Create_Lexical_Env
-        (Parent, Node, Transitive_Parent, Convert_Unit (Unit))
+        (Parent, Node, Transitive_Parent, Sym_Table, Convert_Unit (Unit))
       do
          if Unit /= null then
             Register_Destroyable (Unit, Unwrap (Result.Env));
@@ -4450,7 +4453,8 @@ package body ${ada_lib_name}.Implementation is
      (Self              : ${T.root_node.name};
       Assocs_Getter     : Inner_Env_Assocs_Resolver;
       Assoc_Resolver    : Entity_Resolver;
-      Transitive_Parent : Boolean) return Lexical_Env
+      Transitive_Parent : Boolean;
+      Sym_Table         : Symbol_Table) return Lexical_Env
    is
       Unit : constant Internal_Unit := Self.Unit;
    begin
@@ -4470,7 +4474,8 @@ package body ${ada_lib_name}.Implementation is
          Transitive_Parent => Transitive_Parent,
          Owner             => Convert_Unit (Unit),
          Assocs_Getter     => Assocs_Getter,
-         Assoc_Resolver    => Assoc_Resolver)
+         Assoc_Resolver    => Assoc_Resolver,
+         Sym_Table         => Sym_Table)
       do
          --  Since dynamic lexical environments can only be created in lazy
          --  field initializers, it is fine to tie Result's lifetime to the
@@ -5358,7 +5363,7 @@ package body ${ada_lib_name}.Implementation is
    procedure Remove_Exiled_Entries (Unit : Internal_Unit) is
    begin
       for EE of Unit.Exiled_Entries loop
-         AST_Envs.Remove (EE.Env, EE.Key, EE.Node);
+         AST_Envs.Remove (EE.Env, Thin (EE.Key), EE.Node);
 
          --  Also strip foreign nodes information from "outer" units so that it
          --  does not contain stale information (i.e. dangling pointers to
@@ -5396,7 +5401,7 @@ package body ${ada_lib_name}.Implementation is
       --  environments themselves.
       for EE of Unit.Exiled_Entries_In_NED loop
          Remove (EE.Named_Env.Foreign_Nodes, EE.Key, EE.Node);
-         Remove (EE.Named_Env.Env_With_Precedence, EE.Key, EE.Node);
+         Remove (EE.Named_Env.Env_With_Precedence, Thin (EE.Key), EE.Node);
       end loop;
       Unit.Exiled_Entries_In_NED.Clear;
 

@@ -76,7 +76,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    procedure Get_Internal_Impl
      (Self                    : Lexical_Env;
-      Key                     : Symbol_Type;
+      Key                     : Thin_Symbol;
       Lookup_Kind             : Lookup_Kind_Type := Recursive;
       Rebindings              : Env_Rebindings := null;
       Metadata                : Node_Metadata := Empty_Metadata;
@@ -113,7 +113,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    procedure Get_Internal
      (Self          : Lexical_Env;
-      Key           : Symbol_Type;
+      Key           : Thin_Symbol;
       Lookup_Kind   : Lookup_Kind_Type := Recursive;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Node_Metadata := Empty_Metadata;
@@ -568,14 +568,23 @@ package body Langkit_Support.Lexical_Envs_Impl is
      (Parent            : Lexical_Env;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
+      Sym_Table         : Symbol_Table;
       Owner             : Generic_Unit_Ptr) return Lexical_Env is
    begin
+
       if Parent /= Null_Lexical_Env then
          Inc_Ref (Parent);
+      elsif Sym_Table = No_Symbol_Table then
+         raise Constraint_Error
+         with "Sym_Table shouldn't be null if Parent is null";
       end if;
+
       return Wrap
         (new Lexical_Env_Record'
-           (Kind                     => Static_Primary,
+           (Sym_Table                => (if Sym_Table /= No_Symbol_Table
+                                         then Sym_Table
+                                         else Parent.Env.Sym_Table),
+            Kind                     => Static_Primary,
             Parent                   => Parent,
             Transitive_Parent        => Transitive_Parent,
             Node                     => Node,
@@ -598,6 +607,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Transitive_Parent : Boolean := False;
       Owner             : Generic_Unit_Ptr;
       Assocs_Getter     : Inner_Env_Assocs_Resolver;
+      Sym_Table         : Symbol_Table;
       Assoc_Resolver    : Entity_Resolver := null) return Lexical_Env is
    begin
       if Parent /= Null_Lexical_Env then
@@ -605,7 +615,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
       end if;
       return Wrap
         (new Lexical_Env_Record'
-           (Kind              => Dynamic_Primary,
+           (Sym_Table         => Sym_Table,
+            Kind              => Dynamic_Primary,
             Parent            => Parent,
             Transitive_Parent => Transitive_Parent,
             Node              => Node,
@@ -632,18 +643,19 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    procedure Add
      (Self     : Lexical_Env;
-      Key      : Symbol_Type;
+      Key      : Thin_Symbol;
       Value    : Node_Type;
       Md       : Node_Metadata := Empty_Metadata;
       Resolver : Entity_Resolver := null)
    is
       use Internal_Envs;
 
-      Env   : constant Lexical_Env_Access := Unwrap (Self);
-      Node  : constant Internal_Map_Node := (Value, Md, Resolver);
-      C     : Cursor;
-      Dummy : Boolean;
-      Map   : Internal_Envs.Map renames Env.Map.all;
+      Env      : constant Lexical_Env_Access := Unwrap (Self);
+      Node     : constant Internal_Map_Node := (Value, Md, Resolver);
+      C        : Cursor;
+      Dummy    : Boolean;
+      Map      : Internal_Envs.Map renames Env.Map.all;
+      Full_Key : constant Symbol_Type := To_Symbol (Self.Env.Sym_Table, Key);
    begin
       --  See Empty_Env's documentation
 
@@ -652,7 +664,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
       end if;
 
       Me.Trace
-        ("ADDING VAL key=""" & Image (Key) & """, env=" & Env_Image (Self));
+        ("ADDING VAL key="""
+         & Image (Full_Key) & """, env=" & Env_Image (Self));
 
       --  Invalidate the cache, and make sure we have an entry in the internal
       --  map for the given key.
@@ -677,7 +690,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
    -- Remove --
    ------------
 
-   procedure Remove (Self : Lexical_Env; Key : Symbol_Type; Value : Node_Type)
+   procedure Remove (Self : Lexical_Env; Key : Thin_Symbol; Value : Node_Type)
    is
       Env : constant Lexical_Env_Access := Unwrap (Self);
    begin
@@ -788,7 +801,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    procedure Get_Internal
      (Self          : Lexical_Env;
-      Key           : Symbol_Type;
+      Key           : Thin_Symbol;
       Lookup_Kind   : Lookup_Kind_Type := Recursive;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Node_Metadata := Empty_Metadata;
@@ -810,7 +823,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    procedure Get_Internal_Impl
      (Self                    : Lexical_Env;
-      Key                     : Symbol_Type;
+      Key                     : Thin_Symbol;
       Lookup_Kind             : Lookup_Kind_Type := Recursive;
       Rebindings              : Env_Rebindings := null;
       Metadata                : Node_Metadata := Empty_Metadata;
@@ -819,6 +832,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Toplevel                : Boolean := True;
       Recursive_Check_Reached : in out Boolean)
    is
+      Full_Key : constant Symbol_Type := To_Symbol (Self.Env.Sym_Table, Key);
+
       function Do_Cache return Boolean
       is
         (Has_Lookup_Cache (Self)
@@ -828,7 +843,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
       --  Return whether to cache a particular request or not
 
       function Log_Id return String is
-        ("env=" & Env_Image (Self) & ", key=" & Image (+Key));
+        ("env=" & Env_Image (Self) & ", key=" & Image (Full_Key));
 
       Env : constant Lexical_Env_Access := Unwrap (Self);
 
@@ -862,7 +877,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       procedure Recurse
         (Self                    : Lexical_Env;
-         Key                     : Symbol_Type;
+         Key                     : Thin_Symbol;
          Lookup_Kind             : Lookup_Kind_Type := Recursive;
          Rebindings              : Env_Rebindings := null;
          Metadata                : Node_Metadata := Empty_Metadata;
@@ -882,7 +897,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       procedure Recurse
         (Self                    : Lexical_Env;
-         Key                     : Symbol_Type;
+         Key                     : Thin_Symbol;
          Lookup_Kind             : Lookup_Kind_Type := Recursive;
          Rebindings              : Env_Rebindings := null;
          Metadata                : Node_Metadata := Empty_Metadata;
@@ -910,7 +925,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
            (Natural range <>) of Internal_Envs.Cursor;
 
          function "<" (A, B : Internal_Envs.Cursor) return Boolean is
-           (+Internal_Envs.Key (A) < +Internal_Envs.Key (B));
+           (Get (Self.Env.Sym_Table, Internal_Envs.Key (A)).all
+            < Get (Self.Env.Sym_Table, Internal_Envs.Key (B)).all);
 
          procedure Cursor_Array_Sort is new Ada.Containers.Generic_Array_Sort
            (Index_Type   => Natural,
@@ -975,7 +991,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
                --  If Key is null, we want to get every entity stored in the
                --  map regardless of the symbol.
-               if Key = No_Symbol then
+               if Key = No_Thin_Symbol then
                   Append_All_Nodes (Self, From_Rebound);
                   return True;
                end if;
@@ -1022,7 +1038,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   --  For each individual assoc: add it if Key is null, or only
                   --  assocs with matching symbols.
                   A := Get (Assocs, I);
-                  if Key = No_Symbol or else Key = Get_Key (A) then
+                  if Key = No_Thin_Symbol or else Key = Get_Key (A) then
                      declare
                         IMN : constant Internal_Map_Node :=
                           (Get_Node (A), Get_Metadata (A), Env.Assoc_Resolver);
@@ -1453,7 +1469,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    function Get
      (Self        : Lexical_Env;
-      Key         : Symbol_Type;
+      Key         : Thin_Symbol;
       From        : Node_Type := No_Node;
       Lookup_Kind : Lookup_Kind_Type := Recursive;
       Categories  : Ref_Categories := All_Cats) return Entity_Array
@@ -1472,7 +1488,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    function Get
      (Self        : Lexical_Env;
-      Key         : Symbol_Type;
+      Key         : Thin_Symbol;
       From        : Node_Type := No_Node;
       Lookup_Kind : Lookup_Kind_Type := Recursive;
       Categories  : Ref_Categories := All_Cats)
@@ -1482,7 +1498,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
    begin
       if Has_Trace then
          Me.Trace
-           ("===== In Env get, key=" & Image (Key)
+           ("===== In Env get, key="
+            & Image (To_Symbol (Self.Env.Sym_Table, Key))
             & ", env=" & Lexical_Env_Image (Self, Dump_Content => False)
             & " =====");
          Me.Increase_Indent;
@@ -1516,7 +1533,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   then Image
                     (Node_Text_Image (Lexical_Env_Record (Self.Env.all).Node))
                   else Env_Image (Self))
-               & ", " & Image (+Key) & ") -> " & Entity_Vectors_Image (FV));
+               & ", " & Image (To_Symbol (Self.Env.Sym_Table, Key))
+               & ") -> " & Entity_Vectors_Image (FV));
          end if;
 
          if Has_Trace then
@@ -1535,7 +1553,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    function Get_First
      (Self        : Lexical_Env;
-      Key         : Symbol_Type;
+      Key         : Thin_Symbol;
       From        : Node_Type := No_Node;
       Lookup_Kind : Lookup_Kind_Type := Recursive;
       Categories  : Ref_Categories := All_Cats) return Entity
@@ -1544,7 +1562,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
    begin
 
       if Has_Trace then
-         Me.Trace ("==== In Env Get_First, key=" & Image (Key) & " ====");
+         Me.Trace ("==== In Env Get_First, key="
+                   & Image (To_Symbol (Self.Env.Sym_Table, Key)) & " ====");
          Me.Increase_Indent;
       end if;
 
@@ -1630,7 +1649,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
               else Wrap (new Lexical_Env_Record'
                           (Kind         => Orphaned,
                            Ref_Count    => <>,
-                           Orphaned_Env => Self),
+                           Orphaned_Env => Self,
+                           Sym_Table    => Self.Env.Sym_Table),
                          Owner => Self.Owner));
    end Orphan;
 
@@ -1699,7 +1719,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
             Ref_Count    => <>,
             Grouped_Envs =>
                new Lexical_Env_Array'(Lexical_Env_Array (V.To_Array)),
-            Default_Md   => With_Md))
+            Default_Md   => With_Md,
+            Sym_Table    => Envs (1).Env.Sym_Table))
       do
          Lexical_Env_Vectors.Destroy (V);
       end return;
@@ -1719,6 +1740,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
               then Base_Env
               else Wrap (new Lexical_Env_Record'
                            (Kind               => Rebound,
+                            Sym_Table          => Base_Env.Env.Sym_Table,
                             Ref_Count          => <>,
                             Rebound_Env        => Base_Env,
                             Rebindings         => Rebindings,
@@ -2201,14 +2223,16 @@ package body Langkit_Support.Lexical_Envs_Impl is
    procedure Sort is new Env_Pair_Vectors.Generic_Sort;
 
    function To_Sorted_Env
-     (Env : Internal_Envs.Map) return Env_Pair_Vectors.Vector;
+     (Env       : Internal_Envs.Map;
+      Sym_Table : Symbol_Table) return Env_Pair_Vectors.Vector;
 
    -------------------
    -- To_Sorted_Env --
    -------------------
 
    function To_Sorted_Env
-     (Env : Internal_Envs.Map) return Env_Pair_Vectors.Vector
+     (Env       : Internal_Envs.Map;
+      Sym_Table : Symbol_Table) return Env_Pair_Vectors.Vector
    is
       use Internal_Envs;
    begin
@@ -2217,7 +2241,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
             --  Append a new entry, and then fill it in place to avoid needless
             --  copying.
             Vector.Append
-              ((Key (Pos), Internal_Map_Node_Vectors.Empty_Vector));
+              ((To_Symbol (Sym_Table, Key (Pos)),
+                Internal_Map_Node_Vectors.Empty_Vector));
             declare
                Element : Internal_Map_Element renames
                   Env.Constant_Reference (Pos);
@@ -2370,7 +2395,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
                Append (Result, Sub_Prefix & "  <empty>" & ASCII.LF);
             else
                declare
-                  V : Env_Pair_Vectors.Vector := To_Sorted_Env (Env.Map.all);
+                  V : Env_Pair_Vectors.Vector :=
+                    To_Sorted_Env (Env.Map.all, Self.Env.Sym_Table);
                begin
                   for I in V.First_Index .. V.Last_Index loop
                      declare

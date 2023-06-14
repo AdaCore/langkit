@@ -44,8 +44,8 @@ package Support is
 
    type Inner_Env_Assoc is null record;
    function Get_Key
-     (Dummy : Inner_Env_Assoc) return Langkit_Support.Symbols.Symbol_Type
-   is (Langkit_Support.Symbols.No_Symbol);
+     (Dummy : Inner_Env_Assoc) return Langkit_Support.Symbols.Thin_Symbol
+   is (Langkit_Support.Symbols.No_Thin_Symbol);
    function Get_Node (Dummy : Inner_Env_Assoc) return Character is (' ');
    function Get_Metadata (Dummy : Inner_Env_Assoc) return Metadata
    is (0);

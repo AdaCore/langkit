@@ -12,17 +12,18 @@ use Support.Envs;
 
 procedure Main is
    Symbols : Symbol_Table := Create_Symbol_Table;
-   Key_X   : constant Symbol_Type := Find (Symbols, "X");
+   Key_X   : constant Thin_Symbol := Thin (Find (Symbols, "X"));
 
    New_Env : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, 'N', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'N', Owner => No_Generic_Unit, Sym_Table => Symbols);
 
    Root  : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, 'R', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'R', Owner => No_Generic_Unit, Sym_Table => Symbols);
+
    Child : Lexical_Env := Create_Lexical_Env
-     (Root, 'R', Owner => No_Generic_Unit);
+     (Root, 'R', Owner => No_Generic_Unit, Sym_Table => Symbols);
    Grandchild : Lexical_Env := Create_Lexical_Env
-     (Child, 'O', Owner => No_Generic_Unit);
+     (Child, 'O', Owner => No_Generic_Unit, Sym_Table => Symbols);
 
    Rebindings : Env_Rebindings := Append (null, Child, New_Env);
    Rebound    : Lexical_Env := Rebind_Env (Grandchild, Rebindings);

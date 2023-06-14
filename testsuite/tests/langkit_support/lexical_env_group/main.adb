@@ -9,27 +9,34 @@ with Support; use Support;
 use Support.Envs;
 
 procedure Main is
-   Symbols : Symbol_Table := Create_Symbol_Table;
-   Key_X   : constant Symbol_Type := Find (Symbols, "X");
+   Symbols  : Symbol_Table := Create_Symbol_Table;
+   Key_X    : constant Symbol_Type := Find (Symbols, "X");
+   Key_Thin : constant Thin_Symbol := Thin (Key_X);
 
    A_Parent : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, 'P', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'P',
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
+
    A        : Lexical_Env := Create_Lexical_Env
-     (A_Parent, 'A', Owner => No_Generic_Unit);
+     (A_Parent, 'A',
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
+
    B        : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, 'B', Owner => No_Generic_Unit);
+     (Null_Lexical_Env, 'B', Owner => No_Generic_Unit, Sym_Table => Symbols);
 
    Grouped : Lexical_Env := Group ((A, B));
 begin
-   Add (A_Parent, Key_X, '1');
-   Add (A, Key_X, '2');
-   Add (B, Key_X, '3');
+   Add (A_Parent, Key_Thin, '1');
+   Add (A, Key_Thin, '2');
+   Add (B, Key_Thin, '3');
 
    Put_Line ("Looking in Grouped (Lookup_Kind => Recursive):");
-   Put_Line (Get (Grouped, Key_X, Lookup_Kind => Recursive));
+   Put_Line (Get (Grouped, Key_Thin, Lookup_Kind => Recursive));
 
    Put_Line ("Looking in Grouped (Lookup_Kind => Flat):");
-   Put_Line (Get (Grouped, Key_X, Lookup_Kind => Flat));
+   Put_Line (Get (Grouped, Key_Thin, Lookup_Kind => Flat));
 
    Dec_Ref (Grouped);
    Destroy (A_Parent);

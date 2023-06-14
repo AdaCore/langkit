@@ -113,7 +113,7 @@ generic
 
    type Inner_Env_Assoc is private;
    with function Get_Key
-     (Self : Inner_Env_Assoc) return Symbol_Type is <>;
+     (Self : Inner_Env_Assoc) return Thin_Symbol is <>;
    with function Get_Node
      (Self : Inner_Env_Assoc) return Node_Type is <>;
    with function Get_Metadata
@@ -347,6 +347,7 @@ package Langkit_Support.Lexical_Envs_Impl is
      (Parent            : Lexical_Env;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
+      Sym_Table         : Symbol_Table;
       Owner             : Generic_Unit_Ptr) return Lexical_Env
       with Post => Create_Lexical_Env'Result.Kind = Static_Primary;
    --  Create a new static-primary lexical env
@@ -357,6 +358,7 @@ package Langkit_Support.Lexical_Envs_Impl is
       Transitive_Parent : Boolean := False;
       Owner             : Generic_Unit_Ptr;
       Assocs_Getter     : Inner_Env_Assocs_Resolver;
+      Sym_Table         : Symbol_Table;
       Assoc_Resolver    : Entity_Resolver := null) return Lexical_Env
       with Pre  => Node /= No_Node,
            Post => Create_Dynamic_Lexical_Env'Result.Kind = Dynamic_Primary;
@@ -364,14 +366,14 @@ package Langkit_Support.Lexical_Envs_Impl is
 
    procedure Add
      (Self     : Lexical_Env;
-      Key      : Symbol_Type;
+      Key      : Thin_Symbol;
       Value    : Node_Type;
       Md       : Node_Metadata := Empty_Metadata;
       Resolver : Entity_Resolver := null)
       with Pre => Self.Kind = Static_Primary;
    --  Add Value to the list of values for the key Key, with the metadata Md
 
-   procedure Remove (Self : Lexical_Env; Key : Symbol_Type; Value : Node_Type)
+   procedure Remove (Self : Lexical_Env; Key : Thin_Symbol; Value : Node_Type)
       with Pre => Self.Kind = Static_Primary;
    --  Remove Value from the list of values for the key Key. This does nothing
    --  if Self is the empty environment.
@@ -434,7 +436,7 @@ package Langkit_Support.Lexical_Envs_Impl is
 
    function Get
      (Self        : Lexical_Env;
-      Key         : Symbol_Type;
+      Key         : Thin_Symbol;
       From        : Node_Type := No_Node;
       Lookup_Kind : Lookup_Kind_Type := Recursive;
       Categories  : Ref_Categories := All_Cats) return Entity_Vectors.Vector;
@@ -452,14 +454,14 @@ package Langkit_Support.Lexical_Envs_Impl is
 
    function Get
      (Self        : Lexical_Env;
-      Key         : Symbol_Type;
+      Key         : Thin_Symbol;
       From        : Node_Type := No_Node;
       Lookup_Kind : Lookup_Kind_Type := Recursive;
       Categories  : Ref_Categories := All_Cats) return Entity_Array;
 
    function Get_First
      (Self        : Lexical_Env;
-      Key         : Symbol_Type;
+      Key         : Thin_Symbol;
       From        : Node_Type := No_Node;
       Lookup_Kind : Lookup_Kind_Type := Recursive;
       Categories  : Ref_Categories := All_Cats) return Entity;
@@ -536,7 +538,7 @@ package Langkit_Support.Lexical_Envs_Impl is
    --  Lexical environment lookup result item. Lookups return arrays of these.
 
    package Lookup_Result_Item_Vectors is new Langkit_Support.Vectors
-     (Lookup_Result_Item, Small_Vector_Capacity => 2);
+     (Lookup_Result_Item);
 
    subtype Lookup_Result_Vector is Lookup_Result_Item_Vectors.Vector;
    Empty_Lookup_Result_Vector : Lookup_Result_Vector renames
@@ -548,7 +550,7 @@ package Langkit_Support.Lexical_Envs_Impl is
       Lookup_Result_Item_Vectors.Empty_Array;
 
    type Lookup_Cache_Key is record
-      Symbol : Symbol_Type;
+      Symbol : Thin_Symbol;
       --  Symbol for this lookup
 
       Rebindings : Env_Rebindings;
@@ -580,7 +582,7 @@ package Langkit_Support.Lexical_Envs_Impl is
 
    type Lookup_Cache_Entry is record
       State    : Lookup_Cache_Entry_State;
-      Elements : Lookup_Result_Item_Vectors.Vector;
+      Elements : Lookup_Result_Vector;
    end record;
    --  Result of a lexical environment lookup
 
@@ -647,7 +649,7 @@ package Langkit_Support.Lexical_Envs_Impl is
      (others => <>);
 
    package Internal_Envs is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Symbol_Type,
+     (Key_Type        => Thin_Symbol,
       Element_Type    => Internal_Map_Element,
       Hash            => Hash,
       Equivalent_Keys => "=");
@@ -833,7 +835,8 @@ private
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Record :=
-     (Kind                     => Static_Primary,
+     (Sym_Table                => No_Symbol_Table,
+      Kind                     => Static_Primary,
       Parent                   => Null_Lexical_Env,
       Transitive_Parent        => False,
       Node                     => No_Node,

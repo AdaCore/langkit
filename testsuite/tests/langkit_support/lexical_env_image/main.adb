@@ -24,25 +24,38 @@ procedure Main is
    Name_Item_Y2   : String_Access := +"Item(Y2)";
 
    Symbols : Symbol_Table := Create_Symbol_Table;
-   Key_X   : constant Symbol_Type := Find (Symbols, "X");
-   Key_Y   : constant Symbol_Type := Find (Symbols, "Y");
+   Key_X   : constant Thin_Symbol := Thin (Find (Symbols, "X"));
+   Key_Y   : constant Thin_Symbol := Thin (Find (Symbols, "Y"));
 
    Old_Env_1 : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, Name_Old_Env_1, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_Old_Env_1,
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
    New_Env_1 : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, Name_New_Env_1, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_New_Env_1,
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
    Old_Env_2 : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, Name_Old_Env_2, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_Old_Env_2,
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
    New_Env_2 : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, Name_New_Env_2, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_New_Env_2,
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
 
    R1 : Env_Rebindings := Append (null, Old_Env_1, New_Env_1);
    R2 : Env_Rebindings := Append (R1, Old_Env_2, New_Env_2);
 
    Prim_A : Lexical_Env := Create_Lexical_Env
-     (Null_Lexical_Env, Name_Prim_A, Owner => No_Generic_Unit);
+     (Null_Lexical_Env, Name_Prim_A,
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
    Prim_B : Lexical_Env := Create_Lexical_Env
-     (Prim_A, Name_Prim_B, Owner => No_Generic_Unit);
+     (Prim_A,
+      Name_Prim_B,
+      Owner => No_Generic_Unit,
+      Sym_Table => Symbols);
 
    Orphaned_1 : Lexical_Env := Orphan (Prim_B);
    Orphaned_2 : Lexical_Env := Orphan (Orphaned_1);

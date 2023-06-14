@@ -143,7 +143,7 @@ class EnvGet(AbstractExpression):
                 self.categories.render_pre()
             ]
             args = [('Self', self.env_expr.render_expr()),
-                    ('Key', self.key_expr.render_expr()),
+                    ('Key', f"Thin ({self.key_expr.render_expr()})"),
                     ('Lookup_Kind', 'To_Lookup_Kind_Type ({})'.format(
                         self.lookup_kind_expr.render_expr()
                     )),
@@ -616,7 +616,8 @@ class DynamicLexicalEnv(AbstractExpression):
                 'Create_Dynamic_Lexical_Env',
                 T.LexicalEnv,
                 [construct(Self), assocs_getter_ref, assoc_resolver_ref,
-                 transitive_parent],
+                 transitive_parent,
+                 'Self.Unit.Context.Symbols'],
                 abstract_expr=abstract_expr,
             )
 

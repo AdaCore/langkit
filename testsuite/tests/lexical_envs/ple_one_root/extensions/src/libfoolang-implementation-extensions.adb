@@ -25,7 +25,7 @@ package body Libfoolang.Implementation.Extensions is
       --  have to resolve is "a". If the unit has only one element, it's that
       --  scope. If it's a list of scope, it's the second one.
 
-      if Get_Symbol (Node).all /= "a" then
+      if +Get_Symbol (Node) /= "a" then
          raise Program_Error;
       end if;
 

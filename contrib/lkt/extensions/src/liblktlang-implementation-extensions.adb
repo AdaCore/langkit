@@ -357,11 +357,12 @@ package body Liblktlang.Implementation.Extensions is
       Vals : Internal_Env_Kv_Array_Access) return Lexical_Env
    is
       Ret : constant Lexical_Env :=
-         Create_Static_Lexical_Env (Null_Lexical_Env, Node);
+         Create_Static_Lexical_Env
+           (Null_Lexical_Env, Node, Node.Unit.Context.Symbols);
    begin
 
       for El of Vals.Items loop
-         AST_Envs.Add (Ret, El.Key, El.Value);
+         AST_Envs.Add (Ret, Thin (El.Key), El.Value);
       end loop;
 
       return Ret;
