@@ -124,6 +124,15 @@ package body Langkit_Support.Symbols is
       end if;
    end Hash;
 
+   function Hash (ST : Thin_Symbol) return Hash_Type is
+   begin
+      if ST = No_Thin_Symbol then
+         return Hash_Type (0);
+      else
+         return Hash_Type'Mod (ST);
+      end if;
+   end Hash;
+
    ---------------
    -- To_Symbol --
    ---------------

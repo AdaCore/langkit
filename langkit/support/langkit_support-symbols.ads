@@ -104,6 +104,7 @@ package Langkit_Support.Symbols is
    --  calls to Find.
 
    function Hash (ST : Symbol_Type) return Hash_Type;
+   function Hash (ST : Thin_Symbol) return Hash_Type;
    --  Default hash function for symbols.
    --
    --  .. warning:: It assumes that you don't mix symbols from different symbol
