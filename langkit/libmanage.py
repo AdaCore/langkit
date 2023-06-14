@@ -1176,7 +1176,7 @@ class ManageScript:
 
         # Run dumpbin to get the DLL names
         dumpbin_out = subprocess.check_output([
-            "dumpbin",
+            "dumpbin.exe",
             "/exports",
             dll_file,
         ])
@@ -1189,7 +1189,7 @@ class ManageScript:
 
         # Generate the .lib file from the .def one
         subprocess.check_call([
-            "lib",
+            "lib.exe",
             f"/def:{def_file}",
             f"/out:{lib_file}",
             "/machine:x64",
