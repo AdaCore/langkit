@@ -1894,7 +1894,7 @@ def create_doc_printer(
             if (
                 lang == "python"
                 and isinstance(entity, ASTNodeType)
-                and not entity.is_root_node
+                and entity.base is not None
             ):
                 doc = (
                     f"Subclass of :typeref:`{entity.base.type_repo_name}`."
