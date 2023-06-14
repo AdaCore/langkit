@@ -75,7 +75,7 @@ class BindExpr(CallExpr):
         :param arity: If the functor type handles variadic functions, this
             should be the number of entity arguments to pass to "prop".
         """
-        assocs: List[Tuple[str | names.Name, ResolvedExpression]] = []
+        assocs: List[Tuple[Union[str, names.Name], ResolvedExpression]] = []
 
         if arity is not None:
             assocs.append(("N", IntegerLiteralExpr(arity)))
