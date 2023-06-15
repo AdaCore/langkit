@@ -1,0 +1,2 @@
+# Test that Langkit_Support.Reserve works correctly with Capacity = 0
+driver: langkit_support
