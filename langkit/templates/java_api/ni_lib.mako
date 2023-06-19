@@ -619,6 +619,21 @@
 
         // ----- Node functions -----
 
+        /** Return whether the two given entities are equal */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native int ${nat("node_is_equivalent")}(
+            EntityNative entity_left,
+            EntityNative entity_right
+        );
+
+        /** Get the hash of a node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native int ${nat("node_hash")}(
+            EntityNative entity
+        );
+
         /** Get the type of a node */
         @CompilerDirectives.TruffleBoundary
         @CFunction

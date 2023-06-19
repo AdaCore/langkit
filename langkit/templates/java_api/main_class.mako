@@ -3867,25 +3867,40 @@ public class ${ctx.lib_name.camel} {
             if(this == o) return true;
             if(!(o instanceof ${root_node_type})) return false;
             final ${root_node_type} other = (${root_node_type}) o;
-            return this.entity.node.equals(other.entity.node) &&
-                this.entity.info.rebindings.equals(
-                    other.entity.info.rebindings
+
+            if(ImageInfo.inImageCode()) {
+                final EntityNative thisNative = StackValue.get(
+                    EntityNative.class
                 );
+                this.entity.unwrap(thisNative);
+
+                final EntityNative otherNative = StackValue.get(
+                    EntityNative.class
+                );
+                other.entity.unwrap(otherNative);
+
+                return NI_LIB.${nat("node_is_equivalent")}(
+                    thisNative,
+                    otherNative
+                ) != 0;
+            } else {
+                return JNI_LIB.${nat("node_is_equivalent")}(
+                    this.entity, other.entity
+                ) != 0;
+            }
         }
 
         @Override
         public int hashCode() {
-
             if(ImageInfo.inImageCode()) {
-                return Objects.hash(
-                    this.entity.node.ni().rawValue(),
-                    this.entity.info.rebindings.ni().rawValue()
+                final EntityNative thisNative = StackValue.get(
+                    EntityNative.class
                 );
+                this.entity.unwrap(thisNative);
+
+                return NI_LIB.${nat("node_hash")}(thisNative);
             } else {
-                return Objects.hash(
-                    this.entity.node.jni(),
-                    this.entity.info.rebindings.jni()
-                );
+                return JNI_LIB.${nat("node_hash")}(this.entity);
             }
 
         }

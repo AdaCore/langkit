@@ -1,0 +1,18 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+
+    @export fun with_md(md1: Bool, md2: Bool): FooNode = FooNode(
+        node=node, info=EntityInfo(
+            md=Metadata(md1=md1, md2=md2), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
+        )
+    )
+}
+
+class Example : FooNode {
+}
