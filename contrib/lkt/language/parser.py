@@ -75,7 +75,7 @@ class SemanticResult(Struct):
     the request was made. Then, the result can be either:
 
     * ``result_type`` if the property was a type returning property.
-    * ``result_ref`` if the property was a reference returning property
+    * ``result_decl`` if the property was a decl returning property
     * ``error_message`` if an error was found as part of the resolution
       process.
 
@@ -91,7 +91,7 @@ class SemanticResult(Struct):
     result_type = UserField(
         T.TypeDecl.entity, default_value=No(T.TypeDecl.entity)
     )
-    result_ref = UserField(T.Decl.entity, default_value=No(T.Decl.entity))
+    result_decl = UserField(T.Decl.entity, default_value=No(T.Decl.entity))
     has_error = UserField(T.Bool, default_value=False)
     error_message = UserField(T.String, default_value=No(T.String))
     exempt_analysis = UserField(
@@ -511,7 +511,7 @@ class LktNode(ASTNode):
         # Make sure that "prefix" refers to a generic declaration. If we cannot
         # resolve it, do not emit an error message: standard typing will
         # complain about not being able to find the corresponding declaration.
-        prefix_decl = Var(prefix.referenced_decl.result_ref)
+        prefix_decl = Var(prefix.referenced_decl.result_decl)
         gen_decl = Var(prefix_decl.cast(T.GenericDecl))
         invalid_decl = Var(
             If(
@@ -824,7 +824,7 @@ class Expr(LktNode):
             # If Self is a type, then use the type's scope to lookup operations
             # directly. TODO: Functions are accessible that way, but we didn't
             # define a semantic for this kind of calls yet.
-            decl.result_ref.cast(T.TypeDecl).then(
+            decl.result_decl.cast(T.TypeDecl).then(
                 lambda td: td.type_scope,
                 # Else, take the type of self, and return the type's scope
                 default_val=Entity.expr_type.result_type._.type_scope
@@ -952,7 +952,7 @@ class Expr(LktNode):
             Entity.is_a(T.ModuleRefId),
 
             # TODO: Implement function types
-            Entity.referenced_decl.result_ref.is_a(T.TypeDecl, T.GenericDecl)
+            Entity.referenced_decl.result_decl.is_a(T.TypeDecl, T.GenericDecl)
         ))
 
     @langkit_property(return_type=SemanticResult, public=True)
@@ -1109,7 +1109,7 @@ class Expr(LktNode):
         """
         Return the referenced decl of this expr, raise otherwise.
         """
-        return Entity.referenced_decl._.result_ref.then(
+        return Entity.referenced_decl._.result_decl.then(
             lambda rr: rr,
         )._or(PropertyError(T.Decl.entity, "No referenced decl error"))
 
@@ -1231,7 +1231,7 @@ class GrammarDecl(Decl):
 
         # Lexer decl
         lexer_decl = Var(lexer_arg._.value.cast(T.RefId)._.as_entity
-                         .referenced_decl.result_ref.cast(T.LexerDecl))
+                         .referenced_decl.result_decl.cast(T.LexerDecl))
 
         return (
             # All grammars must have an associated lexer. First check that the
@@ -1419,7 +1419,7 @@ class RefId(Id):
                             LK.flat
                         )
                     ).cast(T.Decl).then(
-                        lambda d: SemanticResult.new(result_ref=d, node=Self),
+                        lambda d: SemanticResult.new(result_decl=d, node=Self),
                         default_val=Self.ref_not_found_error
                     )
                 )
@@ -1485,7 +1485,7 @@ class RefId(Id):
             # RefId in the code. That might be too costly, so we might want to
             # have a first level of textual filter if this ever becomes a
             # problem.
-            And(Entity.referenced_decl.result_ref == error_type,
+            And(Entity.referenced_decl.result_decl == error_type,
                 Not(Entity.parents.any(lambda r: r.is_a(T.RaiseExpr)))),
 
             Self.error(S("Cannot reference `").concat(error_type.full_name)
@@ -2640,7 +2640,7 @@ class SimpleTypeRef(TypeRef):
     @langkit_property(return_type=T.SemanticResult.array)
     def check_correctness_pre():
         d = Var(Entity.type_name.referenced_decl)
-        return d.result_ref.then(
+        return d.result_decl.then(
             lambda d: d.cast(T.TypeDecl).then(
                 lambda _: No(T.SemanticResult.array),
                 default_val=[Entity.error(S("Invalid type reference"))]
@@ -2874,7 +2874,7 @@ class CallExpr(Expr):
             # First, check for generic instantiation errors. Before this, we
             # cannot call ``Entity.called_decl``, because it assumes that
             # generic instantiation errors have been checked beforehand.
-            rd.result_ref.cast(T.GenericDecl).then(
+            rd.result_decl.cast(T.GenericDecl).then(
                 lambda generic_decl: Entity.infer_actuals(
                     generic_decl,
                     Entity.expected_type
@@ -3138,7 +3138,7 @@ class CallExpr(Expr):
             Not(Entity.name.is_a(CallExpr)),
 
             Entity.name.referenced_decl.then(
-                lambda sr: sr.result_ref
+                lambda sr: sr.result_decl
             ).then(lambda decl: If(
                 decl.cast(T.FunDecl)._.is_property, No(T.Decl.entity), decl
             )),
@@ -3342,7 +3342,7 @@ class GenericInstantiation(Expr):
         )
 
     referenced_decl = Property(
-        SemanticResult.new(result_ref=Entity.instantiated_decl, node=Self)
+        SemanticResult.new(result_decl=Entity.instantiated_decl, node=Self)
     )
 
 
