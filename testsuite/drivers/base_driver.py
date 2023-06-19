@@ -2,6 +2,7 @@ import glob
 import os
 import os.path
 
+from e3.fs import sync_tree
 from e3.testsuite.control import YAMLTestControlCreator
 from e3.testsuite.driver.classic import TestAbortWithError
 from e3.testsuite.driver.diff import (
@@ -43,6 +44,16 @@ class BaseDriver(DiffTestDriver):
     @property
     def test_control_creator(self):
         return YAMLTestControlCreator(self.env.control_condition_env)
+
+    def set_up(self):
+        super().set_up()
+
+        # Allow tests to clone directories in their own working dir, such
+        # as common dependencies between multiple tests.
+        for path in self.test_env.get('sync_trees', []):
+            sync_tree(self.test_dir(path),
+                      self.working_dir(),
+                      delete=False)
 
     def tear_down(self):
         # Allow test drivers to create "*.log" files in their working space
