@@ -67,6 +67,10 @@ continuous_builder:
   # Important: this job must be synchronized with the equivalent ones in the
   # Libadalang, Langkit and AdaSAT repositories.
   rules:
+    # We are not interested in running the CB in pipelines that just rebuild
+    # the artifact.
+    - if: $CI_REBUILD_ARTIFACT
+      when: never
     - if: '$CI_COMMIT_BRANCH == "master"'
   services:
      - image:sandbox
