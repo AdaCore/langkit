@@ -158,6 +158,8 @@ package Langkit_Support.Lexical_Envs_Impl is
    end record
       with Convention => C;
 
+   type Entity_Info_Ptr is access all Entity_Info;
+
    type Entity is record
       Node : Node_Type;
       Info : Entity_Info;
@@ -526,16 +528,42 @@ package Langkit_Support.Lexical_Envs_Impl is
 
    type Lookup_Result_Item is record
       E : Entity;
-      --  Returned entity
-
-      Filter_From : Boolean;
-      --  Whether to filter with Can_Reach
 
       Override_Filter_Node : Node_Type := No_Node;
       --  Node to use when filtering with Can_Reach, if different from the
       --  Entity.
+
+      Filter_From : Boolean;
+      --  Whether to filter with Can_Reach
    end record;
    --  Lexical environment lookup result item. Lookups return arrays of these.
+
+   type Stored_Lookup_Result is record
+      Node : Node_Type;
+
+      Info_Or_Null : Entity_Info_Ptr := null;
+
+      Override_Filter_Node : Node_Type := No_Node;
+      --  Node to use when filtering with Can_Reach, if different from the
+      --  Entity.
+
+      Filter_From : Boolean;
+      --  Whether to filter with Can_Reach
+   end record with Pack => True;
+   --  Optimized representation of a ``Lookup_Result_Item``, where instead of
+   --  storing a full entity, we store a node (so a pointer in practice in
+   --  Langkit), and a pointer to ``Entity_Info``.
+   --
+   --  This leverages the fact that ``Entity_Info`` can be quite big (and is in
+   --  the case of Libadalang), and that it is null most of the time. This
+   --  allows us to save memory.
+
+   package Stored_Lookup_Result_Vectors is new Langkit_Support.Vectors
+     (Stored_Lookup_Result);
+   subtype Stored_Lookup_Result_Vector
+   is Stored_Lookup_Result_Vectors.Vector;
+   Empty_Stored_Lookup_Result_Vector : Stored_Lookup_Result_Vector renames
+      Stored_Lookup_Result_Vectors.Empty_Vector;
 
    package Lookup_Result_Item_Vectors is new Langkit_Support.Vectors
      (Lookup_Result_Item);
@@ -582,12 +610,12 @@ package Langkit_Support.Lexical_Envs_Impl is
 
    type Lookup_Cache_Entry is record
       State    : Lookup_Cache_Entry_State;
-      Elements : Lookup_Result_Vector;
+      Elements : Stored_Lookup_Result_Vector;
    end record;
    --  Result of a lexical environment lookup
 
    No_Lookup_Cache_Entry : constant Lookup_Cache_Entry :=
-     (None, Empty_Lookup_Result_Vector);
+     (None, Empty_Stored_Lookup_Result_Vector);
 
    function Hash (Self : Lookup_Cache_Key) return Hash_Type
    is

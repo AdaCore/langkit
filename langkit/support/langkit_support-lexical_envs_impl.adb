@@ -30,6 +30,12 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    No_Entity_Info : constant Entity_Info := (Empty_Metadata, null, False);
 
+   function Info (Res : Stored_Lookup_Result) return Entity_Info
+   is
+      (if Res.Info_Or_Null = null
+       then No_Entity_Info
+       else Res.Info_Or_Null.all);
+
    function Is_Lookup_Cache_Valid (Self : Lexical_Env) return Boolean
       with Pre => Self.Kind = Static_Primary;
    --  Return whether Env's lookup cache is valid. This will check every
@@ -175,14 +181,26 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Env      : constant Lexical_Env_Access := Unwrap (Self);
       C        : Cursor := First (Env.Lookup_Cache);
       Removed  : Long_Long_Integer := 0;
+
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Entity_Info, Entity_Info_Ptr);
    begin
       --  Use an explicit cursor iteration, as a `for of` loop introduces a
       --  non-negligible runtime overhead.
       while Has_Element (C) loop
          declare
-            Elements : Lookup_Result_Item_Vectors.Vector renames
+            Elements : Stored_Lookup_Result_Vector renames
               Env.Lookup_Cache.Reference (C).Elements;
          begin
+
+            for El of Elements loop
+               declare
+                  Var_El : Stored_Lookup_Result := El;
+               begin
+                  Free (Var_El.Info_Or_Null);
+               end;
+            end loop;
+
             Removed := Removed + Long_Long_Integer (Elements.Length);
             Elements.Destroy;
             C := Next (C);
@@ -1275,7 +1293,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
          declare
             Val : constant Lookup_Cache_Entry :=
-              (Computing, Empty_Lookup_Result_Vector);
+              (Computing, Empty_Stored_Lookup_Result_Vector);
          begin
             Env.Lookup_Cache.Insert
               (Res_Key, Val, Cached_Res_Cursor, Inserted);
@@ -1310,10 +1328,20 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   --  cache request.
                   null;
                when Computed =>
-                  Local_Results.Concat (Res_Val.Elements);
+                  for El of Res_Val.Elements loop
+                     Local_Results.Append
+                       (Lookup_Result_Item'
+                         (E => Entity'
+                           (Node                 => El.Node,
+                            Info                 => Info (El)),
+                            Override_Filter_Node => El.Override_Filter_Node,
+                            Filter_From          => El.Filter_From));
+                  end loop;
+
                   if Env.Node /= No_Node then
                      Notify_Cache_Hit (Env.Node);
                   end if;
+
                   return;
                when None =>
                   Need_Cache := True;
@@ -1429,7 +1457,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
          if Recursive_Check_Reached then
             Env.Lookup_Cache.Include
-              (Res_Key, (None, Empty_Lookup_Result_Vector));
+              (Res_Key, (None, Empty_Stored_Lookup_Result_Vector));
 
             Outer_Results.Concat (Local_Results);
             --  We won't keep the local results in the cache, so destroy them
@@ -1445,8 +1473,27 @@ package body Langkit_Support.Lexical_Envs_Impl is
                Notify_Cache_Updated
                  (Env.Node, Long_Long_Integer (Local_Results.Length));
             end if;
-            Env.Lookup_Cache.Include (Res_Key, (Computed, Local_Results));
+
+            declare
+               Stored_Res : Stored_Lookup_Result_Vector;
+            begin
+               for El of Local_Results loop
+
+                  Stored_Res.Append
+                    (Stored_Lookup_Result'
+                      (Node                 => El.E.Node,
+                       Info_Or_Null         =>
+                         (if El.E.Info = No_Entity_Info
+                          then null
+                          else new Entity_Info'(El.E.Info)),
+                       Override_Filter_Node => El.Override_Filter_Node,
+                       Filter_From          => El.Filter_From));
+               end loop;
+               Env.Lookup_Cache.Include (Res_Key, (Computed, Stored_Res));
+            end;
+
             Outer_Results.Concat (Local_Results);
+            Local_Results.Destroy;
             Local_Results := Outer_Results;
          end if;
 
