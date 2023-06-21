@@ -2308,6 +2308,39 @@ ${iterator.jni_c_impl(iterator_type)}
 // AST node functions
 // ==========
 
+// Return whether the two given entities are equal
+${api.jni_func_sig("node_is_equivalent", "jint")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject entity_left,
+    jobject entity_right
+) {
+    // Unwrap the nodes
+    ${entity_type} entity_left_native = Entity_unwrap(env, entity_left);
+    ${entity_type} entity_right_native = Entity_unwrap(env, entity_right);
+
+    // Call the native function
+    return (jint) ${nat("node_is_equivalent")}(
+        &entity_left_native,
+        &entity_right_native
+    );
+}
+
+// Get the hash of a node
+${api.jni_func_sig("node_hash", "jint")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject entity
+) {
+    // Unwrap the node
+    ${entity_type} entity_native = Entity_unwrap(env, entity);
+
+    // Call the native function
+    return (jint) ${nat("node_hash")}(
+        &entity_native
+    );
+}
+
 // Get the kind of a node
 ${api.jni_func_sig("node_kind", "jint")}(
     JNIEnv *env,
