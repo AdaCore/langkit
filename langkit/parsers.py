@@ -1306,6 +1306,7 @@ class Or(Parser):
         # ... and we want to memoize the result.
         self.cached_type = None
 
+    @property
     def can_parse_token_node(self) -> bool:
         return all(p.can_parse_token_node for p in self.parsers)
 

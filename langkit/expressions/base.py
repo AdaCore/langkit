@@ -6,7 +6,7 @@ import inspect
 from itertools import count
 from typing import (
     Any as _Any, Callable, ClassVar, Dict, Iterator, List, Optional as Opt,
-    Sequence, Set, TYPE_CHECKING, Tuple, Union, overload
+    Sequence, Set, TYPE_CHECKING, Tuple, Union, cast, overload
 )
 
 
@@ -434,7 +434,7 @@ class DocumentedExpression:
         """
         return self._argspec
 
-    def _build_argspec(self):
+    def _build_argspec(self) -> tuple[Opt[str], Opt[list[str]]]:
         func = self.constructor
         first_arg_is_self = False
 
@@ -466,7 +466,7 @@ class DocumentedExpression:
         for kw in self.kwargs:
             params_dict.pop(kw)
 
-        argspec: Opt[List[str]] = [p.name for p in params_dict.values()]
+        argspec: List[str] = [p.name for p in params_dict.values()]
 
         # Describe variadic constructors as such
         if varargs:
@@ -475,7 +475,7 @@ class DocumentedExpression:
             argspec.append(r'\*\*' + kwargs)
 
         if self.parameterless:
-            argspec = None
+            return prefix_name, None
         return prefix_name, argspec
 
     def build(self, prefix):
@@ -2792,7 +2792,17 @@ class Let(AbstractExpression):
                 ', '.join(var.name.lower for var in self.vars)
             )
 
-    def __init__(self, lambda_fn):
+    def __init__(
+        self,
+        lambda_fn: Union[
+            Tuple[
+                List[AbstractVariable],
+                List[AbstractExpression],
+                AbstractExpression
+            ],
+            Callable[[], AbstractExpression],
+        ],
+    ):
         """
         :param lambda_fn: Function that take an arbitrary number of arguments
             with default values (``AbstractExpression`` instances) and that
@@ -2808,28 +2818,32 @@ class Let(AbstractExpression):
         vars: List[AbstractVariable]
         var_names: List[str]
         var_exprs: List[AbstractExpression]
-        expr: AbstractExpression
+        expr: Union[AbstractExpression, None]
 
         if isinstance(lambda_fn, tuple):
             vars, var_exprs, expr = lambda_fn
-            var_names = [v._name.lower for v in vars]
-            lambda_fn = None
+            var_names = [cast(names.Name, v._name).lower for v in vars]
+            self.lambda_fn = None
 
         else:
             argspec = inspect.getfullargspec(lambda_fn)
 
             var_names = argspec.args
-            var_exprs = argspec.defaults or []
+            var_exprs = (
+                [unsugar(d) for d in argspec.defaults]
+                if argspec.defaults
+                else []
+            )
 
             # Computed during in the "prepare" pass
             vars = []
             expr = None
+            self.lambda_fn = lambda_fn
 
         self.vars = vars
         self.var_names = var_names
         self.var_exprs = var_exprs
         self.expr = expr
-        self.lambda_fn = lambda_fn
 
     def do_prepare(self):
         # Unless we have a lambda function to expand, there is nothing to
