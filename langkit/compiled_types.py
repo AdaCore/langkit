@@ -2813,7 +2813,7 @@ class ASTNodeType(BaseStructType):
         # decorator may change this attribute later. Likewise for synthetic
         # nodes and nodes whose root list type is abstract.
         self.abstract: bool = is_abstract or is_root or is_generic_list_type
-        self.synthetic = is_synthetic
+        self.synthetic: bool = is_synthetic
 
         self.has_abstract_list: bool = has_abstract_list
         """
