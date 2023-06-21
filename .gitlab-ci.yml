@@ -30,6 +30,7 @@ stages:
   - stage1  # langkit_build, continuous_builder
   - stage2  # langkit_test,  libadalang_build_and_test
   - stage3  # package, executed regardless of testing
+  - stage4  # CB, executed regardless of the rest
 
 #########
 # BUILD #
@@ -59,10 +60,6 @@ langkit_build:
   artifacts:
     paths:
       - $PACKAGE_BASENAME
-
-continuous_builder:
-  extends: .cb
-  stage: stage1
 
 ########
 # TEST #
@@ -188,3 +185,12 @@ package:
     # Upload the package
     - git clone $CI_FRAGMENTS_GIT
     - ./$CI_FRAGMENTS/upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
+
+######
+# CB #
+######
+
+continuous_builder:
+  extends: .cb
+  stage: stage4
+  needs: []
