@@ -2184,43 +2184,47 @@ class Field(BaseField):
 
     @property
     def doc(self) -> str:
-        # If parsers build this field, add a precise list of types it can
-        # contain: the field type might be too generic.
+        # Only nodes can have parse fields
+        assert isinstance(self.struct, ASTNodeType)
 
         result = super().doc
 
-        # Synthetic nodes are not built by parsers, so for now we don't have
-        # precise type information for them.
-        assert isinstance(self.struct, ASTNodeType)
-        if self.struct.synthetic:
-            return result
-
-        precise_types = self.precise_types.minimal_matched_types
+        # If parsers build this field, add a precise list of types it can
+        # contain: the field type might be too generic.  Note that synthetic
+        # nodes are not built by parsers, so for now we don't have precise type
+        # information for them.
+        precise_types_added = False
+        precise_types = list(self.precise_types.minimal_matched_types)
 
         # If the field always contains a list, and that we know it holds one or
         # several types more precise that its element type, give precise types
         # for the list items.
         if len(precise_types) == 1 and self.type.is_list_type:
-            precise_element_types = list(self.precise_element_types
-                                         .minimal_matched_types)
+            precise_element_types = list(
+                self.precise_element_types.minimal_matched_types
+            )
             if (
                 len(precise_element_types) > 1
                 or precise_element_types[0] != self.type.element_type
             ):
-
-                return append_paragraph(
+                result = append_paragraph(
                     result,
                     'This field contains a list that itself contains one of '
                     'the following nodes: '
                     f'{precise_types_doc(precise_element_types)}'
                 )
+                precise_types_added = True
 
-        if len(precise_types) > 1:
-            return append_paragraph(
+        if (
+            not precise_types_added
+            and (len(precise_types) > 1 or precise_types[0] != self.type)
+        ):
+            result = append_paragraph(
                 result,
                 'This field can contain one of the following nodes: '
                 f'{precise_types_doc(precise_types)}'
             )
+            precise_types_added = True
 
         return result
 
