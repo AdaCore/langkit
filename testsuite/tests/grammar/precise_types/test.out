@@ -7,20 +7,32 @@ Code generation was successful
 == Doc for ForSynthParent.f ==
 This field can contain one of the following nodes: :typeref:`A`, :typeref:`B`
 
+When there are no parsing errors, this field is never null.
+
 == Doc for ForSynthChild1.f ==
 This field can contain one of the following nodes: :typeref:`B`
+
+When there are no parsing errors, this field is never null.
 
 == Doc for ForSynthChild2.f ==
 This field can contain one of the following nodes: :typeref:`A`
 
+When there are no parsing errors, this field is never null.
+
 == Doc for Holder.a_list_or_b_list ==
 This field can contain one of the following nodes: :typeref:`AList`, :typeref:`BList`
+
+When there are no parsing errors, this field is never null.
 
 == Doc for Holder.a_or_b ==
 This field can contain one of the following nodes: :typeref:`A`, :typeref:`B`
 
+When there are no parsing errors, this field is never null.
+
 == Doc for Holder.a_or_b_list ==
 This field contains a list that itself contains one of the following nodes: :typeref:`A`, :typeref:`B`
+
+When there are no parsing errors, this field is never null.
 
 == Doc for Holder.a_or_b_or_null ==
 This field can contain one of the following nodes: :typeref:`A`, :typeref:`B`
@@ -28,13 +40,21 @@ This field can contain one of the following nodes: :typeref:`A`, :typeref:`B`
 == Doc for Holder.special_a_list ==
 This field contains a list that itself contains one of the following nodes: :typeref:`A`
 
+When there are no parsing errors, this field is never null.
+
 == Doc for Holder.special_a_list_or_special_b_list ==
 This field contains a list that itself contains one of the following nodes: :typeref:`A`, :typeref:`B`
+
+When there are no parsing errors, this field is never null.
 
 == Doc for Holder.special_a_or_b_list ==
 This field contains a list that itself contains one of the following nodes: :typeref:`A`, :typeref:`B`
 
+When there are no parsing errors, this field is never null.
+
 == Doc for OnlySynthNode.f ==
 This field can contain one of the following nodes: :typeref:`A`
+
+When there are no parsing errors, this field is never null.
 
 Done
