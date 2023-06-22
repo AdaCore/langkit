@@ -111,6 +111,25 @@ public class ${ctx.lib_name.camel} {
     // ==========
 
     /**
+     * Get the string representing the memory.
+     *
+     * @param pointer The pointer to start displaying the memory from.
+     * @param count The number of bytes to display from the pointer.
+     * @return The string representing the memory as hex bytes.
+     */
+    private static String dumpMemory(
+        final Pointer pointer,
+        final long count
+    ) {
+        final StringBuilder res = new StringBuilder();
+        for(int i = 0 ; i < count ; i++) {
+            final byte toDump = pointer.readByte(i);
+            res.append(String.format("%02x ", toDump));
+        }
+        return res.toString();
+    }
+
+    /**
      * Convert a Java string to a C string by allocating memory.
      *
      * @param jString The Java string to convert.
