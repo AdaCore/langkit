@@ -32,6 +32,7 @@ ptr_sig = f"{sig_base}$PointerWrapper"
 jclass main_class_ref = NULL;
 jmethodID encodeUTF32_method_id = NULL;
 jmethodID decodeUTF32_method_id = NULL;
+jmethodID check_exception_method_id = NULL;
 
 void * PointerWrapper_new_value();
 jobject PointerWrapper_wrap(JNIEnv *, void *);
@@ -234,6 +235,14 @@ ${api.jni_func_sig("initialize", "void")}(
         main_class_ref,
         "decodeUTF32",
         "([B)Ljava/lang/String;"
+    );
+
+    // Get the exception checking method
+    check_exception_method_id = (*env)->GetStaticMethodID(
+        env,
+        main_class_ref,
+        "checkException",
+        "()V"
     );
 
     PointerWrapper_class_ref = (jclass) (*env)->NewGlobalRef(
@@ -804,6 +813,15 @@ void encode_utf_32(
         0,
         byte_length,
         (jbyte *) *buffer_ref
+    );
+}
+
+void check_exception(JNIEnv *env) {
+    // Call the Java checking exception function
+    (*env)->CallStaticVoidMethod(
+        env,
+        main_class_ref,
+        check_exception_method_id
     );
 }
 
