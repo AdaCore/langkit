@@ -184,7 +184,7 @@ jobject AnalysisContext_wrap(JNIEnv *, ${analysis_context_type});
 ${analysis_context_type} AnalysisContext_unwrap(JNIEnv *, jobject);
 
 jclass AnalysisContext_class_ref = NULL;
-jmethodID AnalysisContext_constructor_id = NULL;
+jmethodID AnalysisContext_from_reference_id = NULL;
 jfieldID AnalysisContext_reference_field_id = NULL;
 
 ${analysis_unit_type} AnalysisUnit_new_value();
@@ -647,11 +647,11 @@ ${api.jni_func_sig("initialize", "void")}(
         (*env)->FindClass(env, "${sig_base}$AnalysisContext")
     );
 
-    AnalysisContext_constructor_id = (*env)->GetMethodID(
+    AnalysisContext_from_reference_id = (*env)->GetStaticMethodID(
         env,
         AnalysisContext_class_ref,
-        "<init>",
-        "(L${ptr_sig};)V"
+        "fromReference",
+        "(L${ptr_sig};)L${sig_base}$AnalysisContext;"
     );
 
     AnalysisContext_reference_field_id = (*env)->GetFieldID(
@@ -1953,10 +1953,10 @@ jobject AnalysisContext_wrap(
     ${analysis_context_type} context_native
 ) {
     // Return the new analysis context
-    return (*env)->NewObject(
+    return (*env)->CallStaticObjectMethod(
         env,
         AnalysisContext_class_ref,
-        AnalysisContext_constructor_id,
+        AnalysisContext_from_reference_id,
         PointerWrapper_wrap(env, (void *) context_native)
     );
 }

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Objects;
 
 import java.lang.StringBuilder;
@@ -415,8 +416,19 @@ public class ${ctx.lib_name.camel} {
             if(ImageInfo.inImageCode()) {
                 return this.ni.equal(other.ni);
             } else {
-                return this.jni() == other.jni();
+                return this.jni == other.jni;
             }
+        }
+
+        @Override
+        public int hashCode() {
+
+            if(ImageInfo.inImageCode()) {
+                return (int) this.ni.rawValue();
+            } else {
+                return (int) this.jni;
+            }
+
         }
 
     }
@@ -2581,50 +2593,35 @@ public class ${ctx.lib_name.camel} {
 
         /** Singleton that represents the none analysis context. */
         public static final AnalysisContext NONE = new AnalysisContext(
-            PointerWrapper.nullPointer(),
-            false
+            PointerWrapper.nullPointer()
         );
+
+        /** This map contains all created analysis contexts. */
+        private static final Map<PointerWrapper, AnalysisContext> contextCache
+            = new ConcurrentHashMap<>();
 
         // ----- Instance attributes -----
 
         /** The reference to the native analysis context. */
         private final PointerWrapper reference;
 
-        // ----- Constructors -----
+        /** The event handler associated with the context. */
+        private final EventHandler eventHandler;
 
-        /**
-         * Create a new analysis context from it value.
-         *
-         * @param reference The native value of the analysis context in
-         * a pointer wrapper.
-         */
-        AnalysisContext(
-            final PointerWrapper reference
-        ) {
-            this(reference, true);
-        }
+        // ----- Constructors -----
 
         /**
          * Create a new analysis unit from its reference.
          *
          * @param reference The native analysis context.
-         * @param increaseRefeferenceCounter If the context reference counter
-         * should be increased.
          */
         private AnalysisContext(
-            final PointerWrapper reference,
-            final boolean increaseRefeferenceCounter
+            final PointerWrapper reference
         ) {
             this.reference = reference;
+            this.eventHandler = null;
 
-            // Increase the context reference counter if needed.
-            if(increaseRefeferenceCounter) {
-                if(ImageInfo.inImageCode()) {
-                    NI_LIB.${nat("context_incref")}(this.reference.ni());
-                } else {
-                    JNI_LIB.${nat("context_incref")}(this.reference.jni());
-                }
-            }
+            increaseRefCounter(this);
         }
 
         /**
@@ -2693,10 +2690,12 @@ public class ${ctx.lib_name.camel} {
             }
 
             this.reference = reference;
+            this.eventHandler = eventHandler;
+            contextCache.put(this.reference, this);
         }
 
         /**
-         * Create a new analysis context with the default parameters
+         * Create a new analysis context with the default parameters.
          *
          * @return The newly create analysis unit.
          */
@@ -2743,6 +2742,24 @@ public class ${ctx.lib_name.camel} {
             );
         }
 
+        /**
+         * Get the analysis context object from its reference.
+         *
+         * @param reference The native reference to the analysis context.
+         * @return The Java analysis unit associated with the reference.
+         */
+        static AnalysisContext fromReference(
+            final PointerWrapper reference
+        ) {
+            if(contextCache.containsKey(reference)) {
+                final AnalysisContext res = contextCache.get(reference);
+                increaseRefCounter(res);
+                return res;
+            } else {
+                return new AnalysisContext(reference);
+            }
+        }
+
         // ----- Graal C API methods -----
 
         /**
@@ -2768,9 +2785,7 @@ public class ${ctx.lib_name.camel} {
         static AnalysisContext wrap(
             final AnalysisContextNative analysisContextNative
         ) {
-            return new AnalysisContext(
-                new PointerWrapper(analysisContextNative)
-            );
+            return fromReference(new PointerWrapper(analysisContextNative));
         }
 
         /**
@@ -2927,6 +2942,24 @@ public class ${ctx.lib_name.camel} {
                 );
             }
 
+        }
+
+        /**
+         * Increase the reference counter of the given context.
+         *
+         * @param context The context to increase the reference counter of.
+         */
+        private static void increaseRefCounter(
+            final AnalysisContext context
+        ) {
+            // Increase the context reference counter of the context if not null
+            if(!context.reference.isNull()) {
+                if(ImageInfo.inImageCode()) {
+                    NI_LIB.${nat("context_incref")}(context.reference.ni());
+                } else {
+                    JNI_LIB.${nat("context_incref")}(context.reference.jni());
+                }
+            }
         }
 
         /** @see java.lang.AutoCloseable#close() */
@@ -3188,9 +3221,7 @@ public class ${ctx.lib_name.camel} {
 
             if(ImageInfo.inImageCode()) {
                 final AnalysisContextNative contextNative =
-                    NI_LIB.${nat("unit_context")}(
-                    this.reference.ni()
-                );
+                    NI_LIB.${nat("unit_context")}(this.reference.ni());
                 return AnalysisContext.wrap(contextNative);
             } else {
                 return JNI_LIB.${nat("unit_context")}(this);
