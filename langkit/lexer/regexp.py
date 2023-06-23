@@ -553,7 +553,6 @@ class RegexpCollection:
         Parse a regular expression for a character range.
 
         :param file stream: Input regexp stream.
-        :rtype: RegexpCollection.Parser
         """
         assert stream.read() == '['
         ranges: List[Tuple[int, int]] = []
@@ -631,8 +630,6 @@ class NFAState:
 
         None means that no character is needed to do the transition.
         Because this is a NFA, the various character sets can overlap.
-
-        :type: list[(None|CharSet, NFAState)]
         """
 
     def __lt__(self, other: NFAState) -> bool:
@@ -811,8 +808,6 @@ class NFAState:
     def to_dfa(self) -> DFAState:
         """
         Return the conversion of this NFA into a DFA.
-
-        :rtype: DFAState
         """
         result: Optional[DFAState] = None
 
@@ -908,8 +903,6 @@ class DFAState:
     def to_dot(self) -> str:
         """
         Return a dot script representing this DFA.
-
-        :rtype: str
         """
         return _to_dot(self,
                        lambda s: s.transitions,
@@ -1010,9 +1003,6 @@ class DFACodeGenHolder:
                  dfa: DFAState,
                  get_action: Callable[[Set[Any]], Optional[RuleAssoc]]):
         self.states: List[DFACodeGenHolder.State] = []
-        """
-        :type: list[DFACodeGenHolder.State]
-        """
 
         # Compute the list of states corresponding to the code blocks to emit.
         # We store them in a list (self.states) to have deterministic code
@@ -1043,11 +1033,9 @@ class DFACodeGenHolder:
             )
 
         # Generate labels for all the states we saw
-        self.state_labels = {state.dfa_state: state.label
-                             for state in self.states}
-        """
-        :type: dict[DFAState, str]
-        """
+        self.state_labels: dict[DFAState, str] = {
+            state.dfa_state: state.label for state in self.states
+        }
 
         for state in self.states:
             state.compute_transitions(self.state_labels)
