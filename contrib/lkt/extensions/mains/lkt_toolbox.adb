@@ -10,13 +10,11 @@ with GNAT.Traceback.Symbolic;
 with GNATCOLL.Opt_Parse;          use GNATCOLL.Opt_Parse;
 with GNATCOLL.Traces;
 
-with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-
-with Langkit_Support.Diagnostics.Output;
-use Langkit_Support.Diagnostics.Output;
-
-with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
-with Langkit_Support.Text;        use Langkit_Support.Text;
+with Liblktlang_Support.Diagnostics; use Liblktlang_Support.Diagnostics;
+with Liblktlang_Support.Diagnostics.Output;
+use Liblktlang_Support.Diagnostics.Output;
+with Liblktlang_Support.Slocs;       use Liblktlang_Support.Slocs;
+with Liblktlang_Support.Text;        use Liblktlang_Support.Text;
 
 with Liblktlang.Analysis;         use Liblktlang.Analysis;
 with Liblktlang.Common;
