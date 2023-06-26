@@ -2236,8 +2236,8 @@ ${exts.include_extension(
 
 # Misc
 _token_kind_name = _import_func(
-   "${capi.get_name('token_kind_name')}",
-   [ctypes.c_int], ctypes.POINTER(ctypes.c_char)
+    "${capi.get_name('token_kind_name')}",
+    [ctypes.c_int], ctypes.POINTER(ctypes.c_char)
 )
 _token_next = _import_func(
     "${capi.get_name('token_next')}",

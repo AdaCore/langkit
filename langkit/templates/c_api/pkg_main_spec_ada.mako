@@ -680,8 +680,8 @@ private package ${ada_lib_name}.Implementation.C is
    --  allows to avoid truncated error messages).
 
    function ${capi.get_name('token_kind_name')} (Kind : int) return chars_ptr
-      with Export => True,
-           Convention => C,
+      with Export        => True,
+           Convention    => C,
            External_Name => "${capi.get_name('token_kind_name')}";
    ${ada_c_doc('langkit.token_kind_name', 3)}
 
