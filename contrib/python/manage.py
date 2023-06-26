@@ -15,7 +15,8 @@ class Manage(ManageScript):
 
         return CompileCtx(lang_name='Python',
                           lexer=python_lexer,
-                          grammar=python_grammar)
+                          grammar=python_grammar,
+                          standalone=True)
 
 
 if __name__ == '__main__':

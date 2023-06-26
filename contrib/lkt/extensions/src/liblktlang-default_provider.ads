@@ -1,4 +1,4 @@
-with Langkit_Support.Text; use Langkit_Support.Text;
+with Liblktlang_Support.Text; use Liblktlang_Support.Text;
 
 with Liblktlang.Implementation; use Liblktlang.Implementation;
 

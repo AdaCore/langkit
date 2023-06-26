@@ -36,7 +36,8 @@ class Manage(ManageScript):
             grammar=lkt_grammar,
             default_unit_provider=LibraryEntity(
                 'Liblktlang.Default_Provider', 'Create'
-            )
+            ),
+            standalone=True,
         )
 
     def generate_prelude(self, emitter, context):
