@@ -179,6 +179,30 @@
     /** The event handler is just a pointer */
     public interface EventHandlerNative extends Pointer {}
 
+    /** The event handler unit requested callback type */
+    public interface UnitRequestedFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        void invoke(
+            VoidPointer data,
+            AnalysisContextNative context,
+            TextNative name,
+            AnalysisUnitNative from,
+            boolean found,
+            boolean is_not_found_error
+        );
+    }
+
+    /** The event handler unit parsed callback type */
+    public interface UnitParsedFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        void invoke(
+            VoidPointer data,
+            AnalysisContextNative context,
+            AnalysisUnitNative unit,
+            boolean reparsed
+        );
+    }
+
     /** Anonymous structure for the token data handler */
     @RawStructure
     public interface TokenDataHandlerNative extends PointerBase {
@@ -309,6 +333,38 @@
 
         ${exts.include_extension(ctx.ext("java_api", "ni_funcs"))}
 
+        // ----- Entry point literals -----
+
+        /**
+         * This entry point literal provide a pointer to the unit requested
+         * callback.
+         */
+        public static final CEntryPointLiteral<UnitRequestedFunctionPointer>
+            unitRequestedFunction = CEntryPointLiteral.create(
+                ${ctx.lib_name.camel}.class,
+                "unitRequested",
+                IsolateThread.class,
+                AnalysisContextNative.class,
+                TextNative.class,
+                AnalysisUnitNative.class,
+                byte.class,
+                byte.class
+            );
+
+        /**
+         * This entry point literal provide a pointer to the unit parsed
+         * callback.
+         */
+        public static final CEntryPointLiteral<UnitParsedFunctionPointer>
+            unitParsedFunction = CEntryPointLiteral.create(
+                ${ctx.lib_name.camel}.class,
+                "unitParsed",
+                IsolateThread.class,
+                AnalysisContextNative.class,
+                AnalysisUnitNative.class,
+                byte.class
+            );
+
         // ----- Util functions -----
 
         /** Util function to free langkit side allocated memory */
@@ -414,6 +470,16 @@
         );
 
         // ----- Event handler functions -----
+
+        /** Create a new event handler */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native EventHandlerNative ${nat("create_event_handler")}(
+            VoidPointer data,
+            VoidPointer destroy_callback,
+            UnitRequestedFunctionPointer unit_requested_func,
+            UnitParsedFunctionPointer unit_parsed_func
+        );
 
         /** Decrease the ref counter of the event handler */
         @CompilerDirectives.TruffleBoundary

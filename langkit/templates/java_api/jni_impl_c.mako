@@ -26,6 +26,17 @@ ptr_sig = f"{sig_base}$PointerWrapper"
 #include "${lib_file}"
 
 // ==========
+// Type declaration
+// ==========
+
+// Structure to store the information for event handler
+typedef struct {
+    JNIEnv *env;
+    jobject unit_requested_callback;
+    jobject unit_parsed_callback;
+} event_handler_data;
+
+// ==========
 // Function delcarations
 // ==========
 
@@ -157,8 +168,12 @@ jobject EventHandler_wrap(JNIEnv *, ${event_handler_type});
 ${event_handler_type} EventHandler_unwrap(JNIEnv *, jobject);
 
 jclass EventHandler_class_ref = NULL;
-jmethodID EventHandler_constructor_id = NULL;
+jmethodID EventHandler_from_reference_id = NULL;
 jfieldID EventHandler_reference_field_id = NULL;
+jclass UnitRequestedCallback_class_id = NULL;
+jmethodID UnitRequestedCallback_invoke_id = NULL;
+jclass UnitParsedCallback_class_id = NULL;
+jmethodID UnitParsedCallback_invoke_id = NULL;
 
 ${token_type} Token_new_value();
 jobject Token_wrap(JNIEnv *, ${token_type}, jobject);
@@ -546,11 +561,11 @@ ${api.jni_func_sig("initialize", "void")}(
         (*env)->FindClass(env, "${sig_base}$EventHandler")
     );
 
-    EventHandler_constructor_id = (*env)->GetMethodID(
+    EventHandler_from_reference_id = (*env)->GetStaticMethodID(
         env,
         EventHandler_class_ref,
-        "<init>",
-        "(L${ptr_sig};)V"
+        "fromReference",
+        "(L${ptr_sig};)L${sig_base}$EventHandler;"
     );
 
     EventHandler_reference_field_id = (*env)->GetFieldID(
@@ -558,6 +573,37 @@ ${api.jni_func_sig("initialize", "void")}(
         EventHandler_class_ref,
         "reference",
         "L${ptr_sig};"
+    );
+
+    UnitRequestedCallback_class_id = (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(
+            env,
+            "${sig_base}$EventHandler$UnitRequestedCallback"
+        )
+    );
+
+    UnitRequestedCallback_invoke_id = (*env)->GetMethodID(
+        env,
+        UnitRequestedCallback_class_id,
+        "invoke",
+        "(L${sig_base}$AnalysisContext;Ljava/lang/String;"
+        "L${sig_base}$AnalysisUnit;ZZ)V"
+    );
+
+    UnitParsedCallback_class_id = (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(
+            env,
+            "${sig_base}$EventHandler$UnitParsedCallback"
+        )
+    );
+
+    UnitParsedCallback_invoke_id = (*env)->GetMethodID(
+        env,
+        UnitParsedCallback_class_id,
+        "invoke",
+        "(L${sig_base}$AnalysisContext;L${sig_base}$AnalysisUnit;Z)V"
     );
 
     Token_class_ref = (jclass) (*env)->NewGlobalRef(
@@ -1651,10 +1697,10 @@ jobject EventHandler_wrap(
     ${event_handler_type} event_handler_native
 ) {
     // Return the new event handler
-    return (*env)->NewObject(
+    return (*env)->CallStaticObjectMethod(
         env,
         EventHandler_class_ref,
-        EventHandler_constructor_id,
+        EventHandler_from_reference_id,
         PointerWrapper_wrap(env, (void *) event_handler_native)
     );
 }
@@ -1672,6 +1718,120 @@ ${event_handler_type} EventHandler_unwrap(
             EventHandler_reference_field_id
         )
     );
+}
+
+// Util function to destroy the native event handler
+void event_handler_destroy(
+    void *data
+) {
+    event_handler_data *eh_data = (event_handler_data *) data;
+    JNIEnv *env = eh_data->env;
+    (*env)->DeleteGlobalRef(env, eh_data->unit_requested_callback);
+    (*env)->DeleteGlobalRef(env, eh_data->unit_parsed_callback);
+    free(data);
+}
+
+// Util function called when a unit is requested
+void event_handler_unit_requested(
+    void *data,
+    ${analysis_context_type} context,
+    ${text_type} *name,
+    ${analysis_unit_type} from,
+    ${bool_type} found,
+    ${bool_type} is_not_found_error
+) {
+    // Get the event handler data
+    event_handler_data *eh_data = (event_handler_data *) data;
+    JNIEnv *env = eh_data->env;
+
+    // Verify that the callback is not null
+    if(eh_data->unit_requested_callback != NULL) {
+        // Wrap the callback arguments
+        jobject analysis_context = AnalysisContext_wrap(env, context);
+        jobject text = Text_wrap(env, *name);
+        jobject analysis_unit = AnalysisUnit_wrap(env, from);
+
+        // Call the unit requested callback
+        (*env)->CallVoidMethod(
+            env,
+            eh_data->unit_requested_callback,
+            UnitRequestedCallback_invoke_id,
+            analysis_context,
+            get_text_content(env, text),
+            analysis_unit,
+            (jboolean) found,
+            (jboolean) is_not_found_error
+        );
+
+        // Remove the intermediary values
+        ${nat("context_decref")}(context);
+        ${nat("destroy_text")}(name);
+    }
+}
+
+// Util function called when a unit is parsed
+void event_handler_unit_parsed(
+    void *data,
+    ${analysis_context_type} context,
+    ${analysis_unit_type} unit,
+    ${bool_type} reparsed
+) {
+    // Get the event handler data
+    event_handler_data *eh_data = (event_handler_data *) data;
+    JNIEnv *env = eh_data->env;
+
+    // Verify that the callback is not null
+    if(eh_data->unit_parsed_callback != NULL) {
+        // Wrap the callback arguments
+        jobject analysis_context = AnalysisContext_wrap(env, context);
+        jobject analysis_unit = AnalysisUnit_wrap(env, unit);
+
+        // Call the unit parsed callback
+        (*env)->CallVoidMethod(
+            env,
+            eh_data->unit_parsed_callback,
+            UnitParsedCallback_invoke_id,
+            analysis_context,
+            analysis_unit,
+            (jboolean) reparsed
+        );
+
+        // Remove the intermediary values
+        ${nat("context_decref")}(context);
+    }
+}
+
+// Create a new event handler
+${api.jni_func_sig("create_event_handler", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject unit_requested_callback,
+    jobject unit_parsed_callback
+) {
+    // Create the structure to store the event handler information
+    event_handler_data *data = (event_handler_data *) malloc(
+        sizeof(event_handler_data)
+    );
+    data->env = env;
+    data->unit_requested_callback = (*env)->NewGlobalRef(
+        env,
+        unit_requested_callback
+    );
+    data->unit_parsed_callback = (*env)->NewGlobalRef(
+        env,
+        unit_parsed_callback
+    );
+
+    // Call the native function
+    ${event_handler_type} res_native = ${nat("create_event_handler")}(
+        (void *) data,
+        &event_handler_destroy,
+        &event_handler_unit_requested,
+        &event_handler_unit_parsed
+    );
+
+    // Return the wrapped pointer
+    return PointerWrapper_wrap(env, (void *) res_native);
 }
 
 // Decrease the reference counter of an event handler

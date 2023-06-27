@@ -38,11 +38,17 @@ import java.nio.charset.StandardCharsets;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.strings.TruffleString;
 
+import org.graalvm.nativeimage.CurrentIsolate;
+import org.graalvm.nativeimage.ImageInfo;
+import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.StackValue;
 import org.graalvm.nativeimage.UnmanagedMemory;
-import org.graalvm.nativeimage.ImageInfo;
 import org.graalvm.nativeimage.c.CContext;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.function.CEntryPointLiteral;
 import org.graalvm.nativeimage.c.function.CFunction;
+import org.graalvm.nativeimage.c.function.CFunctionPointer;
+import org.graalvm.nativeimage.c.function.InvokeCFunctionPointer;
 import org.graalvm.nativeimage.c.struct.*;
 import org.graalvm.nativeimage.c.type.*;
 import org.graalvm.word.PointerBase;
@@ -60,7 +66,84 @@ Those bindings call the native library using JNI and Native-Image C API.
 
 ====================
 */
-public class ${ctx.lib_name.camel} {
+public final class ${ctx.lib_name.camel} {
+
+    // ==========
+    // Native entry points
+    // ==========
+
+    /**
+     * This method is the only valid callback to pass to a native event
+     * handler for unit requests events.
+     * This method will dispatch the execution according to the passed
+     * analysis context.
+     */
+    @CEntryPoint
+    static void unitRequested(
+        final IsolateThread thread,
+        final AnalysisContextNative contextNative,
+        final TextNative nameNative,
+        final AnalysisUnitNative fromNative,
+        final byte foundNative,
+        final byte isNotFoundErrorNative
+    ) {
+        try(
+            final AnalysisContext context = AnalysisContext.wrap(
+                contextNative
+            );
+            final Text text = Text.wrap(nameNative)
+        ) {
+            // Get the callback from the context event handler
+            final EventHandler.UnitRequestedCallback callback = context
+                .getEventHandler()
+                .getUnitRequestCallback();
+
+            // Call the callback
+            if(callback != null) {
+                callback.invoke(
+                    context,
+                    text.getContent(),
+                    AnalysisUnit.wrap(fromNative),
+                    foundNative != 0,
+                    isNotFoundErrorNative != 0
+                );
+            }
+        }
+    }
+
+    /**
+     * This method is the only valid callback to pass to a native event
+     * handler for unit parsing events.
+     * This method will dispatch the execution according to the passed
+     * analysis context.
+     */
+    @CEntryPoint
+    static void unitParsed(
+        final IsolateThread thread,
+        final AnalysisContextNative contextNative,
+        final AnalysisUnitNative unitNative,
+        final byte reparsedNative
+    ) {
+        try(
+            final AnalysisContext context = AnalysisContext.wrap(
+                contextNative
+            )
+        ) {
+            // Get the callback from the context event handler
+            final EventHandler.UnitParsedCallback callback = context
+                .getEventHandler()
+                .getUnitParsedCallback();
+
+            // Call the callback
+            if(callback != null) {
+                callback.invoke(
+                    context,
+                    AnalysisUnit.wrap(unitNative),
+                    reparsedNative != 0
+                );
+            }
+        }
+    }
 
     // ==========
     // Macros
@@ -564,6 +647,17 @@ public class ${ctx.lib_name.camel} {
      */
     public static final class EnumException extends RuntimeException {
         public EnumException(
+            final String msg
+        ) {
+            super(msg);
+        }
+    }
+
+    /**
+     * This class represents an exception in the references manipulation.
+     */
+    public static final class ReferenceException extends RuntimeException {
+        public ReferenceException(
             final String msg
         ) {
             super(msg);
@@ -2029,13 +2123,31 @@ public class ${ctx.lib_name.camel} {
 
         /** Singleton that represents the none event handler. */
         public static final EventHandler NONE = new EventHandler(
-            PointerWrapper.nullPointer()
+            PointerWrapper.nullPointer(),
+            null,
+            null
         );
+
+        /** This map contains all created event handlers. */
+        private static final Map<PointerWrapper, EventHandler>
+            eventHandlerCache = new ConcurrentHashMap<>();
 
         // ----- Instance attributes -----
 
-        /** The reference to the event handler */
+        /** The reference to the native event handler. */
         private final PointerWrapper reference;
+
+        /**
+         * The Java callback when an analysis unit is requested in the
+         * associated context.
+         */
+        private final UnitRequestedCallback unitRequestedCallback;
+
+        /**
+         * The Java callback when an analysis unit is parsed in the
+         * associated context.
+         */
+        private final UnitParsedCallback unitParsedCallback;
 
         // ----- Constructors -----
 
@@ -2043,39 +2155,105 @@ public class ${ctx.lib_name.camel} {
          * Create a new event handler from its native reference.
          *
          * @param reference The reference to the native event handler.
+         * @param unitRequestedCallback The callback for unit requests.
+         * @param unitParsedCallback The callback for unit parsing.
          */
         EventHandler(
-            final PointerWrapper reference
+            final PointerWrapper reference,
+            final UnitRequestedCallback unitRequestedCallback,
+            final UnitParsedCallback unitParsedCallback
         ) {
             this.reference = reference;
+            this.unitRequestedCallback = unitRequestedCallback;
+            this.unitParsedCallback = unitParsedCallback;
+        }
+
+        /**
+         * Create a new even handler with its callbacks. Callbacks can be null.
+         *
+         * @param unitRequestedCallback The callback for analysis unit requests.
+         * @param unitParsedCallback The callback for analysis unit parsing.
+         */
+        public static EventHandler create(
+            final UnitRequestedCallback unitRequestedCallback,
+            final UnitParsedCallback unitParsedCallback
+        ) {
+            // Prepare the reference to the native event handler
+            final PointerWrapper reference;
+
+            if(ImageInfo.inImageCode()) {
+                // Get the current thread
+                final IsolateThread thread = CurrentIsolate.getCurrentThread();
+
+                // Create the native event handler
+                final EventHandlerNative resNative =
+                    NI_LIB.${nat("create_event_handler")}(
+                        (VoidPointer) thread,
+                        WordFactory.nullPointer(),
+                        NI_LIB.unitRequestedFunction.getFunctionPointer(),
+                        NI_LIB.unitParsedFunction.getFunctionPointer()
+                    );
+
+                // Set the result to the created event handler
+                reference = new PointerWrapper(resNative);
+            } else {
+                reference = JNI_LIB.${nat("create_event_handler")}(
+                    unitRequestedCallback,
+                    unitParsedCallback
+                );
+            }
+
+            // Return the new event handler wrapped object
+            return new EventHandler(
+                reference,
+                unitRequestedCallback,
+                unitParsedCallback
+            );
+        }
+
+        /**
+         * Get event handler Java object from its native pointer.
+         *
+         * @param reference The pointer to the native event handler.
+         * @return The associated Java event handler.
+         */
+        static EventHandler fromReference(
+            final PointerWrapper reference
+        ) {
+            if(eventHandlerCache.containsKey(reference)) {
+                return eventHandlerCache.get(reference);
+            } else {
+                throw new ReferenceException(
+                    "Cannot get event handler from this reference: " +
+                    reference.toString()
+                );
+            }
         }
 
         // ----- Graal C API methods -----
 
         /**
-         * Wrap the given pointer to a native event handler.
+         * Wrap the given pointer to an event handler.
          *
          * @param pointer The pointer to the native event handler.
          * @return The wrapped event handler.
          */
-        static EventHandler wrap(
+        EventHandler wrap(
             final Pointer pointer
         ) {
-            return wrap(pointer.readWord(0));
+            return wrap((EventHandlerNative) pointer.readWord(0));
         }
 
         /**
          * Wrap the given native event handler.
          *
-         * @param eventHandlerNative The native event handler to wrap.
+         * @param eventHandlerNative The native value of the event handler.
          * @return The wrapped event handler.
          */
-        static EventHandler wrap(
+        EventHandler wrap(
             final EventHandlerNative eventHandlerNative
         ) {
-            return new EventHandler(
-                new PointerWrapper(eventHandlerNative)
-            );
+            return fromReference(new PointerWrapper(eventHandlerNative));
         }
 
         /**
@@ -2098,6 +2276,16 @@ public class ${ctx.lib_name.camel} {
             return (EventHandlerNative) this.reference.ni();
         }
 
+        // ----- Getters -----
+
+        public UnitRequestedCallback getUnitRequestCallback() {
+            return this.unitRequestedCallback;
+        }
+
+        public UnitParsedCallback getUnitParsedCallback() {
+            return this.unitParsedCallback;
+        }
+
         // ----- Instance methods -----
 
         /** @see java.lang.AutoCloseable#close() */
@@ -2109,6 +2297,30 @@ public class ${ctx.lib_name.camel} {
                 JNI_LIB.${nat("dec_ref_event_handler")}(this);
             }
 
+        }
+
+        // ----- Inner classes -----
+
+        ${java_doc('langkit.event_handler_unit_requested_callback', 8)}
+        @FunctionalInterface
+        public interface UnitRequestedCallback {
+            void invoke(
+                AnalysisContext context,
+                String name,
+                AnalysisUnit from,
+                boolean found,
+                boolean isNotFoundError
+            );
+        }
+
+        ${java_doc('langkit.event_handler_unit_parsed_callback', 8)}
+        @FunctionalInterface
+        public interface UnitParsedCallback {
+            void invoke(
+                AnalysisContext context,
+                AnalysisUnit unit,
+                boolean reparsed
+            );
         }
 
     }
@@ -2645,33 +2857,12 @@ public class ${ctx.lib_name.camel} {
             final boolean withTrivia,
             final int tabStop
         ) {
-            PointerWrapper reference;
-
+            // Call the function to allocate the native analysis context
+            final PointerWrapper reference;
             if(ImageInfo.inImageCode()) {
-                final CCharPointer charsetNative =
-                    charset == null ?
-                    WordFactory.nullPointer() :
-                    toCString(charset);
-                final AnalysisContextNative resNative =
-                    NI_LIB.${nat("allocate_analysis_context")}();
-
-                NI_LIB.${nat("initialize_analysis_context")}(
-                    resNative,
-                    charsetNative,
-                    (fileReader == null ?
-                        WordFactory.nullPointer() :
-                        fileReader.reference.ni()),
-                    (unitProvider == null ?
-                        WordFactory.nullPointer() :
-                        unitProvider.reference.ni()),
-                    (eventHandler == null ?
-                        WordFactory.nullPointer() :
-                        eventHandler.reference.ni()),
-                    (withTrivia ? 1 : 0),
-                    tabStop
+                reference = new PointerWrapper(
+                    NI_LIB.${nat("allocate_analysis_context")}()
                 );
-                if(charset != null) UnmanagedMemory.free(charsetNative);
-                reference = new PointerWrapper(resNative);
             } else {
                 reference = JNI_LIB.${nat("create_analysis_context")}(
                     charset,
@@ -2689,9 +2880,36 @@ public class ${ctx.lib_name.camel} {
                 );
             }
 
+            // Place the context in the cache for potention callbacks during
+            // context initialization.
             this.reference = reference;
             this.eventHandler = eventHandler;
             contextCache.put(this.reference, this);
+
+            // Perform the context initialization
+            if(ImageInfo.inImageCode()) {
+                final CCharPointer charsetNative =
+                    charset == null ?
+                    WordFactory.nullPointer() :
+                    toCString(charset);
+
+                NI_LIB.${nat("initialize_analysis_context")}(
+                    (AnalysisContextNative) reference.ni(),
+                    charsetNative,
+                    (fileReader == null ?
+                        WordFactory.nullPointer() :
+                        fileReader.reference.ni()),
+                    (unitProvider == null ?
+                        WordFactory.nullPointer() :
+                        unitProvider.reference.ni()),
+                    (eventHandler == null ?
+                        WordFactory.nullPointer() :
+                        eventHandler.reference.ni()),
+                    (withTrivia ? 1 : 0),
+                    tabStop
+                );
+                if(charset != null) UnmanagedMemory.free(charsetNative);
+            }
         }
 
         /**
@@ -2806,6 +3024,12 @@ public class ${ctx.lib_name.camel} {
          */
         AnalysisContextNative unwrap() {
             return (AnalysisContextNative) this.reference.ni();
+        }
+
+        // ----- Getters -----
+
+        public EventHandler getEventHandler() {
+            return this.eventHandler;
         }
 
         // ----- Instance methods -----
