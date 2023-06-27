@@ -84,10 +84,6 @@ private package ${ada_lib_name}.Implementation.C is
       Context                   : ${analysis_context_type};
       Token_Data                : Token_Data_Handler_Access;
       Token_Index, Trivia_Index : int;
-
-      Kind       : int;
-      Text       : ${text_type};
-      Sloc_Range : ${sloc_range_type};
    end record
      with Convention => C;
    ${ada_c_doc('langkit.token_reference_type', 3)}
@@ -679,11 +675,25 @@ private package ${ada_lib_name}.Implementation.C is
    --  pass messages that are longer than what the Ada runtime accepts (i.e.
    --  allows to avoid truncated error messages).
 
+   function ${capi.get_name('token_get_kind')}
+     (Token : ${token_type}) return int
+      with Export        => True,
+           Convention    => C,
+           External_Name => "${capi.get_name('token_get_kind')}";
+   ${ada_c_doc('langkit.token_kind', 3)}
+
    function ${capi.get_name('token_kind_name')} (Kind : int) return chars_ptr
       with Export        => True,
            Convention    => C,
            External_Name => "${capi.get_name('token_kind_name')}";
    ${ada_c_doc('langkit.token_kind_name', 3)}
+
+   procedure ${capi.get_name('token_sloc_range')}
+     (Token : ${token_type}; Result : access ${sloc_range_type})
+      with Export        => True,
+           Convention    => C,
+           External_Name => "${capi.get_name('token_sloc_range')}";
+   ${ada_c_doc('langkit.token_sloc_range', 3)}
 
    procedure ${capi.get_name('token_next')}
      (Token      : ${token_type};

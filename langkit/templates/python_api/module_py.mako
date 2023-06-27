@@ -1179,10 +1179,7 @@ class Token:
         _fields_ = [('context',      AnalysisContext._c_type),
                     ('token_data',   _tdh_c_type),
                     ('token_index',  ctypes.c_int),
-                    ('trivia_index', ctypes.c_int),
-                    ('kind',         ctypes.c_int),
-                    ('text',         _text),
-                    ('sloc_range',   SlocRange._c_type)]
+                    ('trivia_index', ctypes.c_int)]
     _c_type = _hashable_c_pointer(_c_struct)
 
     def __init__(self, c_value: Any):
@@ -1283,7 +1280,8 @@ class Token:
     def kind(self) -> str:
         ${py_doc('langkit.token_kind', 8)}
         self._check_stale_reference()
-        name = _token_kind_name(self._c_value.kind)
+        kind = _token_get_kind(self._c_value)
+        name = _token_kind_name(kind)
         # The _token_kind_name wrapper is already supposed to handle exceptions
         # so this should always return a non-null value.
         assert name
@@ -1306,8 +1304,7 @@ class Token:
     @property
     def text(self) -> str:
         ${py_doc('langkit.token_text', 8)}
-        self._check_stale_reference()
-        return self._c_value.text._wrap()
+        return self.text_range(self, self)
 
     @classmethod
     def text_range(cls, first: Token, last: Token) -> str:
@@ -1328,7 +1325,9 @@ class Token:
     def sloc_range(self) -> SlocRange:
         ${py_doc('langkit.token_sloc_range', 8)}
         self._check_stale_reference()
-        return self._c_value.sloc_range._wrap()
+        result = SlocRange._c_type()
+        _token_sloc_range(ctypes.byref(self._c_value), ctypes.byref(result))
+        return result._wrap()
 
     def __eq__(self, other: Any) -> bool:
         ${py_doc('langkit.python.Token.__eq__', 8)}
@@ -2235,9 +2234,16 @@ ${exts.include_extension(
 )}
 
 # Misc
+_token_get_kind = _import_func(
+    "${capi.get_name('token_get_kind')}", [Token._c_type], ctypes.c_int
+)
 _token_kind_name = _import_func(
     "${capi.get_name('token_kind_name')}",
     [ctypes.c_int], ctypes.POINTER(ctypes.c_char)
+)
+_token_sloc_range = _import_func(
+    "${capi.get_name('token_sloc_range')}",
+    [Token._c_type, ctypes.POINTER(SlocRange._c_type)], None
 )
 _token_next = _import_func(
     "${capi.get_name('token_next')}",

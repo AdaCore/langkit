@@ -633,7 +633,7 @@ ${api.jni_func_sig("initialize", "void")}(
         Token_class_ref,
         "<init>",
         "(L${ptr_sig};L${sig_base}$AnalysisUnit;L${ptr_sig};"
-        "IIL${sig_base}$TokenKind;L${sig_base}$Text;"
+        "IIL${sig_base}$TokenKind;Ljava/lang/String;"
         "L${sig_base}$SourceLocationRange;)V"
     );
 
@@ -683,7 +683,7 @@ ${api.jni_func_sig("initialize", "void")}(
         env,
         Token_class_ref,
         "text",
-        "L${sig_base}$Text;"
+        "Ljava/lang/String;"
     );
 
     Token_sloc_range_field_id = (*env)->GetFieldID(
@@ -1875,10 +1875,7 @@ ${token_type} Token_new_value() {
         NULL,
         NULL,
         0,
-        0,
-        0,
-        Text_new_value(),
-        SourceLocationRange_new_value()
+        0
     };
     return res;
 }
@@ -1889,10 +1886,26 @@ jobject Token_wrap(
     ${token_type} token_native,
     jobject analysis_unit
 ) {
+    ${token_kind} tok_kind;
+    ${text_type} tok_text;
+    ${sloc_range_type} tok_sloc_range;
+    jobject text;
+    jstring text_string;
+
     // Handle the no tokens
     if(token_native.token_data == NULL) {
         return NoToken_wrap(env, analysis_unit);
     }
+
+    // Fetch extra token data requires to build a Token instance, but not
+    // present in the C-level token data type: kind, text and sloc_range.
+    tok_kind = ${nat("token_get_kind")} (&token_native);
+    ${nat("token_sloc_range")} (&token_native, &tok_sloc_range);
+
+    ${nat("token_range_text")} (&token_native, &token_native, &tok_text);
+    text = Text_wrap(env, tok_text);
+    text_string = get_text_content(env, text);
+    ${nat("destroy_text")} (&tok_text);
 
     return (*env)->NewObject(
         env,
@@ -1903,9 +1916,9 @@ jobject Token_wrap(
         PointerWrapper_wrap(env, token_native.token_data),
         (jint) token_native.token_index,
         (jint) token_native.trivia_index,
-        TokenKind_wrap(env, token_native.kind),
-        Text_wrap(env, token_native.text),
-        SourceLocationRange_wrap(env, token_native.sloc_range)
+        TokenKind_wrap(env, tok_kind),
+        text_string,
+        SourceLocationRange_wrap(env, tok_sloc_range)
     );
 }
 
@@ -1942,7 +1955,6 @@ ${token_type} Token_unwrap(
         );
         res.token_index = 0;
         res.trivia_index = 0;
-        res.kind = -1;
 
         // Return the result
         return res;
@@ -1969,21 +1981,6 @@ ${token_type} Token_unwrap(
             token,
             Token_trivia_index_field_id
         );
-        jobject token_kind_value = (*env)->GetObjectField(
-            env,
-            token,
-            Token_token_kind_field_id
-        );
-        jobject text_value = (*env)->GetObjectField(
-            env,
-            token,
-            Token_text_field_id
-        );
-        jobject sloc_range_value = (*env)->GetObjectField(
-            env,
-            token,
-            Token_sloc_range_field_id
-        );
 
         // Fill the result structure
         res.context = (${analysis_context_type}) PointerWrapper_unwrap(
@@ -1996,9 +1993,6 @@ ${token_type} Token_unwrap(
         );
         res.token_index = (int) token_index_value;
         res.trivia_index = (int) trivia_index_value;
-        res.kind = TokenKind_unwrap(env, token_kind_value);
-        res.text = Text_unwrap(env, text_value);
-        res.sloc_range = SourceLocationRange_unwrap(env, sloc_range_value);
 
         // Return the result
         return res;

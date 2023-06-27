@@ -841,6 +841,22 @@ package body ${ada_lib_name}.Implementation.C is
       return New_String (Kind'Image);
    end;
 
+   function ${capi.get_name('token_get_kind')}
+     (Token : ${token_type}) return int is
+   begin
+      Clear_Last_Exception;
+      declare
+         T : constant Token_Reference := Unwrap (Token);
+         D : constant Token_Data_Type := Data (T);
+      begin
+         return Kind (D)'Enum_Rep;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end;
+
    function ${capi.get_name('token_kind_name')} (Kind : int) return chars_ptr
    is
       K : Token_Kind;
@@ -854,6 +870,21 @@ package body ${ada_lib_name}.Implementation.C is
       end;
 
       return New_String (Token_Kind_Name (K));
+   end;
+
+   procedure ${capi.get_name('token_sloc_range')}
+     (Token : ${token_type}; Result : access ${sloc_range_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         T : constant Token_Reference := Unwrap (Token);
+         D : constant Token_Data_Type := Data (T);
+      begin
+         Result.all := Wrap (Sloc_Range (D));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end;
 
    procedure ${capi.get_name('token_next')}
@@ -1374,23 +1405,12 @@ package body ${ada_lib_name}.Implementation.C is
       end if;
 
       declare
-         D : constant Token_Data_Type := Data (Token);
-         K : constant Token_Kind := Kind (D);
-
          Index : constant Token_Or_Trivia_Index := Get_Token_Index (Token);
-
-         Source_Buffer : Text_Cst_Access;
-         First         : Positive;
-         Last          : Natural;
       begin
-         Extract_Token_Text (D, Source_Buffer, First, Last);
          return (Context         => Get_Token_Context (Token),
                  Token_Data      => Get_Token_TDH (Token),
                  Token_Index     => int (Index.Token),
-                 Trivia_Index    => int (Index.Trivia),
-                 Kind            => K'Enum_Rep,
-                 Text            => Wrap (Source_Buffer, First, Last),
-                 Sloc_Range      => Wrap (Sloc_Range (D)));
+                 Trivia_Index    => int (Index.Trivia));
       end;
    end Wrap;
 

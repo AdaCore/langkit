@@ -476,10 +476,26 @@ module Token = struct
   let token_data = field c_type "token_data" (ptr void)
   let token_index = field c_type "token_index" int
   let trivia_index = field c_type "trivia_index" int
-  let kind = field c_type "kind" int
-  let text = field c_type "text" Text.c_struct
-  let sloc_range = field c_type "sloc_range" SlocRange.c_type
   let () = seal c_type
+
+  let _token_get_kind = foreign ~from:c_lib
+    "${capi.get_name('token_get_kind')}"
+    (ptr c_type @-> raisable int)
+
+  let _token_kind_name = foreign ~from:c_lib
+    "${capi.get_name('token_kind_name')}"
+    (int @-> raisable (ptr char))
+
+  let _token_sloc_range = foreign ~from:c_lib
+    "${capi.get_name('token_sloc_range')}"
+    (ptr c_type @-> ptr SlocRange.c_type @-> raisable void)
+
+  let token_kind_name kind =
+    unwrap_str (_token_kind_name kind)
+
+  let token_range_text = foreign ~from:c_lib
+    "${capi.get_name('token_range_text')}"
+    (ptr c_type @-> ptr c_type @-> ptr Text.c_type @-> raisable int)
 
   let wrap (c_value : t structure) : t option =
   let token_data = getf c_value token_data in
@@ -491,9 +507,15 @@ module Token = struct
       token_data;
       token_index = getf c_value token_index;
       trivia_index = getf c_value trivia_index;
-      kind = getf c_value kind;
-      text = Text.wrap (getf c_value text);
-      sloc_range = getf c_value sloc_range;
+      kind = _token_get_kind (addr c_value);
+      text =
+        (let c_result_ptr = allocate_n Text.c_type ~count:1 in
+         let _ = token_range_text (addr c_value) (addr c_value) c_result_ptr in
+         !@ c_result_ptr);
+      sloc_range =
+        (let c_result_ptr = allocate_n SlocRange.c_type ~count:1 in
+         let _ = _token_sloc_range (addr c_value) c_result_ptr in
+         !@ c_result_ptr);
     }
 
   let unwrap (value : t) : t structure =
@@ -502,25 +524,14 @@ module Token = struct
     setf c_value token_data value.token_data;
     setf c_value token_index value.token_index;
     setf c_value trivia_index value.trivia_index;
-    setf c_value kind value.kind;
-    let c_value_text = Text.unwrap value.text in
-    add_gc_link ~from:c_value ~to_:c_value_text;
-    setf c_value text c_value_text;
-    setf c_value sloc_range value.sloc_range;
     c_value
 
-  let _token_kind_name = foreign ~from:c_lib
-    "${capi.get_name('token_kind_name')}"
-    (int @-> raisable (ptr char))
+  let kind_name token = token_kind_name (_token_get_kind (addr (unwrap token)))
 
-  let token_kind_name kind =
-    unwrap_str (_token_kind_name kind)
-
-  let kind_name token = token_kind_name token.kind
-
-  let token_range_text = foreign ~from:c_lib
-    "${capi.get_name('token_range_text')}"
-    (ptr c_type @-> ptr c_type @-> ptr Text.c_type @-> raisable int)
+  let sloc_range token =
+    let c_result_ptr = allocate_n SlocRange.c_type ~count:1 in
+    let _ = _token_sloc_range (addr (unwrap token)) c_result_ptr in
+    !@ c_result_ptr
 
   let token_next = foreign ~from:c_lib
     "${capi.get_name('token_next')}"
@@ -558,6 +569,8 @@ module Token = struct
           pp token_first
           pp token_last));
     !@ c_result_ptr
+
+  let text token = text_range token token
 
   let next token =
     let c_next_token_ptr = allocate_n c_type ~count:1 in

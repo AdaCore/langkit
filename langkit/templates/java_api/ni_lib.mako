@@ -234,46 +234,6 @@
         @CField("trivia_index") public void set_trivia_index(
             int trivia_index
         );
-
-        @CField("kind") public int get_kind();
-        @CField("kind") public void set_kind(
-            int kind
-        );
-
-        @CField("text.chars") public CIntPointer get_text_chars();
-        @CField("text.chars") public void set_text_chars(
-            CIntPointer chars
-        );
-
-        @CField("text.length") public long get_text_length();
-        @CField("text.length") public void set_text_length(
-            long length
-        );
-
-        @CField("text.is_allocated") public int get_text_is_allocated();
-        @CField("text.is_allocated") public void set_text_is_allocated(
-            int is_allocated
-        );
-
-        @CField("sloc_range.start.line") public int get_start_line();
-        @CField("sloc_range.start.line") public void set_start_line(
-            int start_line
-        );
-
-        @CField("sloc_range.start.column") public short get_start_column();
-        @CField("sloc_range.start.column") public void set_start_column(
-            short start_column
-        );
-
-        @CField("sloc_range.end.line") public int get_end_line();
-        @CField("sloc_range.end.line") public void set_end_line(
-            int end_line
-        );
-
-        @CField("sloc_range.end.column") public short get_end_column();
-        @CField("sloc_range.end.column") public void set_end_column(
-            short end_column
-        );
     }
 
     /** Anonymous strucutre for analysis context */
@@ -491,6 +451,21 @@
         );
 
         // ----- Token functions -----
+
+        ${java_doc("langkit.token_kind", 8)}
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native int ${nat("token_get_kind")}(
+            TokenNative token
+        );
+
+        ${java_doc("langkit.token_sloc_range", 8)}
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("token_sloc_range")}(
+            TokenNative token,
+            SourceLocationRangeNative result
+        );
 
         /** Get the next token */
         @CompilerDirectives.TruffleBoundary
