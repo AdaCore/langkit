@@ -1,12 +1,15 @@
 Code generation was successful
-Field ExampleWrapper.field_opt is optional
-Field ExampleWrapper.field_or is optional
-Field ExampleWrapper.field_defer is optional
-Field ExampleWrapper.field_null is optional
-Field ExampleWrapper.field_dont_skip is optional
-Field ExampleWrapper.field_list_opt is not optional
-Field ExampleWrapper.field_list_null is not optional
-Field ExampleWrapper.field_list_or is not optional
-Field ExampleWrapper.field_opt_bool is not optional
-Field ExampleWrapper.field_transform is not optional
+Field NullFieldParent.f1 is not optional
+Field NullFieldParent.f2 is optional
+Field ParserTest.field_opt is optional
+Field ParserTest.field_or is optional
+Field ParserTest.field_defer is optional
+Field ParserTest.field_null is optional
+Field ParserTest.field_dont_skip is optional
+Field ParserTest.field_list_opt is not optional
+Field ParserTest.field_list_null is not optional
+Field ParserTest.field_list_or is not optional
+Field ParserTest.field_opt_bool is not optional
+Field ParserTest.field_transform is not optional
+Field SynthParent.f is optional
 Done

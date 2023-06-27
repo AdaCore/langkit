@@ -7,7 +7,11 @@ from utils import emit_and_print_errors
 
 ctx = emit_and_print_errors(lkt_file='foo.lkt', types_from_lkt=True)
 for n in ctx.astnode_types:
-    if n.dsl_name != "ExampleWrapper":
+    if n.dsl_name not in {
+        "ParserTest",
+        "SynthParent",
+        "NullFieldParent",
+    }:
         continue
     for field in n.get_parse_fields():
         print("Field {} is {}".format(

@@ -1181,18 +1181,41 @@ class CompileCtx:
                         f.abstract_default_value
                     )
 
-    def compute_optional_field_info(self):
+    def compute_optional_field_info(self) -> None:
         """
-        For every parse field, find out if it is an optional field or not, i.e.
-        whether it is ever produced from a parser of the user grammar that can
-        create a null node.
+        Determine for each parse field if it can be null in the absence of
+        parsing error.
         """
+        from langkit.compiled_types import ASTNodeType
         from langkit.parsers import (Defer, DontSkip, List, Null, Opt, Or,
                                      Predicate, Skip, StopCut, _Extract,
                                      _Transform)
 
+        all_parse_fields = [
+            field
+            for node_type in self.astnode_types
+            for field in node_type.get_parse_fields(include_inherited=False)
+        ]
+
+        # By default, assume no that field is optional
+        for field in all_parse_fields:
+            field._is_optional = False
+
+        # All fields that are declared as null fields are by construction
+        # optional. And all the abstract fields that null fields override are
+        # optional as well.
+        for field in all_parse_fields:
+            if field.null:
+                while field is not None:
+                    field._is_optional = True
+                    field = field.base
+
+        # All fields that the parsers can set to null even with no parsing
+        # errors are optional.
+
         @memoized_with_default(False)
-        def can_produce_null(parser):
+        def can_produce_null(parser: Parser) -> bool:
+            assert isinstance(parser.type, ASTNodeType)
 
             # Parsers for list types never return null nodes: they create empty
             # list nodes instead.
@@ -1224,16 +1247,18 @@ class CompileCtx:
             else:
                 raise NotImplementedError("Unhandled parser {}".format(parser))
 
-        all_parse_fields = [
-            field
-            for node_type in self.astnode_types
-            for field in node_type.get_parse_fields(include_inherited=False)
-        ]
-
         for field in all_parse_fields:
-            field._is_optional = False
             for parser in field.parsers_from_transform:
                 if can_produce_null(parser):
+                    field._is_optional = True
+
+        # Properties can create synthetic nodes with null fields in all cases,
+        # so all fields that synthetic nodes inherit are optional.
+        for node_type in self.astnode_types:
+            if node_type.synthetic:
+                for field in node_type.get_parse_fields(
+                    include_inherited=True
+                ):
                     field._is_optional = True
 
     def check_ple_unit_root(self):

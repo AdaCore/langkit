@@ -2,9 +2,9 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- or(rule_1 | rule_2)
+    @main_rule main_rule <- or(rule_1 | rule_2 | rule_3 | rule_4)
 
-    rule_1 <- ExampleWrapper(
+    rule_1 <- ParserTest(
         ?Example("example")
         or(Example("example") | null(Example))
         sub_rule
@@ -19,7 +19,7 @@ grammar foo_grammar {
         Example("example")
     )
 
-    rule_2 <- ExampleWrapper(
+    rule_2 <- ParserTest(
         Example("example")
         Example("example")
         Example("example")
@@ -35,6 +35,9 @@ grammar foo_grammar {
     )
 
     sub_rule <- ?Example("example")
+
+    rule_3 <- SynthParent(Example("example"))
+    rule_4 <- NullFieldChild(Example("example"))
 }
 
 class FooNode implements Node[FooNode] {
@@ -43,7 +46,18 @@ class FooNode implements Node[FooNode] {
 class Example : FooNode {
 }
 
-class ExampleWrapper : FooNode {
+# All abstract fields that are overriden by null nodes are optional
+@abstract class NullFieldParent : FooNode {
+    @abstract @parse_field f1: Example
+    @abstract @parse_field f2: Example
+}
+class NullFieldChild : NullFieldParent {
+    @parse_field f1: Example
+    @parse_field @null_field f2: Example
+}
+
+# Test optionality inferred from the grammar
+class ParserTest : FooNode {
     # Optional fields
     @parse_field field_opt: Example
     @parse_field field_or: Example
@@ -59,6 +73,13 @@ class ExampleWrapper : FooNode {
     # Non optional fields
     @parse_field field_opt_bool: HasExample
     @parse_field field_transform: Example
+}
+
+# All fields that are inherited by synthetic nodes are optional
+class SynthParent : FooNode {
+    @parse_field f: Example
+}
+@synthetic class SynthChild : SynthParent {
 }
 
 @qualifier enum class HasExample : FooNode {
