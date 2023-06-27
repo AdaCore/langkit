@@ -37,14 +37,15 @@ stages:
 #########
 
 langkit_build:
+  extends: .basic
   services:
      - image:sandbox
      - cpu:8
      - mem:16
   stage: stage1
   script:
-    - export PATH=/it/e3/bin:$PATH
-    - . ~/.aws_container_credentials
+    - !reference [.script_snippets, setup]
+
     - cd /it/wave
 
     # Build using anod
@@ -66,6 +67,7 @@ langkit_build:
 ########
 
 langkit_test:
+  extends: .basic
   services:
      - image:sandbox
      - cpu:8
@@ -78,8 +80,7 @@ langkit_test:
       when: never
     - when: always
   script:
-    - export PATH=/it/e3/bin:$PATH
-    - . ~/.aws_container_credentials
+    - !reference [.script_snippets, setup]
 
     # Unpack langkit
     - tar zxf $PACKAGE_ABSOLUTE_NAME -C /
@@ -112,6 +113,7 @@ langkit_test:
 #############################
 
 libadalang_build_and_test:
+  extends: .basic
   services:
      - image:sandbox
      - cpu:8
@@ -124,8 +126,7 @@ libadalang_build_and_test:
       when: never
     - when: always
   script:
-    - export PATH=/it/e3/bin:$PATH
-    - . ~/.aws_container_credentials
+    - !reference [.script_snippets, setup]
 
     # Unpack langkit
     - tar zxf $PACKAGE_ABSOLUTE_NAME -C /
