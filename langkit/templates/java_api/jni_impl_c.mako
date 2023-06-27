@@ -1,3 +1,5 @@
+## vim: filetype=makocpp
+
 <%namespace name="enum" file="enum.mako" />
 <%namespace name="ast_node" file="ast_node.mako" />
 <%namespace name="struct" file="struct.mako" />

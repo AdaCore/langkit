@@ -1,3 +1,5 @@
+## vim: ft=makojava
+
 <%namespace name="jni_lib" file="jni_lib.mako" />
 <%namespace name="ni_lib" file="ni_lib.mako" />
 <%namespace name="enum" file="enum.mako" />

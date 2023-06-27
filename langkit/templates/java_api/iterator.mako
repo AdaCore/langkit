@@ -1,3 +1,5 @@
+## vim: ft=makojava
+
 <%def name="wrapping_class(cls)">
     <%
     api = java_api

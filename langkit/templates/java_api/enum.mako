@@ -1,3 +1,5 @@
+## vim: ft=makojava
+
 <%def name="decl(cls)">
     <%
     api = java_api
