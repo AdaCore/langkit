@@ -3750,9 +3750,9 @@ public class ${ctx.lib_name.camel} {
          * from the node.
          */
         @CompilerDirectives.TruffleBoundary
-        public String dump() {
+        public String dumpAST() {
             final StringBuilder builder = new StringBuilder();
-            this.dump(builder);
+            this.dumpAST(builder);
             return builder.toString();
         }
 
@@ -3762,10 +3762,30 @@ public class ${ctx.lib_name.camel} {
          * @param builder The builder to dump the AST in.
          */
         @CompilerDirectives.TruffleBoundary
-        public void dump(
+        public void dumpAST(
             final StringBuilder builder
         ) {
-            this.dump(builder, 0);
+            this.dumpAST(builder, "");
+        }
+
+        /**
+         * Dump a node field in the given string builder.
+         *
+         * @param builder The string builder to put the file in.
+         * @param indent The current indentation string.
+         * @param name The name of the field.
+         * @param value The value of the field.
+         */
+        protected static void dumpField(
+            final StringBuilder builder,
+            final String indent,
+            final String name,
+            final ${root_node_type} value
+        ) {
+            builder.append(indent)
+                .append(name)
+                .append(":\n");
+            value.dumpAST(builder, indent + "  ");
         }
 
         /**
@@ -3775,73 +3795,37 @@ public class ${ctx.lib_name.camel} {
          * @param indent The starting indent level.
          */
         @CompilerDirectives.TruffleBoundary
-        public void dump(
+        protected void dumpAST(
             final StringBuilder builder,
-            final int indent
+            String indent
         ) {
-            // Indent and add the node name and position
-            indent(builder, indent);
-            builder.append(this.getKindName())
-                .append(" <")
-                .append(this.getSourceLocationRange().toString())
-                .append('>');
+            // Prepare the working variables
+            String image = this.getImage();
+            image = image.substring(1, image.length());
+            final int childrenCount = this.getChildrenCount();
 
-            // If the node is a token node add its text to the builder
+            // Print the node
+            builder.append(indent)
+                .append(image);
             if(this.isTokenNode()) {
-                builder.append(" : ").append(this.getText());
+                builder.append(": ")
+                    .append(this.getText());
             }
+            builder.append('\n');
 
-            // If the node is a list type, display all the children
+            // Print the field of the node
+            indent = indent + "|";
             if(this.isListType()) {
-                builder.append(" [list_node]");
-                final int childrenCount = this.getChildrenCount();
                 for(int i = 0 ; i < childrenCount ; i++) {
-                    builder.append('\n');
-                    indent(builder, indent);
-                    builder.append("|-[").append(i).append("]\n");
-                    this.getChild(i).dump(builder, indent + 1);
+                    final ${root_node_type} child = this.getChild(i);
+                    dumpField(builder, indent, "item_" + i, child);
                 }
-
-                // If there is nothing in the list
-                if(childrenCount == 0) {
-                    builder.append(" EMPTY");
+            } else {
+                for(int i = 0 ; i < childrenCount ; i++) {
+                    final ${root_node_type} child = this.getChild(i);
+                    final String name = this.getFieldNames()[i];
+                    dumpField(builder, indent, name, child);
                 }
-            }
-
-            // Else display all fields of the node
-            else {
-                for(String field : this.getFieldNames()) {
-                    try {
-                        final Method fieldGetter =
-                            this.getClass().getMethod(field);
-                        final ${root_node_type} node =
-                            (${root_node_type}) fieldGetter.invoke(this);
-                        if(!node.isNone()) {
-                            builder.append("\n");
-                            indent(builder, indent);
-                            builder.append("|-").append(field).append("\n");
-                            node.dump(builder, indent + 1);
-                        }
-                    } catch(Exception e) {
-                        e.printStackTrace();
-                        System.err.println("This should not happen");
-                    }
-                }
-            }
-        }
-
-        /**
-         * Indent the given string builder at the given level.
-         *
-         * @param builder The string builder to indent.
-         * @param level The level of indentation.
-         */
-        protected static void indent(
-            final StringBuilder builder,
-            final int level
-        ) {
-            for(int i = 0 ; i < level * 4 ; i++) {
-                if(i % 4 == 0) builder.append("|"); else builder.append(" ");
             }
         }
 
