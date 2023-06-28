@@ -2,7 +2,7 @@ lexer foo_lexer {
 
     char
     dot <- "."
-    id <- p"[a-zA-Z]+"
+    id <- p"[a-zA-Zé🙂]+"
     tick <- "'"
     newline <- p"\n"
 

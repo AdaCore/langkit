@@ -10,6 +10,7 @@ for label, text in (
     ('simple-attr', "a'b"),
     ('char-dot', "'a'.b"),
     ('id-char', "a'b'"),
+    ('unicode-id-char', "\xe9'\U0001f642'"),
 ):
     print('== {} =='.format(label))
     u = ctx.get_from_buffer('{}.txt'.format(label), text)
