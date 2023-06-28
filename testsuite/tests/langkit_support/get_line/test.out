@@ -1,55 +1,57 @@
-== Buffer 1 ==
+== Basic ==
   Line 1: "Line 1"
   Line 2: "Line 2"
   Line 3: "Line 3"
   Line 4: ""
-  Constraint_Error: Out of bound access
+  Line 5: Constraint_Error: Out of bound access
 
-== Buffer 2 ==
+  Offset 3: "Lin"
+    1:3
+  Offset 7: "Line 1\x0a"
+    1:7
+  Offset 8: "Line 1\x0aL"
+    2:1
+  Offset 9: "Line 1\x0aLi"
+    2:2
+  Offset 19: "Line 1\x0aLine 2\x0aLine "
+    3:5
+  Offset 21: "Line 1\x0aLine 2\x0aLine 3\x0a"
+    3:7
+  Offset 250: <out-of-bounds>
+    Constraint_Error: out of bound access
+
+== Empty lines 1/2 ==
   Line 1: ""
   Line 2: "Line 2"
   Line 3: "Line 3"
-  Constraint_Error: Out of bound access
+  Line 4: Constraint_Error: Out of bound access
 
-== Buffer 3 ==
+== Empty lines 2/2 ==
   Line 1: ""
   Line 2: ""
   Line 3: "Line 3"
   Line 4: ""
   Line 5: ""
-  Constraint_Error: Out of bound access
+  Line 6: Constraint_Error: Out of bound access
 
-== Buffer 4 ==
+== Unicode ==
   Line 1: "a\xe9b\U0001f642c"
   Line 2: ""
-  Constraint_Error: Out of bound access
+  Line 3: Constraint_Error: Out of bound access
 
-== Buffer 1 offset 3 ==
-1:3
-== Buffer 1 offset 7 ==
-1:7
-== Buffer 1 offset 8 ==
-2:1
-== Buffer 1 offset 9 ==
-2:2
-== Buffer 1 offset 19 ==
-3:5
-== Buffer 1 offset 21 ==
-3:7
-== Buffer 1 offset 250 ==
-  Constraint_Error: out of bound access
+  Offset 1: "a"
+    1:1
+  Offset 2: "a\xe9"
+    1:2
+  Offset 3: "a\xe9b"
+    1:3
+  Offset 4: "a\xe9b\U0001f642"
+    1:4
+  Offset 5: "a\xe9b\U0001f642c"
+    1:5
+  Offset 6: "a\xe9b\U0001f642c\x0a"
+    1:6
+  Offset 7: <out-of-bounds>
+    2:1
 
-== Buffer 4 offset 1 ==
-1:1
-== Buffer 4 offset 2 ==
-1:2
-== Buffer 4 offset 3 ==
-1:3
-== Buffer 4 offset 4 ==
-1:4
-== Buffer 4 offset 5 ==
-1:5
-== Buffer 4 offset 6 ==
-1:6
-== Buffer 4 offset 7 ==
-2:1
+Done.
