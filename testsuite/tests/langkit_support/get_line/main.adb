@@ -78,16 +78,24 @@ procedure Main is
         Put_Line ("  Constraint_Error: " & Exception_Message (E));
    end Show_Sloc_For_Offset;
 
+   Eacute : constant Text_Type :=
+     ((1 => Character_Type'Val (16#e9#)));
+   Emoji  : constant Text_Type :=
+     ((1 => Character_Type'Val (16#1f642#)));
+
    B1 : Token_Data_Handler := Create
      ("Line 1" & Chars.LF & "Line 2" & Chars.LF & "Line 3" & Chars.LF);
    B2 : Token_Data_Handler := Create
      ("" & Chars.LF & "Line 2" & Chars.LF & "Line 3");
    B3 : Token_Data_Handler := Create
      ("" & Chars.LF & Chars.LF & "Line 3" & Chars.LF & Chars.LF);
+   B4 : Token_Data_Handler := Create
+     ("a" & Eacute & "b" & Emoji & "c" & Chars.LF);
 begin
    Check ("Buffer 1", B1);
    Check ("Buffer 2", B2);
    Check ("Buffer 3", B3);
+   Check ("Buffer 4", B4);
 
    Show_Sloc_For_Offset ("Buffer 1", B1, 3);
    Show_Sloc_For_Offset ("Buffer 1", B1, 7);
@@ -99,8 +107,17 @@ begin
    --  After the last character
    Show_Sloc_For_Offset ("Buffer 1", B1, 250);
 
+   --  Check that column numbers are correct when dealing with non-ASCII
+   --  codepoints.
+
+   New_Line;
+   for I in 1 .. B4.Source_Last + 1 loop
+      Show_Sloc_For_Offset ("Buffer 4", B4, I);
+   end loop;
+
    Destroy (Syms);
    Free (B1);
    Free (B2);
    Free (B3);
+   Free (B4);
 end Main;

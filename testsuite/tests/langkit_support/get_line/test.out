@@ -19,6 +19,11 @@
   Line 5: ""
   Constraint_Error: Out of bound access
 
+== Buffer 4 ==
+  Line 1: "a\xe9b\U0001f642c"
+  Line 2: ""
+  Constraint_Error: Out of bound access
+
 == Buffer 1 offset 3 ==
 1:3
 == Buffer 1 offset 7 ==
@@ -33,3 +38,18 @@
 3:7
 == Buffer 1 offset 250 ==
   Constraint_Error: out of bound access
+
+== Buffer 4 offset 1 ==
+1:1
+== Buffer 4 offset 2 ==
+1:2
+== Buffer 4 offset 3 ==
+1:3
+== Buffer 4 offset 4 ==
+1:4
+== Buffer 4 offset 5 ==
+1:5
+== Buffer 4 offset 6 ==
+1:6
+== Buffer 4 offset 7 ==
+2:1
