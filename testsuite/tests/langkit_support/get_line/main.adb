@@ -1,3 +1,6 @@
+--  Check that Langkit_Support.Token_Data_Handlers.Get_Line/Get_Sloc work as
+--  expected.
+
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Fixed;
 with Ada.Text_IO;    use Ada.Text_IO;
