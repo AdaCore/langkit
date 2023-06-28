@@ -745,21 +745,24 @@ package body Langkit_Support.Token_Data_Handlers is
            Get_Line_Index (Index, TDH.Lines_Starts);
          Line_Offset : constant Positive := TDH.Lines_Starts.Get (Line_Index);
          Line_End    : constant Integer :=
-           Natural'Min (Index, TDH.Source_Last) - 1;
+           Natural'Min (Index - 1, TDH.Source_Last);
          Column      : Column_Number;
       begin
-         --  Allow a sloc pointing at the EOL char (hence the + 1)
+         --  Allow an offset that reference the character that would follow the
+         --  end of the source buffer (i.e. ``'Last + 1``), but no further.
+
          if Index > TDH.Source_Buffer'Last + 1 then
             raise Constraint_Error with "out of bound access";
          end if;
 
-         Column := Column_Count
+         --  Column number at the start of the current line is 1. We must then
+         --  add the columns for anything between the start of the line and the
+         --  requested offset.
+
+         Column := 1 + Column_Count
            (TDH.Source_Buffer (Line_Offset .. Line_End), TDH.Tab_Stop);
 
-         return Source_Location'
-           (Line   => Line_Number (Line_Index),
-            Column => Column_Number'Max
-                        (Column + 1, Column_Number (Index - Line_Offset + 1)));
+         return Source_Location'(Line_Number (Line_Index), Column);
       end;
    end Get_Sloc;
 

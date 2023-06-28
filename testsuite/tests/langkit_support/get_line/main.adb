@@ -98,7 +98,7 @@ begin
       Buffer  => "Line 1" & Chars.LF
                  & "Line 2" & Chars.LF
                  & "Line 3" & Chars.LF,
-      Offsets => (3, 7, 8, 9, 19, 21, 250));
+      Offsets => (3, 7, 8, 9, 19, 21, 22, 23, 250));
 
    --  Various tests with empty lines
 
@@ -116,6 +116,14 @@ begin
                  & "Line 3" & Chars.LF
                  & Chars.LF,
       Offsets => (1 .. 0 => <>));
+
+   --  Check the sloc for the "end of buffer" offset in the absence of trailing
+   --  newline codepoint.
+
+   Check
+     (Label   => "No newline",
+      Buffer  => "abc" & Chars.HT & Chars.HT,
+      Offsets => (1, 2, 3, 4, 5, 6, 7));
 
    --  Check that column numbers are correct when dealing with non-ASCII
    --  codepoints.

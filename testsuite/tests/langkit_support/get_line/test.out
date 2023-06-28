@@ -17,6 +17,10 @@
     3:5
   Offset 21: "Line 1\x0aLine 2\x0aLine 3\x0a"
     3:7
+  Offset 22: <out-of-bounds>
+    4:1
+  Offset 23: <out-of-bounds>
+    Constraint_Error: out of bound access
   Offset 250: <out-of-bounds>
     Constraint_Error: out of bound access
 
@@ -33,6 +37,25 @@
   Line 4: ""
   Line 5: ""
   Line 6: Constraint_Error: Out of bound access
+
+== No newline ==
+  Line 1: "abc\x09\x09"
+  Line 2: Constraint_Error: Out of bound access
+
+  Offset 1: "a"
+    1:1
+  Offset 2: "ab"
+    1:2
+  Offset 3: "abc"
+    1:3
+  Offset 4: "abc\x09"
+    1:4
+  Offset 5: "abc\x09\x09"
+    1:9
+  Offset 6: <out-of-bounds>
+    1:17
+  Offset 7: <out-of-bounds>
+    Constraint_Error: out of bound access
 
 == Unicode ==
   Line 1: "a\xe9b\U0001f642c"
