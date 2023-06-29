@@ -70,6 +70,12 @@ public final class BindingsTests {
         );
         System.out.println("=== Null callbacks ===");
         testEventHandlers(null, null);
+
+        System.out.println("=== Unclosed event handler ===");
+        EventHandler dontClose = EventHandler.create(
+            unitRequestedCallback,
+            unitParsedCallback
+        );
     }
 
 }

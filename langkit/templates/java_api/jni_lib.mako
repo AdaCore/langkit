@@ -16,19 +16,33 @@
 
         static {
             if(!ImageInfo.inImageCode()) {
+                // Load the needed libraries
                 if(OS.indexOf("win") < 0) {
                     System.loadLibrary("langkit_sigsegv_handler");
                 }
                 System.loadLibrary("${ctx.lang_name.lower}lang_jni");
+
+                // Initialize the JNI library
                 ${nat("initialize")}();
+
+                // Register the library finalizer
+                Runtime.getRuntime().addShutdownHook(
+                    new Thread(JNI_LIB::${nat("finalize")})
+                );
             }
         }
-
-        public static native void ${nat("initialize")}();
 
         // ----- Language specific functions -----
 
         ${exts.include_extension(ctx.ext("java_api", "jni_funcs"))}
+
+        // ----- Lifecycle functions ------
+
+        /** Function to initialize the JNI library */
+        public static native void ${nat("initialize")}();
+
+        /** Function to finalize the JNI library */
+        public static native void ${nat("finalize")}();
 
         // ----- Exception functions ------
 
