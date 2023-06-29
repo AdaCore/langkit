@@ -766,7 +766,8 @@ base_langkit_docs = {
 
         ``destroy`` is a callback that is called by
         ``${capi.get_name('dec_ref_event_handler')}`` to leave a chance to
-        free resources that ``data`` may hold.
+        free resources that ``data`` may hold. ``${null}`` can be passed
+        if nothing needs to be done.
 
         ``unit_requested`` is a callback that will be called when a unit is
         requested.

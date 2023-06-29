@@ -1288,7 +1288,9 @@ package body ${ada_lib_name}.Implementation.C is
 
    overriding procedure Finalize (Self : in out C_Event_Handler) is
    begin
-      Self.Destroy_Func (Self.Data);
+      if Self.Destroy_Func /= null then
+          Self.Destroy_Func (Self.Data);
+      end if;
    end Finalize;
 
    -------------
