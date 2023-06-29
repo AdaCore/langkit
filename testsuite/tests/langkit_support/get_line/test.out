@@ -38,6 +38,17 @@
   Line 5: ""
   Line 6: Constraint_Error: Out of bound access
 
+== Empty source buffer ==
+  Line 1: ""
+  Line 2: Constraint_Error: Out of bound access
+
+  Offset 1: <out-of-bounds>
+    1:1
+  Offset 2: <out-of-bounds>
+    Constraint_Error: out of bound access
+  Offset 3: <out-of-bounds>
+    Constraint_Error: out of bound access
+
 == No newline ==
   Line 1: "abc\x09\x09"
   Line 2: Constraint_Error: Out of bound access

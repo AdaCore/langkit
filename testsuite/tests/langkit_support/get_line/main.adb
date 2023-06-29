@@ -117,6 +117,11 @@ begin
                  & Chars.LF,
       Offsets => (1 .. 0 => <>));
 
+   Check
+     (Label   => "Empty source buffer",
+      Buffer  => "",
+      Offsets => (1, 2, 3));
+
    --  Check the sloc for the "end of buffer" offset in the absence of trailing
    --  newline codepoint.
 
