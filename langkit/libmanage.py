@@ -29,6 +29,7 @@ from langkit.utils import (
     get_cpu_count, parse_choice, parse_cmdline_args, parse_list_of_choices,
     printcol
 )
+from langkit.windows import parse_dumpbin_result
 
 
 if TYPE_CHECKING:
@@ -1091,69 +1092,6 @@ class ManageScript:
         """
         Run tools to generate a .lib file from the language DLL.
         """
-        def parse_dumpbin_result(dumpbin_result: str) -> list[str]:
-            """
-            Extract all symbol names from the output of the "dumpbin" command.
-
-            Dumpbin's results are following this format:
-
-            .. code-block::
-
-                Microsoft (R) COFF/PE Dumper Version 14.35.32217.1
-                Copyright (C) Microsoft Corporation.  All rights reserved.
-
-
-                Dump of file my_lib.dll
-
-                File Type: DLL
-
-                  Section contains the following exports for my_lib.dll
-
-                    00000000 characteristics
-                    64382B47 time date stamp Thu Apr 13 18:18:15 2023
-                        0.00 version
-                           1 ordinal base
-                        4 number of functions
-                        4 number of names
-
-                    ordinal hint RVA      name
-
-                          1    0 0001BA4E Symbol_1
-                          2    1 001AF008 Symbol_2
-                          3    2 0001BB12 Symbol_3
-                          4    3 0002B19E Symbol_N
-
-                Summary
-
-                    1000 .CRT
-                    6000 .bss
-                    2000 .data
-                ...
-
-            :param dumpbin_result: Result of a "dumpbin /exports" run.
-            :return: A list containing all names.
-            """
-            res = []
-            parse_line = False
-
-            # For each line of the dumpbin result parse it
-            for line in dumpbin_result.splitlines():
-                words = line.split()
-
-                if not parse_line:
-                    # Spot the heading line of the function listing
-                    parse_line = words == ['ordinal', 'hint', 'RVA', 'name']
-
-                else:
-                    # Add the function name
-                    if len(words) == 4:
-                        res.append(words[3])
-
-                    # Spot the ending line
-                    if len(words) != 4 and len(words) != 0:
-                        parse_line = False
-
-            return res
 
         # Create the file and directory names
         dll_file = self.dirs.build_lib_dir(
