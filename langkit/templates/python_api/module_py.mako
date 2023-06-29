@@ -1003,6 +1003,14 @@ class AnalysisUnit:
             result.append(diag._wrap())
         return result
 
+    def format_gnu_diagnostic(self, d: Diagnostic) -> str:
+        ${py_doc('langkit.format_gnu_diagnostic', 8)}
+        sloc = d.sloc_range.start
+        prefix = f"{os.path.basename(self.filename)}:"
+        if sloc:
+            prefix += f"{sloc}:"
+        return f"{prefix} {d.message}"
+
     def __repr__(self) -> str:
         return '<AnalysisUnit {}>'.format(repr(
             os.path.basename(self.filename)
@@ -2418,7 +2426,18 @@ class App:
         self.units = {}
         for file_name in files:
             self.u = self.ctx.get_from_file(file_name)
+            if self.u.diagnostics:
+                self.on_parsing_errors(self.u)
             self.units[file_name] = self.u
+
+    def on_parsing_errors(self, unit: AnalysisUnit) -> None:
+        """
+        Callback invoked during App initialization, when a requested unit has a
+        parsing error. By default, print the error on the standard output, but
+        subclasses can override this behavior.
+        """
+        for d in unit.diagnostics:
+            print(unit.format_gnu_diagnostic(d))
 
     def default_get_files(self) -> List[str]:
         """

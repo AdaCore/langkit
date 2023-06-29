@@ -395,8 +395,7 @@ package ${ada_lib_name}.Analysis is
 
    function Format_GNU_Diagnostic
      (Unit : Analysis_Unit'Class; D : Diagnostic) return String;
-   --  Format a diagnostic in a GNU fashion. See
-   --  <https://www.gnu.org/prep/standards/html_node/Errors.html>.
+   ${ada_doc('langkit.format_gnu_diagnostic', 3)}
 
    pragma Warnings (Off, "defined after private extension");
    function Root (Unit : Analysis_Unit'Class) return ${root_entity.api_name};

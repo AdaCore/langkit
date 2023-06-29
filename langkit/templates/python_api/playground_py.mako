@@ -25,11 +25,17 @@ HEADER = """
 
 The file(s) passed as argument have been put into the u variable, or units if
 there are multiple.
-
-Enjoy!
 """.strip()
 
 class Playground(${module_name}.App):
+
+    def __init__(self, args=None):
+        self.parsing_errors = []
+        """
+        List of parsing errors found during App initialization.
+        """
+
+        super().__init__(args)
 
     def add_arguments(self):
         self.parser.add_argument(
@@ -38,8 +44,20 @@ class Playground(${module_name}.App):
         )
         super(Playground, self).add_arguments()
 
+    def on_parsing_errors(self, unit):
+        self.parsing_errors += [
+            unit.format_gnu_diagnostic(d) for d in unit.diagnostics
+        ]
+
     def main(self):
         print(HEADER)
+        if self.parsing_errors:
+            print("")
+            print("Note that some units have parsing errors:")
+            print("")
+            for line in self.parsing_errors:
+                print(line)
+
         c = load_default_config()
 
         if self.args.input_script:
