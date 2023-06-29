@@ -68,6 +68,13 @@
 
         // ----- Event handler functions -----
 
+        /** Create a new event handler */
+        @CompilerDirectives.TruffleBoundary
+        public static native PointerWrapper ${nat("create_event_handler")}(
+            EventHandler.UnitRequestedCallback unitRequestedCallback,
+            EventHandler.UnitParsedCallback unitParsedCallback
+        );
+
         /** Decrease the ref counter of the event handler */
         @CompilerDirectives.TruffleBoundary
         public static native void ${nat("dec_ref_event_handler")}(

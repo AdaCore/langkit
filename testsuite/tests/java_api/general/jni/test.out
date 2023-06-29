@@ -47,6 +47,26 @@ Unit root = <Sequence foo.txt:1:1-1:50>
 Unit root kind = Sequence
 Unit root children count = 5
 Unit root children = [<NullNode foo.txt:1:1-1:5>, <Example foo.txt:1:6-1:13>, <Var foo.txt:1:14-1:37>, <Example foo.txt:1:38-1:45>, <NullNode foo.txt:1:46-1:50>]
+Unit root AST dump = Sequence foo.txt:1:1-1:50>
+|item_0:
+|  NullNode foo.txt:1:1-1:5>
+|item_1:
+|  Example foo.txt:1:6-1:13>
+|item_2:
+|  Var foo.txt:1:14-1:37>
+|  |fArg:
+|  |  Sequence foo.txt:1:19-1:36>
+|  |  |item_0:
+|  |  |  NullNode foo.txt:1:19-1:23>
+|  |  |item_1:
+|  |  |  Example foo.txt:1:24-1:31>
+|  |  |item_2:
+|  |  |  NullNode foo.txt:1:32-1:36>
+|item_3:
+|  Example foo.txt:1:38-1:45>
+|item_4:
+|  NullNode foo.txt:1:46-1:50>
+
 Unit root is a list node = true
 Unit root is a token node = false
 Unit root image = <Sequence foo.txt:1:1-1:50>
