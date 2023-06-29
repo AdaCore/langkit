@@ -1564,6 +1564,7 @@ public final class ${ctx.lib_name.camel} {
             } else {
                 JNI_LIB.${nat("destroy_text")}(this);
             }
+            checkException();
 
         }
 
@@ -2020,6 +2021,7 @@ public final class ${ctx.lib_name.camel} {
             } else {
                 JNI_LIB.${nat("dec_ref_file_reader")}(this);
             }
+            checkException();
 
         }
 
@@ -2111,6 +2113,7 @@ public final class ${ctx.lib_name.camel} {
             } else {
                 JNI_LIB.${nat("dec_ref_unit_provider")}(this);
             }
+            checkException();
 
         }
 
@@ -2296,6 +2299,7 @@ public final class ${ctx.lib_name.camel} {
             } else {
                 JNI_LIB.${nat("dec_ref_event_handler")}(this);
             }
+            checkException();
 
         }
 
@@ -3195,6 +3199,7 @@ public final class ${ctx.lib_name.camel} {
             } else {
                 JNI_LIB.${nat("context_decref")}(this.reference.jni());
             }
+            checkException();
 
         }
 
