@@ -333,7 +333,7 @@ grammar foo_grammar {
 }
 
 class ArgAssoc : Arg {
-    @parse_field name: Expr
+    @parse_field @nullable name: Expr
     @parse_field expr: Expr
 }
 
@@ -352,12 +352,12 @@ class VarArgs : Arg {
 
 class AsNameNode : PythonNode {
     @parse_field imported: Expr
-    @parse_field as_name: Expr
+    @parse_field @nullable as_name: Expr
 }
 
 class CompIf : PythonNode {
     @parse_field test: Expr
-    @parse_field comp: PythonNode
+    @parse_field @nullable comp: PythonNode
 }
 
 enum class CompOpKind : PythonNode {
@@ -372,13 +372,13 @@ enum class CompOpKind : PythonNode {
 class CompFor : Comprehension {
     @parse_field exprs: ASTList[PythonNode, Expr]
     @parse_field target: Expr
-    @parse_field comp: PythonNode
+    @parse_field @nullable comp: PythonNode
 }
 
 class CompForL : Comprehension {
     @parse_field exprs: ASTList[PythonNode, Expr]
     @parse_field target: ASTList[PythonNode, Expr]
-    @parse_field comp: PythonNode
+    @parse_field @nullable comp: PythonNode
 }
 
 class Decorator : PythonNode {
@@ -396,7 +396,7 @@ class ElsePart : PythonNode {
 }
 
 class ExceptPart : PythonNode {
-    @parse_field as_name: AsNameNode
+    @parse_field @nullable as_name: AsNameNode
     @parse_field statements: PythonNode
 }
 
@@ -539,12 +539,12 @@ class SetLit : Expr {
 }
 
 class SliceExpr : Expr {
-    @parse_field first: Expr
-    @parse_field last: Expr
+    @parse_field @nullable first: Expr
+    @parse_field @nullable last: Expr
 }
 
 class ExtSliceExpr : SliceExpr {
-    @parse_field stride: Expr
+    @parse_field @nullable stride: Expr
 }
 
 class StringLit : Expr implements TokenNode {
@@ -590,14 +590,14 @@ class Params : PythonNode {
 
 class RelName : PythonNode {
     @parse_field dots: ASTList[PythonNode, Dot]
-    @parse_field name: Name
+    @parse_field @nullable name: Name
 }
 
 class SingleParam : PythonNode {
     @parse_field is_varargs: VarArgsFlag
     @parse_field is_kwargs: KwArgsFlag
     @parse_field name: PythonNode
-    @parse_field default_value: Expr
+    @parse_field @nullable default_value: Expr
 }
 
 @abstract class Stmt : PythonNode {
@@ -605,7 +605,7 @@ class SingleParam : PythonNode {
 
 class AssertStmt : Stmt {
     @parse_field test_expr: Expr
-    @parse_field msg: Expr
+    @parse_field @nullable msg: Expr
 }
 
 class AssignStmt : Stmt {
@@ -641,7 +641,7 @@ class ClassDef : DefStmt {
 
 class FuncDef : DefStmt {
     @parse_field name: Id
-    @parse_field parameters: Params
+    @parse_field @nullable parameters: Params
     @parse_field body: PythonNode
 }
 
@@ -663,7 +663,7 @@ class ForStmt : Stmt {
     @parse_field bindings: ASTList[PythonNode, Expr]
     @parse_field expr: ASTList[PythonNode, Expr]
     @parse_field statements: PythonNode
-    @parse_field else_part: ElsePart
+    @parse_field @nullable else_part: ElsePart
 }
 
 class GlobalStmt : Stmt {
@@ -674,7 +674,7 @@ class IfStmt : Stmt {
     @parse_field cond_test: Expr
     @parse_field statements: PythonNode
     @parse_field elif_branchs: ASTList[PythonNode, ElifBranch]
-    @parse_field else_part: ElsePart
+    @parse_field @nullable else_part: ElsePart
 }
 
 class ImportFrom : Stmt {
@@ -709,14 +709,14 @@ class StreamPrintStmt : Stmt {
 class TryStmt : Stmt {
     @parse_field statements: PythonNode
     @parse_field except_parts: ASTList[PythonNode, ExceptPart]
-    @parse_field else_part: ElsePart
-    @parse_field finally_part: PythonNode
+    @parse_field @nullable else_part: ElsePart
+    @parse_field @nullable finally_part: PythonNode
 }
 
 class WhileStmt : Stmt {
     @parse_field cond_test: Expr
     @parse_field statements: PythonNode
-    @parse_field else_part: ElsePart
+    @parse_field @nullable else_part: ElsePart
 }
 
 class WithStmt : Stmt {

@@ -61,7 +61,7 @@ class Scope : FooNode {
 
 class SelfDecl : FooNode {
     @parse_field id: Id
-    @parse_field md_node: Id
+    @parse_field @nullable md_node: Id
 }
 
 @qualifier enum class Synth : FooNode {

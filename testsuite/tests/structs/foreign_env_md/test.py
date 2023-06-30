@@ -28,7 +28,7 @@ class Name(FooNode):
 
 class Def(FooNode):
     name = Field(type=T.Name)
-    ref = Field(type=T.Name)
+    ref = Field(type=T.Name, nullable=True)
 
     env_spec = EnvSpec(
         add_to_env_kv(

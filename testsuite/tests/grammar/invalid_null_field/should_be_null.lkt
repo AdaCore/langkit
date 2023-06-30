@@ -12,5 +12,5 @@ grammar foo_grammar {
 }
 
 class Holder : FooNode {
-    @parse_field f: Holder
+    @parse_field @nullable f: Holder
 }

@@ -9,14 +9,14 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    # Field that is null only in some concrete derivations
-    fld_1 = AbstractField(type=T.FooNode)
+    # Field that is overriden by a null field only in some concrete derivations
+    fld_1 = AbstractField(type=T.FooNode, nullable=True)
 
-    # Field that is null only in some abstract derivations
-    fld_2 = AbstractField(type=T.FooNode)
+    # Field that is overriden by a null field only in some abstract derivations
+    fld_2 = AbstractField(type=T.FooNode, nullable=True)
 
-    # Field that is never null
-    fld_3 = AbstractField(type=T.FooNode)
+    # Field that is never overriden by a null field
+    fld_3 = AbstractField(type=T.FooNode, nullable=True)
 
 
 @abstract

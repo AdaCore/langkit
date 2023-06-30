@@ -253,7 +253,7 @@ class PackageBody : FooNode {
 class PackageDecl : FooNode {
     @parse_field name: Name
     @parse_field public_part: PublicPart
-    @parse_field private_part: PrivatePart
+    @parse_field @nullable private_part: PrivatePart
 
     fun self_name(): Name = node.name
 

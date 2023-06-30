@@ -17,15 +17,15 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @abstract @parse_field fld_1: FooNode
-    @abstract @parse_field fld_2: FooNode
-    @abstract @parse_field fld_3: FooNode
+    @abstract @parse_field @nullable fld_1: FooNode
+    @abstract @parse_field @nullable fld_2: FooNode
+    @abstract @parse_field @nullable fld_3: FooNode
 }
 
 @abstract class A1 : FooNode {
     @parse_field @null_field fld_2: FooNode
     @parse_field fld_3: FooNode
-    @abstract @parse_field only_on_a1: FooNode
+    @abstract @parse_field @nullable only_on_a1: FooNode
 }
 
 class A1B1 : A1 {

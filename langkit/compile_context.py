@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from contextlib import AbstractContextManager, contextmanager
+import dataclasses
 from enum import Enum
 from functools import reduce
 import importlib
@@ -1181,15 +1182,20 @@ class CompileCtx:
                         f.abstract_default_value
                     )
 
-    def compute_optional_field_info(self) -> None:
+    def compute_field_nullability(self) -> None:
         """
-        Determine for each parse field if it can be null in the absence of
-        parsing error.
+        Compute the definite "nullable" information for all fields.
+
+        This pass uses @nullable annotations from the language spec as well as
+        information found in the grammar to determine if fields are nullable.
+
+        Note that struct fields (``UserField`` instances) cannot have the
+        ``@nullable`` annotation and are always considered nullable.
         """
-        from langkit.compiled_types import ASTNodeType
+        from langkit.compiled_types import ASTNodeType, Field
         from langkit.parsers import (Defer, DontSkip, List, Null, Opt, Or,
-                                     Predicate, Skip, StopCut, _Extract,
-                                     _Transform)
+                                     Parser, Predicate, Skip, StopCut,
+                                     _Extract, _Transform)
 
         all_parse_fields = [
             field
@@ -1197,24 +1203,55 @@ class CompileCtx:
             for field in node_type.get_parse_fields(include_inherited=False)
         ]
 
-        # By default, assume no that field is optional
+        # Only root fields can be annotated with @nullable: overridings just
+        # inherit that property.
         for field in all_parse_fields:
-            field._is_optional = False
+            if field.base:
+                with field.diagnostic_context:
+                    check_source_language(
+                        field.nullable_from_spec in (None, False),
+                        "Only root fields can be annotated with @nullable",
+                        severity=Severity.non_blocking_error,
+                    )
+                field.nullable_from_spec = field.base.nullable_from_spec
 
-        # All fields that are declared as null fields are by construction
-        # optional. And all the abstract fields that null fields override are
-        # optional as well.
+        # Infer field nullability from null fields and from the grammar. If a
+        # field is nullable keep track of why (parser can produce null or
+        # related field is a null one).
+        @dataclasses.dataclass
+        class Nullability:
+            nullable: bool
+            reason: Union[Parser, Field, None]
+
+            def set_nullable(self, reason: Union[Parser, Field]) -> None:
+                self.nullable = True
+                self.reason = reason
+
+        # When a field is nullable, its whole field tree (ancestors and all of
+        # their overridings) is nullable: create only one Nullability instance
+        # for each tree.
+        inferred_nullability: dict[Field, Nullability] = {
+            field: Nullability(False, None)
+            for field in all_parse_fields
+            if field.base is None
+        }
+        for field in all_parse_fields:
+            if field.base:
+                inferred_nullability[field] = inferred_nullability[field.root]
+
+        # Null fields make their field tree nullable
         for field in all_parse_fields:
             if field.null:
-                while field is not None:
-                    field._is_optional = True
-                    field = field.base
+                inferred_nullability[field].set_nullable(field)
 
-        # All fields that the parsers can set to null even with no parsing
-        # errors are optional.
+        # Now infer nullability from the grammar itself
 
         @memoized_with_default(False)
         def can_produce_null(parser: Parser) -> bool:
+            """
+            Return whether ``parser`` can return a null node without a parsing
+            error.
+            """
             assert isinstance(parser.type, ASTNodeType)
 
             # Parsers for list types never return null nodes: they create empty
@@ -1248,18 +1285,63 @@ class CompileCtx:
                 raise NotImplementedError("Unhandled parser {}".format(parser))
 
         for field in all_parse_fields:
-            for parser in field.parsers_from_transform:
-                if can_produce_null(parser):
-                    field._is_optional = True
+            n = inferred_nullability[field]
+            if not n.nullable:
+                for parser in field.parsers_from_transform:
+                    if can_produce_null(parser):
+                        n.set_nullable(parser)
+                        break
 
-        # Properties can create synthetic nodes with null fields in all cases,
-        # so all fields that synthetic nodes inherit are optional.
-        for node_type in self.astnode_types:
-            if node_type.synthetic:
-                for field in node_type.get_parse_fields(
-                    include_inherited=True
-                ):
-                    field._is_optional = True
+        # Set definitive nullability information in fields.
+        #
+        # Also ensure that all fields declared as *not* nullable in the
+        # language spec are not inferred as nullable.
+        for field, n in inferred_nullability.items():
+            field._nullable = bool(n.nullable or field.nullable_from_spec)
+
+            # Since nullability is inferred and specified for whole field
+            # trees, perform validation only on root fields: it is redundant
+            # for overriding fields.
+            if field.is_overriding:
+                continue
+
+            if n.nullable and field.nullable_from_spec is False:
+                if isinstance(n.reason, Parser):
+                    with n.reason.diagnostic_context:
+                        check_source_language(
+                            False,
+                            "This parsing rule can assign a null value to"
+                            f" {field.qualname}: a @nullable annotation is"
+                            " required for that field",
+                            severity=Severity.non_blocking_error,
+                        )
+                elif isinstance(n.reason, Field):
+                    assert n.reason.null
+                    with field.diagnostic_context:
+                        check_source_language(
+                            False,
+                            "@nullable annotation required because"
+                            f" {n.reason.qualname} overrides this field",
+                            severity=Severity.non_blocking_error,
+                        )
+                else:
+                    # All nullable fields should have a reason to be this way
+                    assert False
+
+            # Also warn about @nullable fields that are never null according to
+            # the grammar and never initialized by node synthetization in
+            # properties.
+            with field.diagnostic_context:
+                check_source_language(
+                    n.nullable
+                    or field._synthetized
+                    or not field.nullable_from_spec,
+                    "Spurious @nullable annotation: this field is never null"
+                    " in the absence of parsing error, and is never"
+                    " initialized by node synthetization, so it can never be"
+                    " null in practice.",
+                    severity=Severity.warning,
+                )
 
     def check_ple_unit_root(self):
         """
@@ -2172,8 +2254,6 @@ class CompileCtx:
             ASTNodePass('validate AST node fields',
                         lambda _, astnode: astnode.validate_fields(),
                         auto_context=False),
-            GlobalPass('compute optional field info',
-                       CompileCtx.compute_optional_field_info),
             ASTNodePass('reject abstract AST nodes with no concrete'
                         ' subclasses', CompileCtx.check_concrete_subclasses),
             errors_checkpoint_pass,
@@ -2227,6 +2307,9 @@ class CompileCtx:
 
             GlobalPass("Check types' docstrings",
                        CompileCtx.check_types_docstrings),
+
+            GlobalPass('compute field nullability',
+                       CompileCtx.compute_field_nullability),
 
             errors_checkpoint_pass,
 

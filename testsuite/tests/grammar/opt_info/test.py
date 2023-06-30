@@ -11,12 +11,13 @@ for n in ctx.astnode_types:
         "ParserTest",
         "SynthParent",
         "NullFieldParent",
+        "OptionalByAnnotation",
     }:
         continue
     for field in n.get_parse_fields():
         print("Field {} is {}".format(
             field.qualname,
-            "optional" if field.is_optional else "not optional"
+            "optional" if field.nullable else "not optional"
         ))
 
 print('Done')

@@ -19,14 +19,19 @@ class LiteralSequence : FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Literal]
 
-    @memoized fun new_node(): SynthNode =
-    SynthNode(name=node.name, items=node.items)
+    @memoized fun new_node(with_null: Bool): SynthNode = SynthNode(
+        name=node.name, items=if with_null then (null) else node.items
+    )
 
-    @export fun prop(): SynthNode = node.new_node().as_bare_entity
+    @export fun prop(with_null: Bool): SynthNode =
+    node.new_node(with_null).as_bare_entity
+
+    @lazy new_node2_null: SynthNode2 = SynthNode2(name=node.name, items=null)
 
     @lazy new_node2: SynthNode2 = SynthNode2(name=node.name, items=node.items)
 
-    @export fun prop2(): SynthNode2 = node.new_node2().as_bare_entity
+    @export fun prop2(with_null: Bool): SynthNode2 =
+    if with_null then node.new_node2_null() else node.new_node2().as_bare_entity
 }
 
 class Name : FooNode implements TokenNode {
@@ -39,5 +44,5 @@ class SynthNode : FooNode {
 
 class SynthNode2 : FooNode {
     @parse_field name: Name
-    @parse_field items: ASTList[FooNode, Literal]
+    @parse_field @nullable items: ASTList[FooNode, Literal]
 }

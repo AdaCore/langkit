@@ -17,7 +17,7 @@ grammar foo_grammar {
 
 @abstract class Decl : FooNode {
     @abstract @parse_field name: Name
-    @abstract @parse_field value: Expr
+    @abstract @parse_field @nullable value: Expr
 }
 
 class FunDecl : Decl {

@@ -470,6 +470,7 @@ class FieldAnnotations(ParsedAnnotations):
     final: bool
     lazy: bool
     null_field: bool
+    nullable: bool
     parse_field: bool
     trace: bool
     annotations = [FlagAnnotationSpec('abstract'),
@@ -477,6 +478,7 @@ class FieldAnnotations(ParsedAnnotations):
                    FlagAnnotationSpec('final'),
                    FlagAnnotationSpec('lazy'),
                    FlagAnnotationSpec('null_field'),
+                   FlagAnnotationSpec('nullable'),
                    FlagAnnotationSpec('parse_field'),
                    FlagAnnotationSpec('trace')]
 
@@ -1467,6 +1469,11 @@ class LktTypesLoader:
         constructor: Callable[..., AbstractNodeData]
         kwargs: Dict[str, Any] = {'type': field_type, 'doc': doc}
 
+        check_source_language(
+            annotations.parse_field or not annotations.null_field,
+            '@nullable is valid only for parse fields'
+        )
+
         if annotations.lazy:
             check_source_language(
                 not annotations.null_field,
@@ -1519,6 +1526,7 @@ class LktTypesLoader:
             cls = constructor = Field
             kwargs['abstract'] = annotations.abstract
             kwargs['null'] = annotations.null_field
+            kwargs['nullable'] = annotations.nullable
 
         else:
             check_source_language(
@@ -1956,7 +1964,7 @@ class LktTypesLoader:
                     assert decl.text in ('true', 'false')
                     return E.Literal(decl.text == 'true')
                 else:
-                    assert isinstance(decl, L.BaseValDecl)
+                    assert isinstance(decl, L.BaseValDecl), str(decl)
                     return env[decl]
 
             elif isinstance(expr, L.StringLit):

@@ -104,7 +104,7 @@ class ForeignDecl(FooNode):
 
 class SelfDecl(FooNode):
     id = Field(type=T.Id)
-    md_node = Field(type=T.Id)
+    md_node = Field(type=T.Id, nullable=True)
 
     env_spec = EnvSpec(
         add_to_env_kv(
