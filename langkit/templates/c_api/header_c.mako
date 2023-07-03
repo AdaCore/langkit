@@ -117,10 +117,6 @@ typedef struct {
 
     /* Internal identifiers for this token.  */
     int token_index, trivia_index;
-
-    ${token_kind} kind;
-    ${text_type} text;
-    ${sloc_range_type} sloc_range;
 } ${token_type};
 
 
@@ -589,9 +585,18 @@ ${c_doc('langkit.exception_name')}
 extern char *
 ${capi.get_name('exception_name')}(${exception_kind_type} kind);
 
+${c_doc('langkit.token_kind')}
+extern int
+${capi.get_name('token_get_kind')}(${token_type} *token);
+
 ${c_doc('langkit.token_kind_name')}
 extern char *
 ${capi.get_name('token_kind_name')}(${token_kind} kind);
+
+${c_doc('langkit.token_sloc_range')}
+extern void
+${capi.get_name('token_sloc_range')}(${token_type} *token,
+                                     ${sloc_range_type} *result);
 
 ${c_doc('langkit.token_next')}
 extern void

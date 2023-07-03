@@ -1,3 +1,5 @@
+## vim: ft=makojava
+
 <%def name="generate()">
     <%namespace name="ast_node" file="ast_node.mako" />
     <%namespace name="struct" file="struct.mako" />

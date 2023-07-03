@@ -1,3 +1,5 @@
+## vim: ft=makojava
+
 <%namespace name="jni_lib" file="jni_lib.mako" />
 <%namespace name="ni_lib" file="ni_lib.mako" />
 <%namespace name="enum" file="enum.mako" />
@@ -2357,7 +2359,7 @@ public final class ${ctx.lib_name.camel} {
         public final TokenKind kind;
 
         /** The text of the token. */
-        protected final Text text;
+        protected final String text;
 
         /** The source location range of the token. */
         public final SourceLocationRange sourceLocationRange;
@@ -2383,7 +2385,7 @@ public final class ${ctx.lib_name.camel} {
             final int tokenIndex,
             final int triviaIndex,
             final TokenKind kind,
-            final Text text,
+            final String text,
             final SourceLocationRange sourceLocationRange
         ) {
             this.contextRef = contextRef;
@@ -2430,28 +2432,41 @@ public final class ${ctx.lib_name.camel} {
         ) {
             if(tokenNative.get_data().isNull())
                 return NONE(unit);
-            else return new Token(
+
+            // Fetch the token kind, source location range and text from the
+            // tokenNative reference.
+            final TokenKind kind = TokenKind.fromC(
+                NI_LIB.${nat("token_get_kind")}(tokenNative)
+            );
+
+            final SourceLocationRangeNative slocRangeNative =
+                StackValue.get(SourceLocationRangeNative.class);
+            NI_LIB.${nat("token_sloc_range")}(
+                tokenNative,
+                slocRangeNative
+            );
+            final SourceLocationRange slocRange =
+                SourceLocationRange.wrap(slocRangeNative);
+
+            final TextNative textNative = StackValue.get(TextNative.class);
+            NI_LIB.${nat("token_range_text")}(
+                tokenNative,
+                tokenNative,
+                textNative
+            );
+            final String text = Text.wrap(textNative).getContent();
+            NI_LIB.${nat("destroy_text")}(textNative);
+
+            // Wrap them in a high-level Token instance
+            return new Token(
                 new PointerWrapper(tokenNative.get_context()),
                 unit,
                 new PointerWrapper(tokenNative.get_data()),
                 tokenNative.get_token_index(),
                 tokenNative.get_trivia_index(),
-                TokenKind.fromC(tokenNative.get_kind()),
-                new Text(
-                    new PointerWrapper(tokenNative.get_text_chars()),
-                    tokenNative.get_text_length(),
-                    tokenNative.get_text_is_allocated() != 0
-                ),
-                new SourceLocationRange(
-                    new SourceLocation(
-                        tokenNative.get_start_line(),
-                        tokenNative.get_start_column()
-                    ),
-                    new SourceLocation(
-                        tokenNative.get_end_line(),
-                        tokenNative.get_end_column()
-                    )
-                )
+                kind,
+                text,
+                slocRange
             );
         }
 
@@ -2468,22 +2483,12 @@ public final class ${ctx.lib_name.camel} {
             tokenNative.set_data(this.tokenDataHandler.ni());
             tokenNative.set_token_index(this.tokenIndex);
             tokenNative.set_trivia_index(this.triviaIndex);
-            tokenNative.set_kind(this.kind.toC());
-            tokenNative.set_text_chars(this.text.charPointer.ni());
-            tokenNative.set_text_length(this.text.length);
-            tokenNative.set_text_is_allocated(this.text.isAllocated ? 1 : 0);
-            tokenNative.set_start_line(this.sourceLocationRange.start.line);
-            tokenNative.set_start_column(
-                this.sourceLocationRange.start.column
-            );
-            tokenNative.set_end_line(this.sourceLocationRange.end.line);
-            tokenNative.set_end_column(this.sourceLocationRange.end.column);
         }
 
         // ----- Getters -----
 
         public String getText() {
-            return this.text.getContent();
+            return this.text;
         }
 
         public boolean isTrivia() {
@@ -2763,22 +2768,6 @@ public final class ${ctx.lib_name.camel} {
                 tokenNative.set_data(this.tokenDataHandler.ni());
                 tokenNative.set_token_index(this.tokenIndex);
                 tokenNative.set_trivia_index(this.triviaIndex);
-                tokenNative.set_kind(0);
-                tokenNative.set_text_chars(
-                    (CIntPointer) WordFactory.nullPointer()
-                );
-                tokenNative.set_text_length(0);
-                tokenNative.set_text_is_allocated(0);
-                tokenNative.set_start_line(
-                    this.sourceLocationRange.start.line
-                );
-                tokenNative.set_start_column(
-                    this.sourceLocationRange.start.column
-                );
-                tokenNative.set_end_line(this.sourceLocationRange.end.line);
-                tokenNative.set_end_column(
-                    this.sourceLocationRange.end.column
-                );
             }
 
             // ----- Override methods -----

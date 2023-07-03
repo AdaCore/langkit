@@ -24,6 +24,7 @@ main (void)
   unsigned children_count;
 
   foo_token *tokens;
+  int token_kind;
   char *token_kind_name;
 
   foo_text text;
@@ -100,7 +101,9 @@ main (void)
   for (unsigned i = 0; i < children_count; i++) {
     foo_foo_node_token_start (&children[i], &tokens[i]);
     abort_on_exception ();
-    token_kind_name = foo_token_kind_name (tokens[i].kind);
+    token_kind = foo_token_get_kind (&tokens[i]);
+    abort_on_exception ();
+    token_kind_name = foo_token_kind_name (token_kind);
     abort_on_exception ();
     printf(
       "Start token of the %u child = \"%s\"\n",
