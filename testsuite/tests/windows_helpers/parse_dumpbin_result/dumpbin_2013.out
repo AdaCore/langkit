@@ -1,0 +1,72 @@
+Microsoft (R) COFF/PE Dumper Version 12.00.40629.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file libadalang.dll
+
+File Type: DLL
+
+  Section contains the following exports for libadalang.dll
+
+    00000000 characteristics
+    649D0B4F time date stamp Thu Jun 29 06:40:47 2023
+        0.00 version
+           1 ordinal base
+       61636 number of functions
+       61636 number of names
+
+    ordinal hint RVA      name
+
+          1    0 005BB070 Libadalang__from_generic_token
+          2    1 011B0A40 Libadalang__language_id
+          3    2 005BB0D0 Libadalang__to_generic_token
+          4    3 006FA110 ada_abort_node_p_as_bool
+          5    4 00718EC0 ada_abort_stmt_f_names = ada_subunit_f_body
+          6    5 006FA1D0 ada_abstract_node_p_as_bool
+          7    6 0070ECB0 ada_abstract_state_decl_expr_f_state_decl
+          8    7 007008D0 ada_abstract_state_decl_f_name
+          9    8 00707040 ada_accept_stmt_body_f_name
+         10    9 007172B0 ada_accept_stmt_f_body_decl
+         11    A 007173B0 ada_accept_stmt_f_entry_index_expr
+         12    B 007174B0 ada_accept_stmt_f_params
+         13    C 007175B0 ada_accept_stmt_p_corresponding_entry
+         14    D 007177C0 ada_accept_stmt_with_stmts_f_end_name = ada_if_stmt_f_alternatives
+         15    E 007176C0 ada_accept_stmt_with_stmts_f_stmts = ada_if_stmt_f_then_stmts
+         16    F 0071A620 ada_access_def_f_has_not_null = ada_enum_type_def_f_enum_literals
+         17   10 0071A720 ada_access_to_subp_def_f_has_protected = ada_interface_type_def_f_interface_kind
+         18   11 0071A820 ada_access_to_subp_def_f_subp_spec = ada_interface_type_def_f_interfaces
+         19   12 0071E480 ada_ada_node_array_create
+         20   13 0071E530 ada_ada_node_array_dec_ref
+         21   14 0071E4E0 ada_ada_node_array_inc_ref
+         22   15 006F9D50 ada_ada_node_child_index
+         23   16 006F9AA0 ada_ada_node_children
+         24   17 006FA080 ada_ada_node_full_sloc_image
+         25   18 006F9FF0 ada_ada_node_is_ghost
+         26   19 006F9EA0 ada_ada_node_next_sibling
+         27   1A 006F9210 ada_ada_node_p_bool_type
+         28   1B 006F97C0 ada_ada_node_p_choice_match
+         29   1C 006F89C0 ada_ada_node_p_complete
+         30   1D 006F8770 ada_ada_node_p_declarative_scope
+
+  Summary
+
+        1000 .CRT
+       2E000 .bss
+        5000 .data
+       18000 .debug_abbrev
+        B000 .debug_aranges
+      528000 .debug_frame
+     1082000 .debug_info
+      411000 .debug_line
+       14000 .debug_line_str
+      790000 .debug_loclists
+      147000 .debug_rnglists
+       95000 .debug_str
+      39F000 .edata
+       1A000 .idata
+       EA000 .pdata
+      180000 .rdata
+       1D000 .reloc
+     112C000 .text
+        1000 .tls
+      1BB000 .xdata
