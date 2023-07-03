@@ -361,7 +361,8 @@ class New(AbstractExpression):
         check_source_language(
             not self.struct_type.is_ast_node
             or self.struct_type.synthetic,
-            'Synthetized AST nodes must be annotated as synthetic'
+            'Cannot synthetize a node that is not annotated as synthetic'
+            f' ({self.struct_type.dsl_name})'
         )
 
     def construct(self):
