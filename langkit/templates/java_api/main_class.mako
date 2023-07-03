@@ -146,7 +146,7 @@ public final class ${ctx.lib_name.camel} {
     }
 
     // ==========
-    // Macros
+    // Static values
     // ==========
 
     /** The default grammar rule to parse the inputs. */

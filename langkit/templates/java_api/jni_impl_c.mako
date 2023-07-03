@@ -26,6 +26,12 @@ ptr_sig = f"{sig_base}$PointerWrapper"
 #include "${lib_file}"
 
 // ==========
+// Global declarations
+// ==========
+
+char jvm_running = 0;
+
+// ==========
 // Type declaration
 // ==========
 
@@ -228,16 +234,21 @@ ${iterator.jni_c_decl(iterator_type)}
     % endif
 % endfor
 
+// ==========
+// Lifecycle functions
+// ==========
+
 ${api.jni_func_sig("initialize", "void")}(
     JNIEnv *env,
     jclass jni_lib
 ) {
+    jvm_running = 1;
+
     main_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(env, "${sig_base}")
     );
 
-    // Get the conversion method
     encodeUTF32_method_id = (*env)->GetStaticMethodID(
         env,
         main_class_ref,
@@ -252,7 +263,6 @@ ${api.jni_func_sig("initialize", "void")}(
         "([B)Ljava/lang/String;"
     );
 
-    // Get the exception checking method
     check_exception_method_id = (*env)->GetStaticMethodID(
         env,
         main_class_ref,
@@ -747,6 +757,14 @@ ${array.jni_init_global_refs(array_type)}
 ${iterator.jni_init_global_refs(iterator_type)}
     % endif
 % endfor
+}
+
+// Function to finalize the JNI library
+${api.jni_func_sig("finalize", "void")}(
+    JNIEnv *env,
+    jclass jni_lib
+) {
+    jvm_running = 0;
 }
 
 // ==========
@@ -1726,8 +1744,10 @@ void event_handler_destroy(
 ) {
     event_handler_data *eh_data = (event_handler_data *) data;
     JNIEnv *env = eh_data->env;
-    (*env)->DeleteGlobalRef(env, eh_data->unit_requested_callback);
-    (*env)->DeleteGlobalRef(env, eh_data->unit_parsed_callback);
+    if(jvm_running) {
+        (*env)->DeleteGlobalRef(env, eh_data->unit_requested_callback);
+        (*env)->DeleteGlobalRef(env, eh_data->unit_parsed_callback);
+    }
     free(data);
 }
 
