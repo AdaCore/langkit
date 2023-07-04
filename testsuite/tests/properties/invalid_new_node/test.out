@@ -5,6 +5,6 @@ test.py:XXX: error: Node synthetization can only happen inside memoized properti
 test.py:XXX: error: List node synthetization is not supported for now
 
 == Not synthetic ==
-test.py:XXX: error: Synthetized AST nodes must be annotated as synthetic
+test.py:XXX: error: Cannot synthetize a node that is not annotated as synthetic (Literal)
 
 Done
