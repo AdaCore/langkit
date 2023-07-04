@@ -647,7 +647,12 @@ class AbstractExpression(Frozable):
                 call it after.
             """
             is_abstract_expr = isinstance(obj, AbstractExpression)
-            if is_abstract_expr or getattr(obj, '_traverse_in_prepare', False):
+            if isinstance(obj, TypeRepo.Defer):
+                return expand(obj.get(), fn)
+
+            elif is_abstract_expr or getattr(
+                obj, '_traverse_in_prepare', False
+            ):
                 if is_abstract_expr and pre:
                     obj = fn(obj)
                 for k, v in obj.__dict__.items():
@@ -662,9 +667,6 @@ class AbstractExpression(Frozable):
 
             elif isinstance(obj, dict):
                 return {k: expand(v, fn) for k, v in obj.items()}
-
-            elif isinstance(obj, TypeRepo.Defer):
-                return expand(obj.get(), fn)
 
             else:
                 return obj
