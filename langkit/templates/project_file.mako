@@ -113,9 +113,10 @@ library project ${lib_name} is
    Interfaces := ${format_str_set(emitter.library_interfaces)};
    case Library_Standalone is
       when "no" =>
-         Interfaces := ();
-      when "standard" | "encapsulated" =>
          null;
+      when "standard" | "encapsulated" =>
+         for Library_Standalone use Library_Standalone;
+         for Interfaces use Interfaces;
    end case;
 
    % if emitter.coverage:
@@ -132,8 +133,6 @@ library project ${lib_name} is
 
    for Library_Name use "${capi.shared_object_basename}";
    for Library_Kind use Library_Kind_Param;
-   for Library_Standalone use Library_Standalone;
-   for Interfaces use Interfaces;
    for Library_Dir use "lib/" & Library_Kind_Param & "/" & Build_Mode;
    for Object_Dir use "obj/" & Build_Mode;
 
