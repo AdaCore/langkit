@@ -233,6 +233,7 @@ class JavaAPISettings(AbstractAPISettings):
         "PointerBase",
         "Pointer",
         "VoidPointer",
+        "WordPointer",
         "CCharPointer",
         "CCharPointerPointer",
         "CDoublePointer",
@@ -628,12 +629,12 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: "CCharPointer"),
             (T.Int, lambda _: "CIntPointer"),
             (T.Character, lambda _: "CIntPointer"),
-            (T.BigInt, lambda _: "Pointer"),
-            (T.String, lambda _: "Pointer"),
-            (T.AnalysisUnit, lambda _: "Pointer"),
-            (T.AnalysisContext, lambda _: "Pointer"),
-            (ct.ArrayType, lambda _: "Pointer"),
-            (ct.IteratorType, lambda _: "Pointer"),
+            (T.BigInt, lambda _: "WordPointer"),
+            (T.String, lambda _: "WordPointer"),
+            (T.AnalysisUnit, lambda _: "WordPointer"),
+            (T.AnalysisContext, lambda _: "WordPointer"),
+            (ct.ArrayType, lambda _: "WordPointer"),
+            (ct.IteratorType, lambda _: "WordPointer"),
             (ct.EnumType, lambda _: "CIntPointer"),
             (object, lambda t: self.ni_type(t))
         ])
@@ -646,7 +647,7 @@ class JavaAPISettings(AbstractAPISettings):
         """
         ref_type = self.ni_reference_type(the_type)
         if ref_type in self.ni_pointer_types:
-            return "StackValue.get(SizeOf.get(VoidPointer.class))"
+            return "StackValue.get(SizeOf.get(WordPointer.class))"
         else:
             return f"StackValue.get({ref_type}.class)"
 
@@ -718,8 +719,9 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Character, lambda _: f"{source}.value;"),
             (
                 T.BigInt, lambda t: (
-                    f"{self.ni_stack_value(t)};"
-                    f"BigIntegerWrapper.unwrap({source}, {export});"
+                    f"StackValue.get(SizeOf.get(WordPointer.class));"
+                    f"BigIntegerWrapper.unwrap({source},"
+                    f"(WordPointer) {export});"
                 )
             ),
             (ct.EnumType, lambda _: f"{source}.toC();"),
@@ -771,21 +773,19 @@ class JavaAPISettings(AbstractAPISettings):
         ref_type = self.ni_reference_type(the_type)
 
         if ref_type not in self.ni_pointer_types:
-            res = (
-                f"{self.ni_stack_value(the_type)};"
+            return (
+                f"StackValue.get({ref_type}.class);"
                 f"{source}.unwrap({export});"
             )
 
         else:
             if the_type.is_ada_record:
-                res = (
-                    f"{self.ni_stack_value(the_type)};"
+                return (
+                    f"StackValue.get({ref_type}.class);"
                     f"{source}.unwrap({export});"
                 )
             else:
-                res = f"{source}.unwrap();"
-
-        return res
+                return f"{source}.unwrap();"
 
     def ni_write(self,
                  the_type: CompiledType,
@@ -799,6 +799,7 @@ class JavaAPISettings(AbstractAPISettings):
         :param source: The source Java expression to write.
         :param pointer: The pointer to write in.
         """
+
         return dispatch_on_type(the_type, [
             (
                 T.Bool, lambda _:
@@ -821,15 +822,15 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 T.AnalysisContext, lambda _:
-                f"{pointer}.writeWord(0, {source}.unwrap());"
+                f"{pointer}.write({source}.unwrap());"
             ),
             (
                 T.AnalysisUnit, lambda _:
-                    f"{pointer}.writeWord(0, {source}.unwrap());"
+                    f"{pointer}.write({source}.unwrap());"
             ),
             (
                 ct.IteratorType, lambda _:
-                    f"{pointer}.writeWord(0, {source}.unwrap());"
+                    f"{pointer}.write({source}.unwrap());"
             ),
             (
                 ct.ArrayType, lambda t:
@@ -925,7 +926,7 @@ class JavaAPISettings(AbstractAPISettings):
             (ct.StructType, lambda _: f"{getter}.unwrap({to_write});"),
             (
                 object, lambda t:
-                    f"{to_write}.writeWord(0, {getter}.unwrap());"
+                    f"{to_write}.write({getter}.unwrap());"
             ),
         ])
 

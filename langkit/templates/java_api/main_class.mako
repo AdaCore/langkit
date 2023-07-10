@@ -1007,9 +1007,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The Java big integer.
          */
         static BigInteger wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((BigIntegerNative) pointer.readWord(0));
+            return wrap((BigIntegerNative) pointer.read());
         }
 
         /**
@@ -1026,17 +1026,16 @@ public final class ${ctx.lib_name.camel} {
         }
 
         /**
-         * Unwrap the given big integer in the given pointer as a native
-         * big integer.
+         * Unwrap the given Java big integer in the given word pointer.
          *
          * @param bigInteger The big integer to unwrap.
-         * @param pointer The pointer to place the big integer in.
+         * @param pointer The word pointer to place the big integer in.
          */
         static void unwrap(
             final BigInteger bigInteger,
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            pointer.writeWord(0, unwrap(bigInteger));
+            pointer.write(unwrap(bigInteger));
         }
 
         /**
@@ -1069,9 +1068,9 @@ public final class ${ctx.lib_name.camel} {
          * @param pointer The pointer to the big integer to release.
          */
         static void release(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            release((BigIntegerNative) pointer.readWord(0));
+            release((BigIntegerNative) pointer.read());
         }
 
         /**
@@ -1162,9 +1161,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The wrapped symbol.
          */
         static Symbol wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((SymbolNative) pointer.readWord(0));
+            return wrap((SymbolNative) pointer.read());
         }
 
         /**
@@ -1246,9 +1245,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The Java string wrapped from the native string.
          */
         static String wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((StringNative) pointer.readWord(0));
+            return wrap((StringNative) pointer.read());
         }
 
         /**
@@ -1264,16 +1263,16 @@ public final class ${ctx.lib_name.camel} {
         }
 
         /**
-         * Unwrap the string in the given pointer.
+         * Unwrap the string in the given word pointer.
          *
          * @param string The string to unwrap.
-         * @param pointer The pointer to place the native string in.
+         * @param pointer The word pointer to place the native string in.
          */
         static void unwrap(
             final String string,
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            pointer.writeWord(0, unwrap(string));
+            pointer.write(unwrap(string));
         }
 
         /**
@@ -1294,9 +1293,9 @@ public final class ${ctx.lib_name.camel} {
          * @param pointer The pointer to the native string.
          */
         static void release(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            release((StringNative) pointer.readWord(0));
+            release((StringNative) pointer.read());
         }
 
         /**
@@ -1511,9 +1510,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The wrapped text.
          */
         static Text wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((TextNative) pointer.readWord(0));
+            return wrap((TextNative) pointer.read());
         }
 
         /**
@@ -1658,9 +1657,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The newly wrapper source location.
          */
         static SourceLocation wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((SourceLocationNative) pointer.readWord(0));
+            return wrap((SourceLocationNative) pointer.read());
         }
 
         /**
@@ -1762,9 +1761,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The newly wrapped source location range.
          */
         static SourceLocationRange wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((SourceLocationRangeNative) pointer.readWord(0));
+            return wrap((SourceLocationRangeNative) pointer.read());
         }
 
         /**
@@ -1875,9 +1874,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The wrapped diagnostic.
          */
         static Diagnostic wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((DiagnosticNative) pointer.readWord(0));
+            return wrap((DiagnosticNative) pointer.read());
         }
 
         /**
@@ -1989,9 +1988,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The newly wrapped file reader.
          */
         static FileReader wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((FileReaderNative) pointer.readWord(0));
+            return wrap((FileReaderNative) pointer.read());
         }
 
         /**
@@ -2014,9 +2013,9 @@ public final class ${ctx.lib_name.camel} {
          * @param pointer The pointer to unwrap the file reader in.
          */
         void unwrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            pointer.writeWord(0, this.unwrap());
+            pointer.write(0, this.unwrap());
         }
 
         /**
@@ -2084,9 +2083,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The wrapped unit provider.
          */
         static UnitProvider wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((UnitProviderNative) pointer.readWord(0));
+            return wrap((UnitProviderNative) pointer.read());
         }
 
         /**
@@ -2109,9 +2108,9 @@ public final class ${ctx.lib_name.camel} {
          * @param pointer The pointer to place the native unit provider in.
          */
         void unwrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            pointer.writeWord(0, this.unwrap());
+            pointer.write(this.unwrap());
         }
 
         /**
@@ -2262,9 +2261,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The wrapped event handler.
          */
         EventHandler wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((EventHandlerNative) pointer.readWord(0));
+            return wrap((EventHandlerNative) pointer.read());
         }
 
         /**
@@ -2285,9 +2284,9 @@ public final class ${ctx.lib_name.camel} {
          * @param pointer The pointer to place the native event handler.
          */
         void unwrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            pointer.writeWord(0, this.unwrap());
+            pointer.write(this.unwrap());
         }
 
         /**
@@ -2427,11 +2426,11 @@ public final class ${ctx.lib_name.camel} {
          * one.
          */
         static Token wrap(
-            final Pointer pointer,
+            final WordPointer pointer,
             final AnalysisUnit unit
         ) {
             return wrap(
-                (TokenNative) pointer.readWord(0),
+                (TokenNative) pointer.read(),
                 unit
             );
         }
@@ -3026,9 +3025,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The newly wrapped analysis context.
          */
         static AnalysisContext wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((AnalysisContextNative) pointer.readWord(0));
+            return wrap((AnalysisContextNative) pointer.read());
         }
 
         /**
@@ -3049,9 +3048,9 @@ public final class ${ctx.lib_name.camel} {
          * @param pointer The pointer to place the native analysis unit.
          */
         void unwrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            pointer.writeWord(0, this.unwrap());
+            pointer.write(this.unwrap());
         }
 
         /**
@@ -3338,9 +3337,9 @@ public final class ${ctx.lib_name.camel} {
          * @return The newly wrapped analysis unit.
          */
         static AnalysisUnit wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((AnalysisUnitNative) pointer.readWord(0));
+            return wrap((AnalysisUnitNative) pointer.read());
         }
 
         /**
@@ -3361,9 +3360,9 @@ public final class ${ctx.lib_name.camel} {
          * @param pointer The pointer to place the native analysis unit in.
          */
         void unwrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            pointer.writeWord(0, this.unwrap());
+            pointer.write(this.unwrap());
         }
 
         /**

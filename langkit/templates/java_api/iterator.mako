@@ -45,10 +45,10 @@
          * is null.
          */
         static ${class_name} wrap(
-            Pointer niPointer
+            final WordPointer niPointer
         ) {
             if(niPointer.isNull()) return null;
-            else return wrap((${ni_name}) niPointer.readWord(0));
+            else return wrap((${ni_name}) niPointer.read());
         }
 
         /**
