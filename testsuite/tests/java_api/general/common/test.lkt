@@ -87,6 +87,17 @@ class FooNode implements Node[FooNode] {
     @exported
     @external()
     fun trigger_unit_requested(name: Symbol, found: Bool, error: Bool): Bool
+
+    @exported
+    fun iter_int_id(it: Iterator[Int]): Iterator[Int] = it
+
+    @exported
+    fun iter_entity(): Iterator[Entity[FooNode]] =
+        [self, self, self].to_iterator()
+
+    @exported
+    fun iter_struct(): Iterator[SomeStruct] =
+        [null[SomeStruct], null[SomeStruct]].to_iterator()
 }
 
 class Example: FooNode {
@@ -138,4 +149,3 @@ struct FooNodeStruct {
 struct SomeStruct {
     examples: Array[Entity[Example]]
 }
-

@@ -526,6 +526,14 @@
         );
         % endif
 
+        // ----- Iterator functions -----
+
+        % for iterator_type in ctx.iterator_types:
+            % if iterator_type.exposed and iterator_type.emit_c_type:
+        ${iterator.jni_funcs(iterator_type)}
+            % endif
+        % endfor
+
         // ----- Node functions -----
 
         /** Return whether the two given entities are equal */
