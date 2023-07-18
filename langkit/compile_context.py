@@ -1461,7 +1461,7 @@ class CompileCtx:
             backwards.setdefault(to_prop, set())
             forwards[from_prop].add(to_prop)
             backwards[to_prop].add(from_prop)
-            for over_prop in to_prop.all_overriding_properties:
+            for over_prop in to_prop.all_overridings:
                 add_forward(from_prop, over_prop)
 
         def traverse_expr(expr):
@@ -1579,7 +1579,7 @@ class CompileCtx:
             key=lambda p: p.qualname
         )
         for prop in props_using_einfo:
-            for p in prop.property_set():
+            for p in prop.field_set():
                 with diagnostic_context(p.location):
                     p.set_uses_entity_info()
 
@@ -1670,8 +1670,8 @@ class CompileCtx:
         # consider only root properties.
         forwards = defaultdict(set)
         for prop, called in forwards_strict.items():
-            root = prop.root_property
-            forwards[root].update(c.root_property for c in called)
+            root = prop.root
+            forwards[root].update(c.root for c in called)
 
         # The first is for strict analysis while the second one simplifies
         # properties to their root.
@@ -1689,7 +1689,7 @@ class CompileCtx:
         # Now determine the set of unused abstraction: it's all root properties
         # that are unused in the strict analysis but used in the other one.
         unused_abstractions = {
-            p.root_property for p in
+            p.root for p in
             (unreachable_private_strict - unreachable_private)
         }
 
@@ -1730,12 +1730,12 @@ class CompileCtx:
                 # As we process whole properties set in one round, just focus
                 # on root properties. And of course only on dispatching
                 # properties.
-                if prop.base_property or not prop.dispatching:
+                if prop.base or not prop.dispatching:
                     continue
 
                 # Also focus on properties for which we emit code (concrete
                 # ones and the ones with a runtime check).
-                props = [p for p in prop.property_set()
+                props = [p for p in prop.field_set()
                          if not p.abstract or p.abstract_runtime_check]
 
                 # Set of concrete nodes that can reach this property
@@ -2179,8 +2179,6 @@ class CompileCtx:
             errors_checkpoint_pass,
 
             MajorStepPass('Compiling properties'),
-            PropertyPass('compute base properties',
-                         PropertyDef.compute_base_property),
             PropertyPass('prepare abstract expressions',
                          PropertyDef.prepare_abstract_expression),
             PropertyPass('freeze abstract expressions',
@@ -2489,12 +2487,12 @@ class CompileCtx:
                     i += 1
 
                 # Register the field
-                if (f.abstract or not f.overriding) and f.struct is n:
+                if (f.abstract or not f.is_overriding) and f.struct is n:
                     self.sorted_parse_fields.append(f)
 
             for p in n.get_properties(predicate=lambda p: p.is_public,
                                       include_inherited=False):
-                if not p.overriding:
+                if not p.is_overriding:
                     self.sorted_properties.append(p)
 
     def compute_composite_types(self):
@@ -2747,7 +2745,7 @@ class CompileCtx:
             ):
                 # `prop` must be the ultimate base property: see the above
                 # comment.
-                prop_set = prop.property_set()
+                prop_set = prop.field_set()
                 assert prop_set[0] == prop
 
                 static_props = list(prop_set)

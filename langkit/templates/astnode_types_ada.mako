@@ -59,7 +59,7 @@
    begin
       % if field.abstract:
          case Kind is
-            % for cf in field.concrete_fields:
+            % for cf in field.concrete_overridings:
                when ${' | '.join(n.ada_kind_name
                                  for n in cf.struct.concrete_subclasses)} =>
                   % if cf.null:
@@ -170,7 +170,7 @@
    ## Field getters
    % for field in cls.get_parse_fields( \
       include_inherited=False, \
-      predicate=lambda f: f.abstract or not f.overriding, \
+      predicate=lambda f: f.abstract or not f.is_overriding, \
    ):
       ${bare_field_decl(field)}
    % endfor
@@ -471,7 +471,7 @@
    ## Field getters
    % for field in cls.get_parse_fields( \
       include_inherited=False, \
-      predicate=lambda f: f.abstract or not f.overriding, \
+      predicate=lambda f: f.abstract or not f.is_overriding, \
    ):
       ${bare_field_body(field)}
    % endfor

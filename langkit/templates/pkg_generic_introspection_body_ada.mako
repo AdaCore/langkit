@@ -572,7 +572,7 @@ package body ${ada_lib_name}.Generic_Introspection is
             # Handle all public members (we should have only syntax fields and
             # properties).
             members = node_type.get_abstract_node_data(
-               lambda m: m.is_public and not m.overriding,
+               lambda m: m.is_public and not m.is_overriding,
                include_inherited=False,
             )
             if members:

@@ -4,7 +4,7 @@
 
 ## Regular property function
 
-${"overriding" if property.overriding else ""} function ${property.name}
+${"overriding" if property.is_overriding else ""} function ${property.name}
    ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name}
    % if property.abstract and not property.abstract_runtime_check:

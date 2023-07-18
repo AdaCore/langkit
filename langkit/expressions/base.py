@@ -6,7 +6,7 @@ import inspect
 from itertools import count
 from typing import (
     Any as _Any, Callable, ClassVar, Dict, Iterator, List, Optional as Opt,
-    Sequence, Set, TYPE_CHECKING, Tuple, Union, cast, overload
+    Sequence, TYPE_CHECKING, Tuple, Union, cast, overload
 )
 
 
@@ -28,8 +28,8 @@ from langkit.diagnostics import (
 from langkit.documentation import RstCommentChecker
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
-    Uninitialized, assert_type, dispatch_on_type, inherited_property, memoized,
-    nested, not_implemented_error, self_memoized
+    assert_type, dispatch_on_type, inherited_property, memoized, nested,
+    not_implemented_error
 )
 
 
@@ -3206,7 +3206,7 @@ def render(*args, **kwargs):
     )
 
 
-inherited_information = inherited_property(lambda s: s.base_property)
+inherited_information = inherited_property(lambda s: s.base)
 
 
 class PropertyDef(AbstractNodeData):
@@ -3400,10 +3400,6 @@ class PropertyDef(AbstractNodeData):
         :type: bool
         """
 
-        self._base_property: Union[None, PropertyDef, Uninitialized] = (
-            Uninitialized()
-        )
-
         self.is_dispatcher = False
         """
         Whether this property is just a wrapper that, based on the kind of
@@ -3516,13 +3512,6 @@ class PropertyDef(AbstractNodeData):
                 self._dynamic_vars.append(dyn_var)
                 self._dynamic_vars_default_values.append(default)
 
-        self.overriding_properties: Set[PropertyDef] = set()
-        """
-        Set of properties that override "self".
-
-        This is inferred during the "compute" pass.
-        """
-
         self.prop_decl = None
         """
         The emitted code for this property declaration.
@@ -3633,55 +3622,12 @@ class PropertyDef(AbstractNodeData):
     def ignore_warn_on_node(self):
         return self._ignore_warn_on_node
 
-    @property  # type: ignore
-    @self_memoized
-    def all_overriding_properties(self):
-        """
-        Return self's overriding properties and all their own overriding ones,
-        recursively.
-
-        :rtype: list[PropertyDef]
-        """
-        def helper(prop, except_self=False):
-            return sum((helper(p) for p in prop.overriding_properties),
-                       [] if except_self else [prop])
-        return helper(self, except_self=True)
-
-    def property_set(self):
-        """
-        Return all properties associated with this property in terms of
-        overriding hierarchy.
-
-        :rtype: list[PropertyDef]
-        """
-        return (
-            self.base_property.property_set()
-            if self.base_property else [self] + self.all_overriding_properties
-        )
-
     @property
     def warn_on_unused(self):
         if self._warn_on_unused is not None:
-            ret = self._warn_on_unused
-        # TODO: Accessing base_property here always returns None, but
-        # _base_property works ...
-        elif self._base_property is not None:
-            ret = self._base_property.warn_on_unused
+            return self._warn_on_unused
         else:
-            ret = True
-
-        return ret
-
-    @property
-    def overriding(self):
-        """
-        Whether this property is overriding or not.
-
-        This the information is inferred during the compute phase.
-
-        :rtype: bool
-        """
-        return self.base_property is not None
+            return self.base is None or self.base.warn_on_unused
 
     @property
     def dispatching(self):
@@ -3694,9 +3640,7 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: bool
         """
-        return (self.abstract
-                or self.base_property
-                or self.overriding_properties)
+        return self.abstract or self.base or self.overridings
 
     @property
     def uid(self):
@@ -3789,65 +3733,6 @@ class PropertyDef(AbstractNodeData):
                 self.construct_and_type_expression(get_context())
 
         return resolve_type(self.constructed_expr.type)
-
-    def compute_base_property(self, context):
-        """
-        Get the base property for this property, if it exists.
-        """
-        if self.struct.is_ast_node and self.struct.base:
-            result = self.struct.base.get_abstract_node_data_dict(
-                field_class=PropertyDef
-            ).get(self._original_name, None)
-
-            if result:
-                check_source_language(
-                    not self.abstract or self.abstract_runtime_check,
-                    'Abstract properties with no runtime check cannot'
-                    ' override another property. Here, {} is abstract and'
-                    ' overrides {}.'.format(
-                        self.qualname, result.qualname
-                    )
-                )
-            self._base_property = result
-        else:
-            self._base_property = None
-
-    @property
-    def base_property(self):
-        """
-        Return the property that `self` overrides, if any.
-
-        :rtype: PropertyDef|None
-        """
-        assert (self._base_property is None or
-                isinstance(self._base_property, PropertyDef))
-        return self._base_property
-
-    @property  # type: ignore
-    @self_memoized
-    def root_property(self):
-        """
-        Return the ultimate base property for "self", or "self" is it has no
-        base property.
-
-        :rtype: PropertyDef
-        """
-        result = self
-        while result.base_property:
-            result = result.base_property
-        return result
-
-    def reset_inheritance_info(self):
-        """
-        Reset memoization caches inheritance-related information.
-
-        Must be called when modifying a tree of inherited properties.
-        """
-        for prop in (PropertyDef.root_property,
-                     PropertyDef.all_overriding_properties):
-            prop.fget.reset(self)
-        self._base_property = None
-        self.overriding_properties = set()
 
     @property
     def dynamic_vars(self) -> List[DynamicVariable]:
@@ -3994,25 +3879,17 @@ class PropertyDef(AbstractNodeData):
                 )
             )
 
-        if self.base_property:
-            # If we have a base property, then this property is dispatching and
-            # overriding, and the base property is dispatching (This
-            # information can be missing at this stage for non abstract base
-            # properties).
-            self.base_property.overriding_properties.add(self)
-
+        if self.base:
             # Inherit the privacy level or check that it's consistent with the
             # base property.
             if self._is_public is None:
-                self._is_public = self.base_property.is_public
+                self._is_public = self.base.is_public
             else:
                 check_source_language(
-                    self._is_public == self.base_property.is_public,
+                    self._is_public == self.base.is_public,
                     "{} is {}, so should be {}".format(
-                        self.base_property.qualname,
-                        ('public'
-                            if self.base_property.is_public else
-                            'private'),
+                        self.base.qualname,
+                        'public' if self.base.is_public else 'private',
                         self.qualname,
                     )
                 )
@@ -4020,10 +3897,10 @@ class PropertyDef(AbstractNodeData):
             # Inherit the "lazy field" status, or check its consistency with
             # the base property.
             if self._lazy_field is None:
-                self._lazy_field = self.base_property.lazy_field
+                self._lazy_field = self.base.lazy_field
             else:
                 check_source_language(
-                    self._lazy_field == self.base_property.lazy_field,
+                    self._lazy_field == self.base.lazy_field,
                     "lazy fields cannot override properties, and conversely"
                 )
 
@@ -4031,9 +3908,8 @@ class PropertyDef(AbstractNodeData):
             # with the base property.
             self_dynvars = self._dynamic_vars
             self_dynvars_defaults = self._dynamic_vars_default_values
-            base_dynvars = self.base_property.dynamic_vars
-            base_dynvars_defaults = (self.base_property
-                                     ._dynamic_vars_default_values)
+            base_dynvars = self.base.dynamic_vars
+            base_dynvars_defaults = self.base._dynamic_vars_default_values
             if self_dynvars is not None:
                 check_source_language(
                     len(self_dynvars) == len(base_dynvars)
@@ -4046,7 +3922,7 @@ class PropertyDef(AbstractNodeData):
                                               base_dynvars_defaults)),
                     'Requested set of dynamically bound variables is not'
                     ' consistent with the property to override: {}'.format(
-                        self.base_property.qualname
+                        self.base.qualname
                     )
                 )
             self._dynamic_vars = base_dynvars
@@ -4054,26 +3930,25 @@ class PropertyDef(AbstractNodeData):
 
             # We then want to check the consistency of type annotations if they
             # exist.
-            if self.base_property.expected_type:
+            if self.base.expected_type:
                 if self.expected_type:
                     check_source_language(
-                        self.expected_type.matches(
-                            self.base_property.expected_type),
+                        self.expected_type.matches(self.base.expected_type),
                         '{} returns {} whereas it overrides {}, which returns'
                         ' {}. The former should match the latter.'.format(
                             self.qualname,
                             self.expected_type.dsl_name,
-                            self.base_property.qualname,
-                            self.base_property.type.dsl_name
+                            self.base.qualname,
+                            self.base.type.dsl_name
                         )
                     )
                 else:
                     # If base has a type annotation and not self, then
                     # propagate it.
-                    self.expected_type = self.base_property.expected_type
+                    self.expected_type = self.base.expected_type
 
             args = self.natural_arguments
-            base_args = self.base_property.natural_arguments
+            base_args = self.base.natural_arguments
             check_source_language(
                 len(args) == len(base_args),
                 "Derived and base properties don't have the same number"
@@ -4109,7 +3984,7 @@ class PropertyDef(AbstractNodeData):
                         base_arg.default_value is None,
                         'Argument "{}" must have the same default value as in'
                         ' base property ({})'.format(
-                            arg.dsl_name, self.base_property.qualname
+                            arg.dsl_name, self.base.qualname
                         )
                     )
                 else:
@@ -4117,7 +3992,7 @@ class PropertyDef(AbstractNodeData):
                         base_arg.default_value is not None,
                         'Argument "{}" cannot have a default value, to be'
                         ' consistent with its base property ({})'.format(
-                            arg.dsl_name, self.base_property.qualname
+                            arg.dsl_name, self.base.qualname
                         )
                     )
 
@@ -4186,13 +4061,13 @@ class PropertyDef(AbstractNodeData):
         # At this point, we assume the list of argument has reached its final
         # state.
 
-        if self.base_property:
+        if self.base:
             args = len(self.arguments)
-            base_args = len(self.base_property.arguments)
+            base_args = len(self.base.arguments)
             assert args == base_args, (
                 '{} has {} arguments, whereas its base property {} has {}'
                 ' ones'.format(self.qualname, args,
-                               self.base_property.qualname, base_args)
+                               self.base.qualname, base_args)
             )
 
         if self.lazy_field:
@@ -4209,7 +4084,7 @@ class PropertyDef(AbstractNodeData):
             # boolean telling whether the lazy field was evaluated, and the
             # field itself. For other lazy fields, just re-use the root's
             # fields.
-            if self.base_property is None:
+            if self.base is None:
                 self.lazy_present_field = self.struct.add_internal_user_field(
                     name=names.Name.from_lower(
                         f"lf_present_{self.original_name}"
@@ -4229,8 +4104,8 @@ class PropertyDef(AbstractNodeData):
                     doc=f'Storage for the {self.qualname} lazy field',
                 )
             else:
-                self.lazy_present_field = self.base_property.lazy_present_field
-                self.lazy_storage_field = self.base_property.lazy_storage_field
+                self.lazy_present_field = self.base.lazy_present_field
+                self.lazy_storage_field = self.base.lazy_storage_field
 
         # Now that all dynamic variables are known for this property, extend
         # its documentation using the docs of its dynamic variables.
@@ -4384,10 +4259,9 @@ class PropertyDef(AbstractNodeData):
             assert self.abstract or self.external
             if not self.expected_type:
                 check_source_language(
-                    self.base_property,
-                    'This property requires an explicit return type'
+                    self.base, 'This property requires an explicit return type'
                 )
-                self.expected_type = self.base_property.type
+                self.expected_type = self.base.type
             return
 
         with self.bind(bind_dynamic_vars=True), Self.bind_type(self.struct):
@@ -4395,9 +4269,9 @@ class PropertyDef(AbstractNodeData):
                 'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
                 ' overridden base property in {base_prop})'.format(
-                    base_prop=self.base_property.struct.dsl_name
+                    base_prop=self.base.struct.dsl_name
                 )
-            ) if self.base_property else None
+            ) if self.base else None
 
             self.in_type = True
             try:
@@ -4421,14 +4295,14 @@ class PropertyDef(AbstractNodeData):
         Check that the return type of this property and the return type of the
         base property that self overrides are the same, if applicable.
         """
-        if self.base_property and self.base_property.type:
+        if self.base and self.base.type:
             check_source_language(
-                self.type.matches(self.base_property.type),
+                self.type.matches(self.base.type),
                 "{} returns {} whereas it overrides {}, which returns {}."
                 " The former should match the latter.".format(
                     self.qualname, self.type.dsl_name,
-                    self.base_property.qualname,
-                    self.base_property.type.dsl_name
+                    self.base.qualname,
+                    self.base.type.dsl_name
                 )
             )
 
@@ -4652,7 +4526,7 @@ class PropertyDef(AbstractNodeData):
         # For public properties only, warn undocumented ones. Only warn for
         # base properties: no need to repeat for the other ones.
         WarningSet.undocumented_public_properties.warn_if(
-            self.is_public and not self.overriding and not self.doc,
+            self.is_public and not self.is_overriding and not self.doc,
             'This property is public but it lacks documentation'
         )
 

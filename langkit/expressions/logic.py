@@ -301,7 +301,7 @@ class Bind(AbstractExpression):
 
         # Second, check its signature
 
-        prop = prop.root_property
+        prop = prop.root
         assert prop.struct
         check_source_language(
             prop.struct.matches(T.root_node),
@@ -608,7 +608,7 @@ class Predicate(AbstractExpression):
         self.exprs = exprs
 
     def do_prepare(self):
-        self.pred_property = resolve_property(self.pred_property).root_property
+        self.pred_property = resolve_property(self.pred_property).root
 
     def construct(self):
         check_multiple([

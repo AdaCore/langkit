@@ -1,12 +1,12 @@
+import langkit
+from langkit.diagnostics import DiagnosticError
 from langkit.dsl import ASTNode, T, abstract
 from langkit.expressions import AbstractProperty
 
 from utils import emit_and_print_errors
 
 
-def run(name, runtime_check=False, abstract_root_prop=False):
-    print('== {} =='.format(name))
-
+def run_unsafe(runtime_check, abstract_root_prop):
     if abstract_root_prop:
         class FooNode(ASTNode):
             root_prop = AbstractProperty(T.Bool, public=True)
@@ -29,13 +29,23 @@ def run(name, runtime_check=False, abstract_root_prop=False):
         class BaseNode(FooNode):
             prop = AbstractProperty(T.Bool, public=True)
 
-        class Number(BaseNode):
-            prop = AbstractProperty(T.Bool, runtime_check=runtime_check)
-
         class Identifier(BaseNode):
             prop = AbstractProperty(T.Bool, runtime_check=runtime_check)
 
+        class Number(BaseNode):
+            prop = AbstractProperty(T.Bool, runtime_check=runtime_check)
+
     emit_and_print_errors(lkt_file='foo.lkt')
+
+
+def run(name, runtime_check=False, abstract_root_prop=False):
+    print('== {} =='.format(name))
+    try:
+        run_unsafe(runtime_check, abstract_root_prop)
+    except DiagnosticError:
+        pass
+    finally:
+        langkit.reset()
     print('')
 
 

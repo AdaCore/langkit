@@ -649,7 +649,7 @@ class DynamicLexicalEnv(AbstractExpression):
         # Sanitize assocs_getter: make sure we have a property reference, then
         # make sure it has the expected signature.
 
-        assocs_getter = resolve_property(self.assocs_getter).root_property
+        assocs_getter = resolve_property(self.assocs_getter).root
         assocs_getter.require_untyped_wrapper()
 
         expected_rtype = T.inner_env_assoc.array
@@ -667,7 +667,7 @@ class DynamicLexicalEnv(AbstractExpression):
         if self.assoc_resolver:
             assoc_resolver = resolve_property(
                 self.assoc_resolver
-            ).root_property
+            ).root
             assoc_resolver.require_untyped_wrapper()
 
             check_source_language(

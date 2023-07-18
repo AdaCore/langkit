@@ -382,7 +382,7 @@ private package ${ada_lib_name}.Generic_Introspection is
          # never null.
          null_fields = set()
          if isinstance(m, Field) and m.abstract:
-            null_fields = {f for f in m.concrete_fields if f.null}
+            null_fields = {f for f in m.concrete_overridings if f.null}
 
          # If there is at least one null field, generate the array that
          # describes them.
