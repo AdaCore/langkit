@@ -301,10 +301,10 @@ class AbstractNodeData:
         assert internal_name is None or isinstance(internal_name, names.Name)
         self._internal_name = internal_name
 
-        self.struct: Opt[StructType] = None
+        self.struct: Opt[CompiledType] = None
         """
-        StructType subclass that declared this field. Initialized when creating
-        StructType subclasses.
+        Type that owns this field. Initialized when creating that type: fields
+        are created before their owning type.
         """
 
         self.arguments: List[Argument] = []
@@ -759,7 +759,7 @@ class CompiledType:
         Cache for the get_abstract_node_data_dict class method.
         """
 
-        self._fields: Dict[str, BaseField] = OrderedDict()
+        self._fields: Dict[str, AbstractNodeData] = OrderedDict()
         """
         List of AbstractNodeData fields for this type.
         """
@@ -1443,11 +1443,11 @@ class CompiledType:
 
             self.add_field(f_v)
 
-    def add_field(self, field):
+    def add_field(self, field: AbstractNodeData) -> None:
         """
-        Append a field to this Struct/AST node.
+        Append a field to this type.
 
-        :param AbstractNodeData field: Field to append.
+        :param field: Field to append.
         """
         self._fields[field.indexing_name] = field
         field.struct = self
@@ -1455,7 +1455,7 @@ class CompiledType:
         # Invalidate the field lookup cache for this node and all derivations,
         # as this new field can be looked up by derivations.
 
-        def reset_cache(t: CompiledType):
+        def reset_cache(t: CompiledType) -> None:
             t._abstract_node_data_dict_cache = {}
             for dt in t.derivations:
                 reset_cache(dt)
@@ -1972,7 +1972,7 @@ class Field(BaseField):
     def _compute_precise_types(self) -> None:
         from langkit.parsers import Null
 
-        etypes = None
+        etypes: TypeSet
         is_list = self.type.is_list_type
 
         assert isinstance(self.struct, ASTNodeType)
@@ -1994,7 +1994,6 @@ class Field(BaseField):
                 f._compute_precise_types()
                 types.update(f.precise_types)
                 if is_list:
-                    assert etypes
                     etypes.update(f.precise_element_types)
 
         elif self.struct.synthetic:
@@ -2014,7 +2013,6 @@ class Field(BaseField):
                     all_null = False
                 types.update(p.precise_types)
                 if is_list:
-                    assert etypes
                     etypes.update(p.precise_element_types)
 
             # Only null fields are allowed to get only null parsers. Things are
@@ -2038,13 +2036,12 @@ class Field(BaseField):
             # synthetic node, so take types from node synthesis into account.
             types.update(self.types_from_synthesis)
             if is_list:
-                assert etypes
                 for t in self.types_from_synthesis.matched_types:
                     if t.is_list_type:
                         etypes.include(t.element_type)
 
         self._precise_types = types
-        self._precise_element_types = etypes
+        self._precise_element_types = etypes if is_list else None
 
     @property
     def doc(self) -> str:
