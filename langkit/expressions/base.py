@@ -3420,6 +3420,13 @@ class PropertyDef(AbstractNodeData):
         check.
         """
 
+        self.is_dispatching_root = False
+        """
+        Whether this property is the "root static" property after dispatcher
+        lowering, i.e. whether it is the property implementation for the node
+        that is the root in that property hierarchy.
+        """
+
         self.dispatcher: Opt[PropertyDef] = None
         """
         After property dispatch lowering, this holds a reference to the

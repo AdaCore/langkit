@@ -2831,6 +2831,7 @@ class CompileCtx:
 
                     root_static.struct = prop.struct
                     root_static.location = prop.location
+                    root_static.is_dispatching_root = True
                     prop.is_artificial_dispatcher = True
 
                     # Rewrite overriding properties so that Super() calls that
