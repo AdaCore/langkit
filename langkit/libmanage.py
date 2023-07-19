@@ -106,6 +106,11 @@ class ManageScript:
     Whether warnings to build the generated library are enabled by default.
     """
 
+    ENABLE_JAVA_DEFAULT = False
+    """
+    Whether to build Java bindings by default.
+    """
+
     enable_build_warnings: bool
     """
     Whether to enable build warnings.
@@ -588,8 +593,13 @@ class ManageScript:
         )
 
         subparser.add_argument(
-            '--enable-java', action='store_true',
+            '--enable-java', action='store_true', dest='enable_java',
+            default=self.ENABLE_JAVA_DEFAULT,
             help='Enable the Java bindings building/installation.'
+        )
+        subparser.add_argument(
+            '--disable-java', action='store_false', dest='enable_java',
+            help='Disable the Java bindings building/installation.'
         )
         subparser.add_argument(
             '--maven-local-repo',
