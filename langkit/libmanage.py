@@ -1304,6 +1304,16 @@ class ManageScript:
                     os.path.join(install_dir, os.path.basename(f))
                 )
 
+        # Install the GDB helpers setup script in "share"
+        share_dir = self.dirs.install_dir("share", lib_name)
+        if not path.isdir(share_dir):
+            os.makedirs(share_dir)
+        gdbinit_filename = self.dirs.build_dir("gdbinit.py")
+        shutil.copyfile(
+            gdbinit_filename,
+            os.path.join(share_dir, os.path.basename(gdbinit_filename))
+        )
+
         # Install the remaining miscellaneous files
         for fpath in [
             os.path.join('python', lib_name, '*.py'),
