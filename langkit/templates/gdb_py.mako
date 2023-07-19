@@ -1,5 +1,12 @@
 ## vim: filetype=makopython
 
+"""
+This script is meant to be sourced inside GDB when debugging a program that
+uses ${lib_name}. It installs Langkit's "GDB helpers": pretty-printers and
+custom commands that are convenient when debugging ${lib_name}. Note that GDB
+helpers require the Langkit Python library.
+"""
+
 import sys
 
 
