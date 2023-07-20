@@ -1,5 +1,5 @@
 Mako==1.1.2
-Pygments==2.6.1
+Pygments==2.15.0
 autopep8==1.5.2
 coverage==5.1
 docutils==0.16
