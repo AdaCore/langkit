@@ -205,8 +205,6 @@ class Emitter:
         self._project_file_emitted = False
         """
         Whether we emitted a project file for the generated library.
-
-        :type: bool
         """
 
         self.project_languages = {'Ada', 'C'}
@@ -220,8 +218,6 @@ class Emitter:
         """
         Set of source file base names for all sources that must appear in the
         "Interfaces" attribute of the generated library project file.
-
-        :type: set[str]
         """
 
         self.instr_md = InstrumentationMetadata()
@@ -246,8 +242,6 @@ class Emitter:
         """
         RA22-015: If set to something else than None, then the "dsl unparse"
         pass will be run on the given script.
-
-        :type: langkit.compile_context.UnparseScript|None
         """
 
         # Determine whether we have user external properties. If so,
