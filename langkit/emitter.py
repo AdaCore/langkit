@@ -209,11 +209,11 @@ class Emitter:
         :type: bool
         """
 
-        self.project_languages = {'Ada'}
+        self.project_languages = {'Ada', 'C'}
         """
         List of GPR names for languages used in the generated library.
 
-        :type: set[str]
+        The core library is made of Ada and C sources, so always include them.
         """
 
         self.library_interfaces = set()
@@ -656,7 +656,6 @@ class Emitter:
                                     os_name=os.name),
                 self.post_process_cpp
             )
-            self.project_languages.add('C')
 
     def emit_ocaml_api(self, ctx: CompileCtx) -> None:
         """
