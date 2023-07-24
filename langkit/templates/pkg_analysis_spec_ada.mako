@@ -589,14 +589,14 @@ package ${ada_lib_name}.Analysis is
 
       % for f in e.element_type.get_parse_fields( \
          include_inherited=False, \
-         predicate=lambda f: f.is_public and not f.overriding, \
+         predicate=lambda f: f.is_public and not f.is_overriding, \
       ):
          ${astnode_types.field_decl(f)}
       % endfor
 
       % for p in e.element_type.get_properties( \
          include_inherited=False, \
-         predicate=lambda p: p.is_public and not p.overriding \
+         predicate=lambda p: p.is_public and not p.is_overriding \
       ):
          ${public_properties.decl(p)}
       % endfor

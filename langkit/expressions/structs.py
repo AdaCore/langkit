@@ -951,7 +951,7 @@ class FieldAccess(AbstractExpression):
         # If this is a property call, actually call the root property, as it
         # will be turned into a dispatcher.
         if isinstance(actual_node_data, PropertyDef):
-            actual_node_data = actual_node_data.root_property
+            actual_node_data = actual_node_data.root
 
         args = self.arguments or FieldAccess.Arguments([], {})
         result = self.common_construct(
@@ -998,7 +998,7 @@ class Super(AbstractExpression):
     def construct(self):
         # This expression calls the property that the current one overrides:
         # get it, making sure it exists and it is concrete.
-        prop = PropertyDef.get().base_property
+        prop = PropertyDef.get().base
         if prop is None:
             error("There is no overridden property to call")
         check_source_language(

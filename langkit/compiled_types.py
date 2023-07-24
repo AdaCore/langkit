@@ -17,16 +17,23 @@ from langkit.common import is_keyword
 from langkit.compile_context import (CompileCtx, get_context,
                                      get_context_or_none)
 from langkit.diagnostics import (
-    Location, Severity, WarningSet, check_source_language, diagnostic_context,
+    Location, WarningSet, check_source_language, diagnostic_context, error,
     extract_library_location
 )
-from langkit.utils import issubtype, memoized, not_implemented_error
+from langkit.utils import (
+    issubtype,
+    memoized,
+    not_implemented_error,
+    self_memoized,
+)
 from langkit.utils.text import (append_paragraph, first_line_indentation,
                                 indent)
 from langkit.utils.types import TypeSet
 
 
 if TYPE_CHECKING:
+    from typing_extensions import Self as _Self
+
     from langkit.dsl import Annotations
     from langkit.envs import EnvSpec
     from langkit.expressions import (
@@ -301,10 +308,10 @@ class AbstractNodeData:
         assert internal_name is None or isinstance(internal_name, names.Name)
         self._internal_name = internal_name
 
-        self.struct: Opt[StructType] = None
+        self.struct: Opt[CompiledType] = None
         """
-        StructType subclass that declared this field. Initialized when creating
-        StructType subclasses.
+        Type that owns this field. Initialized when creating that type: fields
+        are created before their owning type.
         """
 
         self.arguments: List[Argument] = []
@@ -326,6 +333,9 @@ class AbstractNodeData:
         self.access_constructor = access_constructor
 
         self._abstract = False
+        self._inheritance_computed = False
+        self._base: Opt[_Self] = None
+        self._overridings: List[_Self] = []
         self.final = final
 
     @property
@@ -337,34 +347,25 @@ class AbstractNodeData:
         return self._abstract
 
     @property
-    def base(self) -> Opt[AbstractNodeData]:
+    def base(self) -> Opt[_Self]:
         """
         If this field overrides an inherited one in a base class, return the
         inherited one, otherwise return None.
         """
-        assert self._name and self.struct and self.struct.is_ast_node
-
-        # Look for a potential field which has the same name as `self` in the
-        # base struct.
-        name_key = self._original_name
-        parent_cls = self.struct.base
-        parent_fields = (parent_cls.get_abstract_node_data_dict()
-                         if parent_cls else {})
-        return parent_fields.get(name_key, None)
+        assert self._inheritance_computed
+        return self._base
 
     @property
-    def root(self) -> AbstractNodeData:
+    def root(self) -> _Self:
         """
         Return the ultimate field that ``self`` inherits.
 
         This returns ``self`` itself if it is not overriding.
         """
-        cursor = self
-        while True:
-            base = cursor.base
-            if base is None:
-                return cursor
-            cursor = base
+        result = self
+        while result.base:
+            result = result.base
+        return result
 
     @property
     def is_overriding(self) -> bool:
@@ -372,6 +373,56 @@ class AbstractNodeData:
         Return whether this field overrides an inheritted one in a base class.
         """
         return self.base is not None
+
+    @property
+    def overridings(self) -> Sequence[_Self]:
+        """
+        Return the list of fields that override ``self``.
+        """
+        return self._overridings
+
+    @property
+    def concrete_overridings(self) -> Sequence[_Self]:
+        """
+        Return the list of concrete overridings for ``self``.
+        """
+        return [f for f in self.overridings if not f.abstract]
+
+    @property  # type: ignore
+    @self_memoized
+    def all_overridings(self) -> Sequence[_Self]:
+        """
+        Return self's overriding fields and all their own overriding ones,
+        recursively.
+        """
+        def helper(field, except_self=False):
+            return sum((helper(f) for f in field.overridings),
+                       [] if except_self else [field])
+        return helper(self, except_self=True)
+
+    def field_set(self) -> Sequence[_Self]:
+        """
+        Return all fields associated with this fields in terms of overriding
+        hierarchy.
+        """
+        return (
+            self.base.field_set()
+            if self.base else
+            [self] + self.all_overridings
+        )
+
+    def reset_inheritance_info(self) -> None:
+        """
+        Reset memoization caches for inheritance-related information.
+
+        Must be called on the root field when modifying a tree of inherited
+        fields.
+        """
+        assert self.base is None
+        for f in [self] + self.all_overridings:
+            f._base = None
+            f._overridings = []
+        AbstractNodeData.all_overridings.fget.reset(self)
 
     @property
     def uses_entity_info(self) -> bool:
@@ -759,7 +810,7 @@ class CompiledType:
         Cache for the get_abstract_node_data_dict class method.
         """
 
-        self._fields: Dict[str, BaseField] = OrderedDict()
+        self._fields: Dict[str, AbstractNodeData] = OrderedDict()
         """
         List of AbstractNodeData fields for this type.
         """
@@ -1443,24 +1494,87 @@ class CompiledType:
 
             self.add_field(f_v)
 
-    def add_field(self, field):
+    def add_field(self, field: AbstractNodeData) -> None:
         """
-        Append a field to this Struct/AST node.
+        Append a field to this type.
 
-        :param AbstractNodeData field: Field to append.
+        This also initializes the inheritance information (base/overridings)
+        for this new field according to the base type for "self".
+
+        :param field: Field to append.
         """
+        from langkit.expressions import PropertyDef
+
         self._fields[field.indexing_name] = field
         field.struct = self
 
         # Invalidate the field lookup cache for this node and all derivations,
         # as this new field can be looked up by derivations.
 
-        def reset_cache(t: CompiledType):
+        def reset_cache(t: CompiledType) -> None:
             t._abstract_node_data_dict_cache = {}
             for dt in t.derivations:
                 reset_cache(dt)
 
         reset_cache(self)
+
+        # Look for the base field, if any: a potential field which has the same
+        # name as "field" in the base struct.
+        name_key = field._original_name
+        base_field = (
+            self.base.get_abstract_node_data_dict()
+            if self.base else
+            {}
+        ).get(name_key)
+
+        # Initialize inheritance information, checking basic base/overriding
+        # field consistency.
+        field._inheritance_computed = True
+        if base_field:
+            base_field._overridings.append(field)
+            field._base = base_field
+
+            with field.diagnostic_context:
+                check_source_language(
+                    not base_field.final,
+                    f"{base_field.qualname} is final, overriding it is illegal"
+                )
+
+                if isinstance(field, BuiltinField):
+                    # Language specs are not supposed to define builtin fields,
+                    # hence the assert instead of a user diagnostic.
+                    assert isinstance(base_field, BuiltinField)
+
+                elif isinstance(base_field, UserField):
+                    error("non-parse fields cannot be overriden")
+
+                elif isinstance(base_field, Field):
+                    if not isinstance(field, Field):
+                        error("only parse fields can override parse fields")
+
+                    check_source_language(
+                        base_field.abstract and not field.abstract,
+                        f"{field.qualname} cannot override"
+                        f" {base_field.qualname} unless the former is a"
+                        " concrete field and the latter is an abstract one"
+                    )
+
+                    # Null fields are not initialized with a type, so they
+                    # must inherit their type from the abstract field they
+                    # override.
+                    assert isinstance(field, Field)
+                    if field.null:
+                        field._type = base_field._type
+
+                elif isinstance(base_field, PropertyDef):
+                    if not isinstance(field, PropertyDef):
+                        error("only properties can override properties")
+                    check_source_language(
+                        not field.abstract or field.abstract_runtime_check,
+                        "Abstract properties with no runtime check cannot"
+                        f" override another property. Here, {field.qualname}"
+                        f" is abstract and overrides {base_field.qualname}."
+                    )
 
     def get_user_fields(self, predicate=None, include_inherited=True):
         """
@@ -1900,10 +2014,6 @@ class Field(BaseField):
         self._abstract = abstract
         self._null = null
 
-        self._overriding_computed = False
-        self._overriding: Opt[Field] = None
-        self._concrete_fields: List[Field] = []
-
         self.parsers_from_transform: List[Parser] = []
         """
         List of parsers that provide a value for this field. Such parsers are
@@ -1972,7 +2082,7 @@ class Field(BaseField):
     def _compute_precise_types(self) -> None:
         from langkit.parsers import Null
 
-        etypes = None
+        etypes: TypeSet
         is_list = self.type.is_list_type
 
         assert isinstance(self.struct, ASTNodeType)
@@ -1990,11 +2100,10 @@ class Field(BaseField):
             types = TypeSet()
             if is_list:
                 etypes = TypeSet()
-            for f in self.concrete_fields:
+            for f in self.concrete_overridings:
                 f._compute_precise_types()
                 types.update(f.precise_types)
                 if is_list:
-                    assert etypes
                     etypes.update(f.precise_element_types)
 
         elif self.struct.synthetic:
@@ -2014,7 +2123,6 @@ class Field(BaseField):
                     all_null = False
                 types.update(p.precise_types)
                 if is_list:
-                    assert etypes
                     etypes.update(p.precise_element_types)
 
             # Only null fields are allowed to get only null parsers. Things are
@@ -2038,13 +2146,12 @@ class Field(BaseField):
             # synthetic node, so take types from node synthesis into account.
             types.update(self.types_from_synthesis)
             if is_list:
-                assert etypes
                 for t in self.types_from_synthesis.matched_types:
                     if t.is_list_type:
                         etypes.include(t.element_type)
 
         self._precise_types = types
-        self._precise_element_types = etypes
+        self._precise_element_types = etypes if is_list else None
 
     @property
     def doc(self) -> str:
@@ -2087,33 +2194,6 @@ class Field(BaseField):
             )
 
         return result
-
-    @property
-    def overriding(self) -> Opt[Field]:
-        """
-        If this field overrides an abstract field, return the abstract field.
-        return None otherwise.
-        """
-        assert self._overriding_computed, (
-            '"overriding" not computed for {}'.format(self.qualname))
-        return self._overriding
-
-    @overriding.setter
-    def overriding(self, overriding: Field) -> None:
-        assert not self._overriding_computed
-        self._overriding_computed = True
-        self._overriding = overriding
-        if overriding:
-            overriding._concrete_fields.append(self)
-
-    @property
-    def concrete_fields(self) -> List[Field]:
-        """
-        Assuming this field is abstract, return the list of concrete fields
-        that override it.
-        """
-        assert self.abstract and self._overriding_computed
-        return self._concrete_fields
 
     @property
     def index(self) -> int:
@@ -2770,27 +2850,6 @@ class ASTNodeType(BaseStructType):
                     'UserField on nodes must be private'
                 )
 
-        # Associate concrete syntax fields to the corresponding abstract ones,
-        # if any. Don't bother doing validity checking here: the valide_field
-        # pass will take care of it.
-        inherited_fields = (self.base.get_abstract_node_data_dict()
-                            if self.base else {})
-        for f_n, f_v in self._fields.items():
-            base_field = inherited_fields.get(f_n)
-            if isinstance(f_v, Field):
-                if (
-                    base_field and
-                    isinstance(base_field, Field) and
-                    base_field.abstract
-                ):
-                    f_v.overriding = base_field
-                    # Null fields are not initialized with a type, so they must
-                    # inherit their type from the abstract field they override.
-                    if f_v.null:
-                        f_v._type = base_field._type
-                else:
-                    f_v.overriding = None
-
         from langkit.dsl import Annotations
         annotations = annotations or Annotations()
         self.annotations: Annotations = annotations
@@ -3335,7 +3394,7 @@ class ASTNodeType(BaseStructType):
             with f.diagnostic_context:
                 # Null fields must override an abstract one
                 check_source_language(
-                    not f.null or f.overriding,
+                    not f.null or f.is_overriding,
                     'Null fields can only be used to override abstract fields',
                 )
 
@@ -3346,64 +3405,41 @@ class ASTNodeType(BaseStructType):
                     ' Here, field type is {}'.format(f.type.dsl_name)
                 )
 
-        # Unless the special case of inheritted abstract fields/properties,
-        # reject fields which are homonym with inherited fields.
+        # All fields inheritted by "self", i.e. all fields from its base node
+        # (if any).
         inherited_fields = (self.base.get_abstract_node_data_dict()
                             if self.base else {})
 
-        # Also check that concrete nodes with not-overriden abstract fields
+        # Subset of inherited fields that are abstract.
+        #
+        # Such abstract fields are removed from this dict as soon as we find a
+        # concrete overriding field for them, and abstract fields that belong
+        # to "self" are added, so that we know at the end what fields are kept
+        # abstract in this node.
         abstract_fields = {f_n: f_v for f_n, f_v in inherited_fields.items()
                            if isinstance(f_v, Field) and f_v.abstract}
 
         for f_n, f_v in self._fields.items():
             with f_v.diagnostic_context:
-                f_v_abstract_field = isinstance(f_v, Field) and f_v.abstract
-                if f_v_abstract_field:
-                    abstract_fields[f_v.name.lower] = f_v
+                # If this is an abstract parse field, add it to
+                # abstract_fields, and remove any corresponding entry from
+                # abstract_fields if it is a concrete parse field.
+                if isinstance(f_v, Field):
+                    if f_v.abstract:
+                        abstract_fields[f_n] = f_v
+                    else:
+                        abstract_fields.pop(f_n, None)
 
-                homonym_fld = inherited_fields.get(f_n)
-                if not homonym_fld:
-                    continue
+                    if f_v.base is not None:
+                        check_source_language(
+                            f_v.type.matches(f_v.base.type),
+                            f"Type of overriding field ({f_v.type.dsl_name})"
+                            " does not match type of abstract field"
+                            f" ({f_v.base.type.dsl_name})"
+                        )
 
-                check_source_language(
-                    not homonym_fld.final,
-                    f"{homonym_fld.qualname} is final, overriding it is"
-                    " illegal"
-                )
-
-                if f_v.is_property:
-                    check_source_language(
-                        homonym_fld.is_property,
-                        'The {} property cannot override {} as the latter is'
-                        ' not a property'.format(f_v.qualname,
-                                                 homonym_fld.qualname),
-                        severity=Severity.non_blocking_error
-                    )
-                elif (
-                    isinstance(f_v, Field) and
-                    not f_v.abstract and
-                    isinstance(homonym_fld, Field) and
-                    homonym_fld.abstract
-                ):
-                    check_source_language(
-                        f_v.type.matches(homonym_fld.type),
-                        'Type of overriding field ({}) does not match type of'
-                        ' abstract field ({})'
-                        .format(f_v.type.dsl_name, homonym_fld.type.dsl_name),
-                        severity=Severity.non_blocking_error
-                    )
-                else:
-                    check_source_language(
-                        False,
-                        '{} cannot override {} unless the former is a concrete'
-                        ' field and the latter is an abstract one'
-                        .format(f_v.qualname, homonym_fld.qualname),
-                        severity=Severity.non_blocking_error
-                    )
-
-                if f_n in abstract_fields:
-                    abstract_fields.pop(f_n)
-
+        # For concrete nodes, make sure that all abstract fields are overriden
+        # by concrete ones.
         with self.diagnostic_context:
             check_source_language(
                 self.abstract or not abstract_fields,
@@ -3411,7 +3447,6 @@ class ASTNodeType(BaseStructType):
                 ' not overriden: {}'.format(', '.join(sorted(
                     f.qualname for f in abstract_fields.values()
                 ))),
-                severity=Severity.non_blocking_error
             )
 
     def builtin_properties(self):
@@ -4005,18 +4040,7 @@ class ArrayType(CompiledType):
             artificial=True,
         )
 
-        builtins = [('to_iterator', self._to_iterator_property)]
-
-        # TODO: this is a hack to work around the fact that it is possible for
-        # some types to be created after the "compute_base_properties" pass,
-        # meaning their _base_property field is never initialized.
-        # A real fix would be to have this field be computed lazily on-demand,
-        # but it seems to be incompatible with how dispatching properties
-        # are expanded (see e54387eb3 for more details).
-        for _, property_def in builtins:
-            property_def._base_property = None
-
-        return builtins
+        return [('to_iterator', self._to_iterator_property)]
 
 
 class IteratorType(CompiledType):

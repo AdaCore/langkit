@@ -10,7 +10,7 @@
 
 % if property.abstract_runtime_check:
 
-${"overriding" if property.overriding else ""} function ${property.name}
+${"overriding" if property.is_overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name}
 is (raise Property_Error
@@ -20,7 +20,7 @@ is (raise Property_Error
 % elif not property.external and not property.abstract:
 ${gdb_property_start(property)}
 pragma Warnings (Off, "is not referenced");
-${"overriding" if property.overriding else ""} function ${property.name}
+${"overriding" if property.is_overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name}
 is

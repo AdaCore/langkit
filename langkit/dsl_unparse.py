@@ -1273,10 +1273,9 @@ def emit_prop(prop, walker):
     # "is_public" and abstract expression for this root property are still
     # attached to the dispatcher.
     assert not prop.is_artificial_dispatcher
-    dispatcher = prop.dispatcher
-    prop_for_walker = (dispatcher
-                       if dispatcher and not prop.base
-                       else prop)
+    prop_for_walker = (prop.dispatcher
+                       if prop.is_dispatching_root else
+                       prop)
 
     if prop_for_walker.is_public:
         quals += "@export "
