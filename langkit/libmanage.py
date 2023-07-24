@@ -106,6 +106,11 @@ class ManageScript:
     Whether warnings to build the generated library are enabled by default.
     """
 
+    ENABLE_JAVA_DEFAULT = False
+    """
+    Whether to build Java bindings by default.
+    """
+
     enable_build_warnings: bool
     """
     Whether to enable build warnings.
@@ -588,8 +593,13 @@ class ManageScript:
         )
 
         subparser.add_argument(
-            '--enable-java', action='store_true',
+            '--enable-java', action='store_true', dest='enable_java',
+            default=self.ENABLE_JAVA_DEFAULT,
             help='Enable the Java bindings building/installation.'
+        )
+        subparser.add_argument(
+            '--disable-java', action='store_false', dest='enable_java',
+            help='Disable the Java bindings building/installation.'
         )
         subparser.add_argument(
             '--maven-local-repo',
@@ -1509,11 +1519,14 @@ class ManageScript:
 
         self.setup_environment(add_path)
 
-    def check_call(self,
-                   name: str,
-                   argv: List[str],
-                   env: Opt[Dict[str, str]] = None,
-                   abort_on_error: bool = True) -> bool:
+    def check_call(
+        self,
+        name: str,
+        argv: List[str],
+        env: Opt[Dict[str, str]] = None,
+        direct_c_header: bool = False,
+        abort_on_error: bool = True,
+    ) -> bool:
         """
         Log and run a command with a derived environment.
 
@@ -1526,12 +1539,13 @@ class ManageScript:
         :param argv: Arguments for the command to run.
         :param env: Environment to use for the command to run. If None, use
             self.derived_env().
+        :param direct_c_header: See ``setup_environment``.
         :param abort_on_error: If the command stops with an error, exit
             ourselves.
         """
         self.log_exec(argv)
         if env is None:
-            env = self.derived_env()
+            env = self.derived_env(direct_c_header=direct_c_header)
         try:
             subprocess.check_call(argv, env=env)
         except (subprocess.CalledProcessError, OSError) as exc:
