@@ -21,7 +21,10 @@ class Testcase:
 
 class BasicApp(libfoolang.App):
     def process_unit(self, unit):
-        unit.root.dump()
+        if unit.root is None:
+            print(f"{os.path.basename(unit.filename)}: <no root node>")
+        else:
+            unit.root.dump()
         print("")
 
 
@@ -39,6 +42,12 @@ class WithEventHandler(BasicApp):
         return WithEventHandler.MyEH()
 
 
+class CustomParsingErrorHandling(BasicApp):
+    def on_parsing_error(self, unit):
+        for d in unit.diagnostics:
+            print(">>> ", unit.format_gnu_diagnostic(d))
+
+
 tests = [
     # Check the interaction between the "default_get_files" method and source
     # files passed on the command line.
@@ -46,6 +55,14 @@ tests = [
     Testcase("nodefaults_args", BasicApp, ["input3"]),
     Testcase("defaults_noargs", WithDefaultFiles, []),
     Testcase("defaults_args", WithDefaultFiles, ["input3"]),
+
+    # Check that parsing errors are handled as expected
+    Testcase("parsing_errors", BasicApp, ["no_such_file", "input4"]),
+    Testcase(
+        "parsing_errors_custom",
+        CustomParsingErrorHandling,
+        ["no_such_file", "input4"],
+    ),
 
     # Check that the "create_event_handler" method is used as expected
     Testcase("event_handler", WithEventHandler, ["input1", "input2"]),

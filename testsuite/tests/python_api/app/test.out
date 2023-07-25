@@ -16,6 +16,22 @@ Example input2:1:1-1:8: example
 
 Example input3:1:1-1:8: example
 
+== parsing_errors ==
+
+no_such_file: Cannot read no_such_file
+input4:1:9: End of input expected, got "Identifier"
+Example input4:1:1-1:8: example
+
+no_such_file: <no root node>
+
+== parsing_errors_custom ==
+
+no_such_file: Cannot read no_such_file
+input4:1:9: End of input expected, got "Identifier"
+Example input4:1:1-1:8: example
+
+no_such_file: <no root node>
+
 == event_handler ==
 
 > unit input1 parsed

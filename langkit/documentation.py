@@ -530,6 +530,10 @@ base_langkit_docs = {
     'langkit.unit_diagnostics': """
         Return an array that contains the diagnostics associated to this unit.
     """,
+    'langkit.format_gnu_diagnostic': """
+        Format a diagnostic in a GNU fashion. See
+        <https://www.gnu.org/prep/standards/html_node/Errors.html>.
+    """,
 
     'langkit.unit_populate_lexical_env': """
         Create lexical environments for this analysis unit, according to the
