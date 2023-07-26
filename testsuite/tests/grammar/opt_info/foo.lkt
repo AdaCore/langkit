@@ -2,7 +2,7 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- or(rule_1 | rule_2 | rule_3 | rule_4)
+    @main_rule main_rule <- or(rule_1 | rule_2 | rule_3 | rule_4 | rule_5)
 
     rule_1 <- ParserTest(
         ?Example("example")
@@ -38,6 +38,7 @@ grammar foo_grammar {
 
     rule_3 <- SynthParent(Example("example"))
     rule_4 <- NullFieldChild(Example("example"))
+    rule_5 <- OptionalByAnnotation(Example("example"))
 }
 
 class FooNode implements Node[FooNode] {
@@ -49,7 +50,7 @@ class Example : FooNode {
 # All abstract fields that are overriden by null nodes are optional
 @abstract class NullFieldParent : FooNode {
     @abstract @parse_field f1: Example
-    @abstract @parse_field f2: Example
+    @abstract @nullable @parse_field f2: Example
 }
 class NullFieldChild : NullFieldParent {
     @parse_field f1: Example
@@ -59,11 +60,11 @@ class NullFieldChild : NullFieldParent {
 # Test optionality inferred from the grammar
 class ParserTest : FooNode {
     # Optional fields
-    @parse_field field_opt: Example
-    @parse_field field_or: Example
-    @parse_field field_defer: Example
-    @parse_field field_null: Example
-    @parse_field field_dont_skip: Example
+    @parse_field @nullable field_opt: Example
+    @parse_field @nullable field_or: Example
+    @parse_field @nullable field_defer: Example
+    @parse_field @nullable field_null: Example
+    @parse_field @nullable field_dont_skip: Example
 
     # Optional fields that return a list node
     @parse_field field_list_opt: ASTList[FooNode, Example]
@@ -75,11 +76,16 @@ class ParserTest : FooNode {
     @parse_field field_transform: Example
 }
 
-# All fields that are inherited by synthetic nodes are optional
+# By default, fields that are inherited by synthetic nodes are not optional
 class SynthParent : FooNode {
     @parse_field f: Example
 }
 @synthetic class SynthChild : SynthParent {
+}
+
+# Fields specifically annotated are optional
+class OptionalByAnnotation : FooNode {
+    @nullable @parse_field f: Example
 }
 
 @qualifier enum class HasExample : FooNode {

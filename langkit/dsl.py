@@ -908,7 +908,7 @@ class _EnumNodeAlternative:
         return self.enum_node_cls._create_parser(self.type_ref, *args)
 
 
-def Field(repr=True, doc='', type=None):
+def Field(repr=True, doc='', type=None, nullable=None):
     """
     Create a field that is meant to store parsing results. Only AST nodes can
     hold such fields.
@@ -921,11 +921,14 @@ def Field(repr=True, doc='', type=None):
     :param DSLType|CompiledType|None type: DSLType or CompiledType subclass for
         values this field holds. If left to None, the type will be inferred
         from the grammar.
+
+    :param bool|None nullable: Whether this field must be considered as
+        nullable even in the absence of syntax error.
     """
-    return _Field(repr, doc, type)
+    return _Field(repr, doc, type, nullable=nullable)
 
 
-def AbstractField(type, doc=''):
+def AbstractField(type, doc='', nullable=None):
     """
     Create an abstract field.
 
@@ -938,8 +941,11 @@ def AbstractField(type, doc=''):
         values this field holds.
 
     :param str doc: User documentation for this field.
+
+    :param bool|None nullable: Whether this field must be considered as
+        nullable even in the absence of syntax error.
     """
-    return _Field(type=type, doc=doc, abstract=True)
+    return _Field(type=type, doc=doc, abstract=True, nullable=nullable)
 
 
 def NullField():

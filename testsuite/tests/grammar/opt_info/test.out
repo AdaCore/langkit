@@ -1,6 +1,11 @@
+foo.lkt:88:28: warning: Spurious @nullable annotation: this field is never null in the absence of parsing error, and is never initialized by node synthetization, so it can never be null in practice.
+88 |     @nullable @parse_field f: Example
+   |                            ^^^^^^^^^^
+
 Code generation was successful
 Field NullFieldParent.f1 is not optional
 Field NullFieldParent.f2 is optional
+Field OptionalByAnnotation.f is optional
 Field ParserTest.field_opt is optional
 Field ParserTest.field_or is optional
 Field ParserTest.field_defer is optional
@@ -11,5 +16,5 @@ Field ParserTest.field_list_null is not optional
 Field ParserTest.field_list_or is not optional
 Field ParserTest.field_opt_bool is not optional
 Field ParserTest.field_transform is not optional
-Field SynthParent.f is optional
+Field SynthParent.f is not optional
 Done

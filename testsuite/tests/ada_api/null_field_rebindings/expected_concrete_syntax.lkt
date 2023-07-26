@@ -11,7 +11,7 @@ grammar foo_grammar {
 }
 
 class Decl : FooNode {
-    @parse_field name: Identifier
+    @parse_field @nullable name: Identifier
 
     @export fun rebind(from_node: FooNode, to_node: FooNode): Decl = {
         val rbdng = self.info.rebindings.append_rebinding(

@@ -455,7 +455,7 @@ module ${ocaml_api.node_name(astnode)} : sig
                ocaml_api.type_public_name(typ)
                for typ in precise_types]))
 
-         if field.is_optional:
+         if field.nullable:
             return_typ += ' option'
       %>
   val ${ocaml_api.field_name(field)} :

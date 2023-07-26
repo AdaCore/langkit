@@ -1312,7 +1312,7 @@ let ${ocaml_api.field_name(field)}
             % else:
         [
                % for field in ocaml_api.get_parse_fields(astnode):
-                  % if field.is_optional:
+                  % if field.nullable:
         ("${ocaml_api.field_name(field)[2:]}"
         , (Lazy.force value.${ocaml_api.field_name(field)}
            :> ${root_entity_type} option));

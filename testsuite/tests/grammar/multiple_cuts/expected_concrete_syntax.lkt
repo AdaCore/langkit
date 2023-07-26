@@ -21,21 +21,21 @@ grammar foo_grammar {
 }
 
 class Comma : FooNode {
-    @parse_field id1: Id
+    @parse_field @nullable id1: Id
     @parse_field id2: Id
     @parse_field id3: Id
 }
 
 class Def : FooNode {
     @parse_field id1: Id
-    @parse_field id2: Id
-    @parse_field id3: Id
+    @parse_field @nullable id2: Id
+    @parse_field @nullable id3: Id
 }
 
 class Dot : FooNode {
     @parse_field id1: Id
-    @parse_field id2: Id
-    @parse_field id3: Id
+    @parse_field @nullable id2: Id
+    @parse_field @nullable id3: Id
 }
 
 class Id : FooNode implements TokenNode {

@@ -257,7 +257,7 @@ class PrivatePart(DeclarativePart):
 class PackageDecl(FooNode):
     name = Field(type=T.Name)
     public_part = Field(type=T.PublicPart)
-    private_part = Field(type=T.PrivatePart)
+    private_part = Field(type=T.PrivatePart, nullable=True)
 
     @langkit_property(return_type=T.Name)
     def self_name():

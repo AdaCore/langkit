@@ -14,7 +14,7 @@ class FooNode(ASTNode):
 @abstract
 class Decl(FooNode):
     name = AbstractField(T.Name)
-    value = AbstractField(T.Expr)
+    value = AbstractField(T.Expr, nullable=True)
 
 
 class VarDecl(Decl):

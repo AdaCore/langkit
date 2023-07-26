@@ -1919,7 +1919,8 @@ class BaseField(AbstractNodeData):
                  access_needs_incref: bool = False,
                  internal_name: Opt[names.Name] = None,
                  prefix: Opt[names.Name] = AbstractNodeData.PREFIX_FIELD,
-                 null: bool = False):
+                 null: bool = False,
+                 nullable: bool | None = None):
         """
         Create an AST node field.
 
@@ -1929,6 +1930,9 @@ class BaseField(AbstractNodeData):
         :param access_needs_incref: See AbstractNodeData's constructor.
         :param internal_name: See AbstractNodeData's constructor.
         :param null: Whether this field is always supposed to be null.
+        :param nullable: None if the language spec does not defines whether
+            this field can be null in the absence of parsing error (i.e. when
+            it is inferred). True/False otherwise (whether it can be null).
         """
 
         assert self.concrete, 'BaseField itself cannot be instantiated'
@@ -1958,6 +1962,22 @@ class BaseField(AbstractNodeData):
         """
 
         self._null = null
+
+        self.nullable_from_spec = nullable
+        """
+        Whether this field has the ``@nullable`` annotation.
+        """
+
+        self._nullable = self.nullable_from_spec
+        """
+        Whether we consider this field as nullable. This is determined during
+        the "compute field nullability" pass.
+        """
+
+        self._synthetized = False
+        """
+        Whether this field is initialized by node synthetization in properties.
+        """
 
     @property
     def has_type(self) -> bool:
@@ -1994,6 +2014,31 @@ class BaseField(AbstractNodeData):
         """
         return self._null
 
+    @property
+    def nullable(self) -> bool:
+        """
+        Whether this field can be null in the absence of parsing error.
+        """
+        assert self._nullable is not None
+        return self._nullable
+
+    @property
+    def synthetized(self) -> bool:
+        """
+        Whether this field is initialized by node synthetization in properties.
+        """
+        return self._synthetized
+
+    def set_synthetized(self) -> None:
+        """
+        Tag this field and its ancestors as being initialized by node
+        synthetization in properties.
+        """
+        field: Opt[BaseField] = self
+        while field is not None:
+            field._synthetized = True
+            field = field.base
+
 
 class Field(BaseField):
     """
@@ -2007,8 +2052,9 @@ class Field(BaseField):
                  doc: str = "",
                  type: Opt[CompiledType] = None,
                  abstract: bool = False,
-                 null: bool = False):
-        super().__init__(repr, doc, type, null=null)
+                 null: bool = False,
+                 nullable: bool | None = None):
+        super().__init__(repr, doc, type, null=null, nullable=nullable)
 
         assert not abstract or not null
         self._abstract = abstract
@@ -2033,12 +2079,6 @@ class Field(BaseField):
         self._precise_element_types: Opt[TypeSet] = None
         """
         Cache for the precise_element_types property.
-        """
-
-        self._is_optional: Opt[bool] = None
-        """
-        See the ``is_optional`` property. This field is computed in a dedicated
-        compilation pass.
         """
 
         self._index: Opt[int] = None
@@ -2067,17 +2107,6 @@ class Field(BaseField):
         assert self.type.is_list_type
         assert self._precise_element_types is not None
         return self._precise_element_types
-
-    @property
-    def is_optional(self) -> bool:
-        """
-        Return whether it is possible for this field, when there is no parsing
-        error, to contain a null node. Note that this is always ``False`` for
-        fields that contain list nodes, as parsers always create an empty list
-        instead of null list nodes.
-        """
-        assert self._is_optional is not None
-        return self._is_optional
 
     def _compute_precise_types(self) -> None:
         from langkit.parsers import Null
@@ -2246,6 +2275,7 @@ class UserField(BaseField):
             access_needs_incref=access_needs_incref,
             internal_name=internal_name,
             prefix=prefix,
+            nullable=True,
         )
         self._is_public = public
 

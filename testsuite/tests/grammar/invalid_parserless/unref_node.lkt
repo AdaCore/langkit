@@ -12,7 +12,7 @@ grammar foo_grammar {
 }
 
 class ExampleNode : FooNode {
-    @parse_field n: FooNode
+    @parse_field @nullable n: FooNode
 }
 
 class ParserlessNode : FooNode {

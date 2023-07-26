@@ -20,7 +20,7 @@ grammar foo_grammar {
 
 @abstract class BaseExample : FooNode {
     @abstract @parse_field fld_1: Name
-    @abstract @parse_field fld_2: FooNode
+    @abstract @parse_field @nullable fld_2: FooNode
 
     @export @abstract fun id_bool(id: Bool): Bool
 }

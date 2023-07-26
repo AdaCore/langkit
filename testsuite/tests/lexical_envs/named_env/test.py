@@ -22,7 +22,7 @@ class FooNode(ASTNode):
 @has_abstract_list
 class Example(FooNode):
     name = Field(type=T.Id)
-    dest_scope = Field(type=T.Id)
+    dest_scope = Field(type=T.Id, nullable=True)
     content = Field(type=T.Id.list)
 
     @langkit_property()

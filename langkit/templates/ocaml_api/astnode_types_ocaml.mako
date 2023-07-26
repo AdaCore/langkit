@@ -7,7 +7,7 @@
          % if len(precise_types) == 1:
     ${ocaml_api.field_name(field)}: ${ocaml_api.type_public_name(
                                          precise_types[0])}
-            % if field.is_optional:
+            % if field.nullable:
     option
             % endif
     Lazy.t;
@@ -18,7 +18,7 @@
           of ${ocaml_api.fields_name(tpe)}
             % endfor
     ]
-            % if field.is_optional:
+            % if field.nullable:
     option
             % endif
     Lazy.t;
@@ -93,7 +93,7 @@
       in
       let node =
          ${ocaml_api.wrap_value('field_c_value', field.public_type, 'context',
-             check_for_null=field.is_optional)}
+             check_for_null=field.nullable)}
       in
          <%
             precise_types = ocaml_api.get_field_type(field)
@@ -103,11 +103,11 @@
       node
          % else:
       match node with
-            <% some_or_nothing = 'Some ' if field.is_optional else '' %>
+            <% some_or_nothing = 'Some ' if field.nullable else '' %>
             % for tpe in precise_types:
       | ${some_or_nothing}${ocaml_api.polymorphic_variant_name(tpe)} _
             %  endfor
-      ${'| None ' if field.is_optional else ''}as e -> e
+      ${'| None ' if field.nullable else ''}as e -> e
       | _ -> assert false
          % endif
     in

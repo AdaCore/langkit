@@ -12,12 +12,15 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-print('== prop ==')
-u.root.p_prop.dump()
-print('')
-
-print('== prop2 ==')
-u.root.p_prop2.dump()
-print('')
+for prop in ("prop", "prop2"):
+    for with_null in (False, True):
+        print(f"== {prop}({with_null}) ==")
+        try:
+            node = getattr(u.root, f"p_{prop}")(with_null)
+        except libfoolang.PropertyError as exc:
+            print(f"PropertyError: {exc}")
+        else:
+            node.dump()
+        print("")
 
 print('main.py: Done.')

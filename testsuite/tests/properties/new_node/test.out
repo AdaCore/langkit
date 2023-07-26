@@ -1,5 +1,5 @@
 main.py: Running...
-== prop ==
+== prop(False) ==
 SynthNode main.txt:1:1-1:15
 |f_name:
 |  Name main.txt:1:2-1:6: main
@@ -12,7 +12,10 @@ SynthNode main.txt:1:1-1:15
 |  |item_2:
 |  |  Literal main.txt:1:13-1:14: 3
 
-== prop2 ==
+== prop(True) ==
+PropertyError: main.txt:1:1-1:15: SynthNode.items cannot be null in synthetic nodes; add a nullable annotation to this field to allow it
+
+== prop2(False) ==
 SynthNode2 main.txt:1:1-1:15
 |f_name:
 |  Name main.txt:1:2-1:6: main
@@ -24,6 +27,12 @@ SynthNode2 main.txt:1:1-1:15
 |  |  Literal main.txt:1:10-1:11: 2
 |  |item_2:
 |  |  Literal main.txt:1:13-1:14: 3
+
+== prop2(True) ==
+SynthNode2 main.txt:1:1-1:15
+|f_name:
+|  Name main.txt:1:2-1:6: main
+|f_items: None
 
 main.py: Done.
 Done

@@ -263,6 +263,9 @@ class New(AbstractExpression):
             self.assocs = {field_or_lookup(field): expr
                            for field, expr in assocs.items()}
 
+            for f in self.assocs:
+                f.set_synthetized()
+
             super().__init__(
                 result_var_name or 'New_Struct',
                 abstract_expr=abstract_expr
