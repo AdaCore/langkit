@@ -522,6 +522,14 @@
             int tab_stop
         );
 
+        ${java_doc("langkit.release_uninitialized_context", 8)}
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void
+        ${nat("release_uninitialized_analysis_context")}(
+            AnalysisContextNative context
+        );
+
         /** Increase the reference counter of a context */
         @CompilerDirectives.TruffleBoundary
         @CFunction
