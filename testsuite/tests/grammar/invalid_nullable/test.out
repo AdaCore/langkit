@@ -1,0 +1,19 @@
+== test.lkt ==
+test.lkt:36:28: error: Only root fields can be annotated with @nullable
+36 |     @nullable @parse_field f3: FooNode
+   |                            ^^^^^^^^^^^
+
+test.lkt:6:9: error: This parsing rule can assign a null value to ParentNode.f1: a @nullable annotation is required for that field
+6 |         null(Example) # f1
+  |         ^^^^^^^^^^^^^
+
+test.lkt:25:28: warning: Spurious @nullable annotation: this field is never null in the absence of parsing error, and is never initialized by node synthetization, so it can never be null in practice.
+25 |     @nullable @parse_field f2: FooNode
+   |                            ^^^^^^^^^^^
+
+test.lkt:30:28: error: @nullable annotation required because ChildNode.f4 overrides this field
+30 |     @abstract @parse_field f4: FooNode
+   |                            ^^^^^^^^^^^
+
+
+Done
