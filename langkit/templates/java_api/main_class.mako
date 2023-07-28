@@ -321,6 +321,20 @@ public final class ${ctx.lib_name.camel} {
     }
 
     /**
+     * Convert a C Langkit exception to the LangkitException class.
+
+     * @param
+     */
+    private static LangkitException wrapException(
+        final LangkitExceptionNative exc
+    ) {
+        return new LangkitException(
+            exc.get_kind(),
+            toJString(exc.get_information())
+        );
+    }
+
+    /**
      * Check the last exception raised by langkit and throw it.
      *
      * @throws The last langkit exception if there is one.
@@ -331,10 +345,7 @@ public final class ${ctx.lib_name.camel} {
             final LangkitExceptionNative exceptionNative =
                 NI_LIB.${nat("get_last_exception")}();
             if(exceptionNative.isNonNull()) {
-                throw new LangkitException(
-                    exceptionNative.get_kind(),
-                    toJString(exceptionNative.get_information())
-                );
+                throw wrapException(exceptionNative);
             }
         } else {
             final LangkitException lastException =
