@@ -2798,7 +2798,8 @@ public final class ${ctx.lib_name.camel} {
 
         /** Singleton that represents the none analysis context. */
         public static final AnalysisContext NONE = new AnalysisContext(
-            PointerWrapper.nullPointer()
+            PointerWrapper.nullPointer(),
+            null
         );
 
         /** This map contains all created analysis contexts. */
@@ -2811,7 +2812,7 @@ public final class ${ctx.lib_name.camel} {
         private final PointerWrapper reference;
 
         /** The event handler associated with the context. */
-        private final EventHandler eventHandler;
+        private EventHandler eventHandler;
 
         // ----- Constructors -----
 
@@ -2819,12 +2820,14 @@ public final class ${ctx.lib_name.camel} {
          * Create a new analysis unit from its reference.
          *
          * @param reference The native analysis context.
+         * @param eventHandler The associated event handler.
          */
         private AnalysisContext(
-            final PointerWrapper reference
+            final PointerWrapper reference,
+            final EventHandler eventHandler
         ) {
             this.reference = reference;
-            this.eventHandler = null;
+            this.eventHandler = eventHandler;
 
             increaseRefCounter(this);
         }
@@ -2957,18 +2960,41 @@ public final class ${ctx.lib_name.camel} {
          * Get the analysis context object from its reference.
          *
          * @param reference The native reference to the analysis context.
+         * @param eventHandler The corresponding event handler.
+         * @param setEventHandler Whether to set the result's eventHandler
+         * field to eventHandler when there is already a cached
+         * AnalysisContext.
+         * @return The Java analysis unit associated with the reference.
+         */
+        static AnalysisContext fromReference(
+            final PointerWrapper reference,
+            final EventHandler eventHandler,
+            final boolean setEventHandler
+        ) {
+            if(contextCache.containsKey(reference)) {
+                final AnalysisContext res = contextCache.get(reference);
+                increaseRefCounter(res);
+                if(setEventHandler)
+                    res.eventHandler = eventHandler;
+                return res;
+            } else {
+                final AnalysisContext result =
+                    new AnalysisContext(reference, eventHandler);
+                contextCache.put(reference, result);
+                return result;
+            }
+        }
+
+        /**
+         * Get the analysis context object from its reference.
+         *
+         * @param reference The native reference to the analysis context.
          * @return The Java analysis unit associated with the reference.
          */
         static AnalysisContext fromReference(
             final PointerWrapper reference
         ) {
-            if(contextCache.containsKey(reference)) {
-                final AnalysisContext res = contextCache.get(reference);
-                increaseRefCounter(res);
-                return res;
-            } else {
-                return new AnalysisContext(reference);
-            }
+            return fromReference(reference, null, false);
         }
 
         // ----- Graal C API methods -----
