@@ -9,6 +9,10 @@ Expected '(', got Identifier at <1:5-1:15>
 Unit for the file foo.txt
 ---------------------
 
+--- Unit provider ---
+pkg/body resolved to: pkg-body.txt
+---------------------
+
 --- Tokens ---
 --- Token info without trivia
   unit_text =

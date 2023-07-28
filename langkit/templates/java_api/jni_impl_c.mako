@@ -2321,6 +2321,37 @@ ${api.jni_func_sig("get_analysis_unit_from_buffer", "jobject")}(
     return AnalysisUnit_wrap(env, res);
 }
 
+% if ctx.default_unit_provider:
+// Create an analysis unit from the unit provider.
+${api.jni_func_sig("get_analysis_unit_from_provider", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject context,
+    jobject name,
+    jint kind,
+    jstring charset,
+    jboolean reparse
+) {
+    ${text_type} name_c = Text_unwrap (env, name);
+    const char *charset_c
+      = (charset == NULL) ? NULL : to_c_string (env, charset);
+
+    ${analysis_unit_type} result = ${nat("get_analysis_unit_from_provider")}(
+        AnalysisContext_unwrap(env, context),
+        &name_c,
+        kind,
+        charset_c,
+        reparse
+    );
+
+    if (charset != NULL)
+      release_c_string (env, charset, charset_c);
+    ${nat("destroy_text")} (&name_c);
+
+    return AnalysisUnit_wrap(env, result);
+}
+% endif
+
 // Get the root entity from an analysis unit
 ${api.jni_func_sig("unit_root", "jobject")}(
     JNIEnv *env,
