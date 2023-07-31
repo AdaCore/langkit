@@ -161,19 +161,6 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
-   procedure ${capi.get_name("release_uninitialized_analysis_context")}
-     (Context : ${analysis_context_type})
-   is
-      Context_Var : Internal_Context := Context;
-   begin
-      Clear_Last_Exception;
-
-      Release_Uninitialized_Context (Context_Var);
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-   end;
-
    function ${capi.get_name('context_incref')}
      (Context : ${analysis_context_type}) return ${analysis_context_type} is
    begin

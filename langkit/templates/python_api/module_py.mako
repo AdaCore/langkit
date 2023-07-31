@@ -1995,10 +1995,6 @@ _initialize_analysis_context = _import_func(
      ctypes.c_int],           # tab_stop
     None,
 )
-_release_uninitialized_analysis_context = _import_func(
-    '${capi.get_name("release_uninitialized_analysis_context")}',
-    [AnalysisContext._c_type], None,
-)
 _context_incref = _import_func(
     '${capi.get_name("context_incref")}',
     [AnalysisContext._c_type], AnalysisContext._c_type

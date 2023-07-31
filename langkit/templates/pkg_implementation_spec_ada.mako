@@ -1528,7 +1528,20 @@ private package ${ada_lib_name}.Implementation is
 
       --  End of ABI area
 
-      Ref_Count : Natural;
+      Initialized : Boolean;
+      Ref_Count   : Natural;
+      --  Whether this context is fully initialized, and when it is allocated,
+      --  its number of ownership shares. Allocated contexts have 3 possible
+      --  states:
+      --
+      --  * Acquired (not yet initialized, Ref_Count => 1, Initialized =>
+      --    False): it can be either initialized or released.
+      --
+      --  * Initialized (Ref_Count > 0, Initialized => True): it can only be
+      --    destroyed and released.
+      --
+      --  * Released (Ref_Count = 0, Initialized => False): it can only be
+      --    acquired again.
 
       Units : Units_Maps.Map;
       --  Collection of analysis units loaded in this context
@@ -1813,9 +1826,6 @@ private package ${ada_lib_name}.Implementation is
    --  when callbacks that happen during context initialization (for instance
    --  "unit parsed" events).
 
-   procedure Release_Uninitialized_Context (Context : in out Internal_Context);
-   ${ada_doc('langkit.release_uninitialized_context', 3)}
-
    function Create_Unit
      (Context             : Internal_Context;
       Normalized_Filename : GNATCOLL.VFS.Virtual_File;
@@ -1931,7 +1941,7 @@ private package ${ada_lib_name}.Implementation is
    --  Decrement the ref-count of Context, destroying it if the ref-count
    --  reaches zero. This does nothing if Context is null.
 
-   procedure Destroy (Context : in out Internal_Context)
+   procedure Destroy (Context : Internal_Context)
       with Pre => not Has_Rewriting_Handle (Context);
    --  Free all resources allocated for Context
 

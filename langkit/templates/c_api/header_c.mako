@@ -282,11 +282,6 @@ ${capi.get_name("initialize_analysis_context")}(
    int tab_stop
 );
 
-${c_doc('langkit.release_uninitialized_context')}
-void ${capi.get_name("release_uninitialized_analysis_context")}(
-   ${analysis_context_type} context
-);
-
 ${c_doc('langkit.context_incref')}
 extern ${analysis_context_type}
 ${capi.get_name("context_incref")}(${analysis_context_type} context);
