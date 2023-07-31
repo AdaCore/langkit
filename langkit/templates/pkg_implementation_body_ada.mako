@@ -484,6 +484,16 @@ package body ${ada_lib_name}.Implementation is
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
    end Initialize_Context;
 
+   -----------------------------------
+   -- Release_Uninitialized_Context --
+   -----------------------------------
+
+   procedure Release_Uninitialized_Context (Context : in out Internal_Context)
+   is
+   begin
+      Context_Pool.Release (Context);
+   end Release_Uninitialized_Context;
+
    -----------------
    -- Create_Unit --
    -----------------

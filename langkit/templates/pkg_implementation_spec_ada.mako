@@ -1813,6 +1813,9 @@ private package ${ada_lib_name}.Implementation is
    --  when callbacks that happen during context initialization (for instance
    --  "unit parsed" events).
 
+   procedure Release_Uninitialized_Context (Context : in out Internal_Context);
+   ${ada_doc('langkit.release_uninitialized_context', 3)}
+
    function Create_Unit
      (Context             : Internal_Context;
       Normalized_Filename : GNATCOLL.VFS.Virtual_File;

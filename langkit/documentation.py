@@ -346,6 +346,17 @@ base_langkit_docs = {
         ready when callbacks that happen during context initialization (for
         instance "unit parsed" events).
     """,
+    'langkit.release_uninitialized_context': """
+        Release an analysis context that was allocated, but that was not
+        initialized yet.
+
+        In order to keep the implementation of language bindings reasonably
+        simple, we need to do arbitrary computations betewen the time we
+        allocate an analysis context and the time we initialize it. These
+        arbitrary computations may fail: in this specific case, we cannot call
+        ``Destroy`` on the analysis context because it is not initialized yet:
+        this is the only time when this procedure must be called.
+    """,
 
     'langkit.context_incref': """
         Increase the reference count to an analysis context.
