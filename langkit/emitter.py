@@ -377,14 +377,33 @@ class Emitter:
             os.path.dirname(os.path.realpath(__file__)), "support"
         )
 
-        # We expect AdaSAT checkout to be at <langkit_root>/langkit/adasat
-        adasat_dir = os.path.join(
+        default_adasat_dir = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "adasat", "src"
         )
+
+        # We expect AdaSAT checkout to be at <langkit_root>/langkit/adasat
+        # If it's not found there, we look for "adasat.gpr" in the
+        # GPR_PROJECT_PATH environment variable.
+        if os.path.exists(default_adasat_dir):
+            adasat_dir = default_adasat_dir
+        else:
+            gpr_paths_var = os.environ.get("GPR_PROJECT_PATH")
+            gpr_paths = (
+                gpr_paths_var.split(os.path.pathsep)
+                if gpr_paths_var else []
+            )
+            adasat_dir = next(
+                (os.path.join(path, "src")
+                 for path in gpr_paths
+                 if os.path.exists(os.path.join(path, "adasat.gpr"))),
+                None
+            )
+
         check_source_language(
-            os.path.exists(adasat_dir),
-            "AdaSAT must be checked out at '<langkit_root>/langkit/adasat'"
-            " in order to build a standalone library.",
+            adasat_dir is not None,
+            "AdaSAT must be checked out at '<langkit_root>/langkit/adasat' or"
+            " its project file be reachable from the 'GPR_PROJECT_PATH'"
+            " environment variable in order to build a standalone library.",
             severity=Severity.error,
             ok_for_codegen=True
         )
