@@ -3161,6 +3161,59 @@ public final class ${ctx.lib_name.camel} {
 
         }
 
+        % if ctx.default_unit_provider:
+        /**
+         * Get an analysis unit from the given unit name and unit kind in the
+         * current context with additional parameters.
+         *
+         * @param name Name of the unit.
+         * @param kind Kind of the unit.
+         * @param charset The charset of the buffer.
+         * @param rule The rule to parse the buffer with.
+         * @return The new analysis unit.
+         */
+        public AnalysisUnit getUnitFromProvider(
+            final Text name,
+            final AnalysisUnitKind kind,
+            final String charset,
+            final boolean reparse
+        ) {
+            if(ImageInfo.inImageCode()) {
+                TextNative nameNative = StackValue.get(TextNative.class);
+                name.unwrap(nameNative);
+                final CCharPointer charsetNative =
+                    charset == null ?
+                    WordFactory.nullPointer() :
+                    toCString(charset);
+                final AnalysisUnitNative resNative =
+                    NI_LIB.${nat("get_analysis_unit_from_provider")}(
+                    this.reference.ni(),
+                    nameNative,
+                    kind.toC(),
+                    charsetNative,
+                    (reparse ? 1 : 0)
+                );
+                if(charset != null) UnmanagedMemory.free(charsetNative);
+                return AnalysisUnit.wrap(resNative);
+            } else {
+                return JNI_LIB.${nat("get_analysis_unit_from_provider")}(
+                    this,
+                    name,
+                    kind.toC(),
+                    charset,
+                    reparse
+                );
+            }
+        }
+
+        public AnalysisUnit getUnitFromProvider(
+            final Text name,
+            final AnalysisUnitKind kind
+        ) {
+            return this.getUnitFromProvider(name, kind, "", false);
+        }
+        % endif
+
         /**
          * Increase the reference counter of the given context.
          *

@@ -571,6 +571,20 @@
             int rule
         );
 
+        % if ctx.default_unit_provider:
+        /** Get a unit from the unit provider. */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native AnalysisUnitNative
+        ${nat("get_analysis_unit_from_provider")}(
+            AnalysisContextNative context,
+            TextNative name,
+            int kind,
+            CCharPointer charset,
+            int reparse
+        );
+        % endif
+
         /** Get the root of an analysis unit */
         @CompilerDirectives.TruffleBoundary
         @CFunction

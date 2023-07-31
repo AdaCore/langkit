@@ -72,8 +72,9 @@ unparse_all_script = 'to:{},lexer,grammar,nodes'.format(unparse_destination)
 
 def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     warning_set=default_warning_set,
-                    symbol_canonicalizer=None, show_property_logging=False,
-                    types_from_lkt=False, lkt_semantic_checks=False,
+                    default_unit_provider=None, symbol_canonicalizer=None,
+                    show_property_logging=False, types_from_lkt=False,
+                    lkt_semantic_checks=False,
                     case_insensitive: bool = False,
                     version: Optional[str] = None,
                     build_date: Optional[str] = None,
@@ -93,6 +94,9 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
         language spec.
 
     :param WarningSet warning_set: Set of warnings to emit.
+
+    :param langkit.compile_context.LibraryEntity|None default_unit_provider:
+        Default unit provider to use for this context, if any.
 
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canonicalizer to use for this context, if any.
@@ -118,6 +122,7 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     # Try to emit code
     ctx = CompileCtx(lang_name='Foo', short_name='foo', lexer=lexer,
                      grammar=grammar,
+                     default_unit_provider=default_unit_provider,
                      symbol_canonicalizer=symbol_canonicalizer,
                      show_property_logging=show_property_logging,
                      lkt_file=lkt_file,
@@ -208,8 +213,9 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                   lexer=None, lkt_file=None, types_from_lkt=False,
                   lkt_semantic_checks=False, ocaml_main=None, java_main=None,
                   ni_main=None, warning_set=default_warning_set,
-                  generate_unparser=False, symbol_canonicalizer=None,
-                  show_property_logging=False, unparse_script=unparse_script,
+                  generate_unparser=False, default_unit_provider=None,
+                  symbol_canonicalizer=None, show_property_logging=False,
+                  unparse_script=unparse_script,
                   case_insensitive: bool = False,
                   version: str | None = None,
                   build_date: str | None = None,
@@ -250,6 +256,9 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
     :param WarningSet warning_set: Set of warnings to emit.
 
     :param bool generate_unparser: Whether to generate unparser.
+
+    :param langkit.compile_context.LibraryEntity|None default_unit_provider:
+        Default unit provider to use for this context, if any.
 
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canonicalizer to use for this context, if any.
@@ -296,6 +305,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
 
     def manage_run(generate_only, types_from_lkt, additional_args):
         ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
+                              default_unit_provider=default_unit_provider,
                               symbol_canonicalizer=symbol_canonicalizer,
                               show_property_logging=show_property_logging,
                               types_from_lkt=types_from_lkt,

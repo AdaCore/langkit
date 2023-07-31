@@ -175,6 +175,19 @@
             int grammarRule
         );
 
+        % if ctx.default_unit_provider:
+        /** Get the analysis unit from the unit provider. */
+        @CompilerDirectives.TruffleBoundary
+        public static native AnalysisUnit
+        ${nat("get_analysis_unit_from_provider")}(
+            AnalysisContext context,
+            Text name,
+            int kind,
+            String charset,
+            boolean reparse
+        );
+        % endif
+
         /** Get the root of the analysis unit */
         @CompilerDirectives.TruffleBoundary
         public static native Entity ${nat("unit_root")}(

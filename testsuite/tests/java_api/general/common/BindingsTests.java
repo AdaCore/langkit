@@ -125,6 +125,25 @@ public final class BindingsTests {
     }
 
     /**
+     * Test getting a unit from the unit provider.
+     */
+    private static void testUnitProvider() {
+       header("Unit provider");
+
+       AnalysisContext ctx = AnalysisContext.create();
+       AnalysisUnit unit = ctx.getUnitFromProvider(
+           Text.create("pkg"),
+           AnalysisUnitKind.UNIT_BODY
+       );
+       System.out.println(
+           "pkg/body resolved to: "
+           + new File(unit.getFileName()).getName()
+       );
+
+       footer("Unit provider");
+    }
+
+    /**
      * Test the token manipulation
      */
     private static void testTokens() {
@@ -531,6 +550,7 @@ public final class BindingsTests {
         System.out.println("===== Start the Java tests =====\n");
         testDiagnostics();
         testUnitFileName();
+        testUnitProvider();
         testTokens();
         testNodes();
         testParent();
