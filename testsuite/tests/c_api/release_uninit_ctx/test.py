@@ -1,5 +1,5 @@
 """
-Check that the file reader APIs work as expected.
+Check that releasing an uninitialized context works as expected.
 """
 
 from langkit.dsl import ASTNode

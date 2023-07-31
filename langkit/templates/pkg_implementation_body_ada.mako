@@ -272,6 +272,9 @@ package body ${ada_lib_name}.Implementation is
 
          GNAT.Task_Lock.Unlock;
 
+         Context.Initialized := False;
+         Context.Ref_Count := 1;
+
       exception
          when others =>
             GNAT.Task_Lock.Unlock;
@@ -410,7 +413,6 @@ package body ${ada_lib_name}.Implementation is
    begin
       return Context : Internal_Context do
          Context_Pool.Acquire (Context);
-         Context.Ref_Count := 1;
       end return;
    end Allocate_Context;
 
@@ -432,6 +434,7 @@ package body ${ada_lib_name}.Implementation is
       Symbols        : constant Precomputed_Symbol_Table
         := Create_Symbol_Table;
    begin
+      Context.Initialized := True;
       Context.Symbols := Symbol_Table (Symbols);
       Context.Charset := To_Unbounded_String (Actual_Charset);
       Context.Tab_Stop := Tab_Stop;
@@ -483,16 +486,6 @@ package body ${ada_lib_name}.Implementation is
 
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
    end Initialize_Context;
-
-   -----------------------------------
-   -- Release_Uninitialized_Context --
-   -----------------------------------
-
-   procedure Release_Uninitialized_Context (Context : in out Internal_Context)
-   is
-   begin
-      Context_Pool.Release (Context);
-   end Release_Uninitialized_Context;
 
    -----------------
    -- Create_Unit --
@@ -908,7 +901,13 @@ package body ${ada_lib_name}.Implementation is
       if Context /= null then
          Context.Ref_Count := Context.Ref_Count - 1;
          if Context.Ref_Count = 0 then
-            Destroy (Context);
+
+            --  If this context was not completely initialized, just release
+            --  the allocated object. Do the full destruction otherwise.
+            if Context.Initialized then
+               Destroy (Context);
+            end if;
+            Context_Pool.Release (Context);
          end if;
       end if;
    end Dec_Ref;
@@ -917,7 +916,7 @@ package body ${ada_lib_name}.Implementation is
    -- Destroy --
    -------------
 
-   procedure Destroy (Context : in out Internal_Context) is
+   procedure Destroy (Context : Internal_Context) is
    begin
       --  Destroy all named environment data structures
       for Desc of Context.Named_Envs loop
@@ -970,7 +969,6 @@ package body ${ada_lib_name}.Implementation is
       Dec_Ref (Context.File_Reader);
       Dec_Ref (Context.Unit_Provider);
       Dec_Ref (Context.Event_Handler);
-      Context_Pool.Release (Context);
    end Destroy;
 
    -------------
