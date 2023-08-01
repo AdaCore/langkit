@@ -335,24 +335,33 @@ public final class ${ctx.lib_name.camel} {
     }
 
     /**
-     * Check the last exception raised by langkit and throw it.
-     *
-     * @throws The last langkit exception if there is one.
-     */
-    private static void checkException() throws LangkitException {
+      * Return the exception raised by the last C API call, or null if the last
+      * call was successful.
+      */
+    private static LangkitException getLastException() {
+        LangkitException result = null;
 
         if(ImageInfo.inImageCode()) {
             final LangkitExceptionNative exceptionNative =
                 NI_LIB.${nat("get_last_exception")}();
             if(exceptionNative.isNonNull()) {
-                throw wrapException(exceptionNative);
+                result = wrapException(exceptionNative);
             }
         } else {
-            final LangkitException lastException =
-                JNI_LIB.${nat("get_last_exception")}();
-            if(lastException != null) throw lastException;
+            result = JNI_LIB.${nat("get_last_exception")}();
         }
+        return result;
+    }
 
+    /**
+     * Check the last exception raised by langkit and throw it.
+     *
+     * @throws The last langkit exception if there is one.
+     */
+    private static void checkException() throws LangkitException {
+        LangkitException exc = getLastException();
+        if(exc != null)
+            throw exc;
     }
 
     // ==========
