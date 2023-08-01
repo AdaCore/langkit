@@ -1,7 +1,16 @@
+<%
+    lib_prefix = ctx.ada_api_settings.lib_name.upper() + "_"
+%>
+
 MKFILE := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(dir $(MKFILE))
 
 CC=gcc
+
+# Allow Makefile users to set the build mode through the
+# ${lib_prefix}BUILD_MODE environment variable.
+${lib_prefix}BUILD_MODE?=debug
+BUILD_MODE=$(${lib_prefix}BUILD_MODE)
 
 ifeq ($(OS), Windows_NT)
 ${'\t'}SYS := $(shell $(CC) -dumpmachine)
@@ -29,8 +38,21 @@ endif
 
 PATHSEP=$(strip $(PATHSEP2))
 
-C_OPT=-fPIC -O3 -Wall -Werror -I$(JAVA_HOME)$(PATHSEP)include \
--I$(JNI_INCLUDE)
+COMMON_C_OPTS=\
+  -fPIC \
+  -g \
+  -Wall \
+  -I$(JAVA_HOME)$(PATHSEP)include \
+  -I$(JNI_INCLUDE)
+ifeq ($(BUILD_MODE), debug)
+BUILD_MODE_OPTS=-O0 -Werror
+else ifeq ($(BUILD_MODE), prod)
+BUILD_MODE_OPTS=-Ofast
+else ifeq ($(BUILD_MODE), prof)
+BUILD_MODE_OPTS=-O3
+endif
+
+C_OPT=$(COMMON_C_OPTS) $(BUILD_MODE_OPTS)
 
 LD_OPT=-shared -fPIC \
 -L$(CUR_DIR)..$(PATHSEP)lib$(PATHSEP)relocatable$(PATHSEP)prod \

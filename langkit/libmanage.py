@@ -1169,6 +1169,12 @@ class ManageScript:
         # explicitly give access to the generated C header.
         env = self.derived_env(direct_c_header=True)
 
+        # Pass the build mode to the Makefile. We do not support building Java
+        # bindings with multiple modes in parallel, so just pick the first one.
+        env[f"{self.context.lib_name.upper}_BUILD_MODE"] = (
+            args.build_modes[0].value
+        )
+
         # Call Maven on the Java bindings
         argv = [
             maven_exec,
