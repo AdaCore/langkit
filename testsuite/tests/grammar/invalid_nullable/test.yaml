@@ -1,0 +1,4 @@
+driver: lkt_compile
+description: |
+    Check that invalid or sucpicious uses of @nullable or missing uses of it
+    are properly reported.

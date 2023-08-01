@@ -1,0 +1,39 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ChildNode(
+        null(Example) # f1
+        example       # f2
+        example       # f3
+        # ...           f4 is null
+    )
+    example <- Example(@example)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example : FooNode implements TokenNode {
+}
+
+@abstract class ParentNode : FooNode {
+    # Error: f3 is nullable because of the grammar
+    @parse_field f1: FooNode
+
+    # Warning: this does not need to be nullable
+    @nullable @parse_field f2: FooNode
+
+    @abstract @parse_field f3: FooNode
+
+    # Error: ParentNode.f2 is nullable because ChildNode.f2 is null
+    @abstract @parse_field f4: FooNode
+
+}
+
+class ChildNode : ParentNode {
+    # Error: only root fields can have "@nullable"
+    @nullable @parse_field f3: FooNode
+
+    @null_field @parse_field f4: FooNode
+}
