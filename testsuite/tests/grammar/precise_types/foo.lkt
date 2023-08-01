@@ -1,7 +1,8 @@
 import lexer_example
 
 grammar foo_grammar {
-    @main_rule main_rule <- Holder(
+    @main_rule main_rule <- or(holder | for_synth)
+    holder <- Holder(
         or(a | b)
         list+(or(a | b))
         or(list+(a) | list+(b))
@@ -12,4 +13,5 @@ grammar foo_grammar {
     )
     a <- A(@identifier("a"))
     b <- B(@identifier("b"))
+    for_synth <- ForSynthChild2(a)
 }
