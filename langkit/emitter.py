@@ -15,7 +15,7 @@ from funcy import keep
 from langkit.caching import Cache
 from langkit.compile_context import AdaSourceKind, CompileCtx, get_context
 from langkit.coverage import InstrumentationMetadata
-from langkit.diagnostics import Severity, check_source_language
+from langkit.diagnostics import Severity, check_source_language, error
 from langkit.generic_api import GenericAPI
 from langkit.lexer.regexp import DFACodeGenHolder
 import langkit.names as names
@@ -384,6 +384,7 @@ class Emitter:
         # We expect AdaSAT checkout to be at <langkit_root>/langkit/adasat
         # If it's not found there, we look for "adasat.gpr" in the
         # GPR_PROJECT_PATH environment variable.
+        adasat_dir: Optional[str]
         if os.path.exists(default_adasat_dir):
             adasat_dir = default_adasat_dir
         else:
@@ -399,14 +400,14 @@ class Emitter:
                 None
             )
 
-        check_source_language(
-            adasat_dir is not None,
-            "AdaSAT must be checked out at '<langkit_root>/langkit/adasat' or"
-            " its project file be reachable from the 'GPR_PROJECT_PATH'"
-            " environment variable in order to build a standalone library.",
-            severity=Severity.error,
-            ok_for_codegen=True
-        )
+        if adasat_dir is None:
+            error(
+                "AdaSAT must be checked out at '<langkit_root>/langkit/adasat'"
+                " or its project file be reachable from the 'GPR_PROJECT_PATH'"
+                " environment variable in order to build a standalone"
+                " library.",
+                ok_for_codegen=True
+            )
 
         self.merge_library_sources(support_dir, self.standalone_support_name)
         self.merge_library_sources(adasat_dir, self.standalone_adasat_name)

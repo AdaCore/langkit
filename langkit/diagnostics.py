@@ -261,11 +261,11 @@ def get_parsable_location() -> str:
         return ""
 
 
-def error(message: str) -> NoReturn:
+def error(message: str, ok_for_codegen: bool = False) -> NoReturn:
     """
     Shortcut around ``check_source_language``, for fatal errors.
     """
-    check_source_language(False, message)
+    check_source_language(False, message, ok_for_codegen=ok_for_codegen)
     # NOTE: The following raise is useless, but is there because mypy is not
     # clever enough to know  that the previous call will never return.
     raise AssertionError("should not happen")
