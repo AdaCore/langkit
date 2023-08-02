@@ -37,6 +37,8 @@ When there are no parsing errors, this field is never null.
 == Doc for Holder.a_or_b_or_null ==
 This field can contain one of the following nodes: :typeref:`A`, :typeref:`B`
 
+This field may be null even when there are no parsing errors.
+
 == Doc for Holder.special_a_list ==
 This field contains a list that itself contains one of the following nodes: :typeref:`A`
 
