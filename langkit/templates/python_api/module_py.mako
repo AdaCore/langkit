@@ -834,6 +834,8 @@ class AnalysisContext:
             self._unit_cache = {}
             self._serial_number = serial_number
 
+    ${exts.include_extension(ctx.ext("python_api", "analysis_context_class"))}
+
 
 class AnalysisUnit:
     ${py_doc('langkit.analysis_unit_type', 4)}
