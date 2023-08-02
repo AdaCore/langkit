@@ -3291,6 +3291,10 @@ public final class ${ctx.lib_name.camel} {
 
         }
 
+        ${exts.include_extension(
+            ctx.ext("java_api", "analysis_context_class")
+        )}
+
     }
 
     ${java_doc('langkit.analysis_unit_type', 4)}
