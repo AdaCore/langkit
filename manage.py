@@ -11,7 +11,7 @@ import subprocess
 import sys
 from typing import Callable, Dict, List, Optional
 
-from langkit.packaging import Packager
+from langkit.packaging import NativeLibPackager
 from langkit.utils import (
     LibraryType, add_to_path, format_path, format_setenv, get_cpu_count,
     parse_cmdline_args
@@ -220,7 +220,7 @@ def package_deps(args: Namespace) -> None:
     """
     Bundle all dependencies to complete GNAT Pro.
     """
-    p = Packager.from_args(args)
+    p = NativeLibPackager.from_args(args)
     p.package_deps(getattr(args, "package-dir"))
 
 
@@ -229,7 +229,7 @@ def package_std_dyn(args: Namespace) -> None:
     Bundle all dependencies to create standalone packages.
     """
     pass
-    p = Packager.from_args(args)
+    p = NativeLibPackager.from_args(args)
     pkg_dir = getattr(args, "package-dir")
     p.package_standalone_dyn(pkg_dir)
     p.package_langkit_support_dyn(pkg_dir)
@@ -391,8 +391,8 @@ if __name__ == '__main__':
     package_std_dyn_parser = create_subparser(subparsers, package_std_dyn)
     for p in (package_deps_parser, package_std_dyn_parser):
         p.add_argument("package-dir", help="Destination directory")
-        Packager.add_prefix_options(p)
-        Packager.add_platform_options(p)
+        NativeLibPackager.add_prefix_options(p)
+        NativeLibPackager.add_platform_options(p)
 
     create_subparser(subparsers, make,
                      with_jobs=True,

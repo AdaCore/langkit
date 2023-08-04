@@ -23,7 +23,7 @@ from langkit.diagnostics import (
     DiagnosticError, DiagnosticStyle, Diagnostics, Location, WarningSet,
     check_source_language, diagnostic_context, extract_library_location
 )
-from langkit.packaging import Packager
+from langkit.packaging import WheelPackager
 from langkit.utils import (
     BuildMode, Colors, LibraryType, Log, add_to_path, col, format_setenv,
     get_cpu_count, parse_choice, parse_cmdline_args, parse_list_of_choices,
@@ -235,7 +235,7 @@ class ManageScript:
         self.create_wheel_parser = self.add_subcommand(
             self.do_create_wheel, needs_context=True
         )
-        Packager.add_platform_options(self.create_wheel_parser)
+        WheelPackager.add_platform_options(self.create_wheel_parser)
         self.create_wheel_parser.add_argument(
             '--with-python',
             help='Python intererpter to use in order to build the wheel. If'
@@ -1388,9 +1388,9 @@ class ManageScript:
         """
         Create a standalone Python wheel for the Python bindings.
         """
-        packager = Packager(Packager.args_to_env(args),
-                            args.library_types,
-                            None)
+        packager = WheelPackager(
+            WheelPackager.args_to_env(args), args.library_types
+        )
         packager.create_python_wheel(
             args.tag,
             getattr(args, 'wheel-dir'),
