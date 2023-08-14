@@ -308,9 +308,6 @@
                     this.entity
                 );
 
-                // Check the langkit exceptions
-                checkException();
-
                 // Wrap and return the result
                 return ${api.java_jni_wrap(field.public_type, "res")};
             }
@@ -390,7 +387,8 @@
         api.jni_c_type(field.public_type)
     )
 
-    release_list = []
+    args_release_list = []
+    return_release_list = []
     %>
 
 % if not field.accessor_basename.lower in api.excluded_fields:
@@ -422,7 +420,7 @@ ${func_sig}(
         arg.public_type,
         f"{arg.name.lower}_java",
         f"{arg.name.lower}_native",
-        release_list
+        args_release_list
     )}
     % endfor
 
@@ -442,21 +440,38 @@ ${func_sig}(
         &res_native
     );
 
-    // Return the wrapped value
-    ${return_type} res = ${api.jni_wrap(
-        field.public_type,
-        "res_native",
-        release_list
-    )};
+    /* If successful, wrap the return value.  */
+    const ${exception_type} *exc_c = ${nat("get_last_exception")} ();
+    ${return_type} res;
+    if (exc_c == NULL)
+      {
+        res = ${api.jni_wrap(
+            field.public_type,
+            "res_native",
+            return_release_list
+        )};
 
-    // Release the memory
-    % for to_release in release_list:
+        /* Release resources used to wrap the result.  */
+        % for to_release in return_release_list:
+          ${api.wrapping_type(to_release.public_type, False)}_release(
+              ${to_release.name}
+          );
+        % endfor
+      }
+
+    /* Release resources used to unwrap the arguments.  */
+    % for to_release in args_release_list:
     ${api.wrapping_type(to_release.public_type, False)}_release(
         ${to_release.name}
     );
     % endfor
 
-    // Return the result
+    /* Raise the exception if any, return the result otherwise.  */
+    if (exc_c != NULL)
+      {
+        jthrowable exc_java = LangkitException_wrap (env, *exc_c);
+        (*env)->Throw (env, exc_java);
+      }
     return res;
 }
 % endif
