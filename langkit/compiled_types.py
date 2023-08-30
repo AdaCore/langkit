@@ -2226,11 +2226,12 @@ class Field(BaseField):
             )
             precise_types_added = True
 
-        if not self.nullable:
-            result = append_paragraph(
-                result,
-                "When there are no parsing errors, this field is never null.",
-            )
+        result = append_paragraph(
+            result,
+            "This field may be null even when there are no parsing errors."
+            if self.nullable else
+            "When there are no parsing errors, this field is never null.",
+        )
 
         return result
 
