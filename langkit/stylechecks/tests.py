@@ -528,7 +528,7 @@ testcases = (
 )
 
 
-def reindent_content(tc):
+def reindent_content(tc: Testcase) -> str:
     """
     Return a stripped version of "tc.content".
 
@@ -556,16 +556,22 @@ def reindent_content(tc):
 
 
 @pytest.mark.parametrize("tc", testcases)
-def test_all(tc: Testcase):
+def test_all(tc: Testcase) -> None:
     # Pre-process content
     report = Report(enable_colors=False)
     content = reindent_content(tc) if tc.reindent_content else tc.content
     check_file_content(report, tc.filename, content)
-    records = [(tc.filename, ) + rec for rec in tc.records]
+    records = [
+        Report.Record(tc.filename, line, col, msg)
+        for line ,col, msg in tc.records
+    ]
 
-    def fmt_records(records):
+    def fmt_records(records: list[Report.Record]) -> str:
         return (
-            '\n'.join('  {}:{}:{}: {}'.format(*rec) for rec in records)
+            '\n'.join(
+                f"  {r.filename}:{r.line}:{r.col}: {r.message}"
+                for r in records
+            )
             if records else
             '  <no report>'
         )
@@ -584,7 +590,7 @@ def test_all(tc: Testcase):
     )
 
 
-def test_report_output():
+def test_report_output() -> None:
     """
     Just to cover output-related code, this trivial feature itself is not
     tested otherwise.
@@ -592,5 +598,6 @@ def test_report_output():
     with open(os.devnull, 'w') as f:
         for enable_colors in (False, True):
             r = Report(enable_colors, f)
+            r.set_context("foo.txt", 1)
             r.add('Foobar')
             r.output()

@@ -13,11 +13,12 @@ from __future__ import annotations
 
 import argparse
 import ast
+import dataclasses
 import os
 import os.path
 import re
 import sys
-from typing import Pattern
+from typing import Any, IO, Iterator, Pattern
 
 
 TERM_CODE_RE = re.compile('(\x1b\\[[^m]*m)')
@@ -31,12 +32,12 @@ punctuation_re = re.compile(' [!?:;]')
 accepted_chars = [chr(c) for c in range(0x20, 0x80)]
 
 
-def colored(msg, color):
+def colored(msg: str, color: str) -> str:
     """Return a string that displays "msg" in "color" inside a terminal."""
     return '{}{}{}'.format(color, msg, RESET)
 
 
-def strip_colors(msg):
+def strip_colors(msg: str) -> str:
     """Return "msg" with all the terminal control codes stripped."""
     while True:
         m = TERM_CODE_RE.search(msg)
@@ -48,71 +49,87 @@ def strip_colors(msg):
 
 
 class Report:
-
     """Container for diagnostic messages."""
 
-    def __init__(self, enable_colors=False, file=None):
+    @dataclasses.dataclass(frozen=True, order=True)
+    class Record:
+        filename: str
+        line: int
+        col: int
+        message: str
+
+    def __init__(
+        self,
+        enable_colors: bool = False,
+        file: IO[str] | None = None,
+    ):
         """Create a report.
 
-        :param bool enable_colors: Whether diagnostics should be printed with
+        :param enable_colors: Whether diagnostics should be printed with
             colors.
-        :param file|None file: File in which the "output" method should write
-            the report. Standard output if None.
+        :param file: File in which the "output" method should write the report.
+            Standard output if None.
         """
         self.file = file or sys.stdout
         self.enable_colors = enable_colors
 
-        self.filename = None
-        self.lineno = None
+        self.filename: str | None = None
+        self.lineno: int | None = None
 
-        self.records = []
+        self.records: list[Report.Record] = []
 
     @property
-    def context(self):
+    def context(self) -> tuple[str | None, int | None]:
         """Return the context for the next diagnostics."""
         return (self.filename, self.lineno)
 
-    def set_context(self, filename, lineno):
+    def set_context(self, filename: str | None, lineno: int | None) -> None:
         """Set the context for the next diagnostics."""
         self.filename = filename
         self.lineno = lineno
 
-    def add(self, message, filename=None, line=None, col=None):
+    def add(
+        self,
+        message: str,
+        filename: str | None = None,
+        line: int | None = None,
+        col: int | None = None,
+    ) -> None:
         """Add a diagnostic record."""
-        line = line or self.lineno
-        col = col or 0
-        filename = filename or self.filename
+        lineno = line or self.lineno
+        assert lineno is not None
+        colno = col or 0
+        f = filename or self.filename
+        assert f is not None
         if not self.enable_colors:
             message = strip_colors(message)
-        self.records.append((
-            filename, line, col, message
-        ))
+        self.records.append(self.Record(f, lineno, colno, message))
 
-    def output(self):
+    def output(self) -> None:
         """Write all diagnostics to the output file."""
-        for filename, lineno, colno, message in sorted(set(self.records)):
+        for r in sorted(set(self.records)):
             line = '{}:{}:{} {}\n'.format(
-                colored(filename, RED),
-                colored(lineno, YELLOW),
-                "{}:".format(colored(colno, YELLOW)) if colno else "",
-                message
+                colored(r.filename, RED),
+                colored(str(r.line), YELLOW),
+                "{}:".format(colored(str(r.col), YELLOW)) if r.col else "",
+                r.message
             )
             if not self.enable_colors:
                 line = strip_colors(line)
             self.file.write(line)
 
 
-def iter_lines(content):
+def iter_lines(content: str) -> Iterator[tuple[int, str]]:
     """Return a generator yielding (line no., string) for each line."""
     return enumerate(content.splitlines(), 1)
 
 
-def indent_level(line):
+def indent_level(line: str) -> int:
     """Return the number of prefix spaces in "line"."""
     return len(line) - len(line.lstrip(' '))
 
 
-def preprocess_docstring(text):
+def preprocess_docstring(text: str) -> tuple[str, int]:
     """
     Strip expected whitespaces in a Python docstring.
 
@@ -150,11 +167,11 @@ def preprocess_docstring(text):
 class PackageChecker:
     """Helper to check the order of imported packages."""
 
-    def __init__(self, report):
+    def __init__(self, report: Report):
         self.report = report
-        self.reset()
+        self.last_package: str | None = None
 
-    def add(self, name):
+    def add(self, name: str) -> None:
         if self.last_package and self.last_package.lower() > name.lower():
             self.report.add(
                 'Imported package "{}" must appear after "{}"'.format(
@@ -164,25 +181,35 @@ class PackageChecker:
             )
         self.last_package = name
 
-    def reset(self):
+    def reset(self) -> None:
         self.last_package = None
 
 
-def check_text(report, filename, lang, first_line, text, is_comment):
+def check_text(
+    report: Report,
+    filename: str,
+    lang: LanguageChecker,
+    first_line: int,
+    text: str,
+    is_comment: bool,
+) -> None:
     """
     Check various rules related to comments and docstrings.
 
-    :param Report report: The report in which diagnostics must be emitted.
-    :param str filename: Filename from which the text to check comes.
-    :param LanguageChecker lang: language checker corresponding to "text".
-    :param int first_line: Line number for the first line in "text".
-    :param str text: Text on which the checks must be performed.
-    :param bool is_comment: True if "text" is a comment, False if it's a
-        docstring.
+    :param report: The report in which diagnostics must be emitted.
+    :param filename: Filename from which the text to check comes.
+    :param lang: language checker corresponding to "text".
+    :param first_line: Line number for the first line in "text".
+    :param text: Text on which the checks must be performed.
+    :param is_comment: True if "text" is a comment, False if it's a docstring.
     """
     lines = text.split('\n')
     chars = set(lines[0])
-    if len(chars) == 1 and chars == set(lang.comment_start):
+    if (
+        lang.comment_start is not None
+        and len(chars) == 1
+        and chars == set(lang.comment_start)
+    ):
         # This is a comment box
 
         # Each line must have the same length
@@ -203,24 +230,24 @@ def check_text(report, filename, lang, first_line, text, is_comment):
 
         """Helper for checking state-tracking."""
 
-        def __init__(self):
+        def __init__(self) -> None:
             # If in a "quote" (i.e. an indented chunk of arbitrary content),
             # this is the minium number of columns for the quoted content. None
             # otherwise.
-            self.quote_indent = None
+            self.quote_indent: int | None = None
 
             self.first_block = True
             self.lines_count = 0
-            self.last_line = None
+            self.last_line = ''
             self.last_end = ''
 
             self.is_sphinx = False
             self.is_prompt = False
 
             self.may_be_header = False
-            self.header_context = None
+            self.header_context: tuple[str | None, int | None] = (None, None)
 
-        def end_block(self, is_last):
+        def end_block(self, is_last: bool) -> None:
             """To be called at the end of each hunk of text."""
             if (not self.last_line or
                     not self.last_line.strip() or
@@ -260,7 +287,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
             self.first_block = False
             self.is_sphinx = False
 
-    def has_prompt(line):
+    def has_prompt(line: str) -> bool:
         """Return whether "line" starts with a Python prompt."""
         return line.lstrip().startswith('>>> ')
 
@@ -318,14 +345,19 @@ def check_text(report, filename, lang, first_line, text, is_comment):
     s.end_block(True)
 
 
-def check_generic(report, filename, content, lang):
+def check_generic(
+    report: Report,
+    filename: str,
+    content: str,
+    lang: LanguageChecker,
+) -> None:
     """
     Perform language-agnostic ("generic") style checks.
 
-    :param Report report: The report in which diagnostics must be emitted.
-    :param str filename: Filename from which the text to check comes.
-    :param LanguageChecker lang: language checker corresponding to "text".
-    :param str content: Text on which the checks must be performed.
+    :param report: The report in which diagnostics must be emitted.
+    :param filename: Filename from which the text to check comes.
+    :param content: Text on which the checks must be performed.
+    :param lang: language checker corresponding to "text".
     """
     if content and not content.endswith('\n'):
         report.set_context(filename, 1 + content.count("\n"))
@@ -340,17 +372,17 @@ def check_generic(report, filename, content, lang):
     non_ascii_allowed = "style: non-ascii" in content
 
     # Line list for the current block of comments
-    comment_block = []
+    comment_block: list[str] = []
 
     # Line number for the first comment line
-    comment_first_line = None
+    comment_first_line: int | None = None
 
     # Column number for the comment block. If we are not in a block but a
     # single line of comment (i.e. we have a comment on the same line as
     # regular code), this is still None.
-    comment_column = None
+    comment_column: int | None = None
 
-    def check_comment():
+    def check_comment() -> None:
         """Helper to invoke check_text on the text in "comment_block".
 
         Reset "comment_block" afterwards.
@@ -384,13 +416,14 @@ def check_generic(report, filename, content, lang):
                 if clean_lines[2] != "SPDX-License-Identifier: Apache-2.0":
                     report.add("Invalid license")
             else:
+                assert comment_first_line is not None
                 check_text(report, filename, lang,
                            comment_first_line,
                            '\n'.join(clean_lines),
                            True)
         comment_block[:] = []
 
-    def start_comment():
+    def start_comment() -> tuple[None | int, int]:
         """
         Return (comment_column, comment_first_line) (see above) for the current
         "line".
@@ -413,12 +446,13 @@ def check_generic(report, filename, content, lang):
                 'https://' not in line):
             report.add('Too long line')
 
-        if lang.comment_start:
-            comment_start = line.find(lang.comment_start)
+        if lang.comment_start is not None:
+            lang_comment_start = lang.comment_start
+            comment_start = line.find(lang_comment_start)
 
-            def get_comment_text():
+            def get_comment_text() -> str:
                 """Return the text contained in the comment in "line"."""
-                first = comment_start + len(lang.comment_start)
+                first = comment_start + len(lang_comment_start)
                 return line[first:]
 
             if comment_start != -1:
@@ -441,21 +475,27 @@ def check_generic(report, filename, content, lang):
 class LanguageChecker:
     """Base class for language-specific checkers."""
 
-    # String for single-line comments starters, if applicable
+    # String for single-line comments starters
     comment_start: str | None
 
     # Regular expression that matches package imports, if applicable
     with_re: Pattern | None
 
-    def check(self, report, filename, content, parse):
+    def check(
+        self,
+        report: Report,
+        filename: str,
+        content: str,
+        parse: bool,
+    ) -> None:
         """
         Perform style checks.
 
-        :param Report report: The report in which diagnostics must be emitted.
-        :param str filename: Filename from which the text to check comes.
-        :param str content: Text on which the checks must be performed.
-        :param bool parse: Whether we expect "content" to be syntactically
-            correct (i.e. if we can parse it without error).
+        :param report: The report in which diagnostics must be emitted.
+        :param filename: Filename from which the text to check comes.
+        :param content: Text on which the checks must be performed.
+        :param parse: Whether we expect "content" to be syntactically correct
+            (i.e. if we can parse it without error).
         """
         raise NotImplementedError()
 
@@ -464,7 +504,13 @@ class AdaLang(LanguageChecker):
     comment_start = '--'
     with_re = re.compile('^with (?P<name>[a-zA-Z0-9_.]+);.*')
 
-    def check(self, report, filename, content, parse):
+    def check(
+        self,
+        report: Report,
+        filename: str,
+        content: str,
+        parse: bool,
+    ) -> None:
         pcheck = PackageChecker(report)
         for i, line in iter_lines(content):
             report.set_context(filename, i)
@@ -481,7 +527,11 @@ class JavaLang(LanguageChecker):
     with_re = re.compile('^import (?P<name>[a-zA-Z0-9_.]+);')
 
     def check(
-        self, report: Report, filename: str, content: str, parse: bool
+        self,
+        report: Report,
+        filename: str,
+        content: str,
+        parse: bool,
     ) -> None:
         pcheck = PackageChecker(report)
         for i, line in iter_lines(content):
@@ -501,13 +551,19 @@ class PythonLang(LanguageChecker):
                            '(?P<remaining>.*)')
     from_import_re = re.compile('^from (?P<name>[a-zA-Z0-9_.]+) import.*')
 
-    def check(self, report, filename, content, parse):
+    def check(
+        self,
+        report: Report,
+        filename: str,
+        content: str,
+        parse: bool,
+    ) -> None:
         self.custom_check(report, filename, content, parse)
         if os.path.exists(filename):
             self.pep8_check(report, filename)
             self.pyflakes_check(report, filename, content)
 
-    def pep8_check(self, report, filename):
+    def pep8_check(self, report: Report, filename: str) -> None:
         """
         Run pep8 checks on given filename, adding pep8 reports to report.
         """
@@ -522,7 +578,13 @@ class PythonLang(LanguageChecker):
             return
 
         class CustomReport(pep8.BaseReport):
-            def error(self, line_number, offset, text, check):
+            def error(
+                self,
+                line_number: int,
+                offset: int,
+                text: str,
+                check: object,
+            ) -> None:
                 # Due to the great architecture of PEP8/pycodestyle, we have to
                 # duplicate this check here in order to not show certain (but
                 # not all) errors that should be ignored.
@@ -539,7 +601,12 @@ class PythonLang(LanguageChecker):
         sg.init_report(CustomReport)
         sg.check_files([filename])
 
-    def pyflakes_check(self, report, filename, content):
+    def pyflakes_check(
+        self,
+        report: Report,
+        filename: str,
+        content: str,
+    ) -> None:
         """
         Run pyflakes on given file with given content. Add pyflakes reports to
         report.
@@ -551,7 +618,7 @@ class PythonLang(LanguageChecker):
         except ImportError:
             return
 
-        lines_map = [(None, None)]
+        lines_map: list[tuple[bool | None, str | None]] = [(None, None)]
         current = True
         for line in content.splitlines():
             if line.strip() == "# pyflakes off":
@@ -561,13 +628,20 @@ class PythonLang(LanguageChecker):
             lines_map.append((current, line))
 
         class CustomReporter(reporter.Reporter):
-            def syntaxError(self, _, msg, lineno, offset, text):
+            def syntaxError(
+                self,
+                _: object,
+                msg: Any,
+                lineno: int,
+                offset: int,
+                text: str,
+            ) -> None:
                 pass
 
-            def unexpectedError(self, filename, msg):
+            def unexpectedError(self, filename: str, msg: Any) -> None:
                 pass
 
-            def flake(self, msg):
+            def flake(self, msg: Any) -> None:
                 if lines_map[msg.lineno][0]:
                     report.add(
                         msg.message % msg.message_args, filename, msg.lineno, 0
@@ -577,9 +651,15 @@ class PythonLang(LanguageChecker):
             filename, reporter=CustomReporter(sys.stdout, sys.stderr)
         )
 
-    def custom_check(self, report, filename, content, parse):
+    def custom_check(
+        self,
+        report: Report,
+        filename: str,
+        content: str,
+        parse: bool,
+    ) -> None:
         pcheck = PackageChecker(report)
-        last_import_line = None
+        last_import_line: int | None = None
         for i, line in iter_lines(content):
             report.set_context(filename, i)
             if not line.strip():
@@ -631,7 +711,7 @@ class PythonLang(LanguageChecker):
                 report.add('Could not parse: {}'.format(exc))
             else:
 
-                def node_lineno(node):
+                def node_lineno(node: ast.AST) -> int:
                     return getattr(node, 'lineno', 0) + 1
 
                 for node in ast.walk(root):
@@ -662,7 +742,11 @@ class PythonLang(LanguageChecker):
                         check_text(report, filename, self, node_lineno(node),
                                    docstring, False)
 
-    def _check_imported_entities(self, report, import_node):
+    def _check_imported_entities(
+        self,
+        report: Report,
+        import_node: ast.ImportFrom,
+    ) -> None:
         last = None
         for alias in import_node.names:
             name = alias.name
@@ -675,7 +759,13 @@ class PythonLang(LanguageChecker):
 class MakoLang(LanguageChecker):
     comment_start = '##'
 
-    def check(self, report, filename, content, parse):
+    def check(
+        self,
+        report: Report,
+        filename: str,
+        content: str,
+        parse: bool,
+    ) -> None:
         first_line = content.split('\n', 1)[0]
         if 'makoada' in first_line:
             ada_lang.check(report, filename, content, parse=False)
@@ -690,7 +780,11 @@ class YAMLLang(LanguageChecker):
     with_re = None
 
     def check(
-        self, report: Report, filename: str, content: str, parse: bool
+        self,
+        report: Report,
+        filename: str,
+        content: str,
+        parse: bool,
     ) -> None:
         pass
 
@@ -712,13 +806,13 @@ langs = {
 }
 
 
-def check_file_content(report, filename, content):
+def check_file_content(report: Report, filename: str, content: str) -> None:
     """
     Perform generic and language-specific style checks.
 
-    :param Report report: The report in which diagnostics must be emitted.
-    :param str filename: Filename from which the text to check comes.
-    :param str content: Text on which the checks must be performed.
+    :param report: The report in which diagnostics must be emitted.
+    :param filename: Filename from which the text to check comes.
+    :param content: Text on which the checks must be performed.
     """
     ext = filename.split('.')[-1]
     lang = langs[ext]
@@ -726,12 +820,12 @@ def check_file_content(report, filename, content):
     lang.check(report, filename, content, parse=True)
 
 
-def check_file(report, filename):  # pragma: no cover
+def check_file(report: Report, filename: str) -> None:  # pragma: no cover
     """
     Perform generic and language-specific style checks.
 
-    :param Report report: The report in which diagnostics must be emitted.
-    :param str filename: Filename from which the text to check comes.
+    :param report: The report in which diagnostics must be emitted.
+    :param filename: Filename from which the text to check comes.
     """
     ext = filename.split('.')[-1]
     if ext not in langs:
@@ -746,28 +840,23 @@ def check_file(report, filename):  # pragma: no cover
     check_file_content(report, filename, content)
 
 
-def excludes_match(path, excludes):
+def excludes_match(path: str, excludes: list[str]) -> bool:
     """
     Return whether at least one item in `excludes` matches the `path`.
-
-    :type path: str
-    :type excludes: list[str]
-    :rtype: bool
     """
     path = os.path.sep + path
     return any(path.endswith(os.path.sep + e)
                for e in excludes)
 
 
-def traverse(report, root, excludes):  # pragma: no cover
+def traverse(report: Report, root: str, excludes: list[str]) -> None:
     """
     Perform generic and language-specific style checks.
 
-    :param Report report: The report in which diagnostics must be emitted.
-    :param str root: Root directory in which the files to stylecheck are looked
+    :param report: The report in which diagnostics must be emitted.
+    :param root: Root directory in which the files to stylecheck are looked
         for. Filenames are accepted as well.
-    :param [str] excludes: List of path to exclude from the search of files to
-        check.
+    :param excludes: List of path to exclude from the search of files to check.
     """
     def process(path: str) -> None:
         """
@@ -789,16 +878,20 @@ def traverse(report, root, excludes):  # pragma: no cover
         process(root)
 
 
-def main(src_root, files, dirs, excludes):
+def main(
+    src_root: str,
+    files: list[str],
+    dirs: list[str],
+    excludes: list[str],
+) -> None:
     """
     Global purpose main procedure.
 
-    :param str langkit_root: Root directory for the Langkit source repository.
-    :param list[str] files: Source files to analyze. If empty, look for all
-        sources in the Langkit repository.
-    :param list[str] dirs: List of directories in which to find sources to
-        check.
-    :param list[str] excludes: List of directories to exclude from the search.
+    :param langkit_root: Root directory for the Langkit source repository.
+    :param files: Source files to analyze. If empty, look for all sources in
+        the Langkit repository.
+    :param dirs: List of directories in which to find sources to check.
+    :param excludes: List of directories to exclude from the search.
     """
     report = Report(enable_colors=os.isatty(sys.stdout.fileno()))
 
@@ -813,7 +906,7 @@ def main(src_root, files, dirs, excludes):
     report.output()
 
 
-def langkit_main(langkit_root, files=[]):
+def langkit_main(langkit_root: str, files: list[str] = []) -> None:
     """
     Run main() on Langkit sources.
     """
