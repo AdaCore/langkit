@@ -270,32 +270,41 @@
                     resNative
                 );
 
-                // Check the langkit exceptions
-                checkException();
+                // Get the potential exception of the native property call
+                final LangkitException propException = getLastException();
+
+                // Wrap the result if the property returned normally
+                ${return_type} res = ${api.none_value(method.public_type)};
+                if(propException == null) {
+                    res = ${api.ni_wrap(
+                        field.public_type,
+                        "resNative",
+                        wrap_release
+                    )};
+
+                    % for to_release in wrap_release:
+                    ${api.wrapper_class(to_release.public_type)}.release(
+                        ${to_release.name}
+                    );
+                    % endfor
+                }
+
+                // Release the unwrapped parameters
+                % for to_release in unwrap_release:
+                ${api.wrapper_class(to_release.public_type)}.release(
+                    ${to_release.name}
+                );
+                % endfor
 
                 % if api.field_needs_context(field):
                 // Close the context
                 currentContext.close();
                 % endif
 
-                // Wrap the result
-                final ${return_type} res = ${api.ni_wrap(
-                    field.public_type,
-                    "resNative",
-                    wrap_release
-                )};
-
-                // Release the allocated ressources
-                % for to_release in unwrap_release:
-                ${api.wrapper_class(to_release.public_type)}.release(
-                    ${to_release.name}
-                );
-                % endfor
-                % for to_release in wrap_release:
-                ${api.wrapper_class(to_release.public_type)}.release(
-                    ${to_release.name}
-                );
-                % endfor
+                // If the property exception is not null throw it
+                if(propException != null) {
+                    throw propException;
+                }
 
                 // Return the result
                 return res;
