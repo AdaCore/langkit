@@ -553,6 +553,7 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: "false"),
             (T.Int, lambda _: "0"),
             (T.EnvRebindings, lambda _: "PointerWrapper.nullPointer()"),
+            (T.Token, lambda _: "Token.NONE(currentUnit)"),
             (
                 ct.ASTNodeType, lambda t:
                     self.none_value(t.entity, ast_wrapping)
