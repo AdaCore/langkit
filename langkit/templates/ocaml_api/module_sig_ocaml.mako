@@ -435,7 +435,7 @@ module ${ocaml_api.node_name(astnode)} : sig
     -> ${ocaml_api.type_public_name(arg.public_type)}
          % endif
       % endfor
-      % if field.public_type.is_entity_type:
+      % if field.public_type.is_entity_type or field.public_type.is_token_type:
     -> ${ocaml_api.type_public_name(field.public_type)} option
       % else:
     -> ${ocaml_api.type_public_name(field.public_type)}
