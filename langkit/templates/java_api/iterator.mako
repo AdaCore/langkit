@@ -12,6 +12,13 @@
     ${java_doc(cls, 4)}
     public static final class ${class_name} implements AutoCloseable {
 
+        // ----- Class attributes -----
+
+        /** Singleton for the iterator NONE value. */
+        public static final ${class_name} NONE = new ${class_name}(
+            PointerWrapper.nullPointer()
+        );
+
         // ----- Attributes -----
 
         /** The pointer to the native iterator. */
