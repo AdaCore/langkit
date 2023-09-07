@@ -803,7 +803,7 @@ public final class ${ctx.lib_name.camel} {
         // ----- Enum values -----
 
         % for i in range(len(ctx.sorted_exception_types)):
-        ${ctx.sorted_exception_types[i].kind_name.upper}(${i}),
+        ${ctx.sorted_exception_types[i].name.upper}(${i}),
         % endfor
         ;
 
@@ -811,7 +811,7 @@ public final class ${ctx.lib_name.camel} {
 
         /** Singleton that represents the none expcetion kind. */
         public static final ExceptionKind NONE =
-            ${ctx.sorted_exception_types[0].kind_name.upper};
+            ${ctx.sorted_exception_types[0].name.upper};
 
         /** The map from int to enum values. */
         private static final Map<Integer, ExceptionKind> map =
