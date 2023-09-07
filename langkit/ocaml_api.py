@@ -57,6 +57,8 @@ class OCamlAPISettings(AbstractAPISettings):
 
         :param typ: Type to encode in the C/OCaml binding layer.
         """
+        result: ct.CompiledTypeOrDefer
+
         # DummyAnalysisContextType is a placeholder, not a real CompiledType
         if isinstance(typ, DummyAnalysisContextType):
             return typ

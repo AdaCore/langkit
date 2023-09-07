@@ -4681,6 +4681,13 @@ class TypeRepo:
         def __repr__(self) -> str:
             return '<Defer {}>'.format(self.label)
 
+    # TODO: Currently, in many contexts that require a CompiledType instance
+    # (not a Defer one), TypeDefer.__getattr__() is used to retrieve a
+    # built-in, so adding type annotations here will make all these uses
+    # invalid. In order to complete type annotations, we should introduce a new
+    # way to get builtin compiled types whose type annotations guarantee that a
+    # CompiledType instance is returned.
+
     def __getattr__(self, type_name):
         """
         Build and return a Defer type that references the above type.
@@ -4713,10 +4720,9 @@ class TypeRepo:
                 result)
 
     @property
-    def root_node(self):
+    def root_node(self) -> ASTNodeType:
         """
         Shortcut to get the root AST node.
-        :rtype: ASTNodeType
         """
         result = CompiledTypeRepo.root_grammar_class
         assert result
@@ -4724,39 +4730,38 @@ class TypeRepo:
 
     @property  # type: ignore
     @memoized
-    def node_kind(self):
+    def node_kind(self) -> names.Name:
         """
         Name of type node kind type.
         """
         return self.root_node.entity.api_name + names.Name('Kind_Type')
 
     @property
-    def defer_root_node(self):
+    def defer_root_node(self) -> TypeRepo.Defer:
         return self.Defer(lambda: self.root_node, 'root_node')
 
     @property
-    def env_md(self):
+    def env_md(self) -> StructType:
         """
         Shortcut to get the lexical environment metadata type.
-        :rtype: StructType
         """
         assert CompiledTypeRepo.env_metadata is not None
         return CompiledTypeRepo.env_metadata
 
     @property
-    def defer_env_md(self):
+    def defer_env_md(self) -> TypeRepo.Defer:
         return self.Defer(lambda: self.env_md, '.env_md')
 
     @property
-    def entity_info(self):
+    def entity_info(self) -> StructType:
         """
         Shortcut to get the entity information type.
-        :rtype: StructType
         """
+        assert CompiledTypeRepo.root_grammar_class is not None
         return CompiledTypeRepo.root_grammar_class.entity_info()
 
     @property
-    def entity(self):
+    def entity(self) -> EntityType:
         """
         This property returns the root type used to describe an AST node with
         semantic information attached.
@@ -4765,7 +4770,7 @@ class TypeRepo:
 
     @property  # type: ignore
     @memoized
-    def env_assoc(self):
+    def env_assoc(self) -> StructType:
         """
         EnvAssoc type, used to add associations of key and value to the lexical
         environments, via the add_to_env primitive.
