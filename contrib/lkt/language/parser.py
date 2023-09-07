@@ -715,6 +715,7 @@ class Decl(LktNode):
     )
 
     decl_type_name = AbstractProperty(
+        public=True,
         type=T.String,
         doc="""
         Return the name of the declaration type, as it should be seen by
