@@ -1638,7 +1638,12 @@ class LktTypesLoader:
             """
             Return whether ``expr`` computes an array.
             """
-            return self.resolve_type_decl(expr.p_check_expr_type).is_array_type
+            expr_type = self.resolve_type_decl(
+                expr.p_check_expr_type,
+                force_lowering=True,
+            )
+            assert isinstance(expr_type, CompiledType)
+            return expr_type.is_array_type
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """

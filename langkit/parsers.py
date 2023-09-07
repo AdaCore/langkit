@@ -2494,7 +2494,9 @@ def node_name(node: Union[TypeRepo.Defer, Type[ASTNode], ASTNodeType]) -> str:
         node = node.get()
 
     if issubtype(node, ASTNode):
-        return node._name.camel
+        result = node._name.camel
+        assert isinstance(result, str)
+        return result
 
     assert isinstance(node, ASTNodeType), (
         'Unexpected node type: {}'.format(repr(node))

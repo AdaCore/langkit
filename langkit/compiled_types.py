@@ -7,8 +7,8 @@ import difflib
 from itertools import count, takewhile
 import pipes
 from typing import (
-    Callable, ClassVar, Dict, Iterator, List, Optional as Opt, Sequence, Set,
-    TYPE_CHECKING, Tuple, Union, ValuesView
+    Any, Callable, ClassVar, Dict, Iterator, List, Optional as Opt, Sequence,
+    Set, TYPE_CHECKING, Tuple, Union, ValuesView
 )
 
 from langkit import names
@@ -4603,28 +4603,31 @@ class TypeRepo:
 
     class Defer:
         """
-        Internal class representing a not-yet resolved type.
+        Internal class representing a not-yet resolved object (type, field,
+        expression, ...).
         """
-        def __init__(self, getter, label):
+        def __init__(
+            self,
+            getter: Callable[[], Any],
+            label: str,
+        ):
             """
-            :param () -> CompiledType getter: A function that will return
-                the resolved type when called.
-            :param str label: Short description of what this Defer object
-                resolves to, for debugging purposes.
+            :param getter: A function that will return the resolved object when
+                called.
+            :param label: Short description of what this Defer object resolves
+                to, for debugging purposes.
             """
             self.getter = getter
             self.label = label
 
-        def get(self):
+        def get(self) -> Any:
             """
-            Resolve the internally referenced type.
-
-            :rtype: CompiledType
+            Resolve the referenced entity.
             """
             return self.getter()
 
-        def __getattr__(self, name):
-            def get():
+        def __getattr__(self, name: str) -> TypeRepo.Defer:
+            def get() -> Any:
                 prefix = self.get()
 
                 # The DSL name for automatic ASTNodeType instances for enum
@@ -4634,9 +4637,10 @@ class TypeRepo:
                 # TypeRepo shortcut, so handle it explicitly here.
                 if (
                     # The following is True iff prefix is an abstract enum node
-                    isinstance(prefix, ASTNodeType) and
-                    prefix.is_enum_node and
-                    not prefix.base.is_enum_node
+                    isinstance(prefix, ASTNodeType)
+                    and prefix.is_enum_node
+                    and prefix.base is not None
+                    and not prefix.base.is_enum_node
                 ):
                     try:
                         return prefix._alternatives_map[name]
@@ -4652,8 +4656,7 @@ class TypeRepo:
                 try:
                     return prefix._fields[name]
                 except KeyError:
-                    check_source_language(
-                        False,
+                    error(
                         '{prefix} has no {attr} attribute'.format(
                             prefix=(prefix.dsl_name
                                     if isinstance(prefix, CompiledType) else
@@ -4664,19 +4667,18 @@ class TypeRepo:
                     )
             return TypeRepo.Defer(get, '{}.{}'.format(self.label, name))
 
-        def __call__(self, *args, **kwargs):
+        def __call__(self, *args: object, **kwargs: object) -> TypeRepo.Defer:
+            # Format the label for the result
             label_args = []
             for arg in args:
                 label_args.append(str(arg))
             for kw, arg in kwargs.items():
                 label_args.append('{}={}'.format(kw, arg))
+            label = "{}({})".format(self.label, ", ".join(label_args))
 
-            return TypeRepo.Defer(
-                lambda: self.get()(*args, **kwargs),
-                '{}({})'.format(self.label, ', '.join(label_args))
-            )
+            return TypeRepo.Defer(lambda: self.get()(*args, **kwargs), label)
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<Defer {}>'.format(self.label)
 
     def __getattr__(self, type_name):
