@@ -377,8 +377,12 @@ class WithLexerAnnotationSpec(AnnotationSpec):
         assert len(args) == 1
 
         lexer_decl = check_referenced_decl(args[0])
-        assert isinstance(lexer_decl, L.LexerDecl)
-        return lexer_decl
+        with ctx.lkt_context(args[0]):
+            if not isinstance(lexer_decl, L.LexerDecl):
+                error(
+                    f"lexer expected, got {lexer_decl.p_decl_type_name}"
+                )
+            return lexer_decl
 
 
 token_cls_map = {'text': WithText,
@@ -743,9 +747,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         with ctx.lkt_context(decl):
             check_source_language(name not in patterns,
                                   'Duplicate pattern name')
-            check_source_language(decl.f_decl_type is None,
-                                  'Patterns must have automatic types in'
-                                  ' lexers')
+            with ctx.lkt_context(decl.f_decl_type):
+                check_source_language(
+                    decl.f_decl_type is None,
+                    "Types are not allowed in lexer declarations"
+                )
             if (
                 not isinstance(decl.f_val, L.StringLit)
                 or not decl.f_val.p_is_regexp_literal
@@ -923,14 +929,18 @@ def create_grammar(ctx: CompileCtx,
         with ctx.lkt_context(full_rule):
             r = full_rule.f_decl
 
-            assert isinstance(r, L.GrammarRuleDecl)
+            if not isinstance(r, L.GrammarRuleDecl):
+                error(f"grammar rule expected, got {r.p_decl_type_name}")
             rule_name = r.f_syn_name.text
 
             # Register this rule as a main rule or an entry point if the
             # corresponding annotations are present.
             anns = parse_annotations(ctx, GrammarRuleAnnotations, full_rule)
             if anns.main_rule:
-                assert main_rule_name is None
+                check_source_language(
+                    main_rule_name is None,
+                    "only one main rule allowed",
+                )
                 main_rule_name = rule_name
             if anns.main_rule or anns.entry_point:
                 entry_points.add(rule_name)
@@ -938,7 +948,9 @@ def create_grammar(ctx: CompileCtx,
             all_rules[rule_name] = (full_rule.f_doc, r.f_expr)
 
     # Now create the result grammar
-    assert main_rule_name is not None
+    if main_rule_name is None:
+        with ctx.lkt_context(full_grammar.f_decl):
+            error("main rule missing (@main_rule annotation)")
     result = Grammar(
         main_rule_name, entry_points, Location.from_lkt_node(full_grammar)
     )
@@ -1017,16 +1029,19 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                     error('Unknown enum node alternative: {}'.format(suffix))
 
         elif isinstance(node_ref, L.GenericTypeRef):
-            check_source_language(
-                node_ref.f_type_name.text == u'ASTList',
-                'Bad generic type name: only ASTList is valid in this context'
-            )
+            with ctx.lkt_context(node_ref.f_type_name):
+                check_source_language(
+                    node_ref.f_type_name.text == u'ASTList',
+                    'Bad generic type name: only ASTList is valid in this'
+                    ' context'
+                )
 
             params = node_ref.f_params
-            check_source_language(
-                len(params) == 2,
-                '2 type argument expected, got {}'.format(len(params))
-            )
+            with ctx.lkt_context(node_ref):
+                check_source_language(
+                    len(params) == 2,
+                    '2 type arguments expected, got {}'.format(len(params))
+                )
             node_params = [resolve_node_ref(cast(NodeRefTypes, p))
                            for p in params]
             assert node_params[0] == T.root_node
