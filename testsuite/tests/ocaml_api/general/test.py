@@ -4,7 +4,7 @@ Test that OCaml API is properly working.
 
 from langkit.compile_context import LibraryEntity
 from langkit.dsl import (
-    ASTNode, Bool, Enum, EnumValue, Field, Struct, Symbol, T, UserField,
+    ASTNode, Bool, Enum, EnumValue, Field, Struct, Symbol, T, Token, UserField,
     has_abstract_list
 )
 from langkit.expressions import (
@@ -75,6 +75,10 @@ class FooNode(ASTNode):
     @langkit_property(public=True)
     def iter_int():
         return ArrayLiteral([1, 2, 3]).to_iterator
+
+    @langkit_property(public=True)
+    def token(t=Token):
+        return t
 
 
 class Sequence(FooNode.list):

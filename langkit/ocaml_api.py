@@ -639,7 +639,7 @@ class OCamlAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.Bool, lambda _: 'bool'),
             (T.Int, lambda _: 'int'),
-            (T.Token, lambda t: from_module_name(t) + " option"),
+            (T.Token, lambda t: from_module_name(t)),
             (T.Symbol, lambda _: 'string'),
             (ct.EnumType, lambda t: from_module_name(t)),
             (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),
