@@ -1915,7 +1915,7 @@ class BaseField(AbstractNodeData):
     def __init__(self,
                  repr: bool = True,
                  doc: str = '',
-                 type: Opt[CompiledType] = None,
+                 type: Opt[CompiledTypeOrDefer] = None,
                  access_needs_incref: bool = False,
                  internal_name: Opt[names.Name] = None,
                  prefix: Opt[names.Name] = AbstractNodeData.PREFIX_FIELD,
@@ -2259,7 +2259,7 @@ class UserField(BaseField):
     concrete = True
 
     def __init__(self,
-                 type: CompiledType,
+                 type: CompiledTypeOrDefer,
                  repr: bool = False,
                  doc: str = '',
                  public: bool = True,
