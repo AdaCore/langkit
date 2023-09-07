@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import os.path
 import sys
+from typing import Any
 
 import mako.exceptions
 from mako.lookup import TemplateLookup
@@ -11,7 +14,11 @@ from langkit.names import Name
 
 class Renderer:
 
-    def __init__(self, template_env=None, **kwargs):
+    def __init__(
+        self,
+        template_env: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ):
         self.env = dict(template_env or {})
         self.env.update(kwargs)
         self.env.update({
@@ -20,15 +27,20 @@ class Renderer:
             'Name': Name,
         })
 
-    def update(self, env):
+    def update(self, env: dict[str, Any]) -> Renderer:
         return Renderer(self.env, **env)
 
-    def render(self, template_name, env=None, **kwargs):
+    def render(
+        self,
+        template_name: str,
+        env: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> str:
         env = dict(env or {})
         env.update(kwargs)
         return self.update(env)._render(template_name)
 
-    def _render(self, template_name):
+    def _render(self, template_name: str) -> str:
         try:
             return mako_template(template_name).render(**self.env)
         except DiagnosticError:  # no-code-coverage
@@ -42,12 +54,11 @@ class Renderer:
             raise
 
 
-_template_dirs = []
-_template_lookup = None
-":type: mako.utils.TemplateLookup"
+_template_dirs: list[str] = []
+_template_lookup: mako.utils.TemplateLookup | None = None
 
 
-def add_template_dir(path):
+def add_template_dir(path: str) -> None:
     global _template_lookup
     _template_dirs.append(path)
     _template_lookup = TemplateLookup(directories=_template_dirs,
@@ -58,5 +69,6 @@ add_template_dir(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                               'templates'))
 
 
-def mako_template(file_name):
+def mako_template(file_name: str) -> mako.template.Template:
+    assert _template_lookup is not None
     return _template_lookup.get_template("{}.mako".format(file_name))
