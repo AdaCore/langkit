@@ -1109,9 +1109,8 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 try:
                     val = tokens[token_name]
                 except KeyError:
-                    check_source_language(
-                        False, 'Unknown token: {}'.format(token_name)
-                    )
+                    with ctx.lkt_context(rule.f_token_name):
+                        error(f"Unknown token: {token_name}")
 
                 match_text = ''
                 if rule.f_expr:
