@@ -4703,6 +4703,28 @@ class TypeRepo:
         def __repr__(self) -> str:
             return '<Defer {}>'.format(self.label)
 
+    def deferred_type(self, type_name: str) -> TypeRepo.Defer:
+        """
+        Return a deferred type for the given type name.
+        """
+        type_dict = CompiledTypeRepo.type_dict
+
+        def getter() -> CompiledType:
+            try:
+                return type_dict[type_name]
+            except KeyError:
+                close_matches = difflib.get_close_matches(type_name, type_dict)
+                error(
+                    'Invalid type name: {}{}'.format(
+                        type_name,
+                        ', did you one of the following? {}'.format(
+                            ', '.join(close_matches)
+                        ) if close_matches else ''
+                    )
+                )
+
+        return TypeRepo.Defer(getter, type_name)
+
     # TODO: Currently, in many contexts that require a CompiledType instance
     # (not a Defer one), TypeDefer.__getattr__() is used to retrieve a
     # built-in, so adding type annotations here will make all these uses
@@ -4716,28 +4738,11 @@ class TypeRepo:
 
         :param str type_name: The name of the rule.
         """
-        type_dict = CompiledTypeRepo.type_dict
-
-        def resolve():
-            try:
-                return type_dict[type_name]
-            except KeyError:
-                close_matches = difflib.get_close_matches(type_name, type_dict)
-                check_source_language(
-                    False,
-                    'Invalid type name: {}{}'.format(
-                        type_name,
-                        ', did you one of the following? {}'.format(
-                            ', '.join(close_matches)
-                        ) if close_matches else ''
-                    )
-                )
-
         # Resolve immediately the type reference if possible, except for AST
         # nodes: use a Defer object anyway so that we can support properties
         # reference on top of it.
-        result = type_dict.get(type_name)
-        return (TypeRepo.Defer(resolve, type_name)
+        result = CompiledTypeRepo.type_dict.get(type_name)
+        return (self.deferred_type(type_name)
                 if result is None or isinstance(result, ASTNodeType) else
                 result)
 

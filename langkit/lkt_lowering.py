@@ -21,14 +21,20 @@ Global architecture:
 
 The last step is the most complex one: type declarations refer to each other,
 and this step includes the lowering of property expressions to abstract
-expressions. All type declarations in the language spec are lowered in sequence
-(arbitrary order), except base classes, which are lowered before classes that
-they derive from. Properties are lowered as part of the lowering of their
-owning types.
+expressions. The lowering of types goes as follows:
+
+* A first pass looks at all top-level declarations (lexers, grammars and types)
+  and registers them by name in the root scope.
+
+* A second pass iterates on all types and lowers them. All type declarations in
+  the language spec are lowered in sequence (arbitrary order), except base
+  classes, which are lowered before classes that they derive from. Properties
+  are lowered as part of the lowering of their owning types.
 """
 
 from __future__ import annotations
 
+import abc
 from collections import OrderedDict
 from dataclasses import dataclass
 import itertools
@@ -152,6 +158,243 @@ def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
             non_blocking_error(d.message)
     errors_checkpoint()
     return list(units_map.values())
+
+
+class Scope:
+    """
+    Lexical environment data structure, use to resolve named references.
+    """
+
+    @dataclass
+    class Entity(metaclass=abc.ABCMeta):
+        """
+        Object that is registered in a scope.
+        """
+        name: str
+
+        @abc.abstractproperty
+        def diagnostic_name(self) -> str:
+            """
+            Name for this entity to use when creating diagnostics.
+            """
+            ...
+
+    @dataclass
+    class BuiltinEntity(Entity):
+        """
+        Any entity that is created automatically by Lkt.
+        """
+        pass
+
+    @dataclass
+    class BuiltinType(BuiltinEntity):
+        """
+        Type created automatically by Lkt.
+        """
+
+        defer: TypeRepo.Defer
+        """
+        Reference to the corresponding compiled type.
+        """
+
+        @property
+        def diagnostic_name(self) -> str:
+            return f"the builtin type {self.name}"
+
+    @dataclass
+    class BuiltinValue(BuiltinEntity):
+        """
+        Named value created automatically by Lkt.
+        """
+
+        value: AbstractExpression
+        """
+        Value to use for this during expression lowering.
+        """
+
+        @property
+        def diagnostic_name(self) -> str:
+            return f"the builtin value {self.value}"
+
+    @dataclass
+    class Generic(BuiltinEntity):
+        """
+        Generic declaration, always created automatically by Lkt.
+        """
+
+        @property
+        def diagnostic_name(self) -> str:
+            return f"the generic {self.name}"
+
+    @dataclass
+    class Trait(BuiltinEntity):
+        """
+        Trait declaration, always created automatically by Lkt.
+        """
+
+        @property
+        def diagnostic_name(self) -> str:
+            return f"the trait {self.name}"
+
+    @dataclass
+    class Exception(BuiltinEntity):
+        """
+        Exception type, always created automatically by Lkt.
+        """
+
+        constructor: Callable[[TypeRepo.Defer, str], E.BaseRaiseException]
+
+        @property
+        def diagnostic_name(self) -> str:
+            return f"the exception {self.name}"
+
+    @dataclass
+    class UserEntity(Entity):
+        """
+        Entity defined in user code.
+        """
+
+        decl: L.Decl
+        """
+        Corresponding Lkt declaration node.
+        """
+
+        kind_name: ClassVar[str]
+        """
+        Name for the kind of this entity, to use when formatting diagnostics.
+        """
+
+        @property
+        def diagnostic_name(self) -> str:
+            loc = Location.from_lkt_node(self.decl)
+            return (
+                f"the {self.kind_name} {self.name} at {loc.gnu_style_repr()}"
+            )
+
+    @dataclass
+    class Lexer(UserEntity):
+        """
+        Lexer declaration.
+        """
+
+        kind_name = "lexer"
+
+    @dataclass
+    class Grammar(UserEntity):
+        """
+        Grammar declaration.
+        """
+
+        kind_name = "grammar"
+
+    @dataclass
+    class UserType(UserEntity):
+        """
+        Type declaration.
+        """
+
+        defer: TypeRepo.Defer
+        """
+        Reference to the corresponding compiled type.
+        """
+
+        kind_name = "type"
+
+    @dataclass
+    class UserValue(UserEntity):
+        """
+        Value declaration.
+        """
+
+        variable: AbstractVariable
+        """
+        Value to use for this during expression lowering.
+        """
+
+    @dataclass
+    class LocalVariable(UserValue):
+        """
+        Local variable declaration.
+        """
+
+        kind_name = "local variable"
+
+    @dataclass
+    class Argument(UserValue):
+        """
+        Function argument declaration.
+        """
+
+        kind_name = "argument"
+
+    def __init__(
+        self,
+        label: str,
+        context: CompileCtx,
+        parent: Scope | None = None,
+    ):
+        """
+        :param label: Label for this scope to use when formatting diagnostics.
+        :param context: Current compilation context.
+        :param parent: Optional parent scope. When looking for an entity by
+            name, the search escalates to the parent if we cannot find the
+            entity in this scope.
+        """
+        self.label = label
+        self.context = context
+        self.parent = parent
+        self.mapping: dict[str, Scope.Entity] = {}
+
+    def add(self, entity: Scope.UserEntity) -> None:
+        """
+        Add a declaration to the current scope.
+
+        Stop with a user-level error if there is already a declaration with the
+        same name in this scope.
+        """
+        other_entity = self.mapping.get(entity.name)
+        if other_entity is None:
+            self.mapping[entity.name] = entity
+        else:
+            with self.context.lkt_context(entity.decl):
+                other_label = (
+                    str(other_entity.decl)
+                    if isinstance(other_entity, Scope.UserEntity) else
+                    "a builtin"
+                )
+                error(f"this declaration conflicts with {other_label}")
+
+    def lookup(self, name: str) -> Scope.Entity:
+        """
+        Look for the declaration for a given name in this scope or one of its
+        parents. Raise a ``KeyError`` exception if there is no such
+        declaration.
+        """
+        scope: Scope | None = self
+        while scope is not None:
+            try:
+                return scope.mapping[name]
+            except KeyError:
+                scope = scope.parent
+
+        raise KeyError(f"no entity called '{name}' in {self.label}")
+
+    def create_child(self, label: str) -> Scope:
+        """
+        Return a new scope whose ``self`` is the parent.
+        """
+        return Scope(label, self.context, self)
+
+    def dump(self) -> None:
+        """
+        Debug helper: dump this scope and its parent on the standard output.
+        """
+        s: Scope | None = self
+        while s is not None:
+            print(f"{s.label}:")
+            for k, v in sorted(s.mapping.items()):
+                print(f"  {k}: {v}")
+            s = s.parent
 
 
 def find_toplevel_decl(ctx: CompileCtx,
@@ -1214,6 +1457,14 @@ class LktTypesLoader:
     Lkt.
     """
 
+    @dataclass
+    class Generics:
+        ast_list: Scope.Generic
+        analysis_unit: Scope.Generic
+        array: Scope.Generic
+        iterator: Scope.Generic
+        node: Scope.Generic
+
     # Map Lkt type declarations to the corresponding CompiledType instances, or
     # to None when the type declaration is currently being lowered. Keeping a
     # None entry in this case helps detecting illegal circular type
@@ -1231,6 +1482,7 @@ class LktTypesLoader:
             type declarations.
         """
         self.ctx = ctx
+        self.root_scope = root_scope = Scope("the root scope", ctx)
         self.type_refs = {}
 
         root = lkt_units[0].root
@@ -1274,27 +1526,79 @@ class LktTypesLoader:
             root.p_symbol_type: T.Symbol,
         }
 
-        # Go through all units, build a map for all type definitions, indexed
-        # by name. This first pass allows to check for type name unicity.
-        named_type_decls: Dict[str, L.FullDecl] = {}
+        def builtin_type(name: str) -> Scope.BuiltinType:
+            return Scope.BuiltinType(name, T.deferred_type(name))
+
+        self.generics = self.Generics(
+            Scope.Generic("ASTList"),
+            Scope.Generic("AnalysisUnit"),
+            Scope.Generic("Array"),
+            Scope.Generic("Iterator"),
+            Scope.Generic("Node"),
+        )
+        self.node_builtin = Scope.BuiltinValue("node", E.Self)
+        self.self_builtin = Scope.BuiltinValue("self", E.Entity)
+
+        self.precondition_failure = Scope.Exception(
+            "PreconditionFailure", E.PreconditionFailure
+        )
+        self.property_error = Scope.Exception("PropertyError", E.PropertyError)
+
+        # Register builtins in the root scope
+        for builtin in [
+            builtin_type("BigInt"),
+            builtin_type("Bool"),
+            builtin_type("Char"),
+            builtin_type("Equation"),
+            builtin_type("Int"),
+            builtin_type("LogicVar"),
+            builtin_type("String"),
+            builtin_type("Symbol"),
+            Scope.BuiltinValue("false", E.Literal(False)),
+            Scope.BuiltinValue("true", E.Literal(True)),
+            self.node_builtin,
+            self.self_builtin,
+            self.precondition_failure,
+            self.property_error,
+            self.generics.ast_list,
+            self.generics.analysis_unit,
+            self.generics.array,
+            self.generics.iterator,
+            self.generics.node,
+            Scope.Trait("ErrorNode"),
+            Scope.Trait("TokenNode"),
+        ]:
+            root_scope.mapping[builtin.name] = builtin
+
+        # Go through all units and register all top-level definitions in the
+        # root scope. This first pass allows to check for name uniqueness,
+        # create TypeRepo.Defer objects and build the list of types to lower.
+        type_decls: list[L.TypeDecl] = []
         for unit in lkt_units:
             assert isinstance(unit.root, L.LangkitRoot)
             for full_decl in unit.root.f_decls:
-                if not isinstance(full_decl.f_decl, L.TypeDecl):
-                    continue
-                name = full_decl.f_decl.f_syn_name.text
-                check_source_language(
-                    name not in named_type_decls,
-                    'Duplicate type name: {}'.format(name)
-                )
-                named_type_decls[name] = full_decl
+                decl = full_decl.f_decl
+                name = decl.f_syn_name.text
+                if isinstance(decl, L.LexerDecl):
+                    root_scope.add(Scope.Lexer(name, decl))
+                elif isinstance(decl, L.GrammarDecl):
+                    root_scope.add(Scope.Grammar(name, decl))
+                elif isinstance(decl, L.TypeDecl):
+                    root_scope.add(
+                        Scope.UserType(name, decl, T.deferred_type(name))
+                    )
+                    type_decls.append(decl)
+                else:
+                    error(
+                        "invalid top-level declaration:"
+                        f" {decl.p_decl_type_name}"
+                    )
 
         # Now create CompiledType instances for each user type. To properly
         # handle node derivation, this recurses on bases first and reject
         # inheritance loops.
-        for _, decl in sorted(named_type_decls.items()):
-            assert isinstance(decl.f_decl, L.TypeDecl)
-            self.lower_type_decl(decl.f_decl)
+        for type_decl in type_decls:
+            self.lower_type_decl(type_decl)
 
     def resolve_type_decl(self,
                           decl: L.TypeDecl,
