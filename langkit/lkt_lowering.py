@@ -371,14 +371,19 @@ class WithLexerAnnotationSpec(AnnotationSpec):
                   kwargs: Dict[str, L.Expr]) -> L.LexerDecl:
         assert not kwargs
         assert len(args) == 1
+        requested_name = args[0]
 
-        lexer_decl = check_referenced_decl(args[0])
-        with ctx.lkt_context(args[0]):
-            if not isinstance(lexer_decl, L.LexerDecl):
-                error(
-                    f"lexer expected, got {lexer_decl.p_decl_type_name}"
-                )
-            return lexer_decl
+        full_decl = find_toplevel_decl(
+            ctx, ctx.lkt_units, L.LexerDecl, "lexer"
+        )
+        decl = full_decl.f_decl
+        assert isinstance(decl, L.LexerDecl)
+        with ctx.lkt_context(requested_name):
+            check_source_language(
+                decl.f_syn_name.text == requested_name.text,
+                f"No '{requested_name.text}' lexer found",
+            )
+            return decl
 
 
 token_cls_map = {'text': WithText,
