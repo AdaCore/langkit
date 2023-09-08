@@ -1,6 +1,30 @@
 """
 Module to gather the logic to lower Lkt syntax trees to Langkit internal data
 structures.
+
+Global architecture:
+
+* In the constructor of CompileCtx, all Lkt units are loaded into the
+  CompileCtx.lkt_units list. At this stage, compilation is aborted in case of
+  lexing/parsing error.
+
+* During the "lower_lkt" pass:
+
+  * The "create_lexer" function below instantiates the langkit.lexer.Lexer
+    class and populates it.
+
+  * The "create_grammar" function below instantiates the
+    langkit.parsers.Grammar class and populates it.
+
+  * The "create_types" function below instantiates all CompiledType instances
+    mentionned in the language spec.
+
+The last step is the most complex one: type declarations refer to each other,
+and this step includes the lowering of property expressions to abstract
+expressions. All type declarations in the language spec are lowered in sequence
+(arbitrary order), except base classes, which are lowered before classes that
+they derive from. Properties are lowered as part of the lowering of their
+owning types.
 """
 
 from __future__ import annotations
