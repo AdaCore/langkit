@@ -835,8 +835,9 @@ class FieldAccess(AbstractExpression):
             return '\n'.join(result)
 
         def _render_expr(self) -> str:
-            return (self.result_var.name
-                    if self.result_var else self.field_access_expr)
+            return (str(self.result_var.name)
+                    if self.result_var else
+                    self.field_access_expr)
 
         @property
         def subexprs(self) -> dict:
