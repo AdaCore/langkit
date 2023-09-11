@@ -367,9 +367,9 @@ class Grammar:
                 rule_name, self.rules.keys()
             )
             check_source_language(
-                False, "Wrong rule name: '{}'. {}".format(
+                False, "Unknown rule: '{}'.{}".format(
                     rule_name,
-                    "Did you mean '{}'?".format(close_matches[0])
+                    " Did you mean '{}'?".format(close_matches[0])
                     if close_matches else ""
                 )
             )

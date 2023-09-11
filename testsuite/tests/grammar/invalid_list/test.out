@@ -1,5 +1,5 @@
 == invalid-astlist.lkt ==
-invalid-astlist.lkt:6:7: error: invalid number of generic parameters
+invalid-astlist.lkt:6:7: error: 2 type arguments expected, got 3
 6 |       ASTList[FooNode, Example, Example]+(Example("example"))
   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -11,7 +11,7 @@ invalid-element-type.lkt:8:9: error: Invalid list type for List parser: sub-pars
 
 
 == invalid-list-cls.lkt ==
-invalid-list-cls.lkt:5:29: error: Cannot find entity `NoSuchGeneric` in this scope
+invalid-list-cls.lkt:5:29: error: Bad generic type name: only ASTList is valid in this context
 5 |     @main_rule main_rule <- NoSuchGeneric[Example]+(Example("example"))
   |                             ^^^^^^^^^^^^^
 

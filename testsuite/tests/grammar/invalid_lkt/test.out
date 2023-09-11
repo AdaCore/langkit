@@ -5,7 +5,7 @@ annotated_grammar_1.lkt:4:24: error: Invalid annotation: foo
 
 
 == annotated_grammar_2.lkt ==
-annotated_grammar_2.lkt:4:13: error: reference to a lexer expected
+annotated_grammar_2.lkt:4:13: error: lexer expected, got grammar declaration
 4 | @with_lexer(foo_grammar) grammar foo_grammar {
   |             ^^^^^^^^^^^
 
@@ -14,7 +14,7 @@ annotated_grammar_2.lkt:4:13: error: reference to a lexer expected
 Code generation was successful
 
 == invalid_decl.lkt ==
-invalid_decl.lkt:6:5: error: grammar declaration forbidden in grammar declaration
+invalid_decl.lkt:6:5: error: grammar rule expected, got grammar declaration
 6 |     @with_lexer(foo_lexer) grammar unexpected_decl {
   |     ^
 
@@ -26,7 +26,7 @@ invalid_main_rule_annot.lkt:5:5: error: This annotation accepts no argument
 
 
 == invalid_token.lkt ==
-invalid_token.lkt:4:30: error: Cannot find entity `UnknownToken` in this scope
+invalid_token.lkt:4:30: error: Unknown token: UnknownToken
 4 |     @main_rule main_rule <- @UnknownToken
   |                              ^^^^^^^^^^^^
 
@@ -46,7 +46,7 @@ several_main_rules.lkt:6:5: error: only one main rule allowed
 
 
 == transform_invalid_node.lkt ==
-transform_invalid_node.lkt:5:29: error: Cannot find entity `NoSuchNode` in this scope
+transform_invalid_node.lkt:5:29: error: Unknown node: NoSuchNode
 5 |     @main_rule main_rule <- NoSuchNode("example")
   |                             ^^^^^^^^^^
 

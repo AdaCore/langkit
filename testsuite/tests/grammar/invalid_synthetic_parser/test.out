@@ -11,7 +11,7 @@ null.lkt:5:29: error: Parsers cannot create synthetic nodes
 
 
 == skip.lkt ==
-skip.lkt:5:52: error: Cannot find entity `SynthExapmle` in this scope
+skip.lkt:5:52: error: Unknown node: SynthExapmle
 5 |     @main_rule main_rule <- Example("example" skip(SynthExapmle))
   |                                                    ^^^^^^^^^^^^
 

@@ -1,11 +1,11 @@
 == bad-alt.lkt ==
-bad-alt.lkt:5:37: error: Cannot find entity `NoSuchAlt` in this scope
+bad-alt.lkt:5:37: error: Unknown enum node alternative: NoSuchAlt
 5 |     @main_rule main_rule <- Example.NoSuchAlt("example")
   |                                     ^^^^^^^^^
 
 
 == bad-prefix.lkt ==
-bad-prefix.lkt:5:29: error: Cannot find entity `NoSuchNode` in this scope
+bad-prefix.lkt:5:29: error: Unknown node: NoSuchNode
 5 |     @main_rule main_rule <- NoSuchNode.Example1("example")
   |                             ^^^^^^^^^^
 

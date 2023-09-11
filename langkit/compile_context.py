@@ -20,7 +20,7 @@ import importlib
 import os
 from os import path
 from typing import (Any, Callable, Dict, Iterator, List, Optional, Set,
-                    TYPE_CHECKING, Tuple, Union, cast)
+                    TYPE_CHECKING, Tuple, Union)
 
 from funcy import lzip
 
@@ -30,7 +30,7 @@ from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
     DiagnosticError, Location, Severity, WarningSet, check_source_language,
-    diagnostic_context, error, print_error, print_error_from_sem_result
+    diagnostic_context, error
 )
 from langkit.documentation import RstCommentChecker
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
@@ -2063,40 +2063,6 @@ class CompileCtx:
             from langkit.lkt_lowering import create_types
             create_types(self, self.lkt_units)
 
-    def check_lkt(self) -> None:
-        """
-        Run checks on the lkt sources.
-        """
-        errors = False
-
-        # First check the absence of syntax errors in all loaded units
-        for unit in self.lkt_units:
-            if unit.diagnostics:
-                for diag in unit.diagnostics:
-                    errors = True
-                    print_error(
-                        diag.message,
-                        Location.from_sloc_range(unit, diag.sloc_range)
-                    )
-
-        # Then check for semantic errors either because requested
-        # (self.lkt_semantic_checks) or because everything is loaded from Lkt
-        # sources.
-        #
-        # NOTE: we cannot automatically enable semantic checks when
-        # types_from_lkt is false, as in this case Liblktlang may not be able
-        # to handle some property DSL feature.
-        #
-        # NOTE: for the moment let's not even try to analyze anything if we
-        # have syntax errors.
-        if not errors and (self.lkt_semantic_checks or self.types_from_lkt):
-            for unit in self.lkt_units:
-                sem_results = cast(L.LangkitRoot, unit.root).p_check_semantic
-                errors = errors or sem_results.has_error
-                for r in sem_results.results:
-                    if r.error_message:
-                        print_error_from_sem_result(r)
-
     def prepare_compilation(self):
         """
         Prepare this context to compile the DSL.
@@ -2216,7 +2182,6 @@ class CompileCtx:
 
         return [
             MajorStepPass('Lkt processing'),
-            GlobalPass('Lkt semantic analysis', CompileCtx.check_lkt),
             errors_checkpoint_pass,
             GlobalPass('lower Lkt', CompileCtx.lower_lkt),
             GlobalPass('prepare compilation', CompileCtx.prepare_compilation),

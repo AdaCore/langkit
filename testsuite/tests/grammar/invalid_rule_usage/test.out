@@ -1,5 +1,5 @@
 == foo.lkt ==
-foo.lkt:5:41: error: Cannot find entity `sec_rules` in this scope
+foo.lkt:5:41: error: Unknown rule: 'sec_rules'.
 5 |     @main_rule main_rule <- ExampleNode(sec_rules)
   |                                         ^^^^^^^^^
 

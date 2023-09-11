@@ -92,9 +92,9 @@ pattern_7.lkt:5:5: error: Duplicate pattern name
 
 
 == pattern_8.lkt ==
-pattern_8.lkt:4:20: error: Mismatched types: expected `Int`, got `Regexp`
+pattern_8.lkt:4:14: error: Types are not allowed in lexer declarations
 4 |     val pat: Int = p"example"
-  |                    ^^^^^^^^^^
+  |              ^^^
 
 
 == pattern_9.lkt ==
@@ -128,7 +128,7 @@ spacing_2.lkt:4:5: error: Token family name expected
 
 
 == spacing_3.lkt ==
-spacing_3.lkt:4:27: error: Cannot find entity `foo` in this scope
+spacing_3.lkt:4:27: error: Unknown token family: foo
 4 |     @unparse_spacing(with=foo)
   |                           ^^^
 
