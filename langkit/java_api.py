@@ -1026,6 +1026,18 @@ class JavaAPISettings(AbstractAPISettings):
             (object, lambda _: "jobject"),
         ])
 
+    def jni_c_none(self, the_type: CompiledType) -> str:
+        """
+        Give the C none expression for the given compiled type.
+
+        :param the_type: The type to get the none expression for.
+        """
+        return dispatch_on_type(the_type, [
+            (T.Bool, lambda _: "0"),
+            (T.Int, lambda _: "0"),
+            (object, lambda _: "NULL"),
+        ])
+
     def jni_sig_type(self, the_type: CompiledType, base_class: str) -> str:
         """
         Get the type representation for the JNI signature definition.

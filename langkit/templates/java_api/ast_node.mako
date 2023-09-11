@@ -451,7 +451,7 @@ ${func_sig}(
 
     /* If successful, wrap the return value.  */
     const ${exception_type} *exc_c = ${nat("get_last_exception")} ();
-    ${return_type} res;
+    ${return_type} res = ${api.jni_c_none(field.public_type)};
     if (exc_c == NULL)
       {
         res = ${api.jni_wrap(
