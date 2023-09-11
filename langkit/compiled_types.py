@@ -7,8 +7,8 @@ import difflib
 from itertools import count, takewhile
 import pipes
 from typing import (
-    Callable, ClassVar, Dict, Iterator, List, Optional as Opt, Sequence, Set,
-    TYPE_CHECKING, Tuple, Union, ValuesView
+    Any, Callable, ClassVar, Dict, Iterator, List, Optional as Opt, Sequence,
+    Set, TYPE_CHECKING, Tuple, Union, ValuesView
 )
 
 from langkit import names
@@ -1915,7 +1915,7 @@ class BaseField(AbstractNodeData):
     def __init__(self,
                  repr: bool = True,
                  doc: str = '',
-                 type: Opt[CompiledType] = None,
+                 type: Opt[CompiledTypeOrDefer] = None,
                  access_needs_incref: bool = False,
                  internal_name: Opt[names.Name] = None,
                  prefix: Opt[names.Name] = AbstractNodeData.PREFIX_FIELD,
@@ -2259,7 +2259,7 @@ class UserField(BaseField):
     concrete = True
 
     def __init__(self,
-                 type: CompiledType,
+                 type: CompiledTypeOrDefer,
                  repr: bool = False,
                  doc: str = '',
                  public: bool = True,
@@ -4603,28 +4603,31 @@ class TypeRepo:
 
     class Defer:
         """
-        Internal class representing a not-yet resolved type.
+        Internal class representing a not-yet resolved object (type, field,
+        expression, ...).
         """
-        def __init__(self, getter, label):
+        def __init__(
+            self,
+            getter: Callable[[], Any],
+            label: str,
+        ):
             """
-            :param () -> CompiledType getter: A function that will return
-                the resolved type when called.
-            :param str label: Short description of what this Defer object
-                resolves to, for debugging purposes.
+            :param getter: A function that will return the resolved object when
+                called.
+            :param label: Short description of what this Defer object resolves
+                to, for debugging purposes.
             """
             self.getter = getter
             self.label = label
 
-        def get(self):
+        def get(self) -> Any:
             """
-            Resolve the internally referenced type.
-
-            :rtype: CompiledType
+            Resolve the referenced entity.
             """
             return self.getter()
 
-        def __getattr__(self, name):
-            def get():
+        def __getattr__(self, name: str) -> TypeRepo.Defer:
+            def get() -> Any:
                 prefix = self.get()
 
                 # The DSL name for automatic ASTNodeType instances for enum
@@ -4634,9 +4637,10 @@ class TypeRepo:
                 # TypeRepo shortcut, so handle it explicitly here.
                 if (
                     # The following is True iff prefix is an abstract enum node
-                    isinstance(prefix, ASTNodeType) and
-                    prefix.is_enum_node and
-                    not prefix.base.is_enum_node
+                    isinstance(prefix, ASTNodeType)
+                    and prefix.is_enum_node
+                    and prefix.base is not None
+                    and not prefix.base.is_enum_node
                 ):
                     try:
                         return prefix._alternatives_map[name]
@@ -4652,8 +4656,7 @@ class TypeRepo:
                 try:
                     return prefix._fields[name]
                 except KeyError:
-                    check_source_language(
-                        False,
+                    error(
                         '{prefix} has no {attr} attribute'.format(
                             prefix=(prefix.dsl_name
                                     if isinstance(prefix, CompiledType) else
@@ -4664,20 +4667,26 @@ class TypeRepo:
                     )
             return TypeRepo.Defer(get, '{}.{}'.format(self.label, name))
 
-        def __call__(self, *args, **kwargs):
+        def __call__(self, *args: object, **kwargs: object) -> TypeRepo.Defer:
+            # Format the label for the result
             label_args = []
             for arg in args:
                 label_args.append(str(arg))
             for kw, arg in kwargs.items():
                 label_args.append('{}={}'.format(kw, arg))
+            label = "{}({})".format(self.label, ", ".join(label_args))
 
-            return TypeRepo.Defer(
-                lambda: self.get()(*args, **kwargs),
-                '{}({})'.format(self.label, ', '.join(label_args))
-            )
+            return TypeRepo.Defer(lambda: self.get()(*args, **kwargs), label)
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<Defer {}>'.format(self.label)
+
+    # TODO: Currently, in many contexts that require a CompiledType instance
+    # (not a Defer one), TypeDefer.__getattr__() is used to retrieve a
+    # built-in, so adding type annotations here will make all these uses
+    # invalid. In order to complete type annotations, we should introduce a new
+    # way to get builtin compiled types whose type annotations guarantee that a
+    # CompiledType instance is returned.
 
     def __getattr__(self, type_name):
         """
@@ -4711,10 +4720,9 @@ class TypeRepo:
                 result)
 
     @property
-    def root_node(self):
+    def root_node(self) -> ASTNodeType:
         """
         Shortcut to get the root AST node.
-        :rtype: ASTNodeType
         """
         result = CompiledTypeRepo.root_grammar_class
         assert result
@@ -4722,39 +4730,38 @@ class TypeRepo:
 
     @property  # type: ignore
     @memoized
-    def node_kind(self):
+    def node_kind(self) -> names.Name:
         """
         Name of type node kind type.
         """
         return self.root_node.entity.api_name + names.Name('Kind_Type')
 
     @property
-    def defer_root_node(self):
+    def defer_root_node(self) -> TypeRepo.Defer:
         return self.Defer(lambda: self.root_node, 'root_node')
 
     @property
-    def env_md(self):
+    def env_md(self) -> StructType:
         """
         Shortcut to get the lexical environment metadata type.
-        :rtype: StructType
         """
         assert CompiledTypeRepo.env_metadata is not None
         return CompiledTypeRepo.env_metadata
 
     @property
-    def defer_env_md(self):
+    def defer_env_md(self) -> TypeRepo.Defer:
         return self.Defer(lambda: self.env_md, '.env_md')
 
     @property
-    def entity_info(self):
+    def entity_info(self) -> StructType:
         """
         Shortcut to get the entity information type.
-        :rtype: StructType
         """
+        assert CompiledTypeRepo.root_grammar_class is not None
         return CompiledTypeRepo.root_grammar_class.entity_info()
 
     @property
-    def entity(self):
+    def entity(self) -> EntityType:
         """
         This property returns the root type used to describe an AST node with
         semantic information attached.
@@ -4763,7 +4770,7 @@ class TypeRepo:
 
     @property  # type: ignore
     @memoized
-    def env_assoc(self):
+    def env_assoc(self) -> StructType:
         """
         EnvAssoc type, used to add associations of key and value to the lexical
         environments, via the add_to_env primitive.
