@@ -1197,7 +1197,7 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, ArrayLiteral):
         if not len(expr.elements):
-            return '[]'
+            return '[]: {}'.format(type_name(expr.element_type))
         return "[{}]".format(", ".join(ee(el) for el in expr.elements))
 
     elif isinstance(expr, CharacterLiteral):
