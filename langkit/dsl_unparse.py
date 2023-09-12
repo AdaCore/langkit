@@ -721,7 +721,8 @@ def emit_expr(expr, **ctx):
         return json.dumps(expr.name)
 
     elif isinstance(expr, BaseRaiseException):
-        return "raise {}({})".format(
+        return "raise[{}] {}({})".format(
+            type_name(expr.expr_type),
             expr.exc_name.camel,
             json.dumps(expr.message) if expr.message else ""
         )
@@ -1323,8 +1324,8 @@ def emit_prop(prop, walker):
         # implemented on type XXX"). We probably need to extend the DSL for
         # this.
         res += (
-            f" = raise PropertyError(\"Property {prop.qualname} not"
-            " implemented\")"
+            f" = raise[{type_name(prop.type)}]"
+            f" PropertyError(\"Property {prop.qualname} not implemented\")"
         )
     elif prop_for_walker.expr:
         with walker.property(prop_for_walker):

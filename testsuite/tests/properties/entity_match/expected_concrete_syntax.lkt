@@ -31,5 +31,5 @@ class Literal : FooNode implements TokenNode {
         case c : FooNode => c.get_num()
     }
 
-    fun a(): FooNode = raise PropertyError("Property Literal.a not implemented")
+    fun a(): FooNode = raise[FooNode] PropertyError("Property Literal.a not implemented")
 }
