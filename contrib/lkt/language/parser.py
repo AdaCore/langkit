@@ -3431,6 +3431,7 @@ class RaiseExpr(Expr):
     """
     Raise expression.
     """
+    dest_type = Field(type=T.TypeRef)
     except_expr = Field(type=T.Expr)
 
     @langkit_property(return_type=T.SemanticResult.array)
@@ -4103,7 +4104,7 @@ lkt_grammar.add_rules(
         "else", G.expr
     ),
 
-    raise_expr=RaiseExpr("raise", G.expr),
+    raise_expr=RaiseExpr("raise", Opt("[", G.type_ref, "]"), G.expr),
     try_expr=TryExpr("try", G.expr, Opt("else", G.expr)),
 
     array_literal=ArrayLiteral(

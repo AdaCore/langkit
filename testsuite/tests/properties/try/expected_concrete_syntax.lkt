@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    fun failing_property(): Bool = raise PropertyError()
+    fun failing_property(): Bool = raise[Bool] PropertyError()
 
     @export fun failsafe_property(): Bool =
     try node.failing_property() else false
