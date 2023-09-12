@@ -1658,17 +1658,6 @@ class LktTypesLoader:
                     args.append(value)
             return args, kwargs
 
-        def is_array_expr(expr: L.Expr) -> bool:
-            """
-            Return whether ``expr`` computes an array.
-            """
-            expr_type = self.resolve_type_decl(
-                expr.p_check_expr_type,
-                force_lowering=True,
-            )
-            assert isinstance(expr_type, CompiledType)
-            return expr_type.is_array_type
-
         def lower(expr: L.Expr) -> AbstractExpression:
             """
             Wrapper around "_lower" to set the expression location.
@@ -1712,13 +1701,6 @@ class LktTypesLoader:
                         L.OpGte: E.OrderingTest.GE,
                     }[type(expr.f_op)]
                     return E.OrderingTest(operator, left, right)
-
-                elif (
-                    isinstance(expr.f_op, L.OpAmp)
-                    and is_array_expr(expr.f_left)
-                ):
-                    assert is_array_expr(expr.f_right)
-                    return left.concat(right)  # type: ignore
 
                 else:
                     operator = {

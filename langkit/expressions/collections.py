@@ -1005,19 +1005,21 @@ class Concat(AbstractExpression):
         self.array_1 = array_1
         self.array_2 = array_2
 
-    def construct(self) -> ResolvedExpression:
-        array_1 = construct(self.array_1)
-        array_2 = construct(self.array_2)
-
+    @staticmethod
+    def create_constructed(
+        left: ResolvedExpression,
+        right: ResolvedExpression,
+        abstract_expr: AbstractExpression | None = None,
+    ) -> ResolvedExpression:
         # Handle strings as a special case
-        if array_1.type.is_string_type:
+        if left.type.is_string_type:
             check_source_language(
-                array_2.type.is_string_type,
-                "String type expected, got {}".format(array_2.type.dsl_name)
+                right.type.is_string_type,
+                "String type expected, got {}".format(right.type.dsl_name)
             )
             return CallExpr(
-                "Concat_Result", "Concat_String", T.String, [array_1, array_2],
-                abstract_expr=self,
+                "Concat_Result", "Concat_String", T.String, [left, right],
+                abstract_expr=abstract_expr,
             )
 
         def check_array(typ: CompiledType) -> None:
@@ -1026,20 +1028,25 @@ class Concat(AbstractExpression):
                 "Expected array type, got {}".format(typ.dsl_name)
             )
 
-        check_array(array_1.type)
-        check_array(array_2.type)
+        check_array(left.type)
+        check_array(right.type)
 
         check_multiple([
-            (array_1.type == array_2.type,
+            (left.type == right.type,
              "Got different array element types in concat: {} and {}".format(
-                 array_1.type.element_type.dsl_name,
-                 array_2.type.element_type.dsl_name
+                 left.type.element_type.dsl_name,
+                 right.type.element_type.dsl_name
              )),
         ])
 
-        return CallExpr('Concat_Result', 'Concat', array_1.type,
-                        [array_1, array_2],
-                        abstract_expr=self)
+        return CallExpr('Concat_Result', 'Concat', left.type,
+                        [left, right],
+                        abstract_expr=abstract_expr)
+
+    def construct(self) -> ResolvedExpression:
+        left = construct(self.array_1)
+        right = construct(self.array_2)
+        return self.create_constructed(left, right)
 
 
 @attr_call("join")
