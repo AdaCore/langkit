@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    fun resolver(): FooNode = null
+    fun resolver(): FooNode = null[FooNode]
 }
 
 class Example : FooNode implements TokenNode {

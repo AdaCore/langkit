@@ -10,7 +10,8 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun env_get_all(): Array[FooNode] = node.children_env().get(null)
+    @export fun env_get_all(): Array[FooNode] =
+    node.children_env().get(null[Symbol])
 }
 
 class Id : FooNode implements TokenNode {

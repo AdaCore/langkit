@@ -19,7 +19,7 @@ grammar foo_grammar {
             case a : Atom => [a]
 
             # This should match Def | Plus .. FooNode.list
-            case _ => null
+            case _ => null[Array[Atom]]
         }
     ) & (
         self.children.mapcat((c) => c.find_atoms())
@@ -34,7 +34,7 @@ grammar foo_grammar {
             case e : Expr => [e]
 
             # This should match Def | FooNode.list
-            case _ => null
+            case _ => null[Array[Expr]]
         }
     ) & (
         self.children.mapcat((c) => c.find_atoms_or_exprs())
@@ -50,7 +50,7 @@ grammar foo_grammar {
             case a : Atom => [a.as[Expr]]
 
             # This should match Def | FooNode.list
-            case _ => null
+            case _ => null[Array[Expr]]
         }
     ) & (
         self.children.mapcat((c) => c.find_exprs())
@@ -70,7 +70,7 @@ class Def : FooNode {
             case r : Ref => [r]
 
             # This should match Lit
-            case _ => null
+            case _ => null[Array[Ref]]
         }
     ) & (
         self.children.mapcat((c) => c.as[Expr]!.find_refs())

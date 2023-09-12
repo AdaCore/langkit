@@ -18,5 +18,5 @@ class Example : FooNode {
 
     @export fun prop2(arg: Color = Color.red): Color = arg
 
-    @export fun prop3(arg: FooNode = null): FooNode = arg
+    @export fun prop3(arg: FooNode = null[FooNode]): FooNode = arg
 }

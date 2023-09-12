@@ -16,7 +16,7 @@ grammar foo_grammar {
 
     fun scope_fqn(): String = match node {
         case dn : DottedName => dn.prefix.fqn()
-        case _ : Identifier => null
+        case _ : Identifier => null[String]
     }
 
     fun fqn(): String = match node {
