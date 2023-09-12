@@ -1163,7 +1163,7 @@ def emit_expr(expr, **ctx):
         return var_name(expr)
 
     elif isinstance(expr, No):
-        return "null"
+        return "null[{}]".format(type_name(expr.expr_type))
         # TODO: Emit valid null values for other types, eg. [] for arrays.
 
     elif isinstance(expr, CollectionSingleton):

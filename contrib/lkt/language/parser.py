@@ -3629,7 +3629,7 @@ class NullLit(Lit):
     """
     Null literal expression.
     """
-    token_node = True
+    dest_type = Field(type=T.TypeRef)
 
 
 class StringLit(Lit):
@@ -4161,7 +4161,7 @@ lkt_grammar.add_rules(
     lambda_expr=LambdaExpr("(", G.lambda_arg_list, ")",
                            Opt(":", G.type_ref), "=>", Cut(), G.expr),
 
-    null_lit=NullLit("null"),
+    null_lit=NullLit("null", Opt("[", G.type_ref, "]")),
 
     param=Param(Opt(G.ref_id, "="), G.expr),
     params=List(G.param, sep=",", empty_valid=True),

@@ -26,5 +26,5 @@ class Example : FooNode {
     else 3
 
     @export fun cond_node(b: Bool): FooNode = if node.identity(b) then node
-    else (null).as_bare_entity
+    else (null[FooNode]).as_bare_entity
 }

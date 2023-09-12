@@ -10,33 +10,40 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export fun test_contains(): Bool = null.contains(node)
+    @export fun test_contains(): Bool =
+    null[ASTList[FooNode, Example]].contains(node)
 
     @export fun test_filter(): Array[Example] =
-    null.filter((n) => n.is_null).map((n) => n.as_bare_entity)
+    null[ASTList[FooNode, Example]].filter((n) => n.is_null).map((n) => n.as_bare_entity)
 
-    @export fun test_filtermap(): Array[Example] = null.filtermap(
+    @export fun test_filtermap(): Array[Example] =
+    null[ASTList[FooNode, Example]].filtermap(
         (n) => n.as_bare_entity, (n) => n.is_null
     )
 
-    @export fun test_map(): Array[Example] = null.map((n) => n.as_bare_entity)
+    @export fun test_map(): Array[Example] =
+    null[ASTList[FooNode, Example]].map((n) => n.as_bare_entity)
 
     @export fun test_mapcat(): Array[Example] =
-    null.mapcat((n) => [n.as_bare_entity])
+    null[ASTList[FooNode, Example]].mapcat((n) => [n.as_bare_entity])
 
     @export fun test_takewhile(): Array[Example] =
-    null.take_while((n) => n.is_null).map((n) => n.as_bare_entity)
+    null[ASTList[FooNode, Example]].take_while((n) => n.is_null).map((n) => n.as_bare_entity)
 
     @export fun test_as_array(): Array[Example] =
-    null.as_array().map((n) => n.as_bare_entity)
+    null[ASTList[FooNode, Example]].as_array().map((n) => n.as_bare_entity)
 
-    @export fun test_all(): Bool = null.all((n) => n.is_null)
+    @export fun test_all(): Bool =
+    null[ASTList[FooNode, Example]].all((n) => n.is_null)
 
-    @export fun test_any(): Bool = null.any((n) => n.is_null)
+    @export fun test_any(): Bool =
+    null[ASTList[FooNode, Example]].any((n) => n.is_null)
 
-    @export fun test_at(): Example = null?(0).as_bare_entity
+    @export fun test_at(): Example =
+    null[ASTList[FooNode, Example]]?(0).as_bare_entity
 
-    @export fun test_at_or_raise(): Example = null(0).as_bare_entity
+    @export fun test_at_or_raise(): Example =
+    null[ASTList[FooNode, Example]](0).as_bare_entity
 
-    @export fun test_length(): Int = null.length()
+    @export fun test_length(): Int = null[ASTList[FooNode, Example]].length()
 }

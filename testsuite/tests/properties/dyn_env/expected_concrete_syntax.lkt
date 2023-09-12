@@ -37,7 +37,7 @@ class CallExpr : FooNode {
 
         decl.args.map(
             (a, i) => InnerEnvAssoc(
-                key=a.name.symbol, value=node.args?(i), metadata=null
+                key=a.name.symbol, value=node.args?(i), metadata=null[Metadata]
             )
         )
     }
@@ -48,7 +48,7 @@ class CallExpr : FooNode {
 
         decl.args.map(
             (a) => InnerEnvAssoc(
-                key=a.name.symbol, value=a.arg_expr.node, metadata=null
+                key=a.name.symbol, value=a.arg_expr.node, metadata=null[Metadata]
             )
         )
     }

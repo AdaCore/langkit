@@ -45,12 +45,12 @@ class Ref : Atom {
     @export fun dummy(): Array[FooNode] =
     node.referenced_env().get(node.name.symbol)
 
-    fun referenced_env(): LexicalEnv[FooNode] = null
+    fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 }
 
 class MiddleRef : Ref {
 
-    fun referenced_env(): LexicalEnv[FooNode] = null
+    fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 }
 
 class DerivedRef : MiddleRef {

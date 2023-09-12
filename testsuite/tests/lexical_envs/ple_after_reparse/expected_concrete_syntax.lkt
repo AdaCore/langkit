@@ -30,7 +30,7 @@ class Dep : FooNode {
 
     fun scope_fqn(): String = match node {
         case p : Prefix => p.prefix.fqn()
-        case _ : Id => null
+        case _ : Id => null[String]
     }
 
     fun fqn(): String = match node {
