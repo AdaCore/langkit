@@ -3834,6 +3834,11 @@ class PropertyDef(AbstractNodeData):
         if not self.expr:
             return
 
+        # If the expression is a Defer object, resolve it now, as all types
+        # should be available at this point.
+        if isinstance(self.expr, T.Defer):
+            self.expr = self.expr.get()
+
         # If the user passed a lambda or function for the expression,
         # now is the moment to transform it into an abstract expression by
         # calling it.

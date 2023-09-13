@@ -48,9 +48,9 @@ import liblktlang as L
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeOrDefer,
-    CompiledTypeRepo, EnumNodeAlternative, EnumType, Field, StructType, T,
-    TypeRepo, UserField, resolve_type
+    ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeRepo,
+    EnumNodeAlternative, EnumType, Field, StructType, T, TypeRepo, UserField,
+    resolve_type
 )
 from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context, error,
@@ -59,7 +59,7 @@ from langkit.diagnostics import (
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
-    Let, LocalVars, Property, PropertyDef, PropertyError, create_lazy_field
+    Let, LocalVars, Property, PropertyDef, create_lazy_field
 )
 from langkit.lexer import (
     Action, Alt, Case, Ignore, Lexer, LexerToken, Literal, Matcher, NoCaseLit,
@@ -75,20 +75,6 @@ from langkit.parsers import (
 
 # List of annotations that we don't compute here but that we can safely ignore
 ANNOTATIONS_WHITELIST = ['builtin']
-
-
-def check_referenced_decl(expr: L.Expr) -> L.Decl:
-    """
-    Wrapper around ``Expr.p_check_referenced_decl``.
-
-    Since we are supposed to lower Lkt code only when it has no semantic error,
-    this property should never fail. If it does, there is a bug somewhere in
-    Langkit: raise an assertion error that points to the relevant Lkt node.
-    """
-    try:
-        return expr.p_check_referenced_decl
-    except L.PropertyError as exc:
-        assert False, f"Cannot get referenced decl for {expr}: {exc}"
 
 
 def same_node(left: L.LktNode, right: L.LktNode) -> bool:
@@ -1471,10 +1457,6 @@ class LktTypesLoader:
     # dependencies.
     compiled_types: Dict[L.TypeDecl, Optional[CompiledType]]
 
-    # Map Lkt type declarations to TypeRepo.Defer instances that resolve to the
-    # corresponding CompiledType instances.
-    type_refs: Dict[L.TypeDecl, TypeRepo.Defer]
-
     def __init__(self, ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]):
         """
         :param ctx: Context in which to create these types.
@@ -1483,51 +1465,24 @@ class LktTypesLoader:
         """
         self.ctx = ctx
         self.root_scope = root_scope = Scope("the root scope", ctx)
-        self.type_refs = {}
 
-        root = lkt_units[0].root
+        self.compiled_types: dict[L.Decl, CompiledType | None] = {}
 
-        def get_field(decl: L.NamedTypeDecl, name: str) -> L.Decl:
+        def builtin_type(
+            name: str,
+            internal_name: str | None = None,
+        ) -> Scope.BuiltinType:
             """
-            Return the (assumed existing and unique) declaration called
-            ``name`` nested in ``decl``.
+            Create a builtin type for scopes.
+
+            :param name: Name for this type in scopes.
+            :param internal_name: If provided, name for the underlying compiled
+                type. Use "name" if not provided.
             """
-            decls = [fd.f_decl
-                     for fd in decl.f_decls
-                     if fd.f_decl.p_name == name]
-            assert len(decls) == 1, str(decls)
-            return decls[0]
-
-        # Pre-fetch the declaration of generic types so that resolve_type_decl
-        # has an efficient access to them.
-        self.analysis_unit_trait = root.p_analysis_unit_trait
-        self.array_type = root.p_array_type
-        self.astlist_type = root.p_astlist_type
-        self.error_node_trait = root.p_error_node_trait
-        self.iterator_trait = root.p_iterator_trait
-        self.node_trait = root.p_node_trait
-        self.property_error_type = root.p_property_error_type
-        self.string_type = root.p_string_type
-        self.token_node_trait = root.p_token_node_trait
-
-        self.find_method = get_field(self.iterator_trait, 'find')
-        self.map_method = get_field(self.iterator_trait, 'map')
-        self.to_symbol_method = get_field(self.string_type, 'to_symbol')
-        self.unique_method = get_field(self.array_type, 'unique')
-
-        # Map Lkt nodes for the declarations of builtin types to the
-        # corresponding CompiledType instances.
-        self.compiled_types = {
-            root.p_char_type: T.Character,
-            root.p_int_type: T.Int,
-            root.p_bool_type: T.Bool,
-            root.p_bigint_type: T.BigInt,
-            root.p_string_type: T.String,
-            root.p_symbol_type: T.Symbol,
-        }
-
-        def builtin_type(name: str) -> Scope.BuiltinType:
-            return Scope.BuiltinType(name, T.deferred_type(name))
+            return Scope.BuiltinType(
+                name,
+                T.deferred_type(internal_name or name),
+            )
 
         self.generics = self.Generics(
             Scope.Generic("ASTList"),
@@ -1548,7 +1503,7 @@ class LktTypesLoader:
         for builtin in [
             builtin_type("BigInt"),
             builtin_type("Bool"),
-            builtin_type("Char"),
+            builtin_type("Char", "Character"),
             builtin_type("Equation"),
             builtin_type("Int"),
             builtin_type("LogicVar"),
@@ -1600,97 +1555,182 @@ class LktTypesLoader:
         for type_decl in type_decls:
             self.lower_type_decl(type_decl)
 
-    def resolve_type_decl(self,
-                          decl: L.TypeDecl,
-                          force_lowering: bool = False) -> CompiledTypeOrDefer:
+    def resolve_entity(self, name: L.Expr, scope: Scope) -> Scope.Entity:
         """
-        Fetch the CompiledType instance corresponding to the given type
-        declaration.
-
-        When ``force_lowering`` is ``False``, if ``decl`` is not lowered yet,
-        return an appropriate TypeRepo.Defer instance instead.
-
-        :param decl: Lkt type declaration to resolve.
+        Resolve the entity designated by ``name`` in the given scope.
         """
-        result: Optional[CompiledTypeOrDefer]
+        if isinstance(name, L.RefId):
+            try:
+                return scope.lookup(name.text)
+            except KeyError as exc:
+                with self.ctx.lkt_context(name):
+                    error(exc.args[0])
+        else:
+            with self.ctx.lkt_context(name):
+                error("invalid entity reference")
 
-        # First, look for an actual CompiledType instance
-        result = self.compiled_types.get(decl)
-        if result is not None:
+    def resolve_generic(self, name: L.Expr, scope: Scope) -> Scope.Generic:
+        """
+        Like ``resolve_entity``, but for generics specifically.
+        """
+        result = self.resolve_entity(name, scope)
+        if isinstance(result, Scope.Generic):
             return result
+        else:
+            with self.ctx.lkt_context(name):
+                error("generic expected, got {result.diagnostic_name}")
 
-        # Not found: unless lowering is forced, look now for an existing
-        # TypeRepo.Defer instance.
-        if not force_lowering:
-            result = self.type_refs.get(decl)
-            if result is not None:
-                return result
+    def resolve_type(self, name: L.TypeRef, scope: Scope) -> TypeRepo.Defer:
+        """
+        Like ``resolve_entity``, but for types specifically.
+        """
+        if isinstance(name, L.GenericTypeRef):
+            with self.ctx.lkt_context(name):
+                generic = self.resolve_generic(name.f_type_name, scope)
+                type_args = list(name.f_params)
+                if generic == self.generics.ast_list:
+                    if len(type_args) != 2:
+                        error(
+                            f"{generic.name} expects two type arguments: the"
+                            " root node and the list element type"
+                        )
+                    root_node_ref, element_type_ref = type_args
 
-        # If this is an instantiated generic type, try to build the
-        # corresponding CompiledType from the type actuals.
-        if isinstance(decl, L.InstantiatedGenericType):
-            inner_type = decl.p_get_inner_type
-            actuals = decl.p_get_actuals
+                    # TODO: validate that root_node_ref is the root node and
+                    # that element_type_ref is a node type. The only way to
+                    # validate this currently is to perform lowering, so we
+                    # have a chicken and egg problem: we may already be
+                    # lowering the root node.
+                    del root_node_ref
 
-            if inner_type == self.array_type:
-                assert len(actuals) == 1
-                result = self.resolve_type_decl(
-                    actuals[0], force_lowering
-                ).array
+                    return self.resolve_type(element_type_ref, scope).list
 
-            elif inner_type == self.iterator_trait:
-                assert len(actuals) == 1
-                result = self.resolve_type_decl(
-                    actuals[0], force_lowering
-                ).iterator
+                elif generic == self.generics.analysis_unit:
+                    if len(type_args) != 1:
+                        error(
+                            f"{generic.name} expects one type argument: the"
+                            " root node"
+                        )
+                    root_node_ref, = type_args
 
-            elif inner_type == self.astlist_type:
-                assert len(actuals) == 2
-                root_node = actuals[0]
-                node = self.resolve_type_decl(
-                    actuals[1], force_lowering=force_lowering
-                )
+                    # TODO: validate that root_node_ref is the root node (see
+                    # above).
+                    del root_node_ref
 
-                # Make sure that "root_node" is indeed a root node (a class
-                # with no base type). Lkt type checking as already supposed to
-                # make sure that "node" is a class (i.e. a node), and lowering
-                # already checks that there is exactly one node types
-                # hierarchy.
+                    return T.AnalysisUnit
+
+                elif generic == self.generics.array:
+                    if len(type_args) != 1:
+                        error(
+                            f"{generic.name} expects one type argument: the"
+                            " element type"
+                        )
+                    element_type, = type_args
+                    return self.resolve_type(element_type, scope).array
+
+                elif generic == self.generics.iterator:
+                    if len(type_args) != 1:
+                        error(
+                            f"{generic.name} expects one type argument: the"
+                            " element type"
+                        )
+                    element_type, = type_args
+                    return self.resolve_type(element_type, scope).iterator
+
+                elif generic == self.generics.node:
+                    error(
+                        "this generic trait is supposed to be used only in"
+                        " the 'implements' part of the root node type"
+                        " declaration"
+                    )
+
+                else:
+                    # User code cannot define new generics, so there cannot
+                    # possibly be other generics.
+                    assert False
+
+        elif isinstance(name, L.SimpleTypeRef):
+            return self.resolve_type_expr(name.f_type_name, scope)
+
+        else:
+            with self.ctx.lkt_context(name):
+                error("invalid type reference")
+
+    def resolve_type_expr(self, name: L.Expr, scope: Scope) -> TypeRepo.Defer:
+        """
+        Like ``resolve_type``, but working on a type expression directly.
+        """
+        with self.ctx.lkt_context(name):
+            if isinstance(name, L.RefId):
+                entity = self.resolve_entity(name, scope)
+                if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
+                    return entity.defer
+                else:
+                    error(f"type expected, got {entity.diagnostic_name}")
+            else:
+                error("invalid type reference")
+
+    def resolve_and_lower_node(
+        self,
+        name: L.TypeRef,
+        scope: Scope,
+    ) -> ASTNodeType:
+        """
+        Resolve a type reference and lower it, checking that it is a node type.
+        """
+        with self.ctx.lkt_context(name):
+            # There are only two legal cases: the base type is just a node
+            # class defined in user code (SimpleTypeRef) or it is a bare node
+            # list instantiation (GenericTypeRef). Reject everything else.
+            if isinstance(name, L.SimpleTypeRef):
+                # We have a direct node class reference: first fetch the Lkt
+                # declaration for it.
+                try:
+                    entity = scope.lookup(name.text)
+                except KeyError as exc:
+                    error(exc.args[1])
+                if not isinstance(entity, Scope.UserType):
+                    error(f"node type expected, got {entity.diagnostic_name}")
+                base_type_decl = entity.decl
+                assert isinstance(base_type_decl, L.TypeDecl)
+
+                # Then, force its lowering
+                base_type = self.lower_type_decl(base_type_decl)
+                if not isinstance(base_type, ASTNodeType):
+                    error("node type expected")
+                return base_type
+
+            elif isinstance(name, L.GenericTypeRef):
+                # This must be a node list instantiation: validate the
+                # instantiation itself.
+                generic = self.resolve_generic(name.f_type_name, scope)
+                if generic != self.generics.ast_list:
+                    error(
+                        "the only generic allowed in this context is"
+                        f" {self.generics.ast_list.name}"
+                    )
+
+                # Lower the root and element nodes
+                type_args = [
+                    self.resolve_and_lower_node(t, scope)
+                    for t in name.f_params
+                ]
                 check_source_language(
-                    isinstance(root_node, L.ClassDecl)
-                    and root_node.f_syn_base_type is None,
-                    "In ASTList[N1, N2], N1 must be the root node"
+                    len(type_args) == 2,
+                    "{generic.name} expects two type arguments: the root node"
+                    " and the list element type"
                 )
+                root_node, element_type = type_args
 
-                assert isinstance(node, (ASTNodeType, TypeRepo.Defer))
-                result = node.list
-
-            elif inner_type == self.analysis_unit_trait:
-                result = T.AnalysisUnit
+                check_source_language(
+                    root_node.is_root_node,
+                    f"in {generic.name}[N1, N2], N1 is supposed to be the root"
+                    " node"
+                )
+                return element_type.list
 
             else:
-                assert False, (
-                    'Unknown generic type: {} (from {})'
-                    .format(inner_type, decl)
-                )
-
-        # Otherwise, "decl" is not lowered yet: create a Defer object or lower
-        # it depending on "force_lowering".
-        else:
-            assert isinstance(decl, L.NamedTypeDecl)
-            result = (
-                self.lower_type_decl(decl)
-                if force_lowering else
-                getattr(T, decl.f_syn_name.text)
-            )
-
-        if isinstance(result, TypeRepo.Defer):
-            assert not force_lowering
-            self.type_refs[decl] = result
-        else:
-            assert isinstance(result, CompiledType)
-            self.compiled_types[decl] = result
-        return result
+                error("invalid node type reference")
 
     def lower_type_decl(self, decl: L.TypeDecl) -> CompiledType:
         """
@@ -1724,44 +1764,35 @@ class LktTypesLoader:
 
             # Dispatch now to the appropriate lowering helper
             result: CompiledType
-            if isinstance(decl, L.InstantiatedGenericType):
-                # At this stage, the only generic types should come from the
-                # prelude (Array, ASTList), so there is no need to do anything
-                # special for them. However the type actuals must be lowered so
-                # that we can return a compiled type, and not a Defer object.
-                resolved = self.resolve_type_decl(decl, force_lowering=True)
-                assert isinstance(resolved, CompiledType)
-                result = resolved
+            full_decl = decl.parent
+            assert isinstance(full_decl, L.FullDecl)
+            if isinstance(decl, L.BasicClassDecl):
+
+                specs = (EnumNodeAnnotations
+                         if isinstance(decl, L.EnumClassDecl)
+                         else NodeAnnotations)
+                result = self.create_node(
+                    decl, parse_annotations(self.ctx, specs, full_decl)
+                )
+
+            elif isinstance(decl, L.EnumTypeDecl):
+                result = self.create_enum(
+                    decl,
+                    parse_annotations(self.ctx, EnumAnnotations, full_decl)
+                )
+
+            elif isinstance(decl, L.StructDecl):
+                result = self.create_struct(
+                    decl,
+                    parse_annotations(
+                        self.ctx, StructAnnotations, full_decl
+                    )
+                )
+
             else:
-                full_decl = decl.parent
-                assert isinstance(full_decl, L.FullDecl)
-                if isinstance(decl, L.BasicClassDecl):
-
-                    specs = (EnumNodeAnnotations
-                             if isinstance(decl, L.EnumClassDecl)
-                             else NodeAnnotations)
-                    result = self.create_node(
-                        decl, parse_annotations(self.ctx, specs, full_decl)
-                    )
-
-                elif isinstance(decl, L.EnumTypeDecl):
-                    result = self.create_enum(
-                        decl,
-                        parse_annotations(self.ctx, EnumAnnotations, full_decl)
-                    )
-
-                elif isinstance(decl, L.StructDecl):
-                    result = self.create_struct(
-                        decl,
-                        parse_annotations(
-                            self.ctx, StructAnnotations, full_decl
-                        )
-                    )
-
-                else:
-                    raise NotImplementedError(
-                        'Unhandled type declaration: {}'.format(decl)
-                    )
+                raise NotImplementedError(
+                    'Unhandled type declaration: {}'.format(decl)
+                )
 
             self.compiled_types[decl] = result
             return result
@@ -1769,7 +1800,8 @@ class LktTypesLoader:
     def lower_base_field(
         self,
         full_decl: L.FullDecl,
-        allowed_field_types: Tuple[Type[AbstractNodeData], ...]
+        allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        struct_name: str,
     ) -> AbstractNodeData:
         """
         Lower the field described in ``decl``.
@@ -1780,7 +1812,7 @@ class LktTypesLoader:
         decl = full_decl.f_decl
         assert isinstance(decl, L.FieldDecl)
         annotations = parse_annotations(self.ctx, FieldAnnotations, full_decl)
-        field_type = self.resolve_type_decl(decl.f_decl_type.p_designated_type)
+        field_type = self.resolve_type(decl.f_decl_type, self.root_scope)
         doc = self.ctx.lkt_doc(full_decl)
 
         cls: Type[AbstractNodeData]
@@ -1809,6 +1841,10 @@ class LktTypesLoader:
                 external=False,
                 arg_decl_list=None,
                 body=decl.f_default_val,
+                label=(
+                    "initializer for lazy field"
+                    f" {struct_name}.{decl.f_syn_name.text}"
+                ),
             )
 
             kwargs = {
@@ -1873,7 +1909,7 @@ class LktTypesLoader:
             )
             cls = constructor = UserField
             kwargs['default_value'] = (
-                self.lower_expr(decl.f_default_val, {}, None)
+                self.lower_expr(decl.f_default_val, self.root_scope, None)
                 if decl.f_default_val
                 else None
             )
@@ -1887,13 +1923,13 @@ class LktTypesLoader:
 
     def lower_expr(self,
                    expr: L.Expr,
-                   env: LocalsEnv,
+                   env: Scope,
                    local_vars: Optional[LocalVars]) -> AbstractExpression:
         """
         Lower the given expression.
 
         :param expr: Expression to lower.
-        :param env: Variable to use when resolving references.
+        :param env: Scope to use when resolving references.
         :param local_vars: If lowering a property expression, set of local
             variables for this property.
         """
@@ -1913,14 +1949,13 @@ class LktTypesLoader:
             :param prefix: Lower-case prefix for the name of the variable in
                 the generated code.
             """
-            assert arg not in env
             source_name = arg.f_syn_name.text
             result = AbstractVariable(
                 names.Name.check_from_lower(f"{prefix}_{next(counter)}"),
                 source_name=source_name,
                 type=type,
             )
-            env[arg] = result
+            env.add(Scope.LocalVariable(source_name, arg, result))
             return result
 
         def extract_call_args(expr: L.CallExpr) -> Tuple[List[L.Expr],
@@ -1960,9 +1995,12 @@ class LktTypesLoader:
 
             if isinstance(expr, L.ArrayLiteral):
                 elts = [lower(e) for e in expr.f_exprs]
-                array_type = self.resolve_type_decl(expr.p_check_expr_type)
-                return E.ArrayLiteral(elts,
-                                      element_type=array_type.element_type)
+                element_type = (
+                    None
+                    if expr.f_element_type is None else
+                    self.resolve_type(expr.f_element_type, env)
+                )
+                return E.ArrayLiteral(elts, element_type=element_type)
 
             elif isinstance(expr, L.BinOp):
                 # Lower both operands
@@ -2006,11 +2044,9 @@ class LktTypesLoader:
                         source_name = v.f_syn_name.text
                         v_name = ada_id_for(source_name)
                         v_type = (
-                            self.resolve_type_decl(
-                                v.f_decl_type.p_designated_type
-                            )
-                            if v.f_decl_type
-                            else None
+                            self.resolve_type(v.f_decl_type, env)
+                            if v.f_decl_type else
+                            None
                         )
                         var = AbstractVariable(
                             v_name, v_type, source_name=source_name
@@ -2021,7 +2057,7 @@ class LktTypesLoader:
                         # Make this variable available to the inner expression
                         # lowering, and register it as a local variable in the
                         # generated code.
-                        env[v] = var
+                        env.add(Scope.LocalVariable(source_name, v, var))
                         var.local_var = local_vars.create_scopeless(
                             v_name,
                             resolve_type(v_type),
@@ -2036,9 +2072,8 @@ class LktTypesLoader:
                 return Let((vars, var_exprs, inner_expr))
 
             elif isinstance(expr, L.CallExpr):
-                # Depending on its name, a call can have different meanings
-                name_decl = check_referenced_decl(expr.f_name)
                 call_expr = expr
+                call_name = call_expr.f_name
 
                 def lower_args() -> Tuple[List[AbstractExpression],
                                           Dict[str, AbstractExpression]]:
@@ -2050,48 +2085,86 @@ class LktTypesLoader:
                     kwargs = {k: lower(v) for k, v in kwarg_nodes.items()}
                     return args, kwargs
 
-                if isinstance(name_decl, L.StructDecl):
-                    # If the name refers to a struct type, this expression
-                    # create a struct value.
-                    struct_type = self.resolve_type_decl(name_decl)
+                # Depending on its name, a call can have different meanings...
+
+                # If the call name is just an identifier, it has to be a
+                # reference to a struct type, and thus the call is a struct
+                # constructor.
+                if isinstance(call_name, L.RefId):
+                    struct_type = self.resolve_type_expr(call_name, env)
                     args, kwargs = lower_args()
-                    assert not args
+                    check_source_language(
+                        len(args) == 0,
+                        "Positional arguments not allowed for struct"
+                        " constructors",
+                    )
                     return E.New(struct_type, **kwargs)
 
-                elif same_node(name_decl, self.find_method):
+                # Otherwise the call has to be a dot expression, for a method
+                # invocation.
+                if not isinstance(call_name, L.DotExpr):
+                    with self.ctx.lkt_context(call_name):
+                        error("invalid call prefix")
+
+                # TODO: introduce a pre-lowering pass to extract the list of
+                # types and their fields/methods so that we can perform
+                # validation here.
+                method_prefix = lower(call_name.f_prefix)
+                method_name = call_name.f_suffix.text
+
+                if method_name == "find":
                     # Build variable for the iteration variable from the lambda
                     # expression arguments.
-                    assert len(call_expr.f_args) == 1
+                    check_source_language(
+                        len(call_expr.f_args) == 1,
+                        "'find' method takes exactly one argument",
+                    )
                     lambda_expr = call_expr.f_args[0].f_value
-                    assert isinstance(lambda_expr, L.LambdaExpr)
-                    lambda_args = lambda_expr.f_params
+                    with self.ctx.lkt_context(lambda_expr):
+                        if not isinstance(lambda_expr, L.LambdaExpr):
+                            error("lambda expression expected")
 
-                    # We expect excatly one argument: the collection element
+                        # We expect excatly one argument: the collection
+                        # element.
+                        lambda_args = lambda_expr.f_params
+                        check_source_language(
+                            len(lambda_args) == 1,
+                            "exactly one argument expected for the lambda"
+                            " expression",
+                        )
+
                     elt_arg, = lambda_args
                     elt_var = var_for_lambda_arg(elt_arg, 'item')
 
-                    # Lower the collection expression and the predicate
-                    # expression.
-                    assert isinstance(call_expr.f_name, L.DotExpr)
-                    coll_expr = lower(call_expr.f_name.f_prefix)
+                    # Lower the predicate expression
                     inner_expr = lower(lambda_expr.f_body)
 
                     return E.Find.create_expanded(
-                        coll_expr, inner_expr, elt_var, index_var=None,
+                        method_prefix, inner_expr, elt_var, index_var=None
                     )
 
-                elif same_node(name_decl, self.map_method):
+                elif method_name == "map":
                     # Build variable for iteration variables from the lambda
                     # expression arguments.
-                    assert len(call_expr.f_args) == 1
+                    check_source_language(
+                        len(call_expr.f_args) == 1,
+                        "'map' method takes exactly one argument",
+                    )
                     lambda_expr = call_expr.f_args[0].f_value
-                    assert isinstance(lambda_expr, L.LambdaExpr)
-                    lambda_args = lambda_expr.f_params
+                    with self.ctx.lkt_context(lambda_expr):
+                        if not isinstance(lambda_expr, L.LambdaExpr):
+                            error("lambda expression expected")
 
-                    # We expect either one argument (for the collection
-                    # element) or two arguments (the collection element and the
-                    # iteration index).
-                    assert len(lambda_args) in (1, 2)
+                        # We expect either one argument (for the collection
+                        # element) or two arguments (the collection element and
+                        # the iteration index).
+                        lambda_args = lambda_expr.f_params
+                        check_source_language(
+                            len(lambda_args) in (1, 2),
+                            "one or two arguments expected for the lambda"
+                            " expression",
+                        )
+
                     element_var = var_for_lambda_arg(lambda_args[0], 'item')
                     index_var = (
                         var_for_lambda_arg(lambda_args[1], 'index', T.Int)
@@ -2100,36 +2173,30 @@ class LktTypesLoader:
                     )
 
                     # Finally lower the expressions
-                    assert isinstance(call_expr.f_name, L.DotExpr)
-                    coll_expr = lower(call_expr.f_name.f_prefix)
                     inner_expr = lower(lambda_expr.f_body)
-                    result = E.Map.create_expanded(coll_expr, inner_expr,
-                                                   element_var, index_var)
+                    result = E.Map.create_expanded(
+                        method_prefix, inner_expr, element_var, index_var
+                    )
                     return result
 
-                elif same_node(name_decl, self.to_symbol_method):
-                    # Lower the prefix (the string to convert)
-                    prefix = lower(expr.f_name)
-
-                    # Defensive programming: make sure we have no argument to
-                    # lower.
+                elif method_name == "to_symbol":
                     args, kwargs = lower_args()
-                    assert not args and not kwargs
+                    check_source_language(
+                        not args and not kwargs,
+                        "'to_symbol' takes no argument",
+                    )
 
-                    return prefix.to_string  # type: ignore
+                    return method_prefix.to_string  # type: ignore
 
-                elif same_node(name_decl, self.unique_method):
-                    # Lower the prefix (the array to copy)
-                    prefix = lower(expr.f_name)
-
-                    # Defensive programming: make sure we have no argument to
-                    # lower.
+                elif method_name == "unique":
                     args, kwargs = lower_args()
-                    assert not args and not kwargs
+                    check_source_language(
+                        not args and not kwargs, "'unique' takes no argument"
+                    )
 
                     # ".unique" works with our auto_attr magic: not worth type
                     # checking until we get rid of the syntax magic.
-                    return prefix.unique  # type: ignore
+                    return method_prefix.unique  # type: ignore
 
                 else:
                     # Otherwise, this call must be a method invocation. Note
@@ -2138,44 +2205,40 @@ class LktTypesLoader:
                     # built-in method are turned into Join instances, so the
                     # "callee" variable below is not necessarily a FieldAccess
                     # instance.
-                    callee = lower(expr.f_name)
                     args, kwargs = lower_args()
-                    return callee(*args, **kwargs)
+                    result = getattr(method_prefix, method_name)
+                    return result(*args, **kwargs)
 
             elif isinstance(expr, L.CastExpr):
                 subexpr = lower(expr.f_expr)
                 excludes_null = expr.f_excludes_null.p_as_bool
-                dest_type = self.resolve_type_decl(
-                    expr.f_dest_type.p_designated_type
-                )
+                dest_type = self.resolve_type(expr.f_dest_type, env)
                 return Cast(subexpr, dest_type, do_raise=excludes_null)
 
             elif isinstance(expr, L.CharLit):
                 return E.CharacterLiteral(expr.p_denoted_value)
 
             elif isinstance(expr, L.DotExpr):
-                # Dotted expressions can designate an enum value or a member
-                # access. Resolving the suffix determines how to process this.
-                suffix_decl = check_referenced_decl(expr.f_suffix)
+                # Dotted expressions can designate an enum value (if the prefix
+                # is a type name) or a member access.
+                prefix_node = expr.f_prefix
+                if isinstance(prefix_node, L.RefId):
+                    try:
+                        t = env.lookup(prefix_node.text)
+                    except KeyError:
+                        pass
+                    else:
+                        if isinstance(t, (Scope.BuiltinType, Scope.UserType)):
+                            # The suffix refers to the declaration of en enum
+                            # value: the prefix must designate the
+                            # corresponding enum type.
+                            return getattr(t.defer, expr.f_suffix.text)
 
-                if isinstance(suffix_decl, L.EnumLitDecl):
-                    # The suffix refers to the declaration of en enum
-                    # value: the prefix must designate the corresponding enum
-                    # type.
-                    enum_type_node = check_referenced_decl(expr.f_prefix)
-                    assert isinstance(enum_type_node, L.EnumTypeDecl)
-                    enum_type = self.lower_type_decl(enum_type_node)
-                    assert isinstance(enum_type, EnumType)
-
-                    name = names.Name.check_from_lower(expr.f_suffix.text)
-                    return enum_type.values_dict[name].to_abstract_expr
-
-                else:
-                    # Otherwise, the prefix is a regular expression, so this
-                    # dotted expression is an access to a member.
-                    prefix = lower(expr.f_prefix)
-                    assert isinstance(prefix, E.AbstractExpression)
-                    return getattr(prefix, expr.f_suffix.text)
+                # Otherwise, the prefix is a regular expression, so this dotted
+                # expression is an access to a member.
+                prefix = lower(expr.f_prefix)
+                assert isinstance(prefix, E.AbstractExpression)
+                return getattr(prefix, expr.f_suffix.text)
 
             elif isinstance(expr, L.IfExpr):
                 # We want to turn the following pattern::
@@ -2203,7 +2266,7 @@ class LktTypesLoader:
             elif isinstance(expr, L.Isa):
                 subexpr = lower(expr.f_expr)
                 nodes = [
-                    self.resolve_type_decl(type_ref.p_designated_type)
+                    self.resolve_type(type_ref, env)
                     for type_ref in expr.f_dest_type
                 ]
                 return E.IsA(subexpr, *nodes)
@@ -2211,16 +2274,14 @@ class LktTypesLoader:
             elif isinstance(expr, L.CastExpr):
                 subexpr = lower(expr.f_expr)
                 excludes_null = expr.f_excludes_null.p_as_bool
-                dest_type = self.resolve_type_decl(
-                    expr.f_dest_type.p_designated_type
-                )
+                dest_type = self.resolve_type(expr.f_dest_type, env)
                 return Cast(subexpr, dest_type, do_raise=excludes_null)
 
             elif isinstance(expr, L.NotExpr):
                 return E.Not(lower(expr.f_expr))
 
             elif isinstance(expr, L.NullLit):
-                result_type = self.resolve_type_decl(expr.p_check_expr_type)
+                result_type = self.resolve_type(expr.f_dest_type, env)
                 return E.No(result_type)
 
             elif isinstance(expr, L.NumLit):
@@ -2233,9 +2294,12 @@ class LktTypesLoader:
                 # A raise expression can only contain a PropertyError struct
                 # constructor.
                 cons_expr = expr.f_except_expr
-                assert isinstance(cons_expr, L.CallExpr)
-                assert (check_referenced_decl(cons_expr.f_name)
-                        == self.property_error_type)
+                if not isinstance(cons_expr, L.CallExpr):
+                    error("'raise' must be followed by a call expression")
+                call_name = cons_expr.f_name
+                entity = self.resolve_entity(call_name, env)
+                if not isinstance(entity, Scope.Exception):
+                    error(f"exception expected, got {entity.diagnostic_name}")
 
                 # Get the exception message argument
                 args_nodes, kwargs_nodes = extract_call_args(cons_expr)
@@ -2244,34 +2308,33 @@ class LktTypesLoader:
                     msg_expr = args_nodes.pop()
                 elif kwargs_nodes:
                     msg_expr = kwargs_nodes.pop("exception_message")
-                assert not args_nodes
-                assert not kwargs_nodes
+                with self.ctx.lkt_context(cons_expr.f_args):
+                    check_source_language(
+                        not args_nodes and not kwargs_nodes,
+                        "at most one argument expected: the exception message",
+                    )
 
                 if msg_expr is None:
                     msg = "PropertyError exception"
                 else:
                     # TODO (S321-013): handle dynamic error message
-                    assert isinstance(msg_expr, L.StringLit)
+                    if not isinstance(msg_expr, L.StringLit):
+                        with self.ctx.lkt_context(msg_expr):
+                            error("string literal expected")
                     msg = msg_expr.p_denoted_value
 
-                expr_type = self.resolve_type_decl(expr.p_check_expr_type)
-                return PropertyError(expr_type, msg)
+                return entity.constructor(
+                    self.resolve_type(expr.f_dest_type, env), msg
+                )
 
             elif isinstance(expr, L.RefId):
-                decl = check_referenced_decl(expr)
-                if isinstance(decl, L.NodeDecl):
-                    return E.Self
-                elif isinstance(decl, L.SelfDecl):
-                    return E.Entity
-                elif isinstance(decl, L.EnumLitDecl):
-                    # TODO: handle all enum types
-                    enum_type_decl = decl.p_get_type()
-                    assert self.compiled_types.get(enum_type_decl) == T.Bool
-                    assert decl.text in ('true', 'false')
-                    return E.Literal(decl.text == 'true')
+                entity = self.resolve_entity(expr, env)
+                if isinstance(entity, Scope.BuiltinValue):
+                    return entity.value
+                elif isinstance(entity, Scope.UserValue):
+                    return entity.variable
                 else:
-                    assert isinstance(decl, L.BaseValDecl), str(decl)
-                    return env[decl]
+                    error(f"value expected, got {entity.diagnostic_name}")
 
             elif isinstance(expr, L.StringLit):
                 return E.SymbolLiteral(expr.p_denoted_value)
@@ -2296,12 +2359,13 @@ class LktTypesLoader:
         abstract: bool,
         external: bool,
         arg_decl_list: Optional[L.FunArgDeclList],
-        body: Optional[L.Expr]
+        body: Optional[L.Expr],
+        label: str,
     ) -> Tuple[List[Argument], Optional[AbstractExpression], LocalVars]:
         """
         Common code to lower properties and lazy fields.
         """
-        env: LocalsEnv = {}
+        env = self.root_scope.create_child(f"scope for {label}")
         local_vars = LocalVars()
 
         # Lower arguments and register them in the environment
@@ -2310,16 +2374,19 @@ class LktTypesLoader:
             if a.f_default_val is None:
                 default_value = None
             else:
-                default_value = self.lower_expr(a.f_default_val, env, None)
+                default_value = self.lower_expr(
+                    a.f_default_val, self.root_scope, None
+                )
                 default_value.prepare()
 
+            source_name = a.f_syn_name.text
             arg = Argument(
-                name=ada_id_for(a.f_syn_name.text),
-                type=self.resolve_type_decl(a.f_decl_type.p_designated_type),
+                name=ada_id_for(source_name),
+                type=self.resolve_type(a.f_decl_type, env),
                 default_value=default_value
             )
             args.append(arg)
-            env[a] = arg.var
+            env.add(Scope.Argument(source_name, a, arg.var))
 
         # Lower the expression itself
         if abstract or external:
@@ -2331,22 +2398,25 @@ class LktTypesLoader:
 
         return args, expr, local_vars
 
-    def lower_property(self, full_decl: L.FullDecl) -> PropertyDef:
+    def lower_property(
+        self,
+        full_decl: L.FullDecl,
+        node_name: str,
+    ) -> PropertyDef:
         """
         Lower the property described in ``decl``.
         """
         decl = full_decl.f_decl
         assert isinstance(decl, L.FunDecl)
         annotations = parse_annotations(self.ctx, FunAnnotations, full_decl)
-        return_type = self.resolve_type_decl(
-            decl.f_return_type.p_designated_type
-        )
+        return_type = self.resolve_type(decl.f_return_type, self.root_scope)
 
         args, expr, local_vars = self.lower_property_expr(
             annotations.abstract,
             annotations.external,
             decl.f_args,
             decl.f_body,
+            f"property {node_name}.{decl.f_syn_name.text}",
         )
 
         # If @uses_entity_info and @uses_envs are not present for non-external
@@ -2395,10 +2465,12 @@ class LktTypesLoader:
 
         return result
 
-    def lower_fields(self,
-                     decls: L.DeclBlock,
-                     allowed_field_types: Tuple[Type[AbstractNodeData], ...]) \
-            -> List[Tuple[names.Name, AbstractNodeData]]:
+    def lower_fields(
+        self,
+        decls: L.DeclBlock,
+        allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        struct_name: str,
+    ) -> List[Tuple[names.Name, AbstractNodeData]]:
         """
         Lower the fields described in the given DeclBlock node.
 
@@ -2431,10 +2503,10 @@ class LktTypesLoader:
                             for cls in allowed_field_types),
                         'Properties not allowed in this context'
                     )
-                    field = self.lower_property(full_decl)
+                    field = self.lower_property(full_decl, struct_name)
                 else:
                     field = self.lower_base_field(
-                        full_decl, allowed_field_types
+                        full_decl, allowed_field_types, struct_name
                     )
 
                 field.location = Location.from_lkt_node(decl)
@@ -2458,37 +2530,41 @@ class LktTypesLoader:
         base_type: Optional[ASTNodeType]
 
         # Check the set of traits that this node implements
-        node_trait_ref: Optional[L.LktNode] = None
-        token_node_trait_ref: Optional[L.LktNode] = None
-        error_node_trait_ref: Optional[L.LktNode] = None
+        node_trait_ref: L.LktNode | None = None
+        token_node_trait_ref: L.LktNode | None = None
+        error_node_trait_ref: L.LktNode | None = None
         for trait_ref in decl.f_traits:
-            trait_decl: L.TypeDecl = trait_ref.p_designated_type
-            if (
-                isinstance(trait_decl, L.InstantiatedGenericType)
-                and trait_decl.p_get_inner_type == self.node_trait
-            ):
-                # If this trait is an instantiation of the Node trait, make
-                # sure it is instantiated on the root node itself (i.e.
-                # "decl").
-                actuals = trait_decl.p_get_actuals
-                assert len(actuals) == 1
-                with self.ctx.lkt_context(trait_ref):
-                    check_source_language(
-                        actuals[0] == decl,
-                        "The Node generic trait must be instantiated with the"
-                        f" root node ({decl.f_syn_name.text})"
-                    )
-                node_trait_ref = trait_ref
-
-            elif trait_decl == self.token_node_trait:
+            if trait_ref.text == "TokenNode":
                 token_node_trait_ref = trait_ref
 
-            elif trait_decl == self.error_node_trait:
+            elif trait_ref.text == "ErrorNode":
                 error_node_trait_ref = trait_ref
 
             else:
-                with self.ctx.lkt_context(trait_ref):
-                    error("Nodes cannot implement this trait")
+                if not isinstance(trait_ref, L.GenericTypeRef):
+                    with self.ctx.lkt_context(trait_ref):
+                        error("Nodes cannot implement this trait")
+
+                # This is a generic instantiation
+                generic_trait = trait_ref.f_type_name
+                type_args = list(trait_ref.f_params)
+                if generic_trait.text == "Node":
+                    # If this trait is an instantiation of the Node trait, make
+                    # sure it is instantiated on the root node itself (i.e.
+                    # "decl").
+                    with self.ctx.lkt_context(trait_ref):
+                        decl_name = decl.f_syn_name.text
+                        check_source_language(
+                            len(type_args) == 1
+                            and type_args[0].text == decl_name,
+                            "The Node generic trait must be instantiated with"
+                            f" the root node ({decl_name})",
+                        )
+                    node_trait_ref = trait_ref
+
+                else:
+                    with self.ctx.lkt_context(trait_ref):
+                        error("Nodes cannot implement this trait")
 
         def check_trait(trait_ref: Optional[L.LktNode],
                         expected: bool,
@@ -2506,7 +2582,8 @@ class LktTypesLoader:
                     error(message)
 
         # Root node case
-        if decl.p_base_type is None:
+        base_type_node = decl.p_base_type
+        if base_type_node is None:
             check_trait(
                 node_trait_ref,
                 True,
@@ -2534,9 +2611,9 @@ class LktTypesLoader:
             base_type = None
             is_token_node = is_error_node = False
         else:
-            base_type_decl = decl.p_base_type.p_designated_type
-            base_type = cast(ASTNodeType,
-                             self.lower_type_decl(base_type_decl))
+            base_type = self.resolve_and_lower_node(
+                base_type_node, self.root_scope
+            )
 
             check_trait(
                 node_trait_ref,
@@ -2584,7 +2661,9 @@ class LktTypesLoader:
             if is_token_node or is_enum_node
             else (AbstractNodeData, )
         )
-        fields = self.lower_fields(decl.f_decls, allowed_field_types)
+        fields = self.lower_fields(
+            decl.f_decls, allowed_field_types, decl.f_syn_name.text
+        )
 
         # For qualifier enum nodes, add the synthetic "as_bool" abstract
         # property that each alternative will override.
@@ -2756,11 +2835,12 @@ class LktTypesLoader:
         :param decl: Corresponding declaration node.
         :param annotations: Annotations for this declaration.
         """
+        name = decl.f_syn_name.text
         return StructType(
-            name=names.Name.check_from_camel(decl.f_syn_name.text),
+            name=names.Name.check_from_camel(name),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl.parent),
-            fields=self.lower_fields(decl.f_decls, (UserField, )),
+            fields=self.lower_fields(decl.f_decls, (UserField, ), name),
         )
 
 

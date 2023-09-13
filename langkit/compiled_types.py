@@ -4669,6 +4669,16 @@ class TypeRepo:
                     except KeyError:
                         pass
 
+                # The DSL name for automatic enum alternatives of EnumType
+                # instances is: ``Foo.bar`` where ``Foo`` is the name of the
+                # enum type and ``bar`` is the name of the alternative.
+                # Correctly resolve it.
+                if isinstance(prefix, EnumType):
+                    enum_value = prefix.values_dict[
+                        names.Name.from_lower(name)
+                    ]
+                    return enum_value.to_abstract_expr
+
                 if (
                     name in ('array', 'list', 'iterator', 'entity', 'new')
                     or not isinstance(prefix, BaseStructType)
