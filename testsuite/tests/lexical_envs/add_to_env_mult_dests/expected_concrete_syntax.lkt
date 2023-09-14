@@ -20,3 +20,7 @@ class Scope : FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, FooNode]
 }
+
+@metadata struct Metadata {
+    @use_in_equality node: FooNode
+}

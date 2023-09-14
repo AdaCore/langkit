@@ -34,3 +34,7 @@ class Ref : FooNode {
 
     @export fun decl(): Decl = node.children_env().get(node.name)?(0).as[Decl]!
 }
+
+@metadata struct Metadata {
+    @use_in_equality b: Bool
+}

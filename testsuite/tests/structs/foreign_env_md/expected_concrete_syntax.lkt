@@ -21,3 +21,7 @@ class Name : FooNode implements TokenNode {
 
     fun resolve(): FooNode = node.parent.node_env().get(node.sym())?(0)
 }
+
+@metadata struct Metadata {
+    @use_in_equality node: FooNode
+}

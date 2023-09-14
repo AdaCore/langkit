@@ -113,6 +113,11 @@ class VarDecl : FooNode {
     @parse_field value: Expr
 }
 
+@metadata struct Metadata {
+    @use_in_equality md1: Bool
+    md2: Bool
+}
+
 struct NodeResult {
     n: Example
     e: Example

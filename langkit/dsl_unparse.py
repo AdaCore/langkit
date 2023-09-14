@@ -1336,10 +1336,12 @@ def emit_prop(prop, walker):
 
 
 def emit_field(field):
-    from langkit.compiled_types import BaseField, Field, UserField
+    from langkit.compiled_types import (
+        BaseField, Field, MetadataField, UserField
+    )
 
     if isinstance(field, BaseField):
-        result = "{}{}{}{}{}: {}".format(
+        result = "{}{}{}{}{}{}: {}".format(
             "@abstract " if isinstance(field, Field) and field.abstract else "",
             "@parse_field " if isinstance(field, Field) else "",
             "@null_field " if field.null else "",
@@ -1347,6 +1349,10 @@ def emit_field(field):
                 isinstance(field, Field)
                 and not field.is_overriding
                 and field.nullable
+            ) else "",
+            "@use_in_equality " if (
+                isinstance(field, MetadataField)
+                and field.use_in_equality
             ) else "",
             unparsed_name(field._indexing_name), type_name(field.type)
         )
@@ -1421,8 +1427,6 @@ def emit_node_type(node_type):
         if base and base.is_generic_list_type:
             return ""
 
-        quals = []
-
         if node_type.is_bool_node:
             quals.append("qualifier")
 
@@ -1456,9 +1460,17 @@ def emit_node_type(node_type):
         if node_type.is_entity_type:
             return ""
         elif node_type in (CompiledTypeRepo.entity_info,
-                           CompiledTypeRepo.env_metadata,
-                           T.env_assoc, T.inner_env_assoc):
+                           T.env_assoc,
+                           T.inner_env_assoc):
             return ""
+        elif (
+            node_type == CompiledTypeRepo.env_metadata
+            and node_type.location is None
+        ):
+            return ""
+
+        if node_type == T.env_md:
+            quals.append("metadata")
 
     parse_fields = [
         f for f in node_type.get_fields(include_inherited=False)

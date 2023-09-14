@@ -23,3 +23,7 @@ class Example : FooNode {
 
 class SynthNode : FooNode {
 }
+
+@metadata struct Metadata {
+    @use_in_equality flag: Bool
+}

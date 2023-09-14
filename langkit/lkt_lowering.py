@@ -49,8 +49,8 @@ import liblktlang as L
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeRepo,
-    EnumNodeAlternative, EnumType, Field, StructType, T, TypeRepo, UserField,
-    resolve_type
+    EnumNodeAlternative, EnumType, Field, MetadataField, StructType, T,
+    TypeRepo, UserField, resolve_type
 )
 from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context, error,
@@ -707,6 +707,7 @@ class FieldAnnotations(ParsedAnnotations):
     nullable: bool
     parse_field: bool
     trace: bool
+    use_in_equality: bool
     annotations = [FlagAnnotationSpec('abstract'),
                    FlagAnnotationSpec('export'),
                    FlagAnnotationSpec('final'),
@@ -714,7 +715,8 @@ class FieldAnnotations(ParsedAnnotations):
                    FlagAnnotationSpec('null_field'),
                    FlagAnnotationSpec('nullable'),
                    FlagAnnotationSpec('parse_field'),
-                   FlagAnnotationSpec('trace')]
+                   FlagAnnotationSpec('trace'),
+                   FlagAnnotationSpec('use_in_equality')]
 
 
 @dataclass
@@ -724,7 +726,8 @@ class EnumAnnotations(ParsedAnnotations):
 
 @dataclass
 class StructAnnotations(ParsedAnnotations):
-    annotations: ClassVar[List[AnnotationSpec]] = []
+    metadata: bool
+    annotations = [FlagAnnotationSpec("metadata")]
 
 
 @dataclass
@@ -1914,6 +1917,19 @@ class LktTypesLoader:
                 else None
             )
 
+            # If this field belongs to the metadata struct, use the appropriate
+            # constructor. Reject @use_in_equality annotations otherwise, as
+            # they are valid only for metadata fields.
+            if allowed_field_types == (MetadataField, ):
+                cls = constructor = MetadataField
+                kwargs["use_in_equality"] = annotations.use_in_equality
+            else:
+                check_source_language(
+                    not annotations.use_in_equality,
+                    "Only metadata fields can have the @use_in_equality"
+                    " annotation",
+                )
+
         check_source_language(
             issubclass(cls, allowed_field_types),
             'Invalid field type in this context'
@@ -2836,12 +2852,28 @@ class LktTypesLoader:
         :param annotations: Annotations for this declaration.
         """
         name = decl.f_syn_name.text
-        return StructType(
+
+        allowed_field_types: Tuple[Type[AbstractNodeData], ...]
+        if annotations.metadata:
+            allowed_field_types = (MetadataField, )
+            check_source_language(
+                CompiledTypeRepo.env_metadata is None,
+                "Only one struct can be the env metadata",
+            )
+        else:
+            allowed_field_types = (UserField, )
+
+        fields = self.lower_fields(decl.f_decls, allowed_field_types, name)
+
+        result = StructType(
             name=names.Name.check_from_camel(name),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl.parent),
-            fields=self.lower_fields(decl.f_decls, (UserField, ), name),
+            fields=fields,
         )
+        if annotations.metadata:
+            CompiledTypeRepo.env_metadata = result
+        return result
 
 
 def create_types(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> None:
