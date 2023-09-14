@@ -131,10 +131,6 @@ module FileReader : sig
   type t
 end
 
-${exts.include_extension(
-   ctx.ext('ocaml_api', 'module_sig')
-)}
-
 module UnitProvider : sig
   ${ocaml_doc('langkit.unit_provider_type', 1)}
 
@@ -232,6 +228,10 @@ module AnalysisContext : sig
     -> AnalysisUnit.t
   ${ocaml_doc('langkit.get_unit_from_buffer', 1)}
 end
+
+${exts.include_extension(
+   ctx.ext('ocaml_api', 'module_sig')
+)}
 
 % for struct_type in ctx.struct_types:
    % if struct_type not in [T.AnalysisUnit, ocaml_api.AnalysisContext,\

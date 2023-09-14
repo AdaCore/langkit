@@ -644,10 +644,6 @@ module FileReader = struct
   let c_type = view (ptr void) ~read ~write:(!@)
 end
 
-${exts.include_extension(
-   ctx.ext('ocaml_api', 'module_struct')
-)}
-
 module UnitProvider = struct
   (* The real C type of a context is a void*. But we use a pointer to this
      type, to be able to allocate a value of t and attach a finalizer to it. *)
@@ -766,6 +762,9 @@ ${struct_types.ocaml_fields(T.env_md, rec=True)}
   ${astnode_types.sig(astnode)}
 % endfor
 
+${exts.include_extension(
+   ctx.ext('ocaml_api', 'module_struct')
+)}
 
 let rec ${ocaml_api.unwrap_function_name(T.root_node)} value =
   (* This is the unique unwrap function that can be called for any node. *)
