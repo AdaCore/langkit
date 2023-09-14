@@ -316,7 +316,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
     maven_exec = os.environ.get('MAVEN_EXECUTABLE')
     maven_repo = os.environ.get('MAVEN_LOCAL_REPO')
 
-    def manage_run(generate_only, types_from_lkt, additional_args):
+    def manage_run(types_from_lkt, additional_args):
         ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
                               default_unit_provider=default_unit_provider,
                               symbol_canonicalizer=symbol_canonicalizer,
@@ -389,17 +389,11 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
         # result to do a full build. Note that we don't unparse the DSL during
         # the second run, as dsl_unparse requires Python sources, which the
         # second run does not have access to.
-        manage_run(generate_only=True,
-                   types_from_lkt=False,
-                   additional_args=unparse_args)
+        manage_run(types_from_lkt=False, additional_args=unparse_args)
         langkit.reset()
-        ctx, m = manage_run(generate_only=False,
-                            types_from_lkt=True,
-                            additional_args=[])
+        ctx, m = manage_run(types_from_lkt=True, additional_args=[])
     else:
-        ctx, m = manage_run(generate_only=False,
-                            types_from_lkt=False,
-                            additional_args=unparse_args)
+        ctx, m = manage_run(types_from_lkt=False, additional_args=unparse_args)
 
     # Write a "setenv" script to make developper investigation convenient
     with open('setenv.sh', 'w') as f:
