@@ -23,13 +23,16 @@ The last step is the most complex one: type declarations refer to each other,
 and this step includes the lowering of property expressions to abstract
 expressions. The lowering of types goes as follows:
 
-* A first pass looks at all top-level declarations (lexers, grammars and types)
-  and registers them by name in the root scope.
+* The first pass looks at all top-level declarations (lexers, grammars and
+  types) and registers them by name in the root scope.
 
-* A second pass iterates on all types and lowers them. All type declarations in
-  the language spec are lowered in sequence (arbitrary order), except base
-  classes, which are lowered before classes that they derive from. Properties
-  are lowered as part of the lowering of their owning types.
+* We then iterate on all types and lower them. All type declarations in the
+  language spec are lowered in sequence (arbitrary order), except base classes,
+  which are lowered before classes that they derive from. This pass creates the
+  actual ``CompiledType`` instances as well as the ``AbstractNodeData`` ones.
+
+* Finally, the arguments' default values and the bodies of all properties are
+  lowered.
 """
 
 from __future__ import annotations
@@ -1461,6 +1464,31 @@ class LktTypesLoader:
     # dependencies.
     compiled_types: Dict[L.TypeDecl, Optional[CompiledType]]
 
+    @dataclass
+    class PropertyToLower:
+        prop: PropertyDef
+        """
+        The property whose expression must be lowered.
+        """
+
+        arguments: list[L.FunArgDecl]
+        """
+        Arguments for this property.
+        """
+
+    @dataclass
+    class PropertyAndExprToLower(PropertyToLower):
+        body: L.Expr
+        """
+        Root expression to lower.
+        """
+
+        scope: Scope
+        """
+        Scope to use during lowering. The property arguments must be available
+        in it.
+        """
+
     def __init__(self, ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]):
         """
         :param ctx: Context in which to create these types.
@@ -1560,8 +1588,34 @@ class LktTypesLoader:
         # Now create CompiledType instances for each user type. To properly
         # handle node derivation, this recurses on bases first and reject
         # inheritance loops.
+        self.properties_to_lower: list[LktTypesLoader.PropertyToLower] = []
         for type_decl in type_decls:
             self.lower_type_decl(type_decl)
+
+        # TODO: resolve all deferred types (member types and argument types)
+
+        # Now that all user-defined compiled types are known, we can start
+        # lowering expressions. Start with default values for property
+        # arguments.
+        for to_lower in self.properties_to_lower:
+            for arg_decl, arg in zip(
+                to_lower.arguments, to_lower.prop.arguments
+            ):
+                if arg_decl.f_default_val is not None:
+                    value = self.lower_expr(
+                        arg_decl.f_default_val, self.root_scope, None
+                    )
+                    value.prepare()
+                    arg.set_default_value(value)
+
+        # Now that all types and properties ("declarations") are available,
+        # lower the property expressions themselves.
+        for to_lower in self.properties_to_lower:
+            if isinstance(to_lower, self.PropertyAndExprToLower):
+                with to_lower.prop.bind():
+                    to_lower.prop.expr = self.lower_expr(
+                        to_lower.body, to_lower.scope, to_lower.prop.vars
+                    )
 
     def resolve_entity(self, name: L.Expr, scope: Scope) -> Scope.Entity:
         """
@@ -1844,6 +1898,7 @@ class LktTypesLoader:
             '@nullable is valid only for parse fields'
         )
 
+        body: L.Expr | None = None
         if annotations.lazy:
             check_source_language(
                 not annotations.null_field,
@@ -1856,19 +1911,10 @@ class LktTypesLoader:
             cls = PropertyDef
             constructor = create_lazy_field
 
-            _, expr, local_vars = self.lower_property_expr(
-                abstract=annotations.abstract,
-                external=False,
-                arg_decl_list=None,
-                body=decl.f_default_val,
-                label=(
-                    "initializer for lazy field"
-                    f" {struct_name}.{decl.f_syn_name.text}"
-                ),
-            )
+            body = decl.f_default_val
 
             kwargs = {
-                'expr': expr,
+                'expr': None,
                 'doc': doc,
                 'public': annotations.export,
                 'return_type': field_type,
@@ -1876,7 +1922,6 @@ class LktTypesLoader:
                          if annotations.abstract
                          else AbstractKind.concrete),
                 'activate_tracing': annotations.trace,
-                'local_vars': local_vars,
             }
 
         elif annotations.parse_field:
@@ -1952,7 +1997,25 @@ class LktTypesLoader:
             'Invalid field type in this context'
         )
 
-        return constructor(**kwargs)
+        result = constructor(**kwargs)
+
+        # If this field has an initialization expression implemented as
+        # property, plan to lower it later.
+        if isinstance(result, PropertyDef):
+            assert body is not None
+            arguments, scope = self.lower_property_arguments(
+                prop=result,
+                arg_decl_list=None,
+                label=(
+                    "initializer for lazy field"
+                    f" {struct_name}.{decl.f_syn_name.text}"
+                ),
+            )
+            self.properties_to_lower.append(
+                self.PropertyAndExprToLower(result, arguments, body, scope)
+            )
+
+        return result
 
     def lower_expr(self,
                    expr: L.Expr,
@@ -2410,49 +2473,33 @@ class LktTypesLoader:
 
         return lower(expr)
 
-    def lower_property_expr(
+    def lower_property_arguments(
         self,
-        abstract: bool,
-        external: bool,
+        prop: PropertyDef,
         arg_decl_list: Optional[L.FunArgDeclList],
-        body: Optional[L.Expr],
         label: str,
-    ) -> Tuple[List[Argument], Optional[AbstractExpression], LocalVars]:
+    ) -> tuple[list[L.FunArgDecl], Scope]:
         """
-        Common code to lower properties and lazy fields.
+        Lower a property's arguments and create the root scope used to lower
+        the property's root expression.
         """
-        env = self.root_scope.create_child(f"scope for {label}")
-        local_vars = LocalVars()
+        arguments: list[L.FunArgDecl] = []
+        scope = self.root_scope.create_child(f"scope for {label}")
 
-        # Lower arguments and register them in the environment
-        args: List[Argument] = []
+        # Lower arguments and register them both in the property's argument
+        # list and in the root property scope.
         for a in arg_decl_list or []:
-            if a.f_default_val is None:
-                default_value = None
-            else:
-                default_value = self.lower_expr(
-                    a.f_default_val, self.root_scope, None
-                )
-                default_value.prepare()
+            arguments.append(a)
 
             source_name = a.f_syn_name.text
             arg = Argument(
                 name=ada_id_for(source_name),
-                type=self.resolve_type(a.f_decl_type, env),
-                default_value=default_value
+                type=self.resolve_type(a.f_decl_type, scope),
             )
-            args.append(arg)
-            env.add(Scope.Argument(source_name, a, arg.var))
+            prop.arguments.append(arg)
+            scope.add(Scope.Argument(source_name, a, arg.var))
 
-        # Lower the expression itself
-        if abstract or external:
-            assert body is None
-            expr = None
-        else:
-            assert body is not None
-            expr = self.lower_expr(body, env, local_vars)
-
-        return args, expr, local_vars
+        return arguments, scope
 
     def lower_property(
         self,
@@ -2467,14 +2514,6 @@ class LktTypesLoader:
         annotations = parse_annotations(self.ctx, FunAnnotations, full_decl)
         return_type = self.resolve_type(decl.f_return_type, self.root_scope)
 
-        args, expr, local_vars = self.lower_property_expr(
-            annotations.abstract,
-            annotations.external,
-            decl.f_args,
-            decl.f_body,
-            f"property {node_name}.{decl.f_syn_name.text}",
-        )
-
         # If @uses_entity_info and @uses_envs are not present for non-external
         # properties, use None instead of False, for the validation machinery
         # in PropertyDef to work properly (we expect False/true for external
@@ -2488,8 +2527,9 @@ class LktTypesLoader:
             uses_entity_info = annotations.uses_entity_info or None
             uses_envs = annotations.uses_envs or None
 
+        # Create the property to return
         result = PropertyDef(
-            expr=expr,
+            expr=None,
             prefix=AbstractNodeData.PREFIX_PROPERTY,
             doc=self.ctx.lkt_doc(full_decl),
 
@@ -2514,10 +2554,20 @@ class LktTypesLoader:
             call_non_memoizable_because=None,
             activate_tracing=annotations.trace,
             dump_ir=False,
-            local_vars=local_vars,
             final=annotations.final,
         )
-        result.arguments.extend(args)
+
+        # Lower its arguments
+        arguments, scope = self.lower_property_arguments(
+            result, decl.f_args, f"property {node_name}.{decl.f_syn_name.text}"
+        )
+
+        # Plan to lower its expressions later
+        self.properties_to_lower.append(
+            self.PropertyToLower(result, arguments)
+            if decl.f_body is None else
+            self.PropertyAndExprToLower(result, arguments, decl.f_body, scope)
+        )
 
         return result
 

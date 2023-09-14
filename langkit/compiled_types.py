@@ -1880,22 +1880,28 @@ class Argument:
             argument. If not provided, an AbstractVariable instance is
             automatically created.
         """
-        from langkit.expressions.base import (AbstractVariable,
-                                              construct_compile_time_known)
+        from langkit.expressions.base import AbstractVariable
 
         self.name = name
         self.var = (abstract_var
                     or AbstractVariable(name, type, source_name=source_name))
         self.is_artificial = is_artificial
 
-        # Make sure that, if present, the default value is a compile-time known
-        # constant.
-        self.abstract_default_value = default_value
-        self.default_value = (
-            None
-            if default_value is None else
-            construct_compile_time_known(default_value, type)
-        )
+        if default_value is None:
+            self.abstract_default_value = None
+            self.default_value = None
+        else:
+            self.set_default_value(default_value)
+
+    def set_default_value(self, value: AbstractExpression) -> None:
+        """
+        Set the default value for this argument. This checks that it is a
+        compile-time known constant.
+        """
+        from langkit.expressions.base import construct_compile_time_known
+
+        self.abstract_default_value = value
+        self.default_value = construct_compile_time_known(value, self.var.type)
 
     @property
     def type(self):
