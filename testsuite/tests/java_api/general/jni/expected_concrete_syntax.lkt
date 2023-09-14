@@ -17,7 +17,7 @@ enum Color {
 
 @abstract @has_abstract_list class FooNode implements Node[FooNode] {
 
-    @export fun count(seq: Array[Example]): Int = seq.length()
+    @export fun count(seq: Array[Entity[Example]]): Int = seq.length()
 
     @export fun get_a(c: Char = 'a'): Char = c
 
@@ -33,10 +33,12 @@ enum Color {
 
     @export fun int_double(c: BigInt): BigInt = c + c
 
-    @export fun me(b: Bool): FooNodeStruct =
-    FooNodeStruct(node=if b then self else (null[FooNode]))
+    @export fun me(b: Bool): FooNodeStruct = FooNodeStruct(
+        node=if b then self else (null[Entity[FooNode]])
+    )
 
-    @export fun get_node(node_struct: FooNodeStruct): FooNode = node_struct.node
+    @export fun get_node(node_struct: FooNodeStruct): Entity[FooNode] =
+    node_struct.node
 
     @export fun iter_int(): Iterator[Int] = [1, 2, 3].to_iterator()
 }
@@ -48,9 +50,9 @@ class Example : FooNode {
 
 class Sequence : ASTList[FooNode, FooNode] {
 
-    @export fun all_items(): Array[FooNode] = self.map((i) => i)
+    @export fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
 
-    @export fun example_items(): Array[Example] = self.filtermap(
+    @export fun example_items(): Array[Entity[Example]] = self.filtermap(
         (i) => i.as[Example]!, (i) => i is Example
     )
 }
@@ -71,9 +73,9 @@ class Var : FooNode {
 }
 
 struct FooNodeStruct {
-    node: FooNode
+    node: Entity[FooNode]
 }
 
 struct SomeStruct {
-    examples: Array[Example]
+    examples: Array[Entity[Example]]
 }

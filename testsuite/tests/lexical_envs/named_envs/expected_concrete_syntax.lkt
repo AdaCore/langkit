@@ -211,7 +211,7 @@ class IncompleteTypeDecl : FooNode {
 
     ## Return the list of declarations that define this name. The lookup
     ## starts from the given environment.
-    fun resolve(from_env: LexicalEnv[FooNode]): FooNode =
+    fun resolve(from_env: LexicalEnv[FooNode]): Entity[FooNode] =
     node.parent_scope(from_env).get_first(node.base_name().to_symbol)
 }
 
@@ -243,7 +243,7 @@ class PackageBody : FooNode {
     node.parent.children_env().get_first(node.name.base_name().to_symbol).as[PackageDecl].node
 
     ## Return the PackageDecl node corresponding to this PackageBody.
-    @export fun decl_part(): PackageDecl = {
+    @export fun decl_part(): Entity[PackageDecl] = {
         val env = node.parent.children_env();
 
         node.name.resolve(env).as[PackageDecl]
@@ -270,14 +270,14 @@ class PackageDecl : FooNode {
     )
 
     ## Return the PackageBody node corresponding to this PackageDecl.
-    @export fun body_part(): PackageBody =
+    @export fun body_part(): Entity[PackageBody] =
     node.private_part.do((pp) => pp, default_val=node).children_env().get_first("__nextpart").as[PackageBody]
 }
 
 class Ref : FooNode {
     @parse_field name: Name
 
-    @export fun resolve(): FooNode = node.name.resolve(node.node_env())
+    @export fun resolve(): Entity[FooNode] = node.name.resolve(node.node_env())
 }
 
 class SubpBody : FooNode {

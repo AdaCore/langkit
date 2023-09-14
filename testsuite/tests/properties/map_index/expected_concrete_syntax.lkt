@@ -7,14 +7,14 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    fun create(index: Int, number: NumberNode): IndexedNumber =
+    fun create(index: Int, number: Entity[NumberNode]): IndexedNumber =
     IndexedNumber(index=index, number=number)
 }
 
 class ListNode : FooNode {
     @parse_field nb_list: ASTList[FooNode, NumberNode]
 
-    fun nb_list_entities(): Array[NumberNode] =
+    fun nb_list_entities(): Array[Entity[NumberNode]] =
     node.nb_list.map((n) => n.as_bare_entity)
 
     @export fun map_no_idx(): Array[IndexedNumber] =
@@ -23,10 +23,10 @@ class ListNode : FooNode {
     @export fun map_idx(): Array[IndexedNumber] =
     node.nb_list_entities().map((n, i) => node.create(i, n))
 
-    @export fun filter_no_idx(): Array[NumberNode] =
+    @export fun filter_no_idx(): Array[Entity[NumberNode]] =
     node.nb_list_entities().filter((n) => n.text() = "2")
 
-    @export fun filter_idx(): Array[NumberNode] =
+    @export fun filter_idx(): Array[Entity[NumberNode]] =
     node.nb_list_entities().filter((n, i) => (n.text() = "2") or (i = 0))
 
     @export fun filtermap_no_idx(): Array[IndexedNumber] =
@@ -55,5 +55,5 @@ class NumberNode : FooNode implements TokenNode {
 
 struct IndexedNumber {
     index: Int
-    number: NumberNode
+    number: Entity[NumberNode]
 }

@@ -13,19 +13,19 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun find_atoms(): Array[Atom] = (
+    @export fun find_atoms(): Array[Entity[Atom]] = (
         match self {
             # This should match Lit .. Ref
             case a : Atom => [a]
 
             # This should match Def | Plus .. FooNode.list
-            case _ => null[Array[Atom]]
+            case _ => null[Array[Entity[Atom]]]
         }
     ) & (
         self.children.mapcat((c) => c.find_atoms())
     )
 
-    @export fun find_atoms_or_exprs(): Array[Expr] = (
+    @export fun find_atoms_or_exprs(): Array[Entity[Expr]] = (
         match self {
             # This should match Lit .. Ref
             case a : Atom => [a.as[Expr]]
@@ -34,13 +34,13 @@ grammar foo_grammar {
             case e : Expr => [e]
 
             # This should match Def | FooNode.list
-            case _ => null[Array[Expr]]
+            case _ => null[Array[Entity[Expr]]]
         }
     ) & (
         self.children.mapcat((c) => c.find_atoms_or_exprs())
     )
 
-    @export fun find_exprs(): Array[Expr] = (
+    @export fun find_exprs(): Array[Entity[Expr]] = (
         match self {
             # This should match Lit .. Plus
             case e : Expr => [e]
@@ -50,7 +50,7 @@ grammar foo_grammar {
             case a : Atom => [a.as[Expr]]
 
             # This should match Def | FooNode.list
-            case _ => null[Array[Expr]]
+            case _ => null[Array[Entity[Expr]]]
         }
     ) & (
         self.children.mapcat((c) => c.find_exprs())
@@ -64,13 +64,13 @@ class Def : FooNode {
 
 @abstract class Expr : FooNode {
 
-    @export fun find_refs(): Array[Ref] = (
+    @export fun find_refs(): Array[Entity[Ref]] = (
         match self {
             # This should match Ref
             case r : Ref => [r]
 
             # This should match Lit
-            case _ => null[Array[Ref]]
+            case _ => null[Array[Entity[Ref]]]
         }
     ) & (
         self.children.mapcat((c) => c.as[Expr]!.find_refs())

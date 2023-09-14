@@ -12,18 +12,19 @@ grammar foo_grammar {
 
 class Literal : FooNode implements TokenNode {
 
-    fun combiner(other: Literal): Literal = self
+    fun combiner(other: Entity[Literal]): Entity[Literal] = self
 }
 
 class Plus : FooNode {
     @parse_field lhs: Literal
     @parse_field rhs: Literal
 
-    @export fun resolve(lhs: FooNode, rhs: FooNode): FooNode = {
+    @export fun resolve(lhs: Entity[FooNode], rhs: Entity[FooNode]): Entity[FooNode] =
+    {
         val eq = [%propagate(node.v, BareLiteral.combiner, node.lhs.v, node.rhs.v), %eq(node.lhs.v, lhs), %eq(node.rhs.v, rhs)];
 
         if eq.solve() then node.v.get_value() else (
-            raise[FooNode] PropertyError("unreachable")
+            raise[Entity[FooNode]] PropertyError("unreachable")
         )
     }
 }

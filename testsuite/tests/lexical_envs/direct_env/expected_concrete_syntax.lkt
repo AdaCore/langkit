@@ -9,7 +9,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun dump_env(): Array[FooNode] =
+    @export fun dump_env(): Array[Entity[FooNode]] =
     node.children_env().get(null[Symbol])
 }
 

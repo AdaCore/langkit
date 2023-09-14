@@ -22,6 +22,6 @@ class Name : FooNode implements TokenNode {
         %domain(node.ref_var, candidates).solve()
     }
 
-    @export fun definition(): Definition =
+    @export fun definition(): Entity[Definition] =
     node.ref_var.get_value().as[Definition]
 }

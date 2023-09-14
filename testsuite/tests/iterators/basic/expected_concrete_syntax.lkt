@@ -21,8 +21,8 @@ class Example : FooNode {
     @export fun bigint_iterator(): Iterator[BigInt] =
     node.bigint_array().to_iterator()
 
-    @export fun entities_array(): Array[Example] = [self, self, self]
+    @export fun entities_array(): Array[Entity[Example]] = [self, self, self]
 
-    @export fun entities_iterator(): Iterator[Example] =
+    @export fun entities_iterator(): Iterator[Entity[Example]] =
     self.entities_array().to_iterator()
 }

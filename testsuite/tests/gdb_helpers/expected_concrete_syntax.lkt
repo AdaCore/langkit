@@ -54,12 +54,12 @@ grammar foo_grammar {
     }
 
     @export fun test_entities(): Int = {
-        val null_root = null[FooNode];
-        val null_example = null[Example];
+        val null_root = null[Entity[FooNode]];
+        val null_example = null[Entity[Example]];
         val ent_root = self;
         # BREAK:test_state
         val ent_example = ent_root.as[Example];
-        val rebound = FooNode(
+        val rebound = Entity[FooNode](
             node=node, info=EntityInfo(
                 md=null[Metadata], rebindings=node.get_rebindings(false), from_rebound=false
             )

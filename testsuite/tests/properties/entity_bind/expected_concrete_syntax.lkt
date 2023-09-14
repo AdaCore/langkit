@@ -15,11 +15,11 @@ class Literal : FooNode implements TokenNode {
 
     fun b(): Equation = %eq(node.var, node.a())
 
-    @export fun public_prop(): Literal = {
+    @export fun public_prop(): Entity[Literal] = {
         val _ = node.b();
 
         node.as_bare_entity
     }
 
-    fun a(): FooNode = raise[FooNode] PropertyError("Property Literal.a not implemented")
+    fun a(): Entity[FooNode] = raise[Entity[FooNode]] PropertyError("Property Literal.a not implemented")
 }

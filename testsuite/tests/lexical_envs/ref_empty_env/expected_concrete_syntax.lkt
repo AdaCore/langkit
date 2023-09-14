@@ -30,7 +30,7 @@ class Block : FooNode {
 
 class Identifier : FooNode implements TokenNode {
 
-    fun resolve(): FooNode = node.children_env().get(node.symbol)?(0)
+    fun resolve(): Entity[FooNode] = node.children_env().get(node.symbol)?(0)
 }
 
 @abstract class Item : FooNode {
@@ -55,5 +55,5 @@ class Open : Item {
 class Ref : Item {
     @parse_field name: Identifier
 
-    @export fun resolve(): FooNode = node.name.resolve()
+    @export fun resolve(): Entity[FooNode] = node.name.resolve()
 }

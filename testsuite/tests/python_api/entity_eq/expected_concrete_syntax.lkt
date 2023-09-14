@@ -26,7 +26,8 @@ class Block : DefNode {
 
     fun name(): Symbol = node.name_field.symbol
 
-    @export fun rebind(from_block: Block, to_block: Block): Block = {
+    @export fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] =
+    {
         val rbdng = self.info.rebindings.append_rebinding(
             from_block.params.children_env(), to_block.children_env()
         );
@@ -34,7 +35,7 @@ class Block : DefNode {
             md=self.info.md, rebindings=rbdng, from_rebound=false
         );
 
-        Block(node=node, info=e_info)
+        Entity[Block](node=node, info=e_info)
     }
 }
 

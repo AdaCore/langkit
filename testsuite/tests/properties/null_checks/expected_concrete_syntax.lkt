@@ -15,19 +15,21 @@ grammar foo_grammar {
 
     @export fun null_unit(): AnalysisUnit[FooNode] = null[AnalysisUnit[FooNode]]
 
-    @export fun null_node(): Expression = null[Expression]
+    @export fun null_node(): Entity[Expression] = null[Entity[Expression]]
 
-    @export fun deref_null_unit(): FooNode =
+    @export fun deref_null_unit(): Entity[FooNode] =
     node.null_unit().root.as_bare_entity
 
-    @export fun deref_null_node(): Expression = node.null_node().null_node()
+    @export fun deref_null_node(): Entity[Expression] =
+    node.null_node().null_node()
 
     @export fun null_node_unit(): AnalysisUnit[FooNode] =
     node.null_node().unit()
 
-    @export fun cast_null_node(): Name = node.null_node().as[Name]
+    @export fun cast_null_node(): Entity[Name] = node.null_node().as[Name]
 
-    @export fun match_null_node(): Expression = match node.null_node().node {
+    @export fun match_null_node(): Entity[Expression] =
+    match node.null_node().node {
         case l : Literal => l
         case n : Name => n
         case others => others
@@ -42,13 +44,16 @@ class Literal : Expression implements TokenNode {
 
 class Name : Expression implements TokenNode {
 
-    fun env_element(): FooNode = node.children_env().get(node.symbol)?(0)
+    fun env_element(): Entity[FooNode] =
+    node.children_env().get(node.symbol)?(0)
 
-    @export fun deref_env_element(): Expression = node.env_element().null_node()
+    @export fun deref_env_element(): Entity[Expression] =
+    node.env_element().null_node()
 
-    @export fun match_env_element(): FooNode = match node.env_element() {
-        case l : Literal => l
-        case n : Name => n
+    @export fun match_env_element(): Entity[FooNode] =
+    match node.env_element() {
+        case l : Entity[Literal] => l
+        case n : Entity[Name] => n
         case others => others
     }
 }

@@ -13,15 +13,15 @@ grammar foo_grammar {
 class Literal : FooNode implements TokenNode {
     var: LogicVar
 
-    fun node(): Literal = node.as_entity
+    fun node(): Entity[Literal] = node.as_entity
 
     fun b(): Equation = %eq(node.var, node.a(), conv_prop=BareLiteral.node)
 
-    @export fun public_pro(): Literal = {
+    @export fun public_pro(): Entity[Literal] = {
         val _ = node.b();
 
         node.as_bare_entity
     }
 
-    fun a(): FooNode = raise[FooNode] PropertyError("Property Literal.a not implemented")
+    fun a(): Entity[FooNode] = raise[Entity[FooNode]] PropertyError("Property Literal.a not implemented")
 }

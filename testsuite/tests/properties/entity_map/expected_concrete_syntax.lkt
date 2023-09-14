@@ -20,7 +20,8 @@ class Decl : FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Ref]
 
-    @export fun entity_items(): Array[Ref] = node.as_entity.items.map((i) => i)
+    @export fun entity_items(): Array[Entity[Ref]] =
+    node.as_entity.items.map((i) => i)
 }
 
 @qualifier enum class HasPlus : FooNode {
@@ -32,7 +33,8 @@ class Name : FooNode implements TokenNode {
 class Ref : FooNode {
     @parse_field name: Name
 
-    @export fun decl(): Decl = node.children_env().get(node.name)?(0).as[Decl]!
+    @export fun decl(): Entity[Decl] =
+    node.children_env().get(node.name)?(0).as[Decl]!
 }
 
 @metadata struct Metadata {

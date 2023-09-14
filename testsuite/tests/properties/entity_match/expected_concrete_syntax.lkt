@@ -22,8 +22,8 @@ class Literal : FooNode implements TokenNode {
     fun get_num(): Int = 3
 
     @export fun b(): Int = match node.a() {
-        case e : Example => e.get_num()
-        case c : FooNode => c.get_num()
+        case e : Entity[Example] => e.get_num()
+        case c : Entity[FooNode] => c.get_num()
     }
 
     @export fun c(): Int = match node.a() {
@@ -31,5 +31,5 @@ class Literal : FooNode implements TokenNode {
         case c : FooNode => c.get_num()
     }
 
-    fun a(): FooNode = raise[FooNode] PropertyError("Property Literal.a not implemented")
+    fun a(): Entity[FooNode] = raise[Entity[FooNode]] PropertyError("Property Literal.a not implemented")
 }

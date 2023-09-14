@@ -19,6 +19,6 @@ class Example : FooNode implements TokenNode {
 
 struct MyStruct {
     entity_field: FooNode
-    array_field: Array[FooNode]
+    array_field: Array[Entity[FooNode]]
     bigint_field: BigInt
 }

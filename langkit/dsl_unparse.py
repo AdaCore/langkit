@@ -730,7 +730,11 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, IsA):
         return "{} is {}".format(
             ee_pexpr(expr.expr),
-            "{}".format(" | ".join(type_name(t) for t in expr.astnodes))
+            "{}".format(
+                " | ".join(
+                    type_name(t, strip_entity=True) for t in expr.astnodes
+                )
+            ),
         )
 
     elif isinstance(expr, LogicTrue):
@@ -892,7 +896,7 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, Cast):
         return "{}.as[{}]{}".format(
             ee(expr._expr),
-            type_name(expr.dest_type),
+            type_name(expr.dest_type, strip_entity=True),
             "!" if expr.do_raise else "",
         )
 
@@ -1366,11 +1370,14 @@ def emit_field(field):
         raise NotImplementedError()
 
 
-def type_name(type):
+def type_name(type, strip_entity=False):
     from langkit.compiled_types import ASTNodeType, resolve_type
     from langkit.compile_context import get_context
 
     type = resolve_type(type)
+
+    if strip_entity and type.is_entity_type:
+        type = type.element_type
 
     def bases(typ):
         t = typ.base
@@ -1389,7 +1396,7 @@ def type_name(type):
     elif type.is_iterator_type:
         return "Iterator[{}]".format(type_name(type.element_type))
     elif type.is_entity_type:
-        return type_name(type.element_type)
+        return "Entity[{}]".format(type_name(type.element_type))
     elif type.is_struct_type:
         return type.api_name.camel
     elif type.is_ast_node:

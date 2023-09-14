@@ -13,7 +13,8 @@ class Decl : FooNode implements TokenNode {
 
     fun refd_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 
-    @export fun lookup(name: Symbol): Array[FooNode] = node.node_env().get(name)
+    @export fun lookup(name: Symbol): Array[Entity[FooNode]] =
+    node.node_env().get(name)
 }
 
 class Scope : FooNode {

@@ -14,7 +14,7 @@ grammar foo_grammar {
 
     @export fun second_set(): Bool = self.info.md.is_second
 
-    @export fun test_main(): FooNode =
+    @export fun test_main(): Entity[FooNode] =
     node.as_entity.as[Couple].first_entity().first
 }
 
@@ -22,16 +22,16 @@ class Couple : FooNode {
     @parse_field first: FooNode
     @parse_field second: FooNode
 
-    fun first_entity(): Couple =
+    fun first_entity(): Entity[Couple] =
     node.as_entity.get_entity(Metadata(is_first=true, is_second=false))
 
-    fun get_entity(md: Metadata): Couple = Couple(
+    fun get_entity(md: Metadata): Entity[Couple] = Entity[Couple](
         node=node, info=EntityInfo(
             md=md, rebindings=null[EnvRebindings], from_rebound=false
         )
     )
 
-    @export fun property_on_entity(): Couple =
+    @export fun property_on_entity(): Entity[Couple] =
     # Check that we can do ".get_entity" even when the prefix is an entity
     node.as_entity.get_entity(node.as_entity.info.md)
 }

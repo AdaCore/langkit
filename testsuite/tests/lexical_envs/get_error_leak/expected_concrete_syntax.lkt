@@ -22,13 +22,13 @@ class ErrorUseClause : FooNode {
 
 class Id : FooNode implements TokenNode {
 
-    fun resolve(): Array[FooNode] = node.node_env().get(node.symbol)
+    fun resolve(): Array[Entity[FooNode]] = node.node_env().get(node.symbol)
 }
 
 class Ref : FooNode {
     @parse_field name: Id
 
-    @export fun resolve(): Array[FooNode] = node.name.resolve()
+    @export fun resolve(): Array[Entity[FooNode]] = node.name.resolve()
 }
 
 class Scope : FooNode {

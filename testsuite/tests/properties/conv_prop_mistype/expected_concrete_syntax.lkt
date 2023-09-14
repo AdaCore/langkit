@@ -24,7 +24,7 @@ class Examples : FooNode {
 
 class PlusExample : FooNode {
 
-    fun conv_prop(): RegularExample = null[RegularExample]
+    fun conv_prop(): Entity[RegularExample] = null[Entity[RegularExample]]
 }
 
 class RegularExample : FooNode {

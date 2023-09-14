@@ -23,7 +23,7 @@ class LiteralSequence : FooNode {
         name=node.name, items=if with_null then (null[ASTList[FooNode, Literal]]) else node.items
     )
 
-    @export fun prop(with_null: Bool): SynthNode =
+    @export fun prop(with_null: Bool): Entity[SynthNode] =
     node.new_node(with_null).as_bare_entity
 
     @lazy new_node2_null: SynthNode2 = SynthNode2(
@@ -32,7 +32,7 @@ class LiteralSequence : FooNode {
 
     @lazy new_node2: SynthNode2 = SynthNode2(name=node.name, items=node.items)
 
-    @export fun prop2(with_null: Bool): SynthNode2 =
+    @export fun prop2(with_null: Bool): Entity[SynthNode2] =
     if with_null then node.new_node2_null() else node.new_node2().as_bare_entity
 }
 

@@ -17,5 +17,5 @@ class Example : FooNode {
 }
 
 struct ExampleHolder {
-    examples: Array[Example]
+    examples: Array[Entity[Example]]
 }

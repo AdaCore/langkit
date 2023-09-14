@@ -21,7 +21,7 @@ class Name : FooNode implements TokenNode {
 class Ref : FooNode {
     @parse_field name: Name
 
-    @export fun resolve(): FooNode = {
+    @export fun resolve(): Entity[FooNode] = {
         bind env = node.parent.parent.node_env();
 
         env.get(node.name.symbol)?(0)

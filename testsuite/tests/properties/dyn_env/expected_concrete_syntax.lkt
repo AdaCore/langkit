@@ -53,10 +53,10 @@ class CallExpr : FooNode {
         )
     }
 
-    @export fun get_arg(name: Symbol): Expr =
+    @export fun get_arg(name: Symbol): Entity[Expr] =
     node.args_env().get_first(name).as[Expr]
 
-    @export fun get_arg_expr(name: Symbol): Expr =
+    @export fun get_arg_expr(name: Symbol): Entity[Expr] =
     node.arg_exprs_env().get_first(name).as[Expr]
 }
 
@@ -67,7 +67,7 @@ class ConsDecl : FooNode {
 
 @abstract class Expr : FooNode {
 
-    fun resolve(): Expr = match self {
+    fun resolve(): Entity[Expr] = match self {
         case l : Literal => l
         case r : Ref => self.node_env().get_first(r.name.symbol).as[ConsDecl].cons_expr.resolve()
     }

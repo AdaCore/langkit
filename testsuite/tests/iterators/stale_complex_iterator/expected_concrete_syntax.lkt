@@ -11,7 +11,9 @@ grammar foo_grammar {
 class Example : FooNode {
 
     @export fun test_struct_iterator(): Iterator[Iterator[TestStruct]] = {
-        val value = TestStruct(count=2, nodes=[null[Example], self]);
+        val value = TestStruct(
+            count=2, nodes=[null[Entity[Example]], self]
+        );
         val itr = [value, value].to_iterator();
 
         [itr, itr].to_iterator()
@@ -20,5 +22,5 @@ class Example : FooNode {
 
 struct TestStruct {
     count: Int
-    nodes: Array[Example]
+    nodes: Array[Entity[Example]]
 }

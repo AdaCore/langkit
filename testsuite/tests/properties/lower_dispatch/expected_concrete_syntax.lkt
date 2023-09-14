@@ -45,7 +45,7 @@ class Lit : Atom implements TokenNode {
 class Ref : Atom {
     @parse_field name: Name
 
-    @export fun resolve(): Def =
+    @export fun resolve(): Entity[Def] =
     node.node_env().get_first(node.name.symbol).as[Def]!
 
     fun evaluate_abstract(): Int = node.resolve().expr.evaluate_abstract()

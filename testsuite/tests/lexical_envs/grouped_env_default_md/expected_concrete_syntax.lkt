@@ -17,7 +17,7 @@ grammar foo_grammar {
         [[node.node_env()].env_group()].env_group()
     }
 
-    @export fun get_with_md(name: Symbol, n1: FooNode, n2: FooNode): FooNode =
+    @export fun get_with_md(name: Symbol, n1: FooNode, n2: FooNode): Entity[FooNode] =
     self.env_with_md(n1, n2).get_first(name)
 
     @export fun get_foo_metadata(): FooNode = self.info.md.n1

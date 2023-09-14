@@ -1451,6 +1451,7 @@ class LktTypesLoader:
         ast_list: Scope.Generic
         analysis_unit: Scope.Generic
         array: Scope.Generic
+        entity: Scope.Generic
         iterator: Scope.Generic
         node: Scope.Generic
 
@@ -1491,6 +1492,7 @@ class LktTypesLoader:
             Scope.Generic("ASTList"),
             Scope.Generic("AnalysisUnit"),
             Scope.Generic("Array"),
+            Scope.Generic("Entity"),
             Scope.Generic("Iterator"),
             Scope.Generic("Node"),
         )
@@ -1507,9 +1509,11 @@ class LktTypesLoader:
             builtin_type("BigInt"),
             builtin_type("Bool"),
             builtin_type("Char", "Character"),
+            builtin_type("EntityInfo"),
             builtin_type("Equation"),
             builtin_type("Int"),
             builtin_type("LogicVar"),
+            builtin_type("EnvRebindings"),
             builtin_type("String"),
             builtin_type("Symbol"),
             Scope.BuiltinValue("false", E.Literal(False)),
@@ -1521,6 +1525,7 @@ class LktTypesLoader:
             self.generics.ast_list,
             self.generics.analysis_unit,
             self.generics.array,
+            self.generics.entity,
             self.generics.iterator,
             self.generics.node,
             Scope.Trait("ErrorNode"),
@@ -1630,6 +1635,18 @@ class LktTypesLoader:
                         )
                     element_type, = type_args
                     return self.resolve_type(element_type, scope).array
+
+                elif generic == self.generics.entity:
+                    if len(type_args) != 1:
+                        error(
+                            f"{generic.name} expects one type argument: the"
+                            " node type"
+                        )
+                    node_type, = type_args
+
+                    # TODO: validate that node_type is indeed a node type
+
+                    return self.resolve_type(node_type, scope).entity
 
                 elif generic == self.generics.iterator:
                     if len(type_args) != 1:

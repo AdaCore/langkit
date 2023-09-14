@@ -21,7 +21,7 @@ class Name : FooNode implements TokenNode {
 class Ref : FooNode {
     @parse_field name: Name
 
-    @export fun referenced(): FooNode =
+    @export fun referenced(): Entity[FooNode] =
     node.referenced_env().env_node.as_bare_entity
 
     @memoized fun referenced_env(): LexicalEnv[FooNode] =

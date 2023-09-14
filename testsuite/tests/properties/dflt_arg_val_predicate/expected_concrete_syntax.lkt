@@ -12,7 +12,7 @@ class Example : FooNode {
     var1: LogicVar
     var2: LogicVar
 
-    fun predicate1(n: FooNode, flag1: Bool = false, flag2: Bool = true): Bool =
+    fun predicate1(n: Entity[FooNode], flag1: Bool = false, flag2: Bool = true): Bool =
     flag1 and (n.is_null) and flag2
 
     @export fun prop1(): Bool = {
@@ -21,7 +21,7 @@ class Example : FooNode {
         eq.solve()
     }
 
-    fun predicate2(n: FooNode, flag: Bool = false): Bool =
+    fun predicate2(n: Entity[FooNode], flag: Bool = false): Bool =
     (n.is_null) and false and flag
 
     @export fun prop2(): Bool = {
@@ -34,7 +34,7 @@ class Example : FooNode {
         eq.solve()
     }
 
-    fun predicate3(n: FooNode, flag: Bool = false): Bool =
+    fun predicate3(n: Entity[FooNode], flag: Bool = false): Bool =
     (n.is_null) and false and flag
 
     @export fun prop3(): Bool = {

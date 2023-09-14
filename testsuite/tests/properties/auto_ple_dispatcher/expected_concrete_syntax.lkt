@@ -31,18 +31,18 @@ class Var : DefNode {
 
 @abstract class Name : FooNode {
 
-    @export @abstract fun resolve(): FooNode
+    @export @abstract fun resolve(): Entity[FooNode]
 }
 
 class Id : Name implements TokenNode {
 
-    fun resolve(): FooNode = node.node_env().get_first(node)
+    fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
 }
 
 class Prefix : Name {
     @parse_field prefix: Name
     @parse_field suffix: Id
 
-    fun resolve(): FooNode =
+    fun resolve(): Entity[FooNode] =
     node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 }

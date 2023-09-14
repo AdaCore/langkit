@@ -57,9 +57,10 @@ class Example : BaseExample {
 
     @export fun id_unit_kind(id: AnalysisUnitKind): AnalysisUnitKind = id
 
-    @export fun id_node_array(id: Array[FooNode]): Array[FooNode] = id
+    @export fun id_node_array(id: Array[Entity[FooNode]]): Array[Entity[FooNode]] =
+    id
 
-    @export fun id_expr_array(id: Array[Expr]): Array[Expr] = id
+    @export fun id_expr_array(id: Array[Entity[Expr]]): Array[Entity[Expr]] = id
 
     @export fun id_bigint_array(id: Array[BigInt]): Array[BigInt] = id
 
@@ -79,7 +80,8 @@ class Example : BaseExample {
 
     @export fun id_dflt_root_node(id: FooNode = null[FooNode]): FooNode = id
 
-    @export fun with_md(md1: Bool, md2: Bool): Example = Example(
+    @export fun with_md(md1: Bool, md2: Bool): Entity[Example] =
+    Entity[Example](
         node=self.node, info=EntityInfo(
             md=Metadata(md1=md1, md2=md2), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
         )
@@ -120,7 +122,7 @@ class VarDecl : FooNode {
 
 struct NodeResult {
     n: Example
-    e: Example
+    e: Entity[Example]
 }
 
 struct Point {

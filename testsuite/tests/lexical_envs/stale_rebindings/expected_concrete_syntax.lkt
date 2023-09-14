@@ -7,7 +7,8 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun rebind(from_node: FooNode, to_node: FooNode): FooNode = {
+    @export fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Entity[FooNode] =
+    {
         val rbdng = self.info.rebindings.append_rebinding(
             from_node.children_env(), to_node.children_env()
         );
@@ -15,7 +16,7 @@ grammar foo_grammar {
             md=self.info.md, rebindings=rbdng, from_rebound=false
         );
 
-        FooNode(node=node, info=e_info)
+        Entity[FooNode](node=node, info=e_info)
     }
 }
 
