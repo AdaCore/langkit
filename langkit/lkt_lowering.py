@@ -2120,11 +2120,33 @@ class LktTypesLoader:
 
                 # Depending on its name, a call can have different meanings...
 
-                # If the call name is just an identifier, it has to be a
-                # reference to a struct type, and thus the call is a struct
-                # constructor.
-                if isinstance(call_name, L.RefId):
-                    struct_type = self.resolve_type_expr(call_name, env)
+                # If the call name is an identifier or a generic instantiation,
+                # it has to be a reference to a struct type, and thus the call
+                # is a struct constructor.
+                if isinstance(call_name, (L.RefId, L.GenericInstantiation)):
+                    # Resolve the type that call_name designates
+                    if isinstance(call_name, L.RefId):
+                        struct_type = self.resolve_type_expr(call_name, env)
+                    else:
+                        generic = self.resolve_generic(call_name.f_name, env)
+                        type_args = call_name.f_args
+                        if generic != self.generics.entity:
+                            error(
+                                f"only {self.generics.entity.name} is the only"
+                                " legal generic in this context"
+                            )
+                        with self.ctx.lkt_context(type_args):
+                            check_source_language(
+                                len(type_args) == 1,
+                                f"{generic.name} expects one type argument:"
+                                " the node type"
+                            )
+
+                        # TODO: ensure that node_type is indeed a node type
+                        node_type = self.resolve_type(type_args[0], env)
+                        struct_type = node_type.entity
+
+                    # Then build the new expression for the struct type
                     args, kwargs = lower_args()
                     check_source_language(
                         len(args) == 0,
