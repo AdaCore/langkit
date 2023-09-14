@@ -924,7 +924,7 @@ def emit_expr(expr, **ctx):
                     res += "$hl{}case {}{} => {}".format(
                         coms,
                         var_name(var),
-                        (" " + sf(": ${type_name(typ)}")) if typ else "",
+                        sf(": ${type_name(typ)}") if typ else "",
                         ee(e)
                     )
 

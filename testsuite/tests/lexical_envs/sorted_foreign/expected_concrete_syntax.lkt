@@ -15,13 +15,13 @@ grammar foo_grammar {
 @abstract class Name : FooNode {
 
     fun scope_fqn(): String = match node {
-        case dn : DottedName => dn.prefix.fqn()
-        case _ : Identifier => null[String]
+        case dn: DottedName => dn.prefix.fqn()
+        case _: Identifier => null[String]
     }
 
     fun fqn(): String = match node {
-        case dn : DottedName => dn.prefix.fqn() & ((".") & dn.suffix.fqn())
-        case id : Identifier => id.text()
+        case dn: DottedName => dn.prefix.fqn() & ((".") & dn.suffix.fqn())
+        case id: Identifier => id.text()
     }
 
     @abstract fun referenced_name(): Symbol

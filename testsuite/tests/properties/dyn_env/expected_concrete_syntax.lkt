@@ -68,8 +68,8 @@ class ConsDecl : FooNode {
 @abstract class Expr : FooNode {
 
     fun resolve(): Entity[Expr] = match self {
-        case l : Literal => l
-        case r : Ref => self.node_env().get_first(r.name.symbol).as[ConsDecl].cons_expr.resolve()
+        case l: Literal => l
+        case r: Ref => self.node_env().get_first(r.name.symbol).as[ConsDecl].cons_expr.resolve()
     }
 }
 

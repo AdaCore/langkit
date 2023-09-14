@@ -16,7 +16,7 @@ grammar foo_grammar {
     @export fun find_atoms(): Array[Entity[Atom]] = (
         match self {
             # This should match Lit .. Ref
-            case a : Atom => [a]
+            case a: Atom => [a]
 
             # This should match Def | Plus .. FooNode.list
             case _ => null[Array[Entity[Atom]]]
@@ -28,10 +28,10 @@ grammar foo_grammar {
     @export fun find_atoms_or_exprs(): Array[Entity[Expr]] = (
         match self {
             # This should match Lit .. Ref
-            case a : Atom => [a.as[Expr]]
+            case a: Atom => [a.as[Expr]]
 
             # This should match the only remaining expression: Plus
-            case e : Expr => [e]
+            case e: Expr => [e]
 
             # This should match Def | FooNode.list
             case _ => null[Array[Entity[Expr]]]
@@ -43,11 +43,11 @@ grammar foo_grammar {
     @export fun find_exprs(): Array[Entity[Expr]] = (
         match self {
             # This should match Lit .. Plus
-            case e : Expr => [e]
+            case e: Expr => [e]
 
             # This should match nothing (Atom is an Expr subclass), so emit a
             # warning.
-            case a : Atom => [a.as[Expr]]
+            case a: Atom => [a.as[Expr]]
 
             # This should match Def | FooNode.list
             case _ => null[Array[Entity[Expr]]]
@@ -67,7 +67,7 @@ class Def : FooNode {
     @export fun find_refs(): Array[Entity[Ref]] = (
         match self {
             # This should match Ref
-            case r : Ref => [r]
+            case r: Ref => [r]
 
             # This should match Lit
             case _ => null[Array[Entity[Ref]]]

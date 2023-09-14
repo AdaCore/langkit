@@ -19,13 +19,13 @@ grammar foo_grammar {
     @export @abstract fun suffix_symbol(): Symbol
 
     fun scope_fqn(): String = match node {
-        case p : Prefix => p.prefix.fqn()
-        case _ : Id => null[String]
+        case p: Prefix => p.prefix.fqn()
+        case _: Id => null[String]
     }
 
     fun fqn(): String = match node {
-        case p : Prefix => p.prefix.fqn() & ((".") & p.suffix.fqn())
-        case i : Id => i.text()
+        case p: Prefix => p.prefix.fqn() & ((".") & p.suffix.fqn())
+        case i: Id => i.text()
     }
 }
 

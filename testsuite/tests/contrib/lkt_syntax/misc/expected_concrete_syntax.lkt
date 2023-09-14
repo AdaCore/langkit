@@ -17,7 +17,7 @@ class Example : FooNode {
     ## Test that null conditional + match expr expands correctly.
     @export fun null_match(): Example = node.do(
         (_) => match _ {
-            case e : Example => e
+            case e: Example => e
         }
     )
 

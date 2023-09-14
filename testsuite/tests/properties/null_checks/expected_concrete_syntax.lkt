@@ -30,8 +30,8 @@ grammar foo_grammar {
 
     @export fun match_null_node(): Entity[Expression] =
     match node.null_node().node {
-        case l : Literal => l
-        case n : Name => n
+        case l: Literal => l
+        case n: Name => n
         case others => others
     }.as_bare_entity
 }
@@ -52,8 +52,8 @@ class Name : Expression implements TokenNode {
 
     @export fun match_env_element(): Entity[FooNode] =
     match node.env_element() {
-        case l : Entity[Literal] => l
-        case n : Entity[Name] => n
+        case l: Entity[Literal] => l
+        case n: Entity[Name] => n
         case others => others
     }
 }

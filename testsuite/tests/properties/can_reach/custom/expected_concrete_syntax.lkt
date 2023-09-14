@@ -13,7 +13,7 @@ grammar foo_grammar {
     # "foo" defs can never be reached: "foo" Def nodes should never appear
     # in the result of any lexical env lookups.
     match node {
-        case d : Def => not (d.name.symbol = "foo")
+        case d: Def => not (d.name.symbol = "foo")
         case _ => true
     }
 

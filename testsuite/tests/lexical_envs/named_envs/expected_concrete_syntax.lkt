@@ -121,8 +121,8 @@ grammar foo_grammar {
             owner is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls | PublicPart | PrivatePart
         ) then (
             match owner {
-                case pp : PublicPart => pp.parent
-                case pp : PrivatePart => pp.parent
+                case pp: PublicPart => pp.parent
+                case pp: PrivatePart => pp.parent
                 case n => n
             }
         ) else (null[FooNode])
@@ -179,22 +179,22 @@ class IncompleteTypeDecl : FooNode {
 
     ## Innermost suffix for this name.
     fun base_name(): String = match node {
-        case id : Identifier => id.text()
-        case dn : DottedName => dn.suffix.base_name()
+        case id: Identifier => id.text()
+        case dn: DottedName => dn.suffix.base_name()
     }
 
     ## Absolute name of the scope that this name defines, assuming that
     ## ``prefix`` is the implicit prefix for that name.
     fun scope_name(): String = match node {
-        case id : Identifier => id.text()
-        case dn : DottedName => (dn.prefix.scope_name() & (".")) & dn.suffix.text()
+        case id: Identifier => id.text()
+        case dn: DottedName => (dn.prefix.scope_name() & (".")) & dn.suffix.text()
     }
 
     ## Absolute name of the scope that defines this name, assuming that
     ## ``prefix`` is the implicit prefix for that name.
     fun parent_scope_name(): String = match node {
-        case _ : Identifier => null[String]
-        case dn : DottedName => dn.prefix.scope_name()
+        case _: Identifier => null[String]
+        case dn: DottedName => dn.prefix.scope_name()
     }
 
     ## Innermost scope for this name. The lookup starts from the given
@@ -205,8 +205,8 @@ class IncompleteTypeDecl : FooNode {
     ## Return the scope that contains the declaration that this name defines.
     fun parent_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
     match node {
-        case _ : Identifier => from_env
-        case dn : DottedName => dn.prefix.scope(from_env)
+        case _: Identifier => from_env
+        case dn: DottedName => dn.prefix.scope(from_env)
     }
 
     ## Return the list of declarations that define this name. The lookup
