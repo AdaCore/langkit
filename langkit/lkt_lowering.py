@@ -2198,6 +2198,13 @@ class LktTypesLoader:
                         method_prefix, inner_expr, elt_var, index_var=None
                     )
 
+                elif method_name == "length":
+                    check_source_language(
+                        len(call_expr.f_args) == 0,
+                        "'length' method takes no argument",
+                    )
+                    return getattr(method_prefix, "length")
+
                 elif method_name == "map":
                     # Build variable for iteration variables from the lambda
                     # expression arguments.
