@@ -270,7 +270,7 @@ module AnalysisContextStruct : sig
 
   val c_type : t typ
 
-  val allocate_analysis_context : unit -> t
+  val allocate_analysis_context : ?keep:'a -> unit -> t
   val initialize_analysis_context :
     t -> string -> unit ptr -> unit ptr -> unit ptr -> bool -> int -> unit
 
@@ -295,23 +295,30 @@ end = struct
 
   let unwrap (value : t) : unit ptr = !@value
 
+  (* The read part is not required as the only function returning a c_type is
+     allocate_analysis_context which is manually written to take an object
+     to keep alive as argument *)
+  let c_type = view (ptr void) ~read:(fun _ -> assert false) ~write:unwrap
+
   let context_decref =
-    let f =
-      foreign ~from:c_lib "${capi.get_name('context_decref')}"
-        (ptr void @-> raisable void)
-    in
-    fun ctx -> f (unwrap ctx)
+    foreign ~from:c_lib "${capi.get_name('context_decref')}"
+      (c_type @-> raisable void)
 
-  let wrap (c_value : unit ptr) : t =
-    (* To deallocate cleanly the context, we need to call context_decref.
-       Allocate a value and attach a finalizer to it *)
-    allocate ~finalise:context_decref (ptr void) c_value
-
-  let c_type = view (ptr void) ~read:wrap ~write:unwrap
-
-  let allocate_analysis_context =
+  let c_allocate_analysis_context =
     foreign ~from:c_lib "${capi.get_name('allocate_analysis_context')}"
-      ( void @-> raisable c_type )
+      ( void @-> raisable (ptr void) )
+
+  let allocate_analysis_context ?keep () =
+    (* To deallocate cleanly the context, we need to call context_decref.
+       Allocate a value and attach a finalizer to it. Use the keep option
+       to keep an object alive while the analysis context is. *)
+    let ref_keep = ref keep in
+    let finalise arg =
+      ref_keep := None;
+      context_decref arg
+    in
+    let c_value = c_allocate_analysis_context () in
+    allocate ~finalise (ptr void) c_value
 
   let initialize_analysis_context =
     foreign ~from:c_lib "${capi.get_name('initialize_analysis_context')}"
