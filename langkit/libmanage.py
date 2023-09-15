@@ -434,6 +434,13 @@ class ManageScript:
                  ' definitions.'
         )
         subparser.add_argument(
+            '--generate-auto-dll-dirs', action='store_true',
+            help='For Python bindings on Windows. Add a code snippet which'
+                 ' uses the "os.add_dll_directory" function to append'
+                 ' directories of the "PATH" environment variable to DLL'
+                 ' searching places.'
+        )
+        subparser.add_argument(
             '--check-only', action='store_true',
             help="Only check the input for errors, don't generate the code."
         )
@@ -834,6 +841,7 @@ class ManageScript:
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
             pretty_print=args.pretty_print,
+            generate_auto_dll_dirs=args.generate_auto_dll_dirs,
             coverage=args.coverage,
             relative_project=args.relative_project,
             unparse_script=args.unparse_script,
