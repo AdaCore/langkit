@@ -32,7 +32,6 @@ from __future__ import annotations
 from collections import OrderedDict
 from dataclasses import dataclass
 import itertools
-import json
 import os.path
 from typing import (
     Any, Callable, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar,
@@ -97,13 +96,6 @@ def same_node(left: L.LktNode, right: L.LktNode) -> bool:
     return left.unit == right.unit and left.sloc_range == right.sloc_range
 
 
-def pattern_as_str(str_lit: Union[L.StringLit, L.TokenPatternLit]) -> str:
-    """
-    Return the regexp string associated to this string literal node.
-    """
-    return json.loads(str_lit.text[1:])
-
-
 def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
     """
     Return the bool value that this expression denotes.
@@ -114,26 +106,6 @@ def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
                               'Boolean literal expected')
 
     return expr.text == 'true'
-
-
-def denoted_char_lit(char_lit: L.CharLit) -> str:
-    """
-    Return the character that ``char_lit`` denotes.
-    """
-    text = char_lit.text
-    assert text[0] == "'" and text[-1] == "'"
-    result = json.loads('"' + text[1:-1] + '"')
-    assert len(result) == 1
-    return result
-
-
-def denoted_string_lit(string_lit: Union[L.StringLit, L.TokenLit]) -> str:
-    """
-    Return the string that ``string_lit`` denotes.
-    """
-    result = json.loads(string_lit.text)
-    assert isinstance(result, str)
-    return result
 
 
 def ada_id_for(n: str) -> names.Name:
@@ -781,9 +753,8 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 or not decl.f_val.p_is_regexp_literal
             ):
                 error('Pattern string literal expected')
-            # TODO: use StringLit.p_denoted_value when properly implemented
             patterns[name] = (
-                pattern_as_str(decl.f_val), Location.from_lkt_node(decl)
+                decl.f_val.p_denoted_value, Location.from_lkt_node(decl)
             )
 
     def lower_matcher(expr: L.GrammarExpr) -> Matcher:
@@ -793,11 +764,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         loc = Location.from_lkt_node(expr)
         with ctx.lkt_context(expr):
             if isinstance(expr, L.TokenLit):
-                return Literal(json.loads(expr.text), location=loc)
+                return Literal(expr.p_denoted_value, location=loc)
             elif isinstance(expr, L.TokenNoCaseLit):
-                return NoCaseLit(json.loads(expr.text), location=loc)
+                return NoCaseLit(expr.f_lit.p_denoted_value, location=loc)
             elif isinstance(expr, L.TokenPatternLit):
-                return Pattern(pattern_as_str(expr), location=loc)
+                return Pattern(expr.p_denoted_value, location=loc)
             else:
                 error('Invalid lexing expression')
 
@@ -1140,12 +1111,12 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 if rule.f_expr:
                     # The grammar is supposed to mainain this invariant
                     assert isinstance(rule.f_expr, L.TokenLit)
-                    match_text = denoted_string_lit(rule.f_expr)
+                    match_text = rule.f_expr.p_denoted_value
 
                 return _Token(val=val, match_text=match_text, location=loc)
 
             elif isinstance(rule, L.TokenLit):
-                return _Token(denoted_string_lit(rule), location=loc)
+                return _Token(rule.p_denoted_value, location=loc)
 
             elif isinstance(rule, L.GrammarList):
                 return PList(
@@ -1871,7 +1842,7 @@ class LktTypesLoader:
                 return Cast(subexpr, dest_type, do_raise=excludes_null)
 
             elif isinstance(expr, L.CharLit):
-                return E.CharacterLiteral(denoted_char_lit(expr))
+                return E.CharacterLiteral(expr.p_denoted_value)
 
             elif isinstance(expr, L.DotExpr):
                 # Dotted expressions can designate an enum value or a member
@@ -1994,7 +1965,7 @@ class LktTypesLoader:
                     return env[decl]
 
             elif isinstance(expr, L.StringLit):
-                return E.SymbolLiteral(denoted_string_lit(expr))
+                return E.SymbolLiteral(expr.p_denoted_value)
 
             elif isinstance(expr, L.TryExpr):
                 return E.Try(
