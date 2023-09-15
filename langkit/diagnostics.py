@@ -657,7 +657,7 @@ def print_error(message: str,
     )
 
     # Print the source listing
-    if location.lkt_unit is not None:
+    if location.lkt_unit is not None and location.line > 0:
         print(source_listing(location))
 
 
