@@ -1512,6 +1512,14 @@ class TokenLit(GrammarExpr):
     """
     token_node = True
 
+    @langkit_property(public=True, return_type=T.String,
+                      external=True, uses_envs=False, uses_entity_info=False)
+    def denoted_value():
+        """
+        Return the content of the given token literal node.
+        """
+        pass
+
 
 class TokenNoCaseLit(GrammarExpr):
     """
@@ -1525,6 +1533,14 @@ class TokenPatternLit(GrammarExpr):
     Grammar expression for a pattern literal.
     """
     token_node = True
+
+    @langkit_property(public=True, return_type=T.String,
+                      external=True, uses_envs=False, uses_entity_info=False)
+    def denoted_value():
+        """
+        Return the content of the given token pattern literal node.
+        """
+        pass
 
 
 class GrammarPick(GrammarExpr):
@@ -3701,6 +3717,14 @@ class CharLit(Lit):
     Character literal expression.
     """
     token_node = True
+
+    @langkit_property(public=True, return_type=T.Character,
+                      external=True, uses_envs=False, uses_entity_info=False)
+    def denoted_value():
+        """
+        Return the content of the given character literal node.
+        """
+        pass
 
     @langkit_property()
     def expected_type_predicate(expected_type=T.TypeDecl.entity):
