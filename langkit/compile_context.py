@@ -30,7 +30,7 @@ from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
     DiagnosticError, Location, Severity, WarningSet, check_source_language,
-    diagnostic_context, error
+    diagnostic_context, error, non_blocking_error
 )
 from langkit.documentation import RstCommentChecker
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
@@ -1308,21 +1308,17 @@ class CompileCtx:
             if n.nullable and field.nullable_from_spec is False:
                 if isinstance(n.reason, Parser):
                     with n.reason.diagnostic_context:
-                        check_source_language(
-                            False,
+                        non_blocking_error(
                             "This parsing rule can assign a null value to"
                             f" {field.qualname}: a @nullable annotation is"
-                            " required for that field",
-                            severity=Severity.non_blocking_error,
+                            " required for that field"
                         )
                 elif isinstance(n.reason, Field):
                     assert n.reason.null
                     with field.diagnostic_context:
-                        check_source_language(
-                            False,
+                        non_blocking_error(
                             "@nullable annotation required because"
-                            f" {n.reason.qualname} overrides this field",
-                            severity=Severity.non_blocking_error,
+                            f" {n.reason.qualname} overrides this field"
                         )
                 else:
                     # All nullable fields should have a reason to be this way
@@ -3329,8 +3325,7 @@ class CompileCtx:
                 message += '({})'.format(annot.reason)
 
             with prop.diagnostic_context:
-                check_source_language(False, message,
-                                      severity=Severity.non_blocking_error)
+                non_blocking_error(message)
 
     TypeSet = utils.TypeSet
 
