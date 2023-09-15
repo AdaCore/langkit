@@ -100,6 +100,7 @@ library project Langkit_Support is
             --  Ensure that we have a relatively fast build but with all
             --  possible stack info & debug info, for profiling.
             for Default_Switches ("Ada") use
+               Common_Ada_Cargs &
                ("-Og", "-ggdb", "-g3", "-fno-omit-frame-pointer");
       end case;
    end Compiler;
