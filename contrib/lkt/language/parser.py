@@ -3574,6 +3574,14 @@ class BinOp(Expr):
         )
 
 
+class UnOp(Expr):
+    """
+    Unary operator expression.
+    """
+    op = Field(type=T.Op)
+    expr = Field(type=T.Expr)
+
+
 class ValDecl(ExplicitlyTypedDecl):
     """
     Value declaration.
@@ -4053,8 +4061,14 @@ lkt_grammar.add_rules(
 
     arith_2=GOr(
         BinOp(G.arith_2,
-              GOr(Op.alt_mult("*"), Op.alt_div("/")), G.isa_or_primary),
-        G.isa_or_primary
+              GOr(Op.alt_mult("*"), Op.alt_div("/")),
+              G.arith_3),
+        G.arith_3,
+    ),
+
+    arith_3=GOr(
+        UnOp(GOr(Op.alt_plus("+"), Op.alt_minus("-")), G.isa_or_primary),
+        G.isa_or_primary,
     ),
 
     isa_or_primary=GOr(

@@ -1,0 +1,6 @@
+val p1 = +1
+val n1 = -1
+val prio_add1 = -2 + 1
+val prio_add2 = 2 + -1
+val prio_mul1 = -2 * 3
+val prio_mul2 = 2 * -3
