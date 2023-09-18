@@ -2396,6 +2396,59 @@ class LktTypesLoader:
                 ]
                 return E.IsA(subexpr, *nodes)
 
+            elif isinstance(expr, L.MatchExpr):
+                assert local_vars is not None
+
+                prefix_expr = lower(expr.f_match_expr)
+
+                # Lower each individual matcher
+                matchers: list[
+                    tuple[TypeRepo.Defer, AbstractVariable, AbstractExpression]
+                ] = []
+                for i, m in enumerate(expr.f_branches):
+                    # Make sure the identifier has the expected casing
+                    decl_id = m.f_decl.f_syn_name
+                    if decl_id.text != "_":
+                        with self.ctx.lkt_context(decl_id):
+                            names.Name.check_from_lower(decl_id.text)
+
+                    # Fetch the type to match, if any
+                    syn_type = m.f_decl.f_decl_type
+                    matched_type = (
+                        None
+                        if syn_type is None else
+                        resolve_type(self.resolve_type(syn_type, env))
+                    )
+
+                    # Create the match variable
+                    var_name = names.Name(f"Match_{i}")
+                    match_var = AbstractVariable(
+                        name=var_name,
+                        type=matched_type,
+                        source_name=decl_id.text,
+                    )
+                    match_var.local_var = local_vars.create_scopeless(
+                        var_name, matched_type
+                    )
+
+                    # Lower the matcher expression, making the match variable
+                    # available if intended.
+                    loc = Location.from_lkt_node(m)
+                    sub_env = env.create_child(
+                        f"scope for match branch at {loc.gnu_style_repr()}"
+                    )
+                    if decl_id.text != "_":
+                        sub_env.add(
+                            Scope.UserValue(decl_id.text, m.f_decl, match_var)
+                        )
+                    match_expr = self.lower_expr(m.f_expr, sub_env, local_vars)
+
+                    matchers.append((matched_type, match_var, match_expr))
+
+                result = E.Match(prefix_expr)
+                result.matchers = matchers
+                return result
+
             elif isinstance(expr, L.NotExpr):
                 return E.Not(lower(expr.f_expr))
 
