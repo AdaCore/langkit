@@ -1887,7 +1887,7 @@ class LktTypesLoader:
         assert isinstance(decl, L.FieldDecl)
         annotations = parse_annotations(self.ctx, FieldAnnotations, full_decl)
         field_type = self.resolve_type(decl.f_decl_type, self.root_scope)
-        doc = self.ctx.lkt_doc(full_decl)
+        doc = self.ctx.lkt_doc(decl)
 
         cls: Type[AbstractNodeData]
         constructor: Callable[..., AbstractNodeData]
@@ -2584,7 +2584,7 @@ class LktTypesLoader:
         result = PropertyDef(
             expr=None,
             prefix=AbstractNodeData.PREFIX_PROPERTY,
-            doc=self.ctx.lkt_doc(full_decl),
+            doc=self.ctx.lkt_doc(decl),
 
             # When the @export annotation is missing, use "None" to mean
             # "public status unspecified", as the property can still be public
@@ -2842,7 +2842,7 @@ class LktTypesLoader:
         result = ASTNodeType(
             names.Name.check_from_camel(decl.f_syn_name.text),
             location=loc,
-            doc=self.ctx.lkt_doc(decl.parent),
+            doc=self.ctx.lkt_doc(decl),
             base=base_type,
             fields=fields,
             is_abstract=is_abstract,
@@ -2981,7 +2981,7 @@ class LktTypesLoader:
         return EnumType(
             name=names.Name.check_from_camel(decl.f_syn_name.text),
             location=Location.from_lkt_node(decl),
-            doc=self.ctx.lkt_doc(decl.parent),
+            doc=self.ctx.lkt_doc(decl),
             value_names=[names.Name.check_from_lower(n) for n in value_names],
         )
 
@@ -3011,7 +3011,7 @@ class LktTypesLoader:
         result = StructType(
             name=names.Name.check_from_camel(name),
             location=Location.from_lkt_node(decl),
-            doc=self.ctx.lkt_doc(decl.parent),
+            doc=self.ctx.lkt_doc(decl),
             fields=fields,
         )
         if annotations.metadata:
