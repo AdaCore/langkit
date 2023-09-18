@@ -449,9 +449,12 @@ class AnnotationSpec:
         self.require_args = require_args
         self.default_value = default_value if unique else []
 
-    def interpret(self, ctx: CompileCtx,
-                  args: List[L.Expr],
-                  kwargs: Dict[str, L.Expr]) -> Any:
+    def interpret(
+        self, ctx: CompileCtx,
+        args: List[L.Expr],
+        kwargs: Dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
         """
         Subclasses must override this in order to interpret an annotation.
 
@@ -460,13 +463,18 @@ class AnnotationSpec:
 
         :param args: Positional arguments for the annotation.
         :param kwargs: Keyword arguments for the annotation.
+        :param scope: Scope to use when resolving entities mentionned in the
+            annotation's arguments.
         """
         raise NotImplementedError
 
-    def parse_single_annotation(self,
-                                ctx: CompileCtx,
-                                result: Dict[str, Any],
-                                annotation: L.DeclAnnotation) -> None:
+    def parse_single_annotation(
+        self,
+        ctx: CompileCtx,
+        result: Dict[str, Any],
+        annotation: L.DeclAnnotation,
+        scope: Scope,
+    ) -> None:
         """
         Parse an annotation node according to this spec. Add the result to
         ``result``.
@@ -480,7 +488,7 @@ class AnnotationSpec:
         if not annotation.f_params:
             check_source_language(not self.require_args,
                                   'Arguments required for this annotation')
-            value = self.interpret(ctx, [], {})
+            value = self.interpret(ctx, [], {}, scope)
         else:
             check_source_language(self.require_args,
                                   'This annotation accepts no argument')
@@ -503,7 +511,7 @@ class AnnotationSpec:
                         args.append(param.f_value)
 
             # Evaluate this annotation
-            value = self.interpret(ctx, args, kwargs)
+            value = self.interpret(ctx, args, kwargs, scope)
 
         # Store annotation evaluation into the result
         if self.unique:
@@ -521,10 +529,13 @@ class FlagAnnotationSpec(AnnotationSpec):
         super().__init__(name, unique=True, require_args=False,
                          default_value=False)
 
-    def interpret(self,
-                  ctx: CompileCtx,
-                  args: List[L.Expr],
-                  kwargs: Dict[str, L.Expr]) -> Any:
+    def interpret(
+        self,
+        ctx: CompileCtx,
+        args: List[L.Expr],
+        kwargs: Dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
         return True
 
 
@@ -535,10 +546,13 @@ class SpacingAnnotationSpec(AnnotationSpec):
     def __init__(self) -> None:
         super().__init__('unparse_spacing', unique=False, require_args=True)
 
-    def interpret(self,
-                  ctx: CompileCtx,
-                  args: List[L.Expr],
-                  kwargs: Dict[str, L.Expr]) -> L.RefId:
+    def interpret(
+        self,
+        ctx: CompileCtx,
+        args: List[L.Expr],
+        kwargs: Dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
         check_source_language(not args, 'No positional argument allowed')
 
         try:
@@ -562,10 +576,13 @@ class TokenAnnotationSpec(AnnotationSpec):
     def __init__(self, name: str):
         super().__init__(name, unique=True, require_args=True)
 
-    def interpret(self,
-                  ctx: CompileCtx,
-                  args: List[L.Expr],
-                  kwargs: Dict[str, L.Expr]) -> Tuple[bool, bool]:
+    def interpret(
+        self,
+        ctx: CompileCtx,
+        args: List[L.Expr],
+        kwargs: Dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
         check_source_language(not args, 'No positional argument allowed')
 
         try:
@@ -597,10 +614,13 @@ class WithLexerAnnotationSpec(AnnotationSpec):
     def __init__(self) -> None:
         super().__init__('with_lexer', unique=True, require_args=True)
 
-    def interpret(self,
-                  ctx: CompileCtx,
-                  args: List[L.Expr],
-                  kwargs: Dict[str, L.Expr]) -> L.LexerDecl:
+    def interpret(
+        self,
+        ctx: CompileCtx,
+        args: List[L.Expr],
+        kwargs: Dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
         assert not kwargs
         assert len(args) == 1
         requested_name = args[0]
@@ -767,9 +787,12 @@ def check_no_annotations(full_decl: L.FullDecl) -> None:
 AnyPA = TypeVar('AnyPA', bound=ParsedAnnotations)
 
 
-def parse_annotations(ctx: CompileCtx,
-                      annotation_class: Type[AnyPA],
-                      full_decl: L.FullDecl) -> AnyPA:
+def parse_annotations(
+    ctx: CompileCtx,
+    annotation_class: Type[AnyPA],
+    full_decl: L.FullDecl,
+    scope: Scope,
+) -> AnyPA:
     """
     Parse annotations according to the specs in
     ``annotation_class.annotations``. Return a ParsedAnnotations that contains
@@ -778,6 +801,8 @@ def parse_annotations(ctx: CompileCtx,
     :param annotation_class: ParsedAnnotations subclass for the result, holding
         the annotation specs to guide parsing.
     :param full_decl: Declaration whose annotations are to be parsed.
+    :param scope: Scope to use when resolving entities mentionned in the
+        annotation's arguments.
     """
     # Build a mapping for all specs
     specs_map: Dict[str, AnnotationSpec] = {}
@@ -797,7 +822,7 @@ def parse_annotations(ctx: CompileCtx,
                         False, 'Invalid annotation: {}'.format(name)
                     )
             else:
-                spec.parse_single_annotation(ctx, values, a)
+                spec.parse_single_annotation(ctx, values, a, scope)
 
     # Use the default value for absent annotations
     for s in annotation_class.annotations:
@@ -814,12 +839,18 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     :param lkt_units: Non-empty list of analysis units where to look for the
         grammar.
     """
+    # TODO: once the DSL is no more, use the same root scope as in the Lkt
+    # types lowering pass.
+    root_scope = Scope("the root scope", ctx)
+
     # Look for the LexerDecl node in top-level lists
     full_lexer = find_toplevel_decl(ctx, lkt_units, L.LexerDecl, 'lexer')
     assert isinstance(full_lexer.f_decl, L.LexerDecl)
 
     with ctx.lkt_context(full_lexer):
-        lexer_annot = parse_annotations(ctx, LexerAnnotations, full_lexer)
+        lexer_annot = parse_annotations(
+            ctx, LexerAnnotations, full_lexer, root_scope
+        )
 
     patterns: Dict[names.Name, Tuple[str, Location]] = {}
     """
@@ -888,8 +919,12 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                     error('Only lexer rules allowed in family blocks')
                 process_token_rule(r, token_set)
 
-            family_annotations = parse_annotations(ctx, TokenFamilyAnnotations,
-                                                   cast(L.FullDecl, f.parent))
+            family_annotations = parse_annotations(
+                ctx,
+                TokenFamilyAnnotations,
+                cast(L.FullDecl, f.parent),
+                root_scope,
+            )
 
             for spacing in family_annotations.unparse_spacing:
                 spacings.append((name, spacing))
@@ -909,7 +944,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         """
         with ctx.lkt_context(r):
             rule_annot: TokenAnnotations = parse_annotations(
-                ctx, TokenAnnotations, r
+                ctx, TokenAnnotations, r, root_scope
             )
 
             # Gather token action info from the annotations. If absent,
@@ -1147,12 +1182,16 @@ def create_grammar(ctx: CompileCtx,
     :param lkt_units: Non-empty list of analysis units where to look for the
         grammar.
     """
+    # TODO: once the DSL is no more, use the same root scope as in the Lkt
+    # types lowering pass.
+    root_scope = Scope("the root scope", ctx)
+
     # Look for the GrammarDecl node in top-level lists
     full_grammar = find_toplevel_decl(ctx, lkt_units, L.GrammarDecl, 'grammar')
     assert isinstance(full_grammar.f_decl, L.GrammarDecl)
 
     with ctx.lkt_context(full_grammar):
-        parse_annotations(ctx, GrammarAnnotations, full_grammar)
+        parse_annotations(ctx, GrammarAnnotations, full_grammar, root_scope)
 
     # Collect the list of grammar rules. This is where we check that we only
     # have grammar rules, that their names are unique, and that they have valid
@@ -1170,7 +1209,9 @@ def create_grammar(ctx: CompileCtx,
 
             # Register this rule as a main rule or an entry point if the
             # corresponding annotations are present.
-            anns = parse_annotations(ctx, GrammarRuleAnnotations, full_rule)
+            anns = parse_annotations(
+                ctx, GrammarRuleAnnotations, full_rule, root_scope
+            )
             if anns.main_rule:
                 check_source_language(
                     main_rule_name is None,
@@ -1846,20 +1887,25 @@ class LktTypesLoader:
                          if isinstance(decl, L.EnumClassDecl)
                          else NodeAnnotations)
                 result = self.create_node(
-                    decl, parse_annotations(self.ctx, specs, full_decl)
+                    decl,
+                    parse_annotations(
+                        self.ctx, specs, full_decl, self.root_scope
+                    ),
                 )
 
             elif isinstance(decl, L.EnumTypeDecl):
                 result = self.create_enum(
                     decl,
-                    parse_annotations(self.ctx, EnumAnnotations, full_decl)
+                    parse_annotations(
+                        self.ctx, EnumAnnotations, full_decl, self.root_scope
+                    )
                 )
 
             elif isinstance(decl, L.StructDecl):
                 result = self.create_struct(
                     decl,
                     parse_annotations(
-                        self.ctx, StructAnnotations, full_decl
+                        self.ctx, StructAnnotations, full_decl, self.root_scope
                     )
                 )
 
@@ -1885,7 +1931,9 @@ class LktTypesLoader:
         """
         decl = full_decl.f_decl
         assert isinstance(decl, L.FieldDecl)
-        annotations = parse_annotations(self.ctx, FieldAnnotations, full_decl)
+        annotations = parse_annotations(
+            self.ctx, FieldAnnotations, full_decl, self.root_scope
+        )
         field_type = self.resolve_type(decl.f_decl_type, self.root_scope)
         doc = self.ctx.lkt_doc(decl)
 
@@ -2564,7 +2612,9 @@ class LktTypesLoader:
         """
         decl = full_decl.f_decl
         assert isinstance(decl, L.FunDecl)
-        annotations = parse_annotations(self.ctx, FunAnnotations, full_decl)
+        annotations = parse_annotations(
+            self.ctx, FunAnnotations, full_decl, self.root_scope,
+        )
         return_type = self.resolve_type(decl.f_return_type, self.root_scope)
 
         # If @uses_entity_info and @uses_envs are not present for non-external
