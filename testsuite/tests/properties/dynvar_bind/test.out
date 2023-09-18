@@ -1,5 +1,4 @@
 main.py: Running...
-<Ref main.txt:2:5-2:8> resolves to <Decl main.txt:6:1-6:6>
-<Ref main.txt:3:5-3:8> resolves to <Decl main.txt:7:1-7:6>
+p_next(42) = 43
 main.py: Done.
 Done

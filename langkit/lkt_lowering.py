@@ -26,6 +26,8 @@ expressions. The lowering of types goes as follows:
 * The first pass looks at all top-level declarations (lexers, grammars and
   types) and registers them by name in the root scope.
 
+* At this point, another pass lowers all dynamic variables.
+
 * We then iterate on all types and lower them. All type declarations in the
   language spec are lowered in sequence (arbitrary order), except base classes,
   which are lowered before classes that they derive from. This pass creates the
@@ -316,6 +318,21 @@ class Scope:
 
         kind_name = "argument"
 
+    @dataclass
+    class DynVar(UserEntity):
+        """
+        Dynamic variable declaration.
+
+        Note that this is not a derivation of ``UserValue`` since dynamic
+        variables cannot be used as-is: they first need to be bound either
+        explicitly through a ``VarBind`` expression or with the
+        ``@with_dynvars`` property annotation.
+        """
+
+        variable: E.DynamicVariable
+
+        kind_name = "dynamic variable"
+
     def __init__(
         self,
         label: str,
@@ -367,6 +384,22 @@ class Scope:
                 scope = scope.parent
 
         raise KeyError(f"no entity called '{name}' in {self.label}")
+
+    def resolve(self, name: L.Expr) -> Scope.Entity:
+        """
+        Resolve the entity designated by ``name`` in this scope.
+
+        Unlike ``lookup``, this create a diagnostic if the entity is not found.
+        """
+        if isinstance(name, L.RefId):
+            try:
+                return self.lookup(name.text)
+            except KeyError as exc:
+                with self.context.lkt_context(name):
+                    error(exc.args[0])
+        else:
+            with self.context.lkt_context(name):
+                error("invalid entity reference")
 
     def create_child(self, label: str) -> Scope:
         """
@@ -537,6 +570,62 @@ class FlagAnnotationSpec(AnnotationSpec):
         scope: Scope,
     ) -> Any:
         return True
+
+
+class WithDynvarsAnnotationSpec(AnnotationSpec):
+    """
+    Interpreter for @with_dynvars annotations for properties.
+    """
+    def __init__(self) -> None:
+        super().__init__("with_dynvars", unique=True, require_args=True)
+
+    def interpret(
+        self,
+        ctx: CompileCtx,
+        args: List[L.Expr],
+        kwargs: Dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
+        result: list[tuple[Scope.DynVar, L.Expr | None]] = []
+
+        def add(
+            entity: Scope.Entity,
+            default_value: L.Expr | None = None,
+        ) -> None:
+            """
+            Append a dynamic variable to ``result``. This also performs
+            validity checks on the arguments.
+
+            :param entity: Entity that is supposed to be a dynamic variable
+                (this is checked).
+            :param default_value: If this dynamic variable is optional, default
+                value for it.
+            """
+            if not isinstance(entity, Scope.DynVar):
+                error(
+                    "dynamic variable expected, got {entity.diagnostic_name}"
+                )
+            if entity in result:
+                error("dynamic variables can appear at most once")
+            result.append((entity, default_value))
+
+        # Positional arguments are supposed to be just dynamic variable names
+        for arg in args:
+            with ctx.lkt_context(arg):
+                entity = scope.resolve(arg)
+                add(entity)
+
+        # Keyword arguments are supposed to associate a dynamic variable name
+        # ("name" below) to a default value for the dynamic variable in the
+        # current property ("default_value" below).
+        for name, default_value in kwargs.items():
+            try:
+                entity = scope.lookup(name)
+            except KeyError as exc:
+                error(exc.args[0])
+            add(entity, default_value)
+
+        return result
 
 
 class SpacingAnnotationSpec(AnnotationSpec):
@@ -763,6 +852,7 @@ class FunAnnotations(ParsedAnnotations):
     trace: bool
     uses_entity_info: bool
     uses_envs: bool
+    with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
     annotations = [
         FlagAnnotationSpec('abstract'),
         FlagAnnotationSpec('export'),
@@ -772,6 +862,7 @@ class FunAnnotations(ParsedAnnotations):
         FlagAnnotationSpec('trace'),
         FlagAnnotationSpec('uses_entity_info'),
         FlagAnnotationSpec('uses_envs'),
+        WithDynvarsAnnotationSpec(),
     ]
 
 
@@ -1517,6 +1608,12 @@ class LktTypesLoader:
         Arguments for this property.
         """
 
+        dynamic_vars: list[tuple[E.DynamicVariable, L.Expr | None]] | None
+        """
+        Dynamic variables for this property, and optional default value for
+        each one. If None, inherit dynamic variables from the base property.
+        """
+
     @dataclass
     class PropertyAndExprToLower(PropertyToLower):
         body: L.Expr
@@ -1606,6 +1703,7 @@ class LktTypesLoader:
         # root scope. This first pass allows to check for name uniqueness,
         # create TypeRepo.Defer objects and build the list of types to lower.
         type_decls: list[L.TypeDecl] = []
+        dyn_vars: list[L.DynVarDecl] = []
         for unit in lkt_units:
             assert isinstance(unit.root, L.LangkitRoot)
             for full_decl in unit.root.f_decls:
@@ -1620,11 +1718,23 @@ class LktTypesLoader:
                         Scope.UserType(name, decl, T.deferred_type(name))
                     )
                     type_decls.append(decl)
+                elif isinstance(decl, L.DynVarDecl):
+                    dyn_vars.append(decl)
                 else:
                     error(
                         "invalid top-level declaration:"
                         f" {decl.p_decl_type_name}"
                     )
+
+        # Create dynamic variables
+        for dyn_var_decl in dyn_vars:
+            name = dyn_var_decl.f_syn_name.text
+            dyn_var = E.DynamicVariable(
+                name=name,
+                type=self.resolve_type(dyn_var_decl.f_decl_type, root_scope),
+                doc=self.ctx.lkt_doc(dyn_var_decl),
+            )
+            root_scope.add(Scope.DynVar(name, dyn_var_decl, dyn_var))
 
         # Now create CompiledType instances for each user type. To properly
         # handle node derivation, this recurses on bases first and reject
@@ -1637,7 +1747,7 @@ class LktTypesLoader:
 
         # Now that all user-defined compiled types are known, we can start
         # lowering expressions. Start with default values for property
-        # arguments.
+        # arguments and dynamic variables.
         for to_lower in self.properties_to_lower:
             for arg_decl, arg in zip(
                 to_lower.arguments, to_lower.prop.arguments
@@ -1648,6 +1758,19 @@ class LktTypesLoader:
                     )
                     value.prepare()
                     arg.set_default_value(value)
+
+            if to_lower.dynamic_vars is not None:
+                to_lower.prop.set_dynamic_vars(
+                    [
+                        (
+                            dynvar,
+                            None
+                            if init_expr is None else
+                            self.lower_expr(init_expr, self.root_scope, None),
+                        )
+                        for dynvar, init_expr in to_lower.dynamic_vars
+                    ]
+                )
 
         # Now that all types and properties ("declarations") are available,
         # lower the property expressions themselves.
@@ -1662,15 +1785,7 @@ class LktTypesLoader:
         """
         Resolve the entity designated by ``name`` in the given scope.
         """
-        if isinstance(name, L.RefId):
-            try:
-                return scope.lookup(name.text)
-            except KeyError as exc:
-                with self.ctx.lkt_context(name):
-                    error(exc.args[0])
-        else:
-            with self.ctx.lkt_context(name):
-                error("invalid entity reference")
+        return scope.resolve(name)
 
     def resolve_generic(self, name: L.Expr, scope: Scope) -> Scope.Generic:
         """
@@ -2060,7 +2175,9 @@ class LktTypesLoader:
                 ),
             )
             self.properties_to_lower.append(
-                self.PropertyAndExprToLower(result, arguments, body, scope)
+                self.PropertyAndExprToLower(
+                    result, arguments, None, body, scope
+                )
             )
 
         return result
@@ -2178,42 +2295,90 @@ class LktTypesLoader:
 
             elif isinstance(expr, L.BlockExpr):
                 assert local_vars is not None
+                loc = Location.from_lkt_node(expr)
+                sub_env = env.create_child(
+                    f"scope for block at {loc.gnu_style_repr()}"
+                )
 
-                # Lower declarations for this block
-                vars = []
-                var_exprs = []
+                @dataclass
+                class DeclAction:
+                    var: AbstractVariable
+                    init_expr: AbstractExpression
+                    location: Location
+
+                actions: list[DeclAction] = []
 
                 for v in expr.f_val_defs:
+                    source_name: str
+                    source_var: L.Decl
+                    var: AbstractVariable
+                    init_abstract_expr: L.Expr
+
                     if isinstance(v, L.ValDecl):
+                        # Create the AbstractVariable for this declaration
                         source_name = v.f_syn_name.text
+                        source_var = v
                         v_name = ada_id_for(source_name)
                         v_type = (
-                            self.resolve_type(v.f_decl_type, env)
+                            resolve_type(self.resolve_type(v.f_decl_type, env))
                             if v.f_decl_type else
                             None
                         )
                         var = AbstractVariable(
-                            v_name, v_type, source_name=source_name
-                        )
-                        vars.append(var)
-                        var_exprs.append(lower(v.f_val))
-
-                        # Make this variable available to the inner expression
-                        # lowering, and register it as a local variable in the
-                        # generated code.
-                        env.add(Scope.LocalVariable(source_name, v, var))
-                        var.local_var = local_vars.create_scopeless(
                             v_name,
-                            resolve_type(v_type),
+                            v_type,
+                            create_local=True,
+                            source_name=source_name,
                         )
+                        init_abstract_expr = v.f_val
+
+                    elif isinstance(v, L.VarBind):
+                        source_name = v.f_name.text
+
+                        # Look for the corresponding dynamic variable
+                        entity = self.resolve_entity(v.f_name, sub_env)
+                        if not isinstance(entity, Scope.DynVar):
+                            error(
+                                "dynamic variable expected, got"
+                                f" {entity.diagnostic_name}"
+                            )
+
+                        source_var = entity.decl
+                        var = entity.variable
+                        init_abstract_expr = v.f_expr
 
                     else:
                         assert False, f'Unhandled def in BlockExpr: {v}'
 
-                # Then lower the block main expression
-                inner_expr = lower(expr.f_expr)
+                    # Make the declaration available to the inner expression
+                    # lowering.
+                    sub_env.add(
+                        Scope.LocalVariable(source_name, source_var, var)
+                    )
 
-                return Let((vars, var_exprs, inner_expr))
+                    # Lower the declaration/bind initialization expression
+                    init_expr = self.lower_expr(
+                        init_abstract_expr, sub_env, local_vars
+                    )
+
+                    actions.append(
+                        DeclAction(var, init_expr, Location.from_lkt_node(v))
+                    )
+
+                # Lower the block main expression and wrap it in declarative
+                # blocks.
+                result = self.lower_expr(expr.f_expr, sub_env, local_vars)
+                for action in reversed(actions):
+                    with AbstractExpression.with_location(action.location):
+                        if isinstance(action.var, E.DynamicVariable):
+                            result = getattr(var, "bind")(
+                                action.init_expr, result
+                            )
+                        else:
+                            result = Let(
+                                ([action.var], [action.init_expr], result)
+                            )
+                return result
 
             elif isinstance(expr, L.CallExpr):
                 call_expr = expr
@@ -2554,7 +2719,17 @@ class LktTypesLoader:
                 elif isinstance(entity, Scope.UserValue):
                     return entity.variable
                 else:
-                    error(f"value expected, got {entity.diagnostic_name}")
+                    with self.ctx.lkt_context(expr):
+                        if isinstance(entity, Scope.DynVar):
+                            error(
+                                f"{entity.name} is not bound in this context:"
+                                " please use the 'bind' construct to bind is"
+                                " first."
+                            )
+                        else:
+                            error(
+                                f"value expected, got {entity.diagnostic_name}"
+                            )
 
             elif isinstance(expr, L.StringLit):
                 return E.SymbolLiteral(expr.p_denoted_value)
@@ -2644,7 +2819,6 @@ class LktTypesLoader:
             abstract=annotations.abstract,
             type=return_type,
             abstract_runtime_check=False,
-            dynamic_vars=None,
             memoized=annotations.memoized,
             call_memoizable=False,
             memoize_in_populate=False,
@@ -2665,11 +2839,27 @@ class LktTypesLoader:
             result, decl.f_args, f"property {node_name}.{decl.f_syn_name.text}"
         )
 
+        # Keep track of the requested set of dynamic variables
+        dynvars: list[
+            tuple[E.DynamicVariable, L.Expr | None]
+        ] | None = None
+        if annotations.with_dynvars is not None:
+            dynvars = []
+            for dynvar, init_expr in annotations.with_dynvars:
+                dynvars.append((dynvar.variable, init_expr))
+                scope.add(
+                    Scope.LocalVariable(
+                        dynvar.name, dynvar.decl, dynvar.variable
+                    )
+                )
+
         # Plan to lower its expressions later
         self.properties_to_lower.append(
-            self.PropertyToLower(result, arguments)
+            self.PropertyToLower(result, arguments, dynvars)
             if decl.f_body is None else
-            self.PropertyAndExprToLower(result, arguments, decl.f_body, scope)
+            self.PropertyAndExprToLower(
+                result, arguments, dynvars, decl.f_body, scope
+            )
         )
 
         return result

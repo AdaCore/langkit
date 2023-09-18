@@ -2,28 +2,21 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list+(decl)
-    decl <- Decl(Name(@identifier) "(" list*(ref) ")")
-    ref <- Ref(Name(@identifier))
+    @main_rule main_rule <- Example(@example)
 }
+
+dynvar dyn_var: Int
 
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Decl : FooNode {
-    @parse_field name: Name
-    @parse_field refs: ASTList[FooNode, Ref]
-}
+class Example : FooNode implements TokenNode {
 
-class Name : FooNode implements TokenNode {
-}
+    @with_dynvars(dyn_var) fun add(value: Int): Int = value + dyn_var
 
-class Ref : FooNode {
-    @parse_field name: Name
+    @export fun next(value: Int): Int = {
+        bind dyn_var = 1;
 
-    @export fun resolve(): Entity[FooNode] = {
-        bind env = node.parent.parent.node_env();
-
-        env.get(node.name.symbol)?(0)
+        node.add(value)
     }
 }

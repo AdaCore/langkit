@@ -23,6 +23,8 @@ grammar foo_grammar {
     ref <- Ref("ref" name)
 }
 
+dynvar env: LexicalEnv[FooNode]
+
 @abstract class FooNode implements Node[FooNode] {
 }
 

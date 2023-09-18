@@ -5,6 +5,8 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
+dynvar my_var: Int
+
 @abstract class FooNode implements Node[FooNode] {
 }
 
@@ -21,7 +23,7 @@ class Example : FooNode {
         eq.solve()
     }
 
-    fun predicate2(n: Entity[FooNode], flag: Bool = false): Bool =
+    @with_dynvars(my_var) fun predicate2(n: Entity[FooNode], flag: Bool = false): Bool =
     (n.is_null) and false and flag
 
     @export fun prop2(): Bool = {
@@ -34,7 +36,7 @@ class Example : FooNode {
         eq.solve()
     }
 
-    fun predicate3(n: Entity[FooNode], flag: Bool = false): Bool =
+    @with_dynvars(my_var=0) fun predicate3(n: Entity[FooNode], flag: Bool = false): Bool =
     (n.is_null) and false and flag
 
     @export fun prop3(): Bool = {

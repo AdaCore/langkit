@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from langkit.dsl import Annotations
     from langkit.envs import EnvSpec
     from langkit.expressions import (
-        AbstractExpression, PropertyDef, ResolvedExpression,
+        AbstractExpression, DynamicVariable, PropertyDef, ResolvedExpression,
     )
     from langkit.lexer import TokenAction
     from langkit.parsers import Parser, _Transform
@@ -215,6 +215,11 @@ class CompiledTypeRepo:
     :type: StructType
     """
 
+    dynamic_vars: list[DynamicVariable] = []
+    """
+    List of known dynamic variables.
+    """
+
     @classmethod
     def reset(cls):
         """
@@ -231,6 +236,7 @@ class CompiledTypeRepo:
         cls.root_grammar_class = None
         cls.env_metadata = None
         cls.entity_info = None
+        cls.dynamic_vars = []
 
 
 class AbstractNodeData:

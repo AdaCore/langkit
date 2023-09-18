@@ -1,5 +1,11 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- ConcreteNode("example")
+}
+
+dynvar v: Int
+
+class RootNode implements Node[RootNode] {
 }

@@ -5,12 +5,14 @@ grammar foo_grammar {
     @main_rule main_rule <- ExampleNode("example")
 }
 
+dynvar bool_var: Bool
+
 @abstract class RootNode implements Node[RootNode] {
 }
 
 class ExampleNode : RootNode {
 
-    @export fun prop(): Bool = bool_var
+    @export @with_dynvars(bool_var=true) fun prop(): Bool = bool_var
 
     @export fun prop2(): Bool = node.prop()
 }

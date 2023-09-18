@@ -17,9 +17,9 @@ import funcy
 from langkit import names
 from langkit.common import ascii_repr, text_repr
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, Argument, CompiledType, EnumValue, T,
-    TypeRepo, UserField, gdb_helper, get_context, no_compiled_type,
-    resolve_type
+    ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeRepo,
+    EnumValue, T, TypeRepo, UserField, gdb_helper, get_context,
+    no_compiled_type, resolve_type
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, WarningSet, check_multiple,
@@ -2275,7 +2275,12 @@ class DynamicVariable(AbstractVariable):
     Reference to a dynamic property variable.
     """
 
-    def __init__(self, name: str, type: CompiledType, doc: str | None = None):
+    def __init__(
+        self,
+        name: str,
+        type: CompiledTypeOrDefer,
+        doc: str | None = None,
+    ):
         """
         Create a dynamic variable.
 
@@ -2288,6 +2293,8 @@ class DynamicVariable(AbstractVariable):
         self.argument_name = names.Name.from_lower(name)
         self.doc = doc
         super().__init__(None, type)
+
+        CompiledTypeRepo.dynamic_vars.append(self)
 
     @property
     def dsl_name(self):
@@ -2489,11 +2496,11 @@ class DynamicVariableBindExpr(ComputingExpr):
             return False
 
         WarningSet.unused_bindings.warn_if(
-            not (is_expr_using_self(self.to_eval_expr) or
-                 traverse_expr(self.to_eval_expr)),
-            "Useless bind of dynamic var '{}'".format(
-                self.dynvar.dsl_name
+            not (
+                is_expr_using_self(self.to_eval_expr)
+                or traverse_expr(self.to_eval_expr)
             ),
+            "Useless bind of dynamic var '{}'".format(self.dynvar.dsl_name),
         )
 
 
@@ -3776,6 +3783,19 @@ class PropertyDef(AbstractNodeData):
                 self.construct_and_type_expression(get_context())
 
         return resolve_type(self.constructed_expr.type)
+
+    def set_dynamic_vars(
+        self,
+        vars: list[tuple[DynamicVariable, AbstractExpression | None]],
+    ) -> None:
+        """
+        Set dynamic variables to this property.
+
+        Each dynamic variable may be associated with a default expression.
+        """
+        assert self._dynamic_vars is None
+        self._dynamic_vars = [v for v, _ in vars]
+        self._dynamic_vars_default_values = [e for _, e in vars]
 
     @property
     def dynamic_vars(self) -> List[DynamicVariable]:

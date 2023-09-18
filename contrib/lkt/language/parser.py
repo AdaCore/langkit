@@ -3600,6 +3600,15 @@ class UnOp(Expr):
     expr = Field(type=T.Expr)
 
 
+class DynVarDecl(ExplicitlyTypedDecl):
+    """
+    Dynamic variable declaration.
+    """
+    decl_type = Field(type=T.TypeRef)
+
+    decl_type_name = Property(S("dynamic variable declaration"))
+
+
 class ValDecl(ExplicitlyTypedDecl):
     """
     Value declaration.
@@ -4024,6 +4033,7 @@ lkt_grammar.add_rules(
         G.field_decl,
         G.val_decl,
         G.grammar_rule,
+        G.dynvar_decl,
     ),
 
     decl=FullDecl(
@@ -4047,6 +4057,8 @@ lkt_grammar.add_rules(
     val_decl=ValDecl(
         "val", G.def_id, Opt(":", G.type_ref), "=", G.expr
     ),
+
+    dynvar_decl=DynVarDecl("dynvar", G.def_id, ":", G.type_ref),
 
     var_bind=VarBind("bind", G.ref_id, "=", G.expr),
 

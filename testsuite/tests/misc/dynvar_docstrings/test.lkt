@@ -1,0 +1,51 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+dynvar v_nodoc: Bool
+
+## One line doc.
+dynvar v_oneline: Bool
+
+## Doc that contains
+## multiple lines.
+dynvar v_multiline: Bool
+
+## This is a very complicated doc.
+##
+## So complicated that it requires several paragraphs to be decently
+## described.
+##
+## * It even has to contain...
+## * Bullet points!
+## * But...
+##
+## .. attention::
+##
+##    This is just an example.
+dynvar v_multiparag: Bool
+
+class FooNode implements Node[FooNode] {
+    # One property to include all dynamic vars, to check the reformatting of
+    # each docstring.
+
+    ## This is the doc for the property itself.
+    @export @with_dynvars(v_nodoc, v_oneline, v_multiline, v_multiparag)
+    fun p1(): FooNode = node
+
+    # One property that demonstrates that the doc is left unchanged for a dyn
+    # var with no docstring.
+
+    ## This is the doc for the property itself.
+    @export @with_dynvars(v_nodoc) fun p2(): FooNode = node
+
+    # One property with no docstring at all mention the doc of the inherited
+    # dynamic var.
+    @export @with_dynvars(v_nodoc) fun p3(): FooNode = node
+}
+
+class Example : FooNode implements TokenNode {
+}

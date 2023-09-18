@@ -1,1 +1,4 @@
-driver: python
+driver: lkt_compile
+description: |
+    Check that the consistency for dynamic variables between base and derived
+    properties is ensured as expected.

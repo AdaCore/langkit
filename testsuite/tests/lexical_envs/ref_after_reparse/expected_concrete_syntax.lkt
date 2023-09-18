@@ -15,6 +15,8 @@ grammar foo_grammar {
     ref <- Ref(name)
 }
 
+dynvar env: LexicalEnv[FooNode]
+
 @abstract class FooNode implements Node[FooNode] {
 }
 
@@ -31,7 +33,7 @@ class Decl : FooNode {
 
 class Name : FooNode implements TokenNode {
 
-    fun ambiant_entity(): Entity[FooNode] = env.get(node)?(0)
+    @with_dynvars(env) fun ambiant_entity(): Entity[FooNode] = env.get(node)?(0)
 
     fun designated_env(): LexicalEnv[FooNode] =
     node.unit().root.node_env().get(node)?(0).children_env()

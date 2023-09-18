@@ -1,40 +1,53 @@
-== abstract: default, concrete: default ==
+== default_default.lkt ==
+common_abstract_default.lkt:4:9: warning: Useless bind of dynamic var 'v'
+4 |         bind v = 10;
+  |         ^^^^^^^^^^^
+
 Code generation was successful
-  AbstractNode.prop: no dynamic variable
-  ConcreteNode.prop: no dynamic variable
 
-== abstract: default, concrete: with dynamic variables ==
-test.py:XXX: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+== default_novar.lkt ==
+common_abstract_default.lkt:4:9: warning: Useless bind of dynamic var 'v'
+4 |         bind v = 10;
+  |         ^^^^^^^^^^^
 
-== abstract: default, concrete: no dynamic variable ==
 Code generation was successful
-  AbstractNode.prop: no dynamic variable
-  ConcreteNode.prop: no dynamic variable
 
-== abstract: with dynamic variables, concrete: default ==
+== default_var.lkt ==
+common_concrete_var.lkt:2:22: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+2 |     @with_dynvars(v) fun prop(): Int = 12
+  |                      ^^^^^^^^^^^^^^^^^^^^
+
+
+== novar_default.lkt ==
+common_abstract_novar.lkt:4:9: warning: Useless bind of dynamic var 'v'
+4 |         bind v = 10;
+  |         ^^^^^^^^^^^
+
 Code generation was successful
-  AbstractNode.prop: with dynamic variables
-  ConcreteNode.prop: with dynamic variables
 
-== abstract: with dynamic variables, concrete: with dynamic variables ==
+== novar_novar.lkt ==
+common_abstract_novar.lkt:4:9: warning: Useless bind of dynamic var 'v'
+4 |         bind v = 10;
+  |         ^^^^^^^^^^^
+
 Code generation was successful
-  AbstractNode.prop: with dynamic variables
-  ConcreteNode.prop: with dynamic variables
 
-== abstract: with dynamic variables, concrete: no dynamic variable ==
-test.py:XXX: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+== novar_var.lkt ==
+common_concrete_var.lkt:2:22: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+2 |     @with_dynvars(v) fun prop(): Int = 12
+  |                      ^^^^^^^^^^^^^^^^^^^^
 
-== abstract: no dynamic variable, concrete: default ==
+
+== var_default.lkt ==
 Code generation was successful
-  AbstractNode.prop: no dynamic variable
-  ConcreteNode.prop: no dynamic variable
 
-== abstract: no dynamic variable, concrete: with dynamic variables ==
-test.py:XXX: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+== var_novar.lkt ==
+common_concrete_novar.lkt:2:21: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+2 |     @with_dynvars() fun prop(): Int = 12
+  |                     ^^^^^^^^^^^^^^^^^^^^
 
-== abstract: no dynamic variable, concrete: no dynamic variable ==
+
+== var_var.lkt ==
 Code generation was successful
-  AbstractNode.prop: no dynamic variable
-  ConcreteNode.prop: no dynamic variable
 
-Done
+lkt_compile: Done

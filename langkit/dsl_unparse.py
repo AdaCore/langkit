@@ -1302,6 +1302,18 @@ def emit_prop(prop, walker):
     if prop.activate_tracing:
         quals += "@trace "
 
+    if prop.dynamic_vars:
+        vars = []
+        for dynvar in prop.dynamic_vars:
+            name = dynvar.dsl_name
+            val = prop.dynamic_var_default_value(dynvar)
+            vars.append(
+                name
+                if val is None else
+                "{}={}".format(name, emit_expr(val))
+            )
+        quals += "@with_dynvars({}) ".format(", ".join(vars))
+
     args = ", ".join("{}: {}{}".format(
         var_name(arg), type_name(arg.type),
         " = {}".format(emit_expr(arg.abstract_default_value))
@@ -1841,6 +1853,7 @@ def unparse_nodes(ctx, f):
     """
     Unparse the nodes for the current language to the given file.
     """
+    from langkit.compiled_types import CompiledTypeRepo
     from langkit.diagnostics import check_source_language, Severity
     check_source_language(
         predicate=libpythonlang_available,
@@ -1848,6 +1861,17 @@ def unparse_nodes(ctx, f):
         severity=Severity.warning,
         do_raise=False
     )
+
+    if CompiledTypeRepo.dynamic_vars:
+        f.write("\n")
+    for dynvar in CompiledTypeRepo.dynamic_vars:
+        name = dynvar.argument_name.lower
+        typ = type_name(dynvar.type)
+        decl = ""
+        if dynvar.doc:
+            decl += emit_doc(dynvar.doc) + "$hl\n"
+        decl += f"dynvar {name}: {typ}$hl"
+        f.write(pp(decl))
 
     enum_types = [emit_enum_type(t)
                   for t in ctx.enum_types
