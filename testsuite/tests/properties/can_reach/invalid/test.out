@@ -1,13 +1,41 @@
-== not a property ==
-test.py:XXX: error: FooNode.can_reach must be a property
-== bad return type ==
-test.py:XXX: error: FooNode.can_reach must return a boolean
-== no argument ==
-test.py:XXX: error: FooNode.can_reach must take one argument: a bare node
-== too many arguments ==
-test.py:XXX: error: FooNode.can_reach must take one argument: a bare node
-== bad arg type ==
-test.py:XXX: error: FooNode.can_reach must take one argument: a bare node
-== use entity info ==
-test.py:XXX: error: FooNode.can_reach cannot use entities
-Done
+== bad_arg_type.lkt ==
+bad_arg_type.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
+4 |     fun can_reach(b: Bool): Bool = b
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== bad_return_type.lkt ==
+bad_return_type.lkt:4:5: error: FooNode.can_reach must return a boolean
+4 |     fun can_reach(n: FooNode): FooNode = n
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== no_argument.lkt ==
+no_argument.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
+4 |     fun can_reach(): Bool = true
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== not_a_property.lkt ==
+not_a_property.lkt:4:5: error: FooNode.can_reach must be a property
+4 |     can_reach: Bool
+  |     ^^^^^^^^^^^^^^^
+
+
+== too_many_arguments.lkt ==
+too_many_arguments.lkt:4:5: warning: The following bindings are not used: n
+4 |     fun can_reach(n: FooNode, b: Bool): Bool = b
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+too_many_arguments.lkt:4:5: error: FooNode.can_reach must take one argument: a bare node
+4 |     fun can_reach(n: FooNode, b: Bool): Bool = b
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== use_entity_info.lkt ==
+use_entity_info.lkt:4:5: error: FooNode.can_reach cannot use entities
+4 |     fun can_reach(n: FooNode): Bool = n.as_bare_entity = self
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

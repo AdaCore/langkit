@@ -2036,6 +2036,7 @@ class LktTypesLoader:
         self,
         full_decl: L.FullDecl,
         allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        user_field_public: bool,
         struct_name: str,
     ) -> AbstractNodeData:
         """
@@ -2043,6 +2044,7 @@ class LktTypesLoader:
 
         :param allowed_field_types: Set of types allowed for the fields to
             load.
+        :param user_field_public: Whether user fields should be made public.
         """
         decl = full_decl.f_decl
         assert isinstance(decl, L.FieldDecl)
@@ -2136,6 +2138,7 @@ class LktTypesLoader:
                 'Regular fields cannot be traced'
             )
             cls = constructor = UserField
+            kwargs['public'] = user_field_public
             kwargs['default_value'] = (
                 self.lower_expr(decl.f_default_val, self.root_scope, None)
                 if decl.f_default_val
@@ -2871,6 +2874,7 @@ class LktTypesLoader:
         self,
         decls: L.DeclBlock,
         allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        user_field_public: bool,
         struct_name: str,
     ) -> List[Tuple[names.Name, AbstractNodeData]]:
         """
@@ -2878,7 +2882,8 @@ class LktTypesLoader:
 
         :param decls: Declarations to process.
         :param allowed_field_types: Set of types allowed for the fields to
-        load.
+            load.
+        :param user_field_public: Whether user fields should be made public.
         """
         result = []
         for full_decl in decls:
@@ -2908,7 +2913,10 @@ class LktTypesLoader:
                     field = self.lower_property(full_decl, struct_name)
                 else:
                     field = self.lower_base_field(
-                        full_decl, allowed_field_types, struct_name
+                        full_decl,
+                        allowed_field_types,
+                        user_field_public,
+                        struct_name,
                     )
 
                 field.location = Location.from_lkt_node(decl)
@@ -3064,7 +3072,10 @@ class LktTypesLoader:
             else (AbstractNodeData, )
         )
         fields = self.lower_fields(
-            decl.f_decls, allowed_field_types, decl.f_syn_name.text
+            decl.f_decls,
+            allowed_field_types,
+            user_field_public=False,
+            struct_name=decl.f_syn_name.text,
         )
 
         # For qualifier enum nodes, add the synthetic "as_bool" abstract
@@ -3254,7 +3265,12 @@ class LktTypesLoader:
         else:
             allowed_field_types = (UserField, )
 
-        fields = self.lower_fields(decl.f_decls, allowed_field_types, name)
+        fields = self.lower_fields(
+            decl.f_decls,
+            allowed_field_types,
+            user_field_public=True,
+            struct_name=name,
+        )
 
         result = StructType(
             name=names.Name.check_from_camel(name),

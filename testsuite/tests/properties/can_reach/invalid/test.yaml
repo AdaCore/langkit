@@ -1,1 +1,3 @@
-driver: python
+driver: lkt_compile
+description: |
+    Check that invalid definitions for "can_reach" are properly rejected.
