@@ -1,0 +1,16 @@
+# Test creating an array literal whose element_type is the node type defined by
+# the enclosing class.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @export fun entities_array(): Array[Entity[Example]] = [self, self, self]
+}
