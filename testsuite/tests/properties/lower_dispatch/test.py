@@ -8,13 +8,11 @@ kinds of root properties:
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env_kv
-from langkit.expressions import (AbstractProperty, DynamicVariable, Entity,
-                                 Self, langkit_property)
+from langkit.expressions import (
+    AbstractProperty, Entity, Self, langkit_property,
+)
 
 from utils import build_and_run
-
-
-dyn_var = DynamicVariable('dyn_var', T.FooNode)
 
 
 @abstract
