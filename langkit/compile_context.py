@@ -2762,11 +2762,11 @@ class CompileCtx:
         Check the docstrings of type definitions.
         """
         for astnode in self.astnode_types:
-            with astnode.diagnostic_context:
+            with diagnostic_context(Location.for_entity_doc(astnode)):
                 RstCommentChecker.check_doc(astnode._doc)
 
         for struct in self.struct_types:
-            with struct.diagnostic_context:
+            with diagnostic_context(Location.for_entity_doc(struct)):
                 RstCommentChecker.check_doc(struct._doc)
 
     def lower_properties_dispatching(self):

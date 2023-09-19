@@ -2835,6 +2835,7 @@ class LktTypesLoader:
             dump_ir=False,
             final=annotations.final,
         )
+        result._doc_location = Location.from_lkt_node(full_decl.f_doc)
 
         # Lower its arguments
         arguments, scope = self.lower_property_arguments(
@@ -3095,6 +3096,8 @@ class LktTypesLoader:
             is_enum_node=is_enum_node,
             is_bool_node=is_bool_node,
         )
+        assert isinstance(decl.parent, L.FullDecl)
+        result._doc_location = Location.from_lkt_node(decl.parent.f_doc)
 
         # Create alternatives for enum nodes
         if isinstance(annotations, EnumNodeAnnotations):
@@ -3220,12 +3223,15 @@ class LktTypesLoader:
             )
             value_names.append(name)
 
-        return EnumType(
+        result = EnumType(
             name=names.Name.check_from_camel(decl.f_syn_name.text),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl),
             value_names=[names.Name.check_from_lower(n) for n in value_names],
         )
+        assert isinstance(decl.parent, L.FullDecl)
+        result._doc_location = Location.from_lkt_node(decl.parent.f_doc)
+        return result
 
     def create_struct(self,
                       decl: L.StructDecl,
@@ -3256,6 +3262,8 @@ class LktTypesLoader:
             doc=self.ctx.lkt_doc(decl),
             fields=fields,
         )
+        assert isinstance(decl.parent, L.FullDecl)
+        result._doc_location = Location.from_lkt_node(decl.parent.f_doc)
         if annotations.metadata:
             CompiledTypeRepo.env_metadata = result
         return result

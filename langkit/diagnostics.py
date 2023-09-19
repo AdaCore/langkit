@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import enum
 from functools import lru_cache
 import os
@@ -10,8 +10,8 @@ import re
 import sys
 import traceback
 from typing import (
-    Any, Iterator, List, NoReturn, Optional as Opt, TextIO, Tuple, Type,
-    TypeVar, Union
+    Any, Iterator, List, NoReturn, Optional as Opt, TYPE_CHECKING, TextIO,
+    Tuple, Type, TypeVar, Union
 )
 
 
@@ -23,6 +23,11 @@ except ImportError:
 
 
 from langkit.utils import Colors, assert_type, col
+
+
+if TYPE_CHECKING:
+    from langkit.compiled_types import CompiledType
+    from langkit.expressions import PropertyDef
 
 
 class DiagnosticStyle(enum.Enum):
@@ -161,6 +166,27 @@ class Location:
         Create a Location based on a Lkt node.
         """
         return cls.from_sloc_range(node.unit, node.sloc_range)
+
+    @classmethod
+    def for_entity_doc(
+        cls,
+        entity: CompiledType | PropertyDef,
+    ) -> Location | None:
+        """
+        Return the location of the docstring for the given entity, if
+        available.
+        """
+        # Lkt case: we have precise location for the entity doc: just return it
+        if entity._doc_location is not None:
+            return entity._doc_location
+
+        # Python DSL: the docstring usually starts one line after the
+        # declaration's first line ("class" keyword or "def" one), and the
+        # docstring first line (just the """ string delimiter) is stripped.
+        result = entity.location
+        if result is not None:
+            result = replace(result, line=result.line + 2)
+        return result
 
 
 def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:

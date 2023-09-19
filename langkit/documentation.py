@@ -26,7 +26,7 @@ from __future__ import annotations
 import inspect
 import textwrap
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import (
     Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING, Union, cast
 )
@@ -40,8 +40,8 @@ import docutils.utils
 from mako.template import Template
 
 from langkit.diagnostics import (
-    Severity, check_source_language,
-    diagnostic_context, get_current_location
+    Location, Severity, check_source_language, diagnostic_context,
+    get_current_location
 )
 from langkit.utils import memoized
 
@@ -1526,9 +1526,18 @@ class RstCommentChecker(docutils.nodes.GenericNodeVisitor):
         loc = get_current_location()
 
         if loc is not None:
+            # We do not have access to column information nor sloc range
+            # information here, so stick to basic location info.
+            line = loc.line
+            lkt_unit = loc.lkt_unit
+
+            # Adjust the location to the part of the docstring that is the
+            # target of the check.
             node_line = get_line(node)
             if node_line is not None:
-                loc = replace(loc, line=loc.line + node_line + 1)
+                line = loc.line + node_line - 1
+
+            loc = Location(loc.file, line, lkt_unit=lkt_unit)
 
         with diagnostic_context(loc):
             check_source_language(

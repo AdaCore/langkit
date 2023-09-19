@@ -3577,6 +3577,8 @@ class PropertyDef(AbstractNodeData):
         self._doc = doc
         ":type: str|None"
 
+        self._doc_location: Location | None = None
+
         self.memoized = memoized
         self.call_memoizable = call_memoizable
         self.memoize_in_populate = memoize_in_populate
@@ -4610,7 +4612,8 @@ class PropertyDef(AbstractNodeData):
         function is correct.
         """
         del context
-        RstCommentChecker.check_doc(self.doc)
+        with diagnostic_context(Location.for_entity_doc(self)):
+            RstCommentChecker.check_doc(self.doc)
 
 
 def ExternalProperty(type=None, doc="", **kwargs):

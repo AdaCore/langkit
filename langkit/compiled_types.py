@@ -789,6 +789,7 @@ class CompiledType:
         self._name = name
         self.location = location
         self._doc = doc
+        self._doc_location: Location | None = None
         self._base = base
         self.is_ptr = is_ptr
         self.has_special_storage = has_special_storage
