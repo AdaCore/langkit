@@ -1,4 +1,7 @@
-== Invalid field ==
-test.py:XXX: error: Type AnalysisUnit has no 'foobar' field or property
+== foo.lkt ==
+foo.lkt:15:26: error: Type AnalysisUnit has no 'foobar' field or property
+15 |     fun result(): Bool = node.unit.foobar
+   |                          ^^^^^^^^^^^^^^^^
 
-Done
+
+lkt_compile: Done
