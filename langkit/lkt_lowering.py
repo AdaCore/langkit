@@ -2216,6 +2216,7 @@ class LktTypesLoader:
                 source_name=source_name,
                 type=type,
             )
+            result.location = Location.from_lkt_node(arg)
             env.add(Scope.LocalVariable(source_name, arg, result))
             return result
 
@@ -2330,6 +2331,7 @@ class LktTypesLoader:
                             create_local=True,
                             source_name=source_name,
                         )
+                        var.location = Location.from_lkt_node(v)
                         init_abstract_expr = v.f_val
 
                     elif isinstance(v, L.VarBind):
