@@ -1,4 +1,12 @@
-test.py:XXX: warning: Useless bind of dynamic var 'dyn_node'
-test.py:XXX: warning: Useless bind of dynamic var 'dyn_node'
+== foo.lkt ==
+foo.lkt:19:9: warning: Useless bind of dynamic var 'dyn_node'
+19 |         bind dyn_node = node;
+   |         ^^^^^^^^^^^^^^^^^^^^
+
+foo.lkt:24:9: warning: Useless bind of dynamic var 'dyn_node'
+24 |         bind dyn_node = node;
+   |         ^^^^^^^^^^^^^^^^^^^^
+
 Code generation was successful
-Done
+
+lkt_compile: Done
