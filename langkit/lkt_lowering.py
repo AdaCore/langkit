@@ -1753,9 +1753,7 @@ class LktTypesLoader:
                 to_lower.arguments, to_lower.prop.arguments
             ):
                 if arg_decl.f_default_val is not None:
-                    value = self.lower_expr(
-                        arg_decl.f_default_val, self.root_scope, None
-                    )
+                    value = self.lower_static_expr(arg_decl.f_default_val)
                     value.prepare()
                     arg.set_default_value(value)
 
@@ -1766,7 +1764,7 @@ class LktTypesLoader:
                             dynvar,
                             None
                             if init_expr is None else
-                            self.lower_expr(init_expr, self.root_scope, None),
+                            self.lower_static_expr(init_expr)
                         )
                         for dynvar, init_expr in to_lower.dynamic_vars
                     ]
@@ -2184,6 +2182,35 @@ class LktTypesLoader:
             )
 
         return result
+
+    def lower_static_expr(self, expr: L.Expr) -> AbstractExpression:
+        """
+        Lower the given expression, checking that it is a valid compile time
+        known value.
+        """
+        with self.ctx.lkt_context(expr):
+            # Accept simple identifiers that refer to builtin values
+            if isinstance(expr, L.RefId):
+                entity = self.resolve_entity(expr, self.root_scope)
+                if (
+                    isinstance(entity, Scope.BuiltinValue)
+                    and isinstance(entity.value, E.Literal)
+                ):
+                    return entity.value
+
+            elif (
+                # Also accept character and number literals, as well as null
+                # expressions.
+                isinstance(expr, (L.CharLit, L.NullLit, L.NumLit))
+                or (
+                    # Finally, also accept references to enum values
+                    isinstance(expr, L.DotExpr)
+                    and isinstance(expr.f_prefix, L.RefId)
+                )
+            ):
+                return self.lower_expr(expr, self.root_scope, None)
+
+            error("static expression expected in this context")
 
     def lower_expr(self,
                    expr: L.Expr,

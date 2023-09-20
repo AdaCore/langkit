@@ -1,0 +1,5 @@
+import common
+
+class Example: FooNode {
+    @export fun p(a: Bool=1): Bool = a
+}
