@@ -1,0 +1,5 @@
+import common
+
+class Example: FooNode {
+    fun p(): Int = null[FooNode].old_env
+}

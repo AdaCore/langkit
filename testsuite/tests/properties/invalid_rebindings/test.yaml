@@ -1,1 +1,3 @@
-driver: python
+driver: lkt_compile
+description: |
+    Check that inputs for .rebindings_* DSL operations are properly validated.
