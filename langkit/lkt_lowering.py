@@ -2325,6 +2325,11 @@ class LktTypesLoader:
                 )
                 return E.ArrayLiteral(elts, element_type=element_type)
 
+            elif isinstance(expr, L.BigNumLit):
+                text = expr.text
+                assert text[-1] == 'b'
+                return E.BigIntLiteral(int(text[:-1]))
+
             elif isinstance(expr, L.BinOp):
                 # Lower both operands
                 left = lower(expr.f_left)
@@ -2517,7 +2522,14 @@ class LktTypesLoader:
                 method_prefix = lower(call_name.f_prefix)
                 method_name = call_name.f_suffix.text
 
-                if method_name == "find":
+                if method_name == "as_int":
+                    check_source_language(
+                        len(call_expr.f_args) == 0,
+                        "'as_int' method takes no argument",
+                    )
+                    return method_prefix.as_int
+
+                elif method_name == "find":
                     # Build variable for the iteration variable from the lambda
                     # expression arguments.
                     check_source_language(
