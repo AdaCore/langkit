@@ -1,7 +1,17 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list_rule
     list_rule <- pick("(" list+(list_item, ",") ")")
     list_item <- Literal(@number)
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Literal: FooNode implements TokenNode {
+}
+
+@synthetic class EmptyNode: FooNode {
 }
