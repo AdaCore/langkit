@@ -1,7 +1,13 @@
-== Heterogeneous types ==
-test.py:XXX: error: Mismatching types in Try expression: Int and Bool
+== heterogeneous.lkt ==
+heterogeneous.lkt:4:29: error: Mismatching types in Try expression: Int and Bool
+4 |     @export fun p(): Bool = try 1 else true
+  |                             ^^^^^^^^^^^^^^^
 
-== Not nullable type ==
-test.py:XXX: error: Try expression should have a default value provided, in cases where the type of the provided fallback expression (here AnalysisUnitKind) does not have a default null value.
 
-Done
+== not_nullable.lkt ==
+not_nullable.lkt:4:29: error: Try expression should have a default value provided, in cases where the type of the provided fallback expression (here AnalysisUnitKind) does not have a default null value.
+4 |     @export fun p(): Bool = try AnalysisUnitKind.unit_body
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

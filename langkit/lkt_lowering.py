@@ -1674,6 +1674,7 @@ class LktTypesLoader:
 
         # Register builtins in the root scope
         for builtin in [
+            builtin_type("AnalysisUnitKind"),
             builtin_type("BigInt"),
             builtin_type("Bool"),
             builtin_type("Char", "Character"),
