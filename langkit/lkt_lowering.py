@@ -2878,6 +2878,7 @@ class LktTypesLoader:
             call_non_memoizable_because=None,
             activate_tracing=annotations.trace,
             dump_ir=False,
+            lazy_field=False,
             final=annotations.final,
         )
         result._doc_location = Location.from_lkt_node(full_decl.f_doc)
