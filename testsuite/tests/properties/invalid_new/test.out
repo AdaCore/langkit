@@ -1,13 +1,22 @@
-== Correct code ==
+== bad_type.lkt ==
+bad_type.lkt:4:28: error: Wrong type for field MyStruct.b: expected Int, got Bool
+4 |     fun prop(): MyStruct = MyStruct(a=12, b=false)
+  |                            ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== correct.lkt ==
 Code generation was successful
 
-== Incorrect new 1 ==
-test.py:XXX: error: Values are missing for MyStruct fields: b
+== extra_field.lkt ==
+extra_field.lkt:4:28: error: Extraneous fields for MyStruct: c
+4 |     fun prop(): MyStruct = MyStruct(a=12, b=15, c=19)
+  |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Incorrect new 2 ==
-test.py:XXX: error: Wrong type for field MyStruct.b: expected Int, got FooNode
 
-== Incorrect new 1 ==
-test.py:XXX: error: Extraneous fields for MyStruct: c
+== missing_field.lkt ==
+missing_field.lkt:4:28: error: Values are missing for MyStruct fields: b
+4 |     fun prop(): MyStruct = MyStruct(a=12)
+  |                            ^^^^^^^^^^^^^^
 
-Done
+
+lkt_compile: Done
