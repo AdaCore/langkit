@@ -1,1 +1,2 @@
-driver: python
+driver: lkt_compile
+all_warnings: true

@@ -11,11 +11,17 @@ import subprocess
 import sys
 
 import langkit
+from langkit.diagnostics import WarningSet
 
-from utils import emit_and_print_errors
+from utils import default_warning_set, emit_and_print_errors
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--all-warnings",
+    action="store_true",
+    help="Enable all Lkt compilation warnings",
+)
 parser.add_argument(
     "--generate-unparser",
     action="store_true",
@@ -34,6 +40,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+warning_set = WarningSet() if args.all_warnings else default_warning_set
 
 # Compile all *.lkt" file except the ones starting with "common", as they
 # contain just common code for the other sources, but are not compilable alone.
@@ -46,6 +53,7 @@ for lkt_file in sorted(tests):
     print(f"== {lkt_file} ==")
     emit_and_print_errors(
         lkt_file=lkt_file,
+        warning_set=warning_set,
         types_from_lkt=True,
         generate_unparser=args.generate_unparser,
     )
