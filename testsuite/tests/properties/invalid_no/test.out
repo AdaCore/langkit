@@ -1,7 +1,10 @@
-== Correct code ==
+== bad_type.lkt ==
+bad_type.lkt:4:31: error: Invalid type for No expression: Int
+4 |     @export fun prop(): Int = null[Int]
+  |                               ^^^^^^^^^
+
+
+== correct.lkt ==
 Code generation was successful
 
-== Incorrect No usage ==
-test.py:XXX: error: Invalid type for No expression: Int
-
-Done
+lkt_compile: Done
