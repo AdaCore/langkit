@@ -1,0 +1,7 @@
+import common
+
+class ListNode: FooNode {
+    @parse_field nb_list: ASTList[FooNode, NumberNode]
+    @export fun prop(): Array[Entity[NumberNode]] =
+        self.nb_list.map((x, y, z) => x)
+}

@@ -1,0 +1,17 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- BarNode("example" list_rule)
+    list_rule <- ListNode(list+(NumberNode(@number)))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class BarNode: FooNode {
+    @parse_field list_node: ListNode
+}
+
+class NumberNode: FooNode implements TokenNode {
+}

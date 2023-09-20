@@ -2543,6 +2543,18 @@ class LktTypesLoader:
                             " expression",
                         )
 
+                    # Reject types and default values for lambda arguments
+                    for arg in lambda_args:
+                        with self.ctx.lkt_context(arg):
+                            check_source_language(
+                                arg.f_decl_type is None,
+                                "argument type must be implicit",
+                            )
+                            check_source_language(
+                                arg.f_default_val is None,
+                                "no default value allowed",
+                            )
+
                     element_var = var_for_lambda_arg(lambda_args[0], 'item')
                     index_var = (
                         var_for_lambda_arg(lambda_args[1], 'index', T.Int)
