@@ -2828,6 +2828,14 @@ class LktTypesLoader:
             arguments.append(a)
 
             source_name = a.f_syn_name.text
+            reserved = PropertyDef.reserved_arg_lower_names
+            with self.ctx.lkt_context(a.f_syn_name):
+                check_source_language(
+                    source_name not in reserved,
+                    "Arguments cannot have reserved names ({})".format(
+                        ", ".join(reserved)
+                    ),
+                )
             arg = Argument(
                 name=ada_id_for(source_name),
                 type=self.resolve_type(a.f_decl_type, scope),
