@@ -1,10 +1,13 @@
-== Abstract overrides without runtime check ==
-test.py:XXX: error: Abstract properties with no runtime check cannot override another property. Here, Identifier.prop is abstract and overrides BaseNode.prop.
+== abstract_overrides.lkt ==
+abstract_overrides.lkt:13:15: error: Abstract properties with no runtime check cannot override another property. Here, Identifier.prop is abstract and overrides BaseNode.prop.
+13 |     @abstract fun prop(): Bool
+   |               ^^^^^^^^^^^^^^^^
 
-== Abstract overrides with runtime check ==
-Code generation was successful
 
-== Abstract in root not overriden in list ==
-test.py:XXX: error: Abstract property root_prop is not overriden in all subclasses. Missing overriding properties on classes: BaseNode.list
+== list_abstract_in_root.lkt ==
+list_abstract_in_root.lkt:7:23: error: Abstract property prop is not overriden in all subclasses. Missing overriding properties on classes: BaseNode.list
+7 |     @export @abstract fun prop(): Bool
+  |                       ^^^^^^^^^^^^^^^^
 
-Done
+
+lkt_compile: Done
