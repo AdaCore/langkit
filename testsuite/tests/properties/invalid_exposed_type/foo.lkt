@@ -1,5 +1,17 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Example("example")
+}
+
+dynvar my_var: EnvRebindings
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @export fun as_rettype(): EnvRebindings = null[EnvRebindings]
+    @export fun as_arg(arg: EnvRebindings): Bool = false
+    @export @with_dynvars(my_var) fun as_dynvar(): Bool = false
 }
