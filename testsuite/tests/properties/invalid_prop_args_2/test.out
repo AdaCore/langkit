@@ -1,3 +1,0 @@
-test.py:XXX: error: Argument "x" does not have the same type as in base property. Base has Symbol, derived has Int
-
-Done

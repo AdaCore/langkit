@@ -1,3 +1,13 @@
-test.py:XXX: error: Derived and base properties don't have the same number of arguments, base has 1, derived has 0
+== bad_type.lkt ==
+bad_type.lkt:4:5: error: Argument "x" does not have the same type as in base property. Base has Symbol, derived has Int
+4 |     fun base_prop(x: Symbol): Int = 12
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Done
+
+== less_args.lkt ==
+less_args.lkt:4:5: error: Derived and base properties don't have the same number of arguments, base has 1, derived has 0
+4 |     fun base_prop(): Int = 12
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done
