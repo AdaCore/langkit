@@ -1,5 +1,10 @@
+# Test that we properly warn for properties that are unreachable because they
+# are defined on an abstract node while all concrete subclasses have it
+# overriden.
+
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(expr)
 
@@ -10,4 +15,41 @@ grammar foo_grammar {
     ref <- Ref(@identifier)
 
     plus <- pick("(" Plus(expr "+" expr) ")")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+@abstract class Expr: FooNode {
+    @export @abstract fun prop1(): Int
+
+    # Warning: all concrete subclasses override this (concrete root property)
+    @export fun prop2(): Int = 0
+}
+
+@abstract class Atom: Expr {
+    # Warning: both concrete subclasses override this (concrete derived
+    # property).
+    fun prop1(): Int = 1
+}
+
+
+class Lit: Atom implements TokenNode {
+    fun prop1(): Int = 2
+    fun prop2(): Int = 2
+}
+
+
+class Ref: Atom implements TokenNode {
+    fun prop1(): Int = 3
+    fun prop2(): Int = 3
+}
+
+
+class Plus: Expr {
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
+
+    fun prop1(): Int = 4
+    fun prop2(): Int = 4
 }
