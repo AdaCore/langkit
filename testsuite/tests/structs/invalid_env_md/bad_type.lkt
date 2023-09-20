@@ -1,0 +1,5 @@
+import common
+
+@metadata struct Metadata {
+    @use_in_equality fld: AnalysisUnit[FooNode]
+}
