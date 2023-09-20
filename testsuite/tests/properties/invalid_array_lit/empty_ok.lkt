@@ -1,0 +1,5 @@
+import common
+
+class Example: FooNode {
+    @export fun p(): Array[Bool] = []: Bool
+}
