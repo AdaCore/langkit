@@ -1,16 +1,13 @@
-== Missing type ==
-test.py:XXX: error: This property requires an explicit return type
+== invalid_abstract.lkt ==
+invalid_abstract.lkt:4:33: error: An external property cannot be abstract
+4 |     @export @external @abstract fun p(): Bool
+  |                                 ^^^^^^^^^^^^^
 
-== Invalid abstract ==
-test.py:XXX: error: An external property cannot be abstract
 
-== Invalid memoized ==
-test.py:XXX: error: An external property cannot be memoized
+== invalid_memoized.lkt ==
+invalid_memoized.lkt:4:33: error: An external property cannot be memoized
+4 |     @export @external @memoized fun p(): Bool
+  |                                 ^^^^^^^^^^^^^
 
-== Missing uses_entity_info=... ==
-test.py:XXX: error: uses_entity_info is required for external properties
 
-== Missing uses_envs=... ==
-test.py:XXX: error: uses_envs is required for external properties
-
-Done
+lkt_compile: Done

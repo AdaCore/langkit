@@ -1,0 +1,5 @@
+import common
+
+class Example: FooNode {
+    @export @external @memoized fun p(): Bool
+}
