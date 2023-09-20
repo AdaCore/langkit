@@ -1682,6 +1682,7 @@ class LktTypesLoader:
             builtin_type("EnvRebindings"),
             builtin_type("String"),
             builtin_type("Symbol"),
+            builtin_type("Token"),
             Scope.BuiltinValue("false", E.Literal(False)),
             Scope.BuiltinValue("true", E.Literal(True)),
             self.node_builtin,

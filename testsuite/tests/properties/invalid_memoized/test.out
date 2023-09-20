@@ -1,2 +1,7 @@
-test.py:XXX: error: This property cannot be memoized because argument a (of type Token.array) is not hashable
-Done
+== foo.lkt ==
+foo.lkt:15:23: error: This property cannot be memoized because argument a (of type Token.array) is not hashable
+15 |     @export @memoized fun prop(a: Array[Token]): Bool = a.length() = 0
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done
