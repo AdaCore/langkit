@@ -1,5 +1,14 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+    @export fun prop(a: Bool): Bool = a
+}
+
+class Example: FooNode {
+    fun prop(b: Bool): Bool = b
 }
