@@ -2522,6 +2522,13 @@ class LktTypesLoader:
                     )
                     return result
 
+                elif method_name == "singleton":
+                    check_source_language(
+                        len(call_expr.f_args) == 0,
+                        "'singleton' takes no argument",
+                    )
+                    return method_prefix.singleton
+
                 elif method_name == "to_symbol":
                     args, kwargs = lower_args()
                     check_source_language(

@@ -1,5 +1,16 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @export fun array_of_nodes(): Array[Example] = node.singleton()
+
+    @export fun array_of_arary(): Array[Array[Example]] =
+        node.singleton().singleton()
 }
