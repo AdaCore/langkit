@@ -1,0 +1,4 @@
+== test.lkt ==
+test.lkt:7:1: error: Expected '}', got Termination
+
+lkt_compile: Done

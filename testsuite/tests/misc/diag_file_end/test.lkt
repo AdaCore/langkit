@@ -1,0 +1,6 @@
+# The missing "}" will trigger a syntax error located at line 7, i.e. after the
+# last actual line in this source file. This used to trigger an IndexError in
+# the source listing code in langkit.diagnostics.
+
+class FooNode implements Node[FooNode] {
+    fun f(): Int = 0

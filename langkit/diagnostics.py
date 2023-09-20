@@ -579,7 +579,10 @@ def style_diagnostic_message(string: str) -> str:
     return re.sub("`.*?`", lambda m: col(m.group(), Colors.BOLD), string)
 
 
-def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
+def source_listing(
+    highlight_sloc: Location,
+    lines_after: int = 0,
+) -> str | None:
     """
     Create a source listing for an error message, centered around a specific
     sloc, that will be highlighted/careted, as in the following example::
@@ -603,6 +606,11 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
     line_nb = highlight_sloc.line - 1
     start_offset = highlight_sloc.column - 1
     end_offset = highlight_sloc.end_column - 1
+
+    # If the location is at the file termination, right after a line break,
+    # there is no useful line to print.
+    if line_nb >= len(source_buffer):
+        return None
 
     # Compute the width of the column needed to print line numbers
     line_nb_width = len(str(highlight_sloc.line + lines_after))
@@ -684,7 +692,9 @@ def print_error(message: str,
 
     # Print the source listing
     if location.lkt_unit is not None and location.line > 0:
-        print(source_listing(location))
+        src_lst = source_listing(location)
+        if src_lst is not None:
+            print(src_lst)
 
 
 def print_error_from_sem_result(sem_result: L.SemanticResult) -> None:
