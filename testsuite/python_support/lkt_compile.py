@@ -21,6 +21,15 @@ parser.add_argument(
     action="store_true",
     help="Enable the generation of the unparser",
 )
+parser.add_argument(
+    "lkt_files",
+    nargs="*",
+    help=(
+        "Lkt sources to compile. If not provided, run through all *.lkt"
+        " sources in the current directory expect the ones starting with"
+        " 'common_'."
+    ),
+)
 
 
 args = parser.parse_args()
@@ -28,7 +37,9 @@ args = parser.parse_args()
 
 # Compile all *.lkt" file except the ones starting with "common", as they
 # contain just common code for the other sources, but are not compilable alone.
-tests = [f for f in glob.glob("*.lkt") if not f.startswith("common")]
+tests = args.lkt_files or [
+    f for f in glob.glob("*.lkt") if not f.startswith("common")
+]
 
 
 for lkt_file in sorted(tests):
