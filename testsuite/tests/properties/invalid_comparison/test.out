@@ -1,2 +1,7 @@
-test.py:XXX: error: Comparisons require the same type for both operands (got Int and BigInt)
-Done
+== foo.lkt ==
+foo.lkt:12:56: error: Comparisons require the same type for both operands (got Int and BigInt)
+12 |     @export fun compare(lhs: Int, rhs: BigInt): Bool = lhs < rhs
+   |                                                        ^^^^^^^^^
+
+
+lkt_compile: Done
