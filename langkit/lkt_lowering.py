@@ -2276,12 +2276,12 @@ class LktTypesLoader:
                 the generated code.
             """
             source_name = arg.f_syn_name.text
-            result = AbstractVariable(
-                names.Name.check_from_lower(f"{prefix}_{next(counter)}"),
-                source_name=source_name,
-                type=type,
-            )
-            result.location = Location.from_lkt_node(arg)
+            with AbstractExpression.with_location(Location.from_lkt_node(arg)):
+                result = AbstractVariable(
+                    names.Name.check_from_lower(f"{prefix}_{next(counter)}"),
+                    source_name=source_name,
+                    type=type,
+                )
             env.add(Scope.LocalVariable(source_name, arg, result))
             return result
 
@@ -2406,13 +2406,15 @@ class LktTypesLoader:
                             if v.f_decl_type else
                             None
                         )
-                        var = AbstractVariable(
-                            v_name,
-                            v_type,
-                            create_local=True,
-                            source_name=source_name,
-                        )
-                        var.location = Location.from_lkt_node(v)
+                        with AbstractExpression.with_location(
+                            Location.from_lkt_node(v)
+                        ):
+                            var = AbstractVariable(
+                                v_name,
+                                v_type,
+                                create_local=True,
+                                source_name=source_name,
+                            )
                         init_abstract_expr = v.f_val
 
                     elif isinstance(v, L.VarBind):
@@ -2744,11 +2746,14 @@ class LktTypesLoader:
 
                     # Create the match variable
                     var_name = names.Name(f"Match_{i}")
-                    match_var = AbstractVariable(
-                        name=var_name,
-                        type=matched_type,
-                        source_name=decl_id.text,
-                    )
+                    with AbstractExpression.with_location(
+                        Location.from_lkt_node(m.f_decl)
+                    ):
+                        match_var = AbstractVariable(
+                            name=var_name,
+                            type=matched_type,
+                            source_name=decl_id.text,
+                        )
                     match_var.local_var = local_vars.create_scopeless(
                         var_name, matched_type
                     )
@@ -2892,10 +2897,11 @@ class LktTypesLoader:
                         ", ".join(reserved)
                     ),
                 )
-            arg = Argument(
-                name=ada_id_for(source_name),
-                type=self.resolve_type(a.f_decl_type, scope),
-            )
+            with AbstractExpression.with_location(Location.from_lkt_node(a)):
+                arg = Argument(
+                    name=ada_id_for(source_name),
+                    type=self.resolve_type(a.f_decl_type, scope),
+                )
             prop.arguments.append(arg)
             scope.add(Scope.Argument(source_name, a, arg.var))
 
