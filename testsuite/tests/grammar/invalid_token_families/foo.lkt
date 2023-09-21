@@ -1,3 +1,0 @@
-grammar foo_grammar {
-    @main_rule main_rule <- or(Identifier(@identifier) | Number(@number))
-}

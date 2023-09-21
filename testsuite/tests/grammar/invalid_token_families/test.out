@@ -1,7 +1,13 @@
-== InvalidToken ==
-test.py:XXX: error: Invalid tokens: foobar
+== invalid_decl.lkt ==
+invalid_decl.lkt:4:5: error: Only lexer rules allowed in family blocks
+4 |     family alphanumericals {
+  |     ^
 
-== PresentTwice ==
-test.py:XXX: error: Tokens must belong to one family exclusively: Number
 
-Done
+== present_twice.lkt ==
+present_twice.lkt:10:9: error: Duplicate token name
+10 |         number <- p"[0-9]+"
+   |         ^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done
