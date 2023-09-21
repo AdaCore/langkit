@@ -1673,35 +1673,36 @@ class LktTypesLoader:
         self.property_error = Scope.Exception("PropertyError", E.PropertyError)
 
         # Register builtins in the root scope
-        for builtin in [
-            builtin_type("AnalysisUnitKind"),
-            builtin_type("BigInt"),
-            builtin_type("Bool"),
-            builtin_type("Char", "Character"),
-            builtin_type("EntityInfo"),
-            builtin_type("Equation"),
-            builtin_type("Int"),
-            builtin_type("LogicVar"),
-            builtin_type("EnvRebindings"),
-            builtin_type("String"),
-            builtin_type("Symbol"),
-            builtin_type("Token"),
-            Scope.BuiltinValue("false", E.Literal(False)),
-            Scope.BuiltinValue("true", E.Literal(True)),
-            self.node_builtin,
-            self.self_builtin,
-            self.precondition_failure,
-            self.property_error,
-            self.generics.ast_list,
-            self.generics.analysis_unit,
-            self.generics.array,
-            self.generics.entity,
-            self.generics.iterator,
-            self.generics.node,
-            Scope.Trait("ErrorNode"),
-            Scope.Trait("TokenNode"),
-        ]:
-            root_scope.mapping[builtin.name] = builtin
+        with AbstractExpression.with_location(Location.builtin):
+            for builtin in [
+                builtin_type("AnalysisUnitKind"),
+                builtin_type("BigInt"),
+                builtin_type("Bool"),
+                builtin_type("Char", "Character"),
+                builtin_type("EntityInfo"),
+                builtin_type("Equation"),
+                builtin_type("Int"),
+                builtin_type("LogicVar"),
+                builtin_type("EnvRebindings"),
+                builtin_type("String"),
+                builtin_type("Symbol"),
+                builtin_type("Token"),
+                Scope.BuiltinValue("false", E.Literal(False)),
+                Scope.BuiltinValue("true", E.Literal(True)),
+                self.node_builtin,
+                self.self_builtin,
+                self.precondition_failure,
+                self.property_error,
+                self.generics.ast_list,
+                self.generics.analysis_unit,
+                self.generics.array,
+                self.generics.entity,
+                self.generics.iterator,
+                self.generics.node,
+                Scope.Trait("ErrorNode"),
+                Scope.Trait("TokenNode"),
+            ]:
+                root_scope.mapping[builtin.name] = builtin
 
         # Go through all units and register all top-level definitions in the
         # root scope. This first pass allows to check for name uniqueness,

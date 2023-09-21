@@ -10,8 +10,8 @@ import re
 import sys
 import traceback
 from typing import (
-    Any, Iterator, List, NoReturn, Optional as Opt, TYPE_CHECKING, TextIO,
-    Tuple, Type, TypeVar, Union
+    Any, ClassVar, Iterator, List, NoReturn, Optional as Opt, TYPE_CHECKING,
+    TextIO, Tuple, Type, TypeVar, Union
 )
 
 
@@ -187,6 +187,15 @@ class Location:
         if result is not None:
             result = replace(result, line=result.line + 2)
         return result
+
+    builtin: ClassVar[Location]
+    """
+    Special location to designate the abstract source location where builtins
+    are defined.
+    """
+
+
+Location.builtin = Location("<builtin>")
 
 
 def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
