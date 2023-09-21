@@ -718,7 +718,7 @@ def emit_expr(expr, **ctx):
         return str(expr.literal).lower()
 
     elif isinstance(expr, SymbolLiteral):
-        return json.dumps(expr.name)
+        return "s" + json.dumps(expr.name)
 
     elif isinstance(expr, BaseRaiseException):
         return "raise[{}] {}({})".format(

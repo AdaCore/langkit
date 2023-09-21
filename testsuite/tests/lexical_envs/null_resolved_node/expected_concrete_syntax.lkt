@@ -13,5 +13,5 @@ grammar foo_grammar {
 class Example : FooNode implements TokenNode {
 
     @export fun get_all_foo(): Array[Entity[FooNode]] =
-    node.children_env().get("foo")
+    node.children_env().get(s"foo")
 }

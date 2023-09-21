@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun prop(): Symbol = "index"
+    @export fun prop(): Symbol = s"index"
 }
 
 class Example : FooNode implements TokenNode {

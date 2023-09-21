@@ -1,5 +1,5 @@
 import common
 
 class Example: FooNode implements TokenNode {
-    @export fun increment(kv: KV): KV = kv.update(key="hello")
+    @export fun increment(kv: KV): KV = kv.update(key=s"hello")
 }

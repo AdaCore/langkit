@@ -2840,7 +2840,14 @@ class LktTypesLoader:
                             )
 
             elif isinstance(expr, L.StringLit):
-                return E.SymbolLiteral(expr.p_denoted_value)
+                string_prefix = expr.p_prefix
+                string_value = expr.p_denoted_value
+                if string_prefix == "\x00":
+                    return E.String(string_value)
+                elif string_prefix == "s":
+                    return E.SymbolLiteral(string_value)
+                else:
+                    error("invalid string prefix")
 
             elif isinstance(expr, L.TryExpr):
                 return E.Try(
