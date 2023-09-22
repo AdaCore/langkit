@@ -25,5 +25,5 @@ grammar foo_grammar {
     n.parents()
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

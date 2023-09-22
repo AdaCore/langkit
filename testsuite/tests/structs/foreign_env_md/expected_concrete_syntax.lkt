@@ -10,12 +10,12 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field name: Name
     @parse_field @nullable ref: Name
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 
     fun sym(): Symbol = node.symbol
 

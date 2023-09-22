@@ -13,7 +13,7 @@ grammar foo_grammar {
     node.children_env().get(null[Symbol])
 }
 
-@has_abstract_list class Example : FooNode {
+@has_abstract_list class Example: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, Id]
 
@@ -22,8 +22,8 @@ grammar foo_grammar {
     node.content.map((c) => c.symbol).contains(kw)
 }
 
-class ToplevelList : ASTList[FooNode, Example] {
+class ToplevelList: ASTList[FooNode, Example] {
 }
 
-class Id : FooNode implements TokenNode {
+class Id: FooNode implements TokenNode {
 }

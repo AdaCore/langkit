@@ -13,5 +13,5 @@ grammar foo_grammar {
     a & b
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

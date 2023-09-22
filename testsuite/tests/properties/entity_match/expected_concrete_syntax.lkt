@@ -12,12 +12,12 @@ grammar foo_grammar {
     @abstract fun get_num(): Int
 }
 
-class Example : FooNode {
+class Example: FooNode {
 
     fun get_num(): Int = 2
 }
 
-class Literal : FooNode implements TokenNode {
+class Literal: FooNode implements TokenNode {
 
     fun get_num(): Int = 3
 

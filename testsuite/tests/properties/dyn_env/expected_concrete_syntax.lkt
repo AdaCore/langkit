@@ -15,12 +15,12 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class ArgSpec : FooNode {
+class ArgSpec: FooNode {
     @parse_field name: Identifier
     @parse_field arg_expr: Expr
 }
 
-class CallExpr : FooNode {
+class CallExpr: FooNode {
     @parse_field name: Identifier
     @parse_field args: ASTList[FooNode, Expr]
 
@@ -60,12 +60,12 @@ class CallExpr : FooNode {
     node.arg_exprs_env().get_first(name).as[Expr]
 }
 
-class ConsDecl : FooNode {
+class ConsDecl: FooNode {
     @parse_field name: Identifier
     @parse_field cons_expr: Expr
 }
 
-@abstract class Expr : FooNode {
+@abstract class Expr: FooNode {
 
     fun resolve(): Entity[Expr] = match self {
         case l: Literal => l
@@ -73,17 +73,17 @@ class ConsDecl : FooNode {
     }
 }
 
-class Literal : Expr implements TokenNode {
+class Literal: Expr implements TokenNode {
 }
 
-class Ref : Expr {
+class Ref: Expr {
     @parse_field name: Identifier
 }
 
-class FunDecl : FooNode {
+class FunDecl: FooNode {
     @parse_field name: Identifier
     @parse_field args: ASTList[FooNode, ArgSpec]
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }

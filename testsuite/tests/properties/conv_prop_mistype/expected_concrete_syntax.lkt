@@ -11,7 +11,7 @@ grammar foo_grammar {
     lvar: LogicVar
 }
 
-class Examples : FooNode {
+class Examples: FooNode {
     @parse_field e1: RegularExample
     @parse_field e2: PlusExample
 
@@ -22,10 +22,10 @@ class Examples : FooNode {
     ) and (%domain(node.e2.lvar, [node.e2])).solve()
 }
 
-class PlusExample : FooNode {
+class PlusExample: FooNode {
 
     fun conv_prop(): Entity[RegularExample] = null[Entity[RegularExample]]
 }
 
-class RegularExample : FooNode {
+class RegularExample: FooNode {
 }

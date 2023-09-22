@@ -21,23 +21,23 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field name: Name
     @parse_field imports: ASTList[FooNode, DerivedRef]
     @parse_field vars: ASTList[FooNode, Var]
     @parse_field expr: Expr
 }
 
-@abstract class Expr : FooNode {
+@abstract class Expr: FooNode {
 }
 
-@abstract class Atom : Expr {
+@abstract class Atom: Expr {
 }
 
-class Lit : Atom implements TokenNode {
+class Lit: Atom implements TokenNode {
 }
 
-class Ref : Atom {
+class Ref: Atom {
     @parse_field name: Name
 
     @export fun resolve(): Entity[FooNode] =
@@ -49,26 +49,26 @@ class Ref : Atom {
     fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 }
 
-class MiddleRef : Ref {
+class MiddleRef: Ref {
 
     fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 }
 
-class DerivedRef : MiddleRef {
+class DerivedRef: MiddleRef {
 
     fun referenced_env(): LexicalEnv[FooNode] =
     node.unit().root.node_env().get_first(node.name.symbol).children_env()
 }
 
-class Plus : Expr {
+class Plus: Expr {
     @parse_field lhs: Expr
     @parse_field rhs: Expr
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Var : FooNode {
+class Var: FooNode {
     @parse_field name: Name
     @parse_field expr: Expr
 }

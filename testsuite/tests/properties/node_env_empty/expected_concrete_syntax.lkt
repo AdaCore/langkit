@@ -10,12 +10,12 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field names: ASTList[FooNode, Name]
 
     @export fun lookup(n: Entity[Name]): Entity[FooNode] =
     self.node_env().get_first(n.symbol)
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }

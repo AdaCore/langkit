@@ -14,12 +14,12 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class DefNode : FooNode {
+@abstract class DefNode: FooNode {
 
     @export @abstract fun name(): Symbol
 }
 
-class Block : DefNode {
+class Block: DefNode {
     @parse_field params: Params
     @parse_field name_field: Name
     @parse_field vars: ASTList[FooNode, BlockVar]
@@ -39,20 +39,20 @@ class Block : DefNode {
     }
 }
 
-class BlockVar : DefNode {
+class BlockVar: DefNode {
     @parse_field name_field: Name
 
     fun name(): Symbol = node.name_field.symbol
 }
 
-@has_abstract_list class Param : DefNode {
+@has_abstract_list class Param: DefNode {
     @parse_field name_field: Name
 
     fun name(): Symbol = node.name_field.symbol
 }
 
-class Params : ASTList[FooNode, Param] {
+class Params: ASTList[FooNode, Param] {
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }

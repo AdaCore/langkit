@@ -21,9 +21,9 @@ grammar foo_grammar {
     node.node_env().get(n, from=node)
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field name: Name
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }

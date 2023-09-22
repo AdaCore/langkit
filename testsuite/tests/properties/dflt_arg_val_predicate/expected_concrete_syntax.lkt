@@ -10,7 +10,7 @@ dynvar my_var: Int
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode {
+class Example: FooNode {
     var1: LogicVar
     var2: LogicVar
 

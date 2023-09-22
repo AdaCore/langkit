@@ -11,13 +11,13 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Id : FooNode implements TokenNode {
+class Id: FooNode implements TokenNode {
 
     @export fun get_scope(): Entity[FooNode] =
     node.children_env().get_first(s"Scope")
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, FooNode]
 }

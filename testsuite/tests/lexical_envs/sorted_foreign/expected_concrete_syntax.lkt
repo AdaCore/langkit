@@ -12,7 +12,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Name : FooNode {
+@abstract class Name: FooNode {
 
     fun scope_fqn(): String = match node {
         case dn: DottedName => dn.prefix.fqn()
@@ -29,7 +29,7 @@ grammar foo_grammar {
     @abstract fun referenced_scope(): LexicalEnv[FooNode]
 }
 
-class DottedName : Name {
+class DottedName: Name {
     @parse_field prefix: Name
     @parse_field suffix: Identifier
 
@@ -42,7 +42,7 @@ class DottedName : Name {
     node.suffix.resolve_scope(node.referenced_parent_scope())
 }
 
-class Identifier : Name implements TokenNode {
+class Identifier: Name implements TokenNode {
 
     fun referenced_name(): Symbol = node.symbol
 
@@ -61,13 +61,13 @@ class Identifier : Name implements TokenNode {
     @trace fun referenced_scope(): LexicalEnv[FooNode] = node.resolve_scope(_)
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
 
     @export fun resolve(): FooNode = node.name.referenced_scope().env_node
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: Name
     @parse_field content: ASTList[FooNode, FooNode]
 }

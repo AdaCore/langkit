@@ -45,12 +45,12 @@ enum Color {
     @export fun token(t: Token): Token = t
 }
 
-class Example : FooNode {
+class Example: FooNode {
 
     @export fun singleton(): SomeStruct = SomeStruct(examples=[self])
 }
 
-class Sequence : ASTList[FooNode, FooNode] {
+class Sequence: ASTList[FooNode, FooNode] {
 
     @export fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
 
@@ -59,18 +59,18 @@ class Sequence : ASTList[FooNode, FooNode] {
     )
 }
 
-class Ident : FooNode implements TokenNode {
+class Ident: FooNode implements TokenNode {
 
     @export fun sym(sym: Symbol): Symbol = sym
 }
 
-class Null : FooNode {
+class Null: FooNode {
 }
 
-class StringLiteral : FooNode {
+class StringLiteral: FooNode {
 }
 
-class Var : FooNode {
+class Var: FooNode {
     @parse_field arg: Sequence
 }
 

@@ -8,7 +8,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode {
+class Example: FooNode {
 
     @export fun raise_msg(): Bool =
     raise[Bool] PropertyError("Custom error message!")

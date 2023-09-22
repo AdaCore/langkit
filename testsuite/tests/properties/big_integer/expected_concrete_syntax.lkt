@@ -30,19 +30,19 @@ grammar foo_grammar {
     fun to_int(b: Bool): BigInt = if b then 1b else 0b
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field name: Identifier
     @parse_field expr_tree: Expr
 }
 
-@abstract class Expr : FooNode {
+@abstract class Expr: FooNode {
 
     @export @abstract fun evaluate(): BigInt
 
     @export fun evaluate_as_int(): Int = node.evaluate().as_int()
 }
 
-class BinOp : Expr {
+class BinOp: Expr {
     @parse_field left: Expr
     @parse_field op: OpKind
     @parse_field right: Expr
@@ -63,21 +63,21 @@ class BinOp : Expr {
     }
 }
 
-class Literal : Expr implements TokenNode {
+class Literal: Expr implements TokenNode {
 
     @external fun evaluate(): BigInt
 }
 
-class ParenExpr : Expr {
+class ParenExpr: Expr {
     @parse_field expr: Expr
 
     fun evaluate(): BigInt = node.expr.evaluate()
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }
 
-enum class OpKind : FooNode {
+enum class OpKind: FooNode {
     case Plus,
     Minus,
     Equal, LessThan, LessThanOrEqual, GreaterThan, GreaterThanOrEqual

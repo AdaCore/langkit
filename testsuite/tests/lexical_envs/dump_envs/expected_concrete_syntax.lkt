@@ -12,14 +12,14 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field id: Identifier
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: Identifier
     @parse_field content: ASTList[FooNode, FooNode]
 }

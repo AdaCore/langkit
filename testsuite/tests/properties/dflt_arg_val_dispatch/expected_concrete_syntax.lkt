@@ -11,19 +11,19 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Decl : FooNode {
+@abstract class Decl: FooNode {
     @parse_field name: Identifier
 
     @export fun prop(arg: Bool = false): Bool = arg
 }
 
-class FunDecl : Decl {
+class FunDecl: Decl {
 }
 
-class VarDecl : Decl {
+class VarDecl: Decl {
 
     fun prop(arg: Bool = false): Bool = not arg
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }

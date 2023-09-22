@@ -26,21 +26,21 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Expr : FooNode {
+@abstract class Expr: FooNode {
 }
 
-class AttrRef : Expr {
+class AttrRef: Expr {
     @parse_field prefix: Expr
     @parse_field name: Name
 }
 
-class CharLit : Expr implements TokenNode {
+class CharLit: Expr implements TokenNode {
 }
 
-class DotExpr : Expr {
+class DotExpr: Expr {
     @parse_field prefix: Expr
     @parse_field suffix: Name
 }
 
-class Name : Expr implements TokenNode {
+class Name: Expr implements TokenNode {
 }

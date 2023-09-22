@@ -14,10 +14,10 @@ grammar foo_grammar {
     node.children_env().get(null[Symbol])
 }
 
-class Id : FooNode implements TokenNode {
+class Id: FooNode implements TokenNode {
 }
 
-class Program : FooNode {
+class Program: FooNode {
     @parse_field name: Id
     @parse_field program_list: ASTList[FooNode, Program]
 }

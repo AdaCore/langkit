@@ -10,15 +10,15 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Block : FooNode {
+class Block: FooNode {
     @parse_field name: Name
     @parse_field content: ASTList[FooNode, Ref]
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
 
     @export fun referenced(): Entity[FooNode] =

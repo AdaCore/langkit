@@ -13,16 +13,16 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class BaseEnvCreator : FooNode {
+@abstract class BaseEnvCreator: FooNode {
 }
 
-class DefaultEnvCreator : BaseEnvCreator {
+class DefaultEnvCreator: BaseEnvCreator {
 }
 
-class RebindableEnvCreator : BaseEnvCreator {
+class RebindableEnvCreator: BaseEnvCreator {
 }
 
-class Rebinder : FooNode {
+class Rebinder: FooNode {
     @parse_field left: BaseEnvCreator
     @parse_field right: BaseEnvCreator
 

@@ -10,7 +10,7 @@ grammar foo_grammar {
     @export fun integers_neq(a: Int, b: Int): Bool = a != b
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 
     @export fun not_eq(other: Example): Bool = node != other
 }

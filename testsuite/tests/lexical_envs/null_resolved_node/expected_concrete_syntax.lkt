@@ -10,7 +10,7 @@ grammar foo_grammar {
     fun resolver(): Entity[FooNode] = null[Entity[FooNode]]
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 
     @export fun get_all_foo(): Array[Entity[FooNode]] =
     node.children_env().get(s"foo")

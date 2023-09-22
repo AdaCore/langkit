@@ -12,7 +12,7 @@ grammar foo_grammar {
     @export fun build_2(key: String, value: Int): KV = KV(key=key, value=value)
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }
 
 struct KV {

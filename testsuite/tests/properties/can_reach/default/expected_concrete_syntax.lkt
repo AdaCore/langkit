@@ -11,5 +11,5 @@ grammar foo_grammar {
     node.can_reach(from_node.node)
 }
 
-class Example : FooNode {
+class Example: FooNode {
 }

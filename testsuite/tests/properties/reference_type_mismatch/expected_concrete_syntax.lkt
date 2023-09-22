@@ -9,7 +9,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Decl : FooNode implements TokenNode {
+class Decl: FooNode implements TokenNode {
 
     fun refd_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 
@@ -17,6 +17,6 @@ class Decl : FooNode implements TokenNode {
     node.node_env().get(name)
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field decls: ASTList[FooNode, Decl]
 }

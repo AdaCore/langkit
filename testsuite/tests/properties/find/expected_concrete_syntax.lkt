@@ -14,5 +14,5 @@ grammar foo_grammar {
     l.find((n) => n.text() == "example")
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

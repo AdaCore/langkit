@@ -16,7 +16,7 @@ grammar foo_grammar {
 ## Example node.
 ##
 ## Second line.
-class ExampleNode : TestNode {
+class ExampleNode: TestNode {
 
     ## docstring.
     @export fun test_no_var(): Int = # hello
@@ -116,8 +116,8 @@ class ExampleNode : TestNode {
     )
 }
 
-class NodeType1 : ExampleNode {
+class NodeType1: ExampleNode {
 }
 
-class NodeType2 : ExampleNode {
+class NodeType2: ExampleNode {
 }

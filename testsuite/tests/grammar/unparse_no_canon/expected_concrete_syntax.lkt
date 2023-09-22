@@ -17,13 +17,13 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }
 
-class Number : FooNode implements TokenNode {
+class Number: FooNode implements TokenNode {
 }
 
-class RootNode : FooNode {
+class RootNode: FooNode {
     @parse_field @nullable ident: Identifier
     @parse_field @nullable number: Number
 }

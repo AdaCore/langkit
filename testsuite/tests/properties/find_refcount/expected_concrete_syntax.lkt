@@ -13,7 +13,7 @@ grammar foo_grammar {
     node.children.map((c) => c.resolve_own()).find((c) => c.value == 1b)
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }
 
 struct MyRecord {

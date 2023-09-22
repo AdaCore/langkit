@@ -9,7 +9,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Block : FooNode {
+class Block: FooNode {
     @parse_field name: Name
 
     ## Helper to create a new entity from ``Entity`` but with the given
@@ -44,5 +44,5 @@ class Block : FooNode {
     self.info.rebindings.old_env.env_node.as_bare_entity
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }

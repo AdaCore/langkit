@@ -10,7 +10,7 @@ grammar foo_grammar {
     fun identity(): FooNode = node
 }
 
-class Example : FooNode {
+class Example: FooNode {
 
     @export fun foo(): FooNode = node.identity().parent.identity()
 }

@@ -1501,8 +1501,8 @@ def emit_node_type(node_type):
     properties = node_type.get_properties(include_inherited=False)
     doc = node_type._doc
 
-    strbase = ": {} ".format(base_name) if base_name else ""
-    strtraits = "implements {} ".format(", ".join(traits)) if traits else ""
+    strbase = ": {}".format(base_name) if base_name else ""
+    strtraits = " implements {}".format(", ".join(traits)) if traits else ""
 
     def is_builtin_prop(prop):
         return any(
@@ -1521,7 +1521,7 @@ def emit_node_type(node_type):
     ${emit_doc(doc)}$hl
     % endif
     ${''.join(f'@{q} ' for q in quals)}
-    ${type_kind} ${type_name(node_type)} ${strbase}${strtraits}{$i$hl
+    ${type_kind} ${type_name(node_type)}${strbase}${strtraits} {$i$hl
     % if enum_members:
     case ${enum_members}
     $hl

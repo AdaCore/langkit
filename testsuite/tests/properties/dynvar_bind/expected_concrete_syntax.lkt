@@ -10,7 +10,7 @@ dynvar dyn_var: Int
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 
     @with_dynvars(dyn_var) fun add(value: Int): Int = value + dyn_var
 

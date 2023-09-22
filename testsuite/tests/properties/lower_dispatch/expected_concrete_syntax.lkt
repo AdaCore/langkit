@@ -14,12 +14,12 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field name: Name
     @parse_field expr: Expr
 }
 
-@abstract class Expr : FooNode {
+@abstract class Expr: FooNode {
 
     @export @abstract fun evaluate_abstract(): Int
 
@@ -30,10 +30,10 @@ class Def : FooNode {
     @export fun evaluate_concrete(): Int = 1
 }
 
-@abstract class Atom : Expr {
+@abstract class Atom: Expr {
 }
 
-class Lit : Atom implements TokenNode {
+class Lit: Atom implements TokenNode {
 
     fun evaluate_abstract(): Int = 1
 
@@ -42,7 +42,7 @@ class Lit : Atom implements TokenNode {
     fun evaluate_entity(): Int = 1
 }
 
-class Ref : Atom {
+class Ref: Atom {
     @parse_field name: Name
 
     @export fun resolve(): Entity[Def] =
@@ -55,7 +55,7 @@ class Ref : Atom {
     fun evaluate_entity(): Int = self.resolve().expr.evaluate_entity()
 }
 
-class Plus : Expr {
+class Plus: Expr {
     @parse_field lhs: Expr
     @parse_field rhs: Expr
 
@@ -72,5 +72,5 @@ class Plus : Expr {
     self.lhs.evaluate_entity() + self.rhs.evaluate_entity()
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }

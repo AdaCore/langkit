@@ -15,22 +15,22 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Cat1 : FooNode {
+class Cat1: FooNode {
     @parse_field decls: ASTList[FooNode, Var]
 }
 
-class Cat2 : FooNode {
+class Cat2: FooNode {
     @parse_field decls: ASTList[FooNode, Var]
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field name: Name
     @parse_field cat1: Cat1
     @parse_field cat2: Cat2
     @parse_field example: Example
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 
     @export fun lookup_all(name: Symbol): Array[Entity[FooNode]] =
     node.children_env().get(name)
@@ -46,9 +46,9 @@ class Example : FooNode implements TokenNode {
     )
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Var : FooNode {
+class Var: FooNode {
     @parse_field name: Name
 }

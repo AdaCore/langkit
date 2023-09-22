@@ -13,19 +13,19 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class DefBlock : FooNode {
+class DefBlock: FooNode {
     @parse_field id: Identifier
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }
 
-class RegularBlock : FooNode {
+class RegularBlock: FooNode {
     @parse_field id: Identifier
 
     @export @lazy synth: SynthNode = SynthNode(id=node.id)
 }
 
-class SynthNode : FooNode {
+class SynthNode: FooNode {
     @parse_field id: Identifier
 }

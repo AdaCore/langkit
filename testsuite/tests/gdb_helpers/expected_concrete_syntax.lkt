@@ -115,7 +115,7 @@ grammar foo_grammar {
     }
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }
 
 struct MyStruct {

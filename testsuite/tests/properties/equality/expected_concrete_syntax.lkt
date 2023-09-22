@@ -19,7 +19,7 @@ grammar foo_grammar {
     [node.children_env().env_orphan()]
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field has_plus: HasPlus
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Ref]
@@ -34,13 +34,13 @@ class Decl : FooNode {
     node.env_array() == other.env_array()
 }
 
-@qualifier enum class HasPlus : FooNode {
+@qualifier enum class HasPlus: FooNode {
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
 }
 

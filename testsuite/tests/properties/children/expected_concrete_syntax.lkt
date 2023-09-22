@@ -20,9 +20,9 @@ grammar foo_grammar {
     n.children
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }
 
-class Sequence : FooNode {
+class Sequence: FooNode {
     @parse_field items: ASTList[FooNode, Example]
 }

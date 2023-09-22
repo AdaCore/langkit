@@ -8,10 +8,10 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class BarNode : FooNode {
+class BarNode: FooNode {
 }
 
-class Literal : FooNode implements TokenNode {
+class Literal: FooNode implements TokenNode {
 
     fun b(): Entity[BarNode] = node.a().as[BarNode]
 

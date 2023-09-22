@@ -9,11 +9,11 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Definition : FooNode {
+class Definition: FooNode {
     @parse_field name: Name
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
     ref_var: LogicVar
 
     @export fun resolve(): Bool = {

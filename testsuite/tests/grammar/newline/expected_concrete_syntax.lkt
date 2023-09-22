@@ -29,22 +29,22 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class CompositeNode : FooNode {
+class CompositeNode: FooNode {
     @parse_field lit_1: Literal
     @parse_field lit_2: Literal
     @parse_field lit_3: Literal
     @parse_field lit_4: Literal
 }
 
-class IndentNode : FooNode {
+class IndentNode: FooNode {
     @parse_field lit_1: Literal
     @parse_field lit_2: Literal
 }
 
-class Literal : FooNode implements TokenNode {
+class Literal: FooNode implements TokenNode {
 }
 
-class NewLineNode : FooNode {
+class NewLineNode: FooNode {
     @parse_field lit_1: Literal
     @parse_field lit_2: Literal
 }

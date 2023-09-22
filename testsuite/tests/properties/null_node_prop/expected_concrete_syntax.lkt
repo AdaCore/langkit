@@ -12,5 +12,5 @@ grammar foo_grammar {
     fun prop(): Bool = true
 }
 
-class Example : FooNode {
+class Example: FooNode {
 }

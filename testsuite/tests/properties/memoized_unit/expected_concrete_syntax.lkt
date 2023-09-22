@@ -8,7 +8,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode {
+class Example: FooNode {
 
     @export @memoized fun unit_root_node(unit: AnalysisUnit[FooNode]): Entity[FooNode] =
     unit.root.as_bare_entity

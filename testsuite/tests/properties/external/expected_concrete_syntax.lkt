@@ -9,17 +9,17 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Expression : FooNode {
+@abstract class Expression: FooNode {
 
     @export @abstract fun result(): Int
 }
 
-class Literal : Expression implements TokenNode {
+class Literal: Expression implements TokenNode {
 
     @external fun result(): Int
 }
 
-class Plus : Expression {
+class Plus: Expression {
     @parse_field left: Literal
     @parse_field right: Expression
 

@@ -12,7 +12,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Name : FooNode {
+@abstract class Name: FooNode {
 
     @export @abstract fun resolve(): Entity[FooNode]
 
@@ -29,14 +29,14 @@ grammar foo_grammar {
     }
 }
 
-class Id : Name implements TokenNode {
+class Id: Name implements TokenNode {
 
     fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
 
     fun suffix_symbol(): Symbol = node.symbol
 }
 
-class Prefix : Name {
+class Prefix: Name {
     @parse_field prefix: Name
     @parse_field suffix: Id
 
@@ -46,12 +46,12 @@ class Prefix : Name {
     fun suffix_symbol(): Symbol = node.suffix.symbol
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: Name
     @parse_field defs: ASTList[FooNode, FooNode]
 }
 
-class Var : FooNode {
+class Var: FooNode {
     @parse_field name: Id
     @parse_field value: Name
 }

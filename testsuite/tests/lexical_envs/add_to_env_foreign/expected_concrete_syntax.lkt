@@ -18,10 +18,10 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class DummySyntheticNode : FooNode {
+class DummySyntheticNode: FooNode {
 }
 
-class ForeignDecl : FooNode {
+class ForeignDecl: FooNode {
     @parse_field create_synthetic: Synth
     @parse_field id: Id
 
@@ -29,14 +29,14 @@ class ForeignDecl : FooNode {
     if node.create_synthetic.as_bool() then (DummySyntheticNode()) else node
 }
 
-@abstract class Id : FooNode {
+@abstract class Id: FooNode {
 
     @abstract fun simple_name(): SimpleId
 
     @abstract fun resolve(base_env: LexicalEnv[FooNode]): Scope
 }
 
-class ScopedId : Id {
+class ScopedId: Id {
     @parse_field scope: Id
     @parse_field name: SimpleId
 
@@ -46,7 +46,7 @@ class ScopedId : Id {
     node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
 }
 
-class SimpleId : Id implements TokenNode {
+class SimpleId: Id implements TokenNode {
 
     fun simple_name(): SimpleId = node
 
@@ -54,17 +54,17 @@ class SimpleId : Id implements TokenNode {
     base_env.get_first(node.symbol).node.as[Scope]
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: SimpleId
     @parse_field content: ASTList[FooNode, Scope]
 }
 
-class SelfDecl : FooNode {
+class SelfDecl: FooNode {
     @parse_field id: Id
     @parse_field @nullable md_node: Id
 }
 
-@qualifier enum class Synth : FooNode {
+@qualifier enum class Synth: FooNode {
 }
 
 @metadata struct Metadata {

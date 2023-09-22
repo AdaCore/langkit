@@ -8,7 +8,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class BarNode : FooNode {
+class BarNode: FooNode {
 
     @external fun foo(i: Int): BigInt
 

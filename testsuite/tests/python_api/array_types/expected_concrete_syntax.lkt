@@ -13,10 +13,10 @@ grammar foo_grammar {
     @export fun count(seq: Array[Entity[Example]]): Int = seq.length()
 }
 
-class Example : FooNode {
+class Example: FooNode {
 }
 
-class Sequence : ASTList[FooNode, FooNode] {
+class Sequence: ASTList[FooNode, FooNode] {
 
     @export fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
 
@@ -25,5 +25,5 @@ class Sequence : ASTList[FooNode, FooNode] {
     )
 }
 
-class NullNode : FooNode {
+class NullNode: FooNode {
 }

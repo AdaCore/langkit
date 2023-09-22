@@ -10,5 +10,5 @@ grammar foo_grammar {
     @export fun prop(e: Example): Symbol = e.symbol
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

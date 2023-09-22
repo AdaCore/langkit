@@ -10,7 +10,7 @@ dynvar bool_var: Bool
 @abstract class RootNode implements Node[RootNode] {
 }
 
-class ExampleNode : RootNode {
+class ExampleNode: RootNode {
 
     @export @with_dynvars(bool_var=true) fun prop(): Bool = bool_var
 

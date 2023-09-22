@@ -16,11 +16,11 @@ grammar foo_grammar {
     node.as[ExprHolder].expr.flag()
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 
     @export fun flag(): Bool = true
 }
 
-class ExprHolder : FooNode {
+class ExprHolder: FooNode {
     @parse_field expr: Example
 }

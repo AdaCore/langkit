@@ -14,7 +14,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Id : FooNode {
+@abstract class Id: FooNode {
 
     @abstract fun designated_symbol(): Symbol
 
@@ -23,7 +23,7 @@ grammar foo_grammar {
     @abstract fun resolve(base_env: LexicalEnv[FooNode]): FooNode
 }
 
-class ScopedId : Id {
+class ScopedId: Id {
     @parse_field scope: Id
     @parse_field name: SimpleId
 
@@ -36,7 +36,7 @@ class ScopedId : Id {
     node.designated_scope(base_env).get_first(node.name).node
 }
 
-class SimpleId : Id implements TokenNode {
+class SimpleId: Id implements TokenNode {
 
     fun designated_symbol(): Symbol = node.symbol
 
@@ -47,7 +47,7 @@ class SimpleId : Id implements TokenNode {
     base_env.get_first(node.symbol).node
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, Scope]
 }

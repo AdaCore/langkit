@@ -152,30 +152,30 @@ grammar foo_grammar {
     fun self_name(): Name = raise[Name] PropertyError("Property FooNode.self_name not implemented")
 }
 
-class DeclarativePart : FooNode {
+class DeclarativePart: FooNode {
     @parse_field decls: ASTList[FooNode, FooNode]
 }
 
-class PrivatePart : DeclarativePart {
+class PrivatePart: DeclarativePart {
 }
 
-class PublicPart : DeclarativePart {
+class PublicPart: DeclarativePart {
 }
 
 ## Top-level list of declaration in a subprogam body.
-class SubpBodyDecls : DeclarativePart {
+class SubpBodyDecls: DeclarativePart {
 }
 
-class DeclareBlock : FooNode {
+class DeclareBlock: FooNode {
     @parse_field decls: DeclarativePart
     @parse_field stmts: ASTList[FooNode, FooNode]
 }
 
-class IncompleteTypeDecl : FooNode {
+class IncompleteTypeDecl: FooNode {
     @parse_field name: Identifier
 }
 
-@abstract class Name : FooNode {
+@abstract class Name: FooNode {
 
     ## Innermost suffix for this name.
     fun base_name(): String = match node {
@@ -215,15 +215,15 @@ class IncompleteTypeDecl : FooNode {
     node.parent_scope(from_env).get_first(node.base_name().to_symbol)
 }
 
-class DottedName : Name {
+class DottedName: Name {
     @parse_field prefix: Name
     @parse_field suffix: Identifier
 }
 
-class Identifier : Name implements TokenNode {
+class Identifier: Name implements TokenNode {
 }
 
-class PackageBody : FooNode {
+class PackageBody: FooNode {
     @parse_field name: Name
     @parse_field decls: DeclarativePart
 
@@ -250,7 +250,7 @@ class PackageBody : FooNode {
     }
 }
 
-class PackageDecl : FooNode {
+class PackageDecl: FooNode {
     @parse_field name: Name
     @parse_field public_part: PublicPart
     @parse_field @nullable private_part: PrivatePart
@@ -274,13 +274,13 @@ class PackageDecl : FooNode {
     node.private_part.do((pp) => pp, default_val=node).children_env().get_first(s"__nextpart").as[PackageBody]
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
 
     @export fun resolve(): Entity[FooNode] = node.name.resolve(node.node_env())
 }
 
-class SubpBody : FooNode {
+class SubpBody: FooNode {
     @parse_field name: Name
     @parse_field decls: SubpBodyDecls
     @parse_field stmts: ASTList[FooNode, FooNode]
@@ -288,12 +288,12 @@ class SubpBody : FooNode {
     fun self_name(): Name = node.name
 }
 
-class SubpDecl : FooNode {
+class SubpDecl: FooNode {
     @parse_field name: Name
 
     fun self_name(): Name = node.name
 }
 
-class TypeDecl : FooNode {
+class TypeDecl: FooNode {
     @parse_field name: Identifier
 }

@@ -20,18 +20,18 @@ dynvar env: LexicalEnv[FooNode]
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Block : FooNode {
+class Block: FooNode {
     @parse_field name: Name
     @parse_field decls: ASTList[FooNode, Decl]
     @parse_field usings: ASTList[FooNode, Using]
     @parse_field refs: ASTList[FooNode, Ref]
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field name: Name
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 
     @with_dynvars(env) fun ambiant_entity(): Entity[FooNode] = env.get(node)?(0)
 
@@ -45,12 +45,12 @@ class Name : FooNode implements TokenNode {
     }
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
 
     @export fun entity(): Entity[FooNode] = node.as_entity.name.entity()
 }
 
-class Using : FooNode {
+class Using: FooNode {
     @parse_field name: Name
 }

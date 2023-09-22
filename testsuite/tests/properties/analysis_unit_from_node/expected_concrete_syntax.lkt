@@ -11,13 +11,13 @@ grammar foo_grammar {
     @export fun root_node(): Entity[FooNode] = node.unit().root.as_bare_entity
 }
 
-@abstract class Expression : FooNode {
+@abstract class Expression: FooNode {
 }
 
-class Literal : Expression implements TokenNode {
+class Literal: Expression implements TokenNode {
 }
 
-class Plus : Expression {
+class Plus: Expression {
     @parse_field left: Literal
     @parse_field right: Expression
 }

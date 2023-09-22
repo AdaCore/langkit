@@ -10,7 +10,7 @@ grammar foo_grammar {
     @export fun prop(): Int = raise[Int] PropertyError("Property FooNode.prop not implemented")
 }
 
-class Literal : FooNode implements TokenNode {
+class Literal: FooNode implements TokenNode {
     var: LogicVar
 
     fun node(): Entity[Literal] = node.as_entity

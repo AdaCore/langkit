@@ -14,29 +14,29 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Expr : FooNode {
+@abstract class Expr: FooNode {
 }
 
-class Addition : Expr {
+class Addition: Expr {
     @parse_field lhs: Expr
     @parse_field rhs: Expr
 }
 
-class Number : Expr implements TokenNode {
+class Number: Expr implements TokenNode {
 }
 
-class Ref : Expr {
+class Ref: Expr {
     @parse_field null_qual: Null
     @parse_field name: Name
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-@qualifier enum class Null : FooNode {
+@qualifier enum class Null: FooNode {
 }
 
-class VarDecl : FooNode {
+class VarDecl: FooNode {
     @parse_field name: Name
     @parse_field value: Expr
 }

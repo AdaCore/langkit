@@ -12,7 +12,7 @@ enum Color {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode {
+class Example: FooNode {
 
     @export fun prop1(arg: Bool = true): Bool = arg
 

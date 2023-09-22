@@ -17,5 +17,5 @@ grammar foo_grammar {
     node.get_as_array().to_iterator()
 }
 
-class Example : FooNode {
+class Example: FooNode {
 }

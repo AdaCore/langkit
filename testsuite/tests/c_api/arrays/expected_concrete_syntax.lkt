@@ -11,5 +11,5 @@ grammar foo_grammar {
     ints.map((i) => i + 1)
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

@@ -34,6 +34,9 @@ Token kinds:
   Plus
   Minus
   Less_Than
+  Less_Than_Or_Equal
+  Greater_Than
+  Greater_Than_Or_Equal
   Number
   Identifier
   String

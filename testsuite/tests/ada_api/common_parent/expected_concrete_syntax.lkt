@@ -10,10 +10,10 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Cons : FooNode {
+class Cons: FooNode {
     @parse_field left: FooNode
     @parse_field right: FooNode
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

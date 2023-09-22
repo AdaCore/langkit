@@ -16,11 +16,11 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field name: Id
 }
 
-class Id : FooNode implements TokenNode {
+class Id: FooNode implements TokenNode {
 
     @external fun referenced_scope_or_error(or_error: Bool): Scope
 
@@ -33,13 +33,13 @@ class Id : FooNode implements TokenNode {
     @export fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
 }
 
-class Dep : Id implements TokenNode {
+class Dep: Id implements TokenNode {
 }
 
-class Ref : Id implements TokenNode {
+class Ref: Id implements TokenNode {
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: Id
     @parse_field deps: ASTList[FooNode, Dep]
     @parse_field defs: ASTList[FooNode, Def]

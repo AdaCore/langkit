@@ -12,10 +12,10 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Literal : FooNode implements TokenNode {
+class Literal: FooNode implements TokenNode {
 }
 
-class LiteralSequence : FooNode {
+class LiteralSequence: FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Literal]
 
@@ -36,15 +36,15 @@ class LiteralSequence : FooNode {
     if with_null then node.new_node2_null() else node.new_node2().as_bare_entity
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class SynthNode : FooNode {
+class SynthNode: FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Literal]
 }
 
-class SynthNode2 : FooNode {
+class SynthNode2: FooNode {
     @parse_field name: Name
     @parse_field @nullable items: ASTList[FooNode, Literal]
 }

@@ -11,7 +11,7 @@ grammar foo_grammar {
     IndexedNumber(index=index, number=number)
 }
 
-class ListNode : FooNode {
+class ListNode: FooNode {
     @parse_field nb_list: ASTList[FooNode, NumberNode]
 
     fun nb_list_entities(): Array[Entity[NumberNode]] =
@@ -50,7 +50,7 @@ class ListNode : FooNode {
     )
 }
 
-class NumberNode : FooNode implements TokenNode {
+class NumberNode: FooNode implements TokenNode {
 }
 
 struct IndexedNumber {

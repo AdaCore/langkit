@@ -18,7 +18,7 @@ grammar foo_grammar {
     node.as_entity.as[Couple].first_entity().first
 }
 
-class Couple : FooNode {
+class Couple: FooNode {
     @parse_field first: FooNode
     @parse_field second: FooNode
 
@@ -36,7 +36,7 @@ class Couple : FooNode {
     node.as_entity.get_entity(node.as_entity.info.md)
 }
 
-class Literal : FooNode implements TokenNode {
+class Literal: FooNode implements TokenNode {
 }
 
 @metadata struct Metadata {

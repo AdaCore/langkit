@@ -329,400 +329,400 @@ grammar foo_grammar {
 @abstract class PythonNode implements Node[PythonNode] {
 }
 
-@abstract class Arg : PythonNode {
+@abstract class Arg: PythonNode {
 }
 
-class ArgAssoc : Arg {
+class ArgAssoc: Arg {
     @parse_field @nullable name: Expr
     @parse_field expr: Expr
 }
 
-class ArgGen : Arg {
+class ArgGen: Arg {
     @parse_field expr: Expr
     @parse_field comprehension: CompFor
 }
 
-class KwArgs : Arg {
+class KwArgs: Arg {
     @parse_field expr: Expr
 }
 
-class VarArgs : Arg {
+class VarArgs: Arg {
     @parse_field expr: Expr
 }
 
-class AsNameNode : PythonNode {
+class AsNameNode: PythonNode {
     @parse_field imported: Expr
     @parse_field @nullable as_name: Expr
 }
 
-class CompIf : PythonNode {
+class CompIf: PythonNode {
     @parse_field test: Expr
     @parse_field @nullable comp: PythonNode
 }
 
-enum class CompOpKind : PythonNode {
+enum class CompOpKind: PythonNode {
     case Lt,
     Gt,
     Eq, Gte, Lte, Diamond, Noteq, In, Notin, Is, Isnot
 }
 
-@abstract class Comprehension : PythonNode {
+@abstract class Comprehension: PythonNode {
 }
 
-class CompFor : Comprehension {
+class CompFor: Comprehension {
     @parse_field exprs: ASTList[PythonNode, Expr]
     @parse_field target: Expr
     @parse_field @nullable comp: PythonNode
 }
 
-class CompForL : Comprehension {
+class CompForL: Comprehension {
     @parse_field exprs: ASTList[PythonNode, Expr]
     @parse_field target: ASTList[PythonNode, Expr]
     @parse_field @nullable comp: PythonNode
 }
 
-class Decorator : PythonNode {
+class Decorator: PythonNode {
     @parse_field dec_name: Name
     @parse_field arg_list: ASTList[PythonNode, Arg]
 }
 
-class DictAssoc : PythonNode {
+class DictAssoc: PythonNode {
     @parse_field key: Expr
     @parse_field value: Expr
 }
 
-class ElsePart : PythonNode {
+class ElsePart: PythonNode {
     @parse_field statements: PythonNode
 }
 
-class ExceptPart : PythonNode {
+class ExceptPart: PythonNode {
     @parse_field @nullable as_name: AsNameNode
     @parse_field statements: PythonNode
 }
 
-@abstract class Expr : PythonNode {
+@abstract class Expr: PythonNode {
 }
 
-class AndExpr : Expr {
+class AndExpr: Expr {
     @parse_field left: Expr
     @parse_field right: Expr
 }
 
-class AndOp : Expr {
+class AndOp: Expr {
     @parse_field left: Expr
     @parse_field right: Expr
 }
 
-@abstract class BinOp : Expr {
+@abstract class BinOp: Expr {
     @parse_field left: Expr
     @parse_field op: Op
     @parse_field right: Expr
 }
 
-class ArithExpr : BinOp {
+class ArithExpr: BinOp {
 }
 
-class ShiftExpr : BinOp {
+class ShiftExpr: BinOp {
 }
 
-class Term : BinOp {
+class Term: BinOp {
 }
 
-class CallExpr : Expr {
+class CallExpr: Expr {
     @parse_field prefix: Expr
     @parse_field suffix: ASTList[PythonNode, Arg]
 }
 
-class CompOp : Expr {
+class CompOp: Expr {
     @parse_field left: Expr
     @parse_field op: CompOpKind
     @parse_field right: Expr
 }
 
-class ConcatStringLit : Expr {
+class ConcatStringLit: Expr {
     @parse_field first_str: StringLit
     @parse_field subsequent_str: ASTList[PythonNode, StringLit]
 }
 
-class DictComp : Expr {
+class DictComp: Expr {
     @parse_field assoc: DictAssoc
     @parse_field comprehension: CompFor
 }
 
-class DictLit : Expr {
+class DictLit: Expr {
     @parse_field assocs: ASTList[PythonNode, DictAssoc]
 }
 
-class Dot : Expr {
+class Dot: Expr {
 }
 
-class EllipsisExpr : Expr {
+class EllipsisExpr: Expr {
 }
 
-class Factor : Expr {
+class Factor: Expr {
     @parse_field op: Op
     @parse_field expr: Expr
 }
 
-class IfExpr : Expr {
+class IfExpr: Expr {
     @parse_field expr: Expr
     @parse_field cond: Expr
     @parse_field else_expr: Expr
 }
 
-class InlineEval : Expr {
+class InlineEval: Expr {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-class LambdaDef : Expr {
+class LambdaDef: Expr {
     @parse_field args: Params
     @parse_field expr: Expr
 }
 
-class ListComp : Expr {
+class ListComp: Expr {
     @parse_field expr: Expr
     @parse_field comprehension: CompForL
 }
 
-class ListGen : Expr {
+class ListGen: Expr {
     @parse_field expr: Expr
     @parse_field comprehension: CompForL
 }
 
-class ListLit : Expr {
+class ListLit: Expr {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-@abstract class Name : Expr {
+@abstract class Name: Expr {
 }
 
-class DottedName : Name {
+class DottedName: Name {
     @parse_field prefix: Expr
     @parse_field suffix: Id
 }
 
-class Id : Name implements TokenNode {
+class Id: Name implements TokenNode {
 
     ## Shortcut to get the symbol of this node
     fun sym(): Symbol = node.symbol
 }
 
-class NotOp : Expr {
+class NotOp: Expr {
     @parse_field expr: Expr
 }
 
-class NumberLit : Expr implements TokenNode {
+class NumberLit: Expr implements TokenNode {
 }
 
-class OrExpr : Expr {
+class OrExpr: Expr {
     @parse_field left: Expr
     @parse_field right: Expr
 }
 
-class OrOp : Expr {
+class OrOp: Expr {
     @parse_field left: Expr
     @parse_field right: Expr
 }
 
-class Power : Expr {
+class Power: Expr {
     @parse_field left: Expr
     @parse_field right: Expr
 }
 
-class SetComp : Expr {
+class SetComp: Expr {
     @parse_field expr: Expr
     @parse_field comprehension: CompFor
 }
 
-class SetLit : Expr {
+class SetLit: Expr {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-class SliceExpr : Expr {
+class SliceExpr: Expr {
     @parse_field @nullable first: Expr
     @parse_field @nullable last: Expr
 }
 
-class ExtSliceExpr : SliceExpr {
+class ExtSliceExpr: SliceExpr {
     @parse_field @nullable stride: Expr
 }
 
-class StringLit : Expr implements TokenNode {
+class StringLit: Expr implements TokenNode {
 }
 
-class SubscriptExpr : Expr {
+class SubscriptExpr: Expr {
     @parse_field prefix: Expr
     @parse_field suffix: ASTList[PythonNode, Expr]
 }
 
-class TupleLit : Expr {
+class TupleLit: Expr {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-class XorExpr : Expr {
+class XorExpr: Expr {
     @parse_field left: Expr
     @parse_field right: Expr
 }
 
-class YieldExpr : Expr {
+class YieldExpr: Expr {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-class FileNode : PythonNode {
+class FileNode: PythonNode {
     @parse_field statements: ASTList[PythonNode, PythonNode]
 }
 
-class ImportStar : PythonNode {
+class ImportStar: PythonNode {
 }
 
-@qualifier enum class KwArgsFlag : PythonNode {
+@qualifier enum class KwArgsFlag: PythonNode {
 }
 
-class NL : PythonNode {
+class NL: PythonNode {
 }
 
-class Op : PythonNode implements TokenNode {
+class Op: PythonNode implements TokenNode {
 }
 
-class Params : PythonNode {
+class Params: PythonNode {
     @parse_field single_params: ASTList[PythonNode, SingleParam]
 }
 
-class RelName : PythonNode {
+class RelName: PythonNode {
     @parse_field dots: ASTList[PythonNode, Dot]
     @parse_field @nullable name: Name
 }
 
-class SingleParam : PythonNode {
+class SingleParam: PythonNode {
     @parse_field is_varargs: VarArgsFlag
     @parse_field is_kwargs: KwArgsFlag
     @parse_field name: PythonNode
     @parse_field @nullable default_value: Expr
 }
 
-@abstract class Stmt : PythonNode {
+@abstract class Stmt: PythonNode {
 }
 
-class AssertStmt : Stmt {
+class AssertStmt: Stmt {
     @parse_field test_expr: Expr
     @parse_field @nullable msg: Expr
 }
 
-class AssignStmt : Stmt {
+class AssignStmt: Stmt {
     @parse_field l_value: ASTList[PythonNode, Expr]
     @parse_field r_values: ASTList[PythonNode, PythonNode]
 }
 
-class AugAssignStmt : Stmt {
+class AugAssignStmt: Stmt {
     @parse_field l_value: ASTList[PythonNode, Expr]
     @parse_field op: Op
     @parse_field r_value: PythonNode
 }
 
-class BreakStmt : Stmt {
+class BreakStmt: Stmt {
 }
 
-class ContinueStmt : Stmt {
+class ContinueStmt: Stmt {
 }
 
-class Decorated : Stmt {
+class Decorated: Stmt {
     @parse_field decorators: ASTList[PythonNode, Decorator]
     @parse_field defn: DefStmt
 }
 
-@abstract class DefStmt : Stmt {
+@abstract class DefStmt: Stmt {
 }
 
-class ClassDef : DefStmt {
+class ClassDef: DefStmt {
     @parse_field name: Id
     @parse_field bases: ASTList[PythonNode, Expr]
     @parse_field statements: PythonNode
 }
 
-class FuncDef : DefStmt {
+class FuncDef: DefStmt {
     @parse_field name: Id
     @parse_field @nullable parameters: Params
     @parse_field body: PythonNode
 }
 
-class DelStmt : Stmt {
+class DelStmt: Stmt {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-class ElifBranch : Stmt {
+class ElifBranch: Stmt {
     @parse_field cond_test: Expr
     @parse_field statements: PythonNode
 }
 
-class ExecStmt : Stmt {
+class ExecStmt: Stmt {
     @parse_field expr: Expr
     @parse_field in_list: ASTList[PythonNode, Expr]
 }
 
-class ForStmt : Stmt {
+class ForStmt: Stmt {
     @parse_field bindings: ASTList[PythonNode, Expr]
     @parse_field expr: ASTList[PythonNode, Expr]
     @parse_field statements: PythonNode
     @parse_field @nullable else_part: ElsePart
 }
 
-class GlobalStmt : Stmt {
+class GlobalStmt: Stmt {
     @parse_field names: ASTList[PythonNode, Id]
 }
 
-class IfStmt : Stmt {
+class IfStmt: Stmt {
     @parse_field cond_test: Expr
     @parse_field statements: PythonNode
     @parse_field elif_branchs: ASTList[PythonNode, ElifBranch]
     @parse_field @nullable else_part: ElsePart
 }
 
-class ImportFrom : Stmt {
+class ImportFrom: Stmt {
     @parse_field rel_name: PythonNode
     @parse_field imported: PythonNode
 }
 
-class ImportName : Stmt {
+class ImportName: Stmt {
     @parse_field imported_names: ASTList[PythonNode, PythonNode]
 }
 
-class PassStmt : Stmt {
+class PassStmt: Stmt {
 }
 
-class PrintStmt : Stmt {
+class PrintStmt: Stmt {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-class RaiseStmt : Stmt {
+class RaiseStmt: Stmt {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-class ReturnStmt : Stmt {
+class ReturnStmt: Stmt {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-class StreamPrintStmt : Stmt {
+class StreamPrintStmt: Stmt {
     @parse_field stream_expr: Expr
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-class TryStmt : Stmt {
+class TryStmt: Stmt {
     @parse_field statements: PythonNode
     @parse_field except_parts: ASTList[PythonNode, ExceptPart]
     @parse_field @nullable else_part: ElsePart
     @parse_field @nullable finally_part: PythonNode
 }
 
-class WhileStmt : Stmt {
+class WhileStmt: Stmt {
     @parse_field cond_test: Expr
     @parse_field statements: PythonNode
     @parse_field @nullable else_part: ElsePart
 }
 
-class WithStmt : Stmt {
+class WithStmt: Stmt {
     @parse_field bindings: ASTList[PythonNode, AsNameNode]
     @parse_field statements: PythonNode
 }
 
-@qualifier enum class VarArgsFlag : PythonNode {
+@qualifier enum class VarArgsFlag: PythonNode {
 }

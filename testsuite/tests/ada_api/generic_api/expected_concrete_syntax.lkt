@@ -18,14 +18,14 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class BaseExample : FooNode {
+@abstract class BaseExample: FooNode {
     @abstract @parse_field fld_1: Name
     @abstract @parse_field @nullable fld_2: FooNode
 
     @export @abstract fun id_bool(id: Bool): Bool
 }
 
-class Example : BaseExample {
+class Example: BaseExample {
     @parse_field @null_field fld_2: FooNode
     @parse_field fld_1: Name
 
@@ -88,28 +88,28 @@ class Example : BaseExample {
     )
 }
 
-@abstract class Expr : FooNode {
+@abstract class Expr: FooNode {
 }
 
-class Addition : Expr {
+class Addition: Expr {
     @parse_field lhs: Expr
     @parse_field rhs: Expr
 }
 
-class Number : Expr implements TokenNode {
+class Number: Expr implements TokenNode {
 }
 
-class Ref : Expr {
+class Ref: Expr {
     @parse_field name: Name
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-@qualifier enum class NullQual : FooNode {
+@qualifier enum class NullQual: FooNode {
 }
 
-class VarDecl : FooNode {
+class VarDecl: FooNode {
     @parse_field is_null: NullQual
     @parse_field name: Name
     @parse_field value: Expr
