@@ -29,6 +29,9 @@ lexer foo_lexer {
 
     minus <- "-"
     less_than <- "<"
+    less_than_or_equal <- "<="
+    greater_than <- ">"
+    greater_than_or_equal <- ">="
 
     @unparse_spacing(with=alphanumericals)
     family alphanumericals {

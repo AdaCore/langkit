@@ -1,0 +1,23 @@
+def simple = 2
+def big = 10000000000000000000000000000000
+def big_plus = 10000000000000000000000000000000 + 1
+def big_plus_minus = (10000000000000000000000000000000 + 1) - 1
+
+def eq_true = (2 + 2) = (1 + 3)
+def eq_false = (2 + 2) = (2 + 3)
+
+def lt_false_1 = (2 + 2) < (2 + 1)
+def lt_false_0 = (2 + 2) < (2 + 2)
+def lt_true = (2 + 2) < (2 + 3)
+
+def lte_false = (2 + 2) <= (2 + 1)
+def lte_true_0 = (2 + 2) <= (2 + 2)
+def lte_true_1 = (2 + 2) <= (2 + 3)
+
+def gt_true = (2 + 2) > (2 + 1)
+def gt_false_0 = (2 + 2) > (2 + 2)
+def gt_false_1 = (2 + 2) > (2 + 3)
+
+def gte_true_1 = (2 + 2) >= (2 + 1)
+def gte_true_0 = (2 + 2) >= (2 + 2)
+def gte_false = (2 + 2) >= (2 + 3)
