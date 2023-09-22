@@ -11,7 +11,7 @@ grammar foo_grammar {
     values.find((i) => i > threshold)
 
     @export fun find_entity(l: Entity[ASTList[FooNode, Example]]): Entity[Example] =
-    l.find((n) => n.text() = "example")
+    l.find((n) => n.text() == "example")
 }
 
 class Example : FooNode implements TokenNode {

@@ -933,7 +933,7 @@ def emit_expr(expr, **ctx):
         return res
 
     elif isinstance(expr, Eq):
-        return "{} = {}".format(ee(expr.lhs), ee(expr.rhs))
+        return "{} == {}".format(ee(expr.lhs), ee(expr.rhs))
 
     elif isinstance(expr, BinaryBooleanOperator):
         with walker.boolean_binop(expr.kind):
@@ -952,6 +952,8 @@ def emit_expr(expr, **ctx):
             return emit_bool_op_rec(expr, walker.arg_count())
 
     elif isinstance(expr, Not):
+        if isinstance(expr.expr, Eq):
+            return "{} != {}".format(ee(expr.expr.lhs), ee(expr.expr.rhs))
         return "not {}".format(emit_paren_expr(expr.expr, **ctx))
 
     elif isinstance(expr, Then):

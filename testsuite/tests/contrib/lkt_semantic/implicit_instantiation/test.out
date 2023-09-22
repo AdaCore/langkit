@@ -132,13 +132,13 @@ Id   <RefId "i" test.lkt:32:16-32:17>
 Expr <RefId "i" test.lkt:32:16-32:17>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:32:20-32:21>
+Expr <NumLit test.lkt:32:21-32:22>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:32:16-32:21>
+Expr <BinOp test.lkt:32:16-32:22>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <LambdaExpr test.lkt:32:9-32:21>
+Expr <LambdaExpr test.lkt:32:9-32:22>
      has type <FunctionType prelude: "(Int) -> Bool">
 
 Expr <CallExpr test.lkt:30:5-33:6>

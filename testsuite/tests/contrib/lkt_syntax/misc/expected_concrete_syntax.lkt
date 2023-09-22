@@ -26,12 +26,12 @@ class Example : FooNode {
 
     ## Test various valid dotexpr's LHS.
     @export fun test_dotexpr_lhs(): Int = {
-        val a = [1].find((v) => v = 1);
+        val a = [1].find((v) => v == 1);
         val b = {
             val b = [1, 2];
 
             b
-        }.find((v) => v = 1);
+        }.find((v) => v == 1);
         val c = ("hello") & (" world");
 
         a

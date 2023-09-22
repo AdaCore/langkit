@@ -1,5 +1,5 @@
 import common
 
 class Example: FooNode {
-    @export fun prop(): Bool = self.parent.as[Lit] = self
+    @export fun prop(): Bool = self.parent.as[Lit] == self
 }

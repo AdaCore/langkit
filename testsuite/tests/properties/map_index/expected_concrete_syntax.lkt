@@ -24,29 +24,29 @@ class ListNode : FooNode {
     node.nb_list_entities().map((n, i) => node.create(i, n))
 
     @export fun filter_no_idx(): Array[Entity[NumberNode]] =
-    node.nb_list_entities().filter((n) => n.text() = "2")
+    node.nb_list_entities().filter((n) => n.text() == "2")
 
     @export fun filter_idx(): Array[Entity[NumberNode]] =
-    node.nb_list_entities().filter((n, i) => (n.text() = "2") or (i = 0))
+    node.nb_list_entities().filter((n, i) => (n.text() == "2") or (i == 0))
 
     @export fun filtermap_no_idx(): Array[IndexedNumber] =
     node.nb_list_entities().filtermap(
-        (n) => node.create(0, n), (n) => n.text() = "2"
+        (n) => node.create(0, n), (n) => n.text() == "2"
     )
 
     @export fun filtermap_elt_idx(): Array[IndexedNumber] =
     node.nb_list_entities().filtermap(
-        (n, i) => node.create(i, n), (n, i) => n.text() = "2"
+        (n, i) => node.create(i, n), (n, i) => n.text() == "2"
     )
 
     @export fun filtermap_filter_idx(): Array[IndexedNumber] =
     node.nb_list_entities().filtermap(
-        (n, i) => node.create(0, n), (n, i) => (n.text() = "2") or (i = 0)
+        (n, i) => node.create(0, n), (n, i) => (n.text() == "2") or (i == 0)
     )
 
     @export fun filtermap_all_idx(): Array[IndexedNumber] =
     node.nb_list_entities().filtermap(
-        (n, i) => node.create(i, n), (n, i) => (n.text() = "2") or (i = 0)
+        (n, i) => node.create(i, n), (n, i) => (n.text() == "2") or (i == 0)
     )
 }
 

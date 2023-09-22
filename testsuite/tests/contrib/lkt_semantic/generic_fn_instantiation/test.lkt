@@ -68,7 +68,7 @@ struct Dummy {}
 @invalid fun test_invalid_singleton_3(): Dummy[Int, String] = singleton("lol")
 
 # Test rel operator
-fun test_rel(a: Int): Bool = (a = 15) or (a = 18)
+fun test_rel(a: Int): Bool = (a == 15) or (a == 18)
 
 # Test that labda params don't leak in their outside env
 @external fun test_lambda_leak_support(a: (Int) -> Int, b: (Int) -> Int): Int

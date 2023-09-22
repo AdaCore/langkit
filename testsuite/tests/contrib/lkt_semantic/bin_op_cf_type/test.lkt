@@ -1,7 +1,7 @@
 # Test binop context free type
 val a: Int = 1
 val b: Int = 2
-val c: Bool = ((a) = b) = (a = b)
+val c: Bool = ((a) == b) == (a == b)
 
 val x: Array[Int] = [1, 2]
 val y: Array[String] = ["3", "4"]

@@ -30,12 +30,12 @@ class ExampleNode : TestNode {
 
     @export fun test_cond(x: Int): Int = # incredible function
     # case 0
-    if (x = 0) then (
+    if (x == 0) then (
         # identity
         x
     )
     # case 1
-    elif (x = 1) then (
+    elif (x == 1) then (
         # increment
         x + 1
     )
@@ -107,10 +107,10 @@ class ExampleNode : TestNode {
         x or (
             (
                 # True
-                x = true
+                x == true
             ) or (
                 # False
-                x = false
+                x == false
             )
         )
     )

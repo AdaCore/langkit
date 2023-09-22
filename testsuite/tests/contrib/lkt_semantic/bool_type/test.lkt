@@ -1,2 +1,2 @@
  # Test that LKNode.bool_type resolves correctly
-fun test_if_2(a: Int, b: Int): Int = if a = b then a else b
+fun test_if_2(a: Int, b: Int): Int = if a == b then a else b

@@ -18,8 +18,8 @@ bad_literal_1.lkt:4:30: error: static expression expected in this context
 
 == bad_literal_2.lkt ==
 bad_literal_2.lkt:4:36: error: static expression expected in this context
-4 |     @export fun p(a: Bool, b: Bool=true = false): Bool = a and b
-  |                                    ^^^^^^^^^^^^
+4 |     @export fun p(a: Bool, b: Bool=true == false): Bool = a and b
+  |                                    ^^^^^^^^^^^^^
 
 
 == bad_type.lkt ==

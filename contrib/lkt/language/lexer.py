@@ -32,6 +32,8 @@ class Token(LexerToken):
     LBrack = WithText()
     RBrack = WithText()
     Equal = WithText()
+    EQ = WithText()
+    NE = WithText()
     GTE = WithText()
     LTE = WithText()
     GT = WithText()
@@ -124,6 +126,8 @@ lkt_lexer.add_rules(
     (Literal('@'),         Token.At),
     (Literal('=>'),        Token.FatRightArrow),
     (Literal('='),         Token.Equal),
+    (Literal('=='),        Token.EQ),
+    (Literal('!='),        Token.NE),
     (Literal('<='),        Token.LTE),
     (Literal('>='),        Token.GTE),
     (Literal('<'),         Token.LT),

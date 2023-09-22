@@ -13,7 +13,7 @@ class Example : FooNode {
     @external fun fetch_example_unit(): AnalysisUnit[FooNode]
 
     @memoized fun internal_mmz_prop(i: Int): Int =
-    if (i = 0) then (raise[Int] PropertyError()) else i
+    if (i == 0) then (raise[Int] PropertyError()) else i
 
     @export @memoized fun mmz_prop(i: Int): Int = {
         # Update context version by parsing a new unit

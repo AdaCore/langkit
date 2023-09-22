@@ -17,7 +17,7 @@ class Decl : FooNode {
 
 class Identifier : FooNode implements TokenNode {
 
-    @export fun matches(s: Symbol): Bool = s = node.symbol
+    @export fun matches(s: Symbol): Bool = s == node.symbol
 }
 
 class Number : FooNode implements TokenNode {

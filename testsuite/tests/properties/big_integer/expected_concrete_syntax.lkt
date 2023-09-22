@@ -42,7 +42,7 @@ class Equal : Expr {
     @parse_field right: Expr
 
     fun evaluate(): BigInt = if (
-        node.left.evaluate() = node.right.evaluate()
+        node.left.evaluate() == node.right.evaluate()
     ) then 1b else 0b
 }
 

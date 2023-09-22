@@ -2334,6 +2334,9 @@ class LktTypesLoader:
                 if isinstance(expr.f_op, L.OpEq):
                     return E.Eq(left, right)
 
+                elif isinstance(expr.f_op, L.OpNe):
+                    return E.Not(E.Eq(left, right))
+
                 elif isinstance(expr.f_op, (L.OpLt, L.OpGt, L.OpLte, L.OpGte)):
                     operator = {
                         L.OpLt: E.OrderingTest.LT,

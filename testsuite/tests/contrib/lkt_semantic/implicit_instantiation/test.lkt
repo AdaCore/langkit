@@ -29,7 +29,7 @@ fun test_map(ints: Array[Int]): Array[String] =
 fun test_filtermap(ints: Array[Int]): Array[String] =
     ints.filtermap(
         (i) => convert_int[String](i),
-        (i) => i = 0
+        (i) => i == 0
     )
 
 # Check that errors are handled correctly even for a call with a dotexpr prefix

@@ -307,31 +307,31 @@ Id   <RefId "a" test.lkt:71:31-71:32>
 Expr <RefId "a" test.lkt:71:31-71:32>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:71:35-71:37>
+Expr <NumLit test.lkt:71:36-71:38>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:71:31-71:37>
+Expr <BinOp test.lkt:71:31-71:38>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <ParenExpr test.lkt:71:30-71:38>
+Expr <ParenExpr test.lkt:71:30-71:39>
      has type <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "a" test.lkt:71:43-71:44>
+Id   <RefId "a" test.lkt:71:44-71:45>
      references <FunArgDecl "a" test.lkt:71:14-71:20>
 
-Expr <RefId "a" test.lkt:71:43-71:44>
+Expr <RefId "a" test.lkt:71:44-71:45>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:71:47-71:49>
+Expr <NumLit test.lkt:71:49-71:51>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:71:43-71:49>
+Expr <BinOp test.lkt:71:44-71:51>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <ParenExpr test.lkt:71:42-71:50>
+Expr <ParenExpr test.lkt:71:43-71:52>
      has type <EnumTypeDecl prelude: "Bool">
 
-Expr <BinOp test.lkt:71:30-71:50>
+Expr <BinOp test.lkt:71:30-71:52>
      has type <EnumTypeDecl prelude: "Bool">
 
 Id   <RefId "Int" test.lkt:74:44-74:47>

@@ -34,8 +34,8 @@ too_many_arguments.lkt:4:5: error: FooNode.can_reach must take one argument: a b
 
 == use_entity_info.lkt ==
 use_entity_info.lkt:4:5: error: FooNode.can_reach cannot use entities
-4 |     fun can_reach(n: FooNode): Bool = n.as_bare_entity = self
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4 |     fun can_reach(n: FooNode): Bool = n.as_bare_entity == self
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done
