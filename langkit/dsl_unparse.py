@@ -1141,7 +1141,7 @@ def emit_expr(expr, **ctx):
             args.append(ee(arg))
         for kw, arg in expr.arguments.kwargs.items():
             args.append("{}={}".format(kw, ee(arg)))
-        return "super({})".format(", ".join(args))
+        return "{}.super({})".format(ee(expr.prefix), ", ".join(args))
 
     elif isinstance(expr, Concat):
         result = ""

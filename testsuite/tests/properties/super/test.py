@@ -4,7 +4,7 @@ Check that the ".super()" DSL construct works as expected.
 
 from langkit.compiled_types import T
 from langkit.dsl import ASTNode, abstract
-from langkit.expressions import Entity, Self, String, langkit_property
+from langkit.expressions import Entity, No, Self, String, langkit_property
 
 from utils import build_and_run
 
@@ -20,7 +20,7 @@ class FooNode(ASTNode):
 
     @langkit_property(public=True)
     def root3():
-        return Entity.info.rebindings.then(lambda _: True)
+        return Entity.info.rebindings != No(T.EnvRebindings)
 
 
 @abstract
@@ -49,5 +49,9 @@ class Name(Expr):
         return Entity.super()
 
 
-build_and_run(lkt_file="expected_concrete_syntax.lkt", py_script="main.py")
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    py_script="main.py",
+    types_from_lkt=True,
+)
 print("Done")
