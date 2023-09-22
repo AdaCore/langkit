@@ -1,0 +1,18 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(or(OpKind.Foo("+") | OpKind.Bar("-")))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+enum class OpKind : FooNode {
+    case Foo, Bar
+
+    @export fun to_int(): Int = match node {
+        case _: OpKind.Foo => 10
+        case _: OpKind.Bar => 20
+    }
+}

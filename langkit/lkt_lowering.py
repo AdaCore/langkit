@@ -1896,6 +1896,36 @@ class LktTypesLoader:
                     return entity.defer
                 else:
                     error(f"type expected, got {entity.diagnostic_name}")
+
+            elif isinstance(name, L.DotExpr):
+                # This must be a reference to an enum node:
+                # "EnumNode.Alternative".
+                dot_expr = name
+                prefix = self.resolve_type_expr(dot_expr.f_prefix, scope)
+                suffix = dot_expr.f_suffix
+
+                def getter() -> ASTNodeType:
+                    enum_node = resolve_type(prefix)
+
+                    if (
+                        # Make sure that enum_node is an enum node...
+                        not isinstance(enum_node, ASTNodeType)
+                        or not enum_node.is_enum_node
+
+                        # ... and not an enum node alternative
+                        or enum_node.base is None
+                        or enum_node.base.is_enum_node
+                    ):
+                        with self.ctx.lkt_context(dot_expr.f_prefix):
+                            error("base enum node expected")
+
+                    try:
+                        return enum_node._alternatives_map[suffix.text]
+                    except KeyError:
+                        with self.ctx.lkt_context(suffix):
+                            error("no such alternative")
+
+                return TypeRepo.Defer(getter, f"{prefix.label}.{suffix}")
             else:
                 error("invalid type reference")
 
