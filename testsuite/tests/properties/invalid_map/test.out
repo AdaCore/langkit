@@ -8,15 +8,15 @@ arg_type.lkt:6:27: error: argument type must be implicit
 Code generation was successful
 
 == default_value.lkt ==
-default_value.lkt:6:27: error: no default value allowed
+default_value.lkt:6:27: error: default values are not allowed here
 6 |         self.nb_list.map((x=12) => x)
   |                           ^^^^
 
 
 == too_many_args.lkt ==
-too_many_args.lkt:6:26: error: one or two arguments expected for the lambda expression
+too_many_args.lkt:6:27: error: at most 2 arguments expected
 6 |         self.nb_list.map((x, y, z) => x)
-  |                          ^^^^^^^^^^^^^^
+  |                           ^^^^^^^
 
 
 lkt_compile: Done
