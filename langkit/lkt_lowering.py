@@ -2263,6 +2263,7 @@ class LktTypesLoader:
         counter = itertools.count(0)
 
         def var_for_lambda_arg(
+            scope: Scope,
             arg: L.LambdaArgDecl,
             prefix: str,
             type: Optional[CompiledType] = None,
@@ -2284,7 +2285,7 @@ class LktTypesLoader:
                     type=type,
                     create_local=create_local,
                 )
-            env.add(Scope.LocalVariable(source_name, arg, result))
+            scope.add(Scope.LocalVariable(source_name, arg, result))
             return result
 
         def extract_call_args(expr: L.CallExpr) -> Tuple[List[L.Expr],
@@ -2312,6 +2313,11 @@ class LktTypesLoader:
             """
             Keyword arguments passed after the lambda expression, with null
             values for absent keywords.
+            """
+
+            scope: Scope
+            """
+            New scope to lower lambda function arguments and inner expression.
             """
 
             largs: list[L.LambdaArgDecl | None]
@@ -2403,7 +2409,13 @@ class LktTypesLoader:
             for name in keyword_args:
                 kwargs_ret.setdefault(name, None)
 
-            return LambdaInfo(kwargs_ret, lambda_args, lambda_expr.f_body)
+            loc = Location.from_lkt_node(lambda_expr)
+            scope = env.create_child(
+                f"scope for lambda expression at {loc.gnu_style_repr()}"
+            )
+            return LambdaInfo(
+                kwargs_ret, scope, lambda_args, lambda_expr.f_body
+            )
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """
@@ -2648,9 +2660,14 @@ class LktTypesLoader:
                     assert arg_node is not None
 
                     arg_var = var_for_lambda_arg(
-                        arg_node, "var_expr", create_local=True,
+                        lambda_info.scope,
+                        arg_node,
+                        "var_expr",
+                        create_local=True,
                     )
-                    then_expr = lower(lambda_info.expr)
+                    then_expr = self.lower_expr(
+                        lambda_info.expr, lambda_info.scope, local_vars
+                    )
 
                     default_val = (
                         None
@@ -2670,8 +2687,12 @@ class LktTypesLoader:
                     elt_arg = lambda_info.largs[0]
                     assert elt_arg is not None
 
-                    elt_var = var_for_lambda_arg(elt_arg, 'item')
-                    inner_expr = lower(lambda_info.expr)
+                    elt_var = var_for_lambda_arg(
+                        lambda_info.scope, elt_arg, 'item'
+                    )
+                    inner_expr = self.lower_expr(
+                        lambda_info.expr, lambda_info.scope, local_vars
+                    )
 
                     return E.Find.create_expanded(
                         method_prefix, inner_expr, elt_var, index_var=None
@@ -2689,15 +2710,21 @@ class LktTypesLoader:
                     element_arg, index_arg = lambda_info.largs
                     assert element_arg is not None
 
-                    element_var = var_for_lambda_arg(element_arg, 'item')
+                    element_var = var_for_lambda_arg(
+                        lambda_info.scope, element_arg, 'item'
+                    )
                     index_var = (
                         None
                         if index_arg is None else
-                        var_for_lambda_arg(index_arg, 'index', T.Int)
+                        var_for_lambda_arg(
+                            lambda_info.scope, index_arg, 'index', T.Int
+                        )
                     )
 
                     # Finally lower the expressions
-                    inner_expr = lower(lambda_info.expr)
+                    inner_expr = self.lower_expr(
+                        lambda_info.expr, lambda_info.scope, local_vars
+                    )
                     result = E.Map.create_expanded(
                         method_prefix, inner_expr, element_var, index_var
                     )
