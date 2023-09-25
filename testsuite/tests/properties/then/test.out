@@ -1,0 +1,7 @@
+main.py: Running...
+p_node_then(None) = None
+p_node_then(e2) = root
+p_node_then_with_default(None) = e1
+p_node_then_with_default(e2) = root
+main.py: Done.
+Done

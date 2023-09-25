@@ -2265,7 +2265,8 @@ class LktTypesLoader:
         def var_for_lambda_arg(
             arg: L.LambdaArgDecl,
             prefix: str,
-            type: Optional[CompiledType] = None
+            type: Optional[CompiledType] = None,
+            create_local: bool = False,
         ) -> AbstractVariable:
             """
             Create an AbstractVariable to translate a lambda argument.
@@ -2281,6 +2282,7 @@ class LktTypesLoader:
                     names.Name.check_from_lower(f"{prefix}_{next(counter)}"),
                     source_name=source_name,
                     type=type,
+                    create_local=create_local,
                 )
             env.add(Scope.LocalVariable(source_name, arg, result))
             return result
@@ -2534,6 +2536,59 @@ class LktTypesLoader:
                         "'as_int' method takes no argument",
                     )
                     return method_prefix.as_int
+
+                elif method_name == "do":
+                    # Validate and lower the lambda expression
+                    n_args = len(call_expr.f_args)
+                    if n_args == 0:
+                        error(
+                            "at least one argument expected: a lambda function"
+                        )
+                    arg_0 = call_expr.f_args[0]
+                    check_source_language(
+                        arg_0.f_name is None,
+                        "the first argument must be positional",
+                    )
+                    lambda_expr = arg_0.f_value
+                    if not isinstance(lambda_expr, L.LambdaExpr):
+                        error("the first argument must be a lambda expression")
+
+                    lambda_args = lambda_expr.f_params
+                    with self.ctx.lkt_context(lambda_args):
+                        check_source_language(
+                            len(lambda_args) == 1,
+                            "exactly one argument expected for the lambda"
+                            " expression",
+                        )
+
+                    arg_node, = lambda_args
+                    arg_var = var_for_lambda_arg(
+                        arg_node, "var_expr", create_local=True,
+                    )
+                    then_expr = lower(lambda_expr.f_body)
+
+                    # The other argument, if present, must be a keyword
+                    # argument.
+                    default_val: AbstractExpression | None = None
+                    if n_args > 1:
+                        arg_1 = call_expr.f_args[1]
+                        check_source_language(
+                            n_args == 2, "at most two arguments expected"
+                        )
+                        check_source_language(
+                            arg_1.f_name is not None
+                            and arg_1.f_name.text == "default_val",
+                            "the second argument is 'default_val', is optional"
+                            " and must be a keyword argument"
+                        )
+                        default_val = lower(arg_1.f_value)
+
+                    return E.Then.create_from_exprs(
+                        method_prefix,
+                        then_expr,
+                        arg_var,
+                        default_val,
+                    )
 
                 elif method_name == "find":
                     # Build variable for the iteration variable from the lambda

@@ -443,12 +443,12 @@ class Then(AbstractExpression):
             return '<Then.Expr>'
 
     @staticmethod
-    def create_from_exprs(base, then_expr, var_expr):
+    def create_from_exprs(base, then_expr, var_expr, default_val=None):
         """
         Create a Then expression without going through a lambda. Used
         internally to constructs then expressions for the underscore operator.
         """
-        ret = Then(base, None)
+        ret = Then(expr=base, then_fn=None, default_val=default_val)
         ret.then_expr = then_expr
         ret.var_expr = var_expr
         return ret

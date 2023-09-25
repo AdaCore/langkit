@@ -1,10 +1,24 @@
-== No argument ==
-test.py:XXX: error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
+== default_no_kw.lkt ==
+error: the second argument is 'default_val', is optional and must be a keyword argument
 
-== Two arguments ==
-test.py:XXX: error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
+== kwarg.lkt ==
+error: the first argument must be positional
 
-== Default value ==
-test.py:XXX: error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
+== lambda_no_arg.lkt ==
+lambda_no_arg.lkt:6:38: error: exactly one argument expected for the lambda expression
+6 |     fun prop(): Name = node.name.do(() => node)
 
-Done
+
+== no_lambda.lkt ==
+error: the first argument must be a lambda expression
+
+== too_many_args.lkt ==
+error: at most two arguments expected
+
+== two_args.lkt ==
+two_args.lkt:6:38: error: exactly one argument expected for the lambda expression
+6 |     fun prop(): Name = node.name.do((x, y) => x.foo(y))
+  |                                      ^^^^
+
+
+lkt_compile: Done
