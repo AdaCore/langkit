@@ -238,33 +238,13 @@ def add_to_path(env: Dict[str, str], name: str, item: str) -> None:
     env[name] = os.path.pathsep.join(keep([item, env.get(name, '')]))
 
 
-def path_separator(name: str) -> str:
-    """
-    Return the path separator to use for the ``name`` environment variable.
-    """
-    # On Cygwin, PATH keeps the Unix syntax instead of using the Window path
-    # separator.
-    return ":" if name == "PATH" else os.path.pathsep
-
-
-def format_path(name: str, dirs: List[str]) -> str:
-    """
-    Format a path environment variable.
-
-    :param name: Name of this environment variable (``PATH``, ``PYTHONPATH``,
-        ...).
-    :param dirs: Directories to include in this path.
-    """
-    return path_separator(name).join(dirs)
-
-
 def format_setenv(name: str, path: str) -> str:
     """
     Return a Bourne shell command to prepend ``path`` to the ``name``
     environment variable.
     """
     return (
-        f'{name}={pipes.quote(path)}"{path_separator(name)}${name}";'
+        f'{name}={pipes.quote(path)}"{os.pathsep}${name}";'
         f" export {name}"
     )
 
