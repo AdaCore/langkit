@@ -2647,15 +2647,25 @@ class LktTypesLoader:
 
                 # Otherwise the call has to be a dot expression, for a method
                 # invocation.
-                if not isinstance(call_name, L.DotExpr):
+                if not isinstance(call_name, L.BaseDotExpr):
                     with self.ctx.lkt_context(call_name):
                         error("invalid call prefix")
+                null_cond = isinstance(call_name, L.NullCondDottedName)
 
                 # TODO: introduce a pre-lowering pass to extract the list of
                 # types and their fields/methods so that we can perform
                 # validation here.
                 method_prefix = lower(call_name.f_prefix)
                 method_name = call_name.f_suffix.text
+
+                # If the method call is protected by a null conditional,
+                # prepare when we need to build the Then expression.
+                if null_cond:
+                    null_cond_var = AbstractVariable(
+                        names.Name("Var_Expr"), create_local=True,
+                    )
+                    then_prefix = method_prefix
+                    method_prefix = null_cond_var
 
                 if method_name in ("all", "any"):
                     lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
@@ -2677,7 +2687,7 @@ class LktTypesLoader:
                     inner_expr = self.lower_expr(
                         lambda_info.expr, lambda_info.scope, local_vars
                     )
-                    return E.Quantifier.create_expanded(
+                    result = E.Quantifier.create_expanded(
                         method_name,
                         method_prefix,
                         inner_expr,
@@ -2690,7 +2700,7 @@ class LktTypesLoader:
                         len(call_expr.f_args) == 0,
                         "'as_int' method takes no argument",
                     )
-                    return method_prefix.as_int
+                    result = method_prefix.as_int
 
                 elif method_name == "do":
                     lambda_info = extract_lambda_and_kwargs(
@@ -2715,7 +2725,7 @@ class LktTypesLoader:
                         lower(lambda_info.kwargs["default_val"])
                     )
 
-                    return E.Then.create_from_exprs(
+                    result = E.Then.create_from_exprs(
                         method_prefix,
                         then_expr,
                         arg_var,
@@ -2734,7 +2744,7 @@ class LktTypesLoader:
                         lambda_info.expr, lambda_info.scope, local_vars
                     )
 
-                    return E.Find.create_expanded(
+                    result = E.Find.create_expanded(
                         method_prefix, inner_expr, elt_var, index_var=None
                     )
 
@@ -2743,7 +2753,7 @@ class LktTypesLoader:
                         len(call_expr.f_args) == 0,
                         "'length' method takes no argument",
                     )
-                    return getattr(method_prefix, "length")
+                    result = getattr(method_prefix, "length")
 
                 elif method_name == "map":
                     lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
@@ -2768,14 +2778,13 @@ class LktTypesLoader:
                     result = E.Map.create_expanded(
                         method_prefix, inner_expr, element_var, index_var
                     )
-                    return result
 
                 elif method_name == "singleton":
                     check_source_language(
                         len(call_expr.f_args) == 0,
                         "'singleton' takes no argument",
                     )
-                    return method_prefix.singleton
+                    result = method_prefix.singleton
 
                 elif method_name == "to_symbol":
                     args, kwargs = lower_args()
@@ -2784,7 +2793,7 @@ class LktTypesLoader:
                         "'to_symbol' takes no argument",
                     )
 
-                    return method_prefix.to_string  # type: ignore
+                    result = method_prefix.to_string  # type: ignore
 
                 elif method_name == "unique":
                     args, kwargs = lower_args()
@@ -2794,7 +2803,7 @@ class LktTypesLoader:
 
                     # ".unique" works with our auto_attr magic: not worth type
                     # checking until we get rid of the syntax magic.
-                    return method_prefix.unique  # type: ignore
+                    result = method_prefix.unique  # type: ignore
 
                 else:
                     # Otherwise, this call must be a method invocation. Note
@@ -2805,7 +2814,17 @@ class LktTypesLoader:
                     # instance.
                     args, kwargs = lower_args()
                     result = getattr(method_prefix, method_name)
-                    return result(*args, **kwargs)
+                    result = result(*args, **kwargs)
+
+                return (
+                    E.Then.create_from_exprs(
+                        base=then_prefix,
+                        then_expr=result,
+                        var_expr=null_cond_var,
+                    )
+                    if null_cond else
+                    result
+                )
 
             elif isinstance(expr, L.CastExpr):
                 subexpr = lower(expr.f_expr)
@@ -2816,7 +2835,9 @@ class LktTypesLoader:
             elif isinstance(expr, L.CharLit):
                 return E.CharacterLiteral(expr.p_denoted_value)
 
-            elif isinstance(expr, L.DotExpr):
+            elif isinstance(expr, L.BaseDotExpr):
+                null_cond = isinstance(expr, L.NullCondDottedName)
+
                 # Dotted expressions can designate an enum value (if the prefix
                 # is a type name) or a member access.
                 prefix_node = expr.f_prefix
@@ -2827,6 +2848,12 @@ class LktTypesLoader:
                         pass
                     else:
                         if isinstance(t, (Scope.BuiltinType, Scope.UserType)):
+                            with self.ctx.lkt_context(expr.f_suffix):
+                                check_source_language(
+                                    not null_cond,
+                                    "null-conditional dotted name notation is"
+                                    " illegal to designate an enum value",
+                                )
                             # The suffix refers to the declaration of en enum
                             # value: the prefix must designate the
                             # corresponding enum type.
@@ -2835,8 +2862,18 @@ class LktTypesLoader:
                 # Otherwise, the prefix is a regular expression, so this dotted
                 # expression is an access to a member.
                 prefix = lower(expr.f_prefix)
-                assert isinstance(prefix, E.AbstractExpression)
-                return getattr(prefix, expr.f_suffix.text)
+                suffix = expr.f_suffix.text
+                if null_cond:
+                    arg_var = AbstractVariable(
+                        names.Name("Var_Expr"), create_local=True
+                    )
+                    return E.Then.create_from_exprs(
+                        base=prefix,
+                        then_expr=getattr(arg_var, suffix),
+                        var_expr=arg_var,
+                    )
+                else:
+                    return getattr(prefix, suffix)
 
             elif isinstance(expr, L.IfExpr):
                 # We want to turn the following pattern::

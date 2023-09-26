@@ -1,0 +1,17 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+enum MyEnum {
+    case a, b
+}
+
+class FooNode implements Node[FooNode] {
+    @export fun p(): MyEnum = MyEnum?.a
+}
+
+class Example: FooNode implements TokenNode {
+}

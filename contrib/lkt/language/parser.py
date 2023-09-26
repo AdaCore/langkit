@@ -1353,18 +1353,24 @@ class GrammarDiscard(GrammarExpr):
     expr = Field(type=T.GrammarExpr)
 
 
-class DotExpr(Expr):
+@abstract
+class BaseDotExpr(Expr):
     """
-    Dotted expression.
+    Base class for regular dotted expressions and null-conditional ones.
     """
     prefix = Field(type=T.Expr)
     suffix = Field(type=T.RefId)
 
+
+class DotExpr(BaseDotExpr):
+    """
+    Dotted expression.
+    """
     referenced_decl = Property(Entity.suffix.referenced_decl)
     expr_context_free_type = Property(Entity.suffix.expr_context_free_type)
 
 
-class NullCondDottedName(DotExpr):
+class NullCondDottedName(BaseDotExpr):
     """
     Null conditional dotted expression.
     """
