@@ -44,6 +44,7 @@ langkit_build:
      - mem:16
   stage: stage1
   script:
+    - unset GITLAB_TOKEN; require_issue
     - !reference [.script_snippets, setup]
 
     - cd /it/wave
