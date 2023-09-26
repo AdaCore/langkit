@@ -807,6 +807,20 @@ class Quantifier(CollectionExpression):
         assert kind in (self.ALL, self.ANY)
         self.kind = kind
 
+    @classmethod
+    def create_expanded(
+        cls,
+        kind: str,
+        collection: AbstractExpression,
+        predicate: AbstractExpression,
+        element_var: AbstractVariable,
+        index_var: Optional[AbstractVariable] = None,
+    ) -> Quantifier:
+        result = cls(collection, None, kind)
+        result.initialize(predicate, element_var, index_var)
+        result.expr = predicate
+        return result
+
     def construct(self) -> ResolvedExpression:
         """
         Construct a resolved expression for this quantifier expression.

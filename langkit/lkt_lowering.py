@@ -2645,7 +2645,35 @@ class LktTypesLoader:
                 method_prefix = lower(call_name.f_prefix)
                 method_name = call_name.f_suffix.text
 
-                if method_name == "as_int":
+                if method_name in ("all", "any"):
+                    lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
+                    element_arg, index_arg = lambda_info.largs
+                    assert element_arg is not None
+
+                    element_var = var_for_lambda_arg(
+                        lambda_info.scope, element_arg, 'item'
+                    )
+                    index_var = (
+                        None
+                        if index_arg is None else
+                        var_for_lambda_arg(
+                            lambda_info.scope, index_arg, 'index', T.Int
+                        )
+                    )
+
+                    # Finally lower the expressions
+                    inner_expr = self.lower_expr(
+                        lambda_info.expr, lambda_info.scope, local_vars
+                    )
+                    return E.Quantifier.create_expanded(
+                        method_name,
+                        method_prefix,
+                        inner_expr,
+                        element_var,
+                        index_var,
+                    )
+
+                elif method_name == "as_int":
                     check_source_language(
                         len(call_expr.f_args) == 0,
                         "'as_int' method takes no argument",
