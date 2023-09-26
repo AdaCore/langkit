@@ -2274,6 +2274,16 @@ class LktTypesLoader:
         # Counter to generate unique names
         counter = itertools.count(0)
 
+        def add_lambda_arg_to_scope(
+            scope: Scope,
+            arg: L.LambdaArgDecl,
+            var: AbstractVariable
+        ) -> None:
+            """
+            Helper to register a lambda expression argument in a scope.
+            """
+            scope.add(Scope.LocalVariable(arg.f_syn_name.text, arg, var))
+
         def var_for_lambda_arg(
             scope: Scope,
             arg: L.LambdaArgDecl,
@@ -2289,15 +2299,14 @@ class LktTypesLoader:
             :param prefix: Lower-case prefix for the name of the variable in
                 the generated code.
             """
-            source_name = arg.f_syn_name.text
             with AbstractExpression.with_location(Location.from_lkt_node(arg)):
                 result = AbstractVariable(
                     names.Name.check_from_lower(f"{prefix}_{next(counter)}"),
-                    source_name=source_name,
+                    source_name=arg.f_syn_name.text,
                     type=type,
                     create_local=create_local,
                 )
-            scope.add(Scope.LocalVariable(source_name, arg, result))
+            add_lambda_arg_to_scope(scope, arg, result)
             return result
 
         def extract_call_args(expr: L.CallExpr) -> Tuple[List[L.Expr],
@@ -2343,6 +2352,61 @@ class LktTypesLoader:
             Lambda expression "body".
             """
 
+        def extract_lambda(
+            expr: L.LambdaExpr,
+            min_lambda_args: int,
+            max_lambda_args: int | None = None,
+        ) -> tuple[Scope, list[L.LambdaArgDecl | None], L.Expr]:
+            """
+            Extract arguments/expr from a lambda expression.
+
+            :param expr: Lambda expression to analyze.
+            :param min_lambda_args: Minimum number of arguments expected for
+                the lambda expression.
+            :param max_lambda_args: Maximum number of arguments expected for
+                the lambda expression. If left to None, expect exactly
+                "min_lambda_args".
+            """
+            lambda_args: list[L.LambdaArgDecl | None] = (
+                [None] * (max_lambda_args or min_lambda_args)
+            )
+            lambda_n_args = len(expr.f_params)
+            with self.ctx.lkt_context(expr.f_params):
+                if max_lambda_args is None:
+                    check_source_language(
+                        lambda_n_args == min_lambda_args,
+                        f"exactly {min_lambda_args} arguments expected",
+                    )
+                else:
+                    check_source_language(
+                        lambda_n_args >= min_lambda_args,
+                        f"at least {min_lambda_args} arguments expected",
+                    )
+                    check_source_language(
+                        lambda_n_args <= max_lambda_args,
+                        f"at most {max_lambda_args} arguments expected",
+                    )
+            for i, larg in enumerate(expr.f_params):
+                lambda_args[i] = larg
+                with self.ctx.lkt_context(larg):
+                    # TODO: accepting type annotations and validating them
+                    # could be useful for language spec readability.
+                    check_source_language(
+                        larg.f_decl_type is None,
+                        "argument type must be implicit",
+                    )
+                    check_source_language(
+                        larg.f_default_val is None,
+                        "default values are not allowed here",
+                    )
+
+            loc = Location.from_lkt_node(expr)
+            scope = env.create_child(
+                f"scope for lambda expression at {loc.gnu_style_repr()}"
+            )
+
+            return (scope, lambda_args, expr.f_body)
+
         def extract_lambda_and_kwargs(
             expr: L.CallExpr,
             min_lambda_args: int,
@@ -2371,41 +2435,11 @@ class LktTypesLoader:
                         "exactly one positional argument expected: a lambda"
                         " expression"
                     )
-            lambda_expr = args[0]
 
-            # Validate its own parameters
-            lambda_args: list[L.LambdaArgDecl | None] = (
-                [None] * (max_lambda_args or min_lambda_args)
+            # Extract info from the lambda expression itself
+            scope, lambda_args, lambda_body = extract_lambda(
+                args[0], min_lambda_args, max_lambda_args
             )
-            lambda_n_args = len(lambda_expr.f_params)
-            with self.ctx.lkt_context(lambda_expr.f_params):
-                if max_lambda_args is None:
-                    check_source_language(
-                        lambda_n_args == min_lambda_args,
-                        f"exactly {min_lambda_args} arguments expected",
-                    )
-                else:
-                    check_source_language(
-                        lambda_n_args >= min_lambda_args,
-                        f"at least {min_lambda_args} arguments expected",
-                    )
-                    check_source_language(
-                        lambda_n_args <= max_lambda_args,
-                        f"at most {max_lambda_args} arguments expected",
-                    )
-            for i, larg in enumerate(lambda_expr.f_params):
-                lambda_args[i] = larg
-                with self.ctx.lkt_context(larg):
-                    # TODO: accepting type annotations and validating them
-                    # could be useful for language spec readability.
-                    check_source_language(
-                        larg.f_decl_type is None,
-                        "argument type must be implicit",
-                    )
-                    check_source_language(
-                        larg.f_default_val is None,
-                        "default values are not allowed here",
-                    )
 
             # Reject invalid keyword arguments
             for arg in expr.f_args:
@@ -2421,13 +2455,7 @@ class LktTypesLoader:
             for name in keyword_args:
                 kwargs_ret.setdefault(name, None)
 
-            loc = Location.from_lkt_node(lambda_expr)
-            scope = env.create_child(
-                f"scope for lambda expression at {loc.gnu_style_repr()}"
-            )
-            return LambdaInfo(
-                kwargs_ret, scope, lambda_args, lambda_expr.f_body
-            )
+            return LambdaInfo(kwargs_ret, scope, lambda_args, lambda_body)
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """
@@ -2730,6 +2758,104 @@ class LktTypesLoader:
                         then_expr,
                         arg_var,
                         default_val,
+                    )
+
+                elif method_name == "filter":
+                    lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
+                    element_arg, index_arg = lambda_info.largs
+                    assert element_arg is not None
+
+                    element_var = var_for_lambda_arg(
+                        lambda_info.scope, element_arg, "item"
+                    )
+                    index_var = (
+                        None
+                        if index_arg is None else
+                        var_for_lambda_arg(
+                            lambda_info.scope, index_arg, "index", T.Int
+                        )
+                    )
+
+                    # Finally lower the expressions
+                    inner_expr = self.lower_expr(
+                        lambda_info.expr, lambda_info.scope, local_vars
+                    )
+                    result = E.Map.create_expanded(
+                        method_prefix,
+                        element_var,
+                        element_var,
+                        index_var,
+                        inner_expr,
+                    )
+
+                elif method_name == "filtermap":
+                    # Validate arguments for ".filtermap()" itself
+                    call_args, call_kwargs = extract_call_args(call_expr)
+                    if len(call_args) != 2 or any(
+                        not isinstance(a, L.LambdaExpr)
+                        for a in call_args
+                    ):
+                        with self.ctx.lkt_context(call_expr):
+                            error(
+                                "exactly two positional arguments expected:"
+                                " lambda expressions"
+                            )
+                    for _, a in call_kwargs.items():
+                        with self.ctx.lkt_context(a.parent):
+                            error("no keyword argument expected")
+
+                    # Validate and analyze the two lambda expressions
+                    assert isinstance(call_args[0], L.LambdaExpr)
+                    map_scope, map_args, map_body = extract_lambda(
+                        call_args[0], 1, 2
+                    )
+                    assert isinstance(call_args[1], L.LambdaExpr)
+                    filter_scope, filter_args, filter_body = extract_lambda(
+                        call_args[1], 1, 2
+                    )
+
+                    # We need to have two different scopes for the two lambda
+                    # expressions, but need to create common iteration
+                    # variables for both. The "element" variable is always
+                    # present, but the "fitler" one may be present in one, two
+                    # or no lambda expression.
+                    assert map_args[0] is not None
+                    assert filter_args[0] is not None
+                    element_var = var_for_lambda_arg(
+                        map_scope, map_args[0], "item"
+                    )
+                    add_lambda_arg_to_scope(
+                        filter_scope, filter_args[0], element_var
+                    )
+
+                    index_var = None
+                    if map_args[1] is not None:
+                        index_var = var_for_lambda_arg(
+                            map_scope, map_args[1], "index", T.Int
+                        )
+                        if filter_args[1] is not None:
+                            add_lambda_arg_to_scope(
+                                filter_scope, filter_args[1], index_var
+                            )
+                    elif filter_args[1] is not None:
+                        index_var = var_for_lambda_arg(
+                            filter_scope, filter_args[1], "Index", T.Int
+                        )
+
+                    # Lower their expressions
+                    map_expr = self.lower_expr(
+                        map_body, map_scope, local_vars
+                    )
+                    filter_expr = self.lower_expr(
+                        filter_body, filter_scope, local_vars
+                    )
+
+                    return E.Map.create_expanded(
+                        collection=method_prefix,
+                        expr=map_expr,
+                        element_var=element_var,
+                        index_var=index_var,
+                        filter_expr=filter_expr,
                     )
 
                 elif method_name == "find":
