@@ -2285,11 +2285,19 @@ class LktTypesLoader:
                     }[type(expr.f_op)]
                     return E.OrderingTest(operator, left, right)
 
+                elif isinstance(expr.f_op, L.OpAnd):
+                    return E.BinaryBooleanOperator(
+                        E.BinaryBooleanOperator.AND, left, right
+                    )
+
+                elif isinstance(expr.f_op, L.OpOr):
+                    return E.BinaryBooleanOperator(
+                        E.BinaryBooleanOperator.OR, left, right
+                    )
+
                 else:
                     operator = {
                         L.OpAmp: '&',
-                        L.OpAnd: '&',
-                        L.OpOr: '|',
                         L.OpPlus: '+',
                         L.OpMinus: '-',
                         L.OpMult: '*',

@@ -1,0 +1,10 @@
+main.py: Running...
+p_check_and(T, F, <none>) = <PropertyError: main.txt:1:1-1:8: dereferencing a null access
+p_check_and(F, F, <none>) = F
+p_check_and(T, F, <root>) = F
+p_check_and(T, T, <root>) = T
+p_check_or(F, F, <root>) = F
+p_check_or(F, T, <root>) = T
+p_check_or(T, F, <none>) = T
+main.py: Done.
+Done

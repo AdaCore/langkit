@@ -1,0 +1,20 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+
+    @export fun check_and(b1: Bool, b2: Bool, n: FooNode): Bool =
+    b1 and n.identity(b2)
+
+    @export fun check_or(b1: Bool, b2: Bool, n: FooNode): Bool =
+    b1 or n.identity(b2)
+
+    @export fun identity(b: Bool): Bool = b
+}
+
+class Example : FooNode implements TokenNode {
+}
