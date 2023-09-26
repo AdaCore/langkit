@@ -4581,6 +4581,9 @@ class PropertyDef(AbstractNodeData):
                 for var in vars
             )
 
+        # TODO: once the Lkt transition is over, emit one warning per unused
+        # binding, and attach it to the location of the binding declaration in
+        # Lkt code.
         WarningSet.unused_bindings.warn_if(
             unused_vars,
             'The following bindings are not used: {}'.format(

@@ -843,6 +843,12 @@ class StructAnnotations(ParsedAnnotations):
 
 
 @dataclass
+class FunArgAnnotations(ParsedAnnotations):
+    ignored: bool
+    annotations = [FlagAnnotationSpec("ignored")]
+
+
+@dataclass
 class FunAnnotations(ParsedAnnotations):
     abstract: bool
     export: bool
@@ -883,7 +889,7 @@ AnyPA = TypeVar('AnyPA', bound=ParsedAnnotations)
 def parse_annotations(
     ctx: CompileCtx,
     annotation_class: Type[AnyPA],
-    full_decl: L.FullDecl,
+    full_decl: L.FullDecl | L.DeclAnnotationList,
     scope: Scope,
 ) -> AnyPA:
     """
@@ -893,7 +899,8 @@ def parse_annotations(
 
     :param annotation_class: ParsedAnnotations subclass for the result, holding
         the annotation specs to guide parsing.
-    :param full_decl: Declaration whose annotations are to be parsed.
+    :param full_decl: Declaration whose annotations are to be parsed, or the
+        annotations themselves.
     :param scope: Scope to use when resolving entities mentionned in the
         annotation's arguments.
     """
@@ -904,8 +911,13 @@ def parse_annotations(
         specs_map[s.name] = s
 
     # Process annotations
+    annotations = (
+        full_decl
+        if isinstance(full_decl, L.DeclAnnotationList) else
+        full_decl.f_decl_annotations
+    )
     values: Dict[str, Any] = {}
-    for a in full_decl.f_decl_annotations:
+    for a in annotations:
         name = a.f_name.text
         spec = specs_map.get(name)
         with ctx.lkt_context(a):
@@ -3025,6 +3037,13 @@ class LktTypesLoader:
         for a in arg_decl_list or []:
             arguments.append(a)
 
+            annotations = parse_annotations(
+                self.ctx,
+                FunArgAnnotations,
+                a.f_decl_annotations,
+                self.root_scope,
+            )
+
             source_name = a.f_syn_name.text
             reserved = PropertyDef.reserved_arg_lower_names
             with self.ctx.lkt_context(a.f_syn_name):
@@ -3039,6 +3058,8 @@ class LktTypesLoader:
                     name=ada_id_for(source_name),
                     type=self.resolve_type(a.f_decl_type, scope),
                 )
+            if annotations.ignored:
+                arg.var.tag_ignored()
             prop.arguments.append(arg)
             scope.add(Scope.Argument(source_name, a, arg.var))
 

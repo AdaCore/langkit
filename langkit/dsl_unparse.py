@@ -1316,11 +1316,13 @@ def emit_prop(prop, walker):
             )
         quals += "@with_dynvars({}) ".format(", ".join(vars))
 
-    args = ", ".join("{}: {}{}".format(
-        var_name(arg), type_name(arg.type),
-        " = {}".format(emit_expr(arg.abstract_default_value))
-        if arg.abstract_default_value else ""
-    ) for arg in prop.natural_arguments)
+    args = []
+    for arg in prop.natural_arguments:
+        arg_text = "@ignored " if arg.var._ignored else ""
+        arg_text += f"{var_name(arg)}: {type_name(arg.type)}"
+        if arg.abstract_default_value:
+            arg_text += " = {}".format(emit_expr(arg.abstract_default_value))
+        args.append(arg_text)
 
     doc = prop.doc
 
@@ -1334,7 +1336,7 @@ def emit_prop(prop, walker):
         )
     else:
         res += "$hl{}fun {}({}): {}".format(
-            quals, prop.original_name, args, type_name(prop.type)
+            quals, prop.original_name, ", ".join(args), type_name(prop.type)
         )
 
     if prop.abstract_runtime_check:

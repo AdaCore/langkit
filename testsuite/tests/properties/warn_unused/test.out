@@ -1,9 +1,29 @@
-test.py:XXX: warning: The following bindings are not used: ex_param
-test.py:XXX: warning: The following bindings are used even though they are supposed to be ignored: ex_wrongly_used_param
-test.py:XXX: warning: The following bindings are not used: block_var
-test.py:XXX: warning: The following bindings are not used: ex_list
-test.py:XXX: warning: The following bindings are not used: ex_item
-test.py:XXX: warning: The following bindings are not used: ex_items
-test.py:XXX: warning: The following bindings are not used: ex
+== foo.lkt ==
+foo.lkt:20:13: warning: The following bindings are not used: ex_param
+20 |     @export fun unused_param(
+   |             ^^^^^^^^^^^^^^^^^
+
+foo.lkt:20:13: warning: The following bindings are used even though they are supposed to be ignored: ex_wrongly_used_param
+20 |     @export fun unused_param(
+   |             ^^^^^^^^^^^^^^^^^
+
+foo.lkt:26:13: warning: The following bindings are not used: ex_var
+26 |     @export fun unused_block_var(): Entity[FooNode] = {
+
+foo.lkt:31:13: warning: The following bindings are not used: ex_list
+31 |     @export fun unused_let_var(): Entity[FooNode] = {
+
+foo.lkt:36:13: warning: The following bindings are not used: ex_item
+36 |     @export fun unused_loop_var(): Array[Bool] =
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo.lkt:39:13: warning: The following bindings are not used: ex_items
+39 |     @export fun unused_then_var(): Entity[FooNode] =
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo.lkt:42:13: warning: The following bindings are not used: ex
+42 |     @export fun unused_match_var(): Array[Bool] =
+
 Code generation was successful
-Done
+
+lkt_compile: Done

@@ -2422,13 +2422,14 @@ class UserValDecl(BaseValDecl):
     """
     Class for user declared val declarations (not synthetic).
     """
-    syn_name = Field(type=T.DefId)
+    pass
 
 
 class FunDecl(UserValDecl):
     """
     Function declaration.
     """
+    syn_name = Field(type=T.DefId)
     args = Field(type=T.FunArgDecl.list)
     return_type = Field(type=T.TypeRef)
     body = Field(type=T.Expr)
@@ -2525,6 +2526,8 @@ class EnumLitDecl(UserValDecl):
     """
     Enum literal declaration.
     """
+    syn_name = Field(type=T.DefId)
+
     @langkit_property()
     def get_type(no_inference=(T.Bool, False)):
         ignore(no_inference)
@@ -2578,6 +2581,8 @@ class FunArgDecl(ComponentDecl):
     """
     Function argument declaration.
     """
+    decl_annotations = Field(type=T.DeclAnnotation.list)
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
     decl_type_name = Property(S("fun arg declaration"))
@@ -2587,6 +2592,7 @@ class LambdaArgDecl(ComponentDecl):
     """
     Function argument declaration.
     """
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
 
@@ -2629,6 +2635,7 @@ class FieldDecl(ComponentDecl):
     """
     Field declaration.
     """
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
     decl_type_name = Property(S("field declaration"))
@@ -3559,6 +3566,7 @@ class MatchValDecl(ExplicitlyTypedDecl):
     """
     Value declaration in a match branch.
     """
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     decl_type_name = Property(S("match value declaration"))
 
@@ -3604,6 +3612,7 @@ class DynVarDecl(ExplicitlyTypedDecl):
     """
     Dynamic variable declaration.
     """
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
 
     decl_type_name = Property(S("dynamic variable declaration"))
@@ -3613,6 +3622,7 @@ class ValDecl(ExplicitlyTypedDecl):
     """
     Value declaration.
     """
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     val = Field(type=T.Expr)
 
@@ -4012,7 +4022,12 @@ lkt_grammar.add_rules(
         G.def_id, Opt(":", G.type_ref), Opt("=", G.expr)
     ),
 
-    fun_arg_decl=FunArgDecl(G.def_id, ":", G.type_ref, Opt("=", G.expr)),
+    fun_arg_decl=FunArgDecl(
+        List(G.decl_annotation, empty_valid=True),
+        G.def_id,
+        ":", G.type_ref,
+        Opt("=", G.expr),
+    ),
 
     fun_arg_list=List(G.fun_arg_decl, empty_valid=True, sep=","),
     lambda_arg_list=List(G.lambda_arg_decl, empty_valid=True, sep=","),

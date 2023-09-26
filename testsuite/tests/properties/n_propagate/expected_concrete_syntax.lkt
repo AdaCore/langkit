@@ -12,7 +12,7 @@ grammar foo_grammar {
 
 class Literal: FooNode implements TokenNode {
 
-    fun combiner(other: Entity[Literal]): Entity[Literal] = self
+    fun combiner(@ignored other: Entity[Literal]): Entity[Literal] = self
 }
 
 class Plus: FooNode {
