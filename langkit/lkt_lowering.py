@@ -3017,9 +3017,13 @@ class LktTypesLoader:
                 # reverse iterate on the alternatives to wrap this expression
                 # with the conditional checks.
                 result = lower(expr.f_else_expr)
-                conditions = [(alt.f_cond_expr, alt.f_then_expr)
-                              for alt in expr.f_alternatives]
-                conditions.append((expr.f_cond_expr, expr.f_then_expr))
+                conditions = (
+                    [(expr.f_cond_expr, expr.f_then_expr)]
+                    + [
+                        (alt.f_cond_expr, alt.f_then_expr)
+                        for alt in expr.f_alternatives
+                    ]
+                )
                 for c, e in reversed(conditions):
                     result = E.If(lower(c), lower(e), result)
                 return result
