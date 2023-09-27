@@ -10,16 +10,16 @@ return a valid iterator on which user can iterate. On the other hand, calling
 """
 
 from langkit.dsl import ASTNode, T
-from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import Self, langkit_property
 
 from utils import build_and_run, unparse_all_script
 
 
 class FooNode(ASTNode):
+
     @langkit_property(public=True, return_type=T.FooNode.entity.array)
     def get_as_array():
-        return Self.children_env.get("example")
+        return Self.children.map(lambda n: n.as_bare_entity)
 
     @langkit_property(public=True, return_type=T.FooNode.entity.iterator)
     def get_as_iterator():
@@ -27,7 +27,7 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
-    env_spec = EnvSpec(add_to_env_kv("example", Self))
+    pass
 
 
 build_and_run(
