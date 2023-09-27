@@ -2625,6 +2625,7 @@ class LktTypesLoader:
             elif isinstance(expr, L.CallExpr):
                 call_expr = expr
                 call_name = call_expr.f_name
+                null_cond = isinstance(expr, L.NullCondCallExpr)
 
                 def lower_args() -> Tuple[List[AbstractExpression],
                                           Dict[str, AbstractExpression]]:
@@ -2642,6 +2643,13 @@ class LktTypesLoader:
                 # it has to be a reference to a struct type, and thus the call
                 # is a struct constructor.
                 if isinstance(call_name, (L.RefId, L.GenericInstantiation)):
+                    with self.ctx.lkt_context(call_expr):
+                        check_source_language(
+                            not null_cond,
+                            "Struct/node creation cannot be a null-conditional"
+                            " operation",
+                        )
+
                     # Resolve the type that call_name designates
                     if isinstance(call_name, L.RefId):
                         struct_type = self.resolve_type_expr(call_name, env)
@@ -2678,6 +2686,13 @@ class LktTypesLoader:
                 if not isinstance(call_name, L.BaseDotExpr):
                     with self.ctx.lkt_context(call_name):
                         error("invalid call prefix")
+
+                if null_cond:
+                    with self.ctx.lkt_context(expr):
+                        error(
+                            "'?' must be attached to the method prefix, not to"
+                            " the call itself",
+                        )
                 null_cond = isinstance(call_name, L.NullCondDottedName)
 
                 # TODO: introduce a pre-lowering pass to extract the list of

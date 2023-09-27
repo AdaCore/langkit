@@ -13,6 +13,12 @@ no_such_prop.lkt:4:35: error: Type BarNode has no 'no_such_prop' field or proper
   |                                   ^^^^^^^^^^^^^^^^^^^^^
 
 
+== null_cond.lkt ==
+null_cond.lkt:4:35: error: '?' must be attached to the method prefix, not to the call itself
+4 |     @export fun bar_prop(): Int = node.root_prop?(12)
+  |                                   ^^^^^^^^^^^^^^^^^^^
+
+
 == too_many_args.lkt ==
 too_many_args.lkt:4:35: error: The last argument is unexpected
 4 |     @export fun bar_prop(): Int = node.root_prop(12, 15)
