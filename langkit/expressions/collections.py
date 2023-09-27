@@ -644,8 +644,9 @@ class Map(CollectionExpression):
         element_var: AbstractVariable,
         index_var: Optional[AbstractVariable] = None,
         filter_expr: Optional[AbstractExpression] = None,
+        do_concat: bool = False,
     ) -> Map:
-        result = cls(collection, None)
+        result = cls(collection, None, do_concat=do_concat)
         result.initialize(expr, element_var, index_var)
         result.filter_expr = filter_expr
         return result

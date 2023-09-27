@@ -23,6 +23,12 @@ class ListNode: FooNode {
     @export fun map_idx(): Array[IndexedNumber] =
     node.nb_list_entities().map((n, i) => node.create(i, n))
 
+    @export fun mapcat_no_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().mapcat((n) => [node.create(0, n)])
+
+    @export fun mapcat_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().mapcat((n, i) => [node.create(i, n)])
+
     @export fun filter_no_idx(): Array[Entity[NumberNode]] =
     node.nb_list_entities().filter((n) => n.text() == "2")
 

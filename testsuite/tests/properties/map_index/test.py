@@ -42,6 +42,18 @@ class ListNode(FooNode):
         )
 
     @langkit_property(public=True)
+    def mapcat_no_idx():
+        return Self.nb_list_entities.mapcat(
+            lambda n: [Self.create(0, n)]
+        )
+
+    @langkit_property(public=True)
+    def mapcat_idx():
+        return Self.nb_list_entities.mapcat(
+            lambda i, n: [Self.create(i, n)]
+        )
+
+    @langkit_property(public=True)
     def filter_no_idx():
         return Self.nb_list_entities.filter(
             lambda n: n.text == String("2")

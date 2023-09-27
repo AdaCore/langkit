@@ -2881,7 +2881,7 @@ class LktTypesLoader:
                     )
                     result = getattr(method_prefix, "length")
 
-                elif method_name == "map":
+                elif method_name in ("map", "mapcat"):
                     lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
                     element_arg, index_arg = lambda_info.largs
                     assert element_arg is not None
@@ -2902,7 +2902,11 @@ class LktTypesLoader:
                         lambda_info.expr, lambda_info.scope, local_vars
                     )
                     result = E.Map.create_expanded(
-                        method_prefix, inner_expr, element_var, index_var
+                        method_prefix,
+                        inner_expr,
+                        element_var,
+                        index_var,
+                        do_concat=method_name == "mapcat",
                     )
 
                 elif method_name == "singleton":
