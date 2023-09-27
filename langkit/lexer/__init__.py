@@ -346,6 +346,12 @@ class LexerToken:
     Dedent: WithText
     Newline: WithText
 
+    @classmethod
+    def reset(cls) -> None:
+        TokenAction._counter = iter(count(0))
+        cls.Termination = WithText()
+        cls.LexingFailure = WithTrivia()
+
     def __init__(self, track_indent: bool = False):
         import inspect
 
