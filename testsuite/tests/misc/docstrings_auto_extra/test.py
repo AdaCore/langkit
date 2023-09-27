@@ -2,39 +2,6 @@
 Check the automatic docstring additions performed when generating code.
 """
 
-
-from langkit.dsl import ASTNode, has_abstract_list
-
-from utils import emit_and_print_errors
-
-
-class FooNode(ASTNode):
-    """
-    Docstring for ``FooNode``.
-    """
-    pass
-
-
-class UndocumentedNode(FooNode):
-    pass
-
-
-@has_abstract_list
-class DocumentedNode(FooNode):
-    """
-    Docstring for ``DocumentedNode``.
-    """
-    pass
-
-
-class DerivedListNode(DocumentedNode.list):
-    """
-    Docstring for ``DerivedListNode``.
-    """
-
-
-emit_and_print_errors(lkt_file="foo.lkt")
-
 # Excerpts of docstrings that we intend to check in generated sources
 excerpts = [
     # "Raw" docstrings above

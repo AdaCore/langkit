@@ -1,4 +1,7 @@
+== foo.lkt ==
 Code generation was successful
+
+== test.py ==
 
 build/src/libfoolang-analysis.ads:
 
@@ -37,3 +40,5 @@ build/python/libfoolang/__init__.py:
   Docstring for ``DerivedListNode``.
 
 Done
+
+lkt_compile: Done
