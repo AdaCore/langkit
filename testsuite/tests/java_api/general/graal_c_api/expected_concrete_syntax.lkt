@@ -53,7 +53,7 @@ class Sequence: ASTList[FooNode, FooNode] {
     @export fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
 
     @export fun example_items(): Array[Entity[Example]] = self.filtermap(
-        (i) => i.as[Example]!, (i) => i is Example
+        (i) => i.as![Example], (i) => i is Example
     )
 }
 

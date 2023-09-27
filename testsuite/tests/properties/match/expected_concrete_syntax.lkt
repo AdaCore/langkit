@@ -73,7 +73,7 @@ class Def: FooNode {
             case _ => null[Array[Entity[Ref]]]
         }
     ) & (
-        self.children.mapcat((c) => c.as[Expr]!.find_refs())
+        self.children.mapcat((c) => c.as![Expr].find_refs())
     )
 }
 

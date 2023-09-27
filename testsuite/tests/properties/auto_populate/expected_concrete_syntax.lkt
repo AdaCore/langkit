@@ -25,5 +25,5 @@ class Ref: FooNode {
     @export fun decl_wrapper(): Entity[Decl] = self.decl()
 
     @export fun decl(): Entity[Decl] =
-    node.children_env().get_first(node.name).as[Decl]!
+    node.children_env().get_first(node.name).as![Decl]
 }
