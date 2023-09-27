@@ -175,5 +175,6 @@ build_and_run(
         "introspection_values.adb",
         "hash.adb",
     ],
+    types_from_lkt=True,
 )
 print("Done")

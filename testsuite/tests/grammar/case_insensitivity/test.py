@@ -30,7 +30,10 @@ class Identifier(FooNode):
         return s == Self.symbol
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              py_script='main.py',
-              case_insensitive=True)
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    py_script='main.py',
+    case_insensitive=True,
+    types_from_lkt=True,
+)
 print('Done')

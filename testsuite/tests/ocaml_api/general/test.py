@@ -116,6 +116,10 @@ class StringLiteral(FooNode):
     pass
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', ocaml_main='main',
-              symbol_canonicalizer=LibraryEntity('Pkg', 'Canonicalize'))
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    ocaml_main='main',
+    symbol_canonicalizer=LibraryEntity('Pkg', 'Canonicalize'),
+    types_from_lkt=True,
+)
 print('Done')

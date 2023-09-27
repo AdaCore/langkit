@@ -1,4 +1,7 @@
 test.py:XXX: warning: The #2 matcher (Atom) is unreachable as all previous matchers cover all the nodes it can match
+expected_concrete_syntax.lkt:35:53: warning: The #2 matcher (Atom) is unreachable as all previous matchers cover all the nodes it can match
+35 |     @export fun find_exprs(): Array[Entity[Expr]] = match self {
+
 main.py: Running...
 Atoms:
    <Lit main.txt:3:6-3:7>

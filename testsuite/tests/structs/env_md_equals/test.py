@@ -34,7 +34,7 @@ class Name(FooNode):
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
     gpr_mains=["main.adb"],
-    lkt_semantic_checks=False,
+    types_from_lkt=True,
 )
 print("")
 print("Done")

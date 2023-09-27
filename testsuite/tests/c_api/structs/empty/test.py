@@ -52,6 +52,10 @@ class Example(FooNode):
         return s.bigint_field
 
 
-build_and_run(lkt_file="expected_concrete_syntax.lkt", gpr_mains=["main.c"])
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    gpr_mains=["main.c"],
+    types_from_lkt=True,
+)
 
 print("Done")

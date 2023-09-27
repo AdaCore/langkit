@@ -1,24 +1,20 @@
-import lexer_example
-@with_lexer(foo_lexer)
-grammar foo_grammar {
-    @main_rule stmt_rule <- list*(or(var | def))
+import parser
 
-    # In the following specific case:
-    #
-    # * a parsing error in "basic_var" causes diagnostics to be emitted
-    #   after the cut parser (so "basic_var" returns a non-null node);
-    #
-    # * then, another parsing error in "var" causes "var" to return a null
-    #   node.
-    #
-    # Then after returning from the "var" parser to "stmt_rule", the next
-    # attempted parser is "def". If "var" does not cleanup diagnostics before
-    # returning, then "def", and thus "stmt_rule" may complete successfully and
-    # still emit parsing errors.
-    basic_var <- BasicVar("var" / name "=")
-    var <- Var(basic_var name)
+class FooNode implements Node[FooNode] {
+}
 
-    def <- Def("var" name "(" ")")
+class Def: FooNode {
+    @parse_field name: Name
+}
 
-    name <- Name(@identifier)
+class BasicVar: FooNode {
+    @parse_field name: Name
+}
+
+class Var: FooNode {
+    @parse_field basic_var: BasicVar
+    @parse_field value: Name
+}
+
+class Name: FooNode implements TokenNode {
 }

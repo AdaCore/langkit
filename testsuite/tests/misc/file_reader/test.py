@@ -20,6 +20,7 @@ build_and_run(
     generate_unparser=True,
     py_script="main.py",
     gpr_mains=["main.adb"],
+    types_from_lkt=True,
 )
 
 print("Done")
