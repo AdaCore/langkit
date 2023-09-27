@@ -14,7 +14,7 @@ grammar foo_grammar {
     name <- Name(@identifier)
 }
 
-enum DeclKind {
+@with_default(none) enum DeclKind {
     case func, var, none
 }
 

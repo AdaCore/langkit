@@ -612,6 +612,27 @@ class FlagAnnotationSpec(AnnotationSpec):
         return True
 
 
+class WithDefaultAnnotationSpec(AnnotationSpec):
+    """
+    Interpreter for @with_default annotations for enum types.
+    """
+    def __init__(self) -> None:
+        super().__init__("with_default", unique=True, require_args=True)
+
+    def interpret(
+        self,
+        ctx: CompileCtx,
+        args: List[L.Expr],
+        kwargs: Dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
+        check_source_language(
+            len(args) == 1 and not kwargs,
+            "exactly one positional argument expected",
+        )
+        return args[0]
+
+
 class WithDynvarsAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @with_dynvars annotations for properties.
@@ -873,7 +894,10 @@ class FieldAnnotations(ParsedAnnotations):
 
 @dataclass
 class EnumAnnotations(ParsedAnnotations):
-    annotations: ClassVar[List[AnnotationSpec]] = []
+    with_default: L.Expr | None
+    annotations = [
+        WithDefaultAnnotationSpec()
+    ]
 
 
 @dataclass
@@ -3808,11 +3832,23 @@ class LktTypesLoader:
             )
             value_names.append(name)
 
+        # If present, validate the default value
+        default_value: names.Name | None = None
+        default_expr = annotations.with_default
+        if default_expr is not None:
+            with self.ctx.lkt_context(default_expr):
+                if not isinstance(default_expr, L.RefId):
+                    error("enum value identifier expected")
+                default_value = names.Name.from_lower(default_expr.text)
+                if default_value not in value_names:
+                    error("no such value in this enum")
+
         result = EnumType(
             name=name_from_camel(self.ctx, "enum type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl),
             value_names=value_names,
+            default_val_name=default_value,
         )
         assert isinstance(decl.parent, L.FullDecl)
         result._doc_location = Location.from_lkt_node(decl.parent.f_doc)

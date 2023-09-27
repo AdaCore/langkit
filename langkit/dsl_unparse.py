@@ -1567,11 +1567,14 @@ def emit_node_type(node_type):
 
 def emit_enum_type(enum_type):
     literals = ", ".join(l.name.lower for l in enum_type.values)
+    quals = ""
+    if enum_type.default_val_name:
+        quals += f"@with_default({enum_type.default_val_name.lower}) "
     return sf("""
     % if enum_type.doc:
     ${emit_doc(enum_type.doc)}$hl
     % endif
-    enum ${enum_type.dsl_name} {$i$hl
+    ${quals}enum ${enum_type.dsl_name} {$i$hl
         case ${literals}$hl
     $d}$hl
     """.strip())

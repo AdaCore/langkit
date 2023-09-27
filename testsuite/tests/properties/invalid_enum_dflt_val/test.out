@@ -1,9 +1,31 @@
-== too_many_defaults ==
-test.py:XXX: error: Only one default value is allowed
-== invalid_base ==
-test.py:XXX: error: Enumeration types must derive from and only from Enum
-== invalid_field ==
-test.py:XXX: error: Enum subclass can only contain EnumValue instances (here, c is 12)
-== enumval_aliasing ==
-test.py:XXX: error: EnumValue instances cannot be used in multiple Enum subclasses (here: a)
-Done
+== kwargs.lkt ==
+kwargs.lkt:3:1: error: exactly one positional argument expected
+3 | @with_default(value=a) enum MyEnum {
+  | ^^^^^^^^^^^^^^^^^^^^^^
+
+
+== no_arg.lkt ==
+no_arg.lkt:3:1: error: exactly one positional argument expected
+3 | @with_default() enum MyEnum {
+  | ^^^^^^^^^^^^^^^
+
+
+== no_such_value.lkt ==
+no_such_value.lkt:3:15: error: no such value in this enum
+3 | @with_default(d) enum MyEnum {
+  |               ^
+
+
+== not_id.lkt ==
+not_id.lkt:3:15: error: enum value identifier expected
+3 | @with_default(0) enum MyEnum {
+  |               ^
+
+
+== too_many_args.lkt ==
+too_many_args.lkt:3:1: error: exactly one positional argument expected
+3 | @with_default(a, b) enum MyEnum {
+  | ^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

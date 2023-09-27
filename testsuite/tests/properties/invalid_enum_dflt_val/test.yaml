@@ -1,1 +1,3 @@
-driver: python
+driver: lkt_compile
+description: |
+    Check validation for the @with_default enum type annotation

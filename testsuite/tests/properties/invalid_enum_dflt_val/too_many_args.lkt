@@ -1,0 +1,5 @@
+import common
+
+@with_default(a, b) enum MyEnum {
+    case a, b, c
+}
