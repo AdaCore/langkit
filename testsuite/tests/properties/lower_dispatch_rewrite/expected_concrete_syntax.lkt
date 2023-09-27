@@ -49,7 +49,7 @@ class Ref: Atom {
     fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 }
 
-class MiddleRef: Ref {
+@synthetic class MiddleRef: Ref {
 
     fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 }

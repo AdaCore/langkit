@@ -40,12 +40,12 @@ class LiteralSequence: FooNode {
 class Name: FooNode implements TokenNode {
 }
 
-class SynthNode: FooNode {
+@synthetic class SynthNode: FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Literal]
 }
 
-class SynthNode2: FooNode {
+@synthetic class SynthNode2: FooNode {
     @parse_field name: Name
     @parse_field @nullable items: ASTList[FooNode, Literal]
 }

@@ -21,7 +21,7 @@ class Example: FooNode {
     @export @lazy my_field: SynthNode = SynthNode()
 }
 
-class SynthNode: FooNode {
+@synthetic class SynthNode: FooNode {
 }
 
 @metadata struct Metadata {

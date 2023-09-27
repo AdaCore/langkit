@@ -26,6 +26,6 @@ class RegularBlock: FooNode {
     @export @lazy synth: SynthNode = SynthNode(id=node.id)
 }
 
-class SynthNode: FooNode {
+@synthetic class SynthNode: FooNode {
     @parse_field id: Identifier
 }

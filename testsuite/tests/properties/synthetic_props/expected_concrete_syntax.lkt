@@ -13,5 +13,5 @@ class Example: FooNode implements TokenNode {
     @export @memoized fun get(): SynthNode = SynthNode()
 }
 
-class SynthNode: FooNode {
+@synthetic class SynthNode: FooNode {
 }

@@ -18,7 +18,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class DummySyntheticNode: FooNode {
+@synthetic class DummySyntheticNode: FooNode {
 }
 
 class ForeignDecl: FooNode {

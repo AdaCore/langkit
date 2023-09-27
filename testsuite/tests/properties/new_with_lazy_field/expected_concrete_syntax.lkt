@@ -15,7 +15,7 @@ class Example: FooNode {
     @export fun prop(): Int = node.new_node().lf()
 }
 
-class SynthNode: FooNode {
+@synthetic class SynthNode: FooNode {
 
     @lazy lf: Int = 42
 }

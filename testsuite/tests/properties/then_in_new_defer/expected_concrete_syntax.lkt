@@ -18,6 +18,6 @@ class Example: FooNode implements TokenNode {
     if true then SynthNode(f=n.do((n) => n, default_val=node)) else null[SynthNode]
 }
 
-class SynthNode: FooNode {
+@synthetic class SynthNode: FooNode {
     @parse_field f: FooNode
 }

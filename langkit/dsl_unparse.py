@@ -1489,6 +1489,9 @@ def emit_node_type(node_type):
         if node_type.has_abstract_list:
             quals.append("has_abstract_list")
 
+        if node_type.synthetic:
+            quals.append("synthetic")
+
         type_kind = "class"
 
         if node_type.is_enum_node:
