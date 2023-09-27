@@ -93,6 +93,18 @@ class ListNode(FooNode):
             lambda i, n: (n.text == String("2")) | (i == 0)
         )
 
+    @langkit_property(public=True)
+    def take_while_no_idx():
+        return Self.nb_list_entities.take_while(
+            lambda n: n.text != String("3")
+        )
+
+    @langkit_property(public=True)
+    def take_while_idx():
+        return Self.nb_list_entities.take_while(
+            lambda i, n: (n.text == String("1")) | (i == 0)
+        )
+
 
 class NumberNode(FooNode):
     token_node = True

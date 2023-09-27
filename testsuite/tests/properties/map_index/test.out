@@ -45,5 +45,12 @@ NumberNode(2)
 0: NumberNode(1)
 1: NumberNode(2)
 
+== p_take_while_no_idx ==
+NumberNode(1)
+NumberNode(2)
+
+== p_take_while_idx ==
+NumberNode(1)
+
 main.py: Done.
 Done

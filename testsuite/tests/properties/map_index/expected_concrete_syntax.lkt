@@ -54,6 +54,12 @@ class ListNode: FooNode {
     node.nb_list_entities().filtermap(
         (n, i) => node.create(i, n), (n, i) => (n.text() == "2") or (i == 0)
     )
+
+    @export fun take_while_no_idx(): Array[Entity[NumberNode]] =
+    node.nb_list_entities().take_while((n) => n.text() != "3")
+
+    @export fun take_while_idx(): Array[Entity[NumberNode]] =
+    node.nb_list_entities().take_while((n, i) => (n.text() == "1") or (i == 0))
 }
 
 class NumberNode: FooNode implements TokenNode {

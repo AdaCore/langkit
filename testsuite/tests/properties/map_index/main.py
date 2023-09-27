@@ -33,6 +33,8 @@ for prop in (
     "p_filtermap_elt_idx",
     "p_filtermap_filter_idx",
     "p_filtermap_all_idx",
+    "p_take_while_no_idx",
+    "p_take_while_idx",
 ):
     print(f"== {prop} ==")
     for item in getattr(u.root, prop):

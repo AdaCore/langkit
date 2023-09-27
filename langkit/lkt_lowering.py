@@ -2916,6 +2916,32 @@ class LktTypesLoader:
                     )
                     result = method_prefix.singleton
 
+                elif method_name == "take_while":
+                    lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
+                    element_arg, index_arg = lambda_info.largs
+                    assert element_arg is not None
+
+                    element_var = var_for_lambda_arg(
+                        lambda_info.scope, element_arg, 'item'
+                    )
+                    index_var = (
+                        None
+                        if index_arg is None else
+                        var_for_lambda_arg(
+                            lambda_info.scope, index_arg, "index", T.Int
+                        )
+                    )
+                    inner_expr = self.lower_expr(
+                        lambda_info.expr, lambda_info.scope, local_vars
+                    )
+                    result = E.Map.create_expanded(
+                        method_prefix,
+                        element_var,
+                        element_var,
+                        index_var,
+                        take_while_expr=inner_expr,
+                    )
+
                 elif method_name == "to_symbol":
                     args, kwargs = lower_args()
                     check_source_language(
