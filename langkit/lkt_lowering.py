@@ -2798,6 +2798,14 @@ class LktTypesLoader:
                         index_var,
                     )
 
+                elif method_name == "as_array":
+                    args, kwargs = lower_args()
+                    check_source_language(
+                        not args and not kwargs, "'as_array' takes no argument"
+                    )
+
+                    result = method_prefix.as_array
+
                 elif method_name == "as_int":
                     check_source_language(
                         len(call_expr.f_args) == 0,
@@ -3281,6 +3289,16 @@ class LktTypesLoader:
                     return E.SymbolLiteral(string_value)
                 else:
                     error("invalid string prefix")
+
+            elif isinstance(expr, L.SubscriptExpr):
+                null_cond = isinstance(expr, L.NullCondSubscriptExpr)
+                prefix = lower(expr.f_prefix)
+                index = lower(expr.f_index)
+                return (
+                    prefix.at(index)
+                    if isinstance(expr, L.NullCondSubscriptExpr) else
+                    prefix.at_or_raise(index)
+                )
 
             elif isinstance(expr, L.TryExpr):
                 return E.Try(

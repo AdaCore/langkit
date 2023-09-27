@@ -1,0 +1,25 @@
+== bad_arg_type.lkt ==
+<builtin>: error: Expected type Int, got Bool
+
+== correct.lkt ==
+Code generation was successful
+
+== kwargs.lkt ==
+kwargs.lkt:4:57: error: Expected ']', got '='
+4 |     @export fun bar_prop(): Int = node.singleton()[index=12]
+  |                                                         ^
+
+
+== no_arg.lkt ==
+no_arg.lkt:4:52: error: Expected '[', got ']'
+4 |     @export fun bar_prop(): Int = node.singleton()[]
+  |                                                    ^
+
+
+== too_many_args.lkt ==
+too_many_args.lkt:4:53: error: Expected ']', got ','
+4 |     @export fun bar_prop(): Int = node.singleton()[0, 12]
+  |                                                     ^
+
+
+lkt_compile: Done
