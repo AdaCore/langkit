@@ -28,7 +28,5 @@ class Literal: RootNode implements TokenNode {
     fun conv(): Entity[Literal] = self
 
     fun xref_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Equation =
-    (%domain(node.var, [arg1])) and (
-        %eq(node.var, arg2, conv_prop=BareLiteral.conv)
-    )
+    %domain(node.var, [arg1]) and %eq(node.var, arg2, conv_prop=BareLiteral.conv)
 }

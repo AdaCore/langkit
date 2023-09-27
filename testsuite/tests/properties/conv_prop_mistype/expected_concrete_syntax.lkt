@@ -17,9 +17,9 @@ class Examples: FooNode {
 
     @export fun do_solving(): Bool = (
         (
-            %eq(node.e1.lvar, node.e2.lvar, conv_prop=BarePlusExample.conv_prop)
-        ) and (%domain(node.e1.lvar, [node.e1]))
-    ) and (%domain(node.e2.lvar, [node.e2])).solve()
+            %eq(node.e1.lvar, node.e2.lvar, conv_prop=BarePlusExample.conv_prop) and %domain(node.e1.lvar, [node.e1])
+        ) and %domain(node.e2.lvar, [node.e2])
+    ).solve()
 }
 
 class PlusExample: FooNode {

@@ -34,7 +34,7 @@ class Dep: FooNode {
     }
 
     fun fqn(): String = match node {
-        case p: Prefix => p.prefix.fqn() & ((".") & p.suffix.fqn())
+        case p: Prefix => p.prefix.fqn() & ("." & p.suffix.fqn())
         case i: Id => i.text()
     }
 }

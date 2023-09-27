@@ -9,7 +9,7 @@ grammar foo_grammar {
 
     @export fun root1(): Array[Int] = [1]
 
-    @export fun root2(a: String, b: String): String = (a & (" + ")) & b
+    @export fun root2(a: String, b: String): String = (a & " + ") & b
 
     @export fun root3(): Bool = self.info.rebindings != null[EnvRebindings]
 }
@@ -24,10 +24,8 @@ class Name: Expr implements TokenNode {
     fun root1(): Array[Int] = node.super() & ([3])
 
     fun root2(a: String, b: String): String = (
-        ("<") & (
-            node.super((("[") & a) & ("]"), b=(("{") & b) & ("}"))
-        )
-    ) & (">")
+        "<" & node.super(("[" & a) & "]", b=("{" & b) & "}")
+    ) & ">"
 
     fun root3(): Bool = self.super()
 }

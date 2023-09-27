@@ -15,9 +15,7 @@ class Example: FooNode implements TokenNode {
     @memoized fun p2(n: FooNode): SynthNode =
     # Wrap the Defer creation in an If expression so that it is not
     # resolved too soon in order to trigger the bug.
-    if true then (
-        SynthNode(f=n.do((n) => n, default_val=node))
-    ) else (null[SynthNode])
+    if true then SynthNode(f=n.do((n) => n, default_val=node)) else null[SynthNode]
 }
 
 class SynthNode: FooNode {

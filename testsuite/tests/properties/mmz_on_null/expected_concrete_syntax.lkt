@@ -13,8 +13,8 @@ grammar foo_grammar {
     @memoized fun pred2(): Bool = not (node.parent.is_null)
 
     fun create_equation(with_pred1: Bool, n: Entity[FooNode]): Equation =
-    (%eq(node.v, n)) and (
-        if with_pred1 then (%predicate(BareFooNode.pred1, node.v)) else (%predicate(BareFooNode.pred2, node.v))
+    %eq(node.v, n) and (
+        if with_pred1 then %predicate(BareFooNode.pred1, node.v) else %predicate(BareFooNode.pred2, node.v)
     )
 
     @export fun p1(n: Entity[FooNode]): Bool =

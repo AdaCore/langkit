@@ -47,7 +47,7 @@ class Open: Item {
         val n = node.name.resolve();
 
         n.do(
-            (n) => n.children_env(), default_val=(null[LexicalEnv[FooNode]])
+            (n) => n.children_env(), default_val=null[LexicalEnv[FooNode]]
         )
     }
 }

@@ -25,7 +25,8 @@ class Example: FooNode {
     elif node.identity(b3) then 3
     else 3
 
-    @export fun cond_node(b: Bool): Entity[FooNode] =
-    if node.identity(b) then node
-    else (null[FooNode]).as_bare_entity
+    @export fun cond_node(b: Bool): Entity[FooNode] = (
+        if node.identity(b) then node
+        else null[FooNode]
+    ).as_bare_entity
 }

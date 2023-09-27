@@ -580,20 +580,28 @@ def expr_is_a(expr, *names):
     return any(expr.__class__.__name__ == n for n in names)
 
 
-def needs_parens(expr):
-    from langkit.expressions import (FieldAccess, Literal, AbstractVariable,
-                                     BigIntLiteral, Map, Quantifier, EnvGet,
-                                     Super)
+def needs_parens(expr, **ctx):
+    import langkit.expressions as E
     return not (
-        isinstance(expr, (FieldAccess, Literal, AbstractVariable, BigIntLiteral, EnvGet,
-                          Map, Quantifier, Super, int))
+        isinstance(expr, (
+            E.FieldAccess, E.Literal, E.AbstractVariable, E.BigIntLiteral,
+            E.EnvGet, E.Map, E.Quantifier, E.Super, E.No, E.Then, E.Match,
+            E.Cast, E.Let, E.ArrayLiteral, E.String, E.Predicate,
+            E.RefCategories, E.Bind, E.NPropagate, E.DynamicLexicalEnv,
+            E.StructUpdate, E.New, int
+        ))
         or expr_is_a(expr, "as_entity", "as_bare_entity", "children",
               "env_parent", "rebindings_parent", "parents", "parent", "root",
+              "env_node", "rebindings_new_env", "rebindings_old_env",
               "append_rebinding", "concat_rebindings", "env_node",
-              "rebindings_new_env", "rebindings_old_env", "get_value",
-              "solve", "is_referenced_from", "env_group", "length",
-              "can_reach", "as_int", "unique", "env_orphan",
-              "is_visible_from", "as_array", "rebind_env")
+              "get_value", "solve", "is_referenced_from", "env_group",
+              "length", "can_reach", "as_int", "unique", "env_orphan",
+              "is_visible_from", "as_array", "rebind_env", "at", "at_or_raise",
+              "domain", "to_symbol", "join")
+        or (
+            isinstance(expr, E.CollectionSingleton)
+            and not ctx.get("then_underscore_var", False)
+        )
     )
 
 
@@ -627,12 +635,11 @@ def emit_paren_expr(expr, **ctx):
 
     strn, has_coms = prepend_comments(expr, **ctx)
 
-    if not needs_parens(expr) and not has_coms:
-        return emit_paren(strn) if len(strn) > 40 else strn
-    elif isinstance(expr, Let):
-        return strn
-    else:
-        return emit_paren(strn, force=has_coms)
+    return (
+        emit_paren(strn, force=has_coms)
+        if needs_parens(expr) or (has_coms and not isinstance(expr, Let)) else
+        strn
+    )
 
 
 def emit_paren(strn, force=False):
@@ -668,6 +675,9 @@ def emit_expr(expr, **ctx):
 
     then_underscore_var = ctx.get('then_underscore_var')
     walker = ctx.get('walker')
+
+    def needs_parens(expr):
+        return langkit.dsl_unparse.needs_parens(expr, **ctx)
 
     def emit_lambda(expr, vars):
         vars_str = ", ".join(var_name(var) for var in vars)
@@ -773,7 +783,7 @@ def emit_expr(expr, **ctx):
         def emit_self():
             nonlocal coll
             with walker.self_arg():
-                coll = ee(expr.collection)
+                coll = ee_pexpr(expr.collection)
 
         def handle_map():
             emit_self()
@@ -834,17 +844,19 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, Quantifier):
         return emit_method_call(
-            ee(expr.collection),
+            ee_pexpr(expr.collection),
             expr.kind,
             [emit_lambda(expr.expr, [expr.element_var])]
         )
 
     elif isinstance(expr, Contains):
-        return emit_method_call(ee(expr.collection), "contains", [ee(expr.item)])
+        return emit_method_call(
+            ee_pexpr(expr.collection), "contains", [ee(expr.item)]
+        )
 
     elif isinstance(expr, Find):
         return emit_method_call(
-            ee(expr.collection),
+            ee_pexpr(expr.collection),
             "find",
             [emit_lambda(expr.expr, [expr.element_var])],
         )
@@ -1056,8 +1068,12 @@ def emit_expr(expr, **ctx):
               "rebindings_new_env", "rebindings_old_env"):
         # Field like expressions
         exprs = expr.sub_expressions
-        return emit_method_call(ee(exprs[0]), type(expr).__name__,
-                                lmap(ee, exprs[1:]), False)
+        return emit_method_call(
+            ee_pexpr(exprs[0]),
+            type(expr).__name__,
+            lmap(ee, exprs[1:]),
+            False,
+        )
 
     elif is_a("append_rebinding", "concat_rebindings", "env_node", "get_value",
               "solve", "is_referenced_from", "env_group", "length", "can_reach",
@@ -1065,8 +1081,9 @@ def emit_expr(expr, **ctx):
               "rebind_env"):
         # Method like expressions
         exprs = expr.sub_expressions
-        return emit_method_call(ee(exprs[0]), type(expr).__name__,
-                                lmap(ee, exprs[1:]))
+        return emit_method_call(
+            ee_pexpr(exprs[0]), type(expr).__name__, lmap(ee, exprs[1:])
+        )
 
     elif isinstance(expr, EnumLiteral):
         return expr.value.dsl_name
@@ -1087,7 +1104,7 @@ def emit_expr(expr, **ctx):
         if expr.categories:
             args.append('categories={}'.format(ee(expr.categories)))
         return emit_method_call(
-            ee(expr.env),
+            ee_pexpr(expr.env),
             "get_first" if expr.only_first else "get",
             args
         )
@@ -1110,7 +1127,7 @@ def emit_expr(expr, **ctx):
         if expr.arguments:
             with walker.method_call(expr.field):
                 field_coms = walker.emit_comments()
-                receiver_str = ee(expr.receiver)
+                receiver_str = ee_pexpr(expr.receiver)
 
                 for i in range(walker.arg_count()):
                     kw = walker.arg_keyword(i)
@@ -1125,7 +1142,7 @@ def emit_expr(expr, **ctx):
                         has_any_commented_arg |= arg_coms != ""
         else:
             field_coms = ""
-            receiver_str = ee(expr.receiver)
+            receiver_str = ee_pexpr(expr.receiver)
 
         return field_coms + emit_method_call(
             receiver_str,
@@ -1174,7 +1191,9 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, CollectionSingleton):
         if then_underscore_var:
-            return emit_method_call(ee(expr.expr), "singleton")
+            return emit_method_call(
+                ee_pexpr(expr.expr), "singleton"
+            )
         else:
             return "[{}]".format(ee(expr.expr))
 

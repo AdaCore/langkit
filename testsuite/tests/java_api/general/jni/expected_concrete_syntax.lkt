@@ -34,7 +34,7 @@ enum Color {
     @export fun int_double(c: BigInt): BigInt = c + c
 
     @export fun me(b: Bool): FooNodeStruct = FooNodeStruct(
-        node=if b then self else (null[Entity[FooNode]])
+        node=if b then self else null[Entity[FooNode]]
     )
 
     @export fun get_node(node_struct: FooNodeStruct): Entity[FooNode] =

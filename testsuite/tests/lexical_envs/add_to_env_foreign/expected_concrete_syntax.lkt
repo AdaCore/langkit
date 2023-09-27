@@ -26,7 +26,7 @@ class ForeignDecl: FooNode {
     @parse_field id: Id
 
     @memoized fun node_for_env(): FooNode =
-    if node.create_synthetic.as_bool() then (DummySyntheticNode()) else node
+    if node.create_synthetic.as_bool() then DummySyntheticNode() else node
 }
 
 @abstract class Id: FooNode {
