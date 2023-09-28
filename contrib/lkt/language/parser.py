@@ -4176,7 +4176,7 @@ lkt_grammar.add_rules(
         G.if_expr,
         G.raise_expr,
         G.try_expr,
-        G.logic,
+        G.basic_expr,
     ),
 
     match_expr=MatchExpr(
@@ -4211,11 +4211,6 @@ lkt_grammar.add_rules(
         ),
     ),
 
-    logic=GOr(
-        LogicExpr("%", G.basic_expr),
-        G.basic_expr
-    ),
-
     basic_expr=GOr(
         CallExpr(G.basic_expr, "(", G.params, ")"),
         NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
@@ -4231,6 +4226,8 @@ lkt_grammar.add_rules(
         ),
         DotExpr(G.basic_expr, ".", G.ref_id),
         NullCondDottedName(G.basic_expr, "?", ".", G.ref_id),
+        LogicExpr("%", CallExpr(G.ref_id, "(", G.params, ")")),
+        LogicExpr("%", G.ref_id),
         G.term
     ),
 
