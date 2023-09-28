@@ -20,7 +20,7 @@ templates: Dict[str, str] = {}
 
 
 def fqn(prop):
-    return "{}.{}".format(prop.struct.name.camel, prop._original_name)
+    return "{}.{}".format(type_name(prop.struct), prop._original_name)
 
 
 class DSLWalker:

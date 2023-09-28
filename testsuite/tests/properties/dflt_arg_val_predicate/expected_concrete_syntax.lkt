@@ -18,7 +18,7 @@ class Example: FooNode {
     flag1 and (n.is_null) and flag2
 
     @export fun prop1(): Bool = {
-        val eq = %predicate(BareExample.predicate1, node.var1, node.var2);
+        val eq = %predicate(Example.predicate1, node.var1, node.var2);
 
         eq.solve()
     }
@@ -30,7 +30,7 @@ class Example: FooNode {
         val eq = {
             bind my_var = 1;
 
-            %predicate(BareExample.predicate2, node.var1, node.var2)
+            %predicate(Example.predicate2, node.var1, node.var2)
         };
 
         eq.solve()
@@ -43,7 +43,7 @@ class Example: FooNode {
         val eq = {
             bind my_var = 1;
 
-            %predicate(BareExample.predicate3, node.var1, node.var2)
+            %predicate(Example.predicate3, node.var1, node.var2)
         };
 
         eq.solve()

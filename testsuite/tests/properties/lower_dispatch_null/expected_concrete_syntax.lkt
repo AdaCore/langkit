@@ -19,6 +19,6 @@ class Example: SomeNode {
     fun test_prop(): Bool = true
 
     @export fun solve(): Bool = (
-        %domain(node.v, [null[Entity[FooNode]]]) and %predicate(BareSomeNode.test_prop, node.v)
+        %domain(node.v, [null[Entity[FooNode]]]) and %predicate(SomeNode.test_prop, node.v)
     ).solve()
 }

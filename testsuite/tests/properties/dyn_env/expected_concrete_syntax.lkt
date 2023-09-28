@@ -25,10 +25,10 @@ class CallExpr: FooNode {
     @parse_field args: ASTList[FooNode, Expr]
 
     @lazy args_env: LexicalEnv[FooNode] =
-    DynamicLexicalEnv(BareCallExpr.args_assocs_getter)
+    DynamicLexicalEnv(CallExpr.args_assocs_getter)
 
     @lazy arg_exprs_env: LexicalEnv[FooNode] =
-    DynamicLexicalEnv(BareCallExpr.arg_exprs_assocs_getter, assoc_resolver=BareExpr.resolve)
+    DynamicLexicalEnv(CallExpr.arg_exprs_assocs_getter, assoc_resolver=Expr.resolve)
 
     ## For each argument, associate its name to the expression passed in this
     ## call.

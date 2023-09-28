@@ -21,7 +21,7 @@ class Plus: FooNode {
 
     @export fun resolve(lhs: Entity[FooNode], rhs: Entity[FooNode]): Entity[FooNode] =
     {
-        val eq = [%propagate(node.v, BareLiteral.combiner, node.lhs.v, node.rhs.v), %eq(node.lhs.v, lhs), %eq(node.rhs.v, rhs)];
+        val eq = [%propagate(node.v, Literal.combiner, node.lhs.v, node.rhs.v), %eq(node.lhs.v, lhs), %eq(node.rhs.v, rhs)];
 
         if eq.solve() then node.v.get_value() else (
             raise[Entity[FooNode]] PropertyError("unreachable")
