@@ -913,10 +913,10 @@ def emit_expr(expr, **ctx):
         )
 
     elif isinstance(expr, All):
-        return ee(expr.equation_array)
+        return "%all({})".format(ee(expr.equation_array))
 
     elif isinstance(expr, Any):
-        return ee(expr.equation_array)
+        return "%any({})".format(ee(expr.equation_array))
 
     elif isinstance(expr, Match):
         with walker.method_call("match"):
