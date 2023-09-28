@@ -1001,6 +1001,93 @@ def parse_annotations(
     return annotation_class(**values)  # type: ignore
 
 
+@dataclass
+class FunctionSignature:
+    """
+    Specification of required/accepted arguments for a function.
+    """
+
+    positional_args: int
+    """
+    Number of positional-only arguments that are required to call such
+    functions.
+    """
+
+    keyword_args: set[str]
+    """
+    Accepted keyword arguments, all optional.
+    """
+
+    def match(self, ctx: CompileCtx, call: L.CallExpr) -> ParsedArgs:
+        """
+        Match call arguments against this signature. If successful, return the
+        parsed arguments. Abort with a user error otherwise.
+        """
+        result = ParsedArgs([], {})
+        for arg in call.f_args:
+            if arg.f_name:
+                # This is a keyword argument
+                name = arg.f_name.text
+                with ctx.lkt_context(arg.f_name):
+                    check_source_language(
+                        name not in result.keyword_args,
+                        "keyword arguments can be passed at most once",
+                    )
+                    check_source_language(
+                        name in self.keyword_args,
+                        "unexpected keyword argument",
+                    )
+                result.keyword_args[name] = arg.f_value
+
+            else:
+                # This is a positional argument
+                result.positional_args.append(arg.f_value)
+
+        # Make sure we got the expected number of positional arguments
+        if len(result.positional_args) != self.positional_args:
+            loc_node = (
+                call.f_name.f_suffix
+                if isinstance(call.f_name, L.DotExpr) else
+                call
+            )
+            with ctx.lkt_context(loc_node):
+                error(
+                    f"{self.positional_args} positional argument(s) expected,"
+                    f" got {len(result.positional_args)}"
+                )
+        return result
+
+
+@dataclass
+class ParsedArgs:
+    """
+    Arguments parsed from a call and a corresponding function signature.
+    """
+    positional_args: list[L.Expr]
+    keyword_args: dict[str, L.Expr]
+
+
+collection_iter_signature = FunctionSignature(1, set())
+"""
+Signature for ".all"/".any".
+"""
+
+do_signature = FunctionSignature(1, {"default_val"})
+"""
+Signature for ".do".
+"""
+
+empty_signature = FunctionSignature(0, set())
+"""
+Signature for a function that takes no argument.
+"""
+
+filtermap_signature = FunctionSignature(2, set())
+"""
+Signature for ".filtermap".
+"""
+
+
 def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     """
     Create and populate a lexer from a Lktlang unit.
@@ -2412,10 +2499,9 @@ class LktTypesLoader:
             Information about the call to a builtin operation that takes a
             lambda as the first argument, plus optional keyword arguments.
             """
-            kwargs: dict[str, L.Expr | None]
+            kwargs: dict[str, L.Expr]
             """
-            Keyword arguments passed after the lambda expression, with null
-            values for absent keywords.
+            Keyword arguments passed after the lambda expression.
             """
 
             scope: Scope
@@ -2491,9 +2577,9 @@ class LktTypesLoader:
 
         def extract_lambda_and_kwargs(
             expr: L.CallExpr,
+            signature: FunctionSignature,
             min_lambda_args: int,
             max_lambda_args: int | None = None,
-            keyword_args: set[str] = set(),
         ) -> LambdaInfo:
             """
             Extract arguments from a call expression, expecting the first
@@ -2501,43 +2587,28 @@ class LktTypesLoader:
 
             :param expr: Call expression that is supposed to pass the lambda
                 expression.
+            :param signature: Signature for the pseudo-function that is called.
             :param min_lambda_args: Minimum number of arguments expected for
                 the lambda expression.
             :param max_lambda_args: Maximum number of arguments expected for
                 the lambda expression. If left to None, expect exactly
                 "min_lambda_args".
             """
-            args, kwargs = extract_call_args(expr)
-
             # Make sure the only positional argument is a lambda expression
-            if len(args) != 1 or not isinstance(args[0], L.LambdaExpr):
-                loc_node = args[0] if len(args) > 0 else expr
-                with self.ctx.lkt_context(loc_node):
-                    error(
-                        "exactly one positional argument expected: a lambda"
-                        " expression"
-                    )
+            parsed_args = signature.match(self.ctx, expr)
+            lambda_expr = parsed_args.positional_args[0]
+            if not isinstance(lambda_expr, L.LambdaExpr):
+                with self.ctx.lkt_context(lambda_expr):
+                    error("lambda expression expected")
 
             # Extract info from the lambda expression itself
             scope, lambda_args, lambda_body = extract_lambda(
-                args[0], min_lambda_args, max_lambda_args
+                lambda_expr, min_lambda_args, max_lambda_args
             )
 
-            # Reject invalid keyword arguments
-            for arg in expr.f_args:
-                if (
-                    arg.f_name is not None
-                    and arg.f_name.text not in keyword_args
-                ):
-                    with self.ctx.lkt_context(arg.f_name):
-                        error("invalid keyword argument")
-
-            # For convenience, add null values for absent keyword arguments
-            kwargs_ret: dict[str, L.Expr | None] = dict(kwargs)
-            for name in keyword_args:
-                kwargs_ret.setdefault(name, None)
-
-            return LambdaInfo(kwargs_ret, scope, lambda_args, lambda_body)
+            return LambdaInfo(
+                parsed_args.keyword_args, scope, lambda_args, lambda_body
+            )
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """
@@ -2709,7 +2780,14 @@ class LktTypesLoader:
             elif isinstance(expr, L.CallExpr):
                 call_expr = expr
                 call_name = call_expr.f_name
-                null_cond = isinstance(expr, L.NullCondCallExpr)
+
+                # TODO: get rid of this syntax? It is never legal for now...
+                if isinstance(expr, L.NullCondCallExpr):
+                    with self.ctx.lkt_context(expr):
+                        error(
+                            "'?' must be attached to the method prefix, not to"
+                            " the call itself",
+                        )
 
                 def lower_args() -> Tuple[List[AbstractExpression],
                                           Dict[str, AbstractExpression]]:
@@ -2721,62 +2799,63 @@ class LktTypesLoader:
                     kwargs = {k: lower(v) for k, v in kwarg_nodes.items()}
                     return args, kwargs
 
-                # Depending on its name, a call can have different meanings...
-
-                # If the call name is an identifier or a generic instantiation,
-                # it has to be a reference to a struct type, and thus the call
-                # is a struct constructor.
-                if isinstance(call_name, (L.RefId, L.GenericInstantiation)):
-                    with self.ctx.lkt_context(call_expr):
-                        check_source_language(
-                            not null_cond,
-                            "Struct/node creation cannot be a null-conditional"
-                            " operation",
-                        )
-
-                    # Resolve the type that call_name designates
-                    if isinstance(call_name, L.RefId):
-                        struct_type = self.resolve_type_expr(call_name, env)
-                    else:
-                        generic = self.resolve_generic(call_name.f_name, env)
-                        type_args = call_name.f_args
-                        if generic != self.generics.entity:
-                            error(
-                                f"only {self.generics.entity.name} is the only"
-                                " legal generic in this context"
-                            )
-                        with self.ctx.lkt_context(type_args):
-                            check_source_language(
-                                len(type_args) == 1,
-                                f"{generic.name} expects one type argument:"
-                                " the node type"
-                            )
-
-                        # TODO: ensure that node_type is indeed a node type
-                        node_type = self.resolve_type(type_args[0], env)
-                        struct_type = node_type.entity
-
-                    # Then build the new expression for the struct type
+                def lower_new(type_ref: TypeRepo.Defer) -> AbstractExpression:
+                    """
+                    Consider that this call creates a new struct, return the
+                    corresponding New expression.
+                    """
                     args, kwargs = lower_args()
                     check_source_language(
                         len(args) == 0,
                         "Positional arguments not allowed for struct"
                         " constructors",
                     )
-                    return E.New(struct_type, **kwargs)
+                    return E.New(type_ref, **kwargs)
 
-                # Otherwise the call has to be a dot expression, for a method
-                # invocation.
-                if not isinstance(call_name, L.BaseDotExpr):
+                # Depending on its name, a call can have different meanings...
+
+                # If it is a simple identifier...
+                if isinstance(call_name, L.RefId):
+                    entity = self.resolve_entity(call_name, env)
+
+                    # It can be a New expression
+                    if isinstance(
+                        entity, (Scope.BuiltinType, Scope.UserType)
+                    ):
+                        return lower_new(entity.defer)
+
+                    # Everything else is illegal
                     with self.ctx.lkt_context(call_name):
                         error("invalid call prefix")
 
-                if null_cond:
-                    with self.ctx.lkt_context(expr):
+                # If the call name is a generic instantiation, it has to be a
+                # reference to a struct type, and thus the call is a New
+                # expression.
+                elif isinstance(call_name, L.GenericInstantiation):
+                    generic = self.resolve_generic(call_name.f_name, env)
+                    type_args = call_name.f_args
+                    if generic != self.generics.entity:
                         error(
-                            "'?' must be attached to the method prefix, not to"
-                            " the call itself",
+                            f"only {self.generics.entity.name} is the only"
+                            " legal generic in this context"
                         )
+                    with self.ctx.lkt_context(type_args):
+                        check_source_language(
+                            len(type_args) == 1,
+                            f"{generic.name} expects one type argument:"
+                            " the node type"
+                        )
+
+                    # TODO: ensure that node_type is indeed a node type
+                    node_type = self.resolve_type(type_args[0], env)
+                    return lower_new(node_type.entity)
+
+                # Otherwise the call has to be a dot expression, for a method
+                # invocation.
+                elif not isinstance(call_name, L.BaseDotExpr):
+                    with self.ctx.lkt_context(call_name):
+                        error("invalid call prefix")
+
                 null_cond = isinstance(call_name, L.NullCondDottedName)
 
                 # TODO: introduce a pre-lowering pass to extract the list of
@@ -2795,7 +2874,9 @@ class LktTypesLoader:
                     method_prefix = null_cond_var
 
                 if method_name in ("all", "any"):
-                    lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
+                    lambda_info = extract_lambda_and_kwargs(
+                        call_expr, collection_iter_signature, 1, 2
+                    )
                     element_arg, index_arg = lambda_info.largs
                     assert element_arg is not None
 
@@ -2823,23 +2904,16 @@ class LktTypesLoader:
                     )
 
                 elif method_name == "as_array":
-                    args, kwargs = lower_args()
-                    check_source_language(
-                        not args and not kwargs, "'as_array' takes no argument"
-                    )
-
+                    empty_signature.match(self.ctx, call_expr)
                     result = method_prefix.as_array
 
                 elif method_name == "as_int":
-                    check_source_language(
-                        len(call_expr.f_args) == 0,
-                        "'as_int' method takes no argument",
-                    )
+                    empty_signature.match(self.ctx, call_expr)
                     result = method_prefix.as_int
 
                 elif method_name == "do":
                     lambda_info = extract_lambda_and_kwargs(
-                        call_expr, 1, 1, {"default_val"}
+                        call_expr, do_signature, 1, 1
                     )
                     arg_node = lambda_info.largs[0]
                     assert arg_node is not None
@@ -2855,9 +2929,9 @@ class LktTypesLoader:
                     )
 
                     default_val = (
-                        None
-                        if lambda_info.kwargs["default_val"] is None else
                         lower(lambda_info.kwargs["default_val"])
+                        if "default_val" in lambda_info.kwargs else
+                        None
                     )
 
                     result = E.Then.create_from_exprs(
@@ -2868,7 +2942,9 @@ class LktTypesLoader:
                     )
 
                 elif method_name == "filter":
-                    lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
+                    lambda_info = extract_lambda_and_kwargs(
+                        call_expr, collection_iter_signature, 1, 2
+                    )
                     element_arg, index_arg = lambda_info.largs
                     assert element_arg is not None
 
@@ -2897,28 +2973,24 @@ class LktTypesLoader:
 
                 elif method_name == "filtermap":
                     # Validate arguments for ".filtermap()" itself
-                    call_args, call_kwargs = extract_call_args(call_expr)
-                    if len(call_args) != 2 or any(
-                        not isinstance(a, L.LambdaExpr)
-                        for a in call_args
-                    ):
-                        with self.ctx.lkt_context(call_expr):
-                            error(
-                                "exactly two positional arguments expected:"
-                                " lambda expressions"
-                            )
-                    for _, a in call_kwargs.items():
-                        with self.ctx.lkt_context(a.parent):
-                            error("no keyword argument expected")
+                    parsed_args = filtermap_signature.match(
+                        self.ctx, call_expr
+                    )
+                    for arg in parsed_args.positional_args:
+                        if not isinstance(arg, L.LambdaExpr):
+                            with self.ctx.lkt_context(arg):
+                                error("lambda expressions expceted")
 
                     # Validate and analyze the two lambda expressions
-                    assert isinstance(call_args[0], L.LambdaExpr)
+                    lambda_0 = parsed_args.positional_args[0]
+                    assert isinstance(lambda_0, L.LambdaExpr)
                     map_scope, map_args, map_body = extract_lambda(
-                        call_args[0], 1, 2
+                        lambda_0, 1, 2
                     )
-                    assert isinstance(call_args[1], L.LambdaExpr)
+                    lambda_1 = parsed_args.positional_args[1]
+                    assert isinstance(lambda_1, L.LambdaExpr)
                     filter_scope, filter_args, filter_body = extract_lambda(
-                        call_args[1], 1, 2
+                        lambda_1, 1, 2
                     )
 
                     # We need to have two different scopes for the two lambda
@@ -2972,7 +3044,9 @@ class LktTypesLoader:
                     )
 
                 elif method_name == "find":
-                    lambda_info = extract_lambda_and_kwargs(call_expr, 1, 1)
+                    lambda_info = extract_lambda_and_kwargs(
+                        call_expr, collection_iter_signature, 1, 1
+                    )
                     elt_arg = lambda_info.largs[0]
                     assert elt_arg is not None
 
@@ -2988,14 +3062,13 @@ class LktTypesLoader:
                     )
 
                 elif method_name == "length":
-                    check_source_language(
-                        len(call_expr.f_args) == 0,
-                        "'length' method takes no argument",
-                    )
+                    empty_signature.match(self.ctx, call_expr)
                     result = getattr(method_prefix, "length")
 
                 elif method_name in ("map", "mapcat"):
-                    lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
+                    lambda_info = extract_lambda_and_kwargs(
+                        call_expr, collection_iter_signature, 1, 2
+                    )
                     element_arg, index_arg = lambda_info.largs
                     assert element_arg is not None
 
@@ -3023,14 +3096,13 @@ class LktTypesLoader:
                     )
 
                 elif method_name == "singleton":
-                    check_source_language(
-                        len(call_expr.f_args) == 0,
-                        "'singleton' takes no argument",
-                    )
+                    empty_signature.match(self.ctx, call_expr)
                     result = method_prefix.singleton
 
                 elif method_name == "take_while":
-                    lambda_info = extract_lambda_and_kwargs(call_expr, 1, 2)
+                    lambda_info = extract_lambda_and_kwargs(
+                        call_expr, collection_iter_signature, 1, 2
+                    )
                     element_arg, index_arg = lambda_info.largs
                     assert element_arg is not None
 
@@ -3056,23 +3128,12 @@ class LktTypesLoader:
                     )
 
                 elif method_name == "to_symbol":
-                    args, kwargs = lower_args()
-                    check_source_language(
-                        not args and not kwargs,
-                        "'to_symbol' takes no argument",
-                    )
-
+                    empty_signature.match(self.ctx, call_expr)
                     result = method_prefix.to_string  # type: ignore
 
                 elif method_name == "unique":
-                    args, kwargs = lower_args()
-                    check_source_language(
-                        not args and not kwargs, "'unique' takes no argument"
-                    )
-
-                    # ".unique" works with our auto_attr magic: not worth type
-                    # checking until we get rid of the syntax magic.
-                    result = method_prefix.unique  # type: ignore
+                    empty_signature.match(self.ctx, call_expr)
+                    result = method_prefix.unique
 
                 else:
                     # Otherwise, this call must be a method invocation. Note
