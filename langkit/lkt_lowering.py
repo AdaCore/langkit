@@ -105,12 +105,52 @@ def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
     return expr.text == 'true'
 
 
-def ada_id_for(n: str) -> names.Name:
+def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
     """
     Turn the lower cased name ``n`` into a valid Ada identifier (for code
     generation).
     """
-    return names.Name.check_from_lower("ignored" if n == "_" else n)
+    source_name = id.text
+    var_name = (
+        names.Name("Ignored")
+        if source_name == "_" else
+        name_from_lower(ctx, "variable", id)
+    )
+    return source_name, var_name
+
+
+def name_from_lower(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
+    """
+    Validate "id" as a lower-case name and return the corresponding ``Name``
+    instance.
+    """
+    with ctx.lkt_context(id):
+        try:
+            names.check_common(id.text)
+        except ValueError as exc:
+            error(str(exc))
+        try:
+            names.check_lower(id.text)
+        except ValueError:
+            error(f"lower case expected for {kind} names")
+        return names.Name.from_lower(id.text)
+
+
+def name_from_camel(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
+    """
+    Validate "id" as a camel-case name and return the corresponding ``Name``
+    instance.
+    """
+    with ctx.lkt_context(id):
+        try:
+            names.check_common(id.text)
+        except ValueError as exc:
+            error(str(exc))
+        try:
+            names.check_camel(id.text)
+        except ValueError as exc:
+            error(f"camel case expected for {kind} names ({exc})")
+        return names.Name.from_camel(id.text)
 
 
 def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
@@ -952,6 +992,9 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     full_lexer = find_toplevel_decl(ctx, lkt_units, L.LexerDecl, 'lexer')
     assert isinstance(full_lexer.f_decl, L.LexerDecl)
 
+    # Ensure the lexer name has proper casing
+    _ = name_from_lower(ctx, "lexer", full_lexer.f_decl.f_syn_name)
+
     with ctx.lkt_context(full_lexer):
         lexer_annot = parse_annotations(
             ctx, LexerAnnotations, full_lexer, root_scope
@@ -1013,7 +1056,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         """
         with ctx.lkt_context(f):
             # Create the token family, if needed
-            name = names.Name.check_from_lower(f.f_syn_name.text)
+            name = name_from_lower(ctx, "token family", f.f_syn_name)
             token_set, _ = token_family_sets.setdefault(
                 name,
                 (set(), Location.from_lkt_node(f)),
@@ -1079,7 +1122,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             token_name = (
                 None
                 if token_lower_name == "_"
-                else names.Name.check_from_lower(token_lower_name)
+                else name_from_lower(ctx, "token", r.f_decl.f_syn_name)
             )
 
             check_source_language(
@@ -1117,8 +1160,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         check_no_annotations(full_decl)
         decl = full_decl.f_decl
         assert isinstance(decl, L.ValDecl)
-        lower_name = decl.f_syn_name.text
-        name = names.Name.check_from_lower(lower_name)
+        name = name_from_lower(ctx, "pattern", decl.f_syn_name)
 
         with ctx.lkt_context(decl):
             check_source_language(name not in patterns,
@@ -1295,6 +1337,9 @@ def create_grammar(ctx: CompileCtx,
     full_grammar = find_toplevel_decl(ctx, lkt_units, L.GrammarDecl, 'grammar')
     assert isinstance(full_grammar.f_decl, L.GrammarDecl)
 
+    # Ensure the grammar name has proper casing
+    _ = name_from_lower(ctx, "grammar", full_grammar.f_decl.f_syn_name)
+
     with ctx.lkt_context(full_grammar):
         parse_annotations(ctx, GrammarAnnotations, full_grammar, root_scope)
 
@@ -1311,6 +1356,9 @@ def create_grammar(ctx: CompileCtx,
             if not isinstance(r, L.GrammarRuleDecl):
                 error(f"grammar rule expected, got {r.p_decl_type_name}")
             rule_name = r.f_syn_name.text
+
+            # Ensure the parsing rule name has proper casing
+            _ = name_from_lower(ctx, "parsing rule", r.f_syn_name)
 
             # Register this rule as a main rule or an entry point if the
             # corresponding annotations are present.
@@ -1745,7 +1793,12 @@ class LktTypesLoader:
 
         # Create dynamic variables
         for dyn_var_decl in dyn_vars:
-            name = dyn_var_decl.f_syn_name.text
+            name_node = dyn_var_decl.f_syn_name
+
+            # Ensure the dynamic variable name has proper casing
+            _ = name_from_lower(self.ctx, "dynamic variable", name_node)
+
+            name = name_node.text
             dyn_var = E.DynamicVariable(
                 name=name,
                 type=self.resolve_type(dyn_var_decl.f_decl_type, root_scope),
@@ -2093,6 +2146,10 @@ class LktTypesLoader:
         """
         decl = full_decl.f_decl
         assert isinstance(decl, L.FieldDecl)
+
+        # Ensure the dynamic variable name has proper casing
+        _ = name_from_lower(self.ctx, "type member", decl.f_syn_name)
+
         annotations = parse_annotations(
             self.ctx, FieldAnnotations, full_decl, self.root_scope
         )
@@ -2299,10 +2356,11 @@ class LktTypesLoader:
             :param prefix: Lower-case prefix for the name of the variable in
                 the generated code.
             """
+            source_name, _ = extract_var_name(self.ctx, arg.f_syn_name)
             with AbstractExpression.with_location(Location.from_lkt_node(arg)):
                 result = AbstractVariable(
-                    names.Name.check_from_lower(f"{prefix}_{next(counter)}"),
-                    source_name=arg.f_syn_name.text,
+                    names.Name.from_lower(f"{prefix}_{next(counter)}"),
+                    source_name=source_name,
                     type=type,
                     create_local=create_local,
                 )
@@ -2557,7 +2615,9 @@ class LktTypesLoader:
                         # Create the AbstractVariable for this declaration
                         source_name = v.f_syn_name.text
                         source_var = v
-                        v_name = ada_id_for(source_name)
+                        source_name, v_name = extract_var_name(
+                            self.ctx, v.f_syn_name
+                        )
                         v_type = (
                             resolve_type(self.resolve_type(v.f_decl_type, env))
                             if v.f_decl_type else
@@ -2839,6 +2899,9 @@ class LktTypesLoader:
                     element_var = var_for_lambda_arg(
                         map_scope, map_args[0], "item"
                     )
+                    name_from_lower(
+                        self.ctx, "argument", filter_args[0].f_syn_name
+                    )
                     add_lambda_arg_to_scope(
                         filter_scope, filter_args[0], element_var
                     )
@@ -2849,6 +2912,9 @@ class LktTypesLoader:
                             map_scope, map_args[1], "index", T.Int
                         )
                         if filter_args[1] is not None:
+                            name_from_lower(
+                                self.ctx, "argument", filter_args[1].f_syn_name
+                            )
                             add_lambda_arg_to_scope(
                                 filter_scope, filter_args[1], index_var
                             )
@@ -3267,8 +3333,9 @@ class LktTypesLoader:
                 )
             with AbstractExpression.with_location(Location.from_lkt_node(a)):
                 arg = Argument(
-                    name=ada_id_for(source_name),
+                    name=name_from_lower(self.ctx, "argument", a.f_syn_name),
                     type=self.resolve_type(a.f_decl_type, scope),
+                    source_name=source_name,
                 )
             if annotations.ignored:
                 arg.var.tag_ignored()
@@ -3385,18 +3452,7 @@ class LktTypesLoader:
         for full_decl in decls:
             with self.ctx.lkt_context(full_decl):
                 decl = full_decl.f_decl
-
-                # Check field name conformity
-                name_text = decl.f_syn_name.text
-                check_source_language(
-                    not name_text.startswith('_'),
-                    'Underscore-prefixed field names are not allowed'
-                )
-                check_source_language(
-                    name_text.lower() == name_text,
-                    'Field names must be lower-case'
-                )
-                name = names.Name.check_from_lower(name_text)
+                name = name_from_lower(self.ctx, "field", decl.f_syn_name)
 
                 field: AbstractNodeData
 
@@ -3590,7 +3646,7 @@ class LktTypesLoader:
             is_bool_node = True
 
         result = ASTNodeType(
-            names.Name.check_from_camel(decl.f_syn_name.text),
+            name_from_camel(self.ctx, "node type", decl.f_syn_name),
             location=loc,
             doc=self.ctx.lkt_doc(decl),
             base=base_type,
@@ -3674,7 +3730,11 @@ class LktTypesLoader:
             )
             alt_descriptions = [
                 EnumNodeAlternative(
-                    names.Name.check_from_camel(alt.f_syn_name.text),
+                    name_from_camel(
+                        self.ctx,
+                        "enum node alternative",
+                        alt.f_syn_name,
+                    ),
                     enum_node,
                     None,
                     Location.from_lkt_node(alt)
@@ -3723,7 +3783,7 @@ class LktTypesLoader:
         # Decode the list of enum literals and validate them
         value_names = []
         for lit in decl.f_literals:
-            name = lit.f_syn_name.text
+            name = name_from_lower(self.ctx, "enum value", lit.f_syn_name)
             check_source_language(
                 name not in value_names,
                 'The "{}" literal is present twice'
@@ -3731,10 +3791,10 @@ class LktTypesLoader:
             value_names.append(name)
 
         result = EnumType(
-            name=names.Name.check_from_camel(decl.f_syn_name.text),
+            name=name_from_camel(self.ctx, "enum type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl),
-            value_names=[names.Name.check_from_lower(n) for n in value_names],
+            value_names=value_names,
         )
         assert isinstance(decl.parent, L.FullDecl)
         result._doc_location = Location.from_lkt_node(decl.parent.f_doc)
@@ -3769,7 +3829,7 @@ class LktTypesLoader:
         )
 
         result = StructType(
-            name=names.Name.check_from_camel(name),
+            name_from_camel(self.ctx, "struct type", decl.f_syn_name),
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl),
             fields=fields,

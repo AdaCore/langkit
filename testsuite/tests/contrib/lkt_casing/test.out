@@ -1,0 +1,97 @@
+== block_var.lkt ==
+block_var.lkt:16:13: error: lower case expected for variable names
+16 |         val N = node;
+   |             ^
+
+
+== dynvar.lkt ==
+dynvar.lkt:11:8: error: lower case expected for dynamic variable names
+11 | dynvar MyVar: Int
+   |        ^^^^^
+
+
+== enum_node_alt.lkt ==
+enum_node_alt.lkt:16:16: error: camel case expected for enum node alternative names (first letter of camel case names must be an upper case letter: 'minus')
+16 |     case Plus, minus
+   |                ^^^^^
+
+
+== enum_type.lkt ==
+enum_type.lkt:11:6: error: camel case expected for enum type names (first letter of camel case names must be an upper case letter: 'myenum')
+11 | enum myenum {
+   |      ^^^^^^
+
+
+== enum_value.lkt ==
+enum_value.lkt:12:16: error: lower case expected for enum value names
+12 |     case plus, Minus
+   |                ^^^^^
+
+
+== grammar.lkt ==
+grammar.lkt:7:9: error: lower case expected for grammar names
+7 | grammar FooGrammar {
+  |         ^^^^^^^^^^
+
+
+== lexer.lkt ==
+lexer.lkt:1:7: error: lower case expected for lexer names
+1 | lexer FooLexer {
+  |       ^^^^^^^^
+
+
+== map_var.lkt ==
+map_var.lkt:16:31: error: lower case expected for variable names
+16 |         node.singleton().map((N) => n.as_bare_entity)
+   |                               ^
+
+
+== parsing_rule.lkt ==
+parsing_rule.lkt:8:16: error: lower case expected for parsing rule names
+8 |     @main_rule MainRule <- Example("example")
+  |                ^^^^^^^^
+
+
+== pattern.lkt ==
+pattern.lkt:2:9: error: lower case expected for pattern names
+2 |     val MyPattern = p"foo"
+  |         ^^^^^^^^^
+
+
+== property.lkt ==
+property.lkt:15:17: error: lower case expected for field names
+15 |     @export fun MySelf(): Example = node
+   |                 ^^^^^^
+
+
+== property_arg.lkt ==
+property_arg.lkt:15:26: error: lower case expected for argument names
+15 |     @export fun identity(N: Example): Example = N
+   |                          ^
+
+
+== struct.lkt ==
+struct.lkt:11:8: error: camel case expected for struct type names (first letter of camel case names must be an upper case letter: 'mystruct')
+11 | struct mystruct {
+   |        ^^^^^^^^
+
+
+== struct_field.lkt ==
+struct_field.lkt:12:5: error: lower case expected for field names
+12 |     MyField: Int
+   |     ^^^^^^^
+
+
+== token.lkt ==
+token.lkt:2:15: error: lower case expected for token names
+2 |     @trivia() Whitespace <- p"[ \n\r\t]+"
+  |               ^^^^^^^^^^
+
+
+== token_family.lkt ==
+token_family.lkt:2:12: error: lower case expected for token family names
+2 |     family Foo {
+  |            ^^^
+
+
+lkt_compile: Done
