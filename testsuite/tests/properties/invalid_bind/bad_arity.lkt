@@ -1,0 +1,5 @@
+import common
+
+class BazNode: FooNode {
+    fun conv_prop(@ignored b: Bool): Entity[FooNode] = self
+}

@@ -1,0 +1,5 @@
+import common
+
+class Example: FooNode {
+    @export fun resolve(): Bool = %eq(self, node.var1).solve
+}

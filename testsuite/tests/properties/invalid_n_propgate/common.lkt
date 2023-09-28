@@ -1,0 +1,30 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(BarNode("example") | BazNode("example"))
+}
+
+class FooNode implements Node[FooNode] {
+    ref_var: LogicVar
+    type_var: LogicVar
+}
+
+class BazNode: FooNode {
+    # Make the properties accept a variying number of entities. Use multiple
+    # entity derived types, as they should all be accepted. Also add a default
+    # argument somewhere, which should not matter when matching the number of
+    # logic variables.
+
+    @ignore_unused fun prop1(): Entity[BazNode] = self
+
+    @ignore_unused fun prop2(
+        @ignored e1: Entity[FooNode],
+        @ignored b: Bool = true
+    ): Entity[BazNode] = self
+
+    @ignore_unused fun prop3(
+        @ignored e1: Entity[BazNode],
+        @ignored e2: Entity[BarNode]
+    ): Entity[BazNode] = self
+}

@@ -1,0 +1,7 @@
+import common
+
+class BazNode: FooNode {
+    @with_dynvars(dyn_node1)
+    fun conv_prop(@ignored b: Bool = true): Entity[FooNode] =
+        dyn_node1.as_bare_entity
+}

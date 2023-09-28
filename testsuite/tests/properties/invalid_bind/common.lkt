@@ -1,0 +1,20 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(BarNode("example") | BazNode("example"))
+}
+
+dynvar dyn_node1: FooNode
+
+class FooNode implements Node[FooNode] {
+    ref_var: LogicVar
+    type_var: LogicVar
+}
+
+class BarNode: FooNode {
+    @ignore_unused fun main_prop(): Equation = {
+        bind dyn_node1 = node;
+        %eq(node.type_var, node.ref_var, conv_prop=BazNode.conv_prop)
+    }
+}

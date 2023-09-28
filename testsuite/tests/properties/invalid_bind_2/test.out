@@ -1,13 +1,19 @@
-== Bind(logic_var, logic_var) ==
+== val_var.lkt ==
+val_var.lkt:4:35: error: Expected type LogicVar, got Example.entity
+4 |     @export fun resolve(): Bool = %eq(self, node.var1).solve
+  |                                   ^^^^^^^^^^^^^^^^^^^^
+
+
+== var_bool.lkt ==
+var_bool.lkt:4:35: error: Right operand must be either a logic variable or an entity, got Bool
+4 |     @export fun resolve(): Bool = %eq(node.var1, true).solve
+  |                                   ^^^^^^^^^^^^^^^^^^^^
+
+
+== var_val.lkt ==
 Code generation was successful
 
-== Bind(logic_var, entity) ==
+== var_var.lkt ==
 Code generation was successful
 
-== Bind(entity, logic_var) ==
-test.py:XXX: error: Expected type LogicVar, got ExampleNode.entity
-
-== Bind(logic_var, bool) ==
-test.py:XXX: error: Right operand must be either a logic variable or an entity, got Bool
-
-Done
+lkt_compile: Done

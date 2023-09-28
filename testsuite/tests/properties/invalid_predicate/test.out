@@ -1,22 +1,28 @@
-== No logic var ==
-test.py:XXX: error: Predicate instantiation should have at least one logic variable expression
+== bad_argument_type.lkt ==
+bad_argument_type.lkt:5:17: error: Argument #1 of predicate has type Bool, should be FooNode.entity
+5 |         val _ = %predicate(Example.pred1, node.var1, true);
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== One missing logic var ==
-test.py:XXX: error: Missing an actual for argument #1 (n)
 
-== Bad argument type ==
-test.py:XXX: error: Argument #1 of predicate has type Bool, should be FooNode.entity
+== no_logic_var.lkt ==
+no_logic_var.lkt:5:18: error: 2 positional argument(s) expected, got 1
+5 |         val _ = %predicate(Example.pred1);
+  |                  ^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Too many arguments ==
-test.py:XXX: error: Too many actuals: at most 2 expected, got 3
 
-== Ok (no default var) ==
+== ok_no_default_var.lkt ==
 Code generation was successful
 
-== Ok (one unpassed default var) ==
+== ok_one_passed_default_var.lkt ==
 Code generation was successful
 
-== Ok (one passed default var) ==
+== ok_one_unpassed_default_var.lkt ==
 Code generation was successful
 
-Done
+== one_missing_var.lkt ==
+one_missing_var.lkt:5:17: error: Missing an actual for argument #1 (n)
+5 |         val _ = %predicate(Example.pred1, node.var1);
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

@@ -66,6 +66,7 @@ from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
     Let, LocalVars, Property, PropertyDef, create_lazy_field
 )
+import langkit.expressions.logic as ELogic
 from langkit.lexer import (
     Action, Alt, Case, Ignore, Lexer, LexerToken, Literal, Matcher, NoCaseLit,
     Pattern, RuleAssoc, TokenAction, TokenFamily, WithSymbol, WithText,
@@ -1018,12 +1019,17 @@ class FunctionSignature:
     Accepted keyword arguments, all optional.
     """
 
+    accepts_others: bool = False
+    """
+    Whether more positional arguments than ``positional_args`` are accepted.
+    """
+
     def match(self, ctx: CompileCtx, call: L.CallExpr) -> ParsedArgs:
         """
         Match call arguments against this signature. If successful, return the
         parsed arguments. Abort with a user error otherwise.
         """
-        result = ParsedArgs([], {})
+        result = ParsedArgs([], {}, [])
         for arg in call.f_args:
             if arg.f_name:
                 # This is a keyword argument
@@ -1043,8 +1049,16 @@ class FunctionSignature:
                 # This is a positional argument
                 result.positional_args.append(arg.f_value)
 
-        # Make sure we got the expected number of positional arguments
-        if len(result.positional_args) != self.positional_args:
+        # Make sure we got the expected number of positional arguments.  If we
+        # have more than expected and if this function can accept them, move
+        # the extra arguments to "result.others".
+        expected = self.positional_args
+        actual = len(result.positional_args)
+        if self.accepts_others and actual > expected:
+            result.other_args = result.positional_args[expected:]
+            result.positional_args = result.positional_args[:expected]
+
+        elif actual != expected:
             loc_node = (
                 call.f_name.f_suffix
                 if isinstance(call.f_name, L.DotExpr) else
@@ -1052,8 +1066,7 @@ class FunctionSignature:
             )
             with ctx.lkt_context(loc_node):
                 error(
-                    f"{self.positional_args} positional argument(s) expected,"
-                    f" got {len(result.positional_args)}"
+                    f"{expected} positional argument(s) expected, got {actual}"
                 )
         return result
 
@@ -1065,6 +1078,7 @@ class ParsedArgs:
     """
     positional_args: list[L.Expr]
     keyword_args: dict[str, L.Expr]
+    other_args: list[L.Expr]
 
 
 collection_iter_signature = FunctionSignature(1, set())
@@ -1077,14 +1091,39 @@ do_signature = FunctionSignature(1, {"default_val"})
 Signature for ".do".
 """
 
+domain_signature = FunctionSignature(2, set())
+"""
+Signature for "%domain".
+"""
+
 empty_signature = FunctionSignature(0, set())
 """
 Signature for a function that takes no argument.
 """
 
+eq_signature = FunctionSignature(2, {"conv_prop"})
+"""
+Signature for "%eq".
+"""
+
 filtermap_signature = FunctionSignature(2, set())
 """
 Signature for ".filtermap".
+"""
+
+logic_all_any_signature = FunctionSignature(1, set())
+"""
+Signature for "%all" and for "%any".
+"""
+
+predicate_signature = FunctionSignature(2, set(), accepts_others=True)
+"""
+Signature for "%predicate".
+"""
+
+propagate_signature = FunctionSignature(2, set(), accepts_others=True)
+"""
+Signature for "%propagate".
 """
 
 
@@ -2109,6 +2148,33 @@ class LktTypesLoader:
             else:
                 error("invalid type reference")
 
+    def resolve_property(self, name: L.Expr) -> TypeRepo.Defer:
+        """
+        Like ``resolve_entity``, but for properties specifically.
+        """
+        if not isinstance(name, L.DotExpr):
+            error(
+                "invalid reference to a property (should be:"
+                " ``T.property_name``)"
+            )
+
+        prefix = self.resolve_type_expr(name.f_prefix, self.root_scope)
+        suffix_node = name.f_suffix
+
+        def getter() -> PropertyDef:
+            node_type = resolve_type(prefix)
+            member = (
+                node_type
+                .get_abstract_node_data_dict()
+                .get(suffix_node.text, None)
+            )
+            if not isinstance(member, PropertyDef):
+                with self.ctx.lkt_context(suffix_node):
+                    error("property expected")
+            return member
+
+        return TypeRepo.Defer(getter, name.text)
+
     def resolve_and_lower_node(
         self,
         name: L.TypeRef,
@@ -3061,6 +3127,10 @@ class LktTypesLoader:
                         method_prefix, inner_expr, elt_var, index_var=None
                     )
 
+                elif method_name == "get_value":
+                    empty_signature.match(self.ctx, call_expr)
+                    result = method_prefix.get_value
+
                 elif method_name == "length":
                     empty_signature.match(self.ctx, call_expr)
                     result = getattr(method_prefix, "length")
@@ -3098,6 +3168,10 @@ class LktTypesLoader:
                 elif method_name == "singleton":
                     empty_signature.match(self.ctx, call_expr)
                     result = method_prefix.singleton
+
+                elif method_name == "solve":
+                    empty_signature.match(self.ctx, call_expr)
+                    result = method_prefix.solve
 
                 elif method_name == "take_while":
                     lambda_info = extract_lambda_and_kwargs(
@@ -3239,6 +3313,75 @@ class LktTypesLoader:
                     for type_ref in expr.f_dest_type
                 ]
                 return E.IsA(subexpr, *nodes)
+
+            elif isinstance(expr, L.LogicExpr):
+                expr = expr.f_expr
+                if isinstance(expr, L.RefId):
+                    if expr.text == "true":
+                        return E.LogicTrue()
+                    elif expr.text == "false":
+                        return E.LogicFalse()
+
+                elif isinstance(expr, L.CallExpr):
+                    call_name = expr.f_name
+                    if not isinstance(call_name, L.RefId):
+                        with self.ctx.lkt_context(expr):
+                            error("invalid logic expression")
+
+                    if call_name.text in ("all", "any"):
+                        parsed_args = logic_all_any_signature.match(
+                            self.ctx, expr
+                        )
+                        eq_array_expr = lower(parsed_args.positional_args[0])
+                        return (
+                            ELogic.All(eq_array_expr)
+                            if call_name.text == "all" else
+                            ELogic.Any(eq_array_expr)
+                        )
+
+                    elif call_name.text == "domain":
+                        parsed_args = domain_signature.match(self.ctx, expr)
+                        logic_var = lower(parsed_args.positional_args[0])
+                        domain_expr = lower(parsed_args.positional_args[1])
+                        return logic_var.domain(domain_expr)
+
+                    elif call_name.text == "eq":
+                        parsed_args = eq_signature.match(self.ctx, expr)
+                        from_expr = lower(parsed_args.positional_args[0])
+                        to_expr = lower(parsed_args.positional_args[1])
+                        conv_prop = (
+                            self.resolve_property(
+                                parsed_args.keyword_args["conv_prop"],
+                            )
+                            if "conv_prop" in parsed_args.keyword_args else
+                            None
+                        )
+                        return E.Bind(from_expr, to_expr, conv_prop=conv_prop)
+
+                    elif call_name.text == "predicate":
+                        parsed_args = predicate_signature.match(self.ctx, expr)
+                        pred_prop = self.resolve_property(
+                            parsed_args.positional_args[0]
+                        )
+                        node_expr = lower(parsed_args.positional_args[1])
+                        arg_exprs = [
+                            lower(arg) for arg in parsed_args.other_args
+                        ]
+                        return E.Predicate(pred_prop, node_expr, *arg_exprs)
+
+                    elif call_name.text == "propagate":
+                        parsed_args = propagate_signature.match(self.ctx, expr)
+                        dest_var = lower(parsed_args.positional_args[0])
+                        comb_prop = self.resolve_property(
+                            parsed_args.positional_args[1]
+                        )
+                        arg_vars = [
+                            lower(arg) for arg in parsed_args.other_args
+                        ]
+                        return E.NPropagate(dest_var, comb_prop, *arg_vars)
+
+                with self.ctx.lkt_context(expr):
+                    error("invalid logic expression")
 
             elif isinstance(expr, L.MatchExpr):
                 assert local_vars is not None
