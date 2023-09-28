@@ -613,6 +613,32 @@ class FlagAnnotationSpec(AnnotationSpec):
         return True
 
 
+class StringLiteralAnnotationSpec(AnnotationSpec):
+    """
+    Convenience subclass for annotations that take a string literal.
+    """
+    def __init__(self, name: str):
+        super().__init__(
+            name, unique=True, require_args=True, default_value=None
+        )
+
+    def interpret(
+        self,
+        ctx: CompileCtx,
+        args: List[L.Expr],
+        kwargs: Dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
+        if (
+            len(args) != 1
+            or kwargs
+            or not isinstance(args[0], L.StringLit)
+            or args[0].p_is_prefixed_string
+        ):
+            error("exactly one position argument expected: a string literal")
+        return args[0].p_denoted_value
+
+
 class WithDefaultAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @with_default annotations for enum types.
@@ -916,6 +942,8 @@ class FunArgAnnotations(ParsedAnnotations):
 @dataclass
 class FunAnnotations(ParsedAnnotations):
     abstract: bool
+    call_memoizable: bool
+    call_non_memoizable_because: str | None
     export: bool
     external: bool
     final: bool
@@ -927,6 +955,8 @@ class FunAnnotations(ParsedAnnotations):
     with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
     annotations = [
         FlagAnnotationSpec('abstract'),
+        FlagAnnotationSpec('call_memoizable'),
+        StringLiteralAnnotationSpec('call_non_memoizable_because'),
         FlagAnnotationSpec('export'),
         FlagAnnotationSpec('external'),
         FlagAnnotationSpec('final'),
@@ -3633,7 +3663,7 @@ class LktTypesLoader:
             type=return_type,
             abstract_runtime_check=False,
             memoized=annotations.memoized,
-            call_memoizable=False,
+            call_memoizable=annotations.call_memoizable,
             memoize_in_populate=False,
             external=annotations.external,
             uses_entity_info=uses_entity_info,
@@ -3641,7 +3671,9 @@ class LktTypesLoader:
             optional_entity_info=False,
             warn_on_unused=not annotations.ignore_unused,
             ignore_warn_on_node=None,
-            call_non_memoizable_because=None,
+            call_non_memoizable_because=(
+                annotations.call_non_memoizable_because
+            ),
             activate_tracing=annotations.trace,
             dump_ir=False,
             lazy_field=False,
