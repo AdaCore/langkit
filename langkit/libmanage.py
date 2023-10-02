@@ -1506,6 +1506,7 @@ class ManageScript:
         if path.isfile(bindings_jar):
             add_path("CLASSPATH", bindings_jar)
             add_path("LD_LIBRARY_PATH", P('java', 'jni'))
+            add_path("PATH", P('java', 'jni'))
 
     def derived_env(self, direct_c_header: bool = False) -> Dict[str, str]:
         """
