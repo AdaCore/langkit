@@ -32,6 +32,7 @@ import ctypes
 import io
 import json
 import os
+import re
 import sys
 import traceback
 from typing import (
@@ -82,6 +83,18 @@ if os.path.exists(_c_lib_path):
                                              os.environ['PATH'])
 else:
     _c_lib_path = _c_lib_name
+
+% if generate_auto_dll_dirs:
+# If 'os.add_dll_directory' is available (i.e. on Windows) we need to add the
+# DLL directories from the PATH environment variable manually.
+_add_dll_directory = getattr(os, "add_dll_directory", None)
+if _add_dll_directory:
+    for path in os.environ.get('PATH', '').split(os.pathsep):
+        try:
+            os.add_dll_directory(os.path.realpath(path))
+        except FileNotFoundError as _:
+            pass # Do nothing on purpose
+% endif
 
 # Finally load the library
 _c_lib = ctypes.cdll.LoadLibrary(_c_lib_path)
