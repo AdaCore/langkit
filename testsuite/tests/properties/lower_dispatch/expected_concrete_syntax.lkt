@@ -17,6 +17,10 @@ grammar foo_grammar {
 class Def: FooNode {
     @parse_field name: Name
     @parse_field expr: Expr
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
 @abstract class Expr: FooNode {

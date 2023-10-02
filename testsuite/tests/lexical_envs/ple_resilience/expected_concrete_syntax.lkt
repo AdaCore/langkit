@@ -25,11 +25,23 @@ class Scope: DefNode {
     @parse_field error: HasError
     @parse_field name: Id
     @parse_field defs: ASTList[FooNode, DefNode]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+        do(
+            if node.error.as_bool() then (raise[FooNode] PropertyError()) else null[FooNode]
+        )
+    }
 }
 
 class Var: DefNode {
     @parse_field name: Id
     @parse_field value: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
 @qualifier enum class HasError: FooNode {

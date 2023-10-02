@@ -18,6 +18,13 @@ class ErrorUseClause: FooNode {
 
     fun resolve(): LexicalEnv[FooNode] =
     raise[LexicalEnv[FooNode]] PropertyError("unconditionally raised")
+
+    env_spec {
+        handle_children()
+        reference(
+            [node.as[FooNode]], ErrorUseClause.resolve
+        )
+    }
 }
 
 class Id: FooNode implements TokenNode {
@@ -34,6 +41,11 @@ class Ref: FooNode {
 class Scope: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, FooNode]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
 class UseClause: FooNode {
@@ -41,4 +53,9 @@ class UseClause: FooNode {
 
     fun resolve(): LexicalEnv[FooNode] =
     node.name.resolve().map((n) => n.children_env()).env_group()
+
+    env_spec {
+        handle_children()
+        reference([node.as[FooNode]], UseClause.resolve)
+    }
 }

@@ -21,4 +21,8 @@ class Example: FooNode implements TokenNode {
         # cosmetic).
         null[LexicalEnv[FooNode]].rebind_env(rbdng).get(s"foo")
     }
+
+    env_spec {
+        add_env()
+    }
 }

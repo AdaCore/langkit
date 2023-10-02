@@ -26,6 +26,11 @@ grammar foo_grammar {
 class Block: FooNode {
     @parse_field name: Identifier
     @parse_field items: ASTList[FooNode, Item]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env(names=[node.name.symbol])
+    }
 }
 
 class Identifier: FooNode implements TokenNode {
@@ -38,6 +43,10 @@ class Identifier: FooNode implements TokenNode {
 
 class Decl: Item {
     @parse_field name: Identifier
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
 class Open: Item {
@@ -49,6 +58,10 @@ class Open: Item {
         n.do(
             (n) => n.children_env(), default_val=null[LexicalEnv[FooNode]]
         )
+    }
+
+    env_spec {
+        reference([node.as[FooNode]], Open.resolve)
     }
 }
 

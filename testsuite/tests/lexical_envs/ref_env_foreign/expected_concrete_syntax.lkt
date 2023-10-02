@@ -38,9 +38,20 @@ class SimpleId: Id implements TokenNode {
 
 class RefClause: FooNode {
     @parse_field ref_id: Id
+
+    env_spec {
+        reference(
+            [node.ref_id.as[FooNode]], FooNode.children_env, dest_env=node.ref_id.resolve(node.parent.children_env()).children_env()
+        )
+    }
 }
 
 class Scope: FooNode {
     @parse_field name: SimpleId
     @parse_field content: ASTList[FooNode, FooNode]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }

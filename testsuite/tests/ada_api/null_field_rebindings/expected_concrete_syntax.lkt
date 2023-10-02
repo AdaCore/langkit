@@ -27,6 +27,10 @@ class Decl: FooNode {
 }
 
 class Example: FooNode implements TokenNode {
+
+    env_spec {
+        add_env()
+    }
 }
 
 class Identifier: FooNode implements TokenNode {

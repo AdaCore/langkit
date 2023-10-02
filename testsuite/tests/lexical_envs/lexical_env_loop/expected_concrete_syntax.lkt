@@ -34,6 +34,11 @@ dynvar env: LexicalEnv[FooNode]
 class Package: Decl {
     @parse_field name: Name
     @parse_field decls: ASTList[FooNode, Decl]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
 class Ref: Decl {
@@ -44,10 +49,20 @@ class Ref: Decl {
 
 class UseClause: Decl {
     @parse_field name: Name
+
+    env_spec {
+        reference(
+            [_], Name.designated_env, kind=transitive
+        )
+    }
 }
 
 class Var: Decl {
     @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
 class Name: FooNode implements TokenNode {

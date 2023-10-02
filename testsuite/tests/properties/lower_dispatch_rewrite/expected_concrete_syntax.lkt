@@ -26,6 +26,14 @@ class Def: FooNode {
     @parse_field imports: ASTList[FooNode, DerivedRef]
     @parse_field vars: ASTList[FooNode, Var]
     @parse_field expr: Expr
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+        reference(
+            node.imports.map((i) => i.as[FooNode]), Ref.referenced_env
+        )
+    }
 }
 
 @abstract class Expr: FooNode {
@@ -71,4 +79,8 @@ class Name: FooNode implements TokenNode {
 class Var: FooNode {
     @parse_field name: Name
     @parse_field expr: Expr
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }

@@ -17,10 +17,18 @@ grammar foo_grammar {
 
 class Cat1: FooNode {
     @parse_field decls: ASTList[FooNode, Var]
+
+    env_spec {
+        add_env()
+    }
 }
 
 class Cat2: FooNode {
     @parse_field decls: ASTList[FooNode, Var]
+
+    env_spec {
+        add_env()
+    }
 }
 
 class Def: FooNode {
@@ -28,6 +36,10 @@ class Def: FooNode {
     @parse_field cat1: Cat1
     @parse_field cat2: Cat2
     @parse_field example: Example
+
+    env_spec {
+        add_env()
+    }
 }
 
 class Example: FooNode implements TokenNode {
@@ -44,6 +56,16 @@ class Example: FooNode implements TokenNode {
     node.children_env().get(
         name, categories=RefCats(cat2=true, others=false)
     )
+
+    env_spec {
+        add_env()
+        reference(
+            [node.parent.as[Def].cat1.as[FooNode]], FooNode.children_env, category="Cat1"
+        )
+        reference(
+            [node.parent.as[Def].cat2.as[FooNode]], FooNode.children_env, category="Cat2"
+        )
+    }
 }
 
 class Name: FooNode implements TokenNode {
@@ -51,4 +73,8 @@ class Name: FooNode implements TokenNode {
 
 class Var: FooNode {
     @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }

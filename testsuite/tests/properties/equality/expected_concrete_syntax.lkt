@@ -32,6 +32,11 @@ class Decl: FooNode {
 
     @export fun test_array(other: Entity[FooNode]): Bool =
     node.env_array() == other.env_array()
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
 @qualifier enum class HasPlus: FooNode {

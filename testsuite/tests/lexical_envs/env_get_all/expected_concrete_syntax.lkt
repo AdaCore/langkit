@@ -20,4 +20,9 @@ class Id: FooNode implements TokenNode {
 class Program: FooNode {
     @parse_field name: Id
     @parse_field program_list: ASTList[FooNode, Program]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }

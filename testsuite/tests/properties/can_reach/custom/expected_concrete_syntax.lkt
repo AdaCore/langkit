@@ -23,6 +23,10 @@ grammar foo_grammar {
 
 class Def: FooNode {
     @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
 class Name: FooNode implements TokenNode {

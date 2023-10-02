@@ -15,6 +15,11 @@ class Decl: FooNode {
 
     @export fun lookup(n: Entity[Name]): Entity[FooNode] =
     self.node_env().get_first(n.symbol)
+
+    env_spec {
+        do(raise[FooNode] PropertyError())
+        add_env()
+    }
 }
 
 class Name: FooNode implements TokenNode {

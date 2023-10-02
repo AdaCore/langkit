@@ -17,6 +17,10 @@ grammar foo_grammar {
 @abstract class DefNode: FooNode {
 
     @export @abstract fun name(): Symbol
+
+    env_spec {
+        add_to_env_kv(node.name(), node)
+    }
 }
 
 class Block: DefNode {
@@ -37,6 +41,11 @@ class Block: DefNode {
 
         Entity[Block](node=node, info=e_info)
     }
+
+    env_spec {
+        add_to_env_kv(node.name(), node)
+        add_env()
+    }
 }
 
 class BlockVar: DefNode {
@@ -52,6 +61,10 @@ class BlockVar: DefNode {
 }
 
 class Params: ASTList[FooNode, Param] {
+
+    env_spec {
+        add_env()
+    }
 }
 
 class Name: FooNode implements TokenNode {

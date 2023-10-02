@@ -18,6 +18,10 @@ grammar foo_grammar {
 
 class Def: FooNode {
     @parse_field name: Id
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
 class Id: FooNode implements TokenNode {
@@ -44,4 +48,17 @@ class Scope: FooNode {
     @parse_field deps: ASTList[FooNode, Dep]
     @parse_field defs: ASTList[FooNode, Def]
     @parse_field refs: ASTList[FooNode, Ref]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+        do(
+            node.deps.map(
+                (d) => d.referenced_scope_or_error(or_error=false)
+            )
+        )
+        reference(
+            node.deps.map((d) => d.as[FooNode]), Id.referenced_env
+        )
+    }
 }

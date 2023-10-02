@@ -14,4 +14,15 @@ class Example: FooNode implements TokenNode {
 
     @export fun get_all_foo(): Array[Entity[FooNode]] =
     node.children_env().get(s"foo")
+
+    env_spec {
+        add_env()
+        add_to_env(
+            EnvAssoc(
+                key=s"foo", value=node, dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                ), metadata=null[Metadata]
+            ), resolver=FooNode.resolver
+        )
+    }
 }

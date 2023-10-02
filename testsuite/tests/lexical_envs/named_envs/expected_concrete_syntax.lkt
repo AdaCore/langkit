@@ -149,6 +149,12 @@ class DeclarativePart: FooNode {
 }
 
 class PrivatePart: DeclarativePart {
+
+    env_spec {
+        add_env(
+            transitive_parent=true, names=[node.parent.suffixed_full_name("__privatepart").to_symbol]
+        )
+    }
 }
 
 class PublicPart: DeclarativePart {
@@ -156,6 +162,20 @@ class PublicPart: DeclarativePart {
 
 ## Top-level list of declaration in a subprogam body.
 class SubpBodyDecls: DeclarativePart {
+
+    env_spec {
+        # The only case where we need a declarative part to have a name is when
+        # it is top-level in subprogram body (A), so that separate subprogram
+        # bodies (B) can use this environment as their initial env. Note that
+        # this case is legal only when that (A) is the syntactic root.
+        add_env(
+            names=if (
+                (node.parent is SubpBody) and (node.parent.parent.is_null)
+            ) then (
+                [node.parent.as[SubpBody].name.scope_name().to_symbol]
+            ) else null[Array[Symbol]]
+        )
+    }
 }
 
 class DeclareBlock: FooNode {
@@ -165,6 +185,10 @@ class DeclareBlock: FooNode {
 
 class IncompleteTypeDecl: FooNode {
     @parse_field name: Identifier
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
 @abstract class Name: FooNode {
@@ -240,6 +264,32 @@ class PackageBody: FooNode {
 
         node.name.resolve(env).as[PackageDecl]
     }
+
+    env_spec {
+        # The initial environment for package bodies is the private part of the
+        # corresponding package specs (or the public part if there is no
+        # private part).
+        set_initial_env(
+            if node.is_toplevel() then DesignatedEnv(
+                kind=DesignatedEnvKind.named_env, env_name=node.suffixed_full_name("__privatepart").to_symbol, direct_env=null[LexicalEnv[FooNode]]
+            ) else DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
+            )
+        )
+        add_to_env_kv(
+            s"__nextpart", node, dest_env=if node.can_have_name() then DesignatedEnv(
+                kind=DesignatedEnvKind.named_env, env_name=node.suffixed_full_name("__privatepart").to_symbol, direct_env=null[LexicalEnv[FooNode]]
+            ) else DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.body_decl_scope()
+            )
+        )
+        add_env(
+            names=[node.suffixed_full_name("__body").to_symbol]
+        )
+        reference(
+            [node.as[FooNode]], PackageBody.body_decl_scope, kind=prioritary, cond=not node.is_toplevel()
+        )
+    }
 }
 
 class PackageDecl: FooNode {
@@ -264,6 +314,22 @@ class PackageDecl: FooNode {
     ## Return the PackageBody node corresponding to this PackageDecl.
     @export fun body_part(): Entity[PackageBody] =
     node.private_part.do((pp) => pp, default_val=node).children_env().get_first(s"__nextpart").as[PackageBody]
+
+    env_spec {
+        set_initial_env(
+            (
+                if node.is_toplevel() then node.decl_parent_scope_name() else null[Symbol]
+            ).do(
+                (name) => DesignatedEnv(
+                    kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv[FooNode]]
+                ), default_val=DesignatedEnv(
+                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
+                )
+            )
+        )
+        add_to_env_kv(node.name.base_name().to_symbol, node)
+        add_env(names=node.new_env_names())
+    }
 }
 
 class Ref: FooNode {
@@ -278,14 +344,27 @@ class SubpBody: FooNode {
     @parse_field stmts: ASTList[FooNode, FooNode]
 
     fun self_name(): Name = node.name
+
+    env_spec {
+        set_initial_env(node.initial_env())
+    }
 }
 
 class SubpDecl: FooNode {
     @parse_field name: Name
 
     fun self_name(): Name = node.name
+
+    env_spec {
+        set_initial_env(node.initial_env())
+        add_to_env_kv(node.name.base_name().to_symbol, node)
+    }
 }
 
 class TypeDecl: FooNode {
     @parse_field name: Identifier
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }

@@ -22,6 +22,12 @@ class Decl: FooNode {
 
     @export fun entity_items(): Array[Entity[Ref]] =
     node.as_entity.items.map((i) => i)
+
+    env_spec {
+        add_to_env_kv(
+            node.name.symbol, node, metadata=Metadata(b=node.has_plus.as_bool())
+        )
+    }
 }
 
 @qualifier enum class HasPlus: FooNode {

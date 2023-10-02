@@ -9,6 +9,7 @@ introduction to their usage.
 from __future__ import annotations
 
 from contextlib import AbstractContextManager
+import dataclasses
 from enum import Enum
 from funcy import lsplit_by
 from itertools import count
@@ -138,7 +139,13 @@ def add_to_env_kv(key: AbstractExpression,
     """
     from langkit.expressions import new_env_assoc
 
-    return add_to_env(new_env_assoc(key, value, dest_env, metadata), resolver)
+    result = add_to_env(
+        new_env_assoc(key, value, dest_env, metadata), resolver
+    )
+    result.kv_params = AddToEnv.KVParams(
+        key, value, dest_env, metadata, resolver
+    )
+    return result
 
 
 def handle_children() -> HandleChildren:
@@ -416,6 +423,7 @@ class EnvAction:
 
 
 class AddEnv(EnvAction):
+
     def __init__(self,
                  no_parent: bool = False,
                  transitive_parent: bool = False,
@@ -436,6 +444,17 @@ class AddEnv(EnvAction):
 
 class AddToEnv(EnvAction):
 
+    @dataclasses.dataclass
+    class KVParams:
+        """
+        Arguments for the "add_to_env_kv()" action constructor.
+        """
+        key: AbstractExpression
+        value: AbstractExpression
+        dest_env: Optional[AbstractExpression]
+        metadata: Optional[AbstractExpression]
+        resolver: Optional[PropertyDef]
+
     def __init__(self,
                  mappings: AbstractExpression,
                  resolver: Optional[PropertyDef]) -> None:
@@ -444,6 +463,8 @@ class AddToEnv(EnvAction):
         self.resolver = resolver
 
         self.mappings_prop: PropertyDef
+
+        self.kv_params: AddToEnv.KVParams | None = None
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
         self.mappings_prop = env_spec.create_internal_property(

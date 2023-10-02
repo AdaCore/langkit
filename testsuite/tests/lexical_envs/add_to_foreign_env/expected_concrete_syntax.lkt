@@ -18,6 +18,14 @@ grammar foo_grammar {
 class ForeignDecl: FooNode {
     @parse_field dest_scope: Id
     @parse_field decl_id: SimpleId
+
+    env_spec {
+        add_to_env_kv(
+            node.decl_id.symbol, node, dest_env=DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.dest_scope.resolve(node.parent.children_env()).children_env()
+            )
+        )
+    }
 }
 
 @abstract class Id: FooNode {
@@ -42,6 +50,11 @@ class SimpleId: Id implements TokenNode {
 class Scope: FooNode {
     @parse_field name: SimpleId
     @parse_field content: ASTList[FooNode, Scope]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
 @metadata struct Metadata {

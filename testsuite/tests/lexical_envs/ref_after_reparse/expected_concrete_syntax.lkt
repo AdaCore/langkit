@@ -25,10 +25,19 @@ class Block: FooNode {
     @parse_field decls: ASTList[FooNode, Decl]
     @parse_field usings: ASTList[FooNode, Using]
     @parse_field refs: ASTList[FooNode, Ref]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
 class Decl: FooNode {
     @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
 class Name: FooNode implements TokenNode {
@@ -53,4 +62,8 @@ class Ref: FooNode {
 
 class Using: FooNode {
     @parse_field name: Name
+
+    env_spec {
+        reference([_], Name.designated_env)
+    }
 }

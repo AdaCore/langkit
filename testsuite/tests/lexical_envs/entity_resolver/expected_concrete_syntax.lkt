@@ -18,6 +18,11 @@ grammar foo_grammar {
 class Decl: FooNode {
     @parse_field name: Name
     @parse_field refs: ASTList[FooNode, Ref]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
 class Name: FooNode implements TokenNode {
@@ -27,4 +32,10 @@ class Ref: FooNode {
     @parse_field name: Name
 
     @export fun resolve(): Entity[FooNode] = node.node_env().get(node.name)?[0]
+
+    env_spec {
+        add_to_env_kv(
+            node.name.symbol, node, resolver=FooNode.resolve_ref
+        )
+    }
 }

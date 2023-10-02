@@ -49,9 +49,27 @@ class Prefix: Name {
 class Scope: FooNode {
     @parse_field name: Name
     @parse_field defs: ASTList[FooNode, FooNode]
+
+    env_spec {
+        set_initial_env(
+            node.name.scope_fqn().do(
+                (s) => DesignatedEnv(
+                    kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv[FooNode]]
+                ), default_val=DesignatedEnv(
+                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
+                )
+            )
+        )
+        add_to_env_kv(node.name.suffix_symbol(), node)
+        add_env(names=[node.name.fqn().to_symbol])
+    }
 }
 
 class Var: FooNode {
     @parse_field name: Id
     @parse_field value: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }

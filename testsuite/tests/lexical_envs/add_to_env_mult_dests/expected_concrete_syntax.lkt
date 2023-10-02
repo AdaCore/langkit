@@ -15,11 +15,32 @@ class Id: FooNode implements TokenNode {
 
     @export fun get_scope(): Entity[FooNode] =
     node.children_env().get_first(s"Scope")
+
+    env_spec {
+        add_env()
+    }
 }
 
 class Scope: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, FooNode]
+
+    env_spec {
+        add_env()
+        handle_children()
+        add_to_env(
+            node.content.children.map(
+                (r) => EnvAssoc(
+                    key=s"Scope", value=node, dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=match r {
+                            case s: Scope => s.name.children_env()
+                            case _ => r.children_env()
+                        }
+                    ), metadata=null[Metadata]
+                )
+            )
+        )
+    }
 }
 
 @metadata struct Metadata {

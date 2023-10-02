@@ -27,6 +27,17 @@ class ForeignDecl: FooNode {
 
     @memoized fun node_for_env(): FooNode =
     if node.create_synthetic.as_bool() then DummySyntheticNode() else node
+
+    env_spec {
+        add_to_env_kv(
+            node.id.simple_name().symbol, node.node_for_env(), dest_env=DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=match node.id {
+                    case simple: SimpleId => simple.node_env()
+                    case scoped: ScopedId => scoped.resolve(node.node_env()).children_env()
+                }
+            )
+        )
+    }
 }
 
 @abstract class Id: FooNode {
@@ -57,11 +68,24 @@ class SimpleId: Id implements TokenNode {
 class Scope: FooNode {
     @parse_field name: SimpleId
     @parse_field content: ASTList[FooNode, Scope]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
 class SelfDecl: FooNode {
     @parse_field id: Id
     @parse_field @nullable md_node: Id
+
+    env_spec {
+        add_to_env_kv(
+            node.id.simple_name().symbol, node.id.resolve(node.node_env()), metadata=Metadata(
+                node=node.md_node.do((n) => n.resolve(node.node_env()))
+            )
+        )
+    }
 }
 
 @qualifier enum class Synth: FooNode {

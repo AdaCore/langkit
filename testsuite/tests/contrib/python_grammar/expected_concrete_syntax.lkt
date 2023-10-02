@@ -598,6 +598,26 @@ class SingleParam: PythonNode {
     @parse_field is_kwargs: KwArgsFlag
     @parse_field name: PythonNode
     @parse_field @nullable default_value: Expr
+
+    env_spec {
+        add_to_env(
+            match node.name {
+                case i: Id => [EnvAssoc(
+                    key=i.sym(), value=node, dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[PythonNode]]
+                    ), metadata=null[Metadata]
+                )]
+                case l: ASTList[PythonNode, Id] => l.map(
+                    (i) => EnvAssoc(
+                        key=i.sym(), value=node, dest_env=DesignatedEnv(
+                            kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[PythonNode]]
+                        ), metadata=null[Metadata]
+                    )
+                )
+                case _ => null[Array[EnvAssoc]]
+            }
+        )
+    }
 }
 
 @abstract class Stmt: PythonNode {
@@ -611,6 +631,18 @@ class AssertStmt: Stmt {
 class AssignStmt: Stmt {
     @parse_field l_value: ASTList[PythonNode, Expr]
     @parse_field r_values: ASTList[PythonNode, PythonNode]
+
+    env_spec {
+        add_to_env(
+            node.l_value.filtermap(
+                (e) => EnvAssoc(
+                    key=e.as![Id].sym(), value=node, dest_env=DesignatedEnv(
+                        kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[PythonNode]]
+                    ), metadata=null[Metadata]
+                ), (e) => e is Id
+            )
+        )
+    }
 }
 
 class AugAssignStmt: Stmt {
@@ -631,6 +663,10 @@ class Decorated: Stmt {
 }
 
 @abstract class DefStmt: Stmt {
+
+    env_spec {
+        add_env()
+    }
 }
 
 class ClassDef: DefStmt {

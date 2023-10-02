@@ -2315,6 +2315,19 @@ class ClassDecl(BasicClassDecl):
         return decl.is_a(T.FunDecl, T.FieldDecl) | decl.is_generic_fun_decl
 
 
+class EnvSpecDecl(Decl):
+    """
+    Env spec declaration.
+
+    Each node type can have one or no env spec. Env specs contains only a list
+    of env actions.
+    """
+    syn_name = Field(type=T.DefId)
+    actions = Field(type=T.CallExpr.list)
+
+    decl_type_name = Property(S("env spec declaration"))
+
+
 class EnumClassAltDecl(TypeDecl):
     """
     Alternative for an enum class decl.
@@ -4083,6 +4096,7 @@ lkt_grammar.add_rules(
         G.grammar_decl,
         G.field_decl,
         G.val_decl,
+        G.env_spec_decl,
         G.grammar_rule,
         G.dynvar_decl,
     ),
@@ -4117,6 +4131,15 @@ lkt_grammar.add_rules(
     dynvar_decl=DynVarDecl("dynvar", G.def_id, ":", G.type_ref),
 
     var_bind=VarBind("bind", G.ref_id, "=", G.expr),
+
+    env_spec_action=CallExpr(RefId(Lex.Identifier), "(", G.params, ")"),
+
+    env_spec_decl=EnvSpecDecl(
+        DefId(Lex.Identifier(match_text="env_spec")),
+        "{",
+        List(G.env_spec_action, empty_valid=True),
+        "}",
+    ),
 
     block=BlockExpr(
         "{",

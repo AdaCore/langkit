@@ -1,5 +1,6 @@
 from collections import defaultdict
 from contextlib import contextmanager
+import itertools
 import json
 import sys
 from typing import Dict
@@ -129,6 +130,38 @@ class DSLWalker:
         yield
         self.current_node = old_node
         self.current_token = new_node.token_end
+
+    def env_spec(self):
+        """
+        Given that the current cursor is on a class defining a node type, move
+        the cursor to the list of constructor argument for EnvSpec.
+        """
+        env_spec_assignment = self.current_node.find(
+            lambda n: (
+                n.is_a(lpl.AssignStmt) and n.f_l_value.text == "env_spec"
+            )
+        )
+        assert isinstance(env_spec_assignment.f_r_values, lpl.PythonNodeList)
+        expr_list = env_spec_assignment.f_r_values[0]
+        assert isinstance(expr_list, lpl.ExprList)
+        assert len(expr_list) == 1
+        env_spec_cons = expr_list[0]
+        assert isinstance(env_spec_cons, lpl.CallExpr)
+        assert env_spec_cons.f_prefix.text == "EnvSpec"
+        args = env_spec_cons.f_suffix
+        assert isinstance(args, lpl.ArgList)
+        self.last_token = env_spec_assignment.token_start
+        return self._with_current_node(args)
+
+    def env_action(self, index):
+        """
+        Given that the current cursor is on an env spec assignment, move the
+        cursor to the node corresponding to the env action for the given index.
+        """
+        arg_assoc = self.current_node[index]
+        assert isinstance(arg_assoc, lpl.ArgAssoc)
+        assert arg_assoc.f_name is None
+        return self._with_current_node(arg_assoc.f_expr)
 
     def property(self, prop):
         """
@@ -361,6 +394,25 @@ class DSLWalker:
                 )
 
         assert False
+
+    def arg_by_keyword(self, name: str, or_index: int):
+        """
+        If the cursor is on a function/metohd call, move the cursor to the
+        expression for the ``name`` keyword argument in this call, if it
+        exists, or to the expression for the ``index``th argument.
+
+        .. code:: This is a context manager.
+        """
+        assert isinstance(self.current_node, lpl.CallExpr)
+        for arg in self.current_node.f_suffix:
+            assert isinstance(arg, lpl.ArgAssoc)
+            if arg.f_name is not None and arg.f_name.text == name:
+                return self._with_current_node(
+                    arg.f_expr
+                )
+        arg = self.current_node.f_suffix[or_index]
+        assert isinstance(arg, lpl.ArgAssoc)
+        return self._with_current_node(arg.f_expr)
 
     def arg_keyword(self, index):
         """
@@ -1558,11 +1610,123 @@ def emit_node_type(node_type):
     ${emit_prop(prop, walker)}$hl
     % endif
     % endfor
+    % if node_type.is_ast_node and node_type.env_spec:
+    $hl${emit_env_spec(node_type, walker)}
+    % endif
     $d
     }$hl
     """.strip())
 
     del base, parse_fields, enum_qual, properties
+
+
+def emit_env_spec(node_type, walker):
+    import langkit.envs as envs
+    import langkit.expressions as E
+
+    def ee(expr):
+        return emit_expr(expr, walker=walker)
+
+    def emit_action(action):
+        if isinstance(action, envs.AddEnv):
+            fn_name = "add_env"
+            args = []
+            if action.no_parent:
+                args.append("no_parent=true")
+            if action.transitive_parent and not (
+                isinstance(action.transitive_parent, E.Literal)
+                and action.transitive_parent.literal is False
+            ):
+                with walker.arg_by_keyword("transitive_parent", 1):
+                    args.append(
+                        f"transitive_parent={ee(action.transitive_parent)}"
+                    )
+            if action.names is not None:
+                with walker.arg_by_keyword("names", 2):
+                    args.append(f"names={ee(action.names)}")
+
+        elif isinstance(action, envs.AddToEnv) and action.kv_params:
+            params = action.kv_params
+            fn_name = "add_to_env_kv"
+            args = []
+            with walker.arg(0):
+                args.append(ee(params.key))
+            with walker.arg(1):
+                args.append(ee(params.value))
+            if params.dest_env is not None:
+                with walker.arg_by_keyword("dest_env", 2):
+                    args.append(f"dest_env={ee(params.dest_env)}")
+            if params.metadata is not None:
+                with walker.arg_by_keyword("metadata", 3):
+                    args.append(f"metadata={ee(params.metadata)}")
+            if params.resolver is not None:
+                with walker.arg_by_keyword("resolver", 5):
+                    args.append(f"resolver={fqn(params.resolver)}")
+
+        elif isinstance(action, envs.AddToEnv):
+            fn_name = "add_to_env"
+            with walker.arg(0):
+                args = [ee(action.mappings)]
+            if action.resolver:
+                with walker.arg_by_keyword("resolver", 1):
+                    args.append(f"resolver={fqn(action.resolver)}")
+
+        elif isinstance(action, envs.Do):
+            fn_name = "do"
+            with walker.arg(0):
+                args = [ee(action.expr)]
+
+        elif isinstance(action, envs.RefEnvs):
+            fn_name = "reference"
+            args = []
+            with walker.arg(0):
+                args.append(ee(action.nodes_expr))
+            with walker.arg(1):
+                args.append(fqn(action.resolver))
+            if action.kind != envs.RefKind.normal:
+                with walker.arg_by_keyword("kind", 2):
+                    args.append(f"kind={action.kind.value.lower()}")
+            if action.dest_env is not None:
+                with walker.arg_by_keyword("dest_env", 3):
+                    args.append(f"dest_env={ee(action.dest_env)}")
+            if action.cond is not None:
+                with walker.arg_by_keyword("cond", 4):
+                    args.append(f"cond={ee(action.cond)}")
+            if action.category is not None:
+                with walker.arg_by_keyword("category", 5):
+                    args.append(f'category="{action.category.lower}"')
+            if action.shed_rebindings:
+                with walker.arg_by_keyword("shed_corresponding_rebindings",6):
+                    args.append("shed_corresponding_rebindings=true")
+
+        elif isinstance(action, envs.SetInitialEnv):
+            fn_name = "set_initial_env"
+            with walker.arg(0):
+                args = [ee(action.env_expr)]
+
+        else:
+            return "# " + str(action)
+
+        return "{}{}".format(fn_name, emit_paren(", ".join(args)))
+
+    with walker.env_spec():
+        env_spec = node_type.env_spec
+        result = ["env_spec {$i$hl\n"]
+        action_index = iter(itertools.count(0))
+        for action in env_spec.pre_actions:
+            with walker.env_action(next(action_index)):
+                result.append(walker.emit_comments())
+                result.append(emit_action(action) + "$hl")
+        if result and env_spec.post_actions:
+            with walker.env_action(next(action_index)):
+                result.append(walker.emit_comments())
+                result.append("handle_children()$hl")
+        for action in env_spec.post_actions:
+            with walker.env_action(next(action_index)):
+                result.append(walker.emit_comments())
+                result.append(emit_action(action) + "$hl")
+        result.append("$d\n}$hl")
+        return "\n".join(result)
 
 
 def emit_enum_type(enum_type):

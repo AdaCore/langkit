@@ -42,6 +42,10 @@ class Block: FooNode {
 
     @export fun old(): Entity[FooNode] =
     self.info.rebindings.old_env.env_node.as_bare_entity
+
+    env_spec {
+        add_env()
+    }
 }
 
 class Name: FooNode implements TokenNode {

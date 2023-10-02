@@ -1,18 +1,18 @@
 == foo.lkt ==
-foo.lkt:15:23: error: Property cannot be memoized (in Example.get_var: Cannot memoize extracting the value of a logic variable, call chain is: Example.get_var)
-15 |     @export @memoized fun get_var(): Entity[FooNode] = node.var.get_value()
+foo.lkt:18:23: error: Property cannot be memoized (in Example.get_var: Cannot memoize extracting the value of a logic variable, call chain is: Example.get_var)
+18 |     @export @memoized fun get_var(): Entity[FooNode] = node.var.get_value()
    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo.lkt:25:23: error: Property cannot be memoized (in Example.get_var2: Cannot memoize extracting the value of a logic variable, call chain is: Example.get_var2_public_wrapper -> Example.get_var2)
-25 |     @export @memoized fun get_var2_public_wrapper(): Entity[FooNode] =
+foo.lkt:28:23: error: Property cannot be memoized (in Example.get_var2: Cannot memoize extracting the value of a logic variable, call chain is: Example.get_var2_public_wrapper -> Example.get_var2)
+28 |     @export @memoized fun get_var2_public_wrapper(): Entity[FooNode] =
    |                       ^
 
-foo.lkt:54:23: error: Property cannot be memoized (in Example.get_something_unmemoizable: get_something_unmemoizable is unmemoizable, call chain is: Example.get_var4_public_wrapper -> Example.get_var4 -> Example.get_something_unmemoizable)
-54 |     @export @memoized fun get_var4_public_wrapper(): Entity[FooNode] =
+foo.lkt:57:23: error: Property cannot be memoized (in Example.get_something_unmemoizable: get_something_unmemoizable is unmemoizable, call chain is: Example.get_var4_public_wrapper -> Example.get_var4 -> Example.get_something_unmemoizable)
+57 |     @export @memoized fun get_var4_public_wrapper(): Entity[FooNode] =
    |                       ^
 
-foo.lkt:30:23: error: Property cannot be memoized (in Example.get_var2: Cannot memoize extracting the value of a logic variable, call chain is: Example.top_wrapper -> Example.get_var2)
-30 |     @export @memoized fun top_wrapper(): Bool =
+foo.lkt:33:23: error: Property cannot be memoized (in Example.get_var2: Cannot memoize extracting the value of a logic variable, call chain is: Example.top_wrapper -> Example.get_var2)
+33 |     @export @memoized fun top_wrapper(): Bool =
    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 

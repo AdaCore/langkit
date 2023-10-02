@@ -23,6 +23,11 @@ grammar foo_grammar {
 
 class Decl: BaseDecl {
     @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
 class SubDecl: Decl {
@@ -37,4 +42,8 @@ class Name: FooNode implements TokenNode {
 
 class RootNode: FooNode {
     @parse_field decls: ASTList[FooNode, BaseDecl]
+
+    env_spec {
+        add_env()
+    }
 }

@@ -15,8 +15,17 @@ class Decl: FooNode implements TokenNode {
 
     @export fun lookup(name: Symbol): Array[Entity[FooNode]] =
     node.node_env().get(name)
+
+    env_spec {
+        add_to_env_kv(node.symbol, node)
+    }
 }
 
 class Scope: FooNode {
     @parse_field decls: ASTList[FooNode, Decl]
+
+    env_spec {
+        add_env()
+        reference([node.as[FooNode]], Decl.refd_env)
+    }
 }

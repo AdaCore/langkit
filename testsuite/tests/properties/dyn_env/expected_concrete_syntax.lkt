@@ -63,6 +63,16 @@ class CallExpr: FooNode {
 class ConsDecl: FooNode {
     @parse_field name: Identifier
     @parse_field cons_expr: Expr
+
+    env_spec {
+        add_to_env(
+            EnvAssoc(
+                key=node.name.symbol, value=node, dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                ), metadata=null[Metadata]
+            )
+        )
+    }
 }
 
 @abstract class Expr: FooNode {
@@ -83,6 +93,16 @@ class Ref: Expr {
 class FunDecl: FooNode {
     @parse_field name: Identifier
     @parse_field args: ASTList[FooNode, ArgSpec]
+
+    env_spec {
+        add_to_env(
+            EnvAssoc(
+                key=node.name.symbol, value=node, dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                ), metadata=null[Metadata]
+            )
+        )
+    }
 }
 
 class Identifier: FooNode implements TokenNode {

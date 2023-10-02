@@ -22,11 +22,20 @@ grammar foo_grammar {
 class Scope: DefNode {
     @parse_field name: Id
     @parse_field defs: ASTList[FooNode, DefNode]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
 class Var: DefNode {
     @parse_field name: Id
     @parse_field value: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
 @abstract class Name: FooNode {
