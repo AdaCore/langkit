@@ -18,7 +18,7 @@ grammar foo_grammar {
     node.env_lookup(node.node_env(), n)
 
     fun env_lookup(env: LexicalEnv[FooNode], n: Symbol): Entity[FooNode] =
-    env.get_first(n)
+    env.get_first(n, lookup=LookupKind.flat)
 }
 
 class Decl: BaseDecl {

@@ -709,6 +709,7 @@ def emit_nl(strn):
 
 
 def emit_expr(expr, **ctx):
+    from langkit.dsl import LookupKind
     from langkit.expressions import (
         Literal, Let, FieldAccess, AbstractVariable, SelfVariable,
         EntityVariable, LogicTrue, LogicFalse, unsugar, Map, All, Any,
@@ -1152,6 +1153,8 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, EnvGet):
         args = [ee(expr.symbol)]
+        if expr.lookup_kind != LookupKind.recursive:
+            args.append(f"lookup={ee(expr.lookup_kind)}")
         if expr.sequential_from:
             args.append("from={}".format(ee(expr.sequential_from)))
         if expr.categories:
