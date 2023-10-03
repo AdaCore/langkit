@@ -1847,6 +1847,7 @@ class LktTypesLoader:
         array: Scope.Generic
         entity: Scope.Generic
         iterator: Scope.Generic
+        lexical_env: Scope.Generic
         node: Scope.Generic
 
     @dataclass
@@ -1923,6 +1924,7 @@ class LktTypesLoader:
             Scope.Generic("Array"),
             Scope.Generic("Entity"),
             Scope.Generic("Iterator"),
+            Scope.Generic("LexicalEnv"),
             Scope.Generic("Node"),
         )
         self.node_builtin = Scope.BuiltinValue("node", E.Self)
@@ -1944,11 +1946,17 @@ class LktTypesLoader:
                 builtin_type("BigInt"),
                 builtin_type("Bool"),
                 builtin_type("Char", "Character"),
+                builtin_type("DesignatedEnv"),
+                builtin_type("DesignatedEnvKind"),
                 builtin_type("EntityInfo"),
+                builtin_type("EnvAssoc"),
+                builtin_type("EnvRebindings"),
                 builtin_type("Equation"),
+                builtin_type("InnerEnvAssoc"),
                 builtin_type("Int"),
                 builtin_type("LogicVar"),
-                builtin_type("EnvRebindings"),
+                builtin_type("LookupKind"),
+                builtin_type("RefCategories"),
                 builtin_type("String"),
                 builtin_type("Symbol"),
                 builtin_type("Token"),
@@ -1963,6 +1971,7 @@ class LktTypesLoader:
                 self.generics.array,
                 self.generics.entity,
                 self.generics.iterator,
+                self.generics.lexical_env,
                 self.generics.node,
                 Scope.Trait("ErrorNode"),
                 Scope.Trait("TokenNode"),
