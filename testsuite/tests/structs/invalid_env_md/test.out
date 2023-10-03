@@ -9,6 +9,9 @@ bad_type.lkt:4:22: error: Environment metadata fields can be only booleans or AS
   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+== implicit.lkt ==
+Code generation was successful
+
 == not_a_struct.lkt ==
 not_a_struct.lkt:3:1: error: Invalid annotation: metadata
 3 | @metadata class Metadata: FooNode {

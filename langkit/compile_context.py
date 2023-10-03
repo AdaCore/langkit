@@ -1087,13 +1087,25 @@ class CompileCtx:
         """
         return self.grammar_rule_api_name(self.grammar.main_rule_name)
 
+    def create_default_metadata(self) -> None:
+        """
+        Assuming the language spec does not define a metadata type, create a
+        default one.
+        """
+        from langkit.compiled_types import CompiledTypeRepo, StructType
+
+        CompiledTypeRepo.env_metadata = StructType(
+            names.Name('Metadata'), None, None, []
+        )
+
     def compute_types(self):
         """
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (CompiledTypeRepo, EnumType,
-                                            StructType, T, resolve_type)
+        from langkit.compiled_types import (
+            CompiledTypeRepo, EnumType, T, resolve_type,
+        )
         from langkit.dsl import _StructMetaclass
         from langkit.expressions.base import construct_compile_time_known
 
@@ -1109,9 +1121,7 @@ class CompileCtx:
             # If the language spec provided no env metadata struct, create a
             # default one.
             if user_env_md is None:
-                CompiledTypeRepo.env_metadata = StructType(
-                    names.Name('Metadata'), None, None, []
-                )
+                self.create_default_metadata()
             else:
                 CompiledTypeRepo.env_metadata = user_env_md
         self.check_env_metadata(CompiledTypeRepo.env_metadata)

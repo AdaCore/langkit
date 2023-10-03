@@ -1971,6 +1971,14 @@ class LktTypesLoader:
                         f" {decl.p_decl_type_name}"
                     )
 
+        # Make sure we have a Metadata type registered in the root scope so
+        # that Lkt code can refer to it.
+        if "Metadata" not in root_scope.mapping:
+            self.root_scope.mapping["Metadata"] = Scope.BuiltinType(
+                name="Metadata",
+                defer=T.deferred_type("Metadata"),
+            )
+
         # Create dynamic variables
         for dyn_var_decl in dyn_vars:
             name_node = dyn_var_decl.f_syn_name
@@ -1993,7 +2001,15 @@ class LktTypesLoader:
         for type_decl in type_decls:
             self.lower_type_decl(type_decl)
 
-        # TODO: resolve all deferred types (member types and argument types)
+        # If user code does not define one, create a default Metadata struct
+        if CompiledTypeRepo.env_metadata is None:
+            self.ctx.create_default_metadata()
+
+        for entity in self.root_scope.mapping.items():
+            if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
+                entity._type = resolve_type(entity.defer)
+                # TODO: resolve all deferred types (member types and argument
+                # types).
 
         # Now that all user-defined compiled types are known, we can start
         # lowering expressions. Start with default values for property
