@@ -1317,7 +1317,7 @@ def emit_expr(expr, **ctx):
         ] + [ee(v) for v in expr.arg_vars])))
 
     elif isinstance(expr, DynamicLexicalEnv):
-        return "DynamicLexicalEnv({})".format(", ".join(keep([
+        return "dynamic_lexical_env({})".format(", ".join(keep([
             fqn(expr.assocs_getter),
             f"assoc_resolver={fqn(expr.assoc_resolver)}"
             if expr.assoc_resolver else '',

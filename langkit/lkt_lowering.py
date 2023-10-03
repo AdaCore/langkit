@@ -46,7 +46,7 @@ import itertools
 import os.path
 from typing import (
     Any, Callable, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar,
-    Union, cast
+    Union, cast, overload
 )
 
 import liblktlang as L
@@ -217,6 +217,16 @@ class Scope:
         Any entity that is created automatically by Lkt.
         """
         pass
+
+    @dataclass
+    class BuiltinFunction(BuiltinEntity):
+        """
+        Builtin function, used to expose a DSL operation.
+        """
+
+        @property
+        def diagnostic_name(self) -> str:
+            return f"the builtin function {self.name}"
 
     @dataclass
     class BuiltinType(BuiltinEntity):
@@ -1126,6 +1136,13 @@ domain_signature = FunctionSignature(2, set())
 Signature for "%domain".
 """
 
+dynamic_lexical_env_signature = FunctionSignature(
+    1, {"assoc_resolver", "transitive_parent"}
+)
+"""
+Signature for the "dynamic_lexical_env" builtin function.
+"""
+
 empty_signature = FunctionSignature(0, set())
 """
 Signature for a function that takes no argument.
@@ -1832,6 +1849,10 @@ class LktTypesLoader:
         iterator: Scope.Generic
         node: Scope.Generic
 
+    @dataclass
+    class Functions:
+        dynamic_lexical_env: Scope.BuiltinFunction
+
     # Map Lkt type declarations to the corresponding CompiledType instances, or
     # to None when the type declaration is currently being lowered. Keeping a
     # None entry in this case helps detecting illegal circular type
@@ -1912,6 +1933,10 @@ class LktTypesLoader:
         )
         self.property_error = Scope.Exception("PropertyError", E.PropertyError)
 
+        self.builtin_functions = self.Functions(
+            Scope.BuiltinFunction("dynamic_lexical_env")
+        )
+
         # Register builtins in the root scope
         with AbstractExpression.with_location(Location.builtin):
             for builtin in [
@@ -1941,6 +1966,7 @@ class LktTypesLoader:
                 self.generics.node,
                 Scope.Trait("ErrorNode"),
                 Scope.Trait("TokenNode"),
+                self.builtin_functions.dynamic_lexical_env,
             ]:
                 root_scope.mapping[builtin.name] = builtin
 
@@ -2194,10 +2220,19 @@ class LktTypesLoader:
             else:
                 error("invalid type reference")
 
-    def resolve_property(self, name: L.Expr) -> TypeRepo.Defer:
+    @overload
+    def resolve_property(self, name: L.Expr) -> TypeRepo.Defer: ...
+
+    @overload
+    def resolve_property(self, name: None) -> None: ...
+
+    def resolve_property(self, name: L.Expr | None) -> TypeRepo.Defer | None:
         """
         Like ``resolve_entity``, but for properties specifically.
         """
+        if name is None:
+            return None
+
         if not isinstance(name, L.DotExpr):
             error(
                 "invalid reference to a property (should be:"
@@ -2930,8 +2965,30 @@ class LktTypesLoader:
                 if isinstance(call_name, L.RefId):
                     entity = self.resolve_entity(call_name, env)
 
+                    # It can be a call to a built-in function
+                    if entity == self.builtin_functions.dynamic_lexical_env:
+                        parsed_args = dynamic_lexical_env_signature.match(
+                            self.ctx, call_expr
+                        )
+                        trans_parent_expr = parsed_args.keyword_args.get(
+                            "transitive_parent"
+                        )
+                        return E.DynamicLexicalEnv(
+                            assocs_getter=lower(
+                                parsed_args.positional_args[0]
+                            ),
+                            assoc_resolver=self.resolve_property(
+                                parsed_args.keyword_args.get("assoc_resolver")
+                            ),
+                            transitive_parent=(
+                                E.Literal(True)
+                                if trans_parent_expr is None else
+                                lower(trans_parent_expr)
+                            ),
+                        )
+
                     # It can be a New expression
-                    if isinstance(
+                    elif isinstance(
                         entity, (Scope.BuiltinType, Scope.UserType)
                     ):
                         return lower_new(entity.defer)
