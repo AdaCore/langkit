@@ -20,7 +20,7 @@ class Decl: FooNode {
     @trace fun id_ref_cat(cats: RefCategories): RefCategories = cats
 
     @export @trace fun entity_items(): Array[Entity[Ref]] = {
-        val cats = node.id_ref_cat(RefCats(others=true));
+        val cats = node.id_ref_cat(RefCategories(_=true));
 
         node.as_entity.items.map((i) => i)
     }

@@ -1289,11 +1289,13 @@ def emit_expr(expr, **ctx):
         else:
             return f'{ee_pexpr(expr.expr)}.as_big_int()'
     elif isinstance(expr, RefCategories):
-        return 'RefCats({})'.format(', '.join(
+        args = [
             '{}={}'.format(name, ee(value))
-            for name, value in
-            list(sorted(expr.cat_map.items())) + [("others", expr.default)]
-        ))
+            for name, value in sorted(expr.cat_map.items())
+        ]
+        if expr.default:
+            args.append("_=true")
+        return 'RefCategories({})'.format(', '.join(args))
 
     elif isinstance(expr, Predicate):
         return "%predicate({})".format(", ".join(keep([

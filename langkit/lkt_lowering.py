@@ -2985,13 +2985,36 @@ class LktTypesLoader:
                     Consider that this call creates a new struct, return the
                     corresponding New expression.
                     """
-                    args, kwargs = lower_args()
-                    check_source_language(
-                        len(args) == 0,
-                        "Positional arguments not allowed for struct"
-                        " constructors",
-                    )
-                    return E.New(type_ref, **kwargs)
+                    # Non-struct/node types have their own constructor
+                    if type_ref.get() == T.RefCategories:
+                        arg_nodes, kwarg_nodes = extract_call_args(call_expr)
+                        check_source_language(
+                            len(arg_nodes) == 0,
+                            "Positional arguments not allowed for"
+                            " RefCategories",
+                        )
+
+                        default_expr = kwarg_nodes.pop("_", None)
+                        enabled_categories = {
+                            k: parse_static_bool(self.ctx, v)
+                            for k, v in kwarg_nodes.items()
+                        }
+                        return E.RefCategories(
+                            default=(
+                                False
+                                if default_expr is None else
+                                parse_static_bool(self.ctx, default_expr)
+                            ),
+                            **enabled_categories,
+                        )
+                    else:
+                        args, kwargs = lower_args()
+                        check_source_language(
+                            len(args) == 0,
+                            "Positional arguments not allowed for struct"
+                            " constructors",
+                        )
+                        return E.New(type_ref, **kwargs)
 
                 # Depending on its name, a call can have different meanings...
 

@@ -49,21 +49,21 @@ class Example: FooNode implements TokenNode {
 
     @export fun lookup_1(name: Symbol): Array[Entity[FooNode]] =
     node.children_env().get(
-        name, categories=RefCats(cat1=true, others=false)
+        name, categories=RefCategories(cat1=true)
     )
 
     @export fun lookup_2(name: Symbol): Array[Entity[FooNode]] =
     node.children_env().get(
-        name, categories=RefCats(cat2=true, others=false)
+        name, categories=RefCategories(cat2=true)
     )
 
     env_spec {
         add_env()
         reference(
-            [node.parent.as[Def].cat1.as[FooNode]], FooNode.children_env, category="Cat1"
+            [node.parent.as[Def].cat1.as[FooNode]], FooNode.children_env, category="cat1"
         )
         reference(
-            [node.parent.as[Def].cat2.as[FooNode]], FooNode.children_env, category="Cat2"
+            [node.parent.as[Def].cat2.as[FooNode]], FooNode.children_env, category="cat2"
         )
     }
 }
