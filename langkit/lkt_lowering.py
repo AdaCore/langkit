@@ -115,7 +115,7 @@ def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
     var_name = (
         names.Name("Ignored")
         if source_name == "_" else
-        name_from_lower(ctx, "variable", id)
+        names.Name("Local") + name_from_lower(ctx, "variable", id)
     )
     return source_name, var_name
 

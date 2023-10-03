@@ -1,0 +1,18 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+
+    @export fun prop(ints: Array[Int]): Int = {
+        val get = ints?[0];
+
+        get + ints?[1]
+    }
+}
