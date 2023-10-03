@@ -1133,9 +1133,10 @@ def emit_expr(expr, **ctx):
               "rebind_env"):
         # Method like expressions
         exprs = expr.sub_expressions
-        return emit_method_call(
-            ee_pexpr(exprs[0]), type(expr).__name__, lmap(ee, exprs[1:])
-        )
+        args = lmap(ee, exprs[1:])
+        for k, v in expr.kwargs.items():
+            args.append(f"{k}={ee(v)}")
+        return emit_method_call(ee_pexpr(exprs[0]), type(expr).__name__, args)
 
     elif isinstance(expr, EnumLiteral):
         return expr.value.dsl_name
