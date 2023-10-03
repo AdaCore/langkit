@@ -1121,9 +1121,19 @@ class ParsedArgs:
     other_args: list[L.Expr]
 
 
+append_rebinding_signature = FunctionSignature(2, set())
+"""
+Signature for ".append_rebinding".
+"""
+
 collection_iter_signature = FunctionSignature(1, set())
 """
 Signature for ".all"/".any".
+"""
+
+concat_rebindings_signature = FunctionSignature(1, set())
+"""
+Signature for ".concat_rebindings".
 """
 
 do_signature = FunctionSignature(1, {"default_val"})
@@ -1148,6 +1158,11 @@ empty_signature = FunctionSignature(0, set())
 Signature for a function that takes no argument.
 """
 
+env_group_signature = FunctionSignature(0, {"with_md"})
+"""
+Signature for ".env_group".
+"""
+
 eq_signature = FunctionSignature(2, {"conv_prop"})
 """
 Signature for "%eq".
@@ -1156,6 +1171,11 @@ Signature for "%eq".
 filtermap_signature = FunctionSignature(2, set())
 """
 Signature for ".filtermap".
+"""
+
+is_visible_from_signature = FunctionSignature(1, set())
+"""
+Signature for ".is_visible_from".
 """
 
 logic_all_any_signature = FunctionSignature(1, set())
@@ -1171,6 +1191,11 @@ Signature for "%predicate".
 propagate_signature = FunctionSignature(2, set(), accepts_others=True)
 """
 Signature for "%propagate".
+"""
+
+rebind_env_signature = FunctionSignature(1, set())
+"""
+Signature for ".rebind_env".
 """
 
 
@@ -3081,6 +3106,15 @@ class LktTypesLoader:
                         index_var,
                     )
 
+                elif method_name == "append_rebinding":
+                    parsed_args = append_rebinding_signature.match(
+                        self.ctx, call_expr
+                    )
+                    old_env_expr, new_env_expr = parsed_args.positional_args
+                    result = method_prefix.append_rebinding(
+                        lower(old_env_expr), lower(new_env_expr)
+                    )
+
                 elif method_name == "as_array":
                     empty_signature.match(self.ctx, call_expr)
                     result = method_prefix.as_array
@@ -3088,6 +3122,14 @@ class LktTypesLoader:
                 elif method_name == "as_int":
                     empty_signature.match(self.ctx, call_expr)
                     result = method_prefix.as_int
+
+                elif method_name == "concat_rebindings":
+                    parsed_args = concat_rebindings_signature.match(
+                        self.ctx, call_expr
+                    )
+                    result = method_prefix.concat_rebindings(
+                        lower(parsed_args.positional_args[0])
+                    )
 
                 elif method_name == "do":
                     lambda_info = extract_lambda_and_kwargs(
@@ -3118,6 +3160,28 @@ class LktTypesLoader:
                         arg_var,
                         default_val,
                     )
+
+                elif method_name == "env_group":
+                    parsed_args = env_group_signature.match(
+                        self.ctx, call_expr
+                    )
+                    with_md_expr = parsed_args.keyword_args.get("with_md")
+                    with_md = (
+                        None if with_md_expr is None else lower(with_md_expr)
+                    )
+                    result = method_prefix.env_group(with_md=with_md)
+
+                elif method_name == "env_node":
+                    empty_signature.match(self.ctx, call_expr)
+                    result = method_prefix.env_node
+
+                elif method_name == "env_orphan":
+                    empty_signature.match(self.ctx, call_expr)
+                    result = method_prefix.env_orphan
+
+                elif method_name == "env_parent":
+                    empty_signature.match(self.ctx, call_expr)
+                    result = method_prefix.env_parent
 
                 elif method_name == "filter":
                     lambda_info = extract_lambda_and_kwargs(
@@ -3243,6 +3307,14 @@ class LktTypesLoader:
                     empty_signature.match(self.ctx, call_expr)
                     result = method_prefix.get_value
 
+                elif method_name == "is_visible_from":
+                    parsed_args = is_visible_from_signature.match(
+                        self.ctx, call_expr
+                    )
+                    result = method_prefix.is_visible_from(
+                        lower(parsed_args.positional_args[0])
+                    )
+
                 elif method_name == "length":
                     empty_signature.match(self.ctx, call_expr)
                     result = getattr(method_prefix, "length")
@@ -3275,6 +3347,14 @@ class LktTypesLoader:
                         element_var,
                         index_var,
                         do_concat=method_name == "mapcat",
+                    )
+
+                elif method_name == "rebind_env":
+                    parsed_args = rebind_env_signature.match(
+                        self.ctx, call_expr
+                    )
+                    result = method_prefix.rebind_env(
+                        lower(parsed_args.positional_args[0])
                     )
 
                 elif method_name == "singleton":
