@@ -26,8 +26,8 @@ class Var: Decl {
     @parse_field expr: Literal
 }
 
-class Literal: FooNode implements TokenNode {
+@custom_short_image class Literal: FooNode implements TokenNode {
 }
 
-class Name: FooNode implements TokenNode {
+@custom_short_image class Name: FooNode implements TokenNode {
 }

@@ -911,11 +911,13 @@ class TokenFamilyAnnotations(ParsedAnnotations):
 
 @dataclass
 class BaseNodeAnnotations(ParsedAnnotations):
+    custom_short_image: bool
     has_abstract_list: bool
     ple_unit_root: bool
     rebindable: bool
     synthetic: bool
     annotations = [
+        FlagAnnotationSpec("custom_short_image"),
         FlagAnnotationSpec("has_abstract_list"),
         FlagAnnotationSpec("ple_unit_root"),
         FlagAnnotationSpec("rebindable"),
@@ -4613,6 +4615,7 @@ class LktTypesLoader:
             fields=fields,
             annotations=langkit.dsl.Annotations(
                 rebindable=annotations.rebindable,
+                custom_short_image=annotations.custom_short_image,
                 ple_unit_root=annotations.ple_unit_root,
             ),
             is_abstract=is_abstract,

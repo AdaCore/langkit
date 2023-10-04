@@ -3,7 +3,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 
 procedure Main is
-   U   : constant Analysis_Unit :=
+   U : constant Analysis_Unit :=
      Create_Context.Get_From_Buffer ("main.txt", Buffer => "def foo");
 begin
    if U.Has_Diagnostics then
