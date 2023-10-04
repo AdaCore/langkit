@@ -1,7 +1,15 @@
+== more-general.lkt ==
+Code generation was successful
+
 == no-dot.lkt ==
 no-dot.lkt:5:29: error: Invalid property reference
 5 |     @main_rule main_rule <- Example("example") |> when(Example)
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== too-specific.lkt ==
+too-specific.lkt:5:29: error: Property passed as predicate must accept all nodes the sub-parser may yield. Here, it should take anything that matches a FooNode, while here Example.pred takes Example arguments
+5 |     @main_rule main_rule <- or(
 
 
 == unknown-node.lkt ==
@@ -16,4 +24,4 @@ unknown-prop.lkt:5:29: error: Example has no no_such_prop property
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-lkt_compile: Done
+Done

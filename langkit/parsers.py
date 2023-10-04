@@ -2255,11 +2255,21 @@ class Predicate(Parser):
             self.property_ref.type.matches(T.Bool),
             'Property passed as predicate to Predicate parser must return'
             ' a boolean')
-        assert self.property_ref.struct is not None
+
+        pred_arg_type = self.property_ref.struct
+        assert pred_arg_type is not None
+
+        parser_rtype = self.parser.type
+        assert parser_rtype is not None
+
         check_source_language(
-            self.property_ref.struct.matches(self.parser.type),
-            'Property passed as predicate to Predicate parser must take a node'
-            ' with the type of the sub-parser')
+            parser_rtype.matches(pred_arg_type),
+            'Property passed as predicate must accept all nodes the sub-parser'
+            ' may yield. Here, it should take anything that matches a'
+            f' {parser_rtype.dsl_name}, while here'
+            f' {self.property_ref.qualname} takes {pred_arg_type.dsl_name}'
+            ' arguments',
+        )
 
         assert self.grammar is not None
         self.grammar.uses_external_properties = (
