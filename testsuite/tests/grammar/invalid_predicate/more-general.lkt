@@ -1,0 +1,16 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example") |> when(BaseExample.pred)
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+@abstract class BaseExample: FooNode {
+    fun pred(): Bool = true
+}
+
+class Example: BaseExample implements TokenNode {
+}
