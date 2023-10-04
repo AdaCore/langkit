@@ -1562,6 +1562,9 @@ def emit_node_type(node_type):
         if annotations.rebindable:
             quals.append("rebindable")
 
+        if annotations.warn_on_node:
+            quals.append("warn_on_node")
+
         if node_type.synthetic:
             quals.append("synthetic")
 

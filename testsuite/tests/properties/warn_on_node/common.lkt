@@ -1,0 +1,32 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule item <- list*(decl)
+    decl <- or(def | var)
+    def <- Def("def" name)
+    var <- Var(name "=" number)
+    name <- Name(@identifier)
+    number <- Number(@identifier)
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Def: Decl {
+    @parse_field name: Name
+}
+
+class Var: Decl {
+    @parse_field name: Name
+    @parse_field value: Number
+
+    @export fun get_name1(): Name = node.name
+    @export @ignore_warn_on_node fun get_name2(): Name = node.name
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Number: FooNode implements TokenNode {
+}

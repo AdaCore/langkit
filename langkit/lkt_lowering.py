@@ -916,12 +916,14 @@ class BaseNodeAnnotations(ParsedAnnotations):
     ple_unit_root: bool
     rebindable: bool
     synthetic: bool
+    warn_on_node: bool
     annotations = [
         FlagAnnotationSpec("custom_short_image"),
         FlagAnnotationSpec("has_abstract_list"),
         FlagAnnotationSpec("ple_unit_root"),
         FlagAnnotationSpec("rebindable"),
         FlagAnnotationSpec('synthetic'),
+        FlagAnnotationSpec("warn_on_node"),
     ]
 
 
@@ -992,6 +994,7 @@ class FunAnnotations(ParsedAnnotations):
     external: bool
     final: bool
     ignore_unused: bool
+    ignore_warn_on_node: bool
     memoized: bool
     trace: bool
     uses_entity_info: bool
@@ -1005,6 +1008,7 @@ class FunAnnotations(ParsedAnnotations):
         FlagAnnotationSpec('external'),
         FlagAnnotationSpec('final'),
         FlagAnnotationSpec('ignore_unused'),
+        FlagAnnotationSpec('ignore_warn_on_node'),
         FlagAnnotationSpec('memoized'),
         FlagAnnotationSpec('trace'),
         FlagAnnotationSpec('uses_entity_info'),
@@ -4102,7 +4106,9 @@ class LktTypesLoader:
             uses_envs=uses_envs,
             optional_entity_info=False,
             warn_on_unused=not annotations.ignore_unused,
-            ignore_warn_on_node=None,
+            # When the @ignore_warn_on_node annotation is missing, use "None"
+            # to inherit this annotation.
+            ignore_warn_on_node=annotations.ignore_warn_on_node or None,
             call_non_memoizable_because=(
                 annotations.call_non_memoizable_because
             ),
@@ -4614,6 +4620,9 @@ class LktTypesLoader:
             base=base_type,
             fields=fields,
             annotations=langkit.dsl.Annotations(
+                # The absence of "warn_on_node" means "inherit from base node",
+                # so pass None in this case.
+                warn_on_node=annotations.warn_on_node or None,
                 rebindable=annotations.rebindable,
                 custom_short_image=annotations.custom_short_image,
                 ple_unit_root=annotations.ple_unit_root,
