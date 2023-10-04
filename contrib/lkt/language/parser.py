@@ -46,7 +46,9 @@ from langkit.expressions import (
     PropertyError, Self, String as S, Try as _Try, Var, direct_env, ignore,
     langkit_property, new_env_assoc
 )
-from langkit.parsers import Cut, Grammar, List, Null, Opt, Or as GOr, Pick
+from langkit.parsers import (
+    Cut, Grammar, List, Null, Opt, Or as GOr, Pick, Predicate
+)
 
 
 from language.lexer import lkt_lexer as Lex
@@ -1382,6 +1384,18 @@ class Id(Expr):
     Identifier.
     """
     token_node = True
+
+    @langkit_property(
+        external=True,
+        uses_envs=False,
+        uses_entity_info=False,
+        return_type=T.Bool,
+    )
+    def is_type_name():
+        """
+        Return whether this identifier refers to a type name.
+        """
+        pass
 
 
 class DefId(Id):
@@ -3807,6 +3821,7 @@ lkt_grammar.add_rules(
     ),
     id=Id(Lex.Identifier),
     ref_id=RefId(Lex.Identifier),
+    type_ref_id=Predicate(G.ref_id, RefId.is_type_name),
     def_id=DefId(Lex.Identifier),
 
     import_stmt=Import("import", ModuleRefId(Lex.Identifier)),
@@ -4061,9 +4076,14 @@ lkt_grammar.add_rules(
         G.doc, List(G.decl_annotation, empty_valid=True), G.bare_decl
     ),
 
+    type_expr=GOr(
+        DotExpr(G.type_expr, ".", G.type_ref_id),
+        G.type_ref_id,
+    ),
+
     type_ref=GOr(
-        GenericTypeRef(G.basic_name, "[", G.type_list, "]"),
-        SimpleTypeRef(G.basic_name),
+        GenericTypeRef(G.type_expr, "[", G.type_list, "]"),
+        SimpleTypeRef(G.type_expr),
         FunctionTypeRef(
             "(", List(G.type_ref, empty_valid=True, sep=","), ")",
             "->", G.type_ref

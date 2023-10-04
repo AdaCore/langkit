@@ -1,1 +1,1 @@
-@invalid val a: NoSuchType.some_field = raise PropertyError
+@invalid val a: NoSuchType.T = raise PropertyError

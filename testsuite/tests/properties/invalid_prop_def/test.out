@@ -2,9 +2,9 @@
 Code generation was successful
 
 == not_type.lkt ==
-not_type.lkt:4:25: error: type expected, got the builtin value <Var Self at ???>
-4 |     @export fun prop(a: node): Int = 0
-  |                         ^^^^
+not_type.lkt:4:25: error: type expected, got the generic Entity
+4 |     @export fun prop(a: Entity): Int = 0
+  |                         ^^^^^^
 
 
 == reserved.lkt ==

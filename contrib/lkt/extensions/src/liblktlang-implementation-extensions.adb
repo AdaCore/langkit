@@ -246,6 +246,20 @@ package body Liblktlang.Implementation.Extensions is
       end if;
    end Decl_Short_Image;
 
+   -----------------------
+   -- Id_P_Is_Type_Name --
+   -----------------------
+
+   function Id_P_Is_Type_Name (Node : Bare_Id) return Boolean is
+      N_Text : constant Text_Type := Text (Node);
+   begin
+      --  Here is not the time to perform casing validation. Type names are
+      --  supposed to have lower case, so we can just check if the first
+      --  character has upper case.
+
+      return N_Text'Length > 0 and then N_Text (N_Text'First) in 'A' .. 'Z';
+   end Id_P_Is_Type_Name;
+
    ---------------------------------------
    -- Lkt_Node_P_Env_From_Vals_Internal --
    ---------------------------------------

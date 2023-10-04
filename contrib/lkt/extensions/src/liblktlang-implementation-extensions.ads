@@ -11,6 +11,9 @@ package Liblktlang.Implementation.Extensions is
    --  Custom version of Short_Image for referencing identifiers. Include
    --  the identifier.
 
+   function Id_P_Is_Type_Name (Node : Bare_Id) return Boolean;
+   --  Return whether this identifier refers to a type name
+
    function Lkt_Node_P_Env_From_Vals_Internal
      (Node : Bare_Lkt_Node;
       Vals : Internal_Env_Kv_Array_Access) return Lexical_Env;

@@ -1,9 +1,9 @@
 Resolving test.lkt
 ==================
 test.lkt:1:17: error: Cannot find entity `NoSuchType` in this scope
-1 | @invalid val a: NoSuchType.some_field = raise PropertyError
+1 | @invalid val a: NoSuchType.T = raise PropertyError
   |                 ^^^^^^^^^^
 
-Id   <RefId "PropertyError" test.lkt:1:47-1:60>
+Id   <RefId "PropertyError" test.lkt:1:38-1:51>
      references <StructDecl prelude: "PropertyError">
 
