@@ -4623,6 +4623,9 @@ def create_builtin_types():
         is_builtin_type=True,
     )
 
+    T.env_assoc
+    T.inner_env_assoc
+
 
 class TypeRepo:
     """
