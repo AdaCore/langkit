@@ -250,6 +250,10 @@ class Emitter:
         pass will be run on the given script.
         """
 
+        extension_unit = (
+            f"{context.ada_api_settings.lib_name}.Implementation.Extensions"
+        )
+
         # Determine whether we have user external properties. If so,
         # automatically WITH $.Implementation.Extensions from the body of
         # $.Analysis and $.Implementation.
@@ -259,11 +263,21 @@ class Emitter:
         ):
             for unit in ('Analysis', 'Implementation', 'Implementation.C'):
                 context.add_with_clause(
-                    unit, AdaSourceKind.body,
-                    '{}.Implementation.Extensions'
-                    .format(context.ada_api_settings.lib_name),
-                    use_clause=True
+                    unit, AdaSourceKind.body, extension_unit, use_clause=True
                 )
+
+        # Likewise, if we have custom "_Short_Image" functions from extensions,
+        # $.Implementation needs to have visibility over it.
+        if any(
+            node.annotations.custom_short_image
+            for node in context.astnode_types
+        ):
+            context.add_with_clause(
+                "Implementation",
+                AdaSourceKind.body,
+                extension_unit,
+                use_clause=True
+            )
 
     def path_to(self, destination: str, path_from: str) -> str:
         """
