@@ -1,19 +1,19 @@
 == no-dot.lkt ==
-no-dot.lkt:4:29: error: Invalid property reference
-4 |     @main_rule main_rule <- Example("example") |> when(Example)
+no-dot.lkt:5:29: error: Invalid property reference
+5 |     @main_rule main_rule <- Example("example") |> when(Example)
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == unknown-node.lkt ==
-unknown-node.lkt:4:56: error: Unknown node: NoSuchNode
-4 |     @main_rule main_rule <- Example("example") |> when(NoSuchNode.no_such_prop)
+unknown-node.lkt:5:56: error: Unknown node: NoSuchNode
+5 |     @main_rule main_rule <- Example("example") |> when(NoSuchNode.no_such_prop)
   |                                                        ^^^^^^^^^^
 
 
 == unknown-prop.lkt ==
-unknown-prop.lkt:4:29: error: Example has no no_such_prop property
-4 |     @main_rule main_rule <- Example("example") |> when(Example.no_such_prop)
+unknown-prop.lkt:5:29: error: Example has no no_such_prop property
+5 |     @main_rule main_rule <- Example("example") |> when(Example.no_such_prop)
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done
