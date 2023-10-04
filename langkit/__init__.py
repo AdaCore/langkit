@@ -13,6 +13,8 @@ def reset():
     import langkit.lexer
     import langkit.utils
 
+    langkit.utils.reset_memoized()
+
     langkit.compiled_types.CompiledTypeRepo.reset()
     langkit.compiled_types.create_builtin_types()
 
@@ -25,5 +27,4 @@ def reset():
 
     langkit.lexer.LexerToken.reset()
 
-    langkit.utils.reset_memoized()
     langkit.compile_context.compile_ctx = None
