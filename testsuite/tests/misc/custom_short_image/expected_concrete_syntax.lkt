@@ -1,0 +1,16 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Decl("def" Name(@identifier))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Decl : FooNode {
+    @parse_field name: Name
+}
+
+class Name : FooNode implements TokenNode {
+}
