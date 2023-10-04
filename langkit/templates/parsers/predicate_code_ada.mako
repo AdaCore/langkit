@@ -5,7 +5,7 @@
 ${parser.parser.generate_code()}
 
 if ${parser.parser.res_var} /= null
-   and then ${parser.property_ref.name} (${parser.parser.res_var})
+   and then ${parser.property_ref.qual_impl_name} (${parser.parser.res_var})
 then
     ${parser.res_var} := ${parser.parser.res_var};
     ${parser.pos_var} := ${parser.parser.pos_var};
