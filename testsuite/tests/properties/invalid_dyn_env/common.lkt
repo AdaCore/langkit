@@ -4,3 +4,6 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
+
+class FooNode implements Node[FooNode] {
+}

@@ -1,0 +1,31 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(decl)
+    decl <- Decl(Name(@identifier) "(" list*(ref) ")")
+    ref <- Ref(Name(@identifier))
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Decl: FooNode {
+    @parse_field name: Name
+    @parse_field refs: ASTList[FooNode, Ref]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
+}
+
+class Ref: FooNode {
+    @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
+    }
+
+    @export fun resolve(): Entity[FooNode] = node.node_env.get(node.name)?[0]
+}

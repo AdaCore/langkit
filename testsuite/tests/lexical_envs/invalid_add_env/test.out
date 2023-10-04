@@ -1,2 +1,7 @@
-error: There can be at most one call to add_env()
-Done
+== foo.lkt ==
+foo.lkt:12:5: error: There can be at most one call to add_env()
+12 |     env_spec {
+   |     ^
+
+
+lkt_compile: Done

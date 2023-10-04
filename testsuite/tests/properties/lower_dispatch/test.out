@@ -1,11 +1,11 @@
 main.py: Running...
 a.p_evaluate_abstract = 3
-a.p_evaluate_rtcheck = <PropertyError: Property Expr.evaluate_rtcheck not implemented on type Ref>
+a.p_evaluate_rtcheck = <PropertyError: Property Expr.evaluate_rtcheck not implemented>
 a.p_evaluate_concrete = 3
 a.p_evaluate_entity = 3
 
 b.p_evaluate_abstract = 6
-b.p_evaluate_rtcheck = <PropertyError: Property Expr.evaluate_rtcheck not implemented on type Ref>
+b.p_evaluate_rtcheck = <PropertyError: Property Expr.evaluate_rtcheck not implemented>
 b.p_evaluate_concrete = 6
 b.p_evaluate_entity = 6
 

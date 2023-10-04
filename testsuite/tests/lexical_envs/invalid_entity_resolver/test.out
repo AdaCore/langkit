@@ -1,7 +1,19 @@
-== Bad return type ==
-test.py:XXX: error: Entity resolver properties must return entities (got FooNode.entity.array)
-== Has dynamic variable ==
-test.py:XXX: error: Entity resolver properties must have no dynamically bound variable
-== Has arguments ==
-test.py:XXX: error: Entity resolver properties must have no argument
-Done
+== bad_return_type.lkt ==
+common.lkt:27:9: error: Entity resolver properties must return entities (got FooNode.entity.array)
+27 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== has_args.lkt ==
+common.lkt:27:9: error: Entity resolver properties must have no argument
+27 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== has_dynvars.lkt ==
+common.lkt:27:9: error: Entity resolver properties must have no dynamically bound variable
+27 |         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

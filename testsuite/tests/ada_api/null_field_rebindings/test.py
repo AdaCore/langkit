@@ -44,5 +44,9 @@ class Decl(FooNode):
         return T.Decl.entity.new(node=Self, info=e_info)
 
 
-build_and_run(lkt_file="expected_concrete_syntax.lkt", gpr_mains=["main.adb"])
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    gpr_mains=["main.adb"],
+    types_from_lkt=True,
+)
 print("Done")

@@ -33,8 +33,9 @@ expressions. The lowering of types goes as follows:
   which are lowered before classes that they derive from. This pass creates the
   actual ``CompiledType`` instances as well as the ``AbstractNodeData`` ones.
 
-* Finally, the arguments' default values and the bodies of all properties are
-  lowered.
+* The arguments' default values and the bodies of all properties are lowered.
+
+* Finally, env specs are lowered.
 """
 
 from __future__ import annotations
@@ -61,10 +62,14 @@ from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context, error,
     errors_checkpoint, non_blocking_error
 )
+from langkit.envs import (
+    AddEnv, AddToEnv, Do, EnvAction, EnvSpec, HandleChildren, RefEnvs, RefKind,
+    SetInitialEnv
+)
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
-    Let, LocalVars, Property, PropertyDef, create_lazy_field
+    Let, LocalVars, Property, PropertyDef, create_lazy_field, unsugar
 )
 import langkit.expressions.logic as ELogic
 from langkit.lexer import (
@@ -104,6 +109,16 @@ def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
                               'Boolean literal expected')
 
     return expr.text == 'true'
+
+
+def parse_static_str(ctx: CompileCtx, expr: L.Expr) -> str:
+    """
+    Return the string value that this expression denotes.
+    """
+    with ctx.lkt_context(expr):
+        if not isinstance(expr, L.StringLit) or expr.p_is_prefixed_string:
+            error("simple string literal expected")
+    return expr.p_denoted_value
 
 
 def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
@@ -289,6 +304,18 @@ class Scope:
         @property
         def diagnostic_name(self) -> str:
             return f"the exception {self.name}"
+
+    @dataclass
+    class RefKindValue(BuiltinEntity):
+        """
+        Reference kinds in "reference()" env actions.
+        """
+
+        value: RefKind
+
+        @property
+        def diagnostic_name(self) -> str:
+            return f"the reference kind {self.name}"
 
     @dataclass
     class UserEntity(Entity):
@@ -1121,6 +1148,25 @@ class ParsedArgs:
     other_args: list[L.Expr]
 
 
+add_env_signature = FunctionSignature(
+    0, {"no_parent", "transitive_parent", "names"}
+)
+"""
+Signature for the "add_env" env action.
+"""
+
+add_to_env_kv_signature = FunctionSignature(
+    2, {"dest_env", "metadata", "resolver"}
+)
+"""
+Signature for the "add_to_env_kv" env action.
+"""
+
+add_to_env_signature = FunctionSignature(1, {"resolver"})
+"""
+Signature for the "add_to_env" env action.
+"""
+
 append_rebinding_signature = FunctionSignature(2, set())
 """
 Signature for ".append_rebinding".
@@ -1139,6 +1185,11 @@ Signature for ".concat_rebindings".
 do_signature = FunctionSignature(1, {"default_val"})
 """
 Signature for ".do".
+"""
+
+do_env_signature = FunctionSignature(1, set())
+"""
+Signature for the "do" env action.
 """
 
 domain_signature = FunctionSignature(2, set())
@@ -1173,6 +1224,11 @@ filtermap_signature = FunctionSignature(2, set())
 Signature for ".filtermap".
 """
 
+get_signature = FunctionSignature(1, {"lookup", "from", "categories"})
+"""
+Signature for ".get"/".get_first".
+"""
+
 is_visible_from_signature = FunctionSignature(1, set())
 """
 Signature for ".is_visible_from".
@@ -1196,6 +1252,19 @@ Signature for "%propagate".
 rebind_env_signature = FunctionSignature(1, set())
 """
 Signature for ".rebind_env".
+"""
+
+reference_signature = FunctionSignature(
+    2,
+    {"kind", "dest_env", "cond", "category", "shed_corresponding_rebindings"},
+)
+"""
+Signature for the "reference" env action.
+"""
+
+set_initial_env_signature = FunctionSignature(1, set())
+"""
+Signature for the "set_initial_env" env action.
 """
 
 
@@ -1925,7 +1994,16 @@ class LktTypesLoader:
         self.ctx = ctx
         self.root_scope = root_scope = Scope("the root scope", ctx)
 
+        # Create a special scope to resolve the "kind" argument for
+        # "reference()" env actions.
+        self.refd_env_scope = Scope("builtin scope", ctx)
+        for ref_kind_value in RefKind:
+            self.refd_env_scope.mapping[ref_kind_value.name] = (
+                Scope.RefKindValue(ref_kind_value.name, ref_kind_value)
+            )
+
         self.compiled_types: dict[L.Decl, CompiledType | None] = {}
+        self.internal_property_counter = iter(itertools.count(0))
 
         def builtin_type(
             name: str,
@@ -2058,6 +2136,7 @@ class LktTypesLoader:
         # handle node derivation, this recurses on bases first and reject
         # inheritance loops.
         self.properties_to_lower: list[LktTypesLoader.PropertyToLower] = []
+        self.env_specs_to_lower: list[tuple[ASTNodeType, L.EnvSpecDecl]] = []
         for type_decl in type_decls:
             self.lower_type_decl(type_decl)
 
@@ -2072,8 +2151,8 @@ class LktTypesLoader:
                 # types).
 
         # Now that all user-defined compiled types are known, we can start
-        # lowering expressions. Start with default values for property
-        # arguments and dynamic variables.
+        # lowering expressions and env specs. Start with default values for
+        # property arguments and dynamic variables.
         for to_lower in self.properties_to_lower:
             for arg_decl, arg in zip(
                 to_lower.arguments, to_lower.prop.arguments
@@ -2104,6 +2183,12 @@ class LktTypesLoader:
                     to_lower.prop.expr = self.lower_expr(
                         to_lower.body, to_lower.scope, to_lower.prop.vars
                     )
+
+        # Finally, lower env specs
+        for node, env_spec_decl in self.env_specs_to_lower:
+            env_spec = self.lower_env_spec(node, env_spec_decl)
+            node.env_spec = env_spec
+            env_spec.ast_node = node
 
     def resolve_entity(self, name: L.Expr, scope: Scope) -> Scope.Entity:
         """
@@ -2190,6 +2275,20 @@ class LktTypesLoader:
                         )
                     element_type, = type_args
                     return self.resolve_type(element_type, scope).iterator
+
+                elif generic == self.generics.lexical_env:
+                    if len(type_args) != 1:
+                        error(
+                            f"{generic.name} expects one type argument: the"
+                            " root node"
+                        )
+                    root_node_ref, = type_args
+
+                    # TODO: validate that root_node_ref is the root node (see
+                    # above).
+                    del root_node_ref
+
+                    return T.LexicalEnv
 
                 elif generic == self.generics.node:
                     error(
@@ -2607,6 +2706,110 @@ class LktTypesLoader:
                 return self.lower_expr(expr, self.root_scope, None)
 
             error("static expression expected in this context")
+
+    def create_internal_property(
+        self,
+        node: ASTNodeType,
+        name: str,
+        lower_expr: Callable[[PropertyDef], AbstractExpression],
+        rtype: CompiledType | None,
+        location: Location,
+    ) -> PropertyDef:
+        """
+        Create an internal property.
+
+        This is similar to ``lower_expr_to_internal_property``, but with a
+        callback to get the lowered expression body.
+        """
+        result = PropertyDef(
+            expr=None,
+            prefix=AbstractNodeData.PREFIX_INTERNAL,
+            name=names.Name.from_lower(
+                f"{name}_{next(self.internal_property_counter)}"
+            ),
+            public=False,
+            type=rtype,
+            ignore_warn_on_node=True,
+        )
+
+        # Make internal properties unreachable from user code
+        result._indexing_name = f"_{result.original_name.lower()}"
+        result._original_name = result._indexing_name
+
+        # Internal properties never have dynamic variables
+        result.set_dynamic_vars([])
+
+        with result.bind():
+            result.expr = lower_expr(result)
+
+        # Register this new property as a field of the owning node
+        node.add_field(result)
+
+        result.location = location
+        return result
+
+    @overload
+    def lower_expr_to_internal_property(
+        self,
+        node: ASTNodeType,
+        name: str,
+        expr: L.Expr | AbstractExpression,
+        rtype: CompiledType | None,
+    ) -> PropertyDef: ...
+
+    @overload
+    def lower_expr_to_internal_property(
+        self,
+        node: ASTNodeType,
+        name: str,
+        expr: None,
+        rtype: CompiledType | None,
+    ) -> None: ...
+
+    def lower_expr_to_internal_property(
+        self,
+        node: ASTNodeType,
+        name: str,
+        expr: L.Expr | AbstractExpression | None,
+        rtype: CompiledType | None,
+    ) -> PropertyDef | None:
+        """
+        Create an internal property to lower an expression.
+
+        For convenience, accept a null body expression: return None in that
+        case (create no property).
+
+        :param node: Node for which we want to create this property.
+        :param name: Name prefix, used to generate the actual property name.
+        :param expr: Body for this proprety.
+        :param rtype: Return type for this property.
+        """
+        if expr is None:
+            return None
+        not_none_expr = expr
+
+        def lower_expr(p: PropertyDef) -> AbstractExpression:
+            expr = not_none_expr
+
+            # If the body is a Lkt expression, lower it. Use it unchanged
+            # otherwise.
+            return (
+                self.lower_expr(expr, self.root_scope, p.vars)
+                if isinstance(expr, L.Expr) else
+                expr
+            )
+
+        return self.create_internal_property(
+            node,
+            name,
+            lower_expr,
+            rtype,
+            location=(
+                Location.from_lkt_node(expr)
+                if isinstance(expr, L.Expr) else
+                Location.builtin
+            )
+        )
 
     def lower_expr(self,
                    expr: L.Expr,
@@ -3326,6 +3529,42 @@ class LktTypesLoader:
                     result = E.Find.create_expanded(
                         method_prefix, inner_expr, elt_var, index_var=None
                     )
+                elif method_name in ("get", "get_first"):
+                    parsed_args = get_signature.match(self.ctx, call_expr)
+                    symbol = lower(parsed_args.positional_args[0])
+
+                    lookup_expr = parsed_args.keyword_args.get("lookup")
+                    lookup: AbstractExpression | None = (
+                        None
+                        if lookup_expr is None else
+                        lower(lookup_expr)
+                    )
+
+                    from_node_expr = parsed_args.keyword_args.get("from")
+                    from_node: AbstractExpression | None = (
+                        None
+                        if from_node_expr is None else
+                        lower(from_node_expr)
+                    )
+
+                    categories_expr = parsed_args.keyword_args.get(
+                        "categories"
+                    )
+                    categories: AbstractExpression | None = (
+                        None
+                        if categories_expr is None else
+                        lower(categories_expr)
+                    )
+
+                    return (
+                        method_prefix.get(
+                            symbol, lookup, from_node, categories
+                        )
+                        if method_name == "get" else
+                        method_prefix.get_first(
+                            symbol, lookup, from_node, categories
+                        )
+                    )
 
                 elif method_name == "get_value":
                     empty_signature.match(self.ctx, call_expr)
@@ -3897,13 +4136,219 @@ class LktTypesLoader:
 
         return result
 
-    def lower_fields(
+    def lower_env_spec(
+        self,
+        node: ASTNodeType,
+        env_spec: L.EnvSpecDecl,
+    ) -> EnvSpec:
+        """
+        Lower an env spec for a node.
+
+        :param node: Node for which we want to lower the env spec.
+        :param env_spec: Env spec to lower.
+        """
+        actions = []
+
+        for syn_action in env_spec.f_actions:
+            assert isinstance(syn_action.f_name, L.RefId)
+            action_kind = syn_action.f_name.text
+            action: EnvAction
+            if action_kind == "add_env":
+                parsed_args = add_env_signature.match(self.ctx, syn_action)
+                action = AddEnv(
+                    no_parent=(
+                        parse_static_bool(
+                            self.ctx, parsed_args.keyword_args["no_parent"]
+                        )
+                        if "no_parent" in parsed_args.keyword_args else
+                        False
+                    ),
+                    transitive_parent=self.lower_expr_to_internal_property(
+                        node,
+                        "env_trans_parent",
+                        parsed_args.keyword_args.get(
+                            "transitive_parent"
+                        ) or unsugar(False),
+                        T.Bool,
+                    ),
+                    names=self.lower_expr_to_internal_property(
+                        node,
+                        "env_names",
+                        parsed_args.keyword_args.get("names"),
+                        T.Symbol.array,
+                    ),
+                )
+
+            elif action_kind == "add_to_env_kv":
+                parsed_args = add_to_env_kv_signature.match(
+                    self.ctx, syn_action
+                )
+                key_expr, value_expr = parsed_args.positional_args
+
+                dest_env_expr = parsed_args.keyword_args.get("dest_env")
+                metadata_expr = parsed_args.keyword_args.get("metadata")
+
+                def lower_expr(
+                    p: PropertyDef,
+                    e: L.Expr,
+                ) -> AbstractExpression:
+                    """
+                    Shortcut for ``self.lower_expr``.
+                    """
+                    return self.lower_expr(e, self.root_scope, p.vars)
+
+                def lower_prop_expr(p: PropertyDef) -> AbstractExpression:
+                    """
+                    Lower the body expression of the "mappings" internal
+                    property.
+                    """
+                    return E.New(
+                        T.env_assoc,
+                        key=lower_expr(p, key_expr),
+                        value=lower_expr(p, value_expr),
+                        dest_env=(
+                            E.current_env()
+                            if dest_env_expr is None else
+                            lower_expr(p, dest_env_expr)
+                        ),
+                        metadata=(
+                            E.No(T.env_md)
+                            if metadata_expr is None else
+                            lower_expr(p, metadata_expr)
+                        ),
+                    )
+
+                action = AddToEnv(
+                    mappings=self.create_internal_property(
+                        node=node,
+                        name="env_mappings",
+                        lower_expr=lower_prop_expr,
+                        rtype=T.EnvAssoc,
+                        location=Location.from_lkt_node(syn_action),
+                    ),
+                    resolver=self.resolve_property(
+                        parsed_args.keyword_args.get("resolver")
+                    ),
+                )
+
+            elif action_kind == "add_to_env":
+                parsed_args = add_to_env_signature.match(self.ctx, syn_action)
+
+                action = AddToEnv(
+                    mappings=self.lower_expr_to_internal_property(
+                        node=node,
+                        name="env_mappings",
+                        expr=parsed_args.positional_args[0],
+                        rtype=None,
+                    ),
+                    resolver=self.resolve_property(
+                        parsed_args.keyword_args.get("resolver")
+                    ),
+                )
+
+            elif action_kind == "do":
+                parsed_args = do_env_signature.match(self.ctx, syn_action)
+                action = Do(
+                    self.lower_expr_to_internal_property(
+                        node=node,
+                        name="env_do",
+                        expr=parsed_args.positional_args[0],
+                        rtype=None,
+                    )
+                )
+
+            elif action_kind == "handle_children":
+                parsed_args = empty_signature.match(self.ctx, syn_action)
+                action = HandleChildren()
+
+            elif action_kind == "reference":
+                parsed_args = reference_signature.match(self.ctx, syn_action)
+
+                kind_expr = parsed_args.keyword_args.get("kind")
+                category_expr = parsed_args.keyword_args.get("category")
+                shed_rebindings_expr = parsed_args.keyword_args.get(
+                    "shed_corresponding_rebindings"
+                )
+
+                kind = RefKind.normal
+                if kind_expr is not None:
+                    kind_entity = self.resolve_entity(
+                        kind_expr, self.refd_env_scope
+                    )
+                    assert isinstance(kind_entity, Scope.RefKindValue)
+                    kind = kind_entity.value
+
+                shed_rebindings = False
+                if shed_rebindings_expr is not None:
+                    shed_rebindings = parse_static_bool(
+                        self.ctx, shed_rebindings_expr
+                    )
+
+                category: str | None = None
+                if category_expr is not None:
+                    category = parse_static_str(self.ctx, category_expr)
+
+                action = RefEnvs(
+                    resolver=self.resolve_property(
+                        parsed_args.positional_args[1]
+                    ),
+                    nodes_expr=self.lower_expr_to_internal_property(
+                        node=node,
+                        name="ref_env_nodes",
+                        expr=parsed_args.positional_args[0],
+                        rtype=T.root_node.array,
+                    ),
+                    kind=kind,
+                    dest_env=self.lower_expr_to_internal_property(
+                        node=node,
+                        name="env_dest",
+                        expr=parsed_args.keyword_args.get("dest_env"),
+                        rtype=T.LexicalEnv,
+                    ),
+                    cond=self.lower_expr_to_internal_property(
+                        node=node,
+                        name="ref_cond",
+                        expr=parsed_args.keyword_args.get("cond"),
+                        rtype=T.Bool,
+                    ),
+                    category=category,
+                    shed_rebindings=shed_rebindings,
+                )
+
+            elif action_kind == "set_initial_env":
+                parsed_args = set_initial_env_signature.match(
+                    self.ctx, syn_action
+                )
+                action = SetInitialEnv(
+                    self.lower_expr_to_internal_property(
+                        node=node,
+                        name="env_do",
+                        expr=parsed_args.positional_args[0],
+                        rtype=T.DesignatedEnv,
+                    )
+                )
+
+            else:
+                with self.ctx.lkt_context(syn_action.f_name):
+                    error("invalid env action name")
+            actions.append(action)
+
+        with self.ctx.lkt_context(env_spec):
+            result = EnvSpec(*actions)
+        result.location = Location.from_lkt_node(env_spec)
+        result.properties_created = True
+        return result
+
+    def _lower_fields(
         self,
         decls: L.DeclBlock,
         allowed_field_types: Tuple[Type[AbstractNodeData], ...],
         user_field_public: bool,
         struct_name: str,
-    ) -> List[Tuple[names.Name, AbstractNodeData]]:
+        allow_env_spec: bool = False,
+    ) -> tuple[
+        List[tuple[names.Name, AbstractNodeData]], L.EnvSpecDecl | None
+    ]:
         """
         Lower the fields described in the given DeclBlock node.
 
@@ -3911,15 +4356,32 @@ class LktTypesLoader:
         :param allowed_field_types: Set of types allowed for the fields to
             load.
         :param user_field_public: Whether user fields should be made public.
+        :param allow_env_spec: Whether to allow the presence of env spec
+            declarations.
         """
-        result = []
+        fields = []
+        env_spec: L.EnvSpecDecl | None = None
         for full_decl in decls:
             with self.ctx.lkt_context(full_decl):
                 decl = full_decl.f_decl
                 name = name_from_lower(self.ctx, "field", decl.f_syn_name)
 
-                field: AbstractNodeData
+                # If this is actually an env spec, run the dedicated lowering
+                # code.
+                if isinstance(decl, L.EnvSpecDecl):
+                    check_source_language(
+                        allow_env_spec,
+                        "env specs are allowed in nodes only",
+                    )
+                    check_source_language(
+                        env_spec is None,
+                        "only one env_spec block allowed per type",
+                    )
+                    env_spec = decl
+                    continue
 
+                # Otherwise, this is a field or a property
+                field: AbstractNodeData
                 if isinstance(decl, L.FunDecl):
                     check_source_language(
                         any(issubclass(PropertyDef, cls)
@@ -3936,9 +4398,38 @@ class LktTypesLoader:
                     )
 
                 field.location = Location.from_lkt_node(decl)
-                result.append((name, cast(AbstractNodeData, field)))
+                fields.append((name, cast(AbstractNodeData, field)))
 
-        return result
+        return fields, env_spec
+
+    def lower_fields_and_env_spec(
+        self,
+        decls: L.DeclBlock,
+        allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        user_field_public: bool,
+        struct_name: str,
+    ) -> tuple[
+        List[tuple[names.Name, AbstractNodeData]], L.EnvSpecDecl | None
+    ]:
+        return self._lower_fields(
+            decls,
+            allowed_field_types,
+            user_field_public,
+            struct_name,
+            allow_env_spec=True,
+        )
+
+    def lower_fields(
+        self,
+        decls: L.DeclBlock,
+        allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        user_field_public: bool,
+        struct_name: str,
+    ) -> List[tuple[names.Name, AbstractNodeData]]:
+        fields, _ = self._lower_fields(
+            decls, allowed_field_types, user_field_public, struct_name
+        )
+        return fields
 
     def create_node(self,
                     decl: L.BasicClassDecl,
@@ -4087,7 +4578,7 @@ class LktTypesLoader:
             if is_token_node or is_enum_node
             else (AbstractNodeData, )
         )
-        fields = self.lower_fields(
+        fields, env_spec = self.lower_fields_and_env_spec(
             decl.f_decls,
             allowed_field_types,
             user_field_public=False,
@@ -4148,6 +4639,9 @@ class LktTypesLoader:
                     else:
                         with f.diagnostic_context:
                             error(error_msg)
+
+        if env_spec is not None:
+            self.env_specs_to_lower.append((result, env_spec))
 
         return result
 

@@ -1,0 +1,5 @@
+import common
+
+class FooNode implements Node[FooNode] {
+    fun resolve_ref(): Array[Entity[FooNode]] = node.node_env.get(s"foo")
+}

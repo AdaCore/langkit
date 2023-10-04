@@ -69,6 +69,10 @@ class Ref(Item):
         return Self.name.resolve()
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              unparse_script=unparse_all_script, py_script='main.py')
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    unparse_script=unparse_all_script,
+    types_from_lkt=True,
+    py_script='main.py',
+)
 print('Done')

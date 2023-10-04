@@ -15,4 +15,8 @@ class Example(FooNode):
     )
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='script.py')
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    py_script='script.py',
+    types_from_lkt=True,
+)

@@ -33,5 +33,9 @@ class Scope(Name.list):
     env_spec = EnvSpec(add_env())
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    py_script='main.py',
+    types_from_lkt=True,
+)
 print('Done')
