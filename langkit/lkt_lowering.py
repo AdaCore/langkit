@@ -2930,9 +2930,10 @@ class LktTypesLoader:
 
                     # Make the declaration available to the inner expression
                     # lowering.
-                    sub_env.add(
-                        Scope.LocalVariable(source_name, source_var, var)
-                    )
+                    if source_name != "_":
+                        sub_env.add(
+                            Scope.LocalVariable(source_name, source_var, var)
+                        )
 
                     # Lower the declaration/bind initialization expression
                     init_expr = self.lower_expr(

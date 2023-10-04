@@ -1,0 +1,7 @@
+== foo.lkt ==
+foo.lkt:14:9: error: no entity called '_' in scope for block at foo.lkt:12:37
+14 |         _ + 1
+   |         ^
+
+
+lkt_compile: Done

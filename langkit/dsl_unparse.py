@@ -755,7 +755,9 @@ def emit_expr(expr, **ctx):
         for i, (var, abs_expr) in enumerate(zip(expr.vars, expr.var_exprs)):
             with walker.var_assignment(i):
                 vars_defs += "{}val {} = {};$hl".format(
-                    walker.emit_comments(), var_name(var), ee(abs_expr)
+                    walker.emit_comments(),
+                    "_" if var.ignored else var_name(var),
+                    ee(abs_expr),
                 )
             vars_defs += walker.emit_comments()
 
