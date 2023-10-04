@@ -26,8 +26,8 @@ grammar foo_grammar {
 
     fun get_rebindings(inverse: Bool): EnvRebindings = {
         val example_nodes = node.parent.as[ASTList[FooNode, Example]].as_array();
-        val n1 = example_nodes?(if inverse then 1 else 2);
-        val n2 = example_nodes?(if inverse then 2 else 1);
+        val n1 = example_nodes?[if inverse then 1 else 2];
+        val n2 = example_nodes?[if inverse then 2 else 1];
 
         null[EnvRebindings].append_rebinding(n1.children_env(), n2.children_env())
     }

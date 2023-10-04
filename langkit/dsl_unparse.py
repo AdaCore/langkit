@@ -1115,10 +1115,10 @@ def emit_expr(expr, **ctx):
                 ee(expr.expr_1) == "0"):
             return ee(expr.expr_0)
 
-        return "{}?({})".format(ee(expr.expr_0), ee(expr.expr_1))
+        return "{}?[{}]".format(ee(expr.expr_0), ee(expr.expr_1))
 
     elif is_a("at_or_raise"):
-        return "{}({})".format(ee(expr.expr_0), ee(expr.expr_1))
+        return "{}[{}]".format(ee(expr.expr_0), ee(expr.expr_1))
 
     elif isinstance(expr, FieldAccess):
         args = []

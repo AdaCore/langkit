@@ -40,10 +40,10 @@ class Example: FooNode {
     null[ASTList[FooNode, Example]].any((n) => n.is_null)
 
     @export fun test_at(): Entity[Example] =
-    null[ASTList[FooNode, Example]]?(0).as_bare_entity
+    null[ASTList[FooNode, Example]]?[0].as_bare_entity
 
     @export fun test_at_or_raise(): Entity[Example] =
-    null[ASTList[FooNode, Example]](0).as_bare_entity
+    null[ASTList[FooNode, Example]][0].as_bare_entity
 
     @export fun test_length(): Int = null[ASTList[FooNode, Example]].length()
 }

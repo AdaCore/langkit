@@ -45,7 +45,7 @@ class Literal: Expression implements TokenNode {
 class Name: Expression implements TokenNode {
 
     fun env_element(): Entity[FooNode] =
-    node.children_env().get(node.symbol)?(0)
+    node.children_env().get(node.symbol)?[0]
 
     @export fun deref_env_element(): Entity[Expression] =
     node.env_element().null_node()

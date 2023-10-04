@@ -53,7 +53,7 @@ class Var: Decl {
 class Name: FooNode implements TokenNode {
 
     fun designated_env(): LexicalEnv[FooNode] =
-    node.node_env().get(node, from=node)?(0).children_env()
+    node.node_env().get(node, from=node)?[0].children_env()
 
-    fun get_ref(): Entity[FooNode] = node.node_env().get(node, from=node)?(0)
+    fun get_ref(): Entity[FooNode] = node.node_env().get(node, from=node)?[0]
 }

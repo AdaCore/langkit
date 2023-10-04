@@ -52,7 +52,7 @@ class Identifier: Name implements TokenNode {
             (e) => e, default_val=node.referenced_parent_scope()
         );
 
-        env.get(node.symbol)?(0).children_env()
+        env.get(node.symbol)?[0].children_env()
     }
 
     @trace fun referenced_parent_scope(): LexicalEnv[FooNode] =

@@ -10,7 +10,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 
     fun resolve_ref(): Entity[FooNode] = match node {
-        case r: Ref => r.parent.parent.node_env().get(r.name)?(0)
+        case r: Ref => r.parent.parent.node_env().get(r.name)?[0]
         case _ => null[Entity[FooNode]]
     }
 }
@@ -26,5 +26,5 @@ class Name: FooNode implements TokenNode {
 class Ref: FooNode {
     @parse_field name: Name
 
-    @export fun resolve(): Entity[FooNode] = node.node_env().get(node.name)?(0)
+    @export fun resolve(): Entity[FooNode] = node.node_env().get(node.name)?[0]
 }

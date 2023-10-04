@@ -3347,6 +3347,21 @@ class NullCondCallExpr(CallExpr):
     pass
 
 
+class SubscriptExpr(Expr):
+    """
+    Array subscript expression.
+    """
+    prefix = Field(type=T.Expr)
+    index = Field(type=T.Expr)
+
+
+class NullCondSubscriptExpr(SubscriptExpr):
+    """
+    Null conditional subscript expression.
+    """
+    pass
+
+
 class GenericInstantiation(Expr):
     """
     Generic instantiation.
@@ -4205,6 +4220,8 @@ lkt_grammar.add_rules(
         CallExpr(G.basic_expr, "(", G.params, ")"),
         NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
         GenericInstantiation(G.basic_expr, "[", G.type_list, "]"),
+        SubscriptExpr(G.basic_expr, "[", G.expr, "]"),
+        NullCondSubscriptExpr(G.basic_expr, "?", "[", G.expr, "]"),
         ErrorOnNull(G.basic_expr, "!"),
         CastExpr(
             G.basic_expr, ".",
