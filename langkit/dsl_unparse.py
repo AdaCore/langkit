@@ -709,6 +709,7 @@ def emit_nl(strn):
 
 
 def emit_expr(expr, **ctx):
+    from langkit.compiled_types import T
     from langkit.dsl import LookupKind
     from langkit.expressions import (
         Literal, Let, FieldAccess, AbstractVariable, SelfVariable,
@@ -719,7 +720,7 @@ def emit_expr(expr, **ctx):
         ArrayLiteral, Arithmetic, BaseRaiseException, CharacterLiteral,
         Predicate, StructUpdate, BigIntLiteral, RefCategories, Bind, Try,
         Block, Contains, PropertyDef, DynamicLexicalEnv, Super, Join, String,
-        NPropagate, Find
+        NPropagate, Find, EmptyEnv
     )
 
     def is_a(*names):
@@ -1236,7 +1237,9 @@ def emit_expr(expr, **ctx):
         return expr.argument_name.lower
 
     elif isinstance(expr, AbstractVariable):
-        if then_underscore_var:
+        if expr is EmptyEnv:
+            return f"null[{type_name(T.LexicalEnv)}]"
+        elif then_underscore_var:
             if id(then_underscore_var) == id(expr):
                 return ""
         return var_name(expr)

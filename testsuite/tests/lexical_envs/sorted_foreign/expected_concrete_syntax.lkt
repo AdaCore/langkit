@@ -58,7 +58,8 @@ class Identifier: Name implements TokenNode {
     @trace fun referenced_parent_scope(): LexicalEnv[FooNode] =
     node.unit().root.children_env()
 
-    @trace fun referenced_scope(): LexicalEnv[FooNode] = node.resolve_scope(_)
+    @trace fun referenced_scope(): LexicalEnv[FooNode] =
+    node.resolve_scope(null[LexicalEnv[FooNode]])
 }
 
 class Ref: FooNode {
