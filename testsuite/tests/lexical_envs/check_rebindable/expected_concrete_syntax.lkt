@@ -23,7 +23,7 @@ grammar foo_grammar {
 class DefaultEnvCreator: BaseEnvCreator {
 }
 
-class RebindableEnvCreator: BaseEnvCreator {
+@rebindable class RebindableEnvCreator: BaseEnvCreator {
 }
 
 class Rebinder: FooNode {

@@ -43,7 +43,7 @@ class Dep: Id implements TokenNode {
 class Ref: Id implements TokenNode {
 }
 
-class Scope: FooNode {
+@ple_unit_root class Scope: FooNode {
     @parse_field name: Id
     @parse_field deps: ASTList[FooNode, Dep]
     @parse_field defs: ASTList[FooNode, Def]

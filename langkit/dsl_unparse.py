@@ -1528,6 +1528,7 @@ def emit_node_type(node_type):
 
         base = node_type.base
         base_name = type_name(base) if base else ""
+        annotations = node_type.annotations
 
         if base and base.is_generic_list_type:
             return ""
@@ -1551,6 +1552,12 @@ def emit_node_type(node_type):
 
         if node_type.has_abstract_list:
             quals.append("has_abstract_list")
+
+        if annotations.ple_unit_root:
+            quals.append("ple_unit_root")
+
+        if annotations.rebindable:
+            quals.append("rebindable")
 
         if node_type.synthetic:
             quals.append("synthetic")

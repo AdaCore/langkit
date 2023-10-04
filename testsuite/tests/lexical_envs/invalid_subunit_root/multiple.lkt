@@ -1,6 +1,16 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- or(Example1("example" ",")
                              | Example2("example" ";"))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+@ple_unit_root class Example1: FooNode {
+}
+
+@ple_unit_root class Example2: FooNode {
 }

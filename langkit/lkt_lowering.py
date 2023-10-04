@@ -62,6 +62,7 @@ from langkit.diagnostics import (
     Location, check_source_language, diagnostic_context, error,
     errors_checkpoint, non_blocking_error
 )
+import langkit.dsl
 from langkit.envs import (
     AddEnv, AddToEnv, Do, EnvAction, EnvSpec, HandleChildren, RefEnvs, RefKind,
     SetInitialEnv
@@ -911,9 +912,13 @@ class TokenFamilyAnnotations(ParsedAnnotations):
 @dataclass
 class BaseNodeAnnotations(ParsedAnnotations):
     has_abstract_list: bool
+    ple_unit_root: bool
+    rebindable: bool
     synthetic: bool
     annotations = [
-        FlagAnnotationSpec('has_abstract_list'),
+        FlagAnnotationSpec("has_abstract_list"),
+        FlagAnnotationSpec("ple_unit_root"),
+        FlagAnnotationSpec("rebindable"),
         FlagAnnotationSpec('synthetic'),
     ]
 
@@ -4606,6 +4611,10 @@ class LktTypesLoader:
             doc=self.ctx.lkt_doc(decl),
             base=base_type,
             fields=fields,
+            annotations=langkit.dsl.Annotations(
+                rebindable=annotations.rebindable,
+                ple_unit_root=annotations.ple_unit_root,
+            ),
             is_abstract=is_abstract,
             is_token_node=is_token_node,
             is_error_node=is_error_node,

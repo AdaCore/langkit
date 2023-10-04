@@ -1,5 +1,13 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(Subunit("example" main_rule))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+@ple_unit_root class Subunit: FooNode {
+    fields: ASTList[FooNode, Subunit]
 }
