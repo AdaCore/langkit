@@ -16,7 +16,7 @@ grammar foo_grammar {
 
 class Literal: Expression implements TokenNode {
 
-    @external fun result(): Int
+    @external() fun result(): Int
 }
 
 class Plus: Expression {

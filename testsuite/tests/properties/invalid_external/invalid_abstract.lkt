@@ -1,7 +1,7 @@
 import common
 
 @abstract class AbstractExample: FooNode {
-    @export @external @abstract fun p(): Bool
+    @export @external() @abstract fun p(): Bool
 }
 
 class Example: AbstractExample {

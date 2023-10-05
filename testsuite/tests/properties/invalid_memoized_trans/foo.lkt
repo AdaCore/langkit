@@ -48,7 +48,7 @@ class Example: FooNode {
 
     # Now, check that explicitely telling Langkit that a property cannot be
     # used transitively in memoization works.
-    @export @external @uses_entity_info @uses_envs
+    @export @external(uses_entity_info=true, uses_envs=true)
     @call_non_memoizable_because("get_something_unmemoizable is unmemoizable")
     fun get_something_unmemoizable(): Entity[FooNode]
 

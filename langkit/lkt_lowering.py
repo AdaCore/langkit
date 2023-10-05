@@ -677,6 +677,43 @@ class StringLiteralAnnotationSpec(AnnotationSpec):
         return args[0].p_denoted_value
 
 
+class ExternalAnnotationSpec(AnnotationSpec):
+    """
+    Interpreter for the @external annotation on properties.
+    """
+
+    @dataclass
+    class Value:
+        uses_envs: bool = False
+        uses_entity_info: bool = False
+
+    def __init__(self) -> None:
+        super().__init__(
+            "external", unique=True, require_args=True, default_value=None
+        )
+
+    def interpret(
+        self,
+        ctx: CompileCtx,
+        args: List[L.Expr],
+        kwargs: Dict[str, L.Expr],
+        scope: Scope,
+    ) -> Any:
+        for arg in args:
+            with ctx.lkt_context(arg):
+                error("no positional argument expected")
+
+        result = self.Value()
+        for k, v in kwargs.items():
+            if k == "uses_envs":
+                result.uses_envs = parse_static_bool(ctx, v)
+            elif k == "uses_entity_info":
+                result.uses_entity_info = parse_static_bool(ctx, v)
+            else:
+                error(f"invalid keyword argument: {k}")
+        return result
+
+
 class WithDefaultAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @with_default annotations for enum types.
@@ -997,28 +1034,24 @@ class FunAnnotations(ParsedAnnotations):
     call_memoizable: bool
     call_non_memoizable_because: str | None
     export: bool
-    external: bool
+    external: ExternalAnnotationSpec.Value | None
     final: bool
     ignore_unused: bool
     ignore_warn_on_node: bool
     memoized: bool
     trace: bool
-    uses_entity_info: bool
-    uses_envs: bool
     with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
     annotations = [
         FlagAnnotationSpec('abstract'),
         FlagAnnotationSpec('call_memoizable'),
         StringLiteralAnnotationSpec('call_non_memoizable_because'),
         FlagAnnotationSpec('export'),
-        FlagAnnotationSpec('external'),
+        ExternalAnnotationSpec(),
         FlagAnnotationSpec('final'),
         FlagAnnotationSpec('ignore_unused'),
         FlagAnnotationSpec('ignore_warn_on_node'),
         FlagAnnotationSpec('memoized'),
         FlagAnnotationSpec('trace'),
-        FlagAnnotationSpec('uses_entity_info'),
-        FlagAnnotationSpec('uses_envs'),
         WithDynvarsAnnotationSpec(),
     ]
 
@@ -4105,18 +4138,13 @@ class LktTypesLoader:
         )
         return_type = self.resolve_type(decl.f_return_type, self.root_scope)
 
-        # If @uses_entity_info and @uses_envs are not present for non-external
-        # properties, use None instead of False, for the validation machinery
-        # in PropertyDef to work properly (we expect False/true for external
-        # properties, and None for non-external ones).
-        uses_entity_info: Optional[bool]
-        uses_envs: Optional[bool]
-        if annotations.external:
-            uses_entity_info = annotations.uses_entity_info
-            uses_envs = annotations.uses_envs
-        else:
-            uses_entity_info = annotations.uses_entity_info or None
-            uses_envs = annotations.uses_envs or None
+        external = False
+        uses_entity_info: bool | None = None
+        uses_envs: bool | None = None
+        if annotations.external is not None:
+            external = True
+            uses_entity_info = annotations.external.uses_entity_info
+            uses_envs = annotations.external.uses_envs
 
         # Create the property to return
         result = PropertyDef(
@@ -4135,7 +4163,7 @@ class LktTypesLoader:
             memoized=annotations.memoized,
             call_memoizable=annotations.call_memoizable,
             memoize_in_populate=False,
-            external=annotations.external,
+            external=external,
             uses_entity_info=uses_entity_info,
             uses_envs=uses_envs,
             optional_entity_info=False,

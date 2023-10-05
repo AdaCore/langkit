@@ -10,9 +10,9 @@ grammar foo_grammar {
 
 class Example: FooNode {
 
-    @external fun ext_fetch_example_unit(): AnalysisUnit[FooNode]
+    @external() fun ext_fetch_example_unit(): AnalysisUnit[FooNode]
 
-    @external fun ext_unit_count(): Int
+    @external() fun ext_unit_count(): Int
 
     @memoized @trace fun fetch_example_unit(): AnalysisUnit[FooNode] =
     node.ext_fetch_example_unit()

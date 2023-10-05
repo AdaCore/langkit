@@ -65,7 +65,7 @@ class BinOp: Expr {
 
 class Literal: Expr implements TokenNode {
 
-    @external fun evaluate(): BigInt
+    @external() fun evaluate(): BigInt
 }
 
 class ParenExpr: Expr {

@@ -30,7 +30,7 @@ class FooNode implements Node[FooNode] {
 
 class Literal: Expression implements TokenNode {
     # This one is private, but it is called by "evaluate" so it's not usused
-    @external fun result(): Int
+    @external() fun result(): Int
 
     # See Expression.names
     fun names(): Array[Name] = null[Array[Name]]
@@ -40,7 +40,7 @@ class Literal: Expression implements TokenNode {
 
 class Name: Expression implements TokenNode {
     # This one is private and called transitively from a public property
-    @external fun designated_unit(): AnalysisUnit[FooNode]
+    @external() fun designated_unit(): AnalysisUnit[FooNode]
 
     fun result(): Int = node.designated_unit.root.as[Expression].result
 

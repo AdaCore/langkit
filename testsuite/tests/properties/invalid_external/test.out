@@ -1,13 +1,13 @@
 == invalid_abstract.lkt ==
-invalid_abstract.lkt:4:33: error: An external property cannot be abstract
-4 |     @export @external @abstract fun p(): Bool
-  |                                 ^^^^^^^^^^^^^
+invalid_abstract.lkt:4:35: error: An external property cannot be abstract
+4 |     @export @external() @abstract fun p(): Bool
+  |                                   ^^^^^^^^^^^^^
 
 
 == invalid_memoized.lkt ==
-invalid_memoized.lkt:4:33: error: An external property cannot be memoized
-4 |     @export @external @memoized fun p(): Bool
-  |                                 ^^^^^^^^^^^^^
+invalid_memoized.lkt:4:35: error: An external property cannot be memoized
+4 |     @export @external() @memoized fun p(): Bool
+  |                                   ^^^^^^^^^^^^^
 
 
 lkt_compile: Done

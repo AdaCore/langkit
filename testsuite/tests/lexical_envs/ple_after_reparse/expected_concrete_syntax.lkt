@@ -27,7 +27,7 @@ class Dep: FooNode {
 
     @export @abstract fun suffix_symbol(): Symbol
 
-    @external fun referenced_unit_or_error(or_error: Bool): AnalysisUnit[FooNode]
+    @external() fun referenced_unit_or_error(or_error: Bool): AnalysisUnit[FooNode]
 
     @export fun referenced_unit(): AnalysisUnit[FooNode] =
     node.referenced_unit_or_error(false)

@@ -1370,11 +1370,12 @@ def emit_prop(prop, walker):
         quals += "@export "
 
     if prop.external:
-        quals += "@external "
+        qual_args = []
         if prop.uses_entity_info:
-            quals += "@uses_entity_info "
+            qual_args.append("uses_entity_info=true")
         if prop.uses_envs:
-            quals += "@uses_envs "
+            qual_args.append("uses_envs=true")
+        quals += "@external({}) ".format(", ".join(qual_args))
     elif not prop.constructed_expr and not prop.abstract_runtime_check:
         quals += "@abstract "
 
