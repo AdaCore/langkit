@@ -917,6 +917,7 @@ class BaseNodeAnnotations(ParsedAnnotations):
     ple_unit_root: bool
     rebindable: bool
     repr_name: str | None
+    snaps: bool
     synthetic: bool
     warn_on_node: bool
     annotations = [
@@ -926,6 +927,7 @@ class BaseNodeAnnotations(ParsedAnnotations):
         FlagAnnotationSpec("ple_unit_root"),
         StringLiteralAnnotationSpec("repr_name"),
         FlagAnnotationSpec("rebindable"),
+        FlagAnnotationSpec("snaps"),
         FlagAnnotationSpec('synthetic'),
         FlagAnnotationSpec("warn_on_node"),
     ]
@@ -4659,6 +4661,7 @@ class LktTypesLoader:
                 warn_on_node=annotations.warn_on_node or None,
                 rebindable=annotations.rebindable,
                 custom_short_image=annotations.custom_short_image,
+                snaps=annotations.snaps,
                 ple_unit_root=annotations.ple_unit_root,
             ),
             is_abstract=is_abstract,

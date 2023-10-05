@@ -1,0 +1,28 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(ListWrapper("{"
+    or(example_list | null_list) "}"))
+    example_list <- WithSnapList+(Example("example"))
+    null_list <- WithoutSnapList+(NullNode("null"))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+@has_abstract_list class Example: FooNode implements TokenNode {
+}
+
+@snaps class WithSnapList: ASTList[FooNode, Example] {
+}
+
+class WithoutSnapList: ASTList[FooNode, NullNode] {
+}
+
+class ListWrapper: FooNode {
+    @parse_field item: FooNodeBaseList
+}
+
+@has_abstract_list class NullNode: FooNode implements TokenNode {
+}

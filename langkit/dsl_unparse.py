@@ -1572,6 +1572,9 @@ def emit_node_type(node_type):
                 f'repr_name("{annotations.repr_name}")'
             )
 
+        if annotations.snaps:
+            quals.append("snaps")
+
         if annotations.warn_on_node:
             quals.append("warn_on_node")
 
