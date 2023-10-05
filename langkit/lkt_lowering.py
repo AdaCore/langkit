@@ -912,6 +912,7 @@ class TokenFamilyAnnotations(ParsedAnnotations):
 @dataclass
 class BaseNodeAnnotations(ParsedAnnotations):
     custom_short_image: bool
+    generic_list_type: str | None
     has_abstract_list: bool
     ple_unit_root: bool
     rebindable: bool
@@ -920,6 +921,7 @@ class BaseNodeAnnotations(ParsedAnnotations):
     warn_on_node: bool
     annotations = [
         FlagAnnotationSpec("custom_short_image"),
+        StringLiteralAnnotationSpec("generic_list_type"),
         FlagAnnotationSpec("has_abstract_list"),
         FlagAnnotationSpec("ple_unit_root"),
         StringLiteralAnnotationSpec("repr_name"),
@@ -2100,6 +2102,7 @@ class LktTypesLoader:
         # create TypeRepo.Defer objects and build the list of types to lower.
         type_decls: list[L.TypeDecl] = []
         dyn_vars: list[L.DynVarDecl] = []
+        root_node_decl: L.BasicClassDecl | None = None
         for unit in lkt_units:
             assert isinstance(unit.root, L.LangkitRoot)
             for full_decl in unit.root.f_decls:
@@ -2114,6 +2117,14 @@ class LktTypesLoader:
                         Scope.UserType(name, decl, T.deferred_type(name))
                     )
                     type_decls.append(decl)
+
+                    # Keep track of anyhing that looks like the root node
+                    if (
+                        isinstance(decl, L.BasicClassDecl)
+                        and decl.p_base_type is None
+                    ):
+                        root_node_decl = decl
+
                 elif isinstance(decl, L.DynVarDecl):
                     dyn_vars.append(decl)
                 else:
@@ -2121,6 +2132,25 @@ class LktTypesLoader:
                         "invalid top-level declaration:"
                         f" {decl.p_decl_type_name}"
                     )
+
+        # If we manage to find a decl that qualifies for the root node type,
+        # register the automatic generic list type.
+        if root_node_decl is not None:
+            full_decl = cast(L.FullDecl, root_node_decl.parent)
+            annotations = parse_annotations(
+                self.ctx, NodeAnnotations, full_decl, self.root_scope
+            )
+            generic_list_type_name = (
+                annotations.generic_list_type
+                or f"{root_node_decl.f_syn_name.text}BaseList"
+            )
+            root_scope.mapping[generic_list_type_name] = Scope.BuiltinType(
+                generic_list_type_name,
+                TypeRepo.Defer(
+                    lambda: resolve_type(T.root_node.generic_list_type),
+                    "generic list type",
+                ),
+            )
 
         # Make sure we have a Metadata type registered in the root scope so
         # that Lkt code can refer to it.
@@ -4623,6 +4653,7 @@ class LktTypesLoader:
             fields=fields,
             annotations=langkit.dsl.Annotations(
                 repr_name=annotations.repr_name,
+                generic_list_type=annotations.generic_list_type,
                 # The absence of "warn_on_node" means "inherit from base node",
                 # so pass None in this case.
                 warn_on_node=annotations.warn_on_node or None,

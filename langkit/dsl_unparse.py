@@ -1556,6 +1556,11 @@ def emit_node_type(node_type):
         if annotations.custom_short_image:
             quals.append("custom_short_image")
 
+        if annotations.generic_list_type:
+            quals.append(
+                f'generic_list_type("{annotations.generic_list_type}")'
+            )
+
         if annotations.ple_unit_root:
             quals.append("ple_unit_root")
 
