@@ -915,12 +915,14 @@ class BaseNodeAnnotations(ParsedAnnotations):
     has_abstract_list: bool
     ple_unit_root: bool
     rebindable: bool
+    repr_name: str | None
     synthetic: bool
     warn_on_node: bool
     annotations = [
         FlagAnnotationSpec("custom_short_image"),
         FlagAnnotationSpec("has_abstract_list"),
         FlagAnnotationSpec("ple_unit_root"),
+        StringLiteralAnnotationSpec("repr_name"),
         FlagAnnotationSpec("rebindable"),
         FlagAnnotationSpec('synthetic'),
         FlagAnnotationSpec("warn_on_node"),
@@ -4620,6 +4622,7 @@ class LktTypesLoader:
             base=base_type,
             fields=fields,
             annotations=langkit.dsl.Annotations(
+                repr_name=annotations.repr_name,
                 # The absence of "warn_on_node" means "inherit from base node",
                 # so pass None in this case.
                 warn_on_node=annotations.warn_on_node or None,
