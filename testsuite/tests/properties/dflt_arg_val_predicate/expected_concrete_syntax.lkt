@@ -12,12 +12,38 @@ class Example : FooNode {
     var1: LogicVar
     var2: LogicVar
 
-    fun predicate(n: FooNode, flag1: Bool = false, flag2: Bool = true): Bool =
+    fun predicate1(n: FooNode, flag1: Bool = false, flag2: Bool = true): Bool =
     flag1 and (n.is_null) and flag2
 
-    @export fun prop(): Example = {
-        val _ = %predicate(BareExample.predicate, node.var1, node.var2);
+    @export fun prop1(): Bool = {
+        val eq = %predicate(BareExample.predicate1, node.var1, node.var2);
 
-        node.as_bare_entity
+        eq.solve()
+    }
+
+    fun predicate2(n: FooNode, flag: Bool = false): Bool =
+    (n.is_null) and false and flag
+
+    @export fun prop2(): Bool = {
+        val eq = {
+            bind my_var = 1;
+
+            %predicate(BareExample.predicate2, node.var1, node.var2)
+        };
+
+        eq.solve()
+    }
+
+    fun predicate3(n: FooNode, flag: Bool = false): Bool =
+    (n.is_null) and false and flag
+
+    @export fun prop3(): Bool = {
+        val eq = {
+            bind my_var = 1;
+
+            %predicate(BareExample.predicate3, node.var1, node.var2)
+        };
+
+        eq.solve()
     }
 }
