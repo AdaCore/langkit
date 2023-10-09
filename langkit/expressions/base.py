@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+import dataclasses
 from functools import partial
 import inspect
 from itertools import count
@@ -3209,6 +3210,52 @@ def render(*args, **kwargs):
 inherited_information = inherited_property(lambda s: s.base)
 
 
+@dataclasses.dataclass
+class LogicPredicate:
+    """
+    Description of the object in generated code used to represent a partially
+    evaluated property, to be used as a predicate in logic equations.
+    """
+
+    @dataclasses.dataclass(frozen=True)
+    class PartialArgument:
+        """
+        Description of a logic predicate argument that is passed for property
+        partial evaluation.
+        """
+
+        index: int
+        """
+        0-based index for the partial argument in the closure for this logic
+        predicate.
+        """
+
+        name: names.Name
+        """
+        Name for the partial argument in the list of arguments in the property.
+        """
+
+        type: CompiledType
+        """
+        Type for the partial argument.
+        """
+
+    id: str
+    """
+    Identifier for the logic predicate.
+    """
+
+    partial_args: tuple[PartialArgument, ...]
+    """
+    Arguments passed to the property for partial evaluation.
+    """
+
+    default_passed_args: int
+    """
+    Number of arguments passed by default value.
+    """
+
+
 class PropertyDef(AbstractNodeData):
     """
     This is the underlying class that is used to represent properties in the
@@ -3442,13 +3489,9 @@ class PropertyDef(AbstractNodeData):
         Recursion guard for the construct pass.
         """
 
-        self.logic_predicates: List[Tuple[CompiledType, str]] = []
+        self.logic_predicates: list[LogicPredicate] = []
         """
-        The list of logic predicates to generate. First element of the tuple is
-        a list of the args types, second is the unique identifier for this
-        predicate.
-
-        :type: [([CompiledType], str)]
+        The list of logic predicates to generate.
         """
 
         self.expr = expr
@@ -4356,20 +4399,22 @@ class PropertyDef(AbstractNodeData):
         return non_art
 
     @memoized
-    def do_generate_logic_predicate(self, partial_args_types,
-                                    default_passed_args):
+    def do_generate_logic_predicate(
+        self,
+        partial_args: tuple[LogicPredicate.PartialArgument, ...],
+        default_passed_args: int,
+    ) -> str:
         """
         Helper method, will trigger the emission of a logic predicate object
         for the property for the given partial argument types.
 
-        :param [CompiledType] partial_args_types: The type of partially applied
-            arguments passed to the logic predicate.
-        :param int default_passed_args: Number of arguments passed by default
+        :param partial_args: Arguments passed to the property for partial
+            evaluation.
+        :param default_passed_args: Number of arguments passed by default
             value.
 
         :return: The identifier for the logic predicate, to be used as a prefix
             in code generation for every entity related to it.
-        :rtype: str
         """
         # We use the length of the list as an id for the logic predicate. If
         # the method is called again with the same arg types, the same id
@@ -4383,28 +4428,27 @@ class PropertyDef(AbstractNodeData):
 
         # We can use a list because the method is memoized, eg. this won't
         # be executed twice for the same partial_args_types tuple.
-        self.logic_predicates.append((partial_args_types,
-                                      default_passed_args,
-                                      pred_id))
+        self.logic_predicates.append(
+            LogicPredicate(pred_id, partial_args, default_passed_args)
+        )
 
         return pred_id
 
-    def get_concrete_node_types(self, partial_args_types, default_passed_args):
+    def get_concrete_node_types(
+        self,
+        pred: LogicPredicate,
+    ) -> list[CompiledType]:
         """
-        Helper for emission of logic predicate wrappers. Given partial
-        argument types for trailing arguments that do not correspond to logic
-        variables bound by the predicate, this helper will return the
-        concrete node type for leading arguments that correspond to logic
-        variables bound by the predicate.
-
-        :param [CompiledType] partial_args_types: The type of partially applied
-            arguments passed to the logic predicate.
-        :param int default_passed_args: Number of arguments passed by default
-            value.
+        Helper for emission of logic predicate wrappers. Return the concrete
+        node type for leading arguments that correspond to logic variables
+        bound by the given predicate.
         """
-        logic_vars = (len(self.arguments) -
-                      len(partial_args_types) -
-                      default_passed_args)
+        logic_vars = (
+            len(self.arguments)
+            - len(pred.partial_args)
+            - pred.default_passed_args
+        )
+        assert self.struct is not None
         return [self.struct] + [a.type for a in self.arguments[:logic_vars]]
 
     @property
