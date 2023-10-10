@@ -1322,14 +1322,23 @@ class CompiledType:
         """
         return self.nullexpr
 
-    def c_type(self, c_api_settings):
+    def c_type(self, capi: CAPISettings) -> CAPIType:
         """
         Return a CAPIType instance for this type.
-
-        :param CAPISettings c_api_settings: The settings for the C API.
         """
-        return CAPIType(c_api_settings, self.c_type_name or self.name,
-                        external=self.external)
+        return CAPIType(
+            capi, self.c_type_name or self.name, external=self.external
+        )
+
+    def c_name(self, capi: CAPISettings, suffix: str) -> str:
+        """
+        Return a name derived from the name of this type in the C API.
+
+        :param suffix: Lower-case suffix to add to the C API type name.
+        """
+        return capi.get_name(
+            self.c_type(capi).unprefixed_name + names.Name.from_lower(suffix)
+        )
 
     def unify(self, other, error_msg=None):
         """
@@ -3928,14 +3937,18 @@ class ArrayType(CompiledType):
         """
         return self.element_type.name + names.Name('Vectors')
 
-    def c_type(self, c_api_settings):
+    def c_type(self, c_api_settings: CAPISettings) -> CAPIType:
         if (
             self.element_type.is_entity_type
             and not self.element_type.emit_c_type
         ):
             return T.entity.array.c_type(c_api_settings)
         else:
-            return CAPIType(c_api_settings, self.api_name)
+            return CAPIType(
+                c_api_settings,
+                self.element_type.c_type(c_api_settings).unprefixed_name +
+                names.Name("Array"),
+            )
 
     def index_type(self):
         """
@@ -3952,32 +3965,23 @@ class ArrayType(CompiledType):
         """
         return self.pkg_vector.camel_with_underscores + '.Vector'
 
-    def c_create(self, capi):
+    def c_create(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to create an array value.
-
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
         """
-        return capi.get_name(self.api_name + names.Name('Create'))
+        return self.c_name(capi, "create")
 
-    def c_inc_ref(self, capi):
+    def c_inc_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to inc-ref an array value.
-
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
         """
-        return capi.get_name(self.api_name + names.Name('Inc_Ref'))
+        return self.c_name(capi, "inc_ref")
 
-    def c_dec_ref(self, capi):
+    def c_dec_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to dec-ref an array value.
-
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
         """
-        return capi.get_name(self.api_name + names.Name('Dec_Ref'))
+        return self.c_name(capi, "dec_ref")
 
     @property
     def py_converter(self):
