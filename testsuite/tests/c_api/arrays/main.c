@@ -8,7 +8,7 @@
 #include "utils_exc.h"
 
 static void
-print_int_array (foo_int_array ints)
+print_ints (foo_int_array ints)
 {
   bool first = true;
   printf ("[");
@@ -23,23 +23,6 @@ print_int_array (foo_int_array ints)
   printf ("]");
 }
 
-static void
-print_int_iter (foo_integer_iterator ints)
-{
-  bool first = true;
-  int item;
-  while (foo_integer_iterator_next (ints, &item))
-    {
-      abort_on_exception ();
-      if (first)
-	first = false;
-      else
-	printf (", ");
-      printf ("%d", item);
-    }
-  abort_on_exception ();
-}
-
 int
 main (void)
 {
@@ -49,8 +32,7 @@ main (void)
   foo_analysis_context context;
   foo_analysis_unit unit;
   foo_base_entity root;
-  foo_int_array int_array;
-  foo_integer_iterator int_iter;
+  foo_int_array ints1, ints2;
 
   context = foo_allocate_analysis_context ();
   abort_on_exception ();
@@ -80,26 +62,26 @@ main (void)
   abort_on_exception ();
 
   /* Create an example array of ints.  */
-  int_array = foo_int_array_create (3);
+  ints1 = foo_int_array_create (3);
   abort_on_exception ();
-  int_array->items[0] = 10;
-  int_array->items[1] = 20;
-  int_array->items[2] = 25;
+  ints1->items[0] = 10;
+  ints1->items[1] = 20;
+  ints1->items[2] = 25;
 
   /* Call the property to use it.  */
-  printf ("Iterating on p_int_array_to_iter(");
-  print_int_array (int_array);
+  printf ("p_int_array_id(");
+  print_ints (ints1);
   printf (") = ");
-  foo_foo_node_p_int_array_to_iter (&root, int_array, &int_iter);
+  foo_foo_node_p_int_array_id (&root, ints1, &ints2);
   abort_on_exception ();
 
   /* Release that array of ints.  */
-  foo_int_array_dec_ref (int_array);
+  foo_int_array_dec_ref (ints1);
   abort_on_exception ();
 
-  /* Iterate on the property result and release it.  */
-  print_int_iter (int_iter);
-  foo_integer_iterator_dec_ref (int_iter);
+  /* Print the property result and release it.  */
+  print_ints (ints2);
+  foo_int_array_dec_ref (ints2);
   abort_on_exception ();
   printf ("\n");
 
