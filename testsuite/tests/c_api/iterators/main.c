@@ -48,7 +48,7 @@ main (void)
 
   foo_analysis_context context;
   foo_analysis_unit unit;
-  foo_base_entity root;
+  foo_node root;
   foo_int_array int_array;
   foo_int_iterator int_iter;
 

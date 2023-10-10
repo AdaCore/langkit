@@ -18,9 +18,9 @@ main (void)
   foo_analysis_context context;
   foo_analysis_unit unit;
 
-  foo_base_entity root;
+  foo_node root;
   foo_node_kind_enum node_kind;
-  foo_base_entity *children;
+  foo_node *children;
   unsigned children_count;
 
   foo_token *tokens;
@@ -77,8 +77,8 @@ main (void)
   // Get the root children.
   children_count = foo_node_children_count (&root);
   printf ("Root children count = %u\n", children_count);
-  children = (foo_base_entity *) malloc (
-    children_count * sizeof (foo_base_entity)
+  children = (foo_node *) malloc (
+    children_count * sizeof (foo_node)
   );
   for (unsigned i = 0; i < children_count; i++) {
     foo_node_child (&root, i, &children[i]);

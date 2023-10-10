@@ -78,7 +78,7 @@ main (void)
   foo_event_handler eh;
   foo_analysis_context ctx;
   foo_analysis_unit u;
-  foo_base_entity n;
+  foo_node n;
 
   foo_bool dummy;
 

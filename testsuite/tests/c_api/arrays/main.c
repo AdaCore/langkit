@@ -31,7 +31,7 @@ main (void)
 
   foo_analysis_context context;
   foo_analysis_unit unit;
-  foo_base_entity root;
+  foo_node root;
   foo_int_array ints1, ints2;
 
   context = foo_allocate_analysis_context ();
