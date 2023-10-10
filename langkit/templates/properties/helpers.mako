@@ -157,16 +157,16 @@
 </%def>
 
 <%def name="logic_predicates(prop)">
-   % for (args_types, default_passed_args, pred_id) in prop.logic_predicates:
+   % for pred in prop.logic_predicates:
 
    <%
-      type_name = f"{pred_id}_Predicate"
-      package_name = f"{pred_id}_Pred"
-      formal_node_types = prop.get_concrete_node_types(args_types,
-                                                       default_passed_args)
+      type_name = f"{pred.id}_Predicate"
+      package_name = f"{pred.id}_Pred"
+      formal_node_types = prop.get_concrete_node_types(pred)
       arity = len(formal_node_types)
-      refcounted_args_types = filter(lambda t: t.is_refcounted, args_types)
-      args = list(enumerate(args_types))
+      has_refcounted_args = any(
+         pa.type.is_refcounted for pa in pred.partial_args
+      )
    %>
 
    <%def name="call_profile()">
@@ -183,25 +183,25 @@
    type ${type_name} is
    new Solver_Ifc.${"Predicate_Type" if arity == 1 else "N_Predicate_Type"}
    with record
-      % for i, arg_type in args:
-         Field_${i} : ${arg_type.name};
+      % for pa in pred.partial_args:
+         Field_${pa.index} : ${pa.type.name};
       % endfor
-      % if not args:
+      % if not pred.partial_args:
          null;
       % endif
    end record;
 
    ${call_profile()};
    overriding function Image (Self : ${type_name}) return String;
-   % if refcounted_args_types:
+   % if has_refcounted_args:
       overriding procedure Destroy (Self : in out ${type_name});
    % endif
 
-   function Create_${pred_id}_Predicate
-   % if args:
+   function Create_${pred.id}_Predicate
+   % if pred.partial_args:
    (
-      % for i, arg_type in args:
-         Field_${i} : ${arg_type.name}${"" if loop.last else ";"}
+      % for pa in pred.partial_args:
+         Field_${pa.index} : ${pa.type.name}${"" if loop.last else ";"}
       % endfor
    )
    % endif
@@ -218,11 +218,11 @@
             "Ref_Count => 1",
          ]
       %>
-      % for i, arg_type in args:
-         % if arg_type.is_refcounted:
-            Inc_Ref (Field_${i});
+      % for pa in pred.partial_args:
+         % if pa.type.is_refcounted:
+            Inc_Ref (Field_${pa.index});
          % endif
-         <% components.append(f"Field_{i} => Field_{i}") %>
+         <% components.append(f"Field_{pa.index} => Field_{pa.index}") %>
       % endfor
       return ${type_name}'(${", ".join(components)});
    end;
@@ -233,7 +233,7 @@
 
    ${call_profile()}
    is
-      % if not args_types:
+      % if not pred.partial_args:
          pragma Unreferenced (Self);
       % endif
 
@@ -263,7 +263,7 @@
             f"(Node => Entities ({i + 1}).Node,"
             f" Info => Entities ({i + 1}).Info)"
             for i, formal_type in enumerate(formal_node_types[1:], 1)
-      ] + [f"Self.Field_{i}" for i, _ in enumerate(args_types)]
+      ] + [f"{pa.name} => Self.Field_{pa.index}" for pa in pred.partial_args]
          if prop.uses_entity_info:
             args.append(f"{prop.entity_info_name} => Entity.Info")
          args_fmt = '({})'.format(', '.join(args)) if args else ''
@@ -280,15 +280,17 @@
       return ${ascii_repr(prop.qualname)};
    end Image;
 
-   % if refcounted_args_types:
+   % if has_refcounted_args:
       -------------
       -- Destroy --
       -------------
 
       overriding procedure Destroy (Self : in out ${type_name}) is
       begin
-         % for i, arg_type in enumerate(refcounted_args_types):
-            Dec_Ref (Self.Field_${i});
+         % for pa in pred.partial_args:
+            % if pa.type.is_refcounted:
+               Dec_Ref (Self.Field_${pa.index});
+            % endif
          % endfor
          null;
       end Destroy;
