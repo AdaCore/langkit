@@ -1,0 +1,9 @@
+main.py: Running...
+Parsing foo:
+   1:1-1:4: Syntax error
+
+Parsing Foo:
+   OK
+
+main.py: Done.
+Done

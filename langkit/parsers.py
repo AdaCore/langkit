@@ -270,6 +270,12 @@ class Grammar:
         If we loaded a Lkt unit, mapping of all grammar rules it contains.
         """
 
+        self.uses_external_properties = False
+        """
+        Whether a parsing rule uses an external property. If one does,
+        generated code must use visibility.
+        """
+
     def context(self) -> AbstractContextManager[None]:
         return diagnostic_context(self.location)
 
@@ -2254,6 +2260,12 @@ class Predicate(Parser):
             self.property_ref.struct.matches(self.parser.type),
             'Property passed as predicate to Predicate parser must take a node'
             ' with the type of the sub-parser')
+
+        assert self.grammar is not None
+        self.grammar.uses_external_properties = (
+            self.grammar.uses_external_properties
+            or self.property_ref.user_external
+        )
 
     def generate_code(self) -> str:
         return self.render('predicate_code_ada')

@@ -22,6 +22,10 @@ pragma Warnings (Off, "referenced");
 with ${ada_lib_name}.Private_Converters; use ${ada_lib_name}.Private_Converters;
 pragma Warnings (On, "referenced");
 
+% if ctx.grammar.uses_external_properties:
+with ${ada_lib_name}.Implementation.Extensions;
+% endif
+
 <% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>
 
 package body ${ada_lib_name}.Parsers is
