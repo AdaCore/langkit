@@ -27,7 +27,7 @@ class Couple : FooNode {
 
     fun get_entity(md: Metadata): Couple = Couple(
         node=node, info=EntityInfo(
-            md=md, rebindings=null, from_rebound=false
+            md=md, rebindings=null[EnvRebindings], from_rebound=false
         )
     )
 

@@ -11,7 +11,7 @@ grammar foo_grammar {
 
 class Decl : FooNode implements TokenNode {
 
-    fun refd_env(): LexicalEnv[FooNode] = null
+    fun refd_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 
     @export fun lookup(name: Symbol): Array[FooNode] = node.node_env().get(name)
 }

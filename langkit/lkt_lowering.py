@@ -1,6 +1,30 @@
 """
 Module to gather the logic to lower Lkt syntax trees to Langkit internal data
 structures.
+
+Global architecture:
+
+* In the constructor of CompileCtx, all Lkt units are loaded into the
+  CompileCtx.lkt_units list. At this stage, compilation is aborted in case of
+  lexing/parsing error.
+
+* During the "lower_lkt" pass:
+
+  * The "create_lexer" function below instantiates the langkit.lexer.Lexer
+    class and populates it.
+
+  * The "create_grammar" function below instantiates the
+    langkit.parsers.Grammar class and populates it.
+
+  * The "create_types" function below instantiates all CompiledType instances
+    mentionned in the language spec.
+
+The last step is the most complex one: type declarations refer to each other,
+and this step includes the lowering of property expressions to abstract
+expressions. All type declarations in the language spec are lowered in sequence
+(arbitrary order), except base classes, which are lowered before classes that
+they derive from. Properties are lowered as part of the lowering of their
+owning types.
 """
 
 from __future__ import annotations
@@ -1634,17 +1658,6 @@ class LktTypesLoader:
                     args.append(value)
             return args, kwargs
 
-        def is_array_expr(expr: L.Expr) -> bool:
-            """
-            Return whether ``expr`` computes an array.
-            """
-            expr_type = self.resolve_type_decl(
-                expr.p_check_expr_type,
-                force_lowering=True,
-            )
-            assert isinstance(expr_type, CompiledType)
-            return expr_type.is_array_type
-
         def lower(expr: L.Expr) -> AbstractExpression:
             """
             Wrapper around "_lower" to set the expression location.
@@ -1688,13 +1701,6 @@ class LktTypesLoader:
                         L.OpGte: E.OrderingTest.GE,
                     }[type(expr.f_op)]
                     return E.OrderingTest(operator, left, right)
-
-                elif (
-                    isinstance(expr.f_op, L.OpAmp)
-                    and is_array_expr(expr.f_left)
-                ):
-                    assert is_array_expr(expr.f_right)
-                    return left.concat(right)  # type: ignore
 
                 else:
                     operator = {

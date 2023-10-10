@@ -10,10 +10,10 @@ grammar foo_grammar {
 
 class Example : FooNode implements TokenNode {
 
-    @export fun new_my_struct(): MyStruct = null
+    @export fun new_my_struct(): MyStruct = null[MyStruct]
 
     @export fun new_non_empty_struct(): NonEmptyStruct = NonEmptyStruct(
-        char_field='X', my_struct_field=null, bigint_field=42b
+        char_field='X', my_struct_field=null[MyStruct], bigint_field=42b
     )
 
     @export fun identity(s: MyStruct): MyStruct = s

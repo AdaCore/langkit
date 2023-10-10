@@ -5419,6 +5419,10 @@ class Arithmetic(AbstractExpression):
                 T.Symbol, [l, r]
             )
 
+        if l.type.is_array_type or l.type.is_string_type:
+            from langkit.expressions import Concat
+            return Concat.create_constructed(l, r)
+
         check_source_language(
             l.type == r.type, "Incompatible types for {}: {} and {}".format(
                 self.op, l.type.dsl_name, r.type.dsl_name

@@ -2696,6 +2696,7 @@ class ArrayLiteral(Expr):
     """
     Literal for an array value.
     """
+    element_type = Field(type=T.TypeRef)
     exprs = Field(type=T.Expr.list)
 
     @langkit_property()
@@ -3431,6 +3432,7 @@ class RaiseExpr(Expr):
     """
     Raise expression.
     """
+    dest_type = Field(type=T.TypeRef)
     except_expr = Field(type=T.Expr)
 
     @langkit_property(return_type=T.SemanticResult.array)
@@ -3627,7 +3629,7 @@ class NullLit(Lit):
     """
     Null literal expression.
     """
-    token_node = True
+    dest_type = Field(type=T.TypeRef)
 
 
 class StringLit(Lit):
@@ -4103,11 +4105,17 @@ lkt_grammar.add_rules(
         "else", G.expr
     ),
 
-    raise_expr=RaiseExpr("raise", G.expr),
+    raise_expr=RaiseExpr("raise", Opt("[", G.type_ref, "]"), G.expr),
     try_expr=TryExpr("try", G.expr, Opt("else", G.expr)),
 
-    array_literal=ArrayLiteral(
-        "[", List(G.expr, sep=",", empty_valid=True), "]"
+    array_literal=GOr(
+        ArrayLiteral("[", "]", ":", G.type_ref, Null(Expr.list)),
+        ArrayLiteral(
+            Null(TypeRef),
+            "[",
+            List(G.expr, sep=",", empty_valid=True),
+            "]",
+        ),
     ),
 
     logic=GOr(
@@ -4153,7 +4161,7 @@ lkt_grammar.add_rules(
     lambda_expr=LambdaExpr("(", G.lambda_arg_list, ")",
                            Opt(":", G.type_ref), "=>", Cut(), G.expr),
 
-    null_lit=NullLit("null"),
+    null_lit=NullLit("null", Opt("[", G.type_ref, "]")),
 
     param=Param(Opt(G.ref_id, "="), G.expr),
     params=List(G.param, sep=",", empty_valid=True),

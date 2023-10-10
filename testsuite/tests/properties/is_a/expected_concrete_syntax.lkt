@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    fun null_node(): FooNode = null
+    fun null_node(): FooNode = null[FooNode]
 
     @export fun is_null_a_def(): Bool = node.null_node() is Def
 

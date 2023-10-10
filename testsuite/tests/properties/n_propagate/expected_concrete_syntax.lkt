@@ -22,6 +22,8 @@ class Plus : FooNode {
     @export fun resolve(lhs: FooNode, rhs: FooNode): FooNode = {
         val eq = [%propagate(node.v, BareLiteral.combiner, node.lhs.v, node.rhs.v), %eq(node.lhs.v, lhs), %eq(node.rhs.v, rhs)];
 
-        if eq.solve() then node.v.get_value() else (raise PropertyError("unreachable"))
+        if eq.solve() then node.v.get_value() else (
+            raise[FooNode] PropertyError("unreachable")
+        )
     }
 }

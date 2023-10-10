@@ -10,5 +10,6 @@ grammar foo_grammar {
 
 class Example : FooNode implements TokenNode {
 
-    fun resolve(): LexicalEnv[FooNode] = raise PropertyError()
+    fun resolve(): LexicalEnv[FooNode] =
+    raise[LexicalEnv[FooNode]] PropertyError()
 }

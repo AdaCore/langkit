@@ -32,7 +32,7 @@ class Rebinder : FooNode {
         # Depending on whether "left_env" is rebindable, the following will
         # succeed or raise a PropertyError. The status of "right_env" does not
         # matter.
-        val r = null.append_rebinding(left_env, right_env);
+        val r = null[EnvRebindings].append_rebinding(left_env, right_env);
 
         node.children_env().rebind_env(r).env_node
     }
