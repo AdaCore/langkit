@@ -2633,7 +2633,7 @@ class EntityType(StructType):
     def c_type(self, capi):
         # Emit only one C binding type for entities. They are all ABI
         # compatible, so this reduces the amount of types emitted.
-        return CAPIType(capi, 'base_entity')
+        return CAPIType(capi, 'node')
 
     @property
     def is_root_type(self):
