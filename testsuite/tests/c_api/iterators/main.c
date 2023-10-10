@@ -24,11 +24,11 @@ print_int_array (foo_int_array ints)
 }
 
 static void
-print_int_iter (foo_integer_iterator ints)
+print_int_iter (foo_int_iterator ints)
 {
   bool first = true;
   int item;
-  while (foo_integer_iterator_next (ints, &item))
+  while (foo_int_iterator_next (ints, &item))
     {
       abort_on_exception ();
       if (first)
@@ -50,7 +50,7 @@ main (void)
   foo_analysis_unit unit;
   foo_base_entity root;
   foo_int_array int_array;
-  foo_integer_iterator int_iter;
+  foo_int_iterator int_iter;
 
   context = foo_allocate_analysis_context ();
   abort_on_exception ();
@@ -99,7 +99,7 @@ main (void)
 
   /* Iterate on the property result and release it.  */
   print_int_iter (int_iter);
-  foo_integer_iterator_dec_ref (int_iter);
+  foo_int_iterator_dec_ref (int_iter);
   abort_on_exception ();
   printf ("\n");
 
