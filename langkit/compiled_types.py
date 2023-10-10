@@ -4138,31 +4138,29 @@ class IteratorType(CompiledType):
         ):
             return T.entity.iterator.c_type(c_api_settings)
         else:
-            return CAPIType(c_api_settings, self.api_name)
+            return CAPIType(
+                c_api_settings,
+                self.element_type.c_type(c_api_settings).unprefixed_name +
+                names.Name("Iterator"),
+            )
 
     def c_next(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to get the next value out of the iterator.
-
-        :param capi: Settings for the C API.
         """
-        return capi.get_name(self.api_name + names.Name('Next'))
+        return self.c_name(capi, "next")
 
     def c_inc_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to inc-ref an iterator value.
-
-        :param capi: Settings for the C API.
         """
-        return capi.get_name(self.api_name + names.Name('Inc_Ref'))
+        return self.c_name(capi, "inc_ref")
 
     def c_dec_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to dec-ref an iterator value.
-
-        :param capi: Settings for the C API.
         """
-        return capi.get_name(self.api_name + names.Name('Dec_Ref'))
+        return self.c_name(capi, "dec_ref")
 
     @property
     def to_public_converter(self) -> names.Name:
