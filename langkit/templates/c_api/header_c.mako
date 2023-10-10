@@ -263,6 +263,18 @@ typedef void *${unit_provider_type};
 % endfor
 
 /*
+ * Iterator types declarations
+ */
+
+${iterator_types.decl(T.entity.iterator)}
+
+% for iterator_type in ctx.iterator_types:
+    % if iterator_type.exposed and iterator_type.emit_c_type:
+        ${iterator_types.decl(iterator_type)}
+    % endif
+% endfor
+
+/*
  * Analysis primitives
  */
 
