@@ -1,5 +1,5 @@
 == Unit not found ==
-a.lkt:Cannot open source file
+a.lkt: error: Cannot open source file
 ... done
 
 == Unit in path, relative ==

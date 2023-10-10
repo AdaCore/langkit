@@ -48,7 +48,8 @@ from langkit.compiled_types import (
     TypeRepo, UserField, resolve_type
 )
 from langkit.diagnostics import (
-    DiagnosticError, Location, check_source_language, diagnostic_context, error
+    Location, check_source_language, diagnostic_context, error,
+    errors_checkpoint, non_blocking_error
 )
 import langkit.expressions as E
 from langkit.expressions import (
@@ -173,12 +174,11 @@ def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
     # Load ``lkt_file`` and all the units it references, transitively
     process_unit(L.AnalysisContext().get_from_file(lkt_file))
 
-    # If there are diagnostics, forward them to the user. TODO: hand them to
-    # langkit.diagnostic.
-    if diagnostics:
-        for u, d in diagnostics:
-            print('{}:{}'.format(os.path.basename(u.filename), d))
-        raise DiagnosticError()
+    # Forward potential lexing/parsing errors to our diagnostics system
+    for u, d in diagnostics:
+        with diagnostic_context(Location.from_sloc_range(u, d.sloc_range)):
+            non_blocking_error(d.message)
+    errors_checkpoint()
     return list(units_map.values())
 
 
