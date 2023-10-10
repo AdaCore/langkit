@@ -21,7 +21,7 @@ from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeOrDefer,
     CompiledTypeRepo, EnumNodeAlternative, EnumType, Field, StructType, T,
-    TypeRepo, UserField
+    TypeRepo, UserField, resolve_type
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, check_source_language, diagnostic_context, error
@@ -1737,7 +1737,8 @@ class LktTypesLoader:
                         # generated code.
                         env[v] = var
                         var.local_var = local_vars.create_scopeless(
-                            v_name, v_type
+                            v_name,
+                            resolve_type(v_type),
                         )
 
                     else:
