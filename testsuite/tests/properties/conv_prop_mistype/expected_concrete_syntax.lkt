@@ -23,7 +23,6 @@ class Examples: FooNode {
 }
 
 class PlusExample: FooNode {
-
     fun conv_prop(): Entity[RegularExample] = null[Entity[RegularExample]]
 }
 

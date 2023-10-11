@@ -25,7 +25,6 @@ class Def: FooNode {
 }
 
 class Id: FooNode implements TokenNode {
-
     @external() fun referenced_scope_or_error(or_error: Bool): Scope
 
     @export fun referenced_scope(): Entity[Scope] =

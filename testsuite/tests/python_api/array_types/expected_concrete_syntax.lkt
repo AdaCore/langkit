@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 @abstract @has_abstract_list class FooNode implements Node[FooNode] {
-
     @export fun count(seq: Array[Entity[Example]]): Int = seq.length()
 }
 
@@ -17,7 +16,6 @@ class Example: FooNode {
 }
 
 class Sequence: ASTList[FooNode, FooNode] {
-
     @export fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
 
     @export fun example_items(): Array[Entity[Example]] = self.filtermap(

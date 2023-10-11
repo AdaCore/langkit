@@ -43,7 +43,6 @@ class Def: FooNode {
 }
 
 class Example: FooNode implements TokenNode {
-
     @export fun lookup_all(name: Symbol): Array[Entity[FooNode]] =
     node.children_env().get(name)
 

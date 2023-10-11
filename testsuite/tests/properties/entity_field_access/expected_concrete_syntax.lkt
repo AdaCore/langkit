@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun first_set(): Bool = self.info.md.is_first
 
     @export fun second_set(): Bool = self.info.md.is_second

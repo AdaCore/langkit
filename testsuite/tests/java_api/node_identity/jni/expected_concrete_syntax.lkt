@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun with_md(md1: Bool, md2: Bool): Entity[FooNode] =
     Entity[FooNode](
         node=node, info=EntityInfo(

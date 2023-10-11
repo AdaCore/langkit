@@ -11,7 +11,6 @@ dynvar bool_var: Bool
 }
 
 class ExampleNode: RootNode {
-
     @export @with_dynvars(bool_var=true) fun prop(): Bool = bool_var
 
     @export fun prop2(): Bool = node.prop()

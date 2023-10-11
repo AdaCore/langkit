@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-
     @export fun compare_as_symbols(s1: String, s2: String): Bool =
     s1.to_symbol == s2.to_symbol
 }

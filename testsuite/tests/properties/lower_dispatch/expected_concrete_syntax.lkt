@@ -24,7 +24,6 @@ class Def: FooNode {
 }
 
 @abstract class Expr: FooNode {
-
     @export @abstract fun evaluate_abstract(): Int
 
     @export @abstract fun evaluate_entity(): Int
@@ -38,7 +37,6 @@ class Def: FooNode {
 }
 
 class Lit: Atom implements TokenNode {
-
     fun evaluate_abstract(): Int = 1
 
     fun evaluate_rtcheck(): Int = 1

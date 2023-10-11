@@ -12,7 +12,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun find_atoms(): Array[Entity[Atom]] = match self {
         # This should match Lit .. Ref
         case a: Atom => [a]
@@ -51,7 +50,6 @@ class Def: FooNode {
 }
 
 @abstract class Expr: FooNode {
-
     @export fun find_refs(): Array[Entity[Ref]] = match self {
         # This should match Ref
         case r: Ref => [r]

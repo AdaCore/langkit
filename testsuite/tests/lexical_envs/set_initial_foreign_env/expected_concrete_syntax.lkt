@@ -15,7 +15,6 @@ grammar foo_grammar {
 }
 
 @abstract class Id: FooNode {
-
     @abstract fun designated_symbol(): Symbol
 
     @abstract fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode]
@@ -37,7 +36,6 @@ class ScopedId: Id {
 }
 
 class SimpleId: Id implements TokenNode {
-
     fun designated_symbol(): Symbol = node.symbol
 
     fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =

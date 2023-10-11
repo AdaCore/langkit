@@ -22,7 +22,6 @@ grammar foo_grammar {
 }
 
 @abstract class Decl: FooNode {
-
     @export @abstract fun decl_kind(): DeclKind
 
     @export fun with_kind(): DeclAndKind =

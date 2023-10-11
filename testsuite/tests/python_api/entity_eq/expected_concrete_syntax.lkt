@@ -15,7 +15,6 @@ grammar foo_grammar {
 }
 
 @abstract class DefNode: FooNode {
-
     @export @abstract fun name(): Symbol
 
     env_spec {
@@ -61,7 +60,6 @@ class BlockVar: DefNode {
 }
 
 class Params: ASTList[FooNode, Param] {
-
     env_spec {
         add_env()
     }

@@ -12,7 +12,6 @@ class BarNode: FooNode {
 }
 
 class Literal: FooNode implements TokenNode {
-
     fun b(): Entity[BarNode] = node.a().as[BarNode]
 
     @export fun c(): Entity[BarNode] = node.b()

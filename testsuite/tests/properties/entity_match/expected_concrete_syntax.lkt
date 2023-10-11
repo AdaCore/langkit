@@ -8,17 +8,14 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @abstract fun get_num(): Int
 }
 
 class Example: FooNode {
-
     fun get_num(): Int = 2
 }
 
 class Literal: FooNode implements TokenNode {
-
     fun get_num(): Int = 3
 
     @export fun b(): Int = match node.a() {

@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun can_reach_wrapper(from_node: Entity[FooNode]): Bool =
     node.can_reach(from_node.node)
 }

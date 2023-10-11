@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun prop(l: ASTList[FooNode, Example]): Array[Int] =
     # Nest two lambda expressions that define arguments with the same name
     # (v).
@@ -14,6 +13,5 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-
     fun values(): Array[Int] = [1]
 }

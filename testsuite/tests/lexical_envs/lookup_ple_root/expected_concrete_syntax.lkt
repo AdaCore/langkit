@@ -14,7 +14,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun get_ple_root(): Entity[FooNode] = node.ple_root().as_bare_entity
 }
 

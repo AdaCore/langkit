@@ -27,7 +27,6 @@ class Decl: FooNode {
 }
 
 class Example: FooNode implements TokenNode {
-
     env_spec {
         add_env()
     }

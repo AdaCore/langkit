@@ -13,7 +13,6 @@ grammar foo_grammar {
 }
 
 @abstract class Name: FooNode {
-
     fun scope_fqn(): String = match node {
         case dn: DottedName => dn.prefix.fqn()
         case _: Identifier => null[String]
@@ -43,7 +42,6 @@ class DottedName: Name {
 }
 
 class Identifier: Name implements TokenNode {
-
     fun referenced_name(): Symbol = node.symbol
 
     @trace fun resolve_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =

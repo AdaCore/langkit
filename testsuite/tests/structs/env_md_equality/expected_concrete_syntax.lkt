@@ -10,7 +10,6 @@ grammar foo_grammar {
 }
 
 class Name: FooNode implements TokenNode {
-
     @export fun with_md(md1: Bool, md2: Bool): Entity[FooNode] =
     Entity[FooNode](
         node=self.node, info=EntityInfo(

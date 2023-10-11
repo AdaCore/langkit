@@ -21,7 +21,6 @@ class FunDecl: Decl {
 }
 
 class VarDecl: Decl {
-
     fun prop(arg: Bool = false): Bool = not arg
 }
 

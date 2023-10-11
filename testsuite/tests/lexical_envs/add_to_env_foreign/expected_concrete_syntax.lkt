@@ -41,7 +41,6 @@ class ForeignDecl: FooNode {
 }
 
 @abstract class Id: FooNode {
-
     @abstract fun simple_name(): SimpleId
 
     @abstract fun resolve(base_env: LexicalEnv[FooNode]): Scope
@@ -58,7 +57,6 @@ class ScopedId: Id {
 }
 
 class SimpleId: Id implements TokenNode {
-
     fun simple_name(): SimpleId = node
 
     fun resolve(base_env: LexicalEnv[FooNode]): Scope =

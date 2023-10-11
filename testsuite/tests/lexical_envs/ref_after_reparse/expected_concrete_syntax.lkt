@@ -41,7 +41,6 @@ class Decl: FooNode {
 }
 
 class Name: FooNode implements TokenNode {
-
     @with_dynvars(env) fun ambiant_entity(): Entity[FooNode] = env.get(node)?[0]
 
     fun designated_env(): LexicalEnv[FooNode] =

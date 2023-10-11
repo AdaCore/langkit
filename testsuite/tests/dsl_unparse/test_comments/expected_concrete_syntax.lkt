@@ -17,7 +17,6 @@ grammar foo_grammar {
 ##
 ## Second line.
 class ExampleNode: TestNode {
-
     ## docstring.
     @export fun test_no_var(): Int = # hello
     42

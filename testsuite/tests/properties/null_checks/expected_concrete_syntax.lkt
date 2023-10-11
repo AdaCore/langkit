@@ -12,7 +12,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun null_unit(): AnalysisUnit[FooNode] = null[AnalysisUnit[FooNode]]
 
     @export fun null_node(): Entity[Expression] = null[Entity[Expression]]
@@ -43,7 +42,6 @@ class Literal: Expression implements TokenNode {
 }
 
 class Name: Expression implements TokenNode {
-
     fun env_element(): Entity[FooNode] =
     node.children_env().get(node.symbol)?[0]
 

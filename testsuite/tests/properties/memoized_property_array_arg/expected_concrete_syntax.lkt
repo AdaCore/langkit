@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-
     @export @memoized fun get_array(): Array[Int] = [1, 2]
 
     @export @memoized fun test_prop(numbers: Array[Int], c: String): Int =

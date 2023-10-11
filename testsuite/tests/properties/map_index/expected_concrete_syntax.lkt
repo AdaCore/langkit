@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     fun create(index: Int, number: Entity[NumberNode]): IndexedNumber =
     IndexedNumber(index=index, number=number)
 }

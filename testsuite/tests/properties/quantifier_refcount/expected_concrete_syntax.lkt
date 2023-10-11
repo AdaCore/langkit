@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     fun get_bigint(): BigInt = 1b
 
     @export fun check(): Bool = node.children.all(

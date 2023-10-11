@@ -22,7 +22,6 @@ class Dep: FooNode {
 }
 
 @abstract class Name: FooNode {
-
     @export @abstract fun resolve(): Entity[FooNode]
 
     @export @abstract fun suffix_symbol(): Symbol
@@ -44,7 +43,6 @@ class Dep: FooNode {
 }
 
 class Id: Name implements TokenNode {
-
     fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
 
     fun suffix_symbol(): Symbol = node.symbol

@@ -9,6 +9,5 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-
     @export @memoized fun compute(i: Int): Int = i + 1
 }

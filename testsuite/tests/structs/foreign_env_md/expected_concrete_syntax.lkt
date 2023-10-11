@@ -26,7 +26,6 @@ class Def: FooNode {
 }
 
 class Name: FooNode implements TokenNode {
-
     fun sym(): Symbol = node.symbol
 
     fun resolve(): Entity[FooNode] = node.parent.node_env().get(node.sym())?[0]

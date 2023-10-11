@@ -67,7 +67,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     ## Return whether this node is in the top-level decl list.
     fun is_toplevel(): Bool =
     (not (node.parent.is_null)) and (node.parent.parent.is_null)
@@ -149,7 +148,6 @@ class DeclarativePart: FooNode {
 }
 
 class PrivatePart: DeclarativePart {
-
     env_spec {
         add_env(
             transitive_parent=true, names=[node.parent.suffixed_full_name("__privatepart").to_symbol]
@@ -162,7 +160,6 @@ class PublicPart: DeclarativePart {
 
 ## Top-level list of declaration in a subprogam body.
 class SubpBodyDecls: DeclarativePart {
-
     env_spec {
         # The only case where we need a declarative part to have a name is when
         # it is top-level in subprogram body (A), so that separate subprogram
@@ -192,7 +189,6 @@ class IncompleteTypeDecl: FooNode {
 }
 
 @abstract class Name: FooNode {
-
     ## Innermost suffix for this name.
     fun base_name(): String = match node {
         case id: Identifier => id.text()

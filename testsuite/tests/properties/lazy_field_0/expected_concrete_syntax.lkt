@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-
     @export @lazy @trace my_field_1: Int = 42
 
     @export @lazy @trace my_field_2: Array[Int] = [1, 2]

@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-
     @export fun test_contains(): Bool =
     null[ASTList[FooNode, Example]].contains(node)
 

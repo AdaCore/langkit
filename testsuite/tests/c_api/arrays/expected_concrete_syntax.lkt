@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun int_array_id(ints: Array[Int]): Array[Int] =
     ints.map((i) => i + 1)
 }

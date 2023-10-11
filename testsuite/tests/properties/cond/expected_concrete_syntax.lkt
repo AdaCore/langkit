@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-
     fun identity(b: Bool): Bool = b
 
     @export fun cond1(b: Bool): Int = if node.identity(b) then 1

@@ -29,7 +29,6 @@ class ForeignDecl: FooNode {
 }
 
 @abstract class Id: FooNode {
-
     @abstract fun resolve(base_env: LexicalEnv[FooNode]): FooNode
 }
 
@@ -42,7 +41,6 @@ class ScopedId: Id {
 }
 
 class SimpleId: Id implements TokenNode {
-
     fun resolve(base_env: LexicalEnv[FooNode]): FooNode =
     base_env.get_first(node.symbol).node
 }

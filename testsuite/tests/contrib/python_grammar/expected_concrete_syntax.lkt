@@ -502,7 +502,6 @@ class DottedName: Name {
 }
 
 class Id: Name implements TokenNode {
-
     ## Shortcut to get the symbol of this node
     fun sym(): Symbol = node.symbol
 }
@@ -663,7 +662,6 @@ class Decorated: Stmt {
 }
 
 @abstract class DefStmt: Stmt {
-
     env_spec {
         add_env()
     }

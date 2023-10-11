@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     fun resolve_own(): MyRecord = MyRecord(value=1b)
 
     @export fun resolve(): MyRecord =

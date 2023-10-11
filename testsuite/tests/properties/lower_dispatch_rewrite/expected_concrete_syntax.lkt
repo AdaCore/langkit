@@ -58,12 +58,10 @@ class Ref: Atom {
 }
 
 @synthetic class MiddleRef: Ref {
-
     fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 }
 
 class DerivedRef: MiddleRef {
-
     fun referenced_env(): LexicalEnv[FooNode] =
     node.unit().root.node_env().get_first(node.name.symbol).children_env()
 }

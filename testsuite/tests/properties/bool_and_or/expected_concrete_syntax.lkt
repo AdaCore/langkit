@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun check_and(b1: Bool, b2: Bool, n: FooNode): Bool =
     b1 and n.identity(b2)
 

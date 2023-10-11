@@ -13,7 +13,6 @@ enum MyEnum {
 }
 
 class Example: FooNode implements TokenNode {
-
     @export @memoized fun id_bool(b: Bool): Bool = b
 
     @export @memoized fun id_my_enum(e: MyEnum): MyEnum = e

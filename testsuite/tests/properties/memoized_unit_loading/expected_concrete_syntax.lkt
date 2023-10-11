@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-
     @external() fun ext_fetch_example_unit(): AnalysisUnit[FooNode]
 
     @external() fun ext_unit_count(): Int

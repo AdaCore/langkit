@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-
     @export fun p1(): Entity[FooNode] = node.p2(null[FooNode]).f.as_bare_entity
 
     @memoized fun p2(n: FooNode): SynthNode =

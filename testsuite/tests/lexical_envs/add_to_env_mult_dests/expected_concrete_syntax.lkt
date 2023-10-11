@@ -12,7 +12,6 @@ grammar foo_grammar {
 }
 
 class Id: FooNode implements TokenNode {
-
     @export fun get_scope(): Entity[FooNode] =
     node.children_env().get_first(s"Scope", lookup=LookupKind.minimal)
 

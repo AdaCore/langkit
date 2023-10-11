@@ -1411,14 +1411,14 @@ def emit_prop(prop, walker):
 
     res = ""
     if doc:
-        res += "$hl{}".format(emit_doc(doc))
+        res += "{}$hl".format(emit_doc(doc))
 
     if prop.lazy_field:
-        res += "$hl{}{}: {}".format(
+        res += "{}{}: {}".format(
             quals, prop.original_name, type_name(prop.type)
         )
     else:
-        res += "$hl{}fun {}({}): {}".format(
+        res += "{}fun {}({}): {}".format(
             quals, prop.original_name, ", ".join(args), type_name(prop.type)
         )
 
@@ -1630,27 +1630,47 @@ def emit_node_type(node_type):
     if base and base.is_enum_node:
         return ""
 
+    content = []
+    # Emit one item per line with no empty line in between for enum
+    # members/fields.
+    if enum_members:
+        content.append(f"case {enum_members}")
+    for field in parse_fields:
+        content.append(emit_field(field))
+
+    # Emit one empty line between each propery, and before the first property
+    # if there are other members (so that the first property is well separated
+    # from what is before).
+    props_to_emit = [
+        prop for prop in properties
+        if (
+            not prop.is_internal
+            and not is_builtin_prop(prop)
+            and not prop.is_artificial_dispatcher
+            and not prop.artificial
+        )
+    ]
+    if content and props_to_emit:
+        content.append("")
+    for i, prop in enumerate(props_to_emit):
+        if i > 0:
+            content.append("")
+        content.append(emit_prop(prop, walker))
+
+    if node_type.is_ast_node and node_type.env_spec:
+        if content:
+            content.append("")
+        content.append(emit_env_spec(node_type, walker))
+
+    content_str = "".join(line + "$hl\n" for line in content)
+
     return sf("""
     % if doc:
     ${emit_doc(doc)}$hl
     % endif
     ${''.join(f'@{q} ' for q in quals)}
     ${type_kind} ${type_name(node_type)}${strbase}${strtraits} {$i$hl
-    % if enum_members:
-    case ${enum_members}
-    $hl
-    % endif
-    % for field in parse_fields:
-    ${emit_field(field)}$hl
-    % endfor
-    % for prop in properties:
-    % if not prop.is_internal and not is_builtin_prop(prop) and not prop.is_artificial_dispatcher and not prop.artificial:
-    ${emit_prop(prop, walker)}$hl
-    % endif
-    % endfor
-    % if node_type.is_ast_node and node_type.env_spec:
-    $hl${emit_env_spec(node_type, walker)}
-    % endif
+    ${content_str}
     $d
     }$hl
     """.strip())
@@ -1763,7 +1783,7 @@ def emit_env_spec(node_type, walker):
             with walker.env_action(next(action_index)):
                 result.append(walker.emit_comments())
                 result.append(emit_action(action) + "$hl")
-        result.append("$d\n}$hl")
+        result.append("$d\n}")
         return "\n".join(result)
 
 

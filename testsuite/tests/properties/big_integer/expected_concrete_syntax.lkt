@@ -21,7 +21,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun identity(value: BigInt): BigInt = value
 
     @export fun check_big_literal(): BigInt =
@@ -36,7 +35,6 @@ class Decl: FooNode {
 }
 
 @abstract class Expr: FooNode {
-
     @export @abstract fun evaluate(): BigInt
 
     @export fun evaluate_as_int(): Int = node.evaluate().as_int()
@@ -64,7 +62,6 @@ class BinOp: Expr {
 }
 
 class Literal: Expr implements TokenNode {
-
     @external() fun evaluate(): BigInt
 }
 

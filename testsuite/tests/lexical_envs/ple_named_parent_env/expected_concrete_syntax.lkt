@@ -13,7 +13,6 @@ grammar foo_grammar {
 }
 
 @abstract class Name: FooNode {
-
     @export @abstract fun resolve(): Entity[FooNode]
 
     @export @abstract fun suffix_symbol(): Symbol
@@ -30,7 +29,6 @@ grammar foo_grammar {
 }
 
 class Id: Name implements TokenNode {
-
     fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
 
     fun suffix_symbol(): Symbol = node.symbol

@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun node_parents(): Array[Entity[FooNode]] =
     node.parents().map((n) => n.as_bare_entity)
 

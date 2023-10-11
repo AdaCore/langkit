@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun root1(): Array[Int] = [1]
 
     @export fun root2(a: String, b: String): String = (a & " + ") & b
@@ -15,12 +14,10 @@ grammar foo_grammar {
 }
 
 @abstract class Expr: FooNode {
-
     fun root1(): Array[Int] = node.super() & ([2])
 }
 
 class Name: Expr implements TokenNode {
-
     fun root1(): Array[Int] = node.super() & ([3])
 
     fun root2(a: String, b: String): String = (

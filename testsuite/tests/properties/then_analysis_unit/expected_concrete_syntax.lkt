@@ -7,7 +7,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun node_unit(): AnalysisUnit[FooNode] =
     node.as[Name].do((n) => n.unit())
 }

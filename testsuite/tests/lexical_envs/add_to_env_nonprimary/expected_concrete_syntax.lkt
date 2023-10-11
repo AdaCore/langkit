@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-
     env_spec {
         add_env()
         add_to_env(

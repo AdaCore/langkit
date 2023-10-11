@@ -10,12 +10,10 @@ grammar foo_grammar {
 }
 
 @abstract class SomeNode: FooNode {
-
     @abstract fun test_prop(): Bool
 }
 
 class Example: SomeNode {
-
     fun test_prop(): Bool = true
 
     @export fun solve(): Bool = (

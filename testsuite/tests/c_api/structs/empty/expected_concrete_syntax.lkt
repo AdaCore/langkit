@@ -9,7 +9,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-
     @export fun new_my_struct(): MyStruct = null[MyStruct]
 
     @export fun new_non_empty_struct(): NonEmptyStruct = NonEmptyStruct(

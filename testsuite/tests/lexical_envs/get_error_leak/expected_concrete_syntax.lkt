@@ -15,7 +15,6 @@ grammar foo_grammar {
 }
 
 class ErrorUseClause: FooNode {
-
     fun resolve(): LexicalEnv[FooNode] =
     raise[LexicalEnv[FooNode]] PropertyError("unconditionally raised")
 
@@ -28,7 +27,6 @@ class ErrorUseClause: FooNode {
 }
 
 class Id: FooNode implements TokenNode {
-
     fun resolve(): Array[Entity[FooNode]] = node.node_env().get(node.symbol)
 }
 

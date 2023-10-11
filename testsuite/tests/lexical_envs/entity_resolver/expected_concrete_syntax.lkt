@@ -8,7 +8,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     fun resolve_ref(): Entity[FooNode] = match node {
         case r: Ref => r.parent.parent.node_env().get(r.name)?[0]
         case _ => null[Entity[FooNode]]

@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun is_flag_enabled(): Bool = self.info.md.flag
 
     @export fun with_flag(flag: Bool): Entity[FooNode] = Entity[FooNode](
@@ -17,7 +16,6 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-
     @export @lazy my_field: SynthNode = SynthNode()
 }
 
