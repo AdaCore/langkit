@@ -112,6 +112,13 @@ package body Langkit_Support.Generic_API.Analysis is
    --  ``Raw_Token_Kind`` is a 0-based index type, whereas ``Token_Kind_Index``
    --  is a 1-based one.
 
+   function Rule_Or_Default
+     (Desc : Language_Descriptor;
+      Rule : Grammar_Rule_Ref) return Grammar_Rule_Index
+   is (if Rule = No_Grammar_Rule_Ref
+       then Desc.Default_Grammar_Rule
+       else To_Index (Rule));
+
    ----------------------------
    -- Create_Node_Safety_Net --
    ----------------------------
@@ -408,21 +415,47 @@ package body Langkit_Support.Generic_API.Analysis is
       Reject_Null_Context (Self);
 
       declare
-         Desc        : Language_Descriptor renames Self.Desc.all;
-         Actual_Rule : Grammar_Rule_Index;
+         Desc : Language_Descriptor renames Self.Desc.all;
       begin
-         if Rule = No_Grammar_Rule_Ref then
-            Actual_Rule := Desc.Default_Grammar_Rule;
-         else
-            Actual_Rule := To_Index (Rule);
-         end if;
-
          Result := Self.Desc.Context_Get_From_File
-           (Self.Internal, Filename, Charset, Reparse, Actual_Rule);
+           (Self.Internal,
+            Filename,
+            Charset,
+            Reparse,
+            Rule_Or_Default (Desc, Rule));
 
          return (Result, Lk_Context (Self));
       end;
    end Get_From_File;
+
+   ---------------------
+   -- Get_From_Buffer --
+   ---------------------
+
+   function Get_From_Buffer
+     (Self     : Lk_Context'Class;
+      Filename : String;
+      Buffer   : String;
+      Charset  : String := "";
+      Rule     : Grammar_Rule_Ref := No_Grammar_Rule_Ref) return Lk_Unit
+   is
+      Result : Internal_Unit;
+   begin
+      Reject_Null_Context (Self);
+
+      declare
+         Desc : Language_Descriptor renames Self.Desc.all;
+      begin
+         Result := Self.Desc.Context_Get_From_Buffer
+           (Self.Internal,
+            Filename,
+            Buffer,
+            Charset,
+            Rule_Or_Default (Desc, Rule));
+
+         return (Result, Lk_Context (Self));
+      end;
+   end Get_From_Buffer;
 
    --------------
    -- Language --

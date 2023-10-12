@@ -164,6 +164,27 @@ begin
    end;
    New_Line;
 
+   Put_Line ("Testing Get_From_Buffer");
+   declare
+      U : Lk_Unit;
+   begin
+      Put_Line ("Base:");
+      U := Ctx.Get_From_Buffer ("buffer.txt", "var foo = 1;");
+      U.Root.Print;
+
+      Put_Line ("Reparsed:");
+      U := Ctx.Get_From_Buffer ("buffer.txt", "example foo");
+      U.Root.Print;
+
+      Put_Line ("Custom rule:");
+      U := Ctx.Get_From_Buffer
+        (Filename => "buffer_custom.txt",
+         Buffer   => "my_id",
+         Rule     => From_Index (Id, Last_Grammar_Rule (Id)));
+      U.Root.Print;
+   end;
+   New_Line;
+
    Put_Line ("Testing various node operations:");
    Put_Line ("Root.Is_Null -> " & N.Is_Null'Image);
 
