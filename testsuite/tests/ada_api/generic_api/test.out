@@ -91,6 +91,13 @@ FooNode.list[1:1-1:12]
 Custom rule:
 Name[1:1-1:6]: my_id
 
+Testing diagnostics-related primitives
+without_error.txt:
+  Has_Diagnostics? FALSE
+with_error.txt:
+  Has_Diagnostics? TRUE
+  with_error.txt:1:12: Expected ';', got Termination
+
 Testing various node operations:
 Root.Is_Null -> FALSE
 Root.Next_Sibling.Image -> None

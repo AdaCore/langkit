@@ -512,6 +512,61 @@ package body Langkit_Support.Generic_API.Analysis is
       end;
    end Filename;
 
+   ---------------------
+   -- Has_Diagnostics --
+   ---------------------
+
+   function Has_Diagnostics (Self : Lk_Unit) return Boolean is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc  : Language_Descriptor renames Self.Context.Desc.all;
+         Diags : Diagnostics_Vectors.Vector renames
+           Desc.Unit_Diagnostics (Self.Internal).all;
+      begin
+         return not Diags.Is_Empty;
+      end;
+   end Has_Diagnostics;
+
+   -----------------
+   -- Diagnostics --
+   -----------------
+
+   function Diagnostics (Self : Lk_Unit) return Diagnostics_Array is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc : Language_Descriptor renames Self.Context.Desc.all;
+         Diags : Diagnostics_Vectors.Vector renames
+           Desc.Unit_Diagnostics (Self.Internal).all;
+      begin
+         return Result : Diagnostics_Array (1 .. Natural (Diags.Length)) do
+            for I in Result'Range loop
+               Result (I) := Diags (I);
+            end loop;
+         end return;
+      end;
+   end Diagnostics;
+
+   ---------------------------
+   -- Format_GNU_Diagnostic --
+   ---------------------------
+
+   function Format_GNU_Diagnostic
+     (Self : Lk_Unit; D : Diagnostic) return String
+   is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc : Language_Descriptor renames Self.Context.Desc.all;
+      begin
+         return Desc.Unit_Format_GNU_Diagnostic (Self.Internal, D);
+      end;
+   end Format_GNU_Diagnostic;
+
    ----------
    -- Root --
    ----------
