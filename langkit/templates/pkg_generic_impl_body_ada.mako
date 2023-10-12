@@ -188,6 +188,29 @@ package body ${ada_lib_name}.Generic_Impl is
       return Implementation.Get_Filename (U);
    end Unit_Filename;
 
+   ----------------------
+   -- Unit_Diagnostics --
+   ----------------------
+
+   function Unit_Diagnostics (Unit : Internal_Unit) return Diagnostics_Access
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return U.Diagnostics'Unrestricted_Access;
+   end Unit_Diagnostics;
+
+   --------------------------------
+   -- Unit_Format_GNU_Diagnostic --
+   --------------------------------
+
+   function Unit_Format_GNU_Diagnostic
+     (Unit : Internal_Unit; D : Diagnostic) return String
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return Implementation.Format_GNU_Diagnostic (U, D);
+   end Unit_Format_GNU_Diagnostic;
+
    ---------------
    -- Unit_Root --
    ---------------
