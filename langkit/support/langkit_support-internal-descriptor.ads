@@ -50,6 +50,10 @@ package Langkit_Support.Internal.Descriptor is
       Filename, Charset : String;
       Reparse           : Boolean;
       Rule              : Grammar_Rule_Index) return Internal_Unit;
+   type Context_Get_From_Buffer_Type is access function
+     (Context                   : Internal_Context;
+      Filename, Buffer, Charset : String;
+      Rule                      : Grammar_Rule_Index) return Internal_Unit;
 
    type Unit_Context_Type is access function
      (Unit : Internal_Unit) return Internal_Context;
@@ -164,12 +168,13 @@ package Langkit_Support.Internal.Descriptor is
 
       --  Implementation for generic operations
 
-      Create_Context        : Create_Context_Type;
-      Context_Inc_Ref       : Context_Inc_Ref_Type;
-      Context_Dec_Ref       : Context_Dec_Ref_Type;
-      Context_Version       : Context_Version_Type;
-      Context_Get_From_File : Context_Get_From_File_Type;
-      Context_Has_Unit      : Context_Has_Unit_Type;
+      Create_Context          : Create_Context_Type;
+      Context_Inc_Ref         : Context_Inc_Ref_Type;
+      Context_Dec_Ref         : Context_Dec_Ref_Type;
+      Context_Version         : Context_Version_Type;
+      Context_Get_From_File   : Context_Get_From_File_Type;
+      Context_Get_From_Buffer : Context_Get_From_Buffer_Type;
+      Context_Has_Unit        : Context_Has_Unit_Type;
 
       Unit_Context     : Unit_Context_Type;
       Unit_Version     : Unit_Version_Type;

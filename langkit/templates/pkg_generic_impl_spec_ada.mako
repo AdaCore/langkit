@@ -95,6 +95,10 @@ private package ${ada_lib_name}.Generic_Impl is
       Filename, Charset : String;
       Reparse           : Boolean;
       Rule              : Grammar_Rule_Index) return Internal_Unit;
+   function Context_Get_From_Buffer
+     (Context                   : Internal_Context;
+      Filename, Buffer, Charset : String;
+      Rule                      : Grammar_Rule_Index) return Internal_Unit;
 
    function Unit_Context (Unit : Internal_Unit) return Internal_Context;
    function Unit_Version (Unit : Internal_Unit) return Version_Number;
@@ -185,12 +189,13 @@ private package ${ada_lib_name}.Generic_Impl is
       Struct_Members => Generic_Introspection.Struct_Members'Access,
       First_Property => Generic_Introspection.First_Property,
 
-      Create_Context        => Create_Context'Access,
-      Context_Inc_Ref       => Context_Inc_Ref'Access,
-      Context_Dec_Ref       => Context_Dec_Ref'Access,
-      Context_Version       => Context_Version'Access,
-      Context_Has_Unit      => Context_Has_Unit'Access,
-      Context_Get_From_File => Context_Get_From_File'Access,
+      Create_Context          => Create_Context'Access,
+      Context_Inc_Ref         => Context_Inc_Ref'Access,
+      Context_Dec_Ref         => Context_Dec_Ref'Access,
+      Context_Version         => Context_Version'Access,
+      Context_Has_Unit        => Context_Has_Unit'Access,
+      Context_Get_From_File   => Context_Get_From_File'Access,
+      Context_Get_From_Buffer => Context_Get_From_Buffer'Access,
 
       Unit_Context     => Unit_Context'Access,
       Unit_Version     => Unit_Version'Access,

@@ -139,6 +139,25 @@ package body ${ada_lib_name}.Generic_Impl is
         (Ctx, Filename, Charset, Reparse, +Rule);
    end Context_Get_From_File;
 
+   -----------------------------
+   -- Context_Get_From_Buffer --
+   -----------------------------
+
+   function Context_Get_From_Buffer
+     (Context                   : Internal_Context;
+      Filename, Buffer, Charset : String;
+      Rule                      : Grammar_Rule_Index) return Internal_Unit
+   is
+      Ctx : constant Implementation.Internal_Context := +Context;
+   begin
+      return +Implementation.Get_From_Buffer
+        (Context  => Ctx,
+         Filename => Filename,
+         Buffer   => Buffer,
+         Charset  => Charset,
+         Rule     => +Rule);
+   end Context_Get_From_Buffer;
+
    ------------------
    -- Unit_Context --
    ------------------
