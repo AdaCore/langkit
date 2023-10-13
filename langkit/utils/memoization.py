@@ -1,12 +1,19 @@
 from __future__ import annotations
 
-from typing import Any, Callable, List, Optional, TypeVar, cast
+from typing import Callable, Optional, TYPE_CHECKING, TypeVar
 
 
-F = TypeVar('F', bound=Callable[..., Any])
+if TYPE_CHECKING:
+    from langkit.utils.types import _P, _T
 
 
-def memoized(func: F, pre_cache_miss: Optional[F] = None) -> F:
+_Self = TypeVar("_Self")
+
+
+def memoized(
+    func: Callable[_P, _T],
+    pre_cache_miss: Optional[Callable[_P, _T]] = None,
+) -> Callable[_P, _T]:
     """
     Decorator to memoize a function.
     This function must be passed only hashable arguments.
@@ -16,17 +23,17 @@ def memoized(func: F, pre_cache_miss: Optional[F] = None) -> F:
         `func` is called. Can be used for example to prepare a value in the
         memoization cache to break infinite recursions.
     """
-    cache: dict = {}
+    cache: dict[object, _T] = {}
 
     try:
-        all_caches: List[dict] = getattr(memoized, "caches")
+        all_caches: list[dict[object, _T]] = getattr(memoized, "caches")
     except AttributeError:
         all_caches = []
         setattr(memoized, "caches", all_caches)
 
     all_caches.append(cache)
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _T:
         key = (args, tuple(kwargs.items()))
         try:
             result = cache[key]
@@ -38,10 +45,12 @@ def memoized(func: F, pre_cache_miss: Optional[F] = None) -> F:
             cache[key] = result
         return result
 
-    return cast(F, wrapper)
+    return wrapper
 
 
-def memoized_with_default(default_value):
+def memoized_with_default(
+    default_value: _T
+) -> Callable[[Callable[_P, _T]], Callable[_P, _T]]:
     """
     Decorator to memoize a function.
 
@@ -51,13 +60,13 @@ def memoized_with_default(default_value):
 
     :param default_value: The value to use to break infinite recursions.
     """
-    def memoize(func):
+    def memoize(func: Callable[_P, _T]) -> Callable[_P, _T]:
         return memoized(func, lambda *args, **kwargs: default_value)
 
     return memoize
 
 
-def self_memoized(func):
+def self_memoized(func: Callable[_P, _T]) -> Callable[_P, _T]:
     """
     Like `memoized`, but specific to instance methods and offers a
     instance-specific reset switch.
@@ -67,27 +76,30 @@ def self_memoized(func):
 
     cache_name = '_cache_{}'.format(func.__name__)
 
-    def wrapper(self, *args, **kwargs):
+    def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _T:
+        self = args[0]
+        args_without_self = args[1:]
+
         # Install the self-specific cache, if needed
         cache = getattr(self, cache_name, {})
         setattr(self, cache_name, cache)
 
-        key = (args, tuple(kwargs.items()))
+        key = (args_without_self, tuple(kwargs.items()))
         try:
             result = cache[key]
         except KeyError:
-            result = func(self, *args, **kwargs)
+            result = func(*args, **kwargs)
             cache[key] = result
         return result
 
-    def reset(self):
+    def reset(self: object) -> None:
         setattr(self, cache_name, {})
 
-    wrapper.reset = reset
+    setattr(wrapper, "reset", reset)
 
     return wrapper
 
 
-def reset_memoized():
+def reset_memoized() -> None:
     for cache in getattr(memoized, "caches", []):
         cache.clear()

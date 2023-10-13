@@ -1,19 +1,55 @@
 from __future__ import annotations
 
 import inspect
+from typing import (
+    Any as _Any, Callable, Generic, Iterable, Protocol, TYPE_CHECKING, Type,
+    TypeVar
+)
 
 
-def type_check_instance(cls):
+_DerivableType = TypeVar("_DerivableType", bound="_DerivableTypeProtocol")
+
+
+if TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+
+    from langkit.compile_context import CompileCtx
+    from langkit.compiled_types import ASTNodeType
+
+    _P = ParamSpec("_P")
+    _T = TypeVar("_T")
+    _RT = TypeVar("_RT")
+
+    class _DerivableTypeProtocol(Protocol[_DerivableType]):
+        @property
+        def base(self) -> _DerivableType | None: ...
+
+        subclasses: list[_DerivableType]
+
+        def get_inheritance_chain(self) -> list[_DerivableType]: ...
+
+        def unify(
+            self,
+            other: _DerivableType,
+            error_msg: str | None = None,
+        ) -> _DerivableType: ...
+
+
+def type_check_instance(cls: Type) -> Callable[[Type], bool]:
     """
     Return a predicate that will return true if its parameter is a subclass
     of `cls`.
-    :param type cls: Class to check against.
-    :rtype: (T) -> bool
+
+    :param cls: Class to check against.
     """
     return lambda t: isinstance(t, cls)
 
 
-def dispatch_on_type(typ_or_inst, type_to_action_assocs, exception=None):
+def dispatch_on_type(
+    typ_or_inst: _Any,
+    type_to_action_assocs: list[tuple[_Any, Callable[[_Any], _RT]]],
+    exception: Exception | None = None,
+) -> _RT:
     """
     Dispatch on `typ_or_inst`, execute the corresponding action depending on
     the type. Every "type" (MatcherType below) in type_to_action_assocs will be
@@ -34,7 +70,7 @@ def dispatch_on_type(typ_or_inst, type_to_action_assocs, exception=None):
 
     :rtype: RType
     """
-    exception = exception or Exception(
+    exc = exception or Exception(
         "Error in dispatch_on_type: {} not handled".format(typ_or_inst)
     )
     for target_type, action in type_to_action_assocs:
@@ -45,10 +81,10 @@ def dispatch_on_type(typ_or_inst, type_to_action_assocs, exception=None):
                      or issubtype(typ_or_inst, target_type)))
         ):
             return action(typ_or_inst)
-    raise exception
+    raise exc
 
 
-def assert_type(obj, typ):
+def assert_type(obj: object, typ: Type[_T]) -> _T:
     """
     Ensure that obj is a subclass or instance of type, depending on whether obj
     is a type or an instance. Return obj. This allows a few things compared to
@@ -71,6 +107,7 @@ def assert_type(obj, typ):
     :rtype: T
     """
     if issubclass(type(obj), type):
+        assert isinstance(obj, type)
         assert issubclass(obj, typ), (
             "Wrong base type for type {}, expected {}".format(obj, typ)
         )
@@ -83,7 +120,7 @@ def assert_type(obj, typ):
     return obj
 
 
-class TypeSet:
+class TypeSet(Generic[_DerivableType]):
     """
     This class is an helper for when you need to check wether an abstract
     operation was fulfilled for a whole hierarchy of classes, given that if
@@ -95,42 +132,42 @@ class TypeSet:
     cases.
     """
 
-    def __init__(self, types=set()):
+    def __init__(self, types: Iterable[_DerivableType] = set()):
         """
-        :param sequence[T] types: Initial set of matched types.
+        :param types: Initial set of matched types.
         """
         # Working set of ASTNodeType instances for the types that are covered
         # by matchers. Updated as we go through the list of matchers.
-        self.matched_types = set()
+        self.matched_types: set[_DerivableType] = set()
         for t in types:
             self.include(t)
 
-    def __eq__(self, type_set):
-        return (isinstance(type_set, TypeSet) and
-                self.matched_types == type_set.matched_types)
+    def __eq__(self, type_set: object) -> bool:
+        return (
+            isinstance(type_set, TypeSet)
+            and self.matched_types == type_set.matched_types
+        )
 
-    def __ne__(self, type_set):
+    def __ne__(self, type_set: object) -> bool:
         return not (self == type_set)
 
-    def __contains__(self, t):
+    def __contains__(self, t: _DerivableType) -> bool:
         """
         Check whether ``t`` is included in this type set.
-
-        :rtype: bool
         """
         return t in self.matched_types
 
-    def update(self, type_set):
+    def update(self, type_set: TypeSet[_DerivableType]) -> None:
         """
         Extend self to contain all types in ``type_set``.
 
-        :param TypeSet type_set: Types to include.
+        :param type_set: Types to include.
         """
         assert isinstance(type_set, TypeSet)
         for t in type_set.matched_types:
             self.include(t)
 
-    def include(self, t):
+    def include(self, t: _DerivableType) -> bool:
         """
         Include a class and all of its subclasses.
 
@@ -140,8 +177,7 @@ class TypeSet:
 
         Return whether `t` was already present in `self`.
 
-        :param ASTNodeType t: AST node to include.
-        :rtype: bool
+        :param t: AST node to include.
         """
         if t in self.matched_types:
             return True
@@ -175,16 +211,16 @@ class TypeSet:
 
         return False
 
-    def exclude(self, t):
+    def exclude(self, t: _DerivableType) -> None:
         """
         Exclude a class and all of its subclasses.
 
-        :param ASTNodeType t: Node to exclude.
+        :param t: Node to exclude.
         """
         if t not in self.matched_types:
             return
 
-        def remove_children(t):
+        def remove_children(t: _DerivableType) -> None:
             self.matched_types.discard(t)
             for child in t.subclasses:
                 remove_children(child)
@@ -198,16 +234,13 @@ class TypeSet:
                 break
             self.matched_types.discard(parent)
 
-    def unmatched_types(self, t):
+    def unmatched_types(self, t: _DerivableType) -> set[_DerivableType]:
         """
         Return the set of `t` subclasses that are not matched by any matcher.
 
         Omit subclasses when none of them are matched: only the parent is
         returned in this case, so that we don't flood users with whole
         hierarchies of classes.
-
-        :type t: ASTNodeType
-        :rtype: set[ASTNodeType]
         """
         if t in self.matched_types:
             return set()
@@ -222,25 +255,20 @@ class TypeSet:
         return result
 
     @property
-    def minimal_matched_types(self):
+    def minimal_matched_types(self) -> set[_DerivableType]:
         """
         Return the minimal set of subclasses that are matched.
 
         The result is "minimal" in the sense that if B derives from A and both
         are matched, the result includes only A.
-
-        :type t: ASTNodeType
-        :rtype: set[ASTNodeType]
         """
         return {t for t in self.matched_types
                 if t.base is None or t.base not in self.matched_types}
 
     @property
-    def minimal_common_type(self):
+    def minimal_common_type(self) -> _DerivableType:
         """
         Return the most specific common ancestor type for matched types.
-
-        :rtype: ASTNodeType
         """
         types = list(self.matched_types)
         assert types
@@ -251,7 +279,7 @@ class TypeSet:
         return result
 
 
-def issubtype(type, parent_type):
+def issubtype(type: object, parent_type: Type) -> bool:
     """
     Helper wrapper around issubclass, because issubclass will raise an
     exception if compared object is not a class, which is extremely tedious for
@@ -263,25 +291,29 @@ def issubtype(type, parent_type):
     return inspect.isclass(type) and issubclass(type, parent_type)
 
 
-def not_implemented_error(self_or_cls, method):  # no-code-coverage
+def not_implemented_error(
+    self_or_cls: object,
+    method: object,
+) -> NotImplementedError:  # no-code-coverage
     """
     Return a NotImplementedError instance to explain that `self or_cls` must
     override method `method`.
 
-    :param self or_cls: Class that does not implement `method`, or the instance
-        of such a class.
+    :param or_cls: Class that does not implement `method`, or the instance of
+        such a class.
     :param method: Method object for the method that should be overriden.
-    :rtype: NotImplementedError
     """
-    cls = self_or_cls if inspect.isclass(self_or_cls) else type(self_or_cls)
-    if isinstance(method, property):
-        method = method.fget
+    cls: type = (
+        self_or_cls if inspect.isclass(self_or_cls) else type(self_or_cls)
+    )
+    func = method.fget if isinstance(method, property) else method
     return NotImplementedError('{} must override method {}'.format(
-        cls.__name__, method.__name__
+        getattr(cls, "__name__"),
+        getattr(func, "__name__")
     ))
 
 
-def astnode_kind_set(context, nodes):
+def astnode_kind_set(context: CompileCtx, nodes: Iterable[ASTNodeType]) -> str:
     """
     Turn a set of AST nodes into a the corresponding set of AST node kinds.
 
@@ -314,7 +346,7 @@ def astnode_kind_set(context, nodes):
             groups.append((k, k))
 
     # Turn numeric constants into enumeration names
-    groups = [
+    groups_names = [
         (context.kind_constant_to_node[f].ada_kind_name,
          context.kind_constant_to_node[l].ada_kind_name)
         for f, l in groups
@@ -322,11 +354,14 @@ def astnode_kind_set(context, nodes):
 
     return ' | '.join(
         (f if f == l else '{} .. {}'.format(f, l))
-        for f, l in groups
+        for f, l in groups_names
     )
 
 
-def collapse_concrete_nodes(input_type, astnodes):
+def collapse_concrete_nodes(
+    input_type: ASTNodeType,
+    astnodes: Iterable[ASTNodeType],
+) -> tuple[list[set[ASTNodeType]], set[ASTNodeType]]:
     """
     Compute the set of concrete subclasses for `input_types` that match each
     AST node in `astnodes`. For each item in `astnodes`, we exclude the set of
@@ -339,8 +374,6 @@ def collapse_concrete_nodes(input_type, astnodes):
     This returns a tuple: first element is a list of the same size as
     `astnodes` and contains the corresponding sets of concrete AST nodes. The
     second element is the set of unmatched concrete AST nodes.
-
-    :rtype: (list[set[ASTNodeType]], set[ASTNodeType])
     """
     remaining_nodes = set(input_type.concrete_subclasses)
     result = []
