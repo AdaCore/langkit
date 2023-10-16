@@ -1359,7 +1359,7 @@ class Or(Parser):
         finally:
             self.is_processing_type = False
 
-    def _precise_types(self) -> TypeSet:
+    def _precise_types(self) -> TypeSet[ASTNodeType]:
         # We need protection from infinite recursion the same way get_type
         # does.
         if self.is_processing_type:
@@ -1367,14 +1367,14 @@ class Or(Parser):
 
         try:
             self.is_processing_type = True
-            result = TypeSet()
+            result: TypeSet[ASTNodeType] = TypeSet()
             for p in self.parsers:
                 result.update(p.precise_types)
             return result
         finally:
             self.is_processing_type = False
 
-    def _precise_element_types(self) -> TypeSet:
+    def _precise_element_types(self) -> TypeSet[ASTNodeType]:
         # We need protection from infinite recursion the same way get_type
         # does.
         if self.is_processing_type:
@@ -1382,7 +1382,7 @@ class Or(Parser):
 
         try:
             self.is_processing_type = True
-            result = TypeSet()
+            result: TypeSet[ASTNodeType] = TypeSet()
             for p in self.parsers:
                 result.update(p.precise_element_types)
             return result
