@@ -981,8 +981,13 @@ package body ${ada_lib_name}.Rewriting_Implementation is
             Result.Children.Vector.Reserve_Capacity
               (Handle.Children.Vector.Length);
             for I in 1 .. Handle.Children.Vector.Last_Index loop
-               Result.Children.Vector.Append
-                 (Clone (Handle.Children.Vector.Element (I)));
+               declare
+                  Child : constant Node_Rewriting_Handle :=
+                    Clone (Handle.Children.Vector.Element (I));
+               begin
+                  Tie (Child, Result, No_Unit_Rewriting_Handle);
+                  Result.Children.Vector.Append (Child);
+               end;
             end loop;
       end case;
 
@@ -1230,8 +1235,13 @@ package body ${ada_lib_name}.Rewriting_Implementation is
                   Result.Children.Vector.Reserve_Capacity
                     (Ada.Containers.Count_Type (Count));
                   for I in 1 .. Count loop
-                     Result.Children.Vector.Append
-                       (Transform (Child (Node, I), Result));
+                     declare
+                        C : constant Node_Rewriting_Handle :=
+                          Transform (Child (Node, I), Result);
+                     begin
+                        Tie (C, Result, No_Unit_Rewriting_Handle);
+                        Result.Children.Vector.Append (C);
+                     end;
                   end loop;
                end;
             end if;
