@@ -123,9 +123,10 @@ begin
          N := Create_Regular_Node (RH, Foo_Error_Def, (1 .. 0 => <>));
       end Create_Regular_Error_Node;
 
-      B  : constant Node_Rewriting_Handle := Child (N, 2);
-      C  : constant Node_Rewriting_Handle := Child (N, 3);
-      C2 : Node_Rewriting_Handle;
+      B       : constant Node_Rewriting_Handle := Child (N, 2);
+      C       : constant Node_Rewriting_Handle := Child (N, 3);
+      C2      : Node_Rewriting_Handle;
+      C2_Name : Node_Rewriting_Handle;
 
    begin
       Try ("Try assigning a child that is already tied to a tree",
@@ -141,6 +142,9 @@ begin
       Put_Line ("C: " & Image (C));
       Put_Line ("C2: " & Image (C2));
       Put_Line ("C2 parent: " & Image (Parent (C2)));
+      C2_Name := Child (C2, Member_Refs.Def_F_Name);
+      Put_Line ("C2 name: " & Image (C2_Name));
+      Put_Line ("C2 name parent: " & Image (Parent (C2_Name)));
       New_Line;
 
       Put_Line ("Replace the middle definition (b) with (c2)");
