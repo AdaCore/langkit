@@ -241,6 +241,15 @@ package body ${ada_lib_name}.Rewriting is
       return Impl.Kind (Unwrap_Node_RH (Handle));
    end Kind;
 
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Handle : Node_Rewriting_Handle) return String is
+   begin
+      return Impl.Image (Unwrap_Node_RH (Handle));
+   end Image;
+
    ----------
    -- Tied --
    ----------
