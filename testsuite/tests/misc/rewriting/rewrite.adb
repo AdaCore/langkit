@@ -123,6 +123,10 @@ begin
          N := Create_Regular_Node (RH, Foo_Error_Def, (1 .. 0 => <>));
       end Create_Regular_Error_Node;
 
+      B  : constant Node_Rewriting_Handle := Child (N, 2);
+      C  : constant Node_Rewriting_Handle := Child (N, 3);
+      C2 : Node_Rewriting_Handle;
+
    begin
       Try ("Try assigning a child that is already tied to a tree",
            Set_Tied_Child'Access);
@@ -130,11 +134,17 @@ begin
            Create_Error_Node'Access);
       Try ("Try creating an error node (Create_Regular_Node)",
            Create_Regular_Error_Node'Access);
-
       New_Line;
-      Put_Line ("Replace the middle definition (b) with a clone of the last"
-                & " definition (c)");
-      Set_Child (N, 2, Clone (Child (N, 3)));
+
+      Put_Line ("Create a clone (c2) of the last definition (c)");
+      C2 := Clone (C);
+      Put_Line ("C: " & Image (C));
+      Put_Line ("C2: " & Image (C2));
+      Put_Line ("C2 parent: " & Image (Parent (C2)));
+      New_Line;
+
+      Put_Line ("Replace the middle definition (b) with (c2)");
+      Replace (B, C2);
    end;
 
    New_Line;
@@ -148,7 +158,7 @@ begin
            Rule      => Def_Rule_Rule);
 
       function Img (N : Node_Rewriting_Handle) return String
-      is (Image (Unparse (N)));
+      is (Image (Unparse (N)) & " (" & Image (N) & ")");
    begin
       Put_Line ("  Tree: " & Img (N));
       Put_Line ("  F_Name child: " & Img (Child (N, Member_Refs.Def_F_Name)));
