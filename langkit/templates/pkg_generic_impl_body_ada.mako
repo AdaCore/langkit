@@ -139,6 +139,25 @@ package body ${ada_lib_name}.Generic_Impl is
         (Ctx, Filename, Charset, Reparse, +Rule);
    end Context_Get_From_File;
 
+   -----------------------------
+   -- Context_Get_From_Buffer --
+   -----------------------------
+
+   function Context_Get_From_Buffer
+     (Context                   : Internal_Context;
+      Filename, Buffer, Charset : String;
+      Rule                      : Grammar_Rule_Index) return Internal_Unit
+   is
+      Ctx : constant Implementation.Internal_Context := +Context;
+   begin
+      return +Implementation.Get_From_Buffer
+        (Context  => Ctx,
+         Filename => Filename,
+         Buffer   => Buffer,
+         Charset  => Charset,
+         Rule     => +Rule);
+   end Context_Get_From_Buffer;
+
    ------------------
    -- Unit_Context --
    ------------------
@@ -168,6 +187,29 @@ package body ${ada_lib_name}.Generic_Impl is
    begin
       return Implementation.Get_Filename (U);
    end Unit_Filename;
+
+   ----------------------
+   -- Unit_Diagnostics --
+   ----------------------
+
+   function Unit_Diagnostics (Unit : Internal_Unit) return Diagnostics_Access
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return U.Diagnostics'Unrestricted_Access;
+   end Unit_Diagnostics;
+
+   --------------------------------
+   -- Unit_Format_GNU_Diagnostic --
+   --------------------------------
+
+   function Unit_Format_GNU_Diagnostic
+     (Unit : Internal_Unit; D : Diagnostic) return String
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return Implementation.Format_GNU_Diagnostic (U, D);
+   end Unit_Format_GNU_Diagnostic;
 
    ---------------
    -- Unit_Root --

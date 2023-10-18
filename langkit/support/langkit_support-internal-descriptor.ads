@@ -5,6 +5,7 @@
 
 with Ada.Unchecked_Conversion;
 
+with Langkit_Support.Diagnostics;       use Langkit_Support.Diagnostics;
 with Langkit_Support.File_Readers;      use Langkit_Support.File_Readers;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
@@ -50,6 +51,10 @@ package Langkit_Support.Internal.Descriptor is
       Filename, Charset : String;
       Reparse           : Boolean;
       Rule              : Grammar_Rule_Index) return Internal_Unit;
+   type Context_Get_From_Buffer_Type is access function
+     (Context                   : Internal_Context;
+      Filename, Buffer, Charset : String;
+      Rule                      : Grammar_Rule_Index) return Internal_Unit;
 
    type Unit_Context_Type is access function
      (Unit : Internal_Unit) return Internal_Context;
@@ -57,6 +62,10 @@ package Langkit_Support.Internal.Descriptor is
      (Unit : Internal_Unit) return Version_Number;
    type Unit_Filename_Type is access function
      (Unit : Internal_Unit) return String;
+   type Unit_Diagnostics_Type is access function
+     (Unit : Internal_Unit) return Diagnostics_Access;
+   type Unit_Format_GNU_Diagnostic_Type is access function
+     (Unit : Internal_Unit; D : Diagnostic) return String;
    type Unit_Root_Type is access function
      (Unit : Internal_Unit) return Analysis.Internal_Node;
    type Unit_Token_Getter_Type is access function
@@ -164,20 +173,23 @@ package Langkit_Support.Internal.Descriptor is
 
       --  Implementation for generic operations
 
-      Create_Context        : Create_Context_Type;
-      Context_Inc_Ref       : Context_Inc_Ref_Type;
-      Context_Dec_Ref       : Context_Dec_Ref_Type;
-      Context_Version       : Context_Version_Type;
-      Context_Get_From_File : Context_Get_From_File_Type;
-      Context_Has_Unit      : Context_Has_Unit_Type;
+      Create_Context          : Create_Context_Type;
+      Context_Inc_Ref         : Context_Inc_Ref_Type;
+      Context_Dec_Ref         : Context_Dec_Ref_Type;
+      Context_Version         : Context_Version_Type;
+      Context_Get_From_File   : Context_Get_From_File_Type;
+      Context_Get_From_Buffer : Context_Get_From_Buffer_Type;
+      Context_Has_Unit        : Context_Has_Unit_Type;
 
-      Unit_Context     : Unit_Context_Type;
-      Unit_Version     : Unit_Version_Type;
-      Unit_Filename    : Unit_Filename_Type;
-      Unit_Root        : Unit_Root_Type;
-      Unit_First_Token : Unit_Token_Getter_Type;
-      Unit_Last_Token  : Unit_Token_Getter_Type;
-      Unit_Get_Line    : Unit_Get_Line_Type;
+      Unit_Context               : Unit_Context_Type;
+      Unit_Version               : Unit_Version_Type;
+      Unit_Filename              : Unit_Filename_Type;
+      Unit_Diagnostics           : Unit_Diagnostics_Type;
+      Unit_Format_GNU_Diagnostic : Unit_Format_GNU_Diagnostic_Type;
+      Unit_Root                  : Unit_Root_Type;
+      Unit_First_Token           : Unit_Token_Getter_Type;
+      Unit_Last_Token            : Unit_Token_Getter_Type;
+      Unit_Get_Line              : Unit_Get_Line_Type;
 
       Node_Metadata_Inc_Ref : Node_Metadata_Inc_Ref_Type;
       Node_Metadata_Dec_Ref : Node_Metadata_Dec_Ref_Type;

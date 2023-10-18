@@ -1,4 +1,5 @@
 with Ada.Containers.Vectors;
+with Ada.Directories;
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
@@ -161,6 +162,43 @@ begin
       when Exc : Precondition_Failure =>
          Put_Line ("Got a Precondition_Failure exception: "
                    & Exception_Message (Exc));
+   end;
+   New_Line;
+
+   Put_Line ("Testing Get_From_Buffer");
+   declare
+      U : Lk_Unit;
+   begin
+      Put_Line ("Base:");
+      U := Ctx.Get_From_Buffer ("buffer.txt", "var foo = 1;");
+      U.Root.Print;
+
+      Put_Line ("Reparsed:");
+      U := Ctx.Get_From_Buffer ("buffer.txt", "example foo");
+      U.Root.Print;
+
+      Put_Line ("Custom rule:");
+      U := Ctx.Get_From_Buffer
+        (Filename => "buffer_custom.txt",
+         Buffer   => "my_id",
+         Rule     => From_Index (Id, Last_Grammar_Rule (Id)));
+      U.Root.Print;
+   end;
+   New_Line;
+
+   Put_Line ("Testing diagnostics-related primitives");
+   declare
+      Units : constant array (Positive range <>) of Lk_Unit :=
+        (Ctx.Get_From_Buffer ("without_error.txt", "var foo = 1;"),
+         Ctx.Get_From_Buffer ("with_error.txt", "var foo = 1"));
+   begin
+      for U of Units loop
+         Put_Line (Ada.Directories.Simple_Name (U.Filename) & ":");
+         Put_Line ("  Has_Diagnostics? " & U.Has_Diagnostics'Image);
+         for D of U.Diagnostics loop
+            Put_Line ("  " & U.Format_GNU_Diagnostic (D));
+         end loop;
+      end loop;
    end;
    New_Line;
 

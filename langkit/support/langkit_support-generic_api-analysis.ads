@@ -15,6 +15,7 @@
 with Ada.Containers; use Ada.Containers;
 private with Ada.Finalization;
 
+with Langkit_Support.Diagnostics;  use Langkit_Support.Diagnostics;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 private with Langkit_Support.Internal.Analysis;
 with Langkit_Support.Slocs;        use Langkit_Support.Slocs;
@@ -112,6 +113,28 @@ package Langkit_Support.Generic_API.Analysis is
    --  It is invalid to pass ``True`` to ``Reparse`` if a rewriting context is
    --  active.
 
+   function Get_From_Buffer
+     (Self     : Lk_Context'Class;
+      Filename : String;
+      Buffer   : String;
+      Charset  : String := "";
+      Rule     : Grammar_Rule_Ref := No_Grammar_Rule_Ref) return Lk_Unit;
+   --  Create a new analysis unit for ``Filename`` or return the existing one
+   --  if any. Whether the analysis unit already exists or not, (re)parse it
+   --  from the source code in ``Buffer``.
+   --
+   --  ``Rule`` controls which grammar rule is used to parse the unit. If
+   --  ``No_Grammar_Rule_Ref``, use the default grammar rule for this language.
+   --
+   --  Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+   --  then use the context's default charset.
+   --
+   --  If any failure occurs, such as file opening, decoding, lexing or parsing
+   --  failure, return an analysis unit anyway: errors are described as
+   --  diagnostics of the returned analysis unit.
+   --
+   --  Calling this is invalid if a rewriting context is active.
+
    --  TODO??? Bind all other analysis context primitives
 
    ------------------------------
@@ -133,6 +156,17 @@ package Langkit_Support.Generic_API.Analysis is
 
    function Filename (Self : Lk_Unit) return String;
    --  Return the filename this unit is associated to
+
+   function Has_Diagnostics (Self : Lk_Unit) return Boolean;
+   --  Return whether this unit has associated diagnostics
+
+   function Diagnostics (Self : Lk_Unit) return Diagnostics_Array;
+   --  Return an array that contains the diagnostics associated to this unit
+
+   function Format_GNU_Diagnostic
+     (Self : Lk_Unit; D : Diagnostic) return String;
+   --  Format a diagnostic in a GNU fashion. See
+   --  <https://www.gnu.org/prep/standards/html_node/Errors.html>.
 
    function Root (Self : Lk_Unit'Class) return Lk_Node;
    --  Return the root node for this unit, or ``No_Lk_Node`` if there is
