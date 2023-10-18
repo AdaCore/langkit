@@ -123,6 +123,9 @@ package ${ada_lib_name}.Rewriting is
    --  Return the introspection type reference corresponding to ``Handle``'s
    --  node.
 
+   function Image (Handle : Node_Rewriting_Handle) return String;
+   ${ada_doc('langkit.rewriting.node_image', 3)}
+
    function Tied (Handle : Node_Rewriting_Handle) return Boolean;
    ${ada_doc('langkit.rewriting.tied', 3)}
 

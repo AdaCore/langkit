@@ -1060,6 +1060,9 @@ base_langkit_docs = {
     'langkit.rewriting.kind': """
         Return the kind corresponding to Handle's node
     """,
+    'langkit.rewriting.node_image': """
+        Return a representation of ``Handle`` as a string.
+    """,
     'langkit.rewriting.tied': """
         Return whether this node handle is tied to an analysis unit. If it is
         not, it can be passed as the Child parameter to Set_Child.

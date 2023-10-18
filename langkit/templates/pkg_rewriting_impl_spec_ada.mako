@@ -238,6 +238,9 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    function Kind (Handle : Node_Rewriting_Handle) return ${T.node_kind};
    --  Implementation for Rewriting.Kind
 
+   function Image (Handle : Node_Rewriting_Handle) return String;
+   --  Implementation for Rewriting.Image
+
    function Tied (Handle : Node_Rewriting_Handle) return Boolean;
    --  Implementation for Rewriting.Tied
 
