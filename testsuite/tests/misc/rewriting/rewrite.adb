@@ -18,7 +18,8 @@ procedure Rewrite is
       & "def b = (2 + a) + 3" & ASCII.LF
       & "def c = a + b" & ASCII.LF
       & "def d = 4" & ASCII.LF
-      & "def e = 5" & ASCII.LF);
+      & "def e = 5" & ASCII.LF
+      & "var f = 6" & ASCII.LF);
 
    procedure Try (Label : String; Proc : access procedure);
 
@@ -95,6 +96,8 @@ begin
       procedure Set_Tied_Child;
       procedure Create_Error_Node;
       procedure Create_Regular_Error_Node;
+      procedure Get_Null_Field;
+      procedure Set_Null_Field;
 
       ----------
       -- Proc --
@@ -111,7 +114,7 @@ begin
 
       procedure Create_Error_Node is
       begin
-         N := Create_Node (RH, Foo_Error_Def);
+         N := Create_Node (RH, Foo_Error_Decl);
       end Create_Error_Node;
 
       -------------------------------
@@ -120,13 +123,32 @@ begin
 
       procedure Create_Regular_Error_Node is
       begin
-         N := Create_Regular_Node (RH, Foo_Error_Def, (1 .. 0 => <>));
+         N := Create_Regular_Node (RH, Foo_Error_Decl, (1 .. 0 => <>));
       end Create_Regular_Error_Node;
 
       B       : constant Node_Rewriting_Handle := Child (N, 2);
       C       : constant Node_Rewriting_Handle := Child (N, 3);
       C2      : Node_Rewriting_Handle;
       C2_Name : Node_Rewriting_Handle;
+      F       : constant Node_Rewriting_Handle := Child (N, 6);
+
+      --------------------
+      -- Get_Null_Field --
+      --------------------
+
+      procedure Get_Null_Field is
+      begin
+         N := Child (F, Member_Refs.Decl_F_Args);
+      end Get_Null_Field;
+
+      --------------------
+      -- Set_Null_Field --
+      --------------------
+
+      procedure Set_Null_Field is
+      begin
+         Set_Child (F, Member_Refs.Decl_F_Args, No_Node_Rewriting_Handle);
+      end Set_Null_Field;
 
    begin
       Try ("Try assigning a child that is already tied to a tree",
@@ -142,13 +164,19 @@ begin
       Put_Line ("C: " & Image (C));
       Put_Line ("C2: " & Image (C2));
       Put_Line ("C2 parent: " & Image (Parent (C2)));
-      C2_Name := Child (C2, Member_Refs.Def_F_Name);
+      C2_Name := Child (C2, Member_Refs.Decl_F_Name);
       Put_Line ("C2 name: " & Image (C2_Name));
       Put_Line ("C2 name parent: " & Image (Parent (C2_Name)));
       New_Line;
 
       Put_Line ("Replace the middle definition (b) with (c2)");
       Replace (B, C2);
+
+      Try ("Try to get the node rewriting handle for a null field",
+           Get_Null_Field'Access);
+
+      Try ("Try to set the node rewriting handle for a null field",
+           Set_Null_Field'Access);
    end;
 
    New_Line;
@@ -165,9 +193,9 @@ begin
       is (Image (Unparse (N)) & " (" & Image (N) & ")");
    begin
       Put_Line ("  Tree: " & Img (N));
-      Put_Line ("  F_Name child: " & Img (Child (N, Member_Refs.Def_F_Name)));
+      Put_Line ("  F_Name child: " & Img (Child (N, Member_Refs.Decl_F_Name)));
       Put_Line ("  F_Expr/F_LHS child: "
-                & Img (Child (N, (Member_Refs.Def_F_Expr,
+                & Img (Child (N, (Member_Refs.Decl_F_Expr,
                                   Member_Refs.Plus_F_Lhs))));
    end;
 
@@ -222,14 +250,14 @@ begin
 
       Fifth_Child : constant Node_Rewriting_Handle := Child (N, 5);
    begin
-      Set_Child (Fifth_Child, Member_Refs.Def_F_Expr, Top_Expr);
+      Set_Child (Fifth_Child, Member_Refs.Decl_F_Expr, Top_Expr);
    end;
 
    New_Line;
    Put_Line ("Replace the root of unit 2");
    declare
       New_Root : constant Node_Rewriting_Handle :=
-         Create_Node (RH, Foo_Foo_Node_List);
+         Create_Node (RH, Foo_Decl_List);
       Expr_1   : constant Node_Rewriting_Handle :=
          Create_Token_Node (RH, Foo_Literal, "111");
       Expr_2   : constant Node_Rewriting_Handle :=
