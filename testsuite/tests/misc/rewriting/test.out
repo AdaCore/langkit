@@ -92,7 +92,7 @@ Create a clone (c2) of the last definition (c)
 C: <Def u1.txt:3:1-3:14 (tied)>
 C2: <Def u1.txt:3:1-3:14>
 C2 parent: None
-C2 name: <Name u1.txt:3:5-3:6 (tied)>
+C2 name: <Name "c" u1.txt:3:5-3:6 (tied)>
 C2 name parent: <Def u1.txt:3:1-3:14>
 
 Replace the middle definition (b) with (c2)
@@ -100,6 +100,9 @@ Try to get the node rewriting handle for a null field...
    Got a precondition failure
 Try to set the node rewriting handle for a null field...
    Got a precondition failure
+Children of <Var u1.txt:6:1-6:10 (tied)>:
+  <Name "f" u1.txt:6:5-6:6 (tied)>
+  <Literal "6" u1.txt:6:9-6:10 (tied)>
 
 Creating a tree from a template:
   Tree: def foo=1+2 (<FOO_DEF>)
@@ -208,6 +211,128 @@ DeclList
 rewrite.adb: Done.
 
 == rewrite_lists.adb ==
+fresh empty list
+   ... list of 0 nodes:
+  <empty>
+
+fresh 1-item list
+   ... list of 1 nodes:
+  <FOO_NAME "n1" (tied)>
+
+fresh 2-items list
+   ... list of 2 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+
+empty + insert_first
+   ... list of 1 nodes:
+  <FOO_NAME "n1" (tied)>
+
+empty + 2 insert_first
+   ... list of 2 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+
+empty + insert_last
+   ... list of 1 nodes:
+  <FOO_NAME "n1" (tied)>
+
+empty + 2 insert_last
+   ... list of 2 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+
+insert_before on the first
+   ... list of 2 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+
+insert_before on the second
+   ... list of 3 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+  <FOO_NAME "n3" (tied)>
+
+insert_after on the first
+   ... list of 2 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+
+insert_after on the second
+   ... list of 3 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+  <FOO_NAME "n3" (tied)>
+
+replace single element
+   ... list of 1 nodes:
+  <FOO_NAME "after" (tied)>
+
+replace first element
+   ... list of 2 nodes:
+  <FOO_NAME "after" (tied)>
+  <FOO_NAME "sibling" (tied)>
+
+replace middle element
+   ... list of 3 nodes:
+  <FOO_NAME "first" (tied)>
+  <FOO_NAME "after" (tied)>
+  <FOO_NAME "last" (tied)>
+
+replace last element
+   ... list of 2 nodes:
+  <FOO_NAME "sibling" (tied)>
+  <FOO_NAME "after" (tied)>
+
+remove_child on child 1
+   ... list of 2 nodes:
+  <FOO_NAME "n2" (tied)>
+  <FOO_NAME "n3" (tied)>
+
+remove_child on child 2
+   ... list of 2 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n3" (tied)>
+
+remove_child on child 3
+   ... list of 2 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+
+remove_child on the only child
+   ... list of 0 nodes:
+  <empty>
+
+create_from_template (empty list)
+   ... list of 0 nodes:
+  <empty>
+
+clone (empty list)
+   ... list of 0 nodes:
+  <empty>
+
+create_from_template (non-empty list)
+   ... list of 3 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+  <FOO_NAME "n3" (tied)>
+
+clone (non-empty list)
+   ... list of 3 nodes:
+  <FOO_NAME "n1" (tied)>
+  <FOO_NAME "n2" (tied)>
+  <FOO_NAME "n3" (tied)>
+
+expanded (empty list)
+   ... list of 0 nodes:
+  <empty>
+
+expanded (non-empty list)
+   ... list of 3 nodes:
+  <Name "n1" main.txt:1:8-1:10 (tied)>
+  <Name "n2" main.txt:1:12-1:14 (tied)>
+  <Name "n3" main.txt:1:16-1:18 (tied)>
+
 Applying the diff...
 DeclList
 |  Def
@@ -248,11 +373,6 @@ Could not apply diff on the main.txt unit:
   1:6: Skipped token =
   1:7: Skipped token a
 def 1=a
-
-# Put a null child in a list node
-Could not apply diff on the main.txt unit:
-  null node found in a list
-Cannot unparse the rewritten tree
 
 apply_error.adb: Done.
 
@@ -380,4 +500,169 @@ DeclList
 |  |  |f_name:
 |  |  |  Name: A
 clone_synthetic.adb: Done.
+
+== check_rotate.adb ==
+== [field] Swap ==
+
+Done with no precondition failure:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:1:1-1:10 (tied)>
+    <Name "b" main.txt:2:5-2:6 (tied)>
+    <NameList main.txt:1:4-1:4 (tied)>
+    <Literal "1" main.txt:1:9-1:10 (tied)>
+  <Def main.txt:2:1-2:10 (tied)>
+    <Name "a" main.txt:1:5-1:6 (tied)>
+    <NameList main.txt:2:4-2:4 (tied)>
+    <Literal "2" main.txt:2:9-2:10 (tied)>
+  <Def main.txt:3:1-3:10 (tied)>
+    <Name "c" main.txt:3:5-3:6 (tied)>
+    <NameList main.txt:3:4-3:4 (tied)>
+    <Literal "3" main.txt:3:9-3:10 (tied)>
+
+== [field] Rotate with null ==
+
+Done with no precondition failure:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:1:1-1:10 (tied)>
+    <Name "a" main.txt:1:5-1:6 (tied)>
+    <NameList main.txt:1:4-1:4 (tied)>
+    None
+  <Def main.txt:2:1-2:10 (tied)>
+    <Name "b" main.txt:2:5-2:6 (tied)>
+    <NameList main.txt:2:4-2:4 (tied)>
+    <Literal "2" main.txt:2:9-2:10 (tied)>
+  <Def main.txt:3:1-3:10 (tied)>
+    <Name "c" main.txt:3:5-3:6 (tied)>
+    <NameList main.txt:3:4-3:4 (tied)>
+    <Literal "3" main.txt:3:9-3:10 (tied)>
+
+== [list] Swap ==
+
+Done with no precondition failure:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:2:1-2:10 (tied)>
+    <Name "b" main.txt:2:5-2:6 (tied)>
+    <NameList main.txt:2:4-2:4 (tied)>
+    <Literal "2" main.txt:2:9-2:10 (tied)>
+  <Def main.txt:1:1-1:10 (tied)>
+    <Name "a" main.txt:1:5-1:6 (tied)>
+    <NameList main.txt:1:4-1:4 (tied)>
+    <Literal "1" main.txt:1:9-1:10 (tied)>
+  <Def main.txt:3:1-3:10 (tied)>
+    <Name "c" main.txt:3:5-3:6 (tied)>
+    <NameList main.txt:3:4-3:4 (tied)>
+    <Literal "3" main.txt:3:9-3:10 (tied)>
+
+== [list] Tri-rotate ==
+
+Done with no precondition failure:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:2:1-2:10 (tied)>
+    <Name "b" main.txt:2:5-2:6 (tied)>
+    <NameList main.txt:2:4-2:4 (tied)>
+    <Literal "2" main.txt:2:9-2:10 (tied)>
+  <Def main.txt:3:1-3:10 (tied)>
+    <Name "c" main.txt:3:5-3:6 (tied)>
+    <NameList main.txt:3:4-3:4 (tied)>
+    <Literal "3" main.txt:3:9-3:10 (tied)>
+  <Def main.txt:1:1-1:10 (tied)>
+    <Name "a" main.txt:1:5-1:6 (tied)>
+    <NameList main.txt:1:4-1:4 (tied)>
+    <Literal "1" main.txt:1:9-1:10 (tied)>
+
+== [list] Swap with null ==
+
+Done with no precondition failure:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:2:1-2:10 (tied)>
+    <Name "b" main.txt:2:5-2:6 (tied)>
+    <NameList main.txt:2:4-2:4 (tied)>
+    <Literal "2" main.txt:2:9-2:10 (tied)>
+  <Def main.txt:3:1-3:10 (tied)>
+    <Name "c" main.txt:3:5-3:6 (tied)>
+    <NameList main.txt:3:4-3:4 (tied)>
+    <Literal "3" main.txt:3:9-3:10 (tied)>
+
+== [list] Tri-rotate with nulls ==
+
+Done with no precondition failure:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:1:1-1:10 (tied)>
+    <Name "a" main.txt:1:5-1:6 (tied)>
+    <NameList main.txt:1:4-1:4 (tied)>
+    <Literal "1" main.txt:1:9-1:10 (tied)>
+
+== [nop] No handle ==
+
+No error:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:1:1-1:10 (tied)>
+    <Name "a" main.txt:1:5-1:6 (tied)>
+    <NameList main.txt:1:4-1:4 (tied)>
+    <Literal "1" main.txt:1:9-1:10 (tied)>
+  <Def main.txt:2:1-2:10 (tied)>
+    <Name "b" main.txt:2:5-2:6 (tied)>
+    <NameList main.txt:2:4-2:4 (tied)>
+    <Literal "2" main.txt:2:9-2:10 (tied)>
+  <Def main.txt:3:1-3:10 (tied)>
+    <Name "c" main.txt:3:5-3:6 (tied)>
+    <NameList main.txt:3:4-3:4 (tied)>
+    <Literal "3" main.txt:3:9-3:10 (tied)>
+
+== [nop] One handle ==
+
+No error:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:1:1-1:10 (tied)>
+    <Name "a" main.txt:1:5-1:6 (tied)>
+    <NameList main.txt:1:4-1:4 (tied)>
+    <Literal "1" main.txt:1:9-1:10 (tied)>
+  <Def main.txt:2:1-2:10 (tied)>
+    <Name "b" main.txt:2:5-2:6 (tied)>
+    <NameList main.txt:2:4-2:4 (tied)>
+    <Literal "2" main.txt:2:9-2:10 (tied)>
+  <Def main.txt:3:1-3:10 (tied)>
+    <Name "c" main.txt:3:5-3:6 (tied)>
+    <NameList main.txt:3:4-3:4 (tied)>
+    <Literal "3" main.txt:3:9-3:10 (tied)>
+
+== [nop] Two null handles ==
+
+No error:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:1:1-1:10 (tied)>
+    <Name "a" main.txt:1:5-1:6 (tied)>
+    <NameList main.txt:1:4-1:4 (tied)>
+    <Literal "1" main.txt:1:9-1:10 (tied)>
+  <Def main.txt:2:1-2:10 (tied)>
+    <Name "b" main.txt:2:5-2:6 (tied)>
+    <NameList main.txt:2:4-2:4 (tied)>
+    <Literal "2" main.txt:2:9-2:10 (tied)>
+  <Def main.txt:3:1-3:10 (tied)>
+    <Name "c" main.txt:3:5-3:6 (tied)>
+    <NameList main.txt:3:4-3:4 (tied)>
+    <Literal "3" main.txt:3:9-3:10 (tied)>
+
+== [nop] Three untied handles ==
+
+No error:
+<DeclList main.txt:1:1-3:10 (tied)>
+  <Def main.txt:1:1-1:10 (tied)>
+    <Name "a" main.txt:1:5-1:6 (tied)>
+    <NameList main.txt:1:4-1:4 (tied)>
+    <Literal "1" main.txt:1:9-1:10 (tied)>
+  <Def main.txt:2:1-2:10 (tied)>
+    <Name "b" main.txt:2:5-2:6 (tied)>
+    <NameList main.txt:2:4-2:4 (tied)>
+    <Literal "2" main.txt:2:9-2:10 (tied)>
+  <Def main.txt:3:1-3:10 (tied)>
+    <Name "c" main.txt:3:5-3:6 (tied)>
+    <NameList main.txt:3:4-3:4 (tied)>
+    <Literal "3" main.txt:3:9-3:10 (tied)>
+
+== [error] Duplicate handles ==
+
+Precondition failure: non-null handles can be present at most once
+
+check_rotate.adb: Done.
 Done

@@ -3,7 +3,9 @@ Test that basic rewriting API usage behaves as expected.
 """
 
 from langkit.compiled_types import T
-from langkit.dsl import ASTNode, AbstractField, Field, NullField, abstract
+from langkit.dsl import (
+    ASTNode, AbstractField, Annotations, Field, NullField, abstract
+)
 
 from utils import build_and_run
 
@@ -14,6 +16,7 @@ class FooNode(ASTNode):
 
 class Name(FooNode):
     token_node = True
+    annotations = Annotations(custom_short_image=True)
 
 
 @abstract
@@ -50,6 +53,7 @@ class Expr(FooNode):
 
 class Literal(Expr):
     token_node = True
+    annotations = Annotations(custom_short_image=True)
 
 
 class Ref(Expr):
@@ -78,7 +82,8 @@ build_and_run(
         "templates.adb",
         "preserve_formatting.adb",
         "preserve_formatting_wrap.adb",
-        "clone_synthetic.adb"
+        "clone_synthetic.adb",
+        "check_rotate.adb",
     ],
     generate_unparser=True,
     types_from_lkt=False,

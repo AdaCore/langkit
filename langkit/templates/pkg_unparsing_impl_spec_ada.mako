@@ -33,12 +33,12 @@ private package ${ada_lib_name}.Unparsing_Implementation is
 
    type Abstract_Cursor (Kind : Abstract_Node_Kind := Abstract_Node_Kind'First)
    is record
-      Next_Child_Index : Positive;
       case Kind is
          when From_Parsing   =>
-            Parsing_List : ${T.root_node.name};
+            Parsing_List     : ${T.root_node.name};
+            Next_Child_Index : Positive;
          when From_Rewriting =>
-            Rewriting_List : Node_Rewriting_Handle;
+            Rewriting_Child  : Node_Rewriting_Handle;
       end case;
    end record;
 

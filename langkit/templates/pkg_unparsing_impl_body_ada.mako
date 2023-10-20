@@ -297,9 +297,8 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
          when From_Rewriting =>
             return
-              (Kind             => From_Rewriting,
-               Rewriting_List   => Node.Rewriting_Node,
-               Next_Child_Index => 1);
+              (Kind            => From_Rewriting,
+               Rewriting_Child => First_Child (Node.Rewriting_Node));
       end case;
    end Iterate_List;
 
@@ -315,8 +314,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                    <= Children_Count (Cursor.Parsing_List);
 
          when From_Rewriting =>
-            return Cursor.Next_Child_Index
-                   <= Children_Count (Cursor.Rewriting_List);
+            return Cursor.Rewriting_Child /= No_Node_Rewriting_Handle;
       end case;
    end Has_Element;
 
@@ -334,8 +332,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
          when From_Rewriting =>
             return
-              Create_Abstract_Node
-                (Child (Cursor.Rewriting_List, Cursor.Next_Child_Index));
+              Create_Abstract_Node (Cursor.Rewriting_Child);
       end case;
    end Element;
 
@@ -354,9 +351,8 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
          when From_Rewriting =>
             return
-              (Kind             => From_Rewriting,
-               Rewriting_List   => Cursor.Rewriting_List,
-               Next_Child_Index => Cursor.Next_Child_Index + 1);
+              (Kind            => From_Rewriting,
+               Rewriting_Child => Next_Child (Cursor.Rewriting_Child));
       end case;
    end Next;
 

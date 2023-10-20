@@ -136,18 +136,6 @@ package ${ada_lib_name}.Rewriting is
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural;
    ${ada_doc('langkit.rewriting.children_count', 3)}
 
-   function Child_Index
-     (Handle : Node_Rewriting_Handle;
-      Field  : Struct_Member_Ref) return Positive
-   is (Syntax_Field_Index (Field, Type_Of (Handle)));
-   --  Return the index of ``Handle``'s ``Child`` that correspond to the given
-   --  ``Field``.
-
-   function Child
-     (Handle : Node_Rewriting_Handle;
-      Index  : Positive) return Node_Rewriting_Handle;
-   ${ada_doc('langkit.rewriting.child', 3)}
-
    function Child
      (Handle : Node_Rewriting_Handle;
       Field  : Struct_Member_Ref) return Node_Rewriting_Handle;
@@ -158,11 +146,9 @@ package ${ada_lib_name}.Rewriting is
       Fields : Struct_Member_Ref_Array) return Node_Rewriting_Handle;
    ${ada_doc('langkit.rewriting.child_deep', 3)}
 
-   procedure Set_Child
-     (Handle : Node_Rewriting_Handle;
-      Index  : Positive;
-      Child  : Node_Rewriting_Handle);
-   ${ada_doc('langkit.rewriting.set_child', 3)}
+   function Children
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle_Array;
+   ${ada_doc('langkit.rewriting.children', 3)}
 
    procedure Set_Child
      (Handle : Node_Rewriting_Handle;
@@ -179,24 +165,47 @@ package ${ada_lib_name}.Rewriting is
    procedure Replace (Handle, New_Node : Node_Rewriting_Handle);
    ${ada_doc('langkit.rewriting.replace', 3)}
 
+   procedure Rotate (Handles : Node_Rewriting_Handle_Array);
+   ${ada_doc('langkit.rewriting.rotate', 3)}
+
+   function Is_List_Node (Handle : Node_Rewriting_Handle) return Boolean;
+   ${ada_doc('langkit.rewriting.is_list_node', 3)}
+
    -------------------------
    -- List node rewriting --
    -------------------------
 
-   procedure Insert_Child
-     (Handle : Node_Rewriting_Handle;
-      Index  : Positive;
-      Child  : Node_Rewriting_Handle);
-   ${ada_doc('langkit.rewriting.insert_child', 3)}
+   function First_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+   ${ada_doc('langkit.rewriting.first_child', 3)}
 
-   procedure Append_Child
-     (Handle : Node_Rewriting_Handle;
-      Child  : Node_Rewriting_Handle);
-   ${ada_doc('langkit.rewriting.append_child', 3)}
+   function Last_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+   ${ada_doc('langkit.rewriting.last_child', 3)}
 
-   procedure Remove_Child
-     (Handle : Node_Rewriting_Handle;
-      Index  : Positive);
+   function Next_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+   ${ada_doc('langkit.rewriting.next_child', 3)}
+
+   function Previous_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+   ${ada_doc('langkit.rewriting.previous_child', 3)}
+
+   procedure Insert_Before
+     (Handle, New_Sibling : Node_Rewriting_Handle);
+   ${ada_doc('langkit.rewriting.insert_before', 3)}
+
+   procedure Insert_After
+     (Handle, New_Sibling : Node_Rewriting_Handle);
+   ${ada_doc('langkit.rewriting.insert_after', 3)}
+
+   procedure Insert_First (Handle, New_Child : Node_Rewriting_Handle);
+   ${ada_doc('langkit.rewriting.insert_first', 3)}
+
+   procedure Insert_Last (Handle, New_Child : Node_Rewriting_Handle);
+   ${ada_doc('langkit.rewriting.insert_last', 3)}
+
+   procedure Remove_Child (Handle : Node_Rewriting_Handle);
    ${ada_doc('langkit.rewriting.remove_child', 3)}
 
    -------------------
