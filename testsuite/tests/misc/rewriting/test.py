@@ -2,7 +2,8 @@
 Test that basic rewriting API usage behaves as expected.
 """
 
-from langkit.dsl import ASTNode, Field, abstract
+from langkit.compiled_types import T
+from langkit.dsl import ASTNode, AbstractField, Field, NullField, abstract
 
 from utils import build_and_run
 
@@ -15,13 +16,30 @@ class Name(FooNode):
     token_node = True
 
 
-class ErrorDef(FooNode):
+@abstract
+class Decl(FooNode):
+    name = AbstractField(type=Name)
+    args = AbstractField(type=Name.list)
+    expr = AbstractField(type=T.Expr)
+
+
+class ErrorDecl(Decl):
     error_node = True
 
+    name = NullField()
+    args = NullField()
+    expr = NullField()
 
-class Def(FooNode):
+
+class Def(Decl):
     name = Field()
     args = Field()
+    expr = Field()
+
+
+class Var(Decl):
+    name = Field()
+    args = NullField()
     expr = Field()
 
 
@@ -63,6 +81,6 @@ build_and_run(
         "clone_synthetic.adb"
     ],
     generate_unparser=True,
-    types_from_lkt=True,
+    types_from_lkt=False,
 )
 print("Done")

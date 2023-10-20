@@ -4,6 +4,8 @@ with Langkit_Support.Text; use Langkit_Support.Text;
 
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
 with Libfoolang.Common;    use Libfoolang.Common;
+with Libfoolang.Generic_API.Introspection;
+use Libfoolang.Generic_API.Introspection;
 with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 
 with Process_Apply;
@@ -28,10 +30,11 @@ begin
    declare
       Def_List : constant Node_Rewriting_Handle := Handle (Root (U));
       Def_A    : constant Node_Rewriting_Handle := Child (Def_List, 1);
-      Expr     : constant Node_Rewriting_Handle := Child (Def_A, 3);
+      Expr     : constant Node_Rewriting_Handle :=
+        Child (Def_A, Member_Refs.Decl_F_Expr);
       Paren    : constant Node_Rewriting_Handle :=
-         Create_Regular_Node (RH, Foo_Paren_Expr,
-                              (1 => No_Node_Rewriting_Handle));
+        Create_Regular_Node (RH, Foo_Paren_Expr,
+                             (1 => No_Node_Rewriting_Handle));
    begin
       Replace (Expr, Paren);
       Set_Child (Paren, 1, Expr);
