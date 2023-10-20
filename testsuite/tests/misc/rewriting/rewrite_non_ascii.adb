@@ -49,7 +49,7 @@ begin
          F_Args => No_Node_Rewriting_Handle,
          F_Expr => Create_Token_Node (RH, Foo_Literal, "1"));
    begin
-      Append_Child (Decl_List, B_Def);
+      Insert_Last (Decl_List, B_Def);
    end;
 
    New_Line;

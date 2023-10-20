@@ -104,8 +104,10 @@ begin
       ----------
 
       procedure Set_Tied_Child is
+         C2 : constant Node_Rewriting_Handle := Next_Child (First_Child (N));
+         C3 : constant Node_Rewriting_Handle := Next_Child (C2);
       begin
-         Set_Child (N, 2, Child (N, 3));
+         Replace (C2, C3);
       end Set_Tied_Child;
 
       -----------------------
@@ -126,11 +128,14 @@ begin
          N := Create_Regular_Node (RH, Foo_Error_Decl, (1 .. 0 => <>));
       end Create_Regular_Error_Node;
 
-      B       : constant Node_Rewriting_Handle := Child (N, 2);
-      C       : constant Node_Rewriting_Handle := Child (N, 3);
+      A       : constant Node_Rewriting_Handle := First_Child (N);
+      B       : constant Node_Rewriting_Handle := Next_Child (A);
+      C       : constant Node_Rewriting_Handle := Next_Child (B);
       C2      : Node_Rewriting_Handle;
       C2_Name : Node_Rewriting_Handle;
-      F       : constant Node_Rewriting_Handle := Child (N, 6);
+      D       : constant Node_Rewriting_Handle := Next_Child (C);
+      E       : constant Node_Rewriting_Handle := Next_Child (D);
+      F       : constant Node_Rewriting_Handle := Next_Child (E);
 
       --------------------
       -- Get_Null_Field --
@@ -174,9 +179,12 @@ begin
 
       Try ("Try to get the node rewriting handle for a null field",
            Get_Null_Field'Access);
-
       Try ("Try to set the node rewriting handle for a null field",
            Set_Null_Field'Access);
+      Put_Line ("Children of " & Image (F) & ":");
+      for F_Child of Children (F) loop
+         Put_Line ("  " & Image (F_Child));
+      end loop;
    end;
 
    New_Line;
@@ -202,33 +210,23 @@ begin
    New_Line;
    Put_Line ("Swap first and fourth defs");
    declare
-      N1 : constant Node_Rewriting_Handle := Child (N, 1);
-      N4 : constant Node_Rewriting_Handle := Child (N, 4);
+      C1 : constant Node_Rewriting_Handle := First_Child (N);
+      C4 : constant Node_Rewriting_Handle :=
+        Next_Child (Next_Child (Next_Child (C1)));
    begin
-      if not Tied (N1) then
+      if not Tied (C1) then
          raise Program_Error;
       end if;
-      if not Tied (N4) then
-         raise Program_Error;
-      end if;
-
-      Set_Child (N, 1, No_Node_Rewriting_Handle);
-      Set_Child (N, 4, No_Node_Rewriting_Handle);
-
-      if Tied (N1) then
-         raise Program_Error;
-      end if;
-      if Tied (N4) then
+      if not Tied (C4) then
          raise Program_Error;
       end if;
 
-      Set_Child (N, 1, N4);
-      Set_Child (N, 4, N1);
+      Rotate ((C4, C1));
 
-      if not Tied (N1) then
+      if not Tied (C1) then
          raise Program_Error;
       end if;
-      if not Tied (N4) then
+      if not Tied (C4) then
          raise Program_Error;
       end if;
    end;
@@ -248,7 +246,8 @@ begin
                 Create_Ref (RH, Create_Token_Node (RH, Foo_Name, "d")),
                 Nested_Expr));
 
-      Fifth_Child : constant Node_Rewriting_Handle := Child (N, 5);
+      Fifth_Child : constant Node_Rewriting_Handle :=
+        Previous_Child (Last_Child (N));
    begin
       Set_Child (Fifth_Child, Member_Refs.Decl_F_Expr, Top_Expr);
    end;
@@ -263,8 +262,8 @@ begin
       Expr_2   : constant Node_Rewriting_Handle :=
          Create_Token_Node (RH, Foo_Literal, "222");
    begin
-      Append_Child (New_Root, Create_Def ("zz", Expr_1));
-      Append_Child (New_Root, Create_Def ("yy", Expr_2));
+      Insert_Last (New_Root, Create_Def ("zz", Expr_1));
+      Insert_Last (New_Root, Create_Def ("yy", Expr_2));
       Replace (Expr_2, Create_Token_Node (RH, Foo_Literal, "333"));
       Replace (Handle (Root (U2)), New_Root);
    end;

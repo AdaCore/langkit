@@ -90,7 +90,7 @@ begin
          Create_From_Template (RH, "(a + 3)", (1 .. 0 => <>), Expr_Rule);
       Full_Expr    : constant Node_Rewriting_Handle :=
          Create_From_Template (RH, "(b + {})", (1 => Nested_Expr), Expr_Rule);
-      Second_Child : constant Node_Rewriting_Handle := Child (N, 2);
+      Second_Child : constant Node_Rewriting_Handle := Last_Child (N);
    begin
       Set_Child (Second_Child, Member_Refs.Decl_F_Expr, Full_Expr);
    end;

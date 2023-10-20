@@ -29,7 +29,7 @@ begin
    Put_Line ("Wrap a's expression in a parenthesized expression...");
    declare
       Def_List : constant Node_Rewriting_Handle := Handle (Root (U));
-      Def_A    : constant Node_Rewriting_Handle := Child (Def_List, 1);
+      Def_A    : constant Node_Rewriting_Handle := First_Child (Def_List);
       Expr     : constant Node_Rewriting_Handle :=
         Child (Def_A, Member_Refs.Decl_F_Expr);
       Paren    : constant Node_Rewriting_Handle :=
@@ -37,7 +37,7 @@ begin
                              (1 => No_Node_Rewriting_Handle));
    begin
       Replace (Expr, Paren);
-      Set_Child (Paren, 1, Expr);
+      Set_Child (Paren, Member_Refs.Paren_Expr_F_Expr, Expr);
    end;
    New_Line;
 

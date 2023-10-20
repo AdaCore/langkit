@@ -14,16 +14,11 @@ procedure Apply_Error is
    N   : constant Node_Rewriting_Handle := Handle (Root (U));
 begin
    Put_Line ("# Put an integer literal instead of an indentifier");
-   Append_Child
+   Insert_Last
      (N, Create_Def
            (RH, Create_Token_Node (RH, Foo_Literal, "1"),
                 No_Node_Rewriting_Handle,
                 Create_Token_Node (RH, Foo_Name, "a")));
-   Process_Apply (RH, Abort_On_Error => False);
-   New_Line;
-
-   Put_Line ("# Put a null child in a list node");
-   Append_Child (N, No_Node_Rewriting_Handle);
    Process_Apply (RH, Abort_On_Error => False);
    New_Line;
 

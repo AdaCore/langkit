@@ -19,14 +19,14 @@ procedure Revert is
 
    RH       : Rewriting_Handle := Start_Rewriting (Ctx);
    Def_List : constant Node_Rewriting_Handle := Handle (Root (U));
-   Def_A    : constant Node_Rewriting_Handle := Child (Def_List, 1);
+   Def_A    : constant Node_Rewriting_Handle := First_Child (Def_List);
 begin
    --  Alter the tree so that rewriting will fail and so that the resulting
    --  list of tokens it much smaller.
    Set_Child
      (Def_A, Member_Refs.Decl_F_Name, No_Node_Rewriting_Handle);
-   Remove_Child (Def_List, 5);
-   Remove_Child (Def_List, 4);
+   Remove_Child (Last_Child (Def_List));
+   Remove_Child (Last_Child (Def_List));
 
    --  Try to apply the rewriting
    if Apply (RH).Success then

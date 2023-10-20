@@ -22,15 +22,16 @@ procedure Preserve_Formatting is
 
    procedure Traverse
      (Handle : Node_Rewriting_Handle;
-      Callback : not null access procedure (Handle : Node_Rewriting_Handle)) is
+      Callback : not null access procedure (Handle : Node_Rewriting_Handle))
+   is
    begin
       if Handle = No_Node_Rewriting_Handle then
          return;
       end if;
 
       Callback (Handle);
-      for I in 1 .. Children_Count (Handle) loop
-         Traverse (Child (Handle, I), Callback);
+      for C of Children (Handle) loop
+         Traverse (C, Callback);
       end loop;
    end Traverse;
 
