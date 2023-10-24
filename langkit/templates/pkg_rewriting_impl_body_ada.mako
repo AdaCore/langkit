@@ -807,6 +807,13 @@ package body ${ada_lib_name}.Rewriting_Implementation is
             Free (N);
          end;
       end loop;
+      for Node of Handle.Stubs loop
+         declare
+            N : Node_Rewriting_Handle := Node;
+         begin
+            Free (N);
+         end;
+      end loop;
       Free (Handle.Pool);
       Free (Handle);
 
