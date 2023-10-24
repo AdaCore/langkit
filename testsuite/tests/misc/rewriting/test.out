@@ -18,6 +18,14 @@ Get a rewriting handle for the analysis unit
 Apply the rewriting
 Create a second rewriting handler
 Apply the rewriting
+
+# Rewriting with a file reader
+
+Original source:
+"def a = 1\x0adef b = 1\x0a# regular comment\x0a"
+
+Rewritten source:
+"def b = 1\x0a# regular comment\x0a"
 main.adb: Done.
 
 == revert.adb ==

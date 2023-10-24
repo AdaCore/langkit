@@ -1,11 +1,14 @@
 with Ada.Strings.Unbounded;
 with Ada.Text_IO; use Ada.Text_IO;
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
 with Libfoolang.Common;
 with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 
 with Process_Apply;
+with Support; use Support;
 
 procedure General_API is
    Buffer : constant String :=
@@ -29,9 +32,8 @@ procedure General_API is
          Put_Line ("   Got a precondition failure");
    end Try;
 
-   Ctx : constant Analysis_Context := Create_Context;
-   U   : constant Analysis_Unit := Get_From_Buffer
-     (Ctx, "main.txt", Buffer => Buffer);
+   Ctx : Analysis_Context := Create_Context;
+   U   : Analysis_Unit := Ctx.Get_From_Buffer ("main.txt", Buffer => Buffer);
    RH  : Rewriting_Handle;
    UH  : Unit_Rewriting_Handle;
 begin
@@ -144,6 +146,22 @@ begin
    RH := Start_Rewriting (Ctx);
    Put_Line ("Apply the rewriting");
    Process_Apply (RH);
+
+   New_Line;
+   Put_Line ("# Rewriting with a file reader");
+   New_Line;
+   Ctx := Create_Context (File_Reader => Create_File_Reader);
+   U := Ctx.Get_From_File ("to_preprocess.txt");
+
+   Put_Line ("Original source:");
+   Put_Line (Image (U.Text, With_Quotes => True));
+   New_Line;
+
+   RH := Start_Rewriting (Ctx);
+   Remove_Child (Handle (U.Root.Child (1)));
+   Process_Apply (RH);
+   Put_Line ("Rewritten source:");
+   Put_Line (Image (U.Text, With_Quotes => True));
 
    Put_Line ("main.adb: Done.");
 end General_API;

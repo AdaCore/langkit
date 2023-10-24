@@ -5,9 +5,8 @@ with Langkit_Support.Errors;       use Langkit_Support.Errors;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 with Langkit_Support.Text;         use Langkit_Support.Text;
 
-with Libfoolang.Analysis;  use Libfoolang.Analysis;
-with Libfoolang.Pkg;       use Libfoolang.Pkg;
-with Libfoolang.Rewriting; use Libfoolang.Rewriting;
+with Libfoolang.Analysis; use Libfoolang.Analysis;
+with Libfoolang.Pkg;      use Libfoolang.Pkg;
 
 procedure Main is
    Ctx : Analysis_Context;
@@ -125,20 +124,6 @@ begin
    Put_Line ("Reparse:");
    begin
       U.Reparse (Buffer => "example");
-   exception
-      when Exc : Precondition_Failure =>
-         Put_Line ("Precondition_Failure: " & Exception_Message (Exc));
-   end;
-   New_Line;
-
-   --  Check that the use of the rewriting API is rejected
-
-   Put_Title ("Using the rewriting API");
-   Put_Line ("Start_Rewriting:");
-   declare
-      Dummy : Rewriting_Handle;
-   begin
-      Dummy := Start_Rewriting (Ctx);
    exception
       when Exc : Precondition_Failure =>
          Put_Line ("Precondition_Failure: " & Exception_Message (Exc));
