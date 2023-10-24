@@ -128,12 +128,6 @@ Precondition_Failure: cannot parse from buffer with a file reader
 Reparse:
 Precondition_Failure: cannot parse from buffer with a file reader
 
-Using the rewriting API
-=======================
-
-Start_Rewriting:
-Precondition_Failure: tree rewriting forbidden with a file reader
-
 main.adb: Done.
 My_File_Reader.Do_Release
 Done

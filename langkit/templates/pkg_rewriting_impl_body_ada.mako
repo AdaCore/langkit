@@ -326,11 +326,6 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    begin
       ${pre_check_rw_no_handle ('Handle (Context)')}
 
-      if Context.File_Reader /= null then
-         raise Precondition_Failure with
-            "tree rewriting forbidden with a file reader";
-      end if;
-
       declare
          Result : constant Rewriting_Handle := new Rewriting_Handle_Type'
            (Context   => Context,
