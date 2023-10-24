@@ -34,7 +34,7 @@ begin
       Def : constant Node_Rewriting_Handle :=
          Create_Def (RH, Clone (B_Id), No_Node_Rewriting_Handle, Ref);
    begin
-      Append_Child (N, Def);
+      Insert_Last (N, Def);
    end;
 
    Put_Line ("Applying the diff...");

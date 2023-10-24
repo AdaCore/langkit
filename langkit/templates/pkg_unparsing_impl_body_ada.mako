@@ -282,6 +282,80 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       end case;
    end Child;
 
+   ------------------
+   -- Iterate_List --
+   ------------------
+
+   function Iterate_List (Node : Abstract_Node) return Abstract_Cursor is
+   begin
+      case Node.Kind is
+         when From_Parsing =>
+            return
+              (Kind             => From_Parsing,
+               Parsing_List     => Node.Parsing_Node,
+               Next_Child_Index => 1);
+
+         when From_Rewriting =>
+            return
+              (Kind            => From_Rewriting,
+               Rewriting_Child => First_Child (Node.Rewriting_Node));
+      end case;
+   end Iterate_List;
+
+   -----------------
+   -- Has_Element --
+   -----------------
+
+   function Has_Element (Cursor : Abstract_Cursor) return Boolean is
+   begin
+      case Cursor.Kind is
+         when From_Parsing =>
+            return Cursor.Next_Child_Index
+                   <= Children_Count (Cursor.Parsing_List);
+
+         when From_Rewriting =>
+            return Cursor.Rewriting_Child /= No_Node_Rewriting_Handle;
+      end case;
+   end Has_Element;
+
+   -------------
+   -- Element --
+   -------------
+
+   function Element (Cursor : Abstract_Cursor) return Abstract_Node is
+   begin
+      case Cursor.Kind is
+         when From_Parsing =>
+            return
+              Create_Abstract_Node
+                (Child (Cursor.Parsing_List, Cursor.Next_Child_Index));
+
+         when From_Rewriting =>
+            return
+              Create_Abstract_Node (Cursor.Rewriting_Child);
+      end case;
+   end Element;
+
+   ----------
+   -- Next --
+   ----------
+
+   function Next (Cursor : Abstract_Cursor) return Abstract_Cursor is
+   begin
+      case Cursor.Kind is
+         when From_Parsing =>
+            return
+              (Kind             => From_Parsing,
+               Parsing_List     => Cursor.Parsing_List,
+               Next_Child_Index => Cursor.Next_Child_Index + 1);
+
+         when From_Rewriting =>
+            return
+              (Kind            => From_Rewriting,
+               Rewriting_Child => Next_Child (Cursor.Rewriting_Child));
+      end case;
+   end Next;
+
    ----------
    -- Text --
    ----------
@@ -758,10 +832,12 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer)
    is
+      Cursor   : Abstract_Cursor := Iterate_List (Node);
+      I        : Positive := 1;
       AN_Child : Abstract_Node;
    begin
-      for I in 1 .. Children_Count (Node) loop
-         AN_Child := Child (Node, I);
+      while Has_Element (Cursor) loop
+         AN_Child := Element (Cursor);
          if Is_Null (AN_Child) then
             raise Malformed_Tree_Error with "null node found in a list";
          end if;
@@ -788,6 +864,9 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          end if;
 
          Unparse_Node (AN_Child, Preserve_Formatting, Result);
+
+         Cursor := Next (Cursor);
+         I := I + 1;
       end loop;
    end Unparse_List_Node;
 

@@ -3,8 +3,6 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
-with Langkit_Support.Generic_API.Introspection;
-use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Text; use Langkit_Support.Text;
 
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
@@ -92,12 +90,9 @@ begin
          Create_From_Template (RH, "(a + 3)", (1 .. 0 => <>), Expr_Rule);
       Full_Expr    : constant Node_Rewriting_Handle :=
          Create_From_Template (RH, "(b + {})", (1 => Nested_Expr), Expr_Rule);
-      Second_Child : constant Node_Rewriting_Handle := Child (N, 2);
+      Second_Child : constant Node_Rewriting_Handle := Last_Child (N);
    begin
-      Set_Child
-        (Second_Child,
-         Syntax_Field_Index (Member_Refs.Def_F_Expr, Type_Refs.Def),
-         Full_Expr);
+      Set_Child (Second_Child, Member_Refs.Decl_F_Expr, Full_Expr);
    end;
 
    New_Line;

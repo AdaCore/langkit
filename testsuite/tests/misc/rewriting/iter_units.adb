@@ -3,8 +3,6 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
-with Langkit_Support.Generic_API.Introspection;
-use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Text; use Langkit_Support.Text;
 
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
@@ -33,11 +31,11 @@ procedure Iter_Units is
 begin
    Set_Child
      (DA,
-      Syntax_Field_Index (Member_Refs.Def_F_Expr, Type_Refs.Def),
+      Member_Refs.Decl_F_Expr,
       Create_Token_Node (RH, Foo_Literal, "11"));
    Set_Child
      (DB,
-      Syntax_Field_Index (Member_Refs.Def_F_Expr, Type_Refs.Def),
+      Member_Refs.Decl_F_Expr,
       Create_Token_Node (RH, Foo_Literal, "22"));
 
    declare

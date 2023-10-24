@@ -8,6 +8,8 @@ with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Bump_Ptr_Vectors;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
@@ -63,6 +65,11 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       --  Keep track of all node rewriting handles that don't map to original
       --  nodes, i.e. all nodes that were created during this rewriting
       --  session.
+
+      Stubs : Nodes_Pools.Vector;
+      --  Keep track of all allocated stub rewriting nodes. These are used in
+      --  ``Rotate`` as stubs for rotated ones, and are re-used each time
+      --  ``Rotate`` is called.
    end record;
 
    type Unit_Rewriting_Handle_Type is record
@@ -92,6 +99,10 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       --  Expanded node rewriting handle: children have their own handle. Note
       --  that this is for all but token nodes.
 
+      Expanded_List,
+      --  Expanded node rewriting handle, specific for list nodes: element
+      --  nodes are stored as a doubly linked list.
+
       Expanded_Token_Node
       --  Expanded node rewriting handle, specific for token nodes: there is no
       --  children, only some associated text.
@@ -99,9 +110,23 @@ private package ${ada_lib_name}.Rewriting_Implementation is
 
    type Node_Children (Kind : Node_Children_Kind := Unexpanded) is record
       case Kind is
-         when Unexpanded          => null;
-         when Expanded_Regular    => Vector : Node_Vectors.Vector;
-         when Expanded_Token_Node => Text   : Unbounded_Wide_Wide_String;
+         when Unexpanded =>
+            null;
+
+         when Expanded_Regular =>
+            Vector : Node_Vectors.Vector;
+            --  Vector of children for all non-null syntax fields
+
+         when Expanded_List =>
+            First, Last : Node_Rewriting_Handle;
+            --  Doubly linked list of children
+
+            Count : Natural;
+            --  Number of children
+
+         when Expanded_Token_Node =>
+            Text : Unbounded_Wide_Wide_String;
+            --  Text for this token node
       end case;
    end record;
    --  Lazily evaluated vector of children for a Node_Rewriting_Handle.
@@ -121,6 +146,15 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       Parent : Node_Rewriting_Handle;
       --  Rewriting handle for Node's parent, or No_Node_Rewriting_Handle if
       --  Node is a root node.
+
+      Previous, Next : Node_Rewriting_Handle;
+      --  If ``Parent`` is a list node, ``Previous`` is the previous subling
+      --  for this node in that list (``No_Node_Rewriting_Handle`` for the
+      --  first sibling), and ``Next`` is the next sibling
+      --  (``No_Node_Rewriting_Handle`` for the last sibling).
+      --
+      --  If ``Parent`` is not a list node, both are set to
+      --  ``No_Node_Rewriting_Handle``).
 
       Kind : ${T.node_kind};
       --  Kind for the node this handle represents. When Node is not null (i.e.
@@ -253,12 +287,16 @@ private package ${ada_lib_name}.Rewriting_Implementation is
 
    function Child
      (Handle : Node_Rewriting_Handle;
-      Index  : Positive) return Node_Rewriting_Handle;
+      Field  : Struct_Member_Ref) return Node_Rewriting_Handle;
    --  Implementation for Rewriting.Child
+
+   function Children
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle_Array;
+   --  Implementation for Rewriting.Children
 
    procedure Set_Child
      (Handle : Node_Rewriting_Handle;
-      Index  : Positive;
+      Field  : Struct_Member_Ref;
       Child  : Node_Rewriting_Handle);
    --  Implementation for Rewriting.Set_Child
 
@@ -271,28 +309,47 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    procedure Replace (Handle, New_Node : Node_Rewriting_Handle);
    --  Implementation for Rewriting.Replace
 
+   procedure Rotate (Handles : Node_Rewriting_Handle_Array);
+   --  Implementation for Rewriting.Rotate
+
+   function Is_List_Node (Handle : Node_Rewriting_Handle) return Boolean;
+   --  Implementation for Rewriting.Is_List_Node
+
    --------------------------------------------
    -- Implementation for list node rewriting --
    --------------------------------------------
 
-   procedure Insert_Child
-     (Handle : Node_Rewriting_Handle;
-      Index  : Positive;
-      Child  : Node_Rewriting_Handle)
-      with Post => Rewriting_Implementation.Child
-                     (Handle, Index) = Child;
-   --  Implementation for Rewriting.Insert_Child
+   function First_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+   --  Implementation for Rewriting.First_Child
 
-   procedure Append_Child
-     (Handle : Node_Rewriting_Handle;
-      Child  : Node_Rewriting_Handle)
-      with Post => Rewriting_Implementation.Child
-                     (Handle, Children_Count (Handle)) = Child;
-   --  Implementation for Rewriting.Append_Child
+   function Last_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+   --  Implementation for Rewriting.Last_Child
 
-   procedure Remove_Child
-     (Handle : Node_Rewriting_Handle;
-      Index  : Positive);
+   function Next_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+   --  Implementation for Rewriting.Next_Child
+
+   function Previous_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+   --  Implementation for Rewriting.Previous_Child
+
+   procedure Insert_Before
+     (Handle, New_Sibling : Node_Rewriting_Handle);
+   --  Implementation for Rewriting.Insert_Before
+
+   procedure Insert_After
+     (Handle, New_Sibling : Node_Rewriting_Handle);
+   --  Implementation for Rewriting.Insert_After
+
+   procedure Insert_First (Handle, New_Child : Node_Rewriting_Handle);
+   --  Implementation for Rewriting.Insert_First
+
+   procedure Insert_Last (Handle, New_Child : Node_Rewriting_Handle);
+   --  Implementation for Rewriting.Insert_Last
+
+   procedure Remove_Child (Handle : Node_Rewriting_Handle);
    --  Implementation for Rewriting.Remove_Child
 
    --------------------------------------
