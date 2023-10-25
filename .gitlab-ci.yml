@@ -26,6 +26,10 @@ langkit_build:
     # Run this for both merge requests and "trigger" pipelines
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+
+    # Also run it after a "push" so that the "package" step has its
+    # dependencies satisfied.
+    - if: '$CI_PIPELINE_SOURCE == "push"'
   services:
      - image:sandbox
      - cpu:8
