@@ -386,10 +386,10 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
       Contents : Decoded_File_Contents;
    begin
-      --  It should not be possible to end up here with anything else than a
-      --  file when there is a file reader, as it would mean that the file
-      --  reader will be by-passed.
-      pragma Assert (File_Reader = null or else Input.Kind = File);
+      --  Note that it is possible to end up here with both a file reader and a
+      --  non-file input: when applying a rewriting session for a context that
+      --  has a file reader, we need to parse in-memory buffers that come from
+      --  the unparsing of rewritten trees.
 
       case Input.Kind is
          when File =>
