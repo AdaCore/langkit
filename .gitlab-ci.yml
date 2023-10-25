@@ -2,22 +2,6 @@ include:
   - project: eng/libadalang/libadalang
     file: /utils/gitlab-ci-common.yml
 
-workflow:
-  rules:
-    # To avoid running too many pipelines, restrict the times we run one:
-
-    # Run "trigger" pipelines
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-
-    # Run pipelines triggered by a merge request creation/update
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
-    # Run for pushes to a branch *except* if there is also a merge request for
-    # it.
-    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
-      when: never
-    - if: '$CI_COMMIT_BRANCH'
-
 variables:
   PACKAGE_BASENAME: langkit.tar.gz
   PACKAGE_ABSOLUTE_NAME: $CI_PROJECT_DIR/$PACKAGE_BASENAME
@@ -38,13 +22,17 @@ stages:
 
 langkit_build:
   extends: .basic
+  rules:
+    # Run this for both merge requests and "trigger" pipelines
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
   services:
      - image:sandbox
      - cpu:8
      - mem:16
   stage: stage1
   script:
-    - unset GITLAB_TOKEN; require_issue
+    - require_issue
     - !reference [.script_snippets, setup]
 
     - cd /it/wave
@@ -69,6 +57,9 @@ langkit_build:
 
 langkit_test:
   extends: .basic
+  rules:
+    # Run this for merge requests only
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   services:
      - image:sandbox
      - cpu:8
@@ -121,11 +112,8 @@ libadalang_build_and_test:
      - mem:16
   stage: stage2
   rules:
-    # Same as above, no point in doing running if we only want
-    # to rebuild the artifact
-    - if: $CI_REBUILD_ARTIFACT
-      when: never
-    - when: always
+    # Run this for merge requests only
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - !reference [.script_snippets, setup]
 
@@ -181,8 +169,12 @@ package:
   stage: stage3
   needs: [langkit_build] # Do not wait for jobs in stage2 (i.e. tests)
   rules:
-     # Store the artifact only for the master branch
-     - if: ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule") && $CI_COMMIT_REF_NAME == "master"
+     # Store the artifact only for pushes the master branch and scheduled
+     # pipelines.
+     - if: '$CI_COMMIT_REF_NAME != "master"'
+       when: never
+     - if: '$CI_PIPELINE_SOURCE == "push"'
+     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
   script:
     - export PATH=/it/e3/bin:$PATH
 
