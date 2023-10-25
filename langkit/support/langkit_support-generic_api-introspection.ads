@@ -538,6 +538,10 @@ package Langkit_Support.Generic_API.Introspection is
       return Value_Ref;
    --  Shortcut for ``Eval_Member``, working directly on a node
 
+   function Eval_Syntax_Field
+     (Value : Lk_Node; Member : Struct_Member_Ref) return Lk_Node;
+   --  Shortcut for ``Eval_Member``, valid for syntax fields only
+
    ---------------
    -- Name maps --
    ---------------

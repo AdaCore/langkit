@@ -12,6 +12,8 @@ use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 
 with Libfoolang.Generic_API;
+with Libfoolang.Generic_API.Introspection;
+use Libfoolang.Generic_API.Introspection;
 
 procedure Introspection_Values is
 
@@ -141,6 +143,7 @@ procedure Introspection_Values is
    Enum     : Type_Ref := No_Type_Ref;
    Enum_Val : Enum_Value_Ref;
    Value    : Value_Ref;
+   Node     : Lk_Node;
 
    Array_Of_Node, Array_Of_Expr, Array_Of_Bigint : Type_Ref;
    Point_Struct, Node_Result_Struct              : Type_Ref;
@@ -772,6 +775,36 @@ begin
    Value := Eval_Node_Member
      (As_Node (Example_Value), P_Id_Bool, (1 => True_Bool));
    Inspect (Value);
+   New_Line;
+
+   Put ("Eval_Syntax_Field: null node value: ");
+   begin
+      Node := Eval_Syntax_Field (No_Lk_Node, F_Fld_1);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Eval_Syntax_Field: non syntax field: ");
+   begin
+      Node := Eval_Syntax_Field (As_Node (Example_Value), P_Id_Bool);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Eval_Syntax_Field: no such field: ");
+   begin
+      Node := Eval_Syntax_Field
+        (As_Node (Example_Value), Member_Refs.Var_Decl_F_Name);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put_Line ("Eval_Syntax_Field: F_Fld_1:");
+   Node := Eval_Syntax_Field (As_Node (Example_Value), F_Fld_1);
+   Node.Print (Line_Prefix => "  ");
    New_Line;
 
    Put_Title ("Type matching");

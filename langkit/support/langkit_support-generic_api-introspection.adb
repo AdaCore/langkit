@@ -1861,6 +1861,26 @@ package body Langkit_Support.Generic_API.Introspection is
       return Eval_Member (Node, Member, Arguments);
    end Eval_Node_Member;
 
+   -----------------------
+   -- Eval_Syntax_Field --
+   -----------------------
+
+   function Eval_Syntax_Field
+     (Value : Lk_Node; Member : Struct_Member_Ref) return Lk_Node
+   is
+      Prefix, Result : Value_Ref;
+   begin
+      if Value = No_Lk_Node then
+         raise Precondition_Failure with "the null node has no member";
+      elsif not Is_Field (Member) then
+         raise Precondition_Failure with "syntax field expected";
+      end if;
+
+      Prefix := From_Node (Value.Language, Value);
+      Result := Eval_Member (Prefix, Member, (1 .. 0 => <>));
+      return Result.As_Node;
+   end Eval_Syntax_Field;
+
    ---------------------
    -- Create_Name_Map --
    ---------------------
