@@ -23,13 +23,16 @@ stages:
 langkit_build:
   extends: .basic
   rules:
-    # Run this for both merge requests and "trigger" pipelines
+    # Run this for merge requests, scheduled pipelines, and pipelines started
+    # from the Web interface (sometimes necessary to manually restart a
+    # scheduled pipeline).
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
 
-    # Also run it after a "push" so that the "package" step has its
-    # dependencies satisfied.
-    - if: '$CI_PIPELINE_SOURCE == "push"'
+    # Also run it after a "master" branch update so that the "package" step has
+    # its dependencies satisfied.
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
   services:
      - image:sandbox
      - cpu:8
@@ -174,12 +177,14 @@ package:
   stage: stage3
   needs: [langkit_build] # Do not wait for jobs in stage2 (i.e. tests)
   rules:
-     # Store the artifact only for pushes the master branch and scheduled
-     # pipelines.
-     - if: '$CI_COMMIT_REF_NAME != "master"'
-       when: never
-     - if: '$CI_PIPELINE_SOURCE == "push"'
-     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+     # Store the artifact for "master" branch updates and scheduled pipelines
+     # only. Also do it to run for pipelines started from the Web interface
+     # (see related comment in the langkit_build job).
+    - if: '$CI_COMMIT_REF_NAME != "master"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
   script:
     - export PATH=/it/e3/bin:$PATH
 
