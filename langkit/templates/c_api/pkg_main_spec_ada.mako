@@ -28,7 +28,7 @@ ${exts.with_clauses(with_clauses)}
 --  Internal package: defines data types and subprograms to provide the
 --  implementation of the exported C API (see the corresponding C header file).
 
-private package ${ada_lib_name}.Implementation.C is
+package ${ada_lib_name}.Implementation.C is
 
    subtype ${analysis_context_type} is Internal_Context;
    ${ada_c_doc('langkit.analysis_context_type', 3)}
