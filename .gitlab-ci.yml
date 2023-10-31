@@ -6,8 +6,6 @@ variables:
   PACKAGE_BASENAME: langkit.tar.gz
   PACKAGE_ABSOLUTE_NAME: $CI_PROJECT_DIR/$PACKAGE_BASENAME
   PACKAGE_REPOSITORY_PROJECT: eng/libadalang/ci-packages
-  CI_FRAGMENTS: ci_fragments
-  CI_FRAGMENTS_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/setton/$CI_FRAGMENTS
   LIBADALANG_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/eng/libadalang/libadalang
 
 stages:
@@ -189,8 +187,7 @@ package:
     - export PATH=/it/e3/bin:$PATH
 
     # Upload the package
-    - git clone $CI_FRAGMENTS_GIT
-    - ./$CI_FRAGMENTS/upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
+    - upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
 
 ######
 # CB #
