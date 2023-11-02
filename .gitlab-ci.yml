@@ -184,6 +184,7 @@ package:
     - if: '$CI_PIPELINE_SOURCE == "web"'
   script:
     - export PATH=/it/e3/bin:$PATH
+    - unset GITLAB_TOKEN
 
     # Upload the package
     - upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
