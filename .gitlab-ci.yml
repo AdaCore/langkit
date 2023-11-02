@@ -63,9 +63,6 @@ langkit_build:
 
 langkit_test:
   extends: .basic
-  rules:
-    # Run this for merge requests only
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   services:
      - image:sandbox
      - cpu:8
@@ -76,7 +73,9 @@ langkit_test:
     # rebuild the artifact
     - if: $CI_REBUILD_ARTIFACT
       when: never
-    - when: on_success
+    # Run this for merge requests only
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
   script:
     - !reference [.script_snippets, setup]
 
