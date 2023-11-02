@@ -76,7 +76,7 @@ langkit_test:
     # rebuild the artifact
     - if: $CI_REBUILD_ARTIFACT
       when: never
-    - when: always
+    - when: on_success
   script:
     - !reference [.script_snippets, setup]
 
