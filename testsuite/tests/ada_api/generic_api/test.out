@@ -1418,6 +1418,12 @@ Eval_Node_Member: P_Id_Bool:
 Inspect: True
   Type_Of: Bool
 
+Eval_Syntax_Field: null node value: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: the null node has no member
+Eval_Syntax_Field: non syntax field: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: syntax field expected
+Eval_Syntax_Field: no such field: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: Example does not have the VarDecl.f_name member
+Eval_Syntax_Field: F_Fld_1:
+  Name[1:9-1:12]: foo
+
 Type matching
 =============
 
