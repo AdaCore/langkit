@@ -6,8 +6,6 @@ variables:
   PACKAGE_BASENAME: langkit.tar.gz
   PACKAGE_ABSOLUTE_NAME: $CI_PROJECT_DIR/$PACKAGE_BASENAME
   PACKAGE_REPOSITORY_PROJECT: eng/libadalang/ci-packages
-  CI_FRAGMENTS: ci_fragments
-  CI_FRAGMENTS_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/setton/$CI_FRAGMENTS
   LIBADALANG_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/eng/libadalang/libadalang
 
 stages:
@@ -65,9 +63,6 @@ langkit_build:
 
 langkit_test:
   extends: .basic
-  rules:
-    # Run this for merge requests only
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   services:
      - image:sandbox
      - cpu:8
@@ -78,7 +73,9 @@ langkit_test:
     # rebuild the artifact
     - if: $CI_REBUILD_ARTIFACT
       when: never
-    - when: always
+    # Run this for merge requests only
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
   script:
     - !reference [.script_snippets, setup]
 
@@ -187,10 +184,10 @@ package:
     - if: '$CI_PIPELINE_SOURCE == "web"'
   script:
     - export PATH=/it/e3/bin:$PATH
+    - unset GITLAB_TOKEN
 
     # Upload the package
-    - git clone $CI_FRAGMENTS_GIT
-    - ./$CI_FRAGMENTS/upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
+    - upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
 
 ######
 # CB #
