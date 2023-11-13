@@ -4,6 +4,7 @@
 
 #include <libfoolang.h>
 
-extern void fprint_unit(FILE *stream, foo_analysis_unit unit);
+extern char *unit_basename (foo_analysis_unit unit);
+extern void fprint_unit (FILE *stream, foo_analysis_unit unit);
 
 #endif /* UTILS_UNIT_H */

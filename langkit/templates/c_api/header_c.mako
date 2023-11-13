@@ -247,6 +247,39 @@ typedef void (*${file_reader_read_type})(
 ${c_doc('langkit.unit_provider_type')}
 typedef void *${unit_provider_type};
 
+/*
+ * Types for introspection
+ */
+
+/* References to struct/node members.  */
+typedef enum {
+   % for i, m in enumerate(generic_api.all_members, 1):
+      ${capi.symbol_prefix}_member_ref_${generic_api.member_name(m).lower()}
+        = ${i},
+   % endfor
+} ${introspection_member_ref_type};
+
+/*
+ * Types for tree rewriting
+ */
+
+${c_doc('langkit.rewriting.rewriting_handle_type')}
+typedef void *${rewriting_handle_type};
+
+${c_doc('langkit.rewriting.unit_rewriting_handle_type')}
+typedef void *${unit_rewriting_handle_type};
+
+${c_doc('langkit.rewriting.node_rewriting_handle_type')}
+typedef void *${node_rewriting_handle_type};
+
+${c_doc('langkit.rewriting.apply_result_type')}
+typedef struct {
+    int success;
+    ${analysis_unit_type} unit;
+    int diagnostics_count;
+    ${diagnostic_type} *diagnostics;
+} ${rewriting_apply_result_type};
+
 /* All the functions below can potentially raise an exception, so
    ${capi.get_name("get_last_exception")} must be checked after them even
    before trying to use the returned value.  */
@@ -630,6 +663,288 @@ ${c_doc('langkit.token_is_equivalent')}
 extern ${bool_type}
 ${capi.get_name('token_is_equivalent')}(${token_type} *left,
                                         ${token_type} *right);
+
+/*
+ * Tree rewriting
+ */
+
+/* ... context rewriting... */
+
+${c_doc('langkit.rewriting.context_handle')}
+extern ${rewriting_handle_type}
+${capi.get_name('rewriting_context_to_handle')}(
+    ${analysis_context_type} context
+);
+
+${c_doc('langkit.rewriting.handle_context')}
+extern ${analysis_context_type}
+${capi.get_name('rewriting_handle_to_context')}(
+    ${rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.start_rewriting')}
+extern ${rewriting_handle_type}
+${capi.get_name('rewriting_start_rewriting')}(
+    ${analysis_context_type} context
+);
+
+${c_doc('langkit.rewriting.abort_rewriting')}
+extern void
+${capi.get_name('rewriting_abort_rewriting')}(
+    ${rewriting_handle_type} context
+);
+
+${c_doc('langkit.rewriting.apply')}
+extern void
+${capi.get_name('rewriting_apply')}(
+    ${rewriting_handle_type} context,
+    ${rewriting_apply_result_type} *result
+);
+
+${c_doc('langkit.rewriting.free_apply_result')}
+extern void
+${capi.get_name('rewriting_free_apply_result')}(
+    ${rewriting_apply_result_type} *result
+);
+
+${c_doc('langkit.rewriting.unit_handles')}
+extern ${unit_rewriting_handle_type} *
+${capi.get_name('rewriting_unit_handles')}(
+    ${rewriting_handle_type} handle
+);
+
+/* ... unit rewriting... */
+
+${c_doc('langkit.rewriting.unit_handle')}
+extern ${unit_rewriting_handle_type}
+${capi.get_name('rewriting_unit_to_handle')}(${analysis_unit_type} context);
+
+${c_doc('langkit.rewriting.handle_unit')}
+extern ${analysis_unit_type}
+${capi.get_name('rewriting_handle_to_unit')}(
+    ${unit_rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.root')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_unit_root')}(
+    ${unit_rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.set_root')}
+extern void
+${capi.get_name('rewriting_unit_set_root')}(
+    ${unit_rewriting_handle_type} handle,
+    ${unit_rewriting_handle_type} root
+);
+
+${c_doc('langkit.rewriting.unit_unparse')}
+extern void
+${capi.get_name('rewriting_unit_unparse')}(
+    ${unit_rewriting_handle_type} handle,
+    ${text_type} *result
+);
+
+/* ... node rewriting... */
+
+${c_doc('langkit.rewriting.node_handle')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_node_to_handle')}(${node_type} context);
+
+${c_doc('langkit.rewriting.handle_node')}
+extern ${node_type}
+${capi.get_name('rewriting_handle_to_node')}(
+    ${node_rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.node_context')}
+extern ${rewriting_handle_type}
+${capi.get_name('rewriting_node_to_context')}(
+    ${node_rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.unparse')}
+extern void
+${capi.get_name('rewriting_node_unparse')}(
+    ${node_rewriting_handle_type} handle,
+    ${text_type} *result
+);
+
+${c_doc('langkit.rewriting.kind')}
+extern ${node_kind_type}
+${capi.get_name('rewriting_kind')}(${node_rewriting_handle_type} handle);
+
+${c_doc('langkit.rewriting.node_image')}
+extern void
+${capi.get_name('rewriting_node_image')}(
+    ${node_rewriting_handle_type} handle,
+    ${text_type} *result
+);
+
+${c_doc('langkit.rewriting.tied')}
+extern int
+${capi.get_name('rewriting_tied')}(${node_rewriting_handle_type} handle);
+
+${c_doc('langkit.rewriting.parent')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_parent')}(${node_rewriting_handle_type} handle);
+
+${c_doc('langkit.rewriting.children_count')}
+extern int
+${capi.get_name('rewriting_children_count')}(
+    ${node_rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.child_by_ref')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_child')}(
+    ${node_rewriting_handle_type} handle,
+    ${introspection_member_ref_type} field
+);
+
+${c_doc('langkit.rewriting.children')}
+extern void
+${capi.get_name('rewriting_children')}(
+    ${node_rewriting_handle_type} handle,
+    ${node_rewriting_handle_type} **children,
+    int *count
+);
+
+${c_doc('langkit.rewriting.set_child_by_ref')}
+extern void
+${capi.get_name('rewriting_set_child')}(
+    ${node_rewriting_handle_type} handle,
+    ${introspection_member_ref_type} field,
+    ${node_rewriting_handle_type} child
+);
+
+${c_doc('langkit.rewriting.text')}
+extern void
+${capi.get_name('rewriting_text')}(
+    ${node_rewriting_handle_type} handle,
+    ${text_type} *result
+);
+
+${c_doc('langkit.rewriting.set_text')}
+extern void
+${capi.get_name('rewriting_set_text')}(
+    ${node_rewriting_handle_type} handle,
+    ${text_type} *text
+);
+
+${c_doc('langkit.rewriting.replace')}
+extern void
+${capi.get_name('rewriting_replace')}(
+    ${node_rewriting_handle_type} handle,
+    ${node_rewriting_handle_type} new_node
+);
+
+${c_doc('langkit.rewriting.rotate')}
+extern void
+${capi.get_name('rewriting_rotate')}(
+    ${node_rewriting_handle_type} *handles,
+    int count
+);
+
+/* ... list node rewriting... */
+
+${c_doc('langkit.rewriting.first_child')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_first_child')}(
+    ${node_rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.last_child')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_last_child')}(
+    ${node_rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.next_child')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_next_child')}(
+    ${node_rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.previous_child')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_previous_child')}(
+    ${node_rewriting_handle_type} handle
+);
+
+${c_doc('langkit.rewriting.insert_before')}
+extern void
+${capi.get_name('rewriting_insert_before')}(
+    ${node_rewriting_handle_type} handle,
+    ${node_rewriting_handle_type} new_sibling
+);
+
+${c_doc('langkit.rewriting.insert_after')}
+extern void
+${capi.get_name('rewriting_insert_after')}(
+    ${node_rewriting_handle_type} handle,
+    ${node_rewriting_handle_type} new_sibling
+);
+
+${c_doc('langkit.rewriting.insert_first')}
+extern void
+${capi.get_name('rewriting_insert_first')}(
+    ${node_rewriting_handle_type} handle,
+    ${node_rewriting_handle_type} new_sibling
+);
+
+${c_doc('langkit.rewriting.insert_last')}
+extern void
+${capi.get_name('rewriting_insert_last')}(
+    ${node_rewriting_handle_type} handle,
+    ${node_rewriting_handle_type} new_sibling
+);
+
+${c_doc('langkit.rewriting.remove_child')}
+extern void
+${capi.get_name('rewriting_remove_child')}(
+    ${node_rewriting_handle_type} handle
+);
+
+/* ... node creation... */
+
+${c_doc('langkit.rewriting.clone')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_clone')}(${node_rewriting_handle_type} handle);
+
+${c_doc('langkit.rewriting.create_node')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_create_node')}(
+    ${node_rewriting_handle_type} handle,
+    ${node_kind_type} kind
+);
+
+${c_doc('langkit.rewriting.create_token_node')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_create_token_node')}(
+    ${node_rewriting_handle_type} handle,
+    ${node_kind_type} kind,
+    ${text_type} *text
+);
+
+${c_doc('langkit.rewriting.create_regular_node')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_create_regular_node')}(
+    ${node_rewriting_handle_type} handle,
+    ${node_kind_type} kind,
+    ${node_rewriting_handle_type} *children,
+    int count
+);
+
+${c_doc('langkit.rewriting.create_from_template')}
+extern ${node_rewriting_handle_type}
+${capi.get_name('rewriting_create_from_template')}(
+    ${node_rewriting_handle_type} handle,
+    ${text_type} *src_template,
+    ${node_rewriting_handle_type} *arguments,
+    int count,
+    ${grammar_rule_type} rule
+);
 
 ${exts.include_extension(ctx.ext('analysis', 'c_api', 'header'))}
 
