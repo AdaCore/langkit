@@ -1300,9 +1300,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    -- Insert_Before --
    -------------------
 
-   procedure Insert_Before
-     (Handle, New_Sibling : Node_Rewriting_Handle)
-   is
+   procedure Insert_Before (Handle, New_Sibling : Node_Rewriting_Handle) is
       Old_Previous, Parent : Node_Rewriting_Handle;
    begin
       ${pre_check_nrw_handle('Handle')}
@@ -1328,9 +1326,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    -- Insert_After --
    ------------------
 
-   procedure Insert_After
-     (Handle, New_Sibling : Node_Rewriting_Handle)
-   is
+   procedure Insert_After (Handle, New_Sibling : Node_Rewriting_Handle) is
       Old_Next, Parent : Node_Rewriting_Handle;
    begin
       ${pre_check_nrw_handle('Handle')}
