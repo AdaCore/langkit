@@ -133,9 +133,9 @@ typedef struct {
    ${c_doc(enum_type, 3)}
 % endfor
 
-const ${grammar_rule_type} ${default_grammar_rule} = ${
+#define ${default_grammar_rule} ${
     T.GrammarRule.values_dict[ctx.main_rule_api_name].c_name(capi)
-};
+}
 
 ${c_doc('langkit.exception_kind_type')}
 typedef enum {
