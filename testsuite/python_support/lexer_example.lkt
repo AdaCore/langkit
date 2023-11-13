@@ -5,9 +5,8 @@ lexer foo_lexer {
 
     family alphanumericals {
         def <- "def"
+        var <- "var"
     }
-
-    var <- "var"
 
     family alphanumericals {
         error <- "error"
