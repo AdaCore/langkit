@@ -335,12 +335,10 @@ private package ${ada_lib_name}.Rewriting_Implementation is
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
    --  Implementation for Rewriting.Previous_Child
 
-   procedure Insert_Before
-     (Handle, New_Sibling : Node_Rewriting_Handle);
+   procedure Insert_Before (Handle, New_Sibling : Node_Rewriting_Handle);
    --  Implementation for Rewriting.Insert_Before
 
-   procedure Insert_After
-     (Handle, New_Sibling : Node_Rewriting_Handle);
+   procedure Insert_After (Handle, New_Sibling : Node_Rewriting_Handle);
    --  Implementation for Rewriting.Insert_After
 
    procedure Insert_First (Handle, New_Child : Node_Rewriting_Handle);
