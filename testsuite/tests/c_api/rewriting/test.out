@@ -1,0 +1,107 @@
+main.c: Starting...
+
+Testing dummy rewriting handle lifecycle...
+List of rewritten units (empty): []
+List of rewritten units (non-empty): [<AnalysisUnit s1.txt>, <AnalysisUnit s2.txt>]
+Unparse unit:
+  |var a = 1
+  |var b = 2
+  |
+  |var c = 3
+  |var d = 4
+  |
+  |var e = 5
+  |var f = 6
+  |var g = 7
+
+Unparse node:
+  |var a = 1
+
+Node kind: DeclList
+Node image: <DeclList s2.txt:1:1-9:10 (tied)>
+Node tied: true
+Children count: 7
+Children:
+  <Var s2.txt:1:1-1:10 (tied)>
+  parent: <Var s2.txt:1:1-1:10 (tied)>
+  Decl.f_name: <Var s2.txt:1:1-1:10 (tied)>
+  Text for Decl.f_name: "a"
+
+  <Var s2.txt:2:1-2:10 (tied)>
+  parent: <Var s2.txt:2:1-2:10 (tied)>
+  Decl.f_name: <Var s2.txt:2:1-2:10 (tied)>
+  Text for Decl.f_name: "b"
+
+  <Var s2.txt:4:1-4:10 (tied)>
+  parent: <Var s2.txt:4:1-4:10 (tied)>
+  Decl.f_name: <Var s2.txt:4:1-4:10 (tied)>
+  Text for Decl.f_name: "c"
+
+  <Var s2.txt:5:1-5:10 (tied)>
+  parent: <Var s2.txt:5:1-5:10 (tied)>
+  Decl.f_name: <Var s2.txt:5:1-5:10 (tied)>
+  Text for Decl.f_name: "d"
+
+  <Var s2.txt:7:1-7:10 (tied)>
+  parent: <Var s2.txt:7:1-7:10 (tied)>
+  Decl.f_name: <Var s2.txt:7:1-7:10 (tied)>
+  Text for Decl.f_name: "e"
+
+  <Var s2.txt:8:1-8:10 (tied)>
+  parent: <Var s2.txt:8:1-8:10 (tied)>
+  Decl.f_name: <Var s2.txt:8:1-8:10 (tied)>
+  Text for Decl.f_name: "f"
+
+  <Var s2.txt:9:1-9:10 (tied)>
+  parent: <Var s2.txt:9:1-9:10 (tied)>
+  Decl.f_name: <Var s2.txt:9:1-9:10 (tied)>
+  Text for Decl.f_name: "g"
+
+First child: <Var s2.txt:1:1-1:10 (tied)>
+Next child: <Var s2.txt:2:1-2:10 (tied)>
+Last child: <Var s2.txt:9:1-9:10 (tied)>
+Previous child: <Var s2.txt:8:1-8:10 (tied)>
+Aborting...
+OK
+
+Testing regular rewriting handle lifecycle
+
+(successful apply)...
+Swap the roots of s1.txt and s2.txt
+Swap identifiers for 'a' and 'b' decls in s1.txt [set_child]
+Swap identifiers for 'c' and 'd' decls in s1.txt [replace]
+Rotate identifiers for 'e', 'f' and 'g' decls in s1.txt
+Set identifier for 'orig_2' to 'renamed' in s2.txt
+Delete 'orig_3'
+Insert a clone of 'orig_1' called 'first'
+Insert a clone of 'orig_1' called 'before'
+Insert a clone of 'orig_1' called 'after'
+Insert a clone of 'orig_1' called 'last'
+Insert a synthetic decl called 'synthetic'
+Insert a templated decl called 'templated'
+Applying...
+Freeing apply result...
+Buffers for s1.txt decls:
+  |var b = 1
+  |var a = 2
+  |
+  |var d = 3
+  |var c = 4
+  |
+  |var f = 5
+  |var g = 6
+  |var e = 7
+
+Buffer for s2.txt:
+  |var first = 9
+  |var before = 9
+  |var orig_1 = 9
+  |var after = 9
+  |var renamed = 0
+  |var last = 9
+  |var synthetic=12 var templated=42
+
+OK
+
+main.c: Done.
+Done

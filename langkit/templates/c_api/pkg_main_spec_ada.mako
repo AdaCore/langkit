@@ -765,6 +765,7 @@ package ${ada_lib_name}.Implementation.C is
    function Wrap (S : Unbounded_Wide_Wide_String) return ${text_type};
 
    function Wrap_Alloc (S : Text_Type) return ${text_type};
+   function Wrap_Alloc (S : Unbounded_Wide_Wide_String) return ${text_type};
    function Wrap
      (S     : Text_Cst_Access;
       First : Positive;
