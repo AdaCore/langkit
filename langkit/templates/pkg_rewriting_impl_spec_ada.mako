@@ -58,7 +58,8 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       --  Analysis context this rewriting handle relates to
 
       Units : Unit_Maps.Map;
-      --  Keep track of rewriting handles we create all units that Context owns
+      --  Keep track of rewriting handles we create for the units that Context
+      --  owns.
 
       Pool      : Bump_Ptr_Pool;
       New_Nodes : Nodes_Pools.Vector;
