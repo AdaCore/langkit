@@ -1,0 +1,33 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(or(var_rule | skip(ErrorDecl)))
+    name <- Name(@identifier)
+    var_rule <- Var("var" name "=" value)
+    value <- Literal(@number)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+@abstract class Decl : FooNode {
+    @abstract @parse_field @nullable name: Name
+    @abstract @parse_field @nullable expr: Literal
+}
+
+class ErrorDecl : Decl implements ErrorNode {
+    @parse_field @null_field name: Name
+    @parse_field @null_field expr: Literal
+}
+
+class Var : Decl {
+    @parse_field name: Name
+    @parse_field expr: Literal
+}
+
+class Literal : FooNode implements TokenNode {
+}
+
+class Name : FooNode implements TokenNode {
+}

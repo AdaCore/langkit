@@ -123,6 +123,23 @@ def template_extensions(ctx):
         'exception_type':        CAPIType(capi, 'exception').name,
         'exception_kind_type':   CAPIType(capi, 'exception_kind').name,
 
+        'introspection_member_ref_type': (
+            CAPIType(capi, 'introspection_member_ref').name
+        ),
+
+        'rewriting_handle_type': (
+            CAPIType(capi, 'rewriting_handle').name
+        ),
+        'unit_rewriting_handle_type': (
+            CAPIType(capi, 'unit_rewriting_handle').name
+        ),
+        'node_rewriting_handle_type': (
+            CAPIType(capi, 'node_rewriting_handle').name
+        ),
+        'rewriting_apply_result_type': (
+            CAPIType(capi, 'rewriting_apply_result').name
+        ),
+
         'Field': Field,
         'TypeSet': TypeSet,
     }

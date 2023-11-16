@@ -4,7 +4,9 @@ with Ada.Containers.Hashed_Sets;
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
+
 with System;
+with System.Memory;
 
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Hashes;
@@ -24,6 +26,8 @@ with ${ada_lib_name}.Unparsing_Implementation;
 use ${ada_lib_name}.Unparsing_Implementation;
 
 package body ${ada_lib_name}.Rewriting_Implementation is
+
+   use type System.Memory.size_t;
 
    function Convert is new Ada.Unchecked_Conversion
      (Rewriting_Handle, Rewriting_Handle_Pointer);
@@ -317,6 +321,36 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    procedure Untie (Handle : Node_Rewriting_Handle);
    --  Untie the node represented by Handle. Do nothing if Handle is null.
 
+   -------------------------
+   -- C_Context_To_Handle --
+   -------------------------
+
+   function C_Context_To_Handle
+     (Context : Internal_Context) return Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      return Handle (Context);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Context_To_Handle;
+
+   -------------------------
+   -- C_Handle_To_Context --
+   -------------------------
+
+   function C_Handle_To_Context
+     (Handle : Rewriting_Handle) return Internal_Context is
+   begin
+      Clear_Last_Exception;
+      return Context (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Handle_To_Context;
+
    ---------------------
    -- Start_Rewriting --
    ---------------------
@@ -341,6 +375,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       end;
    end Start_Rewriting;
 
+   -----------------------
+   -- C_Start_Rewriting --
+   -----------------------
+
+   function C_Start_Rewriting
+     (Context : Internal_Context) return Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      return Start_Rewriting (Context);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Start_Rewriting;
+
    ---------------------
    -- Abort_Rewriting --
    ---------------------
@@ -350,6 +399,20 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       ${pre_check_rw_handle('Handle')}
       Free_Handles (Handle);
    end Abort_Rewriting;
+
+   -----------------------
+   -- C_Abort_Rewriting --
+   -----------------------
+
+   procedure C_Abort_Rewriting (Handle : Rewriting_Handle) is
+      H : Rewriting_Handle := Handle;
+   begin
+      Clear_Last_Exception;
+      Abort_Rewriting (H);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Abort_Rewriting;
 
    -----------
    -- Apply --
@@ -441,6 +504,93 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       return Result;
    end Apply;
 
+   -------------
+   -- C_Apply --
+   -------------
+
+   procedure C_Apply
+     (Handle : Rewriting_Handle;
+      Result : access C_Apply_Result)
+   is
+      H          : Rewriting_Handle := Handle;
+      Ada_Result : Apply_Result;
+   begin
+      Clear_Last_Exception;
+
+      Ada_Result := Apply (H);
+      Result.Success := (if Ada_Result.Success then 1 else 0);
+      if not Ada_Result.Success then
+         Result.Unit := Ada_Result.Unit;
+         if Ada_Result.Diagnostics.Is_Empty then
+            Result.Diagnostics_Count := 0;
+            Result.Diagnostics := null;
+         else
+            Result.Diagnostics_Count :=
+              Interfaces.C.int (Ada_Result.Diagnostics.Length);
+            declare
+               type Array_Type is
+                 array (1 .. Natural (Result.Diagnostics_Count))
+                 of ${diagnostic_type};
+               Diagnostics_Address : constant System.Address :=
+                 System.Memory.Alloc (Array_Type'Size / 8);
+               Diagnostics         : Array_Type
+                 with Import, Address => Diagnostics_Address;
+            begin
+               Result.Diagnostics :=
+                 C_Diagnostic_Array.To_Pointer (Diagnostics_Address);
+               for I in Diagnostics'Range loop
+                  declare
+                     D : Diagnostic renames Ada_Result.Diagnostics (I);
+                  begin
+                     Diagnostics (I).Sloc_Range := Wrap (D.Sloc_Range);
+                     Diagnostics (I).Message :=
+                       Wrap_Alloc (To_Text (D.Message));
+                  end;
+               end loop;
+            end;
+         end if;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Apply;
+
+   -----------------------
+   -- Free_Apply_Result --
+   -----------------------
+
+   procedure Free_Apply_Result (Result : access C_Apply_Result) is
+      use type Interfaces.C.int;
+   begin
+      Clear_Last_Exception;
+
+      if Result.Success = 0 then
+         if Result.Diagnostics_Count /= 0 then
+            declare
+               type Array_Type is
+                 array (1 .. Natural (Result.Diagnostics_Count))
+                 of ${diagnostic_type};
+               Diagnostics_Address : constant System.Address :=
+                 (C_Diagnostic_Array.To_Address (Result.Diagnostics));
+               Diagnostics         : Array_Type
+                 with Import, Address => Diagnostics_Address;
+            begin
+               for D of Diagnostics loop
+                  ${capi.get_name('destroy_text')}
+                    (D.Message'Unrestricted_Access);
+               end loop;
+            end;
+            System.Memory.Free
+              (C_Diagnostic_Array.To_Address (Result.Diagnostics));
+         end if;
+      end if;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end Free_Apply_Result;
+
    ------------------
    -- Unit_Handles --
    ------------------
@@ -462,6 +612,38 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          return Result;
       end;
    end Unit_Handles;
+
+   --------------------
+   -- C_Unit_Handles --
+   --------------------
+
+   function C_Unit_Handles
+     (Handle : Rewriting_Handle) return C_Unit_Array.Object_Pointer is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         Units : constant Unit_Rewriting_Handle_Array := Unit_Handles (Handle);
+         type Array_Type is
+           array (Units'First .. Units'Last + 1)
+           of Unit_Rewriting_Handle;
+         Result_Address : constant System.Address :=
+           System.Memory.Alloc (Array_Type'Size / 8);
+         Result         : Array_Type
+           with Import, Address => Result_Address;
+      begin
+         for I in Units'Range loop
+            Result (I) := Units (I);
+         end loop;
+         Result (Result'Last) := null;
+         return C_Unit_Array.To_Pointer (Result_Address);
+      end;
+
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Unit_Handles;
 
    ------------
    -- Handle --
@@ -511,6 +693,36 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       return Handle.Unit;
    end Unit;
 
+   ----------------------
+   -- C_Unit_To_Handle --
+   ----------------------
+
+   function C_Unit_To_Handle
+     (Unit : Internal_Unit) return Unit_Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      return Handle (Unit);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Unit_To_Handle;
+
+   ----------------------
+   -- C_Handle_To_Unit --
+   ----------------------
+
+   function C_Handle_To_Unit
+     (Handle : Unit_Rewriting_Handle) return Internal_Unit is
+   begin
+      Clear_Last_Exception;
+      return Unit (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Handle_To_Unit;
+
    ----------
    -- Root --
    ----------
@@ -521,6 +733,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       ${pre_check_urw_handle('Handle')}
       return Handle.Root;
    end Root;
+
+   ------------
+   -- C_Root --
+   ------------
+
+   function C_Root
+     (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      return Root (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Root;
 
    --------------
    -- Set_Root --
@@ -538,6 +765,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Tie (Root, No_Node_Rewriting_Handle, Handle);
    end Set_Root;
 
+   ----------------
+   -- C_Set_Root --
+   ----------------
+
+   procedure C_Set_Root
+     (Handle : Unit_Rewriting_Handle;
+      Root   : Node_Rewriting_Handle) is
+   begin
+      Clear_Last_Exception;
+      Set_Root (Handle, Root);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Set_Root;
+
    -------------
    -- Unparse --
    -------------
@@ -552,6 +794,23 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          Preserve_Formatting => True,
          As_Unit             => True);
    end Unparse;
+
+   ---------------
+   -- C_Unparse --
+   ---------------
+
+   procedure C_Unparse
+     (Handle : Unit_Rewriting_Handle; Result : access ${text_type})
+   is
+      Text : Unbounded_Text_Type;
+   begin
+      Clear_Last_Exception;
+      Text := Unparse (Handle);
+      Result.all := Wrap_Alloc (Text);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Unparse;
 
    ------------
    -- Handle --
@@ -592,6 +851,23 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       end;
    end Handle;
 
+   ----------------------
+   -- C_Node_To_Handle --
+   ----------------------
+
+   function C_Node_To_Handle (Node : ${node_type}) return Node_Rewriting_Handle
+   is
+      N : ${T.root_node.name};
+   begin
+      Clear_Last_Exception;
+      N := Unwrap (Node);
+      return Handle (N);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Node_To_Handle;
+
    ----------
    -- Node --
    ----------
@@ -603,6 +879,24 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       return Handle.Node;
    end Node;
 
+   ----------------------
+   -- C_Handle_To_Node --
+   ----------------------
+
+   function C_Handle_To_Node
+     (Handle : Node_Rewriting_Handle) return ${node_type}
+   is
+      N : ${T.root_node.name};
+   begin
+      Clear_Last_Exception;
+      N := Node (Handle);
+      return Wrap (N);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return Wrap (null);
+   end C_Handle_To_Node;
+
    -------------
    -- Context --
    -------------
@@ -612,6 +906,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       ${pre_check_nrw_handle('Handle')}
       return Handle.Context_Handle;
    end Context;
+
+   -----------------------
+   -- C_Node_To_Context --
+   -----------------------
+
+   function C_Node_To_Context
+     (Node : Node_Rewriting_Handle) return Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      return Context (Node);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Node_To_Context;
 
    -------------
    -- Unparse --
@@ -627,6 +936,24 @@ package body ${ada_lib_name}.Rewriting_Implementation is
             Preserve_Formatting => True,
             As_Unit             => False));
    end Unparse;
+
+   ---------------
+   -- C_Unparse --
+   ---------------
+
+   procedure C_Unparse
+     (Handle : Node_Rewriting_Handle; Result : access ${text_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         Text : constant Text_Type := Unparse (Handle);
+      begin
+         Result.all := Wrap_Alloc (Text);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Unparse;
 
    --------------
    -- Allocate --
@@ -858,6 +1185,24 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       return Handle.Kind;
    end Kind;
 
+   ------------
+   -- C_Kind --
+   ------------
+
+   function C_Kind (Handle : Node_Rewriting_Handle) return ${node_kind_type} is
+   begin
+      Clear_Last_Exception;
+      declare
+         K : constant ${T.node_kind} := Kind (Handle);
+      begin
+         return ${node_kind_type} (K'Enum_Rep);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end C_Kind;
+
    -----------
    -- Image --
    -----------
@@ -895,6 +1240,24 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       end;
    end Image;
 
+   -------------
+   -- C_Image --
+   -------------
+
+   procedure C_Image
+     (Handle : Node_Rewriting_Handle; Result : access ${text_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         Img : constant Text_Type := To_Text (Image (Handle));
+      begin
+         Result.all := Wrap_Alloc (Img);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Image;
+
    ----------
    -- Tied --
    ----------
@@ -906,6 +1269,20 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    end Tied;
 
    ------------
+   -- C_Tied --
+   ------------
+
+   function C_Tied (Handle : Node_Rewriting_Handle) return Interfaces.C.int is
+   begin
+      Clear_Last_Exception;
+      return (if Tied (Handle) then 1 else 0);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end C_Tied;
+
+   ------------
    -- Parent --
    ------------
 
@@ -915,6 +1292,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       ${pre_check_nrw_handle('Handle')}
       return Handle.Parent;
    end Parent;
+
+   --------------
+   -- C_Parent --
+   --------------
+
+   function C_Parent
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      return Parent (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Parent;
 
    --------------------
    -- Children_Count --
@@ -930,6 +1322,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          when Expanded_List       => Handle.Children.Count,
          when Expanded_Token_Node => 0);
    end Children_Count;
+
+   ----------------------
+   -- C_Children_Count --
+   ----------------------
+
+   function C_Children_Count
+     (Handle : Node_Rewriting_Handle) return Interfaces.C.int is
+   begin
+      Clear_Last_Exception;
+      return Interfaces.C.int (Children_Count (Handle));
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end C_Children_Count;
 
    -----------
    -- Child --
@@ -950,6 +1357,25 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Expand_Children (Handle);
       return Handle.Children.Vector.Element (Index);
    end Child;
+
+   -------------
+   -- C_Child --
+   -------------
+
+   function C_Child
+     (Handle : Node_Rewriting_Handle;
+      Field  : Interfaces.C.int) return Node_Rewriting_Handle
+   is
+      F : Struct_Member_Ref;
+   begin
+      Clear_Last_Exception;
+      F := From_Index (Self_Id, Struct_Member_Index (Field));
+      return Child (Handle, F);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Child;
 
    --------------
    -- Children --
@@ -987,6 +1413,36 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          end if;
       end return;
    end Children;
+
+   ----------------
+   -- C_Children --
+   ----------------
+
+   procedure C_Children
+     (Handle   : Node_Rewriting_Handle;
+      Children : access C_Node_Array.Object_Pointer;
+      Count    : access Interfaces.C.int) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         Result : constant Node_Rewriting_Handle_Array :=
+           Rewriting_Implementation.Children (Handle);
+
+         subtype Array_Type is Node_Rewriting_Handle_Array (Result'Range);
+         Children_Address : constant System.Address :=
+           System.Memory.Alloc (Array_Type'Size / 8);
+         Ada_Children     : Array_Type
+           with Import, Address => Children_Address;
+      begin
+         Ada_Children := Result;
+         Children.all := C_Node_Array.To_Pointer (Children_Address);
+         Count.all := Result'Length;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Children;
 
    ---------------
    -- Set_Child --
@@ -1030,6 +1486,25 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Set_Child (Handle, Index_For (Handle, Field), Child);
    end Set_Child;
 
+   -----------------
+   -- C_Set_Child --
+   -----------------
+
+   procedure C_Set_Child
+     (Handle : Node_Rewriting_Handle;
+      Field  : Interfaces.C.int;
+      Child  : Node_Rewriting_Handle)
+   is
+      F : Struct_Member_Ref;
+   begin
+      Clear_Last_Exception;
+      F := From_Index (Self_Id, Struct_Member_Index (Field));
+      Set_Child (Handle, F, Child);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Set_Child;
+
    ----------
    -- Text --
    ----------
@@ -1053,6 +1528,24 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       end case;
    end Text;
 
+   ------------
+   -- C_Text --
+   ------------
+
+   procedure C_Text
+     (Handle : Node_Rewriting_Handle; Result : access ${text_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         T : constant Text_Type := Text (Handle);
+      begin
+         Result.all := Wrap_Alloc (T);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Text;
+
    --------------
    -- Set_Text --
    --------------
@@ -1067,6 +1560,23 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
       Handle.Children.Text := To_Unbounded_Wide_Wide_String (Text);
    end Set_Text;
+
+   ----------------
+   -- C_Set_Text --
+   ----------------
+
+   procedure C_Set_Text
+     (Handle : Node_Rewriting_Handle; Text : access ${text_type})
+   is
+      T : constant Text_Type (1 .. Natural (Text.Length))
+      with Import, Address => Text.Chars;
+   begin
+      Clear_Last_Exception;
+      Set_Text (Handle, T);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Set_Text;
 
    -------------
    -- Replace --
@@ -1118,6 +1628,19 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          Set_Root (Handle.Root_Of, New_Node);
       end if;
    end Replace;
+
+   ---------------
+   -- C_Replace --
+   ---------------
+
+   procedure C_Replace (Handle, New_Node : Node_Rewriting_Handle) is
+   begin
+      Clear_Last_Exception;
+      Replace (Handle, New_Node);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Replace;
 
    ------------
    -- Rotate --
@@ -1228,6 +1751,31 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       end;
    end Rotate;
 
+   --------------
+   -- C_Rotate --
+   --------------
+
+   procedure C_Rotate
+     (Handles : C_Node_Array.Object_Pointer;
+      Count   : Interfaces.C.int) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         subtype Array_Type is
+           Node_Rewriting_Handle_Array (1 .. Natural (Count));
+         Handles_Address : constant System.Address :=
+           C_Node_Array.To_Address (Handles);
+         Ada_Handles     : constant Array_Type
+           with Import, Address => Handles_Address;
+      begin
+         Rotate (Ada_Handles);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Rotate;
+
    ------------------
    -- Is_List_Node --
    ------------------
@@ -1253,6 +1801,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       return Handle.Children.First;
    end First_Child;
 
+   -------------------
+   -- C_First_Child --
+   -------------------
+
+   function C_First_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      return First_Child (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_First_Child;
+
    ----------------
    -- Last_Child --
    ----------------
@@ -1268,6 +1831,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       return Handle.Children.Last;
    end Last_Child;
 
+   ------------------
+   -- C_Last_Child --
+   ------------------
+
+   function C_Last_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      return Last_Child (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Last_Child;
+
    ----------------
    -- Next_Child --
    ----------------
@@ -1281,6 +1859,22 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
       return Handle.Next;
    end Next_Child;
+
+   ------------------
+   -- C_Next_Child --
+   ------------------
+
+   function C_Next_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
+   is
+   begin
+      Clear_Last_Exception;
+      return Next_Child (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Next_Child;
 
    --------------------
    -- Previous_Child --
@@ -1296,13 +1890,27 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       return Handle.Previous;
    end Previous_Child;
 
+   ----------------------
+   -- C_Previous_Child --
+   ----------------------
+
+   function C_Previous_Child
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
+   is
+   begin
+      Clear_Last_Exception;
+      return Previous_Child (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Previous_Child;
+
    -------------------
    -- Insert_Before --
    -------------------
 
-   procedure Insert_Before
-     (Handle, New_Sibling : Node_Rewriting_Handle)
-   is
+   procedure Insert_Before (Handle, New_Sibling : Node_Rewriting_Handle) is
       Old_Previous, Parent : Node_Rewriting_Handle;
    begin
       ${pre_check_nrw_handle('Handle')}
@@ -1324,13 +1932,24 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Parent.Children.Count := Parent.Children.Count + 1;
    end Insert_Before;
 
+   ---------------------
+   -- C_Insert_Before --
+   ---------------------
+
+   procedure C_Insert_Before (Handle, New_Sibling : Node_Rewriting_Handle) is
+   begin
+      Clear_Last_Exception;
+      Insert_Before (Handle, New_Sibling);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Insert_Before;
+
    ------------------
    -- Insert_After --
    ------------------
 
-   procedure Insert_After
-     (Handle, New_Sibling : Node_Rewriting_Handle)
-   is
+   procedure Insert_After (Handle, New_Sibling : Node_Rewriting_Handle) is
       Old_Next, Parent : Node_Rewriting_Handle;
    begin
       ${pre_check_nrw_handle('Handle')}
@@ -1351,6 +1970,19 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Tie (New_Sibling, Parent, No_Unit_Rewriting_Handle);
       Parent.Children.Count := Parent.Children.Count + 1;
    end Insert_After;
+
+   --------------------
+   -- C_Insert_After --
+   --------------------
+
+   procedure C_Insert_After (Handle, New_Sibling : Node_Rewriting_Handle) is
+   begin
+      Clear_Last_Exception;
+      Insert_After (Handle, New_Sibling);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Insert_After;
 
    ------------------
    -- Insert_First --
@@ -1375,6 +2007,19 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Handle.Children.Count := Handle.Children.Count + 1;
    end Insert_First;
 
+   --------------------
+   -- C_Insert_First --
+   --------------------
+
+   procedure C_Insert_First (Handle, New_Sibling : Node_Rewriting_Handle) is
+   begin
+      Clear_Last_Exception;
+      Insert_First (Handle, New_Sibling);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Insert_First;
+
    -----------------
    -- Insert_Last --
    -----------------
@@ -1397,6 +2042,19 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Tie (New_Child, Handle, No_Unit_Rewriting_Handle);
       Handle.Children.Count := Handle.Children.Count + 1;
    end Insert_Last;
+
+   -------------------
+   -- C_Insert_Last --
+   -------------------
+
+   procedure C_Insert_Last (Handle, New_Sibling : Node_Rewriting_Handle) is
+   begin
+      Clear_Last_Exception;
+      Insert_Last (Handle, New_Sibling);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Insert_Last;
 
    ------------------
    -- Remove_Child --
@@ -1428,6 +2086,19 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Untie (Handle);
       Parent.Children.Count := Parent.Children.Count - 1;
    end Remove_Child;
+
+   --------------------
+   -- C_Remove_Child --
+   --------------------
+
+   procedure C_Remove_Child (Handle : Node_Rewriting_Handle) is
+   begin
+      Clear_Last_Exception;
+      Remove_Child (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end C_Remove_Child;
 
    -----------
    -- Clone --
@@ -1509,6 +2180,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       return Result;
    end Clone;
 
+   -------------
+   -- C_Clone --
+   -------------
+
+   function C_Clone
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      return Clone (Handle);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Clone;
+
    -----------------
    -- Create_Node --
    -----------------
@@ -1533,6 +2219,25 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       end if;
    end Create_Node;
 
+   -------------------
+   -- C_Create_Node --
+   -------------------
+
+   function C_Create_Node
+     (Handle : Rewriting_Handle;
+      Kind   : ${node_kind_type}) return Node_Rewriting_Handle
+   is
+      K : ${T.node_kind};
+   begin
+      Clear_Last_Exception;
+      K := ${T.node_kind}'Enum_Val (Kind);
+      return Create_Node (Handle, K);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Create_Node;
+
    -----------------------
    -- Create_Token_Node --
    -----------------------
@@ -1555,6 +2260,28 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          return Result;
       end;
    end Create_Token_Node;
+
+   -------------------------
+   -- C_Create_Token_Node --
+   -------------------------
+
+   function C_Create_Token_Node
+     (Handle : Rewriting_Handle;
+      Kind   : ${node_kind_type};
+      Text   : access ${text_type}) return Node_Rewriting_Handle
+   is
+      K : ${T.node_kind};
+      T : constant Text_Type (1 .. Natural (Text.Length))
+      with Import, Address => Text.Chars;
+   begin
+      Clear_Last_Exception;
+      K := ${T.node_kind}'Enum_Val (Kind);
+      return Create_Token_Node (Handle, K, T);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Create_Token_Node;
 
    -------------------------
    -- Create_Regular_Node --
@@ -1618,6 +2345,35 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          return Result;
       end;
    end Create_Regular_Node;
+
+   ---------------------------
+   -- C_Create_Regular_Node --
+   ---------------------------
+
+   function C_Create_Regular_Node
+     (Handle   : Rewriting_Handle;
+      Kind     : ${node_kind_type};
+      Children : C_Node_Array.Object_Pointer;
+      Count    : Interfaces.C.int) return Node_Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      declare
+         K : constant ${T.node_kind} := ${T.node_kind}'Enum_Val (Kind);
+
+         subtype Array_Type is
+           Node_Rewriting_Handle_Array (1 .. Natural (Count));
+         Children_Address : constant System.Address :=
+           C_Node_Array.To_Address (Children);
+         Ada_Children     : constant Array_Type
+           with Import, Address => Children_Address;
+      begin
+         return Create_Regular_Node (Handle, K, Ada_Children);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Create_Regular_Node;
 
    --------------------------
    -- Create_From_Template --
@@ -1836,6 +2592,38 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          end;
       end;
    end Create_From_Template;
+
+   ----------------------------
+   -- C_Create_From_Template --
+   ----------------------------
+
+   function C_Create_From_Template
+     (Handle    : Rewriting_Handle;
+      Template  : access ${text_type};
+      Arguments : C_Node_Array.Object_Pointer;
+      Count     : Interfaces.C.int;
+      Rule      : ${grammar_rule_type}) return Node_Rewriting_Handle is
+   begin
+      Clear_Last_Exception;
+      declare
+         Ada_Template : constant Text_Type (1 .. Natural (Template.Length))
+         with Import, Address => Template.Chars;
+
+         subtype Array_Type is
+           Node_Rewriting_Handle_Array (1 .. Natural (Count));
+         Arguments_Address : constant System.Address :=
+           C_Node_Array.To_Address (Arguments);
+         Ada_Arguments     : constant Array_Type
+           with Import, Address => Arguments_Address;
+      begin
+         return Create_From_Template
+           (Handle, Ada_Template, Ada_Arguments, Rule);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
+   end C_Create_From_Template;
 
    % for n in ctx.astnode_types:
       % if not n.abstract and \

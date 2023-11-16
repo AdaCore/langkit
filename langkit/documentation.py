@@ -1017,9 +1017,26 @@ base_langkit_docs = {
 
         Note that on success, this invalidates all related unit/node handles.
     """,
+    'langkit.rewriting.apply_result_type': """
+        Result of applying a rewriting session.
+
+        On success, ``Success`` is true.
+
+        On failure, ``Success`` is false, ``Unit`` is set to the unit on which
+        rewriting failed, and ``Diagnostics`` is set to related rewriting
+        errors.
+    """,
+    'langkit.rewriting.free_apply_result': """
+        Free the result of the ``Apply`` operation.
+    """,
     'langkit.rewriting.unit_handles': """
         Return the list of unit rewriting handles in the given context handle
         for units that the Apply primitive will modify.
+
+        % if lang == "c":
+        This returns the list as a dynamically allocated NULL-terminated array,
+        that the caller must free when done with it.
+        % endif
     """,
     'langkit.rewriting.unit_handle': """
         Return the rewriting handle corresponding to Unit
@@ -1090,6 +1107,11 @@ base_langkit_docs = {
     """,
     'langkit.rewriting.children': """
         Return the list of children for ``Handle``.
+
+        % if lang == "c":
+        This returns the list as a dynamically allocated array with ``count``
+        elements.  The caller must free it when done with it.
+        % endif
     """,
     'langkit.rewriting.set_child_by_ref': """
         If ``Child`` is ``No_Rewriting_Node``, untie the syntax field in
