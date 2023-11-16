@@ -5,6 +5,7 @@
 
 with Ada.Assertions; use Ada.Assertions;
 with Ada.Calendar;   use Ada.Calendar;
+with Ada.Exceptions;
 
 with GNAT.Traceback.Symbolic; use GNAT.Traceback.Symbolic;
 
@@ -2043,6 +2044,8 @@ package body Langkit_Support.Adalog.Solver is
                Solv_Trace.Trace ("Topo fail!");
             end if;
             begin
+               pragma Assert (not Ctx.Sort_Ctx.Unset_Vars.Is_Empty);
+
                --  First try to revoke this partial solution by finding
                --  contradictions in the sorted subset of atoms.
                if Evaluate_Atoms (Ctx, Sorted_Atoms, Explanation) then
@@ -2050,22 +2053,29 @@ package body Langkit_Support.Adalog.Solver is
                   --  partial solution in another manner: we explain that
                   --  this solution is not feasible because some atoms are
                   --  orphans.
-                  pragma Assert (not Ctx.Sort_Ctx.Unset_Vars.Is_Empty);
                   Explain_Topo_Sort_Failure (Ctx, Model, Explanation);
                end if;
-
-               --  Explanation must be filled at this stage, either by
-               --  ``Evaluate_Atoms`` or by ``Explain_Topo_Sort_Failure``.
-               Contradictions := Explanation.Build;
-               pragma Assert (not Contradictions.Is_Empty);
-               return Cleanup (False);
             exception
                when Timeout_Error =>
                   raise;
-               when others =>
-                  null;
+               when E : others =>
+                  if Solv_Trace.Is_Active then
+                     Solv_Trace.Trace
+                       ("Got exception " & Ada.Exceptions.Exception_Name (E));
+                  end if;
+                  --  Got an exception while trying to evaluate the partial
+                  --  solution. We cannot know if this is because the atoms
+                  --  are really in conflict or because one of the orphan atoms
+                  --  prevented some dependencies from being rightly fulfilled.
+                  --  Hence, explain that this candidate is not feasible due to
+                  --  the presence of orphan atoms.
+                  Explain_Topo_Sort_Failure (Ctx, Model, Explanation);
             end;
-            Fail;
+
+            --  Explanation must be filled at this stage, either by
+            --  ``Evaluate_Atoms`` or by ``Explain_Topo_Sort_Failure``.
+            Contradictions := Explanation.Build;
+            pragma Assert (not Contradictions.Is_Empty);
             return Cleanup (False);
          end if;
 
