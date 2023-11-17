@@ -3354,9 +3354,15 @@ class LktTypesLoader:
                             " the node type"
                         )
 
-                    # TODO: ensure that node_type is indeed a node type
-                    node_type = self.resolve_type(type_args[0], env)
-                    return lower_new(node_type.entity)
+                    node_arg = type_args[0]
+                    node_ref = self.resolve_type(node_arg, env)
+                    with self.ctx.lkt_context(node_arg):
+                        node_type = resolve_type(node_ref)
+                        check_source_language(
+                            isinstance(node_type, ASTNodeType),
+                            "Node type expected"
+                        )
+                    return lower_new(node_ref.entity)
 
                 # Otherwise the call has to be a dot expression, for a method
                 # invocation.

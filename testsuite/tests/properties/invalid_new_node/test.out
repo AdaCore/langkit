@@ -10,6 +10,12 @@ not_memoized.lkt:4:29: error: Node synthetization can only happen inside memoize
   |                             ^^^^^^^^^^^
 
 
+== not_node_entity.lkt ==
+not_node_entity.lkt:5:24: error: Node type expected
+5 |         val e = Entity[Int](0, null[EntityInfo]);
+  |                        ^^^
+
+
 == not_synth.lkt ==
 not_synth.lkt:4:37: error: Cannot synthetize a node that is not annotated as synthetic (Literal)
 4 |     @memoized fun prop(): Literal = Literal()
