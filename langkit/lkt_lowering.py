@@ -1983,6 +1983,9 @@ class LktTypesLoader:
 
     @dataclass
     class Generics:
+        """
+        Holder for all the built-in Lkt generics.
+        """
         ast_list: Scope.Generic
         analysis_unit: Scope.Generic
         array: Scope.Generic
