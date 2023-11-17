@@ -23,19 +23,21 @@ The last step is the most complex one: type declarations refer to each other,
 and this step includes the lowering of property expressions to abstract
 expressions. The lowering of types goes as follows:
 
-* The first pass looks at all top-level declarations (lexers, grammars and
-  types) and registers them by name in the root scope.
+* [ROOT_SCOPE_CREATION] The first step looks at all top-level declarations
+  (lexers, grammars and types) and registers them by name in the root scope.
 
-* At this point, another pass lowers all dynamic variables.
+* [DYNVAR_LOWERING] At this point, another step lowers all dynamic variables.
 
-* We then iterate on all types and lower them. All type declarations in the
-  language spec are lowered in sequence (arbitrary order), except base classes,
-  which are lowered before classes that they derive from. This pass creates the
-  actual ``CompiledType`` instances as well as the ``AbstractNodeData`` ones.
+* [TYPES_LOWERING] We then iterate on all types and lower them. All type
+  declarations in the language spec are lowered in sequence (arbitrary order),
+  except base classes, which are lowered before classes that they derive from.
+  This step creates the actual ``CompiledType`` instances as well as the
+  ``AbstractNodeData`` ones.
 
-* The arguments' default values and the bodies of all properties are lowered.
+* [EXPR_LOWERING] The arguments' default values and the bodies of all
+  properties are lowered.
 
-* Finally, env specs are lowered.
+* [ENV_SPECS_LOWERING] Finally, env specs are lowered.
 """
 
 from __future__ import annotations
@@ -2053,6 +2055,11 @@ class LktTypesLoader:
             type declarations.
         """
         self.ctx = ctx
+
+        #
+        # ROOT_SCOPE_CREATION
+        #
+
         self.root_scope = root_scope = create_root_scope(ctx)
 
         # Create a special scope to resolve the "kind" argument for
@@ -2206,6 +2213,10 @@ class LktTypesLoader:
                 defer=T.deferred_type("Metadata"),
             )
 
+        #
+        # DYNVAR_LOWERING
+        #
+
         # Create dynamic variables
         for dyn_var_decl in dyn_vars:
             name_node = dyn_var_decl.f_syn_name
@@ -2220,6 +2231,10 @@ class LktTypesLoader:
                 doc=self.ctx.lkt_doc(dyn_var_decl),
             )
             root_scope.add(Scope.DynVar(name, dyn_var_decl, dyn_var))
+
+        #
+        # TYPES_LOWERING
+        #
 
         # Now create CompiledType instances for each user type. To properly
         # handle node derivation, this recurses on bases first and reject
@@ -2238,6 +2253,10 @@ class LktTypesLoader:
                 entity._type = resolve_type(entity.defer)
                 # TODO: resolve all deferred types (member types and argument
                 # types).
+
+        #
+        # EXPR_LOWERING
+        #
 
         # Now that all user-defined compiled types are known, we can start
         # lowering expressions and env specs. Start with default values for
@@ -2272,6 +2291,10 @@ class LktTypesLoader:
                     to_lower.prop.expr = self.lower_expr(
                         to_lower.body, to_lower.scope, to_lower.prop.vars
                     )
+
+        #
+        # ENV_SPECS_LOWERING
+        #
 
         # Finally, lower env specs
         for node, env_spec_decl in self.env_specs_to_lower:
