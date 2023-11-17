@@ -5,7 +5,7 @@ annotated_grammar_1.lkt:4:24: error: Invalid annotation: foo
 
 
 == annotated_grammar_2.lkt ==
-annotated_grammar_2.lkt:4:13: error: No 'foo_grammar' lexer found
+annotated_grammar_2.lkt:4:13: error: Invalid lexer name: 'foo_lexer' expected
 4 | @with_lexer(foo_grammar) grammar foo_grammar {
   |             ^^^^^^^^^^^
 

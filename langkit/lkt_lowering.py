@@ -877,15 +877,20 @@ class WithLexerAnnotationSpec(AnnotationSpec):
         assert len(args) == 1
         requested_name = args[0]
 
+        # Get the lexer declaration (find_toplevel_decl checks that there is
+        # exactly one).
         full_decl = find_toplevel_decl(
             ctx, ctx.lkt_units, L.LexerDecl, "lexer"
         )
         decl = full_decl.f_decl
         assert isinstance(decl, L.LexerDecl)
+
+        # Make sure the name mentionned in this annotation matches the actual
+        # lexer name.
         with ctx.lkt_context(requested_name):
             check_source_language(
                 decl.f_syn_name.text == requested_name.text,
-                f"No '{requested_name.text}' lexer found",
+                f"Invalid lexer name: '{decl.f_syn_name.text}' expected",
             )
             return decl
 
