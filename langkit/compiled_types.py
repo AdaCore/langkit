@@ -202,9 +202,14 @@ class CompiledTypeRepo:
     The StrucType instances used as metadata for the lexical environments
     values.
 
-    This is None initially, then set to the struct type during lowering if the
-    language spec declares a metadata struct, or set to the automatic struct
-    otherwise: this is never None after the "compute_types" pass.
+    This is None initially, then set to one of:
+
+    1. The struct type during lowering if the language spec declares a metadata
+       struct.
+
+    2. The empty metadata struct that we generate automatically otherwise.
+
+    This is never None after the "compute_types" pass.
     """
 
     entity_info = None
