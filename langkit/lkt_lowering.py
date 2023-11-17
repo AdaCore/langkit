@@ -227,14 +227,12 @@ class Scope:
             """
             ...
 
-    @dataclass
     class BuiltinEntity(Entity):
         """
         Any entity that is created automatically by Lkt.
         """
         pass
 
-    @dataclass
     class BuiltinFunction(BuiltinEntity):
         """
         Builtin function, used to expose a DSL operation.
@@ -274,7 +272,6 @@ class Scope:
         def diagnostic_name(self) -> str:
             return f"the builtin value {self.value}"
 
-    @dataclass
     class Generic(BuiltinEntity):
         """
         Generic declaration, always created automatically by Lkt.
@@ -284,7 +281,6 @@ class Scope:
         def diagnostic_name(self) -> str:
             return f"the generic {self.name}"
 
-    @dataclass
     class Trait(BuiltinEntity):
         """
         Trait declaration, always created automatically by Lkt.
@@ -341,7 +337,6 @@ class Scope:
                 f"the {self.kind_name} {self.name} at {loc.gnu_style_repr()}"
             )
 
-    @dataclass
     class Lexer(UserEntity):
         """
         Lexer declaration.
@@ -349,7 +344,6 @@ class Scope:
 
         kind_name = "lexer"
 
-    @dataclass
     class Grammar(UserEntity):
         """
         Grammar declaration.
@@ -381,7 +375,6 @@ class Scope:
         Value to use for this during expression lowering.
         """
 
-    @dataclass
     class LocalVariable(UserValue):
         """
         Local variable declaration.
@@ -389,7 +382,6 @@ class Scope:
 
         kind_name = "local variable"
 
-    @dataclass
     class Argument(UserValue):
         """
         Function argument declaration.
