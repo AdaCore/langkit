@@ -490,6 +490,21 @@ class Scope:
             s = s.parent
 
 
+def create_root_scope(ctx: CompileCtx) -> Scope:
+    """
+    Create and return a root scope.
+
+    TODO: once the DSL is no more, use the same root scope in:
+
+    * the lexer lowering pass,
+    * the grammar lowering pass,
+    * the types lowering pass.
+
+    See callers for this helper function.
+    """
+    return Scope("the root scope", ctx)
+
+
 def find_toplevel_decl(ctx: CompileCtx,
                        lkt_units: List[L.AnalysisUnit],
                        node_type: type,
@@ -1322,9 +1337,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     :param lkt_units: Non-empty list of analysis units where to look for the
         grammar.
     """
-    # TODO: once the DSL is no more, use the same root scope as in the Lkt
-    # types lowering pass.
-    root_scope = Scope("the root scope", ctx)
+    root_scope = create_root_scope(ctx)
 
     # Look for the LexerDecl node in top-level lists
     full_lexer = find_toplevel_decl(ctx, lkt_units, L.LexerDecl, 'lexer')
@@ -1667,9 +1680,7 @@ def create_grammar(ctx: CompileCtx,
     :param lkt_units: Non-empty list of analysis units where to look for the
         grammar.
     """
-    # TODO: once the DSL is no more, use the same root scope as in the Lkt
-    # types lowering pass.
-    root_scope = Scope("the root scope", ctx)
+    root_scope = create_root_scope(ctx)
 
     # Look for the GrammarDecl node in top-level lists
     full_grammar = find_toplevel_decl(ctx, lkt_units, L.GrammarDecl, 'grammar')
@@ -2042,7 +2053,7 @@ class LktTypesLoader:
             type declarations.
         """
         self.ctx = ctx
-        self.root_scope = root_scope = Scope("the root scope", ctx)
+        self.root_scope = root_scope = create_root_scope(ctx)
 
         # Create a special scope to resolve the "kind" argument for
         # "reference()" env actions.
