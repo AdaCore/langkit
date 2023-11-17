@@ -210,7 +210,7 @@ def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
 
 class Scope:
     """
-    Lexical environment data structure, use to resolve named references.
+    Scope data structure, use to resolve named references.
     """
 
     @dataclass
