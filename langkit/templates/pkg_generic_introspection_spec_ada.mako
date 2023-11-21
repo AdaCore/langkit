@@ -45,6 +45,14 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${G.member_index(m)} : constant Struct_Member_Index := ${i};
    % endfor
 
+   --------------------------------
+   -- Token kind index constants --
+   --------------------------------
+
+   % for i, t in enumerate(ctx.lexer.sorted_tokens, 1):
+      ${G.token_kind_index(t)} : constant Token_Kind_Index := ${i};
+   % endfor
+
    ------------------------------
    -- Grammar rule descriptors --
    ------------------------------
