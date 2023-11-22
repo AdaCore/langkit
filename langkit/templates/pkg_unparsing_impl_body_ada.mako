@@ -11,10 +11,19 @@ pragma Warnings (On, "internal");
 
 with GNATCOLL.Iconv;
 
+with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
+with Langkit_Support.Internal; use Langkit_Support.Internal;
+with Langkit_Support.Internal.Descriptor;
+use Langkit_Support.Internal.Descriptor;
+with Langkit_Support.Internal.Unparsing;
+use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Generic_API;    use ${ada_lib_name}.Generic_API;
+with ${ada_lib_name}.Generic_Introspection;
+use ${ada_lib_name}.Generic_Introspection;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
@@ -22,6 +31,24 @@ use ${ada_lib_name}.Private_Converters;
 package body ${ada_lib_name}.Unparsing_Implementation is
 
    subtype String_Access is Ada.Strings.Unbounded.String_Access;
+
+   Id                  : Language_Descriptor_Access := +Self_Id;
+   Token_Kinds         : Token_Kind_Descriptor_Array renames
+     Id.Token_Kinds.all;
+   Token_Spacing_Table : Token_Spacing_Table_Impl renames
+     Id.Unparsers.Token_Spacings.all;
+   Token_Newline_Table : Token_Newline_Table_Impl renames
+     Id.Unparsers.Token_Newlines.all;
+   Node_Unparsers      : Node_Unparser_Map_Impl renames
+     Id.Unparsers.Node_Unparsers.all;
+
+   --  Token families and have 1-based indexes in the generic API, and the 'Pos
+   --  of their language-specific type is 0-based.
+
+   function "+" (Kind : Token_Kind) return Token_Kind_Index
+   is (Token_Kind'Pos (Kind) + 1);
+   function "+" (Kind : Token_Kind_Index) return Token_Kind
+   is (Token_Kind'Val (Kind - 1));
 
    --  The "template" data structures below are helpers for the original
    --  source code formatting preservation algorithms. A template can be
@@ -43,7 +70,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
      (Present => True, First => No_Token, Last => No_Token);
 
    function Create_Token_Sequence
-     (Unparser    : Token_Sequence_Access;
+     (Unparser    : Token_Sequence;
       First_Token : in out Token_Reference)
       return Present_Token_Sequence_Template
       with Pre => First_Token /= No_Token;
@@ -91,8 +118,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  are absent.
 
    function Field_Present
-     (Node     : Abstract_Node;
-      Unparser : Field_Unparser) return Boolean;
+     (Node : Abstract_Node; Unparser : Field_Unparser_Impl) return Boolean;
    --  Return whether the given field is to be considered present according to
    --  the given field unparser.
 
@@ -124,13 +150,12 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  Helper for Unparse_Node, focuses on list nodes
 
    procedure Unparse_Token
-     (Unparser : Token_Unparser;
+     (Unparser : Token_Unparser_Impl;
       Result   : in out Unparsing_Buffer);
    --  Using the Unparser unparsing table, unparse a token
 
    procedure Unparse_Token_Sequence
-     (Unparser : Token_Sequence_Access;
-      Result   : in out Unparsing_Buffer);
+     (Unparser : Token_Sequence_Impl; Result : in out Unparsing_Buffer);
    --  Using the Unparser unparsing table, unparse a sequence of tokens
 
    function Relative_Token
@@ -163,32 +188,6 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       Template : Token_Sequence_Template);
    --  Emit to Result the sequence of tokens in Template, or do nothing if the
    --  template is absent.
-
-   ## Emit the table to indicate spacing rules between tokens. Use "Common."
-   ## qualified names for token kinds and token families to avoid conflicts
-   ## with node names from "Analysis.".
-
-   Token_Spacing_Table : array (Token_Family, Token_Family) of Boolean :=
-      <%
-         token_families = ctx.lexer.tokens.token_families
-         spacing_table = ctx.lexer.spacing_table
-      %>
-      (${', '.join(
-         'Common.{} => ({})'.format(tf1.ada_name, ', '.join(
-            'Common.{} => {}'.format(tf2.ada_name, spacing_table[tf1][tf2])
-            for tf2 in token_families
-         ))
-         for tf1 in token_families)});
-   --  A space must be inserted between two consecutive tokens T1 and T2 iff
-   --  given their respective families TF1 and TF2, the following is true:
-   --  Token_Spacing_Table (TF1, TF2).
-
-   Token_Newline_Table : array (Token_Kind) of Boolean :=
-     (${', '.join('Common.{} => {}'.format(t.ada_name,
-                                          t in ctx.lexer.newline_after)
-                  for t in ctx.lexer.sorted_tokens)});
-   --  A line break must be append during unparsing after a token T iff
-   --  Token_Newline_Table (T) is true.
 
    --------------------------
    -- Create_Abstract_Node --
@@ -390,7 +389,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    ---------------------------
 
    function Create_Token_Sequence
-     (Unparser    : Token_Sequence_Access;
+     (Unparser    : Token_Sequence;
       First_Token : in out Token_Reference)
       return Present_Token_Sequence_Template
    is
@@ -432,10 +431,10 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       --  present.
       for I in 1 .. Children_Count (Rewritten_Node) loop
          declare
-            U     : Field_Unparser_List renames Unparser.Field_Unparsers.all;
-            F     : Field_Unparser renames U.Field_Unparsers (I);
-            T     : Token_Sequence_Access renames U.Inter_Tokens (I);
-            FT    : Field_Template renames Result.Fields (I);
+            U  : Field_Unparser_List_Impl renames Unparser.Field_Unparsers.all;
+            F  : Field_Unparser_Impl renames U.Field_Unparsers (I);
+            T  : Token_Sequence renames U.Inter_Tokens (I);
+            FT : Field_Template renames Result.Fields (I);
 
             Rewritten_Child : constant ${T.root_node.name} :=
                Child (Rewritten_Node, I);
@@ -484,8 +483,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------------
 
    function Field_Present
-     (Node     : Abstract_Node;
-      Unparser : Field_Unparser) return Boolean is
+     (Node : Abstract_Node; Unparser : Field_Unparser_Impl) return Boolean is
    begin
       return (not Is_Null (Node)
               and then (not Unparser.Empty_List_Is_Absent
@@ -547,12 +545,12 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       if Length (Buffer.Content) = 0 then
          null;
 
-      elsif Token_Newline_Table (Buffer.Last_Token) then
+      elsif Token_Newline_Table (+Buffer.Last_Token) then
          Append (Buffer, Chars.LF);
 
       elsif Token_Spacing_Table
-        (Token_Kind_To_Family (Buffer.Last_Token),
-         Token_Kind_To_Family (Next_Token))
+        (Token_Kinds (+Buffer.Last_Token).Family,
+         Token_Kinds (+Next_Token).Family)
       then
          Append (Buffer, ' ');
       end if;
@@ -713,8 +711,9 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       Result              : in out Unparsing_Buffer)
    is
       Kind     : constant ${T.node_kind} :=
-         Unparsing_Implementation.Kind (Node);
-      Unparser : Node_Unparser renames Node_Unparsers (Kind);
+        Unparsing_Implementation.Kind (Node);
+      Unparser : Node_Unparser_Impl renames
+        Node_Unparsers (Node_Kinds (Kind)).all;
 
       Rewritten_Node : constant ${T.root_node.name} :=
         (if Preserve_Formatting
@@ -774,16 +773,16 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       if Template.Present then
          Append_Tokens (Result, Template.Pre_Tokens);
       else
-         Unparse_Token_Sequence (Unparser.Pre_Tokens, Result);
+         Unparse_Token_Sequence (Unparser.Pre_Tokens.all, Result);
       end if;
 
       --  Unparse Node's fields, and the tokens between them
       declare
-         U : Field_Unparser_List renames Unparser.Field_Unparsers.all;
+         U : Field_Unparser_List_Impl renames Unparser.Field_Unparsers.all;
       begin
          for I in 1 .. U.N loop
             declare
-               F     : Field_Unparser renames U.Field_Unparsers (I);
+               F     : Field_Unparser_Impl renames U.Field_Unparsers (I);
                Child : constant Abstract_Node :=
                   Unparsing_Implementation.Child (Node, I);
             begin
@@ -792,7 +791,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                if Template.Present then
                   Append_Tokens (Result, Template.Inter_Tokens (I));
                else
-                  Unparse_Token_Sequence (U.Inter_Tokens (I), Result);
+                  Unparse_Token_Sequence (U.Inter_Tokens (I).all, Result);
                end if;
 
                --  Then unparse the field itself
@@ -803,9 +802,9 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                      Append_Tokens (Result, Template.Fields (I).Post_Tokens);
 
                   else
-                     Unparse_Token_Sequence (F.Pre_Tokens, Result);
+                     Unparse_Token_Sequence (F.Pre_Tokens.all, Result);
                      Unparse_Node (Child, Preserve_Formatting, Result);
-                     Unparse_Token_Sequence (F.Post_Tokens, Result);
+                     Unparse_Token_Sequence (F.Post_Tokens.all, Result);
                   end if;
                end if;
             end;
@@ -817,7 +816,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       if Template.Present then
          Append_Tokens (Result, Template.Post_Tokens);
       else
-         Unparse_Token_Sequence (Unparser.Post_Tokens, Result);
+         Unparse_Token_Sequence (Unparser.Post_Tokens.all, Result);
       end if;
    end Unparse_Regular_Node;
 
@@ -875,18 +874,20 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------------
 
    procedure Unparse_Token
-     (Unparser : Token_Unparser;
-      Result   : in out Unparsing_Buffer) is
+     (Unparser : Token_Unparser_Impl;
+      Result   : in out Unparsing_Buffer)
+   is
+      Kind : constant Token_Kind := +Unparser.Kind;
    begin
-      Apply_Spacing_Rules (Result, Unparser.Kind);
+      Apply_Spacing_Rules (Result, Kind);
       if Unparser.Text /= null then
-         Append (Result, Unparser.Kind, Unparser.Text.all);
+         Append (Result, Kind, Unparser.Text.all);
       else
          declare
-            Literal : constant Text_Type := Token_Kind_Literal (Unparser.Kind);
+            Literal : constant Text_Type := Token_Kind_Literal (Kind);
          begin
             pragma Assert (Literal'Length > 0);
-            Append (Result, Unparser.Kind, Literal);
+            Append (Result, Kind, Literal);
          end;
       end if;
    end Unparse_Token;
@@ -896,11 +897,10 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    ----------------------------
 
    procedure Unparse_Token_Sequence
-     (Unparser : Token_Sequence_Access;
-      Result   : in out Unparsing_Buffer) is
+     (Unparser : Token_Sequence_Impl; Result : in out Unparsing_Buffer) is
    begin
-      for U of Unparser.all loop
-         Unparse_Token (U, Result);
+      for U of Unparser loop
+         Unparse_Token (U.all, Result);
       end loop;
    end Unparse_Token_Sequence;
 
@@ -990,109 +990,4 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       end if;
    end Append_Tokens;
 
-   % if ctx.generate_unparser:
-
-      ## Emit constants for token unparsers and token sequence unparsers
-
-      % for tok in ctx.unparsers.sorted_token_unparsers:
-         ${tok.var_name} : aliased constant Token_Unparser := \
-           (${tok.token.ada_name}, \
-            ${("new Text_Type'({})".format(tok.text_repr)
-               if tok.match_text else 'null')});
-      % endfor
-
-      % for tok_seq in ctx.unparsers.token_sequence_unparsers:
-         % if tok_seq:
-            ${tok_seq.var_name} : aliased constant Token_Sequence := \
-              (${', '.join(
-                  '{} => {}'.format(i, tok.var_name)
-                  for i, tok in enumerate(tok_seq.tokens, 1))});
-         % endif
-      % endfor
-
-      ## Emit constants for lists of field unparsers
-
-      % for node in ctx.astnode_types:
-         % if is_regular_node_unparser(node.unparser) \
-              and node.unparser.field_unparsers:
-
-            <%
-               unparser_list = node.unparser.zip_fields
-               field_unparsers = [
-                  ('{} => Empty_Field_Unparser'.format(i)
-                   if not f.pre_tokens and not f.post_tokens else
-                   "{} => ({}'Access, {}'Access, {})".format(
-                        i, f.pre_tokens.var_name, f.post_tokens.var_name,
-                        f.empty_list_is_absent))
-                  for i, (f, _) in enumerate(unparser_list, 1)
-               ]
-               inter_tokens = [
-                  "{} => {}'Access".format(i, tok_seq.var_name)
-                  for i, (_, tok_seq) in enumerate(unparser_list, 1)
-               ]
-            %>
-
-            ${node.unparser.fields_unparser_var_name} \
-               : aliased constant Field_Unparser_List \
-               := (N => ${len(unparser_list)},
-                   Field_Unparsers => (${', '.join(field_unparsers)}),
-                   Inter_Tokens => (${', '.join(inter_tokens)}));
-         % endif
-      % endfor
-
-      ## Finally, emit the unparsing table for nodes themselves
-
-      Node_Unparsers_Array : aliased constant Node_Unparser_Map := (
-         % for i, node in enumerate(ctx.astnode_types, 1):
-            % if not node.abstract:
-               <%
-                  unparser = node.unparser
-                  fields = []
-
-                  if is_regular_node_unparser(unparser):
-                     fields += [
-                        ('Kind', 'Regular'),
-                        ('Pre_Tokens', "{}'Access".format(
-                           unparser.pre_tokens.var_name)),
-                        ('Field_Unparsers', "{}'Access".format(
-                           unparser.fields_unparser_var_name)),
-                        ('Post_Tokens', "{}'Access".format(
-                           unparser.post_tokens.var_name)),
-                     ]
-
-                  elif is_list_node_unparser(unparser):
-                     fields += [
-                        ('Kind', 'List'),
-                        ('Has_Separator', unparser.separator is not None),
-                        ('Separator',
-                         ('<>' if unparser.separator is None else
-                          unparser.separator.var_name)),
-                     ]
-
-                  elif is_token_node_unparser(unparser):
-                     fields += [('Kind', 'Token')]
-
-                  else:
-                     ## This node is synthetic/an error node, so it cannot be
-                     ## unparsed: provide a dummy entry.
-                     assert (
-                        (node.abstract or node.synthetic or node.is_error_node)
-                        and unparser is None
-                     ), ('Unexpected unparser for {}: {}'
-                         .format(node.dsl_name, unparser))
-                     fields += [('Kind', 'Token')]
-               %>
-
-               ${node.ada_kind_name} => (${
-                  ', '.join('{} => {}'.format(name, value)
-                            for name, value in fields)
-               })${',' if i < len(ctx.astnode_types) else ''}
-            % endif
-         % endfor
-      );
-   % endif
-
-begin
-   Node_Unparsers := ${("Node_Unparsers_Array'Access"
-                        if ctx.generate_unparser else 'null')};
 end ${ada_lib_name}.Unparsing_Implementation;
