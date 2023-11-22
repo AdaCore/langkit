@@ -27,6 +27,8 @@ with ${ada_lib_name}.Common;
 
 private package ${ada_lib_name}.Generic_Impl is
 
+   <% G = generic_api %>
+
    function "+" is new Ada.Unchecked_Conversion
      (Internal_Context, Implementation.Internal_Context);
    function "+" is new Ada.Unchecked_Conversion
@@ -66,17 +68,40 @@ private package ${ada_lib_name}.Generic_Impl is
 
    --  Descriptors for token kinds
 
-   <% kind_refs = [] %>
+   <% lines = [] %>
    % for i, token in enumerate(ctx.lexer.sorted_tokens, 1):
       <%
+         if lines:
+            lines[-1] += ","
          name = f"Token_Kind_Name_{i}"
-         kind_refs.append(f"{i} => {name}'Access")
+         family = ctx.lexer.tokens.token_to_family[token]
+         lines += [
+            f"{G.token_kind_index(token)} =>",
+            f" (Name   => {name}'Access,",
+            f"  Family => {G.token_family_index(family)})",
+         ]
       %>
       ${name} : aliased constant Text_Type :=
         ${text_repr(token.base_name.camel_with_underscores)};
    % endfor
-   Token_Kind_Names : aliased constant Token_Kind_Name_Array :=
-     (${", ".join(kind_refs)});
+   Token_Kind_Descriptors : aliased constant Token_Kind_Descriptor_Array := (
+   % for line in lines:
+      ${line}
+   % endfor
+   );
+
+   --  Descriptors for token families
+
+   <% family_refs = [] %>
+   % for i, family in enumerate(ctx.lexer.tokens.token_families, 1):
+      <%
+         name = f"Token_Family_Name_{i}"
+         family_refs.append(f"{i} => {name}'Access")
+      %>
+      ${name} : aliased constant Text_Type := ${text_repr(family.ada_name)};
+   % endfor
+   Token_Family_Names : aliased constant Token_Family_Name_Array :=
+     (${", ".join(family_refs)});
 
    --  Implementations for generic operations on analysis types
 
@@ -181,7 +206,8 @@ private package ${ada_lib_name}.Generic_Impl is
       )},
       Grammar_Rules        => Grammar_Rules'Access,
 
-      Token_Kind_Names => Token_Kind_Names'Access,
+      Token_Kinds        => Token_Kind_Descriptors'Access,
+      Token_Family_Names => Token_Family_Names'Access,
 
       Types          => Generic_Introspection.Types'Access,
       Enum_Types     => Generic_Introspection.Enum_Types'Access,

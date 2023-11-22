@@ -15,32 +15,38 @@ Grammar rules:
   Name: Name
 
 Token kinds:
-  Termination
-  Lexing_Failure
-  Whitespace
-  Def
-  Var
-  Error
-  Example
-  Null_Tok
-  Comma
-  Dot
-  Semicolon
-  L_Par
-  R_Par
-  L_Brace
-  R_Brace
-  Equal
-  Plus
-  Minus
-  Less_Than
-  Less_Than_Or_Equal
-  Greater_Than
-  Greater_Than_Or_Equal
-  Number
-  Identifier
-  String
-  Comment
+  Termination (Default_Family)
+  Lexing_Failure (Default_Family)
+  Whitespace (Default_Family)
+  Def (Alphanumericals)
+  Var (Alphanumericals)
+  Error (Alphanumericals)
+  Example (Alphanumericals)
+  Null_Tok (Alphanumericals)
+  Comma (Punctuation)
+  Dot (Punctuation)
+  Semicolon (Punctuation)
+  L_Par (Punctuation)
+  R_Par (Punctuation)
+  L_Brace (Punctuation)
+  R_Brace (Punctuation)
+  Equal (Punctuation)
+  Plus (Punctuation)
+  Minus (Default_Family)
+  Less_Than (Default_Family)
+  Less_Than_Or_Equal (Default_Family)
+  Greater_Than (Default_Family)
+  Greater_Than_Or_Equal (Default_Family)
+  Number (Alphanumericals)
+  Identifier (Alphanumericals)
+  String (Default_Family)
+  Comment (Comments)
+
+Token families:
+  Alphanumericals
+  Comments
+  Punctuation
+  Default_Family
 
 Use of null context:
 Got a Precondition_Failure exception: null context

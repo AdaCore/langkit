@@ -53,6 +53,14 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${G.token_kind_index(t)} : constant Token_Kind_Index := ${i};
    % endfor
 
+   ----------------------------------
+   -- Token family index constants --
+   ----------------------------------
+
+   % for i, t in enumerate(ctx.lexer.tokens.token_families, 1):
+      ${G.token_family_index(t)} : constant Token_Family_Index := ${i};
+   % endfor
+
    ------------------------------
    -- Grammar rule descriptors --
    ------------------------------
