@@ -122,10 +122,10 @@ private package ${ada_lib_name}.Unparsers is
          elif is_list_node_unparser(unparser):
             fields += [
                ("Kind", "List"),
-               ("Has_Separator", unparser.separator is not None),
                ("Separator",
-                ("<>" if unparser.separator is None else
-                 unparser.separator.var_name)),
+                ("null"
+                 if unparser.separator is None else
+                 f"{unparser.separator.var_name}'Access")),
             ]
 
          elif is_token_node_unparser(unparser):

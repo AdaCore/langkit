@@ -30,7 +30,7 @@ package Langkit_Support.Internal.Unparsing is
       --  specific literal: for such token kinds, this must be the text to emit
       --  for that token.
    end record;
-   type Token_Unparser is not null access constant Token_Unparser_Impl;
+   type Token_Unparser is access constant Token_Unparser_Impl;
    --  Description of how to unparse a specific token
 
    type Token_Sequence_Impl is
@@ -116,10 +116,7 @@ package Langkit_Support.Internal.Unparsing is
             --  List of tokens to emit after fields are unparsed
 
          when List =>
-            Has_Separator : Boolean;
-            --  Whether to emit a token between two list items
-
-            Separator : aliased Token_Unparser_Impl;
+            Separator : Token_Unparser;
             --  If Has_Separator is true, describe what separator token to emit
             --  between two list items.
 

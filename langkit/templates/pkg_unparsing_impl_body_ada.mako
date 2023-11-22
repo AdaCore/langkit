@@ -845,7 +845,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          --  possible, preserve original formatting for the corresponding
          --  separator in the original source.
 
-         if I > 1 and then Unparser.Has_Separator then
+         if I > 1 and then Unparser.Separator /= null then
             if Rewritten_Node /= null
                and then Children_Count (Rewritten_Node) >= I
             then
@@ -857,8 +857,8 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                begin
                   Append_Tokens (Result, Tok, Tok);
                end;
-            else
-               Unparse_Token (Unparser.Separator, Result);
+            elsif Unparser.Separator /= null then
+               Unparse_Token (Unparser.Separator.all, Result);
             end if;
          end if;
 
