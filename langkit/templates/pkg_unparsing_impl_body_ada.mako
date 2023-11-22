@@ -880,16 +880,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       Kind : constant Token_Kind := +Unparser.Kind;
    begin
       Apply_Spacing_Rules (Result, Kind);
-      if Unparser.Text /= null then
-         Append (Result, Kind, Unparser.Text.all);
-      else
-         declare
-            Literal : constant Text_Type := Token_Kind_Literal (Kind);
-         begin
-            pragma Assert (Literal'Length > 0);
-            Append (Result, Kind, Literal);
-         end;
-      end if;
+      Append (Result, Kind, Unparser.Text.all);
    end Unparse_Token;
 
    ----------------------------

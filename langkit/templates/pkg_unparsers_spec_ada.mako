@@ -49,16 +49,26 @@ private package ${ada_lib_name}.Unparsers is
    % endfor
    );
 
-   ## Emit constants for token unparsers and token sequence unparsers
+   ## Emit constants for token unparsers and token sequence unparsers. Emit
+   ## only one Text_Type constant for each text value needed.
 
+   <% tok_text_ids = {} %>
    % for tok in ctx.unparsers.sorted_token_unparsers:
-      % if tok.match_text:
-         Text_For_${tok.var_name} : aliased constant Text_Type :=
-           ${tok.text_repr};
+      <%
+         text = tok.match_text or ctx.lexer_literals_map[tok]
+         text_id = tok_text_ids.get(text)
+         if text_id is None:
+            emit_text_constant = True
+            text_id = f"Text_For_{tok.var_name}"
+            tok_text_ids[text] = text_id
+         else:
+            emit_text_constant = False
+      %>
+      % if emit_text_constant:
+         ${text_id} : aliased constant Text_Type := ${text_repr(text)};
       % endif
       ${tok.var_name} : aliased constant Token_Unparser_Impl :=
-        (${G.token_kind_index(tok.token)},
-         ${f"Text_For_{tok.var_name}'Access" if tok.match_text else "null"});
+        (${G.token_kind_index(tok.token)}, ${text_id}'Access);
    % endfor
 
    % for tok_seq in ctx.unparsers.token_sequence_unparsers:

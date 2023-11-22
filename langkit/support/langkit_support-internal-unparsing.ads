@@ -22,13 +22,11 @@ package Langkit_Support.Internal.Unparsing is
 
    type Token_Unparser_Impl is record
       Kind : Token_Kind_Index;
-      --  Token kind, which is what is used most of the time to determine the
-      --  text to emit for a token.
+      --  Token kind for the token to unparse. This is used to apply
+      --  spacing/newline rules during the unparsing of a sequence of tokens.
 
-      Text : Text_Access_Or_Null;
-      --  Sometimes, we must emit a token whose kind is not associated to a
-      --  specific literal: for such token kinds, this must be the text to emit
-      --  for that token.
+      Text : Text_Access;
+      --  Text to emit for that token
    end record;
    type Token_Unparser is access constant Token_Unparser_Impl;
    --  Description of how to unparse a specific token
