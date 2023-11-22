@@ -23,7 +23,7 @@ package Langkit_Support.Internal is
    --  whenever we need to provide string for debug (compatible with
    --  Ada.Text_IO).
 
-   --  Descriptors for token types
+   --  Descriptors for token kinds
 
    type Token_Kind_Name_Array is
      array (Token_Kind_Index range <>) of Text_Access;
