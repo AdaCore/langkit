@@ -54,16 +54,21 @@ package body ${ada_lib_name}.Generic_API is
    -- From_Generic_Context --
    --------------------------
 
-   function From_Generic_Context
-     (Context : Lk_Context) return Analysis_Context
+   function From_Generic_Context (Context : Lk_Context) return Analysis_Context
    is
-      Ctx : constant Generic_Internal_Context :=
-        Lk_Convs.Unwrap_Context (Context);
    begin
-      if Language (Context) /= Self_Id then
+      if Context = No_Lk_Context then
+         return No_Analysis_Context;
+      elsif Context.Language /= Self_Id then
          raise Precondition_Failure with "context belongs to another language";
+      else
+         declare
+            Ctx : constant Generic_Internal_Context :=
+              Lk_Convs.Unwrap_Context (Context);
+         begin
+            return Wrap_Context.all (+Ctx);
+         end;
       end if;
-      return Wrap_Context.all (+Ctx);
    end From_Generic_Context;
 
    ---------------------
@@ -81,12 +86,18 @@ package body ${ada_lib_name}.Generic_API is
    -----------------------
 
    function From_Generic_Unit (Unit : Lk_Unit) return Analysis_Unit is
-      U : constant Generic_Internal_Unit := Lk_Convs.Unwrap_Unit (Unit);
    begin
-      if Language (Unit) /= Self_Id then
+      if Unit = No_Lk_Unit then
+         return No_Analysis_Unit;
+      elsif Unit.Language /= Self_Id then
          raise Precondition_Failure with "unit belongs to another language";
+      else
+         declare
+            U : constant Generic_Internal_Unit := Lk_Convs.Unwrap_Unit (Unit);
+         begin
+            return Wrap_Unit.all (+U);
+         end;
       end if;
-      return Wrap_Unit.all (+U);
    end From_Generic_Unit;
 
    -----------------------------
@@ -142,15 +153,20 @@ package body ${ada_lib_name}.Generic_API is
 
    function From_Generic_Node (Node : Lk_Node) return ${root_entity.api_name}
    is
-      N : Langkit_Support.Internal.Analysis.Internal_Entity;
-      E : Implementation.${root_entity.name};
    begin
-      if Language (Node) /= Self_Id then
+      if Node.Is_Null then
+         return No_${root_entity.api_name};
+      elsif Node.Language /= Self_Id then
          raise Precondition_Failure with "node belongs to another language";
+      else
+         declare
+            N : constant Langkit_Support.Internal.Analysis.Internal_Entity :=
+              Lk_Convs.Unwrap_Node (Node);
+            E : constant Implementation.${root_entity.name} := +N;
+         begin
+            return Wrap_Node.all (E.Node, E.Info);
+         end;
       end if;
-      N := Lk_Convs.Unwrap_Node (Node);
-      E := +N;
-      return Wrap_Node.all (E.Node, E.Info);
    end From_Generic_Node;
 
 end ${ada_lib_name}.Generic_API;
