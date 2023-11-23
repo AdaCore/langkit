@@ -929,6 +929,48 @@ package body Langkit_Support.Generic_API.Analysis is
         (Self.Desc.Node_Fetch_Sibling (Self.Internal.Node, -1), Self);
    end Previous_Sibling;
 
+   ---------------------------
+   -- Closest_Common_Parent --
+   ---------------------------
+
+   function Closest_Common_Parent (Self, Other : Lk_Node'Class) return Lk_Node
+   is
+   begin
+      if Self.Is_Null or else Other.Is_Null or else Self.Unit /= Other.Unit
+      then
+         return No_Lk_Node;
+      end if;
+
+      --  At this stage, we know that both nodes are non-null and belong to the
+      --  same unit, so they have necessarily one common parent: the unit root
+      --  node.
+      --
+      --  Jointly iterate on parents for both nodes (top-most ancestor first:
+      --  the root node) and stop when the list of parents diverges.
+
+      return Result : Lk_Node := No_Lk_Node do
+         declare
+            Self_Parents  : constant Lk_Node_Array := Self.Parents;
+            Other_Parents : constant Lk_Node_Array := Other.Parents;
+         begin
+            for I in 0
+                  .. Natural'Min
+                       (Self_Parents'Length, Other_Parents'Length) - 1
+            loop
+               declare
+                  Self_P  : Lk_Node renames
+                    Self_Parents (Self_Parents'Last - I);
+                  Other_P : Lk_Node renames
+                    Other_Parents (Other_Parents'Last - I);
+               begin
+                  exit when Self_P /= Other_P;
+                  Result := Self_P;
+               end;
+            end loop;
+         end;
+      end return;
+   end Closest_Common_Parent;
+
    --------------
    -- Is_Ghost --
    --------------

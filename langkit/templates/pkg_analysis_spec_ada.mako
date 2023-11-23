@@ -646,6 +646,13 @@ package ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name};
    --  Return the last child ``Node`` has, or ``No_${root_entity.api_name}`` if
    --  there is none.
+
+   function Closest_Common_Parent
+     (Self, Other : ${root_entity.api_name}'Class)
+      return ${root_entity.api_name};
+   --  If ``Self`` and ``Other`` do not belong to the same analysis unit,
+   --  return ``No_${root_entity.api_name}``. Otherwise, return the deepest
+   --  node in the tree that is a parent for both ``Self`` and ``Other``.
    pragma Warnings (On, "defined after private extension");
 
    function Traverse
