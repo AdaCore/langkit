@@ -1245,9 +1245,8 @@ package body ${ada_lib_name}.Analysis is
    -- Has_Element --
    -----------------
 
-   function Has_Element
-     (Self : Children_Array;
-      Pos  : Natural) return Boolean is
+   function Has_Element (Self : Children_Array; Pos : Natural) return Boolean
+   is
    begin
       return Pos in First (Self) .. Last (Self);
    end Has_Element;
@@ -1256,9 +1255,8 @@ package body ${ada_lib_name}.Analysis is
    -- Element --
    -------------
 
-   function Element
-     (Self : Children_Array;
-      Pos  : Natural) return Child_Record is
+   function Element (Self : Children_Array; Pos : Natural) return Child_Record
+   is
    begin
       return Self.Children (Pos);
    end Element;
@@ -1268,8 +1266,7 @@ package body ${ada_lib_name}.Analysis is
    -------------------------
 
    function Children_And_Trivia
-     (Node : ${root_entity.api_name}'Class) return Children_Array
-   is
+     (Node : ${root_entity.api_name}'Class) return Children_Array is
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";

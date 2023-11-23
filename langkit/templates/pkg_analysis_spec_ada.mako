@@ -471,21 +471,19 @@ package ${ada_lib_name}.Analysis is
    --  Return the last child or trivia cursor corresponding to the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Next (Self : Children_Array; Pos  : Natural) return Natural;
+   function Next (Self : Children_Array; Pos : Natural) return Natural;
    --  Return the child or trivia cursor that follows ``Self`` in the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Previous (Self : Children_Array; Pos  : Natural) return Natural;
+   function Previous (Self : Children_Array; Pos : Natural) return Natural;
    --  Return the child or trivia cursor that follows ``Self`` in the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Has_Element (Self : Children_Array; Pos  : Natural) return Boolean;
+   function Has_Element (Self : Children_Array; Pos : Natural) return Boolean;
    --  Return if ``Pos`` is in ``Self``'s iteration range. Helper for the
    --  ``Iterable`` aspect.
 
-   function Element
-     (Self : Children_Array;
-      Pos  : Natural) return Child_Record;
+   function Element (Self : Children_Array; Pos : Natural) return Child_Record;
    --  Return the child of trivia node at position ``Pos`` in ``Self``. Helper
    --  for the ``Iterable`` aspect.
 
