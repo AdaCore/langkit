@@ -42,6 +42,7 @@ library project Langkit_Support is
       "Langkit_Support.Generic_API",
       "Langkit_Support.Generic_API.Analysis",
       "Langkit_Support.Generic_API.Introspection",
+      "Langkit_Support.Generic_API.Unparsing",
       "Langkit_Support.File_Readers",
       "Langkit_Support.Hashes",
       "Langkit_Support.Images",

@@ -3,12 +3,17 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     ## Parser main entry point
-    @main_rule main_rule <- list+(or(var_decl | Example(@example name)))
+    @main_rule main_rule <- list+(or(var_decl | def | Example(@example name)))
     null_qual <- NullQual("null")
     var_decl <- VarDecl(null_qual "var" name "=" expr ";")
+    def <- Def(
+        "def"
+        name ?pick("(" list+(name, ",") ")") "=" expr ";"
+    )
     ## Use this to parse
     ## any kind of expression.
-    @entry_point expr <- or(Addition(expr "+" expr) | atom)
+    @entry_point expr <- or(Addition(expr "+" expr) | call | atom)
+    call <- Call(name "(" list*(expr, ",") ")")
     atom <- or(number | ref)
     number <- Number(@number)
     ref <- Ref(name)
@@ -88,12 +93,23 @@ class Example: BaseExample {
     )
 }
 
+class Def: FooNode {
+    @parse_field name: Name
+    @parse_field args: ASTList[FooNode, Name]
+    @parse_field expr: Expr
+}
+
 @abstract class Expr: FooNode {
 }
 
 class Addition: Expr {
     @parse_field lhs: Expr
     @parse_field rhs: Expr
+}
+
+class Call: Expr {
+    @parse_field name: Name
+    @parse_field args: ASTList[FooNode, Expr]
 }
 
 class Number: Expr implements TokenNode {

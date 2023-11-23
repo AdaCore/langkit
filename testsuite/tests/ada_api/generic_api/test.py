@@ -145,6 +145,12 @@ class VarDecl(FooNode):
     value = Field()
 
 
+class Def(FooNode):
+    name = Field(type=T.Name)
+    args = Field(type=T.Name.list)
+    expr = Field(type=T.Expr)
+
+
 class Name(FooNode):
     token_node = True
 
@@ -157,6 +163,11 @@ class Expr(FooNode):
 class Addition(Expr):
     lhs = Field()
     rhs = Field()
+
+
+class Call(Expr):
+    name = Field(type=T.Name)
+    args = Field(type=T.Expr.list)
 
 
 class Number(Expr):
@@ -174,6 +185,7 @@ build_and_run(
         "introspection_types.adb",
         "introspection_values.adb",
         "hash.adb",
+        "unparsing.adb",
     ],
     types_from_lkt=True,
     generate_unparser=True,
