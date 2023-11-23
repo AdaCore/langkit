@@ -527,7 +527,7 @@ Addition ( 25)
     <none>
 
 Number ( 26)
-  is a token node
+  is a token node (Number token)
   base = Expr ( 24)
   last derivation = Number ( 26)
   derivations:
@@ -554,7 +554,7 @@ Foo_Node_List ( 29)
     <none>
 
 Name ( 30)
-  is a token node
+  is a token node (Identifier token)
   base = Foo_Node ( 21)
   last derivation = Name ( 30)
   derivations:

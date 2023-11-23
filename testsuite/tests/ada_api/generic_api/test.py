@@ -176,5 +176,6 @@ build_and_run(
         "hash.adb",
     ],
     types_from_lkt=True,
+    generate_unparser=True,
 )
 print("Done")
