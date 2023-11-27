@@ -2377,7 +2377,7 @@ class LktTypesLoader:
                     node_type, = type_args
 
                     # TODO (eng/libadalang/langkit#729: validate that node_type
-                    # is indeed a node type
+                    # is indeed a node type.
 
                     return self.resolve_type(node_type, scope).entity
 
@@ -2925,20 +2925,65 @@ class LktTypesLoader:
             )
         )
 
-    def lower_expr(self,
-                   expr: L.Expr,
-                   env: Scope,
-                   local_vars: Optional[LocalVars]) -> AbstractExpression:
+    @staticmethod
+    def extract_call_args(
+        expr: L.CallExpr
+    ) -> tuple[list[L.Expr], dict[str, L.Expr]]:
         """
-        Lower the given expression.
+        Extract positional and keyword arguments from a call expression.
+        """
+        args = []
+        kwargs = {}
+        for arg in expr.f_args:
+            value = arg.f_value
+            if arg.f_name:
+                kwargs[arg.f_name.text] = value
+            else:
+                args.append(value)
+        return args, kwargs
 
-        :param expr: Expression to lower.
+    def lower_call_args(
+        self,
+        expr: L.CallExpr,
+        lower: Callable[[L.Expr], AbstractExpression],
+    ) -> tuple[list[AbstractExpression], dict[str, AbstractExpression]]:
+        """
+        Collect call positional and keyword arguments.
+        """
+        arg_nodes, kwarg_nodes = self.extract_call_args(expr)
+        args = [lower(v) for v in arg_nodes]
+        kwargs = {k: lower(v) for k, v in kwarg_nodes.items()}
+        return args, kwargs
+
+    def lower_method_call(
+        self,
+        call_expr: L.CallExpr,
+        env: Scope,
+        local_vars: Optional[LocalVars],
+    ) -> AbstractExpression:
+        """
+        Subroutine for "lower_expr": lower specifically a method call.
+
+        :param call_expr: Method call to lower.
         :param env: Scope to use when resolving references.
         :param local_vars: If lowering a property expression, set of local
             variables for this property.
         """
+
+        result: AbstractExpression
+
         # Counter to generate unique names
         counter = itertools.count(0)
+
+        def lower(expr: L.Expr) -> AbstractExpression:
+            """
+            Convenience wrapper around "self.lower_expr" to set the expression
+            location.
+            """
+            with AbstractExpression.with_location(
+                Location.from_lkt_node(expr)
+            ):
+                return self.lower_expr(expr, env, local_vars)
 
         def add_lambda_arg_to_scope(
             scope: Scope,
@@ -2975,21 +3020,6 @@ class LktTypesLoader:
                 )
             add_lambda_arg_to_scope(scope, arg, result)
             return result
-
-        def extract_call_args(expr: L.CallExpr) -> Tuple[List[L.Expr],
-                                                         Dict[str, L.Expr]]:
-            """
-            Extract positional and keyword arguments from a call expression.
-            """
-            args = []
-            kwargs = {}
-            for arg in expr.f_args:
-                value = arg.f_value
-                if arg.f_name:
-                    kwargs[arg.f_name.text] = value
-                else:
-                    args.append(value)
-            return args, kwargs
 
         @dataclass
         class LambdaInfo:
@@ -3108,6 +3138,372 @@ class LktTypesLoader:
             return LambdaInfo(
                 parsed_args.keyword_args, scope, lambda_args, lambda_body
             )
+
+        call_name = call_expr.f_name
+        assert isinstance(call_name, L.BaseDotExpr)
+        null_cond = isinstance(call_name, L.NullCondDottedName)
+
+        # TODO (eng/libadalang/langkit#728): introduce a pre-lowering pass to
+        # extract the list of types and their fields/methods so that we can
+        # perform validation here.
+        method_prefix = lower(call_name.f_prefix)
+        method_name = call_name.f_suffix.text
+
+        # If the method call is protected by a null conditional, prepare when
+        # we need to build the Then expression.
+        if null_cond:
+            null_cond_var = AbstractVariable(
+                names.Name("Var_Expr"), create_local=True,
+            )
+            then_prefix = method_prefix
+            method_prefix = null_cond_var
+
+        if method_name in ("all", "any"):
+            lambda_info = extract_lambda_and_kwargs(
+                call_expr, collection_iter_signature, 1, 2
+            )
+            element_arg, index_arg = lambda_info.largs
+            assert element_arg is not None
+
+            element_var = var_for_lambda_arg(
+                lambda_info.scope, element_arg, 'item'
+            )
+            index_var = (
+                None
+                if index_arg is None else
+                var_for_lambda_arg(
+                    lambda_info.scope, index_arg, 'index', T.Int
+                )
+            )
+
+            # Finally lower the expressions
+            inner_expr = self.lower_expr(
+                lambda_info.expr, lambda_info.scope, local_vars
+            )
+            result = E.Quantifier.create_expanded(
+                method_name, method_prefix, inner_expr, element_var, index_var
+            )
+
+        elif method_name == "append_rebinding":
+            parsed_args = append_rebinding_signature.match(self.ctx, call_expr)
+            old_env_expr, new_env_expr = parsed_args.positional_args
+            result = method_prefix.append_rebinding(
+                lower(old_env_expr), lower(new_env_expr)
+            )
+
+        elif method_name == "as_array":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.as_array
+
+        elif method_name == "as_int":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.as_int
+
+        elif method_name == "concat_rebindings":
+            parsed_args = concat_rebindings_signature.match(
+                self.ctx, call_expr
+            )
+            result = method_prefix.concat_rebindings(
+                lower(parsed_args.positional_args[0])
+            )
+
+        elif method_name == "do":
+            lambda_info = extract_lambda_and_kwargs(
+                call_expr, do_signature, 1, 1
+            )
+            arg_node = lambda_info.largs[0]
+            assert arg_node is not None
+
+            arg_var = var_for_lambda_arg(
+                lambda_info.scope,
+                arg_node,
+                "var_expr",
+                create_local=True,
+            )
+            then_expr = self.lower_expr(
+                lambda_info.expr, lambda_info.scope, local_vars
+            )
+
+            default_val = (
+                lower(lambda_info.kwargs["default_val"])
+                if "default_val" in lambda_info.kwargs else
+                None
+            )
+
+            result = E.Then.create_from_exprs(
+                method_prefix, then_expr, arg_var, default_val
+            )
+
+        elif method_name == "env_group":
+            parsed_args = env_group_signature.match(self.ctx, call_expr)
+            with_md_expr = parsed_args.keyword_args.get("with_md")
+            with_md = None if with_md_expr is None else lower(with_md_expr)
+            result = method_prefix.env_group(with_md=with_md)
+
+        elif method_name == "env_node":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.env_node
+
+        elif method_name == "env_orphan":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.env_orphan
+
+        elif method_name == "env_parent":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.env_parent
+
+        elif method_name == "filter":
+            lambda_info = extract_lambda_and_kwargs(
+                call_expr, collection_iter_signature, 1, 2
+            )
+            element_arg, index_arg = lambda_info.largs
+            assert element_arg is not None
+
+            element_var = var_for_lambda_arg(
+                lambda_info.scope, element_arg, "item"
+            )
+            index_var = (
+                None
+                if index_arg is None else
+                var_for_lambda_arg(
+                    lambda_info.scope, index_arg, "index", T.Int
+                )
+            )
+
+            # Finally lower the expressions
+            inner_expr = self.lower_expr(
+                lambda_info.expr, lambda_info.scope, local_vars
+            )
+            result = E.Map.create_expanded(
+                method_prefix, element_var, element_var, index_var, inner_expr
+            )
+
+        elif method_name == "filtermap":
+            # Validate arguments for ".filtermap()" itself
+            parsed_args = filtermap_signature.match(self.ctx, call_expr)
+            for arg in parsed_args.positional_args:
+                if not isinstance(arg, L.LambdaExpr):
+                    with self.ctx.lkt_context(arg):
+                        error("lambda expressions expceted")
+
+            # Validate and analyze the two lambda expressions
+            lambda_0 = parsed_args.positional_args[0]
+            assert isinstance(lambda_0, L.LambdaExpr)
+            map_scope, map_args, map_body = extract_lambda(lambda_0, 1, 2)
+            lambda_1 = parsed_args.positional_args[1]
+            assert isinstance(lambda_1, L.LambdaExpr)
+            filter_scope, filter_args, filter_body = extract_lambda(
+                lambda_1, 1, 2
+            )
+
+            # We need to have two different scopes for the two lambda
+            # expressions, but need to create common iteration variables for
+            # both. The "element" variable is always present, but the "filter"
+            # one may be present in one, two or no lambda expression.
+            assert map_args[0] is not None
+            assert filter_args[0] is not None
+            element_var = var_for_lambda_arg(map_scope, map_args[0], "item")
+            name_from_lower(self.ctx, "argument", filter_args[0].f_syn_name)
+            add_lambda_arg_to_scope(filter_scope, filter_args[0], element_var)
+
+            index_var = None
+            if map_args[1] is not None:
+                index_var = var_for_lambda_arg(
+                    map_scope, map_args[1], "index", T.Int
+                )
+                if filter_args[1] is not None:
+                    name_from_lower(
+                        self.ctx, "argument", filter_args[1].f_syn_name
+                    )
+                    add_lambda_arg_to_scope(
+                        filter_scope, filter_args[1], index_var
+                    )
+            elif filter_args[1] is not None:
+                index_var = var_for_lambda_arg(
+                    filter_scope, filter_args[1], "Index", T.Int
+                )
+
+            # Lower their expressions
+            map_expr = self.lower_expr(map_body, map_scope, local_vars)
+            filter_expr = self.lower_expr(
+                filter_body, filter_scope, local_vars
+            )
+
+            return E.Map.create_expanded(
+                collection=method_prefix,
+                expr=map_expr,
+                element_var=element_var,
+                index_var=index_var,
+                filter_expr=filter_expr,
+            )
+
+        elif method_name == "find":
+            lambda_info = extract_lambda_and_kwargs(
+                call_expr, collection_iter_signature, 1, 1
+            )
+            elt_arg = lambda_info.largs[0]
+            assert elt_arg is not None
+
+            elt_var = var_for_lambda_arg(lambda_info.scope, elt_arg, 'item')
+            inner_expr = self.lower_expr(
+                lambda_info.expr, lambda_info.scope, local_vars
+            )
+
+            result = E.Find.create_expanded(
+                method_prefix, inner_expr, elt_var, index_var=None
+            )
+        elif method_name in ("get", "get_first"):
+            parsed_args = get_signature.match(self.ctx, call_expr)
+            symbol = lower(parsed_args.positional_args[0])
+
+            lookup_expr = parsed_args.keyword_args.get("lookup")
+            lookup: AbstractExpression | None = (
+                None if lookup_expr is None else lower(lookup_expr)
+            )
+
+            from_node_expr = parsed_args.keyword_args.get("from")
+            from_node: AbstractExpression | None = (
+                None if from_node_expr is None else lower(from_node_expr)
+            )
+
+            categories_expr = parsed_args.keyword_args.get("categories")
+            categories: AbstractExpression | None = (
+                None if categories_expr is None else lower(categories_expr)
+            )
+
+            return (
+                method_prefix.get(symbol, lookup, from_node, categories)
+                if method_name == "get" else
+                method_prefix.get_first(symbol, lookup, from_node, categories)
+            )
+
+        elif method_name == "get_value":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.get_value
+
+        elif method_name == "is_visible_from":
+            parsed_args = is_visible_from_signature.match(self.ctx, call_expr)
+            result = method_prefix.is_visible_from(
+                lower(parsed_args.positional_args[0])
+            )
+
+        elif method_name == "length":
+            empty_signature.match(self.ctx, call_expr)
+            result = getattr(method_prefix, "length")
+
+        elif method_name in ("map", "mapcat"):
+            lambda_info = extract_lambda_and_kwargs(
+                call_expr, collection_iter_signature, 1, 2
+            )
+            element_arg, index_arg = lambda_info.largs
+            assert element_arg is not None
+
+            element_var = var_for_lambda_arg(
+                lambda_info.scope, element_arg, 'item'
+            )
+            index_var = (
+                None
+                if index_arg is None else
+                var_for_lambda_arg(
+                    lambda_info.scope, index_arg, 'index', T.Int
+                )
+            )
+
+            # Finally lower the expressions
+            inner_expr = self.lower_expr(
+                lambda_info.expr, lambda_info.scope, local_vars
+            )
+            result = E.Map.create_expanded(
+                method_prefix,
+                inner_expr,
+                element_var,
+                index_var,
+                do_concat=method_name == "mapcat",
+            )
+
+        elif method_name == "rebind_env":
+            parsed_args = rebind_env_signature.match(self.ctx, call_expr)
+            result = method_prefix.rebind_env(
+                lower(parsed_args.positional_args[0])
+            )
+
+        elif method_name == "singleton":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.singleton
+
+        elif method_name == "solve":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.solve
+
+        elif method_name == "take_while":
+            lambda_info = extract_lambda_and_kwargs(
+                call_expr, collection_iter_signature, 1, 2
+            )
+            element_arg, index_arg = lambda_info.largs
+            assert element_arg is not None
+
+            element_var = var_for_lambda_arg(
+                lambda_info.scope, element_arg, 'item'
+            )
+            index_var = (
+                None
+                if index_arg is None else
+                var_for_lambda_arg(
+                    lambda_info.scope, index_arg, "index", T.Int
+                )
+            )
+            inner_expr = self.lower_expr(
+                lambda_info.expr, lambda_info.scope, local_vars
+            )
+            result = E.Map.create_expanded(
+                method_prefix,
+                element_var,
+                element_var,
+                index_var,
+                take_while_expr=inner_expr,
+            )
+
+        elif method_name == "to_symbol":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.to_string  # type: ignore
+
+        elif method_name == "unique":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.unique
+
+        else:
+            # Otherwise, this call must be a method invocation. Note
+            # that not all methods map to actual field access in the
+            # generated code. For instance, calls to the String.join
+            # built-in method are turned into Join instances, so the
+            # "callee" variable below is not necessarily a FieldAccess
+            # instance.
+            args, kwargs = self.lower_call_args(call_expr, lower)
+            result = getattr(method_prefix, method_name)
+            result = result(*args, **kwargs)
+
+        return (
+            E.Then.create_from_exprs(
+                base=then_prefix,
+                then_expr=result,
+                var_expr=null_cond_var,
+            )
+            if null_cond else
+            result
+        )
+
+    def lower_expr(self,
+                   expr: L.Expr,
+                   env: Scope,
+                   local_vars: Optional[LocalVars]) -> AbstractExpression:
+        """
+        Lower the given expression.
+
+        :param expr: Expression to lower.
+        :param env: Scope to use when resolving references.
+        :param local_vars: If lowering a property expression, set of local
+            variables for this property.
+        """
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """
@@ -3290,16 +3686,6 @@ class LktTypesLoader:
                             " the call itself",
                         )
 
-                def lower_args() -> Tuple[List[AbstractExpression],
-                                          Dict[str, AbstractExpression]]:
-                    """
-                    Collect call positional and keyword arguments.
-                    """
-                    arg_nodes, kwarg_nodes = extract_call_args(call_expr)
-                    args = [lower(v) for v in arg_nodes]
-                    kwargs = {k: lower(v) for k, v in kwarg_nodes.items()}
-                    return args, kwargs
-
                 def lower_new(type_ref: TypeRepo.Defer) -> AbstractExpression:
                     """
                     Consider that this call creates a new struct, return the
@@ -3307,7 +3693,9 @@ class LktTypesLoader:
                     """
                     # Non-struct/node types have their own constructor
                     if type_ref.get() == T.RefCategories:
-                        arg_nodes, kwarg_nodes = extract_call_args(call_expr)
+                        arg_nodes, kwarg_nodes = self.extract_call_args(
+                            call_expr
+                        )
                         check_source_language(
                             len(arg_nodes) == 0,
                             "Positional arguments not allowed for"
@@ -3328,7 +3716,7 @@ class LktTypesLoader:
                             **enabled_categories,
                         )
                     else:
-                        args, kwargs = lower_args()
+                        args, kwargs = self.lower_call_args(call_expr, lower)
                         check_source_language(
                             len(args) == 0,
                             "Positional arguments not allowed for struct"
@@ -3408,404 +3796,7 @@ class LktTypesLoader:
                     with self.ctx.lkt_context(call_name):
                         error("invalid call prefix")
 
-                null_cond = isinstance(call_name, L.NullCondDottedName)
-
-                # TODO (eng/libadalang/langkit#728): introduce a pre-lowering
-                # pass to extract the list of types and their fields/methods so
-                # that we can perform validation here.
-                method_prefix = lower(call_name.f_prefix)
-                method_name = call_name.f_suffix.text
-
-                # If the method call is protected by a null conditional,
-                # prepare when we need to build the Then expression.
-                if null_cond:
-                    null_cond_var = AbstractVariable(
-                        names.Name("Var_Expr"), create_local=True,
-                    )
-                    then_prefix = method_prefix
-                    method_prefix = null_cond_var
-
-                if method_name in ("all", "any"):
-                    lambda_info = extract_lambda_and_kwargs(
-                        call_expr, collection_iter_signature, 1, 2
-                    )
-                    element_arg, index_arg = lambda_info.largs
-                    assert element_arg is not None
-
-                    element_var = var_for_lambda_arg(
-                        lambda_info.scope, element_arg, 'item'
-                    )
-                    index_var = (
-                        None
-                        if index_arg is None else
-                        var_for_lambda_arg(
-                            lambda_info.scope, index_arg, 'index', T.Int
-                        )
-                    )
-
-                    # Finally lower the expressions
-                    inner_expr = self.lower_expr(
-                        lambda_info.expr, lambda_info.scope, local_vars
-                    )
-                    result = E.Quantifier.create_expanded(
-                        method_name,
-                        method_prefix,
-                        inner_expr,
-                        element_var,
-                        index_var,
-                    )
-
-                elif method_name == "append_rebinding":
-                    parsed_args = append_rebinding_signature.match(
-                        self.ctx, call_expr
-                    )
-                    old_env_expr, new_env_expr = parsed_args.positional_args
-                    result = method_prefix.append_rebinding(
-                        lower(old_env_expr), lower(new_env_expr)
-                    )
-
-                elif method_name == "as_array":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.as_array
-
-                elif method_name == "as_int":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.as_int
-
-                elif method_name == "concat_rebindings":
-                    parsed_args = concat_rebindings_signature.match(
-                        self.ctx, call_expr
-                    )
-                    result = method_prefix.concat_rebindings(
-                        lower(parsed_args.positional_args[0])
-                    )
-
-                elif method_name == "do":
-                    lambda_info = extract_lambda_and_kwargs(
-                        call_expr, do_signature, 1, 1
-                    )
-                    arg_node = lambda_info.largs[0]
-                    assert arg_node is not None
-
-                    arg_var = var_for_lambda_arg(
-                        lambda_info.scope,
-                        arg_node,
-                        "var_expr",
-                        create_local=True,
-                    )
-                    then_expr = self.lower_expr(
-                        lambda_info.expr, lambda_info.scope, local_vars
-                    )
-
-                    default_val = (
-                        lower(lambda_info.kwargs["default_val"])
-                        if "default_val" in lambda_info.kwargs else
-                        None
-                    )
-
-                    result = E.Then.create_from_exprs(
-                        method_prefix,
-                        then_expr,
-                        arg_var,
-                        default_val,
-                    )
-
-                elif method_name == "env_group":
-                    parsed_args = env_group_signature.match(
-                        self.ctx, call_expr
-                    )
-                    with_md_expr = parsed_args.keyword_args.get("with_md")
-                    with_md = (
-                        None if with_md_expr is None else lower(with_md_expr)
-                    )
-                    result = method_prefix.env_group(with_md=with_md)
-
-                elif method_name == "env_node":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.env_node
-
-                elif method_name == "env_orphan":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.env_orphan
-
-                elif method_name == "env_parent":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.env_parent
-
-                elif method_name == "filter":
-                    lambda_info = extract_lambda_and_kwargs(
-                        call_expr, collection_iter_signature, 1, 2
-                    )
-                    element_arg, index_arg = lambda_info.largs
-                    assert element_arg is not None
-
-                    element_var = var_for_lambda_arg(
-                        lambda_info.scope, element_arg, "item"
-                    )
-                    index_var = (
-                        None
-                        if index_arg is None else
-                        var_for_lambda_arg(
-                            lambda_info.scope, index_arg, "index", T.Int
-                        )
-                    )
-
-                    # Finally lower the expressions
-                    inner_expr = self.lower_expr(
-                        lambda_info.expr, lambda_info.scope, local_vars
-                    )
-                    result = E.Map.create_expanded(
-                        method_prefix,
-                        element_var,
-                        element_var,
-                        index_var,
-                        inner_expr,
-                    )
-
-                elif method_name == "filtermap":
-                    # Validate arguments for ".filtermap()" itself
-                    parsed_args = filtermap_signature.match(
-                        self.ctx, call_expr
-                    )
-                    for arg in parsed_args.positional_args:
-                        if not isinstance(arg, L.LambdaExpr):
-                            with self.ctx.lkt_context(arg):
-                                error("lambda expressions expceted")
-
-                    # Validate and analyze the two lambda expressions
-                    lambda_0 = parsed_args.positional_args[0]
-                    assert isinstance(lambda_0, L.LambdaExpr)
-                    map_scope, map_args, map_body = extract_lambda(
-                        lambda_0, 1, 2
-                    )
-                    lambda_1 = parsed_args.positional_args[1]
-                    assert isinstance(lambda_1, L.LambdaExpr)
-                    filter_scope, filter_args, filter_body = extract_lambda(
-                        lambda_1, 1, 2
-                    )
-
-                    # We need to have two different scopes for the two lambda
-                    # expressions, but need to create common iteration
-                    # variables for both. The "element" variable is always
-                    # present, but the "fitler" one may be present in one, two
-                    # or no lambda expression.
-                    assert map_args[0] is not None
-                    assert filter_args[0] is not None
-                    element_var = var_for_lambda_arg(
-                        map_scope, map_args[0], "item"
-                    )
-                    name_from_lower(
-                        self.ctx, "argument", filter_args[0].f_syn_name
-                    )
-                    add_lambda_arg_to_scope(
-                        filter_scope, filter_args[0], element_var
-                    )
-
-                    index_var = None
-                    if map_args[1] is not None:
-                        index_var = var_for_lambda_arg(
-                            map_scope, map_args[1], "index", T.Int
-                        )
-                        if filter_args[1] is not None:
-                            name_from_lower(
-                                self.ctx, "argument", filter_args[1].f_syn_name
-                            )
-                            add_lambda_arg_to_scope(
-                                filter_scope, filter_args[1], index_var
-                            )
-                    elif filter_args[1] is not None:
-                        index_var = var_for_lambda_arg(
-                            filter_scope, filter_args[1], "Index", T.Int
-                        )
-
-                    # Lower their expressions
-                    map_expr = self.lower_expr(
-                        map_body, map_scope, local_vars
-                    )
-                    filter_expr = self.lower_expr(
-                        filter_body, filter_scope, local_vars
-                    )
-
-                    return E.Map.create_expanded(
-                        collection=method_prefix,
-                        expr=map_expr,
-                        element_var=element_var,
-                        index_var=index_var,
-                        filter_expr=filter_expr,
-                    )
-
-                elif method_name == "find":
-                    lambda_info = extract_lambda_and_kwargs(
-                        call_expr, collection_iter_signature, 1, 1
-                    )
-                    elt_arg = lambda_info.largs[0]
-                    assert elt_arg is not None
-
-                    elt_var = var_for_lambda_arg(
-                        lambda_info.scope, elt_arg, 'item'
-                    )
-                    inner_expr = self.lower_expr(
-                        lambda_info.expr, lambda_info.scope, local_vars
-                    )
-
-                    result = E.Find.create_expanded(
-                        method_prefix, inner_expr, elt_var, index_var=None
-                    )
-                elif method_name in ("get", "get_first"):
-                    parsed_args = get_signature.match(self.ctx, call_expr)
-                    symbol = lower(parsed_args.positional_args[0])
-
-                    lookup_expr = parsed_args.keyword_args.get("lookup")
-                    lookup: AbstractExpression | None = (
-                        None
-                        if lookup_expr is None else
-                        lower(lookup_expr)
-                    )
-
-                    from_node_expr = parsed_args.keyword_args.get("from")
-                    from_node: AbstractExpression | None = (
-                        None
-                        if from_node_expr is None else
-                        lower(from_node_expr)
-                    )
-
-                    categories_expr = parsed_args.keyword_args.get(
-                        "categories"
-                    )
-                    categories: AbstractExpression | None = (
-                        None
-                        if categories_expr is None else
-                        lower(categories_expr)
-                    )
-
-                    return (
-                        method_prefix.get(
-                            symbol, lookup, from_node, categories
-                        )
-                        if method_name == "get" else
-                        method_prefix.get_first(
-                            symbol, lookup, from_node, categories
-                        )
-                    )
-
-                elif method_name == "get_value":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.get_value
-
-                elif method_name == "is_visible_from":
-                    parsed_args = is_visible_from_signature.match(
-                        self.ctx, call_expr
-                    )
-                    result = method_prefix.is_visible_from(
-                        lower(parsed_args.positional_args[0])
-                    )
-
-                elif method_name == "length":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = getattr(method_prefix, "length")
-
-                elif method_name in ("map", "mapcat"):
-                    lambda_info = extract_lambda_and_kwargs(
-                        call_expr, collection_iter_signature, 1, 2
-                    )
-                    element_arg, index_arg = lambda_info.largs
-                    assert element_arg is not None
-
-                    element_var = var_for_lambda_arg(
-                        lambda_info.scope, element_arg, 'item'
-                    )
-                    index_var = (
-                        None
-                        if index_arg is None else
-                        var_for_lambda_arg(
-                            lambda_info.scope, index_arg, 'index', T.Int
-                        )
-                    )
-
-                    # Finally lower the expressions
-                    inner_expr = self.lower_expr(
-                        lambda_info.expr, lambda_info.scope, local_vars
-                    )
-                    result = E.Map.create_expanded(
-                        method_prefix,
-                        inner_expr,
-                        element_var,
-                        index_var,
-                        do_concat=method_name == "mapcat",
-                    )
-
-                elif method_name == "rebind_env":
-                    parsed_args = rebind_env_signature.match(
-                        self.ctx, call_expr
-                    )
-                    result = method_prefix.rebind_env(
-                        lower(parsed_args.positional_args[0])
-                    )
-
-                elif method_name == "singleton":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.singleton
-
-                elif method_name == "solve":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.solve
-
-                elif method_name == "take_while":
-                    lambda_info = extract_lambda_and_kwargs(
-                        call_expr, collection_iter_signature, 1, 2
-                    )
-                    element_arg, index_arg = lambda_info.largs
-                    assert element_arg is not None
-
-                    element_var = var_for_lambda_arg(
-                        lambda_info.scope, element_arg, 'item'
-                    )
-                    index_var = (
-                        None
-                        if index_arg is None else
-                        var_for_lambda_arg(
-                            lambda_info.scope, index_arg, "index", T.Int
-                        )
-                    )
-                    inner_expr = self.lower_expr(
-                        lambda_info.expr, lambda_info.scope, local_vars
-                    )
-                    result = E.Map.create_expanded(
-                        method_prefix,
-                        element_var,
-                        element_var,
-                        index_var,
-                        take_while_expr=inner_expr,
-                    )
-
-                elif method_name == "to_symbol":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.to_string  # type: ignore
-
-                elif method_name == "unique":
-                    empty_signature.match(self.ctx, call_expr)
-                    result = method_prefix.unique
-
-                else:
-                    # Otherwise, this call must be a method invocation. Note
-                    # that not all methods map to actual field access in the
-                    # generated code. For instance, calls to the String.join
-                    # built-in method are turned into Join instances, so the
-                    # "callee" variable below is not necessarily a FieldAccess
-                    # instance.
-                    args, kwargs = lower_args()
-                    result = getattr(method_prefix, method_name)
-                    result = result(*args, **kwargs)
-
-                return (
-                    E.Then.create_from_exprs(
-                        base=then_prefix,
-                        then_expr=result,
-                        var_expr=null_cond_var,
-                    )
-                    if null_cond else
-                    result
-                )
+                return self.lower_method_call(call_expr, env, local_vars)
 
             elif isinstance(expr, L.CastExpr):
                 subexpr = lower(expr.f_expr)
@@ -4041,7 +4032,7 @@ class LktTypesLoader:
                     error(f"exception expected, got {entity.diagnostic_name}")
 
                 # Get the exception message argument
-                args_nodes, kwargs_nodes = extract_call_args(cons_expr)
+                args_nodes, kwargs_nodes = self.extract_call_args(cons_expr)
                 msg_expr: Optional[L.Expr] = None
                 if args_nodes:
                     msg_expr = args_nodes.pop()
