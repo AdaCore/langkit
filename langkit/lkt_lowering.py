@@ -1051,8 +1051,8 @@ class FunAnnotations(ParsedAnnotations):
     export: bool
     external: ExternalAnnotationSpec.Value | None
     final: bool
-    ignore_unused: bool
-    ignore_warn_on_node: bool
+    ignored: bool
+    no_node_warning: bool
     memoized: bool
     trace: bool
     with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
@@ -1063,8 +1063,8 @@ class FunAnnotations(ParsedAnnotations):
         FlagAnnotationSpec('export'),
         ExternalAnnotationSpec(),
         FlagAnnotationSpec('final'),
-        FlagAnnotationSpec('ignore_unused'),
-        FlagAnnotationSpec('ignore_warn_on_node'),
+        FlagAnnotationSpec('ignored'),
+        FlagAnnotationSpec('no_node_warning'),
         FlagAnnotationSpec('memoized'),
         FlagAnnotationSpec('trace'),
         WithDynvarsAnnotationSpec(),
@@ -4202,10 +4202,10 @@ class LktTypesLoader:
             uses_entity_info=uses_entity_info,
             uses_envs=uses_envs,
             optional_entity_info=False,
-            warn_on_unused=not annotations.ignore_unused,
-            # When the @ignore_warn_on_node annotation is missing, use "None"
-            # to inherit this annotation.
-            ignore_warn_on_node=annotations.ignore_warn_on_node or None,
+            warn_on_unused=not annotations.ignored,
+            # When the @no_node_warning annotation is missing, use "None" to
+            # inherit this annotation.
+            ignore_warn_on_node=annotations.no_node_warning or None,
             call_non_memoizable_because=(
                 annotations.call_non_memoizable_because
             ),

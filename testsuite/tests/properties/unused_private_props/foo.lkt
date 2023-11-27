@@ -12,7 +12,7 @@ class FooNode implements Node[FooNode] {
     fun as_expr(): Expression = node.as[Expression]
 
     # This property is unused but the user asked explicitly to not warn
-    @ignore_unused fun as_expr_2(): Expression = node.as[Expression]
+    @ignored fun as_expr_2(): Expression = node.as[Expression]
 }
 
 @abstract class Expression: FooNode {

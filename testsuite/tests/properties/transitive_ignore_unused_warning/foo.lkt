@@ -1,6 +1,6 @@
 # Check that compilation emits warnings for properties that are transitively
 # unused by public properties or by properties that are annotated with
-# @ignore_unused.
+# @ignored.
 
 import lexer_example
 
@@ -12,11 +12,11 @@ grammar foo_grammar {
 class FooNode implements Node[FooNode] {
 
     # We should have no warnings for the whole subgraph of properties here,
-    # since the root of the callgraph (the "c" property) has @ignore_unused.
+    # since the root of the callgraph (the "c" property) has @ignored.
 
     fun a(): Int = 1
     fun b(): Int = node.a
-    @ignore_unused fun c(): Int = node.b
+    @ignored fun c(): Int = node.b
 
     # We should get a warning for this one though, which is out of the
     # subgraph.

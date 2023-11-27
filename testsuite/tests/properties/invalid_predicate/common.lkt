@@ -12,7 +12,7 @@ class FooNode implements Node[FooNode] {
     var1: LogicVar
     var2: LogicVar
 
-    @ignore_unused fun pred1(n: Entity[FooNode]): Bool = n.is_null
-    @ignore_unused fun pred2(n: Entity[FooNode], b: Bool = false): Bool =
+    @ignored fun pred1(n: Entity[FooNode]): Bool = n.is_null
+    @ignored fun pred2(n: Entity[FooNode], b: Bool = false): Bool =
         n.is_null and b
 }

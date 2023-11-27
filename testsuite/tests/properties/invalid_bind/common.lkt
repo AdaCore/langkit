@@ -13,7 +13,7 @@ class FooNode implements Node[FooNode] {
 }
 
 class BarNode: FooNode {
-    @ignore_unused fun main_prop(): Equation = {
+    @ignored fun main_prop(): Equation = {
         bind dyn_node1 = node;
         %eq(node.type_var, node.ref_var, conv_prop=BazNode.conv_prop)
     }
