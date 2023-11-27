@@ -496,7 +496,8 @@ def create_root_scope(ctx: CompileCtx) -> Scope:
     """
     Create and return a root scope.
 
-    TODO: once the DSL is no more, use the same root scope in:
+    TODO (eng/libadalang/langkit#704): once the DSL is no more, use the same
+    root scope in:
 
     * the lexer lowering pass,
     * the grammar lowering pass,
@@ -2251,8 +2252,8 @@ class LktTypesLoader:
         for entity in self.root_scope.mapping.items():
             if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
                 entity._type = resolve_type(entity.defer)
-                # TODO: resolve all deferred types (member types and argument
-                # types).
+                # TODO (eng/libadalang/langkit#728): resolve all deferred types
+                # (member types and argument types).
 
         #
         # EXPR_LOWERING
@@ -2335,11 +2336,11 @@ class LktTypesLoader:
                         )
                     root_node_ref, element_type_ref = type_args
 
-                    # TODO: validate that root_node_ref is the root node and
-                    # that element_type_ref is a node type. The only way to
-                    # validate this currently is to perform lowering, so we
-                    # have a chicken and egg problem: we may already be
-                    # lowering the root node.
+                    # TODO (eng/libadalang/langkit#729): validate that
+                    # root_node_ref is the root node and that element_type_ref
+                    # is a node type. The only way to validate this currently
+                    # is to perform lowering, so we have a chicken and egg
+                    # problem: we may already be lowering the root node.
                     del root_node_ref
 
                     return self.resolve_type(element_type_ref, scope).list
@@ -2352,8 +2353,8 @@ class LktTypesLoader:
                         )
                     root_node_ref, = type_args
 
-                    # TODO: validate that root_node_ref is the root node (see
-                    # above).
+                    # TODO (eng/libadalang/langkit#729): validate that
+                    # root_node_ref is the root node (see above).
                     del root_node_ref
 
                     return T.AnalysisUnit
@@ -2375,7 +2376,8 @@ class LktTypesLoader:
                         )
                     node_type, = type_args
 
-                    # TODO: validate that node_type is indeed a node type
+                    # TODO (eng/libadalang/langkit#729: validate that node_type
+                    # is indeed a node type
 
                     return self.resolve_type(node_type, scope).entity
 
@@ -2396,8 +2398,8 @@ class LktTypesLoader:
                         )
                     root_node_ref, = type_args
 
-                    # TODO: validate that root_node_ref is the root node (see
-                    # above).
+                    # TODO (eng/libadalang/langkit#729: validate that
+                    # root_node_ref is the root node (see above).
                     del root_node_ref
 
                     return T.LexicalEnv
@@ -3053,8 +3055,9 @@ class LktTypesLoader:
             for i, larg in enumerate(expr.f_params):
                 lambda_args[i] = larg
                 with self.ctx.lkt_context(larg):
-                    # TODO: accepting type annotations and validating them
-                    # could be useful for language spec readability.
+                    # TODO (eng/libadalang/langkit#730): accepting type
+                    # annotations and validating them could be useful for
+                    # language spec readability.
                     check_source_language(
                         larg.f_decl_type is None,
                         "argument type must be implicit",
@@ -3278,7 +3281,8 @@ class LktTypesLoader:
                 call_expr = expr
                 call_name = call_expr.f_name
 
-                # TODO: get rid of this syntax? It is never legal for now...
+                # TODO (eng/libadalang/langkit#731): get rid of this syntax? It
+                # is never legal for now...
                 if isinstance(expr, L.NullCondCallExpr):
                     with self.ctx.lkt_context(expr):
                         error(
@@ -3406,9 +3410,9 @@ class LktTypesLoader:
 
                 null_cond = isinstance(call_name, L.NullCondDottedName)
 
-                # TODO: introduce a pre-lowering pass to extract the list of
-                # types and their fields/methods so that we can perform
-                # validation here.
+                # TODO (eng/libadalang/langkit#728): introduce a pre-lowering
+                # pass to extract the list of types and their fields/methods so
+                # that we can perform validation here.
                 method_prefix = lower(call_name.f_prefix)
                 method_name = call_name.f_suffix.text
 
