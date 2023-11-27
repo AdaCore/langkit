@@ -3069,6 +3069,26 @@ public final class ${ctx.lib_name.camel} {
             return this.eventHandler;
         }
 
+        // ----- Class methods -----
+
+        /**
+         * Increase the reference counter of the given context.
+         *
+         * @param context The context to increase the reference counter of.
+         */
+        private static void increaseRefCounter(
+            final AnalysisContext context
+        ) {
+            // Increase the context reference counter of the context if not null
+            if(!context.reference.isNull()) {
+                if(ImageInfo.inImageCode()) {
+                    NI_LIB.${nat("context_incref")}(context.reference.ni());
+                } else {
+                    JNI_LIB.${nat("context_incref")}(context.reference.jni());
+                }
+            }
+        }
+
         // ----- Instance methods -----
 
         /**
@@ -3257,24 +3277,6 @@ public final class ${ctx.lib_name.camel} {
             return this.getUnitFromProvider(name, kind, "", false);
         }
         % endif
-
-        /**
-         * Increase the reference counter of the given context.
-         *
-         * @param context The context to increase the reference counter of.
-         */
-        private static void increaseRefCounter(
-            final AnalysisContext context
-        ) {
-            // Increase the context reference counter of the context if not null
-            if(!context.reference.isNull()) {
-                if(ImageInfo.inImageCode()) {
-                    NI_LIB.${nat("context_incref")}(context.reference.ni());
-                } else {
-                    JNI_LIB.${nat("context_incref")}(context.reference.jni());
-                }
-            }
-        }
 
         /** @see java.lang.AutoCloseable#close() */
         @Override
