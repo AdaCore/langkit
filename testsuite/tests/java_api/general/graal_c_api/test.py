@@ -12,7 +12,7 @@ common  # avoid pyflakes "unused" warning
 
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
-    java_main="BindingsTests",
+    ni_main="BindingsTests",
     default_unit_provider=LibraryEntity(
         "Libfoolang.Helpers", "Create_Unit_Provider",
     ),
