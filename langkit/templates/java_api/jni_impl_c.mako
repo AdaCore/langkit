@@ -802,7 +802,7 @@ const char * to_c_string(
     return (*env)->GetStringUTFChars(env, j_string, NULL);
 }
 
-// Release the given C string assocaited with the given Java string
+// Release the given C string associated with the given Java string
 void release_c_string(
     JNIEnv *env,
     jstring j_string,

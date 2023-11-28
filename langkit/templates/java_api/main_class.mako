@@ -322,8 +322,6 @@ public final class ${ctx.lib_name.camel} {
 
     /**
      * Convert a C Langkit exception to the LangkitException class.
-
-     * @param
      */
     private static LangkitException wrapException(
         final LangkitExceptionNative exc
@@ -807,7 +805,7 @@ public final class ${ctx.lib_name.camel} {
         % endfor
         ;
 
-        // ----- Class attributes
+        // ----- Class attributes -----
 
         /** Singleton that represents the none expcetion kind. */
         public static final ExceptionKind NONE =
@@ -1820,7 +1818,7 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Class attributes -----
 
-        /** Singleton that represents the none diagnositc. */
+        /** Singleton that represents the none diagnostic. */
         public static final Diagnostic NONE = new Diagnostic(
             SourceLocationRange.NONE,
             Text.NONE
@@ -1873,8 +1871,8 @@ public final class ${ctx.lib_name.camel} {
         /**
          * Wrap a pointer to a native diagnostic.
          *
-         * @param pointer The pointer to the native diagnositc.
-         * @return The wrapped diagnositc.
+         * @param pointer The pointer to the native diagnostic.
+         * @return The wrapped diagnostic.
          */
         static Diagnostic wrap(
             final Pointer pointer
@@ -1886,7 +1884,7 @@ public final class ${ctx.lib_name.camel} {
          * Wrap a diagnostic native value in the Java class.
          *
          * @param diagnosticNative The diagnostic NI native value.
-         * @return The newly wrapped diagnositc.
+         * @return The newly wrapped diagnostic.
          */
         static Diagnostic wrap(
             final DiagnosticNative diagnosticNative
@@ -2049,7 +2047,7 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
-    ${c_doc('langkit.unit_provider_type')}
+    ${java_doc('langkit.unit_provider_type', 4)}
     public static final class UnitProvider implements AutoCloseable {
 
         // ----- Class attributes -----
@@ -2141,7 +2139,7 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
-    ${java_doc('langkit.event_handler_type')}
+    ${java_doc('langkit.event_handler_type', 4)}
     public static final class EventHandler implements AutoCloseable {
 
         // ----- Class attributes -----
@@ -3551,9 +3549,9 @@ public final class ${ctx.lib_name.camel} {
         }
 
         /**
-         * Get the list of assiated diagnositcs. Those are parsing errors.
+         * Get the list of associated diagnostics. Those are parsing errors.
          *
-         * @return The diagnositcs of the unit.
+         * @return The diagnostics of the unit.
          */
         public List<Diagnostic> getDiagnostics() {
             final int diagnosticCount;
