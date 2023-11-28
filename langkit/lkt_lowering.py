@@ -3022,7 +3022,7 @@ class LktTypesLoader:
             return result
 
         @dataclass
-        class LambdaInfo:
+        class BuiltinCallInfo:
             """
             Information about the call to a builtin operation that takes a
             lambda as the first argument, plus optional keyword arguments.
@@ -3109,7 +3109,7 @@ class LktTypesLoader:
             signature: FunctionSignature,
             min_lambda_args: int,
             max_lambda_args: int | None = None,
-        ) -> LambdaInfo:
+        ) -> BuiltinCallInfo:
             """
             Extract arguments from a call expression, expecting the first
             positional argument to be a lambda expression.
@@ -3135,7 +3135,7 @@ class LktTypesLoader:
                 lambda_expr, min_lambda_args, max_lambda_args
             )
 
-            return LambdaInfo(
+            return BuiltinCallInfo(
                 parsed_args.keyword_args, scope, lambda_args, lambda_body
             )
 
