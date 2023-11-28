@@ -90,8 +90,8 @@ unit_compare (const void *left, const void *right)
   char *right_basename;
   int result;
 
-  left_urh = *(foo_analysis_unit *) left;
-  right_urh = *(foo_analysis_unit *) right;
+  left_urh = *(foo_unit_rewriting_handle *) left;
+  right_urh = *(foo_unit_rewriting_handle *) right;
 
   left_unit = foo_rewriting_handle_to_unit (left_urh);
   abort_on_exception ();

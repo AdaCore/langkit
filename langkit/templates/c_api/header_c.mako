@@ -6,7 +6,15 @@
 <%namespace name="astnode_types"  file="astnode_types_c.mako" />
 <%namespace name="exts"           file="../extensions.mako" />
 
-<% entity_type = root_entity.c_type(capi).name %>
+<%
+    entity_type = root_entity.c_type(capi).name
+
+    def define_opaque_ptr(name):
+        """
+        Return a type declaration for an opaque pointer with the given name.
+        """
+        return f"typedef struct {name}__struct *{name};"
+%>
 
 #ifndef ${capi.header_guard_id}
 #define ${capi.header_guard_id}
@@ -30,7 +38,7 @@ typedef struct
 } *${analysis_unit_type};
 
 ${c_doc('langkit.node_type')}
-typedef void* ${node_type};
+${define_opaque_ptr(node_type)}
 
 ${c_doc('langkit.node_kind_type')}
 typedef enum {
@@ -62,7 +70,7 @@ typedef struct {
 } *${string_type};
 
 ${c_doc('langkit.env_rebindings_type')}
-typedef void *${env_rebindings_type};
+${define_opaque_ptr(env_rebindings_type)}
 
 typedef uint8_t ${bool_type};
 
@@ -92,7 +100,7 @@ typedef struct {
 } ${text_type};
 
 ${c_doc('langkit.big_integer_type')}
-typedef void *${big_integer_type};
+${define_opaque_ptr(big_integer_type)}
 
 ${c_doc('langkit.token_kind')}
 typedef enum {
@@ -197,7 +205,7 @@ ${iterator_types.incomplete_decl(T.entity.iterator)}
  */
 
 ${c_doc('langkit.event_handler_type')}
-typedef void *${event_handler_type};
+${define_opaque_ptr(event_handler_type)}
 
 ${c_doc('langkit.event_handler_unit_requested_callback')}
 typedef void (*${event_handler_unit_requested_type})(
@@ -225,7 +233,7 @@ typedef void (*${event_handler_unit_parsed_type})(
  */
 
 ${c_doc('langkit.file_reader_type')}
-typedef void *${file_reader_type};
+${define_opaque_ptr(file_reader_type)}
 
 ${c_doc('langkit.file_reader_destroy_type')}
 typedef void (*${file_reader_destroy_type})(void *data);
@@ -245,7 +253,7 @@ typedef void (*${file_reader_read_type})(
  */
 
 ${c_doc('langkit.unit_provider_type')}
-typedef void *${unit_provider_type};
+${define_opaque_ptr(unit_provider_type)}
 
 /*
  * Types for introspection
@@ -264,13 +272,13 @@ typedef enum {
  */
 
 ${c_doc('langkit.rewriting.rewriting_handle_type')}
-typedef void *${rewriting_handle_type};
+${define_opaque_ptr(rewriting_handle_type)}
 
 ${c_doc('langkit.rewriting.unit_rewriting_handle_type')}
-typedef void *${unit_rewriting_handle_type};
+${define_opaque_ptr(unit_rewriting_handle_type)}
 
 ${c_doc('langkit.rewriting.node_rewriting_handle_type')}
-typedef void *${node_rewriting_handle_type};
+${define_opaque_ptr(node_rewriting_handle_type)}
 
 ${c_doc('langkit.rewriting.apply_result_type')}
 typedef struct {
@@ -735,7 +743,7 @@ ${c_doc('langkit.rewriting.set_root')}
 extern void
 ${capi.get_name('rewriting_unit_set_root')}(
     ${unit_rewriting_handle_type} handle,
-    ${unit_rewriting_handle_type} root
+    ${node_rewriting_handle_type} root
 );
 
 ${c_doc('langkit.rewriting.unit_unparse')}
@@ -915,14 +923,14 @@ ${capi.get_name('rewriting_clone')}(${node_rewriting_handle_type} handle);
 ${c_doc('langkit.rewriting.create_node')}
 extern ${node_rewriting_handle_type}
 ${capi.get_name('rewriting_create_node')}(
-    ${node_rewriting_handle_type} handle,
+    ${rewriting_handle_type} handle,
     ${node_kind_type} kind
 );
 
 ${c_doc('langkit.rewriting.create_token_node')}
 extern ${node_rewriting_handle_type}
 ${capi.get_name('rewriting_create_token_node')}(
-    ${node_rewriting_handle_type} handle,
+    ${rewriting_handle_type} handle,
     ${node_kind_type} kind,
     ${text_type} *text
 );
@@ -930,7 +938,7 @@ ${capi.get_name('rewriting_create_token_node')}(
 ${c_doc('langkit.rewriting.create_regular_node')}
 extern ${node_rewriting_handle_type}
 ${capi.get_name('rewriting_create_regular_node')}(
-    ${node_rewriting_handle_type} handle,
+    ${rewriting_handle_type} handle,
     ${node_kind_type} kind,
     ${node_rewriting_handle_type} *children,
     int count
@@ -939,7 +947,7 @@ ${capi.get_name('rewriting_create_regular_node')}(
 ${c_doc('langkit.rewriting.create_from_template')}
 extern ${node_rewriting_handle_type}
 ${capi.get_name('rewriting_create_from_template')}(
-    ${node_rewriting_handle_type} handle,
+    ${rewriting_handle_type} handle,
     ${text_type} *src_template,
     ${node_rewriting_handle_type} *arguments,
     int count,
