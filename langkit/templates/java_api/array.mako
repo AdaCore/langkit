@@ -102,10 +102,9 @@
             ${elem_ni_ref_type} toRead;
 
             // Iterate over all array elements
+            final int elemSize = SizeOf.get(${elem_ni_type}.class);
             for(int i = 0 ; i < size ; i++) {
-                nativeItem = nativeItems.add(
-                    i * SizeOf.get(${elem_ni_type}.class)
-                );
+                nativeItem = nativeItems.add(i * elemSize);
                 toRead = WordFactory.unsigned(nativeItem.rawValue());
                 content[i] = ${
                     api.ni_wrap(cls.element_type, "toRead", [])
@@ -166,10 +165,9 @@
             ${elem_ni_ref_type} toWrite;
 
             // Place all elements in the native array
+            final int elemSize = SizeOf.get(${elem_ni_type}.class);
             for(int i = 0 ; i < this.content.length ; i++) {
-                nativeItem = nativeItems.add(
-                    i * SizeOf.get(${elem_ni_type}.class)
-                );
+                nativeItem = nativeItems.add(i * elemSize);
                 toWrite = WordFactory.unsigned(
                     nativeItem.rawValue()
                 );
