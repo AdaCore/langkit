@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "langkit"
+description = "A Python framework to generate language parsers"
+version = "0.1.0"
+dependencies = [
+    "Mako",
+    "PyYAML",
+    "funcy",
+    "docutils",
+    "e3-core"
+]
+
+[[project.authors]]
+name = "AdaCore"
+email="support@adacore.com"
+
+[project.urls]
+Homepage = "https://github.com/AdaCore/langkit"
+
+[project.scripts]
+"create-project.py" = "langkit.scripts.create_project:main"
+"generate-msvc-lib-file.py" = "langkit.scripts.generate_msvc_lib_file:main"
+lkm = "langkit.scripts.lkm:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+   "langkit",
+   "langkit.expressions",
+   "langkit.frontend",
+   "langkit.gdb",
+   "langkit.lexer",
+   "langkit.scripts",
+   "langkit.stylechecks",
+   "langkit.utils",
+]
+namespaces = false
+
+[tool.setuptools.package-data]
+langkit = [
+    "adasat/src/*.adb",
+    "adasat/src/*.ads",
+    "coverage.css",
+    "py.typed",
+    "support/*.adb",
+    "support/*.adc",
+    "support/*.ads",
+    "support/*.gpr",
+    "templates/*.mako",
+    "templates/*/*.mako",
+]

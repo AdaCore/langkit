@@ -990,7 +990,7 @@ def langkit_main(langkit_root: str, files: list[str] = []) -> None:
         os.path.join("langkit"),
         os.path.join("manage.py"),
         os.path.join("scripts"),
-        os.path.join("setup.py"),
+        os.path.join("pyproject.toml"),
         os.path.join("testsuite"),
         os.path.join("utils"),
     ]
