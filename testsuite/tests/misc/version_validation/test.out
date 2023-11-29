@@ -1,0 +1,27 @@
+== invalid-version / None ==
+error: Version number does not comply with PEP 440: invalid-version
+
+== 1 / invalid-build-date ==
+error: Local version identifier does not comply with PEP 440: invalid-build-date
+
+== 1 / None ==
+Code generation was successful
+PEP 440 version: 1
+
+== 98!76.54.32a10.post123.dev456 / None ==
+Code generation was successful
+PEP 440 version: 98!76.54.32a10.post123.dev456
+
+== 25.0w.20230901 / None ==
+Code generation was successful
+PEP 440 version: 25.0+w.20230901
+
+== 1 / 20230901 ==
+Code generation was successful
+PEP 440 version: 1+20230901
+
+== 25.0w / 20230901 ==
+Code generation was successful
+PEP 440 version: 25.0+w.20230901
+
+Done
