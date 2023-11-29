@@ -647,10 +647,15 @@ class Emitter:
             language=None,
         )
 
-        # Emit the setup.py script to easily install the Python binding
-        setup_py_file = os.path.join(self.lib_root, "python", "setup.py")
-        self.write_python_file(
-            setup_py_file, ctx.render_template("python_api/setup_py")
+        # Emit the pyproject.toml file to easily install the Python binding or
+        # build a wheel for it.
+        pyproject_file = os.path.join(
+            self.lib_root, "python", "pyproject.toml"
+        )
+        self.write_source_file(
+            pyproject_file,
+            ctx.render_template("python_api/pyproject_toml"),
+            language=None,
         )
 
     def emit_python_playground(self, ctx: CompileCtx) -> None:

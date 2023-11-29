@@ -252,10 +252,7 @@ class ManageScript(abc.ABC):
             " not provided, use the current one.",
         )
         self.create_wheel_parser.add_argument(
-            "--python-tag", help="Forwarded to setup.py bdist_wheel."
-        )
-        self.create_wheel_parser.add_argument(
-            "--plat-name", help="Forwarded to setup.py bdist_wheel."
+            "--plat-name", help="Forwarded to setuptools bdist_wheel."
         )
         self.create_wheel_parser.add_argument(
             "wheel-dir", help="Destination directory for the wheel."
@@ -1235,9 +1232,9 @@ class ManageScript(abc.ABC):
 
         # Install the remaining miscellaneous files
         for fpath in [
+            os.path.join("python", "pyproject.toml"),
             os.path.join("python", lib_name, "*.py"),
             os.path.join("python", lib_name, "py.typed"),
-            os.path.join("python", "setup.py"),
             os.path.join("ocaml", lib_name + ".ml"),
             os.path.join("ocaml", lib_name + ".mli"),
             os.path.join("ocaml", "dune"),
@@ -1334,7 +1331,6 @@ class ManageScript(abc.ABC):
             WheelPackager.args_to_env(args), args.library_types
         )
         packager.create_python_wheel(
-            args.python_tag,
             args.plat_name,
             getattr(args, "wheel-dir"),
             getattr(args, "build-dir"),
