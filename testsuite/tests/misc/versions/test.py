@@ -21,8 +21,8 @@ def run(label, **kwargs):
     try:
         build_and_run(
             lkt_file="expected_concrete_syntax.lkt",
-            version="<version-number>",
-            build_date="<build-date-number>",
+            version="1.version.number",
+            build_date="build.date.number",
             **kwargs
         )
     except DiagnosticError:
@@ -32,7 +32,7 @@ def run(label, **kwargs):
 
 
 run("Conflict on version",
-    additional_make_args=["--version=something"],
+    additional_make_args=["--version=1.something"],
     full_error_traces=False)
 run("Conflict on build date",
     additional_make_args=["--build-date=something"],
