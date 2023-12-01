@@ -1,4 +1,5 @@
 "ExampleList"
+Bare entity created from the root node: <ExampleList main.txt:1:1-2:8>
 Root children count = 2
 Child 1 of root = <Example main.txt:1:1-1:8>
 Child 2 of root = <Example main.txt:2:1-2:8>

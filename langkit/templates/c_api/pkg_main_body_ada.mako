@@ -552,6 +552,18 @@ package body ${ada_lib_name}.Implementation.C is
          return null;
    end;
 
+   procedure ${capi.get_name('create_bare_entity')}
+     (Node   : ${node_type};
+      Entity : access ${entity_type})
+   is
+   begin
+      Clear_Last_Exception;
+      Entity.all := (Node => Unwrap (Node), Info => ${T.entity_info.nullexpr});
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    function ${capi.get_name('is_equivalent')}
      (L, R : ${entity_type}_Ptr) return ${bool_type}
    is

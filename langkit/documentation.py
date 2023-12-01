@@ -590,6 +590,9 @@ base_langkit_docs = {
         Return the Nth child for in this node's fields and store it into
         ``*child_p``.  Return zero on failure (when ``N`` is too big).
     """,
+    'langkit.create_bare_entity': """
+        Create an entity with null entity info for a given node.
+    """,
     'langkit.node_is_null': """
         Return whether this node is a null node reference.
     """,
