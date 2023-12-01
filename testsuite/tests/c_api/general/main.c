@@ -7,6 +7,20 @@
 #include "utils_exc.h"
 #include "utils_text.h"
 
+static void
+print_node (foo_node *node)
+{
+  foo_text text;
+
+  foo_node_image (node, &text);
+  abort_on_exception ();
+
+  fprint_text (stdout, &text, 0);
+
+  foo_destroy_text (&text);
+  abort_on_exception ();
+}
+
 int
 main (void)
 {
@@ -77,15 +91,9 @@ main (void)
   {
     foo_node_child (&root, i, &children[i]);
     abort_on_exception ();
-    node_kind = foo_node_kind (&children[i]);
-    abort_on_exception ();
-    foo_kind_name (node_kind, &text);
-    abort_on_exception ();
     printf ("Child %u of root = ", i + 1);
-    fprint_text (stdout, &text, 1);
-    printf ("\n");
-    foo_destroy_text (&text);
-    abort_on_exception ();
+    print_node (&children[i]);
+    puts ("");
   }
 
   /* Print the start token for each child.  */
