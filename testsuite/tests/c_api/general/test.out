@@ -1,7 +1,7 @@
 "ExampleList"
 Root children count = 2
-Child 1 of root = "Example"
-Child 2 of root = "Example"
+Child 1 of root = <Example main.txt:1:1-1:8>
+Child 2 of root = <Example main.txt:2:1-2:8>
 Start token of the 1 child = "Example"
 Start token of the 2 child = "Example"
 main.c: Done.
