@@ -30,7 +30,7 @@ main (void)
   foo_analysis_context context;
   foo_analysis_unit unit;
 
-  foo_node root;
+  foo_node root, root_copy;
   foo_node_kind_enum node_kind;
   foo_node *children;
   unsigned children_count;
@@ -82,6 +82,13 @@ main (void)
   {
     printf ("Analysis units should be equal!\n");
   }
+
+  /* Check that "create_bare_entity" works as expected.  */
+  foo_create_bare_entity (root.node, &root_copy);
+  abort_on_exception ();
+  printf ("Bare entity created from the root node: ");
+  print_node (&root_copy);
+  puts ("");
 
   /* Print the list of children for the root node.  */
   children_count = foo_node_children_count (&root);
