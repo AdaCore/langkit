@@ -455,6 +455,13 @@ ${capi.get_name("unit_populate_lexical_env")}(
  * General AST node primitives
  */
 
+${c_doc('langkit.create_bare_entity')}
+extern void
+${capi.get_name("create_bare_entity")}(
+    ${node_type} node,
+    ${entity_type} *entity
+);
+
 ${c_doc('langkit.node_is_null')}
 static inline int
 ${capi.get_name("node_is_null")}(${entity_type} *node) {

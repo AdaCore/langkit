@@ -445,6 +445,14 @@ package ${ada_lib_name}.Implementation.C is
    -- General AST node primitives --
    ---------------------------------
 
+   procedure ${capi.get_name('create_bare_entity')}
+     (Node   : ${node_type};
+      Entity : access ${entity_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('create_bare_entity')}";
+   ${ada_c_doc('langkit.create_bare_entity', 3)}
+
    function ${capi.get_name('is_equivalent')}
      (L, R : ${entity_type}_Ptr) return ${bool_type}
       with Export        => True,
