@@ -218,6 +218,8 @@ class NativeLibPackager(BasePackager):
         gnatcoll_core_prefix: str | None = None,
         gnatcoll_gmp_prefix: str | None = None,
         gnatcoll_iconv_prefix: str | None = None,
+        vss_prefix: str | None = None,
+        prettier_ada_prefix: str | None = None,
         adasat_prefix: str | None = None,
         langkit_support_prefix: str | None = None,
     ):
@@ -240,6 +242,10 @@ class NativeLibPackager(BasePackager):
         :param gnatcoll_iconv_prefix: Directory in which
             gnatcoll-bindings(iconv) is installed. By default, use ``gnat
             prefix``.
+        :param vss_prefix: Directory in which VSS is installed.  By default,
+            use ``gnat_prefix``.
+        :param prettier_ada_prefix: Directory in which Prettier_Ada is
+            installed.  By default, use ``gnat_prefix``.
         :param adasat_prefix: Directory in which adasat is installed.  By
             default, use ``gnat_prefix``.
         :param langkit_support_prefix: Directory in which Langkit_Support is
@@ -255,6 +261,8 @@ class NativeLibPackager(BasePackager):
         self.gnatcoll_core_prefix = gnatcoll_core_prefix or gnat_prefix
         self.gnatcoll_gmp_prefix = gnatcoll_gmp_prefix or gnat_prefix
         self.gnatcoll_iconv_prefix = gnatcoll_iconv_prefix or gnat_prefix
+        self.vss_prefix = vss_prefix or gnat_prefix
+        self.prettier_ada_prefix = prettier_ada_prefix or gnat_prefix
         self.adasat_prefix = adasat_prefix or gnat_prefix
         self.langkit_support_prefix = langkit_support_prefix or gnat_prefix
 
@@ -268,7 +276,7 @@ class NativeLibPackager(BasePackager):
         """
         for name in ('gnat', 'gmp', 'libiconv', 'xmlada', 'libgpr',
                      'gnatcoll-core', 'gnatcoll-gmp', 'gnatcoll-iconv',
-                     'adasat', 'langkit-support'):
+                     'vss', 'prettier-ada', 'adasat', 'langkit-support'):
             parser.add_argument(
                 '--with-{}'.format(name),
                 help='Installation directory for {}'.format(name)
@@ -290,6 +298,8 @@ class NativeLibPackager(BasePackager):
             args.with_gnatcoll_core,
             args.with_gnatcoll_gmp,
             args.with_gnatcoll_iconv,
+            args.with_vss,
+            args.with_prettier_ada,
             args.with_adasat,
             args.with_langkit_support
         )
@@ -319,21 +329,21 @@ class NativeLibPackager(BasePackager):
             """Copy the "filename" to the "dirname" directory."""
             cp(filename, os.path.join(dirname, os.path.basename(filename)))
 
-        # Ship gnatcoll-iconv and gnatcoll-gmp. Copy all files that gprinstall
-        # created: shared libs, static libs, manifests, sources, etc.
+        # Ship non-GNAT libraries. Copy all files that gprinstall created:
+        # shared libs, static libs, manifests, sources, etc.
         for prefix, name in [
-            (self.gnatcoll_gmp_prefix, 'gmp'),
-            (self.gnatcoll_iconv_prefix, 'iconv'),
+            (self.gnatcoll_gmp_prefix, 'gnatcoll_gmp'),
+            (self.gnatcoll_iconv_prefix, 'gnatcoll_iconv'),
+            (self.vss_prefix, 'vss'),
+            (self.prettier_ada_prefix, 'prettier_ada'),
         ]:
             # In all of the following directories, look for files/directories
-            # that matches "*gnatcoll_$name*" and copy them in $package_dir,
-            # preserving the directory hierarchy.
+            # that matches "*$name*" and copy them in $package_dir, preserving
+            # the directory hierarchy.
             for d in ('bin', 'include', 'lib',
                       os.path.join('share', 'gpr'),
                       os.path.join('share', 'gpr', 'manifests')):
-                to_copy = glob.glob(os.path.join(
-                    prefix, d, '*gnatcoll_{}*'.format(name)
-                ))
+                to_copy = glob.glob(os.path.join(prefix, d, f'*{name}*'))
                 for item in to_copy:
                     rel_item = os.path.relpath(item, prefix)
                     sync_tree(item,
@@ -450,6 +460,30 @@ class NativeLibPackager(BasePackager):
             self.std_path(self.gnatcoll_gmp_prefix, 'gnatcoll_gmp',
                           'libgnatcoll_gmp')]
 
+        # VSS
+        vss_libs = [
+            (
+                os.path.join(self.vss_prefix, 'bin', 'libvss' + self.dllext)
+                if self.is_windows else
+                os.path.join(
+                    self.vss_prefix,
+                    self.dyn_libdir_name,
+                    'vss',
+                    'relocatable',
+                    'libvss' + self.dllext,
+                )
+            )
+        ]
+
+        # Prettier_Ada
+        prettier_ada_libs = [
+            self.std_path(
+                self.prettier_ada_prefix,
+                os.path.join('prettier_ada', 'prettier_ada'),
+                'libprettier_ada',
+            )
+        ]
+
         # AdaSAT
         adasat_lib = [self.std_path(self.adasat_prefix, 'adasat', 'libadasat')]
 
@@ -460,6 +494,8 @@ class NativeLibPackager(BasePackager):
                         libiconv_libs +
                         gnatcoll_core_libs +
                         gnatcoll_bindings_libs +
+                        vss_libs +
+                        prettier_ada_libs +
                         adasat_lib):
             self.copy_shared_lib(libpath, package_dir)
 
