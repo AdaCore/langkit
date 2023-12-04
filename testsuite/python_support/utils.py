@@ -236,6 +236,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                   full_error_traces: bool = True,
                   additional_make_args: List[str] = [],
                   python_args: Optional[List[str]] = None,
+                  gpr_mains_args: list[str] | None = None,
                   property_exceptions: Set[str] = set()):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
@@ -298,6 +299,8 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
 
     :param python_args: Arguments to pass to the Python interpreter when
         running a Python script.
+
+    :param gpr_mains_args: Arguments to pass to programs built by the GPR file.
 
     :param property_exceptions: See CompileCtx's constructor.
     """
@@ -457,6 +460,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
 
         # Now run all mains. If there are more than one main to run, print a
         # heading before each one.
+        gpr_mains_args = gpr_mains_args or []
         for i, main in enumerate(gpr_mains):
             if i > 0:
                 print("")
@@ -465,6 +469,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
             sys.stdout.flush()
             run(
                 P.join("obj", os.path.splitext(main)[0]),
+                *gpr_mains_args,
                 valgrind=True,
                 valgrind_suppressions=["gnat"],
             )

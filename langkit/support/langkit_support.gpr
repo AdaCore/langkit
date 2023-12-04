@@ -1,7 +1,8 @@
+with "adasat";
 with "gnatcoll";
 with "gnatcoll_gmp";
 with "gnatcoll_iconv";
-with "adasat";
+with "prettier_ada";
 
 library project Langkit_Support is
 

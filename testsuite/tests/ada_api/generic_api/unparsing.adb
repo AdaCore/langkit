@@ -44,6 +44,16 @@ procedure Unparsing is
                   & Image (To_Text (F.Token_Text), With_Quotes => True)
                   & " (" & (+Token_Kind_Name (F.Token_Kind)) & ")");
 
+            when List_Separator_Fragment =>
+               Put ("  List_Separator_Fragment");
+               if F.Token_Kind = No_Token_Kind_Ref then
+                  New_Line;
+               else
+                  Put_Line
+                    (": " & Image (To_Text (F.Token_Text), With_Quotes => True)
+                     & " (" & (+Token_Kind_Name (F.Token_Kind)) & ")");
+               end if;
+
             when Field_Fragment =>
                Put_Line
                  ("  Field_Fragment: "
@@ -62,17 +72,19 @@ procedure Unparsing is
 
       for F of Fragments loop
          case F.Kind is
-            when Token_Fragment =>
-               case Required_Spacing (Last_Token, F.Token_Kind) is
-                  when None =>
-                     null;
-                  when Newline =>
-                     Append (Buffer, Chars.LF);
-                  when Whitespace =>
-                     Append (Buffer, ' ');
-               end case;
-               Last_Token := F.Token_Kind;
-               Append (Buffer, F.Token_Text);
+            when Token_Fragment | List_Separator_Fragment =>
+               if F.Token_Kind /= No_Token_Kind_Ref then
+                  case Required_Spacing (Last_Token, F.Token_Kind) is
+                     when None =>
+                        null;
+                     when Newline =>
+                        Append (Buffer, Chars.LF);
+                     when Whitespace =>
+                        Append (Buffer, ' ');
+                  end case;
+                  Last_Token := F.Token_Kind;
+                  Append (Buffer, F.Token_Text);
+               end if;
 
             when Field_Fragment | List_Child_Fragment =>
                Unparse (F.Node);

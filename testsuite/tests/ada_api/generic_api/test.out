@@ -28,6 +28,7 @@ Token kinds:
   Comma (Punctuation)
   Dot (Punctuation)
   Semicolon (Punctuation)
+  Colon (Punctuation)
   L_Par (Punctuation)
   R_Par (Punctuation)
   L_Brace (Punctuation)
@@ -1596,11 +1597,17 @@ hash.adb: no error
 == unparsing.adb ==
 Fragments for <FooNodeList example3.txt:1:1-13:27>:
   List_Child_Fragment: <Example example3.txt:1:1-2:7> ( 1)
+  List_Separator_Fragment
   List_Child_Fragment: <VarDecl example3.txt:4:1-6:2> ( 2)
+  List_Separator_Fragment
   List_Child_Fragment: <VarDecl example3.txt:7:1-9:2> ( 3)
+  List_Separator_Fragment
   List_Child_Fragment: <Def example3.txt:10:1-10:15> ( 4)
+  List_Separator_Fragment
   List_Child_Fragment: <Def example3.txt:11:1-11:20> ( 5)
+  List_Separator_Fragment
   List_Child_Fragment: <Def example3.txt:12:1-12:28> ( 6)
+  List_Separator_Fragment
   List_Child_Fragment: <Def example3.txt:13:1-13:27> ( 7)
 Fragments for <Example example3.txt:1:1-2:7>:
   Token_Fragment: "example" (Example)
@@ -1698,7 +1705,7 @@ Fragments for <Name example3.txt:12:5-12:6>:
   Token_Fragment: "e" (Identifier)
 Fragments for <NameList example3.txt:12:7-12:13>:
   List_Child_Fragment: <Name example3.txt:12:7-12:9> ( 1)
-  Token_Fragment: "," (Comma)
+  List_Separator_Fragment: "," (Comma)
   List_Child_Fragment: <Name example3.txt:12:11-12:13> ( 2)
 Fragments for <Name example3.txt:12:7-12:9>:
   Token_Fragment: "a1" (Identifier)
@@ -1738,7 +1745,7 @@ Fragments for <Name example3.txt:13:5-13:6>:
   Token_Fragment: "f" (Identifier)
 Fragments for <NameList example3.txt:13:7-13:13>:
   List_Child_Fragment: <Name example3.txt:13:7-13:9> ( 1)
-  Token_Fragment: "," (Comma)
+  List_Separator_Fragment: "," (Comma)
   List_Child_Fragment: <Name example3.txt:13:11-13:13> ( 2)
 Fragments for <Name example3.txt:13:7-13:9>:
   Token_Fragment: "a1" (Identifier)
@@ -1753,7 +1760,7 @@ Fragments for <Name example3.txt:13:17-13:18>:
   Token_Fragment: "e" (Identifier)
 Fragments for <ExprList example3.txt:13:19-13:25>:
   List_Child_Fragment: <Ref example3.txt:13:19-13:21> ( 1)
-  Token_Fragment: "," (Comma)
+  List_Separator_Fragment: "," (Comma)
   List_Child_Fragment: <Ref example3.txt:13:23-13:25> ( 2)
 Fragments for <Ref example3.txt:13:19-13:21>:
   Field_Fragment: <Name example3.txt:13:19-13:21> (F_Name)

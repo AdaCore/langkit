@@ -1,0 +1,10 @@
+{
+  "node_configs": {
+    "StmtList": {
+      "sep": {
+        "kind": "indent",
+        "contents": ["hardline", "recurse", ["softline", "recurse"]]
+      }
+    }
+  }
+}

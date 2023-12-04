@@ -144,6 +144,7 @@ class LangkitTestsuite(Testsuite):
             'has_native_image': not args.disable_native_image,
             'has_gdb': not args.disable_gdb,
             'os': self.env.build.os.name,
+            'valgrind': args.valgrind,
         }
 
         if args.coverage:
