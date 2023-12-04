@@ -89,14 +89,11 @@ private package ${ada_lib_name}.Unparsers is
          <%
             unparser_list = node.unparser.zip_fields
             field_unparsers = [
-               "{} => {}".format(
-                  i,
-                  "Empty_Field_Unparser"
-                  if not f.pre_tokens and not f.post_tokens else
-                  f"({tok_seq_ref(f.pre_tokens)},"
-                  f" {tok_seq_ref(f.post_tokens)},"
-                  f" {f.empty_list_is_absent})"
-               )
+               f"{i} => "
+               f"({G.member_index(f.field)},"
+               f" {tok_seq_ref(f.pre_tokens)},"
+               f" {tok_seq_ref(f.post_tokens)},"
+               f" {f.empty_list_is_absent})"
                for i, (f, _) in enumerate(unparser_list, 1)
             ]
             inter_tokens = [

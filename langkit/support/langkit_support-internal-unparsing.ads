@@ -62,6 +62,9 @@ package Langkit_Support.Internal.Unparsing is
    ---------------------
 
    type Field_Unparser_Impl is record
+      Member : Struct_Member_Index;
+      --  Member reference for the field to unparse
+
       Pre_Tokens, Post_Tokens : Token_Sequence;
       --  Lists of tokens to emit before and after unparsing some node field
 
@@ -74,9 +77,6 @@ package Langkit_Support.Internal.Unparsing is
 
    type Field_Unparser_Array is
      array (Positive range <>) of aliased Field_Unparser_Impl;
-
-   Empty_Field_Unparser : aliased constant Field_Unparser_Impl :=
-     (Empty_Token_Sequence, Empty_Token_Sequence, False);
 
    type Field_Unparser_List_Impl (N : Natural) is record
       Field_Unparsers : Field_Unparser_Array (1 .. N);

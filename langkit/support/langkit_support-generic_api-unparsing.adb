@@ -104,49 +104,38 @@ package body Langkit_Support.Generic_API.Unparsing is
             --  Then append fragments for each field and the tokens between
             --  them.
 
-            declare
-               Node_Members : constant Struct_Member_Ref_Array :=
-                 Members (Node_Type);
-               I            : Positive := 1;
-               Child        : Lk_Node;
-               FU           : Field_Unparser;
-            begin
-               for Member of Node_Members loop
-                  if Is_Field (Member)
-                     and then not Is_Null_For (Member, Node_Type)
+            for I in 1 .. Node_Unparser.Field_Unparsers.N loop
+               declare
+                  Field_Unparser : Field_Unparser_Impl renames
+                    Node_Unparser.Field_Unparsers.Field_Unparsers (I);
+                  Inter_Tokens   : Token_Sequence renames
+                    Node_Unparser.Field_Unparsers.Inter_Tokens (I);
+
+                  Child : constant Lk_Node := Node.Child (I);
+               begin
+                  --  Append fragments that appear unconditionally between
+                  --  fields.
+
+                  Append (Inter_Tokens);
+
+                  --  Then append fragments for the field itself, if present.
+                  --  Note that unparsing tables (Empty_List_Is_Absent
+                  --  component) determine whether a non-null child with no
+                  --  children of its own must be treated as absent.
+
+                  if not Child.Is_Null
+                     and then (not Field_Unparser.Empty_List_Is_Absent
+                               or else Child.Children_Count > 0)
                   then
-                     Child := Node.Child (I);
-                     FU :=
-                       Node_Unparser.Field_Unparsers
-                       .Field_Unparsers (I)'Access;
-
-                     --  Append fragments that appear unconditionally between
-                     --  fields.
-
-                     Append (Node_Unparser.Field_Unparsers.Inter_Tokens (I));
-
-                     --  Then append fragments for the field itself, if
-                     --  present. Note that unparsing tables
-                     --  (Empty_List_Is_Absent component) determine whether
-                     --  a non-null child with no children of its own must be
-                     --  treated as absent.
-
-                     if not Child.Is_Null
-                        and then (not FU.Empty_List_Is_Absent
-                                  or else Child.Children_Count > 0)
-                     then
-                        Append (FU.Pre_Tokens);
-                        Fragments.Append
-                          ((Kind  => Field_Fragment,
-                            Node  => Child,
-                            Field => Member));
-                        Append (FU.Post_Tokens);
-                     end if;
-
-                     I := I + 1;
+                     Append (Field_Unparser.Pre_Tokens);
+                     Fragments.Append
+                       ((Kind  => Field_Fragment,
+                         Node  => Child,
+                         Field => From_Index (Id, Field_Unparser.Member)));
+                     Append (Field_Unparser.Post_Tokens);
                   end if;
-               end loop;
-            end;
+               end;
+            end loop;
 
             --  Append fragments that follow the last field
 
