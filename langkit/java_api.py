@@ -1114,7 +1114,7 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: f"(jboolean) {expr}"),
             (T.Int, lambda _: f"(jint) {expr}"),
             (
-                T.Token, lambda _:(
+                T.Token, lambda _: (
                     f"Token_wrap(env, {expr}, "
                     "AnalysisUnit_wrap(env, unit_native))"
                 )
