@@ -471,21 +471,19 @@ package ${ada_lib_name}.Analysis is
    --  Return the last child or trivia cursor corresponding to the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Next (Self : Children_Array; Pos  : Natural) return Natural;
+   function Next (Self : Children_Array; Pos : Natural) return Natural;
    --  Return the child or trivia cursor that follows ``Self`` in the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Previous (Self : Children_Array; Pos  : Natural) return Natural;
+   function Previous (Self : Children_Array; Pos : Natural) return Natural;
    --  Return the child or trivia cursor that follows ``Self`` in the children
    --  array. Helper for the ``Iterable`` aspect.
 
-   function Has_Element (Self : Children_Array; Pos  : Natural) return Boolean;
+   function Has_Element (Self : Children_Array; Pos : Natural) return Boolean;
    --  Return if ``Pos`` is in ``Self``'s iteration range. Helper for the
    --  ``Iterable`` aspect.
 
-   function Element
-     (Self : Children_Array;
-      Pos  : Natural) return Child_Record;
+   function Element (Self : Children_Array; Pos : Natural) return Child_Record;
    --  Return the child of trivia node at position ``Pos`` in ``Self``. Helper
    --  for the ``Iterable`` aspect.
 
@@ -648,6 +646,13 @@ package ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name};
    --  Return the last child ``Node`` has, or ``No_${root_entity.api_name}`` if
    --  there is none.
+
+   function Closest_Common_Parent
+     (Self, Other : ${root_entity.api_name}'Class)
+      return ${root_entity.api_name};
+   --  If ``Self`` and ``Other`` do not belong to the same analysis unit,
+   --  return ``No_${root_entity.api_name}``. Otherwise, return the deepest
+   --  node in the tree that is a parent for both ``Self`` and ``Other``.
    pragma Warnings (On, "defined after private extension");
 
    function Traverse

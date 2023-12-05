@@ -1,0 +1,19 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(example | cons)
+    example <- Example(@example)
+    cons <- Cons("(" main_rule main_rule ")")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Cons : FooNode {
+    @parse_field left: FooNode
+    @parse_field right: FooNode
+}
+
+class Example : FooNode implements TokenNode {
+}

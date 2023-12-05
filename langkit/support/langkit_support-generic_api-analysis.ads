@@ -259,6 +259,11 @@ package Langkit_Support.Generic_API.Analysis is
    --  Return the ``Node``'s previous sibling, or null if there is no such
    --  sibling.
 
+   function Closest_Common_Parent (Self, Other : Lk_Node'Class) return Lk_Node;
+   --  If ``Self`` and ``Other`` do not belong to the same analysis unit,
+   --  return ``No_Lk_Node``. Otherwise, return the deepest node in the tree
+   --  that is a parent for both ``Self`` and ``Other``.
+
    function Is_Ghost (Self : Lk_Node) return Boolean;
    --  Return whether the node is a ghost.
    --

@@ -19,6 +19,8 @@ pragma Warnings (On, "is an internal GNAT unit");
 % endif
 with GNATCOLL.Traces;
 
+with Langkit_Support.Generic_API.Analysis;
+
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 pragma Warnings (On, "referenced");
@@ -26,6 +28,7 @@ pragma Warnings (On, "referenced");
 with Langkit_Support.Types;        use Langkit_Support.Types;
 
 with ${ada_lib_name}.Common;
+with ${ada_lib_name}.Generic_API;       use ${ada_lib_name}.Generic_API;
 with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
 with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
@@ -1039,6 +1042,22 @@ package body ${ada_lib_name}.Analysis is
       return Wrap_Node (Child (Node.Internal.Node, Index), Node.Internal.Info);
    end Child;
 
+   ---------------------------
+   -- Closest_Common_Parent --
+   ---------------------------
+
+   function Closest_Common_Parent
+     (Self, Other : ${root_entity.api_name}'Class)
+      return ${root_entity.api_name}
+   is
+      use Langkit_Support.Generic_API.Analysis;
+      Lk_Self   : constant Lk_Node := To_Generic_Node (Self);
+      Lk_Other  : constant Lk_Node := To_Generic_Node (Other);
+      Lk_Result : constant Lk_Node := Lk_Self.Closest_Common_Parent (Lk_Other);
+   begin
+      return From_Generic_Node (Lk_Result);
+   end Closest_Common_Parent;
+
    ----------------
    -- Sloc_Range --
    ----------------
@@ -1245,9 +1264,8 @@ package body ${ada_lib_name}.Analysis is
    -- Has_Element --
    -----------------
 
-   function Has_Element
-     (Self : Children_Array;
-      Pos  : Natural) return Boolean is
+   function Has_Element (Self : Children_Array; Pos : Natural) return Boolean
+   is
    begin
       return Pos in First (Self) .. Last (Self);
    end Has_Element;
@@ -1256,9 +1274,8 @@ package body ${ada_lib_name}.Analysis is
    -- Element --
    -------------
 
-   function Element
-     (Self : Children_Array;
-      Pos  : Natural) return Child_Record is
+   function Element (Self : Children_Array; Pos : Natural) return Child_Record
+   is
    begin
       return Self.Children (Pos);
    end Element;
@@ -1268,8 +1285,7 @@ package body ${ada_lib_name}.Analysis is
    -------------------------
 
    function Children_And_Trivia
-     (Node : ${root_entity.api_name}'Class) return Children_Array
-   is
+     (Node : ${root_entity.api_name}'Class) return Children_Array is
    begin
       if Node.Internal.Node = null then
          raise Precondition_Failure with "null node argument";

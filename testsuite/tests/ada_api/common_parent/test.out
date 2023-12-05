@@ -1,0 +1,13 @@
+CCP (  None,   None) =   None
+CCP (  None,   U1_N) =   None
+CCP (  U1_N,   None) =   None
+CCP (  U1_N,   U2_N) =   None
+
+CCP (  U2_N,   U2_N) =   U2_N
+CCP (  U2_N,  U2_N1) =   U2_N
+CCP (  U2_N, U2_N11) =   U2_N
+CCP ( U2_N1,  U2_N2) =   U2_N
+CCP ( U2_N1, U2_N11) =  U2_N1
+CCP ( U2_N2, U2_N11) =   U2_N
+Done.
+Done

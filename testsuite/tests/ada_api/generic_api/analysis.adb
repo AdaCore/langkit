@@ -20,6 +20,10 @@ with Libfoolang.Generic_API.Introspection;
 use Libfoolang.Generic_API.Introspection;
 
 procedure Analysis is
+   use type Libfoolang.Analysis.Analysis_Context;
+   use type Libfoolang.Analysis.Analysis_Unit;
+   use type Libfoolang.Analysis.Foo_Node;
+
    Id : Language_Id renames Libfoolang.Generic_API.Foo_Lang_Id;
 
    Ctx : Lk_Context;
@@ -549,6 +553,16 @@ begin
       Gen_Ctx := To_Generic_Context (Spe_Ctx);
       Spe_Ctx := Libfoolang.Analysis.No_Analysis_Context;
       Put_Line (Gen_Ctx.Get_From_File ("foo.txt").Root.Image);
+
+      --  Check conversions for null contexts
+
+      Gen_Ctx := To_Generic_Context (Libfoolang.Analysis.No_Analysis_Context);
+      Spe_Ctx := From_Generic_Context (No_Lk_Context);
+      if Gen_Ctx /= No_Lk_Context then
+         raise Program_Error;
+      elsif Spe_Ctx /= Libfoolang.Analysis.No_Analysis_Context then
+         raise Program_Error;
+      end if;
    end;
    New_Line;
 
@@ -556,7 +570,7 @@ begin
    declare
       Gen_Ctx  : Lk_Context := Create_Context (Id);
       Gen_Unit : Lk_Unit := Gen_Ctx.Get_From_File ("example.txt");
-      Spe_Unit : constant Libfoolang.Analysis.Analysis_Unit :=
+      Spe_Unit : Libfoolang.Analysis.Analysis_Unit :=
         From_Generic_Unit (Gen_Unit);
    begin
       --  Create an analysis unit while the context can only be referenced
@@ -572,6 +586,16 @@ begin
       Gen_Unit := To_Generic_Unit (Spe_Unit);
       Gen_Ctx := Gen_Unit.Context;
       Put_Line (Gen_Ctx.Get_From_File ("example.txt").Root.Image);
+
+      --  Check conversions for null units
+
+      Gen_Unit := To_Generic_Unit (Libfoolang.Analysis.No_Analysis_Unit);
+      Spe_Unit := From_Generic_Unit (No_Lk_Unit);
+      if Gen_Unit /= No_Lk_Unit then
+         raise Program_Error;
+      elsif Spe_Unit /= Libfoolang.Analysis.No_Analysis_Unit then
+         raise Program_Error;
+      end if;
    end;
    New_Line;
 
@@ -580,13 +604,23 @@ begin
       Gen_Ctx  : constant Lk_Context := Create_Context (Id);
       Gen_Unit : Lk_Unit := Gen_Ctx.Get_From_File ("example.txt");
       Gen_Node : Lk_Node := Gen_Unit.Root;
-      Spe_Node : constant Libfoolang.Analysis.Foo_Node :=
+      Spe_Node : Libfoolang.Analysis.Foo_Node :=
         From_Generic_Node (Gen_Node);
    begin
       Put_Line ("Root from specific: " & Spe_Node.Image);
       Gen_Node := To_Generic_Node (Spe_Node);
       Gen_Unit := Gen_Node.Unit;
       Put_Line ("Root from generic: " & Gen_Unit.Root.Image);
+
+      --  Check conversions for null nodes
+
+      Gen_Node := To_Generic_Node (Libfoolang.Analysis.No_Foo_Node);
+      Spe_Node := From_Generic_Node (No_Lk_Node);
+      if Gen_Node /= No_Lk_Node then
+         raise Program_Error;
+      elsif Spe_Node /= Libfoolang.Analysis.No_Foo_Node then
+         raise Program_Error;
+      end if;
    end;
    New_Line;
 
