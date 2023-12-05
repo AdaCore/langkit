@@ -55,6 +55,11 @@
         // ----- Instance methods -----
 
         @Override
+        public NodeKind getKind() {
+            return ${java_type}.description.kind;
+        }
+
+        @Override
         public String getClassName() {
             return ${java_type}.description.className;
         }
@@ -132,11 +137,15 @@
     base_type = api.wrapping_type(cls.base) if cls.base else None
 
     field_names = api.get_node_formatted_fields(cls)
+    kind = (f"NodeKind.{cls.kwless_raw_name.upper}"
+            if not cls.abstract else
+            "null")
     %>
 
         /** Full description of the node (kind, fields, class...) */
         public static final ${ctx.lib_name.camel}Node description =
             new ${ctx.lib_name.camel}Node(
+                ${kind},
                 ${"true" if cls.is_token_node else "false"},
                 ${"true" if cls.is_list_type else "false"},
                 ${java_type}.class,

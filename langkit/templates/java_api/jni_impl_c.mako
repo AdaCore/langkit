@@ -157,6 +157,18 @@ jmethodID Diagnostic_constructor_id = NULL;
 jfieldID Diagnostic_sloc_range_field_id = NULL;
 jfieldID Diagnostic_text_field_id = NULL;
 
+${rewriting_apply_result_type} RewritingApplyResult_new_value();
+jobject RewritingApplyResult_wrap(JNIEnv *, ${rewriting_apply_result_type});
+${rewriting_apply_result_type} RewritingApplyResult_unwrap(JNIEnv *, jobject);
+
+jclass RewritingApplyResult_class_ref = NULL;
+jmethodID RewritingApplyResult_contructor_id = NULL;
+jmethodID RewritingApplyResult_success_id = NULL;
+jfieldID RewritingApplyResult_success_field_id = NULL;
+jfieldID RewritingApplyResult_unit_field_id = NULL;
+jfieldID RewritingApplyResult_diagnostics_count_field_id = NULL;
+jfieldID RewritingApplyResult_diagnostics_reference_field_id = NULL;
+
 ${file_reader_type} FileReader_new_value();
 jobject FileReader_wrap(JNIEnv *, ${file_reader_type});
 ${file_reader_type} FileReader_unwrap(JNIEnv *, jobject);
@@ -219,6 +231,30 @@ ${analysis_unit_type} AnalysisUnit_unwrap(JNIEnv *, jobject);
 jclass AnalysisUnit_class_ref = NULL;
 jmethodID AnalysisUnit_constructor_id = NULL;
 jfieldID AnalysisUnit_reference_field_id = NULL;
+
+${rewriting_handle_type} RewritingContext_new_value();
+jobject RewritingContext_wrap(JNIEnv *, ${rewriting_handle_type});
+${rewriting_handle_type} RewritingContext_unwrap(JNIEnv *, jobject);
+
+jclass RewritingContext_class_ref = NULL;
+jmethodID RewritingContext_from_reference_id = NULL;
+jfieldID RewritingContext_reference_field_id = NULL;
+
+${unit_rewriting_handle_type} RewritingUnit_new_value();
+jobject RewritingUnit_wrap(JNIEnv *, ${unit_rewriting_handle_type});
+${unit_rewriting_handle_type} RewritingUnit_unwrap(JNIEnv *, jobject);
+
+jclass RewritingUnit_class_ref = NULL;
+jmethodID RewritingUnit_constructor_id = NULL;
+jfieldID RewritingUnit_reference_field_id = NULL;
+
+${node_rewriting_handle_type} RewritingNode_new_value();
+jobject RewritingNode_wrap(JNIEnv *, ${node_rewriting_handle_type});
+${node_rewriting_handle_type} RewritingNode_unwrap(JNIEnv *, jobject);
+
+jclass RewritingNode_class_ref = NULL;
+jmethodID RewritingNode_constructor_id = NULL;
+jfieldID RewritingNode_reference_field_id = NULL;
 
 % for struct_type in ctx.struct_types:
     % if api.should_emit_struct(struct_type):
@@ -536,6 +572,53 @@ ${api.jni_func_sig("initialize", "void")}(
         "L${sig_base}$Text;"
     );
 
+    RewritingApplyResult_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$RewritingApplyResult")
+    );
+
+    RewritingApplyResult_contructor_id = (*env)->GetMethodID(
+        env,
+        RewritingApplyResult_class_ref,
+        "<init>",
+        "(ZL${sig_base}$AnalysisUnit;IL${ptr_sig};)V"
+    );
+
+    RewritingApplyResult_success_id = (*env)->GetStaticMethodID(
+        env,
+        RewritingApplyResult_class_ref,
+        "success",
+        "()L${sig_base}$RewritingApplyResult;"
+    );
+
+    RewritingApplyResult_success_field_id = (*env)->GetFieldID(
+        env,
+        RewritingApplyResult_class_ref,
+        "success",
+        "Z"
+    );
+
+    RewritingApplyResult_unit_field_id = (*env)->GetFieldID(
+        env,
+        RewritingApplyResult_class_ref,
+        "unit",
+        "L${sig_base}$AnalysisUnit;"
+    );
+
+    RewritingApplyResult_diagnostics_count_field_id = (*env)->GetFieldID(
+        env,
+        RewritingApplyResult_class_ref,
+        "diagnosticsCount",
+        "I"
+    );
+
+    RewritingApplyResult_diagnostics_reference_field_id = (*env)->GetFieldID(
+        env,
+        RewritingApplyResult_class_ref,
+        "diagnosticsReference",
+        "L${ptr_sig};"
+    );
+
     FileReader_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(env, "${sig_base}$FileReader")
@@ -744,6 +827,63 @@ ${api.jni_func_sig("initialize", "void")}(
         "L${ptr_sig};"
     );
 
+    RewritingContext_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$RewritingContext")
+    );
+
+    RewritingContext_from_reference_id = (*env)->GetStaticMethodID(
+        env,
+        RewritingContext_class_ref,
+        "fromReference",
+        "(L${ptr_sig};)L${sig_base}$RewritingContext;"
+    );
+
+    RewritingContext_reference_field_id = (*env)->GetFieldID(
+        env,
+        RewritingContext_class_ref,
+        "reference",
+        "L${ptr_sig};"
+    );
+
+    RewritingUnit_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$RewritingUnit")
+    );
+
+    RewritingUnit_constructor_id = (*env)->GetMethodID(
+        env,
+        RewritingUnit_class_ref,
+        "<init>",
+        "(L${ptr_sig};)V"
+    );
+
+    RewritingUnit_reference_field_id = (*env)->GetFieldID(
+        env,
+        RewritingUnit_class_ref,
+        "reference",
+        "L${ptr_sig};"
+    );
+
+    RewritingNode_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$RewritingNode")
+    );
+
+    RewritingNode_constructor_id = (*env)->GetMethodID(
+        env,
+        RewritingNode_class_ref,
+        "<init>",
+        "(L${ptr_sig};)V"
+    );
+
+    RewritingNode_reference_field_id = (*env)->GetFieldID(
+        env,
+        RewritingNode_class_ref,
+        "reference",
+        "L${ptr_sig};"
+    );
+
 % for struct_type in ctx.struct_types:
     % if api.should_emit_struct(struct_type):
 ${struct.jni_init_global_refs(struct_type)}
@@ -933,6 +1073,29 @@ jobject get_node_entity(JNIEnv *env, jobject node) {
         node,
         ${root_node_type}_entity_field_id
     );
+}
+
+// Function to get a rewriting node array from a Java one
+${node_rewriting_handle_type} *rewriting_nodes_to_native(
+    JNIEnv *env,
+    jobjectArray rewriting_nodes
+) {
+    int size = (*env)->GetArrayLength(env, rewriting_nodes);
+    ${node_rewriting_handle_type} *res =
+        (${node_rewriting_handle_type} *) malloc(
+            size * sizeof(${node_rewriting_handle_type})
+        );
+    for(int i = 0; i < size; i++) {
+        res[i] = RewritingNode_unwrap(
+            env,
+            (*env)->GetObjectArrayElement(
+                env,
+                rewriting_nodes,
+                (jsize) i
+            )
+        );
+    }
+    return res;
 }
 
 // ==========
@@ -1651,6 +1814,123 @@ ${diagnostic_type} Diagnostic_unwrap(
 
     // Return the result
     return res;
+}
+
+// ==========
+// Rewriting apply result functions
+// ==========
+
+// Create a new vakye for an apply result
+${rewriting_apply_result_type} RewritingApplyResult_new_value() {
+    ${rewriting_apply_result_type} res = {
+        0,
+        NULL,
+        0,
+        NULL
+    };
+    return res;
+}
+
+// Wrap a native rewriting apply result
+jobject RewritingApplyResult_wrap(
+    JNIEnv *env,
+    ${rewriting_apply_result_type} result_native
+) {
+    if(result_native.success > 0) {
+        return (*env)->CallStaticObjectMethod(
+            env,
+            RewritingApplyResult_class_ref,
+            RewritingApplyResult_success_id
+        );
+    }
+    return (*env)->NewObject(
+        env,
+        RewritingApplyResult_class_ref,
+        RewritingApplyResult_contructor_id,
+        (jboolean) 0,
+        AnalysisUnit_wrap(env, result_native.unit),
+        result_native.diagnostics_count,
+        PointerWrapper_wrap(env, (void *) result_native.diagnostics)
+    );
+}
+
+${rewriting_apply_result_type} RewritingApplyResult_unwrap(
+    JNIEnv *env,
+    jobject rewriting_apply_result
+) {
+    ${rewriting_apply_result_type} res = RewritingApplyResult_new_value();
+    res.success = (int) (*env)->GetBooleanField(
+        env,
+        rewriting_apply_result,
+        RewritingApplyResult_success_field_id
+    );
+    res.unit = AnalysisUnit_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            rewriting_apply_result,
+            RewritingApplyResult_unit_field_id
+        )
+    );
+    res.diagnostics_count = (int) (*env)->GetIntField(
+        env,
+        rewriting_apply_result,
+        RewritingApplyResult_diagnostics_count_field_id
+    );
+    res.diagnostics = (${diagnostic_type} *) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            rewriting_apply_result,
+            RewritingApplyResult_diagnostics_reference_field_id
+        )
+    );
+    return res;
+}
+
+// Function to get the wrapped diagnostics inside a rewriting apply result
+${api.jni_func_sig("rewriting_get_result_diagnostics", "jobjectArray")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jint diagnostics_count,
+    jlong diagnostics_reference
+) {
+    // Create the result array
+    jobjectArray res = (*env)->NewObjectArray(
+        env,
+        (jsize) diagnostics_count,
+        Diagnostic_class_ref,
+        NULL
+    );
+
+    // Fill the result array by wrapping all diagnostics
+    ${diagnostic_type} *diagnostics_native =
+        (${diagnostic_type} *) diagnostics_reference;
+    for(int i = 0; i < (int) diagnostics_count; i++) {
+        (*env)->SetObjectArrayElement(
+            env,
+            res,
+            (jsize) i,
+            Diagnostic_wrap(env, diagnostics_native[i])
+        );
+    }
+
+    // Return the filled array
+    return res;
+}
+
+// Function to free the rewriting apply result
+${api.jni_func_sig("rewriting_free_apply_result", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_apply_result
+) {
+    ${rewriting_apply_result_type} result_native =
+        RewritingApplyResult_unwrap(
+            env,
+            rewriting_apply_result
+        );
+    ${nat("rewriting_free_apply_result")}(&result_native);
 }
 
 // ==========
@@ -2541,6 +2821,736 @@ ${api.jni_func_sig("unit_diagnostic", "jobject")}(
 
     // Return the diagnostic
     return Diagnostic_wrap(env, res);
+}
+
+// ==========
+// Rewriting context functions
+// ==========
+
+// Create a new value for a rewriting context
+${rewriting_handle_type} RewritingContext_new_value() {
+    return NULL;
+}
+
+// Wrap a native rewriting context in its Java class
+jobject RewritingContext_wrap(
+    JNIEnv *env,
+    ${rewriting_handle_type} rewriting_context_native
+) {
+    return (*env)->CallStaticObjectMethod(
+        env,
+        RewritingContext_class_ref,
+        RewritingContext_from_reference_id,
+        PointerWrapper_wrap(env, (void *) rewriting_context_native)
+    );
+}
+
+// Unwrap a Java rewriting context to its native value
+${rewriting_handle_type} RewritingContext_unwrap(
+    JNIEnv *env,
+    jobject rewriting_context
+) {
+    return (${rewriting_handle_type}) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            rewriting_context,
+            RewritingContext_reference_field_id
+        )
+    );
+}
+
+// Start a rewriting session on the given analysis context
+${api.jni_func_sig("rewriting_start_rewriting", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject analysis_context
+) {
+    // Call the native function to create a rewriting context and return the
+    // wrapped result.
+    return RewritingContext_wrap(
+        env,
+        ${nat("rewriting_start_rewriting")}(AnalysisContext_unwrap(
+            env,
+            analysis_context
+        ))
+    );
+}
+
+// Get the analysis context
+${api.jni_func_sig("rewriting_handle_to_context", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_context
+) {
+    return AnalysisContext_wrap(
+        env,
+        ${nat("rewriting_handle_to_context")}(
+            RewritingContext_unwrap(env, rewriting_context)
+        )
+    );
+}
+
+// Get the rewriting units of the context
+${api.jni_func_sig("rewriting_unit_handles", "jobjectArray")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_context
+) {
+    // Call the native function to get the native rewriting units
+    ${unit_rewriting_handle_type} *unit_array_native =
+        ${nat("rewriting_unit_handles")}(
+            RewritingContext_unwrap(env, rewriting_context)
+        );
+
+    // Count the number of units in the result
+    unsigned int unit_count = 0;
+    ${unit_rewriting_handle_type} *cursor = unit_array_native;
+    while(*cursor != NULL) {
+        cursor = &cursor[1];
+        unit_count++;
+    }
+
+    // Create the result array and fill it
+    jobjectArray res = (*env)->NewObjectArray(
+        env,
+        (jsize) unit_count,
+        RewritingUnit_class_ref,
+        NULL
+    );
+    for(unsigned int i = 0; i < unit_count; i++) {
+        (*env)->SetObjectArrayElement(
+            env,
+            res,
+            (jsize) i,
+            RewritingUnit_wrap(env, unit_array_native[i])
+        );
+    }
+    free(unit_array_native);
+    return res;
+}
+
+// Create a new rewriting node in the given context
+${api.jni_func_sig("rewriting_create_node", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_context,
+    jint node_kind
+) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_create_node")}(
+            RewritingContext_unwrap(env, rewriting_context),
+            (${node_kind_type}) node_kind
+        )
+    );
+}
+
+// Create a new rewriting node with its children
+${api.jni_func_sig("rewriting_create_regular_node", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_context,
+    jint node_kind,
+    jobjectArray children
+) {
+    // Unwrap the children
+    ${node_rewriting_handle_type} *children_native =
+        rewriting_nodes_to_native(env, children);
+
+    // Call the native function and wrap the result
+    jobject res = RewritingNode_wrap(
+        env,
+        ${nat("rewriting_create_regular_node")}(
+            RewritingContext_unwrap(env, rewriting_context),
+            (${node_kind_type}) node_kind,
+            children_native,
+            (*env)->GetArrayLength(env, children)
+        )
+    );
+
+    // Free the native children array then return the result
+    free(children_native);
+    return res;
+}
+
+// Create a new rewriting token node in the given context
+${api.jni_func_sig("rewriting_create_token_node", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_context,
+    jint node_kind,
+    jobject node_text
+) {
+    ${text_type} node_text_native = Text_unwrap(env, node_text);
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_create_token_node")}(
+            RewritingContext_unwrap(env, rewriting_context),
+            (${node_kind_type}) node_kind,
+            &node_text_native
+        )
+    );
+}
+
+// Create a new node tree from a template
+${api.jni_func_sig("rewriting_create_from_template", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_context,
+    jobject template_text,
+    jobjectArray arguments,
+    jint rule
+) {
+    // Unwrap the arguments and template text
+    int count = (*env)->GetArrayLength(env, arguments);
+    ${node_rewriting_handle_type} *arguments_native =
+        rewriting_nodes_to_native(env, arguments);
+    ${text_type} template_text_native = Text_unwrap(env, template_text);
+
+    // Call the native function
+    jobject res = RewritingNode_wrap(
+        env,
+        ${nat("rewriting_create_from_template")}(
+            RewritingContext_unwrap(env, rewriting_context),
+            &template_text_native,
+            arguments_native,
+            count,
+            (${grammar_rule_type}) rule
+        )
+    );
+
+    // Free the arguments native array the return the result
+    free(arguments_native);
+    return res;
+}
+
+// Apply the rewriting session and close it if success
+${api.jni_func_sig("rewriting_apply", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_context
+) {
+    ${rewriting_apply_result_type} res_native =
+        RewritingApplyResult_new_value();
+    ${nat("rewriting_apply")}(
+        RewritingContext_unwrap(env, rewriting_context),
+        &res_native
+    );
+    return RewritingApplyResult_wrap(env, res_native);
+}
+
+// Abort the rewriting session
+${api.jni_func_sig("rewriting_abort_rewriting", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_context
+) {
+    // Just call the native function
+    ${nat("rewriting_abort_rewriting")}(
+        RewritingContext_unwrap(env, rewriting_context)
+    );
+}
+
+// ==========
+// Rewriting unit functions
+// ==========
+
+// Create a new value for a native rewriting unit
+${unit_rewriting_handle_type} RewritingUnit_new_value() {
+    return NULL;
+}
+
+// Wrap the native rewrite unit inside the Java class
+jobject RewritingUnit_wrap(
+    JNIEnv *env,
+    ${unit_rewriting_handle_type} rewriting_unit_native
+) {
+    return (*env)->NewObject(
+        env,
+        RewritingUnit_class_ref,
+        RewritingUnit_constructor_id,
+        PointerWrapper_wrap(env, (void *) rewriting_unit_native)
+    );
+}
+
+// Unwrap the Java rewrite unit into a native value
+${unit_rewriting_handle_type} RewritingUnit_unwrap(
+    JNIEnv *env,
+    jobject rewriting_unit
+) {
+    return (${unit_rewriting_handle_type}) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            rewriting_unit,
+            RewritingUnit_reference_field_id
+        )
+    );
+}
+
+// Get or create the rewriting unit from an analysis unit
+${api.jni_func_sig("rewriting_unit_to_handle", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject analysis_unit
+) {
+    return RewritingUnit_wrap(
+        env,
+        ${nat("rewriting_unit_to_handle")}(
+            AnalysisUnit_unwrap(env, analysis_unit)
+        )
+    );
+}
+
+// Get the analysis unit from the rewriting unit
+${api.jni_func_sig("rewriting_handle_to_unit", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_unit
+) {
+    return AnalysisUnit_wrap(
+        env,
+        ${nat("rewriting_handle_to_unit")}(
+            RewritingUnit_unwrap(env, rewriting_unit)
+        )
+    );
+}
+
+// Get the root rewriting node of the rewriting unit
+${api.jni_func_sig("rewriting_unit_root", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_unit
+) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_unit_root")}(
+            RewritingUnit_unwrap(env, rewriting_unit)
+        )
+    );
+}
+
+// Set the root rewriting node of the rewriting unit
+${api.jni_func_sig("rewriting_unit_set_root", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_unit,
+    jobject rewriting_node
+) {
+    ${nat("rewriting_unit_set_root")}(
+        RewritingUnit_unwrap(env, rewriting_unit),
+        RewritingNode_unwrap(env, rewriting_node)
+    );
+}
+
+// Unparse the given rewriting unit
+${api.jni_func_sig("rewriting_unit_unparse", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_unit
+) {
+    ${text_type} res_native = Text_new_value();
+    ${nat("rewriting_unit_unparse")}(
+        RewritingUnit_unwrap(env, rewriting_unit),
+        &res_native
+    );
+    return Text_wrap(env, res_native);
+}
+
+// ==========
+// Rewriting node functions
+// ==========
+
+// Create a new rewriting node native value
+${node_rewriting_handle_type} RewritingNode_new_value() {
+    return NULL;
+}
+
+// Wrap the native rewriting node
+jobject RewritingNode_wrap(
+    JNIEnv *env,
+    ${node_rewriting_handle_type} rewriting_node_native
+) {
+    return (*env)->NewObject(
+        env,
+        RewritingNode_class_ref,
+        RewritingNode_constructor_id,
+        PointerWrapper_wrap(env, (void *) rewriting_node_native)
+    );
+}
+
+// Unwrap the Java rewriting node
+${node_rewriting_handle_type} RewritingNode_unwrap(
+    JNIEnv *env,
+    jobject rewriting_node
+) {
+    return (${node_rewriting_handle_type}) PointerWrapper_unwrap(
+        env,
+        (*env)->GetObjectField(
+            env,
+            rewriting_node,
+            RewritingNode_reference_field_id
+        )
+    );
+}
+
+// Get the rewriting node from the parsed node
+${api.jni_func_sig("rewriting_node_to_handle", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject entity
+ ) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_node_to_handle")}(
+            Entity_unwrap(env, entity).node
+        )
+    );
+}
+
+// Get the parsed node from the given rewriting node
+${api.jni_func_sig("rewriting_handle_to_node", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    ${node_type} bare_node = ${nat("rewriting_handle_to_node")}(
+        RewritingNode_unwrap(
+            env,
+            rewriting_node
+        )
+    );
+    ${entity_type} res_native = Entity_new_value();
+    ${nat("create_bare_entity")}(
+        bare_node,
+        &res_native
+    );
+    return Entity_wrap(env, res_native);
+}
+
+// Get the rewriting context of the given node
+${api.jni_func_sig("rewriting_node_to_context", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    return RewritingContext_wrap(
+        env,
+        ${nat("rewriting_node_to_context")}(
+            RewritingNode_unwrap(env, rewriting_node)
+        )
+    );
+}
+
+// Clone the given rewriting node and return the result
+${api.jni_func_sig("rewriting_clone", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject to_clone
+) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_clone")}(
+            RewritingNode_unwrap(env, to_clone)
+        )
+    );
+}
+
+// Unparse the given rewriting node
+${api.jni_func_sig("rewriting_node_unparse", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    ${text_type} res_native = Text_new_value();
+    ${nat("rewriting_node_unparse")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        &res_native
+    );
+    return Text_wrap(
+        env,
+        res_native
+    );
+}
+
+// Get the kind index of the rewriting node
+${api.jni_func_sig("rewriting_kind", "jint")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    return (jint) ${nat("rewriting_kind")}(
+        RewritingNode_unwrap(env, rewriting_node)
+    );
+}
+
+// Get the image of the rewriting node
+${api.jni_func_sig("rewriting_node_image", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    ${text_type} res_native = Text_new_value();
+    ${nat("rewriting_node_image")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        &res_native
+    );
+    return Text_wrap(env, res_native);
+}
+
+// Get whether the node is tied
+${api.jni_func_sig("rewriting_tied", "jboolean")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    return (jboolean) ${nat("rewriting_tied")}(
+        RewritingNode_unwrap(env, rewriting_node)
+    );
+}
+
+// Get the parent of the rewriting node
+${api.jni_func_sig("rewriting_parent", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_parent")}(
+            RewritingNode_unwrap(env, rewriting_node)
+        )
+    );
+}
+
+// Get the rewriting node children
+${api.jni_func_sig("rewriting_children", "jobjectArray")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    // Call the native method
+    ${node_rewriting_handle_type} *children = NULL;
+    int count = 0;
+    ${nat("rewriting_children")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        &children,
+        &count
+    );
+
+    // Create the new java array adn fill it
+    jobjectArray res = (*env)->NewObjectArray(
+        env,
+        (jsize) count,
+        RewritingNode_class_ref,
+        NULL
+    );
+    for(int i = 0; i < count; i++) {
+        (*env)->SetObjectArrayElement(
+            env,
+            res,
+            (jsize) i,
+            RewritingNode_wrap(env, children[i])
+        );
+    }
+
+    // Free the native children
+    free(children);
+
+    // Return the result
+    return res;
+}
+
+// Get the child of the rewriting node by its member reference
+${api.jni_func_sig("rewriting_child", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_parent,
+    jint child_member_reference
+) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_child")}(
+            RewritingNode_unwrap(env, rewriting_parent),
+            (${introspection_member_ref_type}) child_member_reference
+        )
+    );
+}
+
+// Set the given child at the given member reference
+${api.jni_func_sig("rewriting_set_child", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject parent,
+    jint child_member_reference,
+    jobject new_child
+) {
+    ${nat("rewriting_set_child")}(
+        RewritingNode_unwrap(env, parent),
+        (${introspection_member_ref_type}) child_member_reference,
+        RewritingNode_unwrap(env, new_child)
+    );
+}
+
+// Replace the rewriting node with the new one.
+${api.jni_func_sig("rewriting_replace", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node,
+    jobject new_node
+) {
+    ${nat("rewriting_replace")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        RewritingNode_unwrap(env, new_node)
+    );
+}
+
+// Get the first child of the given parent
+${api.jni_func_sig("rewriting_first_child", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_parent
+) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_first_child")}(
+            RewritingNode_unwrap(env, rewriting_parent)
+        )
+    );
+}
+
+// Get the last child of the given parent
+${api.jni_func_sig("rewriting_last_child", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_parent
+) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_last_child")}(
+            RewritingNode_unwrap(env, rewriting_parent)
+        )
+    );
+}
+
+// Get the next child from the given rewriting node
+${api.jni_func_sig("rewriting_next_child", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_next_child")}(
+            RewritingNode_unwrap(env, rewriting_node)
+        )
+    );
+}
+
+// Get the previous child from the given rewriting node
+${api.jni_func_sig("rewriting_previous_child", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    return RewritingNode_wrap(
+        env,
+        ${nat("rewriting_previous_child")}(
+            RewritingNode_unwrap(env, rewriting_node)
+        )
+    );
+}
+
+// Insert the rewriting node before the other
+${api.jni_func_sig("rewriting_insert_before", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node,
+    jobject to_insert
+) {
+    ${nat("rewriting_insert_before")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        RewritingNode_unwrap(env, to_insert)
+    );
+}
+
+// Insert the rewriting node after the other
+${api.jni_func_sig("rewriting_insert_after", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node,
+    jobject to_insert
+) {
+    ${nat("rewriting_insert_after")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        RewritingNode_unwrap(env, to_insert)
+    );
+}
+
+// Insert the rewriting node at the beginning of children
+${api.jni_func_sig("rewriting_insert_first", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node,
+    jobject to_insert
+) {
+    ${nat("rewriting_insert_first")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        RewritingNode_unwrap(env, to_insert)
+    );
+}
+
+// Insert the rewriting node at the end of children
+${api.jni_func_sig("rewriting_insert_last", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node,
+    jobject to_insert
+) {
+    ${nat("rewriting_insert_last")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        RewritingNode_unwrap(env, to_insert)
+    );
+}
+
+// Remove the given node from its list parent
+${api.jni_func_sig("rewriting_remove_child", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject to_remove
+) {
+    ${nat("rewriting_remove_child")}(
+        RewritingNode_unwrap(env, to_remove)
+    );
+}
+
+// Get the text of the given rewriting token node
+${api.jni_func_sig("rewriting_text", "jobject")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node
+) {
+    ${text_type} res_native = Text_new_value();
+    ${nat("rewriting_text")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        &res_native
+    );
+    return Text_wrap(env, res_native);
+}
+
+// Set the text of the given rewriting token node
+${api.jni_func_sig("rewriting_set_text", "void")}(
+    JNIEnv *env,
+    jclass jni_lib,
+    jobject rewriting_node,
+    jobject text
+) {
+    ${text_type} text_native = Text_unwrap(env, text);
+    ${nat("rewriting_set_text")}(
+        RewritingNode_unwrap(env, rewriting_node),
+        &text_native
+    );
 }
 
 // ==========

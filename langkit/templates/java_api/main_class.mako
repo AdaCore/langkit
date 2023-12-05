@@ -183,12 +183,17 @@ public final class ${ctx.lib_name.camel} {
         NODE_DESCRIPTION_MAP = new HashMap<>();
 
     static {
-        // Fill the node description map
+        // Fill the node description map and set the node kind descriptions
         % for astnode in ctx.astnode_types:
         NODE_DESCRIPTION_MAP.put(
             "${astnode.kwless_raw_name.camel}",
             ${api.wrapping_type(astnode)}.description
         );
+            % if not astnode.abstract:
+        NodeKind.${astnode.kwless_raw_name.upper}.setDescription(
+            ${api.wrapping_type(astnode)}.description
+        );
+            % endif
         % endfor
     }
 
@@ -356,10 +361,27 @@ public final class ${ctx.lib_name.camel} {
      *
      * @throws The last langkit exception if there is one.
      */
+    @CompilerDirectives.TruffleBoundary
     private static void checkException() throws LangkitException {
         LangkitException exc = getLastException();
         if(exc != null)
             throw exc;
+    }
+
+    /**
+     * Create a native array from the given rewriting nodes arrray.
+     * The returned pointer must be freed using UnmanagedMemory#free methods.
+     */
+    private static WordPointer rewritingNodesToNative(
+        final RewritingNode[] rewritingNodes
+    ) {
+        final WordPointer res = UnmanagedMemory.malloc(
+            rewritingNodes.length * SizeOf.get(WordPointer.class)
+        );
+        for(int i = 0; i < rewritingNodes.length; i++) {
+            res.write(i, rewritingNodes[i].unwrap());
+        }
+        return res;
     }
 
     // ==========
@@ -543,6 +565,9 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Instance attributes -----
 
+        /** Kind of the node. This kind is null if the node is abstract */
+        public final NodeKind kind;
+
         /** Whether the node is a token node */
         public final boolean isTokenNode;
 
@@ -565,6 +590,7 @@ public final class ${ctx.lib_name.camel} {
 
         /** Create a new node description with its kind and class */
         public ${ctx.lib_name.camel}Node (
+            NodeKind kind,
             final boolean isTokenNode,
             final boolean isListNode,
             final Class<? extends ${root_node_type}> clazz,
@@ -572,6 +598,7 @@ public final class ${ctx.lib_name.camel} {
             final String[] fields,
             final Map<String, ${ctx.lib_name.camel}Field> fieldDescriptions
         ) {
+            this.kind = kind;
             this.isTokenNode = isTokenNode;
             this.isListNode = isListNode;
             this.clazz = clazz;
@@ -931,6 +958,155 @@ public final class ${ctx.lib_name.camel} {
          *
          * @return The int C value of the enum instance.
          */
+        public int toC() {
+            return this.value;
+        }
+
+    }
+
+    ${java_doc('langkit.node_kind_type', 4)}
+    public enum NodeKind {
+
+        // ----- Enum values -----
+
+        % for n in ctx.astnode_types:
+            <% name = n.kwless_raw_name.upper %>
+            % if n.abstract:
+        // ${name} is abstract
+            % else:
+        ${java_doc(n, 8)}
+        ${name}(${ctx.node_kind_constants[n]}),
+            % endif
+        % endfor
+        ;
+
+        // ----- Class attributes -----
+
+        /** Map containing relation from node kind value and enum instance. */
+        private static final Map<Integer, NodeKind> map = new HashMap<>();
+
+        // ----- Instance attributes -----
+
+        /** Integer value of the node kind. */
+        public final int value;
+
+        /** Description associated to the node kind. */
+        private ${ctx.lib_name.camel}Node description;
+
+        // ----- Constructors -----
+
+        static {
+            // Initialize the lookup map
+            for(NodeKind elem : NodeKind.values()) {
+                map.put(elem.value, elem);
+            }
+        }
+
+        /** Private constructor. */
+        private NodeKind(
+            final int value
+        ) {
+            this.value = value;
+
+            // The "description" field is intiialized with null to avoid
+            // static code execution order issues.
+            this.description = null;
+        }
+
+        // ----- Class methods -----
+
+        /**
+         * Get the enum instance from the given C integer value.
+         *
+         * @throws EnumException If the given C value is not a valid enum
+         *                       value.
+         */
+        public static NodeKind fromC(
+            final int cValue
+        ) {
+            if(!map.containsKey(cValue))
+                throw new EnumException("Cannot get NodeKind from " + cValue);
+            return (NodeKind) map.get(cValue);
+        }
+
+        // ----- Instance methods -----
+
+        /** Get the C integer value of the enum instance. */
+        public int toC() {
+            return this.value;
+        }
+
+        public ${ctx.lib_name.camel}Node getDescription() {
+            return this.description;
+        }
+
+        void setDescription(${ctx.lib_name.camel}Node description) {
+            this.description = description;
+        }
+
+    }
+
+    /** This enum contains all language nodes' member references */
+    public enum MemberReference {
+
+        // ----- Enum values -----
+
+        % for i, m in enumerate(generic_api.all_members, 1):
+            <%
+            prefix = capi.symbol_prefix.upper()
+            member_name = generic_api.member_name(m).upper()
+            %>
+        ${prefix}_${member_name}(${i}),
+        % endfor
+        ;
+
+        // ----- Class attributes -----
+
+        /** Map containing relation from native value to Jave instance. */
+        private static Map<Integer, MemberReference> map = new HashMap<>();
+
+        // ----- Instance attribtues -----
+
+        /** Native value if the member reference. */
+        private final int value;
+
+        // ----- Constructors -----
+
+        /** Private constructor. */
+        private MemberReference (
+            final int value
+        ) {
+            this.value = value;
+        }
+
+        static {
+            // Initialize the lookup map
+            for(MemberReference elem : MemberReference.values()) {
+                map.put(elem.value, elem);
+            }
+        }
+
+        // ----- Class methods -----
+
+        /**
+         * Get the enum instance from the given C integer value.
+         *
+         * @throws EnumException If the given C value is not a valid enum
+         *                       value.
+         */
+        public static MemberReference fromC(
+            final int cValue
+        ) {
+            if(!map.containsKey(cValue))
+                throw new EnumException(
+                    "Cannot get MemberReference from " + cValue
+                );
+            return (MemberReference) map.get(cValue);
+        }
+
+        // ----- Instance methods -----
+
+        /** Get the native value of the enum instance. */
         public int toC() {
             return this.value;
         }
@@ -2073,6 +2249,156 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
+    ${java_doc('langkit.rewriting.apply_result_type', 4)}
+    public static final class RewritingApplyResult implements AutoCloseable {
+
+        // ----- Instance attributes -----
+
+        /** Whether the rewriting application was successful. */
+        public final boolean success;
+
+        /**
+         * If the rewriting failed, this is the unit on which the rewriting
+         * failed. Otherwise it is the None unit.
+         */
+        public final AnalysisUnit unit;
+
+        /**
+         * Number of diagnostics in the result. 0 if the apply has been a
+         * success.
+         */
+        private final int diagnosticsCount;
+
+        /** Pointer to the diagnostic array, null if successful. */
+        private final PointerWrapper diagnosticsReference;
+
+        /** Cache for the unwrapped diagnostics. */
+        private Diagnostic[] diagnostics;
+
+        // ----- Constructors ------
+
+        /** Create a new rewriting result with its content. */
+        RewritingApplyResult(
+            final boolean success,
+            final AnalysisUnit unit,
+            final int diagnosticsCount,
+            final PointerWrapper diagnosticsReference
+        ) {
+            this.success = success;
+            this.unit = unit;
+            this.diagnosticsCount = diagnosticsCount;
+            this.diagnosticsReference = diagnosticsReference;
+            this.diagnostics = null;
+        }
+
+        /** Shortcut creation method for success. */
+        static RewritingApplyResult success() {
+            return new RewritingApplyResult(
+                true,
+                AnalysisUnit.NONE,
+                0,
+                PointerWrapper.nullPointer()
+            );
+        }
+
+        // ----- Graal C API methods -----
+
+        /** Wrap a pointer to a native rewriting apply result. */
+        static RewritingApplyResult wrap(
+            final Pointer pointer
+        ) {
+            return wrap((RewritingApplyResultNative) pointer.readWord(0));
+        }
+
+        /** Wrap a native rewriting apply result to the Java class. */
+        static RewritingApplyResult wrap(
+            final RewritingApplyResultNative rewritingApplyResultNative
+        ) {
+            if(rewritingApplyResultNative.get_success() > 0) {
+                return RewritingApplyResult.success();
+            }
+            return new RewritingApplyResult(
+                false,
+                AnalysisUnit.wrap(rewritingApplyResultNative.get_unit()),
+                rewritingApplyResultNative.get_diagnostics_count(),
+                new PointerWrapper(
+                    rewritingApplyResultNative.get_diagnostics()
+                )
+            );
+        }
+
+        /** Unwrap the rewriting apply result to the provided native value. */
+        void unwrap(
+            final RewritingApplyResultNative rewritingApplyResultNative
+        ) {
+            rewritingApplyResultNative.set_success(this.success ? 1 : 0);
+            rewritingApplyResultNative.set_unit(this.unit.unwrap());
+            rewritingApplyResultNative.set_diagnostics_count(
+                this.diagnosticsCount
+            );
+            rewritingApplyResultNative.set_diagnostics(
+                (DiagnosticNative) this.diagnosticsReference.ni()
+            );
+        }
+
+        // ----- Instance methods -----
+
+        /** Unwrap all diagnostics, cache the result and return it */
+        public Diagnostic[] getDiagnostics() {
+            if(this.diagnostics == null) {
+                if(this.success) {
+                    this.diagnostics = new Diagnostic[0];
+                } else {
+
+                    if(ImageInfo.inImageCode()) {
+                        this.diagnostics =
+                            new Diagnostic[this.diagnosticsCount];
+                        final Pointer diagnostics =
+                            (Pointer) this.diagnosticsReference.ni();
+                        DiagnosticNative diagnosticNative;
+                        final int diagnosticNativeSize = SizeOf.get(
+                            DiagnosticNative.class
+                        );
+                        for(int i = 0; i < this.diagnosticsCount; i++) {
+                            diagnosticNative = WordFactory.unsigned(
+                                diagnostics.add(i * diagnosticNativeSize)
+                                        .rawValue()
+                            );
+                            this.diagnostics[i] = Diagnostic.wrap(
+                                diagnosticNative
+                            );
+                        }
+                    } else {
+                        this.diagnostics =
+                            JNI_LIB
+                                .${nat("rewriting_get_result_diagnostics")}(
+                                    this.diagnosticsCount,
+                                    this.diagnosticsReference.jni()
+                                );
+                    }
+
+                }
+            }
+            return this.diagnostics;
+        }
+
+        ${java_doc('langkit.rewriting.free_apply_result', 8)}
+        @Override
+        public void close() {
+
+            if(ImageInfo.inImageCode()) {
+                final RewritingApplyResultNative resultNative =
+                    StackValue.get(RewritingApplyResultNative.class);
+                unwrap(resultNative);
+                NI_LIB.${nat("rewriting_free_apply_result")}(resultNative);
+            } else {
+                JNI_LIB.${nat("rewriting_free_apply_result")}(this);
+            }
+
+        }
+
+    }
+
     ${java_doc('langkit.file_reader_type', 4)}
     public static final class FileReader implements AutoCloseable {
 
@@ -2953,6 +3279,12 @@ public final class ${ctx.lib_name.camel} {
         /** The event handler associated with the context. */
         private EventHandler eventHandler;
 
+        /**
+         * The rewriting context associated with this analysis context.
+         * It can be the none value.
+         */
+        RewritingContext rewritingContext = RewritingContext.NONE;
+
         // ----- Constructors -----
 
         /**
@@ -3190,6 +3522,16 @@ public final class ${ctx.lib_name.camel} {
             return this.eventHandler;
         }
 
+        /**
+         * Get the currently open rewriting context associated to this
+         * analysis context. The None rewriting context is returned if the
+         * current context hasn't started a rewriting session.
+         * @see AnalysisContext#startRewriting()
+         */
+        public RewritingContext getRewritingContext() {
+            return this.rewritingContext;
+        }
+
         // ----- Class methods -----
 
         /**
@@ -3398,6 +3740,25 @@ public final class ${ctx.lib_name.camel} {
             return this.getUnitFromProvider(name, kind, "", false);
         }
         % endif
+
+        ${java_doc('langkit.rewriting.start_rewriting', 8)}
+        public RewritingContext startRewriting() {
+            final RewritingContext res;
+
+            if(ImageInfo.inImageCode()) {
+                final RewritingContextNative resNative =
+                    NI_LIB.${nat("rewriting_start_rewriting")}(
+                        this.reference.ni()
+                    );
+                res = RewritingContext.wrap(resNative);
+            } else {
+                res = JNI_LIB.${nat("rewriting_start_rewriting")}(this);
+            }
+
+            checkException();
+            this.rewritingContext = res;
+            return this.rewritingContext;
+        }
 
         /** @see java.lang.AutoCloseable#close() */
         @Override
@@ -3714,6 +4075,24 @@ public final class ${ctx.lib_name.camel} {
             return res;
         }
 
+        ${java_doc('langkit.rewriting.unit_handle', 8)}
+        public RewritingUnit getRewritingUnit() {
+            final RewritingUnit res;
+
+            if(ImageInfo.inImageCode()) {
+                RewritingUnitNative rewritingUnitNative =
+                    NI_LIB.${nat("rewriting_unit_to_handle")}(
+                        this.unwrap()
+                    );
+                res = RewritingUnit.wrap(rewritingUnitNative);
+            } else {
+                res = JNI_LIB.${nat("rewriting_unit_to_handle")}(this);
+            }
+
+            checkException();
+            return res;
+        }
+
         // ----- Override methods -----
 
         @Override
@@ -3726,6 +4105,998 @@ public final class ${ctx.lib_name.camel} {
             if(this == o) return true;
             if(!(o instanceof AnalysisUnit)) return false;
             final AnalysisUnit other = (AnalysisUnit) o;
+            return this.reference.equals(other.reference);
+        }
+
+    }
+
+    ${java_doc('langkit.rewriting.rewriting_handle_type', 4)}
+    public static final class RewritingContext implements AutoCloseable {
+
+        // ----- Class attributes -----
+
+// TODO: Remove this NONE singleton for libadalang/langkit-query-language#197
+        /** Singleton representing the none rewriting context */
+        public static final RewritingContext NONE = new RewritingContext(
+            PointerWrapper.nullPointer()
+        );
+
+        /**
+         * This map contains all wrapped rewriting context associated to their
+         * address.
+         */
+        private static final Map<PointerWrapper, RewritingContext> contextCache
+            = new ConcurrentHashMap<>();
+
+        // ----- Instance attributes -----
+
+        /** The reference to the native rewriting context handle. */
+        private final PointerWrapper reference;
+
+        /**
+         * Cache for the analysis context associated with this rewriting
+         * context.
+         */
+        private AnalysisContext analysisContext;
+
+        /** Whether the rewriting context has already been closed. */
+        private boolean closed;
+
+        // ----- Constructors -----
+
+        /** Create a new rewriting context with its native reference. */
+        private RewritingContext(
+            final PointerWrapper reference
+        ) {
+            this.reference = reference;
+            this.closed = false;
+        }
+
+        /**
+         * From the given native reference, get the associate rewriting
+         * context Java object. A native reference can only have one
+         * associated Java instance.
+         */
+        @CompilerDirectives.TruffleBoundary
+        static RewritingContext fromReference(
+            final PointerWrapper reference
+        ) {
+            if(!contextCache.containsKey(reference)) {
+                contextCache.put(
+                    reference,
+                    new RewritingContext(reference)
+                );
+            }
+            final RewritingContext res = contextCache.get(reference);
+            res.closed = false;
+            return res;
+        }
+
+        // ----- Graal C API methods -----
+
+        /** Wrap a native pointer to a native rewriting context. */
+        static RewritingContext wrap(
+            final Pointer pointer
+        ) {
+            return wrap((RewritingContextNative) pointer.readWord(0));
+        }
+
+        /** Wrap a native rewriting context. */
+        static RewritingContext wrap(
+            final RewritingContextNative rewritingContextNative
+        ) {
+            return fromReference(new PointerWrapper(rewritingContextNative));
+        }
+
+        /** Unwrap the analysis context in the given native pointer. */
+        void unwrap(
+            final Pointer pointer
+        ) {
+            pointer.writeWord(0, this.unwrap());
+        }
+
+        /** Unwrap the rewriting context as a native value. */
+        RewritingContextNative unwrap() {
+            return (RewritingContextNative) this.reference.ni();
+        }
+
+        // ----- Getters -----
+
+        public boolean isClosed() {
+            return this.closed;
+        }
+
+
+        ${java_doc('langkit.rewriting.handle_context', 8)}
+        public AnalysisContext getAnalysisContext() {
+            if(this.analysisContext == null) {
+
+                if(ImageInfo.inImageCode()) {
+                    this.analysisContext = AnalysisContext.wrap(
+                        NI_LIB.${nat("rewriting_handle_to_context")}(
+                            this.unwrap()
+                        )
+                    );
+                } else {
+                    this.analysisContext =
+                        JNI_LIB.${nat("rewriting_handle_to_context")}(this);
+                }
+
+            }
+            return this.analysisContext;
+        }
+
+        // ----- Instance methods -----
+
+        ${java_doc('langkit.rewriting.unit_handles', 8)}
+        public RewritingUnit[] rewritingUnits() {
+
+            if(ImageInfo.inImageCode()) {
+                // Get the native array
+                final WordPointer unitArrayNative =
+                    NI_LIB.${nat("rewriting_unit_handles")}(this.unwrap());
+
+                // Fill the Java result list
+                final List<RewritingUnit> resList = new ArrayList<>();
+                int cursor = 0;
+                while(((Pointer) unitArrayNative.read(cursor)).isNonNull()) {
+                    resList.add(RewritingUnit.wrap(
+                        (RewritingUnitNative) unitArrayNative.read(cursor)
+                    ));
+                    cursor++;
+                }
+
+                // Free the native array
+                UnmanagedMemory.free(unitArrayNative);
+
+                // Return the Java list as an array
+                return resList.toArray(new RewritingUnit[0]);
+            } else {
+                return JNI_LIB.${nat("rewriting_unit_handles")}(this);
+            }
+
+        }
+
+        ${java_doc('langkit.rewriting.create_node', 8)}
+        public RewritingNode createNode(
+            final NodeKind kind
+        ) {
+            final RewritingNode res;
+
+            if(ImageInfo.inImageCode()) {
+                res = RewritingNode.wrap(
+                    NI_LIB.${nat("rewriting_create_node")}(
+                        this.unwrap(),
+                        kind.toC()
+                    )
+                );
+            } else {
+                res = JNI_LIB.${nat("rewriting_create_node")}(
+                    this,
+                    kind.toC()
+                );
+            }
+
+            checkException();
+            return res;
+        }
+
+        ${java_doc('langkit.rewriting.create_regular_node', 8)}
+        public RewritingNode createNode(
+            final NodeKind kind,
+            final RewritingNode... children
+        ) {
+            final RewritingNode res;
+
+            if(ImageInfo.inImageCode()) {
+                final WordPointer childrenNative =
+                    rewritingNodesToNative(children);
+                res = RewritingNode.wrap(
+                    NI_LIB.${nat("rewriting_create_regular_node")}(
+                        this.unwrap(),
+                        kind.toC(),
+                        childrenNative,
+                        children.length
+                    )
+                );
+                UnmanagedMemory.free(childrenNative);
+            } else {
+                res = JNI_LIB.${nat("rewriting_create_regular_node")}(
+                    this,
+                    kind.toC(),
+                    children
+                );
+            }
+
+            checkException();
+            return res;
+        }
+
+        ${java_doc('langkit.rewriting.create_token_node', 8)}
+        public RewritingNode createTokenNode(
+            final NodeKind kind,
+            final String text
+        ) {
+            try (
+                final Text nodeText = Text.create(text);
+            ) {
+                final RewritingNode res;
+
+                if(ImageInfo.inImageCode()) {
+                    final TextNative nodeTextNative = StackValue.get(
+                        TextNative.class
+                    );
+                    nodeText.unwrap(nodeTextNative);
+                    res = RewritingNode.wrap(
+                        NI_LIB.${nat("rewriting_create_token_node")}(
+                            this.unwrap(),
+                            kind.toC(),
+                            nodeTextNative
+                        )
+                    );
+                } else {
+                    res = JNI_LIB.${nat("rewriting_create_token_node")}(
+                        this,
+                        kind.toC(),
+                        nodeText
+                    );
+                }
+
+                checkException();
+                return res;
+            }
+        }
+
+        ${java_doc('langkit.rewriting.create_from_template', 8)}
+        public RewritingNode createFromTemplate(
+            final String template,
+            final GrammarRule rule,
+            final RewritingNode... arguments
+        ) {
+            try (
+                final Text templateText = Text.create(template);
+            ) {
+                final RewritingNode res;
+
+                if(ImageInfo.inImageCode()) {
+                    final WordPointer argumentsNative =
+                        rewritingNodesToNative(arguments);
+                    TextNative templateTextNative =
+                        StackValue.get(TextNative.class);
+                    templateText.unwrap(templateTextNative);
+                    res = RewritingNode.wrap(
+                        NI_LIB.${nat("rewriting_create_from_template")}(
+                            this.unwrap(),
+                            templateTextNative,
+                            argumentsNative,
+                            arguments.length,
+                            rule.toC()
+                        )
+                    );
+                    UnmanagedMemory.free(argumentsNative);
+                } else {
+                    res = JNI_LIB.${nat("rewriting_create_from_template")}(
+                        this,
+                        templateText,
+                        arguments,
+                        rule.toC()
+                    );
+                }
+
+                checkException();
+                return res;
+            }
+        }
+
+        ${java_doc('langkit.rewriting.apply', 8)}
+        public RewritingApplyResult apply() {
+            final RewritingApplyResult res;
+
+            if(ImageInfo.inImageCode()) {
+                RewritingApplyResultNative resNative = StackValue.get(
+                    RewritingApplyResultNative.class
+                );
+                NI_LIB.${nat("rewriting_apply")}(
+                    this.unwrap(),
+                    resNative
+                );
+                res = RewritingApplyResult.wrap(resNative);
+            } else {
+                res = JNI_LIB.${nat("rewriting_apply")}(this);
+            }
+
+            this.closed = res.success;
+            return res;
+        }
+
+        ${java_doc('langkit.rewriting.abort_rewriting', 8)}
+        public void close() {
+            if(!this.closed) {
+                if(this.analysisContext != null) {
+                    this.analysisContext.close();
+                    this.analysisContext = null;
+                }
+
+                if(ImageInfo.inImageCode()) {
+                    NI_LIB.${nat("rewriting_abort_rewriting")}(this.unwrap());
+                } else {
+                    JNI_LIB.${nat("rewriting_abort_rewriting")}(this);
+                }
+
+                checkException();
+                this.closed = true;
+            }
+        }
+
+    }
+
+    ${java_doc('langkit.rewriting.unit_rewriting_handle_type', 4)}
+    public static final class RewritingUnit {
+
+        // ----- Class methods -----
+
+// TODO: Remove this NONE singleton for libadalang/langkit-query-language#197
+        /** Singleton representing the none value for the rewriting unit. */
+        public static final RewritingUnit NONE = new RewritingUnit(
+            PointerWrapper.nullPointer()
+        );
+
+        // ----- Instance methods -----
+
+        /** Reference to the native rewriting unit. */
+        private final PointerWrapper reference;
+
+        /** Cache for the analysis unit associated to the rewriting unit. */
+        private AnalysisUnit analysisUnit;
+
+        /** Cache for the unit root rewriting node. */
+        private RewritingNode root;
+
+        // ----- Constructors -----
+
+        /** Create a new rewriting unit with its native reference. */
+        RewritingUnit(
+            final PointerWrapper reference
+        ) {
+            this.reference = reference;
+        }
+
+        // ----- Graal C API methods -----
+
+        /** Wrap the given pointer to the native rewriting unit. */
+        static RewritingUnit wrap(
+            final Pointer pointer
+        ) {
+            return wrap((RewritingUnitNative) pointer.readWord(0));
+        }
+
+        /** Wrap the native rewriting unit. */
+        static RewritingUnit wrap(
+            final RewritingUnitNative rewritingUnitNative
+        ) {
+            return new RewritingUnit(new PointerWrapper(rewritingUnitNative));
+        }
+
+        /** Unwrap the rewriting unit in the given pointer. */
+        void unwrap(
+            final Pointer pointer
+        ) {
+            pointer.writeWord(0, this.unwrap());
+        }
+
+        /** Unwrap the rewriting unit and return its native value. */
+        RewritingUnitNative unwrap() {
+            return (RewritingUnitNative) this.reference.ni();
+        }
+
+        // ----- Getters -----
+
+        ${java_doc('langkit.rewriting.handle_unit', 8)}
+        public AnalysisUnit getAnalysisUnit() {
+            if(this.analysisUnit == null) {
+
+                if(ImageInfo.inImageCode()) {
+                    this.analysisUnit = AnalysisUnit.wrap(
+                        NI_LIB.${nat("rewriting_handle_to_unit")}(
+                            this.unwrap()
+                        )
+                    );
+                } else {
+                    this.analysisUnit =
+                        JNI_LIB.${nat("rewriting_handle_to_unit")}(this);
+                }
+
+            }
+            return this.analysisUnit;
+        }
+
+        ${java_doc('langkit.rewriting.root', 8)}
+        public RewritingNode getRoot() {
+            if(this.root == null) {
+
+                if(ImageInfo.inImageCode()) {
+                    this.root = RewritingNode.wrap(
+                        NI_LIB.${nat("rewriting_unit_root")}(this.unwrap())
+                    );
+                } else {
+                    this.root = JNI_LIB.${nat("rewriting_unit_root")}(this);
+                }
+
+            }
+            return this.root;
+        }
+
+        // ----- Setters -----
+
+        ${java_doc('langkit.rewriting.set_root', 8)}
+        public void setRoot(
+            final RewritingNode root
+        ) {
+            this.root = root;
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("rewriting_unit_set_root")}(
+                    this.unwrap(),
+                    root.unwrap()
+                );
+            } else {
+                JNI_LIB.${nat("rewriting_unit_set_root")}(this, root);
+            }
+        }
+
+        // ----- Instance methods -----
+
+        ${java_doc('langkit.rewriting.unit_unparse', 8)}
+        public String unparse() {
+            final Text unparseText;
+
+            if(ImageInfo.inImageCode()) {
+                final TextNative textNative = StackValue.get(
+                    TextNative.class
+                );
+                NI_LIB.${nat("rewriting_unit_unparse")}(
+                    this.unwrap(),
+                    textNative
+                );
+                unparseText = Text.wrap(textNative);
+            } else {
+                unparseText = JNI_LIB.${nat("rewriting_unit_unparse")}(this);
+            }
+
+            String res = unparseText.getContent();
+            unparseText.close();
+            return res;
+        }
+
+        // ----- Override methods -----
+
+        @Override
+        public boolean equals(Object o) {
+            if(this == o) return true;
+            if(!(o instanceof RewritingUnit)) return false;
+            final RewritingUnit other = (RewritingUnit) o;
+            return this.reference.equals(other.reference);
+        }
+
+    }
+
+    ${java_doc('langkit.rewriting.node_rewriting_handle_type', 4)}
+    public static final class RewritingNode {
+
+        // ----- Class attributes -----
+
+// TODO: Remove this NONE singleton for libadalang/langkit-query-language#197
+        /** Singleton representing the none value for rewriting node. */
+        public static final RewritingNode NONE = new RewritingNode(
+            PointerWrapper.nullPointer()
+        );
+
+        // ----- Instance attributes -----
+
+        /** The reference to the native rewriting node. */
+        private final PointerWrapper reference;
+
+        /** Kind of the rewriting node. */
+        private NodeKind kind;
+
+        /** Cache for the associated parsed node. */
+        private ${root_node_type} parsedNode;
+
+        /** Cache for the rewriting context containing this node. */
+        private RewritingContext rewritingContext;
+
+        // ----- Constructors -----
+
+        /** Create a new rewriting node with its native reference. */
+        RewritingNode(
+            final PointerWrapper reference
+        ) {
+            this.reference = reference;
+        }
+
+        // ----- Graal C API -----
+
+        /** Wrap a pointer to a native rewriting node. */
+        static RewritingNode wrap(
+            final Pointer pointer
+        ) {
+            return wrap((RewritingNodeNative) pointer.readWord(0));
+        }
+
+        /** Wrap the native rewriting node. */
+        static RewritingNode wrap(
+            final RewritingNodeNative rewritingNodeNative
+        ) {
+            return new RewritingNode(new PointerWrapper(rewritingNodeNative));
+        }
+
+        /** Unwrap the rewriting node in the given pointer. */
+        void unwrap(
+            final Pointer pointer
+        ) {
+            pointer.writeWord(0, this.unwrap());
+        }
+
+        /** Unwrap the rewriting node and return its native value. */
+        RewritingNodeNative unwrap() {
+            return (RewritingNodeNative) this.reference.ni();
+        }
+
+        // ----- Getters -----
+
+        ${java_doc('langkit.rewriting.kind',  8)}
+        public NodeKind getKind() {
+            if(this.kind == null) {
+                final int kindNative;
+
+                if(ImageInfo.inImageCode()) {
+                    kindNative = NI_LIB.${nat("rewriting_kind")}(
+                        this.unwrap()
+                    );
+                } else {
+                    kindNative = JNI_LIB.${nat("rewriting_kind")}(this);
+                }
+
+                this.kind = NodeKind.fromC(kindNative);
+            }
+            return this.kind;
+        }
+
+        ${java_doc('langkit.rewriting.handle_node', 8)}
+        public ${root_node_type} getParsedNode() {
+            if(this.parsedNode == null) {
+                final Entity nodeEntity;
+
+                if(ImageInfo.inImageCode()) {
+                    final Pointer nodeNative =
+                        NI_LIB.${nat("rewriting_handle_to_node")}(
+                            this.unwrap()
+                        );
+                    final EntityNative entityNative = StackValue.get(
+                        EntityNative.class
+                    );
+                    NI_LIB.${nat("create_bare_entity")}(
+                        nodeNative,
+                        entityNative
+                    );
+                    nodeEntity = Entity.wrap(entityNative);
+                } else {
+                    nodeEntity = JNI_LIB.${nat("rewriting_handle_to_node")}(
+                        this
+                    );
+                }
+
+                this.parsedNode = ${root_node_type}.fromEntity(nodeEntity);
+            }
+            return this.parsedNode;
+        }
+
+        ${java_doc('langkit.rewriting.node_context', 8)}
+        public RewritingContext getRewritingContext() {
+            if(this.rewritingContext == null) {
+
+                if(ImageInfo.inImageCode()) {
+                    this.rewritingContext = RewritingContext.wrap(
+                        NI_LIB.${nat("rewriting_node_to_context")}(
+                            this.unwrap()
+                        )
+                    );
+                } else {
+                    this.rewritingContext =
+                        JNI_LIB.${nat("rewriting_node_to_context")}(this);
+                }
+
+            }
+            return this.rewritingContext;
+        }
+
+        /** Get whether the rewriting node is a none node. */
+        public boolean isNone() {
+            return this.reference.isNull();
+        }
+
+        // ----- Instance methods -----
+
+        ${java_doc('langkit.rewriting.clone', 8)}
+        public RewritingNode clone() {
+
+            if(ImageInfo.inImageCode()) {
+                return RewritingNode.wrap(
+                    NI_LIB.${nat("rewriting_clone")}(this.unwrap())
+                );
+            } else {
+                return JNI_LIB.${nat("rewriting_clone")}(this);
+            }
+
+        }
+
+        ${java_doc('langkit.rewriting.unparse', 8)}
+        public String unparse() {
+            final Text text;
+
+            if(ImageInfo.inImageCode()) {
+                TextNative textNative = StackValue.get(TextNative.class);
+                NI_LIB.${nat("rewriting_node_unparse")}(
+                    this.unwrap(),
+                    textNative
+                );
+                text = Text.wrap(textNative);
+            } else {
+                text = JNI_LIB.${nat("rewriting_node_unparse")}(this);
+            }
+
+            final String res = text.getContent();
+            text.close();
+            return res;
+        }
+
+        ${java_doc('langkit.rewriting.node_image', 8)}
+        public String image() {
+            final Text text;
+
+            if(ImageInfo.inImageCode()) {
+                TextNative textNative = StackValue.get(TextNative.class);
+                NI_LIB.${nat("rewriting_node_image")}(
+                    this.unwrap(),
+                    textNative
+                );
+                text = Text.wrap(textNative);
+            } else {
+                text = JNI_LIB.${nat("rewriting_node_image")}(this);
+            }
+
+            final String res = text.getContent();
+            text.close();
+            return res;
+        }
+
+        ${java_doc('langkit.rewriting.tied', 8)}
+        public boolean isTied() {
+
+            if(ImageInfo.inImageCode()) {
+                return NI_LIB.${nat("rewriting_tied")}(
+                    this.unwrap()
+                ) > 0;
+            } else {
+                return JNI_LIB.${nat("rewriting_tied")}(this);
+            }
+
+        }
+
+        ${java_doc('langkit.rewriting.parent', 8)}
+        public RewritingNode parent() {
+
+            if(ImageInfo.inImageCode()) {
+                return RewritingNode.wrap(
+                    NI_LIB.${nat("rewriting_parent")}(
+                        this.unwrap()
+                    )
+                );
+            } else {
+                return JNI_LIB.${nat("rewriting_parent")}(this);
+            }
+
+        }
+
+        ${java_doc('langkit.rewriting.children', 8)}
+        public RewritingNode[] children() {
+
+            if(ImageInfo.inImageCode()) {
+                // Call the native function
+                final WordPointer childrenPointer =
+                    StackValue.get(WordPointer.class);
+                final CIntPointer countPointer =
+                    StackValue.get(CIntPointer.class);
+                NI_LIB.${nat("rewriting_children")}(
+                    this.unwrap(),
+                    childrenPointer,
+                    countPointer
+                );
+                final WordPointer children = childrenPointer.read();
+                final int count = countPointer.read();
+
+                // Create the Java array and fill it
+                final RewritingNode[] res = new RewritingNode[count];
+                for(int i = 0; i < res.length; i++) {
+                    res[i] = RewritingNode.wrap(
+                        (RewritingNodeNative) children.read(i)
+                    );
+                }
+
+                // Free the native children
+                UnmanagedMemory.free(children);
+
+                // Return the result
+                return res;
+            } else {
+                return JNI_LIB.${nat("rewriting_children")}(this);
+            }
+
+        }
+
+        ${java_doc('langkit.rewriting.child_by_ref', 8)}
+        public RewritingNode getChild(
+            final MemberReference childMember
+        ) {
+            final RewritingNode res;
+
+            if(ImageInfo.inImageCode()) {
+                res = RewritingNode.wrap(
+                    NI_LIB.${nat("rewriting_child")}(
+                        this.unwrap(),
+                        childMember.toC()
+                    )
+                );
+            } else {
+                res = JNI_LIB.${nat("rewriting_child")}(
+                    this,
+                    childMember.toC()
+                );
+            }
+
+            checkException();
+            return res;
+        }
+
+        ${java_doc('langkit.rewriting.set_child_by_ref', 8)}
+        public void setChild(
+            MemberReference childMember,
+            RewritingNode child
+        ) {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("rewriting_set_child")}(
+                    this.unwrap(),
+                    childMember.toC(),
+                    child.unwrap()
+                );
+            } else {
+                JNI_LIB.${nat("rewriting_set_child")}(
+                    this,
+                    childMember.toC(),
+                    child
+                );
+            }
+            checkException();
+
+        }
+
+        ${java_doc('langkit.rewriting.replace', 8)}
+        public void replace(
+            final RewritingNode newNode
+        ) {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("rewriting_replace")}(
+                    this.unwrap(),
+                    newNode.unwrap()
+                );
+            } else {
+                JNI_LIB.${nat("rewriting_replace")}(this, newNode);
+            }
+            checkException();
+
+        }
+
+        ${java_doc('langkit.rewriting.first_child', 8)}
+        public RewritingNode firstChild() {
+
+            if(ImageInfo.inImageCode()) {
+                return RewritingNode.wrap(
+                    NI_LIB.${nat("rewriting_first_child")}(
+                        this.unwrap()
+                    )
+                );
+            } else {
+                return JNI_LIB.${nat("rewriting_first_child")}(this);
+            }
+
+        }
+
+        ${java_doc('langkit.rewriting.last_child', 8)}
+        public RewritingNode lastChild() {
+
+            if(ImageInfo.inImageCode()) {
+                return RewritingNode.wrap(
+                    NI_LIB.${nat("rewriting_last_child")}(
+                        this.unwrap()
+                    )
+                );
+            } else {
+                return JNI_LIB.${nat("rewriting_last_child")}(this);
+            }
+
+        }
+
+        ${java_doc('langkit.rewriting.next_child', 8)}
+        public RewritingNode nextChild() {
+
+            if(ImageInfo.inImageCode()) {
+                return RewritingNode.wrap(
+                    NI_LIB.${nat("rewriting_next_child")}(
+                        this.unwrap()
+                    )
+                );
+            } else {
+                return JNI_LIB.${nat("rewriting_next_child")}(this);
+            }
+
+        }
+
+        ${java_doc('langkit.rewriting.previous_child', 8)}
+        public RewritingNode previousChild() {
+
+            if(ImageInfo.inImageCode()) {
+                return RewritingNode.wrap(
+                    NI_LIB.${nat("rewriting_previous_child")}(
+                        this.unwrap()
+                    )
+                );
+            } else {
+                return JNI_LIB.${nat("rewriting_previous_child")}(this);
+            }
+
+        }
+
+        ${java_doc('langkit.rewriting.insert_before', 8)}
+        public void insertBefore(
+            final RewritingNode toInsert
+        ) {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("rewriting_insert_before")}(
+                    this.unwrap(),
+                    toInsert.unwrap()
+                );
+            } else {
+                JNI_LIB.${nat("rewriting_insert_before")}(this, toInsert);
+            }
+            checkException();
+
+        }
+
+        ${java_doc('langkit.rewriting.insert_after', 8)}
+        public void insertAfter(
+            final RewritingNode toInsert
+        ) {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("rewriting_insert_after")}(
+                    this.unwrap(),
+                    toInsert.unwrap()
+                );
+            } else {
+                JNI_LIB.${nat("rewriting_insert_after")}(this, toInsert);
+            }
+            checkException();
+
+        }
+
+        ${java_doc('langkit.rewriting.insert_first', 8)}
+        public void insertFirst(
+            final RewritingNode toInsert
+        ) {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("rewriting_insert_first")}(
+                    this.unwrap(),
+                    toInsert.unwrap()
+                );
+            } else {
+                JNI_LIB.${nat("rewriting_insert_first")}(this, toInsert);
+            }
+            checkException();
+
+        }
+
+        ${java_doc('langkit.rewriting.insert_last', 8)}
+        public void insertLast(
+            final RewritingNode toInsert
+        ) {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("rewriting_insert_last")}(
+                    this.unwrap(),
+                    toInsert.unwrap()
+                );
+            } else {
+                JNI_LIB.${nat("rewriting_insert_last")}(this, toInsert);
+            }
+            checkException();
+
+        }
+
+        ${java_doc('langkit.rewriting.remove_child', 8)}
+        public void removeFromParent() {
+
+            if(ImageInfo.inImageCode()) {
+                NI_LIB.${nat("rewriting_remove_child")}(this.unwrap());
+            } else {
+                JNI_LIB.${nat("rewriting_remove_child")}(this);
+            }
+            checkException();
+
+        }
+
+        /** Get the text of the token node. */
+        public String getText() {
+            final Text resultText;
+
+            if(ImageInfo.inImageCode()) {
+                final TextNative textNative = StackValue.get(
+                    TextNative.class
+                );
+                NI_LIB.${nat("rewriting_text")}(
+                    this.unwrap(),
+                    textNative
+                );
+                resultText = Text.wrap(textNative);
+            } else {
+                resultText = JNI_LIB.${nat("rewriting_text")}(this);
+            }
+
+            final String res = resultText.getContent();
+            resultText.close();
+            return res;
+        }
+
+        ${java_doc('langkit.rewriting.set_text', 8)}
+        public void setText(
+            final String text
+        ) {
+            try (
+                final Text nodeText = Text.create(text);
+            ) {
+
+                if(ImageInfo.inImageCode()) {
+                    final TextNative textNative = StackValue.get(
+                        TextNative.class
+                    );
+                    nodeText.unwrap(textNative);
+                    NI_LIB.${nat("rewriting_set_text")}(
+                        this.unwrap(),
+                        textNative
+                    );
+                } else {
+                    JNI_LIB.${nat("rewriting_set_text")}(this, nodeText);
+                }
+                checkException();
+
+            }
+        }
+
+        // ----- Override methods -----
+
+        @Override
+        public String toString() {
+            return this.image();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if(o == this) return true;
+            if(!(o instanceof RewritingNode)) return false;
+            final RewritingNode other = (RewritingNode) o;
             return this.reference.equals(other.reference);
         }
 
@@ -3913,6 +5284,9 @@ public final class ${ctx.lib_name.camel} {
         /** The entity of the node. */
         public final Entity entity;
 
+        /** Cache for the associated rewriting node. */
+        protected RewritingNode rewritingNode;
+
         /** The analysis unit that owns the node. */
         protected AnalysisUnit unit;
 
@@ -3998,6 +5372,10 @@ public final class ${ctx.lib_name.camel} {
         }
 
         // ----- Getters -----
+
+        public NodeKind getKind() {
+            return ${root_node_type}.description.kind;
+        }
 
         public String getClassName() {
             return ${root_node_type}.description.className;
@@ -4214,6 +5592,29 @@ public final class ${ctx.lib_name.camel} {
                 return JNI_LIB.${nat("node_sloc_range")}(this.entity);
             }
 
+        }
+
+        ${java_doc('langkit.rewriting.node_handle', 8)}
+        public RewritingNode getRewritingNode() {
+            if(this.rewritingNode == null) {
+                final RewritingNode tmp;
+
+                if(ImageInfo.inImageCode()) {
+                    tmp = RewritingNode.wrap(
+                        NI_LIB.${nat("rewriting_node_to_handle")}(
+                            (Pointer) this.entity.node.ni()
+                        )
+                    );
+                } else {
+                    tmp = JNI_LIB.${nat("rewriting_node_to_handle")}(
+                        this.entity
+                    );
+                }
+                checkException();
+                this.rewritingNode = tmp;
+
+            }
+            return this.rewritingNode;
         }
 
         // ----- Dumping methods -----

@@ -171,6 +171,26 @@
         );
     }
 
+    /** The structure for reswriting apply results */
+    @CContext(LibDirectives.class)
+    @CStruct("${rewriting_apply_result_type}")
+    public interface RewritingApplyResultNative extends PointerBase {
+        @CField("success") public int get_success();
+        @CField("success") public void set_success(int success);
+
+        @CField("unit") public AnalysisUnitNative get_unit();
+        @CField("unit") public void set_unit(AnalysisUnitNative unit);
+
+        @CField("diagnostics_count") public int get_diagnostics_count();
+        @CField("diagnostics_count") public void set_diagnostics_count(
+            int diagnostics_count
+        );
+
+        @CField("diagnostics") public DiagnosticNative get_diagnostics();
+        @CField("diagnostics") public void set_diagnostics(
+            DiagnosticNative diagnostics
+        );
+    }
 
     /** The file reader is just a pointer */
     public interface FileReaderNative extends Pointer {}
@@ -247,6 +267,15 @@
     public interface AnalysisUnitNative extends PointerBase {
         @RawField public long version_number();
     }
+
+    /** The rewriting context type is just a pointer */
+    public interface RewritingContextNative extends Pointer {}
+
+    /** The rewriting unit native type is just a pointer */
+    public interface RewritingUnitNative extends Pointer {}
+
+    /** The rewriting node native type is just a pointer */
+    public interface RewritingNodeNative extends Pointer {}
 
     // ===== Generated structures =====
 
@@ -411,6 +440,15 @@
         @CFunction
         public static native void ${nat("destroy_text")}(
             TextNative text
+        );
+
+        // ----- Rewriting result functions -----
+
+        /** Free a rewriting apply result */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_free_apply_result")}(
+            RewritingApplyResultNative apply_result
         );
 
         // ----- File reader functions -----
@@ -645,6 +683,322 @@
             DiagnosticNative diagnostic
         );
 
+        // ----- Rewriting context functions -----
+
+        /** Start a new rewriting session on the given analysis context */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingContextNative
+        ${nat("rewriting_start_rewriting")}(
+            AnalysisContextNative analysis_context
+        );
+
+        /** Get the analysis context from the given rewriting context */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native AnalysisContextNative
+        ${nat("rewriting_handle_to_context")}(
+            RewritingContextNative rewriting_context
+        );
+
+        /** Get a pointer to the rewriting units owned by the context */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native WordPointer ${nat("rewriting_unit_handles")}(
+            RewritingContextNative rewriting_context
+        );
+
+        /** Create a node in the rewriting context and return it */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative
+        ${nat("rewriting_create_node")}(
+            RewritingContextNative rewriting_context,
+            int node_kind
+        );
+
+        /** Create a node in the rewriting context with the given children */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative
+        ${nat("rewriting_create_regular_node")}(
+            RewritingContextNative rewriting_context,
+            int node_kind,
+            WordPointer children,
+            int count
+        );
+
+        /** Create a token node in the rewriting context and return it */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative
+        ${nat("rewriting_create_token_node")}(
+            RewritingContextNative rewriting_context,
+            int node_kind,
+            TextNative node_text
+        );
+
+        /** Create a new node tree from the given template */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative
+        ${nat("rewriting_create_from_template")}(
+            RewritingContextNative rewriting_context,
+            TextNative template_text,
+            WordPointer arguments,
+            int count,
+            int rule
+        );
+
+        /** Apply the rewriting session and close it if success */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_apply")}(
+            RewritingContextNative rewriting_context,
+            RewritingApplyResultNative apply_result
+        );
+
+        /** Abort the rewriting session */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_abort_rewriting")}(
+            RewritingContextNative rewriting_context
+        );
+
+        // ----- Rewriting unit functions -----
+
+        /** Get the rewriting unit corresponding to the given analysis unit */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingUnitNative
+        ${nat("rewriting_unit_to_handle")}(
+            AnalysisUnitNative unit
+        );
+
+        /** Get the analysis unit corresponding to the given rewriting unit */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native AnalysisUnitNative
+        ${nat("rewriting_handle_to_unit")}(
+            RewritingUnitNative rewriting_unit
+        );
+
+        /** Get the root of the given rewriting unit */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative ${nat("rewriting_unit_root")}(
+            RewritingUnitNative rewriting_unit
+        );
+
+        /** Set the root of the rewriting unit to the rewriting node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_unit_set_root")}(
+            RewritingUnitNative rewriting_unit,
+            RewritingNodeNative rewriting_node
+        );
+
+        /** Unparse the rewriting unit to get its textual content */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_unit_unparse")}(
+            RewritingUnitNative rewriting_unit,
+            TextNative result
+        );
+
+        // ----- Rewriting node functions -----
+
+        /** Get the rewriting node from the given parsed node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative
+        ${nat("rewriting_node_to_handle")}(
+            Pointer node
+        );
+
+        /** Get the parsed node from the given rewriting node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native Pointer ${nat("rewriting_handle_to_node")}(
+            RewritingNodeNative rewriting_node
+        );
+
+        /** Get the rewriting context from the given rewriting node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingContextNative
+        ${nat("rewriting_node_to_context")}(
+            RewritingNodeNative rewriting_node
+        );
+
+        /** Clone the given rewriting node and return the copy */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative ${nat("rewriting_clone")}(
+            RewritingNodeNative to_clone
+        );
+
+        /** Unparse the given rewriting node in the given text */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_node_unparse")}(
+            RewritingNodeNative rewriting_node,
+            TextNative result
+        );
+
+        /** Get the kind of the rewriting node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native int ${nat("rewriting_kind")}(
+            RewritingNodeNative rewriting_node
+        );
+
+        /** Get the rewriting node image */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_node_image")}(
+            RewritingNodeNative rewriting_node,
+            TextNative result
+        );
+
+        /** Return whether the node is tied to a rewriting unit */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native int ${nat("rewriting_tied")}(
+            RewritingNodeNative rewriting_node
+        );
+
+        /** Return the parent of the given rewriting node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative ${nat("rewriting_parent")}(
+            RewritingNodeNative rewriting_node
+        );
+
+        /** Get the rewriting node children */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_children")}(
+            RewritingNodeNative rewriting_node,
+            WordPointer result_reference,
+            CIntPointer result_count
+        );
+
+        /** Get the child at the given member reference */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative ${nat("rewriting_child")}(
+            RewritingNodeNative parent,
+            int child_member_reference
+        );
+
+        /** Set the given child at the given member reference */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_set_child")}(
+            RewritingNodeNative parent,
+            int child_member_reference,
+            RewritingNodeNative new_child
+        );
+
+        /** Replace the rewriting node by the new one */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_replace")}(
+            RewritingNodeNative rewriting_node,
+            RewritingNodeNative new_node
+        );
+
+        /** Get the first child of the rewriting node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative
+        ${nat("rewriting_first_child")}(
+            RewritingNodeNative parent
+        );
+
+        /** Get the last child of the rewriting node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative
+        ${nat("rewriting_last_child")}(
+            RewritingNodeNative parent
+        );
+
+        /** Get the next child from the given rewriting node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative
+        ${nat("rewriting_next_child")}(
+            RewritingNodeNative rewriting_node
+        );
+
+        /** Get the previous child from the given rewriting node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native RewritingNodeNative
+        ${nat("rewriting_previous_child")}(
+            RewritingNodeNative rewriting_node
+        );
+
+        /** Insert the provided rewriting node before the other node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_insert_before")}(
+            RewritingNodeNative rewriting_node,
+            RewritingNodeNative to_insert
+        );
+
+        /** Insert the provided rewriting node after the other node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_insert_after")}(
+            RewritingNodeNative rewriting_node,
+            RewritingNodeNative to_insert
+        );
+
+        /**
+         * Insert the provided rewriting node at the beginning of the
+         * children
+         */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_insert_first")}(
+            RewritingNodeNative rewriting_node,
+            RewritingNodeNative to_insert
+        );
+
+        /** Insert the provided rewriting node at the end of the children */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_insert_last")}(
+            RewritingNodeNative rewriting_node,
+            RewritingNodeNative to_insert
+        );
+
+        /** Remove the given rewriting node from its list parent */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_remove_child")}(
+            RewritingNodeNative to_remove
+        );
+
+        /** Get the text of the rewriting token node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_text")}(
+            RewritingNodeNative rewriting_node,
+            TextNative result
+        );
+
+        /** Set the text of the rewriting token node */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("rewriting_set_text")}(
+            RewritingNodeNative rewriting_node,
+            TextNative text
+        );
+
         // ----- Array functions -----
 
         % for array_type in ctx.array_types:
@@ -675,6 +1029,14 @@
         % endfor
 
         // ----- Node functions -----
+
+        /** Create a bare entity from a node pointer */
+        @CompilerDirectives.TruffleBoundary
+        @CFunction
+        public static native void ${nat("create_bare_entity")}(
+            Pointer node,
+            EntityNative result
+        );
 
         /** Return whether the two given entities are equal */
         @CompilerDirectives.TruffleBoundary
