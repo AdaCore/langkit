@@ -466,14 +466,6 @@ class ManageScript:
             help='Disable a warning.'
         )
         subparser.add_argument(
-            '--generate-unparser', action='store_true', default=False,
-            help='Generate an unparser along with the parser for the grammar.'
-                 ' Note that this machinery is intended only for languages'
-                 ' that have no significant whitespace, i.e. where whitespaces'
-                 ' can be abitrary inserted between two tokens without'
-                 ' affecting lexing.'
-        )
-        subparser.add_argument(
             '--no-gdb-hook', action='store_true',
             help='Do not generate the ".debug_gdb_script" section. This'
                  ' section is used to automatically run Langkit GDB helpers'
@@ -837,7 +829,6 @@ class ManageScript:
             check_only=args.check_only,
             warnings=args.enabled_warnings,
             no_property_checks=args.no_property_checks,
-            generate_unparser=args.generate_unparser,
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
             pretty_print=args.pretty_print,
