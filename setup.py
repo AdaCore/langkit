@@ -31,5 +31,9 @@ setup(
         'templates/*.mako', 'templates/*/*.mako', 'py.typed',
         'adasat/src/*.ads', 'adasat/src/*.adb'
     ]},
-    scripts=[os.path.join('scripts', 'create-project.py')]
+    entry_points={
+        "console_scripts": [
+            "create-project.py = langkit.scripts.create_project:main",
+        ]
+    },
 )
