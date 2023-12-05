@@ -401,6 +401,24 @@ class NativeLibPackager(BasePackager):
                          libname)
         )
 
+    def vss_path(self, name: str) -> str:
+        """
+        Special case for VSS libraries.
+        """
+        self.assert_with_relocatable()
+        libname = "lib" + name + self.dllext
+        return (
+            os.path.join(self.vss_prefix, "bin", libname)
+            if self.is_windows else
+            os.path.join(
+                self.vss_prefix,
+                self.dyn_libdir_name,
+                "vss",
+                "relocatable",
+                libname,
+            )
+        )
+
     def package_standalone_dyn(self, package_dir: str) -> None:
         """
         Copy the complete closure of dynamic libraries dependencies for
@@ -462,17 +480,13 @@ class NativeLibPackager(BasePackager):
 
         # VSS
         vss_libs = [
-            (
-                os.path.join(self.vss_prefix, 'bin', 'libvss' + self.dllext)
-                if self.is_windows else
-                os.path.join(
-                    self.vss_prefix,
-                    self.dyn_libdir_name,
-                    'vss',
-                    'relocatable',
-                    'libvss' + self.dllext,
-                )
-            )
+            self.vss_path("vss"),
+            self.vss_path("vss-gnat"),
+            self.vss_path("vss-json"),
+            self.vss_path("vss-regexp"),
+            self.vss_path("vss-xml-templates"),
+            self.vss_path("vss-xml-xmlada"),
+            self.vss_path("vss-xml"),
         ]
 
         # Prettier_Ada
