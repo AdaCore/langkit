@@ -22,11 +22,14 @@ project Mains is
    );
 
    package Builder is
-      ## Add a language-specific prefix to the name of the "parse" executable
-      ## for convenience, when multiple ones are available.
-      % if 'parse' in main_programs:
-         for Executable ("parse") use "${ctx.short_name_or_long}_parse";
-      % endif
+      ## Add a language-specific prefix to the name of the default main
+      ## programs for convenience, so that programs from multiple
+      ## Langkit-generated libraries can coexist.
+      % for main in ["parse", "unparse"]:
+         % if main in main_programs:
+            for Executable ("${main}") use "${ctx.short_name_or_long}_${main}";
+         % endif
+      % endfor
    end Builder;
 
    package Compiler is

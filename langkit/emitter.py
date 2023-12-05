@@ -579,11 +579,15 @@ class Emitter:
         Emit sources and the project file for mains.
         """
         with names.camel_with_underscores:
-            self.write_ada_file(
-                path.join(self.lib_root, 'src-mains'),
-                AdaSourceKind.body, ['Parse'],
-                ctx.render_template('main_parse_ada'),
-            )
+            mains = [("Parse", "main_parse_ada")]
+            if ctx.generate_unparser:
+                mains.append(("Unparse", "main_unparse_ada"))
+            for unit_name, template_name in mains:
+                self.write_ada_file(
+                    path.join(self.lib_root, "src-mains"),
+                    AdaSourceKind.body, [unit_name],
+                    ctx.render_template(template_name),
+                )
 
         self.write_source_file(
             self.mains_project,

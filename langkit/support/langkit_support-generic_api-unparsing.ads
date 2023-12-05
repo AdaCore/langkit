@@ -273,6 +273,8 @@ package Langkit_Support.Generic_API.Unparsing is
    --  configuration.
 
    procedure Pretty_Print_Main (Language : Language_Id);
+   --  Implementation of the "*_unparse" test program for the given Language.
+   --
    --  Load the configuration file, the source to pretty-print and formatting
    --  options from the command line, then dump the pretty-printed source on
    --  the standard output.
