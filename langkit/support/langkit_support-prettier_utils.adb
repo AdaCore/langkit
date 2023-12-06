@@ -76,7 +76,7 @@ package body Langkit_Support.Prettier_Utils is
    --------------------------
 
    function To_Prettier_Document
-     (Document : Document_Type) return Prettier_Ada.Documents.Document_Type
+     (Document : Document_Type) return Prettier.Document_Type
    is
       function "+" (Text : Unbounded_Text_Type) return Unbounded_String
       is (To_Unbounded_String (To_UTF8 (To_Text (Text))));
@@ -136,8 +136,7 @@ package body Langkit_Support.Prettier_Utils is
                procedure Flush_Text is
                begin
                   if Length (Text) > 0 then
-                     Items.Append
-                       (Prettier_Ada.Documents.Builders.Text (Text));
+                     Items.Append (Prettier.Builders.Text (Text));
                      Text := Null_Unbounded_String;
                   end if;
                end Flush_Text;
@@ -155,7 +154,7 @@ package body Langkit_Support.Prettier_Utils is
             return Soft_Line;
 
          when Token | Whitespace =>
-            return Prettier_Ada.Documents.Builders.Text (Text_For (Document));
+            return Prettier.Builders.Text (Text_For (Document));
       end case;
    end To_Prettier_Document;
 

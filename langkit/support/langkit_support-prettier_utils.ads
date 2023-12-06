@@ -16,6 +16,8 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 
 private package Langkit_Support.Prettier_Utils is
 
+   package Prettier renames Prettier_Ada.Documents;
+
    --  The Document_Type data structure serves two joint purposes:
    --
    --  * Represent unparsing configuration templates: these contain pure
@@ -90,7 +92,7 @@ private package Langkit_Support.Prettier_Utils is
    --  Will be invalid, as the node will not be included in the unparsing.
 
    function To_Prettier_Document
-     (Document : Document_Type) return Prettier_Ada.Documents.Document_Type;
+     (Document : Document_Type) return Prettier.Document_Type;
    --  Turn an unparsing document into an actual Prettier document
 
    type Document_Pool is tagged private;

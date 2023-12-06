@@ -778,7 +778,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          Internal_Result : Document_Type := Unparse_Node (Node);
       begin
          Insert_Required_Spacing (Pool, Internal_Result);
-         return Result : constant Prettier_Ada.Documents.Document_Type :=
+         return Result : constant Prettier.Document_Type :=
            To_Prettier_Document (Internal_Result)
          do
             Pool.Release;
@@ -817,9 +817,9 @@ package body Langkit_Support.Generic_API.Unparsing is
         (Parser      => Parser,
          Short       => "-k",
          Long        => "--indentation-kind",
-         Arg_Type    => Prettier_Ada.Documents.Indentation_Kind,
+         Arg_Type    => Prettier.Indentation_Kind,
          Help        => "Indentation kind: spaces or tabs",
-         Default_Val => Prettier_Ada.Documents.Spaces);
+         Default_Val => Prettier.Spaces);
 
       package Indentation_Width is new Parse_Option
         (Parser      => Parser,
@@ -833,9 +833,9 @@ package body Langkit_Support.Generic_API.Unparsing is
         (Parser      => Parser,
          Short       => "-e",
          Long        => "--end-of-line",
-         Arg_Type    => Prettier_Ada.Documents.End_Of_Line_Kind,
+         Arg_Type    => Prettier.End_Of_Line_Kind,
          Help        => "End of line: LF, CR, CRLF",
-         Default_Val => Prettier_Ada.Documents.LF);
+         Default_Val => Prettier.LF);
 
       package Config_Filename is new Parse_Positional_Arg
         (Parser   => Parser,
@@ -890,10 +890,10 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       declare
          F         : File_Type;
-         Doc       : constant Prettier_Ada.Documents.Document_Type :=
+         Doc       : constant Prettier.Document_Type :=
            Unparse_To_Prettier (Unit.Root, Config);
          Formatted : constant Unbounded_String :=
-           Prettier_Ada.Documents.Format
+           Prettier.Format
              (Document => Doc,
               Options  =>
                 (Width => Width.Get,
@@ -904,7 +904,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          if Dump_Document.Get then
             Create (F, Name => "doc.json");
-            Put_Line (F, Prettier_Ada.Documents.Json.Serialize (Doc));
+            Put_Line (F, Prettier.Json.Serialize (Doc));
             Close (F);
          end if;
 
