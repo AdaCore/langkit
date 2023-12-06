@@ -1,0 +1,7 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": ["whitespace", "recurse"]
+    }
+  }
+}

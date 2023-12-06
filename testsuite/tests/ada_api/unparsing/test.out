@@ -62,4 +62,174 @@ def f1(a: Int, b: Int=0): Int
     "sep" template for StmtList: invalid "recurse" structure
 
 Done.
+
+== commands.adb ==
+== cmd_recurse.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_whitespace_default.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "text",
+      "text": " var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_whitespace_3.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "text",
+      "text": "   var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_line.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "command",
+      "command": {
+        "command": "line",
+        "literal": false,
+        "soft": false,
+        "hard": false
+      }
+    },
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_hardline.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": true
+          }
+        },
+        {
+          "kind": "command",
+          "command": {
+            "command": "breakParent"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_softline.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "command",
+      "command": {
+        "command": "line",
+        "literal": false,
+        "soft": true,
+        "hard": false
+      }
+    },
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_list.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "command",
+      "command": {
+        "command": "line",
+        "literal": false,
+        "soft": false,
+        "hard": false
+      }
+    },
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    },
+    {
+      "kind": "command",
+      "command": {
+        "command": "line",
+        "literal": false,
+        "soft": false,
+        "hard": false
+      }
+    }
+  ]
+}
+
+== cmd_indent.json ==
+
+{
+  "kind": "command",
+  "command": {
+    "command": "indent",
+    "indentContents": {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        {
+          "kind": "text",
+          "text": "var i:Int=0;"
+        }
+      ]
+    }
+  }
+}
+
+Done.
 Done
