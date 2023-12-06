@@ -404,20 +404,19 @@ package body Langkit_Support.Generic_API.Unparsing is
                Kind : constant String := JSON.Get ("kind");
             begin
                if Kind = "whitespace" then
+                  if not JSON.Has_Field ("length") then
+                     raise Invalid_Input with
+                       Error_Prefix & ": missing ""length"" key";
+                  end if;
                   declare
-                     JSON_Length : JSON_Value;
-                     Length      : Natural := 1;
+                     Length : constant JSON_Value := JSON.Get ("length");
                   begin
-                     if JSON.Has_Field ("length") then
-                        JSON_Length := JSON.Get ("length");
-                        if JSON_Length.Kind /= JSON_Int_Type then
-                           raise Invalid_Input with
-                             Error_Prefix & ": invalid whitespace length: "
-                             & JSON_Length.Kind'Image;
-                        end if;
-                        Length := JSON_Length.Get;
+                     if Length.Kind /= JSON_Int_Type then
+                        raise Invalid_Input with
+                          Error_Prefix & ": invalid whitespace length: "
+                          & Length.Kind'Image;
                      end if;
-                     return Pool.Create_Whitespace (Length);
+                     return Pool.Create_Whitespace (Length.Get);
                   end;
 
                elsif Kind = "indent" then

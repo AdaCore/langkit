@@ -41,6 +41,8 @@ def f1(a: Int, b: Int=0): Int
     template for VarDecl.f_name: invalid template document kind: foo
 # invalid_whitespace.json
     template for VarDecl.f_name: invalid whitespace length: JSON_STRING_TYPE
+# invalid_whitespace2.json
+    template for VarDecl.f_name: missing "length" key
 # invalid_indent.json
     template for VarDecl.f_name: missing "contents" key for indent
 

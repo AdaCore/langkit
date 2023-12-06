@@ -50,6 +50,7 @@ begin
    Check ("invalid_kind_template2.json");
    Check ("invalid_kind_template3.json");
    Check ("invalid_whitespace.json");
+   Check ("invalid_whitespace2.json");
    Check ("invalid_indent.json");
    New_Line;
 
