@@ -24,9 +24,7 @@ def locate_script(name):
 
 # Create a dummy project
 print("Creating dummy project...")
-subprocess.check_call(
-    [sys.executable, locate_script("create-project.py"), "Foo"]
-)
+subprocess.check_call([locate_script("create-project.py"), "Foo"])
 
 # Try to run its "manage.py" script
 print("Running manage.py script with no argument:")
