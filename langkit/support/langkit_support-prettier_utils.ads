@@ -37,34 +37,40 @@ private package Langkit_Support.Prettier_Utils is
      (Positive, Document_Type);
 
    type Document_Kind is
-     (Recurse,
-      Token,
-      Whitespace,
+     (Hard_Line,
+      Indent,
       Line,
-      Hard_Line,
-      Soft_Line,
       List,
-      Indent);
+      Recurse,
+      Soft_Line,
+      Token,
+      Whitespace);
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
       case Kind is
+         when Hard_Line =>
+            null;
+
+         when Indent =>
+            Indent_Document : Document_Type;
+
+         when Line =>
+            null;
+
+         when List =>
+            List_Documents : Document_Vectors.Vector;
+
          when Recurse =>
+            null;
+
+         when Soft_Line =>
             null;
 
          when Token =>
             Token_Kind : Token_Kind_Ref;
             Token_Text : Unbounded_Text_Type;
 
-         when Line | Hard_Line | Soft_Line =>
-            null;
-
          when Whitespace =>
             Whitespace_Length : Positive;
-
-         when List =>
-            List_Documents : Document_Vectors.Vector;
-
-         when Indent =>
-            Indent_Document : Document_Type;
       end case;
    end record;
 
@@ -93,30 +99,17 @@ private package Langkit_Support.Prettier_Utils is
    procedure Release (Self : in out Document_Pool);
    --  Free all the Document_Type nodes allocated in ``Self``
 
-   function Create_Recurse (Self : in out Document_Pool) return Document_Type;
-   --  Return a ``Recurse`` node
-
-   function Create_Token
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type;
-   --  Return a ``Token`` node
-
-   function Create_Line (Self : in out Document_Pool) return Document_Type;
-   --  Return a ``Line`` node
-
    function Create_Hard_Line
      (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Hard_Line`` node
 
-   function Create_Soft_Line
-     (Self : in out Document_Pool) return Document_Type;
-   --  Return a ``Soft_Line`` node
+   function Create_Indent
+     (Self     : in out Document_Pool;
+      Document : Document_Type) return Document_Type;
+   --  Return an ``Indent`` node
 
-   function Create_Whitespace
-     (Self   : in out Document_Pool;
-      Length : Positive := 1) return Document_Type;
-   --  Return a ``Whitespace`` node for the given length
+   function Create_Line (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Line`` node
 
    function Create_List
      (Self      : in out Document_Pool;
@@ -128,10 +121,23 @@ private package Langkit_Support.Prettier_Utils is
      (Self : in out Document_Pool) return Document_Type;
    --  Return a new empty ``List`` node
 
-   function Create_Indent
-     (Self     : in out Document_Pool;
-      Document : Document_Type) return Document_Type;
-   --  Return an ``Indent`` node
+   function Create_Recurse (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Recurse`` node
+
+   function Create_Soft_Line
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Soft_Line`` node
+
+   function Create_Token
+     (Self : in out Document_Pool;
+      Kind : Token_Kind_Ref;
+      Text : Unbounded_Text_Type) return Document_Type;
+   --  Return a ``Token`` node
+
+   function Create_Whitespace
+     (Self   : in out Document_Pool;
+      Length : Positive := 1) return Document_Type;
+   --  Return a ``Whitespace`` node for the given length
 
    procedure Insert_Required_Spacing
      (Pool : in out Document_Pool; Document : in out Document_Type);

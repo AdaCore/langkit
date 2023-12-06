@@ -373,12 +373,12 @@ package body Langkit_Support.Generic_API.Unparsing is
             declare
                Value : constant String := JSON.Get;
             begin
-               if Value = "recurse" then
-                  return Pool.Create_Recurse;
+               if Value = "hardline" then
+                  return Pool.Create_Hard_Line;
                elsif Value = "line" then
                   return Pool.Create_Line;
-               elsif Value = "hardline" then
-                  return Pool.Create_Hard_Line;
+               elsif Value = "recurse" then
+                  return Pool.Create_Recurse;
                elsif Value = "softline" then
                   return Pool.Create_Soft_Line;
                elsif Value = "whitespace" then
@@ -403,7 +403,15 @@ package body Langkit_Support.Generic_API.Unparsing is
             declare
                Kind : constant String := JSON.Get ("kind");
             begin
-               if Kind = "whitespace" then
+               if Kind = "indent" then
+                  if not JSON.Has_Field ("contents") then
+                     raise Invalid_Input with
+                       Error_Prefix & ": missing ""contents"" key for indent";
+                  end if;
+                  return Pool.Create_Indent
+                    (To_Document (JSON.Get ("contents"), Error_Prefix));
+
+               elsif Kind = "whitespace" then
                   if not JSON.Has_Field ("length") then
                      raise Invalid_Input with
                        Error_Prefix & ": missing ""length"" key";
@@ -418,14 +426,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                      end if;
                      return Pool.Create_Whitespace (Length.Get);
                   end;
-
-               elsif Kind = "indent" then
-                  if not JSON.Has_Field ("contents") then
-                     raise Invalid_Input with
-                       Error_Prefix & ": missing ""contents"" key for indent";
-                  end if;
-                  return Pool.Create_Indent
-                    (To_Document (JSON.Get ("contents"), Error_Prefix));
 
                else
                   raise Invalid_Input with
@@ -668,24 +668,15 @@ package body Langkit_Support.Generic_API.Unparsing is
       Filler, Template : Document_Type) return Document_Type is
    begin
       case Template.Kind is
-         when Recurse =>
-            return Filler;
-
-         when Token =>
-            return Pool.Create_Token
-              (Template.Token_Kind, Template.Token_Text);
-
-         when Line =>
-            return Pool.Create_Line;
-
          when Hard_Line =>
             return Pool.Create_Hard_Line;
 
-         when Soft_Line =>
-            return Pool.Create_Soft_Line;
+         when Indent =>
+            return Pool.Create_Indent
+              (Instantiate_Template (Pool, Filler, Template.Indent_Document));
 
-         when Whitespace =>
-            return Pool.Create_Whitespace (Template.Whitespace_Length);
+         when Line =>
+            return Pool.Create_Line;
 
          when List =>
             declare
@@ -699,9 +690,18 @@ package body Langkit_Support.Generic_API.Unparsing is
                return Pool.Create_List (Items);
             end;
 
-         when Indent =>
-            return Pool.Create_Indent
-              (Instantiate_Template (Pool, Filler, Template.Indent_Document));
+         when Recurse =>
+            return Filler;
+
+         when Soft_Line =>
+            return Pool.Create_Soft_Line;
+
+         when Token =>
+            return Pool.Create_Token
+              (Template.Token_Kind, Template.Token_Text);
+
+         when Whitespace =>
+            return Pool.Create_Whitespace (Template.Whitespace_Length);
       end case;
    end Instantiate_Template;
 

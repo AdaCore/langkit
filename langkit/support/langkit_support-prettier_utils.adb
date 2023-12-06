@@ -32,19 +32,13 @@ package body Langkit_Support.Prettier_Utils is
       function Recurse_Count (Self : Document_Type) return Natural is
       begin
          case Self.Kind is
-            when Recurse =>
-               return 1;
-
-            when Token =>
-
-               --  Token documents are not supposed to appear in templates
-
-               raise Program_Error;
-
-            when Line | Hard_Line | Soft_Line =>
+            when Hard_Line =>
                return 0;
 
-            when Whitespace =>
+            when Indent =>
+               return Recurse_Count (Self.Indent_Document);
+
+            when Line =>
                return 0;
 
             when List =>
@@ -56,8 +50,20 @@ package body Langkit_Support.Prettier_Utils is
                   end loop;
                end return;
 
-            when Indent =>
-               return Recurse_Count (Self.Indent_Document);
+            when Recurse =>
+               return 1;
+
+            when Soft_Line =>
+               return 0;
+
+            when Token =>
+
+               --  Token documents are not supposed to appear in templates
+
+               raise Program_Error;
+
+            when Whitespace =>
+               return 0;
          end case;
       end Recurse_Count;
 
@@ -82,20 +88,14 @@ package body Langkit_Support.Prettier_Utils is
           when others     => raise Program_Error);
    begin
       case Document.Kind is
-         when Recurse =>
-            raise Program_Error with "uninstantiated template";
-
-         when Token | Whitespace =>
-            return Prettier_Ada.Documents.Builders.Text (Text_For (Document));
-
-         when Line =>
-            return Line;
-
          when Hard_Line =>
             return Hard_Line;
 
-         when Soft_Line =>
-            return Soft_Line;
+         when Indent =>
+            return Indent (To_Prettier_Document (Document.Indent_Document));
+
+         when Line =>
+            return Line;
 
          when List =>
 
@@ -148,8 +148,14 @@ package body Langkit_Support.Prettier_Utils is
                return List (Items);
             end;
 
-         when Indent =>
-            return Indent (To_Prettier_Document (Document.Indent_Document));
+         when Recurse =>
+            raise Program_Error with "uninstantiated template";
+
+         when Soft_Line =>
+            return Soft_Line;
+
+         when Token | Whitespace =>
+            return Prettier_Ada.Documents.Builders.Text (Text_For (Document));
       end case;
    end To_Prettier_Document;
 
@@ -177,51 +183,6 @@ package body Langkit_Support.Prettier_Utils is
       Self.Append (Document);
    end Register;
 
-   --------------------
-   -- Create_Recurse --
-   --------------------
-
-   function Create_Recurse (Self : in out Document_Pool) return Document_Type
-   is
-   begin
-      return Result : constant Document_Type := new Document_Record (Recurse)
-      do
-         Self.Register (Result);
-      end return;
-   end Create_Recurse;
-
-   ------------------
-   -- Create_Token --
-   ------------------
-
-   function Create_Token
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type is
-   begin
-      return Result : constant Document_Type :=
-        new Document_Record'
-          (Kind       => Token,
-           Token_Kind => Kind,
-           Token_Text => Text)
-      do
-         Self.Register (Result);
-      end return;
-   end Create_Token;
-
-   -----------------
-   -- Create_Line --
-   -----------------
-
-   function Create_Line (Self : in out Document_Pool) return Document_Type is
-   begin
-      return Result : constant Document_Type :=
-        new Document_Record (Kind => Line)
-      do
-         Self.Register (Result);
-      end return;
-   end Create_Line;
-
    ----------------------
    -- Create_Hard_Line --
    ----------------------
@@ -236,34 +197,33 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Hard_Line;
 
-   ----------------------
-   -- Create_Soft_Line --
-   ----------------------
+   -------------------
+   -- Create_Indent --
+   -------------------
 
-   function Create_Soft_Line (Self : in out Document_Pool) return Document_Type
-   is
+   function Create_Indent
+     (Self     : in out Document_Pool;
+      Document : Document_Type) return Document_Type is
    begin
       return Result : constant Document_Type :=
-        new Document_Record (Kind => Soft_Line)
+        new Document_Record'(Kind => Indent, Indent_Document => Document)
       do
          Self.Register (Result);
       end return;
-   end Create_Soft_Line;
+   end Create_Indent;
 
-   -----------------------
-   -- Create_Whitespace --
-   -----------------------
+   -----------------
+   -- Create_Line --
+   -----------------
 
-   function Create_Whitespace
-     (Self : in out Document_Pool; Length : Positive := 1) return Document_Type
-   is
+   function Create_Line (Self : in out Document_Pool) return Document_Type is
    begin
       return Result : constant Document_Type :=
-        new Document_Record'(Kind => Whitespace, Whitespace_Length => Length)
+        new Document_Record (Kind => Line)
       do
          Self.Register (Result);
       end return;
-   end Create_Whitespace;
+   end Create_Line;
 
    -----------------
    -- Create_List --
@@ -301,20 +261,66 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Empty_List;
 
-   -------------------
-   -- Create_Indent --
-   -------------------
+   --------------------
+   -- Create_Recurse --
+   --------------------
 
-   function Create_Indent
-     (Self     : in out Document_Pool;
-      Document : Document_Type) return Document_Type is
+   function Create_Recurse (Self : in out Document_Pool) return Document_Type
+   is
    begin
-      return Result : constant Document_Type :=
-        new Document_Record'(Kind => Indent, Indent_Document => Document)
+      return Result : constant Document_Type := new Document_Record (Recurse)
       do
          Self.Register (Result);
       end return;
-   end Create_Indent;
+   end Create_Recurse;
+
+   ----------------------
+   -- Create_Soft_Line --
+   ----------------------
+
+   function Create_Soft_Line (Self : in out Document_Pool) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Soft_Line)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Soft_Line;
+
+   ------------------
+   -- Create_Token --
+   ------------------
+
+   function Create_Token
+     (Self : in out Document_Pool;
+      Kind : Token_Kind_Ref;
+      Text : Unbounded_Text_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind       => Token,
+           Token_Kind => Kind,
+           Token_Text => Text)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Token;
+
+   -----------------------
+   -- Create_Whitespace --
+   -----------------------
+
+   function Create_Whitespace
+     (Self : in out Document_Pool; Length : Positive := 1) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Whitespace, Whitespace_Length => Length)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Whitespace;
 
    -----------------------------
    -- Insert_Required_Spacing --
@@ -347,8 +353,44 @@ package body Langkit_Support.Prettier_Utils is
          Last_Spacing : in out Spacing_Kind) is
       begin
          case Document.Kind is
+            when Hard_Line =>
+               Extend_Spacing (Last_Spacing, Newline);
+
+            when Indent =>
+
+               --  Indent does not emit any spacing before processing its inner
+               --  document.
+
+               Extend_Spacing (Last_Spacing, None);
+               Process (Document.Indent_Document, Last_Token, Last_Spacing);
+
+            when Line =>
+
+               --  A Line command can be replaced by line breaks or a space: be
+               --  conservative and consider its weakest form: a space.
+
+               Extend_Spacing (Last_Spacing, Whitespace);
+
+            when List =>
+               for I in 1 .. Document.List_Documents.Last_Index loop
+                  declare
+                     D : Document_Type := Document.List_Documents.Element (I);
+                  begin
+                     Process (D, Last_Token, Last_Spacing);
+                     Document.List_Documents.Replace_Element (I, D);
+                  end;
+               end loop;
+
             when Recurse =>
                raise Program_Error;
+
+            when Soft_Line =>
+
+               --  A Soft_Line command can be replaced by a line break or
+               --  nothing: be conservative and consider its weakest form:
+               --  nothing.
+
+               Extend_Spacing (Last_Spacing, None);
 
             when Token =>
                declare
@@ -383,44 +425,8 @@ package body Langkit_Support.Prettier_Utils is
                   end;
                end;
 
-            when Line =>
-
-               --  A Line command can be replaced by line breaks or a space: be
-               --  conservative and consider its weakest form: a space.
-
-               Extend_Spacing (Last_Spacing, Whitespace);
-
-            when Hard_Line =>
-               Extend_Spacing (Last_Spacing, Newline);
-
-            when Soft_Line =>
-
-               --  A Soft_Line command can be replaced by a line break or
-               --  nothing: be conservative and consider its weakest form:
-               --  nothing.
-
-               Extend_Spacing (Last_Spacing, None);
-
             when Whitespace =>
                Extend_Spacing (Last_Spacing, Whitespace);
-
-            when List =>
-               for I in 1 .. Document.List_Documents.Last_Index loop
-                  declare
-                     D : Document_Type := Document.List_Documents.Element (I);
-                  begin
-                     Process (D, Last_Token, Last_Spacing);
-                     Document.List_Documents.Replace_Element (I, D);
-                  end;
-               end loop;
-
-            when Indent =>
-
-               --  Indent does not emit any spacing before processing its inner
-               --  document.
-
-               Extend_Spacing (Last_Spacing, None);
-               Process (Document.Indent_Document, Last_Token, Last_Spacing);
          end case;
       end Process;
 
@@ -459,8 +465,27 @@ package body Langkit_Support.Prettier_Utils is
             return;
          end if;
          case Document.Kind is
+            when Hard_Line =>
+               Put_Line ("hardline");
+
+            when Indent =>
+               Put_Line ("indent:");
+               Process (Document.Indent_Document, Prefix & "  ");
+
+            when Line =>
+               Put_Line ("line");
+
+            when List =>
+               Put_Line ("list:");
+               for I in 1 .. Document.List_Documents.Last_Index loop
+                  Process (Document.List_Documents.Element (I), Prefix & "| ");
+               end loop;
+
             when Recurse =>
                Put_Line ("recurse");
+
+            when Soft_Line =>
+               Put_Line ("softline");
 
             when Token =>
                declare
@@ -472,26 +497,9 @@ package body Langkit_Support.Prettier_Utils is
                      & Image (To_Text (Document.Token_Text)));
                end;
 
-            when Line =>
-               Put_Line ("line");
-            when Hard_Line =>
-               Put_Line ("hardline");
-            when Soft_Line =>
-               Put_Line ("softline");
-
             when Whitespace =>
                Put_Line
                  ("whitespace(" & Document.Whitespace_Length'Image & ")");
-
-            when List =>
-               Put_Line ("list:");
-               for I in 1 .. Document.List_Documents.Last_Index loop
-                  Process (Document.List_Documents.Element (I), Prefix & "| ");
-               end loop;
-
-            when Indent =>
-               Put_Line ("indent:");
-               Process (Document.Indent_Document, Prefix & "  ");
          end case;
       end Process;
    begin

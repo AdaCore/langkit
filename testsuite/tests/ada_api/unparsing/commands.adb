@@ -88,18 +88,14 @@ begin
       raise Program_Error;
    end if;
 
+   Check ("cmd_hardline.json");
+   Check ("cmd_indent.json");
+   Check ("cmd_line.json");
+   Check ("cmd_list.json");
    Check ("cmd_recurse.json");
-
+   Check ("cmd_softline.json");
    Check ("cmd_whitespace_default.json");
    Check ("cmd_whitespace_3.json");
-
-   Check ("cmd_line.json");
-   Check ("cmd_hardline.json");
-   Check ("cmd_softline.json");
-
-   Check ("cmd_list.json");
-
-   Check ("cmd_indent.json");
 
    Put_Line ("Done.");
 end Commands;
