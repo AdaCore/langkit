@@ -169,7 +169,9 @@ def build_langkit_support(args: Namespace) -> None:
             + gargs
         )
 
-    subprocess.check_call(base_argv + ["-P", SIGSEGV_HANDLER_GPR] + gargs)
+    # SigSegV handler is a relocatable library, skip if only static requested
+    if LibraryType.relocatable in args.library_types:
+        subprocess.check_call(base_argv + ["-P", SIGSEGV_HANDLER_GPR] + gargs)
 
 
 def langkit_support_env_map(args: Namespace,
