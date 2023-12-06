@@ -30,7 +30,7 @@ create_project_py = locate_script('create-project.py')
 # Generate two libraries
 for lang in ('Foo', 'Bar'):
     manage_py = os.path.join(lang.lower(), 'manage.py')
-    python(create_project_py, lang)
+    subprocess.check_call([create_project_py, lang])
     python(
         manage_py,
         'make',
