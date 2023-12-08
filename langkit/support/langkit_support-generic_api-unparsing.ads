@@ -219,12 +219,13 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        "breakParent"
    --
-   --    * The "line"/"hardline"/"softline" templates yield the corresponding
-   --      Prettier documents::
+   --    * The "line"/"hardline"/"softline"/"literalline" templates yield the
+   --      corresponding Prettier documents::
    --
    --        "list"
    --        "hardlist"
    --        "softlist"
+   --        "literalline"
    --
    --    * The "whitespace" template yields a "text" document with the
    --      specified amount of spaces::

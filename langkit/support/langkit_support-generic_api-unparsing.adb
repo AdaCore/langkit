@@ -384,6 +384,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                   return Pool.Create_Recurse;
                elsif Value = "softline" then
                   return Pool.Create_Soft_Line;
+               elsif Value = "literalline" then
+                  return Pool.Create_Literal_Line;
                elsif Value = "whitespace" then
                   return Pool.Create_Whitespace;
                else
@@ -783,6 +785,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                end loop;
                return Pool.Create_List (Items);
             end;
+
+         when Literal_Line =>
+            return Pool.Create_Literal_Line;
 
          when Recurse =>
             return Filler;

@@ -96,6 +96,7 @@ begin
    Check ("cmd_fill.json");
    Check ("cmd_line.json");
    Check ("cmd_list.json");
+   Check ("cmd_literalline.json");
    Check ("cmd_recurse.json");
    Check ("cmd_softline.json");
    Check ("cmd_whitespace_default.json");

@@ -49,6 +49,7 @@ private package Langkit_Support.Prettier_Utils is
       Indent,
       Line,
       List,
+      Literal_Line,
       Recurse,
       Soft_Line,
       Token,
@@ -81,6 +82,9 @@ private package Langkit_Support.Prettier_Utils is
 
          when List =>
             List_Documents : Document_Vectors.Vector;
+
+         when Literal_Line =>
+            null;
 
          when Recurse =>
             null;
@@ -162,6 +166,10 @@ private package Langkit_Support.Prettier_Utils is
       Documents : in out Document_Vectors.Vector) return Document_Type;
    --  Transfer all nodes in ``Documents`` to a new ``List`` node and return
    --  that new node.
+
+   function Create_Literal_Line
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Literal_Line`` node
 
    function Create_Empty_List
      (Self : in out Document_Pool) return Document_Type;

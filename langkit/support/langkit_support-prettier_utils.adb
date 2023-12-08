@@ -74,6 +74,9 @@ package body Langkit_Support.Prettier_Utils is
                   end loop;
                end return;
 
+            when Literal_Line =>
+               return 0;
+
             when Recurse =>
                return 1;
 
@@ -187,6 +190,9 @@ package body Langkit_Support.Prettier_Utils is
                Flush_Text;
                return List (Items);
             end;
+
+         when Literal_Line =>
+            return Literal_Line;
 
          when Recurse =>
             raise Program_Error with "uninstantiated template";
@@ -362,6 +368,20 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_List;
 
+   -------------------------
+   -- Create_Literal_Line --
+   -------------------------
+
+   function Create_Literal_Line
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Literal_Line)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Literal_Line;
+
    -----------------------
    -- Create_Empty_List --
    -----------------------
@@ -528,6 +548,9 @@ package body Langkit_Support.Prettier_Utils is
                   end;
                end loop;
 
+            when Literal_Line =>
+               Extend_Spacing (Last_Spacing, Newline);
+
             when Recurse =>
                raise Program_Error;
 
@@ -659,6 +682,9 @@ package body Langkit_Support.Prettier_Utils is
                     (Document.List_Documents.Element (I),
                      Prefix & List_Indent);
                end loop;
+
+            when Literal_Line =>
+               Put_Line ("literalline");
 
             when Recurse =>
                Put_Line ("recurse");
