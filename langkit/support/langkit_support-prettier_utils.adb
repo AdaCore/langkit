@@ -7,12 +7,12 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
-with Prettier_Ada.Document_Vectors;   use Prettier_Ada.Document_Vectors;
-with Prettier_Ada.Documents.Builders; use Prettier_Ada.Documents.Builders;
+with Prettier_Ada.Document_Vectors; use Prettier_Ada.Document_Vectors;
 
+with Langkit_Support.Errors; use Langkit_Support.Errors;
 with Langkit_Support.Generic_API.Unparsing;
 use Langkit_Support.Generic_API.Unparsing;
-with Langkit_Support.Names; use Langkit_Support.Names;
+with Langkit_Support.Names;  use Langkit_Support.Names;
 
 package body Langkit_Support.Prettier_Utils is
 
@@ -32,8 +32,32 @@ package body Langkit_Support.Prettier_Utils is
       function Recurse_Count (Self : Document_Type) return Natural is
       begin
          case Self.Kind is
+            when Break_Parent =>
+               return 0;
+
+            when Fill =>
+               return Recurse_Count (Self.Fill_Document);
+
+            when Group =>
+               return Recurse_Count (Self.Group_Document);
+
             when Hard_Line =>
                return 0;
+
+            when If_Break =>
+               declare
+                  Count_Break : constant Natural :=
+                    Recurse_Count (Self.If_Break_Contents);
+                  Count_Flat  : constant Natural :=
+                    Recurse_Count (Self.If_Break_Flat_Contents);
+               begin
+                  if Count_Break /= Count_Flat then
+                     raise Invalid_Input with
+                       "ifBreak alternatives have an inconsistent recurse"
+                       & " structure";
+                  end if;
+                  return Count_Break;
+               end;
 
             when Indent =>
                return Recurse_Count (Self.Indent_Document);
@@ -88,8 +112,25 @@ package body Langkit_Support.Prettier_Utils is
           when others     => raise Program_Error);
    begin
       case Document.Kind is
+         when Break_Parent =>
+            return Break_Parent;
+
+         when Fill =>
+            return Fill (To_Prettier_Document (Document.Fill_Document));
+
+         when Group =>
+            return Group
+              (To_Prettier_Document (Document.Group_Document),
+               Document.Group_Options);
+
          when Hard_Line =>
             return Hard_Line;
+
+         when If_Break =>
+            return If_Break
+              (To_Prettier_Document (Document.If_Break_Contents),
+               To_Prettier_Document (Document.If_Break_Flat_Contents),
+               (Group_Id => Document.If_Break_Group_Id));
 
          when Indent =>
             return Indent (To_Prettier_Document (Document.Indent_Document));
@@ -182,6 +223,56 @@ package body Langkit_Support.Prettier_Utils is
       Self.Append (Document);
    end Register;
 
+   -------------------------
+   -- Create_Break_Parent --
+   -------------------------
+
+   function Create_Break_Parent
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Break_Parent)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Break_Parent;
+
+   -----------------
+   -- Create_Fill --
+   -----------------
+
+   function Create_Fill
+     (Self     : in out Document_Pool;
+      Document : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind          => Fill,
+           Fill_Document => Document)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Fill;
+
+   ------------------
+   -- Create_Group --
+   ------------------
+
+   function Create_Group
+     (Self     : in out Document_Pool;
+      Document : Document_Type;
+      Options  : Group_Options_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind           => Group,
+           Group_Document => Document,
+           Group_Options  => Options)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Group;
+
    ----------------------
    -- Create_Hard_Line --
    ----------------------
@@ -195,6 +286,31 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_Hard_Line;
+
+   ---------------------
+   -- Create_If_Break --
+   ---------------------
+
+   function Create_If_Break
+     (Self          : in out Document_Pool;
+      Contents      : Document_Type;
+      Flat_Contents : Document_Type := null;
+      Group_Id      : Prettier.Symbol_Type :=
+        Prettier.No_Symbol) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind                   => If_Break,
+           If_Break_Contents      => Contents,
+           If_Break_Flat_Contents =>
+             (if Flat_Contents = null
+              then Self.Create_Empty_List
+              else Flat_Contents),
+           If_Break_Group_Id      => Group_Id)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_If_Break;
 
    -------------------
    -- Create_Indent --
@@ -352,8 +468,40 @@ package body Langkit_Support.Prettier_Utils is
          Last_Spacing : in out Spacing_Kind) is
       begin
          case Document.Kind is
+            when Break_Parent =>
+               null;
+
+            when Fill =>
+               Process (Document.Fill_Document, Last_Token, Last_Spacing);
+
+            when Group =>
+               Process (Document.Group_Document, Last_Token, Last_Spacing);
+
             when Hard_Line =>
                Extend_Spacing (Last_Spacing, Newline);
+
+            when If_Break =>
+               declare
+                  LT_Break : Token_Kind_Ref := Last_Token;
+                  LS_Break : Spacing_Kind := Last_Spacing;
+
+                  LT_Flat : Token_Kind_Ref := Last_Token;
+                  LS_Flat : Spacing_Kind := Last_Spacing;
+               begin
+                  Process (Document.If_Break_Contents, LT_Break, LS_Break);
+                  Process (Document.If_Break_Flat_Contents, LT_Flat, LS_Flat);
+
+                  --  Our "recurse" sanitization should guarantee us that all
+                  --  alternatives output the same sequence of tokens, so this
+                  --  should not happen.
+
+                  if LT_Break /= LT_Flat then
+                     raise Program_Error;
+                  end if;
+
+                  Last_Token := LT_Break;
+                  Last_Spacing := Spacing_Kind'Min (LS_Break, LS_Flat);
+               end;
 
             when Indent =>
 
@@ -450,6 +598,9 @@ package body Langkit_Support.Prettier_Utils is
    ----------
 
    procedure Dump (Document : Document_Type) is
+      Simple_Indent : constant String := "  ";
+      List_Indent   : constant String := "| ";
+
       procedure Process (Document : Document_Type; Prefix : String);
 
       -------------
@@ -464,12 +615,39 @@ package body Langkit_Support.Prettier_Utils is
             return;
          end if;
          case Document.Kind is
+            when Break_Parent =>
+               Put_Line ("breakParent");
+
+            when Fill =>
+               Put_Line ("fill:");
+               Process (Document.Fill_Document, Prefix & Simple_Indent);
+
+            when Group =>
+               Put_Line ("group:");
+               Put_Line
+                 (Prefix & Simple_Indent & "shouldBreak: "
+                  & Document.Group_Options.Should_Break'Image);
+               Put_Line
+                 (Prefix & Simple_Indent & "id: "
+                  & Prettier.Image (Document.Group_Options.Id));
+               Process (Document.Group_Document, Prefix & Simple_Indent);
+
             when Hard_Line =>
                Put_Line ("hardline");
 
+            when If_Break =>
+               Put_Line ("ifBreak:");
+               if Document.If_Break_Group_Id /= No_Symbol then
+                  Put_Line
+                    (Prefix & Simple_Indent & "groupId: "
+                     & Prettier.Image (Document.If_Break_Group_Id));
+               end if;
+               Process (Document.If_Break_Contents, Prefix & List_Indent);
+               Process (Document.If_Break_Flat_Contents, Prefix & List_Indent);
+
             when Indent =>
                Put_Line ("indent:");
-               Process (Document.Indent_Document, Prefix & "  ");
+               Process (Document.Indent_Document, Prefix & Simple_Indent);
 
             when Line =>
                Put_Line ("line");
@@ -477,7 +655,9 @@ package body Langkit_Support.Prettier_Utils is
             when List =>
                Put_Line ("list:");
                for I in 1 .. Document.List_Documents.Last_Index loop
-                  Process (Document.List_Documents.Element (I), Prefix & "| ");
+                  Process
+                    (Document.List_Documents.Element (I),
+                     Prefix & List_Indent);
                end loop;
 
             when Recurse =>

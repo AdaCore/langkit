@@ -214,6 +214,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        "recurse"
    --
+   --    * The "breakParent" template yields a "breakParent" Prettier
+   --      Document::
+   --
+   --        "breakParent"
+   --
    --    * The "line"/"hardline"/"softline" templates yield the corresponding
    --      Prettier documents::
    --
@@ -229,6 +234,24 @@ package Langkit_Support.Generic_API.Unparsing is
    --        /* or just, for length = 1 */
    --
    --        "whitespace"
+   --
+   --    * The "fill" template yields a "fill" Prettier document::
+   --
+   --        {"kind": "fill", "document": <sub-template>}
+   --
+   --    * The "group" template yields a "group" Prettier document::
+   --
+   --        {"kind": "group", "document": <sub-template>}
+   --        {"kind": "group", "document": <sub-template>, "shouldBreak": true}
+   --
+   --    * The "ifBreak" template yields an "ifBreak" Prettier document::
+   --
+   --        {"kind": "ifBreak", "breakContents": <sub-template>}
+   --        {
+   --          "kind": "ifBreak",
+   --          "breakContents": <sub-template>,
+   --          "flatContents": <sub-template>
+   --        }
    --
    --    * The "indent" template yields an "indent" Prettier document::
    --

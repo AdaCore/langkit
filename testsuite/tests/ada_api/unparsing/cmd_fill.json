@@ -1,0 +1,7 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": {"kind": "fill", "document": ["line", "recurse", "line"]}
+    }
+  }
+}

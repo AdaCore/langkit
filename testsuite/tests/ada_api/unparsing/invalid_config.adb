@@ -52,6 +52,8 @@ begin
    Check ("invalid_whitespace.json");
    Check ("invalid_whitespace2.json");
    Check ("invalid_indent.json");
+   Check ("invalid_ifbreak.json");
+   Check ("invalid_fill.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");

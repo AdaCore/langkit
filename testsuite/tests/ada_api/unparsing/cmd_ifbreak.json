@@ -1,0 +1,15 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": [
+        {"kind": "ifBreak", "breakContents": "line"},
+        "recurse",
+        {
+          "kind": "ifBreak",
+          "breakContents": "line",
+          "flatContents": "whitespace"
+        }
+      ]
+    }
+  }
+}

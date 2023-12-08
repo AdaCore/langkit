@@ -45,6 +45,10 @@ def f1(a: Int, b: Int=0): Int
     template for VarDecl.f_name: missing "length" key
 # invalid_indent.json
     template for VarDecl.f_name: missing "contents" key for indent
+# invalid_ifbreak.json
+    template for VarDecl.f_name: missing "breakContents" key for ifBreak
+# invalid_fill.json
+    template for VarDecl.f_name: missing "document" key for fill
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -64,6 +68,70 @@ def f1(a: Int, b: Int=0): Int
 Done.
 
 == commands.adb ==
+== cmd_breakparent.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "command",
+      "command": {
+        "command": "breakParent"
+      }
+    },
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_group.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "command",
+      "command": {
+        "command": "group",
+        "groupContents": {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        "break": false,
+        "expandedStates": null
+      }
+    },
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    },
+    {
+      "kind": "command",
+      "command": {
+        "command": "group",
+        "groupContents": {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        "break": true,
+        "expandedStates": null
+      }
+    }
+  ]
+}
+
 == cmd_hardline.json ==
 
 {
@@ -96,6 +164,59 @@ Done.
   ]
 }
 
+== cmd_ifbreak.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "command",
+      "command": {
+        "command": "ifBreak",
+        "ifBreakGroupId": 0,
+        "breakContents": {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        "flatContents": {
+          "kind": "list",
+          "list": [
+          ]
+        }
+      }
+    },
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    },
+    {
+      "kind": "command",
+      "command": {
+        "command": "ifBreak",
+        "ifBreakGroupId": 0,
+        "breakContents": {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        "flatContents": {
+          "kind": "text",
+          "text": " "
+        }
+      }
+    }
+  ]
+}
+
 == cmd_indent.json ==
 
 {
@@ -117,6 +238,42 @@ Done.
         {
           "kind": "text",
           "text": "var i:Int=0;"
+        }
+      ]
+    }
+  }
+}
+
+== cmd_fill.json ==
+
+{
+  "kind": "command",
+  "command": {
+    "command": "fill",
+    "parts": {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        {
+          "kind": "text",
+          "text": "var i:Int=0;"
+        },
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
         }
       ]
     }

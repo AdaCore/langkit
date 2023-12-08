@@ -88,8 +88,12 @@ begin
       raise Program_Error;
    end if;
 
+   Check ("cmd_breakparent.json");
+   Check ("cmd_group.json");
    Check ("cmd_hardline.json");
+   Check ("cmd_ifbreak.json");
    Check ("cmd_indent.json");
+   Check ("cmd_fill.json");
    Check ("cmd_line.json");
    Check ("cmd_list.json");
    Check ("cmd_recurse.json");

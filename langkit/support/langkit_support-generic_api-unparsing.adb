@@ -16,6 +16,7 @@ with GNAT.Strings;
 with GNATCOLL.JSON; use GNATCOLL.JSON;
 with GNATCOLL.Opt_Parse;
 with GNATCOLL.VFS;  use GNATCOLL.VFS;
+with Prettier_Ada.Documents.Builders;
 with Prettier_Ada.Documents.Json;
 
 with Langkit_Support.Errors;         use Langkit_Support.Errors;
@@ -373,7 +374,9 @@ package body Langkit_Support.Generic_API.Unparsing is
             declare
                Value : constant String := JSON.Get;
             begin
-               if Value = "hardline" then
+               if Value = "breakParent" then
+                  return Pool.Create_Break_Parent;
+               elsif Value = "hardline" then
                   return Pool.Create_Hard_Line;
                elsif Value = "line" then
                   return Pool.Create_Line;
@@ -403,7 +406,79 @@ package body Langkit_Support.Generic_API.Unparsing is
             declare
                Kind : constant String := JSON.Get ("kind");
             begin
-               if Kind = "indent" then
+               if Kind = "fill" then
+                  declare
+                     Document : Document_Type;
+                  begin
+                     if not JSON.Has_Field ("document") then
+                        raise Invalid_Input with
+                          Error_Prefix
+                          & ": missing ""document"" key for fill";
+                     end if;
+                     Document := To_Document
+                       (JSON.Get ("document"), Error_Prefix);
+
+                     return Pool.Create_Fill (Document);
+                  end;
+
+               elsif Kind = "group" then
+                  declare
+                     Document : Document_Type;
+                     Options  : Prettier.Builders.Group_Options_Type :=
+                       Prettier.Builders.No_Group_Options;
+
+                     Should_Break : JSON_Value;
+                  begin
+                     if not JSON.Has_Field ("document") then
+                        raise Invalid_Input with
+                          Error_Prefix
+                          & ": missing ""document"" key for group";
+                     end if;
+                     Document := To_Document
+                       (JSON.Get ("document"), Error_Prefix);
+
+                     if JSON.Has_Field ("shouldBreak") then
+                        Should_Break := JSON.Get ("shouldBreak");
+                        if Should_Break.Kind /= JSON_Boolean_Type then
+                           raise Invalid_Input with
+                             Error_Prefix & ": invalid group shouldBreak: "
+                             & Should_Break.Kind'Image;
+                        end if;
+                        Options.Should_Break := Should_Break.Get;
+                     end if;
+
+                     --  TODO??? (eng/libadalang/langkit#727) Handle the group
+                     --  id.
+
+                     return Pool.Create_Group (Document, Options);
+                  end;
+
+               elsif Kind = "ifBreak" then
+                  declare
+                     Contents      : Document_Type;
+                     Flat_Contents : Document_Type;
+                  begin
+                     if not JSON.Has_Field ("breakContents") then
+                        raise Invalid_Input with
+                          Error_Prefix
+                          & ": missing ""breakContents"" key for ifBreak";
+                     end if;
+                     Contents :=
+                       To_Document (JSON.Get ("breakContents"), Error_Prefix);
+
+                     Flat_Contents :=
+                       (if JSON.Has_Field ("flatContents")
+                        then To_Document
+                               (JSON.Get ("flatContents"), Error_Prefix)
+                        else null);
+
+                     --  TODO??? (eng/libadalang/langkit#727) Handle the group
+                     --  id.
+
+                     return Pool.Create_If_Break (Contents, Flat_Contents);
+                  end;
+
+               elsif Kind = "indent" then
                   if not JSON.Has_Field ("contents") then
                      raise Invalid_Input with
                        Error_Prefix & ": missing ""contents"" key for indent";
@@ -668,8 +743,27 @@ package body Langkit_Support.Generic_API.Unparsing is
       Filler, Template : Document_Type) return Document_Type is
    begin
       case Template.Kind is
+         when Break_Parent =>
+            return Pool.Create_Break_Parent;
+
+         when Fill =>
+            return Pool.Create_Fill
+              (Instantiate_Template (Pool, Filler, Template.Fill_Document));
+
+         when Group =>
+            return Pool.Create_Group
+              (Instantiate_Template (Pool, Filler, Template.Group_Document),
+               Template.Group_Options);
+
          when Hard_Line =>
             return Pool.Create_Hard_Line;
+
+         when If_Break =>
+            return Pool.Create_If_Break
+              (Instantiate_Template (Pool, Filler, Template.If_Break_Contents),
+               Instantiate_Template
+                 (Pool, Filler, Template.If_Break_Flat_Contents),
+               Template.If_Break_Group_Id);
 
          when Indent =>
             return Pool.Create_Indent
