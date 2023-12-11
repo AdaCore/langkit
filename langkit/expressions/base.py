@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+import dataclasses
 from functools import partial
 import inspect
 from itertools import count
@@ -2189,7 +2190,7 @@ class AbstractVariable(AbstractExpression):
             name = self.create_unused_id()
 
         self._type = type
-        self.local_var = None
+        self.local_var: LocalVars.LocalVar | None = None
         self._name = name
         if create_local:
             self.create_local_variable()
@@ -3209,6 +3210,52 @@ def render(*args, **kwargs):
 inherited_information = inherited_property(lambda s: s.base)
 
 
+@dataclasses.dataclass
+class LogicPredicate:
+    """
+    Description of the object in generated code used to represent a partially
+    evaluated property, to be used as a predicate in logic equations.
+    """
+
+    @dataclasses.dataclass(frozen=True)
+    class PartialArgument:
+        """
+        Description of a logic predicate argument that is passed for property
+        partial evaluation.
+        """
+
+        index: int
+        """
+        0-based index for the partial argument in the closure for this logic
+        predicate.
+        """
+
+        name: names.Name
+        """
+        Name for the partial argument in the list of arguments in the property.
+        """
+
+        type: CompiledType
+        """
+        Type for the partial argument.
+        """
+
+    id: str
+    """
+    Identifier for the logic predicate.
+    """
+
+    partial_args: tuple[PartialArgument, ...]
+    """
+    Arguments passed to the property for partial evaluation.
+    """
+
+    default_passed_args: int
+    """
+    Number of arguments passed by default value.
+    """
+
+
 class PropertyDef(AbstractNodeData):
     """
     This is the underlying class that is used to represent properties in the
@@ -3442,13 +3489,9 @@ class PropertyDef(AbstractNodeData):
         Recursion guard for the construct pass.
         """
 
-        self.logic_predicates: List[Tuple[CompiledType, str]] = []
+        self.logic_predicates: list[LogicPredicate] = []
         """
-        The list of logic predicates to generate. First element of the tuple is
-        a list of the args types, second is the unique identifier for this
-        predicate.
-
-        :type: [([CompiledType], str)]
+        The list of logic predicates to generate.
         """
 
         self.expr = expr
@@ -4356,20 +4399,22 @@ class PropertyDef(AbstractNodeData):
         return non_art
 
     @memoized
-    def do_generate_logic_predicate(self, partial_args_types,
-                                    default_passed_args):
+    def do_generate_logic_predicate(
+        self,
+        partial_args: tuple[LogicPredicate.PartialArgument, ...],
+        default_passed_args: int,
+    ) -> str:
         """
         Helper method, will trigger the emission of a logic predicate object
         for the property for the given partial argument types.
 
-        :param [CompiledType] partial_args_types: The type of partially applied
-            arguments passed to the logic predicate.
-        :param int default_passed_args: Number of arguments passed by default
+        :param partial_args: Arguments passed to the property for partial
+            evaluation.
+        :param default_passed_args: Number of arguments passed by default
             value.
 
         :return: The identifier for the logic predicate, to be used as a prefix
             in code generation for every entity related to it.
-        :rtype: str
         """
         # We use the length of the list as an id for the logic predicate. If
         # the method is called again with the same arg types, the same id
@@ -4383,28 +4428,27 @@ class PropertyDef(AbstractNodeData):
 
         # We can use a list because the method is memoized, eg. this won't
         # be executed twice for the same partial_args_types tuple.
-        self.logic_predicates.append((partial_args_types,
-                                      default_passed_args,
-                                      pred_id))
+        self.logic_predicates.append(
+            LogicPredicate(pred_id, partial_args, default_passed_args)
+        )
 
         return pred_id
 
-    def get_concrete_node_types(self, partial_args_types, default_passed_args):
+    def get_concrete_node_types(
+        self,
+        pred: LogicPredicate,
+    ) -> list[CompiledType]:
         """
-        Helper for emission of logic predicate wrappers. Given partial
-        argument types for trailing arguments that do not correspond to logic
-        variables bound by the predicate, this helper will return the
-        concrete node type for leading arguments that correspond to logic
-        variables bound by the predicate.
-
-        :param [CompiledType] partial_args_types: The type of partially applied
-            arguments passed to the logic predicate.
-        :param int default_passed_args: Number of arguments passed by default
-            value.
+        Helper for emission of logic predicate wrappers. Return the concrete
+        node type for leading arguments that correspond to logic variables
+        bound by the given predicate.
         """
-        logic_vars = (len(self.arguments) -
-                      len(partial_args_types) -
-                      default_passed_args)
+        logic_vars = (
+            len(self.arguments)
+            - len(pred.partial_args)
+            - pred.default_passed_args
+        )
+        assert self.struct is not None
         return [self.struct] + [a.type for a in self.arguments[:logic_vars]]
 
     @property
@@ -4965,8 +5009,8 @@ class LocalVars:
     Represents the state of local variables in a property definition.
     """
 
-    def __init__(self):
-        self.local_vars = {}
+    def __init__(self) -> None:
+        self.local_vars: dict[names.Name, LocalVars.LocalVar] = {}
         self.root_scope = LocalVars.Scope(self, None)
         self.current_scope = self.root_scope
 
@@ -4982,52 +5026,50 @@ class LocalVars:
 
         COUNT = count(0)
 
-        def __init__(self, vars, parent):
+        def __init__(self, vars: LocalVars, parent: LocalVars.Scope | None):
             """
-            :param LocalVars vars: LocalVars instance for this scope.
-            :param LocalVars.Scope|None parent: Parent scope.
+            :param vars: LocalVars instance for this scope.
+            :param parent: Parent scope.
             """
             self.index = next(self.COUNT)
             self.vars = vars
             self.parent = parent
-            self.sub_scopes = []
-            self.variables = []
+            self.sub_scopes: list[LocalVars.Scope] = []
+            self.variables: list[LocalVars.LocalVar] = []
 
         @property
-        def name(self):
+        def name(self) -> names.Name:
             return names.Name('Scope_{}'.format(self.index))
 
         @property
-        def finalizer_name(self):
+        def finalizer_name(self) -> names.Name:
             """
             Return the name of the finalization procedure for this scope.
-
-            :rtype: names.Name
             """
             return names.Name('Finalizer') + self.name
 
-        def has_refcounted_vars(self, include_children=False):
+        def has_refcounted_vars(self, include_children: bool = False) -> bool:
             """
             Return whether this scope contains at least one variable that
             matters for reference counting.
 
-            :param bool include_children: Whether to account for children in
-                the computation.
-            :rtype: bool
+            :param include_children: Whether to account for children in the
+                computation.
             """
             for var in self.variables:
+                assert var.type is not None
                 if var.type.is_refcounted:
                     return True
 
             return include_children and any(s.has_refcounted_vars(True)
                                             for s in self.sub_scopes)
 
-        def add(self, var):
+        def add(self, var: LocalVars.LocalVar) -> None:
             """
             Associate "var" to this scope. Doing so twice for the same variable
             is an error.
 
-            :param LocalVars.LocalVar var: Variable to associate.
+            :param var: Variable to associate.
             """
             assert var._scope is None, (
                 'Trying to associate {} to some scope whereas it already has'
@@ -5036,19 +5078,17 @@ class LocalVars:
             self.variables.append(var)
             var._scope = self
 
-        def push(self):
+        def push(self) -> LocalVars.Scope:
             """
             Create a new scope that is a child for the current scope, make it
             the current scope and return it.
-
-            :rtype: LocalVars.Scope
             """
             result = LocalVars.Scope(self.vars, self)
             self.sub_scopes.append(result)
             self.vars.current_scope = result
             return result
 
-        def pop(self):
+        def pop(self) -> LocalVars.Scope:
             """
             Set the current scope to the parent of the current scope. Return
             this parent scope. Doing so when the current scope is the root one
@@ -5062,7 +5102,7 @@ class LocalVars:
             return parent
 
         @contextmanager
-        def new_child(self):
+        def new_child(self) -> Iterator[LocalVars.Scope]:
             """
             Create a child scope for this block and return a context manager to
             make it the current scope temporarily.
@@ -5071,7 +5111,7 @@ class LocalVars:
             self.pop()
 
         @contextmanager
-        def use(self):
+        def use(self) -> Iterator[LocalVars.Scope]:
             """
             Return a context manager to make self the current scope
             temporarily.
@@ -5085,30 +5125,32 @@ class LocalVars:
         """
         Represents one local variable in a property definition.
         """
-        def __init__(self, vars, name, type=None):
+        def __init__(
+            self,
+            vars: LocalVars,
+            name: names.Name,
+            type: CompiledType | None = None
+        ):
             """
 
-            :param LocalVars vars: The LocalVars instance to which this
-                local variable is bound.
-            :param langkit.names.Name name: The name of this local variable.
-            :param langkit.compiled_types.CompiledType type: The type of this
-                local variable.
+            :param vars: The LocalVars instance to which this local variable is
+                bound.
+            :param name: The name of this local variable.
+            :param type: The type of this local variable.
             """
             self.vars = vars
             self.name = name
             self.type = type
             assert self.type is None or isinstance(self.type, CompiledType)
 
-            self._scope = None
+            self._scope: LocalVars.Scope | None = None
             """
             The scope this variable lives in. During the construct phase, all
             resolved expressions that create local variables must initialize
             this using LocalVars.Scope.add.
-
-            :type: LocalVars.Scope
             """
 
-        def render(self):
+        def render(self) -> str:
             assert self.type, "Local var must have type before it is rendered"
             return "{} : {}{};".format(
                 self.name.camel_with_underscores,
@@ -5118,22 +5160,25 @@ class LocalVars:
             )
 
         @property
-        def ref_expr(self):
+        def ref_expr(self) -> VariableExpr:
             """
             Return a resolved expression that references "self".
-            :rtype: VariableExpr
             """
             assert self.type, ('Local variables must have a type before turned'
                                ' into a resolved expression.')
             return VariableExpr(self.type, self.name, local_var=self)
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<LocalVar {} : {}>'.format(
                 self.name.camel_with_underscores,
                 self.type.name.camel if self.type else '<none>'
             )
 
-    def create(self, name, type):
+    def create(
+        self, name:
+        str | names.Name,
+        type: CompiledType,
+    ) -> LocalVars.LocalVar:
         """
         Create a local variable in templates::
 
@@ -5148,24 +5193,24 @@ class LocalVars:
         The new local variable is automatically associated to the current
         scope.
 
-        :param str|names.Name name: The name of the variable.
-        :param langkit.compiled_types.CompiledType type: The type of the local
-            variable.
-        :rtype: LocalVars.LocalVar
+        :param name: The name of the variable.
+        :param type: The type of the local variable.
         """
         result = self.create_scopeless(name, type)
         PropertyDef.get_scope().add(result)
         return result
 
-    def create_scopeless(self, name, type):
+    def create_scopeless(
+        self,
+        name: str | names.Name,
+        type: CompiledType,
+    ) -> LocalVars.LocalVar:
         """
         Like "create", but do not assign a scope for the new local variable.
         The scope will have to be initialized later.
 
-        :param str|names.Name name: The name of the variable.
-        :param langkit.compiled_types.CompiledType type: The type of the local
-            variable.
-        :rtype: LocalVars.LocalVar
+        :param name: The name of the variable.
+        :param type: The type of the local variable.
         """
         name = names.Name.get(name)
 
@@ -5178,7 +5223,7 @@ class LocalVars:
         self.local_vars[name] = ret
         return ret
 
-    def check_scopes(self):
+    def check_scopes(self) -> None:
         """
         Check that all variables are associated to a scope. Raise an
         AssertionError if it is not the case.
@@ -5187,17 +5232,17 @@ class LocalVars:
             assert var._scope, '{} has no scope'.format(var)
 
     @property
-    def all_scopes(self):
+    def all_scopes(self) -> list[LocalVars.Scope]:
         """
         Return the list of all scopes in this repository.
-
-        :rtype: list[LocalVars.Scope]
         """
-        def children(s):
+
+        def children(s: LocalVars.Scope) -> list[LocalVars.Scope]:
             return s.sub_scopes
+
         return funcy.ltree_nodes(self.root_scope, children, children)
 
-    def render(self):
+    def render(self) -> str:
         return "\n".join(lv.render() for lv in self.local_vars.values())
 
 
@@ -5373,6 +5418,10 @@ class Arithmetic(AbstractExpression):
                 'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))',
                 T.Symbol, [l, r]
             )
+
+        if l.type.is_array_type or l.type.is_string_type:
+            from langkit.expressions import Concat
+            return Concat.create_constructed(l, r)
 
         check_source_language(
             l.type == r.type, "Incompatible types for {}: {} and {}".format(

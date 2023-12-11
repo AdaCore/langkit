@@ -18,7 +18,7 @@ main (void)
   // Declaring the working variables
   foo_analysis_context context;
   foo_analysis_unit unit;
-  foo_base_entity root;
+  foo_node root;
   foo_text text;
 
   // Initialize the analysis context

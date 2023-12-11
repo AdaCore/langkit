@@ -5,7 +5,10 @@ bad_rule_1.lkt:4:5: error: Unexpected declaration in lexer
 
 
 == case_1.lkt ==
-case_1.lkt:5:11-5:12: Expected 'discard', got Number
+case_1.lkt:5:11: error: Expected 'discard', got Number
+5 |     match 1 {
+  |           ^
+
 
 == case_2.lkt ==
 case_2.lkt:5:5: error: Invalid case rule topology
@@ -32,7 +35,10 @@ case_5.lkt:6:36: error: Unknown token: bar
 
 
 == case_6.lkt ==
-case_6.lkt:7:24-7:27: Expected Number, got Identifier
+case_6.lkt:7:24: error: Expected Number, got Identifier
+7 |         else send(foo, foo)
+  |                        ^^^
+
 
 == case_7.lkt ==
 case_7.lkt:7:19: error: Unknown token: bar

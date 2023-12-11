@@ -552,6 +552,18 @@ package body ${ada_lib_name}.Implementation.C is
          return null;
    end;
 
+   procedure ${capi.get_name('create_bare_entity')}
+     (Node   : ${node_type};
+      Entity : access ${entity_type})
+   is
+   begin
+      Clear_Last_Exception;
+      Entity.all := (Node => Unwrap (Node), Info => ${T.entity_info.nullexpr});
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    function ${capi.get_name('is_equivalent')}
      (L, R : ${entity_type}_Ptr) return ${bool_type}
    is
@@ -977,6 +989,21 @@ package body ${ada_lib_name}.Implementation.C is
       T : Text_Access := new Text_Type'(S);
    begin
       return ${text_type}'(T.all'Address, T.all'Length, Is_Allocated => 1);
+   end Wrap_Alloc;
+
+   ----------------
+   -- Wrap_Alloc --
+   ----------------
+
+   function Wrap_Alloc (S : Unbounded_Wide_Wide_String) return ${text_type} is
+      Chars     : Big_Wide_Wide_String_Access;
+      Length    : Natural;
+      Allocated : Text_Access;
+   begin
+      Get_Wide_Wide_String (S, Chars, Length);
+      Allocated := new Text_Type (1 .. Length);
+      Allocated.all := Chars (1 .. Length);
+      return (Allocated.all'Address, Allocated.all'Length, 1);
    end Wrap_Alloc;
 
    ----------

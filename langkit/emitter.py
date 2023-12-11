@@ -45,6 +45,7 @@ class Emitter:
                  no_property_checks: bool = False,
                  generate_gdb_hook: bool = True,
                  pretty_print: bool = False,
+                 generate_auto_dll_dirs: bool = False,
                  post_process_ada: PostProcessFn = None,
                  post_process_cpp: PostProcessFn = None,
                  post_process_python: PostProcessFn = None,
@@ -79,6 +80,10 @@ class Emitter:
             section. Good for debugging, but better to disable for releases.
 
         :param pretty_print: If true, pretty-print the generated sources.
+
+        :generate_auto_dll_dirs: If true, generate a code snippet in Python
+            bindings to automatically add directories of the 'PATH' environment
+            variable to the DLL searching directories on Windows systems.
 
         :param post_process_ada: Optional post-processing for generated Ada
             source code.
@@ -135,6 +140,7 @@ class Emitter:
         self.generate_gdb_hook = generate_gdb_hook
         self.generate_unparser = context.generate_unparser
         self.pretty_print = pretty_print
+        self.generate_auto_dll_dirs = generate_auto_dll_dirs
         self.post_process_ada = post_process_ada
         self.post_process_cpp = post_process_cpp
         self.post_process_python = post_process_python
@@ -244,6 +250,10 @@ class Emitter:
         pass will be run on the given script.
         """
 
+        extension_unit = (
+            f"{context.ada_api_settings.lib_name}.Implementation.Extensions"
+        )
+
         # Determine whether we have user external properties. If so,
         # automatically WITH $.Implementation.Extensions from the body of
         # $.Analysis and $.Implementation.
@@ -253,11 +263,21 @@ class Emitter:
         ):
             for unit in ('Analysis', 'Implementation', 'Implementation.C'):
                 context.add_with_clause(
-                    unit, AdaSourceKind.body,
-                    '{}.Implementation.Extensions'
-                    .format(context.ada_api_settings.lib_name),
-                    use_clause=True
+                    unit, AdaSourceKind.body, extension_unit, use_clause=True
                 )
+
+        # Likewise, if we have custom "_Short_Image" functions from extensions,
+        # $.Implementation needs to have visibility over it.
+        if any(
+            node.annotations.custom_short_image
+            for node in context.astnode_types
+        ):
+            context.add_with_clause(
+                "Implementation",
+                AdaSourceKind.body,
+                extension_unit,
+                use_clause=True
+            )
 
     def path_to(self, destination: str, path_from: str) -> str:
         """
@@ -520,7 +540,7 @@ class Emitter:
             Unit('pkg_rewriting', 'Rewriting', unparser=True),
             # Unit for AST rewriting implementation
             Unit('pkg_rewriting_impl', 'Rewriting_Implementation',
-                 unparser=True, is_interface=False),
+                 unparser=True),
             # Unit for AST unparsing primitives
             Unit('pkg_unparsing', 'Unparsing', unparser=True),
             # Unit for AST implementation of unparsing primitives
@@ -610,6 +630,7 @@ class Emitter:
             'python_api/module_py',
             c_api=ctx.c_api_settings,
             pyapi=ctx.python_api_settings,
+            generate_auto_dll_dirs=self.generate_auto_dll_dirs,
             module_name=ctx.python_api_settings.module_name
         )
 

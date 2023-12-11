@@ -1,0 +1,5 @@
+! this line will be removed before parsing
+def a = 1
+! this line too
+def b = 1
+# regular comment

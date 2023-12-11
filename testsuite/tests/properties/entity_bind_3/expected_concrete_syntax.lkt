@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
 
-    @export fun prop(): Int = raise PropertyError("Property FooNode.prop not implemented")
+    @export fun prop(): Int = raise[Int] PropertyError("Property FooNode.prop not implemented")
 }
 
 class Literal : FooNode implements TokenNode {
@@ -23,5 +23,5 @@ class Literal : FooNode implements TokenNode {
         node.as_bare_entity
     }
 
-    fun a(): FooNode = raise PropertyError("Property Literal.a not implemented")
+    fun a(): FooNode = raise[FooNode] PropertyError("Property Literal.a not implemented")
 }

@@ -31,6 +31,17 @@ private package ${ada_lib_name}.Unparsing_Implementation is
       end case;
    end record;
 
+   type Abstract_Cursor (Kind : Abstract_Node_Kind := Abstract_Node_Kind'First)
+   is record
+      case Kind is
+         when From_Parsing   =>
+            Parsing_List     : ${T.root_node.name};
+            Next_Child_Index : Positive;
+         when From_Rewriting =>
+            Rewriting_Child  : Node_Rewriting_Handle;
+      end case;
+   end record;
+
    function Create_Abstract_Node
      (Parsing_Node : ${T.root_node.name}) return Abstract_Node;
    function Create_Abstract_Node
@@ -50,6 +61,14 @@ private package ${ada_lib_name}.Unparsing_Implementation is
      (Node : Abstract_Node; Index : Positive) return Abstract_Node;
    --  Return the Node's child number Index. Index is a 1-based index. If it is
    --  out of bounds, a Constraint_Error is raised.
+
+   function Iterate_List (Node : Abstract_Node) return Abstract_Cursor;
+   --  Assuming that ``Node`` designates a list node, return a cursor to
+   --  iterate on its children starting with the first one.
+
+   function Has_Element (Cursor : Abstract_Cursor) return Boolean;
+   function Element (Cursor : Abstract_Cursor) return Abstract_Node;
+   function Next (Cursor : Abstract_Cursor) return Abstract_Cursor;
 
    function Text (Node : Abstract_Node) return Text_Type;
    --  Assuming Node is a token node, return the associated text

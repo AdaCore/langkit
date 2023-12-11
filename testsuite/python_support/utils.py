@@ -143,6 +143,8 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
                           warning_set=default_warning_set,
                           generate_unparser=False, symbol_canonicalizer=None,
                           unparse_script=None,
+                          version=None,
+                          build_date=None,
                           explicit_passes_triggers={},
                           lkt_semantic_checks=False,
                           types_from_lkt: bool = False):
@@ -169,16 +171,27 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
 
     :param None|str unparse_script: Script to unparse the language spec.
 
+    :param version: See CompileCtx's constructor.
+
+    :param build_date: See CompileCtx's constructor.
+
     :param types_from_lkt: See CompileCtx.types_from_lkt.
 
     :param property_exceptions: See CompileCtx's constructor.
     """
 
     try:
-        ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
-                              symbol_canonicalizer=symbol_canonicalizer,
-                              lkt_semantic_checks=lkt_semantic_checks,
-                              types_from_lkt=types_from_lkt)
+        ctx = prepare_context(
+            grammar,
+            lexer,
+            lkt_file,
+            warning_set,
+            symbol_canonicalizer=symbol_canonicalizer,
+            types_from_lkt=types_from_lkt,
+            lkt_semantic_checks=lkt_semantic_checks,
+            version=version,
+            build_date=build_date,
+        )
         ctx.create_all_passes(
             'build', generate_unparser=generate_unparser,
             unparse_script=(UnparseScript(unparse_script)

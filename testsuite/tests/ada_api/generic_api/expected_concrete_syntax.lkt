@@ -77,7 +77,7 @@ class Example : BaseExample {
 
     @export fun id_dflt_char(id: Char = '\x00'): Char = id
 
-    @export fun id_dflt_root_node(id: FooNode = null): FooNode = id
+    @export fun id_dflt_root_node(id: FooNode = null[FooNode]): FooNode = id
 
     @export fun with_md(md1: Bool, md2: Bool): Example = Example(
         node=self.node, info=EntityInfo(

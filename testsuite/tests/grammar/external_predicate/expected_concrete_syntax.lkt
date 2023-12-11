@@ -1,0 +1,14 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Name(@identifier) |> when(Name.pred)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Name : FooNode implements TokenNode {
+
+    @external fun pred(): Bool
+}

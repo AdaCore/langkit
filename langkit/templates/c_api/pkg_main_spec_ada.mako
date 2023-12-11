@@ -28,7 +28,7 @@ ${exts.with_clauses(with_clauses)}
 --  Internal package: defines data types and subprograms to provide the
 --  implementation of the exported C API (see the corresponding C header file).
 
-private package ${ada_lib_name}.Implementation.C is
+package ${ada_lib_name}.Implementation.C is
 
    subtype ${analysis_context_type} is Internal_Context;
    ${ada_c_doc('langkit.analysis_context_type', 3)}
@@ -445,6 +445,14 @@ private package ${ada_lib_name}.Implementation.C is
    -- General AST node primitives --
    ---------------------------------
 
+   procedure ${capi.get_name('create_bare_entity')}
+     (Node   : ${node_type};
+      Entity : access ${entity_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('create_bare_entity')}";
+   ${ada_c_doc('langkit.create_bare_entity', 3)}
+
    function ${capi.get_name('is_equivalent')}
      (L, R : ${entity_type}_Ptr) return ${bool_type}
       with Export        => True,
@@ -765,6 +773,7 @@ private package ${ada_lib_name}.Implementation.C is
    function Wrap (S : Unbounded_Wide_Wide_String) return ${text_type};
 
    function Wrap_Alloc (S : Text_Type) return ${text_type};
+   function Wrap_Alloc (S : Unbounded_Wide_Wide_String) return ${text_type};
    function Wrap
      (S     : Text_Cst_Access;
       First : Positive;

@@ -14,7 +14,26 @@ import os
 import pipes
 import shlex
 import shutil
-from typing import Callable, Dict, List, Optional, Type
+from typing import (
+    Any, Callable, ContextManager, Dict, Iterable, Iterator, List, Optional,
+    Protocol, Sequence, TYPE_CHECKING, Type, TypeVar
+)
+
+
+if TYPE_CHECKING:
+    from langkit.utils.types import _P, _T
+
+
+T = TypeVar("T")
+T_contra = TypeVar("T_contra", contravariant=True)
+
+
+class Comparable(Protocol[T_contra]):
+    def __eq__(self, other: object) -> bool: ...
+    def __lt__(self, other: T_contra) -> bool: ...
+
+
+ComparableT = TypeVar("ComparableT", bound=Comparable)
 
 
 class LibraryType(Enum):
@@ -23,7 +42,7 @@ class LibraryType(Enum):
     relocatable = "relocatable"
 
     @classmethod
-    def add_argument(cls, parser: argparse.ArgumentParser):
+    def add_argument(cls, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             '--library-types',
             type=parse_list_of_choices(cls),
@@ -41,14 +60,12 @@ class BuildMode(Enum):
     prof = "prof"
 
 
-def copy_with(obj, **kwargs):
+def copy_with(obj: T, **kwargs: object) -> T:
     """
     Copy an object, and add every key value association passed in kwargs to it.
 
-    :param dict[str, Any] kwargs: key value associations to attach to the
-        object.
-    :param T obj: The object to copy.
-    :rtype: T
+    :param kwargs: Key value associations to attach to the object.
+    :param obj: The object to copy.
 
     Example use::
 
@@ -72,7 +89,7 @@ def copy_with(obj, **kwargs):
     return c
 
 
-def is_same(coll):
+def is_same(coll: Iterable[object]) -> bool:
     """
     Helper function, returns True if every element in collection hashes to
     the same value.
@@ -87,7 +104,7 @@ class TopologicalSortError(Exception):
     list.
     """
 
-    def __init__(self, loop):
+    def __init__(self, loop: Iterable[object]):
         super().__init__(
             'Dependency loop detected: {}'
             .format(', '.join(str(item) for item in loop))
@@ -95,7 +112,9 @@ class TopologicalSortError(Exception):
         self.loop = loop
 
 
-def topological_sort(items):
+def topological_sort(
+    items: list[tuple[Comparable, list[Comparable]]]
+) -> list[Comparable]:
     """
     Yield elements from the ``items`` collection in topological order.
 
@@ -105,9 +124,6 @@ def topological_sort(items):
 
     This raises a ``TopologicalSortError`` if ``items`` contains a dependency
     loop.
-
-    :type items: list[(T, list[T])]
-    :rtype: generator[T]
     """
     # Result is the sequence we return (its order matters) whereas satisfied is
     # here only to check for membership to the result.
@@ -116,7 +132,7 @@ def topological_sort(items):
 
     deps_map = {item: sorted(dependencies) for item, dependencies in items}
 
-    def process(item, current_chain):
+    def process(item: Comparable, current_chain: list[Comparable]) -> None:
         """
         Add ``item`` to the result, processing its dependencies first if
         needed. Raise a TopologicalSortError if we detect a loop.
@@ -159,23 +175,26 @@ class classproperty(property):
 
     If the above was valid.
     """
-    def __get__(self, cls, owner):
+    def __get__(self, cls, owner):  # type: ignore
         return classmethod(self.fget).__get__(None, owner)()
 
 
-def inherited_property(parent_getter, default_val=False):
+def inherited_property(
+    parent_getter: Callable[_P, _T],
+    default_val: bool = False,
+) -> Callable[[Callable[_P, _T]], property]:
     """
     Decorate a method, from an object with a parent, so that if the returned
     value is None, it will query it on the parent.
     """
-    def impl(fn):
-        def internal(self, *args, **kwargs):
-            val = fn(self, *args, **kwargs)
+    def impl(fn: Callable[_P, _T]) -> property:
+        def internal(*args: _P.args, **kwargs: _P.kwargs) -> _T:
+            val = fn(*args, **kwargs)
             if val is not None:
                 return val
             else:
-                parent = parent_getter(self)
-                return (internal(parent, *args, **kwargs)
+                parent = parent_getter(args[0])
+                return (internal(parent, *args[1:], **kwargs)
                         if parent else default_val)
 
         return property(internal)
@@ -183,30 +202,32 @@ def inherited_property(parent_getter, default_val=False):
     return impl
 
 
-def ensure_clean_dir(dirname):
+def ensure_clean_dir(dirname: str) -> None:
     """
     Remove any existing file/directory at ``dirname`` and create an empty
     directory instead.
 
-    :param str dirname: Name of the directory to create.
+    :param dirname: Name of the directory to create.
     """
     if os.path.exists(dirname):
         shutil.rmtree(dirname)
     os.makedirs(dirname)
 
 
-def copy_to_dir(filename, dirname):
+def copy_to_dir(filename: str, dirname: str) -> None:
     """
     Copy the ``filename`` regular file to the ``dirname`` directory.
 
-    :param str filename: File to copy.
-    :param str dirname: Destination directory.
+    :param filename: File to copy.
+    :param dirname: Destination directory.
     """
     shutil.copy(filename, os.path.join(dirname, os.path.basename(filename)))
 
 
 @contextmanager
-def nested(*contexts):
+def nested(
+    *contexts: ContextManager[Any]
+) -> Iterator[Sequence[ContextManager[Any]]]:
     """
     Reimplementation of nested in python 3.
     """
@@ -216,7 +237,7 @@ def nested(*contexts):
         yield contexts
 
 
-def get_cpu_count():
+def get_cpu_count() -> int:
     # The "multiprocessing" module is not available on GNATpython's
     # distribution for PPC AIX and the "cpu_count" is not available on Windows:
     # give up on default parallelism on these platforms.
@@ -238,33 +259,13 @@ def add_to_path(env: Dict[str, str], name: str, item: str) -> None:
     env[name] = os.path.pathsep.join(keep([item, env.get(name, '')]))
 
 
-def path_separator(name: str) -> str:
-    """
-    Return the path separator to use for the ``name`` environment variable.
-    """
-    # On Cygwin, PATH keeps the Unix syntax instead of using the Window path
-    # separator.
-    return ":" if name == "PATH" else os.path.pathsep
-
-
-def format_path(name: str, dirs: List[str]) -> str:
-    """
-    Format a path environment variable.
-
-    :param name: Name of this environment variable (``PATH``, ``PYTHONPATH``,
-        ...).
-    :param dirs: Directories to include in this path.
-    """
-    return path_separator(name).join(dirs)
-
-
 def format_setenv(name: str, path: str) -> str:
     """
     Return a Bourne shell command to prepend ``path`` to the ``name``
     environment variable.
     """
     return (
-        f'{name}={pipes.quote(path)}"{path_separator(name)}${name}";'
+        f'{name}={pipes.quote(path)}"{os.pathsep}${name}";'
         f" export {name}"
     )
 

@@ -270,6 +270,12 @@ class Grammar:
         If we loaded a Lkt unit, mapping of all grammar rules it contains.
         """
 
+        self.uses_external_properties = False
+        """
+        Whether a parsing rule uses an external property. If one does,
+        generated code must use visibility.
+        """
+
     def context(self) -> AbstractContextManager[None]:
         return diagnostic_context(self.location)
 
@@ -1353,7 +1359,7 @@ class Or(Parser):
         finally:
             self.is_processing_type = False
 
-    def _precise_types(self) -> TypeSet:
+    def _precise_types(self) -> TypeSet[ASTNodeType]:
         # We need protection from infinite recursion the same way get_type
         # does.
         if self.is_processing_type:
@@ -1361,14 +1367,14 @@ class Or(Parser):
 
         try:
             self.is_processing_type = True
-            result = TypeSet()
+            result: TypeSet[ASTNodeType] = TypeSet()
             for p in self.parsers:
                 result.update(p.precise_types)
             return result
         finally:
             self.is_processing_type = False
 
-    def _precise_element_types(self) -> TypeSet:
+    def _precise_element_types(self) -> TypeSet[ASTNodeType]:
         # We need protection from infinite recursion the same way get_type
         # does.
         if self.is_processing_type:
@@ -1376,7 +1382,7 @@ class Or(Parser):
 
         try:
             self.is_processing_type = True
-            result = TypeSet()
+            result: TypeSet[ASTNodeType] = TypeSet()
             for p in self.parsers:
                 result.update(p.precise_element_types)
             return result
@@ -2249,11 +2255,27 @@ class Predicate(Parser):
             self.property_ref.type.matches(T.Bool),
             'Property passed as predicate to Predicate parser must return'
             ' a boolean')
-        assert self.property_ref.struct is not None
+
+        pred_arg_type = self.property_ref.struct
+        assert pred_arg_type is not None
+
+        parser_rtype = self.parser.type
+        assert parser_rtype is not None
+
         check_source_language(
-            self.property_ref.struct.matches(self.parser.type),
-            'Property passed as predicate to Predicate parser must take a node'
-            ' with the type of the sub-parser')
+            parser_rtype.matches(pred_arg_type),
+            'Property passed as predicate must accept all nodes the sub-parser'
+            ' may yield. Here, it should take anything that matches a'
+            f' {parser_rtype.dsl_name}, while here'
+            f' {self.property_ref.qualname} takes {pred_arg_type.dsl_name}'
+            ' arguments',
+        )
+
+        assert self.grammar is not None
+        self.grammar.uses_external_properties = (
+            self.grammar.uses_external_properties
+            or self.property_ref.user_external
+        )
 
     def generate_code(self) -> str:
         return self.render('predicate_code_ada')

@@ -1,0 +1,3 @@
+var orig_1 = 9
+var orig_2 = 0
+var orig_3 = 1

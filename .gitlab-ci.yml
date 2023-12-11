@@ -2,28 +2,10 @@ include:
   - project: eng/libadalang/libadalang
     file: /utils/gitlab-ci-common.yml
 
-workflow:
-  rules:
-    # To avoid running too many pipelines, restrict the times we run one:
-
-    # Run "trigger" pipelines
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-
-    # Run pipelines triggered by a merge request creation/update
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
-    # Run for pushes to a branch *except* if there is also a merge request for
-    # it.
-    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
-      when: never
-    - if: '$CI_COMMIT_BRANCH'
-
 variables:
   PACKAGE_BASENAME: langkit.tar.gz
   PACKAGE_ABSOLUTE_NAME: $CI_PROJECT_DIR/$PACKAGE_BASENAME
   PACKAGE_REPOSITORY_PROJECT: eng/libadalang/ci-packages
-  CI_FRAGMENTS: ci_fragments
-  CI_FRAGMENTS_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/setton/$CI_FRAGMENTS
   LIBADALANG_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/eng/libadalang/libadalang
 
 stages:
@@ -38,19 +20,31 @@ stages:
 
 langkit_build:
   extends: .basic
+  rules:
+    # Run this for merge requests, scheduled pipelines, and pipelines started
+    # from the Web interface (sometimes necessary to manually restart a
+    # scheduled pipeline).
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+    # Also run it after a "master" branch update so that the "package" step has
+    # its dependencies satisfied.
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
   services:
      - image:sandbox
      - cpu:8
      - mem:16
   stage: stage1
   script:
-    - unset GITLAB_TOKEN; require_issue
+    - require_issue
     - !reference [.script_snippets, setup]
 
     - cd /it/wave
 
     # Build using anod
     - anod vcs --add-repo langkit $CI_PROJECT_DIR
+    - anod build --minimal adasat
     - anod build --minimal langkit_support
     - anod build --minimal langkit
 
@@ -79,7 +73,9 @@ langkit_test:
     # rebuild the artifact
     - if: $CI_REBUILD_ARTIFACT
       when: never
-    - when: always
+    # Run this for merge requests only
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
   script:
     - !reference [.script_snippets, setup]
 
@@ -91,6 +87,7 @@ langkit_test:
     - cd /it/wave
     - mkdir -p fingerprints
     - anod vcs --add-repo langkit $CI_PROJECT_DIR
+    - touch fingerprints/x86_64-linux.adasat.install.json.assume-unchanged
     - touch fingerprints/x86_64-linux.langkit_support.install.json.assume-unchanged
     - touch fingerprints/x86_64-linux.langkit.install.json.assume-unchanged
     - anod test --minimal langkit
@@ -121,11 +118,8 @@ libadalang_build_and_test:
      - mem:16
   stage: stage2
   rules:
-    # Same as above, no point in doing running if we only want
-    # to rebuild the artifact
-    - if: $CI_REBUILD_ARTIFACT
-      when: never
-    - when: always
+    # Run this for merge requests only
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - !reference [.script_snippets, setup]
 
@@ -150,6 +144,7 @@ libadalang_build_and_test:
     - touch fingerprints/x86_64-linux.langkit_support.install.json.assume-unchanged
     - touch fingerprints/x86_64-linux.langkit.install.json.assume-unchanged
     - anod build --minimal libadalang
+    - anod build --minimal libadalang-doc
     - anod build --minimal libadalang_for_customers
     - anod test  --minimal libadalang
 
@@ -179,14 +174,20 @@ package:
   stage: stage3
   needs: [langkit_build] # Do not wait for jobs in stage2 (i.e. tests)
   rules:
-     # Store the artifact only for the master branch
-     - if: ($CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule") && $CI_COMMIT_REF_NAME == "master"
+     # Store the artifact for "master" branch updates and scheduled pipelines
+     # only. Also do it to run for pipelines started from the Web interface
+     # (see related comment in the langkit_build job).
+    - if: '$CI_COMMIT_REF_NAME != "master"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
   script:
     - export PATH=/it/e3/bin:$PATH
+    - unset GITLAB_TOKEN
 
     # Upload the package
-    - git clone $CI_FRAGMENTS_GIT
-    - ./$CI_FRAGMENTS/upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
+    - upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
 
 ######
 # CB #

@@ -2,6 +2,7 @@
 
 with Ada.Unchecked_Conversion;
 
+with Langkit_Support.Diagnostics;       use Langkit_Support.Diagnostics;
 with Langkit_Support.File_Readers;      use Langkit_Support.File_Readers;
 with Langkit_Support.Generic_API;       use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Introspection;
@@ -95,10 +96,17 @@ private package ${ada_lib_name}.Generic_Impl is
       Filename, Charset : String;
       Reparse           : Boolean;
       Rule              : Grammar_Rule_Index) return Internal_Unit;
+   function Context_Get_From_Buffer
+     (Context                   : Internal_Context;
+      Filename, Buffer, Charset : String;
+      Rule                      : Grammar_Rule_Index) return Internal_Unit;
 
    function Unit_Context (Unit : Internal_Unit) return Internal_Context;
    function Unit_Version (Unit : Internal_Unit) return Version_Number;
    function Unit_Filename (Unit : Internal_Unit) return String;
+   function Unit_Diagnostics (Unit : Internal_Unit) return Diagnostics_Access;
+   function Unit_Format_GNU_Diagnostic
+     (Unit : Internal_Unit; D : Diagnostic) return String;
    function Unit_Root (Unit : Internal_Unit) return Internal_Node;
    function Unit_First_Token (Unit : Internal_Unit) return Internal_Token;
    function Unit_Last_Token (Unit : Internal_Unit) return Internal_Token;
@@ -185,20 +193,23 @@ private package ${ada_lib_name}.Generic_Impl is
       Struct_Members => Generic_Introspection.Struct_Members'Access,
       First_Property => Generic_Introspection.First_Property,
 
-      Create_Context        => Create_Context'Access,
-      Context_Inc_Ref       => Context_Inc_Ref'Access,
-      Context_Dec_Ref       => Context_Dec_Ref'Access,
-      Context_Version       => Context_Version'Access,
-      Context_Has_Unit      => Context_Has_Unit'Access,
-      Context_Get_From_File => Context_Get_From_File'Access,
+      Create_Context          => Create_Context'Access,
+      Context_Inc_Ref         => Context_Inc_Ref'Access,
+      Context_Dec_Ref         => Context_Dec_Ref'Access,
+      Context_Version         => Context_Version'Access,
+      Context_Has_Unit        => Context_Has_Unit'Access,
+      Context_Get_From_File   => Context_Get_From_File'Access,
+      Context_Get_From_Buffer => Context_Get_From_Buffer'Access,
 
-      Unit_Context     => Unit_Context'Access,
-      Unit_Version     => Unit_Version'Access,
-      Unit_Filename    => Unit_Filename'Access,
-      Unit_Root        => Unit_Root'Access,
-      Unit_First_Token => Unit_First_Token'Access,
-      Unit_Last_Token  => Unit_Last_Token'Access,
-      Unit_Get_Line    => Unit_Get_Line'Access,
+      Unit_Context               => Unit_Context'Access,
+      Unit_Version               => Unit_Version'Access,
+      Unit_Filename              => Unit_Filename'Access,
+      Unit_Diagnostics           => Unit_Diagnostics'Access,
+      Unit_Format_GNU_Diagnostic => Unit_Format_GNU_Diagnostic'Access,
+      Unit_Root                  => Unit_Root'Access,
+      Unit_First_Token           => Unit_First_Token'Access,
+      Unit_Last_Token            => Unit_Last_Token'Access,
+      Unit_Get_Line              => Unit_Get_Line'Access,
 
       Node_Metadata_Inc_Ref => Node_Metadata_Inc_Ref'Access,
       Node_Metadata_Dec_Ref => Node_Metadata_Dec_Ref'Access,

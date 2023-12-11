@@ -271,6 +271,18 @@ def error(message: str, ok_for_codegen: bool = False) -> NoReturn:
     raise AssertionError("should not happen")
 
 
+def non_blocking_error(message: str, ok_for_codegen: bool = False) -> None:
+    """
+    Shortcut around ``check_source_language``, for non-fatal errors.
+    """
+    check_source_language(
+        False,
+        message,
+        ok_for_codegen=ok_for_codegen,
+        severity=Severity.non_blocking_error,
+    )
+
+
 def check_source_language(predicate: bool,
                           message: str,
                           severity: Severity = Severity.error,
@@ -645,7 +657,7 @@ def print_error(message: str,
     )
 
     # Print the source listing
-    if location.lkt_unit is not None:
+    if location.lkt_unit is not None and location.line > 0:
         print(source_listing(location))
 
 

@@ -13,7 +13,7 @@ from typing import Callable, Dict, List, Optional
 
 from langkit.packaging import NativeLibPackager
 from langkit.utils import (
-    LibraryType, add_to_path, format_path, format_setenv, get_cpu_count,
+    LibraryType, add_to_path, format_setenv, get_cpu_count,
     parse_cmdline_args
 )
 
@@ -54,6 +54,7 @@ def create_subparser(
     with_gargs: bool = False,
     with_build_dir: bool = False,
     with_libs: bool = False,
+    with_generate_dll_lib_adding: bool = False,
     with_no_mypy: bool = False,
     accept_unknown_args: bool = False,
 ) -> ArgumentParser:
@@ -67,6 +68,8 @@ def create_subparser(
     :param bool with_gargs: Whether to create the --gargs option.
     :param bool with_build_dir: Whether to create the --build-dir option.
     :param bool with_libs: Whether to create the --lib option.
+    :param bool with_generate_dll_lib_adding: Whether to create the
+        --generate-auto-dll-dirs option.
     :param bool with_no_mypy: Whether to create the --no-mypy option.
     """
     subparser = subparsers.add_parser(
@@ -110,6 +113,12 @@ def create_subparser(
             "--lib", "-l", choices=("python", "lkt"), action="append",
             help="Select which libraries on which to operate. By default, work"
                  " on all libraries."
+        )
+    if with_generate_dll_lib_adding:
+        subparser.add_argument(
+            '--generate-auto-dll-dirs', action='store_true',
+            help='For selected libs (python and lkt) forward the DLL'
+                 ' directories adding flag to the generation phase.'
         )
     if with_no_mypy:
         subparser.add_argument(
@@ -177,8 +186,7 @@ def langkit_support_env_map(args: Namespace,
         # Make the "langkit_support.gpr" available to GPRbuild
         "GPR_PROJECT_PATH": str(SUPPORT_ROOT),
         "PATH": dynamic_lib_dir,
-        "LD_LIBRARY_PATH": format_path(
-            "LD_LIBRARY_PATH",
+        "LD_LIBRARY_PATH": os.pathsep.join(
             [
                 dynamic_lib_dir,
 
@@ -256,7 +264,7 @@ def setenv(args: Namespace) -> None:
 
         for k, v in d.items():
             if k in env:
-                env[k] = format_path(k, [env[k], v])
+                env[k] = os.pathsep.join([env[k], v])
             else:
                 env[k] = v
 
@@ -308,6 +316,10 @@ def make(args: Namespace) -> None:
         f"--build-mode={args.build_mode}",
         f"-j{args.jobs}",
     ]
+
+    # If the DLL directories adding flag is on forward it
+    if args.generate_auto_dll_dirs:
+        base_argv.append("--generate-auto-dll-dirs")
 
     # Forward gargs to each manage.py script
     for gargs in args.gargs or []:
@@ -400,6 +412,7 @@ if __name__ == '__main__':
                      with_gargs=True,
                      with_build_dir=True,
                      with_libs=True,
+                     with_generate_dll_lib_adding=True,
                      with_no_mypy=True)
     setenv_parser = create_subparser(subparsers, setenv,
                                      with_no_lksp=True,

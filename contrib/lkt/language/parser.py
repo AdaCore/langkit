@@ -1512,6 +1512,14 @@ class TokenLit(GrammarExpr):
     """
     token_node = True
 
+    @langkit_property(public=True, return_type=T.String,
+                      external=True, uses_envs=False, uses_entity_info=False)
+    def denoted_value():
+        """
+        Return the content of the given token literal node.
+        """
+        pass
+
 
 class TokenNoCaseLit(GrammarExpr):
     """
@@ -1525,6 +1533,14 @@ class TokenPatternLit(GrammarExpr):
     Grammar expression for a pattern literal.
     """
     token_node = True
+
+    @langkit_property(public=True, return_type=T.String,
+                      external=True, uses_envs=False, uses_entity_info=False)
+    def denoted_value():
+        """
+        Return the content of the given token pattern literal node.
+        """
+        pass
 
 
 class GrammarPick(GrammarExpr):
@@ -2696,6 +2712,7 @@ class ArrayLiteral(Expr):
     """
     Literal for an array value.
     """
+    element_type = Field(type=T.TypeRef)
     exprs = Field(type=T.Expr.list)
 
     @langkit_property()
@@ -3431,6 +3448,7 @@ class RaiseExpr(Expr):
     """
     Raise expression.
     """
+    dest_type = Field(type=T.TypeRef)
     except_expr = Field(type=T.Expr)
 
     @langkit_property(return_type=T.SemanticResult.array)
@@ -3627,7 +3645,7 @@ class NullLit(Lit):
     """
     Null literal expression.
     """
-    token_node = True
+    dest_type = Field(type=T.TypeRef)
 
 
 class StringLit(Lit):
@@ -3699,6 +3717,14 @@ class CharLit(Lit):
     Character literal expression.
     """
     token_node = True
+
+    @langkit_property(public=True, return_type=T.Character,
+                      external=True, uses_envs=False, uses_entity_info=False)
+    def denoted_value():
+        """
+        Return the content of the given character literal node.
+        """
+        pass
 
     @langkit_property()
     def expected_type_predicate(expected_type=T.TypeDecl.entity):
@@ -4103,11 +4129,17 @@ lkt_grammar.add_rules(
         "else", G.expr
     ),
 
-    raise_expr=RaiseExpr("raise", G.expr),
+    raise_expr=RaiseExpr("raise", Opt("[", G.type_ref, "]"), G.expr),
     try_expr=TryExpr("try", G.expr, Opt("else", G.expr)),
 
-    array_literal=ArrayLiteral(
-        "[", List(G.expr, sep=",", empty_valid=True), "]"
+    array_literal=GOr(
+        ArrayLiteral("[", "]", ":", G.type_ref, Null(Expr.list)),
+        ArrayLiteral(
+            Null(TypeRef),
+            "[",
+            List(G.expr, sep=",", empty_valid=True),
+            "]",
+        ),
     ),
 
     logic=GOr(
@@ -4153,7 +4185,7 @@ lkt_grammar.add_rules(
     lambda_expr=LambdaExpr("(", G.lambda_arg_list, ")",
                            Opt(":", G.type_ref), "=>", Cut(), G.expr),
 
-    null_lit=NullLit("null"),
+    null_lit=NullLit("null", Opt("[", G.type_ref, "]")),
 
     param=Param(Opt(G.ref_id, "="), G.expr),
     params=List(G.param, sep=",", empty_valid=True),

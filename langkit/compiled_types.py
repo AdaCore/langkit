@@ -123,6 +123,23 @@ def template_extensions(ctx):
         'exception_type':        CAPIType(capi, 'exception').name,
         'exception_kind_type':   CAPIType(capi, 'exception_kind').name,
 
+        'introspection_member_ref_type': (
+            CAPIType(capi, 'introspection_member_ref').name
+        ),
+
+        'rewriting_handle_type': (
+            CAPIType(capi, 'rewriting_handle').name
+        ),
+        'unit_rewriting_handle_type': (
+            CAPIType(capi, 'unit_rewriting_handle').name
+        ),
+        'node_rewriting_handle_type': (
+            CAPIType(capi, 'node_rewriting_handle').name
+        ),
+        'rewriting_apply_result_type': (
+            CAPIType(capi, 'rewriting_apply_result').name
+        ),
+
         'Field': Field,
         'TypeSet': TypeSet,
     }
@@ -390,7 +407,7 @@ class AbstractNodeData:
 
     @property  # type: ignore
     @self_memoized
-    def all_overridings(self) -> Sequence[_Self]:
+    def all_overridings(self) -> list[_Self]:
         """
         Return self's overriding fields and all their own overriding ones,
         recursively.
@@ -422,7 +439,10 @@ class AbstractNodeData:
         for f in [self] + self.all_overridings:
             f._base = None
             f._overridings = []
-        AbstractNodeData.all_overridings.fget.reset(self)
+        all_overridings_memoizer = getattr(
+            AbstractNodeData.all_overridings, "fget"
+        )
+        all_overridings_memoizer.reset(self)
 
     @property
     def uses_entity_info(self) -> bool:
@@ -650,7 +670,7 @@ class CompiledType:
                  name: Union[str, names.Name],
                  location: Opt[Location] = None,
                  doc: str = '',
-                 base: Opt[CompiledType] = None,
+                 base: Opt[_Self] = None,
                  is_ptr: bool = True,
                  has_special_storage: bool = False,
                  is_list_type: bool = False,
@@ -826,19 +846,19 @@ class CompiledType:
         """
 
     @property
-    def base(self) -> Opt[CompiledType]:
+    def base(self) -> Opt[_Self]:
         """
         Return the base of this type, or None if there is no derivation
         involved.
         """
         return self._base
 
-    def get_inheritance_chain(self) -> List[CompiledType]:
+    def get_inheritance_chain(self) -> List[_Self]:
         """
         Return the chain of types following the `base` link as a list.
         Root-most types come first.
         """
-        t: Opt[CompiledType] = self
+        t: Opt[_Self] = self
         result = []
         while t is not None:
             result.append(t)
@@ -1322,25 +1342,33 @@ class CompiledType:
         """
         return self.nullexpr
 
-    def c_type(self, c_api_settings):
+    def c_type(self, capi: CAPISettings) -> CAPIType:
         """
         Return a CAPIType instance for this type.
-
-        :param CAPISettings c_api_settings: The settings for the C API.
         """
-        return CAPIType(c_api_settings, self.c_type_name or self.name,
-                        external=self.external)
+        return CAPIType(
+            capi, self.c_type_name or self.name, external=self.external
+        )
 
-    def unify(self, other, error_msg=None):
+    def c_name(self, capi: CAPISettings, suffix: str) -> str:
+        """
+        Return a name derived from the name of this type in the C API.
+
+        :param suffix: Lower-case suffix to add to the C API type name.
+        """
+        return capi.get_name(
+            self.c_type(capi).unprefixed_name + names.Name.from_lower(suffix)
+        )
+
+    def unify(self, other: _Self, error_msg: str | None = None) -> _Self:
         """
         If `self` and `other` are types that match, return the most general
         type to cover both. Create an error diagnostic if they don't match.
 
-        :param CompiledType other: Type to unify with `self`.
-        :param str|None error_msg: Diagnostic message for mismatching types. If
-            None, a generic one is used, otherwise, we call .format on it with
-            the `self` and `other` keys being the names of mismatching types.
-        :rtype: CompiledType
+        :param other: Type to unify with `self`.
+        :param error_msg: Diagnostic message for mismatching types. If None, a
+            generic one is used, otherwise, we call .format on it with the
+            `self` and `other` keys being the names of mismatching types.
         """
 
         # ASTNodeType instances (and thus entities) always can be unified:
@@ -2066,17 +2094,17 @@ class Field(BaseField):
         children of Transform parsers.
         """
 
-        self.types_from_synthesis = TypeSet()
+        self.types_from_synthesis: TypeSet[ASTNodeType] = TypeSet()
         """
         Set of types coming from node synthetization in properties.
         """
 
-        self._precise_types: Opt[TypeSet] = None
+        self._precise_types: TypeSet[ASTNodeType] | None = None
         """
         Cache for the precise_types property.
         """
 
-        self._precise_element_types: Opt[TypeSet] = None
+        self._precise_element_types: TypeSet[ASTNodeType] | None = None
         """
         Cache for the precise_element_types property.
         """
@@ -2115,6 +2143,7 @@ class Field(BaseField):
         is_list = self.type.is_list_type
 
         assert isinstance(self.struct, ASTNodeType)
+        assert isinstance(self.type, ASTNodeType)
 
         if self.null:
             # Null fields have their type automatically computed from the
@@ -2624,7 +2653,7 @@ class EntityType(StructType):
     def c_type(self, capi):
         # Emit only one C binding type for entities. They are all ABI
         # compatible, so this reduces the amount of types emitted.
-        return CAPIType(capi, 'base_entity')
+        return CAPIType(capi, 'node')
 
     @property
     def is_root_type(self):
@@ -3928,14 +3957,18 @@ class ArrayType(CompiledType):
         """
         return self.element_type.name + names.Name('Vectors')
 
-    def c_type(self, c_api_settings):
+    def c_type(self, c_api_settings: CAPISettings) -> CAPIType:
         if (
             self.element_type.is_entity_type
             and not self.element_type.emit_c_type
         ):
             return T.entity.array.c_type(c_api_settings)
         else:
-            return CAPIType(c_api_settings, self.api_name)
+            return CAPIType(
+                c_api_settings,
+                self.element_type.c_type(c_api_settings).unprefixed_name +
+                names.Name("Array"),
+            )
 
     def index_type(self):
         """
@@ -3952,32 +3985,23 @@ class ArrayType(CompiledType):
         """
         return self.pkg_vector.camel_with_underscores + '.Vector'
 
-    def c_create(self, capi):
+    def c_create(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to create an array value.
-
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
         """
-        return capi.get_name(self.api_name + names.Name('Create'))
+        return self.c_name(capi, "create")
 
-    def c_inc_ref(self, capi):
+    def c_inc_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to inc-ref an array value.
-
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
         """
-        return capi.get_name(self.api_name + names.Name('Inc_Ref'))
+        return self.c_name(capi, "inc_ref")
 
-    def c_dec_ref(self, capi):
+    def c_dec_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to dec-ref an array value.
-
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
         """
-        return capi.get_name(self.api_name + names.Name('Dec_Ref'))
+        return self.c_name(capi, "dec_ref")
 
     @property
     def py_converter(self):
@@ -4134,31 +4158,29 @@ class IteratorType(CompiledType):
         ):
             return T.entity.iterator.c_type(c_api_settings)
         else:
-            return CAPIType(c_api_settings, self.api_name)
+            return CAPIType(
+                c_api_settings,
+                self.element_type.c_type(c_api_settings).unprefixed_name +
+                names.Name("Iterator"),
+            )
 
     def c_next(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to get the next value out of the iterator.
-
-        :param capi: Settings for the C API.
         """
-        return capi.get_name(self.api_name + names.Name('Next'))
+        return self.c_name(capi, "next")
 
     def c_inc_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to inc-ref an iterator value.
-
-        :param capi: Settings for the C API.
         """
-        return capi.get_name(self.api_name + names.Name('Inc_Ref'))
+        return self.c_name(capi, "inc_ref")
 
     def c_dec_ref(self, capi: CAPISettings) -> str:
         """
         Name of the C API function to dec-ref an iterator value.
-
-        :param capi: Settings for the C API.
         """
-        return capi.get_name(self.api_name + names.Name('Dec_Ref'))
+        return self.c_name(capi, "dec_ref")
 
     @property
     def to_public_converter(self) -> names.Name:

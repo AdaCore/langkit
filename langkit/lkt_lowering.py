@@ -1,6 +1,30 @@
 """
 Module to gather the logic to lower Lkt syntax trees to Langkit internal data
 structures.
+
+Global architecture:
+
+* In the constructor of CompileCtx, all Lkt units are loaded into the
+  CompileCtx.lkt_units list. At this stage, compilation is aborted in case of
+  lexing/parsing error.
+
+* During the "lower_lkt" pass:
+
+  * The "create_lexer" function below instantiates the langkit.lexer.Lexer
+    class and populates it.
+
+  * The "create_grammar" function below instantiates the
+    langkit.parsers.Grammar class and populates it.
+
+  * The "create_types" function below instantiates all CompiledType instances
+    mentionned in the language spec.
+
+The last step is the most complex one: type declarations refer to each other,
+and this step includes the lowering of property expressions to abstract
+expressions. All type declarations in the language spec are lowered in sequence
+(arbitrary order), except base classes, which are lowered before classes that
+they derive from. Properties are lowered as part of the lowering of their
+owning types.
 """
 
 from __future__ import annotations
@@ -8,7 +32,6 @@ from __future__ import annotations
 from collections import OrderedDict
 from dataclasses import dataclass
 import itertools
-import json
 import os.path
 from typing import (
     Any, Callable, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar,
@@ -21,10 +44,11 @@ from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, CompiledType, CompiledTypeOrDefer,
     CompiledTypeRepo, EnumNodeAlternative, EnumType, Field, StructType, T,
-    TypeRepo, UserField
+    TypeRepo, UserField, resolve_type
 )
 from langkit.diagnostics import (
-    DiagnosticError, Location, check_source_language, diagnostic_context, error
+    Location, check_source_language, diagnostic_context, error,
+    errors_checkpoint, non_blocking_error
 )
 import langkit.expressions as E
 from langkit.expressions import (
@@ -72,13 +96,6 @@ def same_node(left: L.LktNode, right: L.LktNode) -> bool:
     return left.unit == right.unit and left.sloc_range == right.sloc_range
 
 
-def pattern_as_str(str_lit: Union[L.StringLit, L.TokenPatternLit]) -> str:
-    """
-    Return the regexp string associated to this string literal node.
-    """
-    return json.loads(str_lit.text[1:])
-
-
 def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
     """
     Return the bool value that this expression denotes.
@@ -89,26 +106,6 @@ def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
                               'Boolean literal expected')
 
     return expr.text == 'true'
-
-
-def denoted_char_lit(char_lit: L.CharLit) -> str:
-    """
-    Return the character that ``char_lit`` denotes.
-    """
-    text = char_lit.text
-    assert text[0] == "'" and text[-1] == "'"
-    result = json.loads('"' + text[1:-1] + '"')
-    assert len(result) == 1
-    return result
-
-
-def denoted_string_lit(string_lit: Union[L.StringLit, L.TokenLit]) -> str:
-    """
-    Return the string that ``string_lit`` denotes.
-    """
-    result = json.loads(string_lit.text)
-    assert isinstance(result, str)
-    return result
 
 
 def ada_id_for(n: str) -> names.Name:
@@ -149,12 +146,11 @@ def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
     # Load ``lkt_file`` and all the units it references, transitively
     process_unit(L.AnalysisContext().get_from_file(lkt_file))
 
-    # If there are diagnostics, forward them to the user. TODO: hand them to
-    # langkit.diagnostic.
-    if diagnostics:
-        for u, d in diagnostics:
-            print('{}:{}'.format(os.path.basename(u.filename), d))
-        raise DiagnosticError()
+    # Forward potential lexing/parsing errors to our diagnostics system
+    for u, d in diagnostics:
+        with diagnostic_context(Location.from_sloc_range(u, d.sloc_range)):
+            non_blocking_error(d.message)
+    errors_checkpoint()
     return list(units_map.values())
 
 
@@ -757,9 +753,8 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 or not decl.f_val.p_is_regexp_literal
             ):
                 error('Pattern string literal expected')
-            # TODO: use StringLit.p_denoted_value when properly implemented
             patterns[name] = (
-                pattern_as_str(decl.f_val), Location.from_lkt_node(decl)
+                decl.f_val.p_denoted_value, Location.from_lkt_node(decl)
             )
 
     def lower_matcher(expr: L.GrammarExpr) -> Matcher:
@@ -769,11 +764,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         loc = Location.from_lkt_node(expr)
         with ctx.lkt_context(expr):
             if isinstance(expr, L.TokenLit):
-                return Literal(json.loads(expr.text), location=loc)
+                return Literal(expr.p_denoted_value, location=loc)
             elif isinstance(expr, L.TokenNoCaseLit):
-                return NoCaseLit(json.loads(expr.text), location=loc)
+                return NoCaseLit(expr.f_lit.p_denoted_value, location=loc)
             elif isinstance(expr, L.TokenPatternLit):
-                return Pattern(pattern_as_str(expr), location=loc)
+                return Pattern(expr.p_denoted_value, location=loc)
             else:
                 error('Invalid lexing expression')
 
@@ -1116,12 +1111,12 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 if rule.f_expr:
                     # The grammar is supposed to mainain this invariant
                     assert isinstance(rule.f_expr, L.TokenLit)
-                    match_text = denoted_string_lit(rule.f_expr)
+                    match_text = rule.f_expr.p_denoted_value
 
                 return _Token(val=val, match_text=match_text, location=loc)
 
             elif isinstance(rule, L.TokenLit):
-                return _Token(denoted_string_lit(rule), location=loc)
+                return _Token(rule.p_denoted_value, location=loc)
 
             elif isinstance(rule, L.GrammarList):
                 return PList(
@@ -1634,17 +1629,6 @@ class LktTypesLoader:
                     args.append(value)
             return args, kwargs
 
-        def is_array_expr(expr: L.Expr) -> bool:
-            """
-            Return whether ``expr`` computes an array.
-            """
-            expr_type = self.resolve_type_decl(
-                expr.p_check_expr_type,
-                force_lowering=True,
-            )
-            assert isinstance(expr_type, CompiledType)
-            return expr_type.is_array_type
-
         def lower(expr: L.Expr) -> AbstractExpression:
             """
             Wrapper around "_lower" to set the expression location.
@@ -1689,13 +1673,6 @@ class LktTypesLoader:
                     }[type(expr.f_op)]
                     return E.OrderingTest(operator, left, right)
 
-                elif (
-                    isinstance(expr.f_op, L.OpAmp)
-                    and is_array_expr(expr.f_left)
-                ):
-                    assert is_array_expr(expr.f_right)
-                    return left.concat(right)  # type: ignore
-
                 else:
                     operator = {
                         L.OpAmp: '&',
@@ -1737,7 +1714,8 @@ class LktTypesLoader:
                         # generated code.
                         env[v] = var
                         var.local_var = local_vars.create_scopeless(
-                            v_name, v_type
+                            v_name,
+                            resolve_type(v_type),
                         )
 
                     else:
@@ -1864,7 +1842,7 @@ class LktTypesLoader:
                 return Cast(subexpr, dest_type, do_raise=excludes_null)
 
             elif isinstance(expr, L.CharLit):
-                return E.CharacterLiteral(denoted_char_lit(expr))
+                return E.CharacterLiteral(expr.p_denoted_value)
 
             elif isinstance(expr, L.DotExpr):
                 # Dotted expressions can designate an enum value or a member
@@ -1987,7 +1965,7 @@ class LktTypesLoader:
                     return env[decl]
 
             elif isinstance(expr, L.StringLit):
-                return E.SymbolLiteral(denoted_string_lit(expr))
+                return E.SymbolLiteral(expr.p_denoted_value)
 
             elif isinstance(expr, L.TryExpr):
                 return E.Try(

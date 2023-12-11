@@ -52,6 +52,13 @@ class CAPIType:
         return (self._name.lower if self.external else
                 self.c_api_settings.get_name(self._name))
 
+    @property
+    def unprefixed_name(self) -> names.Name:
+        """
+        Return the C name for this type, without wrapping.
+        """
+        return self._name
+
 
 class CAPISettings(AbstractAPISettings):
     """Convenient container for C API generation settings.

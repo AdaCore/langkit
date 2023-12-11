@@ -11,8 +11,8 @@ grammar foo_grammar {
 
     @memoized fun env_with_md(n1: FooNode, n2: FooNode): LexicalEnv[FooNode] =
     {
-        val md1 = Metadata(n1=n1, n2=null);
-        val md2 = Metadata(n1=null, n2=n2);
+        val md1 = Metadata(n1=n1, n2=null[FooNode]);
+        val md2 = Metadata(n1=null[FooNode], n2=n2);
 
         [[node.node_env()].env_group()].env_group()
     }

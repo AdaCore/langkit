@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from contextlib import contextmanager
 import sys
+from typing import Iterator
 
 from langkit.gdb import has_gdb
 
@@ -28,7 +31,7 @@ class Colors:
     _enabled = True
 
     @classmethod
-    def disable_colors(cls):
+    def disable_colors(cls) -> None:
         """
         Disable the use of colors in col/printcol.
         """
@@ -42,7 +45,7 @@ if not has_gdb and (not sys.stdout.isatty() or not sys.stderr.isatty()):
 
 
 @contextmanager
-def no_colors():
+def no_colors() -> Iterator[None]:
     """
     Context manager to disable colors for a given scope.
     """

@@ -6,6 +6,7 @@
 with Ada.Containers; use Ada.Containers;
 with System;
 
+with Langkit_Support.Diagnostics;  use Langkit_Support.Diagnostics;
 with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Token_Data_Handlers;
@@ -137,5 +138,8 @@ package Langkit_Support.Internal.Analysis is
    is (Hash_TDH (if Self = null
                  then System.Null_Address
                  else Self.all'Address));
+
+   type Diagnostics_Access is access constant Diagnostics_Vectors.Vector;
+   --  Reference to an analysis unit's diagnostics array
 
 end Langkit_Support.Internal.Analysis;

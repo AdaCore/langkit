@@ -16,27 +16,28 @@ ifeq ($(OS), Windows_NT)
 ${'\t'}SYS := $(shell $(CC) -dumpmachine)
 ${'\t'}ifneq (, $(findstring mingw, $(SYS)))
 ${'\t'}${'\t'}RM=rm -f
+${'\t'}PATHSEP2=/
 ${'\t'}else ifneq (, $(findstring cygwin, $(SYS)))
 ${'\t'}${'\t'}RM=rm -f
+${'\t'}PATHSEP2=/
 ${'\t'}else
 ${'\t'}${'\t'}RM=del /F /Q
+${'\t'}PATHSEP2=${'\\\\'}
 ${'\t'}endif
 
-${'\t'}PATHSEP2=${'\\\\'}
-${'\t'}JNI_INCLUDE=$(JAVA_HOME)\\include\\win32
-${'\t'}C_FILE := $(CUR_DIR)jni\\jni_impl.c
-${'\t'}O_FILE := $(CUR_DIR)jni\\jni_impl.o
-${'\t'}LIB_FILE := $(CUR_DIR)jni\\${ctx.lang_name.lower}lang_jni.dll
+${'\t'}JNI_INCLUDE=$(JAVA_HOME)$(PATHSEP2)include$(PATHSEP2)win32
+${'\t'}LIB_FILE_NAME := ${ctx.lang_name.lower}lang_jni.dll
 else
 ${'\t'}RM=rm -f
 ${'\t'}PATHSEP2=/
 ${'\t'}JNI_INCLUDE=$(JAVA_HOME)/include/linux
-${'\t'}C_FILE := $(CUR_DIR)jni/jni_impl.c
-${'\t'}O_FILE := $(CUR_DIR)jni/jni_impl.o
-${'\t'}LIB_FILE := $(CUR_DIR)jni/lib${ctx.lang_name.lower}lang_jni.so
+${'\t'}LIB_FILE_NAME := lib${ctx.lang_name.lower}lang_jni.so
 endif
 
 PATHSEP=$(strip $(PATHSEP2))
+C_FILE := jni$(PATHSEP)jni_impl.c
+O_FILE := jni$(PATHSEP)jni_impl.o
+LIB_FILE := jni$(PATHSEP)$(LIB_FILE_NAME)
 
 COMMON_C_OPTS=\
   -fPIC \

@@ -590,6 +590,9 @@ base_langkit_docs = {
         Return the Nth child for in this node's fields and store it into
         ``*child_p``.  Return zero on failure (when ``N`` is too big).
     """,
+    'langkit.create_bare_entity': """
+        Create an entity with null entity info for a given node.
+    """,
     'langkit.node_is_null': """
         Return whether this node is a null node reference.
     """,
@@ -1017,9 +1020,26 @@ base_langkit_docs = {
 
         Note that on success, this invalidates all related unit/node handles.
     """,
+    'langkit.rewriting.apply_result_type': """
+        Result of applying a rewriting session.
+
+        On success, ``Success`` is true.
+
+        On failure, ``Success`` is false, ``Unit`` is set to the unit on which
+        rewriting failed, and ``Diagnostics`` is set to related rewriting
+        errors.
+    """,
+    'langkit.rewriting.free_apply_result': """
+        Free the result of the ``Apply`` operation.
+    """,
     'langkit.rewriting.unit_handles': """
         Return the list of unit rewriting handles in the given context handle
         for units that the Apply primitive will modify.
+
+        % if lang == "c":
+        This returns the list as a dynamically allocated NULL-terminated array,
+        that the caller must free when done with it.
+        % endif
     """,
     'langkit.rewriting.unit_handle': """
         Return the rewriting handle corresponding to Unit
@@ -1060,6 +1080,9 @@ base_langkit_docs = {
     'langkit.rewriting.kind': """
         Return the kind corresponding to Handle's node
     """,
+    'langkit.rewriting.node_image': """
+        Return a representation of ``Handle`` as a string.
+    """,
     'langkit.rewriting.tied': """
         Return whether this node handle is tied to an analysis unit. If it is
         not, it can be passed as the Child parameter to Set_Child.
@@ -1070,10 +1093,6 @@ base_langkit_docs = {
     """,
     'langkit.rewriting.children_count': """
         Return the number of children the node represented by Handle has
-    """,
-    'langkit.rewriting.child': """
-        Return a handle corresponding to the Index'th child of the node that
-        Handle represents. Index is 1-based.
     """,
     'langkit.rewriting.child_by_ref': """
         Return the node that is in the syntax ``Field`` for ``Handle``
@@ -1089,10 +1108,13 @@ base_langkit_docs = {
           CN_1 := Child (CN_2, Fields (N - 1));
           CN := Child (CN_1, Fields (N));
     """,
-    'langkit.rewriting.set_child': """
-        If Child is ``No_Rewriting_Node``, untie the Handle's ``Index``'th
-        child to this tree, so it can be attached to another one. Otherwise,
-        Child must have no parent as it will be tied to ``Handle``'s tree.
+    'langkit.rewriting.children': """
+        Return the list of children for ``Handle``.
+
+        % if lang == "c":
+        This returns the list as a dynamically allocated array with ``count``
+        elements.  The caller must free it when done with it.
+        % endif
     """,
     'langkit.rewriting.set_child_by_ref': """
         If ``Child`` is ``No_Rewriting_Node``, untie the syntax field in
@@ -1115,6 +1137,17 @@ base_langkit_docs = {
         * Handle must be tied to an existing analysis unit handle.
         * New_Node must not already be tied to another analysis unit handle.
     """,
+    'langkit.rewriting.rotate': """
+        Given a list of node rewriting handles ``H1``, ``H2``, ... ``HN``,
+        replace ``H1`` by ``H2`` in the rewritten tree, replace ``H2`` by
+        ``H3``, etc. and replace ``HN`` by ``H1``.
+
+        Note that this operation is atomic: if it fails, no replacement is
+        actually performed.
+    """,
+    'langkit.rewriting.is_list_node': """
+        Return whether ``Handle`` represents a list node.
+    """,
     'langkit.rewriting.insert_child': """
         Assuming Handle refers to a list node, insert the given Child node to
         be in the children list at the given index.
@@ -1127,9 +1160,43 @@ base_langkit_docs = {
 
         The given Child node must not be tied to any analysis unit.
     """,
+    'langkit.rewriting.first_child': """
+        Assuming ``Handle`` refers to a list node, return a handle to its first
+        child, or ``No_Node_Rewriting_Handle``` if it has no child node.
+    """,
+    'langkit.rewriting.last_child': """
+        Assuming ``Handle`` refers to a list node, return a handle to its last
+        child, or ``No_Node_Rewriting_Handle``` if it has no child node.
+    """,
+    'langkit.rewriting.next_child': """
+        Assuming ``Handle`` refers to the child of a list node, return a handle
+        to its next sibling, or ``No_Node_Rewriting_Handle``` if it is the last
+        sibling.
+    """,
+    'langkit.rewriting.previous_child': """
+        Assuming ``Handle`` refers to the child of a list node, return a handle
+        to its previous sibling, or ``No_Node_Rewriting_Handle``` if it is the
+        first sibling.
+    """,
+    'langkit.rewriting.insert_before': """
+        Assuming ``Handle`` refers to the child of a list node, insert
+        ``New_Sibling`` as a new child in this list, right before ``Handle``.
+    """,
+    'langkit.rewriting.insert_after': """
+        Assuming ``Handle`` refers to the child of a list node, insert
+        ``New_Sibling`` as a new child in this list, right before ``Handle``.
+    """,
+    'langkit.rewriting.insert_first': """
+        Assuming ``Handle`` refers to a list node, insert ``New_Child`` to be
+        the first child in this list.
+    """,
+    'langkit.rewriting.insert_last': """
+        Assuming ``Handle`` refers to a list node, insert ``New_Child`` to be
+        the last child in this list.
+    """,
     'langkit.rewriting.remove_child': """
-        Assuming Handle refers to a list node, remove the child at the given
-        Index from the children list.
+        Assuming Handle refers to the child of a list node, remove it from that
+        list.
     """,
     'langkit.rewriting.clone': """
         Create a clone of the Handle node tree. The result is not tied to any

@@ -20,13 +20,15 @@ class LiteralSequence : FooNode {
     @parse_field items: ASTList[FooNode, Literal]
 
     @memoized fun new_node(with_null: Bool): SynthNode = SynthNode(
-        name=node.name, items=if with_null then (null) else node.items
+        name=node.name, items=if with_null then (null[ASTList[FooNode, Literal]]) else node.items
     )
 
     @export fun prop(with_null: Bool): SynthNode =
     node.new_node(with_null).as_bare_entity
 
-    @lazy new_node2_null: SynthNode2 = SynthNode2(name=node.name, items=null)
+    @lazy new_node2_null: SynthNode2 = SynthNode2(
+        name=node.name, items=null[ASTList[FooNode, Literal]]
+    )
 
     @lazy new_node2: SynthNode2 = SynthNode2(name=node.name, items=node.items)
 

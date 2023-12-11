@@ -4,13 +4,13 @@ from typing import Any as _Any, List, Optional, Tuple, Union
 import funcy
 
 from langkit import names
-from langkit.compiled_types import Argument, T, no_compiled_type
+from langkit.compiled_types import ASTNodeType, Argument, T, no_compiled_type
 from langkit.diagnostics import check_multiple, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable,
-    IntegerLiteralExpr, LiteralExpr, NullExpr, PropertyDef, ResolvedExpression,
-    Self, aggregate_expr, auto_attr, construct, dsl_document, render,
-    resolve_property, sloc_info_arg
+    IntegerLiteralExpr, LiteralExpr, LogicPredicate, NullExpr, PropertyDef,
+    ResolvedExpression, Self, aggregate_expr, auto_attr, construct,
+    dsl_document, render, resolve_property, sloc_info_arg
 )
 
 
@@ -610,7 +610,10 @@ class Predicate(AbstractExpression):
     def do_prepare(self):
         self.pred_property = resolve_property(self.pred_property).root
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
+        assert isinstance(self.pred_property, PropertyDef)
+        assert isinstance(self.pred_property.struct, ASTNodeType)
+
         check_multiple([
             (self.pred_property.type.matches(T.Bool),
              'Predicate property must return a boolean, got {}'.format(
@@ -625,6 +628,8 @@ class Predicate(AbstractExpression):
 
         # Separate logic variable expressions from extra argument expressions
         exprs = [construct(e) for e in self.exprs]
+        logic_var_exprs: list[ResolvedExpression]
+        closure_exprs: list[ResolvedExpression]
         logic_var_exprs, closure_exprs = funcy.lsplit_by(
             lambda e: e.type == T.LogicVar, exprs
         )
@@ -651,6 +656,7 @@ class Predicate(AbstractExpression):
         # arguments expect and that 2) arguments left without an actual have a
         # default value.
         default_passed_args = 0
+        partial_args: list[LogicPredicate.PartialArgument] = []
         for i, (expr, arg) in enumerate(zip_longest(exprs, args)):
 
             if expr is None:
@@ -686,19 +692,27 @@ class Predicate(AbstractExpression):
                         i, expr.type.dsl_name, arg.type.dsl_name
                     )
                 )
+                partial_args.append(
+                    LogicPredicate.PartialArgument(
+                        len(partial_args), arg.name, arg.type
+                    )
+                )
 
         DynamicVariable.check_call_bindings(
             self.pred_property, 'In predicate property {prop}'
         )
 
         # Append dynamic variables to embed their values in the closure
-        closure_exprs.extend(
-            construct(dynvar) for dynvar in self.pred_property.dynamic_vars
-        )
+        for dynvar in self.pred_property.dynamic_vars:
+            closure_exprs.append(construct(dynvar))
+            partial_args.append(
+                LogicPredicate.PartialArgument(
+                    len(partial_args), dynvar.argument_name, dynvar.type
+                )
+            )
 
         pred_id = self.pred_property.do_generate_logic_predicate(
-            tuple(e.type for e in closure_exprs),
-            default_passed_args
+            tuple(partial_args), default_passed_args
         )
 
         args = " ({})".format(

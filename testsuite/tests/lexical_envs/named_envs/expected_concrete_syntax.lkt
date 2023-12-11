@@ -110,7 +110,7 @@ grammar foo_grammar {
                 not (node.parent.parent is DeclarativePart)
             )
         ) or (node.parent.parent.parent.is_null)
-    ) then (null) else # All nodes that can define a named environment are supposed to
+    ) then (null[FooNode]) else # All nodes that can define a named environment are supposed to
     # live in lists (Self.parent is a list), so Self.parent.parent is
     # supposed to be a declarative part, and finally Self.parent.parent
     # gets the node that owns that declarative part.
@@ -125,7 +125,7 @@ grammar foo_grammar {
                 case pp : PrivatePart => pp.parent
                 case n => n
             }
-        ) else (null)
+        ) else (null[FooNode])
     }
 
     ## If this node can define a named environment (see ``can_have_name``),
@@ -135,21 +135,21 @@ grammar foo_grammar {
         node.name_parent().do(
             (np) => np.full_name(), default_val=node.self_name().parent_scope_name()
         ).to_symbol
-    ) else (null)
+    ) else (null[Symbol])
 
     fun initial_env(): DesignatedEnv = node.decl_parent_scope_name().do(
         (name) => DesignatedEnv(
-            kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null
+            kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv[FooNode]]
         ), default_val=(
             DesignatedEnv(
-                kind=DesignatedEnvKind.direct_env, env_name=null, direct_env=node.parent.children_env()
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
             )
         )
     )
 
     ## Assuming this node can define a named environment (see
     ## ``can_have_name``), return its syntactic name.
-    fun self_name(): Name = raise PropertyError("Property FooNode.self_name not implemented")
+    fun self_name(): Name = raise[Name] PropertyError("Property FooNode.self_name not implemented")
 }
 
 class DeclarativePart : FooNode {
@@ -193,7 +193,7 @@ class IncompleteTypeDecl : FooNode {
     ## Absolute name of the scope that defines this name, assuming that
     ## ``prefix`` is the implicit prefix for that name.
     fun parent_scope_name(): String = match node {
-        case _ : Identifier => null
+        case _ : Identifier => null[String]
         case dn : DottedName => dn.prefix.scope_name()
     }
 
@@ -263,7 +263,7 @@ class PackageDecl : FooNode {
     # If there is a private part, that's all we need. Otherwise, register
     # this environment with the name of the private part as well, so that
     # package bodies can assume there is always a private part.
-    if (node.full_name() = "") then (null) else (
+    if (node.full_name() = "") then (null[Array[Symbol]]) else (
         if (node.private_part.is_null) then (
             [node.full_name(), node.full_name() & (".__privatepart")]
         ) else ([node.full_name()]).map((s) => s.to_symbol)

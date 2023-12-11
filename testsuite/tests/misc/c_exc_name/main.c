@@ -7,7 +7,7 @@ int
 main (void)
 {
   const foo_exception *exc;
-  foo_base_entity entity;
+  foo_node entity;
 
   foo_unit_root (NULL, &entity);
   exc = foo_get_last_exception ();
