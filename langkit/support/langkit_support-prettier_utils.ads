@@ -54,6 +54,7 @@ private package Langkit_Support.Prettier_Utils is
       Recurse,
       Soft_Line,
       Token,
+      Trim,
       Whitespace);
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
       case Kind is
@@ -100,6 +101,9 @@ private package Langkit_Support.Prettier_Utils is
          when Token =>
             Token_Kind : Token_Kind_Ref;
             Token_Text : Unbounded_Text_Type;
+
+         when Trim =>
+            null;
 
          when Whitespace =>
             Whitespace_Length : Positive;
@@ -203,6 +207,9 @@ private package Langkit_Support.Prettier_Utils is
      (Self   : in out Document_Pool;
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
+
+   function Create_Trim (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Trim`` node
 
    procedure Insert_Required_Spacing
      (Pool : in out Document_Pool; Document : in out Document_Type);

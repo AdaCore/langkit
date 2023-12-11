@@ -540,6 +540,24 @@ Done.
   ]
 }
 
+== cmd_trim.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "command",
+      "command": {
+        "command": "trim"
+      }
+    },
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    }
+  ]
+}
+
 == cmd_whitespace_3.json ==
 
 {

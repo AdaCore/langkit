@@ -386,6 +386,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                   return Pool.Create_Soft_Line;
                elsif Value = "literalline" then
                   return Pool.Create_Literal_Line;
+               elsif Value = "trim" then
+                  return Pool.Create_Trim;
                elsif Value = "whitespace" then
                   return Pool.Create_Whitespace;
                else
@@ -853,6 +855,9 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Token =>
             return Pool.Create_Token
               (Template.Token_Kind, Template.Token_Text);
+
+         when Trim =>
+            return Pool.Create_Trim;
 
          when Whitespace =>
             return Pool.Create_Whitespace (Template.Whitespace_Length);

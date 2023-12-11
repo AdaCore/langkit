@@ -104,6 +104,7 @@ begin
    Check ("cmd_markasroot.json");
    Check ("cmd_recurse.json");
    Check ("cmd_softline.json");
+   Check ("cmd_trim.json");
    Check ("cmd_whitespace_3.json");
    Check ("cmd_whitespace_default.json");
 

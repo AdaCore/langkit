@@ -227,6 +227,10 @@ package Langkit_Support.Generic_API.Unparsing is
    --        "softlist"
    --        "literalline"
    --
+   --    * The "trim" template yields a "trim" Prettier Document::
+   --
+   --        "trim"
+   --
    --    * The "whitespace" template yields a "text" document with the
    --      specified amount of spaces::
    --

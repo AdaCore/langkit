@@ -92,6 +92,9 @@ package body Langkit_Support.Prettier_Utils is
 
                raise Program_Error;
 
+            when Trim =>
+               return 0;
+
             when Whitespace =>
                return 0;
          end case;
@@ -210,6 +213,9 @@ package body Langkit_Support.Prettier_Utils is
 
          when Token | Whitespace =>
             return Prettier.Builders.Text (Text_For (Document));
+
+         when Trim =>
+            return Trim;
       end case;
    end To_Prettier_Document;
 
@@ -470,6 +476,19 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Token;
 
+   -----------------
+   -- Create_Trim --
+   -----------------
+
+   function Create_Trim (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Trim)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Trim;
+
    -----------------------
    -- Create_Whitespace --
    -----------------------
@@ -631,6 +650,9 @@ package body Langkit_Support.Prettier_Utils is
                   end;
                end;
 
+            when Trim =>
+               null;
+
             when Whitespace =>
                Extend_Spacing (Last_Spacing, Whitespace);
          end case;
@@ -758,6 +780,9 @@ package body Langkit_Support.Prettier_Utils is
                     ("token[" & Image (Format_Name (Token_Name, Camel)) & "]: "
                      & Image (To_Text (Document.Token_Text)));
                end;
+
+            when Trim =>
+               Put_Line ("trim");
 
             when Whitespace =>
                Put_Line
