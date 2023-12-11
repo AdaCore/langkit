@@ -236,6 +236,23 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        "whitespace"
    --
+   --    * The "align" template yields a "align" Prettier document::
+   --
+   --        {
+   --          "kind": "align",
+   --          "width": <number or string>,
+   --          "contents": <sub-template>
+   --        }
+   --
+   --    * The "dedent" template yields a "dedent" Prettier document::
+   --
+   --        {"kind": "dedent", "document": <sub-template>}
+   --
+   --    * The "dedentToRoot" template yields a "dedentToRoot" Prettier
+   --      document::
+   --
+   --        {"kind": "dedentToRoot", "document": <sub-template>}
+   --
    --    * The "fill" template yields a "fill" Prettier document::
    --
    --        {"kind": "fill", "document": <sub-template>}
@@ -257,6 +274,10 @@ package Langkit_Support.Generic_API.Unparsing is
    --    * The "indent" template yields an "indent" Prettier document::
    --
    --        {"kind": "indent", "contents": <sub-template>}
+   --
+   --    * The "markAsRoot" template yields a "markAsRoot" Prettier document::
+   --
+   --        {"kind": "markAsRoot", "contents": <sub-template>}
    --
    --    * A JSON list yields the corresponding "list" Prettier document::
    --

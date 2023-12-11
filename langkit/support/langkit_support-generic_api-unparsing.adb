@@ -408,7 +408,57 @@ package body Langkit_Support.Generic_API.Unparsing is
             declare
                Kind : constant String := JSON.Get ("kind");
             begin
-               if Kind = "fill" then
+               if Kind = "align" then
+                  declare
+                     Width : JSON_Value;
+                     Data  : Prettier.Alignment_Data_Type;
+                  begin
+                     if not JSON.Has_Field ("width") then
+                        raise Invalid_Input with
+                          Error_Prefix & ": missing ""width"" key for align";
+                     end if;
+                     Width := JSON.Get ("width");
+                     Data :=
+                       (case Width.Kind is
+                        when JSON_Int_Type =>
+                          (Kind => Prettier.Width, N => Width.Get),
+                        when JSON_String_Type =>
+                          (Kind => Prettier.Text, T => Width.Get),
+                        when others =>
+                          raise Invalid_Input with
+                            Error_Prefix
+                            & ": invalid ""width"" key for align");
+
+                     if not JSON.Has_Field ("contents") then
+                        raise Invalid_Input with
+                          Error_Prefix
+                          & ": missing ""contents"" key for align";
+                     end if;
+
+                     return Pool.Create_Align
+                       (Data,
+                        To_Document (JSON.Get ("contents"), Error_Prefix));
+                  end;
+
+               elsif Kind in
+                  "dedent" | "dedentToRoot" | "markAsRoot"
+               then
+                  if not JSON.Has_Field ("contents") then
+                     raise Invalid_Input with
+                       Error_Prefix & ": missing ""contents"" key for " & Kind;
+                  end if;
+                  return Pool.Create_Align
+                    (Data     => (if Kind = "dedent"
+                                  then (Kind => Prettier.Dedent)
+                                  elsif Kind = "dedentToRoot"
+                                  then (Kind => Prettier.Dedent_To_Root)
+                                  elsif Kind = "markAsRoot"
+                                  then (Kind => Prettier.Root)
+                                  else raise Program_Error),
+                     Contents => To_Document
+                                   (JSON.Get ("contents"), Error_Prefix));
+
+               elsif Kind = "fill" then
                   declare
                      Document : Document_Type;
                   begin
@@ -745,6 +795,11 @@ package body Langkit_Support.Generic_API.Unparsing is
       Filler, Template : Document_Type) return Document_Type is
    begin
       case Template.Kind is
+         when Align =>
+            return Pool.Create_Align
+              (Template.Align_Data,
+               Instantiate_Template (Pool, Filler, Template.Align_Contents));
+
          when Break_Parent =>
             return Pool.Create_Break_Parent;
 

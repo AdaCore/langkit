@@ -1,0 +1,7 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": {"kind": "align", "width": 2, "contents": ["recurse"]}
+    }
+  }
+}

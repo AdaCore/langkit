@@ -88,19 +88,24 @@ begin
       raise Program_Error;
    end if;
 
+   Check ("cmd_align.json");
+   Check ("cmd_align2.json");
    Check ("cmd_breakparent.json");
+   Check ("cmd_dedent.json");
+   Check ("cmd_dedenttoroot.json");
+   Check ("cmd_fill.json");
    Check ("cmd_group.json");
    Check ("cmd_hardline.json");
    Check ("cmd_ifbreak.json");
    Check ("cmd_indent.json");
-   Check ("cmd_fill.json");
    Check ("cmd_line.json");
    Check ("cmd_list.json");
    Check ("cmd_literalline.json");
+   Check ("cmd_markasroot.json");
    Check ("cmd_recurse.json");
    Check ("cmd_softline.json");
-   Check ("cmd_whitespace_default.json");
    Check ("cmd_whitespace_3.json");
+   Check ("cmd_whitespace_default.json");
 
    Put_Line ("Done.");
 end Commands;

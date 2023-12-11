@@ -32,6 +32,9 @@ package body Langkit_Support.Prettier_Utils is
       function Recurse_Count (Self : Document_Type) return Natural is
       begin
          case Self.Kind is
+            when Align =>
+               return Recurse_Count (Self.Align_Contents);
+
             when Break_Parent =>
                return 0;
 
@@ -115,6 +118,11 @@ package body Langkit_Support.Prettier_Utils is
           when others     => raise Program_Error);
    begin
       case Document.Kind is
+         when Align =>
+            return Align
+              (Data     => Document.Align_Data,
+               Contents => To_Prettier_Document (Document.Align_Contents));
+
          when Break_Parent =>
             return Break_Parent;
 
@@ -228,6 +236,26 @@ package body Langkit_Support.Prettier_Utils is
    begin
       Self.Append (Document);
    end Register;
+
+   ------------------
+   -- Create_Align --
+   ------------------
+
+   function Create_Align
+     (Self     : in out Document_Pool;
+      Data     : Prettier.Alignment_Data_Type;
+      Contents : Document_Type) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind           => Align,
+           Align_Data     => Data,
+           Align_Contents => Contents)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Align;
 
    -------------------------
    -- Create_Break_Parent --
@@ -488,6 +516,14 @@ package body Langkit_Support.Prettier_Utils is
          Last_Spacing : in out Spacing_Kind) is
       begin
          case Document.Kind is
+            when Align =>
+
+               --  Align does not emit any spacing before processing its inner
+               --  document.
+
+               Extend_Spacing (Last_Spacing, None);
+               Process (Document.Align_Contents, Last_Token, Last_Spacing);
+
             when Break_Parent =>
                null;
 
@@ -638,6 +674,27 @@ package body Langkit_Support.Prettier_Utils is
             return;
          end if;
          case Document.Kind is
+            when Align =>
+               Put_Line ("align:");
+               Put (Prefix & Simple_Indent & "data: ");
+               case Document.Align_Data.Kind is
+                  when Prettier.Width =>
+                     Put_Line
+                       ("width (number):" & Document.Align_Data.N'Image);
+                  when Prettier.Text =>
+                     Put_Line
+                       ("width (text):" & To_String (Document.Align_Data.T));
+                  when Prettier.Dedent =>
+                     Put_Line ("dedent");
+                  when Prettier.Dedent_To_Root =>
+                     Put_Line ("dedentToRoot");
+                  when Prettier.Root =>
+                     Put_Line ("markAsRoot");
+                  when Prettier.None =>
+                     Put_Line ("none");
+               end case;
+               Process (Document.Align_Contents, Prefix & Simple_Indent);
+
             when Break_Parent =>
                Put_Line ("breakParent");
 

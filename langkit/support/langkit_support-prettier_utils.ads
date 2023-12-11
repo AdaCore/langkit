@@ -41,7 +41,8 @@ private package Langkit_Support.Prettier_Utils is
      (Positive, Document_Type);
 
    type Document_Kind is
-     (Break_Parent,
+     (Align,
+      Break_Parent,
       Fill,
       Group,
       Hard_Line,
@@ -56,6 +57,10 @@ private package Langkit_Support.Prettier_Utils is
       Whitespace);
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
       case Kind is
+         when Align =>
+            Align_Data     : Prettier.Alignment_Data_Type;
+            Align_Contents : Document_Type;
+
          when Break_Parent =>
             null;
 
@@ -125,6 +130,12 @@ private package Langkit_Support.Prettier_Utils is
 
    procedure Release (Self : in out Document_Pool);
    --  Free all the Document_Type nodes allocated in ``Self``
+
+   function Create_Align
+     (Self     : in out Document_Pool;
+      Data     : Prettier.Alignment_Data_Type;
+      Contents : Document_Type) return Document_Type;
+   --  Return an ``Align`` node
 
    function Create_Break_Parent
      (Self : in out Document_Pool) return Document_Type;

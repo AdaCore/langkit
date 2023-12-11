@@ -43,12 +43,22 @@ def f1(a: Int, b: Int=0): Int
     template for VarDecl.f_name: invalid whitespace length: JSON_STRING_TYPE
 # invalid_whitespace2.json
     template for VarDecl.f_name: missing "length" key
-# invalid_indent.json
-    template for VarDecl.f_name: missing "contents" key for indent
-# invalid_ifbreak.json
-    template for VarDecl.f_name: missing "breakContents" key for ifBreak
+# invalid_align.json
+    template for VarDecl.f_name: missing "width" key for align
+# invalid_align2.json
+    template for VarDecl.f_name: invalid "width" key for align
+# invalid_dedent.json
+    template for VarDecl.f_name: missing "contents" key for dedent
+# invalid_dedenttoroot.json
+    template for VarDecl.f_name: missing "contents" key for dedentToRoot
 # invalid_fill.json
     template for VarDecl.f_name: missing "document" key for fill
+# invalid_ifbreak.json
+    template for VarDecl.f_name: missing "breakContents" key for ifBreak
+# invalid_indent.json
+    template for VarDecl.f_name: missing "contents" key for indent
+# invalid_markasroot.json
+    template for VarDecl.f_name: missing "contents" key for markAsRoot
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -68,6 +78,50 @@ def f1(a: Int, b: Int=0): Int
 Done.
 
 == commands.adb ==
+== cmd_align.json ==
+
+{
+  "kind": "command",
+  "command": {
+    "command": "align",
+    "alignData": {
+      "kind": "width",
+      "n": 2
+    },
+    "alignContents": {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "text",
+          "text": "var i:Int=0;"
+        }
+      ]
+    }
+  }
+}
+
+== cmd_align2.json ==
+
+{
+  "kind": "command",
+  "command": {
+    "command": "align",
+    "alignData": {
+      "kind": "text",
+      "t": "  "
+    },
+    "alignContents": {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "text",
+          "text": "var i:Int=0;"
+        }
+      ]
+    }
+  }
+}
+
 == cmd_breakparent.json ==
 
 {
@@ -84,6 +138,102 @@ Done.
       "text": "var i:Int=0;"
     }
   ]
+}
+
+== cmd_dedent.json ==
+
+{
+  "kind": "command",
+  "command": {
+    "command": "align",
+    "alignData": {
+      "kind": "dedent"
+    },
+    "alignContents": {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        {
+          "kind": "text",
+          "text": "var i:Int=0;"
+        }
+      ]
+    }
+  }
+}
+
+== cmd_dedenttoroot.json ==
+
+{
+  "kind": "command",
+  "command": {
+    "command": "align",
+    "alignData": {
+      "kind": "dedentToRoot"
+    },
+    "alignContents": {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        {
+          "kind": "text",
+          "text": "var i:Int=0;"
+        }
+      ]
+    }
+  }
+}
+
+== cmd_fill.json ==
+
+{
+  "kind": "command",
+  "command": {
+    "command": "fill",
+    "parts": {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        {
+          "kind": "text",
+          "text": "var i:Int=0;"
+        },
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        }
+      ]
+    }
+  }
 }
 
 == cmd_group.json ==
@@ -244,42 +394,6 @@ Done.
   }
 }
 
-== cmd_fill.json ==
-
-{
-  "kind": "command",
-  "command": {
-    "command": "fill",
-    "parts": {
-      "kind": "list",
-      "list": [
-        {
-          "kind": "command",
-          "command": {
-            "command": "line",
-            "literal": false,
-            "soft": false,
-            "hard": false
-          }
-        },
-        {
-          "kind": "text",
-          "text": "var i:Int=0;"
-        },
-        {
-          "kind": "command",
-          "command": {
-            "command": "line",
-            "literal": false,
-            "soft": false,
-            "hard": false
-          }
-        }
-      ]
-    }
-  }
-}
-
 == cmd_line.json ==
 
 {
@@ -363,6 +477,36 @@ Done.
   ]
 }
 
+== cmd_markasroot.json ==
+
+{
+  "kind": "command",
+  "command": {
+    "command": "align",
+    "alignData": {
+      "kind": "root"
+    },
+    "alignContents": {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        {
+          "kind": "text",
+          "text": "var i:Int=0;"
+        }
+      ]
+    }
+  }
+}
+
 == cmd_recurse.json ==
 
 {
@@ -396,18 +540,6 @@ Done.
   ]
 }
 
-== cmd_whitespace_default.json ==
-
-{
-  "kind": "list",
-  "list": [
-    {
-      "kind": "text",
-      "text": " var i:Int=0;"
-    }
-  ]
-}
-
 == cmd_whitespace_3.json ==
 
 {
@@ -416,6 +548,18 @@ Done.
     {
       "kind": "text",
       "text": "   var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_whitespace_default.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "text",
+      "text": " var i:Int=0;"
     }
   ]
 }
