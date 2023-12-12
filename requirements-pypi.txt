@@ -17,3 +17,4 @@ sphinx-rtd-theme==0.4.3
 types-docutils==0.18.3
 types-gdb==12.1.2
 yapf==0.30.0
+e3-core
