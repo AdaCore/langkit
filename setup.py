@@ -30,5 +30,9 @@ setup(
         'coverage.css', 'support/*.adb', 'support/*.ads', 'support/*.gpr',
         'templates/*.mako', 'templates/*/*.mako', 'py.typed',
     ]},
-    scripts=[os.path.join('scripts', 'create-project.py')]
+    entry_points={
+        "console_scripts": [
+            "create-project.py = langkit.scripts.create_project:main",
+        ]
+    },
 )
