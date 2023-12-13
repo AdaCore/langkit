@@ -46,6 +46,6 @@ build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
     gpr_mains=["main.c"],
     generate_unparser=True,
-    types_from_lkt=False,
+    types_from_lkt=True,
 )
 print("Done")
