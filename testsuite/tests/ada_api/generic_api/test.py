@@ -185,7 +185,6 @@ build_and_run(
         "introspection_types.adb",
         "introspection_values.adb",
         "hash.adb",
-        "unparsing.adb",
     ],
     types_from_lkt=True,
     generate_unparser=True,

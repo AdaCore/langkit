@@ -5,6 +5,7 @@
 
 with Ada.Command_Line;
 with Ada.Containers.Hashed_Maps;
+with Ada.Containers.Vectors;
 with Ada.Exceptions;           use Ada.Exceptions;
 with Ada.Strings.Unbounded;    use Ada.Strings.Unbounded;
 with Ada.Text_IO;              use Ada.Text_IO;
@@ -20,6 +21,8 @@ with Prettier_Ada.Documents.Builders;
 with Prettier_Ada.Documents.Json;
 
 with Langkit_Support.Errors;         use Langkit_Support.Errors;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Internal.Unparsing;
@@ -28,6 +31,56 @@ with Langkit_Support.Prettier_Utils; use Langkit_Support.Prettier_Utils;
 with Langkit_Support.Symbols;        use Langkit_Support.Symbols;
 
 package body Langkit_Support.Generic_API.Unparsing is
+
+   type Unparsing_Fragment_Kind is
+     (Token_Fragment,
+      List_Separator_Fragment,
+      Field_Fragment,
+      List_Child_Fragment);
+   type Unparsing_Fragment
+     (Kind : Unparsing_Fragment_Kind := Unparsing_Fragment_Kind'First)
+   is record
+      case Kind is
+         when Token_Fragment | List_Separator_Fragment =>
+            Token_Kind : Token_Kind_Ref;
+            --  Token kind corresponding to this token fragment. This component
+            --  is used to determine the spacing required in the source buffer
+            --  between two consecutive tokens.
+
+            Token_Text : Unbounded_Text_Type;
+            --  Text to emit when unparsing this token fragment
+
+         when Field_Fragment | List_Child_Fragment =>
+            Node : Lk_Node;
+            --  Node for this fragment
+
+            case Kind is
+               when Token_Fragment | List_Separator_Fragment =>
+                  null;
+
+               when Field_Fragment =>
+                  Field : Struct_Member_Ref;
+                  --  Syntax field for this fragment (the parent node is a
+                  --  regular node).
+
+               when List_Child_Fragment =>
+                  Child_Index : Positive;
+                  --  Index of this field for this fragment (the parent node is
+                  --  a list node).
+
+            end case;
+      end case;
+   end record;
+   --  Source code unparsing fragment used to unparse source code. Fragments
+   --  are either tokens or nodes (that must be decomposed themselves into
+   --  fragments).
+
+   package Unparsing_Fragment_Vectors is new Ada.Containers.Vectors
+     (Positive, Unparsing_Fragment);
+
+   procedure Unparse_To_Fragments
+     (Node : Lk_Node; Fragments : out Unparsing_Fragment_Vectors.Vector);
+   --  Decompose ``Node`` into a list of unparsing fragments
 
    function Hash (Self : Struct_Member_Index) return Ada.Containers.Hash_Type
    is (Ada.Containers.Hash_Type'Mod (Self));
@@ -83,47 +136,6 @@ package body Langkit_Support.Generic_API.Unparsing is
       Filler, Template : Document_Type) return Document_Type;
    --  Instantiate the given template, i.e. create a copy of it, replacing
    --  "recurse" documents with Filler.
-
-   ----------------------
-   -- Required_Spacing --
-   ----------------------
-
-   function Required_Spacing (Left, Right : Token_Kind_Ref) return Spacing_Kind
-   is
-   begin
-      if Left = No_Token_Kind_Ref then
-         return None;
-      elsif Language (Left) /= Language (Right) then
-         raise Precondition_Failure with
-           "inconsistent languages for requested token kinds";
-      end if;
-
-      declare
-         Id : constant Language_Descriptor_Access := +Language (Left);
-         LK : constant Token_Kind_Index := To_Index (Left);
-
-         function Family (Kind : Token_Kind_Index) return Token_Family_Index
-         is (Id.Token_Kinds (Kind).Family);
-      begin
-         --  If a newline is required after Left, we do not even need to check
-         --  what Right is.
-
-         if Id.Unparsers.Token_Newlines (LK) then
-            return Newline;
-
-         --  Otherwise, check if at least a space is required between Left and
-         --  Right.
-
-         elsif Id.Unparsers.Token_Spacings
-                 (Family (LK), Family (To_Index (Right)))
-         then
-            return Whitespace;
-
-         else
-            return None;
-         end if;
-      end;
-   end Required_Spacing;
 
    --------------------------
    -- Unparse_To_Fragments --
