@@ -5,7 +5,6 @@
 
 with Ada.Command_Line;
 with Ada.Containers.Hashed_Maps;
-with Ada.Containers.Vectors;
 with Ada.Exceptions;           use Ada.Exceptions;
 with Ada.Strings.Unbounded;    use Ada.Strings.Unbounded;
 with Ada.Text_IO;              use Ada.Text_IO;
@@ -75,12 +74,11 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  are either tokens or nodes (that must be decomposed themselves into
    --  fragments).
 
-   package Unparsing_Fragment_Vectors is new Ada.Containers.Vectors
-     (Positive, Unparsing_Fragment);
-
-   procedure Unparse_To_Fragments
-     (Node : Lk_Node; Fragments : out Unparsing_Fragment_Vectors.Vector);
-   --  Decompose ``Node`` into a list of unparsing fragments
+   procedure Iterate_On_Fragments
+     (Node    : Lk_Node;
+      Process : access procedure (Fragment : Unparsing_Fragment));
+   --  Decompose ``Node`` into a list of unparsing fragments and call
+   --  ``Process`` on each fragment.
 
    function Hash (Self : Struct_Member_Index) return Ada.Containers.Hash_Type
    is (Ada.Containers.Hash_Type'Mod (Self));
@@ -138,11 +136,12 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  "recurse" documents with Filler.
 
    --------------------------
-   -- Unparse_To_Fragments --
+   -- Iterate_On_Fragments --
    --------------------------
 
-   procedure Unparse_To_Fragments
-     (Node : Lk_Node; Fragments : out Unparsing_Fragment_Vectors.Vector)
+   procedure Iterate_On_Fragments
+     (Node    : Lk_Node;
+      Process : access procedure (Fragment : Unparsing_Fragment))
    is
       Id        : constant Language_Id := Node.Language;
       Desc      : constant Language_Descriptor_Access := +Id;
@@ -167,7 +166,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             then (List_Separator_Fragment, Kind, Text)
             else (Token_Fragment, Kind, Text));
       begin
-         Fragments.Append (Fragment);
+         Process.all (Fragment);
       end Append;
 
       ------------
@@ -185,8 +184,6 @@ package body Langkit_Support.Generic_API.Unparsing is
       Node_Unparser : Node_Unparser_Impl renames
         Unparsers.Node_Unparsers (To_Index (Node_Type)).all;
    begin
-      Fragments.Clear;
-
       case Node_Unparser.Kind is
          when Regular =>
             --  Append fragments that precede the first field
@@ -220,7 +217,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                                or else Child.Children_Count > 0)
                   then
                      Append (Field_Unparser.Pre_Tokens);
-                     Fragments.Append
+                     Process.all
                        ((Kind  => Field_Fragment,
                          Node  => Child,
                          Field => From_Index (Id, Field_Unparser.Member)));
@@ -237,7 +234,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             for I in 1 .. Node.Children_Count loop
                if I > 1 then
                   if Node_Unparser.Separator = null then
-                     Fragments.Append
+                     Process.all
                        ((Kind => List_Separator_Fragment,
                          Token_Kind => No_Token_Kind_Ref,
                          Token_Text => To_Unbounded_Text ("")));
@@ -246,19 +243,19 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end if;
                end if;
 
-               Fragments.Append
+               Process.all
                  ((Kind        => List_Child_Fragment,
                    Node        => Node.Child (I),
                    Child_Index => I));
             end loop;
 
          when Token =>
-            Fragments.Append
+            Process.all
               ((Kind       => Token_Fragment,
                 Token_Kind => Token_Node_Kind (Node_Type),
                 Token_Text => To_Unbounded_Text (Node.Text)));
       end case;
-   end Unparse_To_Fragments;
+   end Iterate_On_Fragments;
 
    ---------------------------
    -- Load_Unparsing_Config --
@@ -899,10 +896,17 @@ package body Langkit_Support.Generic_API.Unparsing is
          Node_Config : Node_Config_Record renames
            Config.Value.Node_Configs.Element (To_Index (Type_Of (N))).all;
          Items       : Document_Vectors.Vector;
-         Fragments   : Unparsing_Fragment_Vectors.Vector;
-      begin
-         Unparse_To_Fragments (N, Fragments);
-         for F of Fragments loop
+
+         procedure Process_Fragment (F : Unparsing_Fragment);
+         --  Append the documents to ``Items`` to represent the given unparsing
+         --  fragment.
+
+         ----------------------
+         -- Process_Fragment --
+         ----------------------
+
+         procedure Process_Fragment (F : Unparsing_Fragment) is
+         begin
             case F.Kind is
                when Token_Fragment | List_Separator_Fragment =>
                   declare
@@ -932,8 +936,10 @@ package body Langkit_Support.Generic_API.Unparsing is
                when List_Child_Fragment =>
                   Items.Append (Unparse_Node (F.Node));
             end case;
-         end loop;
+         end Process_Fragment;
 
+      begin
+         Iterate_On_Fragments (N, Process_Fragment'Access);
          return Instantiate_Template
            (Pool, Pool.Create_List (Items), Node_Config.Node_Template);
       end Unparse_Node;
