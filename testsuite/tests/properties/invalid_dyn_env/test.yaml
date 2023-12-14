@@ -1,1 +1,4 @@
-driver: python
+driver: lkt_compile
+description: |
+    Check that legality checks for DynamicLexicalEnv expressions work as
+    expected.

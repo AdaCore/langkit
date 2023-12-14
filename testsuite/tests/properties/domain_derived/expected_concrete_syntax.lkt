@@ -9,11 +9,15 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Definition : FooNode {
+class Definition: FooNode {
     @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
     ref_var: LogicVar
 
     @export fun resolve(): Bool = {
@@ -22,6 +26,6 @@ class Name : FooNode implements TokenNode {
         %domain(node.ref_var, candidates).solve()
     }
 
-    @export fun definition(): Definition =
+    @export fun definition(): Entity[Definition] =
     node.ref_var.get_value().as[Definition]
 }

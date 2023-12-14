@@ -1,0 +1,5 @@
+import common
+
+@abstract class FooNode implements Node[FooNode] {
+    can_reach: Bool
+}

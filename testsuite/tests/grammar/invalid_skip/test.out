@@ -4,4 +4,4 @@ test.lkt:7:29: error: Skip parsers can only create error nodes
   |                             ^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

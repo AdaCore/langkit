@@ -1,5 +1,17 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    var: LogicVar
+
+    fun pred(i: Int): Bool = i == 0
+    @export fun prop(i: Int): Bool =
+        %predicate(Example.pred, node.var, i).solve
 }

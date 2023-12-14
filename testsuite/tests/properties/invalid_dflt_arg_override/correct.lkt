@@ -1,0 +1,9 @@
+import common
+
+class FooNode implements Node[FooNode] {
+    @export @abstract fun prop(a: Bool=true): Bool
+}
+
+class Example: FooNode {
+    fun prop(a: Bool=true): Bool = a
+}

@@ -1,19 +1,16 @@
-== Correct code ==
+== correct.lkt ==
 Code generation was successful
 
-== Incorrect property definition 1 ==
-test.py:XXX: error: Invalid function signature: no *args nor **kwargs allowed
+== not_type.lkt ==
+not_type.lkt:4:25: error: type expected, got the generic Entity
+4 |     @export fun prop(a: Entity): Int = 0
+  |                         ^^^^^^
 
-== Incorrect property definition 2 ==
-test.py:XXX: error: All parameters must have an associated type as a default value
 
-== Incorrect property definition 3 ==
-test.py:XXX: error: Cannot define reserved arguments (node, bound_env)
+== reserved.lkt ==
+reserved.lkt:4:22: error: Arguments cannot have reserved names (node, bound_env)
+4 |     @export fun prop(node: Int, lex_env: Int): Int = node + lex_env
+  |                      ^^^^
 
-== Incorrect property definition 4 ==
-test.py:XXX: error: Invalid type reference: ['Obviously wrong']
 
-== Incorrect property definition 5 ==
-test.py:XXX: error: Invalid type reference: <class 'langkit.diagnostics.Diagnostics'>
-
-Done
+lkt_compile: Done

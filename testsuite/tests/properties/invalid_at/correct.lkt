@@ -1,0 +1,26 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Block("{" list*(name) "}")
+    name <- Name(@identifier)
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Block: FooNode {
+    @parse_field names: ASTList[FooNode, Name]
+
+    # Prefix is a method call
+    @export fun p1(): Block = node.singleton()[12]
+
+    # Prefix is a mere identifier
+    @export fun p2(a: Array[Int]): Int = a[12]
+
+    # Prefix is a simple field access
+    @export fun p3(): Name = node.names[12]
+}

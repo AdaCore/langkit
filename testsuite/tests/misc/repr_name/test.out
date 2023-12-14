@@ -1,0 +1,7 @@
+<Decl main.txt:1:1-1:8>
+<Id main.txt:1:5-1:8>
+Decl[1:1-1:8]
+|f_name:
+|  Id[1:5-1:8]: foo
+main.adb: Done.
+Done

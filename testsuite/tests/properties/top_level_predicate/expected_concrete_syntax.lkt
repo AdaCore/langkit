@@ -6,15 +6,14 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     fun sophisticated_predicate(): Bool = true
 }
 
-class Example : FooNode {
+class Example: FooNode {
     var1: LogicVar
 
-    @export fun prop(): Example = {
-        val _ = %predicate(BareFooNode.sophisticated_predicate, node.var1);
+    @export fun prop(): Entity[Example] = {
+        val _ = %predicate(FooNode.sophisticated_predicate, node.var1);
 
         node.as_bare_entity
     }

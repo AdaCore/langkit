@@ -8,8 +8,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode {
-
+class Example: FooNode {
     fun failing_property(): Bool = raise[Bool] PropertyError()
 
     @export fun failsafe_property(): Bool =

@@ -23,37 +23,49 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Block : FooNode {
+class Block: FooNode {
     @parse_field name: Identifier
     @parse_field items: ASTList[FooNode, Item]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env(names=[node.name.symbol])
+    }
 }
 
-class Identifier : FooNode implements TokenNode {
-
-    fun resolve(): FooNode = node.children_env().get(node.symbol)?(0)
+class Identifier: FooNode implements TokenNode {
+    fun resolve(): Entity[FooNode] = node.children_env().get(node.symbol)?[0]
 }
 
-@abstract class Item : FooNode {
+@abstract class Item: FooNode {
 }
 
-class Decl : Item {
+class Decl: Item {
     @parse_field name: Identifier
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
-class Open : Item {
+class Open: Item {
     @parse_field name: Identifier
 
     fun resolve(): LexicalEnv[FooNode] = {
         val n = node.name.resolve();
 
         n.do(
-            (n) => n.children_env(), default_val=(null[LexicalEnv[FooNode]])
+            (n) => n.children_env(), default_val=null[LexicalEnv[FooNode]]
         )
+    }
+
+    env_spec {
+        reference([node.as[FooNode]], Open.resolve)
     }
 }
 
-class Ref : Item {
+class Ref: Item {
     @parse_field name: Identifier
 
-    @export fun resolve(): FooNode = node.name.resolve()
+    @export fun resolve(): Entity[FooNode] = node.name.resolve()
 }

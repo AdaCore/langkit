@@ -879,14 +879,23 @@ class CompileCtx:
             return diagnostic_context(Location.from_lkt_node(lkt_node))
 
     @staticmethod
-    def lkt_doc(full_decl):
+    def lkt_doc(decl: L.Decl) -> str:
         """
-        Return the documentation attached to the ``full_decl`` node, if any.
+        Return the documentation attached to the ``full_decl`` node. This is an
+        empty string if the docstring is missing.
 
-        :param liblktlang.FullDecl full_decl: Declaration to process.
-        :rtype: None|str
+        :param decl: Declaration to process.
         """
-        return '\n'.join(l.text for l in full_decl.f_doc)
+        full_decl = decl.parent
+        assert isinstance(full_decl, L.FullDecl)
+
+        # Remove the "##" docstring line prefix
+        result = []
+        for comment in full_decl.f_doc.f_lines:
+            line = comment.text
+            assert line.startswith("##")
+            result.append(line[2:])
+        return "\n".join(result)
 
     def register_exception_type(self,
                                 package: List[str],
@@ -1078,32 +1087,43 @@ class CompileCtx:
         """
         return self.grammar_rule_api_name(self.grammar.main_rule_name)
 
+    def create_default_metadata(self) -> None:
+        """
+        Assuming the language spec does not define a metadata type, create a
+        default one.
+        """
+        from langkit.compiled_types import CompiledTypeRepo, StructType
+
+        CompiledTypeRepo.env_metadata = StructType(
+            names.Name('Metadata'), None, None, []
+        )
+
     def compute_types(self):
         """
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (CompiledTypeRepo, EnumType,
-                                            StructType, T, resolve_type)
+        from langkit.compiled_types import (
+            CompiledTypeRepo, EnumType, T, resolve_type,
+        )
         from langkit.dsl import _StructMetaclass
         from langkit.expressions.base import construct_compile_time_known
 
         # Make sure the language spec tagged at most one metadata struct.
         # Register it, if there is one.
-        user_env_md = None
-        for st in _StructMetaclass.struct_types:
-            if st._is_env_metadata:
-                assert user_env_md is None
-                user_env_md = st._type
+        if CompiledTypeRepo.env_metadata is None:
+            user_env_md = None
+            for st in _StructMetaclass.struct_types:
+                if st._is_env_metadata:
+                    assert user_env_md is None
+                    user_env_md = st._type
 
-        # If the language spec provided no env metadata struct, create a
-        # default one.
-        if user_env_md is None:
-            CompiledTypeRepo.env_metadata = StructType(
-                names.Name('Metadata'), None, None, []
-            )
-        else:
-            CompiledTypeRepo.env_metadata = user_env_md
+            # If the language spec provided no env metadata struct, create a
+            # default one.
+            if user_env_md is None:
+                self.create_default_metadata()
+            else:
+                CompiledTypeRepo.env_metadata = user_env_md
         self.check_env_metadata(CompiledTypeRepo.env_metadata)
 
         # Get the list of ASTNodeType instances from CompiledTypeRepo
@@ -2752,11 +2772,11 @@ class CompileCtx:
         Check the docstrings of type definitions.
         """
         for astnode in self.astnode_types:
-            with astnode.diagnostic_context:
+            with diagnostic_context(Location.for_entity_doc(astnode)):
                 RstCommentChecker.check_doc(astnode._doc)
 
         for struct in self.struct_types:
-            with struct.diagnostic_context:
+            with diagnostic_context(Location.for_entity_doc(struct)):
                 RstCommentChecker.check_doc(struct._doc)
 
     def lower_properties_dispatching(self):

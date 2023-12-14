@@ -7,21 +7,21 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
-    @export fun node_children(): Array[FooNode] =
+    @export fun node_children(): Array[Entity[FooNode]] =
     node.children.map((n) => n.as_bare_entity)
 
-    @export fun given_node_children(n: FooNode): Array[FooNode] =
+    @export fun given_node_children(n: FooNode): Array[Entity[FooNode]] =
     n.children.map((n) => n.as_bare_entity)
 
-    @export fun entity_children(): Array[FooNode] = self.children
+    @export fun entity_children(): Array[Entity[FooNode]] = self.children
 
-    @export fun given_entity_children(n: FooNode): Array[FooNode] = n.children
+    @export fun given_entity_children(n: Entity[FooNode]): Array[Entity[FooNode]] =
+    n.children
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }
 
-class Sequence : FooNode {
+class Sequence: FooNode {
     @parse_field items: ASTList[FooNode, Example]
 }

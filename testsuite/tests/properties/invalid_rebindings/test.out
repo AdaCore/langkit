@@ -1,10 +1,19 @@
-== .old_env: invalid input type ==
-test.py:XXX: error: Type FooNode has no 'old_env' field or property
+== get_parent.lkt ==
+get_parent.lkt:4:20: error: Type FooNode has no 'get_parent' field or property
+4 |     fun p(): Int = null[FooNode].get_parent
+  |                    ^^^^^^^^^^^^^^^^^^^^^^^^
 
-== .new_env: invalid input type ==
-test.py:XXX: error: Type FooNode has no 'new_env' field or property
 
-== .get_parent: invalid input type ==
-test.py:XXX: error: Type FooNode has no 'get_parent' field or property
+== new_env.lkt ==
+new_env.lkt:4:20: error: Type FooNode has no 'new_env' field or property
+4 |     fun p(): Int = null[FooNode].new_env
+  |                    ^^^^^^^^^^^^^^^^^^^^^
 
-Done
+
+== old_env.lkt ==
+old_env.lkt:4:20: error: Type FooNode has no 'old_env' field or property
+4 |     fun p(): Int = null[FooNode].old_env
+  |                    ^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

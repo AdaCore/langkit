@@ -14,8 +14,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Id : FooNode {
-
+@abstract class Id: FooNode {
     @abstract fun designated_symbol(): Symbol
 
     @abstract fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode]
@@ -23,7 +22,7 @@ grammar foo_grammar {
     @abstract fun resolve(base_env: LexicalEnv[FooNode]): FooNode
 }
 
-class ScopedId : Id {
+class ScopedId: Id {
     @parse_field scope: Id
     @parse_field name: SimpleId
 
@@ -36,8 +35,7 @@ class ScopedId : Id {
     node.designated_scope(base_env).get_first(node.name).node
 }
 
-class SimpleId : Id implements TokenNode {
-
+class SimpleId: Id implements TokenNode {
     fun designated_symbol(): Symbol = node.symbol
 
     fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
@@ -47,7 +45,21 @@ class SimpleId : Id implements TokenNode {
     base_env.get_first(node.symbol).node
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, Scope]
+
+    env_spec {
+        set_initial_env(
+            DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.name.designated_scope(node.parent.children_env())
+            )
+        )
+        add_to_env_kv(node.name.designated_symbol(), node)
+        add_env()
+    }
+}
+
+@metadata struct Metadata {
+    @use_in_equality node: FooNode
 }

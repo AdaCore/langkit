@@ -8,5 +8,12 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode {
+class Example: FooNode {
+    env_spec {
+        set_initial_env(
+            DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.parent.children_env()
+            )
+        )
+    }
 }

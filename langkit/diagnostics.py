@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import enum
 from functools import lru_cache
 import os
@@ -10,8 +10,8 @@ import re
 import sys
 import traceback
 from typing import (
-    Any, Iterator, List, NoReturn, Optional as Opt, TextIO, Tuple, Type,
-    TypeVar, Union
+    Any, ClassVar, Iterator, List, NoReturn, Optional as Opt, TYPE_CHECKING,
+    TextIO, Tuple, Type, TypeVar, Union
 )
 
 
@@ -23,6 +23,11 @@ except ImportError:
 
 
 from langkit.utils import Colors, assert_type, col
+
+
+if TYPE_CHECKING:
+    from langkit.compiled_types import CompiledType
+    from langkit.expressions import PropertyDef
 
 
 class DiagnosticStyle(enum.Enum):
@@ -161,6 +166,36 @@ class Location:
         Create a Location based on a Lkt node.
         """
         return cls.from_sloc_range(node.unit, node.sloc_range)
+
+    @classmethod
+    def for_entity_doc(
+        cls,
+        entity: CompiledType | PropertyDef,
+    ) -> Location | None:
+        """
+        Return the location of the docstring for the given entity, if
+        available.
+        """
+        # Lkt case: we have precise location for the entity doc: just return it
+        if entity._doc_location is not None:
+            return entity._doc_location
+
+        # Python DSL: the docstring usually starts one line after the
+        # declaration's first line ("class" keyword or "def" one), and the
+        # docstring first line (just the """ string delimiter) is stripped.
+        result = entity.location
+        if result is not None:
+            result = replace(result, line=result.line + 2)
+        return result
+
+    builtin: ClassVar[Location]
+    """
+    Special location to designate the abstract source location where builtins
+    are defined.
+    """
+
+
+Location.builtin = Location("<builtin>")
 
 
 def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
@@ -553,7 +588,10 @@ def style_diagnostic_message(string: str) -> str:
     return re.sub("`.*?`", lambda m: col(m.group(), Colors.BOLD), string)
 
 
-def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
+def source_listing(
+    highlight_sloc: Location,
+    lines_after: int = 0,
+) -> str | None:
     """
     Create a source listing for an error message, centered around a specific
     sloc, that will be highlighted/careted, as in the following example::
@@ -577,6 +615,11 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
     line_nb = highlight_sloc.line - 1
     start_offset = highlight_sloc.column - 1
     end_offset = highlight_sloc.end_column - 1
+
+    # If the location is at the file termination, right after a line break,
+    # there is no useful line to print.
+    if line_nb >= len(source_buffer):
+        return None
 
     # Compute the width of the column needed to print line numbers
     line_nb_width = len(str(highlight_sloc.line + lines_after))
@@ -658,7 +701,9 @@ def print_error(message: str,
 
     # Print the source listing
     if location.lkt_unit is not None and location.line > 0:
-        print(source_listing(location))
+        src_lst = source_listing(location)
+        if src_lst is not None:
+            print(src_lst)
 
 
 def print_error_from_sem_result(sem_result: L.SemanticResult) -> None:

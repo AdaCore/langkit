@@ -1,0 +1,16 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(ExampleNode("example") | NullNode("null"))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class NullNode: FooNode {
+}
+
+@abstract class MiddleNode: FooNode {
+    @abstract @export fun get_random_node(): MiddleNode
+}

@@ -1,2 +1,7 @@
-test.py:XXX: error: only properties can override properties
-Done
+== foo.lkt ==
+foo.lkt:19:18: error: only properties can override properties
+19 |     @parse_field name: Name
+   |                  ^^^^^^^^^^
+
+
+lkt_compile: Done

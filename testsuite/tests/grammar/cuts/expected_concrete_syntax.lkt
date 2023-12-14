@@ -12,17 +12,17 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Block : FooNode {
+class Block: FooNode {
     @parse_field el: FooNode
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field id: Id
 }
 
-class Id : FooNode implements TokenNode {
+class Id: FooNode implements TokenNode {
 }
 
-class VarDef : FooNode {
+class VarDef: FooNode {
     @parse_field id: Id
 }

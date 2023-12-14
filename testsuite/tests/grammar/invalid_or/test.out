@@ -4,4 +4,4 @@ foo.lkt:6:16: error: Alternatives yield incompatible types: Sequence, Token
   |                ^^^^^^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

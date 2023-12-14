@@ -181,4 +181,4 @@ token_name.lkt:5:5: error: Duplicate token name
   |     ^^^^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

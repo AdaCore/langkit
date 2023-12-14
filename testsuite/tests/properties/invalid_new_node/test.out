@@ -1,10 +1,25 @@
-== Not memoized ==
-test.py:XXX: error: Node synthetization can only happen inside memoized properties or lazy fields
+== list_synth.lkt ==
+list_synth.lkt:4:41: error: List node synthetization is not supported for now
+4 |     @memoized fun prop(): LiteralList = LiteralList()
+  |                                         ^^^^^^^^^^^^^
 
-== List synthetization ==
-test.py:XXX: error: List node synthetization is not supported for now
 
-== Not synthetic ==
-test.py:XXX: error: Cannot synthetize a node that is not annotated as synthetic (Literal)
+== not_memoized.lkt ==
+not_memoized.lkt:4:29: error: Node synthetization can only happen inside memoized properties or lazy fields
+4 |     fun prop(): EmptyNode = EmptyNode()
+  |                             ^^^^^^^^^^^
 
-Done
+
+== not_node_entity.lkt ==
+not_node_entity.lkt:5:24: error: Node type expected
+5 |         val e = Entity[Int](0, null[EntityInfo]);
+  |                        ^^^
+
+
+== not_synth.lkt ==
+not_synth.lkt:4:37: error: Cannot synthetize a node that is not annotated as synthetic (Literal)
+4 |     @memoized fun prop(): Literal = Literal()
+  |                                     ^^^^^^^^^
+
+
+lkt_compile: Done

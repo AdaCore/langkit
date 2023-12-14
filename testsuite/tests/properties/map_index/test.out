@@ -12,6 +12,18 @@ main.py: Running...
 2: NumberNode(3)
 3: NumberNode(4)
 
+== p_mapcat_no_idx ==
+0: NumberNode(1)
+0: NumberNode(2)
+0: NumberNode(3)
+0: NumberNode(4)
+
+== p_mapcat_idx ==
+0: NumberNode(1)
+1: NumberNode(2)
+2: NumberNode(3)
+3: NumberNode(4)
+
 == p_filter_no_idx ==
 NumberNode(2)
 
@@ -32,6 +44,13 @@ NumberNode(2)
 == p_filtermap_all_idx ==
 0: NumberNode(1)
 1: NumberNode(2)
+
+== p_take_while_no_idx ==
+NumberNode(1)
+NumberNode(2)
+
+== p_take_while_idx ==
+NumberNode(1)
 
 main.py: Done.
 Done

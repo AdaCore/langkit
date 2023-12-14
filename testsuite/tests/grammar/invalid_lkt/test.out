@@ -5,7 +5,7 @@ annotated_grammar_1.lkt:4:24: error: Invalid annotation: foo
 
 
 == annotated_grammar_2.lkt ==
-annotated_grammar_2.lkt:4:13: error: lexer expected, got grammar declaration
+annotated_grammar_2.lkt:4:13: error: Invalid lexer name: 'foo_lexer' expected
 4 | @with_lexer(foo_grammar) grammar foo_grammar {
   |             ^^^^^^^^^^^
 
@@ -69,4 +69,4 @@ unknown_rule_annot.lkt:6:5: error: Invalid annotation: foo
   |     ^^^^
 
 
-Done
+lkt_compile: Done

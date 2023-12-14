@@ -1,40 +1,58 @@
-== Correct: Boolean <-> Boolean ==
+== bool_entity.lkt ==
+bool_entity.lkt:4:32: error: Incompatible types for equality: Bool and Example.entity
+4 |     @export fun prop(): Bool = true == self
+  |                                ^^^^^^^^^^^^
+
+
+== bool_node.lkt ==
+bool_node.lkt:4:32: error: Incompatible types for equality: Bool and Example
+4 |     @export fun prop(): Bool = true == node
+  |                                ^^^^^^^^^^^^
+
+
+== correct_bool.lkt ==
 Code generation was successful
 
-== Correct: ASTNode <-> ASTNode ==
+== correct_entity.lkt ==
 Code generation was successful
 
-== Correct: ASTNode <-> ASTNode (subclass) ==
+== correct_entity_subclass.lkt ==
 Code generation was successful
 
-== Correct: Entity <-> Entity ==
+== correct_node.lkt ==
 Code generation was successful
 
-== Correct: Entity <-> Entity (subclass) ==
+== correct_node_subclass.lkt ==
 Code generation was successful
 
-== Boolean <-> ASTNode ==
-test.py:XXX: error: Incompatible types for equality: Bool and FooNode
+== entity_cross.lkt ==
+entity_cross.lkt:4:32: error: Lit.entity and Example.entity values are never equal
+4 |     @export fun prop(): Bool = self.parent.as[Lit] == self
+  |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== ASTNode <-> Boolean ==
-test.py:XXX: error: Incompatible types for equality: FooNode and Bool
 
-== ASTNode <-> Entity ==
-test.py:XXX: error: Incompatible types for equality: FooNode and FooNode.entity
+== int_bool.lkt ==
+int_bool.lkt:4:32: error: Incompatible types for equality: Int and Bool
+4 |     @export fun prop(): Bool = 1 == true
+  |                                ^^^^^^^^^
 
-== Boolean <-> Entity ==
-test.py:XXX: error: Incompatible types for equality: Bool and FooNode.entity
 
-== ASTNode <-> Boolean ==
-test.py:XXX: error: Incompatible types for equality: FooNode and Bool
+== node_bool.lkt ==
+node_bool.lkt:4:32: error: Incompatible types for equality: Example and Bool
+4 |     @export fun prop(): Bool = node == true
+  |                                ^^^^^^^^^^^^
 
-== Long <-> Boolean ==
-test.py:XXX: error: Incompatible types for equality: Int and Bool
 
-== ASTNode <-> ASTNode (never equal) ==
-test.py:XXX: error: Example and Lit values are never equal
+== node_cross.lkt ==
+node_cross.lkt:4:32: error: Lit and Example values are never equal
+4 |     @export fun prop(): Bool = node.parent.as[Lit] == node
+  |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Entity <-> Entity (never equal) ==
-test.py:XXX: error: Example.entity and Lit.entity values are never equal
 
-Done
+== node_entity.lkt ==
+node_entity.lkt:4:32: error: Incompatible types for equality: Example and Example.entity
+4 |     @export fun prop(): Bool = node == self
+  |                                ^^^^^^^^^^^^
+
+
+lkt_compile: Done

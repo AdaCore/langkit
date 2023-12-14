@@ -1,40 +1,67 @@
-== Bad tuple ==
-test.py:XXX: error: Invalid type reference: (<class 'langkit.dsl.Bool'>,)
+== bad_expr.lkt ==
+bad_expr.lkt:4:27: error: static expression expected in this context
+4 |     @export fun p(a: Bool=Bool): Bool = a
+  |                           ^^^^
 
-== Bad expr ==
-test.py:XXX: error: Invalid abstract expression: <class 'langkit.dsl.Bool'>
 
-== Bad type ==
-test.py:XXX: error: Expected type Bool, got Int
+== bad_kwarg.lkt ==
+bad_kwarg.lkt:5:44: error: Invalid "a" actual for Example.p: expected Bool but got Int
+5 |     @export fun calling(): Bool = node.p(a=1, b=true)
+  |                                            ^
 
-== Bad Self use ==
-test.py:XXX: error: Self is not bound in this context
 
-== Bad dynamic variable use ==
-test.py:XXX: error: Dynamic variables cannot be bound in this context
+== bad_literal_1.lkt ==
+bad_literal_1.lkt:4:30: error: static expression expected in this context
+4 |     @export fun p(a: Example=node): FooNode = a
+  |                              ^^^^
 
-== Missing argument (1) ==
-test.py:XXX: error: Missing actual for argument a
 
-== Missing argument (2) ==
-test.py:XXX: error: Missing actual for argument a
+== bad_literal_2.lkt ==
+bad_literal_2.lkt:4:36: error: static expression expected in this context
+4 |     @export fun p(a: Bool, b: Bool=true == false): Bool = a and b
+  |                                    ^^^^^^^^^^^^^
 
-== Bad keyword argument ==
-test.py:XXX: error: Invalid "a" actual for Example.p: expected Bool but got Int
 
-== Too many arguments (1) ==
-test.py:XXX: error: The last argument is unexpected
+== bad_type.lkt ==
+bad_type.lkt:4:27: error: Expected type Bool, got Int
+4 |     @export fun p(a: Bool=1): Bool = a
+  |                           ^
 
-== Too many arguments (2) ==
-test.py:XXX: error: The last argument is unexpected
 
-== Too many arguments (3) ==
-test.py:XXX: error: Invalid keyword arguments: c
+== missing_arg_1.lkt ==
+missing_arg_1.lkt:5:35: error: Missing actual for argument a
+5 |     @export fun calling(): Bool = node.p()
+  |                                   ^^^^^^^^
 
-== Too many arguments (4) ==
-test.py:XXX: error: The last 2 arguments are unexpected
 
-== Non-literal argument ==
-test.py:XXX: error: Default value must be a compile-time known constant (got <Eq at test.py:XXX>)
+== missing_arg_2.lkt ==
+missing_arg_2.lkt:5:35: error: Missing actual for argument a
+5 |     @export fun calling(): Bool = node.p(b=true)
+  |                                   ^^^^^^^^^^^^^^
 
-Done
+
+== too_many_args_1.lkt ==
+too_many_args_1.lkt:5:35: error: The last argument is unexpected
+5 |     @export fun calling(): Bool = node.p(true, false, b=false)
+  |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== too_many_args_2.lkt ==
+too_many_args_2.lkt:5:35: error: The last argument is unexpected
+5 |     @export fun calling(): Bool = node.p(true, a=false, b=false)
+  |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== too_many_args_3.lkt ==
+too_many_args_3.lkt:5:35: error: Invalid keyword arguments: c
+5 |     @export fun calling(): Bool = node.p(true, false, c=false)
+  |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== too_many_args_4.lkt ==
+too_many_args_4.lkt:5:35: error: The last 2 arguments are unexpected
+5 |     @export fun calling(): Bool = node.p(true, false, 1, a=false)
+  |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

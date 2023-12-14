@@ -11,7 +11,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     fun env_struct(): EnvStruct =
     EnvStruct(env=node.children_env().env_orphan())
 
@@ -19,28 +18,33 @@ grammar foo_grammar {
     [node.children_env().env_orphan()]
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field has_plus: HasPlus
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Ref]
 
-    @export fun test_env(other: FooNode): Bool =
-    node.children_env().env_orphan() = other.children_env().env_orphan()
+    @export fun test_env(other: Entity[FooNode]): Bool =
+    node.children_env().env_orphan() == other.children_env().env_orphan()
 
-    @export fun test_struct(other: FooNode): Bool =
-    node.env_struct() = other.env_struct()
+    @export fun test_struct(other: Entity[FooNode]): Bool =
+    node.env_struct() == other.env_struct()
 
-    @export fun test_array(other: FooNode): Bool =
-    node.env_array() = other.env_array()
+    @export fun test_array(other: Entity[FooNode]): Bool =
+    node.env_array() == other.env_array()
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
-@qualifier enum class HasPlus : FooNode {
+@qualifier enum class HasPlus: FooNode {
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
 }
 

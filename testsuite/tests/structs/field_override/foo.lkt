@@ -1,5 +1,23 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Expr(Name(@identifier))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+@abstract class RootNode: FooNode {
+    fun name(): Name = match node {
+        case e: Expr => e.name
+        case n: Name => n
+    }
+}
+
+class Expr: RootNode {
+    @parse_field name: Name
+}
+
+class Name implements TokenNode {
 }

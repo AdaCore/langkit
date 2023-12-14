@@ -22,4 +22,4 @@ unref_node.lkt:18:1: error: ParserlessNode is not synthetic nor abstract, so at 
    | ^
 
 
-Done
+lkt_compile: Done

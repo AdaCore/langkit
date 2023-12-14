@@ -19,48 +19,48 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Decl : FooNode {
+@abstract class Decl: FooNode {
     @abstract @parse_field @nullable name: Name
     @abstract @parse_field @nullable args: ASTList[FooNode, Name]
     @abstract @parse_field @nullable expr: Expr
 }
 
-class Def : Decl {
+class Def: Decl {
     @parse_field name: Name
     @parse_field args: ASTList[FooNode, Name]
     @parse_field expr: Expr
 }
 
-class ErrorDecl : Decl implements ErrorNode {
+class ErrorDecl: Decl implements ErrorNode {
     @parse_field @null_field name: Name
     @parse_field @null_field args: ASTList[FooNode, Name]
     @parse_field @null_field expr: Expr
 }
 
-class Var : Decl {
+class Var: Decl {
     @parse_field name: Name
     @parse_field @null_field args: ASTList[FooNode, Name]
     @parse_field expr: Expr
 }
 
-@abstract class Expr : FooNode {
+@abstract class Expr: FooNode {
 }
 
-class Literal : Expr implements TokenNode {
+@custom_short_image class Literal: Expr implements TokenNode {
 }
 
-class ParenExpr : Expr {
+class ParenExpr: Expr {
     @parse_field expr: Expr
 }
 
-class Plus : Expr {
+class Plus: Expr {
     @parse_field lhs: Expr
     @parse_field rhs: Expr
 }
 
-class Ref : Expr {
+class Ref: Expr {
     @parse_field name: Name
 }
 
-class Name : FooNode implements TokenNode {
+@custom_short_image class Name: FooNode implements TokenNode {
 }

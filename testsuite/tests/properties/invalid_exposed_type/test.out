@@ -1,5 +1,19 @@
-test.py:XXX: error: return type is LexicalEnv, which is forbidden in public API
-test.py:XXX: error: "env" argument is LexicalEnv, which is forbidden in public API
-test.py:XXX: error: "env" dynamic variable is LexicalEnv, which is forbidden in public API
+== foo.lkt ==
+foo.lkt:15:13: warning: The following bindings are not used: arg
+15 |     @export fun as_arg(arg: EnvRebindings): Bool = false
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Done
+foo.lkt:14:13: error: return type is EnvRebindings, which is forbidden in public API
+14 |     @export fun as_rettype(): EnvRebindings = null[EnvRebindings]
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo.lkt:15:13: error: "arg" argument is EnvRebindings, which is forbidden in public API
+15 |     @export fun as_arg(arg: EnvRebindings): Bool = false
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo.lkt:16:35: error: "my_var" dynamic variable is EnvRebindings, which is forbidden in public API
+16 |     @export @with_dynvars(my_var) fun as_dynvar(): Bool = false
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

@@ -1,16 +1,25 @@
-== test1_inconsistent_base ==
-test.py:XXX: error: lazy fields cannot override properties, and conversely
+== entity_info_1.lkt ==
+entity_info_1.lkt:7:21: error: Cannot use entity info, as explicitly forbidden
+7 |     @lazy p: Bool = self.info.md.flag
+  |                     ^^^^^^^^^
 
-== test2_inconsistent_base ==
-test.py:XXX: error: lazy fields cannot override properties, and conversely
 
-== test3_with_args ==
-test.py:XXX: error: Lazy fields cannot have arguments
+== entity_info_2.lkt ==
+entity_info_2.lkt:8:29: error: Call to FooNode.flag_set must be done on an entity
+8 |     @export @lazy p: Bool = node.flag_set()
+  |                             ^^^^^^^^^^^^^^^
 
-== test4_entity_info ==
-test.py:XXX: error: Cannot use entity info, as explicitly forbidden
 
-== test5_entity_info ==
-test.py:XXX: error: Call to FooNode.flag_set must be done on an entity
+== inconsistent_base_1.lkt ==
+inconsistent_base_1.lkt:8:19: error: lazy fields cannot override properties, and conversely
+8 |     @export @lazy p: Int = 2
+  |                   ^^^^^^^^^^
 
-Done
+
+== inconsistent_base_2.lkt ==
+inconsistent_base_2.lkt:8:13: error: lazy fields cannot override properties, and conversely
+8 |     @export fun p(): Int = 2
+  |             ^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

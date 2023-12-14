@@ -7,18 +7,7 @@ with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
    Ctx : constant Analysis_Context := Create_Context;
-   U   : constant Analysis_Unit := Ctx.Get_From_Buffer
-     (Filename => "main.txt",
-      Buffer   =>
-         "def a0 = 2"
-         & ASCII.LF & "def a = 10000000000000000000000000000000"
-         & ASCII.LF & "def b = a + 1"
-         & ASCII.LF & "def c = b - 1"
-         & ASCII.LF
-         & ASCII.LF & "def d = a = b"
-         & ASCII.LF & "def e = a = c"
-         & ASCII.LF & "def f = a < b"
-         & ASCII.LF & "def g = a < c");
+   U   : constant Analysis_Unit := Ctx.Get_From_File ("main.txt");
 begin
    Put_Line ("main.adb: Running...");
    if U.Has_Diagnostics then

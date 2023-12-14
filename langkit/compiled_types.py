@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from langkit.dsl import Annotations
     from langkit.envs import EnvSpec
     from langkit.expressions import (
-        AbstractExpression, PropertyDef, ResolvedExpression,
+        AbstractExpression, DynamicVariable, PropertyDef, ResolvedExpression,
     )
     from langkit.lexer import TokenAction
     from langkit.parsers import Parser, _Transform
@@ -197,10 +197,19 @@ class CompiledTypeRepo:
     instances must derive directly or indirectly from that class.
     """
 
-    env_metadata: StructType
+    env_metadata: StructType | None = None
     """
     The StrucType instances used as metadata for the lexical environments
     values.
+
+    This is None initially, then set to one of:
+
+    1. The struct type during lowering if the language spec declares a metadata
+       struct.
+
+    2. The empty metadata struct that we generate automatically otherwise.
+
+    This is never None after the "compute_types" pass.
     """
 
     entity_info = None
@@ -209,6 +218,11 @@ class CompiledTypeRepo:
     itself.
 
     :type: StructType
+    """
+
+    dynamic_vars: list[DynamicVariable] = []
+    """
+    List of known dynamic variables.
     """
 
     @classmethod
@@ -227,6 +241,7 @@ class CompiledTypeRepo:
         cls.root_grammar_class = None
         cls.env_metadata = None
         cls.entity_info = None
+        cls.dynamic_vars = []
 
 
 class AbstractNodeData:
@@ -779,6 +794,7 @@ class CompiledType:
         self._name = name
         self.location = location
         self._doc = doc
+        self._doc_location: Location | None = None
         self._base = base
         self.is_ptr = is_ptr
         self.has_special_storage = has_special_storage
@@ -1876,22 +1892,28 @@ class Argument:
             argument. If not provided, an AbstractVariable instance is
             automatically created.
         """
-        from langkit.expressions.base import (AbstractVariable,
-                                              construct_compile_time_known)
+        from langkit.expressions.base import AbstractVariable
 
         self.name = name
         self.var = (abstract_var
                     or AbstractVariable(name, type, source_name=source_name))
         self.is_artificial = is_artificial
 
-        # Make sure that, if present, the default value is a compile-time known
-        # constant.
-        self.abstract_default_value = default_value
-        self.default_value = (
-            None
-            if default_value is None else
-            construct_compile_time_known(default_value, type)
-        )
+        if default_value is None:
+            self.abstract_default_value = None
+            self.default_value = None
+        else:
+            self.set_default_value(default_value)
+
+    def set_default_value(self, value: AbstractExpression) -> None:
+        """
+        Set the default value for this argument. This checks that it is a
+        compile-time known constant.
+        """
+        from langkit.expressions.base import construct_compile_time_known
+
+        self.abstract_default_value = value
+        self.default_value = construct_compile_time_known(value, self.var.type)
 
     @property
     def type(self):
@@ -4606,6 +4628,9 @@ def create_builtin_types():
         is_builtin_type=True,
     )
 
+    T.env_assoc
+    T.inner_env_assoc
+
 
 class TypeRepo:
     """
@@ -4669,6 +4694,16 @@ class TypeRepo:
                     except KeyError:
                         pass
 
+                # The DSL name for automatic enum alternatives of EnumType
+                # instances is: ``Foo.bar`` where ``Foo`` is the name of the
+                # enum type and ``bar`` is the name of the alternative.
+                # Correctly resolve it.
+                if isinstance(prefix, EnumType):
+                    enum_value = prefix.values_dict[
+                        names.Name.from_lower(name)
+                    ]
+                    return enum_value.to_abstract_expr
+
                 if (
                     name in ('array', 'list', 'iterator', 'entity', 'new')
                     or not isinstance(prefix, BaseStructType)
@@ -4703,6 +4738,28 @@ class TypeRepo:
         def __repr__(self) -> str:
             return '<Defer {}>'.format(self.label)
 
+    def deferred_type(self, type_name: str) -> TypeRepo.Defer:
+        """
+        Return a deferred type for the given type name.
+        """
+        type_dict = CompiledTypeRepo.type_dict
+
+        def getter() -> CompiledType:
+            try:
+                return type_dict[type_name]
+            except KeyError:
+                close_matches = difflib.get_close_matches(type_name, type_dict)
+                error(
+                    'Invalid type name: {}{}'.format(
+                        type_name,
+                        ', did you one of the following? {}'.format(
+                            ', '.join(close_matches)
+                        ) if close_matches else ''
+                    )
+                )
+
+        return TypeRepo.Defer(getter, type_name)
+
     # TODO: Currently, in many contexts that require a CompiledType instance
     # (not a Defer one), TypeDefer.__getattr__() is used to retrieve a
     # built-in, so adding type annotations here will make all these uses
@@ -4716,28 +4773,11 @@ class TypeRepo:
 
         :param str type_name: The name of the rule.
         """
-        type_dict = CompiledTypeRepo.type_dict
-
-        def resolve():
-            try:
-                return type_dict[type_name]
-            except KeyError:
-                close_matches = difflib.get_close_matches(type_name, type_dict)
-                check_source_language(
-                    False,
-                    'Invalid type name: {}{}'.format(
-                        type_name,
-                        ', did you one of the following? {}'.format(
-                            ', '.join(close_matches)
-                        ) if close_matches else ''
-                    )
-                )
-
         # Resolve immediately the type reference if possible, except for AST
         # nodes: use a Defer object anyway so that we can support properties
         # reference on top of it.
-        result = type_dict.get(type_name)
-        return (TypeRepo.Defer(resolve, type_name)
+        result = CompiledTypeRepo.type_dict.get(type_name)
+        return (self.deferred_type(type_name)
                 if result is None or isinstance(result, ASTNodeType) else
                 result)
 

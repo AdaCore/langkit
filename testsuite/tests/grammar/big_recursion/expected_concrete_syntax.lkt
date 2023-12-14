@@ -408,5 +408,5 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

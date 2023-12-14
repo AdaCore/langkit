@@ -12,28 +12,37 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class BaseDecl : FooNode {
+@abstract class BaseDecl: FooNode {
+    @export fun lookup(n: Symbol): Entity[FooNode] =
+    node.env_lookup(node.node_env(), n)
 
-    @export fun lookup(n: Symbol): FooNode = node.env_lookup(node.node_env(), n)
-
-    fun env_lookup(env: LexicalEnv[FooNode], n: Symbol): FooNode =
-    env.get_first(n)
+    fun env_lookup(env: LexicalEnv[FooNode], n: Symbol): Entity[FooNode] =
+    env.get_first(n, lookup=LookupKind.flat)
 }
 
-class Decl : BaseDecl {
+class Decl: BaseDecl {
+    @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
+}
+
+class SubDecl: Decl {
+}
+
+class OtherDecl: BaseDecl {
     @parse_field name: Name
 }
 
-class SubDecl : Decl {
+class Name: FooNode implements TokenNode {
 }
 
-class OtherDecl : BaseDecl {
-    @parse_field name: Name
-}
-
-class Name : FooNode implements TokenNode {
-}
-
-class RootNode : FooNode {
+class RootNode: FooNode {
     @parse_field decls: ASTList[FooNode, BaseDecl]
+
+    env_spec {
+        add_env()
+    }
 }

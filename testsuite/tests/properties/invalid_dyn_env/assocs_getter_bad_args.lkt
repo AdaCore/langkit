@@ -1,0 +1,9 @@
+import common
+
+class Example: FooNode {
+    @lazy args_env: LexicalEnv[FooNode] =
+        dynamic_lexical_env(Example.assocs_getter)
+
+    fun assocs_getter(@ignored a: Bool): Array[InnerEnvAssoc] =
+        null[Array[InnerEnvAssoc]]
+}

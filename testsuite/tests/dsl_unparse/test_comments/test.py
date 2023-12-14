@@ -151,6 +151,10 @@ warning_set = default_warning_set.clone()
 warning_set.disable(WarningSet.unused_node_type)
 warning_set.disable(WarningSet.unused_bindings)
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-              warning_set=warning_set)
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    py_script='main.py',
+    warning_set=warning_set,
+    types_from_lkt=True,
+)
 print('Done')

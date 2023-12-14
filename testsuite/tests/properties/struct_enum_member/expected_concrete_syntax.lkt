@@ -14,22 +14,21 @@ grammar foo_grammar {
     name <- Name(@identifier)
 }
 
-enum DeclKind {
+@with_default(none) enum DeclKind {
     case func, var, none
 }
 
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Decl : FooNode {
-
+@abstract class Decl: FooNode {
     @export @abstract fun decl_kind(): DeclKind
 
     @export fun with_kind(): DeclAndKind =
     DeclAndKind(dcl=node, knd=node.decl_kind())
 }
 
-class FuncDecl : Decl {
+class FuncDecl: Decl {
     @parse_field name: Name
     @parse_field args: ASTList[FooNode, Name]
     @parse_field expr: Expression
@@ -37,23 +36,23 @@ class FuncDecl : Decl {
     fun decl_kind(): DeclKind = DeclKind.func
 }
 
-class VarDecl : Decl {
+class VarDecl: Decl {
     @parse_field name: Name
     @parse_field expr: Expression
 
     fun decl_kind(): DeclKind = DeclKind.var
 }
 
-@abstract class Expression : FooNode {
+@abstract class Expression: FooNode {
 }
 
-class Literal : Expression implements TokenNode {
+class Literal: Expression implements TokenNode {
 }
 
-class Name : Expression implements TokenNode {
+class Name: Expression implements TokenNode {
 }
 
-class Plus : Expression {
+class Plus: Expression {
     @parse_field left: Expression
     @parse_field right: Expression
 }

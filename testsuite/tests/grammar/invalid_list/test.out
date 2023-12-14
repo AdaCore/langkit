@@ -28,4 +28,4 @@ token-element.lkt:5:38: error: List parsers only accept subparsers that yield AS
   |                                      ^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

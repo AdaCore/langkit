@@ -73,5 +73,9 @@ class LiteralSequence(FooNode):
         ).as_bare_entity
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    py_script='main.py',
+    types_from_lkt=True,
+)
 print('Done')

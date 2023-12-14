@@ -1,0 +1,15 @@
+ListWrapperList[2:1-13:2]
+|  ListWrapper[2:1-6:2]
+|  |f_item:
+|  |  WithSnapList[2:2-6:1]
+|  |  |  Example[4:1-4:8]: example
+|  |  |  Example[4:9-4:16]: example
+|  |  |  Example[4:17-4:24]: example
+|  ListWrapper[9:1-13:2]
+|  |f_item:
+|  |  WithoutSnapList[11:1-11:15]
+|  |  |  NullNode[11:1-11:5]: null
+|  |  |  NullNode[11:6-11:10]: null
+|  |  |  NullNode[11:11-11:15]: null
+main.adb: Done.
+Done

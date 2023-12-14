@@ -6,28 +6,23 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun root1(): Array[Int] = [1]
 
-    @export fun root2(a: String, b: String): String = (a & (" + ")) & b
+    @export fun root2(a: String, b: String): String = (a & " + ") & b
 
-    @export fun root3(): Bool = self.info.rebindings.do((_) => true)
+    @export fun root3(): Bool = self.info.rebindings != null[EnvRebindings]
 }
 
-@abstract class Expr : FooNode {
-
-    fun root1(): Array[Int] = super() & ([2])
+@abstract class Expr: FooNode {
+    fun root1(): Array[Int] = node.super() & ([2])
 }
 
-class Name : Expr implements TokenNode {
-
-    fun root1(): Array[Int] = super() & ([3])
+class Name: Expr implements TokenNode {
+    fun root1(): Array[Int] = node.super() & ([3])
 
     fun root2(a: String, b: String): String = (
-        ("<") & (
-            super((("[") & a) & ("]"), b=(("{") & b) & ("}"))
-        )
-    ) & (">")
+        "<" & node.super(("[" & a) & "]", b=("{" & b) & "}")
+    ) & ">"
 
-    fun root3(): Bool = super()
+    fun root3(): Bool = self.super()
 }

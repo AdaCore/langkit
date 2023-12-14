@@ -1,1 +1,4 @@
-driver: python
+driver: lkt_compile
+description: |
+    Test that when a property B overrides a property A, B's return type must be
+    a subtype of A's.

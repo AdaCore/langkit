@@ -13,19 +13,31 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class DefBlock : FooNode {
+class DefBlock: FooNode {
     @parse_field id: Identifier
+
+    env_spec {
+        add_env(names=[node.id.symbol])
+    }
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }
 
-class RegularBlock : FooNode {
+class RegularBlock: FooNode {
     @parse_field id: Identifier
 
     @export @lazy synth: SynthNode = SynthNode(id=node.id)
+
+    env_spec {
+        set_initial_env(
+            DesignatedEnv(
+                kind=DesignatedEnvKind.named_env, env_name=node.id.symbol, direct_env=null[LexicalEnv[FooNode]]
+            )
+        )
+    }
 }
 
-class SynthNode : FooNode {
+@synthetic class SynthNode: FooNode {
     @parse_field id: Identifier
 }

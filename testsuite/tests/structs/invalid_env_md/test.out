@@ -1,13 +1,26 @@
-== not_a_struct ==
-test.py:XXX: error: The env_metadata decorator must be called on a Struct subclass (here, got: <class '__main__.not_a_struct.<locals>.Metadata'>)
+== bad_name.lkt ==
+bad_name.lkt:3:11: error: The environment metadata struct type must be called "Metadata" (here: BadName)
+3 | @metadata struct BadName {
 
-== two_md ==
-test.py:XXX: error: Only one Struct subclass can be the env metadata
 
-== bad_name ==
-test.py:XXX: error: The environment metadata struct type must be called "Metadata" (here: BadName)
+== bad_type.lkt ==
+bad_type.lkt:4:22: error: Environment metadata fields can be only booleans or AST nodes
+4 |     @use_in_equality fld: AnalysisUnit[FooNode]
+  |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== bad_type ==
-test.py:XXX: error: Environment metadata fields can be only booleans or AST nodes
 
-Done
+== implicit.lkt ==
+Code generation was successful
+
+== not_a_struct.lkt ==
+not_a_struct.lkt:3:1: error: Invalid annotation: metadata
+3 | @metadata class Metadata: FooNode {
+  | ^^^^^^^^^
+
+
+== two_md.lkt ==
+two_md.lkt:6:11: error: this declaration conflicts with <StructDecl "Metadata" two_md.lkt:3:11-4:2>
+6 | @metadata struct Metadata {
+
+
+lkt_compile: Done

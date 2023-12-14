@@ -1,1 +1,3 @@
-driver: python
+driver: lkt_compile
+description: |
+    Check that invalid ``NPropagate`` expressions are properly rejected.

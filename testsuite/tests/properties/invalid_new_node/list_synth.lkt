@@ -1,0 +1,5 @@
+import common
+
+@synthetic class LiteralList: ASTList[FooNode, Literal] {
+    @memoized fun prop(): LiteralList = LiteralList()
+}

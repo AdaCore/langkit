@@ -33,4 +33,4 @@ unknown_trait.lkt:11:36: error: Nodes cannot implement this trait
    |                                    ^^^^^^^^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

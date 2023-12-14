@@ -1,6 +1,16 @@
-test.py:XXX: warning: title_reference nodes are forbidden in docstrings. You probably meant to use double backquotes.
-test.py:XXX: warning: Inline interpreted text or phrase reference start-string without end-string.
-test.py:XXX: warning: Unsupported Rst tag: doctest_block. Will be excluded from output.
-test.py:XXX: warning: title_reference nodes are forbidden in docstrings. You probably meant to use double backquotes.
+== foo.lkt ==
+foo.lkt:10: warning: title_reference nodes are forbidden in docstrings. You probably meant to use double backquotes.
+10 |     ## Docstring with `invalid_title_ref`.
+
+foo.lkt:13: warning: Inline interpreted text or phrase reference start-string without end-string.
+13 |     ## Docstring with an `rst error in it.
+
+foo.lkt:16: warning: Unsupported Rst tag: doctest_block. Will be excluded from output.
+16 |     ## Docstring with an unsupported block.
+
+foo.lkt:8: warning: title_reference nodes are forbidden in docstrings. You probably meant to use double backquotes.
+8 | ## Docstring with `invalid_title_ref`.
+
 Code generation was successful
-Done
+
+lkt_compile: Done

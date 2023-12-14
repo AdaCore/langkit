@@ -25,12 +25,16 @@ def print_item(item):
 for prop in (
     "p_map_no_idx",
     "p_map_idx",
+    "p_mapcat_no_idx",
+    "p_mapcat_idx",
     "p_filter_no_idx",
     "p_filter_idx",
     "p_filtermap_no_idx",
     "p_filtermap_elt_idx",
     "p_filtermap_filter_idx",
     "p_filtermap_all_idx",
+    "p_take_while_no_idx",
+    "p_take_while_idx",
 ):
     print(f"== {prop} ==")
     for item in getattr(u.root, prop):

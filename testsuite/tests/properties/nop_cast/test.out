@@ -1,3 +1,8 @@
-test.py:XXX: warning: Casting to the same type
+== foo.lkt ==
+foo.lkt:13:9: warning: Casting to the same type
+13 |         node.as[ExampleNode].as_bare_entity
+   |         ^^^^^^^^^^^^^^^^^^^^
+
 Code generation was successful
-Done
+
+lkt_compile: Done

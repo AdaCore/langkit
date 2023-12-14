@@ -1,7 +1,0 @@
-import lexer_example
-
-grammar foo_grammar {
-    @main_rule main_rule <- list+(decl)
-    decl <- Decl(Name(@identifier) "(" list*(ref) ")")
-    ref <- Ref(Name(@identifier))
-}

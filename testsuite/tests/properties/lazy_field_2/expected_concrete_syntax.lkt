@@ -6,20 +6,22 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun is_flag_enabled(): Bool = self.info.md.flag
 
-    @export fun with_flag(flag: Bool): FooNode = FooNode(
+    @export fun with_flag(flag: Bool): Entity[FooNode] = Entity[FooNode](
         node=node, info=EntityInfo(
             md=Metadata(flag=flag), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
         )
     )
 }
 
-class Example : FooNode {
-
+class Example: FooNode {
     @export @lazy my_field: SynthNode = SynthNode()
 }
 
-class SynthNode : FooNode {
+@synthetic class SynthNode: FooNode {
+}
+
+@metadata struct Metadata {
+    @use_in_equality flag: Bool
 }

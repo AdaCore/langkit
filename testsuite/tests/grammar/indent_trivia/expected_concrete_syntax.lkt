@@ -34,22 +34,22 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Call : FooNode {
+class Call: FooNode {
     @parse_field name: Identifier
     @parse_field args: ASTList[FooNode, Call]
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field name: Identifier
     @parse_field stmts: ASTList[FooNode, Indented]
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }
 
-class Indented : FooNode {
+class Indented: FooNode {
     @parse_field inner: ASTList[FooNode, FooNode]
 }
 
-class Newline : FooNode implements TokenNode {
+class Newline: FooNode implements TokenNode {
 }

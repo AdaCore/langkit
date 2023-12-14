@@ -15,40 +15,54 @@ grammar foo_grammar {
     ref <- Ref(name)
 }
 
+dynvar env: LexicalEnv[FooNode]
+
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Block : FooNode {
+class Block: FooNode {
     @parse_field name: Name
     @parse_field decls: ASTList[FooNode, Decl]
     @parse_field usings: ASTList[FooNode, Using]
     @parse_field refs: ASTList[FooNode, Ref]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
-class Name : FooNode implements TokenNode {
-
-    fun ambiant_entity(): FooNode = env.get(node)?(0)
+class Name: FooNode implements TokenNode {
+    @with_dynvars(env) fun ambiant_entity(): Entity[FooNode] = env.get(node)?[0]
 
     fun designated_env(): LexicalEnv[FooNode] =
-    node.unit().root.node_env().get(node)?(0).children_env()
+    node.unit().root.node_env().get(node)?[0].children_env()
 
-    @export fun entity(): FooNode = {
+    @export fun entity(): Entity[FooNode] = {
         bind env = node.node_env();
 
         node.ambiant_entity()
     }
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
 
-    @export fun entity(): FooNode = node.as_entity.name.entity()
+    @export fun entity(): Entity[FooNode] = node.as_entity.name.entity()
 }
 
-class Using : FooNode {
+class Using: FooNode {
     @parse_field name: Name
+
+    env_spec {
+        reference([_], Name.designated_env)
+    }
 }

@@ -1,4 +1,6 @@
+== foo.lkt ==
 error: Invalid composition of types:
       * MyStruct contains a MyStruct.array
       * MyStruct.array contains a MyStruct
-Done
+
+lkt_compile: Done

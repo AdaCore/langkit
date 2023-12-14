@@ -3,4 +3,4 @@ foo.lkt:7:29: error: '\n' token literal is not part of the valid tokens for this
 7 |     @main_rule main_rule <- list+(
 
 
-Done
+lkt_compile: Done

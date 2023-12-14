@@ -1,24 +1,44 @@
 main.py: Running...
 .p_check_big_literal = 99999999999999999999999999999999999999999999
-a0 evaluates to 2 (2)
-a evaluates to 10000000000000000000000000000000 (<too big>)
-b evaluates to 10000000000000000000000000000001 (<too big>)
-c evaluates to 10000000000000000000000000000000 (<too big>)
-d evaluates to 0 (0)
-e evaluates to 1 (1)
-f evaluates to 1 (1)
-g evaluates to 0 (0)
+simple evaluates to 2 (2)
+big evaluates to 10000000000000000000000000000000 (<too big>)
+big_plus evaluates to 10000000000000000000000000000001 (<too big>)
+big_plus_minus evaluates to 10000000000000000000000000000000 (<too big>)
+eq_true evaluates to 1 (1)
+eq_false evaluates to 0 (0)
+lt_false_1 evaluates to 0 (0)
+lt_false_0 evaluates to 0 (0)
+lt_true evaluates to 1 (1)
+lte_false evaluates to 0 (0)
+lte_true_0 evaluates to 1 (1)
+lte_true_1 evaluates to 1 (1)
+gt_true evaluates to 1 (1)
+gt_false_0 evaluates to 0 (0)
+gt_false_1 evaluates to 0 (0)
+gte_true_1 evaluates to 1 (1)
+gte_true_0 evaluates to 1 (1)
+gte_false evaluates to 0 (0)
 .p_identity(1234) = 1234
 main.py: Done.
 main.adb: Running...
 P_Check_Big_Literal: 99999999999999999999999999999999999999999999
-a0 evaluates to 2
-a evaluates to 10000000000000000000000000000000
-b evaluates to 10000000000000000000000000000001
-c evaluates to 10000000000000000000000000000000
-d evaluates to 0
-e evaluates to 1
-f evaluates to 1
-g evaluates to 0
+simple evaluates to 2
+big evaluates to 10000000000000000000000000000000
+big_plus evaluates to 10000000000000000000000000000001
+big_plus_minus evaluates to 10000000000000000000000000000000
+eq_true evaluates to 1
+eq_false evaluates to 0
+lt_false_1 evaluates to 0
+lt_false_0 evaluates to 0
+lt_true evaluates to 1
+lte_false evaluates to 0
+lte_true_0 evaluates to 1
+lte_true_1 evaluates to 1
+gt_true evaluates to 1
+gt_false_0 evaluates to 0
+gt_false_1 evaluates to 0
+gte_true_1 evaluates to 1
+gte_true_0 evaluates to 1
+gte_false evaluates to 0
 main.adb: Done.
 Done

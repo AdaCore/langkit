@@ -56,5 +56,9 @@ class Example(FooNode):
     pass
 
 
-build_and_run(lkt_file="expected_concrete_syntax.lkt", gpr_mains=["main.adb"])
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    gpr_mains=["main.adb"],
+    types_from_lkt=True,
+)
 print("Done")

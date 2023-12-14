@@ -18,25 +18,35 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class DummySyntheticNode : FooNode {
+@synthetic class DummySyntheticNode: FooNode {
 }
 
-class ForeignDecl : FooNode {
+class ForeignDecl: FooNode {
     @parse_field create_synthetic: Synth
     @parse_field id: Id
 
     @memoized fun node_for_env(): FooNode =
-    if node.create_synthetic.as_bool() then (DummySyntheticNode()) else node
+    if node.create_synthetic.as_bool() then DummySyntheticNode() else node
+
+    env_spec {
+        add_to_env_kv(
+            node.id.simple_name().symbol, node.node_for_env(), dest_env=DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=match node.id {
+                    case simple: SimpleId => simple.node_env()
+                    case scoped: ScopedId => scoped.resolve(node.node_env()).children_env()
+                }
+            )
+        )
+    }
 }
 
-@abstract class Id : FooNode {
-
+@abstract class Id: FooNode {
     @abstract fun simple_name(): SimpleId
 
     @abstract fun resolve(base_env: LexicalEnv[FooNode]): Scope
 }
 
-class ScopedId : Id {
+class ScopedId: Id {
     @parse_field scope: Id
     @parse_field name: SimpleId
 
@@ -46,23 +56,39 @@ class ScopedId : Id {
     node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
 }
 
-class SimpleId : Id implements TokenNode {
-
+class SimpleId: Id implements TokenNode {
     fun simple_name(): SimpleId = node
 
     fun resolve(base_env: LexicalEnv[FooNode]): Scope =
     base_env.get_first(node.symbol).node.as[Scope]
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: SimpleId
     @parse_field content: ASTList[FooNode, Scope]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
-class SelfDecl : FooNode {
+class SelfDecl: FooNode {
     @parse_field id: Id
     @parse_field @nullable md_node: Id
+
+    env_spec {
+        add_to_env_kv(
+            node.id.simple_name().symbol, node.id.resolve(node.node_env()), metadata=Metadata(
+                node=node.md_node.do((n) => n.resolve(node.node_env()))
+            )
+        )
+    }
 }
 
-@qualifier enum class Synth : FooNode {
+@qualifier enum class Synth: FooNode {
+}
+
+@metadata struct Metadata {
+    @use_in_equality node: FooNode
 }

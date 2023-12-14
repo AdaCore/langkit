@@ -1,5 +1,27 @@
+# Check that compilation emits warnings for properties that are transitively
+# unused by public properties or by properties that are annotated with
+# @ignored.
+
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- Node("+")
+    @main_rule main_rule <- ExampleNode("+")
+}
+
+class FooNode implements Node[FooNode] {
+
+    # We should have no warnings for the whole subgraph of properties here,
+    # since the root of the callgraph (the "c" property) has @ignored.
+
+    fun a(): Int = 1
+    fun b(): Int = node.a
+    @ignored fun c(): Int = node.b
+
+    # We should get a warning for this one though, which is out of the
+    # subgraph.
+    fun d(): Int = node.c
+}
+
+class ExampleNode: FooNode implements TokenNode {
 }

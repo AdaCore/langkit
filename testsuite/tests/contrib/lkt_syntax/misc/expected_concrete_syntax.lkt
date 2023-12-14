@@ -12,27 +12,26 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode {
-
+class Example: FooNode {
     ## Test that null conditional + match expr expands correctly.
     @export fun null_match(): Example = node.do(
         (_) => match _ {
-            case e : Example => e
+            case e: Example => e
         }
     )
 
     ## Test that sym literals with quotes in them are properly unparsed.
-    @export fun test_symlit_escape(): Symbol = "\"=\""
+    @export fun test_symlit_escape(): Symbol = s"\"=\""
 
     ## Test various valid dotexpr's LHS.
     @export fun test_dotexpr_lhs(): Int = {
-        val a = [1].find((v) => v = 1);
-        val b = {
+        val a = [1].find((v) => v == 1);
+        val _ = {
             val b = [1, 2];
 
             b
-        }.find((v) => v = 1);
-        val c = ("hello") & (" world");
+        }.find((v) => v == 1);
+        val _ = "hello" & " world";
 
         a
     }
@@ -45,7 +44,7 @@ class Example : FooNode {
     }
 
     ## Tests that reserved names are properly avoided in constructor syntax.
-    @export fun test_2(): KV = KV(key="hey", value="you")
+    @export fun test_2(): KV = KV(key=s"hey", value=s"you")
 }
 
 struct KV {

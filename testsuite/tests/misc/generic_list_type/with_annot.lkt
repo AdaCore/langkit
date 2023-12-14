@@ -1,0 +1,4 @@
+import common
+
+@abstract @generic_list_type("FooList") class FooNode implements Node[FooNode] {
+}

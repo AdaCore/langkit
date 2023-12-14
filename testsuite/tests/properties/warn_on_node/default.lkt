@@ -1,0 +1,6 @@
+import common
+
+@abstract class Decl: FooNode {
+    @export fun get_self1(): Decl = node
+    @export @no_node_warning fun get_self2(): Decl = node
+}

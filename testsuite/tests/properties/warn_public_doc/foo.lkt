@@ -1,5 +1,34 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule item <- Example("example")
+}
+
+## Root node.
+class FooNode implements Node[FooNode] {
+    # This property is documented, so it should not have a warning
+    ## This property is documented.
+    @export @abstract fun doc_prop(): Bool
+
+    # This property is undocumented, so it should have a warning
+    @export @abstract fun undoc_prop(): Bool
+
+    # This property is undocumented, so it should have a warning
+    @export @abstract fun will_doc_prop(): Bool
+}
+
+## Example node.
+class Example: FooNode {
+    # This property is undocumented but it inherits a documented one, so it
+    # should not have a warning.
+    @export fun doc_prop(): Bool = true
+
+    # This property is undocumented, but it is overriding another one, so it's
+    # the base property that should have the warning.
+    @export fun undoc_prop(): Bool = true
+
+    # This property is documented, so it should not have a warning
+    ## This property is documented.
+    @export fun will_doc_prop(): Bool = true
 }

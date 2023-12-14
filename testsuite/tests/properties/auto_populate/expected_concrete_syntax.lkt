@@ -11,19 +11,23 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Ref]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
 
-    @export fun decl_wrapper(): Decl = self.decl()
+    @export fun decl_wrapper(): Entity[Decl] = self.decl()
 
-    @export fun decl(): Decl =
-    node.children_env().get_first(node.name).as[Decl]!
+    @export fun decl(): Entity[Decl] =
+    node.children_env().get_first(node.name).as![Decl]
 }

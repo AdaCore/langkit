@@ -13,16 +13,16 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class DefNode : FooNode {
+class DefNode: FooNode {
     @parse_field name: Identifier
     @parse_field value: Number
 }
 
-class ErrorDef : FooNode implements ErrorNode {
+class ErrorDef: FooNode implements ErrorNode {
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }
 
-class Number : FooNode implements TokenNode {
+class Number: FooNode implements TokenNode {
 }

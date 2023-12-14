@@ -16,4 +16,4 @@ test.lkt:30:28: error: @nullable annotation required because ChildNode.f4 overri
    |                            ^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

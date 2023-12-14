@@ -82,5 +82,9 @@ class ScopedId(Id):
         return (Self.designated_scope(base_env).get_first(Self.name).node)
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    py_script='main.py',
+    types_from_lkt=True,
+)
 print('Done')

@@ -46,7 +46,9 @@ from langkit.expressions import (
     PropertyError, Self, String as S, Try as _Try, Var, direct_env, ignore,
     langkit_property, new_env_assoc
 )
-from langkit.parsers import Cut, Grammar, List, Null, Opt, Or as GOr, Pick
+from langkit.parsers import (
+    Cut, Grammar, List, Null, Opt, Or as GOr, Pick, Predicate
+)
 
 
 from language.lexer import lkt_lexer as Lex
@@ -1353,18 +1355,24 @@ class GrammarDiscard(GrammarExpr):
     expr = Field(type=T.GrammarExpr)
 
 
-class DotExpr(Expr):
+@abstract
+class BaseDotExpr(Expr):
     """
-    Dotted expression.
+    Base class for regular dotted expressions and null-conditional ones.
     """
     prefix = Field(type=T.Expr)
     suffix = Field(type=T.RefId)
 
+
+class DotExpr(BaseDotExpr):
+    """
+    Dotted expression.
+    """
     referenced_decl = Property(Entity.suffix.referenced_decl)
     expr_context_free_type = Property(Entity.suffix.expr_context_free_type)
 
 
-class NullCondDottedName(DotExpr):
+class NullCondDottedName(BaseDotExpr):
     """
     Null conditional dotted expression.
     """
@@ -1376,6 +1384,18 @@ class Id(Expr):
     Identifier.
     """
     token_node = True
+
+    @langkit_property(
+        external=True,
+        uses_envs=False,
+        uses_entity_info=False,
+        return_type=T.Bool,
+    )
+    def is_type_name():
+        """
+        Return whether this identifier refers to a type name.
+        """
+        pass
 
 
 class DefId(Id):
@@ -2295,6 +2315,19 @@ class ClassDecl(BasicClassDecl):
         return decl.is_a(T.FunDecl, T.FieldDecl) | decl.is_generic_fun_decl
 
 
+class EnvSpecDecl(Decl):
+    """
+    Env spec declaration.
+
+    Each node type can have one or no env spec. Env specs contains only a list
+    of env actions.
+    """
+    syn_name = Field(type=T.DefId)
+    actions = Field(type=T.CallExpr.list)
+
+    decl_type_name = Property(S("env spec declaration"))
+
+
 class EnumClassAltDecl(TypeDecl):
     """
     Alternative for an enum class decl.
@@ -2422,13 +2455,14 @@ class UserValDecl(BaseValDecl):
     """
     Class for user declared val declarations (not synthetic).
     """
-    syn_name = Field(type=T.DefId)
+    pass
 
 
 class FunDecl(UserValDecl):
     """
     Function declaration.
     """
+    syn_name = Field(type=T.DefId)
     args = Field(type=T.FunArgDecl.list)
     return_type = Field(type=T.TypeRef)
     body = Field(type=T.Expr)
@@ -2525,6 +2559,8 @@ class EnumLitDecl(UserValDecl):
     """
     Enum literal declaration.
     """
+    syn_name = Field(type=T.DefId)
+
     @langkit_property()
     def get_type(no_inference=(T.Bool, False)):
         ignore(no_inference)
@@ -2578,6 +2614,8 @@ class FunArgDecl(ComponentDecl):
     """
     Function argument declaration.
     """
+    decl_annotations = Field(type=T.DeclAnnotation.list)
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
     decl_type_name = Property(S("fun arg declaration"))
@@ -2587,6 +2625,7 @@ class LambdaArgDecl(ComponentDecl):
     """
     Function argument declaration.
     """
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
 
@@ -2629,6 +2668,7 @@ class FieldDecl(ComponentDecl):
     """
     Field declaration.
     """
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
     decl_type_name = Property(S("field declaration"))
@@ -3320,6 +3360,21 @@ class NullCondCallExpr(CallExpr):
     pass
 
 
+class SubscriptExpr(Expr):
+    """
+    Array subscript expression.
+    """
+    prefix = Field(type=T.Expr)
+    index = Field(type=T.Expr)
+
+
+class NullCondSubscriptExpr(SubscriptExpr):
+    """
+    Null conditional subscript expression.
+    """
+    pass
+
+
 class GenericInstantiation(Expr):
     """
     Generic instantiation.
@@ -3559,6 +3614,7 @@ class MatchValDecl(ExplicitlyTypedDecl):
     """
     Value declaration in a match branch.
     """
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     decl_type_name = Property(S("match value declaration"))
 
@@ -3600,10 +3656,21 @@ class UnOp(Expr):
     expr = Field(type=T.Expr)
 
 
+class DynVarDecl(ExplicitlyTypedDecl):
+    """
+    Dynamic variable declaration.
+    """
+    syn_name = Field(type=T.DefId)
+    decl_type = Field(type=T.TypeRef)
+
+    decl_type_name = Property(S("dynamic variable declaration"))
+
+
 class ValDecl(ExplicitlyTypedDecl):
     """
     Value declaration.
     """
+    syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     val = Field(type=T.Expr)
 
@@ -3629,7 +3696,7 @@ class Op(LktNode):
     """
     enum_node = True
 
-    alternatives = ["and", "or", "plus", "minus", "eq", "mult", "div",
+    alternatives = ["and", "or", "plus", "minus", "eq", "ne", "mult", "div",
                     "lt", "gt", "lte", "gte", "amp"]
 
 
@@ -3782,6 +3849,7 @@ lkt_grammar.add_rules(
     ),
     id=Id(Lex.Identifier),
     ref_id=RefId(Lex.Identifier),
+    type_ref_id=Predicate(G.ref_id, RefId.is_type_name),
     def_id=DefId(Lex.Identifier),
 
     import_stmt=Import("import", ModuleRefId(Lex.Identifier)),
@@ -4003,7 +4071,12 @@ lkt_grammar.add_rules(
         G.def_id, Opt(":", G.type_ref), Opt("=", G.expr)
     ),
 
-    fun_arg_decl=FunArgDecl(G.def_id, ":", G.type_ref, Opt("=", G.expr)),
+    fun_arg_decl=FunArgDecl(
+        List(G.decl_annotation, empty_valid=True),
+        G.def_id,
+        ":", G.type_ref,
+        Opt("=", G.expr),
+    ),
 
     fun_arg_list=List(G.fun_arg_decl, empty_valid=True, sep=","),
     lambda_arg_list=List(G.lambda_arg_decl, empty_valid=True, sep=","),
@@ -4023,16 +4096,23 @@ lkt_grammar.add_rules(
         G.grammar_decl,
         G.field_decl,
         G.val_decl,
+        G.env_spec_decl,
         G.grammar_rule,
+        G.dynvar_decl,
     ),
 
     decl=FullDecl(
         G.doc, List(G.decl_annotation, empty_valid=True), G.bare_decl
     ),
 
+    type_expr=GOr(
+        DotExpr(G.type_expr, ".", G.type_ref_id),
+        G.type_ref_id,
+    ),
+
     type_ref=GOr(
-        GenericTypeRef(G.basic_name, "[", G.type_list, "]"),
-        SimpleTypeRef(G.basic_name),
+        GenericTypeRef(G.type_expr, "[", G.type_list, "]"),
+        SimpleTypeRef(G.type_expr),
         FunctionTypeRef(
             "(", List(G.type_ref, empty_valid=True, sep=","), ")",
             "->", G.type_ref
@@ -4048,7 +4128,18 @@ lkt_grammar.add_rules(
         "val", G.def_id, Opt(":", G.type_ref), "=", G.expr
     ),
 
+    dynvar_decl=DynVarDecl("dynvar", G.def_id, ":", G.type_ref),
+
     var_bind=VarBind("bind", G.ref_id, "=", G.expr),
+
+    env_spec_action=CallExpr(RefId(Lex.Identifier), "(", G.params, ")"),
+
+    env_spec_decl=EnvSpecDecl(
+        DefId(Lex.Identifier(match_text="env_spec")),
+        "{",
+        List(G.env_spec_action, empty_valid=True),
+        "}",
+    ),
 
     block=BlockExpr(
         "{",
@@ -4074,7 +4165,8 @@ lkt_grammar.add_rules(
                         Op.alt_lt("<"),
                         Op.alt_gte(">="),
                         Op.alt_gt(">"),
-                        Op.alt_eq("=")), G.arith_1),
+                        Op.alt_eq("=="),
+                        Op.alt_ne("!=")), G.arith_1),
         G.arith_1
     ),
 
@@ -4107,7 +4199,7 @@ lkt_grammar.add_rules(
         G.if_expr,
         G.raise_expr,
         G.try_expr,
-        G.logic,
+        G.basic_expr,
     ),
 
     match_expr=MatchExpr(
@@ -4142,15 +4234,12 @@ lkt_grammar.add_rules(
         ),
     ),
 
-    logic=GOr(
-        LogicExpr("%", G.basic_expr),
-        G.basic_expr
-    ),
-
     basic_expr=GOr(
         CallExpr(G.basic_expr, "(", G.params, ")"),
         NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
         GenericInstantiation(G.basic_expr, "[", G.type_list, "]"),
+        SubscriptExpr(G.basic_expr, "[", G.expr, "]"),
+        NullCondSubscriptExpr(G.basic_expr, "?", "[", G.expr, "]"),
         ErrorOnNull(G.basic_expr, "!"),
         CastExpr(
             G.basic_expr, ".",
@@ -4160,6 +4249,8 @@ lkt_grammar.add_rules(
         ),
         DotExpr(G.basic_expr, ".", G.ref_id),
         NullCondDottedName(G.basic_expr, "?", ".", G.ref_id),
+        LogicExpr("%", CallExpr(G.ref_id, "(", G.params, ")")),
+        LogicExpr("%", G.ref_id),
         G.term
     ),
 

@@ -1,0 +1,15 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- BarCode("example" rule_2)
+    rule_2 <- BarNode("example" rule_2)
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class BarCode: FooNode {
+    @parse_field a: BarNode
+    fun base_prop(x: Int): Int = x
+}

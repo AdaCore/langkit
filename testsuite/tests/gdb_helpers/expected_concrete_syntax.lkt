@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun id_unit(u: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = u
 
     @export fun id_node(n: FooNode): FooNode = n
@@ -26,8 +25,8 @@ grammar foo_grammar {
 
     fun get_rebindings(inverse: Bool): EnvRebindings = {
         val example_nodes = node.parent.as[ASTList[FooNode, Example]].as_array();
-        val n1 = example_nodes?(if inverse then 1 else 2);
-        val n2 = example_nodes?(if inverse then 2 else 1);
+        val n1 = example_nodes?[if inverse then 1 else 2];
+        val n2 = example_nodes?[if inverse then 2 else 1];
 
         null[EnvRebindings].append_rebinding(n1.children_env(), n2.children_env())
     }
@@ -54,12 +53,12 @@ grammar foo_grammar {
     }
 
     @export fun test_entities(): Int = {
-        val null_root = null[FooNode];
-        val null_example = null[Example];
+        val null_root = null[Entity[FooNode]];
+        val null_example = null[Entity[Example]];
         val ent_root = self;
         # BREAK:test_state
         val ent_example = ent_root.as[Example];
-        val rebound = FooNode(
+        val rebound = Entity[FooNode](
             node=node, info=EntityInfo(
                 md=null[Metadata], rebindings=node.get_rebindings(false), from_rebound=false
             )
@@ -115,7 +114,10 @@ grammar foo_grammar {
     }
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
+    env_spec {
+        add_env()
+    }
 }
 
 struct MyStruct {

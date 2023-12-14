@@ -12,18 +12,18 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Literal : FooNode implements TokenNode {
+class Literal: FooNode implements TokenNode {
 }
 
-class LiteralSequence : FooNode {
+class LiteralSequence: FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Literal]
 
     @memoized fun new_node(with_null: Bool): SynthNode = SynthNode(
-        name=node.name, items=if with_null then (null[ASTList[FooNode, Literal]]) else node.items
+        name=node.name, items=if with_null then null[ASTList[FooNode, Literal]] else node.items
     )
 
-    @export fun prop(with_null: Bool): SynthNode =
+    @export fun prop(with_null: Bool): Entity[SynthNode] =
     node.new_node(with_null).as_bare_entity
 
     @lazy new_node2_null: SynthNode2 = SynthNode2(
@@ -32,19 +32,20 @@ class LiteralSequence : FooNode {
 
     @lazy new_node2: SynthNode2 = SynthNode2(name=node.name, items=node.items)
 
-    @export fun prop2(with_null: Bool): SynthNode2 =
-    if with_null then node.new_node2_null() else node.new_node2().as_bare_entity
+    @export fun prop2(with_null: Bool): Entity[SynthNode2] = (
+        if with_null then node.new_node2_null() else node.new_node2()
+    ).as_bare_entity
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class SynthNode : FooNode {
+@synthetic class SynthNode: FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Literal]
 }
 
-class SynthNode2 : FooNode {
+@synthetic class SynthNode2: FooNode {
     @parse_field name: Name
     @parse_field @nullable items: ASTList[FooNode, Literal]
 }

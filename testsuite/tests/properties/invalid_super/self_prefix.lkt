@@ -1,0 +1,13 @@
+import common
+
+class FooNode implements Node[FooNode] {
+    fun p1(): Int = 1
+    @export fun p2(): Int = self.p1
+}
+
+class Example: FooNode implements TokenNode {
+    fun p2(): Int = node.super()
+}
+
+class Number: FooNode implements TokenNode {
+}

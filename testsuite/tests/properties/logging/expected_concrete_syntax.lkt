@@ -12,26 +12,36 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field has_plus: HasPlus
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Ref]
 
     @trace fun id_ref_cat(cats: RefCategories): RefCategories = cats
 
-    @export @trace fun entity_items(): Array[Ref] = {
-        val cats = node.id_ref_cat(RefCats(others=true));
+    @export @trace fun entity_items(): Array[Entity[Ref]] = {
+        val _ = node.id_ref_cat(RefCategories(_=true));
 
         node.as_entity.items.map((i) => i)
     }
+
+    env_spec {
+        add_to_env_kv(
+            node.name.symbol, node, metadata=Metadata(b=node.has_plus.as_bool())
+        )
+    }
 }
 
-@qualifier enum class HasPlus : FooNode {
+@qualifier enum class HasPlus: FooNode {
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
+}
+
+@metadata struct Metadata {
+    @use_in_equality b: Bool
 }

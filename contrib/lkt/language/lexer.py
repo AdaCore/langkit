@@ -32,6 +32,8 @@ class Token(LexerToken):
     LBrack = WithText()
     RBrack = WithText()
     Equal = WithText()
+    EQ = WithText()
+    NE = WithText()
     GTE = WithText()
     LTE = WithText()
     GT = WithText()
@@ -68,6 +70,7 @@ class Token(LexerToken):
     ImportKw = WithText()
     ImplementsKw = WithText()
     TraitKw = WithText()
+    DynVarKw = WithText()
 
     # Trivia
     Comment = WithTrivia()
@@ -123,6 +126,8 @@ lkt_lexer.add_rules(
     (Literal('@'),         Token.At),
     (Literal('=>'),        Token.FatRightArrow),
     (Literal('='),         Token.Equal),
+    (Literal('=='),        Token.EQ),
+    (Literal('!='),        Token.NE),
     (Literal('<='),        Token.LTE),
     (Literal('>='),        Token.GTE),
     (Literal('<'),         Token.LT),
@@ -158,6 +163,7 @@ lkt_lexer.add_rules(
     (Literal('import'),     Token.ImportKw),
     (Literal('implements'), Token.ImplementsKw),
     (Literal('trait'),      Token.TraitKw),
+    (Literal('dynvar'),     Token.DynVarKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),

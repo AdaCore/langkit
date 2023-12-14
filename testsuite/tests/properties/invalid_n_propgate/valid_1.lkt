@@ -1,0 +1,6 @@
+import common
+
+class BarNode: FooNode {
+    @ignored fun main_prop(): Equation =
+        %propagate(node.ref_var, BazNode.prop1, node.type_var)
+}

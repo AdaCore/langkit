@@ -13,16 +13,19 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class BaseEnvCreator : FooNode {
+@abstract class BaseEnvCreator: FooNode {
+    env_spec {
+        add_env()
+    }
 }
 
-class DefaultEnvCreator : BaseEnvCreator {
+class DefaultEnvCreator: BaseEnvCreator {
 }
 
-class RebindableEnvCreator : BaseEnvCreator {
+@rebindable class RebindableEnvCreator: BaseEnvCreator {
 }
 
-class Rebinder : FooNode {
+class Rebinder: FooNode {
     @parse_field left: BaseEnvCreator
     @parse_field right: BaseEnvCreator
 
@@ -35,5 +38,9 @@ class Rebinder : FooNode {
         val r = null[EnvRebindings].append_rebinding(left_env, right_env);
 
         node.children_env().rebind_env(r).env_node
+    }
+
+    env_spec {
+        add_env()
     }
 }

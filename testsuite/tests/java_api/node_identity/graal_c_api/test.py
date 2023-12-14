@@ -11,7 +11,8 @@ common  # avoid pyflakes "unused" warning
 
 build_and_run(
     lkt_file='expected_concrete_syntax.lkt',
-    ni_main='BindingsTests'
+    ni_main='BindingsTests',
+    types_from_lkt=True,
 )
 
 print('Done')

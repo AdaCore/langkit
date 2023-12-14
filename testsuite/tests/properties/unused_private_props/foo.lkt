@@ -1,6 +1,59 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- or(Plus(atom "+" main_rule) | atom)
     atom <- or(Literal(@number) | Name(@identifier))
+}
+
+class FooNode implements Node[FooNode] {
+    # This property is private and only called by unused properties, so it is
+    # unused itself.
+    fun as_expr(): Expression = node.as[Expression]
+
+    # This property is unused but the user asked explicitly to not warn
+    @ignored fun as_expr_2(): Expression = node.as[Expression]
+}
+
+@abstract class Expression: FooNode {
+    # This property and all its children are private. Only Literal.result is
+    # called by a public property, so all others are unused.
+    @abstract fun result(): Int
+
+    # This property is private, but is called from "referenced_units", so
+    # "names" and all its overriding properties are used.
+    @abstract fun names(): Array[Name]
+
+    @export fun referenced_units(): Array[AnalysisUnit[FooNode]] =
+        node.names.map((n) => n.designated_unit)
+}
+
+class Literal: Expression implements TokenNode {
+    # This one is private, but it is called by "evaluate" so it's not usused
+    @external() fun result(): Int
+
+    # See Expression.names
+    fun names(): Array[Name] = null[Array[Name]]
+
+    @export fun evaluate(): Int = node.result
+}
+
+class Name: Expression implements TokenNode {
+    # This one is private and called transitively from a public property
+    @external() fun designated_unit(): AnalysisUnit[FooNode]
+
+    fun result(): Int = node.designated_unit.root.as[Expression].result
+
+    # See Expression.names
+    fun names(): Array[Name] = node.singleton
+}
+
+class Plus: Expression {
+    @parse_field left: Expression
+    @parse_field right: Expression
+
+    fun result(): Int = node.left.result + node.right.result
+
+    # See Expression.names
+    fun names(): Array[Name] = node.left.names & node.right.names
 }

@@ -15,20 +15,20 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class ArgSpec : FooNode {
+class ArgSpec: FooNode {
     @parse_field name: Identifier
     @parse_field arg_expr: Expr
 }
 
-class CallExpr : FooNode {
+class CallExpr: FooNode {
     @parse_field name: Identifier
     @parse_field args: ASTList[FooNode, Expr]
 
     @lazy args_env: LexicalEnv[FooNode] =
-    DynamicLexicalEnv(BareCallExpr.args_assocs_getter)
+    dynamic_lexical_env(CallExpr.args_assocs_getter)
 
     @lazy arg_exprs_env: LexicalEnv[FooNode] =
-    DynamicLexicalEnv(BareCallExpr.arg_exprs_assocs_getter, assoc_resolver=BareExpr.resolve)
+    dynamic_lexical_env(CallExpr.arg_exprs_assocs_getter, assoc_resolver=Expr.resolve)
 
     ## For each argument, associate its name to the expression passed in this
     ## call.
@@ -37,7 +37,7 @@ class CallExpr : FooNode {
 
         decl.args.map(
             (a, i) => InnerEnvAssoc(
-                key=a.name.symbol, value=node.args?(i), metadata=null[Metadata]
+                key=a.name.symbol, value=node.args?[i], metadata=null[Metadata]
             )
         )
     }
@@ -53,37 +53,56 @@ class CallExpr : FooNode {
         )
     }
 
-    @export fun get_arg(name: Symbol): Expr =
+    @export fun get_arg(name: Symbol): Entity[Expr] =
     node.args_env().get_first(name).as[Expr]
 
-    @export fun get_arg_expr(name: Symbol): Expr =
+    @export fun get_arg_expr(name: Symbol): Entity[Expr] =
     node.arg_exprs_env().get_first(name).as[Expr]
 }
 
-class ConsDecl : FooNode {
+class ConsDecl: FooNode {
     @parse_field name: Identifier
     @parse_field cons_expr: Expr
-}
 
-@abstract class Expr : FooNode {
-
-    fun resolve(): Expr = match self {
-        case l : Literal => l
-        case r : Ref => self.node_env().get_first(r.name.symbol).as[ConsDecl].cons_expr.resolve()
+    env_spec {
+        add_to_env(
+            EnvAssoc(
+                key=node.name.symbol, value=node, dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                ), metadata=null[Metadata]
+            )
+        )
     }
 }
 
-class Literal : Expr implements TokenNode {
+@abstract class Expr: FooNode {
+    fun resolve(): Entity[Expr] = match self {
+        case l: Literal => l
+        case r: Ref => self.node_env().get_first(r.name.symbol).as[ConsDecl].cons_expr.resolve()
+    }
 }
 
-class Ref : Expr {
+class Literal: Expr implements TokenNode {
+}
+
+class Ref: Expr {
     @parse_field name: Identifier
 }
 
-class FunDecl : FooNode {
+class FunDecl: FooNode {
     @parse_field name: Identifier
     @parse_field args: ASTList[FooNode, ArgSpec]
+
+    env_spec {
+        add_to_env(
+            EnvAssoc(
+                key=node.name.symbol, value=node, dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                ), metadata=null[Metadata]
+            )
+        )
+    }
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }

@@ -1,4 +1,7 @@
+== test.lkt ==
 Code generation was successful
+
+== test.py ==
 Reading property docs in generated code...
 
 == Doc for P_P1 ==
@@ -31,3 +34,5 @@ Reading property docs in generated code...
 == Doc for P_P3 ==
 
 Done
+
+lkt_compile: Done

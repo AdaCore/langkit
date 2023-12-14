@@ -4,4 +4,4 @@ foo.lkt:17:18: error: AST node parse fields must all be AST node themselves. Her
    |                  ^^^^^^^
 
 
-Done
+lkt_compile: Done

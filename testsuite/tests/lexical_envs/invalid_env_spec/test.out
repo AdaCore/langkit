@@ -1,0 +1,7 @@
+== foo.lkt ==
+foo.lkt:17:5: error: env specs are allowed in nodes only
+17 |     env_spec {
+   |     ^
+
+
+lkt_compile: Done

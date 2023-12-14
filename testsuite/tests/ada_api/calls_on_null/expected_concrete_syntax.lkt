@@ -8,14 +8,13 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun prop(): Bool = true
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field name: Identifier
     @parse_field value: Identifier
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }

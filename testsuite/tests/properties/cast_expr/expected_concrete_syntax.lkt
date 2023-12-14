@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun prop(): Bool =
     # The "cast" expression is represented with a Cast instance, which had
     # an "expr" attribute, so "X.cast(...).expr" used to return "X", and so
@@ -16,11 +15,10 @@ grammar foo_grammar {
     node.as[ExprHolder].expr.flag()
 }
 
-class Example : FooNode implements TokenNode {
-
+class Example: FooNode implements TokenNode {
     @export fun flag(): Bool = true
 }
 
-class ExprHolder : FooNode {
+class ExprHolder: FooNode {
     @parse_field expr: Example
 }

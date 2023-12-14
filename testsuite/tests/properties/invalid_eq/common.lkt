@@ -1,0 +1,12 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(Example("example") | Lit(@number))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Lit: FooNode implements TokenNode {
+}

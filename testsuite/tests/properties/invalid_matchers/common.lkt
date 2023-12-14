@@ -1,0 +1,30 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ExampleNode("example"
+                                        or(expression | NullNode("null")))
+    number <- Number(@number)
+    expression <- or(Compound(number "," expression) | number)
+}
+
+class FooNode implements Node[FooNode] {
+    @export fun prop(): Int = 0
+}
+
+@abstract class BodyNode: FooNode {
+}
+
+class NullNode: BodyNode {
+}
+
+@abstract class Expression: BodyNode {
+}
+
+class Number: Expression implements TokenNode {
+}
+
+class Compound: Expression {
+    @parse_field prefix: Number
+    @parse_field suffix: Expression
+}

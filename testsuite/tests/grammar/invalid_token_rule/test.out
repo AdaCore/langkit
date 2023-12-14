@@ -10,4 +10,4 @@ unknown-token.lkt:5:38: error: Unknown token: no_such_token
   |                                      ^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

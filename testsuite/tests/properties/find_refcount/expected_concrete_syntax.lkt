@@ -6,14 +6,13 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     fun resolve_own(): MyRecord = MyRecord(value=1b)
 
     @export fun resolve(): MyRecord =
-    node.children.map((c) => c.resolve_own()).find((c) => c.value = 1b)
+    node.children.map((c) => c.resolve_own()).find((c) => c.value == 1b)
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }
 
 struct MyRecord {

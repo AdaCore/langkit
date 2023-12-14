@@ -1,25 +1,43 @@
-= multiple =
-test.py:XXX: error: Only one PLE unit root is allowed: Example1
+== bad_main_rule_1.lkt ==
+bad_main_rule_1.lkt:14:18: error: Example.list cannot appear anywhere in trees except as a root node
+14 |     @parse_field example: ASTList[FooNode, Example]
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-= derived =
-test.py:XXX: error: No node can derive from PLE unit roots: here we have DerivedExample
 
-= synthetic =
-test.py:XXX: error: Synthetic nodes cannot be PLE unit roots
-
-= bad_main_rule_1 =
-test.py:XXX: error: Example.list cannot appear anywhere in trees except as a root node
-
-= bad_main_rule_2 =
+== bad_main_rule_2.lkt ==
 error: At least one parser must create lists of PLE unit roots
 
-= non_root_list =
-test.py:XXX: error: Subunit.list cannot appear anywhere in trees except as a root node
+== derived.lkt ==
+derived.lkt:12:16: error: No node can derive from PLE unit roots: here we have DerivedExample
+12 | @ple_unit_root class Example: FooNode {
 
-= multiple_lists =
-test.py:XXX: error: Lists of PLE unit roots cannot be subclassed
 
-= ple_unit_root_field =
-test.py:XXX: error: Example cannot appear anywhere in trees except as a child of Example.list nodes
+== multiple.lkt ==
+multiple.lkt:15:16: error: Only one PLE unit root is allowed: Example1
+15 | @ple_unit_root class Example2: FooNode {
 
-Done
+
+== multiple_lists.lkt ==
+multiple_lists.lkt:14:1: error: Lists of PLE unit roots cannot be subclassed
+14 | class ListOfExample: ASTList[FooNode, Example] {
+   | ^
+
+
+== non_root_list.lkt ==
+non_root_list.lkt:5:35: error: Transform parser gets 1 values, but Subunit has 0 fields
+5 |     @main_rule main_rule <- list+(Subunit("example" main_rule))
+  |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== ple_unit_root_field.lkt ==
+ple_unit_root_field.lkt:13:28: error: Example cannot appear anywhere in trees except as a child of Example.list nodes
+13 |     @parse_field @nullable child: Example
+   |                            ^^^^^^^^^^^^^^
+
+
+== synthetic.lkt ==
+synthetic.lkt:14:27: error: Synthetic nodes cannot be PLE unit roots
+14 | @synthetic @ple_unit_root class SyntheticNode: FooNode {
+
+
+lkt_compile: Done

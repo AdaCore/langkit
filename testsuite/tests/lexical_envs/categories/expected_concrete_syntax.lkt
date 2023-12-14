@@ -15,40 +15,65 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Cat1 : FooNode {
+class Cat1: FooNode {
     @parse_field decls: ASTList[FooNode, Var]
+
+    env_spec {
+        add_env()
+    }
 }
 
-class Cat2 : FooNode {
+class Cat2: FooNode {
     @parse_field decls: ASTList[FooNode, Var]
+
+    env_spec {
+        add_env()
+    }
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field name: Name
     @parse_field cat1: Cat1
     @parse_field cat2: Cat2
     @parse_field example: Example
+
+    env_spec {
+        add_env()
+    }
 }
 
-class Example : FooNode implements TokenNode {
-
-    @export fun lookup_all(name: Symbol): Array[FooNode] =
+class Example: FooNode implements TokenNode {
+    @export fun lookup_all(name: Symbol): Array[Entity[FooNode]] =
     node.children_env().get(name)
 
-    @export fun lookup_1(name: Symbol): Array[FooNode] =
+    @export fun lookup_1(name: Symbol): Array[Entity[FooNode]] =
     node.children_env().get(
-        name, categories=RefCats(cat1=true, others=false)
+        name, categories=RefCategories(cat1=true)
     )
 
-    @export fun lookup_2(name: Symbol): Array[FooNode] =
+    @export fun lookup_2(name: Symbol): Array[Entity[FooNode]] =
     node.children_env().get(
-        name, categories=RefCats(cat2=true, others=false)
+        name, categories=RefCategories(cat2=true)
     )
+
+    env_spec {
+        add_env()
+        reference(
+            [node.parent.as[Def].cat1.as[FooNode]], FooNode.children_env, category="cat1"
+        )
+        reference(
+            [node.parent.as[Def].cat2.as[FooNode]], FooNode.children_env, category="cat2"
+        )
+    }
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Var : FooNode {
+class Var: FooNode {
     @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }

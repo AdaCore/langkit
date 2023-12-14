@@ -11,23 +11,23 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Decl : FooNode {
+@abstract class Decl: FooNode {
     @abstract @parse_field @nullable name: Name
     @abstract @parse_field @nullable expr: Literal
 }
 
-class ErrorDecl : Decl implements ErrorNode {
+class ErrorDecl: Decl implements ErrorNode {
     @parse_field @null_field name: Name
     @parse_field @null_field expr: Literal
 }
 
-class Var : Decl {
+class Var: Decl {
     @parse_field name: Name
     @parse_field expr: Literal
 }
 
-class Literal : FooNode implements TokenNode {
+@custom_short_image class Literal: FooNode implements TokenNode {
 }
 
-class Name : FooNode implements TokenNode {
+@custom_short_image class Name: FooNode implements TokenNode {
 }

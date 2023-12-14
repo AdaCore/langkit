@@ -8,22 +8,46 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
-    @export fun dump_env(): Array[FooNode] =
-    node.children_env().get(null[Symbol])
+    @export fun dump_env(): Array[Entity[FooNode]] =
+    node.children_env().get(null[Symbol], lookup=LookupKind.minimal)
 }
 
-@has_abstract_list class Example : FooNode {
+@has_abstract_list class Example: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, Id]
 
     ## Return whether "content" contains the ``kw`` keyword.
     fun has_kw(kw: Symbol): Bool =
     node.content.map((c) => c.symbol).contains(kw)
+
+    env_spec {
+        add_env()
+        add_to_env_kv(
+            node.name.symbol, node, dest_env=# Check correct behavior when the env argument is null or not (when
+            # it's not, add to the parents' env), and when or_current=True is
+            # passed or not (current = Self's env).
+            {
+                val env = if node.has_kw(s"null_env") then null[LexicalEnv[FooNode]] else node.parent.children_env();
+
+                if node.has_kw(s"or_current") then env.do(
+                    (non_null_env) => DesignatedEnv(
+                        kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=non_null_env
+                    ), default_val=DesignatedEnv(
+                        kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                    )
+                ) else DesignatedEnv(
+                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=env
+                )
+            }
+        )
+    }
 }
 
-class ToplevelList : ASTList[FooNode, Example] {
+class ToplevelList: ASTList[FooNode, Example] {
+    env_spec {
+        add_env()
+    }
 }
 
-class Id : FooNode implements TokenNode {
+class Id: FooNode implements TokenNode {
 }

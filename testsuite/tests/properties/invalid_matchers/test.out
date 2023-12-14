@@ -1,36 +1,56 @@
-== Missing NullNode ==
-test.py:XXX: error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
+== default_after_full.lkt ==
+default_after_full.lkt:6:23: warning: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
+6 |     fun prop(): Int = match node.body {
 
-== Missing Expression ==
-test.py:XXX: error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
-
-== Missing Compound ==
-test.py:XXX: error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
-
-== Invalid type ==
-test.py:XXX: error: Invalid matching type: Bool
-
-== Irrelevant AST node ==
-test.py:XXX: error: Cannot match FooNode (input type is BodyNode)
-
-== Default case after full coverage ==
-test.py:XXX: warning: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
-== Node after default case (1) ==
-test.py:XXX: warning: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+== invalid_type.lkt ==
+invalid_type.lkt:6:23: error: Cannot match Bool (input type is BodyNode)
+6 |     fun prop(): Int = match node.body {
+
+
+== irrelevant_node.lkt ==
+irrelevant_node.lkt:6:23: error: Cannot match FooNode (input type is BodyNode)
+6 |     fun prop(): Int = match node.body {
+
+
+== missing_comp.lkt ==
+missing_comp.lkt:7:23: error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
+7 |         case e: NullNode => e.prop
+
+
+== missing_expr.lkt ==
+missing_expr.lkt:6:23: error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
+6 |     fun prop(): Int = match node.body {
+
+
+== missing_nullnode.lkt ==
+missing_nullnode.lkt:6:23: error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
+6 |     fun prop(): Int = match node.body {
+
+
+== node_after_default_1.lkt ==
+node_after_default_1.lkt:6:23: warning: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+6 |     fun prop(): Int = match node.body {
+
 Code generation was successful
 
-== Node after default case (2) ==
-test.py:XXX: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+== node_after_default_2.lkt ==
+node_after_default_2.lkt:6:23: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+6 |     fun prop(): Int = match node.body {
+
 Code generation was successful
 
-== Node after full coverage (1) ==
-test.py:XXX: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+== node_after_full_1.lkt ==
+node_after_full_1.lkt:6:23: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+6 |     fun prop(): Int = match node.body {
+
 Code generation was successful
 
-== Node after full coverage (2) ==
-test.py:XXX: warning: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+== node_after_full_2.lkt ==
+node_after_full_2.lkt:6:23: warning: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+6 |     fun prop(): Int = match node.body {
+
 Code generation was successful
 
-Done
+lkt_compile: Done

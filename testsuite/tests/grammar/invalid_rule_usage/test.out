@@ -4,4 +4,4 @@ foo.lkt:5:41: error: Unknown rule: 'sec_rules'.
   |                                         ^^^^^^^^^
 
 
-Done
+lkt_compile: Done

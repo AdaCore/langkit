@@ -1,0 +1,10 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- BarNode("example")
+}
+
+class FooNode implements Node[FooNode] {
+    @export fun root_prop(x: Int): Int = x
+}

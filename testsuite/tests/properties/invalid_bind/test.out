@@ -1,16 +1,25 @@
-== Bad return type ==
-test.py:XXX: error: Bind's conv_prop must return a subtype of FooNode.entity
+== bad_arity.lkt ==
+common.lkt:18:9: error: extra arguments for Bind's conv_prop must be optional
+18 |         %eq(node.type_var, node.ref_var, conv_prop=BazNode.conv_prop)
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Bad arity ==
-test.py:XXX: error: extra arguments for Bind's conv_prop must be optional
 
-== Unbound dynamic vars ==
-test.py:XXX: error: In call to BazNode.prop3 as Bind's conv_prop, some dynamic variables need to be bound: dyn_node2
+== bad_return_type.lkt ==
+common.lkt:18:9: error: Bind's conv_prop must return a subtype of FooNode.entity
+18 |         %eq(node.type_var, node.ref_var, conv_prop=BazNode.conv_prop)
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Valid default arg ==
+
+== unbound_dynvar.lkt ==
+common.lkt:18:9: error: In call to BazNode.conv_prop as Bind's conv_prop, some dynamic variables need to be bound: dyn_node2
+18 |         %eq(node.type_var, node.ref_var, conv_prop=BazNode.conv_prop)
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== valid.lkt ==
 Code generation was successful
 
-== Valid ==
+== valid_default_arg.lkt ==
 Code generation was successful
 
-Done
+lkt_compile: Done

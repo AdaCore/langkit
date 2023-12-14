@@ -1,5 +1,24 @@
+# Check that the unification of the return type of match expression is correct.
+
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- or(BarNode("example") | Literal(@number))
+}
+
+class FooNode implements Node[FooNode] {
+    fun pred(): Bool = true
+
+    @export fun foo_1(): Entity[FooNode] = (
+        if node.pred
+        then null[BarNode]
+        else null[Literal]
+    ).as_bare_entity
+}
+
+class BarNode: FooNode {
+}
+
+class Literal: FooNode implements TokenNode {
 }

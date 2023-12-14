@@ -15,18 +15,18 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-enum class Enum : FooNode {
+enum class Enum: FooNode {
     case Null, Example, Default
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Param : FooNode {
+class Param: FooNode {
     @parse_field name: Name
     @parse_field mode: Enum
     @parse_field has_plus: PlusQualifier
 }
 
-@qualifier enum class PlusQualifier : FooNode {
+@qualifier enum class PlusQualifier: FooNode {
 }

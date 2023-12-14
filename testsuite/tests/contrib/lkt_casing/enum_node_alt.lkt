@@ -1,0 +1,17 @@
+lexer foo_lexer {
+    @trivia() whitespace <- p"[ \n\r\t]+"
+    plus <- "+"
+    minus <- "-"
+}
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(OpKind.Plus("+") | OpKind.Minus("-"))
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+enum class OpKind: FooNode {
+    case Plus, minus
+}

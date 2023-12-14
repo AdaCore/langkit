@@ -16,33 +16,40 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class DefNode : FooNode {
+@abstract class DefNode: FooNode {
 }
 
-class Scope : DefNode {
+class Scope: DefNode {
     @parse_field name: Id
     @parse_field defs: ASTList[FooNode, DefNode]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
-class Var : DefNode {
+class Var: DefNode {
     @parse_field name: Id
     @parse_field value: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
-@abstract class Name : FooNode {
-
-    @export @abstract fun resolve(): FooNode
+@abstract class Name: FooNode {
+    @export @abstract fun resolve(): Entity[FooNode]
 }
 
-class Id : Name implements TokenNode {
-
-    fun resolve(): FooNode = node.node_env().get_first(node)
+class Id: Name implements TokenNode {
+    fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
 }
 
-class Prefix : Name {
+class Prefix: Name {
     @parse_field prefix: Name
     @parse_field suffix: Id
 
-    fun resolve(): FooNode =
+    fun resolve(): Entity[FooNode] =
     node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 }

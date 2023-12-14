@@ -6,10 +6,9 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun int_array_to_iter(ints: Array[Int]): Iterator[Int] =
     ints.map((i) => i + 1).to_iterator()
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

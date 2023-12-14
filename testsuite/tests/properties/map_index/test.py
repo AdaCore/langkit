@@ -42,6 +42,18 @@ class ListNode(FooNode):
         )
 
     @langkit_property(public=True)
+    def mapcat_no_idx():
+        return Self.nb_list_entities.mapcat(
+            lambda n: [Self.create(0, n)]
+        )
+
+    @langkit_property(public=True)
+    def mapcat_idx():
+        return Self.nb_list_entities.mapcat(
+            lambda i, n: [Self.create(i, n)]
+        )
+
+    @langkit_property(public=True)
     def filter_no_idx():
         return Self.nb_list_entities.filter(
             lambda n: n.text == String("2")
@@ -81,10 +93,26 @@ class ListNode(FooNode):
             lambda i, n: (n.text == String("2")) | (i == 0)
         )
 
+    @langkit_property(public=True)
+    def take_while_no_idx():
+        return Self.nb_list_entities.take_while(
+            lambda n: n.text != String("3")
+        )
+
+    @langkit_property(public=True)
+    def take_while_idx():
+        return Self.nb_list_entities.take_while(
+            lambda i, n: (n.text == String("1")) | (i == 0)
+        )
+
 
 class NumberNode(FooNode):
     token_node = True
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    py_script='main.py',
+    types_from_lkt=True,
+)
 print('Done')

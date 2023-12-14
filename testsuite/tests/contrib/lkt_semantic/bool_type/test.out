@@ -15,27 +15,27 @@ Id   <RefId "a" test.lkt:2:41-2:42>
 Expr <RefId "a" test.lkt:2:41-2:42>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "b" test.lkt:2:45-2:46>
+Id   <RefId "b" test.lkt:2:46-2:47>
      references <FunArgDecl "b" test.lkt:2:23-2:29>
 
-Expr <RefId "b" test.lkt:2:45-2:46>
+Expr <RefId "b" test.lkt:2:46-2:47>
      has type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:2:41-2:46>
+Expr <BinOp test.lkt:2:41-2:47>
      has type <EnumTypeDecl prelude: "Bool">
 
-Id   <RefId "a" test.lkt:2:52-2:53>
+Id   <RefId "a" test.lkt:2:53-2:54>
      references <FunArgDecl "a" test.lkt:2:15-2:21>
 
-Expr <RefId "a" test.lkt:2:52-2:53>
+Expr <RefId "a" test.lkt:2:53-2:54>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "b" test.lkt:2:59-2:60>
+Id   <RefId "b" test.lkt:2:60-2:61>
      references <FunArgDecl "b" test.lkt:2:23-2:29>
 
-Expr <RefId "b" test.lkt:2:59-2:60>
+Expr <RefId "b" test.lkt:2:60-2:61>
      has type <StructDecl prelude: "Int">
 
-Expr <IfExpr test.lkt:2:38-2:60>
+Expr <IfExpr test.lkt:2:38-2:61>
      has type <StructDecl prelude: "Int">
 

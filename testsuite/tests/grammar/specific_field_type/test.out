@@ -5,4 +5,4 @@ foo.lkt:12:18: warning: Specified type is FooNode, but it could be more specific
 
 Code generation was successful
 
-Done
+lkt_compile: Done

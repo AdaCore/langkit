@@ -6,23 +6,23 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
-    @export fun node_parents(): Array[FooNode] =
+    @export fun node_parents(): Array[Entity[FooNode]] =
     node.parents().map((n) => n.as_bare_entity)
 
-    @export fun node_parents_without_self(): Array[FooNode] =
+    @export fun node_parents_without_self(): Array[Entity[FooNode]] =
     node.parents(with_self=false).map((n) => n.as_bare_entity)
 
-    @export fun given_node_parents(n: FooNode): Array[FooNode] =
+    @export fun given_node_parents(n: FooNode): Array[Entity[FooNode]] =
     n.parents().map((n) => n.as_bare_entity)
 
-    @export fun entity_parents(): Array[FooNode] = self.parents()
+    @export fun entity_parents(): Array[Entity[FooNode]] = self.parents()
 
-    @export fun entity_parents_without_self(): Array[FooNode] =
+    @export fun entity_parents_without_self(): Array[Entity[FooNode]] =
     self.parents(with_self=false)
 
-    @export fun given_entity_parents(n: FooNode): Array[FooNode] = n.parents()
+    @export fun given_entity_parents(n: Entity[FooNode]): Array[Entity[FooNode]] =
+    n.parents()
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

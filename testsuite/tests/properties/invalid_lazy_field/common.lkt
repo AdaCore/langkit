@@ -1,0 +1,13 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(Example("example") | Number(@number))
+}
+
+@metadata struct Metadata {
+    @use_in_equality flag: Bool
+}
+
+class Number: FooNode {
+}

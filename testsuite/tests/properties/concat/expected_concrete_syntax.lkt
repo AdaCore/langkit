@@ -6,12 +6,11 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun int_concat(a: Array[Int], b: Array[Int]): Array[Int] = a & b
 
     @export fun big_int_concat(a: Array[BigInt], b: Array[BigInt]): Array[BigInt] =
     a & b
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

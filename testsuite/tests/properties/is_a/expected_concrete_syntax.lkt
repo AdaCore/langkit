@@ -6,7 +6,6 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     fun null_node(): FooNode = null[FooNode]
 
     @export fun is_null_a_def(): Bool = node.null_node() is Def
@@ -15,9 +14,9 @@ grammar foo_grammar {
     node.null_node() is Def | Example
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field example: Example
 }
 
-class Example : FooNode implements TokenNode {
+class Example: FooNode implements TokenNode {
 }

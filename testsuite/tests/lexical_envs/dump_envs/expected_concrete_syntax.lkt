@@ -12,14 +12,23 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field id: Identifier
+
+    env_spec {
+        add_to_env_kv(node.id.symbol, node)
+    }
 }
 
-class Identifier : FooNode implements TokenNode {
+class Identifier: FooNode implements TokenNode {
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: Identifier
     @parse_field content: ASTList[FooNode, FooNode]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }

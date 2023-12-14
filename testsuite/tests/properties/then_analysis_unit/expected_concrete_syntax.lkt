@@ -7,13 +7,12 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun node_unit(): AnalysisUnit[FooNode] =
-    (node.as[Name]).do((n) => n.unit())
+    node.as[Name].do((n) => n.unit())
 }
 
-class Scope : ASTList[FooNode, Name] {
+class Scope: ASTList[FooNode, Name] {
 }
 
-@has_abstract_list class Name : FooNode implements TokenNode {
+@has_abstract_list class Name: FooNode implements TokenNode {
 }

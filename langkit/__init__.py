@@ -1,4 +1,3 @@
-
 def reset():
     """
     Reset global state in Langkit.
@@ -11,7 +10,10 @@ def reset():
     import langkit.compiled_types
     import langkit.dsl
     import langkit.expressions.base
+    import langkit.lexer
     import langkit.utils
+
+    langkit.utils.reset_memoized()
 
     langkit.compiled_types.CompiledTypeRepo.reset()
     langkit.compiled_types.create_builtin_types()
@@ -23,5 +25,6 @@ def reset():
     langkit.expressions.base.Entity.unfreeze()
     langkit.expressions.base.Self.unfreeze()
 
-    langkit.utils.reset_memoized()
+    langkit.lexer.LexerToken.reset()
+
     langkit.compile_context.compile_ctx = None

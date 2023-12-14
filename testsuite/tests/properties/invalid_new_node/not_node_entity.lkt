@@ -1,0 +1,8 @@
+import common
+
+@synthetic class LiteralList: ASTList[FooNode, Literal] {
+    fun prop(): Int = {
+        val e = Entity[Int](0, null[EntityInfo]);
+        e.node
+    }
+}

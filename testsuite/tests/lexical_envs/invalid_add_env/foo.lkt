@@ -1,5 +1,16 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- ExampleNode("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    env_spec {
+        add_env()
+        add_env()
+    }
 }

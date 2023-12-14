@@ -6,11 +6,9 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
-    @export fun integers_neq(a: Int, b: Int): Bool = not (a = b)
+    @export fun integers_neq(a: Int, b: Int): Bool = a != b
 }
 
-class Example : FooNode implements TokenNode {
-
-    @export fun not_eq(other: Example): Bool = not (node = other)
+class Example: FooNode implements TokenNode {
+    @export fun not_eq(other: Example): Bool = node != other
 }

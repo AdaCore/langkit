@@ -9,15 +9,19 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
-    @export fun env_get_all(): Array[FooNode] =
+    @export fun env_get_all(): Array[Entity[FooNode]] =
     node.children_env().get(null[Symbol])
 }
 
-class Id : FooNode implements TokenNode {
+class Id: FooNode implements TokenNode {
 }
 
-class Program : FooNode {
+class Program: FooNode {
     @parse_field name: Id
     @parse_field program_list: ASTList[FooNode, Program]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }

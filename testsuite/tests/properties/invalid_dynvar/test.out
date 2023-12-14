@@ -1,13 +1,19 @@
-== <EnvGet at test.py:XXX> ==
-test.py:XXX: error: env is not bound in this context: please use the .bind construct to bind it first.
-
-== <FieldAccess for implicit_prop at test.py:XXX> ==
-test.py:XXX: error: In call to ExampleNode.implicit_prop, some dynamic variables need to be bound: env
-
-== <bind at test.py:XXX> ==
+== call_bound.lkt ==
 Code generation was successful
 
-== <bind at test.py:XXX> ==
+== call_unbound.lkt ==
+call_unbound.lkt:4:31: error: In call to BaseNode.internal_get_int, some dynamic variables need to be bound: my_var
+4 |     fun get_int_impl(): Int = node.internal_get_int()
+  |                               ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== use_bound.lkt ==
 Code generation was successful
 
-Done
+== use_unbound.lkt ==
+use_unbound.lkt:4:31: error: my_var is not bound in this context: please use the 'bind' construct to bind is first.
+4 |     fun get_int_impl(): Int = my_var
+  |                               ^^^^^^
+
+
+lkt_compile: Done

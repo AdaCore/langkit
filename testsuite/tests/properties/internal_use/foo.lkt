@@ -1,7 +1,40 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule stmts_rule <- list+(stmt_rule)
     stmt_rule <- or(def_rule | Block("{" list*(stmt_rule) "}"))
     def_rule <- Def(Name(@identifier) ?("(" stmts_rule ")"))
+}
+
+@metadata struct Metadata {
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+@abstract class Stmt: FooNode {
+}
+
+class Def: Stmt {
+    @parse_field id: Name
+    @parse_field body: ASTList[FooNode, Stmt]
+
+    fun faulty_prop(): Array[EnvAssoc] = node._env_mappings_0
+
+    env_spec {
+        add_to_env_kv(node.id.symbol, node)
+        add_env()
+    }
+}
+
+class Block: Stmt {
+    @parse_field items: ASTList[FooNode, Stmt]
+
+    env_spec {
+        add_env()
+    }
 }

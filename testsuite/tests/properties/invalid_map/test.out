@@ -1,13 +1,22 @@
-== Correct code ==
+== arg_type.lkt ==
+arg_type.lkt:6:27: error: argument type must be implicit
+6 |         self.nb_list.map((x: Int) => x)
+  |                           ^^^^^^
+
+
+== correct.lkt ==
 Code generation was successful
 
-== Incorrect map code 1 ==
-test.py:XXX: error: Invalid collection iteration lambda: only one or two parameters expected
+== default_value.lkt ==
+default_value.lkt:6:27: error: default values are not allowed here
+6 |         self.nb_list.map((x=12) => x)
+  |                           ^^^^
 
-== Incorrect map code 2 ==
-test.py:XXX: error: Invalid collection iteration lambda: No default values allowed for arguments
 
-== Incorrect map code 3 ==
-test.py:XXX: error: Invalid collection iteration lambda: no *args or **kwargs
+== too_many_args.lkt ==
+too_many_args.lkt:6:27: error: at most 2 arguments expected
+6 |         self.nb_list.map((x, y, z) => x)
+  |                           ^^^^^^^
 
-Done
+
+lkt_compile: Done

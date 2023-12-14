@@ -31,4 +31,4 @@ overriding_final_2.lkt:17:5: error: AbstractNode.f is final, overriding it is il
    |     ^^^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

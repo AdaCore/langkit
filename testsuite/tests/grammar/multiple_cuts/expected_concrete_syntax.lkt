@@ -20,28 +20,28 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Comma : FooNode {
+class Comma: FooNode {
     @parse_field @nullable id1: Id
     @parse_field id2: Id
     @parse_field id3: Id
 }
 
-class Def : FooNode {
+class Def: FooNode {
     @parse_field id1: Id
     @parse_field @nullable id2: Id
     @parse_field @nullable id3: Id
 }
 
-class Dot : FooNode {
+class Dot: FooNode {
     @parse_field id1: Id
     @parse_field @nullable id2: Id
     @parse_field @nullable id3: Id
 }
 
-class Id : FooNode implements TokenNode {
+class Id: FooNode implements TokenNode {
 }
 
-class Var : FooNode {
+class Var: FooNode {
     @parse_field id: Id
     @parse_field ids: ASTList[FooNode, Id]
 }

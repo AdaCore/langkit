@@ -8,8 +8,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode {
-
+class Example: FooNode {
     @export @lazy @trace my_field_1: Int = 42
 
     @export @lazy @trace my_field_2: Array[Int] = [1, 2]

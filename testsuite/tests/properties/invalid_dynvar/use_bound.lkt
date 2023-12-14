@@ -1,0 +1,8 @@
+import common
+
+class Example: BaseNode implements TokenNode {
+    fun get_int_impl(): Int = {
+        bind my_var = 12;
+        my_var
+    }
+}

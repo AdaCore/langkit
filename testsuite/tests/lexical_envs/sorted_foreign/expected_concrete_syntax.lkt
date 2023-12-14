@@ -12,16 +12,15 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class Name : FooNode {
-
+@abstract class Name: FooNode {
     fun scope_fqn(): String = match node {
-        case dn : DottedName => dn.prefix.fqn()
-        case _ : Identifier => null[String]
+        case dn: DottedName => dn.prefix.fqn()
+        case _: Identifier => null[String]
     }
 
     fun fqn(): String = match node {
-        case dn : DottedName => dn.prefix.fqn() & ((".") & dn.suffix.fqn())
-        case id : Identifier => id.text()
+        case dn: DottedName => dn.prefix.fqn() & ("." & dn.suffix.fqn())
+        case id: Identifier => id.text()
     }
 
     @abstract fun referenced_name(): Symbol
@@ -29,7 +28,7 @@ grammar foo_grammar {
     @abstract fun referenced_scope(): LexicalEnv[FooNode]
 }
 
-class DottedName : Name {
+class DottedName: Name {
     @parse_field prefix: Name
     @parse_field suffix: Identifier
 
@@ -42,8 +41,7 @@ class DottedName : Name {
     node.suffix.resolve_scope(node.referenced_parent_scope())
 }
 
-class Identifier : Name implements TokenNode {
-
+class Identifier: Name implements TokenNode {
     fun referenced_name(): Symbol = node.symbol
 
     @trace fun resolve_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
@@ -52,22 +50,37 @@ class Identifier : Name implements TokenNode {
             (e) => e, default_val=node.referenced_parent_scope()
         );
 
-        env.get(node.symbol)?(0).children_env()
+        env.get(node.symbol)?[0].children_env()
     }
 
     @trace fun referenced_parent_scope(): LexicalEnv[FooNode] =
     node.unit().root.children_env()
 
-    @trace fun referenced_scope(): LexicalEnv[FooNode] = node.resolve_scope(_)
+    @trace fun referenced_scope(): LexicalEnv[FooNode] =
+    node.resolve_scope(null[LexicalEnv[FooNode]])
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
 
     @export fun resolve(): FooNode = node.name.referenced_scope().env_node
 }
 
-class Scope : FooNode {
+class Scope: FooNode {
     @parse_field name: Name
     @parse_field content: ASTList[FooNode, FooNode]
+
+    env_spec {
+        set_initial_env(
+            node.name.scope_fqn().do(
+                (s) => DesignatedEnv(
+                    kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv[FooNode]]
+                ), default_val=DesignatedEnv(
+                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
+                )
+            )
+        )
+        add_to_env_kv(node.name.referenced_name(), node)
+        add_env(names=[node.name.fqn().to_symbol])
+    }
 }

@@ -18,37 +18,47 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@abstract class DefNode : FooNode {
+@abstract class DefNode: FooNode {
 }
 
-class Scope : DefNode {
+class Scope: DefNode {
     @parse_field error: HasError
     @parse_field name: Id
     @parse_field defs: ASTList[FooNode, DefNode]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+        do(
+            if node.error.as_bool() then (raise[FooNode] PropertyError()) else null[FooNode]
+        )
+    }
 }
 
-class Var : DefNode {
+class Var: DefNode {
     @parse_field name: Id
     @parse_field value: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
 }
 
-@qualifier enum class HasError : FooNode {
+@qualifier enum class HasError: FooNode {
 }
 
-@abstract class Name : FooNode {
-
-    @export @abstract fun resolve(): FooNode
+@abstract class Name: FooNode {
+    @export @abstract fun resolve(): Entity[FooNode]
 }
 
-class Id : Name implements TokenNode {
-
-    fun resolve(): FooNode = node.node_env().get_first(node)
+class Id: Name implements TokenNode {
+    fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
 }
 
-class Prefix : Name {
+class Prefix: Name {
     @parse_field prefix: Name
     @parse_field suffix: Id
 
-    fun resolve(): FooNode =
+    fun resolve(): Entity[FooNode] =
     node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 }

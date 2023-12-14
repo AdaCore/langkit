@@ -1,2 +1,6 @@
-test.py:XXX: error: AbstractNode is abstract and has no concrete subclass
-Done
+== foo.lkt ==
+foo.lkt:14:11: error: AbstractNode is abstract and has no concrete subclass
+14 | @abstract class AbstractNode: Example {
+
+
+lkt_compile: Done

@@ -1330,6 +1330,11 @@ class Match(AbstractExpression):
         """
 
     def do_prepare(self):
+        # When Lkt lowering creates this expression, there is no preparation
+        # left to do.
+        if self.matchers is not None:
+            return
+
         self.matchers = []
 
         for i, match_fn in enumerate(self.matchers_functions):

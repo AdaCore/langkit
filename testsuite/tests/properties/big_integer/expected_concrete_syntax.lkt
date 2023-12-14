@@ -4,84 +4,78 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- list+(decl)
     decl <- Decl("def" name "=" expr)
-    expr <- or(op | atom)
-    op <- or(
-        | Plus(atom "+" expr)
-        | Minus(atom "-" expr)
-        | Equal(atom "=" expr)
-        | LessThan(atom "<" expr)
-    )
-    atom <- or(ref | literal)
-    ref <- Ref(name)
     name <- Identifier(@identifier)
+    expr <- or(BinOp(expr op term) | term)
+    term <- or(ParenExpr("(" expr ")") | atom)
+    op <- or(
+        | OpKind.Plus("+")
+        | OpKind.Minus("-")
+        | OpKind.Equal("=")
+        | OpKind.LessThan("<")
+        | OpKind.LessThanOrEqual("<=")
+        | OpKind.GreaterThan(">")
+        | OpKind.GreaterThanOrEqual(">=")
+    )
+    atom <- literal
     literal <- Literal(@number)
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @export fun identity(value: BigInt): BigInt = value
 
     @export fun check_big_literal(): BigInt =
     99999999999999999999999999999999999999999999b
+
+    fun to_int(b: Bool): BigInt = if b then 1b else 0b
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field name: Identifier
     @parse_field expr_tree: Expr
 }
 
-@abstract class Expr : FooNode {
-
+@abstract class Expr: FooNode {
     @export @abstract fun evaluate(): BigInt
 
     @export fun evaluate_as_int(): Int = node.evaluate().as_int()
 }
 
-class Equal : Expr {
+class BinOp: Expr {
     @parse_field left: Expr
+    @parse_field op: OpKind
     @parse_field right: Expr
 
-    fun evaluate(): BigInt = if (
-        node.left.evaluate() = node.right.evaluate()
-    ) then 1b else 0b
+    fun evaluate(): BigInt = {
+        val left = node.left.evaluate();
+        val right = node.right.evaluate();
+
+        match node.op {
+            case _: OpKind.Plus => left + right
+            case _: OpKind.Minus => left - right
+            case _: OpKind.Equal => node.to_int(left == right)
+            case _: OpKind.LessThan => node.to_int(left < right)
+            case _: OpKind.LessThanOrEqual => node.to_int(left <= right)
+            case _: OpKind.GreaterThan => node.to_int(left > right)
+            case _: OpKind.GreaterThanOrEqual => node.to_int(left >= right)
+        }
+    }
 }
 
-class LessThan : Expr {
-    @parse_field left: Expr
-    @parse_field right: Expr
-
-    fun evaluate(): BigInt = (
-        if (
-            node.left.evaluate() < node.right.evaluate()
-        ) then 1 else 0
-    ).as_big_int()
+class Literal: Expr implements TokenNode {
+    @external() fun evaluate(): BigInt
 }
 
-class Literal : Expr implements TokenNode {
+class ParenExpr: Expr {
+    @parse_field expr: Expr
 
-    @external fun evaluate(): BigInt
+    fun evaluate(): BigInt = node.expr.evaluate()
 }
 
-class Minus : Expr {
-    @parse_field left: Expr
-    @parse_field right: Expr
-
-    fun evaluate(): BigInt = node.left.evaluate() - node.right.evaluate()
+class Identifier: FooNode implements TokenNode {
 }
 
-class Plus : Expr {
-    @parse_field left: Expr
-    @parse_field right: Expr
-
-    fun evaluate(): BigInt = node.left.evaluate() + node.right.evaluate()
-}
-
-class Ref : Expr {
-    @parse_field name: Identifier
-
-    fun evaluate(): BigInt =
-    node.node_env().get_first(node.name.symbol).as[Decl].expr_tree.evaluate()
-}
-
-class Identifier : FooNode implements TokenNode {
+enum class OpKind: FooNode {
+    case Plus,
+    Minus,
+    Equal, LessThan, LessThanOrEqual, GreaterThan, GreaterThanOrEqual
 }

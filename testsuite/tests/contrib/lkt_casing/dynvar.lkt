@@ -1,0 +1,17 @@
+lexer foo_lexer {
+    @trivia() whitespace <- p"[ \n\r\t]+"
+    example <- "example"
+}
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+dynvar MyVar: Int
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+}

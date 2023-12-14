@@ -6,15 +6,14 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
-    fun create(index: Int, number: NumberNode): IndexedNumber =
+    fun create(index: Int, number: Entity[NumberNode]): IndexedNumber =
     IndexedNumber(index=index, number=number)
 }
 
-class ListNode : FooNode {
+class ListNode: FooNode {
     @parse_field nb_list: ASTList[FooNode, NumberNode]
 
-    fun nb_list_entities(): Array[NumberNode] =
+    fun nb_list_entities(): Array[Entity[NumberNode]] =
     node.nb_list.map((n) => n.as_bare_entity)
 
     @export fun map_no_idx(): Array[IndexedNumber] =
@@ -23,37 +22,49 @@ class ListNode : FooNode {
     @export fun map_idx(): Array[IndexedNumber] =
     node.nb_list_entities().map((n, i) => node.create(i, n))
 
-    @export fun filter_no_idx(): Array[NumberNode] =
-    node.nb_list_entities().filter((n) => n.text() = "2")
+    @export fun mapcat_no_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().mapcat((n) => [node.create(0, n)])
 
-    @export fun filter_idx(): Array[NumberNode] =
-    node.nb_list_entities().filter((n, i) => (n.text() = "2") or (i = 0))
+    @export fun mapcat_idx(): Array[IndexedNumber] =
+    node.nb_list_entities().mapcat((n, i) => [node.create(i, n)])
+
+    @export fun filter_no_idx(): Array[Entity[NumberNode]] =
+    node.nb_list_entities().filter((n) => n.text() == "2")
+
+    @export fun filter_idx(): Array[Entity[NumberNode]] =
+    node.nb_list_entities().filter((n, i) => (n.text() == "2") or (i == 0))
 
     @export fun filtermap_no_idx(): Array[IndexedNumber] =
     node.nb_list_entities().filtermap(
-        (n) => node.create(0, n), (n) => n.text() = "2"
+        (n) => node.create(0, n), (n) => n.text() == "2"
     )
 
     @export fun filtermap_elt_idx(): Array[IndexedNumber] =
     node.nb_list_entities().filtermap(
-        (n, i) => node.create(i, n), (n, i) => n.text() = "2"
+        (n, i) => node.create(i, n), (n, i) => n.text() == "2"
     )
 
     @export fun filtermap_filter_idx(): Array[IndexedNumber] =
     node.nb_list_entities().filtermap(
-        (n, i) => node.create(0, n), (n, i) => (n.text() = "2") or (i = 0)
+        (n, i) => node.create(0, n), (n, i) => (n.text() == "2") or (i == 0)
     )
 
     @export fun filtermap_all_idx(): Array[IndexedNumber] =
     node.nb_list_entities().filtermap(
-        (n, i) => node.create(i, n), (n, i) => (n.text() = "2") or (i = 0)
+        (n, i) => node.create(i, n), (n, i) => (n.text() == "2") or (i == 0)
     )
+
+    @export fun take_while_no_idx(): Array[Entity[NumberNode]] =
+    node.nb_list_entities().take_while((n) => n.text() != "3")
+
+    @export fun take_while_idx(): Array[Entity[NumberNode]] =
+    node.nb_list_entities().take_while((n, i) => (n.text() == "1") or (i == 0))
 }
 
-class NumberNode : FooNode implements TokenNode {
+class NumberNode: FooNode implements TokenNode {
 }
 
 struct IndexedNumber {
     index: Int
-    number: NumberNode
+    number: Entity[NumberNode]
 }

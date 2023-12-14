@@ -61,8 +61,9 @@ class Ref(FooNode):
     name = Field()
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-
-              # FIXME: switch back to True, see U930-033
-              lkt_semantic_checks=False)
+build_and_run(
+    lkt_file='expected_concrete_syntax.lkt',
+    py_script='main.py',
+    types_from_lkt=True,
+)
 print('Done')

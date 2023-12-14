@@ -458,14 +458,14 @@ class NPropagate(AbstractExpression):
 
 
 class DomainExpr(ComputingExpr):
-    static_type = T.Equation
-
     def __init__(self, domain, logic_var_expr, abstract_expr=None):
         self.domain = domain
         ":type: ResolvedExpression"
 
         self.logic_var_expr = logic_var_expr
         ":type: ResolvedExpression"
+
+        self.static_type = T.Equation
 
         super().__init__('Domain_Equation', abstract_expr=abstract_expr)
 

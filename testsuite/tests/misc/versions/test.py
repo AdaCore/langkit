@@ -23,6 +23,7 @@ def run(label, **kwargs):
             lkt_file="expected_concrete_syntax.lkt",
             version="1.version.number",
             build_date="build.date.number",
+            types_from_lkt=True,
             **kwargs
         )
     except DiagnosticError:

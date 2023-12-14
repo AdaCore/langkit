@@ -24,4 +24,4 @@ unknown-prop.lkt:5:29: error: Example has no no_such_prop property
   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Done
+lkt_compile: Done

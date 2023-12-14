@@ -16,8 +16,7 @@ grammar foo_grammar {
 ## Example node.
 ##
 ## Second line.
-class ExampleNode : TestNode {
-
+class ExampleNode: TestNode {
     ## docstring.
     @export fun test_no_var(): Int = # hello
     42
@@ -30,12 +29,12 @@ class ExampleNode : TestNode {
 
     @export fun test_cond(x: Int): Int = # incredible function
     # case 0
-    if (x = 0) then (
+    if (x == 0) then (
         # identity
         x
     )
     # case 1
-    elif (x = 1) then (
+    elif (x == 1) then (
         # increment
         x + 1
     )
@@ -70,10 +69,10 @@ class ExampleNode : TestNode {
 
     @export fun test_match(): Int = match node {
         # first case
-        case x : NodeType1 => 0
+        case x: NodeType1 => 0
 
         # node type 2!
-        case y : NodeType2 => 1
+        case y: NodeType2 => 1
 
         # well otherwise...
         case _ => 2
@@ -107,17 +106,17 @@ class ExampleNode : TestNode {
         x or (
             (
                 # True
-                x = true
+                x == true
             ) or (
                 # False
-                x = false
+                x == false
             )
         )
     )
 }
 
-class NodeType1 : ExampleNode {
+class NodeType1: ExampleNode {
 }
 
-class NodeType2 : ExampleNode {
+class NodeType2: ExampleNode {
 }

@@ -1,15 +1,19 @@
-== Empty: missing type ==
-test.py:XXX: error: Missing element type for empty array literal
+== empty_missing_type.lkt ==
+empty_missing_type.lkt:4:36: error: Missing element type for empty array literal
+4 |     @export fun p(): Array[Bool] = []
+  |                                    ^^
 
-== Empty: ok ==
-test.py:XXX: warning: This private property is unused
+
+== empty_ok.lkt ==
 Code generation was successful
 
-== Single: ok ==
-test.py:XXX: warning: This private property is unused
+== multiple_incompatible.lkt ==
+multiple_incompatible.lkt:4:36: error: In Array literal, expected element of type Bool, got Example
+4 |     @export fun p(): Array[Bool] = [true, node]
+  |                                    ^^^^^^^^^^^^
+
+
+== single_ok.lkt ==
 Code generation was successful
 
-== Multiple: heterogeneous types ==
-test.py:XXX: error: In Array literal, expected element of type Bool, got Example
-
-Done
+lkt_compile: Done

@@ -644,10 +644,13 @@ class Map(CollectionExpression):
         element_var: AbstractVariable,
         index_var: Optional[AbstractVariable] = None,
         filter_expr: Optional[AbstractExpression] = None,
+        take_while_expr: Optional[AbstractExpression] = None,
+        do_concat: bool = False,
     ) -> Map:
-        result = cls(collection, None)
+        result = cls(collection, None, do_concat=do_concat)
         result.initialize(expr, element_var, index_var)
         result.filter_expr = filter_expr
+        result.take_while_expr = take_while_expr
         return result
 
     def do_prepare(self) -> None:
@@ -806,6 +809,20 @@ class Quantifier(CollectionExpression):
         super().__init__(collection, predicate)
         assert kind in (self.ALL, self.ANY)
         self.kind = kind
+
+    @classmethod
+    def create_expanded(
+        cls,
+        kind: str,
+        collection: AbstractExpression,
+        predicate: AbstractExpression,
+        element_var: AbstractVariable,
+        index_var: Optional[AbstractVariable] = None,
+    ) -> Quantifier:
+        result = cls(collection, None, kind)
+        result.initialize(predicate, element_var, index_var)
+        result.expr = predicate
+        return result
 
     def construct(self) -> ResolvedExpression:
         """

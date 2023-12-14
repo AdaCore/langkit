@@ -4,13 +4,13 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+class FooNode implements Node[FooNode] {
 }
 
 class Example : FooNode {
 
-    @export fun values_array(): Array[Int] = [1, 2, 3]
+    @export fun get_lit(): Int = 2
 
     @export fun values_iterator(): Iterator[Int] =
-    node.values_array().to_iterator
+    node.get_lit().to_iterator()
 }

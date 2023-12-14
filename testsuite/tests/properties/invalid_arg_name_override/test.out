@@ -1,2 +1,7 @@
-test.py:XXX: error: Argument #1 does not have the same name here (b) as in base property (a)
-Done
+== foo.lkt ==
+foo.lkt:13:5: error: Argument #1 does not have the same name here (b) as in base property (a)
+13 |     fun prop(b: Bool): Bool = b
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

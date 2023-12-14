@@ -1,6 +1,14 @@
 import lexer_example
 
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(example)
     example <- Example("example" ?example)
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+@ple_unit_root class Example: FooNode {
+    @parse_field @nullable child: Example
 }

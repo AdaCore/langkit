@@ -1,4 +1,7 @@
+== foo.lkt ==
 Code generation was successful
+
+== test.py ==
 build/src/libfoolang-analysis.ads:
   --  Log this docstring. This is a typeref: :ada:ref:`Foo_Node`.
 build/src/libfoolang.h:
@@ -8,3 +11,5 @@ build/ocaml/libfoolang.mli:
 build/python/libfoolang/__init__.py:
   Log this docstring. This is a typeref: :py:class:`FooNode`.
 Done
+
+lkt_compile: Done

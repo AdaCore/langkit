@@ -9,39 +9,44 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Block : FooNode {
+class Block: FooNode {
     @parse_field name: Name
 
     ## Helper to create a new entity from ``Entity`` but with the given
     ## rebindings.
-    fun create_entity(rbdng: EnvRebindings): Block = {
+    fun create_entity(rbdng: EnvRebindings): Entity[Block] = {
         val e_info = EntityInfo(
             md=self.info.md, rebindings=rbdng, from_rebound=false
         );
 
-        Block(node=node, info=e_info)
+        Entity[Block](node=node, info=e_info)
     }
 
-    @export fun rebind(from_block: Block, to_block: Block): Block =
+    @export fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] =
     self.create_entity(
         self.info.rebindings.append_rebinding(
             from_block.children_env(), to_block.children_env()
         )
     )
 
-    @export fun concat_rebindings(other: Block): Block = self.create_entity(
+    @export fun concat_rebindings(other: Entity[Block]): Entity[Block] =
+    self.create_entity(
         self.info.rebindings.concat_rebindings(other.info.rebindings)
     )
 
-    @export fun parent_rebindings(): Block =
+    @export fun parent_rebindings(): Entity[Block] =
     self.create_entity(self.info.rebindings.get_parent)
 
-    @export fun new(): FooNode =
+    @export fun new(): Entity[FooNode] =
     self.info.rebindings.new_env.env_node.as_bare_entity
 
-    @export fun old(): FooNode =
+    @export fun old(): Entity[FooNode] =
     self.info.rebindings.old_env.env_node.as_bare_entity
+
+    env_spec {
+        add_env()
+    }
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }

@@ -8,16 +8,15 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-
     @memoized fun env_with_md(n1: FooNode, n2: FooNode): LexicalEnv[FooNode] =
     {
         val md1 = Metadata(n1=n1, n2=null[FooNode]);
         val md2 = Metadata(n1=null[FooNode], n2=n2);
 
-        [[node.node_env()].env_group()].env_group()
+        [[node.node_env()].env_group(with_md=md1)].env_group(with_md=md2)
     }
 
-    @export fun get_with_md(name: Symbol, n1: FooNode, n2: FooNode): FooNode =
+    @export fun get_with_md(name: Symbol, n1: FooNode, n2: FooNode): Entity[FooNode] =
     self.env_with_md(n1, n2).get_first(name)
 
     @export fun get_foo_metadata(): FooNode = self.info.md.n1
@@ -25,14 +24,28 @@ grammar foo_grammar {
     @export fun get_bar_metadata(): FooNode = self.info.md.n2
 }
 
-class Decl : FooNode {
+class Decl: FooNode {
     @parse_field name: Name
     @parse_field refs: ASTList[FooNode, Ref]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
 }
 
-class Name : FooNode implements TokenNode {
+class Name: FooNode implements TokenNode {
 }
 
-class Ref : FooNode {
+class Ref: FooNode {
     @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
+}
+
+@metadata struct Metadata {
+    @use_in_equality n1: FooNode
+    @use_in_equality n2: FooNode
 }

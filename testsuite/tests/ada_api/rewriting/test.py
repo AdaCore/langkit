@@ -86,6 +86,6 @@ build_and_run(
         "check_rotate.adb",
     ],
     generate_unparser=True,
-    types_from_lkt=False,
+    types_from_lkt=True,
 )
 print("Done")

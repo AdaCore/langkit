@@ -1,5 +1,6 @@
 from collections import defaultdict
 from contextlib import contextmanager
+import itertools
 import json
 import sys
 from typing import Dict
@@ -20,7 +21,7 @@ templates: Dict[str, str] = {}
 
 
 def fqn(prop):
-    return "{}.{}".format(prop.struct.name.camel, prop._original_name)
+    return "{}.{}".format(type_name(prop.struct), prop._original_name)
 
 
 class DSLWalker:
@@ -129,6 +130,38 @@ class DSLWalker:
         yield
         self.current_node = old_node
         self.current_token = new_node.token_end
+
+    def env_spec(self):
+        """
+        Given that the current cursor is on a class defining a node type, move
+        the cursor to the list of constructor argument for EnvSpec.
+        """
+        env_spec_assignment = self.current_node.find(
+            lambda n: (
+                n.is_a(lpl.AssignStmt) and n.f_l_value.text == "env_spec"
+            )
+        )
+        assert isinstance(env_spec_assignment.f_r_values, lpl.PythonNodeList)
+        expr_list = env_spec_assignment.f_r_values[0]
+        assert isinstance(expr_list, lpl.ExprList)
+        assert len(expr_list) == 1
+        env_spec_cons = expr_list[0]
+        assert isinstance(env_spec_cons, lpl.CallExpr)
+        assert env_spec_cons.f_prefix.text == "EnvSpec"
+        args = env_spec_cons.f_suffix
+        assert isinstance(args, lpl.ArgList)
+        self.last_token = env_spec_assignment.token_start
+        return self._with_current_node(args)
+
+    def env_action(self, index):
+        """
+        Given that the current cursor is on an env spec assignment, move the
+        cursor to the node corresponding to the env action for the given index.
+        """
+        arg_assoc = self.current_node[index]
+        assert isinstance(arg_assoc, lpl.ArgAssoc)
+        assert arg_assoc.f_name is None
+        return self._with_current_node(arg_assoc.f_expr)
 
     def property(self, prop):
         """
@@ -362,6 +395,25 @@ class DSLWalker:
 
         assert False
 
+    def arg_by_keyword(self, name: str, or_index: int):
+        """
+        If the cursor is on a function/metohd call, move the cursor to the
+        expression for the ``name`` keyword argument in this call, if it
+        exists, or to the expression for the ``index``th argument.
+
+        .. code:: This is a context manager.
+        """
+        assert isinstance(self.current_node, lpl.CallExpr)
+        for arg in self.current_node.f_suffix:
+            assert isinstance(arg, lpl.ArgAssoc)
+            if arg.f_name is not None and arg.f_name.text == name:
+                return self._with_current_node(
+                    arg.f_expr
+                )
+        arg = self.current_node.f_suffix[or_index]
+        assert isinstance(arg, lpl.ArgAssoc)
+        return self._with_current_node(arg.f_expr)
+
     def arg_keyword(self, index):
         """
         If the cursor is on a function/method call, return the keyword name
@@ -580,20 +632,28 @@ def expr_is_a(expr, *names):
     return any(expr.__class__.__name__ == n for n in names)
 
 
-def needs_parens(expr):
-    from langkit.expressions import (FieldAccess, Literal, AbstractVariable,
-                                     BigIntLiteral, Map, Quantifier, EnvGet,
-                                     Super)
+def needs_parens(expr, **ctx):
+    import langkit.expressions as E
     return not (
-        isinstance(expr, (FieldAccess, Literal, AbstractVariable, BigIntLiteral, EnvGet,
-                          Map, Quantifier, Super, int))
+        isinstance(expr, (
+            E.FieldAccess, E.Literal, E.AbstractVariable, E.BigIntLiteral,
+            E.EnvGet, E.Map, E.Quantifier, E.Super, E.No, E.Then, E.Match,
+            E.Cast, E.Let, E.ArrayLiteral, E.String, E.Predicate,
+            E.RefCategories, E.Bind, E.NPropagate, E.DynamicLexicalEnv,
+            E.StructUpdate, E.New, int
+        ))
         or expr_is_a(expr, "as_entity", "as_bare_entity", "children",
               "env_parent", "rebindings_parent", "parents", "parent", "root",
+              "env_node", "rebindings_new_env", "rebindings_old_env",
               "append_rebinding", "concat_rebindings", "env_node",
-              "rebindings_new_env", "rebindings_old_env", "get_value",
-              "solve", "is_referenced_from", "env_group", "length",
-              "can_reach", "as_int", "unique", "env_orphan",
-              "is_visible_from", "as_array", "rebind_env")
+              "get_value", "solve", "is_referenced_from", "env_group",
+              "length", "can_reach", "as_int", "unique", "env_orphan",
+              "is_visible_from", "as_array", "rebind_env", "at", "at_or_raise",
+              "domain", "to_symbol", "join")
+        or (
+            isinstance(expr, E.CollectionSingleton)
+            and not ctx.get("then_underscore_var", False)
+        )
     )
 
 
@@ -627,12 +687,11 @@ def emit_paren_expr(expr, **ctx):
 
     strn, has_coms = prepend_comments(expr, **ctx)
 
-    if not needs_parens(expr) and not has_coms:
-        return emit_paren(strn) if len(strn) > 40 else strn
-    elif isinstance(expr, Let):
-        return strn
-    else:
-        return emit_paren(strn, force=has_coms)
+    return (
+        emit_paren(strn, force=has_coms)
+        if needs_parens(expr) or (has_coms and not isinstance(expr, Let)) else
+        strn
+    )
 
 
 def emit_paren(strn, force=False):
@@ -650,6 +709,8 @@ def emit_nl(strn):
 
 
 def emit_expr(expr, **ctx):
+    from langkit.compiled_types import T
+    from langkit.dsl import LookupKind
     from langkit.expressions import (
         Literal, Let, FieldAccess, AbstractVariable, SelfVariable,
         EntityVariable, LogicTrue, LogicFalse, unsugar, Map, All, Any,
@@ -659,7 +720,7 @@ def emit_expr(expr, **ctx):
         ArrayLiteral, Arithmetic, BaseRaiseException, CharacterLiteral,
         Predicate, StructUpdate, BigIntLiteral, RefCategories, Bind, Try,
         Block, Contains, PropertyDef, DynamicLexicalEnv, Super, Join, String,
-        NPropagate, Find
+        NPropagate, Find, EmptyEnv
     )
 
     def is_a(*names):
@@ -668,6 +729,9 @@ def emit_expr(expr, **ctx):
 
     then_underscore_var = ctx.get('then_underscore_var')
     walker = ctx.get('walker')
+
+    def needs_parens(expr):
+        return langkit.dsl_unparse.needs_parens(expr, **ctx)
 
     def emit_lambda(expr, vars):
         vars_str = ", ".join(var_name(var) for var in vars)
@@ -691,7 +755,9 @@ def emit_expr(expr, **ctx):
         for i, (var, abs_expr) in enumerate(zip(expr.vars, expr.var_exprs)):
             with walker.var_assignment(i):
                 vars_defs += "{}val {} = {};$hl".format(
-                    walker.emit_comments(), var_name(var), ee(abs_expr)
+                    walker.emit_comments(),
+                    "_" if var.ignored else var_name(var),
+                    ee(abs_expr),
                 )
             vars_defs += walker.emit_comments()
 
@@ -718,7 +784,7 @@ def emit_expr(expr, **ctx):
         return str(expr.literal).lower()
 
     elif isinstance(expr, SymbolLiteral):
-        return json.dumps(expr.name)
+        return "s" + json.dumps(expr.name)
 
     elif isinstance(expr, BaseRaiseException):
         return "raise[{}] {}({})".format(
@@ -730,7 +796,11 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, IsA):
         return "{} is {}".format(
             ee_pexpr(expr.expr),
-            "{}".format(" | ".join(type_name(t) for t in expr.astnodes))
+            "{}".format(
+                " | ".join(
+                    type_name(t, strip_entity=True) for t in expr.astnodes
+                )
+            ),
         )
 
     elif isinstance(expr, LogicTrue):
@@ -769,7 +839,7 @@ def emit_expr(expr, **ctx):
         def emit_self():
             nonlocal coll
             with walker.self_arg():
-                coll = ee(expr.collection)
+                coll = ee_pexpr(expr.collection)
 
         def handle_map():
             emit_self()
@@ -830,17 +900,19 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, Quantifier):
         return emit_method_call(
-            ee(expr.collection),
+            ee_pexpr(expr.collection),
             expr.kind,
             [emit_lambda(expr.expr, [expr.element_var])]
         )
 
     elif isinstance(expr, Contains):
-        return emit_method_call(ee(expr.collection), "contains", [ee(expr.item)])
+        return emit_method_call(
+            ee_pexpr(expr.collection), "contains", [ee(expr.item)]
+        )
 
     elif isinstance(expr, Find):
         return emit_method_call(
-            ee(expr.collection),
+            ee_pexpr(expr.collection),
             "find",
             [emit_lambda(expr.expr, [expr.element_var])],
         )
@@ -890,17 +962,17 @@ def emit_expr(expr, **ctx):
         return "{}.is_null".format(ee(expr.expr))
 
     elif isinstance(expr, Cast):
-        return "{}.as[{}]{}".format(
+        return "{}.as{}[{}]".format(
             ee(expr._expr),
-            type_name(expr.dest_type),
             "!" if expr.do_raise else "",
+            type_name(expr.dest_type, strip_entity=True),
         )
 
     elif isinstance(expr, All):
-        return ee(expr.equation_array)
+        return "%all({})".format(ee(expr.equation_array))
 
     elif isinstance(expr, Any):
-        return ee(expr.equation_array)
+        return "%any({})".format(ee(expr.equation_array))
 
     elif isinstance(expr, Match):
         with walker.method_call("match"):
@@ -920,7 +992,7 @@ def emit_expr(expr, **ctx):
                     res += "$hl{}case {}{} => {}".format(
                         coms,
                         var_name(var),
-                        (" " + sf(": ${type_name(typ)}")) if typ else "",
+                        sf(": ${type_name(typ)}") if typ else "",
                         ee(e)
                     )
 
@@ -929,7 +1001,7 @@ def emit_expr(expr, **ctx):
         return res
 
     elif isinstance(expr, Eq):
-        return "{} = {}".format(ee(expr.lhs), ee(expr.rhs))
+        return "{} == {}".format(ee(expr.lhs), ee(expr.rhs))
 
     elif isinstance(expr, BinaryBooleanOperator):
         with walker.boolean_binop(expr.kind):
@@ -948,6 +1020,8 @@ def emit_expr(expr, **ctx):
             return emit_bool_op_rec(expr, walker.arg_count())
 
     elif isinstance(expr, Not):
+        if isinstance(expr.expr, Eq):
+            return "{} != {}".format(ee(expr.expr.lhs), ee(expr.expr.rhs))
         return "not {}".format(emit_paren_expr(expr.expr, **ctx))
 
     elif isinstance(expr, Then):
@@ -1050,8 +1124,12 @@ def emit_expr(expr, **ctx):
               "rebindings_new_env", "rebindings_old_env"):
         # Field like expressions
         exprs = expr.sub_expressions
-        return emit_method_call(ee(exprs[0]), type(expr).__name__,
-                                lmap(ee, exprs[1:]), False)
+        return emit_method_call(
+            ee_pexpr(exprs[0]),
+            type(expr).__name__,
+            lmap(ee, exprs[1:]),
+            False,
+        )
 
     elif is_a("append_rebinding", "concat_rebindings", "env_node", "get_value",
               "solve", "is_referenced_from", "env_group", "length", "can_reach",
@@ -1059,8 +1137,10 @@ def emit_expr(expr, **ctx):
               "rebind_env"):
         # Method like expressions
         exprs = expr.sub_expressions
-        return emit_method_call(ee(exprs[0]), type(expr).__name__,
-                                lmap(ee, exprs[1:]))
+        args = lmap(ee, exprs[1:])
+        for k, v in expr.kwargs.items():
+            args.append(f"{k}={ee(v)}")
+        return emit_method_call(ee_pexpr(exprs[0]), type(expr).__name__, args)
 
     elif isinstance(expr, EnumLiteral):
         return expr.value.dsl_name
@@ -1076,12 +1156,14 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, EnvGet):
         args = [ee(expr.symbol)]
+        if expr.lookup_kind != LookupKind.recursive:
+            args.append(f"lookup={ee(expr.lookup_kind)}")
         if expr.sequential_from:
             args.append("from={}".format(ee(expr.sequential_from)))
         if expr.categories:
             args.append('categories={}'.format(ee(expr.categories)))
         return emit_method_call(
-            ee(expr.env),
+            ee_pexpr(expr.env),
             "get_first" if expr.only_first else "get",
             args
         )
@@ -1092,10 +1174,10 @@ def emit_expr(expr, **ctx):
                 ee(expr.expr_1) == "0"):
             return ee(expr.expr_0)
 
-        return "{}?({})".format(ee(expr.expr_0), ee(expr.expr_1))
+        return "{}?[{}]".format(ee(expr.expr_0), ee(expr.expr_1))
 
     elif is_a("at_or_raise"):
-        return "{}({})".format(ee(expr.expr_0), ee(expr.expr_1))
+        return "{}[{}]".format(ee(expr.expr_0), ee(expr.expr_1))
 
     elif isinstance(expr, FieldAccess):
         args = []
@@ -1104,7 +1186,7 @@ def emit_expr(expr, **ctx):
         if expr.arguments:
             with walker.method_call(expr.field):
                 field_coms = walker.emit_comments()
-                receiver_str = ee(expr.receiver)
+                receiver_str = ee_pexpr(expr.receiver)
 
                 for i in range(walker.arg_count()):
                     kw = walker.arg_keyword(i)
@@ -1119,7 +1201,7 @@ def emit_expr(expr, **ctx):
                         has_any_commented_arg |= arg_coms != ""
         else:
             field_coms = ""
-            receiver_str = ee(expr.receiver)
+            receiver_str = ee_pexpr(expr.receiver)
 
         return field_coms + emit_method_call(
             receiver_str,
@@ -1135,7 +1217,7 @@ def emit_expr(expr, **ctx):
             args.append(ee(arg))
         for kw, arg in expr.arguments.kwargs.items():
             args.append("{}={}".format(kw, ee(arg)))
-        return "super({})".format(", ".join(args))
+        return "{}.super({})".format(ee(expr.prefix), ", ".join(args))
 
     elif isinstance(expr, Concat):
         result = ""
@@ -1157,7 +1239,9 @@ def emit_expr(expr, **ctx):
         return expr.argument_name.lower
 
     elif isinstance(expr, AbstractVariable):
-        if then_underscore_var:
+        if expr is EmptyEnv:
+            return f"null[{type_name(T.LexicalEnv)}]"
+        elif then_underscore_var:
             if id(then_underscore_var) == id(expr):
                 return ""
         return var_name(expr)
@@ -1168,7 +1252,9 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, CollectionSingleton):
         if then_underscore_var:
-            return emit_method_call(ee(expr.expr), "singleton")
+            return emit_method_call(
+                ee_pexpr(expr.expr), "singleton"
+            )
         else:
             return "[{}]".format(ee(expr.expr))
 
@@ -1212,11 +1298,13 @@ def emit_expr(expr, **ctx):
         else:
             return f'{ee_pexpr(expr.expr)}.as_big_int()'
     elif isinstance(expr, RefCategories):
-        return 'RefCats({})'.format(', '.join(
+        args = [
             '{}={}'.format(name, ee(value))
-            for name, value in
-            list(sorted(expr.cat_map.items())) + [("others", expr.default)]
-        ))
+            for name, value in sorted(expr.cat_map.items())
+        ]
+        if expr.default:
+            args.append("_=true")
+        return 'RefCategories({})'.format(', '.join(args))
 
     elif isinstance(expr, Predicate):
         return "%predicate({})".format(", ".join(keep([
@@ -1240,7 +1328,7 @@ def emit_expr(expr, **ctx):
         ] + [ee(v) for v in expr.arg_vars])))
 
     elif isinstance(expr, DynamicLexicalEnv):
-        return "DynamicLexicalEnv({})".format(", ".join(keep([
+        return "dynamic_lexical_env({})".format(", ".join(keep([
             fqn(expr.assocs_getter),
             f"assoc_resolver={fqn(expr.assoc_resolver)}"
             if expr.assoc_resolver else '',
@@ -1282,11 +1370,12 @@ def emit_prop(prop, walker):
         quals += "@export "
 
     if prop.external:
-        quals += "@external "
+        qual_args = []
         if prop.uses_entity_info:
-            quals += "@uses_entity_info "
+            qual_args.append("uses_entity_info=true")
         if prop.uses_envs:
-            quals += "@uses_envs "
+            qual_args.append("uses_envs=true")
+        quals += "@external({}) ".format(", ".join(qual_args))
     elif not prop.constructed_expr and not prop.abstract_runtime_check:
         quals += "@abstract "
 
@@ -1298,25 +1387,39 @@ def emit_prop(prop, walker):
     if prop.activate_tracing:
         quals += "@trace "
 
-    args = ", ".join("{}: {}{}".format(
-        var_name(arg), type_name(arg.type),
-        " = {}".format(emit_expr(arg.abstract_default_value))
-        if arg.abstract_default_value else ""
-    ) for arg in prop.natural_arguments)
+    if prop.dynamic_vars:
+        vars = []
+        for dynvar in prop.dynamic_vars:
+            name = dynvar.dsl_name
+            val = prop.dynamic_var_default_value(dynvar)
+            vars.append(
+                name
+                if val is None else
+                "{}={}".format(name, emit_expr(val))
+            )
+        quals += "@with_dynvars({}) ".format(", ".join(vars))
+
+    args = []
+    for arg in prop.natural_arguments:
+        arg_text = "@ignored " if arg.var._ignored else ""
+        arg_text += f"{var_name(arg)}: {type_name(arg.type)}"
+        if arg.abstract_default_value:
+            arg_text += " = {}".format(emit_expr(arg.abstract_default_value))
+        args.append(arg_text)
 
     doc = prop.doc
 
     res = ""
     if doc:
-        res += "$hl{}".format(emit_doc(doc))
+        res += "{}$hl".format(emit_doc(doc))
 
     if prop.lazy_field:
-        res += "$hl{}{}: {}".format(
+        res += "{}{}: {}".format(
             quals, prop.original_name, type_name(prop.type)
         )
     else:
-        res += "$hl{}fun {}({}): {}".format(
-            quals, prop.original_name, args, type_name(prop.type)
+        res += "{}fun {}({}): {}".format(
+            quals, prop.original_name, ", ".join(args), type_name(prop.type)
         )
 
     if prop.abstract_runtime_check:
@@ -1336,10 +1439,12 @@ def emit_prop(prop, walker):
 
 
 def emit_field(field):
-    from langkit.compiled_types import BaseField, Field, UserField
+    from langkit.compiled_types import (
+        BaseField, Field, MetadataField, UserField
+    )
 
     if isinstance(field, BaseField):
-        result = "{}{}{}{}{}: {}".format(
+        result = "{}{}{}{}{}{}: {}".format(
             "@abstract " if isinstance(field, Field) and field.abstract else "",
             "@parse_field " if isinstance(field, Field) else "",
             "@null_field " if field.null else "",
@@ -1347,6 +1452,10 @@ def emit_field(field):
                 isinstance(field, Field)
                 and not field.is_overriding
                 and field.nullable
+            ) else "",
+            "@use_in_equality " if (
+                isinstance(field, MetadataField)
+                and field.use_in_equality
             ) else "",
             unparsed_name(field._indexing_name), type_name(field.type)
         )
@@ -1360,11 +1469,14 @@ def emit_field(field):
         raise NotImplementedError()
 
 
-def type_name(type):
+def type_name(type, strip_entity=False):
     from langkit.compiled_types import ASTNodeType, resolve_type
     from langkit.compile_context import get_context
 
     type = resolve_type(type)
+
+    if strip_entity and type.is_entity_type:
+        type = type.element_type
 
     def bases(typ):
         t = typ.base
@@ -1383,7 +1495,7 @@ def type_name(type):
     elif type.is_iterator_type:
         return "Iterator[{}]".format(type_name(type.element_type))
     elif type.is_entity_type:
-        return type_name(type.element_type)
+        return "Entity[{}]".format(type_name(type.element_type))
     elif type.is_struct_type:
         return type.api_name.camel
     elif type.is_ast_node:
@@ -1417,11 +1529,10 @@ def emit_node_type(node_type):
 
         base = node_type.base
         base_name = type_name(base) if base else ""
+        annotations = node_type.annotations
 
         if base and base.is_generic_list_type:
             return ""
-
-        quals = []
 
         if node_type.is_bool_node:
             quals.append("qualifier")
@@ -1443,6 +1554,34 @@ def emit_node_type(node_type):
         if node_type.has_abstract_list:
             quals.append("has_abstract_list")
 
+        if annotations.custom_short_image:
+            quals.append("custom_short_image")
+
+        if annotations.generic_list_type:
+            quals.append(
+                f'generic_list_type("{annotations.generic_list_type}")'
+            )
+
+        if annotations.ple_unit_root:
+            quals.append("ple_unit_root")
+
+        if annotations.rebindable:
+            quals.append("rebindable")
+
+        if annotations.repr_name:
+            quals.append(
+                f'repr_name("{annotations.repr_name}")'
+            )
+
+        if annotations.snaps:
+            quals.append("snaps")
+
+        if annotations.warn_on_node:
+            quals.append("warn_on_node")
+
+        if node_type.synthetic:
+            quals.append("synthetic")
+
         type_kind = "class"
 
         if node_type.is_enum_node:
@@ -1456,9 +1595,17 @@ def emit_node_type(node_type):
         if node_type.is_entity_type:
             return ""
         elif node_type in (CompiledTypeRepo.entity_info,
-                           CompiledTypeRepo.env_metadata,
-                           T.env_assoc, T.inner_env_assoc):
+                           T.env_assoc,
+                           T.inner_env_assoc):
             return ""
+        elif (
+            node_type == CompiledTypeRepo.env_metadata
+            and node_type.location is None
+        ):
+            return ""
+
+        if node_type == T.env_md:
+            quals.append("metadata")
 
     parse_fields = [
         f for f in node_type.get_fields(include_inherited=False)
@@ -1468,8 +1615,8 @@ def emit_node_type(node_type):
     properties = node_type.get_properties(include_inherited=False)
     doc = node_type._doc
 
-    strbase = ": {} ".format(base_name) if base_name else ""
-    strtraits = "implements {} ".format(", ".join(traits)) if traits else ""
+    strbase = ": {}".format(base_name) if base_name else ""
+    strtraits = " implements {}".format(", ".join(traits)) if traits else ""
 
     def is_builtin_prop(prop):
         return any(
@@ -1483,24 +1630,47 @@ def emit_node_type(node_type):
     if base and base.is_enum_node:
         return ""
 
+    content = []
+    # Emit one item per line with no empty line in between for enum
+    # members/fields.
+    if enum_members:
+        content.append(f"case {enum_members}")
+    for field in parse_fields:
+        content.append(emit_field(field))
+
+    # Emit one empty line between each propery, and before the first property
+    # if there are other members (so that the first property is well separated
+    # from what is before).
+    props_to_emit = [
+        prop for prop in properties
+        if (
+            not prop.is_internal
+            and not is_builtin_prop(prop)
+            and not prop.is_artificial_dispatcher
+            and not prop.artificial
+        )
+    ]
+    if content and props_to_emit:
+        content.append("")
+    for i, prop in enumerate(props_to_emit):
+        if i > 0:
+            content.append("")
+        content.append(emit_prop(prop, walker))
+
+    if node_type.is_ast_node and node_type.env_spec:
+        if content:
+            content.append("")
+        content.append(emit_env_spec(node_type, walker))
+
+    content_str = "".join(line + "$hl\n" for line in content)
+
     return sf("""
     % if doc:
     ${emit_doc(doc)}$hl
     % endif
     ${''.join(f'@{q} ' for q in quals)}
-    ${type_kind} ${type_name(node_type)} ${strbase}${strtraits}{$i$hl
-    % if enum_members:
-    case ${enum_members}
-    $hl
-    % endif
-    % for field in parse_fields:
-    ${emit_field(field)}$hl
-    % endfor
-    % for prop in properties:
-    % if not prop.is_internal and not is_builtin_prop(prop) and not prop.is_artificial_dispatcher and not prop.artificial:
-    ${emit_prop(prop, walker)}$hl
-    % endif
-    % endfor
+    ${type_kind} ${type_name(node_type)}${strbase}${strtraits} {$i$hl
+    ${content_str}
     $d
     }$hl
     """.strip())
@@ -1508,13 +1678,125 @@ def emit_node_type(node_type):
     del base, parse_fields, enum_qual, properties
 
 
+def emit_env_spec(node_type, walker):
+    import langkit.envs as envs
+    import langkit.expressions as E
+
+    def ee(expr):
+        return emit_expr(expr, walker=walker)
+
+    def emit_action(action):
+        if isinstance(action, envs.AddEnv):
+            fn_name = "add_env"
+            args = []
+            if action.no_parent:
+                args.append("no_parent=true")
+            if action.transitive_parent and not (
+                isinstance(action.transitive_parent, E.Literal)
+                and action.transitive_parent.literal is False
+            ):
+                with walker.arg_by_keyword("transitive_parent", 1):
+                    args.append(
+                        f"transitive_parent={ee(action.transitive_parent)}"
+                    )
+            if action.names is not None:
+                with walker.arg_by_keyword("names", 2):
+                    args.append(f"names={ee(action.names)}")
+
+        elif isinstance(action, envs.AddToEnv) and action.kv_params:
+            params = action.kv_params
+            fn_name = "add_to_env_kv"
+            args = []
+            with walker.arg(0):
+                args.append(ee(params.key))
+            with walker.arg(1):
+                args.append(ee(params.value))
+            if params.dest_env is not None:
+                with walker.arg_by_keyword("dest_env", 2):
+                    args.append(f"dest_env={ee(params.dest_env)}")
+            if params.metadata is not None:
+                with walker.arg_by_keyword("metadata", 3):
+                    args.append(f"metadata={ee(params.metadata)}")
+            if params.resolver is not None:
+                with walker.arg_by_keyword("resolver", 5):
+                    args.append(f"resolver={fqn(params.resolver)}")
+
+        elif isinstance(action, envs.AddToEnv):
+            fn_name = "add_to_env"
+            with walker.arg(0):
+                args = [ee(action.mappings)]
+            if action.resolver:
+                with walker.arg_by_keyword("resolver", 1):
+                    args.append(f"resolver={fqn(action.resolver)}")
+
+        elif isinstance(action, envs.Do):
+            fn_name = "do"
+            with walker.arg(0):
+                args = [ee(action.expr)]
+
+        elif isinstance(action, envs.RefEnvs):
+            fn_name = "reference"
+            args = []
+            with walker.arg(0):
+                args.append(ee(action.nodes_expr))
+            with walker.arg(1):
+                args.append(fqn(action.resolver))
+            if action.kind != envs.RefKind.normal:
+                with walker.arg_by_keyword("kind", 2):
+                    args.append(f"kind={action.kind.value.lower()}")
+            if action.dest_env is not None:
+                with walker.arg_by_keyword("dest_env", 3):
+                    args.append(f"dest_env={ee(action.dest_env)}")
+            if action.cond is not None:
+                with walker.arg_by_keyword("cond", 4):
+                    args.append(f"cond={ee(action.cond)}")
+            if action.category is not None:
+                with walker.arg_by_keyword("category", 5):
+                    args.append(f'category="{action.category.lower}"')
+            if action.shed_rebindings:
+                with walker.arg_by_keyword("shed_corresponding_rebindings",6):
+                    args.append("shed_corresponding_rebindings=true")
+
+        elif isinstance(action, envs.SetInitialEnv):
+            fn_name = "set_initial_env"
+            with walker.arg(0):
+                args = [ee(action.env_expr)]
+
+        else:
+            return "# " + str(action)
+
+        return "{}{}".format(fn_name, emit_paren(", ".join(args)))
+
+    with walker.env_spec():
+        env_spec = node_type.env_spec
+        result = ["env_spec {$i$hl\n"]
+        action_index = iter(itertools.count(0))
+        for action in env_spec.pre_actions:
+            with walker.env_action(next(action_index)):
+                result.append(walker.emit_comments())
+                result.append(emit_action(action) + "$hl")
+        if result and env_spec.post_actions:
+            with walker.env_action(next(action_index)):
+                result.append(walker.emit_comments())
+                result.append("handle_children()$hl")
+        for action in env_spec.post_actions:
+            with walker.env_action(next(action_index)):
+                result.append(walker.emit_comments())
+                result.append(emit_action(action) + "$hl")
+        result.append("$d\n}")
+        return "\n".join(result)
+
+
 def emit_enum_type(enum_type):
     literals = ", ".join(l.name.lower for l in enum_type.values)
+    quals = ""
+    if enum_type.default_val_name:
+        quals += f"@with_default({enum_type.default_val_name.lower}) "
     return sf("""
     % if enum_type.doc:
     ${emit_doc(enum_type.doc)}$hl
     % endif
-    enum ${enum_type.dsl_name} {$i$hl
+    ${quals}enum ${enum_type.dsl_name} {$i$hl
         case ${literals}$hl
     $d}$hl
     """.strip())
@@ -1822,6 +2104,7 @@ def unparse_nodes(ctx, f):
     """
     Unparse the nodes for the current language to the given file.
     """
+    from langkit.compiled_types import CompiledTypeRepo
     from langkit.diagnostics import check_source_language, Severity
     check_source_language(
         predicate=libpythonlang_available,
@@ -1829,6 +2112,17 @@ def unparse_nodes(ctx, f):
         severity=Severity.warning,
         do_raise=False
     )
+
+    if CompiledTypeRepo.dynamic_vars:
+        f.write("\n")
+    for dynvar in CompiledTypeRepo.dynamic_vars:
+        name = dynvar.argument_name.lower
+        typ = type_name(dynvar.type)
+        decl = ""
+        if dynvar.doc:
+            decl += emit_doc(dynvar.doc) + "$hl\n"
+        decl += f"dynvar {name}: {typ}$hl"
+        f.write(pp(decl))
 
     enum_types = [emit_enum_type(t)
                   for t in ctx.enum_types

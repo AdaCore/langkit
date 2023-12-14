@@ -17,5 +17,6 @@ build_and_run(
         "Libfoolang.Helpers", "Create_Unit_Provider",
     ),
     symbol_canonicalizer=LibraryEntity("Pkg", "Canonicalize"),
+    types_from_lkt=True,
 )
 print("Done")

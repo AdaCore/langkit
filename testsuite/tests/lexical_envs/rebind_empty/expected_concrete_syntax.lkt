@@ -8,9 +8,8 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode implements TokenNode {
-
-    @export fun rebind(from_node: FooNode, to_node: FooNode): Array[FooNode] =
+class Example: FooNode implements TokenNode {
+    @export fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Array[Entity[FooNode]] =
     {
         # Build non-null rebindings
         val rbdng = null[EnvRebindings].append_rebinding(
@@ -19,6 +18,10 @@ class Example : FooNode implements TokenNode {
 
         # Call rebind_env on them (this is the important part, the rest is
         # cosmetic).
-        null[LexicalEnv[FooNode]].rebind_env(rbdng).get("foo")
+        null[LexicalEnv[FooNode]].rebind_env(rbdng).get(s"foo")
+    }
+
+    env_spec {
+        add_env()
     }
 }

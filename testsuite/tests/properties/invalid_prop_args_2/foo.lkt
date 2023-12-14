@@ -1,6 +1,0 @@
-import lexer_example
-
-grammar foo_grammar {
-    @main_rule main_rule <- BarCode("example" rule_2)
-    rule_2 <- BarNode("example" rule_2)
-}

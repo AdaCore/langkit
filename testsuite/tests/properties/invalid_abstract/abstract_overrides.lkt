@@ -1,0 +1,18 @@
+# Check that abstract properties not overriden in concrete nodes are rejected
+
+import common
+
+class FooNode implements Node[FooNode] {
+}
+
+@abstract class BaseNode: FooNode {
+    @export @abstract fun prop(): Bool
+}
+
+class Identifier: BaseNode {
+    @abstract fun prop(): Bool
+}
+
+class Number: BaseNode {
+    @abstract fun prop(): Bool
+}
