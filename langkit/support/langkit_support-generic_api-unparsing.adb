@@ -645,7 +645,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          JSON := JSON_Result.Value;
       else
          raise Invalid_Input with
-           Filename & Format_Parsing_Error (JSON_Result.Error);
+           Filename & ":" & Format_Parsing_Error (JSON_Result.Error);
       end if;
 
       --  Then load the unparsing configuration from it. Require a

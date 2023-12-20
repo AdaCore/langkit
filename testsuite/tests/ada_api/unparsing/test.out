@@ -13,7 +13,7 @@ def f1(a: Int, b: Int=0): Int
 # no_such_file.json
     cannot read no_such_file.json
 # invalid_syntax.json
-    invalid_syntax.json2:2: empty stream
+    invalid_syntax.json:2:2: empty stream
 # missing_node_configs.json
     missing "node_configs" key
 # invalid_type_name.json
