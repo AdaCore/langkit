@@ -7,6 +7,9 @@ def f1(a: Int, b: Int=0): Int
     a + b + 1;
 }
 
+== main.adb -r param_spec config.json param_spec.txt ==
+a: Int=2
+
 == invalid_config.adb ==
 == Errors outside of templates ==
 

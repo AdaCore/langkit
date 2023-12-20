@@ -75,6 +75,9 @@ build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
     gpr_mains=[
         GPRMain("main.adb", ["config.json", "example.txt"]),
+        GPRMain(
+            "main.adb", ["-r", "param_spec", "config.json", "param_spec.txt"]
+        ),
         "invalid_config.adb",
         "commands.adb",
     ],

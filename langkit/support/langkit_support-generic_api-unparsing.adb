@@ -971,6 +971,28 @@ package body Langkit_Support.Generic_API.Unparsing is
       use Ada.Command_Line;
       use GNATCOLL.Opt_Parse;
 
+      function Convert (Arg : String) return Grammar_Rule_Ref;
+      --  Convert a rule name to the corresponding grammar rule for
+      --  ``Language``. Raise a ``Constraint_Error`` if ``Arg`` is not a valid
+      --  rule name.
+
+      -------------
+      -- Convert --
+      -------------
+
+      function Convert (Arg : String) return Grammar_Rule_Ref is
+         A : constant Text_Type := To_Text (Arg);
+         R : Grammar_Rule_Ref;
+      begin
+         for I in Grammar_Rule_Index'First .. Last_Grammar_Rule (Language) loop
+            R := From_Index (Language, I);
+            if A = Format_Name (Grammar_Rule_Name (R), Lower) then
+               return R;
+            end if;
+         end loop;
+         raise Constraint_Error with "invalid grammar rule name";
+      end Convert;
+
       Parser : Argument_Parser := Create_Argument_Parser
         (Help => "Pretty-print a source file");
 
@@ -1014,6 +1036,15 @@ package body Langkit_Support.Generic_API.Unparsing is
          Help        => "End of line: LF, CR, CRLF",
          Default_Val => Prettier.LF);
 
+      package Rule is new Parse_Option
+        (Parser      => Parser,
+         Short       => "-r",
+         Long        => "--rule-name",
+         Arg_Type    => Grammar_Rule_Ref,
+         Help        =>
+           "Grammar rule name to parse the source file to pretty-print",
+         Default_Val => Default_Grammar_Rule (Language));
+
       package Config_Filename is new Parse_Positional_Arg
         (Parser   => Parser,
          Name     => "config-file",
@@ -1053,7 +1084,9 @@ package body Langkit_Support.Generic_API.Unparsing is
             return;
       end;
       Context := Create_Context (Language);
-      Unit := Context.Get_From_File (To_String (Source_Filename.Get));
+      Unit := Context.Get_From_File
+        (Filename => To_String (Source_Filename.Get),
+         Rule     => Rule.Get);
       if Unit.Has_Diagnostics then
          Put_Line ("Cannot parse source file: aborting...");
          for D of Unit.Diagnostics loop
