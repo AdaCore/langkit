@@ -54,7 +54,11 @@ ${exts.with_clauses(with_clauses + [
        and not ctx.symbol_canonicalizer.unit_fqn.startswith("Langkit_Support.")
     else None),
    ((ctx.default_unit_provider.unit_fqn, False, False)
-    if ctx.default_unit_provider else None)
+    if ctx.default_unit_provider else None),
+   ((ctx.cache_collection_conf.decision_heuristic.unit_fqn, False, False)
+    if ctx.cache_collection_enabled
+       and ctx.cache_collection_conf.decision_heuristic
+    else None)
 ])}
 pragma Warnings (On, "referenced");
 
@@ -138,6 +142,9 @@ package body ${ada_lib_name}.Implementation is
    function Construct_Entity_Array
      (V : AST_Envs.Entity_Vectors.Vector) return ${T.entity.array.name};
    pragma Warnings (On, "referenced");
+
+   procedure Reset_Envs_Caches (Unit : Internal_Unit);
+   --  Reset the env caches of all lexical environments created for ``Unit``
 
    procedure Destroy (Env : in out Lexical_Env_Access);
 
@@ -1015,6 +1022,37 @@ package body ${ada_lib_name}.Implementation is
       null;
    end Reparse;
 
+   -----------------------
+   -- Reset_Envs_Caches --
+   -----------------------
+
+   procedure Reset_Envs_Caches (Unit : Internal_Unit) is
+      procedure Internal (Node : ${T.root_node.name});
+      --  Reset env caches in ``Node`` and then in its children recursively
+
+      Generic_Unit : constant Generic_Unit_Ptr := Convert_Unit (Unit);
+
+      --------------
+      -- Internal --
+      --------------
+
+      procedure Internal (Node : ${T.root_node.name}) is
+      begin
+         if Node = null then
+            return;
+         end if;
+         --  Make sure to only reset caches of envs belonging to this unit
+         if Node.Self_Env.Owner = Generic_Unit then
+            Reset_Caches (Node.Self_Env);
+         end if;
+         for I in 1 .. Children_Count (Node) loop
+            Internal (Child (Node, I));
+         end loop;
+      end Internal;
+   begin
+      Internal (Unit.Ast_Root);
+   end Reset_Envs_Caches;
+
    --------------------------
    -- Populate_Lexical_Env --
    --------------------------
@@ -1037,35 +1075,6 @@ package body ${ada_lib_name}.Implementation is
 
       Has_Errors : Boolean := False;
       --  Whether at least one Property_Error occurred during this PLE pass
-
-      procedure Reset_Envs_Caches (Unit : Internal_Unit);
-      --  Reset the env caches of all lexical environments created for ``Unit``
-
-      -----------------------
-      -- Reset_Envs_Caches --
-      -----------------------
-
-      procedure Reset_Envs_Caches (Unit : Internal_Unit) is
-         procedure Internal (Node : ${T.root_node.name});
-         --  Reset env caches in ``Node`` and then in its children recursively
-
-         --------------
-         -- Internal --
-         --------------
-
-         procedure Internal (Node : ${T.root_node.name}) is
-         begin
-            if Node = null then
-               return;
-            end if;
-            Reset_Caches (Node.Self_Env);
-            for I in 1 .. Children_Count (Node) loop
-               Internal (Child (Node, I));
-            end loop;
-         end Internal;
-      begin
-         Internal (Unit.Ast_Root);
-      end Reset_Envs_Caches;
 
    begin
       --  TODO??? Handle env invalidation when reparsing a unit and when a
@@ -1481,6 +1490,12 @@ package body ${ada_lib_name}.Implementation is
       if Unit = No_Analysis_Unit then
          return;
       end if;
+
+      --  Clear the env caches while the unit is still fully alive to make sure
+      --  that what is accessed in ``Lexical_Env_Cache_Updated`` is still
+      --  valid, as it will be called back by lexical envs that are being
+      --  destroyed.
+      Reset_Envs_Caches (Unit);
 
       Unit.PLE_Roots_Starting_Token.Destroy;
       Unit.Env_Populated_Roots.Destroy;
@@ -2836,6 +2851,112 @@ package body ${ada_lib_name}.Implementation is
    begin
       Node.Unit.Rebindings.Append (Rebinding);
    end Register_Rebinding;
+
+   % if ctx.cache_collection_enabled:
+
+      -------------------------------
+      -- Lexical_Env_Cache_Updated --
+      -------------------------------
+
+      procedure Lexical_Env_Cache_Updated
+        (Node         : ${T.root_node.name};
+         Delta_Amount : Long_Long_Integer)
+      is
+         Ctx : constant Internal_Context := Node.Unit.Context;
+
+         Ctx_Stats : Context_Env_Caches_Stats renames Ctx.Env_Caches_Stats;
+
+         All_Env_Caches_Entry_Count : constant Long_Long_Integer :=
+           Ctx_Stats.Entry_Count;
+         --  Snapshot of the total number of entries before any collection is
+         --  attempted. This is needed because if a collection happens,
+         --  ``Ctx.Env_Caches_Stats.Entry_Count`` will be updated on the go.
+      begin
+         Ctx_Stats.Entry_Count :=
+           All_Env_Caches_Entry_Count + Delta_Amount;
+         Node.Unit.Env_Caches_Stats.Entry_Count :=
+           Node.Unit.Env_Caches_Stats.Entry_Count + Delta_Amount;
+
+         --  If the number of entries exceeds the threshold we had set, attempt
+         --  to invalidate caches. Don't do anything if this notification was
+         --  for removed entries (i.e. if ``Delta_Amount`` is negative) as it
+         --  could mean that we are already in the middle of a collection.
+         if Delta_Amount > 0 and then
+            Ctx_Stats.Entry_Count > Ctx.Env_Caches_Collection_Threshold
+         then
+            if Cache_Invalidation_Trace.Is_Active then
+               Cache_Invalidation_Trace.Trace
+                 ("Attempting cache collection because number of entries"
+                  & " reached" & All_Env_Caches_Entry_Count'Image);
+               Cache_Invalidation_Trace.Increase_Indent;
+            end if;
+
+            for Unit of Ctx.Units loop
+               % if ctx.cache_collection_conf.decision_heuristic:
+               if ${ctx.cache_collection_conf.decision_heuristic.fqn}
+                 (Ctx, Unit, All_Env_Caches_Entry_Count)
+               then
+               % endif
+                  --  Clear all caches and set counters that are meant to
+                  --  track events since the unit's last collection.
+                  Reset_Envs_Caches (Unit);
+                  Unit.Env_Caches_Stats.Lookup_Count := 0;
+                  Unit.Env_Caches_Stats.Hit_Count := 0;
+                  Unit.Env_Caches_Stats.Last_Overall_Lookup_Count :=
+                    Ctx_Stats.Lookup_Count;
+               % if ctx.cache_collection_conf.decision_heuristic:
+               end if;
+               % endif
+               Unit.Env_Caches_Stats.Previous_Lookup_Count :=
+                 Unit.Env_Caches_Stats.Lookup_Count;
+            end loop;
+
+            Ctx_Stats.Previous_Lookup_Count := Ctx_Stats.Lookup_Count;
+
+            --  Setup the threshold so that the next collection is triggered
+            --  when we reach the current number of entries (after this
+            --  collection) plus the increment that is defined for this
+            --  language.
+            Ctx.Env_Caches_Collection_Threshold :=
+              Ctx_Stats.Entry_Count
+              + ${ctx.cache_collection_conf.threshold_increment};
+
+            if Cache_Invalidation_Trace.Is_Active then
+               Cache_Invalidation_Trace.Trace
+                 ("New collection threshold :"
+                  & Ctx.Env_Caches_Collection_Threshold'Image);
+               Cache_Invalidation_Trace.Decrease_Indent;
+            end if;
+         end if;
+      end Lexical_Env_Cache_Updated;
+
+      ---------------------------------
+      -- Lexical_Env_Cache_Looked_Up --
+      ---------------------------------
+
+      procedure Lexical_Env_Cache_Looked_Up (Node : ${T.root_node.name}) is
+         Unit : constant Internal_Unit := Node.Unit;
+         Ctx  : constant Internal_Context := Unit.Context;
+      begin
+         Unit.Env_Caches_Stats.Lookup_Count :=
+            Unit.Env_Caches_Stats.Lookup_Count + 1;
+
+         Ctx.Env_Caches_Stats.Lookup_Count :=
+            Ctx.Env_Caches_Stats.Lookup_Count + 1;
+      end Lexical_Env_Cache_Looked_Up;
+
+      ---------------------------
+      -- Lexical_Env_Cache_Hit --
+      ---------------------------
+
+      procedure Lexical_Env_Cache_Hit (Node : ${T.root_node.name}) is
+         Unit : constant Internal_Unit := Node.Unit;
+      begin
+         Unit.Env_Caches_Stats.Hit_Count :=
+            Unit.Env_Caches_Stats.Hit_Count + 1;
+      end Lexical_Env_Cache_Hit;
+
+   % endif
 
    --------------------
    -- Element_Parent --

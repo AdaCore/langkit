@@ -1,0 +1,24 @@
+== default ==
+main.adb: Starting...
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 30
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 31
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 31
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 31
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 31
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 31
+main.adb: Done.
+
+== custom ==
+main.adb: Starting...
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 30
+   [LIBFOOLANG.CACHE_INVALIDATION] Heuristic decides not to collect unit Internal_Unit ("example")
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 61
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 61
+   [LIBFOOLANG.CACHE_INVALIDATION] Heuristic decides to collect unit Internal_Unit ("example")
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 31
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 31
+   [LIBFOOLANG.CACHE_INVALIDATION] Heuristic decides not to collect unit Internal_Unit ("example")
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 62
+main.adb: Done.
+
+Done
