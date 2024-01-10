@@ -214,7 +214,7 @@ private package Langkit_Support.Prettier_Utils is
    type Spacing_Kind is (None, Whitespace, Newline);
    --  Spacing required between two tokens:
    --
-   --  * ``Node``: no spacing required, the two tokens can be unparsed next to
+   --  * ``None``: no spacing required, the two tokens can be unparsed next to
    --    each other in the source buffer (spacing is permitted, but not
    --    necessary).
    --
