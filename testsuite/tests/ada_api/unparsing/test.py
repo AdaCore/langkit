@@ -73,7 +73,7 @@ class Ref(Expr):
 
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
-    gpr_mains=["main.adb", "invalid_config.adb"],
+    gpr_mains=["main.adb", "invalid_config.adb", "commands.adb"],
     gpr_mains_args=["config.json", "example.txt"],
     generate_unparser=True,
 )

@@ -1,0 +1,11 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": [
+        {"kind": "group", "document": "line"},
+        "recurse",
+        {"kind": "group", "shouldBreak": true, "document": "line"}
+      ]
+    }
+  }
+}

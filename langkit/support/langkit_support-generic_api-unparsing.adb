@@ -16,6 +16,7 @@ with GNAT.Strings;
 with GNATCOLL.JSON; use GNATCOLL.JSON;
 with GNATCOLL.Opt_Parse;
 with GNATCOLL.VFS;  use GNATCOLL.VFS;
+with Prettier_Ada.Documents.Builders;
 with Prettier_Ada.Documents.Json;
 
 with Langkit_Support.Errors;         use Langkit_Support.Errors;
@@ -373,14 +374,20 @@ package body Langkit_Support.Generic_API.Unparsing is
             declare
                Value : constant String := JSON.Get;
             begin
-               if Value = "recurse" then
-                  return Pool.Create_Recurse;
-               elsif Value = "line" then
-                  return Pool.Create_Line;
+               if Value = "breakParent" then
+                  return Pool.Create_Break_Parent;
                elsif Value = "hardline" then
                   return Pool.Create_Hard_Line;
+               elsif Value = "line" then
+                  return Pool.Create_Line;
+               elsif Value = "recurse" then
+                  return Pool.Create_Recurse;
                elsif Value = "softline" then
                   return Pool.Create_Soft_Line;
+               elsif Value = "literalline" then
+                  return Pool.Create_Literal_Line;
+               elsif Value = "trim" then
+                  return Pool.Create_Trim;
                elsif Value = "whitespace" then
                   return Pool.Create_Whitespace;
                else
@@ -403,21 +410,126 @@ package body Langkit_Support.Generic_API.Unparsing is
             declare
                Kind : constant String := JSON.Get ("kind");
             begin
-               if Kind = "whitespace" then
+               if Kind = "align" then
                   declare
-                     JSON_Length : JSON_Value;
-                     Length      : Natural := 1;
+                     Width : JSON_Value;
+                     Data  : Prettier.Alignment_Data_Type;
                   begin
-                     if JSON.Has_Field ("length") then
-                        JSON_Length := JSON.Get ("length");
-                        if JSON_Length.Kind /= JSON_Int_Type then
-                           raise Invalid_Input with
-                             Error_Prefix & ": invalid whitespace length: "
-                             & JSON_Length.Kind'Image;
-                        end if;
-                        Length := JSON_Length.Get;
+                     if not JSON.Has_Field ("width") then
+                        raise Invalid_Input with
+                          Error_Prefix & ": missing ""width"" key for align";
                      end if;
-                     return Pool.Create_Whitespace (Length);
+                     Width := JSON.Get ("width");
+                     Data :=
+                       (case Width.Kind is
+                        when JSON_Int_Type =>
+                          (Kind => Prettier.Width, N => Width.Get),
+                        when JSON_String_Type =>
+                          (Kind => Prettier.Text, T => Width.Get),
+                        when others =>
+                          raise Invalid_Input with
+                            Error_Prefix
+                            & ": invalid ""width"" key for align");
+
+                     if not JSON.Has_Field ("contents") then
+                        raise Invalid_Input with
+                          Error_Prefix
+                          & ": missing ""contents"" key for align";
+                     end if;
+
+                     return Pool.Create_Align
+                       (Data,
+                        To_Document (JSON.Get ("contents"), Error_Prefix));
+                  end;
+
+               elsif Kind in
+                  "dedent" | "dedentToRoot" | "markAsRoot"
+               then
+                  if not JSON.Has_Field ("contents") then
+                     raise Invalid_Input with
+                       Error_Prefix & ": missing ""contents"" key for " & Kind;
+                  end if;
+                  return Pool.Create_Align
+                    (Data     => (if Kind = "dedent"
+                                  then (Kind => Prettier.Dedent)
+                                  elsif Kind = "dedentToRoot"
+                                  then (Kind => Prettier.Dedent_To_Root)
+                                  elsif Kind = "markAsRoot"
+                                  then (Kind => Prettier.Root)
+                                  else raise Program_Error),
+                     Contents => To_Document
+                                   (JSON.Get ("contents"), Error_Prefix));
+
+               elsif Kind = "fill" then
+                  declare
+                     Document : Document_Type;
+                  begin
+                     if not JSON.Has_Field ("document") then
+                        raise Invalid_Input with
+                          Error_Prefix
+                          & ": missing ""document"" key for fill";
+                     end if;
+                     Document := To_Document
+                       (JSON.Get ("document"), Error_Prefix);
+
+                     return Pool.Create_Fill (Document);
+                  end;
+
+               elsif Kind = "group" then
+                  declare
+                     Document : Document_Type;
+                     Options  : Prettier.Builders.Group_Options_Type :=
+                       Prettier.Builders.No_Group_Options;
+
+                     Should_Break : JSON_Value;
+                  begin
+                     if not JSON.Has_Field ("document") then
+                        raise Invalid_Input with
+                          Error_Prefix
+                          & ": missing ""document"" key for group";
+                     end if;
+                     Document := To_Document
+                       (JSON.Get ("document"), Error_Prefix);
+
+                     if JSON.Has_Field ("shouldBreak") then
+                        Should_Break := JSON.Get ("shouldBreak");
+                        if Should_Break.Kind /= JSON_Boolean_Type then
+                           raise Invalid_Input with
+                             Error_Prefix & ": invalid group shouldBreak: "
+                             & Should_Break.Kind'Image;
+                        end if;
+                        Options.Should_Break := Should_Break.Get;
+                     end if;
+
+                     --  TODO??? (eng/libadalang/langkit#727) Handle the group
+                     --  id.
+
+                     return Pool.Create_Group (Document, Options);
+                  end;
+
+               elsif Kind = "ifBreak" then
+                  declare
+                     Contents      : Document_Type;
+                     Flat_Contents : Document_Type;
+                  begin
+                     if not JSON.Has_Field ("breakContents") then
+                        raise Invalid_Input with
+                          Error_Prefix
+                          & ": missing ""breakContents"" key for ifBreak";
+                     end if;
+                     Contents :=
+                       To_Document (JSON.Get ("breakContents"), Error_Prefix);
+
+                     Flat_Contents :=
+                       (if JSON.Has_Field ("flatContents")
+                        then To_Document
+                               (JSON.Get ("flatContents"), Error_Prefix)
+                        else null);
+
+                     --  TODO??? (eng/libadalang/langkit#727) Handle the group
+                     --  id.
+
+                     return Pool.Create_If_Break (Contents, Flat_Contents);
                   end;
 
                elsif Kind = "indent" then
@@ -427,6 +539,22 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end if;
                   return Pool.Create_Indent
                     (To_Document (JSON.Get ("contents"), Error_Prefix));
+
+               elsif Kind = "whitespace" then
+                  if not JSON.Has_Field ("length") then
+                     raise Invalid_Input with
+                       Error_Prefix & ": missing ""length"" key";
+                  end if;
+                  declare
+                     Length : constant JSON_Value := JSON.Get ("length");
+                  begin
+                     if Length.Kind /= JSON_Int_Type then
+                        raise Invalid_Input with
+                          Error_Prefix & ": invalid whitespace length: "
+                          & Length.Kind'Image;
+                     end if;
+                     return Pool.Create_Whitespace (Length.Get);
+                  end;
 
                else
                   raise Invalid_Input with
@@ -669,24 +797,39 @@ package body Langkit_Support.Generic_API.Unparsing is
       Filler, Template : Document_Type) return Document_Type is
    begin
       case Template.Kind is
-         when Recurse =>
-            return Filler;
+         when Align =>
+            return Pool.Create_Align
+              (Template.Align_Data,
+               Instantiate_Template (Pool, Filler, Template.Align_Contents));
 
-         when Token =>
-            return Pool.Create_Token
-              (Template.Token_Kind, Template.Token_Text);
+         when Break_Parent =>
+            return Pool.Create_Break_Parent;
 
-         when Line =>
-            return Pool.Create_Line;
+         when Fill =>
+            return Pool.Create_Fill
+              (Instantiate_Template (Pool, Filler, Template.Fill_Document));
+
+         when Group =>
+            return Pool.Create_Group
+              (Instantiate_Template (Pool, Filler, Template.Group_Document),
+               Template.Group_Options);
 
          when Hard_Line =>
             return Pool.Create_Hard_Line;
 
-         when Soft_Line =>
-            return Pool.Create_Soft_Line;
+         when If_Break =>
+            return Pool.Create_If_Break
+              (Instantiate_Template (Pool, Filler, Template.If_Break_Contents),
+               Instantiate_Template
+                 (Pool, Filler, Template.If_Break_Flat_Contents),
+               Template.If_Break_Group_Id);
 
-         when Whitespace =>
-            return Pool.Create_Whitespace (Template.Whitespace_Length);
+         when Indent =>
+            return Pool.Create_Indent
+              (Instantiate_Template (Pool, Filler, Template.Indent_Document));
+
+         when Line =>
+            return Pool.Create_Line;
 
          when List =>
             declare
@@ -700,9 +843,24 @@ package body Langkit_Support.Generic_API.Unparsing is
                return Pool.Create_List (Items);
             end;
 
-         when Indent =>
-            return Pool.Create_Indent
-              (Instantiate_Template (Pool, Filler, Template.Indent_Document));
+         when Literal_Line =>
+            return Pool.Create_Literal_Line;
+
+         when Recurse =>
+            return Filler;
+
+         when Soft_Line =>
+            return Pool.Create_Soft_Line;
+
+         when Token =>
+            return Pool.Create_Token
+              (Template.Token_Kind, Template.Token_Text);
+
+         when Trim =>
+            return Pool.Create_Trim;
+
+         when Whitespace =>
+            return Pool.Create_Whitespace (Template.Whitespace_Length);
       end case;
    end Instantiate_Template;
 
@@ -779,7 +937,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          Internal_Result : Document_Type := Unparse_Node (Node);
       begin
          Insert_Required_Spacing (Pool, Internal_Result);
-         return Result : constant Prettier_Ada.Documents.Document_Type :=
+         return Result : constant Prettier.Document_Type :=
            To_Prettier_Document (Internal_Result)
          do
             Pool.Release;
@@ -818,9 +976,9 @@ package body Langkit_Support.Generic_API.Unparsing is
         (Parser      => Parser,
          Short       => "-k",
          Long        => "--indentation-kind",
-         Arg_Type    => Prettier_Ada.Documents.Indentation_Kind,
+         Arg_Type    => Prettier.Indentation_Kind,
          Help        => "Indentation kind: spaces or tabs",
-         Default_Val => Prettier_Ada.Documents.Spaces);
+         Default_Val => Prettier.Spaces);
 
       package Indentation_Width is new Parse_Option
         (Parser      => Parser,
@@ -834,9 +992,9 @@ package body Langkit_Support.Generic_API.Unparsing is
         (Parser      => Parser,
          Short       => "-e",
          Long        => "--end-of-line",
-         Arg_Type    => Prettier_Ada.Documents.End_Of_Line_Kind,
+         Arg_Type    => Prettier.End_Of_Line_Kind,
          Help        => "End of line: LF, CR, CRLF",
-         Default_Val => Prettier_Ada.Documents.LF);
+         Default_Val => Prettier.LF);
 
       package Config_Filename is new Parse_Positional_Arg
         (Parser   => Parser,
@@ -891,10 +1049,10 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       declare
          F         : File_Type;
-         Doc       : constant Prettier_Ada.Documents.Document_Type :=
+         Doc       : constant Prettier.Document_Type :=
            Unparse_To_Prettier (Unit.Root, Config);
          Formatted : constant Unbounded_String :=
-           Prettier_Ada.Documents.Format
+           Prettier.Format
              (Document => Doc,
               Options  =>
                 (Width => Width.Get,
@@ -905,7 +1063,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          if Dump_Document.Get then
             Create (F, Name => "doc.json");
-            Put_Line (F, Prettier_Ada.Documents.Json.Serialize (Doc));
+            Put_Line (F, Prettier.Json.Serialize (Doc));
             Close (F);
          end if;
 

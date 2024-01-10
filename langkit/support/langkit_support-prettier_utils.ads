@@ -10,11 +10,15 @@
 with Ada.Containers.Vectors;
 
 with Prettier_Ada.Documents;
+with Prettier_Ada.Documents.Builders; use Prettier_Ada.Documents.Builders;
 
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 private package Langkit_Support.Prettier_Utils is
+
+   package Prettier renames Prettier_Ada.Documents;
+   use type Prettier.Symbol_Type;
 
    --  The Document_Type data structure serves two joint purposes:
    --
@@ -37,34 +41,72 @@ private package Langkit_Support.Prettier_Utils is
      (Positive, Document_Type);
 
    type Document_Kind is
-     (Recurse,
-      Token,
-      Whitespace,
-      Line,
+     (Align,
+      Break_Parent,
+      Fill,
+      Group,
       Hard_Line,
-      Soft_Line,
+      If_Break,
+      Indent,
+      Line,
       List,
-      Indent);
+      Literal_Line,
+      Recurse,
+      Soft_Line,
+      Token,
+      Trim,
+      Whitespace);
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
       case Kind is
+         when Align =>
+            Align_Data     : Prettier.Alignment_Data_Type;
+            Align_Contents : Document_Type;
+
+         when Break_Parent =>
+            null;
+
+         when Fill =>
+            Fill_Document : Document_Type;
+
+         when Group =>
+            Group_Document : Document_Type;
+            Group_Options  : Prettier.Builders.Group_Options_Type;
+
+         when Hard_Line =>
+            null;
+
+         when If_Break =>
+            If_Break_Contents      : Document_Type;
+            If_Break_Flat_Contents : Document_Type;
+            If_Break_Group_Id      : Prettier.Symbol_Type;
+
+         when Indent =>
+            Indent_Document : Document_Type;
+
+         when Line =>
+            null;
+
+         when List =>
+            List_Documents : Document_Vectors.Vector;
+
+         when Literal_Line =>
+            null;
+
          when Recurse =>
+            null;
+
+         when Soft_Line =>
             null;
 
          when Token =>
             Token_Kind : Token_Kind_Ref;
             Token_Text : Unbounded_Text_Type;
 
-         when Line | Hard_Line | Soft_Line =>
+         when Trim =>
             null;
 
          when Whitespace =>
             Whitespace_Length : Positive;
-
-         when List =>
-            List_Documents : Document_Vectors.Vector;
-
-         when Indent =>
-            Indent_Document : Document_Type;
       end case;
    end record;
 
@@ -84,7 +126,7 @@ private package Langkit_Support.Prettier_Utils is
    --  Will be invalid, as the node will not be included in the unparsing.
 
    function To_Prettier_Document
-     (Document : Document_Type) return Prettier_Ada.Documents.Document_Type;
+     (Document : Document_Type) return Prettier.Document_Type;
    --  Turn an unparsing document into an actual Prettier document
 
    type Document_Pool is tagged private;
@@ -93,30 +135,46 @@ private package Langkit_Support.Prettier_Utils is
    procedure Release (Self : in out Document_Pool);
    --  Free all the Document_Type nodes allocated in ``Self``
 
-   function Create_Recurse (Self : in out Document_Pool) return Document_Type;
-   --  Return a ``Recurse`` node
+   function Create_Align
+     (Self     : in out Document_Pool;
+      Data     : Prettier.Alignment_Data_Type;
+      Contents : Document_Type) return Document_Type;
+   --  Return an ``Align`` node
 
-   function Create_Token
-     (Self : in out Document_Pool;
-      Kind : Token_Kind_Ref;
-      Text : Unbounded_Text_Type) return Document_Type;
-   --  Return a ``Token`` node
+   function Create_Break_Parent
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Break_Parent`` node
 
-   function Create_Line (Self : in out Document_Pool) return Document_Type;
-   --  Return a ``Line`` node
+   function Create_Fill
+     (Self     : in out Document_Pool;
+      Document : Document_Type) return Document_Type;
+   --  Return a ``Fill`` node
+
+   function Create_Group
+     (Self     : in out Document_Pool;
+      Document : Document_Type;
+      Options  : Group_Options_Type) return Document_Type;
+   --  Return a ``Group`` node
 
    function Create_Hard_Line
      (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Hard_Line`` node
 
-   function Create_Soft_Line
-     (Self : in out Document_Pool) return Document_Type;
-   --  Return a ``Soft_Line`` node
+   function Create_If_Break
+     (Self          : in out Document_Pool;
+      Contents      : Document_Type;
+      Flat_Contents : Document_Type := null;
+      Group_Id      : Prettier.Symbol_Type :=
+        Prettier.No_Symbol) return Document_Type;
+   --  Return an ``If_Break`` node
 
-   function Create_Whitespace
-     (Self   : in out Document_Pool;
-      Length : Positive := 1) return Document_Type;
-   --  Return a ``Whitespace`` node for the given length
+   function Create_Indent
+     (Self     : in out Document_Pool;
+      Document : Document_Type) return Document_Type;
+   --  Return an ``Indent`` node
+
+   function Create_Line (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Line`` node
 
    function Create_List
      (Self      : in out Document_Pool;
@@ -124,14 +182,34 @@ private package Langkit_Support.Prettier_Utils is
    --  Transfer all nodes in ``Documents`` to a new ``List`` node and return
    --  that new node.
 
+   function Create_Literal_Line
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Literal_Line`` node
+
    function Create_Empty_List
      (Self : in out Document_Pool) return Document_Type;
    --  Return a new empty ``List`` node
 
-   function Create_Indent
-     (Self     : in out Document_Pool;
-      Document : Document_Type) return Document_Type;
-   --  Return an ``Indent`` node
+   function Create_Recurse (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Recurse`` node
+
+   function Create_Soft_Line
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Soft_Line`` node
+
+   function Create_Token
+     (Self : in out Document_Pool;
+      Kind : Token_Kind_Ref;
+      Text : Unbounded_Text_Type) return Document_Type;
+   --  Return a ``Token`` node
+
+   function Create_Whitespace
+     (Self   : in out Document_Pool;
+      Length : Positive := 1) return Document_Type;
+   --  Return a ``Whitespace`` node for the given length
+
+   function Create_Trim (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Trim`` node
 
    procedure Insert_Required_Spacing
      (Pool : in out Document_Pool; Document : in out Document_Type);
