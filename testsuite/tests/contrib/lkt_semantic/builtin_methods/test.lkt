@@ -7,8 +7,8 @@ class Name : RootNode implements TokenNode {
     fun parent_env(): LexicalEnv[RootNode] = node.parent.node_env()
     fun parent_env(): LexicalEnv[RootNode] = node.parent_node().node_env()
 
-    fun parent_env_node(): RootNode = node.parent.node_env().get(node.symbol)?(0)
-    fun parent_env_node(): RootNode = node.parent_env().get(node.symbol)?(0)
+    fun parent_env_node(): RootNode = node.parent.node_env().get(node.symbol)?[0]
+    fun parent_env_node(): RootNode = node.parent_env().get(node.symbol)?[0]
 
     fun analysis_unit_node(): RootNode = node.unit().root
 

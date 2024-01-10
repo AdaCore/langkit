@@ -159,7 +159,7 @@ Expr <CallExpr test.lkt:10:39-10:78>
 Expr <NumLit test.lkt:10:80-10:81>
      has type <StructDecl prelude: "Int">
 
-Expr <NullCondCallExpr test.lkt:10:39-10:82>
+Expr <NullCondSubscriptExpr test.lkt:10:39-10:82>
      has type <ClassDecl "RootNode" test.lkt:1:11-1:54>
 
 Id   <RefId "RootNode" test.lkt:11:28-11:36>
@@ -213,7 +213,7 @@ Expr <CallExpr test.lkt:11:39-11:73>
 Expr <NumLit test.lkt:11:75-11:76>
      has type <StructDecl prelude: "Int">
 
-Expr <NullCondCallExpr test.lkt:11:39-11:77>
+Expr <NullCondSubscriptExpr test.lkt:11:39-11:77>
      has type <ClassDecl "RootNode" test.lkt:1:11-1:54>
 
 Id   <RefId "RootNode" test.lkt:13:31-13:39>
