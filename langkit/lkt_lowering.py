@@ -3677,15 +3677,6 @@ class LktTypesLoader:
                 call_expr = expr
                 call_name = call_expr.f_name
 
-                # TODO (eng/libadalang/langkit#731): get rid of this syntax? It
-                # is never legal for now...
-                if isinstance(expr, L.NullCondCallExpr):
-                    with self.ctx.lkt_context(expr):
-                        error(
-                            "'?' must be attached to the method prefix, not to"
-                            " the call itself",
-                        )
-
                 def lower_new(type_ref: TypeRepo.Defer) -> AbstractExpression:
                     """
                     Consider that this call creates a new struct, return the

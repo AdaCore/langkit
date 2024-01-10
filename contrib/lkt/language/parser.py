@@ -3353,13 +3353,6 @@ class CallExpr(Expr):
         return Self.static_match_params(Entity.formals, Entity.args.as_array)
 
 
-class NullCondCallExpr(CallExpr):
-    """
-    Null conditional call expression.
-    """
-    pass
-
-
 class SubscriptExpr(Expr):
     """
     Array subscript expression.
@@ -4236,7 +4229,6 @@ lkt_grammar.add_rules(
 
     basic_expr=GOr(
         CallExpr(G.basic_expr, "(", G.params, ")"),
-        NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
         GenericInstantiation(G.basic_expr, "[", G.type_list, "]"),
         SubscriptExpr(G.basic_expr, "[", G.expr, "]"),
         NullCondSubscriptExpr(G.basic_expr, "?", "[", G.expr, "]"),
