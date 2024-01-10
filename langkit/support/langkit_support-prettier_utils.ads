@@ -211,6 +211,32 @@ private package Langkit_Support.Prettier_Utils is
    function Create_Trim (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Trim`` node
 
+   type Spacing_Kind is (None, Whitespace, Newline);
+   --  Spacing required between two tokens:
+   --
+   --  * ``None``: no spacing required, the two tokens can be unparsed next to
+   --    each other in the source buffer (spacing is permitted, but not
+   --    necessary).
+   --
+   --  * ``Whitespace``: at least one whitespace (line break, space, horizontal
+   --    tabulation: whatever the language accepts as a whitespace) is required
+   --    after the first token.
+   --
+   --  * ``Newline``: a line break is required right after the first token.
+   --    Extra spacing is permitted after that line break.
+
+   function Required_Spacing
+     (Left, Right : Token_Kind_Ref) return Spacing_Kind;
+   --  Return the spacing that is required when unparsing a token of kind
+   --  ``Right`` just after a token of kind ``Left`` to a source buffer.
+   --
+   --  For convenience, ``Required_Spacing`` is allowed to be
+   --  ``No_Token_Kind_Ref``: the result is always ``None`` in this case. The
+   --  intended use case for this is when processing the first token to unparse
+   --  to a source buffer: ``Left`` is ``No_Token_Kind_Ref`` (no token were
+   --  unprase in the source buffer yet) and ``Right`` is the first token to
+   --  unparse to the source buffer.
+
    procedure Insert_Required_Spacing
      (Pool : in out Document_Pool; Document : in out Document_Type);
    --  Adjust the tree of nodes in ``Document`` so that formatting that

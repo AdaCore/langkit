@@ -20,6 +20,8 @@ with Prettier_Ada.Documents.Builders;
 with Prettier_Ada.Documents.Json;
 
 with Langkit_Support.Errors;         use Langkit_Support.Errors;
+with Langkit_Support.Generic_API.Introspection;
+use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal.Descriptor;
 use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Internal.Unparsing;
@@ -28,6 +30,55 @@ with Langkit_Support.Prettier_Utils; use Langkit_Support.Prettier_Utils;
 with Langkit_Support.Symbols;        use Langkit_Support.Symbols;
 
 package body Langkit_Support.Generic_API.Unparsing is
+
+   type Unparsing_Fragment_Kind is
+     (Token_Fragment,
+      List_Separator_Fragment,
+      Field_Fragment,
+      List_Child_Fragment);
+   type Unparsing_Fragment
+     (Kind : Unparsing_Fragment_Kind := Unparsing_Fragment_Kind'First)
+   is record
+      case Kind is
+         when Token_Fragment | List_Separator_Fragment =>
+            Token_Kind : Token_Kind_Ref;
+            --  Token kind corresponding to this token fragment. This component
+            --  is used to determine the spacing required in the source buffer
+            --  between two consecutive tokens.
+
+            Token_Text : Unbounded_Text_Type;
+            --  Text to emit when unparsing this token fragment
+
+         when Field_Fragment | List_Child_Fragment =>
+            Node : Lk_Node;
+            --  Node for this fragment
+
+            case Kind is
+               when Token_Fragment | List_Separator_Fragment =>
+                  null;
+
+               when Field_Fragment =>
+                  Field : Struct_Member_Ref;
+                  --  Syntax field for this fragment (the parent node is a
+                  --  regular node).
+
+               when List_Child_Fragment =>
+                  Child_Index : Positive;
+                  --  Index of this field for this fragment (the parent node is
+                  --  a list node).
+
+            end case;
+      end case;
+   end record;
+   --  Source code unparsing fragment used to unparse source code. Fragments
+   --  are either tokens or nodes (that must be decomposed themselves into
+   --  fragments).
+
+   procedure Iterate_On_Fragments
+     (Node    : Lk_Node;
+      Process : access procedure (Fragment : Unparsing_Fragment));
+   --  Decompose ``Node`` into a list of unparsing fragments and call
+   --  ``Process`` on each fragment.
 
    function Hash (Self : Struct_Member_Index) return Ada.Containers.Hash_Type
    is (Ada.Containers.Hash_Type'Mod (Self));
@@ -84,53 +135,13 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Instantiate the given template, i.e. create a copy of it, replacing
    --  "recurse" documents with Filler.
 
-   ----------------------
-   -- Required_Spacing --
-   ----------------------
-
-   function Required_Spacing (Left, Right : Token_Kind_Ref) return Spacing_Kind
-   is
-   begin
-      if Left = No_Token_Kind_Ref then
-         return None;
-      elsif Language (Left) /= Language (Right) then
-         raise Precondition_Failure with
-           "inconsistent languages for requested token kinds";
-      end if;
-
-      declare
-         Id : constant Language_Descriptor_Access := +Language (Left);
-         LK : constant Token_Kind_Index := To_Index (Left);
-
-         function Family (Kind : Token_Kind_Index) return Token_Family_Index
-         is (Id.Token_Kinds (Kind).Family);
-      begin
-         --  If a newline is required after Left, we do not even need to check
-         --  what Right is.
-
-         if Id.Unparsers.Token_Newlines (LK) then
-            return Newline;
-
-         --  Otherwise, check if at least a space is required between Left and
-         --  Right.
-
-         elsif Id.Unparsers.Token_Spacings
-                 (Family (LK), Family (To_Index (Right)))
-         then
-            return Whitespace;
-
-         else
-            return None;
-         end if;
-      end;
-   end Required_Spacing;
-
    --------------------------
-   -- Unparse_To_Fragments --
+   -- Iterate_On_Fragments --
    --------------------------
 
-   procedure Unparse_To_Fragments
-     (Node : Lk_Node; Fragments : out Unparsing_Fragment_Vectors.Vector)
+   procedure Iterate_On_Fragments
+     (Node    : Lk_Node;
+      Process : access procedure (Fragment : Unparsing_Fragment))
    is
       Id        : constant Language_Id := Node.Language;
       Desc      : constant Language_Descriptor_Access := +Id;
@@ -155,7 +166,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             then (List_Separator_Fragment, Kind, Text)
             else (Token_Fragment, Kind, Text));
       begin
-         Fragments.Append (Fragment);
+         Process.all (Fragment);
       end Append;
 
       ------------
@@ -173,8 +184,6 @@ package body Langkit_Support.Generic_API.Unparsing is
       Node_Unparser : Node_Unparser_Impl renames
         Unparsers.Node_Unparsers (To_Index (Node_Type)).all;
    begin
-      Fragments.Clear;
-
       case Node_Unparser.Kind is
          when Regular =>
             --  Append fragments that precede the first field
@@ -208,7 +217,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                                or else Child.Children_Count > 0)
                   then
                      Append (Field_Unparser.Pre_Tokens);
-                     Fragments.Append
+                     Process.all
                        ((Kind  => Field_Fragment,
                          Node  => Child,
                          Field => From_Index (Id, Field_Unparser.Member)));
@@ -225,7 +234,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             for I in 1 .. Node.Children_Count loop
                if I > 1 then
                   if Node_Unparser.Separator = null then
-                     Fragments.Append
+                     Process.all
                        ((Kind => List_Separator_Fragment,
                          Token_Kind => No_Token_Kind_Ref,
                          Token_Text => To_Unbounded_Text ("")));
@@ -234,19 +243,19 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end if;
                end if;
 
-               Fragments.Append
+               Process.all
                  ((Kind        => List_Child_Fragment,
                    Node        => Node.Child (I),
                    Child_Index => I));
             end loop;
 
          when Token =>
-            Fragments.Append
+            Process.all
               ((Kind       => Token_Fragment,
                 Token_Kind => Token_Node_Kind (Node_Type),
                 Token_Text => To_Unbounded_Text (Node.Text)));
       end case;
-   end Unparse_To_Fragments;
+   end Iterate_On_Fragments;
 
    ---------------------------
    -- Load_Unparsing_Config --
@@ -887,10 +896,17 @@ package body Langkit_Support.Generic_API.Unparsing is
          Node_Config : Node_Config_Record renames
            Config.Value.Node_Configs.Element (To_Index (Type_Of (N))).all;
          Items       : Document_Vectors.Vector;
-         Fragments   : Unparsing_Fragment_Vectors.Vector;
-      begin
-         Unparse_To_Fragments (N, Fragments);
-         for F of Fragments loop
+
+         procedure Process_Fragment (F : Unparsing_Fragment);
+         --  Append the documents to ``Items`` to represent the given unparsing
+         --  fragment.
+
+         ----------------------
+         -- Process_Fragment --
+         ----------------------
+
+         procedure Process_Fragment (F : Unparsing_Fragment) is
+         begin
             case F.Kind is
                when Token_Fragment | List_Separator_Fragment =>
                   declare
@@ -920,8 +936,10 @@ package body Langkit_Support.Generic_API.Unparsing is
                when List_Child_Fragment =>
                   Items.Append (Unparse_Node (F.Node));
             end case;
-         end loop;
+         end Process_Fragment;
 
+      begin
+         Iterate_On_Fragments (N, Process_Fragment'Access);
          return Instantiate_Template
            (Pool, Pool.Create_List (Items), Node_Config.Node_Template);
       end Unparse_Node;

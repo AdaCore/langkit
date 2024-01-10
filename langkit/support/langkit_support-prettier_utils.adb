@@ -10,8 +10,8 @@ with Ada.Unchecked_Deallocation;
 with Prettier_Ada.Document_Vectors; use Prettier_Ada.Document_Vectors;
 
 with Langkit_Support.Errors; use Langkit_Support.Errors;
-with Langkit_Support.Generic_API.Unparsing;
-use Langkit_Support.Generic_API.Unparsing;
+with Langkit_Support.Internal.Descriptor;
+use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Names;  use Langkit_Support.Names;
 
 package body Langkit_Support.Prettier_Utils is
@@ -503,6 +503,47 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_Whitespace;
+
+   ----------------------
+   -- Required_Spacing --
+   ----------------------
+
+   function Required_Spacing (Left, Right : Token_Kind_Ref) return Spacing_Kind
+   is
+   begin
+      if Left = No_Token_Kind_Ref then
+         return None;
+      elsif Language (Left) /= Language (Right) then
+         raise Precondition_Failure with
+           "inconsistent languages for requested token kinds";
+      end if;
+
+      declare
+         Id : constant Language_Descriptor_Access := +Language (Left);
+         LK : constant Token_Kind_Index := To_Index (Left);
+
+         function Family (Kind : Token_Kind_Index) return Token_Family_Index
+         is (Id.Token_Kinds (Kind).Family);
+      begin
+         --  If a newline is required after Left, we do not even need to check
+         --  what Right is.
+
+         if Id.Unparsers.Token_Newlines (LK) then
+            return Newline;
+
+         --  Otherwise, check if at least a space is required between Left and
+         --  Right.
+
+         elsif Id.Unparsers.Token_Spacings
+                 (Family (LK), Family (To_Index (Right)))
+         then
+            return Whitespace;
+
+         else
+            return None;
+         end if;
+      end;
+   end Required_Spacing;
 
    -----------------------------
    -- Insert_Required_Spacing --
