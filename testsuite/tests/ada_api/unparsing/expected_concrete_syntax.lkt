@@ -1,0 +1,85 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(or(var_decl | fun_decl))
+    name <- Name(@identifier)
+    type_ref <- name
+    null_qual <- NullQual("null")
+    var_decl <- VarDecl(
+        null_qual "var" name ":" type_ref "=" expr ";"
+    )
+    param_spec <- ParamSpec(name ":" type_ref ?pick("=" expr))
+    fun_decl <- FunDecl(
+        "def"
+        name
+        ?pick("("
+        list+(param_spec, ",")
+        ")") ":" type_ref "{" list*(stmt) "}"
+    )
+    stmt <- Stmt(expr ";")
+    expr <- or(Addition(expr "+" expr) | call | atom)
+    atom <- or(number | ref)
+    number <- Number(@number)
+    ref <- Ref(name)
+    call_arg <- CallArg(?pick(name "=") expr)
+    call <- Call(name "(" list*(call_arg, ",") ")")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class CallArg: FooNode {
+    @parse_field @nullable name: Name
+    @parse_field expr: Expr
+}
+
+@abstract class Expr: FooNode {
+}
+
+class Addition: Expr {
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
+}
+
+class Call: Expr {
+    @parse_field callee: Name
+    @parse_field args: ASTList[FooNode, CallArg]
+}
+
+class Number: Expr implements TokenNode {
+}
+
+class Ref: Expr {
+    @parse_field name: Name
+}
+
+class FunDecl: FooNode {
+    @parse_field name: Name
+    @parse_field args: ASTList[FooNode, ParamSpec]
+    @parse_field return_type: Name
+    @parse_field body: ASTList[FooNode, Stmt]
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+@qualifier enum class NullQual: FooNode {
+}
+
+class ParamSpec: FooNode {
+    @parse_field name: Name
+    @parse_field type_expr: Name
+    @parse_field @nullable default_expr: Expr
+}
+
+class Stmt: FooNode {
+    @parse_field expr: Expr
+}
+
+class VarDecl: FooNode {
+    @parse_field is_null: NullQual
+    @parse_field name: Name
+    @parse_field type_expr: Name
+    @parse_field value: Expr
+}

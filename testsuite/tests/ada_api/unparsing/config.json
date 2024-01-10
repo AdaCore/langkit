@@ -1,0 +1,46 @@
+{
+  "node_configs": {
+    "StmtList": {
+      "node": [
+        {
+          "kind": "indent",
+          "contents": ["hardline", "recurse"]
+        },
+        "hardline"
+      ],
+      "sep": ["hardline", "recurse"]
+    },
+    "Stmt": {
+      "node": ["recurse"]
+    },
+    "VarDecl": {
+      "node": ["recurse", "hardline"],
+      "fields": {
+        "f_type_expr": ["whitespace", "recurse", "whitespace"],
+        "f_value": ["whitespace", "recurse"]
+      }
+    },
+    "ParamSpec": {
+      "fields": {
+        "f_type_expr": ["whitespace", "recurse"]
+      }
+    },
+    "ParamSpecList": {
+      "sep": ["recurse", "whitespace"]
+    },
+    "FunDecl": {
+      "fields": {
+        "f_return_type": ["whitespace", "recurse", "hardline"]
+      }
+    },
+    "CallArgList": {
+      "sep": ["recurse", "whitespace"]
+    },
+    "Addition": {
+      "fields": {
+        "f_lhs": ["recurse", "whitespace"],
+        "f_rhs": ["whitespace", "recurse"]
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "node_configs": {
+    "StmtList": {
+      "sep": ["line", "whitespace"]
+    }
+  }
+}

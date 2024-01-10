@@ -10,6 +10,7 @@
 with "gnatcoll";
 with "gnatcoll_gmp";
 with "gnatcoll_iconv";
+with "prettier_ada";
 
 % if not emitter.standalone:
    with "langkit_support";

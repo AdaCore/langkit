@@ -1,0 +1,9 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "f_name": 1
+      }
+    }
+  }
+}

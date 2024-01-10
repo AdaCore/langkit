@@ -19,6 +19,7 @@ lexer foo_lexer {
         comma <- ","
         dot <- "."
         semicolon <- ";"
+        colon <- ":"
         l_par <- "("
         r_par <- ")"
         l_brace <- "{"

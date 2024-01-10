@@ -1,0 +1,9 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "parent": "recurse"
+      }
+    }
+  }
+}

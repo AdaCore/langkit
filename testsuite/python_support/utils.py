@@ -79,7 +79,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     version: Optional[str] = None,
                     build_date: Optional[str] = None,
                     standalone: bool = False,
-                    property_exceptions: Set[str] = set()):
+                    property_exceptions: Set[str] = set(),
+                    generate_unparser: bool = False):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -112,6 +113,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     :param build_date: See CompileCtx's constructor.
 
     :param standalone: See CompileCtx's constructor.
+
+    :param generate_unparser: See CompileCtx's constructor.
     """
 
     # Have a clean build directory
@@ -132,7 +135,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                      version=version,
                      build_date=build_date,
                      standalone=standalone,
-                     property_exceptions=property_exceptions)
+                     property_exceptions=property_exceptions,
+                     generate_unparser=generate_unparser)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -191,9 +195,10 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
             lkt_semantic_checks=lkt_semantic_checks,
             version=version,
             build_date=build_date,
+            generate_unparser=generate_unparser,
         )
         ctx.create_all_passes(
-            'build', generate_unparser=generate_unparser,
+            'build',
             unparse_script=(UnparseScript(unparse_script)
                             if unparse_script else None),
             explicit_passes_triggers=explicit_passes_triggers
@@ -236,6 +241,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                   full_error_traces: bool = True,
                   additional_make_args: List[str] = [],
                   python_args: Optional[List[str]] = None,
+                  gpr_mains_args: list[str] | None = None,
                   property_exceptions: Set[str] = set()):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
@@ -299,6 +305,8 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
     :param python_args: Arguments to pass to the Python interpreter when
         running a Python script.
 
+    :param gpr_mains_args: Arguments to pass to programs built by the GPR file.
+
     :param property_exceptions: See CompileCtx's constructor.
     """
     assert not types_from_lkt or lkt_file is not None
@@ -327,7 +335,8 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                               version=version,
                               build_date=build_date,
                               standalone=standalone,
-                              property_exceptions=property_exceptions)
+                              property_exceptions=property_exceptions,
+                              generate_unparser=generate_unparser)
 
         m = Manage(ctx)
 
@@ -361,8 +370,6 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
             )
         if not pretty_print:
             argv.append('--no-pretty-print')
-        if generate_unparser:
-            argv.append('--generate-unparser')
 
         # No testcase uses the generated mains, so save time: never build them
         argv.append('--disable-all-mains')
@@ -457,6 +464,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
 
         # Now run all mains. If there are more than one main to run, print a
         # heading before each one.
+        gpr_mains_args = gpr_mains_args or []
         for i, main in enumerate(gpr_mains):
             if i > 0:
                 print("")
@@ -465,6 +473,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
             sys.stdout.flush()
             run(
                 P.join("obj", os.path.splitext(main)[0]),
+                *gpr_mains_args,
                 valgrind=True,
                 valgrind_suppressions=["gnat"],
             )

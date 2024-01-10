@@ -338,7 +338,8 @@ class CompileCtx:
                  version: Optional[str] = None,
                  build_date: Optional[str] = None,
                  standalone: bool = False,
-                 property_exceptions: Set[str] = set()):
+                 property_exceptions: Set[str] = set(),
+                 generate_unparser: bool = False):
         """Create a new context for code emission.
 
         :param lang_name: string (mixed case and underscore: see
@@ -442,6 +443,9 @@ class CompileCtx:
 
         :param property_exceptions: In addition to ``Property_Error``, set of
             names for exceptions that properties are allowed to raise.
+
+        :param generate_unparser: If true, generate a pretty printer for the
+            given grammar. False by default.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -452,6 +456,7 @@ class CompileCtx:
         self.version = version
         self.build_date = build_date
         self.standalone = standalone
+        self.generate_unparser = generate_unparser
 
         self.lib_name = (
             names.Name('Lib{}lang'.format(self.lang_name.lower))
@@ -1967,7 +1972,6 @@ class CompileCtx:
         lib_root: str,
         check_only: bool = False,
         warnings: Optional[WarningSet] = None,
-        generate_unparser: bool = False,
         explicit_passes_triggers: Dict[str, bool] = {},
         plugin_passes: List[Union[str, AbstractPass]] = [],
         extra_code_emission_passes: List[AbstractPass] = [],
@@ -1984,9 +1988,6 @@ class CompileCtx:
             code emission. This is useful for IDE hooks. False by default.
 
         :param warnings: If provided, white list of warnings to emit.
-
-        :param generate_unparser: If true, generate a pretty printer for the
-            given grammar. False by default.
 
         :param explicit_passes_triggers: Dict of optional passes names to flags
             (on/off) to trigger activation/deactivation of the passes.
@@ -2013,8 +2014,6 @@ class CompileCtx:
 
         if warnings:
             self.warnings = warnings
-
-        self.generate_unparser = generate_unparser
 
         self.check_only = check_only
 
@@ -2121,15 +2120,10 @@ class CompileCtx:
 
         return GlobalPass('prepare code emission', pass_fn)
 
-    def compile(self, generate_unparser=False):
+    def compile(self):
         """
         Compile the DSL.
-
-        :param bool generate_unparser: If true, generate a pretty printer for
-            the given grammar. False by default.
         """
-        self.generate_unparser = generate_unparser
-
         with global_context(self):
             self.run_passes(self.compilation_passes)
 

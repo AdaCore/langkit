@@ -1,0 +1,3 @@
+driver: python
+control:
+    - [XFAIL, "valgrind", "See eng/libadalang/prettier-ada#10"]

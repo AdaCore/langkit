@@ -466,14 +466,6 @@ class ManageScript:
             help='Disable a warning.'
         )
         subparser.add_argument(
-            '--generate-unparser', action='store_true', default=False,
-            help='Generate an unparser along with the parser for the grammar.'
-                 ' Note that this machinery is intended only for languages'
-                 ' that have no significant whitespace, i.e. where whitespaces'
-                 ' can be abitrary inserted between two tokens without'
-                 ' affecting lexing.'
-        )
-        subparser.add_argument(
             '--no-gdb-hook', action='store_true',
             help='Do not generate the ".debug_gdb_script" section. This'
                  ' section is used to automatically run Langkit GDB helpers'
@@ -573,10 +565,7 @@ class ManageScript:
         )
         subparser.add_argument(
             '--disable-mains', type=self.parse_mains_list, default=[], nargs=1,
-            help=('Comma-separated list of main programs no to build.'
-                  ' Supported main programs are: {}'.format(
-                      ', '.join(sorted(self.main_programs))
-                  ))
+            help='Comma-separated list of main programs not to build.'
         )
         subparser.add_argument(
             '--disable-all-mains', action='store_true',
@@ -652,23 +641,17 @@ class ManageScript:
         Return the list of main programs to build in addition to the generated
         library. Subclasses should override this to add more main programs.
         """
-        return {'parse'}
+        result = {'parse'}
+        if self.context.generate_unparser:
+            result.add('unparse')
+        return result
 
     def parse_mains_list(self, mains: str) -> Set[str]:
         """
         Parse a comma-separated list of main programs. Raise a ValueError if
         one is not a supported main program.
         """
-        if not mains:
-            return set()
-
-        supported_mains = self.main_programs
-        result = set(mains.split(','))
-        if not result.issubset(supported_mains):
-            raise ValueError('Invalid main programs: {}'.format(
-                ', '.join(sorted(result - supported_mains))
-            ))
-        return result
+        return set() if not mains else set(mains.split(","))
 
     @property
     def lib_name(self) -> str:
@@ -837,7 +820,6 @@ class ManageScript:
             check_only=args.check_only,
             warnings=args.enabled_warnings,
             no_property_checks=args.no_property_checks,
-            generate_unparser=args.generate_unparser,
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
             pretty_print=args.pretty_print,
@@ -1221,6 +1203,16 @@ class ManageScript:
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
+        # Compute the set of main programs to build
+        mains = self.main_programs
+        disabled_mains: set[str] = reduce(set.union, args.disable_mains, set())
+        invalid_mains = sorted(disabled_mains - mains)
+        if invalid_mains:
+            print("Invalid main programs:", ", ".join(invalid_mains))
+        if args.disable_all_mains:
+            mains = set()
+        else:
+            mains -= disabled_mains
 
         # Build the generated library itself
         self.log_info("Building the generated source code", Colors.HEADER)
@@ -1228,12 +1220,6 @@ class ManageScript:
         self.gprbuild(args, self.lib_project, is_library=True)
 
         # Then build the main programs
-        disabled_mains: Set[str] = reduce(
-            set.union, args.disable_mains, set()
-        )
-        mains = (set()
-                 if args.disable_all_mains else
-                 self.main_programs - disabled_mains)
         if mains:
             self.log_info("Building the main programs...", Colors.HEADER)
             self.gprbuild(args, self.mains_project,

@@ -1,0 +1,63 @@
+== main.adb ==
+var v1: Int = 2;
+null var v2: Int = 0;
+def f1(a: Int, b: Int=0): Int
+{
+    print(a, b);
+    a + b + 1;
+}
+
+== invalid_config.adb ==
+== Errors outside of templates ==
+
+# no_such_file.json
+    cannot read no_such_file.json
+# invalid_syntax.json
+    invalid_syntax.json2:2: empty stream
+# missing_node_configs.json
+    missing "node_configs" key
+# invalid_type_name.json
+    invalid node name: NoSuchNode
+# invalid_node_name.json
+    invalid node name: Int
+# invalid_member_name.json
+    invalid field for VarDecl: f_no_such_field
+# invalid_field_name.json
+    parent is not a syntax field for VarDecl
+# invalid_node_sep.json
+    VarDecl is not a list node, invalid "sep" configuration
+
+== Decoding errors in templates ==
+
+# invalid_template.json
+    template for VarDecl.f_name: invalid template JSON node: JSON_INT_TYPE
+# invalid_string_template.json
+    template for VarDecl.f_name: invalid string template document kind: foo
+# invalid_kind_template.json
+    template for VarDecl.f_name: missing "kind" key
+# invalid_kind_template2.json
+    template for VarDecl.f_name: invalid "kind": JSON_INT_TYPE
+# invalid_kind_template3.json
+    template for VarDecl.f_name: invalid template document kind: foo
+# invalid_whitespace.json
+    template for VarDecl.f_name: invalid whitespace length: JSON_STRING_TYPE
+# invalid_indent.json
+    template for VarDecl.f_name: missing "contents" key for indent
+
+== Invalid templates (too many/few "recurse") ==
+
+# recurse_list_too_few.json
+    "sep" template for StmtList: invalid "recurse" structure
+# recurse_list_too_many.json
+    "sep" template for StmtList: invalid "recurse" structure
+# recurse_line.json
+    "sep" template for StmtList: invalid "recurse" structure
+# recurse_whitespace.json
+    "sep" template for StmtList: invalid "recurse" structure
+# recurse_indent_too_few.json
+    "sep" template for StmtList: invalid "recurse" structure
+# recurse_indent_too_many.json
+    "sep" template for StmtList: invalid "recurse" structure
+
+Done.
+Done
