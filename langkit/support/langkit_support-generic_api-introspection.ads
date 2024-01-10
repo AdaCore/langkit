@@ -381,6 +381,10 @@ package Langkit_Support.Generic_API.Introspection is
    function Is_Token_Node (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates a token node
 
+   function Token_Node_Kind (Node : Type_Ref) return Token_Kind_Ref;
+   --  Assuming that ``Node`` designates a token node and that the owning
+   --  language has unparsers enabled, return the associated token kind.
+
    function Is_List_Node (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates a list node
 

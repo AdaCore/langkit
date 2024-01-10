@@ -433,7 +433,10 @@ begin
       end if;
 
       if Is_Token_Node (Node) then
-         Put_Line ("  is a token node");
+         Put_Line
+           ("  is a token node ("
+            & (+Token_Kind_Name (Token_Node_Kind (Node)))
+            & " token)");
       end if;
 
       if Is_List_Node (Node) then

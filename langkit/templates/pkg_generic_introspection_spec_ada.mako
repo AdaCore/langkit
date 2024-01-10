@@ -45,6 +45,22 @@ private package ${ada_lib_name}.Generic_Introspection is
       ${G.member_index(m)} : constant Struct_Member_Index := ${i};
    % endfor
 
+   --------------------------------
+   -- Token kind index constants --
+   --------------------------------
+
+   % for i, t in enumerate(ctx.lexer.sorted_tokens, 1):
+      ${G.token_kind_index(t)} : constant Token_Kind_Index := ${i};
+   % endfor
+
+   ----------------------------------
+   -- Token family index constants --
+   ----------------------------------
+
+   % for i, t in enumerate(ctx.lexer.tokens.token_families, 1):
+      ${G.token_family_index(t)} : constant Token_Family_Index := ${i};
+   % endfor
+
    ------------------------------
    -- Grammar rule descriptors --
    ------------------------------
@@ -499,6 +515,11 @@ private package ${ada_lib_name}.Generic_Introspection is
             base = t.base
             abstract = t.abstract
             token_node = t.is_token_node
+            token_node_kind = (
+               G.token_kind_index(t.token_kind)
+               if ctx.generate_unparser and token_node else
+               "No_Token_Kind_Index"
+            )
             list_node = t.is_list_type
             subclasses = t.subclasses
          else:
@@ -507,6 +528,7 @@ private package ${ada_lib_name}.Generic_Introspection is
             base = None
             abstract = False
             token_node = False
+            token_node_kind = "No_Token_Kind_Index"
             list_node = False
             subclasses = []
          desc_const = f"Node_Desc_For_{name}"
@@ -560,6 +582,7 @@ private package ${ada_lib_name}.Generic_Introspection is
          Base_Type         => ${G.type_index(base)},
          Is_Abstract       => ${abstract},
          Is_Token_Node     => ${token_node},
+         Token_Node_Kind   => ${token_node_kind},
          Is_List_Node      => ${list_node},
          Name              => ${name_const}'Access,
          Repr_Name         => ${(

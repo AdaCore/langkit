@@ -12,6 +12,8 @@ use Langkit_Support.Generic_API.Introspection;
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Introspection;
 use Langkit_Support.Internal.Introspection;
+with Langkit_Support.Internal.Unparsing;
+use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 
@@ -142,10 +144,11 @@ package Langkit_Support.Internal.Descriptor is
       Default_Grammar_Rule : Grammar_Rule_Index;
       Grammar_Rules        : Grammar_Rule_Descriptor_Array_Access;
 
-      --  Descriptors for token kinds. The table for names also defines the
-      --  range of supported kinds for this language.
+      --  Descriptors for token kinds/families. The table for names also
+      --  defines the range of supported kinds/families for this language.
 
-      Token_Kind_Names : Token_Kind_Name_Array_Access;
+      Token_Kinds        : Token_Kind_Descriptor_Array_Access;
+      Token_Family_Names : Token_Family_Name_Array_Access;
 
       --  Descriptors for introspection capabilities
 
@@ -170,6 +173,10 @@ package Langkit_Support.Internal.Descriptor is
 
       First_Property : Struct_Member_Index;
       --  Index of the first property descriptor in ``Struct_Members``
+
+      Unparsers : Unparsing.Unparsers;
+      --  If unparsers are enabled for this language, non-null map for all node
+      --  unparsers. Null otherwise.
 
       --  Implementation for generic operations
 

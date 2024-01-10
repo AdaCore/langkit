@@ -144,7 +144,7 @@ package body Langkit_Support.Generic_API is
 
    function Token_Kind_Name (Kind : Token_Kind_Ref) return Name_Type is
    begin
-      return Create_Name (Kind.Id.Token_Kind_Names (Kind.Index).all);
+      return Create_Name (Kind.Id.Token_Kinds (Kind.Index).Name.all);
    end Token_Kind_Name;
 
    --------------
@@ -174,7 +174,7 @@ package body Langkit_Support.Generic_API is
 
    function Last_Token_Kind (Id : Language_Id) return Token_Kind_Index is
    begin
-      return Id.Token_Kind_Names'Last;
+      return Id.Token_Kinds'Last;
    end Last_Token_Kind;
 
    ----------------------
@@ -195,10 +195,96 @@ package body Langkit_Support.Generic_API is
    procedure Check_Token_Kind (Id : Language_Id; Kind : Token_Kind_Index)
    is
    begin
-      if Kind not in Id.Token_Kind_Names.all'Range then
+      if Kind not in Id.Token_Kinds.all'Range then
          raise Precondition_Failure with
            "invalid token kind for this language";
       end if;
    end Check_Token_Kind;
+
+   --------------
+   -- Language --
+   --------------
+
+   function Language (Family : Token_Family_Ref) return Language_Id is
+   begin
+      Check_Token_Family (Family);
+      return Family.Id;
+   end Language;
+
+   -----------------------
+   -- Token_Family_Name --
+   -----------------------
+
+   function Token_Family_Name (Family : Token_Family_Ref) return Name_Type is
+   begin
+      Check_Token_Family (Family);
+      return Create_Name (Family.Id.Token_Family_Names (Family.Index).all);
+   end Token_Family_Name;
+
+   ------------------
+   -- Token_Family --
+   ------------------
+
+   function Token_Family (Kind : Token_Kind_Ref) return Token_Family_Ref is
+      Family : Token_Family_Index;
+   begin
+      Check_Token_Kind (Kind);
+      Family := Kind.Id.Token_Kinds (Kind.Index).Family;
+      return From_Index (Kind.Id, Family);
+   end Token_Family;
+
+   --------------
+   -- To_Index --
+   --------------
+
+   function To_Index (Family : Token_Family_Ref) return Token_Family_Index is
+   begin
+      Check_Token_Family (Family);
+      return Family.Index;
+   end To_Index;
+
+   ----------------
+   -- From_Index --
+   ----------------
+
+   function From_Index
+     (Id : Language_Id; Family : Token_Family_Index) return Token_Family_Ref is
+   begin
+      Check_Token_Family (Id, Family);
+      return (Id, Family);
+   end From_Index;
+
+   -----------------------
+   -- Last_Token_Family --
+   -----------------------
+
+   function Last_Token_Family (Id : Language_Id) return Token_Family_Index is
+   begin
+      return Id.Token_Family_Names'Last;
+   end Last_Token_Family;
+
+   ------------------------
+   -- Check_Token_Family --
+   ------------------------
+
+   procedure Check_Token_Family (Family : Token_Family_Ref) is
+   begin
+      if Family.Id = null then
+         raise Precondition_Failure with "null token family reference";
+      end if;
+   end Check_Token_Family;
+
+   ------------------------
+   -- Check_Token_Family --
+   ------------------------
+
+   procedure Check_Token_Family (Id : Language_Id; Family : Token_Family_Index)
+   is
+   begin
+      if Family not in Id.Token_Family_Names.all'Range then
+         raise Precondition_Failure with
+           "invalid token family for this language";
+      end if;
+   end Check_Token_Family;
 
 end Langkit_Support.Generic_API;

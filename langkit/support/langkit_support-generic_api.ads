@@ -143,6 +143,52 @@ package Langkit_Support.Generic_API is
    function Last_Token_Kind (Id : Language_Id) return Token_Kind_Index;
    --  Return the index of the last token kind for the given language
 
+   --------------------
+   -- Token families --
+   --------------------
+
+   type Token_Family_Ref is private;
+   --  Reference to a token family for a given language
+
+   No_Token_Family_Ref : constant Token_Family_Ref;
+   --  Special value to express no token family reference
+
+   function Language (Family : Token_Family_Ref) return Language_Id;
+   --  Return the language ID corresponding to the given token family. Raise a
+   --  ``Precondition_Failure`` exception if ``Family`` is
+   --  ``No_Token_Family_Ref``.
+
+   function Token_Family_Name (Family : Token_Family_Ref) return Name_Type;
+   --  Return the name for the given token family. Raise a
+   --  ``Precondition_Failure`` exception if ``Family`` is
+   --  ``No_Token_Family_Ref``.
+
+   function Token_Family (Kind : Token_Kind_Ref) return Token_Family_Ref;
+   --  Return the token family that owns tokens of the given ``Kind``
+
+   type Any_Token_Family_Index is new Natural;
+   subtype Token_Family_Index is
+     Any_Token_Family_Index range 1 ..  Any_Token_Family_Index'Last;
+   No_Token_Family_Index : constant Any_Token_Family_Index := 0;
+   --  Language-specific index to designate a token family.
+   --
+   --  A given languages accepts ``N`` token families, so the only valid
+   --  indexes for it are ``1 .. N``. The ``Last_Token_Family`` function below
+   --  gives the actual ``N`` for a given language.
+
+   function To_Index (Family : Token_Family_Ref) return Token_Family_Index;
+   --  Return the index of the given token family. Raise a
+   --  ``Precondition_Failure`` exception if ``Family`` is ``No_Token_Family``.
+
+   function From_Index
+     (Id : Language_Id; Family : Token_Family_Index) return Token_Family_Ref;
+   --  Return the token family for the given language corresponding to the
+   --  ``Family`` index. Raise a ``Precondition_Failure`` exception if
+   --  ``Family`` is not a valid token family index for the given language.
+
+   function Last_Token_Family (Id : Language_Id) return Token_Family_Index;
+   --  Return the index of the last token family for the given language
+
 private
 
    ------------------
@@ -197,5 +243,28 @@ private
    end record;
 
    No_Token_Kind_Ref : constant Token_Kind_Ref := (null, 0);
+
+   --------------------
+   -- Token families --
+   --------------------
+
+   procedure Check_Token_Family (Family : Token_Family_Ref);
+   --  Raise a ``Precondition_Failure`` exception if ``Family`` is
+   --  ``No_Token_Family_Ref``.
+
+   procedure Check_Token_Family
+     (Id : Language_Id; Family : Token_Family_Index);
+   --  If ``Family`` is not a valid token family for Id, raise a
+   --  ``Precondition_Failure`` exception.
+
+   type Token_Family_Ref is record
+      Id    : Any_Language_Id;
+      Index : Any_Token_Family_Index;
+      --  Either this is ``No_Token_Family_Ref``, and in that case both members
+      --  should be null/zero, either ``Index`` designates a valid token family
+      --  for the language ``Id`` represents.
+   end record;
+
+   No_Token_Family_Ref : constant Token_Family_Ref := (null, 0);
 
 end Langkit_Support.Generic_API;

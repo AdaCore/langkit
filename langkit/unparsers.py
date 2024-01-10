@@ -311,6 +311,17 @@ class NodeUnparser(Unparser):
     Base class for parse node unparsers.
     """
 
+    def __init__(self, node: ASTNodeType):
+        """
+        :param node: Parse node that this unparser handles.
+        """
+        self.node = node
+
+        self.var_name = names.Name("Unparser_For") + self.node.kwless_raw_name
+        """
+        Name of the variable to hold this node unparser in code generation.
+        """
+
     @staticmethod
     def from_parser(node: ASTNodeType, parser: Parser) -> NodeUnparser:
         """
@@ -649,9 +660,6 @@ class NullNodeUnparser(NodeUnparser):
     that takes no token and returns a null parse node.
     """
 
-    def __init__(self, node: ASTNodeType):
-        self.node = node
-
     def _dump(self, stream: IO[str]) -> None:
         stream.write('Unparser for {}: null\n'.format(self.node.dsl_name))
 
@@ -748,7 +756,7 @@ class RegularNodeUnparser(NodeUnparser):
         """
         :param node: Parse node that this unparser handles.
         """
-        self.node = node
+        super().__init__(node)
 
         parse_fields = self.node.get_parse_fields(
             predicate=lambda f: not f.null)
@@ -878,7 +886,7 @@ class ListNodeUnparser(NodeUnparser):
         :param separator: Unparser for the separator token, or None if this
             list allows no separator.
         """
-        self.node = node
+        super().__init__(node)
         self.separator = separator
 
     def __repr__(self) -> str:
@@ -912,12 +920,6 @@ class TokenNodeUnparser(NodeUnparser):
     """
     Unparser for token nodes.
     """
-
-    def __init__(self, node: ASTNodeType):
-        """
-        :param node: Parse node that this unparser handles.
-        """
-        self.node = node
 
     def __repr__(self) -> str:
         return f"<TokenNodeUnparser for {self.node.dsl_name}"

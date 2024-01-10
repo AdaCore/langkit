@@ -232,6 +232,11 @@ package Langkit_Support.Internal.Introspection is
       Is_Token_Node : Boolean;
       --  Whether this is a token node
 
+      Token_Node_Kind : Any_Token_Kind_Index;
+      --  If this is a token node and unparsers are enabled for this language,
+      --  token kind corresponding to this token node. ``No_Token_Kind_Index``
+      --  otherwise.
+
       Is_List_Node : Boolean;
       --  Whether this is a list node
 

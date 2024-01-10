@@ -541,6 +541,11 @@ class Emitter:
             # Unit for AST rewriting implementation
             Unit('pkg_rewriting_impl', 'Rewriting_Implementation',
                  unparser=True),
+            # Unit for unparsing tables
+            Unit('pkg_unparsers', 'Unparsers',
+                 has_body=False,
+                 unparser=True,
+                 is_interface=False),
             # Unit for AST unparsing primitives
             Unit('pkg_unparsing', 'Unparsing', unparser=True),
             # Unit for AST implementation of unparsing primitives

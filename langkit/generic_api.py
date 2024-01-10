@@ -8,6 +8,7 @@ from langkit.compiled_types import (
     EnumType, IteratorType, StructType, T
 )
 from langkit.expressions import PropertyDef
+from langkit.lexer import TokenAction, TokenFamily
 import langkit.names as names
 
 
@@ -142,6 +143,28 @@ class GenericAPI:
             "No_Type_Index"
             if t is None
             else f"Type_Index_For_{self.type_name(t)}"
+        )
+
+    def token_kind_index(self, t: TokenAction | None) -> str:
+        """
+        Return the name of the constant for ``t``'s token kind index, or
+        ``No_Token_Kind_Index`` if ``t`` is None.
+        """
+        return (
+            "No_Token_Kind_Index"
+            if t is None
+            else f"Token_Index_For_{t.ada_name}"
+        )
+
+    def token_family_index(self, tf: TokenFamily | None) -> str:
+        """
+        Return the name of the constant for ``tf``'s token family index, or
+        ``No_Token_Family_Index`` if ``tf`` is None.
+        """
+        return (
+            "No_Token_Family_Index"
+            if tf is None
+            else f"Token_Index_For_{tf.ada_name}"
         )
 
     def root_member(self, m: AbstractNodeData) -> AbstractNodeData:

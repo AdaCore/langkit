@@ -1289,6 +1289,28 @@ package body Langkit_Support.Generic_API.Introspection is
       return Node.Id.Struct_Types.all (Node.Index).Is_Token_Node;
    end Is_Token_Node;
 
+   ---------------------
+   -- Token_Node_Kind --
+   ---------------------
+
+   function Token_Node_Kind (Node : Type_Ref) return Token_Kind_Ref is
+   begin
+      Check_Node_Type (Node);
+      declare
+         Desc : Struct_Type_Descriptor renames
+           Node.Id.Struct_Types.all (Node.Index).all;
+      begin
+         if not Desc.Is_Token_Node then
+            raise Precondition_Failure with "token node expected";
+         elsif Desc.Token_Node_Kind = No_Token_Kind_Index then
+            raise Precondition_Failure with
+              "unparsers disabled for this language";
+         else
+            return From_Index (Node.Id, Desc.Token_Node_Kind);
+         end if;
+      end;
+   end Token_Node_Kind;
+
    ------------------
    -- Is_List_Node --
    ------------------
