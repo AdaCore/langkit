@@ -14,6 +14,15 @@ stages:
   - stage3  # package, executed regardless of testing
   - stage4  # CB, executed regardless of the rest
 
+
+###############
+# CHECK_ISSUE #
+###############
+
+check_issue:
+  extends: .check_issue
+  stage: stage1
+
 #########
 # BUILD #
 #########
@@ -37,7 +46,6 @@ langkit_build:
      - mem:16
   stage: stage1
   script:
-    - require_issue
     - !reference [.script_snippets, setup]
 
     - cd /it/wave
