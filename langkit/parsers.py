@@ -263,7 +263,7 @@ class Grammar:
             location or extract_library_location()
         )
 
-        self._all_lkt_rules: Dict[str, Tuple[L.Doc, L.GrammarExpr]] = (
+        self._all_lkt_rules: Dict[str, Tuple[L.Decl, L.GrammarExpr]] = (
             OrderedDict()
         )
         """

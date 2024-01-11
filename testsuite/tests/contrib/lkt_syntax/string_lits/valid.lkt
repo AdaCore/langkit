@@ -11,3 +11,14 @@ val esc_carriage_ret = "\r"
 val esc_backslash = "\\"
 val esc_double_quote = "\""
 val ord_escapes = "\xab\uc0d1\U0001ABCD"
+
+val block_empty = |"
+val block_several_lines =
+  |" Hello
+  |" world!
+val block_empty_line =
+  |" Hello
+  |"
+  |" world!
+val block_esc =
+  |" Hello \0 world!

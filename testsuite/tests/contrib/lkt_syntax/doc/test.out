@@ -4,10 +4,7 @@ LangkitRoot[2:1-13:18]
 |f_decls:
 |  FullDeclList[2:1-13:18]
 |  |  FullDecl[2:1-2:18]
-|  |  |f_doc:
-|  |  |  Doc[2:1-2:1]
-|  |  |  |f_lines:
-|  |  |  |  DocCommentList[2:1-2:1]: <empty list>
+|  |  |f_doc: <null>
 |  |  |f_decl_annotations:
 |  |  |  DeclAnnotationList[2:1-2:1]: <empty list>
 |  |  |f_decl:
@@ -24,10 +21,10 @@ LangkitRoot[2:1-13:18]
 |  |  |  |  NumLit[2:17-2:18]: 1
 |  |  FullDecl[3:1-4:18]
 |  |  |f_doc:
-|  |  |  Doc[3:1-3:14]
+|  |  |  BlockStringLit[3:1-3:14]
 |  |  |  |f_lines:
-|  |  |  |  DocCommentList[3:1-3:14]
-|  |  |  |  |  DocComment[3:1-3:14]: ## Doc for f2
+|  |  |  |  BlockStringLineList[3:1-3:14]
+|  |  |  |  |  BlockStringLine[3:1-3:14]: |" Doc for f2
 |  |  |f_decl_annotations:
 |  |  |  DeclAnnotationList[3:14-3:14]: <empty list>
 |  |  |f_decl:
@@ -44,12 +41,12 @@ LangkitRoot[2:1-13:18]
 |  |  |  |  NumLit[4:17-4:18]: 1
 |  |  FullDecl[5:1-8:18]
 |  |  |f_doc:
-|  |  |  Doc[5:1-7:6]
+|  |  |  BlockStringLit[5:1-7:6]
 |  |  |  |f_lines:
-|  |  |  |  DocCommentList[5:1-7:6]
-|  |  |  |  |  DocComment[5:1-5:14]: ## Multi-line
-|  |  |  |  |  DocComment[6:1-6:11]: ## doc for
-|  |  |  |  |  DocComment[7:1-7:6]: ## f2
+|  |  |  |  BlockStringLineList[5:1-7:6]
+|  |  |  |  |  BlockStringLine[5:1-5:14]: |" Multi-line
+|  |  |  |  |  BlockStringLine[6:1-6:11]: |" doc for
+|  |  |  |  |  BlockStringLine[7:1-7:6]: |" f2
 |  |  |f_decl_annotations:
 |  |  |  DeclAnnotationList[7:6-7:6]: <empty list>
 |  |  |f_decl:
@@ -66,12 +63,12 @@ LangkitRoot[2:1-13:18]
 |  |  |  |  NumLit[8:17-8:18]: 1
 |  |  FullDecl[9:1-13:18]
 |  |  |f_doc:
-|  |  |  Doc[9:1-12:6]
+|  |  |  BlockStringLit[9:1-12:6]
 |  |  |  |f_lines:
-|  |  |  |  DocCommentList[9:1-12:6]
-|  |  |  |  |  DocComment[9:1-9:9]: ## Weird
-|  |  |  |  |  DocComment[11:1-11:11]: ## doc for
-|  |  |  |  |  DocComment[12:1-12:6]: ## f3
+|  |  |  |  BlockStringLineList[9:1-12:6]
+|  |  |  |  |  BlockStringLine[9:1-9:9]: |" Weird
+|  |  |  |  |  BlockStringLine[11:1-11:11]: |" doc for
+|  |  |  |  |  BlockStringLine[12:1-12:6]: |" f3
 |  |  |f_decl_annotations:
 |  |  |  DeclAnnotationList[12:6-12:6]: <empty list>
 |  |  |f_decl:

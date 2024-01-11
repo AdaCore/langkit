@@ -22,21 +22,25 @@ package Liblktlang.Implementation.Extensions is
      (Node : Bare_Lkt_Node; Name : String_Type) return Internal_Unit;
    --  Return the unit that this name designates. Load it if needed.
 
-   function String_Lit_P_Is_Prefixed_String
-     (Node : Bare_String_Lit) return Boolean;
-   --  Return whether this string is prefixed or not
+   function Single_Line_String_Lit_P_Is_Prefixed_String
+     (Node : Bare_Single_Line_String_Lit) return Boolean;
+   --  Return whether this single line string literal is prefixed
 
-   function String_Lit_P_Prefix
-     (Node : Bare_String_Lit) return Character_Type;
-   --  Return the prefix of this string
+   function Single_Line_String_Lit_P_Prefix
+     (Node : Bare_Single_Line_String_Lit) return Character_Type;
+   --  Return the prefix of this single line string literal
 
    function Char_Lit_P_Denoted_Value
      (Node : Bare_Char_Lit) return Internal_Decoded_Char_Value;
    --  Return the content of the given character literal node
 
-   function String_Lit_P_Denoted_Value
-     (Node : Bare_String_Lit) return Internal_Decoded_String_Value;
-   --  Return the content of the given string literal node
+   function Block_String_Lit_P_Denoted_Value
+     (Node : Bare_Block_String_Lit) return Internal_Decoded_String_Value;
+   --  Return the content of the given block string literal node
+
+   function Single_Line_String_Lit_P_Denoted_Value
+     (Node : Bare_Single_Line_String_Lit) return Internal_Decoded_String_Value;
+   --  Return the content of the given single line string literal node
 
    function Token_Lit_P_Denoted_Value
      (Node : Bare_Token_Lit) return Internal_Decoded_String_Value;

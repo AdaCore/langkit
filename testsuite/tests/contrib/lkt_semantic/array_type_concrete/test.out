@@ -39,7 +39,7 @@ Expr <ArrayLiteral test.lkt:3:10-3:19>
 Id   <RefId "String" test.lkt:5:8-5:14>
      references <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:5:17-5:23>
+Expr <SingleLineStringLit test.lkt:5:17-5:23>
      has type <StructDecl prelude: "String">
 
 Id   <RefId "s" test.lkt:6:11-6:12>
@@ -48,7 +48,7 @@ Id   <RefId "s" test.lkt:6:11-6:12>
 Expr <RefId "s" test.lkt:6:11-6:12>
      has type <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:6:14-6:20>
+Expr <SingleLineStringLit test.lkt:6:14-6:20>
      has type <StructDecl prelude: "String">
 
 Expr <ArrayLiteral test.lkt:6:10-6:21>
@@ -99,7 +99,7 @@ Expr <ArrayLiteral test.lkt:10:10-10:23>
 Id   <RefId "String" test.lkt:12:12-12:18>
      references <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:12:21-12:27>
+Expr <SingleLineStringLit test.lkt:12:21-12:27>
      has type <StructDecl prelude: "String">
 
 Id   <RefId "bar" test.lkt:13:11-13:14>
@@ -111,19 +111,19 @@ Expr <RefId "bar" test.lkt:13:11-13:14>
 Expr <CallExpr test.lkt:13:11-13:16>
      has type <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:13:18-13:24>
+Expr <SingleLineStringLit test.lkt:13:18-13:24>
      has type <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:13:26-13:32>
+Expr <SingleLineStringLit test.lkt:13:26-13:32>
      has type <StructDecl prelude: "String">
 
 Expr <ArrayLiteral test.lkt:13:10-13:33>
      has type <InstantiatedGenericType prelude: "Array[String]">
 
-Expr <StringLit test.lkt:14:11-14:17>
+Expr <SingleLineStringLit test.lkt:14:11-14:17>
      has type <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:14:19-14:25>
+Expr <SingleLineStringLit test.lkt:14:19-14:25>
      has type <StructDecl prelude: "String">
 
 Id   <RefId "bar" test.lkt:14:27-14:30>
@@ -401,7 +401,7 @@ Expr <RefId "bar" test.lkt:31:22-31:25>
 Expr <CallExpr test.lkt:31:22-31:27>
      has type <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:31:29-31:32>
+Expr <SingleLineStringLit test.lkt:31:29-31:32>
      has type <StructDecl prelude: "String">
 
 Expr <ArrayLiteral test.lkt:31:21-31:33>

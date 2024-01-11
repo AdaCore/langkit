@@ -1,14 +1,19 @@
 with Ada.Assertions; use Ada.Assertions;
 with Ada.Directories;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Text_IO;    use Ada.Text_IO;
 
 with Interfaces; use Interfaces;
+
+with Liblktlang_Support.Text; use Liblktlang_Support.Text;
 
 with Liblktlang.Analysis;          use Liblktlang.Analysis;
 with Liblktlang.Prelude;
 with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
 
 package body Liblktlang.Implementation.Extensions is
+
+   package WWS renames Ada.Strings.Wide_Wide_Unbounded;
 
    function Common_Denoted_String
      (Node : Bare_Lkt_Node) return Internal_Decoded_String_Value;
@@ -59,12 +64,12 @@ package body Liblktlang.Implementation.Extensions is
          Cursor := Cursor + 1;
       end if;
 
-      --  Update Cursor_Sloc so that it reflects the location of N_Text
-      --  (Cursor).
+      --  Update Cursor_Sloc so that it reflects the location of N_Text's item
+      --  at index Cursor.
 
       Cursor_Sloc.Column :=
         Cursor_Sloc.Column
-        + Column_Count (N_Text (N_Text'First .. Cursor), Tab_Stop);
+        + Column_Count (N_Text (N_Text'First .. Cursor - 1), Tab_Stop);
 
       while Cursor /= N_Text'Last loop
          Result_Last := Result_Last + 1;
@@ -380,34 +385,34 @@ package body Liblktlang.Implementation.Extensions is
       return I;
    end Lkt_Node_P_Internal_Fetch_Referenced_Unit;
 
-   -------------------------------------
-   -- String_Lit_P_Is_Prefixed_String --
-   -------------------------------------
+   -------------------------------------------------
+   -- Single_Line_String_Lit_P_Is_Prefixed_String --
+   -------------------------------------------------
 
-   function String_Lit_P_Is_Prefixed_String
-     (Node : Bare_String_Lit) return Boolean
+   function Single_Line_String_Lit_P_Is_Prefixed_String
+     (Node : Bare_Single_Line_String_Lit) return Boolean
    is
       Tok_Kind : constant Token_Kind :=
          Kind (Data (Token (Node, Node.Token_Start_Index)));
    begin
       return Tok_Kind = Lkt_P_String;
-   end String_Lit_P_Is_Prefixed_String;
+   end Single_Line_String_Lit_P_Is_Prefixed_String;
 
-   -------------------------
-   -- String_Lit_P_Prefix --
-   -------------------------
+   -------------------------------------
+   -- Single_Line_String_Lit_P_Prefix --
+   -------------------------------------
 
-   function String_Lit_P_Prefix
-     (Node : Bare_String_Lit) return Character_Type
+   function Single_Line_String_Lit_P_Prefix
+     (Node : Bare_Single_Line_String_Lit) return Character_Type
    is
       N_Text : constant Text_Type := Text (Node);
    begin
       return
-        (if String_Lit_P_Is_Prefixed_String (Node) then
+        (if Single_Line_String_Lit_P_Is_Prefixed_String (Node) then
             N_Text (N_Text'First)
          else
             Character_Type'Val (0));
-   end String_Lit_P_Prefix;
+   end Single_Line_String_Lit_P_Prefix;
 
    ------------------------------
    -- Char_Lit_P_Denoted_Value --
@@ -443,15 +448,95 @@ package body Liblktlang.Implementation.Extensions is
       return Result;
    end Char_Lit_P_Denoted_Value;
 
-   --------------------------------
-   -- String_Lit_P_Denoted_Value --
-   --------------------------------
+   --------------------------------------
+   -- Block_String_Lit_P_Denoted_Value --
+   --------------------------------------
 
-   function String_Lit_P_Denoted_Value
-     (Node : Bare_String_Lit) return Internal_Decoded_String_Value is
+   function Block_String_Lit_P_Denoted_Value
+     (Node : Bare_Block_String_Lit) return Internal_Decoded_String_Value
+   is
+      Result : Unbounded_Text_Type;
+      List   : constant Bare_Lkt_Node_Base_List :=
+        Node.Block_String_Lit_F_Lines;
+   begin
+      for I in 1 .. List.Count loop
+         declare
+            Item   : constant Bare_Block_String_Line := List.Nodes.all (I);
+            N_Text : constant Text_Type := Text (Item);
+
+            Cursor      : Positive := N_Text'First;
+            Cursor_Sloc : Source_Location := Start_Sloc (Sloc_Range (Item));
+
+            Char_Value : Internal_Decoded_Char_Value;
+         begin
+            --  There are two legal cases:
+            --
+            --  * '|"', which designates an empty line
+            --  * '|" ...', which desigantes a non-empty line: the space after
+            --    '|"' is mandatory. Decode escape sequences in the line
+            --    content.
+            --
+            --  The only thing guaranteed here (by the lexer) is that N_Next
+            --  starts with ``|"``: the rest is to be checked here, as semantic
+            --  checks.
+
+            pragma Assert (N_Text'Length >= 2);
+            pragma Assert (N_Text (N_Text'First .. N_Text'First + 1) = "|""");
+            Cursor := Cursor + 2;
+            Cursor_Sloc.Column := Cursor_Sloc.Column + 2;
+
+            if N_Text'Length > 2 then
+               if N_Text (Cursor) /= ' ' then
+                  return
+                    (Value         => Empty_String,
+                     Has_Error     => True,
+                     Error_Sloc    => Cursor_Sloc,
+                     Error_Message => Create_String ("space missing"));
+               elsif N_Text'Length = 3 then
+                  return
+                    (Value         => Empty_String,
+                     Has_Error     => True,
+                     Error_Sloc    => Cursor_Sloc,
+                     Error_Message => Create_String
+                       ("empty line must not end with a space"));
+               end if;
+
+               Cursor := Cursor + 1;
+               Cursor_Sloc.Column := Cursor_Sloc.Column + 1;
+
+               while Cursor <= N_Text'Last loop
+                  Read_Denoted_Char
+                    (N_Text, False, Cursor, Cursor_Sloc, Char_Value);
+                  if Char_Value.Has_Error then
+                     return
+                       (Value         => Empty_String,
+                        Has_Error     => True,
+                        Error_Sloc    => Char_Value.Error_Sloc,
+                        Error_Message => Char_Value.Error_Message);
+                  end if;
+                  WWS.Append (Result, Char_Value.Value);
+               end loop;
+            end if;
+            WWS.Append (Result, Chars.LF);
+         end;
+      end loop;
+      return
+        (Value         => Create_String (To_Text (Result)),
+         Has_Error     => False,
+         Error_Sloc    => No_Source_Location,
+         Error_Message => Empty_String);
+   end Block_String_Lit_P_Denoted_Value;
+
+   --------------------------------------------
+   -- Single_Line_String_Lit_P_Denoted_Value --
+   --------------------------------------------
+
+   function Single_Line_String_Lit_P_Denoted_Value
+     (Node : Bare_Single_Line_String_Lit) return Internal_Decoded_String_Value
+   is
    begin
       return Common_Denoted_String (Node);
-   end String_Lit_P_Denoted_Value;
+   end Single_Line_String_Lit_P_Denoted_Value;
 
    -------------------------------
    -- Token_Lit_P_Denoted_Value --

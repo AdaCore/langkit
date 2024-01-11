@@ -12,8 +12,8 @@ grammar foo_grammar {
 class Block: FooNode {
     @parse_field name: Name
 
-    ## Helper to create a new entity from ``Entity`` but with the given
-    ## rebindings.
+    |" Helper to create a new entity from ``Entity`` but with the given
+    |" rebindings.
     fun create_entity(rbdng: EnvRebindings): Entity[Block] = {
         val e_info = EntityInfo(
             md=self.info.md, rebindings=rbdng, from_rebound=false

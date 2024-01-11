@@ -2,7 +2,7 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    ## Parser main entry point
+    |" Parser main entry point
     @main_rule main_rule <- or(
         | A1B1(@identifier("a1b1") main_rule main_rule)
         | A1B2(@identifier("a1b2") main_rule)

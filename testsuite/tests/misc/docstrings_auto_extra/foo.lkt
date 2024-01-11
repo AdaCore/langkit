@@ -8,18 +8,18 @@ grammar foo_grammar {
     derived_list_node <- DerivedListNode+(doc_node)
 }
 
-## Docstring for ``FooNode``.
+|" Docstring for ``FooNode``.
 class FooNode implements Node[FooNode] {
 }
 
 class UndocumentedNode: FooNode {
 }
 
-## Docstring for ``DocumentedNode``.
+|" Docstring for ``DocumentedNode``.
 @has_abstract_list
 class DocumentedNode: FooNode {
 }
 
-## Docstring for ``DerivedListNode``.
+|" Docstring for ``DerivedListNode``.
 class DerivedListNode: ASTList[FooNode, DocumentedNode] {
 }

@@ -3,7 +3,7 @@ Resolving test.lkt
 Id   <RefId "String" test.lkt:1:8-1:14>
      references <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:1:17-1:22>
+Expr <SingleLineStringLit test.lkt:1:17-1:22>
      has type <StructDecl prelude: "String">
 
 Id   <RefId "Char" test.lkt:2:8-2:12>

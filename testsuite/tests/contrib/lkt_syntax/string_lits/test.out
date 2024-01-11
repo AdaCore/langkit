@@ -13,21 +13,33 @@ esc_carriage_ret = '\r'
 esc_backslash = '\\'
 esc_double_quote = '"'
 ord_escapes = '\xab\uc0d1\U0001abcd'
+block_empty = '\n'
+block_several_lines = 'Hello\nworld!\n'
+block_empty_line = 'Hello\n\nworld!\n'
+block_esc = 'Hello \x00 world!\n'
 
 == escape_single_quote.lkt ==
 
-s = ERROR: 1:11: invalid escape sequence
+s = ERROR: 1:10: invalid escape sequence
 
 == escape_invalid_char.lkt ==
 
-s = ERROR: 1:11: invalid escape sequence
+s = ERROR: 1:10: invalid escape sequence
 
 == escape_invalid_digit.lkt ==
 
-s = ERROR: 1:11: invalid escape sequence
+s = ERROR: 1:10: invalid escape sequence
 
 == backslash_quote.lkt ==
 
 backslash_quote.lkt:1:13: Invalid token, ignored
+
+== block_missing_space.lkt ==
+
+s = ERROR: 1:11: space missing
+
+== block_trailing_space.lkt ==
+
+s = ERROR: 1:11: empty line must not end with a space
 
 Done

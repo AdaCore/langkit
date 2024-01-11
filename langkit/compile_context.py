@@ -932,24 +932,22 @@ class CompileCtx:
 
             return diagnostic_context(Location.from_lkt_node(lkt_node))
 
-    @staticmethod
-    def lkt_doc(decl: L.Decl) -> str:
+    def lkt_doc(self, decl: L.Decl) -> str:
         """
         Return the documentation attached to the ``full_decl`` node. This is an
         empty string if the docstring is missing.
 
         :param decl: Declaration to process.
         """
+        from langkit.lkt_lowering import denoted_str
+
         full_decl = decl.parent
         assert isinstance(full_decl, L.FullDecl)
 
-        # Remove the "##" docstring line prefix
-        result = []
-        for comment in full_decl.f_doc.f_lines:
-            line = comment.text
-            assert line.startswith("##")
-            result.append(line[2:])
-        return "\n".join(result)
+        if full_decl.f_doc is None:
+            return ""
+
+        return denoted_str(full_decl.f_doc)
 
     def register_exception_type(self,
                                 package: List[str],

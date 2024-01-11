@@ -1349,7 +1349,7 @@ def emit_expr(expr, **ctx):
 
 def emit_doc(doc):
     from inspect import cleandoc
-    doc = "$hl".join(["## "+ l for l in cleandoc(doc).split("\n")])
+    doc = "$hl".join(['|" '+ l for l in cleandoc(doc).split("\n")])
     return sf("${doc}")
 
 
@@ -2070,11 +2070,7 @@ def unparse_grammar(ctx, f):
         Return doc for the given parsing rule.
         """
         doc = ctx.grammar.user_defined_rules_docs[name]
-        return (
-            "".join(f"## {line}\n$hl" for line in doc.split("\n"))
-            if doc
-            else ""
-        )
+        return emit_doc(doc) + "$hl" if doc else ""
 
     def annotations(name: str) -> str:
         """

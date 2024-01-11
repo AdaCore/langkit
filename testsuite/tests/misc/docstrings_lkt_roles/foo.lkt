@@ -5,7 +5,7 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-## Log this docstring. This is a typeref: :typeref:`FooNode`.
+|" Log this docstring. This is a typeref: :typeref:`FooNode`.
 class FooNode implements Node[FooNode] {
     @export fun prop(): Int = 1
 }

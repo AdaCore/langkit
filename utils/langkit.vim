@@ -19,7 +19,6 @@ syn match   langkitToken   "@\s*\h\%(\w\|\.\)*" display
 syn match   langkitGrammarRule   "\%(\w\|_\)\+\s*\(<-\)\@=" display
 syn match   langkitLiteral "\d\+" display
 syn match   langkitComment "#.*$"
-syn match   langkitDocComment "##.*$"
 syn match   langkitOperator "<-"
 syn match   langkitOperator "?"
 syn match   langkitOperator "list+"
@@ -27,6 +26,7 @@ syn match   langkitOperator "list\*"
 syn match   langkitOperator "/"
 syn match   langkitOperator "|"
 syn match   langkitOperator "|>"
+syn match   langkitLineString +|".*$+
 
 hi def link langkitKeyword     Statement
 hi def link langkitQualifier   Identifier
@@ -38,8 +38,8 @@ hi def link langkitEntity	   Function
 hi def link langkitToken	   Define
 hi def link langkitGrammarRule Define
 hi def link langkitLiteral     Number
+hi def link langkitLineString  String
 hi def link langkitComment     Comment
-hi def link langkitDocComment  Comment
 " hi def link LalstateSloc            Type
 " hi def link LalstateCurrentExpr     Identifier
 " hi def link LalstateExpr            Identifier
