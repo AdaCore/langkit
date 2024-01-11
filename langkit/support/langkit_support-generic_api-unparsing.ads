@@ -107,7 +107,7 @@ package Langkit_Support.Generic_API.Unparsing is
    --    * The "line"/"hardline"/"softline"/"literalline" templates yield the
    --      corresponding Prettier documents::
    --
-   --        "list"
+   --        "line"
    --        "hardlist"
    --        "softlist"
    --        "literalline"
