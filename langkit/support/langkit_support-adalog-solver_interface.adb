@@ -29,6 +29,13 @@ package body Langkit_Support.Adalog.Solver_Interface is
      (Self : Predicate_Fn_Wrapper; Val : Value_Type) return Boolean
    is (Self.Callback (Val));
 
+   overriding procedure Failed
+     (Self     : Predicate_Fn_Wrapper;
+      Val      : Value_Type;
+      Ctxs     : Logic_Context_Array;
+      Round    : Natural;
+      Emitter  : Diagnostic_Emitter) is null;
+
    overriding function Image (Self : Predicate_Fn_Wrapper) return String
    is (Self.Name.To_String);
 
@@ -40,6 +47,13 @@ package body Langkit_Support.Adalog.Solver_Interface is
    overriding function Call
      (Self : N_Predicate_Fn_Wrapper; Vs : Value_Array) return Boolean
    is (Self.Callback (Vs));
+
+   overriding procedure Failed
+     (Self     : N_Predicate_Fn_Wrapper;
+      Vals     : Logic_Vars.Value_Array;
+      Ctxs     : Logic_Context_Array;
+      Round    : Natural;
+      Emitter  : Diagnostic_Emitter) is null;
 
    overriding function Image (Self : N_Predicate_Fn_Wrapper) return String
    is (Self.Name.To_String);

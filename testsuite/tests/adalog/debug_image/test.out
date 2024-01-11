@@ -9,12 +9,6 @@ All:
         %X <- 3 main.adb:28
 
 
-... without optimizations:
-Solution: [%X = 1, %Y = 1]
-Solution: [%X = 2, %Y = 2]
-Solution: [%X = 3, %Y = 3]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]
@@ -40,12 +34,6 @@ All: main.adb:34
         %Y <- 10 main.adb:34
 
 
-... without optimizations:
-Solution: [%X = 1, %Y = 10]
-Solution: [%X = 2, %Y = 10]
-Solution: [%X = 3, %Y = 10]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 10]
 Solution: [%X = 2, %Y = 10]
 Solution: [%X = 3, %Y = 10]
@@ -61,9 +49,6 @@ All: main.adb:38
         %X <- 3 main.adb:38
 
 
-... without optimizations:
-
-... with all optimizations:
 
 ========================================================================
 
@@ -72,9 +57,6 @@ All: main.adb:42
     Is_Even?(%Y) main.adb:42
     Is_Even?(%X) main.adb:42
 
-... without optimizations:
-
-... with all optimizations:
 
 ========================================================================
 
@@ -84,11 +66,6 @@ Any: main.adb:45
     %X <- 1 main.adb:45
     %X <- 2 main.adb:45
 
-... without optimizations:
-Solution: [%Y = <undefined>, %X = 1]
-Solution: [%Y = <undefined>, %X = 2]
-
-... with all optimizations:
 Solution: [%Y = <undefined>, %X = 1]
 Solution: [%Y = <undefined>, %X = 2]
 
@@ -99,9 +76,6 @@ Any: main.adb:48
     Is_Even?(%X) main.adb:48
     Is_Even?(%Y) main.adb:48
 
-... without optimizations:
-
-... with all optimizations:
 
 ========================================================================
 
@@ -117,9 +91,6 @@ Any: main.adb:51
         Is_Even?(%Y) main.adb:51
 
 
-... without optimizations:
-
-... with all optimizations:
 
 ========================================================================
 
@@ -136,10 +107,6 @@ All: main.adb:56
 
     %X <-> %Y main.adb:56
 
-... without optimizations:
-Solution: [%X = 2, %Y = 2]
-
-... with all optimizations:
 Solution: [%X = 2, %Y = 2]
 
 Done.

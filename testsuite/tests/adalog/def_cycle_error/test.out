@@ -4,8 +4,5 @@ All:
     %Z <- %Y
     %X <- %Z
 
-... without optimizations:
-
-... with all optimizations:
 
 Done.

@@ -13,10 +13,6 @@ All:
     %X <- Square(3)
     %Y <- Square(4)
 
-... without optimizations:
-Solution: [%X = 9, %Y = 16]
-
-... with all optimizations:
 Solution: [%X = 9, %Y = 16]
 
 ========================================================================
@@ -29,11 +25,6 @@ All:
 
     %X <- Square(4)
 
-... without optimizations:
-Solution: [%Y = 2, %X = 16]
-Solution: [%Y = 3, %X = 16]
-
-... with all optimizations:
 Solution: [%Y = 2, %X = 16]
 Solution: [%Y = 3, %X = 16]
 
@@ -45,9 +36,6 @@ All:
     %X <- Square(3)
     %Y <- Square(%X)
 
-... without optimizations:
-
-... with all optimizations:
 
 ========================================================================
 
@@ -65,17 +53,6 @@ All:
 
     %Y <- Square(%X)
 
-... without optimizations:
-Solution: [%X = 1, %Y = 1]
-Solution: [%X = 2, %Y = 4]
-Solution: [%X = 3, %Y = 9]
-Solution: [%X = 4, %Y = 16]
-Solution: [%X = 5, %Y = 25]
-Solution: [%X = 6, %Y = 36]
-Solution: [%X = 7, %Y = 49]
-Solution: [%X = 8, %Y = 64]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 4]
 Solution: [%X = 3, %Y = 9]

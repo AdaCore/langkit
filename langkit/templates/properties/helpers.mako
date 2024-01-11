@@ -180,28 +180,56 @@
         ) return Boolean
    </%def>
 
+   <%def name="failed_profile()">
+      overriding procedure Failed
+        (Self : ${type_name};
+         % if arity == 1:
+            Entity : ${T.entity.name};
+         % else:
+            Entities : Entity_Vars.Value_Array;
+         % endif
+         Ctxs    : Solver_Ifc.Logic_Context_Array;
+         Round   : Natural;
+         Emitter : Solver_Ifc.Diagnostic_Emitter
+        )
+   </%def>
+
    type ${type_name} is
    new Solver_Ifc.${"Predicate_Type" if arity == 1 else "N_Predicate_Type"}
    with record
       % for pa in pred.partial_args:
          Field_${pa.index} : ${pa.type.name};
       % endfor
-      % if not pred.partial_args:
+      % if prop.predicate_error is not None:
+         Error_Location : ${T.root_node.name};
+      % elif not pred.partial_args:
          null;
       % endif
    end record;
 
    ${call_profile()};
+
+   % if prop.predicate_error is not None:
+   ${failed_profile()};
+   % endif
+
    overriding function Image (Self : ${type_name}) return String;
    % if has_refcounted_args:
       overriding procedure Destroy (Self : in out ${type_name});
    % endif
 
+   <%
+      create_args = [(f"Field_{pa.index}", pa.type)
+                     for pa in pred.partial_args]
+      if prop.predicate_error is not None:
+        create_args.append(("Error_Location", T.root_node))
+   %>
+
    function Create_${pred.id}_Predicate
-   % if pred.partial_args:
+   % if create_args:
    (
-      % for pa in pred.partial_args:
-         Field_${pa.index} : ${pa.type.name}${"" if loop.last else ";"}
+      % for arg_name, arg_type in create_args:
+         ${arg_name} : ${arg_type.name}${"" if loop.last else ";"}
       % endfor
    )
    % endif
@@ -218,11 +246,11 @@
             "Ref_Count => 1",
          ]
       %>
-      % for pa in pred.partial_args:
-         % if pa.type.is_refcounted:
-            Inc_Ref (Field_${pa.index});
+      % for arg_name, arg_type in create_args:
+         % if arg_type.is_refcounted:
+            Inc_Ref (${arg_name});
          % endif
-         <% components.append(f"Field_{pa.index} => Field_{pa.index}") %>
+         <% components.append(f"{arg_name} => {arg_name}") %>
       % endfor
       return ${type_name}'(${", ".join(components)});
    end;
@@ -270,6 +298,39 @@
       %>
       return ${prop.name} ${args_fmt};
    end Call;
+
+   % if prop.predicate_error is not None:
+   ------------
+   -- Failed --
+   ------------
+
+   ${failed_profile()}
+   is
+      <%
+         template, args = prop.predicate_error_diagnostic(arity)
+      %>
+      Args : Internal_Entity_Array_Access :=
+         Create_Internal_Entity_Array (${len(args)});
+
+      Contexts : Internal_Logic_Context_Array_Access :=
+         Create_Internal_Logic_Context_Array (Ctxs'Length);
+
+      Diag : constant Internal_Solver_Diagnostic :=
+        (Template => Create_String ("${template}"),
+         Args     => Args,
+         Contexts => Contexts,
+         Location => Self.Error_Location,
+         Round    => Round);
+   begin
+      % for i, arg in enumerate(args):
+      Args.Items (${i + 1}) := ${arg};
+      % endfor
+      for I in Ctxs'Range loop
+         Contexts.Items (I) := Ctxs (I).all;
+      end loop;
+      Emitter (Diag);
+   end Failed;
+   % endif
 
    -----------
    -- Image --

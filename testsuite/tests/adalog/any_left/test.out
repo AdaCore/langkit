@@ -3,7 +3,6 @@ All:
     %X <- 12
     Is_Even?(%X)
 
-... with all optimizations:
 Solution: [%X = 12]
 
 Solving relation:
@@ -15,7 +14,6 @@ All:
 
     Is_Even?(%X)
 
-... with all optimizations:
 Solution: [%X = 2]
 
 Solving relation:
@@ -28,7 +26,6 @@ All:
 
     Is_Even?(%X)
 
-... with all optimizations:
 Solution: [%X = 2]
 Solution: [%X = 4]
 
@@ -39,7 +36,6 @@ Any:
     %X <- 3
     %X <- 4
 
-... with all optimizations:
 Solution: [%X = 1]
 Solution: [%X = 2]
 Solution: [%X = 3]

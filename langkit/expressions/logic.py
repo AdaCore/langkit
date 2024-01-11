@@ -42,19 +42,33 @@ class BindExpr(CallExpr):
     def __init__(self,
                  constructor_name: str,
                  constructor_args: List[Union[str, ResolvedExpression]],
+                 logic_ctx: Optional[ResolvedExpression],
                  abstract_expr: Optional[AbstractExpression] = None):
         """
         :param constructor_name: Name of the function to create the equation.
         :param constructor_args: Its arguments, exclusing the "Debug_String"
             one, which we automatically add.
+        :param logic_ctx: The logic context to associate to this equation.
         :param abstract_expr: Reference to the corresponding abstract
             expression, if any.
         """
+        self.logic_ctx: Optional[ResolvedExpression] = logic_ctx
+
         args: List[Union[str, ResolvedExpression]] = list(constructor_args)
+
+        if logic_ctx:
+            args.append(CallExpr(
+                "Logic_Ctx",
+                "Allocate_Logic_Context",
+                T.InternalLogicContextAccess,
+                [logic_ctx]
+            ))
+
         if abstract_expr:
             args.append(
                 f"Debug_String => {sloc_info_arg(abstract_expr.location)}"
             )
+
         super().__init__(
             "Bind_Result",
             constructor_name,
@@ -104,6 +118,7 @@ class AssignExpr(BindExpr):
                  logic_var: ResolvedExpression,
                  value: ResolvedExpression,
                  conv_prop: Optional[PropertyDef],
+                 logic_ctx: Optional[ResolvedExpression],
                  abstract_expr: Optional[AbstractExpression] = None):
         self.logic_var = logic_var
         self.value = value
@@ -120,6 +135,7 @@ class AssignExpr(BindExpr):
         super().__init__(
             "Solver.Create_Assign",
             constructor_args,
+            logic_ctx,
             abstract_expr=abstract_expr
         )
 
@@ -129,6 +145,7 @@ class AssignExpr(BindExpr):
             'logic_var': self.logic_var,
             'value': self.value,
             'conv_prop': self.conv_prop,
+            'logic_ctx': self.logic_ctx
         }
 
     def __repr__(self):
@@ -144,6 +161,7 @@ class PropagateExpr(BindExpr):
                  dest_var: ResolvedExpression,
                  arg_vars: List[ResolvedExpression],
                  prop: PropertyDef,
+                 logic_ctx: Optional[ResolvedExpression],
                  abstract_expr: Optional[AbstractExpression] = None):
         self.dest_var = dest_var
         self.arg_vars = arg_vars
@@ -177,7 +195,10 @@ class PropagateExpr(BindExpr):
             ]
 
         super().__init__(
-            constructor_name, constructor_args, abstract_expr=abstract_expr
+            constructor_name,
+            constructor_args,
+            logic_ctx,
+            abstract_expr=abstract_expr
         )
 
     @property
@@ -186,6 +207,7 @@ class PropagateExpr(BindExpr):
             'dest_var': self.dest_var,
             'arg_vars': self.arg_vars,
             'prop': self.prop,
+            'logic_ctx': self.logic_ctx
         }
 
     def __repr__(self):
@@ -200,6 +222,7 @@ class UnifyExpr(BindExpr):
     def __init__(self,
                  left_var: ResolvedExpression,
                  right_var: ResolvedExpression,
+                 logic_ctx: Optional[ResolvedExpression],
                  abstract_expr: Optional[AbstractExpression] = None):
         self.left_var = left_var
         self.right_var = right_var
@@ -207,6 +230,7 @@ class UnifyExpr(BindExpr):
         super().__init__(
             "Solver.Create_Unify",
             [self.left_var, self.right_var],
+            logic_ctx,
             abstract_expr=abstract_expr
         )
 
@@ -215,6 +239,7 @@ class UnifyExpr(BindExpr):
         return {
             'left_var': self.left_var,
             'right_var': self.right_var,
+            'logic_ctx': self.logic_ctx
         }
 
     def __repr__(self):
@@ -240,7 +265,7 @@ class Bind(AbstractExpression):
         Bind(A, B, conv_prop=T.TypeOfA.some_property)
     """
 
-    def __init__(self, from_expr, to_expr, conv_prop=None):
+    def __init__(self, from_expr, to_expr, conv_prop=None, logic_ctx=None):
         """
         :param AbstractExpression from_expr: An expression resolving to a
             logical variable that is the source of the bind.
@@ -251,11 +276,14 @@ class Bind(AbstractExpression):
             For convenience, it can be a property on any subclass of the root
             AST node class, and can return any subclass of the root AST node
             class.
+        :param AbstractExpression logic_ctx: An expression resolving to a
+            LogicContext.
         """
         super().__init__()
         self.from_expr = from_expr
         self.to_expr = to_expr
         self.conv_prop = conv_prop
+        self.logic_ctx = logic_ctx
 
     @staticmethod
     def _resolve_property(name: str,
@@ -368,6 +396,14 @@ class Bind(AbstractExpression):
         # node that is promoted to an entity).
         rhs = construct(self.to_expr)
 
+        logic_ctx = None
+        if self.logic_ctx:
+            logic_ctx = construct(self.logic_ctx)
+            check_source_language(
+                logic_ctx.type.matches(T.LogicContext),
+                f"Expected LogicContext, got {logic_ctx.type.dsl_name}"
+            )
+
         if rhs.type.matches(T.LogicVar):
             # The second operand is a logic variable: this is a Propagate or a
             # Unify equation depending on whether we have a conversion
@@ -378,9 +414,10 @@ class Bind(AbstractExpression):
             rhs = ResetLogicVar(rhs)
 
             return (
-                PropagateExpr(lhs, [rhs], self.conv_prop, abstract_expr=self)
+                PropagateExpr(lhs, [rhs], self.conv_prop, logic_ctx,
+                              abstract_expr=self)
                 if self.conv_prop else
-                UnifyExpr(lhs, rhs, abstract_expr=self)
+                UnifyExpr(lhs, rhs, logic_ctx, abstract_expr=self)
             )
 
         else:
@@ -403,7 +440,9 @@ class Bind(AbstractExpression):
                 from langkit.expressions import Cast
                 rhs = Cast.Expr(rhs, T.root_node.entity)
 
-            return AssignExpr(lhs, rhs, self.conv_prop, abstract_expr=self)
+            return AssignExpr(
+                lhs, rhs, self.conv_prop, logic_ctx, abstract_expr=self
+            )
 
 
 @dsl_document
@@ -421,7 +460,7 @@ class NPropagate(AbstractExpression):
         %V1 <- SomeNode.some_property(%V2, %V3, %V4)
     """
 
-    def __init__(self, dest_var, comb_prop, *arg_vars):
+    def __init__(self, dest_var, comb_prop, *arg_vars, **kwargs):
         """
         :param dest_var: Logic variable that is assigned the result of the
             combiner property.
@@ -435,6 +474,7 @@ class NPropagate(AbstractExpression):
         self.dest_var = dest_var
         self.comb_prop = comb_prop
         self.arg_vars = list(arg_vars)
+        self.logic_ctx = kwargs.pop('logic_ctx', None)
 
     def construct(self):
         # Resolve logic variables
@@ -452,8 +492,17 @@ class NPropagate(AbstractExpression):
         )
         assert self.comb_prop is not None
 
+        logic_ctx = None
+        if self.logic_ctx:
+            logic_ctx = construct(self.logic_ctx)
+            check_source_language(
+                logic_ctx.type.matches(T.LogicContext),
+                f"Expected LogicContext, got {logic_ctx.type.dsl_name}"
+            )
+
         return PropagateExpr(
-            dest_var, arg_vars, self.comb_prop, abstract_expr=self
+            dest_var, arg_vars, self.comb_prop, logic_ctx,
+            abstract_expr=self
         )
 
 
@@ -594,7 +643,7 @@ class Predicate(AbstractExpression):
         def __repr__(self):
             return '<Predicate.Expr {}>'.format(self.pred_id)
 
-    def __init__(self, predicate, *exprs):
+    def __init__(self, predicate, *exprs, **kwargs):
         """
         :param PropertyDef predicate: The property to use as a predicate.
             For convenience, it can be a property of any subtype of the root
@@ -606,6 +655,8 @@ class Predicate(AbstractExpression):
         super().__init__()
         self.pred_property = predicate
         self.exprs = exprs
+        self.pred_error_location = kwargs.pop('error_location', None)
+        check_source_language(len(kwargs) == 0, 'unexpected keyword arguments')
 
     def do_prepare(self):
         self.pred_property = resolve_property(self.pred_property).root
@@ -715,9 +766,22 @@ class Predicate(AbstractExpression):
             tuple(partial_args), default_passed_args
         )
 
+        if self.pred_property.predicate_error is not None:
+            check_source_language(
+                self.pred_error_location is not None,
+                "missing error_location argument for predicate"
+            )
+            error_loc_expr = construct(self.pred_error_location)
+            check_source_language(
+                error_loc_expr.type.matches(T.root_node),
+                "error_location must be a bare node"
+            )
+            closure_exprs.append(error_loc_expr)
+
         args = " ({})".format(
             ', '.join(["{}" for _ in range(len(closure_exprs))])
         ) if closure_exprs else ""
+
         predicate_expr = untyped_literal_expr(
             f"Create_{pred_id}_Predicate{args}", operands=closure_exprs
         )
@@ -779,6 +843,23 @@ def solve(self, equation):
     """
     PropertyDef.get()._solves_equation = True
     return CallExpr('Solve_Success', 'Solve_Wrapper', T.Bool,
+                    [construct(equation, T.Equation),
+                     construct(Self, T.root_node)],
+                    abstract_expr=self)
+
+
+@auto_attr
+def solve_with_diagnostics(self, equation):
+    """
+    Like ``solve`` but return a ``SolverResult`` struct instead, which
+    ``success`` field indicates whether resolution was successful or not.
+    If not, its ``diagnostics`` field contains an array of
+    ``SolverDiagnostic``.
+
+    :param AbstractExpression equation: The equation to solve.
+    """
+    PropertyDef.get()._solves_equation = True
+    return CallExpr('Solve_Result', 'Solve_With_Diagnostics', T.SolverResult,
                     [construct(equation, T.Equation),
                      construct(Self, T.root_node)],
                     abstract_expr=self)

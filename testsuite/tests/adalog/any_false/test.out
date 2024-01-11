@@ -3,10 +3,6 @@ Any:
     False
     %X <- 12
 
-... without optimizations:
-Solution: [%X = 12]
-
-... with all optimizations:
 Solution: [%X = 12]
 
 Done.

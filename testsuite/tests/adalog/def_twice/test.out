@@ -11,10 +11,6 @@ All:
     %X <- 1
     Is_Odd?(%X)
 
-... without optimizations:
-Solution: [%X = 1]
-
-... with all optimizations:
 Solution: [%X = 1]
 
 Done.

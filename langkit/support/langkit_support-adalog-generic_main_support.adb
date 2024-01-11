@@ -3,8 +3,6 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
-with Ada.Command_Line;
-with Ada.Environment_Variables;
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
@@ -16,14 +14,6 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
    procedure Free is new Ada.Unchecked_Deallocation
      (Logic_Var_Record, Refs.Logic_Var);
-
-   --  The following booleans determine which solver configurations to run in
-   --  tests. The ``Setup_Traces`` procedure initializes them with default
-   --  values, possibly modified depending on environment variables, for
-   --  convenience when debugging tests.
-
-   Run_Sym_Without_Opts : Boolean;
-   Run_Sym_With_Opts    : Boolean;
 
    ------------
    -- Create --
@@ -81,14 +71,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
       procedure Free (Self : in out Solution_Vectors.Vector);
       --  Free all solutions in Self and destroy the vector
 
-      function Equivalent
-        (Left, Right : Solution_Vectors.Vector) return Boolean;
-      --  Return whether the two vectors of solutions are equal
-
-      Solutions              : Solution_Vectors.Vector :=
-        Solution_Vectors.Empty_Vector;
-      Solutions_Without_Opts : Solution_Vectors.Vector :=
-        Solution_Vectors.Empty_Vector;
+      Solutions : Solution_Vectors.Vector := Solution_Vectors.Empty_Vector;
 
       function Solution_Callback (Vars : Logic_Var_Array) return Boolean;
       --  Callback for ``Solve``. Print the given solution and append it to
@@ -115,46 +98,6 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
          end loop;
          Self.Destroy;
       end Free;
-
-      ----------------
-      -- Equivalent --
-      ----------------
-
-      function Equivalent
-        (Left, Right : Solution_Vectors.Vector) return Boolean
-      is
-      begin
-         if Left.Length /= Right.Length then
-            return False;
-         end if;
-
-         for I in 1 .. Left.Length loop
-            declare
-               S_L : Solution renames Left.Get (I).all;
-               S_R : Solution renames Right.Get (I).all;
-            begin
-               if S_L'Length /= S_R'Length then
-                  return False;
-               end if;
-
-               for J in S_L'Range loop
-                  declare
-                     L : Var_And_Val renames S_L (J);
-                     R : Var_And_Val renames S_R (J);
-                  begin
-                     if Refs."/=" (L.Var, R.Var)
-                        or else L.Defined /= R.Defined
-                        or else (L.Defined and then L.Val /= R.Val)
-                     then
-                        return False;
-                     end if;
-                  end;
-               end loop;
-            end;
-         end loop;
-
-         return True;
-      end Equivalent;
 
       -----------------------
       -- Solution_Callback --
@@ -184,7 +127,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
       procedure Run_Solve (Opts : Solve_Options_Type) is
       begin
-         Solve (Rel, Solution_Callback'Access, Opts, Timeout);
+         Solve (Rel, Solution_Callback'Access, Opts, null, Timeout);
       exception
          when Early_Binding_Error =>
             Put_Line ("Resolution failed with Early_Binding_Error");
@@ -198,42 +141,15 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
    begin
       Put_Line ("Solving relation:");
       Put_Line (Image (Rel));
-
-      --  Solve both without and with optimizations
-
-      if Run_Sym_Without_Opts then
-         Put_Line ("... without optimizations:");
-         Run_Solve ((others => False));
-         New_Line;
-         Solutions_Without_Opts := Solutions;
-         Solutions := Solution_Vectors.Empty_Vector;
-      end if;
-
-      if Run_Sym_With_Opts then
-         Put_Line ("... with all optimizations:");
-         Run_Solve ((others => True));
-         New_Line;
-      end if;
-
-      --  Check that we had the same results in both cases
-
-      if Run_Sym_Without_Opts
-         and then Run_Sym_With_Opts
-         and then not Equivalent (Solutions_Without_Opts, Solutions)
-      then
-         Put_Line ("ERROR: solutions are not the same");
-         New_Line;
-         Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
-      end if;
+      Run_Solve (Default_Options);
+      New_Line;
 
       --  Clean up, we are done
 
-      Free (Solutions_Without_Opts);
       Free (Solutions);
 
    exception
       when others =>
-         Free (Solutions_Without_Opts);
          Free (Solutions);
          raise;
    end Solve_All;
@@ -255,37 +171,10 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
 
    procedure Run_Main (Main : access procedure) is
    begin
-      Setup_Traces;
+      GNATCOLL.Traces.Parse_Config_File;
       Main.all;
       Finalize;
    end Run_Main;
-
-   ------------------
-   -- Setup_Traces --
-   ------------------
-
-   procedure Setup_Traces is
-      package Env renames Ada.Environment_Variables;
-      Var_Name : constant String := "ADALOG_SOLVER_CFG";
-      Cfg      : constant String := Env.Value (Var_Name, Default => "");
-   begin
-      GNATCOLL.Traces.Parse_Config_File;
-
-      Run_Sym_Without_Opts := False;
-      Run_Sym_With_Opts := False;
-
-      if Cfg = "" then
-         Run_Sym_Without_Opts := True;
-         Run_Sym_With_Opts := True;
-      elsif Cfg = "sym" then
-         Run_Sym_Without_Opts := True;
-      elsif Cfg = "sym-opts" then
-         Run_Sym_With_Opts := True;
-      else
-         raise Program_Error
-           with "Invalid value for env var """ & Var_Name & """";
-      end if;
-   end Setup_Traces;
 
    --------------
    -- Finalize --

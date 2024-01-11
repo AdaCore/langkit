@@ -19,18 +19,6 @@ All:
 
     True
 
-... without optimizations:
-Solution: [%X = 1, %Y = 1]
-Solution: [%X = 2, %Y = 2]
-Solution: [%X = 3, %Y = 3]
-Solution: [%X = 4, %Y = 4]
-Solution: [%X = 5, %Y = 5]
-Solution: [%X = 6, %Y = 6]
-Solution: [%X = 10, %Y = 10]
-Solution: [%X = 11, %Y = 11]
-Solution: [%X = <undefined>, %Y = <undefined>]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = 1]
 Solution: [%X = 2, %Y = 2]
 Solution: [%X = 3, %Y = 3]

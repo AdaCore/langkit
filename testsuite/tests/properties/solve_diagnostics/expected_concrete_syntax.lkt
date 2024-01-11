@@ -1,0 +1,96 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Block(list*(stmt))
+    stmt <- or(proc_decl | call)
+    proc_decl <- ProcDecl(
+        "def" ident "(" ident "," ident ")"
+    )
+    call <- Call(ident "(" literal "," literal ")")
+    ident <- Identifier(@identifier)
+    literal <- or(NumberLiteral(@number) | StringLiteral(@string))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @lazy number_type: NumType = NumType()
+
+    @lazy str_type: StrType = StrType()
+}
+
+class Block: FooNode {
+    @parse_field stmts: ASTList[FooNode, FooNode]
+
+    env_spec {
+        add_env()
+    }
+}
+
+@abstract class Expr: FooNode {
+    type_var: LogicVar
+
+    fun xref_equation(): Equation = %false
+}
+
+class Call: Expr {
+    @parse_field name: Identifier
+    @parse_field first_arg: Expr
+    @parse_field second_arg: Expr
+
+    @export fun resolve(): SolverResult = {
+        val eq = self.first_arg.xref_equation() and self.second_arg.xref_equation() and (
+            %any(node.children_env().get(node.name.symbol).logic_any(
+                (elem) => %eq(node.name.ref_var, elem) and elem.as[ProcDecl].call_equation(
+                    node.first_arg, node.second_arg, ctx=LogicContext(ref_node=self.name, decl_node=elem)
+                )
+            ))
+        );
+
+        eq.solve_with_diagnostics()
+    }
+}
+
+class NumberLiteral: Expr implements TokenNode {
+    fun xref_equation(): Equation =
+    %eq(node.type_var, node.unit().root.number_type())
+}
+
+class StringLiteral: Expr implements TokenNode {
+    fun xref_equation(): Equation =
+    %eq(node.type_var, node.unit().root.str_type())
+}
+
+class Identifier: FooNode implements TokenNode {
+    ref_var: LogicVar
+
+    fun designated_type(): Entity[FooNode] =
+    if (node.symbol == s"number") then node.unit().root.number_type().as_bare_entity
+    elif (node.symbol == s"string") then node.unit().root.str_type().as_bare_entity
+    else null[Entity[FooNode]]
+
+    fun xref_equation(ctx: LogicContext): Equation =
+    %eq(node.ref_var, node.designated_type())
+}
+
+class ProcDecl: FooNode {
+    @parse_field name: Identifier
+    @parse_field first_type: Identifier
+    @parse_field second_type: Identifier
+
+    fun call_equation(first_arg: Expr, second_arg: Expr, ctx: LogicContext): Equation =
+    node.first_type.xref_equation(ctx) and node.second_type.xref_equation(ctx) and %predicate(TypeDecl.match_expected_type, first_arg.type_var, node.first_type.ref_var) and %predicate(TypeDecl.match_expected_type, second_arg.type_var, node.second_type.ref_var)
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
+}
+
+@abstract class TypeDecl: FooNode {
+    fun match_expected_type(expected: Entity[FooNode]): Bool = self == expected
+}
+
+@synthetic class NumType: TypeDecl {
+}
+
+@synthetic class StrType: TypeDecl {
+}

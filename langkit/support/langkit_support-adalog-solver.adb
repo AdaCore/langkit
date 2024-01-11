@@ -11,6 +11,7 @@ with GNAT.Traceback.Symbolic; use GNAT.Traceback.Symbolic;
 
 with GNATCOLL.Strings; use GNATCOLL.Strings;
 
+with Langkit_Support.Adalog.Solver.Diagnostics;
 with Langkit_Support.Images;
 
 with AdaSAT.Builders;
@@ -197,6 +198,9 @@ package body Langkit_Support.Adalog.Solver is
    subtype Atomic_Relation_Vector is Atomic_Relation_Vectors.Vector;
    --  Vectors of atomic relations
 
+   package Internal_Diagnostics is
+     new Langkit_Support.Adalog.Solver.Diagnostics;
+
    --------------------------
    -- Supporting functions --
    --------------------------
@@ -204,6 +208,7 @@ package body Langkit_Support.Adalog.Solver is
    function Create_Propagate
      (From, To     : Logic_Var;
       Conv         : Converter_Access := null;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation;
    --  Helper function to create a Propagate relation
 
@@ -258,6 +263,8 @@ package body Langkit_Support.Adalog.Solver is
 
    package Unified_Vars_Vectors is new Langkit_Support.Vectors
      (Unified_Vars);
+
+   type Logic_Context_Vector_Access is access all Logic_Context_Vectors.Vector;
 
    type Sort_Context is record
       Defining_Atoms : Positive_Vector_Array_Access;
@@ -330,6 +337,14 @@ package body Langkit_Support.Adalog.Solver is
       --  User callback, to be called when a solution is found. Returns whether
       --  to continue exploring the solution space.
 
+      Report_Errors : Boolean;
+      --  Whether to emit a diagnostic each time a candidate solution proposed
+      --  by the SAT solver is rejected.
+
+      Diagnostic_Accumulator : Internal_Diagnostics.Diagnostic_Accumulator;
+      --  Accumulates the diagnostics produced by the theory, so that at the
+      --  end only relevant ones are actually emitted to the user.
+
       Vars : Logic_Var_Array_Access;
       --  List of all logic variables referenced in the top-level relation.
       --
@@ -376,6 +391,10 @@ package body Langkit_Support.Adalog.Solver is
 
       Blocks : BB_Vectors.Vector;
       --  Holds the list of all relations that compose each basic block
+
+      Current_Round : Natural := 0;
+      --  Counter that is incremented each time the SAT solver proposes
+      --  a new candidate solution to the theory.
    end record;
    --  Context for the solving of a compound relation
 
@@ -455,12 +474,21 @@ package body Langkit_Support.Adalog.Solver is
    --  solutions. If not, the ``Explanation`` formula builder is populated with
    --  one or several clauses explaining the failure.
 
+   function Evaluate_Atoms_And_Report_Errors
+     (Ctx          : in out Solving_Context;
+      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array;
+      Explanation  : in out AdaSAT.Builders.Formula_Builder) return Boolean;
+   --  Like ``Evaluate_Atoms``, but register atom failures in the context's
+   --  diagnostic accumulator. Also drop some optimizations to make sure
+   --  all errors are reported.
+
    function Explain_Contradiction
      (Ctx          : Solving_Context;
       Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array;
       Failed_Atom  : Atomic_Relation;
       Unify_Graph  : in out Unification_Graph_Access;
-      Invalid_Vars : in out Index_Set) return AdaSAT.Clause;
+      Invalid_Vars : in out Index_Set;
+      Error_Ctxs   : Logic_Context_Vector_Access := null) return AdaSAT.Clause;
    --  Given a sequence of sorted atoms (see ``Topo_Sort``) and the atom on
    --  which evaluation failed (see ``Evaluate_Atoms``), compute the smallest
    --  set of atoms among that sequence that explains why evaluation failed and
@@ -1105,7 +1133,8 @@ package body Langkit_Support.Adalog.Solver is
       Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array;
       Failed_Atom  : Atomic_Relation;
       Unify_Graph  : in out Unification_Graph_Access;
-      Invalid_Vars : in out Index_Set) return AdaSAT.Clause
+      Invalid_Vars : in out Index_Set;
+      Error_Ctxs   : Logic_Context_Vector_Access := null) return AdaSAT.Clause
    is
       use AdaSAT;
 
@@ -1132,6 +1161,10 @@ package body Langkit_Support.Adalog.Solver is
 
       procedure Add_Conflict (Atom : Atomic_Relation);
       --  Include the given atom in the explanation, if not already present
+
+      procedure Append_Error_Context (Ctx : Logic_Context_Type_Access);
+      --  Add the given context to the ``Error_Ctxs`` vector if it is not
+      --  already present.
 
       procedure Mark_Assignment (Target : Logic_Var);
       --  Find the atom that assigns a value to the given variable and add
@@ -1172,6 +1205,16 @@ package body Langkit_Support.Adalog.Solver is
       procedure Add_Conflict (Atom : Atomic_Relation) is
          Index : constant Variable := Ctx.Atom_Map (Atom.Id);
       begin
+         if Error_Ctxs /= null then
+            case Atom.Atomic_Rel.Kind is
+               when Assign | Propagate | N_Propagate | Unify =>
+                  if Atom.Atomic_Rel.Ctx /= null then
+                     Append_Error_Context (Atom.Atomic_Rel.Ctx);
+                  end if;
+               when others =>
+                  null;
+            end case;
+         end if;
          if Conflict (Index) then
             return;
          end if;
@@ -1185,6 +1228,20 @@ package body Langkit_Support.Adalog.Solver is
             Solv_Trace.Trace (Image (Atom));
          end if;
       end Add_Conflict;
+
+      --------------------------
+      -- Append_Error_Context --
+      --------------------------
+
+      procedure Append_Error_Context (Ctx : Logic_Context_Type_Access) is
+      begin
+         for C of Error_Ctxs.all loop
+            if Solver_Ifc.Same_Contexts (C, Ctx) then
+               return;
+            end if;
+         end loop;
+         Error_Ctxs.Append (Ctx);
+      end Append_Error_Context;
 
       ---------------------
       -- Mark_Assignment --
@@ -1442,6 +1499,10 @@ package body Langkit_Support.Adalog.Solver is
       Success      : Boolean := True;
       Invalid_Vars : Index_Set := (Ctx.Vars'Range => False);
    begin
+      if Ctx.Report_Errors then
+         return Evaluate_Atoms_And_Report_Errors
+           (Ctx, Sorted_Atoms, Explanation);
+      end if;
       --  If we have a timeout, apply it
       Decrease_Remaining_Time (Ctx, Sorted_Atoms'Length);
 
@@ -1487,6 +1548,7 @@ package body Langkit_Support.Adalog.Solver is
             Explanation.Add_Simplify (Explain_Contradiction
               (Ctx, Sorted_Atoms (1 .. Max_Index - 1), Atom,
                Unify_Graph, Invalid_Vars));
+
          end if;
          Max_Index := Max_Index + 1;
       end loop;
@@ -1497,6 +1559,62 @@ package body Langkit_Support.Adalog.Solver is
 
       return Success;
    end Evaluate_Atoms;
+
+   --------------------------------------
+   -- Evaluate_Atoms_And_Report_Errors --
+   --------------------------------------
+
+   function Evaluate_Atoms_And_Report_Errors
+     (Ctx          : in out Solving_Context;
+      Sorted_Atoms : Atomic_Relation_Vectors.Elements_Array;
+      Explanation  : in out AdaSAT.Builders.Formula_Builder) return Boolean
+   is
+      Max_Index    : Positive := 1;
+      Unify_Graph  : Unification_Graph_Access := null;
+      Invalid_Vars : Index_Set := (Ctx.Vars'Range => False);
+      Success      : Boolean := True;
+      Error_Ctxs   : aliased Logic_Context_Vectors.Vector;
+      Last_Clause  : AdaSAT.Clause;
+   begin
+      for Atom of Sorted_Atoms loop
+         if not Solve_Atomic (Atom) then
+            if Solv_Trace.Is_Active then
+               Solv_Trace.Trace ("Failed on " & Image (Atom));
+            end if;
+
+            Last_Clause := Explain_Contradiction
+              (Ctx, Sorted_Atoms (1 .. Max_Index - 1), Atom,
+               Unify_Graph, Invalid_Vars, Error_Ctxs'Unchecked_Access);
+
+            --  Make sure only one clause is added to the explanation when
+            --  in error reporting mode, so that each round really tries
+            --  a single candidate solution.
+            if Success then
+               Explanation.Add_Simplify (Last_Clause);
+            else
+               AdaSAT.Free (Last_Clause);
+            end if;
+
+            Internal_Diagnostics.Register_Failure
+              (Ctx.Diagnostic_Accumulator,
+               Atom.Atomic_Rel,
+               Error_Ctxs,
+               Ctx.Current_Round);
+
+            Error_Ctxs.Clear;
+            Success := False;
+         end if;
+         Max_Index := Max_Index + 1;
+      end loop;
+
+      if Unify_Graph /= null then
+         Destroy_Unification_Graph (Unify_Graph);
+      end if;
+
+      Error_Ctxs.Destroy;
+
+      return Success;
+   end Evaluate_Atoms_And_Report_Errors;
 
    --------------
    -- Uses_Var --
@@ -1999,6 +2117,7 @@ package body Langkit_Support.Adalog.Solver is
    begin
       Ctx.Unifies.Clear;
       Ctx.Atoms.Clear;
+      Ctx.Current_Round := Ctx.Current_Round + 1;
 
       if Solv_Trace.Is_Active then
          Solv_Trace.Trace ("Trying with: " & Image (Model));
@@ -2325,10 +2444,9 @@ package body Langkit_Support.Adalog.Solver is
       Solution_Callback : access function
         (Vars : Logic_Var_Array) return Boolean;
       Solve_Options     : Solve_Options_Type := Default_Options;
+      Diag_Emitter      : Diagnostic_Emitter := null;
       Timeout           : Natural := 0)
    is
-      pragma Unreferenced (Solve_Options);
-
       PRel   : Prepared_Relation;
       Rel    : Relation renames PRel.Rel;
       Ctx    : Solving_Context;
@@ -2356,6 +2474,7 @@ package body Langkit_Support.Adalog.Solver is
       Ctx := Create
         (Solution_Callback'Unrestricted_Access.all, PRel.Vars, Max_Id);
       Ctx.Remaining_Time := Timeout;
+      Ctx.Report_Errors  := Solve_Options.Report_Errors;
 
       declare
          Start : constant Time := Clock;
@@ -2364,12 +2483,21 @@ package body Langkit_Support.Adalog.Solver is
          Trace_Timing ("Solver", Start);
       end;
 
+      if Ctx.Report_Errors then
+         Internal_Diagnostics.Emit_All_And_Destroy
+           (Ctx.Diagnostic_Accumulator, Diag_Emitter);
+      end if;
+
       Cleanup;
    exception
       when E : others =>
          Solver_Trace.Trace ("Exception during solving... Cleaning up");
          if Verbose_Trace.Is_Active then
             Verbose_Trace.Trace (Symbolic_Traceback (E));
+         end if;
+
+         if Ctx.Report_Errors then
+            Internal_Diagnostics.Destroy (Ctx.Diagnostic_Accumulator);
          end if;
 
          --  There is nothing to clean up if we do not have a prepared relation
@@ -2388,6 +2516,7 @@ package body Langkit_Support.Adalog.Solver is
    function Solve_First
      (Self          : Relation;
       Solve_Options : Solve_Options_Type := Default_Options;
+      Diag_Emitter  : Diagnostic_Emitter := null;
       Timeout       : Natural := 0) return Boolean
    is
       Ret : Boolean := False;
@@ -2432,7 +2561,7 @@ package body Langkit_Support.Adalog.Solver is
       end Callback;
 
    begin
-      Solve (Self, Callback'Access, Solve_Options, Timeout);
+      Solve (Self, Callback'Access, Solve_Options, Diag_Emitter, Timeout);
       if Tracked_Vars /= null then
          for TV of Tracked_Vars.all loop
             if TV.Defined then
@@ -2508,6 +2637,7 @@ package body Langkit_Support.Adalog.Solver is
      (Logic_Var    : Logic_Vars.Logic_Var;
       Value        : Value_Type;
       Conv         : Converter_Type'Class := No_Converter;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation
    is
       Conv_Ptr : Converter_Access := null;
@@ -2519,6 +2649,7 @@ package body Langkit_Support.Adalog.Solver is
       return To_Relation
         (Atomic_Relation_Type'
            (Kind     => Assign,
+            Ctx      => Logic_Ctx,
             Conv     => Conv_Ptr,
             Val      => Value,
             Target   => Logic_Var),
@@ -2531,10 +2662,12 @@ package body Langkit_Support.Adalog.Solver is
 
    function Create_Unify
      (Left, Right  : Logic_Var;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation is
    begin
       return To_Relation
         (Atomic_Relation_Type'(Kind       => Unify,
+                               Ctx        => Logic_Ctx,
                                Target     => Right,
                                Unify_From => Left),
          Debug_String => Debug_String);
@@ -2547,9 +2680,11 @@ package body Langkit_Support.Adalog.Solver is
    function Create_Propagate
      (From, To     : Logic_Var;
       Conv         : Converter_Access := null;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation is
    begin
       return To_Relation (Atomic_Relation_Type'(Kind   => Propagate,
+                                                Ctx    => Logic_Ctx,
                                                 Conv   => Conv,
                                                 From   => From,
                                                 Target => To),
@@ -2564,6 +2699,7 @@ package body Langkit_Support.Adalog.Solver is
      (To           : Logic_Var;
       Comb         : Combiner_Type'Class;
       Logic_Vars   : Logic_Var_Array;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation
    is
       Vars_Vec : Logic_Var_Vector := Logic_Var_Vectors.Empty_Vector;
@@ -2571,6 +2707,7 @@ package body Langkit_Support.Adalog.Solver is
       Vars_Vec.Concat (Logic_Var_Vectors.Elements_Array (Logic_Vars));
       return To_Relation
         (Atomic_Relation_Type'(Kind      => N_Propagate,
+                               Ctx       => Logic_Ctx,
                                Comb_Vars => Vars_Vec,
                                Comb      => new Combiner_Type'Class'(Comb),
                                Target    => To),
@@ -2584,6 +2721,7 @@ package body Langkit_Support.Adalog.Solver is
    function Create_Propagate
      (From, To     : Logic_Var;
       Conv         : Converter_Type'Class := No_Converter;
+      Logic_Ctx    : Solver_Ifc.Logic_Context_Access := null;
       Debug_String : String_Access := null) return Relation
    is
       Conv_Ptr : Converter_Access := null;
@@ -2593,7 +2731,7 @@ package body Langkit_Support.Adalog.Solver is
       end if;
 
       return Create_Propagate
-        (From, To, Conv_Ptr, Debug_String => Debug_String);
+        (From, To, Conv_Ptr, Logic_Ctx, Debug_String => Debug_String);
    end Create_Propagate;
 
    -------------------
@@ -2696,6 +2834,10 @@ package body Langkit_Support.Adalog.Solver is
                Destroy (Self.Conv.all);
             end if;
             Free (Self.Conv);
+            Solver_Ifc.Free_Context (Self.Ctx);
+
+         when Unify =>
+            Solver_Ifc.Free_Context (Self.Ctx);
 
          when N_Propagate =>
             Self.Comb_Vars.Destroy;
@@ -2711,7 +2853,7 @@ package body Langkit_Support.Adalog.Solver is
             Destroy (Self.N_Pred.all);
             Free (Self.N_Pred);
 
-         when True | False | Unify =>
+         when True | False =>
             null;
       end case;
    end Destroy;
@@ -2744,6 +2886,17 @@ package body Langkit_Support.Adalog.Solver is
       end case;
    end Destroy;
 
+   ----------------
+   -- Get_Values --
+   ----------------
+
+   procedure Get_Values (Vars : Logic_Var_Vector; Vals : out Value_Array) is
+   begin
+      for I in Vals'Range loop
+         Vals (I) := Get_Value (Vars.Get (I));
+      end loop;
+   end Get_Values;
+
    ------------------
    -- Solve_Atomic --
    ------------------
@@ -2767,14 +2920,6 @@ package body Langkit_Support.Adalog.Solver is
       --  This assumes that ``Self`` is either an ``Assign`` or a
       --  ``Propagate`` relation.
 
-      procedure Get_Values (Vars : Logic_Var_Vector; Vals : out Value_Array);
-      --  Assign to ``Vals`` the value of the variables in ``Vars``.
-      --
-      --  This assumes that ``Vars`` and ``Vals`` have the same bounds. Note
-      --  that we could turn this into a function that returns the array, but
-      --  this would require secondary stack support and its overhead, whereas
-      --  this is performance critical code.
-
       ----------------
       -- Assign_Val --
       ----------------
@@ -2788,17 +2933,6 @@ package body Langkit_Support.Adalog.Solver is
             return True;
          end if;
       end Assign_Val;
-
-      ----------------
-      -- Get_Values --
-      ----------------
-
-      procedure Get_Values (Vars : Logic_Var_Vector; Vals : out Value_Array) is
-      begin
-         for I in Vals'Range loop
-            Vals (I) := Get_Value (Vars.Get (I));
-         end loop;
-      end Get_Values;
 
       Ret : Boolean;
    begin

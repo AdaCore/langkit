@@ -11,12 +11,6 @@ All:
     %y <- double(%x)
     is_odd?(%x)
 
-... without optimizations:
-Solution: [%x = 1, %y = 2]
-Solution: [%x = 3, %y = 6]
-Solution: [%x = 5, %y = 10]
-
-... with all optimizations:
 Solution: [%x = 1, %y = 2]
 Solution: [%x = 3, %y = 6]
 Solution: [%x = 5, %y = 10]

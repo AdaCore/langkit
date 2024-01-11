@@ -255,11 +255,6 @@ All:
         %X9 <- 30 A9
 
 
-... without optimizations:
-Solution: [%X1 = 10, %X2 = 11, %X3 = 20, %X4 = 17, %X5 = 18, %X6 = 19, %X7 = 20, %X8 = 21, %X9 = 22]
-Resolution failed with Timeout_Error
-
-... with all optimizations:
 Solution: [%X1 = 10, %X2 = 11, %X3 = 20, %X4 = 17, %X5 = 18, %X6 = 19, %X7 = 20, %X8 = 21, %X9 = 22]
 Resolution failed with Timeout_Error
 
@@ -332,23 +327,6 @@ All:
     Is_Even?(%X1)
     Is_Next?(%X1, %X2)
 
-... without optimizations:
-Solution: [%X1 = 2, %X2 = 3]
-Solution: [%X1 = 4, %X2 = 5]
-Solution: [%X1 = 6, %X2 = 7]
-Solution: [%X1 = 8, %X2 = 9]
-Solution: [%X1 = 10, %X2 = 11]
-Solution: [%X1 = 12, %X2 = 13]
-Solution: [%X1 = 14, %X2 = 15]
-Solution: [%X1 = 16, %X2 = 17]
-Solution: [%X1 = 18, %X2 = 19]
-Solution: [%X1 = 20, %X2 = 21]
-Solution: [%X1 = 22, %X2 = 23]
-Solution: [%X1 = 24, %X2 = 25]
-Solution: [%X1 = 26, %X2 = 27]
-Solution: [%X1 = 28, %X2 = 29]
-
-... with all optimizations:
 Solution: [%X1 = 2, %X2 = 3]
 Solution: [%X1 = 4, %X2 = 5]
 Solution: [%X1 = 6, %X2 = 7]

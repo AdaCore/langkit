@@ -6,10 +6,6 @@ Any:
         %Y <- 1
 
 
-... without optimizations:
-Solution: [%X = 1, %Y = <undefined>]
-
-... with all optimizations:
 Solution: [%X = 1, %Y = <undefined>]
 
 Done.

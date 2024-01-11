@@ -40,6 +40,9 @@ package Langkit_Support.Diagnostics.Output is
      (To_Unbounded_Text ("error"), Red);
    --  Default style
 
+   Info_Diagnostic_Style : constant Diagnostic_Style :=
+     (To_Unbounded_Text ("info"), Grey);
+
    procedure Print_Diagnostic
      (Self        : Diagnostic;
       Buffer      : Text_Buffer_Ifc'Class;

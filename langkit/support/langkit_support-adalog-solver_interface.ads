@@ -4,12 +4,42 @@
 --
 
 with Langkit_Support.Adalog.Logic_Var;
+with Langkit_Support.Vectors;
 
 generic
    with package Logic_Vars is new Langkit_Support.Adalog.Logic_Var (<>);
+
+   type Logic_Context_Type;
+   type Logic_Context_Type_Access is access Logic_Context_Type;
+   with function Context_Image (X : Logic_Context_Type_Access) return String;
+   with function Context_Equals
+     (X, Y : Logic_Context_Type_Access) return Boolean;
+   with procedure Free (Ctx : in out Logic_Context_Type_Access);
+
+   type Solver_Diagnostic_Type;
 package Langkit_Support.Adalog.Solver_Interface is
 
    use Logic_Vars;
+
+   subtype Logic_Context_Access is Logic_Context_Type_Access;
+
+   package Logic_Context_Vectors is new Langkit_Support.Vectors
+     (Logic_Context_Access);
+
+   subtype Logic_Context_Array is Logic_Context_Vectors.Elements_Array;
+
+   function Image (X : Logic_Context_Type_Access) return String
+                   renames Context_Image;
+
+   function Same_Contexts (X, Y : Logic_Context_Type_Access) return Boolean
+                           renames Context_Equals;
+   --  Returns whether the two given contexts are equivalent
+
+   procedure Free_Context (Ctx : in out Logic_Context_Type_Access)
+                           renames Free;
+
+   type Diagnostic_Emitter is access procedure
+     (Diag : Solver_Diagnostic_Type);
 
    -------------------
    -- Functor types --
@@ -39,6 +69,8 @@ package Langkit_Support.Adalog.Solver_Interface is
       Cache_Key   : Value_Type;
       Cache_Value : Boolean;
    end record;
+   --  A predicate encapsulates the logic of applying a boolean predicate to a
+   --  value, returning whether the predicate succeeds.
 
    function Call
      (Self : Predicate_Type; Val : Value_Type) return Boolean is abstract;
@@ -46,14 +78,21 @@ package Langkit_Support.Adalog.Solver_Interface is
 
    function Call_Wrapper
      (Self : in out Predicate_Type'Class; Val  : Value_Type) return Boolean;
-   --  Converter users must call this instead of ``Convert`` to use the cache
+   --  Predicate users must call this instead of ``Call`` to use the cache
+
+   procedure Failed
+     (Self     : Predicate_Type;
+      Val      : Value_Type;
+      Ctxs     : Logic_Context_Array;
+      Round    : Natural;
+      Emitter  : Diagnostic_Emitter) is null;
+   --  Called by the solver if this predicates caused an attempted solution to
+   --  fail. Derived types can override this to emit diagnostics, for example.
 
    function Image (Self : Predicate_Type) return String is ("");
    function Full_Image
      (Self : Predicate_Type; Dummy_Var : Logic_Vars.Logic_Var) return String
    is ("");
-   --  A predicate encapsulates the logic of applying a boolean predicate to a
-   --  value, returning whether the predicate succeeds.
 
    ----------------------
    -- N_Predicate_Type --
@@ -77,7 +116,16 @@ package Langkit_Support.Adalog.Solver_Interface is
    function Call_Wrapper
      (Self : in out N_Predicate_Type'Class;
       Vals : Logic_Vars.Value_Array) return Boolean;
-   --  Converter users must call this instead of ``Convert`` to use the cache
+   --  Predicate users must call this instead of ``Call`` to use the cache
+
+   procedure Failed
+     (Self     : N_Predicate_Type;
+      Vals     : Logic_Vars.Value_Array;
+      Ctxs     : Logic_Context_Array;
+      Round    : Natural;
+      Emitter  : Diagnostic_Emitter) is null;
+   --  Called by the solver if this predicates caused an attempted solution to
+   --  fail. Derived types can override this to emit diagnostics, for example.
 
    function Image (Self : N_Predicate_Type) return String is ("");
    function Full_Image

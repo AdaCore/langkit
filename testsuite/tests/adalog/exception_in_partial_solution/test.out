@@ -163,8 +163,5 @@ All:
     Is_Even?(%X3)
     Is_Even?(%X6)
 
-... without optimizations:
-
-... with all optimizations:
 
 Done.
