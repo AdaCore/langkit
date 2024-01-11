@@ -3655,7 +3655,7 @@ class PropertyDef(AbstractNodeData):
         Tracking this matters for unreachable base properties analysis.
         """
 
-        self.predicate_error = predicate_error
+        self.predicate_error: Opt[str] = predicate_error
         """
         If not None, the template error message to use when a logic predicate
         that uses this property fails at solve-time. This error string may
@@ -4488,7 +4488,7 @@ class PropertyDef(AbstractNodeData):
         assert self.struct is not None
         return [self.struct] + [a.type for a in self.arguments[:logic_vars]]
 
-    def predicate_error_diagnostic(self, arity: int):
+    def predicate_error_diagnostic(self, arity: int) -> tuple[str, list[str]]:
         """
         This is used internally during code generation to transform this
         predicate's error message template into a pair which contains a
@@ -4500,12 +4500,14 @@ class PropertyDef(AbstractNodeData):
 
         :param arity: the number of arguments that this predicate works on.
         """
+        assert self.predicate_error is not None
+
         # Prepare the regexp that will match holes of the form "$param"
         arg_regexp = re.compile("\\$\\w+")
 
         # The original error message. Will be mutated in each iteration of the
         # loop below to start from the last template parameter seen so far.
-        msg = self.predicate_error
+        msg: str = self.predicate_error
 
         # The new error message, where named holes are replaced by "{}"
         template_string = ""
