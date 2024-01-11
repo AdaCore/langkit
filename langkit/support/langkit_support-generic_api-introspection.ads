@@ -76,6 +76,7 @@ package Langkit_Support.Generic_API.Introspection is
       Bool_Category,
       Char_Category,
       Int_Category,
+      Source_Location_Category,
       Source_Location_Range_Category,
       String_Category,
       Token_Category,
@@ -146,6 +147,10 @@ package Langkit_Support.Generic_API.Introspection is
 
    function From_Int (Id : Language_Id; Value : Integer) return Value_Ref;
    function As_Int (Value : Value_Ref) return Integer;
+
+   function From_Source_Location
+     (Id : Language_Id; Value : Source_Location) return Value_Ref;
+   function As_Source_Location (Value : Value_Ref) return Source_Location;
 
    function From_Source_Location_Range
      (Id : Language_Id; Value : Source_Location_Range) return Value_Ref;

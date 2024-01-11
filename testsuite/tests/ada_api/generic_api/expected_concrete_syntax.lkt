@@ -52,6 +52,8 @@ class Example: BaseExample {
 
     @export fun id_token(id: Token): Token = id
 
+    @export fun id_sloc(id: SourceLocation): SourceLocation = id
+
     @export fun id_sym(id: Symbol): Symbol = id
 
     @export fun id_unit(id: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = id

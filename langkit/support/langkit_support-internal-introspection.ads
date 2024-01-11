@@ -325,6 +325,7 @@ package Langkit_Support.Internal.Introspection is
       Bool                  : Type_Index;
       Char                  : Type_Index;
       Int                   : Type_Index;
+      Source_Location       : Type_Index;
       Source_Location_Range : Type_Index;
       String                : Type_Index;
       Token                 : Type_Index;
@@ -406,6 +407,23 @@ package Langkit_Support.Internal.Introspection is
    overriding function "=" (Left, Right : Internal_Rec_Int) return Boolean;
    overriding function Type_Of (Value : Internal_Rec_Int) return Type_Index;
    overriding function Image (Value : Internal_Rec_Int) return String;
+
+   ---------------------
+   -- Source_Location --
+   ---------------------
+
+   type Internal_Rec_Source_Location is new Internal_Value with record
+      Value : Source_Location;
+   end record;
+   type Internal_Acc_Source_Location is
+     access all Internal_Rec_Source_Location;
+
+   overriding function "="
+     (Left, Right : Internal_Rec_Source_Location) return Boolean;
+   overriding function Type_Of
+     (Value : Internal_Rec_Source_Location) return Type_Index;
+   overriding function Image
+     (Value : Internal_Rec_Source_Location) return String;
 
    ---------------------------
    -- Source_Location_Range --

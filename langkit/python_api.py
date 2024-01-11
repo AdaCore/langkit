@@ -113,6 +113,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
             (T.Token, lambda _: 'Token._wrap({})'),
+            (T.SourceLocation, lambda _: '{}._wrap()'),
             (T.Symbol, lambda _: '_symbol_type.wrap({})'),
             (T.Bool, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.Int, lambda _: '{{}}{}'.format(value_suffix)),
@@ -183,6 +184,7 @@ class PythonAPISettings(AbstractAPISettings):
                 '{}._unwrap({{value}}{{context}})'
                 .format(self.type_public_name(type))),
             (T.Token, lambda _: 'Token._unwrap({value})'),
+            (T.SourceLocation, lambda _: 'Sloc._c_type._unwrap({value})'),
             (T.Symbol, lambda _: '_symbol_type.unwrap({value}{context})'),
             (T.BigInt, lambda _: '_big_integer.unwrap({value})'),
         ], exception=TypeError(
@@ -243,6 +245,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.Int, lambda _: ctype_type('c_int')),
             (T.EnvRebindings, lambda _: '_EnvRebindings_c_type'),
             (T.Token, lambda _: 'Token._c_struct'),
+            (T.SourceLocation, lambda _: 'Sloc._c_type'),
             (T.Symbol, lambda _: '_symbol_type'),
             (T.AnalysisUnit, lambda _: 'AnalysisUnit._c_type'),
             (ct.EnumType, lambda _: ctype_type('c_int')),
@@ -284,6 +287,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.Int, lambda _: 'int'),
             (T.Character, lambda _: 'str'),
             (T.String, lambda _: 'str'),
+            (T.SourceLocation, lambda _: 'Sloc'),
             (T.Token, lambda _: 'Token'),
             (T.Symbol, lambda _: 'str'),
             (ct.EnumType, lambda _: 'str'),

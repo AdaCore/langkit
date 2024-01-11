@@ -4,6 +4,7 @@ pragma Warnings (Off, "referenced");
 with Langkit_Support.Internal.Analysis; use Langkit_Support.Internal.Analysis;
 with Langkit_Support.Internal.Conversions;
 use Langkit_Support.Internal.Conversions;
+with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
 
 with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Generic_API;       use ${ada_lib_name}.Generic_API;

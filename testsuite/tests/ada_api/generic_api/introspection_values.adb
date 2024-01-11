@@ -154,6 +154,7 @@ procedure Introspection_Values is
    P_Id_Bigint                : Struct_Member_Ref;
    P_Id_Char                  : Struct_Member_Ref;
    P_Id_Token                 : Struct_Member_Ref;
+   P_Id_Sloc                  : Struct_Member_Ref;
    P_Id_Sym                   : Struct_Member_Ref;
    P_Id_Unit                  : Struct_Member_Ref;
    P_Id_Root_Node             : Struct_Member_Ref;
@@ -234,6 +235,8 @@ begin
             P_Id_Char := M;
          elsif DN = "Example.p_id_token" then
             P_Id_Token := M;
+         elsif DN = "Example.p_id_sloc" then
+            P_Id_Sloc := M;
          elsif DN = "Example.p_id_sym" then
             P_Id_Sym := M;
          elsif DN = "Example.p_id_unit" then
@@ -364,6 +367,16 @@ begin
       Value := From_Token (Id, Token);
       Inspect (Value);
       if As_Token (Value) /= Token then
+         raise Program_Error;
+      end if;
+   end;
+
+   declare
+      Sloc : constant Source_Location := Start_Sloc (U.Root.Sloc_Range);
+   begin
+      Value := From_Source_Location (Id, Sloc);
+      Inspect (Value);
+      if As_Source_Location (Value) /= Sloc then
          raise Program_Error;
       end if;
    end;
@@ -714,6 +727,9 @@ begin
           False),
          (P_Id_Char, From_Char (Id, 'A'), False),
          (P_Id_Token, From_Token (Id, N.Token_Start), False),
+         (P_Id_Sloc,
+          From_Source_Location (Id, End_Sloc (N.Sloc_Range)),
+          False),
          (P_Id_Sym, From_Symbol (Id, "foobar"), False),
          (P_Id_Unit, From_Unit (Id, U), False),
          (P_Id_Root_Node, From_Node (Id, N), False),

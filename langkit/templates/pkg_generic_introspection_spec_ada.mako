@@ -126,6 +126,8 @@ private package ${ada_lib_name}.Generic_Introspection is
                return "Char_Category"
             elif t.is_int_type:
                return "Int_Category"
+            elif t == T.SourceLocation:
+               return "Source_Location_Category"
             elif t == T.SourceLocationRange:
                return "Source_Location_Range_Category"
             elif t.is_string_type:
@@ -628,6 +630,7 @@ private package ${ada_lib_name}.Generic_Introspection is
       Bool                  => ${G.type_index(T.Bool)},
       Char                  => ${G.type_index(T.Character)},
       Int                   => ${G.type_index(T.Int)},
+      Source_Location       => ${G.type_index(T.SourceLocation)},
       Source_Location_Range => ${G.type_index(T.SourceLocationRange)},
       String                => ${G.type_index(T.String)},
       Token                 => ${G.type_index(T.Token)},

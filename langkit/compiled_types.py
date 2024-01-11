@@ -1224,6 +1224,13 @@ class CompiledType:
         return self == T.Token
 
     @property
+    def is_source_location_type(self) -> bool:
+        """
+        Return whether this is a source location type.
+        """
+        return self == T.SourceLocation
+
+    @property
     def is_big_integer_type(self):
         """
         Return whether this is a big integer type.
@@ -4565,6 +4572,15 @@ def create_builtin_types():
         null_allowed=True,
         external=True,
         hashable=True,
+    )
+
+    CompiledType(
+        'SourceLocation',
+        exposed=True,
+        is_ptr=False,
+        nullexpr='No_Source_Location',
+        null_allowed=True,
+        is_ada_record=True,
     )
 
     CompiledType(
