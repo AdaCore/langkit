@@ -2129,6 +2129,7 @@ class LktTypesLoader:
                 builtin_type("LogicVar"),
                 builtin_type("LookupKind"),
                 builtin_type("RefCategories"),
+                builtin_type("SourceLocation"),
                 builtin_type("String"),
                 builtin_type("Symbol"),
                 builtin_type("Token"),

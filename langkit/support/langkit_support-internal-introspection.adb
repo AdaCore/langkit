@@ -196,6 +196,36 @@ package body Langkit_Support.Internal.Introspection is
    ---------
 
    overriding function "="
+     (Left, Right : Internal_Rec_Source_Location) return Boolean is
+   begin
+      return Left.Value = Right.Value;
+   end "=";
+
+   -------------
+   -- Type_Of --
+   -------------
+
+   overriding function Type_Of
+     (Value : Internal_Rec_Source_Location) return Type_Index is
+   begin
+      return Builtin_Types (Value).Source_Location;
+   end Type_Of;
+
+   -----------
+   -- Image --
+   -----------
+
+   overriding function Image
+     (Value : Internal_Rec_Source_Location) return String is
+   begin
+      return Image (Value.Value);
+   end Image;
+
+   ---------
+   -- "=" --
+   ---------
+
+   overriding function "="
      (Left, Right : Internal_Rec_Source_Location_Range) return Boolean is
    begin
       return Left.Value = Right.Value;

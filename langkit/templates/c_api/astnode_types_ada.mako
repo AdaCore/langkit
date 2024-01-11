@@ -74,6 +74,8 @@
                Convert (${arg_ref})
             % elif arg.type.is_token_type:
                Unwrap (${arg_ref})
+            % elif arg.type.is_source_location_type:
+               Unwrap (${arg_ref})
             % elif arg.type.is_symbol_type:
                Unwrap_Symbol (${arg_ref})
             % elif arg.type.is_big_integer_type:
@@ -139,6 +141,8 @@
                % elif is_array_or_iterator and not field.type.emit_c_type:
                   Convert (Result)
                % elif field.type.is_token_type:
+                   Wrap (Result)
+               % elif field.type.is_source_location_type:
                    Wrap (Result)
                % elif field.type.is_symbol_type:
                    Wrap_Symbol (Result)

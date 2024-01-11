@@ -506,6 +506,35 @@ package body Langkit_Support.Generic_API.Introspection is
       return V.Value;
    end As_Int;
 
+   --------------------------
+   -- From_Source_Location --
+   --------------------------
+
+   function From_Source_Location
+     (Id : Language_Id; Value : Source_Location) return Value_Ref
+   is
+      Result : constant Internal_Acc_Source_Location :=
+        new Internal_Rec_Source_Location;
+   begin
+      Result.Value := Value;
+      return Create_Value (Id, Internal_Value_Access (Result));
+   end From_Source_Location;
+
+   ------------------------
+   -- As_Source_Location --
+   ------------------------
+
+   function As_Source_Location (Value : Value_Ref) return Source_Location is
+      Id : Language_Id;
+      V  : Internal_Acc_Source_Location;
+   begin
+      Check_Value (Value);
+      Id := Value.Value.Id;
+      Check_Value_Type (Value, Id.Builtin_Types.Source_Location);
+      V := Internal_Acc_Source_Location (Value.Value);
+      return V.Value;
+   end As_Source_Location;
+
    --------------------------------
    -- From_Source_Location_Range --
    --------------------------------

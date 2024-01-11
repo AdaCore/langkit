@@ -299,6 +299,8 @@ All types
   CHAR_CATEGORY
 * Int
   INT_CATEGORY
+* SourceLocation
+  SOURCE_LOCATION_CATEGORY
 * SourceLocationRange
   SOURCE_LOCATION_RANGE_CATEGORY
 * String
@@ -403,20 +405,20 @@ Category: Null T argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null typ
 Enum types
 ==========
 
-Analysis_Unit_Kind ( 10)
+Analysis_Unit_Kind ( 11)
   Default value: <No_Enum_Value_Ref>
 
   1: Unit_Specification
   2: Unit_Body
 
-Lookup_Kind ( 11)
+Lookup_Kind ( 12)
   Default value: <No_Enum_Value_Ref>
 
   1: Recursive
   2: Flat
   3: Minimal
 
-Designated_Env_Kind ( 12)
+Designated_Env_Kind ( 13)
   Default value: DesignatedEnvKind.none
 
   1: None
@@ -424,7 +426,7 @@ Designated_Env_Kind ( 12)
   3: Named_Env
   4: Direct_Env
 
-Grammar_Rule ( 13)
+Grammar_Rule ( 14)
   Default value: <No_Enum_Value_Ref>
 
   1: Main_Rule_Rule
@@ -505,133 +507,133 @@ Non-struct Struct argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid
 Nodes
 =====
 
-Foo_Node ( 21)
+Foo_Node ( 22)
   is abstract
   base = Bad_Type_Error: trying to get base type of root node
-  last derivation = Var_Decl ( 38)
+  last derivation = Var_Decl ( 39)
   derivations:
-    Base_Example ( 22)
-    Def ( 24)
-    Expr ( 25)
-    Foo_Node_Base_List ( 30)
-    Name ( 34)
-    Null_Qual ( 35)
-    Var_Decl ( 38)
+    Base_Example ( 23)
+    Def ( 25)
+    Expr ( 26)
+    Foo_Node_Base_List ( 31)
+    Name ( 35)
+    Null_Qual ( 36)
+    Var_Decl ( 39)
 
-Base_Example ( 22)
+Base_Example ( 23)
   is abstract
-  base = Foo_Node ( 21)
-  last derivation = Example ( 23)
+  base = Foo_Node ( 22)
+  last derivation = Example ( 24)
   derivations:
-    Example ( 23)
+    Example ( 24)
 
-Example ( 23)
-  base = Base_Example ( 22)
-  last derivation = Example ( 23)
-  derivations:
-    <none>
-
-Def ( 24)
-  base = Foo_Node ( 21)
-  last derivation = Def ( 24)
+Example ( 24)
+  base = Base_Example ( 23)
+  last derivation = Example ( 24)
   derivations:
     <none>
 
-Expr ( 25)
+Def ( 25)
+  base = Foo_Node ( 22)
+  last derivation = Def ( 25)
+  derivations:
+    <none>
+
+Expr ( 26)
   is abstract
-  base = Foo_Node ( 21)
-  last derivation = Ref ( 29)
+  base = Foo_Node ( 22)
+  last derivation = Ref ( 30)
   derivations:
-    Addition ( 26)
-    Call ( 27)
-    Number ( 28)
-    Ref ( 29)
+    Addition ( 27)
+    Call ( 28)
+    Number ( 29)
+    Ref ( 30)
 
-Addition ( 26)
-  base = Expr ( 25)
-  last derivation = Addition ( 26)
-  derivations:
-    <none>
-
-Call ( 27)
-  base = Expr ( 25)
-  last derivation = Call ( 27)
+Addition ( 27)
+  base = Expr ( 26)
+  last derivation = Addition ( 27)
   derivations:
     <none>
 
-Number ( 28)
+Call ( 28)
+  base = Expr ( 26)
+  last derivation = Call ( 28)
+  derivations:
+    <none>
+
+Number ( 29)
   is a token node (Number token)
-  base = Expr ( 25)
-  last derivation = Number ( 28)
+  base = Expr ( 26)
+  last derivation = Number ( 29)
   derivations:
     <none>
 
-Ref ( 29)
-  base = Expr ( 25)
-  last derivation = Ref ( 29)
+Ref ( 30)
+  base = Expr ( 26)
+  last derivation = Ref ( 30)
   derivations:
     <none>
 
-Foo_Node_Base_List ( 30)
+Foo_Node_Base_List ( 31)
   is abstract
-  base = Foo_Node ( 21)
-  last derivation = Name_List ( 33)
+  base = Foo_Node ( 22)
+  last derivation = Name_List ( 34)
   derivations:
-    Expr_List ( 31)
-    Foo_Node_List ( 32)
-    Name_List ( 33)
+    Expr_List ( 32)
+    Foo_Node_List ( 33)
+    Name_List ( 34)
 
-Expr_List ( 31)
+Expr_List ( 32)
   is a list node
-  base = Foo_Node_Base_List ( 30)
-  last derivation = Expr_List ( 31)
+  base = Foo_Node_Base_List ( 31)
+  last derivation = Expr_List ( 32)
   derivations:
     <none>
 
-Foo_Node_List ( 32)
+Foo_Node_List ( 33)
   is a list node
-  base = Foo_Node_Base_List ( 30)
-  last derivation = Foo_Node_List ( 32)
+  base = Foo_Node_Base_List ( 31)
+  last derivation = Foo_Node_List ( 33)
   derivations:
     <none>
 
-Name_List ( 33)
+Name_List ( 34)
   is a list node
-  base = Foo_Node_Base_List ( 30)
-  last derivation = Name_List ( 33)
+  base = Foo_Node_Base_List ( 31)
+  last derivation = Name_List ( 34)
   derivations:
     <none>
 
-Name ( 34)
+Name ( 35)
   is a token node (Identifier token)
-  base = Foo_Node ( 21)
-  last derivation = Name ( 34)
+  base = Foo_Node ( 22)
+  last derivation = Name ( 35)
   derivations:
     <none>
 
-Null_Qual ( 35)
+Null_Qual ( 36)
   is abstract
-  base = Foo_Node ( 21)
-  last derivation = Null_Qual_Present ( 37)
+  base = Foo_Node ( 22)
+  last derivation = Null_Qual_Present ( 38)
   derivations:
-    Null_Qual_Absent ( 36)
-    Null_Qual_Present ( 37)
+    Null_Qual_Absent ( 37)
+    Null_Qual_Present ( 38)
 
-Null_Qual_Absent ( 36)
-  base = Null_Qual ( 35)
-  last derivation = Null_Qual_Absent ( 36)
-  derivations:
-    <none>
-
-Null_Qual_Present ( 37)
-  base = Null_Qual ( 35)
-  last derivation = Null_Qual_Present ( 37)
+Null_Qual_Absent ( 37)
+  base = Null_Qual ( 36)
+  last derivation = Null_Qual_Absent ( 37)
   derivations:
     <none>
 
-Var_Decl ( 38)
-  base = Foo_Node ( 21)
-  last derivation = Var_Decl ( 38)
+Null_Qual_Present ( 38)
+  base = Null_Qual ( 36)
+  last derivation = Null_Qual_Present ( 38)
+  derivations:
+    <none>
+
+Var_Decl ( 39)
+  base = Foo_Node ( 22)
+  last derivation = Var_Decl ( 39)
   derivations:
     <none>
 
@@ -742,22 +744,23 @@ For Example
   P_Id_Bigint (Example.p_id_bigint: 34)
   P_Id_Char (Example.p_id_char: 35)
   P_Id_Token (Example.p_id_token: 36)
-  P_Id_Sym (Example.p_id_sym: 37)
-  P_Id_Unit (Example.p_id_unit: 38)
-  P_Id_Root_Node (Example.p_id_root_node: 39)
-  P_Id_Name (Example.p_id_name: 40)
-  P_Id_Unit_Kind (Example.p_id_unit_kind: 41)
-  P_Id_Node_Array (Example.p_id_node_array: 42)
-  P_Id_Expr_Array (Example.p_id_expr_array: 43)
-  P_Id_Bigint_Array (Example.p_id_bigint_array: 44)
-  P_Id_Unit_Array (Example.p_id_unit_array: 45)
-  P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 46)
-  P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 47)
-  P_Id_Dflt_Bool (Example.p_id_dflt_bool: 48)
-  P_Id_Dflt_Int (Example.p_id_dflt_int: 49)
-  P_Id_Dflt_Char (Example.p_id_dflt_char: 50)
-  P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 51)
-  P_With_Md (Example.p_with_md: 52)
+  P_Id_Sloc (Example.p_id_sloc: 37)
+  P_Id_Sym (Example.p_id_sym: 38)
+  P_Id_Unit (Example.p_id_unit: 39)
+  P_Id_Root_Node (Example.p_id_root_node: 40)
+  P_Id_Name (Example.p_id_name: 41)
+  P_Id_Unit_Kind (Example.p_id_unit_kind: 42)
+  P_Id_Node_Array (Example.p_id_node_array: 43)
+  P_Id_Expr_Array (Example.p_id_expr_array: 44)
+  P_Id_Bigint_Array (Example.p_id_bigint_array: 45)
+  P_Id_Unit_Array (Example.p_id_unit_array: 46)
+  P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 47)
+  P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 48)
+  P_Id_Dflt_Bool (Example.p_id_dflt_bool: 49)
+  P_Id_Dflt_Int (Example.p_id_dflt_int: 50)
+  P_Id_Dflt_Char (Example.p_id_dflt_char: 51)
+  P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 52)
+  P_With_Md (Example.p_with_md: 53)
 
 For Def
   Parent (FooNode.parent: 19)
@@ -922,7 +925,7 @@ For Null_Qual
   Unit (FooNode.unit: 27)
   Is_Ghost (FooNode.is_ghost: 28)
   Full_Sloc_Image (FooNode.full_sloc_image: 29)
-  P_As_Bool (NullQual.p_as_bool: 53)
+  P_As_Bool (NullQual.p_as_bool: 54)
 
 For Null_Qual_Absent
   Parent (FooNode.parent: 19)
@@ -936,7 +939,7 @@ For Null_Qual_Absent
   Unit (FooNode.unit: 27)
   Is_Ghost (FooNode.is_ghost: 28)
   Full_Sloc_Image (FooNode.full_sloc_image: 29)
-  P_As_Bool (NullQual.p_as_bool: 53)
+  P_As_Bool (NullQual.p_as_bool: 54)
 
 For Null_Qual_Present
   Parent (FooNode.parent: 19)
@@ -950,7 +953,7 @@ For Null_Qual_Present
   Unit (FooNode.unit: 27)
   Is_Ghost (FooNode.is_ghost: 28)
   Full_Sloc_Image (FooNode.full_sloc_image: 29)
-  P_As_Bool (NullQual.p_as_bool: 53)
+  P_As_Bool (NullQual.p_as_bool: 54)
 
 For Var_Decl
   Parent (FooNode.parent: 19)
@@ -1176,111 +1179,118 @@ P_Id_Token (Example.p_id_token: 36)
   arguments:
     Id: Token
 
-P_Id_Sym (Example.p_id_sym: 37)
+P_Id_Sloc (Example.p_id_sloc: 37)
+  owner: Example
+  is a property
+  type: SourceLocation
+  arguments:
+    Id: SourceLocation
+
+P_Id_Sym (Example.p_id_sym: 38)
   owner: Example
   is a property
   type: Symbol
   arguments:
     Id: Symbol
 
-P_Id_Unit (Example.p_id_unit: 38)
+P_Id_Unit (Example.p_id_unit: 39)
   owner: Example
   is a property
   type: AnalysisUnit
   arguments:
     Id: AnalysisUnit
 
-P_Id_Root_Node (Example.p_id_root_node: 39)
+P_Id_Root_Node (Example.p_id_root_node: 40)
   owner: Example
   is a property
   type: FooNode
   arguments:
     Id: FooNode
 
-P_Id_Name (Example.p_id_name: 40)
+P_Id_Name (Example.p_id_name: 41)
   owner: Example
   is a property
   type: Name
   arguments:
     Id: Name
 
-P_Id_Unit_Kind (Example.p_id_unit_kind: 41)
+P_Id_Unit_Kind (Example.p_id_unit_kind: 42)
   owner: Example
   is a property
   type: AnalysisUnitKind
   arguments:
     Id: AnalysisUnitKind
 
-P_Id_Node_Array (Example.p_id_node_array: 42)
+P_Id_Node_Array (Example.p_id_node_array: 43)
   owner: Example
   is a property
   type: FooNode.array
   arguments:
     Id: FooNode.array
 
-P_Id_Expr_Array (Example.p_id_expr_array: 43)
+P_Id_Expr_Array (Example.p_id_expr_array: 44)
   owner: Example
   is a property
   type: Expr.array
   arguments:
     Id: Expr.array
 
-P_Id_Bigint_Array (Example.p_id_bigint_array: 44)
+P_Id_Bigint_Array (Example.p_id_bigint_array: 45)
   owner: Example
   is a property
   type: BigInt.array
   arguments:
     Id: BigInt.array
 
-P_Id_Unit_Array (Example.p_id_unit_array: 45)
+P_Id_Unit_Array (Example.p_id_unit_array: 46)
   owner: Example
   is a property
   type: AnalysisUnit.array
   arguments:
     Id: AnalysisUnit.array
 
-P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 46)
+P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 47)
   owner: Example
   is a property
   type: BigInt.iterator
   no argument
 
-P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 47)
+P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 48)
   owner: Example
   is a property
   type: BigInt.iterator
   arguments:
     Id: BigInt.iterator
 
-P_Id_Dflt_Bool (Example.p_id_dflt_bool: 48)
+P_Id_Dflt_Bool (Example.p_id_dflt_bool: 49)
   owner: Example
   is a property
   type: Bool
   arguments:
     Id: Bool := True
 
-P_Id_Dflt_Int (Example.p_id_dflt_int: 49)
+P_Id_Dflt_Int (Example.p_id_dflt_int: 50)
   owner: Example
   is a property
   type: Int
   arguments:
     Id: Int := 42
 
-P_Id_Dflt_Char (Example.p_id_dflt_char: 50)
+P_Id_Dflt_Char (Example.p_id_dflt_char: 51)
   owner: Example
   is a property
   type: Character
   arguments:
     Id: Character := '\x00'
 
-P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 51)
+P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 52)
   owner: Example
   is a property
   type: FooNode
   arguments:
     Id: FooNode := <No node>
 
-P_With_Md (Example.p_with_md: 52)
+P_With_Md (Example.p_with_md: 53)
   owner: Example
   is a property
   type: Example
@@ -1288,7 +1298,7 @@ P_With_Md (Example.p_with_md: 52)
     Md1: Bool
     Md2: Bool
 
-P_As_Bool (NullQual.p_as_bool: 53)
+P_As_Bool (NullQual.p_as_bool: 54)
   owner: NullQual
   is a property
   type: Bool
@@ -1414,6 +1424,8 @@ Inspect: "hello, world!"
   Type_Of: String
 Inspect: <Token Kind=Example Text="example">
   Type_Of: Token
+Inspect: 1:1
+  Type_Of: SourceLocation
 Inspect: Symbol("foo_bar42")
   Type_Of: Symbol
 Inspect: <No node>
@@ -1509,6 +1521,10 @@ Inspect: 'A'
 Eval_Member: Example.p_id_token:
 Inspect: <Token Kind=Example Text="example">
   Type_Of: Token
+
+Eval_Member: Example.p_id_sloc:
+Inspect: 3:15
+  Type_Of: SourceLocation
 
 Eval_Member: Example.p_id_sym:
 Inspect: Symbol("foobar")

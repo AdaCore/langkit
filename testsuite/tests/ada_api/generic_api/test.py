@@ -94,6 +94,7 @@ class Example(BaseExample):
     id_bigint = Property(lambda id=T.BigInt: id, public=True)
     id_char = Property(lambda id=T.Character: id, public=True)
     id_token = Property(lambda id=T.Token: id, public=True)
+    id_sloc = Property(lambda id=T.SourceLocation: id, public=True)
     id_sym = Property(lambda id=T.Symbol: id, public=True)
     id_unit = Property(lambda id=T.AnalysisUnit: id, public=True)
     id_root_node = Property(lambda id=T.FooNode: id, public=True)
