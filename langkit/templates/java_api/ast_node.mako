@@ -55,18 +55,29 @@
         // ----- Instance methods -----
 
         @Override
-        public String getKindName() {
-            return ${java_type}.kindName;
+        public String getClassName() {
+            return ${java_type}.description.className;
+        }
+
+        @Override
+        public boolean isTokenNode() {
+            return ${java_type}.description.isTokenNode;
+        }
+
+        @Override
+        public boolean isListNode() {
+            return ${java_type}.description.isListNode;
         }
 
         @Override
         public String[] getFieldNames() {
-            return ${java_type}.fieldNames;
+            return ${java_type}.description.fields;
         }
 
         @Override
-        public boolean isListType() {
-            return ${java_type}.isListType;
+        public Map<String, ${ctx.lib_name.camel}Field> getFieldDescriptions()
+        {
+            return ${java_type}.description.fieldDescriptions;
         }
 
         @Override
@@ -74,7 +85,9 @@
         public ${ctx.lib_name.camel}Field getFieldDescription(
             final String name
         ) {
-            return ${java_type}.fieldDescriptions.getOrDefault(name, null);
+            return ${java_type}.description
+                               .fieldDescriptions
+                               .get(name);
         }
 
         % if not cls.abstract:
@@ -121,23 +134,22 @@
     field_names = api.get_node_formatted_fields(cls)
     %>
 
-        /** The name of the node kind */
-        public static final String kindName = "${java_type}";
-
-        /** The names of the fields associated to the node */
-        public static final String[] fieldNames = {
-            ${",".join([f'"{name}"' for name in field_names])}
-        };
-
-        /** If the node is a list node */
-        public static final boolean isListType =
-            ${"true" if cls.is_list_type else "false"};
-
-        /** The map containing the node's fields description. */
-        public static final Map<String, ${ctx.lib_name.camel}Field>
-        fieldDescriptions = new HashMap<>(
-            ${f"{base_type}.fieldDescriptions" if base_type else ""}
-        );
+        /** Full description of the node (kind, fields, class...) */
+        public static final ${ctx.lib_name.camel}Node description =
+            new ${ctx.lib_name.camel}Node(
+                ${"true" if cls.is_token_node else "false"},
+                ${"true" if cls.is_list_type else "false"},
+                ${java_type}.class,
+                "${java_type}",
+                new String[] {
+                    ${",".join([f'"{name}"' for name in field_names])}
+                },
+                new HashMap<>(
+                    ${f"{base_type}.description.fieldDescriptions" \
+                      if base_type else \
+                      ""}
+                )
+            );
 
         // Initialisation of the method map
         static {
@@ -177,7 +189,7 @@
                     % endfor
 
                     // Add the method and the parameters in maps
-                    fieldDescriptions.put(
+                    description.fieldDescriptions.put(
                         "${method.native_name}",
                         new ${ctx.lib_name.camel}Field(method, parameters)
                     );
@@ -185,7 +197,14 @@
                 % endif
                 % endfor
             } catch (Exception e) {
+                // This catch block handles exceptions from the Java reflection
+                // API. Since calls to this API are generated, those exceptions
+                // cannot be raised unless the Java bindings are erroneous.
+                System.err.println(
+                    "ERROR DURING ${ctx.lib_name.upper} STATIC INITIALISATION"
+                );
                 e.printStackTrace();
+                System.exit(1);
             }
             % endif
         }

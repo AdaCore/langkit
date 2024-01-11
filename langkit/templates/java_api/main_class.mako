@@ -178,16 +178,16 @@ public final class ${ctx.lib_name.camel} {
     private static final TruffleString.CopyToByteArrayNode toByteArrayNode =
         TruffleString.CopyToByteArrayNode.create();
 
-    /** A map to store the nodes classes from their name. */
-    public static final Map<String, Class<? extends ${root_node_type}>>
-        NODE_CLASS_MAP = new HashMap<>();
+    /** A map to store node descriptions associated to their camel name. */
+    public static final Map<String, ${ctx.lib_name.camel}Node>
+        NODE_DESCRIPTION_MAP = new HashMap<>();
 
     static {
-        // Populate the node class map
-        % for node_class in ctx.astnode_types:
-        NODE_CLASS_MAP.put(
-            "${node_class.kwless_raw_name.camel}",
-            ${api.wrapping_type(node_class)}.class
+        // Fill the node description map
+        % for astnode in ctx.astnode_types:
+        NODE_DESCRIPTION_MAP.put(
+            "${astnode.kwless_raw_name.camel}",
+            ${api.wrapping_type(astnode)}.description
         );
         % endfor
     }
@@ -532,6 +532,52 @@ public final class ${ctx.lib_name.camel} {
                 return (int) this.jni;
             }
 
+        }
+
+    }
+
+    /**
+     * This class represents the description of a node.
+     */
+    public static final class ${ctx.lib_name.camel}Node {
+
+        // ----- Instance attributes -----
+
+        /** Whether the node is a token node */
+        public final boolean isTokenNode;
+
+        /** Whether the node is a list node */
+        public final boolean isListNode;
+
+        /** Java class of the node */
+        public final Class<? extends ${root_node_type}> clazz;
+
+        /** Simple name of the Java class of the node */
+        public final String className;
+
+        /** Fields of the node, sorted by parsing order */
+        public final String[] fields;
+
+        /** Map containing description for all fields of the node */
+        public final Map<String, ${ctx.lib_name.camel}Field> fieldDescriptions;
+
+        // ----- Constructors -----
+
+        /** Create a new node description with its kind and class */
+        public ${ctx.lib_name.camel}Node (
+            final boolean isTokenNode,
+            final boolean isListNode,
+            final Class<? extends ${root_node_type}> clazz,
+            final String className,
+            final String[] fields,
+            final Map<String, ${ctx.lib_name.camel}Field> fieldDescriptions
+        ) {
+            this.isTokenNode = isTokenNode;
+            this.isListNode = isListNode;
+            this.clazz = clazz;
+            this.className = className;
+            this.fieldDescriptions = fieldDescriptions;
+            this.fields = fields;
         }
 
     }
@@ -3953,32 +3999,34 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Getters -----
 
-        public String getKindName() {
-            return ${root_node_type}.kindName;
-        }
-
-        public String[] getFieldNames() {
-            return ${root_node_type}.fieldNames;
-        }
-
-        public boolean isListType() {
-            return ${root_node_type}.isListType;
+        public String getClassName() {
+            return ${root_node_type}.description.className;
         }
 
         public boolean isTokenNode() {
+            return ${root_node_type}.description.isTokenNode;
+        }
 
-            if(ImageInfo.inImageCode()) {
-                EntityNative entityNative = StackValue.get(
-                    EntityNative.class
-                );
-                this.entity.unwrap(entityNative);
-                return NI_LIB.${nat("node_is_token_node")}(
-                    entityNative
-                ) != 0;
-            } else {
-                return JNI_LIB.${nat("node_is_token_node")}(this.entity);
-            }
+        public boolean isListNode() {
+            return ${root_node_type}.description.isListNode;
+        }
 
+        public String[] getFieldNames() {
+            return ${root_node_type}.description.fields;
+        }
+
+        public Map<String, ${ctx.lib_name.camel}Field> getFieldDescriptions()
+        {
+            return ${root_node_type}.description.fieldDescriptions;
+        }
+
+        @CompilerDirectives.TruffleBoundary
+        public ${ctx.lib_name.camel}Field getFieldDescription(
+            final String name
+        ) {
+            return ${root_node_type}.description
+                                    .fieldDescriptions
+                                    .get(name);
         }
 
         public boolean isNone() {
@@ -4010,17 +4058,6 @@ public final class ${ctx.lib_name.camel} {
 
             }
             return this.unit;
-        }
-
-        /**
-         * Get the descritpion of a field from its name.
-         *
-         * @param name The langkit field name to get the description for.
-         * @return The Java description of the langkit field.
-         */
-        @CompilerDirectives.TruffleBoundary
-        public ${ctx.lib_name.camel}Field getFieldDescription(String name) {
-            return ${root_node_type}.fieldDescriptions.get(name);
         }
 
         /**
@@ -4254,7 +4291,7 @@ public final class ${ctx.lib_name.camel} {
 
             // Print the field of the node
             indent = indent + "|";
-            if(this.isListType()) {
+            if(this.isListNode()) {
                 for(int i = 0 ; i < childrenCount ; i++) {
                     final ${root_node_type} child = this.getChild(i);
                     dumpField(builder, indent, "item_" + i, child);
