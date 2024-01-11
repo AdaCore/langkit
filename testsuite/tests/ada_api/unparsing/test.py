@@ -3,7 +3,7 @@
 from langkit.compiled_types import T
 from langkit.dsl import ASTNode, Field, abstract
 
-from utils import build_and_run
+from utils import GPRMain, build_and_run
 
 
 class FooNode(ASTNode):
@@ -73,8 +73,14 @@ class Ref(Expr):
 
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
-    gpr_mains=["main.adb", "invalid_config.adb", "commands.adb"],
-    gpr_mains_args=["config.json", "example.txt"],
+    gpr_mains=[
+        GPRMain("main.adb", ["config.json", "example.txt"]),
+        GPRMain(
+            "main.adb", ["-r", "param_spec", "config.json", "param_spec.txt"]
+        ),
+        "invalid_config.adb",
+        "commands.adb",
+    ],
     generate_unparser=True,
 )
 print("Done")

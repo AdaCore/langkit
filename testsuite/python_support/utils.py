@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import os
 import os.path as P
 import shutil
@@ -49,6 +50,27 @@ project Gen is
     end Compiler;
 end Gen;
 """
+
+
+@dataclasses.dataclass
+class GPRMain:
+    source_file: str
+    """
+    Basename of the main source file.
+    """
+
+    args: list[str] = dataclasses.field(default_factory=list)
+    """
+    Arguments to pass to this main when running it.
+    """
+
+    @property
+    def label(self) -> str:
+        """
+        Return a representation of this main that is suitable to include in
+        test baselines.
+        """
+        return " ".join([self.source_file] + self.args)
 
 
 valgrind_enabled = bool(os.environ.get('VALGRIND_ENABLED'))
@@ -241,7 +263,6 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                   full_error_traces: bool = True,
                   additional_make_args: List[str] = [],
                   python_args: Optional[List[str]] = None,
-                  gpr_mains_args: list[str] | None = None,
                   property_exceptions: Set[str] = set()):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
@@ -262,9 +283,11 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
     :param None|str py_script: If not None, name of the Python script to run
         with the built library available.
 
-    :param None|list[str] gpr_mains: If not None, list of name of main source
-        files (Ada and/or C) for the generated GPR file, to build and run with
-        the generated library.
+    :param None|list[str|GPRMain] gpr_mains: If not None, list of name of mains
+        (Ada and/or C) for the generated GPR file, to build and run with the
+        generated library. Each main can be either a GPRMain instance or a
+        string (for the main source file basename, the main is run without
+        arguments).
 
     :param None|str ocaml_main: If not None, name of the OCaml source file to
         build and run with the built library available.
@@ -304,8 +327,6 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
 
     :param python_args: Arguments to pass to the Python interpreter when
         running a Python script.
-
-    :param gpr_mains_args: Arguments to pass to programs built by the GPR file.
 
     :param property_exceptions: See CompileCtx's constructor.
     """
@@ -437,7 +458,14 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
         run(*args)
 
     if gpr_mains:
+        # Canonicalize mains to GPRMain instances
+        gpr_mains = [
+            (GPRMain(m) if isinstance(m, str) else m)
+            for m in gpr_mains
+        ]
+
         source_dirs = [".", c_support_dir]
+        main_source_files = sorted(m.source_file for m in gpr_mains)
 
         # Detect languages based on the source files present in the test
         # directory.
@@ -458,22 +486,21 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
             f.write(project_template.format(
                 languages=fmt_str_list(langs),
                 source_dirs=fmt_str_list(source_dirs),
-                main_sources=fmt_str_list(gpr_mains),
+                main_sources=fmt_str_list(main_source_files),
             ))
         run("gprbuild", "-Pgen", "-q", "-p")
 
         # Now run all mains. If there are more than one main to run, print a
         # heading before each one.
-        gpr_mains_args = gpr_mains_args or []
         for i, main in enumerate(gpr_mains):
             if i > 0:
                 print("")
             if len(gpr_mains) > 1:
-                print(f"== {main} ==")
+                print(f"== {main.label} ==")
             sys.stdout.flush()
             run(
-                P.join("obj", os.path.splitext(main)[0]),
-                *gpr_mains_args,
+                P.join("obj", os.path.splitext(main.source_file)[0]),
+                *main.args,
                 valgrind=True,
                 valgrind_suppressions=["gnat"],
             )
