@@ -350,7 +350,7 @@ class JavaAPISettings(AbstractAPISettings):
             self.get_node_formatted_fields(cls.base)
         )
         res.extend(
-            format_name(field.api_name.lower)
+            field.api_name.lower
             for field in cls.get_parse_fields(
                 predicate=lambda f: not f.abstract and not f.null,
                 include_inherited=False
