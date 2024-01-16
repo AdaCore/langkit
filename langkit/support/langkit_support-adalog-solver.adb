@@ -2834,15 +2834,16 @@ package body Langkit_Support.Adalog.Solver is
                Destroy (Self.Conv.all);
             end if;
             Free (Self.Conv);
-            Solver_Ifc.Free_Context (Self.Ctx);
+            Free_Context (Self.Ctx);
 
          when Unify =>
-            Solver_Ifc.Free_Context (Self.Ctx);
+            Free_Context (Self.Ctx);
 
          when N_Propagate =>
             Self.Comb_Vars.Destroy;
             Destroy (Self.Comb.all);
             Free (Self.Comb);
+            Free_Context (Self.Ctx);
 
          when Predicate =>
             Destroy (Self.Pred.all);
