@@ -3,7 +3,9 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(block)
-    block <- Block("def" Name(@identifier))
+    block <- Block(
+        "def" Name(@identifier) ?pick("{" main_rule "}")
+    )
 }
 
 @abstract class FooNode implements Node[FooNode] {
@@ -11,6 +13,7 @@ grammar foo_grammar {
 
 @rebindable class Block: FooNode {
     @parse_field name: Name
+    @parse_field inner: ASTList[FooNode, Block]
 
     |" Helper to create a new entity from ``Entity`` but with the given
     |" rebindings.

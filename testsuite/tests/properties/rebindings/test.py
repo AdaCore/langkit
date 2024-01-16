@@ -19,6 +19,7 @@ class Name(FooNode):
 
 class Block(FooNode):
     name = Field(type=T.Name)
+    inner = Field(type=T.Block.list)
 
     env_spec = EnvSpec(add_env())
 

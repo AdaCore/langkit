@@ -2037,6 +2037,44 @@ package body Langkit_Support.Lexical_Envs_Impl is
          Result := Result.Parent;
       end loop;
 
+      if Result = null then
+         --  We found a rebindable parent but it was not rebound by any entry
+         --  in the given (non-empty) set of rebindings. This could be because
+         --  the rebindable env we found is nested inside other rebindable
+         --  envs. If that's the case, one of these lesser-nested envs might
+         --  actually be rebound by the given rebindings, in which case we must
+         --  also attempt to shed the non-relevant rebindings.
+         --
+         --  For example, assume the following Ada envirnonment structure,
+         --  with ``From_Env`` designating the env containing entity ``X``,
+         --  and ``Rebindings`` containing the rebinding of the generic
+         --  package ``A`` through the instantiation ``My_A``:
+         --
+         --  .. code:: ada
+         --
+         --     generic
+         --        type T is private;
+         --     package A is
+         --        generic package B is
+         --           X : T;
+         --        end B;
+         --     end A;
+         --
+         --     package My_A is new A (Integer);
+         --
+         --
+         --  In that case, our ``First_Rebindable_Parent`` is ``B``. But since
+         --  our rebindings do not rebind ``B``, ``Result`` is empty at this
+         --  point. Hence, stopping here would imply returning entity ``X``
+         --  without any rebindings, whereas we would have expected the
+         --  rebinding of ``A`` to be relevant. This can be fixed by recursing
+         --  one more time starting from the env ``B`` itself. This time, the
+         --  first rebindable env will be ``A``, therefore the rebinding entry
+         --  ``My_A`` will be kept.
+         Result := Shed_Rebindings
+           (Parent (First_Rebindable_Parent), Rebindings);
+      end if;
+
       Dec_Ref (First_Rebindable_Parent);
       return Result;
    end Shed_Rebindings;
