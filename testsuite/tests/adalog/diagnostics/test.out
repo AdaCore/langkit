@@ -1,3 +1,4 @@
 with X set to 4, X is not congruent to 1 modulo 2
 with X unified with Y, with Y set to 5, X is not congruent to 0 modulo 2
 with Y set to 5, with X set to Y + 1, X is not congruent to 1 modulo 2
+with Z set to 6, with Y set to 5, with X set to max(Y, Z), X is not congruent to 1 modulo 2
