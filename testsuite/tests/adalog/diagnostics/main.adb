@@ -98,8 +98,14 @@ procedure Main is
 
    function Add_One (X : Integer) return Integer is (X + 1);
 
+   function Max_Of (Values : Refs.Value_Array) return Integer is
+     (Integer'Max (Values (1), Values (2)));
+
    Add_One_Converter : constant Solver_Ifc.Converter_Type'Class :=
      Solver_Ifc.Converter (Add_One'Access, "add_one");
+
+   Max_Of_Combiner : constant Solver_Ifc.Combiner_Type'Class :=
+     Solver_Ifc.Combiner (Max_Of'Access, 2, "max_of");
 
    ----------------------
    -- Relation helpers --
@@ -166,6 +172,20 @@ procedure Main is
             (To.Dbg_Name.all & " set to " & From.Dbg_Name.all & " + 1")))));
 
    ----------------------
+   -- Propagate_Max_Of --
+   ----------------------
+
+   function Propagate_Max_Of
+     (From_1, From_2, To : Refs.Logic_Var) return Solver.Relation
+   is (Register (Solver.Create_N_Propagate
+        (To, Max_Of_Combiner, (From_1, From_2),
+         Logic_Ctx => new Logic_Context'
+           (Description => To_Unbounded_String
+             (To.Dbg_Name.all & " set to max("
+              & From_1.Dbg_Name.all & ", "
+              & From_2.Dbg_Name.all & ")")))));
+
+   ----------------------
    -- Assert_Congruent --
    ----------------------
 
@@ -194,6 +214,10 @@ procedure Main is
      new Refs.Logic_Var_Record'
        (Dbg_Name => new String'("Y"), Value => 0, others => <>);
 
+   Var_Z : Refs.Logic_Var :=
+     new Refs.Logic_Var_Record'
+       (Dbg_Name => new String'("Z"), Value => 0, others => <>);
+
    Attempt_1 : Solver.Relation := Register (Solver.Create_All
      ((Assert_Congruent (Var_X, 1, 2),
        Assign (Var_Y, 5),
@@ -209,8 +233,14 @@ procedure Main is
        Propagate_Plus_One (Var_Y, Var_X),
        Assign (Var_Y, 5))));
 
+   Attempt_4 : Solver.Relation := Register (Solver.Create_All
+     ((Assert_Congruent (Var_X, 1, 2),
+       Propagate_Max_Of (Var_Y, Var_Z, Var_X),
+       Assign (Var_Y, 5),
+       Assign (Var_Z, 6))));
+
    Problem : constant Solver.Relation := Register (Solver.Create_Any
-     ((Attempt_1, Attempt_2, Attempt_3)));
+     ((Attempt_1, Attempt_2, Attempt_3, Attempt_4)));
 begin
    GNATCOLL.Traces.Parse_Config_File;
 
@@ -221,6 +251,8 @@ begin
    Finalize;
    Refs.Destroy (Var_X.all);
    Refs.Destroy (Var_Y.all);
+   Refs.Destroy (Var_Z.all);
    Free (Var_X);
    Free (Var_Y);
+   Free (Var_Z);
 end Main;
