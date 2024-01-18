@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 def parse_dumpbin_result(dumpbin_result: str) -> list[str]:
     """
     Extract all symbol names from the output of the "dumpbin" command.
