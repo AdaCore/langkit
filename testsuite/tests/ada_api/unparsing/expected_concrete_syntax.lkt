@@ -18,7 +18,12 @@ grammar foo_grammar {
         ")") ":" type_ref "{" list*(stmt) "}"
     )
     stmt <- Stmt(expr ";")
-    expr <- or(Addition(expr "+" expr) | call | atom)
+    expr <- or(
+        | DottedName(expr "." name)
+        | Addition(expr "+" expr)
+        | call
+        | atom
+    )
     atom <- or(number | ref)
     number <- Number(@number)
     ref <- Ref(name)
@@ -45,6 +50,11 @@ class Addition: Expr {
 class Call: Expr {
     @parse_field callee: Name
     @parse_field args: ASTList[FooNode, CallArg]
+}
+
+class DottedName: Expr {
+    @parse_field prefix: Expr
+    @parse_field suffix: Name
 }
 
 class Number: Expr implements TokenNode {

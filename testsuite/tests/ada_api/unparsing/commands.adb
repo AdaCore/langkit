@@ -16,17 +16,17 @@ with Libfoolang.Generic_API; use Libfoolang.Generic_API;
 procedure Commands is
 
    Context : constant Lk_Context := Create_Context (Self_Id);
-   Unit    : constant Lk_Unit := Context.Get_From_Buffer
-    (Filename => "foo.txt", Buffer => "var i: Int = 0;");
 
-   procedure Check (Filename : String);
+   procedure Check (Filename : String; Buffer : String := "var i: Int = 0;");
    procedure Remove_Ids (Value : JSON_Value);
 
    -----------
    -- Check --
    -----------
 
-   procedure Check (Filename : String) is
+   procedure Check (Filename : String; Buffer : String := "var i: Int = 0;") is
+      Unit      : constant Lk_Unit := Context.Get_From_Buffer
+       (Filename => "foo.txt", Buffer => Buffer);
       Config    : Unparsing_Configuration;
       Doc       : Prettier_Ada.Documents.Document_Type;
       JSON      : JSON_Value;
@@ -34,6 +34,13 @@ procedure Commands is
    begin
       Put_Line ("== " & Filename & " ==");
       New_Line;
+
+      if Unit.Has_Diagnostics then
+         for D of Unit.Diagnostics loop
+            Put_Line (Unit.Format_GNU_Diagnostic (D));
+         end loop;
+         raise Program_Error;
+      end if;
 
       Config := Load_Unparsing_Config (Self_Id, Filename);
       Doc := Unparse_To_Prettier (Unit.Root, Config);
@@ -84,10 +91,6 @@ procedure Commands is
    end Remove_Ids;
 
 begin
-   if Unit.Has_Diagnostics then
-      raise Program_Error;
-   end if;
-
    Check ("cmd_align.json");
    Check ("cmd_align2.json");
    Check ("cmd_breakparent.json");
@@ -103,6 +106,16 @@ begin
    Check ("cmd_literalline.json");
    Check ("cmd_markasroot.json");
    Check ("cmd_recurse.json");
+   Check
+     ("cmd_recurse_flatten.json",
+      "var i: Int = AAAAAAAAAAAAAAAAAA"
+      & "(XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      & ".YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+      & ".ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ)"
+      & ".DDDDDDDDDDDDDDDD"
+      & ".EEEEEEEEEEEEEEEE"
+      & ".FFFFFFFFFFFFFFFF"
+      & ".GGGGGGGGGGGGGGGG;");
    Check ("cmd_softline.json");
    Check ("cmd_trim.json");
    Check ("cmd_whitespace_3.json");
