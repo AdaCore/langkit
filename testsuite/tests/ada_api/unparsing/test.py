@@ -48,6 +48,11 @@ class Expr(FooNode):
     pass
 
 
+class DottedName(Expr):
+    prefix = Field(type=T.Expr)
+    suffix = Field(type=T.Name)
+
+
 class Addition(Expr):
     lhs = Field(type=T.Expr)
     rhs = Field(type=T.Expr)

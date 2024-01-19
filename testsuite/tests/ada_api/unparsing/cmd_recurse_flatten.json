@@ -1,0 +1,16 @@
+{
+  "node_configs": {
+    "Call": {
+      "node": {"kind": "group", "document": ["recurse", "line"]}
+    },
+    "DottedName": {
+      "node": {"kind": "fill", "document": "recurse"},
+      "fields": {
+        "f_prefix": [
+          {"kind": "recurse_flatten", "if": ["DottedName"]},
+          "softline"
+        ]
+      }
+    }
+  }
+}

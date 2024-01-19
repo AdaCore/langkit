@@ -31,6 +31,8 @@ with Langkit_Support.Symbols;        use Langkit_Support.Symbols;
 
 package body Langkit_Support.Generic_API.Unparsing is
 
+   use type Ada.Containers.Count_Type;
+
    type Unparsing_Fragment_Kind is
      (Token_Fragment,
       List_Separator_Fragment,
@@ -131,9 +133,14 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    function Instantiate_Template
      (Pool             : in out Document_Pool;
+      Node             : Lk_Node;
       Filler, Template : Document_Type) return Document_Type;
    --  Instantiate the given template, i.e. create a copy of it, replacing
-   --  "recurse" documents with Filler.
+   --  "recurse*" documents with ``Filler``.
+   --
+   --  ``Node`` must be the node for which we instantiate this template: it is
+   --  used to correctly initialize the ``Node`` component of instantiated
+   --  documents.
 
    --------------------------
    -- Iterate_On_Fragments --
@@ -549,6 +556,46 @@ package body Langkit_Support.Generic_API.Unparsing is
                   return Pool.Create_Indent
                     (To_Document (JSON.Get ("contents"), Error_Prefix));
 
+               elsif Kind = "recurse_flatten" then
+                  declare
+                     L     : JSON_Value;
+                     T     : Type_Ref;
+                     Types : Type_Vectors.Vector;
+                  begin
+                     --  Use the given type guard for the flattening, or use
+                     --  the root node to flatten for all nodes.
+
+                     if JSON.Has_Field ("if") then
+                        L := JSON.Get ("if");
+                        if L.Kind /= JSON_Array_Type then
+                           raise Invalid_Input with
+                             Error_Prefix & ": invalid recurse_flatten if: "
+                             & L.Kind'Image;
+                        end if;
+                        for Name of JSON_Array'(L.Get) loop
+                           if Name.Kind /= JSON_String_Type then
+                              raise Invalid_Input with
+                                Error_Prefix
+                                & ": invalid item in recurse_flatten if: "
+                                & Name.Kind'Image;
+                           end if;
+
+                           T := Map.Lookup_Type (To_Symbol (Name.Get));
+                           if T = No_Type_Ref or else not Is_Node_Type (T) then
+                              raise Invalid_Input with
+                                Error_Prefix
+                                & ": invalid node type in recurse_flatten if: "
+                                & Name.Get;
+                           end if;
+
+                           Types.Append (T);
+                        end loop;
+                     else
+                        Types.Append (Root_Node_Type (Language));
+                     end if;
+                     return Pool.Create_Recurse_Flatten (Types);
+                  end;
+
                elsif Kind = "whitespace" then
                   if not JSON.Has_Field ("length") then
                      raise Invalid_Input with
@@ -803,39 +850,49 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    function Instantiate_Template
      (Pool             : in out Document_Pool;
+      Node             : Lk_Node;
       Filler, Template : Document_Type) return Document_Type is
    begin
       case Template.Kind is
          when Align =>
             return Pool.Create_Align
               (Template.Align_Data,
-               Instantiate_Template (Pool, Filler, Template.Align_Contents));
+               Instantiate_Template
+                 (Pool, Node, Filler, Template.Align_Contents),
+               Node);
 
          when Break_Parent =>
             return Pool.Create_Break_Parent;
 
          when Fill =>
             return Pool.Create_Fill
-              (Instantiate_Template (Pool, Filler, Template.Fill_Document));
+              (Instantiate_Template
+                 (Pool, Node, Filler, Template.Fill_Document),
+               Node);
 
          when Group =>
             return Pool.Create_Group
-              (Instantiate_Template (Pool, Filler, Template.Group_Document),
-               Template.Group_Options);
+              (Instantiate_Template
+                 (Pool, Node, Filler, Template.Group_Document),
+               Template.Group_Options,
+               Node);
 
          when Hard_Line =>
             return Pool.Create_Hard_Line;
 
          when If_Break =>
             return Pool.Create_If_Break
-              (Instantiate_Template (Pool, Filler, Template.If_Break_Contents),
+              (Instantiate_Template
+                 (Pool, Node, Filler, Template.If_Break_Contents),
                Instantiate_Template
-                 (Pool, Filler, Template.If_Break_Flat_Contents),
+                 (Pool, Node, Filler, Template.If_Break_Flat_Contents),
                Template.If_Break_Group_Id);
 
          when Indent =>
             return Pool.Create_Indent
-              (Instantiate_Template (Pool, Filler, Template.Indent_Document));
+              (Instantiate_Template
+                 (Pool, Node, Filler, Template.Indent_Document),
+               Node);
 
          when Line =>
             return Pool.Create_Line;
@@ -847,9 +904,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                for I in 1 .. Template.List_Documents.Last_Index loop
                   Items.Append
                     (Instantiate_Template
-                       (Pool, Filler, Template.List_Documents.Element (I)));
+                       (Pool,
+                        Node,
+                        Filler,
+                        Template.List_Documents.Element (I)));
                end loop;
-               return Pool.Create_List (Items);
+               return Pool.Create_List (Items, Node);
             end;
 
          when Literal_Line =>
@@ -857,6 +917,40 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when Recurse =>
             return Filler;
+
+         when Recurse_Flatten =>
+            return Result : Document_Type := Filler do
+
+               --  As long as Result is a document we can flatten and that was
+               --  created by a node that passes the flattening guard, unwrap
+               --  it.
+
+               while not Result.Node.Is_Null
+                     and then Node_Matches
+                                (Result.Node, Template.Recurse_Flatten_Types)
+               loop
+                  case Result.Kind is
+                     when Align =>
+                        Result := Result.Align_Contents;
+
+                     when Fill =>
+                        Result := Result.Fill_Document;
+
+                     when Group =>
+                        Result := Result.Group_Document;
+
+                     when Indent =>
+                        Result := Result.Indent_Document;
+
+                     when List =>
+                        exit when Result.List_Documents.Length /= 1;
+                        Result := Result.List_Documents.First_Element;
+
+                     when others =>
+                        exit;
+                  end case;
+               end loop;
+            end return;
 
          when Soft_Line =>
             return Pool.Create_Soft_Line;
@@ -917,7 +1011,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   begin
                      if F.Kind = List_Separator_Fragment then
                         Token := Instantiate_Template
-                          (Pool, Token, Node_Config.List_Sep);
+                          (Pool, N, Token, Node_Config.List_Sep);
                      end if;
                      Items.Append (Token);
                   end;
@@ -930,7 +1024,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                        Node_Config.Field_Configs.Element (To_Index (F.Field));
                   begin
                      Items.Append
-                       (Instantiate_Template (Pool, Field, Field_Template));
+                       (Instantiate_Template (Pool, N, Field, Field_Template));
                   end;
 
                when List_Child_Fragment =>
@@ -941,7 +1035,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       begin
          Iterate_On_Fragments (N, Process_Fragment'Access);
          return Instantiate_Template
-           (Pool, Pool.Create_List (Items), Node_Config.Node_Template);
+           (Pool, N, Pool.Create_List (Items), Node_Config.Node_Template);
       end Unparse_Node;
 
    begin
@@ -990,7 +1084,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                return R;
             end if;
          end loop;
-         raise Constraint_Error with "invalid grammar rule name";
+         raise Opt_Parse_Error with "invalid grammar rule name";
       end Convert;
 
       Parser : Argument_Parser := Create_Argument_Parser

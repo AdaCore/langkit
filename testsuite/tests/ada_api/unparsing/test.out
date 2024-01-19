@@ -62,6 +62,12 @@ a: Int=2
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json
     template for VarDecl.f_name: missing "contents" key for markAsRoot
+# invalid_recurse_flatten.json
+    template for VarDecl.f_name: invalid recurse_flatten if: JSON_NULL_TYPE
+# invalid_recurse_flatten2.json
+    template for VarDecl.f_name: invalid item in recurse_flatten if: JSON_NULL_TYPE
+# invalid_recurse_flatten3.json
+    template for VarDecl.f_name: invalid node type in recurse_flatten if: NoSuchNode
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -518,6 +524,156 @@ Done.
     {
       "kind": "text",
       "text": "var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_recurse_flatten.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "text",
+      "text": "var i:Int="
+    },
+    {
+      "kind": "command",
+      "command": {
+        "command": "fill",
+        "parts": {
+          "kind": "list",
+          "list": [
+            {
+              "kind": "command",
+              "command": {
+                "command": "group",
+                "groupContents": {
+                  "kind": "list",
+                  "list": [
+                    {
+                      "kind": "text",
+                      "text": "AAAAAAAAAAAAAAAAAA("
+                    },
+                    {
+                      "kind": "command",
+                      "command": {
+                        "command": "fill",
+                        "parts": {
+                          "kind": "list",
+                          "list": [
+                            {
+                              "kind": "text",
+                              "text": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                            },
+                            {
+                              "kind": "command",
+                              "command": {
+                                "command": "line",
+                                "literal": false,
+                                "soft": true,
+                                "hard": false
+                              }
+                            },
+                            {
+                              "kind": "text",
+                              "text": ".YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+                            },
+                            {
+                              "kind": "command",
+                              "command": {
+                                "command": "line",
+                                "literal": false,
+                                "soft": true,
+                                "hard": false
+                              }
+                            },
+                            {
+                              "kind": "text",
+                              "text": ".ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "text",
+                      "text": ")"
+                    },
+                    {
+                      "kind": "command",
+                      "command": {
+                        "command": "line",
+                        "literal": false,
+                        "soft": false,
+                        "hard": false
+                      }
+                    }
+                  ]
+                },
+                "break": false,
+                "expandedStates": null
+              }
+            },
+            {
+              "kind": "command",
+              "command": {
+                "command": "line",
+                "literal": false,
+                "soft": true,
+                "hard": false
+              }
+            },
+            {
+              "kind": "text",
+              "text": ".DDDDDDDDDDDDDDDD"
+            },
+            {
+              "kind": "command",
+              "command": {
+                "command": "line",
+                "literal": false,
+                "soft": true,
+                "hard": false
+              }
+            },
+            {
+              "kind": "text",
+              "text": ".EEEEEEEEEEEEEEEE"
+            },
+            {
+              "kind": "command",
+              "command": {
+                "command": "line",
+                "literal": false,
+                "soft": true,
+                "hard": false
+              }
+            },
+            {
+              "kind": "text",
+              "text": ".FFFFFFFFFFFFFFFF"
+            },
+            {
+              "kind": "command",
+              "command": {
+                "command": "line",
+                "literal": false,
+                "soft": true,
+                "hard": false
+              }
+            },
+            {
+              "kind": "text",
+              "text": ".GGGGGGGGGGGGGGGG"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "kind": "text",
+      "text": ";"
     }
   ]
 }

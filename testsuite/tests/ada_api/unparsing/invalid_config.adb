@@ -59,6 +59,9 @@ begin
    Check ("invalid_ifbreak.json");
    Check ("invalid_indent.json");
    Check ("invalid_markasroot.json");
+   Check ("invalid_recurse_flatten.json");
+   Check ("invalid_recurse_flatten2.json");
+   Check ("invalid_recurse_flatten3.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");
