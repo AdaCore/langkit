@@ -470,8 +470,27 @@ class NativeLibPackager(BasePackager):
                                           'lib*', 'libiconv' + self.dllext)]
 
         # GNATcoll (core and bindings)
-        gnatcoll_core_libs = [self.std_path(self.gnatcoll_core_prefix,
-                                            'gnatcoll', 'libgnatcoll')]
+        # Compute paths of former gnatcoll library.
+        # TODO: remove after 02/2024 stable bump support for former gnatcoll
+        # packaging scheme. See eng/toolchain/gnatcoll-core#25.
+        gnatcoll_core_libs = [
+            self.std_path(self.gnatcoll_core_prefix, "gnatcoll", "libgnatcoll")
+        ]
+        if not os.path.isdir(os.path.dirname(gnatcoll_core_libs[0])):
+            # The directory does not exist so try the new scheme that contains
+            # two libraries.
+            gnatcoll_core_libs = [
+                self.std_path(
+                    self.gnatcoll_core_prefix, "gnatcoll_core",
+                    "libgnatcoll_core"
+                ),
+                self.std_path(
+                    self.gnatcoll_core_prefix,
+                    "gnatcoll_projects",
+                    "libgnatcoll_projects",
+                ),
+            ]
+
         gnatcoll_bindings_libs = [
             self.std_path(self.gnatcoll_iconv_prefix, 'gnatcoll_iconv',
                           'libgnatcoll_iconv'),
