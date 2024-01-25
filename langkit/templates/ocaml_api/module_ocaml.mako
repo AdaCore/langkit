@@ -62,9 +62,20 @@ module Exception = struct
       None
     else
       let c_value = !@ c_value_ptr in
+      let c_information = getf c_value information in
+      (* eng/codepeer/infer#220: Avoid a crash when the "information" field is
+         null. This is never supposed to happen, but has been observed to
+         happen randomly. For now, consider that there is no exception when
+         this is the case. *)
+      let information =
+        if is_null c_information then
+          ""
+        else
+          string_of_char_ptr c_information
+      in
       Some {
         kind = getf c_value kind;
-        information = string_of_char_ptr (getf c_value information);
+        information
       }
 
   let unwrap value =
