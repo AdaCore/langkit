@@ -476,7 +476,7 @@ class NativeLibPackager(BasePackager):
         gnatcoll_core_libs = [
             self.std_path(self.gnatcoll_core_prefix, "gnatcoll", "libgnatcoll")
         ]
-        if not os.path.isdir(os.path.dirname(gnatcoll_core_libs[0])):
+        if not os.path.exists(gnatcoll_core_libs[0]):
             # The directory does not exist so try the new scheme that contains
             # two libraries.
             gnatcoll_core_libs = [
