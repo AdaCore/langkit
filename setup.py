@@ -24,6 +24,7 @@ setup(
               'langkit.expressions',
               'langkit.gdb',
               'langkit.lexer',
+              'langkit.scripts',
               'langkit.stylechecks',
               'langkit.utils'],
     package_data={'langkit': [
