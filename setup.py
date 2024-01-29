@@ -33,7 +33,7 @@ setup(
     ]},
     entry_points={
         "console_scripts": [
-            "create-project.py = langkit.scripts.create_project:main",
+            "create-project = langkit.scripts.create_project:main",
         ]
     },
 )
