@@ -394,6 +394,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                   return Pool.Create_Break_Parent;
                elsif Value = "hardline" then
                   return Pool.Create_Hard_Line;
+               elsif Value = "hardlineWithoutBreakParent" then
+                  return Pool.Create_Hard_Line_Without_Break_Parent;
                elsif Value = "line" then
                   return Pool.Create_Line;
                elsif Value = "recurse" then
@@ -879,6 +881,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when Hard_Line =>
             return Pool.Create_Hard_Line;
+
+         when Hard_Line_Without_Break_Parent =>
+            return Pool.Create_Hard_Line_Without_Break_Parent;
 
          when If_Break =>
             return Pool.Create_If_Break

@@ -64,6 +64,9 @@ package body Langkit_Support.Prettier_Utils is
             when Hard_Line =>
                return 0;
 
+            when Hard_Line_Without_Break_Parent =>
+               return 0;
+
             when If_Break =>
                declare
                   Count_Break : constant Natural :=
@@ -156,6 +159,9 @@ package body Langkit_Support.Prettier_Utils is
 
          when Hard_Line =>
             return Hard_Line;
+
+         when Hard_Line_Without_Break_Parent =>
+            return Hard_Line_Without_Break_Parent;
 
          when If_Break =>
             return If_Break
@@ -350,6 +356,21 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_Hard_Line;
+
+   -------------------------------------------
+   -- Create_Hard_Line_Without_Break_Parent --
+   -------------------------------------------
+
+   function Create_Hard_Line_Without_Break_Parent
+     (Self : in out Document_Pool) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Hard_Line_Without_Break_Parent)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Hard_Line_Without_Break_Parent;
 
    ---------------------
    -- Create_If_Break --
@@ -655,6 +676,9 @@ package body Langkit_Support.Prettier_Utils is
             when Hard_Line =>
                Extend_Spacing (Last_Spacing, Newline);
 
+            when Hard_Line_Without_Break_Parent =>
+               Extend_Spacing (Last_Spacing, Newline);
+
             when If_Break =>
                declare
                   LT_Break : Token_Kind_Ref := Last_Token;
@@ -836,6 +860,9 @@ package body Langkit_Support.Prettier_Utils is
 
             when Hard_Line =>
                Put_Line ("hardline");
+
+            when Hard_Line_Without_Break_Parent =>
+               Put_Line ("hardlineWithoutBreakParent");
 
             when If_Break =>
                Put_Line ("ifBreak:");

@@ -57,6 +57,7 @@ private package Langkit_Support.Prettier_Utils is
       Fill,
       Group,
       Hard_Line,
+      Hard_Line_Without_Break_Parent,
       If_Break,
       Indent,
       Line,
@@ -90,6 +91,9 @@ private package Langkit_Support.Prettier_Utils is
             Group_Options  : Prettier.Builders.Group_Options_Type;
 
          when Hard_Line =>
+            null;
+
+         when Hard_Line_Without_Break_Parent =>
             null;
 
          when If_Break =>
@@ -182,6 +186,10 @@ private package Langkit_Support.Prettier_Utils is
    function Create_Hard_Line
      (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Hard_Line`` node
+
+   function Create_Hard_Line_Without_Break_Parent
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Hard_Line_Without_Break_Parent`` node
 
    function Create_If_Break
      (Self          : in out Document_Pool;
