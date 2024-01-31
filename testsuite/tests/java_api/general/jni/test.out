@@ -51,7 +51,7 @@ Unit root = <Sequence foo.txt:1:1-1:50>
 Unit root kind = Sequence
 Unit root children count = 5
 Unit root children = [<NullNode foo.txt:1:1-1:5>, <Example foo.txt:1:6-1:13>, <Var foo.txt:1:14-1:37>, <Example foo.txt:1:38-1:45>, <NullNode foo.txt:1:46-1:50>]
-Unit root AST dump = Sequence foo.txt:1:1-1:50>
+Unit root tree dump = Sequence foo.txt:1:1-1:50>
 |item_0:
 |  NullNode foo.txt:1:1-1:5>
 |item_1:

@@ -219,7 +219,7 @@ public final class BindingsTests {
                 "Unit root children = " + root.children().toString()
             );
             System.out.println(
-                "Unit root AST dump = " + root.dumpAST()
+                "Unit root tree dump = " + root.dumpTree()
             );
             System.out.println(
                 "Unit root is a list node = " + root.isListType()

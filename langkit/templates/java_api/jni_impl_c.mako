@@ -2530,7 +2530,7 @@ ${iterator.jni_c_impl(iterator_type)}
 % endfor
 
 // ==========
-// AST node functions
+// Node functions
 // ==========
 
 // Return whether the two given entities are equal
@@ -2720,7 +2720,7 @@ ${api.jni_func_sig("node_image", "jobject")}(
 }
 
 // ==========
-// AST node field accessors
+// Node field accessors
 // ==========
 
 % for astnode in ctx.astnode_types:
