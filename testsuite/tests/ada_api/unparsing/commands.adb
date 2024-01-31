@@ -99,6 +99,7 @@ begin
    Check ("cmd_fill.json");
    Check ("cmd_group.json");
    Check ("cmd_hardline.json");
+   Check ("cmd_hardlinewithoutbreakparent.json");
    Check ("cmd_ifbreak.json");
    Check ("cmd_indent.json");
    Check ("cmd_line.json");

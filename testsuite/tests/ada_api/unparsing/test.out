@@ -323,6 +323,27 @@ Done.
   ]
 }
 
+== cmd_hardlinewithoutbreakparent.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "command",
+      "command": {
+        "command": "line",
+        "literal": false,
+        "soft": false,
+        "hard": true
+      }
+    },
+    {
+      "kind": "text",
+      "text": "var i:Int=0;"
+    }
+  ]
+}
+
 == cmd_ifbreak.json ==
 
 {
