@@ -18,7 +18,16 @@ from typing import (
 liblktlang_available = True
 try:
     import liblktlang as L
-except ImportError:
+except (ImportError, OSError):
+    # ImportError may be raised if liblktlang is not available.
+    #
+    # OSError may be raised if liblktlang is available, but the underlying
+    # dynamic library is missing dependency libraries. This can occur if the
+    # library was built with one version of the compiler, and then the compiler
+    # installation gets updated.  liblktlang has stale library links and fails
+    # to load.
+    #
+    # In both scenarios, assume liblktlang is not available and continue.
     liblktlang_available = False
 
 
