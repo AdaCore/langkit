@@ -762,14 +762,16 @@ package body Langkit_Support.Generic_API.Unparsing is
             Context : constant Template_Parsing_Context :=
               (Node_Template, Node);
             Config  : constant Node_Config_Access := new Node_Config_Record'
-              (Node_Template =>
-                 (if Value.Has_Field ("node")
-                  then To_Template (Value.Get ("node"), Context)
-                  else Pool.Create_Recurse),
+              (Node_Template => null,
                Field_Configs => <>,
                List_Sep      => null);
          begin
             Result.Node_Configs.Insert (Key, Config);
+
+            Config.Node_Template :=
+              (if Value.Has_Field ("node")
+               then To_Template (Value.Get ("node"), Context)
+               else Pool.Create_Recurse);
 
             if Value.Has_Field ("fields") then
                Load_Field_Configs
