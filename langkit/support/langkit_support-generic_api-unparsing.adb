@@ -307,6 +307,13 @@ package body Langkit_Support.Generic_API.Unparsing is
           & "." & Image (Format_Name (Member_Name (Member), Lower)));
       --  Return the expected name for the given Member in the given Node
 
+      type Template_Parsing_State_Kind is (Initial, Recurse_Found);
+      type Template_Parsing_State
+        (Kind : Template_Parsing_State_Kind := Initial)
+      is null record;
+
+      Initial_State : constant Template_Parsing_State := (Kind => Initial);
+
       type Template_Parsing_Context_Kind is
         (Node_Template, Field_Template, Sep_Template);
       --  Indicate which kind of template we are parsing:
@@ -322,6 +329,10 @@ package body Langkit_Support.Generic_API.Unparsing is
          Node : Type_Ref;
          --  Node for which we parse this template
 
+         State : Template_Parsing_State;
+         --  Keep track of the parsing state for this template; used for
+         --  validation.
+
          case Kind is
             when Node_Template | Sep_Template =>
                null;
@@ -332,18 +343,23 @@ package body Langkit_Support.Generic_API.Unparsing is
          end case;
       end record;
 
-      function To_Document
+      function Parse_Template
         (JSON    : JSON_Value;
-         Context : Template_Parsing_Context) return Document_Type;
+         Context : in out Template_Parsing_Context) return Document_Type;
       --  Parse a JSON-encoded document. Raise an Invalid_Input exception if
-      --  the JSON encoding is invalid.
+      --  the JSON encoding is invalid or if the template is ill-formed.
 
-      function To_Template
+      function Parse_Template_Helper
         (JSON    : JSON_Value;
-         Context : Template_Parsing_Context) return Document_Type;
-      --  Parse a JSON-encoded document and check that it is a well-formed
-      --  template for the given context. Raise an Invalid_Input exception in
-      --  case of error.
+         Context : in out Template_Parsing_Context) return Document_Type;
+      --  Helper for ``Parse_Template``. Implement the recursive part of
+      --  templates parsing: ``Parse_Template`` takes care of the post-parsing
+      --  validation.
+
+      procedure Process_Recurse (Context : in out Template_Parsing_Context);
+      --  Record in ``Context.State``` that a "recurse" or "recurse_flatten"
+      --  template item has been found. This raises an error if one has already
+      --  been found.
 
       procedure Abort_Parsing
         (Context : Template_Parsing_Context; Message : String)
@@ -399,13 +415,35 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
       end To_Struct_Member_Index;
 
-      -----------------
-      -- To_Document --
-      -----------------
+      --------------------
+      -- Parse_Template --
+      --------------------
 
-      function To_Document
+      function Parse_Template
         (JSON    : JSON_Value;
-         Context : Template_Parsing_Context) return Document_Type is
+         Context : in out Template_Parsing_Context) return Document_Type
+      is
+      begin
+         return Result : constant Document_Type :=
+           Parse_Template_Helper (JSON, Context)
+         do
+            case Context.State.Kind is
+               when Initial =>
+                  Abort_Parsing (Context, "recursion is missing");
+
+               when Recurse_Found =>
+                  null;
+            end case;
+         end return;
+      end Parse_Template;
+
+      ---------------------------
+      -- Parse_Template_Helper --
+      ---------------------------
+
+      function Parse_Template_Helper
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context) return Document_Type is
       begin
          case JSON.Kind is
          when JSON_Array_Type =>
@@ -413,7 +451,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                Items : Document_Vectors.Vector;
             begin
                for D of JSON_Array'(JSON.Get) loop
-                  Items.Append (To_Document (D, Context));
+                  Items.Append (Parse_Template_Helper (D, Context));
                end loop;
                return Pool.Create_List (Items);
             end;
@@ -431,6 +469,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                elsif Value = "line" then
                   return Pool.Create_Line;
                elsif Value = "recurse" then
+                  Process_Recurse (Context);
                   return Pool.Create_Recurse;
                elsif Value = "softline" then
                   return Pool.Create_Soft_Line;
@@ -485,7 +524,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                      end if;
 
                      return Pool.Create_Align
-                       (Data, To_Document (JSON.Get ("contents"), Context));
+                       (Data,
+                        Parse_Template_Helper
+                          (JSON.Get ("contents"), Context));
                   end;
 
                elsif Kind in
@@ -503,7 +544,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                                   elsif Kind = "markAsRoot"
                                   then (Kind => Prettier.Root)
                                   else raise Program_Error),
-                     Contents => To_Document
+                     Contents => Parse_Template_Helper
                                    (JSON.Get ("contents"), Context));
 
                elsif Kind = "fill" then
@@ -514,7 +555,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                         Abort_Parsing
                           (Context, "missing ""document"" key for fill");
                      end if;
-                     Document := To_Document (JSON.Get ("document"), Context);
+                     Document :=
+                       Parse_Template_Helper (JSON.Get ("document"), Context);
 
                      return Pool.Create_Fill (Document);
                   end;
@@ -531,7 +573,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                         Abort_Parsing
                           (Context, "missing ""document"" key for group");
                      end if;
-                     Document := To_Document (JSON.Get ("document"), Context);
+                     Document :=
+                       Parse_Template_Helper (JSON.Get ("document"), Context);
 
                      if JSON.Has_Field ("shouldBreak") then
                         Should_Break := JSON.Get ("shouldBreak");
@@ -554,19 +597,36 @@ package body Langkit_Support.Generic_API.Unparsing is
                   declare
                      Contents      : Document_Type;
                      Flat_Contents : Document_Type;
+
+                     Contents_Context : Template_Parsing_Context := Context;
+                     Flat_Context     : Template_Parsing_Context := Context;
                   begin
                      if not JSON.Has_Field ("breakContents") then
                         Abort_Parsing
                           (Context,
                            "missing ""breakContents"" key for ifBreak");
                      end if;
+
                      Contents :=
-                       To_Document (JSON.Get ("breakContents"), Context);
+                       Parse_Template_Helper
+                         (JSON.Get ("breakContents"), Contents_Context);
 
                      Flat_Contents :=
                        (if JSON.Has_Field ("flatContents")
-                        then To_Document (JSON.Get ("flatContents"), Context)
+                        then Parse_Template_Helper
+                               (JSON.Get ("flatContents"), Flat_Context)
                         else null);
+
+                     --  Unify the parsing state for both branches and update
+                     --  Context accordingly.
+
+                     if Contents_Context.State /= Flat_Context.State then
+                        Abort_Parsing
+                          (Context,
+                           "ifBreak alternatives have inconsistent recurse"
+                           & " structure");
+                     end if;
+                     Context.State := Contents_Context.State;
 
                      --  TODO??? (eng/libadalang/langkit#727) Handle the group
                      --  id.
@@ -580,7 +640,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                        (Context, "missing ""contents"" key for indent");
                   end if;
                   return Pool.Create_Indent
-                    (To_Document (JSON.Get ("contents"), Context));
+                    (Parse_Template_Helper (JSON.Get ("contents"), Context));
 
                elsif Kind = "recurse_flatten" then
                   declare
@@ -619,6 +679,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                      else
                         Types.Append (Root_Node_Type (Language));
                      end if;
+                     Process_Recurse (Context);
                      return Pool.Create_Recurse_Flatten (Types);
                   end;
 
@@ -647,23 +708,21 @@ package body Langkit_Support.Generic_API.Unparsing is
             Abort_Parsing
               (Context, "invalid template JSON node: " & JSON.Kind'Image);
          end case;
-      end To_Document;
+      end Parse_Template_Helper;
 
-      -----------------
-      -- To_Template --
-      -----------------
+      ---------------------
+      -- Process_Recurse --
+      ---------------------
 
-      function To_Template
-        (JSON    : JSON_Value;
-         Context : Template_Parsing_Context) return Document_Type is
+      procedure Process_Recurse (Context : in out Template_Parsing_Context) is
       begin
-         return Result : constant Document_Type := To_Document (JSON, Context)
-         do
-            if not Is_Correct_Template (Result) then
-               Abort_Parsing (Context, "invalid ""recurse"" structure");
-            end if;
-         end return;
-      end To_Template;
+         case Context.State.Kind is
+            when Initial =>
+               Context.State := (Kind => Recurse_Found);
+            when Recurse_Found =>
+               Abort_Parsing (Context, "too many recursions");
+         end case;
+      end Process_Recurse;
 
       -------------------
       -- Abort_Parsing --
@@ -703,10 +762,13 @@ package body Langkit_Support.Generic_API.Unparsing is
          procedure Process (Name : String; Value : JSON_Value) is
             Member  : constant Struct_Member_Index :=
               To_Struct_Member_Index (Name, Node);
-            Context : constant Template_Parsing_Context :=
-              (Field_Template, Node, From_Index (Language, Member));
+            Context : Template_Parsing_Context :=
+              (Kind  => Field_Template,
+               State => Initial_State,
+               Node  => Node,
+               Field => From_Index (Language, Member));
          begin
-            Configs.Insert (Member, To_Template (Value, Context));
+            Configs.Insert (Member, Parse_Template (Value, Context));
          end Process;
 
       begin
@@ -759,8 +821,10 @@ package body Langkit_Support.Generic_API.Unparsing is
          procedure Process (Name : String; Value : JSON_Value) is
             Key     : constant Type_Index := To_Type_Index (Name);
             Node    : constant Type_Ref := From_Index (Language, Key);
-            Context : constant Template_Parsing_Context :=
-              (Node_Template, Node);
+            Context : Template_Parsing_Context :=
+              (Kind  => Node_Template,
+               Node  => Node,
+               State => Initial_State);
             Config  : constant Node_Config_Access := new Node_Config_Record'
               (Node_Template => null,
                Field_Configs => <>,
@@ -770,7 +834,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
             Config.Node_Template :=
               (if Value.Has_Field ("node")
-               then To_Template (Value.Get ("node"), Context)
+               then Parse_Template (Value.Get ("node"), Context)
                else Pool.Create_Recurse);
 
             if Value.Has_Field ("fields") then
@@ -784,9 +848,15 @@ package body Langkit_Support.Generic_API.Unparsing is
                     Name & " is not a list node, invalid ""sep"""
                     & " configuration";
                end if;
-               Config.List_Sep :=
-                 To_Template
-                   (Value.Get ("sep"), (Sep_Template, Node));
+               declare
+                  Context : Template_Parsing_Context :=
+                    (Kind  => Sep_Template,
+                     Node  => Node,
+                     State => Initial_State);
+               begin
+                  Config.List_Sep :=
+                    Parse_Template (Value.Get ("sep"), Context);
+               end;
             end if;
          end Process;
 

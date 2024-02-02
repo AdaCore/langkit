@@ -72,17 +72,17 @@ a: Int=2
 == Invalid templates (too many/few "recurse") ==
 
 # recurse_list_too_few.json
-    "sep" template for StmtList: invalid "recurse" structure
+    "sep" template for StmtList: recursion is missing
 # recurse_list_too_many.json
-    "sep" template for StmtList: invalid "recurse" structure
+    "sep" template for StmtList: too many recursions
 # recurse_line.json
-    "sep" template for StmtList: invalid "recurse" structure
+    "sep" template for StmtList: recursion is missing
 # recurse_whitespace.json
-    "sep" template for StmtList: invalid "recurse" structure
+    "sep" template for StmtList: recursion is missing
 # recurse_indent_too_few.json
-    "sep" template for StmtList: invalid "recurse" structure
+    "sep" template for StmtList: recursion is missing
 # recurse_indent_too_many.json
-    "sep" template for StmtList: invalid "recurse" structure
+    "sep" template for StmtList: too many recursions
 
 Done.
 

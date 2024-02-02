@@ -134,21 +134,6 @@ private package Langkit_Support.Prettier_Utils is
       end case;
    end record;
 
-   function Is_Correct_Template (Self : Document_Type) return Boolean;
-   --  Return whether ``Self`` is a valid template document. This ensures that
-   --  formatting the instantiated template will yield exactly once the
-   --  sub-document corresponding to the Recurse item.
-   --
-   --  An example to clarify: suppose we need a template to unparse a node::
-   --
-   --    ["recurse", "recurse"]
-   --
-   --  Will be invalid, as the node is unparse twice. Similarly::
-   --
-   --    ["whitespace"]
-   --
-   --  Will be invalid, as the node will not be included in the unparsing.
-
    function To_Prettier_Document
      (Document : Document_Type) return Prettier.Document_Type;
    --  Turn an unparsing document into an actual Prettier document
