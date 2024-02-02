@@ -33,6 +33,12 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    use type Ada.Containers.Count_Type;
 
+   function Is_Field_Present
+     (Field          : Lk_Node;
+      Field_Unparser : Field_Unparser_Impl) return Boolean;
+   --  Return whether, according to ``Field_Unparser``, the field ``Field``
+   --  must be considered as present for unparsing.
+
    type Unparsing_Fragment_Kind is
      (Token_Fragment,
       List_Separator_Fragment,
@@ -75,6 +81,15 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Source code unparsing fragment used to unparse source code. Fragments
    --  are either tokens or nodes (that must be decomposed themselves into
    --  fragments).
+
+   function Fragment_For
+     (Id          : Language_Id;
+      Token       : Token_Unparser;
+      Is_List_Sep : Boolean := False) return Unparsing_Fragment;
+   --  Return the unparsing fragment corresponding to the given token.
+   --
+   --  ``Is_List_Sep`` designates whether this token is used as a list
+   --  separator.
 
    procedure Iterate_On_Fragments
      (Node    : Lk_Node;
@@ -159,6 +174,42 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  of template instantiation: ``Instantiate_Template_Helper`` takes care of
    --  the template unwrapping.
 
+   ----------------------
+   -- Is_Field_Present --
+   ----------------------
+
+   function Is_Field_Present
+     (Field          : Lk_Node;
+      Field_Unparser : Field_Unparser_Impl) return Boolean
+   is
+   begin
+      --  Unparsing tables (Empty_List_Is_Absent component) determine whether a
+      --  non-null child with no children of its own must be treated as absent.
+
+      return not Field.Is_Null
+             and then (not Field_Unparser.Empty_List_Is_Absent
+                       or else Field.Children_Count > 0);
+   end Is_Field_Present;
+
+   ------------------
+   -- Fragment_For --
+   ------------------
+
+   function Fragment_For
+     (Id          : Language_Id;
+      Token       : Token_Unparser;
+      Is_List_Sep : Boolean := False) return Unparsing_Fragment
+   is
+      Kind : constant Token_Kind_Ref := From_Index (Id, Token.Kind);
+      Text : constant Unbounded_Text_Type :=
+        To_Unbounded_Text (Token.Text.all);
+   begin
+      return
+        (if Is_List_Sep
+         then (List_Separator_Fragment, Kind, Text)
+         else (Token_Fragment, Kind, Text));
+   end Fragment_For;
+
    --------------------------
    -- Iterate_On_Fragments --
    --------------------------
@@ -171,27 +222,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       Desc      : constant Language_Descriptor_Access := +Id;
       Unparsers : Unparsers_Impl renames Desc.Unparsers.all;
 
-      procedure Append
-        (Token : Token_Unparser; Is_List_Sep : Boolean := False);
       procedure Append (Tokens : Token_Sequence);
-
-      ------------
-      -- Append --
-      ------------
-
-      procedure Append (Token : Token_Unparser; Is_List_Sep : Boolean := False)
-      is
-         Kind : constant Token_Kind_Ref := From_Index (Id, Token.Kind);
-         Text : constant Unbounded_Text_Type :=
-           To_Unbounded_Text (Token.Text.all);
-
-         Fragment : constant Unparsing_Fragment :=
-           (if Is_List_Sep
-            then (List_Separator_Fragment, Kind, Text)
-            else (Token_Fragment, Kind, Text));
-      begin
-         Process.all (Fragment);
-      end Append;
 
       ------------
       -- Append --
@@ -200,7 +231,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       procedure Append (Tokens : Token_Sequence) is
       begin
          for T of Tokens.all loop
-            Append (T);
+            Process.all (Fragment_For (Id, T));
          end loop;
       end Append;
 
@@ -231,15 +262,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                   Append (Inter_Tokens);
 
-                  --  Then append fragments for the field itself, if present.
-                  --  Note that unparsing tables (Empty_List_Is_Absent
-                  --  component) determine whether a non-null child with no
-                  --  children of its own must be treated as absent.
+                  --  Then append fragments for the field itself, if present
 
-                  if not Child.Is_Null
-                     and then (not Field_Unparser.Empty_List_Is_Absent
-                               or else Child.Children_Count > 0)
-                  then
+                  if Is_Field_Present (Child, Field_Unparser) then
                      Append (Field_Unparser.Pre_Tokens);
                      Process.all
                        ((Kind  => Field_Fragment,
@@ -263,7 +288,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                          Token_Kind => No_Token_Kind_Ref,
                          Token_Text => To_Unbounded_Text ("")));
                   else
-                     Append (Node_Unparser.Separator, Is_List_Sep => True);
+                     Process.all
+                       (Fragment_For
+                          (Id, Node_Unparser.Separator, Is_List_Sep => True));
                   end if;
                end if;
 
