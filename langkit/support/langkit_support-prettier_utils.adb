@@ -408,6 +408,16 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Recurse;
 
+   --------------------
+   -- Create_Recurse --
+   --------------------
+
+   function Create_Recurse (Self : in out Document_Pool) return Template_Type
+   is
+   begin
+      return (Kind => With_Recurse, Root => Self.Create_Recurse);
+   end Create_Recurse;
+
    ----------------------------
    -- Create_Recurse_Flatten --
    ----------------------------

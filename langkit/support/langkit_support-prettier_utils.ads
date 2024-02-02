@@ -138,6 +138,22 @@ private package Langkit_Support.Prettier_Utils is
      (Document : Document_Type) return Prettier.Document_Type;
    --  Turn an unparsing document into an actual Prettier document
 
+   type Template_Kind is (No_Template_Kind, With_Recurse);
+   subtype Some_Template_Kind is
+     Template_Kind range With_Recurse ..  With_Recurse;
+   type Template_Type (Kind : Template_Kind := No_Template_Kind) is record
+      case Kind is
+         when No_Template_Kind =>
+            null;
+
+         when With_Recurse =>
+            Root : Document_Type;
+      end case;
+   end record;
+   --  Template document extended with information about how to instantiate it
+
+   No_Template : constant Template_Type := (Kind => No_Template_Kind);
+
    type Document_Pool is tagged private;
    --  Allocation pool for ``Document_Type`` nodes
 
@@ -210,6 +226,9 @@ private package Langkit_Support.Prettier_Utils is
 
    function Create_Recurse (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Recurse`` node
+
+   function Create_Recurse (Self : in out Document_Pool) return Template_Type;
+   --  Return a ``Recurse`` node wrapped in a ``With_Recurse`` template
 
    function Create_Recurse_Flatten
      (Self  : in out Document_Pool;
