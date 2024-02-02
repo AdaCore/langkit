@@ -64,6 +64,7 @@ private package Langkit_Support.Prettier_Utils is
       List,
       Literal_Line,
       Recurse,
+      Recurse_Field,
       Recurse_Flatten,
       Soft_Line,
       Token,
@@ -116,6 +117,19 @@ private package Langkit_Support.Prettier_Utils is
          when Recurse =>
             null;
 
+         when Recurse_Field =>
+            Recurse_Field_Ref : Struct_Member_Ref;
+            --  Node field on which to recurse
+
+            Recurse_Field_Position : Positive;
+            --  1-based index for this field in the list of fields for the
+            --  owning node.
+            --
+            --  This information is in theory redundant with the field
+            --  reference, but using an index allows template instantantiation
+            --  code to use an array rather than a map to store information
+            --  related to fields: more simple and probably more efficient.
+
          when Recurse_Flatten =>
             Recurse_Flatten_Types : Type_Vectors.Vector;
 
@@ -138,15 +152,15 @@ private package Langkit_Support.Prettier_Utils is
      (Document : Document_Type) return Prettier.Document_Type;
    --  Turn an unparsing document into an actual Prettier document
 
-   type Template_Kind is (No_Template_Kind, With_Recurse);
+   type Template_Kind is (No_Template_Kind, With_Recurse, With_Recurse_Field);
    subtype Some_Template_Kind is
-     Template_Kind range With_Recurse ..  With_Recurse;
+     Template_Kind range With_Recurse ..  With_Recurse_Field;
    type Template_Type (Kind : Template_Kind := No_Template_Kind) is record
       case Kind is
          when No_Template_Kind =>
             null;
 
-         when With_Recurse =>
+         when With_Recurse | With_Recurse_Field =>
             Root : Document_Type;
       end case;
    end record;
@@ -229,6 +243,12 @@ private package Langkit_Support.Prettier_Utils is
 
    function Create_Recurse (Self : in out Document_Pool) return Template_Type;
    --  Return a ``Recurse`` node wrapped in a ``With_Recurse`` template
+
+   function Create_Recurse_Field
+     (Self     : in out Document_Pool;
+      Field    : Struct_Member_Ref;
+      Position : Positive) return Document_Type;
+   --  Return a ``Recurse_Field`` node
 
    function Create_Recurse_Flatten
      (Self  : in out Document_Pool;

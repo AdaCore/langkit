@@ -1,0 +1,10 @@
+{
+  "node_configs": {
+    "StmtList": {
+      "node": [
+        {"kind": "text", "text": "foo"},
+        "recurse"
+      ]
+    }
+  }
+}

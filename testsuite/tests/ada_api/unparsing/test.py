@@ -1,7 +1,7 @@
 """Check that the Unparsing/Prettier API works as expect."""
 
 from langkit.compiled_types import T
-from langkit.dsl import ASTNode, Field, abstract
+from langkit.dsl import ASTNode, AbstractField, Field, abstract
 
 from utils import GPRMain, build_and_run
 
@@ -10,12 +10,17 @@ class FooNode(ASTNode):
     pass
 
 
+@abstract
+class Decl(FooNode):
+    name = AbstractField(type=T.Name)
+
+
 class NullQual(FooNode):
     enum_node = True
     qualifier = True
 
 
-class VarDecl(FooNode):
+class VarDecl(Decl):
     is_null = Field(type=T.NullQual)
     name = Field(type=T.Name)
     type_expr = Field(type=T.Name)
@@ -28,7 +33,7 @@ class ParamSpec(FooNode):
     default_expr = Field(type=T.Expr)
 
 
-class FunDecl(FooNode):
+class FunDecl(Decl):
     name = Field(type=T.Name)
     args = Field(type=T.ParamSpec.list)
     return_type = Field(type=T.Name)

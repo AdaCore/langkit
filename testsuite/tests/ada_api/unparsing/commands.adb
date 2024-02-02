@@ -107,6 +107,7 @@ begin
    Check ("cmd_literalline.json");
    Check ("cmd_markasroot.json");
    Check ("cmd_recurse.json");
+   Check ("cmd_recurse_field.json");
    Check
      ("cmd_recurse_flatten.json",
       "var i: Int = AAAAAAAAAAAAAAAAAA"

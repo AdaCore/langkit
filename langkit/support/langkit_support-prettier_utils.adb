@@ -137,7 +137,7 @@ package body Langkit_Support.Prettier_Utils is
          when Literal_Line =>
             return Literal_Line;
 
-         when Recurse | Recurse_Flatten =>
+         when Recurse | Recurse_Field | Recurse_Flatten =>
             raise Program_Error with "uninstantiated template";
 
          when Soft_Line =>
@@ -418,6 +418,26 @@ package body Langkit_Support.Prettier_Utils is
       return (Kind => With_Recurse, Root => Self.Create_Recurse);
    end Create_Recurse;
 
+   --------------------------
+   -- Create_Recurse_Field --
+   --------------------------
+
+   function Create_Recurse_Field
+     (Self     : in out Document_Pool;
+      Field    : Struct_Member_Ref;
+      Position : Positive) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind                   => Recurse_Field,
+           Node                   => No_Lk_Node,
+           Recurse_Field_Ref      => Field,
+           Recurse_Field_Position => Position)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Recurse_Field;
+
    ----------------------------
    -- Create_Recurse_Flatten --
    ----------------------------
@@ -649,7 +669,7 @@ package body Langkit_Support.Prettier_Utils is
             when Literal_Line =>
                Extend_Spacing (Last_Spacing, Newline);
 
-            when Recurse | Recurse_Flatten =>
+            when Recurse | Recurse_Field | Recurse_Flatten =>
                raise Program_Error;
 
             when Soft_Line =>
@@ -813,6 +833,10 @@ package body Langkit_Support.Prettier_Utils is
 
             when Recurse =>
                Put_Line ("recurse");
+
+            when Recurse_Field =>
+               Put_Line
+                 ("recurse_field: " & Debug_Name (Document.Recurse_Field_Ref));
 
             when Recurse_Flatten =>
                Put_Line ("recurse_flatten:");

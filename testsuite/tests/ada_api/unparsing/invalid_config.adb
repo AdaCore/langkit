@@ -17,15 +17,32 @@ procedure Invalid_Config is
 
    procedure Check (Filename : String) is
       Dummy : Unparsing_Configuration;
+      Indent : constant String := "    ";
    begin
       Put_Line ("# " & Filename);
-      Put ("    ");
       begin
          Dummy := Load_Unparsing_Config (Self_Id, Filename);
-         Put_Line ("Success");
+         Put_Line (Indent & "Success");
       exception
          when Exc : Invalid_Input =>
-            Put_Line (Ada.Exceptions.Exception_Message (Exc));
+            declare
+               Empty_Line : Boolean := True;
+               Msg        : constant String :=
+                 Ada.Exceptions.Exception_Message (Exc) & ASCII.LF;
+            begin
+               for C of Msg loop
+                  if C = ASCII.LF then
+                     New_Line;
+                     Empty_Line := True;
+                  else
+                     if Empty_Line then
+                        Put (Indent);
+                        Empty_Line := False;
+                     end if;
+                     Put (C);
+                  end if;
+               end loop;
+            end;
       end;
    end Check;
 
@@ -59,6 +76,17 @@ begin
    Check ("invalid_ifbreak.json");
    Check ("invalid_indent.json");
    Check ("invalid_markasroot.json");
+   Check ("invalid_recurse_field.json");
+   Check ("invalid_recurse_field2.json");
+   Check ("invalid_recurse_field3.json");
+   Check ("invalid_recurse_field4.json");
+   Check ("invalid_recurse_field5.json");
+   Check ("invalid_recurse_field6.json");
+   Check ("invalid_recurse_field7.json");
+   Check ("invalid_recurse_field8.json");
+   Check ("invalid_recurse_field9.json");
+   Check ("invalid_recurse_field10.json");
+   Check ("invalid_recurse_field11.json");
    Check ("invalid_recurse_flatten.json");
    Check ("invalid_recurse_flatten2.json");
    Check ("invalid_recurse_flatten3.json");

@@ -62,6 +62,55 @@ a: Int=2
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json
     template for VarDecl.f_name: missing "contents" key for markAsRoot
+# invalid_recurse_field.json
+    template for VarDecl.f_name: "recurse_field" is valid in "node" templates only
+# invalid_recurse_field2.json
+    "node" template for Stmt: missing "field" key for recurse_field
+# invalid_recurse_field3.json
+    "node" template for Stmt: invalid recurse_field field: JSON_NULL_TYPE
+# invalid_recurse_field4.json
+    "node" template for Decl: "recurse_field" is valid for concrete nodes only
+# invalid_recurse_field5.json
+    "node" template for StmtList: text is not valid for list nodes
+# invalid_recurse_field6.json
+    invalid field for Stmt: f_foo
+# invalid_recurse_field7.json
+    "node" template for Name: text is not valid for token nodes
+# invalid_recurse_field8.json
+    "node" template for VarDecl: "recurse"/"recurse_flatten" and text cannot appear in the same template
+# invalid_recurse_field9.json
+    "node" template for VarDecl: token "var" expected, got field f_name
+    Expected:
+    * field f_is_null
+    * token "var"
+    * field f_name
+    * token ":"
+    * field f_type_expr
+    * token "="
+    * field f_value
+    * token ";"
+# invalid_recurse_field10.json
+    "node" template for VarDecl: missing token ";"
+    Expected:
+    * field f_is_null
+    * token "var"
+    * field f_name
+    * token ":"
+    * field f_type_expr
+    * token "="
+    * field f_value
+    * token ";"
+# invalid_recurse_field11.json
+    "node" template for VarDecl: unexpected extra template item: token "def"
+    Expected:
+    * field f_is_null
+    * token "var"
+    * field f_name
+    * token ":"
+    * field f_type_expr
+    * token "="
+    * field f_value
+    * token ";
 # invalid_recurse_flatten.json
     template for VarDecl.f_name: invalid recurse_flatten if: JSON_NULL_TYPE
 # invalid_recurse_flatten2.json
@@ -545,6 +594,35 @@ Done.
     {
       "kind": "text",
       "text": "var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_recurse_field.json ==
+
+{
+  "kind": "list",
+  "list": [
+    {
+      "kind": "command",
+      "command": {
+        "command": "group",
+        "groupContents": {
+          "kind": "list",
+          "list": [
+            {
+              "kind": "text",
+              "text": "var i:"
+            }
+          ]
+        },
+        "break": false,
+        "expandedStates": null
+      }
+    },
+    {
+      "kind": "text",
+      "text": "Int=0;"
     }
   ]
 }
