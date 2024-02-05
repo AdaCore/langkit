@@ -15,7 +15,10 @@
         {"kind": "text", "text": "="},
         {"kind": "recurse_field", "field": "f_value"},
         {"kind": "text", "text": ";"}
-      ]
+      ],
+      "fields": {
+         "f_value": {"kind": "indent", "contents": "recurse"}
+      }
     }
   }
 }

@@ -622,7 +622,21 @@ Done.
     },
     {
       "kind": "text",
-      "text": "Int=0;"
+      "text": "Int="
+    },
+    {
+      "kind": "command",
+      "command": {
+        "command": "indent",
+        "indentContents": {
+          "kind": "text",
+          "text": "0"
+        }
+      }
+    },
+    {
+      "kind": "text",
+      "text": ";"
     }
   ]
 }

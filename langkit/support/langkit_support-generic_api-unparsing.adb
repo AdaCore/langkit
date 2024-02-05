@@ -1556,6 +1556,15 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Using the unparsing configuration for N, unparse it to a Prettier
       --  document.
 
+      function Unparse_Field
+        (Node        : Lk_Node;
+         Node_Config : Node_Config_Record;
+         Child       : Lk_Node;
+         Field_Ref   : Struct_Member_Index) return Document_Type;
+      --  Unparse ``Child``, which is the ``Field_Ref`` field of ``Node``.
+      --  ``Node_Config`` must be the node unparsing configuration for
+      --  ``Node``.
+
       ------------------
       -- Unparse_Node --
       ------------------
@@ -1602,22 +1611,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end;
 
                when Field_Fragment =>
-                  declare
-                     Field    : constant Document_Type :=
-                       Unparse_Node (F.Node);
-                     Template : constant Template_Type :=
-                       Node_Config.Field_Configs.Element (To_Index (F.Field));
-                     Args     : constant Template_Instantiation_Args :=
-                       (Kind => With_Recurse, With_Recurse_Doc => Field);
-                  begin
-                     pragma Assert (Template.Kind = With_Recurse);
-                     Items.Append
-                       (Instantiate_Template
-                          (Pool      => Pool,
-                           Node      => N,
-                           Template  => Template,
-                           Arguments => Args));
-                  end;
+                  Items.Append
+                    (Unparse_Field
+                       (Node        => N,
+                        Node_Config => Node_Config,
+                        Child       => F.Node,
+                        Field_Ref   => To_Index (F.Field)));
 
                when List_Child_Fragment =>
                   Items.Append (Unparse_Node (F.Node));
@@ -1669,7 +1668,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                               Process_Fragment (Fragment_For (Id, T));
                            end loop;
 
-                           Items.Append (Unparse_Node (Child));
+                           Items.Append
+                             (Unparse_Field
+                                (Node        => N,
+                                 Node_Config => Node_Config,
+                                 Child       => Child,
+                                 Field_Ref   => Field_Unparser.Member));
 
                            for T of Field_Unparser.Post_Tokens.all loop
                               Process_Fragment (Fragment_For (Id, T));
@@ -1689,6 +1693,31 @@ package body Langkit_Support.Generic_API.Unparsing is
                end;
          end case;
       end Unparse_Node;
+
+      -------------------
+      -- Unparse_Field --
+      -------------------
+
+      function Unparse_Field
+        (Node        : Lk_Node;
+         Node_Config : Node_Config_Record;
+         Child       : Lk_Node;
+         Field_Ref   : Struct_Member_Index) return Document_Type
+      is
+         Field_Template : constant Template_Type :=
+           Node_Config.Field_Configs.Element (Field_Ref);
+         pragma Assert (Field_Template.Kind = With_Recurse);
+
+         Field_Template_Args : constant Template_Instantiation_Args :=
+           (Kind             => With_Recurse,
+            With_Recurse_Doc => Unparse_Node (Child));
+      begin
+         return Instantiate_Template
+                  (Pool      => Pool,
+                   Node      => Node,
+                   Template  => Field_Template,
+                   Arguments => Field_Template_Args);
+      end Unparse_Field;
 
    begin
       if Config.Value = null then
