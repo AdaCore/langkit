@@ -636,7 +636,46 @@ Done.
     },
     {
       "kind": "text",
-      "text": ";"
+      "text": ";def f(i"
+    },
+    {
+      "kind": "command",
+      "command": {
+        "command": "line",
+        "literal": false,
+        "soft": true,
+        "hard": false
+      }
+    },
+    {
+      "kind": "text",
+      "text": ":"
+    },
+    {
+      "kind": "command",
+      "command": {
+        "command": "line",
+        "literal": false,
+        "soft": true,
+        "hard": false
+      }
+    },
+    {
+      "kind": "text",
+      "text": "Int"
+    },
+    {
+      "kind": "command",
+      "command": {
+        "command": "line",
+        "literal": false,
+        "soft": false,
+        "hard": false
+      }
+    },
+    {
+      "kind": "text",
+      "text": "):Int{i;}"
     }
   ]
 }

@@ -1681,6 +1681,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                            Arguments.Field_Docs.Append
                              (Pool.Create_List (Items));
+                        else
+                           Arguments.Field_Docs.Append
+                             (Pool.Create_Empty_List);
                         end if;
                      end;
                   end loop;

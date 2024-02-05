@@ -1,5 +1,19 @@
 {
   "node_configs": {
+    "ParamSpec": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_name"},
+        "softline",
+        {"kind": "text", "text": ":"},
+        "softline",
+        {"kind": "recurse_field", "field": "f_type_expr"},
+        "line",
+        {"kind": "recurse_field", "field": "f_default_expr"}
+      ],
+      "fields": {
+        "f_default_expr": ["line", "recurse"]
+      }
+    },
     "VarDecl": {
       "node": [
         {"kind": "recurse_field", "field": "f_is_null"},
