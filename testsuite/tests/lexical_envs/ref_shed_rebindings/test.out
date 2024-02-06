@@ -1,0 +1,6 @@
+main.py: Running...
+lookup 'test' from base: <Scope main.txt:4:13-4:24>
+rebound base: <| Scope main.txt:2:5-7:6 [main.txt:9:5] |>
+lookup 'test' from rebound base: <| Scope main.txt:4:13-4:24 [main.txt:9:5] |>
+main.py: Done.
+Done

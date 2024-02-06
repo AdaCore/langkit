@@ -15,7 +15,7 @@ is
 
    % if uses_einfo:
       E_Info : ${T.entity_info.name} :=
-         Shed_Rebindings (E.Info, Node_Env (E.Node));
+         Shed_Rebindings (E.Info, Children_Env (E.Node));
       <% args.append('E_Info') %>
    % endif
 begin
