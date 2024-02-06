@@ -775,6 +775,8 @@ package body Langkit_Support.Prettier_Utils is
                      Put_Line ("dedentToRoot");
                   when Prettier.Root =>
                      Put_Line ("markAsRoot");
+                  when Prettier.Inner_Root =>
+                     Put_Line ("innerRoot");
                   when Prettier.None =>
                      Put_Line ("none");
                end case;

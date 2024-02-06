@@ -76,6 +76,7 @@ begin
    Check ("invalid_ifbreak.json");
    Check ("invalid_indent.json");
    Check ("invalid_markasroot.json");
+   Check ("invalid_innerroot.json");
    Check ("invalid_recurse_field.json");
    Check ("invalid_recurse_field2.json");
    Check ("invalid_recurse_field3.json");

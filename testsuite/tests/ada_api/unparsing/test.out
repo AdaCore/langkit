@@ -62,6 +62,8 @@ a: Int=2
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json
     template for VarDecl.f_name: missing "contents" key for markAsRoot
+# invalid_innerroot.json
+    template for VarDecl.f_name: missing "contents" key for innerRoot
 # invalid_recurse_field.json
     template for VarDecl.f_name: "recurse_field" is valid in "node" templates only
 # invalid_recurse_field2.json
@@ -564,6 +566,36 @@ Done.
     "command": "align",
     "alignData": {
       "kind": "root"
+    },
+    "alignContents": {
+      "kind": "list",
+      "list": [
+        {
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        {
+          "kind": "text",
+          "text": "var i:Int=0;"
+        }
+      ]
+    }
+  }
+}
+
+== cmd_innerroot.json ==
+
+{
+  "kind": "command",
+  "command": {
+    "command": "align",
+    "alignData": {
+      "kind": "innerRoot"
     },
     "alignContents": {
       "kind": "list",

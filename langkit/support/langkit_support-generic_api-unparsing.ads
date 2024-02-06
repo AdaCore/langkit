@@ -169,6 +169,10 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        {"kind": "markAsRoot", "contents": <sub-template>}
    --
+   --    * The "innerRoot" template yields a "innerRoot" Prettier document::
+   --
+   --        {"kind": "innerRoot", "contents": <sub-template>}
+   --
    --    * The "recurse_field" template is valid only in "node" templates for
    --      concrete nodes that are neither abstract, token nor list nodes. When
    --      used, the whole template cannot contain any
