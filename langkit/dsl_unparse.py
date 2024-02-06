@@ -645,8 +645,8 @@ def needs_parens(expr, **ctx):
         or expr_is_a(expr, "as_entity", "as_bare_entity", "children",
               "env_parent", "rebindings_parent", "parents", "parent", "root",
               "env_node", "rebindings_new_env", "rebindings_old_env",
-              "append_rebinding", "concat_rebindings", "env_node",
-              "get_value", "solve", "solve_with_diagnostics",
+              "append_rebinding", "concat_rebindings", "shed_rebindings",
+              "env_node", "get_value", "solve", "solve_with_diagnostics",
               "is_referenced_from", "env_group", "length", "can_reach",
               "as_int", "unique", "env_orphan", "is_visible_from", "as_array",
               "rebind_env", "at", "at_or_raise", "domain", "to_symbol", "join")
@@ -1227,10 +1227,11 @@ def emit_expr(expr, **ctx):
             False,
         )
 
-    elif is_a("append_rebinding", "concat_rebindings", "env_node", "get_value",
-              "solve", "solve_with_diagnostics", "is_referenced_from",
-              "env_group", "length", "can_reach", "as_int", "unique",
-              "env_orphan", "is_visible_from", "as_array", "rebind_env"):
+    elif is_a("append_rebinding", "concat_rebindings", "shed_rebindings",
+              "env_node", "get_value", "solve", "solve_with_diagnostics",
+              "is_referenced_from", "env_group", "length", "can_reach",
+              "as_int", "unique", "env_orphan", "is_visible_from", "as_array",
+              "rebind_env"):
         # Method like expressions
         exprs = expr.sub_expressions
         args = lmap(ee, exprs[1:])

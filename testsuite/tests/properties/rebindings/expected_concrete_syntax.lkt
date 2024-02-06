@@ -9,7 +9,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Block: FooNode {
+@rebindable class Block: FooNode {
     @parse_field name: Name
 
     |" Helper to create a new entity from ``Entity`` but with the given
@@ -32,6 +32,11 @@ class Block: FooNode {
     @export fun concat_rebindings(other: Entity[Block]): Entity[Block] =
     self.create_entity(
         self.info.rebindings.concat_rebindings(other.info.rebindings)
+    )
+
+    @export fun shed_rebindings(from_block: Entity[Block]): Entity[Block] =
+    self.create_entity(
+        from_block.children_env().shed_rebindings(self.info).rebindings
     )
 
     @export fun parent_rebindings(): Entity[Block] =

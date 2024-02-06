@@ -2,7 +2,7 @@
 Check that .rebindings related built-in properties behave as expected.
 """
 
-from langkit.dsl import ASTNode, Field
+from langkit.dsl import ASTNode, Annotations, Field
 from langkit.envs import EnvSpec, add_env
 from langkit.expressions import Entity, Self, T, Var, langkit_property
 
@@ -21,6 +21,8 @@ class Block(FooNode):
     name = Field(type=T.Name)
 
     env_spec = EnvSpec(add_env())
+
+    annotations = Annotations(rebindable=True)
 
     @langkit_property()
     def create_entity(rbdng=T.EnvRebindings):
@@ -51,6 +53,12 @@ class Block(FooNode):
         return Entity.create_entity(Entity.info.rebindings.concat_rebindings(
             other.info.rebindings
         ))
+
+    @langkit_property(public=True)
+    def shed_rebindings(from_block=T.Block.entity):
+        return Entity.create_entity(from_block.children_env.shed_rebindings(
+            Entity.info
+        ).rebindings)
 
     # Accessors so that main.py can explore the rebindings chain
     @langkit_property(public=True)

@@ -79,4 +79,13 @@ print("-" * 50)
 print()
 print_rebindings(concat_test)
 
+# Shed rebindings
+print()
+print("After shedding rebindings from old_d's env:")
+print("-" * 50)
+print()
+shed_test = concat_test.p_shed_rebindings(old_d)
+print_rebindings(shed_test)
+
+
 print('main.py: Done.')

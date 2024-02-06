@@ -267,6 +267,23 @@ def env_orphan(self, env):
 
 
 @auto_attr
+def shed_rebindings(self, env, entity_info):
+    """
+    Return a new ``entity_info`` struct in which rebindings are shedded
+    according to the location of the given lexical environment. This simply
+    forwards the call to langkit support's ``Shed_Entity_Info`` subprogram.
+
+    :type env: AbstractExpression env
+    :type entity_info: AbstractExpression
+    """
+    return CallExpr(
+        'Shed_Entity_Info', 'AST_Envs.Shed_Rebindings', T.entity_info,
+        [construct(entity_info, T.entity_info), construct(env, T.LexicalEnv)],
+        abstract_expr=self
+    )
+
+
+@auto_attr
 def env_group(self, env_array, with_md=None):
     """
     Return a new lexical environment that logically groups together multiple
