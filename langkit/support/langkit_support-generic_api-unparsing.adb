@@ -6,7 +6,6 @@
 with Ada.Command_Line;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Vectors;
-with Ada.Exceptions;           use Ada.Exceptions;
 with Ada.Strings.Unbounded;    use Ada.Strings.Unbounded;
 with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
@@ -28,6 +27,7 @@ use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Internal.Unparsing;
 use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Prettier_Utils; use Langkit_Support.Prettier_Utils;
+with Langkit_Support.Slocs;          use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;        use Langkit_Support.Symbols;
 
 package body Langkit_Support.Generic_API.Unparsing is
@@ -480,7 +480,10 @@ package body Langkit_Support.Generic_API.Unparsing is
    ---------------------------
 
    function Load_Unparsing_Config
-     (Language : Language_Id; Filename : String) return Unparsing_Configuration
+     (Language    : Language_Id;
+      Filename    : String;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+      return Unparsing_Configuration
    is
       --  Create a map so that we can lookup nodes/fields by name
 
@@ -618,6 +621,10 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Assuming that JSON is the "fields" configuration for Node, parse its
       --  field configurations and set Configs accordingly.
 
+      procedure Abort_Parsing (Message : String) with No_Return;
+      --  Append an item to ``Diagnostics`` and raise an Invalid_Input
+      --  exception.
+
       Result : constant Unparsing_Configuration_Access :=
         new Unparsing_Configuration_Record;
       Pool   : Document_Pool renames Result.Pool;
@@ -630,7 +637,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          T : constant Type_Ref := Map.Lookup_Type (To_Symbol (Name));
       begin
          if T = No_Type_Ref or else not Is_Node_Type (T) then
-            raise Invalid_Input with "invalid node name: " & Name;
+            Abort_Parsing ("invalid node name: " & Name);
          end if;
          return To_Index (T);
       end To_Type_Index;
@@ -646,14 +653,14 @@ package body Langkit_Support.Generic_API.Unparsing is
            Map.Lookup_Struct_Member (Node, To_Symbol (Name));
       begin
          if M = No_Struct_Member_Ref then
-            raise Invalid_Input with
-              "invalid field for " & Node_Type_Image (Node) & ": " & Name;
+            Abort_Parsing
+              ("invalid field for " & Node_Type_Image (Node) & ": " & Name);
          elsif not Is_Field (M) then
-            raise Invalid_Input with
-              Name & " is not a syntax field for " & Node_Type_Image (Node);
+            Abort_Parsing
+              (Name & " is not a syntax field for " & Node_Type_Image (Node));
          elsif Is_Null_For (M, Node) then
-            raise Invalid_Input with
-              Name & " is a null field for " & Node_Type_Image (Node);
+            Abort_Parsing
+              (Name & " is a null field for " & Node_Type_Image (Node));
          else
             return To_Index (M);
          end if;
@@ -1168,7 +1175,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             when Field_Template =>
               "template for " & Field_Image (Context.Field, Context.Node));
       begin
-         raise Invalid_Input with Prefix & ": " & Message;
+         Abort_Parsing (Prefix & ": " & Message);
       end Abort_Parsing;
 
       --------------------------
@@ -1220,6 +1227,16 @@ package body Langkit_Support.Generic_API.Unparsing is
          JSON.Map_JSON_Object (Process'Access);
       end Load_Field_Configs;
 
+      -------------------
+      -- Abort_Parsing --
+      -------------------
+
+      procedure Abort_Parsing (Message : String) is
+      begin
+         Append (Diagnostics, No_Source_Location_Range, To_Text (Message));
+         raise Invalid_Input;
+      end Abort_Parsing;
+
       use type GNAT.Strings.String_Access;
 
       --  First, parse the JSON document
@@ -1229,7 +1246,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       JSON        : JSON_Value;
    begin
       if JSON_Text = null then
-         raise Invalid_Input with "cannot read " & Filename;
+         Abort_Parsing ("cannot read " & Filename);
       end if;
       JSON_Result := Read (JSON_Text.all);
       GNAT.Strings.Free (JSON_Text);
@@ -1237,8 +1254,19 @@ package body Langkit_Support.Generic_API.Unparsing is
       if JSON_Result.Success then
          JSON := JSON_Result.Value;
       else
-         raise Invalid_Input with
-           Filename & ":" & Format_Parsing_Error (JSON_Result.Error);
+         declare
+            Sloc       : constant Source_Location :=
+              (Line_Number (JSON_Result.Error.Line),
+               Column_Number (JSON_Result.Error.Column));
+            Sloc_Range : constant Source_Location_Range :=
+              Make_Range (Sloc, Sloc);
+         begin
+            Append
+              (Diagnostics,
+               Sloc_Range,
+               To_Text (To_String (JSON_Result.Error.Message)));
+            raise Invalid_Input;
+         end;
       end if;
 
       --  Then load the unparsing configuration from it. Require a
@@ -1248,7 +1276,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       Result.Language := Language;
 
       if not JSON.Has_Field ("node_configs") then
-         raise Invalid_Input with "missing ""node_configs"" key";
+         Abort_Parsing ("missing ""node_configs"" key");
       end if;
 
       declare
@@ -1288,9 +1316,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
             if Value.Has_Field ("sep") then
                if not Is_List_Node (Node) then
-                  raise Invalid_Input with
-                    Name & " is not a list node, invalid ""sep"""
-                    & " configuration";
+                  Abort_Parsing
+                    (Name & " is not a list node, invalid ""sep"""
+                     & " configuration");
                end if;
                declare
                   Context : Template_Parsing_Context :=
@@ -1395,8 +1423,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    exception
       when Invalid_Input =>
+         pragma Assert (not Diagnostics.Is_Empty);
          Destroy (Symbols);
-         raise;
+         return No_Unparsing_Configuration;
    end Load_Unparsing_Config;
 
    --------------------------
@@ -1854,14 +1883,16 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Parse the configuration file and the source file to pretty-print.
       --  Abort if there is a parsing failure.
 
+      declare
+         Diagnostics : Diagnostics_Vectors.Vector;
+         Filename    : constant String := To_String (Config_Filename.Get);
       begin
-         Config :=
-           Load_Unparsing_Config (Language, To_String (Config_Filename.Get));
-      exception
-         when Exc : Invalid_Input =>
+         Config := Load_Unparsing_Config (Language, Filename, Diagnostics);
+         if Config = No_Unparsing_Configuration then
             Put_Line ("Error when loading the unparsing configuration:");
-            Put_Line (Exception_Message (Exc));
+            Print (Diagnostics);
             return;
+         end if;
       end;
       Context := Create_Context (Language);
       Unit := Context.Get_From_File

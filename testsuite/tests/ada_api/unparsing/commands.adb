@@ -6,6 +6,7 @@ with GNATCOLL.JSON; use GNATCOLL.JSON;
 with Prettier_Ada.Documents;
 with Prettier_Ada.Documents.Json;
 
+with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Unparsing;
@@ -42,7 +43,15 @@ procedure Commands is
          raise Program_Error;
       end if;
 
-      Config := Load_Unparsing_Config (Self_Id, Filename);
+      declare
+         Diagnostics : Diagnostics_Vectors.Vector;
+      begin
+         Config := Load_Unparsing_Config (Self_Id, Filename, Diagnostics);
+         if Config = No_Unparsing_Configuration then
+            Print (Diagnostics);
+            raise Program_Error;
+         end if;
+      end;
       Doc := Unparse_To_Prettier (Unit.Root, Config);
       JSON_Text := Prettier_Ada.Documents.Json.Serialize (Doc);
 

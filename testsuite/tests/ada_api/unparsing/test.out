@@ -16,7 +16,7 @@ a: Int=2
 # no_such_file.json
     cannot read no_such_file.json
 # invalid_syntax.json
-    invalid_syntax.json:2:2: empty stream
+    2:2: empty stream
 # missing_node_configs.json
     missing "node_configs" key
 # invalid_type_name.json
@@ -112,7 +112,7 @@ a: Int=2
     * field f_type_expr
     * token "="
     * field f_value
-    * token ";
+    * token ";"
 # invalid_recurse_flatten.json
     template for VarDecl.f_name: invalid recurse_flatten if: JSON_NULL_TYPE
 # invalid_recurse_flatten2.json
