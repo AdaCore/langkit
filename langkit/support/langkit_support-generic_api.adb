@@ -144,6 +144,7 @@ package body Langkit_Support.Generic_API is
 
    function Token_Kind_Name (Kind : Token_Kind_Ref) return Name_Type is
    begin
+      Check_Token_Kind (Kind);
       return Create_Name (Kind.Id.Token_Kinds (Kind.Index).Name.all);
    end Token_Kind_Name;
 

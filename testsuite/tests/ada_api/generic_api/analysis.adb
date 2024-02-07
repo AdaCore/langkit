@@ -90,6 +90,19 @@ begin
    end loop;
    New_Line;
 
+   Put_Line ("Use of null token kind:");
+   declare
+      Dummy : Name_Type;
+   begin
+      Dummy := Token_Kind_Name (No_Token_Kind_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line ("Use of null context:");
    declare
       Dummy : Boolean;
