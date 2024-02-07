@@ -73,8 +73,11 @@ begin
          Family_Name : constant Text_Type :=
            Format_Name (Token_Family_Name (Family), Camel_With_Underscores);
       begin
-         Put_Line
-           ("  " & Image (Kind_Name) & " (" & Image (Family_Name) & ")");
+         Put ("  " & Image (Kind_Name) & " (" & Image (Family_Name));
+         if Is_Comment (Kind) then
+            Put (", is_comment");
+         end if;
+         Put_Line (")");
       end;
    end loop;
    New_Line;

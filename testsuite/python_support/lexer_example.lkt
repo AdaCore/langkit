@@ -45,7 +45,7 @@ lexer foo_lexer {
 
     family comments {
         @unparse_newline_after
-        @trivia()
+        @trivia(comment=true)
         comment <- p"#(.?)+"
     }
 

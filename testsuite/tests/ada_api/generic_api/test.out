@@ -43,7 +43,7 @@ Token kinds:
   Number (Alphanumericals)
   Identifier (Alphanumericals)
   String (Default_Family)
-  Comment (Comments)
+  Comment (Comments, is_comment)
 
 Token families:
   Alphanumericals
