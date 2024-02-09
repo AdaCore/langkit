@@ -39,6 +39,24 @@ class CallArg: FooNode {
     @parse_field expr: Expr
 }
 
+@abstract class Decl: FooNode {
+    @abstract @parse_field name: Name
+}
+
+class FunDecl: Decl {
+    @parse_field name: Name
+    @parse_field args: ASTList[FooNode, ParamSpec]
+    @parse_field return_type: Name
+    @parse_field body: ASTList[FooNode, Stmt]
+}
+
+class VarDecl: Decl {
+    @parse_field is_null: NullQual
+    @parse_field name: Name
+    @parse_field type_expr: Name
+    @parse_field value: Expr
+}
+
 @abstract class Expr: FooNode {
 }
 
@@ -64,13 +82,6 @@ class Ref: Expr {
     @parse_field name: Name
 }
 
-class FunDecl: FooNode {
-    @parse_field name: Name
-    @parse_field args: ASTList[FooNode, ParamSpec]
-    @parse_field return_type: Name
-    @parse_field body: ASTList[FooNode, Stmt]
-}
-
 class Name: FooNode implements TokenNode {
 }
 
@@ -85,11 +96,4 @@ class ParamSpec: FooNode {
 
 class Stmt: FooNode {
     @parse_field expr: Expr
-}
-
-class VarDecl: FooNode {
-    @parse_field is_null: NullQual
-    @parse_field name: Name
-    @parse_field type_expr: Name
-    @parse_field value: Expr
 }

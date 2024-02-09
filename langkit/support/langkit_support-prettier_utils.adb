@@ -33,97 +33,6 @@ package body Langkit_Support.Prettier_Utils is
       return False;
    end Node_Matches;
 
-   -------------------------
-   -- Is_Correct_Template --
-   -------------------------
-
-   function Is_Correct_Template (Self : Document_Type) return Boolean is
-      function Recurse_Count (Self : Document_Type) return Natural;
-      --  Return the number of times a Recurse node is included when unparsing
-      --  Self.
-
-      -------------------
-      -- Recurse_Count --
-      -------------------
-
-      function Recurse_Count (Self : Document_Type) return Natural is
-      begin
-         case Self.Kind is
-            when Align =>
-               return Recurse_Count (Self.Align_Contents);
-
-            when Break_Parent =>
-               return 0;
-
-            when Fill =>
-               return Recurse_Count (Self.Fill_Document);
-
-            when Group =>
-               return Recurse_Count (Self.Group_Document);
-
-            when Hard_Line =>
-               return 0;
-
-            when Hard_Line_Without_Break_Parent =>
-               return 0;
-
-            when If_Break =>
-               declare
-                  Count_Break : constant Natural :=
-                    Recurse_Count (Self.If_Break_Contents);
-                  Count_Flat  : constant Natural :=
-                    Recurse_Count (Self.If_Break_Flat_Contents);
-               begin
-                  if Count_Break /= Count_Flat then
-                     raise Invalid_Input with
-                       "ifBreak alternatives have an inconsistent recurse"
-                       & " structure";
-                  end if;
-                  return Count_Break;
-               end;
-
-            when Indent =>
-               return Recurse_Count (Self.Indent_Document);
-
-            when Line =>
-               return 0;
-
-            when List =>
-               return Result : Natural := 0 do
-                  for I in 1 .. Self.List_Documents.Last_Index loop
-                     Result :=
-                       Result
-                       + Recurse_Count (Self.List_Documents.Element (I));
-                  end loop;
-               end return;
-
-            when Literal_Line =>
-               return 0;
-
-            when Recurse | Recurse_Flatten =>
-               return 1;
-
-            when Soft_Line =>
-               return 0;
-
-            when Token =>
-
-               --  Token documents are not supposed to appear in templates
-
-               raise Program_Error;
-
-            when Trim =>
-               return 0;
-
-            when Whitespace =>
-               return 0;
-         end case;
-      end Recurse_Count;
-
-   begin
-      return Recurse_Count (Self) = 1;
-   end Is_Correct_Template;
-
    --------------------------
    -- To_Prettier_Document --
    --------------------------
@@ -228,7 +137,7 @@ package body Langkit_Support.Prettier_Utils is
          when Literal_Line =>
             return Literal_Line;
 
-         when Recurse | Recurse_Flatten =>
+         when Recurse | Recurse_Field | Recurse_Flatten =>
             raise Program_Error with "uninstantiated template";
 
          when Soft_Line =>
@@ -499,6 +408,36 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Recurse;
 
+   --------------------
+   -- Create_Recurse --
+   --------------------
+
+   function Create_Recurse (Self : in out Document_Pool) return Template_Type
+   is
+   begin
+      return (Kind => With_Recurse, Root => Self.Create_Recurse);
+   end Create_Recurse;
+
+   --------------------------
+   -- Create_Recurse_Field --
+   --------------------------
+
+   function Create_Recurse_Field
+     (Self     : in out Document_Pool;
+      Field    : Struct_Member_Ref;
+      Position : Positive) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind                   => Recurse_Field,
+           Node                   => No_Lk_Node,
+           Recurse_Field_Ref      => Field,
+           Recurse_Field_Position => Position)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Recurse_Field;
+
    ----------------------------
    -- Create_Recurse_Flatten --
    ----------------------------
@@ -730,7 +669,7 @@ package body Langkit_Support.Prettier_Utils is
             when Literal_Line =>
                Extend_Spacing (Last_Spacing, Newline);
 
-            when Recurse | Recurse_Flatten =>
+            when Recurse | Recurse_Field | Recurse_Flatten =>
                raise Program_Error;
 
             when Soft_Line =>
@@ -894,6 +833,10 @@ package body Langkit_Support.Prettier_Utils is
 
             when Recurse =>
                Put_Line ("recurse");
+
+            when Recurse_Field =>
+               Put_Line
+                 ("recurse_field: " & Debug_Name (Document.Recurse_Field_Ref));
 
             when Recurse_Flatten =>
                Put_Line ("recurse_flatten:");

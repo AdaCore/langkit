@@ -64,6 +64,7 @@ private package Langkit_Support.Prettier_Utils is
       List,
       Literal_Line,
       Recurse,
+      Recurse_Field,
       Recurse_Flatten,
       Soft_Line,
       Token,
@@ -116,6 +117,19 @@ private package Langkit_Support.Prettier_Utils is
          when Recurse =>
             null;
 
+         when Recurse_Field =>
+            Recurse_Field_Ref : Struct_Member_Ref;
+            --  Node field on which to recurse
+
+            Recurse_Field_Position : Positive;
+            --  1-based index for this field in the list of fields for the
+            --  owning node.
+            --
+            --  This information is in theory redundant with the field
+            --  reference, but using an index allows template instantantiation
+            --  code to use an array rather than a map to store information
+            --  related to fields: more simple and probably more efficient.
+
          when Recurse_Flatten =>
             Recurse_Flatten_Types : Type_Vectors.Vector;
 
@@ -134,24 +148,25 @@ private package Langkit_Support.Prettier_Utils is
       end case;
    end record;
 
-   function Is_Correct_Template (Self : Document_Type) return Boolean;
-   --  Return whether ``Self`` is a valid template document. This ensures that
-   --  formatting the instantiated template will yield exactly once the
-   --  sub-document corresponding to the Recurse item.
-   --
-   --  An example to clarify: suppose we need a template to unparse a node::
-   --
-   --    ["recurse", "recurse"]
-   --
-   --  Will be invalid, as the node is unparse twice. Similarly::
-   --
-   --    ["whitespace"]
-   --
-   --  Will be invalid, as the node will not be included in the unparsing.
-
    function To_Prettier_Document
      (Document : Document_Type) return Prettier.Document_Type;
    --  Turn an unparsing document into an actual Prettier document
+
+   type Template_Kind is (No_Template_Kind, With_Recurse, With_Recurse_Field);
+   subtype Some_Template_Kind is
+     Template_Kind range With_Recurse ..  With_Recurse_Field;
+   type Template_Type (Kind : Template_Kind := No_Template_Kind) is record
+      case Kind is
+         when No_Template_Kind =>
+            null;
+
+         when With_Recurse | With_Recurse_Field =>
+            Root : Document_Type;
+      end case;
+   end record;
+   --  Template document extended with information about how to instantiate it
+
+   No_Template : constant Template_Type := (Kind => No_Template_Kind);
 
    type Document_Pool is tagged private;
    --  Allocation pool for ``Document_Type`` nodes
@@ -225,6 +240,15 @@ private package Langkit_Support.Prettier_Utils is
 
    function Create_Recurse (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Recurse`` node
+
+   function Create_Recurse (Self : in out Document_Pool) return Template_Type;
+   --  Return a ``Recurse`` node wrapped in a ``With_Recurse`` template
+
+   function Create_Recurse_Field
+     (Self     : in out Document_Pool;
+      Field    : Struct_Member_Ref;
+      Position : Positive) return Document_Type;
+   --  Return a ``Recurse_Field`` node
 
    function Create_Recurse_Flatten
      (Self  : in out Document_Pool;

@@ -1,0 +1,10 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": [
+        "recurse",
+        {"kind": "text", "text": "foo"}
+      ]
+    }
+  }
+}

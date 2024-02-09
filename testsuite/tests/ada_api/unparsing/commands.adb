@@ -108,6 +108,10 @@ begin
    Check ("cmd_markasroot.json");
    Check ("cmd_recurse.json");
    Check
+     ("cmd_recurse_field.json",
+      "var i: Int = 0;" & ASCII.LF
+      & "def f(i: Int): Int {i;}");
+   Check
      ("cmd_recurse_flatten.json",
       "var i: Int = AAAAAAAAAAAAAAAAAA"
       & "(XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"

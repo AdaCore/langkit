@@ -1,0 +1,12 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_is_null"},
+        {"kind": "recurse_field", "field": "f_name"},
+        {"kind": "recurse_field", "field": "f_type_expr"},
+        {"kind": "recurse_field", "field": "f_value"}
+      ]
+    }
+  }
+}

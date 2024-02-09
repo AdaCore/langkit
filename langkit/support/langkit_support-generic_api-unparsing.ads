@@ -169,6 +169,34 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        {"kind": "markAsRoot", "contents": <sub-template>}
    --
+   --    * The "recurse_field" template is valid only in "node" templates for
+   --      concrete nodes that are neither abstract, token nor list nodes. When
+   --      used, the whole template cannot contain any
+   --      "recurse"/"recurse_flatten" template, and the template, once
+   --      linearized, must reflect how the node is unparsed.
+   --
+   --      For example, let's consider that the ``VarDecl`` node is created
+   --      parsing the following chunks::
+   --
+   --        "var" [f_name] ":" [f_type] ";"
+   --
+   --      Then its "node" template must contain two "recurse_field" templates
+   --      for the two fields, in the same order, and with the same tokens in
+   --      between. For instance::
+   --
+   --        [
+   --          {"kind": "text", "text": "var"},
+   --          {"kind": "recurse_field", "text": "f_name"},
+   --          {
+   --            "kind": "group",
+   --            "document": [
+   --              {"kind": "text", "text": ":"},
+   --              {"kind": "recurse_field", "text": "f_type"}
+   --            ]
+   --          },
+   --          {"kind": "text", "text": ";"},
+   --        ]
+   --
    --    * The "recurse_flatten" template acts like "recurse" but refines its
    --      result so that the document nested in "align", "fill", "group",
    --      "indent" templates and in 1-item document lists is returned
@@ -180,6 +208,13 @@ package Langkit_Support.Generic_API.Unparsing is
    --      node type names; in this case the flattening is applied only for
    --      templates that were instantiated for nodes that match at least one
    --      of the node types.
+   --
+   --    * The "text" template yields a "text" Prettier document::
+   --
+   --        {"kind": "text", "text": "some_text_to_unparse"}
+   --
+   --      It is valid only when used with "recurse_field" template: see its
+   --      description.
    --
    --    * A JSON list yields the corresponding "list" Prettier document::
    --
