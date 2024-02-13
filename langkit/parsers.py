@@ -1263,10 +1263,9 @@ class DontSkip(Parser):
 
     def generate_code(self) -> str:
         return """
-        Parser.Private_Part.Dont_Skip.Append
-          ({dontskip_parser_fn}'Access);
+        PP.Dont_Skip.Append ({dontskip_parser_fn}'Access);
         {subparser_code}
-        Parser.Private_Part.Dont_Skip.Delete_Last;
+        PP.Dont_Skip.Delete_Last;
         """.format(
             subparser_code=self.subparser.generate_code(),
             dontskip_parser_fn=self.dontskip_parser.gen_fn_name
