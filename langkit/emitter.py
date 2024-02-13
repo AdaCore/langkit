@@ -553,6 +553,7 @@ class Emitter:
                  unparser=True, is_interface=False),
             # Unit for all parsers
             Unit('parsers/pkg_main', 'Parsers'),
+            Unit('parsers/pkg_impl', 'Parsers_Impl', is_interface=False),
             # Units for the lexer
             Unit('pkg_lexer', 'Lexer'),
             Unit('pkg_lexer_impl', 'Lexer_Implementation'),

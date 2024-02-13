@@ -1,8 +1,9 @@
 ## vim: filetype=makoada
 
+with System;
+
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
@@ -44,8 +45,6 @@ private package ${ada_lib_name}.Parsers is
    type Parsed_Node is
       access all Implementation.${T.root_node.value_type_name};
 
-   type Parser_Private_Part is private;
-
    type Parser_Type is record
       Current_Pos  : Token_Index := First_Token_Index;
       Last_Fail    : Fail_Info;
@@ -53,7 +52,7 @@ private package ${ada_lib_name}.Parsers is
       Unit         : access Implementation.Analysis_Unit_Type;
       TDH          : Token_Data_Handler_Access;
       Mem_Pool     : Bump_Ptr_Pool;
-      Private_Part : Parser_Private_Part;
+      Private_Part : System.Address;
    end record;
 
    procedure Init_Parser
@@ -90,10 +89,5 @@ private package ${ada_lib_name}.Parsers is
 
    procedure Destroy (Parser : in out Parser_Type);
    --  Destroy resources associated with the parser
-
-private
-
-   type Parser_Private_Part_Type;
-   type Parser_Private_Part is access all Parser_Private_Part_Type;
 
 end ${ada_lib_name}.Parsers;

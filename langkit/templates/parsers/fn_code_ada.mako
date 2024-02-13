@@ -2,7 +2,7 @@
 
 <%
 ret_type = parser.type.storage_type_name
-memo = 'Parser.Private_Part.{}_Memo'.format(parser.gen_fn_name)
+memo = 'PP.{}_Memo'.format(parser.gen_fn_name)
 %>
 
 function ${parser.gen_fn_name}
@@ -28,7 +28,8 @@ is
       Mem_Res : ${ret_type} := ${parser.type.storage_nullexpr};
    % endif
 
-   M : Memo_Entry := Get (${memo}, Pos);
+   PP : constant Parser_Private_Part := +Parser.Private_Part;
+   M  : Memo_Entry := Get (${memo}, Pos);
 
 begin
    if M.State = Success then

@@ -11,7 +11,7 @@ end if;
 
 ## If a DontSkip ``other_parser`` parser up in the parsing call stack can parse
 ## what is next, abort the skip ad just make this parser fail.
-for Fn of Parser.Private_Part.Dont_Skip loop
+for Fn of PP.Dont_Skip loop
    ${parser.dummy_node} := Fn (Parser, ${parser.start_pos});
 
    if Parser.Current_Pos /= No_Token_Index  then
