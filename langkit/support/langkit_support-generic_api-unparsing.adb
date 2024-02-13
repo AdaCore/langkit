@@ -790,7 +790,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end;
 
                elsif Kind in
-                  "dedent" | "dedentToRoot" | "markAsRoot"
+                  "dedent" | "dedentToRoot" | "markAsRoot" | "innerRoot"
                then
                   if not JSON.Has_Field ("contents") then
                      Abort_Parsing
@@ -803,6 +803,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                                   then (Kind => Prettier.Dedent_To_Root)
                                   elsif Kind = "markAsRoot"
                                   then (Kind => Prettier.Root)
+                                  elsif Kind = "innerRoot"
+                                  then (Kind => Prettier.Inner_Root)
                                   else raise Program_Error),
                      Contents => Parse_Template_Helper
                                    (JSON.Get ("contents"), Context));

@@ -106,6 +106,7 @@ begin
    Check ("cmd_list.json");
    Check ("cmd_literalline.json");
    Check ("cmd_markasroot.json");
+   Check ("cmd_innerroot.json");
    Check ("cmd_recurse.json");
    Check
      ("cmd_recurse_field.json",
