@@ -169,6 +169,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --        {"kind": "group", "document": <sub-template>}
    --        {"kind": "group", "document": <sub-template>, "shouldBreak": true}
    --
+   --      An optional "id" field makes it define a symbol to reference in the
+   --      same template:
+   --
+   --        {"kind": "group", "document": <sub-template>, "id": "mySymbol"}
+   --
    --    * The "ifBreak" template yields an "ifBreak" Prettier document::
    --
    --        {"kind": "ifBreak", "breakContents": <sub-template>}
@@ -176,6 +181,12 @@ package Langkit_Support.Generic_API.Unparsing is
    --          "kind": "ifBreak",
    --          "breakContents": <sub-template>,
    --          "flatContents": <sub-template>
+   --        }
+   --        {
+   --          "kind": "ifBreak",
+   --          "breakContents": <sub-template>,
+   --          "flatContents": <sub-template>,
+   --          "groupId": <symbol>
    --        }
    --
    --    * The "indent" template yields an "indent" Prettier document::

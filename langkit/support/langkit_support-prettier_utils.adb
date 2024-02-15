@@ -7,7 +7,8 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
-with Prettier_Ada.Document_Vectors; use Prettier_Ada.Document_Vectors;
+with Prettier_Ada.Document_Vectors;   use Prettier_Ada.Document_Vectors;
+with Prettier_Ada.Documents.Builders; use Prettier_Ada.Documents.Builders;
 
 with Langkit_Support.Errors; use Langkit_Support.Errors;
 with Langkit_Support.Internal.Descriptor;
@@ -15,6 +16,47 @@ use Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Names;  use Langkit_Support.Names;
 
 package body Langkit_Support.Prettier_Utils is
+
+   package Symbol_Maps is new Ada.Containers.Vectors
+     (Some_Template_Symbol, Prettier.Symbol_Type);
+   --  Mapping between our internal Template_Symbol and Prettier's actual
+   --  symbol type.
+   --
+   --  Note that even though this is a logical map from one symbol type to the
+   --  other, we implement it as a vector for efficiency since our symbols are
+   --  contiguous integers.
+
+   function To_Prettier_Symbol
+     (Symbol_Map : in out Symbol_Maps.Vector;
+      Symbol     : Template_Symbol) return Prettier.Symbol_Type;
+   --  Return a Prettier symbol that correspond to ``Symbol`` according to
+   --  ``Symbol_Map``. This creates the Prettier symbol first if the requested
+   --  one does not --  exist yet.
+
+   ------------------------
+   -- To_Prettier_Symbol --
+   ------------------------
+
+   function To_Prettier_Symbol
+     (Symbol_Map : in out Symbol_Maps.Vector;
+      Symbol     : Template_Symbol) return Prettier.Symbol_Type is
+   begin
+      --  ``Symbol`` maps never track the special "no symbol" value: handle it
+      --  manually here.
+
+      if Symbol = No_Template_Symbol then
+         return Prettier.No_Symbol;
+      end if;
+
+      --  Ensure that we have created a Prettier symbol for the requested
+      --  ``Template_Symbol``.
+
+      for S in Symbol_Map.Last_Index + 1 .. Symbol loop
+         Symbol_Map.Append (Prettier.New_Symbol);
+      end loop;
+
+      return Symbol_Map (Symbol);
+   end To_Prettier_Symbol;
 
    ------------------
    -- Node_Matches --
@@ -40,6 +82,15 @@ package body Langkit_Support.Prettier_Utils is
    function To_Prettier_Document
      (Document : Document_Type) return Prettier.Document_Type
    is
+      Symbol_Map : Symbol_Maps.Vector;
+      --  Mapping between the symbols found in ``Document`` and the ones given
+      --  to Prettier.
+
+      function Recurse
+        (Document : Document_Type) return Prettier.Document_Type;
+      --  Actual transformation function to Prettier document, to be called
+      --  recursively. ``To_Prettier_Document`` is just a wrapper.
+
       function "+" (Text : Unbounded_Text_Type) return Unbounded_String
       is (To_Unbounded_String (To_UTF8 (To_Text (Text))));
 
@@ -48,107 +99,123 @@ package body Langkit_Support.Prettier_Utils is
           when Token      => +Document.Token_Text,
           when Whitespace => Document.Whitespace_Length * ' ',
           when others     => raise Program_Error);
-   begin
-      case Document.Kind is
-         when Align =>
-            return Align
-              (Data     => Document.Align_Data,
-               Contents => To_Prettier_Document (Document.Align_Contents));
 
-         when Break_Parent =>
-            return Break_Parent;
+      -------------
+      -- Recurse --
+      -------------
 
-         when Fill =>
-            return Fill (To_Prettier_Document (Document.Fill_Document));
+      function Recurse
+        (Document : Document_Type) return Prettier.Document_Type
+      is
+      begin
+         case Document.Kind is
+            when Align =>
+               return Align
+                 (Data     => Document.Align_Data,
+                  Contents => Recurse (Document.Align_Contents));
 
-         when Group =>
-            return Group
-              (To_Prettier_Document (Document.Group_Document),
-               Document.Group_Options);
+            when Break_Parent =>
+               return Break_Parent;
 
-         when Hard_Line =>
-            return Hard_Line;
+            when Fill =>
+               return Fill (Recurse (Document.Fill_Document));
 
-         when Hard_Line_Without_Break_Parent =>
-            return Hard_Line_Without_Break_Parent;
+            when Group =>
+               return Group
+                 (Documents => Recurse (Document.Group_Document),
+                  Options   => (Should_Break    => Document.Group_Should_Break,
+                                Id              => To_Prettier_Symbol
+                                                     (Symbol_Map,
+                                                      Document.Group_Id),
+                                Expanded_States => No_Document));
 
-         when If_Break =>
-            return If_Break
-              (To_Prettier_Document (Document.If_Break_Contents),
-               To_Prettier_Document (Document.If_Break_Flat_Contents),
-               (Group_Id => Document.If_Break_Group_Id));
+            when Hard_Line =>
+               return Hard_Line;
 
-         when Indent =>
-            return Indent (To_Prettier_Document (Document.Indent_Document));
+            when Hard_Line_Without_Break_Parent =>
+               return Hard_Line_Without_Break_Parent;
 
-         when Line =>
-            return Line;
+            when If_Break =>
+               return If_Break
+                 (Recurse (Document.If_Break_Contents),
+                  Recurse (Document.If_Break_Flat_Contents),
+                  (Group_Id => To_Prettier_Symbol
+                                 (Symbol_Map, Document.If_Break_Group_Id)));
 
-         when List =>
+            when Indent =>
+               return Indent (Recurse (Document.Indent_Document));
 
-            --  Flatten nested lists, to avoid document bloat, and merge
-            --  consecutive tokens.
+            when Line =>
+               return Line;
 
-            declare
-               Items : Document_Vector;
-               Text  : Unbounded_String;
+            when List =>
 
-               procedure Process_List (Document : Document_Type);
-               procedure Flush_Text;
+               --  Flatten nested lists, to avoid document bloat, and merge
+               --  consecutive tokens.
 
-               ------------------
-               -- Process_List --
-               ------------------
+               declare
+                  Items : Document_Vector;
+                  Text  : Unbounded_String;
 
-               procedure Process_List (Document : Document_Type) is
-                  D : Document_Type;
-               begin
-                  for I in 1 .. Document.List_Documents.Last_Index loop
-                     D := Document.List_Documents.Element (I);
-                     if D.Kind = List then
-                        Process_List (D);
-                     elsif D.Kind in Token | Whitespace then
-                        Append (Text, Text_For (D));
-                     else
-                        Flush_Text;
-                        Items.Append (To_Prettier_Document (D));
+                  procedure Process_List (Document : Document_Type);
+                  procedure Flush_Text;
+
+                  ------------------
+                  -- Process_List --
+                  ------------------
+
+                  procedure Process_List (Document : Document_Type) is
+                     D : Document_Type;
+                  begin
+                     for I in 1 .. Document.List_Documents.Last_Index loop
+                        D := Document.List_Documents.Element (I);
+                        if D.Kind = List then
+                           Process_List (D);
+                        elsif D.Kind in Token | Whitespace then
+                           Append (Text, Text_For (D));
+                        else
+                           Flush_Text;
+                           Items.Append (Recurse (D));
+                        end if;
+                     end loop;
+                  end Process_List;
+
+                  ----------------
+                  -- Flush_Text --
+                  ----------------
+
+                  procedure Flush_Text is
+                  begin
+                     if Length (Text) > 0 then
+                        Items.Append (Prettier.Builders.Text (Text));
+                        Text := Null_Unbounded_String;
                      end if;
-                  end loop;
-               end Process_List;
+                  end Flush_Text;
 
-               ----------------
-               -- Flush_Text --
-               ----------------
-
-               procedure Flush_Text is
                begin
-                  if Length (Text) > 0 then
-                     Items.Append (Prettier.Builders.Text (Text));
-                     Text := Null_Unbounded_String;
-                  end if;
-               end Flush_Text;
+                  Process_List (Document);
+                  Flush_Text;
+                  return List (Items);
+               end;
 
-            begin
-               Process_List (Document);
-               Flush_Text;
-               return List (Items);
-            end;
+            when Literal_Line =>
+               return Literal_Line;
 
-         when Literal_Line =>
-            return Literal_Line;
+            when Recurse | Recurse_Field | Recurse_Flatten =>
+               raise Program_Error with "uninstantiated template";
 
-         when Recurse | Recurse_Field | Recurse_Flatten =>
-            raise Program_Error with "uninstantiated template";
+            when Soft_Line =>
+               return Soft_Line;
 
-         when Soft_Line =>
-            return Soft_Line;
+            when Token | Whitespace =>
+               return Prettier.Builders.Text (Text_For (Document));
 
-         when Token | Whitespace =>
-            return Prettier.Builders.Text (Text_For (Document));
-
-         when Trim =>
-            return Trim;
-      end case;
+            when Trim =>
+               return Trim;
+         end case;
+      end Recurse;
+   begin
+      return Recurse (Document);
    end To_Prettier_Document;
 
    -------------
@@ -235,17 +302,19 @@ package body Langkit_Support.Prettier_Utils is
    ------------------
 
    function Create_Group
-     (Self     : in out Document_Pool;
-      Document : Document_Type;
-      Options  : Group_Options_Type;
-      Node     : Lk_Node := No_Lk_Node) return Document_Type is
+     (Self         : in out Document_Pool;
+      Document     : Document_Type;
+      Should_Break : Boolean;
+      Id           : Template_Symbol;
+      Node         : Lk_Node := No_Lk_Node) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
-          (Kind           => Group,
-           Node           => Node,
-           Group_Document => Document,
-           Group_Options  => Options)
+          (Kind               => Group,
+           Node               => Node,
+           Group_Document     => Document,
+           Group_Should_Break => Should_Break,
+           Group_Id           => Id)
       do
          Self.Register (Result);
       end return;
@@ -289,8 +358,9 @@ package body Langkit_Support.Prettier_Utils is
      (Self          : in out Document_Pool;
       Contents      : Document_Type;
       Flat_Contents : Document_Type := null;
-      Group_Id      : Prettier.Symbol_Type :=
-        Prettier.No_Symbol) return Document_Type is
+      Group_Id      : Template_Symbol := No_Template_Symbol)
+      return Document_Type
+   is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
@@ -793,10 +863,9 @@ package body Langkit_Support.Prettier_Utils is
                Put_Line ("group:");
                Put_Line
                  (Prefix & Simple_Indent & "shouldBreak: "
-                  & Document.Group_Options.Should_Break'Image);
+                  & Document.Group_Should_Break'Image);
                Put_Line
-                 (Prefix & Simple_Indent & "id: "
-                  & Prettier.Image (Document.Group_Options.Id));
+                 (Prefix & Simple_Indent & "id:" & Document.Group_Id'Image);
                Process (Document.Group_Document, Prefix & Simple_Indent);
 
             when Hard_Line =>
@@ -807,10 +876,10 @@ package body Langkit_Support.Prettier_Utils is
 
             when If_Break =>
                Put_Line ("ifBreak:");
-               if Document.If_Break_Group_Id /= No_Symbol then
+               if Document.If_Break_Group_Id /= No_Template_Symbol then
                   Put_Line
                     (Prefix & Simple_Indent & "groupId: "
-                     & Prettier.Image (Document.If_Break_Group_Id));
+                     & Document.If_Break_Group_Id'Image);
                end if;
                Process (Document.If_Break_Contents, Prefix & List_Indent);
                Process (Document.If_Break_Flat_Contents, Prefix & List_Indent);

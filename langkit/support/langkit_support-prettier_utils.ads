@@ -10,7 +10,6 @@
 with Ada.Containers.Vectors;
 
 with Prettier_Ada.Documents;
-with Prettier_Ada.Documents.Builders; use Prettier_Ada.Documents.Builders;
 
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Analysis;
@@ -44,6 +43,11 @@ private package Langkit_Support.Prettier_Utils is
    --  possible, with exceptions (for instance there is no Token or Whitespace
    --  command in Prettier) that allow us to refine raw unparsing documents,
    --  for example insert necessary whitespaces/newlines between tokens.
+
+   type Template_Symbol is new Natural;
+   subtype Some_Template_Symbol is
+     Template_Symbol range 1 ..  Template_Symbol'Last;
+   No_Template_Symbol : constant Template_Symbol := 0;
 
    type Document_Record;
    type Document_Type is access all Document_Record;
@@ -88,8 +92,9 @@ private package Langkit_Support.Prettier_Utils is
             Fill_Document : Document_Type;
 
          when Group =>
-            Group_Document : Document_Type;
-            Group_Options  : Prettier.Builders.Group_Options_Type;
+            Group_Document     : Document_Type;
+            Group_Should_Break : Boolean;
+            Group_Id           : Template_Symbol;
 
          when Hard_Line =>
             null;
@@ -100,7 +105,7 @@ private package Langkit_Support.Prettier_Utils is
          when If_Break =>
             If_Break_Contents      : Document_Type;
             If_Break_Flat_Contents : Document_Type;
-            If_Break_Group_Id      : Prettier.Symbol_Type;
+            If_Break_Group_Id      : Template_Symbol;
 
          when Indent =>
             Indent_Document : Document_Type;
@@ -192,10 +197,11 @@ private package Langkit_Support.Prettier_Utils is
    --  Return a ``Fill`` node
 
    function Create_Group
-     (Self     : in out Document_Pool;
-      Document : Document_Type;
-      Options  : Group_Options_Type;
-      Node     : Lk_Node := No_Lk_Node) return Document_Type;
+     (Self         : in out Document_Pool;
+      Document     : Document_Type;
+      Should_Break : Boolean;
+      Id           : Template_Symbol;
+      Node         : Lk_Node := No_Lk_Node) return Document_Type;
    --  Return a ``Group`` node
 
    function Create_Hard_Line
@@ -210,8 +216,8 @@ private package Langkit_Support.Prettier_Utils is
      (Self          : in out Document_Pool;
       Contents      : Document_Type;
       Flat_Contents : Document_Type := null;
-      Group_Id      : Prettier.Symbol_Type :=
-        Prettier.No_Symbol) return Document_Type;
+      Group_Id      : Template_Symbol := No_Template_Symbol)
+      return Document_Type;
    --  Return an ``If_Break`` node
 
    function Create_Indent
