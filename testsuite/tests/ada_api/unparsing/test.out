@@ -56,6 +56,10 @@ a: Int=2
     template for VarDecl.f_name: missing "contents" key for dedentToRoot
 # invalid_fill.json
     template for VarDecl.f_name: missing "document" key for fill
+# invalid_group.json
+    template for VarDecl.f_name: missing "document" key for group
+# invalid_group2.json
+    template for VarDecl.f_name: invalid group shouldBreak: JSON_INT_TYPE
 # invalid_ifbreak.json
     template for VarDecl.f_name: missing "breakContents" key for ifBreak
 # invalid_indent.json
