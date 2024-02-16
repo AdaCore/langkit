@@ -1,7 +1,6 @@
-with Ada.Exceptions;
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Langkit_Support.Errors; use Langkit_Support.Errors;
+with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Generic_API.Unparsing;
 use Langkit_Support.Generic_API.Unparsing;
 
@@ -16,34 +15,18 @@ procedure Invalid_Config is
    -----------
 
    procedure Check (Filename : String) is
-      Dummy : Unparsing_Configuration;
-      Indent : constant String := "    ";
+      Diagnostics : Diagnostics_Vectors.Vector;
+      Config      : Unparsing_Configuration;
+      Indent      : constant String := "    ";
    begin
       Put_Line ("# " & Filename);
-      begin
-         Dummy := Load_Unparsing_Config (Self_Id, Filename);
+      Config := Load_Unparsing_Config (Self_Id, Filename, Diagnostics);
+      if Config = No_Unparsing_Configuration then
+         Put ((1 .. 4 => ' '));
+         Print (Diagnostics, Prefix => "", Indent => 4);
+      else
          Put_Line (Indent & "Success");
-      exception
-         when Exc : Invalid_Input =>
-            declare
-               Empty_Line : Boolean := True;
-               Msg        : constant String :=
-                 Ada.Exceptions.Exception_Message (Exc) & ASCII.LF;
-            begin
-               for C of Msg loop
-                  if C = ASCII.LF then
-                     New_Line;
-                     Empty_Line := True;
-                  else
-                     if Empty_Line then
-                        Put (Indent);
-                        Empty_Line := False;
-                     end if;
-                     Put (C);
-                  end if;
-               end loop;
-            end;
-      end;
+      end if;
    end Check;
 
 begin

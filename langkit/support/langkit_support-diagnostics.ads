@@ -52,4 +52,12 @@ package Langkit_Support.Diagnostics is
       Exc         : Ada.Exceptions.Exception_Occurrence);
    --  Shortcut to append an exception message to a vector
 
+   procedure Print
+     (Diagnostics : Diagnostics_Vectors.Vector;
+      Prefix      : String := "error: ";
+      Indent      : Natural := 2);
+   --  Print all diagnostics in ``Diagnostics`` on the standard output, with
+   --  ``Prefix`` before each message. For multi-line messages, insert
+   --  ``Indent`` spaces before each line except the first one.
+
 end Langkit_Support.Diagnostics;

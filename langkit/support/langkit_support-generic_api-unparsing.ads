@@ -20,6 +20,7 @@
 --     with Ada.Text_IO;              use Ada.Text_IO;
 --     with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 --
+--     with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 --     with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 --     with Langkit_Support.Generic_API.Analysis;
 --     use Langkit_Support.Generic_API.Analysis;
@@ -38,8 +39,9 @@
 --        --  Load_Unparsing_Config function for more information about this
 --        --  file.
 --
---        Config : constant Unparsing_Configuration :=
---           Load_Unparsing_Config (Self_Id, "config.json");
+--        Diagnostics : Diagnostics_Vectors.Vector;
+--        Config      : constant Unparsing_Configuration :=
+--           Load_Unparsing_Config (Self_Id, "config.json", Diagnostics);
 --
 --        --  Parse the source file to reformat
 --
@@ -48,7 +50,15 @@
 --        U   : constant Lk_Unit :=
 --          Ctx.Get_From_File (Ada.Command_Line.Argument (1));
 --     begin
---        --  If it has parsing errors, bail out
+--        --  If we were unable to load the unparsing configuration, bail out
+--
+--        if Config = No_Unparsing_Configuration then
+--           Put_Line ("Error when loading the unparsing configuration:");
+--           Print (Diagnostics);
+--           raise Program_Error;
+--        end if;
+--
+--        --  If the source file to reformat has parsing errors, bail out
 --
 --        if U.Has_Diagnostics then
 --           Put_Line ("Parsing errors:");
@@ -74,6 +84,7 @@ private with Ada.Finalization;
 
 with Prettier_Ada.Documents;
 
+with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 
@@ -83,12 +94,18 @@ package Langkit_Support.Generic_API.Unparsing is
    --  Configuration that customizes how source fragments are turned into a
    --  prettier document.
 
+   No_Unparsing_Configuration : constant Unparsing_Configuration;
+   --  Special value to mean the absence of an unparsing configuration
+
    function Load_Unparsing_Config
-     (Language : Language_Id;
-      Filename : String) return Unparsing_Configuration;
+     (Language    : Language_Id;
+      Filename    : String;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+      return Unparsing_Configuration;
    --  Read and parse the unparsing configuration for the given Language from
-   --  Filename. Raise a Langkit_Support.Errors.Invalid_Input exception if an
-   --  error occurs while reading the configuration file.
+   --  Filename. Append error messages to ``Diagnostics`` and return
+   --  ``No_Unparsing_Configuration`` if an error occurs while reading the
+   --  configuration file.
    --
    --  The configuration is a JSON file that provides "document templates":
    --  patterns to generate Prettier documents:
@@ -285,5 +302,8 @@ private
 
    overriding procedure Adjust (Self : in out Unparsing_Configuration);
    overriding procedure Finalize (Self : in out Unparsing_Configuration);
+
+   No_Unparsing_Configuration : constant Unparsing_Configuration :=
+     (Ada.Finalization.Controlled with Value => null);
 
 end Langkit_Support.Generic_API.Unparsing;
