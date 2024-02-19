@@ -1,0 +1,13 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "f_name": [
+          {"kind": "group", "document": "line", "id": "myGroup"},
+          "recurse",
+          {"kind": "group", "document": "line", "id": "myGroup"}
+        ]
+      }
+    }
+  }
+}

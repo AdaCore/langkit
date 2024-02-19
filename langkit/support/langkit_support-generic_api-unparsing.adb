@@ -16,7 +16,6 @@ with GNAT.Strings;
 with GNATCOLL.JSON; use GNATCOLL.JSON;
 with GNATCOLL.Opt_Parse;
 with GNATCOLL.VFS;  use GNATCOLL.VFS;
-with Prettier_Ada.Documents.Builders;
 with Prettier_Ada.Documents.Json;
 
 with Langkit_Support.Errors;         use Langkit_Support.Errors;
@@ -105,6 +104,40 @@ package body Langkit_Support.Generic_API.Unparsing is
       Process : access procedure (Fragment : Unparsing_Fragment));
    --  Decompose ``Node`` into a list of unparsing fragments and call
    --  ``Process`` on each fragment.
+
+   -----------------------
+   --  Template symbols --
+   -----------------------
+
+   --  The following map type is used during templates parsing to validate the
+   --  names used as symbols in JSON templates, and to turn them into their
+   --  internal representation: ``Template_Symbol``.
+
+   type Symbol_Info is record
+      Source_Name : Unbounded_String;
+      --  Name for this symbol as found in the unparsing configuration
+
+      Template_Sym : Template_Symbol;
+      --  Unique identifier for this symbol
+
+      Has_Definition : Boolean;
+      --  Whether we have found one definition for this symbol
+   end record;
+
+   package Symbol_Parsing_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Symbol_Type,
+      Element_Type    => Symbol_Info,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
+
+   function Lookup
+     (Source_Name : Unbounded_String;
+      Symbols     : Symbol_Table;
+      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      return Symbol_Parsing_Maps.Reference_Type;
+   --  Return a reference to the entry in ``Symbol_Map`` corresponding to the
+   --  ```Source_Name`` symbol (converted to a ``Symbol_Type`` using
+   --  ``Symbols``). Create a map entry if it does not exist yet.
 
    ----------------------
    -- Linear templates --
@@ -360,6 +393,42 @@ package body Langkit_Support.Generic_API.Unparsing is
       end case;
    end Iterate_On_Fragments;
 
+   ------------
+   -- Lookup --
+   ------------
+
+   function Lookup
+     (Source_Name : Unbounded_String;
+      Symbols     : Symbol_Table;
+      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      return Symbol_Parsing_Maps.Reference_Type
+   is
+      Symbol   : constant Symbol_Type :=
+        Find (Symbols, To_Text (To_String (Source_Name)));
+      Position : Symbol_Parsing_Maps.Cursor := Symbol_Map.Find (Symbol);
+      Inserted : Boolean;
+   begin
+      if not Symbol_Parsing_Maps.Has_Element (Position) then
+
+         --  This is the first time we see this symbol in the current template:
+         --  create a new internal symbol for it. All internal symbols are
+         --  tracked as entries in ``Symbol_Map``, so we can use its length to
+         --  compute internal symbols that are unique for the current template.
+
+         declare
+            Info : constant Symbol_Info :=
+              (Source_Name    => Source_Name,
+               Template_Sym   => Template_Symbol (Symbol_Map.Length + 1),
+               Has_Definition => False);
+         begin
+            Symbol_Map.Insert (Symbol, Info, Position, Inserted);
+            pragma Assert (Inserted);
+         end;
+      end if;
+
+      return Symbol_Map.Reference (Position);
+   end Lookup;
+
    -----------
    -- Image --
    -----------
@@ -580,8 +649,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  ill-formed.
 
       function Parse_Template_Helper
-        (JSON    : JSON_Value;
-         Context : in out Template_Parsing_Context) return Document_Type;
+        (JSON       : JSON_Value;
+         Context    : in out Template_Parsing_Context;
+         Symbol_Map : in out Symbol_Parsing_Maps.Map) return Document_Type;
       --  Helper for ``Parse_Template``. Implement the recursive part of
       --  templates parsing: ``Parse_Template`` takes care of the post-parsing
       --  validation.
@@ -674,9 +744,24 @@ package body Langkit_Support.Generic_API.Unparsing is
         (JSON    : JSON_Value;
          Context : in out Template_Parsing_Context) return Template_Type
       is
+         Symbol_Map : Symbol_Parsing_Maps.Map;
+         --  Mapping from name symbols found in the JSON (Symbol_Type) and
+         --  "ids" (Template_Symbol).
+
          Root : constant Document_Type :=
-           Parse_Template_Helper (JSON, Context);
+           Parse_Template_Helper (JSON, Context, Symbol_Map);
       begin
+         --  Make sure that all symbols referenced in this template are also
+         --  defined in this template.
+
+         for Info of Symbol_Map loop
+            if not Info.Has_Definition then
+               Abort_Parsing
+                 (Context,
+                  "undefined symbol: " & To_String (Info.Source_Name));
+            end if;
+         end loop;
+
          case Context.State.Kind is
             when Initial =>
                Abort_Parsing (Context, "recursion is missing");
@@ -709,8 +794,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       ---------------------------
 
       function Parse_Template_Helper
-        (JSON    : JSON_Value;
-         Context : in out Template_Parsing_Context) return Document_Type is
+        (JSON       : JSON_Value;
+         Context    : in out Template_Parsing_Context;
+         Symbol_Map : in out Symbol_Parsing_Maps.Map) return Document_Type is
       begin
          case JSON.Kind is
          when JSON_Array_Type =>
@@ -718,7 +804,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                Items : Document_Vectors.Vector;
             begin
                for D of JSON_Array'(JSON.Get) loop
-                  Items.Append (Parse_Template_Helper (D, Context));
+                  Items.Append
+                    (Parse_Template_Helper (D, Context, Symbol_Map));
                end loop;
                return Pool.Create_List (Items);
             end;
@@ -793,7 +880,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                      return Pool.Create_Align
                        (Data,
                         Parse_Template_Helper
-                          (JSON.Get ("contents"), Context));
+                          (JSON.Get ("contents"), Context, Symbol_Map));
                   end;
 
                elsif Kind in
@@ -814,7 +901,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                                   then (Kind => Prettier.Inner_Root)
                                   else raise Program_Error),
                      Contents => Parse_Template_Helper
-                                   (JSON.Get ("contents"), Context));
+                                   (JSON.Get ("contents"),
+                                    Context,
+                                    Symbol_Map));
 
                elsif Kind = "fill" then
                   declare
@@ -825,41 +914,75 @@ package body Langkit_Support.Generic_API.Unparsing is
                           (Context, "missing ""document"" key for fill");
                      end if;
                      Document :=
-                       Parse_Template_Helper (JSON.Get ("document"), Context);
+                       Parse_Template_Helper
+                         (JSON.Get ("document"), Context, Symbol_Map);
 
                      return Pool.Create_Fill (Document);
                   end;
 
                elsif Kind = "group" then
                   declare
-                     Document : Document_Type;
-                     Options  : Prettier.Builders.Group_Options_Type :=
-                       Prettier.Builders.No_Group_Options;
-
-                     Should_Break : JSON_Value;
+                     Document     : Document_Type;
+                     Should_Break : Boolean := False;
+                     Id           : Template_Symbol := No_Template_Symbol;
                   begin
                      if not JSON.Has_Field ("document") then
                         Abort_Parsing
                           (Context, "missing ""document"" key for group");
                      end if;
                      Document :=
-                       Parse_Template_Helper (JSON.Get ("document"), Context);
+                       Parse_Template_Helper
+                         (JSON.Get ("document"), Context, Symbol_Map);
 
                      if JSON.Has_Field ("shouldBreak") then
-                        Should_Break := JSON.Get ("shouldBreak");
-                        if Should_Break.Kind /= JSON_Boolean_Type then
-                           Abort_Parsing
-                             (Context,
-                              "invalid group shouldBreak: "
-                              & Should_Break.Kind'Image);
-                        end if;
-                        Options.Should_Break := Should_Break.Get;
+                        declare
+                           JSON_Should_Break : constant JSON_Value :=
+                             JSON.Get ("shouldBreak");
+                        begin
+                           if JSON_Should_Break.Kind /= JSON_Boolean_Type then
+                              Abort_Parsing
+                                (Context,
+                                 "invalid group shouldBreak: "
+                                 & JSON_Should_Break.Kind'Image);
+                           end if;
+                           Should_Break := JSON_Should_Break.Get;
+                        end;
                      end if;
 
-                     --  TODO??? (eng/libadalang/langkit#727) Handle the group
-                     --  id.
+                     --  If a symbol is given to identify this group, create an
+                     --  internal symbol for it.
 
-                     return Pool.Create_Group (Document, Options);
+                     if JSON.Has_Field ("id") then
+                        declare
+                           JSON_Id : constant JSON_Value := JSON.Get ("id");
+                        begin
+                           if JSON_Id.Kind /= JSON_String_Type then
+                              Abort_Parsing
+                                (Context,
+                                 "invalid group id: "
+                                 & JSON_Id.Kind'Image);
+                           end if;
+
+                           declare
+                              Info : Symbol_Info renames
+                                Lookup (JSON_Id.Get, Symbols, Symbol_Map);
+                           begin
+                              --  Ensure that there is no conflicting symbol
+                              --  definition in this template.
+
+                              if Info.Has_Definition then
+                                 Abort_Parsing
+                                   (Context,
+                                    "duplicate group id: " & JSON_Id.Get);
+                              else
+                                 Info.Has_Definition := True;
+                              end if;
+                              Id := Info.Template_Sym;
+                           end;
+                        end;
+                     end if;
+
+                     return Pool.Create_Group (Document, Should_Break, Id);
                   end;
 
                elsif Kind = "ifBreak" then
@@ -869,6 +992,8 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                      Contents_Context : Template_Parsing_Context := Context;
                      Flat_Context     : Template_Parsing_Context := Context;
+
+                     Group_Id : Template_Symbol := No_Template_Symbol;
                   begin
                      if not JSON.Has_Field ("breakContents") then
                         Abort_Parsing
@@ -878,12 +1003,16 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                      Contents :=
                        Parse_Template_Helper
-                         (JSON.Get ("breakContents"), Contents_Context);
+                         (JSON.Get ("breakContents"),
+                          Contents_Context,
+                          Symbol_Map);
 
                      Flat_Contents :=
                        (if JSON.Has_Field ("flatContents")
                         then Parse_Template_Helper
-                               (JSON.Get ("flatContents"), Flat_Context)
+                               (JSON.Get ("flatContents"),
+                                Flat_Context,
+                                Symbol_Map)
                         else null);
 
                      --  Unify the parsing state for both branches and update
@@ -897,10 +1026,28 @@ package body Langkit_Support.Generic_API.Unparsing is
                      end if;
                      Context.State := Contents_Context.State;
 
-                     --  TODO??? (eng/libadalang/langkit#727) Handle the group
-                     --  id.
+                     --  If present, get the symbol for the given group id
 
-                     return Pool.Create_If_Break (Contents, Flat_Contents);
+                     if JSON.Has_Field ("groupId") then
+                        declare
+                           JSON_Id : constant JSON_Value :=
+                             JSON.Get ("groupId");
+                        begin
+                           if JSON_Id.Kind /= JSON_String_Type then
+                              Abort_Parsing
+                                (Context,
+                                 "invalid group id: "
+                                 & JSON_Id.Kind'Image);
+                           end if;
+
+                           Group_Id :=
+                             Lookup (JSON_Id.Get, Symbols, Symbol_Map)
+                             .Template_Sym;
+                        end;
+                     end if;
+
+                     return Pool.Create_If_Break
+                              (Contents, Flat_Contents, Group_Id);
                   end;
 
                elsif Kind = "indent" then
@@ -909,7 +1056,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                        (Context, "missing ""contents"" key for indent");
                   end if;
                   return Pool.Create_Indent
-                    (Parse_Template_Helper (JSON.Get ("contents"), Context));
+                    (Parse_Template_Helper
+                       (JSON.Get ("contents"), Context, Symbol_Map));
 
                elsif Kind = "recurse_field" then
                   declare
@@ -1473,7 +1621,8 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Pool.Create_Group
               (Instantiate_Template_Helper
                  (Pool, Node, Template.Group_Document, Arguments),
-               Template.Group_Options,
+               Template.Group_Should_Break,
+               Template.Group_Id,
                Node);
 
          when Hard_Line =>

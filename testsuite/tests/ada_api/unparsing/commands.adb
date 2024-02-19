@@ -1,3 +1,4 @@
+with Ada.Containers.Ordered_Maps;
 with Ada.Strings.Unbounded;    use Ada.Strings.Unbounded;
 with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
@@ -19,7 +20,11 @@ procedure Commands is
    Context : constant Lk_Context := Create_Context (Self_Id);
 
    procedure Check (Filename : String; Buffer : String := "var i: Int = 0;");
-   procedure Remove_Ids (Value : JSON_Value);
+
+   procedure Reset_Ids (Value : JSON_Value);
+   --  Ids in prettier are generated with a process-wide counter. To avoid
+   --  interference between tests, we use this procedure to renumber Ids for a
+   --  given document.
 
    -----------
    -- Check --
@@ -58,19 +63,26 @@ procedure Commands is
       --  Remove "id" fields from the JSON representation, for output stability
 
       JSON := GNATCOLL.JSON.Read (JSON_Text);
-      Remove_Ids (JSON);
+      Reset_Ids (JSON);
 
       JSON_Text := JSON.Write (Compact => False);
       Put_Line (JSON_Text);
       New_Line;
    end Check;
 
-   ----------------
-   -- Remove_Ids --
-   ----------------
+   ---------------
+   -- Reset_Ids --
+   ---------------
 
-   procedure Remove_Ids (Value : JSON_Value) is
+   procedure Reset_Ids (Value : JSON_Value) is
+
+      package Id_Maps is new Ada.Containers.Ordered_Maps
+        (Key_Type => Integer, Element_Type => Integer);
+      Id_Map : Id_Maps.Map;
+
       procedure Process (Name : String; Value : JSON_Value);
+      procedure Renumber (Object : JSON_Value; Name : String);
+      procedure Recurse (Value : JSON_Value);
 
       -------------
       -- Process --
@@ -79,25 +91,60 @@ procedure Commands is
       procedure Process (Name : String; Value : JSON_Value) is
          pragma Unreferenced (Name);
       begin
-         Remove_Ids (Value);
+         Recurse (Value);
       end Process;
+
+      --------------
+      -- Renumber --
+      --------------
+
+      procedure Renumber (Object : JSON_Value; Name : String) is
+      begin
+         if Object.Has_Field (Name) then
+            declare
+               Old_Id : constant Integer := Object.Get (Name);
+               New_Id : Integer;
+            begin
+               if Old_Id = 0 then
+                  Object.Unset_Field (Name);
+               else
+                  if Id_Map.Contains (Old_Id) then
+                     New_Id := Id_Map.Element (Old_Id);
+                  else
+                     New_Id := Integer (Id_Map.Length) + 1;
+                     Id_Map.Insert (Old_Id, New_Id);
+                  end if;
+                  Object.Set_Field (Name, New_Id);
+               end if;
+            end;
+         end if;
+      end Renumber;
+
+      -------------
+      -- Recurse --
+      -------------
+
+      procedure Recurse (Value : JSON_Value) is
+      begin
+         case Value.Kind is
+            when JSON_Object_Type =>
+               Renumber (Value, "id");
+               Renumber (Value, "ifBreakGroupId");
+               Value.Map_JSON_Object (Process'Access);
+
+            when JSON_Array_Type =>
+               for V of JSON_Array'(Value.Get) loop
+                  Recurse (V);
+               end loop;
+
+            when others =>
+               return;
+         end case;
+      end Recurse;
+
    begin
-      case Value.Kind is
-         when JSON_Object_Type =>
-            if Value.Has_Field ("id") then
-               Value.Unset_Field ("id");
-            end if;
-            Value.Map_JSON_Object (Process'Access);
-
-         when JSON_Array_Type =>
-            for V of JSON_Array'(Value.Get) loop
-               Remove_Ids (V);
-            end loop;
-
-         when others =>
-            return;
-      end case;
-   end Remove_Ids;
+      Recurse (Value);
+   end Reset_Ids;
 
 begin
    Check ("cmd_align.json");
@@ -107,6 +154,7 @@ begin
    Check ("cmd_dedenttoroot.json");
    Check ("cmd_fill.json");
    Check ("cmd_group.json");
+   Check ("cmd_group_id.json");
    Check ("cmd_hardline.json");
    Check ("cmd_hardlinewithoutbreakparent.json");
    Check ("cmd_ifbreak.json");

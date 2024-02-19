@@ -56,7 +56,13 @@ begin
    Check ("invalid_dedent.json");
    Check ("invalid_dedenttoroot.json");
    Check ("invalid_fill.json");
+   Check ("invalid_group.json");
+   Check ("invalid_group2.json");
+   Check ("invalid_group3.json");
+   Check ("invalid_group4.json");
    Check ("invalid_ifbreak.json");
+   Check ("invalid_ifbreak2.json");
+   Check ("invalid_ifbreak3.json");
    Check ("invalid_indent.json");
    Check ("invalid_markasroot.json");
    Check ("invalid_innerroot.json");

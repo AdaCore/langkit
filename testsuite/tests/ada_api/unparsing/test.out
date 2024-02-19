@@ -56,8 +56,20 @@ a: Int=2
     template for VarDecl.f_name: missing "contents" key for dedentToRoot
 # invalid_fill.json
     template for VarDecl.f_name: missing "document" key for fill
+# invalid_group.json
+    template for VarDecl.f_name: missing "document" key for group
+# invalid_group2.json
+    template for VarDecl.f_name: invalid group shouldBreak: JSON_INT_TYPE
+# invalid_group3.json
+    template for VarDecl.f_name: invalid group id: JSON_INT_TYPE
+# invalid_group4.json
+    template for VarDecl.f_name: duplicate group id: myGroup
 # invalid_ifbreak.json
     template for VarDecl.f_name: missing "breakContents" key for ifBreak
+# invalid_ifbreak2.json
+    template for VarDecl.f_name: invalid group id: JSON_INT_TYPE
+# invalid_ifbreak3.json
+    template for VarDecl.f_name: undefined symbol: myGroup
 # invalid_indent.json
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json
@@ -141,6 +153,7 @@ Done.
 == cmd_align.json ==
 
 {
+  "id": 1,
   "kind": "command",
   "command": {
     "command": "align",
@@ -149,6 +162,7 @@ Done.
       "n": 2
     },
     "alignContents": {
+      "id": 2,
       "kind": "list",
       "list": [
         {
@@ -163,6 +177,7 @@ Done.
 == cmd_align2.json ==
 
 {
+  "id": 1,
   "kind": "command",
   "command": {
     "command": "align",
@@ -171,9 +186,11 @@ Done.
       "t": "  "
     },
     "alignContents": {
+      "id": 2,
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "text",
           "text": "var i:Int=0;"
         }
@@ -185,15 +202,18 @@ Done.
 == cmd_breakparent.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "command",
       "command": {
         "command": "breakParent"
       }
     },
     {
+      "id": 3,
       "kind": "text",
       "text": "var i:Int=0;"
     }
@@ -203,6 +223,7 @@ Done.
 == cmd_dedent.json ==
 
 {
+  "id": 1,
   "kind": "command",
   "command": {
     "command": "align",
@@ -210,9 +231,11 @@ Done.
       "kind": "dedent"
     },
     "alignContents": {
+      "id": 2,
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -222,6 +245,7 @@ Done.
           }
         },
         {
+          "id": 4,
           "kind": "text",
           "text": "var i:Int=0;"
         }
@@ -233,6 +257,7 @@ Done.
 == cmd_dedenttoroot.json ==
 
 {
+  "id": 1,
   "kind": "command",
   "command": {
     "command": "align",
@@ -240,9 +265,11 @@ Done.
       "kind": "dedentToRoot"
     },
     "alignContents": {
+      "id": 2,
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -252,6 +279,7 @@ Done.
           }
         },
         {
+          "id": 4,
           "kind": "text",
           "text": "var i:Int=0;"
         }
@@ -263,13 +291,16 @@ Done.
 == cmd_fill.json ==
 
 {
+  "id": 1,
   "kind": "command",
   "command": {
     "command": "fill",
     "parts": {
+      "id": 2,
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -279,10 +310,12 @@ Done.
           }
         },
         {
+          "id": 4,
           "kind": "text",
           "text": "var i:Int=0;"
         },
         {
+          "id": 5,
           "kind": "command",
           "command": {
             "command": "line",
@@ -299,13 +332,16 @@ Done.
 == cmd_group.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "command",
       "command": {
         "command": "group",
         "groupContents": {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -319,14 +355,17 @@ Done.
       }
     },
     {
+      "id": 4,
       "kind": "text",
       "text": "var i:Int=0;"
     },
     {
+      "id": 5,
       "kind": "command",
       "command": {
         "command": "group",
         "groupContents": {
+          "id": 6,
           "kind": "command",
           "command": {
             "command": "line",
@@ -342,15 +381,99 @@ Done.
   ]
 }
 
-== cmd_hardline.json ==
+== cmd_group_id.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
+      "kind": "command",
+      "command": {
+        "command": "group",
+        "id": 3,
+        "groupContents": {
+          "id": 4,
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        "break": false,
+        "expandedStates": null
+      }
+    },
+    {
+      "id": 5,
+      "kind": "text",
+      "text": "var i:Int=0;"
+    },
+    {
+      "id": 6,
+      "kind": "command",
+      "command": {
+        "command": "group",
+        "groupContents": {
+          "id": 7,
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        "break": true,
+        "expandedStates": null
+      }
+    },
+    {
+      "id": 8,
+      "kind": "command",
+      "command": {
+        "command": "ifBreak",
+        "ifBreakGroupId": 3,
+        "breakContents": {
+          "id": 9,
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        },
+        "flatContents": {
+          "id": 10,
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": false
+          }
+        }
+      }
+    }
+  ]
+}
+
+== cmd_hardline.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -360,6 +483,7 @@ Done.
           }
         },
         {
+          "id": 4,
           "kind": "command",
           "command": {
             "command": "breakParent"
@@ -368,6 +492,7 @@ Done.
       ]
     },
     {
+      "id": 5,
       "kind": "text",
       "text": "var i:Int=0;"
     }
@@ -377,9 +502,11 @@ Done.
 == cmd_hardlinewithoutbreakparent.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "command",
       "command": {
         "command": "line",
@@ -389,6 +516,7 @@ Done.
       }
     },
     {
+      "id": 3,
       "kind": "text",
       "text": "var i:Int=0;"
     }
@@ -398,14 +526,16 @@ Done.
 == cmd_ifbreak.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "command",
       "command": {
         "command": "ifBreak",
-        "ifBreakGroupId": 0,
         "breakContents": {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -415,6 +545,7 @@ Done.
           }
         },
         "flatContents": {
+          "id": 4,
           "kind": "list",
           "list": [
           ]
@@ -422,15 +553,17 @@ Done.
       }
     },
     {
+      "id": 5,
       "kind": "text",
       "text": "var i:Int=0;"
     },
     {
+      "id": 6,
       "kind": "command",
       "command": {
         "command": "ifBreak",
-        "ifBreakGroupId": 0,
         "breakContents": {
+          "id": 7,
           "kind": "command",
           "command": {
             "command": "line",
@@ -440,6 +573,7 @@ Done.
           }
         },
         "flatContents": {
+          "id": 8,
           "kind": "text",
           "text": " "
         }
@@ -451,13 +585,16 @@ Done.
 == cmd_indent.json ==
 
 {
+  "id": 1,
   "kind": "command",
   "command": {
     "command": "indent",
     "indentContents": {
+      "id": 2,
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -467,6 +604,7 @@ Done.
           }
         },
         {
+          "id": 4,
           "kind": "text",
           "text": "var i:Int=0;"
         }
@@ -478,9 +616,11 @@ Done.
 == cmd_line.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "command",
       "command": {
         "command": "line",
@@ -490,6 +630,7 @@ Done.
       }
     },
     {
+      "id": 3,
       "kind": "text",
       "text": "var i:Int=0;"
     }
@@ -499,9 +640,11 @@ Done.
 == cmd_list.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "command",
       "command": {
         "command": "line",
@@ -511,10 +654,12 @@ Done.
       }
     },
     {
+      "id": 3,
       "kind": "text",
       "text": "var i:Int=0;"
     },
     {
+      "id": 4,
       "kind": "command",
       "command": {
         "command": "line",
@@ -529,12 +674,15 @@ Done.
 == cmd_literalline.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -544,6 +692,7 @@ Done.
           }
         },
         {
+          "id": 4,
           "kind": "command",
           "command": {
             "command": "breakParent"
@@ -552,6 +701,7 @@ Done.
       ]
     },
     {
+      "id": 5,
       "kind": "text",
       "text": "var i:Int=0;"
     }
@@ -561,6 +711,7 @@ Done.
 == cmd_markasroot.json ==
 
 {
+  "id": 1,
   "kind": "command",
   "command": {
     "command": "align",
@@ -568,9 +719,11 @@ Done.
       "kind": "root"
     },
     "alignContents": {
+      "id": 2,
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -580,6 +733,7 @@ Done.
           }
         },
         {
+          "id": 4,
           "kind": "text",
           "text": "var i:Int=0;"
         }
@@ -591,6 +745,7 @@ Done.
 == cmd_innerroot.json ==
 
 {
+  "id": 1,
   "kind": "command",
   "command": {
     "command": "align",
@@ -598,9 +753,11 @@ Done.
       "kind": "innerRoot"
     },
     "alignContents": {
+      "id": 2,
       "kind": "list",
       "list": [
         {
+          "id": 3,
           "kind": "command",
           "command": {
             "command": "line",
@@ -610,6 +767,7 @@ Done.
           }
         },
         {
+          "id": 4,
           "kind": "text",
           "text": "var i:Int=0;"
         }
@@ -621,9 +779,11 @@ Done.
 == cmd_recurse.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "text",
       "text": "var i:Int=0;"
     }
@@ -633,16 +793,20 @@ Done.
 == cmd_recurse_field.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "command",
       "command": {
         "command": "group",
         "groupContents": {
+          "id": 3,
           "kind": "list",
           "list": [
             {
+              "id": 4,
               "kind": "text",
               "text": "var i:"
             }
@@ -653,24 +817,29 @@ Done.
       }
     },
     {
+      "id": 5,
       "kind": "text",
       "text": "Int="
     },
     {
+      "id": 6,
       "kind": "command",
       "command": {
         "command": "indent",
         "indentContents": {
+          "id": 7,
           "kind": "text",
           "text": "0"
         }
       }
     },
     {
+      "id": 8,
       "kind": "text",
       "text": ";def f(i"
     },
     {
+      "id": 9,
       "kind": "command",
       "command": {
         "command": "line",
@@ -680,10 +849,12 @@ Done.
       }
     },
     {
+      "id": 10,
       "kind": "text",
       "text": ":"
     },
     {
+      "id": 11,
       "kind": "command",
       "command": {
         "command": "line",
@@ -693,10 +864,12 @@ Done.
       }
     },
     {
+      "id": 12,
       "kind": "text",
       "text": "Int"
     },
     {
+      "id": 13,
       "kind": "command",
       "command": {
         "command": "line",
@@ -706,6 +879,7 @@ Done.
       }
     },
     {
+      "id": 14,
       "kind": "text",
       "text": "):Int{i;}"
     }
@@ -715,42 +889,53 @@ Done.
 == cmd_recurse_flatten.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "text",
       "text": "var i:Int="
     },
     {
+      "id": 3,
       "kind": "command",
       "command": {
         "command": "fill",
         "parts": {
+          "id": 4,
           "kind": "list",
           "list": [
             {
+              "id": 5,
               "kind": "command",
               "command": {
                 "command": "group",
                 "groupContents": {
+                  "id": 6,
                   "kind": "list",
                   "list": [
                     {
+                      "id": 7,
                       "kind": "text",
                       "text": "AAAAAAAAAAAAAAAAAA("
                     },
                     {
+                      "id": 8,
                       "kind": "command",
                       "command": {
                         "command": "fill",
                         "parts": {
+                          "id": 9,
                           "kind": "list",
                           "list": [
                             {
+                              "id": 10,
                               "kind": "text",
                               "text": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
                             },
                             {
+                              "id": 11,
                               "kind": "command",
                               "command": {
                                 "command": "line",
@@ -760,10 +945,12 @@ Done.
                               }
                             },
                             {
+                              "id": 12,
                               "kind": "text",
                               "text": ".YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
                             },
                             {
+                              "id": 13,
                               "kind": "command",
                               "command": {
                                 "command": "line",
@@ -773,6 +960,7 @@ Done.
                               }
                             },
                             {
+                              "id": 14,
                               "kind": "text",
                               "text": ".ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
                             }
@@ -781,10 +969,12 @@ Done.
                       }
                     },
                     {
+                      "id": 15,
                       "kind": "text",
                       "text": ")"
                     },
                     {
+                      "id": 16,
                       "kind": "command",
                       "command": {
                         "command": "line",
@@ -800,6 +990,7 @@ Done.
               }
             },
             {
+              "id": 17,
               "kind": "command",
               "command": {
                 "command": "line",
@@ -809,10 +1000,12 @@ Done.
               }
             },
             {
+              "id": 18,
               "kind": "text",
               "text": ".DDDDDDDDDDDDDDDD"
             },
             {
+              "id": 19,
               "kind": "command",
               "command": {
                 "command": "line",
@@ -822,10 +1015,12 @@ Done.
               }
             },
             {
+              "id": 20,
               "kind": "text",
               "text": ".EEEEEEEEEEEEEEEE"
             },
             {
+              "id": 21,
               "kind": "command",
               "command": {
                 "command": "line",
@@ -835,10 +1030,12 @@ Done.
               }
             },
             {
+              "id": 22,
               "kind": "text",
               "text": ".FFFFFFFFFFFFFFFF"
             },
             {
+              "id": 23,
               "kind": "command",
               "command": {
                 "command": "line",
@@ -848,6 +1045,7 @@ Done.
               }
             },
             {
+              "id": 24,
               "kind": "text",
               "text": ".GGGGGGGGGGGGGGGG"
             }
@@ -856,6 +1054,7 @@ Done.
       }
     },
     {
+      "id": 25,
       "kind": "text",
       "text": ";"
     }
@@ -865,9 +1064,11 @@ Done.
 == cmd_softline.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "command",
       "command": {
         "command": "line",
@@ -877,6 +1078,7 @@ Done.
       }
     },
     {
+      "id": 3,
       "kind": "text",
       "text": "var i:Int=0;"
     }
@@ -886,15 +1088,18 @@ Done.
 == cmd_trim.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "command",
       "command": {
         "command": "trim"
       }
     },
     {
+      "id": 3,
       "kind": "text",
       "text": "var i:Int=0;"
     }
@@ -904,9 +1109,11 @@ Done.
 == cmd_whitespace_3.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "text",
       "text": "   var i:Int=0;"
     }
@@ -916,9 +1123,11 @@ Done.
 == cmd_whitespace_default.json ==
 
 {
+  "id": 1,
   "kind": "list",
   "list": [
     {
+      "id": 2,
       "kind": "text",
       "text": " var i:Int=0;"
     }

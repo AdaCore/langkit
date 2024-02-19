@@ -1,0 +1,17 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "f_name": [
+          "recurse",
+          {
+            "kind": "ifBreak",
+            "breakContents": "line",
+            "flatContents": "softline",
+            "groupId": "myGroup"
+          }
+        ]
+      }
+    }
+  }
+}

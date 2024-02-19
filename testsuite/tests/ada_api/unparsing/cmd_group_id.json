@@ -1,0 +1,17 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": [
+        {"kind": "group", "document": "line", "id": "myGroup"},
+        "recurse",
+        {"kind": "group", "shouldBreak": true, "document": "line"},
+        {
+          "kind": "ifBreak",
+          "flatContents": "line",
+          "breakContents": "line",
+          "groupId": "myGroup"
+        }
+      ]
+    }
+  }
+}
