@@ -120,6 +120,11 @@ package Langkit_Support.Generic_API is
    --  Return the name for the given token kind. Raise a
    --  ``Precondition_Failure`` exception if ``Kind`` is ``No_Token_Kind_Ref``.
 
+   function Is_Comment (Kind : Token_Kind_Ref) return Boolean;
+   --  Return whether unparsing must treat the given token kind as a comment,
+   --  i.e. a trivia to preserve in unparsed sources. Raise a
+   --  ``Precondition_Failure`` exception if ``Kind`` is ``No_Token_Kind_Ref``.
+
    type Any_Token_Kind_Index is new Natural;
    subtype Token_Kind_Index is
      Any_Token_Kind_Index range 1 ..  Any_Token_Kind_Index'Last;

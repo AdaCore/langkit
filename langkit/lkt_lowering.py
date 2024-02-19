@@ -846,27 +846,37 @@ class TokenAnnotationSpec(AnnotationSpec):
         scope: Scope,
     ) -> Any:
         check_source_language(not args, 'No positional argument allowed')
+        result: dict[str, Any] = {}
 
         try:
             expr = kwargs.pop('start_ignore_layout')
         except KeyError:
-            start_ignore_layout = False
+            result["start_ignore_layout"] = False
         else:
-            start_ignore_layout = parse_static_bool(ctx, expr)
+            result["start_ignore_layout"] = parse_static_bool(ctx, expr)
 
         try:
             expr = kwargs.pop('end_ignore_layout')
         except KeyError:
-            end_ignore_layout = False
+            result["end_ignore_layout"] = False
         else:
-            end_ignore_layout = parse_static_bool(ctx, expr)
+            result["end_ignore_layout"] = parse_static_bool(ctx, expr)
+
+        # The "comment" argument is valid for trivia tokens only
+        if self.name == "trivia":
+            try:
+                expr = kwargs.pop("comment")
+            except KeyError:
+                result["comment"] = False
+            else:
+                result["comment"] = parse_static_bool(ctx, expr)
 
         check_source_language(
             not kwargs,
             'Invalid arguments: {}'.format(', '.join(sorted(kwargs)))
         )
 
-        return (start_ignore_layout, end_ignore_layout)
+        return result
 
 
 class WithLexerAnnotationSpec(AnnotationSpec):
@@ -1452,15 +1462,17 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             # Gather token action info from the annotations. If absent,
             # fallback to WithText.
             token_cons = None
-            start_ignore_layout = False
-            end_ignore_layout = False
+            cons_kwargs = {
+                "start_ignore_layout": False,
+                "end_ignore_layout": False,
+            }
             if rule_annot.ignore:
                 token_cons = ignore_constructor
             for name in ('text', 'trivia', 'symbol'):
                 annot = getattr(rule_annot, name)
                 if not annot:
                     continue
-                start_ignore_layout, end_ignore_layout = annot
+                cons_kwargs.update(annot)
 
                 check_source_language(token_cons is None,
                                       'At most one token action allowed')
@@ -1486,7 +1498,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             check_source_language(token_name not in tokens,
                                   'Duplicate token name')
 
-            token = token_cons(start_ignore_layout, end_ignore_layout)
+            token = token_cons(**cons_kwargs)
             if token_name is not None:
                 tokens[token_name] = token
             if isinstance(token, TokenAction):

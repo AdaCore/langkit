@@ -169,6 +169,12 @@ token_action_5.lkt:4:5: error: At most one token action allowed
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+== token_action_6.lkt ==
+token_action_6.lkt:4:5: error: Invalid arguments: comment
+4 |     @text(comment=false) example <- "example"
+  |     ^^^^^^^^^^^^^^^^^^^^
+
+
 == token_matcher.lkt ==
 token_matcher.lkt:4:16: error: Invalid lexing expression
 4 |     example <- /

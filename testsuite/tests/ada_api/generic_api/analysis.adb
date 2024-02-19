@@ -73,8 +73,11 @@ begin
          Family_Name : constant Text_Type :=
            Format_Name (Token_Family_Name (Family), Camel_With_Underscores);
       begin
-         Put_Line
-           ("  " & Image (Kind_Name) & " (" & Image (Family_Name) & ")");
+         Put ("  " & Image (Kind_Name) & " (" & Image (Family_Name));
+         if Is_Comment (Kind) then
+            Put (", is_comment");
+         end if;
+         Put_Line (")");
       end;
    end loop;
    New_Line;
@@ -88,6 +91,19 @@ begin
                                               Camel_With_Underscores)));
       end;
    end loop;
+   New_Line;
+
+   Put_Line ("Use of null token kind:");
+   declare
+      Dummy : Name_Type;
+   begin
+      Dummy := Token_Kind_Name (No_Token_Kind_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
    New_Line;
 
    Put_Line ("Use of null context:");

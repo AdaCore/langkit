@@ -240,6 +240,10 @@ class TokenAction(Action):
         prefixed_name = get_context().lang_name + self.base_name
         return prefixed_name.upper
 
+    @property
+    def is_comment(self) -> bool:
+        return isinstance(self, WithTrivia) and self._is_comment
+
     def __repr__(self) -> str:
         assert self.name is not None
         return '<{} {}>'.format(type(self).__name__,
@@ -270,6 +274,19 @@ class WithTrivia(WithText):
             StringLiteral = WithText()
     """
     is_trivia: bool = True
+
+    def __init__(
+        self,
+        start_ignore_layout: bool = False,
+        end_ignore_layout: bool = False,
+        comment: bool = False,
+    ):
+        """
+        :param comment: Whether unparsing must treat this token as a comment,
+            i.e. a trivia to preserve in unparsed sources.
+        """
+        super().__init__(start_ignore_layout, end_ignore_layout)
+        self._is_comment = comment
 
 
 class WithSymbol(TokenAction):

@@ -26,8 +26,9 @@ package Langkit_Support.Internal is
    --  Descriptors for token kinds
 
    type Token_Kind_Descriptor is record
-      Name   : Text_Access;
-      Family : Token_Family_Index;
+      Name       : Text_Access;
+      Family     : Token_Family_Index;
+      Is_Comment : Boolean;
    end record;
    type Token_Kind_Descriptor_Array is
      array (Token_Kind_Index range <>) of Token_Kind_Descriptor;

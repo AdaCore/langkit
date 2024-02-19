@@ -43,13 +43,16 @@ Token kinds:
   Number (Alphanumericals)
   Identifier (Alphanumericals)
   String (Default_Family)
-  Comment (Comments)
+  Comment (Comments, is_comment)
 
 Token families:
   Alphanumericals
   Comments
   Punctuation
   Default_Family
+
+Use of null token kind:
+Got a Precondition_Failure exception: null token kind reference
 
 Use of null context:
 Got a Precondition_Failure exception: null context

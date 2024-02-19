@@ -80,8 +80,9 @@ private package ${ada_lib_name}.Generic_Impl is
          family = ctx.lexer.tokens.token_to_family[token]
          lines += [
             f"{G.token_kind_index(token)} =>",
-            f" (Name   => {name}'Access,",
-            f"  Family => {G.token_family_index(family)})",
+            f" (Name       => {name}'Access,",
+            f"  Family     => {G.token_family_index(family)},",
+            f"  Is_Comment => {token.is_comment})",
          ]
       %>
       ${name} : aliased constant Text_Type :=
