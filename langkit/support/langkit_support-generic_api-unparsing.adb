@@ -78,6 +78,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                   --  Syntax field for this fragment (the parent node is a
                   --  regular node).
 
+                  Field_Unparser_Ref : Field_Unparser;
+                  --  Unparser for this field
+
                when List_Child_Fragment =>
                   Child_Index : Positive;
                   --  Index of this field for this fragment (the parent node is
@@ -350,12 +353,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                   --  Then append fragments for the field itself, if present
 
                   if Is_Field_Present (Child, Field_Unparser) then
-                     Append (Field_Unparser.Pre_Tokens);
                      Process.all
-                       ((Kind  => Field_Fragment,
-                         Node  => Child,
-                         Field => From_Index (Id, Field_Unparser.Member)));
-                     Append (Field_Unparser.Post_Tokens);
+                       ((Kind               => Field_Fragment,
+                         Node               => Child,
+                         Field              => From_Index
+                                                 (Id, Field_Unparser.Member),
+                         Field_Unparser_Ref => Field_Unparser'Access));
                   end if;
                end;
             end loop;
@@ -1855,18 +1858,46 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Pool : Document_Pool;
 
+      procedure Unparse_Tokens
+        (Tokens : Token_Sequence; Items : in out Document_Vectors.Vector);
+      --  Create template nodes for each element in ``Tokens`` and append them
+      --  to ``Items``.
+
       function Unparse_Node (N : Lk_Node) return Document_Type;
       --  Using the unparsing configuration for N, unparse it to a Prettier
       --  document.
 
-      function Unparse_Field
+      procedure Unparse_Field
         (Node        : Lk_Node;
          Node_Config : Node_Config_Record;
          Child       : Lk_Node;
-         Field_Ref   : Struct_Member_Index) return Document_Type;
-      --  Unparse ``Child``, which is the ``Field_Ref`` field of ``Node``.
-      --  ``Node_Config`` must be the node unparsing configuration for
-      --  ``Node``.
+         Field_Ref   : Struct_Member_Index;
+         Unparser    : Field_Unparser_Impl;
+         Items       : in out Document_Vectors.Vector);
+      --  Unparse ``Child``, which is the ``Field_Ref`` field of ``Node``. The
+      --  Resulting items are appended to ``Items``. ``Node_Config`` must be
+      --  the node unparsing configuration for ``Node``, and ``Unparser`` must
+      --  be the unparser for this field.
+
+      --------------------
+      -- Unparse_Tokens --
+      --------------------
+
+      procedure Unparse_Tokens
+        (Tokens : Token_Sequence; Items : in out Document_Vectors.Vector) is
+      begin
+         for T of Tokens.all loop
+            declare
+               Fragment : constant Unparsing_Fragment :=
+                 Fragment_For (Config.Value.Language, T);
+               pragma Assert (Fragment.Kind = Token_Fragment);
+            begin
+               Items.Append
+                 (Pool.Create_Token
+                    (Fragment.Token_Kind, Fragment.Token_Text));
+            end;
+         end loop;
+      end Unparse_Tokens;
 
       ------------------
       -- Unparse_Node --
@@ -1914,12 +1945,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end;
 
                when Field_Fragment =>
-                  Items.Append
-                    (Unparse_Field
-                       (Node        => N,
-                        Node_Config => Node_Config,
-                        Child       => F.Node,
-                        Field_Ref   => To_Index (F.Field)));
+                  Unparse_Field
+                    (Node        => N,
+                     Node_Config => Node_Config,
+                     Child       => F.Node,
+                     Field_Ref   => To_Index (F.Field),
+                     Unparser    => F.Field_Unparser_Ref.all,
+                     Items       => Items);
 
                when List_Child_Fragment =>
                   Items.Append (Unparse_Node (F.Node));
@@ -1966,22 +1998,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                      begin
                         if Is_Field_Present (Child, Field_Unparser) then
                            Items.Clear;
-
-                           for T of Field_Unparser.Pre_Tokens.all loop
-                              Process_Fragment (Fragment_For (Id, T));
-                           end loop;
-
-                           Items.Append
-                             (Unparse_Field
-                                (Node        => N,
-                                 Node_Config => Node_Config,
-                                 Child       => Child,
-                                 Field_Ref   => Field_Unparser.Member));
-
-                           for T of Field_Unparser.Post_Tokens.all loop
-                              Process_Fragment (Fragment_For (Id, T));
-                           end loop;
-
+                           Unparse_Field
+                             (Node        => N,
+                              Node_Config => Node_Config,
+                              Child       => Child,
+                              Field_Ref   => Field_Unparser.Member,
+                              Unparser    => Field_Unparser,
+                              Items       => Items);
                            Arguments.Field_Docs.Append
                              (Pool.Create_List (Items));
                         else
@@ -2004,11 +2027,13 @@ package body Langkit_Support.Generic_API.Unparsing is
       -- Unparse_Field --
       -------------------
 
-      function Unparse_Field
+      procedure Unparse_Field
         (Node        : Lk_Node;
          Node_Config : Node_Config_Record;
          Child       : Lk_Node;
-         Field_Ref   : Struct_Member_Index) return Document_Type
+         Field_Ref   : Struct_Member_Index;
+         Unparser    : Field_Unparser_Impl;
+         Items       : in out Document_Vectors.Vector)
       is
          Field_Template : constant Template_Type :=
            Node_Config.Field_Configs.Element (Field_Ref);
@@ -2018,11 +2043,14 @@ package body Langkit_Support.Generic_API.Unparsing is
            (Kind             => With_Recurse,
             With_Recurse_Doc => Unparse_Node (Child));
       begin
-         return Instantiate_Template
-                  (Pool      => Pool,
-                   Node      => Node,
-                   Template  => Field_Template,
-                   Arguments => Field_Template_Args);
+         Unparse_Tokens (Unparser.Pre_Tokens, Items);
+         Items.Append
+           (Instantiate_Template
+              (Pool      => Pool,
+               Node      => Node,
+               Template  => Field_Template,
+               Arguments => Field_Template_Args));
+         Unparse_Tokens (Unparser.Post_Tokens, Items);
       end Unparse_Field;
 
    begin
