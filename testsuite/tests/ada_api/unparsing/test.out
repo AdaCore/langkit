@@ -134,6 +134,11 @@ a: Int=2
 
 == Invalid templates (too many/few "recurse") ==
 
+# recurse_in_field_too_many.json
+    template for CallArg.f_name: unexpected extra template item: recurse
+    Expected:
+    * recurse
+    * token "="
 # recurse_list_too_few.json
     "sep" template for StmtList: recursion is missing
 # recurse_list_too_many.json
@@ -786,6 +791,20 @@ Done.
       "id": 2,
       "kind": "text",
       "text": "var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_recurse_in_field.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v:Int=f(a =  1);"
     }
   ]
 }

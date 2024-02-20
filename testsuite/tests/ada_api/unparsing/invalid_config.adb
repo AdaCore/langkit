@@ -84,6 +84,7 @@ begin
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");
    New_Line;
+   Check ("recurse_in_field_too_many.json");
    Check ("recurse_list_too_few.json");
    Check ("recurse_list_too_many.json");
    Check ("recurse_line.json");

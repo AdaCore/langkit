@@ -1,0 +1,14 @@
+{
+  "node_configs": {
+    "CallArg": {
+      "fields": {
+        "f_name": [
+          "recurse",
+          {"kind": "whitespace", "length": 1},
+          {"kind": "text", "text": "="},
+          {"kind": "whitespace", "length": 2}
+        ]
+      }
+    }
+  }
+}

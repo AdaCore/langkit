@@ -245,8 +245,14 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        {"kind": "text", "text": "some_text_to_unparse"}
    --
-   --      It is valid only when used with "recurse_field" template: see its
-   --      description.
+   --      Using this template is valid in specific contexts only:
+   --
+   --      * For "node" templates, when used with "recurse_field" template: see
+   --        the documentation for "recurse_field";
+   --
+   --      * For "fields" templates: in this case, the linearized template must
+   --        reflect how the field is unparsed. See the documentation for
+   --        "recurse_field" to have more information about linearization.
    --
    --    * A JSON list yields the corresponding "list" Prettier document::
    --
