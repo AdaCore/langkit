@@ -157,15 +157,37 @@ private package Langkit_Support.Prettier_Utils is
      (Document : Document_Type) return Prettier.Document_Type;
    --  Turn an unparsing document into an actual Prettier document
 
-   type Template_Kind is (No_Template_Kind, With_Recurse, With_Recurse_Field);
+   --  Templates have different kinds depending on how they should be
+   --  instantiated:
+   --
+   --  * No_Template_Kind: Special value to designate the absence of template.
+   --
+   --  * With_Recurse: Node or field template to instantiate with a single node
+   --    document argument. For node templates, the argument must embed all the
+   --    tokens for that node. For field templates, the argument must embed
+   --    only the unparsing of the node that the field contains.
+   --
+   --  * With_Recurse_Field: Node template to instantiate with one argument per
+   --    field.
+   --
+   --  * With_Text_Recurse: Field template to instantiate with a single node
+   --    argument (the field). The argument must embed all the tokens for the
+   --    field (pre/post tokens plus the unparsing of the node that the field
+   --    contains).
+
+   type Template_Kind is
+     (No_Template_Kind,
+      With_Recurse,
+      With_Recurse_Field,
+      With_Text_Recurse);
    subtype Some_Template_Kind is
-     Template_Kind range With_Recurse ..  With_Recurse_Field;
+     Template_Kind range With_Recurse ..  With_Text_Recurse;
    type Template_Type (Kind : Template_Kind := No_Template_Kind) is record
       case Kind is
          when No_Template_Kind =>
             null;
 
-         when With_Recurse | With_Recurse_Field =>
+         when Some_Template_Kind =>
             Root : Document_Type;
       end case;
    end record;

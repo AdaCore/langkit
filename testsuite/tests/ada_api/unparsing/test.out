@@ -77,21 +77,21 @@ a: Int=2
 # invalid_innerroot.json
     template for VarDecl.f_name: missing "contents" key for innerRoot
 # invalid_recurse_field.json
-    template for VarDecl.f_name: "recurse_field" is valid in "node" templates only
+    template for VarDecl.f_name: recurse_field cannot appear in a "recurse" template
 # invalid_recurse_field2.json
     "node" template for Stmt: missing "field" key for recurse_field
 # invalid_recurse_field3.json
     "node" template for Stmt: invalid recurse_field field: JSON_NULL_TYPE
 # invalid_recurse_field4.json
-    "node" template for Decl: "recurse_field" is valid for concrete nodes only
+    "node" template for Decl: text/recurse_field are valid for concrete nodes only
 # invalid_recurse_field5.json
-    "node" template for StmtList: text is not valid for list nodes
+    "node" template for StmtList: text/recurse_field are not valid for list nodes
 # invalid_recurse_field6.json
     invalid field for Stmt: f_foo
 # invalid_recurse_field7.json
-    "node" template for Name: text is not valid for token nodes
+    "node" template for Name: text/recurse_field are not valid for token nodes
 # invalid_recurse_field8.json
-    "node" template for VarDecl: "recurse"/"recurse_flatten" and text cannot appear in the same template
+    "node" template for VarDecl: using "recurse"/"recurse_flatten" in the same template as "recurse_field"/"text" is invalid
 # invalid_recurse_field9.json
     "node" template for VarDecl: token "var" expected, got field f_name
     Expected:
@@ -134,6 +134,11 @@ a: Int=2
 
 == Invalid templates (too many/few "recurse") ==
 
+# recurse_in_field_too_many.json
+    template for CallArg.f_name: unexpected extra template item: recurse
+    Expected:
+    * recurse
+    * token "="
 # recurse_list_too_few.json
     "sep" template for StmtList: recursion is missing
 # recurse_list_too_many.json
@@ -786,6 +791,20 @@ Done.
       "id": 2,
       "kind": "text",
       "text": "var i:Int=0;"
+    }
+  ]
+}
+
+== cmd_recurse_in_field.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v:Int=f(a =  1);"
     }
   ]
 }

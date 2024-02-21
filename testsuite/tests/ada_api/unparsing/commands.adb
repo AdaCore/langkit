@@ -166,6 +166,9 @@ begin
    Check ("cmd_innerroot.json");
    Check ("cmd_recurse.json");
    Check
+     ("cmd_recurse_in_field.json",
+      "var v:Int=f(a=1);");
+   Check
      ("cmd_recurse_field.json",
       "var i: Int = 0;" & ASCII.LF
       & "def f(i: Int): Int {i;}");

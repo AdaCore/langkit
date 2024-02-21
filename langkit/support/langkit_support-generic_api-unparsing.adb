@@ -78,6 +78,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                   --  Syntax field for this fragment (the parent node is a
                   --  regular node).
 
+                  Field_Unparser_Ref : Field_Unparser;
+                  --  Unparser for this field
+
                when List_Child_Fragment =>
                   Child_Index : Positive;
                   --  Index of this field for this fragment (the parent node is
@@ -145,11 +148,17 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    --  While templates encoded with Template_Type/Document_Type are recursive
    --  data structures (they more or less map to prettier documents) with
-   --  disjunction semantics, what we call "linear templates" here are lists of
-   --  tokens/fields used to unparse a concrete regular node type. They are
-   --  used to process templates that employ the "recurse_field" construct.
+   --  disjunction semantics, what we call "linear templates" here are either:
+   --
+   --  * lists of tokens (Token_Item) and recurse_field (Field_Item) items used
+   --    to unparse a concrete regular node type.
+   --
+   --  * lists of tokens (Token_Item) and recurse (Recurse_Item) items used to
+   --    unparse a specific field in a concrete node.
+   --
+   --  They are used to process templates that embed text.
 
-   type Linear_Template_Item_Kind is (Token_Item, Field_Item);
+   type Linear_Template_Item_Kind is (Token_Item, Field_Item, Recurse_Item);
    type Linear_Template_Item
      (Kind : Linear_Template_Item_Kind := Linear_Template_Item_Kind'First)
    is record
@@ -163,6 +172,9 @@ package body Langkit_Support.Generic_API.Unparsing is
             Field_Ref      : Struct_Member_Ref;
             Field_Position : Positive;
             --  Same semantics as the corresponding Document_Type components
+
+         when Recurse_Item =>
+            null;
       end case;
    end record;
 
@@ -172,9 +184,21 @@ package body Langkit_Support.Generic_API.Unparsing is
    package Linear_Template_Vectors is new Ada.Containers.Vectors
      (Positive, Linear_Template_Item);
 
+   procedure Linear_Template_From_Unparser
+     (Linear_Template : in out Linear_Template_Vectors.Vector;
+      Id              : Language_Id;
+      Tokens          : Token_Sequence);
+   --  Append all items in ``Tokens`` to ``Linear_Template``
+
    function Linear_Template
      (Node : Type_Ref) return Linear_Template_Vectors.Vector;
    --  Return the linear template that correspond to ``Node``
+
+   function Linear_Template
+     (Node  : Type_Ref;
+      Field : Struct_Member_Ref) return Linear_Template_Vectors.Vector;
+   --  Return the linear template that correspond to the ``Field`` member of
+   --  ``Node``.
 
    function Hash (Self : Struct_Member_Index) return Ada.Containers.Hash_Type
    is (Ada.Containers.Hash_Type'Mod (Self));
@@ -227,7 +251,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    type Template_Instantiation_Args (Kind : Some_Template_Kind) is record
       case Kind is
-         when With_Recurse =>
+         when With_Recurse | With_Text_Recurse =>
             With_Recurse_Doc : Document_Type;
             --  Document to use in order to replace "recurse"/"recurse_flatten"
             --  templates.
@@ -350,12 +374,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                   --  Then append fragments for the field itself, if present
 
                   if Is_Field_Present (Child, Field_Unparser) then
-                     Append (Field_Unparser.Pre_Tokens);
                      Process.all
-                       ((Kind  => Field_Fragment,
-                         Node  => Child,
-                         Field => From_Index (Id, Field_Unparser.Member)));
-                     Append (Field_Unparser.Post_Tokens);
+                       ((Kind               => Field_Fragment,
+                         Node               => Child,
+                         Field              => From_Index
+                                                 (Id, Field_Unparser.Member),
+                         Field_Unparser_Ref => Field_Unparser'Access));
                   end if;
                end;
             end loop;
@@ -442,6 +466,8 @@ package body Langkit_Support.Generic_API.Unparsing is
             return "field " & Image
                                 (Format_Name
                                   (Member_Name (Item.Field_Ref), Lower));
+         when Recurse_Item =>
+            return "recurse";
       end case;
    end Image;
 
@@ -467,8 +493,33 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Left.Token_Text = Right.Token_Text;
          when Field_Item =>
             return Left.Field_Ref = Right.Field_Ref;
+         when Recurse_Item =>
+            return True;
       end case;
    end Is_Equivalent;
+
+   -----------------------------------
+   -- Linear_Template_From_Unparser --
+   -----------------------------------
+
+   procedure Linear_Template_From_Unparser
+     (Linear_Template : in out Linear_Template_Vectors.Vector;
+      Id              : Language_Id;
+      Tokens          : Token_Sequence)
+   is
+   begin
+      for T of Tokens.all loop
+         declare
+            F : constant Unparsing_Fragment := Fragment_For (Id, T);
+         begin
+            Linear_Template.Append
+              (Linear_Template_Item'
+                 (Kind       => Token_Item,
+                  Token_Kind => F.Token_Kind,
+                  Token_Text => F.Token_Text));
+         end;
+      end loop;
+   end Linear_Template_From_Unparser;
 
    ---------------------
    -- Linear_Template --
@@ -483,35 +534,13 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       Result : Linear_Template_Vectors.Vector;
 
-      procedure Append (Tokens : Token_Sequence);
-      --  Append the given tokens to ``Result``
-
-      ------------
-      -- Append --
-      ------------
-
-      procedure Append (Tokens : Token_Sequence) is
-      begin
-         for T of Tokens.all loop
-            declare
-               F : constant Unparsing_Fragment := Fragment_For (Id, T);
-            begin
-               Result.Append
-                 (Linear_Template_Item'
-                    (Kind       => Token_Item,
-                     Token_Kind => F.Token_Kind,
-                     Token_Text => F.Token_Text));
-            end;
-         end loop;
-      end Append;
-
       Node_Unparser : Node_Unparser_Impl renames
         Unparsers.Node_Unparsers (To_Index (Node)).all;
       pragma Assert (Node_Unparser.Kind = Regular);
    begin
       --  Append tokens that precede the first field
 
-      Append (Node_Unparser.Pre_Tokens);
+      Linear_Template_From_Unparser (Result, Id, Node_Unparser.Pre_Tokens);
 
       --  Then append recurse_field documents for each field and the tokens
       --  between them.
@@ -525,7 +554,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          begin
             --  Append tokens that appear unconditionally between fields
 
-            Append (Inter_Tokens);
+            Linear_Template_From_Unparser (Result, Id, Inter_Tokens);
 
             --  Append fields themselves
 
@@ -539,9 +568,52 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       --  Append tokens that follow the last field
 
-      Append (Node_Unparser.Post_Tokens);
+      Linear_Template_From_Unparser (Result, Id, Node_Unparser.Post_Tokens);
 
       return Result;
+   end Linear_Template;
+
+   ---------------------
+   -- Linear_Template --
+   ---------------------
+
+   function Linear_Template
+     (Node  : Type_Ref;
+      Field : Struct_Member_Ref) return Linear_Template_Vectors.Vector
+   is
+      Id        : constant Language_Id := Language (Node);
+      Desc      : constant Language_Descriptor_Access := +Id;
+      Unparsers : Unparsers_Impl renames Desc.Unparsers.all;
+
+      Node_Unparser : Node_Unparser_Impl renames
+        Unparsers.Node_Unparsers (To_Index (Node)).all;
+      pragma Assert (Node_Unparser.Kind = Regular);
+
+      Result : Linear_Template_Vectors.Vector;
+
+      --  Look for the unparser corresponding to Field
+   begin
+      for I in 1 .. Node_Unparser.Field_Unparsers.N loop
+         declare
+            Field_Unparser : Field_Unparser_Impl renames
+              Node_Unparser.Field_Unparsers.Field_Unparsers (I);
+         begin
+            if Field_Unparser.Member = To_Index (Field) then
+               Linear_Template_From_Unparser
+                 (Result, Id, Field_Unparser.Pre_Tokens);
+               Result.Append
+                 (Linear_Template_Item'(Kind => Recurse_Item));
+               Linear_Template_From_Unparser
+                 (Result, Id, Field_Unparser.Post_Tokens);
+               return Result;
+            end if;
+         end;
+      end loop;
+
+      --  Linear_Template is supposed to be called with a valid pair of
+      --  Node/Field, so the loop above is supposed to return a value.
+
+      raise Program_Error;
    end Linear_Template;
 
    ---------------------------
@@ -591,15 +663,29 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Return the expected name for the given Member in the given Node
 
       type Template_Parsing_State_Kind is
-        (Initial, Recurse_Found, For_Recurse_Field);
+        (Simple_Recurse, Recurse_Field, Recurse_In_Field);
+      --  There are two kinds of templates we expect to find in unparsing
+      --  configurations:
+      --
+      --  * Simple_Recurse templates, that cannot contain "text" nodes and
+      --    whose linearization must yield a single "recurse" node.
+      --
+      --  * Recurse_Field templates, whose linearization must yield the
+      --    sequence of "text"/"recurse_field" that is expected for a node.
+      --
+      --  * Recurse_In_Field templates, whose linearization must yield the
+      --    sequence of "text"/"recurse" that is expected for a node field.
+
       type Template_Parsing_State
-        (Kind : Template_Parsing_State_Kind := Initial)
+        (Kind : Template_Parsing_State_Kind := Simple_Recurse)
       is record
          case Kind is
-            when Initial | Recurse_Found =>
-               null;
+            when Simple_Recurse =>
+               Recurse_Found : Boolean;
+               --  Whether template parsing has found the "recurse" node
+               --  expected for the current branch.
 
-            when For_Recurse_Field =>
+            when Recurse_Field | Recurse_In_Field =>
                Linear_Template : Linear_Template_Vectors.Vector;
                --  Sequence of tokens/fields that the parsed template is
                --  supposed to yield once instantiated/formatted.
@@ -609,8 +695,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  the template to parse.
          end case;
       end record;
-
-      Initial_State : constant Template_Parsing_State := (Kind => Initial);
 
       type Template_Parsing_Context_Kind is
         (Node_Template, Field_Template, Sep_Template);
@@ -640,6 +724,30 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  Field for which we parse this template
          end case;
       end record;
+
+      function Template_Kind
+        (Context : Template_Parsing_Context_Kind;
+         JSON    : JSON_Value) return Template_Parsing_State_Kind;
+      --  Determine the plausible kind for the given JSON-encoded template in
+      --  the given context. Note that this is just a heuristic: if will
+      --  return the right kind for a well-formed template, but will return an
+      --  approximation for an ill-formed template.
+
+      function Initial_State_For
+        (Node    : Type_Ref;
+         JSON    : JSON_Value;
+         Context : Template_Parsing_Context) return Template_Parsing_State;
+      --  Return an inital template parsing state for the "node" template of
+      --  ``Node``, to create from ``JSON``. Raise an Invalid_Input exception
+      --  if the initial state found is invalid in this context.
+
+      function Initial_State_For
+        (Node    : Type_Ref;
+         Field   : Struct_Member_Ref;
+         JSON    : JSON_Value) return Template_Parsing_State;
+      --  Return an inital template parsing state for the template ``JSON``
+      --  corresponding to the node field ``Node``/``Field``.
+      --  ``Node``, to create from ``JSON``.
 
       function Parse_Template
         (JSON    : JSON_Value;
@@ -736,6 +844,178 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
       end To_Struct_Member_Index;
 
+      -------------------
+      -- Template_Kind --
+      -------------------
+
+      function Template_Kind
+        (Context : Template_Parsing_Context_Kind;
+         JSON    : JSON_Value) return Template_Parsing_State_Kind
+      is
+         Result          : Template_Parsing_State_Kind := Simple_Recurse;
+         Abort_Recursion : exception;
+
+         function Kind_Matches
+           (JSON : JSON_Value; Kind : String) return Boolean;
+         --  Assuming that JSON is an object, return whether it has a "kind"
+         --  field equal to Kind.
+
+         procedure Process (JSON : JSON_Value);
+         procedure Process_Map_Item (Name : String; JSON : JSON_Value);
+
+         ------------------
+         -- Kind_Matches --
+         ------------------
+
+         function Kind_Matches
+           (JSON : JSON_Value; Kind : String) return Boolean
+         is
+         begin
+            return JSON.Has_Field ("kind")
+                   and then JSON.Get ("kind").Kind = JSON_String_Type
+                   and then String'(JSON.Get ("kind")) = Kind;
+         end Kind_Matches;
+
+         -------------
+         -- Process --
+         -------------
+
+         procedure Process (JSON : JSON_Value) is
+         begin
+            case JSON.Kind is
+               when JSON_Object_Type =>
+
+                  --   As soon as we find a "text" template node, we know this
+                  --   is a Recurse_Field template (in "node") or a
+                  --   Recurse_In_Field template (in "fields").
+                  --
+                  --   For a "node", we also know this is a Recurse_Field
+                  --   template as soon as we find a "recurse_field" node.
+
+                  case Context is
+                     when Node_Template =>
+                        if Kind_Matches (JSON, "text")
+                           or else Kind_Matches (JSON, "recurse_field")
+                        then
+                           Result := Recurse_Field;
+                           raise Abort_Recursion;
+                        end if;
+
+                     when Field_Template =>
+                        if Kind_Matches (JSON, "text") then
+                           Result := Recurse_In_Field;
+                           raise Abort_Recursion;
+                        end if;
+
+                     when Sep_Template =>
+                        null;
+                  end case;
+
+                  JSON.Map_JSON_Object (Process_Map_Item'Access);
+
+               when JSON_Array_Type =>
+                  for Item of JSON_Array'(JSON.Get) loop
+                     Process (Item);
+                  end loop;
+
+               when others =>
+                  null;
+            end case;
+         end Process;
+
+         ----------------------
+         -- Process_Map_Item --
+         ----------------------
+
+         procedure Process_Map_Item (Name : String; JSON : JSON_Value) is
+            pragma Unreferenced (Name);
+         begin
+            Process (JSON);
+         end Process_Map_Item;
+
+      begin
+         Process (JSON);
+         return Result;
+      exception
+         when Abort_Recursion =>
+            return Result;
+      end Template_Kind;
+
+      -----------------------
+      -- Initial_State_For --
+      -----------------------
+
+      function Initial_State_For
+        (Node    : Type_Ref;
+         JSON    : JSON_Value;
+         Context : Template_Parsing_Context) return Template_Parsing_State is
+      begin
+         return Result : Template_Parsing_State
+                           (Template_Kind (Context.Kind, JSON))
+         do
+            case Result.Kind is
+               when Simple_Recurse =>
+                  Result.Recurse_Found := False;
+
+               when Recurse_Field | Recurse_In_Field =>
+                  if Result.Kind = Recurse_Field then
+
+                     --  Ensure that "recurse_field" templates are valid for
+                     --  this node.
+
+                     if Is_Abstract (Node) then
+                        Abort_Parsing
+                          (Context,
+                           "text/recurse_field are valid for concrete nodes"
+                           & " only");
+                     elsif Is_Token_Node (Node) then
+                        Abort_Parsing
+                          (Context,
+                           "text/recurse_field are not valid for token nodes");
+                     elsif Is_List_Node (Node) then
+                        Abort_Parsing
+                          (Context,
+                           "text/recurse_field are not valid for list nodes");
+                     end if;
+                  end if;
+
+                  Result.Linear_Template := Linear_Template (Node);
+                  Result.Linear_Position := 1;
+            end case;
+         end return;
+      end Initial_State_For;
+
+      -----------------------
+      -- Initial_State_For --
+      -----------------------
+
+      function Initial_State_For
+        (Node    : Type_Ref;
+         Field   : Struct_Member_Ref;
+         JSON    : JSON_Value) return Template_Parsing_State
+      is
+      begin
+         return Result : Template_Parsing_State
+                           (Template_Kind (Field_Template, JSON))
+         do
+            case Result.Kind is
+               when Simple_Recurse =>
+                  Result.Recurse_Found := False;
+
+               when Recurse_Field =>
+
+                  --  Knowing that we are processing a field template,
+                  --  Template_Kind is not supposed to return Recurse_Field.
+
+                  raise Program_Error;
+
+               when Recurse_In_Field =>
+                  Result.Linear_Template := Linear_Template (Node, Field);
+                  Result.Linear_Position := 1;
+            end case;
+         end return;
+      end Initial_State_For;
+
       --------------------
       -- Parse_Template --
       --------------------
@@ -763,13 +1043,14 @@ package body Langkit_Support.Generic_API.Unparsing is
          end loop;
 
          case Context.State.Kind is
-            when Initial =>
-               Abort_Parsing (Context, "recursion is missing");
+            when Simple_Recurse =>
+               if Context.State.Recurse_Found then
+                  return (Kind => With_Recurse, Root => Root);
+               else
+                  Abort_Parsing (Context, "recursion is missing");
+               end if;
 
-            when Recurse_Found =>
-               return (Kind => With_Recurse, Root => Root);
-
-            when For_Recurse_Field =>
+            when Recurse_Field | Recurse_In_Field =>
 
                --  Make sure that the template covers all items in the linear
                --  template.
@@ -785,7 +1066,14 @@ package body Langkit_Support.Generic_API.Unparsing is
                             (Context.State.Linear_Position)));
                end if;
 
-               return (Kind => With_Recurse_Field, Root => Root);
+               case Context.State.Kind is
+                  when Simple_Recurse =>
+                     raise Program_Error;
+                  when Recurse_Field =>
+                     return (Kind => With_Recurse_Field, Root => Root);
+                  when Recurse_In_Field =>
+                     return (Kind => With_Text_Recurse, Root => Root);
+               end case;
          end case;
       end Parse_Template;
 
@@ -1207,15 +1495,25 @@ package body Langkit_Support.Generic_API.Unparsing is
       procedure Process_Recurse (Context : in out Template_Parsing_Context) is
       begin
          case Context.State.Kind is
-            when Initial =>
-               Context.State := (Kind => Recurse_Found);
-            when Recurse_Found =>
-               Abort_Parsing (Context, "too many recursions");
-            when For_Recurse_Field =>
+            when Simple_Recurse =>
+               if Context.State.Recurse_Found then
+                  Abort_Parsing (Context, "too many recursions");
+               else
+                  Context.State.Recurse_Found := True;
+               end if;
+
+            when Recurse_Field =>
                Abort_Parsing
                  (Context,
                   "using ""recurse""/""recurse_flatten"" in the same template"
-                  & " as ""recurse_field""/tokens is invalid");
+                  & " as ""recurse_field""/""text"" is invalid");
+
+            when Recurse_In_Field =>
+               declare
+                  Item : Linear_Template_Item := (Kind => Recurse_Item);
+               begin
+                  Process_Linear_Template_Item (Item, Context);
+               end;
          end case;
       end Process_Recurse;
 
@@ -1229,50 +1527,17 @@ package body Langkit_Support.Generic_API.Unparsing is
       is
          function What return String
          is (case Item.Kind is
-             when Token_Item => "text",
-             when Field_Item => """recurse_field""");
+             when Token_Item   => "text",
+             when Field_Item   => "recurse_field",
+             when Recurse_Item => "recurse");
       begin
-         --  Ensure that the node that the context for which this template is
-         --  parsed supports tokens/"recurse_field" templates.
+         --  Ensure that it is valid to have a "recurse_field" node in this
+         --  template.
 
-         if Context.Kind /= Node_Template then
+         if Context.State.Kind not in Recurse_Field | Recurse_In_Field then
             Abort_Parsing
-              (Context,
-               What & " is valid in ""node"" templates only");
-         elsif Is_Abstract (Context.Node) then
-            Abort_Parsing
-              (Context,
-               What & " is valid for concrete nodes only");
-         elsif Is_Token_Node (Context.Node) then
-            Abort_Parsing
-              (Context,
-               What & " is not valid for token nodes");
-         elsif Is_List_Node (Context.Node) then
-            Abort_Parsing
-              (Context,
-               What & " is not valid for list nodes");
+              (Context, What & " cannot appear in a ""recurse"" template");
          end if;
-
-         --  Ensure that this template does not already has a "recurse"
-         --  template, and that we have a linear template for validation.
-
-         case Context.State.Kind is
-            when Initial =>
-               Context.State :=
-                 (Kind            => For_Recurse_Field,
-                  Linear_Template => Linear_Template
-                                       (Context.Node),
-                  Linear_Position => 1);
-
-            when Recurse_Found =>
-               Abort_Parsing
-                 (Context,
-                  """recurse""/""recurse_flatten"" and " & What
-                  & " cannot appear in the same template");
-
-            when For_Recurse_Field =>
-               null;
-         end case;
 
          --  Now validate this new item: it must match what the linear template
          --  expects next.
@@ -1363,7 +1628,10 @@ package body Langkit_Support.Generic_API.Unparsing is
               To_Struct_Member_Index (Name, Node);
             Context : Template_Parsing_Context :=
               (Kind  => Field_Template,
-               State => Initial_State,
+               State => Initial_State_For
+                          (Node  => Node,
+                           Field => From_Index (Language, Member),
+                           JSON  => Value),
                Node  => Node,
                Field => From_Index (Language, Member));
          begin
@@ -1441,10 +1709,6 @@ package body Langkit_Support.Generic_API.Unparsing is
          procedure Process (Name : String; Value : JSON_Value) is
             Key     : constant Type_Index := To_Type_Index (Name);
             Node    : constant Type_Ref := From_Index (Language, Key);
-            Context : Template_Parsing_Context :=
-              (Kind  => Node_Template,
-               Node  => Node,
-               State => Initial_State);
             Config  : constant Node_Config_Access := new Node_Config_Record'
               (Node_Template => No_Template,
                Field_Configs => <>,
@@ -1452,10 +1716,22 @@ package body Langkit_Support.Generic_API.Unparsing is
          begin
             Result.Node_Configs.Insert (Key, Config);
 
-            Config.Node_Template :=
-              (if Value.Has_Field ("node")
-               then Parse_Template (Value.Get ("node"), Context)
-               else Pool.Create_Recurse);
+            if Value.Has_Field ("node") then
+               declare
+                  JSON_Template : constant JSON_Value := Value.Get ("node");
+                  Context       : Template_Parsing_Context :=
+                    (Kind  => Node_Template,
+                     Node  => Node,
+                     State => <>);
+               begin
+                  Context.State :=
+                    Initial_State_For (Node, JSON_Template, Context);
+                  Config.Node_Template :=
+                    Parse_Template (JSON_Template, Context);
+               end;
+            else
+               Config.Node_Template := Pool.Create_Recurse;
+            end if;
 
             if Value.Has_Field ("fields") then
                Load_Field_Configs
@@ -1472,7 +1748,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                   Context : Template_Parsing_Context :=
                     (Kind  => Sep_Template,
                      Node  => Node,
-                     State => Initial_State);
+                     State => (Kind          => Simple_Recurse,
+                               Recurse_Found => False));
                begin
                   Config.List_Sep :=
                     Parse_Template (Value.Get ("sep"), Context);
@@ -1732,18 +2009,46 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Pool : Document_Pool;
 
+      procedure Unparse_Tokens
+        (Tokens : Token_Sequence; Items : in out Document_Vectors.Vector);
+      --  Create template nodes for each element in ``Tokens`` and append them
+      --  to ``Items``.
+
       function Unparse_Node (N : Lk_Node) return Document_Type;
       --  Using the unparsing configuration for N, unparse it to a Prettier
       --  document.
 
-      function Unparse_Field
+      procedure Unparse_Field
         (Node        : Lk_Node;
          Node_Config : Node_Config_Record;
          Child       : Lk_Node;
-         Field_Ref   : Struct_Member_Index) return Document_Type;
-      --  Unparse ``Child``, which is the ``Field_Ref`` field of ``Node``.
-      --  ``Node_Config`` must be the node unparsing configuration for
-      --  ``Node``.
+         Field_Ref   : Struct_Member_Index;
+         Unparser    : Field_Unparser_Impl;
+         Items       : in out Document_Vectors.Vector);
+      --  Unparse ``Child``, which is the ``Field_Ref`` field of ``Node``. The
+      --  Resulting items are appended to ``Items``. ``Node_Config`` must be
+      --  the node unparsing configuration for ``Node``, and ``Unparser`` must
+      --  be the unparser for this field.
+
+      --------------------
+      -- Unparse_Tokens --
+      --------------------
+
+      procedure Unparse_Tokens
+        (Tokens : Token_Sequence; Items : in out Document_Vectors.Vector) is
+      begin
+         for T of Tokens.all loop
+            declare
+               Fragment : constant Unparsing_Fragment :=
+                 Fragment_For (Config.Value.Language, T);
+               pragma Assert (Fragment.Kind = Token_Fragment);
+            begin
+               Items.Append
+                 (Pool.Create_Token
+                    (Fragment.Token_Kind, Fragment.Token_Text));
+            end;
+         end loop;
+      end Unparse_Tokens;
 
       ------------------
       -- Unparse_Node --
@@ -1791,12 +2096,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end;
 
                when Field_Fragment =>
-                  Items.Append
-                    (Unparse_Field
-                       (Node        => N,
-                        Node_Config => Node_Config,
-                        Child       => F.Node,
-                        Field_Ref   => To_Index (F.Field)));
+                  Unparse_Field
+                    (Node        => N,
+                     Node_Config => Node_Config,
+                     Child       => F.Node,
+                     Field_Ref   => To_Index (F.Field),
+                     Unparser    => F.Field_Unparser_Ref.all,
+                     Items       => Items);
 
                when List_Child_Fragment =>
                   Items.Append (Unparse_Node (F.Node));
@@ -1843,22 +2149,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                      begin
                         if Is_Field_Present (Child, Field_Unparser) then
                            Items.Clear;
-
-                           for T of Field_Unparser.Pre_Tokens.all loop
-                              Process_Fragment (Fragment_For (Id, T));
-                           end loop;
-
-                           Items.Append
-                             (Unparse_Field
-                                (Node        => N,
-                                 Node_Config => Node_Config,
-                                 Child       => Child,
-                                 Field_Ref   => Field_Unparser.Member));
-
-                           for T of Field_Unparser.Post_Tokens.all loop
-                              Process_Fragment (Fragment_For (Id, T));
-                           end loop;
-
+                           Unparse_Field
+                             (Node        => N,
+                              Node_Config => Node_Config,
+                              Child       => Child,
+                              Field_Ref   => Field_Unparser.Member,
+                              Unparser    => Field_Unparser,
+                              Items       => Items);
                            Arguments.Field_Docs.Append
                              (Pool.Create_List (Items));
                         else
@@ -1874,6 +2171,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                      Template  => Template,
                      Arguments => Arguments);
                end;
+
+            when With_Text_Recurse =>
+
+               --  We are supposed to create these templates only for fields,
+               --  never for nodes.
+
+               raise Program_Error;
          end case;
       end Unparse_Node;
 
@@ -1881,25 +2185,44 @@ package body Langkit_Support.Generic_API.Unparsing is
       -- Unparse_Field --
       -------------------
 
-      function Unparse_Field
+      procedure Unparse_Field
         (Node        : Lk_Node;
          Node_Config : Node_Config_Record;
          Child       : Lk_Node;
-         Field_Ref   : Struct_Member_Index) return Document_Type
+         Field_Ref   : Struct_Member_Index;
+         Unparser    : Field_Unparser_Impl;
+         Items       : in out Document_Vectors.Vector)
       is
          Field_Template : constant Template_Type :=
            Node_Config.Field_Configs.Element (Field_Ref);
-         pragma Assert (Field_Template.Kind = With_Recurse);
+         pragma Assert
+           (Field_Template.Kind in With_Recurse | With_Text_Recurse);
 
-         Field_Template_Args : constant Template_Instantiation_Args :=
-           (Kind             => With_Recurse,
-            With_Recurse_Doc => Unparse_Node (Child));
+         Handle_Tokens : constant Boolean :=
+           Field_Template.Kind = With_Recurse;
+         --  Whether we have to take care of pre/post tokens for this field.
+         --  For With_Text_Recurse templates, it is Field_Template that takes
+         --  care of them.
+
+         Field_Template_Args : Template_Instantiation_Args
+                                 (Field_Template.Kind);
       begin
-         return Instantiate_Template
-                  (Pool      => Pool,
-                   Node      => Node,
-                   Template  => Field_Template,
-                   Arguments => Field_Template_Args);
+         Field_Template_Args.With_Recurse_Doc := Unparse_Node (Child);
+
+         if Handle_Tokens then
+            Unparse_Tokens (Unparser.Pre_Tokens, Items);
+         end if;
+
+         Items.Append
+           (Instantiate_Template
+              (Pool      => Pool,
+               Node      => Node,
+               Template  => Field_Template,
+               Arguments => Field_Template_Args));
+
+         if Handle_Tokens then
+            Unparse_Tokens (Unparser.Post_Tokens, Items);
+         end if;
       end Unparse_Field;
 
    begin
