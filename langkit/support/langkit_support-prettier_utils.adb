@@ -249,13 +249,11 @@ package body Langkit_Support.Prettier_Utils is
    function Create_Align
      (Self     : in out Document_Pool;
       Data     : Prettier.Alignment_Data_Type;
-      Contents : Document_Type;
-      Node     : Lk_Node := No_Lk_Node) return Document_Type is
+      Contents : Document_Type) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind           => Align,
-           Node           => Node,
            Align_Data     => Data,
            Align_Contents => Contents)
       do
@@ -273,7 +271,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record (Kind => Break_Parent)
       do
-         Result.Node := No_Lk_Node;
          Self.Register (Result);
       end return;
    end Create_Break_Parent;
@@ -284,13 +281,11 @@ package body Langkit_Support.Prettier_Utils is
 
    function Create_Fill
      (Self     : in out Document_Pool;
-      Document : Document_Type;
-      Node     : Lk_Node := No_Lk_Node) return Document_Type is
+      Document : Document_Type) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind          => Fill,
-           Node          => Node,
            Fill_Document => Document)
       do
          Self.Register (Result);
@@ -305,13 +300,11 @@ package body Langkit_Support.Prettier_Utils is
      (Self         : in out Document_Pool;
       Document     : Document_Type;
       Should_Break : Boolean;
-      Id           : Template_Symbol;
-      Node         : Lk_Node := No_Lk_Node) return Document_Type is
+      Id           : Template_Symbol) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind               => Group,
-           Node               => Node,
            Group_Document     => Document,
            Group_Should_Break => Should_Break,
            Group_Id           => Id)
@@ -330,7 +323,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record (Kind => Hard_Line)
       do
-         Result.Node := No_Lk_Node;
          Self.Register (Result);
       end return;
    end Create_Hard_Line;
@@ -370,8 +362,7 @@ package body Langkit_Support.Prettier_Utils is
              (if Flat_Contents = null
               then Self.Create_Empty_List
               else Flat_Contents),
-           If_Break_Group_Id      => Group_Id,
-           Node                   => No_Lk_Node)
+           If_Break_Group_Id      => Group_Id)
       do
          Self.Register (Result);
       end return;
@@ -383,13 +374,11 @@ package body Langkit_Support.Prettier_Utils is
 
    function Create_Indent
      (Self     : in out Document_Pool;
-      Document : Document_Type;
-      Node     : Lk_Node := No_Lk_Node) return Document_Type is
+      Document : Document_Type) return Document_Type is
    begin
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind            => Indent,
-           Node            => Node,
            Indent_Document => Document)
       do
          Self.Register (Result);
@@ -405,7 +394,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record (Kind => Line)
       do
-         Result.Node := No_Lk_Node;
          Self.Register (Result);
       end return;
    end Create_Line;
@@ -416,8 +404,7 @@ package body Langkit_Support.Prettier_Utils is
 
    function Create_List
      (Self      : in out Document_Pool;
-      Documents : in out Document_Vectors.Vector;
-      Node      : Lk_Node := No_Lk_Node) return Document_Type
+      Documents : in out Document_Vectors.Vector) return Document_Type
    is
       use type Ada.Containers.Count_Type;
    begin
@@ -428,7 +415,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record (Kind => List)
       do
-         Result.Node := Node;
          Result.List_Documents.Move (Documents);
          Self.Register (Result);
       end return;
@@ -444,7 +430,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record (Kind => Literal_Line)
       do
-         Result.Node := No_Lk_Node;
          Self.Register (Result);
       end return;
    end Create_Literal_Line;
@@ -459,7 +444,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record (Kind => List)
       do
-         Result.Node := No_Lk_Node;
          Self.Register (Result);
       end return;
    end Create_Empty_List;
@@ -473,7 +457,6 @@ package body Langkit_Support.Prettier_Utils is
    begin
       return Result : constant Document_Type := new Document_Record (Recurse)
       do
-         Result.Node := No_Lk_Node;
          Self.Register (Result);
       end return;
    end Create_Recurse;
@@ -500,7 +483,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind                   => Recurse_Field,
-           Node                   => No_Lk_Node,
            Recurse_Field_Ref      => Field,
            Recurse_Field_Position => Position)
       do
@@ -520,7 +502,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record (Recurse_Flatten)
       do
-         Result.Node := No_Lk_Node;
          Result.Recurse_Flatten_Types.Move (Types);
          Self.Register (Result);
       end return;
@@ -536,7 +517,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record (Kind => Soft_Line)
       do
-         Result.Node := No_Lk_Node;
          Self.Register (Result);
       end return;
    end Create_Soft_Line;
@@ -553,7 +533,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind       => Token,
-           Node       => No_Lk_Node,
            Token_Kind => Kind,
            Token_Text => Text)
       do
@@ -570,7 +549,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record (Kind => Trim)
       do
-         Result.Node := No_Lk_Node;
          Self.Register (Result);
       end return;
    end Create_Trim;
@@ -586,7 +564,6 @@ package body Langkit_Support.Prettier_Utils is
       return Result : constant Document_Type :=
         new Document_Record'
           (Kind              => Whitespace,
-           Node              => No_Lk_Node,
            Whitespace_Length => Length)
       do
          Self.Register (Result);
