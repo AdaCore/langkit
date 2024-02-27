@@ -63,6 +63,7 @@ private package Langkit_Support.Prettier_Utils is
       Hard_Line,
       Hard_Line_Without_Break_Parent,
       If_Break,
+      If_Empty,
       Indent,
       Line,
       List,
@@ -101,6 +102,10 @@ private package Langkit_Support.Prettier_Utils is
             If_Break_Contents      : Document_Type;
             If_Break_Flat_Contents : Document_Type;
             If_Break_Group_Id      : Template_Symbol;
+
+         when If_Empty =>
+            If_Empty_Then : Document_Type;
+            If_Empty_Else : Document_Type;
 
          when Indent =>
             Indent_Document : Document_Type;
@@ -233,6 +238,12 @@ private package Langkit_Support.Prettier_Utils is
       Group_Id      : Template_Symbol := No_Template_Symbol)
       return Document_Type;
    --  Return an ``If_Break`` node
+
+   function Create_If_Empty
+     (Self          : in out Document_Pool;
+      Then_Contents : Document_Type;
+      Else_Contents : Document_Type) return Document_Type;
+   --  Return an ``If_Empty`` node
 
    function Create_Indent
      (Self     : in out Document_Pool;

@@ -1,0 +1,11 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": {
+        "kind": "ifEmpty",
+        "then": "recurse",
+        "else": "recurse"
+      }
+    }
+  }
+}

@@ -63,6 +63,9 @@ begin
    Check ("invalid_ifbreak.json");
    Check ("invalid_ifbreak2.json");
    Check ("invalid_ifbreak3.json");
+   Check ("invalid_ifempty.json");
+   Check ("invalid_ifempty2.json");
+   Check ("invalid_ifempty3.json");
    Check ("invalid_indent.json");
    Check ("invalid_markasroot.json");
    Check ("invalid_innerroot.json");
@@ -91,6 +94,7 @@ begin
    Check ("recurse_whitespace.json");
    Check ("recurse_indent_too_few.json");
    Check ("recurse_indent_too_many.json");
+   Check ("recurse_if_empty.json");
    New_Line;
 
    Put_Line ("Done.");

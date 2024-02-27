@@ -13,8 +13,8 @@ grammar foo_grammar {
     fun_decl <- FunDecl(
         "def"
         name
-        ?pick("("
-        list+(param_spec, ",")
+        pick("("
+        list*(param_spec, ",")
         ")") ":" type_ref "{" list*(stmt) "}"
     )
     stmt <- Stmt(expr ";")

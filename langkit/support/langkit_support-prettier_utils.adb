@@ -142,6 +142,9 @@ package body Langkit_Support.Prettier_Utils is
                   (Group_Id => To_Prettier_Symbol
                                  (Symbol_Map, Document.If_Break_Group_Id)));
 
+            when If_Empty =>
+               raise Program_Error with "uninstantiated template";
+
             when Indent =>
                return Indent (Recurse (Document.Indent_Document));
 
@@ -367,6 +370,25 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_If_Break;
+
+   ---------------------
+   -- Create_If_Empty --
+   ---------------------
+
+   function Create_If_Empty
+     (Self          : in out Document_Pool;
+      Then_Contents : Document_Type;
+      Else_Contents : Document_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind          => If_Empty,
+           If_Empty_Then => Then_Contents,
+           If_Empty_Else => Else_Contents)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_If_Empty;
 
    -------------------
    -- Create_Indent --
@@ -688,6 +710,9 @@ package body Langkit_Support.Prettier_Utils is
                   Last_Spacing := Spacing_Kind'Min (LS_Break, LS_Flat);
                end;
 
+            when If_Empty =>
+               raise Program_Error;
+
             when Indent =>
 
                --  Indent does not emit any spacing before processing its inner
@@ -860,6 +885,11 @@ package body Langkit_Support.Prettier_Utils is
                end if;
                Process (Document.If_Break_Contents, Prefix & List_Indent);
                Process (Document.If_Break_Flat_Contents, Prefix & List_Indent);
+
+            when If_Empty =>
+               Put_Line ("ifEmpty:");
+               Process (Document.If_Empty_Then, Prefix & List_Indent);
+               Process (Document.If_Empty_Else, Prefix & List_Indent);
 
             when Indent =>
                Put_Line ("indent:");
