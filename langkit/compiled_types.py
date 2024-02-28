@@ -4593,7 +4593,8 @@ def create_builtin_types():
         'SourceLocationRange',
         exposed=True,
         is_ptr=False,
-        nullexpr='SourceLocationRange()',
+        nullexpr='No_Source_Location_Range',
+        null_allowed=True,
     )
 
     TokenType()
