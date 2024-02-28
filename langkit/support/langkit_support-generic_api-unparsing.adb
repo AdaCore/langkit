@@ -249,15 +249,28 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Node configurations for all node types in Language
    end record;
 
+   type Single_Template_Instantiation_Argument is record
+      Document : Document_Type;
+      --  Document to substitute to "recurse*" nodes when instantiating a
+      --  template.
+
+      Node : Lk_Node;
+      --  Node from which ``Document`` was generated. Keeping track of this is
+      --  necessary in order to implement instantiation for "recurse_flatten".
+   end record;
+
+   package Template_Instantiation_Arg_Vectors is new Ada.Containers.Vectors
+     (Positive, Single_Template_Instantiation_Argument);
+
    type Template_Instantiation_Args (Kind : Some_Template_Kind) is record
       case Kind is
          when With_Recurse | With_Text_Recurse =>
-            With_Recurse_Doc : Document_Type;
+            With_Recurse_Doc : Single_Template_Instantiation_Argument;
             --  Document to use in order to replace "recurse"/"recurse_flatten"
             --  templates.
 
          when With_Recurse_Field =>
-            Field_Docs : Document_Vectors.Vector;
+            Field_Docs : Template_Instantiation_Arg_Vectors.Vector;
             --  Documents to use in order to replace "recurse_field" templates
       end case;
    end record;
@@ -1882,8 +1895,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Pool.Create_Align
               (Template.Align_Data,
                Instantiate_Template_Helper
-                 (Pool, Node, Template.Align_Contents, Arguments),
-               Node);
+                 (Pool, Node, Template.Align_Contents, Arguments));
 
          when Break_Parent =>
             return Pool.Create_Break_Parent;
@@ -1891,16 +1903,14 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Fill =>
             return Pool.Create_Fill
               (Instantiate_Template_Helper
-                 (Pool, Node, Template.Fill_Document, Arguments),
-               Node);
+                 (Pool, Node, Template.Fill_Document, Arguments));
 
          when Group =>
             return Pool.Create_Group
               (Instantiate_Template_Helper
                  (Pool, Node, Template.Group_Document, Arguments),
                Template.Group_Should_Break,
-               Template.Group_Id,
-               Node);
+               Template.Group_Id);
 
          when Hard_Line =>
             return Pool.Create_Hard_Line;
@@ -1919,8 +1929,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Indent =>
             return Pool.Create_Indent
               (Instantiate_Template_Helper
-                 (Pool, Node, Template.Indent_Document, Arguments),
-               Node);
+                 (Pool, Node, Template.Indent_Document, Arguments));
 
          when Line =>
             return Pool.Create_Line;
@@ -1937,51 +1946,58 @@ package body Langkit_Support.Generic_API.Unparsing is
                         Template.List_Documents.Element (I),
                         Arguments));
                end loop;
-               return Pool.Create_List (Items, Node);
+               return Pool.Create_List (Items);
             end;
 
          when Literal_Line =>
             return Pool.Create_Literal_Line;
 
          when Recurse =>
-            return Arguments.With_Recurse_Doc;
+            return Arguments.With_Recurse_Doc.Document;
 
          when Recurse_Field =>
-            return Arguments.Field_Docs (Template.Recurse_Field_Position);
+            return Arguments
+                   .Field_Docs (Template.Recurse_Field_Position)
+                   .Document;
 
          when Recurse_Flatten =>
-            return Result : Document_Type := Arguments.With_Recurse_Doc do
+            declare
+               Arg : constant Single_Template_Instantiation_Argument :=
+                 Arguments.With_Recurse_Doc;
+            begin
+               return Result : Document_Type := Arg.Document do
 
-               --  As long as Result is a document we can flatten and that was
-               --  created by a node that passes the flattening guard, unwrap
-               --  it.
+                  --  As long as Result is a document we can flatten and that
+                  --  was created by a node that passes the flattening guard,
+                  --  unwrap it.
 
-               while not Result.Node.Is_Null
-                     and then Node_Matches
-                                (Result.Node, Template.Recurse_Flatten_Types)
-               loop
-                  case Result.Kind is
-                     when Align =>
-                        Result := Result.Align_Contents;
+                  while not Arg.Node.Is_Null
+                        and then Node_Matches
+                                   (Arg.Node, Template.Recurse_Flatten_Types)
+                  loop
+                     case Result.Kind is
+                        when Align =>
+                           Result := Result.Align_Contents;
 
-                     when Fill =>
-                        Result := Result.Fill_Document;
+                        when Fill =>
+                           Result := Result.Fill_Document;
 
-                     when Group =>
-                        Result := Result.Group_Document;
+                        when Group =>
+                           Result := Result.Group_Document;
 
-                     when Indent =>
-                        Result := Result.Indent_Document;
+                        when Indent =>
+                           Result := Result.Indent_Document;
 
-                     when List =>
-                        exit when Result.List_Documents.Length /= 1;
-                        Result := Result.List_Documents.First_Element;
+                        when List =>
+                           exit when Result.List_Documents.Length /= 1;
+                           Result := Result.List_Documents.First_Element;
 
-                     when others =>
-                        exit;
-                  end case;
-               end loop;
-            end return;
+                        when others =>
+                           exit;
+                     end case;
+                  end loop;
+               end return;
+            end;
 
          when Soft_Line =>
             return Pool.Create_Soft_Line;
@@ -2083,7 +2099,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                         declare
                            Args : constant Template_Instantiation_Args :=
                              (Kind             => With_Recurse,
-                              With_Recurse_Doc => Token);
+                              With_Recurse_Doc =>
+                                (Document => Token, Node => N));
                         begin
                            Token := Instantiate_Template
                              (Pool      => Pool,
@@ -2123,7 +2140,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                  (Pool      => Pool,
                   Node      => N,
                   Template  => Template,
-                  Arguments => (With_Recurse, Pool.Create_List (Items)));
+                  Arguments =>
+                    (Kind             => With_Recurse,
+                     With_Recurse_Doc =>
+                       (Document => Pool.Create_List (Items),
+                        Node     => N)));
 
             when With_Recurse_Field =>
 
@@ -2146,6 +2167,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                         Child          : constant Lk_Node := N.Child (I);
                         Field_Unparser : Field_Unparser_Impl renames
                           Node_Unparser.Field_Unparsers.Field_Unparsers (I);
+                        Child_Doc      : Document_Type;
                      begin
                         if Is_Field_Present (Child, Field_Unparser) then
                            Items.Clear;
@@ -2156,12 +2178,14 @@ package body Langkit_Support.Generic_API.Unparsing is
                               Field_Ref   => Field_Unparser.Member,
                               Unparser    => Field_Unparser,
                               Items       => Items);
-                           Arguments.Field_Docs.Append
-                             (Pool.Create_List (Items));
+                           Child_Doc := Pool.Create_List (Items);
                         else
-                           Arguments.Field_Docs.Append
-                             (Pool.Create_Empty_List);
+                           Child_Doc := Pool.Create_Empty_List;
                         end if;
+                        Arguments.Field_Docs.Append
+                          (Single_Template_Instantiation_Argument'
+                             (Document => Child_Doc,
+                              Node     => Child));
                      end;
                   end loop;
 
@@ -2207,7 +2231,9 @@ package body Langkit_Support.Generic_API.Unparsing is
          Field_Template_Args : Template_Instantiation_Args
                                  (Field_Template.Kind);
       begin
-         Field_Template_Args.With_Recurse_Doc := Unparse_Node (Child);
+         Field_Template_Args.With_Recurse_Doc :=
+           (Document => Unparse_Node (Child),
+            Node     => Child);
 
          if Handle_Tokens then
             Unparse_Tokens (Unparser.Pre_Tokens, Items);

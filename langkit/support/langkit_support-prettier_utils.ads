@@ -75,11 +75,6 @@ private package Langkit_Support.Prettier_Utils is
       Trim,
       Whitespace);
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
-      Node : Lk_Node;
-      --  For actual unparsing documents (i.e. instantiated templates): node
-      --  for which this template was instantiated. Tracking this information
-      --  is necessary to implement the guard of "recurse_flatten" templates.
-
       case Kind is
          when Align =>
             Align_Data     : Prettier.Alignment_Data_Type;
@@ -204,8 +199,7 @@ private package Langkit_Support.Prettier_Utils is
    function Create_Align
      (Self     : in out Document_Pool;
       Data     : Prettier.Alignment_Data_Type;
-      Contents : Document_Type;
-      Node     : Lk_Node := No_Lk_Node) return Document_Type;
+      Contents : Document_Type) return Document_Type;
    --  Return an ``Align`` node
 
    function Create_Break_Parent
@@ -214,16 +208,14 @@ private package Langkit_Support.Prettier_Utils is
 
    function Create_Fill
      (Self     : in out Document_Pool;
-      Document : Document_Type;
-      Node     : Lk_Node := No_Lk_Node) return Document_Type;
+      Document : Document_Type) return Document_Type;
    --  Return a ``Fill`` node
 
    function Create_Group
      (Self         : in out Document_Pool;
       Document     : Document_Type;
       Should_Break : Boolean;
-      Id           : Template_Symbol;
-      Node         : Lk_Node := No_Lk_Node) return Document_Type;
+      Id           : Template_Symbol) return Document_Type;
    --  Return a ``Group`` node
 
    function Create_Hard_Line
@@ -244,8 +236,7 @@ private package Langkit_Support.Prettier_Utils is
 
    function Create_Indent
      (Self     : in out Document_Pool;
-      Document : Document_Type;
-      Node     : Lk_Node := No_Lk_Node) return Document_Type;
+      Document : Document_Type) return Document_Type;
    --  Return an ``Indent`` node
 
    function Create_Line (Self : in out Document_Pool) return Document_Type;
@@ -253,8 +244,7 @@ private package Langkit_Support.Prettier_Utils is
 
    function Create_List
      (Self      : in out Document_Pool;
-      Documents : in out Document_Vectors.Vector;
-      Node      : Lk_Node := No_Lk_Node) return Document_Type;
+      Documents : in out Document_Vectors.Vector) return Document_Type;
    --  Transfer all nodes in ``Documents`` to a new ``List`` node and return
    --  that new node.
 
