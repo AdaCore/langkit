@@ -620,7 +620,11 @@ class Lexer:
                 # representation.
                 self.literals_map[m.to_match] = a
 
-                a.matcher = m
+                # Keep track of a canonical representation of this token, to be
+                # used by default in unparsers. The first one found is the
+                # canonical one.
+                if a.matcher is None:
+                    a.matcher = m
 
     def add_spacing(
         self,
