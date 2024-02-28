@@ -91,9 +91,8 @@ lkt_lexer.add_patterns(
     ("HEX_DIGITS_2", r'{HEX_DIGIT}{HEX_DIGIT}'),
     ("HEX_DIGITS_4", r'{HEX_DIGITS_2}{HEX_DIGITS_2}'),
     ("HEX_DIGITS_8", r'{HEX_DIGITS_4}{HEX_DIGITS_4}'),
-    ("STRING_LIT", r'\"(\\\"|[^\n\"])*\"'),
-    ("CHAR_LIT",
-     r"'(\\'|[^\n']|\\x{HEX_DIGITS_2}|\\u{HEX_DIGITS_4}|\\U{HEX_DIGITS_8})'"),
+    ("STRING_LIT", r'"(\\"|\\[^"]|[^\n"\\])*"'),
+    ("CHAR_LIT", r"'(\\'|[^\n']*)'"),
 )
 
 

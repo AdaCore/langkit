@@ -1,0 +1,34 @@
+== valid.lkt ==
+
+simple = 'a'
+esc_null = '\x00'
+esc_bell = '\x07'
+esc_backspace = '\x08'
+esc_htab = '\t'
+esc_newline = '\n'
+esc_vtab = '\x0b'
+esc_form_feed = '\x0c'
+esc_carriage_ret = '\r'
+esc_backslash = '\\'
+esc_single_quote = "'"
+esc_byte = '\xab'
+esc_half = '\uc0d1'
+esc_word = '\U0001abcd'
+
+== empty.lkt ==
+
+c:1:11: exactly one character expected
+
+== escape_double_quote.lkt ==
+
+c:1:10: invalid escape sequence
+
+== escape_invalid_char.lkt ==
+
+c:1:10: invalid escape sequence
+
+== escape_invalid_digit.lkt ==
+
+c:1:10: invalid escape sequence
+
+Done

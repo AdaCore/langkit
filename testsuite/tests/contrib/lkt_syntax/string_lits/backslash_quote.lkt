@@ -1,0 +1,4 @@
+val s = "\\""
+# The double backslash should denote "\", and so the string literal should end
+# right after the last backslash: the lexer should complain about the last
+# double quote on that line.
