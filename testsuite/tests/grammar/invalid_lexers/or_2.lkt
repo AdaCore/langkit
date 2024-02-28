@@ -1,0 +1,10 @@
+import common
+
+lexer foo_lexer {
+    example <- or("example" | or ("foo" | /))
+}
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}

@@ -1,0 +1,16 @@
+main.py: Running...
+AssignmentList main.txt:1:1-2:8
+|item_0:
+|  Assignment main.txt:1:1-1:6
+|  |f_name:
+|  |  Identifier main.txt:1:1-1:2: a
+|  |f_value:
+|  |  Number main.txt:1:5-1:6: 1
+|item_1:
+|  Assignment main.txt:2:1-2:8
+|  |f_name:
+|  |  Identifier main.txt:2:1-2:2: b
+|  |f_value:
+|  |  Number main.txt:2:6-2:8: 24
+main.py: Done.
+Done

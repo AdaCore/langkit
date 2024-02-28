@@ -1872,7 +1872,7 @@ def unparse_lexer_rule_set(newline_afters, rule_set):
             return unparse_matcher(rule_set[0][0].matcher)
         elif len(rule_set) > 1:
             return "or($i$hl{}$d$hl)".format("$hl".join(
-                unparse_matcher(rule.matcher) for rule, _ in rule_set
+                f"| {unparse_matcher(rule.matcher)}" for rule, _ in rule_set
             ))
         return "bordel"
 

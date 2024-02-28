@@ -55,6 +55,18 @@ family_1.lkt:4:5: error: Only lexer rules allowed in family blocks
 == foo.lkt ==
 Code generation was successful
 
+== or_1.lkt ==
+or_1.lkt:4:19: error: exactly one matcher expected
+4 |     example <- or("example" "foo" | "bar")
+  |                   ^^^^^^^^^^^^^^^
+
+
+== or_2.lkt ==
+or_2.lkt:4:43: error: Invalid lexing expression
+4 |     example <- or("example" | or ("foo" | /))
+  |                                           ^
+
+
 == pattern_1.lkt ==
 pattern_1.lkt:4:16: error: unbalanced square bracket
 4 |     example <- p"["
