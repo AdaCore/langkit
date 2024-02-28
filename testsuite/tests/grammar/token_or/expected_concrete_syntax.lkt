@@ -1,0 +1,28 @@
+lexer foo_lexer {
+
+    @trivia() whitespace <- p"[ \n\r\t]+"
+    id <- p"[a-zA-Z]+"
+    number <- p"[0-9]+"
+    assign <- or(
+        | "="
+        | ":="
+    )
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule expr <- list*(Assignment(Identifier(@id) "=" Number(@number)))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Assignment: FooNode {
+    @parse_field name: Identifier
+    @parse_field value: Number
+}
+
+class Identifier: FooNode implements TokenNode {
+}
+
+class Number: FooNode implements TokenNode {
+}

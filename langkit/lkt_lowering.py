@@ -1511,11 +1511,12 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             assert isinstance(r.f_decl, L.GrammarRuleDecl)
             matcher_expr = r.f_decl.f_expr
             if matcher_expr is not None:
-                rule = (lower_matcher(matcher_expr), token)
-                if is_pre:
-                    pre_rules.append(rule)
-                else:
-                    rules.append(rule)
+                for matcher in lower_matcher_list(matcher_expr):
+                    rule = (matcher, token)
+                    if is_pre:
+                        pre_rules.append(rule)
+                    else:
+                        rules.append(rule)
 
     def process_pattern(full_decl: L.FullDecl) -> None:
         """
@@ -1544,6 +1545,25 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             patterns[name] = (
                 decl.f_val.p_denoted_value, Location.from_lkt_node(decl)
             )
+
+    def lower_matcher_list(expr: L.GrammarExpr) -> list[Matcher]:
+        """
+        Lower a list of token matchers to our internals.
+
+        Lists of token matchers are made up of "atomic" matchers nested in "or"
+        grammar expressions.
+        """
+        if isinstance(expr, L.GrammarOrExpr):
+            result = []
+            for child_list in expr.f_sub_exprs:
+                with ctx.lkt_context(child_list):
+                    check_source_language(
+                        len(child_list) == 1, "exactly one matcher expected"
+                    )
+                result += lower_matcher_list(child_list[0])
+            return result
+        else:
+            return [lower_matcher(expr)]
 
     def lower_matcher(expr: L.GrammarExpr) -> Matcher:
         """
