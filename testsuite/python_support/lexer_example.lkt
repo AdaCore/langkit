@@ -24,7 +24,7 @@ lexer foo_lexer {
         r_par <- ")"
         l_brace <- "{"
         r_brace <- "}"
-        equal <- "="
+        equal <- or("=" | ":=")
         plus <- "+"
     }
 
