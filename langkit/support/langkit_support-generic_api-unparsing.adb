@@ -1351,6 +1351,53 @@ package body Langkit_Support.Generic_API.Unparsing is
                               (Contents, Flat_Contents, Group_Id);
                   end;
 
+               elsif Kind = "ifEmpty" then
+                  if Context.Kind /= Field_Template then
+                     Abort_Parsing
+                       (Context,
+                        """ifEmpty"" is valid only in field templates");
+                  end if;
+
+                  declare
+                     Then_Contents : Document_Type;
+                     Else_Contents : Document_Type;
+
+                     Then_Context : Template_Parsing_Context := Context;
+                     Else_Context : Template_Parsing_Context := Context;
+                  begin
+                     if not JSON.Has_Field ("then") then
+                        Abort_Parsing
+                          (Context,
+                           "missing ""then"" key for ifEmpty");
+                     end if;
+                     Then_Contents :=
+                       Parse_Template_Helper
+                         (JSON.Get ("then"), Then_Context, Symbol_Map);
+
+                     if not JSON.Has_Field ("else") then
+                        Abort_Parsing
+                          (Context,
+                           "missing ""else"" key for ifEmpty");
+                     end if;
+                     Else_Contents :=
+                       Parse_Template_Helper
+                         (JSON.Get ("else"), Else_Context, Symbol_Map);
+
+                     --  Unify the parsing state for both branches and update
+                     --  Context accordingly.
+
+                     if Then_Context.State /= Else_Context.State then
+                        Abort_Parsing
+                          (Context,
+                           "ifEmpty alternatives have inconsistent recurse"
+                           & " structure");
+                     end if;
+                     Context.State := Else_Context.State;
+
+                     return Pool.Create_If_Empty
+                              (Then_Contents, Else_Contents);
+                  end;
+
                elsif Kind = "indent" then
                   if not JSON.Has_Field ("contents") then
                      Abort_Parsing
@@ -1925,6 +1972,19 @@ package body Langkit_Support.Generic_API.Unparsing is
                Instantiate_Template_Helper
                  (Pool, Node, Template.If_Break_Flat_Contents, Arguments),
                Template.If_Break_Group_Id);
+
+         when If_Empty =>
+            declare
+               Child       : constant Lk_Node :=
+                 Arguments.With_Recurse_Doc.Node;
+               Subtemplate : constant Document_Type :=
+                 (if Child.Is_List_Node and then Child.Children_Count = 0
+                  then Template.If_Empty_Then
+                  else Template.If_Empty_Else);
+            begin
+               return Instantiate_Template_Helper
+                 (Pool, Node, Subtemplate, Arguments);
+            end;
 
          when Indent =>
             return Pool.Create_Indent

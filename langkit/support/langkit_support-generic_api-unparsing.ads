@@ -189,6 +189,16 @@ package Langkit_Support.Generic_API.Unparsing is
    --          "groupId": <symbol>
    --        }
    --
+   --    * The "ifEmpty" template is valid only inside a fields configuration.
+   --      It yields its "then" alternative if the field is an empty list, and
+   --      its "else" alternative otherwise::
+   --
+   --        {
+   --          "kind": "ifEmpty",
+   --          "then": <sub-template>,
+   --          "else": <sub-template>
+   --        }
+   --
    --    * The "indent" template yields an "indent" Prettier document::
    --
    --        {"kind": "indent", "contents": <sub-template>}

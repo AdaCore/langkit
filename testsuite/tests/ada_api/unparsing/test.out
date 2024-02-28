@@ -70,6 +70,12 @@ a: Int=2
     template for VarDecl.f_name: invalid group id: JSON_INT_TYPE
 # invalid_ifbreak3.json
     template for VarDecl.f_name: undefined symbol: myGroup
+# invalid_ifempty.json
+    template for VarDecl.f_name: missing "else" key for ifEmpty
+# invalid_ifempty2.json
+    template for VarDecl.f_name: missing "then" key for ifEmpty
+# invalid_ifempty3.json
+    "node" template for VarDecl: "ifEmpty" is valid only in field templates
 # invalid_indent.json
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json
@@ -151,6 +157,8 @@ a: Int=2
     "sep" template for StmtList: recursion is missing
 # recurse_indent_too_many.json
     "sep" template for StmtList: too many recursions
+# recurse_if_empty.json
+    template for VarDecl.f_name: ifEmpty alternatives have inconsistent recurse structure
 
 Done.
 
@@ -583,6 +591,118 @@ Done.
           "text": " "
         }
       }
+    }
+  ]
+}
+
+== cmd_ifempty.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "def f("
+    },
+    {
+      "id": 3,
+      "kind": "command",
+      "command": {
+        "command": "line",
+        "literal": false,
+        "soft": true,
+        "hard": false
+      }
+    },
+    {
+      "id": 4,
+      "kind": "text",
+      "text": "):Int{i;}"
+    }
+  ]
+}
+
+== cmd_ifempty.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "def f("
+    },
+    {
+      "id": 3,
+      "kind": "command",
+      "command": {
+        "command": "indent",
+        "indentContents": {
+          "id": 4,
+          "kind": "list",
+          "list": [
+            {
+              "id": 5,
+              "kind": "list",
+              "list": [
+                {
+                  "id": 6,
+                  "kind": "command",
+                  "command": {
+                    "command": "line",
+                    "literal": false,
+                    "soft": false,
+                    "hard": true
+                  }
+                },
+                {
+                  "id": 7,
+                  "kind": "command",
+                  "command": {
+                    "command": "breakParent"
+                  }
+                }
+              ]
+            },
+            {
+              "id": 8,
+              "kind": "text",
+              "text": "i:Int"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 9,
+      "kind": "list",
+      "list": [
+        {
+          "id": 10,
+          "kind": "command",
+          "command": {
+            "command": "line",
+            "literal": false,
+            "soft": false,
+            "hard": true
+          }
+        },
+        {
+          "id": 11,
+          "kind": "command",
+          "command": {
+            "command": "breakParent"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "kind": "text",
+      "text": "):Int{i;}"
     }
   ]
 }

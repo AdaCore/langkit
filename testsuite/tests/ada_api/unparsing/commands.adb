@@ -158,6 +158,8 @@ begin
    Check ("cmd_hardline.json");
    Check ("cmd_hardlinewithoutbreakparent.json");
    Check ("cmd_ifbreak.json");
+   Check ("cmd_ifempty.json", "def f(): Int {i;}");
+   Check ("cmd_ifempty.json", "def f(i: Int): Int {i;}");
    Check ("cmd_indent.json");
    Check ("cmd_line.json");
    Check ("cmd_list.json");
