@@ -2201,6 +2201,7 @@ class LktTypesLoader:
         # Register builtins in the root scope
         with AbstractExpression.with_location(Location.builtin):
             for builtin in [
+                builtin_type("Address"),
                 builtin_type("AnalysisUnitKind"),
                 builtin_type("BigInt"),
                 builtin_type("Bool"),
@@ -2217,6 +2218,7 @@ class LktTypesLoader:
                 builtin_type("LookupKind"),
                 builtin_type("RefCategories"),
                 builtin_type("SourceLocation"),
+                builtin_type("SourceLocationRange"),
                 builtin_type("String"),
                 builtin_type("Symbol"),
                 builtin_type("Token"),
