@@ -13,6 +13,9 @@ with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;        use Langkit_Support.Types;
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package provides common implementation details for Langkit-generated
 --  libraries. Even though it is not private (to allow Langkit-generated
 --  libraries to use it), it is not meant to be used beyond this. As such, this

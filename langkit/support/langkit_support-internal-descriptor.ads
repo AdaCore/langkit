@@ -17,10 +17,8 @@ use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Slocs;             use Langkit_Support.Slocs;
 with Langkit_Support.Types;             use Langkit_Support.Types;
 
---  This package provides common implementation details for Langkit-generated
---  libraries. Even though it is not private (to allow Langkit-generated
---  libraries to use it), it is not meant to be used beyond this. As such, this
---  API is considered unsafe and unstable.
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
 
 package Langkit_Support.Internal.Descriptor is
 

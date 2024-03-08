@@ -3,6 +3,9 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package implement memoization tables for the langkit generated
 --  parsers, which allows them to implement the packrat method of parsing.
 --

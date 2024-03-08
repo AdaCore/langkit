@@ -3,11 +3,10 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: At this stage, this package is considered as internal.
+--
 --  This package provides a generic API so that programs can work with the
 --  $.Analysis packages of all Langkit-generated libraries.
---
---  Note that it is experimental at this stage, and thus not officially
---  supported.
 --
 --  TODO??? Create a language-agnostic documentation for all the concepts
 --  referenced here (context, unit, node, token, trivia, ...).

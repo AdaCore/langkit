@@ -7,7 +7,10 @@ with Ada.Containers; use Ada.Containers;
 
 with System;
 
---  Various helpers to work with hashes for standard containers
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
+--  Various helpers to work with hashes for standard containers.
 
 package Langkit_Support.Hashes is
 

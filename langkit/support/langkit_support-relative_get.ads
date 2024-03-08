@@ -3,6 +3,9 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+
 generic
    type Item_Type is private;
    --  Type for objects to get

@@ -3,6 +3,9 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package provides the user of bump pointer pools with a Vector like
 --  container. Traditional vectors reallocate their whole storage when we
 --  outgrow their current capacity, but this is not possible without a very

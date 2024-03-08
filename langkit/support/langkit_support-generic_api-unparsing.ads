@@ -3,13 +3,12 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: At this stage, this package is considered as internal.
+--
 --  This package provides a generic API so that programs can unparse trees for
 --  any Langkit-generated library, i.e. turn parse trees back to text sources,
 --  with custom formatting. Formatting features are based on the Prettier_Ada
 --  library.
---
---  Note that it is experimental at this stage, and thus not officially
---  supported.
 --
 --  Here is a simplistic pretty-printing program using this API:
 --

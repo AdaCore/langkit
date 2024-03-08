@@ -3,11 +3,10 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: At this stage, this package is considered as internal.
+--
 --  This package and its children provide generic APIs so that programs can
 --  work with all Langkit-generated libraries.
---
---  Note that it is experimental at this stage, and thus not officially
---  supported.
 
 limited private with Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Names; use Langkit_Support.Names;

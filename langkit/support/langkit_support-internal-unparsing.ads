@@ -3,13 +3,12 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package defines the data structures used to represent unparsing
 --  information in Langkit-generated libraries. These tables are enough to turn
 --  a parse tree to synthetic source code.
---
---  Note that even though it is not private (to allow Langkit-generated
---  libraries to use it), it is not meant to be used beyond this. As such, this
---  API is considered unsafe and unstable.
 
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;

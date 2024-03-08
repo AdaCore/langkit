@@ -3,6 +3,9 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package provides a standardized array type (starting at index 0) along
 --  with a host of functional primitives to manipulate instances of this
 --  array. Functional transformations are a more natural way to express some

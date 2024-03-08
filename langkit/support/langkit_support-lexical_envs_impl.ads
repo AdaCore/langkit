@@ -17,6 +17,9 @@ with Langkit_Support.Text;         use Langkit_Support.Text;
 with Langkit_Support.Types;        use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package implements a scoped lexical environment data structure that
 --  will then be used in AST nodes. Particularities:
 --
@@ -30,10 +33,6 @@ with Langkit_Support.Vectors;
 --    more information about the fnodes. The consequence is that metadata needs
 --    to be combinable, eg. you need to be able to create a single metadata
 --    record from two metadata records.
---
---  TODO??? For the moment, everything is public, because it is not yet clear
---  what the interaction interface will be with the generated library. We might
---  want to make the type private at some point (or not).
 
 generic
 
