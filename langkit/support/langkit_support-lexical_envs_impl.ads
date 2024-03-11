@@ -97,6 +97,21 @@ generic
    --  Return the current version number of caches corresponding to Node's
    --  context, for cache invalidation purposes.
 
+   with procedure Notify_Cache_Updated
+     (Node : Node_Type; Delta_Amount : Long_Long_Integer) is null;
+   --  Callback procedure used when the number of entries in the lookup cache
+   --  of the lexical env held by the given node has changed by the given
+   --  amount (positive: N entries were added, negative: N entries were
+   --  removed). May trigger a cache collection.
+
+   with procedure Notify_Cache_Looked_Up (Node : Node_Type) is null;
+   --  Callback procedure used when the lookup cache associated with the given
+   --  node was looked up.
+
+   with procedure Notify_Cache_Hit (Node : Node_Type) is null;
+   --  Callback procedure used when the lookup cache associated with the given
+   --  node successfully returned a cached entry after a lookup.
+
    type Inner_Env_Assoc is private;
    with function Get_Key
      (Self : Inner_Env_Assoc) return Symbol_Type is <>;

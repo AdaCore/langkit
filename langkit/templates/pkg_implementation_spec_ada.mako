@@ -73,9 +73,10 @@ private package ${ada_lib_name}.Implementation is
      GNATCOLL.Traces.Create
        ("${ctx.lib_name.upper}.PLE_ERRORS", GNATCOLL.Traces.From_Config);
 
-   All_Diags_Trace : constant GNATCOLL.Traces.Trace_Handle :=
+   Cache_Invalidation_Trace : constant GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
-       ("${ctx.lib_name.upper}.ALL_SEM_DIAGS", GNATCOLL.Traces.From_Config);
+       ("${ctx.lib_name.upper}.CACHE_INVALIDATION",
+        GNATCOLL.Traces.From_Config);
 
    -------------------------------------
    -- Symbols and token data handlers --
@@ -240,6 +241,9 @@ private package ${ada_lib_name}.Implementation is
    -- Environments handling --
    ---------------------------
 
+   subtype Long_Long_Natural is Long_Long_Integer
+      range 0 .. Long_Long_Integer'Last;
+
    ${struct_types.incomplete_decl(T.env_md)}
    ${struct_types.decl(T.env_md, incomplete_nullexpr=False)}
    ${struct_types.nullexpr_decl(T.env_md)}
@@ -311,6 +315,19 @@ private package ${ada_lib_name}.Implementation is
    --  Register a rebinding to be destroyed when Node's analysis unit is
    --  destroyed or reparsed.
 
+   % if ctx.cache_collection_enabled:
+      procedure Lexical_Env_Cache_Updated
+        (Node         : ${T.root_node.name};
+         Delta_Amount : Long_Long_Integer);
+      --  Callback for Langkit_Support.Lexical_Envs_Impl.Notify_Cache_Updated
+
+      procedure Lexical_Env_Cache_Looked_Up (Node : ${T.root_node.name});
+      --  Callback for Langkit_Support.Lexical_Envs_Impl.Notify_Cache_Looked_Up
+
+      procedure Lexical_Env_Cache_Hit (Node : ${T.root_node.name});
+      --  Callback for Langkit_Support.Lexical_Envs_Impl.Notify_Cache_Hit
+   % endif
+
    function Element_Parent
      (Node : ${T.root_node.name}) return ${T.root_node.name};
 
@@ -359,6 +376,11 @@ private package ${ada_lib_name}.Implementation is
       Node_Text_Image          => AST_Envs_Node_Text_Image,
       Acquire_Rebinding        => Acquire_Rebinding,
       Register_Rebinding       => Register_Rebinding,
+   % if ctx.cache_collection_enabled:
+      Notify_Cache_Updated     => Lexical_Env_Cache_Updated,
+      Notify_Cache_Looked_Up   => Lexical_Env_Cache_Looked_Up,
+      Notify_Cache_Hit         => Lexical_Env_Cache_Hit,
+   % endif
       Ref_Category             => Ref_Category,
       Ref_Categories           => Ref_Categories,
       Inner_Env_Assoc          => ${T.inner_env_assoc.name},
@@ -1543,6 +1565,57 @@ private package ${ada_lib_name}.Implementation is
 
    procedure Dec_Ref (Self : in out Internal_Event_Handler_Access);
 
+   -----------------------------
+   -- Lexical env cache stats --
+   -----------------------------
+
+   % if ctx.cache_collection_enabled:
+
+   type Context_Env_Caches_Stats is record
+      Entry_Count : Long_Long_Integer := 0;
+      --  Current number of entries stored in all lexical env caches of all
+      --  the analysis units owned by this context. A ``Long_Long_Integer``
+      --  is enough to not have to worry about overflow, as it would mean
+      --  reaching a cache capacity of hundreds of thousands of terabytes.
+
+      Lookup_Count : Long_Long_Natural := 0;
+      --  Current number of cache lookups done in any lexical env of any
+      --  analysis unit owned by this context since its creation. A
+      --  ``Long_Long_Natural`` is enough to ensure we will not overflow,
+      --  in any realistic scenario.
+
+      Previous_Lookup_Count : Long_Long_Natural := 0;
+      --  Snapshot of the total number of cache lookups that were done in the
+      --  lexical envs of any analysis unit of this context at the time the
+      --  last collection was attempted.
+   end record;
+
+   type Unit_Env_Caches_Stats is record
+      Entry_Count : Long_Long_Integer := 0;
+      --  Current number of entries stored in lexical env caches of this
+      --  analysis unit.
+
+      Lookup_Count : Long_Long_Natural := 0;
+      --  Current number of cache lookups done in any lexical env of this
+      --  analysis unit since this unit was last collected.
+
+      Hit_Count : Long_Long_Natural := 0;
+      --  Current number of cache hits that have occurred in any lexical env of
+      --  this analysis unit since this unit was last collected.
+
+      Previous_Lookup_Count : Long_Long_Natural := 0;
+      --  Snapshot of the total number of cache lookups that were done in any
+      --  lexical env of this particular analysis unit when the last collection
+      --  was *attempted* (it is updated even if this unit was not collected).
+
+      Last_Overall_Lookup_Count : Long_Long_Natural := 0;
+      --  Snapshot of the total number of cache lookups that were done in any
+      --  lexical env of any analysis unit belonging to the same context as
+      --  this one when this unit was last collected.
+   end record;
+
+   % endif
+
    ---------------------------------
    -- Analysis context definition --
    ---------------------------------
@@ -1664,6 +1737,19 @@ private package ${ada_lib_name}.Implementation is
       --  the node reference is valid regarding its context, we know that the
       --  rebindings pointer is valid, and thus we can just check the rebinding
       --  version number.
+
+      % if ctx.cache_collection_enabled:
+
+      Env_Caches_Stats : Context_Env_Caches_Stats;
+      --  Holds stats about the usage of lexical env caches of all units
+      --  belonging to this context.
+
+      Env_Caches_Collection_Threshold : Long_Long_Integer :=
+        ${ctx.cache_collection_conf.threshold_increment};
+      --  The number of total cache entries that ``Entry_Count`` in
+      --  ``Env_Caches_Stats`` must reach before a new collection is attempted.
+
+      % endif
 
       ${exts.include_extension(ctx.ext("analysis", "context", "components"))}
    end record;
@@ -1807,6 +1893,14 @@ private package ${ada_lib_name}.Implementation is
 
       Cache_Version : Version_Number := 0;
       --  See the eponym field in Analysis_Context_Type
+
+      % if ctx.cache_collection_enabled:
+
+      Env_Caches_Stats : Unit_Env_Caches_Stats;
+      --  Holds stats about the lookup cache usage of all lexical envs
+      --  belonging to this context.
+
+      % endif
 
       ${exts.include_extension(ctx.ext('analysis', 'unit', 'components'))}
    end record;

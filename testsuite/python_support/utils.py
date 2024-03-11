@@ -10,7 +10,9 @@ from typing import List, Optional, Set
 
 import langkit
 import langkit.compile_context
-from langkit.compile_context import CompileCtx, UnparseScript
+from langkit.compile_context import (
+    CacheCollectionConf, CompileCtx, UnparseScript
+)
 from langkit.diagnostics import DiagnosticError, Diagnostics, WarningSet
 from langkit.libmanage import ManageScript
 
@@ -102,7 +104,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     build_date: Optional[str] = None,
                     standalone: bool = False,
                     property_exceptions: Set[str] = set(),
-                    generate_unparser: bool = False):
+                    generate_unparser: bool = False,
+                    cache_coll_conf: Optional[CacheCollectionConf] = None):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -137,6 +140,9 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     :param standalone: See CompileCtx's constructor.
 
     :param generate_unparser: See CompileCtx's constructor.
+
+    :param cache_coll_conf: See CompileCtx's ``cache_collection_conf``
+        constructor argument.
     """
 
     # Have a clean build directory
@@ -158,7 +164,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                      build_date=build_date,
                      standalone=standalone,
                      property_exceptions=property_exceptions,
-                     generate_unparser=generate_unparser)
+                     generate_unparser=generate_unparser,
+                     cache_collection_conf=cache_coll_conf)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -263,7 +270,8 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                   full_error_traces: bool = True,
                   additional_make_args: List[str] = [],
                   python_args: Optional[List[str]] = None,
-                  property_exceptions: Set[str] = set()):
+                  property_exceptions: Set[str] = set(),
+                  cache_collection_conf: Optional[CacheCollectionConf] = None):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -329,6 +337,8 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
         running a Python script.
 
     :param property_exceptions: See CompileCtx's constructor.
+
+    :param cache_collection_conf: See CompileCtx's constructor.
     """
     assert not types_from_lkt or lkt_file is not None
 
@@ -357,7 +367,8 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                               build_date=build_date,
                               standalone=standalone,
                               property_exceptions=property_exceptions,
-                              generate_unparser=generate_unparser)
+                              generate_unparser=generate_unparser,
+                              cache_coll_conf=cache_collection_conf)
 
         m = Manage(ctx)
 

@@ -170,14 +170,31 @@ package body Langkit_Support.Lexical_Envs_Impl is
    ------------------------
 
    procedure Reset_Lookup_Cache (Self : Lexical_Env) is
-      Env : constant Lexical_Env_Access := Unwrap (Self);
+      use Lookup_Cache_Maps;
+
+      Env      : constant Lexical_Env_Access := Unwrap (Self);
+      C        : Cursor := First (Env.Lookup_Cache);
+      Removed  : Long_Long_Integer := 0;
    begin
-      for C of Env.Lookup_Cache loop
-         C.Elements.Destroy;
+      --  Use an explicit cursor iteration, as a `for of` loop introduces a
+      --  non-negligible runtime overhead.
+      while Has_Element (C) loop
+         declare
+            Elements : Lookup_Result_Item_Vectors.Vector renames
+              Env.Lookup_Cache.Reference (C).Elements;
+         begin
+            Removed := Removed + Long_Long_Integer (Elements.Length);
+            Elements.Destroy;
+            C := Next (C);
+         end;
       end loop;
 
       Env.Lookup_Cache.Clear;
       Env.Lookup_Cache_Valid := True;
+
+      if Removed > 0 and then Env.Node /= No_Node then
+         Notify_Cache_Updated (Env.Node, -Removed);
+      end if;
    end Reset_Lookup_Cache;
 
    -----------------------
@@ -1248,6 +1265,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
               (Res_Key, Val, Cached_Res_Cursor, Inserted);
          end;
 
+         if Env.Node /= No_Node then
+            Notify_Cache_Looked_Up (Env.Node);
+         end if;
+
          if Inserted then
             Need_Cache := True;
             Outer_Results := Local_Results;
@@ -1274,6 +1295,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   null;
                when Computed =>
                   Local_Results.Concat (Res_Val.Elements);
+                  if Env.Node /= No_Node then
+                     Notify_Cache_Hit (Env.Node);
+                  end if;
                   return;
                when None =>
                   Need_Cache := True;
@@ -1401,6 +1425,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
                Caches_Trace.Trace ("INSERTING CACHE ENTRY " & Log_Id);
             end if;
 
+            if Env.Node /= No_Node then
+               Notify_Cache_Updated
+                 (Env.Node, Long_Long_Integer (Local_Results.Length));
+            end if;
             Env.Lookup_Cache.Include (Res_Key, (Computed, Local_Results));
             Outer_Results.Concat (Local_Results);
             Local_Results := Outer_Results;
@@ -2540,7 +2568,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
    procedure Reset_Caches (Self : Lexical_Env) is
    begin
-      Unwrap (Self).Lookup_Cache_Valid := False;
+      Reset_Lookup_Cache (Self);
    end Reset_Caches;
 
    ----------------------

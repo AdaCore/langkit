@@ -307,6 +307,35 @@ class GeneratedException:
         return names.Name('Exception') + self.name
 
 
+@dataclasses.dataclass
+class CacheCollectionConf:
+    """
+    Describes a strategy to use for automatic cache collection.
+    """
+
+    threshold_increment: int
+    """
+    Indicates the number of additional lexical env cache entries needed after
+    the last cache collection to trigger a new one. To give an example,
+    assume that we reached the current threshold set to 1000 entries. Hence, a
+    collection is attempted. If after this collection the number of entries is
+    back to, say 800, then we add to it this ``threshold_increment``, say 200,
+    to get the new threshold. This means a new collection will be attempted
+    when we reach 1000 entries again. Must be positive.
+    """
+
+    decision_heuristic: Optional[LibraryEntity] = None
+    """
+    The heuristic to use to decide whether a given unit should have its lexical
+    env caches collected or not. When left to ``None``, this will use the
+    default heuristic which will end up clearing the caches of all units when
+    the collection threshold is reached.
+    """
+
+    def __post_init__(self):
+        assert self.threshold_increment > 0
+
+
 class CompileCtx:
     """State holder for native code emission."""
 
@@ -348,7 +377,8 @@ class CompileCtx:
                  build_date: Optional[str] = None,
                  standalone: bool = False,
                  property_exceptions: Set[str] = set(),
-                 generate_unparser: bool = False):
+                 generate_unparser: bool = False,
+                 cache_collection_conf: Optional[CacheCollectionConf] = None):
         """Create a new context for code emission.
 
         :param lang_name: string (mixed case and underscore: see
@@ -455,6 +485,9 @@ class CompileCtx:
 
         :param generate_unparser: If true, generate a pretty printer for the
             given grammar. False by default.
+
+        :param cache_collection_conf: If not None, setup the automatic cache
+            collection mechanism with this configuration.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -686,6 +719,13 @@ class CompileCtx:
         self.has_ref_env = False
         """
         Whether there is a RefEnvs action in environment specs.
+        """
+
+        self.cache_collection_conf: Optional[CacheCollectionConf] = (
+            cache_collection_conf
+        )
+        """
+        The cache collection configuration to use for this language.
         """
 
         self.template_lookup_extra_dirs: List[str] = (
@@ -1036,6 +1076,13 @@ class CompileCtx:
             .format(to_pkg, source_kind, from_pkg))
         self.with_clauses[(from_pkg, source_kind)].append(
             (to_pkg, use_clause, is_private))
+
+    @property
+    def cache_collection_enabled(self) -> bool:
+        """
+        Return whether the automatic cache collection mechanism is enabled.
+        """
+        return self.cache_collection_conf is not None
 
     @property
     def sorted_logic_functors(self) -> List[Tuple[PropertyDef, int]]:
