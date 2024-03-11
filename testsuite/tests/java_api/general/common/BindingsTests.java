@@ -114,6 +114,20 @@ public final class BindingsTests {
         ) {
             // Get the unit for the foo.txt file
             AnalysisUnit unit = context.getUnitFromFile("foo.txt");
+            AnalysisUnit other = context.getUnitFromFile("foo.txt");
+            AnalysisUnit notSame =
+                context.getUnitFromBuffer("var identifier", "bar.txt");
+            System.out.println(
+                unit.toString() + " != " + other + " = " + (unit != other)
+            );
+            System.out.println(
+                unit.toString() + ".equals(" + other + ") = " +
+                unit.equals(other)
+            );
+            System.out.println(
+                unit.toString() + ".equals(" + notSame +
+                ") = " + unit.equals(notSame)
+            );
             System.out.println(
                 "Unit for the file " +
                 new File(unit.getFileName()).getName()

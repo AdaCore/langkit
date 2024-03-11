@@ -6,6 +6,9 @@ Expected '(', got Identifier at <1:5-1:15>
 -------------------
 
 --- Unit Filename ---
+<AnalysisUnit "foo.txt"> != <AnalysisUnit "foo.txt"> = true
+<AnalysisUnit "foo.txt">.equals(<AnalysisUnit "foo.txt">) = true
+<AnalysisUnit "foo.txt">.equals(<AnalysisUnit "bar.txt">) = false
 Unit for the file foo.txt
 ---------------------
 

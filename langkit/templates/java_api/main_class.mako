@@ -3605,7 +3605,7 @@ public final class ${ctx.lib_name.camel} {
             if(this == o) return true;
             if(!(o instanceof AnalysisUnit)) return false;
             final AnalysisUnit other = (AnalysisUnit) o;
-            return other.reference.equals(other.reference);
+            return this.reference.equals(other.reference);
         }
 
     }
