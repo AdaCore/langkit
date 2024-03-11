@@ -41,7 +41,7 @@ public class Main {
             ${ctx.lib_name.camel}.AnalysisContext.create();
         ${ctx.lib_name.camel}.AnalysisUnit unit = ctx.getUnitFromFile(myFile);
 
-        // Dump the AST
+        // Dump the parsed tree
         System.out.println(unit.root().dump());
 
     }

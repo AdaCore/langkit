@@ -114,6 +114,20 @@ public final class BindingsTests {
         ) {
             // Get the unit for the foo.txt file
             AnalysisUnit unit = context.getUnitFromFile("foo.txt");
+            AnalysisUnit other = context.getUnitFromFile("foo.txt");
+            AnalysisUnit notSame =
+                context.getUnitFromBuffer("var identifier", "bar.txt");
+            System.out.println(
+                unit.toString() + " != " + other + " = " + (unit != other)
+            );
+            System.out.println(
+                unit.toString() + ".equals(" + other + ") = " +
+                unit.equals(other)
+            );
+            System.out.println(
+                unit.toString() + ".equals(" + notSame +
+                ") = " + unit.equals(notSame)
+            );
             System.out.println(
                 "Unit for the file " +
                 new File(unit.getFileName()).getName()
@@ -168,7 +182,7 @@ public final class BindingsTests {
             System.out.println("Text range with a NO_TOKEN = " +
                 Token.textRange(first, none));
 
-            // Test the token equivalence
+            // Test the token equivalence and equality
             AnalysisUnit eqUnit = context.getUnitFromBuffer(
                 "null identifier example identifier example",
                 "foo.txt"
@@ -188,6 +202,20 @@ public final class BindingsTests {
                     }
                 }
                 current = current.next();
+            }
+
+            Token left = eqUnit.getFirstToken();
+            Token right = eqUnit.getFirstToken();
+            while(!(left.isNone() || right.isNone())) {
+                System.out.println(
+                    left.toString() + " != " + right + " = " + (left != right)
+                );
+                System.out.println(
+                    left.toString() + ".equals(" + right + ") = " +
+                    left.equals(right)
+                );
+                left = left.next();
+                right = right.next();
             }
         }
 
@@ -219,7 +247,7 @@ public final class BindingsTests {
                 "Unit root children = " + root.children().toString()
             );
             System.out.println(
-                "Unit root AST dump = " + root.dumpAST()
+                "Unit root tree dump = " + root.dumpTree()
             );
             System.out.println(
                 "Unit root is a list node = " + root.isListType()

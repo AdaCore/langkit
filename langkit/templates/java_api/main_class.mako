@@ -322,8 +322,6 @@ public final class ${ctx.lib_name.camel} {
 
     /**
      * Convert a C Langkit exception to the LangkitException class.
-
-     * @param
      */
     private static LangkitException wrapException(
         final LangkitExceptionNative exc
@@ -369,7 +367,7 @@ public final class ${ctx.lib_name.camel} {
     // ==========
 
     /**
-     * Interface to visit the AST.
+     * Interface to visit the parse tree.
      */
     public static interface BasicVisitor<T> {
         T visit(${root_node_type} node);
@@ -381,7 +379,7 @@ public final class ${ctx.lib_name.camel} {
     }
 
     /**
-     * Interface to visit the AST with a parameter.
+     * Interface to visit the parse tree with a parameter.
      */
     public static interface ParamVisitor<T, P> {
         T visit(${root_node_type} node, P param);
@@ -807,7 +805,7 @@ public final class ${ctx.lib_name.camel} {
         % endfor
         ;
 
-        // ----- Class attributes
+        // ----- Class attributes -----
 
         /** Singleton that represents the none expcetion kind. */
         public static final ExceptionKind NONE =
@@ -1820,7 +1818,7 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Class attributes -----
 
-        /** Singleton that represents the none diagnositc. */
+        /** Singleton that represents the none diagnostic. */
         public static final Diagnostic NONE = new Diagnostic(
             SourceLocationRange.NONE,
             Text.NONE
@@ -1873,8 +1871,8 @@ public final class ${ctx.lib_name.camel} {
         /**
          * Wrap a pointer to a native diagnostic.
          *
-         * @param pointer The pointer to the native diagnositc.
-         * @return The wrapped diagnositc.
+         * @param pointer The pointer to the native diagnostic.
+         * @return The wrapped diagnostic.
          */
         static Diagnostic wrap(
             final Pointer pointer
@@ -1886,7 +1884,7 @@ public final class ${ctx.lib_name.camel} {
          * Wrap a diagnostic native value in the Java class.
          *
          * @param diagnosticNative The diagnostic NI native value.
-         * @return The newly wrapped diagnositc.
+         * @return The newly wrapped diagnostic.
          */
         static Diagnostic wrap(
             final DiagnosticNative diagnosticNative
@@ -2049,7 +2047,7 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
-    ${c_doc('langkit.unit_provider_type')}
+    ${java_doc('langkit.unit_provider_type', 4)}
     public static final class UnitProvider implements AutoCloseable {
 
         // ----- Class attributes -----
@@ -2141,7 +2139,7 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
-    ${java_doc('langkit.event_handler_type')}
+    ${java_doc('langkit.event_handler_type', 4)}
     public static final class EventHandler implements AutoCloseable {
 
         // ----- Class attributes -----
@@ -2687,9 +2685,9 @@ public final class ${ctx.lib_name.camel} {
             if(o == this) return true;
             if(!(o instanceof Token)) return false;
             final Token other = (Token) o;
-            return other.tokenDataHandler.equals(this.tokenDataHandler) &&
-                    other.tokenIndex == this.tokenIndex &&
-                    other.triviaIndex == this.triviaIndex;
+            return this.tokenDataHandler.equals(other.tokenDataHandler) &&
+                    this.tokenIndex == other.tokenIndex &&
+                    this.triviaIndex == other.triviaIndex;
         }
 
         // ----- Inner classes -----
@@ -3071,6 +3069,26 @@ public final class ${ctx.lib_name.camel} {
             return this.eventHandler;
         }
 
+        // ----- Class methods -----
+
+        /**
+         * Increase the reference counter of the given context.
+         *
+         * @param context The context to increase the reference counter of.
+         */
+        private static void increaseRefCounter(
+            final AnalysisContext context
+        ) {
+            // Increase the context reference counter of the context if not null
+            if(!context.reference.isNull()) {
+                if(ImageInfo.inImageCode()) {
+                    NI_LIB.${nat("context_incref")}(context.reference.ni());
+                } else {
+                    JNI_LIB.${nat("context_incref")}(context.reference.jni());
+                }
+            }
+        }
+
         // ----- Instance methods -----
 
         /**
@@ -3259,24 +3277,6 @@ public final class ${ctx.lib_name.camel} {
             return this.getUnitFromProvider(name, kind, "", false);
         }
         % endif
-
-        /**
-         * Increase the reference counter of the given context.
-         *
-         * @param context The context to increase the reference counter of.
-         */
-        private static void increaseRefCounter(
-            final AnalysisContext context
-        ) {
-            // Increase the context reference counter of the context if not null
-            if(!context.reference.isNull()) {
-                if(ImageInfo.inImageCode()) {
-                    NI_LIB.${nat("context_incref")}(context.reference.ni());
-                } else {
-                    JNI_LIB.${nat("context_incref")}(context.reference.jni());
-                }
-            }
-        }
 
         /** @see java.lang.AutoCloseable#close() */
         @Override
@@ -3551,9 +3551,9 @@ public final class ${ctx.lib_name.camel} {
         }
 
         /**
-         * Get the list of assiated diagnositcs. Those are parsing errors.
+         * Get the list of associated diagnostics. Those are parsing errors.
          *
-         * @return The diagnositcs of the unit.
+         * @return The diagnostics of the unit.
          */
         public List<Diagnostic> getDiagnostics() {
             final int diagnosticCount;
@@ -3605,7 +3605,7 @@ public final class ${ctx.lib_name.camel} {
             if(this == o) return true;
             if(!(o instanceof AnalysisUnit)) return false;
             final AnalysisUnit other = (AnalysisUnit) o;
-            return other.reference.equals(other.reference);
+            return this.reference.equals(other.reference);
         }
 
     }
@@ -4096,28 +4096,28 @@ public final class ${ctx.lib_name.camel} {
         // ----- Dumping methods -----
 
         /**
-         * Return the AST in a string.
+         * Return the parsing tree in a string.
          *
-         * @return The string containing the representation of the AST
+         * @return The string containing the representation of the parsing tree
          * from the node.
          */
         @CompilerDirectives.TruffleBoundary
-        public String dumpAST() {
+        public String dumpTree() {
             final StringBuilder builder = new StringBuilder();
-            this.dumpAST(builder);
+            this.dumpTree(builder);
             return builder.toString();
         }
 
         /**
-         * Dump the AST in the given string builder.
+         * Dump the parse tree in the given string builder.
          *
-         * @param builder The builder to dump the AST in.
+         * @param builder The builder to dump the parse tree in.
          */
         @CompilerDirectives.TruffleBoundary
-        public void dumpAST(
+        public void dumpTree(
             final StringBuilder builder
         ) {
-            this.dumpAST(builder, "");
+            this.dumpTree(builder, "");
         }
 
         /**
@@ -4137,17 +4137,18 @@ public final class ${ctx.lib_name.camel} {
             builder.append(indent)
                 .append(name)
                 .append(":\n");
-            value.dumpAST(builder, indent + "  ");
+            value.dumpTree(builder, indent + "  ");
         }
 
         /**
-         * Dump the AST in the given string builder with the indent level.
+         * Dump the parse tree in the given string builder with the indent
+         * level.
          *
-         * @param builder The builder to dump the AST in.
+         * @param builder The builder to dump the tree in.
          * @param indent The starting indent level.
          */
         @CompilerDirectives.TruffleBoundary
-        protected void dumpAST(
+        protected void dumpTree(
             final StringBuilder builder,
             String indent
         ) {
@@ -4271,7 +4272,7 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
-    // ===== Generated AST node wrapping classes =====
+    // ===== Generated node wrapping classes =====
 
     % for astnode in ctx.astnode_types:
         % if astnode != T.root_node:

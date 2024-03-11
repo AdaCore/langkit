@@ -6,6 +6,9 @@ Expected '(', got Identifier at <1:5-1:15>
 -------------------
 
 --- Unit Filename ---
+<AnalysisUnit "foo.txt"> != <AnalysisUnit "foo.txt"> = true
+<AnalysisUnit "foo.txt">.equals(<AnalysisUnit "foo.txt">) = true
+<AnalysisUnit "foo.txt">.equals(<AnalysisUnit "bar.txt">) = false
 Unit for the file foo.txt
 ---------------------
 
@@ -43,6 +46,26 @@ The NO_TOKEN = <Token Kind=No_Token Text="">
 Text range with a NO_TOKEN = 
 Equivalent tokens : <Token Kind=Identifier Text="identifier"> and <Token Kind=Identifier Text="identifier">
 Equivalent tokens : <Token Kind=Example Text="example"> and <Token Kind=Example Text="example">
+<Token Kind=Null_Tok Text="null"> != <Token Kind=Null_Tok Text="null"> = true
+<Token Kind=Null_Tok Text="null">.equals(<Token Kind=Null_Tok Text="null">) = true
+<Token Kind=Whitespace Text=" "> != <Token Kind=Whitespace Text=" "> = true
+<Token Kind=Whitespace Text=" ">.equals(<Token Kind=Whitespace Text=" ">) = true
+<Token Kind=Identifier Text="identifier"> != <Token Kind=Identifier Text="identifier"> = true
+<Token Kind=Identifier Text="identifier">.equals(<Token Kind=Identifier Text="identifier">) = true
+<Token Kind=Whitespace Text=" "> != <Token Kind=Whitespace Text=" "> = true
+<Token Kind=Whitespace Text=" ">.equals(<Token Kind=Whitespace Text=" ">) = true
+<Token Kind=Example Text="example"> != <Token Kind=Example Text="example"> = true
+<Token Kind=Example Text="example">.equals(<Token Kind=Example Text="example">) = true
+<Token Kind=Whitespace Text=" "> != <Token Kind=Whitespace Text=" "> = true
+<Token Kind=Whitespace Text=" ">.equals(<Token Kind=Whitespace Text=" ">) = true
+<Token Kind=Identifier Text="identifier"> != <Token Kind=Identifier Text="identifier"> = true
+<Token Kind=Identifier Text="identifier">.equals(<Token Kind=Identifier Text="identifier">) = true
+<Token Kind=Whitespace Text=" "> != <Token Kind=Whitespace Text=" "> = true
+<Token Kind=Whitespace Text=" ">.equals(<Token Kind=Whitespace Text=" ">) = true
+<Token Kind=Example Text="example"> != <Token Kind=Example Text="example"> = true
+<Token Kind=Example Text="example">.equals(<Token Kind=Example Text="example">) = true
+<Token Kind=Termination Text=""> != <Token Kind=Termination Text=""> = true
+<Token Kind=Termination Text="">.equals(<Token Kind=Termination Text="">) = true
 --------------
 
 --- Nodes ---
@@ -51,7 +74,7 @@ Unit root = <Sequence foo.txt:1:1-1:50>
 Unit root kind = Sequence
 Unit root children count = 5
 Unit root children = [<NullNode foo.txt:1:1-1:5>, <Example foo.txt:1:6-1:13>, <Var foo.txt:1:14-1:37>, <Example foo.txt:1:38-1:45>, <NullNode foo.txt:1:46-1:50>]
-Unit root AST dump = Sequence foo.txt:1:1-1:50>
+Unit root tree dump = Sequence foo.txt:1:1-1:50>
 |item_0:
 |  NullNode foo.txt:1:1-1:5>
 |item_1:
