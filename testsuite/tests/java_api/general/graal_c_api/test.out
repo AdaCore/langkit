@@ -43,6 +43,26 @@ The NO_TOKEN = <Token Kind=No_Token Text="">
 Text range with a NO_TOKEN = 
 Equivalent tokens : <Token Kind=Identifier Text="identifier"> and <Token Kind=Identifier Text="identifier">
 Equivalent tokens : <Token Kind=Example Text="example"> and <Token Kind=Example Text="example">
+<Token Kind=Null_Tok Text="null"> != <Token Kind=Null_Tok Text="null"> = true
+<Token Kind=Null_Tok Text="null">.equals(<Token Kind=Null_Tok Text="null">) = true
+<Token Kind=Whitespace Text=" "> != <Token Kind=Whitespace Text=" "> = true
+<Token Kind=Whitespace Text=" ">.equals(<Token Kind=Whitespace Text=" ">) = true
+<Token Kind=Identifier Text="identifier"> != <Token Kind=Identifier Text="identifier"> = true
+<Token Kind=Identifier Text="identifier">.equals(<Token Kind=Identifier Text="identifier">) = true
+<Token Kind=Whitespace Text=" "> != <Token Kind=Whitespace Text=" "> = true
+<Token Kind=Whitespace Text=" ">.equals(<Token Kind=Whitespace Text=" ">) = true
+<Token Kind=Example Text="example"> != <Token Kind=Example Text="example"> = true
+<Token Kind=Example Text="example">.equals(<Token Kind=Example Text="example">) = true
+<Token Kind=Whitespace Text=" "> != <Token Kind=Whitespace Text=" "> = true
+<Token Kind=Whitespace Text=" ">.equals(<Token Kind=Whitespace Text=" ">) = true
+<Token Kind=Identifier Text="identifier"> != <Token Kind=Identifier Text="identifier"> = true
+<Token Kind=Identifier Text="identifier">.equals(<Token Kind=Identifier Text="identifier">) = true
+<Token Kind=Whitespace Text=" "> != <Token Kind=Whitespace Text=" "> = true
+<Token Kind=Whitespace Text=" ">.equals(<Token Kind=Whitespace Text=" ">) = true
+<Token Kind=Example Text="example"> != <Token Kind=Example Text="example"> = true
+<Token Kind=Example Text="example">.equals(<Token Kind=Example Text="example">) = true
+<Token Kind=Termination Text=""> != <Token Kind=Termination Text=""> = true
+<Token Kind=Termination Text="">.equals(<Token Kind=Termination Text="">) = true
 --------------
 
 --- Nodes ---

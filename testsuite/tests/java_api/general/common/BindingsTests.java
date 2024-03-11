@@ -168,7 +168,7 @@ public final class BindingsTests {
             System.out.println("Text range with a NO_TOKEN = " +
                 Token.textRange(first, none));
 
-            // Test the token equivalence
+            // Test the token equivalence and equality
             AnalysisUnit eqUnit = context.getUnitFromBuffer(
                 "null identifier example identifier example",
                 "foo.txt"
@@ -188,6 +188,20 @@ public final class BindingsTests {
                     }
                 }
                 current = current.next();
+            }
+
+            Token left = eqUnit.getFirstToken();
+            Token right = eqUnit.getFirstToken();
+            while(!(left.isNone() || right.isNone())) {
+                System.out.println(
+                    left.toString() + " != " + right + " = " + (left != right)
+                );
+                System.out.println(
+                    left.toString() + ".equals(" + right + ") = " +
+                    left.equals(right)
+                );
+                left = left.next();
+                right = right.next();
             }
         }
 

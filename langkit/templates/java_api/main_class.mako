@@ -2685,9 +2685,9 @@ public final class ${ctx.lib_name.camel} {
             if(o == this) return true;
             if(!(o instanceof Token)) return false;
             final Token other = (Token) o;
-            return other.tokenDataHandler.equals(this.tokenDataHandler) &&
-                    other.tokenIndex == this.tokenIndex &&
-                    other.triviaIndex == this.triviaIndex;
+            return this.tokenDataHandler.equals(other.tokenDataHandler) &&
+                    this.tokenIndex == other.tokenIndex &&
+                    this.triviaIndex == other.triviaIndex;
         }
 
         // ----- Inner classes -----
