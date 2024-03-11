@@ -55,44 +55,8 @@
         // ----- Instance methods -----
 
         @Override
-        public NodeKind getKind() {
-            return ${java_type}.description.kind;
-        }
-
-        @Override
-        public String getClassName() {
-            return ${java_type}.description.className;
-        }
-
-        @Override
-        public boolean isTokenNode() {
-            return ${java_type}.description.isTokenNode;
-        }
-
-        @Override
-        public boolean isListNode() {
-            return ${java_type}.description.isListNode;
-        }
-
-        @Override
-        public String[] getFieldNames() {
-            return ${java_type}.description.fields;
-        }
-
-        @Override
-        public Map<String, ${ctx.lib_name.camel}Field> getFieldDescriptions()
-        {
-            return ${java_type}.description.fieldDescriptions;
-        }
-
-        @Override
-        @CompilerDirectives.TruffleBoundary
-        public ${ctx.lib_name.camel}Field getFieldDescription(
-            final String name
-        ) {
-            return ${java_type}.description
-                               .fieldDescriptions
-                               .get(name);
+        public ${ctx.lib_name.camel}Node getDescription() {
+            return ${java_type}.description;
         }
 
         % if not cls.abstract:

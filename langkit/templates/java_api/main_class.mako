@@ -5373,38 +5373,42 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Getters -----
 
+        public ${ctx.lib_name.camel}Node getDescription() {
+            return ${root_node_type}.description;
+        }
+
         public NodeKind getKind() {
-            return ${root_node_type}.description.kind;
+            return this.getDescription().kind;
         }
 
         public String getClassName() {
-            return ${root_node_type}.description.className;
+            return this.getDescription().className;
         }
 
         public boolean isTokenNode() {
-            return ${root_node_type}.description.isTokenNode;
+            return this.getDescription().isTokenNode;
         }
 
         public boolean isListNode() {
-            return ${root_node_type}.description.isListNode;
+            return this.getDescription().isListNode;
         }
 
         public String[] getFieldNames() {
-            return ${root_node_type}.description.fields;
+            return this.getDescription().fields;
         }
 
         public Map<String, ${ctx.lib_name.camel}Field> getFieldDescriptions()
         {
-            return ${root_node_type}.description.fieldDescriptions;
+            return this.getDescription().fieldDescriptions;
         }
 
         @CompilerDirectives.TruffleBoundary
         public ${ctx.lib_name.camel}Field getFieldDescription(
             final String name
         ) {
-            return ${root_node_type}.description
-                                    .fieldDescriptions
-                                    .get(name);
+            return this.getDescription()
+                .fieldDescriptions
+                .get(name);
         }
 
         public boolean isNone() {
