@@ -80,9 +80,9 @@
          * @return The newly wrapped array.
          */
         static ${java_type} wrap(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            return wrap((${ni_type}) pointer.readWord(0));
+            return wrap((${ni_type}) pointer.read());
         }
 
         /**
@@ -122,7 +122,7 @@
          * in.
          */
         void unwrap(
-            final Pointer pointer
+            final WordPointer pointer
             ${(
                 ", final AnalysisContext currentContext"
                 if cls.element_type.is_symbol_type else
@@ -139,7 +139,7 @@
             );
 
             // Place the result in the pointer
-            pointer.writeWord(0, resNative);
+            pointer.write(resNative);
         }
 
         /**
@@ -188,9 +188,9 @@
          * @param The pointer to the array to release.
          */
         static void release(
-            final Pointer pointer
+            final WordPointer pointer
         ) {
-            release((${ni_type}) pointer.readWord(0));
+            release((${ni_type}) pointer.read());
         }
 
         /**

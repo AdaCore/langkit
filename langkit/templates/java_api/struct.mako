@@ -77,9 +77,9 @@
          * @return The newly wrapped structure.
          */
         static ${java_type} wrap(
-            final Pointer niPointer
+            final WordPointer pointer
         ) {
-            return wrap((${ni_type}) niPointer.readWord(0));
+            return wrap((${ni_type}) pointer.read());
         }
 
         /**
@@ -153,7 +153,7 @@
          * @return The None instance because the structure is empty.
          */
         static ${java_type} wrap(
-            final Pointer niPointer
+            final WordPointer pointer
         ) {
             return ${java_type}.NONE;
         }
