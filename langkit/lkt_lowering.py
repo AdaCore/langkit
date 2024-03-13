@@ -2027,20 +2027,42 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 return StopCut(lower(rule.f_expr))
 
             elif isinstance(rule, L.GrammarPredicate):
-                if not isinstance(rule.f_prop_ref, L.DotExpr):
-                    error('Invalid property reference')
-                node = resolve_node_ref(cast(NodeRefTypes,
-                                             rule.f_prop_ref.f_prefix))
-                prop_name = rule.f_prop_ref.f_suffix.text
-                try:
-                    prop = node.get_abstract_node_data_dict()[prop_name]
-                except KeyError:
-                    check_source_language(
-                        False,
-                        '{} has no {} property'
-                        .format(node.dsl_name, prop_name)
-                    )
-                return Predicate(lower(rule.f_expr), prop, location=loc)
+                # We expect rule.f_prop_ref to be a reference to a property.
+                # Such things have only one possible syntax:
+                # NodeName.property_name.
+                prop_ref = rule.f_prop_ref
+                if (
+                    not isinstance(prop_ref, L.DotExpr)
+                    or not isinstance(prop_ref.f_prefix, L.RefId)
+                ):
+                    with ctx.lkt_context(prop_ref):
+                        error(
+                            'reference to a property expected'
+                            ' ("Node.property")'
+                        )
+
+                # First resolve the reference to the node
+                node = resolve_node_ref(prop_ref.f_prefix)
+
+                # Then resolve the reference to the property
+                with ctx.lkt_context(prop_ref.f_suffix):
+                    prop_name = prop_ref.f_suffix.text
+                    try:
+                        prop = node.get_abstract_node_data_dict()[prop_name]
+                    except KeyError:
+                        error(f"{node.dsl_name} has no such entity")
+
+                    if not isinstance(prop, PropertyDef):
+                        error(
+                            "reference to a property expected, got a"
+                            f" {prop.kind_name}"
+                        )
+
+                    # If properties are compiled through the DSL, their
+                    # signature is not available at this stage: the
+                    # corresponding validity checks are deferred to the
+                    # Predicate parser class.
+                    return Predicate(lower(rule.f_expr), prop, location=loc)
 
             else:
                 raise NotImplementedError('unhandled parser: {}'.format(rule))

@@ -42,7 +42,7 @@ from langkit.compiled_types import (
     ASTNodeType, CompiledType, Field, T, TokenType, TypeRepo, resolve_type
 )
 from langkit.diagnostics import (
-    Location, Severity, check_source_language, diagnostic_context,
+    Location, Severity, check_source_language, diagnostic_context, error,
     extract_library_location
 )
 from langkit.expressions import PropertyDef, resolve_property
@@ -2250,10 +2250,12 @@ class Predicate(Parser):
         # signature: (parser-result-type) -> bool.
         self.property_ref = resolve_property(self.property_ref)
         assert isinstance(self.property_ref, PropertyDef)
-        check_source_language(
-            self.property_ref.type.matches(T.Bool),
-            'Property passed as predicate to Predicate parser must return'
-            ' a boolean')
+
+        if not self.property_ref.type.matches(T.Bool):
+            error("predicate properties must return booleans")
+
+        if self.property_ref.natural_arguments:
+            error("predicate properties must take no argument")
 
         pred_arg_type = self.property_ref.struct
         assert pred_arg_type is not None
