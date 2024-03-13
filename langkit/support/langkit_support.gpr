@@ -18,6 +18,10 @@ library project Langkit_Support is
    Library_Standalone : Library_Standalone_Type := external
      ("LANGKIT_SUPPORT_STANDALONE", external ("STANDALONE", "standard"));
 
+   SO_Name := External ("LANGKIT_SUPPORT_SONAME", "");
+   Ada_Flags := External_As_List ("ADAFLAGS", " ");
+   Ld_Flags := External_As_List ("LDFLAGS", " ");
+
    for Languages use ("Ada");
    for Source_Dirs use (".");
    for Object_Dir use "obj/" & Build_Mode;
@@ -82,6 +86,19 @@ library project Langkit_Support is
    for Library_Kind use Library_Kind_Param;
    for Library_Dir use "lib/" & Library_Kind_Param & "/" & Build_Mode;
 
+   case Library_Kind_Param is
+      when "relocatable" =>
+         case SO_Name is
+            when "" =>
+               null;
+            when others =>
+               for Library_Version use SO_Name;
+         end case;
+         for Leading_Library_Options use Ld_Flags;
+      when "static" | "static-pic" =>
+         null;
+   end case;
+
    Common_Ada_Cargs := ("-gnatwa", "-gnatyg", "-fPIC");
 
    package Compiler is
@@ -102,6 +119,7 @@ library project Langkit_Support is
             for Default_Switches ("Ada") use
                ("-Og", "-ggdb", "-g3", "-fno-omit-frame-pointer");
       end case;
+      for Default_Switches ("Ada") use Default_Switches ("Ada") & Adaflags;
    end Compiler;
 
 end Langkit_Support;
