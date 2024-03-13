@@ -10,32 +10,46 @@ with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
 
 package body Liblktlang.Implementation.Extensions is
 
-   function Common_Denoted_String (Node : Bare_Lkt_Node) return String_Type;
+   function Common_Denoted_String
+     (Node : Bare_Lkt_Node) return Internal_Decoded_String_Value;
    --  Common implementation for the ``p_denoted_string`` property of all
    --  string/pattern literal nodes.
 
    procedure Read_Denoted_Char
-     (Buffer : Text_Type;
-      Cursor : in out Positive;
-      Result : out Character_Type);
-   --  Read the next denoted character starting at ``Buffer (Cursor)``. Upon
-   --  return, ``Cursor`` points to the first item in ``Buffer`` for the next
-   --  character to read (or to the closing double quote if the character read
-   --  was the last one), and ``Result`` is set to the character that was just
-   --  read.
+     (Buffer       : Text_Type;
+      For_Char_Lit : Boolean;
+      Cursor       : in out Positive;
+      Cursor_Sloc  : in out Source_Location;
+      Result       : out Internal_Decoded_Char_Value);
+   --  Read the next denoted character starting at ``Buffer (Cursor)``.
+   --
+   --  The location of the character at ``Buffer (Cursor)`` must be passed to
+   --  ``Cursor_Sloc``, which is updated to follow the evolution of ``Cursor``.
+   --
+   --  Upon return, ``Cursor`` points to the first item in ``Buffer`` for the
+   --  next character to read (or to the closing single/double quote if the
+   --  character read was the last one) and ``Result`` is set to the character
+   --  that was just read, or to an error message if reading one character was
+   --  unsuccessful.
 
    ---------------------------
    -- Common_Denoted_String --
    ---------------------------
 
-   function Common_Denoted_String (Node : Bare_Lkt_Node) return String_Type is
+   function Common_Denoted_String
+     (Node : Bare_Lkt_Node) return Internal_Decoded_String_Value
+   is
+      Tab_Stop : constant Positive := Node.Unit.Context.Tab_Stop;
+
       N_Text : constant Text_Type := Text (Node);
       pragma Assert (N_Text (N_Text'Last) = '"');
 
-      Cursor : Natural := N_Text'First + 1;
+      Cursor      : Natural := N_Text'First + 1;
+      Cursor_Sloc : Source_Location := Start_Sloc (Sloc_Range (Node));
 
       Result      : Text_Type (1 .. N_Text'Length);
       Result_Last : Natural := Result'First - 1;
+      Char_Value  : Internal_Decoded_Char_Value;
    begin
       --  Make sure that the slice starts at the first denoted character in the
       --  presence of string literal prefix.
@@ -45,12 +59,31 @@ package body Liblktlang.Implementation.Extensions is
          Cursor := Cursor + 1;
       end if;
 
+      --  Update Cursor_Sloc so that it reflects the location of N_Text
+      --  (Cursor).
+
+      Cursor_Sloc.Column :=
+        Cursor_Sloc.Column
+        + Column_Count (N_Text (N_Text'First .. Cursor), Tab_Stop);
+
       while Cursor /= N_Text'Last loop
          Result_Last := Result_Last + 1;
-         Read_Denoted_Char (N_Text, Cursor, Result (Result_Last));
+         Read_Denoted_Char (N_Text, False, Cursor, Cursor_Sloc, Char_Value);
+         if Char_Value.Has_Error then
+            return
+              (Value         => Empty_String,
+               Has_Error     => True,
+               Error_Sloc    => Char_Value.Error_Sloc,
+               Error_Message => Char_Value.Error_Message);
+         end if;
+         Result (Result_Last) := Char_Value.Value;
       end loop;
 
-      return Create_String (Result (Result'First .. Result_Last));
+      return
+        (Value         => Create_String (Result (Result'First .. Result_Last)),
+         Has_Error     => False,
+         Error_Sloc    => No_Source_Location,
+         Error_Message => Empty_String);
    end Common_Denoted_String;
 
    -----------------------
@@ -58,16 +91,21 @@ package body Liblktlang.Implementation.Extensions is
    -----------------------
 
    procedure Read_Denoted_Char
-     (Buffer : Text_Type;
-      Cursor : in out Positive;
-      Result : out Character_Type)
-   is
-      --  Note that, since buffer comes from a successfully lexed character,
-      --  string or pattern literal token, it is supposed to be well-formed:
-      --  "when other" clauses in the code below are thus dead code.
+     (Buffer       : Text_Type;
+      For_Char_Lit : Boolean;
+      Cursor       : in out Positive;
+      Cursor_Sloc  : in out Source_Location;
+      Result       : out Internal_Decoded_Char_Value) is
    begin
+      Result :=
+        (Value         => ' ',
+         Has_Error     => False,
+         Error_Sloc    => Cursor_Sloc,
+         Error_Message => Empty_String);
+
       if Buffer (Cursor) = '\' then
          Cursor := Cursor + 1;
+         Cursor_Sloc.Column := Cursor_Sloc.Column + 1;
          declare
             function Read_Digits (N : Positive) return Character_Type;
             --  Read N hexadecimal digits (encoding a codepoint number) and
@@ -90,7 +128,10 @@ package body Liblktlang.Implementation.Extensions is
                Digit_Value : Unsigned_32;
             begin
                for I in 1 .. N loop
-                  Digit_Char := Buffer (Cursor + I);
+                  Cursor := Cursor + 1;
+                  Cursor_Sloc.Column := Cursor_Sloc.Column + 1;
+
+                  Digit_Char := Buffer (Cursor);
                   case Digit_Char is
                      when '0' .. '9' =>
                         Digit_Value :=
@@ -105,14 +146,19 @@ package body Liblktlang.Implementation.Extensions is
                            Character_Type'Pos (Digit_Char)
                            - Character_Type'Pos ('A') + 10;
                      when others =>
-                        raise Program_Error;
+                        Result.Has_Error := True;
+                        Result.Error_Message :=
+                          Create_String ("invalid escape sequence");
+                        return ' ';
                   end case;
                   Codepoint := 16 * Codepoint + Digit_Value;
                end loop;
 
-               --  Move past the escape sequence prefix and the digits
+               --  Move past the last digit of the escape sequence
 
-               Cursor := Cursor + 1 + N;
+               Cursor := Cursor + 1;
+               Cursor_Sloc.Column := Cursor_Sloc.Column + 1;
+
                return Character_Type'Val (Codepoint);
             end Read_Digits;
 
@@ -124,36 +170,73 @@ package body Liblktlang.Implementation.Extensions is
               (Codepoint : Character) return Character_Type is
             begin
                Cursor := Cursor + 1;
+               Cursor_Sloc.Column := Cursor_Sloc.Column + 1;
                return Character_Type'Val (Character'Pos (Codepoint));
             end Short_Escape_Sequence;
 
          begin
-            Result :=
-              (case Buffer (Cursor) is
+            case Buffer (Cursor) is
 
                --  Escape sequences for codepoint numbers
 
-               when 'x' => Read_Digits (2),
-               when 'u' => Read_Digits (4),
-               when 'U' => Read_Digits (8),
+               when 'x' =>
+                  Result.Value := Read_Digits (2);
+               when 'u' =>
+                  Result.Value := Read_Digits (4);
+               when 'U' =>
+                  Result.Value := Read_Digits (8);
 
                --  Short escape sequences
 
-               when '0' => Short_Escape_Sequence (ASCII.NUL),
-               when 'a' => Short_Escape_Sequence (ASCII.BEL),
-               when 'b' => Short_Escape_Sequence (ASCII.BS),
-               when 't' => Short_Escape_Sequence (ASCII.HT),
-               when 'n' => Short_Escape_Sequence (ASCII.LF),
-               when 'v' => Short_Escape_Sequence (ASCII.VT),
-               when 'f' => Short_Escape_Sequence (ASCII.FF),
-               when 'r' => Short_Escape_Sequence (ASCII.CR),
-               when '\' => Short_Escape_Sequence ('\'),
-               when '"' => Short_Escape_Sequence ('"'),
+               when '0' =>
+                  Result.Value := Short_Escape_Sequence (ASCII.NUL);
+               when 'a' =>
+                  Result.Value := Short_Escape_Sequence (ASCII.BEL);
+               when 'b' =>
+                  Result.Value := Short_Escape_Sequence (ASCII.BS);
+               when 't' =>
+                  Result.Value := Short_Escape_Sequence (ASCII.HT);
+               when 'n' =>
+                  Result.Value := Short_Escape_Sequence (ASCII.LF);
+               when 'v' =>
+                  Result.Value := Short_Escape_Sequence (ASCII.VT);
+               when 'f' =>
+                  Result.Value := Short_Escape_Sequence (ASCII.FF);
+               when 'r' =>
+                  Result.Value := Short_Escape_Sequence (ASCII.CR);
+               when '\' =>
+                  Result.Value := Short_Escape_Sequence ('\');
+               when '"' =>
+                  if For_Char_Lit then
+                     Result.Has_Error := True;
+                     Result.Error_Message :=
+                       Create_String ("invalid escape sequence");
+                  else
+                     Result.Value := Short_Escape_Sequence ('"');
+                  end if;
+               when ''' =>
+                  if For_Char_Lit then
+                     Result.Value := Short_Escape_Sequence (''');
+                  else
+                     Result.Has_Error := True;
+                     Result.Error_Message :=
+                       Create_String ("invalid escape sequence");
+                  end if;
 
-               when others => raise Program_Error);
+               when others =>
+                  Result.Has_Error := True;
+                  Result.Error_Message :=
+                    Create_String ("invalid escape sequence");
+            end case;
+
+            if Result.Has_Error then
+               return;
+            end if;
          end;
       else
-         Result := Buffer (Cursor);
+         Result.Value := Buffer (Cursor);
+         Cursor_Sloc.Column :=
+           Cursor_Sloc.Column + Column_Count (Buffer (Cursor .. Cursor));
          Cursor := Cursor + 1;
       end if;
    end Read_Denoted_Char;
@@ -331,17 +414,32 @@ package body Liblktlang.Implementation.Extensions is
    ------------------------------
 
    function Char_Lit_P_Denoted_Value
-     (Node : Bare_Char_Lit) return Character_Type
+     (Node : Bare_Char_Lit) return Internal_Decoded_Char_Value
    is
       N_Text : constant Text_Type := Text (Node);
       pragma Assert (N_Text (N_Text'First) = ''');
       pragma Assert (N_Text (N_Text'Last) = ''');
 
-      Cursor : Positive := N_Text'First + 1;
-      Result : Character_Type;
+      Cursor      : Positive := N_Text'First + 1;
+      Cursor_Sloc : Source_Location := Start_Sloc (Sloc_Range (Node));
+      Result      : Internal_Decoded_Char_Value;
    begin
-      Read_Denoted_Char (N_Text, Cursor, Result);
-      pragma Assert (Cursor = N_Text'Last);
+      --  Before reading the denoted character, update Cursor_Sloc so that it
+      --  corresponds to the character right after the opening single quote.
+
+      Cursor_Sloc.Column := Cursor_Sloc.Column + 1;
+      Read_Denoted_Char (N_Text, True, Cursor, Cursor_Sloc, Result);
+
+      --  Ensure that reading one character has moved the cursor to the closing
+      --  quote. If it is not the case, there are too many characters in this
+      --  literal.
+
+      if not Result.Has_Error and then Cursor /= N_Text'Last then
+         Result.Has_Error := True;
+         Result.Error_Sloc := Cursor_Sloc;
+         Result.Error_Message :=
+           Create_String ("exactly one character expected");
+      end if;
       return Result;
    end Char_Lit_P_Denoted_Value;
 
@@ -350,7 +448,7 @@ package body Liblktlang.Implementation.Extensions is
    --------------------------------
 
    function String_Lit_P_Denoted_Value
-     (Node : Bare_String_Lit) return String_Type is
+     (Node : Bare_String_Lit) return Internal_Decoded_String_Value is
    begin
       return Common_Denoted_String (Node);
    end String_Lit_P_Denoted_Value;
@@ -360,7 +458,7 @@ package body Liblktlang.Implementation.Extensions is
    -------------------------------
 
    function Token_Lit_P_Denoted_Value
-     (Node : Bare_Token_Lit) return String_Type is
+     (Node : Bare_Token_Lit) return Internal_Decoded_String_Value is
    begin
       return Common_Denoted_String (Node);
    end Token_Lit_P_Denoted_Value;
@@ -370,7 +468,7 @@ package body Liblktlang.Implementation.Extensions is
    ---------------------------------------
 
    function Token_Pattern_Lit_P_Denoted_Value
-     (Node : Bare_Token_Pattern_Lit) return String_Type is
+     (Node : Bare_Token_Pattern_Lit) return Internal_Decoded_String_Value is
    begin
       return Common_Denoted_String (Node);
    end Token_Pattern_Lit_P_Denoted_Value;

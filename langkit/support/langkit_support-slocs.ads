@@ -129,8 +129,10 @@ package Langkit_Support.Slocs is
 
    function Column_Count
      (Line     : Text_Type;
-      Tab_Stop : Positive := Default_Tab_Stop) return Column_Number;
-   --  Return the number of columns in ``Line``, according to the given
-   --  ``Tab_Stop`` to expand horizontal tabulations.
+      Tab_Stop : Positive := Default_Tab_Stop;
+      Start    : Column_Number := 1) return Column_Number;
+   --  Return the number of columns in ``Line`` according to the given
+   --  ``Tab_Stop`` to expand horizontal tabulations and assuming that ``Line
+   --  (Line'First)`` is at column ``Start``.
 
 end Langkit_Support.Slocs;

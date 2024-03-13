@@ -114,6 +114,39 @@ def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
     return expr.text == 'true'
 
 
+def check_no_decoding_error(
+    node: L.LktNode,
+    result: L.DecodedCharValue | L.DecodedStringValue
+) -> None:
+    """
+    If ``result`` has an error, stop with the corresponding diagnostic.
+    """
+    if result.has_error:
+        filename = node.unit.filename
+        line = result.error_sloc.line
+        column = result.error_sloc.column
+        with diagnostic_context(Location(filename, line, column)):
+            error(result.error_message)
+
+
+def denoted_str(strlit: L.StringLit | L.TokenLit | L.TokenPatternLit) -> str:
+    """
+    Return the string value that this literal denotes.
+    """
+    result = strlit.p_denoted_value
+    check_no_decoding_error(strlit, result)
+    return result.value
+
+
+def denoted_char(charlit: L.CharLit) -> str:
+    """
+    Return the character value that this literal denotes.
+    """
+    result = charlit.p_denoted_value
+    check_no_decoding_error(charlit, result)
+    return result.value
+
+
 def parse_static_str(ctx: CompileCtx, expr: L.Expr) -> str:
     """
     Return the string value that this expression denotes.
@@ -121,7 +154,7 @@ def parse_static_str(ctx: CompileCtx, expr: L.Expr) -> str:
     with ctx.lkt_context(expr):
         if not isinstance(expr, L.StringLit) or expr.p_is_prefixed_string:
             error("simple string literal expected")
-    return expr.p_denoted_value
+        return denoted_str(expr)
 
 
 def extract_var_name(ctx: CompileCtx, id: L.Id) -> tuple[str, names.Name]:
@@ -684,7 +717,7 @@ class StringLiteralAnnotationSpec(AnnotationSpec):
             or args[0].p_is_prefixed_string
         ):
             error("exactly one position argument expected: a string literal")
-        return args[0].p_denoted_value
+        return denoted_str(args[0])
 
 
 class ExternalAnnotationSpec(AnnotationSpec):
@@ -1543,7 +1576,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             ):
                 error('Pattern string literal expected')
             patterns[name] = (
-                decl.f_val.p_denoted_value, Location.from_lkt_node(decl)
+                denoted_str(decl.f_val), Location.from_lkt_node(decl)
             )
 
     def lower_matcher_list(expr: L.GrammarExpr) -> list[Matcher]:
@@ -1572,11 +1605,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         loc = Location.from_lkt_node(expr)
         with ctx.lkt_context(expr):
             if isinstance(expr, L.TokenLit):
-                return Literal(expr.p_denoted_value, location=loc)
+                return Literal(denoted_str(expr), location=loc)
             elif isinstance(expr, L.TokenNoCaseLit):
-                return NoCaseLit(expr.f_lit.p_denoted_value, location=loc)
+                return NoCaseLit(denoted_str(expr.f_lit), location=loc)
             elif isinstance(expr, L.TokenPatternLit):
-                return Pattern(expr.p_denoted_value, location=loc)
+                return Pattern(denoted_str(expr), location=loc)
             else:
                 error('Invalid lexing expression')
 
@@ -1929,12 +1962,12 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 if rule.f_expr:
                     # The grammar is supposed to mainain this invariant
                     assert isinstance(rule.f_expr, L.TokenLit)
-                    match_text = rule.f_expr.p_denoted_value
+                    match_text = denoted_str(rule.f_expr)
 
                 return _Token(val=val, match_text=match_text, location=loc)
 
             elif isinstance(rule, L.TokenLit):
-                return _Token(rule.p_denoted_value, location=loc)
+                return _Token(denoted_str(rule), location=loc)
 
             elif isinstance(rule, L.GrammarList):
                 return PList(
@@ -3829,7 +3862,7 @@ class LktTypesLoader:
                 return Cast(subexpr, dest_type, do_raise=excludes_null)
 
             elif isinstance(expr, L.CharLit):
-                return E.CharacterLiteral(expr.p_denoted_value)
+                return E.CharacterLiteral(denoted_char(expr))
 
             elif isinstance(expr, L.BaseDotExpr):
                 null_cond = isinstance(expr, L.NullCondDottedName)
@@ -4075,7 +4108,7 @@ class LktTypesLoader:
                     if not isinstance(msg_expr, L.StringLit):
                         with self.ctx.lkt_context(msg_expr):
                             error("string literal expected")
-                    msg = msg_expr.p_denoted_value
+                    msg = denoted_str(msg_expr)
 
                 return entity.constructor(
                     self.resolve_type(expr.f_dest_type, env), msg
@@ -4102,7 +4135,7 @@ class LktTypesLoader:
 
             elif isinstance(expr, L.StringLit):
                 string_prefix = expr.p_prefix
-                string_value = expr.p_denoted_value
+                string_value = denoted_str(expr)
                 if string_prefix == "\x00":
                     return E.String(string_value)
                 elif string_prefix == "s":

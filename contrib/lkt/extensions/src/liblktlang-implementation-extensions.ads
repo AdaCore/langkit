@@ -31,19 +31,19 @@ package Liblktlang.Implementation.Extensions is
    --  Return the prefix of this string
 
    function Char_Lit_P_Denoted_Value
-     (Node : Bare_Char_Lit) return Character_Type;
+     (Node : Bare_Char_Lit) return Internal_Decoded_Char_Value;
    --  Return the content of the given character literal node
 
    function String_Lit_P_Denoted_Value
-     (Node : Bare_String_Lit) return String_Type;
+     (Node : Bare_String_Lit) return Internal_Decoded_String_Value;
    --  Return the content of the given string literal node
 
    function Token_Lit_P_Denoted_Value
-     (Node : Bare_Token_Lit) return String_Type;
+     (Node : Bare_Token_Lit) return Internal_Decoded_String_Value;
    --  Return the content of the given token literal node
 
    function Token_Pattern_Lit_P_Denoted_Value
-     (Node : Bare_Token_Pattern_Lit) return String_Type;
+     (Node : Bare_Token_Pattern_Lit) return Internal_Decoded_String_Value;
    --  Return the content of the given token pattern literal node
 
 end Liblktlang.Implementation.Extensions;

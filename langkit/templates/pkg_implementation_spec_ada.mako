@@ -588,6 +588,7 @@ private package ${ada_lib_name}.Implementation is
       function Trace_Image (Eq : Logic_Equation) return String;
       function Trace_Image (Var : Logic_Var) return String;
       function Trace_Image (T : Token_Reference) return String renames Image;
+      function Trace_Image (T : Source_Location) return String renames Image;
       function Trace_Image (Self : Ref_Categories) return String;
    % endif
 

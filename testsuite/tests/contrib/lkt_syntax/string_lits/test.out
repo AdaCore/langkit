@@ -1,0 +1,33 @@
+== valid.lkt ==
+
+empty = ''
+simple = "it's a simple string"
+esc_null = '\x00'
+esc_bell = '\x07'
+esc_backspace = '\x08'
+esc_htab = '\t'
+esc_newline = '\n'
+esc_vtab = '\x0b'
+esc_form_feed = '\x0c'
+esc_carriage_ret = '\r'
+esc_backslash = '\\'
+esc_double_quote = '"'
+ord_escapes = '\xab\uc0d1\U0001abcd'
+
+== escape_single_quote.lkt ==
+
+s = ERROR: 1:11: invalid escape sequence
+
+== escape_invalid_char.lkt ==
+
+s = ERROR: 1:11: invalid escape sequence
+
+== escape_invalid_digit.lkt ==
+
+s = ERROR: 1:11: invalid escape sequence
+
+== backslash_quote.lkt ==
+
+backslash_quote.lkt:1:13: Invalid token, ignored
+
+Done

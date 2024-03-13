@@ -1532,7 +1532,7 @@ class TokenLit(GrammarExpr):
     """
     token_node = True
 
-    @langkit_property(public=True, return_type=T.String,
+    @langkit_property(public=True, return_type=T.DecodedStringValue,
                       external=True, uses_envs=False, uses_entity_info=False)
     def denoted_value():
         """
@@ -1554,7 +1554,7 @@ class TokenPatternLit(GrammarExpr):
     """
     token_node = True
 
-    @langkit_property(public=True, return_type=T.String,
+    @langkit_property(public=True, return_type=T.DecodedStringValue,
                       external=True, uses_envs=False, uses_entity_info=False)
     def denoted_value():
         """
@@ -3708,6 +3708,23 @@ class NullLit(Lit):
     dest_type = Field(type=T.TypeRef)
 
 
+class DecodedStringValue(Struct):
+    """
+    Result for ``StringLit.p_denoted_value``.
+
+    If that property is successful, set ``has_error`` to false and ``value`` to
+    the decoded string value. Otherwise, set ``has_error`` to true and
+    ``error_sloc`` and ``error_message`` to give information about the decoding
+    failure.
+    """
+    value = UserField(type=T.String, default_value=No(T.String))
+    has_error = UserField(T.Bool, default_value=False)
+    error_sloc = UserField(
+        T.SourceLocation, default_value=No(T.SourceLocation)
+    )
+    error_message = UserField(T.String, default_value=No(T.String))
+
+
 class StringLit(Lit):
     """
     String literal expression.
@@ -3736,7 +3753,7 @@ class StringLit(Lit):
         """
         pass
 
-    @langkit_property(public=True, return_type=T.String,
+    @langkit_property(public=True, return_type=T.DecodedStringValue,
                       external=True, uses_envs=False, uses_entity_info=False)
     def denoted_value():
         """
@@ -3772,13 +3789,30 @@ class StringLit(Lit):
     invalid_expected_type_error_name = Property(S("a string literal"))
 
 
+class DecodedCharValue(Struct):
+    """
+    Result for ``CharLit.p_denoted_value``.
+
+    If that property is successful, set ``has_error`` to false and ``value`` to
+    the decoded character value. Otherwise, set ``has_error`` to true and
+    ``error_sloc`` and ``error_message`` to give information about the decoding
+    failure.
+    """
+    value = UserField(type=T.Character, default_value=No(T.String))
+    has_error = UserField(T.Bool, default_value=False)
+    error_sloc = UserField(
+        T.SourceLocation, default_value=No(T.SourceLocation)
+    )
+    error_message = UserField(T.String, default_value=No(T.String))
+
+
 class CharLit(Lit):
     """
     Character literal expression.
     """
     token_node = True
 
-    @langkit_property(public=True, return_type=T.Character,
+    @langkit_property(public=True, return_type=T.DecodedCharValue,
                       external=True, uses_envs=False, uses_entity_info=False)
     def denoted_value():
         """
