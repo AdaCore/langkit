@@ -5,6 +5,7 @@ coverage==5.1
 docutils==0.16
 flake8==6.0.0
 funcy==1.14
+importlib-metadata==7.0.1
 mccabe==0.7.0
 mypy==1.1.1
 pexpect==4.8.0
