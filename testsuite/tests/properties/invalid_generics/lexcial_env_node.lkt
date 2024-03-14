@@ -1,0 +1,7 @@
+import common
+
+class ExampleSeq: FooNode {
+    @parse_field items: ASTList[FooNode, Example]
+
+    fun p(@ignored env: LexicalEnv[Int]): Bool = true
+}

@@ -1,0 +1,55 @@
+== analysis_unit_node.lkt ==
+analysis_unit_node.lkt:6:44: error: root node expected
+6 |     @export fun p(@ignored u: AnalysisUnit[Int]): Bool = true
+  |                                            ^^^
+
+
+== analysis_unit_root.lkt ==
+analysis_unit_root.lkt:6:44: error: root node expected
+6 |     @export fun p(@ignored u: AnalysisUnit[Example]): Bool = true
+  |                                            ^^^^^^^
+
+
+== astlist_arity.lkt ==
+astlist_arity.lkt:4:25: error: ASTList expects two type arguments: the root node and the list element type
+4 |     @parse_field items: ASTList[Example]
+  |                         ^^^^^^^^^^^^^^^^
+
+
+== astlist_instr.lkt ==
+astlist_instr.lkt:4:25: error: type expected, got the generic ASTList
+4 |     @parse_field items: ASTList
+  |                         ^^^^^^^
+
+
+== astlist_item.lkt ==
+astlist_item.lkt:4:33: error: root node expected
+4 |     @parse_field items: ASTList[Example, Int]
+  |                                 ^^^^^^^
+
+
+== astlist_root.lkt ==
+astlist_root.lkt:4:33: error: root node expected
+4 |     @parse_field items: ASTList[Example, Example]
+  |                                 ^^^^^^^
+
+
+== entity.lkt ==
+entity.lkt:6:38: error: node expected
+6 |     @export fun p(@ignored e: Entity[Int]): Bool = true
+  |                                      ^^^
+
+
+== lexcial_env_node.lkt ==
+lexcial_env_node.lkt:6:36: error: root node expected
+6 |     fun p(@ignored env: LexicalEnv[Int]): Bool = true
+  |                                    ^^^
+
+
+== lexcial_env_root.lkt ==
+lexcial_env_root.lkt:6:36: error: root node expected
+6 |     fun p(@ignored env: LexicalEnv[Example]): Bool = true
+  |                                    ^^^^^^^
+
+
+lkt_compile: Done
