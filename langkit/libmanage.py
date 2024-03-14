@@ -242,8 +242,12 @@ class ManageScript:
                  ' not provided, use the current one.'
         )
         self.create_wheel_parser.add_argument(
-            '--tag',
-            help="Tag for the wheel (setup.py's --python-tag argument)."
+            '--python-tag',
+            help="Forwarded to setup.py bdist_wheel."
+        )
+        self.create_wheel_parser.add_argument(
+            '--plat-name',
+            help="Forwarded to setup.py bdist_wheel."
         )
         self.create_wheel_parser.add_argument(
             'wheel-dir',
@@ -1386,7 +1390,8 @@ class ManageScript:
             WheelPackager.args_to_env(args), args.library_types
         )
         packager.create_python_wheel(
-            args.tag,
+            args.python_tag,
+            args.plat_name,
             getattr(args, 'wheel-dir'),
             getattr(args, 'build-dir'),
             getattr(args, 'dyn-deps-dir'),
