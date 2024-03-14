@@ -5188,6 +5188,13 @@ package body ${ada_lib_name}.Implementation is
          Update_Named_Envs (Unit.Context, Named_Envs_Needing_Update);
       end;
 
+      --  Explicitly clear the env caches of this unit while it is still fully
+      --  alive to make sure that ``Lexical_Env_Cache_Updated`` accesses valid
+      --  data. Otherwise the env caches end up being cleared during the call
+      --  to ``Destroy_Unit_Destroyables`` where the unit is already partially
+      --  destroyed.
+      Reset_Envs_Caches (Unit);
+
       --  At this point, envs and nodes that don't belong to this unit no
       --  longer reference this unit's envs and nodes. It is thus now safe to
       --  deallocate this unit's obsolete data.
