@@ -142,7 +142,8 @@ class WheelPackager(BasePackager):
 
     def create_python_wheel(
         self,
-        tag: str,
+        python_tag: str,
+        plat_name: str,
         wheel_dir: str,
         build_dir: str,
         dyn_deps_dir: str,
@@ -154,7 +155,10 @@ class WheelPackager(BasePackager):
         """
         Create a Python wheel for a Langkit-generated library.
 
-        :param tag: Tag for the wheel (setup.py's --python-tag argument).
+        :param python_tag: Forwarded to setup.py bdist_wheel's --python-tag
+            argument.
+        :param plat_name: Forwarded to setup.py bdist_wheel's --plat-name
+            argument.
         :param wheel_dir: Destination directory for the wheel.
         :param build_dir: Temporary directory to use in order to build the
             wheel.
@@ -196,8 +200,10 @@ class WheelPackager(BasePackager):
         # setup.py is run from the build directory.
         args = [python_interpreter, 'setup.py', 'bdist_wheel',
                 '-d', os.path.abspath(wheel_dir)]
-        if tag:
-            args.append('--python-tag={}'.format(tag))
+        if python_tag:
+            args.append(f"--python-tag={python_tag}")
+        if plat_name:
+            args.append(f"--plat-name={plat_name}")
         subprocess.check_call(args, cwd=build_dir)
 
 
