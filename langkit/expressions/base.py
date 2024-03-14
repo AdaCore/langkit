@@ -3282,6 +3282,8 @@ class PropertyDef(AbstractNodeData):
     # Overridings for AbstractNodeData class attributes
     is_property = True
 
+    kind_name = "property"
+
     # Reserved names for arguments in generated subprograms
     self_arg_name = names.Name('Node')
     env_arg_name = names.Name('Bound_Env')

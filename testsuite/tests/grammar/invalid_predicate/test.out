@@ -2,9 +2,27 @@
 Code generation was successful
 
 == no-dot.lkt ==
-no-dot.lkt:5:29: error: Invalid property reference
+no-dot.lkt:5:56: error: reference to a property expected ("Node.property")
 5 |     @main_rule main_rule <- Example("example") |> when(Example)
-  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                                        ^^^^^^^
+
+
+== not-a-prop.lkt ==
+not-a-prop.lkt:5:78: error: reference to a property expected, got a field
+5 |     @main_rule main_rule <- Example(Identifier(@identifier)) |> when(Example.n)
+  |                                                                              ^
+
+
+== prop-bad-return-type.lkt ==
+prop-bad-return-type.lkt:5:29: error: predicate properties must return booleans
+5 |     @main_rule main_rule <- Example("example") |> when(Example.pred)
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== prop-too-many-args.lkt ==
+prop-too-many-args.lkt:5:29: error: predicate properties must take no argument
+5 |     @main_rule main_rule <- Example("example") |> when(Example.pred)
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == too-specific.lkt ==
@@ -19,9 +37,9 @@ unknown-node.lkt:5:56: error: Unknown node: NoSuchNode
 
 
 == unknown-prop.lkt ==
-unknown-prop.lkt:5:29: error: Example has no no_such_prop property
+unknown-prop.lkt:5:64: error: Example has no such entity
 5 |     @main_rule main_rule <- Example("example") |> when(Example.no_such_prop)
-  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |                                                                ^^^^^^^^^^^^
 
 
 lkt_compile: Done

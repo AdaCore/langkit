@@ -270,6 +270,11 @@ class AbstractNodeData:
     Whether this class is UserField.
     """
 
+    kind_name: ClassVar[str]
+    """
+    Human-readable name for this kind of node data. Used to format diagnostics.
+    """
+
     PREFIX_FIELD: ClassVar[names.Name] = names.Name('F')
     PREFIX_PROPERTY: ClassVar[names.Name] = names.Name('P')
     PREFIX_INTERNAL: ClassVar[names.Name] = names.Name('Internal')
@@ -2103,6 +2108,7 @@ class Field(BaseField):
     subclasses of ASTNodeType.
     """
     concrete = True
+    kind_name = "field"
 
     def __init__(self,
                  repr: bool = True,
