@@ -4770,12 +4770,17 @@ class TypeRepo:
             """
             self.getter = getter
             self.label = label
+            self._is_resolved = False
+            self._resolved_object: Any
 
         def get(self) -> Any:
             """
             Resolve the referenced entity.
             """
-            return self.getter()
+            if not self._is_resolved:
+                self._resolved_object = self.getter()
+                self._is_resolved = True
+            return self._resolved_object
 
         def __getattr__(self, name: str) -> TypeRepo.Defer:
             def get() -> Any:
