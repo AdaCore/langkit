@@ -91,6 +91,7 @@ build_and_run(
         "invalid_config.adb",
         "commands.adb",
     ],
+    types_from_lkt=True,
     generate_unparser=True,
 )
 print("Done")
