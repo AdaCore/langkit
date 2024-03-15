@@ -1,19 +1,13 @@
 == default_no_kw.lkt ==
-default_no_kw.lkt:6:34: error: 1 positional argument(s) expected, got 2
+default_no_kw.lkt:6:47: error: at most 1 positional argument(s) expected, got 2
 6 |     fun prop(): Name = node.name.do((x) => x, node)
-  |                                  ^^
+  |                                               ^^^^
 
 
 == invalid_kwarg.lkt ==
-invalid_kwarg.lkt:6:47: error: unexpected keyword argument
+invalid_kwarg.lkt:6:47: error: unknown argument
 6 |     fun prop(): Name = node.name.do((x) => x, value=node)
   |                                               ^^^^^
-
-
-== kwarg.lkt ==
-kwarg.lkt:6:37: error: unexpected keyword argument
-6 |     fun prop(): Name = node.name.do(expr=() => node)
-  |                                     ^^^^
 
 
 == lambda_no_arg.lkt ==
@@ -28,9 +22,9 @@ no_lambda.lkt:6:37: error: lambda expression expected
 
 
 == too_many_args.lkt ==
-too_many_args.lkt:6:34: error: 1 positional argument(s) expected, got 2
+too_many_args.lkt:6:47: error: at most 1 positional argument(s) expected, got 2
 6 |     fun prop(): Name = node.name.do((x) => x, node, default_val=node)
-  |                                  ^^
+  |                                               ^^^^
 
 
 == two_args.lkt ==
