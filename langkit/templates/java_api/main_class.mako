@@ -764,6 +764,18 @@ public final class ${ctx.lib_name.camel} {
             this.name = name;
         }
 
+        // ----- Graal C API methods -----
+
+        /**
+         * Internal method to wrap a Native Image C pointer to a token kind
+         * value.
+         */
+        static TokenKind fromC(
+            final CIntPointer pointer
+        ) throws EnumException {
+            return fromC(pointer.read());
+        }
+
         // ----- Enum methods -----
 
         /**
@@ -836,6 +848,18 @@ public final class ${ctx.lib_name.camel} {
             this.value = value;
         }
 
+        // ----- Graal C API methods -----
+
+        /**
+         * Internal method to wrap a Native Image C pointer to a exception
+         * kind value.
+         */
+        static ExceptionKind fromC(
+            final CIntPointer pointer
+        ) throws EnumException {
+            return fromC(pointer.read());
+        }
+
         // ----- Enum methods -----
 
         /**
@@ -878,6 +902,50 @@ public final class ${ctx.lib_name.camel} {
     // ==========
 
     // ===== Constant structure wrapping classes =====
+
+    /**
+     * This class provides static methods to help wrapping and unwrapping
+     * native boolean values.
+     */
+    public static final class BooleanWrapper {
+
+        // ----- Graal C API methods -----
+
+        static boolean wrap(
+            final CCharPointer pointer
+        ) {
+            return pointer.read() != 0;
+        }
+
+        static boolean wrap(
+            final byte nativeValue
+        ) {
+            return nativeValue != 0;
+        }
+
+    }
+
+    /**
+     * This class provides static methods to help wrapping and unwrapping
+     * native integer values.
+     */
+    public static final class IntegerWrapper {
+
+        // ----- Graal C API methods -----
+
+        static int wrap(
+            final CIntPointer pointer
+        ) {
+            return pointer.read();
+        }
+
+        static int wrap(
+            final int nativeValue
+        ) {
+            return nativeValue;
+        }
+
+    }
 
     /**
      * This class wraps the langkit characters which are 32 bit wide.

@@ -45,6 +45,17 @@
             this.value = value;
         }
 
+        // ----- Graal C API methods -----
+
+        /**
+         * Internal method to wrap a Native Image C pointer to an enum value.
+         */
+        static ${java_type} fromC(
+            final CIntPointer pointer
+        ) throws EnumException {
+            return fromC(pointer.read());
+        }
+
         // ----- Enum methods -----
 
         /**

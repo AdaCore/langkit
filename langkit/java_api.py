@@ -536,6 +536,8 @@ class JavaAPISettings(AbstractAPISettings):
             class.
         """
         return dispatch_on_type(the_type, [
+            (T.Bool, lambda _: "BooleanWrapper"),
+            (T.Int, lambda _: "IntegerWrapper"),
             (T.BigInt, lambda _: "BigIntegerWrapper"),
             (T.String, lambda _: "StringWrapper"),
             (object, lambda t: self.wrapping_type(t, ast_wrapping))
@@ -654,36 +656,42 @@ class JavaAPISettings(AbstractAPISettings):
     def ni_wrap(self,
                 the_type: CompiledType,
                 source: str,
-                release_list: list[ToRelease]) -> str:
+                release_list: list[ToRelease],
+                ast_wrapping: bool = True) -> str:
         """
-        Get the Java expression to wrap the given pointer expression.
+        Returns the Java expression (in a string) to wrap the `source` Native
+        Image C API value.
 
         :param the_type: The type of the expression to wrap.
         :param source: The Java expression to wrap.
-        :param release_list: The list of the element to release after the
-            wrapping.
+        :param release_list: The list that will be filled with elements to
+            release after the `source` wrapping.
+        :param ast_wrapping: Whether to wrap node types in their Java classes.
         """
         # Extends the release list
         self.extend_release_list(release_list, the_type, source)
 
         # Return the wrapping expression
         return dispatch_on_type(the_type, [
-            (T.Bool, lambda _: f"({source}.read() != 0)"),
-            (T.Int, lambda _: f"{source}.read()"),
             (
                 ct.EnumType, lambda t:
-                    f"{self.wrapper_class(t)}.fromC({source}.read())"
+                    f"{self.wrapper_class(t)}.fromC({source})"
             ),
             (T.Token, lambda _: f"Token.wrap({source}, currentUnit)"),
             (
                 ct.ASTNodeType, lambda t:
                     self.ni_wrap(t.entity, source, release_list)
+                    if ast_wrapping else
+                    f"PointerWrapper.wrap({source})"
             ),
             (
-                ct.EntityType, lambda t: (
-                    f"{self.wrapper_class(t)}.fromEntity"
-                    f"(Entity.wrap({source}))"
-                )
+                ct.EntityType, lambda t:
+                    (
+                        f"{self.wrapper_class(t)}.fromEntity"
+                        f"(Entity.wrap({source}))"
+                    )
+                    if ast_wrapping else
+                    f"Entity.wrap({source})"
             ),
             (object, lambda t: f"{self.wrapper_class(t)}.wrap({source})"),
         ])
@@ -855,31 +863,35 @@ class JavaAPISettings(AbstractAPISettings):
         :param field: The field to wrap.
         :param base: The base of the current fields.
         """
-        # Get the base or an empty list
         base = base or []
-
         field_type = self.wrapping_type(field.public_type, False)
-        wrapper_class = self.wrapper_class(field.public_type, False)
+
+        # If the field to wrap is a leaf (not a struct) then generate the
+        # wrapping operation on it.
         if field.fields is None:
             field_name = "_".join(base + [field.native_name])
             getter = f"structNative.get_{field_name}()"
-            return dispatch_on_type(field.public_type, [
-                (T.Bool, lambda _: f"{getter} != 0"),
-                (T.Int, lambda _: getter),
-                (ct.EnumType, lambda _: f"{field_type}.fromC({getter})"),
-                (
-                    object, lambda t: f"{wrapper_class}.wrap({getter})"
-                ),
-            ])
+            return self.ni_wrap(
+                field.public_type,
+                getter,
+                [],
+                ast_wrapping=False
+            )
+
+        # Else, it the field has sub-fields, this is a composite value
+        # (struct), we have to call field wrapping on all its components.
         elif field.fields:
             inside = [
                 self.ni_field_wrap(
                     inner_field,
-                    base + [field.native_name]
+                    base=base + [field.native_name]
                 )
                 for inner_field in field.fields
             ]
             return f"new {field_type}({', '.join(inside)})"
+
+        # Else, the field is a struct without any fields, we just return its
+        # `NONE` singleton.
         else:
             return f"{field_type}.NONE"
 
