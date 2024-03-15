@@ -3,6 +3,9 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package provides common implementation details for Langkit-generated
 --  libraries. Even though it is not private (to allow Langkit-generated
 --  libraries to use it), it is not meant to be used beyond this. As such, this

@@ -8,6 +8,9 @@ with Ada.Unchecked_Deallocation;
 
 with System;
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package implements a very simple Vector type. It has the following
 --  attributes:
 --

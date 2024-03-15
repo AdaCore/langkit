@@ -15,6 +15,9 @@ with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Types;   use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+
 package Langkit_Support.Token_Data_Handlers is
 
    type Raw_Token_Kind is new Natural;

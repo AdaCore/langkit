@@ -3,6 +3,9 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package provides helper on top of the Prettier_Ada library to build
 --  documents incremenally: create a document, inspect it, possibly modify it,
 --  and at the end produce the final Prettier_Ada document.

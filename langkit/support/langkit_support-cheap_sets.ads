@@ -5,6 +5,9 @@
 
 with Langkit_Support.Vectors;
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+--
 --  This package implements generic sets in a fast and cheap way, using a
 --  vector underneath. This is done because:
 --

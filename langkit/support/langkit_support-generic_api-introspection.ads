@@ -3,11 +3,10 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  .. note:: At this stage, this package is considered as internal.
+--
 --  This package provides a generic API so that programs can work with the
 --  $.Introspection packages of all Langkit-generated libraries.
---
---  Note that it is experimental at this stage, and thus not officially
---  supported.
 
 private with Ada.Containers.Hashed_Maps;
 private with Ada.Finalization;

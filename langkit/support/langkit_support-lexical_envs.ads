@@ -15,6 +15,9 @@ with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
 with Langkit_Support.Types;   use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
+--  .. note:: This unit is internal: only Langkit and Langkit-generated
+--  libraries are supposed to use it.
+
 package Langkit_Support.Lexical_Envs is
 
    type Lookup_Cache_Kind is (Disabled, Toplevel_Only, Full);
