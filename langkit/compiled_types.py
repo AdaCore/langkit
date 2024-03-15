@@ -4770,12 +4770,38 @@ class TypeRepo:
             """
             self.getter = getter
             self.label = label
+            self._is_resolved = False
+            self._resolved_object: Any
 
         def get(self) -> Any:
             """
             Resolve the referenced entity.
             """
-            return self.getter()
+            if not self._is_resolved:
+                self._resolved_object = self.getter()
+                self._is_resolved = True
+            return self._resolved_object
+
+        def with_check(
+            self, callback: Callable[[], None]
+        ) -> TypeRepo.Defer:
+            """
+            Return a new ``Defer`` instance whose resolver will run some
+            arbitrary check (``callback`` function) and then return the result
+            of ``self``'s own resolver.
+
+            This method is useful to run checks for type references whose
+            resolution is used only to run these checks, for instance
+            ``ASTList[T1, T2]``: during the resolution of the generic
+            instantiation, we need to resolve ``T1`` only to check that it is
+            the root node: building the list type itself needs to resolve
+            ``T2`` only.
+            """
+            def getter() -> Any:
+                callback()
+                return self.get()
+
+            return TypeRepo.Defer(getter, self.label)
 
         def __getattr__(self, name: str) -> TypeRepo.Defer:
             def get() -> Any:

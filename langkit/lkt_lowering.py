@@ -2412,6 +2412,16 @@ class LktTypesLoader:
         """
         Like ``resolve_entity``, but for types specifically.
         """
+        # A general note regarding validation: translating TypeRef nodes to
+        # TypeRepo.Defer instances is done during lowering, and checking
+        # whether some type is a node requires lowering. As a consequence,
+        # these checks must be deferred in order to avoid chicken and egg
+        # problems (type lowering infinite recursion).
+        #
+        # To implement these deferred checks, we use the
+        # TypeRepo.Defer.with_check method to add checks to the process of
+        # CompiledType resolution.
+
         if isinstance(name, L.GenericTypeRef):
             with self.ctx.lkt_context(name):
                 generic = self.resolve_generic(name.f_type_name, scope)
@@ -2424,14 +2434,12 @@ class LktTypesLoader:
                         )
                     root_node_ref, element_type_ref = type_args
 
-                    # TODO (eng/libadalang/langkit#729): validate that
-                    # root_node_ref is the root node and that element_type_ref
-                    # is a node type. The only way to validate this currently
-                    # is to perform lowering, so we have a chicken and egg
-                    # problem: we may already be lowering the root node.
-                    del root_node_ref
-
-                    return self.resolve_type(element_type_ref, scope).list
+                    # Check that the element type is a node and that the
+                    # designated root node is indeed the root node.
+                    return (
+                        self.resolve_node(element_type_ref, scope).list
+                        .with_check(self.root_node_check(root_node_ref, scope))
+                    )
 
                 elif generic == self.generics.analysis_unit:
                     if len(type_args) != 1:
@@ -2441,11 +2449,11 @@ class LktTypesLoader:
                         )
                     root_node_ref, = type_args
 
-                    # TODO (eng/libadalang/langkit#729): validate that
-                    # root_node_ref is the root node (see above).
-                    del root_node_ref
-
-                    return T.AnalysisUnit
+                    # Check that the designated root node is indeed the root
+                    # node.
+                    return T.deferred_type("AnalysisUnit").with_check(
+                        self.root_node_check(root_node_ref, scope)
+                    )
 
                 elif generic == self.generics.array:
                     if len(type_args) != 1:
@@ -2463,11 +2471,7 @@ class LktTypesLoader:
                             " node type"
                         )
                     node_type, = type_args
-
-                    # TODO (eng/libadalang/langkit#729: validate that node_type
-                    # is indeed a node type.
-
-                    return self.resolve_type(node_type, scope).entity
+                    return self.resolve_node(node_type, scope).entity
 
                 elif generic == self.generics.iterator:
                     if len(type_args) != 1:
@@ -2486,11 +2490,11 @@ class LktTypesLoader:
                         )
                     root_node_ref, = type_args
 
-                    # TODO (eng/libadalang/langkit#729: validate that
-                    # root_node_ref is the root node (see above).
-                    del root_node_ref
-
-                    return T.LexicalEnv
+                    # Check that the designated root node is indeed the root
+                    # node.
+                    return T.deferred_type("LexicalEnv").with_check(
+                        self.root_node_check(root_node_ref, scope)
+                    )
 
                 elif generic == self.generics.node:
                     error(
@@ -2510,6 +2514,64 @@ class LktTypesLoader:
         else:
             with self.ctx.lkt_context(name):
                 error("invalid type reference")
+
+    def type_predicate_check(
+        self,
+        name: L.TypeRef,
+        defer: TypeRepo.Defer,
+        predicate: Callable[[CompiledType], bool],
+        error_message: str,
+    ) -> Callable[[], None]:
+        """
+        Return a "check" callback that, given a compiled type, emits an error
+        if that type does not satisfy a predicate.
+
+        :param name: Lkt node that designates the compiled type to check.
+        :param defer: Defer instance for the compiled type to check.
+        :param predicate: Compiled type predicate that returns whether the type
+            passes the check.
+        :param error_message: Message for the error to emit if the type fails
+            the check.
+        """
+        def check() -> None:
+            with self.ctx.lkt_context(name):
+                check_source_language(predicate(defer.get()), error_message)
+
+        return check
+
+    def root_node_check(
+        self,
+        name: L.TypeRef,
+        scope: Scope,
+    ) -> Callable[[], None]:
+        """
+        Return a check (for `TypeRepo.Defer.with_check`) for the compiled type
+        designated by ``name`` in Lkt sources and that ``defer`` resolves to.
+        This check ensures that this type is the root node.
+        """
+        return self.type_predicate_check(
+            name,
+            self.resolve_type(name, scope),
+            lambda t: t.is_root_node, "root node expected",
+        )
+
+    def resolve_node(
+        self,
+        name: L.TypeRef,
+        scope: Scope,
+    ) -> TypeRepo.Defer:
+        """
+        Like ``resolve_type``, but checks that the resolved type is a node.
+        """
+        defer = self.resolve_type(name, scope)
+        return defer.with_check(
+            self.type_predicate_check(
+                name,
+                defer,
+                lambda t: isinstance(t, ASTNodeType),
+                "node expected",
+            )
+        )
 
     def resolve_type_expr(self, name: L.Expr, scope: Scope) -> TypeRepo.Defer:
         """
