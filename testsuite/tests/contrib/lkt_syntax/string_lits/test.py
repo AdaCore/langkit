@@ -13,6 +13,8 @@ for filename in [
     "escape_invalid_char.lkt",
     "escape_invalid_digit.lkt",
     "backslash_quote.lkt",
+    "block_missing_space.lkt",
+    "block_trailing_space.lkt",
 ]:
     print(f"== {filename} ==")
     print("")

@@ -75,7 +75,7 @@ Id   <RefId "Array" test.lkt:15:9-15:14>
 Id   <RefId "String" test.lkt:15:15-15:21>
      references <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:15:26-15:29>
+Expr <SingleLineStringLit test.lkt:15:26-15:29>
      has type <StructDecl prelude: "String">
 
 Expr <ArrayLiteral test.lkt:15:25-15:30>
@@ -87,13 +87,13 @@ Id   <RefId "Array" test.lkt:16:9-16:14>
 Id   <RefId "String" test.lkt:16:15-16:21>
      references <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:16:26-16:29>
+Expr <SingleLineStringLit test.lkt:16:26-16:29>
      has type <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:16:31-16:34>
+Expr <SingleLineStringLit test.lkt:16:31-16:34>
      has type <StructDecl prelude: "String">
 
-Expr <StringLit test.lkt:16:36-16:39>
+Expr <SingleLineStringLit test.lkt:16:36-16:39>
      has type <StructDecl prelude: "String">
 
 Expr <ArrayLiteral test.lkt:16:25-16:40>

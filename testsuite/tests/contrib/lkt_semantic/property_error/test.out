@@ -6,7 +6,7 @@ Id   <RefId "Bool" test.lkt:1:14-1:18>
 Id   <RefId "PropertyError" test.lkt:1:27-1:40>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:1:41-1:48>
+Expr <SingleLineStringLit test.lkt:1:41-1:48>
      has type <StructDecl prelude: "String">
 
 Expr <CallExpr test.lkt:1:27-1:49>
@@ -21,7 +21,7 @@ Id   <RefId "Bool" test.lkt:2:14-2:18>
 Id   <RefId "PropertyError" test.lkt:2:28-2:41>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:2:42-2:49>
+Expr <SingleLineStringLit test.lkt:2:42-2:49>
      has type <StructDecl prelude: "String">
 
 Expr <CallExpr test.lkt:2:28-2:50>
@@ -39,7 +39,7 @@ Id   <RefId "Bool" test.lkt:3:23-3:27>
 Id   <RefId "PropertyError" test.lkt:3:37-3:50>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:3:51-3:58>
+Expr <SingleLineStringLit test.lkt:3:51-3:58>
      has type <StructDecl prelude: "String">
 
 Expr <CallExpr test.lkt:3:37-3:59>
@@ -93,7 +93,7 @@ test.lkt:8:30: error: raised expression needs to be a `PropertyError` constructo
 Id   <RefId "PropertyError" test.lkt:11:22-11:35>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:11:36-11:43>
+Expr <SingleLineStringLit test.lkt:11:36-11:43>
      has type <StructDecl prelude: "String">
 
 Expr <CallExpr test.lkt:11:22-11:44>
@@ -106,7 +106,7 @@ test.lkt:11:22: error: Cannot reference `PropertyError` outside of a raise expre
 Id   <RefId "PropertyError" test.lkt:12:23-12:36>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:12:37-12:44>
+Expr <SingleLineStringLit test.lkt:12:37-12:44>
      has type <StructDecl prelude: "String">
 
 Expr <CallExpr test.lkt:12:23-12:45>
@@ -131,7 +131,7 @@ Expr <NumLit test.lkt:15:17-15:18>
 Id   <RefId "PropertyError" test.lkt:17:10-17:23>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:17:24-17:40>
+Expr <SingleLineStringLit test.lkt:17:24-17:40>
      has type <StructDecl prelude: "String">
 
 Expr <CallExpr test.lkt:17:10-17:41>
@@ -174,7 +174,7 @@ Id   <RefId "PropertyError" test.lkt:24:31-24:44>
 Id   <RefId "PropertyError" test.lkt:24:45-24:58>
      references <StructDecl prelude: "PropertyError">
 
-Expr <StringLit test.lkt:24:59-24:64>
+Expr <SingleLineStringLit test.lkt:24:59-24:64>
      has type <StructDecl prelude: "String">
 
 Expr <CallExpr test.lkt:24:45-24:65>

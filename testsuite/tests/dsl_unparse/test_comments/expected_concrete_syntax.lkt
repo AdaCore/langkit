@@ -9,15 +9,15 @@ grammar foo_grammar {
     )
 }
 
-## Root node class for Test AST nodes.
+|" Root node class for Test AST nodes.
 @abstract class TestNode implements Node[TestNode] {
 }
 
-## Example node.
-##
-## Second line.
+|" Example node.
+|"
+|" Second line.
 class ExampleNode: TestNode {
-    ## docstring.
+    |" docstring.
     @export fun test_no_var(): Int = # hello
     42
 

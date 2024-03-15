@@ -77,6 +77,7 @@ class Token(LexerToken):
 
     # Literals
     String = WithText()
+    BlockStringLine = WithText()
     PString = WithText()
     Char = WithText()
     DocComment = WithText()
@@ -175,8 +176,8 @@ lkt_lexer.add_rules(
     (Pattern('{STRING_LIT}'),         Token.String),
     (Pattern('[a-zA-Z]{STRING_LIT}'), Token.PString),
     (Pattern('{CHAR_LIT}'),           Token.Char),
+    (Pattern(r'\|"[^\r\n]*'),         Token.BlockStringLine),
 
     # Comments
-    (Pattern(r"##(.?)+"),  Token.DocComment),
     (Pattern(r"#(.?)+"),   Token.Comment),
 )

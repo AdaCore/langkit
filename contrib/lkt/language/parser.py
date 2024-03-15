@@ -649,7 +649,7 @@ class FullDecl(LktNode):
     Container for an lkt declaration. Contains the decl node plus the
     documentation and annotations.
     """
-    doc = Field(type=T.Doc)
+    doc = Field(type=T.StringLit)
     decl_annotations = Field(type=T.DeclAnnotation.list)
     decl = Field(type=T.Decl)
 
@@ -2382,20 +2382,6 @@ class EnumClassDecl(BasicClassDecl):
         return decl.is_a(T.FunDecl)
 
 
-class DocComment(LktNode):
-    """
-    Node for one line of documentation attached to a node.
-    """
-    token_node = True
-
-
-class Doc(LktNode):
-    """
-    Documentation attached to a decl node.
-    """
-    lines = Field(type=T.DocComment.list)
-
-
 @abstract
 class BaseValDecl(Decl):
     """
@@ -3725,39 +3711,38 @@ class DecodedStringValue(Struct):
     error_message = UserField(T.String, default_value=No(T.String))
 
 
+@abstract
 class StringLit(Lit):
     """
-    String literal expression.
-
-    Note that in order to reduce the size of the node type hierarchy, we define
-    only one node (StringLit) for all our string literals (only regular strings
-    and pattern string literals at the moment). This will also make it easy to
-    add new string prefixes in the future.
+    Base node type for string literals.
     """
-    token_node = True
+    @langkit_property(
+        public=True,
+        return_type=T.DecodedStringValue,
+        kind=AbstractKind.abstract,
+    )
+    def denoted_value():
+        """
+        Return the content of the given string literal node.
+        """
+        pass
 
-    @langkit_property(public=True, return_type=T.Bool,
-                      external=True, uses_envs=False, uses_entity_info=False)
+    @langkit_property(
+        public=True, return_type=T.Bool, kind=AbstractKind.abstract
+    )
     def is_prefixed_string():
         """
         Return whether this string is prefixed or not.
         """
         pass
 
-    @langkit_property(public=True, return_type=T.Character,
-                      external=True, uses_envs=False, uses_entity_info=False)
+    @langkit_property(
+        public=True, return_type=T.Character, kind=AbstractKind.abstract
+    )
     def prefix():
         """
         Return the prefix of this string, or the null character if there is no
         prefix.
-        """
-        pass
-
-    @langkit_property(public=True, return_type=T.DecodedStringValue,
-                      external=True, uses_envs=False, uses_entity_info=False)
-    def denoted_value():
-        """
-        Return the content of the given string literal node.
         """
         pass
 
@@ -3768,6 +3753,66 @@ class StringLit(Lit):
         checking that this string is prefixed by 'p'.
         """
         return Self.prefix == CharacterLiteral('p')
+
+
+class BlockStringLine(LktNode):
+    """
+    A single line in a block string literal.
+    """
+    token_node = True
+
+
+class BlockStringLit(StringLit):
+    """
+    String literal expression, made of multiple line strings.
+
+    The denoted string value is the concatenation of all line string items.
+    Each line string item must be either:
+
+    * The empty string designator (``|"``), to denote an empty line (``\\n``).
+
+    * ``|" <content>``, to designate a non-empty line. The space before
+      ``<content>`` is mandatory, and is not included in the denoted string
+      value. ``<content>`` can be anything that appear in a regular string
+      literal: escape sequences are interpreted the same way.
+    """
+    lines = Field(type=T.BlockStringLine.list)
+
+    @langkit_property(external=True, uses_envs=False, uses_entity_info=False)
+    def denoted_value():
+        pass
+
+    @langkit_property()
+    def is_prefixed_string():
+        return False
+
+    @langkit_property()
+    def prefix():
+        return CharacterLiteral("\x00")
+
+
+class SingleLineStringLit(StringLit):
+    """
+    Single line string literal expression.
+
+    Note that in order to reduce the size of the node type hierarchy, we define
+    only one node (StringLit) for all our string literals (only regular strings
+    and pattern string literals at the moment). This will also make it easy to
+    add new string prefixes in the future.
+    """
+    token_node = True
+
+    @langkit_property(external=True, uses_envs=False, uses_entity_info=False)
+    def denoted_value():
+        pass
+
+    @langkit_property(external=True, uses_envs=False, uses_entity_info=False)
+    def is_prefixed_string():
+        pass
+
+    @langkit_property(external=True, uses_envs=False, uses_entity_info=False)
+    def prefix():
+        pass
 
     @langkit_property()
     def expr_context_free_type():
@@ -3879,12 +3924,10 @@ lkt_grammar.add_rules(
     type_ref_id=Predicate(G.ref_id, RefId.is_type_name),
     def_id=DefId(Lex.Identifier),
 
+    doc=Opt(G.string_lit),
+
     import_stmt=Import("import", ModuleRefId(Lex.Identifier)),
     imports=List(G.import_stmt, empty_valid=True),
-
-    doc_comment=DocComment(Lex.DocComment),
-
-    doc=Doc(List(G.doc_comment, empty_valid=True)),
 
     lexer_decl=LexerDecl(
         "lexer", G.def_id, "{",
@@ -4239,7 +4282,13 @@ lkt_grammar.add_rules(
 
     num_lit=NumLit(Lex.Number),
     big_num_lit=BigNumLit(Lex.BigNumber),
-    string_lit=StringLit(GOr(Lex.String, Lex.PString)),
+    string_lit=GOr(
+        SingleLineStringLit(GOr(Lex.String, Lex.PString)),
+        G.block_string_lit,
+    ),
+    block_string_lit=BlockStringLit(
+        List(BlockStringLine(Lex.BlockStringLine), empty_valid=False)
+    ),
     char_lit=CharLit(Lex.Char),
 
     if_expr=IfExpr(

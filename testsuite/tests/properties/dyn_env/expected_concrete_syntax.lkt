@@ -30,8 +30,8 @@ class CallExpr: FooNode {
     @lazy arg_exprs_env: LexicalEnv[FooNode] =
     dynamic_lexical_env(CallExpr.arg_exprs_assocs_getter, assoc_resolver=Expr.resolve)
 
-    ## For each argument, associate its name to the expression passed in this
-    ## call.
+    |" For each argument, associate its name to the expression passed in this
+    |" call.
     fun args_assocs_getter(): Array[InnerEnvAssoc] = {
         val decl = node.node_env().get_first(node.name).as[FunDecl];
 
@@ -42,7 +42,7 @@ class CallExpr: FooNode {
         )
     }
 
-    ## For each argument, associate its name to its default expression.
+    |" For each argument, associate its name to its default expression.
     fun arg_exprs_assocs_getter(): Array[InnerEnvAssoc] = {
         val decl = node.node_env().get_first(node.name).as[FunDecl];
 

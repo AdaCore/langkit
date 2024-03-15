@@ -16,7 +16,7 @@ grammar foo_grammar {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, Id]
 
-    ## Return whether "content" contains the ``kw`` keyword.
+    |" Return whether "content" contains the ``kw`` keyword.
     fun has_kw(kw: Symbol): Bool =
     node.content.map((c) => c.symbol).contains(kw)
 

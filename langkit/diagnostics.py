@@ -177,6 +177,14 @@ class Location:
         return cls.from_sloc_range(node.unit, node.sloc_range)
 
     @classmethod
+    def from_lkt_node_or_none(cls, node: L.LktNode | None) -> Location | None:
+        """
+        Create a Location based on a Lkt node. Accept null nodes: return a null
+        location in that case.
+        """
+        return None if node is None else cls.from_lkt_node(node)
+
+    @classmethod
     def for_entity_doc(
         cls,
         entity: CompiledType | PropertyDef,

@@ -1714,28 +1714,6 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     return result
 
 
-def extract_doc(doc: L.Doc) -> str:
-    """
-    Turn a Doc node into the corresponding doc string.
-    """
-    # Extract the text from all doc lines
-    lines: List[str] = []
-    for d_line in doc.f_lines:
-        line = d_line.text
-        assert line.startswith("##")
-        lines.append(line[2:])
-
-    # Remove the biggest common indentation
-    if lines:
-        common_indent = min(
-            len(line) - len(line.lstrip(" "))
-            for line in lines
-        )
-        lines = [line[common_indent:] for line in lines]
-
-    return "\n".join(lines)
-
-
 def create_grammar(ctx: CompileCtx,
                    lkt_units: List[L.AnalysisUnit]) -> Grammar:
     """
@@ -1791,7 +1769,7 @@ def create_grammar(ctx: CompileCtx,
             if anns.main_rule or anns.entry_point:
                 entry_points.add(rule_name)
 
-            all_rules[rule_name] = (full_rule.f_doc, r.f_expr)
+            all_rules[rule_name] = (r, r.f_expr)
 
     # Now create the result grammar
     if main_rule_name is None:
@@ -2068,7 +2046,7 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 raise NotImplementedError('unhandled parser: {}'.format(rule))
 
     for name, (rule_doc, rule_expr) in grammar._all_lkt_rules.items():
-        grammar._add_rule(name, lower(rule_expr), extract_doc(rule_doc))
+        grammar._add_rule(name, lower(rule_expr), ctx.lkt_doc(rule_doc))
 
 
 # Mapping to associate declarations to the corresponding AbstractVariable
@@ -2201,6 +2179,7 @@ class LktTypesLoader:
         # Register builtins in the root scope
         with AbstractExpression.with_location(Location.builtin):
             for builtin in [
+                builtin_type("Address"),
                 builtin_type("AnalysisUnitKind"),
                 builtin_type("BigInt"),
                 builtin_type("Bool"),
@@ -2217,6 +2196,7 @@ class LktTypesLoader:
                 builtin_type("LookupKind"),
                 builtin_type("RefCategories"),
                 builtin_type("SourceLocation"),
+                builtin_type("SourceLocationRange"),
                 builtin_type("String"),
                 builtin_type("Symbol"),
                 builtin_type("Token"),
@@ -4355,7 +4335,7 @@ class LktTypesLoader:
             lazy_field=False,
             final=annotations.final,
         )
-        result._doc_location = Location.from_lkt_node(full_decl.f_doc)
+        result._doc_location = Location.from_lkt_node_or_none(full_decl.f_doc)
 
         # Lower its arguments
         arguments, scope = self.lower_property_arguments(
@@ -4877,7 +4857,9 @@ class LktTypesLoader:
             is_bool_node=is_bool_node,
         )
         assert isinstance(decl.parent, L.FullDecl)
-        result._doc_location = Location.from_lkt_node(decl.parent.f_doc)
+        result._doc_location = Location.from_lkt_node_or_none(
+            decl.parent.f_doc
+        )
 
         # Create alternatives for enum nodes
         if isinstance(annotations, EnumNodeAnnotations):
@@ -5029,7 +5011,9 @@ class LktTypesLoader:
             default_val_name=default_value,
         )
         assert isinstance(decl.parent, L.FullDecl)
-        result._doc_location = Location.from_lkt_node(decl.parent.f_doc)
+        result._doc_location = Location.from_lkt_node_or_none(
+            decl.parent.f_doc
+        )
         return result
 
     def create_struct(self,
@@ -5067,7 +5051,9 @@ class LktTypesLoader:
             fields=fields,
         )
         assert isinstance(decl.parent, L.FullDecl)
-        result._doc_location = Location.from_lkt_node(decl.parent.f_doc)
+        result._doc_location = Location.from_lkt_node_or_none(
+            decl.parent.f_doc
+        )
         if annotations.metadata:
             CompiledTypeRepo.env_metadata = result
         return result

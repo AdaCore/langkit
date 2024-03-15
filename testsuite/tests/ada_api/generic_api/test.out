@@ -4,12 +4,12 @@ Language name: Foo
 
 Grammar rules:
   Main_Rule (default) (public): Foo_Node_List
-    doc: "Parser main entry point"
+    doc: "Parser main entry point\x0a"
   Null_Qual: Null_Qual
   Var_Decl: Var_Decl
   Def: Def
   Expr (public): Expr
-    doc: "Use this to parse\x0aany kind of expression."
+    doc: "Use this to parse\x0aany kind of expression.\x0a"
   Call: Call
   Atom: Expr
   Number: Number
