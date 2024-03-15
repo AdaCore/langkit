@@ -227,6 +227,9 @@ package body Langkit_Support.Generic_API.Unparsing is
    type Node_Config_Access is access all Node_Config_Record;
    --  Unparsing configuration for a given node type
 
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Node_Config_Record, Node_Config_Access);
+
    package Node_Config_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Type_Index,
       Element_Type    => Node_Config_Access,
@@ -248,6 +251,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       Node_Configs : Node_Config_Maps.Map;
       --  Node configurations for all node types in Language
    end record;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Unparsing_Configuration_Record, Unparsing_Configuration_Access);
 
    type Single_Template_Instantiation_Argument is record
       Document : Document_Type;
@@ -1769,7 +1775,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          procedure Process (Name : String; Value : JSON_Value) is
             Key     : constant Type_Index := To_Type_Index (Name);
             Node    : constant Type_Ref := From_Index (Language, Key);
-            Config  : constant Node_Config_Access := new Node_Config_Record'
+            Config  : Node_Config_Access := new Node_Config_Record'
               (Node_Template => No_Template,
                Field_Configs => <>,
                List_Sep      => No_Template);
@@ -1815,6 +1821,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                     Parse_Template (Value.Get ("sep"), Context);
                end;
             end if;
+
+         exception
+            when others =>
+               Free (Config);
+               raise;
          end Process;
 
       begin
@@ -1910,6 +1921,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       when Invalid_Input =>
          pragma Assert (not Diagnostics.Is_Empty);
          Destroy (Symbols);
+         Pool.Release;
          return No_Unparsing_Configuration;
    end Load_Unparsing_Config;
 
@@ -2515,11 +2527,6 @@ package body Langkit_Support.Generic_API.Unparsing is
    --------------
 
    overriding procedure Finalize (Self : in out Unparsing_Configuration) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Unparsing_Configuration_Record,
-         Unparsing_Configuration_Access);
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Node_Config_Record, Node_Config_Access);
    begin
       if Self.Value /= null then
          Self.Value.Ref_Count := Self.Value.Ref_Count - 1;
