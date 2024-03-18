@@ -1,14 +1,17 @@
+from __future__ import annotations
+
 from functools import reduce
 import funcy
 import inspect
 
 from langkit import names
-from langkit.compiled_types import T
+from langkit.compiled_types import CompiledType, T, TypeRepo
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
-    ComputingExpr, LiteralExpr, PropertyDef, Self, attr_call, construct,
-    dsl_document, expr_or_null, render, sloc_info_arg, unsugar
+    ComputingExpr, LiteralExpr, PropertyDef, ResolvedExpression, Self,
+    SequenceExpr, attr_call, construct, dsl_document, expr_or_null, render,
+    sloc_info_arg, unsugar
 )
 
 
@@ -113,6 +116,46 @@ def Or(*args):
     :rtype: BinaryBooleanOperator
     """
     return reduce(lambda a, b: a | b, args)
+
+
+@attr_call("any_of")
+class AnyOf(AbstractExpression):
+    """
+    Return whether ``expr`` is equal to one of ``values``.
+    """
+
+    def __init__(self, expr, *values):
+        super().__init__()
+        self.expr = expr
+        self.values = values
+
+    def construct(self) -> ResolvedExpression:
+        # Lower all sub-expressions. If the prefix is a node/entity, then
+        # we only require that other operands are nodes/entities themselves.
+        # Otherwise, operand types must match the prefix's.
+        expr = construct(self.expr)
+        expected_type: TypeRepo.Defer | CompiledType
+        if expr.type.is_ast_node:
+            expected_type = T.root_node
+        elif expr.type.is_entity_type:
+            expected_type = T.entity
+        else:
+            expected_type = expr.type
+        values = [construct(v, expected_type) for v in self.values]
+        assert len(values) >= 1
+
+        # Make sure the prefix has a result variable so that equality tests do
+        # not re-evaluate it over and over.
+        expr_var = expr.create_result_var("Any_Of_Prefix")
+        result = Eq.make_expr(expr_var, values.pop())
+        while values:
+            result = If.Expr(
+                Eq.make_expr(expr_var, values.pop()),
+                LiteralExpr("True", T.Bool),
+                result,
+            )
+
+        return SequenceExpr(expr, result, abstract_expr=self)
 
 
 @attr_call("equals")

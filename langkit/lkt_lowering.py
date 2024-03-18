@@ -3784,7 +3784,14 @@ class LktTypesLoader:
             """
             result: AbstractExpression
 
-            if isinstance(expr, L.ArrayLiteral):
+            if isinstance(expr, L.AnyOf):
+                prefix = lower(expr.f_expr)
+                return E.AnyOf(
+                    lower(expr.f_expr),
+                    *[lower(v) for v in expr.f_values],
+                )
+
+            elif isinstance(expr, L.ArrayLiteral):
                 elts = [lower(e) for e in expr.f_exprs]
                 element_type = (
                     None

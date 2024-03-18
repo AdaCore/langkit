@@ -1,0 +1,19 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    fun identity(i: Int): Int = i
+
+    @export fun in_1(i: Int): Bool = node.identity(i) in 1
+
+    @export fun in_1_3_4(i: Int): Bool = node.identity(i) in 1 | 3 | 4
+
+    @export fun in_nodes(n1: FooNode, n2: FooNode): Bool = node in n1 | n2
+}

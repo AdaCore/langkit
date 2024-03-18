@@ -1,0 +1,10 @@
+main.py: Running...
+p_in_1(1) = True
+p_in_1(2) = False
+p_in_1_3_4(1) = True
+p_in_1_3_4(2) = False
+p_in_nodes(None, None) = False
+p_in_nodes(<ExampleList main.txt:1:1-1:16>, <Example main.txt:1:1-1:8>) = True
+p_in_nodes(<ExampleList main.txt:1:1-1:16>, <Example main.txt:1:9-1:16>) = False
+main.py: Done.
+Done

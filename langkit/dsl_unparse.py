@@ -720,7 +720,7 @@ def emit_expr(expr, **ctx):
         ArrayLiteral, Arithmetic, BaseRaiseException, CharacterLiteral,
         Predicate, StructUpdate, BigIntLiteral, RefCategories, Bind, Try,
         Block, Contains, PropertyDef, DynamicLexicalEnv, Super, Join, String,
-        NPropagate, Find, EmptyEnv
+        NPropagate, Find, EmptyEnv, AnyOf
     )
 
     def is_a(*names):
@@ -792,6 +792,30 @@ def emit_expr(expr, **ctx):
             expr.exc_name.camel,
             json.dumps(expr.message) if expr.message else ""
         )
+
+    elif isinstance(expr, AnyOf):
+        with walker.method_call("any_of"):
+            result = f"{ee(expr.expr)} in"
+            indented = False
+            for i, v in enumerate(expr.values):
+                with walker.arg(i):
+                    comms = walker.emit_comments()
+                    strn = emit_expr(v, **ctx)
+                    if comms:
+                        if i == 0:
+                            result += "$i$hl" + comms
+                            indented = True
+                        else:
+                            result += "$hl" + comms + "| "
+                    elif i > 0:
+                        result += " | "
+                    else:
+                        result += " "
+                    result += strn
+
+            if indented:
+                result += "$d$hl"
+            return result
 
     elif isinstance(expr, IsA):
         return "{} is {}".format(

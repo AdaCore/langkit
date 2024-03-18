@@ -701,12 +701,10 @@ class AbstractExpression(Frozable):
         built-in ones. Since they're built on regular attrs, we cannot put
         them in attrs or it would cause infinite recursion.
         """
-        from langkit.expressions.boolean import Or
         from langkit.expressions.logic import All, Any as LogicAny
 
         return {
             '_or': lambda alt: self.then(lambda e: e, default_val=alt),
-            'any_of': lambda *els: Or(*[self == el for el in els]),
             'empty': self.length.equals(0),
             'keep': lambda cls:
                 self.filtermap(lambda e: e.cast(cls),
