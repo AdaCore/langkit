@@ -3624,6 +3624,21 @@ class LktTypesLoader:
             empty_signature.match(self.ctx, call_expr)
             result = getattr(method_prefix, "length")
 
+        elif method_name in ("logic_all", "logic_any"):
+            import langkit.expressions.logic as LE
+            inner_expr, element_var, index_var = lower_collection_iter()
+            map_expr = E.Map.create_expanded(
+                method_prefix,
+                inner_expr,
+                element_var,
+                index_var,
+            )
+            result = (
+                LE.All(map_expr)
+                if method_name == "logic_all" else
+                LE.Any(map_expr)
+            )
+
         elif method_name in ("map", "mapcat"):
             inner_expr, element_var, index_var = lower_collection_iter()
             result = E.Map.create_expanded(

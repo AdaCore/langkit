@@ -969,10 +969,18 @@ def emit_expr(expr, **ctx):
         )
 
     elif isinstance(expr, All):
-        return "%all({})".format(ee(expr.equation_array))
+        return (
+            ee(expr.equation_array)
+            if expr._origin_composed_attr == "logic_all" else
+            "%all({})".format(ee(expr.equation_array))
+        )
 
     elif isinstance(expr, Any):
-        return "%any({})".format(ee(expr.equation_array))
+        return (
+            ee(expr.equation_array)
+            if expr._origin_composed_attr == "logic_any" else
+            "%any({})".format(ee(expr.equation_array))
+        )
 
     elif isinstance(expr, Match):
         with walker.method_call("match"):
