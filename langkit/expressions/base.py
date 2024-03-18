@@ -532,10 +532,17 @@ class AbstractExpression(Frozable):
     def diagnostic_context(self):
         return diagnostic_context(self.location)
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.location = (
             self.current_location or extract_library_location()
         )
+
+        self._origin_composed_attr: str | None = None
+        """
+        If this abstract expression was created through
+        "AbstractExpression.composed_attrs", name of the corresponding
+        attribute. None otherwise.
+        """
 
     @property
     def location_repr(self) -> str:
@@ -724,7 +731,18 @@ class AbstractExpression(Frozable):
         try:
             return AbstractExpression.attrs_dict[attr].build(self)
         except KeyError:
-            return self.composed_attrs().get(attr, FieldAccess(self, attr))
+            entry = self.composed_attrs().get(attr)
+            if entry is None:
+                return FieldAccess(self, attr)
+            elif isinstance(entry, AbstractExpression):
+                entry._origin_composed_attr = attr
+                return entry
+            else:
+                def wrapper(*args, **kwargs):
+                    result = entry(*args, **kwargs)
+                    result._origin_composed_attr = attr
+                    return result
+                return wrapper
 
     @Frozable.protect
     def __call__(self, *args, **kwargs):

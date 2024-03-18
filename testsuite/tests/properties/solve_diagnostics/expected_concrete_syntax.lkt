@@ -39,11 +39,11 @@ class Call: Expr {
 
     @export fun resolve(): SolverResult = {
         val eq = self.first_arg.xref_equation() and self.second_arg.xref_equation() and (
-            %any(node.children_env().get(node.name.symbol).logic_any(
+            node.children_env().get(node.name.symbol).logic_any(
                 (elem) => %eq(node.name.ref_var, elem) and elem.as[ProcDecl].call_equation(
                     node.first_arg, node.second_arg, ctx=LogicContext(ref_node=self.name, decl_node=elem)
                 )
-            ))
+            )
         );
 
         eq.solve_with_diagnostics()
@@ -69,7 +69,7 @@ class Identifier: FooNode implements TokenNode {
     else null[Entity[FooNode]]
 
     fun xref_equation(ctx: LogicContext): Equation =
-    %eq(node.ref_var, node.designated_type())
+    %eq(node.ref_var, node.designated_type(), logic_ctx=ctx)
 }
 
 class ProcDecl: FooNode {
@@ -78,7 +78,7 @@ class ProcDecl: FooNode {
     @parse_field second_type: Identifier
 
     fun call_equation(first_arg: Expr, second_arg: Expr, ctx: LogicContext): Equation =
-    node.first_type.xref_equation(ctx) and node.second_type.xref_equation(ctx) and %predicate(TypeDecl.match_expected_type, first_arg.type_var, node.first_type.ref_var) and %predicate(TypeDecl.match_expected_type, second_arg.type_var, node.second_type.ref_var)
+    node.first_type.xref_equation(ctx) and node.second_type.xref_equation(ctx) and %predicate(TypeDecl.match_expected_type, first_arg.type_var, error_location=first_arg, node.first_type.ref_var) and %predicate(TypeDecl.match_expected_type, second_arg.type_var, error_location=second_arg, node.second_type.ref_var)
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)
@@ -86,7 +86,8 @@ class ProcDecl: FooNode {
 }
 
 @abstract class TypeDecl: FooNode {
-    fun match_expected_type(expected: Entity[FooNode]): Bool = self == expected
+    @predicate_error("expected $expected, got $Self") fun match_expected_type(expected: Entity[FooNode]): Bool =
+    self == expected
 }
 
 @synthetic class NumType: TypeDecl {

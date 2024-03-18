@@ -1097,6 +1097,7 @@ class FunAnnotations(ParsedAnnotations):
     ignored: bool
     no_node_warning: bool
     memoized: bool
+    predicate_error: str | None
     trace: bool
     with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
     annotations = [
@@ -1108,6 +1109,7 @@ class FunAnnotations(ParsedAnnotations):
         FlagAnnotationSpec('final'),
         FlagAnnotationSpec('ignored'),
         FlagAnnotationSpec('no_node_warning'),
+        StringLiteralAnnotationSpec('predicate_error'),
         FlagAnnotationSpec('memoized'),
         FlagAnnotationSpec('trace'),
         WithDynvarsAnnotationSpec(),
@@ -1400,6 +1402,7 @@ eq_signature = FunctionSignature(
     FunctionParamSpec("from"),
     FunctionParamSpec("to"),
     FunctionParamSpec("conv_prop", optional=True, keyword_only=True),
+    FunctionParamSpec("logic_ctx", optional=True, keyword_only=True),
 )
 """
 Signature for "%eq".
@@ -1435,6 +1438,7 @@ Signature for "%all" and for "%any".
 predicate_signature = FunctionSignature(
     FunctionParamSpec("pred_prop"),
     FunctionParamSpec("node"),
+    FunctionParamSpec("error_location", optional=True, keyword_only=True),
     positional_variadic=True,
 )
 """
@@ -1444,6 +1448,7 @@ Signature for "%predicate".
 propagate_signature = FunctionSignature(
     FunctionParamSpec("dest"),
     FunctionParamSpec("comb_prop"),
+    FunctionParamSpec("logic_ctx", optional=True, keyword_only=True),
     positional_variadic=True,
 )
 """
@@ -2292,9 +2297,12 @@ class LktTypesLoader:
                 builtin_type("Equation"),
                 builtin_type("InnerEnvAssoc"),
                 builtin_type("Int"),
+                builtin_type("LogicContext"),
                 builtin_type("LogicVar"),
                 builtin_type("LookupKind"),
                 builtin_type("RefCategories"),
+                builtin_type("SolverDiagonstic"),
+                builtin_type("SolverResult"),
                 builtin_type("SourceLocation"),
                 builtin_type("SourceLocationRange"),
                 builtin_type("String"),
@@ -3371,6 +3379,54 @@ class LktTypesLoader:
 
             return BuiltinCallInfo(args, scope, lambda_args, lambda_body)
 
+        def lower_collection_iter() -> tuple[
+            AbstractExpression,
+            AbstractVariable,
+            AbstractVariable | None,
+        ]:
+            """
+            Helper to lower a method call that implements a collection
+            iteration.
+
+            This assumes that that ``call_expr`` is such a method call: the
+            signature for this method is ``collection_iter_signature``, and its
+            ``expr`` argument is expected to be a lambda function to process
+            one collection element. That lambda function must accept either the
+            collection element itself only or an additional element index.
+
+            Return the lowered expression for the lambda, the variable for the
+            iteration element, and an optional variable for the iteration
+            index (if the lambda requires it).
+            """
+            # We expect a single argument: a lambda (itself taking the
+            # collection element plus optionally its index).
+            lambda_info = extract_lambda_and_kwargs(
+                call_expr, collection_iter_signature, "expr", 1, 2
+            )
+            element_arg, index_arg = lambda_info.largs
+            assert element_arg is not None
+
+            # There is always an iteration variable for the collection element
+            element_var = var_for_lambda_arg(
+                lambda_info.scope, element_arg, 'item'
+            )
+
+            # The iteration variable for the iteration index is optional: we
+            # create one only if the lambda has the corresponding element.
+            index_var = (
+                None
+                if index_arg is None else
+                var_for_lambda_arg(
+                    lambda_info.scope, index_arg, 'index', T.Int
+                )
+            )
+
+            # Lower the body expression for that lambda
+            inner_expr = self.lower_expr(
+                lambda_info.expr, lambda_info.scope, local_vars
+            )
+            return (inner_expr, element_var, index_var)
+
         call_name = call_expr.f_name
         assert isinstance(call_name, L.BaseDotExpr)
         null_cond = isinstance(call_name, L.NullCondDottedName)
@@ -3391,27 +3447,7 @@ class LktTypesLoader:
             method_prefix = null_cond_var
 
         if method_name in ("all", "any"):
-            lambda_info = extract_lambda_and_kwargs(
-                call_expr, collection_iter_signature, "expr", 1, 2
-            )
-            element_arg, index_arg = lambda_info.largs
-            assert element_arg is not None
-
-            element_var = var_for_lambda_arg(
-                lambda_info.scope, element_arg, 'item'
-            )
-            index_var = (
-                None
-                if index_arg is None else
-                var_for_lambda_arg(
-                    lambda_info.scope, index_arg, 'index', T.Int
-                )
-            )
-
-            # Finally lower the expressions
-            inner_expr = self.lower_expr(
-                lambda_info.expr, lambda_info.scope, local_vars
-            )
+            inner_expr, element_var, index_var = lower_collection_iter()
             result = E.Quantifier.create_expanded(
                 method_name, method_prefix, inner_expr, element_var, index_var
             )
@@ -3480,27 +3516,7 @@ class LktTypesLoader:
             result = method_prefix.env_parent
 
         elif method_name == "filter":
-            lambda_info = extract_lambda_and_kwargs(
-                call_expr, collection_iter_signature, "expr", 1, 2
-            )
-            element_arg, index_arg = lambda_info.largs
-            assert element_arg is not None
-
-            element_var = var_for_lambda_arg(
-                lambda_info.scope, element_arg, "item"
-            )
-            index_var = (
-                None
-                if index_arg is None else
-                var_for_lambda_arg(
-                    lambda_info.scope, index_arg, "index", T.Int
-                )
-            )
-
-            # Finally lower the expressions
-            inner_expr = self.lower_expr(
-                lambda_info.expr, lambda_info.scope, local_vars
-            )
+            inner_expr, element_var, index_var = lower_collection_iter()
             result = E.Map.create_expanded(
                 method_prefix, element_var, element_var, index_var, inner_expr
             )
@@ -3616,28 +3632,23 @@ class LktTypesLoader:
             empty_signature.match(self.ctx, call_expr)
             result = getattr(method_prefix, "length")
 
+        elif method_name in ("logic_all", "logic_any"):
+            import langkit.expressions.logic as LE
+            inner_expr, element_var, index_var = lower_collection_iter()
+            map_expr = E.Map.create_expanded(
+                method_prefix,
+                inner_expr,
+                element_var,
+                index_var,
+            )
+            result = (
+                LE.All(map_expr)
+                if method_name == "logic_all" else
+                LE.Any(map_expr)
+            )
+
         elif method_name in ("map", "mapcat"):
-            lambda_info = extract_lambda_and_kwargs(
-                call_expr, collection_iter_signature, "expr", 1, 2
-            )
-            element_arg, index_arg = lambda_info.largs
-            assert element_arg is not None
-
-            element_var = var_for_lambda_arg(
-                lambda_info.scope, element_arg, 'item'
-            )
-            index_var = (
-                None
-                if index_arg is None else
-                var_for_lambda_arg(
-                    lambda_info.scope, index_arg, 'index', T.Int
-                )
-            )
-
-            # Finally lower the expressions
-            inner_expr = self.lower_expr(
-                lambda_info.expr, lambda_info.scope, local_vars
-            )
+            inner_expr, element_var, index_var = lower_collection_iter()
             result = E.Map.create_expanded(
                 method_prefix,
                 inner_expr,
@@ -3654,30 +3665,16 @@ class LktTypesLoader:
             empty_signature.match(self.ctx, call_expr)
             result = method_prefix.singleton
 
-        elif method_name == "solve":
+        elif method_name in ("solve", "solve_with_diagnostics"):
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.solve
+            result = getattr(method_prefix, method_name)
+
+        elif method_name == "solve_with_diagnostics":
+            empty_signature.match(self.ctx, call_expr)
+            result = method_prefix.solve_
 
         elif method_name == "take_while":
-            lambda_info = extract_lambda_and_kwargs(
-                call_expr, collection_iter_signature, "expr", 1, 2
-            )
-            element_arg, index_arg = lambda_info.largs
-            assert element_arg is not None
-
-            element_var = var_for_lambda_arg(
-                lambda_info.scope, element_arg, 'item'
-            )
-            index_var = (
-                None
-                if index_arg is None else
-                var_for_lambda_arg(
-                    lambda_info.scope, index_arg, "index", T.Int
-                )
-            )
-            inner_expr = self.lower_expr(
-                lambda_info.expr, lambda_info.scope, local_vars
-            )
+            inner_expr, element_var, index_var = lower_collection_iter()
             result = E.Map.create_expanded(
                 method_prefix,
                 element_var,
@@ -4123,11 +4120,17 @@ class LktTypesLoader:
 
                     elif call_name.text == "eq":
                         args, _ = eq_signature.match(self.ctx, expr)
+                        logic_ctx_expr = args.get("logic_ctx")
                         return E.Bind(
                             lower(args["from"]),
                             lower(args["to"]),
                             conv_prop=self.resolve_property(
                                 args.get("conv_prop")
+                            ),
+                            logic_ctx=(
+                                None
+                                if logic_ctx_expr is None else
+                                lower(logic_ctx_expr)
                             ),
                         )
 
@@ -4135,15 +4138,35 @@ class LktTypesLoader:
                         args, vargs = predicate_signature.match(self.ctx, expr)
                         pred_prop = self.resolve_property(args["pred_prop"])
                         node_expr = lower(args["node"])
+                        error_location_expr = args.get("error_location")
                         arg_exprs = [lower(arg) for arg in vargs]
-                        return E.Predicate(pred_prop, node_expr, *arg_exprs)
+                        return E.Predicate(
+                            pred_prop,
+                            node_expr,
+                            error_location=(
+                                None
+                                if error_location_expr is None else
+                                lower(error_location_expr)
+                            ),
+                            *arg_exprs,
+                        )
 
                     elif call_name.text == "propagate":
                         args, vargs = propagate_signature.match(self.ctx, expr)
                         dest_var = lower(args["dest"])
                         comb_prop = self.resolve_property(args["comb_prop"])
+                        logic_ctx_expr = args.get("logic_ctx")
                         arg_vars = [lower(arg) for arg in vargs]
-                        return E.NPropagate(dest_var, comb_prop, *arg_vars)
+                        return E.NPropagate(
+                            dest_var,
+                            comb_prop,
+                            logic_ctx=(
+                                None
+                                if logic_ctx_expr is None else
+                                lower(logic_ctx_expr)
+                            ),
+                            *arg_vars,
+                        )
 
                 with self.ctx.lkt_context(expr):
                     error("invalid logic expression")
@@ -4410,6 +4433,7 @@ class LktTypesLoader:
             dump_ir=False,
             lazy_field=False,
             final=annotations.final,
+            predicate_error=annotations.predicate_error,
         )
         result._doc_location = Location.from_lkt_node_or_none(full_decl.f_doc)
 

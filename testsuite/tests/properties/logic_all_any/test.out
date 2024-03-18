@@ -1,0 +1,27 @@
+main.py: Running...
+# ()
+any_foo = False
+all_foo = True
+
+# (a)
+any_foo = False
+all_foo = False
+
+# (foo)
+any_foo = True
+all_foo = True
+
+# (a foo b)
+any_foo = True
+all_foo = False
+
+# (a b c)
+any_foo = False
+all_foo = False
+
+# (foo foo)
+any_foo = True
+all_foo = True
+
+main.py: Done.
+Done
