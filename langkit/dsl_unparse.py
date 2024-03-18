@@ -1318,6 +1318,11 @@ def emit_expr(expr, **ctx):
         return "%predicate({})".format(", ".join(keep([
             fqn(expr.pred_property),
             ee(expr.exprs[0]),
+            (
+                ""
+                if expr.pred_error_location is None else
+                "error_location={}".format(ee(expr.pred_error_location))
+            ),
         ] + [ee(e) for e in expr.exprs[1:]])))
 
     elif is_a("domain"):
@@ -1326,13 +1331,15 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, Bind):
         return "%eq({})".format(", ".join(keep([
             ee(expr.from_expr), ee(expr.to_expr),
-            "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else ""
+            "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else "",
+            "logic_ctx={}".format(ee(expr.logic_ctx)) if expr.logic_ctx else "",
         ])))
 
     elif isinstance(expr, NPropagate):
         return "%propagate({})".format(", ".join(keep([
             ee(expr.dest_var),
             fqn(expr.comb_prop),
+            "logic_ctx={}".format(ee(expr.logic_ctx)) if expr.logic_ctx else "",
         ] + [ee(v) for v in expr.arg_vars])))
 
     elif isinstance(expr, DynamicLexicalEnv):
@@ -1406,6 +1413,9 @@ def emit_prop(prop, walker):
                 "{}={}".format(name, emit_expr(val))
             )
         quals += "@with_dynvars({}) ".format(", ".join(vars))
+
+    if prop.predicate_error:
+        quals += "@predicate_error({}) ".format(json.dumps(prop.predicate_error))
 
     args = []
     for arg in prop.natural_arguments:
