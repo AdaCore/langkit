@@ -48,8 +48,8 @@ from dataclasses import dataclass
 import itertools
 import os.path
 from typing import (
-    Any, Callable, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar,
-    Union, cast, overload
+    Any, Callable, ClassVar, Dict, Generic, List, Optional, Set, Tuple, Type,
+    TypeVar, Union, cast, overload
 )
 
 import liblktlang as L
@@ -1177,200 +1177,300 @@ def parse_annotations(
     return annotation_class(**values)  # type: ignore
 
 
-@dataclass
-class FunctionSignature:
+class FunctionParamSpec:
     """
-    Specification of required/accepted arguments for a function.
-    """
-
-    positional_args: int
-    """
-    Number of positional-only arguments that are required to call such
-    functions.
+    Specification for a function parameter.
     """
 
-    keyword_args: set[str]
+    def __init__(
+        self,
+        name: str,
+        optional: bool = False,
+        keyword_only: bool = False,
+    ):
+        """
+        :param optional: Whether passing an argument for this parameter is
+            optional.
+        """
+        self.name = name
+        self.optional = optional
+        self.keyword_only = keyword_only
+
+
+AnyFunctionParamSpec = TypeVar("AnyFunctionParamSpec", bound=FunctionParamSpec)
+
+
+class FunctionSignature(Generic[AnyFunctionParamSpec]):
     """
-    Accepted keyword arguments, all optional.
+    Specification of required/accepted parameters for a function.
+
+    ``AnyFunctionParamSpec`` designates whatever metadata is associated to each
+    function parameter.
     """
 
-    accepts_others: bool = False
-    """
-    Whether more positional arguments than ``positional_args`` are accepted.
-    """
+    def __init__(
+        self,
+        *param_specs: AnyFunctionParamSpec,
+        positional_variadic: bool = False,
+    ):
+        """
+        Create a function signature.
 
-    def match(self, ctx: CompileCtx, call: L.CallExpr) -> ParsedArgs:
+        :param param_specs: List of parameter specifications.
+        :param positional_variadic: Whether this function accepts an arbitrary
+            number of positional arguments in addition to the ones described by
+            ``param_specs``.
+        """
+        self.param_specs = list(param_specs)
+        self.positional_variadic = positional_variadic
+
+        self.positionals = [
+            spec for spec in self.param_specs if not spec.keyword_only
+        ]
+        """Subset of parameters that can be passed as positional arguments."""
+
+        self.by_name: dict[str, AnyFunctionParamSpec] = {}
+        for spec in self.param_specs:
+            assert spec.name not in self.by_name
+            self.by_name[spec.name] = spec
+
+    def match(
+        self,
+        ctx: CompileCtx,
+        call: L.CallExpr
+    ) -> tuple[dict[str, L.Expr], list[L.Expr]]:
         """
         Match call arguments against this signature. If successful, return the
         parsed arguments. Abort with a user error otherwise.
+
+        The result is a dict that maps parameter names to syntactically passed
+        arguments, and a list of remaining arguments if
+        ``self.positional_variadic`` is true.
         """
-        result = ParsedArgs([], {}, [])
+        # Match results
+        args: dict[str, L.Expr] = {}
+        vargs: list[L.Expr] = []
+
+        # Index in "self.positionals" for the next expected positional
+        # argument.
+        next_positional = 0
+
         for arg in call.f_args:
             if arg.f_name:
-                # This is a keyword argument
+                # This is a keyword argument. Make sure it is known and that it
+                # was not passed already.
                 name = arg.f_name.text
                 with ctx.lkt_context(arg.f_name):
                     check_source_language(
-                        name not in result.keyword_args,
-                        "keyword arguments can be passed at most once",
+                        name in self.by_name, "unknown argument"
                     )
                     check_source_language(
-                        name in self.keyword_args,
-                        "unexpected keyword argument",
+                        name not in args, "this argument is already passed"
                     )
-                result.keyword_args[name] = arg.f_value
+                args[name] = arg.f_value
 
             else:
-                # This is a positional argument
-                result.positional_args.append(arg.f_value)
+                # This is a positional argument: look for the corresponding
+                # parameter spec. First update "next_positional" in case they
+                # were passed by keyword.
+                while (
+                    next_positional < len(self.positionals)
+                    and self.positionals[next_positional].name in args
+                ):
+                    next_positional += 1
 
-        # Make sure we got the expected number of positional arguments.  If we
-        # have more than expected and if this function can accept them, move
-        # the extra arguments to "result.others".
-        expected = self.positional_args
-        actual = len(result.positional_args)
-        if self.accepts_others and actual > expected:
-            result.other_args = result.positional_args[expected:]
-            result.positional_args = result.positional_args[:expected]
+                if next_positional < len(self.positionals):
+                    args[self.positionals[next_positional].name] = arg.f_value
+                else:
+                    with ctx.lkt_context(arg):
+                        check_source_language(
+                            self.positional_variadic,
+                            f"at most {next_positional} positional argument(s)"
+                            f" expected, got {next_positional + 1}",
+                        )
+                    vargs.append(arg.f_value)
 
-        elif actual != expected:
+        # Check that all required arguments were passed
+        missing = (
+            {name for name, spec in self.by_name.items() if not spec.optional}
+            - set(args)
+        )
+        if missing:
             loc_node = (
                 call.f_name.f_suffix
                 if isinstance(call.f_name, L.DotExpr) else
                 call
             )
             with ctx.lkt_context(loc_node):
-                error(
-                    f"{expected} positional argument(s) expected, got {actual}"
-                )
-        return result
+                error(f"argument '{list(missing)[0]}' is missing")
 
-
-@dataclass
-class ParsedArgs:
-    """
-    Arguments parsed from a call and a corresponding function signature.
-    """
-    positional_args: list[L.Expr]
-    keyword_args: dict[str, L.Expr]
-    other_args: list[L.Expr]
+        return args, vargs
 
 
 add_env_signature = FunctionSignature(
-    0, {"no_parent", "transitive_parent", "names"}
+    FunctionParamSpec("no_parent", optional=True, keyword_only=True),
+    FunctionParamSpec("transitive_parent", optional=True, keyword_only=True),
+    FunctionParamSpec("names", optional=True, keyword_only=True),
 )
 """
 Signature for the "add_env" env action.
 """
 
 add_to_env_kv_signature = FunctionSignature(
-    2, {"dest_env", "metadata", "resolver"}
+    FunctionParamSpec("key"),
+    FunctionParamSpec("value"),
+    FunctionParamSpec("dest_env", optional=True, keyword_only=True),
+    FunctionParamSpec("metadata", optional=True, keyword_only=True),
+    FunctionParamSpec("resolver", optional=True, keyword_only=True),
 )
 """
 Signature for the "add_to_env_kv" env action.
 """
 
-add_to_env_signature = FunctionSignature(1, {"resolver"})
+add_to_env_signature = FunctionSignature(
+    FunctionParamSpec("mappings"),
+    FunctionParamSpec("resolver", optional=True, keyword_only=True),
+)
 """
 Signature for the "add_to_env" env action.
 """
 
-append_rebinding_signature = FunctionSignature(2, set())
+append_rebinding_signature = FunctionSignature(
+    FunctionParamSpec("old_env"),
+    FunctionParamSpec("new_env"),
+)
 """
 Signature for ".append_rebinding".
 """
 
-collection_iter_signature = FunctionSignature(1, set())
+collection_iter_signature = FunctionSignature(FunctionParamSpec("expr"))
 """
 Signature for ".all"/".any".
 """
 
-concat_rebindings_signature = FunctionSignature(1, set())
+concat_rebindings_signature = FunctionSignature(
+    FunctionParamSpec("rebindings"),
+)
 """
 Signature for ".concat_rebindings".
 """
 
-do_signature = FunctionSignature(1, {"default_val"})
+do_signature = FunctionSignature(
+    FunctionParamSpec("expr"),
+    FunctionParamSpec("default_val", optional=True, keyword_only=True),
+)
 """
 Signature for ".do".
 """
 
-do_env_signature = FunctionSignature(1, set())
+do_env_signature = FunctionSignature(FunctionParamSpec("expr"))
 """
 Signature for the "do" env action.
 """
 
-domain_signature = FunctionSignature(2, set())
+domain_signature = FunctionSignature(
+    FunctionParamSpec("var"), FunctionParamSpec("domain")
+)
 """
 Signature for "%domain".
 """
 
 dynamic_lexical_env_signature = FunctionSignature(
-    1, {"assoc_resolver", "transitive_parent"}
+    FunctionParamSpec("assocs"),
+    FunctionParamSpec("assoc_resolver", optional=True, keyword_only=True),
+    FunctionParamSpec("transitive_parent", optional=True, keyword_only=True),
 )
 """
 Signature for the "dynamic_lexical_env" builtin function.
 """
 
-empty_signature = FunctionSignature(0, set())
+empty_signature: FunctionSignature[FunctionParamSpec] = FunctionSignature()
 """
 Signature for a function that takes no argument.
 """
 
-env_group_signature = FunctionSignature(0, {"with_md"})
+env_group_signature = FunctionSignature(
+    FunctionParamSpec("with_md", optional=True, keyword_only=True),
+)
 """
 Signature for ".env_group".
 """
 
-eq_signature = FunctionSignature(2, {"conv_prop"})
+eq_signature = FunctionSignature(
+    FunctionParamSpec("from"),
+    FunctionParamSpec("to"),
+    FunctionParamSpec("conv_prop", optional=True, keyword_only=True),
+)
 """
 Signature for "%eq".
 """
 
-filtermap_signature = FunctionSignature(2, set())
+filtermap_signature = FunctionSignature(
+    FunctionParamSpec("expr"), FunctionParamSpec("filter")
+)
 """
 Signature for ".filtermap".
 """
 
-get_signature = FunctionSignature(1, {"lookup", "from", "categories"})
+get_signature = FunctionSignature(
+    FunctionParamSpec("symbol"),
+    FunctionParamSpec("lookup", optional=True, keyword_only=True),
+    FunctionParamSpec("from", optional=True, keyword_only=True),
+    FunctionParamSpec("categories", optional=True, keyword_only=True),
+)
 """
 Signature for ".get"/".get_first".
 """
 
-is_visible_from_signature = FunctionSignature(1, set())
+is_visible_from_signature = FunctionSignature(FunctionParamSpec("unit"))
 """
 Signature for ".is_visible_from".
 """
 
-logic_all_any_signature = FunctionSignature(1, set())
+logic_all_any_signature = FunctionSignature(FunctionParamSpec("equations"))
 """
 Signature for "%all" and for "%any".
 """
 
-predicate_signature = FunctionSignature(2, set(), accepts_others=True)
+predicate_signature = FunctionSignature(
+    FunctionParamSpec("pred_prop"),
+    FunctionParamSpec("node"),
+    positional_variadic=True,
+)
 """
 Signature for "%predicate".
 """
 
-propagate_signature = FunctionSignature(2, set(), accepts_others=True)
+propagate_signature = FunctionSignature(
+    FunctionParamSpec("dest"),
+    FunctionParamSpec("comb_prop"),
+    positional_variadic=True,
+)
 """
 Signature for "%propagate".
 """
 
-rebind_env_signature = FunctionSignature(1, set())
+rebind_env_signature = FunctionSignature(FunctionParamSpec("env"))
 """
 Signature for ".rebind_env".
 """
 
 reference_signature = FunctionSignature(
-    2,
-    {"kind", "dest_env", "cond", "category", "shed_corresponding_rebindings"},
+    FunctionParamSpec("nodes"),
+    FunctionParamSpec("resolver"),
+    FunctionParamSpec("kind", optional=True, keyword_only=True),
+    FunctionParamSpec("dest_env", optional=True, keyword_only=True),
+    FunctionParamSpec("cond", optional=True, keyword_only=True),
+    FunctionParamSpec("category", optional=True, keyword_only=True),
+    FunctionParamSpec(
+        "shed_corresponding_rebindings", optional=True, keyword_only=True
+    ),
 )
 """
 Signature for the "reference" env action.
 """
 
-set_initial_env_signature = FunctionSignature(1, set())
+set_initial_env_signature = FunctionSignature(FunctionParamSpec("env"))
 """
 Signature for the "set_initial_env" env action.
 """
@@ -3237,6 +3337,7 @@ class LktTypesLoader:
         def extract_lambda_and_kwargs(
             expr: L.CallExpr,
             signature: FunctionSignature,
+            arg_for_lambda: str,
             min_lambda_args: int,
             max_lambda_args: int | None = None,
         ) -> BuiltinCallInfo:
@@ -3246,7 +3347,10 @@ class LktTypesLoader:
 
             :param expr: Call expression that is supposed to pass the lambda
                 expression.
-            :param signature: Signature for the pseudo-function that is called.
+            :param signature: Signature for the builtin function that is
+                called.
+            :param arg_for_lambda: Name of the argument in ``signature`` that
+                must contain the lambda.
             :param min_lambda_args: Minimum number of arguments expected for
                 the lambda expression.
             :param max_lambda_args: Maximum number of arguments expected for
@@ -3254,8 +3358,8 @@ class LktTypesLoader:
                 "min_lambda_args".
             """
             # Make sure the only positional argument is a lambda expression
-            parsed_args = signature.match(self.ctx, expr)
-            lambda_expr = parsed_args.positional_args[0]
+            args, _ = signature.match(self.ctx, expr)
+            lambda_expr = args[arg_for_lambda]
             if not isinstance(lambda_expr, L.LambdaExpr):
                 with self.ctx.lkt_context(lambda_expr):
                     error("lambda expression expected")
@@ -3265,9 +3369,7 @@ class LktTypesLoader:
                 lambda_expr, min_lambda_args, max_lambda_args
             )
 
-            return BuiltinCallInfo(
-                parsed_args.keyword_args, scope, lambda_args, lambda_body
-            )
+            return BuiltinCallInfo(args, scope, lambda_args, lambda_body)
 
         call_name = call_expr.f_name
         assert isinstance(call_name, L.BaseDotExpr)
@@ -3290,7 +3392,7 @@ class LktTypesLoader:
 
         if method_name in ("all", "any"):
             lambda_info = extract_lambda_and_kwargs(
-                call_expr, collection_iter_signature, 1, 2
+                call_expr, collection_iter_signature, "expr", 1, 2
             )
             element_arg, index_arg = lambda_info.largs
             assert element_arg is not None
@@ -3315,10 +3417,9 @@ class LktTypesLoader:
             )
 
         elif method_name == "append_rebinding":
-            parsed_args = append_rebinding_signature.match(self.ctx, call_expr)
-            old_env_expr, new_env_expr = parsed_args.positional_args
+            args, _ = append_rebinding_signature.match(self.ctx, call_expr)
             result = method_prefix.append_rebinding(
-                lower(old_env_expr), lower(new_env_expr)
+                lower(args["old_env"]), lower(args["new_env"])
             )
 
         elif method_name == "as_array":
@@ -3330,16 +3431,12 @@ class LktTypesLoader:
             result = method_prefix.as_int
 
         elif method_name == "concat_rebindings":
-            parsed_args = concat_rebindings_signature.match(
-                self.ctx, call_expr
-            )
-            result = method_prefix.concat_rebindings(
-                lower(parsed_args.positional_args[0])
-            )
+            args, _ = concat_rebindings_signature.match(self.ctx, call_expr)
+            result = method_prefix.concat_rebindings(lower(args["rebindings"]))
 
         elif method_name == "do":
             lambda_info = extract_lambda_and_kwargs(
-                call_expr, do_signature, 1, 1
+                call_expr, do_signature, "expr", 1, 1
             )
             arg_node = lambda_info.largs[0]
             assert arg_node is not None
@@ -3365,8 +3462,8 @@ class LktTypesLoader:
             )
 
         elif method_name == "env_group":
-            parsed_args = env_group_signature.match(self.ctx, call_expr)
-            with_md_expr = parsed_args.keyword_args.get("with_md")
+            args, _ = env_group_signature.match(self.ctx, call_expr)
+            with_md_expr = args.get("with_md")
             with_md = None if with_md_expr is None else lower(with_md_expr)
             result = method_prefix.env_group(with_md=with_md)
 
@@ -3384,7 +3481,7 @@ class LktTypesLoader:
 
         elif method_name == "filter":
             lambda_info = extract_lambda_and_kwargs(
-                call_expr, collection_iter_signature, 1, 2
+                call_expr, collection_iter_signature, "expr", 1, 2
             )
             element_arg, index_arg = lambda_info.largs
             assert element_arg is not None
@@ -3410,17 +3507,17 @@ class LktTypesLoader:
 
         elif method_name == "filtermap":
             # Validate arguments for ".filtermap()" itself
-            parsed_args = filtermap_signature.match(self.ctx, call_expr)
-            for arg in parsed_args.positional_args:
+            args, _ = filtermap_signature.match(self.ctx, call_expr)
+            for arg in [args["expr"], args["filter"]]:
                 if not isinstance(arg, L.LambdaExpr):
                     with self.ctx.lkt_context(arg):
                         error("lambda expressions expceted")
 
             # Validate and analyze the two lambda expressions
-            lambda_0 = parsed_args.positional_args[0]
+            lambda_0 = args["expr"]
             assert isinstance(lambda_0, L.LambdaExpr)
             map_scope, map_args, map_body = extract_lambda(lambda_0, 1, 2)
-            lambda_1 = parsed_args.positional_args[1]
+            lambda_1 = args["filter"]
             assert isinstance(lambda_1, L.LambdaExpr)
             filter_scope, filter_args, filter_body = extract_lambda(
                 lambda_1, 1, 2
@@ -3469,7 +3566,7 @@ class LktTypesLoader:
 
         elif method_name == "find":
             lambda_info = extract_lambda_and_kwargs(
-                call_expr, collection_iter_signature, 1, 1
+                call_expr, collection_iter_signature, "expr", 1, 1
             )
             elt_arg = lambda_info.largs[0]
             assert elt_arg is not None
@@ -3483,20 +3580,20 @@ class LktTypesLoader:
                 method_prefix, inner_expr, elt_var, index_var=None
             )
         elif method_name in ("get", "get_first"):
-            parsed_args = get_signature.match(self.ctx, call_expr)
-            symbol = lower(parsed_args.positional_args[0])
+            args, _ = get_signature.match(self.ctx, call_expr)
+            symbol = lower(args["symbol"])
 
-            lookup_expr = parsed_args.keyword_args.get("lookup")
+            lookup_expr = args.get("lookup")
             lookup: AbstractExpression | None = (
                 None if lookup_expr is None else lower(lookup_expr)
             )
 
-            from_node_expr = parsed_args.keyword_args.get("from")
+            from_node_expr = args.get("from")
             from_node: AbstractExpression | None = (
                 None if from_node_expr is None else lower(from_node_expr)
             )
 
-            categories_expr = parsed_args.keyword_args.get("categories")
+            categories_expr = args.get("categories")
             categories: AbstractExpression | None = (
                 None if categories_expr is None else lower(categories_expr)
             )
@@ -3512,10 +3609,8 @@ class LktTypesLoader:
             result = method_prefix.get_value
 
         elif method_name == "is_visible_from":
-            parsed_args = is_visible_from_signature.match(self.ctx, call_expr)
-            result = method_prefix.is_visible_from(
-                lower(parsed_args.positional_args[0])
-            )
+            args, _ = is_visible_from_signature.match(self.ctx, call_expr)
+            result = method_prefix.is_visible_from(lower(args["unit"]))
 
         elif method_name == "length":
             empty_signature.match(self.ctx, call_expr)
@@ -3523,7 +3618,7 @@ class LktTypesLoader:
 
         elif method_name in ("map", "mapcat"):
             lambda_info = extract_lambda_and_kwargs(
-                call_expr, collection_iter_signature, 1, 2
+                call_expr, collection_iter_signature, "expr", 1, 2
             )
             element_arg, index_arg = lambda_info.largs
             assert element_arg is not None
@@ -3552,10 +3647,8 @@ class LktTypesLoader:
             )
 
         elif method_name == "rebind_env":
-            parsed_args = rebind_env_signature.match(self.ctx, call_expr)
-            result = method_prefix.rebind_env(
-                lower(parsed_args.positional_args[0])
-            )
+            args, _ = rebind_env_signature.match(self.ctx, call_expr)
+            result = method_prefix.rebind_env(lower(args["env"]))
 
         elif method_name == "singleton":
             empty_signature.match(self.ctx, call_expr)
@@ -3567,7 +3660,7 @@ class LktTypesLoader:
 
         elif method_name == "take_while":
             lambda_info = extract_lambda_and_kwargs(
-                call_expr, collection_iter_signature, 1, 2
+                call_expr, collection_iter_signature, "expr", 1, 2
             )
             element_arg, index_arg = lambda_info.largs
             assert element_arg is not None
@@ -3608,9 +3701,9 @@ class LktTypesLoader:
             # built-in method are turned into Join instances, so the
             # "callee" variable below is not necessarily a FieldAccess
             # instance.
-            args, kwargs = self.lower_call_args(call_expr, lower)
+            call_args, call_kwargs = self.lower_call_args(call_expr, lower)
             result = getattr(method_prefix, method_name)
-            result = result(*args, **kwargs)
+            result = result(*call_args, **call_kwargs)
 
         return (
             E.Then.create_from_exprs(
@@ -3853,18 +3946,14 @@ class LktTypesLoader:
 
                     # It can be a call to a built-in function
                     if entity == self.builtin_functions.dynamic_lexical_env:
-                        parsed_args = dynamic_lexical_env_signature.match(
+                        args, _ = dynamic_lexical_env_signature.match(
                             self.ctx, call_expr
                         )
-                        trans_parent_expr = parsed_args.keyword_args.get(
-                            "transitive_parent"
-                        )
+                        trans_parent_expr = args.get("transitive_parent")
                         return E.DynamicLexicalEnv(
-                            assocs_getter=lower(
-                                parsed_args.positional_args[0]
-                            ),
+                            assocs_getter=lower(args["assocs"]),
                             assoc_resolver=self.resolve_property(
-                                parsed_args.keyword_args.get("assoc_resolver")
+                                args.get("assoc_resolver")
                             ),
                             transitive_parent=(
                                 E.Literal(True)
@@ -4018,10 +4107,8 @@ class LktTypesLoader:
                             error("invalid logic expression")
 
                     if call_name.text in ("all", "any"):
-                        parsed_args = logic_all_any_signature.match(
-                            self.ctx, expr
-                        )
-                        eq_array_expr = lower(parsed_args.positional_args[0])
+                        args, _ = logic_all_any_signature.match(self.ctx, expr)
+                        eq_array_expr = lower(args["equations"])
                         return (
                             ELogic.All(eq_array_expr)
                             if call_name.text == "all" else
@@ -4029,44 +4116,33 @@ class LktTypesLoader:
                         )
 
                     elif call_name.text == "domain":
-                        parsed_args = domain_signature.match(self.ctx, expr)
-                        logic_var = lower(parsed_args.positional_args[0])
-                        domain_expr = lower(parsed_args.positional_args[1])
+                        args, _ = domain_signature.match(self.ctx, expr)
+                        logic_var = lower(args["var"])
+                        domain_expr = lower(args["domain"])
                         return logic_var.domain(domain_expr)
 
                     elif call_name.text == "eq":
-                        parsed_args = eq_signature.match(self.ctx, expr)
-                        from_expr = lower(parsed_args.positional_args[0])
-                        to_expr = lower(parsed_args.positional_args[1])
-                        conv_prop = (
-                            self.resolve_property(
-                                parsed_args.keyword_args["conv_prop"],
-                            )
-                            if "conv_prop" in parsed_args.keyword_args else
-                            None
+                        args, _ = eq_signature.match(self.ctx, expr)
+                        return E.Bind(
+                            lower(args["from"]),
+                            lower(args["to"]),
+                            conv_prop=self.resolve_property(
+                                args.get("conv_prop")
+                            ),
                         )
-                        return E.Bind(from_expr, to_expr, conv_prop=conv_prop)
 
                     elif call_name.text == "predicate":
-                        parsed_args = predicate_signature.match(self.ctx, expr)
-                        pred_prop = self.resolve_property(
-                            parsed_args.positional_args[0]
-                        )
-                        node_expr = lower(parsed_args.positional_args[1])
-                        arg_exprs = [
-                            lower(arg) for arg in parsed_args.other_args
-                        ]
+                        args, vargs = predicate_signature.match(self.ctx, expr)
+                        pred_prop = self.resolve_property(args["pred_prop"])
+                        node_expr = lower(args["node"])
+                        arg_exprs = [lower(arg) for arg in vargs]
                         return E.Predicate(pred_prop, node_expr, *arg_exprs)
 
                     elif call_name.text == "propagate":
-                        parsed_args = propagate_signature.match(self.ctx, expr)
-                        dest_var = lower(parsed_args.positional_args[0])
-                        comb_prop = self.resolve_property(
-                            parsed_args.positional_args[1]
-                        )
-                        arg_vars = [
-                            lower(arg) for arg in parsed_args.other_args
-                        ]
+                        args, vargs = propagate_signature.match(self.ctx, expr)
+                        dest_var = lower(args["dest"])
+                        comb_prop = self.resolve_property(args["comb_prop"])
+                        arg_vars = [lower(arg) for arg in vargs]
                         return E.NPropagate(dest_var, comb_prop, *arg_vars)
 
                 with self.ctx.lkt_context(expr):
@@ -4385,19 +4461,17 @@ class LktTypesLoader:
             action_kind = syn_action.f_name.text
             action: EnvAction
             if action_kind == "add_env":
-                parsed_args = add_env_signature.match(self.ctx, syn_action)
+                args, _ = add_env_signature.match(self.ctx, syn_action)
                 action = AddEnv(
                     no_parent=(
-                        parse_static_bool(
-                            self.ctx, parsed_args.keyword_args["no_parent"]
-                        )
-                        if "no_parent" in parsed_args.keyword_args else
+                        parse_static_bool(self.ctx, args["no_parent"])
+                        if "no_parent" in args else
                         False
                     ),
                     transitive_parent=self.lower_expr_to_internal_property(
                         node,
                         "env_trans_parent",
-                        parsed_args.keyword_args.get(
+                        args.get(
                             "transitive_parent"
                         ) or unsugar(False),
                         T.Bool,
@@ -4405,19 +4479,13 @@ class LktTypesLoader:
                     names=self.lower_expr_to_internal_property(
                         node,
                         "env_names",
-                        parsed_args.keyword_args.get("names"),
+                        args.get("names"),
                         T.Symbol.array,
                     ),
                 )
 
             elif action_kind == "add_to_env_kv":
-                parsed_args = add_to_env_kv_signature.match(
-                    self.ctx, syn_action
-                )
-                key_expr, value_expr = parsed_args.positional_args
-
-                dest_env_expr = parsed_args.keyword_args.get("dest_env")
-                metadata_expr = parsed_args.keyword_args.get("metadata")
+                args, _ = add_to_env_kv_signature.match(self.ctx, syn_action)
 
                 def lower_expr(
                     p: PropertyDef,
@@ -4435,17 +4503,17 @@ class LktTypesLoader:
                     """
                     return E.New(
                         T.env_assoc,
-                        key=lower_expr(p, key_expr),
-                        value=lower_expr(p, value_expr),
+                        key=lower_expr(p, args["key"]),
+                        value=lower_expr(p, args["value"]),
                         dest_env=(
+                            lower_expr(p, args["dest_env"])
+                            if "dest_env" in args else
                             E.current_env()
-                            if dest_env_expr is None else
-                            lower_expr(p, dest_env_expr)
                         ),
                         metadata=(
+                            lower_expr(p, args["metadata"])
+                            if "metadata" in args else
                             E.No(T.env_md)
-                            if metadata_expr is None else
-                            lower_expr(p, metadata_expr)
                         ),
                     )
 
@@ -4457,47 +4525,43 @@ class LktTypesLoader:
                         rtype=T.EnvAssoc,
                         location=Location.from_lkt_node(syn_action),
                     ),
-                    resolver=self.resolve_property(
-                        parsed_args.keyword_args.get("resolver")
-                    ),
+                    resolver=self.resolve_property(args.get("resolver")),
                 )
 
             elif action_kind == "add_to_env":
-                parsed_args = add_to_env_signature.match(self.ctx, syn_action)
+                args, _ = add_to_env_signature.match(self.ctx, syn_action)
 
                 action = AddToEnv(
                     mappings=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_mappings",
-                        expr=parsed_args.positional_args[0],
+                        expr=args["mappings"],
                         rtype=None,
                     ),
-                    resolver=self.resolve_property(
-                        parsed_args.keyword_args.get("resolver")
-                    ),
+                    resolver=self.resolve_property(args.get("resolver")),
                 )
 
             elif action_kind == "do":
-                parsed_args = do_env_signature.match(self.ctx, syn_action)
+                args, _ = do_env_signature.match(self.ctx, syn_action)
                 action = Do(
                     self.lower_expr_to_internal_property(
                         node=node,
                         name="env_do",
-                        expr=parsed_args.positional_args[0],
+                        expr=args["expr"],
                         rtype=None,
                     )
                 )
 
             elif action_kind == "handle_children":
-                parsed_args = empty_signature.match(self.ctx, syn_action)
+                args, _ = empty_signature.match(self.ctx, syn_action)
                 action = HandleChildren()
 
             elif action_kind == "reference":
-                parsed_args = reference_signature.match(self.ctx, syn_action)
+                args, _ = reference_signature.match(self.ctx, syn_action)
 
-                kind_expr = parsed_args.keyword_args.get("kind")
-                category_expr = parsed_args.keyword_args.get("category")
-                shed_rebindings_expr = parsed_args.keyword_args.get(
+                kind_expr = args.get("kind")
+                category_expr = args.get("category")
+                shed_rebindings_expr = args.get(
                     "shed_corresponding_rebindings"
                 )
 
@@ -4520,26 +4584,24 @@ class LktTypesLoader:
                     category = parse_static_str(self.ctx, category_expr)
 
                 action = RefEnvs(
-                    resolver=self.resolve_property(
-                        parsed_args.positional_args[1]
-                    ),
+                    resolver=self.resolve_property(args["resolver"]),
                     nodes_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="ref_env_nodes",
-                        expr=parsed_args.positional_args[0],
+                        expr=args["nodes"],
                         rtype=T.root_node.array,
                     ),
                     kind=kind,
                     dest_env=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_dest",
-                        expr=parsed_args.keyword_args.get("dest_env"),
+                        expr=args.get("dest_env"),
                         rtype=T.LexicalEnv,
                     ),
                     cond=self.lower_expr_to_internal_property(
                         node=node,
                         name="ref_cond",
-                        expr=parsed_args.keyword_args.get("cond"),
+                        expr=args.get("cond"),
                         rtype=T.Bool,
                     ),
                     category=category,
@@ -4547,14 +4609,14 @@ class LktTypesLoader:
                 )
 
             elif action_kind == "set_initial_env":
-                parsed_args = set_initial_env_signature.match(
+                args, _ = set_initial_env_signature.match(
                     self.ctx, syn_action
                 )
                 action = SetInitialEnv(
                     self.lower_expr_to_internal_property(
                         node=node,
-                        name="env_do",
-                        expr=parsed_args.positional_args[0],
+                        name="env_init",
+                        expr=args["env"],
                         rtype=T.DesignatedEnv,
                     )
                 )

@@ -5,7 +5,7 @@ bad_argument_type.lkt:5:17: error: Argument #1 of predicate has type Bool, shoul
 
 
 == no_logic_var.lkt ==
-no_logic_var.lkt:5:18: error: 2 positional argument(s) expected, got 1
+no_logic_var.lkt:5:18: error: argument 'node' is missing
 5 |         val _ = %predicate(Example.pred1);
   |                  ^^^^^^^^^^^^^^^^^^^^^^^^
 
