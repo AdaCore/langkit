@@ -829,6 +829,10 @@ class JavaAPISettings(AbstractAPISettings):
                     f"StringWrapper.unwrap({source}, {pointer});"
             ),
             (
+                T.EnvRebindings, lambda _:
+                    f"{pointer}.writeWord(0, {source}.ni());"
+            ),
+            (
                 T.AnalysisContext, lambda _:
                 f"{pointer}.write({source}.unwrap());"
             ),
@@ -848,9 +852,9 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 ct.ASTNodeType, lambda t:
-                    self.ni_write(t.entity, source, pointer)
+                    f"{pointer}.writeWord(0, {source}.ni());"
             ),
-            (ct.EntityType, lambda _: f"{source}.entity.unwrap({pointer});"),
+            (ct.EntityType, lambda _: f"{source}.unwrap({pointer});"),
             (object, lambda _: f"{source}.unwrap({pointer});")
         ])
 
@@ -901,48 +905,19 @@ class JavaAPISettings(AbstractAPISettings):
 
         :param flat: The flat field to unwrap.
         """
-        ref_type = self.ni_reference_type(flat.public_type)
         getter = f"this.{flat.java_access}"
         to_write = f"{flat.native_access}Native"
 
         res = (
-            f"{ref_type} {to_write} = "
+            f"{self.ni_reference_type(flat.public_type)} {to_write} = "
             f"structNative.address_{flat.native_access}();"
         )
 
-        res += dispatch_on_type(flat.public_type, [
-            (
-                T.Bool, lambda _:
-                    f"{to_write}.write({getter} ? (byte) 1 : (byte) 0);"
-            ),
-            (T.Int, lambda _: f"{to_write}.write({getter});"),
-            (
-                T.BigInt, lambda _:
-                    f"BigIntegerWrapper.unwrap({getter}, {to_write});"
-            ),
-            (T.Character, lambda _: f"{to_write}.write({getter}.value);"),
-            (
-                T.EnvRebindings, lambda _:
-                    f"{to_write}.writeWord(0, {getter}.ni());"
-            ),
-            (
-                T.String, lambda _:
-                    f"StringWrapper.unwrap({getter}, {to_write});"
-            ),
-            (ct.EnumType, lambda _: f"{to_write}.write({getter}.toC());"),
-            (
-                ct.ASTNodeType, lambda _:
-                    f"{to_write}.writeWord(0, {getter}.ni());"
-            ),
-            (ct.ArrayType, lambda _: f"{getter}.unwrap({to_write});"),
-            (ct.StructType, lambda _: f"{getter}.unwrap({to_write});"),
-            (
-                object, lambda t:
-                    f"{to_write}.write({getter}.unwrap());"
-            ),
-        ])
-
-        return res
+        return res + self.ni_write(
+            flat.public_type,
+            getter,
+            to_write
+        )
 
     # ----- JNI methods -----
 

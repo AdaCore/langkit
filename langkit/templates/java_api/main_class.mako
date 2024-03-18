@@ -3940,6 +3940,17 @@ public final class ${ctx.lib_name.camel} {
             }
         }
 
+        // ----- Graal C API methods -----
+
+        /**
+         * Util internal method to unwrap a node to a native entity struct
+         */
+        void unwrap(
+            final EntityNative entityNative
+        ) {
+            this.entity.unwrap(entityNative);
+        }
+
         // ----- Getters -----
 
         public String getKindName() {
