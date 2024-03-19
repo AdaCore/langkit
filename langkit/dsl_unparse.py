@@ -828,6 +828,15 @@ def emit_expr(expr, **ctx):
                     return walker.emit_comments() + emit_let(expr)
 
     elif isinstance(expr, Map):
+
+        if expr._origin_composed_attr == "keep":
+            assert isinstance(expr.expr, Cast)
+            with walker.method_call("keep"):
+                return "{}.keep[{}]".format(
+                    ee(expr.collection),
+                    type_name(expr.expr.dest_type, strip_entity=True),
+                )
+
         op_name = expr.kind
         args = []
         vars = [expr.element_var]

@@ -4171,6 +4171,14 @@ class LktTypesLoader:
                 with self.ctx.lkt_context(expr):
                     error("invalid logic expression")
 
+            elif isinstance(expr, L.KeepExpr):
+                subexpr = lower(expr.f_expr)
+                keep_type = self.resolve_type(expr.f_keep_type, env)
+                return subexpr.filtermap(
+                    lambda e: e.cast(keep_type),
+                    lambda e: e.is_a(keep_type),
+                )
+
             elif isinstance(expr, L.MatchExpr):
                 assert local_vars is not None
 

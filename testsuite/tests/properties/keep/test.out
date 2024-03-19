@@ -1,0 +1,24 @@
+main.py: Running...
+
+# ()
+  keep_list:  <empty>
+  keep_array: <empty>
+
+# (1)
+  keep_list:  <empty>
+  keep_array: <empty>
+
+# (a)
+  keep_list:  a
+  keep_array: a
+
+# (1 a 2)
+  keep_list:  a
+  keep_array: a
+
+# (a 1 b)
+  keep_list:  a b
+  keep_array: a b
+
+main.py: Done.
+Done

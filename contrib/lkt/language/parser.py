@@ -2813,6 +2813,14 @@ class ExcludesNull(LktNode):
     qualifier = True
 
 
+class KeepExpr(Expr):
+    """
+    Keep expression.
+    """
+    expr = Field(type=T.Expr)
+    keep_type = Field(type=T.TypeRef)
+
+
 class CastExpr(Expr):
     """
     Cast expression.
@@ -4316,6 +4324,11 @@ lkt_grammar.add_rules(
         SubscriptExpr(G.basic_expr, "[", G.expr, "]"),
         NullCondSubscriptExpr(G.basic_expr, "?", "[", G.expr, "]"),
         ErrorOnNull(G.basic_expr, "!"),
+        KeepExpr(
+            G.basic_expr, ".",
+            Lex.Identifier(match_text="keep"),
+            "[", G.type_ref, "]"
+        ),
         CastExpr(
             G.basic_expr, ".",
             Lex.Identifier(match_text="as"),
