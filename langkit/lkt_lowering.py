@@ -3829,6 +3829,9 @@ class LktTypesLoader:
                         E.BinaryBooleanOperator.OR, left, right
                     )
 
+                elif isinstance(expr.f_op, L.OpOrInt):
+                    return left._or(right)
+
                 else:
                     operator = {
                         L.OpAmp: '&',

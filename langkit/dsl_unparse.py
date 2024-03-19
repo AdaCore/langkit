@@ -1047,6 +1047,14 @@ def emit_expr(expr, **ctx):
         return "not {}".format(emit_paren_expr(expr.expr, **ctx))
 
     elif isinstance(expr, Then):
+        if expr._origin_composed_attr == "_or":
+            with walker.method_call("_or"):
+                with walker.self_arg():
+                    lhs = ee_pexpr(expr.expr)
+                with walker.arg(0):
+                    rhs = ee_pexpr(expr.default_val)
+            return f"{lhs} or? {rhs}"
+
         def emit_final_call(self_expr, param_name, then_expr, default_expr):
             return emit_method_call(
                 self_expr,
