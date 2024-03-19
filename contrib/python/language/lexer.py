@@ -87,22 +87,22 @@ class Token(LexerToken):
 
 
 python_lexer = Lexer(Token, track_indent=True, pre_rules=[
-    (Pattern(r'\\\n[ \r\t]*'), Ignore())
+    (Pattern('\\\\\n[ \r\t]*'), Ignore())
 ])
 
 python_lexer.add_patterns(
-    ("STRING_DBQ", r'"(\\"|[^\n"])*"'),
-    ("STRING_SQ",  r"'(\\'|[^\n'])*'"),
-    ("MLSTRING_DBQ", r'"""([^"]|("[^"])|(""[^"])|\n)*"""'),
-    ("MLSTRING_SQ", r"'''([^']|('[^'])|(''[^'])|\n)*'''"),
+    ("STRING_DBQ", '"(\\\\"|[^\n"])*"'),
+    ("STRING_SQ",  "'(\\\\'|[^\n'])*'"),
+    ("MLSTRING_DBQ", '"""([^"]|("[^"])|(""[^"])|\n)*"""'),
+    ("MLSTRING_SQ", "'''([^']|('[^'])|(''[^'])|\n)*'''"),
 )
 
 python_lexer.add_rules(
     (Pattern('(u|U)?(r|R)?'
              '({MLSTRING_SQ}|{MLSTRING_DBQ}'
              '|{STRING_SQ}|{STRING_DBQ})'), Token.String),
-    (Pattern(r'[ \r\t]+'),   Ignore()),
-    (Pattern(r"#(.?)+"),     Token.Comment),
+    (Pattern('[ \r\t]+'),   Ignore()),
+    (Pattern("#(.?)+"),     Token.Comment),
 
     (Literal('>>='),         Token.RshAssign),
     (Literal('is'),          Token.Is),
