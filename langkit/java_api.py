@@ -108,28 +108,6 @@ class FlatStructField:
     """
 
     @property
-    def name(self) -> str:
-        """
-        Get the field formatted name.
-        """
-        return format_name(self.lower_name)
-
-    @property
-    def native_name(self) -> str:
-        """
-        Get the field name as it appears in the native header.
-        """
-        return self.lower_name
-
-    @property
-    def java_access(self) -> str:
-        """
-        Get the Java pointed access to the nested field.
-        """
-        full_path = self.base + [self.lower_name]
-        return '.'.join([format_name(part) for part in full_path])
-
-    @property
     def native_access(self) -> str:
         """
         Get the access name of the field in the native image field naming
@@ -869,53 +847,51 @@ class JavaAPISettings(AbstractAPISettings):
         """
         base = base or []
         field_type = self.wrapping_type(field.public_type, False)
+        field_name = "_".join(base + [field.native_name])
 
         # If the field to wrap is a leaf (not a struct) then generate the
-        # wrapping operation on it.
+        # wrapping operation on it by getting the native value from the
+        # native struct.
         if field.fields is None:
-            field_name = "_".join(base + [field.native_name])
-            getter = f"structNative.get_{field_name}()"
             return self.ni_wrap(
                 field.public_type,
-                getter,
+                f"structNative.get_{field_name}()",
                 [],
                 ast_wrapping=False
             )
 
         # Else, it the field has sub-fields, this is a composite value
-        # (struct), we have to call field wrapping on all its components.
+        # (struct), we call the wrapping operation for the field type with
+        # the native address of the field.
         elif field.fields:
-            inside = [
-                self.ni_field_wrap(
-                    inner_field,
-                    base=base + [field.native_name]
-                )
-                for inner_field in field.fields
-            ]
-            return f"new {field_type}({', '.join(inside)})"
+            return self.ni_wrap(
+                field.public_type,
+                f"structNative.address_{field_name}()",
+                [],
+                ast_wrapping=False
+            )
 
         # Else, the field is a struct without any fields, we just return its
         # `NONE` singleton.
         else:
             return f"{field_type}.NONE"
 
-    def ni_field_unwrap(self, flat: FlatStructField) -> str:
+    def ni_field_unwrap(self, field: StructField) -> str:
         """
-        Unwrap the given flat field in a native structure.
+        Unwrap the given structure field and write the result in the assumed
+        initialized 'structNative' variable.
 
-        :param flat: The flat field to unwrap.
+        :param field: The field to unwrap.
         """
-        getter = f"this.{flat.java_access}"
-        to_write = f"{flat.native_access}Native"
-
+        to_write = f"{field.name}Native"
         res = (
-            f"{self.ni_reference_type(flat.public_type)} {to_write} = "
-            f"structNative.address_{flat.native_access}();"
+            f"{self.ni_reference_type(field.public_type)} {to_write} = "
+            f"structNative.address_{field.lower_name}();"
         )
 
         return res + self.ni_write(
-            flat.public_type,
-            getter,
+            field.public_type,
+            f"this.{field.name}",
             to_write
         )
 

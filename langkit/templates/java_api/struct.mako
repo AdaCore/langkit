@@ -107,8 +107,8 @@
         void unwrap(
             final ${ni_type} structNative
         ) {
-            % for flat in flatten_fields:
-            ${api.ni_field_unwrap(flat)}
+            % for field in fields:
+            ${api.ni_field_unwrap(field)}
             % endfor
         }
 
@@ -191,7 +191,8 @@
     ni_type = api.ni_type(cls)
     c_type = cls.c_type(capi).name
 
-    flatten_fields = api.flatten_struct_fields(api.get_struct_fields(cls))
+    fields = api.get_struct_fields(cls)
+    flatten_fields = api.flatten_struct_fields(fields)
     %>
 
     % if not cls.is_empty:
@@ -212,6 +213,22 @@
 
         @CFieldAddress("${field.custom_access('.')}")
         public <T extends PointerBase> T address_${field.native_access}();
+
+        % endfor
+
+        % for field in [f for f in fields if f.fields is not None]:
+            <%
+            n = lambda f:(
+                [f.lower_name] + n(f.fields[0])
+                if f.fields else
+                [f.lower_name]
+            )
+            first_field = n(field)
+            %>
+        @CFieldAddress("${'.'.join(first_field)}")
+        public ${api.ni_type(field.public_type)}
+        address_${field.lower_name}();
+
         % endfor
     }
     % else:
