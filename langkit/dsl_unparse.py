@@ -1018,6 +1018,11 @@ def emit_expr(expr, **ctx):
         return res
 
     elif isinstance(expr, Eq):
+        if expr._origin_composed_attr == "empty":
+            assert type(expr.lhs).__name__ == "length"
+            assert expr.rhs == 0
+            return emit_method_call(ee_pexpr(expr.lhs.expr_0), "empty")
+
         return "{} == {}".format(ee(expr.lhs), ee(expr.rhs))
 
     elif isinstance(expr, BinaryBooleanOperator):
