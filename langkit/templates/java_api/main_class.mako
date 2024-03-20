@@ -988,6 +988,14 @@ public final class ${ctx.lib_name.camel} {
             return decodeUTF32(buffer.array());
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if(o == this) return true;
+            if(!(o instanceof Char)) return false;
+            Char other = (Char) o;
+            return this.value == other.value;
+        }
+
     }
 
     ${java_doc('langkit.big_integer_type', 4)}
