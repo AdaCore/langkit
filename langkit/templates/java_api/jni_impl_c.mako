@@ -10,6 +10,8 @@
 api = java_api
 nat = c_api.get_name
 
+root_node_type = api.wrapping_type(T.root_node)
+
 h_file = f"com_adacore_{ctx.lib_name.lower}_{ctx.lib_name.camel}_JNI_LIB.h"
 lib_file = f"{ctx.lib_name.lower}.h"
 sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
@@ -235,6 +237,10 @@ ${array.jni_c_decl(array_type)}
 ${iterator.jni_c_decl(iterator_type)}
     % endif
 % endfor
+
+jclass ${root_node_type}_class_ref = NULL;
+jmethodID ${root_node_type}_from_entity_id = NULL;
+jfieldID ${root_node_type}_entity_field_id = NULL;
 
 // ==========
 // Lifecycle functions
@@ -759,6 +765,25 @@ ${array.jni_init_global_refs(array_type)}
 ${iterator.jni_init_global_refs(iterator_type)}
     % endif
 % endfor
+
+    ${root_node_type}_class_ref = (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$${root_node_type}")
+    );
+
+    ${root_node_type}_from_entity_id = (*env)->GetStaticMethodID(
+        env,
+        ${root_node_type}_class_ref,
+        "fromEntity",
+        "(L${sig_base}$Entity;)L${sig_base}$${root_node_type};"
+    );
+
+    ${root_node_type}_entity_field_id = (*env)->GetFieldID(
+        env,
+        ${root_node_type}_class_ref,
+        "entity",
+        "L${sig_base}$Entity;"
+    );
 }
 
 // Function to finalize the JNI library
@@ -888,6 +913,25 @@ void check_exception(JNIEnv *env) {
         env,
         main_class_ref,
         check_exception_method_id
+    );
+}
+
+// Util function to wrap a native entity into a Java node class
+jobject node_from_entity(JNIEnv *env, jobject entity) {
+    return (*env)->CallStaticObjectMethod(
+        env,
+        ${root_node_type}_class_ref,
+        ${root_node_type}_from_entity_id,
+        entity
+    );
+}
+
+// Util function to get the entity Java object from a wrapped node
+jobject get_node_entity(JNIEnv *env, jobject node) {
+    return (*env)->GetObjectField(
+        env,
+        node,
+        ${root_node_type}_entity_field_id
     );
 }
 
