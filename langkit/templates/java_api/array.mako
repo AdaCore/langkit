@@ -380,7 +380,7 @@ jobject ${java_type}_wrap(
             env,
             array_content,
             (jsize) i,
-            ${api.jni_wrap(cls.element_type, "elem", [])}
+            ${api.jni_wrap(cls.element_type, "elem", [], ast_wrapping=False)}
         );
     }
 
@@ -433,7 +433,8 @@ ${c_type} ${java_type}_unwrap(
             cls.element_type,
             "elem",
             "elem_native",
-            []
+            [],
+            ast_wrapping=False
         )}
         res->items[i] = elem_native;
     }

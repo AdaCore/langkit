@@ -23,6 +23,12 @@ class FooNodeStruct(Struct):
     node = UserField(T.FooNode.entity)
 
 
+class BareNodeStruct(Struct):
+    a_boolean = UserField(Bool)
+    bare_node = UserField(T.FooNode)
+    a_char = UserField(T.Character)
+
+
 class SomeStruct(Struct):
     examples = UserField(T.Example.entity.array)
 
@@ -67,8 +73,20 @@ class FooNode(ASTNode):
         return FooNodeStruct.new(node=If(b, Entity, No(FooNode.entity)))
 
     @langkit_property(public=True)
+    def my_node():
+        return BareNodeStruct.new(
+            a_boolean=True,
+            bare_node=Entity.node,
+            a_char=CharacterLiteral('a')
+        )
+
+    @langkit_property(public=True)
     def get_node(node_struct=FooNodeStruct):
         return node_struct.node
+
+    @langkit_property(public=True)
+    def get_char(s=BareNodeStruct):
+        return s.a_char
 
     @langkit_property(public=True)
     def iter_int():

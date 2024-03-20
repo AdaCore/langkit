@@ -36,8 +36,14 @@ enum Color {
         node=if b then self else null[Entity[FooNode]]
     )
 
+    @export fun my_node(): BareNodeStruct = BareNodeStruct(
+        a_boolean=true, bare_node=self.node, a_char='a'
+    )
+
     @export fun get_node(node_struct: FooNodeStruct): Entity[FooNode] =
     node_struct.node
+
+    @export fun get_char(s: BareNodeStruct): Char = s.a_char
 
     @export fun iter_int(): Iterator[Int] = [1, 2, 3].to_iterator()
 }
@@ -66,6 +72,12 @@ class StringLiteral: FooNode {
 
 class Var: FooNode {
     @parse_field arg: Sequence
+}
+
+struct BareNodeStruct {
+    a_boolean: Bool
+    bare_node: FooNode
+    a_char: Char
 }
 
 struct FooNodeStruct {

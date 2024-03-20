@@ -429,7 +429,8 @@ ${func_sig}(
         arg.public_type,
         f"{arg.name.lower}_java",
         f"{arg.name.lower}_native",
-        args_release_list
+        args_release_list,
+        ast_wrapping=False
     )}
     % endfor
 
@@ -457,7 +458,8 @@ ${func_sig}(
         res = ${api.jni_wrap(
             field.public_type,
             "res_native",
-            return_release_list
+            return_release_list,
+            ast_wrapping=False
         )};
 
         /* Release resources used to wrap the result.  */
