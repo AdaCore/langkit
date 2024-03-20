@@ -1073,8 +1073,23 @@ def emit_expr(expr, **ctx):
             # syntax on it. Likewise for IsA.
             if not isinstance(expr.then_expr, (Match, IsA)):
                 # If the "then" expression also implies a "?", do not emit it
-                # twice.
-                fmt = '{}{}' if expr_is_a(expr.then_expr, 'at') else '{}?{}'
+                # twice. Since casting a null node always works, it is
+                # pointless to add a "?" before a cast (and X?.as[T] is not
+                # parsed as a cast expression anyway).
+
+                def leftmost_null_ok(expr):
+                    if expr_is_a(expr, 'at') or isinstance(expr, Cast):
+                        return True
+                    elif isinstance(expr, FieldAccess):
+                        return leftmost_null_ok(expr.receiver)
+                    else:
+                        return False
+
+                fmt = (
+                    '{}{}'
+                    if leftmost_null_ok(expr.then_expr)
+                    else '{}?{}'
+                )
 
                 return fmt.format(
                     ee(expr.expr),
