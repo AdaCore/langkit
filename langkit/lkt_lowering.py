@@ -2478,7 +2478,9 @@ class LktTypesLoader:
                 to_lower.arguments, to_lower.prop.arguments
             ):
                 if arg_decl.f_default_val is not None:
-                    value = self.lower_static_expr(arg_decl.f_default_val)
+                    value = self.lower_static_expr(
+                        arg_decl.f_default_val, self.root_scope
+                    )
                     value.prepare()
                     arg.set_default_value(value)
 
@@ -2489,7 +2491,7 @@ class LktTypesLoader:
                             dynvar,
                             None
                             if init_expr is None else
-                            self.lower_static_expr(init_expr)
+                            self.lower_static_expr(init_expr, self.root_scope)
                         )
                         for dynvar, init_expr in to_lower.dynamic_vars
                     ]
@@ -3065,34 +3067,18 @@ class LktTypesLoader:
 
         return result
 
-    def lower_static_expr(self, expr: L.Expr) -> AbstractExpression:
+    def lower_static_expr(
+        self,
+        expr: L.Expr,
+        env: Scope,
+    ) -> AbstractExpression:
         """
         Lower the given expression, checking that it is a valid compile time
         known value.
         """
-        with self.ctx.lkt_context(expr):
-            # Accept simple identifiers that refer to builtin values
-            if isinstance(expr, L.RefId):
-                entity = self.resolve_entity(expr, self.root_scope)
-                if (
-                    isinstance(entity, Scope.BuiltinValue)
-                    and isinstance(entity.value, E.Literal)
-                ):
-                    return entity.value
-
-            elif (
-                # Also accept character and number literals, as well as null
-                # expressions.
-                isinstance(expr, (L.CharLit, L.NullLit, L.NumLit))
-                or (
-                    # Finally, also accept references to enum values
-                    isinstance(expr, L.DotExpr)
-                    and isinstance(expr.f_prefix, L.RefId)
-                )
-            ):
-                return self.lower_expr(expr, self.root_scope, None)
-
-            error("static expression expected in this context")
+        return self.lower_expr(
+            expr, env, local_vars=None, static_required=True
+        )
 
     def create_internal_property(
         self,
@@ -3754,7 +3740,8 @@ class LktTypesLoader:
     def lower_expr(self,
                    expr: L.Expr,
                    env: Scope,
-                   local_vars: Optional[LocalVars]) -> AbstractExpression:
+                   local_vars: Optional[LocalVars],
+                   static_required: bool = False) -> AbstractExpression:
         """
         Lower the given expression.
 
@@ -3762,7 +3749,17 @@ class LktTypesLoader:
         :param env: Scope to use when resolving references.
         :param local_vars: If lowering a property expression, set of local
             variables for this property.
+        :param static_required: Whether "expr" is required to be a static
+            expression.
         """
+
+        def abort_if_static_required(expr: L.Expr) -> None:
+            """
+            Abort lowering if a static expression is required for "expr".
+            """
+            if static_required:
+                with self.ctx.lkt_context(expr):
+                    error("static expression expected in this context")
 
         def lower(expr: L.Expr) -> AbstractExpression:
             """
@@ -3785,6 +3782,8 @@ class LktTypesLoader:
             result: AbstractExpression
 
             if isinstance(expr, L.AnyOf):
+                abort_if_static_required(expr)
+
                 prefix = lower(expr.f_expr)
                 return E.AnyOf(
                     lower(expr.f_expr),
@@ -3792,6 +3791,8 @@ class LktTypesLoader:
                 )
 
             elif isinstance(expr, L.ArrayLiteral):
+                abort_if_static_required(expr)
+
                 elts = [lower(e) for e in expr.f_exprs]
                 element_type = (
                     None
@@ -3801,11 +3802,15 @@ class LktTypesLoader:
                 return E.ArrayLiteral(elts, element_type=element_type)
 
             elif isinstance(expr, L.BigNumLit):
+                abort_if_static_required(expr)
+
                 text = expr.text
                 assert text[-1] == 'b'
                 return E.BigIntLiteral(int(text[:-1]))
 
             elif isinstance(expr, L.BinOp):
+                abort_if_static_required(expr)
+
                 # Lower both operands
                 left = lower(expr.f_left)
                 right = lower(expr.f_right)
@@ -3850,6 +3855,8 @@ class LktTypesLoader:
                     return E.Arithmetic(left, right, operator)
 
             elif isinstance(expr, L.BlockExpr):
+                abort_if_static_required(expr)
+
                 assert local_vars is not None
                 loc = Location.from_lkt_node(expr)
                 sub_env = env.create_child(
@@ -3947,6 +3954,8 @@ class LktTypesLoader:
                 return result
 
             elif isinstance(expr, L.CallExpr):
+                abort_if_static_required(expr)
+
                 call_expr = expr
                 call_name = call_expr.f_name
 
@@ -3996,6 +4005,8 @@ class LktTypesLoader:
 
                     # It can be a call to a built-in function
                     if entity == self.builtin_functions.dynamic_lexical_env:
+                        abort_if_static_required(expr)
+
                         args, _ = dynamic_lexical_env_signature.match(
                             self.ctx, call_expr
                         )
@@ -4026,6 +4037,8 @@ class LktTypesLoader:
                 # reference to a struct type, and thus the call is a New
                 # expression.
                 elif isinstance(call_name, L.GenericInstantiation):
+                    abort_if_static_required(expr)
+
                     generic = self.resolve_generic(call_name.f_name, env)
                     type_args = call_name.f_args
                     if generic != self.generics.entity:
@@ -4056,9 +4069,12 @@ class LktTypesLoader:
                     with self.ctx.lkt_context(call_name):
                         error("invalid call prefix")
 
+                abort_if_static_required(expr)
                 return self.lower_method_call(call_expr, env, local_vars)
 
             elif isinstance(expr, L.CastExpr):
+                abort_if_static_required(expr)
+
                 subexpr = lower(expr.f_expr)
                 excludes_null = expr.f_excludes_null.p_as_bool
                 dest_type = self.resolve_type(expr.f_dest_type, env)
@@ -4093,6 +4109,8 @@ class LktTypesLoader:
 
                 # Otherwise, the prefix is a regular expression, so this dotted
                 # expression is an access to a member.
+                abort_if_static_required(expr)
+
                 prefix = lower(expr.f_prefix)
                 suffix = expr.f_suffix.text
                 if null_cond:
@@ -4108,6 +4126,8 @@ class LktTypesLoader:
                     return getattr(prefix, suffix)
 
             elif isinstance(expr, L.IfExpr):
+                abort_if_static_required(expr)
+
                 # We want to turn the following pattern::
                 #
                 #   IfExpr(C1, E1, [(C2, E2), (C3, E3), ...], E_last)
@@ -4135,6 +4155,8 @@ class LktTypesLoader:
                 return result
 
             elif isinstance(expr, L.Isa):
+                abort_if_static_required(expr)
+
                 subexpr = lower(expr.f_expr)
                 nodes = [
                     self.resolve_type(type_ref, env)
@@ -4143,6 +4165,8 @@ class LktTypesLoader:
                 return E.IsA(subexpr, *nodes)
 
             elif isinstance(expr, L.LogicExpr):
+                abort_if_static_required(expr)
+
                 expr = expr.f_expr
                 if isinstance(expr, L.RefId):
                     if expr.text == "true":
@@ -4225,6 +4249,8 @@ class LktTypesLoader:
                     error("invalid logic expression")
 
             elif isinstance(expr, L.KeepExpr):
+                abort_if_static_required(expr)
+
                 subexpr = lower(expr.f_expr)
                 keep_type = self.resolve_type(expr.f_keep_type, env)
                 return subexpr.filtermap(
@@ -4233,6 +4259,7 @@ class LktTypesLoader:
                 )
 
             elif isinstance(expr, L.MatchExpr):
+                abort_if_static_required(expr)
                 assert local_vars is not None
 
                 prefix_expr = lower(expr.f_match_expr)
@@ -4289,6 +4316,8 @@ class LktTypesLoader:
                 return result
 
             elif isinstance(expr, L.NotExpr):
+                abort_if_static_required(expr)
+
                 return E.Not(lower(expr.f_expr))
 
             elif isinstance(expr, L.NullLit):
@@ -4302,6 +4331,8 @@ class LktTypesLoader:
                 return lower(expr.f_expr)
 
             elif isinstance(expr, L.RaiseExpr):
+                abort_if_static_required(expr)
+
                 # A raise expression can only contain a PropertyError struct
                 # constructor.
                 cons_expr = expr.f_except_expr
@@ -4341,8 +4372,12 @@ class LktTypesLoader:
             elif isinstance(expr, L.RefId):
                 entity = self.resolve_entity(expr, env)
                 if isinstance(entity, Scope.BuiltinValue):
+                    if not isinstance(entity.value, E.Literal):
+                        abort_if_static_required(expr)
+
                     return entity.value
                 elif isinstance(entity, Scope.UserValue):
+                    abort_if_static_required(expr)
                     return entity.variable
                 else:
                     with self.ctx.lkt_context(expr):
@@ -4358,6 +4393,8 @@ class LktTypesLoader:
                             )
 
             elif isinstance(expr, L.StringLit):
+                abort_if_static_required(expr)
+
                 string_prefix = expr.p_prefix
                 string_value = denoted_str(expr)
                 if string_prefix == "\x00":
@@ -4368,6 +4405,8 @@ class LktTypesLoader:
                     error("invalid string prefix")
 
             elif isinstance(expr, L.SubscriptExpr):
+                abort_if_static_required(expr)
+
                 null_cond = isinstance(expr, L.NullCondSubscriptExpr)
                 prefix = lower(expr.f_prefix)
                 index = lower(expr.f_index)
@@ -4378,6 +4417,8 @@ class LktTypesLoader:
                 )
 
             elif isinstance(expr, L.TryExpr):
+                abort_if_static_required(expr)
+
                 return E.Try(
                     try_expr=lower(expr.f_try_expr),
                     else_expr=(
