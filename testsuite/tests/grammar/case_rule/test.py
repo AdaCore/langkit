@@ -4,7 +4,7 @@ Check that the Case lexing rule works as expected.
 
 from langkit.dsl import ASTNode, Field, abstract
 
-from utils import build_and_run, unparse_all_script
+from utils import build_and_run
 
 
 class FooNode(ASTNode):
@@ -34,7 +34,10 @@ class AttrRef(Expr):
     name = Field(type=Name)
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-              unparse_script=unparse_all_script,
-              types_from_lkt=True)
+build_and_run(
+    lkt_file='lexer_parser.lkt',
+    py_script='main.py',
+    unparse_script="to:expected_concrete_syntax.lkt,nodes",
+    types_from_lkt=True,
+)
 print('Done')

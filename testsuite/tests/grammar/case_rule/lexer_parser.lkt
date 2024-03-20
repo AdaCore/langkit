@@ -1,0 +1,27 @@
+import expected_concrete_syntax
+
+lexer foo_lexer {
+
+    match p"'.'" {
+        if previous_token is id then send(tick, 1)
+        else send(char, 3)
+    }
+
+    char
+    dot <- "."
+    id <- p"[a-zA-Zé🙂]+"
+    tick <- "'"
+    newline <- p"\n"
+}
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule expr <- or(
+        | DotExpr(expr "." name)
+        | AttrRef(expr "'" name)
+        | char_lit
+        | name
+    )
+    char_lit <- CharLit(@char)
+    name <- Name(@id)
+}
