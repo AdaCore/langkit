@@ -27,6 +27,13 @@ class FooNode(ASTNode):
     def str_type():
         return T.StrType.new()
 
+    # This is just to make sure that SolverResult is correctly exposed to the
+    # DSL.
+
+    @langkit_property(public=True, return_type=T.SolverDiagnostic)
+    def get_first_diag(r=T.SolverResult):
+        return r.diagnostics.at(0)
+
 
 class Block(FooNode):
     stmts = Field()

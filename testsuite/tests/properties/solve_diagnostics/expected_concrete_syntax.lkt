@@ -16,6 +16,9 @@ grammar foo_grammar {
     @lazy number_type: NumType = NumType()
 
     @lazy str_type: StrType = StrType()
+
+    @export fun get_first_diag(r: SolverResult): SolverDiagnostic =
+    r.diagnostics?[0]
 }
 
 class Block: FooNode {
