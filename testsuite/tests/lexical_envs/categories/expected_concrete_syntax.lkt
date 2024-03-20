@@ -3,8 +3,10 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Def(
-        "def" name "{" cat1 cat2 Example("example") "}"
+        "def"
+        name "{" nocat cat1 cat2 Example("example") "}"
     )
+    nocat <- NoCat(@identifier("nocat") "{" decls "}")
     cat1 <- Cat1(@identifier("cat1") "{" decls "}")
     cat2 <- Cat2(@identifier("cat2") "{" decls "}")
     decls <- list*(var)
@@ -33,6 +35,7 @@ class Cat2: FooNode {
 
 class Def: FooNode {
     @parse_field name: Name
+    @parse_field nocat: NoCat
     @parse_field cat1: Cat1
     @parse_field cat2: Cat2
     @parse_field example: Example
@@ -46,18 +49,23 @@ class Example: FooNode implements TokenNode {
     @export fun lookup_all(name: Symbol): Array[Entity[FooNode]] =
     node.children_env().get(name)
 
+    fun lookup_by_cat(name: Symbol, cats: RefCategories = RefCategories()): Array[Entity[FooNode]] =
+    node.children_env().get(name, categories=cats)
+
+    @export fun lookup_none(name: Symbol): Array[Entity[FooNode]] =
+    node.lookup_by_cat(name)
+
     @export fun lookup_1(name: Symbol): Array[Entity[FooNode]] =
-    node.children_env().get(
-        name, categories=RefCategories(cat1=true)
-    )
+    node.lookup_by_cat(name, cats=RefCategories(cat1=true))
 
     @export fun lookup_2(name: Symbol): Array[Entity[FooNode]] =
-    node.children_env().get(
-        name, categories=RefCategories(cat2=true)
-    )
+    node.lookup_by_cat(name, cats=RefCategories(cat2=true))
 
     env_spec {
         add_env()
+        reference(
+            [node.parent.as[Def].nocat.as[FooNode]], FooNode.children_env
+        )
         reference(
             [node.parent.as[Def].cat1.as[FooNode]], FooNode.children_env, category="cat1"
         )
@@ -68,6 +76,14 @@ class Example: FooNode implements TokenNode {
 }
 
 class Name: FooNode implements TokenNode {
+}
+
+class NoCat: FooNode {
+    @parse_field decls: ASTList[FooNode, Var]
+
+    env_spec {
+        add_env()
+    }
 }
 
 class Var: FooNode {
