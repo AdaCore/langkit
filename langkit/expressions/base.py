@@ -713,8 +713,6 @@ class AbstractExpression(Frozable):
                                lambda e: e.is_a(cls)),
             'logic_all': lambda e: All(self.map(e)),
             'logic_any': lambda e: LogicAny(self.map(e)),
-            'find_or_raise': lambda filter_expr:
-                self.filter(filter_expr).at_or_raise(0),
         }
 
     @Frozable.protect
