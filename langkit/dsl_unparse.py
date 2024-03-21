@@ -1854,7 +1854,7 @@ def unparse_token_decl(token, newline_afters, is_pre):
     if is_pre:
         result.append('@pre_rule')
     if token in newline_afters:
-        result.append('@newline_after')
+        result.append('@unparse_newline_after')
 
     options = []
     if token.start_ignore_layout:
