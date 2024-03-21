@@ -3516,6 +3516,10 @@ class LktTypesLoader:
                 method_prefix, then_expr, arg_var, default_val
             )
 
+        elif method_name == "empty":
+            empty_signature.match(self.ctx, call_expr)
+            result = getattr(method_prefix, "empty")
+
         elif method_name == "env_group":
             args, _ = env_group_signature.match(self.ctx, call_expr)
             with_md_expr = args.get("with_md")

@@ -1,0 +1,11 @@
+main.py: Running...
+check_list(()) = True
+check_list((example)) = False
+check_list((example example example)) = False
+
+check_array([]) = True
+check_array([1]) = False
+check_array([1, 2, 3]) = False
+
+main.py: Done.
+Done
