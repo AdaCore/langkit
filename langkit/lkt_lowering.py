@@ -486,7 +486,7 @@ class Scope:
         else:
             with self.context.lkt_context(entity.diagnostic_node):
                 other_label = (
-                    str(other_entity.diagnostic_node)
+                    other_entity.diagnostic_name
                     if isinstance(other_entity, Scope.UserEntity) else
                     "a builtin"
                 )
