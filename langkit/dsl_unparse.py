@@ -932,10 +932,13 @@ def emit_expr(expr, **ctx):
         return emit_method_call(coll, op_name, args)
 
     elif isinstance(expr, Quantifier):
+        vars = [expr.element_var]
+        if expr.requires_index:
+            vars.append(expr.index_var)
         return emit_method_call(
             ee_pexpr(expr.collection),
             expr.kind,
-            [emit_lambda(expr.expr, [expr.element_var])]
+            [emit_lambda(expr.expr, vars)],
         )
 
     elif isinstance(expr, Contains):
