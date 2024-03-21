@@ -2301,7 +2301,7 @@ class LktTypesLoader:
                 builtin_type("LogicVar"),
                 builtin_type("LookupKind"),
                 builtin_type("RefCategories"),
-                builtin_type("SolverDiagonstic"),
+                builtin_type("SolverDiagnostic"),
                 builtin_type("SolverResult"),
                 builtin_type("SourceLocation"),
                 builtin_type("SourceLocationRange"),
