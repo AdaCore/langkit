@@ -1742,6 +1742,14 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
     # Go through all rules to register tokens, their token families and lexing
     # rules.
+    #
+    # Process "case" lexing rules only at the end, since they can reference
+    # other lexing rules that may appear earlier in the lexer declaration.
+    case_rules: list[
+        tuple[
+            L.GrammarExpr, L.BaseLexerCaseRuleAlt, L.BaseLexerCaseRuleAlt
+        ]
+    ] = []
     for full_decl in full_lexer.f_decl.f_rules:
         with ctx.lkt_context(full_decl):
             if isinstance(full_decl, L.FullDecl):
@@ -1768,23 +1776,34 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
             elif isinstance(full_decl, L.LexerCaseRule):
                 syn_alts = list(full_decl.f_alts)
-
-                # This is a rule for conditional lexing: lower its matcher and
-                # its alternative rules.
-                matcher = lower_matcher(full_decl.f_expr)
                 check_source_language(
                     len(syn_alts) == 2 and
                     isinstance(syn_alts[0], L.LexerCaseRuleCondAlt) and
                     isinstance(syn_alts[1], L.LexerCaseRuleDefaultAlt),
                     'Invalid case rule topology'
                 )
-                rules.append(Case(matcher,
-                                  lower_case_alt(syn_alts[0]),
-                                  lower_case_alt(syn_alts[1])))
+                case_rules.append((
+                    full_decl.f_expr,
+                    syn_alts[0],
+                    syn_alts[1],
+                ))
 
             else:
                 # The grammar should make the following dead code
                 assert False, 'Invalid lexer rule: {}'.format(full_decl)
+
+    # Lower "case" rules
+    for matcher_expr, alt_0, alt_1 in case_rules:
+        with ctx.lkt_context(matcher_expr):
+            matcher = lower_matcher(matcher_expr)
+            rules.append(
+                Case(
+                    matcher,
+                    lower_case_alt(alt_0),
+                    lower_case_alt(alt_1),
+                    location=Location.from_lkt_node(matcher_expr),
+                )
+            )
 
     # Create the LexerToken subclass to define all tokens and token families
     items: Dict[str, Union[Action, TokenFamily]] = {}

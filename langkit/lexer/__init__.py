@@ -963,7 +963,14 @@ class Case(RuleAssoc):
             return ('CaseAction', self.match_length,
                     sorted(alt.signature for alt in self.all_alts))
 
-    def __init__(self, matcher: Matcher, *alts: Alt):
+    def __init__(
+        self,
+        matcher: Matcher,
+        *alts: Alt,
+        location: Optional[Location] = None,
+    ):
         super().__init__(
-            matcher, Case.CaseAction(matcher.match_length, *alts)
+            matcher,
+            Case.CaseAction(matcher.match_length, *alts),
+            location=location,
         )
