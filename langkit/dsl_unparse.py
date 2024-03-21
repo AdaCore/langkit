@@ -1841,6 +1841,7 @@ def format_pattern(pat):
         '\r': '\\r',
         '\t': '\\t',
         '"': '\\"',
+        '\\': '\\\\',
     }
     return '"{}"'.format(''.join(escaped.get(c, c) for c in pat))
 

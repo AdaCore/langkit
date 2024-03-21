@@ -1,0 +1,17 @@
+lexer foo_lexer {
+
+    @trivia() escaped_newline <- p"\\\\\n[ \t\r]*"
+    @trivia() newline <- p"\n"
+    @trivia() whitespace <- p"[ \t]+"
+    id <- p"([a-zA-Z]|\\\\|\\\")+"
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule expr <- list*(Identifier(@id))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Identifier: FooNode implements TokenNode {
+}
