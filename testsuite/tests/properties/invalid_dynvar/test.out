@@ -1,3 +1,9 @@
+== bind_twice.lkt ==
+bind_twice.lkt:6:9: error: this declaration conflicts with <VarBind bind_twice.lkt:5:9-5:25>
+6 |         bind my_var = 13;
+  |         ^^^^^^^^^^^^^^^^
+
+
 == call_bound.lkt ==
 Code generation was successful
 

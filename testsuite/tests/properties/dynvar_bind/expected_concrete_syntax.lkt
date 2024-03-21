@@ -18,4 +18,16 @@ class Example: FooNode implements TokenNode {
 
         node.add(value)
     }
+
+    @with_dynvars(dyn_var) fun add_two(): Int = {
+        bind dyn_var = dyn_var + 1;
+
+        node.add(1)
+    }
+
+    @export fun next_next(value: Int): Int = {
+        bind dyn_var = value;
+
+        node.add_two()
+    }
 }

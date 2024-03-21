@@ -355,9 +355,12 @@ class Scope:
         Entity defined in user code.
         """
 
-        decl: L.Decl
+        diagnostic_node: L.LktNode
         """
-        Corresponding Lkt declaration node.
+        Lkt node to use as the reference for this entity when creating
+        diagnostics: generally a declaration (VarDecl for a variable
+        declaration, TypeDecl for a type declaration, ...), sometimes not
+        (VarBind for a bound dynamic variable).
         """
 
         kind_name: ClassVar[str]
@@ -367,7 +370,7 @@ class Scope:
 
         @property
         def diagnostic_name(self) -> str:
-            loc = Location.from_lkt_node(self.decl)
+            loc = Location.from_lkt_node(self.diagnostic_node)
             return (
                 f"the {self.kind_name} {self.name} at {loc.gnu_style_repr()}"
             )
@@ -416,6 +419,19 @@ class Scope:
         """
 
         kind_name = "local variable"
+
+    @dataclass
+    class BoundDynVar(LocalVariable):
+        """
+        Dynamic variable that has been bound.
+
+        ``BoudDynVar`` instances are put in a scope as soon as a dynamic
+        variable is bound in that scope: it allows keep track of the fact that
+        it is bound (to be used as regular variables, hence the
+        ``LocalVariable`` derivation).
+        """
+
+        kind_name = "bound dynamic variable"
 
     class Argument(UserValue):
         """
@@ -468,9 +484,9 @@ class Scope:
         if other_entity is None:
             self.mapping[entity.name] = entity
         else:
-            with self.context.lkt_context(entity.decl):
+            with self.context.lkt_context(entity.diagnostic_node):
                 other_label = (
-                    str(other_entity.decl)
+                    str(other_entity.diagnostic_node)
                     if isinstance(other_entity, Scope.UserEntity) else
                     "a builtin"
                 )
@@ -2781,7 +2797,7 @@ class LktTypesLoader:
                     error(exc.args[1])
                 if not isinstance(entity, Scope.UserType):
                     error(f"node type expected, got {entity.diagnostic_name}")
-                base_type_decl = entity.decl
+                base_type_decl = entity.diagnostic_node
                 assert isinstance(base_type_decl, L.TypeDecl)
 
                 # Then, force its lowering
@@ -3839,15 +3855,12 @@ class LktTypesLoader:
                 actions: list[DeclAction] = []
 
                 for v in expr.f_val_defs:
-                    source_name: str
-                    source_var: L.Decl
                     var: AbstractVariable
                     init_abstract_expr: L.Expr
 
                     if isinstance(v, L.ValDecl):
                         # Create the AbstractVariable for this declaration
                         source_name = v.f_syn_name.text
-                        source_var = v
                         source_name, v_name = extract_var_name(
                             self.ctx, v.f_syn_name
                         )
@@ -3867,30 +3880,37 @@ class LktTypesLoader:
                             )
                         init_abstract_expr = v.f_val
 
-                    elif isinstance(v, L.VarBind):
-                        source_name = v.f_name.text
-
-                        # Look for the corresponding dynamic variable
-                        entity = self.resolve_entity(v.f_name, sub_env)
-                        if not isinstance(entity, Scope.DynVar):
-                            error(
-                                "dynamic variable expected, got"
-                                f" {entity.diagnostic_name}"
+                        # Make the declared value available to the inner
+                        # expression lowering.
+                        if source_name != "_":
+                            sub_env.add(
+                                Scope.LocalVariable(source_name, v, var)
                             )
 
-                        source_var = entity.decl
+                    elif isinstance(v, L.VarBind):
+                        # Look for the corresponding dynamic variable, either
+                        # unbound (DynVar, that we will bound) or already
+                        # bounded (BoundDynVar, that we will rebind in this
+                        # scope).
+                        entity = self.resolve_entity(v.f_name, sub_env)
+                        if not isinstance(
+                            entity, (Scope.DynVar, Scope.BoundDynVar)
+                        ):
+                            with self.ctx.lkt_context(v.f_name):
+                                error(
+                                    "dynamic variable expected, got"
+                                    f" {entity.diagnostic_name}"
+                                )
+
                         var = entity.variable
                         init_abstract_expr = v.f_expr
 
+                        # Make the bound dynamic variable available to the
+                        # inner expression lowering.
+                        sub_env.add(Scope.BoundDynVar(v.f_name.text, v, var))
+
                     else:
                         assert False, f'Unhandled def in BlockExpr: {v}'
-
-                    # Make the declaration available to the inner expression
-                    # lowering.
-                    if source_name != "_":
-                        sub_env.add(
-                            Scope.LocalVariable(source_name, source_var, var)
-                        )
 
                     # Lower the declaration/bind initialization expression
                     init_expr = self.lower_expr(
@@ -4482,8 +4502,8 @@ class LktTypesLoader:
             for dynvar, init_expr in annotations.with_dynvars:
                 dynvars.append((dynvar.variable, init_expr))
                 scope.add(
-                    Scope.LocalVariable(
-                        dynvar.name, dynvar.decl, dynvar.variable
+                    Scope.BoundDynVar(
+                        dynvar.name, dynvar.diagnostic_node, dynvar.variable
                     )
                 )
 

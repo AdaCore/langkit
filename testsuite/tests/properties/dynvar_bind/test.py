@@ -14,6 +14,8 @@ class FooNode(ASTNode):
 class Example(FooNode):
     token_node = True
 
+    # Regular usage
+
     @langkit_property(dynamic_vars=[dyn_var])
     def add(value=T.Int):
         return value + dyn_var
@@ -21,6 +23,16 @@ class Example(FooNode):
     @langkit_property(public=True)
     def next(value=T.Int):
         return dyn_var.bind(1, Self.add(value))
+
+    # Try to bind dyn_var in an area where it is already bound
+
+    @langkit_property(dynamic_vars=[dyn_var])
+    def add_two():
+        return dyn_var.bind(dyn_var + 1, Self.add(1))
+
+    @langkit_property(public=True)
+    def next_next(value=T.Int):
+        return dyn_var.bind(value, Self.add_two)
 
 
 build_and_run(

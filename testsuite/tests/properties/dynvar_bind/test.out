@@ -1,4 +1,5 @@
 main.py: Running...
 p_next(42) = 43
+p_next_next(42) = 44
 main.py: Done.
 Done
