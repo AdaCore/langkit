@@ -29,7 +29,7 @@ package body Langkit_Support.Symbols.Precomputed is
       Index : Precomputed_Symbol_Index) return Symbol_Type
    is
    begin
-      return Get_Symbol (Symbol_Table (ST), Precomputed_Symbol (ST, Index));
+      return To_Symbol (Symbol_Table (ST), Precomputed_Symbol (ST, Index));
    end Precomputed_Symbol;
 
    ------------------------

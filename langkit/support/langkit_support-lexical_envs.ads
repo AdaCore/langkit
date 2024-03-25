@@ -12,6 +12,7 @@ with System;
 with GNATCOLL.Traces;
 
 with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Types;   use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
@@ -101,7 +102,12 @@ package Langkit_Support.Lexical_Envs is
    subtype Primary_Kind is
       Lexical_Env_Kind range Static_Primary ..  Dynamic_Primary;
 
-   type Base_Lexical_Env_Record is abstract tagged null record;
+   type Base_Lexical_Env_Record is abstract tagged record
+      Sym_Table : Symbol_Table;
+      --  Field used to retrieve symbols that are necessary for lexical env
+      --  operation. The symbol table is not owned by the lexical env. In
+      --  regular Langkit operation, it's owned by the analysis context.
+   end record;
    --  Root class of the lexical env type for all languages
 
    type Generic_Lexical_Env_Ptr is access all Base_Lexical_Env_Record'Class;

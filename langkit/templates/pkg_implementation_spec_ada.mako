@@ -255,8 +255,8 @@ private package ${ada_lib_name}.Implementation is
    ${struct_types.incomplete_decl(T.inner_env_assoc)}
    ${struct_types.decl(T.inner_env_assoc, incomplete_nullexpr=False)}
    ${struct_types.nullexpr_decl(T.inner_env_assoc)}
-   function Get_Key (Self : ${T.inner_env_assoc.name}) return Symbol_Type
-   is (Self.Key);
+   function Get_Key (Self : ${T.inner_env_assoc.name}) return Thin_Symbol
+   is (Thin (Self.Key));
    function Get_Node
      (Self : ${T.inner_env_assoc.name}) return ${T.root_node.name}
    is (Self.Value);
@@ -411,7 +411,8 @@ private package ${ada_lib_name}.Implementation is
      (Self              : ${T.root_node.name};
       Assocs_Getter     : Inner_Env_Assocs_Resolver;
       Assoc_Resolver    : Entity_Resolver;
-      Transitive_Parent : Boolean) return Lexical_Env;
+      Transitive_Parent : Boolean;
+      Sym_Table         : Symbol_Table) return Lexical_Env;
    --  Helper for properties code generation: wrapper around
    --  AST_Envs.Create_Dynamic_Lexical_Env.
 
@@ -1273,6 +1274,7 @@ private package ${ada_lib_name}.Implementation is
    function Create_Static_Lexical_Env
      (Parent            : Lexical_Env;
       Node              : ${T.root_node.name};
+      Sym_Table         : Symbol_Table;
       Transitive_Parent : Boolean := False) return Lexical_Env;
    --  Wrapper around AST_Envs.Create_Lexical_Env. Create the environment and,
    --  if Node is not null, register the result for destruction in Node's

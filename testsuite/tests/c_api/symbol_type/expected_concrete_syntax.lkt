@@ -1,0 +1,15 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@identifier)
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    @export fun sym(): Symbol = node.symbol
+
+    @export fun sym_array(): Array[Symbol] = [s"a", s"b", s"c"]
+}

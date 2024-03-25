@@ -45,7 +45,8 @@ package ${ada_lib_name}.Implementation.C is
    ${struct_types.decl(root_entity)}
 
    type ${symbol_type} is record
-      Data, Bounds : System.Address;
+      Thin_Sym : Unsigned_32;
+      Table    : System.Address;
    end record
       with Convention => C;
    ${ada_c_doc('langkit.symbol_type', 3)}

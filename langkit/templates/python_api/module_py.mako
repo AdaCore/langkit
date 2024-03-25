@@ -337,8 +337,8 @@ class _text(ctypes.Structure):
 
 
 class _symbol_type(ctypes.Structure):
-    _fields_ = [('data', ctypes.c_void_p),
-                ('bounds', ctypes.c_void_p)]
+    _fields_ = [('thin_symbol', ctypes.c_uint32),
+                ('table', ctypes.c_void_p)]
 
     @classmethod
     def wrap(cls, c_value: Any) -> str:

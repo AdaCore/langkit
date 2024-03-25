@@ -1005,7 +1005,7 @@ begin
       end;
       Put ("Null symbol: ");
       begin
-         Dummy_Type := Lookup_Type (Map, null);
+         Dummy_Type := Lookup_Type (Map, No_Symbol);
          raise Program_Error;
       exception
          when Exc : Precondition_Failure =>
@@ -1032,7 +1032,7 @@ begin
       end;
       Put ("Null symbol: ");
       begin
-         Dummy_Enum_Value := Lookup_Enum_Value (Map, Enum, null);
+         Dummy_Enum_Value := Lookup_Enum_Value (Map, Enum, No_Symbol);
          raise Program_Error;
       exception
          when Exc : Precondition_Failure =>
@@ -1059,7 +1059,7 @@ begin
       end;
       Put ("Null symbol: ");
       begin
-         Dummy_Struct_Member := Lookup_Struct_Member (Map, Struct, null);
+         Dummy_Struct_Member := Lookup_Struct_Member (Map, Struct, No_Symbol);
          raise Program_Error;
       exception
          when Exc : Precondition_Failure =>

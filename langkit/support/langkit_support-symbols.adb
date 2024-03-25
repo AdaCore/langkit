@@ -18,8 +18,23 @@ package body Langkit_Support.Symbols is
 
    function Image (S : Symbol_Type) return Text_Type is
    begin
-      return (if S = null then "<no symbol>" else S.all);
+      return (if S = No_Symbol
+              then "<no symbol>"
+              else Get (S).all);
    end Image;
+
+   ---------
+   -- Get --
+   ---------
+
+   function Get (S : Symbol_Type) return Text_Access is
+   begin
+      if S = No_Symbol then
+         return null;
+      else
+         return Get (S.Table, S.TS);
+      end if;
+   end Get;
 
    -----------
    -- Image --
@@ -28,10 +43,10 @@ package body Langkit_Support.Symbols is
    function Image
      (S : Symbol_Type; With_Quotes : Boolean := False) return String is
    begin
-      if S = null then
+      if S = No_Symbol then
          return "<no symbol>";
       else
-         return Image (S.all, With_Quotes);
+         return Image (Get (S).all, With_Quotes);
       end if;
    end Image;
 
@@ -56,7 +71,7 @@ package body Langkit_Support.Symbols is
    is
       use Maps;
 
-      T_Acc  : Symbol_Type := T'Unrestricted_Access;
+      T_Acc  : Text_Access := T'Unrestricted_Access;
       Result : constant Cursor := ST.Symbols_Map.Find (T_Acc);
    begin
       --  If we already have such a symbol, return the access we already
@@ -102,26 +117,59 @@ package body Langkit_Support.Symbols is
 
    function Hash (ST : Symbol_Type) return Hash_Type is
    begin
-      if ST = null then
+      if ST = No_Symbol then
          return Hash_Type (0);
       else
-         return Hash_Type'Mod (To_Integer (ST.all'Address));
+         return Hash_Type'Mod (To_Integer (Get (ST).all'Address));
       end if;
    end Hash;
 
-   ----------------
-   -- Get_Symbol --
-   ----------------
+   function Hash (ST : Thin_Symbol) return Hash_Type is
+   begin
+      if ST = No_Thin_Symbol then
+         return Hash_Type (0);
+      else
+         return Hash_Type'Mod (ST);
+      end if;
+   end Hash;
 
-   function Get_Symbol
+   ---------------
+   -- To_Symbol --
+   ---------------
+
+   function To_Symbol
      (Self : Symbol_Table; TS : Thin_Symbol) return Symbol_Type is
+   begin
+      if TS = No_Thin_Symbol then
+         return No_Symbol;
+      else
+         return (TS, Self);
+      end if;
+   end To_Symbol;
+
+   ----------
+   -- Thin --
+   ----------
+
+   function Thin
+     (S : Symbol_Type) return Thin_Symbol is
+   begin
+      return S.TS;
+   end Thin;
+
+   ---------
+   -- Get --
+   ---------
+
+   function Get
+     (Self : Symbol_Table; TS : Thin_Symbol) return Text_Access is
    begin
       if TS = No_Thin_Symbol then
          return null;
       else
          return Self.Symbols.Get (Positive (TS));
       end if;
-   end Get_Symbol;
+   end Get;
 
    ---------------
    -- Fold_Case --
@@ -137,5 +185,18 @@ package body Langkit_Support.Symbols is
          end loop;
       end return;
    end Fold_Case;
+
+   ----------
+   -- Find --
+   ----------
+
+   function Find
+     (ST     : Symbol_Table;
+      T      : Text_Type;
+      Create : Boolean := True) return Symbol_Type
+   is
+   begin
+      return (Find (ST, T, Create), ST);
+   end Find;
 
 end Langkit_Support.Symbols;

@@ -58,8 +58,8 @@ typedef enum {
 
 ${c_doc('langkit.symbol_type')}
 typedef struct {
-   void *data;
-   void *bounds;
+   uint32_t thin_sym;
+   void *table;
 } ${symbol_type};
 
 ${c_doc('langkit.string_type')}
