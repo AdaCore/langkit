@@ -10,7 +10,7 @@ public final class Main {
         AnalysisContext ctx = AnalysisContext.create();
         AnalysisUnit u = ctx.getUnitFromBuffer("example", "main.txt");
 
-        FooNodeArray nodes;
+        FooNode[] nodes;
         System.out.println("About to call pProp...");
         try {
             nodes = u.getRoot().pProp();

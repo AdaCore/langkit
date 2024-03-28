@@ -303,7 +303,7 @@
     // ===== Generated arrays =====
 
     % for array_type in ctx.array_types:
-        % if array_type.exposed and array_type.emit_c_type:
+        % if array_type.exposed:
     ${array.ni_def(array_type)}
         % endif
     % endfor

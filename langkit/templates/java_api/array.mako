@@ -4,8 +4,10 @@
     <%
     api = java_api
 
+    
+
     java_type = api.wrapping_type(cls)
-    ni_type = api.ni_type(cls)
+    ni_type = api.ni_type(cls, ast_wrapping=False)
     c_type = cls.c_type(capi).name
 
     elem_java_type = api.wrapping_type(cls.element_type)

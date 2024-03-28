@@ -487,20 +487,15 @@ class JavaAPISettings(AbstractAPISettings):
                     if ast_wrapping else
                     "Entity"
             ),
-            (ct.StructType, lambda t: t.api_name.camel),
-            (ct.ArrayType, lambda t: self.array_wrapping_type(t)),
-            (ct.IteratorType, lambda t: t.api_name.camel),
+            (object, lambda t: t.api_name.camel),
         ])
 
-    def array_wrapping_type(self, array_type: ArrayType) -> str:
+    @classmethod
+    def exposed_array_wrapping_type(cls, array_type: ArrayType) -> str:
         """
         Get the array type in Java for the wanted compiled type.
         """
-        return (
-            ct.T.entity.array
-            if array_type.element_type.is_entity_type else
-            array_type
-        ).api_name.camel
+        return array_type.element_type.api_name.camel + "[]"
 
     def wrapper_class(self,
                       the_type: CompiledType,
@@ -564,11 +559,12 @@ class JavaAPISettings(AbstractAPISettings):
 
     # ----- Native-Image methods -----
 
-    def ni_type(self, the_type: CompiledType) -> str:
+    def ni_type(self, the_type: CompiledType, ast_wrapping: bool = True) -> str:
         """
         Get the Java type that represents the given type for the Graal C API.
 
         :param the_type: The type you want the name from.
+        :param ast_wrapping: If the AST node should be wrapped.
         """
         return dispatch_on_type(the_type, [
             (T.Bool, lambda _: "byte"),
@@ -593,9 +589,11 @@ class JavaAPISettings(AbstractAPISettings):
             (T.env_md, lambda _: "MetadataNative"),
             (ct.EntityType, lambda _: "EntityNative"),
             (ct.ASTNodeType, lambda _: "Pointer"),
-            (ct.StructType, lambda t: f"{t.api_name.camel}Native"),
-            (ct.ArrayType, lambda t: f"{self.array_wrapping_type(t)}Native"),
-            (ct.IteratorType, lambda t: f"{t.api_name.camel}Native"),
+            (ct.ArrayType, lambda t: (
+                f"{t.api_name.camel}Native" if ast_wrapping or not t.element_type.is_entity_type
+                    else f"{ct.T.entity.array.api_name.camel}Native"
+             )),
+            (object, lambda t: f"{t.api_name.camel}Native"),
         ])
 
     def ni_reference_type(self, the_type: CompiledType) -> str:
@@ -695,7 +693,7 @@ class JavaAPISettings(AbstractAPISettings):
         self.extend_release_list(release_list, the_type, export)
 
         # Return the unwrapping statement
-        ni_type = self.ni_type(the_type)
+        ni_type = self.ni_type(the_type, ast_wrapping=False)
 
         res = f"{ni_type} {export} = "
 

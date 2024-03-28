@@ -265,7 +265,7 @@ ${struct.jni_c_decl(struct_type)}
 % endfor
 
 % for array_type in ctx.array_types:
-    % if array_type.exposed and array_type.emit_c_type:
+    % if array_type.exposed:
 ${array.jni_c_decl(array_type)}
     % endif
 % endfor
@@ -899,7 +899,7 @@ ${enum.jni_init_global_refs(enum_type)}
 % endfor
 
 % for array_type in ctx.array_types:
-    % if array_type.exposed and array_type.emit_c_type:
+    % if array_type.exposed:
 ${array.jni_init_global_refs(array_type)}
     % endif
 % endfor
@@ -3578,7 +3578,7 @@ ${struct.jni_c_impl(struct_type)}
 // ==========
 
 % for array_type in ctx.array_types:
-    % if array_type.exposed and array_type.emit_c_type:
+    % if array_type.exposed:
 ${array.jni_c_impl(array_type)}
     % endif
 % endfor

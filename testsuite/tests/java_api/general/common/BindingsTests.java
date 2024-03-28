@@ -2,6 +2,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import java.math.BigInteger;
 
@@ -223,6 +225,10 @@ public final class BindingsTests {
         footer("Tokens");
     }
 
+    private static String nodesToString(FooNode[] nodes) {
+        return "[%s]".formatted(Stream.of(nodes).map(x -> x.toString())
+                .collect(Collectors.joining(", ")));
+    }
 
     /**
      * Test the node manipulation
@@ -243,9 +249,7 @@ public final class BindingsTests {
             System.out.println(
                 "Unit root children count = " + root.getChildrenCount()
             );
-            System.out.println(
-                "Unit root children = " + root.children().toString()
-            );
+            System.out.println( "Unit root children = " + nodesToString(root.children()));
             System.out.println(
                 "Unit root tree dump = " + root.dumpTree()
             );
@@ -258,8 +262,8 @@ public final class BindingsTests {
             System.out.println("Unit root image = " + root.getImage());
             System.out.println("Unit root text = " + root.getText());
             Sequence sequence = (Sequence) root;
-            FooNodeArray items = sequence.pAllItems();
-            System.out.println("Root \"p_all_items\" = " + items.toString());
+            FooNode[] items = sequence.pAllItems();
+            System.out.println("Root \"p_all_items\" = " + nodesToString(items));
             Var var = (Var) root.getChild(2);
             System.out.println("Var (3rd child) = " + var.toString());
             System.out.println("Var image = " + var.getImage());
@@ -267,9 +271,9 @@ public final class BindingsTests {
                 "Var fields = " + Arrays.toString(var.getFieldNames())
             );
             Sequence arg = var.fArg();
-            FooNodeArray argItems = arg.pAllItems();
+            FooNode[] argItems = arg.pAllItems();
             System.out.println("Var arg = " + arg.toString());
-            System.out.println("Var content = " + argItems.toString());
+            System.out.println("Var content = " + nodesToString(argItems));
             Var var2 = (Var) root.getChild(2);
             System.out.println("Node equality = " + var.equals(var2));
             System.out.println(
@@ -334,7 +338,7 @@ public final class BindingsTests {
         ) {
             AnalysisUnit unit = context.getUnitFromFile("foo.txt");
             Sequence root = (Sequence) unit.getRoot();
-            FooNodeArray items = root.pAllItems();
+            FooNode[] items = root.pAllItems();
 
             // Visit all the items and display their siblings
             for(FooNode item : items) {
@@ -366,14 +370,14 @@ public final class BindingsTests {
             Sequence root = (Sequence) unit.getRoot();
 
             // Visit the sequence
-            FooNodeArray items = root.pAllItems();
-            System.out.println("Sequence size = " + items.size());
+            FooNode[] items = root.pAllItems();
+            System.out.println("Sequence size = " + items.length);
             System.out.println("Sequence content :");
-            for(int i = 0 ; i < items.size() ; i++) {
-                FooNode item = items.get(i);
+            for(int i = 0 ; i < items.length ; i++) {
+                FooNode item = items[i];
                 System.out.println("  " + item.toString());
             }
-            FooNodeArray eqItems = root.pAllItems();
+            FooNode[] eqItems = root.pAllItems();
             System.out.println("Array equality = " + items.equals(eqItems));
         }
 

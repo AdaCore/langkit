@@ -192,6 +192,11 @@
     native_function = nat(field.accessor_basename.lower)
 
     return_type = api.wrapping_type(method.public_type)
+    exposed_return_type = (
+        api.exposed_array_wrapping_type(method.public_type)
+        if method.public_type.is_array_type
+        else return_type
+    )
     return_unw_type = api.wrapping_type(method.public_type, False)
     return_ni_ref_type = api.ni_reference_type(method.public_type)
 
@@ -204,7 +209,7 @@
 
         % if not method.name in api.excluded_fields:
         ${java_doc(field, 8)}
-        public ${return_type} ${method.name}(
+        public ${exposed_return_type} ${method.name}(
             ${','.join([
                 f"final {api.wrapping_type(param.public_type)} {param.name}"
                 for param in method.params
@@ -299,9 +304,23 @@
                 }
 
                 // Return the result
+                % if method.public_type.is_array_type:
+                return res.content;
+                % else:
                 return res;
+                % endif
             } else {
                 // Call the native function
+                % if method.public_type.is_array_type:
+                final ${return_unw_type} res = JNI_LIB.${native_function}(
+                    % for param in method.params:
+                    ${api.java_jni_unwrap(param.public_type, param.name)},
+                    % endfor
+                    this.entity
+                );
+                return res.content;
+
+                % else:
                 final ${return_unw_type} res = JNI_LIB.${native_function}(
                     % for param in method.params:
                     ${api.java_jni_unwrap(param.public_type, param.name)},
@@ -311,6 +330,7 @@
 
                 // Wrap and return the result
                 return ${api.java_jni_wrap(field.public_type, "res")};
+                % endif
             }
 
         }
@@ -331,7 +351,7 @@
             arg_list = []
             for arg in field.arguments:
                 arg_list.append(
-                    f"{api.ni_type(arg.public_type)} {arg.name.lower}"
+                    f"{api.ni_type(arg.public_type, ast_wrapping=False)} {arg.name.lower}"
                 )
             %>
 
