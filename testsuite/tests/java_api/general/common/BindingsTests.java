@@ -225,11 +225,6 @@ public final class BindingsTests {
         footer("Tokens");
     }
 
-    private static String nodesToString(FooNode[] nodes) {
-        return "[%s]".formatted(Stream.of(nodes).map(x -> x.toString())
-                .collect(Collectors.joining(", ")));
-    }
-
     /**
      * Test the node manipulation
      */
@@ -249,7 +244,7 @@ public final class BindingsTests {
             System.out.println(
                 "Unit root children count = " + root.getChildrenCount()
             );
-            System.out.println( "Unit root children = " + nodesToString(root.children()));
+            System.out.println( "Unit root children = " + Arrays.toString(root.children()));
             System.out.println(
                 "Unit root tree dump = " + root.dumpTree()
             );
@@ -263,7 +258,9 @@ public final class BindingsTests {
             System.out.println("Unit root text = " + root.getText());
             Sequence sequence = (Sequence) root;
             FooNode[] items = sequence.pAllItems();
-            System.out.println("Root \"p_all_items\" = " + nodesToString(items));
+            System.out.println("Root \"p_all_items\" = " + Arrays.toString(items));
+            Example[] examples = sequence.pExampleItems();
+            System.out.println("Root \"p_example_items\" = " + Arrays.toString(examples));
             Var var = (Var) root.getChild(2);
             System.out.println("Var (3rd child) = " + var.toString());
             System.out.println("Var image = " + var.getImage());
@@ -273,7 +270,7 @@ public final class BindingsTests {
             Sequence arg = var.fArg();
             FooNode[] argItems = arg.pAllItems();
             System.out.println("Var arg = " + arg.toString());
-            System.out.println("Var content = " + nodesToString(argItems));
+            System.out.println("Var content = " + Arrays.toString(argItems));
             Var var2 = (Var) root.getChild(2);
             System.out.println("Node equality = " + var.equals(var2));
             System.out.println(

@@ -4,8 +4,7 @@
     <%
     api = java_api
 
-    
-
+    wrapper_class = api.wrapper_class(cls)
     java_type = api.wrapping_type(cls)
     ni_type = api.ni_type(cls, ast_wrapping=False)
     c_type = cls.c_type(capi).name
@@ -19,28 +18,14 @@
     /**
      * This class represents the ${c_type} Java wrapping class
      */
-    public static final class
-    ${java_type} extends ArrayBase<${elem_java_type}> {
+    public static final class ${wrapper_class} {
 
         // ----- Class attributes -----
 
         /** Singleton that represents the none array. */
-        public static final ${java_type} NONE = new ${java_type}(
-            new ${elem_java_type}[0]
-        );
+        public static final ${java_type} NONE = new ${elem_java_type}[0];
 
         // ----- Constructors -----
-
-        /**
-         * Create a new array with the given content.
-         *
-         * @param content The content of the array.
-         */
-        ${java_type}(
-            final ${elem_java_type}[] content
-        ) {
-            super(content);
-        }
 
         /**
          * Create a new array from the JNI stub.
@@ -50,13 +35,13 @@
         private static ${java_type} jniCreate(
             final ${elem_java_unw_type}[] jniContent
         ) {
-            final ${elem_java_type}[] content =
+            final ${java_type} content =
                 new ${elem_java_type}[jniContent.length];
             for(int i = 0 ; i < content.length ; i++) {
                 content[i] =
                     ${api.java_jni_wrap(cls.element_type, "jniContent[i]")};
             }
-            return new ${java_type}(content);
+            return content;
         }
 
         /**
@@ -68,9 +53,7 @@
         public static ${java_type} create(
             final int size
         ) {
-            return new ${java_type}(
-                new ${elem_java_type}[size]
-            );
+            return new ${elem_java_type}[size];
         }
 
         // ----- Graal C API methods -----
@@ -113,8 +96,7 @@
                 };
             }
 
-            // Return the new langkit array
-            return new ${java_type}(content);
+            return content;
         }
 
         /**
@@ -123,7 +105,8 @@
          * @param pointer The pointer to place the native array pointer
          * in.
          */
-        void unwrap(
+        static void unwrap(
+            ${java_type} source,
             final WordPointer pointer
             ${(
                 ", final AnalysisContext currentContext"
@@ -132,9 +115,10 @@
             )}
         ) {
             // Create a new native array with the size
-            final ${ni_type} resNative = this.unwrap(
+            final ${ni_type} resNative = unwrap(
+                source
                 ${(
-                    "currentContext"
+                    ",currentContext"
                     if cls.element_type.is_symbol_type else
                     ""
                 )}
@@ -149,16 +133,17 @@
          *
          * @return The newly allocated unwraped array.
          */
-        ${ni_type} unwrap(
+        static ${ni_type} unwrap(
+            ${java_type} source
             ${(
-                "final AnalysisContext currentContext"
+                ",final AnalysisContext currentContext"
                 if cls.element_type.is_symbol_type else
                 ""
             )}
         ) {
             // Create a new native array with the size
             final ${ni_type} res = NI_LIB.${cls.c_create(capi)}(
-                this.content.length
+                source.length
             );
 
             // Prepare the working vars
@@ -168,14 +153,14 @@
 
             // Place all elements in the native array
             final int elemSize = SizeOf.get(${elem_ni_type}.class);
-            for(int i = 0 ; i < this.content.length ; i++) {
+            for(int i = 0 ; i < source.length ; i++) {
                 nativeItem = nativeItems.add(i * elemSize);
                 toWrite = WordFactory.unsigned(
                     nativeItem.rawValue()
                 );
                 ${api.ni_write(
                     cls.element_type,
-                    "this.content[i]",
+                    "source[i]",
                     "toWrite"
                 )}
             }
@@ -213,13 +198,12 @@
          *
          * @return The content unwrapped.
          */
-        private ${elem_java_unw_type}[] jniContent() {
-            final ${elem_java_unw_type}[] res =
-                new ${elem_java_unw_type}[this.content.length];
+        private static ${elem_java_unw_type}[] jniUnwrap(${java_type} content) {
+            final ${elem_java_unw_type}[] res = new ${elem_java_unw_type}[content.length];
             for(int i = 0 ; i < res.length ; i++) {
                 res[i] = ${api.java_jni_unwrap(
                     cls.element_type,
-                    "this.content[i]"
+                    "content[i]"
                 )};
             }
             return res;
@@ -285,12 +269,12 @@
     api = java_api
 
     c_type = cls.c_type(capi).name
-    java_type = api.wrapping_type(cls)
+    wrapper_type = api.wrapper_class(cls)
     %>
 
-${c_type} ${java_type}_new_value();
-jobject ${java_type}_wrap(JNIEnv *, ${c_type});
-${c_type} ${java_type}_unwrap(
+${c_type} ${wrapper_type}_new_value();
+jobject ${wrapper_type}_wrap(JNIEnv *, ${c_type});
+${c_type} ${wrapper_type}_unwrap(
     JNIEnv *,
     jobject
     ${(
@@ -298,43 +282,47 @@ ${c_type} ${java_type}_unwrap(
         if cls.element_type.is_symbol_type else
         ""
     )});
-void ${java_type}_release(${c_type});
+void ${wrapper_type}_release(${c_type});
 
-jclass ${java_type}_class_ref = NULL;
-jmethodID ${java_type}_create_method_id = NULL;
-jmethodID ${java_type}_content_method_id = NULL;
+jclass ${wrapper_type}_class_ref = NULL;
+jmethodID ${wrapper_type}_create_method_id = NULL;
+jmethodID ${wrapper_type}_unwrap_method_id = NULL;
 </%def>
 
 <%def name="jni_init_global_refs(cls)">
     <%
     api = java_api
 
-    java_type = api.wrapping_type(cls, False)
+    wrapper_type = api.wrapper_class(cls, False)
 
     sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
-    sig = f"L{sig_base}${java_type};"
+    sig = f"L{sig_base}${wrapper_type};"
 
-    elem_java_type = api.wrapping_type(cls.element_type, False)
-    elem_sig = f"L{sig_base}${elem_java_type};"
+    elem_java_type = api.wrapping_type(cls.element_type)
+    elem_java_type_sig = f"L{sig_base}${elem_java_type};"
+
+
+    elem_java_unw_type = api.wrapping_type(cls.element_type, False)
+    elem_unw_sig = f"L{sig_base}${elem_java_unw_type};"
     %>
 
-    ${java_type}_class_ref = (jclass) (*env)->NewGlobalRef(
+    ${wrapper_type}_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(env, "${sig}")
     );
 
-    ${java_type}_create_method_id = (*env)->GetStaticMethodID(
+    ${wrapper_type}_create_method_id = (*env)->GetStaticMethodID(
         env,
-        ${java_type}_class_ref,
+        ${wrapper_type}_class_ref,
         "jniCreate",
-        "([${elem_sig})${sig}"
+        "([${elem_unw_sig})[${elem_java_type_sig}"
     );
 
-    ${java_type}_content_method_id = (*env)->GetMethodID(
+    ${wrapper_type}_unwrap_method_id = (*env)->GetStaticMethodID(
         env,
-        ${java_type}_class_ref,
-        "jniContent",
-        "()[${elem_sig}"
+        ${wrapper_type}_class_ref,
+        "jniUnwrap",
+        "([${elem_java_type_sig})[${elem_unw_sig}"
     );
 </%def>
 
@@ -346,8 +334,8 @@ jmethodID ${java_type}_content_method_id = NULL;
     ptr_sig = f"{sig_base}$PointerWrapper"
 
     c_type = cls.c_type(capi).name
-    java_type = api.wrapping_type(cls)
-    sig = f"L{sig_base}${java_type};"
+    wrapper_type = api.wrapper_class(cls)
+    sig = f"L{sig_base}${wrapper_type};"
 
     elem_c_type = cls.element_type.c_type(capi).name
     elem_java_type = api.wrapping_type(cls.element_type, False)
@@ -355,12 +343,12 @@ jmethodID ${java_type}_content_method_id = NULL;
     %>
 
 // Create a new value for a ${c_type}
-${c_type} ${java_type}_new_value() {
+${c_type} ${wrapper_type}_new_value() {
     return NULL;
 }
 
 // Wrap a native ${c_type} in the Java wrapping class
-jobject ${java_type}_wrap(
+jobject ${wrapper_type}_wrap(
     JNIEnv *env,
     ${c_type} array_native
 ) {
@@ -389,16 +377,16 @@ jobject ${java_type}_wrap(
     // Return the new array
     return (*env)->CallStaticObjectMethod(
         env,
-        ${java_type}_class_ref,
-        ${java_type}_create_method_id,
+        ${wrapper_type}_class_ref,
+        ${wrapper_type}_create_method_id,
         array_content
     );
 }
 
 // Get a native ${c_type} from a Java wrapping instance
-${c_type} ${java_type}_unwrap(
+${c_type} ${wrapper_type}_unwrap(
     JNIEnv *env,
-    jobject array
+    jobjectArray array
     ${(
         ", jobject context"
         if cls.element_type.is_symbol_type else
@@ -412,10 +400,10 @@ ${c_type} ${java_type}_unwrap(
     % endif
 
     //  Retrieve the array's content
-    jobjectArray content = (jobjectArray) (*env)->CallObjectMethod(
+    jobjectArray content = (jobjectArray) (*env)->CallStaticObjectMethod(
         env,
         array,
-        ${java_type}_content_method_id
+        ${wrapper_type}_unwrap_method_id
     );
 
     // Get the content size
@@ -446,7 +434,7 @@ ${c_type} ${java_type}_unwrap(
 }
 
 // Release the given native array
-void ${java_type}_release(
+void ${wrapper_type}_release(
     ${c_type} array_native
 ) {
     ${cls.c_dec_ref(c_api)}(array_native);
