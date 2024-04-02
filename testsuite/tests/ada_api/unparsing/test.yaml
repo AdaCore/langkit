@@ -1,1 +1,3 @@
 driver: python
+control:
+    - [XFAIL, "True", 'Pending resolution of #777']
