@@ -556,12 +556,30 @@ public final class BindingsTests {
             AnalysisUnit unit = context.getUnitFromFile("foo.txt");
             FooNode root = unit.getRoot();
 
+            // Test a struct with an entity
             FooNodeStruct falseNodeStruct = root.pMe(false);
             FooNodeStruct trueNodeStruct = root.pMe(true);
             FooNode falseNode = root.pGetNode(falseNodeStruct);
             FooNode trueNode = root.pGetNode(trueNodeStruct);
             System.out.println("me false = " + falseNode);
             System.out.println("me true = " + trueNode);
+            System.out.println(
+                "falseNode.equals(falseNodeStruct.node) = " +
+                falseNode.equals(falseNodeStruct.node)
+            );
+
+            // Test a struct with a bare node and verify that it has been
+            // wrapped.
+            BareNodeStruct bareNodeStruct = root.pMyNode();
+            FooNode bareNode = bareNodeStruct.bareNode;
+            System.out.println("root.pMyNode().bareNode = " + bareNode);
+
+            // Test passing this structure as a property parameter
+            Char aChar = bareNodeStruct.aChar;
+            Char otherChar = root.pGetChar(bareNodeStruct);
+            System.out.println(
+                "aChar.equals(otherChar) = " + aChar.equals(otherChar)
+            );
         }
 
         // Display the footer
