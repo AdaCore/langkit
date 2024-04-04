@@ -1,0 +1,289 @@
+===== Start the Java rewriting tests =====
+--- Rewriting context ---
+Asserting: Rewriting context is None
+Creating rewriting context
+Asserting: Rewriting context reference to analysis context
+Try: Creating an other rewriting context
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Handle (Context) must be null
+Asserting: Rewriting context is opened
+Closing the rewriting context
+Asserting: Rewriting context is closed
+
+Creating an other rewriting context
+Asserting: Old and new rewriting contexts are the same
+Applying the new rewriting context
+Asserting: Rewriting result is successful
+Asserting: Rewriting result has no diagnostics
+Asserting: Rewriting result unit is none
+Asserting: Other rewriting context is closed
+Free the apply result
+-------------------------
+
+--- Rewriting unit ---
+Creating analysis and rewriting units
+Asserting: Analysis unit reference to rewriting unit
+Asserting: Rewriting unit reference to analysis unit
+s2.txt rewriting unit unparsing:
+#####
+var a = 1
+var b = 2
+
+var c = 3
+var d = 4
+
+var e = 5
+var f = 6
+var g = 7
+
+#####
+Asserting: Fetched rewriting units count is 2
+Try: Creating a rewriting unit from a non-rewritable context
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Handle (Context (Unit)) should not be null
+----------------------
+
+--- Rewriting node ---
+Creating analysis and rewriting units
+
+Getting rewriting units root nodes
+Asserting: Rewriting root is not None
+Asserting: Rewriting node parsed node reference
+Asserting: Parsed node rewriting reference
+Asserting: Rewriting root kind is the same as root
+Asserting: Rewriting node context reference
+Asserting: Rewriting root is tied
+Try: Create a rewriting node from a non rewriting context
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Handle (Context (Node.Unit)) should not be null
+s1.txt rewriting root node image
+<DeclList s1.txt:1:1-3:15 (tied)>
+s1.txt rewriting root node unparsing
+#####
+var orig_1 = 9
+var orig_2 = 0
+var orig_3 = 1
+
+#####
+Asserting: Unit and root unparsing results are the same
+
+Getting the rewriting root children
+Root rewriting node children: [<Var s1.txt:1:1-1:15 (tied)>, <Var s1.txt:2:1-2:15 (tied)>, <Var s1.txt:3:1-3:15 (tied)>]
+Asserting: Children count is 3
+Asserting: Child parent is the root
+
+Navigating the root node children
+Root first child: <Var s1.txt:1:1-1:15 (tied)>
+Root last child: <Var s1.txt:3:1-3:15 (tied)>
+Asserting: Last child previous is the first child next
+Asserting: Last child next is None
+Asserting: First child previous is None
+
+Getting the name and expression of the first declaration
+  name: <Name "orig_1" s1.txt:1:5-1:11 (tied)>
+  expr: <Literal "9" s1.txt:1:14-1:15 (tied)>
+Try: Getting f_name child on the root list
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Decl.list does not have the Decl.f_name member
+Try: Getting f_expr child on a name node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Name does not have the Decl.f_expr member
+Asserting: First child of the name is None
+Asserting: Last child of the expr is None
+----------------------
+
+--- Rewriting node text getting/setting ---
+Creating analysis and rewriting units
+
+Getting the first declaration statement
+Original declaration statement: 'var orig_1 = 9'
+Asserting: Variable name is 'orig_1'
+Changing the variable name for 'hello'
+Asserting: Variable name has been changed
+New declaration statement: 'var hello = 9'
+New rewriting unit:
+#####
+var hello = 9
+var orig_2 = 0
+var orig_3 = 1
+
+#####
+-------------------------------------------
+
+--- Rewriting node creation ---
+Creating analysis and rewriting units
+
+Cloning the first declaration statement
+Source node: <Var s1.txt:1:1-1:15 (tied)>
+Cloned node: <Var s1.txt:1:1-1:15>
+Asserting: Clone result is not tied
+Asserting: Clone is different from the source
+
+Creating a declaration statement from scratch
+Created node: <FOO_VAR>
+Asserting: Created node is not tied
+Asserting: Created node parsed node is None
+Asserting: Created declaration name is None
+
+Creating a name and an integer literal
+Asserting: Create name is not tied
+Asserting: Created name kind is NAME
+Asserting: Create name text is 'first_name'
+Try: Creating a token node with an non-token kind 
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Expected a token node. Got FOO_VAR
+
+Creating a declaration statement with its children
+Created node: <FOO_VAR>
+Asserting: Created node is not tied
+Asserting: Created decl name is the previously created name
+Asserting: Created decl expression is the previously created one
+Try: Creating a node with already tied children
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = One_Child must not be tied to another rewriting context.
+Try: Creating a node with the invalid type
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Expected a token node. Got FOO_NAME
+
+Creating a declaration statement from a template
+Created node: <FOO_VAR>
+Asserting: Created node is a VAR
+Asserting: Created node is not tied
+Asserting: Created declaration name text is 'second_name'
+Asserting: Created declaration expression text is '2'
+Try: Creating from template with invalid argument count
+  Exception kind = TEMPLATE_ARGS_ERROR
+  Exception message = not enough arguments provided
+
+Creating the declaration list
+Created declaration list: <FOO_DECL_LIST>
+Asserting: Created list child count is 2
+Create declaration list unparse result:
+#####
+var first_name=1 var second_name=2
+#####
+-------------------------------
+
+--- Rewriting node modifications ---
+Creating analysis and rewriting units
+
+Replacing the first declaration name
+Asserting: First declaration name is 'orig_1'
+Asserting: First declaration name is tied
+Asserting: Current name node is the created one
+Asserting: First declaration name is now 'replaced'
+Asserting: Created name is now tied
+Asserting: Old name node is not tied anymore
+Try: Setting an already tied child
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Child must not be tied to another rewriting context.
+
+Replacing the first delaration name for the original one
+Asserting: Replacing name is now untied
+Asserting: Original name is now tied
+Asserting: First declaration name is now 'orig_1'
+Try: Replacing the name with an already tied node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = New_Node must not be tied to another rewriting context.
+Try: Replacing an untied node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Handle must be tied to an analysis unit.
+
+Declaration list original unparse:
+#####
+var orig_1 = 9
+var orig_2 = 0
+var orig_3 = 1
+
+#####
+
+Inserting a declaration at the beginning
+Declaration list unparse:
+#####
+var c1=1 var orig_1 = 9
+var orig_2 = 0
+var orig_3 = 1
+
+#####
+Asserting: Inserted node is now tied
+Asserting: First declaration is the inserted one
+Asserting: Children count is now 4
+Try: Inserting a first child in a non list node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Expected a list node. Got FOO_VAR
+Try: Inserting an already tied child node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = New_Child must not be tied to another rewriting context.
+
+Inserting a declartion at the end
+Declaration list unparse:
+#####
+var c1=1 var orig_1 = 9
+var orig_2 = 0
+var orig_3 = 1
+var c2=2
+#####
+Asserting: Inserted node is now tied
+Asserting: Last declaration is the inserted one
+Asserting: Children count is now 5
+Try: Inserting a last child in a non list node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Expected a list node. Got FOO_VAR
+Try: Inserting an already tied child node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = New_Child must not be tied to another rewriting context.
+
+Inserting a declaration before the 3rd
+Declaration list unparse:
+#####
+var c1=1 var orig_1 = 9
+var c3=3 var orig_2 = 0
+var orig_3 = 1
+var c2=2
+#####
+Asserting: Inserted node is now tied
+Asserting: 3rd declaration is the inserted one
+Asserting: Children count is now 6
+Try: Inserting a node before a non-list-parent node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Expected a list node. Got FOO_VAR
+Try: Inserting an already tied node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = New_Sibling must not be tied to another rewriting context.
+
+Inserting a declaration after the 4th
+Declaration list unparse:
+#####
+var c1=1 var orig_1 = 9
+var c3=3 var orig_2 = 0
+var c4=4 var orig_3 = 1
+var c2=2
+#####
+Asserting: Inserted node is now tied
+Asserting: 5th declaration is the inserted one
+Asserting: Children count is now 7
+Try: Inserting a node before a non-list-parent node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Expected a list node. Got FOO_VAR
+Try: Inserting an already tied node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = New_Sibling must not be tied to another rewriting context.
+
+Removing the 2nd child
+Declaration list unparse:
+#####
+var c1=1 var c3=3 var orig_2 = 0
+var c4=4 var orig_3 = 1
+var c2=2
+#####
+Asserting: Children count is now 6
+Try: Removing a node which is not in a list node
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Expected a list node. Got FOO_VAR
+Try: Removing a node which is not tied
+  Exception kind = PRECONDITION_FAILURE
+  Exception message = Handle.Parent should not be null
+------------------------------------
+
+===== End of the Java rewriting tests =====
+Done

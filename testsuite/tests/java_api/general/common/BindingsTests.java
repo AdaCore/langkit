@@ -239,7 +239,7 @@ public final class BindingsTests {
 
             System.out.println("Unit = " + unit.toString());
             System.out.println("Unit root = " + root.toString());
-            System.out.println("Unit root kind = " + root.getKindName());
+            System.out.println("Unit root kind = " + root.getClassName());
             System.out.println(
                 "Unit root children count = " + root.getChildrenCount()
             );
@@ -250,7 +250,7 @@ public final class BindingsTests {
                 "Unit root tree dump = " + root.dumpTree()
             );
             System.out.println(
-                "Unit root is a list node = " + root.isListType()
+                "Unit root is a list node = " + root.isListNode()
             );
             System.out.println(
                 "Unit root is a token node = " + root.isTokenNode()

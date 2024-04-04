@@ -81,7 +81,7 @@ Unit root tree dump = Sequence foo.txt:1:1-1:50>
 |  Example foo.txt:1:6-1:13>
 |item_2:
 |  Var foo.txt:1:14-1:37>
-|  |fArg:
+|  |f_arg:
 |  |  Sequence foo.txt:1:19-1:36>
 |  |  |item_0:
 |  |  |  NullNode foo.txt:1:19-1:23>
@@ -101,7 +101,7 @@ Unit root text = null example var (null example null) example null
 Root "p_all_items" = [<NullNode foo.txt:1:1-1:5>, <Example foo.txt:1:6-1:13>, <Var foo.txt:1:14-1:37>, <Example foo.txt:1:38-1:45>, <NullNode foo.txt:1:46-1:50>]
 Var (3rd child) = <Var foo.txt:1:14-1:37>
 Var image = <Var foo.txt:1:14-1:37>
-Var fields = [fArg]
+Var fields = [f_arg]
 Var arg = <Sequence foo.txt:1:19-1:36>
 Var content = [<NullNode foo.txt:1:19-1:23>, <Example foo.txt:1:24-1:31>, <NullNode foo.txt:1:32-1:36>]
 Node equality = true
