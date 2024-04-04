@@ -4047,7 +4047,7 @@ public final class ${ctx.lib_name.camel} {
          *
          * @return The diagnostics of the unit.
          */
-        public List<Diagnostic> getDiagnostics() {
+        public Diagnostic[] getDiagnostics() {
             final int diagnosticCount;
 
             if(ImageInfo.inImageCode()) {
@@ -4060,7 +4060,7 @@ public final class ${ctx.lib_name.camel} {
                 );
             }
 
-            final List<Diagnostic> res = new ArrayList<>(diagnosticCount);
+            Diagnostic[] res = new Diagnostic[diagnosticCount];
 
             if(ImageInfo.inImageCode()) {
                 final DiagnosticNative diagnosticNative = StackValue.get(
@@ -4072,13 +4072,11 @@ public final class ${ctx.lib_name.camel} {
                         i,
                         diagnosticNative
                     );
-                    res.add(Diagnostic.wrap(diagnosticNative));
+                    res[i] = Diagnostic.wrap(diagnosticNative);
                 }
             } else {
                 for(int i = 0 ; i < diagnosticCount ; i++) {
-                    res.add(
-                        JNI_LIB.${nat("unit_diagnostic")}(this, i)
-                    );
+                    res[i] = JNI_LIB.${nat("unit_diagnostic")}(this, i);
                 }
             }
 

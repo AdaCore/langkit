@@ -80,7 +80,7 @@ public final class BindingsTests {
 
         // Prepare the working variables
         AnalysisUnit unit;
-        List<Diagnostic> diags;
+        Diagnostic[] diags;
 
         try(
             AnalysisContext context = AnalysisContext.create()
