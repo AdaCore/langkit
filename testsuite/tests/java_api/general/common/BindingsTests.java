@@ -244,7 +244,9 @@ public final class BindingsTests {
             System.out.println(
                 "Unit root children count = " + root.getChildrenCount()
             );
-            System.out.println( "Unit root children = " + Arrays.toString(root.children()));
+            System.out.println(
+                "Unit root children = " + Arrays.toString(root.children())
+            );
             System.out.println(
                 "Unit root tree dump = " + root.dumpTree()
             );
@@ -258,9 +260,13 @@ public final class BindingsTests {
             System.out.println("Unit root text = " + root.getText());
             Sequence sequence = (Sequence) root;
             FooNode[] items = sequence.pAllItems();
-            System.out.println("Root \"p_all_items\" = " + Arrays.toString(items));
+            System.out.println(
+                "Root \"p_all_items\" = " + Arrays.toString(items)
+            );
             Example[] examples = sequence.pExampleItems();
-            System.out.println("Root \"p_example_items\" = " + Arrays.toString(examples));
+            System.out.println(
+                "Root \"p_example_items\" = " + Arrays.toString(examples)
+            );
             Var var = (Var) root.getChild(2);
             System.out.println("Var (3rd child) = " + var.toString());
             System.out.println("Var image = " + var.getImage());

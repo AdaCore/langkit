@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
-from langkit.compiled_types import ArrayType, BaseField, CompiledType, T
+from langkit.compiled_types import BaseField, CompiledType, T
 from langkit.language_api import AbstractAPISettings
 from langkit.names import Name
 from langkit.utils import dispatch_on_type
@@ -487,7 +487,10 @@ class JavaAPISettings(AbstractAPISettings):
                     if ast_wrapping else
                     "Entity"
             ),
-            (ct.ArrayType, lambda t: f"{self.wrapping_type(t.element_type)}[]"),
+            (
+                ct.ArrayType, lambda t:
+                    f"{self.wrapping_type(t.element_type)}[]"
+            ),
             (object, lambda t: t.api_name.camel),
         ])
 
@@ -554,7 +557,9 @@ class JavaAPISettings(AbstractAPISettings):
 
     # ----- Native-Image methods -----
 
-    def ni_type(self, the_type: CompiledType, ast_wrapping: bool = True) -> str:
+    def ni_type(self,
+                the_type: CompiledType,
+                ast_wrapping: bool = True) -> str:
         """
         Get the Java type that represents the given type for the Graal C API.
 
@@ -731,7 +736,8 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 ct.ArrayType, lambda t:
-                    f"{self.wrapper_class(t)}.unwrap({source}, currentContext);"
+                    f"{self.wrapper_class(t)}"
+                    f".unwrap({source}, currentContext);"
                     if t.element_type.is_symbol_type else
                     f"{self.wrapper_class(t)}.unwrap({source});"
             ),
@@ -822,7 +828,8 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 ct.ArrayType, lambda t:
-                    f"{self.wrapper_class(t)}.unwrap({source}, {pointer}, currentContext);"
+                    f"{self.wrapper_class(t)}"
+                    f".unwrap({source}, {pointer}, currentContext);"
                     if t.element_type.is_symbol_type else
                     f"{self.wrapper_class(t)}.unwrap({source}, {pointer});"
             ),
@@ -1031,7 +1038,10 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Int, lambda _: "I"),
             (T.BigInt, lambda _: "Ljava/math/BigInteger;"),
             (T.String, lambda _: "Ljava/lang/String;"),
-            (ct.ArrayType, lambda t: f"[L{base_class}${self.wrapping_type(t.element_type)};"),
+            (
+                ct.ArrayType, lambda t:
+                    f"[L{base_class}${self.wrapping_type(t.element_type)};"
+            ),
             (
                 object, lambda t: (
                     f"L{base_class}$"
@@ -1106,7 +1116,13 @@ class JavaAPISettings(AbstractAPISettings):
                     if ast_wrapping else
                     f"Entity_wrap(env, {expr})"
             ),
-            (object, lambda t: f"{self.wrapper_class(t, ast_wrapping=ast_wrapping)}_wrap(env, {expr})"),
+            (
+                object, lambda t:
+                    (
+                        f"{self.wrapper_class(t, ast_wrapping=ast_wrapping)}"
+                        f"_wrap(env, {expr})"
+                    )
+            ),
         ])
 
     def jni_unwrap(self,
@@ -1143,7 +1159,8 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 ct.ArrayType, lambda t:
-                    f"{self.wrapper_class(t)}_unwrap(env, {expr}, context_native);"
+                    f"{self.wrapper_class(t)}"
+                    f"_unwrap(env, {expr}, context_native);"
                     if t.element_type.is_symbol_type else
                     f"{self.wrapper_class(t)}_unwrap(env, {expr});"
             ),
@@ -1161,7 +1178,10 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 object, lambda t:
-                    f"{self.wrapper_class(t, ast_wrapping=ast_wrapping)}_unwrap(env, {expr});"
+                    (
+                        f"{self.wrapper_class(t, ast_wrapping=ast_wrapping)}"
+                        f"_unwrap(env, {expr});"
+                    )
             ),
         ])
 

@@ -199,7 +199,8 @@
          * @return The content unwrapped.
          */
         private static ${elem_java_unw_type}[] jniUnwrap(${java_type} content) {
-            final ${elem_java_unw_type}[] res = new ${elem_java_unw_type}[content.length];
+            final ${elem_java_unw_type}[] res =
+                new ${elem_java_unw_type}[content.length];
             for(int i = 0 ; i < res.length ; i++) {
                 res[i] = ${api.java_jni_unwrap(
                     cls.element_type,

@@ -331,7 +331,8 @@
             arg_list = []
             for arg in field.arguments:
                 arg_list.append(
-                    f"{api.ni_type(arg.public_type, ast_wrapping=False)} {arg.name.lower}"
+                    f"{api.ni_type(arg.public_type, ast_wrapping=False)} "
+                    f"{arg.name.lower}"
                 )
             %>
 
