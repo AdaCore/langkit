@@ -16,7 +16,7 @@ a: Int=2
 # no_such_file.json
     cannot read no_such_file.json
 # invalid_syntax.json
-    2:2: empty stream
+    1:2: string expected
 # missing_node_configs.json
     missing "node_configs" key
 # invalid_type_name.json
