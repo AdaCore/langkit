@@ -171,27 +171,6 @@
         );
     }
 
-    /** The structure for reswriting apply results */
-    @CContext(LibDirectives.class)
-    @CStruct("${rewriting_apply_result_type}")
-    public interface RewritingApplyResultNative extends PointerBase {
-        @CField("success") public int get_success();
-        @CField("success") public void set_success(int success);
-
-        @CField("unit") public AnalysisUnitNative get_unit();
-        @CField("unit") public void set_unit(AnalysisUnitNative unit);
-
-        @CField("diagnostics_count") public int get_diagnostics_count();
-        @CField("diagnostics_count") public void set_diagnostics_count(
-            int diagnostics_count
-        );
-
-        @CField("diagnostics") public DiagnosticNative get_diagnostics();
-        @CField("diagnostics") public void set_diagnostics(
-            DiagnosticNative diagnostics
-        );
-    }
-
     /** The file reader is just a pointer */
     public interface FileReaderNative extends Pointer {}
 
@@ -268,6 +247,28 @@
         @RawField public long version_number();
     }
 
+    % if ctx.generate_unparser:
+    /** The structure for reswriting apply results */
+    @CContext(LibDirectives.class)
+    @CStruct("${rewriting_apply_result_type}")
+    public interface RewritingApplyResultNative extends PointerBase {
+        @CField("success") public int get_success();
+        @CField("success") public void set_success(int success);
+
+        @CField("unit") public AnalysisUnitNative get_unit();
+        @CField("unit") public void set_unit(AnalysisUnitNative unit);
+
+        @CField("diagnostics_count") public int get_diagnostics_count();
+        @CField("diagnostics_count") public void set_diagnostics_count(
+            int diagnostics_count
+        );
+
+        @CField("diagnostics") public DiagnosticNative get_diagnostics();
+        @CField("diagnostics") public void set_diagnostics(
+            DiagnosticNative diagnostics
+        );
+    }
+
     /** The rewriting context type is just a pointer */
     public interface RewritingContextNative extends Pointer {}
 
@@ -276,6 +277,7 @@
 
     /** The rewriting node native type is just a pointer */
     public interface RewritingNodeNative extends Pointer {}
+    % endif
 
     // ===== Generated structures =====
 
@@ -442,6 +444,7 @@
             TextNative text
         );
 
+        % if ctx.generate_unparser:
         // ----- Rewriting result functions -----
 
         /** Free a rewriting apply result */
@@ -450,6 +453,7 @@
         public static native void ${nat("rewriting_free_apply_result")}(
             RewritingApplyResultNative apply_result
         );
+        % endif
 
         // ----- File reader functions -----
 
@@ -683,6 +687,7 @@
             DiagnosticNative diagnostic
         );
 
+        % if ctx.generate_unparser:
         // ----- Rewriting context functions -----
 
         /** Start a new rewriting session on the given analysis context */
@@ -998,6 +1003,7 @@
             RewritingNodeNative rewriting_node,
             TextNative text
         );
+        % endif
 
         // ----- Array functions -----
 

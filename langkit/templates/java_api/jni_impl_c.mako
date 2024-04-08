@@ -157,18 +157,6 @@ jmethodID Diagnostic_constructor_id = NULL;
 jfieldID Diagnostic_sloc_range_field_id = NULL;
 jfieldID Diagnostic_text_field_id = NULL;
 
-${rewriting_apply_result_type} RewritingApplyResult_new_value();
-jobject RewritingApplyResult_wrap(JNIEnv *, ${rewriting_apply_result_type});
-${rewriting_apply_result_type} RewritingApplyResult_unwrap(JNIEnv *, jobject);
-
-jclass RewritingApplyResult_class_ref = NULL;
-jmethodID RewritingApplyResult_contructor_id = NULL;
-jmethodID RewritingApplyResult_success_id = NULL;
-jfieldID RewritingApplyResult_success_field_id = NULL;
-jfieldID RewritingApplyResult_unit_field_id = NULL;
-jfieldID RewritingApplyResult_diagnostics_count_field_id = NULL;
-jfieldID RewritingApplyResult_diagnostics_reference_field_id = NULL;
-
 ${file_reader_type} FileReader_new_value();
 jobject FileReader_wrap(JNIEnv *, ${file_reader_type});
 ${file_reader_type} FileReader_unwrap(JNIEnv *, jobject);
@@ -232,6 +220,19 @@ jclass AnalysisUnit_class_ref = NULL;
 jmethodID AnalysisUnit_constructor_id = NULL;
 jfieldID AnalysisUnit_reference_field_id = NULL;
 
+% if ctx.generate_unparser:
+${rewriting_apply_result_type} RewritingApplyResult_new_value();
+jobject RewritingApplyResult_wrap(JNIEnv *, ${rewriting_apply_result_type});
+${rewriting_apply_result_type} RewritingApplyResult_unwrap(JNIEnv *, jobject);
+
+jclass RewritingApplyResult_class_ref = NULL;
+jmethodID RewritingApplyResult_contructor_id = NULL;
+jmethodID RewritingApplyResult_success_id = NULL;
+jfieldID RewritingApplyResult_success_field_id = NULL;
+jfieldID RewritingApplyResult_unit_field_id = NULL;
+jfieldID RewritingApplyResult_diagnostics_count_field_id = NULL;
+jfieldID RewritingApplyResult_diagnostics_reference_field_id = NULL;
+
 ${rewriting_handle_type} RewritingContext_new_value();
 jobject RewritingContext_wrap(JNIEnv *, ${rewriting_handle_type});
 ${rewriting_handle_type} RewritingContext_unwrap(JNIEnv *, jobject);
@@ -255,6 +256,7 @@ ${node_rewriting_handle_type} RewritingNode_unwrap(JNIEnv *, jobject);
 jclass RewritingNode_class_ref = NULL;
 jmethodID RewritingNode_constructor_id = NULL;
 jfieldID RewritingNode_reference_field_id = NULL;
+% endif
 
 % for struct_type in ctx.struct_types:
     % if api.should_emit_struct(struct_type):
@@ -572,53 +574,6 @@ ${api.jni_func_sig("initialize", "void")}(
         "L${sig_base}$Text;"
     );
 
-    RewritingApplyResult_class_ref = (jclass) (*env)->NewGlobalRef(
-        env,
-        (*env)->FindClass(env, "${sig_base}$RewritingApplyResult")
-    );
-
-    RewritingApplyResult_contructor_id = (*env)->GetMethodID(
-        env,
-        RewritingApplyResult_class_ref,
-        "<init>",
-        "(ZL${sig_base}$AnalysisUnit;IL${ptr_sig};)V"
-    );
-
-    RewritingApplyResult_success_id = (*env)->GetStaticMethodID(
-        env,
-        RewritingApplyResult_class_ref,
-        "success",
-        "()L${sig_base}$RewritingApplyResult;"
-    );
-
-    RewritingApplyResult_success_field_id = (*env)->GetFieldID(
-        env,
-        RewritingApplyResult_class_ref,
-        "success",
-        "Z"
-    );
-
-    RewritingApplyResult_unit_field_id = (*env)->GetFieldID(
-        env,
-        RewritingApplyResult_class_ref,
-        "unit",
-        "L${sig_base}$AnalysisUnit;"
-    );
-
-    RewritingApplyResult_diagnostics_count_field_id = (*env)->GetFieldID(
-        env,
-        RewritingApplyResult_class_ref,
-        "diagnosticsCount",
-        "I"
-    );
-
-    RewritingApplyResult_diagnostics_reference_field_id = (*env)->GetFieldID(
-        env,
-        RewritingApplyResult_class_ref,
-        "diagnosticsReference",
-        "L${ptr_sig};"
-    );
-
     FileReader_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(env, "${sig_base}$FileReader")
@@ -827,6 +782,54 @@ ${api.jni_func_sig("initialize", "void")}(
         "L${ptr_sig};"
     );
 
+    % if ctx.generate_unparser:
+    RewritingApplyResult_class_ref = (jclass) (*env)->NewGlobalRef(
+        env,
+        (*env)->FindClass(env, "${sig_base}$RewritingApplyResult")
+    );
+
+    RewritingApplyResult_contructor_id = (*env)->GetMethodID(
+        env,
+        RewritingApplyResult_class_ref,
+        "<init>",
+        "(ZL${sig_base}$AnalysisUnit;IL${ptr_sig};)V"
+    );
+
+    RewritingApplyResult_success_id = (*env)->GetStaticMethodID(
+        env,
+        RewritingApplyResult_class_ref,
+        "success",
+        "()L${sig_base}$RewritingApplyResult;"
+    );
+
+    RewritingApplyResult_success_field_id = (*env)->GetFieldID(
+        env,
+        RewritingApplyResult_class_ref,
+        "success",
+        "Z"
+    );
+
+    RewritingApplyResult_unit_field_id = (*env)->GetFieldID(
+        env,
+        RewritingApplyResult_class_ref,
+        "unit",
+        "L${sig_base}$AnalysisUnit;"
+    );
+
+    RewritingApplyResult_diagnostics_count_field_id = (*env)->GetFieldID(
+        env,
+        RewritingApplyResult_class_ref,
+        "diagnosticsCount",
+        "I"
+    );
+
+    RewritingApplyResult_diagnostics_reference_field_id = (*env)->GetFieldID(
+        env,
+        RewritingApplyResult_class_ref,
+        "diagnosticsReference",
+        "L${ptr_sig};"
+    );
+
     RewritingContext_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
         (*env)->FindClass(env, "${sig_base}$RewritingContext")
@@ -883,6 +886,7 @@ ${api.jni_func_sig("initialize", "void")}(
         "reference",
         "L${ptr_sig};"
     );
+    % endif
 
 % for struct_type in ctx.struct_types:
     % if api.should_emit_struct(struct_type):
@@ -1075,6 +1079,7 @@ jobject get_node_entity(JNIEnv *env, jobject node) {
     );
 }
 
+% if ctx.generate_unparser:
 // Function to get a rewriting node array from a Java one
 ${node_rewriting_handle_type} *rewriting_nodes_to_native(
     JNIEnv *env,
@@ -1097,6 +1102,7 @@ ${node_rewriting_handle_type} *rewriting_nodes_to_native(
     }
     return res;
 }
+% endif
 
 // ==========
 // Language specific extensions
@@ -1816,6 +1822,7 @@ ${diagnostic_type} Diagnostic_unwrap(
     return res;
 }
 
+% if ctx.generate_unparser:
 // ==========
 // Rewriting apply result functions
 // ==========
@@ -1932,6 +1939,7 @@ ${api.jni_func_sig("rewriting_free_apply_result", "void")}(
         );
     ${nat("rewriting_free_apply_result")}(&result_native);
 }
+% endif
 
 // ==========
 // File reader functions
@@ -2823,6 +2831,7 @@ ${api.jni_func_sig("unit_diagnostic", "jobject")}(
     return Diagnostic_wrap(env, res);
 }
 
+% if ctx.generate_unparser:
 // ==========
 // Rewriting context functions
 // ==========
@@ -3552,6 +3561,7 @@ ${api.jni_func_sig("rewriting_set_text", "void")}(
         &text_native
     );
 }
+% endif
 
 // ==========
 // Generated structure functions

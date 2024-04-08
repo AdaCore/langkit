@@ -66,6 +66,7 @@
             Text text
         );
 
+        % if ctx.generate_unparser:
         // ----- Rewriting apply result functions -----
 
         /** Get the diagnostics from the rewriting apply result */
@@ -81,6 +82,7 @@
         public static native void ${nat("rewriting_free_apply_result")}(
             RewritingApplyResult applyResult
         );
+        % endif
 
         // ----- File reader functions -----
 
@@ -259,6 +261,7 @@
             int n
         );
 
+        % if ctx.generate_unparser:
         // ----- Rewriting context functions -----
 
         /** Start a rewriting session and return the new context */
@@ -521,6 +524,7 @@
             RewritingNode rewritingNode,
             Text text
         );
+        % endif
 
         // ----- Node functions -----
 
