@@ -267,6 +267,7 @@ typedef enum {
    % endfor
 } ${introspection_member_ref_type};
 
+% if ctx.generate_unparser:
 /*
  * Types for tree rewriting
  */
@@ -287,6 +288,7 @@ typedef struct {
     int diagnostics_count;
     ${diagnostic_type} *diagnostics;
 } ${rewriting_apply_result_type};
+% endif
 
 /* All the functions below can potentially raise an exception, so
    ${capi.get_name("get_last_exception")} must be checked after them even
@@ -679,6 +681,7 @@ extern ${bool_type}
 ${capi.get_name('token_is_equivalent')}(${token_type} *left,
                                         ${token_type} *right);
 
+% if ctx.generate_unparser:
 /*
  * Tree rewriting
  */
@@ -960,6 +963,7 @@ ${capi.get_name('rewriting_create_from_template')}(
     int count,
     ${grammar_rule_type} rule
 );
+% endif
 
 ${exts.include_extension(ctx.ext('analysis', 'c_api', 'header'))}
 

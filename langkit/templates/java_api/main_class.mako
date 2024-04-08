@@ -368,8 +368,9 @@ public final class ${ctx.lib_name.camel} {
             throw exc;
     }
 
+    % if ctx.generate_unparser:
     /**
-     * Create a native array from the given rewriting nodes arrray.
+     * Create a native array from the given rewriting nodes array.
      * The returned pointer must be freed using UnmanagedMemory#free methods.
      */
     private static WordPointer rewritingNodesToNative(
@@ -383,6 +384,7 @@ public final class ${ctx.lib_name.camel} {
         }
         return res;
     }
+    % endif
 
     // ==========
     // Util interfaces
@@ -2249,6 +2251,7 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
+    % if ctx.generate_unparser:
     ${java_doc('langkit.rewriting.apply_result_type', 4)}
     public static final class RewritingApplyResult implements AutoCloseable {
 
@@ -2398,6 +2401,7 @@ public final class ${ctx.lib_name.camel} {
         }
 
     }
+    % endif
 
     ${java_doc('langkit.file_reader_type', 4)}
     public static final class FileReader implements AutoCloseable {
@@ -3279,11 +3283,13 @@ public final class ${ctx.lib_name.camel} {
         /** The event handler associated with the context. */
         private EventHandler eventHandler;
 
+        % if ctx.generate_unparser:
         /**
          * The rewriting context associated with this analysis context.
          * It can be the none value.
          */
         RewritingContext rewritingContext = RewritingContext.NONE;
+        % endif
 
         // ----- Constructors -----
 
@@ -3522,6 +3528,7 @@ public final class ${ctx.lib_name.camel} {
             return this.eventHandler;
         }
 
+        % if ctx.generate_unparser:
         /**
          * Get the currently open rewriting context associated to this
          * analysis context. The None rewriting context is returned if the
@@ -3531,6 +3538,7 @@ public final class ${ctx.lib_name.camel} {
         public RewritingContext getRewritingContext() {
             return this.rewritingContext;
         }
+        % endif
 
         // ----- Class methods -----
 
@@ -3741,6 +3749,7 @@ public final class ${ctx.lib_name.camel} {
         }
         % endif
 
+        % if ctx.generate_unparser:
         ${java_doc('langkit.rewriting.start_rewriting', 8)}
         public RewritingContext startRewriting() {
             final RewritingContext res;
@@ -3759,6 +3768,7 @@ public final class ${ctx.lib_name.camel} {
             this.rewritingContext = res;
             return this.rewritingContext;
         }
+        % endif
 
         /** @see java.lang.AutoCloseable#close() */
         @Override
@@ -4075,6 +4085,7 @@ public final class ${ctx.lib_name.camel} {
             return res;
         }
 
+        % if ctx.generate_unparser:
         ${java_doc('langkit.rewriting.unit_handle', 8)}
         public RewritingUnit getRewritingUnit() {
             final RewritingUnit res;
@@ -4092,6 +4103,7 @@ public final class ${ctx.lib_name.camel} {
             checkException();
             return res;
         }
+        % endif
 
         // ----- Override methods -----
 
@@ -4110,12 +4122,13 @@ public final class ${ctx.lib_name.camel} {
 
     }
 
+    % if ctx.generate_unparser:
+    ## Generate this part only if the unparser is required
     ${java_doc('langkit.rewriting.rewriting_handle_type', 4)}
     public static final class RewritingContext implements AutoCloseable {
 
         // ----- Class attributes -----
 
-// TODO: Remove this NONE singleton for libadalang/langkit-query-language#197
         /** Singleton representing the none rewriting context */
         public static final RewritingContext NONE = new RewritingContext(
             PointerWrapper.nullPointer()
@@ -4435,7 +4448,6 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Class methods -----
 
-// TODO: Remove this NONE singleton for libadalang/langkit-query-language#197
         /** Singleton representing the none value for the rewriting unit. */
         public static final RewritingUnit NONE = new RewritingUnit(
             PointerWrapper.nullPointer()
@@ -4585,7 +4597,6 @@ public final class ${ctx.lib_name.camel} {
 
         // ----- Class attributes -----
 
-// TODO: Remove this NONE singleton for libadalang/langkit-query-language#197
         /** Singleton representing the none value for rewriting node. */
         public static final RewritingNode NONE = new RewritingNode(
             PointerWrapper.nullPointer()
@@ -5101,6 +5112,8 @@ public final class ${ctx.lib_name.camel} {
         }
 
     }
+    ## End of the rewriting API part
+    % endif
 
     // ===== Generated structure wrapping classes =====
 
@@ -5284,8 +5297,10 @@ public final class ${ctx.lib_name.camel} {
         /** The entity of the node. */
         public final Entity entity;
 
+        % if ctx.generate_unparser:
         /** Cache for the associated rewriting node. */
         protected RewritingNode rewritingNode;
+        % endif
 
         /** The analysis unit that owns the node. */
         protected AnalysisUnit unit;
@@ -5598,6 +5613,7 @@ public final class ${ctx.lib_name.camel} {
 
         }
 
+        % if ctx.generate_unparser:
         ${java_doc('langkit.rewriting.node_handle', 8)}
         public RewritingNode getRewritingNode() {
             if(this.rewritingNode == null) {
@@ -5620,6 +5636,7 @@ public final class ${ctx.lib_name.camel} {
             }
             return this.rewritingNode;
         }
+        % endif
 
         // ----- Dumping methods -----
 
