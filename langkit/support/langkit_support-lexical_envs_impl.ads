@@ -78,6 +78,9 @@ generic
    with function Is_Rebindable (Node : Node_Type) return Boolean is <>;
    --  Return whether a lexical environment whose node is Node can be rebound
 
+   with function Self_Env (Node : Node_Type) return Lexical_Env is <>;
+   --  Return the possibly-null lexical environment attached to this node
+
    with function Node_Text_Image
      (Node  : Node_Type; Short : Boolean := True) return Text_Type;
 

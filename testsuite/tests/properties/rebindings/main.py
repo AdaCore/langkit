@@ -101,5 +101,18 @@ print()
 shed_test = concat_test.p_shed_rebindings(old_d.f_inner[0])
 print_rebindings(shed_test)
 
+# Shed rebindings from old_b's env. The shedding mechanism used to only remove
+# entries from the top of the stack until finding a matching rebindable env,
+# without touching anything behind it, meaning in this case the rebindings
+# returned would still contain the entries for old_c and old_d. Now, all
+# entries are considered for shedding, and since old_c and old_d are not
+# deemed relevant from neither old_b nor new_b, they will be removed.
+print()
+print("After shedding rebindings from old_b's env:")
+print("-" * 50)
+print()
+shed_test = concat_test.p_shed_rebindings(old_b)
+print_rebindings(shed_test)
+
 
 print('main.py: Done.')
