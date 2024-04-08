@@ -160,6 +160,12 @@ begin
    Check ("cmd_ifbreak.json");
    Check ("cmd_ifempty.json", "def f(): Int {i;}");
    Check ("cmd_ifempty.json", "def f(i: Int): Int {i;}");
+   Check ("cmd_ifkind.json", "var i: Int = 2+2;");
+   Check ("cmd_ifkind.json", "var i: Int = 2+j;");
+   Check ("cmd_ifkind2.json", "var i: Int = 2+j;");
+   Check ("cmd_ifkind3.json", "var i: Int = 2+j;");
+   Check ("cmd_ifkind4.json", "var v:Int=f(1);");
+   Check ("cmd_ifkind5.json", "var v:Int=f(1);");
    Check ("cmd_indent.json");
    Check ("cmd_line.json");
    Check ("cmd_list.json");
