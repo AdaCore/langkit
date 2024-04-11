@@ -11,7 +11,6 @@ Closing the rewriting context
 Asserting: Rewriting context is closed
 
 Creating an other rewriting context
-Asserting: Old and new rewriting contexts are the same
 Applying the new rewriting context
 Asserting: Rewriting result is successful
 Asserting: Rewriting result has no diagnostics

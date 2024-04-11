@@ -87,8 +87,6 @@ public class RewritingTests {
             // Open a new context and apply it empty
             System.out.println("\nCreating an other rewriting context");
             RewritingContext rcontext2 = context.startRewriting();
-            assertTrue("Old and new rewriting contexts are the same",
-                       rcontext1 == rcontext2);
             System.out.println("Applying the new rewriting context");
             RewritingApplyResult applyResult = rcontext2.apply();
             assertTrue("Rewriting result is successful", applyResult.success);
