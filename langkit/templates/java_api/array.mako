@@ -32,7 +32,7 @@
          *
          * @param content The unwrapped JNI content.
          */
-        private static ${java_type} jniCreate(
+        private static ${java_type} jniWrap(
             final ${elem_java_unw_type}[] jniContent
         ) {
             final ${java_type} content =
@@ -42,18 +42,6 @@
                     ${api.java_jni_wrap(cls.element_type, "jniContent[i]")};
             }
             return content;
-        }
-
-        /**
-         * Create a sized array.
-         *
-         * @param size The size of the array you want to create.
-         * @return The newly created array.
-         */
-        public static ${java_type} create(
-            final int size
-        ) {
-            return new ${elem_java_type}[size];
         }
 
         // ----- Graal C API methods -----
@@ -286,7 +274,7 @@ ${c_type} ${wrapper_type}_unwrap(
 void ${wrapper_type}_release(${c_type});
 
 jclass ${wrapper_type}_class_ref = NULL;
-jmethodID ${wrapper_type}_create_method_id = NULL;
+jmethodID ${wrapper_type}_wrap_method_id = NULL;
 jmethodID ${wrapper_type}_unwrap_method_id = NULL;
 </%def>
 
@@ -312,10 +300,10 @@ jmethodID ${wrapper_type}_unwrap_method_id = NULL;
         (*env)->FindClass(env, "${sig}")
     );
 
-    ${wrapper_type}_create_method_id = (*env)->GetStaticMethodID(
+    ${wrapper_type}_wrap_method_id = (*env)->GetStaticMethodID(
         env,
         ${wrapper_type}_class_ref,
-        "jniCreate",
+        "jniWrap",
         "([${elem_unw_sig})[${elem_java_type_sig}"
     );
 
@@ -379,7 +367,7 @@ jobject ${wrapper_type}_wrap(
     return (*env)->CallStaticObjectMethod(
         env,
         ${wrapper_type}_class_ref,
-        ${wrapper_type}_create_method_id,
+        ${wrapper_type}_wrap_method_id,
         array_content
     );
 }
