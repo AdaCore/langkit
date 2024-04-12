@@ -117,6 +117,14 @@ testcases = (
         # Header comment
         #
     ''', []),
+    Testcase('comment_mako_0.py', '''
+        ## This is multi line
+        ## Mako comment.
+    ''', []),
+    Testcase('comment_mako_1.py', '''
+        ## This is multi line
+        ## Mako comment
+    ''', [(2, 0, 'Multi-line comment must have a final period')]),
 
     #
     # Packages sorting testing
@@ -447,6 +455,34 @@ testcases = (
             Documenting some :ref:ada:`function <foo>`.
             """
     ''', []),
+    Testcase('docstring_multi_20.py', '''
+        def foo():
+            """
+            Documenting some function.
+
+            # Title 1
+
+            Foo.
+
+            # Title 2
+
+            Bar.
+            """
+    ''', []),
+    Testcase('docstring_multi_21.py', '''
+        def foo():
+            """
+            Documenting some function.
+
+            # Title 1
+
+            Foo
+
+            # Title 2
+
+            Bar.
+            """
+    ''', [(7, 0, 'Docstring sentences must end with periods')]),
 
     #
     # "from __future__ testing

@@ -308,7 +308,8 @@ def check_text(
 
         if (line.startswith(':type')
                 or line.startswith(':rtype:')
-                or line.startswith('.. code')):
+                or line.startswith('.. code')
+                or (not is_comment and line.startswith('#'))):
             s.end_block(False)
             s.is_sphinx = True
         elif line.startswith(':param'):
