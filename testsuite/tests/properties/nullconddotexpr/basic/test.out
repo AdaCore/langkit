@@ -4,7 +4,7 @@ p_field_1(<n1>) = None
 p_field_1(<n1.n2>) = <n1>
 p_field_1(<n1.n2.n3>) = <n1.n2>
 
-p_field_2(None) = <PropertyError: main.txt:1:1-1:9: dereferencing a null access
+p_field_2(None) = None
 p_field_2(<n1>) = <PropertyError: main.txt:1:1-1:9: dereferencing a null access
 p_field_2(<n1.n2>) = None
 p_field_2(<n1.n2.n3>) = <n1>
@@ -24,7 +24,7 @@ p_call_1(<n1>) = None
 p_call_1(<n1.n2>) = <n1>
 p_call_1(<n1.n2.n3>) = <n1.n2>
 
-p_call_2(None) = <PropertyError: main.txt:1:1-1:9: dereferencing a null access
+p_call_2(None) = None
 p_call_2(<n1>) = <PropertyError: main.txt:1:1-1:9: dereferencing a null access
 p_call_2(<n1.n2>) = None
 p_call_2(<n1.n2.n3>) = <n1>

@@ -1095,32 +1095,50 @@ def emit_expr(expr, **ctx):
 
         if expr.var_expr.source_name is None:
             assert expr.underscore_then
+
+            # Get the the deepest prefix expression we can find in the "then"
+            # part (the "then" variable excluded), or the "then" part itself if
+            # it has no direct prefix child.
+            #
+            # Stop at "match" or "is_a" expressions, which will not use dot
+            # notation in Lkt.
+            deepest_prefix = expr.then_expr
+            while not isinstance(deepest_prefix, (Match, IsA)):
+                if (
+                    isinstance(deepest_prefix, Then)
+                    and deepest_prefix.underscore_then
+                ):
+                    deepest_prefix = deepest_prefix.expr
+
+                else:
+                    prefix_attr_name = deepest_prefix.__dict__.get(
+                        "_prefix_attr_name"
+                    )
+                    if prefix_attr_name is None:
+                        break
+                    next_prefix = getattr(deepest_prefix, prefix_attr_name)
+                    if next_prefix is expr.var_expr:
+                        break
+                    deepest_prefix = next_prefix
+
             # Match is like a function call in the Python DSL, but is a regular
             # expression in the new syntax, so we don't want to use the ?
             # syntax on it. Likewise for IsA.
-            if not isinstance(expr.then_expr, (Match, IsA)):
+            if not isinstance(deepest_prefix, (Match, IsA)):
                 # If the "then" expression also implies a "?", do not emit it
                 # twice. Since casting a null node always works, it is
                 # pointless to add a "?" before a cast (and X?.as[T] is not
                 # parsed as a cast expression anyway).
-
-                def leftmost_null_ok(expr):
-                    if expr_is_a(expr, 'at') or isinstance(expr, Cast):
-                        return True
-                    elif isinstance(expr, FieldAccess):
-                        return leftmost_null_ok(expr.receiver)
-                    else:
-                        return False
-
-                fmt = (
-                    '{}{}'
-                    if leftmost_null_ok(expr.then_expr)
-                    else '{}?{}'
-                )
-
-                return fmt.format(
-                    ee(expr.expr),
-                    ee(expr.then_expr, then_underscore_var=expr.var_expr)
+                then_prefix = ee(expr.expr)
+                if not (
+                    expr_is_a(deepest_prefix, "at")
+                    or isinstance(deepest_prefix, Cast)
+                ):
+                    then_prefix += "?"
+                return ee(
+                    expr.then_expr,
+                    then_underscore_var=expr.var_expr,
+                    then_prefix=then_prefix,
                 )
             else:
                 return emit_final_call(
@@ -1315,7 +1333,7 @@ def emit_expr(expr, **ctx):
             return f"null[{type_name(T.LexicalEnv)}]"
         elif then_underscore_var:
             if id(then_underscore_var) == id(expr):
-                return ""
+                return ctx["then_prefix"]
         return var_name(expr)
 
     elif isinstance(expr, No):

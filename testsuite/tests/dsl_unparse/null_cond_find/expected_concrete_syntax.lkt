@@ -1,0 +1,17 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @export fun p(): Entity[FooNode] = (
+        [self]?.find(
+            (n) => n.as[Example].do((e) => e.parent.is_null)
+        )
+    ).do((n) => n.parent)
+}
+
+class Example: FooNode implements TokenNode {
+}

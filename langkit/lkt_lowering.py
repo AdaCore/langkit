@@ -72,7 +72,7 @@ from langkit.envs import (
 import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
-    Let, LocalVars, Property, PropertyDef, create_lazy_field, unsugar
+    Let, LocalVars, NullCond, Property, PropertyDef, create_lazy_field, unsugar
 )
 import langkit.expressions.logic as ELogic
 from langkit.lexer import (
@@ -3450,7 +3450,6 @@ class LktTypesLoader:
 
         call_name = call_expr.f_name
         assert isinstance(call_name, L.BaseDotExpr)
-        null_cond = isinstance(call_name, L.NullCondDottedName)
 
         # TODO (eng/libadalang/langkit#728): introduce a pre-lowering pass to
         # extract the list of types and their fields/methods so that we can
@@ -3458,14 +3457,15 @@ class LktTypesLoader:
         method_prefix = lower(call_name.f_prefix)
         method_name = call_name.f_suffix.text
 
-        # If the method call is protected by a null conditional, prepare when
-        # we need to build the Then expression.
-        if null_cond:
-            null_cond_var = AbstractVariable(
-                names.Name("Var_Expr"), create_local=True,
-            )
-            then_prefix = method_prefix
-            method_prefix = null_cond_var
+        # Add the right wrappers to handle null conditional constructs. Note
+        # that anything going through "getattr" will take care of validating
+        # Check and adding a Prefix wrapper: adjust wrappers accordingly for
+        # them.
+        getattr_prefix = method_prefix
+        if isinstance(call_name, L.NullCondDottedName):
+            getattr_prefix = NullCond.Check(getattr_prefix, validated=False)
+            method_prefix = NullCond.Check(method_prefix, validated=True)
+        method_prefix = NullCond.Prefix(method_prefix)
 
         if method_name in ("all", "any"):
             inner_expr, element_var, index_var = lower_collection_iter()
@@ -3475,21 +3475,23 @@ class LktTypesLoader:
 
         elif method_name == "append_rebinding":
             args, _ = append_rebinding_signature.match(self.ctx, call_expr)
-            result = method_prefix.append_rebinding(
+            result = getattr_prefix.append_rebinding(
                 lower(args["old_env"]), lower(args["new_env"])
             )
 
         elif method_name == "as_array":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.as_array
+            result = getattr_prefix.as_array
 
         elif method_name == "as_int":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.as_int
+            result = getattr_prefix.as_int
 
         elif method_name == "concat_rebindings":
             args, _ = concat_rebindings_signature.match(self.ctx, call_expr)
-            result = method_prefix.concat_rebindings(lower(args["rebindings"]))
+            result = getattr_prefix.concat_rebindings(
+                lower(args["rebindings"])
+            )
 
         elif method_name == "do":
             lambda_info = extract_lambda_and_kwargs(
@@ -3520,25 +3522,25 @@ class LktTypesLoader:
 
         elif method_name == "empty":
             empty_signature.match(self.ctx, call_expr)
-            result = getattr(method_prefix, "empty")
+            result = getattr(getattr_prefix, "empty")
 
         elif method_name == "env_group":
             args, _ = env_group_signature.match(self.ctx, call_expr)
             with_md_expr = args.get("with_md")
             with_md = None if with_md_expr is None else lower(with_md_expr)
-            result = method_prefix.env_group(with_md=with_md)
+            result = getattr_prefix.env_group(with_md=with_md)
 
         elif method_name == "env_node":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.env_node
+            result = getattr_prefix.env_node
 
         elif method_name == "env_orphan":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.env_orphan
+            result = getattr_prefix.env_orphan
 
         elif method_name == "env_parent":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.env_parent
+            result = getattr_prefix.env_parent
 
         elif method_name == "filter":
             inner_expr, element_var, index_var = lower_collection_iter()
@@ -3640,22 +3642,22 @@ class LktTypesLoader:
             )
 
             return (
-                method_prefix.get(symbol, lookup, from_node, categories)
+                getattr_prefix.get(symbol, lookup, from_node, categories)
                 if method_name == "get" else
-                method_prefix.get_first(symbol, lookup, from_node, categories)
+                getattr_prefix.get_first(symbol, lookup, from_node, categories)
             )
 
         elif method_name == "get_value":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.get_value
+            result = getattr_prefix.get_value
 
         elif method_name == "is_visible_from":
             args, _ = is_visible_from_signature.match(self.ctx, call_expr)
-            result = method_prefix.is_visible_from(lower(args["unit"]))
+            result = getattr_prefix.is_visible_from(lower(args["unit"]))
 
         elif method_name == "length":
             empty_signature.match(self.ctx, call_expr)
-            result = getattr(method_prefix, "length")
+            result = getattr(getattr_prefix, "length")
 
         elif method_name in ("logic_all", "logic_any"):
             import langkit.expressions.logic as LE
@@ -3684,19 +3686,19 @@ class LktTypesLoader:
 
         elif method_name == "rebind_env":
             args, _ = rebind_env_signature.match(self.ctx, call_expr)
-            result = method_prefix.rebind_env(lower(args["env"]))
+            result = getattr_prefix.rebind_env(lower(args["env"]))
 
         elif method_name == "singleton":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.singleton
+            result = getattr_prefix.singleton
 
         elif method_name in ("solve", "solve_with_diagnostics"):
             empty_signature.match(self.ctx, call_expr)
-            result = getattr(method_prefix, method_name)
+            result = getattr(getattr_prefix, method_name)
 
         elif method_name == "solve_with_diagnostics":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.solve_
+            result = getattr_prefix.solve_
 
         elif method_name == "take_while":
             inner_expr, element_var, index_var = lower_collection_iter()
@@ -3710,11 +3712,11 @@ class LktTypesLoader:
 
         elif method_name == "to_symbol":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.to_string  # type: ignore
+            result = getattr_prefix.to_string  # type: ignore
 
         elif method_name == "unique":
             empty_signature.match(self.ctx, call_expr)
-            result = method_prefix.unique
+            result = getattr_prefix.unique
 
         else:
             # Otherwise, this call must be a method invocation. Note
@@ -3724,18 +3726,10 @@ class LktTypesLoader:
             # "callee" variable below is not necessarily a FieldAccess
             # instance.
             call_args, call_kwargs = self.lower_call_args(call_expr, lower)
-            result = getattr(method_prefix, method_name)
+            result = getattr(getattr_prefix, method_name)
             result = result(*call_args, **call_kwargs)
 
-        return (
-            E.Then.create_from_exprs(
-                base=then_prefix,
-                then_expr=result,
-                var_expr=null_cond_var,
-            )
-            if null_cond else
-            result
-        )
+        return result
 
     def lower_expr(self,
                    expr: L.Expr,
@@ -4113,17 +4107,14 @@ class LktTypesLoader:
 
                 prefix = lower(expr.f_prefix)
                 suffix = expr.f_suffix.text
+
+                # Add the right wrappers to handle null conditional constructs.
+                # Note that "getattr" will take care of validating Check and
+                # adding a Prefix wrapper.
                 if null_cond:
-                    arg_var = AbstractVariable(
-                        names.Name("Var_Expr"), create_local=True
-                    )
-                    return E.Then.create_from_exprs(
-                        base=prefix,
-                        then_expr=getattr(arg_var, suffix),
-                        var_expr=arg_var,
-                    )
-                else:
-                    return getattr(prefix, suffix)
+                    prefix = NullCond.Check(prefix, validated=False)
+
+                return getattr(prefix, suffix)
 
             elif isinstance(expr, L.IfExpr):
                 abort_if_static_required(expr)
@@ -4328,7 +4319,7 @@ class LktTypesLoader:
                 return E.Literal(int(expr.text))
 
             elif isinstance(expr, L.ParenExpr):
-                return lower(expr.f_expr)
+                return E.Paren(lower(expr.f_expr))
 
             elif isinstance(expr, L.RaiseExpr):
                 abort_if_static_required(expr)
