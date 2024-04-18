@@ -4260,7 +4260,7 @@ public final class ${ctx.lib_name.camel} {
                 }
 
                 // Free the native array
-                UnmanagedMemory.free(unitArrayNative);
+                NI_LIB.${nat("free")}(unitArrayNative);
 
                 // Return the Java list as an array
                 return resList.toArray(new RewritingUnit[0]);
@@ -4835,7 +4835,7 @@ public final class ${ctx.lib_name.camel} {
                 }
 
                 // Free the native children
-                UnmanagedMemory.free(children);
+                NI_LIB.${nat("free")}(children);
 
                 // Return the result
                 return res;
