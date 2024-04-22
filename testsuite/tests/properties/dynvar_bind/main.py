@@ -13,5 +13,6 @@ if u.diagnostics:
     sys.exit(1)
 
 print(f"p_next(42) = {u.root.p_next(42)}")
+print(f"p_next_next(42) = {u.root.p_next_next(42)}")
 
 print("main.py: Done.")
