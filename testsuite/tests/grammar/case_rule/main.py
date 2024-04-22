@@ -19,7 +19,7 @@ for label, text in (
             print(d)
         print('--')
     for t in u.iter_tokens():
-        print(t)
+        print(ascii(str(t)))
     print('')
 
 print('main.py: Done.')
