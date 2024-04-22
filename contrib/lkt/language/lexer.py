@@ -52,6 +52,7 @@ class Token(LexerToken):
     PrivateKw = WithText()
     NullKw = WithText()
     IsKw = WithText()
+    InKw = WithText()
     ValKw = WithText()
     IfKw = WithText()
     ThenKw = WithText()
@@ -144,6 +145,7 @@ lkt_lexer.add_rules(
     (Literal('private'),    Token.PrivateKw),
     (Literal('null'),       Token.NullKw),
     (Literal('is'),         Token.IsKw),
+    (Literal('in'),         Token.InKw),
     (Literal('val'),        Token.ValKw),
     (Literal('if'),         Token.IfKw),
     (Literal('elif'),       Token.ElifKw),

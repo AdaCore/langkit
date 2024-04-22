@@ -104,13 +104,12 @@ class ExampleNode: TestNode {
     ) and (
         # wow
         x or (
-            (
+            x in
                 # True
-                x == true
-            ) or (
+                true
                 # False
-                x == false
-            )
+                | false
+
         )
     )
 }
