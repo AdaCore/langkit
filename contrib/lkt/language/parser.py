@@ -3683,8 +3683,8 @@ class Op(LktNode):
     """
     enum_node = True
 
-    alternatives = ["and", "or", "plus", "minus", "eq", "ne", "mult", "div",
-                    "lt", "gt", "lte", "gte", "amp"]
+    alternatives = ["and", "or", "or_int", "plus", "minus", "eq", "ne", "mult",
+                    "div", "lt", "gt", "lte", "gte", "amp"]
 
 
 @abstract
@@ -4229,8 +4229,16 @@ lkt_grammar.add_rules(
     ),
 
     expr=GOr(
-        BinOp(G.expr, GOr(Op.alt_or("or"), Op.alt_and("and")), G.rel),
-        G.rel
+        BinOp(
+            G.expr,
+            GOr(
+                Op.alt_or_int("or", "?"),
+                Op.alt_or("or"),
+                Op.alt_and("and"),
+            ),
+            G.rel,
+        ),
+        G.rel,
     ),
 
     rel=GOr(

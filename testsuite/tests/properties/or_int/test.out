@@ -1,0 +1,11 @@
+main.py: Running...
+compute(a, b, c) = a
+compute(<None>, b, c) = b
+compute(a, <None>, c) = a
+compute(a, b, <None>) = a
+compute(a, <None>, <None>) = a
+compute(<None>, b, <None>) = b
+compute(<None>, <None>, c) = c
+compute(<None>, <None>, <None>) = <None>
+main.py: Done.
+Done
