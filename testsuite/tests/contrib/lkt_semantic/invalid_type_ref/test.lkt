@@ -1,8 +1,0 @@
-generic [T]
-class U {
-}
-
-@invalid a: U
-
-@invalid class V: U {
-}

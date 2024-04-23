@@ -1,0 +1,25 @@
+class A {}
+class B: A {}
+class C: A {}
+class D: B {}
+class E: B {}
+
+val v1 = if true then null[B] else null[C]
+val v2 = if true then null[E] elif true then null[C] else null[D]
+val v3 = if true then null[E] elif true then null[E] else null[D]
+
+val v4 = match 1 {
+    case m1 : Int => null[B]
+    case m2 : Int => null[C]
+}
+
+val v5 = match 1 {
+    case m1 : Int => null[D]
+    case m2 : Int => null[E]
+}
+
+val v6 = match 1 {
+    case m1 : Int => null[C]
+    case m2 : Int => null[D]
+    case m3 : Int => null[E]
+}

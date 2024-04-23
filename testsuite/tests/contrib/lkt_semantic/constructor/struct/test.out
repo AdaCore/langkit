@@ -1,0 +1,229 @@
+Resolving test.lkt
+==================
+Decl <FieldDecl "f1" test.lkt:2:5-2:12>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:2:9-2:12>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+Decl <FieldDecl "f2" test.lkt:3:5-3:15>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:3:9-3:15>
+        has_type None
+        references <StructDecl prelude: "String">
+
+Decl <FieldDecl "f1" test.lkt:7:5-7:16>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:7:9-7:12>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:7:15-7:16>
+        has_type <StructDecl prelude: "Int">
+
+Decl <FieldDecl "f2" test.lkt:8:5-8:21>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:8:9-8:15>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <SingleLineStringLit test.lkt:8:18-8:21>
+        has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "v1" test.lkt:11:1-11:22>
+     has_type <StructDecl "Test1" test.lkt:1:1-4:2>
+
+   Expr <CallExpr test.lkt:11:10-11:22>
+        has_type <StructDecl "Test1" test.lkt:1:1-4:2>
+
+      Id   <RefId "Test1" test.lkt:11:10-11:15>
+           has_type <FunctionType "(Int, String) -> Test1" test.lkt>
+           references <StructDecl "Test1" test.lkt:1:1-4:2>
+
+      Expr <NumLit test.lkt:11:16-11:17>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <SingleLineStringLit test.lkt:11:19-11:21>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "v2" test.lkt:12:1-12:28>
+     has_type <StructDecl "Test1" test.lkt:1:1-4:2>
+
+   Expr <CallExpr test.lkt:12:10-12:28>
+        has_type <StructDecl "Test1" test.lkt:1:1-4:2>
+
+      Id   <RefId "Test1" test.lkt:12:10-12:15>
+           has_type <FunctionType "(Int, String) -> Test1" test.lkt>
+           references <StructDecl "Test1" test.lkt:1:1-4:2>
+
+      Id   <RefId "f1" test.lkt:12:16-12:18>
+           has_type None
+           references <FieldDecl "f1" test.lkt:2:5-2:12>
+
+      Expr <NumLit test.lkt:12:19-12:20>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "f2" test.lkt:12:22-12:24>
+           has_type None
+           references <FieldDecl "f2" test.lkt:3:5-3:15>
+
+      Expr <SingleLineStringLit test.lkt:12:25-12:27>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "v4" test.lkt:14:1-14:17>
+     has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+   Expr <CallExpr test.lkt:14:10-14:17>
+        has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+      Id   <RefId "Test2" test.lkt:14:10-14:15>
+           has_type <FunctionType "(Int, String) -> Test2" test.lkt>
+           references <StructDecl "Test2" test.lkt:6:1-9:2>
+
+Decl <ValDecl "v5" test.lkt:15:1-15:18>
+     has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+   Expr <CallExpr test.lkt:15:10-15:18>
+        has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+      Id   <RefId "Test2" test.lkt:15:10-15:15>
+           has_type <FunctionType "(Int, String) -> Test2" test.lkt>
+           references <StructDecl "Test2" test.lkt:6:1-9:2>
+
+      Expr <NumLit test.lkt:15:16-15:17>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "v6" test.lkt:16:1-16:22>
+     has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+   Expr <CallExpr test.lkt:16:10-16:22>
+        has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+      Id   <RefId "Test2" test.lkt:16:10-16:15>
+           has_type <FunctionType "(Int, String) -> Test2" test.lkt>
+           references <StructDecl "Test2" test.lkt:6:1-9:2>
+
+      Expr <NumLit test.lkt:16:16-16:17>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <SingleLineStringLit test.lkt:16:19-16:21>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "v7" test.lkt:17:1-17:21>
+     has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+   Expr <CallExpr test.lkt:17:10-17:21>
+        has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+      Id   <RefId "Test2" test.lkt:17:10-17:15>
+           has_type <FunctionType "(Int, String) -> Test2" test.lkt>
+           references <StructDecl "Test2" test.lkt:6:1-9:2>
+
+      Id   <RefId "f1" test.lkt:17:16-17:18>
+           has_type None
+           references <FieldDecl "f1" test.lkt:7:5-7:16>
+
+      Expr <NumLit test.lkt:17:19-17:20>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "v8" test.lkt:18:1-18:22>
+     has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+   Expr <CallExpr test.lkt:18:10-18:22>
+        has_type <StructDecl "Test2" test.lkt:6:1-9:2>
+
+      Id   <RefId "Test2" test.lkt:18:10-18:15>
+           has_type <FunctionType "(Int, String) -> Test2" test.lkt>
+           references <StructDecl "Test2" test.lkt:6:1-9:2>
+
+      Id   <RefId "f2" test.lkt:18:16-18:18>
+           has_type None
+           references <FieldDecl "f2" test.lkt:8:5-8:21>
+
+      Expr <SingleLineStringLit test.lkt:18:19-18:21>
+           has_type <StructDecl prelude: "String">
+
+<ValDecl "inv1" test.lkt:20:1-20:19> failed nameres:
+test.lkt:20:12-20:19: error: invalid call, expected (Int, String) -> Test1
+ 20 | val inv1 = Test1()
+    |            ^^^^^^^ 
+
+Decl <ValDecl "inv1" test.lkt:20:1-20:19>
+     has_type None
+
+   Expr <CallExpr test.lkt:20:12-20:19>
+        has_type None
+
+      Id   <RefId "Test1" test.lkt:20:12-20:17>
+           has_type None
+           references None
+
+<ValDecl "inv2" test.lkt:21:1-21:20> failed nameres:
+test.lkt:21:12-21:20: error: invalid call, expected (Int, String) -> Test1
+ 21 | val inv2 = Test1(1)
+    |            ^^^^^^^^ 
+
+Decl <ValDecl "inv2" test.lkt:21:1-21:20>
+     has_type None
+
+   Expr <CallExpr test.lkt:21:12-21:20>
+        has_type None
+
+      Id   <RefId "Test1" test.lkt:21:12-21:17>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:21:18-21:19>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "inv3" test.lkt:22:1-22:25> failed nameres:
+test.lkt:22:18-22:21: error: expected Int, got String
+ 22 | val inv3 = Test1("1", 2)
+    |                  ^^^ 
+
+test.lkt:22:23-22:24: error: expected String, got Int
+ 22 | val inv3 = Test1("1", 2)
+    |                       ^ 
+
+Decl <ValDecl "inv3" test.lkt:22:1-22:25>
+     has_type None
+
+   Expr <CallExpr test.lkt:22:12-22:25>
+        has_type None
+
+      Id   <RefId "Test1" test.lkt:22:12-22:17>
+           has_type None
+           references None
+
+      Expr <SingleLineStringLit test.lkt:22:18-22:21>
+           has_type <StructDecl prelude: "String">
+
+      Expr <NumLit test.lkt:22:23-22:24>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "inv4" test.lkt:24:1-24:25> failed nameres:
+test.lkt:24:21-24:24: error: expected Int, got String
+ 24 | val inv4 = Test2(f1="1")
+    |                     ^^^ 
+
+Decl <ValDecl "inv4" test.lkt:24:1-24:25>
+     has_type None
+
+   Expr <CallExpr test.lkt:24:12-24:25>
+        has_type None
+
+      Id   <RefId "Test2" test.lkt:24:12-24:17>
+           has_type None
+           references None
+
+      Id   <RefId "f1" test.lkt:24:18-24:20>
+           has_type None
+           references None
+
+      Expr <SingleLineStringLit test.lkt:24:21-24:24>
+           has_type <StructDecl prelude: "String">
+

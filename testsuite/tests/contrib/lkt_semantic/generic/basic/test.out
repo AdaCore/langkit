@@ -1,0 +1,314 @@
+Resolving test.lkt
+==================
+Decl <FieldDecl "f" test.lkt:3:5-3:9>
+     has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+
+   Id   <RefId "T" test.lkt:3:8-3:9>
+        has_type None
+        references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+
+Decl <FieldDecl "g" test.lkt:4:5-4:9>
+     has_type <GenericFormalTypeDecl "U" test.lkt:1:12-1:13>
+
+   Id   <RefId "U" test.lkt:4:8-4:9>
+        has_type None
+        references <GenericFormalTypeDecl "U" test.lkt:1:12-1:13>
+
+Decl <ValDecl "v1" test.lkt:7:1-7:64>
+     has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+
+   Id   <RefId "GenStruct" test.lkt:7:10-7:19>
+        has_type None
+        references <StructDecl "GenStruct[T, U]" test.lkt:2:1-5:2>
+
+   Id   <RefId "String" test.lkt:7:20-7:26>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Id   <RefId "Int" test.lkt:7:28-7:31>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:7:35-7:64>
+        has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+
+      Expr <GenericInstantiation test.lkt:7:35-7:57>
+           has_type <FunctionType "(String, Int) -> GenStruct[String, Int]" test.lkt>
+
+         Id   <RefId "GenStruct" test.lkt:7:35-7:44>
+              has_type None
+              references <StructDecl "GenStruct[T, U]" test.lkt:2:1-5:2>
+
+         Id   <RefId "String" test.lkt:7:45-7:51>
+              has_type None
+              references <StructDecl prelude: "String">
+
+         Id   <RefId "Int" test.lkt:7:53-7:56>
+              has_type None
+              references <StructDecl prelude: "Int">
+
+      Expr <SingleLineStringLit test.lkt:7:58-7:60>
+           has_type <StructDecl prelude: "String">
+
+      Expr <NumLit test.lkt:7:62-7:63>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "v2" test.lkt:8:1-8:39>
+     has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+
+   Expr <CallExpr test.lkt:8:10-8:39>
+        has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+
+      Expr <GenericInstantiation test.lkt:8:10-8:32>
+           has_type <FunctionType "(String, Int) -> GenStruct[String, Int]" test.lkt>
+
+         Id   <RefId "GenStruct" test.lkt:8:10-8:19>
+              has_type None
+              references <StructDecl "GenStruct[T, U]" test.lkt:2:1-5:2>
+
+         Id   <RefId "String" test.lkt:8:20-8:26>
+              has_type None
+              references <StructDecl prelude: "String">
+
+         Id   <RefId "Int" test.lkt:8:28-8:31>
+              has_type None
+              references <StructDecl prelude: "Int">
+
+      Expr <SingleLineStringLit test.lkt:8:33-8:35>
+           has_type <StructDecl prelude: "String">
+
+      Expr <NumLit test.lkt:8:37-8:38>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "cmp" test.lkt:10:1-10:19>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:10:11-10:19>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "v1" test.lkt:10:11-10:13>
+           has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+           references <ValDecl "v1" test.lkt:7:1-7:64>
+
+      Id   <RefId "v2" test.lkt:10:17-10:19>
+           has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+           references <ValDecl "v2" test.lkt:8:1-8:39>
+
+Decl <ValDecl "f1" test.lkt:12:1-12:14>
+     has_type <StructDecl prelude: "String">
+
+   Expr <DotExpr test.lkt:12:10-12:14>
+        has_type <StructDecl prelude: "String">
+
+      Id   <RefId "v1" test.lkt:12:10-12:12>
+           has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+           references <ValDecl "v1" test.lkt:7:1-7:64>
+
+      Id   <RefId "f" test.lkt:12:13-12:14>
+           has_type <StructDecl prelude: "String">
+           references <FieldDecl "f" test.lkt:3:5-3:9>
+
+Decl <ValDecl "f2" test.lkt:13:1-13:14>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:13:10-13:14>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "v2" test.lkt:13:10-13:12>
+           has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+           references <ValDecl "v2" test.lkt:8:1-8:39>
+
+      Id   <RefId "g" test.lkt:13:13-13:14>
+           has_type <StructDecl prelude: "Int">
+           references <FieldDecl "g" test.lkt:4:5-4:9>
+
+Decl <ValDecl "f2" test.lkt:15:1-15:22>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:15:10-15:22>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Expr <DotExpr test.lkt:15:10-15:14>
+           has_type <StructDecl prelude: "String">
+
+         Id   <RefId "v1" test.lkt:15:10-15:12>
+              has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+              references <ValDecl "v1" test.lkt:7:1-7:64>
+
+         Id   <RefId "f" test.lkt:15:13-15:14>
+              has_type <StructDecl prelude: "String">
+              references <FieldDecl "f" test.lkt:3:5-3:9>
+
+      Expr <DotExpr test.lkt:15:18-15:22>
+           has_type <StructDecl prelude: "String">
+
+         Id   <RefId "v2" test.lkt:15:18-15:20>
+              has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+              references <ValDecl "v2" test.lkt:8:1-8:39>
+
+         Id   <RefId "f" test.lkt:15:21-15:22>
+              has_type <StructDecl prelude: "String">
+              references <FieldDecl "f" test.lkt:3:5-3:9>
+
+<ValDecl "invalid1" test.lkt:17:1-17:66> failed nameres:
+test.lkt:17:41-17:66: error: expected GenStruct[String, Int], got GenStruct[Int, Int]
+ 17 | val invalid1 : GenStruct[String, Int] = GenStruct[Int, Int](1, 2)
+    |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "invalid1" test.lkt:17:1-17:66>
+     has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+
+   Id   <RefId "GenStruct" test.lkt:17:16-17:25>
+        has_type None
+        references <StructDecl "GenStruct[T, U]" test.lkt:2:1-5:2>
+
+   Id   <RefId "String" test.lkt:17:26-17:32>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Id   <RefId "Int" test.lkt:17:34-17:37>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:17:41-17:66>
+        has_type None
+
+      Expr <GenericInstantiation test.lkt:17:41-17:60>
+           has_type <FunctionType "(Int, Int) -> GenStruct[Int, Int]" test.lkt>
+
+         Id   <RefId "GenStruct" test.lkt:17:41-17:50>
+              has_type None
+              references None
+
+         Id   <RefId "Int" test.lkt:17:51-17:54>
+              has_type None
+              references None
+
+         Id   <RefId "Int" test.lkt:17:56-17:59>
+              has_type None
+              references None
+
+      Expr <NumLit test.lkt:17:61-17:62>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:17:64-17:65>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "invalid2" test.lkt:18:1-18:45> failed nameres:
+test.lkt:18:39-18:40: error: expected String, got Int
+ 18 | val invalid2 = GenStruct[String, Int](1, "")
+    |                                       ^ 
+
+test.lkt:18:42-18:44: error: expected Int, got String
+ 18 | val invalid2 = GenStruct[String, Int](1, "")
+    |                                          ^^ 
+
+Decl <ValDecl "invalid2" test.lkt:18:1-18:45>
+     has_type None
+
+   Expr <CallExpr test.lkt:18:16-18:45>
+        has_type None
+
+      Expr <GenericInstantiation test.lkt:18:16-18:38>
+           has_type <FunctionType "(String, Int) -> GenStruct[String, Int]" test.lkt>
+
+         Id   <RefId "GenStruct" test.lkt:18:16-18:25>
+              has_type None
+              references None
+
+         Id   <RefId "String" test.lkt:18:26-18:32>
+              has_type None
+              references None
+
+         Id   <RefId "Int" test.lkt:18:34-18:37>
+              has_type None
+              references None
+
+      Expr <NumLit test.lkt:18:39-18:40>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <SingleLineStringLit test.lkt:18:42-18:44>
+           has_type <StructDecl prelude: "String">
+
+<ValDecl "invalidf1" test.lkt:20:1-20:27> failed nameres:
+test.lkt:20:23-20:27: error: expected Int, got String
+ 20 | val invalidf1 : Int = v1.f
+    |                       ^^^^ 
+
+Decl <ValDecl "invalidf1" test.lkt:20:1-20:27>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:20:17-20:20>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <DotExpr test.lkt:20:23-20:27>
+        has_type None
+
+      Id   <RefId "v1" test.lkt:20:23-20:25>
+           has_type <StructDecl "GenStruct[String, Int]" test.lkt:2:1-5:2>
+           references <ValDecl "v1" test.lkt:7:1-7:64>
+
+      Id   <RefId "f" test.lkt:20:26-20:27>
+           has_type None
+           references None
+
+<ValDecl "invalidcmp" test.lkt:22:1-22:80> failed nameres:
+test.lkt:22:55-22:80: error: expected GenStruct[String, String], got GenStruct[Int, Int]
+ 22 | val invalidcmp = GenStruct[String, String]("", "") == GenStruct[Int, Int](1, 1)
+    |                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "invalidcmp" test.lkt:22:1-22:80>
+     has_type None
+
+   Expr <BinOp test.lkt:22:18-22:80>
+        has_type None
+
+      Expr <CallExpr test.lkt:22:18-22:51>
+           has_type None
+
+         Expr <GenericInstantiation test.lkt:22:18-22:43>
+              has_type <FunctionType "(String, String) -> GenStruct[String, String]" test.lkt>
+
+            Id   <RefId "GenStruct" test.lkt:22:18-22:27>
+                 has_type None
+                 references None
+
+            Id   <RefId "String" test.lkt:22:28-22:34>
+                 has_type None
+                 references None
+
+            Id   <RefId "String" test.lkt:22:36-22:42>
+                 has_type None
+                 references None
+
+         Expr <SingleLineStringLit test.lkt:22:44-22:46>
+              has_type <StructDecl prelude: "String">
+
+         Expr <SingleLineStringLit test.lkt:22:48-22:50>
+              has_type <StructDecl prelude: "String">
+
+      Expr <CallExpr test.lkt:22:55-22:80>
+           has_type None
+
+         Expr <GenericInstantiation test.lkt:22:55-22:74>
+              has_type <FunctionType "(Int, Int) -> GenStruct[Int, Int]" test.lkt>
+
+            Id   <RefId "GenStruct" test.lkt:22:55-22:64>
+                 has_type None
+                 references None
+
+            Id   <RefId "Int" test.lkt:22:65-22:68>
+                 has_type None
+                 references None
+
+            Id   <RefId "Int" test.lkt:22:70-22:73>
+                 has_type None
+                 references None
+
+         Expr <NumLit test.lkt:22:75-22:76>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <NumLit test.lkt:22:78-22:79>
+              has_type <StructDecl prelude: "Int">
+

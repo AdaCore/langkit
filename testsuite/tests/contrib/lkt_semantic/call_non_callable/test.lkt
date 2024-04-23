@@ -1,7 +1,0 @@
-# Error for trying to call a non callable
-
-val a: (Int) -> Int = null
-@invalid val b: Int = a(12)()
-
-fun c(i: Int): Int = i + 2
-@invalid val d: Int = a(12)()

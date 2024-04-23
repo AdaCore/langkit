@@ -1,0 +1,6 @@
+val val1 = 1
+val val1t : Int = 1
+val valref = val1
+val valreft : Int = val1
+
+val incorrect : String = val1

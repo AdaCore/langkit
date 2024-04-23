@@ -1,0 +1,4 @@
+val v1 : String = null[String]
+val v2 = null[String]
+val v2 : String = null
+

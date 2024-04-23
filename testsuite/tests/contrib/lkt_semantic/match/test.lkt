@@ -1,0 +1,46 @@
+class A {}
+class B : A {}
+class C : A {}
+
+class D {}
+
+val a : A = null
+
+val m1 = match a {
+    case a : A => 1
+    case b : B => 2
+    case c : C => 3
+}
+val m2 = match a {
+    case b : B => 1
+    case c : C => 2
+    case _ => 3
+}
+
+val m3 = match a {
+    case b : B => b
+    case c : C => c
+}
+
+val expected_propagate = match a {
+    case b : B => b
+    case c : C => null
+}
+
+val expected_propagate : A = match a {
+    case b : B => null
+    case c : C => null
+}
+
+val invalid = match a {
+    case b : B => 1
+    case c : C => ""
+}
+
+val mvd_no_type = match 1 {
+    case i => i.as_big_int()
+}
+
+val match_match = match match 1 { case _ => 1} {
+    case i => i
+}

@@ -1,0 +1,17 @@
+class FooNode implements Node[FooNode] {}
+
+val plus : Int = 1 + 1
+val wrong_plus : Int = 1 + ""
+val sub : Int = 1 - 1
+val wrong_sub : Int = 1 - ""
+
+val str_concat = "" & ""
+val array_concat = [""] & [""]
+val invalid_concat = 1 & 2
+
+val node_cmp = FooNode() < FooNode()
+val entity_node_cmp = FooNode().as_entity < FooNode().as_entity
+
+val or_int = null or? FooNode()
+val invalid_or_int1 = null or? null
+val invalid_or_int2 = "" or? 1

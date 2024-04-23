@@ -1,4 +1,0 @@
-# Call a non static declaration
-
-val a: (Int) -> Int = null
-val b: Int = a(12)

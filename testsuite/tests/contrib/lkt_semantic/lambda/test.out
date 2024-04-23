@@ -1,134 +1,112 @@
 Resolving test.lkt
 ==================
-Id   <RefId "Int" test.lkt:5:39-5:42>
-     references <StructDecl prelude: "Int">
+Decl <ValDecl "identity" test.lkt:3:1-3:35>
+     has_type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:5:49-5:52>
-     references <StructDecl prelude: "Int">
+   Id   <RefId "Int" test.lkt:3:16-3:19>
+        has_type None
+        references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:5:54-5:57>
-     references <StructDecl prelude: "Int">
+   Expr <CallExpr test.lkt:3:22-3:35>
+        has_type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:5:62-5:65>
-     references <StructDecl prelude: "Int">
+      Expr <ParenExpr test.lkt:3:22-3:32>
+           has_type <FunctionType prelude: "(Int) -> Int">
 
-Id   <RefId "Int" test.lkt:5:68-5:71>
-     references <StructDecl prelude: "Int">
+         Expr <LambdaExpr test.lkt:3:23-3:31>
+              has_type <FunctionType prelude: "(Int) -> Int">
 
-Id   <RefId "Int" test.lkt:8:22-8:25>
-     references <StructDecl prelude: "Int">
+            Decl <LambdaArgDecl "i" test.lkt:3:24-3:25>
+                 has_type <StructDecl prelude: "Int">
 
-Id   <RefId "lambda_test_helper" test.lkt:8:28-8:46>
-     references <FunDecl "lambda_test_helper" test.lkt:5:11-5:71>
+            Id   <RefId "i" test.lkt:3:30-3:31>
+                 has_type <StructDecl prelude: "Int">
+                 references <LambdaArgDecl "i" test.lkt:3:24-3:25>
 
-Expr <RefId "lambda_test_helper" test.lkt:8:28-8:46>
-     has type <FunctionType prelude: "(Int, (Int, Int) -> Int) -> Int">
+      Expr <NumLit test.lkt:3:33-3:34>
+           has_type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:8:47-8:49>
-     has type <StructDecl prelude: "Int">
+<ValDecl "half_decl_type" test.lkt:4:1-4:62> failed nameres:
+test.lkt:4:5-4:19: error: could not determine type
+ 4 | val half_decl_type : (Int, Int) -> Int = (i: Int, j) => i + j
+   |     ^^^^^^^^^^^^^^ 
 
-Id   <RefId "x" test.lkt:8:61-8:62>
-     references <LambdaArgDecl "x" test.lkt:8:52-8:53>
+Decl <ValDecl "half_decl_type" test.lkt:4:1-4:62>
+     has_type <FunctionType prelude: "(Int, Int) -> Int">
 
-Expr <RefId "x" test.lkt:8:61-8:62>
-     has type <StructDecl prelude: "Int">
+   Id   <RefId "Int" test.lkt:4:23-4:26>
+        has_type None
+        references <StructDecl prelude: "Int">
 
-Id   <RefId "y" test.lkt:8:65-8:66>
-     references <LambdaArgDecl "y" test.lkt:8:55-8:56>
+   Id   <RefId "Int" test.lkt:4:28-4:31>
+        has_type None
+        references <StructDecl prelude: "Int">
 
-Expr <RefId "y" test.lkt:8:65-8:66>
-     has type <StructDecl prelude: "Int">
+   Id   <RefId "Int" test.lkt:4:36-4:39>
+        has_type None
+        references <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:8:69-8:70>
-     has type <StructDecl prelude: "Int">
+   Expr <LambdaExpr test.lkt:4:42-4:62>
+        has_type None
 
-Expr <BinOp test.lkt:8:65-8:70>
-     has type <StructDecl prelude: "Int">
+      Decl <LambdaArgDecl "i" test.lkt:4:43-4:49>
+           has_type <StructDecl prelude: "Int">
 
-Expr <BinOp test.lkt:8:61-8:70>
-     has type <StructDecl prelude: "Int">
+         Id   <RefId "Int" test.lkt:4:46-4:49>
+              has_type None
+              references <StructDecl prelude: "Int">
 
-Expr <LambdaExpr test.lkt:8:51-8:70>
-     has type <FunctionType prelude: "(Int, Int) -> Int">
+      Decl <LambdaArgDecl "j" test.lkt:4:51-4:52>
+           has_type None
 
-Expr <CallExpr test.lkt:8:28-8:71>
-     has type <StructDecl prelude: "Int">
+      Expr <BinOp test.lkt:4:57-4:62>
+           has_type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:11:41-11:44>
-     references <StructDecl prelude: "Int">
+         Id   <RefId "i" test.lkt:4:57-4:58>
+              has_type <StructDecl prelude: "Int">
+              references <LambdaArgDecl "i" test.lkt:4:43-4:49>
 
-Id   <RefId "lambda_test_helper" test.lkt:12:5-12:23>
-     references <FunDecl "lambda_test_helper" test.lkt:5:11-5:71>
+         Id   <RefId "j" test.lkt:4:61-4:62>
+              has_type None
+              references <LambdaArgDecl "j" test.lkt:4:51-4:52>
 
-Expr <RefId "lambda_test_helper" test.lkt:12:5-12:23>
-     has type <FunctionType prelude: "(Int, (Int, Int) -> Int) -> Int">
+<ValDecl "no_decl_type" test.lkt:5:1-5:55> failed nameres:
+test.lkt:5:5-5:17: error: could not determine type
+ 5 | val no_decl_type : (Int, Int) -> Int = (i, j) => i + j
+   |     ^^^^^^^^^^^^ 
 
-Expr <NumLit test.lkt:12:24-12:26>
-     has type <StructDecl prelude: "Int">
+Decl <ValDecl "no_decl_type" test.lkt:5:1-5:55>
+     has_type <FunctionType prelude: "(Int, Int) -> Int">
 
-test.lkt:12:29: error: Invalid type annotations for lambda parameters.
-Annotate either all or no params
-12 |     lambda_test_helper(12, (x: Int, y) => x + y * 2)
-   |                             ^^^^^^^^^
+   Id   <RefId "Int" test.lkt:5:21-5:24>
+        has_type None
+        references <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:12:32-12:35>
-     references <StructDecl prelude: "Int">
+   Id   <RefId "Int" test.lkt:5:26-5:29>
+        has_type None
+        references <StructDecl prelude: "Int">
 
-Id   <RefId "x" test.lkt:12:43-12:44>
-     references <LambdaArgDecl "x" test.lkt:12:29-12:35>
+   Id   <RefId "Int" test.lkt:5:34-5:37>
+        has_type None
+        references <StructDecl prelude: "Int">
 
-Expr <RefId "x" test.lkt:12:43-12:44>
-     has type <StructDecl prelude: "Int">
+   Expr <LambdaExpr test.lkt:5:40-5:55>
+        has_type None
 
-Id   <RefId "y" test.lkt:12:47-12:48>
-     references <LambdaArgDecl "y" test.lkt:12:37-12:38>
+      Decl <LambdaArgDecl "i" test.lkt:5:41-5:42>
+           has_type None
 
-Expr <RefId "y" test.lkt:12:47-12:48>
-     has type <StructDecl prelude: "Int">
+      Decl <LambdaArgDecl "j" test.lkt:5:44-5:45>
+           has_type None
 
-Expr <NumLit test.lkt:12:51-12:52>
-     has type <StructDecl prelude: "Int">
+      Expr <BinOp test.lkt:5:50-5:55>
+           has_type None
 
-Expr <BinOp test.lkt:12:47-12:52>
-     has type <StructDecl prelude: "Int">
+         Id   <RefId "i" test.lkt:5:50-5:51>
+              has_type None
+              references <LambdaArgDecl "i" test.lkt:5:41-5:42>
 
-Expr <BinOp test.lkt:12:43-12:52>
-     has type <StructDecl prelude: "Int">
-
-Expr <LambdaExpr test.lkt:12:28-12:52>
-     has type <FunctionType prelude: "(Int, Int) -> Int">
-
-Expr <CallExpr test.lkt:12:5-12:53>
-     has type <StructDecl prelude: "Int">
-
-Id   <RefId "Int" test.lkt:15:41-15:44>
-     references <StructDecl prelude: "Int">
-
-Id   <RefId "lambda_test_helper" test.lkt:16:5-16:23>
-     references <FunDecl "lambda_test_helper" test.lkt:5:11-5:71>
-
-Expr <RefId "lambda_test_helper" test.lkt:16:5-16:23>
-     has type <FunctionType prelude: "(Int, (Int, Int) -> Int) -> Int">
-
-Expr <NumLit test.lkt:16:24-16:26>
-     has type <StructDecl prelude: "Int">
-
-Id   <RefId "String" test.lkt:16:32-16:38>
-     references <StructDecl prelude: "String">
-
-Id   <RefId "String" test.lkt:16:43-16:49>
-     references <StructDecl prelude: "String">
-
-Id   <RefId "Int" test.lkt:16:52-16:55>
-     references <StructDecl prelude: "Int">
-
-Expr <NumLit test.lkt:16:59-16:61>
-     has type <StructDecl prelude: "Int">
-
-test.lkt:16:28: error: Mismatched types: expected `(Int, Int) -> Int`, got `(String, String) -> Int`
-16 |     lambda_test_helper(12, (x: String, y: String): Int => 12)
-   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Expr <CallExpr test.lkt:16:5-16:62>
-     has type <StructDecl prelude: "Int">
+         Id   <RefId "j" test.lkt:5:54-5:55>
+              has_type None
+              references <LambdaArgDecl "j" test.lkt:5:44-5:45>
 

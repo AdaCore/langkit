@@ -1,0 +1,14 @@
+fun f1(): Int = 1
+fun f2(i: Int): Int = i * 2
+fun f3(i: Int, j: Int, k: Int): Int = i + j + k
+
+val not_callable = 1
+
+val invalid1 = f1(1)
+val invalid2 = f2("")
+val invalid3 = f3(1, 2)
+val invalid4 = not_callable()
+
+val named1 = f1(i=1)
+val named2 = f2(1, i=1)
+val named2 = f3(1, 2, k="")

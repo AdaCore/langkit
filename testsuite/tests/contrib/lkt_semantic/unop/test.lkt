@@ -1,0 +1,8 @@
+val p = +1
+val n = -1
+
+val pb = +1b
+val pn = -1b
+
+val invalid1 = +""
+val invalid2 = -""

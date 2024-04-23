@@ -1,4 +1,0 @@
-# Test paren exprs type forwarding
-val a: Int = 1
-val b: Int = 2
-val b: Bool = (a) == (b)

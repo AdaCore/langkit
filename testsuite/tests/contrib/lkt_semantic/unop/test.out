@@ -1,0 +1,66 @@
+Resolving test.lkt
+==================
+Decl <ValDecl "p" test.lkt:1:1-1:11>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <UnOp test.lkt:1:9-1:11>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:1:10-1:11>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "n" test.lkt:2:1-2:11>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <UnOp test.lkt:2:9-2:11>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:2:10-2:11>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "pb" test.lkt:4:1-4:13>
+     has_type <StructDecl prelude: "BigInt">
+
+   Expr <UnOp test.lkt:4:10-4:13>
+        has_type <StructDecl prelude: "BigInt">
+
+      Expr <BigNumLit test.lkt:4:11-4:13>
+           has_type <StructDecl prelude: "BigInt">
+
+Decl <ValDecl "pn" test.lkt:5:1-5:13>
+     has_type <StructDecl prelude: "BigInt">
+
+   Expr <UnOp test.lkt:5:10-5:13>
+        has_type <StructDecl prelude: "BigInt">
+
+      Expr <BigNumLit test.lkt:5:11-5:13>
+           has_type <StructDecl prelude: "BigInt">
+
+<ValDecl "invalid1" test.lkt:7:1-7:19> failed nameres:
+test.lkt:7:17-7:19: error: expression must be of type Int or BigInt, got String
+ 7 | val invalid1 = +""
+   |                 ^^ 
+
+Decl <ValDecl "invalid1" test.lkt:7:1-7:19>
+     has_type None
+
+   Expr <UnOp test.lkt:7:16-7:19>
+        has_type None
+
+      Expr <SingleLineStringLit test.lkt:7:17-7:19>
+           has_type None
+
+<ValDecl "invalid2" test.lkt:8:1-8:19> failed nameres:
+test.lkt:8:17-8:19: error: expression must be of type Int or BigInt, got String
+ 8 | val invalid2 = -""
+   |                 ^^ 
+
+Decl <ValDecl "invalid2" test.lkt:8:1-8:19>
+     has_type None
+
+   Expr <UnOp test.lkt:8:16-8:19>
+        has_type None
+
+      Expr <SingleLineStringLit test.lkt:8:17-8:19>
+           has_type None
+

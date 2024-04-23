@@ -1,0 +1,10 @@
+fun f1(): Int = 1
+fun f2(i: Int): Int = i * 2
+fun f3(i: Int, j: Int, k: Int): Int = i + j + k
+
+val valid1 = f1()
+val valid2 = f2(1)
+val valid3 = f3(1, 2, 3)
+
+val named1 = f2(i = 2)
+val named2 = f3(1, j=2, k=3)

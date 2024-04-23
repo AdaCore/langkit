@@ -1,0 +1,20 @@
+class A { }
+class B : A { }
+class C : A { }
+class D : C { }
+class E : C { }
+
+val valid1 = if true then 1 else 2
+val valid2 = if true then "nonempty" else ""
+val valid3 = if true then 1 elif false then 2 else 3
+
+val valid4 = if true then if true then 1 else 2 else 3
+
+val expected_propagate1 = if true then A() else null
+val expected_propagate2 : A = if true then B() else null
+val expected_propagate3 : A = if true then null else null
+val expected_propagate4 = if true then B() elif true then D() else null
+
+val wrong_cond_type = if 1 then 1 else 2
+
+val non_matching_exprs = if true then 1 else ""

@@ -1,0 +1,19 @@
+class Type implements Node[Type] {
+    fun property(type: Entity[Type]): Entity[Type] = null
+    fun non_entity(): Type = null
+}
+
+val lv1 = LogicVar()
+val lv2 = LogicVar()
+val lv3 = LogicVar()
+
+val eq1 : Equation = lv1 <- Type().as_entity
+val eq2 : Equation = lv1 <-> lv2
+val eq3 : Equation = lv2 <- Type.property%(lv3, Type().as_entity)
+
+val no_logicvar_assign = 1 <- Type().as_entity
+val non_entity_assign = lv1 <- Type()
+
+val no_logicvar_unify1 = 1 <-> lv1
+val no_logicvar_unify2 = lv1 <-> 1
+val non_entity_propagate = lv2 <- Type.non_entity%(lv3)

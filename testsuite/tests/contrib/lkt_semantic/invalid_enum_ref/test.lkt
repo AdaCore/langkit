@@ -1,1 +1,0 @@
-@invalid val a: NoSuchType.T = raise PropertyError

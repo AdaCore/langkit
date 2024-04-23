@@ -1,0 +1,277 @@
+Resolving test.lkt
+==================
+Decl <FunDecl "identity[T]" test.lkt:2:1-2:27>
+     has_type <FunctionType "(T) -> T" test.lkt>
+
+   Decl <FunArgDecl "t" test.lkt:2:14-2:18>
+        has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+
+      Id   <RefId "T" test.lkt:2:17-2:18>
+           has_type None
+           references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+
+   Id   <RefId "T" test.lkt:2:21-2:22>
+        has_type None
+        references <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+
+   Id   <RefId "t" test.lkt:2:26-2:27>
+        has_type <GenericFormalTypeDecl "T" test.lkt:1:9-1:10>
+        references <FunArgDecl "t" test.lkt:2:14-2:18>
+
+Decl <ValDecl "v1" test.lkt:4:1-4:32>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:4:10-4:13>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:4:16-4:32>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <GenericInstantiation test.lkt:4:16-4:29>
+           has_type <FunctionType "(Int) -> Int" test.lkt>
+
+         Id   <RefId "identity" test.lkt:4:16-4:24>
+              has_type <FunctionType "(T) -> T" test.lkt>
+              references <FunDecl "identity[T]" test.lkt:2:1-2:27>
+
+         Id   <RefId "Int" test.lkt:4:25-4:28>
+              has_type None
+              references <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:4:30-4:31>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "v2" test.lkt:5:1-5:39>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:5:10-5:16>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <CallExpr test.lkt:5:19-5:39>
+        has_type <StructDecl prelude: "String">
+
+      Expr <GenericInstantiation test.lkt:5:19-5:35>
+           has_type <FunctionType "(String) -> String" test.lkt>
+
+         Id   <RefId "identity" test.lkt:5:19-5:27>
+              has_type <FunctionType "(T) -> T" test.lkt>
+              references <FunDecl "identity[T]" test.lkt:2:1-2:27>
+
+         Id   <RefId "String" test.lkt:5:28-5:34>
+              has_type None
+              references <StructDecl prelude: "String">
+
+      Expr <SingleLineStringLit test.lkt:5:36-5:38>
+           has_type <StructDecl prelude: "String">
+
+<ValDecl "invalid1" test.lkt:7:1-7:35> failed nameres:
+test.lkt:7:33-7:34: error: expected String, got Int
+ 7 | val invalid1 = identity[String](1)
+   |                                 ^ 
+
+Decl <ValDecl "invalid1" test.lkt:7:1-7:35>
+     has_type None
+
+   Expr <CallExpr test.lkt:7:16-7:35>
+        has_type None
+
+      Expr <GenericInstantiation test.lkt:7:16-7:32>
+           has_type <FunctionType "(String) -> String" test.lkt>
+
+         Id   <RefId "identity" test.lkt:7:16-7:24>
+              has_type None
+              references None
+
+         Id   <RefId "String" test.lkt:7:25-7:31>
+              has_type None
+              references None
+
+      Expr <NumLit test.lkt:7:33-7:34>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "invalid2" test.lkt:8:1-8:41> failed nameres:
+test.lkt:8:25-8:41: error: expected String, got Int
+ 8 | val invalid2 : String = identity[Int](1)
+   |                         ^^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "invalid2" test.lkt:8:1-8:41>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:8:16-8:22>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <CallExpr test.lkt:8:25-8:41>
+        has_type None
+
+      Expr <GenericInstantiation test.lkt:8:25-8:38>
+           has_type <FunctionType "(Int) -> Int" test.lkt>
+
+         Id   <RefId "identity" test.lkt:8:25-8:33>
+              has_type None
+              references None
+
+         Id   <RefId "Int" test.lkt:8:34-8:37>
+              has_type None
+              references None
+
+      Expr <NumLit test.lkt:8:39-8:40>
+           has_type <StructDecl prelude: "Int">
+
+Decl <FunDecl "twoargs[T, U]" test.lkt:11:1-11:31>
+     has_type <FunctionType "(T, U) -> T" test.lkt>
+
+   Decl <FunArgDecl "t" test.lkt:11:13-11:17>
+        has_type <GenericFormalTypeDecl "T" test.lkt:10:9-10:10>
+
+      Id   <RefId "T" test.lkt:11:16-11:17>
+           has_type None
+           references <GenericFormalTypeDecl "T" test.lkt:10:9-10:10>
+
+   Decl <FunArgDecl "u" test.lkt:11:19-11:23>
+        has_type <GenericFormalTypeDecl "U" test.lkt:10:12-10:13>
+
+      Id   <RefId "U" test.lkt:11:22-11:23>
+           has_type None
+           references <GenericFormalTypeDecl "U" test.lkt:10:12-10:13>
+
+   Id   <RefId "T" test.lkt:11:26-11:27>
+        has_type None
+        references <GenericFormalTypeDecl "T" test.lkt:10:9-10:10>
+
+   Id   <RefId "t" test.lkt:11:30-11:31>
+        has_type <GenericFormalTypeDecl "T" test.lkt:10:9-10:10>
+        references <FunArgDecl "t" test.lkt:11:13-11:17>
+
+Decl <ValDecl "v3" test.lkt:13:1-13:43>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:13:10-13:13>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:13:16-13:43>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <GenericInstantiation test.lkt:13:16-13:36>
+           has_type <FunctionType "(Int, String) -> Int" test.lkt>
+
+         Id   <RefId "twoargs" test.lkt:13:16-13:23>
+              has_type <FunctionType "(T, U) -> T" test.lkt>
+              references <FunDecl "twoargs[T, U]" test.lkt:11:1-11:31>
+
+         Id   <RefId "Int" test.lkt:13:24-13:27>
+              has_type None
+              references <StructDecl prelude: "Int">
+
+         Id   <RefId "String" test.lkt:13:29-13:35>
+              has_type None
+              references <StructDecl prelude: "String">
+
+      Expr <NumLit test.lkt:13:37-13:38>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <SingleLineStringLit test.lkt:13:40-13:42>
+           has_type <StructDecl prelude: "String">
+
+Decl <ValDecl "v4" test.lkt:14:1-14:46>
+     has_type <StructDecl prelude: "String">
+
+   Id   <RefId "String" test.lkt:14:10-14:16>
+        has_type None
+        references <StructDecl prelude: "String">
+
+   Expr <CallExpr test.lkt:14:19-14:46>
+        has_type <StructDecl prelude: "String">
+
+      Expr <GenericInstantiation test.lkt:14:19-14:39>
+           has_type <FunctionType "(String, Int) -> String" test.lkt>
+
+         Id   <RefId "twoargs" test.lkt:14:19-14:26>
+              has_type <FunctionType "(T, U) -> T" test.lkt>
+              references <FunDecl "twoargs[T, U]" test.lkt:11:1-11:31>
+
+         Id   <RefId "String" test.lkt:14:27-14:33>
+              has_type None
+              references <StructDecl prelude: "String">
+
+         Id   <RefId "Int" test.lkt:14:35-14:38>
+              has_type None
+              references <StructDecl prelude: "Int">
+
+      Expr <SingleLineStringLit test.lkt:14:40-14:42>
+           has_type <StructDecl prelude: "String">
+
+      Expr <NumLit test.lkt:14:44-14:45>
+           has_type <StructDecl prelude: "Int">
+
+Decl <FieldDecl "f" test.lkt:18:5-18:9>
+     has_type <GenericFormalTypeDecl "T" test.lkt:16:9-16:10>
+
+   Id   <RefId "T" test.lkt:18:8-18:9>
+        has_type None
+        references <GenericFormalTypeDecl "T" test.lkt:16:9-16:10>
+
+Decl <FunDecl "get_f[T]" test.lkt:22:1-22:36>
+     has_type <FunctionType "(GenStruct[T]) -> T" test.lkt>
+
+   Decl <FunArgDecl "t" test.lkt:22:11-22:26>
+        has_type <StructDecl "GenStruct[T]" test.lkt:17:1-19:2>
+
+      Id   <RefId "GenStruct" test.lkt:22:14-22:23>
+           has_type None
+           references <StructDecl "GenStruct[T]" test.lkt:17:1-19:2>
+
+      Id   <RefId "T" test.lkt:22:24-22:25>
+           has_type None
+           references <GenericFormalTypeDecl "T" test.lkt:21:9-21:10>
+
+   Id   <RefId "T" test.lkt:22:29-22:30>
+        has_type None
+        references <GenericFormalTypeDecl "T" test.lkt:21:9-21:10>
+
+   Expr <DotExpr test.lkt:22:33-22:36>
+        has_type <GenericFormalTypeDecl "T" test.lkt:21:9-21:10>
+
+      Id   <RefId "t" test.lkt:22:33-22:34>
+           has_type <StructDecl "GenStruct[T]" test.lkt:17:1-19:2>
+           references <FunArgDecl "t" test.lkt:22:11-22:26>
+
+      Id   <RefId "f" test.lkt:22:35-22:36>
+           has_type <GenericFormalTypeDecl "T" test.lkt:21:9-21:10>
+           references <FieldDecl "f" test.lkt:18:5-18:9>
+
+Decl <ValDecl "v3" test.lkt:24:1-24:48>
+     has_type <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:24:10-24:13>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <CallExpr test.lkt:24:16-24:48>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <GenericInstantiation test.lkt:24:16-24:26>
+           has_type <FunctionType "(GenStruct[Int]) -> Int" test.lkt>
+
+         Id   <RefId "get_f" test.lkt:24:16-24:21>
+              has_type <FunctionType "(GenStruct[T]) -> T" test.lkt>
+              references <FunDecl "get_f[T]" test.lkt:22:1-22:36>
+
+         Id   <RefId "Int" test.lkt:24:22-24:25>
+              has_type None
+              references <StructDecl prelude: "Int">
+
+      Expr <NullLit test.lkt:24:27-24:47>
+           has_type <StructDecl "GenStruct[Int]" test.lkt:17:1-19:2>
+
+         Id   <RefId "GenStruct" test.lkt:24:32-24:41>
+              has_type None
+              references <StructDecl "GenStruct[T]" test.lkt:17:1-19:2>
+
+         Id   <RefId "Int" test.lkt:24:42-24:45>
+              has_type None
+              references <StructDecl prelude: "Int">
+

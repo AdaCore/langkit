@@ -1,0 +1,239 @@
+Resolving test.lkt
+==================
+Decl <FunDecl "f1" test.lkt:1:1-1:18>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:1:11-1:14>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:1:17-1:18>
+        has_type <StructDecl prelude: "Int">
+
+Decl <FunDecl "f2" test.lkt:2:1-2:28>
+     has_type <FunctionType "(Int) -> Int" test.lkt>
+
+   Decl <FunArgDecl "i" test.lkt:2:8-2:14>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "Int" test.lkt:2:11-2:14>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:2:17-2:20>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:2:23-2:28>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "i" test.lkt:2:23-2:24>
+           has_type <StructDecl prelude: "Int">
+           references <FunArgDecl "i" test.lkt:2:8-2:14>
+
+      Expr <NumLit test.lkt:2:27-2:28>
+           has_type <StructDecl prelude: "Int">
+
+Decl <FunDecl "f3" test.lkt:3:1-3:48>
+     has_type <FunctionType "(Int, Int, Int) -> Int" test.lkt>
+
+   Decl <FunArgDecl "i" test.lkt:3:8-3:14>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "Int" test.lkt:3:11-3:14>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+   Decl <FunArgDecl "j" test.lkt:3:16-3:22>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "Int" test.lkt:3:19-3:22>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+   Decl <FunArgDecl "k" test.lkt:3:24-3:30>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "Int" test.lkt:3:27-3:30>
+           has_type None
+           references <StructDecl prelude: "Int">
+
+   Id   <RefId "Int" test.lkt:3:33-3:36>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <BinOp test.lkt:3:39-3:48>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <BinOp test.lkt:3:39-3:44>
+           has_type <StructDecl prelude: "Int">
+
+         Id   <RefId "i" test.lkt:3:39-3:40>
+              has_type <StructDecl prelude: "Int">
+              references <FunArgDecl "i" test.lkt:3:8-3:14>
+
+         Id   <RefId "j" test.lkt:3:43-3:44>
+              has_type <StructDecl prelude: "Int">
+              references <FunArgDecl "j" test.lkt:3:16-3:22>
+
+      Id   <RefId "k" test.lkt:3:47-3:48>
+           has_type <StructDecl prelude: "Int">
+           references <FunArgDecl "k" test.lkt:3:24-3:30>
+
+Decl <ValDecl "not_callable" test.lkt:5:1-5:21>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <NumLit test.lkt:5:20-5:21>
+        has_type <StructDecl prelude: "Int">
+
+<ValDecl "invalid1" test.lkt:7:1-7:21> failed nameres:
+test.lkt:7:16-7:21: error: invalid call, expected () -> Int
+ 7 | val invalid1 = f1(1)
+   |                ^^^^^ 
+
+Decl <ValDecl "invalid1" test.lkt:7:1-7:21>
+     has_type None
+
+   Expr <CallExpr test.lkt:7:16-7:21>
+        has_type None
+
+      Id   <RefId "f1" test.lkt:7:16-7:18>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:7:19-7:20>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "invalid2" test.lkt:8:1-8:22> failed nameres:
+test.lkt:8:19-8:21: error: expected Int, got String
+ 8 | val invalid2 = f2("")
+   |                   ^^ 
+
+Decl <ValDecl "invalid2" test.lkt:8:1-8:22>
+     has_type None
+
+   Expr <CallExpr test.lkt:8:16-8:22>
+        has_type None
+
+      Id   <RefId "f2" test.lkt:8:16-8:18>
+           has_type None
+           references None
+
+      Expr <SingleLineStringLit test.lkt:8:19-8:21>
+           has_type <StructDecl prelude: "String">
+
+<ValDecl "invalid3" test.lkt:9:1-9:24> failed nameres:
+test.lkt:9:16-9:24: error: invalid call, expected (Int, Int, Int) -> Int
+ 9 | val invalid3 = f3(1, 2)
+   |                ^^^^^^^^ 
+
+Decl <ValDecl "invalid3" test.lkt:9:1-9:24>
+     has_type None
+
+   Expr <CallExpr test.lkt:9:16-9:24>
+        has_type None
+
+      Id   <RefId "f3" test.lkt:9:16-9:18>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:9:19-9:20>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:9:22-9:23>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "invalid4" test.lkt:10:1-10:30> failed nameres:
+test.lkt:10:16-10:28: error: Int is not callable
+ 10 | val invalid4 = not_callable()
+    |                ^^^^^^^^^^^^ 
+
+test.lkt:10:5-10:13: error: could not determine type
+ 10 | val invalid4 = not_callable()
+    |     ^^^^^^^^ 
+
+Decl <ValDecl "invalid4" test.lkt:10:1-10:30>
+     has_type None
+
+   Expr <CallExpr test.lkt:10:16-10:30>
+        has_type None
+
+      Id   <RefId "not_callable" test.lkt:10:16-10:28>
+           has_type None
+           references None
+
+<ValDecl "named1" test.lkt:12:1-12:21> failed nameres:
+test.lkt:12:17-12:18: error: unmatched arguments
+ 12 | val named1 = f1(i=1)
+    |                 ^ 
+
+Decl <ValDecl "named1" test.lkt:12:1-12:21>
+     has_type None
+
+   Expr <CallExpr test.lkt:12:14-12:21>
+        has_type None
+
+      Id   <RefId "f1" test.lkt:12:14-12:16>
+           has_type None
+           references None
+
+      Id   <RefId "i" test.lkt:12:17-12:18>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:12:19-12:20>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "named2" test.lkt:13:1-13:24> failed nameres:
+test.lkt:13:20-13:21: error: unmatched arguments
+ 13 | val named2 = f2(1, i=1)
+    |                    ^ 
+
+Decl <ValDecl "named2" test.lkt:13:1-13:24>
+     has_type None
+
+   Expr <CallExpr test.lkt:13:14-13:24>
+        has_type None
+
+      Id   <RefId "f2" test.lkt:13:14-13:16>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:13:17-13:18>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "i" test.lkt:13:20-13:21>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:13:22-13:23>
+           has_type <StructDecl prelude: "Int">
+
+<ValDecl "named2" test.lkt:14:1-14:28> failed nameres:
+test.lkt:14:25-14:27: error: expected Int, got String
+ 14 | val named2 = f3(1, 2, k="")
+    |                         ^^ 
+
+Decl <ValDecl "named2" test.lkt:14:1-14:28>
+     has_type None
+
+   Expr <CallExpr test.lkt:14:14-14:28>
+        has_type None
+
+      Id   <RefId "f3" test.lkt:14:14-14:16>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:14:17-14:18>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <NumLit test.lkt:14:20-14:21>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "k" test.lkt:14:23-14:24>
+           has_type None
+           references None
+
+      Expr <SingleLineStringLit test.lkt:14:25-14:27>
+           has_type <StructDecl prelude: "String">
+

@@ -1,0 +1,11 @@
+generic[T]
+fun identity(t: T): T = t
+generic[T]
+fun f(arr: Array[T], t: T): T
+
+val v1 = identity(1)
+val infer_arg_1 = f([null], 1)
+val infer_arg_2 = f([1], null)
+
+val invalid1 : String = identity(1)
+val invalid2 : String = identity(null)

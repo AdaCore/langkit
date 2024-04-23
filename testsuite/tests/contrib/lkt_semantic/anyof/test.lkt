@@ -1,0 +1,8 @@
+class FooNode implements Node[FooNode] {}
+class Child : FooNode {}
+
+val valid1 = 1 in 1 | 2 | 3
+val valid2 = Child() in FooNode() | Child() | null
+
+val one_invalid = 1 in 1 | 2 | "3"
+val all_invalid = 1 in "1" | "2" | "3"

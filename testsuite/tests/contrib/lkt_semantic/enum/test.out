@@ -1,0 +1,198 @@
+Resolving test.lkt
+==================
+Decl <EnumLitDecl "a1" test.lkt:2:10-2:12>
+     has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+Decl <EnumLitDecl "b1" test.lkt:2:14-2:16>
+     has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+Decl <EnumLitDecl "c1" test.lkt:2:18-2:20>
+     has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+Decl <ValDecl "v1" test.lkt:5:1-5:26>
+     has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+   Id   <RefId "Basic" test.lkt:5:10-5:15>
+        has_type None
+        references <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+   Expr <DotExpr test.lkt:5:18-5:26>
+        has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+      Id   <RefId "Basic" test.lkt:5:18-5:23>
+           has_type None
+           references <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+      Id   <RefId "a1" test.lkt:5:24-5:26>
+           has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+           references <EnumLitDecl "a1" test.lkt:2:10-2:12>
+
+<ValDecl "notfound" test.lkt:6:1-6:18> failed nameres:
+test.lkt:6:16-6:18: error: undefined entity
+ 6 | val notfound = b1
+   |                ^^ 
+
+test.lkt:6:5-6:13: error: could not determine type
+ 6 | val notfound = b1
+   |     ^^^^^^^^ 
+
+Decl <ValDecl "notfound" test.lkt:6:1-6:18>
+     has_type None
+
+   Id   <RefId "b1" test.lkt:6:16-6:18>
+        has_type None
+        references None
+
+Expr <Id "open" test.lkt:8:2-8:6>
+     has_type None
+
+Decl <EnumLitDecl "a2" test.lkt:9:10-9:12>
+     has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+Decl <EnumLitDecl "b2" test.lkt:9:14-9:16>
+     has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+Decl <EnumLitDecl "c2" test.lkt:9:18-9:20>
+     has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+Decl <ValDecl "v3" test.lkt:12:1-12:21>
+     has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+   Id   <RefId "Opened" test.lkt:12:10-12:16>
+        has_type None
+        references <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+   Id   <RefId "a2" test.lkt:12:19-12:21>
+        has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+        references <EnumLitDecl "a2" test.lkt:9:10-9:12>
+
+Decl <ValDecl "v4" test.lkt:13:1-13:28>
+     has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+   Id   <RefId "Opened" test.lkt:13:10-13:16>
+        has_type None
+        references <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+   Expr <DotExpr test.lkt:13:19-13:28>
+        has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+      Id   <RefId "Opened" test.lkt:13:19-13:25>
+           has_type None
+           references <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+      Id   <RefId "b2" test.lkt:13:26-13:28>
+           has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+           references <EnumLitDecl "b2" test.lkt:9:14-9:16>
+
+Decl <ValDecl "v5" test.lkt:14:1-14:12>
+     has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+   Id   <RefId "c2" test.lkt:14:10-14:12>
+        has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+        references <EnumLitDecl "c2" test.lkt:9:18-9:20>
+
+<ValDecl "not_match1" test.lkt:16:1-16:35> failed nameres:
+test.lkt:16:27-16:35: error: expected Opened, got Basic
+ 16 | val not_match1 : Opened = Basic.a1
+    |                           ^^^^^^^^ 
+
+Decl <ValDecl "not_match1" test.lkt:16:1-16:35>
+     has_type <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+   Id   <RefId "Opened" test.lkt:16:18-16:24>
+        has_type None
+        references <EnumTypeDecl "Opened" test.lkt:8:7-10:2>
+
+   Expr <DotExpr test.lkt:16:27-16:35>
+        has_type None
+
+      Id   <RefId "Basic" test.lkt:16:27-16:32>
+           has_type None
+           references <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+      Id   <RefId "a1" test.lkt:16:33-16:35>
+           has_type None
+           references None
+
+<ValDecl "enum_no_field" test.lkt:18:1-18:40> failed nameres:
+test.lkt:18:38-18:40: error: undefined entity
+ 18 | val enum_no_field : Basic = Basic.a1.b1
+    |                                      ^^ 
+
+test.lkt:18:5-18:18: error: could not determine type
+ 18 | val enum_no_field : Basic = Basic.a1.b1
+    |     ^^^^^^^^^^^^^ 
+
+Decl <ValDecl "enum_no_field" test.lkt:18:1-18:40>
+     has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+   Id   <RefId "Basic" test.lkt:18:21-18:26>
+        has_type None
+        references <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+   Expr <DotExpr test.lkt:18:29-18:40>
+        has_type None
+
+      Expr <DotExpr test.lkt:18:29-18:37>
+           has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+         Id   <RefId "Basic" test.lkt:18:29-18:34>
+              has_type None
+              references <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+
+         Id   <RefId "a1" test.lkt:18:35-18:37>
+              has_type <EnumTypeDecl "Basic" test.lkt:1:1-3:2>
+              references <EnumLitDecl "a1" test.lkt:2:10-2:12>
+
+      Id   <RefId "b1" test.lkt:18:38-18:40>
+           has_type None
+           references None
+
+Decl <FunDecl "t" test.lkt:23:5-26:6>
+     has_type <FunctionType "() -> Int" test.lkt>
+
+   Id   <RefId "Int" test.lkt:23:14-23:17>
+        has_type None
+        references <StructDecl prelude: "Int">
+
+   Expr <MatchExpr test.lkt:23:20-26:6>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "node" test.lkt:23:26-23:30>
+           has_type <EnumClassDecl "Toto" test.lkt:20:1-27:2>
+           references <NodeDecl "node" test.lkt:20:1-27:2>
+
+      Decl <MatchValDecl "_" test.lkt:24:14-24:26>
+           has_type <EnumClassAltDecl "Titi" test.lkt:21:10-21:14>
+
+         Expr <DotExpr test.lkt:24:17-24:26>
+              has_type None
+
+            Id   <RefId "Toto" test.lkt:24:17-24:21>
+                 has_type None
+                 references <EnumClassDecl "Toto" test.lkt:20:1-27:2>
+
+            Id   <RefId "Titi" test.lkt:24:22-24:26>
+                 has_type None
+                 references <EnumClassAltDecl "Titi" test.lkt:21:10-21:14>
+
+      Expr <NumLit test.lkt:24:30-24:31>
+           has_type <StructDecl prelude: "Int">
+
+      Decl <MatchValDecl "_" test.lkt:25:14-25:26>
+           has_type <EnumClassAltDecl "Tata" test.lkt:21:16-21:20>
+
+         Expr <DotExpr test.lkt:25:17-25:26>
+              has_type None
+
+            Id   <RefId "Toto" test.lkt:25:17-25:21>
+                 has_type None
+                 references <EnumClassDecl "Toto" test.lkt:20:1-27:2>
+
+            Id   <RefId "Tata" test.lkt:25:22-25:26>
+                 has_type None
+                 references <EnumClassAltDecl "Tata" test.lkt:21:16-21:20>
+
+      Expr <NumLit test.lkt:25:30-25:31>
+           has_type <StructDecl prelude: "Int">
+

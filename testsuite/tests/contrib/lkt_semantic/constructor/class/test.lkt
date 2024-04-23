@@ -1,0 +1,13 @@
+class A {
+    a: Int
+}
+
+class B : A {
+    b: Int
+    c: String
+}
+
+val v1: A = A(1)
+val v2: A = B(a=1, b=2, c="3")
+
+val invalid: A = A(1, 2)

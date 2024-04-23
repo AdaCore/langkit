@@ -1,9 +1,0 @@
-# Check that we properly handle BigInt
-
-fun itob(i: Int): BigInt = i.as_big_int()
-fun btoi(i: BigInt): Int = i.as_int()
-
-val v1 = itob(1)
-@invalid val v2 = itob(1b)
-val v3 = btoi(1b)
-@invalid val v4 = btoi(1)

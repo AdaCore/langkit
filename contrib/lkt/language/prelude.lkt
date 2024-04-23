@@ -1,92 +1,524 @@
-@builtin struct Int {
-    @builtin fun as_big_int(): BigInt
+# In this file, the RootNode__ type designates the root node type from the
+# Langkit spec importing this prelude. See the ``Decl`` environment spec for
+# more details.
+
+|" Trait implicitly implemented by all types
+generic[T]
+trait BasicTrait {
+    @builtin
+    @property
+    fun is_null(): Bool
+
+    @builtin
+    @property
+    fun singleton(): Array[T]
+
+    @builtin
+    generic[U]
+    fun do(do_fn: (T)->U, default_val: U = null[U]): U
+
+    @builtin
+    @property
+    fun as_entity(): Entity[T]
+
+    @builtin
+    @property
+    fun as_bare_entity(): Entity[T]
+
+    @builtin
+    fun to_builder(): NodeBuilder[T]
 }
 
-@builtin struct BigInt {
-    @builtin fun as_int(): Int
+@builtin
+struct Int {
+    @builtin
+    fun as_big_int(): BigInt
 }
 
-@builtin struct Symbol {
+@builtin
+struct BigInt {
+    @builtin
+    fun as_int(): Int
 }
 
-@builtin struct Regexp {
+@builtin
+struct Symbol {
+    @builtin
+    fun image(): String
 }
 
-@builtin @open enum Bool {
+@builtin
+struct Regexp {
+}
+
+@builtin
+@open
+enum Bool {
     case false, true
 }
 
-@builtin trait Sized {
-    @builtin fun length(): Int
+@builtin
+trait Sized {
+    @builtin
+    fun length(): Int
 }
 
-@builtin generic[T]
+@builtin
+generic[T]
 trait Indexable {
-    @builtin fun __call__(index: Int): T
+    @builtin
+    fun __call__(index: Int): T
 }
 
-@builtin generic[T]
-trait Iterator {
-    @builtin generic[U]
-    fun map(map_fn: (T) -> U): Array[U]
+@builtin
+generic[T]
+trait Iterable {
+    @builtin
+    generic[U]
+    fun map(map_fn: (T)->U): Array[U]
 
-    @builtin generic[U]
-    fun filtermap(map_fn: (T) -> U, filter_fn: (T) -> Bool): Array[U]
+    @builtin
+    generic[U]
+    fun imap(map_fn: (T, Int)->U): Array[U]
 
-    @builtin fun find(filter_fn: (T) -> Bool): T
+    @builtin
+    generic[U]
+    fun mapcat(map_fn: (T)->Array[U]): Array[U]
+
+    @builtin
+    generic[U]
+    fun imapcat(map_fn: (T, Int)->Array[U]): Array[U]
+
+    @builtin
+    fun filter(filter_fn: (T)->Bool): Array[T]
+
+    @builtin
+    fun ifilter(filter_fn: (T, Int)->Bool): Array[T]
+
+    @builtin
+    generic[U]
+    fun filtermap(map_fn: (T)->U, filter_fn: (T)->Bool): Array[U]
+
+    @builtin
+    generic[U]
+    fun ifiltermap(map_fn: (T, Int)->U, filter_fn: (T, Int)->Bool): Array[U]
+
+    @builtin
+    fun find(filter_fn: (T)->Bool): T
+
+    @builtin
+    fun take_while(pred_fn: (T)->Bool): Array[T]
+
+    @builtin
+    fun itake_while(pred_fn: (T, Int)->Bool): Array[T]
+
+    @builtin
+    fun empty(): Bool
+
+    @builtin
+    fun contains(elt: T): Bool
+
+    @builtin
+    fun all(logic_fn: (T)->Bool): Bool
+
+    @builtin
+    fun iall(logic_fn: (T, Int)->Bool): Bool
+
+    @builtin
+    fun any(logic_fn: (T)->Bool): Bool
+
+    @builtin
+    fun iany(logic_fn: (T, Int)->Bool): Bool
+
+    @builtin
+    fun logic_all(logic_fn: (T)->Equation): Equation
+
+    @builtin
+    fun ilogic_all(logic_fn: (T, Int)->Equation): Equation
+
+    @builtin
+    fun logic_any(logic_fn: (T)->Equation): Equation
+
+    @builtin
+    fun ilogic_any(logic_fn: (T, Int)->Equation): Equation
 }
 
-@builtin generic[T]
-struct Array implements Sized, Indexable[T], Iterator[T] {
-    @builtin fun to_iterator(): Iterator[T]
-    @builtin fun unique(): Array[T]
+@builtin
+generic[T]
+struct Array implements Sized, Indexable[T], Iterable[T] {
+    @builtin
+    fun to_iterator(): Iterator[T]
+
+    @builtin
+    fun unique(): Array[T]
+
+    @builtin
+    fun env_group(with_md: Metadata = null[Metadata]): LexicalEnv
 }
 
-@builtin generic[class RootNode, T]
-class ASTList : RootNode implements Sized, Indexable[T], Iterator[T] {
+@builtin
+generic[T]
+struct Iterator {
 }
 
-@builtin struct Char {
+@builtin
+generic[T]
+trait Node {
+    @builtin
+    @property
+    fun parent(): T
+
+    @builtin
+    @property
+    fun node_env(): LexicalEnv
+
+    @builtin
+    @property
+    fun children_env(): LexicalEnv
+
+    @builtin
+    @property
+    fun unit(): AnalysisUnit
+
+    @builtin
+    fun parents(with_self: Bool = true): Array[T]
+
+    @builtin
+    @property
+    fun children(): Array[T]
+
+    @builtin
+    @property
+    fun text(): String
+
+    @builtin
+    fun ple_root(): RootNode__
+
+    @builtin
+    fun can_reach(from_node: RootNode__): Bool
+
+    @builtin
+    fun token_start(): Token
+
+    @builtin
+    fun token_end(): Token
+
+    @builtin
+    @property
+    fun child_index(): Int
+
+    @builtin
+    @property
+    fun previous_sibling(): Entity[RootNode__]
+
+    @builtin
+    @property
+    fun next_sibling(): Entity[RootNode__]
+
+    @builtin
+    fun is_ghost(): Bool
+
+    @builtin
+    fun full_sloc_image(): String
 }
 
-@builtin struct String implements Sized, Indexable[Char], Iterator[Char] {
-    @builtin @property fun to_symbol(): Symbol
-    @builtin fun join(strings: Array[String]): String
+@builtin
+generic[class T]
+class ASTList: RootNode__ implements Sized, Indexable[T], Iterable[T] {
+    @builtin
+    fun as_array(): Array[T]
 }
 
-@builtin class LogicalVar {
+@builtin
+generic[class T]
+class NodeBuilder {
+    @builtin
+    fun build(parent: RootNode__): T
 }
 
-@builtin class Equation {
+@builtin
+struct Char {
 }
 
-@builtin struct PropertyError {
+@builtin
+struct String implements Sized, Indexable[Char], Iterable[Char] {
+    @builtin
+    @property
+    fun to_symbol(): Symbol
+
+    @builtin
+    fun join(strings: Array[String]): String
+}
+
+@builtin
+struct LogicVar {
+    @builtin
+    fun get_value(): Entity[RootNode__]
+}
+
+@builtin
+struct LogicContext {
+    ref_node: Entity[RootNode__]
+    decl_node: Entity[RootNode__]
+}
+
+dynvar logic_context: LogicContext
+
+@builtin
+struct Equation {
+    @builtin
+    @property
+    fun solve(): Bool
+
+    @builtin
+    @property
+    fun solve_with_diagnostics(): SolverResult
+}
+
+@builtin
+struct PropertyError {
     exception_message: String = "PropertyError exception"
 }
 
-@builtin generic[RootNode] trait LexicalEnv {
-    @builtin fun get(symbol: Symbol): Array[RootNode]
-    @builtin fun get_first(symbol: Symbol): RootNode
-    @builtin fun env_node(): RootNode
-    @builtin fun env_orphan(): LexicalEnv
+@builtin
+struct PreconditionFailure {
+    exception_message: String = "PreconditionFailure exception"
 }
 
-@builtin generic[RootNode] trait AnalysisUnit {
-    @builtin @property fun root(): RootNode
+@builtin
+@ignore_constructor_arg
+struct RefCategories {
 }
 
-@builtin generic[RootNode] trait Node {
-    @builtin @property fun parent(): RootNode
-    @builtin fun node_env(): LexicalEnv[RootNode]
-    @builtin fun children_env(): LexicalEnv[RootNode]
-    @builtin fun unit(): AnalysisUnit[RootNode]
-    @builtin fun parents(with_self: Bool = true): Array[RootNode]
-    @builtin @property fun children(): Array[RootNode]
+@builtin
+enum LookupKind {
+    case recursive, flat, minimal
 }
 
-@builtin trait TokenNode {
-    @builtin @property fun symbol(): Symbol
+@builtin
+struct LexicalEnv {
+    @builtin
+    fun get(
+        symbol: Symbol,
+        from: RootNode__ = null[RootNode__],
+        lookup: LookupKind = LookupKind.recursive,
+        categories: RefCategories = null[RefCategories]
+    ): Array[Entity[RootNode__]]
+
+    @builtin
+    fun get_first(
+        symbol: Symbol,
+        from: RootNode__ = null[RootNode__],
+        lookup: LookupKind = LookupKind.recursive,
+        categories: RefCategories = null[RefCategories]
+    ): Entity[RootNode__]
+
+    @builtin
+    @property
+    fun env_node(): RootNode__
+
+    @builtin
+    @property
+    fun env_orphan(): LexicalEnv
+
+    @builtin
+    @property
+    fun env_parent(): LexicalEnv
+
+    @builtin
+    fun is_visible_from(base_env: LexicalEnv): Bool
+
+    @builtin
+    fun shed_rebindings(info: EntityInfo): EntityInfo
+
+    @builtin
+    fun rebind_env(r: EnvRebindings): LexicalEnv
 }
 
-@builtin trait ErrorNode {
+@builtin
+enum DesignatedEnvKind {
+    case none, current_env, named_env, direct_env
 }
+
+@builtin
+struct DesignatedEnv {
+    kind: DesignatedEnvKind
+    env_name: Symbol
+    direct_env: LexicalEnv
+}
+
+@builtin
+enum AnalysisUnitKind {
+    case unit_specification, unit_body
+}
+
+@builtin
+trait AnalysisUnit {
+    @builtin
+    @property
+    fun root(): RootNode__
+
+    @builtin
+    fun is_referenced_from(unit: AnalysisUnit): Bool
+}
+
+@builtin
+struct EnvRebindings {
+    old_env: LexicalEnv
+    new_env: LexicalEnv
+    get_parent: EnvRebindings
+
+    @builtin
+    fun append_rebinding(
+        old_env: LexicalEnv,
+        new_env: LexicalEnv
+    ): EnvRebindings
+
+    @builtin
+    fun concat_rebindings(rhs: EnvRebindings): EnvRebindings
+}
+
+@builtin
+struct EnvAssoc {
+    key: Symbol
+    value: RootNode__
+    dest_env: DesignatedEnv
+    metadata: Metadata
+}
+
+@builtin
+struct InnerEnvAssoc {
+    key: Symbol
+    value: RootNode__
+    rebindings: EnvRebindings = null[EnvRebindings]
+    metadata: Metadata = null[Metadata]
+}
+
+@builtin
+@open
+enum RefKind {
+    case transitive, prioritary, normal
+}
+
+@builtin
+struct EnvAction {
+}
+
+@builtin
+fun set_initial_env(env: DesignatedEnv): EnvAction
+
+@builtin
+fun add_env(
+    no_parent: Bool = false,
+    transitive_parent: Bool = false,
+    names: Array[Symbol] = null
+): EnvAction
+
+@builtin
+fun add_single_to_env(mapping: EnvAssoc): EnvAction
+
+@builtin
+fun add_all_to_env(mappings: Array[EnvAssoc]): EnvAction
+
+@builtin
+fun add_to_env_kv(
+    key: Symbol,
+    value: RootNode__,
+    dest_env: DesignatedEnv = null,
+    metadata: Metadata = null
+): EnvAction
+
+@builtin
+generic[T]
+fun do(expr: T): EnvAction
+
+@builtin
+fun handle_children(): EnvAction
+
+@builtin
+fun reference(
+    nodes: Array[RootNode__],
+    through: ()->LexicalEnv,
+    kind: RefKind = normal,
+    dest_env: LexicalEnv = null,
+    cond: Bool = true,
+    category: String = null,
+    shed_corresponding_rebindings: Bool = false
+): EnvAction
+
+@builtin
+struct EntityInfo {
+    |" The metadata associated to the AST node
+    md: Metadata
+    rebindings: EnvRebindings
+    from_rebound: Bool
+}
+
+@builtin
+generic[N]
+struct Entity {
+    node: N
+    info: EntityInfo
+}
+
+@builtin
+trait TokenNode {
+    @builtin
+    @property
+    fun symbol(): Symbol
+}
+
+@builtin
+struct SolverDiagnostic {
+    template: String
+    args: Array[Entity[RootNode__]]
+    location: RootNode__
+    contexts: Array[LogicContext]
+    round: Int
+}
+
+@builtin
+struct SolverResult {
+    success: Bool
+    diagnostics: Array[SolverDiagnostic] = null[Array[SolverDiagnostic]]
+}
+
+@builtin
+struct Token {
+}
+
+@builtin
+struct SourceLocation {
+}
+
+struct __internal {
+    |" Placeholder type when the langkit specification does not have a type
+    |" annotated with ``@metadata``.
+    |"
+    |" This is hidden in its own scope and later has a reference in the
+    |" global lexical environemnt so that if no type is designated as metadata,
+    |" this types serves as fallback.
+    @metadata
+    struct __EmptyMetadata {
+    }
+}
+
+@builtin
+trait ErrorNode {
+}
+
+@builtin
+struct Address {
+}
+
+@builtin
+fun dynamic_lexical_env(
+    assocs_getter: ()->Array[InnerEnvAssoc],
+    assoc_resolver: ()->Entity[RootNode__] = null,
+    transitive_parent: Bool = true
+): LexicalEnv
+
+@builtin
+fun domain(var: LogicVar, values: Array[Entity[RootNode__]]): Equation
+
+dynvar error_location: RootNode__

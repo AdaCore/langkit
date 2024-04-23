@@ -1,0 +1,15 @@
+generic[T, U]
+struct GenStruct {
+    f: T
+    g: U
+}
+
+generic[T]
+struct GenStruct2 {
+    f: T
+    g: T
+}
+
+val v1 = GenStruct(1, "")
+
+val invalid1 = GenStruct2(1, "")

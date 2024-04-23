@@ -1,0 +1,63 @@
+Resolving test.lkt
+==================
+Decl <ValDecl "many_array" test.lkt:1:1-1:29>
+     has_type <StructDecl prelude: "Array[Array[Array[Array[Array[Int]]]]]">
+
+   Expr <ArrayLiteral test.lkt:1:18-1:29>
+        has_type <StructDecl prelude: "Array[Array[Array[Array[Array[Int]]]]]">
+
+      Expr <ArrayLiteral test.lkt:1:19-1:28>
+           has_type <StructDecl prelude: "Array[Array[Array[Array[Int]]]]">
+
+         Expr <ArrayLiteral test.lkt:1:20-1:27>
+              has_type <StructDecl prelude: "Array[Array[Array[Int]]]">
+
+            Expr <ArrayLiteral test.lkt:1:21-1:26>
+                 has_type <StructDecl prelude: "Array[Array[Int]]">
+
+               Expr <ArrayLiteral test.lkt:1:22-1:25>
+                    has_type <StructDecl prelude: "Array[Int]">
+
+                  Expr <NumLit test.lkt:1:23-1:24>
+                       has_type <StructDecl prelude: "Int">
+
+Id   <RefId "Node" test.lkt:3:27-3:31>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "BaseNode" test.lkt:3:32-3:40>
+     has_type None
+     references <ClassDecl "BaseNode" test.lkt:3:1-5:2>
+
+Decl <FieldDecl "entity_array" test.lkt:7:6-7:69>
+     has_type <StructDecl prelude: "Array[Entity[BaseNode]]">
+
+   Id   <RefId "Array" test.lkt:7:21-7:26>
+        has_type None
+        references <StructDecl prelude: "Array[T]">
+
+   Id   <RefId "Entity" test.lkt:7:27-7:33>
+        has_type None
+        references <StructDecl prelude: "Entity[N]">
+
+   Id   <RefId "BaseNode" test.lkt:7:34-7:42>
+        has_type None
+        references <ClassDecl "BaseNode" test.lkt:3:1-5:2>
+
+   Expr <ArrayLiteral test.lkt:7:47-7:69>
+        has_type <StructDecl prelude: "Array[Entity[BaseNode]]">
+
+      Expr <DotExpr test.lkt:7:48-7:68>
+           has_type <StructDecl prelude: "Entity[BaseNode]">
+
+         Expr <CallExpr test.lkt:7:48-7:58>
+              has_type <ClassDecl "BaseNode" test.lkt:3:1-5:2>
+
+            Id   <RefId "BaseNode" test.lkt:7:48-7:56>
+                 has_type <FunctionType "() -> BaseNode" test.lkt>
+                 references <ClassDecl "BaseNode" test.lkt:3:1-5:2>
+
+         Id   <RefId "as_entity" test.lkt:7:59-7:68>
+              has_type <StructDecl prelude: "Entity[BaseNode]">
+              references <FunDecl prelude: "as_entity">
+

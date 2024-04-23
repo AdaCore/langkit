@@ -1,0 +1,7 @@
+val many_array = [[[[[1]]]]]
+
+class BaseNode implements Node[BaseNode] {
+
+}
+
+test entity_array : Array[Entity[BaseNode]] = [BaseNode().as_entity]

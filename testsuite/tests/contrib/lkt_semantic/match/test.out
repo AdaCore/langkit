@@ -1,0 +1,279 @@
+Resolving test.lkt
+==================
+Id   <RefId "A" test.lkt:2:11-2:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Id   <RefId "A" test.lkt:3:11-3:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "a" test.lkt:7:1-7:17>
+     has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+   Id   <RefId "A" test.lkt:7:9-7:10>
+        has_type None
+        references <ClassDecl "A" test.lkt:1:1-1:11>
+
+   Expr <NullLit test.lkt:7:13-7:17>
+        has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+Decl <ValDecl "m1" test.lkt:9:1-13:2>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <MatchExpr test.lkt:9:10-13:2>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "a" test.lkt:9:16-9:17>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+           references <ValDecl "a" test.lkt:7:1-7:17>
+
+      Decl <MatchValDecl "a" test.lkt:10:10-10:15>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+         Id   <RefId "A" test.lkt:10:14-10:15>
+              has_type None
+              references <ClassDecl "A" test.lkt:1:1-1:11>
+
+      Expr <NumLit test.lkt:10:19-10:20>
+           has_type <StructDecl prelude: "Int">
+
+      Decl <MatchValDecl "b" test.lkt:11:10-11:15>
+           has_type <ClassDecl "B" test.lkt:2:1-2:15>
+
+         Id   <RefId "B" test.lkt:11:14-11:15>
+              has_type None
+              references <ClassDecl "B" test.lkt:2:1-2:15>
+
+      Expr <NumLit test.lkt:11:19-11:20>
+           has_type <StructDecl prelude: "Int">
+
+      Decl <MatchValDecl "c" test.lkt:12:10-12:15>
+           has_type <ClassDecl "C" test.lkt:3:1-3:15>
+
+         Id   <RefId "C" test.lkt:12:14-12:15>
+              has_type None
+              references <ClassDecl "C" test.lkt:3:1-3:15>
+
+      Expr <NumLit test.lkt:12:19-12:20>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "m2" test.lkt:14:1-18:2>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <MatchExpr test.lkt:14:10-18:2>
+        has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "a" test.lkt:14:16-14:17>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+           references <ValDecl "a" test.lkt:7:1-7:17>
+
+      Decl <MatchValDecl "b" test.lkt:15:10-15:15>
+           has_type <ClassDecl "B" test.lkt:2:1-2:15>
+
+         Id   <RefId "B" test.lkt:15:14-15:15>
+              has_type None
+              references <ClassDecl "B" test.lkt:2:1-2:15>
+
+      Expr <NumLit test.lkt:15:19-15:20>
+           has_type <StructDecl prelude: "Int">
+
+      Decl <MatchValDecl "c" test.lkt:16:10-16:15>
+           has_type <ClassDecl "C" test.lkt:3:1-3:15>
+
+         Id   <RefId "C" test.lkt:16:14-16:15>
+              has_type None
+              references <ClassDecl "C" test.lkt:3:1-3:15>
+
+      Expr <NumLit test.lkt:16:19-16:20>
+           has_type <StructDecl prelude: "Int">
+
+      Decl <MatchValDecl "_" test.lkt:17:10-17:11>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+      Expr <NumLit test.lkt:17:15-17:16>
+           has_type <StructDecl prelude: "Int">
+
+Decl <ValDecl "m3" test.lkt:20:1-23:2>
+     has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+   Expr <MatchExpr test.lkt:20:10-23:2>
+        has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+      Id   <RefId "a" test.lkt:20:16-20:17>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+           references <ValDecl "a" test.lkt:7:1-7:17>
+
+      Decl <MatchValDecl "b" test.lkt:21:10-21:15>
+           has_type <ClassDecl "B" test.lkt:2:1-2:15>
+
+         Id   <RefId "B" test.lkt:21:14-21:15>
+              has_type None
+              references <ClassDecl "B" test.lkt:2:1-2:15>
+
+      Id   <RefId "b" test.lkt:21:19-21:20>
+           has_type <ClassDecl "B" test.lkt:2:1-2:15>
+           references <MatchValDecl "b" test.lkt:21:10-21:15>
+
+      Decl <MatchValDecl "c" test.lkt:22:10-22:15>
+           has_type <ClassDecl "C" test.lkt:3:1-3:15>
+
+         Id   <RefId "C" test.lkt:22:14-22:15>
+              has_type None
+              references <ClassDecl "C" test.lkt:3:1-3:15>
+
+      Id   <RefId "c" test.lkt:22:19-22:20>
+           has_type <ClassDecl "C" test.lkt:3:1-3:15>
+           references <MatchValDecl "c" test.lkt:22:10-22:15>
+
+Decl <ValDecl "expected_propagate" test.lkt:25:1-28:2>
+     has_type <ClassDecl "B" test.lkt:2:1-2:15>
+
+   Expr <MatchExpr test.lkt:25:26-28:2>
+        has_type <ClassDecl "B" test.lkt:2:1-2:15>
+
+      Id   <RefId "a" test.lkt:25:32-25:33>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+           references <ValDecl "a" test.lkt:7:1-7:17>
+
+      Decl <MatchValDecl "b" test.lkt:26:10-26:15>
+           has_type <ClassDecl "B" test.lkt:2:1-2:15>
+
+         Id   <RefId "B" test.lkt:26:14-26:15>
+              has_type None
+              references <ClassDecl "B" test.lkt:2:1-2:15>
+
+      Id   <RefId "b" test.lkt:26:19-26:20>
+           has_type <ClassDecl "B" test.lkt:2:1-2:15>
+           references <MatchValDecl "b" test.lkt:26:10-26:15>
+
+      Decl <MatchValDecl "c" test.lkt:27:10-27:15>
+           has_type <ClassDecl "C" test.lkt:3:1-3:15>
+
+         Id   <RefId "C" test.lkt:27:14-27:15>
+              has_type None
+              references <ClassDecl "C" test.lkt:3:1-3:15>
+
+      Expr <NullLit test.lkt:27:19-27:23>
+           has_type <ClassDecl "B" test.lkt:2:1-2:15>
+
+Decl <ValDecl "expected_propagate" test.lkt:30:1-33:2>
+     has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+   Id   <RefId "A" test.lkt:30:26-30:27>
+        has_type None
+        references <ClassDecl "A" test.lkt:1:1-1:11>
+
+   Expr <MatchExpr test.lkt:30:30-33:2>
+        has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+      Id   <RefId "a" test.lkt:30:36-30:37>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+           references <ValDecl "a" test.lkt:7:1-7:17>
+
+      Decl <MatchValDecl "b" test.lkt:31:10-31:15>
+           has_type <ClassDecl "B" test.lkt:2:1-2:15>
+
+         Id   <RefId "B" test.lkt:31:14-31:15>
+              has_type None
+              references <ClassDecl "B" test.lkt:2:1-2:15>
+
+      Expr <NullLit test.lkt:31:19-31:23>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+      Decl <MatchValDecl "c" test.lkt:32:10-32:15>
+           has_type <ClassDecl "C" test.lkt:3:1-3:15>
+
+         Id   <RefId "C" test.lkt:32:14-32:15>
+              has_type None
+              references <ClassDecl "C" test.lkt:3:1-3:15>
+
+      Expr <NullLit test.lkt:32:19-32:23>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+
+<ValDecl "invalid" test.lkt:35:1-38:2> failed nameres:
+test.lkt:37:19-37:21: error: expected Int, got String
+ 37 |     case c : C => ""
+    |                   ^^ 
+
+Decl <ValDecl "invalid" test.lkt:35:1-38:2>
+     has_type None
+
+   Expr <MatchExpr test.lkt:35:15-38:2>
+        has_type None
+
+      Id   <RefId "a" test.lkt:35:21-35:22>
+           has_type <ClassDecl "A" test.lkt:1:1-1:11>
+           references <ValDecl "a" test.lkt:7:1-7:17>
+
+      Decl <MatchValDecl "b" test.lkt:36:10-36:15>
+           has_type <ClassDecl "B" test.lkt:2:1-2:15>
+
+         Id   <RefId "B" test.lkt:36:14-36:15>
+              has_type None
+              references <ClassDecl "B" test.lkt:2:1-2:15>
+
+      Expr <NumLit test.lkt:36:19-36:20>
+           has_type None
+
+      Decl <MatchValDecl "c" test.lkt:37:10-37:15>
+           has_type <ClassDecl "C" test.lkt:3:1-3:15>
+
+         Id   <RefId "C" test.lkt:37:14-37:15>
+              has_type None
+              references <ClassDecl "C" test.lkt:3:1-3:15>
+
+      Expr <SingleLineStringLit test.lkt:37:19-37:21>
+           has_type None
+
+Decl <ValDecl "mvd_no_type" test.lkt:40:1-42:2>
+     has_type <StructDecl prelude: "BigInt">
+
+   Expr <MatchExpr test.lkt:40:19-42:2>
+        has_type <StructDecl prelude: "BigInt">
+
+      Expr <NumLit test.lkt:40:25-40:26>
+           has_type <StructDecl prelude: "Int">
+
+      Decl <MatchValDecl "i" test.lkt:41:10-41:11>
+           has_type <StructDecl prelude: "Int">
+
+      Expr <CallExpr test.lkt:41:15-41:29>
+           has_type <StructDecl prelude: "BigInt">
+
+         Expr <DotExpr test.lkt:41:15-41:27>
+              has_type <FunctionType prelude: "() -> BigInt">
+
+            Id   <RefId "i" test.lkt:41:15-41:16>
+                 has_type <StructDecl prelude: "Int">
+                 references <MatchValDecl "i" test.lkt:41:10-41:11>
+
+            Id   <RefId "as_big_int" test.lkt:41:17-41:27>
+                 has_type <FunctionType prelude: "() -> BigInt">
+                 references <FunDecl prelude: "as_big_int">
+
+Decl <ValDecl "match_match" test.lkt:44:1-46:2>
+     has_type <StructDecl prelude: "Int">
+
+   Expr <MatchExpr test.lkt:44:19-46:2>
+        has_type <StructDecl prelude: "Int">
+
+      Expr <MatchExpr test.lkt:44:25-44:47>
+           has_type <StructDecl prelude: "Int">
+
+         Expr <NumLit test.lkt:44:31-44:32>
+              has_type <StructDecl prelude: "Int">
+
+         Decl <MatchValDecl "_" test.lkt:44:40-44:41>
+              has_type <StructDecl prelude: "Int">
+
+         Expr <NumLit test.lkt:44:45-44:46>
+              has_type <StructDecl prelude: "Int">
+
+      Decl <MatchValDecl "i" test.lkt:45:10-45:11>
+           has_type <StructDecl prelude: "Int">
+
+      Id   <RefId "i" test.lkt:45:15-45:16>
+           has_type <StructDecl prelude: "Int">
+           references <MatchValDecl "i" test.lkt:45:10-45:11>
+

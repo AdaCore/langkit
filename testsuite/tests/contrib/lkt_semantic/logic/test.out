@@ -1,0 +1,286 @@
+Resolving test.lkt
+==================
+Id   <RefId "Node" test.lkt:1:23-1:27>
+     has_type None
+     references <TraitDecl prelude: "Node[T]">
+
+Id   <RefId "Type" test.lkt:1:28-1:32>
+     has_type None
+     references <ClassDecl "Type" test.lkt:1:1-4:2>
+
+Decl <FunDecl "property" test.lkt:2:5-2:58>
+     has_type <FunctionType "(Entity[Type]) -> Entity[Type]" test.lkt>
+
+   Decl <FunArgDecl "type" test.lkt:2:18-2:36>
+        has_type <StructDecl prelude: "Entity[Type]">
+
+      Id   <RefId "Entity" test.lkt:2:24-2:30>
+           has_type None
+           references <StructDecl prelude: "Entity[N]">
+
+      Id   <RefId "Type" test.lkt:2:31-2:35>
+           has_type None
+           references <ClassDecl "Type" test.lkt:1:1-4:2>
+
+   Id   <RefId "Entity" test.lkt:2:39-2:45>
+        has_type None
+        references <StructDecl prelude: "Entity[N]">
+
+   Id   <RefId "Type" test.lkt:2:46-2:50>
+        has_type None
+        references <ClassDecl "Type" test.lkt:1:1-4:2>
+
+   Expr <NullLit test.lkt:2:54-2:58>
+        has_type <StructDecl prelude: "Entity[Type]">
+
+Decl <FunDecl "non_entity" test.lkt:3:5-3:34>
+     has_type <FunctionType "() -> Type" test.lkt>
+
+   Id   <RefId "Type" test.lkt:3:23-3:27>
+        has_type None
+        references <ClassDecl "Type" test.lkt:1:1-4:2>
+
+   Expr <NullLit test.lkt:3:30-3:34>
+        has_type <ClassDecl "Type" test.lkt:1:1-4:2>
+
+Decl <ValDecl "lv1" test.lkt:6:1-6:21>
+     has_type <StructDecl prelude: "LogicVar">
+
+   Expr <CallExpr test.lkt:6:11-6:21>
+        has_type <StructDecl prelude: "LogicVar">
+
+      Id   <RefId "LogicVar" test.lkt:6:11-6:19>
+           has_type <FunctionType prelude: "() -> LogicVar">
+           references <StructDecl prelude: "LogicVar">
+
+Decl <ValDecl "lv2" test.lkt:7:1-7:21>
+     has_type <StructDecl prelude: "LogicVar">
+
+   Expr <CallExpr test.lkt:7:11-7:21>
+        has_type <StructDecl prelude: "LogicVar">
+
+      Id   <RefId "LogicVar" test.lkt:7:11-7:19>
+           has_type <FunctionType prelude: "() -> LogicVar">
+           references <StructDecl prelude: "LogicVar">
+
+Decl <ValDecl "lv3" test.lkt:8:1-8:21>
+     has_type <StructDecl prelude: "LogicVar">
+
+   Expr <CallExpr test.lkt:8:11-8:21>
+        has_type <StructDecl prelude: "LogicVar">
+
+      Id   <RefId "LogicVar" test.lkt:8:11-8:19>
+           has_type <FunctionType prelude: "() -> LogicVar">
+           references <StructDecl prelude: "LogicVar">
+
+Decl <ValDecl "eq1" test.lkt:10:1-10:45>
+     has_type <StructDecl prelude: "Equation">
+
+   Id   <RefId "Equation" test.lkt:10:11-10:19>
+        has_type None
+        references <StructDecl prelude: "Equation">
+
+   Expr <LogicAssign test.lkt:10:22-10:45>
+        has_type <StructDecl prelude: "Equation">
+
+      Id   <RefId "lv1" test.lkt:10:22-10:25>
+           has_type <StructDecl prelude: "LogicVar">
+           references <ValDecl "lv1" test.lkt:6:1-6:21>
+
+      Expr <DotExpr test.lkt:10:29-10:45>
+           has_type <StructDecl prelude: "Entity[Type]">
+
+         Expr <CallExpr test.lkt:10:29-10:35>
+              has_type <ClassDecl "Type" test.lkt:1:1-4:2>
+
+            Id   <RefId "Type" test.lkt:10:29-10:33>
+                 has_type <FunctionType "() -> Type" test.lkt>
+                 references <ClassDecl "Type" test.lkt:1:1-4:2>
+
+         Id   <RefId "as_entity" test.lkt:10:36-10:45>
+              has_type <StructDecl prelude: "Entity[Type]">
+              references <FunDecl prelude: "as_entity">
+
+Decl <ValDecl "eq2" test.lkt:11:1-11:33>
+     has_type <StructDecl prelude: "Equation">
+
+   Id   <RefId "Equation" test.lkt:11:11-11:19>
+        has_type None
+        references <StructDecl prelude: "Equation">
+
+   Expr <LogicUnify test.lkt:11:22-11:33>
+        has_type <StructDecl prelude: "Equation">
+
+      Id   <RefId "lv1" test.lkt:11:22-11:25>
+           has_type <StructDecl prelude: "LogicVar">
+           references <ValDecl "lv1" test.lkt:6:1-6:21>
+
+      Id   <RefId "lv2" test.lkt:11:30-11:33>
+           has_type <StructDecl prelude: "LogicVar">
+           references <ValDecl "lv2" test.lkt:7:1-7:21>
+
+Decl <ValDecl "eq3" test.lkt:12:1-12:66>
+     has_type <StructDecl prelude: "Equation">
+
+   Id   <RefId "Equation" test.lkt:12:11-12:19>
+        has_type None
+        references <StructDecl prelude: "Equation">
+
+   Expr <LogicPropagate test.lkt:12:22-12:66>
+        has_type <StructDecl prelude: "Equation">
+
+      Id   <RefId "lv2" test.lkt:12:22-12:25>
+           has_type <StructDecl prelude: "LogicVar">
+           references <ValDecl "lv2" test.lkt:7:1-7:21>
+
+      Expr <LogicPropagateCall test.lkt:12:29-12:66>
+           has_type None
+
+         Expr <DotExpr test.lkt:12:29-12:42>
+              has_type <FunctionType "(Entity[Type]) -> Entity[Type]" test.lkt>
+
+            Id   <RefId "Type" test.lkt:12:29-12:33>
+                 has_type None
+                 references <ClassDecl "Type" test.lkt:1:1-4:2>
+
+            Id   <RefId "property" test.lkt:12:34-12:42>
+                 has_type <FunctionType "(Entity[Type]) -> Entity[Type]" test.lkt>
+                 references <FunDecl "property" test.lkt:2:5-2:58>
+
+         Id   <RefId "lv3" test.lkt:12:44-12:47>
+              has_type <StructDecl prelude: "LogicVar">
+              references <ValDecl "lv3" test.lkt:8:1-8:21>
+
+         Expr <DotExpr test.lkt:12:49-12:65>
+              has_type <StructDecl prelude: "Entity[Type]">
+
+            Expr <CallExpr test.lkt:12:49-12:55>
+                 has_type <ClassDecl "Type" test.lkt:1:1-4:2>
+
+               Id   <RefId "Type" test.lkt:12:49-12:53>
+                    has_type <FunctionType "() -> Type" test.lkt>
+                    references <ClassDecl "Type" test.lkt:1:1-4:2>
+
+            Id   <RefId "as_entity" test.lkt:12:56-12:65>
+                 has_type <StructDecl prelude: "Entity[Type]">
+                 references <FunDecl prelude: "as_entity">
+
+<ValDecl "no_logicvar_assign" test.lkt:14:1-14:47> failed nameres:
+test.lkt:14:26-14:27: error: expected LogicVar, got Int
+ 14 | val no_logicvar_assign = 1 <- Type().as_entity
+    |                          ^ 
+
+Decl <ValDecl "no_logicvar_assign" test.lkt:14:1-14:47>
+     has_type None
+
+   Expr <LogicAssign test.lkt:14:26-14:47>
+        has_type None
+
+      Expr <NumLit test.lkt:14:26-14:27>
+           has_type None
+
+      Expr <DotExpr test.lkt:14:31-14:47>
+           has_type None
+
+         Expr <CallExpr test.lkt:14:31-14:37>
+              has_type <ClassDecl "Type" test.lkt:1:1-4:2>
+
+            Id   <RefId "Type" test.lkt:14:31-14:35>
+                 has_type <FunctionType "() -> Type" test.lkt>
+                 references <ClassDecl "Type" test.lkt:1:1-4:2>
+
+         Id   <RefId "as_entity" test.lkt:14:38-14:47>
+              has_type None
+              references None
+
+<ValDecl "non_entity_assign" test.lkt:15:1-15:38> failed nameres:
+test.lkt:15:32-15:38: error: expected Entity[Type], got Type
+ 15 | val non_entity_assign = lv1 <- Type()
+    |                                ^^^^^^ 
+
+Decl <ValDecl "non_entity_assign" test.lkt:15:1-15:38>
+     has_type None
+
+   Expr <LogicAssign test.lkt:15:25-15:38>
+        has_type None
+
+      Id   <RefId "lv1" test.lkt:15:25-15:28>
+           has_type None
+           references None
+
+      Expr <CallExpr test.lkt:15:32-15:38>
+           has_type None
+
+         Id   <RefId "Type" test.lkt:15:32-15:36>
+              has_type None
+              references None
+
+<ValDecl "no_logicvar_unify1" test.lkt:17:1-17:35> failed nameres:
+test.lkt:17:26-17:27: error: expected LogicVar, got Int
+ 17 | val no_logicvar_unify1 = 1 <-> lv1
+    |                          ^ 
+
+Decl <ValDecl "no_logicvar_unify1" test.lkt:17:1-17:35>
+     has_type None
+
+   Expr <LogicUnify test.lkt:17:26-17:35>
+        has_type None
+
+      Expr <NumLit test.lkt:17:26-17:27>
+           has_type None
+
+      Id   <RefId "lv1" test.lkt:17:32-17:35>
+           has_type None
+           references None
+
+<ValDecl "no_logicvar_unify2" test.lkt:18:1-18:35> failed nameres:
+test.lkt:18:34-18:35: error: expected LogicVar, got Int
+ 18 | val no_logicvar_unify2 = lv1 <-> 1
+    |                                  ^ 
+
+Decl <ValDecl "no_logicvar_unify2" test.lkt:18:1-18:35>
+     has_type None
+
+   Expr <LogicUnify test.lkt:18:26-18:35>
+        has_type None
+
+      Id   <RefId "lv1" test.lkt:18:26-18:29>
+           has_type None
+           references None
+
+      Expr <NumLit test.lkt:18:34-18:35>
+           has_type None
+
+<ValDecl "non_entity_propagate" test.lkt:19:1-19:56> failed nameres:
+test.lkt:19:35-19:50: error: Propagate functions must return entities
+ 19 | val non_entity_propagate = lv2 <- Type.non_entity%(lv3)
+    |                                   ^^^^^^^^^^^^^^^ 
+
+Decl <ValDecl "non_entity_propagate" test.lkt:19:1-19:56>
+     has_type None
+
+   Expr <LogicPropagate test.lkt:19:28-19:56>
+        has_type None
+
+      Id   <RefId "lv2" test.lkt:19:28-19:31>
+           has_type None
+           references None
+
+      Expr <LogicPropagateCall test.lkt:19:35-19:56>
+           has_type None
+
+         Expr <DotExpr test.lkt:19:35-19:50>
+              has_type None
+
+            Id   <RefId "Type" test.lkt:19:35-19:39>
+                 has_type None
+                 references <ClassDecl "Type" test.lkt:1:1-4:2>
+
+            Id   <RefId "non_entity" test.lkt:19:40-19:50>
+                 has_type None
+                 references None
+
+         Id   <RefId "lv3" test.lkt:19:52-19:55>
+              has_type <StructDecl prelude: "LogicVar">
+              references <ValDecl "lv3" test.lkt:8:1-8:21>
+

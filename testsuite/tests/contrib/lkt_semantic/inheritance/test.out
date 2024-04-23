@@ -1,0 +1,205 @@
+Resolving test.lkt
+==================
+Decl <ValDecl "va" test.lkt:2:1-2:17>
+     has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Expr <NullLit test.lkt:2:10-2:17>
+        has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+      Id   <RefId "A" test.lkt:2:15-2:16>
+           has_type None
+           references <ClassDecl "A" test.lkt:1:1-1:12>
+
+Id   <RefId "A" test.lkt:4:11-4:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:12>
+
+Decl <ValDecl "vb" test.lkt:5:1-5:17>
+     has_type <ClassDecl "B" test.lkt:4:1-4:16>
+
+   Expr <NullLit test.lkt:5:10-5:17>
+        has_type <ClassDecl "B" test.lkt:4:1-4:16>
+
+      Id   <RefId "B" test.lkt:5:15-5:16>
+           has_type None
+           references <ClassDecl "B" test.lkt:4:1-4:16>
+
+Id   <RefId "A" test.lkt:7:11-7:12>
+     has_type None
+     references <ClassDecl "A" test.lkt:1:1-1:12>
+
+Decl <ValDecl "vc" test.lkt:8:1-8:17>
+     has_type <ClassDecl "C" test.lkt:7:1-7:16>
+
+   Expr <NullLit test.lkt:8:10-8:17>
+        has_type <ClassDecl "C" test.lkt:7:1-7:16>
+
+      Id   <RefId "C" test.lkt:8:15-8:16>
+           has_type None
+           references <ClassDecl "C" test.lkt:7:1-7:16>
+
+Id   <RefId "C" test.lkt:10:11-10:12>
+     has_type None
+     references <ClassDecl "C" test.lkt:7:1-7:16>
+
+Decl <ValDecl "vd" test.lkt:11:1-11:17>
+     has_type <ClassDecl "D" test.lkt:10:1-10:16>
+
+   Expr <NullLit test.lkt:11:10-11:17>
+        has_type <ClassDecl "D" test.lkt:10:1-10:16>
+
+      Id   <RefId "D" test.lkt:11:15-11:16>
+           has_type None
+           references <ClassDecl "D" test.lkt:10:1-10:16>
+
+Decl <ValDecl "eq1" test.lkt:13:1-13:19>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:13:11-13:19>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "va" test.lkt:13:11-13:13>
+           has_type <ClassDecl "A" test.lkt:1:1-1:12>
+           references <ValDecl "va" test.lkt:2:1-2:17>
+
+      Id   <RefId "vb" test.lkt:13:17-13:19>
+           has_type <ClassDecl "B" test.lkt:4:1-4:16>
+           references <ValDecl "vb" test.lkt:5:1-5:17>
+
+Decl <ValDecl "eq2" test.lkt:14:1-14:19>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:14:11-14:19>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "vb" test.lkt:14:11-14:13>
+           has_type <ClassDecl "B" test.lkt:4:1-4:16>
+           references <ValDecl "vb" test.lkt:5:1-5:17>
+
+      Id   <RefId "va" test.lkt:14:17-14:19>
+           has_type <ClassDecl "A" test.lkt:1:1-1:12>
+           references <ValDecl "va" test.lkt:2:1-2:17>
+
+Decl <ValDecl "eq3" test.lkt:15:1-15:19>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:15:11-15:19>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "va" test.lkt:15:11-15:13>
+           has_type <ClassDecl "A" test.lkt:1:1-1:12>
+           references <ValDecl "va" test.lkt:2:1-2:17>
+
+      Id   <RefId "vd" test.lkt:15:17-15:19>
+           has_type <ClassDecl "D" test.lkt:10:1-10:16>
+           references <ValDecl "vd" test.lkt:11:1-11:17>
+
+Decl <ValDecl "eq4" test.lkt:16:1-16:19>
+     has_type <EnumTypeDecl prelude: "Bool">
+
+   Expr <BinOp test.lkt:16:11-16:19>
+        has_type <EnumTypeDecl prelude: "Bool">
+
+      Id   <RefId "vd" test.lkt:16:11-16:13>
+           has_type <ClassDecl "D" test.lkt:10:1-10:16>
+           references <ValDecl "vd" test.lkt:11:1-11:17>
+
+      Id   <RefId "vc" test.lkt:16:17-16:19>
+           has_type <ClassDecl "C" test.lkt:7:1-7:16>
+           references <ValDecl "vc" test.lkt:8:1-8:17>
+
+<ValDecl "failing_eq1" test.lkt:18:1-18:27> failed nameres:
+test.lkt:18:25-18:27: error: expected C, got B
+ 18 | val failing_eq1 = vc == vb
+    |                         ^^ 
+
+Decl <ValDecl "failing_eq1" test.lkt:18:1-18:27>
+     has_type None
+
+   Expr <BinOp test.lkt:18:19-18:27>
+        has_type None
+
+      Id   <RefId "vc" test.lkt:18:19-18:21>
+           has_type None
+           references None
+
+      Id   <RefId "vb" test.lkt:18:25-18:27>
+           has_type None
+           references None
+
+Decl <ValDecl "assign1" test.lkt:20:1-20:21>
+     has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Id   <RefId "A" test.lkt:20:15-20:16>
+        has_type None
+        references <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Id   <RefId "va" test.lkt:20:19-20:21>
+        has_type <ClassDecl "A" test.lkt:1:1-1:12>
+        references <ValDecl "va" test.lkt:2:1-2:17>
+
+Decl <ValDecl "assign2" test.lkt:21:1-21:21>
+     has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Id   <RefId "A" test.lkt:21:15-21:16>
+        has_type None
+        references <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Id   <RefId "vb" test.lkt:21:19-21:21>
+        has_type <ClassDecl "B" test.lkt:4:1-4:16>
+        references <ValDecl "vb" test.lkt:5:1-5:17>
+
+Decl <ValDecl "assign3" test.lkt:22:1-22:21>
+     has_type <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Id   <RefId "A" test.lkt:22:15-22:16>
+        has_type None
+        references <ClassDecl "A" test.lkt:1:1-1:12>
+
+   Id   <RefId "vd" test.lkt:22:19-22:21>
+        has_type <ClassDecl "D" test.lkt:10:1-10:16>
+        references <ValDecl "vd" test.lkt:11:1-11:17>
+
+Decl <ValDecl "assign4" test.lkt:23:1-23:21>
+     has_type <ClassDecl "C" test.lkt:7:1-7:16>
+
+   Id   <RefId "C" test.lkt:23:15-23:16>
+        has_type None
+        references <ClassDecl "C" test.lkt:7:1-7:16>
+
+   Id   <RefId "vd" test.lkt:23:19-23:21>
+        has_type <ClassDecl "D" test.lkt:10:1-10:16>
+        references <ValDecl "vd" test.lkt:11:1-11:17>
+
+<ValDecl "assign_fail1" test.lkt:24:1-24:26> failed nameres:
+test.lkt:24:24-24:26: error: expected C, got B
+ 24 | val assign_fail1 : C = vb
+    |                        ^^ 
+
+Decl <ValDecl "assign_fail1" test.lkt:24:1-24:26>
+     has_type <ClassDecl "C" test.lkt:7:1-7:16>
+
+   Id   <RefId "C" test.lkt:24:20-24:21>
+        has_type None
+        references <ClassDecl "C" test.lkt:7:1-7:16>
+
+   Id   <RefId "vb" test.lkt:24:24-24:26>
+        has_type None
+        references None
+
+<ValDecl "assign_fail2" test.lkt:25:1-25:26> failed nameres:
+test.lkt:25:24-25:26: error: expected B, got D
+ 25 | val assign_fail2 : B = vd
+    |                        ^^ 
+
+Decl <ValDecl "assign_fail2" test.lkt:25:1-25:26>
+     has_type <ClassDecl "B" test.lkt:4:1-4:16>
+
+   Id   <RefId "B" test.lkt:25:20-25:21>
+        has_type None
+        references <ClassDecl "B" test.lkt:4:1-4:16>
+
+   Id   <RefId "vd" test.lkt:25:24-25:26>
+        has_type None
+        references None
+

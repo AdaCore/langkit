@@ -1,0 +1,4 @@
+val arr = [1, 2, 3]
+
+val map = arr.map((i) => i)
+val map = arr.map((i) => "")
