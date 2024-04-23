@@ -1897,7 +1897,7 @@ def create():
 def pp(strn, indent_step=4, line_size=80):
     from io import StringIO
     import re
-    buf = re.split("(\$hl|\$sl|\$i|\$d)", strn)
+    buf = re.split(r"(\$hl|\$sl|\$i|\$d)", strn)
     file_str = StringIO()
     indent_level = 0
     current_line = ""
