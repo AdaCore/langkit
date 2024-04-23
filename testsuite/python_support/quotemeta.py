@@ -1,4 +1,4 @@
-"""
+r"""
 This package allows us to transform testcase expressions
 into regular expressions.
 
