@@ -25,5 +25,9 @@ class Example(FooNode):
         return ["a", "b", "c"]
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', gpr_mains=["main.c"])
-print('Done')
+build_and_run(
+    lkt_file="expected_concrete_syntax.lkt",
+    gpr_mains=["main.c"],
+    types_from_lkt=True,
+)
+print("Done")
