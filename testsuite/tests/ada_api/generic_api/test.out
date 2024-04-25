@@ -210,6 +210,8 @@ No_Lk_Token.Is_Null -> TRUE
 First_Token.Is_Null -> FALSE
 Checking the Token->Unit backlink...
 No_Lk_Token.Unit -> Got a Precondition_Failure exception: null token
+Token_Count -> 15
+Trivia_Count -> 14
 First_Token.Kind -> Example
 Last_Token.Kind -> Termination
 First_Token.Image -> <Token Kind=Example Text="example">

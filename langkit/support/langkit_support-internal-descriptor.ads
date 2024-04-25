@@ -72,6 +72,8 @@ package Langkit_Support.Internal.Descriptor is
      (Unit : Internal_Unit) return Analysis.Internal_Token;
    type Unit_Get_Line_Type is access function
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
+   type Unit_Get_Natural_Type is access function
+     (Unit : Internal_Unit) return Natural;
 
    type Node_Metadata_Inc_Ref_Type is access procedure
      (Metadata : Internal_Node_Metadata);
@@ -194,6 +196,8 @@ package Langkit_Support.Internal.Descriptor is
       Unit_Root                  : Unit_Root_Type;
       Unit_First_Token           : Unit_Token_Getter_Type;
       Unit_Last_Token            : Unit_Token_Getter_Type;
+      Unit_Token_Count           : Unit_Get_Natural_Type;
+      Unit_Trivia_Count          : Unit_Get_Natural_Type;
       Unit_Get_Line              : Unit_Get_Line_Type;
 
       Node_Metadata_Inc_Ref : Node_Metadata_Inc_Ref_Type;

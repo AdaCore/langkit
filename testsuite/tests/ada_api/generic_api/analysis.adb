@@ -398,6 +398,8 @@ begin
          Put_Line ("Got a Precondition_Failure exception: "
                    & Exception_Message (Exc));
    end;
+   Put_Line ("Token_Count ->" & U.Token_Count'Image);
+   Put_Line ("Trivia_Count ->" & U.Trivia_Count'Image);
    Put_Line ("First_Token.Kind -> "
              & Image (Format_Name (Token_Kind_Name (U.First_Token.Kind),
                                    Camel_With_Underscores)));
