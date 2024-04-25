@@ -1,5 +1,5 @@
 == bad_expr.lkt ==
-bad_expr.lkt:4:27: error: static expression expected in this context
+bad_expr.lkt:4:27: error: value expected, got the builtin type Bool
 4 |     @export fun p(a: Bool=Bool): Bool = a
   |                           ^^^^
 
