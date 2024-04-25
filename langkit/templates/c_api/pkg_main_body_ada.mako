@@ -500,12 +500,17 @@ package body ${ada_lib_name}.Implementation.C is
    ---------------------------------
 
    Node_Kind_Names : constant array (${T.node_kind}) of Text_Access :=
-     (${', '.join('{} => new Text_Type\'(To_Text ("{}"))'.format(
-                      cls.ada_kind_name,
-                      cls.kwless_raw_name.camel
-                  )
-                  for cls in ctx.astnode_types
-                  if not cls.abstract)});
+   ${ada_block_with_parens(
+      [
+         '{} => new Text_Type\'(To_Text ("{}"))'.format(
+            cls.ada_kind_name,
+            cls.kwless_raw_name.camel,
+         )
+         for cls in ctx.astnode_types
+         if not cls.abstract
+      ],
+      3,
+   )};
 
    function ${capi.get_name('node_kind')}
      (Node : ${entity_type}_Ptr) return ${node_kind_type} is

@@ -98,9 +98,12 @@ package ${ada_lib_name}.Implementation.C is
      with Convention => C;
    ${ada_c_doc('langkit.diagnostic_type', 3)}
 
-   type ${exception_kind_type} is (
-      ${', '.join(str(e.kind_name) for e in ctx.sorted_exception_types)}
-   ) with Convention => C;
+   ${ada_enum_type_decl(
+      exception_kind_type,
+      [str(e.kind_name) for e in ctx.sorted_exception_types],
+      3,
+      convention_c=True,
+   )}
    ${ada_c_doc('langkit.exception_kind_type', 3)}
 
    type ${exception_type} is record

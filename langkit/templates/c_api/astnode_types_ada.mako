@@ -115,15 +115,14 @@
                   actuals.append('{} => Node.Info'.format(
                       field.entity_info_name
                   ))
-              field_access = '{} ({})'.format(field.qual_impl_name,
-                                              ', '.join(actuals))
             %>
 
             Result : ${field.type.name};
          begin
             ##  Keep this assignment after the BEGIN keyword above so that the
             ##  exception handler covers it.
-            Result := ${field_access};
+            Result := ${field.qual_impl_name}
+            ${ada_block_with_parens(actuals, 12)};
 
             Value_P.all :=
                % if field.type.is_bool_type:

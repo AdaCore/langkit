@@ -376,10 +376,16 @@ private package ${ada_lib_name}.Generic_Introspection is
                val_expr = "(Kind => Null_Node_Value)"
 
             args.append(
-               f"{arg_no} =>"
-               f" (Name          => Arg_Name_{arg_no}'Access,"
-               f"  Argument_Type => {G.type_index(arg.type)},"
-               f"  Default_Value => {val_expr})"
+               f"{arg_no} =>\n"
+               + ada_block_with_parens(
+                  [
+                     f"Name          => Arg_Name_{arg_no}'Access",
+                     f"Argument_Type => {G.type_index(arg.type)}",
+                     f"Default_Value => {val_expr}",
+                  ],
+                  12,
+                  indent_first=True,
+               )
             )
             arg_no += 1
          %>
@@ -490,19 +496,18 @@ private package ${ada_lib_name}.Generic_Introspection is
          Indexes       => ${(
             "null" if indexes_const is None else f"{indexes_const}'Access"
          )},
-         Arguments     => (
-            % if m.arguments:
-               ${",\n".join(args)}
-            % else:
-               1 .. 0 => <>
-            % endif
-        ));
+         Arguments     =>
+         % if m.arguments:
+         ${ada_block_with_parens(args, 9)}
+         % else:
+           (1 .. 0 => <>)
+         % endif
+        );
 
    % endfor
 
-   Struct_Members : aliased constant Struct_Member_Descriptor_Array := (
-      ${",\n".join(member_descs)}
-   );
+   Struct_Members : aliased constant Struct_Member_Descriptor_Array :=
+   ${ada_block_with_parens(member_descs, 3)};
 
    -----------------------------
    -- Struct type descriptors --
@@ -637,9 +642,14 @@ private package ${ada_lib_name}.Generic_Introspection is
       Symbol                => ${G.type_index(T.Symbol)});
 
    Node_Kinds : constant array (${T.node_kind}) of Type_Index :=
-     (${", ".join(f"{n.ada_kind_name} => {G.type_index(n)}"
-                  for n in ctx.astnode_types
-                  if not n.abstract)});
+   ${ada_block_with_parens(
+      [
+         f"{n.ada_kind_name} => {G.type_index(n)}"
+         for n in ctx.astnode_types
+         if not n.abstract
+      ],
+      3,
+   )};
    --  Associate a type index to each concrete node
 
    -----------------------------------------------------

@@ -210,3 +210,82 @@ def gen_name(var_name: Union[str, names.Name]) -> names.Name:
 
     var_id = next(__next_ids[var_name.lower])
     return names.Name(var_name.camel_with_underscores + str(var_id))
+
+
+def ada_block_with_parens(
+    lines: list[str],
+    column: int,
+    indent_first: bool = False,
+) -> str:
+    """
+    Format an Ada-style parenthetized multi-line block.
+
+    For instance::
+
+       ada_block_with_parens(["a => 1", "b => 2", column=0)
+
+       "  (a => 1,
+           b => 2);"
+
+       ada_block_with_parens(["a => 1", "b => 2", column=3)
+
+       "     (a => 1,
+              b => 2);"
+
+    :param lines: Individual lines to include in the generated block.
+    :param column: Indentation level for that block.
+    :param indent_first: Whether the result should have its first line
+        indented.
+    """
+    indent = " " * column
+    result = []
+    for i, line in enumerate(lines):
+        if i == 0:
+            result.append(f"{indent if indent_first else ''}  ({line}")
+        else:
+            result[-1] += ","
+            result.append(f"{indent}   {line}")
+    result[-1] += ")"
+    return "\n".join(result)
+
+
+def ada_enum_type_decl(
+    type_name: Union[str, names.Name],
+    value_names: list[Union[str, names.Name]],
+    column: int,
+    convention_c: bool = False,
+) -> str:
+    """
+    Generate an Ada type declaration for an enumerated type.
+
+    :param type_name: Name for this type declaration.
+    :param value_names: Sequence of names for enumeration values.
+    :param column: Indentation level for this type declaration.
+    :param convention_c: Whether the type should have the "Convention => C"
+        aspect.
+    """
+    result = f"type {type_name} is\n" + ada_block_with_parens(
+        [str(v) for v in value_names], column, indent_first=True,
+    )
+    if convention_c:
+        result += "\n" + " " * column + "with Convention => C"
+    return result + ";"
+
+
+def ada_pipe_list(lines: list[str], column: int) -> str:
+    """
+    Generate an Ada-style |-separated list of lines.
+
+    :param lines: Lines to format.
+    :param column: Indentation level for this list.
+    """
+    indent = " " * column
+    return "\n".join(
+        [
+            (
+                line
+                if i == 0 else
+                f"{indent}| {line}"
+            ) for i, line in enumerate(lines)
+        ]
+    )

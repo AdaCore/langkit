@@ -47,10 +47,15 @@ if ${parser.pos_var} /= No_Token_Index then
 
    ## Run the kind-specific initializer, if any
    % if parser.type.has_fields_initializer:
+      <%
+         init_args = [f"Self => {parser.res_var}"]
+         init_args += [
+            f"{field.name} => {subresult}"
+            for field, subparser, subresult in args
+         ]
+      %>
       Initialize_Fields_For_${parser.type.kwless_raw_name}
-        (Self => ${parser.res_var}${''.join(
-            ', {} => {}'.format(field.name, subresult)
-            for field, subparser, subresult in args)});
+      ${ada_block_with_parens(init_args, 6)};
    % endif
 
    % if args:

@@ -41,13 +41,14 @@ private package ${ada_lib_name}.Unparsers is
    % endfor
    );
 
-   Token_Newlines : aliased constant Token_Newline_Table_Impl := (
-   % for i, t in enumerate(ctx.lexer.sorted_tokens):
-      ${", " if i > 0 else ""}${G.token_kind_index(t)} => ${(
-         t in ctx.lexer.newline_after
-      )}
-   % endfor
-   );
+   Token_Newlines : aliased constant Token_Newline_Table_Impl :=
+   ${ada_block_with_parens(
+       [
+           f"{G.token_kind_index(t)} => {t in ctx.lexer.newline_after}"
+           for t in ctx.lexer.sorted_tokens
+       ],
+       3,
+   )};
 
    ## Emit constants for token unparsers and token sequence unparsers. Emit
    ## only one Text_Type constant for each text value needed.
@@ -105,8 +106,10 @@ private package ${ada_lib_name}.Unparsers is
          ${node.unparser.fields_unparser_var_name}
             : aliased constant Field_Unparser_List_Impl
             := (N               => ${len(unparser_list)},
-                Field_Unparsers => (${", ".join(field_unparsers)}),
-                Inter_Tokens    => (${", ".join(inter_tokens)}));
+                Field_Unparsers =>
+                ${ada_block_with_parens(field_unparsers, 16)},
+                Inter_Tokens    =>
+                ${ada_block_with_parens(inter_tokens, 16)});
       % endif
    % endfor
 
@@ -148,12 +151,10 @@ private package ${ada_lib_name}.Unparsers is
       %>
 
       % if unparser is not None:
-         ${unparser.var_name} : aliased constant Node_Unparser_Impl := (
-         % for i, (name, value) in enumerate(fields):
-            ${"," if i > 0 else ""}
-            ${name} => ${value}
-         % endfor
-         );
+         ${unparser.var_name} : aliased constant Node_Unparser_Impl :=
+         ${ada_block_with_parens(
+             [f"{name} => {value}" for name, value in fields], 9
+         )};
       % endif
    % endfor
 
