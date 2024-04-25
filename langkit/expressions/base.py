@@ -890,6 +890,57 @@ class AbstractExpression(Frozable):
         from langkit.expressions.boolean import Eq, Not
         return Not(Eq(self, other))
 
+    def dump(self) -> None:
+        """
+        Dump the expression tree on the standard output.
+        """
+        from langkit.expressions import FieldAccess
+
+        def pp(pfx, obj):
+            if isinstance(obj, AbstractVariable):
+                print(pfx, obj)
+
+            elif isinstance(obj, AbstractExpression):
+                print(pfx, type(obj).__name__)
+                pfx += " |"
+                for k, v in sorted(obj.__dict__.items()):
+                    if k in ("location", "_origin_composed_attr"):
+                        continue
+                    print(pfx, f"{k}:")
+                    pp(pfx + "  ", v)
+
+            elif isinstance(obj, TypeRepo.Defer):
+                pp(pfx, obj.get())
+
+            elif isinstance(obj, FieldAccess.Arguments):
+                print(pfx, "Arguments:")
+                pfx += "  "
+                for i, arg in enumerate(obj.args):
+                    print(pfx, f"[{i}]")
+                    pp(pfx + "  ", arg)
+                for k, v in sorted(obj.kwargs.items()):
+                    print(pfx, f"[{k}]")
+                    pp(pfx + "  ", v)
+
+            elif isinstance(obj, (list, tuple)):
+                print(pfx, "Sequence:")
+                pfx += "  "
+                for i, v in enumerate(obj):
+                    print(pfx, f"[{i}]")
+                    pp(pfx + "  ", v)
+
+            elif isinstance(obj, dict):
+                print(pfx, "Mapping:")
+                pfx += "  "
+                for k, v in sorted(obj.items()):
+                    print(pfx, f"[{k}]")
+                    pp(pfx + "  ", v)
+
+            else:
+                print(pfx, obj)
+
+        pp("", self)
+
 
 def dsl_document(cls):
     """
