@@ -241,6 +241,26 @@ package body ${ada_lib_name}.Generic_Impl is
       return +Implementation.Last_Token (U);
    end Unit_Last_Token;
 
+   ----------------------
+   -- Unit_Token_Count --
+   ----------------------
+
+   function Unit_Token_Count (Unit : Internal_Unit) return Natural is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return +Implementation.Token_Count (U);
+   end Unit_Token_Count;
+
+   -----------------------
+   -- Unit_Trivia_Count --
+   -----------------------
+
+   function Unit_Trivia_Count (Unit : Internal_Unit) return Natural is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return +Implementation.Trivia_Count (U);
+   end Unit_Trivia_Count;
+
    -------------------
    -- Unit_Get_Line --
    -------------------

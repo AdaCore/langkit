@@ -177,6 +177,13 @@ package Langkit_Support.Generic_API.Analysis is
    function Last_Token (Self : Lk_Unit'Class) return Lk_Token;
    --  Return a reference to the last token scanned in this unit
 
+   function Token_Count (Self : Lk_Unit'Class) return Natural;
+   --  Return the number of tokens in this unit
+
+   function Trivia_Count (Self : Lk_Unit'Class) return Natural;
+   --  Return the number of trivias in this unit. This is 0 for units that were
+   --  parsed with trivia analysis disabled.
+
    function Text (Self : Lk_Unit) return Text_Type;
    --  Return the source buffer associated to this unit
 

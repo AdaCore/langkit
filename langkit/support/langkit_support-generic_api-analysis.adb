@@ -622,6 +622,26 @@ package body Langkit_Support.Generic_API.Analysis is
       end;
    end First_Token;
 
+   -----------------
+   -- Token_Count --
+   -----------------
+
+   function Token_Count (Self : Lk_Unit'Class) return Natural is
+   begin
+      Reject_Null_Unit (Self);
+      return Self.Context.Desc.Unit_Token_Count (Self.Internal);
+   end Token_Count;
+
+   ------------------
+   -- Trivia_Count --
+   ------------------
+
+   function Trivia_Count (Self : Lk_Unit'Class) return Natural is
+   begin
+      Reject_Null_Unit (Self);
+      return Self.Context.Desc.Unit_Trivia_Count (Self.Internal);
+   end Trivia_Count;
+
    ----------------
    -- Last_Token --
    ----------------
