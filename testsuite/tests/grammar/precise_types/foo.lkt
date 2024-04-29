@@ -15,3 +15,50 @@ grammar foo_grammar {
     b <- B(@identifier("b"))
     for_synth <- ForSynthChild2(a)
 }
+
+class FooNode implements Node[FooNode] {
+}
+
+class A: FooNode implements TokenNode {
+}
+
+class B: FooNode implements TokenNode {
+}
+
+class SpecialList: ASTList[FooNode, FooNode] {
+}
+
+class Holder: FooNode {
+    @parse_field a_or_b: FooNode
+    @parse_field a_or_b_list: ASTList[FooNode, FooNode]
+    @parse_field a_list_or_b_list: FooNode
+    @parse_field special_a_list: SpecialList
+    @parse_field special_a_list_or_special_b_list: SpecialList
+    @parse_field special_a_or_b_list: SpecialList
+    @parse_field @nullable a_or_b_or_null: FooNode
+}
+
+@abstract class ForSynthParent: FooNode {
+    @abstract @parse_field f: FooNode
+
+    @memoized fun private_create(n: B): ForSynthChild1 = ForSynthChild1(f=n)
+    @export fun public_create(n: Entity[B]): ForSynthChild1 =
+        node.private_create(n.node)
+}
+
+@synthetic class ForSynthChild1: ForSynthParent {
+    @parse_field f: FooNode
+}
+
+class ForSynthChild2: ForSynthParent {
+    @parse_field f: FooNode
+}
+
+@synthetic
+class OnlySynthNode: FooNode {
+    @parse_field f: FooNode
+
+    @memoized fun private_create(n: A): OnlySynthNode = OnlySynthNode(f=n)
+    @export fun public_create(n: Entity[A]): OnlySynthNode =
+        node.private_create(n.node)
+}
