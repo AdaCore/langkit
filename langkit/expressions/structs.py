@@ -466,8 +466,6 @@ class FieldAccess(AbstractExpression):
         Holder for arguments to pass to a property.
         """
 
-        _traverse_in_prepare = True
-
         def __init__(self,
                      args: Sequence[AbstractExpression],
                      kwargs: Dict[str, AbstractExpression]):

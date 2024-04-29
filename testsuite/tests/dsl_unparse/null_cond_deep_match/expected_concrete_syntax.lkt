@@ -1,0 +1,29 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @export fun p1(n: Entity[FooNode]): Entity[FooNode] = n.do(
+        (_) => match _ {
+            case e: Example => e
+            case _ => null[Entity[FooNode]]
+        }.do((n) => n.parent)
+    )
+
+    @export fun p2(): Entity[Example] = (
+        self.to_singleton().find((e) => e is Example)
+    ).do(
+        (_) => match _ {
+            case e: Example => e.parent
+            case _ => null[Entity[FooNode]]
+        }.as[Example]
+    )
+
+    fun to_singleton(): Array[Entity[FooNode]] = [self]
+}
+
+class Example: FooNode implements TokenNode {
+}

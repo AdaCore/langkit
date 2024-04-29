@@ -1247,7 +1247,7 @@ class GrammarDecl(Decl):
 
             # Then check that the associated arguments are correct
             .concat(
-                Or(lexer_annot_params._.children.length != 1,
+                Or(lexer_annot_params.then(lambda p: p.children.length != 1),
                    Not(lexer_arg._.name.is_null),
                    lexer_arg._.value.is_null)
 
@@ -1846,9 +1846,10 @@ class TypeDecl(Decl):
         """
         Return the root type of this type, if applicable, else null.
         """
-        return Entity.base_type._.designated_type.then(
-            lambda b: b.root_type
-        )._or(Entity)
+        return Entity.base_type.then(
+            lambda bd: bd.designated_type._.root_type,
+            default_val=Entity
+        )
 
     @langkit_property(public=True)
     def is_subtype(potential_base=T.TypeDecl.entity):

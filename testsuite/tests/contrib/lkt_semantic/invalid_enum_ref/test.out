@@ -7,3 +7,7 @@ test.lkt:1:17: error: Cannot find entity `NoSuchType` in this scope
 Id   <RefId "PropertyError" test.lkt:1:38-1:51>
      references <StructDecl prelude: "PropertyError">
 
+test.lkt:1:32: error: ambiguous type for expression
+1 | @invalid val a: NoSuchType.T = raise PropertyError
+  |                                ^^^^^^^^^^^^^^^^^^^
+

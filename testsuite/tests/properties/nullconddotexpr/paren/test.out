@@ -1,0 +1,13 @@
+main.py: Running...
+p_p1(None) = None
+p_p1(<n1>) = <PropertyError: main.txt:1:1-1:9: dereferencing a null access
+p_p1(<n1.n2>) = None
+p_p1(<n1.n2.n3>) = <n1>
+
+p_p2(None) = <PropertyError: main.txt:1:1-1:9: dereferencing a null access
+p_p2(<n1>) = <PropertyError: main.txt:1:1-1:9: dereferencing a null access
+p_p2(<n1.n2>) = None
+p_p2(<n1.n2.n3>) = <n1>
+
+main.py: Done.
+Done

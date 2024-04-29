@@ -576,115 +576,87 @@ class AbstractExpression(Frozable):
         """
         pass
 
-    def expand_underscores_1(self):
+    def prepare(self) -> AbstractExpression:
         """
-        First pass for underscore expansion. This allows a user to write::
-
-            A._.b
-
-        instead of::
-
-            A.then(lambda real_a: real_a.b)
-        """
-        from langkit.expressions import AbstractVariable, FieldAccess, Then
-
-        for k, v in self.__dict__.items():
-            if isinstance(v, FieldAccess) and v.field == "_":
-                var_expr = AbstractVariable(names.Name("Var_Expr"),
-                                            create_local=True)
-                setattr(self, k, var_expr)
-                t = Then.create_from_exprs(v.receiver, self, var_expr)
-                t.underscore_then = True
-                return t
-
-    def expand_underscores_2(self):
-        """
-        Second pass for underscore expansion. This will hoist further field
-        accesses on an underscore expression, so that a user can write::
-
-            A._.b.c
-        """
-        from langkit.expressions import FieldAccess, Then
-        if (isinstance(self, FieldAccess)
-                and isinstance(self.receiver, Then)
-                and self.receiver.underscore_then):
-            then = self.receiver
-            self.receiver = then.then_expr
-            then.then_expr = self
-            return then
-
-    def prepare(self):
-        """
-        This method will be called in the top-level construct function, for
-        expressions that have not been prepared yet. It will run a certain
-        number of passes on AbstractExpression trees, before they are frozen.
-
-        This means that if you want to add custom expansions to expression
-        trees, this is a good moment to do it. You can register new passes that
-        will be called on every node, and decide if the pass is called on
-        children first or on the parent first.
-
-        The current passes are:
-        * prepare_pass: A pass that will run the custom do_prepare method on
-          every AbstractExpression in the expression tree, aswell as the first
-          part of the expand_underscores transformation.
-
-        * expand_underscores_2: Second part of the expand_underscores
-          transformation.
+        Run "do_prepare" hooks on this expression tree and perform null
+        conditional expansion (see ``NullCond``'s docstring).
         """
 
-        def prepare_pass(expr):
-            expr = expr.expand_underscores_1() or expr
-            expr.do_prepare()
-            return expr
+        from langkit.expressions import FieldAccess
 
-        passes = [
-            (prepare_pass, True),
-            (lambda expr: expr.expand_underscores_2() or expr, False)
-        ]
-
-        def expand(obj, fn, pre=True):
+        def expand(obj: object) -> object:
             """
-            Traverse the `obj` object graph and call `fn` on every object that
-            is an AbstractExpression. If `fn` returns a new AbstractExpression,
-            it will replace the old one in the tree. Return the expanded
-            expression, which can be `obj` after mutation.
-
-            :param obj: Object to visit.
-            :param fn: Function to apply.
-            :param pre: True to call `fn` before traversing the graph, False to
-                call it after.
+            Traverse the ``obj`` object tree and call the ``do_prepare`` method
+            on every AbstractExpression instance in that tree.
             """
-            is_abstract_expr = isinstance(obj, AbstractExpression)
-            if isinstance(obj, TypeRepo.Defer):
-                return expand(obj.get(), fn)
+            if isinstance(obj, AbstractExpression):
+                checks: NullCond.CheckStack = []
+                result = expand_expr(obj, checks)
+                return NullCond.wrap_checks(checks, result)
 
-            elif is_abstract_expr or getattr(
-                obj, '_traverse_in_prepare', False
-            ):
-                if is_abstract_expr and pre:
-                    obj = fn(obj)
-                for k, v in obj.__dict__.items():
-                    obj.__dict__[k] = expand(v, fn)
-                if is_abstract_expr and not pre:
-                    obj = fn(obj)
+            elif isinstance(obj, TypeRepo.Defer):
+                return expand(obj.get())
+
+            elif isinstance(obj, FieldAccess.Arguments):
+                obj.args = cast(Sequence[AbstractExpression], expand(obj.args))
+                obj.kwargs = cast(
+                    dict[str, AbstractExpression], expand(obj.kwargs)
+                )
                 return obj
 
             elif isinstance(obj, (list, tuple)):
                 obj_type = type(obj)
-                return obj_type(expand(v, fn) for v in obj)
+                return obj_type(expand(v) for v in obj)
 
             elif isinstance(obj, dict):
-                return {k: expand(v, fn) for k, v in obj.items()}
+                return {k: expand(v) for k, v in obj.items()}
 
             else:
                 return obj
 
-        ret = self
+        def expand_expr(
+            expr: AbstractExpression,
+            checks: NullCond.CheckStack,
+        ) -> AbstractExpression:
+            """
+            Prepare/expand the given abstract expression, adding check couples
+            to ``checks`` when appropriate.
+            """
+            assert not isinstance(expr, NullCond.Prefix)
+            expr.do_prepare()
+
+            if isinstance(expr, NullCond.Check):
+                return NullCond.record_check(
+                    checks, expand_expr(expr._expr, checks)
+                )
+
+            # TODO (eng/libadalang&18): Keeping track of which
+            # attribute contains the prefix is used for DSL unparsing.
+            # We should get rid of this once the DSL is removed.
+            prefix_attr_name = None
+
+            for k, v in expr.__dict__.items():
+                if isinstance(v, NullCond.Prefix):
+                    if isinstance(v, NullCond.Check):
+                        v = NullCond.record_check(
+                            checks, expand_expr(v._expr, checks)
+                        )
+                    v = expand_expr(v._expr, checks)
+                    prefix_attr_name = k
+
+                else:
+                    v = expand(v)
+                expr.__dict__[k] = v
+
+            if prefix_attr_name is not None:
+                expr._prefix_attr_name = prefix_attr_name  # type: ignore
+
+            return expr
+
         with self.diagnostic_context:
-            for p, order in passes:
-                ret = expand(ret, p, order)
-        return ret
+            result = expand(self)
+            assert isinstance(result, AbstractExpression)
+            return result
 
     def construct(self):
         """
@@ -724,12 +696,22 @@ class AbstractExpression(Frozable):
         """
         from langkit.expressions.structs import FieldAccess
 
+        if attr == "_":
+            return NullCond.Check(self, validated=False)
+
+        if isinstance(self, NullCond.Check):
+            prefix = NullCond.Check(self._expr, validated=True)
+        else:
+            prefix = self
+
+        prefix = NullCond.Prefix(prefix)
+
         try:
-            return AbstractExpression.attrs_dict[attr].build(self)
+            return AbstractExpression.attrs_dict[attr].build(prefix)
         except KeyError:
             entry = self.composed_attrs().get(attr)
             if entry is None:
-                return FieldAccess(self, attr)
+                return FieldAccess(prefix, attr)
             elif isinstance(entry, AbstractExpression):
                 entry._origin_composed_attr = attr
                 return entry
@@ -2197,6 +2179,306 @@ class SequenceExpr(ResolvedExpression):
 
         return cls(cls._ForwardExpr(dest_var, pre_expr), post_expr,
                    abstract_expr=abstract_expr)
+
+
+class NullCond:
+    """
+    Class acting as a namespace for helpers to handle null-conditional
+    expressions ("._." in the DSL, "?." in Lkt).
+
+    The design is to include ``Prefix`` and ``Check`` instances in abstract
+    expression trees, and then let the ``prepare`` compilation pass expand them
+    to the expected ``Then`` expressions.
+
+    # Prefix/Check creation
+
+    ``Prefix`` is meant as a wrapper for expressions that are used as dot
+    notation prefixes. For instance, ``A`` is the prefix in ``A.B``, so we
+    expect the following expression tree::
+
+       FieldAccess(Prefix(A), B)
+
+    Explicitly materializing prefixes in trees is necessary to treat
+    differently the same expression produced by different syntaxes. For
+    instance, the following examples designate the same expression, but
+    null-conditional behavior propagates to the match expression in the DSL
+    because dot notation is used on ``N`` whereas it does not propagate in Lkt
+    since ``match`` does not involve dot notation::
+
+       # DSL
+       N.match(lambda _: True)
+
+       # Lkt
+       match N {
+           case _ => true
+       }
+
+    ``Check`` is meant to be a wrapper to expressions that trigger the null
+    conditional behavior for their parent prefixes. For example::
+
+       # Tree for A?.B
+       FieldAccess(Prefix(Check(A)), B)
+
+       # Tree for A?.B.C?.D. Note that Check wraps FieldAccess expressions
+       # on A and ...C only.
+       FieldAccess(
+           Prefix(Check(
+               FieldAccess(
+                   Prefix(FieldAccess(Prefix(Check(A)), B)),
+                   C,
+               ),
+           )),
+           D,
+       )
+
+    # Lowering
+
+    ``Check`` nodes have some "magic" behavior: when their operands are null,
+    execution must "jump" up in the expression tree, climbing up the chain of
+    ``Prefix`` in parents. To implement this behavior, we lower these nodes to
+    ``Then`` expressions. For instance::
+
+       # Tree for A?.B.C
+       FieldAccess(Prefix(FieldAccess(Prefix(Check(A)), B), C))
+
+       # Lowered tree
+       Then(
+           expr=A,
+           var_expr=AbstractVariable(V1),
+           then_expr=FieldAccess(FieldAccess(V1, B), C),
+       )
+
+    This expansion is performed during the "prepare" property pass, right after
+    running the "do_prepare" hooks. The idea is to keep track of null checks
+    during the recursion on expression trees, and use the presence/absence of
+    ``Prefix`` to turn collected null checks into the corresponding ``Then``
+    expressions.
+
+    Checks are recorded using a stack of variable/expression couples
+    (the ``CheckCouple`` type defined below), with the following semantics:
+
+      * The expression of the bottom of the stack (``CheckStack[0].expr``) is
+        to be evaluated first, and assigned to the corresponding variable
+        (``CheckStack[0].var``).
+
+      * If it evaluated to null, then all other expressions are skipped, and
+        the whole expression must return a null value directly.
+
+      * Otherwise, proceed with the next expression in the stack
+        (``CheckStack[1].expr``, that uses the first variable to do its
+        computation), assign it to its own variable, etc.
+
+      * Once the last stack expression has been evaluated to a non-null value,
+        the rest of the expression can be evaluated.
+
+    Let's illustrate this with an example::
+
+       # Checks stack for A?.B.C?.D.E:
+       [0] var_1, A
+       [1] var_2, var_1.B.C
+       [2] var_3, var_2.D
+
+       # Remaining expression:
+       var_3.E
+
+    In order to evaluate the whole expression, we start with the first check:
+    evaluate ``A`` and assign the result to the ``var_1`` variable: if it is
+    null, the whole expression returns a null value for the type of the ``E``
+    field, otherwise, evaluation continues with the second expression:
+    ``var_1.B.C``. Rinse and repeat... If ``var_3`` is assigned a non-null
+    value, then we can then evaluate ``var_3.E``, i.e. the evalution of the
+    whole expression has completed.
+
+    Lowering first builds this stack of checks from ``Prefix`` and ``Check``
+    expression nodes, and then it is trivial to turn the stack into the right
+    nesting of ``Then`` expression: see the ``NullCond.wrap_checks`` method
+    below.
+
+    Building the stack of checks is easy with a simple recursion on the
+    expression tree. When recursion starts on an ``AbstractExpression``
+    instance, it begins with an empty list of checks. From there, we
+    distinguish two cases:
+
+    * When processing a ``Prefix`` child, the list of checks is passed down to
+      recursion: the recursive call will append checks in that list, collecting
+      the chain of computations/checks necessary to compute the prefix. This is
+      what allows the nested checks to propagate up in the expression tree.
+
+    * When processing anything else, we recurse with a new empty list of
+      checks, and wrap them at the end of recursion.
+
+    Again, here are some examples to clarify::
+
+       # Tree for A?.B.C?.D, with [labels] to explain recursion
+       [fld:D] FieldAccess(
+           [pfx:D] Prefix(Check(
+               [fld:C] FieldAccess(
+                   [pfx:C] Prefix(
+                       [fld:B] FieldAccess(
+                           [pfx:B] Prefix(Check(A)), B
+                       ),
+                   ),
+                   C,
+               ),
+           )),
+           D,
+       )
+
+    * [Depth 1] Lowering starts at ``fld:D`` with an empty list of checks:
+      let's call it ``C1``. Its only subexpression is a ``Prefix`` that wraps a
+      ``Check`` (``pfx:D``). Recursion goes directly to the wrapped
+      expression: ``fld:C``.
+
+    * [Depth 2] The only subexpression at this point is ``pfx:C``, which is
+      also a ``Prefix``, so recursion goes to ``fld:B`` with ``C1``.
+
+    * [Depth 3] The only subexpression there is ``pfx:B``, which is a
+      ``Prefix`` that wraps a ``Check``. Recursion goes directly to the wrapped
+      expression: ``A``, still carrying ``C1``.
+
+    * [Depth 4] This just returns the expression for ``A`` (let's call it
+      ``X1``), potentially adding checks to ``C1`` if ``A`` contains checked
+      prefixes.
+
+    * [Back to depth 3] That was a checked prefix: a new variable is created
+      (let's call it ``V1``), and a new check couple (``V1``, ``X1``) is
+      added to ``C1``. Recursion at that level returns ``V1.B``.
+
+    * [Back to depth 2] That was not a checked prefix, so this returns the
+      expression for ``V1.B.C``.
+
+    * [Back to depth 1] That was a checked prefix: a new variable is created
+      (let's call it ``V2``), and a new check couple (``V2``, ``V1.B.C``) is
+      added to ``C1``. Recursion at that level returns ``V2.D``.
+
+    Expression lowering completes at this stage with the following stack::
+
+       [0] V1, X1
+       [1] V2, V1.B.C
+
+    And the following returned expression::
+
+       V2.D
+
+    Expansion turns this into the desired final expression::
+
+       Then(
+           expr=X1,
+           var_expr=AbstractVariable(V1),
+           then_expr=Then(
+               expr=FieldAccess(FieldAccess(V1, B), C),
+               var_expr=AbstractVariable(V2),
+               then_expr=FieldAccess(V2, D),
+           ),
+       )
+    """
+
+    class Prefix(AbstractExpression):
+        """
+        Wrapper that designates the "prefix" operand in an abstract expression:
+        ``receiver`` in a ``FieldAccess``, ``X`` in a ``X.map(...)``
+        expression, etc.
+        """
+
+        def __init__(self, expr):
+            super().__init__()
+            assert not isinstance(expr, NullCond.Prefix)
+            self._expr = expr
+
+    class Check(AbstractExpression):
+        """
+        Wrapper that designates a checked prefix in an abstract expression
+        (``X`` in ``X._.Y``).
+        """
+
+        def __init__(self, expr, validated):
+            """
+            :param validated: Whether the use of this check is legal. ``X._``
+                creates an unvalidated check (so that ``X._ + 1`` is rejected,
+                for instance), and ``X._.Y`` then creates a validated one out
+                of the unvalidated one.
+            """
+            super().__init__()
+            self._expr = expr
+            self._validated = validated
+
+        def do_prepare(self) -> None:
+            with self.diagnostic_context:
+                check_source_language(
+                    self._validated, "Invalid use of the '_' special attribute"
+                )
+
+    @dataclasses.dataclass
+    class CheckCouple:
+        """
+        Variable/expression couple in the expansion stack for null conditional
+        expressions.
+        """
+        var: AbstractVariable
+        """
+        Variable that is checked.
+        """
+
+        expr: AbstractExpression
+        """
+        Initialization expression for that variable.
+        """
+
+    CheckStack = list[CheckCouple]
+
+    _counter = count(1)
+    """
+    Counter to generate unique variable names during expansion.
+    """
+
+    @staticmethod
+    def record_check(
+        checks: NullCond.CheckStack,
+        expr: AbstractExpression,
+    ) -> AbstractVariable:
+        """
+        Return a new variable after appending a new couple for it and ``expr``
+        to ``checks``.
+        """
+        var = AbstractVariable(
+            names.Name(f"Var_Expr_{next(NullCond._counter)}"),
+            create_local=True,
+        )
+        checks.append(NullCond.CheckCouple(var, expr))
+        return var
+
+    @staticmethod
+    def wrap_checks(
+        checks: NullCond.CheckStack,
+        expr: AbstractExpression,
+    ) -> AbstractExpression:
+        """
+        Turn the given checks and ``expr`` to the final expression according to
+        null conditional rules.
+        """
+
+        from langkit.expressions import Then
+
+        result = expr
+        for couple in reversed(checks):
+            then = Then.create_from_exprs(couple.expr, result, couple.var)
+            then.underscore_then = True
+            result = then
+        return result
+
+
+class Paren(AbstractExpression):
+    """
+    Dummy expression to materialize the presence of parens in an expression
+    tree.
+    """
+
+    def __init__(self, subexpr: AbstractExpression):
+        super().__init__()
+        self.subexpr = subexpr
+
+    def construct(self) -> ResolvedExpression:
+        return construct(self.subexpr)
 
 
 class AbstractVariable(AbstractExpression):
@@ -3959,7 +4241,7 @@ class PropertyDef(AbstractNodeData):
 
         if self.expr:
             with self.bind():
-                self.expr = self.expr.prepare() or self.expr
+                self.expr = self.expr.prepare()
 
     def freeze_abstract_expression(self, context):
         """
