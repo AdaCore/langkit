@@ -52,11 +52,13 @@ package ${ada_lib_name}.Common is
    ----------------------------
 
    % for enum_type in ctx.enum_types:
-      type ${enum_type.api_name} is
-        (${', '.join(str(v.name) for v in enum_type.values)})
-         with Convention => C;
+      ${ada_enum_type_decl(
+         enum_type.api_name,
+         [v.name for v in enum_type.values],
+         6,
+         convention_c=True,
+      )}
       ${ada_doc(enum_type, 6)}
-
 
       % if ctx.properties_logging:
       function Trace_Image (Self : ${enum_type.api_name}) return String
@@ -72,17 +74,22 @@ package ${ada_lib_name}.Common is
    ## Output enumerators so that all concrete AST_Node subclasses get their own
    ## kind. Nothing can be an instance of an abstract subclass, so these do not
    ## need their own kind.
-   type ${T.node_kind} is
-     (${', '.join(cls.ada_kind_name
-                  for cls in ctx.astnode_types
-                  if not cls.abstract)});
+   ${ada_enum_type_decl(
+      T.node_kind,
+      [t.ada_kind_name for t in ctx.astnode_types if not t.abstract],
+      3,
+   )}
    --  Type for concrete nodes
 
    for ${T.node_kind} use
-     (${', '.join('{} => {}'.format(cls.ada_kind_name,
-                                    ctx.node_kind_constants[cls])
-                  for cls in ctx.astnode_types
-                  if not cls.abstract)});
+   ${ada_block_with_parens(
+       [
+           f"{cls.ada_kind_name} => {ctx.node_kind_constants[cls]}"
+           for cls in ctx.astnode_types
+           if not cls.abstract
+       ],
+       3
+   )};
 
    ## Output subranges to materialize abstract classes as sets of their
    ## concrete subclasses.
@@ -102,7 +109,7 @@ package ${ada_lib_name}.Common is
       with Static_Predicate =>
       % if ctx.synthetic_nodes:
          Synthetic_Nodes in
-         ${' | '.join(cls.ada_kind_name for cls in ctx.synthetic_nodes)}
+         ${ada_pipe_list([t.ada_kind_name for t in ctx.synthetic_nodes], 9)}
       % else:
          False
       % endif
@@ -135,13 +142,18 @@ package ${ada_lib_name}.Common is
    -- Tokens --
    ------------
 
-   type Token_Kind is (
-      ${',\n'.join(t.ada_name for t in tokens)}
-   );
+   ${ada_enum_type_decl(
+      "Token_Kind",
+      [t.ada_name for t in tokens],
+      3,
+   )}
    --  Kind of token: indentifier, string literal, ...
 
-   type Token_Family is
-     (${', '.join(tf.ada_name for tf in lexer.tokens.token_families)});
+   ${ada_enum_type_decl(
+      "Token_Family",
+      [tf.ada_name for tf in lexer.tokens.token_families],
+      3,
+   )}
    --  Groups of token kinds, to make the processing of some groups of token
    --  uniform.
 
@@ -151,9 +163,13 @@ package ${ada_lib_name}.Common is
    % endif
 
    Token_Kind_To_Family : array (Token_Kind) of Token_Family :=
-     (${', '.join('{} => {}'.format(t.ada_name,
-                                     lexer.tokens.token_to_family[t].ada_name)
-                   for t in tokens)});
+   ${ada_block_with_parens(
+       [
+           f"{t.ada_name} => {lexer.tokens.token_to_family[t].ada_name}"
+           for t in tokens
+       ],
+       3
+   )};
    --  Associate a token family to all token kinds
    --
    --% document-value: False

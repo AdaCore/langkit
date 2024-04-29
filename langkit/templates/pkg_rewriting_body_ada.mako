@@ -561,13 +561,15 @@ package body ${ada_lib_name}.Rewriting is
             % endfor
             ) return Node_Rewriting_Handle is
          begin
+            <%
+               args = ["Unwrap_RH (Handle)"]
+               args += [
+                  f"{f.name} => Unwrap_Node_RH ({f.api_name})"
+                  for f in n.get_parse_fields()
+               ]
+            %>
             return Wrap_Node_RH (Impl.Create_${n.entity.api_name}
-               (Unwrap_RH (Handle),
-                ${
-                   ', '.join(
-                     '{} => Unwrap_Node_RH ({})'.format(f.name, f.api_name)
-                     for i, f in enumerate(n.get_parse_fields(), 1)
-                )}));
+            ${ada_block_with_parens(args, 12)});
          end;
 
       % endif

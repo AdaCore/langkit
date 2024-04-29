@@ -32,14 +32,26 @@ with GNATcov_RTS.Traces.Output.Files;
 package body ${ada_lib_name}.Common is
 
    Is_Token_Node_Kind : constant array (${T.node_kind}) of Boolean :=
-     (${', '.join('{} => {}'.format(n.ada_kind_name, n.is_token_node)
-                  for n in ctx.astnode_types if not n.abstract)});
+   ${ada_block_with_parens(
+       [
+           f"{n.ada_kind_name} => {n.is_token_node}"
+           for n in ctx.astnode_types
+           if not n.abstract
+       ],
+       3
+   )};
    --  For each node kind, return whether it is a node that contains only a
    --  single token.
 
    Is_Error_Node_Kind : constant array (${T.node_kind}) of Boolean :=
-     (${', '.join('{} => {}'.format(n.ada_kind_name, n.is_error_node)
-                  for n in ctx.astnode_types if not n.abstract)});
+   ${ada_block_with_parens(
+       [
+           f"{n.ada_kind_name} => {n.is_error_node}"
+           for n in ctx.astnode_types
+           if not n.abstract
+       ],
+       3
+   )};
    --  For each node kind, return whether it is an error node
 
    function Wrap_Token_Reference

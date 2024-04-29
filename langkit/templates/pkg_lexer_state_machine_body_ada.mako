@@ -8,10 +8,10 @@
 
 package body ${ada_lib_name}.Lexer_State_Machine is
 
-   Is_Trivia : constant array (Token_Kind) of Boolean := (
-      ${', '.join('{} => {}'.format(t.ada_name, t.is_trivia)
-                  for t in lexer.sorted_tokens)}
-   );
+   Is_Trivia : constant array (Token_Kind) of Boolean :=
+   ${ada_block_with_parens(
+       [f"{t.ada_name} => {t.is_trivia}" for t in lexer.sorted_tokens], 3
+   )};
 
    type Character_Range is record
       First, Last : Character_Type;

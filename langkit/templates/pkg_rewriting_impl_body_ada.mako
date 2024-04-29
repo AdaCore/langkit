@@ -2642,8 +2642,13 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
             return Create_Regular_Node
               (Handle, ${n.ada_kind_name},
-               (${', '.join('{} => {}'.format(i, f.name)
-                            for i, f in enumerate(n.get_parse_fields(), 1))}));
+               ${ada_block_with_parens(
+                   [
+                       f"{i} => {f.name}"
+                       for i, f in enumerate(n.get_parse_fields(), 1)
+                   ],
+                   15
+               )});
          end;
 
       % endif
