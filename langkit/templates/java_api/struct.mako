@@ -226,7 +226,7 @@
     public interface ${ni_type} extends PointerBase {
         % for field in flatten_fields:
         @CField("${field.custom_access('.')}")
-        public ${api.ni_type(field.public_type)}
+        public ${api.ni_type(field.public_type, ast_wrapping=False)}
         get_${field.native_access}();
 
         @CField("${field.custom_access('.')}")

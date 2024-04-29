@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
-from langkit.compiled_types import ArrayType, BaseField, CompiledType, T
+from langkit.compiled_types import BaseField, CompiledType, T
 from langkit.language_api import AbstractAPISettings
 from langkit.names import Name
 from langkit.utils import dispatch_on_type
@@ -487,20 +487,12 @@ class JavaAPISettings(AbstractAPISettings):
                     if ast_wrapping else
                     "Entity"
             ),
-            (ct.StructType, lambda t: t.api_name.camel),
-            (ct.ArrayType, lambda t: self.array_wrapping_type(t)),
-            (ct.IteratorType, lambda t: t.api_name.camel),
+            (
+                ct.ArrayType, lambda t:
+                    f"{self.wrapping_type(t.element_type)}[]"
+            ),
+            (object, lambda t: t.api_name.camel),
         ])
-
-    def array_wrapping_type(self, array_type: ArrayType) -> str:
-        """
-        Get the array type in Java for the wanted compiled type.
-        """
-        return (
-            ct.T.entity.array
-            if array_type.element_type.is_entity_type else
-            array_type
-        ).api_name.camel
 
     def wrapper_class(self,
                       the_type: CompiledType,
@@ -518,6 +510,7 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Int, lambda _: "IntegerWrapper"),
             (T.BigInt, lambda _: "BigIntegerWrapper"),
             (T.String, lambda _: "StringWrapper"),
+            (ct.ArrayType, lambda t: f"{t.api_name.camel}Wrapper"),
             (object, lambda t: self.wrapping_type(t, ast_wrapping))
         ])
 
@@ -564,11 +557,14 @@ class JavaAPISettings(AbstractAPISettings):
 
     # ----- Native-Image methods -----
 
-    def ni_type(self, the_type: CompiledType) -> str:
+    def ni_type(self,
+                the_type: CompiledType,
+                ast_wrapping: bool = True) -> str:
         """
         Get the Java type that represents the given type for the Graal C API.
 
         :param the_type: The type you want the name from.
+        :param ast_wrapping: If the AST node should be wrapped.
         """
         return dispatch_on_type(the_type, [
             (T.Bool, lambda _: "byte"),
@@ -593,9 +589,13 @@ class JavaAPISettings(AbstractAPISettings):
             (T.env_md, lambda _: "MetadataNative"),
             (ct.EntityType, lambda _: "EntityNative"),
             (ct.ASTNodeType, lambda _: "Pointer"),
-            (ct.StructType, lambda t: f"{t.api_name.camel}Native"),
-            (ct.ArrayType, lambda t: f"{self.array_wrapping_type(t)}Native"),
-            (ct.IteratorType, lambda t: f"{t.api_name.camel}Native"),
+            (
+                ct.ArrayType, lambda t:
+                    f"{t.api_name.camel}Native"
+                    if ast_wrapping or not t.element_type.is_entity_type else
+                    f"{ct.T.entity.array.api_name.camel}Native"
+            ),
+            (object, lambda t: f"{t.api_name.camel}Native"),
         ])
 
     def ni_reference_type(self, the_type: CompiledType) -> str:
@@ -695,7 +695,7 @@ class JavaAPISettings(AbstractAPISettings):
         self.extend_release_list(release_list, the_type, export)
 
         # Return the unwrapping statement
-        ni_type = self.ni_type(the_type)
+        ni_type = self.ni_type(the_type, ast_wrapping=False)
 
         res = f"{ni_type} {export} = "
 
@@ -736,9 +736,10 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 ct.ArrayType, lambda t:
-                    f"{source}.unwrap(currentContext);"
+                    f"{self.wrapper_class(t)}"
+                    f".unwrap({source}, currentContext);"
                     if t.element_type.is_symbol_type else
-                    f"{source}.unwrap();"
+                    f"{self.wrapper_class(t)}.unwrap({source});"
             ),
             (
                 object, lambda _:
@@ -827,9 +828,10 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 ct.ArrayType, lambda t:
-                    f"{source}.unwrap({pointer}, currentContext);"
+                    f"{self.wrapper_class(t)}"
+                    f".unwrap({source}, {pointer}, currentContext);"
                     if t.element_type.is_symbol_type else
-                    f"{source}.unwrap({pointer});"
+                    f"{self.wrapper_class(t)}.unwrap({source}, {pointer});"
             ),
             (
                 ct.ASTNodeType, lambda t:
@@ -1037,6 +1039,10 @@ class JavaAPISettings(AbstractAPISettings):
             (T.BigInt, lambda _: "Ljava/math/BigInteger;"),
             (T.String, lambda _: "Ljava/lang/String;"),
             (
+                ct.ArrayType, lambda t:
+                    f"[L{base_class}${self.wrapping_type(t.element_type)};"
+            ),
+            (
                 object, lambda t: (
                     f"L{base_class}$"
                     f"{self.wrapping_type(t, ast_wrapping=ast_wrapping)};"
@@ -1065,7 +1071,7 @@ class JavaAPISettings(AbstractAPISettings):
         return dispatch_on_type(the_type, [
             (T.Bool, lambda _: "0"),
             (T.Int, lambda _: "0"),
-            (object, lambda t: f"{self.wrapping_type(t, False)}_new_value()"),
+            (object, lambda t: f"{self.wrapper_class(t, False)}_new_value()"),
         ])
 
     def jni_wrap(self,
@@ -1086,7 +1092,6 @@ class JavaAPISettings(AbstractAPISettings):
         self.extend_release_list(release_list, the_type, expr)
 
         # Return the wrapping expression
-        java_type = self.wrapping_type(the_type, ast_wrapping=ast_wrapping)
         return dispatch_on_type(the_type, [
             (T.Bool, lambda _: f"(jboolean) {expr}"),
             (T.Int, lambda _: f"(jint) {expr}"),
@@ -1111,7 +1116,13 @@ class JavaAPISettings(AbstractAPISettings):
                     if ast_wrapping else
                     f"Entity_wrap(env, {expr})"
             ),
-            (object, lambda _: f"{java_type}_wrap(env, {expr})"),
+            (
+                object, lambda t:
+                    (
+                        f"{self.wrapper_class(t, ast_wrapping=ast_wrapping)}"
+                        f"_wrap(env, {expr})"
+                    )
+            ),
         ])
 
     def jni_unwrap(self,
@@ -1136,7 +1147,6 @@ class JavaAPISettings(AbstractAPISettings):
         self.extend_release_list(release_list, the_type, export)
 
         # Return the unwrapping expression
-        java_type = self.wrapping_type(the_type, ast_wrapping=ast_wrapping)
         export_type = the_type.c_type(self.c_api_settings).name
         res = f"{export_type} {export} = "
 
@@ -1149,9 +1159,10 @@ class JavaAPISettings(AbstractAPISettings):
             ),
             (
                 ct.ArrayType, lambda t:
-                    f"{java_type}_unwrap(env, {expr}, context_native);"
+                    f"{self.wrapper_class(t)}"
+                    f"_unwrap(env, {expr}, context_native);"
                     if t.element_type.is_symbol_type else
-                    f"{java_type}_unwrap(env, {expr});"
+                    f"{self.wrapper_class(t)}_unwrap(env, {expr});"
             ),
             (
                 ct.ASTNodeType, lambda _:
@@ -1166,8 +1177,11 @@ class JavaAPISettings(AbstractAPISettings):
                     f"Entity_unwrap(env, {expr});"
             ),
             (
-                object, lambda _:
-                    f"{java_type}_unwrap(env, {expr});"
+                object, lambda t:
+                    (
+                        f"{self.wrapper_class(t, ast_wrapping=ast_wrapping)}"
+                        f"_unwrap(env, {expr});"
+                    )
             ),
         ])
 

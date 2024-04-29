@@ -89,10 +89,10 @@ jclass Char_class_ref = NULL;
 jmethodID Char_constructor_id = NULL;
 jfieldID Char_value_field_id = NULL;
 
-${big_integer_type} BigInteger_new_value();
-jobject BigInteger_wrap(JNIEnv *, ${big_integer_type});
-${big_integer_type} BigInteger_unwrap(JNIEnv *, jobject);
-void BigInteger_release(${big_integer_type});
+${big_integer_type} BigIntegerWrapper_new_value();
+jobject BigIntegerWrapper_wrap(JNIEnv *, ${big_integer_type});
+${big_integer_type} BigIntegerWrapper_unwrap(JNIEnv *, jobject);
+void BigIntegerWrapper_release(${big_integer_type});
 
 jclass BigInteger_class_ref = NULL;
 jmethodID BigInteger_constructor_id = NULL;
@@ -109,10 +109,10 @@ jfieldID Symbol_text_field_id = NULL;
 jclass SymbolException_class_ref = NULL;
 jmethodID SymbolException_constructor_id = NULL;
 
-${string_type} String_new_value();
-jobject String_wrap(JNIEnv *, ${string_type});
-${string_type} String_unwrap(JNIEnv *, jobject);
-void String_release(${string_type});
+${string_type} StringWrapper_new_value();
+jobject StringWrapper_wrap(JNIEnv *, ${string_type});
+${string_type} StringWrapper_unwrap(JNIEnv *, jobject);
+void StringWrapper_release(${string_type});
 
 ${text_type} Text_new_value();
 jobject Text_wrap(JNIEnv *, ${text_type});
@@ -265,7 +265,7 @@ ${struct.jni_c_decl(struct_type)}
 % endfor
 
 % for array_type in ctx.array_types:
-    % if array_type.exposed and array_type.emit_c_type:
+    % if array_type.exposed:
 ${array.jni_c_decl(array_type)}
     % endif
 % endfor
@@ -899,7 +899,7 @@ ${enum.jni_init_global_refs(enum_type)}
 % endfor
 
 % for array_type in ctx.array_types:
-    % if array_type.exposed and array_type.emit_c_type:
+    % if array_type.exposed:
 ${array.jni_init_global_refs(array_type)}
     % endif
 % endfor
@@ -1276,12 +1276,12 @@ uint32_t Char_unwrap(
 // ==========
 
 // Create a new value for a big integer
-${big_integer_type} BigInteger_new_value() {
+${big_integer_type} BigIntegerWrapper_new_value() {
     return NULL;
 }
 
 // Wrap a native big integer in the Java class
-jobject BigInteger_wrap(
+jobject BigIntegerWrapper_wrap(
     JNIEnv *env,
     ${big_integer_type} big_int_native
 ) {
@@ -1309,7 +1309,7 @@ jobject BigInteger_wrap(
 }
 
 // Get the native big integer from the Java wrapping instance
-${big_integer_type} BigInteger_unwrap(
+${big_integer_type} BigIntegerWrapper_unwrap(
     JNIEnv *env,
     jobject big_integer
 ) {
@@ -1342,7 +1342,7 @@ ${big_integer_type} BigInteger_unwrap(
 }
 
 // Release the given native big integer
-void BigInteger_release(
+void BigIntegerWrapper_release(
     ${big_integer_type} big_int_native
 ) {
     ${nat("big_integer_decref")}(big_int_native);
@@ -1445,12 +1445,12 @@ jthrowable new_symbol_exception(
 // ==========
 
 // Create a new value for a langkit string
-${string_type} String_new_value() {
+${string_type} StringWrapper_new_value() {
     return NULL;
 }
 
 // Wrap a native langkit string in the Java class
-jstring String_wrap(
+jstring StringWrapper_wrap(
     JNIEnv *env,
     ${string_type} string_native
 ) {
@@ -1462,7 +1462,7 @@ jstring String_wrap(
 }
 
 // Get the native langkit string from a Java wrapping instance
-${string_type} String_unwrap(
+${string_type} StringWrapper_unwrap(
     JNIEnv *env,
     jstring string
 ) {
@@ -1490,7 +1490,7 @@ ${string_type} String_unwrap(
 }
 
 // Release the given native string
-void String_release(
+void StringWrapper_release(
     ${string_type} string_native
 ) {
     ${nat("string_dec_ref")}(string_native);
@@ -3578,7 +3578,7 @@ ${struct.jni_c_impl(struct_type)}
 // ==========
 
 % for array_type in ctx.array_types:
-    % if array_type.exposed and array_type.emit_c_type:
+    % if array_type.exposed:
 ${array.jni_c_impl(array_type)}
     % endif
 % endfor

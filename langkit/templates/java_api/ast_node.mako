@@ -331,7 +331,8 @@
             arg_list = []
             for arg in field.arguments:
                 arg_list.append(
-                    f"{api.ni_type(arg.public_type)} {arg.name.lower}"
+                    f"{api.ni_type(arg.public_type, ast_wrapping=False)} "
+                    f"{arg.name.lower}"
                 )
             %>
 
@@ -456,7 +457,7 @@ ${func_sig}(
 
         /* Release resources used to wrap the result.  */
         % for to_release in return_release_list:
-          ${api.wrapping_type(to_release.public_type, False)}_release(
+          ${api.wrapper_class(to_release.public_type, False)}_release(
               ${to_release.name}
           );
         % endfor
@@ -464,7 +465,7 @@ ${func_sig}(
 
     /* Release resources used to unwrap the arguments.  */
     % for to_release in args_release_list:
-    ${api.wrapping_type(to_release.public_type, False)}_release(
+    ${api.wrapper_class(to_release.public_type, False)}_release(
         ${to_release.name}
     );
     % endfor
