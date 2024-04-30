@@ -3948,8 +3948,6 @@ class LktTypesLoader:
                 return result
 
             elif isinstance(expr, L.CallExpr):
-                abort_if_static_required(expr)
-
                 call_expr = expr
                 call_name = call_expr.f_name
 
@@ -3983,6 +3981,8 @@ class LktTypesLoader:
                             **enabled_categories,
                         )
                     else:
+                        abort_if_static_required(expr)
+
                         args, kwargs = self.lower_call_args(call_expr, lower)
                         check_source_language(
                             len(args) == 0,

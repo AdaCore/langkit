@@ -15,9 +15,16 @@ class FooNode(ASTNode):
 
 class Def(FooNode):
     name = Field(type=T.Name)
+    nocat = Field(type=T.NoCat)
     cat1 = Field(type=T.Cat1)
     cat2 = Field(type=T.Cat2)
     example = Field(type=T.Example)
+
+    env_spec = EnvSpec(add_env())
+
+
+class NoCat(FooNode):
+    decls = Field(type=T.Var.list)
 
     env_spec = EnvSpec(add_env())
 
@@ -39,6 +46,8 @@ class Example(FooNode):
 
     env_spec = EnvSpec(
         add_env(),
+        reference([Self.parent.cast(Def).nocat.cast(T.FooNode)],
+                  T.FooNode.children_env),
         reference([Self.parent.cast(Def).cat1.cast(T.FooNode)],
                   T.FooNode.children_env,
                   category='cat1'),
@@ -51,13 +60,23 @@ class Example(FooNode):
     def lookup_all(name=T.Symbol):
         return Self.children_env.get(name)
 
+    @langkit_property()
+    def lookup_by_cat(
+        name=T.Symbol, cats=(T.RefCategories, RefCategories(default=False))
+    ):
+        return Self.children_env.get(name, categories=cats)
+
+    @langkit_property(public=True)
+    def lookup_none(name=T.Symbol):
+        return Self.lookup_by_cat(name)
+
     @langkit_property(public=True)
     def lookup_1(name=T.Symbol):
-        return Self.children_env.get(name, categories=RefCategories(cat1=True))
+        return Self.lookup_by_cat(name, cats=RefCategories(cat1=True))
 
     @langkit_property(public=True)
     def lookup_2(name=T.Symbol):
-        return Self.children_env.get(name, categories=RefCategories(cat2=True))
+        return Self.lookup_by_cat(name, cats=RefCategories(cat2=True))
 
 
 class Name(FooNode):

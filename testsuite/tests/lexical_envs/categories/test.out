@@ -1,21 +1,27 @@
 main.py: Running...
 With p_lookup_all:
   (a) -> []
-  (b) -> ['<Var b, line 3>', '<Var b, line 4>']
-  (c) -> ['<Var c, line 3>']
-  (d) -> ['<Var d, line 4>']
+  (b) -> ['<Var b, line 3>', '<Var b, line 4>', '<Var b, line 5>']
+  (c) -> ['<Var c, line 4>']
+  (d) -> ['<Var d, line 5>']
+
+With p_lookup_none:
+  (a) -> []
+  (b) -> ['<Var b, line 3>']
+  (c) -> []
+  (d) -> []
 
 With p_lookup_1:
   (a) -> []
-  (b) -> ['<Var b, line 3>']
-  (c) -> ['<Var c, line 3>']
+  (b) -> ['<Var b, line 3>', '<Var b, line 4>']
+  (c) -> ['<Var c, line 4>']
   (d) -> []
 
 With p_lookup_2:
   (a) -> []
-  (b) -> ['<Var b, line 4>']
+  (b) -> ['<Var b, line 3>', '<Var b, line 5>']
   (c) -> []
-  (d) -> ['<Var d, line 4>']
+  (d) -> ['<Var d, line 5>']
 
 main.py: Done.
 Done

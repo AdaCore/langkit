@@ -9,8 +9,9 @@ print('main.py: Running...')
 ctx = libfoolang.AnalysisContext()
 u = ctx.get_from_buffer('input', """
 def a {
-    cat1 { b c   }
-    cat2 { b   d }
+    nocat { b     }
+    cat1  { b c   }
+    cat2  { b   d }
     example
 }
 """)
@@ -25,7 +26,7 @@ def var_image(v):
 
 
 example = u.root[-1]
-for lookup in ('p_lookup_all', 'p_lookup_1', 'p_lookup_2'):
+for lookup in ('p_lookup_all', 'p_lookup_none', 'p_lookup_1', 'p_lookup_2'):
     print('With {}:'.format(lookup))
     for name in ('a', 'b', 'c', 'd'):
         lookup_prop = getattr(example, lookup)
