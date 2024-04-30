@@ -480,6 +480,11 @@ class Scope:
         Stop with a user-level error if there is already a declaration with the
         same name in this scope.
         """
+        # Pseudo "_" entities are used to mean "do not bind this to an
+        # identifier": just skip them.
+        if entity.name == "_":
+            return
+
         other_entity = self.mapping.get(entity.name)
         if other_entity is None:
             self.mapping[entity.name] = entity
@@ -3893,10 +3898,7 @@ class LktTypesLoader:
 
                         # Make the declared value available to the inner
                         # expression lowering.
-                        if source_name != "_":
-                            sub_env.add(
-                                Scope.LocalVariable(source_name, v, var)
-                            )
+                        sub_env.add(Scope.LocalVariable(source_name, v, var))
 
                     elif isinstance(v, L.VarBind):
                         # Look for the corresponding dynamic variable, either
