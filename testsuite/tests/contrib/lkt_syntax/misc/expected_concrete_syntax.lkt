@@ -15,7 +15,7 @@ grammar foo_grammar {
 class Example: FooNode {
     |" Test that null conditional + match expr expands correctly.
     @export fun null_match(): Example = node.do(
-        (_) => match _ {
+        (v1) => match v1 {
             case e: Example => e
         }
     )

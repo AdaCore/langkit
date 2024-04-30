@@ -1141,9 +1141,15 @@ def emit_expr(expr, **ctx):
                     then_prefix=then_prefix,
                 )
             else:
+                # Since we cannot use the "?." syntax, we need an actual
+                # variable name, so generate one if needed.
+                v = var_name(expr.var_expr)
+                if v == "_":
+                     v = expr.var_expr.source_name = new_undercore_varname_id()
+
                 return emit_final_call(
                     ee_pexpr(expr.expr),
-                    var_name(expr.var_expr),
+                    v,
                     ee(expr.then_expr),
                     ee_pexpr(expr.default_val)
                     if expr.default_val else None
@@ -1450,7 +1456,20 @@ def emit_doc(doc):
     return sf("${doc}")
 
 
+# Generator for synthetic "underscore" variables identifiers. This is used when
+# the DSL has no explicit variable due to the "._." notation, but we cannot use
+# "?." in Lkt: we need to go through the explicit ".do((x) => ...)" notation,
+# and thus create a synthetic variable (a variable in Lkt that has does not
+# exist in the DSL).
+underscore_varname_ids = itertools.count(0)
+def new_undercore_varname_id():
+    return f"v{next(underscore_varname_ids)}"
+
+
 def emit_prop(prop, walker):
+    global underscore_varname_ids
+    underscore_varname_ids = itertools.count(1)
+
     quals = ""
 
     # When a property declared in the DSL happens to be the root of a property
