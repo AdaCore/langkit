@@ -391,8 +391,9 @@ ${c_type} ${wrapper_type}_unwrap(
     //  Retrieve the array's content
     jobjectArray content = (jobjectArray) (*env)->CallStaticObjectMethod(
         env,
-        array,
-        ${wrapper_type}_unwrap_method_id
+        ${wrapper_type}_class_ref,
+        ${wrapper_type}_unwrap_method_id,
+        array
     );
 
     // Get the content size
