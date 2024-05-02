@@ -64,7 +64,7 @@ class Using: FooNode {
 
     env_spec {
         reference(
-            node.name.as[FooNode]?.singleton(), Name.designated_env
+            node.name.as[FooNode].do((v1) => [v1]), Name.designated_env
         )
     }
 }
