@@ -1820,11 +1820,12 @@ def emit_env_spec(node_type, walker):
             ):
                 with walker.arg_by_keyword("transitive_parent", 1):
                     args.append(
-                        f"transitive_parent={ee(action.transitive_parent)}"
+                        "transitive_parent="
+                        f"{ee(action.transitive_parent_prop.expr)}"
                     )
             if action.names is not None:
                 with walker.arg_by_keyword("names", 2):
-                    args.append(f"names={ee(action.names)}")
+                    args.append(f"names={ee(action.names_prop.expr)}")
 
         elif isinstance(action, envs.AddToEnv) and action.kv_params:
             params = action.kv_params
@@ -1847,7 +1848,7 @@ def emit_env_spec(node_type, walker):
         elif isinstance(action, envs.AddToEnv):
             fn_name = "add_to_env"
             with walker.arg(0):
-                args = [ee(action.mappings)]
+                args = [ee(action.mappings_prop.expr)]
             if action.resolver:
                 with walker.arg_by_keyword("resolver", 1):
                     args.append(f"resolver={fqn(action.resolver)}")
@@ -1855,13 +1856,13 @@ def emit_env_spec(node_type, walker):
         elif isinstance(action, envs.Do):
             fn_name = "do"
             with walker.arg(0):
-                args = [ee(action.expr)]
+                args = [ee(action.do_property.expr)]
 
         elif isinstance(action, envs.RefEnvs):
             fn_name = "reference"
             args = []
             with walker.arg(0):
-                args.append(ee(action.nodes_expr))
+                args.append(ee(action.nodes_property.expr))
             with walker.arg(1):
                 args.append(fqn(action.resolver))
             if action.kind != envs.RefKind.normal:
@@ -1869,10 +1870,10 @@ def emit_env_spec(node_type, walker):
                     args.append(f"kind={action.kind.value.lower()}")
             if action.dest_env is not None:
                 with walker.arg_by_keyword("dest_env", 3):
-                    args.append(f"dest_env={ee(action.dest_env)}")
+                    args.append(f"dest_env={ee(action.dest_env_prop.expr)}")
             if action.cond is not None:
                 with walker.arg_by_keyword("cond", 4):
-                    args.append(f"cond={ee(action.cond)}")
+                    args.append(f"cond={ee(action.cond_prop.expr)}")
             if action.category is not None:
                 with walker.arg_by_keyword("category", 5):
                     args.append(f'category="{action.category.lower}"')
@@ -1883,7 +1884,7 @@ def emit_env_spec(node_type, walker):
         elif isinstance(action, envs.SetInitialEnv):
             fn_name = "set_initial_env"
             with walker.arg(0):
-                args = [ee(action.env_expr)]
+                args = [ee(action.env_prop.expr)]
 
         else:
             return "# " + str(action)

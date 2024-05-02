@@ -63,6 +63,8 @@ class Using: FooNode {
     @parse_field name: Name
 
     env_spec {
-        reference([_], Name.designated_env)
+        reference(
+            node.name.as[FooNode]?.singleton(), Name.designated_env
+        )
     }
 }
