@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
     @export fun p1(n: Entity[FooNode]): Entity[FooNode] = n.do(
-        (_) => match _ {
+        (v1) => match v1 {
             case e: Example => e
             case _ => null[Entity[FooNode]]
         }.do((n) => n.parent)
@@ -16,7 +16,7 @@ grammar foo_grammar {
     @export fun p2(): Entity[Example] = (
         self.to_singleton().find((e) => e is Example)
     ).do(
-        (_) => match _ {
+        (v1) => match v1 {
             case e: Example => e.parent
             case _ => null[Entity[FooNode]]
         }.as[Example]
