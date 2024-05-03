@@ -126,6 +126,18 @@ def construct_compile_time_known(expr, *args, **kwargs):
     return result
 
 
+def construct_compile_time_known_or_none(expr, *args, **kwargs):
+    """
+    Like construct_compile_time_known, but just return None if the argument is
+    None.
+    """
+    return (
+        None
+        if expr is None else
+        construct_compile_time_known(expr, *args, **kwargs)
+    )
+
+
 def match_default_values(left, right):
     """
     Return whether the given optional default values are identical.
@@ -137,6 +149,8 @@ def match_default_values(left, right):
     if left is None or right is None:
         return left == right
     else:
+        assert isinstance(left, ResolvedExpression), left
+        assert isinstance(right, ResolvedExpression), right
         return left.ir_dump == right.ir_dump
 
 
@@ -4353,9 +4367,15 @@ class PropertyDef(AbstractNodeData):
                     # returns a new AbstractExpression.
                     and all(sd is bd
                             for sd, bd in zip(self_dynvars, base_dynvars))
-                    and all(match_default_values(sd, bd)
-                            for sd, bd in zip(self_dynvars_defaults,
-                                              base_dynvars_defaults)),
+                    and all(
+                        match_default_values(
+                            construct_compile_time_known_or_none(sd),
+                            construct_compile_time_known_or_none(bd)
+                        )
+                        for sd, bd in zip(
+                            self_dynvars_defaults, base_dynvars_defaults
+                        )
+                    ),
                     'Requested set of dynamically bound variables is not'
                     ' consistent with the property to override: {}'.format(
                         self.base.qualname
