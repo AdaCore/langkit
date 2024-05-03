@@ -243,8 +243,9 @@ private package ${ada_lib_name}.Generic_Introspection is
          at = G.array_access_type(t)
       %>
 
-      type ${at} is access all ${t.api_name};
-      procedure Free is new Ada.Unchecked_Deallocation (${t.api_name}, ${at});
+      type ${at} is access all ${t.qualified_api_name};
+      procedure Free is new Ada.Unchecked_Deallocation
+        (${t.qualified_api_name}, ${at});
 
       type ${vt} is new Base_Internal_Array_Value with record
          Value : ${at};

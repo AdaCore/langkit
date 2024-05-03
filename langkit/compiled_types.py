@@ -981,6 +981,31 @@ class CompiledType:
         return self.name if self._api_name is None else self._api_name
 
     @property
+    def qualified_api_name(self) -> str:
+        """
+        Return the Ada qualified name to use for this type in public APIs.
+        """
+        result = self.api_name.camel_with_underscores
+        prefix = None
+        if self.is_enum_type:
+            prefix = "Common"
+        elif not (
+            self.is_big_int_type
+            or self.is_bool_type
+            or self.is_character_type
+            or self.is_env_rebindings_type
+            or self.is_env_rebindings_type
+            or self.is_int_type
+            or self.is_source_location_type
+            or self.is_string_type
+            or self.is_symbol_type
+            or self.is_token_type
+        ):
+            prefix = "Analysis"
+
+        return f"{prefix}.{result}" if prefix else result
+
+    @property
     def dsl_name(self):
         """
         Type name as it appears in the DSL. To be used in diagnostics.
