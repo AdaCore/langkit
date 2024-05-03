@@ -1,0 +1,19 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @export fun negate_int(i: Int): Int = -i
+
+    @export fun minus_one_int(): Int = -1
+
+    @export fun negate_bigint(i: BigInt): BigInt = -i
+
+    @export fun minus_one_bigint(): BigInt = -1b
+}
+
+class Example: FooNode implements TokenNode {
+}

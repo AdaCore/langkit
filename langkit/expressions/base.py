@@ -872,6 +872,13 @@ class AbstractExpression(Frozable):
         from langkit.expressions.boolean import Eq, Not
         return Not(Eq(self, other))
 
+    @Frozable.protect
+    def __neg__(self):
+        """
+        Return an UnaryNeg expression.
+        """
+        return UnaryNeg(self)
+
     def dump(self) -> None:
         """
         Dump the expression tree on the standard output.
@@ -5893,6 +5900,45 @@ class Arithmetic(AbstractExpression):
 
     def __repr__(self):
         return f"<Arithmetic {self.op} at {self.location_repr}>"
+
+
+class UnaryNeg(AbstractExpression):
+    """
+    Unary "-" operator.
+    """
+
+    class Expr(ComputingExpr):
+        def __init__(self, expr, abstract_expr=None):
+            self.expr = expr
+            self.static_type = expr.type
+            super().__init__("Neg", abstract_expr=abstract_expr)
+
+        def _render_pre(self):
+            result = [
+                self.expr.render_pre(),
+                assign_var(
+                    self.result_var.ref_expr,
+                    f"-{self.expr.render_expr()}",
+                    requires_incref=False,
+                )
+            ]
+            return "\n".join(result)
+
+        @property
+        def subexprs(self):
+            return {"expr": self.expr}
+
+    def __init__(self, expr):
+        super().__init__()
+        self.expr = expr
+
+    def construct(self):
+        expr = construct(self.expr)
+        check_source_language(
+            expr.type.is_int_type or expr.type.is_big_int_type,
+            f"Integer or big integer expected, got {expr.type.dsl_name}",
+        )
+        return UnaryNeg.Expr(expr)
 
 
 def ignore(*vars):

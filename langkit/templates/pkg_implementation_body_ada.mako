@@ -3398,6 +3398,16 @@ package body ${ada_lib_name}.Implementation is
       return Create_Big_Integer (Left.Value - Right.Value);
    end "-";
 
+   ---------
+   -- "-" --
+   ---------
+
+   function "-" (Value : Big_Integer_Type) return Big_Integer_Type is
+      use type GNATCOLL.GMP.Integers.Big_Integer;
+   begin
+      return Create_Big_Integer (-Value.Value);
+   end "-";
+
    ------------------
    -- Unit_Version --
    ------------------

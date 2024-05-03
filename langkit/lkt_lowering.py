@@ -4421,6 +4421,10 @@ class LktTypesLoader:
                     ),
                 )
 
+            elif isinstance(expr, L.UnOp):
+                assert isinstance(expr.f_op, L.OpMinus)
+                return E.UnaryNeg(lower(expr.f_expr))
+
             else:
                 assert False, 'Unhandled expression: {}'.format(expr)
 
