@@ -225,7 +225,7 @@ class DSLWalker:
         var_calls = self.current_node.findall(
             lambda n: n.is_a(lpl.CallExpr) and n.f_prefix.text == "Var"
         )
-        return self._with_current_node(var_calls[index].f_suffix)
+        return self._with_current_node(var_calls[index].f_suffix[0].f_expr)
 
     def returned_expr(self):
         """

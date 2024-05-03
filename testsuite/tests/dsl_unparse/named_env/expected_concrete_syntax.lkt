@@ -1,0 +1,25 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @export fun p1(): Symbol = {
+        val dest_env = node.p2(false).do(
+            (non_null_name) => DesignatedEnv(
+                kind=DesignatedEnvKind.named_env, env_name=non_null_name, direct_env=null[LexicalEnv[FooNode]]
+            ), default_val=DesignatedEnv(
+                kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+            )
+        );
+
+        dest_env.env_name
+    }
+
+    fun p2(b: Bool): Symbol = if b then (s"foo") else (s"bar")
+}
+
+class Example: FooNode implements TokenNode {
+}
