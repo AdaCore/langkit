@@ -1,0 +1,16 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- TypeRef("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class TypeRef: FooNode implements TokenNode {
+    @export fun p1(): Array[Entity[TypeRef]] =
+    node.p2().map((n) => n.as_bare_entity)
+
+    fun p2(): Array[TypeRef] = [node]
+}

@@ -67,7 +67,7 @@ package body ${ada_lib_name}.Generic_Introspection is
             init_expr = f"{expr}.Value"
             renaming = True
 
-         decl = f"{var_name} : {public_type.api_name}"
+         decl = f"{var_name} : {public_type.qualified_api_name}"
          if renaming:
             decl += f" renames {init_expr}"
          elif init_expr:
@@ -112,7 +112,9 @@ package body ${ada_lib_name}.Generic_Introspection is
                   "end loop;",
                ])
             else:
-               init_stmt = f"{var_name}.Value := new {t.api_name}'({expr});"
+               init_stmt = (
+                  f"{var_name}.Value := new {t.qualified_api_name}'({expr});"
+               )
          elif public_type.is_token_type:
             init_stmt = f"{var_name}.Value := To_Generic ({expr});"
          else:
@@ -246,7 +248,7 @@ package body ${ada_lib_name}.Generic_Introspection is
       overriding function Array_Item
         (Value : ${vt}; Index : Positive) return Internal_Value_Access
       is
-         Item : ${elt_type.api_name} renames Value.Value.all (Index);
+         Item : ${elt_type.qualified_api_name} renames Value.Value.all (Index);
 
          <%
             decls = []
@@ -275,11 +277,11 @@ package body ${ada_lib_name}.Generic_Introspection is
          Result_Index : Natural := 0;
       begin
          return Result : constant ${G.internal_value_access(t)} := new ${vt} do
-            Result.Value := new ${t.api_name} (1 .. Values'Length);
+            Result.Value := new ${t.qualified_api_name} (1 .. Values'Length);
             for I in Values'Range loop
                Result_Index := Result_Index + 1;
                declare
-                  Result_Item : ${elt_type.api_name} renames
+                  Result_Item : ${elt_type.qualified_api_name} renames
                     Result.Value (Result_Index);
                   Value       : ${G.internal_value_type(elt_type)} renames
                     ${G.internal_value_access(elt_type)} (Values (I)).all;
