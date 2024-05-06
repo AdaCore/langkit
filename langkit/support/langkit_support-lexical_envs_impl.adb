@@ -68,6 +68,27 @@ package body Langkit_Support.Lexical_Envs_Impl is
    --  If Rebindings is bound to a new set of rebindings upon return, the
    --  ownership share of the old rebinding set will have been forfeited.
 
+   function Find_Rebindable_Env (From_Env : Lexical_Env) return Lexical_Env;
+   --  Traverse "From_Env" parent environments until stumbling upon one which
+   --  is rebindable.
+
+   function Merge_Subsets
+     (Base, Subset_1, Subset_2 : Env_Rebindings) return Env_Rebindings;
+   --  Given a ``Base`` rebinding chain and two other chains which are
+   --  subsets of ``Base`` (i.e. they only contain entries which appear in
+   --  ``Base``, and these entries appear in the same order in the subset
+   --  as they appear in ``Base``), compute a single chain of rebindings
+   --  which assembles the subset so as to preserve the order in which
+   --  individual entries appeared in ``Base`` while avoiding duplicate
+   --  entries. Example:
+   --
+   --  .. code::
+   --
+   --      Base     = [A, B, C, D, E]
+   --      Subset_1 = [A, C]
+   --      Subset_2 = [B, C, E]
+   --      Result   = [A, B, C, E]
+
    function Shed_Rebindings
      (From_Env   : Lexical_Env;
       Rebindings : Env_Rebindings) return Env_Rebindings
@@ -1965,23 +1986,14 @@ package body Langkit_Support.Lexical_Envs_Impl is
       return Return_Env;
    end Extract_Rebinding;
 
-   ---------------------
-   -- Shed_Rebindings --
-   ---------------------
+   -------------------------
+   -- Find_Rebindable_Env --
+   -------------------------
 
-   function Shed_Rebindings
-     (From_Env   : Lexical_Env;
-      Rebindings : Env_Rebindings) return Env_Rebindings
-   is
+   function Find_Rebindable_Env (From_Env : Lexical_Env) return Lexical_Env is
       First_Rebindable_Parent : Lexical_Env;
       Assoc_Ref_Env           : Lexical_Env;
-      Result                  : Env_Rebindings := Rebindings;
    begin
-      --  If there is no bindings, nothing to do here
-      if Rebindings = null then
-         return null;
-      end if;
-
       --  Look for the first environment in From_Env's parent chain whose Node
       --  is rebindable. Use null if there is no such env.
       First_Rebindable_Parent := From_Env;
@@ -2023,6 +2035,62 @@ package body Langkit_Support.Lexical_Envs_Impl is
          end;
       end loop;
 
+      return First_Rebindable_Parent;
+   end Find_Rebindable_Env;
+
+   -------------------
+   -- Merge_Subsets --
+   -------------------
+
+   function Merge_Subsets
+     (Base, Subset_1, Subset_2 : Env_Rebindings) return Env_Rebindings
+   is
+      Next_Subset_1 : Env_Rebindings := Subset_1;
+      Next_Subset_2 : Env_Rebindings := Subset_2;
+      Result        : Env_Rebindings;
+   begin
+      if Base = null then
+         return null;
+      end if;
+
+      if Subset_1 /= null and then Base.Old_Env = Subset_1.Old_Env then
+         Next_Subset_1 := Subset_1.Parent;
+      end if;
+
+      if Subset_2 /= null and then Base.Old_Env = Subset_2.Old_Env then
+         Next_Subset_2 := Subset_2.Parent;
+      end if;
+
+      Result := Merge_Subsets
+        (Base.Parent, Next_Subset_1, Next_Subset_2);
+
+      if Next_Subset_1 /= Subset_1 or else Next_Subset_2 /= Subset_2 then
+         Result := Append_Rebinding (Result, Base.Old_Env, Base.New_Env);
+      end if;
+
+      return Result;
+   end Merge_Subsets;
+
+   ---------------------
+   -- Shed_Rebindings --
+   ---------------------
+
+   function Shed_Rebindings
+     (From_Env   : Lexical_Env;
+      Rebindings : Env_Rebindings) return Env_Rebindings
+   is
+      First_Rebindable_Parent : Lexical_Env;
+      Result                  : Env_Rebindings := Rebindings;
+   begin
+      --  If there is no bindings, nothing to do here
+      if Rebindings = null then
+         return null;
+      end if;
+
+      --  Look for the first environment in From_Env's parent chain whose Node
+      --  is rebindable. Use null if there is no such env.
+      First_Rebindable_Parent := Find_Rebindable_Env (From_Env);
+
       --  If there is no rebindable parent anywhere, it means we cannot have
       --  rebindings. In that case, shed them all, i.e. return null rebindings.
       if First_Rebindable_Parent = Empty_Env then
@@ -2036,6 +2104,122 @@ package body Langkit_Support.Lexical_Envs_Impl is
       loop
          Result := Result.Parent;
       end loop;
+
+      if Result = null then
+         --  We found a rebindable parent but it was not rebound by any entry
+         --  in the given (non-empty) set of rebindings. This could be because
+         --  the rebindable env we found is nested inside other rebindable
+         --  envs. If that's the case, one of these lesser-nested envs might
+         --  actually be rebound by the given rebindings, in which case we must
+         --  also attempt to shed the non-relevant rebindings.
+         --
+         --  For example, assume the following Ada envirnonment structure,
+         --  with ``From_Env`` designating the env containing entity ``X``,
+         --  and ``Rebindings`` containing the rebinding of the generic
+         --  package ``A`` through the instantiation ``My_A``:
+         --
+         --  .. code:: ada
+         --
+         --     generic
+         --        type T is private;
+         --     package A is
+         --        generic package B is
+         --           X : T;
+         --        end B;
+         --     end A;
+         --
+         --     package My_A is new A (Integer);
+         --
+         --
+         --  In that case, our ``First_Rebindable_Parent`` is ``B``. But since
+         --  our rebindings do not rebind ``B``, ``Result`` is empty at this
+         --  point. Hence, stopping here would imply returning entity ``X``
+         --  without any rebindings, whereas we would have expected the
+         --  rebinding of ``A`` to be relevant. This can be fixed by recursing
+         --  one more time starting from the env ``B`` itself. This time, the
+         --  first rebindable env will be ``A``, therefore the rebinding entry
+         --  ``My_A`` will be kept.
+         Result := Shed_Rebindings
+           (Parent (First_Rebindable_Parent), Rebindings);
+      end if;
+
+      if Result /= null then
+         --  We found a redindable parent and are left with a non-empty
+         --  rebindings after shedding every entries from the top of the stack
+         --  down to this parent. However, we could still have non-relevant
+         --  entries *behind* this rebindable parent, i.e. entries which were
+         --  only relevant for some of the entries that we just shedded. In
+         --  order to remove those, we make the observation that a rebinding
+         --  entry behind the rebindable env we found is relevant iff:
+         --  1. it is used to rebind another outer parent of that lexical env
+         --  2. it used to rebind the environment in which new_env's node lies
+         --  3. it is transitively used (according to the same criterion) by
+         --     any env matching the two points above.
+         --
+         --  For example, assume the following Ada program:
+         --
+         --  .. code:: ada
+         --
+         --     generic
+         --        type T is private;
+         --     package A is
+         --        generic
+         --           type V is private;
+         --        package C is
+         --           X : T;
+         --           Y : V;
+         --        end C;
+         --     end A;
+         --
+         --     generic
+         --        type U is private;
+         --        with package F_A is new A (<>);
+         --     package B is
+         --        package My_C is new F_A.C (U);
+         --     end B;
+         --
+         --     package My_A is new A (Integer);
+         --     package My_B is new B (Float, My_A);
+         --
+         --
+         --  Navigating inside ``My_B`` and then inside ``My_C`` lands us on
+         --  the environment of package ``C`` with rebindings
+         --  ``[My_A, My_B, My_C]``. Intuitively, all these entries are useful:
+         --  - ``My_C`` is needed to resolve reference ``V`` to ``U``.
+         --  - ``My_B`` is needed to resolve reference ``U`` to ``Float``.
+         --  - ``My_A`` is needed to resolve reference ``T`` to ``Integer``.
+         --  Let's see how the criterions defined above confirm this.
+         declare
+            From_Here    : constant Env_Rebindings := Shed_Rebindings
+              (Parent (First_Rebindable_Parent), Result.Parent);
+            --  These rebindings represent all entries matching criteria 1,
+            --  and those transitively matching all criterions for those.
+            --  In our example, this will return ``[My_A]``, as ``A`` is a
+            --  lexical parent of ``C``.
+
+            From_New_Env : constant Env_Rebindings := Shed_Rebindings
+              (Self_Env (Env_Node (Result.New_Env)), Result.Parent);
+            --  These rebindings represent all entries matching criteria 2,
+            --  and those transitively matching all criterions for those.
+            --  We use `Self_Env (Env_Node (...))` to retrieve the static
+            --  primary environment of `New_Env`'s node.
+            --  In our example, this will return ``[My_B]``, as ``B`` contains
+            --  the new env of ``C`` (``My_C``).
+         begin
+            --  We now have two independent sets of rebindings that are both
+            --  subsets of the original set of rebindings contained in Result.
+            --  The call to `Merge_Subsets` will rebuild a single rebinding
+            --  chain out of those, avoiding duplicate entries and making sure
+            --  that entries appear in the same order as they appeared in
+            --  Result. This will indeed compute ``[My_A, My_B, My_C]`` on our
+            --  example.
+            Result := Append_Rebinding
+              (Merge_Subsets
+                 (Result.Parent, From_Here, From_New_Env),
+               Result.Old_Env,
+               Result.New_Env);
+         end;
+      end if;
 
       Dec_Ref (First_Rebindable_Parent);
       return Result;

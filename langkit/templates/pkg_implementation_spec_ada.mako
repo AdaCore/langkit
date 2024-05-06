@@ -353,6 +353,8 @@ private package ${ada_lib_name}.Implementation is
    --  context, which is incremented every time a unit in this context is
    --  parsed.
 
+   function Self_Env (Node : ${T.root_node.name}) return Lexical_Env;
+
    type Ref_Category is
      (${", ".join(sorted(str(cat) for cat in ctx.ref_cats))});
    type Ref_Categories is array (Ref_Category) of Boolean;

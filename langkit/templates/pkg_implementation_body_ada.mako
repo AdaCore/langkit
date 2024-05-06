@@ -3417,6 +3417,15 @@ package body ${ada_lib_name}.Implementation is
       return Node.Unit.Context.Cache_Version;
    end Get_Context_Version;
 
+   ---------------
+   --  Self_Env --
+   ---------------
+
+   function Self_Env (Node : ${T.root_node.name}) return Lexical_Env is
+   begin
+      return Node.Self_Env;
+   end Self_Env;
+
    --------------------------
    -- Properties_May_Raise --
    --------------------------

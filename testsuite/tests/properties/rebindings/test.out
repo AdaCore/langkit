@@ -31,5 +31,38 @@ After concatenating rebindings:
   new = <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
   old = <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
   no parent: <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
+
+After shedding rebindings from old_d's env:
+--------------------------------------------------
+
+<Block foo>:
+  new = <Block new_d>
+  old = <Block old_d>
+<Block foo>:
+  new = <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
+  old = <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
+  no parent: <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
+
+After shedding rebindings from old_d's inner env:
+--------------------------------------------------
+
+<Block foo>:
+  new = <Block new_d>
+  old = <Block old_d>
+<Block foo>:
+  new = <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
+  old = <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
+  no parent: <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
+
+After shedding rebindings from old_b's env:
+--------------------------------------------------
+
+<Block foo>:
+  new = <Block new_b>
+  old = <Block old_b>
+<Block foo>:
+  new = <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
+  old = <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
+  no parent: <PropertyError: main.txt:2:1-2:8: dereferencing a null access>
 main.py: Done.
 Done

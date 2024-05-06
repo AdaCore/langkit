@@ -66,6 +66,9 @@ package Support is
    function Properties_May_Raise (Dummy : Exception_Occurrence) return Boolean
    is (False);
 
+   function Self_Env (Dummy_C : Character) return Lexical_Env is
+     (Null_Lexical_Env);
+
    package Envs is new Langkit_Support.Lexical_Envs_Impl
      (Get_Unit_Version      => Get_Unit_Version,
       Node_Type             => Character,

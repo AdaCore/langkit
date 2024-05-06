@@ -50,7 +50,9 @@ def new_b
 def old_c
 def new_c
 
-def old_d
+def old_d {
+    def inner
+}
 def new_d
 """)
 if u.diagnostics:
@@ -78,5 +80,39 @@ print("After concatenating rebindings:")
 print("-" * 50)
 print()
 print_rebindings(concat_test)
+
+# Shed rebindings from old_d's env
+print()
+print("After shedding rebindings from old_d's env:")
+print("-" * 50)
+print()
+shed_test = concat_test.p_shed_rebindings(old_d)
+print_rebindings(shed_test)
+
+# Shed rebindings from old_d's inner env. Since the inner env is rebindable
+# but the given rebinding stack doesn't rebind it, this used to return no
+# rebinding, which is incorrect as old_d is still rebound in that stack and
+# is a rebindable parent of the old_d's inner env. Instead, the returned
+# rebindings should mention old_d.
+print()
+print("After shedding rebindings from old_d's inner env:")
+print("-" * 50)
+print()
+shed_test = concat_test.p_shed_rebindings(old_d.f_inner[0])
+print_rebindings(shed_test)
+
+# Shed rebindings from old_b's env. The shedding mechanism used to only remove
+# entries from the top of the stack until finding a matching rebindable env,
+# without touching anything behind it, meaning in this case the rebindings
+# returned would still contain the entries for old_c and old_d. Now, all
+# entries are considered for shedding, and since old_c and old_d are not
+# deemed relevant from neither old_b nor new_b, they will be removed.
+print()
+print("After shedding rebindings from old_b's env:")
+print("-" * 50)
+print()
+shed_test = concat_test.p_shed_rebindings(old_b)
+print_rebindings(shed_test)
+
 
 print('main.py: Done.')
