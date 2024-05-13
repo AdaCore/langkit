@@ -4930,8 +4930,13 @@ class PropertyDef(AbstractNodeData):
                 else:
                     # Otherwise it necessarily refers to a partially evaluated
                     # argument. We subtract `arity` to get the actual field
-                    # index since those start at 0.
-                    args_code.append(f"Self.Field_{arg_index - arity}")
+                    # index since those start at 0. Also, since the type of the
+                    # field may be more precise than the root entity type, we
+                    # always construct a root entity from scratch.
+                    args_code.append(
+                        f"""(Self.Field_{arg_index - arity}.Node,
+                         Self.Field_{arg_index - arity}.Info)"""
+                    )
 
             msg = msg[end_idx:]
 

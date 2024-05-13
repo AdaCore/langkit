@@ -45,7 +45,7 @@ class Identifier(FooNode):
 
     ref_var = UserField(type=T.LogicVar, public=False)
 
-    @langkit_property()
+    @langkit_property(return_type=T.TypeDecl.entity)
     def designated_type():
         return Cond(
             Self.symbol == "number",
@@ -54,7 +54,7 @@ class Identifier(FooNode):
             Self.symbol == "string",
             Self.unit.root.str_type.as_bare_entity,
 
-            No(FooNode.entity)
+            No(TypeDecl.entity)
         )
 
     @langkit_property(return_type=T.Equation)
@@ -64,11 +64,16 @@ class Identifier(FooNode):
 
 
 @abstract
-class TypeDecl(FooNode):
+class BaseTypeDecl(FooNode):
     @langkit_property(return_type=T.Bool,
                       predicate_error="expected $expected, got $Self")
-    def match_expected_type(expected=T.FooNode.entity):
+    def match_expected_type(expected=T.BaseTypeDecl.entity):
         return expected == Entity
+
+
+@abstract
+class TypeDecl(BaseTypeDecl):
+    pass
 
 
 @synthetic
