@@ -486,6 +486,7 @@ private package ${ada_lib_name}.Implementation is
 
    function "+" (Left, Right : Big_Integer_Type) return Big_Integer_Type;
    function "-" (Left, Right : Big_Integer_Type) return Big_Integer_Type;
+   function "-" (Value : Big_Integer_Type) return Big_Integer_Type;
 
    % if ctx.properties_logging:
    function Trace_Image (I : Big_Integer_Type) return String;

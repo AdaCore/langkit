@@ -720,7 +720,7 @@ def emit_expr(expr, **ctx):
         ArrayLiteral, Arithmetic, BaseRaiseException, CharacterLiteral,
         Predicate, StructUpdate, BigIntLiteral, RefCategories, Bind, Try,
         Block, Contains, PropertyDef, DynamicLexicalEnv, Super, Join, String,
-        NPropagate, Find, EmptyEnv, AnyOf
+        NPropagate, Find, EmptyEnv, AnyOf, UnaryNeg
     )
 
     def is_a(*names):
@@ -1445,6 +1445,9 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, Join):
         return "{}.join({})".format(ee(expr.separator), ee(expr.strings))
+
+    elif isinstance(expr, UnaryNeg):
+        return f"-{ee(expr.expr)}"
 
     else:
         # raise NotImplementedError(type(expr))
