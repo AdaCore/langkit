@@ -166,14 +166,7 @@ Done.
 == cmd_align.json ==
 
 {
-  "id": 1,
-  "kind": "command",
   "command": {
-    "command": "align",
-    "alignData": {
-      "kind": "width",
-      "n": 2
-    },
     "alignContents": {
       "id": 2,
       "kind": "list",
@@ -183,21 +176,21 @@ Done.
           "text": "var i:Int=0;"
         }
       ]
-    }
-  }
+    },
+    "alignData": {
+      "kind": "width",
+      "n": 2
+    },
+    "command": "align"
+  },
+  "id": 1,
+  "kind": "command"
 }
 
 == cmd_align2.json ==
 
 {
-  "id": 1,
-  "kind": "command",
   "command": {
-    "command": "align",
-    "alignData": {
-      "kind": "text",
-      "t": "  "
-    },
     "alignContents": {
       "id": 2,
       "kind": "list",
@@ -208,8 +201,15 @@ Done.
           "text": "var i:Int=0;"
         }
       ]
-    }
-  }
+    },
+    "alignData": {
+      "kind": "text",
+      "t": "  "
+    },
+    "command": "align"
+  },
+  "id": 1,
+  "kind": "command"
 }
 
 == cmd_breakparent.json ==
@@ -219,11 +219,11 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
         "command": "breakParent"
-      }
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 3,
@@ -236,26 +236,20 @@ Done.
 == cmd_dedent.json ==
 
 {
-  "id": 1,
-  "kind": "command",
   "command": {
-    "command": "align",
-    "alignData": {
-      "kind": "dedent"
-    },
     "alignContents": {
       "id": 2,
       "kind": "list",
       "list": [
         {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
         },
         {
           "id": 4,
@@ -263,33 +257,33 @@ Done.
           "text": "var i:Int=0;"
         }
       ]
-    }
-  }
+    },
+    "alignData": {
+      "kind": "dedent"
+    },
+    "command": "align"
+  },
+  "id": 1,
+  "kind": "command"
 }
 
 == cmd_dedenttoroot.json ==
 
 {
-  "id": 1,
-  "kind": "command",
   "command": {
-    "command": "align",
-    "alignData": {
-      "kind": "dedentToRoot"
-    },
     "alignContents": {
       "id": 2,
       "kind": "list",
       "list": [
         {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
         },
         {
           "id": 4,
@@ -297,15 +291,19 @@ Done.
           "text": "var i:Int=0;"
         }
       ]
-    }
-  }
+    },
+    "alignData": {
+      "kind": "dedentToRoot"
+    },
+    "command": "align"
+  },
+  "id": 1,
+  "kind": "command"
 }
 
 == cmd_fill.json ==
 
 {
-  "id": 1,
-  "kind": "command",
   "command": {
     "command": "fill",
     "parts": {
@@ -313,14 +311,14 @@ Done.
       "kind": "list",
       "list": [
         {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
         },
         {
           "id": 4,
@@ -328,18 +326,20 @@ Done.
           "text": "var i:Int=0;"
         },
         {
-          "id": 5,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 5,
+          "kind": "command"
         }
       ]
     }
-  }
+  },
+  "id": 1,
+  "kind": "command"
 }
 
 == cmd_group.json ==
@@ -349,23 +349,23 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
+        "break": false,
         "command": "group",
+        "expandedStates": null,
         "groupContents": {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
-        },
-        "break": false,
-        "expandedStates": null
-      }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
+        }
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 4,
@@ -373,23 +373,23 @@ Done.
       "text": "var i:Int=0;"
     },
     {
-      "id": 5,
-      "kind": "command",
       "command": {
+        "break": true,
         "command": "group",
+        "expandedStates": null,
         "groupContents": {
-          "id": 6,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
-        },
-        "break": true,
-        "expandedStates": null
-      }
+            "soft": false
+          },
+          "id": 6,
+          "kind": "command"
+        }
+      },
+      "id": 5,
+      "kind": "command"
     }
   ]
 }
@@ -401,24 +401,24 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
+        "break": false,
         "command": "group",
-        "id": 3,
+        "expandedStates": null,
         "groupContents": {
-          "id": 4,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 4,
+          "kind": "command"
         },
-        "break": false,
-        "expandedStates": null
-      }
+        "id": 3
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 5,
@@ -426,51 +426,51 @@ Done.
       "text": "var i:Int=0;"
     },
     {
-      "id": 6,
-      "kind": "command",
       "command": {
+        "break": true,
         "command": "group",
+        "expandedStates": null,
         "groupContents": {
-          "id": 7,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
-        },
-        "break": true,
-        "expandedStates": null
-      }
+            "soft": false
+          },
+          "id": 7,
+          "kind": "command"
+        }
+      },
+      "id": 6,
+      "kind": "command"
     },
     {
-      "id": 8,
-      "kind": "command",
       "command": {
-        "command": "ifBreak",
-        "ifBreakGroupId": 3,
         "breakContents": {
+          "command": {
+            "command": "line",
+            "hard": false,
+            "literal": false,
+            "soft": false
+          },
           "id": 9,
-          "kind": "command",
-          "command": {
-            "command": "line",
-            "literal": false,
-            "soft": false,
-            "hard": false
-          }
+          "kind": "command"
         },
+        "command": "ifBreak",
         "flatContents": {
-          "id": 10,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
-        }
-      }
+            "soft": false
+          },
+          "id": 10,
+          "kind": "command"
+        },
+        "ifBreakGroupId": 3
+      },
+      "id": 8,
+      "kind": "command"
     }
   ]
 }
@@ -486,21 +486,21 @@ Done.
       "kind": "list",
       "list": [
         {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": true,
             "literal": false,
-            "soft": false,
-            "hard": true
-          }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
         },
         {
-          "id": 4,
-          "kind": "command",
           "command": {
             "command": "breakParent"
-          }
+          },
+          "id": 4,
+          "kind": "command"
         }
       ]
     },
@@ -519,14 +519,14 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
         "command": "line",
+        "hard": true,
         "literal": false,
-        "soft": false,
-        "hard": true
-      }
+        "soft": false
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 3,
@@ -543,27 +543,27 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
-        "command": "ifBreak",
         "breakContents": {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
         },
+        "command": "ifBreak",
         "flatContents": {
           "id": 4,
           "kind": "list",
           "list": [
           ]
         }
-      }
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 5,
@@ -571,26 +571,26 @@ Done.
       "text": "var i:Int=0;"
     },
     {
-      "id": 6,
-      "kind": "command",
       "command": {
-        "command": "ifBreak",
         "breakContents": {
-          "id": 7,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 7,
+          "kind": "command"
         },
+        "command": "ifBreak",
         "flatContents": {
           "id": 8,
           "kind": "text",
           "text": " "
         }
-      }
+      },
+      "id": 6,
+      "kind": "command"
     }
   ]
 }
@@ -607,14 +607,14 @@ Done.
       "text": "def f("
     },
     {
-      "id": 3,
-      "kind": "command",
       "command": {
         "command": "line",
+        "hard": false,
         "literal": false,
-        "soft": true,
-        "hard": false
-      }
+        "soft": true
+      },
+      "id": 3,
+      "kind": "command"
     },
     {
       "id": 4,
@@ -636,8 +636,6 @@ Done.
       "text": "def f("
     },
     {
-      "id": 3,
-      "kind": "command",
       "command": {
         "command": "indent",
         "indentContents": {
@@ -649,21 +647,21 @@ Done.
               "kind": "list",
               "list": [
                 {
-                  "id": 6,
-                  "kind": "command",
                   "command": {
                     "command": "line",
+                    "hard": true,
                     "literal": false,
-                    "soft": false,
-                    "hard": true
-                  }
+                    "soft": false
+                  },
+                  "id": 6,
+                  "kind": "command"
                 },
                 {
-                  "id": 7,
-                  "kind": "command",
                   "command": {
                     "command": "breakParent"
-                  }
+                  },
+                  "id": 7,
+                  "kind": "command"
                 }
               ]
             },
@@ -674,28 +672,30 @@ Done.
             }
           ]
         }
-      }
+      },
+      "id": 3,
+      "kind": "command"
     },
     {
       "id": 9,
       "kind": "list",
       "list": [
         {
-          "id": 10,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": true,
             "literal": false,
-            "soft": false,
-            "hard": true
-          }
+            "soft": false
+          },
+          "id": 10,
+          "kind": "command"
         },
         {
-          "id": 11,
-          "kind": "command",
           "command": {
             "command": "breakParent"
-          }
+          },
+          "id": 11,
+          "kind": "command"
         }
       ]
     },
@@ -710,8 +710,6 @@ Done.
 == cmd_indent.json ==
 
 {
-  "id": 1,
-  "kind": "command",
   "command": {
     "command": "indent",
     "indentContents": {
@@ -719,14 +717,14 @@ Done.
       "kind": "list",
       "list": [
         {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
         },
         {
           "id": 4,
@@ -735,7 +733,9 @@ Done.
         }
       ]
     }
-  }
+  },
+  "id": 1,
+  "kind": "command"
 }
 
 == cmd_line.json ==
@@ -745,14 +745,14 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
         "command": "line",
+        "hard": false,
         "literal": false,
-        "soft": false,
-        "hard": false
-      }
+        "soft": false
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 3,
@@ -769,14 +769,14 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
         "command": "line",
+        "hard": false,
         "literal": false,
-        "soft": false,
-        "hard": false
-      }
+        "soft": false
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 3,
@@ -784,14 +784,14 @@ Done.
       "text": "var i:Int=0;"
     },
     {
-      "id": 4,
-      "kind": "command",
       "command": {
         "command": "line",
+        "hard": false,
         "literal": false,
-        "soft": false,
-        "hard": false
-      }
+        "soft": false
+      },
+      "id": 4,
+      "kind": "command"
     }
   ]
 }
@@ -807,21 +807,21 @@ Done.
       "kind": "list",
       "list": [
         {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": true,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
         },
         {
-          "id": 4,
-          "kind": "command",
           "command": {
             "command": "breakParent"
-          }
+          },
+          "id": 4,
+          "kind": "command"
         }
       ]
     },
@@ -836,26 +836,20 @@ Done.
 == cmd_markasroot.json ==
 
 {
-  "id": 1,
-  "kind": "command",
   "command": {
-    "command": "align",
-    "alignData": {
-      "kind": "root"
-    },
     "alignContents": {
       "id": 2,
       "kind": "list",
       "list": [
         {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
         },
         {
           "id": 4,
@@ -863,33 +857,33 @@ Done.
           "text": "var i:Int=0;"
         }
       ]
-    }
-  }
+    },
+    "alignData": {
+      "kind": "root"
+    },
+    "command": "align"
+  },
+  "id": 1,
+  "kind": "command"
 }
 
 == cmd_innerroot.json ==
 
 {
-  "id": 1,
-  "kind": "command",
   "command": {
-    "command": "align",
-    "alignData": {
-      "kind": "innerRoot"
-    },
     "alignContents": {
       "id": 2,
       "kind": "list",
       "list": [
         {
-          "id": 3,
-          "kind": "command",
           "command": {
             "command": "line",
+            "hard": false,
             "literal": false,
-            "soft": false,
-            "hard": false
-          }
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
         },
         {
           "id": 4,
@@ -897,8 +891,14 @@ Done.
           "text": "var i:Int=0;"
         }
       ]
-    }
-  }
+    },
+    "alignData": {
+      "kind": "innerRoot"
+    },
+    "command": "align"
+  },
+  "id": 1,
+  "kind": "command"
 }
 
 == cmd_recurse.json ==
@@ -936,10 +936,10 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
+        "break": false,
         "command": "group",
+        "expandedStates": null,
         "groupContents": {
           "id": 3,
           "kind": "list",
@@ -950,10 +950,10 @@ Done.
               "text": "var i:"
             }
           ]
-        },
-        "break": false,
-        "expandedStates": null
-      }
+        }
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 5,
@@ -961,8 +961,6 @@ Done.
       "text": "Int="
     },
     {
-      "id": 6,
-      "kind": "command",
       "command": {
         "command": "indent",
         "indentContents": {
@@ -970,7 +968,9 @@ Done.
           "kind": "text",
           "text": "0"
         }
-      }
+      },
+      "id": 6,
+      "kind": "command"
     },
     {
       "id": 8,
@@ -978,14 +978,14 @@ Done.
       "text": ";def f(i"
     },
     {
-      "id": 9,
-      "kind": "command",
       "command": {
         "command": "line",
+        "hard": false,
         "literal": false,
-        "soft": true,
-        "hard": false
-      }
+        "soft": true
+      },
+      "id": 9,
+      "kind": "command"
     },
     {
       "id": 10,
@@ -993,14 +993,14 @@ Done.
       "text": ":"
     },
     {
-      "id": 11,
-      "kind": "command",
       "command": {
         "command": "line",
+        "hard": false,
         "literal": false,
-        "soft": true,
-        "hard": false
-      }
+        "soft": true
+      },
+      "id": 11,
+      "kind": "command"
     },
     {
       "id": 12,
@@ -1008,14 +1008,14 @@ Done.
       "text": "Int"
     },
     {
-      "id": 13,
-      "kind": "command",
       "command": {
         "command": "line",
+        "hard": false,
         "literal": false,
-        "soft": false,
-        "hard": false
-      }
+        "soft": false
+      },
+      "id": 13,
+      "kind": "command"
     },
     {
       "id": 14,
@@ -1037,8 +1037,6 @@ Done.
       "text": "var i:Int="
     },
     {
-      "id": 3,
-      "kind": "command",
       "command": {
         "command": "fill",
         "parts": {
@@ -1046,10 +1044,10 @@ Done.
           "kind": "list",
           "list": [
             {
-              "id": 5,
-              "kind": "command",
               "command": {
+                "break": false,
                 "command": "group",
+                "expandedStates": null,
                 "groupContents": {
                   "id": 6,
                   "kind": "list",
@@ -1060,8 +1058,6 @@ Done.
                       "text": "AAAAAAAAAAAAAAAAAA("
                     },
                     {
-                      "id": 8,
-                      "kind": "command",
                       "command": {
                         "command": "fill",
                         "parts": {
@@ -1074,14 +1070,14 @@ Done.
                               "text": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
                             },
                             {
-                              "id": 11,
-                              "kind": "command",
                               "command": {
                                 "command": "line",
+                                "hard": false,
                                 "literal": false,
-                                "soft": true,
-                                "hard": false
-                              }
+                                "soft": true
+                              },
+                              "id": 11,
+                              "kind": "command"
                             },
                             {
                               "id": 12,
@@ -1089,14 +1085,14 @@ Done.
                               "text": ".YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
                             },
                             {
-                              "id": 13,
-                              "kind": "command",
                               "command": {
                                 "command": "line",
+                                "hard": false,
                                 "literal": false,
-                                "soft": true,
-                                "hard": false
-                              }
+                                "soft": true
+                              },
+                              "id": 13,
+                              "kind": "command"
                             },
                             {
                               "id": 14,
@@ -1105,7 +1101,9 @@ Done.
                             }
                           ]
                         }
-                      }
+                      },
+                      "id": 8,
+                      "kind": "command"
                     },
                     {
                       "id": 15,
@@ -1113,30 +1111,30 @@ Done.
                       "text": ")"
                     },
                     {
-                      "id": 16,
-                      "kind": "command",
                       "command": {
                         "command": "line",
+                        "hard": false,
                         "literal": false,
-                        "soft": false,
-                        "hard": false
-                      }
+                        "soft": false
+                      },
+                      "id": 16,
+                      "kind": "command"
                     }
                   ]
-                },
-                "break": false,
-                "expandedStates": null
-              }
+                }
+              },
+              "id": 5,
+              "kind": "command"
             },
             {
-              "id": 17,
-              "kind": "command",
               "command": {
                 "command": "line",
+                "hard": false,
                 "literal": false,
-                "soft": true,
-                "hard": false
-              }
+                "soft": true
+              },
+              "id": 17,
+              "kind": "command"
             },
             {
               "id": 18,
@@ -1144,14 +1142,14 @@ Done.
               "text": ".DDDDDDDDDDDDDDDD"
             },
             {
-              "id": 19,
-              "kind": "command",
               "command": {
                 "command": "line",
+                "hard": false,
                 "literal": false,
-                "soft": true,
-                "hard": false
-              }
+                "soft": true
+              },
+              "id": 19,
+              "kind": "command"
             },
             {
               "id": 20,
@@ -1159,14 +1157,14 @@ Done.
               "text": ".EEEEEEEEEEEEEEEE"
             },
             {
-              "id": 21,
-              "kind": "command",
               "command": {
                 "command": "line",
+                "hard": false,
                 "literal": false,
-                "soft": true,
-                "hard": false
-              }
+                "soft": true
+              },
+              "id": 21,
+              "kind": "command"
             },
             {
               "id": 22,
@@ -1174,14 +1172,14 @@ Done.
               "text": ".FFFFFFFFFFFFFFFF"
             },
             {
-              "id": 23,
-              "kind": "command",
               "command": {
                 "command": "line",
+                "hard": false,
                 "literal": false,
-                "soft": true,
-                "hard": false
-              }
+                "soft": true
+              },
+              "id": 23,
+              "kind": "command"
             },
             {
               "id": 24,
@@ -1190,7 +1188,9 @@ Done.
             }
           ]
         }
-      }
+      },
+      "id": 3,
+      "kind": "command"
     },
     {
       "id": 25,
@@ -1207,14 +1207,14 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
         "command": "line",
+        "hard": false,
         "literal": false,
-        "soft": true,
-        "hard": false
-      }
+        "soft": true
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 3,
@@ -1231,11 +1231,11 @@ Done.
   "kind": "list",
   "list": [
     {
-      "id": 2,
-      "kind": "command",
       "command": {
         "command": "trim"
-      }
+      },
+      "id": 2,
+      "kind": "command"
     },
     {
       "id": 3,
