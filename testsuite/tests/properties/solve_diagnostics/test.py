@@ -11,8 +11,8 @@ from langkit.dsl import (
 )
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import (
-    And, Bind, Cond, Entity, LogicFalse, No, Predicate, Self, Var,
-    langkit_property, lazy_field
+    AbstractKind, And, Bind, Cond, Entity, LogicFalse, No, Predicate, Self,
+    Var, langkit_property, lazy_field
 )
 
 from utils import build_and_run
@@ -132,12 +132,20 @@ class ProcDecl(FooNode):
     )
 
 
-class Call(Expr):
+@abstract
+class Resolvable(Expr):
+    @langkit_property(return_type=T.SolverResult, public=True,
+                      kind=AbstractKind.abstract)
+    def resolve():
+        pass
+
+
+class Call(Resolvable):
     name = Field()
     first_arg = Field()
     second_arg = Field()
 
-    @langkit_property(return_type=T.SolverResult, public=True)
+    @langkit_property()
     def resolve():
         eq = Var(And(
             Entity.first_arg.xref_equation,
@@ -155,6 +163,23 @@ class Call(Expr):
                     )
                 )
             )
+        ))
+        return eq.solve_with_diagnostics
+
+
+class TypeAssert(Resolvable):
+    expr = Field()
+    ident = Field()
+
+    @langkit_property()
+    def resolve():
+        eq = Var(And(
+            Entity.expr.xref_equation,
+            Entity.ident.xref_equation(No(T.LogicContext)),
+            Predicate(TypeDecl.match_expected_type,
+                      Self.expr.type_var,
+                      Entity.ident.designated_type,
+                      error_location=Self.expr)
         ))
         return eq.solve_with_diagnostics
 

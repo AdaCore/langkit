@@ -4874,7 +4874,8 @@ class PropertyDef(AbstractNodeData):
          - Template => "Expected {} got {}"
          - Args     => ["Entities (2)", "Entities (1)"].
 
-        :param arity: the number of arguments that this predicate works on.
+        :param arity: the number of *logic variable* arguments that this
+            predicate works on.
         """
         assert self.predicate_error is not None
 
@@ -4914,12 +4915,23 @@ class PropertyDef(AbstractNodeData):
                 else:
                     args_code.append("Entities (1)")
             else:
+                # Find the index of the argument which name matches. We add 1
+                # because `Self` is not included in those arguments.
                 arg_index = next(i for i, arg in enumerate(self.arguments)
-                                 if arg.dsl_name == arg_name)
-                # The "2" below is because indices of `Entities` start at one
-                # whereas `enumerate` starts at 0, and the first component of
-                # `Entities` is for `Self`.
-                args_code.append(f"Entities ({arg_index + 2})")
+                                 if arg.dsl_name == arg_name) + 1
+                if arg_index < arity:
+                    # If the argument index is less than the number of logic
+                    # var arguments, it necessarily refers to one of them, as
+                    # partial arguments need to be passed last. Therefore we
+                    # need to index the `Entities` array which contains the
+                    # dynamic values. We add 1 to the index as indices of the
+                    # `Entities` array start at 1.
+                    args_code.append(f"Entities ({arg_index + 1})")
+                else:
+                    # Otherwise it necessarily refers to a partially evaluated
+                    # argument. We subtract `arity` to get the actual field
+                    # index since those start at 0.
+                    args_code.append(f"Self.Field_{arg_index - arity}")
 
             msg = msg[end_idx:]
 

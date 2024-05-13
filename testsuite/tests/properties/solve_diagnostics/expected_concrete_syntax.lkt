@@ -3,13 +3,14 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Block(list*(stmt))
-    stmt <- or(proc_decl | call)
+    stmt <- or(proc_decl | call | type_assert)
     proc_decl <- ProcDecl(
         "def" ident "(" ident "," ident ")"
     )
     call <- Call(ident "(" literal "," literal ")")
     ident <- Identifier(@identifier)
     literal <- or(NumberLiteral(@number) | StringLiteral(@string))
+    type_assert <- TypeAssert(literal ":" ident)
 }
 
 @abstract class FooNode implements Node[FooNode] {
@@ -35,12 +36,21 @@ class Block: FooNode {
     fun xref_equation(): Equation = %false
 }
 
-class Call: Expr {
+class NumberLiteral: Expr implements TokenNode {
+    fun xref_equation(): Equation =
+    %eq(node.type_var, node.unit().root.number_type())
+}
+
+@abstract class Resolvable: Expr {
+    @export @abstract fun resolve(): SolverResult
+}
+
+class Call: Resolvable {
     @parse_field name: Identifier
     @parse_field first_arg: Expr
     @parse_field second_arg: Expr
 
-    @export fun resolve(): SolverResult = {
+    fun resolve(): SolverResult = {
         val eq = self.first_arg.xref_equation() and self.second_arg.xref_equation() and (
             node.children_env().get(node.name.symbol).logic_any(
                 (elem) => %eq(node.name.ref_var, elem) and elem.as[ProcDecl].call_equation(
@@ -53,9 +63,15 @@ class Call: Expr {
     }
 }
 
-class NumberLiteral: Expr implements TokenNode {
-    fun xref_equation(): Equation =
-    %eq(node.type_var, node.unit().root.number_type())
+class TypeAssert: Resolvable {
+    @parse_field expr: Expr
+    @parse_field ident: Identifier
+
+    fun resolve(): SolverResult = {
+        val eq = self.expr.xref_equation() and self.ident.xref_equation(null[LogicContext]) and %predicate(TypeDecl.match_expected_type, node.expr.type_var, error_location=node.expr, self.ident.designated_type());
+
+        eq.solve_with_diagnostics()
+    }
 }
 
 class StringLiteral: Expr implements TokenNode {
