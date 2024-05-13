@@ -4,3 +4,10 @@ grammar foo_grammar {
     @main_rule main_rule <- or(ConcreteNode("example")
                              | OtherConcreteNode("null"))
 }
+
+class FooNode implements Node[FooNode] {
+}
+
+class OtherConcreteNode: AbstractNode {
+    fun prop(): Bool = false
+}

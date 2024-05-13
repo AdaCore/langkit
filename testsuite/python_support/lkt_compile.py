@@ -7,7 +7,6 @@ in the test directory, also execute it at the end of the driver execution.
 import argparse
 import glob
 import os.path
-import subprocess
 import sys
 
 import langkit
@@ -51,22 +50,36 @@ tests = args.lkt_files or [
 
 for lkt_file in sorted(tests):
     print(f"== {lkt_file} ==")
-    emit_and_print_errors(
+    ctx = emit_and_print_errors(
         lkt_file=lkt_file,
         warning_set=warning_set,
         types_from_lkt=True,
         generate_unparser=args.generate_unparser,
     )
+    print("")
+
+    # If there is a "test.py" script in the test directory, run it
+    if os.path.exists("test.py"):
+        print("== test.py ==")
+        sys.stderr.flush()
+        sys.stdout.flush()
+
+        with open("test.py", "rb") as f:
+            code = f.read()
+        globs = {
+            "__file__": "test.py",
+            "__name__": "__main__",
+        }
+        exec(code, globs)
+
+        # If this script defines a "main" function, call it with the
+        # compilation context (or None if the compilation failed).
+        if "main" in globs:
+            globs["main"](ctx)
+
+        print("")
+
     langkit.reset()
-    print("")
 
-
-# If there is a "test.py" script in the test directory, run it
-if os.path.exists("test.py"):
-    print("== test.py ==")
-    sys.stderr.flush()
-    sys.stdout.flush()
-    subprocess.check_call([sys.executable, "test.py"])
-    print("")
 
 print("lkt_compile: Done")

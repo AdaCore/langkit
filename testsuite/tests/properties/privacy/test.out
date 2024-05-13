@@ -1,40 +1,35 @@
-== abstract: default, concrete: default ==
+== priv_priv.lkt ==
 Code generation was successful
+
+== test.py ==
   AbstractNode.prop: private
   ConcreteNode.prop: private
 
-== abstract: default, concrete: public ==
-test.py:XXX: error: AbstractNode.prop is private, so should be ConcreteNode.prop
 
-== abstract: default, concrete: private ==
-Code generation was successful
-  AbstractNode.prop: private
-  ConcreteNode.prop: private
+== priv_pub.lkt ==
+priv_pub.lkt:9:13: error: AbstractNode.prop is private, so should be ConcreteNode.prop
+9 |     @export fun prop(): Bool = true
+  |             ^^^^^^^^^^^^^^^^^^^^^^^
 
-== abstract: public, concrete: default ==
+
+== test.py ==
+Compilation failed
+
+
+== pub_priv.lkt ==
 Code generation was successful
+
+== test.py ==
   AbstractNode.prop: public
   ConcreteNode.prop: public
 
-== abstract: public, concrete: public ==
+
+== pub_pub.lkt ==
 Code generation was successful
+
+== test.py ==
   AbstractNode.prop: public
   ConcreteNode.prop: public
 
-== abstract: public, concrete: private ==
-test.py:XXX: error: AbstractNode.prop is public, so should be ConcreteNode.prop
 
-== abstract: private, concrete: default ==
-Code generation was successful
-  AbstractNode.prop: private
-  ConcreteNode.prop: private
-
-== abstract: private, concrete: public ==
-test.py:XXX: error: AbstractNode.prop is private, so should be ConcreteNode.prop
-
-== abstract: private, concrete: private ==
-Code generation was successful
-  AbstractNode.prop: private
-  ConcreteNode.prop: private
-
-Done
+lkt_compile: Done

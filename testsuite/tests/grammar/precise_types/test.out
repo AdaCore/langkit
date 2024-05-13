@@ -1,9 +1,24 @@
-test.py:XXX: warning: Specified type is FooNode, but it could be more specific: B
-test.py:XXX: warning: Specified type is FooNode, but it could be more specific: A
-test.py:XXX: warning: Specified type is FooNode, but it could be more specific: FooNodeBaseList
-test.py:XXX: warning: Specified type is FooNode, but it could be more specific: A
+== foo.lkt ==
+foo.lkt:50:18: warning: Specified type is FooNode, but it could be more specific: B
+50 |     @parse_field f: FooNode
+   |                  ^^^^^^^^^^
+
+foo.lkt:54:18: warning: Specified type is FooNode, but it could be more specific: A
+54 |     @parse_field f: FooNode
+   |                  ^^^^^^^^^^
+
+foo.lkt:34:18: warning: Specified type is FooNode, but it could be more specific: FooNodeBaseList
+34 |     @parse_field a_list_or_b_list: FooNode
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo.lkt:59:18: warning: Specified type is FooNode, but it could be more specific: A
+59 |     @parse_field f: FooNode
+   |                  ^^^^^^^^^^
+
 Code generation was successful
 
+== test.py ==
+Done
 == Doc for ForSynthParent.f ==
 This field can contain one of the following nodes: :typeref:`A`, :typeref:`B`
 
@@ -59,4 +74,5 @@ This field can contain one of the following nodes: :typeref:`A`
 
 When there are no parsing errors, this field is never null.
 
-Done
+
+lkt_compile: Done

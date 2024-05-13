@@ -1,0 +1,10 @@
+import common
+
+@abstract class AbstractNode: FooNode {
+    @abstract fun prop(): Bool
+    @export fun public_prop(): Bool = node.prop()
+}
+
+class ConcreteNode: AbstractNode {
+    fun prop(): Bool = true
+}
