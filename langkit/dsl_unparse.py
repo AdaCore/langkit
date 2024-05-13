@@ -650,10 +650,6 @@ def needs_parens(expr, **ctx):
               "is_referenced_from", "env_group", "length", "can_reach",
               "as_int", "unique", "env_orphan", "is_visible_from", "as_array",
               "rebind_env", "at", "at_or_raise", "domain", "to_symbol", "join")
-        or (
-            isinstance(expr, E.CollectionSingleton)
-            and not ctx.get("then_underscore_var", False)
-        )
     )
 
 
@@ -1096,14 +1092,19 @@ def emit_expr(expr, **ctx):
         if expr.var_expr.source_name is None:
             assert expr.underscore_then
 
+            def has_dot_notation(expr):
+                return not isinstance(
+                    deepest_prefix, (Match, IsA, CollectionSingleton)
+                )
+
             # Get the the deepest prefix expression we can find in the "then"
             # part (the "then" variable excluded), or the "then" part itself if
             # it has no direct prefix child.
             #
-            # Stop at "match" or "is_a" expressions, which will not use dot
-            # notation in Lkt.
+            # Stop at "is_a", "match" or "singleton" expressions, which will
+            # not use dot notation in Lkt.
             deepest_prefix = expr.then_expr
-            while not isinstance(deepest_prefix, (Match, IsA)):
+            while has_dot_notation(deepest_prefix):
                 if (
                     isinstance(deepest_prefix, Then)
                     and deepest_prefix.underscore_then
@@ -1121,10 +1122,10 @@ def emit_expr(expr, **ctx):
                         break
                     deepest_prefix = next_prefix
 
-            # Match is like a function call in the Python DSL, but is a regular
-            # expression in the new syntax, so we don't want to use the ?
-            # syntax on it. Likewise for IsA.
-            if not isinstance(deepest_prefix, (Match, IsA)):
+            # For null-cond operators in the DSL which cannot keep the
+            # null-cond form in Lkt, use the explicit "X.do((v) => Y)" form
+            # instead.
+            if has_dot_notation(deepest_prefix):
                 # If the "then" expression also implies a "?", do not emit it
                 # twice. Since casting a null node always works, it is
                 # pointless to add a "?" before a cast (and X?.as[T] is not
@@ -1348,12 +1349,7 @@ def emit_expr(expr, **ctx):
         # TODO: Emit valid null values for other types, eg. [] for arrays.
 
     elif isinstance(expr, CollectionSingleton):
-        if then_underscore_var:
-            return emit_method_call(
-                ee_pexpr(expr.expr), "singleton"
-            )
-        else:
-            return "[{}]".format(ee(expr.expr))
+        return "[{}]".format(ee(expr.expr))
 
     elif isinstance(expr, New):
         # The order of arguments in the source is lost during the call to New's
@@ -1820,11 +1816,12 @@ def emit_env_spec(node_type, walker):
             ):
                 with walker.arg_by_keyword("transitive_parent", 1):
                     args.append(
-                        f"transitive_parent={ee(action.transitive_parent)}"
+                        "transitive_parent="
+                        f"{ee(action.transitive_parent_prop.expr)}"
                     )
             if action.names is not None:
                 with walker.arg_by_keyword("names", 2):
-                    args.append(f"names={ee(action.names)}")
+                    args.append(f"names={ee(action.names_prop.expr)}")
 
         elif isinstance(action, envs.AddToEnv) and action.kv_params:
             params = action.kv_params
@@ -1847,7 +1844,7 @@ def emit_env_spec(node_type, walker):
         elif isinstance(action, envs.AddToEnv):
             fn_name = "add_to_env"
             with walker.arg(0):
-                args = [ee(action.mappings)]
+                args = [ee(action.mappings_prop.expr)]
             if action.resolver:
                 with walker.arg_by_keyword("resolver", 1):
                     args.append(f"resolver={fqn(action.resolver)}")
@@ -1855,13 +1852,13 @@ def emit_env_spec(node_type, walker):
         elif isinstance(action, envs.Do):
             fn_name = "do"
             with walker.arg(0):
-                args = [ee(action.expr)]
+                args = [ee(action.do_property.expr)]
 
         elif isinstance(action, envs.RefEnvs):
             fn_name = "reference"
             args = []
             with walker.arg(0):
-                args.append(ee(action.nodes_expr))
+                args.append(ee(action.nodes_property.expr))
             with walker.arg(1):
                 args.append(fqn(action.resolver))
             if action.kind != envs.RefKind.normal:
@@ -1869,10 +1866,10 @@ def emit_env_spec(node_type, walker):
                     args.append(f"kind={action.kind.value.lower()}")
             if action.dest_env is not None:
                 with walker.arg_by_keyword("dest_env", 3):
-                    args.append(f"dest_env={ee(action.dest_env)}")
+                    args.append(f"dest_env={ee(action.dest_env_prop.expr)}")
             if action.cond is not None:
                 with walker.arg_by_keyword("cond", 4):
-                    args.append(f"cond={ee(action.cond)}")
+                    args.append(f"cond={ee(action.cond_prop.expr)}")
             if action.category is not None:
                 with walker.arg_by_keyword("category", 5):
                     args.append(f'category="{action.category.lower}"')
@@ -1883,7 +1880,7 @@ def emit_env_spec(node_type, walker):
         elif isinstance(action, envs.SetInitialEnv):
             fn_name = "set_initial_env"
             with walker.arg(0):
-                args = [ee(action.env_expr)]
+                args = [ee(action.env_prop.expr)]
 
         else:
             return "# " + str(action)

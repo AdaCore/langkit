@@ -52,7 +52,7 @@ class UseClause: Decl {
 
     env_spec {
         reference(
-            [_], Name.designated_env, kind=transitive
+            node.name.as[FooNode].do((v1) => [v1]), Name.designated_env, kind=transitive
         )
     }
 }
