@@ -382,6 +382,18 @@ public final class BindingsTests {
             }
             FooNode[] eqItems = root.pAllItems();
             System.out.println("Array equality = " + items.equals(eqItems));
+
+            // Test an array of primitive type (integer)
+            int[] intArray = root.pGetIntArray();
+            System.out.println("Integer array size = " + intArray.length);
+            System.out.println(
+                "Integer array size (from property) = " +
+                root.pArrayLen(intArray)
+            );
+            System.out.println("Integer array content :");
+            for (int i = 0; i < intArray.length; i++) {
+                System.out.println("  " + intArray[i]);
+            }
         }
 
         // Display the footer

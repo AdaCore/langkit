@@ -25,25 +25,6 @@
         /** Singleton that represents the none array. */
         public static final ${java_type} NONE = new ${elem_java_type}[0];
 
-        // ----- Constructors -----
-
-        /**
-         * Create a new array from the JNI stub.
-         *
-         * @param content The unwrapped JNI content.
-         */
-        private static ${java_type} jniWrap(
-            final ${elem_java_unw_type}[] jniContent
-        ) {
-            final ${java_type} content =
-                new ${elem_java_type}[jniContent.length];
-            for(int i = 0 ; i < content.length ; i++) {
-                content[i] =
-                    ${api.java_jni_wrap(cls.element_type, "jniContent[i]")};
-            }
-            return content;
-        }
-
         // ----- Graal C API methods -----
 
         /**
@@ -75,7 +56,7 @@
             ${elem_ni_ref_type} toRead;
 
             // Iterate over all array elements
-            final int elemSize = SizeOf.get(${elem_ni_type}.class);
+            final int elemSize = SizeOf.get(${elem_ni_ref_type}.class);
             for(int i = 0 ; i < size ; i++) {
                 nativeItem = nativeItems.add(i * elemSize);
                 toRead = WordFactory.unsigned(nativeItem.rawValue());
@@ -140,12 +121,10 @@
             ${elem_ni_ref_type} toWrite;
 
             // Place all elements in the native array
-            final int elemSize = SizeOf.get(${elem_ni_type}.class);
+            final int elemSize = SizeOf.get(${elem_ni_ref_type}.class);
             for(int i = 0 ; i < source.length ; i++) {
                 nativeItem = nativeItems.add(i * elemSize);
-                toWrite = WordFactory.unsigned(
-                    nativeItem.rawValue()
-                );
+                toWrite = WordFactory.unsigned(nativeItem.rawValue());
                 ${api.ni_write(
                     cls.element_type,
                     "source[i]",
@@ -179,7 +158,24 @@
             NI_LIB.${cls.c_dec_ref(c_api)}(arrayNative);
         }
 
-        // ----- Getters -----
+        // ----- JNI methods -----
+
+        /**
+         * Create a new array from the JNI stub.
+         *
+         * @param content The unwrapped JNI content.
+         */
+        private static ${java_type} jniWrap(
+            final ${elem_java_unw_type}[] jniContent
+        ) {
+            final ${java_type} content =
+                new ${elem_java_type}[jniContent.length];
+            for(int i = 0 ; i < content.length ; i++) {
+                content[i] =
+                    ${api.java_jni_wrap(cls.element_type, "jniContent[i]")};
+            }
+            return content;
+        }
 
         /**
          * Get the content in an array unwrapped for the JNI stubs.
@@ -281,23 +277,22 @@ jmethodID ${wrapper_type}_unwrap_method_id = NULL;
 <%def name="jni_init_global_refs(cls)">
     <%
     api = java_api
-
-    wrapper_type = api.wrapper_class(cls, False)
-
     sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
-    sig = f"L{sig_base}${wrapper_type};"
 
-    elem_java_type = api.wrapping_type(cls.element_type)
-    elem_java_type_sig = f"L{sig_base}${elem_java_type};"
+    wrapper_type = api.wrapper_class(cls, ast_wrapping=False)
+    wrapper_sig = f"L{sig_base}${wrapper_type};"
 
-
-    elem_java_unw_type = api.wrapping_type(cls.element_type, False)
-    elem_unw_sig = f"L{sig_base}${elem_java_unw_type};"
+    elem_java_type_sig = api.jni_sig_type(cls.element_type, sig_base)
+    elem_unw_sig = api.jni_sig_type(
+        cls.element_type,
+        sig_base,
+        ast_wrapping=False
+    )
     %>
 
     ${wrapper_type}_class_ref = (jclass) (*env)->NewGlobalRef(
         env,
-        (*env)->FindClass(env, "${sig}")
+        (*env)->FindClass(env, "${wrapper_sig}")
     );
 
     ${wrapper_type}_wrap_method_id = (*env)->GetStaticMethodID(
@@ -318,17 +313,19 @@ jmethodID ${wrapper_type}_unwrap_method_id = NULL;
 <%def name="jni_c_impl(cls)">
     <%
     api = java_api
-
     sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
-    ptr_sig = f"{sig_base}$PointerWrapper"
 
     c_type = cls.c_type(capi).name
     wrapper_type = api.wrapper_class(cls)
-    sig = f"L{sig_base}${wrapper_type};"
 
     elem_c_type = cls.element_type.c_type(capi).name
+    elem_jni_c_type = api.jni_c_type(cls.element_type)
     elem_java_type = api.wrapping_type(cls.element_type, False)
     elem_sig = f"L{sig_base}${elem_java_type};"
+
+    array_creation_function = api.jni_new_array(cls)
+    array_access_function = api.jni_array_access(cls)
+    array_writing_function = api.jni_array_writing(cls)
     %>
 
 // Create a new value for a ${c_type}
@@ -344,24 +341,41 @@ jobject ${wrapper_type}_wrap(
     // Get the size of the array
     int array_size = array_native->n;
 
+    % if api.is_java_primitive(cls.element_type):
     // Create a new Java array of object of the element type
-    jobjectArray array_content = (*env)->NewObjectArray(
+    jarray array_content = (*env)->${array_creation_function}(
+        env,
+        (jsize) array_size
+    );
+
+    // Put elements in the Java array
+    (*env)->${array_writing_function}(
+        env,
+        array_content,
+        (jsize) 0,
+        (jsize) array_size,
+        (${elem_jni_c_type} *) array_native->items
+    );
+    % else:
+    // Create a new Java array of object of the element type
+    jarray array_content = (*env)->${array_creation_function}(
         env,
         (jsize) array_size,
         ${elem_java_type}_class_ref,
         NULL
     );
 
-    // Put the elements in the Java array
+    // Put elements in the Java array
     for(int i = 0 ; i < array_size ; i++) {
         ${elem_c_type} elem = array_native->items[i];
-        (*env)->SetObjectArrayElement(
+        (*env)->${array_writing_function}(
             env,
             array_content,
             (jsize) i,
             ${api.jni_wrap(cls.element_type, "elem", [], ast_wrapping=False)}
         );
     }
+    % endif
 
     // Return the new array
     return (*env)->CallStaticObjectMethod(
@@ -375,7 +389,7 @@ jobject ${wrapper_type}_wrap(
 // Get a native ${c_type} from a Java wrapping instance
 ${c_type} ${wrapper_type}_unwrap(
     JNIEnv *env,
-    jobjectArray array
+    jarray array
     ${(
         ", jobject context"
         if cls.element_type.is_symbol_type else
@@ -389,7 +403,7 @@ ${c_type} ${wrapper_type}_unwrap(
     % endif
 
     //  Retrieve the array's content
-    jobjectArray content = (jobjectArray) (*env)->CallStaticObjectMethod(
+    jarray content = (jarray) (*env)->CallStaticObjectMethod(
         env,
         ${wrapper_type}_class_ref,
         ${wrapper_type}_unwrap_method_id,
@@ -404,11 +418,22 @@ ${c_type} ${wrapper_type}_unwrap(
 
     // Fill the new native array
     for(int i = 0 ; i < size ; i++) {
-        jobject elem = (*env)->GetObjectArrayElement(
+        ${elem_jni_c_type} elem;
+    % if api.is_java_primitive(cls.element_type):
+        (*env)->${array_access_function}(
+            env,
+            content,
+            (jsize) i,
+            (jsize) 1,
+            &elem
+        );
+    % else:
+        elem = (*env)->${array_access_function}(
             env,
             content,
             (jsize) i
         );
+    % endif
         ${api.jni_unwrap(
             cls.element_type,
             "elem",
