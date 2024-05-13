@@ -2919,6 +2919,10 @@ class CompileCtx:
                     # Transfer arguments from the dispatcher to the new static
                     # property, then regenerate arguments in the dispatcher.
                     root_static.arguments = prop.arguments
+                    root_static._dynamic_vars = prop._dynamic_vars
+                    root_static._dynamic_vars_default_values = (
+                        prop._dynamic_vars_default_values
+                    )
                     prop.arguments = [
                         Argument(arg.name, arg.type, arg.is_artificial,
                                  arg.abstract_default_value)
