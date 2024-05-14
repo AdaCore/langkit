@@ -634,6 +634,8 @@ def expr_is_a(expr, *names):
 
 def needs_parens(expr, **ctx):
     import langkit.expressions as E
+    if isinstance(expr, E.Then) and expr._origin_composed_attr == "_or":
+        return True
     return not (
         isinstance(expr, (
             E.FieldAccess, E.Literal, E.AbstractVariable, E.BigIntLiteral,
