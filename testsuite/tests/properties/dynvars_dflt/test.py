@@ -6,7 +6,12 @@ Test that assigning a default value to a dynamic variable:
 """
 
 from langkit.dsl import ASTNode, Bool
-from langkit.expressions import DynamicVariable, Self, langkit_property
+from langkit.expressions import (
+    AbstractKind,
+    DynamicVariable,
+    Self,
+    langkit_property,
+)
 
 from utils import build_and_run
 
@@ -15,11 +20,21 @@ BoolVar = DynamicVariable('bool_var', Bool)
 
 
 class RootNode(ASTNode):
-    pass
+
+    @langkit_property(
+        public=True,
+        return_type=Bool,
+        dynamic_vars=[(BoolVar, True)],
+        kind=AbstractKind.abstract,
+    )
+    def prop():
+        pass
 
 
 class ExampleNode(RootNode):
-    @langkit_property(public=True, dynamic_vars=[(BoolVar, True)])
+
+    # Check that inheritance works as expected
+    @langkit_property(dynamic_vars=[(BoolVar, True)])
     def prop():
         return BoolVar
 
