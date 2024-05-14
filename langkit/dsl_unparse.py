@@ -997,7 +997,7 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, Cast):
         return "{}.as{}[{}]".format(
-            ee(expr._expr),
+            ee_pexpr(expr._expr),
             "!" if expr.do_raise else "",
             type_name(expr.dest_type, strip_entity=True),
         )
