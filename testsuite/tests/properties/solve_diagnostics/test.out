@@ -6,19 +6,23 @@ success
 success
 
 -- Resolving <Call main.txt:7:1-7:12> --
-7:5-7:6:expected <StrType main.txt:2:1-8:12>, got <NumType main.txt:2:1-8:12>
+7:5-7:6:expected <StrType main.txt:2:1-9:13>, got <NumType main.txt:2:1-9:13>
   with foo => def foo(string, string)
 
-7:8-7:11:expected <NumType main.txt:2:1-8:12>, got <StrType main.txt:2:1-8:12>
+7:8-7:11:expected <NumType main.txt:2:1-9:13>, got <StrType main.txt:2:1-9:13>
   with foo => def foo(number, number)
 
 
 -- Resolving <Call main.txt:8:1-8:12> --
-8:10-8:11:expected <StrType main.txt:2:1-8:12>, got <NumType main.txt:2:1-8:12>
+8:10-8:11:expected <StrType main.txt:2:1-9:13>, got <NumType main.txt:2:1-9:13>
   with foo => def foo(string, string)
 
-8:5-8:8:expected <NumType main.txt:2:1-8:12>, got <StrType main.txt:2:1-8:12>
+8:5-8:8:expected <NumType main.txt:2:1-9:13>, got <StrType main.txt:2:1-9:13>
   with foo => def foo(number, number)
+
+
+-- Resolving <TypeAssert main.txt:9:1-9:13> --
+9:1-9:4:expected <NumType main.txt:2:1-9:13>, got <StrType main.txt:2:1-9:13>
 
 
 main.py: Done.

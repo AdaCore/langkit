@@ -11,8 +11,8 @@ from langkit.dsl import (
 )
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import (
-    And, Bind, Cond, Entity, LogicFalse, No, Predicate, Self, Var,
-    langkit_property, lazy_field
+    AbstractKind, And, Bind, Cond, Entity, LogicFalse, No, Predicate, Self,
+    Var, langkit_property, lazy_field
 )
 
 from utils import build_and_run
@@ -45,7 +45,7 @@ class Identifier(FooNode):
 
     ref_var = UserField(type=T.LogicVar, public=False)
 
-    @langkit_property()
+    @langkit_property(return_type=T.TypeDecl.entity)
     def designated_type():
         return Cond(
             Self.symbol == "number",
@@ -54,7 +54,7 @@ class Identifier(FooNode):
             Self.symbol == "string",
             Self.unit.root.str_type.as_bare_entity,
 
-            No(FooNode.entity)
+            No(TypeDecl.entity)
         )
 
     @langkit_property(return_type=T.Equation)
@@ -64,11 +64,16 @@ class Identifier(FooNode):
 
 
 @abstract
-class TypeDecl(FooNode):
+class BaseTypeDecl(FooNode):
     @langkit_property(return_type=T.Bool,
                       predicate_error="expected $expected, got $Self")
-    def match_expected_type(expected=T.FooNode.entity):
+    def match_expected_type(expected=T.BaseTypeDecl.entity):
         return expected == Entity
+
+
+@abstract
+class TypeDecl(BaseTypeDecl):
+    pass
 
 
 @synthetic
@@ -132,12 +137,20 @@ class ProcDecl(FooNode):
     )
 
 
-class Call(Expr):
+@abstract
+class Resolvable(Expr):
+    @langkit_property(return_type=T.SolverResult, public=True,
+                      kind=AbstractKind.abstract)
+    def resolve():
+        pass
+
+
+class Call(Resolvable):
     name = Field()
     first_arg = Field()
     second_arg = Field()
 
-    @langkit_property(return_type=T.SolverResult, public=True)
+    @langkit_property()
     def resolve():
         eq = Var(And(
             Entity.first_arg.xref_equation,
@@ -155,6 +168,23 @@ class Call(Expr):
                     )
                 )
             )
+        ))
+        return eq.solve_with_diagnostics
+
+
+class TypeAssert(Resolvable):
+    expr = Field()
+    ident = Field()
+
+    @langkit_property()
+    def resolve():
+        eq = Var(And(
+            Entity.expr.xref_equation,
+            Entity.ident.xref_equation(No(T.LogicContext)),
+            Predicate(TypeDecl.match_expected_type,
+                      Self.expr.type_var,
+                      Entity.ident.designated_type,
+                      error_location=Self.expr)
         ))
         return eq.solve_with_diagnostics
 

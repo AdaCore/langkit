@@ -3,13 +3,14 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Block(list*(stmt))
-    stmt <- or(proc_decl | call)
+    stmt <- or(proc_decl | call | type_assert)
     proc_decl <- ProcDecl(
         "def" ident "(" ident "," ident ")"
     )
     call <- Call(ident "(" literal "," literal ")")
     ident <- Identifier(@identifier)
     literal <- or(NumberLiteral(@number) | StringLiteral(@string))
+    type_assert <- TypeAssert(literal ":" ident)
 }
 
 @abstract class FooNode implements Node[FooNode] {
@@ -19,6 +20,20 @@ grammar foo_grammar {
 
     @export fun get_first_diag(r: SolverResult): SolverDiagnostic =
     r.diagnostics?[0]
+}
+
+@abstract class BaseTypeDecl: FooNode {
+    @predicate_error("expected $expected, got $Self") fun match_expected_type(expected: Entity[BaseTypeDecl]): Bool =
+    self == expected
+}
+
+@abstract class TypeDecl: BaseTypeDecl {
+}
+
+@synthetic class NumType: TypeDecl {
+}
+
+@synthetic class StrType: TypeDecl {
 }
 
 class Block: FooNode {
@@ -35,12 +50,21 @@ class Block: FooNode {
     fun xref_equation(): Equation = %false
 }
 
-class Call: Expr {
+class NumberLiteral: Expr implements TokenNode {
+    fun xref_equation(): Equation =
+    %eq(node.type_var, node.unit().root.number_type())
+}
+
+@abstract class Resolvable: Expr {
+    @export @abstract fun resolve(): SolverResult
+}
+
+class Call: Resolvable {
     @parse_field name: Identifier
     @parse_field first_arg: Expr
     @parse_field second_arg: Expr
 
-    @export fun resolve(): SolverResult = {
+    fun resolve(): SolverResult = {
         val eq = self.first_arg.xref_equation() and self.second_arg.xref_equation() and (
             node.children_env().get(node.name.symbol).logic_any(
                 (elem) => %eq(node.name.ref_var, elem) and elem.as[ProcDecl].call_equation(
@@ -53,9 +77,15 @@ class Call: Expr {
     }
 }
 
-class NumberLiteral: Expr implements TokenNode {
-    fun xref_equation(): Equation =
-    %eq(node.type_var, node.unit().root.number_type())
+class TypeAssert: Resolvable {
+    @parse_field expr: Expr
+    @parse_field ident: Identifier
+
+    fun resolve(): SolverResult = {
+        val eq = self.expr.xref_equation() and self.ident.xref_equation(null[LogicContext]) and %predicate(BaseTypeDecl.match_expected_type, node.expr.type_var, error_location=node.expr, self.ident.designated_type());
+
+        eq.solve_with_diagnostics()
+    }
 }
 
 class StringLiteral: Expr implements TokenNode {
@@ -66,10 +96,10 @@ class StringLiteral: Expr implements TokenNode {
 class Identifier: FooNode implements TokenNode {
     ref_var: LogicVar
 
-    fun designated_type(): Entity[FooNode] =
+    fun designated_type(): Entity[TypeDecl] =
     if (node.symbol == s"number") then node.unit().root.number_type().as_bare_entity
     elif (node.symbol == s"string") then node.unit().root.str_type().as_bare_entity
-    else null[Entity[FooNode]]
+    else null[Entity[TypeDecl]]
 
     fun xref_equation(ctx: LogicContext): Equation =
     %eq(node.ref_var, node.designated_type(), logic_ctx=ctx)
@@ -81,20 +111,9 @@ class ProcDecl: FooNode {
     @parse_field second_type: Identifier
 
     fun call_equation(first_arg: Expr, second_arg: Expr, ctx: LogicContext): Equation =
-    node.first_type.xref_equation(ctx) and node.second_type.xref_equation(ctx) and %predicate(TypeDecl.match_expected_type, first_arg.type_var, error_location=first_arg, node.first_type.ref_var) and %predicate(TypeDecl.match_expected_type, second_arg.type_var, error_location=second_arg, node.second_type.ref_var)
+    node.first_type.xref_equation(ctx) and node.second_type.xref_equation(ctx) and %predicate(BaseTypeDecl.match_expected_type, first_arg.type_var, error_location=first_arg, node.first_type.ref_var) and %predicate(BaseTypeDecl.match_expected_type, second_arg.type_var, error_location=second_arg, node.second_type.ref_var)
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)
     }
-}
-
-@abstract class TypeDecl: FooNode {
-    @predicate_error("expected $expected, got $Self") fun match_expected_type(expected: Entity[FooNode]): Bool =
-    self == expected
-}
-
-@synthetic class NumType: TypeDecl {
-}
-
-@synthetic class StrType: TypeDecl {
 }

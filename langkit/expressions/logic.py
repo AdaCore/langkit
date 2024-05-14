@@ -662,6 +662,8 @@ class Predicate(AbstractExpression):
         self.pred_property = resolve_property(self.pred_property).root
 
     def construct(self) -> ResolvedExpression:
+        from langkit.expressions import Cast
+
         assert isinstance(self.pred_property, PropertyDef)
         assert isinstance(self.pred_property.struct, ASTNodeType)
 
@@ -752,6 +754,14 @@ class Predicate(AbstractExpression):
         DynamicVariable.check_call_bindings(
             self.pred_property, 'In predicate property {prop}'
         )
+
+        # Since we allow instantiating a predicate with partial arguments that
+        # are subtypes of their corresponding property parameter, we may need
+        # to generate an intermediate cast.
+        closure_exprs = [
+            Cast.Expr(expr, arg.type) if expr.type != arg.type else expr
+            for expr, arg in zip(closure_exprs, partial_args)
+        ]
 
         # Append dynamic variables to embed their values in the closure
         for dynvar in self.pred_property.dynamic_vars:

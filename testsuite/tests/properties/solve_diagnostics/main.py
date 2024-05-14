@@ -24,6 +24,7 @@ foo(1, 2)
 foo("a", "b")
 foo(1, "b")
 foo("a", 2)
+"a" : number
 """
 
 ctx = libfoolang.AnalysisContext()
@@ -34,9 +35,9 @@ if u.diagnostics:
     sys.exit(1)
 
 
-for call in u.root.findall(libfoolang.Call):
-    print(f"-- Resolving {call} --")
-    result = call.p_resolve
+for node in u.root.findall(libfoolang.Resolvable):
+    print(f"-- Resolving {node} --")
+    result = node.p_resolve
     if result.success:
         print("success")
     else:
