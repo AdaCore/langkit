@@ -1551,7 +1551,7 @@ def emit_prop(prop, walker):
             f" = raise[{type_name(prop.type)}]"
             f" PropertyError(\"Property {prop.qualname} not implemented\")"
         )
-    elif prop_for_walker.expr:
+    elif prop_for_walker.expr is not None:
         with walker.property(prop_for_walker):
             res += " = $sl{}".format(emit_expr(prop_for_walker.expr,
                                                walker=walker))
