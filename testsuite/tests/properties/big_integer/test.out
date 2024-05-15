@@ -1,5 +1,6 @@
 main.py: Running...
 .p_check_big_literal = 99999999999999999999999999999999999999999999
+.p_check_to_big_int(12) = 12
 simple evaluates to 2 (2)
 big evaluates to 10000000000000000000000000000000 (<too big>)
 big_plus evaluates to 10000000000000000000000000000001 (<too big>)
