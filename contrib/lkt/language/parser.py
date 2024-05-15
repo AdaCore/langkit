@@ -4310,7 +4310,7 @@ lkt_grammar.add_rules(
 
     isa_or_primary=GOr(
         Isa(G.primary, "is", List(G.type_ref, sep="|", empty_valid=False)),
-        AnyOf(G.primary, "in", List(G.expr, sep="|", empty_valid=False)),
+        AnyOf(G.primary, "in", List(G.primary, sep="|", empty_valid=False)),
         G.primary
     ),
 

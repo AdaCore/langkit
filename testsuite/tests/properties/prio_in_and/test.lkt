@@ -1,0 +1,16 @@
+# Check that parser gives precedence to the "in" operator over "and"
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @export fun entities_array(s: Symbol, b: Bool): Bool =
+        s in s"A" | s"B" and b
+}
