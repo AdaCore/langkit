@@ -19,7 +19,7 @@ grammar foo_grammar {
     }
 
     fun fqn(): String = match node {
-        case dn: DottedName => dn.prefix.fqn() & ("." & dn.suffix.fqn())
+        case dn: DottedName => dn.prefix.fqn() & "." & dn.suffix.fqn()
         case id: Identifier => id.text()
     }
 

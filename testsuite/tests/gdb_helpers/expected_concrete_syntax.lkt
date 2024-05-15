@@ -72,7 +72,7 @@ grammar foo_grammar {
         val empty = null[Array[Example]];
         val single = [node.as[Example]];
         val complete = node.parent.as[ASTList[FooNode, Example]].as_array();
-        val arr = (empty & single) & complete;
+        val arr = empty & single & complete;
 
         arr.length()
     }

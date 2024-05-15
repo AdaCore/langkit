@@ -8,9 +8,9 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
     v: LogicVar
 
-    @memoized fun pred1(): Bool = not (node.is_null)
+    @memoized fun pred1(): Bool = not node.is_null
 
-    @memoized fun pred2(): Bool = not (node.parent.is_null)
+    @memoized fun pred2(): Bool = not node.parent.is_null
 
     fun create_equation(with_pred1: Bool, n: Entity[FooNode]): Equation =
     %eq(node.v, n) and (

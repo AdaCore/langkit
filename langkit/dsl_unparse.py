@@ -1,9 +1,11 @@
 from collections import defaultdict
 from contextlib import contextmanager
+import dataclasses
+import enum
 import itertools
 import json
 import sys
-from typing import Dict
+from typing import Dict, Union
 
 from funcy import keep, lmap
 
@@ -633,64 +635,59 @@ def expr_is_a(expr, *names):
     return any(expr.__class__.__name__ == n for n in names)
 
 
-def needs_parens(expr, **ctx):
-    import langkit.expressions as E
-    if isinstance(expr, E.Then) and expr._origin_composed_attr == "_or":
-        return True
-    return not (
-        isinstance(expr, (
-            E.FieldAccess, E.Literal, E.AbstractVariable, E.BigIntLiteral,
-            E.EnvGet, E.Map, E.Quantifier, E.Super, E.No, E.Then, E.Match,
-            E.Cast, E.Let, E.ArrayLiteral, E.String, E.Predicate,
-            E.RefCategories, E.Bind, E.NPropagate, E.DynamicLexicalEnv,
-            E.StructUpdate, E.New, int
-        ))
-        or expr_is_a(expr, "as_entity", "as_bare_entity", "children",
-              "env_parent", "rebindings_parent", "parents", "parent", "root",
-              "env_node", "rebindings_new_env", "rebindings_old_env",
-              "append_rebinding", "concat_rebindings", "shed_rebindings",
-              "env_node", "get_value", "solve", "solve_with_diagnostics",
-              "is_referenced_from", "env_group", "length", "can_reach",
-              "as_int", "unique", "env_orphan", "is_visible_from", "as_array",
-              "rebind_env", "at", "at_or_raise", "domain", "to_symbol", "join")
+def needs_parens(outer_assoc_prio, inner_assoc_prio):
+    outer_binop = None
+    if isinstance(outer_assoc_prio, PrioInfo):
+        outer_binop = outer_assoc_prio.binop
+        outer_assoc_prio = outer_assoc_prio.level
+
+    inner_binop = None
+    if isinstance(inner_assoc_prio, PrioInfo):
+        inner_binop = inner_assoc_prio.binop
+        inner_assoc_prio = inner_assoc_prio.level
+
+    return (
+        outer_assoc_prio > inner_assoc_prio
+        or (
+            outer_assoc_prio == P.bool_binop
+            and inner_assoc_prio == P.bool_binop
+            and outer_binop != inner_binop
+        )
     )
-
-
-def emit_indent_expr(expr, **ctx):
-    strn = emit_expr(expr, **ctx)
-    starts_with_comment = len(strn) > 0 and strn[0] == '#'
-    if len(strn) > 40 or starts_with_comment:
-        return "$i$hl{}$d$hl".format(strn)
-    else:
-        return strn
 
 
 def prepend_comments(expr, **ctx):
     arg_expr = ctx.pop('arg_expr', None)
     if arg_expr is None:
-        return emit_expr(expr, **ctx), False
+        prio, result = emit_expr_prio(expr, **ctx)
+        return prio, result, False
 
     walker = ctx.get('walker')
     with walker.arg(arg_expr):
         coms = walker.emit_comments()
-        strn = emit_expr(expr, **ctx)
+        prio, strn = emit_expr_prio(expr, **ctx)
 
     if coms == "":
-        return strn, False
+        return prio, strn, False
 
-    return coms + strn, True
+    return prio, coms + strn, True
 
 
-def emit_paren_expr(expr, **ctx):
+def emit_paren_expr(outer_assoc_prio, expr, **ctx):
     from langkit.expressions import Let
 
-    strn, has_coms = prepend_comments(expr, **ctx)
+    if isinstance(outer_assoc_prio, PrioInfo):
+        outer_assoc_prio = outer_assoc_prio.level
 
-    return (
-        emit_paren(strn, force=has_coms)
-        if needs_parens(expr) or (has_coms and not isinstance(expr, Let)) else
-        strn
-    )
+    prio, strn, has_coms = prepend_comments(expr, **ctx)
+
+    if (
+        needs_parens(outer_assoc_prio, prio)
+        or (has_coms and not isinstance(expr, Let))
+    ):
+        strn = emit_paren(strn, force=has_coms)
+
+    return strn
 
 
 def emit_paren(strn, force=False):
@@ -707,7 +704,45 @@ def emit_nl(strn):
         return "{}".format(strn)
 
 
-def emit_expr(expr, **ctx):
+class P(enum.IntEnum):
+    lowest = enum.auto()
+
+    # or?, or, and
+    bool_binop = enum.auto()
+
+    # <=, <, >=, >, ==, !=
+    comp_binop = enum.auto()
+
+    # +, -, &
+    sum_binop = enum.auto()
+
+    # *, /
+    mult_binop = enum.auto()
+
+    # not, +, -
+    unop = enum.auto()
+
+    # is, in
+    member_op = enum.auto()
+
+    highest = enum.auto()
+
+
+@dataclasses.dataclass
+class PrioInfo:
+    level: P
+    binop: Union[str, None] = None
+
+
+def emit_expr(outer_assoc_prio, expr, **ctx):
+    inner_assoc_prio, result = emit_expr_prio(expr, **ctx)
+    return (
+        emit_paren(result)
+        if needs_parens(outer_assoc_prio, inner_assoc_prio) else
+        result
+    )
+
+def emit_expr_prio(expr, **ctx):
     from langkit.compiled_types import T
     from langkit.dsl import LookupKind
     from langkit.expressions import (
@@ -725,30 +760,32 @@ def emit_expr(expr, **ctx):
     def is_a(*names):
         return any(expr.__class__.__name__ == n for n in names)
 
+    prio = PrioInfo(P.highest)
 
     then_underscore_var = ctx.get('then_underscore_var')
     walker = ctx.get('walker')
 
-    def needs_parens(expr):
-        return langkit.dsl_unparse.needs_parens(expr, **ctx)
-
     def emit_lambda(expr, vars):
         vars_str = ", ".join(var_name(var) for var in vars)
-        return "({}) => {}".format(vars_str, ee(expr))
+        return "({}) => {}".format(vars_str, ee_prio(P.lowest, expr))
         del vars_str
 
     def emit_method_call(receiver, name, args=[],
                          force_parens=True, as_multiline=False):
-        return "{}.{}{}".format(
+        return PrioInfo(P.highest), "{}.{}{}".format(
             receiver, name,
             emit_paren(", ".join(args), as_multiline)
             if force_parens or args else ""
         )
 
     def emit_let(expr):
+        nonlocal prio
+
         if len(expr.vars) == 0:
             with walker.returned_expr():
-                return walker.emit_comments() + ee(expr.expr)
+                coms = walker.emit_comments()
+                prio, expr_result = emit_expr_prio(expr.expr, **ctx)
+                return prio, coms + expr_result
 
         vars_defs = ""
         for i, (var, abs_expr) in enumerate(zip(expr.vars, expr.var_exprs)):
@@ -756,50 +793,55 @@ def emit_expr(expr, **ctx):
                 vars_defs += "{}val {} = {};$hl".format(
                     walker.emit_comments(),
                     "_" if var.ignored else var_name(var),
-                    ee(abs_expr),
+                    ee_prio(P.lowest, abs_expr),
                 )
             vars_defs += walker.emit_comments()
 
         with walker.returned_expr():
-            return "{{$i$hl{}$hl{}{}$hl$d}}".format(
-                vars_defs, walker.emit_comments(), ee(expr.expr)
+            return prio, "{{$i$hl{}$hl{}{}$hl$d}}".format(
+                vars_defs, walker.emit_comments(), ee_prio(P.lowest, expr.expr)
             )
 
     def ee(expr, **extra_ctx):
         full_ctx = dict(ctx, **extra_ctx)
-        return emit_expr(expr, **full_ctx)
+        return emit_expr(prio, expr, **full_ctx)
 
-    def ee_pexpr(expr, **extra_ctx):
+    def ee_prio(outer_assoc_prio, expr, **extra_ctx):
+        full_ctx = dict(ctx, **extra_ctx)
+        return emit_expr(outer_assoc_prio, expr, **full_ctx)
+
+    def ee_pexpr(outer_assoc_prio, expr, **extra_ctx):
         # We don't want to carry an arg_expr data left in the context from a
         # previous call, it needs to be specified in each call to ee_pexpr.
         ctx.pop('arg_expr', None)
 
         full_ctx = dict(ctx, **extra_ctx)
-        return emit_paren_expr(expr, **full_ctx)
+        return emit_paren_expr(outer_assoc_prio, expr, **full_ctx)
 
     expr = unsugar(expr)
 
     if isinstance(expr, Literal):
-        return str(expr.literal).lower()
+        return prio, str(expr.literal).lower()
 
     elif isinstance(expr, SymbolLiteral):
-        return "s" + json.dumps(expr.name)
+        return prio, "s" + json.dumps(expr.name)
 
     elif isinstance(expr, BaseRaiseException):
-        return "raise[{}] {}({})".format(
+        return prio, "raise[{}] {}({})".format(
             type_name(expr.expr_type),
             expr.exc_name.camel,
             json.dumps(expr.message) if expr.message else ""
         )
 
     elif isinstance(expr, AnyOf):
+        prio = PrioInfo(P.member_op)
         with walker.method_call("any_of"):
             result = f"{ee(expr.expr)} in"
             indented = False
             for i, v in enumerate(expr.values):
                 with walker.arg(i):
                     comms = walker.emit_comments()
-                    strn = emit_expr(v, **ctx)
+                    strn = ee_prio(prio, v)
                     if comms:
                         if i == 0:
                             result += "$i$hl" + comms
@@ -814,11 +856,12 @@ def emit_expr(expr, **ctx):
 
             if indented:
                 result += "$d$hl"
-            return result
+            return prio, result
 
     elif isinstance(expr, IsA):
-        return "{} is {}".format(
-            ee_pexpr(expr.expr),
+        prio = PrioInfo(P.member_op)
+        return prio, "{} is {}".format(
+            ee_pexpr(prio, expr.expr),
             "{}".format(
                 " | ".join(
                     type_name(t, strip_entity=True) for t in expr.astnodes
@@ -827,20 +870,18 @@ def emit_expr(expr, **ctx):
         )
 
     elif isinstance(expr, LogicTrue):
-        return "%true"
+        return prio, "%true"
 
     elif isinstance(expr, LogicFalse):
-        return "%false"
+        return prio, "%false"
 
     elif is_a("bind"):
-
         bind = "bind {} = {};$hl".format(
-            ee(expr.expr_0), ee(expr.expr_1)
+            ee_prio(P.lowest, expr.expr_0),
+            ee_prio(P.lowest, expr.expr_1),
         )
-
-        return "{{$i$hl{}$hl{}$hl$d}}".format(
-            bind, ee(expr.expr_2)
-        )
+        subexpr = ee_prio(P.lowest, expr.expr_2)
+        return prio, "{{$i$hl{}$hl{}$hl$d}}".format(bind, subexpr)
 
     elif isinstance(expr, Let):
         if isinstance(expr, Block):
@@ -848,14 +889,16 @@ def emit_expr(expr, **ctx):
         else:
             with walker.call('Let'):
                 with walker.arg(0):
-                    return walker.emit_comments() + emit_let(expr)
+                    comments = walker.emit_comments()
+                    prio, result = emit_let(expr)
+                    return prio, comments + result
 
     elif isinstance(expr, Map):
 
         if expr._origin_composed_attr == "keep":
             assert isinstance(expr.expr, Cast)
             with walker.method_call("keep"):
-                return "{}.keep[{}]".format(
+                return prio, "{}.keep[{}]".format(
                     ee(expr.collection),
                     type_name(expr.expr.dest_type, strip_entity=True),
                 )
@@ -871,7 +914,7 @@ def emit_expr(expr, **ctx):
         def emit_self():
             nonlocal coll
             with walker.self_arg():
-                coll = ee_pexpr(expr.collection)
+                coll = ee_pexpr(P.highest, expr.collection)
 
         def handle_map():
             emit_self()
@@ -935,38 +978,41 @@ def emit_expr(expr, **ctx):
         if expr.requires_index:
             vars.append(expr.index_var)
         return emit_method_call(
-            ee_pexpr(expr.collection),
+            ee_pexpr(P.highest, expr.collection),
             expr.kind,
             [emit_lambda(expr.expr, vars)],
         )
 
     elif isinstance(expr, Contains):
         return emit_method_call(
-            ee_pexpr(expr.collection), "contains", [ee(expr.item)]
+            ee_pexpr(P.highest, expr.collection),
+            "contains",
+            [ee_prio(P.lowest, expr.item)],
         )
 
     elif isinstance(expr, Find):
         return emit_method_call(
-            ee_pexpr(expr.collection),
+            ee_pexpr(P.highest, expr.collection),
             "find",
             [emit_lambda(expr.expr, [expr.element_var])],
         )
 
     elif isinstance(expr, If):
+        prio = PrioInfo(P.lowest)
         with walker.call('If'):
             with walker.arg(0):
                 coms = walker.emit_comments()
-                cond_strn = ee_pexpr(expr.cond)
+                cond_strn = ee_pexpr(prio, expr.cond)
 
-            res = "{}if {} then {} else {}".format(
+            return prio, "{}if {} then {} else {}".format(
                 coms,
                 cond_strn,
-                ee_pexpr(expr._then, arg_expr=1),
-                ee_pexpr(expr.else_then, arg_expr=2)
+                ee_pexpr(prio, expr._then, arg_expr=1),
+                ee_pexpr(prio, expr.else_then, arg_expr=2)
             )
-            return res
 
     elif isinstance(expr, Cond):
+        prio = PrioInfo(P.lowest)
         with walker.call('Cond'):
             branches = expr.branches
             res = ""
@@ -975,8 +1021,8 @@ def emit_expr(expr, **ctx):
                 # condition
                 with walker.arg(i * 2):
                     coms = walker.emit_comments()
-                    cond_strn = ee_pexpr(b[0])
-                expr_strn = ee_pexpr(b[1], arg_expr=i * 2 + 1)
+                    cond_strn = ee_pexpr(prio, b[0])
+                expr_strn = ee_pexpr(prio, b[1], arg_expr=i * 2 + 1)
 
                 res += "{}{} {} then {}$hl".format(
                     coms,
@@ -987,31 +1033,31 @@ def emit_expr(expr, **ctx):
 
             with walker.arg(len(branches) * 2):
                 coms = walker.emit_comments()
-                else_strn = ee_pexpr(expr.else_expr)
+                else_strn = ee_pexpr(prio, expr.else_expr)
 
             res += "{}else {}".format(coms, else_strn)
 
-            return res
+            return prio, res
 
     elif isinstance(expr, IsNull):
-        return "{}.is_null".format(ee(expr.expr))
+        return prio, "{}.is_null".format(ee(expr.expr))
 
     elif isinstance(expr, Cast):
-        return "{}.as{}[{}]".format(
-            ee_pexpr(expr._expr),
+        return prio, "{}.as{}[{}]".format(
+            ee_pexpr(prio, expr._expr),
             "!" if expr.do_raise else "",
             type_name(expr.dest_type, strip_entity=True),
         )
 
     elif isinstance(expr, All):
-        return (
+        return prio, (
             ee(expr.equation_array)
             if expr._origin_composed_attr == "logic_all" else
             "%all({})".format(ee(expr.equation_array))
         )
 
     elif isinstance(expr, Any):
-        return (
+        return prio, (
             ee(expr.equation_array)
             if expr._origin_composed_attr == "logic_any" else
             "%any({})".format(ee(expr.equation_array))
@@ -1022,7 +1068,7 @@ def emit_expr(expr, **ctx):
             res = ""
             with walker.self_arg():
                 coms = walker.emit_comments()
-                matched_expr_strn = ee(expr.matched_expr)
+                matched_expr_strn = ee_prio(P.lowest, expr.matched_expr)
 
             res += "{}match {} {{$i".format(coms, matched_expr_strn)
 
@@ -1036,50 +1082,60 @@ def emit_expr(expr, **ctx):
                         coms,
                         var_name(var),
                         sf(": ${type_name(typ)}") if typ else "",
-                        ee(e)
+                        ee_prio(P.lowest, e)
                     )
 
             res += "$d$hl}"
 
-        return res
+        return prio, res
 
     elif isinstance(expr, Eq):
         if expr._origin_composed_attr == "empty":
             assert type(expr.lhs).__name__ == "length"
             assert expr.rhs == 0
-            return emit_method_call(ee_pexpr(expr.lhs.expr_0), "empty")
+            return emit_method_call(ee_pexpr(prio, expr.lhs.expr_0), "empty")
 
-        return "{} == {}".format(ee(expr.lhs), ee(expr.rhs))
+        prio = PrioInfo(P.comp_binop)
+        return prio, "{} == {}".format(ee(expr.lhs), ee(expr.rhs))
 
     elif isinstance(expr, BinaryBooleanOperator):
+        prio = PrioInfo(P.bool_binop, expr.kind)
         with walker.boolean_binop(expr.kind):
             def emit_bool_op_rec(expr, depth):
                 if depth == 2:
-                    lhs = emit_paren_expr(expr.lhs, arg_expr=0, **ctx)
+                    lhs = emit_paren_expr(prio, expr.lhs, arg_expr=0, **ctx)
                 else:
                     lhs = emit_bool_op_rec(expr.lhs, depth - 1)
 
                 return "{} {} {}".format(
                     lhs,
                     expr.kind,
-                    emit_paren_expr(expr.rhs, arg_expr=depth - 1, **ctx)
+                    emit_paren_expr(prio, expr.rhs, arg_expr=depth - 1, **ctx)
                 )
 
-            return emit_bool_op_rec(expr, walker.arg_count())
+            return prio, emit_bool_op_rec(expr, walker.arg_count())
 
     elif isinstance(expr, Not):
         if isinstance(expr.expr, Eq):
-            return "{} != {}".format(ee(expr.expr.lhs), ee(expr.expr.rhs))
-        return "not {}".format(emit_paren_expr(expr.expr, **ctx))
+            prio = PrioInfo(P.comp_binop)
+            return prio, "{} != {}".format(
+                ee(expr.expr.lhs), ee(expr.expr.rhs)
+            )
+        else:
+            prio = PrioInfo(P.unop)
+            return prio, "not {}".format(
+                emit_paren_expr(prio, expr.expr, **ctx)
+            )
 
     elif isinstance(expr, Then):
         if expr._origin_composed_attr == "_or":
+            prio = PrioInfo(P.bool_binop, "_or")
             with walker.method_call("_or"):
                 with walker.self_arg():
-                    lhs = ee_pexpr(expr.expr)
+                    lhs = ee_pexpr(prio, expr.expr)
                 with walker.arg(0):
-                    rhs = ee_pexpr(expr.default_val)
-            return f"{lhs} or? {rhs}"
+                    rhs = ee_pexpr(prio, expr.default_val)
+            return prio, f"{lhs} or? {rhs}"
 
         def emit_final_call(self_expr, param_name, then_expr, default_expr):
             return emit_method_call(
@@ -1139,7 +1195,7 @@ def emit_expr(expr, **ctx):
                     or isinstance(deepest_prefix, Cast)
                 ):
                     then_prefix += "?"
-                return ee(
+                return prio, ee(
                     expr.then_expr,
                     then_underscore_var=expr.var_expr,
                     then_prefix=then_prefix,
@@ -1152,23 +1208,23 @@ def emit_expr(expr, **ctx):
                      v = expr.var_expr.source_name = new_undercore_varname_id()
 
                 return emit_final_call(
-                    ee_pexpr(expr.expr),
+                    ee_pexpr(prio, expr.expr),
                     v,
-                    ee(expr.then_expr),
-                    ee_pexpr(expr.default_val)
+                    ee_prio(P.lowest, expr.then_expr),
+                    ee_pexpr(P.lowest, expr.default_val)
                     if expr.default_val else None
                 )
 
         def handle_then_call():
             with walker.self_arg():
-                self_expr = ee_pexpr(expr.expr)
+                self_expr = ee_pexpr(prio, expr.expr)
 
             with walker.arg(0):
-                then_expr = ee(expr.then_expr)
+                then_expr = ee_prio(P.lowest, expr.then_expr)
 
             if expr.default_val is not None:
                 with walker.arg(1):
-                    default_expr = ee_pexpr(expr.default_val)
+                    default_expr = ee_pexpr(P.lowest, expr.default_val)
             else:
                 default_expr = None
 
@@ -1177,23 +1233,22 @@ def emit_expr(expr, **ctx):
             )
 
         def handle_or_call():
+            prio = PrioInfo(P.bool_binop, "_or")
             with walker.self_arg():
-                self_expr = ee_pexpr(expr.expr)
+                self_expr = ee_pexpr(prio, expr.expr)
 
             with walker.arg(0):
-                fallback_expr = ee_pexpr(expr.default_val)
+                fallback_expr = ee_pexpr(prio, expr.default_val)
 
-            return emit_final_call(
-                self_expr, "e", "e", fallback_expr
-            )
+            return emit_final_call(self_expr, "e", "e", fallback_expr)
 
         def handle_designated_env_macro():
-            self_expr = ee_pexpr(expr.expr)
+            self_expr = ee_pexpr(P.lowest, expr.expr)
 
-            then_expr = ee(expr.then_expr)
+            then_expr = ee_prio(P.lowest, expr.then_expr)
 
             if expr.default_val is not None:
-                default_expr = ee_pexpr(expr.default_val)
+                default_expr = ee_pexpr(P.lowest, expr.default_val)
             else:
                 default_expr = None
 
@@ -1210,14 +1265,15 @@ def emit_expr(expr, **ctx):
         })
 
     elif isinstance(expr, OrderingTest):
-        return "{} {} {}".format(
-            ee_pexpr(expr.lhs),
+        prio = PrioInfo(P.comp_binop)
+        return prio, "{} {} {}".format(
+            ee_pexpr(prio, expr.lhs),
             expr.OPERATOR_IMAGE[expr.operator],
-            ee_pexpr(expr.rhs)
+            ee_pexpr(prio, expr.rhs)
         )
 
     elif isinstance(expr, GetSymbol):
-        return "{}.symbol".format(ee(expr.node_expr))
+        return prio, "{}.symbol".format(ee(expr.node_expr))
 
     elif is_a("as_entity", "as_bare_entity", "children", "env_parent",
               "rebindings_parent", "parents", "parent", "root", "env_node",
@@ -1225,7 +1281,7 @@ def emit_expr(expr, **ctx):
         # Field like expressions
         exprs = expr.sub_expressions
         return emit_method_call(
-            ee_pexpr(exprs[0]),
+            ee_pexpr(prio, exprs[0]),
             type(expr).__name__,
             lmap(ee, exprs[1:]),
             False,
@@ -1241,21 +1297,35 @@ def emit_expr(expr, **ctx):
         args = lmap(ee, exprs[1:])
         for k, v in expr.kwargs.items():
             args.append(f"{k}={ee(v)}")
-        return emit_method_call(ee_pexpr(exprs[0]), type(expr).__name__, args)
+        return emit_method_call(
+            ee_pexpr(P.highest, exprs[0]), type(expr).__name__, args
+        )
 
     elif isinstance(expr, EnumLiteral):
-        return expr.value.dsl_name
+        return prio, expr.value.dsl_name
 
     elif isinstance(expr, Try):
-        return "try $sl$i{}$sl$d {}".format(
-            ee_pexpr(expr.try_expr),
-            "else {}".format(ee_pexpr(expr.else_expr)) if expr.else_expr is not None else ""
+        return prio, "try $sl$i{}$sl$d {}".format(
+            ee_pexpr(P.lowest, expr.try_expr),
+            "else {}".format(
+                ee_pexpr(P.lowest, expr.else_expr)
+            ) if expr.else_expr is not None else ""
         )
 
     elif isinstance(expr, Arithmetic):
-        return "{} {} {}".format(ee_pexpr(expr.l), expr.op, ee_pexpr(expr.r))
+        prio = PrioInfo({
+            "+": P.sum_binop,
+            "-": P.sum_binop,
+            "&": P.sum_binop,
+            "*": P.mult_binop,
+            "/": P.mult_binop,
+        }[expr.op])
+        return prio, "{} {} {}".format(
+            ee_pexpr(prio, expr.l), expr.op, ee_pexpr(prio, expr.r)
+        )
 
     elif isinstance(expr, EnvGet):
+        prio = PrioInfo(P.lowest)
         args = [ee(expr.symbol)]
         if expr.lookup_kind != LookupKind.recursive:
             args.append(f"lookup={ee(expr.lookup_kind)}")
@@ -1264,7 +1334,7 @@ def emit_expr(expr, **ctx):
         if expr.categories:
             args.append('categories={}'.format(ee(expr.categories)))
         return emit_method_call(
-            ee_pexpr(expr.env),
+            ee_pexpr(prio, expr.env),
             "get_first" if expr.only_first else "get",
             args
         )
@@ -1273,12 +1343,16 @@ def emit_expr(expr, **ctx):
         # Recognize find
         if (isinstance(expr.expr_0, Map) and expr.expr_0.kind == 'filter' and
                 ee(expr.expr_1) == "0"):
-            return ee(expr.expr_0)
+            return prio, ee(expr.expr_0)
 
-        return "{}?[{}]".format(ee(expr.expr_0), ee(expr.expr_1))
+        return prio, "{}?[{}]".format(
+            ee(expr.expr_0), ee_prio(P.lowest, expr.expr_1)
+        )
 
     elif is_a("at_or_raise"):
-        return "{}[{}]".format(ee(expr.expr_0), ee(expr.expr_1))
+        return prio, "{}[{}]".format(
+            ee(expr.expr_0), ee_prio(P.lowest, expr.expr_1)
+        )
 
     elif isinstance(expr, FieldAccess):
         args = []
@@ -1287,72 +1361,78 @@ def emit_expr(expr, **ctx):
         if expr.arguments:
             with walker.method_call(expr.field):
                 field_coms = walker.emit_comments()
-                receiver_str = ee_pexpr(expr.receiver)
+                receiver_str = ee_pexpr(prio, expr.receiver)
 
                 for i in range(walker.arg_count()):
                     kw = walker.arg_keyword(i)
                     with walker.arg(i):
                         arg_coms = walker.emit_comments()
                         if kw is None:
-                            args.append(arg_coms + ee(expr.arguments.args[i]))
+                            args.append(
+                                arg_coms
+                                + ee_prio(P.lowest, expr.arguments.args[i])
+                            )
                         else:
                             args.append(arg_coms + "{}={}".format(
-                                kw, ee(expr.arguments.kwargs[kw])
+                                kw,
+                                ee_prio(P.lowest, expr.arguments.kwargs[kw]),
                             ))
                         has_any_commented_arg |= arg_coms != ""
         else:
             field_coms = ""
-            receiver_str = ee_pexpr(expr.receiver)
+            receiver_str = ee_pexpr(prio, expr.receiver)
 
-        return field_coms + emit_method_call(
+        prio, result = emit_method_call(
             receiver_str,
             expr.field,
             args,
             as_multiline=has_any_commented_arg,
             force_parens=is_property
         )
+        return prio, field_coms + result
 
     elif isinstance(expr, Super):
         args = []
         for arg in expr.arguments.args:
-            args.append(ee(arg))
+            args.append(ee_prio(P.lowest, arg))
         for kw, arg in expr.arguments.kwargs.items():
-            args.append("{}={}".format(kw, ee(arg)))
-        return "{}.super({})".format(ee(expr.prefix), ", ".join(args))
+            args.append("{}={}".format(kw, ee_prio(P.lowest, arg)))
+        return prio, "{}.super({})".format(ee(expr.prefix), ", ".join(args))
 
     elif isinstance(expr, Concat):
+        prio = PrioInfo(P.sum_binop)
         result = ""
         with walker.method_call("concat"):
             with walker.self_arg():
-                result += ee_pexpr(expr.array_1)
+                result += ee_pexpr(prio, expr.array_1)
             result += " & "
             with walker.arg(0):
-                result += ee_pexpr(expr.array_2)
-        return result
+                result += ee_pexpr(prio, expr.array_2)
+        return prio, result
 
     elif isinstance(expr, EntityVariable):
-        return "self"
+        return prio, "self"
 
     elif isinstance(expr, SelfVariable):
-        return "node"
+        return prio, "node"
 
     elif isinstance(expr, DynamicVariable):
-        return expr.argument_name.lower
+        return prio, expr.argument_name.lower
 
     elif isinstance(expr, AbstractVariable):
         if expr is EmptyEnv:
-            return f"null[{type_name(T.LexicalEnv)}]"
+            return prio, f"null[{type_name(T.LexicalEnv)}]"
         elif then_underscore_var:
             if id(then_underscore_var) == id(expr):
-                return ctx["then_prefix"]
-        return var_name(expr)
+                return prio, ctx["then_prefix"]
+        return prio, var_name(expr)
 
     elif isinstance(expr, No):
-        return "null[{}]".format(type_name(expr.expr_type))
+        return prio, "null[{}]".format(type_name(expr.expr_type))
         # TODO: Emit valid null values for other types, eg. [] for arrays.
 
     elif isinstance(expr, CollectionSingleton):
-        return "[{}]".format(ee(expr.expr))
+        return prio, "[{}]".format(ee_prio(P.lowest, expr.expr))
 
     elif isinstance(expr, New):
         # The order of arguments in the source is lost during the call to New's
@@ -1364,93 +1444,110 @@ def emit_expr(expr, **ctx):
                        for name, _ in fields
                        if name in expr.field_values]
 
-        return "{}{}".format(
+        return prio, "{}{}".format(
             type_name(expr.struct_type),
-            emit_paren(", ".join("{}={}".format(unparsed_name(k), ee(v))
-                                 for k, v in field_exprs))
+            emit_paren(
+                ", ".join(
+                    "{}={}".format(unparsed_name(k), ee_prio(P.lowest, v))
+                    for k, v in field_exprs
+                )
+            )
         )
 
     elif isinstance(expr, StructUpdate):
-        return '{}.update({})'.format(
+        return prio, '{}.update({})'.format(
             ee(expr.expr),
-            ', '.join('{}={}'.format(name, ee(field_expr))
-                      for name, field_expr in sorted(expr.assocs.items()))
+            ', '.join(
+                '{}={}'.format(name, ee_prio(P.lowest, field_expr))
+                for name, field_expr in sorted(expr.assocs.items())
+            )
         )
 
     elif isinstance(expr, ArrayLiteral):
         if not len(expr.elements):
-            return '[]: {}'.format(type_name(expr.element_type))
-        return "[{}]".format(", ".join(ee(el) for el in expr.elements))
+            return prio, '[]: {}'.format(type_name(expr.element_type))
+        return prio, "[{}]".format(
+            ", ".join(ee_prio(P.lowest, el) for el in expr.elements)
+        )
 
     elif isinstance(expr, CharacterLiteral):
-        return repr(expr.value)
+        return prio, repr(expr.value)
 
     elif isinstance(expr, String):
-        return json.dumps(expr.value)
+        return prio, json.dumps(expr.value)
 
     elif isinstance(expr, BigIntLiteral):
         if isinstance(expr.expr, int):
-            return f'{expr.expr}b'
+            return prio, f'{expr.expr}b'
         else:
-            return f'{ee_pexpr(expr.expr)}.as_big_int()'
+            return prio, f'{ee_pexpr(prio, expr.expr)}.as_big_int()'
     elif isinstance(expr, RefCategories):
         args = [
-            '{}={}'.format(name, ee(value))
+            '{}={}'.format(name, ee_prio(P.lowest, value))
             for name, value in sorted(expr.cat_map.items())
         ]
         if expr.default:
             args.append("_=true")
-        return 'RefCategories({})'.format(', '.join(args))
+        return prio, 'RefCategories({})'.format(', '.join(args))
 
     elif isinstance(expr, Predicate):
-        return "%predicate({})".format(", ".join(keep([
+        return prio, "%predicate({})".format(", ".join(keep([
             fqn(expr.pred_property),
-            ee(expr.exprs[0]),
+            ee_prio(P.lowest, expr.exprs[0]),
             (
                 ""
                 if expr.pred_error_location is None else
-                "error_location={}".format(ee(expr.pred_error_location))
+                "error_location={}".format(
+                    ee_prio(P.lowest, expr.pred_error_location)
+                )
             ),
-        ] + [ee(e) for e in expr.exprs[1:]])))
+        ] + [ee_prio(P.lowest, e) for e in expr.exprs[1:]])))
 
     elif is_a("domain"):
-        return "%domain({}, {})".format(ee(expr.expr_0), ee(expr.expr_1))
+        return prio, "%domain({}, {})".format(
+            ee_prio(P.lowest, expr.expr_0),
+            ee_prio(P.lowest, expr.expr_1),
+        )
 
     elif isinstance(expr, Bind):
-        return "%eq({})".format(", ".join(keep([
-            ee(expr.from_expr), ee(expr.to_expr),
+        return prio, "%eq({})".format(", ".join(keep([
+            ee_prio(P.lowest, expr.from_expr), ee_prio(P.lowest, expr.to_expr),
             "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else "",
-            "logic_ctx={}".format(ee(expr.logic_ctx)) if expr.logic_ctx else "",
+            "logic_ctx={}".format(ee_prio(P.lowest, expr.logic_ctx)) if expr.logic_ctx else "",
         ])))
 
     elif isinstance(expr, NPropagate):
-        return "%propagate({})".format(", ".join(keep([
-            ee(expr.dest_var),
+        return prio, "%propagate({})".format(", ".join(keep([
+            ee_prio(P.lowest, expr.dest_var),
             fqn(expr.comb_prop),
-            "logic_ctx={}".format(ee(expr.logic_ctx)) if expr.logic_ctx else "",
-        ] + [ee(v) for v in expr.arg_vars])))
+            "logic_ctx={}".format(ee_prio(P.lowest, expr.logic_ctx))
+            if expr.logic_ctx else "",
+        ] + [ee_prio(P.lowest, v) for v in expr.arg_vars])))
 
     elif isinstance(expr, DynamicLexicalEnv):
-        return "dynamic_lexical_env({})".format(", ".join(keep([
+        return prio, "dynamic_lexical_env({})".format(", ".join(keep([
             fqn(expr.assocs_getter),
             f"assoc_resolver={fqn(expr.assoc_resolver)}"
             if expr.assoc_resolver else '',
-            "transitive_parent={}".format(ee(expr.transitive_parent))
+            "transitive_parent={}".format(ee_prio(P.lowest, expr.transitive_parent))
             if not expr.transitive_parent else '',
         ])))
 
     elif is_a("to_symbol"):
-        return "{}.to_symbol".format(ee(expr.expr_0))
+        return prio, "{}.to_symbol".format(ee(expr.expr_0))
 
     elif isinstance(expr, Join):
-        return "{}.join({})".format(ee(expr.separator), ee(expr.strings))
+        return prio, "{}.join({})".format(
+            ee(expr.separator), ee_prio(P.lowest, expr.strings)
+        )
 
     elif isinstance(expr, UnaryNeg):
-        return f"-{ee(expr.expr)}"
+        prio = PrioInfo(P.unop)
+        return prio, f"-{ee(expr.expr)}"
 
     else:
         # raise NotImplementedError(type(expr))
-        return repr(expr)
+        return prio, repr(expr)
 
 
 def emit_doc(doc):
@@ -1521,7 +1618,7 @@ def emit_prop(prop, walker):
             vars.append(
                 name
                 if val is None else
-                "{}={}".format(name, emit_expr(val))
+                "{}={}".format(name, emit_expr(P.lowest, val))
             )
         quals += "@with_dynvars({}) ".format(", ".join(vars))
 
@@ -1533,7 +1630,9 @@ def emit_prop(prop, walker):
         arg_text = "@ignored " if arg.var._ignored else ""
         arg_text += f"{var_name(arg)}: {type_name(arg.type)}"
         if arg.abstract_default_value:
-            arg_text += " = {}".format(emit_expr(arg.abstract_default_value))
+            arg_text += " = {}".format(
+                emit_expr(P.lowest, arg.abstract_default_value)
+            )
         args.append(arg_text)
 
     doc = prop.doc
@@ -1561,7 +1660,8 @@ def emit_prop(prop, walker):
         )
     elif prop_for_walker.expr is not None:
         with walker.property(prop_for_walker):
-            res += " = $sl{}".format(emit_expr(prop_for_walker.expr,
+            res += " = $sl{}".format(emit_expr(P.lowest,
+                                               prop_for_walker.expr,
                                                walker=walker))
 
     return res
@@ -1592,7 +1692,9 @@ def emit_field(field):
             isinstance(field, UserField)
             and field.abstract_default_value is not None
         ):
-            result += " = {}".format(emit_expr(field.abstract_default_value))
+            result += " = {}".format(
+                emit_expr(P.lowest, field.abstract_default_value)
+            )
         return result
     else:
         raise NotImplementedError()
@@ -1812,7 +1914,7 @@ def emit_env_spec(node_type, walker):
     import langkit.expressions as E
 
     def ee(expr):
-        return emit_expr(expr, walker=walker)
+        return emit_expr(P.lowest, expr, walker=walker)
 
     def emit_action(action):
         if isinstance(action, envs.AddEnv):

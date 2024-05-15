@@ -28,7 +28,7 @@ grammar foo_grammar {
             # it's not, add to the parents' env), and when or_current=True is
             # passed or not (current = Self's env).
             {
-                val name = if node.has_kw(s"null_name") then null[Symbol] else (node.dest_scope.symbol);
+                val name = if node.has_kw(s"null_name") then null[Symbol] else node.dest_scope.symbol;
 
                 if node.has_kw(s"or_current") then name.do(
                     (non_null_name) => DesignatedEnv(

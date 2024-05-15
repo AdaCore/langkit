@@ -65,11 +65,9 @@ class Call: Resolvable {
     @parse_field second_arg: Expr
 
     fun resolve(): SolverResult = {
-        val eq = self.first_arg.xref_equation() and self.second_arg.xref_equation() and (
-            node.children_env().get(node.name.symbol).logic_any(
-                (elem) => %eq(node.name.ref_var, elem) and elem.as[ProcDecl].call_equation(
-                    node.first_arg, node.second_arg, ctx=LogicContext(ref_node=self.name, decl_node=elem)
-                )
+        val eq = self.first_arg.xref_equation() and self.second_arg.xref_equation() and node.children_env().get(node.name.symbol).logic_any(
+            (elem) => %eq(node.name.ref_var, elem) and elem.as[ProcDecl].call_equation(
+                node.first_arg, node.second_arg, ctx=LogicContext(ref_node=self.name, decl_node=elem)
             )
         );
 
@@ -97,8 +95,8 @@ class Identifier: FooNode implements TokenNode {
     ref_var: LogicVar
 
     fun designated_type(): Entity[TypeDecl] =
-    if (node.symbol == s"number") then node.unit().root.number_type().as_bare_entity
-    elif (node.symbol == s"string") then node.unit().root.str_type().as_bare_entity
+    if node.symbol == s"number" then node.unit().root.number_type().as_bare_entity
+    elif node.symbol == s"string" then node.unit().root.str_type().as_bare_entity
     else null[Entity[TypeDecl]]
 
     fun xref_equation(ctx: LogicContext): Equation =

@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node[FooNode] {
     @export fun p(): Entity[FooNode] = (
-        if (node is Example) then node else null[Example]
+        if node is Example then node else null[Example]
     ).as[FooNode].to_entity()
 
     fun to_entity(): Entity[FooNode] = node.as_bare_entity

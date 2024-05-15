@@ -20,9 +20,6 @@ class Example: FooNode {
 
     @export @memoized fun prop3(): Bool = node.raise_error(false)
 
-    fun raise_error(prop_error: Bool): Bool = if prop_error then (
-        raise[Bool] PropertyError("This is a Property_Error")
-    ) else (
-        raise[Bool] PreconditionFailure("This is a Precondition_Failure")
-    )
+    fun raise_error(prop_error: Bool): Bool =
+    if prop_error then raise[Bool] PropertyError("This is a Property_Error") else raise[Bool] PreconditionFailure("This is a Precondition_Failure")
 }

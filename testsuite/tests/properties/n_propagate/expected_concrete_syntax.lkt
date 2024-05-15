@@ -22,8 +22,6 @@ class Plus: FooNode {
     {
         val eq = %all([%propagate(node.v, Literal.combiner, node.lhs.v, node.rhs.v), %eq(node.lhs.v, lhs), %eq(node.rhs.v, rhs)]);
 
-        if eq.solve() then node.v.get_value() else (
-            raise[Entity[FooNode]] PropertyError("unreachable")
-        )
+        if eq.solve() then node.v.get_value() else raise[Entity[FooNode]] PropertyError("unreachable")
     }
 }
