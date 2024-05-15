@@ -256,7 +256,7 @@ package Langkit_Support.Generic_API.Analysis is
    --  such child.
 
    function Children (Self : Lk_Node) return Lk_Node_Array;
-   --  Return the number of children in ``Node``
+   --  Return the children in ``Node``
 
    function Next_Sibling (Self : Lk_Node'Class) return Lk_Node;
    --  Return the ``Node``'s next sibling, or null if there is no such sibling
