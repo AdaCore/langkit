@@ -1601,6 +1601,14 @@ class GrammarOpt(GrammarExpr):
     expr = Field(type=T.GrammarExpr)
 
 
+class GrammarOptError(GrammarExpr):
+    """
+    Grammar expression for an optional parsing result. Missing result creates
+    an error, but parsing continues.
+    """
+    expr = Field(type=T.GrammarExpr)
+
+
 class GrammarStopCut(GrammarExpr):
     """
     Grammar expression for a StopCut.
@@ -1611,6 +1619,14 @@ class GrammarStopCut(GrammarExpr):
 class GrammarOptGroup(GrammarExpr):
     """
     Grammar expression for a group of optional parsing results.
+    """
+    expr = Field(type=T.GrammarExpr.list)
+
+
+class GrammarOptErrorGroup(GrammarExpr):
+    """
+    Grammar expression for a group of optional parsing results. Failure to
+    parse an optional result creates an error, but parsing continues.
     """
     expr = Field(type=T.GrammarExpr.list)
 
@@ -4006,6 +4022,7 @@ lkt_grammar.add_rules(
         G.grammar_stopcut,
         G.parse_node_expr,
         G.grammar_opt,
+        G.grammar_opt_error,
         G.grammar_or_expr,
         G.grammar_rule_ref,
         G.grammar_discard_expr,
@@ -4037,6 +4054,13 @@ lkt_grammar.add_rules(
     grammar_opt=GOr(
         GrammarOpt("?", G.grammar_expr),
         GrammarOptGroup("?", "(", List(G.grammar_expr, empty_valid=True), ")"),
+    ),
+
+    grammar_opt_error=GOr(
+        GrammarOptError("!", G.grammar_expr),
+        GrammarOptErrorGroup(
+            "!", "(", List(G.grammar_expr, empty_valid=True), ")"
+        ),
     ),
 
     grammar_cut=GrammarCut("/"),

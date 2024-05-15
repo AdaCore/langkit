@@ -2125,6 +2125,13 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 return Opt(*[lower(subparser) for subparser in rule.f_expr],
                            location=loc)
 
+            elif isinstance(rule, L.GrammarOptError):
+                return Opt(lower(rule.f_expr), location=loc).error()
+
+            elif isinstance(rule, L.GrammarOptErrorGroup):
+                return Opt(*[lower(subparser) for subparser in rule.f_expr],
+                           location=loc).error()
+
             elif isinstance(rule, L.GrammarExprList):
                 return Pick(*[lower(subparser) for subparser in rule],
                             location=loc)
