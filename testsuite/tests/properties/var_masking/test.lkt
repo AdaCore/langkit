@@ -1,0 +1,21 @@
+# Check that parser gives precedence to the "in" operator over "and"
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+class FooNode implements Node[FooNode] {
+    @export fun p(): Bool = match node {
+        case e: Example => {
+            val e = e.parent;
+            e.is_null
+        }
+        case _ => false
+    }
+}
+
+class Example: FooNode implements TokenNode {
+}
