@@ -1341,8 +1341,7 @@ def emit_expr_prio(expr, **ctx):
 
     elif is_a("at"):
         # Recognize find
-        if (isinstance(expr.expr_0, Map) and expr.expr_0.kind == 'filter' and
-                ee(expr.expr_1) == "0"):
+        if expr._origin_composed_attr == "find":
             return prio, ee(expr.expr_0)
 
         return prio, "{}?[{}]".format(
