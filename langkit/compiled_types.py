@@ -513,6 +513,12 @@ class AbstractNodeData:
     def type(self, t: CompiledType) -> None:
         raise not_implemented_error(self, type(self).type)
 
+    def resolve_types(self) -> None:
+        """
+        Turn type references into ``CompiledType`` instances in this field.
+        """
+        raise not_implemented_error(self, type(self).resolve_types)
+
     @property
     def public_type(self) -> CompiledType:
         return self.type.public_type
@@ -2074,6 +2080,10 @@ class BaseField(AbstractNodeData):
         If this returns ``False``, evaluating the ``type`` field is illegal.
         """
         return self._type is not None
+
+    def resolve_types(self) -> None:
+        # The "type" property takes care of both resolution and substitution
+        _ = self.type
 
     @property
     def type(self) -> CompiledType:

@@ -34,6 +34,12 @@ expressions. The lowering of types goes as follows:
   This step creates the actual ``CompiledType`` instances as well as the
   ``AbstractNodeData`` ones.
 
+* [TYPES_RESOLUTION] Now that we have a ``CompiledType`` for all builtin types
+  and all types declared in the language spec, it is possible to resolve all
+  type references: we iterate on all user types to replace type references
+  (``TypeRepo.defer``) instances and replace them with the corresponding
+  ``CompiledType`` instances.
+
 * [EXPR_LOWERING] The arguments' default values and the bodies of all
   properties are lowered.
 
@@ -2410,24 +2416,27 @@ class LktTypesLoader:
                         f" {decl.p_decl_type_name}"
                     )
 
-        # If we manage to find a decl that qualifies for the root node type,
-        # register the automatic generic list type.
-        if root_node_decl is not None:
-            full_decl = cast(L.FullDecl, root_node_decl.parent)
-            annotations = parse_annotations(
-                self.ctx, NodeAnnotations, full_decl, self.root_scope
-            )
-            generic_list_type_name = (
-                annotations.generic_list_type
-                or f"{root_node_decl.f_syn_name.text}BaseList"
-            )
-            root_scope.mapping[generic_list_type_name] = Scope.BuiltinType(
-                generic_list_type_name,
-                TypeRepo.Defer(
-                    lambda: resolve_type(T.root_node.generic_list_type),
-                    "generic list type",
-                ),
-            )
+        # There is little point going further if we have not found the root
+        # node type.
+        if root_node_decl is None:
+            error("no node type declaration found")
+
+        # Register the automatic generic list type
+        full_decl = cast(L.FullDecl, root_node_decl.parent)
+        annotations = parse_annotations(
+            self.ctx, NodeAnnotations, full_decl, self.root_scope
+        )
+        generic_list_type_name = (
+            annotations.generic_list_type
+            or f"{root_node_decl.f_syn_name.text}BaseList"
+        )
+        root_scope.mapping[generic_list_type_name] = Scope.BuiltinType(
+            generic_list_type_name,
+            TypeRepo.Defer(
+                lambda: resolve_type(T.root_node.generic_list_type),
+                "generic list type",
+            ),
+        )
 
         # Make sure we have a Metadata type registered in the root scope so
         # that Lkt code can refer to it.
@@ -2469,14 +2478,29 @@ class LktTypesLoader:
             self.lower_type_decl(type_decl)
 
         # If user code does not define one, create a default Metadata struct
+        # and make it visible in the root scope. Otherwise, validate it.
         if CompiledTypeRepo.env_metadata is None:
             self.ctx.create_default_metadata()
+            root_scope.mapping["Metadata"] = builtin_type("Metadata")
+        else:
+            ctx.check_env_metadata(CompiledTypeRepo.env_metadata)
 
-        for entity in self.root_scope.mapping.items():
+        # Make sure entity types are created
+        entity_info_type = T.entity_info
+        assert isinstance(entity_info_type, CompiledType)
+        entity_type = T.entity
+        assert isinstance(entity_type, CompiledType)
+
+        #
+        # TYPES_RESOLUTION
+        #
+
+        # Resolve type references in all type fields
+        for entity in self.root_scope.mapping.values():
             if isinstance(entity, (Scope.BuiltinType, Scope.UserType)):
-                entity._type = resolve_type(entity.defer)
-                # TODO (eng/libadalang/langkit#728): resolve all deferred types
-                # (member types and argument types).
+                t = resolve_type(entity.defer)
+                for field in t._fields.values():
+                    field.resolve_types()
 
         #
         # EXPR_LOWERING
