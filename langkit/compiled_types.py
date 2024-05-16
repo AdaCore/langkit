@@ -3467,7 +3467,7 @@ class ASTNodeType(BaseStructType):
         # not play well with class method when we want the memoization to be
         # common to the whole class hierarchy.
         if not CompiledTypeRepo.entity_info:
-            CompiledTypeRepo.entity_info = StructType(
+            entity_info_type = StructType(
                 names.Name('Entity_Info'), None, None,
                 [
                     (names.Name('Md'), BuiltinField(
@@ -3483,6 +3483,8 @@ class ASTNodeType(BaseStructType):
                     ('from_rebound', BuiltinField(T.Bool, doc=""))
                 ],
             )
+            CompiledTypeRepo.entity_info = entity_info_type
+            CompiledTypeRepo.type_dict["EntityInfo"] = entity_info_type
         return CompiledTypeRepo.entity_info
 
     @property  # type: ignore
