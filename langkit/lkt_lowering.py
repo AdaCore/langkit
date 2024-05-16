@@ -3877,6 +3877,7 @@ class LktTypesLoader:
                 for v in expr.f_val_defs:
                     var: AbstractVariable
                     init_abstract_expr: L.Expr
+                    scope_var: Scope.UserValue
 
                     if isinstance(v, L.ValDecl):
                         # Create the AbstractVariable for this declaration
@@ -3899,10 +3900,7 @@ class LktTypesLoader:
                                 source_name=source_name,
                             )
                         init_abstract_expr = v.f_val
-
-                        # Make the declared value available to the inner
-                        # expression lowering.
-                        sub_env.add(Scope.LocalVariable(source_name, v, var))
+                        scope_var = Scope.LocalVariable(source_name, v, var)
 
                     elif isinstance(v, L.VarBind):
                         # Look for the corresponding dynamic variable, either
@@ -3921,10 +3919,7 @@ class LktTypesLoader:
 
                         var = entity.variable
                         init_abstract_expr = v.f_expr
-
-                        # Make the bound dynamic variable available to the
-                        # inner expression lowering.
-                        sub_env.add(Scope.BoundDynVar(v.f_name.text, v, var))
+                        scope_var = Scope.BoundDynVar(v.f_name.text, v, var)
 
                     else:
                         assert False, f'Unhandled def in BlockExpr: {v}'
@@ -3934,6 +3929,9 @@ class LktTypesLoader:
                         init_abstract_expr, sub_env, local_vars
                     )
 
+                    # Make the declared value/dynamic variable available to the
+                    # remaining expressions.
+                    sub_env.add(scope_var)
                     actions.append(
                         DeclAction(var, init_expr, Location.from_lkt_node(v))
                     )
