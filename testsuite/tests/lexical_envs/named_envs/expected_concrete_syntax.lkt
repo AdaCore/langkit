@@ -69,28 +69,27 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
     |" Return whether this node is in the top-level decl list.
     fun is_toplevel(): Bool =
-    (not (node.parent.is_null)) and (node.parent.parent.is_null)
+    not node.parent.is_null and node.parent.parent.is_null
 
     |" Return whether this node can define a named environment.
-    @memoized fun can_have_name(): Bool = if (
-        node is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls
-    ) then (
+    @memoized fun can_have_name(): Bool =
+    if node is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls then (
         # All nodes that can define a named environment are supposed to
         # live in lists, so use Self.parent.parent to get the node that
         # owns that list.
-        (node.parent is ASTList[FooNode, FooNode]) and (
-            (node.parent.parent.is_null) or node.parent.parent.can_have_name()
+        node.parent is ASTList[FooNode, FooNode] and (
+            node.parent.parent.is_null or node.parent.parent.can_have_name()
         )
     ) else false
 
     |" Assuming this node can define a named environment (see
     |" ``can_have_name``), return its fully qualified namem.
     fun full_name(): String = node.name_parent().do(
-        (np) => (np.full_name() & ".") & node.self_name().as[Identifier].base_name(), default_val=node.self_name().scope_name()
+        (np) => np.full_name() & "." & node.self_name().as[Identifier].base_name(), default_val=node.self_name().scope_name()
     )
 
     fun suffixed_full_name(suffix: String): String =
-    node.full_name().do((n) => (n & ".") & suffix)
+    node.full_name().do((n) => n & "." & suffix)
 
     |" Assuming this node can define a named environment, return the syntactic
     |" parent node that defines the parent scope for Self. If there is no such
@@ -98,25 +97,17 @@ grammar foo_grammar {
     fun name_parent(): FooNode = if (
         (
             (
-                (
-                    (node.parent.is_null) or (
-                        not (node.parent is ASTList[FooNode, FooNode])
-                    )
-                ) or (node.parent.parent.is_null)
-            ) or (
-                not (node.parent.parent is DeclarativePart)
-            )
-        ) or (node.parent.parent.parent.is_null)
-    ) then null[FooNode] else # All nodes that can define a named environment are supposed to
+                node.parent.is_null or not node.parent is ASTList[FooNode, FooNode]
+            ) or node.parent.parent.is_null
+        ) or not node.parent.parent is DeclarativePart
+    ) or node.parent.parent.parent.is_null then null[FooNode] else # All nodes that can define a named environment are supposed to
     # live in lists (Self.parent is a list), so Self.parent.parent is
     # supposed to be a declarative part, and finally Self.parent.parent
     # gets the node that owns that declarative part.
     {
         val owner = node.parent.parent.parent;
 
-        if (
-            owner is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls | PublicPart | PrivatePart
-        ) then match owner {
+        if owner is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls | PublicPart | PrivatePart then match owner {
             case pp: PublicPart => pp.parent
             case pp: PrivatePart => pp.parent
             case n => n
@@ -166,11 +157,7 @@ class SubpBodyDecls: DeclarativePart {
         # bodies (B) can use this environment as their initial env. Note that
         # this case is legal only when that (A) is the syntactic root.
         add_env(
-            names=if (
-                (node.parent is SubpBody) and (node.parent.parent.is_null)
-            ) then (
-                [node.parent.as[SubpBody].name.scope_name().to_symbol]
-            ) else null[Array[Symbol]]
+            names=if node.parent is SubpBody and node.parent.parent.is_null then [node.parent.as[SubpBody].name.scope_name().to_symbol] else null[Array[Symbol]]
         )
     }
 }
@@ -199,7 +186,7 @@ class IncompleteTypeDecl: FooNode {
     |" ``prefix`` is the implicit prefix for that name.
     fun scope_name(): String = match node {
         case id: Identifier => id.text()
-        case dn: DottedName => (dn.prefix.scope_name() & ".") & dn.suffix.text()
+        case dn: DottedName => dn.prefix.scope_name() & "." & dn.suffix.text()
     }
 
     |" Absolute name of the scope that defines this name, assuming that
@@ -246,7 +233,7 @@ class PackageBody: FooNode {
     fun body_decl_scope(): LexicalEnv[FooNode] = {
         val pkg_decl = node.lookup_decl_part();
 
-        if (pkg_decl.private_part.is_null) then pkg_decl.children_env() else pkg_decl.private_part.children_env()
+        if pkg_decl.private_part.is_null then pkg_decl.children_env() else pkg_decl.private_part.children_env()
     }
 
     |" Assuming this PackageBody is not in the top-level list, return the
@@ -301,10 +288,8 @@ class PackageDecl: FooNode {
     # If there is a private part, that's all we need. Otherwise, register
     # this environment with the name of the private part as well, so that
     # package bodies can assume there is always a private part.
-    if (node.full_name() == "") then null[Array[Symbol]] else (
-        if (node.private_part.is_null) then (
-            [node.full_name(), node.full_name() & ".__privatepart"]
-        ) else ([node.full_name()])
+    if node.full_name() == "" then null[Array[Symbol]] else (
+        if node.private_part.is_null then [node.full_name(), node.full_name() & ".__privatepart"] else [node.full_name()]
     ).map((s) => s.to_symbol)
 
     |" Return the PackageBody node corresponding to this PackageDecl.

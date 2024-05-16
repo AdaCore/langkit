@@ -12,7 +12,7 @@ class Example: FooNode {
     @export @memoized fun get_array(): Array[Int] = [1, 2]
 
     @export @memoized fun test_prop(numbers: Array[Int], c: String): Int =
-    if (c == "one") then numbers?[0] else numbers?[1]
+    if c == "one" then numbers?[0] else numbers?[1]
 
     @export @memoized fun test_prop2(numbers: Array[Entity[FooNode]]): Bool =
     numbers.length() == 0

@@ -30,7 +30,7 @@ class Scope: DefNode {
         add_to_env_kv(node.name.symbol, node)
         add_env()
         do(
-            if node.error.as_bool() then (raise[FooNode] PropertyError()) else null[FooNode]
+            if node.error.as_bool() then raise[FooNode] PropertyError() else null[FooNode]
         )
     }
 }
