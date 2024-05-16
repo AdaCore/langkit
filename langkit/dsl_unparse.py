@@ -537,13 +537,14 @@ def emit_rule(rule, top_level=False):
     elif isinstance(rule, _Row):
         return " $sl".join(emit_rule(r) for r in rule.parsers)
     elif isinstance(rule, Opt):
+        punctuation = "!" if rule._is_error else "?"
         if rule._booleanize:
             return '{}({})'.format(node_name(rule.booleanized_type),
                                    emit_rule(rule.parser))
         elif isinstance(rule.parser, _Row):
-            return "?({})".format(emit_rule(rule.parser))
+            return "{}({})".format(punctuation, emit_rule(rule.parser))
         else:
-            return "?{}".format(emit_rule(rule.parser))
+            return "{}{}".format(punctuation, emit_rule(rule.parser))
     elif isinstance(rule, _Extract):
         return 'pick({})'.format(emit_rule(rule.parser))
     elif isinstance(rule, List):
