@@ -13,6 +13,7 @@ if u.diagnostics:
     sys.exit(1)
 
 print(f".p_check_big_literal = {u.root.p_check_big_literal}")
+print(f".p_check_to_big_int(12) = {u.root.p_check_to_big_int(12)}")
 
 for decl in u.root:
     expr = decl.f_expr_tree

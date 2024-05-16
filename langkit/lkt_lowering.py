@@ -3488,6 +3488,10 @@ class LktTypesLoader:
             empty_signature.match(self.ctx, call_expr)
             result = getattr_prefix.as_array
 
+        elif method_name == "as_big_int":
+            empty_signature.match(self.ctx, call_expr)
+            result = E.BigIntLiteral(getattr_prefix)
+
         elif method_name == "as_int":
             empty_signature.match(self.ctx, call_expr)
             result = getattr_prefix.as_int

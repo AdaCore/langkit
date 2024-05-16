@@ -26,6 +26,8 @@ grammar foo_grammar {
     @export fun check_big_literal(): BigInt =
     99999999999999999999999999999999999999999999b
 
+    @export fun check_to_big_int(i: Int): BigInt = i.as_big_int()
+
     fun to_int(b: Bool): BigInt = if b then 1b else 0b
 }
 

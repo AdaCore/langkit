@@ -21,6 +21,10 @@ class FooNode(ASTNode):
     def check_big_literal():
         return BigIntLiteral(99999999999999999999999999999999999999999999)
 
+    @langkit_property(public=True)
+    def check_to_big_int(i=T.Int):
+        return BigIntLiteral(i)
+
     @langkit_property()
     def to_int(b=T.Bool):
         return If(b, BigIntLiteral(1), BigIntLiteral(0))
