@@ -1,0 +1,19 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @export @memoized fun p1(): Symbol = s"foo"
+
+    @export @memoized @call_memoizable fun p2(): Symbol = s"foo"
+
+    @export @call_non_memoizable_because("bar") fun p3(): Symbol = s"foo"
+
+    @export @lazy lf1: Symbol = s"foo"
+}
+
+class Example: FooNode implements TokenNode {
+}

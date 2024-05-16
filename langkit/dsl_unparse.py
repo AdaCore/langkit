@@ -1497,10 +1497,17 @@ def emit_prop(prop, walker):
     elif not prop.constructed_expr and not prop.abstract_runtime_check:
         quals += "@abstract "
 
-    if prop.memoized:
-        quals += "@memoized "
-    elif prop.lazy_field:
+    if prop.lazy_field:
         quals += "@lazy "
+    else:
+        if prop.memoized:
+            quals += "@memoized "
+        if prop.call_memoizable:
+            quals += "@call_memoizable "
+        if prop._call_non_memoizable_because:
+            quals += "@call_non_memoizable_because({}) ".format(
+                json.dumps(prop._call_non_memoizable_because)
+            )
 
     if prop.activate_tracing:
         quals += "@trace "
