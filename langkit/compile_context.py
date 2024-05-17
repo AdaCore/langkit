@@ -2324,10 +2324,10 @@ class CompileCtx:
             ASTNodePass('expose public structs and arrays types in APIs',
                         CompileCtx.expose_public_api_types,
                         auto_context=False),
-            GlobalPass('check memoized properties',
-                       CompileCtx.check_memoized),
             GlobalPass('lower properties dispatching',
                        CompileCtx.lower_properties_dispatching),
+            GlobalPass('check memoized properties',
+                       CompileCtx.check_memoized),
             GlobalPass('compute AST node constants',
                        CompileCtx.compute_astnode_constants),
 
@@ -2901,6 +2901,7 @@ class CompileCtx:
                         uses_entity_info=prop.uses_entity_info,
                         uses_envs=prop.uses_envs,
                         optional_entity_info=prop.optional_entity_info,
+                        memoized=prop.memoized,
                         lazy_field=prop.lazy_field,
                     )
                     static_props[0] = root_static
@@ -2947,6 +2948,12 @@ class CompileCtx:
                     root_static.location = prop.location
                     root_static.is_dispatching_root = True
                     prop.is_artificial_dispatcher = True
+
+                    # Dispatchers themselves are never memoized: if the
+                    # annotation was present on the original property, we
+                    # instead propagate it to the actual root property during
+                    # the above construction of "root_static".
+                    prop.memoized = False
 
                     # Rewrite overriding properties so that Super() calls that
                     # target the root property (which is now a dispatcher) are

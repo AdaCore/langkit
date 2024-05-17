@@ -37,9 +37,7 @@ is
       ${gdb_bind('self', 'Self')}
    % endif
 
-   ## Dispatchers must not memoize because it will be done at the static
-   ## property level: we do not want to do it twice.
-   <% memoized = property.memoized and not property.is_dispatcher %>
+   <% memoized = property.memoized %>
 
    % for arg in property.arguments:
    ${gdb_bind(arg.name.lower, arg.name.camel_with_underscores)}
