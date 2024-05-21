@@ -391,7 +391,7 @@ package Langkit_Support.Generic_API.Analysis is
    --  belong to the same analysis unit.
 
    function Is_Trivia (Self : Lk_Token) return Boolean;
-   --  Return whether this token is a trivia. If it's not, it's a regular token
+   --  Return whether this token is not null and is a trivia
 
    function Index (Self : Lk_Token) return Token_Index;
    --  One-based index for this token/trivia. Tokens and trivias get their own

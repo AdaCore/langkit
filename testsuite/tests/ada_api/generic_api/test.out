@@ -226,6 +226,7 @@ Last_Token.Next -> <No Token>
 No_Lk_Token.Previous -> <No Token>
 First_Token.Previous -> <No Token>
 Last_Token.Previous -> <Token Kind=Whitespace Text="\x0a">
+No_Token.Is_Trivia -> FALSE
 First_Token.Is_Trivia -> FALSE
 Last_Token.Is_Trivia -> FALSE
 Last_Token.Previous.Is_Trivia -> TRUE

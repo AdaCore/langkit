@@ -1356,7 +1356,6 @@ package body Langkit_Support.Generic_API.Analysis is
    function Is_Trivia (Self : Lk_Token) return Boolean is
    begin
       Check_Safety_Net (Self);
-      Reject_Null_Token (Self);
       return Self.Index.Trivia /= No_Token_Index;
    end Is_Trivia;
 

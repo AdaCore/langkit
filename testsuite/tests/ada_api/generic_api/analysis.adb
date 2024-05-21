@@ -427,6 +427,7 @@ begin
    Put_Line ("No_Lk_Token.Previous -> " & No_Lk_Token.Previous.Image);
    Put_Line ("First_Token.Previous -> " & U.First_Token.Previous.Image);
    Put_Line ("Last_Token.Previous -> " & U.Last_Token.Previous.Image);
+   Put_Line ("No_Token.Is_Trivia -> " & No_Lk_Token.Is_Trivia'Image);
    Put_Line ("First_Token.Is_Trivia -> " & U.First_Token.Is_Trivia'Image);
    Put_Line ("Last_Token.Is_Trivia -> " & U.Last_Token.Is_Trivia'Image);
    Put_Line ("Last_Token.Previous.Is_Trivia -> "
