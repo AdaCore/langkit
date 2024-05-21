@@ -13,7 +13,9 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    pass
+    @langkit_property(return_type=T.Bool, public=True)
+    def is_referenced(unit=T.AnalysisUnit):
+        return unit.is_referenced_from(Self.unit)
 
 
 @abstract
