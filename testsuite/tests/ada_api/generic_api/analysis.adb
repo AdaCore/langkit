@@ -29,6 +29,8 @@ procedure Analysis is
    Ctx : Lk_Context;
    U   : Lk_Unit;
    N   : Lk_Node;
+
+   Comment_Tok : Lk_Token;
 begin
    New_Line;
 
@@ -424,9 +426,12 @@ begin
    end;
    New_Line;
 
+   Comment_Tok := U.Last_Token.Previous.Previous;
+
    Put_Line ("No_Lk_Token.Image -> " & No_Lk_Token.Image);
    Put_Line ("First_Token.Image -> " & U.First_Token.Image);
    Put_Line ("Last_Token.Image -> " & U.Last_Token.Image);
+   Put_Line ("Comment_Tok.Image -> " & Comment_Tok.Image);
    Put_Line ("Last_Token.Previous.Image -> " & U.Last_Token.Previous.Image);
    New_Line;
 
@@ -463,6 +468,12 @@ begin
 
    Put_Line ("First_Token.Index ->" & U.First_Token.Index'Image);
    Put_Line ("Last_Token.Index ->" & U.Last_Token.Index'Image);
+   New_Line;
+
+   Put_Line ("No_Token.Is_Comment -> " & No_Lk_Token.Is_Comment'Image);
+   Put_Line ("First_Token.Is_Comment -> " & U.First_Token.Is_Comment'Image);
+   Put_Line ("Last_Token.Is_Comment -> " & U.Last_Token.Is_Comment'Image);
+   Put_Line ("Comment_Tok.Is_Comment -> " & Comment_Tok.Is_Comment'Image);
    New_Line;
 
    Put_Line ("Testing ordering predicate for various cases:");

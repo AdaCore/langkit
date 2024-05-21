@@ -390,6 +390,11 @@ package Langkit_Support.Generic_API.Analysis is
    --  This raises a ``Precondition_Failure`` if ``First`` and ``Last`` don't
    --  belong to the same analysis unit.
 
+   function Is_Comment (Self : Lk_Token) return Boolean;
+   --  Return whether unparsing must treat the given token kind as a comment,
+   --  i.e. a trivia to preserve in unparsed sources. Return False if passed a
+   --  null token.
+
    function Is_Trivia (Self : Lk_Token) return Boolean;
    --  Return whether this token is not null and is a trivia
 

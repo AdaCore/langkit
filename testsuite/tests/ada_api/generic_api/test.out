@@ -222,6 +222,7 @@ No_Lk_Token.Kind -> Got a Precondition_Failure exception: null token
 No_Lk_Token.Image -> <No Token>
 First_Token.Image -> <Token Kind=Example Text="example">
 Last_Token.Image -> <Token Kind=Termination Text="">
+Comment_Tok.Image -> <Token Kind=Comment Text="# Comment">
 Last_Token.Previous.Image -> <Token Kind=Whitespace Text="\x0a">
 
 First_Token.Text -> "example"
@@ -243,6 +244,11 @@ Last_Token.Previous.Is_Trivia -> TRUE
 
 First_Token.Index -> 1
 Last_Token.Index -> 15
+
+No_Token.Is_Comment -> FALSE
+First_Token.Is_Comment -> FALSE
+Last_Token.Is_Comment -> FALSE
+Comment_Tok.Is_Comment -> TRUE
 
 Testing ordering predicate for various cases:
 First_Token < Last_Token: -> TRUE
