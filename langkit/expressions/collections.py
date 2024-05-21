@@ -336,6 +336,33 @@ class CollectionExpression(AbstractExpression):
         """
         assert self.element_var is not None
 
+        @dataclass
+        class AbstractInitializedVar:
+            """
+            Variable associated to an optional initialization expression.
+
+            It is only once local variables for them are created (call to
+            .create_local_variable below) that we can construct them (turn
+            AbstractVariable instances into VariableExpr ones), hence this
+            intermediate class before InitializedVar.
+            """
+            var: AbstractVariable
+            init_expr_constructor: (
+                Callable[[], ResolvedExpression] | None
+            ) = None
+
+            def construct(self) -> InitializedVar:
+                return InitializedVar(
+                    construct_var(self.var),
+                    (
+                        None
+                        if self.init_expr_constructor is None else
+                        self.init_expr_constructor()
+                    ),
+                )
+
+        iter_vars: List[AbstractInitializedVar] = []
+
         current_scope = PropertyDef.get_scope()
 
         # Because of the discrepancy between the storage type in list nodes
@@ -365,38 +392,29 @@ class CollectionExpression(AbstractExpression):
             )
         )
 
-        # Now that potential entity types are unwrapped, we can look for its
-        # element type.
+        # Now that potential entity types are unwrapped, we can look for the
+        # collection element type.
         elt_type = collection_expr.type.element_type
         if with_entities:
             elt_type = elt_type.entity
-        self.element_var.set_type(elt_type)
-        user_element_var = construct(self.element_var)
-        assert isinstance(user_element_var, VariableExpr)
-
-        # List of element variables, and the associated initialization
-        # expressions (when applicable).
-        #
-        # Start with the only element variable that exists at this point: the
-        # one that the user code for each iteration uses directly. When
-        # relevant, each step in the code below creates a new variable N and
-        # initialize variable N-1 from it.
-        element_vars: List[InitializedVar] = [InitializedVar(user_element_var)]
+        user_element_var = self.element_var
+        user_element_var.set_type(elt_type)
+        iter_vars.append(AbstractInitializedVar(user_element_var))
 
         # Node lists contain bare nodes: if the user code deals with entities,
         # create a variable to hold a bare node and initialize the user
         # variable using it.
         if with_entities:
             assert self.element_var is not None and self.element_var._name
-            entity_var = element_vars[-1]
+            entity_var = iter_vars[-1]
             node_var = AbstractVariable(
                 names.Name('Bare') + self.element_var._name,
                 type=elt_type.element_type
             )
-            entity_var.init_expr = make_as_entity(
+            entity_var.init_expr_constructor = lambda: make_as_entity(
                 construct(node_var), entity_info=entity_info
             )
-            element_vars.append(InitializedVar(construct_var(node_var)))
+            iter_vars.append(AbstractInitializedVar(node_var))
 
         # Node lists contain root nodes: if the user code deals with non-root
         # nodes, create a variable to hold the root bare node and initialize
@@ -406,47 +424,47 @@ class CollectionExpression(AbstractExpression):
             and not collection_expr.type.is_root_node
         ):
             assert self.element_var._name is not None
-            typed_elt_var = element_vars[-1]
+            typed_elt_var = iter_vars[-1]
             untyped_elt_var = AbstractVariable(
                 names.Name('Untyped') + self.element_var._name,
                 type=get_context().root_grammar_class
             )
-            typed_elt_var.init_expr = UncheckedCastExpr(
+            typed_elt_var.init_expr_constructor = lambda: UncheckedCastExpr(
                 construct(untyped_elt_var), typed_elt_var.var.type
             )
-            element_vars.append(InitializedVar(construct_var(untyped_elt_var)))
+            iter_vars.append(AbstractInitializedVar(untyped_elt_var))
 
         # Keep track of the ultimate "codegen" element variable. Unlike all
         # other iteration variable, it is the only one that will be defined by
         # the "for" loop in Ada (the other ones must be declared as regular
         # local variables).
-        codegen_element_var = element_vars[-1].var
+        codegen_element_var = iter_vars[-1].var
 
-        # Create a scope to contain the code that runs during an iteration and
-        # lower the iteration expression.
+        # If requested, create the index variable
+        if self.index_var:
+            iter_vars.append(AbstractInitializedVar(self.index_var))
+
+        # Create a scope to contain the code that runs during an iteration,
+        # create the necessary local variables and lower the iteration
+        # expression.
         with current_scope.new_child() as inner_scope:
+            for v in iter_vars:
+                if v.var is not codegen_element_var:
+                    v.var.create_local_variable(inner_scope)
             inner_expr = construct(self.expr)
 
-        # Build the list of all iteration variables
-        iter_vars = list(element_vars)
-        index_var = None
-        if self.index_var:
-            index_var = construct_var(self.index_var)
-            iter_vars.append(InitializedVar(index_var))
-
-        # Create local variables for all iteration variables that need it
-        for v in iter_vars:
-            if v.var != codegen_element_var:
-                v.var.abstract_var.create_local_variable(inner_scope)
-
         return self.ConstructCommonResult(
-            collection_expr,
-            codegen_element_var,
-            user_element_var,
-            index_var,
-            iter_vars,
-            inner_expr,
-            inner_scope,
+            collection_expr=collection_expr,
+            codegen_element_var=construct_var(codegen_element_var),
+            user_element_var=construct_var(user_element_var),
+            index_var=(
+                None
+                if self.index_var is None else
+                construct_var(self.index_var)
+            ),
+            iter_vars=[v.construct() for v in iter_vars],
+            inner_expr=inner_expr,
+            inner_scope=inner_scope,
         )
 
 
