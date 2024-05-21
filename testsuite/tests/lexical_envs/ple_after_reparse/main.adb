@@ -89,5 +89,22 @@ begin
    Reparse (Unit_C);
    Resolve;
 
+   Put_Line ("Checking that referenced units are cleared after reparse...");
+
+   if not Unit_A.Root.P_Is_Referenced (Unit_B) then
+      Put_Line ("Unit_A should reference Unit_B before reparse!");
+      raise Program_Error;
+   end if;
+
+   declare
+      Dummy : constant Analysis_Unit := Get_From_Buffer
+        (Ctx, Filename => "a.txt", Buffer => "a { }");
+   begin
+      if Unit_A.Root.P_Is_Referenced (Unit_B) then
+         Put_Line ("Unit_A should not reference Unit_B after reparse!");
+         raise Program_Error;
+      end if;
+   end;
+
    Put_Line ("main.adb: Done.");
 end Main;

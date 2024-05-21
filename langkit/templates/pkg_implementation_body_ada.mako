@@ -5246,6 +5246,10 @@ package body ${ada_lib_name}.Implementation is
       --  pool.
       Destroy_Rebindings (Unit.Rebindings'Access);
 
+      --  Clear the set of units referenced from that one, as it may no longer
+      --  hold in the reparsed unit.
+      Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
+
       --  Destroy the old AST node and replace it by the new one
       if Unit.Ast_Root /= null then
          Destroy (Unit.Ast_Root);

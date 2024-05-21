@@ -54,5 +54,10 @@ Starting resolution...
    <Var a.txt:5:4-5:13> -> <Var b.txt:2:4-2:10>
    <Var a.txt:6:4-6:15> -> <Var b-c.txt:2:4-2:10>
 
+Checking that referenced units are cleared after reparse...
+[LIBFOOLANG.MAIN_TRACE] Parsing unit a.txt
+[LIBFOOLANG.MAIN_TRACE] Updating lexical envs for a.txt after reparse
+   [LIBFOOLANG.MAIN_TRACE] Populating lexical envs for unit: a.txt
+   [LIBFOOLANG.MAIN_TRACE] Finished populating lexical envs for unit: a.txt
 main.adb: Done.
 Done
