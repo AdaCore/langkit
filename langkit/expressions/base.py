@@ -5794,7 +5794,7 @@ class CallExpr(BasicExpr):
                 '3-shadow-args': self.shadow_args}
 
     def __repr__(self):
-        return '<CallExpr {}>'.format(self.name.camel_with_underscores)
+        return f"<CallExpr {self.name}>"
 
 
 class NullCheckExpr(ResolvedExpression):
