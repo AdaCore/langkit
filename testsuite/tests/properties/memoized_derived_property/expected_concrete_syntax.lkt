@@ -1,0 +1,25 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Block(Example1("example") Example2("example"))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @trace fun identity(x: Int): Int = x
+
+    @export @memoized fun foo(x: Int): Int = node.identity(x)
+}
+
+class Block: FooNode {
+    @parse_field example1: Example1
+    @parse_field example2: Example2
+}
+
+class Example1: FooNode {
+    fun foo(x: Int): Int = node.identity(x) + 1
+}
+
+class Example2: FooNode {
+    @memoized fun foo(x: Int): Int = node.identity(x) + 2
+}
