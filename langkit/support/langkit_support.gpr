@@ -105,4 +105,13 @@ library project Langkit_Support is
       end case;
    end Compiler;
 
+   package Binder is
+      case Build_Mode is
+         when "dev" =>
+            for Switches ("Ada") use ("-Es");
+         when "prod" | "prof" =>
+            for Switches ("Ada") use ("-E");
+      end case;
+   end Binder;
+
 end Langkit_Support;

@@ -50,6 +50,10 @@ project Gen is
         for Default_Switches ("C") use
           ("-g", "-O0", "-Wall", "-W", "-Werror", "-pedantic");
     end Compiler;
+
+    package Binder is
+        for Switches ("Ada") use ("-Es");
+    end Binder;
 end Gen;
 """
 

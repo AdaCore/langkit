@@ -267,4 +267,13 @@ library project ${lib_name} is
       end case;
    end Compiler;
 
+   package Binder is
+      case Build_Mode is
+         when "dev" =>
+            for Switches ("Ada") use ("-Es");
+         when "prod" | "prof" =>
+            for Switches ("Ada") use ("-E");
+      end case;
+   end Binder;
+
 end ${lib_name};
