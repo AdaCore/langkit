@@ -160,6 +160,15 @@ package body Langkit_Support.Lexical_Envs_Impl is
    procedure Reset_Lookup_Cache (Self : Lexical_Env);
    --  Reset Self's lexical environment lookup cache
 
+   function Key_Image
+     (Self : Lexical_Env; Key : Thin_Symbol) return String
+   is (if Self.Env.Sym_Table = No_Symbol_Table
+       then "?(from empty env)"
+       else Image (To_Symbol (Self.Env.Sym_Table, Key)));
+   --  There should be only one case where the symbol table should be missing:
+    --  for the empty env. No big deal if we cannot get back the symbol text
+    --  in this special case.
+
    ----------------
    -- Text_Image --
    ----------------
@@ -871,8 +880,6 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Toplevel                : Boolean := True;
       Recursive_Check_Reached : in out Boolean)
    is
-      Full_Key : constant Symbol_Type := To_Symbol (Self.Env.Sym_Table, Key);
-
       function Do_Cache return Boolean
       is
         (Has_Lookup_Cache (Self)
@@ -882,7 +889,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
       --  Return whether to cache a particular request or not
 
       function Log_Id return String is
-        ("env=" & Env_Image (Self) & ", key=" & Image (Full_Key));
+        ("env=" & Env_Image (Self) & ", key=" & Key_Image (Self, Key));
 
       Env : constant Lexical_Env_Access := Unwrap (Self);
 
@@ -1567,7 +1574,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
       if Has_Trace then
          Me.Trace
            ("===== In Env get, key="
-            & Image (To_Symbol (Self.Env.Sym_Table, Key))
+            & Key_Image (Self, Key)
             & ", env=" & Lexical_Env_Image (Self, Dump_Content => False)
             & " =====");
          Me.Increase_Indent;
@@ -1601,7 +1608,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   then Image
                     (Node_Text_Image (Lexical_Env_Record (Self.Env.all).Node))
                   else Env_Image (Self))
-               & ", " & Image (To_Symbol (Self.Env.Sym_Table, Key))
+               & ", " & Key_Image (Self, Key)
                & ") -> " & Entity_Vectors_Image (FV));
          end if;
 
@@ -1628,10 +1635,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
    is
       FV : Entity_Vectors.Vector;
    begin
-
       if Has_Trace then
          Me.Trace ("==== In Env Get_First, key="
-                   & Image (To_Symbol (Self.Env.Sym_Table, Key)) & " ====");
+                   & Key_Image (Self, Key) & " ====");
          Me.Increase_Indent;
       end if;
 
