@@ -1153,9 +1153,9 @@ class CompileCtx:
         """
         from langkit.compiled_types import CompiledTypeRepo, StructType
 
-        CompiledTypeRepo.env_metadata = StructType(
-            names.Name('Metadata'), None, None, []
-        )
+        metadata_type = StructType(names.Name('Metadata'), None, None, [])
+        CompiledTypeRepo.env_metadata = metadata_type
+        CompiledTypeRepo.type_dict["Metadata"] = metadata_type
 
     def compute_types(self):
         """
