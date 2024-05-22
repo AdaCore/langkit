@@ -1,0 +1,17 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @export fun p1(): Bool = {
+        val v1 = node.parents.filter((e1, i1) => i1 != 0);
+        val v2 = node.parents.filter((e2, i2) => i2 != 0);
+        v1 == v2
+    }
+}

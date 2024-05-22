@@ -2554,6 +2554,11 @@ class AbstractVariable(AbstractExpression):
         """
         super().__init__()
 
+        self._constructed = False
+        """
+        Whether the "construct" method has already been called.
+        """
+
         # Kludge: in DynamicVariable and only there, name can be None
         if name is not None and name.lower == '_':
             name = self.create_unused_id()
@@ -2585,6 +2590,13 @@ class AbstractVariable(AbstractExpression):
         :param LocalVars.Scope|None scope: If left to None, the variable is
             created scope-less. Otherwise, it is added to `scope`.
         """
+        # If this expression was already constructed (i.e. if a
+        # ResolvedExpression was already created for it), then creating a local
+        # variable for it is a bug: this operation may change its code
+        # generation name, and thus the ResolvedExpression will refer to the
+        # wrong name.
+        assert not self._constructed
+
         assert self.local_var is None
 
         self.local_var = PropertyDef.get().vars.create_scopeless(self._name,
@@ -2604,6 +2616,7 @@ class AbstractVariable(AbstractExpression):
         scope.add(self.local_var)
 
     def construct(self):
+        self._constructed = True
         typ = self.type
         key = (self._name, typ)
         try:
@@ -5794,7 +5807,7 @@ class CallExpr(BasicExpr):
                 '3-shadow-args': self.shadow_args}
 
     def __repr__(self):
-        return '<CallExpr {}>'.format(self.name.camel_with_underscores)
+        return f"<CallExpr {self.name}>"
 
 
 class NullCheckExpr(ResolvedExpression):
