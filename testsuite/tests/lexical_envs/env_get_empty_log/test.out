@@ -1,0 +1,7 @@
+Calling P_Prop:
+[LANGKIT.LEXICAL_ENV] ===== In Env get, key=?(from empty env), env=LexEnv(Static_Primary, Empty) =====
+   [LANGKIT.LEXICAL_ENV] Returning vector []
+   [LANGKIT.LEXICAL_ENV_MINIMAL] Env.Get(null, ?(from empty env)) -> []
+[LANGKIT.LEXICAL_ENV] ===== Out Env get =====
+Done.
+Done
