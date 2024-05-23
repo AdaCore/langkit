@@ -12,6 +12,7 @@ from langkit.common import (
     ada_enum_type_decl,
     ada_pipe_list,
     ascii_repr,
+    bytes_repr,
     text_repr,
 )
 from langkit.diagnostics import DiagnosticError
@@ -32,6 +33,7 @@ class Renderer:
             'ada_enum_type_decl': ada_enum_type_decl,
             'ada_pipe_list': ada_pipe_list,
             'ascii_repr': ascii_repr,
+            'bytes_repr': bytes_repr,
             'text_repr': text_repr,
             'Name': Name,
         })

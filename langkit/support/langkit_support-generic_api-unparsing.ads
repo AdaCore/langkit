@@ -96,6 +96,10 @@ package Langkit_Support.Generic_API.Unparsing is
    No_Unparsing_Configuration : constant Unparsing_Configuration;
    --  Special value to mean the absence of an unparsing configuration
 
+   function Default_Unparsing_Configuration
+     (Language : Language_Id) return Unparsing_Configuration;
+   --  Return the default unparsing configuration for the given language
+
    function Load_Unparsing_Config
      (Language    : Language_Id;
       Filename    : String;

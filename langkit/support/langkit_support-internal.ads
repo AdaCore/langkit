@@ -16,7 +16,11 @@ package Langkit_Support.Internal is
    --  Reference to a static Unicode string. Used in descriptor tables whenever
    --  we need to provide a name.
 
-   type Debug_String_Access is not null access constant String;
+   type Bytes_Access is not null access constant String;
+   type Bytes_Access_Or_Null is access constant String;
+   --  Reference to a static string of bytes
+
+   subtype Debug_String_Access is Bytes_Access;
    --  Reference to a statically allocated String. Used in descriptor tables
    --  whenever we need to provide string for debug (compatible with
    --  Ada.Text_IO).

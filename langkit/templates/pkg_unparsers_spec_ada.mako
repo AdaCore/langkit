@@ -171,9 +171,13 @@ private package ${ada_lib_name}.Unparsers is
       % endfor
    );
 
+   Default_Config : aliased constant String :=
+     ${bytes_repr(ctx.emitter.default_unparsing_config, " " * 5)};
+
    Unparsers : aliased constant Unparsers_Impl :=
      (Token_Spacings'Access,
       Token_Newlines'Access,
-      Node_Unparsers'Access);
+      Node_Unparsers'Access,
+      Default_Config'Access);
 
 end ${ada_lib_name}.Unparsers;

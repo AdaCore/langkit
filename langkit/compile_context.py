@@ -378,6 +378,7 @@ class CompileCtx:
                  standalone: bool = False,
                  property_exceptions: Set[str] = set(),
                  generate_unparser: bool = False,
+                 default_unparsing_config: str | None = None,
                  cache_collection_conf: Optional[CacheCollectionConf] = None):
         """Create a new context for code emission.
 
@@ -486,6 +487,10 @@ class CompileCtx:
         :param generate_unparser: If true, generate a pretty printer for the
             given grammar. False by default.
 
+        :param default_unparsing_config: Filename relative to the extensions
+            directory, containing the default JSON unparsing configuration for
+            the generated library. Use an empty configuration if omitted.
+
         :param cache_collection_conf: If not None, setup the automatic cache
             collection mechanism with this configuration.
         """
@@ -499,6 +504,7 @@ class CompileCtx:
         self.build_date = build_date
         self.standalone = standalone
         self.generate_unparser = generate_unparser
+        self.default_unparsing_config = default_unparsing_config
 
         self.lib_name = (
             names.Name('Lib{}lang'.format(self.lang_name.lower))
