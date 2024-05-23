@@ -533,6 +533,42 @@ ${c_doc('langkit.text_to_locale_string')}
 extern char *
 ${capi.get_name("text_to_locale_string")}(${text_type} *text);
 
+${c_doc('langkit.text_to_utf8')}
+extern void
+${capi.get_name("text_to_utf8")}(${text_type} *text,
+                                 char **bytes,
+                                 size_t *length);
+
+${c_doc('langkit.text_from_utf8')}
+extern void
+${capi.get_name("text_from_utf8")}(const char *bytes,
+                                   size_t length,
+                                   ${text_type} *text);
+
+${c_doc('langkit.char_to_utf8')}
+extern void
+${capi.get_name("char_to_utf8")}(uint32_t codepoint,
+                                 char **bytes,
+                                 size_t *length);
+
+${c_doc('langkit.char_from_utf8')}
+extern void
+${capi.get_name("char_from_utf8")}(const char *bytes,
+                                   size_t length,
+                                   uint32_t *codepoint);
+
+${c_doc('langkit.string_to_utf8')}
+extern void
+${capi.get_name("string_to_utf8")}(${string_type} string,
+                                   char **bytes,
+                                   size_t *length);
+
+${c_doc('langkit.string_from_utf8')}
+extern void
+${capi.get_name("string_from_utf8")}(const char *bytes,
+                                     size_t length,
+                                     ${string_type} *string);
+
 ${c_doc('langkit.free')}
 extern void
 ${capi.get_name("free")}(void *address);

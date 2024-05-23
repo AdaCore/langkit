@@ -560,6 +560,60 @@ package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('text_to_locale_string')}";
    ${ada_c_doc('langkit.text_to_locale_string', 3)}
 
+   procedure ${capi.get_name('text_to_utf8')}
+     (Text   : ${text_type};
+      Bytes  : out chars_ptr;
+      Length : out size_t)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('text_to_utf8')}";
+   ${ada_c_doc('langkit.text_to_utf8', 3)}
+
+   procedure ${capi.get_name('text_from_utf8')}
+     (Bytes  : chars_ptr;
+      Length : size_t;
+      Text   : out ${text_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('text_from_utf8')}";
+   ${ada_c_doc('langkit.text_from_utf8', 3)}
+
+   procedure ${capi.get_name('char_to_utf8')}
+     (Char   : Unsigned_32;
+      Bytes  : out chars_ptr;
+      Length : out size_t)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('char_to_utf8')}";
+   ${ada_c_doc('langkit.char_to_utf8', 3)}
+
+   procedure ${capi.get_name('char_from_utf8')}
+     (Bytes  : chars_ptr;
+      Length : size_t;
+      Char   : out Unsigned_32)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('char_from_utf8')}";
+   ${ada_c_doc('langkit.char_from_utf8', 3)}
+
+   procedure ${capi.get_name('string_to_utf8')}
+     (Str    : ${string_type};
+      Bytes  : out chars_ptr;
+      Length : out size_t)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('string_to_utf8')}";
+   ${ada_c_doc('langkit.string_to_utf8', 3)}
+
+   procedure ${capi.get_name('string_from_utf8')}
+     (Bytes  : chars_ptr;
+      Length : size_t;
+      Str    : out ${string_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('string_from_utf8')}";
+   ${ada_c_doc('langkit.string_from_utf8', 3)}
+
    ------------------
    -- File readers --
    ------------------

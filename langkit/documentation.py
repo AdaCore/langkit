@@ -627,6 +627,33 @@ base_langkit_docs = {
         support some characters). Production code should use real conversion
         routines such as libiconv's in order to deal with UTF-32 texts.
     """,
+    'langkit.text_to_utf8': """
+        Encode some text to a newly allocated UTF-8 buffer (``bytes``). The
+        size of this buffer is stored in ``length``, and the actual allocated
+        buffer has one extra NUL byte (note that it is valid for the first
+        ``length`` bytes in ``bytes`` to contain NUL bytes).
+    """,
+    'langkit.text_from_utf8': """
+        Decode a UTF-8 buffer (``bytes``, of size ``length``) to a text buffer.
+    """,
+    'langkit.char_to_utf8': """
+        Encode the given character to a newly allocated UTF-8 buffer
+        (``bytes``). The size of this buffer is stored in ``length``.
+    """,
+    'langkit.char_from_utf8': """
+        Decode a UTF-8 buffer (``bytes``, of size ``length``) to a text buffer.
+        Note that the UTF-8 buffer is supposed to contain only one codepoint.
+    """,
+    'langkit.string_to_utf8': """
+        Encode some string to a newly allocated UTF-8 buffer (``bytes``). The
+        size of this buffer is stored in ``length``, and the actual allocated
+        buffer has one extra NUL byte (note that it is valid for the first
+        ``length`` bytes in ``bytes`` to contain NUL bytes).
+    """,
+    'langkit.string_from_utf8': """
+        Decode a UTF-8 buffer (``bytes``, of size ``length``) to a string
+        buffer.
+    """,
     'langkit.free': """
         Free dynamically allocated memory.
 
