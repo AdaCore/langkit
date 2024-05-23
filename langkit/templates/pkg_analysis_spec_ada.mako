@@ -83,18 +83,30 @@ package ${ada_lib_name}.Analysis is
    -- AST nodes --
    ---------------
 
+   pragma Warnings
+     (Off, """First_Controlling_Parameter"" is not a valid aspect identifier");
+   --  TODO???  (eng/libadalang/libadalang#1374) Remove this pragma once all
+   --  supported GNAT versions have support for the First_Controlling_Parameter
+   --  aspect.
+
    % for e in ctx.entity_types:
       % if e.is_root_type:
-      type ${e.api_name} is tagged private;
+      ## Use First_Controlling_Parameter so that nodes have as few primitives
+      ## as possible: because of all the derivations, this avoids the
+      ## generation of tons of thunks in GNAT, which was responsible for huge
+      ## compilation time and memory consumption without this aspect.
+      type ${e.api_name} is tagged private with First_Controlling_Parameter;
       ${ada_doc('langkit.node_type', 6)}
       --
       % else:
       type ${e.api_name} is new ${e.base.api_name} with private
+         with First_Controlling_Parameter
       % if e.element_type.is_root_list_type:
-         with Iterable => (First       => ${e.api_name}_First,
+            , Iterable => (First       => ${e.api_name}_First,
                            Next        => ${e.api_name}_Next,
                            Has_Element => ${e.api_name}_Has_Element,
                            Element     => ${e.api_name}_Element)
+      % else:
       % endif
       ;
       % endif
