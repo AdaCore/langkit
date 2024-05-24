@@ -35,8 +35,6 @@ end
 % endfor
 val default_grammar_rule : GrammarRule.t
 
-module Camomile : CamomileLibrary.Type
-
 module Sloc : sig
   ${ocaml_doc('langkit.sloc_type', 1)}
 
@@ -117,6 +115,18 @@ end
 
 module BigInteger : sig
   type t = Z.t
+end
+
+module Character : sig
+  (** Represents an utf8 character *)
+
+  type t = private string
+
+  val code : t -> int
+  (** Get the codepoint representing the given utf8 character *)
+
+  val chr : int -> t
+  (** Get the character representing the given integer codepoint *)
 end
 
 module BareNode : sig

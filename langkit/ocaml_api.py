@@ -546,6 +546,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: None),
             (T.AnalysisUnit, lambda _: None),
             (T.String, lambda _: 'StringType.dec_ref'),
+            (T.TextType, lambda _: 'Text.destroy_text'),
             (ct.CompiledType, lambda t: dec_ref(t))
         ])
 

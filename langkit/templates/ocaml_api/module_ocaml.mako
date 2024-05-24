@@ -116,59 +116,24 @@ let raisable typ =
   let new_typ = view typ ~read ~write in
   returning new_typ
 
-(* Module used to encode/decode UTF32 strings *)
+(* Convert a char ptr encoding an utf8 string to an ocaml String (cannot use
+   char_ptr_of_string here as bytes could contain null characters in the
+   middle) *)
+let string_of_bytes bytes length =
+  String.init (Unsigned.Size_t.to_int (!@ length)) (fun i -> !@ (!@ bytes +@ i))
 
-(* Camomile needs to know the location of its standard library to work,
-   so we use the following heuristic:
-   - if the directory chosen at build time exists, we assume the installation
-     is ok
-   - otherwise we look for a directory 'share/camomile' next to the binary
-   - otherwise we fail
-*)
+(* Convert an OCaml String encoded in utf8, to a char* and its length. The
+   returned char* is not null terminated *)
+let bytes_of_string str =
+  let length = String.length str in
+  let bytes = allocate_n char ~count:length in
+  String.iteri (fun i c ->
+    bytes +@ i <-@ c
+  ) str ;
+  (Unsigned.Size_t.of_int length), bytes
 
-module type CamomileConfig = module type of CamomileLibrary.DefaultConfig
-
-module CamomileDefaultConfig : CamomileConfig = CamomileLibrary.DefaultConfig
-
-let ( ^/ ) = Filename.concat
-
-let build_camomile_config root_path = (module struct
-  let share_dir = root_path ^/ "share" ^/ "camomile"
-
-  let datadir = share_dir ^/ "database"
-
-  let localedir = share_dir ^/ "locales"
-
-  let charmapdir = share_dir ^/ "charmaps"
-
-  let unimapdir = share_dir ^/ "mappings"
-
-  end : CamomileConfig)
-
-module CamomileShareConfig =
-  (val build_camomile_config
-    (Filename.dirname Sys.executable_name ^/ Filename.parent_dir_name)
-    : CamomileConfig)
-
-(* In case we are building through an opam-installed env, find
-   Camomile's stdlib through the appropriate opam env variable *)
-module CamomileOpamConfig =
-  (val
-    let opam_dir = try Sys.getenv "OPAM_SWITCH_PREFIX" with _ -> "DUMMY" in
-    build_camomile_config opam_dir : CamomileConfig)
-
-let camomile_config =
-  if Sys.file_exists CamomileDefaultConfig.datadir then
-    (module CamomileDefaultConfig : CamomileConfig )
-  else if Sys.file_exists CamomileShareConfig.datadir then
-    (module CamomileShareConfig : CamomileConfig )
-  else if Sys.file_exists CamomileOpamConfig.datadir then
-    (module CamomileOpamConfig : CamomileConfig)
-  else failwith "no camomile library found"
-
-module CamomileConfig = (val camomile_config)
-
-module Camomile = CamomileLibrary.Make (CamomileConfig)
+let free = foreign ~from:c_lib "${capi.get_name('free')}"
+ (ptr char @-> returning void)
 
 module Text = struct
   type t = string
@@ -186,43 +151,26 @@ module Text = struct
   let destroy_text = foreign ~from:c_lib "${capi.get_name('destroy_text')}"
     (ptr c_struct @-> raisable void)
 
-  module UCS4Encoding = Camomile.CharEncoding.Make (Camomile.UCS4)
+  let text_to_utf8 = foreign ~from:c_lib "${capi.get_name('text_to_utf8')}"
+    (ptr c_struct @-> ptr (ptr char) @-> ptr size_t @-> raisable void)
+
+  let text_from_utf8 = foreign ~from:c_lib "${capi.get_name('text_from_utf8')}"
+    (ptr char @-> size_t @-> ptr c_struct @-> raisable void)
 
   let wrap (c_value : t structure) : t =
-    let open Unsigned.Size_t in
-    let open Camomile in
-    let length = to_int (getf c_value length) in
-    let chars = getf c_value chars in
-    let f i =
-      UChar.chr_of_uint (Unsigned.UInt32.to_int !@ (chars +@ i))
-    in
-    let result = UCS4.init length f in
-    (* Now that the value is fully transformed to an ocaml value, we can
-      free it by calling destroy_text *)
-    destroy_text (addr c_value) ;
-    UCS4Encoding.encode CharEncoding.utf8 result
+     let bytes = allocate (ptr char) (from_voidp char null) in
+     let length = allocate (size_t) (Unsigned.Size_t.of_int 0) in
+     text_to_utf8 (addr c_value) bytes length ;
+     let r = string_of_bytes bytes length in
+     free (!@ bytes);
+     destroy_text (addr c_value);
+     r
 
   let unwrap (value : t) : t structure =
-    let open Unsigned in
-    let open Camomile in
-    let text = UCS4Encoding.decode CharEncoding.utf8 value in
-    let struct_length = Size_t.of_int (UCS4.length text) in
-    let struct_chars = allocate_n uint32_t ~count:(UCS4.length text) in
-    let i = ref 0 in
-    let f c =
-      struct_chars +@ !i <-@ (UInt32.of_int (UChar.code c));
-      i := !i + 1
-    in
-    UCS4.iter f text ;
-    let c_value = make c_struct in
-    setf c_value length struct_length ;
-    add_gc_link ~from:c_value ~to_:struct_chars;
-    setf c_value chars struct_chars ;
-    setf c_value is_allocated false ;
-    (* We don't need to care about calling destroy_text here since we
-     manually allocated the pointer, ctypes will take care of freeing the
-     memory *)
-    c_value
+     let length, bytes = bytes_of_string value in
+     let c_value = allocate c_struct (make c_struct) in
+     text_from_utf8 bytes length c_value;
+     !@ c_value
 
   let c_type = view c_struct ~read:wrap ~write:unwrap
 end
@@ -232,24 +180,31 @@ module Character = struct
    characters *)
   type t = string
 
-  module UCharEncoding = Camomile.CharEncoding.Make (Camomile.UText)
+  let char_to_utf8 = foreign ~from:c_lib "${capi.get_name('char_to_utf8')}"
+    (uint32_t @-> ptr (ptr char) @-> ptr size_t @-> raisable void)
 
-  let of_int i =
-    let open Camomile in
-    let uchar = UChar.chr i in
-    UCharEncoding.encode CharEncoding.utf8 (UText.init 1 (fun _ -> uchar))
-
-  let of_int32 i =
-    of_int (Unsigned.UInt32.to_int i)
+  let char_from_utf8 = foreign ~from:c_lib "${capi.get_name('char_from_utf8')}"
+    (ptr char @-> size_t @-> ptr uint32_t @-> raisable void)
 
   let wrap (c_value : Unsigned.UInt32.t) : t =
-    of_int32 c_value
+     let bytes = allocate (ptr char) (from_voidp char null) in
+     let length = allocate (size_t) (Unsigned.Size_t.of_int 0) in
+     char_to_utf8 c_value bytes length ;
+     let r = string_of_bytes bytes length in
+     free (!@ bytes);
+     r
+
+  let chr i =
+    wrap (Unsigned.UInt32.of_int i)
 
   let unwrap (value : string) : Unsigned.UInt32.t =
-    let open Camomile in
-    let text = UCharEncoding.decode CharEncoding.utf8 value in
-    let uchar = UText.get text 0 in
-    Unsigned.UInt32.of_int (UChar.code uchar)
+     let length, bytes = bytes_of_string value in
+     let c_value = allocate uint32_t (Unsigned.UInt32.of_int 0) in
+     char_from_utf8 bytes length c_value;
+     !@ c_value
+
+  let code i =
+    Unsigned.UInt32.to_int (unwrap i)
 
   let c_type = view uint32_t ~read:wrap ~write:unwrap
 end
@@ -264,47 +219,32 @@ module StringType = struct
   let content_field = field c_struct "content" uint32_t
   let () = seal c_struct
 
-  let buffer_ptr_type = ptr uint32_t
   let c_type = ptr c_struct
 
-  let create = foreign ~from:c_lib "${c_api.get_name('create_string')}"
-    (buffer_ptr_type @-> int @-> raisable c_type)
+  let string_to_utf8 = foreign ~from:c_lib "${capi.get_name('string_to_utf8')}"
+    (c_type @-> ptr (ptr char) @-> ptr size_t @-> raisable void)
+
+  let string_from_utf8 =
+    foreign ~from:c_lib "${capi.get_name('string_from_utf8')}"
+      (ptr char @-> size_t @-> ptr c_type @-> raisable void)
+
   let dec_ref = foreign ~from:c_lib "${c_api.get_name('string_dec_ref')}"
     (c_type @-> raisable void)
 
-  module UCharEncoding = Camomile.CharEncoding.Make (Camomile.UText)
-
   let wrap c_value_ptr =
-    let open Text in
-    let open Camomile in
-    let c_value = !@ c_value_ptr in
-    let length = getf c_value length_field in
-    let content = c_value @. content_field in
-    (* We use Camomile to encode utf32 strings to an ocaml string *)
-    let f i = UChar.chr_of_uint (Unsigned.UInt32.to_int !@(content +@ i)) in
-    let result =
-      UCS4Encoding.encode CharEncoding.utf8 (UCS4.init length f)
-    in
+    let bytes = allocate (ptr char) (from_voidp char null) in
+    let length = allocate (size_t) (Unsigned.Size_t.of_int 0) in
+    string_to_utf8 c_value_ptr bytes length ;
+    let r = string_of_bytes bytes length in
+    free (!@ bytes);
     dec_ref c_value_ptr;
-    result
+    r
 
   let unwrap value =
-    let open Text in
-    let open Camomile in
-
-    (* Create a buffer to contain the UTF-32 encoded string. *)
-    let text = UCS4Encoding.decode CharEncoding.utf8 value in
-    let length = UCS4.length text in
-    let buffer = allocate_n uint32_t ~count:length in
-    let i = ref 0 in
-    let f c =
-      buffer +@ !i <-@ (Unsigned.UInt32.of_int (UChar.code c));
-      i := !i + 1
-    in
-    UCS4.iter f text ;
-
-    (* ctypes is supposed to take care of freeing "buffer" before returning. *)
-    create buffer length
+    let length, bytes = bytes_of_string value in
+    let c_value = allocate c_type (from_voidp c_struct null) in
+    string_from_utf8 bytes length c_value;
+    !@ c_value
 end
 
 module BigInteger = struct
