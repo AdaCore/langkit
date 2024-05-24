@@ -90,8 +90,10 @@ build_and_run(
         ),
         "invalid_config.adb",
         "commands.adb",
+        "default_config.adb",
     ],
     types_from_lkt=True,
     generate_unparser=True,
+    default_unparsing_config="default_cfg.json",
 )
 print("Done")

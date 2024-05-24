@@ -279,6 +279,19 @@ class Emitter:
                 use_clause=True
             )
 
+        # Determine the default unparsing configuration
+        if self.context.default_unparsing_config is None:
+            self.default_unparsing_config = b'{"node_configs": {}}'
+        else:
+            with open(
+                path.join(
+                    self.context.extensions_dir,
+                    self.context.default_unparsing_config,
+                ),
+                "rb",
+            ) as fp:
+                self.default_unparsing_config = fp.read()
+
     def path_to(self, destination: str, path_from: str) -> str:
         """
         Helper to generate absolute or relative paths inside the generated

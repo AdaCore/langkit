@@ -139,6 +139,7 @@ package Langkit_Support.Internal.Unparsing is
       Token_Spacings : Token_Spacing_Table;
       Token_Newlines : Token_Newline_Table;
       Node_Unparsers : Node_Unparser_Map;
+      Default_Config : Bytes_Access;
    end record;
    type Unparsers is access constant Unparsers_Impl;
 

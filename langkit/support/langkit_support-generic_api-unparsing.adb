@@ -33,6 +33,14 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    use type Ada.Containers.Count_Type;
 
+   function Load_Unparsing_Config_From_Buffer
+     (Language    : Language_Id;
+      Buffer      : String;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+      return Unparsing_Configuration;
+   --  Like ``Load_Unparsing_Config``, but loading the unparsing configuration
+   --  from an in-memory buffer rather than from a file.
+
    function Is_Field_Present
      (Field          : Lk_Node;
       Field_Unparser : Field_Unparser_Impl) return Boolean;
@@ -635,6 +643,24 @@ package body Langkit_Support.Generic_API.Unparsing is
       raise Program_Error;
    end Linear_Template;
 
+   -------------------------------------
+   -- Default_Unparsing_Configuration --
+   -------------------------------------
+
+   function Default_Unparsing_Configuration
+     (Language : Language_Id) return Unparsing_Configuration
+   is
+      Diagnostics : Diagnostics_Vectors.Vector;
+      Result      : constant Unparsing_Configuration :=
+        Load_Unparsing_Config_From_Buffer
+          (Language, Language.Unparsers.Default_Config.all, Diagnostics);
+   begin
+      if not Diagnostics.Is_Empty then
+         raise Program_Error;
+      end if;
+      return Result;
+   end Default_Unparsing_Configuration;
+
    ---------------------------
    -- Load_Unparsing_Config --
    ---------------------------
@@ -642,6 +668,36 @@ package body Langkit_Support.Generic_API.Unparsing is
    function Load_Unparsing_Config
      (Language    : Language_Id;
       Filename    : String;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+      return Unparsing_Configuration
+   is
+      use type GNAT.Strings.String_Access;
+
+      JSON_Text : GNAT.Strings.String_Access := Create (+Filename).Read_File;
+   begin
+      if JSON_Text = null then
+         Append
+           (Diagnostics,
+            No_Source_Location_Range,
+            To_Text ("cannot read " & Filename));
+         return No_Unparsing_Configuration;
+      end if;
+
+      return Result : constant Unparsing_Configuration :=
+        Load_Unparsing_Config_From_Buffer
+          (Language, JSON_Text.all, Diagnostics)
+      do
+         GNAT.Strings.Free (JSON_Text);
+      end return;
+   end Load_Unparsing_Config;
+
+   ---------------------------------------
+   -- Load_Unparsing_Config_From_Buffer --
+   ---------------------------------------
+
+   function Load_Unparsing_Config_From_Buffer
+     (Language    : Language_Id;
+      Buffer      : String;
       Diagnostics : in out Diagnostics_Vectors.Vector)
       return Unparsing_Configuration
    is
@@ -1719,20 +1775,11 @@ package body Langkit_Support.Generic_API.Unparsing is
          raise Invalid_Input;
       end Abort_Parsing;
 
-      use type GNAT.Strings.String_Access;
-
       --  First, parse the JSON document
 
-      JSON_Text   : GNAT.Strings.String_Access := Create (+Filename).Read_File;
-      JSON_Result : Read_Result;
+      JSON_Result : constant Read_Result := Read (Buffer);
       JSON        : JSON_Value;
    begin
-      if JSON_Text = null then
-         Abort_Parsing ("cannot read " & Filename);
-      end if;
-      JSON_Result := Read (JSON_Text.all);
-      GNAT.Strings.Free (JSON_Text);
-
       if JSON_Result.Success then
          JSON := JSON_Result.Value;
       else
@@ -1923,7 +1970,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          Destroy (Symbols);
          Pool.Release;
          return No_Unparsing_Configuration;
-   end Load_Unparsing_Config;
+   end Load_Unparsing_Config_From_Buffer;
 
    --------------------------
    -- Instantiate_Template --

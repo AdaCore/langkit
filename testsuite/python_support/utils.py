@@ -105,6 +105,7 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     standalone: bool = False,
                     property_exceptions: Set[str] = set(),
                     generate_unparser: bool = False,
+                    default_unparsing_config: str | None = None,
                     cache_coll_conf: Optional[CacheCollectionConf] = None):
     """
     Create a compile context and prepare the build directory for code
@@ -141,6 +142,9 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
 
     :param generate_unparser: See CompileCtx's constructor.
 
+    :param default_unparsing_config: See the homonym CompileCtx constructor
+        argument.
+
     :param cache_coll_conf: See CompileCtx's ``cache_collection_conf``
         constructor argument.
     """
@@ -151,21 +155,23 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     os.mkdir('build')
 
     # Try to emit code
-    ctx = CompileCtx(lang_name='Foo', short_name='foo', lexer=lexer,
-                     grammar=grammar,
-                     default_unit_provider=default_unit_provider,
-                     symbol_canonicalizer=symbol_canonicalizer,
-                     show_property_logging=show_property_logging,
-                     lkt_file=lkt_file,
-                     types_from_lkt=types_from_lkt,
-                     lkt_semantic_checks=lkt_semantic_checks,
-                     case_insensitive=case_insensitive,
-                     version=version,
-                     build_date=build_date,
-                     standalone=standalone,
-                     property_exceptions=property_exceptions,
-                     generate_unparser=generate_unparser,
-                     cache_collection_conf=cache_coll_conf)
+    ctx = CompileCtx(
+        lang_name='Foo', short_name='foo', lexer=lexer, grammar=grammar,
+        default_unit_provider=default_unit_provider,
+        symbol_canonicalizer=symbol_canonicalizer,
+        show_property_logging=show_property_logging,
+        lkt_file=lkt_file,
+        types_from_lkt=types_from_lkt,
+        lkt_semantic_checks=lkt_semantic_checks,
+        case_insensitive=case_insensitive,
+        version=version,
+        build_date=build_date,
+        standalone=standalone,
+        property_exceptions=property_exceptions,
+        generate_unparser=generate_unparser,
+        default_unparsing_config=default_unparsing_config,
+        cache_collection_conf=cache_coll_conf,
+    )
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -260,8 +266,9 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                   lexer=None, lkt_file=None, types_from_lkt=False,
                   lkt_semantic_checks=False, ocaml_main=None, java_main=None,
                   ni_main=None, warning_set=default_warning_set,
-                  generate_unparser=False, default_unit_provider=None,
-                  symbol_canonicalizer=None, show_property_logging=False,
+                  generate_unparser=False, default_unparsing_config=None,
+                  default_unit_provider=None, symbol_canonicalizer=None,
+                  show_property_logging=False,
                   unparse_script=unparse_script,
                   case_insensitive: bool = False,
                   version: str | None = None,
@@ -306,6 +313,9 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
     :param WarningSet warning_set: Set of warnings to emit.
 
     :param bool generate_unparser: Whether to generate unparser.
+
+    :param default_unparsing_config: See the homonym CompileCtx constructor
+        argument.
 
     :param langkit.compile_context.LibraryEntity|None default_unit_provider:
         Default unit provider to use for this context, if any.
@@ -356,19 +366,22 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
     maven_repo = os.environ.get('MAVEN_LOCAL_REPO')
 
     def manage_run(types_from_lkt, additional_args):
-        ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
-                              default_unit_provider=default_unit_provider,
-                              symbol_canonicalizer=symbol_canonicalizer,
-                              show_property_logging=show_property_logging,
-                              types_from_lkt=types_from_lkt,
-                              lkt_semantic_checks=lkt_semantic_checks,
-                              case_insensitive=case_insensitive,
-                              version=version,
-                              build_date=build_date,
-                              standalone=standalone,
-                              property_exceptions=property_exceptions,
-                              generate_unparser=generate_unparser,
-                              cache_coll_conf=cache_collection_conf)
+        ctx = prepare_context(
+            grammar, lexer, lkt_file, warning_set,
+            default_unit_provider=default_unit_provider,
+            symbol_canonicalizer=symbol_canonicalizer,
+            show_property_logging=show_property_logging,
+            types_from_lkt=types_from_lkt,
+            lkt_semantic_checks=lkt_semantic_checks,
+            case_insensitive=case_insensitive,
+            version=version,
+            build_date=build_date,
+            standalone=standalone,
+            property_exceptions=property_exceptions,
+            generate_unparser=generate_unparser,
+            default_unparsing_config=default_unparsing_config,
+            cache_coll_conf=cache_collection_conf,
+        )
 
         m = Manage(ctx)
 
