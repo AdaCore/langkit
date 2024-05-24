@@ -813,73 +813,99 @@ package body Langkit_Support.Prettier_Utils is
    -- Dump --
    ----------
 
-   procedure Dump (Document : Document_Type) is
-      Simple_Indent : constant String := "  ";
-      List_Indent   : constant String := "| ";
+   procedure Dump
+     (Document : Document_Type; Trace : GNATCOLL.Traces.Trace_Handle := null)
+   is
+      use type GNATCOLL.Traces.Trace_Handle;
 
-      procedure Process (Document : Document_Type; Prefix : String);
+      Simple_Indent : constant Unbounded_String := To_Unbounded_String ("  ");
+      List_Indent   : constant Unbounded_String := To_Unbounded_String ("| ");
+
+      procedure Write (S : Unbounded_String);
+      procedure Process (Document : Document_Type; Prefix : Unbounded_String);
+
+      -----------
+      -- Write --
+      -----------
+
+      procedure Write (S : Unbounded_String) is
+      begin
+         if Trace = null then
+            Put_Line (To_String (S));
+         else
+            Trace.Trace (To_String (S));
+         end if;
+      end Write;
 
       -------------
       -- Process --
       -------------
 
-      procedure Process (Document : Document_Type; Prefix : String) is
+      procedure Process (Document : Document_Type; Prefix : Unbounded_String)
+      is
       begin
-         Put (Prefix);
          if Document = null then
-            Put_Line ("<none>");
+            Write (Prefix & "<none>");
             return;
          end if;
          case Document.Kind is
             when Align =>
-               Put_Line ("align:");
-               Put (Prefix & Simple_Indent & "data: ");
-               case Document.Align_Data.Kind is
-                  when Prettier.Width =>
-                     Put_Line
-                       ("width (number):" & Document.Align_Data.N'Image);
-                  when Prettier.Text =>
-                     Put_Line
-                       ("width (text):" & To_String (Document.Align_Data.T));
-                  when Prettier.Dedent =>
-                     Put_Line ("dedent");
-                  when Prettier.Dedent_To_Root =>
-                     Put_Line ("dedentToRoot");
-                  when Prettier.Root =>
-                     Put_Line ("markAsRoot");
-                  when Prettier.Inner_Root =>
-                     Put_Line ("innerRoot");
-                  when Prettier.None =>
-                     Put_Line ("none");
-               end case;
+               Write (Prefix & "align:");
+               declare
+                  Line : Unbounded_String;
+               begin
+                  Line := Prefix & Simple_Indent & "data: ";
+                  case Document.Align_Data.Kind is
+                     when Prettier.Width =>
+                        Append
+                          (Line,
+                           "width (number):" & Document.Align_Data.N'Image);
+                     when Prettier.Text =>
+                        Append
+                          (Line,
+                           "width (text):"
+                           & To_String (Document.Align_Data.T));
+                     when Prettier.Dedent =>
+                        Append (Line, "dedent");
+                     when Prettier.Dedent_To_Root =>
+                        Append (Line, "dedentToRoot");
+                     when Prettier.Root =>
+                        Append (Line, "markAsRoot");
+                     when Prettier.Inner_Root =>
+                        Append (Line, "innerRoot");
+                     when Prettier.None =>
+                        Append (Line, "none");
+                  end case;
+                  Write (Line);
+               end;
                Process (Document.Align_Contents, Prefix & Simple_Indent);
 
             when Break_Parent =>
-               Put_Line ("breakParent");
+               Write (Prefix & "breakParent");
 
             when Fill =>
-               Put_Line ("fill:");
+               Write (Prefix & "fill:");
                Process (Document.Fill_Document, Prefix & Simple_Indent);
 
             when Group =>
-               Put_Line ("group:");
-               Put_Line
+               Write (Prefix & "group:");
+               Write
                  (Prefix & Simple_Indent & "shouldBreak: "
                   & Document.Group_Should_Break'Image);
-               Put_Line
+               Write
                  (Prefix & Simple_Indent & "id:" & Document.Group_Id'Image);
                Process (Document.Group_Document, Prefix & Simple_Indent);
 
             when Hard_Line =>
-               Put_Line ("hardline");
+               Write (Prefix & "hardline");
 
             when Hard_Line_Without_Break_Parent =>
-               Put_Line ("hardlineWithoutBreakParent");
+               Write (Prefix & "hardlineWithoutBreakParent");
 
             when If_Break =>
-               Put_Line ("ifBreak:");
+               Write (Prefix & "ifBreak:");
                if Document.If_Break_Group_Id /= No_Template_Symbol then
-                  Put_Line
+                  Write
                     (Prefix & Simple_Indent & "groupId: "
                      & Document.If_Break_Group_Id'Image);
                end if;
@@ -887,19 +913,19 @@ package body Langkit_Support.Prettier_Utils is
                Process (Document.If_Break_Flat_Contents, Prefix & List_Indent);
 
             when If_Empty =>
-               Put_Line ("ifEmpty:");
+               Write (Prefix & "ifEmpty:");
                Process (Document.If_Empty_Then, Prefix & List_Indent);
                Process (Document.If_Empty_Else, Prefix & List_Indent);
 
             when Indent =>
-               Put_Line ("indent:");
+               Write (Prefix & "indent:");
                Process (Document.Indent_Document, Prefix & Simple_Indent);
 
             when Line =>
-               Put_Line ("line");
+               Write (Prefix & "line");
 
             when List =>
-               Put_Line ("list:");
+               Write (Prefix & "list:");
                for I in 1 .. Document.List_Documents.Last_Index loop
                   Process
                     (Document.List_Documents.Element (I),
@@ -907,49 +933,55 @@ package body Langkit_Support.Prettier_Utils is
                end loop;
 
             when Literal_Line =>
-               Put_Line ("literalline");
+               Write (Prefix & "literalline");
 
             when Recurse =>
-               Put_Line ("recurse");
+               Write (Prefix & "recurse");
 
             when Recurse_Field =>
-               Put_Line
-                 ("recurse_field: " & Debug_Name (Document.Recurse_Field_Ref));
+               Write
+                 (Prefix & "recurse_field: "
+                  & Debug_Name (Document.Recurse_Field_Ref));
 
             when Recurse_Flatten =>
-               Put_Line ("recurse_flatten:");
+               Write (Prefix & "recurse_flatten:");
                for I in 1 .. Document.Recurse_Flatten_Types.Last_Index loop
                   declare
                      T : constant Type_Ref :=
                        Document.Recurse_Flatten_Types.Element (I);
                   begin
-                     Put_Line (Prefix & Simple_Indent & Debug_Name (T));
+                     Write (Prefix & Simple_Indent & Debug_Name (T));
                   end;
                end loop;
 
             when Soft_Line =>
-               Put_Line ("softline");
+               Write (Prefix & "softline");
 
             when Token =>
                declare
                   Token_Name : constant Name_Type :=
                     Token_Kind_Name (Document.Token_Kind);
                begin
-                  Put_Line
-                    ("token[" & Image (Format_Name (Token_Name, Camel)) & "]: "
+                  Write
+                    (Prefix & "token["
+                     & Image (Format_Name (Token_Name, Camel)) & "]: "
                      & Image (To_Text (Document.Token_Text)));
                end;
 
             when Trim =>
-               Put_Line ("trim");
+               Write (Prefix & "trim");
 
             when Whitespace =>
-               Put_Line
-                 ("whitespace(" & Document.Whitespace_Length'Image & ")");
+               Write
+                 (Prefix & "whitespace(" & Document.Whitespace_Length'Image
+                  & ")");
          end case;
       end Process;
    begin
-      Process (Document, "");
+      if Trace /= null and then not Trace.Is_Active then
+         return;
+      end if;
+      Process (Document, Null_Unbounded_String);
    end Dump;
 
 end Langkit_Support.Prettier_Utils;
