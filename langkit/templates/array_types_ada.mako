@@ -393,6 +393,9 @@
    ----------------
 
    function Equivalent (L, R : ${cls.name}) return Boolean is
+      % if cls.element_type == T.LogicVar:
+      use type Logic_Var;
+      % endif
    begin
       if L.N /= R.N then
          return False;

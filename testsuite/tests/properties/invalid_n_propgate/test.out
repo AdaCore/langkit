@@ -1,5 +1,5 @@
 == bad_arity_1_0.lkt ==
-bad_arity_1_0.lkt:5:9: error: At least one argument logic variable expected
+bad_arity_1_0.lkt:5:9: error: At least one argument logic variable (or array thereof) expected
 5 |         %propagate(node.ref_var, BazNode.prop1)
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -14,6 +14,24 @@ bad_arity_1_2.lkt:5:9: error: NPropagate's comb_prop property must accept 1 enti
 bad_arity_2_1.lkt:5:9: error: extra arguments for NPropagate's comb_prop must be optional
 5 |         %propagate(node.ref_var, BazNode.prop3, node.type_var)
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== bad_arity_dyn_0.lkt ==
+bad_arity_dyn_0.lkt:5:9: error: At least one argument logic variable (or array thereof) expected
+5 |         %propagate(node.ref_var, BazNode.prop4)
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== bad_arity_dyn_2.lkt ==
+bad_arity_dyn_2.lkt:5:9: error: Dynamic combiners only accept a single logic variable array
+5 |         %propagate(node.ref_var, BazNode.prop4, [node.type_var], node.type_var)
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== bad_type_dyn.lkt ==
+bad_type_dyn.lkt:5:49: error: Expected type LogicVar.array, got LogicVar
+5 |         %propagate(node.ref_var, BazNode.prop4, node.type_var)
+  |                                                 ^^^^^^^^^^^^^
 
 
 == valid_1.lkt ==

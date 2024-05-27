@@ -4881,6 +4881,15 @@ class PropertyDef(AbstractNodeData):
         assert self.struct is not None
         return [self.struct] + [a.type for a in self.arguments[:logic_vars]]
 
+    @property
+    def is_dynamic_combiner(self) -> bool:
+        """
+        When this property is used as a combiner inside an NPropagate equation,
+        return whether it expects a dynamic number of arguments.
+        """
+        args = self.natural_arguments
+        return len(args) >= 1 and args[0].type.is_array_type
+
     def predicate_error_diagnostic(self, arity: int) -> tuple[str, list[str]]:
         """
         This is used internally during code generation to transform this

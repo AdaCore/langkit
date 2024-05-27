@@ -17,7 +17,6 @@ plus = u.root
 lit_left = plus[0]
 lit_right = plus[1]
 
-
 for lhs, rhs in [
     (lit_left, lit_right),
     (plus, lit_right),
@@ -25,11 +24,14 @@ for lhs, rhs in [
     (lit_left, plus),
     (lit_left, None),
 ]:
-    try:
-        result = str(plus.p_resolve(lhs, rhs))
-    except libfoolang.PropertyError as exc:
-        result = f"<PropertyError: {exc}>"
+    for dyn in [False, True]:
+        try:
+            result = str(plus.p_resolve(lhs, rhs, dyn))
+        except libfoolang.PropertyError as exc:
+            result = f"<PropertyError: {exc}>"
 
-    print(f"p_resolve({lhs}, {rhs}) = {result}")
+        print(
+            f"p_resolve({lhs}, {rhs}, use_dynamic_combiner={dyn}) = {result}"
+        )
 
 print('main.py: Done.')

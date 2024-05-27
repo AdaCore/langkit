@@ -27,4 +27,9 @@ class BazNode: FooNode {
         @ignored e1: Entity[BazNode],
         @ignored e2: Entity[BarNode]
     ): Entity[BazNode] = self
+
+    @ignored fun prop4(
+        @ignored e1: Array[Entity[BazNode]],
+        @ignored b: Bool = true
+    ): Entity[BazNode] = self
 }

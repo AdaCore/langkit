@@ -1,8 +1,13 @@
 main.py: Running...
-p_resolve(<Literal main.txt:1:1-1:2>, <Literal main.txt:1:5-1:6>) = <Literal main.txt:1:1-1:2>
-p_resolve(<Plus main.txt:1:1-1:6>, <Literal main.txt:1:5-1:6>) = <PropertyError: main.txt:1:1-1:6: mismatching node type for comb_prop>
-p_resolve(None, <Literal main.txt:1:5-1:6>) = None
-p_resolve(<Literal main.txt:1:1-1:2>, <Plus main.txt:1:1-1:6>) = <PropertyError: main.txt:1:1-1:2: mismatching node type for comb_prop>
-p_resolve(<Literal main.txt:1:1-1:2>, None) = <Literal main.txt:1:1-1:2>
+p_resolve(<Literal main.txt:1:1-1:2>, <Literal main.txt:1:5-1:6>, use_dynamic_combiner=False) = <Literal main.txt:1:5-1:6>
+p_resolve(<Literal main.txt:1:1-1:2>, <Literal main.txt:1:5-1:6>, use_dynamic_combiner=True) = <Literal main.txt:1:5-1:6>
+p_resolve(<Plus main.txt:1:1-1:6>, <Literal main.txt:1:5-1:6>, use_dynamic_combiner=False) = <PropertyError: main.txt:1:1-1:6: mismatching node type for comb_prop>
+p_resolve(<Plus main.txt:1:1-1:6>, <Literal main.txt:1:5-1:6>, use_dynamic_combiner=True) = <PropertyError: main.txt:1:1-1:6: mismatching node type for comb_prop>
+p_resolve(None, <Literal main.txt:1:5-1:6>, use_dynamic_combiner=False) = <Literal main.txt:1:5-1:6>
+p_resolve(None, <Literal main.txt:1:5-1:6>, use_dynamic_combiner=True) = <Literal main.txt:1:5-1:6>
+p_resolve(<Literal main.txt:1:1-1:2>, <Plus main.txt:1:1-1:6>, use_dynamic_combiner=False) = <PropertyError: main.txt:1:1-1:2: mismatching node type for comb_prop>
+p_resolve(<Literal main.txt:1:1-1:2>, <Plus main.txt:1:1-1:6>, use_dynamic_combiner=True) = <PropertyError: main.txt:1:1-1:6: mismatching node type for comb_prop>
+p_resolve(<Literal main.txt:1:1-1:2>, None, use_dynamic_combiner=False) = None
+p_resolve(<Literal main.txt:1:1-1:2>, None, use_dynamic_combiner=True) = None
 main.py: Done.
 Done

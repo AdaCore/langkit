@@ -32,11 +32,13 @@
    <%
       type_name = f"Logic_Functor_{prop.uid}"
       entity = T.entity.name
+      is_dynamic = prop.is_dynamic_combiner
+      is_converter = arity == 1 and not is_dynamic
 
       base_type: str
       subp_name: str
       error_name: str
-      if arity == 1:
+      if is_converter:
          base_type = "Converter_Type"
          subp_name = "Convert"
          error_name = "conv_prop"
@@ -48,7 +50,7 @@
       args = [f"Self : {type_name}"]
       args.append(
          f"From : {entity}"
-         if arity == 1 else
+         if is_converter else
          f"Vals : Entity_Vars.Value_Array"
       )
       subp_spec = (
@@ -73,8 +75,14 @@
       ## If there is no From argument, create a local variable so that code
       ## generation below can always refer to the controlling argument as
       ## "From".
-      % if arity > 1:
+      % if not is_converter:
          From : constant ${T.entity.name} := Vals (1);
+      % endif
+
+      % if is_dynamic:
+         <% arr_arg = prop.natural_arguments[0] %>
+         Args : ${arr_arg.type.name} :=
+           ${arr_arg.type.constructor_name} (Vals'Length - 1);
       % endif
 
       <%
@@ -119,11 +127,32 @@
          % endif
       % endfor
 
+      % if is_dynamic:
+      <% expected_type = arr_arg.type.element_type.element_type %>
+      for I in 2 .. Vals'Last loop
+         % if has_multiple_concrete_nodes and expected_type != T.root_node:
+            if Vals (I).Node /= null
+               and then Vals (I).Node.Kind not in
+                  ${expected_type.ada_kind_range_name}
+            then
+               Raise_Property_Exception
+                 (Vals (I).Node,
+                  Property_Error'Identity,
+                  "mismatching node type for ${error_name}");
+            end if;
+         % endif
+         Args.Items (I - 1) := (Vals (I).Node, Vals (I).Info);
+      end loop;
+      % endif
+
       ## Here, we just forward the return value from prop to our caller, so
       ## there is nothing to do regarding ref-counting.
       <%
          # Pass the property controlling node argument
          args = [f"{prop.self_arg_name} => From.Node"]
+
+         if is_dynamic:
+            args.append(f"{arr_arg.name} => Args")
 
          # Pass other entity arguments. Pass an aggregate as the property may
          # take a non-root entity type, while "Vals" contains only root
@@ -147,7 +176,17 @@
       %>
       Ret := ${prop.name} (${", ".join(args)});
 
+      % if is_dynamic:
+      Dec_Ref (Args);
+      % endif;
+
       return (Node => Ret.Node, Info => Ret.Info);
+   % if is_dynamic:
+   exception
+      when Exc : Property_Error =>
+         Dec_Ref (Args);
+         raise;
+   % endif
    end ${subp_name};
 
    -----------
