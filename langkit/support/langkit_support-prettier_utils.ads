@@ -12,6 +12,7 @@
 
 with Ada.Containers.Vectors;
 
+with GNATCOLL.Traces;
 with Prettier_Ada.Documents;
 
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
@@ -337,9 +338,11 @@ private package Langkit_Support.Prettier_Utils is
    --  unparsing document will leave the mandatory spacing between tokens (i.e.
    --  so that the formatted document can be re-parsed correctly).
 
-   procedure Dump (Document : Document_Type);
-   --  Debug helper: dump a textual representation of Document on the standard
-   --  output.
+   procedure Dump
+     (Document : Document_Type; Trace : GNATCOLL.Traces.Trace_Handle := null);
+   --  Debug helper: dump a textual representation of ``Document`` on the given
+   --  trace (do nothing if the trace is disabled), or on the standard output
+   --  (if ``Trace`` is null).
 
 private
 

@@ -3,10 +3,13 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+with Ada.Characters.Handling;
 with Ada.Command_Line;
 with Ada.Containers.Hashed_Maps;
+with Ada.Containers.Hashed_Sets;
 with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded;    use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded.Hash;
 with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 with Ada.Unchecked_Deallocation;
@@ -40,6 +43,16 @@ package body Langkit_Support.Generic_API.Unparsing is
       return Unparsing_Configuration;
    --  Like ``Load_Unparsing_Config``, but loading the unparsing configuration
    --  from an in-memory buffer rather than from a file.
+
+   package String_Sets is new Ada.Containers.Hashed_Sets
+     (Element_Type        => Unbounded_String,
+      Equivalent_Elements => "=",
+      Hash                => Hash);
+   Traces_To_Enable : String_Sets.Set;
+
+   procedure Process_Enable_Traces (Trace : GNATCOLL.Traces.Trace_Handle);
+   --  Callback for GNATCOLL.Traces.For_Each_Handle. If Traces's name matches
+   --  an element of Traces_To_Enable, activate it.
 
    function Is_Field_Present
      (Field          : Lk_Node;
@@ -309,6 +322,17 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Helper for ``Instantiate_Template_Helper``. Implement the recursive part
    --  of template instantiation: ``Instantiate_Template_Helper`` takes care of
    --  the template unwrapping.
+
+   ---------------------------
+   -- Process_Enable_Traces --
+   ---------------------------
+
+   procedure Process_Enable_Traces (Trace : GNATCOLL.Traces.Trace_Handle) is
+   begin
+      if Traces_To_Enable.Contains (To_Unbounded_String (Trace.Unit_Name)) then
+         Trace.Set_Active (True);
+      end if;
+   end Process_Enable_Traces;
 
    ----------------------
    -- Is_Field_Present --
@@ -2380,7 +2404,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       declare
          Internal_Result : Document_Type := Unparse_Node (Node);
       begin
+         Dump (Internal_Result, Before_Spacing_Trace);
          Insert_Required_Spacing (Pool, Internal_Result);
+         Dump (Internal_Result, Final_Doc_Trace);
          return Result : constant Prettier.Document_Type :=
            To_Prettier_Document (Internal_Result)
          do
@@ -2471,6 +2497,14 @@ package body Langkit_Support.Generic_API.Unparsing is
            "Grammar rule name to parse the source file to pretty-print",
          Default_Val => Default_Grammar_Rule (Language));
 
+      package Traces is new Parse_Option_List
+        (Parser      => Parser,
+         Short       => "-t",
+         Long        => "--trace",
+         Arg_Type    => Unbounded_String,
+         Help        =>
+           "LANGKIT.UNPARSING.*. sub-trace name to activate");
+
       package Config_Filename is new Parse_Positional_Arg
         (Parser   => Parser,
          Name     => "config-file",
@@ -2493,9 +2527,20 @@ package body Langkit_Support.Generic_API.Unparsing is
       Context : Lk_Context;
       Unit    : Lk_Unit;
    begin
+      GNATCOLL.Traces.Parse_Config_File;
       if not Parser.Parse then
          return;
       end if;
+
+      --  Enable all requested traces
+
+      for N of Traces.Get loop
+         Traces_To_Enable.Include
+           (To_Unbounded_String ("LANGKIT.UNPARSING.")
+            & To_Unbounded_String
+                (Ada.Characters.Handling.To_Upper (To_String (N))));
+      end loop;
+      GNATCOLL.Traces.For_Each_Handle (Process_Enable_Traces'Access);
 
       --  Parse the configuration file and the source file to pretty-print.
       --  Abort if there is a parsing failure.

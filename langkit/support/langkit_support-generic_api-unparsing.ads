@@ -81,6 +81,7 @@
 
 private with Ada.Finalization;
 
+with GNATCOLL.Traces;
 with Prettier_Ada.Documents;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
@@ -311,6 +312,22 @@ package Langkit_Support.Generic_API.Unparsing is
    --  Load the configuration file, the source to pretty-print and formatting
    --  options from the command line, then dump the pretty-printed source on
    --  the standard output.
+
+   ----------------------
+   -- Unparsing traces --
+   ----------------------
+
+   Before_Spacing_Trace : GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.UNPARSING.BEFORE_SPACING",
+        Default => GNATCOLL.Traces.From_Config);
+   --  Trace to dump the internal document just before required spacing is
+   --  inserted.
+
+   Final_Doc_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.UNPARSING.FINAL_DOC", Default => GNATCOLL.Traces.From_Config);
+   --  Trace to dump the final internal document, just before the conversion to
+   --  a Prettier document.
 
 private
 
