@@ -57,6 +57,10 @@ package Langkit_Support.Names is
    --  Format a name to the given casing convention. Raise an
    --  ``Invalid_Name_Error`` exception if ``Name`` is not initialized.
 
+   function Image (Name : Name_Type) return String
+   is (Image (Format_Name (Name, Camel_With_Underscores)));
+   --  Debug helper: return a human-readable text to represent a name
+
    function Hash (Name : Name_Type) return Ada.Containers.Hash_Type;
 
 private
