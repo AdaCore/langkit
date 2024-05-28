@@ -54,6 +54,8 @@
       subp_spec = (
          f"overriding function {subp_name} ({'; '.join(args)}) return {entity}"
       )
+
+      has_multiple_concrete_nodes = len(T.root_node.concrete_subclasses) > 1
    %>
 
    ${dynamic_vars_holder_decl(
@@ -84,11 +86,11 @@
          extra_entity_args_range = range(2, arity + 1)
 
          # List of all entity arguments ("Self" included) to pass to the
-         # property, plus their expected types as node kind ranges.
+         # property, plus their expected types.
          typed_entity_args = [
-            ("From", prop.struct.ada_kind_range_name),
+            ("From", prop.struct),
          ] + [
-            (f"Vals ({i})", arg.type.element_type.ada_kind_range_name)
+            (f"Vals ({i})", arg.type.element_type)
             for i, arg in zip(extra_entity_args_range, prop.natural_arguments)
          ]
       %>
@@ -100,20 +102,22 @@
       ## doing the call so that we can raise a Property_Error exception right
       ## now instead of letting Ada raise an automatic Constraint_Error.
       ##
-      ## No need to perform the check if there is only one concrete node in the
-      ## whole language, or we get a compilation warning.
-      % if len(T.root_node.concrete_subclasses) > 1:
-         % for arg, kind_range in typed_entity_args:
+      ## No need to perform the check if the expected kind is the root node or
+      ## if there is only one concrete node in the whole language, else get a
+      ## compilation warning.
+      % for arg, expected_type in typed_entity_args:
+         % if has_multiple_concrete_nodes and expected_type != T.root_node:
             if ${arg}.Node /= null
-               and then ${arg}.Node.Kind not in ${kind_range}
+               and then ${arg}.Node.Kind not in
+                 ${expected_type.ada_kind_range_name}
             then
                Raise_Property_Exception
                  (From.Node,
                   Property_Error'Identity,
                   "mismatching node type for ${error_name}");
             end if;
-         % endfor
-      % endif
+         % endif
+      % endfor
 
       ## Here, we just forward the return value from prop to our caller, so
       ## there is nothing to do regarding ref-counting.

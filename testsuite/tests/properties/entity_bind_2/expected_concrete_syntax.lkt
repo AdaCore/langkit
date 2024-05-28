@@ -6,6 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
+    fun foo_conv(): Entity[FooNode] = self
 }
 
 @abstract class RootNode: FooNode {
@@ -23,8 +24,13 @@ class Identifier: RootNode implements TokenNode {
 }
 
 class Literal: RootNode implements TokenNode {
-    fun conv(): Entity[Literal] = self
+    fun literal_conv(): Entity[Literal] = self
 
-    fun xref_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Equation =
-    %domain(node.var, [arg1]) and %eq(node.var, arg2, conv_prop=Literal.conv)
+    fun xref_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Equation = (
+        %domain(node.var, [arg1]) and %eq(node.var, arg2, conv_prop=Literal.literal_conv)
+    ) and (
+        # Also check that you can use a property defined on the root
+        # node type.
+        %eq(node.var, arg2, conv_prop=FooNode.foo_conv)
+    )
 }
