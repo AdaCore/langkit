@@ -1349,6 +1349,16 @@ package body Langkit_Support.Generic_API.Analysis is
       return First.TDH.Source_Buffer (FD.Source_First .. LD.Source_Last);
    end Text;
 
+   ----------------
+   -- Is_Comment --
+   ----------------
+
+   function Is_Comment (Self : Lk_Token) return Boolean is
+   begin
+      Check_Safety_Net (Self);
+      return Self.Desc /= null and then Is_Comment (Kind (Self));
+   end Is_Comment;
+
    ---------------
    -- Is_Trivia --
    ---------------
@@ -1356,7 +1366,6 @@ package body Langkit_Support.Generic_API.Analysis is
    function Is_Trivia (Self : Lk_Token) return Boolean is
    begin
       Check_Safety_Net (Self);
-      Reject_Null_Token (Self);
       return Self.Index.Trivia /= No_Token_Index;
    end Is_Trivia;
 

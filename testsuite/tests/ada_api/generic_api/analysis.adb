@@ -29,6 +29,8 @@ procedure Analysis is
    Ctx : Lk_Context;
    U   : Lk_Unit;
    N   : Lk_Node;
+
+   Comment_Tok : Lk_Token;
 begin
    New_Line;
 
@@ -384,6 +386,8 @@ begin
    Put_Line ("Testing various token operations:");
    Put_Line ("No_Lk_Token.Is_Null -> " & No_Lk_Token.Is_Null'Image);
    Put_Line ("First_Token.Is_Null -> " & U.First_Token.Is_Null'Image);
+   New_Line;
+
    Put_Line ("Checking the Token->Unit backlink...");
    if U.First_Token.Unit /= U then
       raise Program_Error with "wrong token->unit backlink";
@@ -398,17 +402,39 @@ begin
          Put_Line ("Got a Precondition_Failure exception: "
                    & Exception_Message (Exc));
    end;
+   New_Line;
+
    Put_Line ("Token_Count ->" & U.Token_Count'Image);
    Put_Line ("Trivia_Count ->" & U.Trivia_Count'Image);
+   New_Line;
+
    Put_Line ("First_Token.Kind -> "
              & Image (Format_Name (Token_Kind_Name (U.First_Token.Kind),
                                    Camel_With_Underscores)));
    Put_Line ("Last_Token.Kind -> "
              & Image (Format_Name (Token_Kind_Name (U.Last_Token.Kind),
                                    Camel_With_Underscores)));
+   Put ("No_Lk_Token.Kind -> ");
+   declare
+      Dummy : Token_Kind_Ref;
+   begin
+      Dummy := No_Lk_Token.Kind;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
+   Comment_Tok := U.Last_Token.Previous.Previous;
+
+   Put_Line ("No_Lk_Token.Image -> " & No_Lk_Token.Image);
    Put_Line ("First_Token.Image -> " & U.First_Token.Image);
    Put_Line ("Last_Token.Image -> " & U.Last_Token.Image);
-   Put_Line ("No_Lk_Token.Image -> " & No_Lk_Token.Image);
+   Put_Line ("Comment_Tok.Image -> " & Comment_Tok.Image);
+   Put_Line ("Last_Token.Previous.Image -> " & U.Last_Token.Previous.Image);
+   New_Line;
+
    Put_Line ("First_Token.Text -> "
              & Image (U.First_Token.Text, With_Quotes => True));
    Put_Line ("Last_Token.Text -> "
@@ -421,17 +447,33 @@ begin
          Put_Line ("Got a Precondition_Failure exception: "
                    & Exception_Message (Exc));
    end;
+   New_Line;
+
    Put_Line ("No_Lk_Token.Next -> " & No_Lk_Token.Next.Image);
    Put_Line ("First_Token.Next -> " & U.First_Token.Next.Image);
    Put_Line ("Last_Token.Next -> " & U.Last_Token.Next.Image);
+   New_Line;
+
    Put_Line ("No_Lk_Token.Previous -> " & No_Lk_Token.Previous.Image);
    Put_Line ("First_Token.Previous -> " & U.First_Token.Previous.Image);
    Put_Line ("Last_Token.Previous -> " & U.Last_Token.Previous.Image);
+   New_Line;
+
+   Put_Line ("No_Token.Is_Trivia -> " & No_Lk_Token.Is_Trivia'Image);
    Put_Line ("First_Token.Is_Trivia -> " & U.First_Token.Is_Trivia'Image);
    Put_Line ("Last_Token.Is_Trivia -> " & U.Last_Token.Is_Trivia'Image);
    Put_Line ("Last_Token.Previous.Is_Trivia -> "
              & U.Last_Token.Previous.Is_Trivia'Image);
+   New_Line;
+
    Put_Line ("First_Token.Index ->" & U.First_Token.Index'Image);
+   Put_Line ("Last_Token.Index ->" & U.Last_Token.Index'Image);
+   New_Line;
+
+   Put_Line ("No_Token.Is_Comment -> " & No_Lk_Token.Is_Comment'Image);
+   Put_Line ("First_Token.Is_Comment -> " & U.First_Token.Is_Comment'Image);
+   Put_Line ("Last_Token.Is_Comment -> " & U.Last_Token.Is_Comment'Image);
+   Put_Line ("Comment_Tok.Is_Comment -> " & Comment_Tok.Is_Comment'Image);
    New_Line;
 
    Put_Line ("Testing ordering predicate for various cases:");

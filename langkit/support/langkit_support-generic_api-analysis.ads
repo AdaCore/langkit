@@ -256,7 +256,7 @@ package Langkit_Support.Generic_API.Analysis is
    --  such child.
 
    function Children (Self : Lk_Node) return Lk_Node_Array;
-   --  Return the number of children in ``Node``
+   --  Return the children in ``Node``
 
    function Next_Sibling (Self : Lk_Node'Class) return Lk_Node;
    --  Return the ``Node``'s next sibling, or null if there is no such sibling
@@ -390,8 +390,13 @@ package Langkit_Support.Generic_API.Analysis is
    --  This raises a ``Precondition_Failure`` if ``First`` and ``Last`` don't
    --  belong to the same analysis unit.
 
+   function Is_Comment (Self : Lk_Token) return Boolean;
+   --  Return whether unparsing must treat the given token kind as a comment,
+   --  i.e. a trivia to preserve in unparsed sources. Return False if passed a
+   --  null token.
+
    function Is_Trivia (Self : Lk_Token) return Boolean;
-   --  Return whether this token is a trivia. If it's not, it's a regular token
+   --  Return whether this token is not null and is a trivia
 
    function Index (Self : Lk_Token) return Token_Index;
    --  One-based index for this token/trivia. Tokens and trivias get their own
