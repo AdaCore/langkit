@@ -100,6 +100,37 @@ package body ${ada_lib_name}.Implementation.C is
 
    Last_Exception : ${exception_type}_Ptr := null;
 
+   -----------------------------
+   -- UTF transcoding helpers --
+   -----------------------------
+
+   type U32_Array is array (size_t range <>) of Unsigned_32;
+   type U8_Array is array (size_t range <>) of Unsigned_8;
+   function "+" is new Ada.Unchecked_Conversion (System.Address, chars_ptr);
+      function "+" is new Ada.Unchecked_Conversion (chars_ptr, System.Address);
+
+   function Codepoint_UTF8_Size (Codepoint : Unsigned_32) return size_t
+   is (case Codepoint is
+       when 0 .. 16#7f#                => 1,
+       when 16#80# .. 16#07ff#         => 2,
+       when 16#0800# .. 16#ffff#       => 3,
+       when 16#01_0000# .. 16#10_ffff# => 4,
+       when others                     => raise Program_Error);
+   --  Return the number of bytes necessary to encode the given codepoint in
+   --  UTF8.
+
+   procedure UTF32_To_UTF8
+     (UTF32 : U32_Array; Bytes : out chars_ptr; Length : out size_t);
+   --  Allocate an UTF-8 buffer and transcode the given UTF-32 buffer into it.
+   --  But the allocated buffer in ``Bytes`` and its size in ``Length``.
+
+   function UTF8_Codepoints_Count (UTF8 : U8_Array) return Natural;
+   --  Return the number of codepoints in the given UTF-8 buffer
+
+   procedure UTF8_To_UTF32 (UTF8 : U8_Array; UTF32 : out U32_Array);
+   --  Assuming that UTF8 contains UTF32'Size codepoints, transcode UTF8 into
+   --  UTF32.
+
    ----------
    -- Free --
    ----------
@@ -773,6 +804,263 @@ package body ${ada_lib_name}.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return System.Null_Address;
+   end;
+
+   -------------------
+   -- UTF32_To_UTF8 --
+   -------------------
+
+   procedure UTF32_To_UTF8
+     (UTF32 : U32_Array; Bytes : out chars_ptr; Length : out size_t)
+   is
+      Output : System.Address;
+   begin
+      --  Compute the size of the UTF-8 string and allocate it, using
+      --  System.Memory.Alloc so that users can call C's "free" function to
+      --  deallocate it.
+
+      Length := 0;
+      for C of UTF32 loop
+         Length := Length + Codepoint_UTF8_Size (C);
+      end loop;
+      Output := System.Memory.Alloc (System.Memory.size_t (Length));
+      Bytes := +Output;
+
+      --  Do the conversion
+
+      declare
+         B    : U8_Array (1 .. Length) with Import, Address => Output;
+         Next : size_t := B'First;
+      begin
+         for C of UTF32 loop
+            case C is
+               when 0 .. 16#7f# =>
+                  B (Next) := Unsigned_8 (C);
+                  Next := Next + 1;
+
+               when 16#80# .. 16#07ff# =>
+                  B (Next) :=
+                    16#c0# or Unsigned_8 (Shift_Right (C and 16#07c0#, 6));
+                  B (Next + 1) :=
+                    16#80# or Unsigned_8 (C and 16#003f#);
+                  Next := Next + 2;
+
+               when 16#0800# .. 16#ffff# =>
+                  B (Next) :=
+                    16#e0# or Unsigned_8 (Shift_Right (C and 16#f000#, 12));
+                  B (Next + 1) :=
+                    16#80# or Unsigned_8 (Shift_Right (C and 16#0fc0#, 6));
+                  B (Next + 2) :=
+                    16#80# or Unsigned_8 (C and 16#003f#);
+                  Next := Next + 3;
+
+               when 16#01_0000# .. 16#10_ffff# =>
+                  B (Next) :=
+                    16#f0# or Unsigned_8 (Shift_Right (C and 16#1c_0000#, 18));
+                  B (Next + 1) :=
+                    16#80# or Unsigned_8 (Shift_Right (C and 16#03_f000#, 12));
+                  B (Next + 2) :=
+                    16#80# or Unsigned_8 (Shift_Right (C and 16#00_0fc0#, 6));
+                  B (Next + 3) :=
+                    16#80# or Unsigned_8 (C and 16#00_003f#);
+                  Next := Next + 4;
+
+               when others =>
+                  raise Program_Error;
+            end case;
+         end loop;
+      end;
+   end UTF32_To_UTF8;
+
+   ---------------------------
+   -- UTF8_Codepoints_Count --
+   ---------------------------
+
+   function UTF8_Codepoints_Count (UTF8 : U8_Array) return Natural is
+   begin
+      return Result : Natural := 0 do
+         for Byte of UTF8 loop
+            if (Byte and 16#c0#) /= 16#80# then
+               Result := Result + 1;
+            end if;
+         end loop;
+      end return;
+   end UTF8_Codepoints_Count;
+
+   -------------------
+   -- UTF8_To_UTF32 --
+   -------------------
+
+   procedure UTF8_To_UTF32 (UTF8 : U8_Array; UTF32 : out U32_Array) is
+      Next : size_t := UTF8'First;
+   begin
+      for C of UTF32 loop
+         case UTF8 (Next) and 16#f8# is
+            when 16#00# .. 16#78# =>
+               C := Unsigned_32 (UTF8 (Next));
+               Next := Next + 1;
+
+            when 16#c0# .. 16#d8# =>
+               C :=
+                 Shift_Left (Unsigned_32 (UTF8 (Next) and 16#1f#), 6)
+                 or Unsigned_32 (UTF8 (Next + 1) and 16#3f#);
+               Next := Next + 2;
+
+            when 16#e0# .. 16#e8# =>
+               C :=
+                 Shift_Left (Unsigned_32 (UTF8 (Next) and 16#0f#), 12)
+                 or Shift_Left (Unsigned_32 (UTF8 (Next + 1) and 16#3f#), 6)
+                 or Unsigned_32 (UTF8 (Next + 2) and 16#3f#);
+               Next := Next + 3;
+
+            when 16#f0# =>
+               C :=
+                 Shift_Left (Unsigned_32 (UTF8 (Next) and 16#07#), 18)
+                 or Shift_Left (Unsigned_32 (UTF8 (Next + 1) and 16#3f#), 12)
+                 or Shift_Left (Unsigned_32 (UTF8 (Next + 2) and 16#3f#), 6)
+                 or Unsigned_32 (UTF8 (Next + 3) and 16#3f#);
+               Next := Next + 4;
+
+            when others =>
+               raise Program_Error;
+         end case;
+      end loop;
+   end UTF8_To_UTF32;
+
+   procedure ${capi.get_name('text_to_utf8')}
+     (Text   : ${text_type};
+      Bytes  : out chars_ptr;
+      Length : out size_t) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         UTF32 : constant U32_Array (1 .. Text.Length)
+           with Import, Address => Text.Chars;
+      begin
+         UTF32_To_UTF8 (UTF32, Bytes, Length);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   procedure ${capi.get_name('text_from_utf8')}
+     (Bytes  : chars_ptr;
+      Length : size_t;
+      Text   : out ${text_type})
+   is
+      B : U8_Array (1 .. Length) with Import, Address => +Bytes;
+
+      --  Allocate a buffer with just enough room to transcode Bytes
+
+      Text_Length : Natural := 0;
+      Text_Alloc  : Text_Access;
+   begin
+      Clear_Last_Exception;
+
+      Text_Length := UTF8_Codepoints_Count (B);
+      Text_Alloc := new Text_Type (1 .. Text_Length);
+      Text :=
+        (Chars        => Text_Alloc.all'Address,
+         Length       => size_t (Text_Length),
+         Is_Allocated => 1);
+
+      --  Do the conversion
+
+      declare
+         T : U32_Array (1 .. size_t (Text_Length))
+           with Import, Address => Text_Alloc.all'Address;
+      begin
+         UTF8_To_UTF32 (B, T);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   procedure ${capi.get_name('char_to_utf8')}
+     (Char   : Unsigned_32;
+      Bytes  : out chars_ptr;
+      Length : out size_t) is
+   begin
+      Clear_Last_Exception;
+
+      UTF32_To_UTF8 ((1 => Char), Bytes, Length);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   procedure ${capi.get_name('char_from_utf8')}
+     (Bytes  : chars_ptr;
+      Length : size_t;
+      Char   : out Unsigned_32)
+   is
+      B : U8_Array (1 .. Length) with Import, Address => +Bytes;
+      T : U32_Array (1 .. 1);
+   begin
+      Clear_Last_Exception;
+
+      --  Callers are supposed to provide a 1 codepoint sized buffer
+
+      if UTF8_Codepoints_Count (B) /= 1 then
+         raise Program_Error;
+      end if;
+
+      UTF8_To_UTF32 (B, T);
+      Char := T (1);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   procedure ${capi.get_name('string_to_utf8')}
+     (Str    : ${string_type};
+      Bytes  : out chars_ptr;
+      Length : out size_t) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         UTF32 : constant U32_Array (1 .. size_t (Str.Length))
+           with Import, Address => Str.Content'Address;
+      begin
+         UTF32_To_UTF8 (UTF32, Bytes, Length);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   procedure ${capi.get_name('string_from_utf8')}
+     (Bytes  : chars_ptr;
+      Length : size_t;
+      Str    : out ${string_type})
+   is
+      B : U8_Array (1 .. Length) with Import, Address => +Bytes;
+
+      --  Allocate a buffer with just enough room to transcode Bytes
+
+      String_Length : Natural := 0;
+   begin
+      Clear_Last_Exception;
+
+      String_Length := UTF8_Codepoints_Count (B);
+      Str := new String_Record (String_Length);
+      Str.Ref_Count := 1;
+
+      --  Do the conversion
+
+      declare
+         T : U32_Array (1 .. size_t (String_Length))
+           with Import, Address => Str.Content'Address;
+      begin
+         UTF8_To_UTF32 (B, T);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end;
 
    ----------
