@@ -2292,7 +2292,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             when With_Recurse_Field =>
 
                --  Compute sub-documents for all fields (do not forget the
-               --  field's own pre/post tokensn) and let the template do its
+               --  field's own pre/post tokens) and let the template do its
                --  magic.
 
                declare
