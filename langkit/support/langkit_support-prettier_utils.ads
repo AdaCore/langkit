@@ -322,6 +322,10 @@ private package Langkit_Support.Prettier_Utils is
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
 
+   procedure Detect_Broken_Groups (Self : Document_Type);
+   --  Set the Group_Should_Break flag for all groups that can be statically
+   --  proven to be broken.
+
    procedure Dump
      (Document : Document_Type; Trace : GNATCOLL.Traces.Trace_Handle := null);
    --  Debug helper: dump a textual representation of ``Document`` on the given

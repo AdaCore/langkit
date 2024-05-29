@@ -324,6 +324,13 @@ package Langkit_Support.Generic_API.Unparsing is
    --  Trace to dump the internal document just before required spacing is
    --  inserted.
 
+   Broken_Groups_Trace : GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.UNPARSING.BROKEN_GROUPS",
+        Default => GNATCOLL.Traces.From_Config);
+   --  Trace to dump the internal document just after the broken groups
+   --  detection.
+
    Final_Doc_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.UNPARSING.FINAL_DOC", Default => GNATCOLL.Traces.From_Config);
    --  Trace to dump the final internal document, just before the conversion to
