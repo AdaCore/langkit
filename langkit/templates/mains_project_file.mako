@@ -56,7 +56,12 @@ project Mains is
    end Compiler;
 
    package Binder is
-      for Switches ("ada") use ("-E");
+      case Build_Mode is
+         when "dev" =>
+            for Switches ("Ada") use ("-Es");
+         when "prod" | "prof" =>
+            for Switches ("Ada") use ("-E");
+      end case;
    end Binder;
 
 end Mains;
