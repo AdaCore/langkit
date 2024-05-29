@@ -2030,6 +2030,9 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Break_Parent =>
             return Pool.Create_Break_Parent;
 
+         when Expected_Line_Breaks =>
+            raise Program_Error with "invalid template node";
+
          when Fill =>
             return Pool.Create_Fill
               (Instantiate_Template_Helper

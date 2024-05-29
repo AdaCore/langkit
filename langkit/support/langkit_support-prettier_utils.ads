@@ -62,6 +62,7 @@ private package Langkit_Support.Prettier_Utils is
    type Document_Kind is
      (Align,
       Break_Parent,
+      Expected_Line_Breaks,
       Fill,
       Group,
       Hard_Line,
@@ -87,6 +88,9 @@ private package Langkit_Support.Prettier_Utils is
 
          when Break_Parent =>
             null;
+
+         when Expected_Line_Breaks =>
+            Expected_Line_Breaks_Count : Positive;
 
          when Fill =>
             Fill_Document : Document_Type;
@@ -215,6 +219,10 @@ private package Langkit_Support.Prettier_Utils is
      (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Break_Parent`` node
 
+   function Create_Expected_Line_Breaks
+     (Self : in out Document_Pool; Count : Positive) return Document_Type;
+   --  Return an ``Expected_Line_Breaks`` node
+
    function Create_Fill
      (Self     : in out Document_Pool;
       Document : Document_Type) return Document_Type;
@@ -298,15 +306,25 @@ private package Langkit_Support.Prettier_Utils is
       Text : Unbounded_Text_Type) return Document_Type;
    --  Return a ``Token`` node
 
+   function Create_Trim (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Trim`` node
+
    function Create_Whitespace
      (Self   : in out Document_Pool;
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
 
-   function Create_Trim (Self : in out Document_Pool) return Document_Type;
-   --  Return a ``Trim`` node
+   procedure Dump
+     (Document : Document_Type; Trace : GNATCOLL.Traces.Trace_Handle := null);
+   --  Debug helper: dump a textual representation of ``Document`` on the given
+   --  trace (do nothing if the trace is disabled), or on the standard output
+   --  (if ``Trace`` is null).
 
-   type Spacing_Kind is (None, Whitespace, Newline);
+   -------------
+   -- Spacing --
+   -------------
+
+   type Spacing_Kind is (None, Whitespace, Line_Breaks);
    --  Spacing required between two tokens:
    --
    --  * ``None``: no spacing required, the two tokens can be unparsed next to
@@ -317,11 +335,42 @@ private package Langkit_Support.Prettier_Utils is
    --    tabulation: whatever the language accepts as a whitespace) is required
    --    after the first token.
    --
-   --  * ``Newline``: a line break is required right after the first token.
-   --    Extra spacing is permitted after that line break.
+   --  * ``Line_Breaks``: a given number of line breaks is required right after
+   --    the first token.  Extra spacing is permitted after that line break.
+
+   type Spacing_Type (Kind : Spacing_Kind := Spacing_Kind'First) is record
+      case Kind is
+         when None | Whitespace => null;
+         when Line_Breaks =>
+            Count : Positive;
+      end case;
+   end record;
+
+   No_Spacing          : constant Spacing_Type := (Kind => None);
+   Whitespace_Spacing  : constant Spacing_Type := (Kind => Whitespace);
+   One_Line_Break_Spacing : constant Spacing_Type :=
+     (Kind => Line_Breaks, Count => 1);
+
+   --  There is a total order for all possible Spacing_Type values:
+   --
+   --  * ``No_Spacing`` is the weakest spacing requirement.
+   --  * ``Whitespace_Spacing`` is the second weakest.
+   --  * ``One_Line_Break_Spacing`` is the third weakest.
+   --  * ``(Line_Breaks, 2)`` is the fourth.
+   --  * ... and so on.
+
+   function "<" (Left, Right : Spacing_Type) return Boolean;
+   function "<=" (Left, Right : Spacing_Type) return Boolean
+   is (Left < Right or else Left = Right);
+
+   function Max_Spacing (Left, Right : Spacing_Type) return Spacing_Type
+   is (if Left < Right then Right else Left);
+
+   function Min_Spacing (Left, Right : Spacing_Type) return Spacing_Type
+   is (if Left < Right then Left else Right);
 
    function Required_Spacing
-     (Left, Right : Token_Kind_Ref) return Spacing_Kind;
+     (Left, Right : Token_Kind_Ref) return Spacing_Type;
    --  Return the spacing that is required when unparsing a token of kind
    --  ``Right`` just after a token of kind ``Left`` to a source buffer.
    --
@@ -332,17 +381,17 @@ private package Langkit_Support.Prettier_Utils is
    --  unprase in the source buffer yet) and ``Right`` is the first token to
    --  unparse to the source buffer.
 
+   procedure Extend_Spacing
+     (Self : in out Spacing_Type; Requirement : Spacing_Type);
+   --  Shortcut for::
+   --
+   --     Self := Max_Spacing (Self, Requirement);
+
    procedure Insert_Required_Spacing
      (Pool : in out Document_Pool; Document : in out Document_Type);
    --  Adjust the tree of nodes in ``Document`` so that formatting that
    --  unparsing document will leave the mandatory spacing between tokens (i.e.
    --  so that the formatted document can be re-parsed correctly).
-
-   procedure Dump
-     (Document : Document_Type; Trace : GNATCOLL.Traces.Trace_Handle := null);
-   --  Debug helper: dump a textual representation of ``Document`` on the given
-   --  trace (do nothing if the trace is disabled), or on the standard output
-   --  (if ``Trace`` is null).
 
 private
 
