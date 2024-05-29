@@ -2502,6 +2502,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          Short       => "-t",
          Long        => "--trace",
          Arg_Type    => Unbounded_String,
+         Accumulate  => True,
          Help        =>
            "LANGKIT.UNPARSING.*. sub-trace name to activate");
 
