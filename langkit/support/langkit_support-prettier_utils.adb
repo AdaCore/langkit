@@ -120,6 +120,9 @@ package body Langkit_Support.Prettier_Utils is
             when Expected_Line_Breaks =>
                raise Program_Error with "unexpanded document";
 
+            when Expected_Whitespaces =>
+               raise Program_Error with "unexpanded document";
+
             when Fill =>
                return Fill (Recurse (Document.Fill_Document));
 
@@ -295,6 +298,21 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_Expected_Line_Breaks;
+
+   ---------------------------------
+   -- Create_Expected_Whitespaces --
+   ---------------------------------
+
+   function Create_Expected_Whitespaces
+     (Self : in out Document_Pool; Count : Positive) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind => Expected_Whitespaces, Expected_Whitespaces_Count => Count)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Expected_Whitespaces;
 
    -----------------
    -- Create_Fill --
@@ -689,6 +707,11 @@ package body Langkit_Support.Prettier_Utils is
                  (Prefix & "expectedLineBreaks:"
                   & Document.Expected_Line_Breaks_Count'Image);
 
+            when Expected_Whitespaces =>
+               Write
+                 (Prefix & "expectedWhitespaces:"
+                  & Document.Expected_Whitespaces_Count'Image);
+
             when Fill =>
                Write (Prefix & "fill:");
                Process (Document.Fill_Document, Prefix & Simple_Indent);
@@ -803,10 +826,9 @@ package body Langkit_Support.Prettier_Utils is
       end if;
 
       case Left.Kind is
-         when None | Whitespace =>
+         when None =>
             return False;
-
-         when Line_Breaks =>
+         when Whitespaces | Line_Breaks =>
             return Left.Count < Right.Count;
       end case;
    end "<";
@@ -844,7 +866,7 @@ package body Langkit_Support.Prettier_Utils is
          elsif Id.Unparsers.Token_Spacings
                  (Family (LK), Family (To_Index (Right)))
          then
-            return Whitespace_Spacing;
+            return One_Whitespace_Spacing;
 
          else
             return No_Spacing;
@@ -864,10 +886,10 @@ package body Langkit_Support.Prettier_Utils is
 
       elsif Self.Kind = Requirement.Kind then
          case Self.Kind is
-            when None | Whitespaces =>
+            when None =>
                null;
 
-            when Line_Breaks =>
+            when Whitespaces | Line_Breaks =>
                Self.Count := Self.Count + Requirement.Count;
          end case;
       end if;
@@ -952,6 +974,17 @@ package body Langkit_Support.Prettier_Utils is
 
                Document := Pool.Create_Empty_List;
 
+            when Expected_Whitespaces =>
+
+               Extend_Spacing
+                 (State.Expected,
+                  (Whitespaces, Document.Expected_Whitespaces_Count));
+
+               --  The translator to Prettier does not support this internal
+               --  node: replace it with an empty list.
+
+               Document := Pool.Create_Empty_List;
+
             when Fill =>
                Process (Document.Fill_Document, State);
 
@@ -989,7 +1022,7 @@ package body Langkit_Support.Prettier_Utils is
                --  A Line command can be replaced by line breaks or a space: be
                --  conservative and consider its weakest form: a space.
 
-               Extend_Spacing (State.Actual, Whitespace_Spacing);
+               Extend_Spacing (State.Actual, One_Whitespace_Spacing);
 
             when List =>
                for I in 1 .. Document.List_Documents.Last_Index loop
@@ -1042,15 +1075,27 @@ package body Langkit_Support.Prettier_Utils is
                         when None =>
                            raise Program_Error;
 
-                        when Whitespace =>
-                           Items.Append (Pool.Create_Whitespace);
+                        when Whitespaces =>
+                           declare
+                              Last_Whitespaces : constant Natural :=
+                                (case Saved_Actual.Kind is
+                                 when None        => 0,
+                                 when Whitespaces => Saved_Actual.Count,
+                                 when Line_Breaks => raise Program_Error);
+                              Count_To_Add     : constant Positive :=
+                                Required.Count - Last_Whitespaces;
+                           begin
+                              Items.Append
+                                (Pool.Create_Whitespace (Count_To_Add));
+                           end;
 
                         when Line_Breaks =>
                            declare
                               Last_Line_Breaks : constant Natural :=
                                 (case Saved_Actual.Kind is
-                                 when None | Whitespace => 0,
-                                 when Line_Breaks       => Saved_Actual.Count);
+                                 when None | Whitespaces => 0,
+                                 when Line_Breaks        =>
+                                        Saved_Actual.Count);
                            begin
                               for Dummy in 1
                                         .. Required.Count - Last_Line_Breaks
@@ -1068,7 +1113,7 @@ package body Langkit_Support.Prettier_Utils is
                null;
 
             when Whitespace =>
-               Extend_Spacing (State.Actual, Whitespace_Spacing);
+               Extend_Spacing (State.Actual, One_Whitespace_Spacing);
          end case;
       end Process;
 

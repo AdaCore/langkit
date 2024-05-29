@@ -2033,6 +2033,9 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Expected_Line_Breaks =>
             raise Program_Error with "invalid template node";
 
+         when Expected_Whitespaces =>
+            raise Program_Error with "invalid template node";
+
          when Fill =>
             return Pool.Create_Fill
               (Instantiate_Template_Helper

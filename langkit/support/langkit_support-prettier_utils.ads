@@ -63,6 +63,7 @@ private package Langkit_Support.Prettier_Utils is
      (Align,
       Break_Parent,
       Expected_Line_Breaks,
+      Expected_Whitespaces,
       Fill,
       Group,
       Hard_Line,
@@ -91,6 +92,9 @@ private package Langkit_Support.Prettier_Utils is
 
          when Expected_Line_Breaks =>
             Expected_Line_Breaks_Count : Positive;
+
+         when Expected_Whitespaces =>
+            Expected_Whitespaces_Count : Positive;
 
          when Fill =>
             Fill_Document : Document_Type;
@@ -223,6 +227,10 @@ private package Langkit_Support.Prettier_Utils is
      (Self : in out Document_Pool; Count : Positive) return Document_Type;
    --  Return an ``Expected_Line_Breaks`` node
 
+   function Create_Expected_Whitespaces
+     (Self : in out Document_Pool; Count : Positive) return Document_Type;
+   --  Return an ``Expected_Whitespaces`` node
+
    function Create_Fill
      (Self     : in out Document_Pool;
       Document : Document_Type) return Document_Type;
@@ -324,39 +332,42 @@ private package Langkit_Support.Prettier_Utils is
    -- Spacing --
    -------------
 
-   type Spacing_Kind is (None, Whitespace, Line_Breaks);
+   type Spacing_Kind is (None, Whitespaces, Line_Breaks);
    --  Spacing required between two tokens:
    --
    --  * ``None``: no spacing required, the two tokens can be unparsed next to
    --    each other in the source buffer (spacing is permitted, but not
    --    necessary).
    --
-   --  * ``Whitespace``: at least one whitespace (line break, space, horizontal
-   --    tabulation: whatever the language accepts as a whitespace) is required
-   --    after the first token.
+   --  * ``Whitespaces``: a given number of whitespaces is required after the
+   --    first token. Note that one line break satisfies an arbitrary number of
+   --    required whitespaces.
    --
    --  * ``Line_Breaks``: a given number of line breaks is required right after
    --    the first token.  Extra spacing is permitted after that line break.
 
    type Spacing_Type (Kind : Spacing_Kind := Spacing_Kind'First) is record
       case Kind is
-         when None | Whitespace => null;
-         when Line_Breaks =>
-            Count : Positive;
+         when None                      => null;
+         when Whitespaces | Line_Breaks => Count : Positive;
       end case;
    end record;
 
-   No_Spacing          : constant Spacing_Type := (Kind => None);
-   Whitespace_Spacing  : constant Spacing_Type := (Kind => Whitespace);
+   No_Spacing             : constant Spacing_Type := (Kind => None);
+   One_Whitespace_Spacing : constant Spacing_Type :=
+     (Kind => Whitespaces, Count => 1);
    One_Line_Break_Spacing : constant Spacing_Type :=
      (Kind => Line_Breaks, Count => 1);
 
    --  There is a total order for all possible Spacing_Type values:
    --
    --  * ``No_Spacing`` is the weakest spacing requirement.
-   --  * ``Whitespace_Spacing`` is the second weakest.
-   --  * ``One_Line_Break_Spacing`` is the third weakest.
-   --  * ``(Line_Breaks, 2)`` is the fourth.
+   --  * ``One_Whitespace_Spacing`` is the second weakest.
+   --  * ``(Whitespaces, 2)`` comes third.
+   --  * ...
+   --  * ``One_Line_Break_Spacing`` is stronger than all whitespaces
+   --    requirements.
+   --  * Then comes ``(Line_Breaks, 2)``.
    --  * ... and so on.
 
    function "<" (Left, Right : Spacing_Type) return Boolean;
