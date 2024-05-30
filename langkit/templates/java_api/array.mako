@@ -10,7 +10,7 @@
     c_type = cls.c_type(capi).name
 
     elem_java_type = api.wrapping_type(cls.element_type)
-    elem_java_unw_type = api.wrapping_type(cls.element_type, False)
+    elem_java_unw_type = api.wrapping_type(cls.element_type, ast_wrapping=False)
     elem_ni_type = api.ni_type(cls.element_type)
     elem_ni_ref_type = api.ni_reference_type(cls.element_type)
     %>
@@ -320,7 +320,7 @@ jmethodID ${wrapper_type}_unwrap_method_id = NULL;
 
     elem_c_type = cls.element_type.c_type(capi).name
     elem_jni_c_type = api.jni_c_type(cls.element_type)
-    elem_java_type = api.wrapping_type(cls.element_type, False)
+    elem_java_type = api.wrapping_type(cls.element_type, ast_wrapping=False)
     elem_sig = f"L{sig_base}${elem_java_type};"
 
     array_creation_function = api.jni_new_array(cls)
