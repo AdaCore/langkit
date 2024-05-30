@@ -1154,22 +1154,35 @@ package body Langkit_Support.Prettier_Utils is
                Extend_Spacing (State.Actual, One_Line_Break_Spacing);
 
             when If_Break =>
-               declare
-                  Break_State : Spacing_State := State;
-                  Flat_State  : Spacing_State := State;
-               begin
-                  --  If this If_Break node is conditionned on its own parent
-                  --  group, then the If_Break_Content part is known to operate
-                  --  in a broken group.
 
-                  if Document.If_Break_Group_Id = No_Template_Symbol then
-                     Break_State.In_Broken_Group := True;
-                  end if;
+               --  If this If_Break node is conditionned on its own parent
+               --  group and if we know that this parent group is broken,
+               --  simplify the tree: just keep the "broken group" branch.
 
-                  Process (Document.If_Break_Contents, Break_State);
-                  Process (Document.If_Break_Flat_Contents, Flat_State);
-                  State := Join (Break_State, Flat_State);
-               end;
+               if Document.If_Break_Group_Id = No_Template_Symbol
+                  and then State.In_Broken_Group
+               then
+                  Document := Document.If_Break_Contents;
+                  Process (Document, State);
+
+               else
+                  declare
+                     Break_State : Spacing_State := State;
+                     Flat_State  : Spacing_State := State;
+                  begin
+                     --  If this If_Break node is conditionned on its own
+                     --  parent group, then the If_Break_Content part is known
+                     --  to operate in a broken group.
+
+                     if Document.If_Break_Group_Id = No_Template_Symbol then
+                        Break_State.In_Broken_Group := True;
+                     end if;
+
+                     Process (Document.If_Break_Contents, Break_State);
+                     Process (Document.If_Break_Flat_Contents, Flat_State);
+                     State := Join (Break_State, Flat_State);
+                  end;
+               end if;
 
             when If_Empty =>
                raise Program_Error;
