@@ -166,6 +166,12 @@ Sequence content :
   <Example foo.txt:1:19-1:26>
   <Var foo.txt:1:27-1:53>
 Array equality = false
+Integer array size = 3
+Integer array size (from property) = 3
+Integer array content :
+  1
+  2
+  3
 --------------
 
 --- Symbols ---

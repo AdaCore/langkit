@@ -543,16 +543,16 @@ class JavaAPISettings(AbstractAPISettings):
             (object, lambda t: f"{self.wrapper_class(t, ast_wrapping)}.NONE"),
         ])
 
-    def is_java_nullable(self, the_type: CompiledType) -> bool:
+    def is_java_primitive(self, the_type: CompiledType) -> bool:
         """
-        Get if the given type is nullable in the Java semantic.
+        Get whether the given type maps to a primitive Java type.
 
-        :param the_type: The type to verify the nullability.
+        :param the_type: The type.
         """
         return dispatch_on_type(the_type, [
-            (T.Bool, lambda _: False),
-            (T.Int, lambda _: False),
-            (object, lambda _: True),
+            (T.Bool, lambda _: True),
+            (T.Int, lambda _: True),
+            (object, lambda _: False),
         ])
 
     # ----- Native-Image methods -----
@@ -1060,6 +1060,44 @@ class JavaAPISettings(AbstractAPISettings):
             (T.Bool, lambda _: "GetBooleanField"),
             (T.Int, lambda _: "GetIntField"),
             (object, lambda _: "GetObjectField"),
+        ])
+
+    def jni_new_array(self, the_type: CompiledType) -> str:
+        """
+        Get the JNI function to create a new JNI array of the given type.
+
+        :param the_type: The type to get the array creation function for.
+        """
+        return dispatch_on_type(the_type.element_type, [
+            (T.Bool, lambda _: "NewBooleanArray"),
+            (T.Int, lambda _: "NewIntArray"),
+            (object, lambda _: "NewObjectArray"),
+        ])
+
+    def jni_array_access(self, the_type: CompiledType) -> str:
+        """
+        Get the JNI function to access array elements in an array of the given
+        type.
+
+        :param the_type: The type to get the access function for.
+        """
+        return dispatch_on_type(the_type.element_type, [
+            (T.Bool, lambda _: "GetBooleanArrayRegion"),
+            (T.Int, lambda _: "GetIntArrayRegion"),
+            (object, lambda _: "GetObjectArrayElement"),
+        ])
+
+    def jni_array_writing(self, the_type: CompiledType) -> str:
+        """
+        Get the JNI function to write array elements in an array of the given
+        type.
+
+        :param the_type: The type to get the writing function for.
+        """
+        return dispatch_on_type(the_type.element_type, [
+            (T.Bool, lambda _: "SetBooleanArrayRegion"),
+            (T.Int, lambda _: "SetIntArrayRegion"),
+            (object, lambda _: "SetObjectArrayElement"),
         ])
 
     def jni_new_value(self, the_type: CompiledType) -> str:

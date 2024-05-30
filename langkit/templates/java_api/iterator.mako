@@ -91,7 +91,7 @@
 <%def name="jni_c_decl(cls)">
     <%
     api = java_api
-    j_name = api.wrapping_type(cls, False)
+    j_name = api.wrapping_type(cls, ast_wrapping=False)
     c_name = cls.c_type(capi).name
     %>
 
@@ -107,7 +107,7 @@ jfieldID ${j_name}_reference_field_id = NULL;
 <%def name="jni_init_global_refs(cls)">
     <%
     api = java_api
-    j_name = api.wrapping_type(cls, False)
+    j_name = api.wrapping_type(cls, ast_wrapping=False)
 
     sig_base = f"com/adacore/{ctx.lib_name.lower}/{ctx.lib_name.camel}"
     ptr_sig = f"{sig_base}$PointerWrapper"
@@ -136,7 +136,7 @@ jfieldID ${j_name}_reference_field_id = NULL;
 <%def name="jni_c_impl(cls)">
     <%
     api = java_api
-    j_name = api.wrapping_type(cls, False)
+    j_name = api.wrapping_type(cls, ast_wrapping=False)
     c_name = cls.c_type(capi).name
     %>
 

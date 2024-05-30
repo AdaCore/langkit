@@ -49,6 +49,14 @@ class FooNode(ASTNode):
         return c
 
     @langkit_property(public=True)
+    def get_int_array():
+        return [1, 2, 3]
+
+    @langkit_property(public=True)
+    def array_len(a=T.Int.array):
+        return a.length
+
+    @langkit_property(public=True)
     def identity(c=T.Character):
         return c
 

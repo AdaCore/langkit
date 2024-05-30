@@ -22,6 +22,10 @@ enum Color {
 
     @export fun get_eacute(c: Char = 'é'): Char = c
 
+    @export fun get_int_array(): Array[Int] = [1, 2, 3]
+
+    @export fun array_len(a: Array[Int]): Int = a.length()
+
     @export fun identity(c: Char): Char = c
 
     @export fun get_str(s: String): String = s

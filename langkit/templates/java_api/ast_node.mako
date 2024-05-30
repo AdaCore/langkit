@@ -192,7 +192,7 @@
     native_function = nat(field.accessor_basename.lower)
 
     return_type = api.wrapping_type(method.public_type)
-    return_unw_type = api.wrapping_type(method.public_type, False)
+    return_unw_type = api.wrapping_type(method.public_type, ast_wrapping=False)
     return_ni_ref_type = api.ni_reference_type(method.public_type)
 
     need_unit = api.field_needs_context(field) or api.field_needs_unit(field)
@@ -213,7 +213,7 @@
 
             // Verify that arguments are not null
             % for param in method.params:
-                % if api.is_java_nullable(param.public_type):
+                % if not api.is_java_primitive(param.public_type):
             if(${param.name} == null) throw new IllegalArgumentException(
                 "Argument '${param.name}' of type " +
                 "${api.wrapping_type(param.public_type)} cannot be null"
@@ -360,7 +360,7 @@
         % for field in cls.fields_with_accessors():
             <%
             native_function = nat(field.accessor_basename.lower)
-            jni_type = api.wrapping_type(field.public_type, False)
+            jni_type = api.wrapping_type(field.public_type, ast_wrapping=False)
             %>
 
         % if not field.accessor_basename.lower in api.excluded_fields:
@@ -368,7 +368,8 @@
         @CompilerDirectives.TruffleBoundary
         public static native ${jni_type} ${native_function}(
             % for arg in field.arguments:
-            ${api.wrapping_type(arg.public_type, False)} ${arg.name.lower},
+            ${api.wrapping_type(arg.public_type, ast_wrapping=False)}
+            ${arg.name.lower},
             % endfor
             Entity node
         );
@@ -457,15 +458,21 @@ ${func_sig}(
 
         /* Release resources used to wrap the result.  */
         % for to_release in return_release_list:
-          ${api.wrapper_class(to_release.public_type, False)}_release(
-              ${to_release.name}
-          );
+        ${api.wrapper_class(
+            to_release.public_type,
+            ast_wrapping=False
+        )}_release(
+            ${to_release.name}
+        );
         % endfor
       }
 
     /* Release resources used to unwrap the arguments.  */
     % for to_release in args_release_list:
-    ${api.wrapper_class(to_release.public_type, False)}_release(
+    ${api.wrapper_class(
+        to_release.public_type,
+        ast_wrapping=False
+    )}_release(
         ${to_release.name}
     );
     % endfor

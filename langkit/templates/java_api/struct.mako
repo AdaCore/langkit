@@ -43,8 +43,8 @@
          */
         ${java_type}(
             ${','.join([
-                f"final "
-                f"{api.wrapping_type(field.public_type, wrap_nodes)}"
+                "final " +
+                api.wrapping_type(field.public_type, ast_wrapping=wrap_nodes) +
                 f" {field.name}"
                 for field in fields
             ])}
@@ -59,8 +59,8 @@
          */
         public static ${java_type} create(
             ${','.join([
-                f"final "
-                f"{api.wrapping_type(field.public_type, wrap_nodes)}"
+                "final " +
+                api.wrapping_type(field.public_type, ast_wrapping=wrap_nodes) +
                 f" {field.name}"
                 for field in fields
             ])}
