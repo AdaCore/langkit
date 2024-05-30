@@ -4,7 +4,7 @@ Check that ``NPropagate`` expressions work as expected.
 
 from langkit.dsl import ASTNode, Field, T, UserField
 from langkit.expressions import (
-    All, Bind, Entity, If, NPropagate, PropertyError, Self, Var, ignore,
+    All, ArrayLiteral, Bind, If, NPropagate, PropertyError, Self, Var,
     langkit_property
 )
 
@@ -19,9 +19,12 @@ class Literal(FooNode):
     token_node = True
 
     @langkit_property()
-    def combiner(other=T.Literal.entity):
-        ignore(other)
-        return Entity
+    def static_combiner(other=T.Literal.entity):
+        return other
+
+    @langkit_property()
+    def dynamic_combiner(lits=T.Literal.entity.array):
+        return lits.at(0)
 
 
 class Plus(FooNode):
@@ -29,14 +32,21 @@ class Plus(FooNode):
     rhs = Field()
 
     @langkit_property(public=True)
-    def resolve(lhs=T.FooNode.entity, rhs=T.FooNode.entity):
-        eq = Var(
-            All([
-                NPropagate(Self.v, T.Literal.combiner, Self.lhs.v, Self.rhs.v),
-                Bind(Self.lhs.v, lhs),
-                Bind(Self.rhs.v, rhs),
-            ])
-        )
+    def resolve(lhs=T.FooNode.entity,
+                rhs=T.FooNode.entity,
+                use_dynamic_combiner=T.Bool):
+        propagator = Var(If(
+            use_dynamic_combiner,
+            NPropagate(Self.v, T.Literal.dynamic_combiner,
+                       ArrayLiteral([Self.lhs.v, Self.rhs.v])),
+            NPropagate(Self.v, T.Literal.static_combiner,
+                       Self.lhs.v, Self.rhs.v),
+        ))
+        eq = Var(All([
+            propagator,
+            Bind(Self.lhs.v, lhs),
+            Bind(Self.rhs.v, rhs),
+        ]))
         return If(
             eq.solve,
             Self.v.get_value,
@@ -47,6 +57,6 @@ class Plus(FooNode):
 build_and_run(
     lkt_file='expected_concrete_syntax.lkt',
     py_script='main.py',
-    types_from_lkt=True,
+    types_from_lkt=False,
 )
 print('Done')

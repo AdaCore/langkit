@@ -11,7 +11,9 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    pass
+    @langkit_property(return_type=T.FooNode.entity)
+    def foo_conv():
+        return Entity
 
 
 @abstract
@@ -41,13 +43,16 @@ class Literal(RootNode):
     token_node = True
 
     @langkit_property(return_type=T.Literal.entity)
-    def conv():
+    def literal_conv():
         return Entity
 
     @langkit_property()
     def xref_eq(arg1=T.FooNode.entity, arg2=T.FooNode.entity):
         return (Self.var.domain([arg1]) &
-                Bind(Self.var, arg2, conv_prop=Self.conv))
+                Bind(Self.var, arg2, conv_prop=Self.literal_conv) &
+                # Also check that you can use a property defined on the root
+                # node type.
+                Bind(Self.var, arg2, conv_prop=Self.foo_conv))
 
 
 build_and_run(

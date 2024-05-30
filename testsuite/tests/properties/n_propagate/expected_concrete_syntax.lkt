@@ -11,16 +11,20 @@ grammar foo_grammar {
 }
 
 class Literal: FooNode implements TokenNode {
-    fun combiner(@ignored other: Entity[Literal]): Entity[Literal] = self
+    fun static_combiner(other: Entity[Literal]): Entity[Literal] = other
+
+    fun dynamic_combiner(lits: Array[Entity[Literal]]): Entity[Literal] =
+    lits?[0]
 }
 
 class Plus: FooNode {
     @parse_field lhs: Literal
     @parse_field rhs: Literal
 
-    @export fun resolve(lhs: Entity[FooNode], rhs: Entity[FooNode]): Entity[FooNode] =
+    @export fun resolve(lhs: Entity[FooNode], rhs: Entity[FooNode], use_dynamic_combiner: Bool): Entity[FooNode] =
     {
-        val eq = %all([%propagate(node.v, Literal.combiner, node.lhs.v, node.rhs.v), %eq(node.lhs.v, lhs), %eq(node.rhs.v, rhs)]);
+        val propagator = if use_dynamic_combiner then %propagate(node.v, Literal.dynamic_combiner, [node.lhs.v, node.rhs.v]) else %propagate(node.v, Literal.static_combiner, node.lhs.v, node.rhs.v);
+        val eq = %all([propagator, %eq(node.lhs.v, lhs), %eq(node.rhs.v, rhs)]);
 
         if eq.solve() then node.v.get_value() else raise[Entity[FooNode]] PropertyError("unreachable")
     }

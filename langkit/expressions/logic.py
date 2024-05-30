@@ -78,9 +78,11 @@ class BindExpr(CallExpr):
         )
 
     @staticmethod
-    def functor_expr(type_name: str,
-                     prop: PropertyDef,
-                     arity: Optional[int] = None) -> LiteralExpr:
+    def functor_expr(
+        type_name: str,
+        prop: PropertyDef,
+        arity: Optional[ResolvedExpression] = None
+    ) -> LiteralExpr:
         """
         Return an expression to create a functor for ``Prop``.
 
@@ -92,7 +94,7 @@ class BindExpr(CallExpr):
         assocs: List[Tuple[Union[str, names.Name], ResolvedExpression]] = []
 
         if arity is not None:
-            assocs.append(("N", IntegerLiteralExpr(arity)))
+            assocs.append(("N", arity))
 
         assocs.extend([
             ("Ref_Count", IntegerLiteralExpr(1)),
@@ -170,7 +172,30 @@ class PropagateExpr(BindExpr):
         constructor_name: str
         constructor_args: List[Union[str, ResolvedExpression]]
 
-        if len(arg_vars) == 1:
+        if prop.is_dynamic_combiner:
+            # For combiners that work on an array of logic vars, the solver's
+            # ``Create_N_Propagate`` constructor already expects an array of
+            # logic variables. Although the types are different (one comes from
+            # the support library and the other is generated), they have the
+            # same structure, so we cast the given one to the expected type.
+            assert len(arg_vars) == 1
+            constructor_name = "Solver.Create_N_Propagate"
+            var_array = LiteralExpr(
+                "Entity_Vars.Logic_Var_Array ({}.Items)", None, arg_vars
+            )
+            var_length = LiteralExpr(
+                "{}.N", None, [arg_vars[0].result_var.ref_expr]
+            )
+            constructor_args = [
+                dest_var,
+                self.functor_expr(
+                    f"Logic_Functor_{prop.uid}", prop, var_length
+                )
+                if prop else
+                "Solver_Ifc.No_Combiner",
+                var_array,
+            ]
+        elif len(arg_vars) == 1:
             constructor_name = "Solver.Create_Propagate"
             constructor_args = [
                 dest_var,
@@ -184,7 +209,8 @@ class PropagateExpr(BindExpr):
             constructor_args = [
                 dest_var,
                 self.functor_expr(
-                    f"Logic_Functor_{prop.uid}", prop, len(arg_vars)
+                    f"Logic_Functor_{prop.uid}", prop,
+                    IntegerLiteralExpr(len(arg_vars))
                 )
                 if prop else
                 "Solver_Ifc.No_Combiner",
@@ -336,18 +362,30 @@ class Bind(AbstractExpression):
             f"{name} must belong to a subtype of {T.root_node.dsl_name}",
         )
 
-        # Check that it takes the expected number of arguments. "Self" counts
-        # as an implicit argument, so we expect at least ``arity - 1`` natural
-        # arguments.
-        n_args = arity - 1
-        entity_args = prop.natural_arguments[:n_args]
-        extra_args = prop.natural_arguments[n_args:]
-        check_source_language(
-            len(entity_args) == n_args
-            and all(arg.type.is_entity_type for arg in entity_args),
-            f"{name} property must accept {n_args} entity arguments (only"
-            f" {len(entity_args)} found)",
-        )
+        if prop.is_dynamic_combiner:
+            # We are using a propagate with a dynamic number of arguments, so
+            # we expect a property that takes an array of entity as its first
+            # parameter.
+            entity_arg = prop.natural_arguments[0]
+            extra_args = prop.natural_arguments[1:]
+            check_source_language(
+                entity_arg.type.element_type.is_entity_type,
+                f"{name} property's first argument must be an array of entity,"
+                f" not {entity_arg.type.dsl_name})",
+            )
+        else:
+            # Otherwise, check that it takes the expected number of arguments.
+            # "Self" counts as an implicit argument, so we expect at least
+            # ``arity - 1`` natural arguments.
+            n_args = arity - 1
+            entity_args = prop.natural_arguments[:n_args]
+            extra_args = prop.natural_arguments[n_args:]
+            check_source_language(
+                len(entity_args) == n_args
+                and all(arg.type.is_entity_type for arg in entity_args),
+                f"{name} property must accept {n_args} entity arguments (only"
+                f" {len(entity_args)} found)",
+            )
 
         # The other argumenst must be optional
         check_source_language(
@@ -477,20 +515,31 @@ class NPropagate(AbstractExpression):
         self.logic_ctx = kwargs.pop('logic_ctx', None)
 
     def construct(self):
-        # Resolve logic variables
-        dest_var = Bind._construct_logic_var(self.dest_var)
-        arg_vars = [Bind._construct_logic_var(v) for v in self.arg_vars]
         check_source_language(
-            len(arg_vars) >= 1,
-            "At least one argument logic variable expected"
+            len(self.arg_vars) >= 1,
+            "At least one argument logic variable (or array thereof) expected"
         )
 
         # Resolve the combiner property, make sure it matches the argument
         # logic variables and generate a functor for it.
         self.comb_prop = Bind._resolve_property(
-            "NPropagate's comb_prop", self.comb_prop, len(arg_vars)
+            "NPropagate's comb_prop", self.comb_prop, len(self.arg_vars)
         )
         assert self.comb_prop is not None
+
+        # Resolve logic variables
+        dest_var = Bind._construct_logic_var(self.dest_var)
+        arg_vars: List[ResolvedExpression]
+        if self.comb_prop.is_dynamic_combiner:
+            arg_vars = [ResetAllLogicVars(
+                construct(self.arg_vars[0], T.LogicVar.array)
+            )]
+            check_source_language(
+                len(self.arg_vars) == 1,
+                "Dynamic combiners only accept a single logic variable array"
+            )
+        else:
+            arg_vars = [Bind._construct_logic_var(v) for v in self.arg_vars]
 
         logic_ctx = None
         if self.logic_ctx:
@@ -1001,3 +1050,44 @@ class ResetLogicVar(ResolvedExpression):
 
     def __repr__(self):
         return '<ResetLogicVar>'
+
+
+class ResetAllLogicVars(ResolvedExpression):
+    """
+    Resolved expression wrapper to reset an array of logic variables.
+
+    We use this wrapper during logic equation construction (specifically for
+    equations that take arrays of logic variables, such as the dynamic version
+    of NPropagate) so that they can work on logic variables that don't hold
+    stale results.
+    """
+
+    def __init__(self, logic_vars_expr):
+        assert logic_vars_expr.type == T.LogicVar.array
+        self.logic_vars_expr = logic_vars_expr
+        self.static_type = T.LogicVar.array
+        super().__init__(skippable_refcount=True)
+
+    def _render_pre(self):
+        return '\n'.join([
+            '{pre}',
+            'for Var of {var}.Items loop',
+            '   Var.Value := No_Entity;',
+            '   Entity_Vars.Reset (Var);',
+            'end loop;',
+        ]).format(pre=self.logic_vars_expr.render_pre(),
+                  var=self.logic_vars_expr.render_expr())
+
+    def _render_expr(self):
+        return self.logic_vars_expr.render_expr()
+
+    @property
+    def subexprs(self):
+        return {'logic_vars': self.logic_vars_expr}
+
+    @property
+    def result_var(self):
+        return self.logic_vars_expr.result_var
+
+    def __repr__(self):
+        return '<ResetAllLogicVars>'
