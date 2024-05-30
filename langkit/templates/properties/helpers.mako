@@ -184,6 +184,7 @@
    % if is_dynamic:
    exception
       when Exc : Property_Error =>
+         pragma Unreferenced (Exc);
          Dec_Ref (Args);
          raise;
    % endif
