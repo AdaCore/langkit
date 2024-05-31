@@ -19,6 +19,8 @@ with Langkit_Support.Names;  use Langkit_Support.Names;
 
 package body Langkit_Support.Prettier_Utils is
 
+   use type Ada.Containers.Count_Type;
+
    package Symbol_Maps is new Ada.Containers.Vectors
      (Some_Template_Symbol, Prettier.Symbol_Type);
    --  Mapping between our internal Template_Symbol and Prettier's actual
@@ -508,9 +510,7 @@ package body Langkit_Support.Prettier_Utils is
 
    function Create_List
      (Self      : in out Document_Pool;
-      Documents : in out Document_Vectors.Vector) return Document_Type
-   is
-      use type Ada.Containers.Count_Type;
+      Documents : in out Document_Vectors.Vector) return Document_Type is
    begin
       if Documents.Length = 1 then
          return Documents.Element (1);
@@ -1216,6 +1216,25 @@ package body Langkit_Support.Prettier_Utils is
                      Document.List_Documents.Replace_Element (I, D);
                   end;
                end loop;
+
+               --  Changes may allow to simplify the tree: remove empty list
+               --  children, and simplify further if there is only a single
+               --  element left.
+
+               for I in reverse 1 .. Document.List_Documents.Last_Index loop
+                  declare
+                     D : constant Document_Type :=
+                       Document.List_Documents.Element (I);
+                  begin
+                     if D.Kind = List and then D.List_Documents.Is_Empty then
+                        Document.List_Documents.Delete (I);
+                     end if;
+                  end;
+               end loop;
+
+               if Document.List_Documents.Length = 1 then
+                  Document := Document.List_Documents.First_Element;
+               end if;
 
             when Literal_Line =>
                Extend_Spacing (State.Actual, One_Line_Break_Spacing);
