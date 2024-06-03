@@ -35,10 +35,14 @@ class Plus(FooNode):
     def resolve(lhs=T.FooNode.entity,
                 rhs=T.FooNode.entity,
                 use_dynamic_combiner=T.Bool):
+        arr = Var(ArrayLiteral([Self.lhs.v, Self.rhs.v]))
         propagator = Var(If(
             use_dynamic_combiner,
             NPropagate(Self.v, T.Literal.dynamic_combiner,
-                       ArrayLiteral([Self.lhs.v, Self.rhs.v])),
+                       ArrayLiteral([Self.lhs.v, Self.rhs.v]))
+            # Check that array passed to the dynamic combiner need not be
+            # an array literal.
+            & NPropagate(Self.v, T.Literal.dynamic_combiner, arr),
             NPropagate(Self.v, T.Literal.static_combiner,
                        Self.lhs.v, Self.rhs.v),
         ))

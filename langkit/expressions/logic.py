@@ -9,8 +9,9 @@ from langkit.diagnostics import check_multiple, check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable,
     IntegerLiteralExpr, LiteralExpr, LogicPredicate, NullExpr, PropertyDef,
-    ResolvedExpression, Self, aggregate_expr, auto_attr, construct,
-    dsl_document, render, resolve_property, sloc_info_arg
+    ResolvedExpression, SavedExpr, Self, SequenceExpr, aggregate_expr,
+    auto_attr, construct, dsl_document, render, resolve_property,
+    sloc_info_arg
 )
 
 
@@ -163,14 +164,32 @@ class PropagateExpr(BindExpr):
                  dest_var: ResolvedExpression,
                  arg_vars: List[ResolvedExpression],
                  prop: PropertyDef,
+                 constructor_name: str,
+                 constructor_args: List[Union[str, ResolvedExpression]],
                  logic_ctx: Optional[ResolvedExpression],
                  abstract_expr: Optional[AbstractExpression] = None):
         self.dest_var = dest_var
         self.arg_vars = arg_vars
         self.prop = prop
+        super().__init__(
+            constructor_name,
+            constructor_args,
+            logic_ctx,
+            abstract_expr=abstract_expr
+        )
 
+    @classmethod
+    def construct_propagate(
+        cls,
+        dest_var: ResolvedExpression,
+        arg_vars: List[ResolvedExpression],
+        prop: PropertyDef,
+        logic_ctx: Optional[ResolvedExpression],
+        abstract_expr: Optional[AbstractExpression] = None
+    ) -> ResolvedExpression:
         constructor_name: str
         constructor_args: List[Union[str, ResolvedExpression]]
+        saved_exprs: List[SavedExpr] = []
 
         if prop.is_dynamic_combiner:
             # For combiners that work on an array of logic vars, the solver's
@@ -180,15 +199,18 @@ class PropagateExpr(BindExpr):
             # same structure, so we cast the given one to the expected type.
             assert len(arg_vars) == 1
             constructor_name = "Solver.Create_N_Propagate"
+            var_array_expr = SavedExpr("Logic_Vars", arg_vars[0])
+            saved_exprs.append(var_array_expr)
             var_array = LiteralExpr(
-                "Entity_Vars.Logic_Var_Array ({}.Items)", None, arg_vars
+                "Entity_Vars.Logic_Var_Array ({}.Items)", None,
+                [var_array_expr.result_var_expr]
             )
             var_length = LiteralExpr(
-                "{}.N", None, [arg_vars[0].result_var.ref_expr]
+                "{}.N", None, [var_array_expr.result_var_expr]
             )
             constructor_args = [
                 dest_var,
-                self.functor_expr(
+                cls.functor_expr(
                     f"Logic_Functor_{prop.uid}", prop, var_length
                 )
                 if prop else
@@ -200,7 +222,7 @@ class PropagateExpr(BindExpr):
             constructor_args = [
                 dest_var,
                 arg_vars[0],
-                self.functor_expr(f"Logic_Functor_{prop.uid}", prop)
+                cls.functor_expr(f"Logic_Functor_{prop.uid}", prop)
                 if prop else
                 "Solver_Ifc.No_Converter",
             ]
@@ -208,7 +230,7 @@ class PropagateExpr(BindExpr):
             constructor_name = "Solver.Create_N_Propagate"
             constructor_args = [
                 dest_var,
-                self.functor_expr(
+                cls.functor_expr(
                     f"Logic_Functor_{prop.uid}", prop,
                     IntegerLiteralExpr(len(arg_vars))
                 )
@@ -220,12 +242,13 @@ class PropagateExpr(BindExpr):
                 ),
             ]
 
-        super().__init__(
-            constructor_name,
-            constructor_args,
-            logic_ctx,
-            abstract_expr=abstract_expr
+        result: ResolvedExpression = PropagateExpr(
+            dest_var, arg_vars, prop, constructor_name, constructor_args,
+            logic_ctx, abstract_expr
         )
+        for e in reversed(saved_exprs):
+            result = SequenceExpr(e, result)
+        return result
 
     @property
     def subexprs(self):
@@ -452,8 +475,9 @@ class Bind(AbstractExpression):
             rhs = ResetLogicVar(rhs)
 
             return (
-                PropagateExpr(lhs, [rhs], self.conv_prop, logic_ctx,
-                              abstract_expr=self)
+                PropagateExpr.construct_propagate(
+                    lhs, [rhs], self.conv_prop, logic_ctx, abstract_expr=self
+                )
                 if self.conv_prop else
                 UnifyExpr(lhs, rhs, logic_ctx, abstract_expr=self)
             )
@@ -514,7 +538,7 @@ class NPropagate(AbstractExpression):
         self.arg_vars = list(arg_vars)
         self.logic_ctx = kwargs.pop('logic_ctx', None)
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         check_source_language(
             len(self.arg_vars) >= 1,
             "At least one argument logic variable (or array thereof) expected"
@@ -549,7 +573,7 @@ class NPropagate(AbstractExpression):
                 f"Expected LogicContext, got {logic_ctx.type.dsl_name}"
             )
 
-        return PropagateExpr(
+        return PropagateExpr.construct_propagate(
             dest_var, arg_vars, self.comb_prop, logic_ctx,
             abstract_expr=self
         )
@@ -1084,10 +1108,6 @@ class ResetAllLogicVars(ResolvedExpression):
     @property
     def subexprs(self):
         return {'logic_vars': self.logic_vars_expr}
-
-    @property
-    def result_var(self):
-        return self.logic_vars_expr.result_var
 
     def __repr__(self):
         return '<ResetAllLogicVars>'
