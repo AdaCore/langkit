@@ -2041,6 +2041,9 @@ package body Langkit_Support.Generic_API.Unparsing is
               (Instantiate_Template_Helper
                  (Pool, Node, Template.Fill_Document, Arguments));
 
+         when Flush_Line_Breaks =>
+            raise Program_Error with "invalid template node";
+
          when Group =>
             return Pool.Create_Group
               (Instantiate_Template_Helper

@@ -65,6 +65,7 @@ private package Langkit_Support.Prettier_Utils is
       Expected_Line_Breaks,
       Expected_Whitespaces,
       Fill,
+      Flush_Line_Breaks,
       Group,
       Hard_Line,
       Hard_Line_Without_Break_Parent,
@@ -98,6 +99,9 @@ private package Langkit_Support.Prettier_Utils is
 
          when Fill =>
             Fill_Document : Document_Type;
+
+         when Flush_Line_Breaks =>
+            null;
 
          when Group =>
             Group_Document     : Document_Type;
@@ -235,6 +239,10 @@ private package Langkit_Support.Prettier_Utils is
      (Self     : in out Document_Pool;
       Document : Document_Type) return Document_Type;
    --  Return a ``Fill`` node
+
+   function Create_Flush_Line_Breaks
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Flush_Line_Breaks`` node
 
    function Create_Group
      (Self         : in out Document_Pool;
@@ -395,6 +403,11 @@ private package Langkit_Support.Prettier_Utils is
    --  to a source buffer: ``Left`` is ``No_Token_Kind_Ref`` (no token were
    --  unprase in the source buffer yet) and ``Right`` is the first token to
    --  unparse to the source buffer.
+
+   function Required_Line_Breaks (Self : Spacing_Type) return Natural
+   is (case Self.Kind is
+       when None | Whitespaces => 0,
+       when Line_Breaks        => Self.Count);
 
    procedure Extend_Spacing
      (Self : in out Spacing_Type; Requirement : Spacing_Type);
