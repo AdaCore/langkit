@@ -2579,9 +2579,11 @@ package body Langkit_Support.Generic_API.Unparsing is
            Prettier.Format
              (Document => Doc,
               Options  =>
-                (Width => Width.Get,
-                 Indentation => (Indentation_Kind.Get, Indentation_Width.Get),
-                 End_Of_Line => End_Of_Line.Get));
+                (Width              => Width.Get,
+                 Indentation        =>
+                   (Indentation_Kind.Get, Indentation_Width.Get),
+                 End_Of_Line        => End_Of_Line.Get,
+                 Indentation_Offset => 0));
       begin
          --  If requested, dump it as a JSON file
 
