@@ -4,5 +4,9 @@ null var v2: Int = 0;
 def f1(a: Int, b: Int = 0): Int
 {
   print(a, b);
+  very_long_call(aaaaaaaaa, bbbbbbb, cccccccc, dddddddd, eeeeeee, fffffffff,
+  ggggggggg, hhhhhhhh);
   a + b + 1;
+
+  n1, n2, n2 = foo(a, b);
 }

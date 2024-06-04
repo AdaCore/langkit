@@ -2,7 +2,7 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list+(or(var_decl | fun_decl))
+    @main_rule main_rule <- list*(or(var_decl | fun_decl | block))
     name <- Name(@identifier)
     type_ref <- name
     null_qual <- NullQual("null")
@@ -17,7 +17,10 @@ grammar foo_grammar {
         list*(param_spec, ",")
         ")") ":" type_ref "{" list*(stmt) "}"
     )
-    stmt <- Stmt(expr ";")
+    stmt <- or(
+        | ExprStmt(expr ";")
+        | AssignStmt(list+(name, ",") "=" expr ";")
+    )
     expr <- or(
         | DottedName(expr "." name)
         | Addition(expr "+" expr)
@@ -29,9 +32,14 @@ grammar foo_grammar {
     ref <- Ref(name)
     call_arg <- CallArg(?pick(name "=") expr)
     call <- Call(name "(" list*(call_arg, ",") ")")
+    block <- Block("{" list*(or(var_decl | fun_decl)) "}")
 }
 
 @abstract class FooNode implements Node[FooNode] {
+}
+
+class Block: FooNode {
+    @parse_field items: ASTList[FooNode, Decl]
 }
 
 class CallArg: FooNode {
@@ -94,6 +102,14 @@ class ParamSpec: FooNode {
     @parse_field @nullable default_expr: Expr
 }
 
-class Stmt: FooNode {
+@abstract class Stmt: FooNode {
+}
+
+class AssignStmt: Stmt {
+    @parse_field names: ASTList[FooNode, Name]
+    @parse_field expr: Expr
+}
+
+class ExprStmt: Stmt {
     @parse_field expr: Expr
 }

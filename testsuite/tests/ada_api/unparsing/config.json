@@ -1,23 +1,72 @@
 {
   "node_configs": {
-    "StmtList": {
-      "node": [
-        {
-          "kind": "indent",
-          "contents": ["hardline", "recurse"]
-        },
-        "hardline"
-      ],
-      "sep": ["hardline", "recurse"]
+    "FooNodeList": {
+      "sep": ["recurse", "hardline"]
     },
-    "Stmt": {
-      "node": ["recurse"]
+    "Block": {
+       "fields": {
+         "f_items": [
+           {
+             "kind": "ifEmpty",
+             "then": ["hardline", "recurse"],
+             "else": [
+               {
+                 "kind": "indent",
+                 "contents": ["hardline", "recurse"]
+               },
+               "hardline"
+             ]
+           }
+         ]
+       }
+    },
+    "CallArgList": {
+      "sep": ["recurse", "line"]
+    },
+    "DeclList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "FunDecl": {
+      "fields": {
+        "f_return_type": ["whitespace", "recurse", "hardline"],
+        "f_body": {
+          "kind": "ifEmpty",
+          "then": ["recurse", "hardline"],
+          "else": [
+            {
+              "kind": "indent",
+              "contents": ["hardline", "recurse"]
+            },
+            "hardline"
+          ]
+        }
+      }
     },
     "VarDecl": {
-      "node": ["recurse", "hardline"],
       "fields": {
         "f_type_expr": ["whitespace", "recurse", "whitespace"],
         "f_value": ["whitespace", "recurse"]
+      }
+    },
+    "Addition": {
+      "fields": {
+        "f_lhs": ["recurse", "whitespace"],
+        "f_rhs": ["whitespace", "recurse"]
+      }
+    },
+    "Call": {
+      "fields": {
+        "f_args": {
+          "kind": "group",
+          "document": {
+            "kind": "ifBreak",
+            "breakContents": [
+              {"kind": "indent", "contents": ["line", "recurse"]},
+              "line"
+            ],
+            "flatContents": "recurse"
+          }
+        }
       }
     },
     "ParamSpec": {
@@ -28,19 +77,21 @@
     "ParamSpecList": {
       "sep": ["recurse", "whitespace"]
     },
-    "FunDecl": {
+    "Stmt": {
+      "node": ["recurse"]
+    },
+    "AssignStmt": {
+      "node": {"kind": "group", "document": "recurse"},
       "fields": {
-        "f_return_type": ["whitespace", "recurse", "hardline"]
+        "f_names": [{"kind": "group", "document": "recurse"}, "line"],
+        "f_expr": ["line", {"kind": "group", "document": "recurse"}]
       }
     },
-    "CallArgList": {
-      "sep": ["recurse", "whitespace"]
+    "StmtList": {
+      "sep": ["hardline", "recurse"]
     },
-    "Addition": {
-      "fields": {
-        "f_lhs": ["recurse", "whitespace"],
-        "f_rhs": ["whitespace", "recurse"]
-      }
+    "NameList": {
+      "sep": ["recurse", "line"]
     }
   }
 }

@@ -10,6 +10,10 @@ class FooNode(ASTNode):
     pass
 
 
+class Block(FooNode):
+    items = Field(type=T.Decl.list)
+
+
 @abstract
 class Decl(FooNode):
     name = AbstractField(type=T.Name)
@@ -40,7 +44,17 @@ class FunDecl(Decl):
     body = Field(type=T.Stmt.list)
 
 
+@abstract
 class Stmt(FooNode):
+    pass
+
+
+class ExprStmt(Stmt):
+    expr = Field(type=T.Expr)
+
+
+class AssignStmt(Stmt):
+    names = Field(type=T.Name.list)
     expr = Field(type=T.Expr)
 
 
