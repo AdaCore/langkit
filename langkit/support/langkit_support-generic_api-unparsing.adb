@@ -124,10 +124,16 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  separator.
 
    procedure Iterate_On_Fragments
-     (Node    : Lk_Node;
-      Process : access procedure (Fragment : Unparsing_Fragment));
+     (Node          : Lk_Node;
+      Current_Token : in out Lk_Token;
+      Process       : access procedure (Fragment      : Unparsing_Fragment;
+                                        Current_Token : in out Lk_Token));
    --  Decompose ``Node`` into a list of unparsing fragments and call
    --  ``Process`` on each fragment.
+   --
+   --  ``Current_Token`` must be the first token for ``Node``, and is updated
+   --  to account for all the tokens that are processed. The ``Process``
+   --  callback is expected to do the same.
 
    -----------------------
    --  Template symbols --
@@ -284,6 +290,10 @@ package body Langkit_Support.Generic_API.Unparsing is
       Node : Lk_Node;
       --  Node from which ``Document`` was generated. Keeping track of this is
       --  necessary in order to implement instantiation for "recurse_flatten".
+
+      Next_Token : Lk_Token;
+      --  Token that follows ``Node``, i.e. the token to assign to
+      --  ``Current_Token`` after this template argument has been processed.
    end record;
 
    package Template_Instantiation_Arg_Vectors is new Ada.Containers.Vectors
@@ -303,22 +313,40 @@ package body Langkit_Support.Generic_API.Unparsing is
    end record;
 
    function Instantiate_Template
-     (Pool      : in out Document_Pool;
-      Node      : Lk_Node;
-      Template  : Template_Type;
-      Arguments : Template_Instantiation_Args) return Document_Type;
+     (Pool          : in out Document_Pool;
+      Node          : Lk_Node;
+      Current_Token : in out Lk_Token;
+      Template      : Template_Type;
+      Arguments     : Template_Instantiation_Args) return Document_Type;
    --  Instantiate the given template, i.e. create a copy of it, replacing
    --  "recurse*" documents with the relevant documents in ``Arguments``.
    --
    --  ``Node`` must be the node for which we instantiate this template: it is
    --  used to correctly initialize the ``Node`` component of instantiated
    --  documents.
+   --
+   --  ``Current_Token`` must be the first token for ``Node``, and is updated
+   --  to account for all the tokens that are processed by this template.
+
+   type Instantiation_State is record
+      Node : Lk_Node;
+      --  Node for which we instantiate a template (see the ``Node`` argument
+      --  of ``Instantiate_Template``).
+
+      Current_Token : Lk_Token;
+      --  Token that is about to be unparsed by this template instantiation.
+      --  It is updated as tokens are processed during the instantiation.
+
+      Arguments : not null access constant Template_Instantiation_Args;
+      --  Template arguments for the instantiation
+   end record;
+   --  Group of common parameters for ``Instantiate_Template_Helper``, to have
+   --  a single argument to pass down to recursion.
 
    function Instantiate_Template_Helper
-     (Pool      : in out Document_Pool;
-      Node      : Lk_Node;
-      Template  : Document_Type;
-      Arguments : Template_Instantiation_Args) return Document_Type;
+     (Pool     : in out Document_Pool;
+      State    : in out Instantiation_State;
+      Template : Document_Type) return Document_Type;
    --  Helper for ``Instantiate_Template_Helper``. Implement the recursive part
    --  of template instantiation: ``Instantiate_Template_Helper`` takes care of
    --  the template unwrapping.
@@ -375,25 +403,32 @@ package body Langkit_Support.Generic_API.Unparsing is
    --------------------------
 
    procedure Iterate_On_Fragments
-     (Node    : Lk_Node;
-      Process : access procedure (Fragment : Unparsing_Fragment))
+     (Node          : Lk_Node;
+      Current_Token : in out Lk_Token;
+      Process       : access procedure (Fragment      : Unparsing_Fragment;
+                                        Current_Token : in out Lk_Token))
    is
       Id        : constant Language_Id := Node.Language;
       Desc      : constant Language_Descriptor_Access := +Id;
       Unparsers : Unparsers_Impl renames Desc.Unparsers.all;
 
-      procedure Append (Tokens : Token_Sequence);
+      procedure Process_Tokens (Tokens : Token_Sequence);
 
-      ------------
-      -- Append --
-      ------------
+      --------------------
+      -- Process_Tokens --
+      --------------------
 
-      procedure Append (Tokens : Token_Sequence) is
+      procedure Process_Tokens (Tokens : Token_Sequence) is
       begin
          for T of Tokens.all loop
-            Process.all (Fragment_For (Id, T));
+
+            --  Let the ``Process`` procedure take care of updating
+            --  ``Current_Token`` for ``T``.
+
+            pragma Assert (To_Index (Kind (Current_Token)) = T.Kind);
+            Process.all (Fragment_For (Id, T), Current_Token);
          end loop;
-      end Append;
+      end Process_Tokens;
 
       Node_Type     : constant Type_Ref := Type_Of (Node);
       Node_Unparser : Node_Unparser_Impl renames
@@ -401,11 +436,12 @@ package body Langkit_Support.Generic_API.Unparsing is
    begin
       case Node_Unparser.Kind is
          when Regular =>
-            --  Append fragments that precede the first field
 
-            Append (Node_Unparser.Pre_Tokens);
+            --  Process fragments that precede the first field
 
-            --  Then append fragments for each field and the tokens between
+            Process_Tokens (Node_Unparser.Pre_Tokens);
+
+            --  Then process fragments for each field and the tokens between
             --  them.
 
             for I in 1 .. Node_Unparser.Field_Unparsers.N loop
@@ -417,54 +453,64 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                   Child : constant Lk_Node := Node.Child (I);
                begin
-                  --  Append fragments that appear unconditionally between
+                  --  Process fragments that appear unconditionally between
                   --  fields.
 
-                  Append (Inter_Tokens);
+                  Process_Tokens (Inter_Tokens);
 
-                  --  Then append fragments for the field itself, if present
+                  --  Then process fragments for the field itself, if present
 
                   if Is_Field_Present (Child, Field_Unparser) then
                      Process.all
-                       ((Kind               => Field_Fragment,
-                         Node               => Child,
-                         Field              => From_Index
-                                                 (Id, Field_Unparser.Member),
-                         Field_Unparser_Ref => Field_Unparser'Access));
+                       (Fragment      =>
+                          (Kind               => Field_Fragment,
+                           Node               => Child,
+                           Field              => From_Index
+                                                   (Id, Field_Unparser.Member),
+                           Field_Unparser_Ref => Field_Unparser'Access),
+                        Current_Token => Current_Token);
                   end if;
                end;
             end loop;
 
-            --  Append fragments that follow the last field
+            --  Process fragments that follow the last field
 
-            Append (Node_Unparser.Post_Tokens);
+            Process_Tokens (Node_Unparser.Post_Tokens);
 
          when List =>
             for I in 1 .. Node.Children_Count loop
                if I > 1 then
                   if Node_Unparser.Separator = null then
                      Process.all
-                       ((Kind => List_Separator_Fragment,
-                         Token_Kind => No_Token_Kind_Ref,
-                         Token_Text => To_Unbounded_Text ("")));
+                       (Fragment      =>
+                          (Kind       => List_Separator_Fragment,
+                           Token_Kind => No_Token_Kind_Ref,
+                           Token_Text => To_Unbounded_Text ("")),
+                        Current_Token => Current_Token);
                   else
                      Process.all
-                       (Fragment_For
-                          (Id, Node_Unparser.Separator, Is_List_Sep => True));
+                       (Fragment      =>
+                          Fragment_For
+                            (Id, Node_Unparser.Separator, Is_List_Sep => True),
+                        Current_Token => Current_Token);
                   end if;
                end if;
 
                Process.all
-                 ((Kind        => List_Child_Fragment,
-                   Node        => Node.Child (I),
-                   Child_Index => I));
+                 (Fragment      =>
+                    (Kind        => List_Child_Fragment,
+                     Node        => Node.Child (I),
+                     Child_Index => I),
+                  Current_Token => Current_Token);
             end loop;
 
          when Token =>
             Process.all
-              ((Kind       => Token_Fragment,
-                Token_Kind => Token_Node_Kind (Node_Type),
-                Token_Text => To_Unbounded_Text (Node.Text)));
+              (Fragment      =>
+                 (Kind       => Token_Fragment,
+                  Token_Kind => Token_Node_Kind (Node_Type),
+                  Token_Text => To_Unbounded_Text (Node.Text)),
+               Current_Token => Current_Token);
       end case;
    end Iterate_On_Fragments;
 
@@ -2001,13 +2047,22 @@ package body Langkit_Support.Generic_API.Unparsing is
    --------------------------
 
    function Instantiate_Template
-     (Pool      : in out Document_Pool;
-      Node      : Lk_Node;
-      Template  : Template_Type;
-      Arguments : Template_Instantiation_Args) return Document_Type is
+     (Pool          : in out Document_Pool;
+      Node          : Lk_Node;
+      Current_Token : in out Lk_Token;
+      Template      : Template_Type;
+      Arguments     : Template_Instantiation_Args) return Document_Type
+   is
+      State : Instantiation_State :=
+        (Node,
+         Current_Token,
+         Arguments'Unrestricted_Access);
    begin
-      return Instantiate_Template_Helper
-               (Pool, Node, Template.Root, Arguments);
+      return Result : constant Document_Type :=
+        Instantiate_Template_Helper (Pool, State, Template.Root)
+      do
+         Current_Token := State.Current_Token;
+      end return;
    end Instantiate_Template;
 
    ---------------------------------
@@ -2015,17 +2070,16 @@ package body Langkit_Support.Generic_API.Unparsing is
    ---------------------------------
 
    function Instantiate_Template_Helper
-     (Pool      : in out Document_Pool;
-      Node      : Lk_Node;
-      Template  : Document_Type;
-      Arguments : Template_Instantiation_Args) return Document_Type is
+     (Pool     : in out Document_Pool;
+      State    : in out Instantiation_State;
+      Template : Document_Type) return Document_Type is
    begin
       case Template_Document_Kind (Template.Kind) is
          when Align =>
             return Pool.Create_Align
               (Template.Align_Data,
                Instantiate_Template_Helper
-                 (Pool, Node, Template.Align_Contents, Arguments));
+                 (Pool, State, Template.Align_Contents));
 
          when Break_Parent =>
             return Pool.Create_Break_Parent;
@@ -2033,12 +2087,12 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Fill =>
             return Pool.Create_Fill
               (Instantiate_Template_Helper
-                 (Pool, Node, Template.Fill_Document, Arguments));
+                 (Pool, State, Template.Fill_Document));
 
          when Group =>
             return Pool.Create_Group
               (Instantiate_Template_Helper
-                 (Pool, Node, Template.Group_Document, Arguments),
+                 (Pool, State, Template.Group_Document),
                Template.Group_Should_Break,
                Template.Group_Id);
 
@@ -2049,30 +2103,46 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Pool.Create_Hard_Line_Without_Break_Parent;
 
          when If_Break =>
-            return Pool.Create_If_Break
-              (Instantiate_Template_Helper
-                 (Pool, Node, Template.If_Break_Contents, Arguments),
-               Instantiate_Template_Helper
-                 (Pool, Node, Template.If_Break_Flat_Contents, Arguments),
-               Template.If_Break_Group_Id);
+            declare
+               Break_State : Instantiation_State := State;
+               Flat_State  : Instantiation_State := State;
+
+               --  Instantiate both alternative templates
+
+               Break_Doc : constant Document_Type :=
+                 Instantiate_Template_Helper
+                   (Pool, Break_State, Template.If_Break_Contents);
+               Flat_Doc  : constant Document_Type :=
+                 Instantiate_Template_Helper
+                   (Pool, Flat_State, Template.If_Break_Flat_Contents);
+            begin
+               --  Thanks to our validation process, both alternatives are
+               --  supposed to process the same number of tokens.
+
+               pragma Assert
+                 (Break_State.Current_Token = Flat_State.Current_Token);
+               State := Break_State;
+
+               return Pool.Create_If_Break
+                 (Break_Doc, Flat_Doc, Template.If_Break_Group_Id);
+            end;
 
          when If_Empty =>
             declare
                Child       : constant Lk_Node :=
-                 Arguments.With_Recurse_Doc.Node;
+                 State.Arguments.With_Recurse_Doc.Node;
                Subtemplate : constant Document_Type :=
                  (if Child.Is_List_Node and then Child.Children_Count = 0
                   then Template.If_Empty_Then
                   else Template.If_Empty_Else);
             begin
-               return Instantiate_Template_Helper
-                 (Pool, Node, Subtemplate, Arguments);
+               return Instantiate_Template_Helper (Pool, State, Subtemplate);
             end;
 
          when Indent =>
             return Pool.Create_Indent
               (Instantiate_Template_Helper
-                 (Pool, Node, Template.Indent_Document, Arguments));
+                 (Pool, State, Template.Indent_Document));
 
          when Line =>
             return Pool.Create_Line;
@@ -2085,9 +2155,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                   Items.Append
                     (Instantiate_Template_Helper
                        (Pool,
-                        Node,
-                        Template.List_Documents.Element (I),
-                        Arguments));
+                        State,
+                        Template.List_Documents.Element (I)));
                end loop;
                return Pool.Create_List (Items);
             end;
@@ -2095,20 +2164,36 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Literal_Line =>
             return Pool.Create_Literal_Line;
 
+         --  For all "recurse" nodes, the knowledge of how to update
+         --  ``State.Current_Token`` is encoded in the ``Next_Token`` member of
+         --  the corresponding ``Single_Template_Instantiation_Argument``
+         --  record.
+
          when Recurse =>
-            return Arguments.With_Recurse_Doc.Document;
+            declare
+               Arg : constant Single_Template_Instantiation_Argument :=
+                 State.Arguments.With_Recurse_Doc;
+            begin
+               State.Current_Token := Arg.Next_Token;
+               return Arg.Document;
+            end;
 
          when Recurse_Field =>
-            return Arguments
-                   .Field_Docs (Template.Recurse_Field_Position)
-                   .Document;
+            declare
+               Arg : constant Single_Template_Instantiation_Argument :=
+                 State.Arguments.Field_Docs (Template.Recurse_Field_Position);
+            begin
+               State.Current_Token := Arg.Next_Token;
+               return Arg.Document;
+            end;
 
          when Recurse_Flatten =>
             declare
                Arg : constant Single_Template_Instantiation_Argument :=
-                 Arguments.With_Recurse_Doc;
+                 State.Arguments.With_Recurse_Doc;
             begin
                return Result : Document_Type := Arg.Document do
+                  State.Current_Token := Arg.Next_Token;
 
                   --  As long as Result is a document we can flatten and that
                   --  was created by a node that passes the flattening guard,
@@ -2146,6 +2231,8 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Pool.Create_Soft_Line;
 
          when Token =>
+            State.Current_Token :=
+              State.Current_Token.Next (Exclude_Trivia => True);
             return Pool.Create_Token
               (Template.Token_Kind, Template.Token_Text);
 
@@ -2168,33 +2255,74 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Pool : Document_Pool;
 
-      procedure Unparse_Tokens
-        (Tokens : Token_Sequence; Items : in out Document_Vectors.Vector);
-      --  Create template nodes for each element in ``Tokens`` and append them
-      --  to ``Items``.
+      procedure Skip_Tokens
+        (Current_Token : in out Lk_Token;
+         Tokens        : Token_Sequence;
+         Label         : String);
+      --  Update ``Current_Token`` as if we unparsed the given token sequence.
+      --
+      --  ``Label`` is used to track which token sequence is processed in debug
+      --  traces.
 
-      function Unparse_Node (N : Lk_Node) return Document_Type;
+      procedure Unparse_Tokens
+        (Current_Token : in out Lk_Token;
+         Tokens        : Token_Sequence;
+         Items         : in out Document_Vectors.Vector;
+         Label         : String);
+      --  Create template nodes for each element in ``Tokens`` and append them
+      --  to ``Items``. Update ``Current_Token`` accordingly.
+      --
+      --  ``Label`` is used to track which token sequence is processed in debug
+      --  traces.
+
+      function Unparse_Node
+        (N : Lk_Node; Current_Token : in out Lk_Token) return Document_Type;
       --  Using the unparsing configuration for N, unparse it to a Prettier
-      --  document.
+      --  document. Update ``Current_Token`` accordingly.
 
       procedure Unparse_Field
-        (Node        : Lk_Node;
-         Node_Config : Node_Config_Record;
-         Child       : Lk_Node;
-         Field_Ref   : Struct_Member_Index;
-         Unparser    : Field_Unparser_Impl;
-         Items       : in out Document_Vectors.Vector);
+        (Node          : Lk_Node;
+         Node_Config   : Node_Config_Record;
+         Child         : Lk_Node;
+         Field_Ref     : Struct_Member_Index;
+         Unparser      : Field_Unparser_Impl;
+         Items         : in out Document_Vectors.Vector;
+         Current_Token : in out Lk_Token);
       --  Unparse ``Child``, which is the ``Field_Ref`` field of ``Node``. The
       --  Resulting items are appended to ``Items``. ``Node_Config`` must be
       --  the node unparsing configuration for ``Node``, and ``Unparser`` must
-      --  be the unparser for this field.
+      --  be the unparser for this field. Update ``Current_Token`` accordingly.
+
+      -----------------
+      -- Skip_Tokens --
+      -----------------
+
+      procedure Skip_Tokens
+        (Current_Token : in out Lk_Token;
+         Tokens        : Token_Sequence;
+         Label         : String) is
+      begin
+         for T of Tokens.all loop
+            pragma Assert (To_Index (Kind (Current_Token)) = T.Kind);
+            Current_Token := Current_Token.Next (Exclude_Trivia => True);
+         end loop;
+
+         if Tokens.all'Length > 0 and then Current_Token_Trace.Is_Active then
+            Current_Token_Trace.Trace
+              (Tokens.all'Length'Image & " token(s) skipped (" & Label
+               & "), current token: " & Current_Token.Image);
+         end if;
+      end Skip_Tokens;
 
       --------------------
       -- Unparse_Tokens --
       --------------------
 
       procedure Unparse_Tokens
-        (Tokens : Token_Sequence; Items : in out Document_Vectors.Vector) is
+        (Current_Token : in out Lk_Token;
+         Tokens        : Token_Sequence;
+         Items         : in out Document_Vectors.Vector;
+         Label         : String) is
       begin
          for T of Tokens.all loop
             declare
@@ -2205,20 +2333,31 @@ package body Langkit_Support.Generic_API.Unparsing is
                Items.Append
                  (Pool.Create_Token
                     (Fragment.Token_Kind, Fragment.Token_Text));
+               Current_Token := Current_Token.Next (Exclude_Trivia => True);
             end;
          end loop;
+
+         if Tokens.all'Length > 0 and then Current_Token_Trace.Is_Active then
+            Current_Token_Trace.Trace
+              (Tokens.all'Length'Image & " token(s) unparsed (" & Label
+               & "), current token: " & Current_Token.Image);
+         end if;
       end Unparse_Tokens;
 
       ------------------
       -- Unparse_Node --
       ------------------
 
-      function Unparse_Node (N : Lk_Node) return Document_Type is
+      function Unparse_Node
+        (N : Lk_Node; Current_Token : in out Lk_Token) return Document_Type
+      is
          Node_Config : Node_Config_Record renames
            Config.Value.Node_Configs.Element (To_Index (Type_Of (N))).all;
          Items       : Document_Vectors.Vector;
 
-         procedure Process_Fragment (F : Unparsing_Fragment);
+         procedure Process_Fragment
+           (F             : Unparsing_Fragment;
+            Current_Token : in out Lk_Token);
          --  Append the documents to ``Items`` to represent the given unparsing
          --  fragment.
 
@@ -2226,51 +2365,117 @@ package body Langkit_Support.Generic_API.Unparsing is
          -- Process_Fragment --
          ----------------------
 
-         procedure Process_Fragment (F : Unparsing_Fragment) is
+         procedure Process_Fragment
+           (F             : Unparsing_Fragment;
+            Current_Token : in out Lk_Token) is
          begin
+            if Current_Token_Trace.Is_Active then
+               Current_Token_Trace.Trace
+                 ("About to unparse " & F.Kind'Image
+                  & ", current token: " & Current_Token.Image);
+            end if;
+
             case F.Kind is
                when Token_Fragment | List_Separator_Fragment =>
                   declare
+                     Is_Fake_Token : constant Boolean :=
+                       (F.Kind = List_Separator_Fragment
+                        and then F.Token_Kind = No_Token_Kind_Ref);
+
+                     --  Make sure Current_Token is synchronized with the given
+                     --  unparsing fragment. There is one exception: the
+                     --  fragment is a fake empty token, for the case of
+                     --  processing the separator of a list with no separator
+                     --  token. Doing so is necessary to apply the "sep"
+                     --  template of such a list node.
+
+                     pragma Assert
+                       (F.Token_Kind = Current_Token.Kind
+                        or else Is_Fake_Token);
+
                      Token : Document_Type :=
                        (if F.Token_Kind = No_Token_Kind_Ref
                         then Pool.Create_Empty_List
                         else Pool.Create_Token (F.Token_Kind, F.Token_Text));
                   begin
+                     --  If we have a list separator, instantiate the
+                     --  corresponding template to wrap ``Token``.
+
                      if F.Kind = List_Separator_Fragment then
                         pragma Assert
                           (Node_Config.List_Sep.Kind = With_Recurse);
                         declare
+                           Next_Token : constant Lk_Token :=
+                             (if Is_Fake_Token
+                              then Current_Token
+                              else Current_Token.Next
+                                     (Exclude_Trivia => True));
+                           --  Value for ``Current_Token`` after the list
+                           --  separator has been processed.
+
                            Args : constant Template_Instantiation_Args :=
                              (Kind             => With_Recurse,
                               With_Recurse_Doc =>
-                                (Document => Token, Node => N));
+                                (Document   => Token,
+                                 Node       => N,
+                                 Next_Token => Next_Token));
                         begin
                            Token := Instantiate_Template
-                             (Pool      => Pool,
-                              Node      => N,
-                              Template  => Node_Config.List_Sep,
-                              Arguments => Args);
+                             (Pool          => Pool,
+                              Node          => N,
+                              Current_Token => Current_Token,
+                              Template      => Node_Config.List_Sep,
+                              Arguments     => Args);
+                           pragma Assert (Current_Token = Next_Token);
+                           Items.Append (Token);
                         end;
+
+                     else
+                        Items.Append (Token);
+                        Current_Token :=
+                          Current_Token.Next (Exclude_Trivia => True);
                      end if;
-                     Items.Append (Token);
                   end;
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Trace
+                       ("Token fragment unparsed, current token: "
+                        & Current_Token.Image);
+                  end if;
 
                when Field_Fragment =>
                   Unparse_Field
-                    (Node        => N,
-                     Node_Config => Node_Config,
-                     Child       => F.Node,
-                     Field_Ref   => To_Index (F.Field),
-                     Unparser    => F.Field_Unparser_Ref.all,
-                     Items       => Items);
+                    (Node          => N,
+                     Node_Config   => Node_Config,
+                     Child         => F.Node,
+                     Field_Ref     => To_Index (F.Field),
+                     Unparser      => F.Field_Unparser_Ref.all,
+                     Items         => Items,
+                     Current_Token => Current_Token);
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Trace
+                       ("Field fragment " & Debug_Name (F.Field)
+                        & " unparsed, current token: " & Current_Token.Image);
+                  end if;
 
                when List_Child_Fragment =>
-                  Items.Append (Unparse_Node (F.Node));
+                  Items.Append (Unparse_Node (F.Node, Current_Token));
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Trace
+                       ("List child fragment unparsed, current token: "
+                        & Current_Token.Image);
+                  end if;
             end case;
          end Process_Fragment;
 
          Template : Template_Type renames Node_Config.Node_Template;
+         Result   : Document_Type;
       begin
+         if Current_Token_Trace.Is_Active then
+            Current_Token_Trace.Increase_Indent
+              ("Unparsing " & N.Image
+               & ", current token: " & Current_Token.Image);
+         end if;
+
          case Some_Template_Kind (Template.Kind) is
             when With_Recurse =>
 
@@ -2278,18 +2483,25 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  then group them in a list document, and use that list to
                --  instantiate the template for the node itself.
 
-               Iterate_On_Fragments (N, Process_Fragment'Access);
-               return Instantiate_Template
-                 (Pool      => Pool,
-                  Node      => N,
-                  Template  => Template,
-                  Arguments =>
+               Iterate_On_Fragments
+                 (N, Current_Token, Process_Fragment'Access);
+               Result := Instantiate_Template
+                 (Pool          => Pool,
+                  Node          => N,
+                  Current_Token => Current_Token,
+                  Template      => Template,
+                  Arguments     =>
                     (Kind             => With_Recurse,
                      With_Recurse_Doc =>
-                       (Document => Pool.Create_List (Items),
-                        Node     => N)));
+                       (Document   => Pool.Create_List (Items),
+                        Node       => N,
+                        Next_Token => Current_Token)));
 
             when With_Recurse_Field =>
+               if Current_Token_Trace.Is_Active then
+                  Current_Token_Trace.Increase_Indent
+                    ("About to process a ""recurse_field"" template");
+               end if;
 
                --  Compute sub-documents for all fields (do not forget the
                --  field's own pre/post tokens) and let the template do its
@@ -2304,7 +2516,20 @@ package body Langkit_Support.Generic_API.Unparsing is
                     Unparsers.Node_Unparsers (To_Index (Node_Type)).all;
 
                   Arguments : Template_Instantiation_Args (With_Recurse_Field);
+
+                  Field_Token : Lk_Token := Current_Token;
+                  --  Copy of Current_Token, maintained just for the
+                  --  instantiation of template arguments (one for each field):
+                  --  we get back to Current_Token to instantiate the node-wide
+                  --  template.
+
                begin
+                  --  Prepare arguments to instantiate ``Template``. Use
+                  --  ``Field_Token`` to achieve this.
+
+                  Skip_Tokens
+                    (Field_Token, Node_Unparser.Pre_Tokens, "pre tokens");
+
                   for I in 1 .. N.Children_Count loop
                      declare
                         Child          : constant Lk_Node := N.Child (I);
@@ -2312,31 +2537,69 @@ package body Langkit_Support.Generic_API.Unparsing is
                           Node_Unparser.Field_Unparsers.Field_Unparsers (I);
                         Child_Doc      : Document_Type;
                      begin
+                        Skip_Tokens
+                          (Field_Token,
+                           Node_Unparser.Field_Unparsers.Inter_Tokens (I),
+                           "inter tokens");
+
+                        if Current_Token_Trace.Is_Active then
+                           Current_Token_Trace.Increase_Indent
+                             ("Processing field " & Child.Image
+                              & ", field token: " & Field_Token.Image);
+                        end if;
+
                         if Is_Field_Present (Child, Field_Unparser) then
                            Items.Clear;
                            Unparse_Field
-                             (Node        => N,
-                              Node_Config => Node_Config,
-                              Child       => Child,
-                              Field_Ref   => Field_Unparser.Member,
-                              Unparser    => Field_Unparser,
-                              Items       => Items);
+                             (Node          => N,
+                              Node_Config   => Node_Config,
+                              Child         => Child,
+                              Field_Ref     => Field_Unparser.Member,
+                              Unparser      => Field_Unparser,
+                              Items         => Items,
+                              Current_Token => Field_Token);
                            Child_Doc := Pool.Create_List (Items);
                         else
                            Child_Doc := Pool.Create_Empty_List;
                         end if;
                         Arguments.Field_Docs.Append
                           (Single_Template_Instantiation_Argument'
-                             (Document => Child_Doc,
-                              Node     => Child));
+                             (Document   => Child_Doc,
+                              Node       => Child,
+                              Next_Token => Field_Token));
+
+                        if Current_Token_Trace.Is_Active then
+                           Current_Token_Trace.Decrease_Indent
+                             ("Done processing field " & Child.Image
+                              & ", field token: " & Field_Token.Image);
+                        end if;
                      end;
                   end loop;
 
-                  return Instantiate_Template
-                    (Pool      => Pool,
-                     Node      => N,
-                     Template  => Template,
-                     Arguments => Arguments);
+                  Skip_Tokens
+                    (Field_Token, Node_Unparser.Post_Tokens, "post tokens");
+
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Trace
+                       ("Template arguments for fields are ready, now"
+                        & " instantiating the main template");
+                  end if;
+
+                  --  Now run the template instantiation, getting back to
+                  --  ``Current_Token``. In the end, ``Current_Token`` and
+                  --  ``Field_Token`` should be in sync.
+
+                  Result := Instantiate_Template
+                    (Pool          => Pool,
+                     Node          => N,
+                     Current_Token => Current_Token,
+                     Template      => Template,
+                     Arguments     => Arguments);
+                  pragma Assert (Current_Token = Field_Token);
+
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Decrease_Indent;
+                  end if;
                end;
 
             when With_Text_Recurse =>
@@ -2346,6 +2609,14 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                raise Program_Error;
          end case;
+
+         if Current_Token_Trace.Is_Active then
+            Current_Token_Trace.Decrease_Indent
+              ("Done with " & N.Image
+               & ", current token: " & Current_Token.Image);
+         end if;
+
+         return Result;
       end Unparse_Node;
 
       -------------------
@@ -2353,12 +2624,13 @@ package body Langkit_Support.Generic_API.Unparsing is
       -------------------
 
       procedure Unparse_Field
-        (Node        : Lk_Node;
-         Node_Config : Node_Config_Record;
-         Child       : Lk_Node;
-         Field_Ref   : Struct_Member_Index;
-         Unparser    : Field_Unparser_Impl;
-         Items       : in out Document_Vectors.Vector)
+        (Node          : Lk_Node;
+         Node_Config   : Node_Config_Record;
+         Child         : Lk_Node;
+         Field_Ref     : Struct_Member_Index;
+         Unparser      : Field_Unparser_Impl;
+         Items         : in out Document_Vectors.Vector;
+         Current_Token : in out Lk_Token)
       is
          Field_Template : constant Template_Type :=
            Node_Config.Field_Configs.Element (Field_Ref);
@@ -2373,24 +2645,55 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          Field_Template_Args : Template_Instantiation_Args
                                  (Field_Template.Kind);
-      begin
-         Field_Template_Args.With_Recurse_Doc :=
-           (Document => Unparse_Node (Child),
-            Node     => Child);
 
+         Next_Token : Lk_Token;
+         --  Token that follows ``Child``, i.e. token to assign to
+         --  ``Current_Token`` after the child has been processed.
+         --
+         --  Before we compute the template argument, it must be set just
+         --  passed the pre-tokens.
+      begin
          if Handle_Tokens then
-            Unparse_Tokens (Unparser.Pre_Tokens, Items);
+
+            --  ``Field_Template`` does *not* take care of pre/post tokens for
+            --  this field: do it now.
+
+            Unparse_Tokens
+              (Current_Token, Unparser.Pre_Tokens, Items, "pre tokens");
+            Next_Token := Current_Token;
+
+         else
+            --  ``Field_Template`` does not take care of pre/post tokens for
+            --  this field: just make sure ``Next_Token`` goes past pre-tokens.
+
+            Next_Token := Current_Token;
+            Skip_Tokens (Next_Token, Unparser.Pre_Tokens, "pre tokens");
          end if;
+
+         declare
+            Field_Doc : constant Document_Type :=
+              Unparse_Node (Child, Next_Token);
+         begin
+            Field_Template_Args.With_Recurse_Doc :=
+              (Document   => Field_Doc,
+               Node       => Child,
+               Next_Token => Next_Token);
+         end;
+
+         --  Now that the argument for this field template is ready,
+         --  instantiate the template.
 
          Items.Append
            (Instantiate_Template
-              (Pool      => Pool,
-               Node      => Node,
-               Template  => Field_Template,
-               Arguments => Field_Template_Args));
+              (Pool          => Pool,
+               Node          => Node,
+               Current_Token => Current_Token,
+               Template      => Field_Template,
+               Arguments     => Field_Template_Args));
 
          if Handle_Tokens then
-            Unparse_Tokens (Unparser.Post_Tokens, Items);
+            Unparse_Tokens
+              (Current_Token, Unparser.Post_Tokens, Items, "post tokens");
          end if;
       end Unparse_Field;
 
@@ -2401,12 +2704,18 @@ package body Langkit_Support.Generic_API.Unparsing is
          raise Precondition_Failure with "inconsistent languages";
       end if;
 
+      --  Run the unparser on the given node
+
       declare
-         Internal_Result : Document_Type := Unparse_Node (Node);
+         Current_Token   : Lk_Token := Node.Token_Start;
+         Internal_Result : Document_Type := Unparse_Node (Node, Current_Token);
       begin
          Dump (Internal_Result, Before_Spacing_Trace);
          Insert_Required_Spacing (Pool, Internal_Result);
          Dump (Internal_Result, Final_Doc_Trace);
+
+         --  Produce the Prettier document from our internal document tree
+
          return Result : constant Prettier.Document_Type :=
            To_Prettier_Document (Internal_Result)
          do

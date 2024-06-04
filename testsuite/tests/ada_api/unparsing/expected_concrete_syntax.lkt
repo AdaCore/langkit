@@ -2,7 +2,7 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list*(or(var_decl | fun_decl | block))
+    @main_rule main_rule <- list*(or(var_decl | fun_decl | block | sync_rule))
     name <- Name(@identifier)
     type_ref <- name
     null_qual <- NullQual("null")
@@ -33,6 +33,9 @@ grammar foo_grammar {
     call_arg <- CallArg(?pick(name "=") expr)
     call <- Call(name "(" list*(call_arg, ",") ")")
     block <- Block("{" list*(or(var_decl | fun_decl)) "}")
+    sync_rule <- SyncNode(
+        "kwA" name "kwC" ?pick("kwD" name "kwE") "kwF"
+    )
 }
 
 @abstract class FooNode implements Node[FooNode] {
@@ -112,4 +115,13 @@ class AssignStmt: Stmt {
 
 class ExprStmt: Stmt {
     @parse_field expr: Expr
+}
+
+|" Node used to test the token synchronization during unparsing: there are
+|" both pre (kwA) and post (kwF) tokens for the node itself (SyncNode), an
+|" inter token between the two fields (kwC) and pre/post tokens (kwD and kwE)
+|" for child_2.
+class SyncNode: FooNode {
+    @parse_field child_1: Name
+    @parse_field @nullable child_2: Name
 }

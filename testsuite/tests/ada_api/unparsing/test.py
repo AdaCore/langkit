@@ -95,6 +95,17 @@ class Ref(Expr):
     name = Field(type=T.Name)
 
 
+class SyncNode(FooNode):
+    """
+    Node used to test the token synchronization during unparsing: there are
+    both pre (kwA) and post (kwF) tokens for the node itself (SyncNode), an
+    inter token between the two fields (kwC) and pre/post tokens (kwD and kwE)
+    for child_2.
+    """
+    child_1 = Field(type=T.Name)
+    child_2 = Field(type=T.Name)
+
+
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
     gpr_mains=[
@@ -102,6 +113,8 @@ build_and_run(
         GPRMain(
             "main.adb", ["-r", "param_spec", "config.json", "param_spec.txt"]
         ),
+        GPRMain("main.adb", ["token_sync_config_1.json", "token_sync.txt"]),
+        GPRMain("main.adb", ["token_sync_config_2.json", "token_sync.txt"]),
         "invalid_config.adb",
         "commands.adb",
         "default_config.adb",

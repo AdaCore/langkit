@@ -317,6 +317,12 @@ package Langkit_Support.Generic_API.Unparsing is
    -- Unparsing traces --
    ----------------------
 
+   Current_Token_Trace : GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.UNPARSING.CURRENT_TOKEN",
+        Default => GNATCOLL.Traces.From_Config);
+   --  Trace to print the evolution of the "current token" information
+
    Before_Spacing_Trace : GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
        ("LANGKIT.UNPARSING.BEFORE_SPACING",

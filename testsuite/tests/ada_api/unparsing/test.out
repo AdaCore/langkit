@@ -21,6 +21,20 @@ def f1(a: Int, b: Int=0): Int
 == main.adb -r param_spec config.json param_spec.txt ==
 a: Int=2
 
+== main.adb token_sync_config_1.json token_sync.txt ==
+kwA foo kwC kwF
+kwA bar kwC kwD qux kwE kwF
+var a:T=b();
+var c:T=d(1);
+var e:T=f(1,2,3);
+
+== main.adb token_sync_config_2.json token_sync.txt ==
+kwA foo kwC kwF
+kwA bar kwC kwD qux kwE kwF
+var a:T=b();
+var c:T=d(1);
+var e:T=f(1,2,3);
+
 == invalid_config.adb ==
 == Errors outside of templates ==
 

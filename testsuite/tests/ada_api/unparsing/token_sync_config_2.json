@@ -1,0 +1,16 @@
+{
+  "node_configs": {
+    "SyncNode": {
+      "node": [
+        {"kind": "text", "text": "kwA"},
+        {"kind": "recurse_field", "field": "f_child_1"},
+        {"kind": "text", "text": "kwC"},
+        {"kind": "recurse_field", "field": "f_child_2"},
+        {"kind": "text", "text": "kwF"}
+      ]
+    },
+    "FooNodeList": {
+      "sep": ["recurse", "hardline"]
+    }
+  }
+}
