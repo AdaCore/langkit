@@ -2020,7 +2020,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       Template  : Document_Type;
       Arguments : Template_Instantiation_Args) return Document_Type is
    begin
-      case Template.Kind is
+      case Template_Document_Kind (Template.Kind) is
          when Align =>
             return Pool.Create_Align
               (Template.Align_Data,
@@ -2030,19 +2030,10 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Break_Parent =>
             return Pool.Create_Break_Parent;
 
-         when Expected_Line_Breaks =>
-            raise Program_Error with "invalid template node";
-
-         when Expected_Whitespaces =>
-            raise Program_Error with "invalid template node";
-
          when Fill =>
             return Pool.Create_Fill
               (Instantiate_Template_Helper
                  (Pool, Node, Template.Fill_Document, Arguments));
-
-         when Flush_Line_Breaks =>
-            raise Program_Error with "invalid template node";
 
          when Group =>
             return Pool.Create_Group

@@ -82,6 +82,29 @@ private package Langkit_Support.Prettier_Utils is
       Token,
       Trim,
       Whitespace);
+
+   subtype Template_Document_Kind is Document_Kind
+   with Static_Predicate =>
+     Template_Document_Kind not in
+       Expected_Line_Breaks
+     | Expected_Whitespaces
+     | Flush_Line_Breaks;
+
+   subtype Instantiated_Template_Document_Kind is Document_Kind
+   with Static_Predicate =>
+     Instantiated_Template_Document_Kind not in
+       If_Empty
+     | Recurse
+     | Recurse_Field
+     | Recurse_Flatten;
+
+   subtype Final_Document_Kind is Instantiated_Template_Document_Kind
+   with Static_Predicate =>
+     Final_Document_Kind not in
+       Expected_Line_Breaks
+     | Expected_Whitespaces
+     | Flush_Line_Breaks;
+
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
       case Kind is
          when Align =>

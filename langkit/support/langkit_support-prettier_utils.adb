@@ -156,7 +156,7 @@ package body Langkit_Support.Prettier_Utils is
         (Document : Document_Type) return Prettier.Document_Type
       is
       begin
-         case Document.Kind is
+         case Final_Document_Kind (Document.Kind) is
             when Align =>
                return Align
                  (Data     => Document.Align_Data,
@@ -165,17 +165,8 @@ package body Langkit_Support.Prettier_Utils is
             when Break_Parent =>
                return Break_Parent;
 
-            when Expected_Line_Breaks =>
-               raise Program_Error with "unexpanded document";
-
-            when Expected_Whitespaces =>
-               raise Program_Error with "unexpanded document";
-
             when Fill =>
                return Fill (Recurse (Document.Fill_Document));
-
-            when Flush_Line_Breaks =>
-               raise Program_Error with "unexpanded document";
 
             when Group =>
                return Group
@@ -198,9 +189,6 @@ package body Langkit_Support.Prettier_Utils is
                   Recurse (Document.If_Break_Flat_Contents),
                   (Group_Id => To_Prettier_Symbol
                                  (Symbol_Map, Document.If_Break_Group_Id)));
-
-            when If_Empty =>
-               raise Program_Error with "uninstantiated template";
 
             when Indent =>
                return Indent (Recurse (Document.Indent_Document));
@@ -260,9 +248,6 @@ package body Langkit_Support.Prettier_Utils is
 
             when Literal_Line =>
                return Literal_Line;
-
-            when Recurse | Recurse_Field | Recurse_Flatten =>
-               raise Program_Error with "uninstantiated template";
 
             when Soft_Line =>
                return Soft_Line;
@@ -715,7 +700,7 @@ package body Langkit_Support.Prettier_Utils is
          Breaks : out Boolean) is
       begin
          Breaks := False;
-         case Self.Kind is
+         case Instantiated_Template_Document_Kind (Self.Kind) is
             when Align =>
                Process (Self.Align_Contents, State, Breaks);
 
@@ -776,9 +761,6 @@ package body Langkit_Support.Prettier_Utils is
                   Breaks := BB and then FB;
                end;
 
-            when If_Empty =>
-               raise Program_Error;
-
             when Indent =>
                Process (Self.Indent_Document, State, Breaks);
 
@@ -799,9 +781,6 @@ package body Langkit_Support.Prettier_Utils is
             when Literal_Line =>
                Extend_Spacing (State.Actual, One_Line_Break_Spacing);
                Breaks := True;
-
-            when Recurse | Recurse_Field | Recurse_Flatten =>
-               raise Program_Error;
 
             when Soft_Line =>
                null;
@@ -1149,7 +1128,7 @@ package body Langkit_Support.Prettier_Utils is
       procedure Process
         (Document : in out Document_Type; State : in out Spacing_State) is
       begin
-         case Document.Kind is
+         case Instantiated_Template_Document_Kind (Document.Kind) is
             when Align =>
 
                --  Align does not emit any spacing before processing its inner
@@ -1251,9 +1230,6 @@ package body Langkit_Support.Prettier_Utils is
                   end;
                end if;
 
-            when If_Empty =>
-               raise Program_Error;
-
             when Indent =>
 
                --  Indent does not emit any spacing before processing its inner
@@ -1306,9 +1282,6 @@ package body Langkit_Support.Prettier_Utils is
             when Literal_Line =>
                Extend_Spacing (State.Actual, One_Line_Break_Spacing);
                State.In_Broken_Group := True;
-
-            when Recurse | Recurse_Field | Recurse_Flatten =>
-               raise Program_Error;
 
             when Soft_Line =>
 
