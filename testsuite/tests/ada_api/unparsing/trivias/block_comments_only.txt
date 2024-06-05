@@ -1,0 +1,9 @@
+{
+# There are only comments
+# in this box
+
+# We expect comments and empty lines
+# to be preserved
+
+# But it should still be re-indented
+}

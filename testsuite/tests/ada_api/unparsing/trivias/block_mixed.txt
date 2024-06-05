@@ -1,0 +1,18 @@
+# Comment before the block
+
+{
+    # First block comment
+    var v0: Int = 0;
+
+    var v1: Int = 0; # Second block (trailing) comment
+
+    # Intermediate comments (1)
+    # Intermediate comments (2)
+
+    var v2: Int = 0;
+    # Third block comment
+
+    # Last comment
+}
+
+# Comment after the block

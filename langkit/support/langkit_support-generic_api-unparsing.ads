@@ -323,6 +323,12 @@ package Langkit_Support.Generic_API.Unparsing is
         Default => GNATCOLL.Traces.From_Config);
    --  Trace to print the evolution of the "current token" information
 
+   Trivias_Trace : GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.UNPARSING.TRIVIAS",
+        Default => GNATCOLL.Traces.From_Config);
+   --  Trace to log information about the handling of trivias
+
    Before_Spacing_Trace : GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
        ("LANGKIT.UNPARSING.BEFORE_SPACING",

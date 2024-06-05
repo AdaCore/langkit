@@ -1,0 +1,12 @@
+def f(): T
+{
+  # First comment
+
+  a, b = c();
+
+  # Second comment
+
+  d, e = f();
+
+  # Third comment
+}

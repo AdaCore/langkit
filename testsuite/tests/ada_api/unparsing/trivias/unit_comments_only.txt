@@ -1,0 +1,8 @@
+# First...
+# A comment block
+
+   # Then...
+   # Another (originially indented)
+   # comment block
+
+# Last comment

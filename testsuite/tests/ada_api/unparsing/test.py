@@ -41,6 +41,7 @@ class FunDecl(Decl):
     name = Field(type=T.Name)
     args = Field(type=T.ParamSpec.list)
     return_type = Field(type=T.Name)
+    is_null = Field(type=T.NullQual)
     body = Field(type=T.Stmt.list)
 
 
@@ -95,30 +96,37 @@ class Ref(Expr):
     name = Field(type=T.Name)
 
 
-class SyncNode(FooNode):
-    """
-    Node used to test the token synchronization during unparsing: there are
-    both pre (kwA) and post (kwF) tokens for the node itself (SyncNode), an
-    inter token between the two fields (kwC) and pre/post tokens (kwD and kwE)
-    for child_2.
-    """
-    child_1 = Field(type=T.Name)
-    child_2 = Field(type=T.Name)
+mains = [
+    GPRMain("main.adb", ["config.json", "example.txt"]),
+    GPRMain(
+        "main.adb", ["-r", "param_spec", "config.json", "param_spec.txt"]
+    ),
+    "invalid_config.adb",
+    "commands.adb",
+    "default_config.adb",
+]
+
+for source in [
+    "block_comments_only.txt",
+    "block_empty.txt",
+    "block_first_empty_line.txt",
+    "block_mixed.txt",
+    "block_trailing.txt",
+    "list_nested_reattach.txt",
+    "list_ghost_before_trailing.txt",
+    "list_separator.txt",
+    "list_separator_trailing.txt",
+    "unit_comments_only.txt",
+    "unit_empty.txt",
+]:
+    mains.append(
+        GPRMain("main.adb", ["config.json", "trivias/{}".format(source)])
+    )
 
 
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
-    gpr_mains=[
-        GPRMain("main.adb", ["config.json", "example.txt"]),
-        GPRMain(
-            "main.adb", ["-r", "param_spec", "config.json", "param_spec.txt"]
-        ),
-        GPRMain("main.adb", ["token_sync_config_1.json", "token_sync.txt"]),
-        GPRMain("main.adb", ["token_sync_config_2.json", "token_sync.txt"]),
-        "invalid_config.adb",
-        "commands.adb",
-        "default_config.adb",
-    ],
+    gpr_mains=mains,
     types_from_lkt=True,
     generate_unparser=True,
     default_unparsing_config="default_cfg.json",
