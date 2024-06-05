@@ -172,7 +172,7 @@ module Text = struct
      text_from_utf8 bytes length c_value;
      !@ c_value
 
-  let c_type = view c_struct ~read:wrap ~write:unwrap
+  let c_type = c_struct
 end
 
 module Character = struct
@@ -266,10 +266,13 @@ module BigInteger = struct
     let c_text_ptr = allocate_n Text.c_type ~count:1 in
     text c_value c_text_ptr;
     decref c_value;
-    Z.of_string (!@ c_text_ptr)
+    Z.of_string (Text.wrap (!@ c_text_ptr))
 
   let unwrap (value : t) : unit ptr =
-    create (allocate Text.c_type (Z.to_string value))
+    let c_text = Text.unwrap (Z.to_string value) in
+    let r = create (addr c_text) in
+    Text.destroy_text (addr c_text);
+    r
 end
 
 % for enum_type in ctx.enum_types:
@@ -462,7 +465,7 @@ module Token = struct
       text =
         (let c_result_ptr = allocate_n Text.c_type ~count:1 in
          let _ = token_range_text (addr c_value) (addr c_value) c_result_ptr in
-         !@ c_result_ptr);
+         Text.wrap (!@ c_result_ptr));
       sloc_range =
         (let c_result_ptr = allocate_n SlocRange.c_type ~count:1 in
          let _ = _token_sloc_range (addr c_value) c_result_ptr in
@@ -519,7 +522,7 @@ module Token = struct
         (Format.asprintf "%a and %a come from different units"
           pp token_first
           pp token_last));
-    !@ c_result_ptr
+    Text.wrap (!@ c_result_ptr)
 
   let text token = text_range token token
 
@@ -1098,7 +1101,7 @@ let ${ocaml_api.field_name(field)}
     CFunctions.image
       (addr (${ocaml_api.unwrap_value('node', root_entity, 'context node')}))
       c_result_ptr;
-    !@ c_result_ptr
+    (Text.wrap (!@ c_result_ptr))
 
   let is_token_node node =
     let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
