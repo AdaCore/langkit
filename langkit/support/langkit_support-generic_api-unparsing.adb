@@ -411,6 +411,10 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       Node_Configs : Node_Config_Maps.Map;
       --  Node configurations for all node types in Language
+
+      Max_Empty_Lines : Integer;
+      --  Maximum number of consecutive empty lines to preserve during
+      --  source code reformatting. If negative, all empty lines are preserved.
    end record;
 
    procedure Free is new Ada.Unchecked_Deallocation
@@ -2496,6 +2500,27 @@ package body Langkit_Support.Generic_API.Unparsing is
          end;
       end loop;
 
+      --  Process the optional "max_empty_lines" entry
+
+      declare
+         Max_Empty_Lines : Integer := -1;
+      begin
+         if JSON.Has_Field ("max_empty_lines") then
+            declare
+               Value : constant JSON_Value := JSON.Get ("max_empty_lines");
+            begin
+               if Value.Kind /= JSON_Int_Type or else Integer'(Value.Get) < 0
+               then
+                  Abort_Parsing
+                    ("invalid ""max_empty lines"" entry: natural integer"
+                     & " expected");
+               end if;
+               Max_Empty_Lines := Value.Get;
+            end;
+         end if;
+         Result.Max_Empty_Lines := Max_Empty_Lines;
+      end;
+
       Destroy (Symbols);
       return (Ada.Finalization.Controlled with Value => Result);
 
@@ -3295,7 +3320,8 @@ package body Langkit_Support.Generic_API.Unparsing is
          Internal_Result := Pool.Create_List (Items);
 
          Dump (Internal_Result, Before_Spacing_Trace);
-         Insert_Required_Spacing (Pool, Internal_Result);
+         Insert_Required_Spacing
+           (Pool, Internal_Result, Config.Value.Max_Empty_Lines);
          Dump (Internal_Result, Final_Doc_Trace);
 
          --  Produce the Prettier document from our internal document tree

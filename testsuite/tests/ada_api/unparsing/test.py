@@ -123,6 +123,17 @@ for source in [
         GPRMain("main.adb", ["config.json", "trivias/{}".format(source)])
     )
 
+for i in ["none", 0, 1, 2]:
+    mains.append(
+        GPRMain(
+            "main.adb",
+            [
+                "max_empty_lines_{}.json".format(i),
+                "trivias/max_empty_lines.txt",
+            ],
+        )
+    )
+
 
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",

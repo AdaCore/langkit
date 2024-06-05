@@ -353,9 +353,13 @@ private package Langkit_Support.Prettier_Utils is
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
 
-   procedure Detect_Broken_Groups (Self : Document_Type);
+   procedure Detect_Broken_Groups
+     (Self : Document_Type; Max_Empty_Lines : Integer);
    --  Set the Group_Should_Break flag for all groups that can be statically
    --  proven to be broken.
+   --
+   --  See ``Unparsing_Configuration_Record.Max_Empty_Lines`` for the semantics
+   --  of ``Max_Empty_Lines``.
 
    procedure Dump
      (Document : Document_Type; Trace : GNATCOLL.Traces.Trace_Handle := null);
@@ -427,10 +431,10 @@ private package Langkit_Support.Prettier_Utils is
    --  unprase in the source buffer yet) and ``Right`` is the first token to
    --  unparse to the source buffer.
 
-   function Required_Line_Breaks (Self : Spacing_Type) return Natural
-   is (case Self.Kind is
-       when None | Whitespaces => 0,
-       when Line_Breaks        => Self.Count);
+   function Required_Line_Breaks
+     (Self : Spacing_Type; Max_Empty_Lines : Integer) return Natural;
+   --  Return the number of line breaks that ``Self`` implies, within the limit
+   --  implied by ``Max_Empty_Lines``.
 
    procedure Extend_Spacing
      (Self : in out Spacing_Type; Requirement : Spacing_Type);
@@ -439,10 +443,15 @@ private package Langkit_Support.Prettier_Utils is
    --     Self := Max_Spacing (Self, Requirement);
 
    procedure Insert_Required_Spacing
-     (Pool : in out Document_Pool; Document : in out Document_Type);
+     (Pool            : in out Document_Pool;
+      Document        : in out Document_Type;
+      Max_Empty_Lines : Integer);
    --  Adjust the tree of nodes in ``Document`` so that formatting that
    --  unparsing document will leave the mandatory spacing between tokens (i.e.
    --  so that the formatted document can be re-parsed correctly).
+   --
+   --  See ``Unparsing_Configuration_Record.Max_Empty_Lines`` for the semantics
+   --  of ``Max_Empty_Lines``.
 
 private
 

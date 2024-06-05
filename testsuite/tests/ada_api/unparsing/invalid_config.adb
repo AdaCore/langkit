@@ -40,6 +40,8 @@ begin
    Check ("invalid_member_name.json");
    Check ("invalid_field_name.json");
    Check ("invalid_node_sep.json");
+   Check ("invalid_max_empty_lines_1.json");
+   Check ("invalid_max_empty_lines_2.json");
    New_Line;
 
    Put_Line ("== Decoding errors in templates ==");
