@@ -168,9 +168,9 @@ module Text = struct
 
   let unwrap (value : t) : t structure =
      let length, bytes = bytes_of_string value in
-     let c_value = allocate c_struct (make c_struct) in
-     text_from_utf8 bytes length c_value;
-     !@ c_value
+     let c_value = make c_struct in
+     text_from_utf8 bytes length (addr c_value);
+     c_value
 
   let c_type = c_struct
 end
