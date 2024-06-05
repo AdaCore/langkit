@@ -2030,6 +2030,12 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Break_Parent =>
             return Pool.Create_Break_Parent;
 
+         when Expected_Line_Breaks =>
+            raise Program_Error with "invalid template node";
+
+         when Expected_Whitespaces =>
+            raise Program_Error with "invalid template node";
+
          when Fill =>
             return Pool.Create_Fill
               (Instantiate_Template_Helper
@@ -2292,7 +2298,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             when With_Recurse_Field =>
 
                --  Compute sub-documents for all fields (do not forget the
-               --  field's own pre/post tokensn) and let the template do its
+               --  field's own pre/post tokens) and let the template do its
                --  magic.
 
                declare
@@ -2502,6 +2508,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          Short       => "-t",
          Long        => "--trace",
          Arg_Type    => Unbounded_String,
+         Accumulate  => True,
          Help        =>
            "LANGKIT.UNPARSING.*. sub-trace name to activate");
 
