@@ -2,14 +2,37 @@
 Check the automatic docstring additions performed when generating code.
 """
 
+from langkit.names import Name
+
+
 # Excerpts of docstrings that we intend to check in generated sources
 excerpts = [
     # "Raw" docstrings above
     "Docstring for ``",
 
+    # Derivation additions
+    "This node type has the following derivations:",
+    "This node type has no derivation.",
+
     # Python-specific additions for nodes
     "Subclass of :py:class",
 ]
+
+for type_name in [
+    "Foo_Node",
+    "Foo_Node_Base_List",
+    "Undocumented_Node",
+    "Documented_Node",
+    "Documented_Node_List",
+    "Derived_List_Node",
+]:
+    t = Name(type_name)
+    excerpts += [
+        f":ada:ref:`{t.camel_with_underscores}`",
+        f":py:class:`{t.camel}`",
+        f"``foo_{t.lower}``",
+        f"``{t.lower}``",
+    ]
 
 # Log docstrings
 for path in [
@@ -32,7 +55,7 @@ for path in [
         for line in f.readlines():
             # Skip empty lines lines that are empty comments from our analysis.
             # This is necessary for the continuous lines detection.
-            if line.strip() in {"#", "--", ""}:
+            if line.strip() in {"#", "--", "*", ""}:
                 continue
 
             if any(e in line for e in excerpts):

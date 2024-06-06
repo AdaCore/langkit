@@ -55,9 +55,9 @@ def gdb_helper(*args):
             if get_context().emitter.generate_gdb_hook else '')
 
 
-def precise_types_doc(types: List[CompiledType]) -> str:
+def type_ref_list_doc(types: List[CompiledType]) -> str:
     """
-    Helper to format documentation about precise types.
+    Helper to format a list of type references for the Sphinx documentation.
     """
     return ', '.join(sorted(f':typeref:`{t.type_repo_name}`' for t in types))
 
@@ -2310,7 +2310,7 @@ class Field(BaseField):
                     result,
                     'This field contains a list that itself contains one of '
                     'the following nodes: '
-                    f'{precise_types_doc(precise_element_types)}'
+                    f'{type_ref_list_doc(precise_element_types)}'
                 )
                 precise_types_added = True
 
@@ -2321,7 +2321,7 @@ class Field(BaseField):
             result = append_paragraph(
                 result,
                 'This field can contain one of the following nodes: '
-                f'{precise_types_doc(precise_types)}'
+                f'{type_ref_list_doc(precise_types)}'
             )
             precise_types_added = True
 
@@ -3107,18 +3107,31 @@ class ASTNodeType(BaseStructType):
     def doc(self):
         result = super().doc
 
+        extra_paragraphs = []
+
         # If this is a list node and that parsers build it, add a precise list
         # of types it can contain: the element type might be too generic.
         if self.is_list and not self.synthetic:
             precise_types = list(self.precise_list_element_types
                                  .minimal_matched_types)
             if len(precise_types) > 1 or precise_types[0] != self.element_type:
-                addition = indent(
+                extra_paragraphs.append(
                     'This list node can contain one of the following'
-                    f' nodes: {precise_types_doc(precise_types)}',
-                    first_line_indentation(result)
+                    f' nodes: {type_ref_list_doc(precise_types)}'
                 )
-                return append_paragraph(result, addition)
+
+        if self.subclasses:
+            extra_paragraphs.append(
+                "This node type has the following derivations: "
+                f"{type_ref_list_doc(self.subclasses)}"
+            )
+        else:
+            extra_paragraphs.append("This node type has no derivation.")
+
+        base_indent = first_line_indentation(result)
+        for text in extra_paragraphs:
+            addition = indent(text, base_indent)
+            result = append_paragraph(result, addition)
 
         return result
 
