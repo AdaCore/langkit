@@ -3122,8 +3122,7 @@ class ASTNodeType(BaseStructType):
 
         if self.subclasses:
             extra_paragraphs.append(
-                "This node type has the following derivations: "
-                f"{type_ref_list_doc(self.subclasses)}"
+                f"Derived nodes: {type_ref_list_doc(self.subclasses)}"
             )
         else:
             extra_paragraphs.append("This node type has no derivation.")

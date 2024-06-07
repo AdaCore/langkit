@@ -11,7 +11,7 @@ excerpts = [
     "Docstring for ``",
 
     # Derivation additions
-    "This node type has the following derivations:",
+    "Derived nodes:",
     "This node type has no derivation.",
 
     # Python-specific additions for nodes
