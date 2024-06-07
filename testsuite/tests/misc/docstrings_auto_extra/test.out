@@ -6,38 +6,87 @@ Code generation was successful
 build/src/libfoolang-analysis.ads:
 
   --  Docstring for ``FooNode``.
+  --  This node type has the following derivations:
+  --  :ada:ref:`Documented_Node`, :ada:ref:`Foo_Node_Base_List`,
+  --  :ada:ref:`Undocumented_Node`
+
+  --  This node type has the following derivations:
+  --  :ada:ref:`Documented_Node_List`
+
+  --  This node type has the following derivations:
+  --  :ada:ref:`Derived_List_Node`
 
   --  Docstring for ``DerivedListNode``.
+  --  This node type has no derivation.
 
   --  Docstring for ``DocumentedNode``.
+  --  This node type has no derivation.
+
+  --  This node type has no derivation.
 
 build/src/libfoolang.h:
 
   * Docstring for ``FooNode``.
+  * This node type has the following derivations:
+  * ``foo_documented_node``, ``foo_foo_node_base_list``,
+  * ``foo_undocumented_node``
 
   * Docstring for ``DocumentedNode``.
+  * This node type has no derivation.
+
+  * This node type has the following derivations:
+  * ``foo_documented_node_list``
+
+  * This node type has the following derivations:
+  * ``foo_derived_list_node``
 
   * Docstring for ``DerivedListNode``.
+  * This node type has no derivation.
+
+  * This node type has no derivation.
 
 build/ocaml/libfoolang.mli:
 
+  * This node type has no derivation.
+
   * Docstring for ``DerivedListNode``.
+  * This node type has no derivation.
+
+  * This node type has the following derivations: ``derived_list_node``
+
+  * This node type has the following derivations: ``documented_node_list``
 
   * Docstring for ``DocumentedNode``.
+  * This node type has no derivation.
 
   * Docstring for ``FooNode``.
+  * This node type has the following derivations: ``documented_node``,
+  * ``foo_node_base_list``, ``undocumented_node``
 
 build/python/libfoolang/__init__.py:
 
   Docstring for ``FooNode``.
+  This node type has the following derivations: :py:class:`DocumentedNode`,
+  :py:class:`FooNodeBaseList`, :py:class:`UndocumentedNode`
 
   Subclass of :py:class:`FooNode`.
   Docstring for ``DocumentedNode``.
+  This node type has no derivation.
+
+  Subclass of :py:class:`FooNode`.
+  This node type has the following derivations:
+  :py:class:`DocumentedNodeList`
 
   Subclass of :py:class:`FooNodeBaseList`.
 
+  This node type has the following derivations: :py:class:`DerivedListNode`
+
   Subclass of :py:class:`DocumentedNodeList`.
   Docstring for ``DerivedListNode``.
+  This node type has no derivation.
+
+  Subclass of :py:class:`FooNode`.
+  This node type has no derivation.
 
 Done
 
