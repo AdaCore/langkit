@@ -4558,9 +4558,18 @@ class PropertyDef(AbstractNodeData):
             # field itself. For other lazy fields, just re-use the root's
             # fields.
             if self.base is None:
+                # Use the name of the owning node as a prefix for each storage
+                # field, to avoid conflict with homonym lazy fields in other
+                # nodes: all storage fields end up in the same discriminated
+                # record type in the generated Ada code.
+                field_name_template = (
+                    f"{self.struct.api_name.lower}"
+                    "_lf_{}_"
+                    f"{self.original_name}"
+                )
                 self.lazy_present_field = self.struct.add_internal_user_field(
                     name=names.Name.from_lower(
-                        f"lf_present_{self.original_name}"
+                        field_name_template.format("present")
                     ),
                     type=T.Bool,
                     default_value=Literal(True),
@@ -4571,7 +4580,9 @@ class PropertyDef(AbstractNodeData):
                 # Access to the storage field is guarded by the "present flag"
                 # field, so it is fine to leave it uninitialized.
                 self.lazy_storage_field = self.struct.add_internal_user_field(
-                    name=names.Name.from_lower(f"lf_stg_{self.original_name}"),
+                    name=names.Name.from_lower(
+                        field_name_template.format("stg")
+                    ),
                     type=self.type,
                     default_value=None,
                     doc=f'Storage for the {self.qualname} lazy field',
