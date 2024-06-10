@@ -10,6 +10,10 @@ class FooNode(ASTNode):
     pass
 
 
+class Block(FooNode):
+    items = Field(type=T.Decl.list)
+
+
 @abstract
 class Decl(FooNode):
     name = AbstractField(type=T.Name)
@@ -37,10 +41,21 @@ class FunDecl(Decl):
     name = Field(type=T.Name)
     args = Field(type=T.ParamSpec.list)
     return_type = Field(type=T.Name)
+    is_null = Field(type=T.NullQual)
     body = Field(type=T.Stmt.list)
 
 
+@abstract
 class Stmt(FooNode):
+    pass
+
+
+class ExprStmt(Stmt):
+    expr = Field(type=T.Expr)
+
+
+class AssignStmt(Stmt):
+    names = Field(type=T.Name.list)
     expr = Field(type=T.Expr)
 
 
@@ -81,17 +96,48 @@ class Ref(Expr):
     name = Field(type=T.Name)
 
 
+mains = [
+    GPRMain("main.adb", ["config.json", "example.txt"]),
+    GPRMain(
+        "main.adb", ["-r", "param_spec", "config.json", "param_spec.txt"]
+    ),
+    "invalid_config.adb",
+    "commands.adb",
+    "default_config.adb",
+]
+
+for source in [
+    "block_comments_only.txt",
+    "block_empty.txt",
+    "block_first_empty_line.txt",
+    "block_mixed.txt",
+    "block_trailing.txt",
+    "list_nested_reattach.txt",
+    "list_ghost_before_trailing.txt",
+    "list_separator.txt",
+    "list_separator_trailing.txt",
+    "unit_comments_only.txt",
+    "unit_empty.txt",
+]:
+    mains.append(
+        GPRMain("main.adb", ["config.json", "trivias/{}".format(source)])
+    )
+
+for i in ["none", 0, 1, 2]:
+    mains.append(
+        GPRMain(
+            "main.adb",
+            [
+                "max_empty_lines_{}.json".format(i),
+                "trivias/max_empty_lines.txt",
+            ],
+        )
+    )
+
+
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
-    gpr_mains=[
-        GPRMain("main.adb", ["config.json", "example.txt"]),
-        GPRMain(
-            "main.adb", ["-r", "param_spec", "config.json", "param_spec.txt"]
-        ),
-        "invalid_config.adb",
-        "commands.adb",
-        "default_config.adb",
-    ],
+    gpr_mains=mains,
     types_from_lkt=True,
     generate_unparser=True,
     default_unparsing_config="default_cfg.json",

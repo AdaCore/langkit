@@ -1,6 +1,6 @@
 {
   "node_configs": {
-    "Stmt": {
+    "ExprStmt": {
       "node": {"kind": "recurse_field"}
     }
   }

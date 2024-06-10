@@ -1,0 +1,3 @@
+var v: T = foo(a, # Comment for a
+               b  # Comment for b
+               );

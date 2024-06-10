@@ -1,0 +1,9 @@
+# A first comment
+
+{ # Then a block
+    var v: Int = 0;
+}
+
+# Another comment
+
+# A last comment

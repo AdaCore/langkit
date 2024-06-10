@@ -1,7 +1,7 @@
 Resolving test.lkt
 ==================
 Id   <RefId "foo_lexer" test.lkt:3:22-3:31>
-     references <LexerDecl "foo_lexer" lexer_example.lkt:1:1-52:2>
+     references <LexerDecl "foo_lexer" lexer_example.lkt:1:1-59:2>
 
 Id   <RefId "Int" test.lkt:4:12-4:15>
      references <StructDecl prelude: "Int">
@@ -14,7 +14,7 @@ test.lkt:4:5: error: value declaration forbidden in grammar declaration
   |     ^^^^^^^^^^^^^^
 
 Id   <RefId "foo_lexer" test.lkt:9:22-9:31>
-     references <LexerDecl "foo_lexer" lexer_example.lkt:1:1-52:2>
+     references <LexerDecl "foo_lexer" lexer_example.lkt:1:1-59:2>
 
 test.lkt:12:5: error: only one main rule allowed
 12 |     @main_rule foobar <- "foobar"
@@ -25,7 +25,7 @@ test.lkt:13:5: error: only one main rule allowed
    |     ^^^^^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "foo_lexer" test.lkt:16:22-16:31>
-     references <LexerDecl "foo_lexer" lexer_example.lkt:1:1-52:2>
+     references <LexerDecl "foo_lexer" lexer_example.lkt:1:1-59:2>
 
 test.lkt:16:33: error: main rule missing (@main_rule annotation)
 16 |  @invalid @with_lexer(foo_lexer) grammar main_missing {

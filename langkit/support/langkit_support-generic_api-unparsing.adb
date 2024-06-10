@@ -72,7 +72,13 @@ package body Langkit_Support.Generic_API.Unparsing is
      (Token_Fragment,
       List_Separator_Fragment,
       Field_Fragment,
-      List_Child_Fragment);
+      List_Child_Fragment,
+      Suffix_Comment,
+      Line_Comment,
+      Whitespaces,
+      Empty_Lines);
+   subtype Trivia_Fragment_Kind is
+     Unparsing_Fragment_Kind range Suffix_Comment .. Empty_Lines;
    type Unparsing_Fragment
      (Kind : Unparsing_Fragment_Kind := Unparsing_Fragment_Kind'First)
    is record
@@ -107,12 +113,73 @@ package body Langkit_Support.Generic_API.Unparsing is
                   --  Index of this field for this fragment (the parent node is
                   --  a list node).
 
+               when Trivia_Fragment_Kind =>
+                  null;
             end case;
+
+         when Suffix_Comment | Line_Comment =>
+
+            --  Fragment for:
+            --
+            --  *  ``Suffix_Comment``: a comment that appears as a line suffix
+            --      (i.e. following a non-comment token on the same line).
+            --
+            --  * ``Line_Comment``: a comment that is alone on its line.
+
+            Comment_Token : Lk_Token;
+
+         when Whitespaces =>
+
+            --  Fragment to record the presence of whitespaces before a suffix
+            --  comment. This fragment is materialized only before a suffix
+            --  comment: other whitespaces are ignored.
+
+            Whitespaces_Count : Positive;
+            --  Number of whitespaces found
+
+         when Empty_Lines =>
+
+            --  Fragment to record the presence of empty lines in the original
+            --  source code.
+
+            Empty_Lines_Count : Positive;
+            --  Number of empty lines found
       end case;
    end record;
    --  Source code unparsing fragment used to unparse source code. Fragments
    --  are either tokens or nodes (that must be decomposed themselves into
    --  fragments).
+
+   package Token_Sets is new Ada.Containers.Hashed_Sets
+     (Element_Type        => Lk_Token,
+      Hash                => Hash,
+      Equivalent_Elements => "=");
+
+   --  Trivias from the original source code to unparse are generally processed
+   --  in the same context as the token that preceeds them. There is one
+   --  exception to this: trivias that precede or come after a list node, so
+   --  that they are processed as part of the unparsing of that list node.
+   --  Here, we call such trivias "reattached".
+   --
+   --  To implement this, a first pass (``Compute_Trivias_Info``) looks for
+   --  trivias that precede/come after list tokens and add them to the
+   --  ``First_Reattached_Trivias`` set. Each time we are about to process a
+   --  sequence of trivias because they follow a token, we return early (skip
+   --  them) if ``First_Reattached_Trivias`` contains the first trivia.
+   --
+   --  In addition, each time we unparse a list node, we force the processing
+   --  of the sequence of trivias that precede/come after it. In order to avoid
+   --  processing these trivias multiple times, we add them to the
+   --  ``Processed_Reattached_Trivias`` set.
+
+   type Trivias_Info is record
+      First_Reattached_Trivias : Token_Sets.Set;
+      --  Set of first trivia for all sequences of reattached trivias
+
+      Processed_Reattached_Trivias : Token_Sets.Set;
+      --  Subset of ``First_Reattached_Trivias`` for the trivias that were
+      --  already processed (included in the unparsing).
+   end record;
 
    function Fragment_For
      (Id          : Language_Id;
@@ -123,11 +190,84 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  ``Is_List_Sep`` designates whether this token is used as a list
    --  separator.
 
+   procedure Compute_Trivias_Info (Node : Lk_Node; Info : out Trivias_Info);
+   --  Preparatory pass for the unparsing of trivias (empty lines, comments):
+   --  compute information about trivias found in the ``Node`` subtree and fill
+   --  ``Info``'s data structures accordingly.
+
+   function First_Trivia_Before (Node : Lk_Node) return Lk_Token;
+   --  Return the first trivia (i.e. the trivia with the lowest index) in the
+   --  contiguous sequence of trivias that precedes the given node's first
+   --  token, or ``No_Lk_Token`` if no trivia immediately precedes that first
+   --  token.
+
+   function Count_Line_Breaks (Token : Lk_Token) return Natural;
+   --  Return the number of line breaks found in ``Token``
+
+   function Is_Empty_List (Node : Lk_Node) return Boolean;
+   --  Return whether ``Node`` is a list node that can be considered empty for
+   --  the purpose of unparsing (i.e. for the ``ifEmpty`` command).
+   --
+   --  In this context, we consider that a list node with no child but with
+   --  attached comments is *not* empty. This makes more sense for formatting
+   --  concerns, as we unparse these comments as list children.
+
+   procedure Process_Trivias
+     (Token              : in out Lk_Token;
+      Items              : in out Document_Vectors.Vector;
+      Pool               : in out Document_Pool;
+      Trivias            : Trivias_Info;
+      Skip_Token         : Boolean;
+      Skip_If_Reattached : Boolean := True)
+   with Pre  => (if Skip_Token
+                 then not Is_Trivia (Token)
+                 else Is_Trivia (Token)),
+        Post => not Is_Trivia (Token);
+   --  Process all trivias that follow the given ``Token``. Add the
+   --  corresponding internal documents to ``Items`` (this is delegated to the
+   --  ``Append_Trivia_Fragment`` procedure). Update ``Token`` to get past all
+   --  processed tokens/trivias (so it is supposed to refer to a non-trivia
+   --  token upon return).
+   --
+   --  ``Pool`` is used to allocate the new internal document nodes.
+   --
+   --  ``Trivias`` is used to skip reattached trivias.
+   --
+   --  If ``Skip_Token`` is true, ``Token`` is assumed to be the token that
+   --  precedes the trivias to process. Otherwise, ``Token`` is assumed to be
+   --  the first trivia to process.
+   --
+   --  If ``Skip_If_Reattached``, this returns early if the first trivia to
+   --  process is reattached according to ``Trivias``. Otherwise, that first
+   --  trivia is processed unconditionally.
+
+   procedure Append_Trivia_Fragment
+     (Fragment : Unparsing_Fragment;
+      Items    : in out Document_Vectors.Vector;
+      Pool     : in out Document_Pool)
+   with Pre => Fragment.Kind in Trivia_Fragment_Kind;
+   --  Create the internal document node that corresponds to the given trivia
+   --  fragment and append it to ``Items``.
+
+   procedure Process_Reattached_Trivias
+     (First_Trivia : Lk_Token;
+      Items        : in out Document_Vectors.Vector;
+      Pool         : in out Document_Pool;
+      Trivias      : in out Trivias_Info);
+   --  If unprocessed reattached trivias precede ``Node``, process them and add
+   --  the corresponding internal document nodes to ``Items``.
+
    procedure Iterate_On_Fragments
-     (Node    : Lk_Node;
-      Process : access procedure (Fragment : Unparsing_Fragment));
+     (Node          : Lk_Node;
+      Current_Token : in out Lk_Token;
+      Process       : access procedure (Fragment      : Unparsing_Fragment;
+                                        Current_Token : in out Lk_Token));
    --  Decompose ``Node`` into a list of unparsing fragments and call
    --  ``Process`` on each fragment.
+   --
+   --  ``Current_Token`` must be the first token for ``Node``, and is updated
+   --  to account for all the tokens that are processed. The ``Process``
+   --  callback is expected to do the same.
 
    -----------------------
    --  Template symbols --
@@ -271,6 +411,10 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       Node_Configs : Node_Config_Maps.Map;
       --  Node configurations for all node types in Language
+
+      Max_Empty_Lines : Integer;
+      --  Maximum number of consecutive empty lines to preserve during
+      --  source code reformatting. If negative, all empty lines are preserved.
    end record;
 
    procedure Free is new Ada.Unchecked_Deallocation
@@ -284,6 +428,10 @@ package body Langkit_Support.Generic_API.Unparsing is
       Node : Lk_Node;
       --  Node from which ``Document`` was generated. Keeping track of this is
       --  necessary in order to implement instantiation for "recurse_flatten".
+
+      Next_Token : Lk_Token;
+      --  Token that follows ``Node``, i.e. the token to assign to
+      --  ``Current_Token`` after this template argument has been processed.
    end record;
 
    package Template_Instantiation_Arg_Vectors is new Ada.Containers.Vectors
@@ -303,22 +451,46 @@ package body Langkit_Support.Generic_API.Unparsing is
    end record;
 
    function Instantiate_Template
-     (Pool      : in out Document_Pool;
-      Node      : Lk_Node;
-      Template  : Template_Type;
-      Arguments : Template_Instantiation_Args) return Document_Type;
+     (Pool          : in out Document_Pool;
+      Node          : Lk_Node;
+      Current_Token : in out Lk_Token;
+      Trivias       : Trivias_Info;
+      Template      : Template_Type;
+      Arguments     : Template_Instantiation_Args) return Document_Type;
    --  Instantiate the given template, i.e. create a copy of it, replacing
    --  "recurse*" documents with the relevant documents in ``Arguments``.
    --
    --  ``Node`` must be the node for which we instantiate this template: it is
    --  used to correctly initialize the ``Node`` component of instantiated
    --  documents.
+   --
+   --  ``Current_Token`` must be the first token for ``Node``, and is updated
+   --  to account for all the tokens that are processed by this template.
+   --
+   --  Information in ``Trivias`` is used to process trivias as expected.
+
+   type Instantiation_State is record
+      Node : Lk_Node;
+      --  Node for which we instantiate a template (see the ``Node`` argument
+      --  of ``Instantiate_Template``).
+
+      Current_Token : Lk_Token;
+      --  Token that is about to be unparsed by this template instantiation.
+      --  It is updated as tokens are processed during the instantiation.
+
+      Arguments : not null access constant Template_Instantiation_Args;
+      --  Template arguments for the instantiation
+
+      Trivias : not null access constant Trivias_Info;
+      --  Information used to process trivias as expected
+   end record;
+   --  Group of common parameters for ``Instantiate_Template_Helper``, to have
+   --  a single argument to pass down to recursion.
 
    function Instantiate_Template_Helper
-     (Pool      : in out Document_Pool;
-      Node      : Lk_Node;
-      Template  : Document_Type;
-      Arguments : Template_Instantiation_Args) return Document_Type;
+     (Pool     : in out Document_Pool;
+      State    : in out Instantiation_State;
+      Template : Document_Type) return Document_Type;
    --  Helper for ``Instantiate_Template_Helper``. Implement the recursive part
    --  of template instantiation: ``Instantiate_Template_Helper`` takes care of
    --  the template unwrapping.
@@ -371,29 +543,361 @@ package body Langkit_Support.Generic_API.Unparsing is
    end Fragment_For;
 
    --------------------------
+   -- Compute_Trivias_Info --
+   --------------------------
+
+   procedure Compute_Trivias_Info (Node : Lk_Node; Info : out Trivias_Info)
+   is
+      function Process (Node : Lk_Node) return Visit_Status;
+      --  Callback for ``Langkit_Support.Analysis.Traverse``
+
+      -------------
+      -- Process --
+      -------------
+
+      function Process (Node : Lk_Node) return Visit_Status is
+      begin
+         --  Register reattached trivias that come before list nodes
+
+         if Node.Is_List_Node then
+            declare
+               First_Trivia : constant Lk_Token := First_Trivia_Before (Node);
+            begin
+               if not First_Trivia.Is_Null then
+                  Info.First_Reattached_Trivias.Include (First_Trivia);
+                  if Trivias_Trace.Is_Active then
+                     Trivias_Trace.Trace ("Found leading trivias:");
+                     Trivias_Trace.Trace ("  " & Image (First_Trivia));
+                     Trivias_Trace.Trace ("  to reattach to " & Node.Image);
+                  end if;
+               end if;
+            end;
+
+            if Node.Children_Count > 0 then
+               declare
+                  T : constant Lk_Token := Node.Token_End.Next;
+               begin
+                  if T.Is_Trivia then
+                     Info.First_Reattached_Trivias.Include (T);
+                     if Trivias_Trace.Is_Active then
+                        Trivias_Trace.Trace ("Found trailing trivias:");
+                        Trivias_Trace.Trace ("  " & Image (T));
+                        Trivias_Trace.Trace ("  to reattach to " & Node.Image);
+                     end if;
+                  end if;
+               end;
+            end if;
+         end if;
+         return Into;
+      end Process;
+   begin
+      Info.First_Reattached_Trivias.Clear;
+      Node.Traverse (Process'Access);
+   end Compute_Trivias_Info;
+
+   -------------------------
+   -- First_Trivia_Before --
+   -------------------------
+
+   function First_Trivia_Before (Node : Lk_Node) return Lk_Token is
+      First_Trivia, T : Lk_Token;
+   begin
+      First_Trivia := Node.Token_Start.Previous;
+      if First_Trivia.Is_Trivia then
+         loop
+            T := First_Trivia.Previous;
+            if not T.Is_Trivia then
+               return First_Trivia;
+            end if;
+            First_Trivia := T;
+         end loop;
+      else
+         return No_Lk_Token;
+      end if;
+   end First_Trivia_Before;
+
+   -----------------------
+   -- Count_Line_Breaks --
+   -----------------------
+
+   function Count_Line_Breaks (Token : Lk_Token) return Natural is
+   begin
+      return Result : Natural := 0 do
+         for C of Token.Text loop
+            if C = Chars.LF then
+               Result := Result + 1;
+            end if;
+         end loop;
+      end return;
+   end Count_Line_Breaks;
+
+   -------------------
+   -- Is_Empty_List --
+   -------------------
+
+   function Is_Empty_List (Node : Lk_Node) return Boolean is
+      T : Lk_Token;
+   begin
+      if not Node.Is_List_Node or else Node.Children_Count > 0 then
+         return False;
+      end if;
+
+      --  Node is an empty list, so it covers no token. Check for the presence
+      --  of comments in the trivias that logically precede Node in the token
+      --  stream: if we find at least one comment, we consider that this list
+      --  node is not empty.
+
+      T := Node.Token_Start.Previous;
+      while not T.Is_Null and then T.Is_Trivia loop
+         if T.Is_Comment then
+            return False;
+         end if;
+         T := T.Previous;
+      end loop;
+      return True;
+   end Is_Empty_List;
+
+   ----------------------
+   -- Process_Trivias_ --
+   ----------------------
+
+   procedure Process_Trivias
+     (Token              : in out Lk_Token;
+      Items              : in out Document_Vectors.Vector;
+      Pool               : in out Document_Pool;
+      Trivias            : Trivias_Info;
+      Skip_Token         : Boolean;
+      Skip_If_Reattached : Boolean := True)
+   is
+      Trace : constant Boolean := Trivias_Trace.Is_Active;
+
+      First_Line : Boolean := True;
+      --  Whether the currently processed trivia starts on the first line for
+      --  this sequence of trivias.
+
+      Line_Break_Required_Before_Line_Comment : Boolean := True;
+      --  Whether inserting a line break will be necessary if what comes next
+      --  is a line comment.
+
+      Columns : Natural := 0;
+      --  If processing the first line, this is set to the number of
+      --  whitespaces found so far. This is used to track how many whitespaces
+      --  precede the suffix comment (if any).
+   begin
+      if Trace then
+         Trivias_Trace.Increase_Indent
+           ("Processing trivias after " & Token.Image
+            & " (" & (if Skip_Token then "excluded" else "included") & ")");
+      end if;
+
+      if Skip_Token then
+         Token := Token.Next;
+      end if;
+
+      --  Skip reattached tokens if asked to
+
+      if Skip_If_Reattached
+         and then Trivias.First_Reattached_Trivias.Contains (Token)
+      then
+         Token := Token.Next (Exclude_Trivia => True);
+         return;
+      end if;
+
+      while Token.Is_Trivia loop
+         if Trace then
+            Trivias_Trace.Trace ("Found " & Token.Image);
+         end if;
+
+         if not Token.Is_Comment then
+            declare
+               --  This is a non-comment trivia, so treat it as a sequence of
+               --  whitespaces/line breaks: count the number of line breaks it
+               --  contains, and the number of prefix columns.
+
+               Line_Breaks : constant Natural := Count_Line_Breaks (Token);
+            begin
+               if Trace then
+                  Trivias_Trace.Trace
+                    ("   ... it has" & Line_Breaks'Image & " line breaks");
+               end if;
+
+               --  If we are still processing the first line in this sequence
+               --  of trivias, compute the number of spaces that come before
+               --  the potential suffix comment that comes next.
+
+               if First_Line and then Line_Breaks = 0 then
+                  declare
+                     Sloc_Range : constant Source_Location_Range :=
+                       Token.Sloc_Range;
+                  begin
+                     pragma Assert
+                       (Sloc_Range.Start_Line = Sloc_Range.End_Line);
+                     Columns := Positive
+                       (Sloc_Range.End_Column - Sloc_Range.Start_Column);
+                  end;
+               end if;
+
+               --  If there are N line breaks with N > 2, there are N - 1 empty
+               --  lines to account for.
+
+               if Line_Breaks >= 2 then
+                  Append_Trivia_Fragment
+                    (Fragment =>
+                       (Kind              => Empty_Lines,
+                        Empty_Lines_Count => Line_Breaks - 1),
+                     Items    => Items,
+                     Pool     => Pool);
+                  Line_Break_Required_Before_Line_Comment := False;
+               end if;
+
+               --  If this trivia contained at least one line break, the next
+               --  trivia to process will not start on the first line.
+
+               if Line_Breaks > 0 then
+                  First_Line := False;
+               end if;
+            end;
+
+         elsif First_Line then
+            if Trace then
+               Trivias_Trace.Trace ("   ... it is a suffix comment");
+            end if;
+
+            --  Propagate spaces that appear before this suffix comment, if any
+
+            if Columns > 0 then
+               Append_Trivia_Fragment
+                 (Fragment =>
+                    (Whitespaces, Whitespaces_Count => Columns),
+                  Items    => Items,
+                  Pool     => Pool);
+            end if;
+
+            Append_Trivia_Fragment
+              (Fragment => (Suffix_Comment, Token),
+               Items    => Items,
+               Pool     => Pool);
+            Line_Break_Required_Before_Line_Comment := False;
+
+         else
+            if Trace then
+               Trivias_Trace.Trace ("   ... it is a line comment");
+            end if;
+
+            --  If there was no empty line nor comment before this *line*
+            --  comment, make sure there is at least one line break before it,
+            --  so that it does not accidentally gets unparsed as a *suffix*
+            --  comment.
+
+            if Line_Break_Required_Before_Line_Comment then
+               Items.Append (Pool.Create_Expected_Line_Breaks (1));
+            end if;
+
+            Append_Trivia_Fragment
+              (Fragment => (Line_Comment, Token),
+               Items    => Items,
+               Pool     => Pool);
+            Line_Break_Required_Before_Line_Comment := False;
+         end if;
+
+         Token := Token.Next;
+      end loop;
+
+      if Trace then
+         Trivias_Trace.Decrease_Indent;
+      end if;
+   end Process_Trivias;
+
+   ----------------------------
+   -- Append_Trivia_Fragment --
+   ----------------------------
+
+   procedure Append_Trivia_Fragment
+     (Fragment : Unparsing_Fragment;
+      Items    : in out Document_Vectors.Vector;
+      Pool     : in out Document_Pool) is
+   begin
+      case Trivia_Fragment_Kind (Fragment.Kind) is
+         when Suffix_Comment | Line_Comment =>
+            Items.Append
+              (Pool.Create_Token
+                 (Kind (Fragment.Comment_Token),
+                  To_Unbounded_Text (Analysis.Text (Fragment.Comment_Token))));
+
+         when Whitespaces =>
+            Items.Append
+              (Pool.Create_Expected_Whitespaces (Fragment.Whitespaces_Count));
+
+         when Empty_Lines =>
+
+            --  It takes N+1 line consecutive breaks to make N empty lines
+
+            Items.Append
+              (Pool.Create_Expected_Line_Breaks
+                 (Fragment.Empty_Lines_Count + 1));
+      end case;
+   end Append_Trivia_Fragment;
+
+   --------------------------------
+   -- Process_Reattached_Trivias --
+   --------------------------------
+
+   procedure Process_Reattached_Trivias
+     (First_Trivia : Lk_Token;
+      Items        : in out Document_Vectors.Vector;
+      Pool         : in out Document_Pool;
+      Trivias      : in out Trivias_Info)
+   is
+      Current_Token : Lk_Token := First_Trivia;
+   begin
+      if not First_Trivia.Is_Null
+         and then Trivias.First_Reattached_Trivias.Contains (First_Trivia)
+         and then not Trivias
+                      .Processed_Reattached_Trivias
+                      .Contains (First_Trivia)
+      then
+         Process_Trivias
+           (Current_Token,
+            Items,
+            Pool,
+            Trivias,
+            Skip_Token         => False,
+            Skip_If_Reattached => False);
+         Trivias.Processed_Reattached_Trivias.Include (First_Trivia);
+      end if;
+   end Process_Reattached_Trivias;
+
+   --------------------------
    -- Iterate_On_Fragments --
    --------------------------
 
    procedure Iterate_On_Fragments
-     (Node    : Lk_Node;
-      Process : access procedure (Fragment : Unparsing_Fragment))
+     (Node          : Lk_Node;
+      Current_Token : in out Lk_Token;
+      Process       : access procedure (Fragment      : Unparsing_Fragment;
+                                        Current_Token : in out Lk_Token))
    is
       Id        : constant Language_Id := Node.Language;
       Desc      : constant Language_Descriptor_Access := +Id;
       Unparsers : Unparsers_Impl renames Desc.Unparsers.all;
 
-      procedure Append (Tokens : Token_Sequence);
+      procedure Process_Tokens (Tokens : Token_Sequence);
 
-      ------------
-      -- Append --
-      ------------
+      --------------------
+      -- Process_Tokens --
+      --------------------
 
-      procedure Append (Tokens : Token_Sequence) is
+      procedure Process_Tokens (Tokens : Token_Sequence) is
       begin
          for T of Tokens.all loop
-            Process.all (Fragment_For (Id, T));
+
+            --  Let the ``Process`` procedure take care of updating
+            --  ``Current_Token`` for ``T``.
+
+            pragma Assert (To_Index (Kind (Current_Token)) = T.Kind);
+            Process.all (Fragment_For (Id, T), Current_Token);
          end loop;
-      end Append;
+      end Process_Tokens;
 
       Node_Type     : constant Type_Ref := Type_Of (Node);
       Node_Unparser : Node_Unparser_Impl renames
@@ -401,11 +905,12 @@ package body Langkit_Support.Generic_API.Unparsing is
    begin
       case Node_Unparser.Kind is
          when Regular =>
-            --  Append fragments that precede the first field
 
-            Append (Node_Unparser.Pre_Tokens);
+            --  Process fragments that precede the first field
 
-            --  Then append fragments for each field and the tokens between
+            Process_Tokens (Node_Unparser.Pre_Tokens);
+
+            --  Then process fragments for each field and the tokens between
             --  them.
 
             for I in 1 .. Node_Unparser.Field_Unparsers.N loop
@@ -417,54 +922,64 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                   Child : constant Lk_Node := Node.Child (I);
                begin
-                  --  Append fragments that appear unconditionally between
+                  --  Process fragments that appear unconditionally between
                   --  fields.
 
-                  Append (Inter_Tokens);
+                  Process_Tokens (Inter_Tokens);
 
-                  --  Then append fragments for the field itself, if present
+                  --  Then process fragments for the field itself, if present
 
                   if Is_Field_Present (Child, Field_Unparser) then
                      Process.all
-                       ((Kind               => Field_Fragment,
-                         Node               => Child,
-                         Field              => From_Index
-                                                 (Id, Field_Unparser.Member),
-                         Field_Unparser_Ref => Field_Unparser'Access));
+                       (Fragment      =>
+                          (Kind               => Field_Fragment,
+                           Node               => Child,
+                           Field              => From_Index
+                                                   (Id, Field_Unparser.Member),
+                           Field_Unparser_Ref => Field_Unparser'Access),
+                        Current_Token => Current_Token);
                   end if;
                end;
             end loop;
 
-            --  Append fragments that follow the last field
+            --  Process fragments that follow the last field
 
-            Append (Node_Unparser.Post_Tokens);
+            Process_Tokens (Node_Unparser.Post_Tokens);
 
          when List =>
             for I in 1 .. Node.Children_Count loop
                if I > 1 then
                   if Node_Unparser.Separator = null then
                      Process.all
-                       ((Kind => List_Separator_Fragment,
-                         Token_Kind => No_Token_Kind_Ref,
-                         Token_Text => To_Unbounded_Text ("")));
+                       (Fragment      =>
+                          (Kind       => List_Separator_Fragment,
+                           Token_Kind => No_Token_Kind_Ref,
+                           Token_Text => To_Unbounded_Text ("")),
+                        Current_Token => Current_Token);
                   else
                      Process.all
-                       (Fragment_For
-                          (Id, Node_Unparser.Separator, Is_List_Sep => True));
+                       (Fragment      =>
+                          Fragment_For
+                            (Id, Node_Unparser.Separator, Is_List_Sep => True),
+                        Current_Token => Current_Token);
                   end if;
                end if;
 
                Process.all
-                 ((Kind        => List_Child_Fragment,
-                   Node        => Node.Child (I),
-                   Child_Index => I));
+                 (Fragment      =>
+                    (Kind        => List_Child_Fragment,
+                     Node        => Node.Child (I),
+                     Child_Index => I),
+                  Current_Token => Current_Token);
             end loop;
 
          when Token =>
             Process.all
-              ((Kind       => Token_Fragment,
-                Token_Kind => Token_Node_Kind (Node_Type),
-                Token_Text => To_Unbounded_Text (Node.Text)));
+              (Fragment      =>
+                 (Kind       => Token_Fragment,
+                  Token_Kind => Token_Node_Kind (Node_Type),
+                  Token_Text => To_Unbounded_Text (Node.Text)),
+               Current_Token => Current_Token);
       end case;
    end Iterate_On_Fragments;
 
@@ -1985,6 +2500,27 @@ package body Langkit_Support.Generic_API.Unparsing is
          end;
       end loop;
 
+      --  Process the optional "max_empty_lines" entry
+
+      declare
+         Max_Empty_Lines : Integer := -1;
+      begin
+         if JSON.Has_Field ("max_empty_lines") then
+            declare
+               Value : constant JSON_Value := JSON.Get ("max_empty_lines");
+            begin
+               if Value.Kind /= JSON_Int_Type or else Integer'(Value.Get) < 0
+               then
+                  Abort_Parsing
+                    ("invalid ""max_empty lines"" entry: natural integer"
+                     & " expected");
+               end if;
+               Max_Empty_Lines := Value.Get;
+            end;
+         end if;
+         Result.Max_Empty_Lines := Max_Empty_Lines;
+      end;
+
       Destroy (Symbols);
       return (Ada.Finalization.Controlled with Value => Result);
 
@@ -2001,13 +2537,24 @@ package body Langkit_Support.Generic_API.Unparsing is
    --------------------------
 
    function Instantiate_Template
-     (Pool      : in out Document_Pool;
-      Node      : Lk_Node;
-      Template  : Template_Type;
-      Arguments : Template_Instantiation_Args) return Document_Type is
+     (Pool          : in out Document_Pool;
+      Node          : Lk_Node;
+      Current_Token : in out Lk_Token;
+      Trivias       : Trivias_Info;
+      Template      : Template_Type;
+      Arguments     : Template_Instantiation_Args) return Document_Type
+   is
+      State : Instantiation_State :=
+        (Node,
+         Current_Token,
+         Arguments'Unrestricted_Access,
+         Trivias'Unrestricted_Access);
    begin
-      return Instantiate_Template_Helper
-               (Pool, Node, Template.Root, Arguments);
+      return Result : constant Document_Type :=
+        Instantiate_Template_Helper (Pool, State, Template.Root)
+      do
+         Current_Token := State.Current_Token;
+      end return;
    end Instantiate_Template;
 
    ---------------------------------
@@ -2015,36 +2562,29 @@ package body Langkit_Support.Generic_API.Unparsing is
    ---------------------------------
 
    function Instantiate_Template_Helper
-     (Pool      : in out Document_Pool;
-      Node      : Lk_Node;
-      Template  : Document_Type;
-      Arguments : Template_Instantiation_Args) return Document_Type is
+     (Pool     : in out Document_Pool;
+      State    : in out Instantiation_State;
+      Template : Document_Type) return Document_Type is
    begin
-      case Template.Kind is
+      case Template_Document_Kind (Template.Kind) is
          when Align =>
             return Pool.Create_Align
               (Template.Align_Data,
                Instantiate_Template_Helper
-                 (Pool, Node, Template.Align_Contents, Arguments));
+                 (Pool, State, Template.Align_Contents));
 
          when Break_Parent =>
             return Pool.Create_Break_Parent;
 
-         when Expected_Line_Breaks =>
-            raise Program_Error with "invalid template node";
-
-         when Expected_Whitespaces =>
-            raise Program_Error with "invalid template node";
-
          when Fill =>
             return Pool.Create_Fill
               (Instantiate_Template_Helper
-                 (Pool, Node, Template.Fill_Document, Arguments));
+                 (Pool, State, Template.Fill_Document));
 
          when Group =>
             return Pool.Create_Group
               (Instantiate_Template_Helper
-                 (Pool, Node, Template.Group_Document, Arguments),
+                 (Pool, State, Template.Group_Document),
                Template.Group_Should_Break,
                Template.Group_Id);
 
@@ -2055,30 +2595,51 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Pool.Create_Hard_Line_Without_Break_Parent;
 
          when If_Break =>
-            return Pool.Create_If_Break
-              (Instantiate_Template_Helper
-                 (Pool, Node, Template.If_Break_Contents, Arguments),
-               Instantiate_Template_Helper
-                 (Pool, Node, Template.If_Break_Flat_Contents, Arguments),
-               Template.If_Break_Group_Id);
+            declare
+               Break_State : Instantiation_State := State;
+               Flat_State  : Instantiation_State := State;
+
+               --  Instantiate both alternative templates
+
+               Break_Doc : constant Document_Type :=
+                 Instantiate_Template_Helper
+                   (Pool, Break_State, Template.If_Break_Contents);
+               Flat_Doc  : constant Document_Type :=
+                 Instantiate_Template_Helper
+                   (Pool, Flat_State, Template.If_Break_Flat_Contents);
+            begin
+               --  Thanks to our validation process, both alternatives are
+               --  supposed to process the same number of tokens.
+
+               pragma Assert
+                 (Break_State.Current_Token = Flat_State.Current_Token);
+               State := Break_State;
+
+               return Pool.Create_If_Break
+                 (Break_Doc, Flat_Doc, Template.If_Break_Group_Id);
+            end;
 
          when If_Empty =>
             declare
+               --  Consider that a list node with no child but with attached
+               --  comments is *not* empty. This makes more sense for
+               --  formatting concerns, as we unparse these comments as list
+               --  children.
+
                Child       : constant Lk_Node :=
-                 Arguments.With_Recurse_Doc.Node;
+                 State.Arguments.With_Recurse_Doc.Node;
                Subtemplate : constant Document_Type :=
-                 (if Child.Is_List_Node and then Child.Children_Count = 0
+                 (if Is_Empty_List (Child)
                   then Template.If_Empty_Then
                   else Template.If_Empty_Else);
             begin
-               return Instantiate_Template_Helper
-                 (Pool, Node, Subtemplate, Arguments);
+               return Instantiate_Template_Helper (Pool, State, Subtemplate);
             end;
 
          when Indent =>
             return Pool.Create_Indent
               (Instantiate_Template_Helper
-                 (Pool, Node, Template.Indent_Document, Arguments));
+                 (Pool, State, Template.Indent_Document));
 
          when Line =>
             return Pool.Create_Line;
@@ -2091,9 +2652,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                   Items.Append
                     (Instantiate_Template_Helper
                        (Pool,
-                        Node,
-                        Template.List_Documents.Element (I),
-                        Arguments));
+                        State,
+                        Template.List_Documents.Element (I)));
                end loop;
                return Pool.Create_List (Items);
             end;
@@ -2101,20 +2661,36 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Literal_Line =>
             return Pool.Create_Literal_Line;
 
+         --  For all "recurse" nodes, the knowledge of how to update
+         --  ``State.Current_Token`` is encoded in the ``Next_Token`` member of
+         --  the corresponding ``Single_Template_Instantiation_Argument``
+         --  record.
+
          when Recurse =>
-            return Arguments.With_Recurse_Doc.Document;
+            declare
+               Arg : constant Single_Template_Instantiation_Argument :=
+                 State.Arguments.With_Recurse_Doc;
+            begin
+               State.Current_Token := Arg.Next_Token;
+               return Arg.Document;
+            end;
 
          when Recurse_Field =>
-            return Arguments
-                   .Field_Docs (Template.Recurse_Field_Position)
-                   .Document;
+            declare
+               Arg : constant Single_Template_Instantiation_Argument :=
+                 State.Arguments.Field_Docs (Template.Recurse_Field_Position);
+            begin
+               State.Current_Token := Arg.Next_Token;
+               return Arg.Document;
+            end;
 
          when Recurse_Flatten =>
             declare
                Arg : constant Single_Template_Instantiation_Argument :=
-                 Arguments.With_Recurse_Doc;
+                 State.Arguments.With_Recurse_Doc;
             begin
                return Result : Document_Type := Arg.Document do
+                  State.Current_Token := Arg.Next_Token;
 
                   --  As long as Result is a document we can flatten and that
                   --  was created by a node that passes the flattening guard,
@@ -2152,8 +2728,20 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Pool.Create_Soft_Line;
 
          when Token =>
-            return Pool.Create_Token
-              (Template.Token_Kind, Template.Token_Text);
+            declare
+               Items : Document_Vectors.Vector;
+            begin
+               Items.Append
+                 (Pool.Create_Token
+                    (Template.Token_Kind, Template.Token_Text));
+               Process_Trivias
+                 (State.Current_Token,
+                  Items,
+                  Pool,
+                  State.Trivias.all,
+                  Skip_Token => True);
+               return Pool.Create_List (Items);
+            end;
 
          when Trim =>
             return Pool.Create_Trim;
@@ -2172,35 +2760,77 @@ package body Langkit_Support.Generic_API.Unparsing is
       Config : Unparsing_Configuration)
       return Prettier_Ada.Documents.Document_Type
    is
-      Pool : Document_Pool;
+      Trivias : Trivias_Info;
+      Pool    : Document_Pool;
+
+      procedure Skip_Tokens
+        (Current_Token : in out Lk_Token;
+         Tokens        : Token_Sequence;
+         Label         : String);
+      --  Update ``Current_Token`` as if we unparsed the given token sequence.
+      --
+      --  ``Label`` is used to track which token sequence is processed in debug
+      --  traces.
 
       procedure Unparse_Tokens
-        (Tokens : Token_Sequence; Items : in out Document_Vectors.Vector);
+        (Current_Token : in out Lk_Token;
+         Tokens        : Token_Sequence;
+         Items         : in out Document_Vectors.Vector;
+         Label         : String);
       --  Create template nodes for each element in ``Tokens`` and append them
-      --  to ``Items``.
+      --  to ``Items``. Update ``Current_Token`` accordingly.
+      --
+      --  ``Label`` is used to track which token sequence is processed in debug
+      --  traces.
 
-      function Unparse_Node (N : Lk_Node) return Document_Type;
+      function Unparse_Node
+        (N : Lk_Node; Current_Token : in out Lk_Token) return Document_Type;
       --  Using the unparsing configuration for N, unparse it to a Prettier
-      --  document.
+      --  document. Update ``Current_Token`` accordingly.
 
       procedure Unparse_Field
-        (Node        : Lk_Node;
-         Node_Config : Node_Config_Record;
-         Child       : Lk_Node;
-         Field_Ref   : Struct_Member_Index;
-         Unparser    : Field_Unparser_Impl;
-         Items       : in out Document_Vectors.Vector);
+        (Node          : Lk_Node;
+         Node_Config   : Node_Config_Record;
+         Child         : Lk_Node;
+         Field_Ref     : Struct_Member_Index;
+         Unparser      : Field_Unparser_Impl;
+         Items         : in out Document_Vectors.Vector;
+         Current_Token : in out Lk_Token);
       --  Unparse ``Child``, which is the ``Field_Ref`` field of ``Node``. The
       --  Resulting items are appended to ``Items``. ``Node_Config`` must be
       --  the node unparsing configuration for ``Node``, and ``Unparser`` must
-      --  be the unparser for this field.
+      --  be the unparser for this field. Update ``Current_Token`` accordingly.
+
+      -----------------
+      -- Skip_Tokens --
+      -----------------
+
+      procedure Skip_Tokens
+        (Current_Token : in out Lk_Token;
+         Tokens        : Token_Sequence;
+         Label         : String) is
+      begin
+         for T of Tokens.all loop
+            pragma Assert (To_Index (Kind (Current_Token)) = T.Kind);
+            Current_Token := Current_Token.Next (Exclude_Trivia => True);
+         end loop;
+
+         if Tokens.all'Length > 0 and then Current_Token_Trace.Is_Active then
+            Current_Token_Trace.Trace
+              (Tokens.all'Length'Image & " token(s) skipped (" & Label
+               & "), current token: " & Current_Token.Image);
+         end if;
+      end Skip_Tokens;
 
       --------------------
       -- Unparse_Tokens --
       --------------------
 
       procedure Unparse_Tokens
-        (Tokens : Token_Sequence; Items : in out Document_Vectors.Vector) is
+        (Current_Token : in out Lk_Token;
+         Tokens        : Token_Sequence;
+         Items         : in out Document_Vectors.Vector;
+         Label         : String) is
       begin
          for T of Tokens.all loop
             declare
@@ -2211,20 +2841,32 @@ package body Langkit_Support.Generic_API.Unparsing is
                Items.Append
                  (Pool.Create_Token
                     (Fragment.Token_Kind, Fragment.Token_Text));
+               Process_Trivias
+                 (Current_Token, Items, Pool, Trivias, Skip_Token => True);
             end;
          end loop;
+
+         if Tokens.all'Length > 0 and then Current_Token_Trace.Is_Active then
+            Current_Token_Trace.Trace
+              (Tokens.all'Length'Image & " token(s) unparsed (" & Label
+               & "), current token: " & Current_Token.Image);
+         end if;
       end Unparse_Tokens;
 
       ------------------
       -- Unparse_Node --
       ------------------
 
-      function Unparse_Node (N : Lk_Node) return Document_Type is
+      function Unparse_Node
+        (N : Lk_Node; Current_Token : in out Lk_Token) return Document_Type
+      is
          Node_Config : Node_Config_Record renames
            Config.Value.Node_Configs.Element (To_Index (Type_Of (N))).all;
          Items       : Document_Vectors.Vector;
 
-         procedure Process_Fragment (F : Unparsing_Fragment);
+         procedure Process_Fragment
+           (F             : Unparsing_Fragment;
+            Current_Token : in out Lk_Token);
          --  Append the documents to ``Items`` to represent the given unparsing
          --  fragment.
 
@@ -2232,51 +2874,159 @@ package body Langkit_Support.Generic_API.Unparsing is
          -- Process_Fragment --
          ----------------------
 
-         procedure Process_Fragment (F : Unparsing_Fragment) is
+         procedure Process_Fragment
+           (F             : Unparsing_Fragment;
+            Current_Token : in out Lk_Token) is
          begin
+            if Current_Token_Trace.Is_Active then
+               Current_Token_Trace.Trace
+                 ("About to unparse " & F.Kind'Image
+                  & ", current token: " & Current_Token.Image);
+            end if;
+
             case F.Kind is
                when Token_Fragment | List_Separator_Fragment =>
                   declare
+                     Is_Fake_Token : constant Boolean :=
+                       (F.Kind = List_Separator_Fragment
+                        and then F.Token_Kind = No_Token_Kind_Ref);
+
+                     --  Make sure Current_Token is synchronized with the given
+                     --  unparsing fragment. There is one exception: the
+                     --  fragment is a fake empty token, for the case of
+                     --  processing the separator of a list with no separator
+                     --  token. Doing so is necessary to apply the "sep"
+                     --  template of such a list node.
+
+                     pragma Assert
+                       (F.Token_Kind = Current_Token.Kind
+                        or else Is_Fake_Token);
+
                      Token : Document_Type :=
                        (if F.Token_Kind = No_Token_Kind_Ref
                         then Pool.Create_Empty_List
                         else Pool.Create_Token (F.Token_Kind, F.Token_Text));
                   begin
+                     --  If we have a list separator, instantiate the
+                     --  corresponding template to wrap ``Token``.
+
                      if F.Kind = List_Separator_Fragment then
                         pragma Assert
                           (Node_Config.List_Sep.Kind = With_Recurse);
                         declare
-                           Args : constant Template_Instantiation_Args :=
-                             (Kind             => With_Recurse,
-                              With_Recurse_Doc =>
-                                (Document => Token, Node => N));
+                           Sep_Items : Document_Vectors.Vector;
+                           --  Token and trivia used to unparse the list
+                           --  separator.
+
+                           Next_Token : Lk_Token := Current_Token;
+                           --  Value for ``Current_Token`` after the list
+                           --  separator has been processed.
+
+                           Args : Template_Instantiation_Args (With_Recurse);
                         begin
+                           if not Is_Fake_Token then
+                              Sep_Items.Append (Token);
+                              Process_Trivias
+                                (Next_Token,
+                                 Sep_Items,
+                                 Pool,
+                                 Trivias,
+                                 Skip_Token => True);
+                           end if;
+                           Args.With_Recurse_Doc :=
+                             (Document   => Pool.Create_List (Sep_Items),
+                              Node       => N,
+                              Next_Token => Next_Token);
                            Token := Instantiate_Template
-                             (Pool      => Pool,
-                              Node      => N,
-                              Template  => Node_Config.List_Sep,
-                              Arguments => Args);
+                             (Pool          => Pool,
+                              Node          => N,
+                              Current_Token => Current_Token,
+                              Trivias       => Trivias,
+                              Template      => Node_Config.List_Sep,
+                              Arguments     => Args);
+                           pragma Assert (Current_Token = Next_Token);
+                           Items.Append (Token);
                         end;
+
+                        --  Flush line breaks before unparsing the next list
+                        --  child, so that line breaks do not get inserted
+                        --  inside groups/indents/... that belong to the next
+                        --  child.
+
+                        Items.Append (Pool.Create_Flush_Line_Breaks);
+
+                     else
+                        --  This is an actual token (non-trivia) fragment:
+                        --  unparse it and process its trivias.
+
+                        Items.Append (Token);
+                        Process_Trivias
+                          (Current_Token,
+                           Items,
+                           Pool,
+                           Trivias,
+                           Skip_Token => True);
                      end if;
-                     Items.Append (Token);
                   end;
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Trace
+                       ("Token fragment unparsed, current token: "
+                        & Current_Token.Image);
+                  end if;
 
                when Field_Fragment =>
                   Unparse_Field
-                    (Node        => N,
-                     Node_Config => Node_Config,
-                     Child       => F.Node,
-                     Field_Ref   => To_Index (F.Field),
-                     Unparser    => F.Field_Unparser_Ref.all,
-                     Items       => Items);
+                    (Node          => N,
+                     Node_Config   => Node_Config,
+                     Child         => F.Node,
+                     Field_Ref     => To_Index (F.Field),
+                     Unparser      => F.Field_Unparser_Ref.all,
+                     Items         => Items,
+                     Current_Token => Current_Token);
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Trace
+                       ("Field fragment " & Debug_Name (F.Field)
+                        & " unparsed, current token: " & Current_Token.Image);
+                  end if;
 
                when List_Child_Fragment =>
-                  Items.Append (Unparse_Node (F.Node));
+
+                  --  If reattached tokens precede this child, process them now
+                  --  so that they are unparsed as part of this list node
+                  --  instead of another (possibly deeply nested) list node.
+
+                  Process_Reattached_Trivias
+                    (First_Trivia_Before (F.Node), Items, Pool, Trivias);
+
+                  --  Flush line breaks before unparsing the list child, so
+                  --  that line breaks do not get inserted inside
+                  --  groups/indents/... that would belong to it.
+
+                  Items.Append (Pool.Create_Flush_Line_Breaks);
+
+                  --  Finally unparse the list child
+
+                  Items.Append (Unparse_Node (F.Node, Current_Token));
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Trace
+                       ("List child fragment unparsed, current token: "
+                        & Current_Token.Image);
+                  end if;
+
+               when Trivia_Fragment_Kind =>
+                  Append_Trivia_Fragment (F, Items, Pool);
             end case;
          end Process_Fragment;
 
          Template : Template_Type renames Node_Config.Node_Template;
+         Result   : Document_Type;
       begin
+         if Current_Token_Trace.Is_Active then
+            Current_Token_Trace.Increase_Indent
+              ("Unparsing " & N.Image
+               & ", current token: " & Current_Token.Image);
+         end if;
+
          case Some_Template_Kind (Template.Kind) is
             when With_Recurse =>
 
@@ -2284,18 +3034,26 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  then group them in a list document, and use that list to
                --  instantiate the template for the node itself.
 
-               Iterate_On_Fragments (N, Process_Fragment'Access);
-               return Instantiate_Template
-                 (Pool      => Pool,
-                  Node      => N,
-                  Template  => Template,
-                  Arguments =>
+               Iterate_On_Fragments
+                 (N, Current_Token, Process_Fragment'Access);
+               Result := Instantiate_Template
+                 (Pool          => Pool,
+                  Node          => N,
+                  Trivias       => Trivias,
+                  Current_Token => Current_Token,
+                  Template      => Template,
+                  Arguments     =>
                     (Kind             => With_Recurse,
                      With_Recurse_Doc =>
-                       (Document => Pool.Create_List (Items),
-                        Node     => N)));
+                       (Document   => Pool.Create_List (Items),
+                        Node       => N,
+                        Next_Token => Current_Token)));
 
             when With_Recurse_Field =>
+               if Current_Token_Trace.Is_Active then
+                  Current_Token_Trace.Increase_Indent
+                    ("About to process a ""recurse_field"" template");
+               end if;
 
                --  Compute sub-documents for all fields (do not forget the
                --  field's own pre/post tokens) and let the template do its
@@ -2310,7 +3068,20 @@ package body Langkit_Support.Generic_API.Unparsing is
                     Unparsers.Node_Unparsers (To_Index (Node_Type)).all;
 
                   Arguments : Template_Instantiation_Args (With_Recurse_Field);
+
+                  Field_Token : Lk_Token := Current_Token;
+                  --  Copy of Current_Token, maintained just for the
+                  --  instantiation of template arguments (one for each field):
+                  --  we get back to Current_Token to instantiate the node-wide
+                  --  template.
+
                begin
+                  --  Prepare arguments to instantiate ``Template``. Use
+                  --  ``Field_Token`` to achieve this.
+
+                  Skip_Tokens
+                    (Field_Token, Node_Unparser.Pre_Tokens, "pre tokens");
+
                   for I in 1 .. N.Children_Count loop
                      declare
                         Child          : constant Lk_Node := N.Child (I);
@@ -2318,31 +3089,70 @@ package body Langkit_Support.Generic_API.Unparsing is
                           Node_Unparser.Field_Unparsers.Field_Unparsers (I);
                         Child_Doc      : Document_Type;
                      begin
+                        Skip_Tokens
+                          (Field_Token,
+                           Node_Unparser.Field_Unparsers.Inter_Tokens (I),
+                           "inter tokens");
+
+                        if Current_Token_Trace.Is_Active then
+                           Current_Token_Trace.Increase_Indent
+                             ("Processing field " & Child.Image
+                              & ", field token: " & Field_Token.Image);
+                        end if;
+
                         if Is_Field_Present (Child, Field_Unparser) then
                            Items.Clear;
                            Unparse_Field
-                             (Node        => N,
-                              Node_Config => Node_Config,
-                              Child       => Child,
-                              Field_Ref   => Field_Unparser.Member,
-                              Unparser    => Field_Unparser,
-                              Items       => Items);
+                             (Node          => N,
+                              Node_Config   => Node_Config,
+                              Child         => Child,
+                              Field_Ref     => Field_Unparser.Member,
+                              Unparser      => Field_Unparser,
+                              Items         => Items,
+                              Current_Token => Field_Token);
                            Child_Doc := Pool.Create_List (Items);
                         else
                            Child_Doc := Pool.Create_Empty_List;
                         end if;
                         Arguments.Field_Docs.Append
                           (Single_Template_Instantiation_Argument'
-                             (Document => Child_Doc,
-                              Node     => Child));
+                             (Document   => Child_Doc,
+                              Node       => Child,
+                              Next_Token => Field_Token));
+
+                        if Current_Token_Trace.Is_Active then
+                           Current_Token_Trace.Decrease_Indent
+                             ("Done processing field " & Child.Image
+                              & ", field token: " & Field_Token.Image);
+                        end if;
                      end;
                   end loop;
 
-                  return Instantiate_Template
-                    (Pool      => Pool,
-                     Node      => N,
-                     Template  => Template,
-                     Arguments => Arguments);
+                  Skip_Tokens
+                    (Field_Token, Node_Unparser.Post_Tokens, "post tokens");
+
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Trace
+                       ("Template arguments for fields are ready, now"
+                        & " instantiating the main template");
+                  end if;
+
+                  --  Now run the template instantiation, getting back to
+                  --  ``Current_Token``. In the end, ``Current_Token`` and
+                  --  ``Field_Token`` should be in sync.
+
+                  Result := Instantiate_Template
+                    (Pool          => Pool,
+                     Node          => N,
+                     Current_Token => Current_Token,
+                     Trivias       => Trivias,
+                     Template      => Template,
+                     Arguments     => Arguments);
+                  pragma Assert (Current_Token = Field_Token);
+
+                  if Current_Token_Trace.Is_Active then
+                     Current_Token_Trace.Decrease_Indent;
+                  end if;
                end;
 
             when With_Text_Recurse =>
@@ -2352,6 +3162,42 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                raise Program_Error;
          end case;
+
+         --  If reattached trivias precede or come after this node, this is our
+         --  last chance to process them and integrate them to the returned
+         --  document.
+
+         declare
+            Items  : Document_Vectors.Vector;
+            T      : Lk_Token;
+         begin
+            Process_Reattached_Trivias
+              (First_Trivia_Before (N), Items, Pool, Trivias);
+
+            Items.Append (Result);
+
+            --  If this is a ghost node, leading and trailing trivias are the
+            --  same. In addition, ``N.Token_End`` points at the first token
+            --  that appears logically after the ghost node, so what comes next
+            --  has nothing to do with the ghost node.
+
+            if not N.Is_Ghost then
+               T := N.Token_End.Next;
+               if T.Is_Trivia then
+                  Process_Reattached_Trivias (T, Items, Pool, Trivias);
+               end if;
+            end if;
+
+            Result := Pool.Create_List (Items);
+         end;
+
+         if Current_Token_Trace.Is_Active then
+            Current_Token_Trace.Decrease_Indent
+              ("Done with " & N.Image
+               & ", current token: " & Current_Token.Image);
+         end if;
+
+         return Result;
       end Unparse_Node;
 
       -------------------
@@ -2359,12 +3205,13 @@ package body Langkit_Support.Generic_API.Unparsing is
       -------------------
 
       procedure Unparse_Field
-        (Node        : Lk_Node;
-         Node_Config : Node_Config_Record;
-         Child       : Lk_Node;
-         Field_Ref   : Struct_Member_Index;
-         Unparser    : Field_Unparser_Impl;
-         Items       : in out Document_Vectors.Vector)
+        (Node          : Lk_Node;
+         Node_Config   : Node_Config_Record;
+         Child         : Lk_Node;
+         Field_Ref     : Struct_Member_Index;
+         Unparser      : Field_Unparser_Impl;
+         Items         : in out Document_Vectors.Vector;
+         Current_Token : in out Lk_Token)
       is
          Field_Template : constant Template_Type :=
            Node_Config.Field_Configs.Element (Field_Ref);
@@ -2379,24 +3226,56 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          Field_Template_Args : Template_Instantiation_Args
                                  (Field_Template.Kind);
-      begin
-         Field_Template_Args.With_Recurse_Doc :=
-           (Document => Unparse_Node (Child),
-            Node     => Child);
 
+         Next_Token : Lk_Token;
+         --  Token that follows ``Child``, i.e. token to assign to
+         --  ``Current_Token`` after the child has been processed.
+         --
+         --  Before we compute the template argument, it must be set just
+         --  passed the pre-tokens.
+      begin
          if Handle_Tokens then
-            Unparse_Tokens (Unparser.Pre_Tokens, Items);
+
+            --  ``Field_Template`` does *not* take care of pre/post tokens for
+            --  this field: do it now.
+
+            Unparse_Tokens
+              (Current_Token, Unparser.Pre_Tokens, Items, "pre tokens");
+            Next_Token := Current_Token;
+
+         else
+            --  ``Field_Template`` does not take care of pre/post tokens for
+            --  this field: just make sure ``Next_Token`` goes past pre-tokens.
+
+            Next_Token := Current_Token;
+            Skip_Tokens (Next_Token, Unparser.Pre_Tokens, "pre tokens");
          end if;
+
+         declare
+            Field_Doc : constant Document_Type :=
+              Unparse_Node (Child, Next_Token);
+         begin
+            Field_Template_Args.With_Recurse_Doc :=
+              (Document   => Field_Doc,
+               Node       => Child,
+               Next_Token => Next_Token);
+         end;
+
+         --  Now that the argument for this field template is ready,
+         --  instantiate the template.
 
          Items.Append
            (Instantiate_Template
-              (Pool      => Pool,
-               Node      => Node,
-               Template  => Field_Template,
-               Arguments => Field_Template_Args));
+              (Pool          => Pool,
+               Node          => Node,
+               Current_Token => Current_Token,
+               Trivias       => Trivias,
+               Template      => Field_Template,
+               Arguments     => Field_Template_Args));
 
          if Handle_Tokens then
-            Unparse_Tokens (Unparser.Post_Tokens, Items);
+            Unparse_Tokens
+              (Current_Token, Unparser.Post_Tokens, Items, "post tokens");
          end if;
       end Unparse_Field;
 
@@ -2407,12 +3286,46 @@ package body Langkit_Support.Generic_API.Unparsing is
          raise Precondition_Failure with "inconsistent languages";
       end if;
 
+      --  Before running the unparser itself, determine the set of reattached
+      --  trivias.
+
+      Compute_Trivias_Info (Node, Trivias);
+
       declare
-         Internal_Result : Document_Type := Unparse_Node (Node);
+         Items : Document_Vectors.Vector;
+
+         --  If ``Node`` is the root of its analysis unit, also unparse trivias
+         --  that come before the root node.
+
+         Current_Token   : Lk_Token := Node.Unit.First_Token;
+         Internal_Result : Document_Type;
       begin
+         if Current_Token.Is_Trivia
+            and then not Node.Is_List_Node
+            and then Node = Node.Unit.Root
+         then
+            Process_Trivias
+              (Current_Token,
+               Items,
+               Pool,
+               Trivias,
+               Skip_Token => False);
+         else
+            Current_Token := Node.Token_Start;
+         end if;
+
+         --  Now run the unparser on the given node
+
+         Items.Append (Unparse_Node (Node, Current_Token));
+         Internal_Result := Pool.Create_List (Items);
+
          Dump (Internal_Result, Before_Spacing_Trace);
-         Insert_Required_Spacing (Pool, Internal_Result);
+         Insert_Required_Spacing
+           (Pool, Internal_Result, Config.Value.Max_Empty_Lines);
          Dump (Internal_Result, Final_Doc_Trace);
+
+         --  Produce the Prettier document from our internal document tree
+
          return Result : constant Prettier.Document_Type :=
            To_Prettier_Document (Internal_Result)
          do

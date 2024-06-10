@@ -1,0 +1,4 @@
+{
+
+# Block comment after an empty line
+}

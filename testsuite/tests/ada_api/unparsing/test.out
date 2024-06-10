@@ -1,10 +1,23 @@
 == main.adb config.json example.txt ==
 var v1: Int = 2;
 null var v2: Int = 0;
+
 def f1(a: Int, b: Int=0): Int
 {
     print(a, b);
+    very_long_call(
+        aaaaaaaaa,
+        bbbbbbb,
+        cccccccc,
+        dddddddd,
+        eeeeeee,
+        fffffffff,
+        ggggggggg,
+        hhhhhhhh
+    );
     a + b + 1;
+
+    n1, n2, n2 = foo(a, b);
 }
 
 == main.adb -r param_spec config.json param_spec.txt ==
@@ -29,6 +42,10 @@ a: Int=2
     parent is not a syntax field for VarDecl
 # invalid_node_sep.json
     VarDecl is not a list node, invalid "sep" configuration
+# invalid_max_empty_lines_1.json
+    invalid "max_empty lines" entry: natural integer expected
+# invalid_max_empty_lines_2.json
+    invalid "max_empty lines" entry: natural integer expected
 
 == Decoding errors in templates ==
 
@@ -85,15 +102,15 @@ a: Int=2
 # invalid_recurse_field.json
     template for VarDecl.f_name: recurse_field cannot appear in a "recurse" template
 # invalid_recurse_field2.json
-    "node" template for Stmt: missing "field" key for recurse_field
+    "node" template for ExprStmt: missing "field" key for recurse_field
 # invalid_recurse_field3.json
-    "node" template for Stmt: invalid recurse_field field: JSON_NULL_TYPE
+    "node" template for ExprStmt: invalid recurse_field field: JSON_NULL_TYPE
 # invalid_recurse_field4.json
     "node" template for Decl: text/recurse_field are valid for concrete nodes only
 # invalid_recurse_field5.json
     "node" template for StmtList: text/recurse_field are not valid for list nodes
 # invalid_recurse_field6.json
-    invalid field for Stmt: f_foo
+    invalid field for ExprStmt: f_foo
 # invalid_recurse_field7.json
     "node" template for Name: text/recurse_field are not valid for token nodes
 # invalid_recurse_field8.json
@@ -1276,9 +1293,148 @@ Done.
 Done.
 
 == default_config.adb ==
-var v1:Int=2;null var v2:Int=0;def f1(a:Int,b:Int=0):Int{print(a,b);
+var v1:Int=2;null var v2:Int=0;
 
-a+b+1;}
+def f1(a:Int,b:Int=0):Int{print(a,b);
+
+very_long_call(aaaaaaaaa,bbbbbbb,cccccccc,dddddddd,eeeeeee,fffffffff,ggggggggg,hhhhhhhh);
+
+a+b+1;
+
+n1,n2,n2=foo(a,b);}
 
 main.adb: done
+
+== main.adb config.json trivias/block_comments_only.txt ==
+{
+    # There are only comments
+    # in this box
+
+    # We expect comments and empty lines
+    # to be preserved
+
+    # But it should still be re-indented
+}
+
+== main.adb config.json trivias/block_empty.txt ==
+{
+}
+
+== main.adb config.json trivias/block_first_empty_line.txt ==
+{
+
+    # Block comment after an empty line
+}
+
+== main.adb config.json trivias/block_mixed.txt ==
+# Comment before the block
+
+{
+    # First block comment
+    var v0: Int = 0;
+
+    var v1: Int = 0; # Second block (trailing) comment
+
+    # Intermediate comments (1)
+    # Intermediate comments (2)
+
+    var v2: Int = 0;
+    # Third block comment
+
+    # Last comment
+}
+
+# Comment after the block
+
+== main.adb config.json trivias/block_trailing.txt ==
+{
+    # Trailing comment
+}
+
+== main.adb config.json trivias/list_nested_reattach.txt ==
+def f(): T
+{
+    # First comment
+
+    a, b = c();
+
+    # Second comment
+
+    d, e = f();
+
+    # Third comment
+}
+
+== main.adb config.json trivias/list_ghost_before_trailing.txt ==
+def f(): T
+{
+
+    print();
+}
+
+== main.adb config.json trivias/list_separator.txt ==
+var v: T = foo(
+    # Comment for a
+    a,
+
+    # Comment for b
+    b
+);
+
+== main.adb config.json trivias/list_separator_trailing.txt ==
+var v: T = foo(
+    a, # Comment for a
+    b  # Comment for b
+);
+
+== main.adb config.json trivias/unit_comments_only.txt ==
+# First...
+# A comment block
+
+# Then...
+# Another (originially indented)
+# comment block
+
+# Last comment
+
+== main.adb config.json trivias/unit_empty.txt ==
+
+
+== main.adb max_empty_lines_none.json trivias/max_empty_lines.txt ==
+var v0:T=0;var v1:T=1;
+
+var v2:T=2;
+
+
+var v3:T=3;
+
+
+
+var v4:T=4;
+
+== main.adb max_empty_lines_0.json trivias/max_empty_lines.txt ==
+var v0:T=0;var v1:T=1;
+var v2:T=2;
+var v3:T=3;
+var v4:T=4;
+
+== main.adb max_empty_lines_1.json trivias/max_empty_lines.txt ==
+var v0:T=0;var v1:T=1;
+
+var v2:T=2;
+
+var v3:T=3;
+
+var v4:T=4;
+
+== main.adb max_empty_lines_2.json trivias/max_empty_lines.txt ==
+var v0:T=0;var v1:T=1;
+
+var v2:T=2;
+
+
+var v3:T=3;
+
+
+var v4:T=4;
 Done

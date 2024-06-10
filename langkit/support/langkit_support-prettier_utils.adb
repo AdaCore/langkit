@@ -156,7 +156,7 @@ package body Langkit_Support.Prettier_Utils is
         (Document : Document_Type) return Prettier.Document_Type
       is
       begin
-         case Document.Kind is
+         case Final_Document_Kind (Document.Kind) is
             when Align =>
                return Align
                  (Data     => Document.Align_Data,
@@ -164,12 +164,6 @@ package body Langkit_Support.Prettier_Utils is
 
             when Break_Parent =>
                return Break_Parent;
-
-            when Expected_Line_Breaks =>
-               raise Program_Error with "unexpanded document";
-
-            when Expected_Whitespaces =>
-               raise Program_Error with "unexpanded document";
 
             when Fill =>
                return Fill (Recurse (Document.Fill_Document));
@@ -195,9 +189,6 @@ package body Langkit_Support.Prettier_Utils is
                   Recurse (Document.If_Break_Flat_Contents),
                   (Group_Id => To_Prettier_Symbol
                                  (Symbol_Map, Document.If_Break_Group_Id)));
-
-            when If_Empty =>
-               raise Program_Error with "uninstantiated template";
 
             when Indent =>
                return Indent (Recurse (Document.Indent_Document));
@@ -257,9 +248,6 @@ package body Langkit_Support.Prettier_Utils is
 
             when Literal_Line =>
                return Literal_Line;
-
-            when Recurse | Recurse_Field | Recurse_Flatten =>
-               raise Program_Error with "uninstantiated template";
 
             when Soft_Line =>
                return Soft_Line;
@@ -378,6 +366,21 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_Fill;
+
+   ------------------------------
+   -- Create_Flush_Line_Breaks --
+   ------------------------------
+
+   function Create_Flush_Line_Breaks
+     (Self : in out Document_Pool) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Flush_Line_Breaks)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Flush_Line_Breaks;
 
    ------------------
    -- Create_Group --
@@ -678,7 +681,18 @@ package body Langkit_Support.Prettier_Utils is
    -- Detect_Broken_Groups --
    --------------------------
 
-   procedure Detect_Broken_Groups (Self : Document_Type) is
+   procedure Detect_Broken_Groups
+     (Self : Document_Type; Max_Empty_Lines : Integer)
+   is
+      function Line_Break_Needed
+        (Actual, Expected : Spacing_Type) return Boolean
+      is (Expected.Kind = Line_Breaks
+          and then (Actual.Kind /= Line_Breaks
+                    or else Actual.Count
+                            < Required_Line_Breaks
+                                (Expected, Max_Empty_Lines)));
+      --  Retun whether line breaks are needed to satisfy the ``Expected``
+      --  spacing, given the previous ``Actual`` spacing.
 
       procedure Process
         (Self   : Document_Type;
@@ -697,7 +711,7 @@ package body Langkit_Support.Prettier_Utils is
          Breaks : out Boolean) is
       begin
          Breaks := False;
-         case Self.Kind is
+         case Instantiated_Template_Document_Kind (Self.Kind) is
             when Align =>
                Process (Self.Align_Contents, State, Breaks);
 
@@ -716,6 +730,14 @@ package body Langkit_Support.Prettier_Utils is
 
             when Fill =>
                Process (Self.Fill_Document, State, Breaks);
+
+            when Flush_Line_Breaks =>
+               if State.Expected.Kind = Line_Breaks then
+                  if Line_Break_Needed (State.Actual, State.Expected) then
+                     Breaks := True;
+                     State.Actual := State.Expected;
+                  end if;
+               end if;
 
             when Group =>
                declare
@@ -748,9 +770,6 @@ package body Langkit_Support.Prettier_Utils is
                   Breaks := BB and then FB;
                end;
 
-            when If_Empty =>
-               raise Program_Error;
-
             when Indent =>
                Process (Self.Indent_Document, State, Breaks);
 
@@ -772,9 +791,6 @@ package body Langkit_Support.Prettier_Utils is
                Extend_Spacing (State.Actual, One_Line_Break_Spacing);
                Breaks := True;
 
-            when Recurse | Recurse_Field | Recurse_Flatten =>
-               raise Program_Error;
-
             when Soft_Line =>
                null;
 
@@ -789,11 +805,7 @@ package body Langkit_Support.Prettier_Utils is
                   --  group if there are more line expected than actually got
                   --  so far.
 
-                  Breaks :=
-                    Required.Kind = Line_Breaks
-                    and then (State.Actual.Kind /= Line_Breaks
-                              or else Required.Count > State.Actual.Count);
-
+                  Breaks := Line_Break_Needed (State.Actual, Required);
                   State.Expected := No_Spacing;
                   State.Actual := No_Spacing;
                   State.Last_Token := Self.Token_Kind;
@@ -894,6 +906,9 @@ package body Langkit_Support.Prettier_Utils is
                Write
                  (Prefix & "expectedWhitespaces:"
                   & Document.Expected_Whitespaces_Count'Image);
+
+            when Flush_Line_Breaks =>
+               Write (Prefix & "flushLineBreaks");
 
             when Fill =>
                Write (Prefix & "fill:");
@@ -1078,13 +1093,39 @@ package body Langkit_Support.Prettier_Utils is
       end if;
    end Extend_Spacing;
 
+   --------------------------
+   -- Required_Line_Breaks --
+   --------------------------
+
+   function Required_Line_Breaks
+     (Self : Spacing_Type; Max_Empty_Lines : Integer) return Natural
+   is
+      Count : constant Natural :=
+        (case Self.Kind is
+         when None | Whitespaces => 0,
+         when Line_Breaks        => Self.Count);
+   begin
+      return
+        (if Max_Empty_Lines < 0
+         then Count
+         else Natural'Min (Max_Empty_Lines + 1, Count));
+   end Required_Line_Breaks;
+
    -----------------------------
    -- Insert_Required_Spacing --
    -----------------------------
 
    procedure Insert_Required_Spacing
-     (Pool : in out Document_Pool; Document : in out Document_Type)
+     (Pool            : in out Document_Pool;
+      Document        : in out Document_Type;
+      Max_Empty_Lines : Integer)
    is
+      procedure Append_Required_Line_Breaks
+        (Expected, Actual : Natural; Items : in out Document_Vectors.Vector);
+      --  Given the previous ``Actual`` line breaks, append to ``Items`` the
+      --  amount of line breaks necessary so that there are at most
+      --  ``Expected`` line breaks.
+
       procedure Process
         (Document : in out Document_Type; State : in out Spacing_State);
       --  Using the given spacing state, insert required spacing inside
@@ -1093,6 +1134,18 @@ package body Langkit_Support.Prettier_Utils is
       --  Update ``State`` to reflect the last token/spacing emitted once
       --  ``Document`` itself has been unparsed.
 
+      ---------------------------------
+      -- Append_Required_Line_Breaks --
+      ---------------------------------
+
+      procedure Append_Required_Line_Breaks
+        (Expected, Actual : Natural; Items : in out Document_Vectors.Vector) is
+      begin
+         for Dummy in Actual + 1 .. Expected loop
+            Items.Append (Pool.Create_Hard_Line);
+         end loop;
+      end Append_Required_Line_Breaks;
+
       -------------
       -- Process --
       -------------
@@ -1100,7 +1153,7 @@ package body Langkit_Support.Prettier_Utils is
       procedure Process
         (Document : in out Document_Type; State : in out Spacing_State) is
       begin
-         case Document.Kind is
+         case Instantiated_Template_Document_Kind (Document.Kind) is
             when Align =>
 
                --  Align does not emit any spacing before processing its inner
@@ -1132,6 +1185,24 @@ package body Langkit_Support.Prettier_Utils is
                --  node: replace it with an empty list.
 
                Document := Pool.Create_Empty_List;
+
+            when Flush_Line_Breaks =>
+               declare
+                  Items          : Document_Vectors.Vector;
+                  Expected_Lines : constant Natural :=
+                    Required_Line_Breaks (State.Expected, Max_Empty_Lines);
+                  Actual_Lines   : constant Natural :=
+                    Required_Line_Breaks (State.Actual, -1);
+               begin
+                  if Expected_Lines > Actual_Lines then
+                     Append_Required_Line_Breaks
+                       (Required_Line_Breaks (State.Expected, Max_Empty_Lines),
+                        Required_Line_Breaks (State.Actual, -1),
+                        Items);
+                     State.Actual := State.Expected;
+                  end if;
+                  Document := Pool.Create_List (Items);
+               end;
 
             when Fill =>
                Process (Document.Fill_Document, State);
@@ -1183,9 +1254,6 @@ package body Langkit_Support.Prettier_Utils is
                      State := Join (Break_State, Flat_State);
                   end;
                end if;
-
-            when If_Empty =>
-               raise Program_Error;
 
             when Indent =>
 
@@ -1239,9 +1307,6 @@ package body Langkit_Support.Prettier_Utils is
             when Literal_Line =>
                Extend_Spacing (State.Actual, One_Line_Break_Spacing);
                State.In_Broken_Group := True;
-
-            when Recurse | Recurse_Field | Recurse_Flatten =>
-               raise Program_Error;
 
             when Soft_Line =>
 
@@ -1298,19 +1363,10 @@ package body Langkit_Support.Prettier_Utils is
                            end;
 
                         when Line_Breaks =>
-                           declare
-                              Last_Line_Breaks : constant Natural :=
-                                (case Saved_Actual.Kind is
-                                 when None | Whitespaces => 0,
-                                 when Line_Breaks        =>
-                                        Saved_Actual.Count);
-                           begin
-                              for Dummy in 1
-                                        .. Required.Count - Last_Line_Breaks
-                              loop
-                                 Items.Append (Pool.Create_Hard_Line);
-                              end loop;
-                           end;
+                           Append_Required_Line_Breaks
+                             (Required.Count,
+                              Required_Line_Breaks (Saved_Actual, -1),
+                              Items);
                      end case;
                      Items.Append (Token_Document);
                      Document := Pool.Create_List (Items);
@@ -1327,7 +1383,7 @@ package body Langkit_Support.Prettier_Utils is
 
       State : Spacing_State := Initial_Spacing_State;
    begin
-      Detect_Broken_Groups (Document);
+      Detect_Broken_Groups (Document, Max_Empty_Lines);
       Process (Document, State);
    end Insert_Required_Spacing;
 

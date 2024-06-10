@@ -12,6 +12,13 @@ lexer foo_lexer {
         error <- "error"
         example <- "example"
         null_tok <- "null"
+
+        kw_a <- "kwA"
+        kw_b <- "kwB"
+        kw_c <- "kwC"
+        kw_d <- "kwD"
+        kw_e <- "kwE"
+        kw_f <- "kwF"
     }
 
 

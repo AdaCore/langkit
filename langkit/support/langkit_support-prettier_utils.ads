@@ -65,6 +65,7 @@ private package Langkit_Support.Prettier_Utils is
       Expected_Line_Breaks,
       Expected_Whitespaces,
       Fill,
+      Flush_Line_Breaks,
       Group,
       Hard_Line,
       Hard_Line_Without_Break_Parent,
@@ -81,6 +82,29 @@ private package Langkit_Support.Prettier_Utils is
       Token,
       Trim,
       Whitespace);
+
+   subtype Template_Document_Kind is Document_Kind
+   with Static_Predicate =>
+     Template_Document_Kind not in
+       Expected_Line_Breaks
+     | Expected_Whitespaces
+     | Flush_Line_Breaks;
+
+   subtype Instantiated_Template_Document_Kind is Document_Kind
+   with Static_Predicate =>
+     Instantiated_Template_Document_Kind not in
+       If_Empty
+     | Recurse
+     | Recurse_Field
+     | Recurse_Flatten;
+
+   subtype Final_Document_Kind is Instantiated_Template_Document_Kind
+   with Static_Predicate =>
+     Final_Document_Kind not in
+       Expected_Line_Breaks
+     | Expected_Whitespaces
+     | Flush_Line_Breaks;
+
    type Document_Record (Kind : Document_Kind := Document_Kind'First) is record
       case Kind is
          when Align =>
@@ -98,6 +122,9 @@ private package Langkit_Support.Prettier_Utils is
 
          when Fill =>
             Fill_Document : Document_Type;
+
+         when Flush_Line_Breaks =>
+            null;
 
          when Group =>
             Group_Document     : Document_Type;
@@ -236,6 +263,10 @@ private package Langkit_Support.Prettier_Utils is
       Document : Document_Type) return Document_Type;
    --  Return a ``Fill`` node
 
+   function Create_Flush_Line_Breaks
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Flush_Line_Breaks`` node
+
    function Create_Group
      (Self         : in out Document_Pool;
       Document     : Document_Type;
@@ -322,9 +353,13 @@ private package Langkit_Support.Prettier_Utils is
       Length : Positive := 1) return Document_Type;
    --  Return a ``Whitespace`` node for the given length
 
-   procedure Detect_Broken_Groups (Self : Document_Type);
+   procedure Detect_Broken_Groups
+     (Self : Document_Type; Max_Empty_Lines : Integer);
    --  Set the Group_Should_Break flag for all groups that can be statically
    --  proven to be broken.
+   --
+   --  See ``Unparsing_Configuration_Record.Max_Empty_Lines`` for the semantics
+   --  of ``Max_Empty_Lines``.
 
    procedure Dump
      (Document : Document_Type; Trace : GNATCOLL.Traces.Trace_Handle := null);
@@ -396,6 +431,11 @@ private package Langkit_Support.Prettier_Utils is
    --  unprase in the source buffer yet) and ``Right`` is the first token to
    --  unparse to the source buffer.
 
+   function Required_Line_Breaks
+     (Self : Spacing_Type; Max_Empty_Lines : Integer) return Natural;
+   --  Return the number of line breaks that ``Self`` implies, within the limit
+   --  implied by ``Max_Empty_Lines``.
+
    procedure Extend_Spacing
      (Self : in out Spacing_Type; Requirement : Spacing_Type);
    --  Shortcut for::
@@ -403,10 +443,15 @@ private package Langkit_Support.Prettier_Utils is
    --     Self := Max_Spacing (Self, Requirement);
 
    procedure Insert_Required_Spacing
-     (Pool : in out Document_Pool; Document : in out Document_Type);
+     (Pool            : in out Document_Pool;
+      Document        : in out Document_Type;
+      Max_Empty_Lines : Integer);
    --  Adjust the tree of nodes in ``Document`` so that formatting that
    --  unparsing document will leave the mandatory spacing between tokens (i.e.
    --  so that the formatted document can be re-parsed correctly).
+   --
+   --  See ``Unparsing_Configuration_Record.Max_Empty_Lines`` for the semantics
+   --  of ``Max_Empty_Lines``.
 
 private
 

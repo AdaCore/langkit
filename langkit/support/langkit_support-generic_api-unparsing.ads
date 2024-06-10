@@ -274,10 +274,14 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --  The configuration file has the following format::
    --
-   --    {"node_configs": {<node-name>: <node-config>}}
+   --    {
+   --      "node_configs": {<node-name>: <node-config>},
+   --      "max_empty_lines": <natural-number>
+   --    }
    --
-   --  For each node to configure, the inner mapping associates the name of the
-   --  node (as a string key) to another mapping with the following format::
+   --  For each node to configure, the inner "node_configs" mapping associates
+   --  the name of the node (as a string key) to another mapping with the
+   --  following format::
    --
    --    {
    --      "node": <template>,
@@ -298,6 +302,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --  derives from node A, and if node B does not specify a configuration for
    --  its field F, then the configuration of field F for node A applies (same
    --  for the list separator).
+   --
+   --  The "max_empty_lines" entry is optional. If provided, it must be a
+   --  natural number that indicates the maximum number of consecutive empty
+   --  lines to preserve during the source code reformatting. If omitted, all
+   --  empty lines are preserved.
 
    function Unparse_To_Prettier
      (Node   : Lk_Node;
@@ -316,6 +325,18 @@ package Langkit_Support.Generic_API.Unparsing is
    ----------------------
    -- Unparsing traces --
    ----------------------
+
+   Current_Token_Trace : GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.UNPARSING.CURRENT_TOKEN",
+        Default => GNATCOLL.Traces.From_Config);
+   --  Trace to print the evolution of the "current token" information
+
+   Trivias_Trace : GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.UNPARSING.TRIVIAS",
+        Default => GNATCOLL.Traces.From_Config);
+   --  Trace to log information about the handling of trivias
 
    Before_Spacing_Trace : GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create

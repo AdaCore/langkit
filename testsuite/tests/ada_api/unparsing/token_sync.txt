@@ -1,0 +1,5 @@
+kwA foo kwC kwF
+kwA bar kwC kwD qux kwE kwF
+var a: T = b();
+var c: T = d(1);
+var e: T = f(1, 2, 3);
