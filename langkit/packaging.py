@@ -407,12 +407,12 @@ class NativeLibPackager(BasePackager):
                          libname)
         )
 
-    def vss_path(self, name: str) -> str:
+    def vss_path(self, lib_radix: str, project_name: str) -> str:
         """
         Special case for VSS libraries.
         """
         self.assert_with_relocatable()
-        libname = "lib" + name + self.dllext
+        libname = "lib" + lib_radix + self.dllext
         return (
             os.path.join(self.vss_prefix, "bin", libname)
             if self.is_windows else
@@ -421,6 +421,7 @@ class NativeLibPackager(BasePackager):
                 self.dyn_libdir_name,
                 "vss",
                 "relocatable",
+                project_name,
                 libname,
             )
         )
@@ -505,13 +506,13 @@ class NativeLibPackager(BasePackager):
 
         # VSS
         vss_libs = [
-            self.vss_path("vss"),
-            self.vss_path("vss-gnat"),
-            self.vss_path("vss-json"),
-            self.vss_path("vss-regexp"),
-            self.vss_path("vss-xml-templates"),
-            self.vss_path("vss-xml-xmlada"),
-            self.vss_path("vss-xml"),
+            self.vss_path("vss", "vss_text"),
+            self.vss_path("vss-gnat", "vss_gnat"),
+            self.vss_path("vss-json", "vss_json"),
+            self.vss_path("vss-regexp", "vss_regexp"),
+            self.vss_path("vss-xml-templates", "vss_xml_templates"),
+            self.vss_path("vss-xml-xmlada", "vss_xml_xmlada"),
+            self.vss_path("vss-xml", "vss_xml"),
         ]
 
         # Prettier_Ada
