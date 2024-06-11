@@ -420,6 +420,9 @@ package body Langkit_Support.Generic_API.Unparsing is
    procedure Free is new Ada.Unchecked_Deallocation
      (Unparsing_Configuration_Record, Unparsing_Configuration_Access);
 
+   procedure Release (Self : in out Unparsing_Configuration_Access);
+   --  Release all the memory that was allocated for ``Self``
+
    type Single_Template_Instantiation_Argument is record
       Document : Document_Type;
       --  Document to substitute to "recurse*" nodes when instantiating a
@@ -1417,7 +1420,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Append an item to ``Diagnostics`` and raise an Invalid_Input
       --  exception.
 
-      Result : constant Unparsing_Configuration_Access :=
+      Result : Unparsing_Configuration_Access :=
         new Unparsing_Configuration_Record;
       Pool   : Document_Pool renames Result.Pool;
 
@@ -2366,8 +2369,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                Field_Configs => <>,
                List_Sep      => No_Template);
          begin
-            Result.Node_Configs.Insert (Key, Config);
-
             if Value.Has_Field ("node") then
                declare
                   JSON_Template : constant JSON_Value := Value.Get ("node");
@@ -2407,6 +2408,14 @@ package body Langkit_Support.Generic_API.Unparsing is
                     Parse_Template (Value.Get ("sep"), Context);
                end;
             end if;
+
+            --  It is only now that this node config has been successfully
+            --  imported that we can add it to the unparsing configuration.
+            --  This is necessary so that potential premature release of the
+            --  unparsing configuration can be released in case of input
+            --  validation error.
+
+            Result.Node_Configs.Insert (Key, Config);
 
          exception
             when others =>
@@ -2528,7 +2537,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       when Invalid_Input =>
          pragma Assert (not Diagnostics.Is_Empty);
          Destroy (Symbols);
-         Pool.Release;
+         Release (Result);
          return No_Unparsing_Configuration;
    end Load_Unparsing_Config_From_Buffer;
 
@@ -3536,6 +3545,24 @@ package body Langkit_Support.Generic_API.Unparsing is
       end if;
    end Adjust;
 
+   -------------
+   -- Release --
+   -------------
+
+   procedure Release (Self : in out Unparsing_Configuration_Access) is
+   begin
+      for Cur in Self.Node_Configs.Iterate loop
+         declare
+            Node_Config : Node_Config_Access renames
+              Self.Node_Configs.Reference (Cur);
+         begin
+            Free (Node_Config);
+         end;
+      end loop;
+      Self.Pool.Release;
+      Free (Self);
+   end Release;
+
    --------------
    -- Finalize --
    --------------
@@ -3545,16 +3572,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       if Self.Value /= null then
          Self.Value.Ref_Count := Self.Value.Ref_Count - 1;
          if Self.Value.Ref_Count = 0 then
-            for Cur in Self.Value.Node_Configs.Iterate loop
-               declare
-                  Node_Config : Node_Config_Access renames
-                    Self.Value.Node_Configs.Reference (Cur);
-               begin
-                  Free (Node_Config);
-               end;
-            end loop;
-            Self.Value.Pool.Release;
-            Free (Self.Value);
+            Release (Self.Value);
          end if;
       end if;
    end Finalize;
