@@ -296,6 +296,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Int, lambda _: False),
             (T.Character, lambda _: False),
             (T.String, lambda _: False),
+            (T.TextType, lambda _: False),
             (ct.ArrayType, lambda t:
                 self.wrap_requires_context(t.element_type)),
             (ct.IteratorType, lambda t:
@@ -330,6 +331,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Int, lambda _: True),
             (T.Character, lambda _: True),
             (T.String, lambda _: False),
+            (T.TextType, lambda _: False),
             (ct.ArrayType, lambda _: False),
             (ct.IteratorType, lambda _: False),
             (ct.StructType, lambda _: False),
@@ -507,6 +509,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Int, lambda _: False),
             (T.Character, lambda _: False),
             (T.String, lambda _: True),
+            (T.TextType, lambda _: True),
             (T.Token, lambda _: True),
             (T.SourceLocation, lambda _: True),
             (T.Symbol, lambda _: False),

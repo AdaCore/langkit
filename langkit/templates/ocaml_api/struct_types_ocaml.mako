@@ -227,10 +227,10 @@ module Symbol : sig
 
   val unwrap : AnalysisContextStruct.t -> t -> (t structure)
 
-  val symbol_text : t structure ptr -> string ptr -> unit
+  val symbol_text : t structure ptr -> Text.t structure ptr -> unit
 
   val context_symbol :
-    AnalysisContextStruct.t -> string ptr -> t structure ptr -> int
+    AnalysisContextStruct.t -> Text.t structure ptr -> t structure ptr -> int
 end = struct
   type t = string
 
@@ -245,7 +245,7 @@ end = struct
   let wrap (c_value : t structure) : t =
     let c_result_ptr = allocate_n Text.c_type ~count:1 in
     symbol_text (addr c_value) c_result_ptr;
-    !@ c_result_ptr
+    Text.wrap (!@ c_result_ptr)
 
   let context_symbol = foreign ~from:c_lib "${capi.get_name('context_symbol')}"
     (AnalysisContextStruct.c_type
@@ -255,9 +255,11 @@ end = struct
 
   let unwrap (ctx : AnalysisContextStruct.t) (value : t) : t structure =
     let result = make c_type in
+    let c_text = Text.unwrap value in
     let code =
-      context_symbol ctx (allocate Text.c_type value) (addr result)
+      context_symbol ctx (addr c_text) (addr result)
     in
+    Text.destroy_text (addr c_text);
     if code = 0 then
       raise (InvalidSymbolError value) ;
     result
