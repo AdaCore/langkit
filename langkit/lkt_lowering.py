@@ -863,10 +863,10 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
 
 class SpacingAnnotationSpec(AnnotationSpec):
     """
-    Interpreter for @spacing annotations for token families.
+    Interpreter for @unparsing_spacing annotations for token families.
     """
     def __init__(self) -> None:
-        super().__init__('unparse_spacing', unique=False, require_args=True)
+        super().__init__('unparsing_spacing', unique=False, require_args=True)
 
     def interpret(
         self,
@@ -1027,7 +1027,7 @@ class LexerAnnotations(ParsedAnnotations):
 
 @dataclass
 class TokenFamilyAnnotations(ParsedAnnotations):
-    unparse_spacing: List[L.RefId]
+    unparsing_spacing: List[L.RefId]
     annotations = [SpacingAnnotationSpec()]
 
 
@@ -1603,7 +1603,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 root_scope,
             )
 
-            for spacing in family_annotations.unparse_spacing:
+            for spacing in family_annotations.unparsing_spacing:
                 spacings.append((name, spacing))
 
     def process_token_rule(

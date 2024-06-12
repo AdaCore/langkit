@@ -2240,7 +2240,7 @@ def unparse_lexer(ctx, f):
             for otherfam, has_spacing in spacings.items():
                 if has_spacing:
                     result.append(
-                        f'@unparse_spacing(with={otherfam.name.lower})$hl'
+                        f'@unparsing_spacing(with={otherfam.name.lower})$hl'
                     )
             result.append('family {} {{$i'
                           .format(family.name.lower))
