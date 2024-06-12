@@ -1008,13 +1008,13 @@ class TokenAnnotations(ParsedAnnotations):
     text: Tuple[bool, bool]
     trivia: Tuple[bool, bool]
     symbol: Tuple[bool, bool]
-    unparse_newline_after: bool
+    with_unparsing_newline: bool
     pre_rule: bool
     ignored: bool
     annotations = [TokenAnnotationSpec('text'),
                    TokenAnnotationSpec('trivia'),
                    TokenAnnotationSpec('symbol'),
-                   FlagAnnotationSpec('unparse_newline_after'),
+                   FlagAnnotationSpec('with_unparsing_newline'),
                    FlagAnnotationSpec('pre_rule'),
                    FlagAnnotationSpec('ignored')]
 
@@ -1669,7 +1669,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             if isinstance(token, TokenAction):
                 if token_set is not None:
                     token_set.add(token)
-                if rule_annot.unparse_newline_after:
+                if rule_annot.with_unparsing_newline:
                     newline_after.append(token)
 
             # Lower the lexing rule, if present

@@ -51,7 +51,7 @@ lexer foo_lexer {
     string <- p"\"[^\"]*\""
 
     family comments {
-        @unparse_newline_after
+        @with_unparsing_newline
         @trivia(comment=true)
         comment <- p"#(.?)+"
     }
