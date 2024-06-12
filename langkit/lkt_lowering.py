@@ -1010,13 +1010,13 @@ class TokenAnnotations(ParsedAnnotations):
     symbol: Tuple[bool, bool]
     unparse_newline_after: bool
     pre_rule: bool
-    ignore: bool
+    ignored: bool
     annotations = [TokenAnnotationSpec('text'),
                    TokenAnnotationSpec('trivia'),
                    TokenAnnotationSpec('symbol'),
                    FlagAnnotationSpec('unparse_newline_after'),
                    FlagAnnotationSpec('pre_rule'),
-                   FlagAnnotationSpec('ignore')]
+                   FlagAnnotationSpec('ignored')]
 
 
 @dataclass
@@ -1631,7 +1631,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 "start_ignore_layout": False,
                 "end_ignore_layout": False,
             }
-            if rule_annot.ignore:
+            if rule_annot.ignored:
                 token_cons = ignore_constructor
             for name in ('text', 'trivia', 'symbol'):
                 annot = getattr(rule_annot, name)

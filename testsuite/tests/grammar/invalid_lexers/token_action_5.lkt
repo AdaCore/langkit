@@ -1,5 +1,5 @@
 import common
 
 lexer foo_lexer {
-    @ignore @text() example <- "example"
+    @ignored @text() example <- "example"
 }

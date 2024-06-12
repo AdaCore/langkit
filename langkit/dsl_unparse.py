@@ -2137,8 +2137,8 @@ def unparse_lexer_rule_set(newline_afters, rule_set):
     action = first_rule.action
 
     if isinstance(action, Ignore):
-        return "{}@ignore _ <- {}".format("@pre_rule " if is_pre else "",
-                                          unparse_rule_matchers(rule_set))
+        return "{}@ignored _ <- {}".format("@pre_rule " if is_pre else "",
+                                           unparse_rule_matchers(rule_set))
 
     if isinstance(action, Case.CaseAction):
         assert len(rule_set) == 1

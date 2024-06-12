@@ -177,8 +177,8 @@ token_action_4.lkt:4:31: error: Boolean literal expected
 
 == token_action_5.lkt ==
 token_action_5.lkt:4:5: error: At most one token action allowed
-4 |     @ignore @text() example <- "example"
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4 |     @ignored @text() example <- "example"
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == token_action_6.lkt ==
