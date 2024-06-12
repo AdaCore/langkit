@@ -859,7 +859,7 @@ def has_abstract_list(cls):
     :param ASTNode cls: Type parameter. The AST node type to decorate.
     """
     _check_decorator_use(has_abstract_list, ASTNode, cls)
-    cls._type.has_abstract_list = True
+    cls._type.with_abstract_list = True
     return cls
 
 

@@ -12,7 +12,7 @@ grammar foo_grammar {
 class FooNode implements Node[FooNode] {
 }
 
-@abstract @has_abstract_list class AbstractHolder: FooNode {
+@abstract @with_abstract_list class AbstractHolder: FooNode {
     @parse_field f: Expr
 }
 

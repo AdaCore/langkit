@@ -1781,8 +1781,8 @@ def emit_node_type(node_type):
         if node_type.is_error_node:
             traits.append('ErrorNode')
 
-        if node_type.has_abstract_list:
-            quals.append("has_abstract_list")
+        if node_type.with_abstract_list:
+            quals.append("with_abstract_list")
 
         if annotations.custom_short_image:
             quals.append("custom_short_image")

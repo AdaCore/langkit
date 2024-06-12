@@ -15,7 +15,7 @@ enum Color {
     case red, green, blue
 }
 
-@abstract @has_abstract_list class FooNode implements Node[FooNode] {
+@abstract @with_abstract_list class FooNode implements Node[FooNode] {
     @exported fun count(seq: Array[Entity[Example]]): Int = seq.length()
 
     @exported fun get_a(c: Char = 'a'): Char = c

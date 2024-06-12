@@ -12,7 +12,7 @@ grammar foo_grammar {
     node.children_env().get(null[Symbol], lookup=LookupKind.minimal)
 }
 
-@has_abstract_list class Example: FooNode {
+@with_abstract_list class Example: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, Id]
 

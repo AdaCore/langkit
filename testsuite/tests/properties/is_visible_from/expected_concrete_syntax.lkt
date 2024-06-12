@@ -21,7 +21,7 @@ class Scope: ASTList[FooNode, Name] {
     }
 }
 
-@has_abstract_list class Name: FooNode implements TokenNode {
+@with_abstract_list class Name: FooNode implements TokenNode {
     env_spec {
         add_to_env_kv(node.symbol, node)
         add_env()

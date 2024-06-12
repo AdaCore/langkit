@@ -1035,7 +1035,7 @@ class TokenFamilyAnnotations(ParsedAnnotations):
 class BaseNodeAnnotations(ParsedAnnotations):
     custom_short_image: bool
     generic_list_type: str | None
-    has_abstract_list: bool
+    with_abstract_list: bool
     ple_unit_root: bool
     rebindable: bool
     repr_name: str | None
@@ -1045,7 +1045,7 @@ class BaseNodeAnnotations(ParsedAnnotations):
     annotations = [
         FlagAnnotationSpec("custom_short_image"),
         StringLiteralAnnotationSpec("generic_list_type"),
-        FlagAnnotationSpec("has_abstract_list"),
+        FlagAnnotationSpec("with_abstract_list"),
         FlagAnnotationSpec("ple_unit_root"),
         StringLiteralAnnotationSpec("repr_name"),
         FlagAnnotationSpec("rebindable"),
@@ -5070,7 +5070,7 @@ class LktTypesLoader:
             is_token_node=is_token_node,
             is_error_node=is_error_node,
             is_synthetic=is_synthetic,
-            has_abstract_list=annotations.has_abstract_list,
+            with_abstract_list=annotations.with_abstract_list,
             is_enum_node=is_enum_node,
             is_bool_node=is_bool_node,
         )

@@ -11,7 +11,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-@has_abstract_list class Example: FooNode implements TokenNode {
+@with_abstract_list class Example: FooNode implements TokenNode {
 }
 
 @snaps class WithSnapList: ASTList[FooNode, Example] {
@@ -24,5 +24,5 @@ class ListWrapper: FooNode {
     @parse_field item: FooNodeBaseList
 }
 
-@has_abstract_list class NullNode: FooNode implements TokenNode {
+@with_abstract_list class NullNode: FooNode implements TokenNode {
 }

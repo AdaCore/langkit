@@ -11,7 +11,7 @@ grammar foo_grammar {
 class AExampleList : ASTList[CFooNode, BExample] {
 }
 
-@has_abstract_list class BExample : CFooNode implements TokenNode {
+@with_abstract_list class BExample : CFooNode implements TokenNode {
 }
 
 @abstract class CFooNode implements Node[CFooNode] {
