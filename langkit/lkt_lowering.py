@@ -1080,7 +1080,7 @@ class FieldAnnotations(ParsedAnnotations):
     null_field: bool
     nullable: bool
     parse_field: bool
-    trace: bool
+    traced: bool
     use_in_equality: bool
     annotations = [FlagAnnotationSpec('abstract'),
                    FlagAnnotationSpec('exported'),
@@ -1089,7 +1089,7 @@ class FieldAnnotations(ParsedAnnotations):
                    FlagAnnotationSpec('null_field'),
                    FlagAnnotationSpec('nullable'),
                    FlagAnnotationSpec('parse_field'),
-                   FlagAnnotationSpec('trace'),
+                   FlagAnnotationSpec('traced'),
                    FlagAnnotationSpec('use_in_equality')]
 
 
@@ -1125,7 +1125,7 @@ class FunAnnotations(ParsedAnnotations):
     no_node_warning: bool
     memoized: bool
     predicate_error: str | None
-    trace: bool
+    traced: bool
     with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
     annotations = [
         FlagAnnotationSpec('abstract'),
@@ -1138,7 +1138,7 @@ class FunAnnotations(ParsedAnnotations):
         FlagAnnotationSpec('no_node_warning'),
         StringLiteralAnnotationSpec('predicate_error'),
         FlagAnnotationSpec('memoized'),
-        FlagAnnotationSpec('trace'),
+        FlagAnnotationSpec('traced'),
         WithDynvarsAnnotationSpec(),
     ]
 
@@ -3004,7 +3004,7 @@ class LktTypesLoader:
                 'kind': (AbstractKind.abstract
                          if annotations.abstract
                          else AbstractKind.concrete),
-                'activate_tracing': annotations.trace,
+                'activate_tracing': annotations.traced,
             }
 
         elif annotations.parse_field:
@@ -3022,7 +3022,7 @@ class LktTypesLoader:
                 'Parse fields cannot be lazy'
             )
             check_source_language(
-                not annotations.trace,
+                not annotations.traced,
                 'Parse fields cannot be traced'
             )
             cls = constructor = Field
@@ -3052,7 +3052,7 @@ class LktTypesLoader:
                 'Regular fields cannot be null'
             )
             check_source_language(
-                not annotations.trace,
+                not annotations.traced,
                 'Regular fields cannot be traced'
             )
             cls = constructor = UserField
@@ -4561,7 +4561,7 @@ class LktTypesLoader:
             call_non_memoizable_because=(
                 annotations.call_non_memoizable_because
             ),
-            activate_tracing=annotations.trace,
+            activate_tracing=annotations.traced,
             dump_ir=False,
             lazy_field=False,
             final=annotations.final,

@@ -1607,7 +1607,7 @@ def emit_prop(prop, walker):
             )
 
     if prop.activate_tracing:
-        quals += "@trace "
+        quals += "@traced "
 
     if prop.dynamic_vars:
         vars = []

@@ -13,12 +13,12 @@ class Example: FooNode {
 
     @external() fun ext_unit_count(): Int
 
-    @memoized @trace fun fetch_example_unit(): AnalysisUnit[FooNode] =
+    @memoized @traced fun fetch_example_unit(): AnalysisUnit[FooNode] =
     node.ext_fetch_example_unit()
 
-    @memoized @trace fun unit_count(): Int = node.ext_unit_count()
+    @memoized @traced fun unit_count(): Int = node.ext_unit_count()
 
-    @exported @memoized @trace fun mmz_prop(): Array[Int] = {
+    @exported @memoized @traced fun mmz_prop(): Array[Int] = {
         # Both calls to unit_count are memoized, but when called for the first
         # time, the first one's result will be different from the second one.
         val before = [node.unit_count()];

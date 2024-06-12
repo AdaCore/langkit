@@ -17,9 +17,9 @@ class Decl: FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Ref]
 
-    @trace fun id_ref_cat(cats: RefCategories): RefCategories = cats
+    @traced fun id_ref_cat(cats: RefCategories): RefCategories = cats
 
-    @exported @trace fun entity_items(): Array[Entity[Ref]] = {
+    @exported @traced fun entity_items(): Array[Entity[Ref]] = {
         val _ = node.id_ref_cat(RefCategories(_=true));
 
         node.as_entity.items.map((i) => i)

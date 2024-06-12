@@ -44,7 +44,7 @@ class DottedName: Name {
 class Identifier: Name implements TokenNode {
     fun referenced_name(): Symbol = node.symbol
 
-    @trace fun resolve_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
+    @traced fun resolve_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
     {
         val env = from_env.do(
             (e) => e, default_val=node.referenced_parent_scope()
@@ -53,10 +53,10 @@ class Identifier: Name implements TokenNode {
         env.get(node.symbol)?[0].children_env()
     }
 
-    @trace fun referenced_parent_scope(): LexicalEnv[FooNode] =
+    @traced fun referenced_parent_scope(): LexicalEnv[FooNode] =
     node.unit().root.children_env()
 
-    @trace fun referenced_scope(): LexicalEnv[FooNode] =
+    @traced fun referenced_scope(): LexicalEnv[FooNode] =
     node.resolve_scope(null[LexicalEnv[FooNode]])
 }
 
