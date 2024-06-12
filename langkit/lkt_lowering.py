@@ -1074,7 +1074,7 @@ class EnumNodeAnnotations(BaseNodeAnnotations):
 @dataclass
 class FieldAnnotations(ParsedAnnotations):
     abstract: bool
-    export: bool
+    exported: bool
     final: bool
     lazy: bool
     null_field: bool
@@ -1083,7 +1083,7 @@ class FieldAnnotations(ParsedAnnotations):
     trace: bool
     use_in_equality: bool
     annotations = [FlagAnnotationSpec('abstract'),
-                   FlagAnnotationSpec('export'),
+                   FlagAnnotationSpec('exported'),
                    FlagAnnotationSpec('final'),
                    FlagAnnotationSpec('lazy'),
                    FlagAnnotationSpec('null_field'),
@@ -1118,7 +1118,7 @@ class FunAnnotations(ParsedAnnotations):
     abstract: bool
     call_memoizable: bool
     call_non_memoizable_because: str | None
-    export: bool
+    exported: bool
     external: ExternalAnnotationSpec.Value | None
     final: bool
     ignored: bool
@@ -1131,7 +1131,7 @@ class FunAnnotations(ParsedAnnotations):
         FlagAnnotationSpec('abstract'),
         FlagAnnotationSpec('call_memoizable'),
         StringLiteralAnnotationSpec('call_non_memoizable_because'),
-        FlagAnnotationSpec('export'),
+        FlagAnnotationSpec('exported'),
         ExternalAnnotationSpec(),
         FlagAnnotationSpec('final'),
         FlagAnnotationSpec('ignored'),
@@ -2999,7 +2999,7 @@ class LktTypesLoader:
             kwargs = {
                 'expr': None,
                 'doc': doc,
-                'public': annotations.export,
+                'public': annotations.exported,
                 'return_type': field_type,
                 'kind': (AbstractKind.abstract
                          if annotations.abstract
@@ -3010,7 +3010,7 @@ class LktTypesLoader:
         elif annotations.parse_field:
             assert decl.f_default_val is None
             check_source_language(
-                not annotations.export,
+                not annotations.exported,
                 'Parse fields are implicitly exported'
             )
             check_source_language(
@@ -3036,7 +3036,7 @@ class LktTypesLoader:
                 'Regular fields cannot be abstract'
             )
             check_source_language(
-                not annotations.export,
+                not annotations.exported,
                 'Regular fields are implicitly exported'
             )
             check_source_language(
@@ -4542,7 +4542,7 @@ class LktTypesLoader:
             # When the @export annotation is missing, use "None" to mean
             # "public status unspecified", as the property can still be public
             # thanks to inheritance.
-            public=annotations.export or None,
+            public=annotations.exported or None,
 
             abstract=annotations.abstract,
             type=return_type,

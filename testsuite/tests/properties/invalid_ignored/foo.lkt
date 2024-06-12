@@ -9,7 +9,7 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun prop(i: Int): Int = {
+    @exported fun prop(i: Int): Int = {
         val _ = i + 1;
         _ + 1
     }

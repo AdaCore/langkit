@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun p(): FooNode =
+    @exported fun p(): FooNode =
     node.parents().filter((n) => n.parent.is_null)?[0].do(
         (v1) => match v1 {
             case e: Example => e

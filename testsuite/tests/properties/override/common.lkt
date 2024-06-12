@@ -12,5 +12,5 @@ class NullNode: FooNode {
 }
 
 @abstract class MiddleNode: FooNode {
-    @abstract @export fun get_random_node(): MiddleNode
+    @abstract @exported fun get_random_node(): MiddleNode
 }

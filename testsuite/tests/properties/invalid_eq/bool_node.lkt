@@ -1,5 +1,5 @@
 import common
 
 class Example: FooNode {
-    @export fun prop(): Bool = true == node
+    @exported fun prop(): Bool = true == node
 }

@@ -9,7 +9,7 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-    @export fun test_struct_iterator(): Iterator[Iterator[TestStruct]] = {
+    @exported fun test_struct_iterator(): Iterator[Iterator[TestStruct]] = {
         val value = TestStruct(
             count=2, nodes=[null[Entity[Example]], self]
         );

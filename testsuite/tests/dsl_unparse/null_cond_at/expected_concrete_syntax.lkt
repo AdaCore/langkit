@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun p1(): Example = node.p2()?[0].as[Example]
+    @exported fun p1(): Example = node.p2()?[0].as[Example]
 
     fun p2(): Array[FooNode] = [node]
 }

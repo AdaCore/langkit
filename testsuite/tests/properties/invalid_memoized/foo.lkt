@@ -12,5 +12,5 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @export @memoized fun prop(a: Array[Token]): Bool = a.length() == 0
+    @exported @memoized fun prop(a: Array[Token]): Bool = a.length() == 0
 }

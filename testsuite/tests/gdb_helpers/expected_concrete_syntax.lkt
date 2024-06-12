@@ -6,11 +6,11 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun id_unit(u: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = u
+    @exported fun id_unit(u: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = u
 
-    @export fun id_node(n: FooNode): FooNode = n
+    @exported fun id_node(n: FooNode): FooNode = n
 
-    @export fun test_strings(): Int = {
+    @exported fun test_strings(): Int = {
         val empty = "";
         val foo = "foo";
         val s_quote = "'";
@@ -31,7 +31,7 @@ grammar foo_grammar {
         null[EnvRebindings].append_rebinding(n1.children_env(), n2.children_env())
     }
 
-    @export fun test_rebindings(): Int = {
+    @exported fun test_rebindings(): Int = {
         val null_var = null[EnvRebindings];
         val r1 = node.get_rebindings(false);
         val r2 = node.get_rebindings(true);
@@ -41,7 +41,7 @@ grammar foo_grammar {
         arr.length()
     }
 
-    @export fun test_envs(): Int = {
+    @exported fun test_envs(): Int = {
         val null_var = null[LexicalEnv[FooNode]];
         val primary = node.children_env();
         val orphan = primary.env_orphan();
@@ -52,7 +52,7 @@ grammar foo_grammar {
         arr.length()
     }
 
-    @export fun test_entities(): Int = {
+    @exported fun test_entities(): Int = {
         val null_root = null[Entity[FooNode]];
         val null_example = null[Entity[Example]];
         val ent_root = self;
@@ -68,7 +68,7 @@ grammar foo_grammar {
         arr.length()
     }
 
-    @export fun test_arrays(): Int = {
+    @exported fun test_arrays(): Int = {
         val empty = null[Array[Example]];
         val single = [node.as[Example]];
         val complete = node.parent.as[ASTList[FooNode, Example]].as_array();
@@ -77,14 +77,14 @@ grammar foo_grammar {
         arr.length()
     }
 
-    @export fun test_vectors(): Int = {
+    @exported fun test_vectors(): Int = {
         val arr = node.parents().map((n) => n.children);
         # BREAK:test_vectors
 
         arr.length()
     }
 
-    @export fun test_tokens(): Int = {
+    @exported fun test_tokens(): Int = {
         val null_var = null[Token];
         val first = node.token_start();
         val arr = [null_var, first];
@@ -94,7 +94,7 @@ grammar foo_grammar {
 
     fun control_flow_helper(item: Array[FooNode]): Int = item.length() + 1
 
-    @export fun test_control_flow(i: Int): Int = {
+    @exported fun test_control_flow(i: Int): Int = {
         val nodes = node.parent.children;
         val arr = nodes.map(
             (n) => n.parents().length() + {
@@ -107,7 +107,7 @@ grammar foo_grammar {
         i + arr.length()
     }
 
-    @export fun test_struct(i: Int): Int = {
+    @exported fun test_struct(i: Int): Int = {
         val result = MyStruct(a=i, b=i + 10);
 
         result.a

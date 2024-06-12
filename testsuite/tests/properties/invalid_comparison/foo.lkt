@@ -9,5 +9,5 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @export fun compare(lhs: Int, rhs: BigInt): Bool = lhs < rhs
+    @exported fun compare(lhs: Int, rhs: BigInt): Bool = lhs < rhs
 }

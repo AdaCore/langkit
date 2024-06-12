@@ -1582,7 +1582,7 @@ def emit_prop(prop, walker):
                        prop)
 
     if prop_for_walker.is_public:
-        quals += "@export "
+        quals += "@exported "
 
     if prop.external:
         qual_args = []

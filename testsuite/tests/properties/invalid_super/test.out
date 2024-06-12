@@ -11,15 +11,15 @@ invalid_prefix.lkt:8:20: error: .super() is allowed on Self or Entity only
 
 
 == no_overriden.lkt ==
-no_overriden.lkt:4:28: error: There is no overridden property to call
-4 |     @export fun p(): Int = node.super() + 1
-  |                            ^^^^^^^^^^^^
+no_overriden.lkt:4:30: error: There is no overridden property to call
+4 |     @exported fun p(): Int = node.super() + 1
+  |                              ^^^^^^^^^^^^
 
 
 == overridden_abstract.lkt ==
-overridden_abstract.lkt:8:28: error: Cannot call abstract overridden property
-8 |     @export fun p(): Int = node.super() + 1
-  |                            ^^^^^^^^^^^^
+overridden_abstract.lkt:8:30: error: Cannot call abstract overridden property
+8 |     @exported fun p(): Int = node.super() + 1
+  |                              ^^^^^^^^^^^^
 
 
 == self_prefix.lkt ==

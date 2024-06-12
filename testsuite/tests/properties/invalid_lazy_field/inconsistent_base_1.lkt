@@ -1,9 +1,9 @@
 import common
 
 class FooNode implements Node[FooNode] {
-    @export fun p(): Int = 1
+    @exported fun p(): Int = 1
 }
 
 class Example: FooNode {
-    @export @lazy p: Int = 2
+    @exported @lazy p: Int = 2
 }

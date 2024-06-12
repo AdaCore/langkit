@@ -2,5 +2,5 @@ import common
 
 
 class Example: FooNode implements TokenNode {
-    @export fun p(n: Entity[FooNode]): Entity[FooNode] = n.do((_) => _)
+    @exported fun p(n: Entity[FooNode]): Entity[FooNode] = n.do((_) => _)
 }

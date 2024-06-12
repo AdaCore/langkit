@@ -15,22 +15,22 @@ class FooNode implements Node[FooNode] {
 class Example: FooNode {
     # Most simple case: trying to memoize a property that does something with
     # side effect.
-    @export @memoized fun get_var(): Entity[FooNode] = node.var.get_value()
+    @exported @memoized fun get_var(): Entity[FooNode] = node.var.get_value()
 
     # This one is just a wrapper, to demonstrate transitivity
-    @export fun get_var_wrapper(): Entity[FooNode] = node.get_var()
+    @exported fun get_var_wrapper(): Entity[FooNode] = node.get_var()
 
     # This one is not memoized, but is another property with side effects
-    @export fun get_var2(): Entity[FooNode] = node.var.get_value()
+    @exported fun get_var2(): Entity[FooNode] = node.var.get_value()
 
     # This tries to memoize a property that calls one which does directly a
     # side effect (but the latter is not memoized).
-    @export @memoized fun get_var2_public_wrapper(): Entity[FooNode] =
+    @exported @memoized fun get_var2_public_wrapper(): Entity[FooNode] =
         node.get_var2()
 
     # This is memoized and calling two properties that do side effect by
     # transitivity.
-    @export @memoized fun top_wrapper(): Bool =
+    @exported @memoized fun top_wrapper(): Bool =
         node.get_var_wrapper() == node.get_var2()
 
     #
@@ -39,21 +39,21 @@ class Example: FooNode {
 
     # First check that this attribute works on a property that cannot be
     # memoized because it contains an "immediately" unsafe construct.
-    @export @memoized @call_memoizable fun get_var3(): Entity[FooNode] =
+    @exported @memoized @call_memoizable fun get_var3(): Entity[FooNode] =
         node.var.get_value()
 
     # Then, on one that cannot be memoized because of transitivity
-    @export @memoized @call_memoizable
+    @exported @memoized @call_memoizable
     fun get_var2_public_wrapper2(): Entity[FooNode] = node.get_var2()
 
     # Now, check that explicitely telling Langkit that a property cannot be
     # used transitively in memoization works.
-    @export @external(uses_entity_info=true, uses_envs=true)
+    @exported @external(uses_entity_info=true, uses_envs=true)
     @call_non_memoizable_because("get_something_unmemoizable is unmemoizable")
     fun get_something_unmemoizable(): Entity[FooNode]
 
-    @export fun get_var4(): Entity[FooNode] = self.get_something_unmemoizable
+    @exported fun get_var4(): Entity[FooNode] = self.get_something_unmemoizable
 
-    @export @memoized fun get_var4_public_wrapper(): Entity[FooNode] =
+    @exported @memoized fun get_var4_public_wrapper(): Entity[FooNode] =
         self.get_var4()
 }

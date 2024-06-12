@@ -44,7 +44,7 @@ class Package: Decl {
 class Ref: Decl {
     @parse_field name: Name
 
-    @export fun entity(): Entity[FooNode] = node.as_entity.name.get_ref()
+    @exported fun entity(): Entity[FooNode] = node.as_entity.name.get_ref()
 }
 
 class UseClause: Decl {

@@ -9,5 +9,5 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun id_sloc(l: SourceLocation): SourceLocation = l
+    @exported fun id_sloc(l: SourceLocation): SourceLocation = l
 }

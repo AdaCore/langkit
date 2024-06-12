@@ -12,7 +12,7 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun identity(): Example = {
+    @exported fun identity(): Example = {
         val N = node;
         N
     }

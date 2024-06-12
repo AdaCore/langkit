@@ -10,21 +10,21 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun field_1(n: Cons): Cons = n?.prefix
+    @exported fun field_1(n: Cons): Cons = n?.prefix
 
-    @export fun field_2(n: Cons): Cons = n?.prefix.prefix
+    @exported fun field_2(n: Cons): Cons = n?.prefix.prefix
 
-    @export fun field_3(n: Cons): Cons = n.prefix?.prefix
+    @exported fun field_3(n: Cons): Cons = n.prefix?.prefix
 
-    @export fun field_4(n: Cons): Cons = n?.prefix?.prefix
+    @exported fun field_4(n: Cons): Cons = n?.prefix?.prefix
 
-    @export fun call_1(n: Cons): Cons = n?.get_prefix(node)
+    @exported fun call_1(n: Cons): Cons = n?.get_prefix(node)
 
-    @export fun call_2(n: Cons): Cons = n?.get_prefix(node).get_prefix(node)
+    @exported fun call_2(n: Cons): Cons = n?.get_prefix(node).get_prefix(node)
 
-    @export fun call_3(n: Cons): Cons = n.get_prefix(node)?.get_prefix(node)
+    @exported fun call_3(n: Cons): Cons = n.get_prefix(node)?.get_prefix(node)
 
-    @export fun call_4(n: Cons): Cons = n?.get_prefix(node)?.get_prefix(node)
+    @exported fun call_4(n: Cons): Cons = n?.get_prefix(node)?.get_prefix(node)
 }
 
 class Cons: FooNode {

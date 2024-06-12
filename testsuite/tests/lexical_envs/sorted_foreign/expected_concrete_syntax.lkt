@@ -63,7 +63,7 @@ class Identifier: Name implements TokenNode {
 class Ref: FooNode {
     @parse_field name: Name
 
-    @export fun resolve(): FooNode = node.name.referenced_scope().env_node
+    @exported fun resolve(): FooNode = node.name.referenced_scope().env_node
 }
 
 class Scope: FooNode {

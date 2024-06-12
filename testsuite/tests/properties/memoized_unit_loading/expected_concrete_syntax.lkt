@@ -18,7 +18,7 @@ class Example: FooNode {
 
     @memoized @trace fun unit_count(): Int = node.ext_unit_count()
 
-    @export @memoized @trace fun mmz_prop(): Array[Int] = {
+    @exported @memoized @trace fun mmz_prop(): Array[Int] = {
         # Both calls to unit_count are memoized, but when called for the first
         # time, the first one's result will be different from the second one.
         val before = [node.unit_count()];

@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun match_formal_params(): Bool =
+    @exported fun match_formal_params(): Bool =
     node.children.all((p, i) => i == 0 and node == p)
 }
 

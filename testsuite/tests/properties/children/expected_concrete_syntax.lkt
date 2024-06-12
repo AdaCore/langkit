@@ -7,15 +7,15 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun node_children(): Array[Entity[FooNode]] =
+    @exported fun node_children(): Array[Entity[FooNode]] =
     node.children.map((n) => n.as_bare_entity)
 
-    @export fun given_node_children(n: FooNode): Array[Entity[FooNode]] =
+    @exported fun given_node_children(n: FooNode): Array[Entity[FooNode]] =
     n.children.map((n) => n.as_bare_entity)
 
-    @export fun entity_children(): Array[Entity[FooNode]] = self.children
+    @exported fun entity_children(): Array[Entity[FooNode]] = self.children
 
-    @export fun given_entity_children(n: Entity[FooNode]): Array[Entity[FooNode]] =
+    @exported fun given_entity_children(n: Entity[FooNode]): Array[Entity[FooNode]] =
     n.children
 }
 

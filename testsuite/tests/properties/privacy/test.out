@@ -7,9 +7,9 @@ Code generation was successful
 
 
 == priv_pub.lkt ==
-priv_pub.lkt:9:13: error: AbstractNode.prop is private, so should be ConcreteNode.prop
-9 |     @export fun prop(): Bool = true
-  |             ^^^^^^^^^^^^^^^^^^^^^^^
+priv_pub.lkt:9:15: error: AbstractNode.prop is private, so should be ConcreteNode.prop
+9 |     @exported fun prop(): Bool = true
+  |               ^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == test.py ==

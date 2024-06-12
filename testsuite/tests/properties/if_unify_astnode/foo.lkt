@@ -10,7 +10,7 @@ grammar foo_grammar {
 class FooNode implements Node[FooNode] {
     fun pred(): Bool = true
 
-    @export fun foo_1(): Entity[FooNode] = (
+    @exported fun foo_1(): Entity[FooNode] = (
         if node.pred
         then null[BarNode]
         else null[Literal]

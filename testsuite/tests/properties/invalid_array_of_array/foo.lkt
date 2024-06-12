@@ -9,8 +9,8 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @export fun array_of_nodes(): Array[Example] = node.singleton()
+    @exported fun array_of_nodes(): Array[Example] = node.singleton()
 
-    @export fun array_of_arary(): Array[Array[Example]] =
+    @exported fun array_of_arary(): Array[Array[Example]] =
         node.singleton().singleton()
 }

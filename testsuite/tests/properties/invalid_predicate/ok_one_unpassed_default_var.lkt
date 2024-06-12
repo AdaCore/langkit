@@ -1,7 +1,7 @@
 import common
 
 class Example: BaseExample {
-    @export fun prop(): Entity[FooNode] = {
+    @exported fun prop(): Entity[FooNode] = {
         val _ = %predicate(Example.pred2, node.var1, node.var2);
         node.as_bare_entity
     }

@@ -9,6 +9,6 @@ class FooNode implements Node[FooNode] {
 }
 
 class ExampleNode: FooNode {
-    @export fun prop(): Entity[ExampleNode] =
+    @exported fun prop(): Entity[ExampleNode] =
         node.as[ExampleNode].as_bare_entity
 }

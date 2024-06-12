@@ -23,13 +23,13 @@ class Decl: FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Ref]
 
-    @export fun test_env(other: Entity[FooNode]): Bool =
+    @exported fun test_env(other: Entity[FooNode]): Bool =
     node.children_env().env_orphan() == other.children_env().env_orphan()
 
-    @export fun test_struct(other: Entity[FooNode]): Bool =
+    @exported fun test_struct(other: Entity[FooNode]): Bool =
     node.env_struct() == other.env_struct()
 
-    @export fun test_array(other: Entity[FooNode]): Bool =
+    @exported fun test_array(other: Entity[FooNode]): Bool =
     node.env_array() == other.env_array()
 
     env_spec {

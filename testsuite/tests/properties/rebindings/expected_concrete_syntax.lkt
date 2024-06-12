@@ -25,30 +25,30 @@ grammar foo_grammar {
         Entity[Block](node=node, info=e_info)
     }
 
-    @export fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] =
+    @exported fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] =
     self.create_entity(
         self.info.rebindings.append_rebinding(
             from_block.children_env(), to_block.children_env()
         )
     )
 
-    @export fun concat_rebindings(other: Entity[Block]): Entity[Block] =
+    @exported fun concat_rebindings(other: Entity[Block]): Entity[Block] =
     self.create_entity(
         self.info.rebindings.concat_rebindings(other.info.rebindings)
     )
 
-    @export fun shed_rebindings(from_block: Entity[Block]): Entity[Block] =
+    @exported fun shed_rebindings(from_block: Entity[Block]): Entity[Block] =
     self.create_entity(
         from_block.children_env().shed_rebindings(self.info).rebindings
     )
 
-    @export fun parent_rebindings(): Entity[Block] =
+    @exported fun parent_rebindings(): Entity[Block] =
     self.create_entity(self.info.rebindings.get_parent)
 
-    @export fun new(): Entity[FooNode] =
+    @exported fun new(): Entity[FooNode] =
     self.info.rebindings.new_env.env_node.as_bare_entity
 
-    @export fun old(): Entity[FooNode] =
+    @exported fun old(): Entity[FooNode] =
     self.info.rebindings.old_env.env_node.as_bare_entity
 
     env_spec {

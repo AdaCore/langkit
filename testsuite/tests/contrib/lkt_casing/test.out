@@ -59,15 +59,15 @@ pattern.lkt:2:9: error: lower case expected for pattern names
 
 
 == property.lkt ==
-property.lkt:15:17: error: lower case expected for field names
-15 |     @export fun MySelf(): Example = node
-   |                 ^^^^^^
+property.lkt:15:19: error: lower case expected for field names
+15 |     @exported fun MySelf(): Example = node
+   |                   ^^^^^^
 
 
 == property_arg.lkt ==
-property_arg.lkt:15:26: error: lower case expected for argument names
-15 |     @export fun identity(N: Example): Example = N
-   |                          ^
+property_arg.lkt:15:28: error: lower case expected for argument names
+15 |     @exported fun identity(N: Example): Example = N
+   |                            ^
 
 
 == struct.lkt ==

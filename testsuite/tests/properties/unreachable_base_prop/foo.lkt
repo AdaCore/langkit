@@ -21,10 +21,10 @@ class FooNode implements Node[FooNode] {
 }
 
 @abstract class Expr: FooNode {
-    @export @abstract fun prop1(): Int
+    @exported @abstract fun prop1(): Int
 
     # Warning: all concrete subclasses override this (concrete root property)
-    @export fun prop2(): Int = 0
+    @exported fun prop2(): Int = 0
 }
 
 @abstract class Atom: Expr {

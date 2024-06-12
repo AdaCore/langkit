@@ -12,5 +12,5 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun identity(N: Example): Example = N
+    @exported fun identity(N: Example): Example = N
 }

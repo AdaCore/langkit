@@ -1,5 +1,5 @@
 import common
 
 class BarNode: FooNode {
-    @export fun prop(a: Entity): Int = 0
+    @exported fun prop(a: Entity): Int = 0
 }

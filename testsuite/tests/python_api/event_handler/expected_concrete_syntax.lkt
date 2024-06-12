@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export @external() fun trigger_unit_requested(name: Symbol, found: Bool, error: Bool): Bool
+    @exported @external() fun trigger_unit_requested(name: Symbol, found: Bool, error: Bool): Bool
 }
 
 class Example: FooNode implements TokenNode {

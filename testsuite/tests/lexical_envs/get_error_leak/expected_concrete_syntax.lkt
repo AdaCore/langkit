@@ -33,7 +33,7 @@ class Id: FooNode implements TokenNode {
 class Ref: FooNode {
     @parse_field name: Id
 
-    @export fun resolve(): Array[Entity[FooNode]] = node.name.resolve()
+    @exported fun resolve(): Array[Entity[FooNode]] = node.name.resolve()
 }
 
 class Scope: FooNode {

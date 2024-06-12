@@ -1,7 +1,7 @@
 == foo.lkt ==
-foo.lkt:12:56: error: Comparisons require the same type for both operands (got Int and BigInt)
-12 |     @export fun compare(lhs: Int, rhs: BigInt): Bool = lhs < rhs
-   |                                                        ^^^^^^^^^
+foo.lkt:12:58: error: Comparisons require the same type for both operands (got Int and BigInt)
+12 |     @exported fun compare(lhs: Int, rhs: BigInt): Bool = lhs < rhs
+   |                                                          ^^^^^^^^^
 
 
 lkt_compile: Done

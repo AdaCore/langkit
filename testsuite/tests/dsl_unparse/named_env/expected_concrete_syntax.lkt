@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun p1(): Symbol = {
+    @exported fun p1(): Symbol = {
         val dest_env = node.p2(false).do(
             (non_null_name) => DesignatedEnv(
                 kind=DesignatedEnvKind.named_env, env_name=non_null_name, direct_env=null[LexicalEnv[FooNode]]

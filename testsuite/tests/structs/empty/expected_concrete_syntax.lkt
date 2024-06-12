@@ -9,7 +9,7 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun identity(s: MyStruct): MyStruct = s
+    @exported fun identity(s: MyStruct): MyStruct = s
 }
 
 struct MyStruct {

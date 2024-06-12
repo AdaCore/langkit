@@ -4,5 +4,5 @@ class ListNode: FooNode {
     @parse_field nb_list: ASTList[FooNode, NumberNode]
 
     fun bar_node_parent(): BarNode = node.parent.as[BarNode]
-    @export fun prop(): ListNode = node.bar_node_parent.as[ListNode]
+    @exported fun prop(): ListNode = node.bar_node_parent.as[ListNode]
 }

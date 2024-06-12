@@ -8,9 +8,9 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
     fun null_node(): FooNode = null[FooNode]
 
-    @export fun is_null_a_def(): Bool = node.null_node() is Def
+    @exported fun is_null_a_def(): Bool = node.null_node() is Def
 
-    @export fun is_null_a_def_or_example(): Bool =
+    @exported fun is_null_a_def_or_example(): Bool =
     node.null_node() is Def | Example
 }
 

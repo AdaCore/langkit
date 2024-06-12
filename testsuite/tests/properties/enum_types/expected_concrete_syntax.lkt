@@ -19,11 +19,11 @@ enum DeclKind {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun identity(k: DeclKind): DeclKind = k
+    @exported fun identity(k: DeclKind): DeclKind = k
 }
 
 @abstract class Decl: FooNode {
-    @export @abstract fun decl_kind(): DeclKind
+    @exported @abstract fun decl_kind(): DeclKind
 }
 
 class FuncDecl: Decl {

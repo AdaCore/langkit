@@ -27,7 +27,7 @@ class HolderList: ASTList[FooNode, AbstractHolder] {
 }
 
 class ParsedManyHolder: AbstractManyHolder {
-    @export @memoized fun synth(): SyntheticManyHolder =
+    @exported @memoized fun synth(): SyntheticManyHolder =
         SyntheticManyHolder(f=node.f)
 }
 
@@ -44,12 +44,12 @@ class ParsedManyHolder: AbstractManyHolder {
 }
 
 @abstract class Expr: FooNode {
-    @export @abstract fun synth(): FooNode
+    @exported @abstract fun synth(): FooNode
 }
 
 class Literal: Expr implements TokenNode {
     @memoized fun synth(): SynthNode = SynthNode(f=node)
-    @export @memoized fun holder(): SynthHolder = SynthHolder(f=node)
+    @exported @memoized fun holder(): SynthHolder = SynthHolder(f=node)
 }
 
 class Name: Expr implements TokenNode {

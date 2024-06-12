@@ -6,11 +6,11 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun root1(): Array[Int] = [1]
+    @exported fun root1(): Array[Int] = [1]
 
-    @export fun root2(a: String, b: String): String = a & " + " & b
+    @exported fun root2(a: String, b: String): String = a & " + " & b
 
-    @export fun root3(): Bool = self.info.rebindings != null[EnvRebindings]
+    @exported fun root3(): Bool = self.info.rebindings != null[EnvRebindings]
 }
 
 @abstract class Expr: FooNode {

@@ -1,5 +1,5 @@
 import common
 
 class BarNode: FooNode {
-    @export fun bar_prop(): Int = node.singleton()[]
+    @exported fun bar_prop(): Int = node.singleton()[]
 }

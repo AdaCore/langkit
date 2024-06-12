@@ -16,12 +16,12 @@ grammar foo_grammar {
         [[node.node_env()].env_group(with_md=md1)].env_group(with_md=md2)
     }
 
-    @export fun get_with_md(name: Symbol, n1: FooNode, n2: FooNode): Entity[FooNode] =
+    @exported fun get_with_md(name: Symbol, n1: FooNode, n2: FooNode): Entity[FooNode] =
     self.env_with_md(n1, n2).get_first(name)
 
-    @export fun get_foo_metadata(): FooNode = self.info.md.n1
+    @exported fun get_foo_metadata(): FooNode = self.info.md.n1
 
-    @export fun get_bar_metadata(): FooNode = self.info.md.n2
+    @exported fun get_bar_metadata(): FooNode = self.info.md.n2
 }
 
 class Decl: FooNode {

@@ -12,6 +12,6 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun identity(): Array[Entity[Example]] =
+    @exported fun identity(): Array[Entity[Example]] =
         node.singleton().map((N) => n.as_bare_entity)
 }

@@ -11,7 +11,7 @@ grammar foo_grammar {
 class BarNode: FooNode {
     @external() fun foo(i: Int): BigInt
 
-    @export fun prop(): BigInt = {
+    @exported fun prop(): BigInt = {
         val _ = node.foo(1);
 
         node.foo(2)

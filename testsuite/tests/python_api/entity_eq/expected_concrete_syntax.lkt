@@ -15,7 +15,7 @@ grammar foo_grammar {
 }
 
 @abstract class DefNode: FooNode {
-    @export @abstract fun name(): Symbol
+    @exported @abstract fun name(): Symbol
 
     env_spec {
         add_to_env_kv(node.name(), node)
@@ -29,7 +29,7 @@ class Block: DefNode {
 
     fun name(): Symbol = node.name_field.symbol
 
-    @export fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] =
+    @exported fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] =
     {
         val rbdng = self.info.rebindings.append_rebinding(
             from_block.params.children_env(), to_block.children_env()

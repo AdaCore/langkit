@@ -7,14 +7,14 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun eval_unit(u: AnalysisUnit[FooNode]): Int =
+    @exported fun eval_unit(u: AnalysisUnit[FooNode]): Int =
     u.root.as[Expression].result()
 
-    @export fun id_unit(u: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = u
+    @exported fun id_unit(u: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = u
 }
 
 @abstract class Expression: FooNode {
-    @export @abstract fun result(): Int
+    @exported @abstract fun result(): Int
 }
 
 class Literal: Expression implements TokenNode {

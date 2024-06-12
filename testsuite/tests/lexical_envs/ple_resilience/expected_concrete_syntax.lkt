@@ -48,7 +48,7 @@ class Var: DefNode {
 }
 
 @abstract class Name: FooNode {
-    @export @abstract fun resolve(): Entity[FooNode]
+    @exported @abstract fun resolve(): Entity[FooNode]
 }
 
 class Id: Name implements TokenNode {

@@ -9,11 +9,11 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun first_set(): Bool = self.info.md.is_first
+    @exported fun first_set(): Bool = self.info.md.is_first
 
-    @export fun second_set(): Bool = self.info.md.is_second
+    @exported fun second_set(): Bool = self.info.md.is_second
 
-    @export fun test_main(): Entity[FooNode] =
+    @exported fun test_main(): Entity[FooNode] =
     node.as_entity.as[Couple].first_entity().first
 }
 
@@ -30,7 +30,7 @@ class Couple: FooNode {
         )
     )
 
-    @export fun property_on_entity(): Entity[Couple] =
+    @exported fun property_on_entity(): Entity[Couple] =
     # Check that we can do ".get_entity" even when the prefix is an entity
     node.as_entity.get_entity(node.as_entity.info.md)
 }

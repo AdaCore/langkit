@@ -8,15 +8,15 @@ grammar foo_grammar {
 |" Docstring with `invalid_title_ref`.
 class FooNode implements Node[FooNode] {
     |" Docstring with `invalid_title_ref`.
-    @export fun prop(): Int = 1
+    @exported fun prop(): Int = 1
 
     |" Docstring with an `rst error in it.
-    @export fun prop2(): Int = 2
+    @exported fun prop2(): Int = 2
 
     |" Docstring with an unsupported block.
     |"
     |" >>> 1 + 1
-    @export fun prop3(): Int = 3
+    @exported fun prop3(): Int = 3
 }
 
 class Example: FooNode implements TokenNode {

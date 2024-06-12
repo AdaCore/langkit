@@ -11,7 +11,7 @@ grammar foo_grammar {
 class Example: FooNode {
     @lazy new_node: SynthNode = SynthNode()
 
-    @export fun prop(): Int = node.new_node().lf()
+    @exported fun prop(): Int = node.new_node().lf()
 }
 
 @synthetic class SynthNode: FooNode {

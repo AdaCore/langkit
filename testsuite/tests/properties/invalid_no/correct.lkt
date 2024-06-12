@@ -1,5 +1,5 @@
 import common
 
 class BarNode: FooNode {
-    @export fun prop(): Entity[FooNode] = null[Entity[FooNode]]
+    @exported fun prop(): Entity[FooNode] = null[Entity[FooNode]]
 }

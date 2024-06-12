@@ -2,13 +2,13 @@
 Code generation was successful
 
 == warn_on_node.lkt ==
-warn_on_node.lkt:4:13: warning: Decl.get_self1 returns a node type
-4 |     @export fun get_self1(): Decl = node
-  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+warn_on_node.lkt:4:15: warning: Decl.get_self1 returns a node type
+4 |     @exported fun get_self1(): Decl = node
+  |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-common.lkt:24:13: warning: Var.get_name1 returns a node type
-24 |     @export fun get_name1(): Name = node.name
-   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+common.lkt:24:15: warning: Var.get_name1 returns a node type
+24 |     @exported fun get_name1(): Name = node.name
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Code generation was successful
 

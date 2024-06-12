@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun p1(b: Array[Bool]): Bool = {
+    @exported fun p1(b: Array[Bool]): Bool = {
         val v1 = (b?[0] or b?[1]) and (b?[2] or b?[3]);
         val v2 = (b?[0] and b?[1]) and b?[2];
         val v3 = (b?[0] and b?[1]) or (b?[2] and b?[3]);
@@ -14,10 +14,10 @@ grammar foo_grammar {
         (v1 and v2) and v3
     }
 
-    @export fun p2(): Bool =
+    @exported fun p2(): Bool =
     (node is Example and node.parent.is_null) or node.parent.parent.is_null
 
-    @export fun p3(): Bool = node is Example and (
+    @exported fun p3(): Bool = node is Example and (
         node.parent.is_null or node.parent.parent.is_null
     )
 }

@@ -1,5 +1,5 @@
 import common
 
 class Example: FooNode implements TokenNode {
-    @export fun p(): Symbol = node.is_null.symbol
+    @exported fun p(): Symbol = node.is_null.symbol
 }

@@ -6,13 +6,13 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export @memoized fun p1(): Symbol = s"foo"
+    @exported @memoized fun p1(): Symbol = s"foo"
 
-    @export @memoized @call_memoizable fun p2(): Symbol = s"foo"
+    @exported @memoized @call_memoizable fun p2(): Symbol = s"foo"
 
-    @export @call_non_memoizable_because("bar") fun p3(): Symbol = s"foo"
+    @exported @call_non_memoizable_because("bar") fun p3(): Symbol = s"foo"
 
-    @export @lazy lf1: Symbol = s"foo"
+    @exported @lazy lf1: Symbol = s"foo"
 }
 
 class Example: FooNode implements TokenNode {

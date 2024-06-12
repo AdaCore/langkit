@@ -5,9 +5,9 @@ abstract_overrides.lkt:13:15: error: Abstract properties with no runtime check c
 
 
 == list_abstract_in_root.lkt ==
-list_abstract_in_root.lkt:7:23: error: Abstract property prop is not overriden in all subclasses. Missing overriding properties on classes: BaseNode.list
-7 |     @export @abstract fun prop(): Bool
-  |                       ^^^^^^^^^^^^^^^^
+list_abstract_in_root.lkt:7:25: error: Abstract property prop is not overriden in all subclasses. Missing overriding properties on classes: BaseNode.list
+7 |     @exported @abstract fun prop(): Bool
+  |                         ^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done

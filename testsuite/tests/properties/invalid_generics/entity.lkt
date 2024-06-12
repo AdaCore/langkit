@@ -3,5 +3,5 @@ import common
 class ExampleSeq: FooNode {
     @parse_field items: ASTList[FooNode, Example]
 
-    @export fun p(@ignored e: Entity[Int]): Bool = true
+    @exported fun p(@ignored e: Entity[Int]): Bool = true
 }

@@ -21,8 +21,8 @@ class Var: Decl {
     @parse_field name: Name
     @parse_field value: Number
 
-    @export fun get_name1(): Name = node.name
-    @export @no_node_warning fun get_name2(): Name = node.name
+    @exported fun get_name1(): Name = node.name
+    @exported @no_node_warning fun get_name2(): Name = node.name
 }
 
 class Name: FooNode implements TokenNode {

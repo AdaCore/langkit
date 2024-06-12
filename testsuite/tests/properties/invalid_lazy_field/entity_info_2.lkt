@@ -1,9 +1,9 @@
 import common
 
 class FooNode implements Node[FooNode] {
-    @export fun flag_set(): Bool = self.info.md.flag
+    @exported fun flag_set(): Bool = self.info.md.flag
 }
 
 class Example: FooNode {
-    @export @lazy p: Bool = node.flag_set()
+    @exported @lazy p: Bool = node.flag_set()
 }

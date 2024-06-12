@@ -13,7 +13,7 @@ dynvar my_var: Int
 @abstract class BaseNode: FooNode {
     @with_dynvars(my_var) fun internal_get_int(): Int = my_var
     @abstract fun get_int_impl(): Int
-    @export fun get_int(): Int = {
+    @exported fun get_int(): Int = {
         bind my_var = 24;
         node.get_int_impl() + node.internal_get_int()
     }

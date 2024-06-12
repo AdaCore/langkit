@@ -12,7 +12,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun find_atoms(): Array[Entity[Atom]] = match self {
+    @exported fun find_atoms(): Array[Entity[Atom]] = match self {
         # This should match Lit .. Ref
         case a: Atom => [a]
 
@@ -20,7 +20,7 @@ grammar foo_grammar {
         case _ => null[Array[Entity[Atom]]]
     } & self.children.mapcat((c) => c.find_atoms())
 
-    @export fun find_atoms_or_exprs(): Array[Entity[Expr]] = match self {
+    @exported fun find_atoms_or_exprs(): Array[Entity[Expr]] = match self {
         # This should match Lit .. Ref
         case a: Atom => [a.as[Expr]]
 
@@ -31,7 +31,7 @@ grammar foo_grammar {
         case _ => null[Array[Entity[Expr]]]
     } & self.children.mapcat((c) => c.find_atoms_or_exprs())
 
-    @export fun find_exprs(): Array[Entity[Expr]] = match self {
+    @exported fun find_exprs(): Array[Entity[Expr]] = match self {
         # This should match Lit .. Plus
         case e: Expr => [e]
 
@@ -50,7 +50,7 @@ class Def: FooNode {
 }
 
 @abstract class Expr: FooNode {
-    @export fun find_refs(): Array[Entity[Ref]] = match self {
+    @exported fun find_refs(): Array[Entity[Ref]] = match self {
         # This should match Ref
         case r: Ref => [r]
 

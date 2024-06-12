@@ -1,11 +1,11 @@
 == foo.lkt ==
-foo.lkt:15:23: warning: This property is public but it lacks documentation
-15 |     @export @abstract fun undoc_prop(): Bool
-   |                       ^^^^^^^^^^^^^^^^^^^^^^
+foo.lkt:15:25: warning: This property is public but it lacks documentation
+15 |     @exported @abstract fun undoc_prop(): Bool
+   |                         ^^^^^^^^^^^^^^^^^^^^^^
 
-foo.lkt:18:23: warning: This property is public but it lacks documentation
-18 |     @export @abstract fun will_doc_prop(): Bool
-   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+foo.lkt:18:25: warning: This property is public but it lacks documentation
+18 |     @exported @abstract fun will_doc_prop(): Bool
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Code generation was successful
 

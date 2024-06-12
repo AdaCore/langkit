@@ -14,7 +14,7 @@ grammar foo_grammar {
 
     @abstract fun xref_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Equation
 
-    @export fun solve_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Bool =
+    @exported fun solve_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Bool =
     node.xref_eq(arg1, arg2).solve()
 }
 

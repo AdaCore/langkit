@@ -1,22 +1,22 @@
 == bad_arg_type.lkt ==
-bad_arg_type.lkt:4:50: error: Invalid "x" actual (#1) for FooNode.root_prop: expected Int but got FooNode
-4 |     @export fun bar_prop(): Int = node.root_prop(null[FooNode])
-  |                                                  ^^^^^^^^^^^^^
+bad_arg_type.lkt:4:52: error: Invalid "x" actual (#1) for FooNode.root_prop: expected Int but got FooNode
+4 |     @exported fun bar_prop(): Int = node.root_prop(null[FooNode])
+  |                                                    ^^^^^^^^^^^^^
 
 
 == correct.lkt ==
 Code generation was successful
 
 == no_such_prop.lkt ==
-no_such_prop.lkt:4:35: error: Type BarNode has no 'no_such_prop' field or property
-4 |     @export fun bar_prop(): Int = node.no_such_prop(12)
-  |                                   ^^^^^^^^^^^^^^^^^^^^^
+no_such_prop.lkt:4:37: error: Type BarNode has no 'no_such_prop' field or property
+4 |     @exported fun bar_prop(): Int = node.no_such_prop(12)
+  |                                     ^^^^^^^^^^^^^^^^^^^^^
 
 
 == too_many_args.lkt ==
-too_many_args.lkt:4:35: error: The last argument is unexpected
-4 |     @export fun bar_prop(): Int = node.root_prop(12, 15)
-  |                                   ^^^^^^^^^^^^^^^^^^^^^^
+too_many_args.lkt:4:37: error: The last argument is unexpected
+4 |     @exported fun bar_prop(): Int = node.root_prop(12, 15)
+  |                                     ^^^^^^^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done

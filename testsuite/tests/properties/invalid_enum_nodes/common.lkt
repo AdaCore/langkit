@@ -15,7 +15,7 @@ class FooNode implements Node[FooNode] {
 enum class OpKind: FooNode {
     case Foo, Bar
 
-    @export fun to_int(): Int = match node {
+    @exported fun to_int(): Int = match node {
         case _: OpKind.Foo => 10
         case _: OpKind.Bar => 20
     }

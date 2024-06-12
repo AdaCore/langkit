@@ -1,7 +1,7 @@
 import common
 
 class Example: FooNode implements TokenNode {
-    @export fun p(): Int = match node.parent {
+    @exported fun p(): Int = match node.parent {
         case _: Int.Foo => 1
         case _ => 0
     }

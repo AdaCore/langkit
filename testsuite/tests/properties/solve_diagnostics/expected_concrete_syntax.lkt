@@ -18,7 +18,7 @@ grammar foo_grammar {
 
     @lazy str_type: StrType = StrType()
 
-    @export fun get_first_diag(r: SolverResult): SolverDiagnostic =
+    @exported fun get_first_diag(r: SolverResult): SolverDiagnostic =
     r.diagnostics?[0]
 }
 
@@ -56,7 +56,7 @@ class NumberLiteral: Expr implements TokenNode {
 }
 
 @abstract class Resolvable: Expr {
-    @export @abstract fun resolve(): SolverResult
+    @exported @abstract fun resolve(): SolverResult
 }
 
 class Call: Resolvable {

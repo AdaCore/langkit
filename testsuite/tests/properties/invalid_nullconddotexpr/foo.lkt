@@ -10,7 +10,7 @@ enum MyEnum {
 }
 
 class FooNode implements Node[FooNode] {
-    @export fun p(): MyEnum = MyEnum?.a
+    @exported fun p(): MyEnum = MyEnum?.a
 }
 
 class Example: FooNode implements TokenNode {

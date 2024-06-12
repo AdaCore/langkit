@@ -6,5 +6,5 @@ grammar foo_grammar {
 }
 
 class FooNode implements Node[FooNode] {
-    @export fun prop(value: MyEnum): MyEnum = value
+    @exported fun prop(value: MyEnum): MyEnum = value
 }

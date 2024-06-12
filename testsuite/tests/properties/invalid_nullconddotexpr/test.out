@@ -1,7 +1,7 @@
 == foo.lkt ==
-foo.lkt:13:39: error: null-conditional dotted name notation is illegal to designate an enum value
-13 |     @export fun p(): MyEnum = MyEnum?.a
-   |                                       ^
+foo.lkt:13:41: error: null-conditional dotted name notation is illegal to designate an enum value
+13 |     @exported fun p(): MyEnum = MyEnum?.a
+   |                                         ^
 
 
 lkt_compile: Done

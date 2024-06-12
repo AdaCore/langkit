@@ -42,7 +42,7 @@ class Holder: FooNode {
     @abstract @parse_field f: FooNode
 
     @memoized fun private_create(n: B): ForSynthChild1 = ForSynthChild1(f=n)
-    @export fun public_create(n: Entity[B]): ForSynthChild1 =
+    @exported fun public_create(n: Entity[B]): ForSynthChild1 =
         node.private_create(n.node)
 }
 
@@ -59,6 +59,6 @@ class OnlySynthNode: FooNode {
     @parse_field f: FooNode
 
     @memoized fun private_create(n: A): OnlySynthNode = OnlySynthNode(f=n)
-    @export fun public_create(n: Entity[A]): OnlySynthNode =
+    @exported fun public_create(n: Entity[A]): OnlySynthNode =
         node.private_create(n.node)
 }

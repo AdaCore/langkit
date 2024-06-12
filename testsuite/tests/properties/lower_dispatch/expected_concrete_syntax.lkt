@@ -24,13 +24,13 @@ class Def: FooNode {
 }
 
 @abstract class Expr: FooNode {
-    @export @abstract fun evaluate_abstract(): Int
+    @exported @abstract fun evaluate_abstract(): Int
 
-    @export @abstract fun evaluate_entity(): Int
+    @exported @abstract fun evaluate_entity(): Int
 
-    @export fun evaluate_rtcheck(): Int = raise[Int] PropertyError("Property Expr.evaluate_rtcheck not implemented")
+    @exported fun evaluate_rtcheck(): Int = raise[Int] PropertyError("Property Expr.evaluate_rtcheck not implemented")
 
-    @export fun evaluate_concrete(): Int = 1
+    @exported fun evaluate_concrete(): Int = 1
 }
 
 @abstract class Atom: Expr {
@@ -47,7 +47,7 @@ class Lit: Atom implements TokenNode {
 class Ref: Atom {
     @parse_field name: Name
 
-    @export fun resolve(): Entity[Def] =
+    @exported fun resolve(): Entity[Def] =
     node.node_env().get_first(node.name.symbol).as![Def]
 
     fun evaluate_abstract(): Int = node.resolve().expr.evaluate_abstract()

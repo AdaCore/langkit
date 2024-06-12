@@ -11,10 +11,10 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun lookup(sym: Symbol): Entity[FooNode] =
+    @exported fun lookup(sym: Symbol): Entity[FooNode] =
     self.children_env().get_first(sym)
 
-    @export fun with_rebinding(from_scope: Entity[Scope], to_scope: Entity[Scope]): Entity[FooNode] =
+    @exported fun with_rebinding(from_scope: Entity[Scope], to_scope: Entity[Scope]): Entity[FooNode] =
     {
         val rbs = self.info.rebindings.append_rebinding(
             from_scope.children_env(), to_scope.children_env()

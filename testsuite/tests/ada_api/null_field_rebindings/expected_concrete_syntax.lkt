@@ -13,7 +13,7 @@ grammar foo_grammar {
 class Decl: FooNode {
     @parse_field @nullable name: Identifier
 
-    @export fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Entity[Decl] =
+    @exported fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Entity[Decl] =
     {
         val rbdng = self.info.rebindings.append_rebinding(
             from_node.children_env(), to_node.children_env()
