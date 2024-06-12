@@ -1041,7 +1041,6 @@ class BaseNodeAnnotations(ParsedAnnotations):
     repr_name: str | None
     snaps: bool
     synthetic: bool
-    warn_on_node: bool
     annotations = [
         FlagAnnotationSpec("custom_short_image"),
         StringLiteralAnnotationSpec("generic_list_type"),
@@ -1051,7 +1050,6 @@ class BaseNodeAnnotations(ParsedAnnotations):
         FlagAnnotationSpec("rebindable"),
         FlagAnnotationSpec("snaps"),
         FlagAnnotationSpec('synthetic'),
-        FlagAnnotationSpec("warn_on_node"),
     ]
 
 
@@ -1122,7 +1120,6 @@ class FunAnnotations(ParsedAnnotations):
     external: ExternalAnnotationSpec.Value | None
     final: bool
     ignored: bool
-    no_node_warning: bool
     memoized: bool
     predicate_error: str | None
     traced: bool
@@ -1135,7 +1132,6 @@ class FunAnnotations(ParsedAnnotations):
         ExternalAnnotationSpec(),
         FlagAnnotationSpec('final'),
         FlagAnnotationSpec('ignored'),
-        FlagAnnotationSpec('no_node_warning'),
         StringLiteralAnnotationSpec('predicate_error'),
         FlagAnnotationSpec('memoized'),
         FlagAnnotationSpec('traced'),
@@ -3138,7 +3134,6 @@ class LktTypesLoader:
             ),
             public=False,
             type=rtype,
-            ignore_warn_on_node=True,
         )
 
         # Make internal properties unreachable from user code
@@ -4555,9 +4550,6 @@ class LktTypesLoader:
             uses_envs=uses_envs,
             optional_entity_info=False,
             warn_on_unused=not annotations.ignored,
-            # When the @no_node_warning annotation is missing, use "None" to
-            # inherit this annotation.
-            ignore_warn_on_node=annotations.no_node_warning or None,
             call_non_memoizable_because=(
                 annotations.call_non_memoizable_because
             ),
@@ -5058,9 +5050,6 @@ class LktTypesLoader:
             annotations=langkit.dsl.Annotations(
                 repr_name=annotations.repr_name,
                 generic_list_type=annotations.generic_list_type,
-                # The absence of "warn_on_node" means "inherit from base node",
-                # so pass None in this case.
-                warn_on_node=annotations.warn_on_node or None,
                 rebindable=annotations.rebindable,
                 custom_short_image=annotations.custom_short_image,
                 snaps=annotations.snaps,

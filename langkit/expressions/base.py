@@ -3680,7 +3680,7 @@ class PropertyDef(AbstractNodeData):
                  memoize_in_populate=False, external=False,
                  uses_entity_info=None, uses_envs=None,
                  optional_entity_info=False, warn_on_unused=None,
-                 ignore_warn_on_node=None, call_non_memoizable_because=None,
+                 call_non_memoizable_because=None,
                  activate_tracing=False, dump_ir=False,
                  lazy_field: Opt[bool] = None,
                  artificial: bool = False,
@@ -3796,9 +3796,6 @@ class PropertyDef(AbstractNodeData):
         :param bool artificial: Whether this property is artificial: not
             created in the language spec, but still visible for users (unlike
             internal properties).
-
-        :param bool|None ignore_warn_on_node: Wether to ignore warn_on_node
-            warnings for this property. Defaults to None, which means inherit.
 
         :param str|None call_non_memoizable_because: If not-None, makes the use
             of this property in a memoized context impossible. Must be used for
@@ -3989,7 +3986,6 @@ class PropertyDef(AbstractNodeData):
 
         self._requires_untyped_wrapper = False
         self._warn_on_unused = warn_on_unused
-        self._ignore_warn_on_node = ignore_warn_on_node
 
         self._call_non_memoizable_because = call_non_memoizable_because
 
@@ -4062,10 +4058,6 @@ class PropertyDef(AbstractNodeData):
         """
         return ('[dispatcher]{}'.format(self.qualname)
                 if self.is_dispatcher else self.qualname)
-
-    @inherited_information
-    def ignore_warn_on_node(self):
-        return self._ignore_warn_on_node
 
     @property
     def warn_on_unused(self):
@@ -4790,19 +4782,6 @@ class PropertyDef(AbstractNodeData):
                 )
             )
 
-    def check_returned_nodes(self, context):
-        """
-        Check if a property returns a node type and hasn't been properly
-        annotated.
-        """
-        if (self.struct.is_ast_node
-                and self.struct.annotations.warn_on_node
-                and not self.ignore_warn_on_node):
-            WarningSet.prop_only_entities.warn_if(
-                self.type.matches(T.root_node),
-                '{} returns a node type'.format(self.qualname),
-            )
-
     def render_property(self, context):
         """
         Render the given property to generated code.
@@ -5153,8 +5132,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 # noinspection PyPep8Naming
 def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
              memoized=False, warn_on_unused=None, uses_entity_info=None,
-             ignore_warn_on_node=None, call_non_memoizable_because=None,
-             final=False):
+             call_non_memoizable_because=None, final=False):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -5174,8 +5152,7 @@ def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
     return PropertyDef(
         expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc, public=public,
         type=type, dynamic_vars=dynamic_vars, memoized=memoized,
-        warn_on_unused=warn_on_unused, ignore_warn_on_node=ignore_warn_on_node,
-        uses_entity_info=uses_entity_info,
+        warn_on_unused=warn_on_unused, uses_entity_info=uses_entity_info,
         call_non_memoizable_because=call_non_memoizable_because,
         lazy_field=False, final=False,
     )
@@ -5191,8 +5168,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      dynamic_vars=None, memoized=False,
                      call_memoizable=False, memoize_in_populate=False,
                      external=False, uses_entity_info=None, uses_envs=None,
-                     warn_on_unused=None, ignore_warn_on_node=None,
-                     call_non_memoizable_because=None,
+                     warn_on_unused=None, call_non_memoizable_because=None,
                      activate_tracing=False, dump_ir=False, final=False,
                      predicate_error=None):
     """
@@ -5220,7 +5196,6 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             uses_entity_info=uses_entity_info,
             uses_envs=uses_envs,
             warn_on_unused=warn_on_unused,
-            ignore_warn_on_node=ignore_warn_on_node,
             call_non_memoizable_because=call_non_memoizable_because,
             activate_tracing=activate_tracing,
             dump_ir=dump_ir,
@@ -5237,7 +5212,6 @@ def create_lazy_field(expr: _Any,
                       return_type: Opt[CompiledType] = None,
                       kind: AbstractKind = AbstractKind.concrete,
                       warn_on_unused: Opt[bool] = None,
-                      ignore_warn_on_node: Opt[bool] = None,
                       activate_tracing: bool = False,
                       dump_ir: bool = False,
                       local_vars: Opt[LocalVars] = None) -> PropertyDef:
@@ -5258,7 +5232,6 @@ def create_lazy_field(expr: _Any,
         uses_entity_info=None,
         uses_envs=None,
         warn_on_unused=warn_on_unused,
-        ignore_warn_on_node=ignore_warn_on_node,
         call_non_memoizable_because=None,
         activate_tracing=activate_tracing,
         dump_ir=dump_ir,
@@ -5271,7 +5244,6 @@ def lazy_field(public: Opt[bool] = None,
                return_type: Opt[CompiledType] = None,
                kind: AbstractKind = AbstractKind.concrete,
                warn_on_unused: Opt[bool] = None,
-               ignore_warn_on_node: Opt[bool] = None,
                activate_tracing: bool = False,
                dump_ir: bool = False):
     """
@@ -5296,7 +5268,6 @@ def lazy_field(public: Opt[bool] = None,
             return_type,
             kind,
             warn_on_unused,
-            ignore_warn_on_node,
             activate_tracing,
             dump_ir,
         )

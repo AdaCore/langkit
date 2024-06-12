@@ -319,8 +319,7 @@ inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
 
 class Annotations:
     def __init__(self, repr_name=None, generic_list_type=None,
-                 warn_on_node=None, rebindable=False,
-                 custom_short_image=False, snaps=False,
+                 rebindable=False, custom_short_image=False, snaps=False,
                  ple_unit_root=False):
         """
         Constructor for a node's annotations.
@@ -328,8 +327,6 @@ class Annotations:
         :param str|None repr_name: The name to be used in repr for this node
             type.
         :param str|None generic_list_type: The name of the generic list type.
-        :param bool|None warn_on_node: Inherited attribute (False by default).
-            Per-node switch to disable some warnings.
         :param bool rebindable: Whether lexical environments that belong to
             this kind of node can be rebound.
         :param bool custom_short_image: Whether this AST node must use a
@@ -349,15 +346,10 @@ class Annotations:
         """
         self.repr_name = repr_name
         self.generic_list_type = generic_list_type
-        self._warn_on_node = warn_on_node
         self._rebindable = rebindable
         self.custom_short_image = custom_short_image
         self._snaps = snaps
         self.ple_unit_root = ple_unit_root
-
-    @inherited_annotation
-    def warn_on_node(self):
-        return self._warn_on_node
 
     @inherited_annotation
     def rebindable(self):
@@ -381,9 +373,6 @@ class Annotations:
                 is_root, 'Name of the generic list type must be a string, but'
                 ' got {}'.format(repr(self.generic_list_type))
             )
-
-        if is_root and self._warn_on_node is None:
-            self._warn_on_node = False
 
     def get_parent_annotations(self):
         """

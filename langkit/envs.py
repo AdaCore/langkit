@@ -311,7 +311,8 @@ class EnvSpec:
         p = PropertyDef(
             expr, AbstractNodeData.PREFIX_INTERNAL,
             name=names.Name.from_lower(f"{name}_{next(self.PROPERTY_COUNT)}"),
-            public=False, type=type, ignore_warn_on_node=True
+            public=False,
+            type=type,
         )
         p._indexing_name = '_{}'.format(p.original_name.lower())
         p._original_name = p._indexing_name

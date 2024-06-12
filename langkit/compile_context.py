@@ -2304,8 +2304,6 @@ class CompileCtx:
                          PropertyDef.construct_and_type_expression),
             PropertyPass('check overriding types',
                          PropertyDef.check_overriding_types),
-            PropertyPass('check properties returning node types',
-                         PropertyDef.check_returned_nodes),
             GlobalPass('compute properties callgraphs',
                        CompileCtx.compute_properties_callgraphs),
             GlobalPass('compute uses entity info attribute',
