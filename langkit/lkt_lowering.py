@@ -1021,8 +1021,8 @@ class TokenAnnotations(ParsedAnnotations):
 
 @dataclass
 class LexerAnnotations(ParsedAnnotations):
-    track_indent: bool
-    annotations = [FlagAnnotationSpec('track_indent')]
+    indentation_tracking: bool
+    annotations = [FlagAnnotationSpec('indentation_tracking')]
 
 
 @dataclass
@@ -1844,7 +1844,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
     # Create the Lexer instance and register all patterns and lexing rules
     result = Lexer(token_class,
-                   lexer_annot.track_indent,
+                   lexer_annot.indentation_tracking,
                    pre_rules)
     for name, (regexp, loc) in patterns.items():
         result._add_pattern(name.lower, regexp, location=loc)

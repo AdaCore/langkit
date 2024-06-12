@@ -2164,7 +2164,9 @@ def unparse_lexer(ctx, f):
     from langkit.lexer import TokenAction
 
     # Prepare unparsing of lexer
-    lexer_annotations = "@track_indent$hl" if ctx.lexer.track_indent else ""
+    lexer_annotations = (
+        "@indentation_tracking$hl" if ctx.lexer.track_indent else ""
+    )
     lexer_newline_rule_index = next(
         i
         for i, r in enumerate(ctx.lexer.rules)

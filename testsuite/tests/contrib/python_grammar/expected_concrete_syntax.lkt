@@ -1,4 +1,4 @@
-@track_indent
+@indentation_tracking
 lexer foo_lexer {
     val STRING_DBQ = p"\"(\\\\\"|[^\n\"])*\""
     val STRING_SQ = p"'(\\\\'|[^\n'])*'"

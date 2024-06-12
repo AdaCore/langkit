@@ -1,4 +1,4 @@
-@track_indent
+@indentation_tracking
 lexer foo_lexer {
 
     @ignored _ <- p"[ \r\t]+"
