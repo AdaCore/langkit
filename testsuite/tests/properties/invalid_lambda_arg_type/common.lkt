@@ -1,0 +1,22 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ExampleBlock(list*(Example("example")))
+}
+
+struct IndexedItem {
+    e: Example
+    i: Int
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+}
+
+@abstract
+class BaseExampleBlock: FooNode {
+    @parse_field items: ASTList[FooNode, Example]
+}

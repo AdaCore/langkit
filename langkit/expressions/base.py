@@ -2482,7 +2482,7 @@ class NullCond:
 
         result = expr
         for couple in reversed(checks):
-            then = Then.create_from_exprs(couple.expr, result, couple.var)
+            then = Then.create_from_exprs(couple.expr, result, [], couple.var)
             then.underscore_then = True
             result = then
         return result
@@ -5984,6 +5984,44 @@ class UnaryNeg(AbstractExpression):
             f"Integer or big integer expected, got {expr.type.dsl_name}",
         )
         return UnaryNeg.Expr(expr)
+
+
+@dataclasses.dataclass
+class LambdaArgInfo:
+    """
+    Information for a lambda function argument.
+    """
+
+    var: AbstractVariable
+    """
+    Variable to represent this argument.
+    """
+
+    type: CompiledType
+    """
+    Type for this argument, if provided in the language spec.
+    """
+
+    type_location: Location
+    """
+    Location for the argument type specification, if provided.
+    """
+
+    def check(self) -> None:
+        """
+        Assuming that ``var`` has type information, check that ``type``
+        designates the same type. If not, emit an error associated to
+        ``type_location``.
+        """
+        assert self.var.type is not None
+        if self.var.type is not self.type:
+            with diagnostic_context(self.type_location):
+                error(f"{self.var.type.dsl_name} expected")
+
+    @staticmethod
+    def check_list(infos: list[LambdaArgInfo]) -> None:
+        for item in infos:
+            item.check()
 
 
 def ignore(*vars):

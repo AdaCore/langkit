@@ -1,0 +1,11 @@
+import common
+
+class ExampleBlock: BaseExampleBlock {
+    @exported fun p(): Array[IndexedItem] =
+        node.items.mapcat(
+            (e: Example, i: Bool) => [
+                IndexedItem(e=e, i=if i then 1 else 0),
+                IndexedItem(e=e, i=1 + if i then 1 else 0)
+            ]
+        )
+}
