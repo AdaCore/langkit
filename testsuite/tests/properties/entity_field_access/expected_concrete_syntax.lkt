@@ -39,6 +39,6 @@ class Literal: FooNode implements TokenNode {
 }
 
 @metadata struct Metadata {
-    @use_in_equality is_first: Bool
-    @use_in_equality is_second: Bool
+    @used_in_equality is_first: Bool
+    @used_in_equality is_second: Bool
 }

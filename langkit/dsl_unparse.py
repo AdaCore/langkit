@@ -1681,7 +1681,7 @@ def emit_field(field):
                 and not field.is_overriding
                 and field.nullable
             ) else "",
-            "@use_in_equality " if (
+            "@used_in_equality " if (
                 isinstance(field, MetadataField)
                 and field.use_in_equality
             ) else "",

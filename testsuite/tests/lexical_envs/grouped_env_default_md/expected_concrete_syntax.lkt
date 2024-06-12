@@ -46,6 +46,6 @@ class Ref: FooNode {
 }
 
 @metadata struct Metadata {
-    @use_in_equality n1: FooNode
-    @use_in_equality n2: FooNode
+    @used_in_equality n1: FooNode
+    @used_in_equality n2: FooNode
 }

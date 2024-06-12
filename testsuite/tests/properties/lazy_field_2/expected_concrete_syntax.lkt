@@ -23,5 +23,5 @@ class Example: FooNode {
 }
 
 @metadata struct Metadata {
-    @use_in_equality flag: Bool
+    @used_in_equality flag: Bool
 }

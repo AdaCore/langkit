@@ -18,6 +18,6 @@ class Example: FooNode {
 }
 
 @metadata struct Metadata {
-    @use_in_equality md1: Bool
+    @used_in_equality md1: Bool
     md2: Bool
 }

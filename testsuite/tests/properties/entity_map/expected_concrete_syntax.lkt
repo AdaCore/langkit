@@ -43,5 +43,5 @@ class Ref: FooNode {
 }
 
 @metadata struct Metadata {
-    @use_in_equality b: Bool
+    @used_in_equality b: Bool
 }

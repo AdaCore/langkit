@@ -1081,7 +1081,7 @@ class FieldAnnotations(ParsedAnnotations):
     nullable: bool
     parse_field: bool
     traced: bool
-    use_in_equality: bool
+    used_in_equality: bool
     annotations = [FlagAnnotationSpec('abstract'),
                    FlagAnnotationSpec('exported'),
                    FlagAnnotationSpec('final'),
@@ -1090,7 +1090,7 @@ class FieldAnnotations(ParsedAnnotations):
                    FlagAnnotationSpec('nullable'),
                    FlagAnnotationSpec('parse_field'),
                    FlagAnnotationSpec('traced'),
-                   FlagAnnotationSpec('use_in_equality')]
+                   FlagAnnotationSpec('used_in_equality')]
 
 
 @dataclass
@@ -3064,15 +3064,15 @@ class LktTypesLoader:
             )
 
             # If this field belongs to the metadata struct, use the appropriate
-            # constructor. Reject @use_in_equality annotations otherwise, as
+            # constructor. Reject @used_in_equality annotations otherwise, as
             # they are valid only for metadata fields.
             if allowed_field_types == (MetadataField, ):
                 cls = constructor = MetadataField
-                kwargs["use_in_equality"] = annotations.use_in_equality
+                kwargs["use_in_equality"] = annotations.used_in_equality
             else:
                 check_source_language(
-                    not annotations.use_in_equality,
-                    "Only metadata fields can have the @use_in_equality"
+                    not annotations.used_in_equality,
+                    "Only metadata fields can have the @used_in_equality"
                     " annotation",
                 )
 
