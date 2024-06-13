@@ -4643,7 +4643,11 @@ class LktTypesLoader:
             uses_entity_info=uses_entity_info,
             uses_envs=uses_envs,
             optional_entity_info=False,
-            warn_on_unused=not annotations.ignored,
+
+            # When the @ignored annotation is missing, use "None" to mean
+            # "same as from base node".
+            warn_on_unused=not annotations.ignored and None,
+
             call_non_memoizable_because=(
                 annotations.call_non_memoizable_because
             ),

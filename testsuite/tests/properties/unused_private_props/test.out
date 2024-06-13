@@ -3,8 +3,8 @@ foo.lkt:12:5: warning: This private property is unused
 12 |     fun as_expr(): Expression = node.as[Expression]
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo.lkt:21:15: warning: This private abstraction is unused
-21 |     @abstract fun result(): Int
+foo.lkt:24:15: warning: This private abstraction is unused
+24 |     @abstract fun result(): Int
    |               ^^^^^^^^^^^^^^^^^
 
 Code generation was successful
