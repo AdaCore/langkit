@@ -42,6 +42,17 @@ grammar foo_grammar {
         # This should match Def | FooNode.list
         case _ => null[Array[Entity[Expr]]]
     } & self.children.mapcat((c) => c.find_exprs())
+
+    @exported fun nested_match(): Bool =
+    # We used to generate invalid Ada code for nested match expressions
+    match self.parent {
+        case _: Atom => true
+        case _: Expr => match self {
+            case _: Atom => true
+            case _ => false
+        }
+        case _ => false
+    }
 }
 
 class Def: FooNode {
