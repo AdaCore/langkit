@@ -1,17 +1,17 @@
 == bad_arity.lkt ==
-common.lkt:18:9: error: extra arguments for NPropagate's comb_prop must be optional
+common.lkt:18:9: error: Missing an actual for argument #1 (b)
 18 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == bad_return_type.lkt ==
-common.lkt:18:9: error: NPropagate's comb_prop must return a subtype of FooNode.entity
+common.lkt:18:9: error: Converter property must return a subtype of FooNode.entity
 18 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == unbound_dynvar.lkt ==
-common.lkt:18:9: error: In call to BazNode.conv_prop as NPropagate's comb_prop, some dynamic variables need to be bound: dyn_node2
+common.lkt:18:9: error: Some dynamic variables need to be bound: dyn_node2
 18 |         node.type_var <- BazNode.conv_prop%(node.ref_var)
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

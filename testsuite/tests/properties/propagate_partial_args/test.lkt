@@ -1,0 +1,55 @@
+# Check that Propagate atoms can have partial arguments
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Plus(literal "+" literal)
+    literal <- Literal(@Number)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    v: LogicVar
+}
+
+class Literal: FooNode implements TokenNode {
+    fun static_combiner(other: Entity[Literal],
+                        use_self: Bool): Entity[Literal] =
+        if use_self then self else other
+
+    fun static_n_combiner(other1: Entity[Literal],
+                          other2: Entity[Literal],
+                          idx: Int): Entity[Literal] =
+        if idx == 0 then self
+        elif idx == 1 then other1
+        else other2
+
+    fun variadic_combiner(lits: Array[Entity[Literal]],
+                          idx: Int): Entity[Literal] =
+        if idx == -1 then self else lits?[idx]
+}
+
+class Plus: FooNode {
+    @parse_field lhs: Literal
+    @parse_field rhs: Literal
+
+    @exported
+    fun resolve(lhs: Entity[FooNode],
+                rhs: Entity[FooNode]): Entity[FooNode] = {
+        val eq = %all(
+            node.v <- Literal.static_combiner%(node.lhs.v, node.rhs.v, true),
+            node.v <- Literal.static_n_combiner%(
+                node.lhs.v, node.rhs.v, node.rhs.v, 0
+            ),
+            node.v <- Literal.variadic_combiner%([node.lhs.v, node.rhs.v], 0),
+            node.lhs.v <- lhs,
+            node.rhs.v <- rhs
+        );
+
+        if eq.solve() then
+            node.v.get_value()
+        else
+            raise[Entity[FooNode]] PropertyError("name resolution failure")
+    }
+}

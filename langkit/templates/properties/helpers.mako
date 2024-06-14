@@ -15,25 +15,20 @@
   )
 </%def>
 
-<%def name="dynamic_vars_holder_decl(type_name, base_type_name, dynvars)">
-   type ${type_name} is new ${base_type_name} with
-   % if dynvars:
-      record
-         % for dynvar in dynvars:
-            ${dynvar.argument_name} : ${dynvar.type.name};
-         % endfor
-      end record;
-   % else:
-      null record;
-   % endif
-</%def>
+<%def name="logic_functors(prop)">
+   % for functor in prop.logic_functors:
 
-<%def name="logic_functor(prop, arity)">
    <%
-      type_name = f"Logic_Functor_{prop.uid}"
+      type_name = f"{functor.id}_Functor"
+      formal_node_types = prop.get_concrete_node_types(functor)
+      arity = len(formal_node_types)
+      has_refcounted_args = any(
+         pa.type.is_refcounted for pa in functor.partial_args
+      )
+
       entity = T.entity.name
-      is_dynamic = prop.is_dynamic_combiner
-      is_converter = arity == 1 and not is_dynamic
+      is_variadic = arity > 1 and formal_node_types[1].is_array_type
+      is_converter = arity == 1
 
       base_type: str
       subp_name: str
@@ -60,15 +55,64 @@
       has_multiple_concrete_nodes = len(T.root_node.concrete_subclasses) > 1
    %>
 
-   ${dynamic_vars_holder_decl(
-         type_name, f"Solver_Ifc.{base_type}", prop.dynamic_vars
-   )}
+   type ${type_name} is new ${f"Solver_Ifc.{base_type}"} with
+   % if functor.partial_args:
+      record
+         % for pa in functor.partial_args:
+            ${pa.name} : ${pa.type.name};
+         % endfor
+      end record;
+   % else:
+      null record;
+   % endif
 
    ${subp_spec} with Inline;
    overriding function Image (Self : ${type_name}) return String;
 
+   % if has_refcounted_args:
+      overriding procedure Destroy (Self : in out ${type_name});
+   % endif
+
+   <%
+      create_args = []
+      if not is_converter:
+         create_args.append(("N", "Positive"))
+      for pa in functor.partial_args:
+         create_args.append((pa.name, pa.type.name))
+   %>
+
+   function Create_${functor.id}_Functor
+   % if create_args:
+   (
+      % for arg_name, arg_type in create_args:
+         ${arg_name} : ${arg_type}${"" if loop.last else ";"}
+      % endfor
+   )
+   % endif
+      return ${type_name} is
+   begin
+      <%
+         components = []
+         if not is_converter:
+            components.append(f"N => N")
+         components += [
+            "Cache_Set => False",
+            "Cache_Key => <>",
+            "Cache_Value => <>",
+            "Ref_Count => 1",
+         ]
+      %>
+      % for pa in functor.partial_args:
+         % if pa.type.is_refcounted:
+            Inc_Ref (${pa.name});
+         % endif
+         <% components.append(f"{pa.name} => {pa.name}") %>
+      % endfor
+      return ${type_name}'(${", ".join(components)});
+   end;
+
    ${subp_spec} is
-      % if not prop.dynamic_vars:
+      % if not functor.partial_args:
          pragma Unreferenced (Self);
       % endif
 
@@ -79,7 +123,7 @@
          From : constant ${T.entity.name} := Vals (1);
       % endif
 
-      % if is_dynamic:
+      % if is_variadic:
          <% arr_arg = prop.natural_arguments[0] %>
          Args : ${arr_arg.type.name} :=
            ${arr_arg.type.constructor_name} (Vals'Length - 1);
@@ -89,9 +133,13 @@
          # Range of "Vals" indexes for the entity arguments to pass to the
          # property in addition to "Self".
          #
-         # Index 1 is for "Self", so the other entity arguments start at index
-         # 2.
-         extra_entity_args_range = range(2, arity + 1)
+         # Index 1 is for "Self", so the other entity arguments start at
+         # index 2. For variadic combiners it is not supported to have
+         # additional entities passed through logic vars so we use an empty
+         # range.
+         extra_entity_args_range = (
+             [] if is_variadic else range(2, arity + 1)
+         )
 
          # List of all entity arguments ("Self" included) to pass to the
          # property, plus their expected types.
@@ -99,7 +147,9 @@
             ("From", prop.struct),
          ] + [
             (f"Vals ({i})", arg.type.element_type)
-            for i, arg in zip(extra_entity_args_range, prop.natural_arguments)
+            for i, arg in zip(
+               extra_entity_args_range, prop.natural_arguments
+            )
          ]
       %>
 
@@ -107,12 +157,13 @@
    begin
       ## Entities passed as arguments can contain any node type: make sure
       ## their types match the expected types for "prop"'s arguments before
-      ## doing the call so that we can raise a Property_Error exception right
-      ## now instead of letting Ada raise an automatic Constraint_Error.
+      ## doing the call so that we can raise a Property_Error exception
+      ## right now instead of letting Ada raise an automatic
+      ## Constraint_Error.
       ##
-      ## No need to perform the check if the expected kind is the root node or
-      ## if there is only one concrete node in the whole language, else get a
-      ## compilation warning.
+      ## No need to perform the check if the expected kind is the root node
+      ## or if there is only one concrete node in the whole language, else
+      ## get a compilation warning.
       % for arg, expected_type in typed_entity_args:
          % if has_multiple_concrete_nodes and expected_type != T.root_node:
             if ${arg}.Node /= null
@@ -127,7 +178,7 @@
          % endif
       % endfor
 
-      % if is_dynamic:
+      % if is_variadic:
       <% expected_type = arr_arg.type.element_type.element_type %>
       for I in 2 .. Vals'Last loop
          % if has_multiple_concrete_nodes and expected_type != T.root_node:
@@ -151,23 +202,23 @@
          # Pass the property controlling node argument
          args = [f"{prop.self_arg_name} => From.Node"]
 
-         if is_dynamic:
+         if is_variadic:
             args.append(f"{arr_arg.name} => Args")
-
-         # Pass other entity arguments. Pass an aggregate as the property may
-         # take a non-root entity type, while "Vals" contains only root
-         # entities.
-         for i, vals_index in enumerate(extra_entity_args_range):
-            args.append(
-               f"{prop.natural_arguments[i].name} =>"
-               f" (Node => Vals ({vals_index}).Node,"
-               f"  Info => Vals ({vals_index}).Info)"
-            )
+         else:
+            # Pass other entity arguments. Pass an aggregate as the property
+            # may take a non-root entity type, while "Vals" contains only
+            # root entities.
+            for i, vals_index in enumerate(extra_entity_args_range):
+               args.append(
+                  f"{prop.natural_arguments[i].name} =>"
+                  f" (Node => Vals ({vals_index}).Node,"
+                  f"  Info => Vals ({vals_index}).Info)"
+               )
 
          # Pass all the required dynamic variables from the closure
-         for dynvar in prop.dynamic_vars:
+         for pa in functor.partial_args:
             args.append(
-               f"{dynvar.argument_name} => Self.{dynvar.argument_name}"
+               f"{pa.name} => Self.{pa.name}"
             )
 
          # Pass the entity info argument, if the property takes one
@@ -176,12 +227,12 @@
       %>
       Ret := ${prop.name} (${", ".join(args)});
 
-      % if is_dynamic:
+      % if is_variadic:
       Dec_Ref (Args);
       % endif;
 
       return (Node => Ret.Node, Info => Ret.Info);
-   % if is_dynamic:
+   % if is_variadic:
    exception
       when Exc : Property_Error =>
          pragma Unreferenced (Exc);
@@ -198,6 +249,24 @@
    begin
       return (${ascii_repr(prop.qualname)});
    end Image;
+
+   % if has_refcounted_args:
+      -------------
+      -- Destroy --
+      -------------
+
+      overriding procedure Destroy (Self : in out ${type_name}) is
+      begin
+         % for pa in functor.partial_args:
+            % if pa.type.is_refcounted:
+               Dec_Ref (Self.${pa.name});
+            % endif
+         % endfor
+         null;
+      end Destroy;
+   % endif
+
+   % endfor
 </%def>
 
 <%def name="logic_predicates(prop)">
@@ -205,7 +274,6 @@
 
    <%
       type_name = f"{pred.id}_Predicate"
-      package_name = f"{pred.id}_Pred"
       formal_node_types = prop.get_concrete_node_types(pred)
       enumerated_arg_types = list(enumerate(formal_node_types[1:], 1))
       arity = len(formal_node_types)
@@ -213,6 +281,7 @@
          pa.type.is_refcounted for pa in pred.partial_args
       )
       has_multiple_concrete_nodes = len(T.root_node.concrete_subclasses) > 1
+      is_variadic = arity > 1 and formal_node_types[1].is_array_type
    %>
 
    <%def name="call_profile()">
@@ -265,17 +334,20 @@
    % endif
 
    <%
-      create_args = [(f"Field_{pa.index}", pa.type)
-                     for pa in pred.partial_args]
+      create_args = []
+      if arity > 1:
+          create_args.append(("N", "Positive"))
+      for pa in pred.partial_args:
+          create_args.append((pa.name, pa.type.name))
       if prop.predicate_error is not None:
-        create_args.append(("Error_Location", T.root_node))
+          create_args.append(("Error_Location", T.root_node.name))
    %>
 
    function Create_${pred.id}_Predicate
    % if create_args:
    (
       % for arg_name, arg_type in create_args:
-         ${arg_name} : ${arg_type.name}${"" if loop.last else ";"}
+         ${arg_name} : ${arg_type}${"" if loop.last else ";"}
       % endfor
    )
    % endif
@@ -284,19 +356,21 @@
       <%
          components = []
          if arity > 1:
-            components.append(f"N => {arity}")
+            components.append("N => N")
          components += [
             "Cache_Set => False",
             "Cache_Key => <>",
             "Cache_Value => <>",
             "Ref_Count => 1",
          ]
+         if prop.predicate_error is not None:
+             components.append("Error_Location => Error_Location")
       %>
-      % for arg_name, arg_type in create_args:
-         % if arg_type.is_refcounted:
-            Inc_Ref (${arg_name});
+      % for pa in pred.partial_args:
+         % if pa.type.is_refcounted:
+            Inc_Ref (${pa.name});
          % endif
-         <% components.append(f"{arg_name} => {arg_name}") %>
+         <% components.append(f"Field_{pa.index} => {pa.name}") %>
       % endfor
       return ${type_name}'(${", ".join(components)});
    end;
@@ -314,8 +388,17 @@
       % if arity > 1:
          Entity : ${T.entity.name} := Entities (1);
       % endif
+
+      % if is_variadic:
+         <% arr_arg = prop.natural_arguments[0] %>
+         Args : ${arr_arg.type.name} :=
+           ${arr_arg.type.constructor_name} (Entities'Length - 1);
+      % endif
+
       <% node0_type = formal_node_types[0] %>
       Node : ${node0_type.name};
+
+      Ret : Boolean;
    begin
       ## Here, we'll raise a property error, but only for dispatching
       ## properties. For non dispatching properties we'll allow the user
@@ -332,9 +415,8 @@
       ## Type check nodes that come from logic vars to avoid Assertion_Error or
       ## Assertion_Error in case of mismatch.
       <%
-         typed_nodes = (
-            [("Entity.Node", prop.struct)]
-            + [
+         typed_nodes = [("Entity.Node", prop.struct)] + (
+            [] if is_variadic else [
                (f"Entities ({i + 1}).Node", t.element_type)
                for i, t in enumerated_arg_types
             ]
@@ -354,22 +436,59 @@
 
       Node := Entity.Node;
 
+      % if is_variadic:
+      <% expected_type = arr_arg.type.element_type.element_type %>
+      for I in 2 .. Entities'Last loop
+         % if has_multiple_concrete_nodes and not expected_type.is_root_node:
+            if Entities (I).Node /= null
+               and then Entities (I).Node.Kind not in
+                  ${expected_type.ada_kind_range_name}
+            then
+               Raise_Property_Exception
+                 (Entities (I).Node,
+                  Property_Error'Identity,
+                  "mismatching node type");
+            end if;
+         % endif
+         Args.Items (I - 1) := (Entities (I).Node, Entities (I).Info);
+      end loop;
+      % endif
+
       ## Pass the "prefix" node (the one that owns the property to call) using
       ## the conventional bare node/entity_info arguments. Pass the other node
       ## arguments as entities directly.
       <%
-         args = ['Node'] + [
-            f"(Node => Entities ({i + 1}).Node,"
-            f" Info => Entities ({i + 1}).Info)"
-            for i, formal_type in enumerated_arg_types
-         ] + [
-            f"{pa.name} => Self.Field_{pa.index}" for pa in pred.partial_args
-         ]
+         args = ['Node']
+         if is_variadic:
+            args.append("Args")
+         else:
+            args.extend([
+               f"(Node => Entities ({i + 1}).Node,"
+               f" Info => Entities ({i + 1}).Info)"
+               for i, formal_type in enumerated_arg_types
+            ])
+         args.extend(
+            [f"{pa.name} => Self.Field_{pa.index}" for pa in pred.partial_args]
+         )
          if prop.uses_entity_info:
             args.append(f"{prop.entity_info_name} => Entity.Info")
          args_fmt = '({})'.format(', '.join(args)) if args else ''
       %>
-      return ${prop.name} ${args_fmt};
+
+      Ret := ${prop.name} ${args_fmt};
+
+      % if is_variadic:
+      Dec_Ref (Args);
+      % endif;
+
+      return Ret;
+   % if is_variadic:
+   exception
+      when Exc : Property_Error =>
+         pragma Unreferenced (Exc);
+         Dec_Ref (Args);
+         raise;
+   % endif
    end Call;
 
    % if prop.predicate_error is not None:

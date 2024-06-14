@@ -2866,7 +2866,8 @@ class DynamicVariable(AbstractVariable):
         return hash(self._id_tuple)
 
     @staticmethod
-    def check_call_bindings(prop, context_msg):
+    def check_call_bindings(prop: PropertyDef,
+                            context_msg: str = "") -> None:
         """
         Ensure all need dynamic vars are bound for a call to ``prop``.
 
@@ -2874,9 +2875,9 @@ class DynamicVariable(AbstractVariable):
         variable in ``prop`` that is not currently bound *and* that has no
         default value.
 
-        :param PropertyDef prop: Property "to call".
-        :param str context_msg: String to describe how this property is used.
-            This helps formatting the error message. It is formatted with
+        :param prop: Property "to call".
+        :param context_msg: format string to describe how this property is
+            used. This helps formatting the error message. It is formatted with
             "prop", being the name of the property. For instance:
 
                 "In call to {prop}".
@@ -2888,10 +2889,15 @@ class DynamicVariable(AbstractVariable):
                 and prop.dynamic_var_default_value(dynvar) is None
             )
         ]
+        prefix = (
+            "{}, some".format(context_msg.format(prop=prop.qualname))
+            if context_msg
+            else "Some"
+        )
         check_source_language(
             not unbound_dynvars,
-            '{}, some dynamic variables need to be bound: {}'.format(
-                context_msg.format(prop=prop.qualname),
+            '{} dynamic variables need to be bound: {}'.format(
+                prefix,
                 ', '.join(dynvar.dsl_name for dynvar in unbound_dynvars)
             )
         )
@@ -3685,10 +3691,11 @@ inherited_information = inherited_property(lambda s: s.base)
 
 
 @dataclasses.dataclass
-class LogicPredicate:
+class PropertyClosure:
     """
     Description of the object in generated code used to represent a partially
-    evaluated property, to be used as a predicate in logic equations.
+    evaluated property, currently used by predicate and propagate atoms in
+    logic equations.
     """
 
     @dataclasses.dataclass(frozen=True)
@@ -3965,9 +3972,14 @@ class PropertyDef(AbstractNodeData):
         Recursion guard for the construct pass.
         """
 
-        self.logic_predicates: list[LogicPredicate] = []
+        self.logic_predicates: list[PropertyClosure] = []
         """
         The list of logic predicates to generate.
+        """
+
+        self.logic_functors: list[PropertyClosure] = []
+        """
+        The list of logic functors to generate.
         """
 
         self.expr = expr
@@ -4918,7 +4930,7 @@ class PropertyDef(AbstractNodeData):
     @memoized
     def do_generate_logic_predicate(
         self,
-        partial_args: tuple[LogicPredicate.PartialArgument, ...],
+        partial_args: tuple[PropertyClosure.PartialArgument, ...],
         default_passed_args: int,
     ) -> str:
         """
@@ -4946,36 +4958,60 @@ class PropertyDef(AbstractNodeData):
         # We can use a list because the method is memoized, eg. this won't
         # be executed twice for the same partial_args_types tuple.
         self.logic_predicates.append(
-            LogicPredicate(pred_id, partial_args, default_passed_args)
+            PropertyClosure(pred_id, partial_args, default_passed_args)
         )
 
         return pred_id
 
+    @memoized
+    def do_generate_logic_functor(
+        self,
+        partial_args: tuple[PropertyClosure.PartialArgument, ...],
+        default_passed_args: int,
+    ) -> str:
+        """
+        Generate a logic binder for this convert/combine property.
+
+        If you call this function several times for the same property, only one
+        binder will be generated.
+
+        :param arity: Number of entity arguments this property takes ("Self"
+            included).
+
+        :return: The identifier for the logic functor, to be used as a prefix
+            in code generation for every entity related to it.
+        """
+        functor_num = len(self.logic_functors)
+
+        # This id will uniquely identify both the generic package and the
+        # closure data structure.
+        with names.camel_with_underscores:
+            functor_id = "{}_{}".format(self.name, functor_num)
+
+        # Thanks to memoization, we will generate at most one functor for the
+        # given arguments, so storing them in a list is fine.
+        self.logic_functors.append(
+            PropertyClosure(functor_id, partial_args, default_passed_args)
+        )
+
+        return functor_id
+
     def get_concrete_node_types(
         self,
-        pred: LogicPredicate,
+        closure: PropertyClosure,
     ) -> list[CompiledType]:
         """
-        Helper for emission of logic predicate wrappers. Return the concrete
+        Helper for emission of logic closure wrappers. Return the concrete
         node type for leading arguments that correspond to logic variables
-        bound by the given predicate.
+        bound by the given closure.
         """
         logic_vars = (
             len(self.arguments)
-            - len(pred.partial_args)
-            - pred.default_passed_args
+            - len(closure.partial_args)
+            - closure.default_passed_args
         )
         assert self.struct is not None
         return [self.struct] + [a.type for a in self.arguments[:logic_vars]]
-
-    @property
-    def is_dynamic_combiner(self) -> bool:
-        """
-        When this property is used as a combiner inside an NPropagate equation,
-        return whether it expects a dynamic number of arguments.
-        """
-        args = self.natural_arguments
-        return len(args) >= 1 and args[0].type.is_array_type
 
     def predicate_error_diagnostic(self, arity: int) -> tuple[str, list[str]]:
         """

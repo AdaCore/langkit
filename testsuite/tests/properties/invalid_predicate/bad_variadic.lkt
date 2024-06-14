@@ -1,0 +1,9 @@
+import common
+
+class Example: BaseExample {
+    @exported fun prop(): Entity[FooNode] = {
+        val _ = Example.pred1%([node.var1]);
+        node.as_bare_entity
+    }
+}
+

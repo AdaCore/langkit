@@ -1,7 +1,13 @@
 == bad_argument_type.lkt ==
-bad_argument_type.lkt:5:17: error: Argument #1 of predicate has type Bool, should be FooNode.entity
+bad_argument_type.lkt:5:17: error: Argument #1 of BaseExample.pred1 has type Bool, should be FooNode.entity
 5 |         val _ = Example.pred1%(node.var1, true);
   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== bad_variadic.lkt ==
+bad_variadic.lkt:5:17: error: BaseExample.pred1 property's first argument must be an array of entities, not FooNode.entity)
+5 |         val _ = Example.pred1%([node.var1]);
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == no_logic_var.lkt ==
