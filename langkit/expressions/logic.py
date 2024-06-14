@@ -412,33 +412,12 @@ class Bind(AbstractExpression):
         :param arity: Expected number of entity arguments for this property
             ("Self" included).
         """
-        from langkit.expressions import FieldAccess
-
         # First, resolve the property
 
-        prop: PropertyDef
+        prop: Optional[PropertyDef] = resolve_property(prop_ref)
 
-        if prop_ref is None:
+        if prop is None:
             return None
-
-        elif isinstance(prop_ref, FieldAccess):
-            node_data = prop_ref.resolve_field()
-            if isinstance(node_data, PropertyDef):
-                prop = node_data
-            else:
-                error(f"{name} must be a property")
-
-        elif isinstance(prop_ref, T.Defer):
-            prop = prop_ref.get()
-
-        elif isinstance(prop_ref, PropertyDef):
-            prop = prop_ref
-
-        else:
-            error(
-                f"{name} must be either a FieldAccess resolving to a property,"
-                " or a direct reference to a property"
-            )
 
         # Second, check its signature
 
