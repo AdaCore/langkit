@@ -6134,7 +6134,15 @@ def ignore(*vars):
         var.tag_ignored()
 
 
-def resolve_property(propref):
+@overload
+def resolve_property(propref: None) -> None: ...
+@overload
+def resolve_property(propref: PropertyDef | TypeRepo.Defer) -> PropertyDef: ...
+
+
+def resolve_property(
+    propref: PropertyDef | TypeRepo.Defer | None
+) -> PropertyDef | None:
     """
     Resolve a property reference to the actual PropertyDef instance.
 
@@ -6143,8 +6151,6 @@ def resolve_property(propref):
         * None: it is directly returned;
         * a PropertyDef instance: it is directly returned;
         * a TypeRepo.Defer instance: it is deferred.
-
-    :rtype: PropertyDef
     """
     if propref is None or isinstance(propref, PropertyDef):
         result = propref
