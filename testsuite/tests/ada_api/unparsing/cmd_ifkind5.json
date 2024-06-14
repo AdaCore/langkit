@@ -1,0 +1,46 @@
+{
+  "node_configs": {
+    "CallArg": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {
+            "kind": "ifKind",
+            "field": "f_name",
+            "matchers": [
+              {
+                "kind": "Name",
+                "document": [
+                  {
+                    "kind": "recurse_field",
+                    "field": "f_name"
+                  },
+                  "whitespace"
+                ]
+              }
+            ],
+            "default": [
+              {
+                "kind": "recurse_field",
+                "field": "f_name"
+              },
+              "hardline"
+            ],
+            "null": [
+              {
+                "kind": "recurse_field",
+                "field": "f_name"
+              },
+              "whitespace",
+              "whitespace"
+            ]
+          },
+          {
+            "kind": "recurse_field",
+            "field": "f_expr"
+          }
+        ]
+      }
+    }
+  }
+}

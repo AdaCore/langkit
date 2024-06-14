@@ -59,6 +59,15 @@ private package Langkit_Support.Prettier_Utils is
    package Document_Vectors is new Ada.Containers.Vectors
      (Positive, Document_Type);
 
+   type Matcher_Record is record
+      Matched_Type : Type_Ref;
+      Document     : Document_Type;
+   end record;
+
+   package Matcher_Vectors is new Ada.Containers.Vectors
+     (Index_Type   => Positive,
+      Element_Type => Matcher_Record);
+
    type Document_Kind is
      (Align,
       Break_Parent,
@@ -71,6 +80,7 @@ private package Langkit_Support.Prettier_Utils is
       Hard_Line_Without_Break_Parent,
       If_Break,
       If_Empty,
+      If_Kind,
       Indent,
       Line,
       List,
@@ -94,6 +104,7 @@ private package Langkit_Support.Prettier_Utils is
    with Static_Predicate =>
      Instantiated_Template_Document_Kind not in
        If_Empty
+     | If_Kind
      | Recurse
      | Recurse_Field
      | Recurse_Flatten;
@@ -145,6 +156,12 @@ private package Langkit_Support.Prettier_Utils is
          when If_Empty =>
             If_Empty_Then : Document_Type;
             If_Empty_Else : Document_Type;
+
+         when If_Kind =>
+            If_Kind_Field    : Struct_Member_Ref;
+            If_Kind_Matchers : Matcher_Vectors.Vector;
+            If_Kind_Default  : Document_Type;
+            If_Kind_Null     : Document_Type;
 
          when Indent =>
             Indent_Document : Document_Type;
@@ -295,6 +312,14 @@ private package Langkit_Support.Prettier_Utils is
       Then_Contents : Document_Type;
       Else_Contents : Document_Type) return Document_Type;
    --  Return an ``If_Empty`` node
+
+   function Create_If_Kind
+     (Self             : in out Document_Pool;
+      If_Kind_Field    : Struct_Member_Ref;
+      If_Kind_Matchers : in out Matcher_Vectors.Vector;
+      If_Kind_Default  : Document_Type;
+      If_Kind_Null     : Document_Type) return Document_Type;
+   --  Return an ``If_Kind`` node
 
    function Create_Indent
      (Self     : in out Document_Pool;

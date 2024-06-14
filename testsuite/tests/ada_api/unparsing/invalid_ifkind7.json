@@ -1,0 +1,33 @@
+{
+  "node_configs": {
+    "Addition": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {
+            "kind": "recurse_field",
+            "field": "f_lhs"
+          },
+          {
+            "kind": "ifKind",
+            "field": "f_rhs",
+            "matchers": {
+              "invalid": "invalid"
+            },
+            "default": [
+              {
+                "kind": "text",
+                "text": "+"
+              },
+              "hardline",
+              {
+                "kind": "recurse_field",
+                "field": "f_rhs"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

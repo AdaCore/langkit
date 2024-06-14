@@ -93,6 +93,28 @@ a: Int=2
     template for VarDecl.f_name: missing "then" key for ifEmpty
 # invalid_ifempty3.json
     "node" template for VarDecl: "ifEmpty" is valid only in field templates
+# invalid_ifkind.json
+    "node" template for Addition: ifKind matcher "Number" has an inconsistent recurse structure
+# invalid_ifkind2.json
+    "node" template for Addition: missing field f_rhs
+    Expected:
+    * field f_lhs
+    * token "+"
+    * field f_rhs
+# invalid_ifkind3.json
+    "node" template for Addition: missing "field" key for ifKind
+# invalid_ifkind4.json
+    "node" template for Addition: missing "matchers" key for ifKind
+# invalid_ifkind5.json
+    "node" template for Addition: missing "default" key for ifKind
+# invalid_ifkind6.json
+    "node" template for Addition: invalid "field" key kind for ifKind: found JSON_ARRAY_TYPE; expected JSON_STRING_TYPE
+# invalid_ifkind7.json
+    "node" template for Addition: invalid "matchers" key kind for ifKind: found JSON_OBJECT_TYPE; expected JSON_ARRAY_TYPE
+# invalid_ifkind8.json
+    "node" template for Addition: invalid string template document kind: invalid
+# invalid_ifkind9.json
+    invalid field for Addition: f_invalid
 # invalid_indent.json
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json
@@ -720,6 +742,367 @@ Done.
       "id": 12,
       "kind": "text",
       "text": "):Int{i;}"
+    }
+  ]
+}
+
+== cmd_ifkind.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var i:Int="
+    },
+    {
+      "command": {
+        "break": true,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "id": 4,
+          "kind": "list",
+          "list": [
+            {
+              "id": 5,
+              "kind": "text",
+              "text": "2"
+            },
+            {
+              "id": 6,
+              "kind": "list",
+              "list": [
+                {
+                  "command": {
+                    "command": "line",
+                    "hard": true,
+                    "literal": false,
+                    "soft": false
+                  },
+                  "id": 7,
+                  "kind": "command"
+                },
+                {
+                  "command": {
+                    "command": "breakParent"
+                  },
+                  "id": 8,
+                  "kind": "command"
+                }
+              ]
+            },
+            {
+              "id": 9,
+              "kind": "text",
+              "text": "+2"
+            }
+          ]
+        }
+      },
+      "id": 3,
+      "kind": "command"
+    },
+    {
+      "id": 10,
+      "kind": "text",
+      "text": ";"
+    }
+  ]
+}
+
+== cmd_ifkind.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var i:Int="
+    },
+    {
+      "command": {
+        "break": true,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "id": 4,
+          "kind": "list",
+          "list": [
+            {
+              "id": 5,
+              "kind": "text",
+              "text": "2+"
+            },
+            {
+              "id": 6,
+              "kind": "list",
+              "list": [
+                {
+                  "command": {
+                    "command": "line",
+                    "hard": true,
+                    "literal": false,
+                    "soft": false
+                  },
+                  "id": 7,
+                  "kind": "command"
+                },
+                {
+                  "command": {
+                    "command": "breakParent"
+                  },
+                  "id": 8,
+                  "kind": "command"
+                }
+              ]
+            },
+            {
+              "id": 9,
+              "kind": "text",
+              "text": "j"
+            }
+          ]
+        }
+      },
+      "id": 3,
+      "kind": "command"
+    },
+    {
+      "id": 10,
+      "kind": "text",
+      "text": ";"
+    }
+  ]
+}
+
+== cmd_ifkind2.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var i:Int="
+    },
+    {
+      "command": {
+        "break": true,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "id": 4,
+          "kind": "list",
+          "list": [
+            {
+              "id": 5,
+              "kind": "text",
+              "text": "2"
+            },
+            {
+              "command": {
+                "break": true,
+                "command": "group",
+                "expandedStates": null,
+                "groupContents": {
+                  "id": 7,
+                  "kind": "list",
+                  "list": [
+                    {
+                      "id": 8,
+                      "kind": "text",
+                      "text": "+"
+                    },
+                    {
+                      "id": 9,
+                      "kind": "list",
+                      "list": [
+                        {
+                          "command": {
+                            "command": "line",
+                            "hard": true,
+                            "literal": false,
+                            "soft": false
+                          },
+                          "id": 10,
+                          "kind": "command"
+                        },
+                        {
+                          "command": {
+                            "command": "breakParent"
+                          },
+                          "id": 11,
+                          "kind": "command"
+                        }
+                      ]
+                    },
+                    {
+                      "id": 12,
+                      "kind": "text",
+                      "text": "j"
+                    }
+                  ]
+                }
+              },
+              "id": 6,
+              "kind": "command"
+            }
+          ]
+        }
+      },
+      "id": 3,
+      "kind": "command"
+    },
+    {
+      "id": 13,
+      "kind": "text",
+      "text": ";"
+    }
+  ]
+}
+
+== cmd_ifkind3.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var i:Int="
+    },
+    {
+      "command": {
+        "break": false,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "id": 4,
+          "kind": "list",
+          "list": [
+            {
+              "id": 5,
+              "kind": "text",
+              "text": "2 +j"
+            }
+          ]
+        }
+      },
+      "id": 3,
+      "kind": "command"
+    },
+    {
+      "id": 6,
+      "kind": "text",
+      "text": ";"
+    }
+  ]
+}
+
+== cmd_ifkind4.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v:Int=f("
+    },
+    {
+      "command": {
+        "break": true,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "id": 4,
+          "kind": "list",
+          "list": [
+            {
+              "id": 5,
+              "kind": "list",
+              "list": [
+                {
+                  "command": {
+                    "command": "line",
+                    "hard": true,
+                    "literal": false,
+                    "soft": false
+                  },
+                  "id": 6,
+                  "kind": "command"
+                },
+                {
+                  "command": {
+                    "command": "breakParent"
+                  },
+                  "id": 7,
+                  "kind": "command"
+                }
+              ]
+            },
+            {
+              "id": 8,
+              "kind": "text",
+              "text": "1"
+            }
+          ]
+        }
+      },
+      "id": 3,
+      "kind": "command"
+    },
+    {
+      "id": 9,
+      "kind": "text",
+      "text": ");"
+    }
+  ]
+}
+
+== cmd_ifkind5.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v:Int=f("
+    },
+    {
+      "command": {
+        "break": false,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "id": 4,
+          "kind": "list",
+          "list": [
+            {
+              "id": 5,
+              "kind": "text",
+              "text": "  1"
+            }
+          ]
+        }
+      },
+      "id": 3,
+      "kind": "command"
+    },
+    {
+      "id": 6,
+      "kind": "text",
+      "text": ");"
     }
   ]
 }

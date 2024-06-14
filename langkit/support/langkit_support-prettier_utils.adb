@@ -477,6 +477,31 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_If_Empty;
 
+   --------------------
+   -- Create_If_Kind --
+   --------------------
+
+   function Create_If_Kind
+     (Self             : in out Document_Pool;
+      If_Kind_Field    : Struct_Member_Ref;
+      If_Kind_Matchers : in out Matcher_Vectors.Vector;
+      If_Kind_Default  : Document_Type;
+      If_Kind_Null     : Document_Type) return Document_Type
+   is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind             => If_Kind,
+           If_Kind_Field    => If_Kind_Field,
+           If_Kind_Matchers => Matcher_Vectors.Empty_Vector,
+           If_Kind_Default  => If_Kind_Default,
+           If_Kind_Null     => If_Kind_Null)
+      do
+         Result.If_Kind_Matchers.Move (If_Kind_Matchers);
+         Self.Register (Result);
+      end return;
+   end Create_If_Kind;
+
    -------------------
    -- Create_Indent --
    -------------------
@@ -944,6 +969,41 @@ package body Langkit_Support.Prettier_Utils is
                Process (Document.If_Empty_Then, Prefix & List_Indent);
                Process (Document.If_Empty_Else, Prefix & List_Indent);
 
+            when If_Kind =>
+               Write (Prefix & "ifKind:");
+               Write (Prefix & Simple_Indent & "default:");
+               Process
+                 (Document.If_Kind_Default,
+                  Prefix & Simple_Indent & Simple_Indent);
+               Write (Prefix & Simple_Indent & "null:");
+               Process
+                 (Document.If_Kind_Null,
+                  Prefix & Simple_Indent & Simple_Indent);
+               Write (Prefix & Simple_Indent & "matchers:");
+               declare
+                  Matcher_Kind_Indent     : constant Unbounded_String :=
+                    Prefix & Simple_Indent & Simple_Indent;
+                  Matcher_Document_Indent : constant Unbounded_String :=
+                    Prefix & Simple_Indent & Simple_Indent & Simple_Indent;
+
+               begin
+                  for J in
+                    Document.If_Kind_Matchers.First_Index
+                    .. Document.If_Kind_Matchers.Last_Index
+                  loop
+                     Write
+                       (Matcher_Kind_Indent
+                        & Debug_Name
+                            (Document
+                               .If_Kind_Matchers
+                               .Element (J)
+                               .Matched_Type));
+                     Process
+                       (Document.If_Kind_Matchers.Element (J).Document,
+                        Matcher_Document_Indent);
+                  end loop;
+               end;
+
             when Indent =>
                Write (Prefix & "indent:");
                Process (Document.Indent_Document, Prefix & Simple_Indent);
@@ -1378,6 +1438,7 @@ package body Langkit_Support.Prettier_Utils is
 
             when Whitespace =>
                Extend_Spacing (State.Actual, One_Whitespace_Spacing);
+
          end case;
       end Process;
 

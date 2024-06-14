@@ -68,6 +68,15 @@ begin
    Check ("invalid_ifempty.json");
    Check ("invalid_ifempty2.json");
    Check ("invalid_ifempty3.json");
+   Check ("invalid_ifkind.json");
+   Check ("invalid_ifkind2.json");
+   Check ("invalid_ifkind3.json");
+   Check ("invalid_ifkind4.json");
+   Check ("invalid_ifkind5.json");
+   Check ("invalid_ifkind6.json");
+   Check ("invalid_ifkind7.json");
+   Check ("invalid_ifkind8.json");
+   Check ("invalid_ifkind9.json");
    Check ("invalid_indent.json");
    Check ("invalid_markasroot.json");
    Check ("invalid_innerroot.json");

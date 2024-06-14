@@ -2002,6 +2002,181 @@ package body Langkit_Support.Generic_API.Unparsing is
                               (Then_Contents, Else_Contents);
                   end;
 
+               elsif Kind = "ifKind" then
+                  if Context.Kind /= Node_Template then
+                     Abort_Parsing
+                       (Context,
+                        """ifKind"" is valid only in node templates");
+                  end if;
+
+                  declare
+                     Field_JSON    : constant JSON_Value :=
+                       JSON.Get ("field");
+                     Matchers_JSON : constant JSON_Value :=
+                       JSON.Get ("matchers");
+                     Default_JSON  : constant JSON_Value :=
+                       JSON.Get ("default");
+                     Null_JSON     : constant JSON_Value :=
+                       JSON.Get ("null");
+
+                  begin
+                     --  Validate that the keys are present and have the
+                     --  correct type.
+
+                     if Field_JSON.Kind = JSON_Null_Type then
+                        Abort_Parsing
+                          (Context, "missing ""field"" key for ifKind");
+
+                     elsif Field_JSON.Kind /= JSON_String_Type then
+                        Abort_Parsing
+                          (Context,
+                           "invalid ""field"" key kind for ifKind: found "
+                           & Field_JSON.Kind'Image
+                           & "; expected "
+                           & JSON_String_Type'Image);
+                     end if;
+
+                     if Default_JSON.Kind = JSON_Null_Type then
+                        Abort_Parsing
+                          (Context, "missing ""default"" key for ifKind");
+                     end if;
+
+                     if Matchers_JSON.Kind = JSON_Null_Type then
+                        Abort_Parsing
+                          (Context, "missing ""matchers"" key for ifKind");
+
+                     elsif Matchers_JSON.Kind /= JSON_Array_Type then
+                        Abort_Parsing
+                          (Context,
+                           "invalid ""matchers"" key kind for ifKind: "
+                           & "found "
+                           & Matchers_JSON.Kind'Image
+                           & "; expected "
+                           & JSON_Array_Type'Image);
+                     end if;
+
+                     declare
+                        --  Before parsing the "matchers", "default" or "null"
+                        --  keys, save the current context.
+                        --
+                        --  Start by parsing the "default" key with the current
+                        --  context.
+                        --
+                        --  Then process each matcher with its own nested
+                        --  context confirming that all end on the same state.
+
+                        Initial_Context : constant Template_Parsing_Context :=
+                          Context;
+
+                        If_Kind_Default  : Document_Type;
+                        If_Kind_Null     : Document_Type := null;
+                        If_Kind_Matchers : Matcher_Vectors.Vector;
+
+                        procedure Process_Matcher (Matcher_JSON : JSON_Value);
+                        --  Process Matcher_JSON with their own nested context
+                        --  context confirming that it ends in the same state
+                        --  as Context.
+
+                        ---------------------
+                        -- Process_Matcher --
+                        ---------------------
+
+                        procedure Process_Matcher (Matcher_JSON : JSON_Value)
+                        is
+                           Kind          : constant JSON_Value :=
+                             Matcher_JSON.Get ("kind");
+                           Document_JSON : constant JSON_Value :=
+                             Matcher_JSON.Get ("document");
+
+                           Nested_Context : Template_Parsing_Context :=
+                             Initial_Context;
+
+                        begin
+                           if Kind.Kind /= JSON_String_Type then
+                              Abort_Parsing
+                                (Context,
+                                 "invalid matcher ""kind"" field for "
+                                 & """ifKind"" - found "
+                                 & Kind.Kind'Image
+                                 & "; expected "
+                                 & JSON_String_Type'Image);
+                           end if;
+
+                           --  Parse the matcher and store it in the table
+
+                           If_Kind_Matchers.Append
+                             ((From_Index
+                                 (Language, To_Type_Index (Kind.Get)),
+                               Parse_Template_Helper
+                                 (Document_JSON, Nested_Context, Symbol_Map)));
+
+                           --  Confirm that the final linear position is
+                           --  homogeneous between all matchers.
+
+                           if Nested_Context.State /= Context.State then
+                              Abort_Parsing
+                                (Context,
+                                 "ifKind matcher """ & Kind.Get & """ has an "
+                                 & "inconsistent recurse structure");
+                           end if;
+                        end Process_Matcher;
+
+                     begin
+                        If_Kind_Default :=
+                          Parse_Template_Helper
+                            (Default_JSON, Context, Symbol_Map);
+
+                        if Null_JSON.Kind /= JSON_Null_Type then
+                           declare
+                              If_Kind_Null_Context :
+                                Template_Parsing_Context :=
+                                  Initial_Context;
+
+                           begin
+                              If_Kind_Null :=
+                                Parse_Template_Helper
+                                  (Null_JSON,
+                                   If_Kind_Null_Context,
+                                   Symbol_Map);
+
+                              if If_Kind_Null_Context.State /= Context.State
+                              then
+                                 Abort_Parsing
+                                   (Context,
+                                    "ifKind ""null"" matcher has an "
+                                    & "inconsistent recurse structure");
+                              end if;
+                           end;
+                        end if;
+
+                        for Matcher_JSON of
+                          JSON_Array'(Get (Matchers_JSON))
+                        loop
+                           if Matcher_JSON.Kind /= JSON_Object_Type then
+                              Abort_Parsing
+                                (Context,
+                                 "invalid ""matchers"" element kind for "
+                                 & """ifKind"" - found "
+                                 & Matcher_JSON.Kind'Image
+                                 & "; expected "
+                                 & JSON_Object_Type'Image);
+                           end if;
+
+                           Process_Matcher (Matcher_JSON);
+                        end loop;
+
+                        return
+                          Pool.Create_If_Kind
+                            (From_Index
+                               (Language,
+                                To_Struct_Member_Index
+                                  (Field_JSON.Get, Context.Node)),
+                             If_Kind_Matchers,
+                             If_Kind_Default,
+                             If_Kind_Null);
+                     end;
+                  end;
+
                elsif Kind = "indent" then
                   if not JSON.Has_Field ("contents") then
                      Abort_Parsing
@@ -2642,7 +2817,47 @@ package body Langkit_Support.Generic_API.Unparsing is
                   then Template.If_Empty_Then
                   else Template.If_Empty_Else);
             begin
-               return Instantiate_Template_Helper (Pool, State, Subtemplate);
+               return Instantiate_Template_Helper
+                        (Pool, State, Subtemplate);
+            end;
+
+         when If_Kind =>
+            declare
+               Field_Node       : constant Lk_Node :=
+                 Eval_Syntax_Field (State.Node, Template.If_Kind_Field);
+               Matched_Template : Document_Type := Template.If_Kind_Default;
+
+            begin
+               --  If the field is not null, pick the document for the
+               --  first matcher that accepts it.
+
+               if not Field_Node.Is_Null then
+                  for J in
+                    Template.If_Kind_Matchers.First_Index
+                    .. Template.If_Kind_Matchers.Last_Index
+                  loop
+                     if Type_Matches
+                          (Field_Node,
+                           Template
+                             .If_Kind_Matchers
+                             .Reference (J)
+                             .Matched_Type)
+                     then
+                        Matched_Template :=
+                          Template.If_Kind_Matchers (J).Document;
+                        exit;
+                     end if;
+                  end loop;
+
+               --  Otherwise, use the null template, if present. For all
+               --  other cases, use the default template.
+
+               elsif Template.If_Kind_Null /= null then
+                  Matched_Template := Template.If_Kind_Null;
+               end if;
+
+               return Instantiate_Template_Helper
+                        (Pool, State, Matched_Template);
             end;
 
          when Indent =>

@@ -203,6 +203,21 @@ package Langkit_Support.Generic_API.Unparsing is
    --          "else": <sub-template>
    --        }
    --
+   --    * The "ifKind" template is valid only inside a node configuration.
+   --      The "null" entry is optional. If "field" is a null node, "null"
+   --      is yielded if defined, otherwise fallsback to "default". If "field"
+   --      is not a null node, it yields the match from its "matchers" field
+   --      whose key matches with the kind of its "field" key, or "default" if
+   --      none matches::
+   --
+   --        {
+   --          "kind": "ifKind",
+   --          "field": "<field-name>",
+   --          "matchers": [{<node-name>: <sub-template>}, ...],
+   --          "default": <sub-template>
+   --          "null": <sub-template>
+   --        }
+   --
    --    * The "indent" template yields an "indent" Prettier document::
    --
    --        {"kind": "indent", "contents": <sub-template>}

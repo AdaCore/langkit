@@ -1,0 +1,63 @@
+{
+  "node_configs": {
+    "Addition": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {
+            "kind": "ifKind",
+            "field": "f_lhs",
+            "matchers": [
+              {
+                "kind": "Expr",
+                "document": [
+                  {
+                    "kind": "recurse_field",
+                    "field": "f_lhs"
+                  },
+                  "whitespace",
+                  {
+                    "kind": "text",
+                    "text": "+"
+                  }
+                ]
+              },
+              {
+                "kind": "Number",
+                "document": [
+                  {
+                    "kind": "recurse_field",
+                    "field": "f_lhs"
+                  },
+                  "hardline",
+                  {
+                    "kind": "text",
+                    "text": "+"
+                  }
+                ]
+              }
+            ],
+            "default": {
+              "kind": "group",
+              "document": [
+                {
+                  "kind": "recurse_field",
+                  "field": "f_lhs"
+                },
+                "hardline",
+                {
+                  "kind": "text",
+                  "text": "+"
+                }
+              ]
+            }
+          },
+          {
+            "kind": "recurse_field",
+            "field": "f_rhs"
+          }
+        ]
+      }
+    }
+  }
+}
