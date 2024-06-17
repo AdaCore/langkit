@@ -77,6 +77,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       Line_Comment,
       Whitespaces,
       Empty_Lines);
+   subtype Non_Trivia_Fragment_Kind is
+     Unparsing_Fragment_Kind range Token_Fragment .. List_Child_Fragment;
    subtype Trivia_Fragment_Kind is
      Unparsing_Fragment_Kind range Suffix_Comment .. Empty_Lines;
    type Unparsing_Fragment
@@ -262,8 +264,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       Current_Token : in out Lk_Token;
       Process       : access procedure (Fragment      : Unparsing_Fragment;
                                         Current_Token : in out Lk_Token));
-   --  Decompose ``Node`` into a list of unparsing fragments and call
-   --  ``Process`` on each fragment.
+   --  Decompose ``Node`` into a list of unparsing fragments
+   --  (``Non_Trivia_Fragment_Kind`` ones only) and call ``Process`` on each
+   --  fragment.
    --
    --  ``Current_Token`` must be the first token for ``Node``, and is updated
    --  to account for all the tokens that are processed. The ``Process``
@@ -3108,7 +3111,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   & ", current token: " & Current_Token.Image);
             end if;
 
-            case F.Kind is
+            case Non_Trivia_Fragment_Kind (F.Kind) is
                when Token_Fragment | List_Separator_Fragment =>
                   declare
                      Is_Fake_Token : constant Boolean :=
@@ -3236,9 +3239,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                        ("List child fragment unparsed, current token: "
                         & Current_Token.Image);
                   end if;
-
-               when Trivia_Fragment_Kind =>
-                  Append_Trivia_Fragment (F, Items, Pool);
             end case;
          end Process_Fragment;
 
