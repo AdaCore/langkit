@@ -13,5 +13,5 @@ struct MyStruct {
 }
 
 class ExampleNode : FooNode implements TokenNode {
-    @export fun get_f(s: MyStruct): Int = s.f
+    @exported fun get_f(s: MyStruct): Int = s.f
 }

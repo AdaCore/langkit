@@ -9,5 +9,5 @@ grammar foo_grammar {
 }
 
 class ExampleNode : FooNode implements TokenNode {
-    @export @final @lazy f: Bool = true
+    @exported @final @lazy f: Bool = true
 }

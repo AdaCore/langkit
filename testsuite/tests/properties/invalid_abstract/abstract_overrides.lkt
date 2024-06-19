@@ -6,7 +6,7 @@ class FooNode implements Node[FooNode] {
 }
 
 @abstract class BaseNode: FooNode {
-    @export @abstract fun prop(): Bool
+    @exported @abstract fun prop(): Bool
 }
 
 class Identifier: BaseNode {

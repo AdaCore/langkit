@@ -9,5 +9,5 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-    @export @memoized fun recurse(): Bool = node.recurse()
+    @exported @memoized fun recurse(): Bool = node.recurse()
 }

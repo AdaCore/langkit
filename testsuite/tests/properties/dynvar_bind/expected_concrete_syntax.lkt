@@ -13,7 +13,7 @@ dynvar dyn_var: Int
 class Example: FooNode implements TokenNode {
     @with_dynvars(dyn_var) fun add(value: Int): Int = value + dyn_var
 
-    @export fun next(value: Int): Int = {
+    @exported fun next(value: Int): Int = {
         bind dyn_var = 1;
 
         node.add(value)
@@ -25,7 +25,7 @@ class Example: FooNode implements TokenNode {
         node.add(1)
     }
 
-    @export fun next_next(value: Int): Int = {
+    @exported fun next_next(value: Int): Int = {
         bind dyn_var = value;
 
         node.add_two()

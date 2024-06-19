@@ -10,8 +10,8 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun p1(n: Cons): Cons = n?.prefix.prefix
-    @export fun p2(n: Cons): Cons = (n?.prefix).prefix
+    @exported fun p1(n: Cons): Cons = n?.prefix.prefix
+    @exported fun p2(n: Cons): Cons = (n?.prefix).prefix
 }
 
 class Cons: FooNode {

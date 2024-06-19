@@ -12,25 +12,25 @@ dynvar dyn_node: FooNode
 dynvar dyn_node_2: FooNode
 
 class FooNode implements Node[FooNode] {
-    @export fun helper_1(): Bool = true
-    @export @with_dynvars(dyn_node_2) fun helper_2(): Bool = true
+    @exported fun helper_1(): Bool = true
+    @exported @with_dynvars(dyn_node_2) fun helper_2(): Bool = true
 
-    @export fun test_prop_1(): Bool = {
+    @exported fun test_prop_1(): Bool = {
         bind dyn_node = node;
         node.helper_1
     }
 
-    @export @with_dynvars(dyn_node_2) fun test_prop_2(): Bool = {
+    @exported @with_dynvars(dyn_node_2) fun test_prop_2(): Bool = {
         bind dyn_node = node;
         node.helper_2
     }
 
-    @export fun test_prop_3(): FooNode = {
+    @exported fun test_prop_3(): FooNode = {
         bind dyn_node = node;
         dyn_node
     }
 
-    @export fun test_prop_4(): Bool = {
+    @exported fun test_prop_4(): Bool = {
         bind dyn_node_2 = node;
         node.helper_2
     }

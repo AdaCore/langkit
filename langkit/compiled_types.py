@@ -2807,7 +2807,7 @@ class ASTNodeType(BaseStructType):
         is_generic_list_type: bool = False,
         is_abstract: bool = False,
         is_synthetic: bool = False,
-        has_abstract_list: bool = False,
+        with_abstract_list: bool = False,
         is_enum_node: bool = False,
         is_bool_node: bool = False,
         is_token_node: bool = False,
@@ -2839,14 +2839,14 @@ class ASTNodeType(BaseStructType):
         :param is_abstract: Whether this node is abstract. Note that this can
             be changed later. This is forced to True for the generic list type
             and for root list types whose element type has the
-            `has_abstract_list` attribute set to True.
+            `with_abstract_list` attribute set to True.
 
         :param is_synthetic: Whether this node is synthetic. Note that this can
             be changed later.
 
-        :param has_abstract_list: Whether the root list type for this node must
-            be abstract. Node that this can be changed later, until the list
-            type is actually created.
+        :param with_abstract_list: Whether the root list type for this node
+            must be abstract. Node that this can be changed later, until the
+            list type is actually created.
 
         :param is_enum_node: Whether this node comes from the expansion of an
             enum node.
@@ -2891,8 +2891,8 @@ class ASTNodeType(BaseStructType):
             assert element_type is not None and element_type.is_ast_node
 
             # TODO: at this point, we need to make sure thas
-            # element_type.has_abstract_list in the future.
-            is_abstract = is_abstract or element_type.has_abstract_list
+            # element_type.with_abstract_list in the future.
+            is_abstract = is_abstract or element_type.with_abstract_list
 
         else:
             assert element_type is None
@@ -3014,7 +3014,7 @@ class ASTNodeType(BaseStructType):
         self.abstract: bool = is_abstract or is_root or is_generic_list_type
         self.synthetic: bool = is_synthetic
 
-        self.has_abstract_list: bool = has_abstract_list
+        self.with_abstract_list: bool = with_abstract_list
         """
         Whether the automatically generated list type for this ASTNodeType (the
         "root list type") is abstract.
@@ -3720,7 +3720,7 @@ class ASTNodeType(BaseStructType):
             ('ple_root', PropertyDef(
                 expr=None, prefix=None, type=T.root_node, public=False,
                 external=True, uses_entity_info=False, uses_envs=False,
-                warn_on_unused=False, ignore_warn_on_node=True,
+                warn_on_unused=False,
                 doc="""
                 Return the PLE root that owns this node, or the unit root node
                 if this unit has no PLE root.

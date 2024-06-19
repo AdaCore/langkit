@@ -1,19 +1,19 @@
 == invalid_field.lkt ==
-invalid_field.lkt:4:41: error: Invalid KV field: nosuchfield
-4 |     @export fun increment(kv: KV): KV = kv.update(nosuchfield=1)
-  |                                         ^^^^^^^^^^^^^^^^^^^^^^^^
+invalid_field.lkt:4:43: error: Invalid KV field: nosuchfield
+4 |     @exported fun increment(kv: KV): KV = kv.update(nosuchfield=1)
+  |                                           ^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == invalid_type.lkt ==
-invalid_type.lkt:4:55: error: Wrong type for field KV.key: expected String, got Symbol
-4 |     @export fun increment(kv: KV): KV = kv.update(key=s"hello")
-  |                                                       ^^^^^^^^
+invalid_type.lkt:4:57: error: Wrong type for field KV.key: expected String, got Symbol
+4 |     @exported fun increment(kv: KV): KV = kv.update(key=s"hello")
+  |                                                         ^^^^^^^^
 
 
 == not_a_struct.lkt ==
-not_a_struct.lkt:4:41: error: Struct expected, got Example
-4 |     @export fun increment(kv: KV): KV = node.update(value=kv)
-  |                                         ^^^^^^^^^^^^^^^^^^^^^
+not_a_struct.lkt:4:43: error: Struct expected, got Example
+4 |     @exported fun increment(kv: KV): KV = node.update(value=kv)
+  |                                           ^^^^^^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done

@@ -1,13 +1,13 @@
-@track_indent
+@indentation_tracking
 lexer foo_lexer {
     val STRING_DBQ = p"\"(\\\\\"|[^\n\"])*\""
     val STRING_SQ = p"'(\\\\'|[^\n'])*'"
     val MLSTRING_DBQ = p"\"\"\"([^\"]|(\"[^\"])|(\"\"[^\"])|\n)*\"\"\""
     val MLSTRING_SQ = p"'''([^']|('[^'])|(''[^'])|\n)*'''"
 
-    @pre_rule @ignore _ <- p"\\\\\n[ \r\t]*"
+    @pre_rule @ignored _ <- p"\\\\\n[ \r\t]*"
     string <- p"(u|U)?(r|R)?({MLSTRING_SQ}|{MLSTRING_DBQ}|{STRING_SQ}|{STRING_DBQ})"
-    @ignore _ <- p"[ \r\t]+"
+    @ignored _ <- p"[ \r\t]+"
     @trivia() comment <- p"#(.?)+"
     rsh_assign <- ">>="
     is_tok <- "is"

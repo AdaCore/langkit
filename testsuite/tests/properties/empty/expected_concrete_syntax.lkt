@@ -8,9 +8,9 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun check_list(n: ASTList[FooNode, Example]): Bool = n.empty()
+    @exported fun check_list(n: ASTList[FooNode, Example]): Bool = n.empty()
 
-    @export fun check_array(ints: Array[Int]): Bool = ints.empty()
+    @exported fun check_array(ints: Array[Int]): Bool = ints.empty()
 }
 
 class Example: FooNode implements TokenNode {

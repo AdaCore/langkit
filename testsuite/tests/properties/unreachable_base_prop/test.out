@@ -1,7 +1,7 @@
 == foo.lkt ==
-foo.lkt:27:13: warning: Unreachable property: all concrete subclasses override it
-27 |     @export fun prop2(): Int = 0
-   |             ^^^^^^^^^^^^^^^^^^^^
+foo.lkt:27:15: warning: Unreachable property: all concrete subclasses override it
+27 |     @exported fun prop2(): Int = 0
+   |               ^^^^^^^^^^^^^^^^^^^^
 
 foo.lkt:33:5: warning: Unreachable property: all concrete subclasses override it
 33 |     fun prop1(): Int = 1

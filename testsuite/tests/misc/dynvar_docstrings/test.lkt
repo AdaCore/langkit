@@ -33,18 +33,18 @@ class FooNode implements Node[FooNode] {
     # each docstring.
 
     |" This is the doc for the property itself.
-    @export @with_dynvars(v_nodoc, v_oneline, v_multiline, v_multiparag)
+    @exported @with_dynvars(v_nodoc, v_oneline, v_multiline, v_multiparag)
     fun p1(): FooNode = node
 
     # One property that demonstrates that the doc is left unchanged for a dyn
     # var with no docstring.
 
     |" This is the doc for the property itself.
-    @export @with_dynvars(v_nodoc) fun p2(): FooNode = node
+    @exported @with_dynvars(v_nodoc) fun p2(): FooNode = node
 
     # One property with no docstring at all mention the doc of the inherited
     # dynamic var.
-    @export @with_dynvars(v_nodoc) fun p3(): FooNode = node
+    @exported @with_dynvars(v_nodoc) fun p3(): FooNode = node
 }
 
 class Example : FooNode implements TokenNode {

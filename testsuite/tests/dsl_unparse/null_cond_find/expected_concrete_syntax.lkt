@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun p(): Entity[FooNode] = [self]?.find(
+    @exported fun p(): Entity[FooNode] = [self]?.find(
         (n) => n.as[Example].do((e) => e.parent.is_null)
     ).do((n) => n.parent)
 }

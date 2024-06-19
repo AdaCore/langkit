@@ -10,7 +10,7 @@ grammar foo_grammar {
 }
 
 @abstract class Expr: FooNode {
-    @export @lazy my_field: Int = 42
+    @exported @lazy my_field: Int = 42
 }
 
 class AddExpr: Expr {

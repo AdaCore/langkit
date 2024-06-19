@@ -6,9 +6,9 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @trace fun identity(x: Int): Int = x
+    @traced fun identity(x: Int): Int = x
 
-    @export @memoized fun foo(x: Int): Int = node.identity(x)
+    @exported @memoized fun foo(x: Int): Int = node.identity(x)
 }
 
 class Block: FooNode {

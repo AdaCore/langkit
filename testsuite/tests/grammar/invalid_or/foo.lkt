@@ -8,7 +8,7 @@ grammar foo_grammar {
     atom <- @identifier
 }
 
-@abstract @has_abstract_list class Element implements Node[Element] {
+@abstract @with_abstract_list class Element implements Node[Element] {
 }
 
 class Sequence : ASTList[Element, Element] {

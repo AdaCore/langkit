@@ -1,8 +1,8 @@
 import common
 
 @abstract class AbstractNode: FooNode {
-    @export @abstract fun prop(): Bool
-    @export fun public_prop(): Bool = node.prop()
+    @exported @abstract fun prop(): Bool
+    @exported fun public_prop(): Bool = node.prop()
 }
 
 class ConcreteNode: AbstractNode {

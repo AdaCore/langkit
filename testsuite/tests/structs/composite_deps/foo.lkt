@@ -12,7 +12,7 @@ struct MyStruct {
 }
 
 class FooNode implements Node[FooNode] {
-    @export fun get(): MyStruct = MyStruct(children=null[Array[MyStruct]])
+    @exported fun get(): MyStruct = MyStruct(children=null[Array[MyStruct]])
 }
 
 class Example: FooNode {

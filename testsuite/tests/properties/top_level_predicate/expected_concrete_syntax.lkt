@@ -12,7 +12,7 @@ grammar foo_grammar {
 class Example: FooNode {
     var1: LogicVar
 
-    @export fun prop(): Entity[Example] = {
+    @exported fun prop(): Entity[Example] = {
         val _ = %predicate(FooNode.sophisticated_predicate, node.var1);
 
         node.as_bare_entity

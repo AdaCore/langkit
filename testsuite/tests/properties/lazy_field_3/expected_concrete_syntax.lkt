@@ -9,9 +9,9 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-    @export @lazy my_field: Int = 2
+    @exported @lazy my_field: Int = 2
 }
 
 class Identifier: FooNode implements TokenNode {
-    @export @lazy my_field: Int = 1
+    @exported @lazy my_field: Int = 1
 }

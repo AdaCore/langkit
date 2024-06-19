@@ -9,7 +9,7 @@ grammar foo_grammar {
 }
 
 @abstract class AbstractNode : FooNode {
-    @export @final fun f(): Int = 0
+    @exported @final fun f(): Int = 0
 }
 
 class ConcreteNode : AbstractNode implements TokenNode {

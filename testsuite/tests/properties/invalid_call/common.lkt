@@ -6,5 +6,5 @@ grammar foo_grammar {
 }
 
 class FooNode implements Node[FooNode] {
-    @export fun root_prop(x: Int): Int = x
+    @exported fun root_prop(x: Int): Int = x
 }

@@ -11,6 +11,6 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @export fun entities_array(s: Symbol, b: Bool): Bool =
+    @exported fun entities_array(s: Symbol, b: Bool): Bool =
         s in s"A" | s"B" and b
 }

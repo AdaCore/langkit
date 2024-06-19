@@ -12,5 +12,5 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @export fun entities_array(): Array[Entity[Example]] = [self, self, self]
+    @exported fun entities_array(): Array[Entity[Example]] = [self, self, self]
 }

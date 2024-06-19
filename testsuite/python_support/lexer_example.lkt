@@ -41,7 +41,7 @@ lexer foo_lexer {
     greater_than <- ">"
     greater_than_or_equal <- ">="
 
-    @unparse_spacing(with=alphanumericals)
+    @unparsing_spacing(with=alphanumericals)
     family alphanumericals {
         number <- p"[0-9]+|0x[0-9a-f]+"
         @symbol()
@@ -51,7 +51,7 @@ lexer foo_lexer {
     string <- p"\"[^\"]*\""
 
     family comments {
-        @unparse_newline_after
+        @with_unparsing_newline
         @trivia(comment=true)
         comment <- p"#(.?)+"
     }

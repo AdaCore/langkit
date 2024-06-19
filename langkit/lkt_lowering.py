@@ -863,10 +863,10 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
 
 class SpacingAnnotationSpec(AnnotationSpec):
     """
-    Interpreter for @spacing annotations for token families.
+    Interpreter for @unparsing_spacing annotations for token families.
     """
     def __init__(self) -> None:
-        super().__init__('unparse_spacing', unique=False, require_args=True)
+        super().__init__('unparsing_spacing', unique=False, require_args=True)
 
     def interpret(
         self,
@@ -1008,26 +1008,26 @@ class TokenAnnotations(ParsedAnnotations):
     text: Tuple[bool, bool]
     trivia: Tuple[bool, bool]
     symbol: Tuple[bool, bool]
-    unparse_newline_after: bool
+    with_unparsing_newline: bool
     pre_rule: bool
-    ignore: bool
+    ignored: bool
     annotations = [TokenAnnotationSpec('text'),
                    TokenAnnotationSpec('trivia'),
                    TokenAnnotationSpec('symbol'),
-                   FlagAnnotationSpec('unparse_newline_after'),
+                   FlagAnnotationSpec('with_unparsing_newline'),
                    FlagAnnotationSpec('pre_rule'),
-                   FlagAnnotationSpec('ignore')]
+                   FlagAnnotationSpec('ignored')]
 
 
 @dataclass
 class LexerAnnotations(ParsedAnnotations):
-    track_indent: bool
-    annotations = [FlagAnnotationSpec('track_indent')]
+    indentation_tracking: bool
+    annotations = [FlagAnnotationSpec('indentation_tracking')]
 
 
 @dataclass
 class TokenFamilyAnnotations(ParsedAnnotations):
-    unparse_spacing: List[L.RefId]
+    unparsing_spacing: List[L.RefId]
     annotations = [SpacingAnnotationSpec()]
 
 
@@ -1035,23 +1035,21 @@ class TokenFamilyAnnotations(ParsedAnnotations):
 class BaseNodeAnnotations(ParsedAnnotations):
     custom_short_image: bool
     generic_list_type: str | None
-    has_abstract_list: bool
+    with_abstract_list: bool
     ple_unit_root: bool
     rebindable: bool
     repr_name: str | None
     snaps: bool
     synthetic: bool
-    warn_on_node: bool
     annotations = [
         FlagAnnotationSpec("custom_short_image"),
         StringLiteralAnnotationSpec("generic_list_type"),
-        FlagAnnotationSpec("has_abstract_list"),
+        FlagAnnotationSpec("with_abstract_list"),
         FlagAnnotationSpec("ple_unit_root"),
         StringLiteralAnnotationSpec("repr_name"),
         FlagAnnotationSpec("rebindable"),
         FlagAnnotationSpec("snaps"),
         FlagAnnotationSpec('synthetic'),
-        FlagAnnotationSpec("warn_on_node"),
     ]
 
 
@@ -1074,23 +1072,23 @@ class EnumNodeAnnotations(BaseNodeAnnotations):
 @dataclass
 class FieldAnnotations(ParsedAnnotations):
     abstract: bool
-    export: bool
+    exported: bool
     final: bool
     lazy: bool
     null_field: bool
     nullable: bool
     parse_field: bool
-    trace: bool
-    use_in_equality: bool
+    traced: bool
+    used_in_equality: bool
     annotations = [FlagAnnotationSpec('abstract'),
-                   FlagAnnotationSpec('export'),
+                   FlagAnnotationSpec('exported'),
                    FlagAnnotationSpec('final'),
                    FlagAnnotationSpec('lazy'),
                    FlagAnnotationSpec('null_field'),
                    FlagAnnotationSpec('nullable'),
                    FlagAnnotationSpec('parse_field'),
-                   FlagAnnotationSpec('trace'),
-                   FlagAnnotationSpec('use_in_equality')]
+                   FlagAnnotationSpec('traced'),
+                   FlagAnnotationSpec('used_in_equality')]
 
 
 @dataclass
@@ -1118,27 +1116,25 @@ class FunAnnotations(ParsedAnnotations):
     abstract: bool
     call_memoizable: bool
     call_non_memoizable_because: str | None
-    export: bool
+    exported: bool
     external: ExternalAnnotationSpec.Value | None
     final: bool
     ignored: bool
-    no_node_warning: bool
     memoized: bool
     predicate_error: str | None
-    trace: bool
+    traced: bool
     with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
     annotations = [
         FlagAnnotationSpec('abstract'),
         FlagAnnotationSpec('call_memoizable'),
         StringLiteralAnnotationSpec('call_non_memoizable_because'),
-        FlagAnnotationSpec('export'),
+        FlagAnnotationSpec('exported'),
         ExternalAnnotationSpec(),
         FlagAnnotationSpec('final'),
         FlagAnnotationSpec('ignored'),
-        FlagAnnotationSpec('no_node_warning'),
         StringLiteralAnnotationSpec('predicate_error'),
         FlagAnnotationSpec('memoized'),
-        FlagAnnotationSpec('trace'),
+        FlagAnnotationSpec('traced'),
         WithDynvarsAnnotationSpec(),
     ]
 
@@ -1603,7 +1599,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 root_scope,
             )
 
-            for spacing in family_annotations.unparse_spacing:
+            for spacing in family_annotations.unparsing_spacing:
                 spacings.append((name, spacing))
 
     def process_token_rule(
@@ -1631,7 +1627,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 "start_ignore_layout": False,
                 "end_ignore_layout": False,
             }
-            if rule_annot.ignore:
+            if rule_annot.ignored:
                 token_cons = ignore_constructor
             for name in ('text', 'trivia', 'symbol'):
                 annot = getattr(rule_annot, name)
@@ -1669,7 +1665,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             if isinstance(token, TokenAction):
                 if token_set is not None:
                     token_set.add(token)
-                if rule_annot.unparse_newline_after:
+                if rule_annot.with_unparsing_newline:
                     newline_after.append(token)
 
             # Lower the lexing rule, if present
@@ -1844,7 +1840,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
     # Create the Lexer instance and register all patterns and lexing rules
     result = Lexer(token_class,
-                   lexer_annot.track_indent,
+                   lexer_annot.indentation_tracking,
                    pre_rules)
     for name, (regexp, loc) in patterns.items():
         result._add_pattern(name.lower, regexp, location=loc)
@@ -2999,18 +2995,18 @@ class LktTypesLoader:
             kwargs = {
                 'expr': None,
                 'doc': doc,
-                'public': annotations.export,
+                'public': annotations.exported,
                 'return_type': field_type,
                 'kind': (AbstractKind.abstract
                          if annotations.abstract
                          else AbstractKind.concrete),
-                'activate_tracing': annotations.trace,
+                'activate_tracing': annotations.traced,
             }
 
         elif annotations.parse_field:
             assert decl.f_default_val is None
             check_source_language(
-                not annotations.export,
+                not annotations.exported,
                 'Parse fields are implicitly exported'
             )
             check_source_language(
@@ -3022,7 +3018,7 @@ class LktTypesLoader:
                 'Parse fields cannot be lazy'
             )
             check_source_language(
-                not annotations.trace,
+                not annotations.traced,
                 'Parse fields cannot be traced'
             )
             cls = constructor = Field
@@ -3036,7 +3032,7 @@ class LktTypesLoader:
                 'Regular fields cannot be abstract'
             )
             check_source_language(
-                not annotations.export,
+                not annotations.exported,
                 'Regular fields are implicitly exported'
             )
             check_source_language(
@@ -3052,7 +3048,7 @@ class LktTypesLoader:
                 'Regular fields cannot be null'
             )
             check_source_language(
-                not annotations.trace,
+                not annotations.traced,
                 'Regular fields cannot be traced'
             )
             cls = constructor = UserField
@@ -3064,15 +3060,15 @@ class LktTypesLoader:
             )
 
             # If this field belongs to the metadata struct, use the appropriate
-            # constructor. Reject @use_in_equality annotations otherwise, as
+            # constructor. Reject @used_in_equality annotations otherwise, as
             # they are valid only for metadata fields.
             if allowed_field_types == (MetadataField, ):
                 cls = constructor = MetadataField
-                kwargs["use_in_equality"] = annotations.use_in_equality
+                kwargs["use_in_equality"] = annotations.used_in_equality
             else:
                 check_source_language(
-                    not annotations.use_in_equality,
-                    "Only metadata fields can have the @use_in_equality"
+                    not annotations.used_in_equality,
+                    "Only metadata fields can have the @used_in_equality"
                     " annotation",
                 )
 
@@ -3138,7 +3134,6 @@ class LktTypesLoader:
             ),
             public=False,
             type=rtype,
-            ignore_warn_on_node=True,
         )
 
         # Make internal properties unreachable from user code
@@ -4542,7 +4537,7 @@ class LktTypesLoader:
             # When the @export annotation is missing, use "None" to mean
             # "public status unspecified", as the property can still be public
             # thanks to inheritance.
-            public=annotations.export or None,
+            public=annotations.exported or None,
 
             abstract=annotations.abstract,
             type=return_type,
@@ -4555,13 +4550,10 @@ class LktTypesLoader:
             uses_envs=uses_envs,
             optional_entity_info=False,
             warn_on_unused=not annotations.ignored,
-            # When the @no_node_warning annotation is missing, use "None" to
-            # inherit this annotation.
-            ignore_warn_on_node=annotations.no_node_warning or None,
             call_non_memoizable_because=(
                 annotations.call_non_memoizable_because
             ),
-            activate_tracing=annotations.trace,
+            activate_tracing=annotations.traced,
             dump_ir=False,
             lazy_field=False,
             final=annotations.final,
@@ -5058,9 +5050,6 @@ class LktTypesLoader:
             annotations=langkit.dsl.Annotations(
                 repr_name=annotations.repr_name,
                 generic_list_type=annotations.generic_list_type,
-                # The absence of "warn_on_node" means "inherit from base node",
-                # so pass None in this case.
-                warn_on_node=annotations.warn_on_node or None,
                 rebindable=annotations.rebindable,
                 custom_short_image=annotations.custom_short_image,
                 snaps=annotations.snaps,
@@ -5070,7 +5059,7 @@ class LktTypesLoader:
             is_token_node=is_token_node,
             is_error_node=is_error_node,
             is_synthetic=is_synthetic,
-            has_abstract_list=annotations.has_abstract_list,
+            with_abstract_list=annotations.with_abstract_list,
             is_enum_node=is_enum_node,
             is_bool_node=is_bool_node,
         )

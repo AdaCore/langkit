@@ -1,11 +1,11 @@
 == do_lambda_arg.lkt ==
-do_lambda_arg.lkt:5:70: error: no entity called '_' in scope for lambda expression at do_lambda_arg.lkt:5:63
-5 |     @export fun p(n: Entity[FooNode]): Entity[FooNode] = n.do((_) => _)
-  |                                                                      ^
+do_lambda_arg.lkt:5:72: error: no entity called '_' in scope for lambda expression at do_lambda_arg.lkt:5:65
+5 |     @exported fun p(n: Entity[FooNode]): Entity[FooNode] = n.do((_) => _)
+  |                                                                        ^
 
 
 == val.lkt ==
-val.lkt:7:9: error: no entity called '_' in scope for block at val.lkt:5:29
+val.lkt:7:9: error: no entity called '_' in scope for block at val.lkt:5:31
 7 |         _
   |         ^
 

@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun with_md(md1: Bool, md2: Bool): Entity[FooNode] =
+    @exported fun with_md(md1: Bool, md2: Bool): Entity[FooNode] =
     Entity[FooNode](
         node=node, info=EntityInfo(
             md=Metadata(md1=md1, md2=md2), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
@@ -18,6 +18,6 @@ class Example: FooNode {
 }
 
 @metadata struct Metadata {
-    @use_in_equality md1: Bool
+    @used_in_equality md1: Bool
     md2: Bool
 }

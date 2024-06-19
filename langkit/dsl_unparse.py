@@ -1582,7 +1582,7 @@ def emit_prop(prop, walker):
                        prop)
 
     if prop_for_walker.is_public:
-        quals += "@export "
+        quals += "@exported "
 
     if prop.external:
         qual_args = []
@@ -1607,7 +1607,7 @@ def emit_prop(prop, walker):
             )
 
     if prop.activate_tracing:
-        quals += "@trace "
+        quals += "@traced "
 
     if prop.dynamic_vars:
         vars = []
@@ -1681,7 +1681,7 @@ def emit_field(field):
                 and not field.is_overriding
                 and field.nullable
             ) else "",
-            "@use_in_equality " if (
+            "@used_in_equality " if (
                 isinstance(field, MetadataField)
                 and field.use_in_equality
             ) else "",
@@ -1781,8 +1781,8 @@ def emit_node_type(node_type):
         if node_type.is_error_node:
             traits.append('ErrorNode')
 
-        if node_type.has_abstract_list:
-            quals.append("has_abstract_list")
+        if node_type.with_abstract_list:
+            quals.append("with_abstract_list")
 
         if annotations.custom_short_image:
             quals.append("custom_short_image")
@@ -1805,9 +1805,6 @@ def emit_node_type(node_type):
 
         if annotations.snaps:
             quals.append("snaps")
-
-        if annotations.warn_on_node:
-            quals.append("warn_on_node")
 
         if node_type.synthetic:
             quals.append("synthetic")
@@ -2058,7 +2055,7 @@ def unparse_token_decl(token, newline_afters, is_pre):
     if is_pre:
         result.append('@pre_rule')
     if token in newline_afters:
-        result.append('@unparse_newline_after')
+        result.append('@with_unparsing_newline')
 
     options = []
     if token.start_ignore_layout:
@@ -2137,8 +2134,8 @@ def unparse_lexer_rule_set(newline_afters, rule_set):
     action = first_rule.action
 
     if isinstance(action, Ignore):
-        return "{}@ignore _ <- {}".format("@pre_rule " if is_pre else "",
-                                          unparse_rule_matchers(rule_set))
+        return "{}@ignored _ <- {}".format("@pre_rule " if is_pre else "",
+                                           unparse_rule_matchers(rule_set))
 
     if isinstance(action, Case.CaseAction):
         assert len(rule_set) == 1
@@ -2164,7 +2161,9 @@ def unparse_lexer(ctx, f):
     from langkit.lexer import TokenAction
 
     # Prepare unparsing of lexer
-    lexer_annotations = "@track_indent$hl" if ctx.lexer.track_indent else ""
+    lexer_annotations = (
+        "@indentation_tracking$hl" if ctx.lexer.track_indent else ""
+    )
     lexer_newline_rule_index = next(
         i
         for i, r in enumerate(ctx.lexer.rules)
@@ -2238,7 +2237,7 @@ def unparse_lexer(ctx, f):
             for otherfam, has_spacing in spacings.items():
                 if has_spacing:
                     result.append(
-                        f'@unparse_spacing(with={otherfam.name.lower})$hl'
+                        f'@unparsing_spacing(with={otherfam.name.lower})$hl'
                     )
             result.append('family {} {{$i'
                           .format(family.name.lower))

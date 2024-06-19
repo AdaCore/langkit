@@ -67,5 +67,5 @@ class Open: Item {
 class Ref: Item {
     @parse_field name: Identifier
 
-    @export fun resolve(): Entity[FooNode] = node.name.resolve()
+    @exported fun resolve(): Entity[FooNode] = node.name.resolve()
 }

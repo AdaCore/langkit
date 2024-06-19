@@ -1,5 +1,5 @@
 import common
 
 class Example: FooNode {
-    @export fun p(a: Bool, b: Bool=true == false): Bool = a and b
+    @exported fun p(a: Bool, b: Bool=true == false): Bool = a and b
 }

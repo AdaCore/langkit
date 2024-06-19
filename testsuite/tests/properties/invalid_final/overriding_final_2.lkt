@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun f(): Int = 0
+    @exported fun f(): Int = 0
 }
 
 @abstract class AbstractNode : FooNode {

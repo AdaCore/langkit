@@ -1,3 +1,0 @@
-driver: lkt_compile
-description: |
-    Check that the @warn_on_node node annotation works as expected.

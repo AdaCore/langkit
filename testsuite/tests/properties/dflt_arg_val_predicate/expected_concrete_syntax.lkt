@@ -17,7 +17,7 @@ class Example: FooNode {
     fun predicate1(n: Entity[FooNode], flag1: Bool = false, flag2: Bool = true): Bool =
     flag1 and n.is_null and flag2
 
-    @export fun prop1(): Bool = {
+    @exported fun prop1(): Bool = {
         val eq = %predicate(Example.predicate1, node.var1, node.var2);
 
         eq.solve()
@@ -26,7 +26,7 @@ class Example: FooNode {
     @with_dynvars(my_var) fun predicate2(n: Entity[FooNode], flag: Bool = false): Bool =
     n.is_null and false and flag
 
-    @export fun prop2(): Bool = {
+    @exported fun prop2(): Bool = {
         val eq = {
             bind my_var = 1;
 
@@ -39,7 +39,7 @@ class Example: FooNode {
     @with_dynvars(my_var=0) fun predicate3(n: Entity[FooNode], flag: Bool = false): Bool =
     n.is_null and false and flag
 
-    @export fun prop3(): Bool = {
+    @exported fun prop3(): Bool = {
         val eq = {
             bind my_var = 1;
 

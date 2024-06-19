@@ -1,7 +1,7 @@
 == bad_type.lkt ==
-bad_type.lkt:4:31: error: Invalid type for No expression: Int
-4 |     @export fun prop(): Int = null[Int]
-  |                               ^^^^^^^^^
+bad_type.lkt:4:33: error: Invalid type for No expression: Int
+4 |     @exported fun prop(): Int = null[Int]
+  |                                 ^^^^^^^^^
 
 
 == correct.lkt ==

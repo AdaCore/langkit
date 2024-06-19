@@ -15,49 +15,49 @@ enum Color {
     case red, green, blue
 }
 
-@abstract @has_abstract_list class FooNode implements Node[FooNode] {
-    @export fun count(seq: Array[Entity[Example]]): Int = seq.length()
+@abstract @with_abstract_list class FooNode implements Node[FooNode] {
+    @exported fun count(seq: Array[Entity[Example]]): Int = seq.length()
 
-    @export fun get_a(c: Char = 'a'): Char = c
+    @exported fun get_a(c: Char = 'a'): Char = c
 
-    @export fun get_eacute(c: Char = 'é'): Char = c
+    @exported fun get_eacute(c: Char = 'é'): Char = c
 
-    @export fun identity(c: Char): Char = c
+    @exported fun identity(c: Char): Char = c
 
-    @export fun get_str(s: String): String = s
+    @exported fun get_str(s: String): String = s
 
-    @export fun same_color(c: Color): Color = c
+    @exported fun same_color(c: Color): Color = c
 
-    @export fun same_color_dflt(c: Color = Color.red): Color = c
+    @exported fun same_color_dflt(c: Color = Color.red): Color = c
 
-    @export fun int_double(c: BigInt): BigInt = c + c
+    @exported fun int_double(c: BigInt): BigInt = c + c
 
-    @export fun me(b: Bool): FooNodeStruct = FooNodeStruct(
+    @exported fun me(b: Bool): FooNodeStruct = FooNodeStruct(
         node=if b then self else null[Entity[FooNode]]
     )
 
-    @export fun get_node(node_struct: FooNodeStruct): Entity[FooNode] =
+    @exported fun get_node(node_struct: FooNodeStruct): Entity[FooNode] =
     node_struct.node
 
-    @export fun iter_int(): Iterator[Int] = [1, 2, 3].to_iterator()
+    @exported fun iter_int(): Iterator[Int] = [1, 2, 3].to_iterator()
 
-    @export fun token(t: Token): Token = t
+    @exported fun token(t: Token): Token = t
 }
 
 class Example: FooNode {
-    @export fun singleton(): SomeStruct = SomeStruct(examples=[self])
+    @exported fun singleton(): SomeStruct = SomeStruct(examples=[self])
 }
 
 class Sequence: ASTList[FooNode, FooNode] {
-    @export fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
+    @exported fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
 
-    @export fun example_items(): Array[Entity[Example]] = self.filtermap(
+    @exported fun example_items(): Array[Entity[Example]] = self.filtermap(
         (i) => i.as![Example], (i) => i is Example
     )
 }
 
 class Ident: FooNode implements TokenNode {
-    @export fun sym(sym: Symbol): Symbol = sym
+    @exported fun sym(sym: Symbol): Symbol = sym
 }
 
 class Null: FooNode {

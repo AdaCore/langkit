@@ -13,9 +13,9 @@ grammar foo_grammar {
 }
 
 @abstract class Name: FooNode {
-    @export @abstract fun resolve(): Entity[FooNode]
+    @exported @abstract fun resolve(): Entity[FooNode]
 
-    @export @abstract fun suffix_symbol(): Symbol
+    @exported @abstract fun suffix_symbol(): Symbol
 
     fun scope_fqn(): String = match node {
         case p: Prefix => p.prefix.fqn()

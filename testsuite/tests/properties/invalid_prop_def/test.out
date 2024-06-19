@@ -2,15 +2,15 @@
 Code generation was successful
 
 == not_type.lkt ==
-not_type.lkt:4:25: error: type expected, got the generic Entity
-4 |     @export fun prop(a: Entity): Int = 0
-  |                         ^^^^^^
+not_type.lkt:4:27: error: type expected, got the generic Entity
+4 |     @exported fun prop(a: Entity): Int = 0
+  |                           ^^^^^^
 
 
 == reserved.lkt ==
-reserved.lkt:4:22: error: Arguments cannot have reserved names (node, bound_env)
-4 |     @export fun prop(node: Int, lex_env: Int): Int = node + lex_env
-  |                      ^^^^
+reserved.lkt:4:24: error: Arguments cannot have reserved names (node, bound_env)
+4 |     @exported fun prop(node: Int, lex_env: Int): Int = node + lex_env
+  |                        ^^^^
 
 
 lkt_compile: Done

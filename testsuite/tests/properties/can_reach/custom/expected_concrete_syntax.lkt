@@ -16,7 +16,7 @@ grammar foo_grammar {
         case _ => true
     }
 
-    @export fun lookup(n: Symbol): Array[Entity[FooNode]] =
+    @exported fun lookup(n: Symbol): Array[Entity[FooNode]] =
     node.node_env().get(n, from=node)
 }
 

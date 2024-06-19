@@ -10,7 +10,7 @@ grammar foo_grammar {
 }
 
 @abstract class Expression: FooNode {
-    @export @abstract fun result(): Int
+    @exported @abstract fun result(): Int
 }
 
 class Literal: Expression implements TokenNode {

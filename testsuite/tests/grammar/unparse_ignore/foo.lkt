@@ -1,6 +1,6 @@
 lexer foo_lexer {
     example <- "example"
-    @ignore whitespace <- p"[ \t]+"
+    @ignored whitespace <- p"[ \t]+"
 }
 
 @with_lexer(foo_lexer)

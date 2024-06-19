@@ -53,10 +53,10 @@ class CallExpr: FooNode {
         )
     }
 
-    @export fun get_arg(name: Symbol): Entity[Expr] =
+    @exported fun get_arg(name: Symbol): Entity[Expr] =
     node.args_env().get_first(name).as[Expr]
 
-    @export fun get_arg_expr(name: Symbol): Entity[Expr] =
+    @exported fun get_arg_expr(name: Symbol): Entity[Expr] =
     node.arg_exprs_env().get_first(name).as[Expr]
 }
 

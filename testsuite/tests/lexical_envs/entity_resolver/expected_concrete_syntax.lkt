@@ -30,7 +30,8 @@ class Name: FooNode implements TokenNode {
 class Ref: FooNode {
     @parse_field name: Name
 
-    @export fun resolve(): Entity[FooNode] = node.node_env().get(node.name)?[0]
+    @exported fun resolve(): Entity[FooNode] =
+    node.node_env().get(node.name)?[0]
 
     env_spec {
         add_to_env_kv(

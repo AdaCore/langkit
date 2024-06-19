@@ -16,7 +16,7 @@ class UndocumentedNode: FooNode {
 }
 
 |" Docstring for ``DocumentedNode``.
-@has_abstract_list
+@with_abstract_list
 class DocumentedNode: FooNode {
 }
 

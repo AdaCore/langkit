@@ -9,9 +9,9 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun sum(s: MyStruct): Int = s.a + s.b
+    @exported fun sum(s: MyStruct): Int = s.a + s.b
 
-    @export fun create(a: Int, b: Int): MyStruct = MyStruct(a=a, b=b)
+    @exported fun create(a: Int, b: Int): MyStruct = MyStruct(a=a, b=b)
 }
 
 struct MyStruct {

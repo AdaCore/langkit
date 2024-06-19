@@ -1,7 +1,7 @@
 import common
 
 class FooNode implements Node[FooNode] {
-    @export fun p(): Int = node.super() + 1
+    @exported fun p(): Int = node.super() + 1
 }
 
 class Example: FooNode implements TokenNode {

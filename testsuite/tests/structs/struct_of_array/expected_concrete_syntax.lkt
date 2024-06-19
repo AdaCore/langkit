@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun get(): KV = KV(key="So", value="What")
+    @exported fun get(): KV = KV(key="So", value="What")
 }
 
 class Example: FooNode {

@@ -1,13 +1,13 @@
 == analysis_unit_node.lkt ==
-analysis_unit_node.lkt:6:44: error: root node expected
-6 |     @export fun p(@ignored u: AnalysisUnit[Int]): Bool = true
-  |                                            ^^^
+analysis_unit_node.lkt:6:46: error: root node expected
+6 |     @exported fun p(@ignored u: AnalysisUnit[Int]): Bool = true
+  |                                              ^^^
 
 
 == analysis_unit_root.lkt ==
-analysis_unit_root.lkt:6:44: error: root node expected
-6 |     @export fun p(@ignored u: AnalysisUnit[Example]): Bool = true
-  |                                            ^^^^^^^
+analysis_unit_root.lkt:6:46: error: root node expected
+6 |     @exported fun p(@ignored u: AnalysisUnit[Example]): Bool = true
+  |                                              ^^^^^^^
 
 
 == astlist_arity.lkt ==
@@ -35,9 +35,9 @@ astlist_root.lkt:4:33: error: root node expected
 
 
 == entity.lkt ==
-entity.lkt:6:38: error: node expected
-6 |     @export fun p(@ignored e: Entity[Int]): Bool = true
-  |                                      ^^^
+entity.lkt:6:40: error: node expected
+6 |     @exported fun p(@ignored e: Entity[Int]): Bool = true
+  |                                        ^^^
 
 
 == lexcial_env_node.lkt ==

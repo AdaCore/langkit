@@ -9,7 +9,7 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun sym(): Symbol = node.symbol
+    @exported fun sym(): Symbol = node.symbol
 
-    @export fun sym_array(): Array[Symbol] = [s"a", s"b", s"c"]
+    @exported fun sym_array(): Array[Symbol] = [s"a", s"b", s"c"]
 }

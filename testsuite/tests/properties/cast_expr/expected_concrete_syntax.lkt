@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun prop(): Bool =
+    @exported fun prop(): Bool =
     # The "cast" expression is represented with a Cast instance, which had
     # an "expr" attribute, so "X.cast(...).expr" used to return "X", and so
     # part of the expression was ignored. If it still was, the following
@@ -16,7 +16,7 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun flag(): Bool = true
+    @exported fun flag(): Bool = true
 }
 
 class ExprHolder: FooNode {

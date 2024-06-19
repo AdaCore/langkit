@@ -12,6 +12,6 @@ class Example: FooNode {
     var: LogicVar
 
     fun pred(i: Int): Bool = i == 0
-    @export fun prop(i: Int): Bool =
+    @exported fun prop(i: Int): Bool =
         %predicate(Example.pred, node.var, i).solve
 }

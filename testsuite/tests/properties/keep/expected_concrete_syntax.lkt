@@ -19,9 +19,9 @@ class Number: FooNode implements TokenNode {
 class Sequence: FooNode {
     @parse_field items: ASTList[FooNode, FooNode]
 
-    @export fun keep_list(): Array[Entity[Identifier]] =
+    @exported fun keep_list(): Array[Entity[Identifier]] =
     self.items.keep[Identifier]
 
-    @export fun keep_array(items: Array[Entity[FooNode]]): Array[Entity[Identifier]] =
+    @exported fun keep_array(items: Array[Entity[FooNode]]): Array[Entity[Identifier]] =
     items.keep[Identifier]
 }

@@ -2,15 +2,15 @@
 Code generation was successful
 
 == cross_node.lkt ==
-cross_node.lkt:7:36: error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
-7 |     @export fun prop(): ListNode = node.bar_node_parent.as[ListNode]
-  |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cross_node.lkt:7:38: error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
+7 |     @exported fun prop(): ListNode = node.bar_node_parent.as[ListNode]
+  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == not_node.lkt ==
-not_node.lkt:6:31: error: One can only cast to an ASTNode subtype or to an entity
-6 |     @export fun prop(): Int = node.parent.as[Int]
-  |                               ^^^^^^^^^^^^^^^^^^^
+not_node.lkt:6:33: error: One can only cast to an ASTNode subtype or to an entity
+6 |     @exported fun prop(): Int = node.parent.as[Int]
+  |                                 ^^^^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done

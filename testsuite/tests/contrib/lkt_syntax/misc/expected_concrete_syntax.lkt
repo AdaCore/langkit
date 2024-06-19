@@ -1,6 +1,6 @@
 lexer foo_lexer {
 
-    @ignore _ <- p"[ \n\r\t]+"
+    @ignored _ <- p"[ \n\r\t]+"
     example <- "example"
     @trivia() comment <- p"#(.?)+"
 }
@@ -14,17 +14,17 @@ grammar foo_grammar {
 
 class Example: FooNode {
     |" Test that null conditional + match expr expands correctly.
-    @export fun null_match(): Example = node.do(
+    @exported fun null_match(): Example = node.do(
         (v1) => match v1 {
             case e: Example => e
         }
     )
 
     |" Test that sym literals with quotes in them are properly unparsed.
-    @export fun test_symlit_escape(): Symbol = s"\"=\""
+    @exported fun test_symlit_escape(): Symbol = s"\"=\""
 
     |" Test various valid dotexpr's LHS.
-    @export fun test_dotexpr_lhs(): Int = {
+    @exported fun test_dotexpr_lhs(): Int = {
         val a = [1].find((v) => v == 1);
         val _ = {
             val b = [1, 2];
@@ -37,14 +37,14 @@ class Example: FooNode {
     }
 
     |" Tests that block delimiter prevents a syntactic ambiguity.
-    @export fun test_1(): Array[Int] = {
+    @exported fun test_1(): Array[Int] = {
         val a = 12;
 
         [a]
     }
 
     |" Tests that reserved names are properly avoided in constructor syntax.
-    @export fun test_2(): KV = KV(key=s"hey", value=s"you")
+    @exported fun test_2(): KV = KV(key=s"hey", value=s"you")
 }
 
 struct KV {

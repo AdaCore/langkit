@@ -32,5 +32,5 @@ class Name: FooNode implements TokenNode {
 }
 
 @metadata struct Metadata {
-    @use_in_equality node: FooNode
+    @used_in_equality node: FooNode
 }

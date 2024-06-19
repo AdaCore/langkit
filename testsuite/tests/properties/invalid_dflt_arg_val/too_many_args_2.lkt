@@ -1,6 +1,6 @@
 import common
 
 class Example: FooNode {
-    @export fun p(a: Bool, b: Bool=true): Bool = a and b
-    @export fun calling(): Bool = node.p(true, a=false, b=false)
+    @exported fun p(a: Bool, b: Bool=true): Bool = a and b
+    @exported fun calling(): Bool = node.p(true, a=false, b=false)
 }

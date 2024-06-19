@@ -9,5 +9,5 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun sym(sym: Symbol): Symbol = sym
+    @exported fun sym(sym: Symbol): Symbol = sym
 }

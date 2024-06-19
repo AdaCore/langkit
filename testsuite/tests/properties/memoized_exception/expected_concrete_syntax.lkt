@@ -9,16 +9,16 @@ grammar foo_grammar {
 }
 
 class Example: FooNode {
-    @export @memoized fun prop1(): Bool = {
+    @exported @memoized fun prop1(): Bool = {
         val _ = [node];
 
         raise[Bool] PropertyError("Explicit error 1")
     }
 
-    @export @memoized fun prop2(): Bool =
+    @exported @memoized fun prop2(): Bool =
     raise[Bool] PropertyError("Explicit error 2")
 
-    @export @memoized fun prop3(): Bool = node.raise_error(false)
+    @exported @memoized fun prop3(): Bool = node.raise_error(false)
 
     fun raise_error(prop_error: Bool): Bool =
     if prop_error then raise[Bool] PropertyError("This is a Property_Error") else raise[Bool] PreconditionFailure("This is a Precondition_Failure")

@@ -12,5 +12,5 @@ class ExampleNode : FooNode implements TokenNode {
 }
 
 class BarNode : FooNode {
-    @export @final @parse_field f: ExampleNode
+    @exported @final @parse_field f: ExampleNode
 }

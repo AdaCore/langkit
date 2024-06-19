@@ -6,7 +6,7 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode implements Node[FooNode] {
-    @export fun compute(n1: Entity[FooNode], n2: Entity[FooNode], n3: Entity[FooNode]): Entity[FooNode] =
+    @exported fun compute(n1: Entity[FooNode], n2: Entity[FooNode], n3: Entity[FooNode]): Entity[FooNode] =
     n1 or? (n2 or? n3)
 }
 

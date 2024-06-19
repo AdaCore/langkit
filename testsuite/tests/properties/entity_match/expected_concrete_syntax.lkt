@@ -18,12 +18,12 @@ class Example: FooNode {
 class Literal: FooNode implements TokenNode {
     fun get_num(): Int = 3
 
-    @export fun b(): Int = match node.a() {
+    @exported fun b(): Int = match node.a() {
         case e: Entity[Example] => e.get_num()
         case c: Entity[FooNode] => c.get_num()
     }
 
-    @export fun c(): Int = match node.a() {
+    @exported fun c(): Int = match node.a() {
         case e: Example => e.get_num()
         case c: FooNode => c.get_num()
     }

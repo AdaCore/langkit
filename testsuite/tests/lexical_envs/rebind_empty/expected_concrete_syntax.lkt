@@ -9,7 +9,7 @@ grammar foo_grammar {
 }
 
 class Example: FooNode implements TokenNode {
-    @export fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Array[Entity[FooNode]] =
+    @exported fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Array[Entity[FooNode]] =
     {
         # Build non-null rebindings
         val rbdng = null[EnvRebindings].append_rebinding(

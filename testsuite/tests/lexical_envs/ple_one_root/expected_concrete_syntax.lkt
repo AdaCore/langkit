@@ -27,13 +27,13 @@ class Def: FooNode {
 class Id: FooNode implements TokenNode {
     @external() fun referenced_scope_or_error(or_error: Bool): Scope
 
-    @export fun referenced_scope(): Entity[Scope] =
+    @exported fun referenced_scope(): Entity[Scope] =
     node.referenced_scope_or_error(false).as_bare_entity
 
     fun referenced_env(): LexicalEnv[FooNode] =
     node.resolve().as[Scope]?.children_env()
 
-    @export fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
+    @exported fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
 }
 
 class Dep: Id implements TokenNode {

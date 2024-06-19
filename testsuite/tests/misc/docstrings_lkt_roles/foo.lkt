@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 |" Log this docstring. This is a typeref: :typeref:`FooNode`.
 class FooNode implements Node[FooNode] {
-    @export fun prop(): Int = 1
+    @exported fun prop(): Int = 1
 }
 
 class Example: FooNode implements TokenNode {

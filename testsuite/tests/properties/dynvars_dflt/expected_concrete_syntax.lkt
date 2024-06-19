@@ -8,11 +8,11 @@ grammar foo_grammar {
 dynvar bool_var: Bool
 
 @abstract class RootNode implements Node[RootNode] {
-    @export @abstract @with_dynvars(bool_var=true) fun prop(): Bool
+    @exported @abstract @with_dynvars(bool_var=true) fun prop(): Bool
 }
 
 class ExampleNode: RootNode {
     @with_dynvars(bool_var=true) fun prop(): Bool = bool_var
 
-    @export fun prop2(): Bool = node.prop()
+    @exported fun prop2(): Bool = node.prop()
 }

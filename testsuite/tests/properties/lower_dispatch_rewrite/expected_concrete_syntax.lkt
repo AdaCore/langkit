@@ -48,10 +48,10 @@ class Lit: Atom implements TokenNode {
 class Ref: Atom {
     @parse_field name: Name
 
-    @export fun resolve(): Entity[FooNode] =
+    @exported fun resolve(): Entity[FooNode] =
     node.node_env().get_first(node.name.symbol)
 
-    @export fun dummy(): Array[Entity[FooNode]] =
+    @exported fun dummy(): Array[Entity[FooNode]] =
     node.referenced_env().get(node.name.symbol)
 
     fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]

@@ -9,8 +9,8 @@ class FooNode implements Node[FooNode] {
 
 class Example : FooNode {
 
-    @export fun get_lit(): Int = 2
+    @exported fun get_lit(): Int = 2
 
-    @export fun values_iterator(): Iterator[Int] =
+    @exported fun values_iterator(): Iterator[Int] =
     node.get_lit().to_iterator()
 }

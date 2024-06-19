@@ -13,10 +13,10 @@ enum Color {
 }
 
 class Example: FooNode {
-    @export fun prop1(arg: Bool = true): Bool = arg
+    @exported fun prop1(arg: Bool = true): Bool = arg
 
-    @export fun prop2(arg: Color = Color.red): Color = arg
+    @exported fun prop2(arg: Color = Color.red): Color = arg
 
-    @export fun prop3(arg: Entity[FooNode] = null[Entity[FooNode]]): Entity[FooNode] =
+    @exported fun prop3(arg: Entity[FooNode] = null[Entity[FooNode]]): Entity[FooNode] =
     arg
 }
