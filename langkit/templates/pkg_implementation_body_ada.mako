@@ -1963,7 +1963,10 @@ package body ${ada_lib_name}.Implementation is
                V : Internal_Map_Node_Vectors.Vector renames
                   FN.Reference (Cur);
             begin
-               V.Append ((Value, Md, Resolver));
+               V.Append ((Value, null, Md, Resolver));
+               --  Note that the rebindings field is unused by the relocation
+               --  mechanism (since we don't even allow adding env entries
+               --  with custom rebindings), hence we simply leave it to null.
             end;
          end;
          Value.Unit.Exiled_Entries_In_NED.Append ((Dest_NED, Key, Value));

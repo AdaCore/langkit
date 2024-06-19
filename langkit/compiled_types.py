@@ -5043,6 +5043,8 @@ class TypeRepo:
             names.Name('Inner_Env_Assoc'), None, None,
             [('key', UserField(type=T.Symbol)),
              ('value', UserField(type=self.defer_root_node)),
+             ('rebindings', UserField(type=T.EnvRebindings,
+                                      default_value=No(T.EnvRebindings))),
              ('metadata', UserField(type=self.defer_env_md,
                                     default_value=No(self.defer_env_md)))]
         )
