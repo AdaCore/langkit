@@ -1,0 +1,23 @@
+{
+  "node_configs": {
+    "ParamSpecList": {
+      "node": [
+        {"kind": "indent", "contents": ["hardline", "recurse"]},
+        "hardline"
+      ],
+      "table": {
+        "sep_before": true,
+        "split": ["empty_line"]
+      }
+    },
+    "ParamSpec": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_name"},
+        {"kind": "tableSeparator", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_type_expr"},
+        {"kind": "recurse_field", "field": "f_default_expr"}
+      ]
+    }
+  }
+}

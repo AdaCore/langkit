@@ -477,6 +477,69 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    type Sep_Templates is array (List_Sep_Template_Kind) of Template_Type;
 
+   type List_Table_Split_Kind is (Empty_Line, Line_Comment);
+   type List_Table_Split_Options is array (List_Table_Split_Kind) of Boolean;
+   --  Flags to determine what trivias trigger a table split:
+   --
+   --  * Empty_Line: at least one empty line splits the current table.
+   --  * Line_Comment: at least one line comment splits the current table.
+
+   type Table_Config_Record (Enabled : Boolean := False) is record
+      case Enabled is
+         when False =>
+            null;
+
+         when True =>
+            Sep_Before : Boolean;
+            --  If we generate a table for this list node, whether list
+            --  separators must be inserted at the end of the previous row
+            --  (``Table_Sep_Before => True``) or at the beginning of the next
+            --  row (``Table_Sep_Before => False``).
+
+            Split : List_Table_Split_Options;
+            --  If we generate a table for this list node, conditions to split
+            --  a table in two.
+
+            Must_Break : Boolean;
+            --  If we generate a table for this list node, whether its rows
+            --  must break the current group.
+      end case;
+   end record;
+
+   type List_Config_Record is record
+      Seps : Sep_Templates;
+      --  Templates to decorate the unparsing of list separators
+
+      Table_Config : Table_Config_Record;
+      --  Table config for this list type
+   end record;
+
+   function Table_Needs_Split
+     (Inter_Trivia : Lk_Token;
+      Config       : List_Config_Record;
+      Trivias      : Trivias_Info) return Boolean
+   with Pre => Config.Table_Config.Enabled;
+   --  Assuming that we are unparsing a list node (``Config`` is its unparsing
+   --  configuration, ``Config.Table_Config.Enabled`` is assumed to be true),
+   --  return whether the sequence of trivias starting at ``Inter_Trivia`` must
+   --  trigger a table split.
+
+   function Table_Needs_Split
+     (Next_Child : Lk_Node;
+      Last_Sep   : Lk_Token;
+      Config     : List_Config_Record;
+      Trivias    : Trivias_Info) return Boolean
+   with Pre => Config.Table_Config.Enabled;
+   --  Assuming that we are unparsing a list node (``Config`` is its unparsing
+   --  configuration, ``Config.Table_Config.Enabled`` is assumed to be true),
+   --  and given the next list child to process (``Next_Child``), return
+   --  whether the table needs to be split before adding a row for
+   --  ``Next_Child``.
+
+   No_List_Config : constant List_Config_Record :=
+     (Seps         => (others => No_Template),
+      Table_Config => (Enabled => False));
+
    type Node_Config_Record is limited record
       Node_Template : Template_Type;
       --  Template to decorate the unparsing of the whole node
@@ -485,9 +548,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  For each non-null syntax field in this node, template to decorate the
       --  unparsing of the field.
 
-      List_Seps : Sep_Templates;
-      --  For list nodes only: templates to decorate the unparsing of list
-      --  separators.
+      List_Config : List_Config_Record;
+      --  Configuration bits that are specific to list nodes
    end record;
    type Node_Config_Access is access all Node_Config_Record;
    --  Unparsing configuration for a given node type
@@ -1559,6 +1621,79 @@ package body Langkit_Support.Generic_API.Unparsing is
       raise Program_Error;
    end Linear_Template;
 
+   -----------------------
+   -- Table_Needs_Split --
+   -----------------------
+
+   function Table_Needs_Split
+     (Inter_Trivia : Lk_Token;
+      Config       : List_Config_Record;
+      Trivias      : Trivias_Info) return Boolean
+   is
+      Result : Boolean := False;
+
+      procedure Process (Fragment : Unparsing_Fragment);
+      --  Callback for ``Iterate_On_Trivia_Fragment``. Update ``Result``
+      --  for the given fragment according to the split rules in ``Config``.
+
+      -------------
+      -- Process --
+      -------------
+
+      procedure Process (Fragment : Unparsing_Fragment) is
+      begin
+         case Trivia_Fragment_Kind (Fragment.Kind) is
+            when Whitespaces | Suffix_Comment =>
+               null;
+
+            when Line_Comment =>
+               if Config.Table_Config.Split (Line_Comment) then
+                  Result := True;
+               end if;
+
+            when Line_Breaks =>
+               if Fragment.Line_Breaks_Count >= 2
+                  and then Config.Table_Config.Split (Empty_Line)
+               then
+                  Result := True;
+               end if;
+         end case;
+      end Process;
+   begin
+      --  The table must split if at least one trivia in the given sequence
+      --  must trigger the split.
+
+      if Inter_Trivia.Is_Trivia then
+         Iterate_On_Trivia_Fragments (Inter_Trivia, Trivias, Process'Access);
+      end if;
+      return Result;
+   end Table_Needs_Split;
+
+   -----------------------
+   -- Table_Needs_Split --
+   -----------------------
+
+   function Table_Needs_Split
+     (Next_Child : Lk_Node;
+      Last_Sep   : Lk_Token;
+      Config     : List_Config_Record;
+      Trivias    : Trivias_Info) return Boolean is
+   begin
+      return
+        --  The table must split if at least one trivia in the sequence that
+        --  preceeds ``First_Trivia`` must trigger the split.
+
+        Table_Needs_Split
+          (Next_Child.Token_Start.Previous (Exclude_Trivia => True).Next,
+           Config,
+           Trivias)
+
+        --  It must also split if trivias before the previous list separator
+        --  triggers the split.
+
+        or else Table_Needs_Split (Last_Sep.Next, Config, Trivias);
+   end Table_Needs_Split;
+
    -------------------------------------
    -- Default_Unparsing_Configuration --
    -------------------------------------
@@ -1967,9 +2102,9 @@ package body Langkit_Support.Generic_API.Unparsing is
             case JSON.Kind is
                when JSON_Object_Type =>
 
-                  --   As soon as we find a "text" template node, we know this
-                  --   is a Recurse_Field template (in "node") or a
-                  --   Recurse_In_Field template (in "fields").
+                  --   As soon as we find a "tableSeparator"/"text" template
+                  --   node, we know this is a Recurse_Field template (in
+                  --   "node") or a Recurse_In_Field template (in "fields").
                   --
                   --   For a "node", we also know this is a Recurse_Field
                   --   template as soon as we find a "recurse_field" node.
@@ -1984,7 +2119,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                         end if;
 
                      when Field_Template =>
-                        if Kind_Matches (JSON, "text") then
+                        if Kind_Matches (JSON, "tableSeparator")
+                           or else Kind_Matches (JSON, "text")
+                        then
                            Result := Recurse_In_Field;
                            raise Abort_Recursion;
                         end if;
@@ -2779,13 +2916,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                      return Pool.Create_Recurse_Flatten (Types);
                   end;
 
-               elsif Kind = "text" then
+               elsif Kind in "tableSeparator" | "text" then
                   declare
                      T : JSON_Value;
                   begin
                      if not JSON.Has_Field ("text") then
                         Abort_Parsing
-                          (Context, "missing ""text"" key for text");
+                          (Context, "missing ""text"" key for " & Kind);
                      end if;
 
                      T := JSON.Get ("text");
@@ -2809,8 +2946,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                                            (From_UTF8 (T.Get)));
                      begin
                         Process_Linear_Template_Item (Item, Context);
-                        return Pool.Create_Token
-                                 (Item.Token_Kind, Item.Token_Text);
+                        if Kind = "text" then
+                           return Pool.Create_Token
+                                    (Item.Token_Kind, Item.Token_Text);
+                        else
+                           return Pool.Create_Table_Separator
+                                    (Item.Token_Kind, Item.Token_Text);
+                        end if;
                      end;
                   end;
 
@@ -3072,7 +3214,7 @@ package body Langkit_Support.Generic_API.Unparsing is
               new Node_Config_Record'
                 (Node_Template => No_Template,
                  Field_Configs => <>,
-                 List_Seps     => (others => No_Template));
+                 List_Config   => No_List_Config);
             Base_Config : constant Node_Config_Access :=
               (if Node = Root_Node_Type (Language)
                then null
@@ -3182,7 +3324,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                   function From_Base return Template_Type
                   is (if Base_Config /= null
-                      then Base_Config.List_Seps (Kind)
+                      then Base_Config.List_Config.Seps (Kind)
                       else Pool.Create_Recurse);
                begin
                   if JSON.Kind = JSON_Object_Type
@@ -3231,23 +3373,114 @@ package body Langkit_Support.Generic_API.Unparsing is
                                         Recurse_Found => False),
                            Symbols  => Node_Config.Node_Template.Symbols);
                      begin
-                        Node_Config.List_Seps (Kind) :=
+                        Node_Config.List_Config.Seps (Kind) :=
                           Parse_Template (JSON.Get (JSON_Key), Context);
                      end;
 
                   elsif Kind = Sep_Template then
-                     Node_Config.List_Seps (Kind) := From_Base;
+                     Node_Config.List_Config.Seps (Kind) := From_Base;
 
                   elsif JSON.Kind = JSON_Object_Type
                         and then JSON.Has_Field (JSON_Key_For (Sep_Template))
                   then
-                     Node_Config.List_Seps (Kind) :=
-                       Node_Config.List_Seps (Sep_Template);
+                     Node_Config.List_Config.Seps (Kind) :=
+                       Node_Config.List_Config.Seps (Sep_Template);
                   else
-                     Node_Config.List_Seps (Kind) := From_Base;
+                     Node_Config.List_Config.Seps (Kind) := From_Base;
                   end if;
                end;
             end loop;
+
+            --  (4) the "table" entry (if present). Inherit if possible/needed
+
+            if JSON.Kind = JSON_Object_Type and then JSON.Has_Field ("table")
+            then
+               if not Is_List_Node (Node) then
+                  Abort_Parsing
+                    (Debug_Name (Node) & " is not a list node, invalid"
+                    & " ""table"" configuration");
+               end if;
+               declare
+                  Cfg             : Table_Config_Record renames
+                    Node_Config.List_Config.Table_Config;
+                  Table_JSON      : constant JSON_Value := JSON.Get ("table");
+                  Sep_Before_JSON : JSON_Value;
+                  Split_JSON      : JSON_Value;
+                  Must_Break_JSON : JSON_Value;
+               begin
+                  if Table_JSON.Kind = JSON_Null_Type then
+                     Cfg := (Enabled => False);
+                  elsif Table_JSON.Kind /= JSON_Object_Type then
+                     Abort_Parsing
+                       ("invalid ""table"" entry for " & Debug_Name (Node)
+                        & ": object expected");
+                  else
+                     Cfg :=
+                       (Enabled    => True,
+                        Sep_Before => True,
+                        Split      => (others => False),
+                        Must_Break => False);
+
+                     if Table_JSON.Has_Field ("sep_before") then
+                        Sep_Before_JSON := Table_JSON.Get ("sep_before");
+                        if Sep_Before_JSON.Kind /= JSON_Boolean_Type then
+                           Abort_Parsing
+                             ("invalid ""table""/""sep_before"" entry for "
+                              & Debug_Name (Node) & ": boolean expected");
+                        end if;
+                        Cfg.Sep_Before := Sep_Before_JSON.Get;
+                     end if;
+
+                     if Table_JSON.Has_Field ("split") then
+                        Split_JSON := Table_JSON.Get ("split");
+                        if Split_JSON.Kind /= JSON_Array_Type then
+                           Abort_Parsing
+                             ("invalid ""table""/""split"" entry for "
+                              & Debug_Name (Node) & ": array expected");
+                        end if;
+                        for Item of JSON_Array'(Split_JSON.Get) loop
+                           if Item.Kind /= JSON_String_Type then
+                              Abort_Parsing
+                                ("invalid ""table""/""split"" entry for "
+                                 & Debug_Name (Node));
+                           end if;
+
+                           declare
+                              Split : constant String := Item.Get;
+                              Kind  : List_Table_Split_Kind;
+                           begin
+                              if Split = "empty_line" then
+                                 Kind := Empty_Line;
+                              elsif Split = "line_comment" then
+                                 Kind := Line_Comment;
+                              else
+                                 Abort_Parsing
+                                   ("invalid ""table""/""split"" entry for "
+                                    & Debug_Name (Node));
+                              end if;
+                              Cfg.Split (Kind) := True;
+                           end;
+                        end loop;
+                     end if;
+
+                     if Table_JSON.Has_Field ("must_break") then
+                        Must_Break_JSON := Table_JSON.Get ("must_break");
+                        if Must_Break_JSON.Kind /= JSON_Boolean_Type then
+                           Abort_Parsing
+                             ("invalid ""table""/""must_break"" entry for "
+                              & Debug_Name (Node) & ": boolean expected");
+                        end if;
+                        Cfg.Must_Break := Must_Break_JSON.Get;
+                     end if;
+                  end if;
+               end;
+
+            elsif Base_Config /= null then
+               Node_Config.List_Config.Table_Config :=
+                 Base_Config.List_Config.Table_Config;
+            else
+               Node_Config.List_Config.Table_Config := (Enabled => False);
+            end if;
 
             --  Since inheritance may mix templates from different node
             --  configurations, we need to double check that there are no
@@ -3276,7 +3509,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                      """node"" template",
                      Node_Config.Node_Template,
                      """" & JSON_Key & """ template",
-                     Node_Config.List_Seps (Kind));
+                     Node_Config.List_Config.Seps (Kind));
                end;
             end loop;
          end;
@@ -3555,13 +3788,20 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Soft_Line =>
             return Pool.Create_Soft_Line;
 
-         when Token =>
+         when Table_Separator | Token =>
             declare
                Items : Document_Vectors.Vector;
+               Inner : constant Document_Type :=
+                 (case Template.Kind is
+                  when Table_Separator => Pool.Create_Table_Separator
+                                            (Template.Token_Kind,
+                                             Template.Token_Text),
+                  when Token           => Pool.Create_Token
+                                            (Template.Token_Kind,
+                                             Template.Token_Text),
+                  when others          => raise Program_Error);
             begin
-               Items.Append
-                 (Pool.Create_Token
-                    (Template.Token_Kind, Template.Token_Text));
+               Items.Append (Inner);
                Process_Trivias
                  (State.Current_Token,
                   Items,
@@ -3611,6 +3851,25 @@ package body Langkit_Support.Generic_API.Unparsing is
       --
       --  ``Label`` is used to track which token sequence is processed in debug
       --  traces.
+
+      procedure Append_To_Row
+        (Rows    : in out Document_Vectors.Vector;
+         Items   : in out Document_Vectors.Vector;
+         New_Row : Boolean);
+      --  Assuming that ``Rows`` is a vector of list nodes:
+      --
+      --  * If ``New_Row`` is true, append a new list node to ``Rows`` and
+      --    transfer elements of ``Items`` to it.
+      --
+      --  * Otherwise, transfer elements of ``Items`` to the last list in
+      --    ``Rows``.
+
+      procedure Create_Table
+        (Tables     : in out Document_Vectors.Vector;
+         Rows       : in out Document_Vectors.Vector;
+         Must_Break : Boolean);
+      --  If ``Rows`` is not empty, create a table document out of it and
+      --  append it to ``Tables``.
 
       function Unparse_Node
         (N : Lk_Node; Current_Token : in out Lk_Token) return Document_Type;
@@ -3683,6 +3942,49 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
       end Unparse_Tokens;
 
+      -------------------
+      -- Append_To_Row --
+      -------------------
+
+      procedure Append_To_Row
+        (Rows    : in out Document_Vectors.Vector;
+         Items   : in out Document_Vectors.Vector;
+         New_Row : Boolean)
+      is
+         Row : Document_Type;
+      begin
+         if New_Row or else Rows.Is_Empty then
+            Row := Pool.Create_Empty_List;
+            Rows.Append (Row);
+         else
+            Row := Rows.Last_Element;
+         end if;
+         Row.List_Documents.Append (Items);
+         Items.Clear;
+      end Append_To_Row;
+
+      ------------------
+      -- Create_Table --
+      ------------------
+
+      procedure Create_Table
+        (Tables     : in out Document_Vectors.Vector;
+         Rows       : in out Document_Vectors.Vector;
+         Must_Break : Boolean)
+      is
+      begin
+         if Rows.Is_Empty then
+            return;
+         end if;
+
+         --  Prettier expect tables to start at the same columns as the rows it
+         --  contains, so flush line breaks before inserting the table, so that
+         --  the table starts at the same indentation level as all of its rows.
+
+         Tables.Append (Pool.Create_Flush_Line_Breaks);
+         Tables.Append (Pool.Create_Table (Rows, Must_Break));
+      end Create_Table;
+
       ------------------
       -- Unparse_Node --
       ------------------
@@ -3696,6 +3998,34 @@ package body Langkit_Support.Generic_API.Unparsing is
          Node_Config : Node_Config_Record renames
            Config.Value.Node_Configs.Element (To_Index (Type_Of (N))).all;
          Items       : Document_Vectors.Vector;
+
+         --  Table management (for list nodes with this behavior enabled)
+
+         Is_List          : constant Boolean := N.Is_List_Node;
+         With_Table       : constant Boolean :=
+           Node_Config.List_Config.Table_Config.Enabled;
+         Table_Sep_Before : constant Boolean :=
+           (if With_Table
+            then Node_Config.List_Config.Table_Config.Sep_Before
+            else False);
+         Table_Must_Break : constant Boolean :=
+           (if With_Table
+            then Node_Config.List_Config.Table_Config.Must_Break
+            else False);
+         pragma Assert (not With_Table or else Is_List);
+
+         Tables : Document_Vectors.Vector;
+         --  List of tables we are creating for this list node (thus unused
+         --  unless ``With_Table`` is true).
+
+         Table_Rows : Document_Vectors.Vector;
+         --  For the current table we are creating for this list node (thus
+         --  unused unless ``With_Table`` is true): vector of list documents:
+         --  one for each table row.
+
+         Last_Sep : Lk_Token := No_Lk_Token;
+         --  If we just processed a list separator, reference to it (unused
+         --  unless ``With_Table`` is true), ``No_Lk_Token`` if there is none.
 
          procedure Process_Fragment
            (F             : Unparsing_Fragment;
@@ -3716,6 +4046,17 @@ package body Langkit_Support.Generic_API.Unparsing is
                  ("About to unparse " & F.Kind'Image
                   & ", current token: " & Image_With_Sloc (Current_Token));
             end if;
+
+            --  For list nodes, there are only two possible fragments kinds:
+            --  list separators and children. Since ``With_Table`` can be true
+            --  only for list nodes, this means that we can get only these two
+            --  fragment kinds when generating a table, and thus that ``Items``
+            --  is not used to collect fragments in that case.
+
+            pragma Assert
+              (not Is_List
+               or else F.Kind in List_Separator_Fragment
+                               | List_Child_Fragment);
 
             case Non_Trivia_Fragment_Kind (F.Kind) is
                when Token_Fragment | List_Separator_Fragment =>
@@ -3746,7 +4087,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                      if F.Kind = List_Separator_Fragment then
                         declare
                            Sep_Template : constant Template_Type :=
-                             Node_Config.List_Seps (F.List_Sep_Kind);
+                             Node_Config.List_Config.Seps (F.List_Sep_Kind);
 
                            pragma Assert (Sep_Template.Kind = With_Recurse);
 
@@ -3761,6 +4102,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                            Args : Template_Instantiation_Args (With_Recurse);
                         begin
                            if not Is_Fake_Token then
+                              Last_Sep := Current_Token;
                               Sep_Items.Append (Token);
                               Process_Trivias
                                 (Next_Token,
@@ -3785,12 +4127,32 @@ package body Langkit_Support.Generic_API.Unparsing is
                            Items.Append (Token);
                         end;
 
-                        --  Flush line breaks before unparsing the next list
-                        --  child, so that line breaks do not get inserted
-                        --  inside groups/indents/... that belong to the next
-                        --  child.
+                        --  If we are generating a table for this list node,
+                        --  append the list separator unparsing (in ``Items``)
+                        --  to the last row, or create a new row for it
+                        --  (depending on the unparsing configuration for this
+                        --  list node).
 
-                        Items.Append (Pool.Create_Flush_Line_Breaks);
+                        if With_Table then
+                           Append_To_Row
+                             (Table_Rows,
+                              Items,
+                              New_Row => not Table_Sep_Before);
+
+                        else
+                           --  Flush line breaks before unparsing the next list
+                           --  child, so that line breaks do not get inserted
+                           --  inside groups/indents/... that belong to the
+                           --  next child.
+                           --
+                           --  Note that we avoid this when generating a table,
+                           --  since the end of the table row may insert a new
+                           --  line: the flush must come after so that this
+                           --  implicit line break is accounted for during the
+                           --  flush.
+
+                           Items.Append (Pool.Create_Flush_Line_Breaks);
+                        end if;
 
                      else
                         --  This is an actual token (non-trivia) fragment:
@@ -3830,6 +4192,20 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                when List_Child_Fragment =>
 
+                  --  If the current table has a least one row and trivia that
+                  --  preceed this list child match the unparsing
+                  --  configuration's criteria, split tables.
+
+                  if not Table_Rows.Is_Empty
+                     and then Table_Needs_Split
+                                (F.Node,
+                                 Last_Sep,
+                                 Node_Config.List_Config,
+                                 Trivias)
+                  then
+                     Create_Table (Tables, Table_Rows, Table_Must_Break);
+                  end if;
+
                   --  If reattached tokens precede this child, process them now
                   --  so that they are unparsed as part of this list node
                   --  instead of another (possibly deeply nested) list node.
@@ -3865,6 +4241,22 @@ package body Langkit_Support.Generic_API.Unparsing is
                      Items,
                      Pool,
                      Trivias);
+
+                  --  If we are generating tables for this list node, transfer
+                  --  the result of the unparsing for this child node (in
+                  --  ``Items``) to a dedicated row in the current table.
+                  --
+                  --  This must create a new row if 1) there was no row so far
+                  --  for the current table or if 2) the table separator just
+                  --  got inserted in the last row.
+
+                  if With_Table then
+                     Append_To_Row
+                       (Table_Rows,
+                        Items,
+                        New_Row => Table_Sep_Before);
+                  end if;
+                  Last_Sep := No_Lk_Token;
             end case;
          end Process_Fragment;
 
@@ -3886,6 +4278,17 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                Iterate_On_Fragments
                  (N, Current_Token, Process_Fragment'Access);
+
+               --  If we unparsed a list document for which we must create
+               --  tables, finalize the last table (if not empty), then create
+               --  the list of tables.
+
+               if With_Table then
+                  pragma Assert (Items.Is_Empty);
+                  Create_Table (Tables, Table_Rows, Table_Must_Break);
+                  Items.Append (Pool.Create_List (Tables));
+               end if;
+
                Result := Instantiate_Template
                  (Pool          => Pool,
                   Symbols       => Symbols,

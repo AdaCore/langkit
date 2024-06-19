@@ -10,13 +10,26 @@ class FooNode(ASTNode):
     pass
 
 
-class Block(FooNode):
-    items = Field(type=T.Decl.list)
-
-
 @abstract
 class Decl(FooNode):
     name = AbstractField(type=T.Name)
+
+
+@abstract
+class BaseBlock(FooNode):
+    pass
+
+
+class Block(BaseBlock):
+    items = Field(type=T.Decl.list)
+
+
+class PlusDecls(Decl.list):
+    pass
+
+
+class PlusBlock(BaseBlock):
+    items = Field(type=T.PlusDecls)
 
 
 class NullQual(FooNode):
@@ -166,6 +179,29 @@ for i in ["none", 0, 1, 2]:
     add_main(
         "max_empty_lines_{}.json".format(i),
         "trivias/max_empty_lines.txt",
+    )
+
+for cfg in ["no_split", "split_all", "split_comments", "split_empty_lines"]:
+    add_main(
+        "table_align/{}.json".format(cfg),
+        "table_align/var_decls.txt",
+    )
+
+for cfg in ["missing", "true", "false"]:
+    add_main(
+        "table_align/sep_before_{}.json".format(cfg),
+        "table_align/fun_decls.txt",
+    )
+
+add_main(
+    "table_align/table_sep_in_field.json",
+    "table_align/calls.txt",
+)
+
+for cfg in ["inherit", "inherit_null"]:
+    add_main(
+        "table_align/{}.json".format(cfg),
+        "table_align/blocks.txt",
     )
 
 

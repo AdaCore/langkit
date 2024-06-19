@@ -154,6 +154,8 @@ private package Langkit_Support.Prettier_Utils is
       Recurse_Field,
       Recurse_Flatten,
       Soft_Line,
+      Table,
+      Table_Separator,
       Token,
       Trim,
       Whitespace);
@@ -162,7 +164,8 @@ private package Langkit_Support.Prettier_Utils is
    with Static_Predicate =>
      Template_Document_Kind not in
        Expected_Line_Breaks
-     | Expected_Whitespaces;
+     | Expected_Whitespaces
+     | Table;
 
    subtype Instantiated_Template_Document_Kind is Document_Kind
    with Static_Predicate =>
@@ -261,7 +264,11 @@ private package Langkit_Support.Prettier_Utils is
          when Soft_Line =>
             null;
 
-         when Token =>
+         when Table =>
+            Table_Rows       : Document_Vectors.Vector;
+            Table_Must_Break : Boolean;
+
+         when Table_Separator | Token =>
             Token_Kind : Token_Kind_Ref;
             Token_Text : Unbounded_Text_Type;
 
@@ -427,6 +434,18 @@ private package Langkit_Support.Prettier_Utils is
      (Self  : in out Document_Pool;
       Types : in out Type_Vectors.Vector) return Document_Type;
    --  Return a ``Recurse_Flatten`` node
+
+   function Create_Table
+     (Self       : in out Document_Pool;
+      Rows       : in out Document_Vectors.Vector;
+      Must_Break : Boolean) return Document_Type;
+   --  Return a ``Table`` node
+
+   function Create_Table_Separator
+     (Self : in out Document_Pool;
+      Kind : Token_Kind_Ref;
+      Text : Unbounded_Text_Type) return Document_Type;
+   --  Return a ``Table_Separator`` node
 
    function Create_Soft_Line
      (Self : in out Document_Pool) return Document_Type;

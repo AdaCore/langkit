@@ -1,0 +1,26 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "table": {
+        "split": ["empty_line"],
+        "must_break": true
+      }
+    },
+    "VarDecl": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_is_null"},
+        {"kind": "text", "text": "var"},
+        {"kind": "recurse_field", "field": "f_name"},
+        "whitespace",
+        {"kind": "tableSeparator", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_type_expr"},
+        "whitespace",
+        {"kind": "text", "text": "="},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_value"},
+        {"kind": "text", "text": ";"}
+      ]
+    }
+  }
+}

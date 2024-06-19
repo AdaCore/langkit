@@ -346,7 +346,33 @@ package body Langkit_Support.Prettier_Utils is
                   Do_Break;
                end if;
 
-            when Token =>
+            when Table =>
+               for I in 1 .. Self.Table_Rows.Last_Index loop
+                  declare
+                     Inner_Breaks : Boolean;
+                     Last         : constant Natural :=
+                       Self.Table_Rows.Last_Index;
+                     D            : Document_Type :=
+                       Self.Table_Rows.Element (I);
+                  begin
+                     Process (D, State, Inner_Breaks);
+                     Self.Table_Rows.Replace_Element (I, D);
+                     if Inner_Breaks then
+                        Do_Break;
+                        Self.Table_Must_Break := True;
+                     end if;
+
+                     --  For breaking tables, all but the last row imply a
+                     --  hard line break.
+
+                     if Self.Table_Must_Break and then I < Last then
+                        Extend_Spacing (State.Actual, One_Line_Break_Spacing);
+                        Do_Break;
+                     end if;
+                  end;
+               end loop;
+
+            when Table_Separator | Token =>
                declare
                   Saved_Actual : constant Spacing_Type := State.Actual;
                   Required     : constant Spacing_Type :=
@@ -546,9 +572,14 @@ package body Langkit_Support.Prettier_Utils is
 
       function Text_For (Document : Document_Type) return Unbounded_String
       is (case Document.Kind is
-          when Token      => +Document.Token_Text,
-          when Whitespace => Document.Whitespace_Length * ' ',
-          when others     => raise Program_Error);
+          when Table_Separator | Token => +Document.Token_Text,
+          when Whitespace              => Document.Whitespace_Length * ' ',
+          when others                  => raise Program_Error);
+
+      procedure Append_Flattened_List
+        (Self : Document_Type; Dest : in out Document_Vector);
+      --  If ``Self`` is not a list, just append its Prettier conversion to
+      --  ``Dest``. Otherwise, recurse on each list item.
 
       -------------
       -- Recurse --
@@ -653,6 +684,24 @@ package body Langkit_Support.Prettier_Utils is
             when Soft_Line =>
                return Soft_Line;
 
+            when Table =>
+               declare
+                  Rows : Document_Table;
+               begin
+                  for I in 1 .. Document.Table_Rows.Last_Index loop
+                     declare
+                        Row : Document_Vector;
+                     begin
+                        Append_Flattened_List (Document.Table_Rows (I), Row);
+                        Rows.Append (Row);
+                     end;
+                  end loop;
+                  return Alignment_Table (Rows, Document.Table_Must_Break);
+               end;
+
+            when Table_Separator =>
+               return Alignment_Table_Separator (Text_For (Document));
+
             when Token | Whitespace =>
                return Prettier.Builders.Text (Text_For (Document));
 
@@ -660,6 +709,23 @@ package body Langkit_Support.Prettier_Utils is
                return Trim;
          end case;
       end Recurse;
+
+      ---------------------------
+      -- Append_Flattened_List --
+      ---------------------------
+
+      procedure Append_Flattened_List
+        (Self : Document_Type; Dest : in out Document_Vector) is
+      begin
+         if Self.Kind = List then
+            for I in 1 .. Self.List_Documents.Last_Index loop
+               Append_Flattened_List (Self.List_Documents (I), Dest);
+            end loop;
+         else
+            Dest.Append (Recurse (Self));
+         end if;
+      end Append_Flattened_List;
+
    begin
       return Recurse (Document);
    end To_Prettier_Document;
@@ -1058,6 +1124,43 @@ package body Langkit_Support.Prettier_Utils is
    end Create_Soft_Line;
 
    ------------------
+   -- Create_Table --
+   ------------------
+
+   function Create_Table
+     (Self       : in out Document_Pool;
+      Rows       : in out Document_Vectors.Vector;
+      Must_Break : Boolean) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Table)
+      do
+         Result.Table_Rows.Move (Rows);
+         Result.Table_Must_Break := Must_Break;
+         Self.Register (Result);
+      end return;
+   end Create_Table;
+
+   ----------------------------
+   -- Create_Table_Separator --
+   ----------------------------
+
+   function Create_Table_Separator
+     (Self : in out Document_Pool;
+      Kind : Token_Kind_Ref;
+      Text : Unbounded_Text_Type) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record'
+          (Kind       => Table_Separator,
+           Token_Kind => Kind,
+           Token_Text => Text)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Table_Separator;
+
+   ------------------
    -- Create_Token --
    ------------------
 
@@ -1315,13 +1418,30 @@ package body Langkit_Support.Prettier_Utils is
             when Soft_Line =>
                Write (Prefix & "softline");
 
-            when Token =>
+            when Table =>
+               Write (Prefix & "table:");
+               Write
+                 (Prefix & Simple_Indent & "must_break: "
+                  & Document.Table_Must_Break'Image);
+               for I in 1 .. Document.Table_Rows.Last_Index loop
+                  Write (Prefix & Simple_Indent & "row:");
+                  Process
+                    (Document.Table_Rows.Element (I),
+                     Prefix & Simple_Indent & List_Indent);
+               end loop;
+
+            when Table_Separator | Token =>
                declare
+                  Label      : constant String :=
+                    (case Document.Kind is
+                     when Table_Separator => "tableSeparator",
+                     when Token           => "token",
+                     when others          => raise Program_Error);
                   Token_Name : constant Name_Type :=
                     Token_Kind_Name (Document.Token_Kind);
                begin
                   Write
-                    (Prefix & "token["
+                    (Prefix & Label & "["
                      & Image (Format_Name (Token_Name, Camel)) & "]: "
                      & Image (To_Text (Document.Token_Text)));
                end;

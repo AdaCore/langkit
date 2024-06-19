@@ -282,6 +282,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --      templates that were instantiated for nodes that match at least one
    --      of the node types.
    --
+   --    * The "tableSeparator" template yields the corresponding Prettier
+   --      document::
+   --
+   --        {"kind": "tableSeparator", "text": "some_text_to_unparse"}
+   --
    --    * The "text" template yields a "text" Prettier document::
    --
    --        {"kind": "text", "text": "some_text_to_unparse"}
@@ -324,8 +329,29 @@ package Langkit_Support.Generic_API.Unparsing is
    --  The "fields" component is optional. If present, it contains a mapping
    --  from field names to document templates.
    --
-   --  The "sep" component is also optional, valid for list nodes only. If
-   --  present, it contains a document template to unparse the list separator.
+   --  The "sep" component is optional, valid for list nodes only. If present,
+   --  it contains a document template to unparse the list separator.
+   --
+   --  The "table" component is optional, valid for list nodes only. If
+   --  present, unparsing such lists yield a list of table documents, each list
+   --  child being unparsing to a list row. If present, it must contain an
+   --  object that accepts the following entries:
+   --
+   --  * "sep_before": Whether list separators must be inserted at the end of
+   --    the previous row (``"sep_before": true``) or at the beginning of the
+   --    next row (``"sep_before": false``). This is optional, and defaults to
+   --    ``true``.
+   --
+   --  * "split": Determine which kind of trivia found between two list
+   --    children trigger a table split (i.e. the presence of such trivias end
+   --    the current table, and trigger the creation of a new table for the
+   --    next children). This field is optional (by default: nothing splits
+   --    table), and when present, must be an array of strings, with the
+   --    following possible values: ``"empty_line"``, ``"line_comment"``.
+   --
+   --  * "must_break": Whether each row for this table must go on its own line.
+   --    If false (the default), rows go on each line only when a break occurs
+   --    in the table.
    --
    --  The "leading_sep" and "trailing_sep" components are optional, and valid
    --  only for list nodes that accept respectively leading and trailing
