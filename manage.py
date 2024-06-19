@@ -309,7 +309,7 @@ def make(args: Namespace) -> None:
         shutil.rmtree(PYTHON_LIB_ROOT / 'build', ignore_errors=True)
         shutil.rmtree(LKT_LIB_ROOT / 'build', ignore_errors=True)
 
-    lib_types = ",".join(l.name for l in args.library_types)
+    lib_types = ",".join(l.value for l in args.library_types)
     base_argv = [
         sys.executable, "./manage.py",
         "make", "-P",
