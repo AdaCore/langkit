@@ -82,7 +82,7 @@ class CallExpr(FooNode):
         """
         decl = Var(Self.node_env.get_first(Self.name).cast(T.FunDecl))
         return decl.args.map(lambda i, a: T.inner_env_assoc.new(
-            key=a.name.symbol, value=Self.args.at(i), metadata=No(T.env_md)
+            key=a.name.symbol, value=Self.args.at(i)
         ))
 
     @langkit_property(return_type=T.inner_env_assoc.array)
@@ -92,7 +92,7 @@ class CallExpr(FooNode):
         """
         decl = Var(Self.node_env.get_first(Self.name).cast(T.FunDecl))
         return decl.args.map(lambda a: T.inner_env_assoc.new(
-            key=a.name.symbol, value=a.arg_expr.node, metadata=No(T.env_md)
+            key=a.name.symbol, value=a.arg_expr.node
         ))
 
     # Entry points for the test program
