@@ -1,59 +1,59 @@
 lexer foo_lexer {
 
     @trivia()
-    whitespace <- p"[ \n\r\t]+"
+    Whitespace <- p"[ \n\r\t]+"
 
     family alphanumericals {
-        def <- "def"
-        var <- "var"
+        Def <- "def"
+        Var <- "var"
     }
 
     family alphanumericals {
-        error <- "error"
-        example <- "example"
-        null_tok <- "null"
+        Error <- "error"
+        Example <- "example"
+        Null <- "null"
 
-        kw_a <- "kwA"
-        kw_b <- "kwB"
-        kw_c <- "kwC"
-        kw_d <- "kwD"
-        kw_e <- "kwE"
-        kw_f <- "kwF"
+        KwA <- "kwA"
+        KwB <- "kwB"
+        KwC <- "kwC"
+        KwD <- "kwD"
+        KwE <- "kwE"
+        KwF <- "kwF"
     }
 
 
     family punctuation {
-        comma <- ","
-        dot <- "."
-        semicolon <- ";"
-        colon <- ":"
-        l_par <- "("
-        r_par <- ")"
-        l_brace <- "{"
-        r_brace <- "}"
-        equal <- or("=" | ":=")
-        plus <- "+"
+        Comma <- ","
+        Dot <- "."
+        Semicolon <- ";"
+        Colon <- ":"
+        LPar <- "("
+        RPar <- ")"
+        LBrace <- "{"
+        RBrace <- "}"
+        Equal <- or("=" | ":=")
+        Plus <- "+"
     }
 
-    minus <- "-"
-    less_than <- "<"
-    less_than_or_equal <- "<="
-    greater_than <- ">"
-    greater_than_or_equal <- ">="
+    Minus <- "-"
+    LessThan <- "<"
+    LessThanOrEqual <- "<="
+    GreaterThan <- ">"
+    GreaterThanOrEqual <- ">="
 
     @unparsing_spacing(with=alphanumericals)
     family alphanumericals {
-        number <- p"[0-9]+|0x[0-9a-f]+"
+        Number <- p"[0-9]+|0x[0-9a-f]+"
         @symbol()
-        identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+        Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
     }
 
-    string <- p"\"[^\"]*\""
+    String <- p"\"[^\"]*\""
 
     family comments {
         @with_unparsing_newline
         @trivia(comment=true)
-        comment <- p"#(.?)+"
+        Comment <- p"#(.?)+"
     }
 
 }

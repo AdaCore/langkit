@@ -2,8 +2,8 @@ import common
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    example <- Example(@example)
-    num <- Num(@number)
+    example <- Example(@Example)
+    num <- Num(@Number)
     @main_rule main_rule <- or(
         ASTList[FooNode, Example]*(num)
         | ListNode(example)

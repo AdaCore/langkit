@@ -1,7 +1,7 @@
 import common
 
 lexer foo_lexer {
-    termination <- "def"
+    Termination <- "def"
 }
 
 @with_lexer(foo_lexer)

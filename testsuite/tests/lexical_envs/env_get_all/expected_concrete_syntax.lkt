@@ -5,7 +5,7 @@ grammar foo_grammar {
     @main_rule program <- Program(
         "def" ident ?pick("{" list+(program) "}")
     )
-    ident <- Id(@identifier)
+    ident <- Id(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

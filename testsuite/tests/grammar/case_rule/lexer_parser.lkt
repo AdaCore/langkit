@@ -3,21 +3,21 @@ import expected_concrete_syntax
 lexer foo_lexer {
 
     match p"'.'" {
-        if previous_token is id then send(tick, 1)
-        else send(char, 3)
+        if previous_token is Id then send(Tick, 1)
+        else send(Char, 3)
     }
 
     match "access" {
-        if previous_token is tick then send(id, 6)
-        else send(access, 6)
+        if previous_token is Tick then send(Id, 6)
+        else send(Access, 6)
     }
 
-    access
-    char
-    dot <- "."
-    id <- p"[a-zA-Zé🙂]+"
-    tick <- "'"
-    @trivia() whitespace <- p"[ \n]+"
+    Access
+    Char
+    Dot <- "."
+    Id <- p"[a-zA-Zé🙂]+"
+    Tick <- "'"
+    @trivia() Whitespace <- p"[ \n]+"
 }
 
 @with_lexer(foo_lexer)
@@ -29,6 +29,6 @@ grammar foo_grammar {
         | char_lit
         | name
     )
-    char_lit <- CharLit(@char)
-    name <- Name(@id)
+    char_lit <- CharLit(@Char)
+    name <- Name(@Id)
 }

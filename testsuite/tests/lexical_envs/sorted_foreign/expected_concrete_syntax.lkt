@@ -5,7 +5,7 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(scope)
     scope <- Scope(name "{" list*(or(scope | ref)) "}")
     ref <- Ref(name)
-    identifier <- Identifier(@identifier)
+    identifier <- Identifier(@Identifier)
     name <- or(DottedName(name "." identifier) | identifier)
 }
 

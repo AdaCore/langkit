@@ -5,7 +5,7 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(scope)
     scope <- Scope(id "{" scope_content "}")
     scope_content <- list*(or(scope | use_clause | error_use_clause | ref))
-    id <- Id(@identifier)
+    id <- Id(@Identifier)
     use_clause <- UseClause("+" id)
     error_use_clause <- ErrorUseClause("+" "error")
     ref <- Ref("=" id)

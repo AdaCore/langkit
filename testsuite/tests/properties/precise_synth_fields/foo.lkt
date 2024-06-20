@@ -3,8 +3,8 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- or(literal | name | holder | many_holder)
-    literal <- Literal(@number)
-    name <- Name(@identifier)
+    literal <- Literal(@Number)
+    name <- Name(@Identifier)
     holder <- ParsedHolder("(" name ")")
     many_holder <- ParsedManyHolder("(" HolderList+(holder, ",") ")")
 }

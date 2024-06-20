@@ -13,7 +13,7 @@ grammar foo_grammar {
         | TypeInstantiation(type_expr "(" type_expr ")")
         | TypeRef(id)
     )
-    id <- Identifier(@identifier)
+    id <- Identifier(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

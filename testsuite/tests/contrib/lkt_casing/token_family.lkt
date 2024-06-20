@@ -1,7 +1,7 @@
 lexer foo_lexer {
     family Foo {
-        @trivia() whitespace <- p"[ \n\r\t]+"
-        example <- "example"
+        @trivia() Whitespace <- p"[ \n\r\t]+"
+        Example <- "example"
     }
 }
 

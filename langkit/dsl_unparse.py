@@ -2038,7 +2038,7 @@ def emit_enum_type(enum_type):
 
 
 def format_token_name(name):
-    return unparsed_name(name, "_tok")
+    return name.camel
 
 
 def format_pattern(pat):

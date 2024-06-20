@@ -20,25 +20,25 @@ pkg/body resolved to: pkg-body.txt
 --- Token info without trivia
   unit_text =
     null example var (null example null) example null
-  first_token = <Token Kind=Null_Tok Text="null">
+  first_token = <Token Kind=Null Text="null">
   first_text = null
   last_token = <Token Kind=Termination Text="">
   last_text = 
   root_node = <Sequence foo.txt:1:1-1:50>
-  root_start = <Token Kind=Null_Tok Text="null">
-  root_end = <Token Kind=Null_Tok Text="null">
+  root_start = <Token Kind=Null Text="null">
+  root_end = <Token Kind=Null Text="null">
   token_count = 11
   trivia_count = 0
 --- Token info with trivia
   unit_text =
     null example var (null example null) example null
-  first_token = <Token Kind=Null_Tok Text="null">
+  first_token = <Token Kind=Null Text="null">
   first_text = null
   last_token = <Token Kind=Termination Text="">
   last_text = 
   root_node = <Sequence foo.txt:1:1-1:50>
-  root_start = <Token Kind=Null_Tok Text="null">
-  root_end = <Token Kind=Null_Tok Text="null">
+  root_start = <Token Kind=Null Text="null">
+  root_end = <Token Kind=Null Text="null">
   token_count = 11
   trivia_count = 8
 
@@ -46,8 +46,8 @@ The NO_TOKEN = <Token Kind=No_Token Text="">
 Text range with a NO_TOKEN = 
 Equivalent tokens : <Token Kind=Identifier Text="identifier"> and <Token Kind=Identifier Text="identifier">
 Equivalent tokens : <Token Kind=Example Text="example"> and <Token Kind=Example Text="example">
-<Token Kind=Null_Tok Text="null"> != <Token Kind=Null_Tok Text="null"> = true
-<Token Kind=Null_Tok Text="null">.equals(<Token Kind=Null_Tok Text="null">) = true
+<Token Kind=Null Text="null"> != <Token Kind=Null Text="null"> = true
+<Token Kind=Null Text="null">.equals(<Token Kind=Null Text="null">) = true
 <Token Kind=Whitespace Text=" "> != <Token Kind=Whitespace Text=" "> = true
 <Token Kind=Whitespace Text=" ">.equals(<Token Kind=Whitespace Text=" ">) = true
 <Token Kind=Identifier Text="identifier"> != <Token Kind=Identifier Text="identifier"> = true

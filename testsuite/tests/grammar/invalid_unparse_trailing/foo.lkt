@@ -9,8 +9,8 @@ grammar foo_grammar {
     decl <- Decl("def" decl_assignment "," Example("example"))
     decl_assignment <- Assignment(identifier "=" number)
 
-    identifier <- Identifier(@identifier)
-    number <- Number(@number)
+    identifier <- Identifier(@Identifier)
+    number <- Number(@Number)
 }
 
 @abstract class FooNode implements Node[FooNode] {

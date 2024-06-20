@@ -4,7 +4,7 @@ import lexer_example
 grammar foo_grammar {
     @main_rule stmt_rule <- list*(or(def | blk))
     blk <- Block("{" or(stop_cut(def) | var_def) "}")
-    id <- Id(@identifier)
+    id <- Id(@Identifier)
     def <- Def("def" / id)
     var_def <- VarDef("def" "var" / id)
 }

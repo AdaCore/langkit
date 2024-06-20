@@ -1,11 +1,11 @@
 import common
 
 lexer foo_lexer {
-    ex1 <- p"a"
-    ex2 <- p"b"
-    ex3 <- p"+"
-    ex4 <- p"c"
-    ex5 <- p"d"
+    Ex1 <- p"a"
+    Ex2 <- p"b"
+    Ex3 <- p"+"
+    Ex4 <- p"c"
+    Ex5 <- p"d"
 }
 
 @with_lexer(foo_lexer)

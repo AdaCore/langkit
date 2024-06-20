@@ -3,8 +3,8 @@ import common
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- Root(or(
-        Identifier(@identifier)
-        | Identifier(@example)
-        | Number(@number)
+        Identifier(@Identifier)
+        | Identifier(@Example)
+        | Number(@Number)
     ))
 }

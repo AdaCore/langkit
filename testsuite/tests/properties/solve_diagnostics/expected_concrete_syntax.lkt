@@ -8,8 +8,8 @@ grammar foo_grammar {
         "def" ident "(" ident "," ident ")"
     )
     call <- Call(ident "(" literal "," literal ")")
-    ident <- Identifier(@identifier)
-    literal <- or(NumberLiteral(@number) | StringLiteral(@string))
+    ident <- Identifier(@Identifier)
+    literal <- or(NumberLiteral(@Number) | StringLiteral(@String))
     type_assert <- TypeAssert(literal ":" ident)
 }
 

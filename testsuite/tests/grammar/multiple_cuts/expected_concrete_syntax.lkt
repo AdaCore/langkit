@@ -3,7 +3,7 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule stmt_rule <- list*(or(def | var | dot | comma))
-    id <- Id(@identifier)
+    id <- Id(@Identifier)
     def <- Def(
         "def"
         / id ?pick("(" / id ")") ?pick("{" / id "}")

@@ -6,12 +6,12 @@ grammar foo_grammar {
     defs <- list*(def_rule)
     def_rule <- or(scope | var)
     scope <- Scope(
-        HasError("error") Id(@identifier) "{" defs "}"
+        HasError("error") Id(@Identifier) "{" defs "}"
     )
-    var <- Var(Id(@identifier) "=" name)
+    var <- Var(Id(@Identifier) "=" name)
     name <- or(
-        | Prefix(name "." Id(@identifier))
-        | Id(@identifier)
+        | Prefix(name "." Id(@Identifier))
+        | Id(@Identifier)
     )
 }
 

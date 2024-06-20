@@ -8,7 +8,7 @@ grammar foo_grammar {
     fun_decl <- FunDecl(
         "def" null(NullQual) name "(" ")" ";"
     )
-    name <- Identifier(@identifier)
+    name <- Identifier(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

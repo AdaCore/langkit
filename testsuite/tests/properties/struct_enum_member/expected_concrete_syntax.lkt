@@ -10,8 +10,8 @@ grammar foo_grammar {
         )
     )
     expr <- or(Plus(atom "+" expr) | atom)
-    atom <- or(Literal(@number) | name)
-    name <- Name(@identifier)
+    atom <- or(Literal(@Number) | name)
+    name <- Name(@Identifier)
 }
 
 @with_default(none) enum DeclKind {

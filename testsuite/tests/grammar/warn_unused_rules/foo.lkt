@@ -10,7 +10,7 @@ grammar foo_grammar {
     decl <- or(var_decl | fun_decl)
     var_decl <- VarDecl("var" name ";")
     fun_decl <- FunDecl("def" name ";")
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
 
     # Even though it is not used by the main parsing rule, this is an entry
     # point, so we should not warn about it.
@@ -18,8 +18,8 @@ grammar foo_grammar {
 
     # Neither of the following are used from the main rule nor from entry
     # points, we should warn about them.
-    example <- Example(@identifier number)
-    number <- Number(@number)
+    example <- Example(@Identifier number)
+    number <- Number(@Number)
 }
 
 @abstract class FooNode implements Node[FooNode] {

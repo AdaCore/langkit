@@ -402,7 +402,7 @@ grammar foo_grammar {
     rule397 <- ?rule398
     rule398 <- ?rule399
     rule399 <- ?rule400
-    rule400 <- Example(@example)
+    rule400 <- Example(@Example)
 }
 
 @abstract class FooNode implements Node[FooNode] {

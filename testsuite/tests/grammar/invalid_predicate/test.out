@@ -9,7 +9,7 @@ no-dot.lkt:5:56: error: reference to a property expected ("Node.property")
 
 == not-a-prop.lkt ==
 not-a-prop.lkt:5:78: error: reference to a property expected, got a field
-5 |     @main_rule main_rule <- Example(Identifier(@identifier)) |> when(Example.n)
+5 |     @main_rule main_rule <- Example(Identifier(@Identifier)) |> when(Example.n)
   |                                                                              ^
 
 

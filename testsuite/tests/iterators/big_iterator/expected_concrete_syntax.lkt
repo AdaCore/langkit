@@ -1,7 +1,7 @@
 lexer foo_lexer {
 
-    example <- "e"
-    @trivia() whitespace <- " "
+    Example <- "e"
+    @trivia() Whitespace <- " "
 }
 @with_lexer(foo_lexer)
 grammar foo_grammar {

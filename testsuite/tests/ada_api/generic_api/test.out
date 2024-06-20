@@ -24,7 +24,7 @@ Token kinds:
   Var (Alphanumericals)
   Error (Alphanumericals)
   Example (Alphanumericals)
-  Null_Tok (Alphanumericals)
+  Null (Alphanumericals)
   Kw_A (Alphanumericals)
   Kw_B (Alphanumericals)
   Kw_C (Alphanumericals)

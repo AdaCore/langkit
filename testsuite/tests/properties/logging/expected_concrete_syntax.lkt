@@ -6,7 +6,7 @@ grammar foo_grammar {
     decl <- Decl(HasPlus("+") name "(" ref_list ")")
     ref_list <- list*(ref)
     ref <- Ref(name)
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

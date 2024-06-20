@@ -6,7 +6,7 @@ abstract_node.lkt:5:35: error: Parsers cannot create abstract nodes
 
 == error_node.lkt ==
 error_node.lkt:5:56: error: Only Skip parsers can create error nodes
-5 |     @main_rule stmt_rule <- list*(or(Def("def" name) | Error(@identifier)))
+5 |     @main_rule stmt_rule <- list*(or(Def("def" name) | Error(@Identifier)))
   |                                                        ^^^^^^^^^^^^^^^^^^
 
 

@@ -5,7 +5,7 @@ grammar foo_grammar {
     defs <- list*(pick(or(scope | var) ";"))
     @main_rule scope <- list+(Scope(name "{" defs "}"))
     var <- Var(id "=" name)
-    id <- Id(@identifier)
+    id <- Id(@Identifier)
     name <- or(Prefix(name "." id) | id)
 }
 

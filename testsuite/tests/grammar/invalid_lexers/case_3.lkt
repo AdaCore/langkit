@@ -1,9 +1,9 @@
 import common
 
 lexer foo_example {
-    foo
+    Foo
     match p"foo" {
-        else send(foo, 3)
-        else send(foo, 3)
+        else send(Foo, 3)
+        else send(Foo, 3)
     }
 }

@@ -2,7 +2,7 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
     @main_rule main_rule <- list+(or(Definition("def" name) | name), ",")
 }
 

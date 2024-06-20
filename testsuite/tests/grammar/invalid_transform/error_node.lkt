@@ -2,8 +2,8 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule stmt_rule <- list*(or(Def("def" name) | Error(@identifier)))
-    name <- Name(@identifier)
+    @main_rule stmt_rule <- list*(or(Def("def" name) | Error(@Identifier)))
+    name <- Name(@Identifier)
 }
 
 class FooNode implements Node[FooNode] {

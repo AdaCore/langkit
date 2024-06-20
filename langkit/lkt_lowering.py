@@ -1656,16 +1656,16 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             # Create the token and register it where needed: the global token
             # mapping, its token family (if any) and the "newline_after" group
             # if the corresponding annotation is present.
-            token_lower_name = r.f_decl.f_syn_name.text
+            token_camel_name = r.f_decl.f_syn_name.text
             token_name = (
                 None
-                if token_lower_name == "_"
-                else name_from_lower(ctx, "token", r.f_decl.f_syn_name)
+                if token_camel_name == "_"
+                else name_from_camel(ctx, "token", r.f_decl.f_syn_name)
             )
 
             check_source_language(
-                token_lower_name not in ('termination', 'lexing_failure'),
-                '{} is a reserved token name'.format(token_lower_name)
+                token_camel_name not in ('Termination', 'LexingFailure'),
+                '{} is a reserved token name'.format(token_camel_name)
             )
             check_source_language(token_name not in tokens,
                                   'Duplicate token name')
@@ -1752,9 +1752,9 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         Return the Token that `ref` refers to.
         """
         with ctx.lkt_context(ref):
-            token_name = names.Name.check_from_lower(ref.text)
+            token_name = names.Name.check_from_camel(ref.text)
             check_source_language(token_name in tokens,
-                                  'Unknown token: {}'.format(token_name.lower))
+                                  'Unknown token: {}'.format(token_name.camel))
             return tokens[token_name]
 
     def lower_case_alt(alt: L.BaseLexerCaseRuleAlt) -> Alt:
@@ -1954,9 +1954,9 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
     grammar = ctx.grammar
     assert grammar is not None
 
-    # Build a mapping for all tokens registered in the lexer. Use lower case
+    # Build a mapping for all tokens registered in the lexer. Use camel case
     # names, as this is what the concrete syntax is supposed to use.
-    tokens = {cast(names.Name, token.name).lower: token
+    tokens = {cast(names.Name, token.name).camel: token
               for token in lexer_tokens.tokens}
 
     # Build a mapping for all nodes created in the DSL. We cannot use T (the

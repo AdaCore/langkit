@@ -8,8 +8,8 @@ grammar foo_grammar {
     fun_decl <- FunDecl("def" id "(" list*(argspec) ")")
     argspec <- ArgSpec(id "=" expr)
     call_expr <- CallExpr(id "(" list*(expr) ")")
-    expr <- or(Literal(@number) | Ref(id))
-    id <- Identifier(@identifier)
+    expr <- or(Literal(@Number) | Ref(id))
+    id <- Identifier(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

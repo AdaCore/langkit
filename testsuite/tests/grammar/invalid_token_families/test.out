@@ -6,7 +6,7 @@ invalid_decl.lkt:4:5: error: Only lexer rules allowed in family blocks
 
 == present_twice.lkt ==
 present_twice.lkt:10:9: error: Duplicate token name
-10 |         number <- p"[0-9]+"
+10 |         Number <- p"[0-9]+"
    |         ^^^^^^^^^^^^^^^^^^^
 
 

@@ -4,7 +4,7 @@ import lexer_example
 grammar foo_grammar {
     @main_rule stmts_rule <- list+(stmt_rule)
     stmt_rule <- or(def_rule | Block("{" list*(stmt_rule) "}"))
-    def_rule <- Def(Name(@identifier) ?("(" stmts_rule ")"))
+    def_rule <- Def(Name(@Identifier) ?("(" stmts_rule ")"))
 }
 
 @metadata struct Metadata {

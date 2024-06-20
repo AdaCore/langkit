@@ -3,5 +3,5 @@ import common
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- pick("example" Root(item))
-    item <- or(Identifier(@identifier) | Number(@number))
+    item <- or(Identifier(@Identifier) | Number(@Number))
 }

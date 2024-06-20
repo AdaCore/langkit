@@ -3,7 +3,7 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule expr <- list*(Decl(
-        "def" Identifier(@identifier) "=" Number(@number)
+        "def" Identifier(@Identifier) "=" Number(@Number)
     ))
 }
 

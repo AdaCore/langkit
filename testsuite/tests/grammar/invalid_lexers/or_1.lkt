@@ -1,7 +1,7 @@
 import common
 
 lexer foo_lexer {
-    example <- or("example" "foo" | "bar")
+    Example <- or("example" "foo" | "bar")
 }
 
 @with_lexer(foo_lexer)

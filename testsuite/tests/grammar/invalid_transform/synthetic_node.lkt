@@ -3,7 +3,7 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule stmt_rule <- list*(or(Def("def" name) | SynthNode(name)))
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
 }
 
 class FooNode implements Node[FooNode] {

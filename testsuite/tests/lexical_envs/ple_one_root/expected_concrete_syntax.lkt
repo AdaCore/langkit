@@ -3,14 +3,14 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- or(
-        | pick(scope @termination)
-        | pick(list*(scope) @termination)
+        | pick(scope @Termination)
+        | pick(list*(scope) @Termination)
     )
     scope <- Scope(id "{" ?deps ?defs refs "}")
-    deps <- pick("+" "{" list*(Dep(@identifier)) "}")
+    deps <- pick("+" "{" list*(Dep(@Identifier)) "}")
     defs <- pick("def" "{" list*(Def(id)) "}")
-    refs <- list*(Ref(@identifier))
-    id <- Id(@identifier)
+    refs <- list*(Ref(@Identifier))
+    id <- Id(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

@@ -1,16 +1,16 @@
 lexer foo_lexer {
 
-    @trivia() whitespace <- p"[ \n\r\t]+"
-    id <- p"[a-zA-Z]+"
-    number <- p"[0-9]+"
-    assign <- or(
+    @trivia() Whitespace <- p"[ \n\r\t]+"
+    Id <- p"[a-zA-Z]+"
+    Number <- p"[0-9]+"
+    Assign <- or(
         | "="
         | ":="
     )
 }
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule expr <- list*(Assignment(Identifier(@id) "=" Number(@number)))
+    @main_rule expr <- list*(Assignment(Identifier(@Id) "=" Number(@Number)))
 }
 
 @abstract class FooNode implements Node[FooNode] {

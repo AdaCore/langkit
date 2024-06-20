@@ -5,11 +5,11 @@ grammar foo_grammar {
     @main_rule main_rule <- defs
     defs <- list*(def_rule)
     def_rule <- or(scope | var)
-    scope <- Scope(Id(@identifier) "{" defs "}")
-    var <- Var(Id(@identifier) "=" name)
+    scope <- Scope(Id(@Identifier) "{" defs "}")
+    var <- Var(Id(@Identifier) "=" name)
     name <- or(
-        | Prefix(name "." Id(@identifier))
-        | Id(@identifier)
+        | Prefix(name "." Id(@Identifier))
+        | Id(@Identifier)
     )
 }
 

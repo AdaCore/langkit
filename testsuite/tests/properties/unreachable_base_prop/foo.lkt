@@ -11,8 +11,8 @@ grammar foo_grammar {
     expr <- or(atom | plus)
 
     atom <- or(lit | ref)
-    lit <- Lit(@number)
-    ref <- Ref(@identifier)
+    lit <- Lit(@Number)
+    ref <- Ref(@Identifier)
 
     plus <- pick("(" Plus(expr "+" expr) ")")
 }

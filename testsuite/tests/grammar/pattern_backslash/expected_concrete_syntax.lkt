@@ -1,13 +1,13 @@
 lexer foo_lexer {
 
-    @trivia() escaped_newline <- p"\\\\\n[ \t\r]*"
-    @trivia() newline <- p"\n"
-    @trivia() whitespace <- p"[ \t]+"
-    id <- p"([a-zA-Z]|\\\\|\\\")+"
+    @trivia() EscapedNewline <- p"\\\\\n[ \t\r]*"
+    @trivia() Newline <- p"\n"
+    @trivia() Whitespace <- p"[ \t]+"
+    Id <- p"([a-zA-Z]|\\\\|\\\")+"
 }
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule expr <- list*(Identifier(@id))
+    @main_rule expr <- list*(Identifier(@Id))
 }
 
 @abstract class FooNode implements Node[FooNode] {

@@ -29,20 +29,20 @@ case_4.lkt:5:5: error: Invalid case rule topology
 
 
 == case_5.lkt ==
-case_5.lkt:6:36: error: Unknown token: bar
-6 |         if previous_token is foo | bar then send(foo, 3)
+case_5.lkt:6:36: error: Unknown token: Bar
+6 |         if previous_token is Foo | Bar then send(Foo, 3)
   |                                    ^^^
 
 
 == case_6.lkt ==
 case_6.lkt:7:24: error: Expected Number, got Identifier
-7 |         else send(foo, foo)
+7 |         else send(Foo, Foo)
   |                        ^^^
 
 
 == case_7.lkt ==
-case_7.lkt:7:19: error: Unknown token: bar
-7 |         else send(bar, 3)
+case_7.lkt:7:19: error: Unknown token: Bar
+7 |         else send(Bar, 3)
   |                   ^^^
 
 
@@ -57,31 +57,31 @@ Code generation was successful
 
 == or_1.lkt ==
 or_1.lkt:4:19: error: exactly one matcher expected
-4 |     example <- or("example" "foo" | "bar")
+4 |     Example <- or("example" "foo" | "bar")
   |                   ^^^^^^^^^^^^^^^
 
 
 == or_2.lkt ==
 or_2.lkt:4:43: error: Invalid lexing expression
-4 |     example <- or("example" | or ("foo" | /))
+4 |     Example <- or("example" | or ("foo" | /))
   |                                           ^
 
 
 == pattern_1.lkt ==
 pattern_1.lkt:4:16: error: unbalanced square bracket
-4 |     example <- p"["
+4 |     Example <- p"["
   |                ^^^^
 
 
 == pattern_2.lkt ==
 pattern_2.lkt:4:16: error: unknown pattern: no_such_pattern
-4 |     example <- p"{no_such_pattern}"
+4 |     Example <- p"{no_such_pattern}"
   |                ^^^^^^^^^^^^^^^^^^^^
 
 
 == pattern_3.lkt ==
 pattern_3.lkt:6:16: error: infinite recursion in pat1
-6 |     example <- p"{pat1}"
+6 |     Example <- p"{pat1}"
   |                ^^^^^^^^^
 
 
@@ -93,13 +93,13 @@ pattern_4.lkt:4:5: error: unbalanced square bracket
 
 == pattern_5.lkt ==
 pattern_5.lkt:6:12: error: nothing to repeat
-6 |     ex3 <- p"+"
+6 |     Ex3 <- p"+"
   |            ^^^^
 
 
 == pattern_6.lkt ==
 pattern_6.lkt:4:16: error: unbalanced parentheses
-4 |     example <- p"a)"
+4 |     Example <- p"a)"
   |                ^^^^^
 
 
@@ -122,15 +122,15 @@ pattern_9.lkt:4:5: error: Pattern string literal expected
 
 
 == rule_1.lkt ==
-rule_1.lkt:4:5: error: termination is a reserved token name
-4 |     termination <- "def"
+rule_1.lkt:4:5: error: Termination is a reserved token name
+4 |     Termination <- "def"
   |     ^^^^^^^^^^^^^^^^^^^^
 
 
 == rule_2.lkt ==
-rule_2.lkt:4:5: error: lexing_failure is a reserved token name
-4 |     lexing_failure <- "example"
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+rule_2.lkt:4:5: error: LexingFailure is a reserved token name
+4 |     LexingFailure <- "example"
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == spacing_1.lkt ==
@@ -153,49 +153,49 @@ spacing_3.lkt:4:29: error: Unknown token family: foo
 
 == token_action_1.lkt ==
 token_action_1.lkt:4:5: error: Arguments required for this annotation
-4 |     @text example <- "example"
+4 |     @text Example <- "example"
   |     ^^^^^
 
 
 == token_action_2.lkt ==
 token_action_2.lkt:4:5: error: No positional argument allowed
-4 |     @text(1) example <- "example"
+4 |     @text(1) Example <- "example"
   |     ^^^^^^^^
 
 
 == token_action_3.lkt ==
 token_action_3.lkt:4:5: error: Invalid arguments: bar
-4 |     @text(bar=true) example <- "example"
+4 |     @text(bar=true) Example <- "example"
   |     ^^^^^^^^^^^^^^^
 
 
 == token_action_4.lkt ==
 token_action_4.lkt:4:31: error: Boolean literal expected
-4 |     @text(start_ignore_layout=1) example <- "example"
+4 |     @text(start_ignore_layout=1) Example <- "example"
   |                               ^
 
 
 == token_action_5.lkt ==
 token_action_5.lkt:4:5: error: At most one token action allowed
-4 |     @ignored @text() example <- "example"
+4 |     @ignored @text() Example <- "example"
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == token_action_6.lkt ==
 token_action_6.lkt:4:5: error: Invalid arguments: comment
-4 |     @text(comment=false) example <- "example"
+4 |     @text(comment=false) Example <- "example"
   |     ^^^^^^^^^^^^^^^^^^^^
 
 
 == token_matcher.lkt ==
 token_matcher.lkt:4:16: error: Invalid lexing expression
-4 |     example <- /
+4 |     Example <- /
   |                ^
 
 
 == token_name.lkt ==
 token_name.lkt:5:5: error: Duplicate token name
-5 |     example <- "null"
+5 |     Example <- "null"
   |     ^^^^^^^^^^^^^^^^^
 
 

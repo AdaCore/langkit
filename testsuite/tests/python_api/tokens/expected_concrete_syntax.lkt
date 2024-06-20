@@ -5,7 +5,7 @@ grammar foo_grammar {
     @main_rule main_rule <- element
     element <- or(sequence | atom)
     sequence <- pick("(" Sequence*(element) ")")
-    atom <- Atom(@identifier)
+    atom <- Atom(@Identifier)
 }
 
 @abstract @with_abstract_list class FooNode implements Node[FooNode] {

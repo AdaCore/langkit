@@ -12,7 +12,7 @@ With trivia:
   root text=
     "null example var (null example null) example null"
   first_token = "null"
-  first_token_kind_name = "Null_Tok"
+  first_token_kind_name = "Null"
   last_token = ""
   token_start = "null"
   token_end = "null"
@@ -23,7 +23,7 @@ Without trivia:
   root text=
     "null example var (null example null) example null"
   first_token = "null"
-  first_token_kind_name = "Null_Tok"
+  first_token_kind_name = "Null"
   last_token = ""
   token_start = "null"
   token_end = "null"
