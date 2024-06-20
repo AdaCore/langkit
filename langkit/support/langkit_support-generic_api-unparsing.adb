@@ -14,6 +14,7 @@ with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 with Ada.Unchecked_Deallocation;
 
+with GNAT.Regpat;
 with GNAT.Strings;
 
 with GNATCOLL.JSON; use GNATCOLL.JSON;
@@ -3730,6 +3731,21 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  ``Language``. Raise a ``Constraint_Error`` if ``Arg`` is not a valid
       --  rule name.
 
+      type Sloc_Specifier is record
+         Sloc         : Source_Location;
+         Parent_Level : Natural;
+      end record;
+
+      No_Sloc_Specifier     : constant Sloc_Specifier :=
+        (No_Source_Location, 0);
+      Sloc_Specifier_Regexp : constant GNAT.Regpat.Pattern_Matcher :=
+        GNAT.Regpat.Compile
+          ("^([0-9]+)"
+           & ":([0-9]+)"
+           & "(\^([0-9]+))?$");
+
+      function Convert (Arg : String) return Sloc_Specifier;
+
       -------------
       -- Convert --
       -------------
@@ -3745,6 +3761,29 @@ package body Langkit_Support.Generic_API.Unparsing is
             end if;
          end loop;
          raise Opt_Parse_Error with "invalid grammar rule name";
+      end Convert;
+
+      -------------
+      -- Convert --
+      -------------
+
+      function Convert (Arg : String) return Sloc_Specifier is
+         use GNAT.Regpat;
+         Matches : Match_Array (0 .. 4);
+      begin
+         Match (Sloc_Specifier_Regexp, Arg, Matches);
+         if Matches (0) = No_Match then
+            raise Opt_Parse_Error with "invalid sloc specifier";
+         end if;
+
+         return
+           (Sloc         => Value
+                              (Arg (Matches (1).First .. Matches (2).Last)),
+            Parent_Level => (if Matches (4) = No_Match
+                             then 0
+                             else Natural'Value
+                                    (Arg (Matches (4).First
+                                          ..  Matches (4).Last))));
       end Convert;
 
       Parser : Argument_Parser := Create_Argument_Parser
@@ -3808,6 +3847,17 @@ package body Langkit_Support.Generic_API.Unparsing is
          Help        =>
            "LANGKIT.UNPARSING.*. sub-trace name to activate");
 
+      package Sloc is new Parse_Option
+        (Parser      => Parser,
+         Short       => "-s",
+         Long        => "--sloc",
+         Arg_Type    => Sloc_Specifier,
+         Help        => "Location of the node to unparse. Format: L:C (L ="
+                        & " line number, C = column number) or L:C^N (N = "
+                        & " number of times we get the parent of the node"
+                        & " looked up by sloc).",
+         Default_Val => No_Sloc_Specifier);
+
       package Config_Filename is new Parse_Positional_Arg
         (Parser   => Parser,
          Name     => "config-file",
@@ -3829,6 +3879,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       Config  : Unparsing_Configuration;
       Context : Lk_Context;
       Unit    : Lk_Unit;
+      Node    : Lk_Node;
    begin
       GNATCOLL.Traces.Parse_Config_File;
       if not Parser.Parse then
@@ -3872,12 +3923,33 @@ package body Langkit_Support.Generic_API.Unparsing is
          return;
       end if;
 
+      --  Look for the node to unparse
+
+      Node := Unit.Root;
+      declare
+         SS : constant Sloc_Specifier := Sloc.Get;
+      begin
+         if SS /= No_Sloc_Specifier then
+            Node := Node.Lookup (SS.Sloc);
+            for I in 1 .. SS.Parent_Level loop
+               exit when Node.Is_Null;
+               Node := Node.Parent;
+            end loop;
+
+            if Node.Is_Null then
+               Put_Line ("No node found at the given location");
+               Set_Exit_Status (Failure);
+               return;
+            end if;
+         end if;
+      end;
+
       --  Unparse the tree to a Prettier document
 
       declare
          F         : File_Type;
          Doc       : constant Prettier.Document_Type :=
-           Unparse_To_Prettier (Unit.Root, Config);
+           Unparse_To_Prettier (Node, Config);
          Formatted : constant Unbounded_String :=
            Prettier.Format
              (Document => Doc,
