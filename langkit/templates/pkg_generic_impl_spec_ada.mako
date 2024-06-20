@@ -180,6 +180,9 @@ private package ${ada_lib_name}.Generic_Impl is
    function Node_Text (Node : Internal_Node) return Text_Type;
    function Node_Sloc_Range
      (Node : Internal_Node) return Source_Location_Range;
+   function Node_Lookup
+     (Node : Analysis.Internal_Node;
+      Sloc : Source_Location) return Analysis.Internal_Node;
    function Node_Last_Attempted_Child (Node : Internal_Node) return Integer;
 
    function Entity_Image (Entity : Internal_Entity) return String;
@@ -267,6 +270,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Node_Token_End            => Node_Token_End'Access,
       Node_Text                 => Node_Text'Access,
       Node_Sloc_Range           => Node_Sloc_Range'Access,
+      Node_Lookup               => Node_Lookup'Access,
       Node_Last_Attempted_Child => Node_Last_Attempted_Child'Access,
 
       Entity_Image => Entity_Image'Access,

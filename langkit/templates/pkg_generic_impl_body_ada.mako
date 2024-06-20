@@ -465,6 +465,17 @@ package body ${ada_lib_name}.Generic_Impl is
       return Implementation.Sloc_Range (+Node);
    end Node_Sloc_Range;
 
+   -----------------
+   -- Node_Lookup --
+   -----------------
+
+   function Node_Lookup
+     (Node : Analysis.Internal_Node;
+      Sloc : Source_Location) return Analysis.Internal_Node is
+   begin
+      return +Implementation.Lookup (+Node, Sloc);
+   end Node_Lookup;
+
    -------------------------------
    -- Node_Last_Attempted_Child --
    -------------------------------

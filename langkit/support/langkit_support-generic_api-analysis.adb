@@ -1149,6 +1149,22 @@ package body Langkit_Support.Generic_API.Analysis is
       return Self.Desc.Node_Sloc_Range (Self.Internal.Node);
    end Sloc_Range;
 
+   ------------
+   -- Lookup --
+   ------------
+
+   function Lookup
+     (Self : Lk_Node'Class; Sloc : Source_Location) return Lk_Node is
+   begin
+      Check_Safety_Net (Self);
+      if Self.Is_Null then
+         return No_Lk_Node;
+      end if;
+
+      return Wrap_Node
+               (Self.Desc.Node_Lookup (Self.Internal.Node, Sloc), Self);
+   end Lookup;
+
    -------------------
    -- Is_Incomplete --
    -------------------
