@@ -123,6 +123,12 @@ for source in [
         GPRMain("main.adb", ["config.json", "trivias/{}".format(source)])
     )
 
+mains.append(
+    GPRMain(
+        "main.adb", ["trivias/var_group_config.json", "trivias/var_decls.txt"]
+    )
+)
+
 for i in ["none", 0, 1, 2]:
     mains.append(
         GPRMain(

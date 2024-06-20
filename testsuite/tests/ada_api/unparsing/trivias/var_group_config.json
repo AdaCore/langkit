@@ -1,0 +1,14 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "VarDecl": {
+      "node": {"kind": "group", "document": "recurse"},
+      "fields": {
+        "f_type_expr": ["line", "recurse", "line"],
+        "f_value": ["line", "recurse"]
+      }
+    }
+  }
+}

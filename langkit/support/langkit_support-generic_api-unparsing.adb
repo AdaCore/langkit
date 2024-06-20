@@ -771,8 +771,14 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    procedure Compute_Trivias_Info (Node : Lk_Node; Info : out Trivias_Info)
    is
+      Trace : constant Boolean := Trivias_Trace.Is_Active;
+
       function Process (Node : Lk_Node) return Visit_Status;
       --  Callback for ``Langkit_Support.Analysis.Traverse``
+
+      procedure Reattach (T : Lk_Token; What : String);
+      --  Include ``T`` to reattached trivias. ``What`` is used to qualify this
+      --  trivia in debug logs.
 
       -------------
       -- Process --
@@ -780,19 +786,14 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       function Process (Node : Lk_Node) return Visit_Status is
       begin
-         --  Register reattached trivias that come before list nodes
+         --  Register reattached trivias that come before/after list nodes
 
          if Node.Is_List_Node then
             declare
                First_Trivia : constant Lk_Token := First_Trivia_Before (Node);
             begin
                if not First_Trivia.Is_Null then
-                  Info.First_Reattached_Trivias.Include (First_Trivia);
-                  if Trivias_Trace.Is_Active then
-                     Trivias_Trace.Trace ("Found leading trivias:");
-                     Trivias_Trace.Trace ("  " & Image (First_Trivia));
-                     Trivias_Trace.Trace ("  to reattach to " & Node.Image);
-                  end if;
+                  Reattach (First_Trivia, "leading trivias before list node");
                end if;
             end;
 
@@ -801,18 +802,39 @@ package body Langkit_Support.Generic_API.Unparsing is
                   T : constant Lk_Token := Node.Token_End.Next;
                begin
                   if T.Is_Trivia then
-                     Info.First_Reattached_Trivias.Include (T);
-                     if Trivias_Trace.Is_Active then
-                        Trivias_Trace.Trace ("Found trailing trivias:");
-                        Trivias_Trace.Trace ("  " & Image (T));
-                        Trivias_Trace.Trace ("  to reattach to " & Node.Image);
-                     end if;
+                     Reattach (T, "trailing trivias after list node");
                   end if;
                end;
             end if;
          end if;
+
+         --  Also register reattached trivias that come after list children:
+         --  they must be processed during the unparsing of the parent list.
+
+         if not Node.Parent.Is_Null and then Node.Parent.Is_List_Node then
+            declare
+               T : constant Lk_Token := Node.Token_End.Next;
+            begin
+               if T.Is_Trivia then
+                  Reattach (T, "trailing trivias after list child");
+               end if;
+            end;
+         end if;
+
          return Into;
       end Process;
+
+      --------------
+      -- Reattach --
+      --------------
+
+      procedure Reattach (T : Lk_Token; What : String) is
+      begin
+         Info.First_Reattached_Trivias.Include (T);
+         if Trace then
+            Trivias_Trace.Trace ("Reattaching " & What & ":" & T.Image);
+         end if;
+      end Reattach;
    begin
       --  Determine which tokens have reattached trivias
 

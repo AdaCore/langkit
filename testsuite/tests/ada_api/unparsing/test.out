@@ -1783,6 +1783,15 @@ var v: T = foo(
 == main.adb config.json trivias/unit_empty.txt ==
 
 
+== main.adb trivias/var_group_config.json trivias/var_decls.txt ==
+var v1: T = 1;
+
+# Comment 1
+var v2: T = 2;
+
+# Comment 2
+var v3: T = 3;
+
 == main.adb max_empty_lines_none.json trivias/max_empty_lines.txt ==
 var v0:T=0;var v1:T=1;
 
