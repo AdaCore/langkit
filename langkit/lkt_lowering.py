@@ -1565,6 +1565,14 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     List of tokens after which we must introduce a newline during unparsing.
     """
 
+    @dataclass
+    class RegularRule:
+        token: Action
+        is_pre: bool
+        matcher_expr: L.GrammarExpr
+
+    SrcRule = Union[RegularRule, L.LexerCaseRule]
+
     def ignore_constructor(start_ignore_layout: bool,
                            end_ignore_layout: bool) -> Action:
         """
@@ -1574,10 +1582,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         del start_ignore_layout, end_ignore_layout
         return Ignore()
 
-    def process_family(f: L.LexerFamilyDecl) -> None:
+    def process_family(f: L.LexerFamilyDecl, rules: list[SrcRule]) -> None:
         """
-        Process a LexerFamilyDecl node. Register the token family and process
-        the rules it contains.
+        Process a LexerFamilyDecl node. Register the token family, the token
+        declarations it contains, and append the rules it contains to
+        ``rules``.
         """
         with ctx.lkt_context(f):
             # Create the token family, if needed
@@ -1590,7 +1599,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             for r in f.f_rules:
                 if not isinstance(r.f_decl, L.GrammarRuleDecl):
                     error('Only lexer rules allowed in family blocks')
-                process_token_rule(r, token_set)
+                process_token_rule(r, rules, token_set)
 
             family_annotations = parse_annotations(
                 ctx,
@@ -1604,13 +1613,15 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
     def process_token_rule(
         r: L.FullDecl,
-        token_set: Optional[Set[TokenAction]] = None
+        rules: list[SrcRule],
+        token_set: Optional[Set[TokenAction]] = None,
     ) -> None:
         """
         Process the full declaration of a GrammarRuleDecl node: create the
         token it declares and lower the optional associated lexing rule.
 
         :param r: Full declaration for the GrammarRuleDecl to process.
+        :param rules: List of lexing rules, to be completed with ``r``.
         :param token_set: If this declaration appears in the context of a token
             family, this adds the new token to this set.  Must be left to None
             otherwise.
@@ -1668,16 +1679,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 if rule_annot.with_unparsing_newline:
                     newline_after.append(token)
 
-            # Lower the lexing rule, if present
+            # If there is a matcher, register this rule to be processed later
             assert isinstance(r.f_decl, L.GrammarRuleDecl)
             matcher_expr = r.f_decl.f_expr
             if matcher_expr is not None:
-                for matcher in lower_matcher_list(matcher_expr):
-                    rule = (matcher, token)
-                    if is_pre:
-                        pre_rules.append(rule)
-                    else:
-                        rules.append(rule)
+                rules.append(RegularRule(token, is_pre, matcher_expr))
 
     def process_pattern(full_decl: L.FullDecl) -> None:
         """
@@ -1763,16 +1769,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                    send=lower_token_ref(alt.f_send.f_sent),
                    match_size=int(alt.f_send.f_match_size.text))
 
-    # Go through all rules to register tokens, their token families and lexing
-    # rules.
-    #
-    # Process "case" lexing rules only at the end, since they can reference
-    # other lexing rules that may appear earlier in the lexer declaration.
-    case_rules: list[
-        tuple[
-            L.GrammarExpr, L.BaseLexerCaseRuleAlt, L.BaseLexerCaseRuleAlt
-        ]
-    ] = []
+    # First, go through all rules to register tokens and their token families.
+    # Process lexing rules only after that (in order, to preserve precedence
+    # information). Doing two passes is necessary to properly handle "forward
+    # references".
+    src_rules: list[SrcRule] = []
     for full_decl in full_lexer.f_decl.f_rules:
         with ctx.lkt_context(full_decl):
             if isinstance(full_decl, L.FullDecl):
@@ -1782,7 +1783,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 if isinstance(decl, L.GrammarRuleDecl):
                     # Here, we have a token declaration, potentially associated
                     # with a lexing rule.
-                    process_token_rule(full_decl)
+                    process_token_rule(full_decl, src_rules)
 
                 elif isinstance(decl, L.ValDecl):
                     # This is the declaration of a pattern
@@ -1791,42 +1792,51 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 elif isinstance(decl, L.LexerFamilyDecl):
                     # This is a family block: go through all declarations
                     # inside it.
-                    process_family(decl)
+                    process_family(decl, src_rules)
 
                 else:
                     check_source_language(False,
                                           'Unexpected declaration in lexer')
 
             elif isinstance(full_decl, L.LexerCaseRule):
-                syn_alts = list(full_decl.f_alts)
+                src_rules.append(full_decl)
+
+            else:
+                # The grammar should make the following dead code
+                assert False, 'Invalid lexer rule: {}'.format(full_decl)
+
+    # Lower all lexing rules in source order
+    for r in src_rules:
+        if isinstance(r, RegularRule):
+            for matcher in lower_matcher_list(r.matcher_expr):
+                rule = (matcher, r.token)
+                if r.is_pre:
+                    pre_rules.append(rule)
+                else:
+                    rules.append(rule)
+
+        elif isinstance(r, L.LexerCaseRule):
+            syn_alts = list(r.f_alts)
+            with ctx.lkt_context(r):
                 check_source_language(
                     len(syn_alts) == 2 and
                     isinstance(syn_alts[0], L.LexerCaseRuleCondAlt) and
                     isinstance(syn_alts[1], L.LexerCaseRuleDefaultAlt),
                     'Invalid case rule topology'
                 )
-                case_rules.append((
-                    full_decl.f_expr,
-                    syn_alts[0],
-                    syn_alts[1],
-                ))
-
-            else:
-                # The grammar should make the following dead code
-                assert False, 'Invalid lexer rule: {}'.format(full_decl)
-
-    # Lower "case" rules
-    for matcher_expr, alt_0, alt_1 in case_rules:
-        with ctx.lkt_context(matcher_expr):
+            matcher_expr = r.f_expr
             matcher = lower_matcher(matcher_expr)
             rules.append(
                 Case(
                     matcher,
-                    lower_case_alt(alt_0),
-                    lower_case_alt(alt_1),
+                    lower_case_alt(syn_alts[0]),
+                    lower_case_alt(syn_alts[1]),
                     location=Location.from_lkt_node(matcher_expr),
                 )
             )
+
+        else:
+            assert False, f"Unexpected lexer rule: {r}"
 
     # Create the LexerToken subclass to define all tokens and token families
     items: Dict[str, Union[Action, TokenFamily]] = {}
