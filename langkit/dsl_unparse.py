@@ -2075,6 +2075,8 @@ def unparse_token_decl(token, newline_afters, is_pre):
         kind = 'symbol'
     elif isinstance(token, WithTrivia):
         kind = 'trivia'
+        if token.is_comment:
+            options += ["comment=true"]
     elif isinstance(token, WithText):
         kind = 'text'
     else:
