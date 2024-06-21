@@ -2,7 +2,7 @@ def f(): T
 {
   # First comment
 
-  a, b = c();
+  a, b = c(); # Suffix comment
 
   # Second comment
 

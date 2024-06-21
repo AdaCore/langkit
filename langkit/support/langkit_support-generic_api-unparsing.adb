@@ -235,8 +235,8 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  separator.
 
    procedure Compute_Trivia_Fragments
-     (Unit : Lk_Unit; Fragments : out Trivias_Fragments);
-   --  Compute unparsing fragments for all trivias in ``Unit`` and store them
+     (Node : Lk_Node; Fragments : out Trivias_Fragments);
+   --  Compute unparsing fragments for all trivias in ``Node`` and store them
    --  in ``Fragments``.
 
    procedure Compute_Trivias_Info (Node : Lk_Node; Info : out Trivias_Info);
@@ -608,12 +608,12 @@ package body Langkit_Support.Generic_API.Unparsing is
    ------------------------------
 
    procedure Compute_Trivia_Fragments
-     (Unit : Lk_Unit; Fragments : out Trivias_Fragments)
+     (Node : Lk_Node; Fragments : out Trivias_Fragments)
    is
       Trace : constant Boolean := Trivias_Trace.Is_Active;
 
-      T : Lk_Token := Unit.First_Token;
-      --  Token/trivia cursor (we go through all tokens in the given unit)
+      T, Exit_Token : Lk_Token;
+      --  Token/trivia cursor, and token to stop trivia fragments computation
 
       First_Trivia : Token_Index := No_Token_Index;
       --  When we are processing a sequence of trivia, this contains the index
@@ -653,7 +653,20 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
          Fragment_Range.Last := Fragments.Vector.Last_Index;
       end Append;
+
+      Unit         : constant Lk_Unit := Node.Unit;
+      Node_Is_Root : constant Boolean := Node = Unit.Root;
    begin
+      --  Determine the token iteration range
+
+      if Node_Is_Root then
+         T := Unit.First_Token;
+         Exit_Token := No_Lk_Token;
+      else
+         T := Node.Token_Start;
+         Exit_Token := Node.Token_End.Next;
+      end if;
+
       --  Allocate a map from trivia index to unparsing fragment range that is
       --  big enough for all trivias in ``Unit``. Only some trivias start a
       --  trivia sequence, so some slots will be unused: put a buggy range for
@@ -668,7 +681,7 @@ package body Langkit_Support.Generic_API.Unparsing is
      --  Iterate through all tokens/trivias in this unit to find sequences of
      --  trivias: create unparsing fragments for them.
 
-      while not T.Is_Null loop
+      while T /= Exit_Token loop
          if T.Is_Trivia then
             if Trace then
                Trivias_Trace.Trace ("Found " & T.Image);
@@ -843,7 +856,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       --  Scan all tokens and create the corresponding trivias
 
-      Compute_Trivia_Fragments (Node.Unit, Info.Fragments);
+      Compute_Trivia_Fragments (Node, Info.Fragments);
    end Compute_Trivias_Info;
 
    ---------------------------------
