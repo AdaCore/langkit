@@ -105,4 +105,4 @@ gdb.print_expr(
 break_dsl("test_tokens")
 run_continue()
 check_var_state("null", "No_Token")
-check_var_state("first", "<Token 6 1/0 at 1:1-1:8 'example'>")
+check_var_state("first", "<Token 7 1/0 at 1:1-1:8 'example'>")

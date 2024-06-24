@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections import defaultdict
 from contextlib import AbstractContextManager
-from itertools import count
 import re
 from typing import (Any, Dict, Iterator, List, Optional, Sequence, Set,
                     TYPE_CHECKING, Tuple, Type, Union, cast)
@@ -158,10 +157,6 @@ class TokenAction(Action):
             Identifier = WithSymbol()
             Keyword = WithText()
     """
-    # This counter is used to preserve the order of TokenAction instantiations,
-    # which allows us to get the declaration order of token enum kinds.
-    _counter = iter(count(0))
-
     is_trivia: bool = False
 
     def __init__(self,
@@ -186,7 +181,7 @@ class TokenAction(Action):
         """
         super().__init__()
 
-        self._index = next(TokenAction._counter)
+        self._index: None | int = None
 
         self.name: Optional[Name] = None
         """
@@ -207,6 +202,7 @@ class TokenAction(Action):
 
     @property
     def value(self) -> int:
+        assert self._index is not None
         return self._index
 
     def __call__(self, *args: Any, **kwargs: Any) -> _Token:
@@ -365,7 +361,6 @@ class LexerToken:
 
     @classmethod
     def reset(cls) -> None:
-        TokenAction._counter = iter(count(0))
         cls.Termination = WithText()
         cls.LexingFailure = WithTrivia()
 
@@ -479,6 +474,9 @@ class Lexer:
 
         self.tokens = tokens_class(track_indent)
         assert isinstance(self.tokens, LexerToken)
+
+        for i, t in enumerate(sorted(self.tokens, key=lambda t: t.base_name)):
+            t._index = i
 
         self.patterns: List[Tuple[str, str, Location]] = []
         self.rules: List[RuleAssoc] = []
