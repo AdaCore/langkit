@@ -2247,7 +2247,11 @@ class Field(BaseField):
                 etypes = TypeSet()
             all_null = True
             for p in self.parsers_from_transform:
-                if not isinstance(p, Null):
+                # Keep track of whether at least one parser can create a
+                # non-null node for this field. Note that Null parser create a
+                # non-null node in two cases: for list nodes and "qualifier"
+                # nodes.
+                if not isinstance(p, Null) or p.for_bool_node:
                     all_null = False
                 types.update(p.precise_types)
                 if is_list:

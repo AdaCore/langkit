@@ -1,0 +1,22 @@
+main.py: Running...
+DeclList main.txt:2:5-4:14
+|item_0:
+|  VarDecl main.txt:2:5-2:12
+|  |f_is_null:
+|  |  NullQualAbsent main.txt:2:5-2:5
+|  |f_name:
+|  |  Identifier main.txt:2:9-2:11: v1
+|item_1:
+|  VarDecl main.txt:3:5-3:17
+|  |f_is_null:
+|  |  NullQualPresent main.txt:3:5-3:9
+|  |f_name:
+|  |  Identifier main.txt:3:14-3:16: v2
+|item_2:
+|  FunDecl main.txt:4:5-4:14
+|  |f_is_null:
+|  |  NullQualAbsent main.txt:4:8-4:8
+|  |f_name:
+|  |  Identifier main.txt:4:9-4:11: f1
+main.py: Done.
+Done
