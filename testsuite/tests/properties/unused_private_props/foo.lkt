@@ -13,6 +13,9 @@ class FooNode implements Node[FooNode] {
 
     # This property is unused but the user asked explicitly to not warn
     @ignored fun as_expr_2(): Expression = node.as[Expression]
+
+    # Likewise (relevant for the derivation in Plus)
+    @ignored fun unused_tree(): Bool = false
 }
 
 @abstract class Expression: FooNode {
@@ -56,4 +59,8 @@ class Plus: Expression {
 
     # See Expression.names
     fun names(): Array[Name] = node.left.names & node.right.names
+
+    # This is not marked as @ignored, but we should get no unused warning for
+    # this property as it inherits an @ignored property.
+    fun unused_tree(): Bool = true
 }

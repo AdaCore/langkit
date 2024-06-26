@@ -1624,6 +1624,9 @@ def emit_prop(prop, walker):
     if prop.predicate_error:
         quals += "@predicate_error({}) ".format(json.dumps(prop.predicate_error))
 
+    if prop.warn_on_unused is False:
+        quals += "@ignored "
+
     args = []
     for arg in prop.natural_arguments:
         arg_text = "@ignored " if arg.var._ignored else ""
