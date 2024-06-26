@@ -1629,7 +1629,11 @@ def emit_prop(prop, walker):
 
     args = []
     for arg in prop.natural_arguments:
-        arg_text = "@ignored " if arg.var._ignored else ""
+        arg_text = (
+            "@ignored "
+            if arg.var._ignored or prop.abstract_runtime_check else
+            ""
+        )
         arg_text += f"{var_name(arg)}: {type_name(arg.type)}"
         if arg.abstract_default_value:
             arg_text += " = {}".format(
