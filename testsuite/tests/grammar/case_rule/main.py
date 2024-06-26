@@ -11,6 +11,8 @@ for label, text in (
     ('char-dot', "'a'.b"),
     ('id-char', "a'b'"),
     ('unicode-id-char', "\xe9'\U0001f642'"),
+    ('access', "access T"),
+    ('tick-access', "T'access"),
 ):
     print('== {} =='.format(label))
     u = ctx.get_from_buffer('{}.txt'.format(label), text)

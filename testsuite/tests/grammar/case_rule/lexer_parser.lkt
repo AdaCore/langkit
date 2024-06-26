@@ -7,11 +7,17 @@ lexer foo_lexer {
         else send(char, 3)
     }
 
+    match "access" {
+        if previous_token is tick then send(id, 6)
+        else send(access, 6)
+    }
+
+    access
     char
     dot <- "."
     id <- p"[a-zA-Zé🙂]+"
     tick <- "'"
-    newline <- p"\n"
+    @trivia() whitespace <- p"[ \n]+"
 }
 
 @with_lexer(foo_lexer)
@@ -19,6 +25,7 @@ grammar foo_grammar {
     @main_rule expr <- or(
         | DotExpr(expr "." name)
         | AttrRef(expr "'" name)
+        | AccessType("access" name)
         | char_lit
         | name
     )

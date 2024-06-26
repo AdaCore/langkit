@@ -33,5 +33,17 @@ main.py: Running...
 '<Token Tick "\'" at 1:4-1:5>'
 '<Token Termination at 1:5-1:5>'
 
+== access ==
+"<Token Access 'access' at 1:1-1:7>"
+"<Token Whitespace ' ' at 1:7-1:8>"
+"<Token Id 'T' at 1:8-1:9>"
+'<Token Termination at 1:9-1:9>'
+
+== tick-access ==
+"<Token Id 'T' at 1:1-1:2>"
+'<Token Tick "\'" at 1:2-1:3>'
+"<Token Id 'access' at 1:3-1:9>"
+'<Token Termination at 1:9-1:9>'
+
 main.py: Done.
 Done

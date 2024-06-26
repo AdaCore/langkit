@@ -34,10 +34,14 @@ class AttrRef(Expr):
     name = Field(type=Name)
 
 
+class AccessType(Expr):
+    name = Field(type=Name)
+
+
 build_and_run(
     lkt_file='lexer_parser.lkt',
     py_script='main.py',
-    unparse_script="to:expected_concrete_syntax.lkt,nodes",
+    unparse_script="to:concrete_syntax.lkt,nodes",
     types_from_lkt=True,
 )
 print('Done')

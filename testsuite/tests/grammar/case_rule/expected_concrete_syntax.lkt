@@ -1,7 +1,12 @@
+
 @abstract class FooNode implements Node[FooNode] {
 }
 
 @abstract class Expr: FooNode {
+}
+
+class AccessType: Expr {
+    @parse_field name: Name
 }
 
 class AttrRef: Expr {
