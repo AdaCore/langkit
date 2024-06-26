@@ -46,6 +46,18 @@ class FooNode(ASTNode):
             lambda _: No(T.Expr.entity.array),
         ).concat(Entity.children.mapcat(lambda c: c.find_exprs))
 
+    @langkit_property(return_type=T.Bool, public=True)
+    def nested_match():
+        # We used to generate invalid Ada code for nested match expressions
+        return Entity.parent.match(
+            lambda _=T.Atom: True,
+            lambda _=T.Expr: Entity.match(
+                lambda _=T.Atom: True,
+                lambda _: False,
+            ),
+            lambda _: False,
+        )
+
 
 @abstract
 class Expr(FooNode):

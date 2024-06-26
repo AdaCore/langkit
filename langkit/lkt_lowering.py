@@ -4408,9 +4408,7 @@ class LktTypesLoader:
                             type=matched_type,
                             source_name=decl_id.text,
                         )
-                    match_var.local_var = local_vars.create_scopeless(
-                        var_name, matched_type
-                    )
+                    match_var.create_local_variable()
 
                     # Lower the matcher expression, making the match variable
                     # available if intended.
