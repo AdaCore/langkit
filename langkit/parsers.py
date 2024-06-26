@@ -2178,6 +2178,15 @@ class Null(Parser):
         reject_error_node(result)
         return result
 
+    @property
+    def for_bool_node(self) -> bool:
+        """
+        Return whether this parser creates an "absent" bool node.
+        """
+        t = self.type
+        assert isinstance(t, ASTNodeType)
+        return t.is_bool_node
+
     # This parser always return a null node, so it does not contribute to the
     # list of precise types.
 
