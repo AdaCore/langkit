@@ -119,6 +119,8 @@ generic
      (Self : Inner_Env_Assoc) return Thin_Symbol is <>;
    with function Get_Node
      (Self : Inner_Env_Assoc) return Node_Type is <>;
+   with function Get_Rebindings
+     (Self : Inner_Env_Assoc) return Env_Rebindings is <>;
    with function Get_Metadata
      (Self : Inner_Env_Assoc) return Node_Metadata is <>;
 
@@ -644,6 +646,9 @@ package Langkit_Support.Lexical_Envs_Impl is
       --  If Resolver is null, this is the node that lexical env lookup must
       --  return. Otherwise, it is the argument to pass to Resolver in order to
       --  get the result.
+
+      Rebindings : Env_Rebindings;
+      --  Rebindings associated to Node
 
       Md : Node_Metadata;
       --  Metadata associated to Node

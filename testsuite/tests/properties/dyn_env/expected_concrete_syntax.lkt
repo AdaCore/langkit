@@ -36,9 +36,7 @@ class CallExpr: FooNode {
         val decl = node.node_env().get_first(node.name).as[FunDecl];
 
         decl.args.map(
-            (a, i) => InnerEnvAssoc(
-                key=a.name.symbol, value=node.args?[i], metadata=null[Metadata]
-            )
+            (a, i) => InnerEnvAssoc(key=a.name.symbol, value=node.args?[i])
         )
     }
 
@@ -47,9 +45,7 @@ class CallExpr: FooNode {
         val decl = node.node_env().get_first(node.name).as[FunDecl];
 
         decl.args.map(
-            (a) => InnerEnvAssoc(
-                key=a.name.symbol, value=a.arg_expr.node, metadata=null[Metadata]
-            )
+            (a) => InnerEnvAssoc(key=a.name.symbol, value=a.arg_expr.node)
         )
     }
 

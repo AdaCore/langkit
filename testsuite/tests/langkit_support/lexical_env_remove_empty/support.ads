@@ -47,6 +47,8 @@ package Support is
      (Dummy : Inner_Env_Assoc) return Langkit_Support.Symbols.Thin_Symbol
    is (Langkit_Support.Symbols.No_Thin_Symbol);
    function Get_Node (Dummy : Inner_Env_Assoc) return Character is (' ');
+   function Get_Rebindings (Dummy : Inner_Env_Assoc) return Env_Rebindings
+   is (null);
    function Get_Metadata (Dummy : Inner_Env_Assoc) return Metadata
    is (0);
 

@@ -260,6 +260,9 @@ private package ${ada_lib_name}.Implementation is
    function Get_Node
      (Self : ${T.inner_env_assoc.name}) return ${T.root_node.name}
    is (Self.Value);
+   function Get_Rebindings
+     (Self : ${T.inner_env_assoc.name}) return Env_Rebindings
+   is (Self.Rebindings);
    function Get_Metadata
      (Self : ${T.inner_env_assoc.name}) return ${T.env_md.name}
    is (Self.Metadata);

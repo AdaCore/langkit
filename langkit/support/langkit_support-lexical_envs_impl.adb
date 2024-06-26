@@ -699,11 +699,14 @@ package body Langkit_Support.Lexical_Envs_Impl is
       use Internal_Envs;
 
       Env      : constant Lexical_Env_Access := Unwrap (Self);
-      Node     : constant Internal_Map_Node := (Value, Md, Resolver);
       C        : Cursor;
       Dummy    : Boolean;
       Map      : Internal_Envs.Map renames Env.Map.all;
       Full_Key : constant Symbol_Type := To_Symbol (Self.Env.Sym_Table, Key);
+      Node     : constant Internal_Map_Node := (Value, null, Md, Resolver);
+      --  Note that unlike for dynamic lexical envs, we do not allow custom
+      --  rebindings here (hence the `null`) because the referenced lexical
+      --  envs may not live for as long as Self, thus making it unsafe.
    begin
       --  See Empty_Env's documentation
 
@@ -1087,7 +1090,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   if Key = No_Thin_Symbol or else Key = Get_Key (A) then
                      declare
                         IMN : constant Internal_Map_Node :=
-                          (Get_Node (A), Get_Metadata (A), Env.Assoc_Resolver);
+                          (Get_Node (A),
+                           Get_Rebindings (A),
+                           Get_Metadata (A),
+                           Env.Assoc_Resolver);
                      begin
                         Append_Result
                           (IMN, Metadata, Current_Rebindings, From_Rebound);
@@ -1115,10 +1121,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
          E : constant Entity :=
            (Node => Node.Node,
             Info => (Md           => Combine (Node.Md, Md),
-                     Rebindings   => Rebindings,
+                     Rebindings   => Combine (Node.Rebindings, Rebindings),
                      From_Rebound => From_Rebound));
       begin
-
          if Has_Trace then
             Rec.Trace
               ("Found " & Image (Node_Text_Image (E.Node, False))

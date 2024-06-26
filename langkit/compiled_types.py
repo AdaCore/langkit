@@ -5038,11 +5038,15 @@ class TypeRepo:
 
         This built-in type is involved in the dynamic primary envs mechanism.
         """
+        from langkit.expressions import No
         return StructType(
             names.Name('Inner_Env_Assoc'), None, None,
             [('key', UserField(type=T.Symbol)),
              ('value', UserField(type=self.defer_root_node)),
-             ('metadata', UserField(type=self.defer_env_md))]
+             ('rebindings', UserField(type=T.EnvRebindings,
+                                      default_value=No(T.EnvRebindings))),
+             ('metadata', UserField(type=self.defer_env_md,
+                                    default_value=No(self.defer_env_md)))]
         )
 
     @property
