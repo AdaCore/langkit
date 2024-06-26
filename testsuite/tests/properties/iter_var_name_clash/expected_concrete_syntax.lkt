@@ -1,0 +1,26 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example(@example))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @exported fun prop(): Array[MyStruct] = node.entity_array().mapcat(
+        (elt1) => elt1.node_array().filtermap(
+            (elt2) => MyStruct(n=elt2, e=elt1), (elt2) => true
+        )
+    )
+
+    fun entity_array(): Array[Entity[FooNode]] = [node.as_bare_entity]
+
+    fun node_array(): Array[FooNode] = [node]
+}
+
+class Example: FooNode implements TokenNode {
+}
+
+struct MyStruct {
+    n: FooNode
+    e: Entity[FooNode]
+}

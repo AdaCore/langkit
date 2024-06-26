@@ -2534,6 +2534,7 @@ class LktTypesLoader:
         for to_lower in self.properties_to_lower:
             if isinstance(to_lower, self.PropertyAndExprToLower):
                 with to_lower.prop.bind():
+                    self.names_counter = itertools.count(0)
                     to_lower.prop.expr = self.lower_expr(
                         to_lower.body, to_lower.scope, to_lower.prop.vars
                     )
@@ -3262,9 +3263,6 @@ class LktTypesLoader:
 
         result: AbstractExpression
 
-        # Counter to generate unique names
-        counter = itertools.count(0)
-
         def lower(expr: L.Expr) -> AbstractExpression:
             """
             Convenience wrapper around "self.lower_expr" to set the expression
@@ -3327,7 +3325,9 @@ class LktTypesLoader:
             source_name, _ = extract_var_name(self.ctx, arg.f_syn_name)
             with AbstractExpression.with_location(Location.from_lkt_node(arg)):
                 result = AbstractVariable(
-                    names.Name.from_lower(f"{prefix}_{next(counter)}"),
+                    names.Name.from_lower(
+                        f"{prefix}_{next(self.names_counter)}"
+                    ),
                     source_name=source_name,
                     type=type,
                     create_local=create_local,
