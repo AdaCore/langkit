@@ -1,0 +1,33 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+
+    # We used to compile default values for property arguments down to
+    # ResolvedExpression before lowering env specs. However, env specs lowering
+    # is the time where the legal set of categories is computed, and
+    # constructing RefCategories expressions needs to know the set of legal
+    # categories to work properly.
+    #
+    # So compiling the default value below used to trigger an "invalid
+    # category: mycat" error.
+
+    @ignored fun lookup(
+        name: Symbol,
+        cats: RefCategories = RefCategories(mycat=true)
+    ): Array[Entity[FooNode]] =
+        node.children_env().get(name, categories=cats)
+
+    env_spec {
+        reference(
+            [node.as[FooNode]], FooNode.children_env, category="mycat"
+        )
+    }
+}

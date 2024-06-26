@@ -2509,6 +2509,20 @@ class LktTypesLoader:
                     field.resolve_types()
 
         #
+        # ENV_SPECS_LOWERING
+        #
+
+        # Note that lowering env specs needs to be done before any expression
+        # is constructed: the set of legal ref categories is determined by env
+        # specs, and constructing RefCategory expressions needs to know the
+        # whole set of ref categories.
+        for node, env_spec_decl in self.env_specs_to_lower:
+            env_spec = self.lower_env_spec(node, env_spec_decl)
+            node.env_spec = env_spec
+            env_spec.ast_node = node
+            env_spec.register_categories(self.ctx)
+
+        #
         # EXPR_LOWERING
         #
 
@@ -2544,20 +2558,10 @@ class LktTypesLoader:
         for to_lower in self.properties_to_lower:
             if isinstance(to_lower, self.PropertyAndExprToLower):
                 with to_lower.prop.bind():
-                    self.names_counter = itertools.count(0)
+                    self.reset_names_counter()
                     to_lower.prop.expr = self.lower_expr(
                         to_lower.body, to_lower.scope, to_lower.prop.vars
                     )
-
-        #
-        # ENV_SPECS_LOWERING
-        #
-
-        # Finally, lower env specs
-        for node, env_spec_decl in self.env_specs_to_lower:
-            env_spec = self.lower_env_spec(node, env_spec_decl)
-            node.env_spec = env_spec
-            env_spec.ast_node = node
 
     def resolve_entity(self, name: L.Expr, scope: Scope) -> Scope.Entity:
         """
@@ -3154,6 +3158,8 @@ class LktTypesLoader:
         # Internal properties never have dynamic variables
         result.set_dynamic_vars([])
 
+        self.reset_names_counter()
+
         with result.bind():
             result.expr = lower_expr(result)
 
@@ -3162,6 +3168,16 @@ class LktTypesLoader:
 
         result.location = location
         return result
+
+    def reset_names_counter(self) -> None:
+        """
+        Reset the counter used to generate names that are unique inside a
+        property (e.g. for local variables).
+
+        This method must be called each time we are about to lower a property's
+        body expression.
+        """
+        self.names_counter = itertools.count(0)
 
     @overload
     def lower_expr_to_internal_property(
