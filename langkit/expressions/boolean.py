@@ -9,9 +9,9 @@ from langkit.compiled_types import CompiledType, T, TypeRepo
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
-    ComputingExpr, LiteralExpr, PropertyDef, ResolvedExpression, Self,
-    SequenceExpr, attr_call, construct, dsl_document, expr_or_null, render,
-    sloc_info_arg, unsugar
+    ComputingExpr, LambdaArgInfo, LiteralExpr, PropertyDef, ResolvedExpression,
+    Self, SequenceExpr, attr_call, construct, dsl_document, expr_or_null,
+    render, sloc_info_arg, unsugar
 )
 
 
@@ -486,13 +486,20 @@ class Then(AbstractExpression):
             return '<Then.Expr>'
 
     @staticmethod
-    def create_from_exprs(base, then_expr, var_expr, default_val=None):
+    def create_from_exprs(
+        base: AbstractExpression,
+        then_expr: AbstractExpression,
+        lambda_arg_infos: list[LambdaArgInfo],
+        var_expr: AbstractVariable,
+        default_val: AbstractExpression | None = None,
+    ):
         """
         Create a Then expression without going through a lambda. Used
         internally to constructs then expressions for the underscore operator.
         """
         ret = Then(expr=base, then_fn=None, default_val=default_val)
         ret.then_expr = then_expr
+        ret.lambda_arg_infos = lambda_arg_infos
         ret.var_expr = var_expr
         return ret
 
@@ -511,6 +518,7 @@ class Then(AbstractExpression):
         self.default_val = default_val
         self.var_expr = self.then_expr = None
         self.underscore_then = False
+        self.lambda_arg_infos = []
 
     def do_prepare(self):
         # If this Then was created using create_from exprs, there is no lambda
@@ -543,6 +551,10 @@ class Then(AbstractExpression):
             'Invalid prefix type for .then: {expr_type}'
         )
         self.var_expr.set_type(expr.type)
+
+        # Now that the variable is typed, ensure that its type annotation in
+        # the lambda expression (if present) is correct.
+        LambdaArgInfo.check_list(self.lambda_arg_infos)
 
         # Create a then-expr specific scope to restrict the span of the "then"
         # variable in the debugger.

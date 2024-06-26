@@ -3285,9 +3285,24 @@ class LktTypesLoader:
             """
             scope.add(Scope.LocalVariable(arg.f_syn_name.text, arg, var))
 
+        def append_lambda_arg_info(
+            infos: list[E.LambdaArgInfo],
+            arg: L.LambdaArgDecl,
+            var: AbstractVariable,
+        ) -> None:
+            if arg.f_decl_type is not None:
+                infos.append(
+                    E.LambdaArgInfo(
+                        var,
+                        resolve_type(self.resolve_type(arg.f_decl_type, env)),
+                        Location.from_lkt_node(arg.f_decl_type),
+                    )
+                )
+
         def var_for_lambda_arg(
             scope: Scope,
             arg: L.LambdaArgDecl,
+            infos: list[E.LambdaArgInfo],
             prefix: str,
             type: Optional[CompiledType] = None,
             create_local: bool = False,
@@ -3297,8 +3312,17 @@ class LktTypesLoader:
 
             This also registers this decl/variable association in ``env``.
 
+            :param scope: Scope in which to register this variable.
+            :param arg: Lambda argument to lower.
+            :param infos: List of lambda argument information in which to
+                append information for this argument, in case the argument
+                declaration contains a type annotation.
             :param prefix: Lower-case prefix for the name of the variable in
                 the generated code.
+            :param type: Optional type information to associate to this
+                variable.
+            :param create_local: See the corresponding AbstractVariable
+                constructor argument.
             """
             source_name, _ = extract_var_name(self.ctx, arg.f_syn_name)
             with AbstractExpression.with_location(Location.from_lkt_node(arg)):
@@ -3309,6 +3333,7 @@ class LktTypesLoader:
                     create_local=create_local,
                 )
             add_lambda_arg_to_scope(scope, arg, result)
+            append_lambda_arg_info(infos, arg, result)
             return result
 
         @dataclass
@@ -3375,13 +3400,6 @@ class LktTypesLoader:
             for i, larg in enumerate(expr.f_params):
                 lambda_args[i] = larg
                 with self.ctx.lkt_context(larg):
-                    # TODO (eng/libadalang/langkit#730): accepting type
-                    # annotations and validating them could be useful for
-                    # language spec readability.
-                    check_source_language(
-                        larg.f_decl_type is None,
-                        "argument type must be implicit",
-                    )
                     check_source_language(
                         larg.f_default_val is None,
                         "default values are not allowed here",
@@ -3431,11 +3449,35 @@ class LktTypesLoader:
 
             return BuiltinCallInfo(args, scope, lambda_args, lambda_body)
 
-        def lower_collection_iter() -> tuple[
-            AbstractExpression,
-            AbstractVariable,
-            AbstractVariable | None,
-        ]:
+        @dataclass
+        class CollectionLoweringResult:
+            """
+            Container for the result of the "lower_collection_iter" function.
+            """
+
+            inner_expr: AbstractExpression
+            """
+            Expression to evaluate each element of the array the collection
+            expression computes.
+            """
+
+            lambda_arg_infos: list[E.LambdaArgInfo]
+            """
+            Information about all lambda arguments involved in this expression.
+            """
+
+            element_var: AbstractVariable
+            """
+            Iteration variable to hold each collection element.
+            """
+
+            index_var: AbstractVariable | None
+            """
+            Iteration variable to hold each collection element index, if
+            needed.
+            """
+
+        def lower_collection_iter() -> CollectionLoweringResult:
             """
             Helper to lower a method call that implements a collection
             iteration.
@@ -3446,38 +3488,44 @@ class LktTypesLoader:
             one collection element. That lambda function must accept either the
             collection element itself only or an additional element index.
 
-            Return the lowered expression for the lambda, the variable for the
-            iteration element, and an optional variable for the iteration
-            index (if the lambda requires it).
+            Return the lowered expression for the lambda, information for
+            lambda args, the variable for the iteration element, and an
+            optional variable for the iteration index (if the lambda requires
+            it).
             """
             # We expect a single argument: a lambda (itself taking the
             # collection element plus optionally its index).
             lambda_info = extract_lambda_and_kwargs(
                 call_expr, collection_iter_signature, "expr", 1, 2
             )
+            lambda_arg_infos: list[E.LambdaArgInfo] = []
             element_arg, index_arg = lambda_info.largs
             assert element_arg is not None
 
             # There is always an iteration variable for the collection element
             element_var = var_for_lambda_arg(
-                lambda_info.scope, element_arg, 'item'
+                lambda_info.scope, element_arg, lambda_arg_infos, 'item'
             )
 
             # The iteration variable for the iteration index is optional: we
             # create one only if the lambda has the corresponding element.
-            index_var = (
-                None
-                if index_arg is None else
-                var_for_lambda_arg(
-                    lambda_info.scope, index_arg, 'index', T.Int
+            index_var: AbstractVariable | None = None
+            if index_arg is not None:
+                index_var = var_for_lambda_arg(
+                    lambda_info.scope,
+                    index_arg,
+                    lambda_arg_infos,
+                    'index',
+                    T.Int,
                 )
-            )
 
             # Lower the body expression for that lambda
             inner_expr = self.lower_expr(
                 lambda_info.expr, lambda_info.scope, local_vars
             )
-            return (inner_expr, element_var, index_var)
+            return CollectionLoweringResult(
+                inner_expr, lambda_arg_infos, element_var, index_var
+            )
 
         call_name = call_expr.f_name
         assert isinstance(call_name, L.BaseDotExpr)
@@ -3499,9 +3547,14 @@ class LktTypesLoader:
         method_prefix = NullCond.Prefix(method_prefix)
 
         if method_name in ("all", "any"):
-            inner_expr, element_var, index_var = lower_collection_iter()
+            clr = lower_collection_iter()
             result = E.Quantifier.create_expanded(
-                method_name, method_prefix, inner_expr, element_var, index_var
+                method_name,
+                method_prefix,
+                clr.inner_expr,
+                clr.lambda_arg_infos,
+                clr.element_var,
+                clr.index_var,
             )
 
         elif method_name == "append_rebinding":
@@ -3535,9 +3588,11 @@ class LktTypesLoader:
             arg_node = lambda_info.largs[0]
             assert arg_node is not None
 
+            lambda_arg_infos: list[E.LambdaArgInfo] = []
             arg_var = var_for_lambda_arg(
                 lambda_info.scope,
                 arg_node,
+                lambda_arg_infos,
                 "var_expr",
                 create_local=True,
             )
@@ -3552,7 +3607,11 @@ class LktTypesLoader:
             )
 
             result = E.Then.create_from_exprs(
-                method_prefix, then_expr, arg_var, default_val
+                method_prefix,
+                then_expr,
+                lambda_arg_infos,
+                arg_var,
+                default_val,
             )
 
         elif method_name == "empty":
@@ -3578,9 +3637,14 @@ class LktTypesLoader:
             result = getattr_prefix.env_parent
 
         elif method_name == "filter":
-            inner_expr, element_var, index_var = lower_collection_iter()
+            clr = lower_collection_iter()
             result = E.Map.create_expanded(
-                method_prefix, element_var, element_var, index_var, inner_expr
+                method_prefix,
+                clr.element_var,
+                clr.lambda_arg_infos,
+                clr.element_var,
+                clr.index_var,
+                clr.inner_expr,
             )
 
         elif method_name == "filtermap":
@@ -3607,14 +3671,23 @@ class LktTypesLoader:
             # one may be present in one, two or no lambda expression.
             assert map_args[0] is not None
             assert filter_args[0] is not None
-            element_var = var_for_lambda_arg(map_scope, map_args[0], "item")
+            lambda_arg_infos = []
+            element_var = var_for_lambda_arg(
+                map_scope,
+                map_args[0],
+                lambda_arg_infos,
+                "item",
+            )
             name_from_lower(self.ctx, "argument", filter_args[0].f_syn_name)
             add_lambda_arg_to_scope(filter_scope, filter_args[0], element_var)
+            append_lambda_arg_info(
+                lambda_arg_infos, filter_args[0], element_var
+            )
 
             index_var = None
             if map_args[1] is not None:
                 index_var = var_for_lambda_arg(
-                    map_scope, map_args[1], "index", T.Int
+                    map_scope, map_args[1], lambda_arg_infos, "index", T.Int
                 )
                 if filter_args[1] is not None:
                     name_from_lower(
@@ -3623,9 +3696,16 @@ class LktTypesLoader:
                     add_lambda_arg_to_scope(
                         filter_scope, filter_args[1], index_var
                     )
+                    append_lambda_arg_info(
+                        lambda_arg_infos, filter_args[1], index_var
+                    )
             elif filter_args[1] is not None:
                 index_var = var_for_lambda_arg(
-                    filter_scope, filter_args[1], "Index", T.Int
+                    filter_scope,
+                    filter_args[1],
+                    lambda_arg_infos,
+                    "Index",
+                    T.Int,
                 )
 
             # Lower their expressions
@@ -3637,6 +3717,7 @@ class LktTypesLoader:
             return E.Map.create_expanded(
                 collection=method_prefix,
                 expr=map_expr,
+                lambda_arg_infos=lambda_arg_infos,
                 element_var=element_var,
                 index_var=index_var,
                 filter_expr=filter_expr,
@@ -3649,13 +3730,23 @@ class LktTypesLoader:
             elt_arg = lambda_info.largs[0]
             assert elt_arg is not None
 
-            elt_var = var_for_lambda_arg(lambda_info.scope, elt_arg, 'item')
+            lambda_arg_infos = []
+            elt_var = var_for_lambda_arg(
+                lambda_info.scope,
+                elt_arg,
+                lambda_arg_infos,
+                'item',
+            )
             inner_expr = self.lower_expr(
                 lambda_info.expr, lambda_info.scope, local_vars
             )
 
             result = E.Find.create_expanded(
-                method_prefix, inner_expr, elt_var, index_var=None
+                method_prefix,
+                inner_expr,
+                lambda_arg_infos,
+                elt_var,
+                index_var=None,
             )
         elif method_name in ("get", "get_first"):
             args, _ = get_signature.match(self.ctx, call_expr)
@@ -3696,12 +3787,13 @@ class LktTypesLoader:
 
         elif method_name in ("logic_all", "logic_any"):
             import langkit.expressions.logic as LE
-            inner_expr, element_var, index_var = lower_collection_iter()
+            clr = lower_collection_iter()
             map_expr = E.Map.create_expanded(
                 method_prefix,
-                inner_expr,
-                element_var,
-                index_var,
+                clr.inner_expr,
+                clr.lambda_arg_infos,
+                clr.element_var,
+                clr.index_var,
             )
             result = (
                 LE.All(map_expr)
@@ -3710,12 +3802,13 @@ class LktTypesLoader:
             )
 
         elif method_name in ("map", "mapcat"):
-            inner_expr, element_var, index_var = lower_collection_iter()
+            clr = lower_collection_iter()
             result = E.Map.create_expanded(
                 method_prefix,
-                inner_expr,
-                element_var,
-                index_var,
+                clr.inner_expr,
+                clr.lambda_arg_infos,
+                clr.element_var,
+                clr.index_var,
                 do_concat=method_name == "mapcat",
             )
 
@@ -3736,13 +3829,14 @@ class LktTypesLoader:
             result = getattr_prefix.solve_
 
         elif method_name == "take_while":
-            inner_expr, element_var, index_var = lower_collection_iter()
+            clr = lower_collection_iter()
             result = E.Map.create_expanded(
                 method_prefix,
-                element_var,
-                element_var,
-                index_var,
-                take_while_expr=inner_expr,
+                clr.element_var,
+                clr.lambda_arg_infos,
+                clr.element_var,
+                clr.index_var,
+                take_while_expr=clr.inner_expr,
             )
 
         elif method_name == "to_symbol":

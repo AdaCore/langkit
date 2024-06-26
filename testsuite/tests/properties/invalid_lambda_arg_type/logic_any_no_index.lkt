@@ -1,0 +1,6 @@
+import common
+
+class ExampleBlock: BaseExampleBlock {
+    @exported fun p(): Array[Entity[Example]] =
+        node.items.logic_any((_: Example, _: Bool) => %true).solve()
+}

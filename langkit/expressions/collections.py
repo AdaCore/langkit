@@ -15,9 +15,9 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.base import (
     AbstractExpression, AbstractNodeData, AbstractVariable, CallExpr,
-    ComputingExpr, FieldAccessExpr, LocalVars, NullCheckExpr, PropertyDef,
-    ResolvedExpression, Self, SequenceExpr, T, UncheckedCastExpr, VariableExpr,
-    attr_call, attr_expr, auto_attr, auto_attr_custom, construct,
+    ComputingExpr, FieldAccessExpr, LambdaArgInfo, LocalVars, NullCheckExpr,
+    PropertyDef, ResolvedExpression, Self, SequenceExpr, T, UncheckedCastExpr,
+    VariableExpr, attr_call, attr_expr, auto_attr, auto_attr_custom, construct,
     construct_var, render, unsugar
 )
 from langkit.expressions.envs import make_as_entity
@@ -196,10 +196,15 @@ class CollectionExpression(AbstractExpression):
         self.requires_index: bool = False
         self.index_var: Optional[AbstractVariable] = None
 
-    def initialize(self,
-                   expr: AbstractExpression,
-                   element_var: AbstractVariable,
-                   index_var: Optional[AbstractVariable] = None) -> None:
+        self.lambda_arg_infos: list[LambdaArgInfo] = []
+
+    def initialize(
+        self,
+        expr: AbstractExpression,
+        lambda_arg_infos: list[LambdaArgInfo],
+        element_var: AbstractVariable,
+        index_var: Optional[AbstractVariable] = None,
+    ) -> None:
         """
         Initialize this expression using already expanded sub-expressions.
 
@@ -208,6 +213,7 @@ class CollectionExpression(AbstractExpression):
         """
         self.expr = expr
         self.expr_initialized = True
+        self.lambda_arg_infos = lambda_arg_infos
         self.element_var = element_var
         self.requires_index = index_var is not None
         self.index_var = index_var
@@ -400,6 +406,10 @@ class CollectionExpression(AbstractExpression):
         user_element_var = self.element_var
         user_element_var.set_type(elt_type)
         iter_vars.append(AbstractInitializedVar(user_element_var))
+
+        # Now that all the iteration variables are typed, ensure that type
+        # annotations for lambda arguments are correct.
+        LambdaArgInfo.check_list(self.lambda_arg_infos)
 
         # Node lists contain bare nodes: if the user code deals with entities,
         # create a variable to hold a bare node and initialize the user
@@ -659,6 +669,7 @@ class Map(CollectionExpression):
         cls,
         collection: AbstractExpression,
         expr: AbstractExpression,
+        lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
         index_var: Optional[AbstractVariable] = None,
         filter_expr: Optional[AbstractExpression] = None,
@@ -666,7 +677,7 @@ class Map(CollectionExpression):
         do_concat: bool = False,
     ) -> Map:
         result = cls(collection, None, do_concat=do_concat)
-        result.initialize(expr, element_var, index_var)
+        result.initialize(expr, lambda_arg_infos, element_var, index_var)
         result.filter_expr = filter_expr
         result.take_while_expr = take_while_expr
         return result
@@ -834,11 +845,12 @@ class Quantifier(CollectionExpression):
         kind: str,
         collection: AbstractExpression,
         predicate: AbstractExpression,
+        lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
         index_var: Optional[AbstractVariable] = None,
     ) -> Quantifier:
         result = cls(collection, None, kind)
-        result.initialize(predicate, element_var, index_var)
+        result.initialize(predicate, lambda_arg_infos, element_var, index_var)
         result.expr = predicate
         return result
 
@@ -1171,11 +1183,12 @@ class Find(CollectionExpression):
         cls,
         collection: AbstractExpression,
         expr: AbstractExpression,
+        lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
         index_var: Optional[AbstractVariable] = None,
     ) -> Find:
         result = cls(collection, None)
-        result.initialize(expr, element_var, index_var)
+        result.initialize(expr, lambda_arg_infos, element_var, index_var)
         return result
 
     def construct(self) -> ResolvedExpression:
