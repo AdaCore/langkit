@@ -11,8 +11,10 @@ grammar foo_grammar {
     plus <- pick("(" Plus(expr "+" expr) ")")
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun find_atoms(): Array[Entity[Atom]] = match self {
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun find_atoms(): Array[Entity[Atom]] = match self {
         # This should match Lit .. Ref
         case a: Atom => [a]
 
@@ -20,7 +22,8 @@ grammar foo_grammar {
         case _ => null[Array[Entity[Atom]]]
     } & self.children.mapcat((c) => c.find_atoms())
 
-    @exported fun find_atoms_or_exprs(): Array[Entity[Expr]] = match self {
+    @exported
+    fun find_atoms_or_exprs(): Array[Entity[Expr]] = match self {
         # This should match Lit .. Ref
         case a: Atom => [a.as[Expr]]
 
@@ -31,7 +34,8 @@ grammar foo_grammar {
         case _ => null[Array[Entity[Expr]]]
     } & self.children.mapcat((c) => c.find_atoms_or_exprs())
 
-    @exported fun find_exprs(): Array[Entity[Expr]] = match self {
+    @exported
+    fun find_exprs(): Array[Entity[Expr]] = match self {
         # This should match Lit .. Plus
         case e: Expr => [e]
 
@@ -43,16 +47,17 @@ grammar foo_grammar {
         case _ => null[Array[Entity[Expr]]]
     } & self.children.mapcat((c) => c.find_exprs())
 
-    @exported fun nested_match(): Bool =
-    # We used to generate invalid Ada code for nested match expressions
-    match self.parent {
-        case _: Atom => true
-        case _: Expr => match self {
+    @exported
+    fun nested_match(): Bool =
+        # We used to generate invalid Ada code for nested match expressions
+        match self.parent {
             case _: Atom => true
+            case _: Expr => match self {
+                case _: Atom => true
+                case _ => false
+            }
             case _ => false
         }
-        case _ => false
-    }
 }
 
 class Def: FooNode {
@@ -60,8 +65,10 @@ class Def: FooNode {
     @parse_field expr: Expr
 }
 
-@abstract class Expr: FooNode {
-    @exported fun find_refs(): Array[Entity[Ref]] = match self {
+@abstract
+class Expr: FooNode {
+    @exported
+    fun find_refs(): Array[Entity[Ref]] = match self {
         # This should match Ref
         case r: Ref => [r]
 
@@ -70,7 +77,8 @@ class Def: FooNode {
     } & self.children.mapcat((c) => c.as![Expr].find_refs())
 }
 
-@abstract class Atom: Expr implements TokenNode {
+@abstract
+class Atom: Expr implements TokenNode {
 }
 
 class Lit: Atom implements TokenNode {

@@ -5,11 +5,14 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun int_concat(a: Array[Int], b: Array[Int]): Array[Int] = a & b
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun int_concat(a: Array[Int], b: Array[Int]): Array[Int] = a & b
 
-    @exported fun big_int_concat(a: Array[BigInt], b: Array[BigInt]): Array[BigInt] =
-    a & b
+    @exported
+    fun big_int_concat(a: Array[BigInt], b: Array[BigInt]): Array[BigInt] =
+        a & b
 }
 
 class Example: FooNode implements TokenNode {

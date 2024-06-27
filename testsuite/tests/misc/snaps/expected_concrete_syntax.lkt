@@ -8,13 +8,16 @@ grammar foo_grammar {
     null_list <- WithoutSnapList+(NullNode("null"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@with_abstract_list class Example: FooNode implements TokenNode {
+@with_abstract_list
+class Example: FooNode implements TokenNode {
 }
 
-@snaps class WithSnapList: ASTList[FooNode, Example] {
+@snaps
+class WithSnapList: ASTList[FooNode, Example] {
 }
 
 class WithoutSnapList: ASTList[FooNode, NullNode] {
@@ -24,5 +27,6 @@ class ListWrapper: FooNode {
     @parse_field item: FooNodeBaseList
 }
 
-@with_abstract_list class NullNode: FooNode implements TokenNode {
+@with_abstract_list
+class NullNode: FooNode implements TokenNode {
 }

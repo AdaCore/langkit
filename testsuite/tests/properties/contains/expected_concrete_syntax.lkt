@@ -5,13 +5,15 @@ grammar foo_grammar {
     @main_rule main_rule <- ListNode(list+(NumberNode(@Number)))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class ListNode: FooNode {
     @parse_field nb_list: ASTList[FooNode, NumberNode]
 
-    @exported fun prop(): Bool = node.nb_list.map((_, i) => i).contains(1)
+    @exported
+    fun prop(): Bool = node.nb_list.map((_, i) => i).contains(1)
 }
 
 class NumberNode: FooNode implements TokenNode {

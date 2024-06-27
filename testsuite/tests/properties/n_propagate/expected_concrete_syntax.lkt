@@ -6,7 +6,8 @@ grammar foo_grammar {
     literal <- Literal(@Number)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     v: LogicVar
 }
 
@@ -14,15 +15,15 @@ class Literal: FooNode implements TokenNode {
     fun static_combiner(other: Entity[Literal]): Entity[Literal] = other
 
     fun dynamic_combiner(lits: Array[Entity[Literal]]): Entity[Literal] =
-    lits?[0]
+        lits?[0]
 }
 
 class Plus: FooNode {
     @parse_field lhs: Literal
     @parse_field rhs: Literal
 
-    @exported fun resolve(lhs: Entity[FooNode], rhs: Entity[FooNode], use_dynamic_combiner: Bool): Entity[FooNode] =
-    {
+    @exported
+    fun resolve(lhs: Entity[FooNode], rhs: Entity[FooNode], use_dynamic_combiner: Bool): Entity[FooNode] = {
         val arr = [node.lhs.v, node.rhs.v];
         val propagator = if use_dynamic_combiner then %propagate(node.v, Literal.dynamic_combiner, [node.lhs.v, node.rhs.v]) and (
             # Check that array passed to the dynamic combiner need not be

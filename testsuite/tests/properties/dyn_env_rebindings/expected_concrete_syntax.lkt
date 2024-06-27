@@ -16,13 +16,15 @@ grammar foo_grammar {
     id <- Identifier(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Identifier: FooNode implements TokenNode {
 }
 
-@abstract class TypeDecl: FooNode {
+@abstract
+class TypeDecl: FooNode {
     @parse_field name: Identifier
 
     env_spec {
@@ -43,29 +45,36 @@ class BareStruct: TypeDecl {
 class GenericFormalTypeDecl: TypeDecl {
 }
 
-@rebindable class GenericStruct: TypeDecl {
+@rebindable
+class GenericStruct: TypeDecl {
     @parse_field type_param: GenericFormalTypeDecl
 
-    @exported fun actual_type(): Entity[TypeDecl] =
-    self.children_env().get_first(node.type_param.name.symbol).as[TypeDecl]
+    @exported
+    fun actual_type(): Entity[TypeDecl] =
+        self.children_env().get_first(node.type_param.name.symbol).as[TypeDecl]
 }
 
 class TypeAlias: TypeDecl {
     @parse_field type_expr: TypeExpr
 }
 
-@abstract class TypeExpr: FooNode {
-    @exported @abstract fun resolve(): Entity[TypeDecl]
+@abstract
+class TypeExpr: FooNode {
+    @exported
+    @abstract
+    fun resolve(): Entity[TypeDecl]
 }
 
 class TypeInstantiation: TypeExpr {
     @parse_field generic_type: TypeExpr
     @parse_field actual_type: TypeExpr
 
-    @lazy instantiation_env: LexicalEnv[FooNode] =
-    dynamic_lexical_env(TypeInstantiation.instantiation_bindings)
+    @lazy
+    instantiation_env: LexicalEnv[FooNode] =
+        dynamic_lexical_env(TypeInstantiation.instantiation_bindings)
 
-    @memoized fun instantiation_bindings(): Array[InnerEnvAssoc] = {
+    @memoized
+    fun instantiation_bindings(): Array[InnerEnvAssoc] = {
         val ent = node.as_bare_entity;
         val gen = ent.generic_type.resolve().as[GenericStruct];
         val act = ent.actual_type.resolve();
@@ -92,8 +101,8 @@ class TypeRef: TypeExpr {
     @parse_field name: Identifier
 
     fun resolve(): Entity[TypeDecl] =
-    match self.children_env().get_first(node.name.symbol) {
-        case alias: Entity[TypeAlias] => alias.type_expr.resolve()
-        case other => other.as[TypeDecl]
-    }
+        match self.children_env().get_first(node.name.symbol) {
+            case alias: Entity[TypeAlias] => alias.type_expr.resolve()
+            case other => other.as[TypeDecl]
+        }
 }

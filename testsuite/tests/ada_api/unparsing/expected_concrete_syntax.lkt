@@ -35,7 +35,8 @@ grammar foo_grammar {
     block <- Block("{" list*(or(var_decl | fun_decl)) "}")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Block: FooNode {
@@ -47,7 +48,8 @@ class CallArg: FooNode {
     @parse_field expr: Expr
 }
 
-@abstract class Decl: FooNode {
+@abstract
+class Decl: FooNode {
     @abstract @parse_field name: Name
 }
 
@@ -66,7 +68,8 @@ class VarDecl: Decl {
     @parse_field value: Expr
 }
 
-@abstract class Expr: FooNode {
+@abstract
+class Expr: FooNode {
 }
 
 class Addition: Expr {
@@ -94,7 +97,8 @@ class Ref: Expr {
 class Name: FooNode implements TokenNode {
 }
 
-@qualifier enum class NullQual: FooNode {
+@qualifier
+enum class NullQual: FooNode {
 }
 
 class ParamSpec: FooNode {
@@ -103,7 +107,8 @@ class ParamSpec: FooNode {
     @parse_field @nullable default_expr: Expr
 }
 
-@abstract class Stmt: FooNode {
+@abstract
+class Stmt: FooNode {
 }
 
 class AssignStmt: Stmt {

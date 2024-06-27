@@ -7,7 +7,8 @@ grammar foo_grammar {
     name <- Name(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Def: FooNode {
@@ -28,9 +29,11 @@ class Def: FooNode {
 class Name: FooNode implements TokenNode {
     fun sym(): Symbol = node.symbol
 
-    fun resolve(): Entity[FooNode] = node.parent.node_env().get(node.sym())?[0]
+    fun resolve(): Entity[FooNode] =
+        node.parent.node_env().get(node.sym())?[0]
 }
 
-@metadata struct Metadata {
+@metadata
+struct Metadata {
     @used_in_equality node: FooNode
 }

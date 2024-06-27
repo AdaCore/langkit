@@ -7,7 +7,8 @@ grammar foo_grammar {
     )
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Block: FooNode {
@@ -30,9 +31,11 @@ class Name: FooNode implements TokenNode {
 class Ref: FooNode {
     @parse_field name: Name
 
-    @exported fun referenced(): Entity[FooNode] =
-    node.referenced_env().env_node.as_bare_entity
+    @exported
+    fun referenced(): Entity[FooNode] =
+        node.referenced_env().env_node.as_bare_entity
 
-    @memoized fun referenced_env(): LexicalEnv[FooNode] =
-    node.node_env().get(node.name.symbol)?[0].children_env()
+    @memoized
+    fun referenced_env(): LexicalEnv[FooNode] =
+        node.node_env().get(node.name.symbol)?[0].children_env()
 }

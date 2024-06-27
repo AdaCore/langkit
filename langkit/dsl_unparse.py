@@ -1569,7 +1569,7 @@ def emit_prop(prop, walker):
     global underscore_varname_ids
     underscore_varname_ids = itertools.count(1)
 
-    quals = ""
+    quals = []
 
     # When a property declared in the DSL happens to be the root of a property
     # dispatching tree, it is hidden by an artificial property (the
@@ -1582,7 +1582,7 @@ def emit_prop(prop, walker):
                        prop)
 
     if prop_for_walker.is_public:
-        quals += "@exported "
+        quals.append("@exported")
 
     if prop.external:
         qual_args = []
@@ -1590,24 +1590,24 @@ def emit_prop(prop, walker):
             qual_args.append("uses_entity_info=true")
         if prop.uses_envs:
             qual_args.append("uses_envs=true")
-        quals += "@external({}) ".format(", ".join(qual_args))
+        quals.append("@external({})".format(", ".join(qual_args)))
     elif not prop.constructed_expr and not prop.abstract_runtime_check:
-        quals += "@abstract "
+        quals.append("@abstract")
 
     if prop.lazy_field:
-        quals += "@lazy "
+        quals.append("@lazy")
     else:
         if prop.memoized:
-            quals += "@memoized "
+            quals.append("@memoized")
         if prop.call_memoizable:
-            quals += "@call_memoizable "
+            quals.append("@call_memoizable")
         if prop._call_non_memoizable_because:
-            quals += "@call_non_memoizable_because({}) ".format(
+            quals.append("@call_non_memoizable_because({})".format(
                 json.dumps(prop._call_non_memoizable_because)
-            )
+            ))
 
     if prop.activate_tracing:
-        quals += "@traced "
+        quals.append("@traced")
 
     if prop.dynamic_vars:
         vars = []
@@ -1619,13 +1619,15 @@ def emit_prop(prop, walker):
                 if val is None else
                 "{}={}".format(name, emit_expr(P.lowest, val))
             )
-        quals += "@with_dynvars({}) ".format(", ".join(vars))
+        quals.append("@with_dynvars({})".format(", ".join(vars)))
 
     if prop.predicate_error:
-        quals += "@predicate_error({}) ".format(json.dumps(prop.predicate_error))
+        quals.append(
+            "@predicate_error({})".format(json.dumps(prop.predicate_error))
+        )
 
     if prop.warn_on_unused is False:
-        quals += "@ignored "
+        quals.append("@ignored")
 
     args = []
     for arg in prop.natural_arguments:
@@ -1641,19 +1643,26 @@ def emit_prop(prop, walker):
             )
         args.append(arg_text)
 
-    doc = prop.doc
+    doc = prop._raw_doc
 
     res = ""
     if doc:
         res += "{}$hl".format(emit_doc(doc))
 
+    quals_str = "".join([f"{q}$hl" for q in quals])
+
     if prop.lazy_field:
         res += "{}{}: {}".format(
-            quals, prop.original_name, type_name(prop.type)
+            quals_str,
+            prop.original_name,
+            type_name(prop.type)
         )
     else:
         res += "{}fun {}({}): {}".format(
-            quals, prop.original_name, ", ".join(args), type_name(prop.type)
+            quals_str,
+            prop.original_name,
+            ", ".join(args),
+            type_name(prop.type)
         )
 
     if prop.abstract_runtime_check:
@@ -1666,9 +1675,15 @@ def emit_prop(prop, walker):
         )
     elif prop_for_walker.expr is not None:
         with walker.property(prop_for_walker):
-            res += " = $sl{}".format(emit_expr(P.lowest,
-                                               prop_for_walker.expr,
-                                               walker=walker))
+            expr_str = emit_expr(P.lowest,
+                                 prop_for_walker.expr,
+                                 walker=walker)
+            hl_index = expr_str.find('$hl')
+
+            if 0 < hl_index < 50:
+                res += f" = {expr_str}"
+            else:
+                res += f' = $i$sl{expr_str}$d'
 
     return res
 
@@ -1896,13 +1911,14 @@ def emit_node_type(node_type):
             content.append("")
         content.append(emit_env_spec(node_type, walker))
 
+    quals_str = ''.join(f'@{q}$hl' for q in quals)
     content_str = "".join(line + "$hl\n" for line in content)
 
     return sf("""
     % if doc:
     ${emit_doc(doc)}$hl
     % endif
-    ${''.join(f'@{q} ' for q in quals)}
+    ${quals_str}
     ${type_kind} ${type_name(node_type)}${strbase}${strtraits} {$i$hl
     ${content_str}
     $d
@@ -2026,7 +2042,7 @@ def emit_enum_type(enum_type):
     literals = ", ".join(l.name.lower for l in enum_type.values)
     quals = ""
     if enum_type.default_val_name:
-        quals += f"@with_default({enum_type.default_val_name.lower}) "
+        quals += f"@with_default({enum_type.default_val_name.lower})$hl"
     return sf("""
     % if enum_type.doc:
     ${emit_doc(enum_type.doc)}$hl

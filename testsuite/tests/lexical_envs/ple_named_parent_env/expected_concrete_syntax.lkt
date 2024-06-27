@@ -9,13 +9,19 @@ grammar foo_grammar {
     name <- or(Prefix(name "." id) | id)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Name: FooNode {
-    @exported @abstract fun resolve(): Entity[FooNode]
+@abstract
+class Name: FooNode {
+    @exported
+    @abstract
+    fun resolve(): Entity[FooNode]
 
-    @exported @abstract fun suffix_symbol(): Symbol
+    @exported
+    @abstract
+    fun suffix_symbol(): Symbol
 
     fun scope_fqn(): String = match node {
         case p: Prefix => p.prefix.fqn()
@@ -39,7 +45,7 @@ class Prefix: Name {
     @parse_field suffix: Id
 
     fun resolve(): Entity[FooNode] =
-    node.prefix.resolve()?.children_env().get_first(node.suffix.symbol)
+        node.prefix.resolve()?.children_env().get_first(node.suffix.symbol)
 
     fun suffix_symbol(): Symbol = node.suffix.symbol
 }

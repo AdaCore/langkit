@@ -9,15 +9,18 @@ grammar foo_grammar {
     name <- Name(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class BaseDecl: FooNode {
-    @exported fun lookup(n: Symbol): Entity[FooNode] =
-    node.env_lookup(node.node_env(), n)
+@abstract
+class BaseDecl: FooNode {
+    @exported
+    fun lookup(n: Symbol): Entity[FooNode] =
+        node.env_lookup(node.node_env(), n)
 
     fun env_lookup(env: LexicalEnv[FooNode], n: Symbol): Entity[FooNode] =
-    env.get_first(n, lookup=LookupKind.flat)
+        env.get_first(n, lookup=LookupKind.flat)
 }
 
 class Decl: BaseDecl {

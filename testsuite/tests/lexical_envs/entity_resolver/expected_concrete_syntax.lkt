@@ -7,7 +7,8 @@ grammar foo_grammar {
     ref <- Ref(Name(@Identifier))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     fun resolve_ref(): Entity[FooNode] = match node {
         case r: Ref => r.parent.parent.node_env().get(r.name)?[0]
         case _ => null[Entity[FooNode]]
@@ -30,8 +31,8 @@ class Name: FooNode implements TokenNode {
 class Ref: FooNode {
     @parse_field name: Name
 
-    @exported fun resolve(): Entity[FooNode] =
-    node.node_env().get(node.name)?[0]
+    @exported
+    fun resolve(): Entity[FooNode] = node.node_env().get(node.name)?[0]
 
     env_spec {
         add_to_env_kv(

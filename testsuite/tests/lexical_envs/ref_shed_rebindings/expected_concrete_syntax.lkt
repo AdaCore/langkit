@@ -10,12 +10,14 @@ grammar foo_grammar {
     ref_clause <- RefClause("+" identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun lookup(sym: Symbol): Entity[FooNode] =
-    self.children_env().get_first(sym)
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun lookup(sym: Symbol): Entity[FooNode] =
+        self.children_env().get_first(sym)
 
-    @exported fun with_rebinding(from_scope: Entity[Scope], to_scope: Entity[Scope]): Entity[FooNode] =
-    {
+    @exported
+    fun with_rebinding(from_scope: Entity[Scope], to_scope: Entity[Scope]): Entity[FooNode] = {
         val rbs = self.info.rebindings.append_rebinding(
             from_scope.children_env(), to_scope.children_env()
         );
@@ -34,10 +36,11 @@ class RefClause: FooNode {
     @parse_field ref_id: Id
 
     fun resolve(): LexicalEnv[FooNode] =
-    self.lookup(node.ref_id.symbol)?.children_env()
+        self.lookup(node.ref_id.symbol)?.children_env()
 }
 
-@rebindable class Scope: FooNode {
+@rebindable
+class Scope: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, FooNode]
 

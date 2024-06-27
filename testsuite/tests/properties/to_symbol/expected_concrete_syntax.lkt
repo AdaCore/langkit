@@ -5,10 +5,12 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @exported fun compare_as_symbols(s1: String, s2: String): Bool =
-    s1.to_symbol == s2.to_symbol
+    @exported
+    fun compare_as_symbols(s1: String, s2: String): Bool =
+        s1.to_symbol == s2.to_symbol
 }

@@ -10,9 +10,11 @@ grammar foo_grammar {
     name <- or(Prefix(name "." id) | id)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun is_referenced(unit: AnalysisUnit[FooNode]): Bool =
-    unit.is_referenced_from(node.unit())
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun is_referenced(unit: AnalysisUnit[FooNode]): Bool =
+        unit.is_referenced_from(node.unit())
 }
 
 class Dep: FooNode {
@@ -23,15 +25,22 @@ class Dep: FooNode {
     }
 }
 
-@abstract class Name: FooNode {
-    @exported @abstract fun resolve(): Entity[FooNode]
+@abstract
+class Name: FooNode {
+    @exported
+    @abstract
+    fun resolve(): Entity[FooNode]
 
-    @exported @abstract fun suffix_symbol(): Symbol
+    @exported
+    @abstract
+    fun suffix_symbol(): Symbol
 
-    @external() fun referenced_unit_or_error(or_error: Bool): AnalysisUnit[FooNode]
+    @external()
+    fun referenced_unit_or_error(or_error: Bool): AnalysisUnit[FooNode]
 
-    @exported fun referenced_unit(): AnalysisUnit[FooNode] =
-    node.referenced_unit_or_error(false)
+    @exported
+    fun referenced_unit(): AnalysisUnit[FooNode] =
+        node.referenced_unit_or_error(false)
 
     fun scope_fqn(): String = match node {
         case p: Prefix => p.prefix.fqn()
@@ -55,7 +64,7 @@ class Prefix: Name {
     @parse_field suffix: Id
 
     fun resolve(): Entity[FooNode] =
-    node.prefix.resolve().children_env().get_first(node.suffix.symbol)
+        node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 
     fun suffix_symbol(): Symbol = node.suffix.symbol
 }

@@ -15,57 +15,78 @@ enum Color {
     case red, green, blue
 }
 
-@abstract @with_abstract_list class FooNode implements Node[FooNode] {
-    @exported fun count(seq: Array[Entity[Example]]): Int = seq.length()
+@abstract
+@with_abstract_list
+class FooNode implements Node[FooNode] {
+    @exported
+    fun count(seq: Array[Entity[Example]]): Int = seq.length()
 
-    @exported fun get_a(c: Char = 'a'): Char = c
+    @exported
+    fun get_a(c: Char = 'a'): Char = c
 
-    @exported fun get_eacute(c: Char = 'é'): Char = c
+    @exported
+    fun get_eacute(c: Char = 'é'): Char = c
 
-    @exported fun get_int_array(): Array[Int] = [1, 2, 3]
+    @exported
+    fun get_int_array(): Array[Int] = [1, 2, 3]
 
-    @exported fun array_len(a: Array[Int]): Int = a.length()
+    @exported
+    fun array_len(a: Array[Int]): Int = a.length()
 
-    @exported fun identity(c: Char): Char = c
+    @exported
+    fun identity(c: Char): Char = c
 
-    @exported fun get_str(s: String): String = s
+    @exported
+    fun get_str(s: String): String = s
 
-    @exported fun same_color(c: Color): Color = c
+    @exported
+    fun same_color(c: Color): Color = c
 
-    @exported fun same_color_dflt(c: Color = Color.red): Color = c
+    @exported
+    fun same_color_dflt(c: Color = Color.red): Color = c
 
-    @exported fun int_double(c: BigInt): BigInt = c + c
+    @exported
+    fun int_double(c: BigInt): BigInt = c + c
 
-    @exported fun me(b: Bool): FooNodeStruct = FooNodeStruct(
+    @exported
+    fun me(b: Bool): FooNodeStruct = FooNodeStruct(
         node=if b then self else null[Entity[FooNode]]
     )
 
-    @exported fun my_node(): BareNodeStruct = BareNodeStruct(
+    @exported
+    fun my_node(): BareNodeStruct = BareNodeStruct(
         a_boolean=true, bare_node=self.node, a_char='a'
     )
 
-    @exported fun get_node(node_struct: FooNodeStruct): Entity[FooNode] =
-    node_struct.node
+    @exported
+    fun get_node(node_struct: FooNodeStruct): Entity[FooNode] =
+        node_struct.node
 
-    @exported fun get_char(s: BareNodeStruct): Char = s.a_char
+    @exported
+    fun get_char(s: BareNodeStruct): Char = s.a_char
 
-    @exported fun iter_int(): Iterator[Int] = [1, 2, 3].to_iterator()
+    @exported
+    fun iter_int(): Iterator[Int] = [1, 2, 3].to_iterator()
 }
 
 class Example: FooNode {
-    @exported fun singleton(): SomeStruct = SomeStruct(examples=[self])
+    @exported
+    fun singleton(): SomeStruct = SomeStruct(examples=[self])
 }
 
 class Sequence: ASTList[FooNode, FooNode] {
-    @exported fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
+    @exported
+    fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
 
-    @exported fun example_items(): Array[Entity[Example]] = self.filtermap(
+    @exported
+    fun example_items(): Array[Entity[Example]] = self.filtermap(
         (i) => i.as![Example], (i) => i is Example
     )
 }
 
 class Ident: FooNode implements TokenNode {
-    @exported fun sym(sym: Symbol): Symbol = sym
+    @exported
+    fun sym(sym: Symbol): Symbol = sym
 }
 
 class Null: FooNode {

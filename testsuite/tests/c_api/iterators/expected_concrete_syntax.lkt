@@ -5,9 +5,11 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(Example("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun int_array_to_iter(ints: Array[Int]): Iterator[Int] =
-    ints.map((i) => i + 1).to_iterator()
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun int_array_to_iter(ints: Array[Int]): Iterator[Int] =
+        ints.map((i) => i + 1).to_iterator()
 }
 
 class Example: FooNode implements TokenNode {

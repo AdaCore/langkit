@@ -5,7 +5,8 @@ grammar foo_grammar {
     @main_rule main_rule <- Name(@Identifier) |> when(Name.is_not_class_id)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Name: FooNode implements TokenNode {

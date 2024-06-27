@@ -6,7 +6,8 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(or(Definition("def" name) | name), ",")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Definition: FooNode {
@@ -20,12 +21,14 @@ class Definition: FooNode {
 class Name: FooNode implements TokenNode {
     ref_var: LogicVar
 
-    @exported fun resolve(): Bool = {
+    @exported
+    fun resolve(): Bool = {
         val candidates = node.node_env().get(node).map((d) => d.as[Definition]);
 
         %domain(node.ref_var, candidates).solve()
     }
 
-    @exported fun definition(): Entity[Definition] =
-    node.ref_var.get_value().as[Definition]
+    @exported
+    fun definition(): Entity[Definition] =
+        node.ref_var.get_value().as[Definition]
 }

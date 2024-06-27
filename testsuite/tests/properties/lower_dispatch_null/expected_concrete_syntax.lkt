@@ -5,18 +5,22 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     v: LogicVar
 }
 
-@abstract class SomeNode: FooNode {
-    @abstract fun test_prop(): Bool
+@abstract
+class SomeNode: FooNode {
+    @abstract
+    fun test_prop(): Bool
 }
 
 class Example: SomeNode {
     fun test_prop(): Bool = true
 
-    @exported fun solve(): Bool = (
+    @exported
+    fun solve(): Bool = (
         %domain(node.v, [null[Entity[FooNode]]]) and %predicate(SomeNode.test_prop, node.v)
     ).solve()
 }

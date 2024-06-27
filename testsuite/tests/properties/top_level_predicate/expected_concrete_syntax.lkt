@@ -5,14 +5,16 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     fun sophisticated_predicate(): Bool = true
 }
 
 class Example: FooNode {
     var1: LogicVar
 
-    @exported fun prop(): Entity[Example] = {
+    @exported
+    fun prop(): Entity[Example] = {
         val _ = %predicate(FooNode.sophisticated_predicate, node.var1);
 
         node.as_bare_entity

@@ -5,15 +5,18 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(Example("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @exported fun get_struct(): MyStruct = MyStruct(
+    @exported
+    fun get_struct(): MyStruct = MyStruct(
         entity_field=node, array_field=[node.as[FooNode].as_bare_entity, node.parent.as_bare_entity], bigint_field=10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b
     )
 
-    @exported fun struct_identity(s: MyStruct): MyStruct = s
+    @exported
+    fun struct_identity(s: MyStruct): MyStruct = s
 }
 
 struct MyStruct {

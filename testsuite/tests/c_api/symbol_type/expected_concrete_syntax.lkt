@@ -5,11 +5,14 @@ grammar foo_grammar {
     @main_rule main_rule <- Example(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @exported fun sym(): Symbol = node.symbol
+    @exported
+    fun sym(): Symbol = node.symbol
 
-    @exported fun sym_array(): Array[Symbol] = [s"a", s"b", s"c"]
+    @exported
+    fun sym_array(): Array[Symbol] = [s"a", s"b", s"c"]
 }

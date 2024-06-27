@@ -8,9 +8,11 @@ grammar foo_grammar {
     ident <- Id(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun env_get_all(): Array[Entity[FooNode]] =
-    node.children_env().get(null[Symbol])
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun env_get_all(): Array[Entity[FooNode]] =
+        node.children_env().get(null[Symbol])
 }
 
 class Id: FooNode implements TokenNode {

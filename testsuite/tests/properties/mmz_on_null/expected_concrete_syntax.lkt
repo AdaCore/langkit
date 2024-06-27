@@ -5,23 +5,25 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     v: LogicVar
 
-    @memoized fun pred1(): Bool = not node.is_null
+    @memoized
+    fun pred1(): Bool = not node.is_null
 
-    @memoized fun pred2(): Bool = not node.parent.is_null
+    @memoized
+    fun pred2(): Bool = not node.parent.is_null
 
-    fun create_equation(with_pred1: Bool, n: Entity[FooNode]): Equation =
-    %eq(node.v, n) and (
+    fun create_equation(with_pred1: Bool, n: Entity[FooNode]): Equation = %eq(node.v, n) and (
         if with_pred1 then %predicate(FooNode.pred1, node.v) else %predicate(FooNode.pred2, node.v)
     )
 
-    @exported fun p1(n: Entity[FooNode]): Bool =
-    node.create_equation(true, n).solve()
+    @exported
+    fun p1(n: Entity[FooNode]): Bool = node.create_equation(true, n).solve()
 
-    @exported fun p2(n: Entity[FooNode]): Bool =
-    node.create_equation(false, n).solve()
+    @exported
+    fun p2(n: Entity[FooNode]): Bool = node.create_equation(false, n).solve()
 }
 
 class Example: FooNode {

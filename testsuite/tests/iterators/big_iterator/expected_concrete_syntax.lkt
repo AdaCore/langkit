@@ -8,12 +8,15 @@ grammar foo_grammar {
     @main_rule main_rule <- list*(Example("e"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun get_as_array(): Array[Entity[FooNode]] =
-    node.children.map((n) => n.as_bare_entity)
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun get_as_array(): Array[Entity[FooNode]] =
+        node.children.map((n) => n.as_bare_entity)
 
-    @exported fun get_as_iterator(): Iterator[Entity[FooNode]] =
-    node.get_as_array().to_iterator()
+    @exported
+    fun get_as_iterator(): Iterator[Entity[FooNode]] =
+        node.get_as_array().to_iterator()
 }
 
 class Example: FooNode {

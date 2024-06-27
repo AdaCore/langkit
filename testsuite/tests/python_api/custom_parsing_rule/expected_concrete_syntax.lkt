@@ -15,7 +15,8 @@ grammar foo_grammar {
     )
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Def: FooNode {
@@ -24,7 +25,8 @@ class Def: FooNode {
     @parse_field expr: Expr
 }
 
-@abstract class Expr: FooNode {
+@abstract
+class Expr: FooNode {
 }
 
 class Literal: Expr implements TokenNode {

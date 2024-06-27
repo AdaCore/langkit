@@ -5,10 +5,13 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(Example("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun integers_neq(a: Int, b: Int): Bool = a != b
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun integers_neq(a: Int, b: Int): Bool = a != b
 }
 
 class Example: FooNode implements TokenNode {
-    @exported fun not_eq(other: Example): Bool = node != other
+    @exported
+    fun not_eq(other: Example): Bool = node != other
 }

@@ -5,12 +5,15 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(Example(@Example))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun find_above(values: Array[Int], threshold: Int): Int =
-    values.find((i) => i > threshold)
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun find_above(values: Array[Int], threshold: Int): Int =
+        values.find((i) => i > threshold)
 
-    @exported fun find_entity(l: Entity[ASTList[FooNode, Example]]): Entity[Example] =
-    l.find((n) => n.text() == "example")
+    @exported
+    fun find_entity(l: Entity[ASTList[FooNode, Example]]): Entity[Example] =
+        l.find((n) => n.text() == "example")
 }
 
 class Example: FooNode implements TokenNode {

@@ -7,7 +7,8 @@ grammar foo_grammar {
     id <- Identifier(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Decl: FooNode {
@@ -15,7 +16,8 @@ class Decl: FooNode {
     @parse_field error: DeclError
 }
 
-@qualifier enum class DeclError: FooNode {
+@qualifier
+enum class DeclError: FooNode {
 }
 
 class Identifier: FooNode implements TokenNode {

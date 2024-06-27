@@ -11,10 +11,12 @@ grammar foo_grammar {
     name <- Identifier(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Decl: FooNode {
+@abstract
+class Decl: FooNode {
     @parse_field @nullable is_null: NullQual
     @parse_field name: Identifier
 }
@@ -28,5 +30,6 @@ class VarDecl: Decl {
 class Identifier: FooNode implements TokenNode {
 }
 
-@qualifier enum class NullQual: FooNode {
+@qualifier
+enum class NullQual: FooNode {
 }

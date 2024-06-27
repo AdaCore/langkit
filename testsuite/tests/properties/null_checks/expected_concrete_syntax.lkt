@@ -11,32 +11,37 @@ grammar foo_grammar {
     atom <- or(Literal(@Number) | Name(@Identifier))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun null_unit(): AnalysisUnit[FooNode] =
-    null[AnalysisUnit[FooNode]]
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun null_unit(): AnalysisUnit[FooNode] = null[AnalysisUnit[FooNode]]
 
-    @exported fun null_node(): Entity[Expression] = null[Entity[Expression]]
+    @exported
+    fun null_node(): Entity[Expression] = null[Entity[Expression]]
 
-    @exported fun deref_null_unit(): Entity[FooNode] =
-    node.null_unit().root.as_bare_entity
+    @exported
+    fun deref_null_unit(): Entity[FooNode] =
+        node.null_unit().root.as_bare_entity
 
-    @exported fun deref_null_node(): Entity[Expression] =
-    node.null_node().null_node()
+    @exported
+    fun deref_null_node(): Entity[Expression] = node.null_node().null_node()
 
-    @exported fun null_node_unit(): AnalysisUnit[FooNode] =
-    node.null_node().unit()
+    @exported
+    fun null_node_unit(): AnalysisUnit[FooNode] = node.null_node().unit()
 
-    @exported fun cast_null_node(): Entity[Name] = node.null_node().as[Name]
+    @exported
+    fun cast_null_node(): Entity[Name] = node.null_node().as[Name]
 
-    @exported fun match_null_node(): Entity[Expression] =
-    match node.null_node().node {
+    @exported
+    fun match_null_node(): Entity[Expression] = match node.null_node().node {
         case l: Literal => l
         case n: Name => n
         case others => others
     }.as_bare_entity
 }
 
-@abstract class Expression: FooNode {
+@abstract
+class Expression: FooNode {
 }
 
 class Literal: Expression implements TokenNode {
@@ -44,13 +49,14 @@ class Literal: Expression implements TokenNode {
 
 class Name: Expression implements TokenNode {
     fun env_element(): Entity[FooNode] =
-    node.children_env().get(node.symbol)?[0]
+        node.children_env().get(node.symbol)?[0]
 
-    @exported fun deref_env_element(): Entity[Expression] =
-    node.env_element().null_node()
+    @exported
+    fun deref_env_element(): Entity[Expression] =
+        node.env_element().null_node()
 
-    @exported fun match_env_element(): Entity[FooNode] =
-    match node.env_element() {
+    @exported
+    fun match_env_element(): Entity[FooNode] = match node.env_element() {
         case l: Entity[Literal] => l
         case n: Entity[Name] => n
         case others => others

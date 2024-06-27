@@ -11,7 +11,8 @@ grammar foo_grammar {
     plus <- pick("(" Plus(expr "+" expr) ")")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Def: FooNode {
@@ -23,17 +24,25 @@ class Def: FooNode {
     }
 }
 
-@abstract class Expr: FooNode {
-    @exported @abstract fun evaluate_abstract(): Int
+@abstract
+class Expr: FooNode {
+    @exported
+    @abstract
+    fun evaluate_abstract(): Int
 
-    @exported @abstract fun evaluate_entity(): Int
+    @exported
+    @abstract
+    fun evaluate_entity(): Int
 
-    @exported fun evaluate_rtcheck(): Int = raise[Int] PropertyError("Property Expr.evaluate_rtcheck not implemented")
+    @exported
+    fun evaluate_rtcheck(): Int = raise[Int] PropertyError("Property Expr.evaluate_rtcheck not implemented")
 
-    @exported fun evaluate_concrete(): Int = 1
+    @exported
+    fun evaluate_concrete(): Int = 1
 }
 
-@abstract class Atom: Expr {
+@abstract
+class Atom: Expr {
 }
 
 class Lit: Atom implements TokenNode {
@@ -47,8 +56,9 @@ class Lit: Atom implements TokenNode {
 class Ref: Atom {
     @parse_field name: Name
 
-    @exported fun resolve(): Entity[Def] =
-    node.node_env().get_first(node.name.symbol).as![Def]
+    @exported
+    fun resolve(): Entity[Def] =
+        node.node_env().get_first(node.name.symbol).as![Def]
 
     fun evaluate_abstract(): Int = node.resolve().expr.evaluate_abstract()
 
@@ -62,16 +72,16 @@ class Plus: Expr {
     @parse_field rhs: Expr
 
     fun evaluate_abstract(): Int =
-    node.lhs.evaluate_abstract() + node.rhs.evaluate_abstract()
+        node.lhs.evaluate_abstract() + node.rhs.evaluate_abstract()
 
     fun evaluate_rtcheck(): Int =
-    node.lhs.evaluate_rtcheck() + node.rhs.evaluate_rtcheck()
+        node.lhs.evaluate_rtcheck() + node.rhs.evaluate_rtcheck()
 
     fun evaluate_concrete(): Int =
-    node.lhs.evaluate_concrete() + node.rhs.evaluate_concrete()
+        node.lhs.evaluate_concrete() + node.rhs.evaluate_concrete()
 
     fun evaluate_entity(): Int =
-    self.lhs.evaluate_entity() + self.rhs.evaluate_entity()
+        self.lhs.evaluate_entity() + self.rhs.evaluate_entity()
 }
 
 class Name: FooNode implements TokenNode {

@@ -5,12 +5,14 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @exported fun raise_msg(): Bool =
-    raise[Bool] PropertyError("Custom error message!")
+    @exported
+    fun raise_msg(): Bool = raise[Bool] PropertyError("Custom error message!")
 
-    @exported fun raise_no_msg(): Bool = raise[Bool] PropertyError()
+    @exported
+    fun raise_no_msg(): Bool = raise[Bool] PropertyError()
 }

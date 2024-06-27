@@ -18,7 +18,8 @@ grammar foo_grammar {
     plus <- pick("(" Plus(expr "+" expr) ")")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Def: FooNode {
@@ -36,10 +37,12 @@ class Def: FooNode {
     }
 }
 
-@abstract class Expr: FooNode {
+@abstract
+class Expr: FooNode {
 }
 
-@abstract class Atom: Expr {
+@abstract
+class Atom: Expr {
 }
 
 class Lit: Atom implements TokenNode {
@@ -48,22 +51,25 @@ class Lit: Atom implements TokenNode {
 class Ref: Atom {
     @parse_field name: Name
 
-    @exported fun resolve(): Entity[FooNode] =
-    node.node_env().get_first(node.name.symbol)
+    @exported
+    fun resolve(): Entity[FooNode] =
+        node.node_env().get_first(node.name.symbol)
 
-    @exported fun dummy(): Array[Entity[FooNode]] =
-    node.referenced_env().get(node.name.symbol)
+    @exported
+    fun dummy(): Array[Entity[FooNode]] =
+        node.referenced_env().get(node.name.symbol)
 
     fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 }
 
-@synthetic class MiddleRef: Ref {
+@synthetic
+class MiddleRef: Ref {
     fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
 }
 
 class DerivedRef: MiddleRef {
     fun referenced_env(): LexicalEnv[FooNode] =
-    node.unit().root.node_env().get_first(node.name.symbol).children_env()
+        node.unit().root.node_env().get_first(node.name.symbol).children_env()
 }
 
 class Plus: Expr {

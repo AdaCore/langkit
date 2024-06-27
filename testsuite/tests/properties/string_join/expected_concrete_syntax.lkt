@@ -5,12 +5,14 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @exported fun join(strings: Array[Str], separator: String): String =
-    separator.join(strings.map((s) => s.value))
+    @exported
+    fun join(strings: Array[Str], separator: String): String =
+        separator.join(strings.map((s) => s.value))
 }
 
 struct Str {

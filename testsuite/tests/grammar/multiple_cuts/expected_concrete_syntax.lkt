@@ -17,7 +17,8 @@ grammar foo_grammar {
     comma <- Comma(?pick("(" / id ")") "," id id)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Comma: FooNode {

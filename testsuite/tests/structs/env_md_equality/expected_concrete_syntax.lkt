@@ -6,19 +6,21 @@ grammar foo_grammar {
     name <- Name(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Name: FooNode implements TokenNode {
-    @exported fun with_md(md1: Bool, md2: Bool): Entity[FooNode] =
-    Entity[FooNode](
+    @exported
+    fun with_md(md1: Bool, md2: Bool): Entity[FooNode] = Entity[FooNode](
         node=self.node, info=EntityInfo(
             md=Metadata(md1=md1, md2=md2), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
         )
     )
 }
 
-@metadata struct Metadata {
+@metadata
+struct Metadata {
     @used_in_equality md1: Bool
     md2: Bool
 }

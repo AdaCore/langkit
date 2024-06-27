@@ -12,7 +12,8 @@ grammar foo_grammar {
     plus <- PlusQualifier("+")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 enum class Enum: FooNode {
@@ -28,5 +29,6 @@ class Param: FooNode {
     @parse_field has_plus: PlusQualifier
 }
 
-@qualifier enum class PlusQualifier: FooNode {
+@qualifier
+enum class PlusQualifier: FooNode {
 }

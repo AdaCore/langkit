@@ -6,15 +6,20 @@ grammar foo_grammar {
     atom <- Literal(@Number)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Expression: FooNode {
-    @exported @abstract fun result(): Int
+@abstract
+class Expression: FooNode {
+    @exported
+    @abstract
+    fun result(): Int
 }
 
 class Literal: Expression implements TokenNode {
-    @external() fun result(): Int
+    @external()
+    fun result(): Int
 }
 
 class Plus: Expression {

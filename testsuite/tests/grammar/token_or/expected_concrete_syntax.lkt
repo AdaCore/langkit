@@ -13,7 +13,8 @@ grammar foo_grammar {
     @main_rule expr <- list*(Assignment(Identifier(@Id) "=" Number(@Number)))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Assignment: FooNode {

@@ -20,13 +20,17 @@ grammar foo_grammar {
     literal <- Literal(@Number)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun identity(value: BigInt): BigInt = value
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun identity(value: BigInt): BigInt = value
 
-    @exported fun check_big_literal(): BigInt =
-    99999999999999999999999999999999999999999999b
+    @exported
+    fun check_big_literal(): BigInt =
+        99999999999999999999999999999999999999999999b
 
-    @exported fun check_to_big_int(i: Int): BigInt = i.as_big_int()
+    @exported
+    fun check_to_big_int(i: Int): BigInt = i.as_big_int()
 
     fun to_int(b: Bool): BigInt = if b then 1b else 0b
 }
@@ -36,10 +40,14 @@ class Decl: FooNode {
     @parse_field expr_tree: Expr
 }
 
-@abstract class Expr: FooNode {
-    @exported @abstract fun evaluate(): BigInt
+@abstract
+class Expr: FooNode {
+    @exported
+    @abstract
+    fun evaluate(): BigInt
 
-    @exported fun evaluate_as_int(): Int = node.evaluate().as_int()
+    @exported
+    fun evaluate_as_int(): Int = node.evaluate().as_int()
 }
 
 class BinOp: Expr {
@@ -64,7 +72,8 @@ class BinOp: Expr {
 }
 
 class Literal: Expr implements TokenNode {
-    @external() fun evaluate(): BigInt
+    @external()
+    fun evaluate(): BigInt
 }
 
 class ParenExpr: Expr {

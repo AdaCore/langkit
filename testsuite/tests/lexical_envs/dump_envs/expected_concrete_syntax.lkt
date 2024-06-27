@@ -9,7 +9,8 @@ grammar foo_grammar {
     identifier <- Identifier(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Decl: FooNode {

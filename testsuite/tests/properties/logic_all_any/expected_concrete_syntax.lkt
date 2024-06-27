@@ -5,7 +5,8 @@ grammar foo_grammar {
     @main_rule main_rule <- NameSequence("(" list*(Name(@Identifier)) ")")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Name: FooNode implements TokenNode {
@@ -20,12 +21,14 @@ class NameSequence: FooNode {
     fun domains(): Equation = node.names.logic_all((n) => %domain(n.var, [n]))
 
     |" Return whether at least one name is "foo".
-    @exported fun any_foo(): Bool = (
+    @exported
+    fun any_foo(): Bool = (
         node.domains() and node.names.logic_any((n) => %predicate(Name.predicate, n.var))
     ).solve()
 
     |" Return whether all names are "foo".
-    @exported fun all_foo(): Bool = (
+    @exported
+    fun all_foo(): Bool = (
         node.domains() and node.names.logic_all((n) => %predicate(Name.predicate, n.var))
     ).solve()
 }

@@ -10,7 +10,8 @@ grammar foo_grammar {
     @main_rule expr <- list*(Identifier(@Id))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Identifier: FooNode implements TokenNode {

@@ -5,13 +5,17 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @exported fun identity(s: String): String = s
+    @exported
+    fun identity(s: String): String = s
 
-    @exported fun extend(s: String): String = s & "foo"
+    @exported
+    fun extend(s: String): String = s & "foo"
 
-    @exported fun newline(): String = "hello\nworld"
+    @exported
+    fun newline(): String = "hello\nworld"
 }

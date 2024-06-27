@@ -7,14 +7,15 @@ grammar foo_grammar {
     example <- Example(@Example)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Decl: FooNode {
     @parse_field @nullable name: Identifier
 
-    @exported fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Entity[Decl] =
-    {
+    @exported
+    fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Entity[Decl] = {
         val rbdng = self.info.rebindings.append_rebinding(
             from_node.children_env(), to_node.children_env()
         );

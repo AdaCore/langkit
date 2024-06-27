@@ -13,7 +13,8 @@ grammar foo_grammar {
     id <- Id(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Def: FooNode {
@@ -25,15 +26,18 @@ class Def: FooNode {
 }
 
 class Id: FooNode implements TokenNode {
-    @external() fun referenced_scope_or_error(or_error: Bool): Scope
+    @external()
+    fun referenced_scope_or_error(or_error: Bool): Scope
 
-    @exported fun referenced_scope(): Entity[Scope] =
-    node.referenced_scope_or_error(false).as_bare_entity
+    @exported
+    fun referenced_scope(): Entity[Scope] =
+        node.referenced_scope_or_error(false).as_bare_entity
 
     fun referenced_env(): LexicalEnv[FooNode] =
-    node.resolve().as[Scope]?.children_env()
+        node.resolve().as[Scope]?.children_env()
 
-    @exported fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
+    @exported
+    fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
 }
 
 class Dep: Id implements TokenNode {
@@ -42,7 +46,8 @@ class Dep: Id implements TokenNode {
 class Ref: Id implements TokenNode {
 }
 
-@ple_unit_root class Scope: FooNode {
+@ple_unit_root
+class Scope: FooNode {
     @parse_field name: Id
     @parse_field deps: ASTList[FooNode, Dep]
     @parse_field defs: ASTList[FooNode, Def]

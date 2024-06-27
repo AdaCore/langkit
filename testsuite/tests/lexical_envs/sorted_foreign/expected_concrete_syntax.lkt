@@ -9,10 +9,12 @@ grammar foo_grammar {
     name <- or(DottedName(name "." identifier) | identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Name: FooNode {
+@abstract
+class Name: FooNode {
     fun scope_fqn(): String = match node {
         case dn: DottedName => dn.prefix.fqn()
         case _: Identifier => null[String]
@@ -23,9 +25,11 @@ grammar foo_grammar {
         case id: Identifier => id.text()
     }
 
-    @abstract fun referenced_name(): Symbol
+    @abstract
+    fun referenced_name(): Symbol
 
-    @abstract fun referenced_scope(): LexicalEnv[FooNode]
+    @abstract
+    fun referenced_scope(): LexicalEnv[FooNode]
 }
 
 class DottedName: Name {
@@ -35,17 +39,17 @@ class DottedName: Name {
     fun referenced_name(): Symbol = node.suffix.referenced_name()
 
     fun referenced_parent_scope(): LexicalEnv[FooNode] =
-    node.prefix.referenced_scope()
+        node.prefix.referenced_scope()
 
     fun referenced_scope(): LexicalEnv[FooNode] =
-    node.suffix.resolve_scope(node.referenced_parent_scope())
+        node.suffix.resolve_scope(node.referenced_parent_scope())
 }
 
 class Identifier: Name implements TokenNode {
     fun referenced_name(): Symbol = node.symbol
 
-    @traced fun resolve_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
-    {
+    @traced
+    fun resolve_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] = {
         val env = from_env.do(
             (e) => e, default_val=node.referenced_parent_scope()
         );
@@ -53,17 +57,20 @@ class Identifier: Name implements TokenNode {
         env.get(node.symbol)?[0].children_env()
     }
 
-    @traced fun referenced_parent_scope(): LexicalEnv[FooNode] =
-    node.unit().root.children_env()
+    @traced
+    fun referenced_parent_scope(): LexicalEnv[FooNode] =
+        node.unit().root.children_env()
 
-    @traced fun referenced_scope(): LexicalEnv[FooNode] =
-    node.resolve_scope(null[LexicalEnv[FooNode]])
+    @traced
+    fun referenced_scope(): LexicalEnv[FooNode] =
+        node.resolve_scope(null[LexicalEnv[FooNode]])
 }
 
 class Ref: FooNode {
     @parse_field name: Name
 
-    @exported fun resolve(): FooNode = node.name.referenced_scope().env_node
+    @exported
+    fun resolve(): FooNode = node.name.referenced_scope().env_node
 }
 
 class Scope: FooNode {

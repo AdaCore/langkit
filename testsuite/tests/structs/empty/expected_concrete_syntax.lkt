@@ -5,11 +5,13 @@ grammar foo_grammar {
     @main_rule main_rule <- Example(@Example)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @exported fun identity(s: MyStruct): MyStruct = s
+    @exported
+    fun identity(s: MyStruct): MyStruct = s
 }
 
 struct MyStruct {

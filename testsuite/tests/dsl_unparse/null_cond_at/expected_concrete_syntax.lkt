@@ -5,8 +5,10 @@ grammar foo_grammar {
     @main_rule main_rule <- list*(Example("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun p1(): Example = node.p2()?[0].as[Example]
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun p1(): Example = node.p2()?[0].as[Example]
 
     fun p2(): Array[FooNode] = [node]
 }

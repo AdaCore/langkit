@@ -13,10 +13,12 @@ grammar foo_grammar {
     )
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class DefNode: FooNode {
+@abstract
+class DefNode: FooNode {
 }
 
 class Scope: DefNode {
@@ -38,8 +40,11 @@ class Var: DefNode {
     }
 }
 
-@abstract class Name: FooNode {
-    @exported @abstract fun resolve(): Entity[FooNode]
+@abstract
+class Name: FooNode {
+    @exported
+    @abstract
+    fun resolve(): Entity[FooNode]
 }
 
 class Id: Name implements TokenNode {
@@ -51,5 +56,5 @@ class Prefix: Name {
     @parse_field suffix: Id
 
     fun resolve(): Entity[FooNode] =
-    node.prefix.resolve().children_env().get_first(node.suffix.symbol)
+        node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 }

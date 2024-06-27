@@ -8,7 +8,8 @@ grammar foo_grammar {
     ref <- Ref(Name(@Identifier))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Decl: FooNode {
@@ -26,8 +27,10 @@ class Name: FooNode implements TokenNode {
 class Ref: FooNode {
     @parse_field name: Name
 
-    @exported fun decl_wrapper(): Entity[Decl] = self.decl()
+    @exported
+    fun decl_wrapper(): Entity[Decl] = self.decl()
 
-    @exported fun decl(): Entity[Decl] =
-    node.children_env().get_first(node.name).as![Decl]
+    @exported
+    fun decl(): Entity[Decl] =
+        node.children_env().get_first(node.name).as![Decl]
 }

@@ -3959,9 +3959,8 @@ class PropertyDef(AbstractNodeData):
         :type: str
         """
 
-        self._doc = doc
-        ":type: str|None"
-
+        self._raw_doc: str | None = doc
+        self._doc: str | None = doc
         self._doc_location: Location | None = None
 
         self.memoized = memoized
@@ -4595,7 +4594,7 @@ class PropertyDef(AbstractNodeData):
                 doc = inspect.cleandoc(dyn_var.doc)
                 dyn_var_docs.append(f"``{name}``: {doc}")
         if dyn_var_docs:
-            self._doc = (self._doc or "") + "".join(
+            self._doc = (self._raw_doc or "") + "".join(
                 f"\n\n{doc}" for doc in dyn_var_docs
             )
 

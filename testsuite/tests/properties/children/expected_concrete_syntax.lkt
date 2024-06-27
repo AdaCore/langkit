@@ -6,17 +6,22 @@ grammar foo_grammar {
     sequence <- Sequence("(" list*(Example(@Example)) ")")
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun node_children(): Array[Entity[FooNode]] =
-    node.children.map((n) => n.as_bare_entity)
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun node_children(): Array[Entity[FooNode]] =
+        node.children.map((n) => n.as_bare_entity)
 
-    @exported fun given_node_children(n: FooNode): Array[Entity[FooNode]] =
-    n.children.map((n) => n.as_bare_entity)
+    @exported
+    fun given_node_children(n: FooNode): Array[Entity[FooNode]] =
+        n.children.map((n) => n.as_bare_entity)
 
-    @exported fun entity_children(): Array[Entity[FooNode]] = self.children
+    @exported
+    fun entity_children(): Array[Entity[FooNode]] = self.children
 
-    @exported fun given_entity_children(n: Entity[FooNode]): Array[Entity[FooNode]] =
-    n.children
+    @exported
+    fun given_entity_children(n: Entity[FooNode]): Array[Entity[FooNode]] =
+        n.children
 }
 
 class Example: FooNode implements TokenNode {

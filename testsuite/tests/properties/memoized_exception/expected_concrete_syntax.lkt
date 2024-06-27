@@ -5,21 +5,27 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @exported @memoized fun prop1(): Bool = {
+    @exported
+    @memoized
+    fun prop1(): Bool = {
         val _ = [node];
 
         raise[Bool] PropertyError("Explicit error 1")
     }
 
-    @exported @memoized fun prop2(): Bool =
-    raise[Bool] PropertyError("Explicit error 2")
+    @exported
+    @memoized
+    fun prop2(): Bool = raise[Bool] PropertyError("Explicit error 2")
 
-    @exported @memoized fun prop3(): Bool = node.raise_error(false)
+    @exported
+    @memoized
+    fun prop3(): Bool = node.raise_error(false)
 
     fun raise_error(prop_error: Bool): Bool =
-    if prop_error then raise[Bool] PropertyError("This is a Property_Error") else raise[Bool] PreconditionFailure("This is a Precondition_Failure")
+        if prop_error then raise[Bool] PropertyError("This is a Property_Error") else raise[Bool] PreconditionFailure("This is a Precondition_Failure")
 }

@@ -5,15 +5,17 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
     fun failing_property(): Bool = raise[Bool] PropertyError()
 
-    @exported fun failsafe_property(): Bool =
-    try node.failing_property() else false
+    @exported
+    fun failsafe_property(): Bool =
+        try node.failing_property() else false
 
-    @exported fun failsafe_property_2(): Bool =
-    try node.failing_property()
+    @exported
+    fun failsafe_property_2(): Bool = try node.failing_property()
 }
