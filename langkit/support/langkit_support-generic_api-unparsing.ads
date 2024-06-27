@@ -242,6 +242,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --        {"kind": "innerRoot", "contents": <sub-template>}
    --
+   --    * The "continuationLineIndent" template yields a
+   --      "continuationLineIndent" Prettier document::
+   --
+   --        {"kind": "continuationLineIndent", "contents": <sub-template>}
+   --
    --    * The "recurse_field" template is valid only in "node" templates for
    --      concrete nodes that are neither abstract, token nor list nodes. When
    --      used, the whole template cannot contain any

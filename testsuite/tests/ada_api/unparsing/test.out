@@ -142,6 +142,8 @@ a: Int=2
     template for VarDecl.f_name: missing "contents" key for markAsRoot
 # invalid_innerroot.json
     template for VarDecl.f_name: missing "contents" key for innerRoot
+# invalid_continuationlineindent.json
+    template for VarDecl.f_name: missing "contents" key for continuationLineIndent
 # invalid_recurse_field.json
     template for VarDecl.f_name: recurse_field cannot appear in a "recurse" template
 # invalid_recurse_field2.json
@@ -1769,6 +1771,40 @@ Done.
     },
     "alignData": {
       "kind": "innerRoot"
+    },
+    "command": "align"
+  },
+  "id": 1,
+  "kind": "command"
+}
+
+== cmd_continuationlineindent.json ==
+
+{
+  "command": {
+    "alignContents": {
+      "id": 2,
+      "kind": "list",
+      "list": [
+        {
+          "command": {
+            "command": "line",
+            "hard": false,
+            "literal": false,
+            "soft": false
+          },
+          "id": 3,
+          "kind": "command"
+        },
+        {
+          "id": 4,
+          "kind": "text",
+          "text": "var i:Int=0;"
+        }
+      ]
+    },
+    "alignData": {
+      "kind": "continuationLineIndent"
     },
     "command": "align"
   },

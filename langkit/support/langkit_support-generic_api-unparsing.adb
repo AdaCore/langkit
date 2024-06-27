@@ -2449,7 +2449,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end;
 
                elsif Kind in
-                  "dedent" | "dedentToRoot" | "markAsRoot" | "innerRoot"
+                  "dedent"
+                  | "dedentToRoot"
+                  | "markAsRoot"
+                  | "innerRoot"
+                  | "continuationLineIndent"
                then
                   if not JSON.Has_Field ("contents") then
                      Abort_Parsing
@@ -2464,6 +2468,9 @@ package body Langkit_Support.Generic_API.Unparsing is
                                   then (Kind => Prettier.Root)
                                   elsif Kind = "innerRoot"
                                   then (Kind => Prettier.Inner_Root)
+                                  elsif Kind = "continuationLineIndent"
+                                  then
+                                    (Kind => Prettier.Continuation_Line_Indent)
                                   else raise Program_Error),
                      Contents => Parse_Template_Helper
                                    (JSON.Get ("contents"), Context));
@@ -4699,6 +4706,14 @@ package body Langkit_Support.Generic_API.Unparsing is
          Help        => "Indentation width",
          Default_Val => 4);
 
+      package Indentation_Continuation is new Parse_Option
+        (Parser      => Parser,
+         Short       => "-I",
+         Long        => "--indentation-continuation",
+         Arg_Type    => Natural,
+         Help        => "Continuation line indentation",
+         Default_Val => 2);
+
       package End_Of_Line is new Parse_Enum_Option
         (Parser      => Parser,
          Short       => "-e",
@@ -4835,9 +4850,10 @@ package body Langkit_Support.Generic_API.Unparsing is
               Options  =>
                 (Width       => Width.Get,
                  Indentation =>
-                   (Indentation_Kind.Get,
-                    Indentation_Width.Get,
-                    Offset => (Tabs => 0, Spaces => 0)),
+                   (Kind         => Indentation_Kind.Get,
+                    Width        => Indentation_Width.Get,
+                    Continuation => Indentation_Continuation.Get,
+                    Offset       => (Tabs => 0, Spaces => 0)),
                  End_Of_Line => End_Of_Line.Get));
       begin
          --  If requested, dump it as a JSON file

@@ -1286,6 +1286,8 @@ package body Langkit_Support.Prettier_Utils is
                         Append (Line, "markAsRoot");
                      when Prettier.Inner_Root =>
                         Append (Line, "innerRoot");
+                     when Prettier.Continuation_Line_Indent =>
+                        Append (Line, "continuationLineIndent");
                      when Prettier.None =>
                         Append (Line, "none");
                   end case;
