@@ -1,3 +1,4 @@
 driver: python
 control:
     - [SKIP, "not has_gdb", "GDB required"]
+    - [XFAIL, "True", "eng/toolchain/gdb#95: GDB crashes"]
