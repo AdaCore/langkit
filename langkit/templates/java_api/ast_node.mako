@@ -55,7 +55,7 @@
         // ----- Instance methods -----
 
         @Override
-        public ${ctx.lib_name.camel}Node getDescription() {
+        public Reflection.Node getDescription() {
             return ${java_type}.description;
         }
 
@@ -107,8 +107,8 @@
     %>
 
         /** Full description of the node (kind, fields, class...) */
-        public static final ${ctx.lib_name.camel}Node description =
-            new ${ctx.lib_name.camel}Node(
+        public static final Reflection.Node description =
+            new Reflection.Node(
                 ${kind},
                 ${"true" if cls.is_token_node else "false"},
                 ${"true" if cls.is_list_type else "false"},
@@ -145,15 +145,15 @@
                     );
 
                     // Create the parameter list
-                    List<Param> parameters = new ArrayList<>();
+                    List<Reflection.Param> parameters = new ArrayList<>();
                     % for param in method.params:
                         % if param.default_value_expr is None:
-                    parameters.add(new Param(
+                    parameters.add(new Reflection.Param(
                         ${api.wrapping_type(param.public_type)}.class,
                         "${param.name}"
                     ));
                         % else:
-                    parameters.add(new ParamWithDefaultValue(
+                    parameters.add(new Reflection.Param(
                         ${api.wrapping_type(param.public_type)}.class,
                         "${param.name}",
                         ${param.default_value_expr}
@@ -164,7 +164,7 @@
                     // Add the method and the parameters in maps
                     description.fieldDescriptions.put(
                         "${method.native_name}",
-                        new ${ctx.lib_name.camel}Field(method, parameters)
+                        new Reflection.Field(method, parameters)
                     );
                 }
                 % endif

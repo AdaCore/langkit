@@ -462,18 +462,18 @@ public final class BindingsTests {
             FooNode root = unit.getRoot();
 
             // Test the character manipulation
-            LibfoolangField getAField = root.getFieldDescription("p_get_a");
-            LibfoolangField getEacuteField =
+            Reflection.Field getAField = root.getFieldDescription("p_get_a");
+            Reflection.Field getEacuteField =
                 root.getFieldDescription("p_get_eacute");
             Char c1 = root.pGetA(
                 (Char) (
-                    (ParamWithDefaultValue) getAField.params.get(0)
-                ).defaultValue
+                    (Reflection.Param) getAField.params.get(0)
+                ).defaultValue.get()
             );
             Char c2 = root.pGetEacute(
                 (Char) (
-                    (ParamWithDefaultValue) getEacuteField.params.get(0)
-                ).defaultValue
+                    (Reflection.Param) getEacuteField.params.get(0)
+                ).defaultValue.get()
             );
             Char cIdent = root.pIdentity(Char.create('\u00e9'));
             System.out.println("The 'a' char = " + c1.toString());
