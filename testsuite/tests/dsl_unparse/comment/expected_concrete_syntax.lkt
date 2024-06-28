@@ -1,0 +1,24 @@
+lexer foo_lexer {
+
+    @trivia() Whitespace <- p"[ \n\r\t]+"
+
+    family alphanumericals {
+        Example <- "example"
+    }
+
+
+    family comments {
+        @with_unparsing_newline @trivia(comment=true) Comment <- p"#(.?)+"
+    }
+
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+}
