@@ -11,8 +11,8 @@ grammar foo_grammar {
         or(SpecialList+(or(a | b)))
         or(a | b | null(Holder))
     )
-    a <- A(@identifier("a"))
-    b <- B(@identifier("b"))
+    a <- A(@Identifier("a"))
+    b <- B(@Identifier("b"))
     for_synth <- ForSynthChild2(a)
 }
 

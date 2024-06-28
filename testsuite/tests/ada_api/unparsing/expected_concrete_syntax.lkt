@@ -3,7 +3,7 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list*(or(var_decl | fun_decl | block))
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
     type_ref <- name
     null_qual <- NullQual("null")
     var_decl <- VarDecl(
@@ -28,7 +28,7 @@ grammar foo_grammar {
         | atom
     )
     atom <- or(number | ref)
-    number <- Number(@number)
+    number <- Number(@Number)
     ref <- Ref(name)
     call_arg <- CallArg(?pick(name "=") expr)
     call <- Call(name "(" list*(call_arg, ",") ")")

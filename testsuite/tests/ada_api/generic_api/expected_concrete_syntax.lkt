@@ -3,7 +3,7 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     |" Parser main entry point
-    @main_rule main_rule <- list+(or(var_decl | def | Example(@example name)))
+    @main_rule main_rule <- list+(or(var_decl | def | Example(@Example name)))
     null_qual <- NullQual("null")
     var_decl <- VarDecl(null_qual "var" name "=" expr ";")
     def <- Def(
@@ -15,9 +15,9 @@ grammar foo_grammar {
     @entry_point expr <- or(Addition(expr "+" expr) | call | atom)
     call <- Call(name "(" list*(expr, ",") ")")
     atom <- or(number | ref)
-    number <- Number(@number)
+    number <- Number(@Number)
     ref <- Ref(name)
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

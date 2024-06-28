@@ -4,7 +4,7 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- list+(decl)
     decl <- Decl("def" name "=" expr)
-    name <- Identifier(@identifier)
+    name <- Identifier(@Identifier)
     expr <- or(BinOp(expr op term) | term)
     term <- or(ParenExpr("(" expr ")") | atom)
     op <- or(
@@ -17,7 +17,7 @@ grammar foo_grammar {
         | OpKind.GreaterThanOrEqual(">=")
     )
     atom <- literal
-    literal <- Literal(@number)
+    literal <- Literal(@Number)
 }
 
 @abstract class FooNode implements Node[FooNode] {

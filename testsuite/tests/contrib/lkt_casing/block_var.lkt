@@ -1,6 +1,6 @@
 lexer foo_lexer {
-    @trivia() whitespace <- p"[ \n\r\t]+"
-    example <- "example"
+    @trivia() Whitespace <- p"[ \n\r\t]+"
+    Example <- "example"
 }
 
 @with_lexer(foo_lexer)

@@ -1,5 +1,5 @@
 import common
 
 lexer foo_lexer {
-    @text(1) example <- "example"
+    @text(1) Example <- "example"
 }

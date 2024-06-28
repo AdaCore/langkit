@@ -3,9 +3,9 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(decl)
-    decl <- Decl(Name(@identifier) "(" ref_list ")")
+    decl <- Decl(Name(@Identifier) "(" ref_list ")")
     ref_list <- list*(ref)
-    ref <- Ref(Name(@identifier))
+    ref <- Ref(Name(@Identifier))
 }
 
 @abstract class FooNode implements Node[FooNode] {

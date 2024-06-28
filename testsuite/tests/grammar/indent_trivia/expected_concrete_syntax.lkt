@@ -2,18 +2,18 @@
 lexer foo_lexer {
 
     @ignored _ <- p"[ \r\t]+"
-    def <- "def"
-    comma <- ","
-    l_par <- "("
-    r_par <- ")"
-    @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
-    @trivia() comment <- p"#.*"
+    Def <- "def"
+    Comma <- ","
+    LPar <- "("
+    RPar <- ")"
+    @symbol() Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    @trivia() Comment <- p"#.*"
 }
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    newline <- Newline(@newline)
+    newline <- Newline(@Newline)
     expr <- or(call | identifier | indented)
-    identifier <- Identifier(@identifier)
+    identifier <- Identifier(@Identifier)
     call <- Call(
         identifier
         "("
@@ -22,11 +22,11 @@ grammar foo_grammar {
     )
     indented <- Indented(
         discard(list*(newline))
-        @indent
+        @Indent
         list+(pick(discard(list*(newline))
-        expr discard(list*(newline))), @newline) @dedent
+        expr discard(list*(newline))), @Newline) @Dedent
     )
-    def_node <- Def("def" identifier @newline list+(indented))
+    def_node <- Def("def" identifier @Newline list+(indented))
     @main_rule main_rule <- list+(pick(discard(list*(newline))
     def_node discard(list*(newline))))
 }

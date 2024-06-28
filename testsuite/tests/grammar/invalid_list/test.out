@@ -24,7 +24,7 @@ non-list-cls.lkt:6:29: error: Invalid list type for List parser: ListNode. Not a
 
 == token-element.lkt ==
 token-element.lkt:5:38: error: List parsers only accept subparsers that yield AST nodes (Token provided here)
-5 |     @main_rule main_rule <- ListNode(list+(@number))
+5 |     @main_rule main_rule <- ListNode(list+(@Number))
   |                                      ^^^^^^^^^^^^^^
 
 

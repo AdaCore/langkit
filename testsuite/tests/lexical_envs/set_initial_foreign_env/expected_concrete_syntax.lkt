@@ -8,7 +8,7 @@ grammar foo_grammar {
         | ScopedId(identifier "." simple_identifier)
         | simple_identifier
     )
-    simple_identifier <- SimpleId(@identifier)
+    simple_identifier <- SimpleId(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

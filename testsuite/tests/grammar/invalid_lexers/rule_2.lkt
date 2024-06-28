@@ -1,7 +1,7 @@
 import common
 
 lexer foo_lexer {
-    lexing_failure <- "example"
+    LexingFailure <- "example"
 }
 
 @with_lexer(foo_lexer)

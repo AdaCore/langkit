@@ -1,7 +1,7 @@
 lexer foo_lexer {
-    @trivia() whitespace <- p"[ \n\r\t]+"
-    plus <- "+"
-    minus <- "-"
+    @trivia() Whitespace <- p"[ \n\r\t]+"
+    Plus <- "+"
+    Minus <- "-"
 }
 
 @with_lexer(foo_lexer)

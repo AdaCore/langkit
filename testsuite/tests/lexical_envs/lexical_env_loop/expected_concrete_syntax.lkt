@@ -1,21 +1,21 @@
 lexer foo_lexer {
 
-    @trivia() whitespace <- p"[ \n\r\t]+"
-    @trivia() comment <- p"#(.?)+"
-    package <- "package"
-    use <- "use"
-    ref <- "ref"
-    l_brace <- "{"
-    r_brace <- "}"
-    var <- "var"
-    l_par <- "("
-    r_par <- ")"
-    @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    @trivia() Whitespace <- p"[ \n\r\t]+"
+    @trivia() Comment <- p"#(.?)+"
+    Package <- "package"
+    Use <- "use"
+    Ref <- "ref"
+    LBrace <- "{"
+    RBrace <- "}"
+    Var <- "var"
+    LPar <- "("
+    RPar <- ")"
+    @symbol() Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
 }
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(decl)
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
     package <- Package("package" name "{" list*(decl) "}")
     var <- Var("var" name)
     decl <- or(var | package | use_clause | ref)

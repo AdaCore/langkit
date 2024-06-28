@@ -2,7 +2,7 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- NameSequence("(" list*(Name(@identifier)) ")")
+    @main_rule main_rule <- NameSequence("(" list*(Name(@Identifier)) ")")
 }
 
 @abstract class FooNode implements Node[FooNode] {

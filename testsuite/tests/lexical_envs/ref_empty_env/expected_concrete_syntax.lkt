@@ -1,17 +1,17 @@
 lexer foo_lexer {
 
-    @trivia() whitespace <- p"[ \n\r\t]+"
-    def <- "def"
-    ref <- "ref"
-    open <- "open"
-    left_curly_bracket <- "{"
-    right_curly_bracket <- "}"
-    @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    @trivia() Whitespace <- p"[ \n\r\t]+"
+    Def <- "def"
+    Ref <- "ref"
+    Open <- "open"
+    LeftCurlyBracket <- "{"
+    RightCurlyBracket <- "}"
+    @symbol() Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
 }
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list*(block)
-    id <- Identifier(@identifier)
+    id <- Identifier(@Identifier)
     block <- Block(id "{" list*(item) "}")
     item <- or(
         | Decl("def" id)

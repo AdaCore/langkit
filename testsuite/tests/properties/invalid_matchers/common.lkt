@@ -4,7 +4,7 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- ExampleNode("example"
                                         or(expression | NullNode("null")))
-    number <- Number(@number)
+    number <- Number(@Number)
     expression <- or(Compound(number "," expression) | number)
 }
 

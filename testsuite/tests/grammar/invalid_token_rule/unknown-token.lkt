@@ -2,5 +2,5 @@ import common
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- Example(@no_such_token)
+    @main_rule main_rule <- Example(@NoSuchToken)
 }

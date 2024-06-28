@@ -1,7 +1,7 @@
 import common
 
 lexer foo_lexer {
-    example <- p"["
+    Example <- p"["
 }
 
 @with_lexer(foo_lexer)

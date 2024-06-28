@@ -8,7 +8,7 @@ grammar foo_grammar {
         | Plus(atom "+" main_rule)
         | atom
     )
-    atom <- or(Literal(@number) | Name(@identifier))
+    atom <- or(Literal(@Number) | Name(@Identifier))
 }
 
 @abstract class FooNode implements Node[FooNode] {

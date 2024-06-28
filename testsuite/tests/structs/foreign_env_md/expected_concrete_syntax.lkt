@@ -4,7 +4,7 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- list+(def_rule)
     def_rule <- Def(name ?pick("+" name))
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

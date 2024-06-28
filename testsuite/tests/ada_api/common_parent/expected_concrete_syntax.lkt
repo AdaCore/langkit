@@ -3,7 +3,7 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- or(example | cons)
-    example <- Example(@example)
+    example <- Example(@Example)
     cons <- Cons("(" main_rule main_rule ")")
 }
 

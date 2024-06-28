@@ -6,101 +6,101 @@ lexer foo_lexer {
     val MLSTRING_SQ = p"'''([^']|('[^'])|(''[^'])|\n)*'''"
 
     @pre_rule @ignored _ <- p"\\\\\n[ \r\t]*"
-    string <- p"(u|U)?(r|R)?({MLSTRING_SQ}|{MLSTRING_DBQ}|{STRING_SQ}|{STRING_DBQ})"
+    String <- p"(u|U)?(r|R)?({MLSTRING_SQ}|{MLSTRING_DBQ}|{STRING_SQ}|{STRING_DBQ})"
     @ignored _ <- p"[ \r\t]+"
-    @trivia() comment <- p"#(.?)+"
-    rsh_assign <- ">>="
-    is_tok <- "is"
-    equals <- "=="
-    def <- "def"
-    lte <- "<="
-    raise_tok <- "raise"
-    mod <- "%"
-    yield <- "yield"
-    xor_assign <- "^="
-    as <- "as"
-    lambda <- "lambda"
-    backtick <- "`"
-    try_tok <- "try"
-    divide <- "/"
-    invert <- "~"
-    return <- "return"
-    assert <- "assert"
-    xor <- "^"
-    break <- "break"
-    @text(end_ignore_layout=true) rbrack <- "]"
-    power_assign <- "**="
-    import <- "import"
-    exec <- "exec"
-    comma <- ","
-    @text(start_ignore_layout=true) l_par <- "("
-    dot <- "."
-    gte <- ">="
-    floordiv_assign <- "//="
-    multiply <- "*"
-    div_assign <- "/="
-    at <- "@"
-    assign <- "="
-    floordiv <- "//"
-    notequal <- "!="
-    mult_assign <- "*="
-    mod_assign <- "%="
-    gt <- ">"
-    power <- "**"
-    amp <- "&"
-    not_tok <- "not"
-    colon <- ":"
-    diamond <- "<>"
-    in_tok <- "in"
-    @text(start_ignore_layout=true) l_curl <- "{"
-    class_tok <- "class"
-    or_assign <- "|="
-    elif_tok <- "elif"
-    and_tok <- "and"
-    semicolon <- ";"
-    add_asign <- "+="
-    print <- "print"
-    lsh <- "<<"
-    continue <- "continue"
-    while <- "while"
-    except <- "except"
-    if_tok <- "if"
-    else_tok <- "else"
-    del <- "del"
-    minus_assign <- "-="
-    or_tok <- "or"
-    minus <- "-"
-    @text(start_ignore_layout=true) lbrack <- "["
-    and_assign <- "&="
-    @text(end_ignore_layout=true) r_par <- ")"
-    global <- "global"
-    for <- "for"
-    from <- "from"
-    rsh <- ">>"
-    finally <- "finally"
-    pass <- "pass"
-    lsh_assign <- "<<="
-    bin_or <- "|"
-    @text(end_ignore_layout=true) rcurl <- "}"
-    with <- "with"
-    plus <- "+"
-    lt <- "<"
-    number <- p"[0-9]+"
-    @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    @trivia() Comment <- p"#(.?)+"
+    RshAssign <- ">>="
+    Is <- "is"
+    Equals <- "=="
+    Def <- "def"
+    Lte <- "<="
+    Raise <- "raise"
+    Mod <- "%"
+    Yield <- "yield"
+    XorAssign <- "^="
+    As <- "as"
+    Lambda <- "lambda"
+    Backtick <- "`"
+    Try <- "try"
+    Divide <- "/"
+    Invert <- "~"
+    Return <- "return"
+    Assert <- "assert"
+    Xor <- "^"
+    Break <- "break"
+    @text(end_ignore_layout=true) Rbrack <- "]"
+    PowerAssign <- "**="
+    Import <- "import"
+    Exec <- "exec"
+    Comma <- ","
+    @text(start_ignore_layout=true) LPar <- "("
+    Dot <- "."
+    Gte <- ">="
+    FloordivAssign <- "//="
+    Multiply <- "*"
+    DivAssign <- "/="
+    At <- "@"
+    Assign <- "="
+    Floordiv <- "//"
+    Notequal <- "!="
+    MultAssign <- "*="
+    ModAssign <- "%="
+    Gt <- ">"
+    Power <- "**"
+    Amp <- "&"
+    Not <- "not"
+    Colon <- ":"
+    Diamond <- "<>"
+    In <- "in"
+    @text(start_ignore_layout=true) LCurl <- "{"
+    Class <- "class"
+    OrAssign <- "|="
+    Elif <- "elif"
+    And <- "and"
+    Semicolon <- ";"
+    AddAsign <- "+="
+    Print <- "print"
+    Lsh <- "<<"
+    Continue <- "continue"
+    While <- "while"
+    Except <- "except"
+    If <- "if"
+    Else <- "else"
+    Del <- "del"
+    MinusAssign <- "-="
+    Or <- "or"
+    Minus <- "-"
+    @text(start_ignore_layout=true) Lbrack <- "["
+    AndAssign <- "&="
+    @text(end_ignore_layout=true) RPar <- ")"
+    Global <- "global"
+    For <- "for"
+    From <- "from"
+    Rsh <- ">>"
+    Finally <- "finally"
+    Pass <- "pass"
+    LshAssign <- "<<="
+    BinOr <- "|"
+    @text(end_ignore_layout=true) Rcurl <- "}"
+    With <- "with"
+    Plus <- "+"
+    Lt <- "<"
+    Number <- p"[0-9]+"
+    @symbol() Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
 }
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    name <- Id(@identifier)
-    number <- NumberLit(@number)
-    string <- StringLit(@string)
+    name <- Id(@Identifier)
+    number <- NumberLit(@Number)
+    string <- StringLit(@String)
     cat_string <- ConcatStringLit(string list+(string))
-    nl <- NL(@newline)
+    nl <- NL(@Newline)
     @main_rule main_rule <- FileNode(
         list+(pick(discard(list*(nl))
-        stmt discard(list*(nl)))) @termination
+        stmt discard(list*(nl)))) @Termination
     )
     decorator <- Decorator(
-        "@" dotted_name ?pick("(" arg_list ")") @newline
+        "@" dotted_name ?pick("(" arg_list ")") @Newline
     )
     decorators <- list+(decorator)
     decorated <- Decorated(decorators or(class_def | func_def))
@@ -115,7 +115,7 @@ grammar foo_grammar {
     name_list <- pick(list+(name, ",") ?",")
     stmt <- or(simple_stmt | compound_stmt)
     simple_stmt <- pick(or(small_stmt | pick(list+(small_stmt, ";")
-    ?";")) @newline)
+    ?";")) @Newline)
     small_stmt <- or(
         | expr_stmt
         | print_stmt
@@ -219,8 +219,8 @@ grammar foo_grammar {
     with_item <- AsNameNode(test ?pick("as" expr))
     suite <- or(
         | pick(discard(list*(nl))
-        @indent
-        list+(pick(discard(list*(nl)) stmt discard(list*(nl)))) @dedent)
+        @Indent
+        list+(pick(discard(list*(nl)) stmt discard(list*(nl)))) @Dedent)
         | simple_stmt
     )
     test <- or(

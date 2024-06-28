@@ -6,5 +6,5 @@ grammar foo_grammar {
         Root("example" list+(leaf, ","))
         | list+(leaf)
     ))
-    leaf <- or(Identifier(@identifier) | Number(@number))
+    leaf <- or(Identifier(@Identifier) | Number(@Number))
 }

@@ -3,7 +3,7 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list*(or(def_rule | var_rule | skip(ErrorDecl)))
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
     def_rule <- Def(
         "def" name ?pick("(" list+(name, ",") ")") "=" expr
     )
@@ -12,7 +12,7 @@ grammar foo_grammar {
         | Plus(expr "+" expr)
         | ParenExpr("(" expr ")")
         | Ref(name)
-        | Literal(@number)
+        | Literal(@Number)
     )
 }
 

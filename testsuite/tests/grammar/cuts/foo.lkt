@@ -11,7 +11,7 @@ grammar foo_grammar {
     # `def` fails, and thus makes this order valid.
     blk <- Block("{" or(stop_cut(def) | var_def) "}")
 
-    id <- Id(@identifier)
+    id <- Id(@Identifier)
 
     # This is a simple testcase for cut: If we parse "def" and then something
     # that is not an id, parsing should fail and not backtrack, and we should

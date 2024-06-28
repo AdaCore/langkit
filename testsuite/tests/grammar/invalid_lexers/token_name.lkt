@@ -1,6 +1,6 @@
 import common
 
 lexer foo_lexer {
-    example <- "example"
-    example <- "null"
+    Example <- "example"
+    Example <- "null"
 }

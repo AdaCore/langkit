@@ -2,7 +2,7 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- or(Literal(@number) | BarNode("example"))
+    @main_rule main_rule <- or(Literal(@Number) | BarNode("example"))
 }
 
 @abstract class FooNode implements Node[FooNode] {

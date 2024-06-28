@@ -6,8 +6,8 @@ grammar foo_grammar {
         | DefNode("def" identifier "=" number ";")
         | skip(ErrorDef)
     ))
-    number <- Number(@number)
-    identifier <- Identifier(@identifier)
+    number <- Number(@Number)
+    identifier <- Identifier(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

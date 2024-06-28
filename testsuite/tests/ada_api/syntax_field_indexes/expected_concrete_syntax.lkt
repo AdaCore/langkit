@@ -4,13 +4,13 @@ import lexer_example
 grammar foo_grammar {
     |" Parser main entry point
     @main_rule main_rule <- or(
-        | A1B1(@identifier("a1b1") main_rule main_rule)
-        | A1B2(@identifier("a1b2") main_rule)
+        | A1B1(@Identifier("a1b1") main_rule main_rule)
+        | A1B2(@Identifier("a1b2") main_rule)
         | A2B1(
-            @identifier("a2b1") main_rule main_rule main_rule
+            @Identifier("a2b1") main_rule main_rule main_rule
         )
         | A2B2(
-            @identifier("a2b2") main_rule main_rule main_rule
+            @Identifier("a2b2") main_rule main_rule main_rule
         )
         | null(FooNode)
     )

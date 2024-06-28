@@ -5,7 +5,7 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(or(
         | OpKind.Foo("+")
         | OpKind.Bar("-")
-        | Example(@example)
+        | Example(@Example)
     ))
 }
 

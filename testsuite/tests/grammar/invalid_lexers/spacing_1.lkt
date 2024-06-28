@@ -2,6 +2,6 @@ import common
 
 lexer foo_lexer {
     @unparsing_spacing() family ids {
-        example <- "example"
+        Example <- "example"
     }
 }

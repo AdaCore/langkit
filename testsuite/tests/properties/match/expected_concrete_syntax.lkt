@@ -3,11 +3,11 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(or(Def("def"
-    Name(@identifier) expr) | expr))
+    Name(@Identifier) expr) | expr))
     expr <- or(atom | plus)
     atom <- or(lit | ref)
-    lit <- Lit(@number)
-    ref <- Ref(@identifier)
+    lit <- Lit(@Number)
+    ref <- Ref(@Identifier)
     plus <- pick("(" Plus(expr "+" expr) ")")
 }
 

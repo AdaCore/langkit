@@ -6,9 +6,9 @@ grammar foo_grammar {
     var_decl <- VarDecl("var" name "=" expr ";")
     expr <- or(Addition(expr "+" expr) | atom)
     atom <- or(number | ref)
-    number <- Number(@number)
+    number <- Number(@Number)
     ref <- Ref(Null("null") name)
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

@@ -6,7 +6,7 @@ grammar foo_grammar {
     decl <- Decl("def" name)
     other_decl <- OtherDecl("def" "var" name)
     subdecl <- SubDecl("var" name)
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

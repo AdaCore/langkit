@@ -1,25 +1,25 @@
 lexer foo_lexer {
 
-    @trivia() whitespace <- p"[ \n\r\t]+"
-    package <- "package"
-    procedure <- "procedure"
-    task <- "task"
-    type <- "type"
-    body <- "body"
-    is_kw <- "is"
-    private_kw <- "private"
-    end_kw <- "end"
-    separate <- "separate"
-    ref <- "ref"
-    declare <- "declare"
-    begin <- "begin"
-    dot <- "."
-    semicolon <- ";"
-    l_par <- "("
-    r_par <- ")"
-    number <- p"[0-9]+"
-    @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
-    string <- p"\"[^\"]*\""
+    @trivia() Whitespace <- p"[ \n\r\t]+"
+    Package <- "package"
+    Procedure <- "procedure"
+    Task <- "task"
+    Type <- "type"
+    Body <- "body"
+    IsKw <- "is"
+    PrivateKw <- "private"
+    EndKw <- "end"
+    Separate <- "separate"
+    Ref <- "ref"
+    Declare <- "declare"
+    Begin <- "begin"
+    Dot <- "."
+    Semicolon <- ";"
+    LPar <- "("
+    RPar <- ")"
+    Number <- p"[0-9]+"
+    @symbol() Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    String <- p"\"[^\"]*\""
 }
 @with_lexer(foo_lexer)
 grammar foo_grammar {
@@ -57,7 +57,7 @@ grammar foo_grammar {
     )
     incomplete_type_decl <- IncompleteTypeDecl("type" identifier ";")
     type_decl <- TypeDecl("type" identifier "is" "end" ";")
-    identifier <- Identifier(@identifier)
+    identifier <- Identifier(@Identifier)
     name <- or(DottedName(name "." identifier) | identifier)
     stmts <- list*(or(declare_block | ref))
     declare_block <- DeclareBlock(

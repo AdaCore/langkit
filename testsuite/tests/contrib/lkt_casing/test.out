@@ -83,8 +83,8 @@ struct_field.lkt:12:5: error: lower case expected for field names
 
 
 == token.lkt ==
-token.lkt:2:15: error: lower case expected for token names
-2 |     @trivia() Whitespace <- p"[ \n\r\t]+"
+token.lkt:2:15: error: camel case expected for token names (first letter of camel case names must be an upper case letter: 'whitespace')
+2 |     @trivia() whitespace <- p"[ \n\r\t]+"
   |               ^^^^^^^^^^
 
 

@@ -4,7 +4,7 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- list*(sequence)
     sequence <- Sequence("(" list*(sequence_item) ")")
-    sequence_item <- or(Number(@number) | Identifier(@identifier))
+    sequence_item <- or(Number(@Number) | Identifier(@Identifier))
 }
 
 @abstract class FooNode implements Node[FooNode] {

@@ -2,11 +2,11 @@ import common
 
 lexer foo_lexer {
     family alphanumericals {
-        number <- p"[0-9]+"
-        identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+        Number <- p"[0-9]+"
+        Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
     }
 
     family alphanumericals {
-        number <- p"[0-9]+"
+        Number <- p"[0-9]+"
     }
 }

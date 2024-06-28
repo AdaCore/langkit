@@ -3,14 +3,14 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- or(
-        | pick(var @termination)
-        | pick(scope @termination)
-        | pick(list+(scope) @termination)
+        | pick(var @Termination)
+        | pick(scope @Termination)
+        | pick(list+(scope) @Termination)
     )
     var <- Var(id "=" id)
     scope <- Scope("{" items "}")
     items <- list*(id)
-    id <- Identifier(@identifier)
+    id <- Identifier(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

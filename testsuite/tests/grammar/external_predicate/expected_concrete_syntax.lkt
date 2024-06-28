@@ -2,7 +2,7 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- Name(@identifier) |> when(Name.pred)
+    @main_rule main_rule <- Name(@Identifier) |> when(Name.pred)
 }
 
 @abstract class FooNode implements Node[FooNode] {

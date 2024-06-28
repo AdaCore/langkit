@@ -6,7 +6,7 @@ grammar foo_grammar {
     scope <- Scope(
         "def" identifier "{" list*(or(scope | ref_clause)) "}"
     )
-    identifier <- Id(@identifier)
+    identifier <- Id(@Identifier)
     ref_clause <- RefClause("+" identifier)
 }
 

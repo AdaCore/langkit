@@ -3,7 +3,7 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(block)
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
     block <- Block(
         name decl_list "{" using_list ref_list "}"
     )

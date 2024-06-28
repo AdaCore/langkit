@@ -6,7 +6,7 @@ grammar foo_grammar {
         | Cons(cons "." name)
         | Cons(null(Cons) name)
     )
-    name <- Name(@identifier)
+    name <- Name(@Identifier)
 }
 
 @abstract class FooNode implements Node[FooNode] {

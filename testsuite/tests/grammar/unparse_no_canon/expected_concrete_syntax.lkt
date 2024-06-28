@@ -5,11 +5,11 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(or(
         | RootNode(
             "def"
-            null(Identifier) ?pick("{" Number(@number) "}") ";"
+            null(Identifier) ?pick("{" Number(@Number) "}") ";"
         )
         | RootNode(
             "def"
-            ?pick("(" Identifier(@identifier) ")") null(Number) ";"
+            ?pick("(" Identifier(@Identifier) ")") null(Number) ";"
         )
     ))
 }
