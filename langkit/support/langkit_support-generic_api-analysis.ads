@@ -333,6 +333,12 @@ package Langkit_Support.Generic_API.Analysis is
    --
    --  Note that this returns the sloc of the parent for synthetic nodes.
 
+   function Lookup
+     (Self : Lk_Node'Class; Sloc : Source_Location) return Lk_Node;
+   --  Look for the bottom-most node in the ``Self`` subtree whose sloc range
+   --  contains ``Sloc``. Return it, or ``No_Lk_Node`` if no such node was
+   --  found.
+
    --  TODO??? Bind all other node primitives
 
    function Is_Incomplete (Self : Lk_Node) return Boolean;

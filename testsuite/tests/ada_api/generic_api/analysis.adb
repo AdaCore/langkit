@@ -330,6 +330,11 @@ begin
    end;
    New_Line;
 
+   Put_Line
+     ("No_Lk_Node.Lookup (1, 1) -> " & Image (No_Lk_Node.Lookup ((1, 1))));
+   Put_Line ("Root.Lookup (2, 7) -> " & Image (U.Root.Lookup ((2, 7))));
+   New_Line;
+
    Put_Line ("Root.Is_Incomplete -> " & U.Root.Is_Incomplete'Image);
    Put ("No_Lk_Node.Is_Incomplete -> ");
    declare
