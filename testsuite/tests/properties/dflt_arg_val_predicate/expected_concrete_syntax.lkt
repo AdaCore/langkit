@@ -24,7 +24,7 @@ class Example: FooNode {
     }
 
     @with_dynvars(my_var) fun predicate2(n: Entity[FooNode], flag: Bool = false): Bool =
-    n.is_null and false and flag
+    n.is_null and my_var == 0 and flag
 
     @exported fun prop2(): Bool = {
         val eq = {
@@ -37,7 +37,7 @@ class Example: FooNode {
     }
 
     @with_dynvars(my_var=0) fun predicate3(n: Entity[FooNode], flag: Bool = false): Bool =
-    n.is_null and false and flag
+    n.is_null and my_var == 0 and flag
 
     @exported fun prop3(): Bool = {
         val eq = {
