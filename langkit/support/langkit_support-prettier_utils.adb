@@ -170,12 +170,11 @@ package body Langkit_Support.Prettier_Utils is
 
             when Group =>
                return Group
-                 (Documents => Recurse (Document.Group_Document),
-                  Options   => (Should_Break    => Document.Group_Should_Break,
-                                Id              => To_Prettier_Symbol
-                                                     (Symbol_Map,
-                                                      Document.Group_Id),
-                                Expanded_States => No_Document));
+                 (Documents    => Recurse (Document.Group_Document),
+                  Should_Break => Document.Group_Should_Break,
+                  Id           => To_Prettier_Symbol
+                                    (Symbol_Map,
+                                     Document.Group_Id));
 
             when Hard_Line =>
                return Hard_Line;
