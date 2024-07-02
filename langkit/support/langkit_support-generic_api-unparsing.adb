@@ -364,6 +364,33 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  ```Source_Name`` symbol (converted to a ``Symbol_Type`` using
    --  ``Symbols``). Create a map entry if it does not exist yet.
 
+   package Symbol_Instantiation_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Some_Template_Symbol,
+      Element_Type    => Some_Template_Symbol,
+      Hash            => Ada.Containers.Hash_Type'Mod,
+      Equivalent_Keys => "=");
+
+   type Symbol_Instantiation_Context is record
+      Map         : Symbol_Instantiation_Maps.Map;
+      Next_Symbol : not null access Some_Template_Symbol;
+   end record;
+   --  Information necessary to generate independent symbols when instantiating
+   --  templates.
+   --
+   --  ``Next_Symbol`` is used to generate unique new symbols (incremented each
+   --  time a new symbol is created).
+   --
+   --  ``Map`` is used to keep track of already generated symbols.
+
+   function Instantiate_Symbol
+     (Self   : in out Symbol_Instantiation_Context;
+      Symbol : Template_Symbol) return Template_Symbol;
+   --  Return the "instantiated" symbol for ``Symbol``, creating one if needed.
+   --  Update ``Self`` accordingly.
+   --
+   --  As a convenient special case, if ``Symbol`` is ``No_Template_Symbol``,
+   --  just return it unchanged.
+
    ----------------------
    -- Linear templates --
    ----------------------
@@ -516,6 +543,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    function Instantiate_Template
      (Pool          : in out Document_Pool;
+      Symbols       : in out Symbol_Instantiation_Context;
       Node          : Lk_Node;
       Current_Token : in out Lk_Token;
       Trivias       : Trivias_Info;
@@ -541,6 +569,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       Current_Token : Lk_Token;
       --  Token that is about to be unparsed by this template instantiation.
       --  It is updated as tokens are processed during the instantiation.
+
+      Symbols : not null access Symbol_Instantiation_Context;
+      --  Mapping for the symbols to create during the instantiation
 
       Arguments : not null access constant Template_Instantiation_Args;
       --  Template arguments for the instantiation
@@ -1233,6 +1264,34 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       return Symbol_Map.Reference (Position);
    end Lookup;
+
+   ------------------------
+   -- Instantiate_Symbol --
+   ------------------------
+
+   function Instantiate_Symbol
+     (Self   : in out Symbol_Instantiation_Context;
+      Symbol : Template_Symbol) return Template_Symbol
+   is
+      use Symbol_Instantiation_Maps;
+
+      Next_Symbol : Some_Template_Symbol renames Self.Next_Symbol.all;
+      Cur         : Cursor;
+   begin
+      if Symbol = No_Template_Symbol then
+         return No_Template_Symbol;
+      end if;
+
+      Cur := Self.Map.Find (Symbol);
+      if Has_Element (Cur) then
+         return Element (Cur);
+      else
+         return Result : constant Template_Symbol := Next_Symbol do
+            Next_Symbol := Next_Symbol + 1;
+            Self.Map.Insert (Symbol, Result);
+         end return;
+      end if;
+   end Instantiate_Symbol;
 
    -----------
    -- Image --
@@ -2934,6 +2993,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    function Instantiate_Template
      (Pool          : in out Document_Pool;
+      Symbols       : in out Symbol_Instantiation_Context;
       Node          : Lk_Node;
       Current_Token : in out Lk_Token;
       Trivias       : Trivias_Info;
@@ -2943,6 +3003,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       State : Instantiation_State :=
         (Node,
          Current_Token,
+         Symbols'Unrestricted_Access,
          Arguments'Unrestricted_Access,
          Trivias'Unrestricted_Access);
    begin
@@ -2982,7 +3043,7 @@ package body Langkit_Support.Generic_API.Unparsing is
               (Instantiate_Template_Helper
                  (Pool, State, Template.Group_Document),
                Template.Group_Should_Break,
-               Template.Group_Id);
+               Instantiate_Symbol (State.Symbols.all, Template.Group_Id));
 
          when Hard_Line =>
             return Pool.Create_Hard_Line;
@@ -3012,7 +3073,10 @@ package body Langkit_Support.Generic_API.Unparsing is
                State := Break_State;
 
                return Pool.Create_If_Break
-                 (Break_Doc, Flat_Doc, Template.If_Break_Group_Id);
+                 (Break_Doc,
+                  Flat_Doc,
+                  Instantiate_Symbol
+                    (State.Symbols.all, Template.If_Break_Group_Id));
             end;
 
          when If_Empty =>
@@ -3196,8 +3260,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       Config : Unparsing_Configuration)
       return Prettier_Ada.Documents.Document_Type
    is
-      Trivias : Trivias_Info;
-      Pool    : Document_Pool;
+      Trivias     : Trivias_Info;
+      Pool        : Document_Pool;
+      Next_Symbol : Some_Template_Symbol := 1;
 
       procedure Skip_Tokens
         (Current_Token : in out Lk_Token;
@@ -3231,7 +3296,8 @@ package body Langkit_Support.Generic_API.Unparsing is
          Field_Ref     : Struct_Member_Index;
          Unparser      : Field_Unparser_Impl;
          Items         : in out Document_Vectors.Vector;
-         Current_Token : in out Lk_Token);
+         Current_Token : in out Lk_Token;
+         Symbols       : in out Symbol_Instantiation_Context);
       --  Unparse ``Child``, which is the ``Field_Ref`` field of ``Node``. The
       --  Resulting items are appended to ``Items``. ``Node_Config`` must be
       --  the node unparsing configuration for ``Node``, and ``Unparser`` must
@@ -3296,6 +3362,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       function Unparse_Node
         (N : Lk_Node; Current_Token : in out Lk_Token) return Document_Type
       is
+         Symbols     : Symbol_Instantiation_Context :=
+           (Map         => Symbol_Instantiation_Maps.Empty_Map,
+            Next_Symbol => Next_Symbol'Unrestricted_Access);
          Node_Config : Node_Config_Record renames
            Config.Value.Node_Configs.Element (To_Index (Type_Of (N))).all;
          Items       : Document_Vectors.Vector;
@@ -3375,6 +3444,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                               Next_Token => Next_Token);
                            Token := Instantiate_Template
                              (Pool          => Pool,
+                              Symbols       => Symbols,
                               Node          => N,
                               Current_Token => Current_Token,
                               Trivias       => Trivias,
@@ -3418,7 +3488,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                      Field_Ref     => To_Index (F.Field),
                      Unparser      => F.Field_Unparser_Ref.all,
                      Items         => Items,
-                     Current_Token => Current_Token);
+                     Current_Token => Current_Token,
+                     Symbols       => Symbols);
                   if Current_Token_Trace.Is_Active then
                      Current_Token_Trace.Trace
                        ("Field fragment " & Debug_Name (F.Field)
@@ -3471,6 +3542,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                  (N, Current_Token, Process_Fragment'Access);
                Result := Instantiate_Template
                  (Pool          => Pool,
+                  Symbols       => Symbols,
                   Node          => N,
                   Trivias       => Trivias,
                   Current_Token => Current_Token,
@@ -3542,7 +3614,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                               Field_Ref     => Field_Unparser.Member,
                               Unparser      => Field_Unparser,
                               Items         => Items,
-                              Current_Token => Field_Token);
+                              Current_Token => Field_Token,
+                              Symbols       => Symbols);
                            Child_Doc := Pool.Create_List (Items);
                         else
                            Child_Doc := Pool.Create_Empty_List;
@@ -3576,6 +3649,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                   Result := Instantiate_Template
                     (Pool          => Pool,
+                     Symbols       => Symbols,
                      Node          => N,
                      Current_Token => Current_Token,
                      Trivias       => Trivias,
@@ -3644,7 +3718,8 @@ package body Langkit_Support.Generic_API.Unparsing is
          Field_Ref     : Struct_Member_Index;
          Unparser      : Field_Unparser_Impl;
          Items         : in out Document_Vectors.Vector;
-         Current_Token : in out Lk_Token)
+         Current_Token : in out Lk_Token;
+         Symbols       : in out Symbol_Instantiation_Context)
       is
          Field_Template : constant Template_Type :=
            Node_Config.Field_Configs.Element (Field_Ref);
@@ -3700,6 +3775,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          Items.Append
            (Instantiate_Template
               (Pool          => Pool,
+               Symbols       => Symbols,
                Node          => Node,
                Current_Token => Current_Token,
                Trivias       => Trivias,
