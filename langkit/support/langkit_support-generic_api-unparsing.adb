@@ -225,6 +225,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Unparsing fragments for all trivias
    end record;
 
+   procedure Free (Self : in out Trivias_Info);
+   --  Release resources allocated for ``Self``
+
    function Fragment_For
      (Id          : Language_Id;
       Token       : Token_Unparser;
@@ -583,6 +586,17 @@ package body Langkit_Support.Generic_API.Unparsing is
              and then (not Field_Unparser.Empty_List_Is_Absent
                        or else Field.Children_Count > 0);
    end Is_Field_Present;
+
+   ----------
+   -- Free --
+   ----------
+
+   procedure Free (Self : in out Trivias_Info) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Unparsing_Fragment_Array, Unparsing_Fragment_Array_Access);
+   begin
+      Free (Self.Fragments.Trivia_To_Fragments);
+   end Free;
 
    ------------------
    -- Fragment_For --
@@ -3742,6 +3756,8 @@ package body Langkit_Support.Generic_API.Unparsing is
          Insert_Required_Spacing
            (Pool, Internal_Result, Config.Value.Max_Empty_Lines);
          Dump (Internal_Result, Final_Doc_Trace);
+
+         Free (Trivias);
 
          --  Produce the Prettier document from our internal document tree
 
