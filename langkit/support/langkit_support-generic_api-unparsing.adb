@@ -14,6 +14,7 @@ with Ada.Text_IO;              use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 with Ada.Unchecked_Deallocation;
 
+with GNAT.Regpat;
 with GNAT.Strings;
 
 with GNATCOLL.JSON; use GNATCOLL.JSON;
@@ -31,6 +32,8 @@ use Langkit_Support.Internal.Unparsing;
 with Langkit_Support.Prettier_Utils; use Langkit_Support.Prettier_Utils;
 with Langkit_Support.Slocs;          use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;        use Langkit_Support.Symbols;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 package body Langkit_Support.Generic_API.Unparsing is
 
@@ -77,6 +80,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       Line_Comment,
       Whitespaces,
       Empty_Lines);
+   subtype Non_Trivia_Fragment_Kind is
+     Unparsing_Fragment_Kind range Token_Fragment .. List_Child_Fragment;
    subtype Trivia_Fragment_Kind is
      Unparsing_Fragment_Kind range Suffix_Comment .. Empty_Lines;
    type Unparsing_Fragment
@@ -172,6 +177,42 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  processing these trivias multiple times, we add them to the
    --  ``Processed_Reattached_Trivias`` set.
 
+   type Any_Unparsing_Fragment_Index is new Natural;
+   subtype Unparsing_Fragment_Index is
+     Any_Unparsing_Fragment_Index
+     range 1 ..  Any_Unparsing_Fragment_Index'Last;
+
+   package Unparsing_Fragment_Vectors is new Ada.Containers.Vectors
+     (Unparsing_Fragment_Index, Unparsing_Fragment);
+
+   type Unparsing_Fragment_Range is record
+      First : Unparsing_Fragment_Index;
+      Last  : Any_Unparsing_Fragment_Index;
+   end record;
+   --  Range of unparsing fragments in an
+   --  ``Unparsing_Fragment_Vectors.Vector``. As in Ada, ``First`` and ``Last``
+   --  indexes are inclusive so ``First`` > ``Last`` designates the empty
+   --  range.
+
+   Empty_Unparsing_Fragment_Range : constant Unparsing_Fragment_Range :=
+     (1, 0);
+
+   type Unparsing_Fragment_Array is
+     array (Token_Index range <>) of Unparsing_Fragment_Range;
+   type Unparsing_Fragment_Array_Access is access Unparsing_Fragment_Array;
+
+   type Trivias_Fragments is record
+      Vector              : Unparsing_Fragment_Vectors.Vector;
+      Trivia_To_Fragments : Unparsing_Fragment_Array_Access;
+   end record;
+   --  Mapping from sequences of trivias to the corresponding unparsing
+   --  fragments.
+   --
+   --  For a sequence of consecutive trivias whose indexes are ``TI1 .. I2``,
+   --  the corresponding unparsing fragments are stored in
+   --  ``Trivias_Fragments.Vector`` as the range corresponding to
+   --  ``Trivias_Fragments.Trivia_To_Fragments (TI1)``.
+
    type Trivias_Info is record
       First_Reattached_Trivias : Token_Sets.Set;
       --  Set of first trivia for all sequences of reattached trivias
@@ -179,6 +220,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       Processed_Reattached_Trivias : Token_Sets.Set;
       --  Subset of ``First_Reattached_Trivias`` for the trivias that were
       --  already processed (included in the unparsing).
+
+      Fragments : Trivias_Fragments;
+      --  Unparsing fragments for all trivias
    end record;
 
    function Fragment_For
@@ -190,10 +234,23 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  ``Is_List_Sep`` designates whether this token is used as a list
    --  separator.
 
+   procedure Compute_Trivia_Fragments
+     (Node : Lk_Node; Fragments : out Trivias_Fragments);
+   --  Compute unparsing fragments for all trivias in ``Node`` and store them
+   --  in ``Fragments``.
+
    procedure Compute_Trivias_Info (Node : Lk_Node; Info : out Trivias_Info);
    --  Preparatory pass for the unparsing of trivias (empty lines, comments):
    --  compute information about trivias found in the ``Node`` subtree and fill
    --  ``Info``'s data structures accordingly.
+
+   procedure Iterate_On_Trivia_Fragments
+     (First_Trivia : Lk_Token;
+      Info         : Trivias_Info;
+      Process      : access procedure (Fragment : Unparsing_Fragment));
+   --  Assuming that ``First_Trivia`` designates a trivia token (the first in a
+   --  sequence of consecutive trivias), call ``Process`` on all the
+   --  corresponding unparsing fragments.
 
    function First_Trivia_Before (Node : Lk_Node) return Lk_Token;
    --  Return the first trivia (i.e. the trivia with the lowest index) in the
@@ -262,8 +319,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       Current_Token : in out Lk_Token;
       Process       : access procedure (Fragment      : Unparsing_Fragment;
                                         Current_Token : in out Lk_Token));
-   --  Decompose ``Node`` into a list of unparsing fragments and call
-   --  ``Process`` on each fragment.
+   --  Decompose ``Node`` into a list of unparsing fragments
+   --  (``Non_Trivia_Fragment_Kind`` ones only) and call ``Process`` on each
+   --  fragment.
    --
    --  ``Current_Token`` must be the first token for ``Node``, and is updated
    --  to account for all the tokens that are processed. The ``Process``
@@ -545,14 +603,195 @@ package body Langkit_Support.Generic_API.Unparsing is
          else (Token_Fragment, Kind, Text));
    end Fragment_For;
 
+   ------------------------------
+   -- Compute_Trivia_Fragments --
+   ------------------------------
+
+   procedure Compute_Trivia_Fragments
+     (Node : Lk_Node; Fragments : out Trivias_Fragments)
+   is
+      Trace : constant Boolean := Trivias_Trace.Is_Active;
+
+      T, Exit_Token : Lk_Token;
+      --  Token/trivia cursor, and token to stop trivia fragments computation
+
+      First_Trivia : Token_Index := No_Token_Index;
+      --  When we are processing a sequence of trivia, this contains the index
+      --  of the first trivia of that sequence. Set to ``No_Token_Index`` the
+      --  rest of the time (i.e. when ``T`` is not a trivia).
+
+      First_Line : Boolean;
+      --  Whether the currently processed trivia starts on the first line for
+      --  this sequence of trivias.
+
+      Columns : Natural;
+      --  If processing the first line, this is set to the number of
+      --  whitespaces found so far. This is used to track how many whitespaces
+      --  precede the suffix comment (if any).
+
+      procedure Append (Fragment : Unparsing_Fragment);
+      --  Append ``Fragment`` as a new unparsing fragment for the sequence of
+      --  trivias we are currently processing.
+
+      ------------
+      -- Append --
+      ------------
+
+      procedure Append (Fragment : Unparsing_Fragment) is
+
+         --  Get the range for the current sequence of trivias
+
+         Fragment_Range : Unparsing_Fragment_Range renames
+           Fragments.Trivia_To_Fragments (First_Trivia);
+      begin
+         --  Append the new fragment to the storage vector and update the range
+         --  to include it.
+
+         Fragments.Vector.Append (Fragment);
+         if Fragment_Range = Empty_Unparsing_Fragment_Range then
+            Fragment_Range.First := Fragments.Vector.Last_Index;
+         end if;
+         Fragment_Range.Last := Fragments.Vector.Last_Index;
+      end Append;
+
+      Unit         : constant Lk_Unit := Node.Unit;
+      Node_Is_Root : constant Boolean := Node = Unit.Root;
+   begin
+      --  Determine the token iteration range
+
+      if Node_Is_Root then
+         T := Unit.First_Token;
+         Exit_Token := No_Lk_Token;
+      else
+         T := Node.Token_Start;
+         Exit_Token := Node.Token_End.Next;
+      end if;
+
+      --  Allocate a map from trivia index to unparsing fragment range that is
+      --  big enough for all trivias in ``Unit``. Only some trivias start a
+      --  trivia sequence, so some slots will be unused: put a buggy range for
+      --  them, just in case that (could help debugging).
+
+      Fragments.Trivia_To_Fragments :=
+        new Unparsing_Fragment_Array (1 .. Token_Index (Unit.Trivia_Count));
+      for R of Fragments.Trivia_To_Fragments.all loop
+         R := Empty_Unparsing_Fragment_Range;
+      end loop;
+
+     --  Iterate through all tokens/trivias in this unit to find sequences of
+     --  trivias: create unparsing fragments for them.
+
+      while T /= Exit_Token loop
+         if T.Is_Trivia then
+            if Trace then
+               Trivias_Trace.Trace ("Found " & T.Image);
+            end if;
+
+            --  If ``T`` starts a new sequence of trivias, reset the "trivia
+            --  parsing state".
+
+            if First_Trivia = No_Token_Index then
+               if Trace then
+                  Trivias_Trace.Trace
+                    ("  ... it starts a sequence of trivias");
+               end if;
+               First_Trivia := T.Index;
+               First_Line := True;
+               Columns := 0;
+            end if;
+
+            if not T.Is_Comment then
+               declare
+                  --  This is a non-comment trivia, so treat it as a sequence
+                  --  of whitespaces/line breaks: count the number of line
+                  --  breaks it contains, and the number of prefix columns.
+
+                  Line_Breaks : constant Natural := Count_Line_Breaks (T);
+               begin
+                  if Trace then
+                     Trivias_Trace.Trace
+                       ("   ... it has" & Line_Breaks'Image & " line breaks");
+                  end if;
+
+                  --  If we are still processing the first line in this
+                  --  sequence of trivias, compute the number of spaces that
+                  --  come before the potential suffix comment that comes next.
+
+                  if First_Line and then Line_Breaks = 0 then
+                     declare
+                        Sloc_Range : constant Source_Location_Range :=
+                          T.Sloc_Range;
+                     begin
+                        pragma Assert
+                          (Sloc_Range.Start_Line = Sloc_Range.End_Line);
+                        Columns := Positive
+                          (Sloc_Range.End_Column - Sloc_Range.Start_Column);
+                     end;
+                  end if;
+
+                  --  If there are N line breaks with N > 2, there are N - 1
+                  --  empty lines to account for.
+
+                  if Line_Breaks >= 2 then
+                     Append
+                       ((Kind              => Empty_Lines,
+                         Empty_Lines_Count => Line_Breaks - 1));
+                  end if;
+
+                  --  If this trivia contained at least one line break, the
+                  --  next trivia to process will not start on the first line.
+
+                  if Line_Breaks > 0 then
+                     First_Line := False;
+                  end if;
+               end;
+
+            elsif First_Line then
+               if Trace then
+                  Trivias_Trace.Trace ("   ... it is a suffix comment");
+               end if;
+
+               --  Propagate spaces that appear before this suffix comment, if
+               --  any.
+
+               if Columns > 0 then
+                  Append ((Whitespaces, Whitespaces_Count => Columns));
+               end if;
+
+               Append ((Suffix_Comment, T));
+
+            else
+               if Trace then
+                  Trivias_Trace.Trace ("   ... it is a line comment");
+               end if;
+
+               Append ((Line_Comment, T));
+            end if;
+
+         else
+            --  ``T`` is not a trivia: update our state to represent that we
+            --  are not in a sequence of trivias.
+
+            First_Trivia := No_Token_Index;
+         end if;
+         T := T.Next;
+      end loop;
+   end Compute_Trivia_Fragments;
+
    --------------------------
    -- Compute_Trivias_Info --
    --------------------------
 
    procedure Compute_Trivias_Info (Node : Lk_Node; Info : out Trivias_Info)
    is
+      Trace : constant Boolean := Trivias_Trace.Is_Active;
+
       function Process (Node : Lk_Node) return Visit_Status;
       --  Callback for ``Langkit_Support.Analysis.Traverse``
+
+      procedure Reattach (T : Lk_Token; What : String);
+      --  Include ``T`` to reattached trivias. ``What`` is used to qualify this
+      --  trivia in debug logs.
 
       -------------
       -- Process --
@@ -560,19 +799,14 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       function Process (Node : Lk_Node) return Visit_Status is
       begin
-         --  Register reattached trivias that come before list nodes
+         --  Register reattached trivias that come before/after list nodes
 
          if Node.Is_List_Node then
             declare
                First_Trivia : constant Lk_Token := First_Trivia_Before (Node);
             begin
                if not First_Trivia.Is_Null then
-                  Info.First_Reattached_Trivias.Include (First_Trivia);
-                  if Trivias_Trace.Is_Active then
-                     Trivias_Trace.Trace ("Found leading trivias:");
-                     Trivias_Trace.Trace ("  " & Image (First_Trivia));
-                     Trivias_Trace.Trace ("  to reattach to " & Node.Image);
-                  end if;
+                  Reattach (First_Trivia, "leading trivias before list node");
                end if;
             end;
 
@@ -581,22 +815,66 @@ package body Langkit_Support.Generic_API.Unparsing is
                   T : constant Lk_Token := Node.Token_End.Next;
                begin
                   if T.Is_Trivia then
-                     Info.First_Reattached_Trivias.Include (T);
-                     if Trivias_Trace.Is_Active then
-                        Trivias_Trace.Trace ("Found trailing trivias:");
-                        Trivias_Trace.Trace ("  " & Image (T));
-                        Trivias_Trace.Trace ("  to reattach to " & Node.Image);
-                     end if;
+                     Reattach (T, "trailing trivias after list node");
                   end if;
                end;
             end if;
          end if;
+
+         --  Also register reattached trivias that come after list children:
+         --  they must be processed during the unparsing of the parent list.
+
+         if not Node.Parent.Is_Null and then Node.Parent.Is_List_Node then
+            declare
+               T : constant Lk_Token := Node.Token_End.Next;
+            begin
+               if T.Is_Trivia then
+                  Reattach (T, "trailing trivias after list child");
+               end if;
+            end;
+         end if;
+
          return Into;
       end Process;
+
+      --------------
+      -- Reattach --
+      --------------
+
+      procedure Reattach (T : Lk_Token; What : String) is
+      begin
+         Info.First_Reattached_Trivias.Include (T);
+         if Trace then
+            Trivias_Trace.Trace ("Reattaching " & What & ":" & T.Image);
+         end if;
+      end Reattach;
    begin
+      --  Determine which tokens have reattached trivias
+
       Info.First_Reattached_Trivias.Clear;
       Node.Traverse (Process'Access);
+
+      --  Scan all tokens and create the corresponding trivias
+
+      Compute_Trivia_Fragments (Node, Info.Fragments);
    end Compute_Trivias_Info;
+
+   ---------------------------------
+   -- Iterate_On_Trivia_Fragments --
+   ---------------------------------
+
+   procedure Iterate_On_Trivia_Fragments
+     (First_Trivia : Lk_Token;
+      Info         : Trivias_Info;
+      Process      : access procedure (Fragment : Unparsing_Fragment))
+   is
+      Fragment_Range : Unparsing_Fragment_Range renames
+        Info.Fragments.Trivia_To_Fragments.all (First_Trivia.Index);
+   begin
+      for I in Fragment_Range.First .. Fragment_Range.Last loop
+         Process.all (Info.Fragments.Vector (I));
+      end loop;
+   end Iterate_On_Trivia_Fragments;
 
    -------------------------
    -- First_Trivia_Before --
@@ -674,21 +952,36 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Trace : constant Boolean := Trivias_Trace.Is_Active;
 
-      First_Line : Boolean := True;
-      --  Whether the currently processed trivia starts on the first line for
-      --  this sequence of trivias.
-
       Line_Break_Required_Before_Line_Comment : Boolean := True;
       --  Whether inserting a line break will be necessary if what comes next
       --  is a line comment.
 
-      Columns : Natural := 0;
-      --  If processing the first line, this is set to the number of
-      --  whitespaces found so far. This is used to track how many whitespaces
-      --  precede the suffix comment (if any).
+      procedure Process (Fragment : Unparsing_Fragment);
+      --  Callback for ``Iterate_On_Trivia_Fragments``, to turn unparsing
+      --  fragments for trivias into internal documents in ``Items``.
+
+      -------------
+      -- Process --
+      -------------
+
+      procedure Process (Fragment : Unparsing_Fragment) is
+      begin
+         --  If ``Fragment`` is a line commend and there was no empty line nor
+         --  comment before it, make sure there is at least one line break
+         --  before it, so that it does not accidentally gets unparsed as a
+         --  *suffix* comment.
+
+         if Fragment.Kind = Line_Comment
+            and then Line_Break_Required_Before_Line_Comment
+         then
+            Items.Append (Pool.Create_Expected_Line_Breaks (1));
+         end if;
+         Line_Break_Required_Before_Line_Comment := False;
+         Append_Trivia_Fragment (Fragment, Items, Pool);
+      end Process;
    begin
       if Trace then
-         Trivias_Trace.Increase_Indent
+         Trivias_Trace.Trace
            ("Processing trivias after " & Token.Image
             & " (" & (if Skip_Token then "excluded" else "included") & ")");
       end if;
@@ -706,108 +999,13 @@ package body Langkit_Support.Generic_API.Unparsing is
          return;
       end if;
 
-      while Token.Is_Trivia loop
-         if Trace then
-            Trivias_Trace.Trace ("Found " & Token.Image);
-         end if;
+      --  Now go through unparsing fragments for the sequence of trivias that
+      --  start at ``Token`` and add the corresponding internal documents to
+      --  ``Items``.
 
-         if not Token.Is_Comment then
-            declare
-               --  This is a non-comment trivia, so treat it as a sequence of
-               --  whitespaces/line breaks: count the number of line breaks it
-               --  contains, and the number of prefix columns.
-
-               Line_Breaks : constant Natural := Count_Line_Breaks (Token);
-            begin
-               if Trace then
-                  Trivias_Trace.Trace
-                    ("   ... it has" & Line_Breaks'Image & " line breaks");
-               end if;
-
-               --  If we are still processing the first line in this sequence
-               --  of trivias, compute the number of spaces that come before
-               --  the potential suffix comment that comes next.
-
-               if First_Line and then Line_Breaks = 0 then
-                  declare
-                     Sloc_Range : constant Source_Location_Range :=
-                       Token.Sloc_Range;
-                  begin
-                     pragma Assert
-                       (Sloc_Range.Start_Line = Sloc_Range.End_Line);
-                     Columns := Positive
-                       (Sloc_Range.End_Column - Sloc_Range.Start_Column);
-                  end;
-               end if;
-
-               --  If there are N line breaks with N > 2, there are N - 1 empty
-               --  lines to account for.
-
-               if Line_Breaks >= 2 then
-                  Append_Trivia_Fragment
-                    (Fragment =>
-                       (Kind              => Empty_Lines,
-                        Empty_Lines_Count => Line_Breaks - 1),
-                     Items    => Items,
-                     Pool     => Pool);
-                  Line_Break_Required_Before_Line_Comment := False;
-               end if;
-
-               --  If this trivia contained at least one line break, the next
-               --  trivia to process will not start on the first line.
-
-               if Line_Breaks > 0 then
-                  First_Line := False;
-               end if;
-            end;
-
-         elsif First_Line then
-            if Trace then
-               Trivias_Trace.Trace ("   ... it is a suffix comment");
-            end if;
-
-            --  Propagate spaces that appear before this suffix comment, if any
-
-            if Columns > 0 then
-               Append_Trivia_Fragment
-                 (Fragment =>
-                    (Whitespaces, Whitespaces_Count => Columns),
-                  Items    => Items,
-                  Pool     => Pool);
-            end if;
-
-            Append_Trivia_Fragment
-              (Fragment => (Suffix_Comment, Token),
-               Items    => Items,
-               Pool     => Pool);
-            Line_Break_Required_Before_Line_Comment := False;
-
-         else
-            if Trace then
-               Trivias_Trace.Trace ("   ... it is a line comment");
-            end if;
-
-            --  If there was no empty line nor comment before this *line*
-            --  comment, make sure there is at least one line break before it,
-            --  so that it does not accidentally gets unparsed as a *suffix*
-            --  comment.
-
-            if Line_Break_Required_Before_Line_Comment then
-               Items.Append (Pool.Create_Expected_Line_Breaks (1));
-            end if;
-
-            Append_Trivia_Fragment
-              (Fragment => (Line_Comment, Token),
-               Items    => Items,
-               Pool     => Pool);
-            Line_Break_Required_Before_Line_Comment := False;
-         end if;
-
-         Token := Token.Next;
-      end loop;
-
-      if Trace then
-         Trivias_Trace.Decrease_Indent;
+      if Token.Is_Trivia then
+         Iterate_On_Trivia_Fragments (Token, Trivias, Process'Access);
+         Token := Token.Next (Exclude_Trivia => True);
       end if;
    end Process_Trivias;
 
@@ -3108,7 +3306,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   & ", current token: " & Current_Token.Image);
             end if;
 
-            case F.Kind is
+            case Non_Trivia_Fragment_Kind (F.Kind) is
                when Token_Fragment | List_Separator_Fragment =>
                   declare
                      Is_Fake_Token : constant Boolean :=
@@ -3236,9 +3434,6 @@ package body Langkit_Support.Generic_API.Unparsing is
                        ("List child fragment unparsed, current token: "
                         & Current_Token.Image);
                   end if;
-
-               when Trivia_Fragment_Kind =>
-                  Append_Trivia_Fragment (F, Items, Pool);
             end case;
          end Process_Fragment;
 
@@ -3571,6 +3766,21 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  ``Language``. Raise a ``Constraint_Error`` if ``Arg`` is not a valid
       --  rule name.
 
+      type Sloc_Specifier is record
+         Sloc         : Source_Location;
+         Parent_Level : Natural;
+      end record;
+
+      No_Sloc_Specifier     : constant Sloc_Specifier :=
+        (No_Source_Location, 0);
+      Sloc_Specifier_Regexp : constant GNAT.Regpat.Pattern_Matcher :=
+        GNAT.Regpat.Compile
+          ("^([0-9]+)"
+           & ":([0-9]+)"
+           & "(\^([0-9]+))?$");
+
+      function Convert (Arg : String) return Sloc_Specifier;
+
       -------------
       -- Convert --
       -------------
@@ -3586,6 +3796,29 @@ package body Langkit_Support.Generic_API.Unparsing is
             end if;
          end loop;
          raise Opt_Parse_Error with "invalid grammar rule name";
+      end Convert;
+
+      -------------
+      -- Convert --
+      -------------
+
+      function Convert (Arg : String) return Sloc_Specifier is
+         use GNAT.Regpat;
+         Matches : Match_Array (0 .. 4);
+      begin
+         Match (Sloc_Specifier_Regexp, Arg, Matches);
+         if Matches (0) = No_Match then
+            raise Opt_Parse_Error with "invalid sloc specifier";
+         end if;
+
+         return
+           (Sloc         => Value
+                              (Arg (Matches (1).First .. Matches (2).Last)),
+            Parent_Level => (if Matches (4) = No_Match
+                             then 0
+                             else Natural'Value
+                                    (Arg (Matches (4).First
+                                          ..  Matches (4).Last))));
       end Convert;
 
       Parser : Argument_Parser := Create_Argument_Parser
@@ -3649,6 +3882,17 @@ package body Langkit_Support.Generic_API.Unparsing is
          Help        =>
            "LANGKIT.UNPARSING.*. sub-trace name to activate");
 
+      package Sloc is new Parse_Option
+        (Parser      => Parser,
+         Short       => "-s",
+         Long        => "--sloc",
+         Arg_Type    => Sloc_Specifier,
+         Help        => "Location of the node to unparse. Format: L:C (L ="
+                        & " line number, C = column number) or L:C^N (N = "
+                        & " number of times we get the parent of the node"
+                        & " looked up by sloc).",
+         Default_Val => No_Sloc_Specifier);
+
       package Config_Filename is new Parse_Positional_Arg
         (Parser   => Parser,
          Name     => "config-file",
@@ -3670,6 +3914,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       Config  : Unparsing_Configuration;
       Context : Lk_Context;
       Unit    : Lk_Unit;
+      Node    : Lk_Node;
    begin
       GNATCOLL.Traces.Parse_Config_File;
       if not Parser.Parse then
@@ -3713,12 +3958,33 @@ package body Langkit_Support.Generic_API.Unparsing is
          return;
       end if;
 
+      --  Look for the node to unparse
+
+      Node := Unit.Root;
+      declare
+         SS : constant Sloc_Specifier := Sloc.Get;
+      begin
+         if SS /= No_Sloc_Specifier then
+            Node := Node.Lookup (SS.Sloc);
+            for I in 1 .. SS.Parent_Level loop
+               exit when Node.Is_Null;
+               Node := Node.Parent;
+            end loop;
+
+            if Node.Is_Null then
+               Put_Line ("No node found at the given location");
+               Set_Exit_Status (Failure);
+               return;
+            end if;
+         end if;
+      end;
+
       --  Unparse the tree to a Prettier document
 
       declare
          F         : File_Type;
          Doc       : constant Prettier.Document_Type :=
-           Unparse_To_Prettier (Unit.Root, Config);
+           Unparse_To_Prettier (Node, Config);
          Formatted : constant Unbounded_String :=
            Prettier.Format
              (Document => Doc,

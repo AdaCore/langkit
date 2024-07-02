@@ -96,11 +96,22 @@ class Ref(Expr):
     name = Field(type=T.Name)
 
 
-mains = [
-    GPRMain("main.adb", ["config.json", "example.txt"]),
-    GPRMain(
-        "main.adb", ["-r", "param_spec", "config.json", "param_spec.txt"]
-    ),
+mains = []
+
+
+def add_main(config, srcfile, rule=None, sloc=None):
+    args = [config, srcfile]
+    if rule:
+        args += ["-r", rule]
+    if sloc:
+        args += ["-s", sloc]
+    mains.append(GPRMain("main.adb", args))
+
+
+add_main("config.json", "example.txt")
+add_main("config.json", "param_spec.txt", rule="param_spec")
+
+mains += [
     "invalid_config.adb",
     "commands.adb",
     "default_config.adb",
@@ -119,19 +130,24 @@ for source in [
     "unit_comments_only.txt",
     "unit_empty.txt",
 ]:
-    mains.append(
-        GPRMain("main.adb", ["config.json", "trivias/{}".format(source)])
-    )
+    add_main("config.json", "trivias/{}".format(source))
+
+add_main("trivias/var_group_config.json", "trivias/var_decls.txt")
+add_main(
+    "trivias/var_group_config.json",
+    "trivias/list_nested_reattach.txt",
+    sloc="5:4^1",
+)
+add_main(
+    "trivias/var_group_config.json",
+    "trivias/list_nested_reattach.txt",
+    sloc="9:4^1",
+)
 
 for i in ["none", 0, 1, 2]:
-    mains.append(
-        GPRMain(
-            "main.adb",
-            [
-                "max_empty_lines_{}.json".format(i),
-                "trivias/max_empty_lines.txt",
-            ],
-        )
+    add_main(
+        "max_empty_lines_{}.json".format(i),
+        "trivias/max_empty_lines.txt",
     )
 
 
