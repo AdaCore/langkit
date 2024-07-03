@@ -1,0 +1,21 @@
+{
+  "node_configs": {
+    "Decl": {
+      "node": [
+        {"kind": "group", "id": "myGroup", "document": "line"},
+        "recurse"
+      ],
+      "fields": {
+        "f_name": {
+          "kind": "ifBreak",
+          "groupId": "myGroup",
+          "breakContents": "recurse",
+          "flatContents": "recurse"
+        }
+      }
+    },
+    "VarDecl": {
+      "node": "recurse"
+    }
+  }
+}

@@ -31,7 +31,12 @@ grammar foo_grammar {
     number <- Number(@Number)
     ref <- Ref(name)
     call_arg <- CallArg(?pick(name "=") expr)
-    call <- Call(name "(" list*(call_arg, ",") ")")
+    call <- or(
+        | Call(name "(" list*(call_arg, ",") ")")
+        | ExampleCall(
+            "example" null(Name) "(" list*(call_arg, ",") ")"
+        )
+    )
     block <- Block("{" list*(or(var_decl | fun_decl)) "}")
 }
 
@@ -78,8 +83,11 @@ class Addition: Expr {
 }
 
 class Call: Expr {
-    @parse_field callee: Name
+    @parse_field @nullable callee: Name
     @parse_field args: ASTList[CallArg]
+}
+
+class ExampleCall: Call {
 }
 
 class DottedName: Expr {

@@ -1,0 +1,25 @@
+{
+  "node_configs": {
+    "Call": {
+      "node": [
+        {
+          "kind": "group",
+          "id": "myGroup",
+          "document": "recurse"
+        },
+        {
+          "kind": "ifBreak",
+          "groupId": "myGroup",
+          "breakContents": "line",
+          "flatContents": []
+        }
+      ],
+      "fields": {
+        "f_callee": "recurse"
+      }
+    },
+    "ExampleCall": {
+      "node": "recurse"
+    }
+  }
+}

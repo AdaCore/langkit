@@ -3,8 +3,7 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Text_IO;           use Ada.Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
 with Prettier_Ada.Document_Vectors;   use Prettier_Ada.Document_Vectors;
@@ -29,6 +28,15 @@ package body Langkit_Support.Prettier_Utils is
    --  Note that even though this is a logical map from one symbol type to the
    --  other, we implement it as a vector for efficiency since our symbols are
    --  contiguous integers.
+
+   function Lookup
+     (Source_Name : Unbounded_String;
+      Symbols     : Symbol_Table;
+      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      return Symbol_Parsing_Maps.Reference_Type;
+   --  Return a reference to the entry in ``Symbol_Map`` corresponding to the
+   --  ```Source_Name`` symbol (converted to a ``Symbol_Type`` using
+   --  ``Symbols``). Create a map entry if it does not exist yet.
 
    function To_Prettier_Symbol
      (Symbol_Map : in out Symbol_Maps.Vector;
@@ -122,6 +130,106 @@ package body Langkit_Support.Prettier_Utils is
       end loop;
       return False;
    end Node_Matches;
+
+   ------------
+   -- Lookup --
+   ------------
+
+   function Lookup
+     (Source_Name : Unbounded_String;
+      Symbols     : Symbol_Table;
+      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      return Symbol_Parsing_Maps.Reference_Type
+   is
+      Symbol   : constant Symbol_Type :=
+        Find (Symbols, To_Text (To_String (Source_Name)));
+      Position : Symbol_Parsing_Maps.Cursor := Symbol_Map.Find (Symbol);
+      Inserted : Boolean;
+   begin
+      if not Symbol_Parsing_Maps.Has_Element (Position) then
+
+         --  This is the first time we see this symbol in the current template:
+         --  create a new internal symbol for it. All internal symbols are
+         --  tracked as entries in ``Symbol_Map``, so we can use its length to
+         --  compute internal symbols that are unique for the current template.
+
+         declare
+            Info : constant Symbol_Info :=
+              (Source_Name    => Source_Name,
+               Template_Sym   => Template_Symbol (Symbol_Map.Length + 1),
+               Has_Definition => False,
+               Is_Referenced  => False);
+         begin
+            Symbol_Map.Insert (Symbol, Info, Position, Inserted);
+            pragma Assert (Inserted);
+         end;
+      end if;
+
+      return Symbol_Map.Reference (Position);
+   end Lookup;
+
+   --------------------
+   -- Declare_Symbol --
+   --------------------
+
+   function Declare_Symbol
+     (Source_Name : Unbounded_String;
+      Symbols     : Symbol_Table;
+      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      return Some_Template_Symbol
+   is
+      Info : Symbol_Info renames Lookup (Source_Name, Symbols, Symbol_Map);
+   begin
+      --  Ensure that there is no conflicting symbol definition in this
+      --  template.
+
+      if Info.Has_Definition then
+         raise Duplicate_Symbol_Definition;
+      else
+         Info.Has_Definition := True;
+      end if;
+      return Info.Template_Sym;
+   end Declare_Symbol;
+
+   ----------------------
+   -- Reference_Symbol --
+   ----------------------
+
+   function Reference_Symbol
+     (Source_Name : Unbounded_String;
+      Symbols     : Symbol_Table;
+      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      return Some_Template_Symbol
+   is
+      Info : Symbol_Info renames Lookup (Source_Name, Symbols, Symbol_Map);
+   begin
+      Info.Is_Referenced := True;
+      return Info.Template_Sym;
+   end Reference_Symbol;
+
+   -------------------------
+   -- Extract_Definitions --
+   -------------------------
+
+   function Extract_Definitions
+     (Source : Symbol_Parsing_Maps.Map) return Symbol_Parsing_Maps.Map
+   is
+      use Symbol_Parsing_Maps;
+   begin
+      return Result : Map do
+         for Cur in Source.Iterate loop
+            declare
+               K : constant Symbol_Type := Key (Cur);
+               V : Symbol_Info := Element (Cur);
+            begin
+               if V.Has_Definition then
+                  V.Is_Referenced := False;
+                  Result.Insert (K, V);
+               end if;
+            end;
+         end loop;
+      end return;
+   end Extract_Definitions;
 
    --------------------------
    -- To_Prettier_Document --
@@ -599,7 +707,10 @@ package body Langkit_Support.Prettier_Utils is
    function Create_Recurse (Self : in out Document_Pool) return Template_Type
    is
    begin
-      return (Kind => With_Recurse, Root => Self.Create_Recurse);
+      return
+        (Kind    => With_Recurse,
+         Root    => Self.Create_Recurse,
+         Symbols => Symbol_Parsing_Maps.Empty_Map);
    end Create_Recurse;
 
    --------------------------

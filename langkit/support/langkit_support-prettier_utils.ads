@@ -10,7 +10,9 @@
 --  documents incremenally: create a document, inspect it, possibly modify it,
 --  and at the end produce the final Prettier_Ada document.
 
+with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Vectors;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with GNATCOLL.Traces;
 with Prettier_Ada.Documents;
@@ -20,6 +22,7 @@ with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
+with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 private package Langkit_Support.Prettier_Utils is
@@ -48,10 +51,72 @@ private package Langkit_Support.Prettier_Utils is
    --  command in Prettier) that allow us to refine raw unparsing documents,
    --  for example insert necessary whitespaces/newlines between tokens.
 
+   -----------------------
+   --  Template symbols --
+   -----------------------
+
    type Template_Symbol is new Natural;
    subtype Some_Template_Symbol is
      Template_Symbol range 1 ..  Template_Symbol'Last;
    No_Template_Symbol : constant Template_Symbol := 0;
+
+   --  The following map type is used during templates parsing to validate the
+   --  names used as symbols in JSON templates, and to turn them into their
+   --  internal representation: ``Template_Symbol``.
+
+   type Symbol_Info is record
+      Source_Name : Unbounded_String;
+      --  Name for this symbol as found in the unparsing configuration
+
+      Template_Sym : Some_Template_Symbol;
+      --  Unique identifier for this symbol
+
+      Has_Definition : Boolean;
+      --  Whether we have found one definition for this symbol
+
+      Is_Referenced : Boolean;
+      --  Whether we have found at least one reference to this symbol
+   end record;
+
+   package Symbol_Parsing_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Symbol_Type,
+      Element_Type    => Symbol_Info,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
+
+   Duplicate_Symbol_Definition : exception;
+
+   function Declare_Symbol
+     (Source_Name : Unbounded_String;
+      Symbols     : Symbol_Table;
+      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      return Some_Template_Symbol;
+   --  Return the template symbol corresponding to ``Source_Name`` (creating it
+   --  if needed) and mark it as being declared in ``Symbol_Map``.
+   --
+   --  Raise a ``Duplicate_Symbol_Definition`` exception if that symbol was
+   --  already marked as declared.
+
+   function Reference_Symbol
+     (Source_Name : Unbounded_String;
+      Symbols     : Symbol_Table;
+      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
+      return Some_Template_Symbol;
+   --  Return the template symbol corresponding to ``Source_Name`` (creating it
+   --  if needed) and mark it as being referenced in ``Symbol_Map``.
+
+   function Extract_Definitions
+     (Source : Symbol_Parsing_Maps.Map) return Symbol_Parsing_Maps.Map;
+   --  Return a new map that contains only entries from ``Source`` that have
+   --  the ``Has_Definition`` component set to true, resetting their
+   --  ``Is_Referenced`` component to False.
+   --
+   --  This is useful when creating the initial symbol map to parse templates
+   --  for (A) node fields or (B) list separators from the map obtained after
+   --  parsing the corresponding (C) node template: symbols defined in (C) can
+   --  be referenced from both (A) and (B), but symbols referenced in (C) must
+   --  be marked as referenced in (A) or (B) only if these templates do
+   --  reference them.
 
    type Document_Record;
    type Document_Type is access all Document_Record;
@@ -245,6 +310,10 @@ private package Langkit_Support.Prettier_Utils is
 
          when Some_Template_Kind =>
             Root : Document_Type;
+            --  Root node for this template
+
+            Symbols : Symbol_Parsing_Maps.Map;
+            --  Symbols that are referenced and defined in this template
       end case;
    end record;
    --  Template document extended with information about how to instantiate it

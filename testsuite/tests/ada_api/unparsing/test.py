@@ -84,8 +84,12 @@ class CallArg(FooNode):
 
 
 class Call(Expr):
-    callee = Field(type=T.Name)
+    callee = Field(type=T.Name, nullable=True)
     args = Field(type=T.CallArg.list)
+
+
+class ExampleCall(Call):
+    pass
 
 
 class Number(Expr):

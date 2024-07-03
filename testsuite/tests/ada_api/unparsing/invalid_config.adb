@@ -62,9 +62,13 @@ begin
    Check ("invalid_group2.json");
    Check ("invalid_group3.json");
    Check ("invalid_group4.json");
+   Check ("invalid_group5.json");
+   Check ("invalid_group6.json");
+   Check ("invalid_group7.json");
    Check ("invalid_ifbreak.json");
    Check ("invalid_ifbreak2.json");
    Check ("invalid_ifbreak3.json");
+   Check ("invalid_ifbreak4.json");
    Check ("invalid_ifempty.json");
    Check ("invalid_ifempty2.json");
    Check ("invalid_ifempty3.json");
