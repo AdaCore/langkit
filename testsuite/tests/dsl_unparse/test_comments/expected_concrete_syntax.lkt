@@ -10,7 +10,8 @@ grammar foo_grammar {
 }
 
 |" Root node class for Test AST nodes.
-@abstract class TestNode implements Node[TestNode] {
+@abstract
+class TestNode implements Node[TestNode] {
 }
 
 |" Example node.
@@ -18,16 +19,20 @@ grammar foo_grammar {
 |" Second line.
 class ExampleNode: TestNode {
     |" docstring.
-    @exported fun test_no_var(): Int = # hello
+    @exported
+    fun test_no_var(): Int = # hello
     42
 
-    @exported fun prop_inline(): Int = 43
+    @exported
+    fun prop_inline(): Int = 43
 
-    @exported fun prop_lambda(x: Int): Int = # identity
+    @exported
+    fun prop_lambda(x: Int): Int = # identity
     # yep
     x
 
-    @exported fun test_cond(x: Int): Int = # incredible function
+    @exported
+    fun test_cond(x: Int): Int = # incredible function
     # case 0
     if x == 0 then (
         # identity
@@ -41,7 +46,8 @@ class ExampleNode: TestNode {
     # otherwise double
     else x + x
 
-    @exported fun test_if(): Int = {
+    @exported
+    fun test_if(): Int = {
         # define x
         # let's see... maybe 24?
         val x = 24;
@@ -67,7 +73,8 @@ class ExampleNode: TestNode {
         )
     }
 
-    @exported fun test_match(): Int = match node {
+    @exported
+    fun test_match(): Int = match node {
         # first case
         case x: NodeType1 => 0
 
@@ -78,7 +85,8 @@ class ExampleNode: TestNode {
         case _ => 2
     }
 
-    @exported fun test_let(): Int = # let it go!!!
+    @exported
+    fun test_let(): Int = # let it go!!!
     # where is this comment?
     {
         # define x
@@ -90,7 +98,8 @@ class ExampleNode: TestNode {
         x + y
     }
 
-    @exported fun test_bool_binops(x: Bool, y: Bool): Bool = (
+    @exported
+    fun test_bool_binops(x: Bool, y: Bool): Bool = (
         # hehe
         (
             (

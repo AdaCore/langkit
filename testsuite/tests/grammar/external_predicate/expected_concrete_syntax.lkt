@@ -5,9 +5,11 @@ grammar foo_grammar {
     @main_rule main_rule <- Name(@Identifier) |> when(Name.pred)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Name: FooNode implements TokenNode {
-    @external() fun pred(): Bool
+    @external()
+    fun pred(): Bool
 }

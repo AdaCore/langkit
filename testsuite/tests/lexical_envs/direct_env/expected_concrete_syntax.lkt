@@ -7,18 +7,21 @@ grammar foo_grammar {
     id <- Id(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun dump_env(): Array[Entity[FooNode]] =
-    node.children_env().get(null[Symbol], lookup=LookupKind.minimal)
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun dump_env(): Array[Entity[FooNode]] =
+        node.children_env().get(null[Symbol], lookup=LookupKind.minimal)
 }
 
-@with_abstract_list class Example: FooNode {
+@with_abstract_list
+class Example: FooNode {
     @parse_field name: Id
     @parse_field content: ASTList[FooNode, Id]
 
     |" Return whether "content" contains the ``kw`` keyword.
     fun has_kw(kw: Symbol): Bool =
-    node.content.map((c) => c.symbol).contains(kw)
+        node.content.map((c) => c.symbol).contains(kw)
 
     env_spec {
         add_env()

@@ -5,8 +5,10 @@ grammar foo_grammar {
     @main_rule main_rule <- list*(Example(@Example))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun prop(): Array[MyStruct] = node.entity_array().mapcat(
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun prop(): Array[MyStruct] = node.entity_array().mapcat(
         (elt1) => elt1.node_array().filtermap(
             (elt2) => MyStruct(n=elt2, e=elt1), (elt2) => true
         )

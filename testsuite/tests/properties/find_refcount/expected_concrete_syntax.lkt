@@ -5,11 +5,13 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(Example(@Example))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     fun resolve_own(): MyRecord = MyRecord(value=1b)
 
-    @exported fun resolve(): MyRecord =
-    node.children.map((c) => c.resolve_own()).find((c) => c.value == 1b)
+    @exported
+    fun resolve(): MyRecord =
+        node.children.map((c) => c.resolve_own()).find((c) => c.value == 1b)
 }
 
 class Example: FooNode implements TokenNode {

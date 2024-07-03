@@ -5,8 +5,10 @@ grammar foo_grammar {
     @main_rule main_rule <- list*(Example("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun p(): Entity[FooNode] = (
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun p(): Entity[FooNode] = (
         if node is Example then node else null[Example]
     ).as[FooNode].to_entity()
 

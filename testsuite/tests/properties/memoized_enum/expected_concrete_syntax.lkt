@@ -9,11 +9,16 @@ enum MyEnum {
     case a, b
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @exported @memoized fun id_bool(b: Bool): Bool = b
+    @exported
+    @memoized
+    fun id_bool(b: Bool): Bool = b
 
-    @exported @memoized fun id_my_enum(e: MyEnum): MyEnum = e
+    @exported
+    @memoized
+    fun id_my_enum(e: MyEnum): MyEnum = e
 }

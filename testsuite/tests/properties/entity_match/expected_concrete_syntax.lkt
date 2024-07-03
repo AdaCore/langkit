@@ -7,8 +7,10 @@ grammar foo_grammar {
     example <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @abstract fun get_num(): Int
+@abstract
+class FooNode implements Node[FooNode] {
+    @abstract
+    fun get_num(): Int
 }
 
 class Example: FooNode {
@@ -18,12 +20,14 @@ class Example: FooNode {
 class Literal: FooNode implements TokenNode {
     fun get_num(): Int = 3
 
-    @exported fun b(): Int = match node.a() {
+    @exported
+    fun b(): Int = match node.a() {
         case e: Entity[Example] => e.get_num()
         case c: Entity[FooNode] => c.get_num()
     }
 
-    @exported fun c(): Int = match node.a() {
+    @exported
+    fun c(): Int = match node.a() {
         case e: Example => e.get_num()
         case c: FooNode => c.get_num()
     }

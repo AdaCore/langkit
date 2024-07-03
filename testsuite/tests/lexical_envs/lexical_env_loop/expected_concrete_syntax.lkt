@@ -25,10 +25,12 @@ grammar foo_grammar {
 
 dynvar env: LexicalEnv[FooNode]
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Decl: FooNode {
+@abstract
+class Decl: FooNode {
 }
 
 class Package: Decl {
@@ -44,7 +46,8 @@ class Package: Decl {
 class Ref: Decl {
     @parse_field name: Name
 
-    @exported fun entity(): Entity[FooNode] = node.as_entity.name.get_ref()
+    @exported
+    fun entity(): Entity[FooNode] = node.as_entity.name.get_ref()
 }
 
 class UseClause: Decl {
@@ -67,7 +70,7 @@ class Var: Decl {
 
 class Name: FooNode implements TokenNode {
     fun designated_env(): LexicalEnv[FooNode] =
-    node.node_env().get(node, from=node)?[0].children_env()
+        node.node_env().get(node, from=node)?[0].children_env()
 
     fun get_ref(): Entity[FooNode] = node.node_env().get(node, from=node)?[0]
 }

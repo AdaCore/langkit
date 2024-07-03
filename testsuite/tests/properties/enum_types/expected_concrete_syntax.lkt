@@ -18,12 +18,17 @@ enum DeclKind {
     case func, var
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun identity(k: DeclKind): DeclKind = k
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun identity(k: DeclKind): DeclKind = k
 }
 
-@abstract class Decl: FooNode {
-    @exported @abstract fun decl_kind(): DeclKind
+@abstract
+class Decl: FooNode {
+    @exported
+    @abstract
+    fun decl_kind(): DeclKind
 }
 
 class FuncDecl: Decl {
@@ -41,7 +46,8 @@ class VarDecl: Decl {
     fun decl_kind(): DeclKind = DeclKind.var
 }
 
-@abstract class Expression: FooNode {
+@abstract
+class Expression: FooNode {
 }
 
 class Literal: Expression implements TokenNode {

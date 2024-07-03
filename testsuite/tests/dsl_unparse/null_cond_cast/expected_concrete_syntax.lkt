@@ -5,20 +5,24 @@ grammar foo_grammar {
     @main_rule main_rule <- list*(Example("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     fun ident(): FooNode = node
 
     fun static_ident(n: FooNode): FooNode = n
 
-    @exported fun p1(): Example = node.as![Example]
+    @exported
+    fun p1(): Example = node.as![Example]
 
-    @exported fun p2(): Array[Entity[Example]] =
-    node.static_ident(node).as![ASTList[FooNode, Example]].filtermap(
-        (e) => e.as_bare_entity, (e) => e.parent.is_null
-    )
+    @exported
+    fun p2(): Array[Entity[Example]] =
+        node.static_ident(node).as![ASTList[FooNode, Example]].filtermap(
+            (e) => e.as_bare_entity, (e) => e.parent.is_null
+        )
 
-    @exported fun p3(unit: AnalysisUnit[FooNode]): FooNode =
-    unit?.root.as![Example].ident()
+    @exported
+    fun p3(unit: AnalysisUnit[FooNode]): FooNode =
+        unit?.root.as![Example].ident()
 }
 
 class Example: FooNode implements TokenNode {

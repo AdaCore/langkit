@@ -5,8 +5,10 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun eval_unit(): Bool = null[FooNode].prop()
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun eval_unit(): Bool = null[FooNode].prop()
 
     fun prop(): Bool = true
 }

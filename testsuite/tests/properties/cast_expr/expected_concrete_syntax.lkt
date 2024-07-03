@@ -5,18 +5,21 @@ grammar foo_grammar {
     @main_rule main_rule <- ExprHolder("(" Example("example") ")")
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun prop(): Bool =
-    # The "cast" expression is represented with a Cast instance, which had
-    # an "expr" attribute, so "X.cast(...).expr" used to return "X", and so
-    # part of the expression was ignored. If it still was, the following
-    # would try to evaluate the ".flag" field on Self, i.e. on a FooNode,
-    # which is invalid, so this example would not compile.
-    node.as[ExprHolder].expr.flag()
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun prop(): Bool =
+        # The "cast" expression is represented with a Cast instance, which had
+        # an "expr" attribute, so "X.cast(...).expr" used to return "X", and so
+        # part of the expression was ignored. If it still was, the following
+        # would try to evaluate the ".flag" field on Self, i.e. on a FooNode,
+        # which is invalid, so this example would not compile.
+        node.as[ExprHolder].expr.flag()
 }
 
 class Example: FooNode implements TokenNode {
-    @exported fun flag(): Bool = true
+    @exported
+    fun flag(): Bool = true
 }
 
 class ExprHolder: FooNode {

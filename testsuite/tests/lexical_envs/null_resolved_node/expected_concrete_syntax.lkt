@@ -5,13 +5,15 @@ grammar foo_grammar {
     @main_rule main_rule <- Example(@Example)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     fun resolver(): Entity[FooNode] = null[Entity[FooNode]]
 }
 
 class Example: FooNode implements TokenNode {
-    @exported fun get_all_foo(): Array[Entity[FooNode]] =
-    node.children_env().get(s"foo")
+    @exported
+    fun get_all_foo(): Array[Entity[FooNode]] =
+        node.children_env().get(s"foo")
 
     env_spec {
         add_env()

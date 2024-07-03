@@ -5,13 +5,15 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(Def("def" Example("example")))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     fun null_node(): FooNode = null[FooNode]
 
-    @exported fun is_null_a_def(): Bool = node.null_node() is Def
+    @exported
+    fun is_null_a_def(): Bool = node.null_node() is Def
 
-    @exported fun is_null_a_def_or_example(): Bool =
-    node.null_node() is Def | Example
+    @exported
+    fun is_null_a_def_or_example(): Bool = node.null_node() is Def | Example
 }
 
 class Def: FooNode {

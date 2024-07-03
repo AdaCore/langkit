@@ -10,12 +10,13 @@ grammar foo_grammar {
     ref <- Ref(Name(@Identifier))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     fun env_struct(): EnvStruct =
-    EnvStruct(env=node.children_env().env_orphan())
+        EnvStruct(env=node.children_env().env_orphan())
 
     fun env_array(): Array[LexicalEnv[FooNode]] =
-    [node.children_env().env_orphan()]
+        [node.children_env().env_orphan()]
 }
 
 class Decl: FooNode {
@@ -23,14 +24,17 @@ class Decl: FooNode {
     @parse_field name: Name
     @parse_field items: ASTList[FooNode, Ref]
 
-    @exported fun test_env(other: Entity[FooNode]): Bool =
-    node.children_env().env_orphan() == other.children_env().env_orphan()
+    @exported
+    fun test_env(other: Entity[FooNode]): Bool =
+        node.children_env().env_orphan() == other.children_env().env_orphan()
 
-    @exported fun test_struct(other: Entity[FooNode]): Bool =
-    node.env_struct() == other.env_struct()
+    @exported
+    fun test_struct(other: Entity[FooNode]): Bool =
+        node.env_struct() == other.env_struct()
 
-    @exported fun test_array(other: Entity[FooNode]): Bool =
-    node.env_array() == other.env_array()
+    @exported
+    fun test_array(other: Entity[FooNode]): Bool =
+        node.env_array() == other.env_array()
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)
@@ -38,7 +42,8 @@ class Decl: FooNode {
     }
 }
 
-@qualifier enum class HasPlus: FooNode {
+@qualifier
+enum class HasPlus: FooNode {
 }
 
 class Name: FooNode implements TokenNode {

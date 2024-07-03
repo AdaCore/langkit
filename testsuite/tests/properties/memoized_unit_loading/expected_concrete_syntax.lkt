@@ -5,20 +5,30 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @external() fun ext_fetch_example_unit(): AnalysisUnit[FooNode]
+    @external()
+    fun ext_fetch_example_unit(): AnalysisUnit[FooNode]
 
-    @external() fun ext_unit_count(): Int
+    @external()
+    fun ext_unit_count(): Int
 
-    @memoized @traced fun fetch_example_unit(): AnalysisUnit[FooNode] =
-    node.ext_fetch_example_unit()
+    @memoized
+    @traced
+    fun fetch_example_unit(): AnalysisUnit[FooNode] =
+        node.ext_fetch_example_unit()
 
-    @memoized @traced fun unit_count(): Int = node.ext_unit_count()
+    @memoized
+    @traced
+    fun unit_count(): Int = node.ext_unit_count()
 
-    @exported @memoized @traced fun mmz_prop(): Array[Int] = {
+    @exported
+    @memoized
+    @traced
+    fun mmz_prop(): Array[Int] = {
         # Both calls to unit_count are memoized, but when called for the first
         # time, the first one's result will be different from the second one.
         val before = [node.unit_count()];

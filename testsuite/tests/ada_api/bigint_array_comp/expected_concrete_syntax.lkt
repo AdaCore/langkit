@@ -5,9 +5,11 @@ grammar foo_grammar {
     @main_rule main_rule <- Example(@Example)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @exported fun prop(a: Array[BigInt]): Array[BigInt] = a
+    @exported
+    fun prop(a: Array[BigInt]): Array[BigInt] = a
 }

@@ -5,9 +5,11 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @exported fun compute(n: FooNode): FooNode = n
+    @exported
+    fun compute(n: FooNode): FooNode = n
 }

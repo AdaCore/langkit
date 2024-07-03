@@ -5,19 +5,22 @@ grammar foo_grammar {
     @main_rule main_rule <- Example(@Example)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @exported fun p1(): Entity[FooNode] =
-    node.p2(null[FooNode]).f.as_bare_entity
+    @exported
+    fun p1(): Entity[FooNode] = node.p2(null[FooNode]).f.as_bare_entity
 
-    @memoized fun p2(n: FooNode): SynthNode =
-    # Wrap the Defer creation in an If expression so that it is not
-    # resolved too soon in order to trigger the bug.
-    if true then SynthNode(f=n.do((n) => n, default_val=node)) else null[SynthNode]
+    @memoized
+    fun p2(n: FooNode): SynthNode =
+        # Wrap the Defer creation in an If expression so that it is not
+        # resolved too soon in order to trigger the bug.
+        if true then SynthNode(f=n.do((n) => n, default_val=node)) else null[SynthNode]
 }
 
-@synthetic class SynthNode: FooNode {
+@synthetic
+class SynthNode: FooNode {
     @parse_field f: FooNode
 }

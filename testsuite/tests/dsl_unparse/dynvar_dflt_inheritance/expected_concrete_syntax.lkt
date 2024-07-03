@@ -7,10 +7,14 @@ grammar foo_grammar {
 
 dynvar v: Bool
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported @with_dynvars(v=false) fun p(): Bool = true
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    @with_dynvars(v=false)
+    fun p(): Bool = true
 }
 
 class Example: FooNode implements TokenNode {
-    @with_dynvars(v=false) fun p(): Bool = false
+    @with_dynvars(v=false)
+    fun p(): Bool = false
 }

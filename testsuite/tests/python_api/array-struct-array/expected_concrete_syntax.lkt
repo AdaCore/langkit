@@ -5,14 +5,17 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @exported fun example_holders(): Array[ExampleHolder] =
-    [ExampleHolder(examples=[self])]
+    @exported
+    fun example_holders(): Array[ExampleHolder] =
+        [ExampleHolder(examples=[self])]
 
-    @exported fun identity(a: Array[ExampleHolder]): Array[ExampleHolder] = a
+    @exported
+    fun identity(a: Array[ExampleHolder]): Array[ExampleHolder] = a
 }
 
 struct ExampleHolder {

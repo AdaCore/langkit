@@ -5,13 +5,16 @@ grammar foo_grammar {
     @main_rule main_rule <- BarNode("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class BarNode: FooNode {
-    @external() fun foo(i: Int): BigInt
+    @external()
+    fun foo(i: Int): BigInt
 
-    @exported fun prop(): BigInt = {
+    @exported
+    fun prop(): BigInt = {
         val _ = node.foo(1);
 
         node.foo(2)

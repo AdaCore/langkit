@@ -11,10 +11,12 @@ grammar foo_grammar {
     name <- Name(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Expr: FooNode {
+@abstract
+class Expr: FooNode {
 }
 
 class Addition: Expr {
@@ -33,7 +35,8 @@ class Ref: Expr {
 class Name: FooNode implements TokenNode {
 }
 
-@qualifier enum class Null: FooNode {
+@qualifier
+enum class Null: FooNode {
 }
 
 class VarDecl: FooNode {

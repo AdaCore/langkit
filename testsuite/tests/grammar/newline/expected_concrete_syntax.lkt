@@ -26,7 +26,8 @@ grammar foo_grammar {
     @main_rule main_rule <- or(comp | ind | nl)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class CompositeNode: FooNode {

@@ -7,7 +7,8 @@ grammar foo_grammar {
     cons <- Cons("(" main_rule main_rule ")")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Cons: FooNode {

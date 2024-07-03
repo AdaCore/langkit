@@ -7,17 +7,19 @@ grammar foo_grammar {
     name <- Name(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     fun can_reach(@ignored origin: FooNode): Bool =
-    # "foo" defs can never be reached: "foo" Def nodes should never appear
-    # in the result of any lexical env lookups.
-    match node {
-        case d: Def => d.name.symbol != s"foo"
-        case _ => true
-    }
+        # "foo" defs can never be reached: "foo" Def nodes should never appear
+        # in the result of any lexical env lookups.
+        match node {
+            case d: Def => d.name.symbol != s"foo"
+            case _ => true
+        }
 
-    @exported fun lookup(n: Symbol): Array[Entity[FooNode]] =
-    node.node_env().get(n, from=node)
+    @exported
+    fun lookup(n: Symbol): Array[Entity[FooNode]] =
+        node.node_env().get(n, from=node)
 }
 
 class Def: FooNode {

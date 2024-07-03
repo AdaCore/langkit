@@ -5,12 +5,16 @@ grammar foo_grammar {
     @main_rule main_rule <- HasExample("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class EnumNode: FooNode {
-    @exported fun prop(): Bool = true
+@abstract
+class EnumNode: FooNode {
+    @exported
+    fun prop(): Bool = true
 }
 
-@qualifier enum class HasExample: EnumNode {
+@qualifier
+enum class HasExample: EnumNode {
 }

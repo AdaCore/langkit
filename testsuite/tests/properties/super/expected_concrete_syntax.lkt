@@ -5,15 +5,20 @@ grammar foo_grammar {
     @main_rule main_rule <- Name(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun root1(): Array[Int] = [1]
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun root1(): Array[Int] = [1]
 
-    @exported fun root2(a: String, b: String): String = a & " + " & b
+    @exported
+    fun root2(a: String, b: String): String = a & " + " & b
 
-    @exported fun root3(): Bool = self.info.rebindings != null[EnvRebindings]
+    @exported
+    fun root3(): Bool = self.info.rebindings != null[EnvRebindings]
 }
 
-@abstract class Expr: FooNode {
+@abstract
+class Expr: FooNode {
     fun root1(): Array[Int] = node.super() & [2]
 }
 
@@ -21,7 +26,7 @@ class Name: Expr implements TokenNode {
     fun root1(): Array[Int] = node.super() & [3]
 
     fun root2(a: String, b: String): String =
-    "<" & node.super("[" & a & "]", b="{" & b & "}") & ">"
+        "<" & node.super("[" & a & "]", b="{" & b & "}") & ">"
 
     fun root3(): Bool = self.super()
 }

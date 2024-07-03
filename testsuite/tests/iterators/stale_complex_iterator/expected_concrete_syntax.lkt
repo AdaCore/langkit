@@ -5,11 +5,13 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @exported fun test_struct_iterator(): Iterator[Iterator[TestStruct]] = {
+    @exported
+    fun test_struct_iterator(): Iterator[Iterator[TestStruct]] = {
         val value = TestStruct(
             count=2, nodes=[null[Entity[Example]], self]
         );

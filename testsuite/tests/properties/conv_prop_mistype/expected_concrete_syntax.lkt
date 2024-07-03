@@ -7,7 +7,8 @@ grammar foo_grammar {
     )
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
     lvar: LogicVar
 }
 
@@ -15,7 +16,8 @@ class Examples: FooNode {
     @parse_field e1: RegularExample
     @parse_field e2: PlusExample
 
-    @exported fun do_solving(): Bool = (
+    @exported
+    fun do_solving(): Bool = (
         (
             %eq(node.e1.lvar, node.e2.lvar, conv_prop=PlusExample.conv_prop) and %domain(node.e1.lvar, [node.e1])
         ) and %domain(node.e2.lvar, [node.e2])

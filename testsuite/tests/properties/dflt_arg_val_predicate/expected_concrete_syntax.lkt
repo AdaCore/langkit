@@ -7,7 +7,8 @@ grammar foo_grammar {
 
 dynvar my_var: Int
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
@@ -15,18 +16,21 @@ class Example: FooNode {
     var2: LogicVar
 
     fun predicate1(n: Entity[FooNode], flag1: Bool = false, flag2: Bool = true): Bool =
-    flag1 and n.is_null and flag2
+        flag1 and n.is_null and flag2
 
-    @exported fun prop1(): Bool = {
+    @exported
+    fun prop1(): Bool = {
         val eq = %predicate(Example.predicate1, node.var1, node.var2);
 
         eq.solve()
     }
 
-    @with_dynvars(my_var) fun predicate2(n: Entity[FooNode], flag: Bool = false): Bool =
-    n.is_null and my_var == 0 and flag
+    @with_dynvars(my_var)
+    fun predicate2(n: Entity[FooNode], flag: Bool = false): Bool =
+        n.is_null and my_var == 0 and flag
 
-    @exported fun prop2(): Bool = {
+    @exported
+    fun prop2(): Bool = {
         val eq = {
             bind my_var = 1;
 
@@ -36,10 +40,12 @@ class Example: FooNode {
         eq.solve()
     }
 
-    @with_dynvars(my_var=0) fun predicate3(n: Entity[FooNode], flag: Bool = false): Bool =
-    n.is_null and my_var == 0 and flag
+    @with_dynvars(my_var=0)
+    fun predicate3(n: Entity[FooNode], flag: Bool = false): Bool =
+        n.is_null and my_var == 0 and flag
 
-    @exported fun prop3(): Bool = {
+    @exported
+    fun prop3(): Bool = {
         val eq = {
             bind my_var = 1;
 

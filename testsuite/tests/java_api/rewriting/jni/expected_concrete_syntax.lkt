@@ -8,10 +8,12 @@ grammar foo_grammar {
     value <- Literal(@Number)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Decl: FooNode {
+@abstract
+class Decl: FooNode {
     @abstract @parse_field @nullable name: Name
     @abstract @parse_field @nullable expr: Literal
 }
@@ -26,8 +28,10 @@ class Var: Decl {
     @parse_field expr: Literal
 }
 
-@custom_short_image class Literal: FooNode implements TokenNode {
+@custom_short_image
+class Literal: FooNode implements TokenNode {
 }
 
-@custom_short_image class Name: FooNode implements TokenNode {
+@custom_short_image
+class Name: FooNode implements TokenNode {
 }

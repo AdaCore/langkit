@@ -10,10 +10,12 @@ grammar foo_grammar {
     )
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class BaseEnvCreator: FooNode {
+@abstract
+class BaseEnvCreator: FooNode {
     env_spec {
         add_env()
     }
@@ -22,14 +24,16 @@ grammar foo_grammar {
 class DefaultEnvCreator: BaseEnvCreator {
 }
 
-@rebindable class RebindableEnvCreator: BaseEnvCreator {
+@rebindable
+class RebindableEnvCreator: BaseEnvCreator {
 }
 
 class Rebinder: FooNode {
     @parse_field left: BaseEnvCreator
     @parse_field right: BaseEnvCreator
 
-    @exported fun rebind(): FooNode = {
+    @exported
+    fun rebind(): FooNode = {
         val left_env = node.left.children_env();
         val right_env = node.right.children_env();
         # Depending on whether "left_env" is rebindable, the following will

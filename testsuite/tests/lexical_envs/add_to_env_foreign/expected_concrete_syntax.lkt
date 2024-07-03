@@ -15,18 +15,21 @@ grammar foo_grammar {
     )
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@synthetic class DummySyntheticNode: FooNode {
+@synthetic
+class DummySyntheticNode: FooNode {
 }
 
 class ForeignDecl: FooNode {
     @parse_field create_synthetic: Synth
     @parse_field id: Id
 
-    @memoized fun node_for_env(): FooNode =
-    if node.create_synthetic.as_bool() then DummySyntheticNode() else node
+    @memoized
+    fun node_for_env(): FooNode =
+        if node.create_synthetic.as_bool() then DummySyntheticNode() else node
 
     env_spec {
         add_to_env_kv(
@@ -40,10 +43,13 @@ class ForeignDecl: FooNode {
     }
 }
 
-@abstract class Id: FooNode {
-    @abstract fun simple_name(): SimpleId
+@abstract
+class Id: FooNode {
+    @abstract
+    fun simple_name(): SimpleId
 
-    @abstract fun resolve(base_env: LexicalEnv[FooNode]): Scope
+    @abstract
+    fun resolve(base_env: LexicalEnv[FooNode]): Scope
 }
 
 class ScopedId: Id {
@@ -53,14 +59,14 @@ class ScopedId: Id {
     fun simple_name(): SimpleId = node.name
 
     fun resolve(base_env: LexicalEnv[FooNode]): Scope =
-    node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
+        node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
 }
 
 class SimpleId: Id implements TokenNode {
     fun simple_name(): SimpleId = node
 
     fun resolve(base_env: LexicalEnv[FooNode]): Scope =
-    base_env.get_first(node.symbol).node.as[Scope]
+        base_env.get_first(node.symbol).node.as[Scope]
 }
 
 class Scope: FooNode {
@@ -86,9 +92,11 @@ class SelfDecl: FooNode {
     }
 }
 
-@qualifier enum class Synth: FooNode {
+@qualifier
+enum class Synth: FooNode {
 }
 
-@metadata struct Metadata {
+@metadata
+struct Metadata {
     @used_in_equality node: FooNode
 }

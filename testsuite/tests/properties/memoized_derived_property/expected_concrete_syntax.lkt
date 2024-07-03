@@ -5,10 +5,14 @@ grammar foo_grammar {
     @main_rule main_rule <- Block(Example1("example") Example2("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @traced fun identity(x: Int): Int = x
+@abstract
+class FooNode implements Node[FooNode] {
+    @traced
+    fun identity(x: Int): Int = x
 
-    @exported @memoized fun foo(x: Int): Int = node.identity(x)
+    @exported
+    @memoized
+    fun foo(x: Int): Int = node.identity(x)
 }
 
 class Block: FooNode {
@@ -21,5 +25,6 @@ class Example1: FooNode {
 }
 
 class Example2: FooNode {
-    @memoized fun foo(x: Int): Int = node.identity(x) + 2
+    @memoized
+    fun foo(x: Int): Int = node.identity(x) + 2
 }

@@ -5,15 +5,19 @@ grammar foo_grammar {
     @main_rule main_rule <- list*(Example("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
     fun identity(i: Int): Int = i
 
-    @exported fun in_1(i: Int): Bool = node.identity(i) in 1
+    @exported
+    fun in_1(i: Int): Bool = node.identity(i) in 1
 
-    @exported fun in_1_3_4(i: Int): Bool = node.identity(i) in 1 | 3 | 4
+    @exported
+    fun in_1_3_4(i: Int): Bool = node.identity(i) in 1 | 3 | 4
 
-    @exported fun in_nodes(n1: FooNode, n2: FooNode): Bool = node in n1 | n2
+    @exported
+    fun in_nodes(n1: FooNode, n2: FooNode): Bool = node in n1 | n2
 }

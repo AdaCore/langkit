@@ -20,14 +20,18 @@ grammar foo_grammar {
     name <- Name(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class BaseExample: FooNode {
+@abstract
+class BaseExample: FooNode {
     @abstract @parse_field fld_1: Name
     @abstract @parse_field @nullable fld_2: FooNode
 
-    @exported @abstract fun id_bool(id: Bool): Bool
+    @exported
+    @abstract
+    fun id_bool(id: Bool): Bool
 }
 
 class Example: BaseExample {
@@ -35,62 +39,80 @@ class Example: BaseExample {
     @parse_field fld_1: Name
 
     fun to_public(p: PrivatePoint): Point =
-    Point(label="from private", x=p.x, y=p.y)
+        Point(label="from private", x=p.x, y=p.y)
 
-    @exported fun prop(p: Point): Point =
-    node.to_public(PrivatePoint(x=p.x, y=p.y))
+    @exported
+    fun prop(p: Point): Point = node.to_public(PrivatePoint(x=p.x, y=p.y))
 
-    @exported fun result(): NodeResult = NodeResult(n=node, e=self)
+    @exported
+    fun result(): NodeResult = NodeResult(n=node, e=self)
 
     fun id_bool(id: Bool): Bool = id
 
-    @exported fun id_int(id: Int): Int = id
+    @exported
+    fun id_int(id: Int): Int = id
 
-    @exported fun id_bigint(id: BigInt): BigInt = id
+    @exported
+    fun id_bigint(id: BigInt): BigInt = id
 
-    @exported fun id_char(id: Char): Char = id
+    @exported
+    fun id_char(id: Char): Char = id
 
-    @exported fun id_token(id: Token): Token = id
+    @exported
+    fun id_token(id: Token): Token = id
 
-    @exported fun id_sloc(id: SourceLocation): SourceLocation = id
+    @exported
+    fun id_sloc(id: SourceLocation): SourceLocation = id
 
-    @exported fun id_sym(id: Symbol): Symbol = id
+    @exported
+    fun id_sym(id: Symbol): Symbol = id
 
-    @exported fun id_unit(id: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = id
+    @exported
+    fun id_unit(id: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = id
 
-    @exported fun id_root_node(id: FooNode): FooNode = id
+    @exported
+    fun id_root_node(id: FooNode): FooNode = id
 
-    @exported fun id_name(id: Name): Name = id
+    @exported
+    fun id_name(id: Name): Name = id
 
-    @exported fun id_unit_kind(id: AnalysisUnitKind): AnalysisUnitKind = id
+    @exported
+    fun id_unit_kind(id: AnalysisUnitKind): AnalysisUnitKind = id
 
-    @exported fun id_node_array(id: Array[Entity[FooNode]]): Array[Entity[FooNode]] =
-    id
+    @exported
+    fun id_node_array(id: Array[Entity[FooNode]]): Array[Entity[FooNode]] = id
 
-    @exported fun id_expr_array(id: Array[Entity[Expr]]): Array[Entity[Expr]] =
-    id
+    @exported
+    fun id_expr_array(id: Array[Entity[Expr]]): Array[Entity[Expr]] = id
 
-    @exported fun id_bigint_array(id: Array[BigInt]): Array[BigInt] = id
+    @exported
+    fun id_bigint_array(id: Array[BigInt]): Array[BigInt] = id
 
-    @exported fun id_unit_array(id: Array[AnalysisUnit[FooNode]]): Array[AnalysisUnit[FooNode]] =
-    id
+    @exported
+    fun id_unit_array(id: Array[AnalysisUnit[FooNode]]): Array[AnalysisUnit[FooNode]] =
+        id
 
-    @exported fun create_bigint_iterator(): Iterator[BigInt] =
-    [1b, 2b, 3b].to_iterator()
+    @exported
+    fun create_bigint_iterator(): Iterator[BigInt] =
+        [1b, 2b, 3b].to_iterator()
 
-    @exported fun id_bigint_iterator(id: Iterator[BigInt]): Iterator[BigInt] =
-    id
+    @exported
+    fun id_bigint_iterator(id: Iterator[BigInt]): Iterator[BigInt] = id
 
-    @exported fun id_dflt_bool(id: Bool = true): Bool = id
+    @exported
+    fun id_dflt_bool(id: Bool = true): Bool = id
 
-    @exported fun id_dflt_int(id: Int = 42): Int = id
+    @exported
+    fun id_dflt_int(id: Int = 42): Int = id
 
-    @exported fun id_dflt_char(id: Char = '\x00'): Char = id
+    @exported
+    fun id_dflt_char(id: Char = '\x00'): Char = id
 
-    @exported fun id_dflt_root_node(id: FooNode = null[FooNode]): FooNode = id
+    @exported
+    fun id_dflt_root_node(id: FooNode = null[FooNode]): FooNode = id
 
-    @exported fun with_md(md1: Bool, md2: Bool): Entity[Example] =
-    Entity[Example](
+    @exported
+    fun with_md(md1: Bool, md2: Bool): Entity[Example] = Entity[Example](
         node=self.node, info=EntityInfo(
             md=Metadata(md1=md1, md2=md2), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
         )
@@ -103,7 +125,8 @@ class Def: FooNode {
     @parse_field expr: Expr
 }
 
-@abstract class Expr: FooNode {
+@abstract
+class Expr: FooNode {
 }
 
 class Addition: Expr {
@@ -126,7 +149,8 @@ class Ref: Expr {
 class Name: FooNode implements TokenNode {
 }
 
-@qualifier enum class NullQual: FooNode {
+@qualifier
+enum class NullQual: FooNode {
 }
 
 class VarDecl: FooNode {
@@ -135,7 +159,8 @@ class VarDecl: FooNode {
     @parse_field value: Expr
 }
 
-@metadata struct Metadata {
+@metadata
+struct Metadata {
     @used_in_equality md1: Bool
     md2: Bool
 }

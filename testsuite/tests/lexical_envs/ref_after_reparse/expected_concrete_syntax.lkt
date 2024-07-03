@@ -17,7 +17,8 @@ grammar foo_grammar {
 
 dynvar env: LexicalEnv[FooNode]
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Block: FooNode {
@@ -41,12 +42,14 @@ class Decl: FooNode {
 }
 
 class Name: FooNode implements TokenNode {
-    @with_dynvars(env) fun ambiant_entity(): Entity[FooNode] = env.get(node)?[0]
+    @with_dynvars(env)
+    fun ambiant_entity(): Entity[FooNode] = env.get(node)?[0]
 
     fun designated_env(): LexicalEnv[FooNode] =
-    node.unit().root.node_env().get(node)?[0].children_env()
+        node.unit().root.node_env().get(node)?[0].children_env()
 
-    @exported fun entity(): Entity[FooNode] = {
+    @exported
+    fun entity(): Entity[FooNode] = {
         bind env = node.node_env();
 
         node.ambiant_entity()
@@ -56,7 +59,8 @@ class Name: FooNode implements TokenNode {
 class Ref: FooNode {
     @parse_field name: Name
 
-    @exported fun entity(): Entity[FooNode] = node.as_entity.name.entity()
+    @exported
+    fun entity(): Entity[FooNode] = node.as_entity.name.entity()
 }
 
 class Using: FooNode {

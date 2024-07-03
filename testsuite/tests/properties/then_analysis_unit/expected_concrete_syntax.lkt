@@ -6,13 +6,15 @@ grammar foo_grammar {
     name <- Name(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun node_unit(): AnalysisUnit[FooNode] =
-    node.as[Name].do((n) => n.unit())
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun node_unit(): AnalysisUnit[FooNode] = node.as[Name].do((n) => n.unit())
 }
 
 class Scope: ASTList[FooNode, Name] {
 }
 
-@with_abstract_list class Name: FooNode implements TokenNode {
+@with_abstract_list
+class Name: FooNode implements TokenNode {
 }

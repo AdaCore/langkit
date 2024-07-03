@@ -7,14 +7,16 @@ grammar foo_grammar {
     name <- Name(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Decl: FooNode {
     @parse_field names: ASTList[FooNode, Name]
 
-    @exported fun lookup(n: Entity[Name]): Entity[FooNode] =
-    self.node_env().get_first(n.symbol)
+    @exported
+    fun lookup(n: Entity[Name]): Entity[FooNode] =
+        self.node_env().get_first(n.symbol)
 
     env_spec {
         do(raise[FooNode] PropertyError())

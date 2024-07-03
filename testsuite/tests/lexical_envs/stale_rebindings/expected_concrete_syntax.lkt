@@ -5,9 +5,10 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(Example("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Entity[FooNode] =
-    {
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Entity[FooNode] = {
         val rbdng = self.info.rebindings.append_rebinding(
             from_node.children_env(), to_node.children_env()
         );

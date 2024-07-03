@@ -8,12 +8,14 @@ grammar foo_grammar {
     id <- Id(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Id: FooNode implements TokenNode {
-    @exported fun get_scope(): Entity[FooNode] =
-    node.children_env().get_first(s"Scope", lookup=LookupKind.minimal)
+    @exported
+    fun get_scope(): Entity[FooNode] =
+        node.children_env().get_first(s"Scope", lookup=LookupKind.minimal)
 
     env_spec {
         add_env()
@@ -42,6 +44,7 @@ class Scope: FooNode {
     }
 }
 
-@metadata struct Metadata {
+@metadata
+struct Metadata {
     @used_in_equality node: FooNode
 }

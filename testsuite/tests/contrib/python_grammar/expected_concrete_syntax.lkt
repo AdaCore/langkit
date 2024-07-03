@@ -326,10 +326,12 @@ grammar foo_grammar {
     comp_if <- CompIf("if" test ?comp_iter)
 }
 
-@abstract class PythonNode implements Node[PythonNode] {
+@abstract
+class PythonNode implements Node[PythonNode] {
 }
 
-@abstract class Arg: PythonNode {
+@abstract
+class Arg: PythonNode {
 }
 
 class ArgAssoc: Arg {
@@ -366,7 +368,8 @@ enum class CompOpKind: PythonNode {
     Eq, Gte, Lte, Diamond, Noteq, In, Notin, Is, Isnot
 }
 
-@abstract class Comprehension: PythonNode {
+@abstract
+class Comprehension: PythonNode {
 }
 
 class CompFor: Comprehension {
@@ -400,7 +403,8 @@ class ExceptPart: PythonNode {
     @parse_field statements: PythonNode
 }
 
-@abstract class Expr: PythonNode {
+@abstract
+class Expr: PythonNode {
 }
 
 class AndExpr: Expr {
@@ -413,7 +417,8 @@ class AndOp: Expr {
     @parse_field right: Expr
 }
 
-@abstract class BinOp: Expr {
+@abstract
+class BinOp: Expr {
     @parse_field left: Expr
     @parse_field op: Op
     @parse_field right: Expr
@@ -493,7 +498,8 @@ class ListLit: Expr {
     @parse_field exprs: ASTList[PythonNode, Expr]
 }
 
-@abstract class Name: Expr {
+@abstract
+class Name: Expr {
 }
 
 class DottedName: Name {
@@ -574,7 +580,8 @@ class FileNode: PythonNode {
 class ImportStar: PythonNode {
 }
 
-@qualifier enum class KwArgsFlag: PythonNode {
+@qualifier
+enum class KwArgsFlag: PythonNode {
 }
 
 class NL: PythonNode {
@@ -619,7 +626,8 @@ class SingleParam: PythonNode {
     }
 }
 
-@abstract class Stmt: PythonNode {
+@abstract
+class Stmt: PythonNode {
 }
 
 class AssertStmt: Stmt {
@@ -661,7 +669,8 @@ class Decorated: Stmt {
     @parse_field defn: DefStmt
 }
 
-@abstract class DefStmt: Stmt {
+@abstract
+class DefStmt: Stmt {
     env_spec {
         add_env()
     }
@@ -758,5 +767,6 @@ class WithStmt: Stmt {
     @parse_field statements: PythonNode
 }
 
-@qualifier enum class VarArgsFlag: PythonNode {
+@qualifier
+enum class VarArgsFlag: PythonNode {
 }

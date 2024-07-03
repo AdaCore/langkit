@@ -8,13 +8,16 @@ grammar foo_grammar {
     identifier <- Identifier(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Decl: FooNode {
+@abstract
+class Decl: FooNode {
     @parse_field name: Identifier
 
-    @exported fun prop(arg: Bool = false): Bool = arg
+    @exported
+    fun prop(arg: Bool = false): Bool = arg
 }
 
 class FunDecl: Decl {

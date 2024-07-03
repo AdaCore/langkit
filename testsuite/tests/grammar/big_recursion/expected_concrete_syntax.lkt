@@ -405,7 +405,8 @@ grammar foo_grammar {
     rule400 <- Example(@Example)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {

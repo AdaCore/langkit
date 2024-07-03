@@ -8,7 +8,9 @@ grammar foo_grammar {
     atom <- Atom(@Identifier)
 }
 
-@abstract @with_abstract_list class FooNode implements Node[FooNode] {
+@abstract
+@with_abstract_list
+class FooNode implements Node[FooNode] {
 }
 
 class Atom: FooNode implements TokenNode {

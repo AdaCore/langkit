@@ -5,12 +5,16 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    @exported @memoized fun get(): SynthNode = SynthNode()
+    @exported
+    @memoized
+    fun get(): SynthNode = SynthNode()
 }
 
-@synthetic class SynthNode: FooNode {
+@synthetic
+class SynthNode: FooNode {
 }

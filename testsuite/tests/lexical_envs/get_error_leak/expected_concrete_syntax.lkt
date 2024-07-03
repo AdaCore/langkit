@@ -11,12 +11,13 @@ grammar foo_grammar {
     ref <- Ref("=" id)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class ErrorUseClause: FooNode {
     fun resolve(): LexicalEnv[FooNode] =
-    raise[LexicalEnv[FooNode]] PropertyError("unconditionally raised")
+        raise[LexicalEnv[FooNode]] PropertyError("unconditionally raised")
 
     env_spec {
         handle_children()
@@ -33,7 +34,8 @@ class Id: FooNode implements TokenNode {
 class Ref: FooNode {
     @parse_field name: Id
 
-    @exported fun resolve(): Array[Entity[FooNode]] = node.name.resolve()
+    @exported
+    fun resolve(): Array[Entity[FooNode]] = node.name.resolve()
 }
 
 class Scope: FooNode {
@@ -50,7 +52,7 @@ class UseClause: FooNode {
     @parse_field name: Id
 
     fun resolve(): LexicalEnv[FooNode] =
-    node.name.resolve().map((n) => n.children_env()).env_group()
+        node.name.resolve().map((n) => n.children_env()).env_group()
 
     env_spec {
         handle_children()

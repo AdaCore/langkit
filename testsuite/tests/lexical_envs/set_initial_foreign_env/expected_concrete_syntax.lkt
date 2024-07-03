@@ -11,15 +11,20 @@ grammar foo_grammar {
     simple_identifier <- SimpleId(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Id: FooNode {
-    @abstract fun designated_symbol(): Symbol
+@abstract
+class Id: FooNode {
+    @abstract
+    fun designated_symbol(): Symbol
 
-    @abstract fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode]
+    @abstract
+    fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode]
 
-    @abstract fun resolve(base_env: LexicalEnv[FooNode]): FooNode
+    @abstract
+    fun resolve(base_env: LexicalEnv[FooNode]): FooNode
 }
 
 class ScopedId: Id {
@@ -29,20 +34,20 @@ class ScopedId: Id {
     fun designated_symbol(): Symbol = node.name.symbol
 
     fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
-    node.scope.resolve(base_env).children_env()
+        node.scope.resolve(base_env).children_env()
 
     fun resolve(base_env: LexicalEnv[FooNode]): FooNode =
-    node.designated_scope(base_env).get_first(node.name).node
+        node.designated_scope(base_env).get_first(node.name).node
 }
 
 class SimpleId: Id implements TokenNode {
     fun designated_symbol(): Symbol = node.symbol
 
     fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
-    base_env
+        base_env
 
     fun resolve(base_env: LexicalEnv[FooNode]): FooNode =
-    base_env.get_first(node.symbol).node
+        base_env.get_first(node.symbol).node
 }
 
 class Scope: FooNode {
@@ -60,6 +65,7 @@ class Scope: FooNode {
     }
 }
 
-@metadata struct Metadata {
+@metadata
+struct Metadata {
     @used_in_equality node: FooNode
 }

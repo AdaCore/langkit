@@ -5,14 +5,15 @@ grammar foo_grammar {
     @main_rule main_rule <- list*(Example("example"))
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun p(): FooNode =
-    node.parents().filter((n) => n.parent.is_null)?[0].do(
-        (v1) => match v1 {
-            case e: Example => e
-            case n => n
-        }
-    )
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun p(): FooNode = node.parents().filter((n) => n.parent.is_null)?[0].do(
+            (v1) => match v1 {
+                case e: Example => e
+                case n => n
+            }
+        )
 }
 
 class Example: FooNode implements TokenNode {

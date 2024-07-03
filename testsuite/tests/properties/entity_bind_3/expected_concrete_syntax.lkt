@@ -5,8 +5,10 @@ grammar foo_grammar {
     @main_rule main_rule <- Literal(@Number)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun prop(): Int = raise[Int] PropertyError("Property FooNode.prop not implemented")
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun prop(): Int = raise[Int] PropertyError("Property FooNode.prop not implemented")
 }
 
 class Literal: FooNode implements TokenNode {
@@ -16,7 +18,8 @@ class Literal: FooNode implements TokenNode {
 
     fun b(): Equation = %eq(node.var, node.a(), conv_prop=Literal.node)
 
-    @exported fun public_pro(): Entity[Literal] = {
+    @exported
+    fun public_pro(): Entity[Literal] = {
         val _ = node.b();
 
         node.as_bare_entity

@@ -8,10 +8,12 @@ grammar foo_grammar {
     )
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@rebindable class Block: FooNode {
+@rebindable
+class Block: FooNode {
     @parse_field name: Name
     @parse_field inner: ASTList[FooNode, Block]
 
@@ -25,31 +27,34 @@ grammar foo_grammar {
         Entity[Block](node=node, info=e_info)
     }
 
-    @exported fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] =
-    self.create_entity(
+    @exported
+    fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] = self.create_entity(
         self.info.rebindings.append_rebinding(
             from_block.children_env(), to_block.children_env()
         )
     )
 
-    @exported fun concat_rebindings(other: Entity[Block]): Entity[Block] =
-    self.create_entity(
+    @exported
+    fun concat_rebindings(other: Entity[Block]): Entity[Block] = self.create_entity(
         self.info.rebindings.concat_rebindings(other.info.rebindings)
     )
 
-    @exported fun shed_rebindings(from_block: Entity[Block]): Entity[Block] =
-    self.create_entity(
+    @exported
+    fun shed_rebindings(from_block: Entity[Block]): Entity[Block] = self.create_entity(
         from_block.children_env().shed_rebindings(self.info).rebindings
     )
 
-    @exported fun parent_rebindings(): Entity[Block] =
-    self.create_entity(self.info.rebindings.get_parent)
+    @exported
+    fun parent_rebindings(): Entity[Block] =
+        self.create_entity(self.info.rebindings.get_parent)
 
-    @exported fun new(): Entity[FooNode] =
-    self.info.rebindings.new_env.env_node.as_bare_entity
+    @exported
+    fun new(): Entity[FooNode] =
+        self.info.rebindings.new_env.env_node.as_bare_entity
 
-    @exported fun old(): Entity[FooNode] =
-    self.info.rebindings.old_env.env_node.as_bare_entity
+    @exported
+    fun old(): Entity[FooNode] =
+        self.info.rebindings.old_env.env_node.as_bare_entity
 
     env_spec {
         add_env()

@@ -13,27 +13,35 @@ grammar foo_grammar {
     type_assert <- TypeAssert(literal ":" ident)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @lazy number_type: NumType = NumType()
+@abstract
+class FooNode implements Node[FooNode] {
+    @lazy
+    number_type: NumType = NumType()
 
-    @lazy str_type: StrType = StrType()
+    @lazy
+    str_type: StrType = StrType()
 
-    @exported fun get_first_diag(r: SolverResult): SolverDiagnostic =
-    r.diagnostics?[0]
+    @exported
+    fun get_first_diag(r: SolverResult): SolverDiagnostic = r.diagnostics?[0]
 }
 
-@abstract class BaseTypeDecl: FooNode {
-    @predicate_error("expected $expected, got $Self") fun match_expected_type(expected: Entity[BaseTypeDecl]): Bool =
-    self == expected
+@abstract
+class BaseTypeDecl: FooNode {
+    @predicate_error("expected $expected, got $Self")
+    fun match_expected_type(expected: Entity[BaseTypeDecl]): Bool =
+        self == expected
 }
 
-@abstract class TypeDecl: BaseTypeDecl {
+@abstract
+class TypeDecl: BaseTypeDecl {
 }
 
-@synthetic class NumType: TypeDecl {
+@synthetic
+class NumType: TypeDecl {
 }
 
-@synthetic class StrType: TypeDecl {
+@synthetic
+class StrType: TypeDecl {
 }
 
 class Block: FooNode {
@@ -44,7 +52,8 @@ class Block: FooNode {
     }
 }
 
-@abstract class Expr: FooNode {
+@abstract
+class Expr: FooNode {
     type_var: LogicVar
 
     fun xref_equation(): Equation = %false
@@ -52,11 +61,14 @@ class Block: FooNode {
 
 class NumberLiteral: Expr implements TokenNode {
     fun xref_equation(): Equation =
-    %eq(node.type_var, node.unit().root.number_type())
+        %eq(node.type_var, node.unit().root.number_type())
 }
 
-@abstract class Resolvable: Expr {
-    @exported @abstract fun resolve(): SolverResult
+@abstract
+class Resolvable: Expr {
+    @exported
+    @abstract
+    fun resolve(): SolverResult
 }
 
 class Call: Resolvable {
@@ -88,19 +100,19 @@ class TypeAssert: Resolvable {
 
 class StringLiteral: Expr implements TokenNode {
     fun xref_equation(): Equation =
-    %eq(node.type_var, node.unit().root.str_type())
+        %eq(node.type_var, node.unit().root.str_type())
 }
 
 class Identifier: FooNode implements TokenNode {
     ref_var: LogicVar
 
     fun designated_type(): Entity[TypeDecl] =
-    if node.symbol == s"number" then node.unit().root.number_type().as_bare_entity
-    elif node.symbol == s"string" then node.unit().root.str_type().as_bare_entity
-    else null[Entity[TypeDecl]]
+        if node.symbol == s"number" then node.unit().root.number_type().as_bare_entity
+        elif node.symbol == s"string" then node.unit().root.str_type().as_bare_entity
+        else null[Entity[TypeDecl]]
 
     fun xref_equation(ctx: LogicContext): Equation =
-    %eq(node.ref_var, node.designated_type(), logic_ctx=ctx)
+        %eq(node.ref_var, node.designated_type(), logic_ctx=ctx)
 }
 
 class ProcDecl: FooNode {
@@ -109,7 +121,7 @@ class ProcDecl: FooNode {
     @parse_field second_type: Identifier
 
     fun call_equation(first_arg: Expr, second_arg: Expr, ctx: LogicContext): Equation =
-    node.first_type.xref_equation(ctx) and node.second_type.xref_equation(ctx) and %predicate(BaseTypeDecl.match_expected_type, first_arg.type_var, error_location=first_arg, node.first_type.ref_var) and %predicate(BaseTypeDecl.match_expected_type, second_arg.type_var, error_location=second_arg, node.second_type.ref_var)
+        node.first_type.xref_equation(ctx) and node.second_type.xref_equation(ctx) and %predicate(BaseTypeDecl.match_expected_type, first_arg.type_var, error_location=first_arg, node.first_type.ref_var) and %predicate(BaseTypeDecl.match_expected_type, second_arg.type_var, error_location=second_arg, node.second_type.ref_var)
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)

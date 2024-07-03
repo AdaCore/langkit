@@ -2899,7 +2899,7 @@ class CompileCtx:
                     root_static = PropertyDef(
                         expr=None, prefix=None, name=None,
                         type=prop.type,
-                        doc=prop.doc,
+                        doc=prop._raw_doc,
                         public=False,
                         dynamic_vars=prop.dynamic_vars,
                         uses_entity_info=prop.uses_entity_info,

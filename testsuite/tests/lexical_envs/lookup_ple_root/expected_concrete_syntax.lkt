@@ -13,15 +13,17 @@ grammar foo_grammar {
     id <- Identifier(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
-    @exported fun get_ple_root(): Entity[FooNode] =
-    node.ple_root().as_bare_entity
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun get_ple_root(): Entity[FooNode] = node.ple_root().as_bare_entity
 }
 
 class Identifier: FooNode implements TokenNode {
 }
 
-@ple_unit_root class Scope: FooNode {
+@ple_unit_root
+class Scope: FooNode {
     @parse_field items: ASTList[FooNode, Identifier]
 }
 

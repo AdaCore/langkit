@@ -5,8 +5,10 @@ grammar foo_grammar {
     @main_rule main_rule <- HasError("error")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@qualifier enum class HasError: FooNode {
+@qualifier
+enum class HasError: FooNode {
 }

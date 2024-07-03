@@ -14,18 +14,23 @@ grammar foo_grammar {
     name <- Name(@Identifier)
 }
 
-@with_default(none) enum DeclKind {
+@with_default(none)
+enum DeclKind {
     case func, var, none
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Decl: FooNode {
-    @exported @abstract fun decl_kind(): DeclKind
+@abstract
+class Decl: FooNode {
+    @exported
+    @abstract
+    fun decl_kind(): DeclKind
 
-    @exported fun with_kind(): DeclAndKind =
-    DeclAndKind(dcl=node, knd=node.decl_kind())
+    @exported
+    fun with_kind(): DeclAndKind = DeclAndKind(dcl=node, knd=node.decl_kind())
 }
 
 class FuncDecl: Decl {
@@ -43,7 +48,8 @@ class VarDecl: Decl {
     fun decl_kind(): DeclKind = DeclKind.var
 }
 
-@abstract class Expression: FooNode {
+@abstract
+class Expression: FooNode {
 }
 
 class Literal: Expression implements TokenNode {

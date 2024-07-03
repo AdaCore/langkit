@@ -10,7 +10,8 @@ grammar foo_grammar {
     id <- Identifier(@Identifier)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class DefBlock: FooNode {
@@ -27,7 +28,9 @@ class Identifier: FooNode implements TokenNode {
 class RegularBlock: FooNode {
     @parse_field id: Identifier
 
-    @exported @lazy synth: SynthNode = SynthNode(id=node.id)
+    @exported
+    @lazy
+    synth: SynthNode = SynthNode(id=node.id)
 
     env_spec {
         set_initial_env(
@@ -38,6 +41,7 @@ class RegularBlock: FooNode {
     }
 }
 
-@synthetic class SynthNode: FooNode {
+@synthetic
+class SynthNode: FooNode {
     @parse_field id: Identifier
 }

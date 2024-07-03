@@ -5,11 +5,18 @@ grammar foo_grammar {
     @main_rule main_rule <- Example(@Example)
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @exported @lazy @traced my_field_1: Int = 42
+    @exported
+    @lazy
+    @traced
+    my_field_1: Int = 42
 
-    @exported @lazy @traced my_field_2: Array[Int] = [1, 2]
+    @exported
+    @lazy
+    @traced
+    my_field_2: Array[Int] = [1, 2]
 }

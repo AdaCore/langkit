@@ -6,11 +6,15 @@ grammar foo_grammar {
     expr <- or(AddExpr(expr "+" expr) | IntLit(@Number))
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
-@abstract class Expr: FooNode {
-    @exported @lazy my_field: Int = 42
+@abstract
+class Expr: FooNode {
+    @exported
+    @lazy
+    my_field: Int = 42
 }
 
 class AddExpr: Expr {
