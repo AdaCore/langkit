@@ -10,7 +10,7 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @memoized
-    fun env_with_md(n1: FooNode, n2: FooNode): LexicalEnv[FooNode] = {
+    fun env_with_md(n1: FooNode, n2: FooNode): LexicalEnv = {
         val md1 = Metadata(n1=n1, n2=null[FooNode]);
         val md2 = Metadata(n1=null[FooNode], n2=n2);
 
@@ -30,7 +30,7 @@ class FooNode implements Node[FooNode] {
 
 class Decl: FooNode {
     @parse_field name: Name
-    @parse_field refs: ASTList[FooNode, Ref]
+    @parse_field refs: ASTList[Ref]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)

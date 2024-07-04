@@ -45,7 +45,7 @@ class StrType: TypeDecl {
 }
 
 class Block: FooNode {
-    @parse_field stmts: ASTList[FooNode, FooNode]
+    @parse_field stmts: ASTList[FooNode]
 
     env_spec {
         add_env()

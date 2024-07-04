@@ -1,13 +1,13 @@
 == invalid-astlist.lkt ==
-invalid-astlist.lkt:6:7: error: 2 type arguments expected, got 3
+invalid-astlist.lkt:6:7: error: 1 type argument expected, got 3
 6 |       ASTList[FooNode, Example, Example]+(Example("example"))
   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == invalid-element-type.lkt ==
 invalid-element-type.lkt:8:9: error: Invalid list type for List parser: sub-parser produces Num nodes while Example.list accepts only Example nodes
-8 |         ASTList[FooNode, Example]*(num)
-  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+8 |         ASTList[Example]*(num)
+  |         ^^^^^^^^^^^^^^^^^^^^^^
 
 
 == invalid-list-cls.lkt ==

@@ -13,7 +13,7 @@ class FooNode implements Node[FooNode] {
 
 class Block: FooNode {
     @parse_field name: Name
-    @parse_field content: ASTList[FooNode, Ref]
+    @parse_field content: ASTList[Ref]
 
     env_spec {
         add_env()
@@ -36,6 +36,6 @@ class Ref: FooNode {
         node.referenced_env().env_node.as_bare_entity
 
     @memoized
-    fun referenced_env(): LexicalEnv[FooNode] =
+    fun referenced_env(): LexicalEnv =
         node.node_env().get(node.name.symbol)?[0].children_env()
 }

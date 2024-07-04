@@ -49,7 +49,7 @@ class Id: FooNode {
     fun simple_name(): SimpleId
 
     @abstract
-    fun resolve(base_env: LexicalEnv[FooNode]): Scope
+    fun resolve(base_env: LexicalEnv): Scope
 }
 
 class ScopedId: Id {
@@ -58,20 +58,20 @@ class ScopedId: Id {
 
     fun simple_name(): SimpleId = node.name
 
-    fun resolve(base_env: LexicalEnv[FooNode]): Scope =
+    fun resolve(base_env: LexicalEnv): Scope =
         node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
 }
 
 class SimpleId: Id implements TokenNode {
     fun simple_name(): SimpleId = node
 
-    fun resolve(base_env: LexicalEnv[FooNode]): Scope =
+    fun resolve(base_env: LexicalEnv): Scope =
         base_env.get_first(node.symbol).node.as[Scope]
 }
 
 class Scope: FooNode {
     @parse_field name: SimpleId
-    @parse_field content: ASTList[FooNode, Scope]
+    @parse_field content: ASTList[Scope]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)

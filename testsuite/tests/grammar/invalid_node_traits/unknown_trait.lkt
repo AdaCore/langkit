@@ -8,5 +8,5 @@ grammar foo_grammar {
 @abstract class FooNode implements Node[FooNode] {
 }
 
-class Example : FooNode implements AnalysisUnit[FooNode] {
+class Example : FooNode implements NoSuchTrait[FooNode] {
 }

@@ -37,19 +37,19 @@ class FooNode implements Node[FooNode] {
 
 class Call: FooNode {
     @parse_field name: Identifier
-    @parse_field args: ASTList[FooNode, Call]
+    @parse_field args: ASTList[Call]
 }
 
 class Def: FooNode {
     @parse_field name: Identifier
-    @parse_field stmts: ASTList[FooNode, Indented]
+    @parse_field stmts: ASTList[Indented]
 }
 
 class Identifier: FooNode implements TokenNode {
 }
 
 class Indented: FooNode {
-    @parse_field inner: ASTList[FooNode, FooNode]
+    @parse_field inner: ASTList[FooNode]
 }
 
 class Newline: FooNode implements TokenNode {

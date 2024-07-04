@@ -19,7 +19,7 @@ class FooNode implements Node[FooNode] {
 }
 
 class Cat1: FooNode {
-    @parse_field decls: ASTList[FooNode, Var]
+    @parse_field decls: ASTList[Var]
 
     env_spec {
         add_env()
@@ -27,7 +27,7 @@ class Cat1: FooNode {
 }
 
 class Cat2: FooNode {
-    @parse_field decls: ASTList[FooNode, Var]
+    @parse_field decls: ASTList[Var]
 
     env_spec {
         add_env()
@@ -84,7 +84,7 @@ class Name: FooNode implements TokenNode {
 }
 
 class NoCat: FooNode {
-    @parse_field decls: ASTList[FooNode, Var]
+    @parse_field decls: ASTList[Var]
 
     env_spec {
         add_env()

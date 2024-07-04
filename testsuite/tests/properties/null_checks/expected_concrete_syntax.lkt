@@ -14,7 +14,7 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @exported
-    fun null_unit(): AnalysisUnit[FooNode] = null[AnalysisUnit[FooNode]]
+    fun null_unit(): AnalysisUnit = null[AnalysisUnit]
 
     @exported
     fun null_node(): Entity[Expression] = null[Entity[Expression]]
@@ -27,7 +27,7 @@ class FooNode implements Node[FooNode] {
     fun deref_null_node(): Entity[Expression] = node.null_node().null_node()
 
     @exported
-    fun null_node_unit(): AnalysisUnit[FooNode] = node.null_node().unit()
+    fun null_node_unit(): AnalysisUnit = node.null_node().unit()
 
     @exported
     fun cast_null_node(): Entity[Name] = node.null_node().as[Name]

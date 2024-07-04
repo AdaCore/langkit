@@ -15,7 +15,7 @@ class Example: FooNode {
 }
 
 class ExampleList: FooNode {
-    @parse_field items: ASTList[FooNode, FooNode]
+    @parse_field items: ASTList[FooNode]
 
     @exported fun unused_param(
         ex_param: Entity[FooNode],

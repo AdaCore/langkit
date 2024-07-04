@@ -31,7 +31,7 @@ class TypeDecl: FooNode {
         add_to_env(
             EnvAssoc(
                 key=node.name.symbol, value=node, dest_env=DesignatedEnv(
-                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv]
                 ), metadata=null[Metadata]
             )
         )
@@ -70,7 +70,7 @@ class TypeInstantiation: TypeExpr {
     @parse_field actual_type: TypeExpr
 
     @lazy
-    instantiation_env: LexicalEnv[FooNode] =
+    instantiation_env: LexicalEnv =
         dynamic_lexical_env(TypeInstantiation.instantiation_bindings)
 
     @memoized

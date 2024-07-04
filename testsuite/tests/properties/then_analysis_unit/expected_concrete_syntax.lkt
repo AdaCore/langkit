@@ -9,10 +9,10 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @exported
-    fun node_unit(): AnalysisUnit[FooNode] = node.as[Name].do((n) => n.unit())
+    fun node_unit(): AnalysisUnit = node.as[Name].do((n) => n.unit())
 }
 
-class Scope: ASTList[FooNode, Name] {
+class Scope: ASTList[Name] {
 }
 
 @with_abstract_list

@@ -12,7 +12,7 @@ class FooNode implements Node[FooNode] {
 }
 
 class ListNode: FooNode {
-    @parse_field nb_list: ASTList[FooNode, NumberNode]
+    @parse_field nb_list: ASTList[NumberNode]
 
     fun nb_list_entities(): Array[Entity[NumberNode]] =
         node.nb_list.map((n) => n.as_bare_entity)

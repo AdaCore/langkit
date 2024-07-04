@@ -11,7 +11,7 @@ class FooNode implements Node[FooNode] {
 
 class Example: FooNode {
     @external()
-    fun fetch_example_unit(): AnalysisUnit[FooNode]
+    fun fetch_example_unit(): AnalysisUnit
 
     @memoized
     fun internal_mmz_prop(i: Int): Int =

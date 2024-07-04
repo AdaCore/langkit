@@ -19,7 +19,7 @@ class FooNode implements Node[FooNode] {
 class Decl: FooNode {
     @parse_field has_plus: HasPlus
     @parse_field name: Name
-    @parse_field items: ASTList[FooNode, Ref]
+    @parse_field items: ASTList[Ref]
 
     @exported
     fun entity_items(): Array[Entity[Ref]] =

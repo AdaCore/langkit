@@ -12,5 +12,5 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    @parse_field examples: ASTList[FooNode, Example]
+    @parse_field examples: ASTList[Example]
 }

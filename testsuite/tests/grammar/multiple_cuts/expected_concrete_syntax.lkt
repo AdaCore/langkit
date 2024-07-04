@@ -44,5 +44,5 @@ class Id: FooNode implements TokenNode {
 
 class Var: FooNode {
     @parse_field id: Id
-    @parse_field ids: ASTList[FooNode, Id]
+    @parse_field ids: ASTList[Id]
 }

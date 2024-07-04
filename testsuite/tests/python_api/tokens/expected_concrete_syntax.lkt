@@ -16,5 +16,5 @@ class FooNode implements Node[FooNode] {
 class Atom: FooNode implements TokenNode {
 }
 
-class Sequence: ASTList[FooNode, FooNode] {
+class Sequence: ASTList[FooNode] {
 }

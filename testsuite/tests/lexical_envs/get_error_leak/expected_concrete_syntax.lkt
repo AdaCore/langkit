@@ -16,8 +16,8 @@ class FooNode implements Node[FooNode] {
 }
 
 class ErrorUseClause: FooNode {
-    fun resolve(): LexicalEnv[FooNode] =
-        raise[LexicalEnv[FooNode]] PropertyError("unconditionally raised")
+    fun resolve(): LexicalEnv =
+        raise[LexicalEnv] PropertyError("unconditionally raised")
 
     env_spec {
         handle_children()
@@ -40,7 +40,7 @@ class Ref: FooNode {
 
 class Scope: FooNode {
     @parse_field name: Id
-    @parse_field content: ASTList[FooNode, FooNode]
+    @parse_field content: ASTList[FooNode]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)
@@ -51,7 +51,7 @@ class Scope: FooNode {
 class UseClause: FooNode {
     @parse_field name: Id
 
-    fun resolve(): LexicalEnv[FooNode] =
+    fun resolve(): LexicalEnv =
         node.name.resolve().map((n) => n.children_env()).env_group()
 
     env_spec {

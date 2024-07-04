@@ -26,7 +26,7 @@ class DefNode: FooNode {
 class Scope: DefNode {
     @parse_field error: HasError
     @parse_field name: Id
-    @parse_field defs: ASTList[FooNode, DefNode]
+    @parse_field defs: ASTList[DefNode]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)

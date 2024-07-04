@@ -15,7 +15,7 @@ class FooNode implements Node[FooNode] {
 @rebindable
 class Block: FooNode {
     @parse_field name: Name
-    @parse_field inner: ASTList[FooNode, Block]
+    @parse_field inner: ASTList[Block]
 
     |" Helper to create a new entity from ``Entity`` but with the given
     |" rebindings.

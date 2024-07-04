@@ -18,7 +18,7 @@ class FooNode implements Node[FooNode] {
 class Example: FooNode {
 }
 
-class Sequence: ASTList[FooNode, FooNode] {
+class Sequence: ASTList[FooNode] {
     @exported
     fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
 

@@ -19,11 +19,11 @@ class FooNode implements Node[FooNode] {
 class ParsedHolder: AbstractHolder {
 }
 
-class HolderList: ASTList[FooNode, AbstractHolder] {
+class HolderList: ASTList[AbstractHolder] {
 }
 
 @abstract class AbstractManyHolder: FooNode {
-    @parse_field f: ASTList[FooNode, AbstractHolder]
+    @parse_field f: ASTList[AbstractHolder]
 }
 
 class ParsedManyHolder: AbstractManyHolder {

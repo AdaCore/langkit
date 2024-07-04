@@ -8,7 +8,7 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @exported
-    fun prop(l: ASTList[FooNode, Example]): Array[Int] =
+    fun prop(l: ASTList[Example]): Array[Int] =
         # Nest two lambda expressions that define arguments with the same name
         # (v).
         l.map((v) => v.values().find((v) => v == 1))

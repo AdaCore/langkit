@@ -9,11 +9,10 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @exported
-    fun eval_unit(u: AnalysisUnit[FooNode]): Int =
-        u.root.as[Expression].result()
+    fun eval_unit(u: AnalysisUnit): Int = u.root.as[Expression].result()
 
     @exported
-    fun id_unit(u: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = u
+    fun id_unit(u: AnalysisUnit): AnalysisUnit = u
 }
 
 @abstract
@@ -30,7 +29,7 @@ class Literal: Expression implements TokenNode {
 
 class Name: Expression implements TokenNode {
     @external(uses_envs=true)
-    fun designated_unit(): AnalysisUnit[FooNode]
+    fun designated_unit(): AnalysisUnit
 
     fun result(): Int = node.designated_unit().root.as[Expression].result()
 }

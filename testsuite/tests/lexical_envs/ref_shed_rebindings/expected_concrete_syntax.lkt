@@ -35,16 +35,16 @@ class Id: FooNode implements TokenNode {
 class RefClause: FooNode {
     @parse_field ref_id: Id
 
-    fun resolve(): LexicalEnv[FooNode] =
+    fun resolve(): LexicalEnv =
         self.lookup(node.ref_id.symbol)?.children_env()
 }
 
 @rebindable
 class Scope: FooNode {
     @parse_field name: Id
-    @parse_field content: ASTList[FooNode, FooNode]
+    @parse_field content: ASTList[FooNode]
 
-    fun refd_envs(): LexicalEnv[FooNode] = self.content.children.filtermap(
+    fun refd_envs(): LexicalEnv = self.content.children.filtermap(
         (c) => c.as[RefClause].resolve(), (c) => c is RefClause
     ).env_group()
 

@@ -503,7 +503,7 @@ def sf(strn):
 def root_list_name(node):
     from langkit.compiled_types import T
     assert node.is_root_list_type
-    return f"ASTList[{node_name(T.root_node)}, {node_name(node.element_type)}]"
+    return f"ASTList[{node_name(node.element_type)}]"
 
 
 def node_name(node):
@@ -1752,11 +1752,6 @@ def type_name(type, strip_entity=False):
         return type.api_name.camel
     elif type.is_ast_node:
         return "{}.node".format(type.dsl_name)
-    elif type.is_lexical_env_type or type.is_analysis_unit_type:
-        return "{}[{}]".format(type.dsl_name,
-                               type_name(get_context().root_grammar_class))
-
-        return "".format
     else:
         return type.dsl_name
 

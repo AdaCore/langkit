@@ -14,7 +14,7 @@ class FooNode implements Node[FooNode] {
 
 class Decl: FooNode {
     @parse_field name: Name
-    @parse_field items: ASTList[FooNode, Ref]
+    @parse_field items: ASTList[Ref]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)

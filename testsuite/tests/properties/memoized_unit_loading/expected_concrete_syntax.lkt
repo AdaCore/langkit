@@ -11,15 +11,14 @@ class FooNode implements Node[FooNode] {
 
 class Example: FooNode {
     @external()
-    fun ext_fetch_example_unit(): AnalysisUnit[FooNode]
+    fun ext_fetch_example_unit(): AnalysisUnit
 
     @external()
     fun ext_unit_count(): Int
 
     @memoized
     @traced
-    fun fetch_example_unit(): AnalysisUnit[FooNode] =
-        node.ext_fetch_example_unit()
+    fun fetch_example_unit(): AnalysisUnit = node.ext_fetch_example_unit()
 
     @memoized
     @traced

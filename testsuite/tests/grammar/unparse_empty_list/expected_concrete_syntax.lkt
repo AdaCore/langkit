@@ -4,7 +4,7 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- list+(def_node)
     def_node <- DefNode(
-        "(" identifier "," null(ASTList[FooNode, DefNode]) ")"
+        "(" identifier "," null(ASTList[DefNode]) ")"
     )
     identifier <- Identifier(@Identifier)
 }
@@ -15,7 +15,7 @@ class FooNode implements Node[FooNode] {
 
 class DefNode: FooNode {
     @parse_field name: Identifier
-    @parse_field values: ASTList[FooNode, DefNode]
+    @parse_field values: ASTList[DefNode]
 }
 
 class Identifier: FooNode implements TokenNode {

@@ -12,7 +12,7 @@ class Name: FooNode implements TokenNode {
 
 class Decl: FooNode {
     @parse_field name: Name
-    @parse_field refs: ASTList[FooNode, Ref]
+    @parse_field refs: ASTList[Ref]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)

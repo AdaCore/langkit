@@ -10,7 +10,7 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @exported
-    fun check_list(n: ASTList[FooNode, Example]): Bool = n.empty()
+    fun check_list(n: ASTList[Example]): Bool = n.empty()
 
     @exported
     fun check_array(ints: Array[Int]): Bool = ints.empty()
@@ -20,5 +20,5 @@ class Example: FooNode implements TokenNode {
 }
 
 class Sequence: FooNode {
-    @parse_field items: ASTList[FooNode, Example]
+    @parse_field items: ASTList[Example]
 }

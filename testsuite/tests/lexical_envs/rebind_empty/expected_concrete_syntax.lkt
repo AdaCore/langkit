@@ -19,7 +19,7 @@ class Example: FooNode implements TokenNode {
 
         # Call rebind_env on them (this is the important part, the rest is
         # cosmetic).
-        null[LexicalEnv[FooNode]].rebind_env(rbdng).get(s"foo")
+        null[LexicalEnv].rebind_env(rbdng).get(s"foo")
     }
 
     env_spec {

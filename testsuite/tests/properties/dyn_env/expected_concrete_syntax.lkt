@@ -23,14 +23,13 @@ class ArgSpec: FooNode {
 
 class CallExpr: FooNode {
     @parse_field name: Identifier
-    @parse_field args: ASTList[FooNode, Expr]
+    @parse_field args: ASTList[Expr]
 
     @lazy
-    args_env: LexicalEnv[FooNode] =
-        dynamic_lexical_env(CallExpr.args_assocs_getter)
+    args_env: LexicalEnv = dynamic_lexical_env(CallExpr.args_assocs_getter)
 
     @lazy
-    arg_exprs_env: LexicalEnv[FooNode] =
+    arg_exprs_env: LexicalEnv =
         dynamic_lexical_env(CallExpr.arg_exprs_assocs_getter, assoc_resolver=Expr.resolve)
 
     |" For each argument, associate its name to the expression passed in this
@@ -69,7 +68,7 @@ class ConsDecl: FooNode {
         add_to_env(
             EnvAssoc(
                 key=node.name.symbol, value=node, dest_env=DesignatedEnv(
-                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv]
                 ), metadata=null[Metadata]
             )
         )
@@ -93,13 +92,13 @@ class Ref: Expr {
 
 class FunDecl: FooNode {
     @parse_field name: Identifier
-    @parse_field args: ASTList[FooNode, ArgSpec]
+    @parse_field args: ASTList[ArgSpec]
 
     env_spec {
         add_to_env(
             EnvAssoc(
                 key=node.name.symbol, value=node, dest_env=DesignatedEnv(
-                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv]
                 ), metadata=null[Metadata]
             )
         )

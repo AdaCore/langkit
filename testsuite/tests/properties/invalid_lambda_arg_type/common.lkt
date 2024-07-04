@@ -18,5 +18,5 @@ class Example: FooNode implements TokenNode {
 
 @abstract
 class BaseExampleBlock: FooNode {
-    @parse_field items: ASTList[FooNode, Example]
+    @parse_field items: ASTList[Example]
 }
