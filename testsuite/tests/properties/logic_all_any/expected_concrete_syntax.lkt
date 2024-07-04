@@ -16,7 +16,7 @@ class Name: FooNode implements TokenNode {
 }
 
 class NameSequence: FooNode {
-    @parse_field names: ASTList[FooNode, Name]
+    @parse_field names: ASTList[Name]
 
     fun domains(): Equation = node.names.logic_all((n) => %domain(n.var, [n]))
 

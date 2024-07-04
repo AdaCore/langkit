@@ -11,6 +11,5 @@ class FooNode implements Node[FooNode] {
 
 class Example: FooNode implements TokenNode {
     @exported
-    fun test(a: Array[AnalysisUnit[FooNode]]): Array[AnalysisUnit[FooNode]] =
-        a.unique()
+    fun test(a: Array[AnalysisUnit]): Array[AnalysisUnit] = a.unique()
 }

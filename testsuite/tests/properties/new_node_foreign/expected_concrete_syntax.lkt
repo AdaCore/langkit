@@ -35,7 +35,7 @@ class RegularBlock: FooNode {
     env_spec {
         set_initial_env(
             DesignatedEnv(
-                kind=DesignatedEnvKind.named_env, env_name=node.id.symbol, direct_env=null[LexicalEnv[FooNode]]
+                kind=DesignatedEnvKind.named_env, env_name=node.id.symbol, direct_env=null[LexicalEnv]
             )
         )
     }

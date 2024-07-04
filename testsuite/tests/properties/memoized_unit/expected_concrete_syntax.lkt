@@ -12,6 +12,6 @@ class FooNode implements Node[FooNode] {
 class Example: FooNode {
     @exported
     @memoized
-    fun unit_root_node(unit: AnalysisUnit[FooNode]): Entity[FooNode] =
+    fun unit_root_node(unit: AnalysisUnit): Entity[FooNode] =
         unit.root.as_bare_entity
 }

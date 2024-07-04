@@ -17,10 +17,10 @@ class Example: FooNode implements TokenNode {
 }
 
 @snaps
-class WithSnapList: ASTList[FooNode, Example] {
+class WithSnapList: ASTList[Example] {
 }
 
-class WithoutSnapList: ASTList[FooNode, NullNode] {
+class WithoutSnapList: ASTList[NullNode] {
 }
 
 class ListWrapper: FooNode {

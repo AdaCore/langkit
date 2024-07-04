@@ -2020,13 +2020,12 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
             params = node_ref.f_params
             with ctx.lkt_context(node_ref):
                 check_source_language(
-                    len(params) == 2,
-                    '2 type arguments expected, got {}'.format(len(params))
+                    len(params) == 1,
+                    '1 type argument expected, got {}'.format(len(params))
                 )
             node_params = [resolve_node_ref(cast(NodeRefTypes, p))
                            for p in params]
-            assert node_params[0] == T.root_node
-            return node_params[1].list
+            return node_params[0].list
 
         elif isinstance(node_ref, L.SimpleTypeRef):
             return resolve_node_ref(cast(NodeRefTypes, node_ref.f_type_name))
@@ -2230,11 +2229,9 @@ class LktTypesLoader:
         Holder for all the built-in Lkt generics.
         """
         ast_list: Scope.Generic
-        analysis_unit: Scope.Generic
         array: Scope.Generic
         entity: Scope.Generic
         iterator: Scope.Generic
-        lexical_env: Scope.Generic
         node: Scope.Generic
 
     @dataclass
@@ -2321,11 +2318,9 @@ class LktTypesLoader:
 
         self.generics = self.Generics(
             Scope.Generic("ASTList"),
-            Scope.Generic("AnalysisUnit"),
             Scope.Generic("Array"),
             Scope.Generic("Entity"),
             Scope.Generic("Iterator"),
-            Scope.Generic("LexicalEnv"),
             Scope.Generic("Node"),
         )
         self.node_builtin = Scope.BuiltinValue("node", E.Self)
@@ -2344,6 +2339,7 @@ class LktTypesLoader:
         with AbstractExpression.with_location(Location.builtin):
             for builtin in [
                 builtin_type("Address"),
+                builtin_type("AnalysisUnit"),
                 builtin_type("AnalysisUnitKind"),
                 builtin_type("BigInt"),
                 builtin_type("Bool"),
@@ -2356,6 +2352,7 @@ class LktTypesLoader:
                 builtin_type("Equation"),
                 builtin_type("InnerEnvAssoc"),
                 builtin_type("Int"),
+                builtin_type("LexicalEnv"),
                 builtin_type("LogicContext"),
                 builtin_type("LogicVar"),
                 builtin_type("LookupKind"),
@@ -2374,11 +2371,9 @@ class LktTypesLoader:
                 self.precondition_failure,
                 self.property_error,
                 self.generics.ast_list,
-                self.generics.analysis_unit,
                 self.generics.array,
                 self.generics.entity,
                 self.generics.iterator,
-                self.generics.lexical_env,
                 self.generics.node,
                 Scope.Trait("ErrorNode"),
                 Scope.Trait("TokenNode"),
@@ -2578,7 +2573,7 @@ class LktTypesLoader:
             return result
         else:
             with self.ctx.lkt_context(name):
-                error("generic expected, got {result.diagnostic_name}")
+                error(f"generic expected, got {result.diagnostic_name}")
 
     def resolve_type(self, name: L.TypeRef, scope: Scope) -> TypeRepo.Defer:
         """
@@ -2599,33 +2594,16 @@ class LktTypesLoader:
                 generic = self.resolve_generic(name.f_type_name, scope)
                 type_args = list(name.f_params)
                 if generic == self.generics.ast_list:
-                    if len(type_args) != 2:
-                        error(
-                            f"{generic.name} expects two type arguments: the"
-                            " root node and the list element type"
-                        )
-                    root_node_ref, element_type_ref = type_args
-
-                    # Check that the element type is a node and that the
-                    # designated root node is indeed the root node.
-                    return (
-                        self.resolve_node(element_type_ref, scope).list
-                        .with_check(self.root_node_check(root_node_ref, scope))
-                    )
-
-                elif generic == self.generics.analysis_unit:
                     if len(type_args) != 1:
                         error(
                             f"{generic.name} expects one type argument: the"
-                            " root node"
+                            " list element type"
                         )
-                    root_node_ref, = type_args
+                    element_type, = type_args
 
-                    # Check that the designated root node is indeed the root
-                    # node.
-                    return T.deferred_type("AnalysisUnit").with_check(
-                        self.root_node_check(root_node_ref, scope)
-                    )
+                    # Check that the element type is a node and that the
+                    # designated root node is indeed the root node.
+                    return self.resolve_node(element_type, scope).list
 
                 elif generic == self.generics.array:
                     if len(type_args) != 1:
@@ -2653,20 +2631,6 @@ class LktTypesLoader:
                         )
                     element_type, = type_args
                     return self.resolve_type(element_type, scope).iterator
-
-                elif generic == self.generics.lexical_env:
-                    if len(type_args) != 1:
-                        error(
-                            f"{generic.name} expects one type argument: the"
-                            " root node"
-                        )
-                    root_node_ref, = type_args
-
-                    # Check that the designated root node is indeed the root
-                    # node.
-                    return T.deferred_type("LexicalEnv").with_check(
-                        self.root_node_check(root_node_ref, scope)
-                    )
 
                 elif generic == self.generics.node:
                     error(
@@ -2865,24 +2829,17 @@ class LktTypesLoader:
                         f" {self.generics.ast_list.name}"
                     )
 
-                # Lower the root and element nodes
+                # Lower type arguments
                 type_args = [
                     self.resolve_and_lower_node(t, scope)
                     for t in name.f_params
                 ]
                 check_source_language(
-                    len(type_args) == 2,
-                    "{generic.name} expects two type arguments: the root node"
-                    " and the list element type"
+                    len(type_args) == 1,
+                    f"{generic.name} expects type argument: the list element"
+                    " type"
                 )
-                root_node, element_type = type_args
-
-                check_source_language(
-                    root_node.is_root_node,
-                    f"in {generic.name}[N1, N2], N1 is supposed to be the root"
-                    " node"
-                )
-                return element_type.list
+                return type_args[0].list
 
             else:
                 error("invalid node type reference")

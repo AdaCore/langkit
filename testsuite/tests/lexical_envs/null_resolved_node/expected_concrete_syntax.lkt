@@ -20,7 +20,7 @@ class Example: FooNode implements TokenNode {
         add_to_env(
             EnvAssoc(
                 key=s"foo", value=node, dest_env=DesignatedEnv(
-                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                    kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv]
                 ), metadata=null[Metadata]
             ), resolver=FooNode.resolver
         )

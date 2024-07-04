@@ -26,7 +26,7 @@ class FooNode implements Node[FooNode] {
 
 class Block: FooNode {
     @parse_field name: Identifier
-    @parse_field items: ASTList[FooNode, Item]
+    @parse_field items: ASTList[Item]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)
@@ -53,11 +53,11 @@ class Decl: Item {
 class Open: Item {
     @parse_field name: Identifier
 
-    fun resolve(): LexicalEnv[FooNode] = {
+    fun resolve(): LexicalEnv = {
         val n = node.name.resolve();
 
         n.do(
-            (n) => n.children_env(), default_val=null[LexicalEnv[FooNode]]
+            (n) => n.children_env(), default_val=null[LexicalEnv]
         )
     }
 

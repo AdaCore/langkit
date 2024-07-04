@@ -15,7 +15,7 @@ grammar foo_grammar {
     ref <- Ref(name)
 }
 
-dynvar env: LexicalEnv[FooNode]
+dynvar env: LexicalEnv
 
 @abstract
 class FooNode implements Node[FooNode] {
@@ -23,9 +23,9 @@ class FooNode implements Node[FooNode] {
 
 class Block: FooNode {
     @parse_field name: Name
-    @parse_field decls: ASTList[FooNode, Decl]
-    @parse_field usings: ASTList[FooNode, Using]
-    @parse_field refs: ASTList[FooNode, Ref]
+    @parse_field decls: ASTList[Decl]
+    @parse_field usings: ASTList[Using]
+    @parse_field refs: ASTList[Ref]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)
@@ -45,7 +45,7 @@ class Name: FooNode implements TokenNode {
     @with_dynvars(env)
     fun ambiant_entity(): Entity[FooNode] = env.get(node)?[0]
 
-    fun designated_env(): LexicalEnv[FooNode] =
+    fun designated_env(): LexicalEnv =
         node.unit().root.node_env().get(node)?[0].children_env()
 
     @exported

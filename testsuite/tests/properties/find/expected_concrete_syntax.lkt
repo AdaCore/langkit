@@ -12,7 +12,7 @@ class FooNode implements Node[FooNode] {
         values.find((i) => i > threshold)
 
     @exported
-    fun find_entity(l: Entity[ASTList[FooNode, Example]]): Entity[Example] =
+    fun find_entity(l: Entity[ASTList[Example]]): Entity[Example] =
         l.find((n) => n.text() == "example")
 }
 

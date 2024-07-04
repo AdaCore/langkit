@@ -79,7 +79,7 @@ class FooNode implements Node[FooNode] {
             # All nodes that can define a named environment are supposed to
             # live in lists, so use Self.parent.parent to get the node that
             # owns that list.
-            node.parent is ASTList[FooNode, FooNode] and (
+            node.parent is ASTList[FooNode] and (
                 node.parent.parent.is_null or node.parent.parent.can_have_name()
             )
         ) else false
@@ -99,7 +99,7 @@ class FooNode implements Node[FooNode] {
     fun name_parent(): FooNode = if (
         (
             (
-                node.parent.is_null or not node.parent is ASTList[FooNode, FooNode]
+                node.parent.is_null or not node.parent is ASTList[FooNode]
             ) or node.parent.parent.is_null
         ) or not node.parent.parent is DeclarativePart
     ) or node.parent.parent.parent.is_null then null[FooNode] else # All nodes that can define a named environment are supposed to
@@ -126,7 +126,7 @@ class FooNode implements Node[FooNode] {
 
     fun initial_env(): DesignatedEnv = node.decl_parent_scope_name().do(
         (name) => DesignatedEnv(
-            kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv[FooNode]]
+            kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv]
         ), default_val=DesignatedEnv(
             kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
         )
@@ -138,7 +138,7 @@ class FooNode implements Node[FooNode] {
 }
 
 class DeclarativePart: FooNode {
-    @parse_field decls: ASTList[FooNode, FooNode]
+    @parse_field decls: ASTList[FooNode]
 }
 
 class PrivatePart: DeclarativePart {
@@ -167,7 +167,7 @@ class SubpBodyDecls: DeclarativePart {
 
 class DeclareBlock: FooNode {
     @parse_field decls: DeclarativePart
-    @parse_field stmts: ASTList[FooNode, FooNode]
+    @parse_field stmts: ASTList[FooNode]
 }
 
 class IncompleteTypeDecl: FooNode {
@@ -202,18 +202,18 @@ class Name: FooNode {
 
     |" Innermost scope for this name. The lookup starts from the given
     |" environment.
-    fun scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
+    fun scope(from_env: LexicalEnv): LexicalEnv =
         node.resolve(from_env).children_env()
 
     |" Return the scope that contains the declaration that this name defines.
-    fun parent_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] = match node {
+    fun parent_scope(from_env: LexicalEnv): LexicalEnv = match node {
         case _: Identifier => from_env
         case dn: DottedName => dn.prefix.scope(from_env)
     }
 
     |" Return the list of declarations that define this name. The lookup
     |" starts from the given environment.
-    fun resolve(from_env: LexicalEnv[FooNode]): Entity[FooNode] =
+    fun resolve(from_env: LexicalEnv): Entity[FooNode] =
         node.parent_scope(from_env).get_first(node.base_name().to_symbol)
 }
 
@@ -233,7 +233,7 @@ class PackageBody: FooNode {
 
     |" Assuming this PackageBody is not in the top-level list, return the
     |" environment of its PackageDecl that it should reference.
-    fun body_decl_scope(): LexicalEnv[FooNode] = {
+    fun body_decl_scope(): LexicalEnv = {
         val pkg_decl = node.lookup_decl_part();
 
         if pkg_decl.private_part.is_null then pkg_decl.children_env() else pkg_decl.private_part.children_env()
@@ -258,14 +258,14 @@ class PackageBody: FooNode {
         # private part).
         set_initial_env(
             if node.is_toplevel() then DesignatedEnv(
-                kind=DesignatedEnvKind.named_env, env_name=node.suffixed_full_name("__privatepart").to_symbol, direct_env=null[LexicalEnv[FooNode]]
+                kind=DesignatedEnvKind.named_env, env_name=node.suffixed_full_name("__privatepart").to_symbol, direct_env=null[LexicalEnv]
             ) else DesignatedEnv(
                 kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
             )
         )
         add_to_env_kv(
             s"__nextpart", node, dest_env=if node.can_have_name() then DesignatedEnv(
-                kind=DesignatedEnvKind.named_env, env_name=node.suffixed_full_name("__privatepart").to_symbol, direct_env=null[LexicalEnv[FooNode]]
+                kind=DesignatedEnvKind.named_env, env_name=node.suffixed_full_name("__privatepart").to_symbol, direct_env=null[LexicalEnv]
             ) else DesignatedEnv(
                 kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.body_decl_scope()
             )
@@ -307,7 +307,7 @@ class PackageDecl: FooNode {
                 if node.is_toplevel() then node.decl_parent_scope_name() else null[Symbol]
             ).do(
                 (name) => DesignatedEnv(
-                    kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv[FooNode]]
+                    kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv]
                 ), default_val=DesignatedEnv(
                     kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
                 )
@@ -328,7 +328,7 @@ class Ref: FooNode {
 class SubpBody: FooNode {
     @parse_field name: Name
     @parse_field decls: SubpBodyDecls
-    @parse_field stmts: ASTList[FooNode, FooNode]
+    @parse_field stmts: ASTList[FooNode]
 
     fun self_name(): Name = node.name
 

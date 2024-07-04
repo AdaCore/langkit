@@ -13,7 +13,7 @@ class FooNode implements Node[FooNode] {
 
 class Def : FooNode {
     @parse_field name: Name
-    @parse_field stmts: ASTList[FooNode, FooNode]
+    @parse_field stmts: ASTList[FooNode]
 }
 
 class Name : FooNode implements TokenNode {

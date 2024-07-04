@@ -12,8 +12,8 @@ grammar foo_grammar {
         ?(Example("example")).dont_skip(sub_rule)
 
         ?pick("(" list+(Example("example")) ")")
-        null(ASTList[FooNode, Example])
-        or(Example("example") | null(ASTList[FooNode, Example]))
+        null(ASTList[Example])
+        or(Example("example") | null(ASTList[Example]))
 
         HasExample(Example("example"))
         Example("example")
@@ -67,8 +67,8 @@ class ParserTest : FooNode {
     @parse_field @nullable field_dont_skip: Example
 
     # Optional fields that return a list node
-    @parse_field field_list_opt: ASTList[FooNode, Example]
-    @parse_field field_list_null: ASTList[FooNode, Example]
+    @parse_field field_list_opt: ASTList[Example]
+    @parse_field field_list_null: ASTList[Example]
     @parse_field field_list_or: FooNode
 
     # Non optional fields

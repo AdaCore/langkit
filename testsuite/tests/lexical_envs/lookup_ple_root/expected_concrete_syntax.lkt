@@ -24,7 +24,7 @@ class Identifier: FooNode implements TokenNode {
 
 @ple_unit_root
 class Scope: FooNode {
-    @parse_field items: ASTList[FooNode, Identifier]
+    @parse_field items: ASTList[Identifier]
 }
 
 class Var: FooNode {

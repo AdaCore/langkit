@@ -12,5 +12,5 @@ class SynthExample : FooNode {
 }
 
 @synthetic
-class ListSynthExample : ASTList[FooNode, FooNode] {
+class ListSynthExample : ASTList[FooNode] {
 }

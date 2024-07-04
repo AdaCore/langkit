@@ -29,8 +29,8 @@ root_token.lkt:8:51: error: The root node cannot be a token node
 
 == unknown_trait.lkt ==
 unknown_trait.lkt:11:36: error: Nodes cannot implement this trait
-11 | class Example : FooNode implements AnalysisUnit[FooNode] {
-   |                                    ^^^^^^^^^^^^^^^^^^^^^
+11 | class Example : FooNode implements NoSuchTrait[FooNode] {
+   |                                    ^^^^^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done

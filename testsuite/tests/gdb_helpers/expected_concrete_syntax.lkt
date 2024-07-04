@@ -8,7 +8,7 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @exported
-    fun id_unit(u: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = u
+    fun id_unit(u: AnalysisUnit): AnalysisUnit = u
 
     @exported
     fun id_node(n: FooNode): FooNode = n
@@ -28,7 +28,7 @@ class FooNode implements Node[FooNode] {
     }
 
     fun get_rebindings(inverse: Bool): EnvRebindings = {
-        val example_nodes = node.parent.as[ASTList[FooNode, Example]].as_array();
+        val example_nodes = node.parent.as[ASTList[Example]].as_array();
         val n1 = example_nodes?[if inverse then 1 else 2];
         val n2 = example_nodes?[if inverse then 2 else 1];
 
@@ -48,7 +48,7 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun test_envs(): Int = {
-        val null_var = null[LexicalEnv[FooNode]];
+        val null_var = null[LexicalEnv];
         val primary = node.children_env();
         val orphan = primary.env_orphan();
         val group = [primary, null_var].env_group();
@@ -79,7 +79,7 @@ class FooNode implements Node[FooNode] {
     fun test_arrays(): Int = {
         val empty = null[Array[Example]];
         val single = [node.as[Example]];
-        val complete = node.parent.as[ASTList[FooNode, Example]].as_array();
+        val complete = node.parent.as[ASTList[Example]].as_array();
         val arr = empty & single & complete;
 
         arr.length()

@@ -11,49 +11,46 @@ class FooNode implements Node[FooNode] {
 
 class Example: FooNode {
     @exported
-    fun test_contains(): Bool = null[ASTList[FooNode, Example]].contains(node)
+    fun test_contains(): Bool = null[ASTList[Example]].contains(node)
 
     @exported
     fun test_filter(): Array[Entity[Example]] =
-        null[ASTList[FooNode, Example]].filter((n) => n.is_null).map((n) => n.as_bare_entity)
+        null[ASTList[Example]].filter((n) => n.is_null).map((n) => n.as_bare_entity)
 
     @exported
-    fun test_filtermap(): Array[Entity[Example]] = null[ASTList[FooNode, Example]].filtermap(
+    fun test_filtermap(): Array[Entity[Example]] = null[ASTList[Example]].filtermap(
         (n) => n.as_bare_entity, (n) => n.is_null
     )
 
     @exported
     fun test_map(): Array[Entity[Example]] =
-        null[ASTList[FooNode, Example]].map((n) => n.as_bare_entity)
+        null[ASTList[Example]].map((n) => n.as_bare_entity)
 
     @exported
     fun test_mapcat(): Array[Entity[Example]] =
-        null[ASTList[FooNode, Example]].mapcat((n) => [n.as_bare_entity])
+        null[ASTList[Example]].mapcat((n) => [n.as_bare_entity])
 
     @exported
     fun test_takewhile(): Array[Entity[Example]] =
-        null[ASTList[FooNode, Example]].take_while((n) => n.is_null).map((n) => n.as_bare_entity)
+        null[ASTList[Example]].take_while((n) => n.is_null).map((n) => n.as_bare_entity)
 
     @exported
     fun test_as_array(): Array[Entity[Example]] =
-        null[ASTList[FooNode, Example]].as_array().map((n) => n.as_bare_entity)
+        null[ASTList[Example]].as_array().map((n) => n.as_bare_entity)
 
     @exported
-    fun test_all(): Bool =
-        null[ASTList[FooNode, Example]].all((n) => n.is_null)
+    fun test_all(): Bool = null[ASTList[Example]].all((n) => n.is_null)
 
     @exported
-    fun test_any(): Bool =
-        null[ASTList[FooNode, Example]].any((n) => n.is_null)
+    fun test_any(): Bool = null[ASTList[Example]].any((n) => n.is_null)
 
     @exported
-    fun test_at(): Entity[Example] =
-        null[ASTList[FooNode, Example]]?[0].as_bare_entity
+    fun test_at(): Entity[Example] = null[ASTList[Example]]?[0].as_bare_entity
 
     @exported
     fun test_at_or_raise(): Entity[Example] =
-        null[ASTList[FooNode, Example]][0].as_bare_entity
+        null[ASTList[Example]][0].as_bare_entity
 
     @exported
-    fun test_length(): Int = null[ASTList[FooNode, Example]].length()
+    fun test_length(): Int = null[ASTList[Example]].length()
 }

@@ -52,13 +52,13 @@ class Prefix: Name {
 
 class Scope: FooNode {
     @parse_field name: Name
-    @parse_field defs: ASTList[FooNode, FooNode]
+    @parse_field defs: ASTList[FooNode]
 
     env_spec {
         set_initial_env(
             node.name.scope_fqn().do(
                 (s) => DesignatedEnv(
-                    kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv[FooNode]]
+                    kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv]
                 ), default_val=DesignatedEnv(
                     kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
                 )

@@ -8,7 +8,7 @@ grammar foo_grammar {
     @main_rule main_rule <- AExampleList*(BExample("example"))
 }
 
-class AExampleList : ASTList[CFooNode, BExample] {
+class AExampleList : ASTList[BExample] {
 }
 
 @with_abstract_list class BExample : CFooNode implements TokenNode {
@@ -16,4 +16,3 @@ class AExampleList : ASTList[CFooNode, BExample] {
 
 @abstract class CFooNode implements Node[CFooNode] {
 }
-

@@ -8,7 +8,7 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @exported
-    fun prop(): Array[Entity[FooNode]] = null[LexicalEnv[FooNode]].get(s"foo")
+    fun prop(): Array[Entity[FooNode]] = null[LexicalEnv].get(s"foo")
 }
 
 class Example: FooNode implements TokenNode {

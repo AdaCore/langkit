@@ -15,14 +15,13 @@ class FooNode implements Node[FooNode] {
     fun env_struct(): EnvStruct =
         EnvStruct(env=node.children_env().env_orphan())
 
-    fun env_array(): Array[LexicalEnv[FooNode]] =
-        [node.children_env().env_orphan()]
+    fun env_array(): Array[LexicalEnv] = [node.children_env().env_orphan()]
 }
 
 class Decl: FooNode {
     @parse_field has_plus: HasPlus
     @parse_field name: Name
-    @parse_field items: ASTList[FooNode, Ref]
+    @parse_field items: ASTList[Ref]
 
     @exported
     fun test_env(other: Entity[FooNode]): Bool =
@@ -54,5 +53,5 @@ class Ref: FooNode {
 }
 
 struct EnvStruct {
-    env: LexicalEnv[FooNode]
+    env: LexicalEnv
 }

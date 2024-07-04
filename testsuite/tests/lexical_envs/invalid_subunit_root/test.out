@@ -1,7 +1,7 @@
 == bad_main_rule_1.lkt ==
 bad_main_rule_1.lkt:14:18: error: Example.list cannot appear anywhere in trees except as a root node
-14 |     @parse_field example: ASTList[FooNode, Example]
-   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 |     @parse_field example: ASTList[Example]
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == bad_main_rule_2.lkt ==
@@ -19,7 +19,7 @@ multiple.lkt:15:16: error: Only one PLE unit root is allowed: Example1
 
 == multiple_lists.lkt ==
 multiple_lists.lkt:14:1: error: Lists of PLE unit roots cannot be subclassed
-14 | class ListOfExample: ASTList[FooNode, Example] {
+14 | class ListOfExample: ASTList[Example] {
    | ^
 
 

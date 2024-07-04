@@ -25,12 +25,12 @@ class A: FooNode implements TokenNode {
 class B: FooNode implements TokenNode {
 }
 
-class SpecialList: ASTList[FooNode, FooNode] {
+class SpecialList: ASTList[FooNode] {
 }
 
 class Holder: FooNode {
     @parse_field a_or_b: FooNode
-    @parse_field a_or_b_list: ASTList[FooNode, FooNode]
+    @parse_field a_or_b_list: ASTList[FooNode]
     @parse_field a_list_or_b_list: FooNode
     @parse_field special_a_list: SpecialList
     @parse_field special_a_list_or_special_b_list: SpecialList

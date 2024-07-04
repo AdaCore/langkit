@@ -24,8 +24,8 @@ class FooNode implements Node[FooNode] {
 
 class Def: FooNode {
     @parse_field name: Name
-    @parse_field imports: ASTList[FooNode, DerivedRef]
-    @parse_field vars: ASTList[FooNode, Var]
+    @parse_field imports: ASTList[DerivedRef]
+    @parse_field vars: ASTList[Var]
     @parse_field expr: Expr
 
     env_spec {
@@ -59,16 +59,16 @@ class Ref: Atom {
     fun dummy(): Array[Entity[FooNode]] =
         node.referenced_env().get(node.name.symbol)
 
-    fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
+    fun referenced_env(): LexicalEnv = null[LexicalEnv]
 }
 
 @synthetic
 class MiddleRef: Ref {
-    fun referenced_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
+    fun referenced_env(): LexicalEnv = null[LexicalEnv]
 }
 
 class DerivedRef: MiddleRef {
-    fun referenced_env(): LexicalEnv[FooNode] =
+    fun referenced_env(): LexicalEnv =
         node.unit().root.node_env().get_first(node.name.symbol).children_env()
 }
 

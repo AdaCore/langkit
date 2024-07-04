@@ -19,7 +19,7 @@ class BaseDecl: FooNode {
     fun lookup(n: Symbol): Entity[FooNode] =
         node.env_lookup(node.node_env(), n)
 
-    fun env_lookup(env: LexicalEnv[FooNode], n: Symbol): Entity[FooNode] =
+    fun env_lookup(env: LexicalEnv, n: Symbol): Entity[FooNode] =
         env.get_first(n, lookup=LookupKind.flat)
 }
 
@@ -43,7 +43,7 @@ class Name: FooNode implements TokenNode {
 }
 
 class RootNode: FooNode {
-    @parse_field decls: ASTList[FooNode, BaseDecl]
+    @parse_field decls: ASTList[BaseDecl]
 
     env_spec {
         add_env()

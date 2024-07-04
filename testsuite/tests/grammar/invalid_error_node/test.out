@@ -5,9 +5,9 @@ test_abstract.lkt:3:52: error: Error nodes cannot be abstract
 
 
 == test_error_and_list.lkt ==
-test_error_and_list.lkt:3:56: error: Error nodes cannot be lists
-3 | class ErrorDecl : ASTList[FooNode, Example] implements ErrorNode {
-  |                                                        ^^^^^^^^^
+test_error_and_list.lkt:3:47: error: Error nodes cannot be lists
+3 | class ErrorDecl : ASTList[Example] implements ErrorNode {
+  |                                               ^^^^^^^^^
 
 
 == test_error_and_token.lkt ==

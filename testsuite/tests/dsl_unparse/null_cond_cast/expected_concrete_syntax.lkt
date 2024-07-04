@@ -16,13 +16,12 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun p2(): Array[Entity[Example]] =
-        node.static_ident(node).as![ASTList[FooNode, Example]].filtermap(
+        node.static_ident(node).as![ASTList[Example]].filtermap(
             (e) => e.as_bare_entity, (e) => e.parent.is_null
         )
 
     @exported
-    fun p3(unit: AnalysisUnit[FooNode]): FooNode =
-        unit?.root.as![Example].ident()
+    fun p3(unit: AnalysisUnit): FooNode = unit?.root.as![Example].ident()
 }
 
 class Example: FooNode implements TokenNode {

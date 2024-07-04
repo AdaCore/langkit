@@ -11,7 +11,7 @@ class FooNode implements Node[FooNode] {
 }
 
 class Decl: FooNode implements TokenNode {
-    fun refd_env(): LexicalEnv[FooNode] = null[LexicalEnv[FooNode]]
+    fun refd_env(): LexicalEnv = null[LexicalEnv]
 
     @exported
     fun lookup(name: Symbol): Array[Entity[FooNode]] =
@@ -23,7 +23,7 @@ class Decl: FooNode implements TokenNode {
 }
 
 class Scope: FooNode {
-    @parse_field decls: ASTList[FooNode, Decl]
+    @parse_field decls: ASTList[Decl]
 
     env_spec {
         add_env()

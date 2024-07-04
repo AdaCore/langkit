@@ -13,7 +13,7 @@ class Name: FooNode implements TokenNode {
 }
 
 class Names: FooNode {
-    @parse_field names: ASTList[FooNode, Name]
+    @parse_field names: ASTList[Name]
 
     @exported
     fun count(): Int = self.names.length()

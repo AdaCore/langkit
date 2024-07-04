@@ -13,7 +13,7 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @exported
-    fun is_referenced(unit: AnalysisUnit[FooNode]): Bool =
+    fun is_referenced(unit: AnalysisUnit): Bool =
         unit.is_referenced_from(node.unit())
 }
 
@@ -36,11 +36,10 @@ class Name: FooNode {
     fun suffix_symbol(): Symbol
 
     @external()
-    fun referenced_unit_or_error(or_error: Bool): AnalysisUnit[FooNode]
+    fun referenced_unit_or_error(or_error: Bool): AnalysisUnit
 
     @exported
-    fun referenced_unit(): AnalysisUnit[FooNode] =
-        node.referenced_unit_or_error(false)
+    fun referenced_unit(): AnalysisUnit = node.referenced_unit_or_error(false)
 
     fun scope_fqn(): String = match node {
         case p: Prefix => p.prefix.fqn()
@@ -71,14 +70,14 @@ class Prefix: Name {
 
 class Scope: FooNode {
     @parse_field name: Name
-    @parse_field deps: ASTList[FooNode, Dep]
-    @parse_field defs: ASTList[FooNode, FooNode]
+    @parse_field deps: ASTList[Dep]
+    @parse_field defs: ASTList[FooNode]
 
     env_spec {
         set_initial_env(
             node.name.scope_fqn().do(
                 (s) => DesignatedEnv(
-                    kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv[FooNode]]
+                    kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv]
                 ), default_val=DesignatedEnv(
                     kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
                 )

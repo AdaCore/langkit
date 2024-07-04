@@ -68,7 +68,7 @@ class Example: BaseExample {
     fun id_sym(id: Symbol): Symbol = id
 
     @exported
-    fun id_unit(id: AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = id
+    fun id_unit(id: AnalysisUnit): AnalysisUnit = id
 
     @exported
     fun id_root_node(id: FooNode): FooNode = id
@@ -89,8 +89,7 @@ class Example: BaseExample {
     fun id_bigint_array(id: Array[BigInt]): Array[BigInt] = id
 
     @exported
-    fun id_unit_array(id: Array[AnalysisUnit[FooNode]]): Array[AnalysisUnit[FooNode]] =
-        id
+    fun id_unit_array(id: Array[AnalysisUnit]): Array[AnalysisUnit] = id
 
     @exported
     fun create_bigint_iterator(): Iterator[BigInt] =
@@ -121,7 +120,7 @@ class Example: BaseExample {
 
 class Def: FooNode {
     @parse_field name: Name
-    @parse_field args: ASTList[FooNode, Name]
+    @parse_field args: ASTList[Name]
     @parse_field expr: Expr
 }
 
@@ -136,7 +135,7 @@ class Addition: Expr {
 
 class Call: Expr {
     @parse_field name: Name
-    @parse_field args: ASTList[FooNode, Expr]
+    @parse_field args: ASTList[Expr]
 }
 
 class Number: Expr implements TokenNode {

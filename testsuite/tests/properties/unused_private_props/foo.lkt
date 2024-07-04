@@ -27,7 +27,7 @@ class FooNode implements Node[FooNode] {
     # "names" and all its overriding properties are used.
     @abstract fun names(): Array[Name]
 
-    @exported fun referenced_units(): Array[AnalysisUnit[FooNode]] =
+    @exported fun referenced_units(): Array[AnalysisUnit] =
         node.names.map((n) => n.designated_unit)
 }
 
@@ -43,7 +43,7 @@ class Literal: Expression implements TokenNode {
 
 class Name: Expression implements TokenNode {
     # This one is private and called transitively from a public property
-    @external() fun designated_unit(): AnalysisUnit[FooNode]
+    @external() fun designated_unit(): AnalysisUnit
 
     fun result(): Int = node.designated_unit.root.as[Expression].result
 

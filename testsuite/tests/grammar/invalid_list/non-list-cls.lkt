@@ -7,7 +7,7 @@ grammar foo_grammar {
 }
 
 class ListNode : FooNode {
-    @parse_field items: ASTList[FooNode, FooNode]
+    @parse_field items: ASTList[FooNode]
 }
 
 class Num : FooNode implements TokenNode {

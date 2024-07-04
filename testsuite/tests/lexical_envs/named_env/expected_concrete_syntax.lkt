@@ -18,7 +18,7 @@ class FooNode implements Node[FooNode] {
 class Example: FooNode {
     @parse_field name: Id
     @parse_field @nullable dest_scope: Id
-    @parse_field content: ASTList[FooNode, Id]
+    @parse_field content: ASTList[Id]
 
     |" Return whether "content" contains the ``kw`` keyword.
     fun has_kw(kw: Symbol): Bool =
@@ -35,19 +35,19 @@ class Example: FooNode {
 
                 if node.has_kw(s"or_current") then name.do(
                     (non_null_name) => DesignatedEnv(
-                        kind=DesignatedEnvKind.named_env, env_name=non_null_name, direct_env=null[LexicalEnv[FooNode]]
+                        kind=DesignatedEnvKind.named_env, env_name=non_null_name, direct_env=null[LexicalEnv]
                     ), default_val=DesignatedEnv(
-                        kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv[FooNode]]
+                        kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv]
                     )
                 ) else DesignatedEnv(
-                    kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv[FooNode]]
+                    kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv]
                 )
             }
         )
     }
 }
 
-class ToplevelList: ASTList[FooNode, Example] {
+class ToplevelList: ASTList[Example] {
     env_spec {
         add_env()
     }

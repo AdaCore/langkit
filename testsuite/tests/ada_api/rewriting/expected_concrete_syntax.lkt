@@ -23,25 +23,25 @@ class FooNode implements Node[FooNode] {
 @abstract
 class Decl: FooNode {
     @abstract @parse_field @nullable name: Name
-    @abstract @parse_field @nullable args: ASTList[FooNode, Name]
+    @abstract @parse_field @nullable args: ASTList[Name]
     @abstract @parse_field @nullable expr: Expr
 }
 
 class Def: Decl {
     @parse_field name: Name
-    @parse_field args: ASTList[FooNode, Name]
+    @parse_field args: ASTList[Name]
     @parse_field expr: Expr
 }
 
 class ErrorDecl: Decl implements ErrorNode {
     @parse_field @null_field name: Name
-    @parse_field @null_field args: ASTList[FooNode, Name]
+    @parse_field @null_field args: ASTList[Name]
     @parse_field @null_field expr: Expr
 }
 
 class Var: Decl {
     @parse_field name: Name
-    @parse_field @null_field args: ASTList[FooNode, Name]
+    @parse_field @null_field args: ASTList[Name]
     @parse_field expr: Expr
 }
 

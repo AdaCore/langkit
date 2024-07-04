@@ -33,7 +33,7 @@ class Id: FooNode implements TokenNode {
     fun referenced_scope(): Entity[Scope] =
         node.referenced_scope_or_error(false).as_bare_entity
 
-    fun referenced_env(): LexicalEnv[FooNode] =
+    fun referenced_env(): LexicalEnv =
         node.resolve().as[Scope]?.children_env()
 
     @exported
@@ -49,9 +49,9 @@ class Ref: Id implements TokenNode {
 @ple_unit_root
 class Scope: FooNode {
     @parse_field name: Id
-    @parse_field deps: ASTList[FooNode, Dep]
-    @parse_field defs: ASTList[FooNode, Def]
-    @parse_field refs: ASTList[FooNode, Ref]
+    @parse_field deps: ASTList[Dep]
+    @parse_field defs: ASTList[Def]
+    @parse_field refs: ASTList[Ref]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)

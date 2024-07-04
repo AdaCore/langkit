@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 @abstract
 class FooNode implements Node[FooNode] {
-    fun resolver(): LexicalEnv[FooNode] = node.children_env()
+    fun resolver(): LexicalEnv = node.children_env()
 
     env_spec {
         reference(node.do((v1) => [v1]), FooNode.resolver)

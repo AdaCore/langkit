@@ -21,10 +21,10 @@ class Id: FooNode {
     fun designated_symbol(): Symbol
 
     @abstract
-    fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode]
+    fun designated_scope(base_env: LexicalEnv): LexicalEnv
 
     @abstract
-    fun resolve(base_env: LexicalEnv[FooNode]): FooNode
+    fun resolve(base_env: LexicalEnv): FooNode
 }
 
 class ScopedId: Id {
@@ -33,26 +33,25 @@ class ScopedId: Id {
 
     fun designated_symbol(): Symbol = node.name.symbol
 
-    fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
+    fun designated_scope(base_env: LexicalEnv): LexicalEnv =
         node.scope.resolve(base_env).children_env()
 
-    fun resolve(base_env: LexicalEnv[FooNode]): FooNode =
+    fun resolve(base_env: LexicalEnv): FooNode =
         node.designated_scope(base_env).get_first(node.name).node
 }
 
 class SimpleId: Id implements TokenNode {
     fun designated_symbol(): Symbol = node.symbol
 
-    fun designated_scope(base_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] =
-        base_env
+    fun designated_scope(base_env: LexicalEnv): LexicalEnv = base_env
 
-    fun resolve(base_env: LexicalEnv[FooNode]): FooNode =
+    fun resolve(base_env: LexicalEnv): FooNode =
         base_env.get_first(node.symbol).node
 }
 
 class Scope: FooNode {
     @parse_field name: Id
-    @parse_field content: ASTList[FooNode, Scope]
+    @parse_field content: ASTList[Scope]
 
     env_spec {
         set_initial_env(

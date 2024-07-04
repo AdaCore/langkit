@@ -29,7 +29,7 @@ class DefNode: FooNode {
 class Block: DefNode {
     @parse_field params: Params
     @parse_field name_field: Name
-    @parse_field vars: ASTList[FooNode, BlockVar]
+    @parse_field vars: ASTList[BlockVar]
 
     fun name(): Symbol = node.name_field.symbol
 
@@ -64,7 +64,7 @@ class Param: DefNode {
     fun name(): Symbol = node.name_field.symbol
 }
 
-class Params: ASTList[FooNode, Param] {
+class Params: ASTList[Param] {
     env_spec {
         add_env()
     }

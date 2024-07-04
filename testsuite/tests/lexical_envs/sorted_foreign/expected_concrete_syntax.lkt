@@ -29,7 +29,7 @@ class Name: FooNode {
     fun referenced_name(): Symbol
 
     @abstract
-    fun referenced_scope(): LexicalEnv[FooNode]
+    fun referenced_scope(): LexicalEnv
 }
 
 class DottedName: Name {
@@ -38,10 +38,9 @@ class DottedName: Name {
 
     fun referenced_name(): Symbol = node.suffix.referenced_name()
 
-    fun referenced_parent_scope(): LexicalEnv[FooNode] =
-        node.prefix.referenced_scope()
+    fun referenced_parent_scope(): LexicalEnv = node.prefix.referenced_scope()
 
-    fun referenced_scope(): LexicalEnv[FooNode] =
+    fun referenced_scope(): LexicalEnv =
         node.suffix.resolve_scope(node.referenced_parent_scope())
 }
 
@@ -49,7 +48,7 @@ class Identifier: Name implements TokenNode {
     fun referenced_name(): Symbol = node.symbol
 
     @traced
-    fun resolve_scope(from_env: LexicalEnv[FooNode]): LexicalEnv[FooNode] = {
+    fun resolve_scope(from_env: LexicalEnv): LexicalEnv = {
         val env = from_env.do(
             (e) => e, default_val=node.referenced_parent_scope()
         );
@@ -58,12 +57,11 @@ class Identifier: Name implements TokenNode {
     }
 
     @traced
-    fun referenced_parent_scope(): LexicalEnv[FooNode] =
+    fun referenced_parent_scope(): LexicalEnv =
         node.unit().root.children_env()
 
     @traced
-    fun referenced_scope(): LexicalEnv[FooNode] =
-        node.resolve_scope(null[LexicalEnv[FooNode]])
+    fun referenced_scope(): LexicalEnv = node.resolve_scope(null[LexicalEnv])
 }
 
 class Ref: FooNode {
@@ -75,13 +73,13 @@ class Ref: FooNode {
 
 class Scope: FooNode {
     @parse_field name: Name
-    @parse_field content: ASTList[FooNode, FooNode]
+    @parse_field content: ASTList[FooNode]
 
     env_spec {
         set_initial_env(
             node.name.scope_fqn().do(
                 (s) => DesignatedEnv(
-                    kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv[FooNode]]
+                    kind=DesignatedEnvKind.named_env, env_name=s.to_symbol, direct_env=null[LexicalEnv]
                 ), default_val=DesignatedEnv(
                     kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
                 )

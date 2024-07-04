@@ -1,6 +1,6 @@
 import common
 
-dynvar env: LexicalEnv[FooNode]
+dynvar env: LexicalEnv
 
 class FooNode implements Node[FooNode] {
     @with_dynvars(env)

@@ -10,8 +10,7 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    fun resolve(): LexicalEnv[FooNode] =
-        raise[LexicalEnv[FooNode]] PropertyError()
+    fun resolve(): LexicalEnv = raise[LexicalEnv] PropertyError()
 
     env_spec {
         add_env()

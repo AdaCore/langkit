@@ -10,5 +10,5 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
-    unused_fld: LexicalEnv[FooNode]
+    unused_fld: LexicalEnv
 }

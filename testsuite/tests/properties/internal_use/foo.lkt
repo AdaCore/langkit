@@ -21,7 +21,7 @@ class Name: FooNode implements TokenNode {
 
 class Def: Stmt {
     @parse_field id: Name
-    @parse_field body: ASTList[FooNode, Stmt]
+    @parse_field body: ASTList[Stmt]
 
     fun faulty_prop(): Array[EnvAssoc] = node._env_mappings_0
 
@@ -32,7 +32,7 @@ class Def: Stmt {
 }
 
 class Block: Stmt {
-    @parse_field items: ASTList[FooNode, Stmt]
+    @parse_field items: ASTList[Stmt]
 
     env_spec {
         add_env()

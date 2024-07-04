@@ -11,5 +11,5 @@ grammar foo_grammar {
 @abstract @with_abstract_list class Element implements Node[Element] {
 }
 
-class Sequence : ASTList[Element, Element] {
+class Sequence : ASTList[Element] {
 }

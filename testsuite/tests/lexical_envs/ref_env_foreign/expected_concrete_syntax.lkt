@@ -21,19 +21,19 @@ class FooNode implements Node[FooNode] {
 @abstract
 class Id: FooNode {
     @abstract
-    fun resolve(base_env: LexicalEnv[FooNode]): FooNode
+    fun resolve(base_env: LexicalEnv): FooNode
 }
 
 class ScopedId: Id {
     @parse_field scope: Id
     @parse_field name: SimpleId
 
-    fun resolve(base_env: LexicalEnv[FooNode]): FooNode =
+    fun resolve(base_env: LexicalEnv): FooNode =
         node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node
 }
 
 class SimpleId: Id implements TokenNode {
-    fun resolve(base_env: LexicalEnv[FooNode]): FooNode =
+    fun resolve(base_env: LexicalEnv): FooNode =
         base_env.get_first(node.symbol).node
 }
 
@@ -49,7 +49,7 @@ class RefClause: FooNode {
 
 class Scope: FooNode {
     @parse_field name: SimpleId
-    @parse_field content: ASTList[FooNode, FooNode]
+    @parse_field content: ASTList[FooNode]
 
     env_spec {
         add_to_env_kv(node.name.symbol, node)

@@ -74,7 +74,7 @@ class Example: FooNode {
     fun singleton(): SomeStruct = SomeStruct(examples=[self])
 }
 
-class Sequence: ASTList[FooNode, FooNode] {
+class Sequence: ASTList[FooNode] {
     @exported
     fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
 
