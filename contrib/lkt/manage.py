@@ -38,6 +38,7 @@ class Manage(ManageScript):
                 'Liblktlang.Default_Provider', 'Create'
             ),
             standalone=True,
+            generate_unparser=True,
         )
 
     def generate_prelude(self, emitter, context):
