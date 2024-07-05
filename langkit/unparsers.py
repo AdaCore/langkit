@@ -627,6 +627,14 @@ class NodeUnparser(Unparser):
             # this field.
             field_unparser.always_absent = False
             for subparser in parser.parsers:
+                # It is never legal for Pick parsers to be direct operands of
+                # Or parsers, as it means that pre-post tokens for this field
+                # will depend on what Or alternative was taken (not decidable
+                # for unparsers).
+                if isinstance(subparser, _Extract):
+                    with subparser.diagnostic_context:
+                        error("Pick parser cannot appear as an Or subparser")
+
                 # Named parsing rules always create nodes, so we don't need to
                 # check Defer parsers. Skip parsers also create nodes, but most
                 # importantly they trigger a parsing error, so unparsers can
