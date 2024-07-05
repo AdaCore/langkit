@@ -1067,8 +1067,8 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Suffix_Comment | Line_Comment =>
             Items.Append
               (Pool.Create_Token
-                 (Kind (Fragment.Comment_Token),
-                  To_Unbounded_Text (Analysis.Text (Fragment.Comment_Token))));
+                 (Fragment.Comment_Token.Kind,
+                  To_Unbounded_Text (Fragment.Comment_Token.Text)));
 
          when Whitespaces =>
             Items.Append
