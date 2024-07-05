@@ -378,7 +378,7 @@ class NodeUnparser(Unparser):
             if isinstance(parser, Null):
                 return NullNodeUnparser(node)
 
-            error(f"Unsupported parser for unparsers generation: {parser}")
+            error("Unsupported parser for unparsers generation")
 
     @staticmethod
     def _from_transform_parser(
@@ -488,8 +488,8 @@ class NodeUnparser(Unparser):
 
         check_source_language(
             accepted,
-            'Unsupported token node parser for unparsers generation, only'
-            ' direct token parsers are accepted: {}'.format(parser)
+            "Unsupported token node parser for unparsers generation, only"
+            " direct token parsers are accepted"
         )
         return TokenNodeUnparser(node)
 
