@@ -661,7 +661,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Token/trivia cursor, and token to stop trivia fragments computation
 
       First_Trivia : Token_Index := No_Token_Index;
-      --  When we are processing a sequence of trivia, this contains the index
+      --  When we are processing a sequence of trivias, this contains the index
       --  of the first trivia of that sequence. Set to ``No_Token_Index`` the
       --  rest of the time (i.e. when ``T`` is not a trivia).
 
