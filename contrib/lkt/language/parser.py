@@ -47,7 +47,7 @@ from langkit.expressions import (
     langkit_property, new_env_assoc
 )
 from langkit.parsers import (
-    Cut, Grammar, List, Null, Opt, Or as GOr, Pick, Predicate
+    Cut, Grammar, List, Null, Opt, Or as GOr, Predicate
 )
 
 
@@ -2708,6 +2708,18 @@ class SimpleTypeRef(TypeRef):
         )
 
 
+class DefaultListTypeRef(TypeRef):
+    """
+    "list" type reference in parsers.
+    """
+
+    token_node = True
+
+    @langkit_property()
+    def designated_type():
+        return PropertyError(T.TypeDecl.entity)
+
+
 class GenericTypeRef(TypeRef):
     """
     Reference to a generic type.
@@ -4095,8 +4107,7 @@ lkt_grammar.add_rules(
     grammar_list_expr=GrammarList(
         # Match either "list" (type inference will determine the list type) or
         # a specific list type.
-        GOr(Pick(Lex.Identifier(match_text="list"), Null(TypeRef)),
-            G.type_ref),
+        GOr(DefaultListTypeRef(Lex.Identifier(match_text="list")), G.type_ref),
 
         GOr(ListKind.alt_one("+"), ListKind.alt_zero("*")),
         "(",
