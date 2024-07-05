@@ -2223,6 +2223,16 @@ class LktTypesLoader:
     Lkt.
     """
 
+    # Map Lkt type declarations to the corresponding CompiledType instances, or
+    # to None when the type declaration is currently being lowered. Keeping a
+    # None entry in this case helps detecting illegal circular type
+    # dependencies.
+    compiled_types: Dict[L.TypeDecl, Optional[CompiledType]]
+
+    ###################
+    # Builtin helpers #
+    ###################
+
     @dataclass
     class Generics:
         """
@@ -2238,11 +2248,9 @@ class LktTypesLoader:
     class Functions:
         dynamic_lexical_env: Scope.BuiltinFunction
 
-    # Map Lkt type declarations to the corresponding CompiledType instances, or
-    # to None when the type declaration is currently being lowered. Keeping a
-    # None entry in this case helps detecting illegal circular type
-    # dependencies.
-    compiled_types: Dict[L.TypeDecl, Optional[CompiledType]]
+    #############################
+    # Property lowering helpers #
+    #############################
 
     @dataclass
     class PropertyToLower:
@@ -2273,6 +2281,85 @@ class LktTypesLoader:
         """
         Scope to use during lowering. The property arguments must be available
         in it.
+        """
+
+    @dataclass
+    class BuiltinCallInfo:
+        """
+        Information about the call to a builtin operation that takes a lambda
+        as the first argument, plus optional keyword arguments.
+        """
+        kwargs: dict[str, L.Expr]
+        """
+        Keyword arguments passed after the lambda expression.
+        """
+
+        scope: Scope
+        """
+        New scope to lower lambda function arguments and inner expression.
+        """
+
+        largs: list[L.LambdaArgDecl | None]
+        """
+        List of arguments for this lambda expression, padded with None up to
+        "max_lambda_args" list items.
+        """
+
+        expr: L.Expr
+        """
+        Lambda expression "body".
+        """
+
+    @dataclass
+    class CollectionLoweringResult:
+        """
+        Container for the result of the "lower_collection_iter" function.
+        """
+
+        inner_expr: AbstractExpression
+        """
+        Expression to evaluate each element of the array the collection
+        expression computes.
+        """
+
+        lambda_arg_infos: list[E.LambdaArgInfo]
+        """
+        Information about all lambda arguments involved in this expression.
+        """
+
+        element_var: AbstractVariable
+        """
+        Iteration variable to hold each collection element.
+        """
+
+        index_var: AbstractVariable | None
+        """
+        Iteration variable to hold each collection element index, if needed.
+        """
+
+    @dataclass
+    class DeclAction:
+        """
+        Helper for block lowering. Represents a declaration in a block
+        expression.
+        """
+
+        var: AbstractVariable
+        """
+        Abstract variable corresponding to an entity declared in a block.
+        """
+
+        init_expr: AbstractExpression
+        """
+        Initialization expression for this variable.
+        """
+
+        location: Location
+        """
+        Location of this variable declaration. This may not be ``var``'s
+        location for "declarations" that represent dynamic variable bindings:
+        the dynamic variable is declared at the module level, whereas this
+        "declaration" is located inside a property ("VarBind" Lkt node).
         """
 
     def __init__(self, ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]):
@@ -3319,33 +3406,6 @@ class LktTypesLoader:
             append_lambda_arg_info(infos, arg, result)
             return result
 
-        @dataclass
-        class BuiltinCallInfo:
-            """
-            Information about the call to a builtin operation that takes a
-            lambda as the first argument, plus optional keyword arguments.
-            """
-            kwargs: dict[str, L.Expr]
-            """
-            Keyword arguments passed after the lambda expression.
-            """
-
-            scope: Scope
-            """
-            New scope to lower lambda function arguments and inner expression.
-            """
-
-            largs: list[L.LambdaArgDecl | None]
-            """
-            List of arguments for this lambda expression, padded with None up
-            to "max_lambda_args" list items.
-            """
-
-            expr: L.Expr
-            """
-            Lambda expression "body".
-            """
-
         def extract_lambda(
             expr: L.LambdaExpr,
             min_lambda_args: int,
@@ -3401,7 +3461,7 @@ class LktTypesLoader:
             arg_for_lambda: str,
             min_lambda_args: int,
             max_lambda_args: int | None = None,
-        ) -> BuiltinCallInfo:
+        ) -> LktTypesLoader.BuiltinCallInfo:
             """
             Extract arguments from a call expression, expecting the first
             positional argument to be a lambda expression.
@@ -3430,37 +3490,11 @@ class LktTypesLoader:
                 lambda_expr, min_lambda_args, max_lambda_args
             )
 
-            return BuiltinCallInfo(args, scope, lambda_args, lambda_body)
+            return LktTypesLoader.BuiltinCallInfo(
+                args, scope, lambda_args, lambda_body
+            )
 
-        @dataclass
-        class CollectionLoweringResult:
-            """
-            Container for the result of the "lower_collection_iter" function.
-            """
-
-            inner_expr: AbstractExpression
-            """
-            Expression to evaluate each element of the array the collection
-            expression computes.
-            """
-
-            lambda_arg_infos: list[E.LambdaArgInfo]
-            """
-            Information about all lambda arguments involved in this expression.
-            """
-
-            element_var: AbstractVariable
-            """
-            Iteration variable to hold each collection element.
-            """
-
-            index_var: AbstractVariable | None
-            """
-            Iteration variable to hold each collection element index, if
-            needed.
-            """
-
-        def lower_collection_iter() -> CollectionLoweringResult:
+        def lower_collection_iter() -> LktTypesLoader.CollectionLoweringResult:
             """
             Helper to lower a method call that implements a collection
             iteration.
@@ -3506,7 +3540,7 @@ class LktTypesLoader:
             inner_expr = self.lower_expr(
                 lambda_info.expr, lambda_info.scope, local_vars
             )
-            return CollectionLoweringResult(
+            return LktTypesLoader.CollectionLoweringResult(
                 inner_expr, lambda_arg_infos, element_var, index_var
             )
 
@@ -3969,13 +4003,7 @@ class LktTypesLoader:
                     f"scope for block at {loc.gnu_style_repr()}"
                 )
 
-                @dataclass
-                class DeclAction:
-                    var: AbstractVariable
-                    init_expr: AbstractExpression
-                    location: Location
-
-                actions: list[DeclAction] = []
+                actions: list[LktTypesLoader.DeclAction] = []
 
                 for v in expr.f_val_defs:
                     var: AbstractVariable
@@ -4036,7 +4064,9 @@ class LktTypesLoader:
                     # remaining expressions.
                     sub_env.add(scope_var)
                     actions.append(
-                        DeclAction(var, init_expr, Location.from_lkt_node(v))
+                        LktTypesLoader.DeclAction(
+                            var, init_expr, Location.from_lkt_node(v)
+                        )
                     )
 
                 # Lower the block main expression and wrap it in declarative
