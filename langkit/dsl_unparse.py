@@ -593,7 +593,7 @@ def emit_rule(rule, top_level=False):
     elif isinstance(rule, StopCut):
         return "stop_cut({})".format(emit_rule(rule.parser))
     elif isinstance(rule, Defer):
-        return str(rule)
+        return rule.name
     elif isinstance(rule, Predicate):
         return "{} |> when({})".format(
             emit_rule(rule.parser), rule.property_name

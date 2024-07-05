@@ -567,6 +567,12 @@ class Parser:
         generation.
         """
 
+    def __repr__(self) -> str:
+        return "<{} at {}>".format(
+            type(self).__name__,
+            self.location.gnu_style_repr() if self.location else "???"
+        )
+
     def traverse_create_vars(self, start_pos: VarDef) -> None:
         """
         This method will traverse the parser tree and create variables for
@@ -1038,9 +1044,6 @@ class _Token(Parser):
         else:
             return str(self.val)
 
-    def __repr__(self) -> str:
-        return "Token({0})".format(repr(self._val))
-
     def discard(self) -> bool:
         return True
 
@@ -1195,9 +1198,6 @@ class Skip(Parser):
         self.dest_node_parser = _Transform(_Row(), dest_node,
                                            force_error_node=True)
 
-    def __repr__(self) -> str:
-        return 'Skip({})'.format(node_name(self.dest_node))
-
     @property
     def children(self) -> _List[Parser]:
         return [self.dest_node_parser]
@@ -1251,9 +1251,6 @@ class DontSkip(Parser):
         self.subparser = resolve(subparser)
         self.dontskip_parsers = [resolve(sb) for sb in dontskip_parsers]
 
-    def __repr__(self) -> str:
-        return 'DontSkip({}, {})'.format(self.subparser, self.dontskip_parsers)
-
     @property
     def children(self) -> _List[Parser]:
         return [self.subparser]
@@ -1290,9 +1287,6 @@ class Or(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return any(parser._is_left_recursive(rule_name)
                    for parser in self.parsers)
-
-    def __repr__(self) -> str:
-        return "Or({0})".format(", ".join(repr(m) for m in self.parsers))
 
     def __init__(self, *parsers: Union[Parser, str, TokenAction], **opts: Any):
         """
@@ -1471,9 +1465,6 @@ class _Row(Parser):
                 break
         return False
 
-    def __repr__(self) -> str:
-        return "Row({0})".format(", ".join(repr(m) for m in self.parsers))
-
     def __init__(self, *parsers: Parser, **opts: Any):
         """
         Create a parser that matches the sequence of matches for all
@@ -1555,12 +1546,6 @@ class List(Parser):
             res and (self.empty_valid or not always_make_progress(self.parser))
         )
         return res
-
-    def __repr__(self) -> str:
-        return "List({0})".format(
-            repr(self.parser) + (", sep={0}".format(self.sep)
-                                 if self.sep else "")
-        )
 
     def __init__(self, *parsers: Parser, **opts: Any):
         """
@@ -1693,12 +1678,6 @@ class Opt(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
 
-    def __repr__(self) -> str:
-        args = [str(self.parser)]
-        if self._booleanize:
-            args.append('to_bool={}'.format(self._booleanize))
-        return "Opt({0})".format(', '.join(args))
-
     def __init__(self, *parsers: Parser, **opts: Any):
         """
         Create a parser that matches `parsers` if possible or matches an empty
@@ -1817,9 +1796,6 @@ class _Extract(Parser):
     def error_repr(self) -> str:
         return self.parser.error_repr
 
-    def __repr__(self) -> str:
-        return "Extract({0}, {1})".format(self.parser, self.index)
-
     def __init__(self,
                  parser: Parser,
                  index: int,
@@ -1869,9 +1845,6 @@ class Discard(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
 
-    def __repr__(self) -> str:
-        return "Discard({0})".format(self.parser)
-
     def __init__(self, parser: Parser, location: Optional[Location] = None):
         Parser.__init__(self, location=location)
 
@@ -1916,9 +1889,6 @@ class Defer(Parser):
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.name == rule_name
-
-    def __repr__(self) -> str:
-        return "{0}".format(self.name)
 
     def __init__(self,
                  rule_name: str,
@@ -1967,9 +1937,6 @@ class _Transform(Parser):
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
-
-    def __repr__(self) -> str:
-        return "Transform({0}, {1})".format(self.parser, node_name(self.typ))
 
     def __init__(self,
                  parser: Parser,
@@ -2160,9 +2127,6 @@ class Null(Parser):
     def _is_left_recursive(self, rule_name: str) -> bool:
         return False
 
-    def __repr__(self) -> str:
-        return "Null"
-
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars(start_pos)
 
@@ -2234,9 +2198,6 @@ class Predicate(Parser):
         return (self.property_ref.label
                 if isinstance(self.property_ref, T.Defer) else
                 self.property_ref.qualname)
-
-    def __repr__(self) -> str:
-        return 'Predicate({}, {})'.format(self.parser, self.property_name)
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.init_vars()
@@ -2334,9 +2295,6 @@ class StopCut(Parser):
     def __init__(self, parser: Parser, location: Optional[Location] = None):
         Parser.__init__(self, location=location)
         self.parser = resolve(parser)
-
-    def __repr__(self) -> str:
-        return f"StopCut({self.parser})"
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return self.parser._is_left_recursive(rule_name)
@@ -2501,9 +2459,6 @@ class Cut(Parser):
 
     def _is_left_recursive(self, rule_name: str) -> bool:
         return False
-
-    def __repr__(self) -> str:
-        return "Cut"
 
     def create_vars_after(self, start_pos: VarDef) -> None:
         self.pos_var = start_pos
