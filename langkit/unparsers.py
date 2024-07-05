@@ -333,7 +333,7 @@ class NodeUnparser(Unparser):
         :param parser: Parser for which we want to create an unparser.
         """
         assert not node.abstract and not node.synthetic, (
-            'Invalid unparser request for {}'.format(node.dsl_name)
+            f"Invalid unparser request for {node.dsl_name} ({parser})"
         )
         parser = unwrap(parser)
 
