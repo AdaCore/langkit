@@ -3879,6 +3879,13 @@ class SingleLineStringLit(StringLit):
     invalid_expected_type_error_name = Property(S("a string literal"))
 
 
+class PatternSingleLineStringLit(SingleLineStringLit):
+    """
+    Pattern single line string literal expression.
+    """
+    pass
+
+
 class DecodedCharValue(Struct):
     """
     Result for ``CharLit.p_denoted_value``.
@@ -4344,7 +4351,8 @@ lkt_grammar.add_rules(
     num_lit=NumLit(Lex.Number),
     big_num_lit=BigNumLit(Lex.BigNumber),
     string_lit=GOr(
-        SingleLineStringLit(GOr(Lex.String, Lex.PString)),
+        SingleLineStringLit(Lex.String),
+        PatternSingleLineStringLit(Lex.PString),
         G.block_string_lit,
     ),
     block_string_lit=BlockStringLit(
