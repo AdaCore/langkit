@@ -46,7 +46,9 @@ from langkit.expressions import (
     PropertyError, Self, String as S, Try as _Try, Var, direct_env, ignore,
     langkit_property, new_env_assoc
 )
-from langkit.parsers import Cut, Grammar, List, Opt, Or as GOr, Predicate
+from langkit.parsers import (
+    Cut, Grammar, List, ListSepExtra, Opt, Or as GOr, Predicate
+)
 
 
 from language.lexer import lkt_lexer as Lex
@@ -4129,7 +4131,7 @@ lkt_grammar.add_rules(
 
     grammar_or_expr=GrammarOrExpr(
         "or", "(",
-        Opt("|"), List(List(G.grammar_expr), sep="|"),
+        List(List(G.grammar_expr), sep="|", extra=ListSepExtra.allow_leading),
         ")"
     ),
 
