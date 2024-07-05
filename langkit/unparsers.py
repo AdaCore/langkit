@@ -128,16 +128,37 @@ class TokenUnparser(Unparser):
             None.
         """
         self.token = token
+        self.is_termination = False
+        self.is_lexing_failure = False
+
         matcher = token.matcher
-        if matcher is None:
+        if token == LexerToken.Termination:
+            self.is_termination = True
+        elif token == LexerToken.LexingFailure:
+            self.is_lexing_failure = True
+        elif matcher is None:
             assert match_text is not None
-            self.match_text = match_text
+            match_text = match_text
         else:
             assert match_text is None
             assert isinstance(matcher, Literal)
-            self.match_text = matcher.to_match
+            match_text = matcher.to_match
 
+        self._match_text = match_text
         self._var_name: names.Name | None = None
+
+    @property
+    def is_special(self) -> bool:
+        """
+        Return whether this unparser represents a special token, which should
+        not make it to unparsing tables.
+        """
+        return self.is_termination or self.is_lexing_failure
+
+    @property
+    def match_text(self) -> str:
+        assert self._match_text is not None, str(self)
+        return self._match_text
 
     @overload
     @classmethod
@@ -194,14 +215,20 @@ class TokenUnparser(Unparser):
         return '<none>' if token is None else token.dumps()
 
     def _dump(self, stream: IO[str]) -> None:
-        stream.write(self.match_text)
+        if self.is_termination:
+            label = "<termination>"
+        elif self.is_lexing_failure:
+            label = "<lexing failure>"
+        else:
+            label = self.match_text
+        stream.write(label)
 
     @property
     def text_repr(self) -> str:
         """
         Return an Ada string literal for the text to emit this token.
         """
-        return text_repr(self.dumps())
+        return text_repr(self.match_text)
 
     # Comparing tokens is done through
     # ``TokenSequenceUnparser.check_equivalence``, which is already good at
@@ -232,7 +259,9 @@ class TokenSequenceUnparser(Unparser):
         """
         :param init_tokens: Optional list of tokens to start with.
         """
-        self.tokens = list(init_tokens or [])
+        self.tokens = []
+        if init_tokens:
+            self.tokens = [t for t in init_tokens if not t.is_special]
 
         self._serial_number: int | None = None
         self._var_name: names.Name | None = None
@@ -262,6 +291,8 @@ class TokenSequenceUnparser(Unparser):
 
         :param token: Token unparser to append.
         """
+        if token.is_special:
+            return
         self.tokens.append(token)
 
     def check_equivalence(
@@ -970,7 +1001,7 @@ class TokenSequenceUnparserPool:
     def finalize(self) -> None:
         self.sorted = sorted(
             self.pool.values(),
-            key=lambda tok_seq: tuple(t.text_repr for t in tok_seq.tokens),
+            key=lambda tok_seq: tuple(t.dumps() for t in tok_seq.tokens),
         )
 
         # Assign a unique identification number to token sequences for code
@@ -1027,8 +1058,9 @@ class Unparsers:
         """
         List of all token unparsers. Order is consistent across runs.
         """
-        return sorted(self.token_unparsers.values(),
-                      key=lambda t: t.dumps())
+        result = [t for t in self.token_unparsers.values() if not t.is_special]
+        result.sort(key=lambda t: t.dumps())
+        return result
 
     def abort_unparser(self, message: str) -> None:
         """
