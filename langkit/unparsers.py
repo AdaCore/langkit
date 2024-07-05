@@ -407,8 +407,6 @@ class NodeUnparser(Unparser):
             Considering the next field to process, return a tuple that contains
             the token sequence that precedes it, and the token sequence that
             succeeds it.
-
-            :rtype: (TokenSequenceUnparser, TokenSequenceUnparser|None)
             """
             if next_field == 0:
                 pre_tokens = result.pre_tokens
@@ -435,7 +433,7 @@ class NodeUnparser(Unparser):
         for i, subp in enumerate(subparsers):
             if subp.discard():
                 tok_seq, _ = surrounding_inter_tokens()
-                NodeUnparser._emit_to_token_sequence(subp, tok_seq.tokens)
+                NodeUnparser._emit_to_token_sequence(subp, tok_seq)
             else:
                 pre_tokens, post_tokens = surrounding_inter_tokens()
                 assert post_tokens is not None
@@ -509,24 +507,22 @@ class NodeUnparser(Unparser):
         subparsers = parser.parser.parsers
         index = parser.index
 
-        pre_toks: list[TokenUnparser] = []
+        pre_toks = TokenSequenceUnparser()
         for pre_parser in subparsers[:index]:
             NodeUnparser._emit_to_token_sequence(pre_parser, pre_toks)
 
         node_parser = subparsers[parser.index]
 
-        post_toks: list[TokenUnparser] = []
+        post_toks = TokenSequenceUnparser()
         for post_parser in subparsers[index + 1:]:
             NodeUnparser._emit_to_token_sequence(post_parser, post_toks)
 
-        return (TokenSequenceUnparser(pre_toks),
-                node_parser,
-                TokenSequenceUnparser(post_toks))
+        return (pre_toks, node_parser, post_toks)
 
     @staticmethod
     def _emit_to_token_sequence(
         parser: Parser,
-        token_sequence: list[TokenUnparser],
+        token_sequence: TokenSequenceUnparser,
     ) -> None:
         """
         Turn the given parser into a sequence of tokens.
