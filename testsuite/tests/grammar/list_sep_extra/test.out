@@ -1,0 +1,61 @@
+== expected_concrete_syntax.lkt ==
+Code generation was successful
+
+== test.py ==
+main.py: Running...
+== kwA ==
+
+  OK    kwA ;
+  ERROR kwA , ;
+  OK    kwA a ;
+  ERROR kwA a , ;
+  ERROR kwA , a ;
+  ERROR kwA , a , ;
+  OK    kwA a, b, c ;
+  ERROR kwA , a, b, c ;
+  ERROR kwA a, b, c , ;
+  ERROR kwA , a, b, c , ;
+
+== kwB ==
+
+  OK    kwB ;
+  ERROR kwB , ;
+  OK    kwB a ;
+  ERROR kwB a , ;
+  ERROR kwB , a ;
+  ERROR kwB , a , ;
+  OK    kwB a, b, c ;
+  ERROR kwB , a, b, c ;
+  ERROR kwB a, b, c , ;
+  ERROR kwB , a, b, c , ;
+
+== kwC ==
+
+  OK    kwC ;
+  ERROR kwC , ;
+  OK    kwC a ;
+  ERROR kwC a , ;
+  OK    kwC , a ;
+  ERROR kwC , a , ;
+  OK    kwC a, b, c ;
+  OK    kwC , a, b, c ;
+  ERROR kwC a, b, c , ;
+  ERROR kwC , a, b, c , ;
+
+== kwD ==
+
+  OK    kwD ;
+  ERROR kwD , ;
+  OK    kwD a ;
+  OK    kwD a , ;
+  ERROR kwD , a ;
+  ERROR kwD , a , ;
+  OK    kwD a, b, c ;
+  ERROR kwD , a, b, c ;
+  OK    kwD a, b, c , ;
+  ERROR kwD , a, b, c , ;
+
+main.py: Done.
+Done
+
+lkt_compile: Done

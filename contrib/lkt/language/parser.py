@@ -1670,6 +1670,14 @@ class GrammarDontSkip(GrammarExpr):
     dont_skip = Field(type=T.GrammarExpr)
 
 
+class GrammarListSep(LktNode):
+    """
+    Specification for the separator of a list parser.
+    """
+    token = Field(type=T.GrammarExpr)
+    extra = Field(type=T.Id)
+
+
 class GrammarList(GrammarExpr):
     """
     Grammar expression to parse lists of results. Results can be separated by a
@@ -1678,7 +1686,7 @@ class GrammarList(GrammarExpr):
     list_type = Field(type=T.TypeRef)
     kind = Field(type=T.ListKind)
     expr = Field(type=T.GrammarExpr)
-    sep = Field(type=T.GrammarExpr)
+    sep = Field(type=T.GrammarListSep)
 
 
 class ListKind(LktNode):
@@ -4157,8 +4165,10 @@ lkt_grammar.add_rules(
         G.grammar_implicit_pick | G.grammar_expr,
 
         # Separator
-        Opt(",", G.grammar_expr), ")",
+        Opt(",", G.grammar_list_sep), ")",
     ),
+
+    grammar_list_sep=GrammarListSep(G.grammar_expr, Opt(",", G.id)),
 
     grammar_skip=GrammarSkip(
         Lex.Identifier(match_text="skip"), "(", G.type_ref, ")"
