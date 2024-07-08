@@ -1,0 +1,40 @@
+# Regression testcase: lowering for multiple dynvar bindings in blocks used to
+# always take the same dynvar during lowering. As a consequence, compilation
+# for the "p" property aborted with a spurious error.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+dynvar origin: Int
+dynvar env: Int
+dynvar no_visibility: Bool
+
+class Example: FooNode implements TokenNode {
+    fun get_origin(): Int = 10
+    fun get_env(): Int = 20
+
+    @with_dynvars(origin, env, no_visibility)
+    fun get_complete_env(): Int = if no_visibility then origin else env
+
+    @exported
+    fun p(): Int = {
+        bind origin = node.get_origin();
+        bind env = node.get_env();
+        val complete_env = {
+            bind no_visibility = true;
+            node.get_complete_env()
+        };
+        val visible_env = {
+            bind no_visibility = false;
+            node.get_complete_env()
+        };
+        complete_env + visible_env
+    }
+}
