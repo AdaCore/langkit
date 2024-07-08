@@ -38,7 +38,6 @@ loop
          exit;
       end if;
    % endif
-
 end loop;
 
 ## Create the result of this parser: an AST list node, and copy the elements
@@ -47,8 +46,7 @@ declare
    Token_Start, Token_End : Token_Index;
    Count                  : constant Natural := ${parser.tmplist}.Nodes.Length;
 begin
-   ${parser.res_var} :=
-      ${list_type.parser_allocator} (Parser.Mem_Pool);
+   ${parser.res_var} := ${list_type.parser_allocator} (Parser.Mem_Pool);
 
    ## Depending on whether we have an empty list, initialize token start/end
    ## information.
