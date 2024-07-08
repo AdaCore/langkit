@@ -1547,7 +1547,14 @@ class List(Parser):
         )
         return res
 
-    def __init__(self, *parsers: Parser, **opts: Any):
+    def __init__(
+        self,
+        *parsers: Parser,
+        sep: Parser | TokenAction | str | None = None,
+        empty_valid: bool = False,
+        list_cls: ASTNodeType | None = None,
+        location: Location | None = None,
+    ):
         """
         Create a parser that matches a list of elements.
 
@@ -1561,17 +1568,16 @@ class List(Parser):
         By default, this parser will not match empty sequences but it will if
         `empty_valid` is True.
 
-        :param ASTNodeType list_cls: If provided, it must be a
-            ASTNodeType.list subtype to be used for the result of this
-            parser.
+        :param sep: Parser or string corresponding to the token that is used to
+            match separators between elements.
 
-        :param types.Token|string sep: Parser or string corresponding to the
-            token that is used to match separators between elements.
+        :param list_cls: If provided, it must be a ASTNodeType.list subtype to
+            be used for the result of this parser.
 
-        :param bool empty_valid: Whether to match empty sequences or not.
+        :param empty_valid: Whether to match empty sequences or not.
         """
+        Parser.__init__(self, location=location)
 
-        Parser.__init__(self, location=opts.pop('location', None))
         if len(parsers) == 1:
             # If one parser, just keep it as the main parser
             self.parser = resolve(parsers[0])
@@ -1579,14 +1585,9 @@ class List(Parser):
             # If several, then wrap them in a Pick parser
             self.parser = Pick(*parsers)
 
-        sep = opts.pop('sep', None)
         self.sep = resolve(sep) if sep else None
-        self.empty_valid = opts.pop('empty_valid', False)
-        self.list_cls = opts.pop('list_cls', None)
-
-        if opts:
-            raise TypeError('unexpected keyword arguments: {}'.format(
-                ', '.join(opts)))
+        self.empty_valid = empty_valid
+        self.list_cls = list_cls
 
     @property
     def children(self) -> _List[Parser]:
