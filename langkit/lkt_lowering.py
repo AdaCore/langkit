@@ -4075,7 +4075,7 @@ class LktTypesLoader:
                 for action in reversed(actions):
                     with AbstractExpression.with_location(action.location):
                         if isinstance(action.var, E.DynamicVariable):
-                            result = getattr(var, "bind")(
+                            result = getattr(action.var, "bind")(
                                 action.init_expr, result
                             )
                         else:
