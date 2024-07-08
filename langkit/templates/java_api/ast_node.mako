@@ -135,6 +135,10 @@
                     f"{api.wrapping_type(param.public_type)}.class"
                     for param in method.params
                 ]
+                member_ref_name = (
+                    f"{capi.symbol_prefix.upper()}_"
+                    f"{generic_api.member_name(field).upper()}"
+                )
                 %>
                 % if not method.name in api.excluded_fields:
                 {
@@ -164,7 +168,11 @@
                     // Add the method and the parameters in maps
                     description.fieldDescriptions.put(
                         "${method.native_name}",
-                        new Reflection.Field(method, parameters)
+                        new Reflection.Field(
+                            method,
+                            parameters,
+                            MemberReference.${member_ref_name}
+                        )
                     );
                 }
                 % endif

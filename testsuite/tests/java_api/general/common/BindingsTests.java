@@ -282,6 +282,11 @@ public final class BindingsTests {
             System.out.println(
                 "Node hash equality = " + (var.hashCode() == var2.hashCode())
             );
+            System.out.println(
+                "Node 'p_all_items' member reference equality = " +
+                (root.getFieldDescription("p_all_items").memberRef ==
+                 MemberReference.FOO_SEQUENCE_P_ALL_ITEMS)
+            );
         }
 
         // Display the footer

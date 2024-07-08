@@ -630,6 +630,9 @@ public final class ${ctx.lib_name.camel} {
             /** The parameters of the method */
             public final List<Param> params;
 
+            /** The generic member reference of this field */
+            public final MemberReference memberRef;
+
             // ----- Constructors -----
 
             /**
@@ -640,10 +643,12 @@ public final class ${ctx.lib_name.camel} {
             */
             public Field(
                 final Method javaMethod,
-                final List<Param> params
+                final List<Param> params,
+                final MemberReference memberRef
             ) {
                 this.javaMethod = javaMethod;
                 this.params = params;
+                this.memberRef = memberRef;
             }
 
         }

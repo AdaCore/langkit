@@ -107,6 +107,7 @@ Var arg = <Sequence foo.txt:1:19-1:36>
 Var content = [<NullNode foo.txt:1:19-1:23>, <Example foo.txt:1:24-1:31>, <NullNode foo.txt:1:32-1:36>]
 Node equality = true
 Node hash equality = true
+Node 'p_all_items' member reference equality = true
 -------------
 
 --- Parent(s) ---
