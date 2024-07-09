@@ -1845,8 +1845,9 @@ package body Langkit_Support.Adalog.Solver is
       -----------------
 
       procedure Alias_Cycle (V : Logic_Var) is
-         V_Id    : constant Natural := Id (V);
-         Visited : Index_Set := (Ctx.Vars'Range => False);
+         V_Id      : constant Natural := Id (V);
+         Visited   : Index_Set := (Ctx.Vars'Range => False);
+         Has_Cycle : Boolean := False;
 
          function DFS (W : Logic_Var) return Boolean;
          --  Implement a basic depth-first search in the dependency graph
@@ -1870,7 +1871,13 @@ package body Langkit_Support.Adalog.Solver is
             for Dep of Dependencies (W_Id) loop
                if Id (Dep) = V_Id or else DFS (Dep) then
                   if Solv_Trace.Is_Active then
-                     Solv_Trace.Trace (" - New alias " & Image_With_Id (W));
+                     if not Has_Cycle then
+                        Has_Cycle := True;
+                        Solv_Trace.Trace
+                          ("Var " & Image_With_Id (V) & " is part of a cycle"
+                           & " containing:");
+                     end if;
+                     Solv_Trace.Trace (" - " & Image_With_Id (W));
                   end if;
                   Alias (W, V);
                   return True;
@@ -1880,10 +1887,6 @@ package body Langkit_Support.Adalog.Solver is
             return False;
          end DFS;
       begin
-         if Solv_Trace.Is_Active then
-            Solv_Trace.Trace ("Aliasing var " & Image_With_Id (V));
-         end if;
-
          --  Avoid adding the same variable twice in ``Atomic_Unset_Vars``
          if Is_Atomic_Var (V) then
             return;

@@ -4,5 +4,37 @@ All:
     %Z <- %Y
     %X <- %Z
 
+[LANGKIT.SOLVER.SOLVE] Block 1
+   [LANGKIT.SOLVER.SOLVE] [1] %Y <- %X
+   [LANGKIT.SOLVER.SOLVE] [2] %Z <- %Y
+   [LANGKIT.SOLVER.SOLVE] [3] %X <- %Z
+[LANGKIT.SOLVER.SOLVE]  1 vs  1
+[LANGKIT.SOLVER.SOLVE] clauses: 1
+[LANGKIT.SOLVER.SOLVE] (1)
+[LANGKIT.SOLVER.SOLVE] Trying with:  1
+[LANGKIT.SOLVER.SOLVE] [1] %Y <- %X
+[LANGKIT.SOLVER.SOLVE] [2] %Z <- %Y
+[LANGKIT.SOLVER.SOLVE] [3] %X <- %Z
+[LANGKIT.SOLVER.SOLVE] Orphan relation: [1] %Y <- %X
+[LANGKIT.SOLVER.SOLVE] Orphan relation: [2] %Z <- %Y
+[LANGKIT.SOLVER.SOLVE] Orphan relation: [3] %X <- %Z
+[LANGKIT.SOLVER.SOLVE] Topo fail!
+[LANGKIT.SOLVER.SOLVE] Dependencies of unset var %Y (ID: 1)
+[LANGKIT.SOLVER.SOLVE]  - %X (ID: 2)
+[LANGKIT.SOLVER.SOLVE] Dependencies of unset var %Z (ID: 3)
+[LANGKIT.SOLVER.SOLVE]  - %Y (ID: 1)
+[LANGKIT.SOLVER.SOLVE] Dependencies of unset var %X (ID: 2)
+[LANGKIT.SOLVER.SOLVE]  - %Z (ID: 3)
+[LANGKIT.SOLVER.SOLVE] Var %Y (ID: 1) is part of a cycle containing:
+[LANGKIT.SOLVER.SOLVE]  - %Z (ID: 3)
+[LANGKIT.SOLVER.SOLVE]  - %X (ID: 2)
+[LANGKIT.SOLVER.SOLVE]  - %Y (ID: 1)
+[LANGKIT.SOLVER.SOLVE] Orphan rels for unset var %Y:
+[LANGKIT.SOLVER.SOLVE] [1] %Y <- %X
+[LANGKIT.SOLVER.SOLVE] [2] %Z <- %Y
+[LANGKIT.SOLVER.SOLVE] [3] %X <- %Z
+[LANGKIT.SOLVER.SOLVE] Candidate defining rels:
+[LANGKIT.SOLVER.SOLVE] Learning the following clauses:
+[LANGKIT.SOLVER.SOLVE] (¬1)
 
 Done.
