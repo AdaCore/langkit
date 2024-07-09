@@ -3958,6 +3958,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          if Config = No_Unparsing_Configuration then
             Put_Line ("Error when loading the unparsing configuration:");
             Print (Diagnostics);
+            Set_Exit_Status (Failure);
             return;
          end if;
       end;
