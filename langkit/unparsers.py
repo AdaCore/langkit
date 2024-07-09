@@ -56,8 +56,8 @@ class Unparser:
         """
         Print a debug representation of this unparser to the ``stream`` file.
 
-        :param file|None stream: Stream to emit debug representation to.
-            ``sys.stdout`` is used if left to None.
+        :param stream: Stream to emit debug representation to.  ``sys.stdout``
+            is used if left to None.
         """
         stream = stream or sys.stdout
         self._dump(stream)
@@ -65,8 +65,6 @@ class Unparser:
     def dumps(self) -> str:
         """
         Return a debug representation of this unparser.
-
-        :rtype: str
         """
         result = StringIO()
         self.dump(result)
@@ -324,8 +322,6 @@ class TokenSequenceUnparser(Unparser):
         """
         Name of the variable to hold this sequence of tokens in code
         generation.
-
-        :rtype: names.Name
         """
         if not self.tokens:
             return names.Name('Empty_Token_Sequence')
@@ -530,8 +526,7 @@ class NodeUnparser(Unparser):
         Split ``_Extract`` parsers into three parts: a sequence of pre-tokens,
         the node parser in the middle, and a sequence of post-tokens.
 
-        :param _Extract parser: _Extract parser to split.
-        :rtype: (TokenSequenceUnparser, Parser, TokenSequenceUnparser)
+        :param parser: _Extract parser to split.
         """
         assert isinstance(parser, _Extract)
         assert isinstance(parser.parser, _Row)
@@ -1088,7 +1083,7 @@ class Unparsers:
         Also abort the generation of unparsers if the grammar contains parsing
         constructs we don't support with unparsers.
 
-        :param Parser parser: Parser combinator to analyze.
+        :param parser: Parser combinator to analyze.
         """
 
         # Skip parsers generated for DontSkip. They don't generate any nodes,
