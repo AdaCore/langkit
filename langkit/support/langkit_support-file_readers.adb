@@ -16,6 +16,17 @@ with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 
 package body Langkit_Support.File_Readers is
 
+   procedure Decode_Buffer_Impl
+     (Buffer      : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Result      : in out Text_Access;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+   --  Implementation helper for ``Decode_Buffer``: assuming that a correctly
+   --  sized output buffer is allocated for the given input (``Result``),
+   --  perfom the decoding that ``Decode_Buffer`` is supposed to do.
+
    ----------------------------------
    -- Create_Decoded_File_Contents --
    ----------------------------------
@@ -39,13 +50,50 @@ package body Langkit_Support.File_Readers is
       Contents    : out Decoded_File_Contents;
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
+      --  In the worst case, we have one character per input byte, so
+      --  allocating an output buffer with one codepoint per input byte will be
+      --  big enough.
+      --
+      --  Defensive code: abort early with a clean error if this would make us
+      --  allocate a buffer that is too big to be accessed as a String (indexed
+      --  by Natural).
+
+      Result : Text_Access;
+   begin
+      if Buffer'Length > Natural'Last / 4 then
+         declare
+            Size_Str : constant String := Buffer'Length'Image;
+         begin
+            Contents := Create_Decoded_File_Contents ("");
+            Append
+              (Diagnostics,
+               Message => To_Text
+                            ("Source file is too big ("
+                             & Size_Str (Size_Str'First + 1 .. Size_Str'Last)
+                             & " bytes)"));
+         end;
+      else
+         Result := new Text_Type (1 .. Buffer'Length);
+         Decode_Buffer_Impl
+           (Buffer, Charset, Read_BOM, Result, Contents, Diagnostics);
+      end if;
+   end Decode_Buffer;
+
+   ------------------------
+   -- Decode_Buffer_Impl --
+   ------------------------
+
+   procedure Decode_Buffer_Impl
+     (Buffer      : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Result      : in out Text_Access;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
       use GNAT.Byte_Order_Mark;
       use GNATCOLL.Iconv;
 
-      --  In the worst case, we have one character per input byte, so the
-      --  following is supposed to be big enough.
-
-      Result : Text_Access := new Text_Type (1 .. Buffer'Length);
       State  : Iconv_T;
       Status : Iconv_Result;
       BOM    : BOM_Kind := Unknown;
@@ -55,7 +103,7 @@ package body Langkit_Support.File_Readers is
       First_Output_Index : constant Positive := Result'First;
       --  Index of the first byte in Result at which Iconv must decode Buffer
 
-      Output : Byte_Sequence (1 .. 4 * Buffer'Size);
+      Output : Byte_Sequence (1 .. 4 * Buffer'Length);
       for Output'Address use Result.all'Address;
       --  Iconv works on mere strings, so this is a kind of a view conversion
 
@@ -199,7 +247,7 @@ package body Langkit_Support.File_Readers is
       end case;
 
       Iconv_Close (State);
-   end Decode_Buffer;
+   end Decode_Buffer_Impl;
 
    -----------------
    -- Direct_Read --
