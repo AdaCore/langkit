@@ -1,0 +1,16 @@
+## vim: filetype=makopython
+
+def _coerce_bytes(label, value, what='a bytes string', or_none=False):
+    """
+    Take bytes (forwarded as-is to C) but also accept text (encoded using
+    the system encoding).
+    """
+    if value is None and or_none:
+        return None
+    elif isinstance(value, bytes):
+        return value
+    elif isinstance(value, str):
+        return value.encode()
+    else:
+        raise TypeError('`{}` argument must be {} (got {})'
+                        .format(label, what, _type_fullname(type(value))))

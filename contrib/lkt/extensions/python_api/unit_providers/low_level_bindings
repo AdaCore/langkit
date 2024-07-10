@@ -1,0 +1,7 @@
+## vim: filetype=makopython
+
+_create_default_provider = _import_func(
+    '${capi.get_name("create_default_provider")}',
+    [ctypes.POINTER(ctypes.c_char_p)],
+    _unit_provider,
+)
