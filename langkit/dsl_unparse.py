@@ -526,7 +526,7 @@ def node_name(node):
 
 def emit_rule(rule, top_level=False):
     from langkit.parsers import (
-        _Transform, _Row, Opt, List, Or, _Token, Cut, StopCut,
+        _Transform, _Row, Opt, ListSepExtra, List, Or, _Token, Cut, StopCut,
         _Extract, DontSkip, Skip, Null, Parser, resolve, Defer, Predicate,
         Discard
     )
@@ -553,6 +553,8 @@ def emit_rule(rule, top_level=False):
         kind= '*' if rule.empty_valid else '+'
         subparser = emit_rule(rule.parser)
         sep = ", {}".format(emit_rule(rule.sep)) if rule.sep else ""
+        if rule._original_extra is not None:
+            sep += f", {rule.extra.name}"
         return ("{list_cls}{kind}({subparser}{sep})"
                 .format(list_cls=node_name(rule.type),
                         kind=kind, subparser=subparser, sep=sep)

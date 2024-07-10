@@ -88,8 +88,8 @@ from langkit.lexer import (
 )
 import langkit.names as names
 from langkit.parsers import (
-    Cut, Defer, Discard, DontSkip, Grammar, List as PList, Null, Opt,
-    Or, Parser, Pick, Predicate, Skip, StopCut, _Row, _Token, _Transform
+    Cut, Defer, Discard, DontSkip, Grammar, List as PList, ListSepExtra, Null,
+    Opt, Or, Parser, Pick, Predicate, Skip, StopCut, _Row, _Token, _Transform
 )
 
 
@@ -2107,17 +2107,31 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 return _Token(denoted_str(rule), location=loc)
 
             elif isinstance(rule, L.GrammarList):
+                list_cls = (
+                    None
+                    if isinstance(rule.f_list_type, L.DefaultListTypeRef) else
+                    resolve_node_ref(rule.f_list_type)
+                )
+
+                # If present, lower the separator specified
+                sep = None
+                extra: ListSepExtra | None = None
+                if rule.f_sep is not None:
+                    sep = lower(rule.f_sep.f_token)
+                    if rule.f_sep.f_extra is not None:
+                        extra_str = rule.f_sep.f_extra.text
+                        try:
+                            extra = ListSepExtra[extra_str]
+                        except KeyError:
+                            with ctx.lkt_context(rule.f_sep.f_extra):
+                                error('invalid separator "extra" specifier')
+
                 return PList(
                     lower(rule.f_expr),
+                    sep=sep,
                     empty_valid=rule.f_kind.text == '*',
-                    list_cls=(
-                        None
-                        if isinstance(
-                            rule.f_list_type, L.DefaultListTypeRef
-                        ) else
-                        resolve_node_ref(rule.f_list_type)
-                    ),
-                    sep=lower_or_none(rule.f_sep),
+                    list_cls=list_cls,
+                    extra=extra,
                     location=loc,
                 )
 

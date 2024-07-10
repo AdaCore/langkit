@@ -25,6 +25,7 @@ from __future__ import annotations
 from collections import OrderedDict
 from contextlib import AbstractContextManager, contextmanager
 import difflib
+import enum
 from funcy import keep
 import inspect
 from itertools import count
@@ -1535,6 +1536,26 @@ class _Row(Parser):
         return self.render('row_code_ada', exit_label=gen_name("exit_row"))
 
 
+class ListSepExtra(enum.Enum):
+    """
+    Whether list parsers allow extra separators.
+    """
+    allow_none = enum.auto()
+    """
+    It accepts only separators between list elements.
+    """
+
+    allow_leading = enum.auto()
+    """
+    It accepts one optional list separator before the first element.
+    """
+
+    allow_trailing = enum.auto()
+    """
+    It accepts one optional list separator after the last element.
+    """
+
+
 class List(Parser):
     """
     Parser that matches a list.  A sub-parser matches list items.
@@ -1547,7 +1568,15 @@ class List(Parser):
         )
         return res
 
-    def __init__(self, *parsers: Parser, **opts: Any):
+    def __init__(
+        self,
+        *parsers: Parser,
+        sep: Parser | TokenAction | str | None = None,
+        empty_valid: bool = False,
+        list_cls: ASTNodeType | None = None,
+        extra: ListSepExtra | None = None,
+        location: Location | None = None,
+    ):
         """
         Create a parser that matches a list of elements.
 
@@ -1561,17 +1590,18 @@ class List(Parser):
         By default, this parser will not match empty sequences but it will if
         `empty_valid` is True.
 
-        :param ASTNodeType list_cls: If provided, it must be a
-            ASTNodeType.list subtype to be used for the result of this
-            parser.
+        :param sep: Parser or string corresponding to the token that is used to
+            match separators between elements.
 
-        :param types.Token|string sep: Parser or string corresponding to the
-            token that is used to match separators between elements.
+        :param list_cls: If provided, it must be a ASTNodeType.list subtype to
+            be used for the result of this parser.
 
-        :param bool empty_valid: Whether to match empty sequences or not.
+        :param empty_valid: Whether to match empty sequences or not.
+
+        :param extra: Whether this list parser allows extra separators.
         """
+        Parser.__init__(self, location=location)
 
-        Parser.__init__(self, location=opts.pop('location', None))
         if len(parsers) == 1:
             # If one parser, just keep it as the main parser
             self.parser = resolve(parsers[0])
@@ -1579,14 +1609,24 @@ class List(Parser):
             # If several, then wrap them in a Pick parser
             self.parser = Pick(*parsers)
 
-        sep = opts.pop('sep', None)
         self.sep = resolve(sep) if sep else None
-        self.empty_valid = opts.pop('empty_valid', False)
-        self.list_cls = opts.pop('list_cls', None)
+        self.empty_valid = empty_valid
+        self.list_cls = list_cls
 
-        if opts:
-            raise TypeError('unexpected keyword arguments: {}'.format(
-                ', '.join(opts)))
+        self._original_extra = extra
+        self.extra = ListSepExtra.allow_none if extra is None else extra
+
+        # It is not possible to accept extra separators in lists that do not
+        # have separators.
+        assert self.extra == ListSepExtra.allow_none or self.sep is not None
+
+    @property
+    def allow_leading(self) -> bool:
+        return self.extra == ListSepExtra.allow_leading
+
+    @property
+    def allow_trailing(self) -> bool:
+        return self.extra == ListSepExtra.allow_trailing
 
     @property
     def children(self) -> _List[Parser]:
@@ -1656,6 +1696,8 @@ class List(Parser):
     def create_vars_before(self) -> Optional[VarDef]:
         self.cpos = VarDef("lst_cpos", T.Token)
         self.tmplist = VarDef('tmp_list', 'Free_Parse_List')
+        if self.extra == ListSepExtra.allow_leading:
+            self.has_leading = VarDef("has_leading", T.Bool)
         return self.cpos
 
     def create_vars_after(self, start_pos: VarDef) -> None:

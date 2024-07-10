@@ -15,6 +15,18 @@
 ${parser.cpos} := ${parser.start_pos};
 ${parser.tmplist} := Get_Parse_List (Parser);
 
+## If we accept a leading separator, try to scan it now. Just keep rolling if
+## it is not there.
+% if parser.allow_leading:
+   ${parser.sep.generate_code()}
+   if ${parser.sep.pos_var} /= No_Token_Index then
+       ${parser.cpos} := ${parser.sep.pos_var};
+       ${parser.has_leading} := True;
+   else
+       ${parser.has_leading} := False;
+   end if;
+% endif
+
 loop
    ## Parse one list element
    ${parser.parser.generate_code()}
@@ -33,13 +45,25 @@ loop
       ${parser.sep.generate_code()}
       if ${parser.sep.pos_var} /= No_Token_Index then
           ${parser.cpos} := ${parser.sep.pos_var};
+
+          ## If we accept a trailing separator, mark the separator we just got
+          ## as being part of this list node.
+          % if parser.allow_trailing:
+             ${parser.pos_var} := ${parser.cpos};
+          % endif
       else
          ## If we didn't successfully parse a separator, exit
          exit;
       end if;
    % endif
-
 end loop;
+
+## If we had a leading separator, then we expect at least one element
+% if parser.allow_leading:
+   if ${parser.has_leading} and then ${parser.tmplist}.Nodes.Is_Empty then
+      ${parser.pos_var} := No_Token_Index;
+   end if;
+% endif
 
 ## Create the result of this parser: an AST list node, and copy the elements
 ## from our temporary parse list to the result.
@@ -47,8 +71,7 @@ declare
    Token_Start, Token_End : Token_Index;
    Count                  : constant Natural := ${parser.tmplist}.Nodes.Length;
 begin
-   ${parser.res_var} :=
-      ${list_type.parser_allocator} (Parser.Mem_Pool);
+   ${parser.res_var} := ${list_type.parser_allocator} (Parser.Mem_Pool);
 
    ## Depending on whether we have an empty list, initialize token start/end
    ## information.
