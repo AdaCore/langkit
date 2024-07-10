@@ -154,7 +154,7 @@ begin
    Check ("cmd_dedenttoroot.json");
    Check ("cmd_fill.json");
    Check ("cmd_group.json");
-   Check ("cmd_group_id.json");
+   Check ("cmd_group_id.json", "var v1: T = 0; var v2: T = 1;");
    Check ("cmd_hardline.json");
    Check ("cmd_hardlinewithoutbreakparent.json");
    Check ("cmd_ifbreak.json");

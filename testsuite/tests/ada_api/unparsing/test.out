@@ -462,7 +462,7 @@ Done.
     {
       "id": 5,
       "kind": "text",
-      "text": "var i:Int=0;"
+      "text": "var v1:T=0;"
     },
     {
       "command": {
@@ -509,6 +509,78 @@ Done.
         "ifBreakGroupId": 3
       },
       "id": 8,
+      "kind": "command"
+    },
+    {
+      "command": {
+        "break": false,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "command": {
+            "command": "line",
+            "hard": false,
+            "literal": false,
+            "soft": false
+          },
+          "id": 13,
+          "kind": "command"
+        },
+        "id": 12
+      },
+      "id": 11,
+      "kind": "command"
+    },
+    {
+      "id": 14,
+      "kind": "text",
+      "text": "var v2:T=1;"
+    },
+    {
+      "command": {
+        "break": true,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "command": {
+            "command": "line",
+            "hard": false,
+            "literal": false,
+            "soft": false
+          },
+          "id": 16,
+          "kind": "command"
+        }
+      },
+      "id": 15,
+      "kind": "command"
+    },
+    {
+      "command": {
+        "breakContents": {
+          "command": {
+            "command": "line",
+            "hard": false,
+            "literal": false,
+            "soft": false
+          },
+          "id": 18,
+          "kind": "command"
+        },
+        "command": "ifBreak",
+        "flatContents": {
+          "command": {
+            "command": "line",
+            "hard": false,
+            "literal": false,
+            "soft": false
+          },
+          "id": 19,
+          "kind": "command"
+        },
+        "ifBreakGroupId": 12
+      },
+      "id": 17,
       "kind": "command"
     }
   ]
