@@ -1555,6 +1555,13 @@ class ListSepExtra(enum.Enum):
     It accepts one optional list separator after the last element.
     """
 
+    @property
+    def ada_name(self) -> str:
+        """
+        Return the name for this enum value, with the Ada casing.
+        """
+        return names.Name.from_lower(self.name).camel_with_underscores
+
 
 class List(Parser):
     """

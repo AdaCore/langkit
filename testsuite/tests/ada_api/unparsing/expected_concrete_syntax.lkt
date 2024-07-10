@@ -14,12 +14,14 @@ grammar foo_grammar {
         "def"
         name
         pick("("
-        list*(param_spec, ",")
+        list*(param_spec, ",", allow_trailing)
         ")") ":" type_ref null_qual "{" list*(stmt) "}"
     )
     stmt <- or(
         | ExprStmt(expr ";")
-        | AssignStmt(list+(name, ",") "=" expr ";")
+        | AssignStmt(
+            list+(name, ",", allow_leading) "=" expr ";"
+        )
     )
     expr <- or(
         | DottedName(expr "." name)

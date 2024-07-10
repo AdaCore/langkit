@@ -148,6 +148,10 @@ add_main(
     sloc="9:4^1",
 )
 
+for cfg in ["default.json", "same_as_regular.json", "override.json"]:
+    add_main("list_extra_sep/{}".format(cfg), "list_extra_sep/assign.txt")
+    add_main("list_extra_sep/{}".format(cfg), "list_extra_sep/params.txt")
+
 for i in ["none", 0, 1, 2]:
     add_main(
         "max_empty_lines_{}.json".format(i),

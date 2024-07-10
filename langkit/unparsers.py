@@ -24,8 +24,8 @@ from langkit.diagnostics import WarningSet, check_source_language, error
 from langkit.lexer import Ignore, LexerToken, Literal, TokenAction
 import langkit.names as names
 from langkit.parsers import (
-    Cut, Defer, DontSkip, List, Null, Opt, Or, Parser, Predicate, Skip,
-    StopCut, _Extract, _Row, _Token, _Transform
+    Cut, Defer, DontSkip, List, ListSepExtra, Null, Opt, Or, Parser, Predicate,
+    Skip, StopCut, _Extract, _Row, _Token, _Transform
 )
 from langkit.utils import not_implemented_error
 
@@ -380,7 +380,8 @@ class NodeUnparser(Unparser):
                 )
                 return ListNodeUnparser(
                     node,
-                    TokenUnparser.from_parser(parser.sep)
+                    TokenUnparser.from_parser(parser.sep),
+                    parser.extra,
                 )
 
             if isinstance(parser, Opt):
@@ -910,7 +911,12 @@ class ListNodeUnparser(NodeUnparser):
     Unparser for list nodes.
     """
 
-    def __init__(self, node: ASTNodeType, separator: TokenUnparser | None):
+    def __init__(
+        self,
+        node: ASTNodeType,
+        separator: TokenUnparser | None,
+        extra: ListSepExtra,
+    ):
         """
         :param node: Parse node that this unparser handles.
         :param separator: Unparser for the separator token, or None if this
@@ -918,17 +924,20 @@ class ListNodeUnparser(NodeUnparser):
         """
         super().__init__(node)
         self.separator = separator
+        self.extra = extra
 
     def __repr__(self) -> str:
         return (
             f"<ListNodeUnparser for {self.node.dsl_name},"
-            f" separator={repr(self.separator)}>"
+            f" separator={repr(self.separator)},"
+            f" extra={self.extra.name}>"
         )
 
     def _dump(self, stream: IO[str]) -> None:
         stream.write('Unparser for {}:\n'.format(self.node.dsl_name))
         if self.separator:
             stream.write('   separator: {}\n'.format(self.separator.dumps()))
+        stream.write('   extra: {}\n'.format(self.extra.name))
 
     def _combine(self, other: Self) -> Self:
         assert self.node == other.node
@@ -939,6 +948,11 @@ class ListNodeUnparser(NodeUnparser):
                 TokenUnparser.dump_or_none(self.separator),
                 TokenUnparser.dump_or_none(other.separator)
             )
+        )
+        check_source_language(
+            self.extra == other.extra,
+            f"Inconsistent extra separation token for {self.node.dsl_name}:"
+            f" {self.extra.name} and {other.extra.name}",
         )
         return self
 

@@ -20,6 +20,11 @@ def f1(a: Int, b: Int=0): Int
     n1, n2, n2 = foo(a, b);
 }
 
+def f2(a: Int, ): Int
+{
+    a + 1;
+}
+
 == main.adb config.json param_spec.txt -r param_spec ==
 a: Int=2
 
@@ -42,6 +47,10 @@ a: Int=2
     parent is not a syntax field for VarDecl
 # invalid_node_sep.json
     VarDecl is not a list node, invalid "sep" configuration
+# invalid_leading_sep.json
+    Name.list does not allow trailing separators: invalid "trailing_sep" configuration
+# invalid_trailing_sep.json
+    ParamSpec.list does not allow leading separators: invalid "leading_sep" configuration
 # invalid_max_empty_lines_1.json
     invalid "max_empty lines" entry: natural integer expected
 # invalid_max_empty_lines_2.json
@@ -1988,6 +1997,8 @@ a+b+1;
 
 n1,n2,n2=foo(a,b);}
 
+def f2(a:Int,):Int{a+1;}
+
 main.adb: done
 
 == main.adb config.json trivias/block_comments_only.txt ==
@@ -2100,6 +2111,47 @@ a,b=c();
 
 == main.adb trivias/var_group_config.json trivias/list_nested_reattach.txt -s 9:4^1 ==
 d,e=f();
+
+== main.adb list_extra_sep/default.json list_extra_sep/assign.txt ==
+def f():T{
+    c,d=1;
+    ,a,b=1;
+}
+
+== main.adb list_extra_sep/default.json list_extra_sep/params.txt ==
+def f(a:T,b:T,):T{
+
+}def f(a:T,b:T):T{
+
+}
+
+== main.adb list_extra_sep/same_as_regular.json list_extra_sep/assign.txt ==
+def f():T{
+    c, d=1;
+    , a, b=1;
+}
+
+== main.adb list_extra_sep/same_as_regular.json list_extra_sep/params.txt ==
+def f(a:T, b:T, ):T{
+
+}def f(a:T, b:T):T{
+
+}
+
+== main.adb list_extra_sep/override.json list_extra_sep/assign.txt ==
+def f():T{
+    c, d=1;
+    ,
+    a, b=1;
+}
+
+== main.adb list_extra_sep/override.json list_extra_sep/params.txt ==
+def f(a:T, b:T,
+):T{
+
+}def f(a:T, b:T):T{
+
+}
 
 == main.adb max_empty_lines_none.json trivias/max_empty_lines.txt ==
 var v0:T=0;var v1:T=1;
