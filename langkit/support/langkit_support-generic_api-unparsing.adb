@@ -79,11 +79,11 @@ package body Langkit_Support.Generic_API.Unparsing is
       Suffix_Comment,
       Line_Comment,
       Whitespaces,
-      Empty_Lines);
+      Line_Breaks);
    subtype Non_Trivia_Fragment_Kind is
      Unparsing_Fragment_Kind range Token_Fragment .. List_Child_Fragment;
    subtype Trivia_Fragment_Kind is
-     Unparsing_Fragment_Kind range Suffix_Comment .. Empty_Lines;
+     Unparsing_Fragment_Kind range Suffix_Comment .. Line_Breaks;
    type Unparsing_Fragment
      (Kind : Unparsing_Fragment_Kind := Unparsing_Fragment_Kind'First)
    is record
@@ -142,13 +142,13 @@ package body Langkit_Support.Generic_API.Unparsing is
             Whitespaces_Count : Positive;
             --  Number of whitespaces found
 
-         when Empty_Lines =>
+         when Line_Breaks =>
 
-            --  Fragment to record the presence of empty lines in the original
+            --  Fragment to record the presence of line breaks in the original
             --  source code.
 
-            Empty_Lines_Count : Positive;
-            --  Number of empty lines found
+            Line_Breaks_Count : Positive;
+            --  Number of line breaks found
       end case;
    end record;
    --  Source code unparsing fragment used to unparse source code. Fragments
@@ -655,13 +655,14 @@ package body Langkit_Support.Generic_API.Unparsing is
    procedure Compute_Trivia_Fragments
      (Node : Lk_Node; Fragments : out Trivias_Fragments)
    is
+      Id    : constant Language_Descriptor_Access := +Node.Language;
       Trace : constant Boolean := Trivias_Trace.Is_Active;
 
       T, Exit_Token : Lk_Token;
       --  Token/trivia cursor, and token to stop trivia fragments computation
 
       First_Trivia : Token_Index := No_Token_Index;
-      --  When we are processing a sequence of trivia, this contains the index
+      --  When we are processing a sequence of trivias, this contains the index
       --  of the first trivia of that sequence. Set to ``No_Token_Index`` the
       --  rest of the time (i.e. when ``T`` is not a trivia).
 
@@ -677,6 +678,18 @@ package body Langkit_Support.Generic_API.Unparsing is
       procedure Append (Fragment : Unparsing_Fragment);
       --  Append ``Fragment`` as a new unparsing fragment for the sequence of
       --  trivias we are currently processing.
+
+      procedure Finalize_Sequence;
+      --  If we are processing a sequence of trivias, close it:
+      --
+      --  * Set ``First_Trivia`` to ``No_Token_Index``.
+      --
+      --  * If the last trivia in this sequence is a comment, and if these
+      --    comments require a newline before the next token, append a line
+      --    break at the end of this sequence of trivia. This is necessary to
+      --    avoid letting the mandatory line break to be inserted "too" late,
+      --    inside the next group for instance, which would cause unwanted
+      --    formatting.
 
       ------------
       -- Append --
@@ -698,6 +711,49 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
          Fragment_Range.Last := Fragments.Vector.Last_Index;
       end Append;
+
+      -----------------------
+      -- Finalize_Sequence --
+      -----------------------
+
+      procedure Finalize_Sequence is
+      begin
+         if First_Trivia = No_Token_Index then
+            return;
+         end if;
+
+         declare
+            Fragment_Range : Unparsing_Fragment_Range renames
+              Fragments.Trivia_To_Fragments (First_Trivia);
+            Last_Fragment  : Unparsing_Fragment;
+            K              : Token_Kind_Ref;
+         begin
+            --  Is this trivia fragment sequence empty?
+
+            if Fragment_Range.First <= Fragment_Range.Last then
+               Last_Fragment := Fragments.Vector (Fragment_Range.Last);
+
+               --  Is the last trivia fragment a comment?
+
+               if Last_Fragment.Kind in Suffix_Comment | Line_Comment then
+                  K := Last_Fragment.Comment_Token.Kind;
+
+                  --  Does this comment requires a line break?
+
+                  if Id.Unparsers.Token_Newlines (To_Index (K)) then
+
+                     --  Then add this line break now
+
+                     Append ((Line_Breaks, 1));
+                  end if;
+               end if;
+            end if;
+         end;
+
+         --  Finally, mark close this sequence
+
+         First_Trivia := No_Token_Index;
+      end Finalize_Sequence;
 
       Unit         : constant Lk_Unit := Node.Unit;
       Node_Is_Root : constant Boolean := Node = Unit.Root;
@@ -751,18 +807,20 @@ package body Langkit_Support.Generic_API.Unparsing is
                   --  of whitespaces/line breaks: count the number of line
                   --  breaks it contains, and the number of prefix columns.
 
-                  Line_Breaks : constant Natural := Count_Line_Breaks (T);
+                  Line_Breaks_Count : constant Natural :=
+                    Count_Line_Breaks (T);
                begin
                   if Trace then
                      Trivias_Trace.Trace
-                       ("   ... it has" & Line_Breaks'Image & " line breaks");
+                       ("   ... it has" & Line_Breaks_Count'Image
+                        & " line breaks");
                   end if;
 
                   --  If we are still processing the first line in this
                   --  sequence of trivias, compute the number of spaces that
                   --  come before the potential suffix comment that comes next.
 
-                  if First_Line and then Line_Breaks = 0 then
+                  if First_Line and then Line_Breaks_Count = 0 then
                      declare
                         Sloc_Range : constant Source_Location_Range :=
                           T.Sloc_Range;
@@ -775,18 +833,19 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end if;
 
                   --  If there are N line breaks with N > 2, there are N - 1
-                  --  empty lines to account for.
+                  --  empty lines to account for, and so N line breaks to
+                  --  preserve.
 
-                  if Line_Breaks >= 2 then
+                  if Line_Breaks_Count >= 2 then
                      Append
-                       ((Kind              => Empty_Lines,
-                         Empty_Lines_Count => Line_Breaks - 1));
+                       ((Kind              => Line_Breaks,
+                         Line_Breaks_Count => Line_Breaks_Count));
                   end if;
 
                   --  If this trivia contained at least one line break, the
                   --  next trivia to process will not start on the first line.
 
-                  if Line_Breaks > 0 then
+                  if Line_Breaks_Count > 0 then
                      First_Line := False;
                   end if;
                end;
@@ -817,10 +876,12 @@ package body Langkit_Support.Generic_API.Unparsing is
             --  ``T`` is not a trivia: update our state to represent that we
             --  are not in a sequence of trivias.
 
-            First_Trivia := No_Token_Index;
+            Finalize_Sequence;
          end if;
          T := T.Next;
       end loop;
+
+      Finalize_Sequence;
    end Compute_Trivia_Fragments;
 
    --------------------------
@@ -1067,20 +1128,16 @@ package body Langkit_Support.Generic_API.Unparsing is
          when Suffix_Comment | Line_Comment =>
             Items.Append
               (Pool.Create_Token
-                 (Kind (Fragment.Comment_Token),
-                  To_Unbounded_Text (Analysis.Text (Fragment.Comment_Token))));
+                 (Fragment.Comment_Token.Kind,
+                  To_Unbounded_Text (Fragment.Comment_Token.Text)));
 
          when Whitespaces =>
             Items.Append
               (Pool.Create_Expected_Whitespaces (Fragment.Whitespaces_Count));
 
-         when Empty_Lines =>
-
-            --  It takes N+1 line consecutive breaks to make N empty lines
-
+         when Line_Breaks =>
             Items.Append
-              (Pool.Create_Expected_Line_Breaks
-                 (Fragment.Empty_Lines_Count + 1));
+              (Pool.Create_Expected_Line_Breaks (Fragment.Line_Breaks_Count));
       end case;
    end Append_Trivia_Fragment;
 

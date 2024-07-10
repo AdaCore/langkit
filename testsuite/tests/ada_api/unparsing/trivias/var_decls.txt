@@ -1,7 +1,8 @@
+# Comment 1
   var v1:T=1;
 
-    # Comment 1
+    # Comment 2
     var v2:T=2;
 
-# Comment 2
+# Comment 3
 var v3:T=3;
