@@ -118,7 +118,9 @@ package ${ada_lib_name}.Rewriting is
    function Kind (Handle : Node_Rewriting_Handle) return ${T.node_kind};
    ${ada_doc('langkit.rewriting.kind', 3)}
 
-   function Type_Of (Handle : Node_Rewriting_Handle) return Type_Ref
+   function Type_Of
+     (Handle : Node_Rewriting_Handle)
+      return Langkit_Support.Generic_API.Introspection.Type_Ref
    is (Kind_To_Type (Kind (Handle)));
    --  Return the introspection type reference corresponding to ``Handle``'s
    --  node.

@@ -2040,13 +2040,20 @@ class InferInstantiation(Struct):
     error = UserField(T.SemanticResult, default_value=No(T.SemanticResult))
 
 
+class GenericFormalDeclList(FullDecl.list):
+    """
+    Comma-separated list of generic formal types.
+    """
+    pass
+
+
 class GenericDecl(Decl):
     """
     Generic entity declaration.
     """
     annotations = Annotations(rebindable=True)
 
-    generic_formal_decls = Field(type=T.FullDecl.list)
+    generic_formal_decls = Field(type=T.GenericFormalDeclList)
     decl = Field(type=T.Decl)
     name = Property(Self.decl.name)
     syn_name = NullField()
@@ -2876,12 +2883,30 @@ class CastExpr(Expr):
         )
 
 
+class IsaList(TypeRef.list):
+    """
+    Pipe-separated list of type references.
+
+    This is used to represent the accepted types in an ``Isa`` expression.
+    """
+    pass
+
+
 class Isa(Expr):
     """
     Isa expression.
     """
     expr = Field(type=T.Expr)
-    dest_type = Field(type=T.TypeRef.list)
+    dest_type = Field(type=T.IsaList)
+
+
+class AnyOfList(Expr.list):
+    """
+    Pipe-separated list of expressions.
+
+    This is used to represent the "values" operand of an ``AnyOf`` expression.
+    """
+    pass
 
 
 class AnyOf(Expr):
@@ -2889,7 +2914,7 @@ class AnyOf(Expr):
     "Any of" expression.
     """
     expr = Field(type=T.Expr)
-    values = Field(type=T.Expr.list)
+    values = Field(type=T.AnyOfList)
 
 
 class DeclAnnotation(LktNode):
@@ -3604,11 +3629,20 @@ class ElsifBranch(LktNode):
     then_expr = Field(type=T.Expr)
 
 
+class BlockDeclList(LktNode.list):
+    """
+    Semicolon-separated list of declarations.
+
+    This is used to represent declarations in a block expression.
+    """
+    pass
+
+
 class BlockExpr(Expr):
     """
     Block expression.
     """
-    val_defs = Field(type=T.LktNode.list)
+    val_defs = Field(type=T.BlockDeclList)
     expr = Field(type=T.Expr)
 
     env_spec = EnvSpec(add_env())
@@ -3877,6 +3911,13 @@ class SingleLineStringLit(StringLit):
                   expected_type == Self.symbol_type)
 
     invalid_expected_type_error_name = Property(S("a string literal"))
+
+
+class PatternSingleLineStringLit(SingleLineStringLit):
+    """
+    Pattern single line string literal expression.
+    """
+    pass
 
 
 class DecodedCharValue(Struct):
@@ -4171,7 +4212,11 @@ lkt_grammar.add_rules(
     ),
 
     generic_decl=GenericDecl(
-        "generic", "[", List(G.generic_formal_type, sep=","), "]", G.bare_decl
+        "generic",
+        "[",
+        List(G.generic_formal_type, sep=",", list_cls=GenericFormalDeclList),
+        "]",
+        G.bare_decl,
     ),
 
     generic_formal_type=FullDecl(
@@ -4266,7 +4311,12 @@ lkt_grammar.add_rules(
     block=BlockExpr(
         "{",
         # TODO: Add discard/ignore in the list
-        List(GOr(G.val_decl, G.var_bind), empty_valid=False, sep=";"),
+        List(
+            GOr(G.val_decl, G.var_bind),
+            empty_valid=False,
+            sep=";",
+            list_cls=BlockDeclList,
+        ),
         ";",
         G.expr,
         "}"
@@ -4320,8 +4370,16 @@ lkt_grammar.add_rules(
     ),
 
     isa_or_primary=GOr(
-        Isa(G.primary, "is", List(G.type_ref, sep="|", empty_valid=False)),
-        AnyOf(G.primary, "in", List(G.primary, sep="|", empty_valid=False)),
+        Isa(
+            G.primary,
+            "is",
+            List(G.type_ref, sep="|", empty_valid=False, list_cls=IsaList),
+        ),
+        AnyOf(
+            G.primary,
+            "in",
+            List(G.primary, sep="|", empty_valid=False, list_cls=AnyOfList),
+        ),
         G.primary
     ),
 
@@ -4344,7 +4402,8 @@ lkt_grammar.add_rules(
     num_lit=NumLit(Lex.Number),
     big_num_lit=BigNumLit(Lex.BigNumber),
     string_lit=GOr(
-        SingleLineStringLit(GOr(Lex.String, Lex.PString)),
+        SingleLineStringLit(Lex.String),
+        PatternSingleLineStringLit(Lex.PString),
         G.block_string_lit,
     ),
     block_string_lit=BlockStringLit(

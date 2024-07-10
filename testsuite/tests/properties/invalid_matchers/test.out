@@ -16,7 +16,7 @@ irrelevant_node.lkt:6:23: error: Cannot match FooNode (input type is BodyNode)
 
 == missing_comp.lkt ==
 missing_comp.lkt:7:23: error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
-7 |         case e: NullNode => e.prop
+7 |     fun prop(): Int = match node.body {
 
 
 == missing_expr.lkt ==

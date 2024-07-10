@@ -1,6 +1,5 @@
 from langkit.lexer import (
-    Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText,
-    WithTrivia
+    Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText, WithTrivia
 )
 
 
@@ -75,6 +74,7 @@ class Token(LexerToken):
 
     # Trivia
     Comment = WithTrivia()
+    Whitespace = WithTrivia()
 
     # Literals
     String = WithText()
@@ -100,7 +100,7 @@ lkt_lexer.add_patterns(
 
 lkt_lexer.add_rules(
     # Whitespace & EOF
-    (Pattern(r"[ \t\r\n\f]+"), Ignore()),
+    (Pattern(r"[ \t\r\n\f]+"), Token.Whitespace),
 
     # Operators
     (Literal('!'),         Token.ExclMark),

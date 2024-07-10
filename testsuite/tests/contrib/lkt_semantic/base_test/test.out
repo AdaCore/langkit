@@ -82,13 +82,13 @@ Expr <BinOp test.lkt:14:48-14:57>
 Id   <RefId "Regexp" test.lkt:16:26-16:32>
      references <StructDecl prelude: "Regexp">
 
-Expr <SingleLineStringLit test.lkt:16:35-16:43>
+Expr <PatternSingleLineStringLit test.lkt:16:35-16:43>
      has type <StructDecl prelude: "Regexp">
 
 Id   <RefId "Regexp" test.lkt:18:26-18:32>
      references <StructDecl prelude: "Regexp">
 
-Expr <SingleLineStringLit test.lkt:19:18-19:26>
+Expr <PatternSingleLineStringLit test.lkt:19:18-19:26>
      has type <StructDecl prelude: "Regexp">
 
 Id   <RefId "rg" test.lkt:20:9-20:11>

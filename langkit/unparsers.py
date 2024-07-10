@@ -56,8 +56,8 @@ class Unparser:
         """
         Print a debug representation of this unparser to the ``stream`` file.
 
-        :param file|None stream: Stream to emit debug representation to.
-            ``sys.stdout`` is used if left to None.
+        :param stream: Stream to emit debug representation to.  ``sys.stdout``
+            is used if left to None.
         """
         stream = stream or sys.stdout
         self._dump(stream)
@@ -65,8 +65,6 @@ class Unparser:
     def dumps(self) -> str:
         """
         Return a debug representation of this unparser.
-
-        :rtype: str
         """
         result = StringIO()
         self.dump(result)
@@ -128,16 +126,37 @@ class TokenUnparser(Unparser):
             None.
         """
         self.token = token
+        self.is_termination = False
+        self.is_lexing_failure = False
+
         matcher = token.matcher
-        if matcher is None:
+        if token == LexerToken.Termination:
+            self.is_termination = True
+        elif token == LexerToken.LexingFailure:
+            self.is_lexing_failure = True
+        elif matcher is None:
             assert match_text is not None
-            self.match_text = match_text
+            match_text = match_text
         else:
             assert match_text is None
             assert isinstance(matcher, Literal)
-            self.match_text = matcher.to_match
+            match_text = matcher.to_match
 
+        self._match_text = match_text
         self._var_name: names.Name | None = None
+
+    @property
+    def is_special(self) -> bool:
+        """
+        Return whether this unparser represents a special token, which should
+        not make it to unparsing tables.
+        """
+        return self.is_termination or self.is_lexing_failure
+
+    @property
+    def match_text(self) -> str:
+        assert self._match_text is not None, str(self)
+        return self._match_text
 
     @overload
     @classmethod
@@ -194,14 +213,20 @@ class TokenUnparser(Unparser):
         return '<none>' if token is None else token.dumps()
 
     def _dump(self, stream: IO[str]) -> None:
-        stream.write(self.match_text)
+        if self.is_termination:
+            label = "<termination>"
+        elif self.is_lexing_failure:
+            label = "<lexing failure>"
+        else:
+            label = self.match_text
+        stream.write(label)
 
     @property
     def text_repr(self) -> str:
         """
         Return an Ada string literal for the text to emit this token.
         """
-        return text_repr(self.dumps())
+        return text_repr(self.match_text)
 
     # Comparing tokens is done through
     # ``TokenSequenceUnparser.check_equivalence``, which is already good at
@@ -232,7 +257,9 @@ class TokenSequenceUnparser(Unparser):
         """
         :param init_tokens: Optional list of tokens to start with.
         """
-        self.tokens = list(init_tokens or [])
+        self.tokens = []
+        if init_tokens:
+            self.tokens = [t for t in init_tokens if not t.is_special]
 
         self._serial_number: int | None = None
         self._var_name: names.Name | None = None
@@ -262,6 +289,8 @@ class TokenSequenceUnparser(Unparser):
 
         :param token: Token unparser to append.
         """
+        if token.is_special:
+            return
         self.tokens.append(token)
 
     def check_equivalence(
@@ -293,8 +322,6 @@ class TokenSequenceUnparser(Unparser):
         """
         Name of the variable to hold this sequence of tokens in code
         generation.
-
-        :rtype: names.Name
         """
         if not self.tokens:
             return names.Name('Empty_Token_Sequence')
@@ -407,8 +434,6 @@ class NodeUnparser(Unparser):
             Considering the next field to process, return a tuple that contains
             the token sequence that precedes it, and the token sequence that
             succeeds it.
-
-            :rtype: (TokenSequenceUnparser, TokenSequenceUnparser|None)
             """
             if next_field == 0:
                 pre_tokens = result.pre_tokens
@@ -435,7 +460,7 @@ class NodeUnparser(Unparser):
         for i, subp in enumerate(subparsers):
             if subp.discard():
                 tok_seq, _ = surrounding_inter_tokens()
-                NodeUnparser._emit_to_token_sequence(subp, tok_seq.tokens)
+                NodeUnparser._emit_to_token_sequence(subp, tok_seq)
             else:
                 pre_tokens, post_tokens = surrounding_inter_tokens()
                 assert post_tokens is not None
@@ -501,32 +526,29 @@ class NodeUnparser(Unparser):
         Split ``_Extract`` parsers into three parts: a sequence of pre-tokens,
         the node parser in the middle, and a sequence of post-tokens.
 
-        :param _Extract parser: _Extract parser to split.
-        :rtype: (TokenSequenceUnparser, Parser, TokenSequenceUnparser)
+        :param parser: _Extract parser to split.
         """
         assert isinstance(parser, _Extract)
         assert isinstance(parser.parser, _Row)
         subparsers = parser.parser.parsers
         index = parser.index
 
-        pre_toks: list[TokenUnparser] = []
+        pre_toks = TokenSequenceUnparser()
         for pre_parser in subparsers[:index]:
             NodeUnparser._emit_to_token_sequence(pre_parser, pre_toks)
 
         node_parser = subparsers[parser.index]
 
-        post_toks: list[TokenUnparser] = []
+        post_toks = TokenSequenceUnparser()
         for post_parser in subparsers[index + 1:]:
             NodeUnparser._emit_to_token_sequence(post_parser, post_toks)
 
-        return (TokenSequenceUnparser(pre_toks),
-                node_parser,
-                TokenSequenceUnparser(post_toks))
+        return (pre_toks, node_parser, post_toks)
 
     @staticmethod
     def _emit_to_token_sequence(
         parser: Parser,
-        token_sequence: list[TokenUnparser],
+        token_sequence: TokenSequenceUnparser,
     ) -> None:
         """
         Turn the given parser into a sequence of tokens.
@@ -974,7 +996,7 @@ class TokenSequenceUnparserPool:
     def finalize(self) -> None:
         self.sorted = sorted(
             self.pool.values(),
-            key=lambda tok_seq: tuple(t.text_repr for t in tok_seq.tokens),
+            key=lambda tok_seq: tuple(t.dumps() for t in tok_seq.tokens),
         )
 
         # Assign a unique identification number to token sequences for code
@@ -1031,8 +1053,9 @@ class Unparsers:
         """
         List of all token unparsers. Order is consistent across runs.
         """
-        return sorted(self.token_unparsers.values(),
-                      key=lambda t: t.dumps())
+        result = [t for t in self.token_unparsers.values() if not t.is_special]
+        result.sort(key=lambda t: t.dumps())
+        return result
 
     def abort_unparser(self, message: str) -> None:
         """
@@ -1060,7 +1083,7 @@ class Unparsers:
         Also abort the generation of unparsers if the grammar contains parsing
         constructs we don't support with unparsers.
 
-        :param Parser parser: Parser combinator to analyze.
+        :param parser: Parser combinator to analyze.
         """
 
         # Skip parsers generated for DontSkip. They don't generate any nodes,
