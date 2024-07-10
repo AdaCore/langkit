@@ -1,3 +1,6 @@
+with Ada.Containers.Vectors;
+with Ada.Strings.Unbounded;
+
 with Liblktlang_Support.Text; use Liblktlang_Support.Text;
 
 with Liblktlang.Implementation; use Liblktlang.Implementation;
@@ -9,6 +12,8 @@ with Liblktlang.Implementation; use Liblktlang.Implementation;
 
 private package Liblktlang.Default_Provider is
 
+   package US renames Ada.Strings.Unbounded;
+
    Path_Var_Name : constant String := "LKT_PATH";
    --  Name of the environment variable that contains the path to Lkt source
    --  files.
@@ -18,6 +23,19 @@ private package Liblktlang.Default_Provider is
    --  string if Name is not a valid unit name.
 
    function Create return Internal_Unit_Provider_Access;
-   --  Create a new default unit provider instance
+   --  Create a new default unit provider instance from the ``LKT_PATH``
+   --  environment variable.
+
+   package String_Vectors is new Ada.Containers.Vectors
+     (Index_Type   => Positive,
+      Element_Type => US.Unbounded_String,
+      "="          => US."=");
+
+   function Create_From_Dirs
+     (Directories : String_Vectors.Vector)
+      return Internal_Unit_Provider_Access;
+   --  Create a new default unit provider instance from an explicit list of
+   --  directories. Note that the current directory is still implicitly looked
+   --  at first.
 
 end Liblktlang.Default_Provider;

@@ -239,7 +239,10 @@ def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
                 process_unit(imp.p_referenced_unit)
 
     # Load ``lkt_file`` and all the units it references, transitively
-    process_unit(L.AnalysisContext().get_from_file(lkt_file))
+    ctx = L.AnalysisContext(unit_provider=L.UnitProvider.from_lkt_path())
+    process_unit(
+        ctx.get_from_file(lkt_file)
+    )
 
     # Forward potential lexing/parsing errors to our diagnostics system
     for u, d in diagnostics:

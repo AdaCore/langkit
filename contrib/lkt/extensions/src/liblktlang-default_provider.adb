@@ -1,7 +1,5 @@
-with Ada.Containers.Vectors;
 with Ada.Directories;
 with Ada.Environment_Variables;
-with Ada.Strings.Unbounded;
 
 with GNAT.OS_Lib;
 
@@ -11,11 +9,6 @@ package body Liblktlang.Default_Provider is
 
    package Dirs renames Ada.Directories;
    package Env renames Ada.Environment_Variables;
-   package US renames Ada.Strings.Unbounded;
-   package String_Vectors is new Ada.Containers.Vectors
-     (Index_Type   => Positive,
-      Element_Type => US.Unbounded_String,
-      "="          => US."=");
 
    type Default_Unit_Provider is new Internal_Unit_Provider with record
       Ref_Count   : Natural;
@@ -200,5 +193,27 @@ package body Liblktlang.Default_Provider is
 
       return Internal_Unit_Provider_Access (Result);
    end Create;
+
+   ----------------------
+   -- Create_From_Dirs --
+   ----------------------
+
+   function Create_From_Dirs
+     (Directories : String_Vectors.Vector)
+      return Internal_Unit_Provider_Access
+   is
+      Result : constant Default_Unit_Provider_Access :=
+        new Default_Unit_Provider'(Internal_Unit_Provider with
+                                   Ref_Count   => 1,
+                                   Directories => <>);
+   begin
+      --  Sources in the current directory always come first
+
+      Result.Directories.Append
+        (US.To_Unbounded_String (Dirs.Current_Directory));
+      Result.Directories.Append_Vector (Directories);
+
+      return Internal_Unit_Provider_Access (Result);
+   end Create_From_Dirs;
 
 end Liblktlang.Default_Provider;
