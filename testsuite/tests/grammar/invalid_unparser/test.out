@@ -6,14 +6,20 @@ pick-in-list.lkt:5:29: error: Unparsers generation require list parsers to direc
 5 |     @main_rule main_rule <- list+("example" Root(or(
 
 
-== pick-in-or.lkt ==
-pick-in-or.lkt:6:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Extract(Row(Token(<WithText Example>), Transform(Row(Token(<WithSymbol Identifier>)), Identifier)), 1)
+== pick-in-or-1.lkt ==
+pick-in-or-1.lkt:6:9: error: Pick parser cannot appear as an Or subparser
 6 |         pick("example" Identifier(@Identifier))
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+== pick-in-or-2.lkt ==
+pick-in-or-2.lkt:19:11: error: Pick parser cannot appear as an Or subparser
+19 |         | pick("example" null(FooNode))
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 == several-1.lkt ==
-several-1.lkt:6:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Transform(Row(Or(Token(<WithSymbol Identifier>), Token(<WithText Example>))), Identifier)
+several-1.lkt:6:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted
 6 |         Identifier(or(@Identifier | @Example))
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

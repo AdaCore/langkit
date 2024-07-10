@@ -2107,9 +2107,15 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 return PList(
                     lower(rule.f_expr),
                     empty_valid=rule.f_kind.text == '*',
-                    list_cls=resolve_node_ref_or_none(rule.f_list_type),
+                    list_cls=(
+                        None
+                        if isinstance(
+                            rule.f_list_type, L.DefaultListTypeRef
+                        ) else
+                        resolve_node_ref(rule.f_list_type)
+                    ),
                     sep=lower_or_none(rule.f_sep),
-                    location=loc
+                    location=loc,
                 )
 
             elif isinstance(rule, (L.GrammarImplicitPick,

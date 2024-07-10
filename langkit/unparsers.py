@@ -333,7 +333,7 @@ class NodeUnparser(Unparser):
         :param parser: Parser for which we want to create an unparser.
         """
         assert not node.abstract and not node.synthetic, (
-            'Invalid unparser request for {}'.format(node.dsl_name)
+            f"Invalid unparser request for {node.dsl_name} ({parser})"
         )
         parser = unwrap(parser)
 
@@ -378,7 +378,7 @@ class NodeUnparser(Unparser):
             if isinstance(parser, Null):
                 return NullNodeUnparser(node)
 
-            error(f"Unsupported parser for unparsers generation: {parser}")
+            error("Unsupported parser for unparsers generation")
 
     @staticmethod
     def _from_transform_parser(
@@ -488,8 +488,8 @@ class NodeUnparser(Unparser):
 
         check_source_language(
             accepted,
-            'Unsupported token node parser for unparsers generation, only'
-            ' direct token parsers are accepted: {}'.format(parser)
+            "Unsupported token node parser for unparsers generation, only"
+            " direct token parsers are accepted"
         )
         return TokenNodeUnparser(node)
 
@@ -627,6 +627,14 @@ class NodeUnparser(Unparser):
             # this field.
             field_unparser.always_absent = False
             for subparser in parser.parsers:
+                # It is never legal for Pick parsers to be direct operands of
+                # Or parsers, as it means that pre-post tokens for this field
+                # will depend on what Or alternative was taken (not decidable
+                # for unparsers).
+                if isinstance(subparser, _Extract):
+                    with subparser.diagnostic_context:
+                        error("Pick parser cannot appear as an Or subparser")
+
                 # Named parsing rules always create nodes, so we don't need to
                 # check Defer parsers. Skip parsers also create nodes, but most
                 # importantly they trigger a parsing error, so unparsers can
