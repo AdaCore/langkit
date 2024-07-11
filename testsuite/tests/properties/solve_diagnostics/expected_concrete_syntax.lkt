@@ -61,7 +61,7 @@ class Expr: FooNode {
 
 class NumberLiteral: Expr implements TokenNode {
     fun xref_equation(): Equation =
-        %eq(node.type_var, node.unit().root.number_type())
+        %eq(node.type_var, node.unit().root.number_type)
 }
 
 @abstract
@@ -100,15 +100,15 @@ class TypeAssert: Resolvable {
 
 class StringLiteral: Expr implements TokenNode {
     fun xref_equation(): Equation =
-        %eq(node.type_var, node.unit().root.str_type())
+        %eq(node.type_var, node.unit().root.str_type)
 }
 
 class Identifier: FooNode implements TokenNode {
     ref_var: LogicVar
 
     fun designated_type(): Entity[TypeDecl] =
-        if node.symbol == s"number" then node.unit().root.number_type().as_bare_entity
-        elif node.symbol == s"string" then node.unit().root.str_type().as_bare_entity
+        if node.symbol == s"number" then node.unit().root.number_type.as_bare_entity
+        elif node.symbol == s"string" then node.unit().root.str_type.as_bare_entity
         else null[Entity[TypeDecl]]
 
     fun xref_equation(ctx: LogicContext): Equation =

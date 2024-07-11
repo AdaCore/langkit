@@ -53,11 +53,11 @@ class CallExpr: FooNode {
 
     @exported
     fun get_arg(name: Symbol): Entity[Expr] =
-        node.args_env().get_first(name).as[Expr]
+        node.args_env.get_first(name).as[Expr]
 
     @exported
     fun get_arg_expr(name: Symbol): Entity[Expr] =
-        node.arg_exprs_env().get_first(name).as[Expr]
+        node.arg_exprs_env.get_first(name).as[Expr]
 }
 
 class ConsDecl: FooNode {

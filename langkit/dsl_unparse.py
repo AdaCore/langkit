@@ -1358,7 +1358,6 @@ def emit_expr_prio(expr, **ctx):
     elif isinstance(expr, FieldAccess):
         args = []
         has_any_commented_arg = False
-        is_property = isinstance(expr.constructed_node_data, PropertyDef)
         if expr.arguments:
             with walker.method_call(expr.field):
                 field_coms = walker.emit_comments()
@@ -1388,7 +1387,10 @@ def emit_expr_prio(expr, **ctx):
             expr.field,
             args,
             as_multiline=has_any_commented_arg,
-            force_parens=is_property
+            force_parens=(
+                isinstance(expr.constructed_node_data, PropertyDef)
+                and not expr.constructed_node_data.lazy_field
+            ),
         )
         return prio, field_coms + result
 

@@ -14,7 +14,7 @@ class Example: FooNode {
     new_node: SynthNode = SynthNode()
 
     @exported
-    fun prop(): Int = node.new_node().lf()
+    fun prop(): Int = node.new_node.lf
 }
 
 @synthetic
