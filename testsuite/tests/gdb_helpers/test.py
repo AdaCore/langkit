@@ -12,7 +12,7 @@ helpers features.
 import subprocess
 import sys
 
-from langkit.dsl import ASTNode, AnalysisUnit, Struct, T, UserField
+from langkit.dsl import ASTNode, AnalysisUnit, Field, Struct, T, UserField
 from langkit.envs import EnvSpec, add_env
 from langkit.expressions import (
     ArrayLiteral, Entity, If, Let, No, Self, String, Var, langkit_property
@@ -59,7 +59,7 @@ class FooNode(ASTNode):
 
     @langkit_property()
     def get_rebindings(inverse=T.Bool):
-        example_nodes = Var(Self.parent.cast(T.Example.list).as_array)
+        example_nodes = Var(Self.parent.cast(T.FooNode.list).as_array)
         n1 = Var(example_nodes.at(If(inverse, 1, 2)))
         n2 = Var(example_nodes.at(If(inverse, 2, 1)))
         return No(T.EnvRebindings).append_rebinding(
@@ -125,9 +125,9 @@ class FooNode(ASTNode):
 
     @langkit_property(public=True)
     def test_arrays():
-        empty = Var(No(T.Example.array))
-        single = Var(ArrayLiteral([Self.cast(Example)]))
-        complete = Var(Self.parent.cast(T.Example.list).as_array)
+        empty = Var(No(T.FooNode.array))
+        single = Var(ArrayLiteral([Self]))
+        complete = Var(Self.parent.cast(T.FooNode.list).as_array)
 
         arr = Var(empty.concat(single).concat(complete))
         return arr.length  # BREAK:test_arrays
@@ -175,6 +175,10 @@ class Example(FooNode):
     token_node = True
 
     env_spec = EnvSpec(add_env())
+
+
+class Parens(FooNode):
+    items = Field(type=T.FooNode.list)
 
 
 # Build the generated library and the Ada test program

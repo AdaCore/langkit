@@ -33,7 +33,7 @@ gdb.test("foostate nosuchvar", "No binding called nosuchvar")
 # Check state at various points during the property execution
 run_foonext("Now evaluating <parent at test.py:@NUMBER>")
 run_foonext("""\
-<parent at test.py:@NUMBER> evaluated to: <ExampleList main.txt:1:1-1:23>
+<parent at test.py:@NUMBER> evaluated to: <FooNodeList main.txt:1:1-1:23>
 
 Now evaluating <children at test.py:@NUMBER>""")
 run_foonext("""\
@@ -53,7 +53,7 @@ Currently evaluating <Block at test.py:@NUMBER>
 from @...test.py:@NUMBER
   nodes = Bare_Foo_Node array of length 3 =\
  {<Example main.txt:1:1-1:8>, <Example main.txt...
-  <parent at test.py:@NUMBER> -> <ExampleList main.txt:1:1-1:23>
+  <parent at test.py:@NUMBER> -> <FooNodeList main.txt:1:1-1:23>
   <children at test.py:@NUMBER> -> Bare_Foo_Node array of length 3 =\
  {<Example main.txt:1:1-1:8>, <Example main.txt...
 
@@ -109,7 +109,7 @@ gdb.test("fooout", "Not evaluating any expression currently")
 run_continue()
 run_foosi("Now evaluating <parent at test.py:@NUMBER>")
 run_foosi("""\
-<parent at test.py:@NUMBER> evaluated to: <ExampleList main.txt:1:1-1:23>
+<parent at test.py:@NUMBER> evaluated to: <FooNodeList main.txt:1:1-1:23>
 
 Now evaluating <children at test.py:@NUMBER>""")
 run_foosi("""\

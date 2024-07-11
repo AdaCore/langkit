@@ -81,11 +81,11 @@ check_var_state("rebound", "<| Example main.txt:1:1-1:8 [main.txt:1:9] |>")
 # Check pretty-printing for arrays
 break_dsl("test_arrays")
 run_continue()
-check_var_state("empty", "Bare_Example array of length 0")
-check_var_state("single", f"Bare_Example array of length 1 = {{{node_img}}}")
+check_var_state("empty", "Bare_Foo_Node array of length 0")
+check_var_state("single", f"Bare_Foo_Node array of length 1 = {{{node_img}}}")
 check_var_state(
     "complete",
-    "Bare_Example array of length 3"
+    "Bare_Foo_Node array of length 3"
     " = {<Example main.txt:1:1-1:8>,"
     " <Example main.txt:1:9-1:16>,"
     " <Example main.txt:1:17-1:23>}"
