@@ -39,7 +39,7 @@ class LiteralSequence: FooNode {
 
     @exported
     fun prop2(with_null: Bool): Entity[SynthNode2] = (
-        if with_null then node.new_node2_null() else node.new_node2()
+        if with_null then node.new_node2_null else node.new_node2
     ).as_bare_entity
 }
 
