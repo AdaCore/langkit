@@ -1,5 +1,6 @@
 from langkit.lexer import (
-    Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText, WithTrivia
+    Lexer, LexerToken, Literal, Pattern, TokenFamily, WithSymbol, WithText,
+    WithTrivia
 )
 
 
@@ -73,7 +74,7 @@ class Token(LexerToken):
     DynVarKw = WithText()
 
     # Trivia
-    Comment = WithTrivia()
+    Comment = WithTrivia(comment=True)
     Whitespace = WithTrivia()
 
     # Literals
@@ -84,6 +85,44 @@ class Token(LexerToken):
     DocComment = WithText()
     Number = WithText()
     BigNumber = WithText()
+
+    Alphanumericals = TokenFamily(
+        Identifier,
+        LexerKw,
+        GrammarKw,
+        OrKw,
+        NotKw,
+        ClassKw,
+        StructKw,
+        FunKw,
+        PublicKw,
+        PrivateKw,
+        NullKw,
+        IsKw,
+        InKw,
+        ValKw,
+        IfKw,
+        ThenKw,
+        ElifKw,
+        ElseKw,
+        AndKw,
+        OrKw,
+        BindKw,
+        MatchKw,
+        CaseKw,
+        RaiseKw,
+        TryKw,
+        EnumKw,
+        GenericKw,
+        DiscardKw,
+        ImportKw,
+        ImplementsKw,
+        TraitKw,
+        DynVarKw,
+        PString,
+        Number,
+        BigNumber,
+    )
 
 
 lkt_lexer = Lexer(Token)
@@ -182,4 +221,11 @@ lkt_lexer.add_rules(
 
     # Comments
     (Pattern(r"#(.?)+"),   Token.Comment),
+)
+
+lkt_lexer.add_spacing((Token.Alphanumericals, Token.Alphanumericals))
+lkt_lexer.add_newline_after(
+    Token.Comment,
+    Token.BlockStringLine,
+    Token.DocComment,
 )

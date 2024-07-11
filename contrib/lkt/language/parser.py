@@ -47,7 +47,7 @@ from langkit.expressions import (
     langkit_property, new_env_assoc
 )
 from langkit.parsers import (
-    Cut, Grammar, List, Null, Opt, Or as GOr, Predicate
+    Cut, Grammar, List, ListSepExtra, Opt, Or as GOr, Predicate
 )
 
 
@@ -2782,8 +2782,8 @@ class ArrayLiteral(Expr):
     """
     Literal for an array value.
     """
-    element_type = Field(type=T.TypeRef)
     exprs = Field(type=T.Expr.list)
+    element_type = Field(type=T.TypeRef)
 
     @langkit_property()
     def expected_type_predicate(expected_type=T.TypeDecl.entity):
@@ -4131,7 +4131,7 @@ lkt_grammar.add_rules(
 
     grammar_or_expr=GrammarOrExpr(
         "or", "(",
-        Opt("|"), List(List(G.grammar_expr), sep="|"),
+        List(List(G.grammar_expr), sep="|", extra=ListSepExtra.allow_leading),
         ")"
     ),
 
@@ -4430,14 +4430,11 @@ lkt_grammar.add_rules(
     raise_expr=RaiseExpr("raise", Opt("[", G.type_ref, "]"), G.expr),
     try_expr=TryExpr("try", G.expr, Opt("else", G.expr)),
 
-    array_literal=GOr(
-        ArrayLiteral("[", "]", ":", G.type_ref, Null(Expr.list)),
-        ArrayLiteral(
-            Null(TypeRef),
-            "[",
-            List(G.expr, sep=",", empty_valid=True),
-            "]",
-        ),
+    array_literal=ArrayLiteral(
+        "[",
+        List(G.expr, sep=",", empty_valid=True),
+        "]",
+        Opt(":", G.type_ref),
     ),
 
     basic_expr=GOr(
