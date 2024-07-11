@@ -1571,6 +1571,32 @@ package body Langkit_Support.Generic_API.Unparsing is
       Diagnostics : in out Diagnostics_Vectors.Vector)
       return Unparsing_Configuration
    is
+      ------------------
+      -- JSON helpers --
+      ------------------
+
+      package Node_JSON_Maps is new Ada.Containers.Hashed_Maps
+        (Key_Type        => Type_Index,
+         Element_Type    => JSON_Value,
+         Hash            => Hash,
+         Equivalent_Keys => "=");
+
+      function Node_Entries (JSON : JSON_Value) return Node_JSON_Maps.Map;
+      --  Assuming that ``JSON`` is an object whose keys are node type names,
+      --  compute the corresponding map where keys are converted to node types.
+
+      package Field_JSON_Maps is new Ada.Containers.Hashed_Maps
+        (Key_Type        => Struct_Member_Index,
+         Element_Type    => JSON_Value,
+         Hash            => Hash,
+         Equivalent_Keys => "=");
+
+      function Field_Entries
+        (Node : Type_Ref; JSON : JSON_Value) return Field_JSON_Maps.Map;
+      --  Assuming that ``JSON`` is an object whose keys are field type names,
+      --  compute the corresponding map where keys are converted to struct
+      --  member references.
+
       --  Create a map so that we can lookup nodes/fields by name
 
       Symbols : Symbol_Table := Create_Symbol_Table;
@@ -1737,13 +1763,6 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Like ``Abort_Parsing``, but add the expected linear template at the
       --  end of the error message.
 
-      procedure Load_Field_Configs
-        (Node    : Type_Ref;
-         JSON    : JSON_Value;
-         Configs : out Field_Config_Maps.Map);
-      --  Assuming that JSON is the "fields" configuration for Node, parse its
-      --  field configurations and set Configs accordingly.
-
       procedure Abort_Parsing (Message : String) with No_Return;
       --  Append an item to ``Diagnostics`` and raise an Invalid_Input
       --  exception.
@@ -1751,6 +1770,49 @@ package body Langkit_Support.Generic_API.Unparsing is
       Result : Unparsing_Configuration_Access :=
         new Unparsing_Configuration_Record;
       Pool   : Document_Pool renames Result.Pool;
+
+      ------------------
+      -- Node_Entries --
+      ------------------
+
+      function Node_Entries (JSON : JSON_Value) return Node_JSON_Maps.Map is
+         Result : Node_JSON_Maps.Map;
+
+         procedure Process (Name : String; Value : JSON_Value);
+         --  Add Value to Result
+
+         procedure Process (Name : String; Value : JSON_Value) is
+            Key : constant Type_Index := To_Type_Index (Name);
+         begin
+            Result.Insert (Key, Value);
+         end Process;
+      begin
+         JSON.Map_JSON_Object (Process'Access);
+         return Result;
+      end Node_Entries;
+
+      -------------------
+      -- Field_Entries --
+      -------------------
+
+      function Field_Entries
+        (Node : Type_Ref; JSON : JSON_Value) return Field_JSON_Maps.Map
+      is
+         Result : Field_JSON_Maps.Map;
+
+         procedure Process (Name : String; Value : JSON_Value);
+         --  Add Value to Result
+
+         procedure Process (Name : String; Value : JSON_Value) is
+            Key : constant Struct_Member_Index :=
+              To_Struct_Member_Index (Name, Node);
+         begin
+            Result.Insert (Key, Value);
+         end Process;
+      begin
+         JSON.Map_JSON_Object (Process'Access);
+         return Result;
+      end Field_Entries;
 
       -------------------
       -- To_Type_Index --
@@ -2774,42 +2836,6 @@ package body Langkit_Support.Generic_API.Unparsing is
          Abort_Parsing (Context, Message & To_String (Suffix));
       end Abort_Parsing_Linear;
 
-      ------------------------
-      -- Load_Field_Configs --
-      ------------------------
-
-      procedure Load_Field_Configs
-        (Node    : Type_Ref;
-         JSON    : JSON_Value;
-         Configs : out Field_Config_Maps.Map)
-      is
-         procedure Process (Name : String; Value : JSON_Value);
-         --  Load the Value template for the Node field called Name
-
-         -------------
-         -- Process --
-         -------------
-
-         procedure Process (Name : String; Value : JSON_Value) is
-            Member  : constant Struct_Member_Index :=
-              To_Struct_Member_Index (Name, Node);
-            Context : Template_Parsing_Context :=
-              (Kind  => Field_Template,
-               State => Initial_State_For
-                          (Node  => Node,
-                           Field => From_Index (Language, Member),
-                           JSON  => Value),
-               Node  => Node,
-               Field => From_Index (Language, Member));
-         begin
-            Configs.Insert (Member, Parse_Template (Value, Context));
-         end Process;
-
-      begin
-         Configs.Clear;
-         JSON.Map_JSON_Object (Process'Access);
-      end Load_Field_Configs;
-
       -------------------
       -- Abort_Parsing --
       -------------------
@@ -2819,6 +2845,10 @@ package body Langkit_Support.Generic_API.Unparsing is
          Append (Diagnostics, No_Source_Location_Range, To_Text (Message));
          raise Invalid_Input;
       end Abort_Parsing;
+
+      Node_JSON_Map : Node_JSON_Maps.Map;
+      --  For each node type described in the unparsing configuration,
+      --  reference to the corresponding node configuration.
 
       --  First, parse the JSON document
 
@@ -2853,28 +2883,51 @@ package body Langkit_Support.Generic_API.Unparsing is
          Abort_Parsing ("missing ""node_configs"" key");
       end if;
 
-      declare
-         Node_Configs : constant JSON_Value := JSON.Get ("node_configs");
+      --  Register all node configurations in Node_JSON_Map
 
-         procedure Process (Name : String; Value : JSON_Value);
-         --  Load the unparsing configuration from Value for the node called
-         --  Name.
+      Node_JSON_Map := Node_Entries (JSON.Get ("node_configs"));
 
-         -------------
-         -- Process --
-         -------------
+      --  Now, go through all node types: parse JSON configurations for nodes
+      --  that have one, and implement configuration inheritance in general.
 
-         procedure Process (Name : String; Value : JSON_Value) is
-            Key     : constant Type_Index := To_Type_Index (Name);
-            Node    : constant Type_Ref := From_Index (Language, Key);
-            Config  : Node_Config_Access := new Node_Config_Record'
-              (Node_Template => No_Template,
-               Field_Configs => <>,
-               List_Sep      => No_Template);
+      for Node of All_Node_Types (Language) loop
+         declare
+            Key  : constant Type_Index := To_Index (Node);
+            JSON : constant JSON_Value :=
+              (if Node_JSON_Map.Contains (Key)
+               then Node_JSON_Map.Element (Key)
+               else JSON_Null);
+
+            --  Create the configuration for this node, and look for the
+            --  configuration of the node it derives.
+
+            Node_Config : constant Node_Config_Access :=
+              new Node_Config_Record'
+                (Node_Template => No_Template,
+                 Field_Configs => <>,
+                 List_Sep      => No_Template);
+            Base_Config : constant Node_Config_Access :=
+              (if Node = Root_Node_Type (Language)
+               then null
+               else Result.Node_Configs.Element (To_Index (Base_Type (Node))));
          begin
-            if Value.Has_Field ("node") then
+            Result.Node_Configs.Insert (Key, Node_Config);
+
+            --  Decode the JSON configuration:
+
+            if JSON.Kind not in JSON_Null_Type | JSON_Object_Type then
+               Abort_Parsing
+                 ("invalid JSON configuration for " & Debug_Name (Node));
+            end if;
+
+            --  (1) the "node" entry (if present). If not present, inherit the
+            --  config from the base field. As the last resort, use the default
+            --  template.
+
+            if JSON.Kind = JSON_Object_Type and then JSON.Has_Field ("node")
+            then
                declare
-                  JSON_Template : constant JSON_Value := Value.Get ("node");
+                  JSON_Template : constant JSON_Value := JSON.Get ("node");
                   Context       : Template_Parsing_Context :=
                     (Kind  => Node_Template,
                      Node  => Node,
@@ -2882,22 +2935,78 @@ package body Langkit_Support.Generic_API.Unparsing is
                begin
                   Context.State :=
                     Initial_State_For (Node, JSON_Template, Context);
-                  Config.Node_Template :=
+                  Node_Config.Node_Template :=
                     Parse_Template (JSON_Template, Context);
                end;
+            elsif Base_Config /= null then
+               Node_Config.Node_Template := Base_Config.Node_Template;
             else
-               Config.Node_Template := Pool.Create_Recurse;
+               Node_Config.Node_Template := Pool.Create_Recurse;
             end if;
 
-            if Value.Has_Field ("fields") then
-               Load_Field_Configs
-                 (Node, Value.Get ("fields"), Config.Field_Configs);
-            end if;
+            --  (2) the "fields" entry (if present)
 
-            if Value.Has_Field ("sep") then
+            declare
+               Field_JSON_Map : constant Field_JSON_Maps.Map :=
+                 (if JSON.Kind = JSON_Object_Type
+                     and then JSON.Has_Field ("fields")
+                  then Field_Entries (Node, JSON.Get ("fields"))
+                  else Field_JSON_Maps.Empty_Map);
+            begin
+               for Member of Members (Node) loop
+                  if Is_Field (Member) and then not Is_Null_For (Member, Node)
+                  then
+                     declare
+                        Key : constant Struct_Member_Index :=
+                          To_Index (Member);
+                        T   : Template_Type;
+                     begin
+                        --  If we have a JSON template for this field, just use
+                        --  it.
+
+                        if Field_JSON_Map.Contains (Key) then
+                           declare
+                              JSON    : constant JSON_Value :=
+                                Field_JSON_Map.Element (Key);
+                              Context : Template_Parsing_Context :=
+                                (Kind  => Field_Template,
+                                 State => Initial_State_For
+                                            (Node, Member, JSON),
+                                 Node  => Node,
+                                 Field => Member);
+                           begin
+                              T := Parse_Template (JSON, Context);
+                           end;
+
+                        --  Otherwise, if the base node has this field, inherit
+                        --  its configuration.
+
+                        elsif Base_Config /= null
+                              and then Base_Config.Field_Configs.Contains (Key)
+                        then
+                           T := Base_Config.Field_Configs.Element (Key);
+
+                        --  If none of the above work, just provide the default
+                        --  template.
+
+                        else
+                           T := Pool.Create_Recurse;
+                        end if;
+
+                        Node_Config.Field_Configs.Insert (Key, T);
+                     end;
+                  end if;
+               end loop;
+            end;
+
+            --  (3) the "sep" entry (if present). As usual, inherit it if
+            --  possible/needed.
+
+            if JSON.Kind = JSON_Object_Type and then JSON.Has_Field ("sep")
+            then
                if not Is_List_Node (Node) then
                   Abort_Parsing
-                    (Name & " is not a list node, invalid ""sep"""
+                    (Debug_Name (Node) & " is not a list node, invalid ""sep"""
                      & " configuration");
                end if;
                declare
@@ -2907,107 +3016,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                      State => (Kind          => Simple_Recurse,
                                Recurse_Found => False));
                begin
-                  Config.List_Sep :=
-                    Parse_Template (Value.Get ("sep"), Context);
+                  Node_Config.List_Sep :=
+                    Parse_Template (JSON.Get ("sep"), Context);
                end;
-            end if;
-
-            --  It is only now that this node config has been successfully
-            --  imported that we can add it to the unparsing configuration.
-            --  This is necessary so that potential premature release of the
-            --  unparsing configuration can be released in case of input
-            --  validation error.
-
-            Result.Node_Configs.Insert (Key, Config);
-
-         exception
-            when others =>
-               Free (Config);
-               raise;
-         end Process;
-
-      begin
-         Node_Configs.Map_JSON_Object (Process'Access);
-      end;
-
-      --  Now that we all node customizations, compute the unparsing
-      --  configuration for all nodes.
-
-      for Node of All_Node_Types (Language) loop
-         declare
-            Key         : constant Type_Index := To_Index (Node);
-            Cur         : constant Node_Config_Maps.Cursor :=
-              Result.Node_Configs.Find (Key);
-            Node_Config : Node_Config_Access;
-            Base_Config : constant Node_Config_Access :=
-              (if Node = Root_Node_Type (Language)
-               then null
-               else Result.Node_Configs.Element (To_Index (Base_Type (Node))));
-         begin
-            --  Create a configuration for this node if there isn't one yet
-
-            if Node_Config_Maps.Has_Element (Cur) then
-               Node_Config := Node_Config_Maps.Element (Cur);
+            elsif Base_Config /= null then
+               Node_Config.List_Sep := Base_Config.List_Sep;
             else
-               Node_Config := new Node_Config_Record;
-               Result.Node_Configs.Insert (Key, Node_Config);
-            end if;
-
-            --  Inherit configuration details from the base node, or provide
-            --  the default one for the root node.
-
-            if Node_Config.Node_Template = No_Template then
-               Node_Config.Node_Template :=
-                 (if Base_Config = null
-                  then Pool.Create_Recurse
-                  else Base_Config.Node_Template);
-            end if;
-
-            for Member of Members (Node) loop
-               if Is_Field (Member) and then not Is_Null_For (Member, Node)
-               then
-                  declare
-                     Key            : constant Struct_Member_Index :=
-                       To_Index (Member);
-                     Cur            : constant Field_Config_Maps.Cursor :=
-                       Node_Config.Field_Configs.Find (Key);
-                     Present        : constant Boolean :=
-                        Field_Config_Maps.Has_Element (Cur);
-                     Field_Template : Template_Type;
-                  begin
-                     if Present then
-                        Field_Template := Field_Config_Maps.Element (Cur);
-                     elsif Base_Config /= null then
-                        declare
-                           Cur : constant Field_Config_Maps.Cursor :=
-                             Base_Config.Field_Configs.Find (Key);
-                        begin
-                           Field_Template :=
-                             (if Field_Config_Maps.Has_Element (Cur)
-                              then Field_Config_Maps.Element (Cur)
-                              else Pool.Create_Recurse);
-                        end;
-                     end if;
-
-                     if Field_Template = No_Template then
-                        Field_Template := Pool.Create_Recurse;
-                     end if;
-
-                     if Present then
-                        Node_Config.Field_Configs.Replace_Element
-                          (Cur, Field_Template);
-                     else
-                        Node_Config.Field_Configs.Insert (Key, Field_Template);
-                     end if;
-                  end;
-               end if;
-            end loop;
-
-            if Node_Config.List_Sep = No_Template then
-               Node_Config.List_Sep :=
-                 (if Base_Config = null
-                  then Pool.Create_Recurse
-                  else Base_Config.List_Sep);
+               Node_Config.List_Sep := Pool.Create_Recurse;
             end if;
          end;
       end loop;
