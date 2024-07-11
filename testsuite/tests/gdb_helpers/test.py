@@ -162,6 +162,24 @@ class FooNode(ASTNode):
         ))
         return i + arr.length
 
+    @langkit_property(return_type=T.Int)
+    def int_array_sum(ints=T.Int.array, i=T.Int):
+        return If(
+            i <= ints.length,
+            ints.at(i) + Self.int_array_sum(ints, i + 1),
+            0,
+        )
+
+    @langkit_property(public=True, return_type=T.Int)
+    def test_recursive_cf():
+        self_count = Var(If(Self.is_a(T.Example), 1, 0))
+        children_counts = Var(
+            Self.children.map(
+                lambda n: n.test_recursive_cf  # BREAK:recursive_inner_loop
+            )
+        )
+        return Self.int_array_sum(children_counts, 0) + self_count
+
     @langkit_property(public=True)
     def test_struct(i=T.Int):
         result = Var(MyStruct.new(
@@ -187,7 +205,12 @@ build_and_run(lkt_file="expected_concrete_syntax.lkt", gpr_mains=["main.adb"])
 # Run the test program under GDB to check the helpers. We keep this part in
 # separate scripts to make it convenient, for debugging purposes, to run these
 # checks without re-building the library/program.
-for script in ["check_printers.py", "check_control_flow.py", "check_state.py"]:
+for script in [
+    "check_printers.py",
+    "check_control_flow.py",
+    "check_recursive_cf.py",
+    "check_state.py",
+]:
     subprocess.check_call([sys.executable, script])
 
 print("Done")

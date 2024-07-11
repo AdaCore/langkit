@@ -121,6 +121,18 @@ class FooNode implements Node[FooNode] {
         i + arr.length()
     }
 
+    fun int_array_sum(ints: Array[Int], i: Int): Int =
+        if i <= ints.length() then ints?[i] + node.int_array_sum(ints, i + 1) else 0
+
+    @exported
+    fun test_recursive_cf(): Int = {
+        val self_count = if node is Example then 1 else 0;
+        val children_counts = node.children.map((n) => n.test_recursive_cf());
+        # BREAK:recursive_inner_loop
+
+        node.int_array_sum(children_counts, 0) + self_count
+    }
+
     @exported
     fun test_struct(i: Int): Int = {
         val result = MyStruct(a=i, b=i + 10);

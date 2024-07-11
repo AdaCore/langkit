@@ -51,6 +51,11 @@ begin
       Dummy_Int := N.P_Test_Control_Flow (2);
       Dummy_Int := N.P_Test_Control_Flow (3);
 
+   elsif Mode = "recursive_cf" then
+      U.Reparse (Buffer => "(example example) (example)");
+
+      Dummy_Int := U.Root.P_Test_Recursive_Cf;
+
    else
       Put_Line ("Invalid mode argument");
    end if;

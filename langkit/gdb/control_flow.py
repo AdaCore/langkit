@@ -53,6 +53,7 @@ def break_scope_start(
     context: Context,
     scope: Scope,
     from_line_no: Optional[int] = None,
+    same_call: bool = False,
 ) -> Optional[BreakpointGroup]:
     """
     Create a breakpoint group for all entry points that are relevant (for
@@ -61,9 +62,15 @@ def break_scope_start(
 
     :param from_line_no: If given, don't consider line numbers lower than or
         equal to `from_line_no`.
+    :param same_call: Whether the breakpoint must trigger in the same call
+        frame as the currently selected frame.
     """
     candidates = scope_start_line_nos(scope, from_line_no)
-    return BreakpointGroup(context, candidates) if candidates else None
+    return (
+        BreakpointGroup(context, candidates, same_call=same_call)
+        if candidates else
+        None
+    )
 
 
 def go_next(context: Context) -> None:
@@ -89,8 +96,12 @@ def go_next(context: Context) -> None:
         # expressions: either the property just started (root expression
         # evaluation is ahead), either it is about to return (root expr.  eval.
         # is behind).
-        bp_group = break_scope_start(context, state.property_scope.scope,
-                                     from_line_no=state.line_no)
+        bp_group = break_scope_start(
+            context,
+            state.property_scope.scope,
+            from_line_no=state.line_no,
+            same_call=True,
+        )
 
         if bp_group:
             # The first expression is ahead: resume execution until we reach
@@ -113,7 +124,7 @@ def go_next(context: Context) -> None:
         for subexpr in current_expr.start_event.sub_expr_start:
             next_slocs_candidates.append(subexpr.line_no)
 
-        BreakpointGroup(context, next_slocs_candidates)
+        BreakpointGroup(context, next_slocs_candidates, same_call=True)
         gdb.execute('continue')
 
     new_current_expr = None
@@ -170,7 +181,8 @@ def go_out(context: Context) -> None:
 
     # Now go there! When we land in the expected place, also be useful and
     # display the value we got.
-    gdb.execute('until {}'.format(until_line_no))
+    BreakpointGroup(context, [until_line_no], same_call=True)
+    gdb.execute("continue")
     frame = gdb.selected_frame()
     new_state = context.decode_state(frame)
     assert new_state is not None
