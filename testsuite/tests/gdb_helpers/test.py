@@ -181,7 +181,7 @@ class Example(FooNode):
 build_and_run(lkt_file="expected_concrete_syntax.lkt", gpr_mains=["main.adb"])
 
 # Run the test program under GDB to check the helpers. We keep this part in
-# separate scripts to make it convenient, for debugging pruposes, to run these
+# separate scripts to make it convenient, for debugging purposes, to run these
 # checks without re-building the library/program.
 for script in ["check_printers.py", "check_control_flow.py", "check_state.py"]:
     subprocess.check_call([sys.executable, script])
