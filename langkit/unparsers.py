@@ -478,7 +478,7 @@ class NodeUnparser(Unparser):
         # pre-tokens, parsed fields, token sequences between parse fields, and
         # post-tokens.
         for i, subp in enumerate(subparsers):
-            if subp.discard():
+            if subp.discard:
                 tok_seq, _ = surrounding_inter_tokens()
                 NodeUnparser._emit_to_token_sequence(subp, tok_seq)
             else:

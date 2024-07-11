@@ -704,6 +704,7 @@ class Parser(abc.ABC):
         assert self._name is not None
         return self._name.lower
 
+    @property
     def discard(self) -> bool:
         """
         Return whether the result of this parser must be discarded (i.e.
@@ -1018,6 +1019,7 @@ class _Token(Parser):
         else:
             return str(self.val)
 
+    @property
     def discard(self) -> bool:
         return True
 
@@ -1383,8 +1385,9 @@ class Or(Parser):
             + self.loc_comment("END")
         )
 
+    @property
     def discard(self) -> bool:
-        return all(p.discard() for p in self.parsers)
+        return all(p.discard for p in self.parsers)
 
 
 def always_make_progress(parser: Parser) -> bool:
@@ -1420,7 +1423,7 @@ def _pick_impl(parsers: Sequence[Parser],
     parsers = [resolve(p) for p in parsers if p]
     pick_parser_idx = -1
     for i, p in enumerate(parsers):
-        if p.discard():
+        if p.discard:
             continue
         with diagnostic_context(location):
             check_source_language(
@@ -1499,8 +1502,9 @@ class _Row(Parser):
         result for each sub-parser in this row.
         """
 
+    @property
     def discard(self) -> bool:
-        return all(p.discard() for p in self.parsers)
+        return all(p.discard for p in self.parsers)
 
     @property
     def children(self) -> list[Parser]:
@@ -1517,7 +1521,7 @@ class _Row(Parser):
         return self.pos_var
 
     def create_vars_after(self, pos_var: VarDef) -> None:
-        self.subresults = [p.res_var if not p.discard() else None
+        self.subresults = [p.res_var if not p.discard else None
                            for p in self.parsers]
 
         # Create the progress variable if there is a containing transform in
@@ -1749,8 +1753,9 @@ class Opt(Parser):
         self.contains_anonymous_row = bool(parsers)
         self.parser = Pick(*parsers)
 
+    @property
     def discard(self) -> bool:
-        return self._booleanize is None and self.parser.discard()
+        return self._booleanize is None and self.parser.discard
 
     def error(self) -> Parser:
         """
@@ -1898,6 +1903,7 @@ class Discard(Parser):
     Wrapper parser used to discard the match.
     """
 
+    @property
     def discard(self) -> bool:
         return True
 
@@ -2093,7 +2099,7 @@ class _Transform(Parser):
         # Gather field types that come from all child parsers
         elif isinstance(self.parser, _Row):
             # There are multiple fields for _Row parsers
-            return [p for p in self.parser.parsers if not p.discard()]
+            return [p for p in self.parser.parsers if not p.discard]
         elif isinstance(self.parser, _Token):
             return []
         else:
@@ -2540,6 +2546,7 @@ class Cut(Parser):
     will be incompletely parsed (no backtrack because of the ``Cut``).
     """
 
+    @property
     def discard(self) -> bool:
         return True
 
