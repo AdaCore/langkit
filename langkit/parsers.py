@@ -705,6 +705,10 @@ class Parser(abc.ABC):
         return self._name.lower
 
     def discard(self) -> bool:
+        """
+        Return whether the result of this parser must be discarded (i.e.
+        whether it *does not* return a node).
+        """
         return False
 
     def __or__(self, other: Parser) -> Parser:
