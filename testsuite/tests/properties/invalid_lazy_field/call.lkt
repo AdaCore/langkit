@@ -1,0 +1,11 @@
+import common
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @lazy lf: Bool = true
+
+    @exported
+    fun p(): Bool = node.lf()
+}

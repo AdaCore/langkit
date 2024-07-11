@@ -955,6 +955,12 @@ class FieldAccess(AbstractExpression):
         if isinstance(actual_node_data, PropertyDef):
             actual_node_data = actual_node_data.root
 
+            # Also reject the call syntax for lazy fields
+            check_source_language(
+                self.arguments is None or not actual_node_data.lazy_field,
+                "call syntax is forbidden for lazy fields",
+            )
+
         args = self.arguments or FieldAccess.Arguments([], {})
         result = self.common_construct(
             self.receiver_expr, node_data, actual_node_data, args,

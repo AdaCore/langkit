@@ -1,3 +1,9 @@
+== call.lkt ==
+call.lkt:10:21: error: call syntax is forbidden for lazy fields
+10 |     fun p(): Bool = node.lf()
+   |                     ^^^^^^^^^
+
+
 == entity_info_1.lkt ==
 entity_info_1.lkt:7:21: error: Cannot use entity info, as explicitly forbidden
 7 |     @lazy p: Bool = self.info.md.flag
