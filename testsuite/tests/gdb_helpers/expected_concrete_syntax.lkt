@@ -2,7 +2,10 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list+(Example(@Example))
+    @main_rule main_rule <- list+(or(example | parens))
+    node_list <- list*(or(example | parens))
+    parens <- Parens("(" node_list ")")
+    example <- Example(@Example)
 }
 
 @abstract
@@ -28,7 +31,7 @@ class FooNode implements Node[FooNode] {
     }
 
     fun get_rebindings(inverse: Bool): EnvRebindings = {
-        val example_nodes = node.parent.as[ASTList[Example]].as_array();
+        val example_nodes = node.parent.as[ASTList[FooNode]].as_array();
         val n1 = example_nodes?[if inverse then 1 else 2];
         val n2 = example_nodes?[if inverse then 2 else 1];
 
@@ -77,9 +80,9 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun test_arrays(): Int = {
-        val empty = null[Array[Example]];
-        val single = [node.as[Example]];
-        val complete = node.parent.as[ASTList[Example]].as_array();
+        val empty = null[Array[FooNode]];
+        val single = [node];
+        val complete = node.parent.as[ASTList[FooNode]].as_array();
         val arr = empty & single & complete;
 
         arr.length()
@@ -118,6 +121,18 @@ class FooNode implements Node[FooNode] {
         i + arr.length()
     }
 
+    fun int_array_sum(ints: Array[Int], i: Int): Int =
+        if i <= ints.length() then ints?[i] + node.int_array_sum(ints, i + 1) else 0
+
+    @exported
+    fun test_recursive_cf(): Int = {
+        val self_count = if node is Example then 1 else 0;
+        val children_counts = node.children.map((n) => n.test_recursive_cf());
+        # BREAK:recursive_inner_loop
+
+        node.int_array_sum(children_counts, 0) + self_count
+    }
+
     @exported
     fun test_struct(i: Int): Int = {
         val result = MyStruct(a=i, b=i + 10);
@@ -130,6 +145,10 @@ class Example: FooNode implements TokenNode {
     env_spec {
         add_env()
     }
+}
+
+class Parens: FooNode {
+    @parse_field items: ASTList[FooNode]
 }
 
 struct MyStruct {

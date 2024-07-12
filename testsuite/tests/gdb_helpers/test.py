@@ -12,7 +12,7 @@ helpers features.
 import subprocess
 import sys
 
-from langkit.dsl import ASTNode, AnalysisUnit, Struct, T, UserField
+from langkit.dsl import ASTNode, AnalysisUnit, Field, Struct, T, UserField
 from langkit.envs import EnvSpec, add_env
 from langkit.expressions import (
     ArrayLiteral, Entity, If, Let, No, Self, String, Var, langkit_property
@@ -59,7 +59,7 @@ class FooNode(ASTNode):
 
     @langkit_property()
     def get_rebindings(inverse=T.Bool):
-        example_nodes = Var(Self.parent.cast(T.Example.list).as_array)
+        example_nodes = Var(Self.parent.cast(T.FooNode.list).as_array)
         n1 = Var(example_nodes.at(If(inverse, 1, 2)))
         n2 = Var(example_nodes.at(If(inverse, 2, 1)))
         return No(T.EnvRebindings).append_rebinding(
@@ -125,9 +125,9 @@ class FooNode(ASTNode):
 
     @langkit_property(public=True)
     def test_arrays():
-        empty = Var(No(T.Example.array))
-        single = Var(ArrayLiteral([Self.cast(Example)]))
-        complete = Var(Self.parent.cast(T.Example.list).as_array)
+        empty = Var(No(T.FooNode.array))
+        single = Var(ArrayLiteral([Self]))
+        complete = Var(Self.parent.cast(T.FooNode.list).as_array)
 
         arr = Var(empty.concat(single).concat(complete))
         return arr.length  # BREAK:test_arrays
@@ -162,6 +162,24 @@ class FooNode(ASTNode):
         ))
         return i + arr.length
 
+    @langkit_property(return_type=T.Int)
+    def int_array_sum(ints=T.Int.array, i=T.Int):
+        return If(
+            i <= ints.length,
+            ints.at(i) + Self.int_array_sum(ints, i + 1),
+            0,
+        )
+
+    @langkit_property(public=True, return_type=T.Int)
+    def test_recursive_cf():
+        self_count = Var(If(Self.is_a(T.Example), 1, 0))
+        children_counts = Var(
+            Self.children.map(
+                lambda n: n.test_recursive_cf  # BREAK:recursive_inner_loop
+            )
+        )
+        return Self.int_array_sum(children_counts, 0) + self_count
+
     @langkit_property(public=True)
     def test_struct(i=T.Int):
         result = Var(MyStruct.new(
@@ -177,13 +195,22 @@ class Example(FooNode):
     env_spec = EnvSpec(add_env())
 
 
+class Parens(FooNode):
+    items = Field(type=T.FooNode.list)
+
+
 # Build the generated library and the Ada test program
 build_and_run(lkt_file="expected_concrete_syntax.lkt", gpr_mains=["main.adb"])
 
 # Run the test program under GDB to check the helpers. We keep this part in
-# separate scripts to make it convenient, for debugging pruposes, to run these
+# separate scripts to make it convenient, for debugging purposes, to run these
 # checks without re-building the library/program.
-for script in ["check_printers.py", "check_control_flow.py", "check_state.py"]:
+for script in [
+    "check_printers.py",
+    "check_control_flow.py",
+    "check_recursive_cf.py",
+    "check_state.py",
+]:
     subprocess.check_call([sys.executable, script])
 
 print("Done")
