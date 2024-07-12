@@ -1,0 +1,18 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "f_is_null": {
+          "kind": "ifKind",
+          "matchers": [
+            {
+              "kind": "NullQualPresent",
+              "document": ["recurse", "hardline"]
+            }
+          ],
+          "default": ["whitespace", "recurse"]
+        }
+      }
+    }
+  }
+}

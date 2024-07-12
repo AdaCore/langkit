@@ -81,6 +81,8 @@ begin
    Check ("invalid_ifkind7.json");
    Check ("invalid_ifkind8.json");
    Check ("invalid_ifkind9.json");
+   Check ("invalid_ifkind10.json");
+   Check ("invalid_ifkind11.json");
    Check ("invalid_indent.json");
    Check ("invalid_markasroot.json");
    Check ("invalid_innerroot.json");

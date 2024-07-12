@@ -123,6 +123,10 @@ a: Int=2
     "node" template for Addition: invalid string template document kind: invalid
 # invalid_ifkind9.json
     invalid field for Addition: f_invalid
+# invalid_ifkind10.json
+    "sep" template for FooNodeList: "ifKind" is valid in node templates and field templates only
+# invalid_ifkind11.json
+    template for VarDecl.f_name: invalid "field" key for ifKind
 # invalid_indent.json
     template for VarDecl.f_name: missing "contents" key for indent
 # invalid_markasroot.json
@@ -1359,6 +1363,48 @@ Done.
       "id": 6,
       "kind": "text",
       "text": ");"
+    }
+  ]
+}
+
+== cmd_ifkind6.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "null"
+    },
+    {
+      "id": 3,
+      "kind": "list",
+      "list": [
+        {
+          "command": {
+            "command": "line",
+            "hard": true,
+            "literal": false,
+            "soft": false
+          },
+          "id": 4,
+          "kind": "command"
+        },
+        {
+          "command": {
+            "command": "breakParent"
+          },
+          "id": 5,
+          "kind": "command"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "text",
+      "text": "var v1:T=1; var v2:T=2;"
     }
   ]
 }

@@ -221,6 +221,10 @@ package Langkit_Support.Generic_API.Unparsing is
    --          "null": <sub-template>
    --        }
    --
+   --      A variant is available in field templates. It has no "field" entry:
+   --      the alternative is picked depending on the field that owns this
+   --      template.
+   --
    --    * The "indent" template yields an "indent" Prettier document::
    --
    --        {"kind": "indent", "contents": <sub-template>}
