@@ -213,7 +213,10 @@ package Langkit_Support.Generic_API.Unparsing is
    --        {
    --          "kind": "ifKind",
    --          "field": "<field-name>",
-   --          "matchers": [{<node-name>: <sub-template>}, ...],
+   --          "matchers": [
+   --            {"kind": <node-name>, "document": <sub-template>},
+   --            ...
+   --          ],
    --          "default": <sub-template>
    --          "null": <sub-template>
    --        }
