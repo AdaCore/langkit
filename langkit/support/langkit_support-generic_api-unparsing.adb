@@ -39,6 +39,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    use type Ada.Containers.Count_Type;
 
+   function Image_With_Sloc (T : Lk_Token) return String
+   is (T.Image & " (" & Image (Start_Sloc (T.Sloc_Range)) & ")");
+
    function Load_Unparsing_Config_From_Buffer
      (Language    : Language_Id;
       Buffer      : String;
@@ -788,7 +791,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       while T /= Exit_Token loop
          if T.Is_Trivia then
             if Trace then
-               Trivias_Trace.Trace ("Found " & T.Image);
+               Trivias_Trace.Trace ("Found " & Image_With_Sloc (T));
             end if;
 
             --  If ``T`` starts a new sequence of trivias, reset the "trivia
@@ -815,7 +818,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                begin
                   if Trace then
                      Trivias_Trace.Trace
-                       ("   ... it has" & Line_Breaks_Count'Image
+                       ("  ... it has" & Line_Breaks_Count'Image
                         & " line breaks");
                   end if;
 
@@ -855,7 +858,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
             elsif First_Line then
                if Trace then
-                  Trivias_Trace.Trace ("   ... it is a suffix comment");
+                  Trivias_Trace.Trace ("  ... it is a suffix comment");
                end if;
 
                --  Propagate spaces that appear before this suffix comment, if
@@ -869,7 +872,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
             else
                if Trace then
-                  Trivias_Trace.Trace ("   ... it is a line comment");
+                  Trivias_Trace.Trace ("  ... it is a line comment");
                end if;
 
                Append ((Line_Comment, T));
@@ -954,7 +957,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       begin
          Info.First_Reattached_Trivias.Include (T);
          if Trace then
-            Trivias_Trace.Trace ("Reattaching " & What & ":" & T.Image);
+            Trivias_Trace.Trace
+              ("Reattaching " & What & ": " & Image_With_Sloc (T));
          end if;
       end Reattach;
    begin
@@ -1090,13 +1094,25 @@ package body Langkit_Support.Generic_API.Unparsing is
       end Process;
    begin
       if Trace then
-         Trivias_Trace.Trace
-           ("Processing trivias after " & Token.Image
-            & " (" & (if Skip_Token then "excluded" else "included") & ")");
+         declare
+            What   : constant String :=
+              (if Skip_Token
+               then "trivias after"
+               else "trivias starting at");
+            Status : constant String :=
+              (if Skip_Token then "excluded" else "included");
+         begin
+            Trivias_Trace.Trace
+              ("Processing " & What & " " & Image_With_Sloc (Token)
+               & " (" & Status & ")");
+         end;
       end if;
 
       if Skip_Token then
          Token := Token.Next;
+         if Trace then
+            Trivias_Trace.Trace ("  ... i.e. " & Image_With_Sloc (Token));
+         end if;
       end if;
 
       --  Skip reattached tokens if asked to
@@ -1104,6 +1120,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       if Skip_If_Reattached
          and then Trivias.First_Reattached_Trivias.Contains (Token)
       then
+         if Trace then
+            Trivias_Trace.Trace ("  ... never mind, they are reattached");
+         end if;
          Token := Token.Next (Exclude_Trivia => True);
          return;
       end if;
@@ -3588,7 +3607,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          if Tokens.all'Length > 0 and then Current_Token_Trace.Is_Active then
             Current_Token_Trace.Trace
               (Tokens.all'Length'Image & " token(s) skipped (" & Label
-               & "), current token: " & Current_Token.Image);
+               & "), current token: " & Image_With_Sloc (Current_Token));
          end if;
       end Skip_Tokens;
 
@@ -3619,7 +3638,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          if Tokens.all'Length > 0 and then Current_Token_Trace.Is_Active then
             Current_Token_Trace.Trace
               (Tokens.all'Length'Image & " token(s) unparsed (" & Label
-               & "), current token: " & Current_Token.Image);
+               & "), current token: " & Image_With_Sloc (Current_Token));
          end if;
       end Unparse_Tokens;
 
@@ -3654,7 +3673,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             if Current_Token_Trace.Is_Active then
                Current_Token_Trace.Trace
                  ("About to unparse " & F.Kind'Image
-                  & ", current token: " & Current_Token.Image);
+                  & ", current token: " & Image_With_Sloc (Current_Token));
             end if;
 
             case Non_Trivia_Fragment_Kind (F.Kind) is
@@ -3748,7 +3767,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   if Current_Token_Trace.Is_Active then
                      Current_Token_Trace.Trace
                        ("Token fragment unparsed, current token: "
-                        & Current_Token.Image);
+                        & Image_With_Sloc (Current_Token));
                   end if;
 
                when Field_Fragment =>
@@ -3764,7 +3783,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                   if Current_Token_Trace.Is_Active then
                      Current_Token_Trace.Trace
                        ("Field fragment " & Debug_Name (F.Field)
-                        & " unparsed, current token: " & Current_Token.Image);
+                        & " unparsed, current token: "
+                        & Image_With_Sloc (Current_Token));
                   end if;
 
                when List_Child_Fragment =>
@@ -3788,7 +3808,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   if Current_Token_Trace.Is_Active then
                      Current_Token_Trace.Trace
                        ("List child fragment unparsed, current token: "
-                        & Current_Token.Image);
+                        & Image_With_Sloc (Current_Token));
                   end if;
             end case;
          end Process_Fragment;
@@ -3799,7 +3819,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          if Current_Token_Trace.Is_Active then
             Current_Token_Trace.Increase_Indent
               ("Unparsing " & N.Image
-               & ", current token: " & Current_Token.Image);
+               & ", current token: " & Image_With_Sloc (Current_Token));
          end if;
 
          case Some_Template_Kind (Template.Kind) is
@@ -3873,7 +3893,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                         if Current_Token_Trace.Is_Active then
                            Current_Token_Trace.Increase_Indent
                              ("Processing field " & Child.Image
-                              & ", field token: " & Field_Token.Image);
+                              & ", field token: "
+                              & Image_With_Sloc (Field_Token));
                         end if;
 
                         if Is_Field_Present (Child, Field_Unparser) then
@@ -3900,7 +3921,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                         if Current_Token_Trace.Is_Active then
                            Current_Token_Trace.Decrease_Indent
                              ("Done processing field " & Child.Image
-                              & ", field token: " & Field_Token.Image);
+                              & ", field token: "
+                              & Image_With_Sloc (Field_Token));
                         end if;
                      end;
                   end loop;
@@ -3972,7 +3994,7 @@ package body Langkit_Support.Generic_API.Unparsing is
          if Current_Token_Trace.Is_Active then
             Current_Token_Trace.Decrease_Indent
               ("Done with " & N.Image
-               & ", current token: " & Current_Token.Image);
+               & ", current token: " & Image_With_Sloc (Current_Token));
          end if;
 
          return Result;
