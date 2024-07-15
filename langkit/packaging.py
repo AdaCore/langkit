@@ -497,6 +497,15 @@ class NativeLibPackager(BasePackager):
                     "libgnatcoll_projects",
                 ),
             ]
+            # New split of gnatcoll_core into two libraries introduced in
+            # July 2024.
+            gnatcoll_minimal_path = self.std_path(
+                self.gnatcoll_core_prefix,
+                "gnatcoll_minimal",
+                "libgnatcoll_minimal",
+            )
+            if os.path.exists(gnatcoll_minimal_path):
+                gnatcoll_core_libs.append(gnatcoll_minimal_path)
 
         gnatcoll_bindings_libs = [
             self.std_path(self.gnatcoll_iconv_prefix, 'gnatcoll_iconv',
