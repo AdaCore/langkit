@@ -2,13 +2,15 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list*(or(var_decl | fun_decl | block))
+    @main_rule main_rule <- list*(or(annot_var_decl | annot_fun_decl | block))
     name <- Name(@Identifier)
     type_ref <- name
+    annotations <- AnnotationList*(name, ",")
     null_qual <- NullQual("null")
     var_decl <- VarDecl(
         null_qual "var" name ":" type_ref "=" expr ";"
     )
+    annot_var_decl <- AnnotatedDecl(annotations var_decl)
     param_spec <- ParamSpec(name ":" type_ref ?pick("=" expr))
     fun_decl <- FunDecl(
         "def"
@@ -17,6 +19,7 @@ grammar foo_grammar {
         list*(param_spec, ",", allow_trailing)
         ")") ":" type_ref null_qual "{" list*(stmt) "}"
     )
+    annot_fun_decl <- AnnotatedDecl(annotations fun_decl)
     stmt <- or(
         | ExprStmt(expr ";")
         | AssignStmt(
@@ -44,6 +47,11 @@ grammar foo_grammar {
 
 @abstract
 class FooNode implements Node[FooNode] {
+}
+
+class AnnotatedDecl: FooNode {
+    @parse_field annotation_names: AnnotationList
+    @parse_field decl: Decl
 }
 
 class Block: FooNode {
@@ -102,6 +110,9 @@ class Number: Expr implements TokenNode {
 
 class Ref: Expr {
     @parse_field name: Name
+}
+
+class AnnotationList: ASTList[Name] {
 }
 
 class Name: FooNode implements TokenNode {

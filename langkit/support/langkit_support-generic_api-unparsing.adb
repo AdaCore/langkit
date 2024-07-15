@@ -184,6 +184,12 @@ package body Langkit_Support.Generic_API.Unparsing is
       Hash                => Hash,
       Equivalent_Elements => "=");
 
+   package Token_To_Node_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Lk_Token,
+      Element_Type    => Lk_Node,
+      Equivalent_Keys => "=",
+      Hash            => Hash);
+
    --  Trivias from the original source code to unparse are generally processed
    --  in the same context as the token that preceeds them. There is one
    --  exception to this: trivias that precede or come after a list node, so
@@ -238,11 +244,12 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  ``Trivias_Fragments.Trivia_To_Fragments (TI1)``.
 
    type Trivias_Info is record
-      First_Reattached_Trivias : Token_Sets.Set;
-      --  Set of first trivia for all sequences of reattached trivias
+      First_Reattached_Trivias : Token_To_Node_Maps.Map;
+      --  Mapping from first trivia to reattachment node for all sequences of
+      --  reattached trivias.
 
       Processed_Reattached_Trivias : Token_Sets.Set;
-      --  Subset of ``First_Reattached_Trivias`` for the trivias that were
+      --  Subset of ``First_Reattached_Trivias`` keys for the trivias that were
       --  already processed (included in the unparsing).
 
       Fragments : Trivias_Fragments;
@@ -270,6 +277,11 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Preparatory pass for the unparsing of trivias (empty lines, comments):
    --  compute information about trivias found in the ``Node`` subtree and fill
    --  ``Info``'s data structures accordingly.
+
+   function Reattached_Trivia_Needs_Processing
+     (Token : Lk_Token; Node : Lk_Node; Info : Trivias_Info) return Boolean;
+   --  Return whether ``Info.First_Reattached_Trivias`` contains a ``Token ->
+   --  Node`` entry.
 
    procedure Iterate_On_Trivia_Fragments
      (First_Trivia : Lk_Token;
@@ -335,11 +347,13 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    procedure Process_Reattached_Trivias
      (First_Trivia : Lk_Token;
+      Node         : Lk_Node;
       Items        : in out Document_Vectors.Vector;
       Pool         : in out Document_Pool;
       Trivias      : in out Trivias_Info);
-   --  If unprocessed reattached trivias precede ``Node``, process them and add
-   --  the corresponding internal document nodes to ``Items``.
+   --  If ``First_Trivia`` is unprocessed trivia reattached to ``Node``,
+   --  process them now and add the corresponding internal document nodes to
+   --  ``Items``.
 
    procedure Iterate_On_Fragments
      (Node          : Lk_Node;
@@ -901,8 +915,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       function Process (Node : Lk_Node) return Visit_Status;
       --  Callback for ``Langkit_Support.Analysis.Traverse``
 
-      procedure Reattach (T : Lk_Token; What : String);
-      --  Include ``T`` to reattached trivias. ``What`` is used to qualify this
+      procedure Reattach (T : Lk_Token; To : Lk_Node; What : String);
+      --  Reattach ``T`` to the ``To`` node. ``What`` is used to qualify this
       --  trivia in debug logs.
 
       -------------
@@ -918,7 +932,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                First_Trivia : constant Lk_Token := First_Trivia_Before (Node);
             begin
                if not First_Trivia.Is_Null then
-                  Reattach (First_Trivia, "leading trivias before list node");
+                  Reattach
+                    (First_Trivia, Node, "leading trivias before list node");
                end if;
             end;
 
@@ -927,7 +942,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   T : constant Lk_Token := Node.Token_End.Next;
                begin
                   if T.Is_Trivia then
-                     Reattach (T, "trailing trivias after list node");
+                     Reattach (T, Node, "trailing trivias after list node");
                   end if;
                end;
             end if;
@@ -941,7 +956,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                T : constant Lk_Token := Node.Token_End.Next;
             begin
                if T.Is_Trivia then
-                  Reattach (T, "trailing trivias after list child");
+                  Reattach
+                    (T, Node.Parent, "trailing trivias after list child");
                end if;
             end;
          end if;
@@ -953,12 +969,16 @@ package body Langkit_Support.Generic_API.Unparsing is
       -- Reattach --
       --------------
 
-      procedure Reattach (T : Lk_Token; What : String) is
+      procedure Reattach (T : Lk_Token; To : Lk_Node; What : String) is
+         Dummy_Position : Token_To_Node_Maps.Cursor;
+         Dummy_Inserted : Boolean;
       begin
-         Info.First_Reattached_Trivias.Include (T);
+         Info.First_Reattached_Trivias.Insert
+           (T, To, Dummy_Position, Dummy_Inserted);
          if Trace then
             Trivias_Trace.Trace
-              ("Reattaching " & What & ": " & Image_With_Sloc (T));
+              ("Reattaching " & What & ": " & Image_With_Sloc (T) & " to "
+               & To.Image);
          end if;
       end Reattach;
    begin
@@ -971,6 +991,20 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       Compute_Trivia_Fragments (Node, Info.Fragments);
    end Compute_Trivias_Info;
+
+   ----------------------------------------
+   -- Reattached_Trivia_Needs_Processing --
+   ----------------------------------------
+
+   function Reattached_Trivia_Needs_Processing
+     (Token : Lk_Token; Node : Lk_Node; Info : Trivias_Info) return Boolean
+   is
+      use Token_To_Node_Maps;
+
+      Pos : constant Cursor := Info.First_Reattached_Trivias.Find (Token);
+   begin
+      return Has_Element (Pos) and then Element (Pos) = Node;
+   end Reattached_Trivia_Needs_Processing;
 
    ---------------------------------
    -- Iterate_On_Trivia_Fragments --
@@ -1169,6 +1203,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
    procedure Process_Reattached_Trivias
      (First_Trivia : Lk_Token;
+      Node         : Lk_Node;
       Items        : in out Document_Vectors.Vector;
       Pool         : in out Document_Pool;
       Trivias      : in out Trivias_Info)
@@ -1176,7 +1211,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       Current_Token : Lk_Token := First_Trivia;
    begin
       if not First_Trivia.Is_Null
-         and then Trivias.First_Reattached_Trivias.Contains (First_Trivia)
+         and then Reattached_Trivia_Needs_Processing
+                    (First_Trivia, Node, Trivias)
          and then not Trivias
                       .Processed_Reattached_Trivias
                       .Contains (First_Trivia)
@@ -3794,7 +3830,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                   --  instead of another (possibly deeply nested) list node.
 
                   Process_Reattached_Trivias
-                    (First_Trivia_Before (F.Node), Items, Pool, Trivias);
+                    (First_Trivia_Before (F.Node),
+                     N,
+                     Items,
+                     Pool,
+                     Trivias);
 
                   --  Flush line breaks before unparsing the list child, so
                   --  that line breaks do not get inserted inside
@@ -3802,7 +3842,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                   Items.Append (Pool.Create_Flush_Line_Breaks);
 
-                  --  Finally unparse the list child
+                  --  Unparse the list child itself
 
                   Items.Append (Unparse_Node (F.Node, Current_Token));
                   if Current_Token_Trace.Is_Active then
@@ -3810,6 +3850,16 @@ package body Langkit_Support.Generic_API.Unparsing is
                        ("List child fragment unparsed, current token: "
                         & Image_With_Sloc (Current_Token));
                   end if;
+
+                  --  Likewise, if reattached tokens come after this child,
+                  --  process them now.
+
+                  Process_Reattached_Trivias
+                    (F.Node.Token_End.Next,
+                     N,
+                     Items,
+                     Pool,
+                     Trivias);
             end case;
          end Process_Fragment;
 
@@ -3972,7 +4022,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             T      : Lk_Token;
          begin
             Process_Reattached_Trivias
-              (First_Trivia_Before (N), Items, Pool, Trivias);
+              (First_Trivia_Before (N), N, Items, Pool, Trivias);
 
             Items.Append (Result);
 
@@ -3984,7 +4034,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             if not N.Is_Ghost then
                T := N.Token_End.Next;
                if T.Is_Trivia then
-                  Process_Reattached_Trivias (T, Items, Pool, Trivias);
+                  Process_Reattached_Trivias (T, N, Items, Pool, Trivias);
                end if;
             end if;
 
