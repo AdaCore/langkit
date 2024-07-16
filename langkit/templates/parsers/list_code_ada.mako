@@ -43,18 +43,19 @@ loop
    ## Parse the separator, if there is one. The separator is always discarded.
    % if parser.sep:
       ${parser.sep.generate_code()}
-      if ${parser.sep.pos_var} /= No_Token_Index then
-          ${parser.cpos} := ${parser.sep.pos_var};
 
-          ## If we accept a trailing separator, mark the separator we just got
-          ## as being part of this list node.
-          % if parser.allow_trailing:
-             ${parser.pos_var} := ${parser.cpos};
-          % endif
-      else
-         ## If we didn't successfully parse a separator, exit
-         exit;
-      end if;
+      ## If we didn't successfully parse a separator, exit
+      exit when ${parser.sep.pos_var} = No_Token_Index;
+
+      ## The next attempt at parsing a list element will start where the
+      ## separator parser stopped.
+      ${parser.cpos} := ${parser.sep.pos_var};
+
+      ## If we accept a trailing separator, mark the separator we just got
+      ## as being part of this list node.
+      % if parser.allow_trailing:
+         ${parser.pos_var} := ${parser.cpos};
+      % endif
    % endif
 end loop;
 
