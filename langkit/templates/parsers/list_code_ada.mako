@@ -80,7 +80,7 @@ begin
       Token_Start := ${parser.start_pos};
       Token_End := (if ${parser.cpos} = ${parser.start_pos}
                     then ${parser.start_pos}
-                    else ${parser.cpos} - 1);
+                    else ${parser.pos_var} - 1);
 
    else
       Token_Start := Token_Index'Max (${parser.start_pos}, 1);
