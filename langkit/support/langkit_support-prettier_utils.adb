@@ -72,6 +72,40 @@ package body Langkit_Support.Prettier_Utils is
    --  requirement and the weakest actual spacing. This is to keep guesses
    --  conservative when handling disjunction commands (like ``If_Break``).
 
+   generic
+      with procedure Preprocess
+        (Self : in out Document_Type; State : Spacing_State) is null;
+      --  Callback invoked on a node whenever the traversal is about to process
+      --  that node. It can use the current spacing state to transform the
+      --  given ``Self`` document in place.
+
+      with procedure Postprocess (Self : in out Document_Type) is null;
+      --  Callback invoked on a node whenever the traversal is finished
+      --  processing a node and its children. It can refine the given ``Self``
+      --  document in place.
+
+      with procedure Insert_Spacing
+        (Self  : in out Document_Type;
+         Kind  : Some_Spacing_Kind;
+         Count : Positive) is null;
+      --  Callback used to implement the modification of a document to insert
+      --  spacing corresponding to ``Kind``/``Count`` before ``Self`` (or
+      --  instead of ``Self`` it is an internal node whose purpose is to be
+      --  expanded to spacing.
+
+   procedure Process_Required_Spacing
+     (Self : in out Document_Type; Max_Empty_Lines : Integer);
+   --  Common implementation for the pass to detect broken groups, and the pass
+   --  that inserts required spacing.
+   --
+   --  Both passes need to know where spacing (whitespaces, line breaks) is in
+   --  the internal tree, and where to insert it when it is missing. Both
+   --  passes also need to make the same decisions, so it makes sense to
+   --  maintain a single implementation.
+   --
+   --  This procedure traverses the tree rooted as ``Self`` using depth-first
+   --  search order.
+
    ------------------------
    -- To_Prettier_Symbol --
    ------------------------
@@ -113,6 +147,266 @@ package body Langkit_Support.Prettier_Utils is
          Actual          => Min_Spacing (Left.Actual, Right.Actual),
          Last_Token      => Left.Last_Token);
    end Join;
+
+   ------------------------------
+   -- Process_Required_Spacing --
+   ------------------------------
+
+   procedure Process_Required_Spacing
+     (Self : in out Document_Type; Max_Empty_Lines : Integer)
+   is
+      procedure Process
+        (Self   : in out Document_Type;
+         State  : in out Spacing_State;
+         Breaks : out Boolean);
+      --  Process ``Self`` and its children, potentially modifying it in place.
+      --
+      --  Upon return, ``State`` is updated to reflect the effect of ``Self``
+      --  on the spacing state, and ``Break`` is set to whether this document
+      --  breaks the parent group.
+
+      -------------
+      -- Process --
+      -------------
+
+      procedure Process
+        (Self   : in out Document_Type;
+         State  : in out Spacing_State;
+         Breaks : out Boolean)
+      is
+         procedure Do_Break;
+         --  Helper to break the parent group
+
+         --------------
+         -- Do_Break --
+         --------------
+
+         procedure Do_Break is
+         begin
+            Breaks := True;
+            State.In_Broken_Group := True;
+         end Do_Break;
+      begin
+         Breaks := False;
+
+         Preprocess (Self, State);
+
+         case Instantiated_Template_Document_Kind (Self.Kind) is
+            when Align =>
+               Process (Self.Align_Contents, State, Breaks);
+
+            when Break_Parent =>
+               Do_Break;
+
+            when Expected_Line_Breaks =>
+               Extend_Spacing
+                 (State.Expected,
+                  (Line_Breaks, Self.Expected_Line_Breaks_Count));
+
+            when Expected_Whitespaces =>
+               Extend_Spacing
+                 (State.Expected,
+                  (Whitespaces, Self.Expected_Whitespaces_Count));
+
+            when Fill =>
+               Process (Self.Fill_Document, State, Breaks);
+
+            when Flush_Line_Breaks =>
+               declare
+                  Expected_Lines : constant Natural :=
+                    Required_Line_Breaks (State.Expected, Max_Empty_Lines);
+                  Actual_Lines   : constant Natural :=
+                    Required_Line_Breaks (State.Actual, -1);
+               begin
+                  if Expected_Lines > Actual_Lines then
+                     Insert_Spacing
+                       (Self, Line_Breaks, Expected_Lines - Actual_Lines);
+                     State.Actual := State.Expected;
+                     Do_Break;
+                  end if;
+               end;
+
+            when Group =>
+               declare
+                  Parent_Broken : constant Boolean := State.In_Broken_Group;
+                  Inner_Breaks  : Boolean;
+               begin
+                  --  The fact that the parent group is broken does not imply
+                  --  that this child group is broken: just pick the
+                  --  information we have about it currently.
+
+                  State.In_Broken_Group := Self.Group_Should_Break;
+                  Process (Self.Group_Document, State, Inner_Breaks);
+
+                  --  Restore broken state for the parent group. In addition,
+                  --  the fact that the child group is broken does imply that
+                  --  the parent is broken.
+
+                  State.In_Broken_Group := Parent_Broken;
+                  if Inner_Breaks then
+                     Do_Break;
+                     Self.Group_Should_Break := True;
+                  end if;
+               end;
+
+            when Hard_Line =>
+               Extend_Spacing (State.Actual, One_Line_Break_Spacing);
+               Do_Break;
+
+            when Hard_Line_Without_Break_Parent =>
+               Extend_Spacing (State.Actual, One_Line_Break_Spacing);
+
+            when If_Break =>
+               declare
+                  BS     : Spacing_State := State;
+                  FS     : Spacing_State := State;
+                  BB, FB : Boolean;
+               begin
+                  --  If this If_Break node is conditionned on its own
+                  --  parent group, then the If_Break_Content part is known
+                  --  to operate in a broken group.
+
+                  if Self.If_Break_Group_Id = No_Template_Symbol then
+                     BS.In_Broken_Group := True;
+                  end if;
+
+                  Process (Self.If_Break_Contents, BS, BB);
+                  Process (Self.If_Break_Flat_Contents, FS, FB);
+
+                  State := Join (BS, FS);
+                  if BB and then FB then
+                     Do_Break;
+                  end if;
+               end;
+
+            when Indent =>
+               Process (Self.Indent_Document, State, Breaks);
+
+            when Line =>
+
+               --  A Line command can be replaced by a line break or a space:
+               --  unless we could prove that it would return into an actual
+               --  line break, be conservative and consider its weakest form: a
+               --  space.
+
+               if State.In_Broken_Group then
+                  Extend_Spacing (State.Actual, One_Line_Break_Spacing);
+                  Do_Break;
+               else
+                  Extend_Spacing (State.Actual, One_Whitespace_Spacing);
+               end if;
+
+            when List =>
+               for I in 1 .. Self.List_Documents.Last_Index loop
+                  declare
+                     Inner_Breaks : Boolean;
+                     D            : Document_Type :=
+                       Self.List_Documents.Element (I);
+                  begin
+                     Process (D, State, Inner_Breaks);
+                     if Inner_Breaks then
+                        Do_Break;
+                     end if;
+                     Self.List_Documents.Replace_Element (I, D);
+                  end;
+               end loop;
+
+               --  Changes may allow to simplify the tree: remove empty list
+               --  children, and simplify further if there is only a single
+               --  element left.
+
+               for I in reverse 1 .. Self.List_Documents.Last_Index loop
+                  declare
+                     D : constant Document_Type :=
+                       Self.List_Documents.Element (I);
+                  begin
+                     if D.Kind = List and then D.List_Documents.Is_Empty then
+                        Self.List_Documents.Delete (I);
+                     end if;
+                  end;
+               end loop;
+
+               if Self.List_Documents.Length = 1 then
+                  Self := Self.List_Documents.First_Element;
+               end if;
+
+            when Literal_Line =>
+               Extend_Spacing (State.Actual, One_Line_Break_Spacing);
+               Do_Break;
+
+            when Soft_Line =>
+
+               --  A Soft_Line command can be replaced by line break or a
+               --  space: unless we could prove that it would return into an
+               --  actual line break, be conservative and consider its weakest
+               --  form: nothing.
+
+               if State.In_Broken_Group then
+                  Extend_Spacing (State.Actual, One_Line_Break_Spacing);
+                  Do_Break;
+               end if;
+
+            when Token =>
+               declare
+                  Saved_Actual : constant Spacing_Type := State.Actual;
+                  Required     : constant Spacing_Type :=
+                    Max_Spacing
+                       (Required_Spacing (State.Last_Token, Self.Token_Kind),
+                        State.Expected);
+               begin
+                  State.Expected := No_Spacing;
+                  State.Actual := No_Spacing;
+                  State.Last_Token := Self.Token_Kind;
+
+                  --  If we notice that there is no guarantee that this
+                  --  token has the required spacing with the previous token
+                  --  unparsed: insert the spacing that is missing.
+
+                  if Saved_Actual < Required then
+                     case Required.Kind is
+                        when None =>
+                           raise Program_Error;
+
+                        when Whitespaces =>
+                           declare
+                              Last_Whitespaces : constant Natural :=
+                                (case Saved_Actual.Kind is
+                                 when None        => 0,
+                                 when Whitespaces => Saved_Actual.Count,
+                                 when Line_Breaks => raise Program_Error);
+                           begin
+                              Insert_Spacing
+                                (Self,
+                                 Whitespaces,
+                                 Required.Count - Last_Whitespaces);
+                           end;
+
+                        when Line_Breaks =>
+                           Insert_Spacing
+                             (Self,
+                              Line_Breaks,
+                              Required.Count
+                                - Required_Line_Breaks (Saved_Actual, -1));
+                           Do_Break;
+                     end case;
+                  end if;
+               end;
+
+            when Trim =>
+               null;
+
+            when Whitespace =>
+               Extend_Spacing (State.Actual, One_Whitespace_Spacing);
+         end case;
+
+         Postprocess (Self);
+      end Process;
+
+      State  : Spacing_State := Initial_Spacing_State;
+      Breaks : Boolean;
+   begin
+      Process (Self, State, Breaks);
+   end Process_Required_Spacing;
 
    ------------------
    -- Node_Matches --
@@ -817,144 +1111,11 @@ package body Langkit_Support.Prettier_Utils is
    --------------------------
 
    procedure Detect_Broken_Groups
-     (Self : Document_Type; Max_Empty_Lines : Integer)
+     (Self : in out Document_Type; Max_Empty_Lines : Integer)
    is
-      function Line_Break_Needed
-        (Actual, Expected : Spacing_Type) return Boolean
-      is (Expected.Kind = Line_Breaks
-          and then (Actual.Kind /= Line_Breaks
-                    or else Actual.Count
-                            < Required_Line_Breaks
-                                (Expected, Max_Empty_Lines)));
-      --  Retun whether line breaks are needed to satisfy the ``Expected``
-      --  spacing, given the previous ``Actual`` spacing.
-
-      procedure Process
-        (Self   : Document_Type;
-         State  : in out Spacing_State;
-         Breaks : out Boolean);
-      --  Set ``Breaks`` to whether ``Self`` is known to break its parent group
-      --  (``False`` if we do not know).
-
-      -------------
-      -- Process --
-      -------------
-
-      procedure Process
-        (Self   : Document_Type;
-         State  : in out Spacing_State;
-         Breaks : out Boolean) is
-      begin
-         Breaks := False;
-         case Instantiated_Template_Document_Kind (Self.Kind) is
-            when Align =>
-               Process (Self.Align_Contents, State, Breaks);
-
-            when Break_Parent =>
-               Breaks := True;
-
-            when Expected_Line_Breaks =>
-               Extend_Spacing
-                 (State.Expected,
-                  (Line_Breaks, Self.Expected_Line_Breaks_Count));
-
-            when Expected_Whitespaces =>
-               Extend_Spacing
-                 (State.Expected,
-                  (Whitespaces, Self.Expected_Whitespaces_Count));
-
-            when Fill =>
-               Process (Self.Fill_Document, State, Breaks);
-
-            when Flush_Line_Breaks =>
-               if State.Expected.Kind = Line_Breaks then
-                  if Line_Break_Needed (State.Actual, State.Expected) then
-                     Breaks := True;
-                     State.Actual := State.Expected;
-                  end if;
-               end if;
-
-            when Group =>
-               declare
-                  Inner_Breaks : Boolean;
-               begin
-                  Process (Self.Group_Document, State, Inner_Breaks);
-                  Self.Group_Should_Break :=
-                    Inner_Breaks or else Self.Group_Should_Break;
-                  Breaks := Self.Group_Should_Break;
-               end;
-
-            when Hard_Line =>
-               Extend_Spacing (State.Actual, One_Line_Break_Spacing);
-               Breaks := True;
-
-            when Hard_Line_Without_Break_Parent =>
-               Extend_Spacing (State.Actual, One_Line_Break_Spacing);
-
-            when If_Break =>
-               declare
-                  BS : Spacing_State := State;
-                  FS : Spacing_State := State;
-                  BB : Boolean;
-                  FB : Boolean;
-               begin
-                  Process (Self.If_Break_Contents, BS, BB);
-                  Process (Self.If_Break_Flat_Contents, FS, FB);
-
-                  State := Join (BS, FS);
-                  Breaks := BB and then FB;
-               end;
-
-            when Indent =>
-               Process (Self.Indent_Document, State, Breaks);
-
-            when Line =>
-               Extend_Spacing (State.Actual, One_Whitespace_Spacing);
-
-            when List =>
-               for I in 1 .. Self.List_Documents.Last_Index loop
-                  declare
-                     Inner_Breaks : Boolean;
-                  begin
-                     Process
-                       (Self.List_Documents.Element (I), State, Inner_Breaks);
-                     Breaks := Breaks or else Inner_Breaks;
-                  end;
-               end loop;
-
-            when Literal_Line =>
-               Extend_Spacing (State.Actual, One_Line_Break_Spacing);
-               Breaks := True;
-
-            when Soft_Line =>
-               null;
-
-            when Token =>
-               declare
-                  Required : constant Spacing_Type :=
-                    Max_Spacing
-                       (Required_Spacing (State.Last_Token, Self.Token_Kind),
-                        State.Expected);
-               begin
-                  --  The insertion of spacing here will break the current
-                  --  group if there are more line expected than actually got
-                  --  so far.
-
-                  Breaks := Line_Break_Needed (State.Actual, Required);
-                  State.Expected := No_Spacing;
-                  State.Actual := No_Spacing;
-                  State.Last_Token := Self.Token_Kind;
-               end;
-
-            when Trim | Whitespace =>
-               null;
-         end case;
-      end Process;
-
-      Dummy : Boolean;
-      State : Spacing_State := Initial_Spacing_State;
+      procedure Process is new Process_Required_Spacing;
    begin
-      Process (Self, State, Dummy);
+      Process (Self, Max_Empty_Lines);
       Dump (Self, Broken_Groups_Trace);
    end Detect_Broken_Groups;
 
@@ -1290,272 +1451,93 @@ package body Langkit_Support.Prettier_Utils is
       Document        : in out Document_Type;
       Max_Empty_Lines : Integer)
    is
-      procedure Append_Required_Line_Breaks
-        (Expected, Actual : Natural; Items : in out Document_Vectors.Vector);
-      --  Given the previous ``Actual`` line breaks, append to ``Items`` the
-      --  amount of line breaks necessary so that there are at most
-      --  ``Expected`` line breaks.
+      procedure Preprocess
+        (Self : in out Document_Type; State : Spacing_State);
+      --  Callback for ``Process_Required_Spacing``
 
-      procedure Process
-        (Document : in out Document_Type; State : in out Spacing_State);
-      --  Using the given spacing state, insert required spacing inside
-      --  ``Document`` itself.
-      --
-      --  Update ``State`` to reflect the last token/spacing emitted once
-      --  ``Document`` itself has been unparsed.
+      procedure Postprocess (Self : in out Document_Type);
+      --  Callback for ``Process_Required_Spacing``
 
-      ---------------------------------
-      -- Append_Required_Line_Breaks --
-      ---------------------------------
+      procedure Insert_Spacing
+        (Self  : in out Document_Type;
+         Kind  : Some_Spacing_Kind;
+         Count : Positive);
+      --  Callback for ``Process_Required_Spacing``
 
-      procedure Append_Required_Line_Breaks
-        (Expected, Actual : Natural; Items : in out Document_Vectors.Vector) is
+      ----------------
+      -- Preprocess --
+      ----------------
+
+      procedure Preprocess
+        (Self : in out Document_Type; State : Spacing_State) is
       begin
-         for Dummy in Actual + 1 .. Expected loop
-            Items.Append (Pool.Create_Hard_Line);
-         end loop;
-      end Append_Required_Line_Breaks;
-
-      -------------
-      -- Process --
-      -------------
-
-      procedure Process
-        (Document : in out Document_Type; State : in out Spacing_State) is
-      begin
-         case Instantiated_Template_Document_Kind (Document.Kind) is
-            when Align =>
-
-               --  Align does not emit any spacing before processing its inner
-               --  document.
-
-               Process (Document.Align_Contents, State);
-
-            when Break_Parent =>
-               State.In_Broken_Group := True;
-
-            when Expected_Line_Breaks =>
-
-               Extend_Spacing
-                 (State.Expected,
-                  (Line_Breaks, Document.Expected_Line_Breaks_Count));
-
-               --  The translator to Prettier does not support this internal
-               --  node: replace it with an empty list.
-
-               Document := Pool.Create_Empty_List;
-
-            when Expected_Whitespaces =>
-
-               Extend_Spacing
-                 (State.Expected,
-                  (Whitespaces, Document.Expected_Whitespaces_Count));
-
-               --  The translator to Prettier does not support this internal
-               --  node: replace it with an empty list.
-
-               Document := Pool.Create_Empty_List;
-
-            when Flush_Line_Breaks =>
-               declare
-                  Items          : Document_Vectors.Vector;
-                  Expected_Lines : constant Natural :=
-                    Required_Line_Breaks (State.Expected, Max_Empty_Lines);
-                  Actual_Lines   : constant Natural :=
-                    Required_Line_Breaks (State.Actual, -1);
-               begin
-                  if Expected_Lines > Actual_Lines then
-                     Append_Required_Line_Breaks
-                       (Required_Line_Breaks (State.Expected, Max_Empty_Lines),
-                        Required_Line_Breaks (State.Actual, -1),
-                        Items);
-                     State.Actual := State.Expected;
-                  end if;
-                  Document := Pool.Create_List (Items);
-               end;
-
-            when Fill =>
-               Process (Document.Fill_Document, State);
-
-            when Group =>
-               declare
-                  Saved_In_Broken_Group : constant Boolean :=
-                    State.In_Broken_Group;
-               begin
-                  State.In_Broken_Group := Document.Group_Should_Break;
-                  Process (Document.Group_Document, State);
-                  State.In_Broken_Group := Saved_In_Broken_Group;
-               end;
-
-            when Hard_Line =>
-               Extend_Spacing (State.Actual, One_Line_Break_Spacing);
-               State.In_Broken_Group := True;
-
-            when Hard_Line_Without_Break_Parent =>
-               Extend_Spacing (State.Actual, One_Line_Break_Spacing);
-
+         case Instantiated_Template_Document_Kind (Self.Kind) is
             when If_Break =>
 
                --  If this If_Break node is conditionned on its own parent
                --  group and if we know that this parent group is broken,
                --  simplify the tree: just keep the "broken group" branch.
 
-               if Document.If_Break_Group_Id = No_Template_Symbol
+               if Self.If_Break_Group_Id = No_Template_Symbol
                   and then State.In_Broken_Group
                then
-                  Document := Document.If_Break_Contents;
-                  Process (Document, State);
-
-               else
-                  declare
-                     Break_State : Spacing_State := State;
-                     Flat_State  : Spacing_State := State;
-                  begin
-                     --  If this If_Break node is conditionned on its own
-                     --  parent group, then the If_Break_Content part is known
-                     --  to operate in a broken group.
-
-                     if Document.If_Break_Group_Id = No_Template_Symbol then
-                        Break_State.In_Broken_Group := True;
-                     end if;
-
-                     Process (Document.If_Break_Contents, Break_State);
-                     Process (Document.If_Break_Flat_Contents, Flat_State);
-                     State := Join (Break_State, Flat_State);
-                  end;
+                  Self := Self.If_Break_Contents;
                end if;
 
-            when Indent =>
-
-               --  Indent does not emit any spacing before processing its inner
-               --  document.
-
-               Process (Document.Indent_Document, State);
-
-            when Line =>
-
-               --  A Line command can be replaced by a line break or a space:
-               --  unless we could prove that it would return into an actual
-               --  line break, be conservative and consider its weakest form: a
-               --  space.
-
-               Extend_Spacing
-                 (State.Actual,
-                  (if State.In_Broken_Group
-                   then One_Line_Break_Spacing
-                   else One_Whitespace_Spacing));
-
-            when List =>
-               for I in 1 .. Document.List_Documents.Last_Index loop
-                  declare
-                     D : Document_Type := Document.List_Documents.Element (I);
-                  begin
-                     Process (D, State);
-                     Document.List_Documents.Replace_Element (I, D);
-                  end;
-               end loop;
-
-               --  Changes may allow to simplify the tree: remove empty list
-               --  children, and simplify further if there is only a single
-               --  element left.
-
-               for I in reverse 1 .. Document.List_Documents.Last_Index loop
-                  declare
-                     D : constant Document_Type :=
-                       Document.List_Documents.Element (I);
-                  begin
-                     if D.Kind = List and then D.List_Documents.Is_Empty then
-                        Document.List_Documents.Delete (I);
-                     end if;
-                  end;
-               end loop;
-
-               if Document.List_Documents.Length = 1 then
-                  Document := Document.List_Documents.First_Element;
-               end if;
-
-            when Literal_Line =>
-               Extend_Spacing (State.Actual, One_Line_Break_Spacing);
-               State.In_Broken_Group := True;
-
-            when Soft_Line =>
-
-               --  A Soft_Line command can be replaced by line break or a
-               --  space: unless we could prove that it would return into an
-               --  actual line break, be conservative and consider its weakest
-               --  form: nothing.
-
-               if State.In_Broken_Group then
-                  Extend_Spacing (State.Actual, One_Line_Break_Spacing);
-               end if;
-
-            when Token =>
-               declare
-                  Saved_Actual : constant Spacing_Type := State.Actual;
-                  Required     : constant Spacing_Type :=
-                    Max_Spacing
-                       (Required_Spacing
-                          (State.Last_Token, Document.Token_Kind),
-                        State.Expected);
-               begin
-                  State.Expected := No_Spacing;
-                  State.Actual := No_Spacing;
-                  State.Last_Token := Document.Token_Kind;
-                  if Required <= Saved_Actual then
-                     return;
-                  end if;
-
-                  --  If we reach this point, we noticed that there is no
-                  --  guarantee that this token has the required spacing with
-                  --  the previous token unparsed: insert the spacing that is
-                  --  missing.
-
-                  declare
-                     Token_Document : constant Document_Type := Document;
-                     Items          : Document_Vectors.Vector;
-                  begin
-                     case Required.Kind is
-                        when None =>
-                           raise Program_Error;
-
-                        when Whitespaces =>
-                           declare
-                              Last_Whitespaces : constant Natural :=
-                                (case Saved_Actual.Kind is
-                                 when None        => 0,
-                                 when Whitespaces => Saved_Actual.Count,
-                                 when Line_Breaks => raise Program_Error);
-                              Count_To_Add     : constant Positive :=
-                                Required.Count - Last_Whitespaces;
-                           begin
-                              Items.Append
-                                (Pool.Create_Whitespace (Count_To_Add));
-                           end;
-
-                        when Line_Breaks =>
-                           Append_Required_Line_Breaks
-                             (Required.Count,
-                              Required_Line_Breaks (Saved_Actual, -1),
-                              Items);
-                     end case;
-                     Items.Append (Token_Document);
-                     Document := Pool.Create_List (Items);
-                  end;
-               end;
-
-            when Trim =>
+            when others =>
                null;
-
-            when Whitespace =>
-               Extend_Spacing (State.Actual, One_Whitespace_Spacing);
-
          end case;
-      end Process;
+      end Preprocess;
 
-      State : Spacing_State := Initial_Spacing_State;
+      -----------------
+      -- Postprocess --
+      -----------------
+
+      procedure Postprocess (Self : in out Document_Type) is
+      begin
+         if Self.Kind not in Final_Document_Kind then
+            Self := Pool.Create_Empty_List;
+         end if;
+      end Postprocess;
+
+      --------------------
+      -- Insert_Spacing --
+      --------------------
+
+      procedure Insert_Spacing
+        (Self  : in out Document_Type;
+         Kind  : Some_Spacing_Kind;
+         Count : Positive)
+      is
+         Items : Document_Vectors.Vector;
+      begin
+         case Kind is
+            when Whitespaces =>
+               Items.Append (Pool.Create_Whitespace (Count));
+
+            when Line_Breaks =>
+               for Dummy in 1 .. Count loop
+                  Items.Append (Pool.Create_Hard_Line);
+               end loop;
+         end case;
+
+         --  If the spacing is meant to be inserted as the expansion of an
+         --  intermediate node (not an actual Prettier document), do not
+         --  preserve that node.
+
+         if Self.Kind in Final_Document_Kind then
+            Items.Append (Self);
+         end if;
+
+         Self := Pool.Create_List (Items);
+      end Insert_Spacing;
+
+      procedure Process is new Process_Required_Spacing
+        (Preprocess, Postprocess, Insert_Spacing);
+
    begin
       Detect_Broken_Groups (Document, Max_Empty_Lines);
-      Process (Document, State);
+      Process (Document, Max_Empty_Lines);
    end Insert_Required_Spacing;
 
 end Langkit_Support.Prettier_Utils;
