@@ -1517,6 +1517,10 @@ package body Langkit_Support.Adalog.Solver is
       --  multiple times, hence the important use of ``Invalid_Vars``,
       --  ``Explanation.Is_Feasible`` and ``Add_Simplify`` instead of ``Add``.
       for Atom of Sorted_Atoms loop
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace (Image (Atom));
+         end if;
+
          if Atom.Atomic_Rel.Kind in Predicate and then
             (Invalid_Vars (Id (Atom.Atomic_Rel.Target))
              or else not Explanation.Is_Feasible (+Ctx.Atom_Map (Atom.Id)))
@@ -1578,6 +1582,10 @@ package body Langkit_Support.Adalog.Solver is
       Last_Clause  : AdaSAT.Clause;
    begin
       for Atom of Sorted_Atoms loop
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace (Image (Atom));
+         end if;
+
          if not Solve_Atomic (Atom) then
             if Solv_Trace.Is_Active then
                Solv_Trace.Trace ("Failed on " & Image (Atom));
@@ -2144,11 +2152,6 @@ package body Langkit_Support.Adalog.Solver is
             end loop;
          end if;
       end loop;
-      if Solv_Trace.Is_Active then
-         for R of Ctx.Atoms loop
-            Solv_Trace.Trace (Image (R));
-         end loop;
-      end if;
 
       declare
          use Atomic_Relation_Vectors;
