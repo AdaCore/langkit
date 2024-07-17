@@ -2391,10 +2391,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                   end;
 
                elsif Kind = "ifKind" then
-                  if Context.Kind /= Node_Template then
+                  if Context.Kind not in Node_Template | Field_Template then
                      Abort_Parsing
                        (Context,
-                        """ifKind"" is valid only in node templates");
+                        """ifKind"" is valid in node templates and field"
+                        & " templates only");
                   end if;
 
                   declare
@@ -2407,21 +2408,35 @@ package body Langkit_Support.Generic_API.Unparsing is
                      Null_JSON     : constant JSON_Value :=
                        JSON.Get ("null");
 
+                     Field_Ref : Struct_Member_Ref;
                   begin
                      --  Validate that the keys are present and have the
                      --  correct type.
 
-                     if Field_JSON.Kind = JSON_Null_Type then
-                        Abort_Parsing
-                          (Context, "missing ""field"" key for ifKind");
+                     if Context.Kind = Node_Template then
+                        if Field_JSON.Kind = JSON_Null_Type then
+                           Abort_Parsing
+                             (Context, "missing ""field"" key for ifKind");
 
-                     elsif Field_JSON.Kind /= JSON_String_Type then
+                        elsif Field_JSON.Kind /= JSON_String_Type then
+                           Abort_Parsing
+                             (Context,
+                              "invalid ""field"" key kind for ifKind: found "
+                              & Field_JSON.Kind'Image
+                              & "; expected "
+                              & JSON_String_Type'Image);
+                        end if;
+
+                        Field_Ref := From_Index
+                          (Language,
+                           To_Struct_Member_Index
+                             (Field_JSON.Get, Context.Node));
+
+                     elsif Field_JSON.Kind /= JSON_Null_Type then
                         Abort_Parsing
-                          (Context,
-                           "invalid ""field"" key kind for ifKind: found "
-                           & Field_JSON.Kind'Image
-                           & "; expected "
-                           & JSON_String_Type'Image);
+                          (Context, "invalid ""field"" key for ifKind");
+                     else
+                        Field_Ref := Context.Field;
                      end if;
 
                      if Default_JSON.Kind = JSON_Null_Type then
@@ -2552,10 +2567,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                         return
                           Pool.Create_If_Kind
-                            (From_Index
-                               (Language,
-                                To_Struct_Member_Index
-                                  (Field_JSON.Get, Context.Node)),
+                            (Field_Ref,
                              If_Kind_Matchers,
                              If_Kind_Default,
                              If_Kind_Null);

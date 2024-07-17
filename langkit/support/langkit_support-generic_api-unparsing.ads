@@ -213,10 +213,17 @@ package Langkit_Support.Generic_API.Unparsing is
    --        {
    --          "kind": "ifKind",
    --          "field": "<field-name>",
-   --          "matchers": [{<node-name>: <sub-template>}, ...],
+   --          "matchers": [
+   --            {"kind": <node-name>, "document": <sub-template>},
+   --            ...
+   --          ],
    --          "default": <sub-template>
    --          "null": <sub-template>
    --        }
+   --
+   --      A variant is available in field templates. It has no "field" entry:
+   --      the alternative is picked depending on the field that owns this
+   --      template.
    --
    --    * The "indent" template yields an "indent" Prettier document::
    --

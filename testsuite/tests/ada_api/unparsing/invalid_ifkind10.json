@@ -1,0 +1,7 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "sep": {"kind": "ifKind", "matchers": [], "default": "recurse"}
+    }
+  }
+}
