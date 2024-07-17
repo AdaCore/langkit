@@ -1,0 +1,23 @@
+{
+  "node_configs": {
+    "FunDecl": {
+      "fields": {
+        "f_body": [
+          {"kind": "indent", "contents": ["hardline", "recurse"]},
+          "hardline"
+        ]
+      }
+    },
+    "StmtList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "NameList": {
+      "sep": ["recurse", "whitespace"],
+      "leading_sep": ["recurse", "hardline"]
+    },
+    "ParamSpecList": {
+      "sep": ["recurse", "whitespace"],
+      "trailing_sep": ["recurse", "hardline"]
+    }
+  }
+}

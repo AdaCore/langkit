@@ -308,7 +308,9 @@ package Langkit_Support.Generic_API.Unparsing is
    --    {
    --      "node": <template>,
    --      "fields": {<field-name>: <template>},
-   --      "sep": <template>
+   --      "sep": <template>,
+   --      "leading_sep": <template>,
+   --      "trailing_sep": <template>
    --    }
    --
    --  The "node" component is optional. If present, it contains a document
@@ -319,6 +321,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --
    --  The "sep" component is also optional, valid for list nodes only. If
    --  present, it contains a document template to unparse the list separator.
+   --
+   --  The "leading_sep" and "trailing_sep" components are optional, and valid
+   --  only for list nodes that accept respectively leading and trailing
+   --  separators. If present, they contain document templates to unparse
+   --  leading/trailing separators.
    --
    --  Standard node derivation rules apply to configurations: if node B
    --  derives from node A, and if node B does not specify a configuration for

@@ -1,6 +1,9 @@
 == ambiguous-lists.lkt ==
 error: Inconsistent separation token for FooNode.list: , and <none>
 
+== list-extra.lkt ==
+error: Inconsistent extra separation token for FooNode.list: allow_leading and allow_none
+
 == pick-in-list.lkt ==
 pick-in-list.lkt:5:29: error: Unparsers generation require list parsers to directly build nodes for each list item
 5 |     @main_rule main_rule <- list+("example" Root(or(

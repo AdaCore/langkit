@@ -100,6 +100,18 @@ package Langkit_Support.Internal.Unparsing is
 
    type Node_Unparser_Kind is (Regular, List, Token);
 
+   type List_Sep_Extra is (Allow_None, Allow_Leading, Allow_Trailing);
+   --  Whether parsers for this list node parser accept...
+   --
+   --  ``Allow_None``
+   --    No extra separator.
+   --
+   --  ``Allow_Leading``
+   --    A separator that comes before the first element.
+   --
+   --  ``Allow_Trailing``
+   --    A separator that comes after the last element.
+
    type Node_Unparser_Impl (Kind : Node_Unparser_Kind := Regular) is record
       case Kind is
          when Regular =>
@@ -116,6 +128,9 @@ package Langkit_Support.Internal.Unparsing is
             Separator : Token_Unparser;
             --  If Has_Separator is true, describe what separator token to emit
             --  between two list items.
+
+            Sep_Extra : List_Sep_Extra;
+            --  Whether this list node can have leading/trailing separators
 
          when Token =>
             null;

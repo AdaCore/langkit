@@ -1,0 +1,7 @@
+{
+  "node_configs": {
+    "NameList": {
+      "trailing_sep": "recurse"
+    }
+  }
+}

@@ -63,6 +63,18 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Return whether, according to ``Field_Unparser``, the field ``Field``
    --  must be considered as present for unparsing.
 
+   function Token_Matches
+     (Token : Lk_Token; Unparser : Token_Unparser) return Boolean
+   is (To_Index (Token.Kind) = Unparser.Kind);
+   --  Return whether the given ``Token`` has a kind that matches the one found
+   --  in ``Unparser``.
+
+   type Any_List_Sep_Template_Kind is
+     (None, Sep_Template, Leading_Sep_Template, Trailing_Sep_Template);
+   subtype List_Sep_Template_Kind is
+     Any_List_Sep_Template_Kind range Sep_Template .. Trailing_Sep_Template;
+   --  Kind of template for list node separators
+
    --------------
    -- Fragment --
    --------------
@@ -96,6 +108,15 @@ package body Langkit_Support.Generic_API.Unparsing is
 
             Token_Text : Unbounded_Text_Type;
             --  Text to emit when unparsing this token fragment
+
+            case Kind is
+               when List_Separator_Fragment =>
+                  List_Sep_Kind : List_Sep_Template_Kind;
+                  --  Separator template to use for this separator fragment
+
+               when others =>
+                  null;
+            end case;
 
          when Field_Fragment | List_Child_Fragment =>
             Node : Lk_Node;
@@ -229,13 +250,13 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  Release resources allocated for ``Self``
 
    function Fragment_For
-     (Id          : Language_Id;
-      Token       : Token_Unparser;
-      Is_List_Sep : Boolean := False) return Unparsing_Fragment;
+     (Id       : Language_Id;
+      Token    : Token_Unparser;
+      List_Sep : Any_List_Sep_Template_Kind := None) return Unparsing_Fragment;
    --  Return the unparsing fragment corresponding to the given token.
    --
-   --  ``Is_List_Sep`` designates whether this token is used as a list
-   --  separator.
+   --  ``List_Sep`` must be ``None`` if this fragment is not for a list
+   --  separator, and the corresponding separate kind otherwise.
 
    procedure Compute_Trivia_Fragments
      (Node : Lk_Node; Fragments : out Trivias_Fragments);
@@ -431,6 +452,14 @@ package body Langkit_Support.Generic_API.Unparsing is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
+   function JSON_Key_For (Kind : List_Sep_Template_Kind) return String
+   is (case Kind is
+       when Sep_Template          => "sep",
+       when Leading_Sep_Template  => "leading_sep",
+       when Trailing_Sep_Template => "trailing_sep");
+
+   type Sep_Templates is array (List_Sep_Template_Kind) of Template_Type;
+
    type Node_Config_Record is limited record
       Node_Template : Template_Type;
       --  Template to decorate the unparsing of the whole node
@@ -439,9 +468,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  For each non-null syntax field in this node, template to decorate the
       --  unparsing of the field.
 
-      List_Sep : Template_Type;
-      --  For list nodes only: template to decorate the unparsing of the list
-      --  separator.
+      List_Seps : Sep_Templates;
+      --  For list nodes only: templates to decorate the unparsing of list
+      --  separators.
    end record;
    type Node_Config_Access is access all Node_Config_Record;
    --  Unparsing configuration for a given node type
@@ -607,18 +636,19 @@ package body Langkit_Support.Generic_API.Unparsing is
    ------------------
 
    function Fragment_For
-     (Id          : Language_Id;
-      Token       : Token_Unparser;
-      Is_List_Sep : Boolean := False) return Unparsing_Fragment
+     (Id       : Language_Id;
+      Token    : Token_Unparser;
+      List_Sep : Any_List_Sep_Template_Kind := None) return Unparsing_Fragment
    is
       Kind : constant Token_Kind_Ref := From_Index (Id, Token.Kind);
       Text : constant Unbounded_Text_Type :=
         To_Unbounded_Text (Token.Text.all);
    begin
       return
-        (if Is_List_Sep
-         then (List_Separator_Fragment, Kind, Text)
-         else (Token_Fragment, Kind, Text));
+        (case List_Sep is
+         when None                   => (Token_Fragment, Kind, Text),
+         when List_Sep_Template_Kind =>
+           (List_Separator_Fragment, Kind, Text, List_Sep));
    end Fragment_For;
 
    ------------------------------
@@ -1223,31 +1253,55 @@ package body Langkit_Support.Generic_API.Unparsing is
             Process_Tokens (Node_Unparser.Post_Tokens);
 
          when List =>
-            for I in 1 .. Node.Children_Count loop
-               if I > 1 then
-                  if Node_Unparser.Separator = null then
-                     Process.all
-                       (Fragment      =>
-                          (Kind       => List_Separator_Fragment,
-                           Token_Kind => No_Token_Kind_Ref,
-                           Token_Text => To_Unbounded_Text ("")),
-                        Current_Token => Current_Token);
-                  else
-                     Process.all
-                       (Fragment      =>
-                          Fragment_For
-                            (Id, Node_Unparser.Separator, Is_List_Sep => True),
-                        Current_Token => Current_Token);
-                  end if;
+            declare
+               Count        : constant Natural := Node.Children_Count;
+               Sep_Fragment : Unparsing_Fragment :=
+                 (if Node_Unparser.Separator = null
+                  then (Kind          => List_Separator_Fragment,
+                        Token_Kind    => No_Token_Kind_Ref,
+                        Token_Text    => To_Unbounded_Text (""),
+                        List_Sep_Kind => Sep_Template)
+                  else Fragment_For
+                         (Id, Node_Unparser.Separator, Sep_Template));
+            begin
+               --  Emit the leading separator, if present
+
+               if Node_Unparser.Sep_Extra = Allow_Leading
+                  and then Count > 0
+                  and then Token_Matches
+                             (Node.Token_Start, Node_Unparser.Separator)
+               then
+                  Sep_Fragment.List_Sep_Kind := Leading_Sep_Template;
+                  Process.all (Sep_Fragment, Current_Token);
                end if;
 
-               Process.all
-                 (Fragment      =>
-                    (Kind        => List_Child_Fragment,
-                     Node        => Node.Child (I),
-                     Child_Index => I),
-                  Current_Token => Current_Token);
-            end loop;
+               --  Then each list element, with each separator token in between
+
+               for I in 1 .. Count loop
+                  if I > 1 then
+                     Sep_Fragment.List_Sep_Kind := Sep_Template;
+                     Process.all (Sep_Fragment, Current_Token);
+                  end if;
+
+                  Process.all
+                    (Fragment      =>
+                       (Kind        => List_Child_Fragment,
+                        Node        => Node.Child (I),
+                        Child_Index => I),
+                     Current_Token => Current_Token);
+               end loop;
+
+               --  And finally emit the trailing separator, if present
+
+               if Node_Unparser.Sep_Extra = Allow_Trailing
+                  and then Count > 0
+                  and then Token_Matches
+                             (Node.Token_End, Node_Unparser.Separator)
+               then
+                  Sep_Fragment.List_Sep_Kind := Trailing_Sep_Template;
+                  Process.all (Sep_Fragment, Current_Token);
+               end if;
+            end;
 
          when Token =>
             Process.all
@@ -1508,6 +1562,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       Diagnostics : in out Diagnostics_Vectors.Vector)
       return Unparsing_Configuration
    is
+      Desc      : constant Language_Descriptor_Access := +Language;
+      Unparsers : Unparsers_Impl renames Desc.Unparsers.all;
+
       ------------------
       -- JSON helpers --
       ------------------
@@ -1612,7 +1669,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       --
       --  ``Field_Template``: a template in the "fields" mapping.
       --
-      --  ``Sep_Template``: a "sep" template.
+      --  ``Sep_Template``: a "sep"/"leading_sep"/"trailing_sep" template.
 
       type Template_Parsing_Context (Kind : Template_Parsing_Context_Kind) is
       record
@@ -1638,8 +1695,12 @@ package body Langkit_Support.Generic_API.Unparsing is
          --  addressed at some point.
 
          case Kind is
-            when Node_Template | Sep_Template =>
+            when Node_Template =>
                null;
+
+            when Sep_Template =>
+               Sep_Kind : List_Sep_Template_Kind;
+               --  Kind of separator for this template
 
             when Field_Template =>
                Field : Struct_Member_Ref;
@@ -2860,7 +2921,8 @@ package body Langkit_Support.Generic_API.Unparsing is
             when Node_Template =>
               """node"" template for " & Node_Type_Image (Context.Node),
             when Sep_Template =>
-              """sep"" template for " & Node_Type_Image (Context.Node),
+              """" & JSON_Key_For (Context.Sep_Kind) & """ template for "
+              & Node_Type_Image (Context.Node),
             when Field_Template =>
               "template for " & Field_Image (Context.Field, Context.Node));
       begin
@@ -2953,7 +3015,7 @@ package body Langkit_Support.Generic_API.Unparsing is
               new Node_Config_Record'
                 (Node_Template => No_Template,
                  Field_Configs => <>,
-                 List_Sep      => No_Template);
+                 List_Seps     => (others => No_Template));
             Base_Config : constant Node_Config_Access :=
               (if Node = Root_Node_Type (Language)
                then null
@@ -3049,32 +3111,86 @@ package body Langkit_Support.Generic_API.Unparsing is
                end loop;
             end;
 
-            --  (3) the "sep" entry (if present). As usual, inherit it if
-            --  possible/needed.
+            --  (3) the "sep"/"leading_sep"/"trailing_sep" entries (if
+            --  present). "sep" follows the usual inheritance rules, but for
+            --  the two others:
+            --
+            --  * copy the "sep" template if provided for the same node
+            --  * otherwise inherit the corresponding template from the base
+            --    node.
 
-            if JSON.Kind = JSON_Object_Type and then JSON.Has_Field ("sep")
-            then
-               if not Is_List_Node (Node) then
-                  Abort_Parsing
-                    (Debug_Name (Node) & " is not a list node, invalid ""sep"""
-                     & " configuration");
-               end if;
+            for Kind in List_Sep_Template_Kind'Range loop
                declare
-                  Context : Template_Parsing_Context :=
-                    (Kind    => Sep_Template,
-                     Node    => Node,
-                     State   => (Kind          => Simple_Recurse,
-                                 Recurse_Found => False),
-                     Symbols => Node_Config.Node_Template.Symbols);
+                  JSON_Key : constant String := JSON_Key_For (Kind);
+
+                  function From_Base return Template_Type
+                  is (if Base_Config /= null
+                      then Base_Config.List_Seps (Kind)
+                      else Pool.Create_Recurse);
                begin
-                  Node_Config.List_Sep :=
-                    Parse_Template (JSON.Get ("sep"), Context);
+                  if JSON.Kind = JSON_Object_Type
+                     and then JSON.Has_Field (JSON_Key)
+                  then
+                     --  Make sure this is for a list node
+
+                     if not Is_List_Node (Node) then
+                        Abort_Parsing
+                          (Debug_Name (Node)
+                           & " is not a list node, invalid """ & JSON_Key
+                           & """ configuration");
+                     end if;
+
+                     --  Make sure that the list node accepts leading/trailing
+                     --  separators if we have a template for them.
+
+                     declare
+                        Sep_Extra : constant List_Sep_Extra :=
+                          Unparsers.Node_Unparsers.all (Key).Sep_Extra;
+                     begin
+                        if Kind = Leading_Sep_Template
+                           and then Sep_Extra /= Allow_Leading
+                        then
+                           Abort_Parsing
+                             (Debug_Name (Node)
+                              & " does not allow leading separators: invalid"
+                              & " """ & JSON_Key & """ configuration");
+
+                        elsif Kind = Trailing_Sep_Template
+                           and then Sep_Extra /= Allow_Trailing
+                        then
+                           Abort_Parsing
+                             (Debug_Name (Node) & " does not allow trailing"
+                              & " separators: invalid """ & JSON_Key & """"
+                              & " configuration");
+                        end if;
+                     end;
+
+                     declare
+                        Context : Template_Parsing_Context :=
+                          (Kind     => Sep_Template,
+                           Node     => Node,
+                           Sep_Kind => Kind,
+                           State    => (Kind          => Simple_Recurse,
+                                        Recurse_Found => False),
+                           Symbols  => Node_Config.Node_Template.Symbols);
+                     begin
+                        Node_Config.List_Seps (Kind) :=
+                          Parse_Template (JSON.Get (JSON_Key), Context);
+                     end;
+
+                  elsif Kind = Sep_Template then
+                     Node_Config.List_Seps (Kind) := From_Base;
+
+                  elsif JSON.Kind = JSON_Object_Type
+                        and then JSON.Has_Field (JSON_Key_For (Sep_Template))
+                  then
+                     Node_Config.List_Seps (Kind) :=
+                       Node_Config.List_Seps (Sep_Template);
+                  else
+                     Node_Config.List_Seps (Kind) := From_Base;
+                  end if;
                end;
-            elsif Base_Config /= null then
-               Node_Config.List_Sep := Base_Config.List_Sep;
-            else
-               Node_Config.List_Sep := Pool.Create_Recurse;
-            end if;
+            end loop;
 
             --  Since inheritance may mix templates from different node
             --  configurations, we need to double check that there are no
@@ -3094,12 +3210,18 @@ package body Langkit_Support.Generic_API.Unparsing is
                      Field_Config_Maps.Element (Cur));
                end;
             end loop;
-            Check_Symbols
-              (Node,
-               """node"" template",
-               Node_Config.Node_Template,
-               """sep"" template",
-               Node_Config.List_Sep);
+            for Kind in List_Sep_Template_Kind'Range loop
+               declare
+                  JSON_Key : constant String := JSON_Key_For (Kind);
+               begin
+                  Check_Symbols
+                    (Node,
+                     """node"" template",
+                     Node_Config.Node_Template,
+                     """" & JSON_Key & """ template",
+                     Node_Config.List_Seps (Kind));
+               end;
+            end loop;
          end;
       end loop;
 
@@ -3562,9 +3684,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                      --  corresponding template to wrap ``Token``.
 
                      if F.Kind = List_Separator_Fragment then
-                        pragma Assert
-                          (Node_Config.List_Sep.Kind = With_Recurse);
                         declare
+                           Sep_Template : constant Template_Type :=
+                             Node_Config.List_Seps (F.List_Sep_Kind);
+
+                           pragma Assert (Sep_Template.Kind = With_Recurse);
+
                            Sep_Items : Document_Vectors.Vector;
                            --  Token and trivia used to unparse the list
                            --  separator.
@@ -3594,7 +3719,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                               Node          => N,
                               Current_Token => Current_Token,
                               Trivias       => Trivias,
-                              Template      => Node_Config.List_Sep,
+                              Template      => Sep_Template,
                               Arguments     => Args);
                            pragma Assert (Current_Token = Next_Token);
                            Items.Append (Token);

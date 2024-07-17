@@ -136,6 +136,7 @@ private package ${ada_lib_name}.Unparsers is
                 ("null"
                  if unparser.separator is None else
                  f"{unparser.separator.var_name}'Access")),
+               ("Sep_Extra", unparser.extra.ada_name),
             ]
 
          elif is_token_node_unparser(unparser):

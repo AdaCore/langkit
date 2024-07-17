@@ -10,3 +10,5 @@ def f1(a: Int, b: Int = 0): Int
 
   n1, n2, n2 = foo(a, b);
 }
+
+def f2(a: Int, ): Int { a + 1; }
