@@ -330,39 +330,9 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  to account for all the tokens that are processed. The ``Process``
    --  callback is expected to do the same.
 
-   -----------------------
-   --  Template symbols --
-   -----------------------
-
-   --  The following map type is used during templates parsing to validate the
-   --  names used as symbols in JSON templates, and to turn them into their
-   --  internal representation: ``Template_Symbol``.
-
-   type Symbol_Info is record
-      Source_Name : Unbounded_String;
-      --  Name for this symbol as found in the unparsing configuration
-
-      Template_Sym : Template_Symbol;
-      --  Unique identifier for this symbol
-
-      Has_Definition : Boolean;
-      --  Whether we have found one definition for this symbol
-   end record;
-
-   package Symbol_Parsing_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Symbol_Type,
-      Element_Type    => Symbol_Info,
-      Hash            => Hash,
-      Equivalent_Keys => "=");
-
-   function Lookup
-     (Source_Name : Unbounded_String;
-      Symbols     : Symbol_Table;
-      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
-      return Symbol_Parsing_Maps.Reference_Type;
-   --  Return a reference to the entry in ``Symbol_Map`` corresponding to the
-   --  ```Source_Name`` symbol (converted to a ``Symbol_Type`` using
-   --  ``Symbols``). Create a map entry if it does not exist yet.
+   -----------------------------------
+   -- Template symbol instantiation --
+   -----------------------------------
 
    package Symbol_Instantiation_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Some_Template_Symbol,
@@ -496,6 +466,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       Pool : Document_Pool;
       --  Allocation pool for all Document_Type values, to be released when the
       --  unparsing configuration is destroyed.
+
+      Symbols : Symbol_Table;
+      --  Symbol table for group ids
 
       Node_Configs : Node_Config_Maps.Map;
       --  Node configurations for all node types in Language
@@ -1286,42 +1259,6 @@ package body Langkit_Support.Generic_API.Unparsing is
       end case;
    end Iterate_On_Fragments;
 
-   ------------
-   -- Lookup --
-   ------------
-
-   function Lookup
-     (Source_Name : Unbounded_String;
-      Symbols     : Symbol_Table;
-      Symbol_Map  : in out Symbol_Parsing_Maps.Map)
-      return Symbol_Parsing_Maps.Reference_Type
-   is
-      Symbol   : constant Symbol_Type :=
-        Find (Symbols, To_Text (To_String (Source_Name)));
-      Position : Symbol_Parsing_Maps.Cursor := Symbol_Map.Find (Symbol);
-      Inserted : Boolean;
-   begin
-      if not Symbol_Parsing_Maps.Has_Element (Position) then
-
-         --  This is the first time we see this symbol in the current template:
-         --  create a new internal symbol for it. All internal symbols are
-         --  tracked as entries in ``Symbol_Map``, so we can use its length to
-         --  compute internal symbols that are unique for the current template.
-
-         declare
-            Info : constant Symbol_Info :=
-              (Source_Name    => Source_Name,
-               Template_Sym   => Template_Symbol (Symbol_Map.Length + 1),
-               Has_Definition => False);
-         begin
-            Symbol_Map.Insert (Symbol, Info, Position, Inserted);
-            pragma Assert (Inserted);
-         end;
-      end if;
-
-      return Symbol_Map.Reference (Position);
-   end Lookup;
-
    ------------------------
    -- Instantiate_Symbol --
    ------------------------
@@ -1599,7 +1536,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       --  Create a map so that we can lookup nodes/fields by name
 
-      Symbols : Symbol_Table := Create_Symbol_Table;
+      Symbols : constant Symbol_Table := Create_Symbol_Table;
       Map     : constant Name_Map := Create_Name_Map
         (Id             => Language,
          Symbols        => Symbols,
@@ -1686,6 +1623,20 @@ package body Langkit_Support.Generic_API.Unparsing is
          --  Keep track of the parsing state for this template; used for
          --  validation.
 
+         Symbols : Symbol_Parsing_Maps.Map;
+         --  Symbols referenced/declared in this template. Initialize it
+         --  with the symbols that can be referenced from the template, and
+         --  read after template parsing what symbols the template
+         --  declares/references.
+         --
+         --  TODO??? (eng/libadalang/langkit#805) For now, this is out of the
+         --  parsing state, and thus it is not sensitive to control flow
+         --  constructs: it is not possible to create groups with the same
+         --  symbol in alternative paths. This also means that it is possible
+         --  to refer to a group even in contexts where we are not guaranteed
+         --  that the group will be printed. These limitations should be
+         --  addressed at some point.
+
          case Kind is
             when Node_Template | Sep_Template =>
                null;
@@ -1728,9 +1679,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  ill-formed.
 
       function Parse_Template_Helper
-        (JSON       : JSON_Value;
-         Context    : in out Template_Parsing_Context;
-         Symbol_Map : in out Symbol_Parsing_Maps.Map) return Document_Type;
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context) return Document_Type;
       --  Helper for ``Parse_Template``. Implement the recursive part of
       --  templates parsing: ``Parse_Template`` takes care of the post-parsing
       --  validation.
@@ -1750,6 +1700,15 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  On success, update ``Item`` so that its Token_Ref/Field_Position
       --  component reflect the ones found in the linear template fo the
       --  current nod.
+
+      procedure Check_Symbols
+        (Node            : Type_Ref;
+         Parent_Name     : String;
+         Parent_Template : Template_Type;
+         Child_Name      : String;
+         Child_Template  : Template_Type);
+      --  Check that symbol usage for both templates is compatible. Names are
+      --  used for error message formatting.
 
       procedure Abort_Parsing
         (Context : Template_Parsing_Context; Message : String)
@@ -2031,28 +1990,77 @@ package body Langkit_Support.Generic_API.Unparsing is
         (JSON    : JSON_Value;
          Context : in out Template_Parsing_Context) return Template_Type
       is
-         Symbol_Map : Symbol_Parsing_Maps.Map;
-         --  Mapping from name symbols found in the JSON (Symbol_Type) and
-         --  "ids" (Template_Symbol).
+         Initial_Symbol_Map : constant Symbol_Parsing_Maps.Map :=
+           Context.Symbols;
+         --  Symbol map before template parsing, i.e. only symbols defined in a
+         --  "parent" template.
 
-         Root : constant Document_Type :=
-           Parse_Template_Helper (JSON, Context, Symbol_Map);
+         Result_Symbols : Symbol_Parsing_Maps.Map;
+         --  Symbol map that represent this template only (its own definitions,
+         --  its own references).
+
+         Root : Document_Type;
       begin
-         --  Make sure that all symbols referenced in this template are also
-         --  defined in this template.
+         --  Clear symbol reference marks (so that we compute which symbols
+         --  *this* template references) and run the template parser.
 
-         for Info of Symbol_Map loop
-            if not Info.Has_Definition then
-               Abort_Parsing
-                 (Context,
-                  "undefined symbol: " & To_String (Info.Source_Name));
-            end if;
+         for Info of Context.Symbols loop
+            pragma Assert (Info.Has_Definition);
+            Info.Is_Referenced := False;
+         end loop;
+
+         Root := Parse_Template_Helper (JSON, Context);
+
+         --  Now, sanity check symbol usage and compute symbol usage that is
+         --  specific to this template (Result_Symbols).
+
+         for Ctx_Cur in Context.Symbols.Iterate loop
+            declare
+               use Symbol_Parsing_Maps;
+
+               K        : constant Symbol_Type := Key (Ctx_Cur);
+               Ctx_Info : Symbol_Info renames Context.Symbols (Ctx_Cur);
+               Init_Cur : constant Cursor := Initial_Symbol_Map.Find (K);
+            begin
+               --  Make sure that all symbols referenced in this template are
+               --  also defined in this template.
+
+               if not Ctx_Info.Has_Definition then
+                  Abort_Parsing
+                    (Context,
+                     "undefined symbol: " & To_String (Ctx_Info.Source_Name));
+               end if;
+
+               --  Report definitions
+
+               if not Has_Element (Init_Cur) then
+
+                  --  The template we parsed defines this symbol
+
+                  Result_Symbols.Insert (K, Ctx_Info);
+
+               elsif Ctx_Info.Is_Referenced then
+
+                  --  The template we parse does not define this symbol, but it
+                  --  references it.
+
+                  Result_Symbols.Insert
+                    (K,
+                     (Ctx_Info.Source_Name,
+                      Ctx_Info.Template_Sym,
+                      Has_Definition => False,
+                      Is_Referenced  => True));
+               end if;
+            end;
          end loop;
 
          case Context.State.Kind is
             when Simple_Recurse =>
                if Context.State.Recurse_Found then
-                  return (Kind => With_Recurse, Root => Root);
+                  return
+                    (Kind    => With_Recurse,
+                     Root    => Root,
+                     Symbols => Result_Symbols);
                else
                   Abort_Parsing (Context, "recursion is missing");
                end if;
@@ -2077,9 +2085,15 @@ package body Langkit_Support.Generic_API.Unparsing is
                   when Simple_Recurse =>
                      raise Program_Error;
                   when Recurse_Field =>
-                     return (Kind => With_Recurse_Field, Root => Root);
+                     return
+                       (Kind    => With_Recurse_Field,
+                        Root    => Root,
+                        Symbols => Result_Symbols);
                   when Recurse_In_Field =>
-                     return (Kind => With_Text_Recurse, Root => Root);
+                     return
+                       (Kind    => With_Text_Recurse,
+                        Root    => Root,
+                        Symbols => Result_Symbols);
                end case;
          end case;
       end Parse_Template;
@@ -2089,9 +2103,10 @@ package body Langkit_Support.Generic_API.Unparsing is
       ---------------------------
 
       function Parse_Template_Helper
-        (JSON       : JSON_Value;
-         Context    : in out Template_Parsing_Context;
-         Symbol_Map : in out Symbol_Parsing_Maps.Map) return Document_Type is
+        (JSON    : JSON_Value;
+         Context : in out Template_Parsing_Context) return Document_Type
+      is
+         Symbol_Map : Symbol_Parsing_Maps.Map renames Context.Symbols;
       begin
          case JSON.Kind is
          when JSON_Array_Type =>
@@ -2100,7 +2115,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             begin
                for D of JSON_Array'(JSON.Get) loop
                   Items.Append
-                    (Parse_Template_Helper (D, Context, Symbol_Map));
+                    (Parse_Template_Helper (D, Context));
                end loop;
                return Pool.Create_List (Items);
             end;
@@ -2175,7 +2190,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                      return Pool.Create_Align
                        (Data,
                         Parse_Template_Helper
-                          (JSON.Get ("contents"), Context, Symbol_Map));
+                          (JSON.Get ("contents"), Context));
                   end;
 
                elsif Kind in
@@ -2196,9 +2211,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                                   then (Kind => Prettier.Inner_Root)
                                   else raise Program_Error),
                      Contents => Parse_Template_Helper
-                                   (JSON.Get ("contents"),
-                                    Context,
-                                    Symbol_Map));
+                                   (JSON.Get ("contents"), Context));
 
                elsif Kind = "fill" then
                   declare
@@ -2209,8 +2222,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                           (Context, "missing ""document"" key for fill");
                      end if;
                      Document :=
-                       Parse_Template_Helper
-                         (JSON.Get ("document"), Context, Symbol_Map);
+                       Parse_Template_Helper (JSON.Get ("document"), Context);
 
                      return Pool.Create_Fill (Document);
                   end;
@@ -2226,8 +2238,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                           (Context, "missing ""document"" key for group");
                      end if;
                      Document :=
-                       Parse_Template_Helper
-                         (JSON.Get ("document"), Context, Symbol_Map);
+                       Parse_Template_Helper (JSON.Get ("document"), Context);
 
                      if JSON.Has_Field ("shouldBreak") then
                         declare
@@ -2258,21 +2269,14 @@ package body Langkit_Support.Generic_API.Unparsing is
                                  & JSON_Id.Kind'Image);
                            end if;
 
-                           declare
-                              Info : Symbol_Info renames
-                                Lookup (JSON_Id.Get, Symbols, Symbol_Map);
                            begin
-                              --  Ensure that there is no conflicting symbol
-                              --  definition in this template.
-
-                              if Info.Has_Definition then
+                              Id := Declare_Symbol
+                                (JSON_Id.Get, Symbols, Symbol_Map);
+                           exception
+                              when Duplicate_Symbol_Definition =>
                                  Abort_Parsing
                                    (Context,
                                     "duplicate group id: " & JSON_Id.Get);
-                              else
-                                 Info.Has_Definition := True;
-                              end if;
-                              Id := Info.Template_Sym;
                            end;
                         end;
                      end if;
@@ -2298,16 +2302,12 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                      Contents :=
                        Parse_Template_Helper
-                         (JSON.Get ("breakContents"),
-                          Contents_Context,
-                          Symbol_Map);
+                         (JSON.Get ("breakContents"), Contents_Context);
 
                      Flat_Contents :=
                        (if JSON.Has_Field ("flatContents")
                         then Parse_Template_Helper
-                               (JSON.Get ("flatContents"),
-                                Flat_Context,
-                                Symbol_Map)
+                               (JSON.Get ("flatContents"), Flat_Context)
                         else null);
 
                      --  Unify the parsing state for both branches and update
@@ -2336,8 +2336,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                            end if;
 
                            Group_Id :=
-                             Lookup (JSON_Id.Get, Symbols, Symbol_Map)
-                             .Template_Sym;
+                             Reference_Symbol
+                               (JSON_Id.Get, Symbols, Symbol_Map);
                         end;
                      end if;
 
@@ -2365,8 +2365,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                            "missing ""then"" key for ifEmpty");
                      end if;
                      Then_Contents :=
-                       Parse_Template_Helper
-                         (JSON.Get ("then"), Then_Context, Symbol_Map);
+                       Parse_Template_Helper (JSON.Get ("then"), Then_Context);
 
                      if not JSON.Has_Field ("else") then
                         Abort_Parsing
@@ -2374,8 +2373,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                            "missing ""else"" key for ifEmpty");
                      end if;
                      Else_Contents :=
-                       Parse_Template_Helper
-                         (JSON.Get ("else"), Else_Context, Symbol_Map);
+                       Parse_Template_Helper (JSON.Get ("else"), Else_Context);
 
                      --  Unify the parsing state for both branches and update
                      --  Context accordingly.
@@ -2498,7 +2496,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                              ((From_Index
                                  (Language, To_Type_Index (Kind.Get)),
                                Parse_Template_Helper
-                                 (Document_JSON, Nested_Context, Symbol_Map)));
+                                 (Document_JSON, Nested_Context)));
 
                            --  Confirm that the final linear position is
                            --  homogeneous between all matchers.
@@ -2513,8 +2511,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                      begin
                         If_Kind_Default :=
-                          Parse_Template_Helper
-                            (Default_JSON, Context, Symbol_Map);
+                          Parse_Template_Helper (Default_JSON, Context);
 
                         if Null_JSON.Kind /= JSON_Null_Type then
                            declare
@@ -2525,9 +2522,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                            begin
                               If_Kind_Null :=
                                 Parse_Template_Helper
-                                  (Null_JSON,
-                                   If_Kind_Null_Context,
-                                   Symbol_Map);
+                                  (Null_JSON, If_Kind_Null_Context);
 
                               if If_Kind_Null_Context.State /= Context.State
                               then
@@ -2573,8 +2568,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                        (Context, "missing ""contents"" key for indent");
                   end if;
                   return Pool.Create_Indent
-                    (Parse_Template_Helper
-                       (JSON.Get ("contents"), Context, Symbol_Map));
+                    (Parse_Template_Helper (JSON.Get ("contents"), Context));
 
                elsif Kind = "recurse_field" then
                   declare
@@ -2802,6 +2796,47 @@ package body Langkit_Support.Generic_API.Unparsing is
       end Process_Linear_Template_Item;
 
       -------------------
+      -- Check_Symbols --
+      -------------------
+
+      procedure Check_Symbols
+        (Node            : Type_Ref;
+         Parent_Name     : String;
+         Parent_Template : Template_Type;
+         Child_Name      : String;
+         Child_Template  : Template_Type)
+      is
+         use Symbol_Parsing_Maps;
+      begin
+         for Child_Cur in Child_Template.Symbols.Iterate loop
+            declare
+               Child_Info        : Symbol_Info renames
+                 Child_Template.Symbols (Child_Cur);
+               Defined_In_Parent : constant Boolean :=
+                 Parent_Template.Symbols.Contains (Key (Child_Cur));
+            begin
+               if Child_Info.Has_Definition then
+                  if Defined_In_Parent then
+                     Abort_Parsing
+                       (Debug_Name (Node) & ": group id "
+                        & To_String (Child_Info.Source_Name)
+                        & " in " & Parent_Name
+                        & " is duplicated in " & Child_Name);
+                  end if;
+               else
+                  if not Defined_In_Parent then
+                     Abort_Parsing
+                       (Debug_Name (Node) & ": group id "
+                        & To_String (Child_Info.Source_Name)
+                        & " is referenced in " & Child_Name
+                        & " but not defined in " & Parent_Name);
+                  end if;
+               end if;
+            end;
+         end loop;
+      end Check_Symbols;
+
+      -------------------
       -- Abort_Parsing --
       -------------------
 
@@ -2878,6 +2913,7 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       Result.Ref_Count := 1;
       Result.Language := Language;
+      Result.Symbols := Symbols;
 
       if not JSON.Has_Field ("node_configs") then
          Abort_Parsing ("missing ""node_configs"" key");
@@ -2929,9 +2965,10 @@ package body Langkit_Support.Generic_API.Unparsing is
                declare
                   JSON_Template : constant JSON_Value := JSON.Get ("node");
                   Context       : Template_Parsing_Context :=
-                    (Kind  => Node_Template,
-                     Node  => Node,
-                     State => <>);
+                    (Kind    => Node_Template,
+                     Node    => Node,
+                     State   => <>,
+                     Symbols => <>);
                begin
                   Context.State :=
                     Initial_State_For (Node, JSON_Template, Context);
@@ -2969,11 +3006,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                               JSON    : constant JSON_Value :=
                                 Field_JSON_Map.Element (Key);
                               Context : Template_Parsing_Context :=
-                                (Kind  => Field_Template,
-                                 State => Initial_State_For
-                                            (Node, Member, JSON),
-                                 Node  => Node,
-                                 Field => Member);
+                                (Kind    => Field_Template,
+                                 State   => Initial_State_For
+                                              (Node, Member, JSON),
+                                 Symbols => Node_Config.Node_Template.Symbols,
+                                 Node    => Node,
+                                 Field   => Member);
                            begin
                               T := Parse_Template (JSON, Context);
                            end;
@@ -3011,10 +3049,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                end if;
                declare
                   Context : Template_Parsing_Context :=
-                    (Kind  => Sep_Template,
-                     Node  => Node,
-                     State => (Kind          => Simple_Recurse,
-                               Recurse_Found => False));
+                    (Kind    => Sep_Template,
+                     Node    => Node,
+                     State   => (Kind          => Simple_Recurse,
+                                 Recurse_Found => False),
+                     Symbols => Node_Config.Node_Template.Symbols);
                begin
                   Node_Config.List_Sep :=
                     Parse_Template (JSON.Get ("sep"), Context);
@@ -3024,6 +3063,31 @@ package body Langkit_Support.Generic_API.Unparsing is
             else
                Node_Config.List_Sep := Pool.Create_Recurse;
             end if;
+
+            --  Since inheritance may mix templates from different node
+            --  configurations, we need to double check that there are no
+            --  duplicate symbol definitions, and that all referenced symbols
+            --  are defined.
+
+            for Cur in Node_Config.Field_Configs.Iterate loop
+               declare
+                  Field : constant Struct_Member_Ref :=
+                    From_Index (Language, Field_Config_Maps.Key (Cur));
+               begin
+                  Check_Symbols
+                    (Node,
+                     "the ""node"" template",
+                     Node_Config.Node_Template,
+                     "the """ & Debug_Name (Field) & """ template",
+                     Field_Config_Maps.Element (Cur));
+               end;
+            end loop;
+            Check_Symbols
+              (Node,
+               """node"" template",
+               Node_Config.Node_Template,
+               """sep"" template",
+               Node_Config.List_Sep);
          end;
       end loop;
 
@@ -3048,13 +3112,11 @@ package body Langkit_Support.Generic_API.Unparsing is
          Result.Max_Empty_Lines := Max_Empty_Lines;
       end;
 
-      Destroy (Symbols);
       return (Ada.Finalization.Controlled with Value => Result);
 
    exception
       when Invalid_Input =>
          pragma Assert (not Diagnostics.Is_Empty);
-         Destroy (Symbols);
          Release (Result);
          return No_Unparsing_Configuration;
    end Load_Unparsing_Config_From_Buffer;
@@ -4207,6 +4269,9 @@ package body Langkit_Support.Generic_API.Unparsing is
          end;
       end loop;
       Self.Pool.Release;
+      if Self.Symbols /= null then
+         Destroy (Self.Symbols);
+      end if;
       Free (Self);
    end Release;
 

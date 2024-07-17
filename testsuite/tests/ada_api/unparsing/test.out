@@ -81,12 +81,20 @@ a: Int=2
     template for VarDecl.f_name: invalid group id: JSON_INT_TYPE
 # invalid_group4.json
     template for VarDecl.f_name: duplicate group id: myGroup
+# invalid_group5.json
+    template for VarDecl.f_name: duplicate group id: myGroup
+# invalid_group6.json
+    VarDecl: group id myGroup in the "node" template is duplicated in the "Decl.f_name" template
+# invalid_group7.json
+    "sep" template for DeclList: duplicate group id: myGroup
 # invalid_ifbreak.json
     template for VarDecl.f_name: missing "breakContents" key for ifBreak
 # invalid_ifbreak2.json
     template for VarDecl.f_name: invalid group id: JSON_INT_TYPE
 # invalid_ifbreak3.json
     template for VarDecl.f_name: undefined symbol: myGroup
+# invalid_ifbreak4.json
+    VarDecl: group id myGroup is referenced in the "Decl.f_name" template but not defined in the "node" template
 # invalid_ifempty.json
     template for VarDecl.f_name: missing "else" key for ifEmpty
 # invalid_ifempty2.json
@@ -583,6 +591,182 @@ Done.
       "id": 17,
       "kind": "command"
     }
+  ]
+}
+
+== cmd_group_id2.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "command": {
+        "break": false,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "id": 4,
+          "kind": "list",
+          "list": [
+          ]
+        },
+        "id": 3
+      },
+      "id": 2,
+      "kind": "command"
+    },
+    {
+      "id": 5,
+      "kind": "text",
+      "text": "var"
+    },
+    {
+      "command": {
+        "breakContents": {
+          "id": 7,
+          "kind": "list",
+          "list": [
+            {
+              "id": 8,
+              "kind": "text",
+              "text": " v1"
+            }
+          ]
+        },
+        "command": "ifBreak",
+        "flatContents": {
+          "id": 9,
+          "kind": "list",
+          "list": [
+            {
+              "id": 10,
+              "kind": "text",
+              "text": " v1"
+            }
+          ]
+        },
+        "ifBreakGroupId": 3
+      },
+      "id": 6,
+      "kind": "command"
+    },
+    {
+      "id": 11,
+      "kind": "text",
+      "text": ":"
+    },
+    {
+      "command": {
+        "breakContents": {
+          "id": 13,
+          "kind": "text",
+          "text": "T"
+        },
+        "command": "ifBreak",
+        "flatContents": {
+          "id": 14,
+          "kind": "text",
+          "text": "T"
+        },
+        "ifBreakGroupId": 3
+      },
+      "id": 12,
+      "kind": "command"
+    },
+    {
+      "id": 15,
+      "kind": "text",
+      "text": "=0;"
+    },
+    {
+      "command": {
+        "break": false,
+        "command": "group",
+        "expandedStates": null,
+        "groupContents": {
+          "id": 18,
+          "kind": "list",
+          "list": [
+          ]
+        },
+        "id": 17
+      },
+      "id": 16,
+      "kind": "command"
+    },
+    {
+      "id": 19,
+      "kind": "text",
+      "text": "var"
+    },
+    {
+      "command": {
+        "breakContents": {
+          "id": 21,
+          "kind": "list",
+          "list": [
+            {
+              "id": 22,
+              "kind": "text",
+              "text": " v2"
+            }
+          ]
+        },
+        "command": "ifBreak",
+        "flatContents": {
+          "id": 23,
+          "kind": "list",
+          "list": [
+            {
+              "id": 24,
+              "kind": "text",
+              "text": " v2"
+            }
+          ]
+        },
+        "ifBreakGroupId": 17
+      },
+      "id": 20,
+      "kind": "command"
+    },
+    {
+      "id": 25,
+      "kind": "text",
+      "text": ":"
+    },
+    {
+      "command": {
+        "breakContents": {
+          "id": 27,
+          "kind": "text",
+          "text": "T"
+        },
+        "command": "ifBreak",
+        "flatContents": {
+          "id": 28,
+          "kind": "text",
+          "text": "T"
+        },
+        "ifBreakGroupId": 17
+      },
+      "id": 26,
+      "kind": "command"
+    },
+    {
+      "id": 29,
+      "kind": "text",
+      "text": "=1;"
+    }
+  ]
+}
+
+== cmd_group_id3.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
   ]
 }
 

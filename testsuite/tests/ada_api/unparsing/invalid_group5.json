@@ -1,0 +1,26 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": [
+        {
+          "kind": "group",
+          "id": "myGroup",
+          "document": {"kind": "recurse_field", "field": "f_is_null"}
+        },
+        {"kind": "text", "text": "var"},
+        {"kind": "recurse_field", "field": "f_name"},
+        {"kind": "text", "text": ":"},
+        {"kind": "recurse_field", "field": "f_type_expr"},
+        {"kind": "text", "text": "="},
+        {"kind": "recurse_field", "field": "f_value"},
+        {"kind": "text", "text": ";"}
+      ],
+      "fields": {
+        "f_name": [
+          {"kind": "group", "document": "line", "id": "myGroup"},
+          "recurse"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "node_configs": {
+    "DeclList": {
+      "node": [
+        {"kind": "group", "id": "myGroup", "document": "line"},
+        "recurse"
+      ],
+      "sep": [
+        {"kind": "group", "id": "myGroup", "document": "line"},
+        "recurse"
+      ]
+    }
+  }
+}
