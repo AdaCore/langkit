@@ -153,6 +153,12 @@ begin
    Check ("cmd_dedent.json");
    Check ("cmd_dedenttoroot.json");
    Check ("cmd_fill.json");
+   Check
+     ("cmd_no_flush_line_breaks.json",
+      "var v: T =" & ASCII.LF & ASCII.LF & "0;");
+   Check
+     ("cmd_flush_line_breaks.json",
+      "var v: T =" & ASCII.LF & ASCII.LF & "0;");
    Check ("cmd_group.json");
    Check ("cmd_group_id.json", "var v1: T = 0; var v2: T = 1;");
    Check ("cmd_group_id2.json", "var v1: T = 0; var v2: T = 1;");

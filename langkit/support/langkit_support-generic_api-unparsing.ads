@@ -134,6 +134,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --        "softline"
    --        "literalline"
    --
+   --    * The "flushLineBreaks" template is used as a placeholder to emit
+   --      potential line breaks that come from the source code to reformat::
+   --
+   --        "flushLineBreaks"
+   --
    --    * The "trim" template yields a "trim" Prettier Document::
    --
    --        "trim"

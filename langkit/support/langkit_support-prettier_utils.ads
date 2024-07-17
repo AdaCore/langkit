@@ -162,8 +162,7 @@ private package Langkit_Support.Prettier_Utils is
    with Static_Predicate =>
      Template_Document_Kind not in
        Expected_Line_Breaks
-     | Expected_Whitespaces
-     | Flush_Line_Breaks;
+     | Expected_Whitespaces;
 
    subtype Instantiated_Template_Document_Kind is Document_Kind
    with Static_Predicate =>
