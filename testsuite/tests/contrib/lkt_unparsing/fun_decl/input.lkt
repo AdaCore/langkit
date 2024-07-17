@@ -1,0 +1,21 @@
+fun f1(): T = foo
+
+fun f2(): T = foo1 + foo2 + foo3 + foo4 + foo5 + foo6 + foo7 + foo8 + foo9
++ foo10 + foo11
+
+fun f3(a: Int): T = a + 1
+
+fun f4(a: Int, b: Int): T = a + b
+
+fun f5(a: Int = 0, b: Int): T = a + b
+
+fun f6(a: SomeLongType, b: SomeLongType = 0, c: SomeLongType, d: SomeLongType, e:
+SomeLongType): T = a + b + c + d + e
+
+fun f7(@ignored a: T): T = 0
+
+fun f8(@ignored a: T, @ignored b: T): T = 0
+
+fun f8(): T =
+# Comment about the sum
+a + b

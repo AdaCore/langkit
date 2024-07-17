@@ -1,0 +1,1045 @@
+{
+  "node_configs": {
+    "AnyOfList": {
+      "sep": ["line", "recurse", "whitespace"]
+    },
+    "AnyOf": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "recurse_field", "field": "f_expr"},
+          "whitespace",
+          {"kind": "text", "text": "in"},
+          "whitespace",
+          {"kind": "recurse_field", "field": "f_values"}
+        ]
+      }
+    },
+    "ArrayLiteral": {
+      "fields": {
+        "f_exprs": {
+          "kind": "group",
+          "document": [
+            {"kind": "indent", "contents": ["softline", "recurse"]},
+            "softline"
+          ]
+        },
+        "f_element_type": [
+          {"kind": "text", "text": ":"},
+          "whitespace",
+          "recurse"
+        ]
+      }
+    },
+    "BaseDotExpr": {
+      "node": {
+        "kind": "group", "document": "recurse"
+      },
+      "fields": {
+        "f_prefix": [
+          {
+            "kind": "recurse_flatten",
+            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
+          },
+          "softline"
+        ]
+      }
+    },
+    "BaseLexerCaseRuleAltList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "BinOp": {
+      "node": {
+        "kind": "group",
+        "document": [
+           {"kind": "recurse_field", "field": "f_left"},
+           "line",
+           {"kind": "recurse_field", "field": "f_op"},
+           "whitespace",
+           {"kind": "recurse_field", "field": "f_right"}
+        ]
+      }
+    },
+    "BlockDeclList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "BlockExpr": {
+      "node": [
+         {"kind": "text", "text": "{"},
+         {
+           "kind": "indent",
+           "contents": [
+             "hardline",
+             {"kind": "recurse_field", "field": "f_val_defs"},
+             {"kind": "text", "text": ";"},
+             "hardline",
+             "flushLineBreaks",
+             {
+               "kind": "group",
+               "document": {"kind": "recurse_field", "field": "f_expr"}
+             }
+           ]
+         },
+         "hardline",
+         {"kind": "text", "text": "}"}
+      ]
+    },
+    "CallExpr": {
+      "node": {
+        "kind": "group", "document": "recurse"
+      },
+      "fields": {
+        "f_name": {
+          "kind": "group",
+          "document": {
+            "kind": "recurse_flatten",
+            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
+          }
+        },
+        "f_args": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": ["softline", "recurse"]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "CallExprList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "CastExpr": {
+      "node": {
+        "kind": "group", "document": "recurse"
+      },
+      "fields": {
+        "f_expr": [
+          {
+            "kind": "recurse_flatten",
+            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
+          },
+          "softline"
+        ]
+      }
+    },
+    "ClassDecl": {
+      "node": [
+         {"kind": "text", "text": "class"},
+         {"kind": "recurse_field", "field": "f_syn_name"},
+         {"kind": "recurse_field", "field": "f_syn_base_type"},
+         {"kind": "recurse_field", "field": "f_traits"},
+         "whitespace",
+         {"kind": "text", "text": "{"},
+         {"kind": "recurse_field", "field": "f_decls"},
+         {"kind": "text", "text": "}"}
+      ],
+      "fields": {
+        "f_syn_base_type": [
+         {"kind": "text", "text": ":"},
+         "whitespace",
+         "recurse"
+        ],
+        "f_decls": [
+          {
+            "kind": "ifEmpty",
+            "then": ["hardline", "recurse"],
+            "else": [
+              {"kind": "indent", "contents": ["hardline", "recurse"]},
+              "hardline"
+            ]
+          }
+        ]
+      }
+    },
+    "DeclAnnotation": {
+      "node": ["recurse", "hardline"]
+    },
+    "DeclAnnotationParams": {
+      "fields": {
+        "f_params": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": [
+                "softline",
+                {"kind": "group", "document": "recurse"}
+              ]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "DynVarDecl": {
+      "fields": {
+        "f_decl_type": ["whitespace", "recurse"]
+      }
+    },
+    "ElsifBranchList": {
+      "sep": ["hardline", "recurse"]
+    },
+    "ElsifBranch": {
+      "node": [
+        {"kind": "text", "text": "elif"},
+        {
+          "kind": "indent",
+          "contents": [
+            "line",
+            {
+              "kind": "group",
+              "document": {"kind": "recurse_field", "field": "f_cond_expr"}
+            }
+          ]
+        },
+        "hardline",
+        {"kind": "text", "text": "then"},
+        {
+          "kind": "indent",
+          "contents": [
+            "line",
+            {"kind": "recurse_field", "field": "f_then_expr"}
+          ]
+        }
+      ]
+    },
+    "EnvSpecDecl": {
+      "fields": {
+        "f_syn_name": ["recurse", "whitespace"],
+        "f_actions": [
+          {
+            "kind": "indent",
+            "contents": [
+              {"kind": "ifEmpty", "then": [], "else": "hardline"},
+              "recurse"
+            ]
+          },
+          "hardline"
+        ]
+      }
+    },
+    "EnumClassAltDeclList": {
+      "sep": ["recurse", "line"]
+    },
+    "EnumClassCase": {
+      "node": [
+        {"kind": "text", "text": "case"},
+        {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": [
+                "line",
+                {"kind": "recurse_field", "field": "f_decls"}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "EnumClassCaseList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "EnumClassDecl": {
+      "node": [
+         {"kind": "text", "text": "enum"},
+         {"kind": "text", "text": "class"},
+         {"kind": "recurse_field", "field": "f_syn_name"},
+         {"kind": "recurse_field", "field": "f_syn_base_type"},
+         {"kind": "recurse_field", "field": "f_traits"},
+         "whitespace",
+         {"kind": "text", "text": "{"},
+         {
+           "kind": "indent",
+           "contents": [
+             {"kind": "recurse_field", "field": "f_branches"},
+             {"kind": "recurse_field", "field": "f_decls"}
+           ]
+         },
+         "hardline",
+         {"kind": "text", "text": "}"}
+      ],
+      "fields": {
+        "f_syn_base_type": [
+         {"kind": "text", "text": ":"},
+         "whitespace",
+         "recurse"
+        ],
+        "f_branches": {
+          "kind": "ifEmpty",
+          "then": ["recurse"],
+          "else": ["hardline", "recurse"]
+        },
+        "f_decls": {
+          "kind": "ifEmpty",
+          "then": ["recurse"],
+          "else": ["hardline", "recurse"]
+        }
+      }
+    },
+    "EnumLitDeclList": {
+      "sep": ["recurse", "line"]
+    },
+    "EnumTypeDecl": {
+      "node": [
+         {"kind": "text", "text": "enum"},
+         {"kind": "recurse_field", "field": "f_syn_name"},
+         {"kind": "recurse_field", "field": "f_traits"},
+         "whitespace",
+         {"kind": "text", "text": "{"},
+         {
+           "kind": "indent",
+           "contents": [
+             "hardline",
+             {"kind": "text", "text": "case"},
+             {
+               "kind": "group",
+               "document": {
+                 "kind": "indent",
+                 "contents": [
+                   "line",
+                   {"kind": "recurse_field", "field": "f_literals"}
+                 ]
+               }
+             },
+             {"kind": "recurse_field", "field": "f_decls"}
+           ]
+         },
+         "hardline",
+         {"kind": "text", "text": "}"}
+      ],
+      "fields": {
+        "f_decls": {
+          "kind": "ifEmpty",
+          "then": ["recurse"],
+          "else": ["hardline", "recurse"]
+        }
+      }
+    },
+    "ExprList": {
+      "sep": ["recurse", "line"]
+    },
+    "FullDeclList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "FunArgDecl": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_decl_annotations"},
+        {"kind": "recurse_field", "field": "f_syn_name"},
+        {"kind": "text", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_decl_type"},
+        {"kind": "recurse_field", "field": "f_default_val"}
+      ],
+      "fields": {
+        "f_default_val": [
+          "whitespace",
+          {"kind": "text", "text": "="},
+          "whitespace",
+          "recurse"
+        ]
+      }
+    },
+    "FunArgDeclList": {
+      "sep": ["recurse", "line"]
+    },
+    "FunDecl": {
+      "node": [
+        {"kind": "text", "text": "fun"},
+        {"kind": "recurse_field", "field": "f_syn_name"},
+        {"kind": "text", "text": "("},
+        {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": [
+                "softline",
+                {"kind": "recurse_field", "field": "f_args"}
+              ]
+            },
+            "softline"
+          ]
+        },
+        {"kind": "text", "text": ")"},
+        {"kind": "text", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_return_type"},
+        {"kind": "recurse_field", "field": "f_body"}
+      ],
+      "fields": {
+        "f_body": [
+         "whitespace",
+         {
+           "kind": "ifKind",
+           "matchers": [
+             {
+               "kind": "BlockExpr",
+               "document": [
+                 {"kind": "text", "text": "="},
+                 "whitespace",
+                 "recurse"
+               ]
+             },
+             {
+               "kind": "MatchExpr",
+               "document": [
+                 {"kind": "text", "text": "="},
+                 "whitespace",
+                 "recurse"
+               ]
+             }
+           ],
+           "default": {
+             "kind": "group",
+             "document": [
+               {
+                 "kind": "indent",
+                 "contents": [
+                   {"kind": "text", "text": "="},
+                   "line",
+                   "recurse"
+                 ]
+               }
+             ]
+           }
+         }
+        ]
+      }
+    },
+    "GrammarDecl": {
+      "node": [
+        {"kind": "text", "text": "grammar"},
+        {"kind": "recurse_field", "field": "f_syn_name"},
+        "whitespace",
+        {"kind": "text", "text": "{"},
+        {"kind": "recurse_field", "field": "f_rules"},
+        {"kind": "text", "text": "}"}
+      ],
+      "fields": {
+        "f_rules": [
+          {
+            "kind": "ifEmpty",
+            "then": ["hardline", "recurse"],
+            "else": [
+              {"kind": "indent", "contents": ["hardline", "recurse"]},
+              "hardline"
+            ]
+          }
+        ]
+      }
+    },
+    "GrammarDiscard": {
+      "fields": {
+        "f_expr": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": ["softline", "recurse"]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "GrammarExprList": {
+      "sep": ["recurse", "line"]
+    },
+    "GrammarExprListList": {
+      "sep": ["line", "recurse", "whitespace"],
+      "leading_sep": ["recurse", "whitespace"]
+    },
+    "GrammarImplicitPick": {
+      "fields": {
+        "f_exprs": "recurse"
+      }
+    },
+    "GrammarList": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_list_type"},
+        {"kind": "recurse_field", "field": "f_kind"},
+        {"kind": "text", "text": "("},
+        {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": [
+                "softline",
+                {"kind": "recurse_field", "field": "f_expr"},
+                {"kind": "recurse_field", "field": "f_sep"}
+              ]
+            },
+            "softline"
+          ]
+        },
+        {"kind": "text", "text": ")"}
+      ],
+      "fields": {
+        "f_sep": [
+          {"kind": "text", "text": ","},
+          "line",
+          "recurse"
+        ]
+      }
+    },
+    "GrammarListSep": {
+      "fields": {
+        "f_extra": [
+          {"kind": "text", "text": ","},
+          "line",
+          "recurse"
+        ]
+      }
+    },
+    "GrammarOptGroup": {
+      "fields": {
+        "f_expr": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": ["softline", "recurse"]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "GrammarOptErrorGroup": {
+      "fields": {
+        "f_expr": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": ["softline", "recurse"]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "GrammarOrExpr": {
+      "fields": {
+        "f_sub_exprs": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": ["softline", "recurse"]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "GrammarPick": {
+      "fields": {
+        "f_exprs": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": ["softline", "recurse"]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "GrammarPredicate": {
+      "node": [
+         {"kind": "recurse_field", "field": "f_expr"},
+         "whitespace",
+         {"kind": "text", "text": "|>"},
+         "whitespace",
+         {"kind": "text", "text": "when"},
+         {"kind": "text", "text": "("},
+         {"kind": "recurse_field", "field": "f_prop_ref"},
+         {"kind": "text", "text": ")"}
+      ]
+    },
+    "GrammarStopCut": {
+      "fields": {
+        "f_expr": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": ["softline", "recurse"]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "GrammarRuleDecl": {
+      "fields": {
+        "f_expr": [
+           "whitespace",
+           {"kind": "text", "text": "<-"},
+           "whitespace",
+           "recurse"
+        ]
+      }
+    },
+    "Import": {
+      "node": ["recurse", "hardline"]
+    },
+    "IfExpr": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "text", "text": "if"},
+          {
+            "kind": "indent",
+            "contents": [
+              "line",
+              {
+                "kind": "group",
+                "document": {"kind": "recurse_field", "field": "f_cond_expr"}
+              }
+            ]
+          },
+          "line",
+          {"kind": "text", "text": "then"},
+          {
+            "kind": "indent",
+            "contents": [
+              "line",
+              {"kind": "recurse_field", "field": "f_then_expr"}
+            ]
+          },
+          {"kind": "recurse_field", "field": "f_alternatives"},
+          "line",
+          {"kind": "text", "text": "else"},
+          {
+            "kind": "indent",
+            "contents": [
+              "line",
+              {"kind": "recurse_field", "field": "f_else_expr"}
+            ]
+          }
+        ]
+      },
+      "fields": {
+        "f_alternatives": [
+          {"kind": "ifEmpty", "then": [], "else": "hardline"},
+          "recurse"
+        ]
+      }
+    },
+    "IsaList": {
+      "sep": ["line", "recurse", "whitespace"]
+    },
+    "Isa": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "recurse_field", "field": "f_expr"},
+          "whitespace",
+          {"kind": "text", "text": "is"},
+          "whitespace",
+          {"kind": "recurse_field", "field": "f_dest_type"}
+        ]
+      }
+    },
+    "KeepExpr": {
+      "fields": {
+        "f_expr": [
+          {
+            "kind": "recurse_flatten",
+            "if": ["BaseDotExpr", "KeepExpr", "CastExpr", "CallExpr"]
+          },
+          "softline"
+        ]
+      }
+    },
+    "LambdaArgDecl": {
+      "fields": {
+        "f_decl_type": [
+          {"kind": "text", "text": ":"},
+          "whitespace",
+          "recurse"
+        ],
+        "f_default_val": [
+          "whitespace",
+          {"kind": "text", "text": "="},
+          "whitespace",
+          "recurse"
+        ]
+      }
+    },
+    "LambdaArgDeclList": {
+      "sep": ["recurse", "line"]
+    },
+    "LambdaExpr": {
+      "node": [
+        {"kind": "text", "text": "("},
+        {"kind": "recurse_field", "field": "f_params"},
+        {"kind": "text", "text": ")"},
+        {"kind": "recurse_field", "field": "f_return_type"},
+        "whitespace",
+        {"kind": "text", "text": "=>"},
+        {
+          "kind": "group",
+          "document": {
+            "kind": "indent",
+            "contents": [
+              "line",
+              {"kind": "recurse_field", "field": "f_body"}
+            ]
+          }
+        }
+      ],
+      "fields": {
+        "f_params": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": ["softline", "recurse"]
+            },
+            "softline"
+          ]
+        },
+        "f_return_type": [
+          {"kind": "text", "text": ":"},
+          "whitespace",
+          "recurse"
+        ]
+      }
+    },
+    "LangkitRoot": {
+      "fields": {
+        "f_imports": [
+          "recurse",
+          {"kind": "ifEmpty", "then": [], "else": "hardline"}
+        ]
+      }
+    },
+    "LexerCaseRule": {
+      "node": [
+         {"kind": "text", "text": "match"},
+         {"kind": "recurse_field", "field": "f_expr"},
+         "whitespace",
+         {"kind": "text", "text": "{"},
+         {"kind": "recurse_field", "field": "f_alts"},
+         {"kind": "text", "text": "}"}
+      ],
+      "fields": {
+        "f_alts": [
+          {"kind": "indent", "contents": ["hardline", "recurse"]},
+          "hardline"
+        ]
+      }
+    },
+    "LexerCaseRuleSend": {
+      "fields": {
+        "f_match_size": ["whitespace", "recurse"]
+      }
+    },
+    "LexerDecl": {
+      "node": [
+         {"kind": "text", "text": "lexer"},
+         {"kind": "recurse_field", "field": "f_syn_name"},
+         "whitespace",
+         {"kind": "text", "text": "{"},
+         {"kind": "recurse_field", "field": "f_rules"},
+         {"kind": "text", "text": "}"}
+      ],
+      "fields": {
+        "f_rules": [
+          {
+            "kind": "ifEmpty",
+            "then": ["hardline", "recurse"],
+            "else": [
+              {"kind": "indent", "contents": ["hardline", "recurse"]},
+              "hardline"
+            ]
+          }
+        ]
+      }
+    },
+    "LexerFamilyDecl": {
+      "node": [
+         {"kind": "text", "text": "family"},
+         {"kind": "recurse_field", "field": "f_syn_name"},
+         "whitespace",
+         {"kind": "text", "text": "{"},
+         {"kind": "recurse_field", "field": "f_rules"},
+         {"kind": "text", "text": "}"}
+      ],
+      "fields": {
+        "f_rules": [
+          {
+            "kind": "ifEmpty",
+            "then": ["hardline", "recurse"],
+            "else": [
+              {"kind": "indent", "contents": ["hardline", "recurse"]},
+              "hardline"
+            ]
+          }
+        ]
+      }
+    },
+    "LktNodeList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "MatchBranch": {
+      "node": [
+        {"kind": "text", "text": "case"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_decl"},
+        "whitespace",
+        {"kind": "text", "text": "=>"},
+        {
+          "kind": "group",
+          "document": {
+            "kind": "indent",
+            "contents": [
+              "line",
+              {"kind": "recurse_field", "field": "f_expr"}
+            ]
+          }
+        }
+      ]
+    },
+    "MatchBranchList": {
+      "sep": ["recurse", "hardline"]
+    },
+    "MatchExpr": {
+      "node": [
+        {"kind": "text", "text": "match"},
+        {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": [
+                "line",
+                {"kind": "recurse_field", "field": "f_match_expr"}
+              ]
+            },
+            "line"
+          ]
+        },
+        {"kind": "text", "text": "{"},
+        {
+          "kind": "indent",
+          "contents": [
+            "hardline",
+            {"kind": "recurse_field", "field": "f_branches"}
+          ]
+        },
+        "hardline",
+        {"kind": "text", "text": "}"}
+      ]
+    },
+    "MatchValDecl": {
+      "fields": {
+        "f_decl_type": ["whitespace", "recurse"]
+      }
+    },
+    "NotExpr": {
+      "fields": {
+        "f_expr": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": ["whitespace", "recurse"]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "ParamList": {
+      "sep": ["recurse", "line"]
+    },
+    "ParenExpr": {
+      "fields": {
+        "f_expr": {
+          "kind": "group",
+          "document": [
+            {"kind": "indent", "contents": ["softline", "recurse"]},
+            "softline"
+          ]
+        }
+      }
+    },
+    "ParseNodeExpr": {
+      "fields": {
+        "f_sub_exprs": {
+          "kind": "group",
+          "document": [
+            {
+              "kind": "indent",
+              "contents": [
+                "softline",
+                {"kind": "group", "document": "recurse"}
+              ]
+            },
+            "softline"
+          ]
+        }
+      }
+    },
+    "RaiseExpr": {
+      "fields": {
+        "f_except_expr": ["whitespace", "recurse"]
+      }
+    },
+    "StructDecl": {
+      "node": [
+         {"kind": "text", "text": "struct"},
+         {"kind": "recurse_field", "field": "f_syn_name"},
+         {"kind": "recurse_field", "field": "f_traits"},
+         "whitespace",
+         {"kind": "text", "text": "{"},
+         {"kind": "recurse_field", "field": "f_decls"},
+         {"kind": "text", "text": "}"}
+      ],
+      "fields": {
+        "f_decls": [
+          {
+            "kind": "ifEmpty",
+            "then": ["hardline", "recurse"],
+            "else": [
+              {"kind": "indent", "contents": ["hardline", "recurse"]},
+              "hardline"
+            ]
+          }
+        ]
+      }
+    },
+    "SubscriptExpr": {
+      "node": {"kind": "group", "document": "recurse"},
+      "fields": {
+        "f_index": [
+          {"kind": "indent", "contents": ["softline", "recurse"]},
+          "softline"
+        ]
+      }
+    },
+    "TraitDecl": {
+      "node": [
+        {"kind": "text", "text": "trait"},
+        {"kind": "recurse_field", "field": "f_syn_name"},
+        "whitespace",
+        {"kind": "text", "text": "{"},
+        {"kind": "recurse_field", "field": "f_decls"},
+        {"kind": "text", "text": "}"}
+      ],
+      "fields": {
+        "f_decls": [
+          {
+            "kind": "ifEmpty",
+            "then": ["hardline", "recurse"],
+            "else": [
+              {"kind": "indent", "contents": ["hardline", "recurse"]},
+              "hardline"
+            ]
+          }
+        ]
+      }
+    },
+    "TryExpr": {
+      "node": {"kind": "group", "document": "recurse"},
+      "fields": {
+        "f_try_expr": {
+          "kind": "group",
+          "document": {
+            "kind": "indent",
+            "contents": ["line", "recurse"]
+          }
+        },
+        "f_or_expr": [
+          "line",
+          {"kind": "text", "text": "else"},
+          {
+            "kind": "group",
+            "document": {
+              "kind": "indent",
+              "contents": ["line", "recurse"]
+            }
+          }
+        ]
+      }
+    },
+    "TypeRefList": {
+      "sep": ["recurse", "whitespace"]
+    },
+    "ValDecl": {
+      "node": [
+        {"kind": "text", "text": "val"},
+        {"kind": "recurse_field", "field": "f_syn_name"},
+        {"kind": "recurse_field", "field": "f_decl_type"},
+        "whitespace",
+        {"kind": "text", "text": "="},
+        {
+          "kind": "ifKind",
+          "field": "f_val",
+          "matchers": [
+             {
+               "kind": "BlockExpr",
+               "document": [
+                 "whitespace",
+                 {"kind": "recurse_field", "field": "f_val"}
+               ]
+             },
+             {
+               "kind": "MatchExpr",
+               "document": [
+                 "whitespace",
+                 {"kind": "recurse_field", "field": "f_val"}
+               ]
+             }
+          ],
+          "default": {
+            "kind": "group",
+            "document": {
+              "kind": "indent",
+              "contents": [
+                "line",
+                {"kind": "recurse_field", "field": "f_val"}
+              ]
+            }
+          }
+        }
+      ],
+      "fields": {
+         "f_decl_type": [
+           {"kind": "text", "text": ":"},
+           "whitespace",
+           "recurse"
+         ]
+      }
+    },
+    "VarBind": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "text", "text": "bind"},
+          {"kind": "recurse_field", "field": "f_name"},
+          "whitespace",
+          {"kind": "text", "text": "="},
+          {
+            "kind": "indent",
+            "contents": [
+              "line",
+              {"kind": "recurse_field", "field": "f_expr"}
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

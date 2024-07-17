@@ -1,0 +1,12 @@
+val short = (foo)
+val long =
+    (aaaaaaaaaaaaa.bbbbbbbbbbbbbbbb.cccccccccccc.dddddddddddd.eeeeeeeeeeee)
+val longer =
+    (
+        aaaaaaaaaaaaa
+        .bbbbbbbbbbbbbbbb
+        .cccccccccccc
+        .dddddddddddd
+        .eeeeeeeeeeee
+        .ffffffffff
+    )

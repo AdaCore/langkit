@@ -1,0 +1,29 @@
+enum class C1 {
+}
+
+enum class C2: C1 {
+}
+
+enum class C3 implements T1 {
+}
+
+enum class C4 implements T1, T2 {
+}
+
+enum class C5: C1 implements T1 {
+}
+
+enum class C6 {
+    case A1 case A2, A3
+}
+
+enum class C7 {
+    case A
+    case Aaaaaaaaaa, Bbbbbbbbbbbbb, Ccccccccc, Dddddddddd, Eeeeeeeeeeee,
+    Fffffffff, Gggggggg
+    case Z
+}
+
+enum class C6 {
+    case A1 @export fun f(): Bool = true
+}

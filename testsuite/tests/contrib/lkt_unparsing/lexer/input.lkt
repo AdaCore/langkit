@@ -1,0 +1,27 @@
+lexer l1 {
+}
+
+lexer l2 {
+    val digit = p"[0-9]"
+
+    @text() kw1 <- "foo"
+
+    family f1 {
+        @trivia() kw2 <- "bar"
+        @text() kw3 <- "baz"
+    }
+
+    @text() kw4 <- "qux"
+    @text() kw5 <- "fiou"
+
+    @unparsing_spacing(with=f2)
+    family f2 {
+        @trivia() ws <- "[ \n]+"
+        @trivia() com <- "#.*"
+    }
+
+    match p"'.'" {
+        if previous_token is Kw2 then send(Kw3, 1)
+        else send(Kw4, 2)
+    }
+}

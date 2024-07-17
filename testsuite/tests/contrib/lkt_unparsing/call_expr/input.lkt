@@ -1,0 +1,38 @@
+val short_empty_args = a()
+val short = a(b, c, d)
+
+val long_prefix_empty_args =
+aaaaaaaaaa.bbbbbbbbbb.ccccccccc.ddddddddddddd.eeeeeeeeeeee.fffffffff.gggggggg()
+val long_prefix =
+aaaaaaaaaa.bbbbbbbbbb.ccccccccc.ddddddddddddd.eeeeeeeeeeee.fffffffff(
+aaa, bbb, ccc)
+val longer_prefix=
+aaaaaaaaaa.bbbbbbbbbb.ccccccccc.ddddddddddddd.eeeeeeeeeeee.fffffffff
+.gggggggggggg()
+val long_prefix =
+aaaaaaaaaa.bbbbbbbbbb.ccccccccc.ddddddddddddd.eeeeeeeeeeee.fffffffff
+.gggggggggggg(aaa, bbb, ccc)
+
+val long_args = a(aaaaaa.bbbbbbb.ccccccc,
+ddddddddddddddd.eeeeeeeeeeeeeeee.fffffffffffffffff.gggggggggggggg.hhhhhhhhhhhhh
+)
+
+val long_prefix_and_args =
+aaaaaaaaaa.bbbbbbbbbb.ccccccccc.ddddddddddddd.eeeeeeeeeeee.fffffffff
+.gggggggggggg(aaaaaa.bbbbbbb.ccccccc,
+ddddddddddddddd.eeeeeeeeeeeeeeee.fffffffffffffffff.gggggggggggggg.hhhhhhhhhhhhh
+)
+
+val kwargs_short = a(kw1=1, kw2=2)
+val kwargs_long = a(kw111111111111111111111=1, kw22222222222222=2,
+kw33333333=aaaaaaaaaaaaaa.bbbbbbbbbbbbbbb.ccccccccccccccc
+.ddddddddddddddd.eeeeeeeeee)
+val kwargs_nested = a(kw111111111111111111111=foo(), kw22222222222222=bar(1, 2),
+kw33333333=foobar(aaaaaaaaaaaaaa.bbbbbbbbbbbbbbb.ccccccccccccccc
+.ddddddddddddddd.eeeeeeeeee))
+
+val in_broken = foo(
+    foo.bar(),
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+)

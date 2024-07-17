@@ -1,0 +1,6 @@
+struct S1 {
+}
+
+struct S2 {
+    f:T
+}

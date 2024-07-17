@@ -1,0 +1,24 @@
+@foobar
+dynvar v: T
+
+@foobar()
+dynvar v: T
+
+@foobar(a, b, c)
+dynvar v: T
+
+@foobar(
+    aaaaaaaa, bbbbbbbbbbb, cccccccccccc, dddddddddddd, eeeeeeeeee, fffffffff
+)
+dynvar v: T
+
+@foobar(
+    aaaaaaaa,
+    bbbbbbbbbbb,
+    cccccccccccc,
+    dddddddddddd,
+    eeeeeeeeee,
+    fffffffff,
+    ggggggg
+)
+dynvar v: T

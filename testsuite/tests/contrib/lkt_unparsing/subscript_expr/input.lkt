@@ -1,0 +1,11 @@
+val v1 = a[0]
+val v2 = aaaaaaa[f(aaaaaaaaaa, bbbbbbbbbbbbb, cccccccccccc, ddddddddddddd,
+eeeeeeeeee)]
+val v3 = a[f(aaaaaaaaaa, bbbbbbbbbbbbb, cccccccccccc, ddddddddddddd,
+eeeeeeeeee, ffffffff)]
+
+val v4 = a?[0]
+val v5 = aaaaaaa?[f(aaaaaaaaaa, bbbbbbbbbbbbb, cccccccccccc, ddddddddddddd,
+eeeeeeeeee)]
+val v6 = a?[f(aaaaaaaaaa, bbbbbbbbbbbbb, cccccccccccc, ddddddddddddd,
+eeeeeeeeee, ffffffff)]
