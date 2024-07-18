@@ -1,0 +1,27 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_is_null"},
+        {"kind": "text", "text": "var"},
+        {"kind": "recurse_field", "field": "f_name"},
+        {"kind": "text", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_type_expr"},
+        "whitespace",
+        {"kind": "text", "text": "="},
+        {
+          "kind": "indent",
+          "contents": [
+            "line",
+            {"kind": "recurse_field", "field": "f_value"},
+            {"kind": "text", "text": ";"}
+          ]
+        }
+      ]
+    },
+    "AnnotatedDecl": {
+      "node": {"kind": "group", "document": "recurse"}
+    }
+  }
+}

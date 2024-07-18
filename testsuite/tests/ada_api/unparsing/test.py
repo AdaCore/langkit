@@ -100,6 +100,15 @@ class Ref(Expr):
     name = Field(type=T.Name)
 
 
+class AnnotationList(Name.list):
+    pass
+
+
+class AnnotatedDecl(FooNode):
+    annotation_names = Field(type=T.AnnotationList)
+    decl = Field(type=T.Decl)
+
+
 mains = []
 
 
@@ -135,6 +144,7 @@ for source in [
     "unit_empty.txt",
 ]:
     add_main("config.json", "trivias/{}".format(source))
+add_main("trivias/wrapped_list_item.json", "trivias/wrapped_list_item.txt")
 
 add_main("trivias/var_group_config.json", "trivias/var_decls.txt")
 add_main(
