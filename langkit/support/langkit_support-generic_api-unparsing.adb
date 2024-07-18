@@ -2242,19 +2242,21 @@ package body Langkit_Support.Generic_API.Unparsing is
             begin
                if Value = "breakParent" then
                   return Pool.Create_Break_Parent;
+               elsif Value = "flushLineBreaks" then
+                  return Pool.Create_Flush_Line_Breaks;
                elsif Value = "hardline" then
                   return Pool.Create_Hard_Line;
                elsif Value = "hardlineWithoutBreakParent" then
                   return Pool.Create_Hard_Line_Without_Break_Parent;
                elsif Value = "line" then
                   return Pool.Create_Line;
+               elsif Value = "literalline" then
+                  return Pool.Create_Literal_Line;
                elsif Value = "recurse" then
                   Process_Recurse (Context);
                   return Pool.Create_Recurse;
                elsif Value = "softline" then
                   return Pool.Create_Soft_Line;
-               elsif Value = "literalline" then
-                  return Pool.Create_Literal_Line;
                elsif Value = "trim" then
                   return Pool.Create_Trim;
                elsif Value = "whitespace" then
@@ -3360,6 +3362,9 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Pool.Create_Fill
               (Instantiate_Template_Helper
                  (Pool, State, Template.Fill_Document));
+
+         when Flush_Line_Breaks =>
+            return Pool.Create_Flush_Line_Breaks;
 
          when Group =>
             return Pool.Create_Group

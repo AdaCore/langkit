@@ -1,0 +1,12 @@
+{
+  "node_configs": {
+    "VarDecl": {
+      "fields": {
+        "f_value": [
+          "flushLineBreaks",
+          {"kind": "group", "document": "recurse"}
+        ]
+      }
+    }
+  }
+}
