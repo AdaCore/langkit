@@ -3021,6 +3021,10 @@ package body Langkit_Support.Generic_API.Unparsing is
       JSON_Result : constant Read_Result := Read (Buffer);
       JSON        : JSON_Value;
    begin
+      Result.Ref_Count := 1;
+      Result.Language := Language;
+      Result.Symbols := Symbols;
+
       if JSON_Result.Success then
          JSON := JSON_Result.Value;
       else
@@ -3041,10 +3045,6 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       --  Then load the unparsing configuration from it. Require a
       --  "node_configs" key.
-
-      Result.Ref_Count := 1;
-      Result.Language := Language;
-      Result.Symbols := Symbols;
 
       if not JSON.Has_Field ("node_configs") then
          Abort_Parsing ("missing ""node_configs"" key");
