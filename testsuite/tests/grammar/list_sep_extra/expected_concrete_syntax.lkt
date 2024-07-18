@@ -2,11 +2,12 @@ import lexer_example
 
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- or(a_list | b_list | c_list | d_list)
+    @main_rule main_rule <- or(a_list | b_list | c_list | d_list | e_list)
     a_list <- pick("kwA" list*(name, ",") ";")
     b_list <- pick("kwB" list*(name, ",", allow_none) ";")
     c_list <- pick("kwC" list*(name, ",", allow_leading) ";")
     d_list <- pick("kwD" list*(name, ",", allow_trailing) ";")
+    e_list <- pick("kwE" list*(name, ";") ";")
     name <- Name(@Identifier)
 }
 

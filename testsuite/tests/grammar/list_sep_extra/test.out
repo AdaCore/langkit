@@ -55,6 +55,12 @@ main.py: Running...
   OK    kwD a, b, c , ;
   ERROR kwD , a, b, c , ;
 
+== Token range for: kwE foo; bar; ==
+
+Root: <NameList buffer:1:5-1:13>
+Token start: <Token Identifier 'foo' at 1:5-1:8>
+Token end: <Token Identifier 'bar' at 1:10-1:13>
+
 main.py: Done.
 Done
 
