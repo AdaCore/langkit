@@ -1015,8 +1015,9 @@ package body Langkit_Support.Adalog.Solver is
 
             --  If requested, log all orphan atoms
 
-            if Solv_Trace.Is_Active then
-               Solv_Trace.Trace ("Orphan relation: " & Image (Atoms.Get (I)));
+            if Verbose_Trace.Is_Active then
+               Verbose_Trace.Trace
+                 ("Orphan relation: " & Image (Atoms.Get (I)));
             end if;
          end if;
       end loop;
@@ -1516,6 +1517,10 @@ package body Langkit_Support.Adalog.Solver is
       --  multiple times, hence the important use of ``Invalid_Vars``,
       --  ``Explanation.Is_Feasible`` and ``Add_Simplify`` instead of ``Add``.
       for Atom of Sorted_Atoms loop
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace (Image (Atom));
+         end if;
+
          if Atom.Atomic_Rel.Kind in Predicate and then
             (Invalid_Vars (Id (Atom.Atomic_Rel.Target))
              or else not Explanation.Is_Feasible (+Ctx.Atom_Map (Atom.Id)))
@@ -1577,6 +1582,10 @@ package body Langkit_Support.Adalog.Solver is
       Last_Clause  : AdaSAT.Clause;
    begin
       for Atom of Sorted_Atoms loop
+         if Solv_Trace.Is_Active then
+            Solv_Trace.Trace (Image (Atom));
+         end if;
+
          if not Solve_Atomic (Atom) then
             if Solv_Trace.Is_Active then
                Solv_Trace.Trace ("Failed on " & Image (Atom));
@@ -1774,8 +1783,8 @@ package body Langkit_Support.Adalog.Solver is
       procedure Populate_Dependencies (V : Logic_Var) is
          V_Id : constant Natural := Id (V);
       begin
-         if Solv_Trace.Is_Active then
-            Solv_Trace.Trace
+         if Verbose_Trace.Is_Active then
+            Verbose_Trace.Trace
               ("Dependencies of unset var " & Image_With_Id (V));
          end if;
 
@@ -1794,8 +1803,8 @@ package body Langkit_Support.Adalog.Solver is
                         Id (Atom.From) /= V_Id
                      then
                         Dependencies (V_Id).Append (Atom.From);
-                        if Solv_Trace.Is_Active then
-                           Solv_Trace.Trace
+                        if Verbose_Trace.Is_Active then
+                           Verbose_Trace.Trace
                              (" - " & Image_With_Id (Atom.From));
                         end if;
                      end if;
@@ -1816,8 +1825,8 @@ package body Langkit_Support.Adalog.Solver is
                         for W of Atom.Comb_Vars loop
                            if Id (W) /= V_Id then
                               Dependencies (V_Id).Append (W);
-                              if Solv_Trace.Is_Active then
-                                 Solv_Trace.Trace
+                              if Verbose_Trace.Is_Active then
+                                 Verbose_Trace.Trace
                                    (" - " & Image_With_Id (W));
                               end if;
                            end if;
@@ -1870,14 +1879,14 @@ package body Langkit_Support.Adalog.Solver is
 
             for Dep of Dependencies (W_Id) loop
                if Id (Dep) = V_Id or else DFS (Dep) then
-                  if Solv_Trace.Is_Active then
+                  if Verbose_Trace.Is_Active then
                      if not Has_Cycle then
                         Has_Cycle := True;
-                        Solv_Trace.Trace
+                        Verbose_Trace.Trace
                           ("Var " & Image_With_Id (V) & " is part of a cycle"
                            & " containing:");
                      end if;
-                     Solv_Trace.Trace (" - " & Image_With_Id (W));
+                     Verbose_Trace.Trace (" - " & Image_With_Id (W));
                   end if;
                   Alias (W, V);
                   return True;
@@ -1915,16 +1924,17 @@ package body Langkit_Support.Adalog.Solver is
          V_Id   : constant Natural := Id (V);
          Result : AdaSAT.Builders.Clause_Builder;
       begin
-         if Solv_Trace.Is_Active then
-            Solv_Trace.Trace ("Orphan rels for unset var " & Image (V) & ":");
+         if Verbose_Trace.Is_Active then
+            Verbose_Trace.Trace
+              ("Orphan rels for unset var " & Image (V) & ":");
          end if;
 
          --  First gather all equations that use V. First include all unifying
          --  atoms.
          for U of Ctx.Unifies loop
             if Id (U.Atomic_Rel.Target) = V_Id then
-               if Solv_Trace.Is_Active then
-                  Solv_Trace.Trace (Image (U));
+               if Verbose_Trace.Is_Active then
+                  Verbose_Trace.Trace (Image (U));
                end if;
 
                Result.Add_Simplify (-Ctx.Atom_Map (U.Id));
@@ -1934,14 +1944,14 @@ package body Langkit_Support.Adalog.Solver is
          --  And then also include the rest of the atoms
          for R of Ctx.Atoms loop
             if Uses_Var (R.Atomic_Rel, V) then
-               if Solv_Trace.Is_Active then
-                  Solv_Trace.Trace (Image (R));
+               if Verbose_Trace.Is_Active then
+                  Verbose_Trace.Trace (Image (R));
                end if;
                Result.Add_Simplify (-Ctx.Atom_Map (R.Id));
             end if;
          end loop;
 
-         Solv_Trace.Trace ("Candidate defining rels:");
+         Verbose_Trace.Trace ("Candidate defining rels:");
 
          for Block_Id in 1 .. Ctx.Blocks.Length loop
             if Model (Variable (Block_Id)) in False then
@@ -1950,8 +1960,8 @@ package body Langkit_Support.Adalog.Solver is
                      W : constant Logic_Var := Defined_Var (R.Atomic_Rel);
                   begin
                      if W /= null and then Id (W) = V_Id then
-                        if Solv_Trace.Is_Active then
-                           Solv_Trace.Trace (Image (R));
+                        if Verbose_Trace.Is_Active then
+                           Verbose_Trace.Trace (Image (R));
                         end if;
                         Result.Add_Simplify (+Variable (Block_Id));
                         exit;
@@ -2142,11 +2152,6 @@ package body Langkit_Support.Adalog.Solver is
             end loop;
          end if;
       end loop;
-      if Solv_Trace.Is_Active then
-         for R of Ctx.Atoms loop
-            Solv_Trace.Trace (Image (R));
-         end loop;
-      end if;
 
       declare
          use Atomic_Relation_Vectors;
