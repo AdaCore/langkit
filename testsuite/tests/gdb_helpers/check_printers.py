@@ -36,6 +36,13 @@ check_var_state("quote_mix", "\"\"\"'\"")
 check_var_state("lf", "\"[\"00000a\"]\"")
 check_var_state("nul", "\"[\"000000\"]\"")
 
+# Check pretty-printing for symbols
+
+break_dsl("test_symbols")
+run_continue()
+check_var_state("empty", 'No_Symbol')
+check_var_state("foo", '"foo"')
+
 # Check pretty-printing for rebindings
 break_dsl("test_rebindings")
 run_continue()

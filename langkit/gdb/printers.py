@@ -591,6 +591,32 @@ class StringPrettyPrinter(BasePrinter):
         return self.value["content"].format_string()
 
 
+class SymbolPrettyPrinter(BasePrinter):
+    """
+    Pretty-printer for "fat" symbols.
+    """
+
+    name = 'Symbol'
+
+    @classmethod
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
+        return (
+            value.type.code == gdb.TYPE_CODE_STRUCT
+            and value.type.name == 'langkit_support.symbols.symbol_type'
+        )
+
+    def to_string(self) -> str:
+        # Simply extract the thin symbol and the symbol table from the fat
+        # symbol and perform the lookup.
+        index = self.value["ts"]
+        if index:
+            table = self.value["table"].dereference()
+            symbols = table["symbols"]["e"].dereference()
+            return symbols[index]
+        else:
+            return "No_Symbol"
+
+
 class ArrayPrettyPrinter(BasePrinter):
     """
     Pretty-printer for array nodes from properties.

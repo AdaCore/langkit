@@ -38,6 +38,7 @@ begin
       end;
 
       Dummy_Int := N.P_Test_Strings;
+      Dummy_Int := N.P_Test_Symbols;
       Dummy_Int := N.P_Test_Rebindings;
       Dummy_Int := N.P_Test_Envs;
       Dummy_Int := N.P_Test_Entities;

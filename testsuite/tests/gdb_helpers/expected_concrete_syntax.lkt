@@ -30,6 +30,15 @@ class FooNode implements Node[FooNode] {
         arr.length()
     }
 
+    @exported
+    fun test_symbols(): Int = {
+        val empty = null[Symbol];
+        val foo = s"foo";
+        val arr = [empty, foo];
+
+        arr.length()
+    }
+
     fun get_rebindings(inverse: Bool): EnvRebindings = {
         val example_nodes = node.parent.as[ASTList[FooNode]].as_array();
         val n1 = example_nodes?[if inverse then 1 else 2];

@@ -57,6 +57,16 @@ class FooNode(ASTNode):
         ]))
         return arr.length  # BREAK:test_strings
 
+    @langkit_property(public=True)
+    def test_symbols():
+        empty = Var(No(T.Symbol))
+        foo = Var("foo")
+        arr = Var(ArrayLiteral([
+            empty,
+            foo
+        ]))
+        return arr.length  # BREAK:test_symbols
+
     @langkit_property()
     def get_rebindings(inverse=T.Bool):
         example_nodes = Var(Self.parent.cast(T.FooNode.list).as_array)
