@@ -447,7 +447,7 @@ private package Langkit_Support.Prettier_Utils is
    --  Return a ``Whitespace`` node for the given length
 
    procedure Detect_Broken_Groups
-     (Self : Document_Type; Max_Empty_Lines : Integer);
+     (Self : in out Document_Type; Max_Empty_Lines : Integer);
    --  Set the Group_Should_Break flag for all groups that can be statically
    --  proven to be broken.
    --
@@ -477,6 +477,8 @@ private package Langkit_Support.Prettier_Utils is
    --
    --  * ``Line_Breaks``: a given number of line breaks is required right after
    --    the first token.  Extra spacing is permitted after that line break.
+
+   subtype Some_Spacing_Kind is Spacing_Kind range Whitespaces .. Line_Breaks;
 
    type Spacing_Type (Kind : Spacing_Kind := Spacing_Kind'First) is record
       case Kind is
