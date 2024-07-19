@@ -3673,6 +3673,7 @@ class LktTypesLoader:
                 method_prefix,
                 method_name,
                 E.FieldAccess.Arguments(call_args, call_kwargs),
+                check_call_syntax=True,
             )
 
         # Past this point, we know that this is a builtin method call
@@ -4384,6 +4385,7 @@ class LktTypesLoader:
                     return E.FieldAccess(
                         NullCond.Prefix(prefix),
                         suffix,
+                        check_call_syntax=True,
                     )
                 else:
                     if null_cond:

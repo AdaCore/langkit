@@ -7,10 +7,22 @@ bad_arg_type.lkt:4:52: error: Invalid "x" actual (#1) for FooNode.root_prop: exp
 == correct.lkt ==
 Code generation was successful
 
+== field.lkt ==
+field.lkt:6:42: error: cannot call a field
+6 |     @ignored fun p(): Array[LogicVar] = [node.v()]
+  |                                          ^^^^^^^^
+
+
 == no_such_prop.lkt ==
 no_such_prop.lkt:4:37: error: Type BarNode has no 'no_such_prop' field or property
 4 |     @exported fun bar_prop(): Int = node.no_such_prop(12)
   |                                     ^^^^^^^^^^^^^^^^^^^^^
+
+
+== not_a_call.lkt ==
+not_a_call.lkt:6:30: error: call syntax is mandatory for properties
+6 |     @exported fun p(): Int = node.get_int
+  |                              ^^^^^^^^^^^^
 
 
 == too_many_args.lkt ==
