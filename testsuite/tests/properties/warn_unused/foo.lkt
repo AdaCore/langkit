@@ -37,7 +37,7 @@ class ExampleList: FooNode {
         node.items.map((ex_item) => true)
 
     @exported fun unused_then_var(): Entity[FooNode] =
-        node.items.do((ex_items) => node.items.at(0).as_bare_entity)
+        node.items.do((ex_items) => node.items[0].as_bare_entity)
 
     @exported fun unused_match_var(): Array[Bool] =
         node.items.map((item) => match item {

@@ -1,12 +1,12 @@
 == val_var.lkt ==
 val_var.lkt:4:37: error: Expected type LogicVar, got Example.entity
-4 |     @exported fun resolve(): Bool = %eq(self, node.var1).solve
+4 |     @exported fun resolve(): Bool = %eq(self, node.var1).solve()
   |                                     ^^^^^^^^^^^^^^^^^^^^
 
 
 == var_bool.lkt ==
 var_bool.lkt:4:37: error: Right operand must be either a logic variable or an entity, got Bool
-4 |     @exported fun resolve(): Bool = %eq(node.var1, true).solve
+4 |     @exported fun resolve(): Bool = %eq(node.var1, true).solve()
   |                                     ^^^^^^^^^^^^^^^^^^^^
 
 
