@@ -608,11 +608,11 @@ class SymbolPrettyPrinter(BasePrinter):
     def to_string(self) -> str:
         # Simply extract the thin symbol and the symbol table from the fat
         # symbol and perform the lookup.
-        index = self.value["ts"]
+        index = int(self.value["ts"])
         if index:
             table = self.value["table"].dereference()
             symbols = table["symbols"]["e"].dereference()
-            return symbols[index]
+            return str(symbols[index])
         else:
             return "No_Symbol"
 
