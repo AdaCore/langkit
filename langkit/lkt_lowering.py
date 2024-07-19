@@ -51,6 +51,7 @@ from __future__ import annotations
 import abc
 from collections import OrderedDict
 from dataclasses import dataclass
+import enum
 import itertools
 import os.path
 from typing import (
@@ -611,6 +612,59 @@ def find_toplevel_decl(ctx: CompileCtx,
             error('missing {}'.format(label))
 
     return result
+
+
+class BuiltinAttribute(enum.Enum):
+    as_bare_entity = enum.auto()
+    as_entity = enum.auto()
+    children = enum.auto()
+    env_node = enum.auto()
+    env_parent = enum.auto()
+    is_null = enum.auto()
+    parent = enum.auto()
+    rebindings_new_env = enum.auto()
+    rebindings_old_env = enum.auto()
+    rebindings_parent = enum.auto()
+    root = enum.auto()
+    symbol = enum.auto()
+    to_symbol = enum.auto()
+
+
+class BuiltinMethod(enum.Enum):
+    all = enum.auto()
+    any = enum.auto()
+    append_rebinding = enum.auto()
+    as_array = enum.auto()
+    as_big_int = enum.auto()
+    as_int = enum.auto()
+    concat_rebindings = enum.auto()
+    contains = enum.auto()
+    do = enum.auto()
+    empty = enum.auto()
+    env_group = enum.auto()
+    env_orphan = enum.auto()
+    filter = enum.auto()
+    filtermap = enum.auto()
+    find = enum.auto()
+    get = enum.auto()
+    get_first = enum.auto()
+    get_value = enum.auto()
+    is_visible_from = enum.auto()
+    join = enum.auto()
+    length = enum.auto()
+    logic_all = enum.auto()
+    logic_any = enum.auto()
+    map = enum.auto()
+    mapcat = enum.auto()
+    rebind_env = enum.auto()
+    shed_rebindings = enum.auto()
+    singleton = enum.auto()
+    solve = enum.auto()
+    solve_with_diagnostics = enum.auto()
+    super = enum.auto()
+    take_while = enum.auto()
+    unique = enum.auto()
+    update = enum.auto()
 
 
 class AnnotationSpec:
@@ -1383,6 +1437,11 @@ concat_rebindings_signature = FunctionSignature(
 Signature for ".concat_rebindings".
 """
 
+contains_signature = FunctionSignature(FunctionParamSpec("value"))
+"""
+Signature for ".contains".
+"""
+
 do_signature = FunctionSignature(
     FunctionParamSpec("expr"),
     FunctionParamSpec("default_val", optional=True, keyword_only=True),
@@ -1456,6 +1515,11 @@ is_visible_from_signature = FunctionSignature(FunctionParamSpec("unit"))
 Signature for ".is_visible_from".
 """
 
+join_signature = FunctionSignature(FunctionParamSpec("strings"))
+"""
+Signature for ".join".
+"""
+
 logic_all_any_signature = FunctionSignature(FunctionParamSpec("equations"))
 """
 Signature for "%all" and for "%any".
@@ -1504,6 +1568,11 @@ Signature for the "reference" env action.
 set_initial_env_signature = FunctionSignature(FunctionParamSpec("env"))
 """
 Signature for the "set_initial_env" env action.
+"""
+
+shed_rebindings_signature = FunctionSignature(FunctionParamSpec("entity_info"))
+"""
+Signature for ".shed_rebindings".
 """
 
 
@@ -3586,7 +3655,28 @@ class LktTypesLoader:
             method_prefix = NullCond.Check(method_prefix, validated=True)
         method_prefix = NullCond.Prefix(method_prefix)
 
-        if method_name in ("all", "any"):
+        # Make sure this is not an attempt to call a builin field
+        try:
+            BuiltinAttribute[method_name]
+        except KeyError:
+            pass
+        else:
+            with self.ctx.lkt_context(call_name.f_suffix):
+                error("this is a builtin attribute, it should not be called")
+
+        # Handle calls to builtin methods and regular properties separately
+        try:
+            builtin = BuiltinMethod[method_name]
+        except KeyError:
+            call_args, call_kwargs = self.lower_call_args(call_expr, lower)
+            return E.FieldAccess(
+                method_prefix,
+                method_name,
+                E.FieldAccess.Arguments(call_args, call_kwargs),
+            )
+
+        # Past this point, we know that this is a builtin method call
+        if builtin in (BuiltinMethod.all, BuiltinMethod.any):
             clr = lower_collection_iter()
             result = E.Quantifier.create_expanded(
                 method_name,
@@ -3597,31 +3687,35 @@ class LktTypesLoader:
                 clr.index_var,
             )
 
-        elif method_name == "append_rebinding":
+        elif builtin == BuiltinMethod.append_rebinding:
             args, _ = append_rebinding_signature.match(self.ctx, call_expr)
             result = getattr_prefix.append_rebinding(
                 lower(args["old_env"]), lower(args["new_env"])
             )
 
-        elif method_name == "as_array":
+        elif builtin == BuiltinMethod.as_array:
             empty_signature.match(self.ctx, call_expr)
             result = getattr_prefix.as_array
 
-        elif method_name == "as_big_int":
+        elif builtin == BuiltinMethod.as_big_int:
             empty_signature.match(self.ctx, call_expr)
-            result = E.BigIntLiteral(getattr_prefix)
+            result = E.BigIntLiteral(method_prefix)
 
-        elif method_name == "as_int":
+        elif builtin == BuiltinMethod.as_int:
             empty_signature.match(self.ctx, call_expr)
             result = getattr_prefix.as_int
 
-        elif method_name == "concat_rebindings":
+        elif builtin == BuiltinMethod.concat_rebindings:
             args, _ = concat_rebindings_signature.match(self.ctx, call_expr)
             result = getattr_prefix.concat_rebindings(
                 lower(args["rebindings"])
             )
 
-        elif method_name == "do":
+        elif builtin == BuiltinMethod.contains:
+            args, _ = contains_signature.match(self.ctx, call_expr)
+            result = getattr_prefix.contains(lower(args["value"]))
+
+        elif builtin == BuiltinMethod.do:
             lambda_info = extract_lambda_and_kwargs(
                 call_expr, do_signature, "expr", 1, 1
             )
@@ -3654,29 +3748,21 @@ class LktTypesLoader:
                 default_val,
             )
 
-        elif method_name == "empty":
+        elif builtin == BuiltinMethod.empty:
             empty_signature.match(self.ctx, call_expr)
             result = getattr(getattr_prefix, "empty")
 
-        elif method_name == "env_group":
+        elif builtin == BuiltinMethod.env_group:
             args, _ = env_group_signature.match(self.ctx, call_expr)
             with_md_expr = args.get("with_md")
             with_md = None if with_md_expr is None else lower(with_md_expr)
             result = getattr_prefix.env_group(with_md=with_md)
 
-        elif method_name == "env_node":
-            empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.env_node
-
-        elif method_name == "env_orphan":
+        elif builtin == BuiltinMethod.env_orphan:
             empty_signature.match(self.ctx, call_expr)
             result = getattr_prefix.env_orphan
 
-        elif method_name == "env_parent":
-            empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.env_parent
-
-        elif method_name == "filter":
+        elif builtin == BuiltinMethod.filter:
             clr = lower_collection_iter()
             result = E.Map.create_expanded(
                 method_prefix,
@@ -3687,7 +3773,7 @@ class LktTypesLoader:
                 clr.inner_expr,
             )
 
-        elif method_name == "filtermap":
+        elif builtin == BuiltinMethod.filtermap:
             # Validate arguments for ".filtermap()" itself
             args, _ = filtermap_signature.match(self.ctx, call_expr)
             for arg in [args["expr"], args["filter"]]:
@@ -3763,7 +3849,7 @@ class LktTypesLoader:
                 filter_expr=filter_expr,
             )
 
-        elif method_name == "find":
+        elif builtin == BuiltinMethod.find:
             lambda_info = extract_lambda_and_kwargs(
                 call_expr, collection_iter_signature, "expr", 1, 1
             )
@@ -3788,7 +3874,7 @@ class LktTypesLoader:
                 elt_var,
                 index_var=None,
             )
-        elif method_name in ("get", "get_first"):
+        elif builtin in (BuiltinMethod.get, BuiltinMethod.get_first):
             args, _ = get_signature.match(self.ctx, call_expr)
             symbol = lower(args["symbol"])
 
@@ -3813,19 +3899,23 @@ class LktTypesLoader:
                 getattr_prefix.get_first(symbol, lookup, from_node, categories)
             )
 
-        elif method_name == "get_value":
+        elif builtin == BuiltinMethod.get_value:
             empty_signature.match(self.ctx, call_expr)
             result = getattr_prefix.get_value
 
-        elif method_name == "is_visible_from":
+        elif builtin == BuiltinMethod.is_visible_from:
             args, _ = is_visible_from_signature.match(self.ctx, call_expr)
             result = getattr_prefix.is_visible_from(lower(args["unit"]))
 
-        elif method_name == "length":
+        elif builtin == BuiltinMethod.join:
+            args, _ = join_signature.match(self.ctx, call_expr)
+            result = getattr_prefix.join(lower(args["strings"]))
+
+        elif builtin == BuiltinMethod.length:
             empty_signature.match(self.ctx, call_expr)
             result = getattr(getattr_prefix, "length")
 
-        elif method_name in ("logic_all", "logic_any"):
+        elif builtin in (BuiltinMethod.logic_all, BuiltinMethod.logic_any):
             import langkit.expressions.logic as LE
             clr = lower_collection_iter()
             map_expr = E.Map.create_expanded(
@@ -3841,7 +3931,7 @@ class LktTypesLoader:
                 LE.Any(map_expr)
             )
 
-        elif method_name in ("map", "mapcat"):
+        elif builtin in (BuiltinMethod.map, BuiltinMethod.mapcat):
             clr = lower_collection_iter()
             result = E.Map.create_expanded(
                 method_prefix,
@@ -3852,23 +3942,29 @@ class LktTypesLoader:
                 do_concat=method_name == "mapcat",
             )
 
-        elif method_name == "rebind_env":
+        elif builtin == BuiltinMethod.rebind_env:
             args, _ = rebind_env_signature.match(self.ctx, call_expr)
             result = getattr_prefix.rebind_env(lower(args["env"]))
 
-        elif method_name == "singleton":
+        elif builtin == BuiltinMethod.singleton:
             empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.singleton
+            result = getattr(getattr_prefix, "singleton")
 
-        elif method_name in ("solve", "solve_with_diagnostics"):
+        elif builtin == BuiltinMethod.shed_rebindings:
+            args, _ = shed_rebindings_signature.match(self.ctx, call_expr)
+            result = getattr_prefix.shed_rebindings(lower(args["entity_info"]))
+
+        elif builtin in (
+            BuiltinMethod.solve, BuiltinMethod.solve_with_diagnostics
+        ):
             empty_signature.match(self.ctx, call_expr)
             result = getattr(getattr_prefix, method_name)
 
-        elif method_name == "solve_with_diagnostics":
-            empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.solve_
+        elif builtin == BuiltinMethod.super:
+            call_args, call_kwargs = self.lower_call_args(call_expr, lower)
+            result = E.Super(method_prefix, *call_args, **call_kwargs)
 
-        elif method_name == "take_while":
+        elif builtin == BuiltinMethod.take_while:
             clr = lower_collection_iter()
             result = E.Map.create_expanded(
                 method_prefix,
@@ -3879,24 +3975,20 @@ class LktTypesLoader:
                 take_while_expr=clr.inner_expr,
             )
 
-        elif method_name == "to_symbol":
-            empty_signature.match(self.ctx, call_expr)
-            result = getattr_prefix.to_string  # type: ignore
-
-        elif method_name == "unique":
+        elif builtin == BuiltinMethod.unique:
             empty_signature.match(self.ctx, call_expr)
             result = getattr_prefix.unique
 
+        elif builtin == BuiltinMethod.update:
+            arg_nodes, kwarg_nodes = self.extract_call_args(call_expr)
+            if arg_nodes:
+                with self.ctx.lkt_context(arg_nodes[0]):
+                    error(".update() accepts keyword arguments only")
+            field_exprs = {k: lower(v) for k, v in kwarg_nodes.items()}
+            result = E.StructUpdate(method_prefix, **field_exprs)
+
         else:
-            # Otherwise, this call must be a method invocation. Note
-            # that not all methods map to actual field access in the
-            # generated code. For instance, calls to the String.join
-            # built-in method are turned into Join instances, so the
-            # "callee" variable below is not necessarily a FieldAccess
-            # instance.
-            call_args, call_kwargs = self.lower_call_args(call_expr, lower)
-            result = getattr(getattr_prefix, method_name)
-            result = result(*call_args, **call_kwargs)
+            assert False, f"unhandled builitn call: {call_name.f_suffix}"
 
         return result
 
@@ -4268,13 +4360,35 @@ class LktTypesLoader:
                 prefix = lower(expr.f_prefix)
                 suffix = expr.f_suffix.text
 
-                # Add the right wrappers to handle null conditional constructs.
-                # Note that "getattr" will take care of validating Check and
-                # adding a Prefix wrapper.
-                if null_cond:
-                    prefix = NullCond.Check(prefix, validated=False)
+                # Make sure this is not an attempt to access a builtin method
+                try:
+                    BuiltinMethod[suffix]
+                except KeyError:
+                    pass
+                else:
+                    with self.ctx.lkt_context(expr.f_suffix):
+                        error("this is a builtin method, it should be called")
 
-                return getattr(prefix, suffix)
+                # Handle accesses to builtin attributes and regular field
+                # access separately.
+                #
+                # In both cases, add the NullCond.Check wrapper when needed. In
+                # the case of builtin attributes, getattr will take care of
+                # introducing the NullCheck.Prefix wrapper and validating the
+                # .Check one.
+                try:
+                    BuiltinAttribute[suffix]
+                except KeyError:
+                    if null_cond:
+                        prefix = NullCond.Check(prefix, validated=True)
+                    return E.FieldAccess(
+                        NullCond.Prefix(prefix),
+                        suffix,
+                    )
+                else:
+                    if null_cond:
+                        prefix = NullCond.Check(prefix, validated=False)
+                    return getattr(prefix, suffix)
 
             elif isinstance(expr, L.IfExpr):
                 abort_if_static_required(expr)
