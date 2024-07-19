@@ -10,8 +10,8 @@ grammar foo_grammar {
 
 class Example: FooNode {
     @exported fun p1(): Bool = {
-        val v1 = node.parents.filter((e1, i1) => i1 != 0);
-        val v2 = node.parents.filter((e2, i2) => i2 != 0);
+        val v1 = node.parents().filter((e1, i1) => i1 != 0);
+        val v2 = node.parents().filter((e2, i2) => i2 != 0);
         v1 == v2
     }
 }

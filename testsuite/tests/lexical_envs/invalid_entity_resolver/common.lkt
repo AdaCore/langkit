@@ -27,5 +27,6 @@ class Ref: FooNode {
         add_to_env_kv(node.name.symbol, node, resolver=FooNode.resolve_ref)
     }
 
-    @exported fun resolve(): Entity[FooNode] = node.node_env.get(node.name)?[0]
+    @exported fun resolve(): Entity[FooNode] =
+        node.node_env().get(node.name)?[0]
 }

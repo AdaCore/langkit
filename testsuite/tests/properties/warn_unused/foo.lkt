@@ -43,7 +43,7 @@ class ExampleList: FooNode {
         node.items.map((item) => match item {
             case ex: Example => true
             case ex_list: ExampleList =>
-                ex_list.unused_match_var.all((b) => b)
+                ex_list.unused_match_var().all((b) => b)
             case _ => false
         })
 }

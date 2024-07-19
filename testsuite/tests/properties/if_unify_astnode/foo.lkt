@@ -11,7 +11,7 @@ class FooNode implements Node[FooNode] {
     fun pred(): Bool = true
 
     @exported fun foo_1(): Entity[FooNode] = (
-        if node.pred
+        if node.pred()
         then null[BarNode]
         else null[Literal]
     ).as_bare_entity

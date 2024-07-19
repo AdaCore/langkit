@@ -1,7 +1,7 @@
 == foo.lkt ==
 foo.lkt:15:26: error: Type AnalysisUnit has no 'foobar' field or property
-15 |     fun result(): Bool = node.unit.foobar
-   |                          ^^^^^^^^^^^^^^^^
+15 |     fun result(): Bool = node.unit().foobar
+   |                          ^^^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done

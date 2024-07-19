@@ -15,12 +15,12 @@ class FooNode implements Node[FooNode] {
     # since the root of the callgraph (the "c" property) has @ignored.
 
     fun a(): Int = 1
-    fun b(): Int = node.a
-    @ignored fun c(): Int = node.b
+    fun b(): Int = node.a()
+    @ignored fun c(): Int = node.b()
 
     # We should get a warning for this one though, which is out of the
     # subgraph.
-    fun d(): Int = node.c
+    fun d(): Int = node.c()
 }
 
 class ExampleNode: FooNode implements TokenNode {

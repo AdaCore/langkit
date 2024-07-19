@@ -1,5 +1,5 @@
 == call.lkt ==
-call.lkt:10:21: error: call syntax is forbidden for lazy fields
+call.lkt:10:21: error: cannot call a lazy field
 10 |     fun p(): Bool = node.lf()
    |                     ^^^^^^^^^
 

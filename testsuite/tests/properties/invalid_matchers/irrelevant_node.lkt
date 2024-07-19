@@ -4,8 +4,8 @@ class ExampleNode: FooNode {
     @parse_field body: BodyNode
 
     fun prop(): Int = match node.body {
-        case e: NullNode   => e.prop
-        case e: Expression => e.prop
-        case e: FooNode    => e.prop
+        case e: NullNode   => e.prop()
+        case e: Expression => e.prop()
+        case e: FooNode    => e.prop()
     }
 }

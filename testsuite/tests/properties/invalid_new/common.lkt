@@ -13,7 +13,7 @@ struct MyStruct {
 class FooNode implements Node[FooNode] {
     @abstract fun prop(): MyStruct
     @exported fun public_prop(): Int = {
-        val s = node.prop;
+        val s = node.prop();
         s.a + s.b
     }
 }

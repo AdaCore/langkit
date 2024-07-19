@@ -2,7 +2,7 @@ import common
 
 class FooNode implements Node[FooNode] {
     fun p1(): Int = 1
-    @exported fun p2(): Int = self.p1
+    @exported fun p2(): Int = self.p1()
 }
 
 class Example: FooNode implements TokenNode {
