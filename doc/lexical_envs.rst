@@ -257,7 +257,11 @@ information about each action.
 ``reference``
     Add to a lexical environment E references to other envs. This is a way to
     extend the set of environment covered by a lookup on E: the lookup will
-    process E, and then will process the envs referenced by E.
+    process E, and then will process the envs referenced by E. Note that when
+    adding multiple references, the lookups done in the resolver of each
+    reference will only be allowed to go through env references added *before*
+    itself in the env. Hence the order in which env references are added
+    matters.
 
 ``add_to_env``/``add_to_env_kv``
     Add symbol/node associations to a lexical environment.

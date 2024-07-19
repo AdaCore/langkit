@@ -263,7 +263,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
    function Dyn_Env_Getter
      (Resolver : Lexical_Env_Resolver; Node : Node_Type) return Env_Getter is
    begin
-      return Env_Getter'(True, Null_Lexical_Env, Node, Resolver);
+      return Env_Getter'
+        (True, Null_Lexical_Env, Node, Resolver, No_Entity_Info);
    end Dyn_Env_Getter;
 
    -------------
@@ -307,9 +308,6 @@ package body Langkit_Support.Lexical_Envs_Impl is
    function Get_Env (Self : in out Env_Getter;
                      Info : Entity_Info) return Lexical_Env
    is
-      Cache_Enabled : constant Boolean := Info = No_Entity_Info;
-      --  The cache (Self.Env) can be used only if No_Entity_Info is passed
-
       --  Note: in this whole function, we take special care for empty
       --  environments: while these are represented using the ``Empty_Env``
       --  constant through the whole codebase, here rules are slightly twisted
@@ -383,7 +381,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
       if Self.Dynamic then
          --  Resolve the dynamic lexical env getter. For this, use the cache if
          --  possible.
-         if Cache_Enabled and then Self.Env /= Null_Lexical_Env then
+         if Info = Self.Cached_Info and then Self.Env /= Null_Lexical_Env then
 
             --  If it is not stale, return it. Make sure to return genuine
             --  ``Empty_Env`` copies for empty environments.
@@ -406,28 +404,28 @@ package body Langkit_Support.Lexical_Envs_Impl is
             E      : constant Entity := (Node => Self.Node, Info => Info);
             Result : constant Lexical_Env := Self.Resolver.all (E);
          begin
-            if Cache_Enabled then
-               --  Since the call to Self.Resolver above may have invoked
-               --  Get_Env on the same Env_Getter object (Self), we need to be
-               --  re-entrant. This means that though called Dec_Ref on
-               --  Self.Env above, once we got here, Self.Env may have another
-               --  value: we need to remove its ownership share before
-               --  overriding below.
-               Dec_Ref (Self.Env);
+            --  Since the call to Self.Resolver above may have invoked
+            --  Get_Env on the same Env_Getter object (Self), we need to be
+            --  re-entrant. This means that though called Dec_Ref on
+            --  Self.Env above, once we got here, Self.Env may have another
+            --  value: we need to remove its ownership share before
+            --  overriding below.
+            Dec_Ref (Self.Env);
 
-               --  The ownership share returned by the resolver goes to the
-               --  cache: the call to Inc_Ref below will create a new one for
-               --  the returned value.
-               Self.Env := Result;
+            --  Store the entity info that was used to compute the env that we
+            --  cache, to make sure we don't use with another entity info.
+            Self.Cached_Info := Info;
 
-               --  Don't forget to record the context version for caches in the
-               --  case of Empty_Env (see Env_Getter.Env and the cache hit code
-               --  above).
-               if Self.Env.Env = Empty_Env.Env then
-                  Self.Env.Version := Get_Context_Version (Self.Node);
-               end if;
-            else
-               return Result;
+            --  The ownership share returned by the resolver goes to the
+            --  cache: the call to Inc_Ref below will create a new one for
+            --  the returned value.
+            Self.Env := Result;
+
+            --  Don't forget to record the context version for caches in the
+            --  case of Empty_Env (see Env_Getter.Env and the cache hit code
+            --  above).
+            if Self.Env.Env = Empty_Env.Env then
+               Self.Env.Version := Get_Context_Version (Self.Node);
             end if;
          end;
       end if;
@@ -903,6 +901,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Current_Rebindings : Env_Rebindings;
 
       procedure Get_Refd_Nodes (Self : in out Referenced_Env);
+      --  Perform a recursive lookup inside the given referenced environment
 
       procedure Append_Result
         (Node         : Internal_Map_Node;
@@ -1168,7 +1167,6 @@ package body Langkit_Support.Lexical_Envs_Impl is
          --     From.
 
          if (Lookup_Kind /= Recursive and then Self.Kind /= Transitive)
-           or else Self.Being_Visited
            or else Self.State = Inactive
          then
             --  We reached a loop in the env graph, propagate the information
@@ -1423,6 +1421,19 @@ package body Langkit_Support.Lexical_Envs_Impl is
                if Env.Referenced_Envs.Get_Access (I).Kind
                in Transitive | Prioritary
                then
+                  --  This env is already being visited, so we have reached a
+                  --  recursion cycle. In that case, we not only avoid visiting
+                  --  this env, we abort the traversal of referenced envs
+                  --  entirely. This implicitly creates an order upon which
+                  --  referenced envs can depend upon each other: if we add an
+                  --  env reference A to a static environment, and then another
+                  --  env reference B, then resolving the env getter of B can
+                  --  use the env referenced by A, but not the other way
+                  --  around.
+                  if Env.Referenced_Envs.Get_Access (I).Being_Visited then
+                     Recursive_Check_Reached := True;
+                     exit;
+                  end if;
                   Get_Refd_Nodes (Env.Referenced_Envs.Get_Access (I).all);
                end if;
             end loop;
@@ -1468,6 +1479,12 @@ package body Langkit_Support.Lexical_Envs_Impl is
                if Env.Referenced_Envs.Get_Access (I).Kind
                not in Transitive | Prioritary
                then
+                  --  Abort env traversal when a cycle is reached (see comment
+                  --  above in the traversal of prioritary referenced envs).
+                  if Env.Referenced_Envs.Get_Access (I).Being_Visited then
+                     Recursive_Check_Reached := True;
+                     exit;
+                  end if;
                   Get_Refd_Nodes (Env.Referenced_Envs.Get_Access (I).all);
                end if;
             end loop;
@@ -1496,7 +1513,6 @@ package body Langkit_Support.Lexical_Envs_Impl is
             --  We won't keep the local results in the cache, so destroy them
             Local_Results.Destroy;
             Local_Results := Outer_Results;
-
          else
             if Has_Trace then
                Caches_Trace.Trace ("INSERTING CACHE ENTRY " & Log_Id);

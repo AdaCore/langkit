@@ -1,0 +1,15 @@
+main.py: Running...
+
+===== Functional Test =====
+
+lookup 'baz' from test_1: <Scope main.txt:4:13-4:23>
+lookup 'baz' from test_2: None
+lookup 'baz' from test_1: <Scope main.txt:4:13-4:23>
+lookup 'baz' from test_2: None
+
+===== Performance Test =====
+
+lookup 'foo' from test: <Scope main.txt:2:13-2:23>
+lookup 'bar' from test: <Scope main.txt:27:13-27:23>
+main.py: Done.
+Done
