@@ -1,0 +1,9 @@
+trait T1 {
+}
+
+trait T2 {
+    @builtin
+    fun f1(): Bool
+    @builtin
+    fun f2(): Int
+}

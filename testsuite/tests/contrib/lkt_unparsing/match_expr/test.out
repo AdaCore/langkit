@@ -1,0 +1,22 @@
+val basic = match v {
+    case e1: T1 => e1.foo
+    case e2: T2 => e2.foo
+    case e3 => e3.foo
+}
+val long_expr = match
+    aaaaaaaaaaaaaa.bbbbbbbbbbbbb.ccccccccccccc.ddddddddddd.eeeeeee
+{
+    case e: T1 => e.foo
+    case _ => bar
+}
+val long_branch = match v {
+    case e: T1 =>
+        e1.aaaaaaaaaaaaaa.bbbbbbbbbbbbb.ccccccccccccc.ddddddddddd.eeeeeeeeee
+    case _ => bar
+}
+val with_trivia = match v {
+    # Comment 1
+    case e: T1 => v1
+    # Comment 2
+    case _ => default
+}

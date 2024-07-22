@@ -1,0 +1,15 @@
+val v1 = n is T
+val v2 = n is T1 | T2
+val v3 =
+    n is Aaaaaaaaaaaaaaaaaaaa
+    | Bbbbbbbbbbbbbbbbbbb
+    | Cccccccccccccccc
+    | Dddddddddddddddd
+    | Eeeeeeeeeeee
+
+val in_broken =
+    foo(
+        foo is A | B,
+        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+        bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    )

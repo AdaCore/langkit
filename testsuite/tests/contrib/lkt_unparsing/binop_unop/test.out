@@ -1,0 +1,21 @@
+val binop = a + b
+val or_nullcond = a or? b
+
+val long_binop_mix =
+    aaaaaaaaaaaaaa == bbbbbbbbbbbbbbbb and ccccccccccccc == ddddddddddddddd
+    and eeeeeeeee == fffffff
+
+val not_expr_1 = not a
+val not_expr_2 = not [].empty
+val not_expr_3 =
+    not aaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbb.cccccccccccccccc.ddddddddddddd
+val not_expr_4 =
+    not aaaaaaaaaaaaaaaaaa
+        .bbbbbbbbbbbbbbbbbb
+        .cccccccccccccccc
+        .ddddddddddddd
+        .eeeeeeeeeeeeee
+
+
+val plus_unop = +a
+val minus_unop = -a

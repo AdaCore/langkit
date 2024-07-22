@@ -1,0 +1,19 @@
+|" One line of doc
+struct S1 {
+}
+
+|" Two lines
+|" of doc.
+struct S2 {
+}
+
+@annot1
+@annot2(foo)
+@annot3
+struct S3 {
+}
+
+|" Doc with annotations
+@annot
+struct S4 {
+}

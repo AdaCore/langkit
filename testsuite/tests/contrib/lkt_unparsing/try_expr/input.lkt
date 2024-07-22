@@ -1,0 +1,11 @@
+val v1 = try a
+val v2 = try a else b
+val v3 = try f(aaaaaaaaaa, bbbbbbbbbbbbb, cccccccccccc, ddddddddddddd,
+eeeeeeeeee, ffffffff)
+val v4 = try f(aaaaaaaaaa, bbbbbbbbbbbbb, cccccccccccc, ddddddddddddd,
+eeeeeeeeee, ffffffff) else b
+val v5 = try a else f(aaaaaaaaaa, bbbbbbbbbbbbb, cccccccccccc, ddddddddddddd,
+eeeeeeeeee, ffffffff)
+val v6 = try f(aaaaaaaaaaa, bbbbbbbbbbbbbbb, cccccccccccc, ddddddddddd,
+eeeeeeeeee, fffffffffff) else g(aaaaaaaaaa, bbbbbbbbbbbbb, cccccccccccc,
+ddddddddddddd, eeeeeeeeee, ffffffff)

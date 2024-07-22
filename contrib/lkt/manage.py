@@ -39,6 +39,7 @@ class Manage(ManageScript):
             ),
             standalone=True,
             generate_unparser=True,
+            default_unparsing_config="default_unparsing_config.json",
         )
 
     def generate_prelude(self, emitter, context):

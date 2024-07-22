@@ -1,0 +1,16 @@
+val v1 = () => 0
+val v2 = (a) => 0
+val v3 = (a: Int) => 0
+val v4 = (a: Int = 0) => 0
+val v5 = (aaaaaaaaa: TTTTTTTTTTT, bbbbbbbbbb: TTTTTTTTTTTTT, ccccccccccc:
+TTTTTTTT) => 0
+val v6 = (aaaaaaaaa: TTTTTTTTTTT, bbbbbbbbbb: TTTTTTTTTTTTT, ccccccccccc:
+TTTTTTTT) => 0
+val v7 = (a: Int, b: Int) => aaaaaaaa + bbbbbbbbbb + ccccccccc + dddddddddddd +
+eeeeeeeeee
+val v8 = n.map(
+    (n) => aaaaaaaaaaaaaa + bbbbbbbbbbbbbbbb + ccccccccccccccc +
+    ddddddddddddddd + eeeeeeee,
+    (n) => aaaaaaaaaa or bbbbbbbbbbbbbb or cccccccccccccccccc or ddddddddddd or
+    eeeeeeeeee
+)

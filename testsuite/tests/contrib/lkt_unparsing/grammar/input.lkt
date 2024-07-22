@@ -1,0 +1,74 @@
+grammar g1 {
+}
+
+grammar g2 {
+    small_node <- SmallNode(@Identifier)
+    middle_node <- SmallNode(foo bar foo bar foo bar foo bar foo bar foo bar
+    foo)
+    big_node_node <- BigNode(
+        foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar
+        foo bar foo bar
+    )
+
+    small_or <- or(foo | bar)
+    big_or <- or(
+        foo | bar | foo | bar | foo | bar | foo | bar | foo | bar | foo | bar
+        | foo | bar
+    )
+    big_or_with_prefix <- or(
+        | foo | bar | foo | bar | foo | bar | foo | bar | foo | bar | foo | bar
+        | foo | bar
+    )
+
+    g_opt <- ?"foo"
+    small_opt_group <- ?("foo" "bar")
+    big_opt_group <- ?(
+        "foo" "foo" "foo" "foo" "foo" "foo" "foo"
+        bar bar bar bar bar bar bar bar bar bar
+    )
+
+    g_opt_error <- !"foo"
+    small_opt_error_group <- !("foo" "bar")
+    big_opt_error_group <- !(
+        "foo" "foo" "foo" "foo" "foo" "foo" "foo"
+        bar bar bar bar bar bar bar bar bar bar
+    )
+
+    small_stop_cut <- stop_cut("foo")
+    big_stop_cut <- stop_cut(Foo(
+        "foo" "foo" "foo" "foo" "foo" "foo" "foo"
+        bar bar bar bar bar bar bar bar bar bar
+    ))
+
+    small_discard <- discard("foo")
+    big_discard <- discard(Foo(
+        "foo" "foo" "foo" "foo" "foo" "foo" "foo"
+        bar bar bar bar bar bar bar bar bar bar
+    ))
+
+    small_list <- list*(foo)
+    big_list <- list*(
+        foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar
+        foo bar foo bar
+    )
+    small_list_with_sep <- list*(foo, "|")
+    big_list_with_sep <- list*(
+        foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar
+        foo bar foo bar, "|"
+    )
+    small_list_with_extra <- list*(foo, "|", allow_leading)
+    big_list_with_extra <- list*(
+        foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar
+        foo bar foo bar, "|", allow_leading
+    )
+
+    small_pick <- pick("foo" bar)
+    big_pick <- pick(
+        "foo" bar "foo" "foo" "foo" "foo" "foo" "foo" "foo" "foo" "foo" "foo"
+        "foo" "foo" "foo" "foo"
+    )
+
+    predicate <- foo |> when(Foo.bar)
+
+    g_skip <- skip(Foo)
+}

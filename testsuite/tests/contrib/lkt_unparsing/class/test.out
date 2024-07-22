@@ -1,0 +1,14 @@
+class C1 {
+}
+
+class C2: C1 {
+}
+
+class C3 implements T1 {
+}
+
+class C4 implements T1, T2 {
+}
+
+class C5: C1 implements T1 {
+}

@@ -1,0 +1,28 @@
+enum E1 {
+    case A
+}
+
+enum E2 implements T1 {
+    case A
+}
+
+enum E3 implements T1, T2 {
+    case A
+}
+
+enum E4 {
+    case
+        Aaaaaaaaaa,
+        Bbbbbbbbbbbbb,
+        Ccccccccc,
+        Dddddddddd,
+        Eeeeeeeeeeee,
+        Fffffffff,
+        Gggggggg
+}
+
+enum E5 {
+    case A
+    @export
+    fun f(): Bool = true
+}

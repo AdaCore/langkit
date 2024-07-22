@@ -1,0 +1,39 @@
+val short = a.b.c
+val long =
+aaaaaaaaaa.bbbbbbbbbb.ccccccccc.ddddddddddddd.eeeeeeeeeeee.fffffffff.gggggggg
+
+val long_with_calls =
+aaaaaaaaaa(1, 2).bbbbbbbbbb.ccccccccc(3).ddddddddddddd(4).eeeeeeeeeeee
+.fffffffff.gggggggg(6,7,8)
+val with_long_call =
+aaaaaaaaaa.bbbbbbbbb(1111111, 222222222, 3333333, 44444444, 555555555,
+666666666, 77777777).bbbbbbbbbb.ccccccccc
+
+val short_cast = n.as[T]
+val long_cast1 =
+aaaaaaaaaaaaaa.as[T].bbbbbbbbbbbbbbbbb.cccccccccccccccc.ddddddddddddddd
+.eeeeeeeeeeeeee
+val long_cast2 =
+    aaaaaaaaaaa.bbbbbbbbbbbbbbb.cccccccccccccc.dddddddddddd.as[DeclaratvePart]
+
+val short_keep = n.keep[T]
+val long_keep =
+aaaaaaaaaaaaaa.keep[T].bbbbbbbbbbbbbbbbb.cccccccccccccccc.ddddddddddddddd
+.eeeeeeeeeeeeee
+
+val nc_short = a?.b?.c
+val nc_long =
+aaaaaaaaaa?.bbbbbbbbbb?.ccccccccc?.ddddddddddddd?.eeeeeeeeeeee?.fffffffff?.gggggggg
+
+val nc_long_with_calls =
+aaaaaaaaaa(1, 2)?.bbbbbbbbbb?.ccccccccc(3)?.ddddddddddddd(4)?.eeeeeeeeeeee
+?.fffffffff?.gggggggg(6,7,8)
+val nc_with_long_call =
+aaaaaaaaaa?.bbbbbbbbb(1111111, 222222222, 3333333, 44444444, 555555555,
+666666666, 77777777)?.bbbbbbbbbb?.ccccccccc
+
+val in_broken = foo(
+    foo.bar,
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+)

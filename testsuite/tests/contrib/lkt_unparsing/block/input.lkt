@@ -1,0 +1,29 @@
+fun f1(): T = {val v = 1; v + 1}
+
+fun f2(): T = {val v = 1; bind foo = bar + 1; v + foo + bar}
+
+fun f3(): T = {
+val v = foo + foo + foo + foo + foo + foo + foo + foo + foo + foo + foo + foo;
+v + foo + bar
+}
+
+fun f4(): T = {
+bind v = foo + foo + foo + foo + foo + foo + foo + foo + foo + foo + foo + foo;
+v + foo + bar
+}
+
+fun f5(): T = {
+    bind v = value;
+
+    foo + bar
+}
+
+fun f6(): T = {
+    # Comment A
+
+    bind v = value;
+
+    # Comment B
+
+    foo + bar
+}

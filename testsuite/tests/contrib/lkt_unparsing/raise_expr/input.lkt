@@ -1,0 +1,6 @@
+val v1 = raise[T] PropertyError
+val v2 = raise[T] PropertyError("foo")
+val v3 = raise[T] PropertyError(
+"fairly long exception message, line will overflow")
+val v4 = raise[T] PropertyError(
+"a bit longer long exception message, line will overflow")

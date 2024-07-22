@@ -1,0 +1,12 @@
+val v1 = n in v
+val v2 = n in v1 | v2
+val v3 = n in aaaaaaaaaaaaaaaaaaaa | bbbbbbbbbbbbbbbbbbb | cccccccccccccccc
+| dddddddddddddddd | eeeeeeeeeeee
+val v3 = n in ffffffffff(aaaaaaaaa, bbbbbbbbbb, ccccccccccc, dddddddddddd,
+eeeeee) | gggggggggg(xxxxxxxxxxxx, yyyyyyyyyyy, zzzzz)
+
+val in_broken = foo(
+    foo in a | b,
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+)

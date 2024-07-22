@@ -1,0 +1,5 @@
+import foo
+import bar
+
+dynvar v1: T
+dynvar v2: T

@@ -1,0 +1,29 @@
+class C1 {
+    env_spec {
+    }
+}
+
+class C2 {
+    env_spec {
+        add_env()
+    }
+}
+
+class C2 {
+    env_spec {
+        do(node.foo())
+        add_env()
+    }
+}
+
+class C4 {
+    env_spec {
+        do(node.foo())
+        add_env(names=node.bar())
+        reference(
+            node.get_a_list_of_nodes(),
+            MyClass.property_reference,
+            cond=node.parent is AFirstNodeClass | ASecondNodeClass
+        )
+    }
+}

@@ -1,0 +1,13 @@
+val short_single = [foo]
+val short_multiple = [foo, bar, foobar]
+val long_single = [aaaaaaaaaaaaa.bbbbbbbbbbbbbbbb.cccccccccccc.dddddddddddd
+.eeeeeeeeeeee]
+val long_multiple = [aaaaaaaaaaaaa, bbbbbbbbbbbbbbbb, cccccccccccc,
+dddddddddddd, eeeeeeeeeeee]
+val longer = [aaaaaaaaaaaaa.bbbbbbbbbbbbbbbb.cccccccccccc.dddddddddddd
+.eeeeeeeeeeee.ffffffffff]
+val longer_multiple = [aaaaaaaaaaaaa, bbbbbbbbbbbbbbbb, cccccccccccc,
+dddddddddddd, eeeeeeeeeeee, ffffffffff]
+val with_type = []:T
+val long_with_type = [aaaaaaaaaaaaa,bbbbbbbbbbbbbbbb,cccccccccccc,dddddddddddd,
+eeeeeeeeeeee]: T
