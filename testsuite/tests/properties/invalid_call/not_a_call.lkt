@@ -1,0 +1,7 @@
+import common
+
+class BarNode: FooNode {
+    fun get_int(): Int = 1
+
+    @exported fun p(): Int = node.get_int
+}

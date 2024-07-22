@@ -848,18 +848,23 @@ class FieldAccess(AbstractExpression):
     def __init__(self,
                  receiver: AbstractExpression,
                  field: str,
-                 arguments: Optional[FieldAccess.Arguments] = None):
+                 arguments: Optional[FieldAccess.Arguments] = None,
+                 check_call_syntax: bool = False):
         """
         :param receiver: Expression on which the field access was done.
         :param field: The name of the field that is accessed.
         :param arguments: Assuming field is a property that takes arguments,
             these are passed to it.
+        :param check_call_syntax: Whether the presence/absence of a call syntax
+            for the accessed node data must be checked (True for Lkt
+            expressions, False for DSL expressions).
         """
         super().__init__()
         self.receiver = receiver
         self.field = field
         self.arguments = arguments
         self.is_deref = False
+        self.check_call_syntax = check_call_syntax
 
         self.node_data: AbstractNodeData
 
@@ -955,10 +960,22 @@ class FieldAccess(AbstractExpression):
         if isinstance(actual_node_data, PropertyDef):
             actual_node_data = actual_node_data.root
 
-            # Also reject the call syntax for lazy fields
+            if self.check_call_syntax:
+                # Reject the call syntax for lazy fields, and mandate it for
+                # regular properties.
+                if actual_node_data.lazy_field:
+                    check_source_language(
+                        self.arguments is None, "cannot call a lazy field"
+                    )
+                else:
+                    check_source_language(
+                        self.arguments is not None,
+                        "call syntax is mandatory for properties",
+                    )
+        elif self.check_call_syntax:
+            # Reject the call syntax for anything that is not a property
             check_source_language(
-                self.arguments is None or not actual_node_data.lazy_field,
-                "call syntax is forbidden for lazy fields",
+                self.arguments is None, "cannot call a field"
             )
 
         args = self.arguments or FieldAccess.Arguments([], {})

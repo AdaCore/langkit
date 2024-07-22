@@ -3,8 +3,8 @@ Code generation was successful
 
 == cross_node.lkt ==
 cross_node.lkt:7:38: error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
-7 |     @exported fun prop(): ListNode = node.bar_node_parent.as[ListNode]
-  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+7 |     @exported fun prop(): ListNode = node.bar_node_parent().as[ListNode]
+  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 == not_node.lkt ==

@@ -4,5 +4,5 @@ dynvar env: LexicalEnv
 
 class FooNode implements Node[FooNode] {
     @with_dynvars(env)
-    fun resolve_ref(): Entity[FooNode] = node.node_env.get(s"foo")?[0]
+    fun resolve_ref(): Entity[FooNode] = node.node_env().get(s"foo")?[0]
 }

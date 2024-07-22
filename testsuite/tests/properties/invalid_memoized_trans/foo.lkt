@@ -52,7 +52,8 @@ class Example: FooNode {
     @call_non_memoizable_because("get_something_unmemoizable is unmemoizable")
     fun get_something_unmemoizable(): Entity[FooNode]
 
-    @exported fun get_var4(): Entity[FooNode] = self.get_something_unmemoizable
+    @exported fun get_var4(): Entity[FooNode] =
+        self.get_something_unmemoizable()
 
     @exported @memoized fun get_var4_public_wrapper(): Entity[FooNode] =
         self.get_var4()

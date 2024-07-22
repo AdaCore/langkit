@@ -1,7 +1,7 @@
 == foo.lkt ==
 foo.lkt:23:5: warning: This private property is unused
-23 |     fun d(): Int = node.c
-   |     ^^^^^^^^^^^^^^^^^^^^^
+23 |     fun d(): Int = node.c()
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
 
 Code generation was successful
 

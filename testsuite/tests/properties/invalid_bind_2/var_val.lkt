@@ -1,5 +1,5 @@
 import common
 
 class Example: FooNode {
-    @exported fun resolve(): Bool = %eq(node.var1, self).solve
+    @exported fun resolve(): Bool = %eq(node.var1, self).solve()
 }

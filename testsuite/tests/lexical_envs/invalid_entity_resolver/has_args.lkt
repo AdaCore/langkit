@@ -1,5 +1,5 @@
 import common
 
 class FooNode implements Node[FooNode] {
-    fun resolve_ref(i: Int): Entity[FooNode] = node.node_env.get(s"foo")?[i]
+    fun resolve_ref(i: Int): Entity[FooNode] = node.node_env().get(s"foo")?[i]
 }

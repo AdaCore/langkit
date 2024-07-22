@@ -17,12 +17,12 @@ class FooNode implements Node[FooNode] {
 
     @exported fun test_prop_1(): Bool = {
         bind dyn_node = node;
-        node.helper_1
+        node.helper_1()
     }
 
     @exported @with_dynvars(dyn_node_2) fun test_prop_2(): Bool = {
         bind dyn_node = node;
-        node.helper_2
+        node.helper_2()
     }
 
     @exported fun test_prop_3(): FooNode = {
@@ -32,7 +32,7 @@ class FooNode implements Node[FooNode] {
 
     @exported fun test_prop_4(): Bool = {
         bind dyn_node_2 = node;
-        node.helper_2
+        node.helper_2()
     }
 }
 

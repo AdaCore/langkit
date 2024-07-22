@@ -12,5 +12,5 @@ class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
-    fun result(): Bool = node.unit.foobar
+    fun result(): Bool = node.unit().foobar
 }
