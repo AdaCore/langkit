@@ -18,4 +18,7 @@ class LktUnparseDriver(BaseDriver):
             "extensions",
             "default_unparsing_config.json",
         )
-        self.run_and_check(["lkt_unparse", cfg, "input.lkt"], memcheck=True)
+        self.run_and_check(
+            ["lkt_unparse", cfg, "input.lkt"],
+            memcheck=self.memcheck_for_lkt,
+        )
