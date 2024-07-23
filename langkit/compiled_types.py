@@ -2479,16 +2479,14 @@ class BaseStructType(CompiledType):
         ))
 
     @property
-    def required_fields_in_exprs(self):
+    def required_fields_in_exprs(self) -> dict[str, BaseField]:
         """
         Return all fields that must be involved in the property DSL.
 
         This returns a mapping from DSL field names to fields for all fields
         that must be considered when building structs in the property DSL.
-
-        :rtype: dict[str, Field]
         """
-        def is_required(f):
+        def is_required(f: AbstractNodeData) -> bool:
             if f._original_name is None:
                 # If this field does not have an original name, it does not
                 # come from sources (it's automatic/internal), and thus users
