@@ -224,6 +224,17 @@ class BaseDriver(DiffTestDriver):
 
         self.shell(argv, env=env, analyze_output=analyze_output)
 
+    @property
+    def memcheck_for_lkt(self) -> bool:
+        """
+        Return whether Lkt programs can be run under Valgrind.
+
+        We always build Langkit for 64-bit platforms, so when we test it to
+        target 32-bit, we cannot use Valgrind (32-bit) to memcheck Langkit
+        binaries (64-bit).
+        """
+        return self.env.build.cpu.bits == 64
+
     def create_project_file(self, project_file, mains):
         """
         Create a project file for the given main source files.
