@@ -1,0 +1,6 @@
+null var v1: Int = 1;
+var v22: Int = 2;
+
+var v333: Bool = true;
+# Comment
+var v4444: Int = 4;

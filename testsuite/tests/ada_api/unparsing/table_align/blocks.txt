@@ -1,0 +1,9 @@
+{
+    var v0: T = 0;
+    var vv1: T = 1;
+}
+
++{
+    var v0: T = 0;
+    var vv1: T = 1;
+}

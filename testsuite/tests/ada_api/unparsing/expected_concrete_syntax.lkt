@@ -42,7 +42,12 @@ grammar foo_grammar {
             "example" null(Name) "(" list*(call_arg, ",") ")"
         )
     )
-    block <- Block("{" list*(or(var_decl | fun_decl)) "}")
+    block <- or(
+        | Block("{" list*(or(var_decl | fun_decl)) "}")
+        | PlusBlock(
+            "+" "{" PlusDecls*(or(var_decl | fun_decl)) "}"
+        )
+    )
 }
 
 @abstract
@@ -54,8 +59,16 @@ class AnnotatedDecl: FooNode {
     @parse_field decl: Decl
 }
 
-class Block: FooNode {
+@abstract
+class BaseBlock: FooNode {
+}
+
+class Block: BaseBlock {
     @parse_field items: ASTList[Decl]
+}
+
+class PlusBlock: BaseBlock {
+    @parse_field items: PlusDecls
 }
 
 class CallArg: FooNode {
@@ -110,6 +123,9 @@ class Number: Expr implements TokenNode {
 
 class Ref: Expr {
     @parse_field name: Name
+}
+
+class PlusDecls: ASTList[Decl] {
 }
 
 class AnnotationList: ASTList[Name] {
