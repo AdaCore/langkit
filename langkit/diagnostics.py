@@ -73,16 +73,42 @@ class Diagnostics:
     diagnostics.
     """
 
+    blacklisted_frames: dict[str, set[int]] = {}
+    """
+    Mapping from filename to set of line numbers for all stack frames to
+    blacklist from DSL locations.
+    """
+
     @classmethod
-    def is_langkit_dsl(cls, python_file: str) -> bool:
+    def blacklist_frame(cls, frame: traceback.FrameSummary) -> None:
         """
-        Return whether ``python_file`` belongs to the user language spec.
+        Add the given frame to blacklisted ones for DSL locations.
+        """
+        if isinstance(frame.lineno, int):
+            filename = P.normpath(frame.filename)
+            lineno_set = cls.blacklisted_frames.setdefault(filename, set())
+            lineno_set.add(frame.lineno)
+
+    @classmethod
+    def is_langkit_dsl(cls, frame: traceback.FrameSummary) -> bool:
+        """
+        Return whether to exclude the given frame from locations used to create
+        diagnostics.
         """
         # If the path of the file is in the list of blacklisted paths, then
         # it's definitely not part of the language spec.
-        python_file = P.normpath(python_file)
+        python_file = P.normpath(frame.filename)
         if any(path in python_file for path in cls.blacklisted_paths):
             return False
+
+        # Never use blacklisted stack frames to create DSL locations
+        try:
+            linenos = cls.blacklisted_frames[python_file]
+        except KeyError:
+            pass
+        else:
+            if frame.lineno in linenos:
+                return False
 
         # The "manage.py" script is supposed to define settings for the
         # language spec, but is not the language spec itself.
@@ -224,9 +250,9 @@ def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
     stack = stack or traceback.extract_stack()
 
     # Create Location instances for each stack frame
-    locs = [Location(file=t[0], line=t[1])
+    locs = [Location(file=t.filename, line=t.lineno)
             for t in stack
-            if Diagnostics.is_langkit_dsl(t[0])]
+            if isinstance(t.lineno, int) and Diagnostics.is_langkit_dsl(t)]
 
     return locs[-1] if locs else None
 

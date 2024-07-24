@@ -40,7 +40,7 @@ run_foonext("""\
 <children at test.py:@NUMBER> evaluated to: Bare_Foo_Node array of\
  length 3 = {@...}
 
-Now evaluating <Block at test.py:@NUMBER>""")
+Now evaluating <Block at ???>""")
 run_foonext("Now evaluating <Map at test.py:@NUMBER>")
 run_foonext("Now evaluating <FieldAccess for parents at test.py:@NUMBER>")
 gdb.test("foostate", """\
@@ -49,8 +49,7 @@ from @...test.py:@NUMBER
   self = <Example main.txt:1:1-1:8>
   i = 1
 
-Currently evaluating <Block at test.py:@NUMBER>
-from @...test.py:@NUMBER
+Currently evaluating <Block at ???>
   nodes = Bare_Foo_Node array of length 3 =\
  {<Example main.txt:1:1-1:8>, <Example main.txt...
   <parent at test.py:@NUMBER> -> <FooNodeList main.txt:1:1-1:23>
@@ -97,8 +96,8 @@ Now evaluating <Map at test.py:@NUMBER>""")
 run_fooout("""\
 <Map at test.py:@NUMBER> evaluated to: Integer array of length 3 = {@...
 
-Now evaluating <Block at test.py:@NUMBER>""")
-run_fooout("<Block at test.py:@NUMBER> evaluated to: 5")
+Now evaluating <Block at ???>""")
+run_fooout("<Block at ???> evaluated to: 5")
 gdb.test("fooout", "Not evaluating any expression currently")
 
 #
@@ -116,7 +115,7 @@ run_foosi("""\
 <children at test.py:@NUMBER> evaluated to:\
  Bare_Foo_Node array of length 3 = {@...
 
-Now evaluating <Block at test.py:@NUMBER>""")
+Now evaluating <Block at ???>""")
 run_foosi("Now evaluating <Map at test.py:@NUMBER>")
 run_foosi("Now evaluating <FieldAccess for parents at test.py:@NUMBER>")
 run_foosi("""\
