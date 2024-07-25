@@ -499,7 +499,10 @@ class Lexer:
 
         if self.track_indent:
             self.add_rules(
-                (Literal('\n'), self.tokens.Newline),
+                (
+                    Literal("\n", location=Location.builtin),
+                    self.tokens.Newline,
+                ),
             )
 
         self.spacing_table: Dict[TokenFamily, Dict[TokenFamily, bool]] = (
