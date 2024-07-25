@@ -216,6 +216,7 @@ def ada_block_with_parens(
     lines: list[str],
     column: int,
     indent_first: bool = False,
+    separator: str = ","
 ) -> str:
     """
     Format an Ada-style parenthetized multi-line block.
@@ -236,6 +237,7 @@ def ada_block_with_parens(
     :param column: Indentation level for that block.
     :param indent_first: Whether the result should have its first line
         indented.
+    :param separator: Separator between elements.
     """
     indent = " " * column
     result = []
@@ -243,7 +245,7 @@ def ada_block_with_parens(
         if i == 0:
             result.append(f"{indent if indent_first else ''}  ({line}")
         else:
-            result[-1] += ","
+            result[-1] += separator
             result.append(f"{indent}   {line}")
     result[-1] += ")"
     return "\n".join(result)

@@ -181,6 +181,12 @@ class CompiledTypeRepo:
     is no context.
     """
 
+    node_builder_types: Set[NodeBuilderType] = set()
+    """
+    Set of ``NodeBuilder`` instances for all synthetic nodes for which we
+    create builders.
+    """
+
     array_types: Set[ArrayType] = set()
     """
     Set of all created ArrayType instances.
@@ -236,6 +242,7 @@ class CompiledTypeRepo:
         cls.astnode_types = []
         cls.struct_types = []
         cls.pending_list_types = []
+        cls.node_builder_types = set()
         cls.array_types = set()
         cls.iterator_types = []
         cls.root_grammar_class = None
@@ -374,6 +381,9 @@ class AbstractNodeData:
         self._base: Opt[_Self] = None
         self._overridings: List[_Self] = []
         self.final = final
+
+    def __lt__(self, other: AbstractNodeData) -> bool:
+        return self._serial < other._serial
 
     @property
     def abstract(self) -> bool:
@@ -3520,6 +3530,17 @@ class ASTNodeType(BaseStructType):
         """
         return EntityType(self)
 
+    @property
+    @memoized
+    def builder_type(self):
+        """
+        Return the node builder type corresponding to this node.
+
+        Note that this may raise a language check error if no syntethic node
+        matches this node type.
+        """
+        return NodeBuilderType(self)
+
     def validate_fields(self):
         """
         Perform various checks on this ASTNodeType's fields.
@@ -3933,6 +3954,159 @@ class StringType(CompiledType):
 
     def to_internal_expr(self, public_expr, context=None):
         return 'Create_String ({})'.format(public_expr)
+
+
+class NodeBuilderType(CompiledType):
+    """
+    Base class for node builder types.
+    """
+
+    def __init__(self, node_type: ASTNodeType):
+        """
+        :param node_type: Node type that this builder creates.
+        """
+        super().__init__(
+            name=node_type.name + names.Name("Node_Builder"),
+            exposed=False,
+            null_allowed=True,
+            is_refcounted=True,
+            nullexpr="No_Node_Builder",
+            dsl_name=f"NodeBuilder[{node_type.dsl_name}]",
+        )
+        self.node_type = node_type
+        CompiledTypeRepo.node_builder_types.add(self)
+
+        self.synth_node_builder_needed = False
+        """
+        Whether we need to generate code to create synthetizing node builders
+        for this type in Ada.
+        """
+
+        self._init_fields(self.builtin_properties())
+
+    @property
+    def record_type(self) -> str:
+        """
+        Return the name of the Ada record type that implements this node
+        builder type.
+        """
+        # This record type will not be present in generated code unless it is
+        # explicitly required during the "construct" pass.
+        assert self.synth_node_builder_needed
+        return f"{self.name.camel_with_underscores}_Record"
+
+    @property
+    def access_type(self) -> str:
+        """
+        Return the name of the Ada record access type that implements this node
+        builder type.
+        """
+        # This record type will not be present in generated code unless it is
+        # explicitly required during the "construct" pass.
+        assert self.synth_node_builder_needed
+        return f"{self.name.camel_with_underscores}_Access"
+
+    @property
+    def synth_constructor(self) -> str:
+        """
+        Return the name of the Ada function that creates a synthetizing node
+        builder.
+        """
+        # This constructor will not be present in generated code unless it is
+        # explicitly required during the "construct" pass.
+        assert self.synth_node_builder_needed
+        return f"Create_{self.name.camel_with_underscores}"
+
+    @property
+    def synth_constructor_args(self) -> list[tuple[BaseField, CompiledType]]:
+        """
+        Return the list of arguments for the Ada function that creates a
+        synthetizing node builder.
+
+        Each argument encodes a value for a field to initialize in the
+        synthetized node. In the result of this property, arguments are encoded
+        with a tuple of: the field to initialize (``field``), and the argument
+        type (``arg_type``).
+
+        Note that in the case of parse fields, the argument type is a node
+        builder, which is why ``field.type`` and ``arg_type`` can be different.
+        """
+        def arg_type(field: BaseField) -> CompiledType:
+            """
+            Return the type of the argument used to initialize the given field.
+            """
+            if isinstance(field, Field):
+                assert isinstance(field.type, ASTNodeType)
+                return field.type.builder_type
+            else:
+                return field.type
+
+        return [
+            (field, arg_type(field))
+            for field in self.node_type.required_fields_in_exprs.values()
+        ]
+
+    def builtin_properties(self) -> List[Tuple[str, PropertyDef]]:
+        """
+        Return properties available for all node builder types.
+        """
+        from langkit.expressions import LiteralExpr, No, NullExpr, PropertyDef
+
+        def construct_build(
+            prefix: ResolvedExpression,
+            node_data: AbstractNodeData,
+            args: list[ResolvedExpression | None],
+            abstract_expr: AbstractExpression | None,
+        ):
+            """
+            Create the resolved expression for a call to the ".build" property.
+
+            See AbstractNodeData.__init__'s access_constructor.
+            """
+            prop = PropertyDef.get()
+            if prop is None or not prop.lazy_field:
+                error(
+                    "NodeBuilder.build can be called in lazy field"
+                    " initializers only"
+                )
+
+            assert len(args) == 1
+            parent_expr = args[0] or NullExpr(T.root_node)
+
+            return LiteralExpr(
+                template=(
+                    "Node_Builder_Type'({}).all.Build"
+                    " (Parent => {}, Self_Node => Self)"
+                ),
+                expr_type=node_data.type,
+                operands=[prefix, parent_expr],
+                abstract_expr=abstract_expr,
+            )
+
+        build_prop = PropertyDef(
+            expr=None,
+            prefix=None,
+            type=self.node_type,
+            public=False,
+            external=True,
+            uses_entity_info=False,
+            uses_envs=False,
+            optional_entity_info=False,
+            dynamic_vars=[],
+            doc="Create a new from this builder.",
+            lazy_field=False,
+            artificial=True,
+            access_constructor=construct_build,
+        )
+        build_prop.arguments.append(
+            Argument(
+                names.Name("Parent"),
+                type=T.root_node,
+                default_value=No(T.root_node),
+            )
+        )
+
+        return [("build", build_prop)]
 
 
 class ArrayType(CompiledType):

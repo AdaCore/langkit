@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 from typing import Callable, List, Optional, Sequence, cast
 
-from langkit.compiled_types import AbstractNodeData, T
-from langkit.diagnostics import check_source_language
+from langkit.compiled_types import (
+    ASTNodeType, AbstractNodeData, T, TypeRepo, resolve_type
+)
+from langkit.diagnostics import check_source_language, error
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, FieldAccessExpr, NullCheckExpr,
     ResolvedExpression, auto_attr, construct
 )
-from langkit.expressions.structs import FieldAccess
+from langkit.expressions.structs import FieldAccess, New
 
 
 def get_builtin_field(name: str) -> AbstractNodeData:
@@ -137,3 +141,77 @@ def children(self, node):
         ),
         abstract_expr=self,
     )
+
+
+class CreateCopyNodeBuilder(AbstractExpression):
+    """
+    Expression to create a non-synthetizing node builder.
+    """
+    def __init__(self, value: AbstractExpression):
+        super().__init__()
+        self.value = value
+
+    @staticmethod
+    def common_construct(
+        value: ResolvedExpression,
+        abstract_expr: AbstractExpression | None = None,
+    ) -> ResolvedExpression:
+        node_type = value.type
+        assert isinstance(node_type, ASTNodeType)
+
+        return CallExpr(
+            "Builder",
+            "Create_Copy_Node_Builder",
+            node_type.builder_type,
+            [value],
+            abstract_expr=abstract_expr,
+        )
+
+    def construct(self) -> ResolvedExpression:
+        value = construct(self.value)
+        if not isinstance(value.type, ASTNodeType):
+            error(f"node expected, got {value.type.dsl_name}")
+        return self.common_construct(value=value, abstract_expr=self)
+
+
+class CreateSynthNodeBuilder(AbstractExpression):
+    """
+    Expression to create a synthetizing node builder.
+    """
+    def __init__(
+        self,
+        node_type: TypeRepo.Defer | ASTNodeType,
+        **field_builders: AbstractExpression,
+    ):
+        super().__init__()
+        self.node_type = node_type
+        self.field_builders = field_builders
+
+    def construct(self) -> ResolvedExpression:
+        node_type = resolve_type(self.node_type)
+        if not isinstance(node_type, ASTNodeType) or not node_type.synthetic:
+            error("node builders can yield synthetic nodes only")
+
+        # Enable code generation for synthetizing node builds for this node
+        # type.
+        builder_type = node_type.builder_type
+        builder_type.synth_node_builder_needed = True
+
+        # Make sure the required compiled types for the synthetizing node
+        # builder constructor are known before code generation starts.
+        _ = builder_type.synth_constructor_args
+
+        field_values_map = New.construct_fields(
+            node_type, self.field_builders, for_node_builder=True
+        )
+        field_values_list = [
+            expr for _, expr in sorted(field_values_map.items())
+        ]
+
+        return CallExpr(
+            "Builder",
+            builder_type.synth_constructor,
+            builder_type,
+            field_values_list,
+            abstract_expr=self,
+        )

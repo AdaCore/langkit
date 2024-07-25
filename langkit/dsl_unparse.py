@@ -756,7 +756,8 @@ def emit_expr_prio(expr, **ctx):
         ArrayLiteral, Arithmetic, BaseRaiseException, CharacterLiteral,
         Predicate, StructUpdate, BigIntLiteral, RefCategories, Bind, Try,
         Block, Contains, PropertyDef, DynamicLexicalEnv, Super, Join, String,
-        NPropagate, Find, EmptyEnv, AnyOf, UnaryNeg
+        NPropagate, Find, EmptyEnv, AnyOf, UnaryNeg, CreateCopyNodeBuilder,
+        CreateSynthNodeBuilder
     )
 
     def is_a(*names):
@@ -1556,6 +1557,16 @@ def emit_expr_prio(expr, **ctx):
     elif isinstance(expr, UnaryNeg):
         prio = PrioInfo(P.unop)
         return prio, f"-{ee(expr.expr)}"
+
+    elif isinstance(expr, CreateCopyNodeBuilder):
+        return prio, "{}.to_builder()".format(ee(expr.value))
+
+    elif isinstance(expr, CreateSynthNodeBuilder):
+        return emit_method_call(
+            expr.node_type.dsl_name,
+            "builder",
+            [f"{k}={ee(v)}" for k, v in expr.field_builders.items()]
+        )
 
     else:
         # raise NotImplementedError(type(expr))

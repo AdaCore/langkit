@@ -509,6 +509,83 @@ private package ${ada_lib_name}.Implementation is
    function Kind_Name (Node : ${T.root_node.name}) return String;
    --  Return the concrete kind for Node
 
+   -------------------
+   -- Node Builders --
+   -------------------
+
+   --  A node builder is basically a functor that takes one argument (a "parent
+   --  node") and that returns a node (either an existing node or a node that
+   --  the node builder creates).
+
+   type Node_Builder_Record is abstract tagged record
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+   end record;
+   type Node_Builder_Type is access all Node_Builder_Record'Class;
+
+   function Build
+     (Self              : Node_Builder_Record;
+      Parent, Self_Node : ${T.root_node.name}) return ${T.root_node.name}
+   is abstract;
+   --  Return the node that ``Self`` must create.
+   --
+   --  If actual node synthetization occurs, ``Parent`` is used to initialize
+   --  the parent link of the returned node.
+   --
+   --  This function is meant to be called in a property: ``Self_Node`` must be
+   --  the ``Self`` of the calling property.
+
+   procedure Release (Self : in out Node_Builder_Record) is null;
+   --  Free resources for this node builder
+
+   type Copy_Node_Builder_Record is new Node_Builder_Record with record
+      Value : ${T.root_node.name};
+      --  Existing node that this builder must yield
+   end record;
+
+   overriding function Build
+     (Self              : Copy_Node_Builder_Record;
+      Parent, Self_Node : ${T.root_node.name}) return ${T.root_node.name}
+   is (Self.Value);
+
+   Null_Node_Builder_Record : aliased Copy_Node_Builder_Record :=
+     (Ref_Count => -1, Value => null);
+   Null_Node_Builder        : constant Node_Builder_Type :=
+     Null_Node_Builder_Record'Access;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Node_Builder_Record'Class, Node_Builder_Type);
+
+   procedure Inc_Ref (Self : Node_Builder_Type);
+   procedure Dec_Ref (Self : in out Node_Builder_Type);
+
+   function Create_Copy_Node_Builder
+     (Value : ${T.root_node.name}) return Node_Builder_Type;
+
+   % for t in ctx.node_builder_types:
+      subtype ${t.name} is Node_Builder_Type;
+   % endfor
+
+   % for t in ctx.node_builder_types:
+      % if t.synth_node_builder_needed:
+         <% constructor_args = t.synth_constructor_args %>
+
+         function ${t.synth_constructor}
+           % if constructor_args:
+           ${ada_block_with_parens(
+              [
+                 f"{field.name} : {arg_type.name}"
+                 for field, arg_type in constructor_args
+              ],
+              12,
+              separator=";",
+           )}
+           % endif
+           return ${t.name};
+      % endif
+   % endfor
+
    -----------------------------------------------
    -- Structure types (incomplete declarations) --
    -----------------------------------------------

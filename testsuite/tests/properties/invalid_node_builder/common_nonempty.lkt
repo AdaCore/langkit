@@ -1,0 +1,8 @@
+import common
+
+@synthetic
+class SynthNode: FooNode {
+    number: Int
+    @parse_field f1: Literal
+    @parse_field f2: FooNode
+}

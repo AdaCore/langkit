@@ -2406,7 +2406,9 @@ package body ${ada_lib_name}.Implementation is
 
    begin
       if Is_Synthetic (Node) then
-         return Sloc_Range (Node.Parent);
+         return (if Node.Parent = null
+                 then No_Source_Location_Range
+                 else Sloc_Range (Node.Parent));
       end if;
 
       if Is_Ghost (Node) then
@@ -4058,6 +4060,238 @@ package body ${ada_lib_name}.Implementation is
    begin
       return Fetch_Sibling (Node, E_Info, 1);
    end Next_Sibling;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Node_Builder_Type) is
+   begin
+      if Self.Ref_Count > 0 then
+         Self.Ref_Count := Self.Ref_Count + 1;
+      end if;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out Node_Builder_Type) is
+   begin
+      if Self.Ref_Count < 0 then
+         return;
+      elsif Self.Ref_Count = 1 then
+         Self.Release;
+         Free (Self);
+      else
+         Self.Ref_Count := Self.Ref_Count - 1;
+      end if;
+   end Dec_Ref;
+
+   ------------------------------
+   -- Create_Copy_Node_Builder --
+   ------------------------------
+
+   function Create_Copy_Node_Builder
+     (Value : ${T.root_node.name}) return Node_Builder_Type is
+   begin
+      --  No need to allocate a new builder if in practice it cannot be
+      --  distinguished from the "null" builder.
+
+      if Value = null then
+         return Null_Node_Builder;
+      else
+         return new Copy_Node_Builder_Record'(Ref_Count => 1, Value => Value);
+      end if;
+   end Create_Copy_Node_Builder;
+
+   % for t in ctx.node_builder_types:
+      % if t.synth_node_builder_needed:
+         <%
+            constructor_args = t.synth_constructor_args
+            refcount_needed = any(
+               f.type.is_refcounted for f, _ in constructor_args
+            )
+
+            parse_fields = [
+               f for f, _ in constructor_args if not f.is_user_field
+            ]
+            user_fields = [f for f, _ in constructor_args if f.is_user_field]
+         %>
+
+         type ${t.record_type} is new Node_Builder_Record with
+         % if constructor_args:
+            record
+            % for field, arg_type in constructor_args:
+               ${field.name} : ${arg_type.name};
+            % endfor
+            end record;
+         % else:
+            null record;
+         % endif
+         type ${t.access_type} is access all ${t.record_type};
+
+         overriding function Build
+           (Self              : ${t.record_type};
+            Parent, Self_Node : ${T.root_node.name})
+            return ${T.root_node.name};
+
+         % if refcount_needed:
+            overriding procedure Release (Self : in out ${t.record_type});
+         % endif
+
+         -----------
+         -- Build --
+         -----------
+
+         overriding function Build
+           (Self              : ${t.record_type};
+            Parent, Self_Node : ${T.root_node.name})
+            return ${T.root_node.name}
+         is
+            Result : ${T.root_node.name};
+            Unit   : constant Internal_Unit := Self_Node.Unit;
+            Env    : constant Lexical_Env :=
+              (if Parent = null
+               then Empty_Env
+               else Parent.Self_Env);
+         begin
+            if Parent /= null and then Parent.Unit /= Unit then
+               Raise_Property_Exception
+                 (Self_Node,
+                  Property_Error'Identity,
+                  "synthetic node parents must belong to the same unit as the"
+                  & " nodes that trigger node synthetization");
+            end if;
+
+            ## Forbid node synthetization when Self.Self_Env is foreign, as in
+            ## that case, this new node would escape the relocation mechanism
+            ## when that foreign env is terminated.
+            ##
+            ## Note that we could, in principle, register this synthetized node
+            ## so that the relocation mechanism takes care of it, but this
+            ## incurs extra complexity for a use case that is not yet proven
+            ## useful. So just forbid this situation.
+            if Is_Foreign_Strict (Env, Parent) then
+               Raise_Property_Exception
+                 (Self_Node,
+                  Property_Error'Identity,
+                  "synthetic nodes cannot have foreign lexical envs");
+            end if;
+
+            ## Allocate the synthetic node and initialize all of its components
+            ## except the children.
+            Result := new ${T.root_node.value_type_name}
+              (${t.node_type.ada_kind_name});
+            Initialize
+              (Self => Result,
+               Kind => ${t.node_type.ada_kind_name},
+               Unit => Unit,
+
+               ## Keep the token start/end null, as expected for a synthetized
+               ## node.
+               Token_Start_Index => No_Token_Index,
+               Token_End_Index   => No_Token_Index,
+
+               Parent   => Parent,
+               Self_Env => Env);
+            Register_Destroyable (Unit, Result);
+
+            ## Build children and then initialize parse fields using the
+            ## standard initialize procedure.
+            % if parse_fields:
+               declare
+                  Children : array (1 .. ${len(parse_fields)})
+                               of ${T.root_node.name};
+               begin
+                  <% init_fields_args = ["Self => Result"] %>
+                  % for i, field in enumerate(parse_fields, 1):
+                     <%
+                        child_expr = f"Children ({i})"
+                        init_fields_args.append(
+                           f"{field.name} => {child_expr}"
+                        )
+                     %>
+                     ${child_expr} :=
+                       Self.${field.name}.Build (Result, Self_Node);
+
+                     ## Reject null nodes for fields that are not nullable for
+                     ## synthetic nodes.
+                     % if not field.nullable:
+                        if ${child_expr} = null then
+                           Raise_Property_Exception
+                             (Self_Node,
+                              Property_Error'Identity,
+                              "${field.qualname} cannot be null in synthetic"
+                              & " nodes; add a nullable annotation to this"
+                              & " field to allow it");
+                        end if;
+                     % endif
+                  % endfor
+
+                  Initialize_Fields_For_${t.node_type.kwless_raw_name}
+                  ${ada_block_with_parens(init_fields_args, 18)};
+               end;
+            % endif
+
+            ## Then initialize user fields individually
+            % for field in user_fields:
+               Result.${field.name} :=
+                  ${field.type.convert_to_storage_expr(
+                     "Result", f"Self.{field.name}"
+                  )};
+               % if field.type.is_refcounted:
+                  Inc_Ref (Result.${field.name});
+               % endif
+            % endfor
+
+            return Result;
+         end Build;
+
+         % if refcount_needed:
+
+            -------------
+            -- Release --
+            -------------
+
+            overriding procedure Release (Self : in out ${t.record_type}) is
+            begin
+               % for field, arg_type in constructor_args:
+                  ## Non-user fields are parse fields, and we store node
+                  ## builders for them, which are refcounted.
+                  % if not field.is_user_field or field.type.is_refcounted:
+                     Dec_Ref (Self.${field.name});
+                  % endif
+               % endfor
+            end Release;
+         % endif
+
+         function ${t.synth_constructor}
+           % if constructor_args:
+           ${ada_block_with_parens(
+              [
+                 f"{field.name} : {arg_type.name}"
+                 for field, arg_type in constructor_args
+              ],
+              12,
+              separator=";",
+           )}
+           % endif
+           return ${t.name}
+         is
+            Builder : constant ${t.access_type} := new ${t.record_type};
+         begin
+            Builder.Ref_Count := 1;
+            % for field, arg_type in constructor_args:
+               Builder.${field.name} := ${field.name};
+               % if arg_type.is_refcounted:
+                  Inc_Ref (Builder.${field.name});
+               % endif
+            % endfor
+            return Node_Builder_Type (Builder);
+         end ${t.synth_constructor};
+      % endif
+   % endfor
 
    ## Env metadata's body
 
