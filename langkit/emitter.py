@@ -391,6 +391,15 @@ class Emitter:
                     no_post_processing=True,
                 )
 
+    @property
+    def support_dir(self) -> str:
+        """
+        Return the directory that contains the langkit_support library.
+        """
+        return os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "support"
+        )
+
     def merge_support_libraries(self, ctx: CompileCtx) -> None:
         """
         In standalone mode only, copy all units from Langkit_Support and AdaSAT
@@ -399,10 +408,6 @@ class Emitter:
         """
         if not self.standalone:
             return
-
-        support_dir = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "support"
-        )
 
         default_adasat_dir = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "adasat", "src"
@@ -436,7 +441,9 @@ class Emitter:
                 ok_for_codegen=True
             )
 
-        self.merge_library_sources(support_dir, self.standalone_support_name)
+        self.merge_library_sources(
+            self.support_dir, self.standalone_support_name
+        )
         self.merge_library_sources(adasat_dir, self.standalone_adasat_name)
 
     def emit_lib_project_file(self, ctx: CompileCtx) -> None:
@@ -612,6 +619,12 @@ class Emitter:
                 main_programs=self.main_programs
             )
         )
+
+        with open(path.join(self.support_dir, "gnat.adc")) as f:
+            self.write_source_file(
+                path.join(self.lib_root, "gnat.adc"),
+                f.read()
+            )
 
     def emit_c_api(self, ctx: CompileCtx) -> None:
         """

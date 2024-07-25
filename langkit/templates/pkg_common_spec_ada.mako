@@ -2,6 +2,9 @@
 
 <%namespace name="exts" file="extensions.mako" />
 
+--  To facilitate use from a -gnatX project, since we don't use the [] syntax
+pragma Warnings (Off, "obsolescent");
+
 with GNATCOLL.GMP.Integers;
 
 with Langkit_Support.Errors;

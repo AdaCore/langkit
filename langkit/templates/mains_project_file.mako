@@ -32,22 +32,28 @@ project Mains is
       % endfor
    end Builder;
 
+   Common_Ada_Cargs := ("-gnatX");
+
    package Compiler is
+      for Local_Configuration_Pragmas use "gnat.adc";
+
       case Build_Mode is
          when "dev" =>
-            for Default_Switches ("Ada") use ("-g", "-O0", "-gnatyg",
-                                              "-gnatwae");
+            for Default_Switches ("Ada") use
+              Common_Ada_Cargs & ("-g", "-O0", "-gnatyg", "-gnatwae");
 
          when "prod" =>
             --  Debug information is useful even with optimization for
             --  profiling, for instance.
-            for Default_Switches ("Ada") use ("-g", "-Ofast");
+            for Default_Switches ("Ada") use
+              Common_Ada_Cargs & ("-g", "-Ofast");
 
          when "prof" =>
             --  Ensure that we have a relatively fast build but with all
             --  possible stack info & debug info, for profiling.
             for Default_Switches ("Ada") use
-               ("-Og", "-ggdb", "-g3", "-fno-omit-frame-pointer");
+               Common_Ada_Cargs
+               & ("-Og", "-ggdb", "-g3", "-fno-omit-frame-pointer");
       end case;
 
       --  A version of s-memory may be included for memory monitoring

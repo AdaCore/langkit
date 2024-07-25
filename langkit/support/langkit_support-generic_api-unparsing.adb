@@ -2770,9 +2770,10 @@ package body Langkit_Support.Generic_API.Unparsing is
                            --  Parse the matcher and store it in the table
 
                            If_Kind_Matchers.Append
-                             ((From_Index
+                             (Matcher_Record'
+                               (From_Index
                                  (Language, To_Type_Index (Kind.Get)),
-                               Parse_Template_Helper
+                                Parse_Template_Helper
                                  (Document_JSON, Nested_Context)));
 
                            --  Confirm that the final linear position is

@@ -8,6 +8,6 @@ project Main is
 
    package Compiler is
       for Default_Switches ("Ada") use
-        ("-g", "-O0", "-gnata", "-gnatwae", "-gnatyg");
+        ("-g", "-O0", "-gnata", "-gnatwae", "-gnatyg", "-gnatX");
    end Compiler;
 end Main;

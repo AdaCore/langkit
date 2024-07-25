@@ -8,6 +8,9 @@
 --  This package provides a generic API so that programs can work with the
 --  $.Introspection packages of all Langkit-generated libraries.
 
+--  To facilitate use from a -gnatX project, since we don't use the [] syntax
+pragma Warnings (Off, "obsolescent");
+
 private with Ada.Containers.Hashed_Maps;
 private with Ada.Finalization;
 private with Ada.Unchecked_Deallocation;

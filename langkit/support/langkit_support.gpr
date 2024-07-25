@@ -5,7 +5,6 @@ with "gnatcoll_iconv";
 with "prettier_ada";
 
 library project Langkit_Support is
-
    type Build_Mode_Type is ("dev", "prod", "prof");
    Build_Mode : Build_Mode_Type :=
      external ("LANGKIT_SUPPORT_BUILD_MODE", external ("BUILD_MODE", "dev"));
@@ -82,9 +81,11 @@ library project Langkit_Support is
    for Library_Kind use Library_Kind_Param;
    for Library_Dir use "lib/" & Library_Kind_Param & "/" & Build_Mode;
 
-   Common_Ada_Cargs := ("-gnatwa", "-gnatyg", "-fPIC");
+   Common_Ada_Cargs := ("-gnatwa", "-gnatyg", "-fPIC", "-gnatX");
 
    package Compiler is
+      for Local_Configuration_Pragmas use "gnat.adc";
+
       case Build_Mode is
          when "dev" =>
             for Default_Switches ("Ada") use
