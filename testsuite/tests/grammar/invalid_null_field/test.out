@@ -1,3 +1,6 @@
+== always_synthetic.lkt ==
+Code generation was successful
+
 == should_be_null.lkt ==
 should_be_null.lkt:15:28: error: According to the grammar, this field always contain null nodes: please tag it a null field
 15 |     @parse_field @nullable f: Holder

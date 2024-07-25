@@ -2234,7 +2234,7 @@ class Field(BaseField):
                 if is_list:
                     etypes.update(f.precise_element_types)
 
-        elif self.struct.synthetic:
+        elif all(n.synthetic for n in self.struct.concrete_subclasses):
             types = self.types_from_synthesis
             assert types.matched_types
             if is_list:

@@ -1,0 +1,24 @@
+# Check that we do not reject "non null fields" that are parse fields which
+# always belong to synthetic nodes.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract class FooNode implements Node[FooNode] {
+    @exported @lazy synth: Synth = Synth(f=node.parent)
+}
+
+class Example: FooNode implements TokenNode {
+}
+
+@abstract class BaseSynth: FooNode {
+    @parse_field f: FooNode
+}
+
+@synthetic
+class Synth: BaseSynth {
+}
