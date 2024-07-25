@@ -1,5 +1,0 @@
-main.adb: Running...
-<Identifier main.txt:1:1-1:4>.F_My_Field = 1
-<Example main.txt:1:5-1:12>.F_My_Field = 2
-main.adb: Done.
-Done

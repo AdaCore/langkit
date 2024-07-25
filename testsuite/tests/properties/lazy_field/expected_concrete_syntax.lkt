@@ -1,0 +1,54 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(or(Example("example") | NullNode("null")))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class AbstractNode: FooNode {
+    @exported
+    @lazy
+    lazy_in_abstract: Int = 42
+}
+
+class Example: AbstractNode implements TokenNode {
+    @exported
+    @lazy
+    @traced
+    lazy_int: Int = 42
+
+    @exported
+    @lazy
+    @traced
+    lazy_refcounted: Array[Int] = [1, 2]
+
+    @exported
+    fun is_flag_enabled(): Bool = self.info.md.flag
+
+    @exported
+    fun with_flag(flag: Bool): Entity[Example] = Entity[Example](
+        node=node, info=EntityInfo(
+            md=Metadata(flag=flag), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
+        )
+    )
+
+    @exported
+    @lazy
+    lazy_node: Example = node
+}
+
+class NullNode: AbstractNode implements TokenNode {
+    @exported
+    @lazy
+    lazy_int: Int = 21
+}
+
+@metadata
+struct Metadata {
+    @used_in_equality flag: Bool
+}
