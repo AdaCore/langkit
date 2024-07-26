@@ -1,8 +1,10 @@
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Exceptions; use Ada.Exceptions;
+with Ada.Text_IO;    use Ada.Text_IO;
 
 with GNATCOLL.Traces;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
+with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
    Ctx : constant Analysis_Context := Create_Context;
@@ -66,6 +68,18 @@ begin
         ("EF.F_Lazy_Node.P_Is_Flag_Enabled = "
          & EF.F_Lazy_Node.P_Is_Flag_Enabled'Image);
    end;
+   New_Line;
+
+   Put_Line ("== Lazy_Error ==");
+   for I in 1 .. 2 loop
+      Put ("Attempt" & I'Image & "... ");
+      begin
+         Put_Line (E.F_Lazy_Error'Image);
+      exception
+         when Exc : Property_Error =>
+            Put_Line ("Property_Error: " & Exception_Message (Exc));
+      end;
+   end loop;
    New_Line;
 
    Put_Line ("main.adb: Done.");

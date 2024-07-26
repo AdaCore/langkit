@@ -4389,6 +4389,48 @@ package body ${ada_lib_name}.Implementation is
       end loop;
    end Assign_Names_To_Logic_Vars;
 
+   --------------------------
+   -- Initialization_Error --
+   --------------------------
+
+   function Initialization_Error
+     (Exc : Ada.Exceptions.Exception_Occurrence)
+      return Error_Initialization_State
+   is
+      use Ada.Exceptions;
+   begin
+      if
+      % for i, exc in enumerate(ctx.property_exceptions):
+         ${"" if i == 0 else "elsif"}
+            Exception_Identity (Exc) = ${exc}'Identity
+         then
+            return Raised_${exc};
+      % endfor
+      else
+         raise Program_Error;
+      end if;
+   end Initialization_Error;
+
+   ----------------------------------
+   -- Reraise_Initialization_Error --
+   ----------------------------------
+
+   procedure Reraise_Initialization_Error
+     (Node    : ${T.root_node.name};
+      State   : Error_Initialization_State;
+      Message : String)
+   is
+      Exc : Ada.Exceptions.Exception_Id;
+   begin
+      case State is
+         % for exc in ctx.property_exceptions:
+            when Raised_${exc} =>
+               Exc := ${exc}'Identity;
+         % endfor
+      end case;
+      Raise_Property_Exception (Node, Exc, Message);
+   end Reraise_Initialization_Error;
+
    ----------------
    -- Text_Image --
    ----------------

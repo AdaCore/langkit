@@ -4,7 +4,13 @@ Check that code emission for lazy fields is correct.
 
 from langkit.compiled_types import T
 from langkit.dsl import ASTNode, MetadataField, Struct, abstract, env_metadata
-from langkit.expressions import Entity, Self, langkit_property, lazy_field
+from langkit.expressions import (
+    Entity,
+    PropertyError,
+    Self,
+    langkit_property,
+    lazy_field,
+)
 
 from utils import build_and_run
 
@@ -63,6 +69,12 @@ class Example(AbstractNode):
     @lazy_field(public=True, return_type=T.Example)
     def lazy_node():
         return Self
+
+    # Regression test: lazy fields that raise an exception used to be
+    # re-evaluated each time.
+    @lazy_field(public=True, activate_tracing=True)
+    def lazy_error():
+        return PropertyError(T.Int, "foo")
 
 
 class NullNode(AbstractNode):

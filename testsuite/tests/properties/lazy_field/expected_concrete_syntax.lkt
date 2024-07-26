@@ -40,6 +40,11 @@ class Example: AbstractNode implements TokenNode {
     @exported
     @lazy
     lazy_node: Example = node
+
+    @exported
+    @lazy
+    @traced
+    lazy_error: Int = raise[Int] PropertyError("foo")
 }
 
 class NullNode: AbstractNode implements TokenNode {
