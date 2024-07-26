@@ -19,8 +19,13 @@ from langkit import names
 from langkit.compile_context import CompileCtx, get_context
 from langkit.compiled_types import (ASTNodeType, AbstractNodeData,
                                     CompiledType, T, TypeRepo)
-from langkit.diagnostics import (check_source_language, diagnostic_context,
-                                 extract_library_location)
+from langkit.diagnostics import (
+    Location,
+    check_source_language,
+    diagnostic_context,
+    error,
+    extract_library_location,
+)
 from langkit.expressions import (AbstractExpression, FieldAccess, PropertyDef,
                                  Self, resolve_property, unsugar)
 
@@ -201,6 +206,9 @@ class EnvSpec:
 
         # Analyze the given list of actions
         self._parse_actions(list(actions))
+        self.pre_actions: list[EnvAction]
+        self.post_actions: list[EnvAction]
+        self.actions: list[EnvAction]
 
         self.adds_env = any(isinstance(a, AddEnv) for a in self.pre_actions)
         """
@@ -218,11 +226,14 @@ class EnvSpec:
         Analyze the given list of actions and extract pre/post actions, i.e.
         actions executed before and after handling children.
         """
-        def count(cls: Type[EnvAction], sequence: List[EnvAction]) -> int:
+        def filter(
+            cls: Type[EnvAction],
+            sequence: List[EnvAction],
+        ) -> list[EnvAction]:
             """
             Return the number of ``cls`` instances in ``sequence``.
             """
-            return len([a for a in sequence if isinstance(a, cls)])
+            return [a for a in sequence if isinstance(a, cls)]
 
         # If present, allow Do actions to come before SetInitialEnv
         first_actions = []
@@ -233,22 +244,24 @@ class EnvSpec:
         # After that, allow at most one call to SetInitialEnv
         self.initial_env = None
         if actions and isinstance(actions[0], SetInitialEnv):
-            check_source_language(
-                isinstance(actions[0], SetInitialEnv),
-                'The initial environment must come first after the potential'
-                ' do()'
-            )
+            with actions[0].diagnostic_context:
+                check_source_language(
+                    isinstance(actions[0], SetInitialEnv),
+                    'The initial environment must come first after the'
+                    ' potential do()'
+                )
             self.initial_env = cast(SetInitialEnv, actions.pop(0))
             first_actions.append(self.initial_env)
-        check_source_language(
-            count(SetInitialEnv, actions) == 0,
-            "set_initial_env can only be preceded by do()"
-        )
 
-        check_source_language(
-            count(AddEnv, actions) <= 1,
-            "There can be at most one call to add_env()"
-        )
+        spurious_sie = filter(SetInitialEnv, actions)
+        if spurious_sie:
+            with spurious_sie[0].diagnostic_context:
+                error("set_initial_env can only be preceded by do()")
+
+        add_envs = filter(AddEnv, actions)
+        if len(add_envs) > 1:
+            with diagnostic_context(add_envs[1].location):
+                error("There can be at most one call to add_env()")
 
         # Separate actions that must occur before and after the handling of
         # children. Get also rid of the HandleChildren delimiter action.
@@ -256,10 +269,10 @@ class EnvSpec:
                               actions)
         post = post and post[1:]
 
-        check_source_language(
-            count(AddEnv, post) == 0,
-            'add_env() must occur before processing children'
-        )
+        post_add_envs = filter(AddEnv, post)
+        if post_add_envs:
+            with diagnostic_context(post_add_envs[0].location):
+                error('add_env() must occur before processing children')
 
         self.pre_actions = first_actions + pre
         self.post_actions = post
@@ -396,8 +409,16 @@ class EnvAction:
     class attribute to None on the base class.
     """
 
-    def __init__(self) -> None:
-        self.location = extract_library_location()
+    def __init__(self, location: Location | None = None) -> None:
+        self.location = location or extract_library_location()
+
+    @property
+    def diagnostic_context(self) -> AbstractContextManager[None]:
+        """
+        Diagnostic context for env actions.
+        """
+        assert self.location is not None
+        return diagnostic_context(self.location)
 
     @property
     def str_location(self) -> str:
@@ -435,8 +456,9 @@ class AddEnv(EnvAction):
         no_parent: bool = False,
         transitive_parent: AbstractExpression | PropertyDef | None = None,
         names: AbstractExpression | PropertyDef | None = None,
+        location: Location | None = None,
     ) -> None:
-        super().__init__()
+        super().__init__(location)
         self.no_parent = no_parent
         if isinstance(transitive_parent, PropertyDef):
             self.transitive_parent_prop: PropertyDef | None = transitive_parent
@@ -475,8 +497,9 @@ class AddToEnv(EnvAction):
         self,
         mappings: AbstractExpression | PropertyDef,
         resolver: PropertyDef | TypeRepo.Defer | None,
+        location: Location | None = None,
     ) -> None:
-        super().__init__()
+        super().__init__(location)
         if isinstance(mappings, PropertyDef):
             self.mappings_prop: PropertyDef = mappings
         else:
@@ -540,14 +563,17 @@ class RefEnvs(EnvAction):
     Couple of a property and an expression to evaluate referenced envs.
     """
 
-    def __init__(self,
-                 resolver: PropertyDef | TypeRepo.Defer,
-                 nodes_expr: AbstractExpression | PropertyDef,
-                 kind: RefKind = RefKind.normal,
-                 dest_env: AbstractExpression | PropertyDef | None = None,
-                 cond: AbstractExpression | PropertyDef | None = None,
-                 category: str | None = None,
-                 shed_rebindings: bool = False) -> None:
+    def __init__(
+        self,
+        resolver: PropertyDef | TypeRepo.Defer,
+        nodes_expr: AbstractExpression | PropertyDef,
+        kind: RefKind = RefKind.normal,
+        dest_env: AbstractExpression | PropertyDef | None = None,
+        cond: AbstractExpression | PropertyDef | None = None,
+        category: str | None = None,
+        shed_rebindings: bool = False,
+        location: Location | None = None,
+    ) -> None:
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -571,7 +597,7 @@ class RefEnvs(EnvAction):
         assert resolver
         assert nodes_expr
 
-        super().__init__()
+        super().__init__(location)
 
         self.resolver: PropertyDef | TypeRepo.Defer = resolver
         if isinstance(nodes_expr, PropertyDef):
@@ -650,8 +676,12 @@ class HandleChildren(EnvAction):
 
 
 class SetInitialEnv(EnvAction):
-    def __init__(self, env_expr: AbstractExpression | PropertyDef):
-        super().__init__()
+    def __init__(
+        self,
+        env_expr: AbstractExpression | PropertyDef,
+        location: Location | None = None,
+    ):
+        super().__init__(location)
         if isinstance(env_expr, PropertyDef):
             self.env_prop = env_expr
         else:
@@ -664,7 +694,12 @@ class SetInitialEnv(EnvAction):
 
 
 class Do(EnvAction):
-    def __init__(self, expr: AbstractExpression | PropertyDef) -> None:
+    def __init__(
+        self,
+        expr: AbstractExpression | PropertyDef,
+        location: Location | None = None,
+    ) -> None:
+        super().__init__(location)
         if isinstance(expr, PropertyDef):
             self.do_property = expr
         else:

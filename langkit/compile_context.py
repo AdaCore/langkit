@@ -1700,7 +1700,8 @@ class CompileCtx:
         for astnode in self.astnode_types:
             if astnode.env_spec:
                 queue.update(
-                    action.resolver for action in astnode.env_spec.actions
+                    resolve_property(action.resolver)
+                    for action in astnode.env_spec.actions
                     if action.resolver
                 )
 

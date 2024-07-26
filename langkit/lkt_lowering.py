@@ -4921,6 +4921,7 @@ class LktTypesLoader:
         actions = []
 
         for syn_action in env_spec.f_actions:
+            location = Location.from_lkt_node(syn_action)
             assert isinstance(syn_action.f_name, L.RefId)
             action_kind = syn_action.f_name.text
             action: EnvAction
@@ -4946,6 +4947,7 @@ class LktTypesLoader:
                         args.get("names"),
                         T.Symbol.array,
                     ),
+                    location=location,
                 )
 
             elif action_kind == "add_to_env_kv":
@@ -4990,6 +4992,7 @@ class LktTypesLoader:
                         location=Location.from_lkt_node(syn_action),
                     ),
                     resolver=self.resolve_property(args.get("resolver")),
+                    location=location,
                 )
 
             elif action_kind == "add_to_env":
@@ -5003,22 +5006,24 @@ class LktTypesLoader:
                         rtype=None,
                     ),
                     resolver=self.resolve_property(args.get("resolver")),
+                    location=location,
                 )
 
             elif action_kind == "do":
                 args, _ = do_env_signature.match(self.ctx, syn_action)
                 action = Do(
-                    self.lower_expr_to_internal_property(
+                    expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_do",
                         expr=args["expr"],
                         rtype=None,
-                    )
+                    ),
+                    location=location,
                 )
 
             elif action_kind == "handle_children":
                 args, _ = empty_signature.match(self.ctx, syn_action)
-                action = HandleChildren()
+                action = HandleChildren(location=location)
 
             elif action_kind == "reference":
                 args, _ = reference_signature.match(self.ctx, syn_action)
@@ -5070,6 +5075,7 @@ class LktTypesLoader:
                     ),
                     category=category,
                     shed_rebindings=shed_rebindings,
+                    location=location,
                 )
 
             elif action_kind == "set_initial_env":
@@ -5077,12 +5083,13 @@ class LktTypesLoader:
                     self.ctx, syn_action
                 )
                 action = SetInitialEnv(
-                    self.lower_expr_to_internal_property(
+                    env_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_init",
                         expr=args["env"],
                         rtype=T.DesignatedEnv,
-                    )
+                    ),
+                    location=location,
                 )
 
             else:
