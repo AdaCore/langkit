@@ -127,7 +127,9 @@ class Action:
     match.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, location: Location | None = None) -> None:
+        self.location = location or extract_library_location()
+
         self.matcher: Optional[Matcher] = None
         """
         If this action is associated to a Literal matcher, this will be set to
@@ -159,9 +161,12 @@ class TokenAction(Action):
     """
     is_trivia: bool = False
 
-    def __init__(self,
-                 start_ignore_layout: bool = False,
-                 end_ignore_layout: bool = False):
+    def __init__(
+        self,
+        start_ignore_layout: bool = False,
+        end_ignore_layout: bool = False,
+        location: Location | None = None,
+    ):
         """
         Create a new token action. This is meant to be called on subclasses of
         TokenAction.
@@ -179,7 +184,7 @@ class TokenAction(Action):
         ends it so that it is taken into account again. The lexer won't handle
         proper pairing: This is up to the parser's implementer.
         """
-        super().__init__()
+        super().__init__(location)
 
         self._index: None | int = None
 
@@ -276,12 +281,13 @@ class WithTrivia(WithText):
         start_ignore_layout: bool = False,
         end_ignore_layout: bool = False,
         comment: bool = False,
+        location: Location | None = None,
     ):
         """
         :param comment: Whether unparsing must treat this token as a comment,
             i.e. a trivia to preserve in unparsed sources.
         """
-        super().__init__(start_ignore_layout, end_ignore_layout)
+        super().__init__(start_ignore_layout, end_ignore_layout, location)
         self._is_comment = comment
 
 

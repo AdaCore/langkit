@@ -20,7 +20,9 @@ from langkit.compiled_types import (
     get_context,
     resolve_type,
 )
-from langkit.diagnostics import WarningSet, check_source_language, error
+from langkit.diagnostics import (
+    Location, WarningSet, check_source_language, diagnostic_context, error
+)
 from langkit.lexer import Ignore, LexerToken, Literal, TokenAction
 import langkit.names as names
 from langkit.parsers import (
@@ -1202,16 +1204,14 @@ class Unparsers:
         if not self.context.generate_unparser:
             return
 
-        ignore_tokens = []
         assert self.context.lexer
         for rule_assoc in self.context.lexer.rules:
             if isinstance(rule_assoc.action, Ignore):
-                ignore_tokens.append(rule_assoc.action)
-        check_source_language(
-            not ignore_tokens,
-            'Ignore() tokens are incompatible with unparsers.'
-            ' Consider using WithTrivia() instead.'
-        )
+                with diagnostic_context(rule_assoc.action.location):
+                    error(
+                        'Ignore() tokens are incompatible with unparsers.'
+                        ' Consider using WithTrivia() instead.'
+                    )
 
         # Combine all unparsers for each node, except synthetic/error/abstract
         # nodes. Check that they are consistent. Iterate on all nodes first to

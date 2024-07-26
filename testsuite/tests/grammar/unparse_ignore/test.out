@@ -1,4 +1,7 @@
 == foo.lkt ==
-error: Ignore() tokens are incompatible with unparsers. Consider using WithTrivia() instead.
+foo.lkt:3:5: error: Ignore() tokens are incompatible with unparsers. Consider using WithTrivia() instead.
+3 |     @ignored Whitespace <- p"[ \t]+"
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 lkt_compile: Done
