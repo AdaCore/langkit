@@ -1457,10 +1457,11 @@ class CompileCtx:
         if self.ple_unit_root is None:
             return
 
-        check_source_language(
-            self.ple_unit_root in self.list_types,
-            'At least one parser must create lists of PLE unit roots'
-        )
+        with diagnostic_context(Location.nowhere):
+            check_source_language(
+                self.ple_unit_root in self.list_types,
+                'At least one parser must create lists of PLE unit roots'
+            )
         ple_unit_root_list = self.ple_unit_root.list
 
         # Check that there is no subclass for lists of PLE unit roots
@@ -2686,7 +2687,8 @@ class CompileCtx:
                              exc.loop[0])
                 message.append('  * {} contains a {}'
                                .format(item.dsl_name, next_item.dsl_name))
-            check_source_language(False, '\n'.join(message))
+            with diagnostic_context(Location.nowhere):
+                error('\n'.join(message))
 
         self._array_types = [t for t in self._composite_types
                              if t.is_array_type]

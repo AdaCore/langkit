@@ -2,7 +2,7 @@
 Test the parsing of regular expressions in lexer specifications.
 """
 
-from langkit.diagnostics import DiagnosticError
+from langkit.diagnostics import DiagnosticError, Location, diagnostic_context
 from langkit.lexer.char_set import CharSet
 from langkit.lexer.regexp import RegexpCollection
 
@@ -56,13 +56,14 @@ for regexp in [
 
     print('== {} =='.format(regexp))
 
-    lexer = RegexpCollection()
-    try:
-        parser = lexer._parse(regexp)
-    except DiagnosticError:
-        pass
-    else:
-        print(parser)
+    with diagnostic_context(Location.nowhere):
+        lexer = RegexpCollection()
+        try:
+            parser = lexer._parse(regexp)
+        except DiagnosticError:
+            pass
+        else:
+            print(parser)
     print('')
 
 print('Done')

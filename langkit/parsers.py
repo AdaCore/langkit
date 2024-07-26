@@ -474,11 +474,12 @@ class Grammar:
         """
         unreferenced_rules = self.get_unreferenced_rules()
 
-        check_source_language(
-            not unreferenced_rules, "The following parsing rules are not "
-            "used: {}".format(", ".join(sorted(unreferenced_rules))),
-            severity=Severity.warning
-        )
+        with diagnostic_context(Location.nowhere):
+            check_source_language(
+                not unreferenced_rules, "The following parsing rules are not "
+                "used: {}".format(", ".join(sorted(unreferenced_rules))),
+                severity=Severity.warning
+            )
 
     def check_entry_points(self, context: CompileCtx) -> None:
         """
