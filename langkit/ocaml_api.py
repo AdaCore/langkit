@@ -412,7 +412,8 @@ class OCamlAPISettings(AbstractAPISettings):
                    value: str,
                    type: ct.CompiledType,
                    context: Optional[str],
-                   check_for_null: bool = False) -> str:
+                   check_for_null: bool = False,
+                   dec_ref: str = "true") -> str:
         """
         Given an expression for a low-level value and the associated type,
         return an other expression that yields the corresponding high-level
@@ -424,16 +425,25 @@ class OCamlAPISettings(AbstractAPISettings):
             checks if the underlying node value is null. If it is the case, the
             expression is evaluated to None. We check null only for entity
             types.
+        :param dec_ref: This value is passed to the wrap function to signal
+            that it can safely call the dec_ref function of the wrapped type
+            after being done.
         """
 
         def from_function(typ: ct.CompiledType, value: str) -> str:
+            dec_ref_arg = (
+                '~dec_ref:{} '.format(dec_ref)
+                if typ.is_refcounted else ''
+            )
+
             context_arg = (
                 '{} '.format(context)
                 if self.wrap_requires_context(typ) else ''
             )
 
-            return "{} {}({})".format(
+            return "{} {}{}({})".format(
                 self.wrap_function_name(typ),
+                dec_ref_arg,
                 context_arg,
                 value
             )
@@ -548,7 +558,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.ASTNodeType, lambda _: None),
             (ct.EntityType, lambda _: None),
             (T.AnalysisUnit, lambda _: None),
-            (T.String, lambda _: 'StringType.dec_ref'),
+            (T.String, lambda _: 'StringType.string_dec_ref'),
             (T.TextType, lambda _: 'Text.destroy_text'),
             (ct.CompiledType, lambda t: dec_ref(t))
         ])

@@ -29,9 +29,16 @@ end
   type t = ${ocaml_api.type_public_name(cls)}
 
    % if ocaml_api.wrap_requires_context(cls):
-  val wrap : analysis_context -> ${ocaml_api.c_value_type(cls)} -> t
+  val wrap :
+       ?dec_ref:bool
+    -> analysis_context
+    -> ${ocaml_api.c_value_type(cls)}
+    -> t
    % else:
-  val wrap : ${ocaml_api.c_value_type(cls)} -> t
+  val wrap :
+       ?dec_ref:bool
+    -> ${ocaml_api.c_value_type(cls)}
+    -> t
    % endif
 
    % if cls.conversion_requires_context:
@@ -45,9 +52,9 @@ end
   type t = ${ocaml_api.type_public_name(cls)}
 
    % if ocaml_api.wrap_requires_context(cls):
-  let wrap (context : analysis_context) c_value_ptr =
+  let wrap ?(dec_ref=true) (context : analysis_context) c_value_ptr =
    % else:
-  let wrap c_value_ptr =
+  let wrap ?(dec_ref=true) c_value_ptr =
    % endif
     let c_value = !@ c_value_ptr in
     let length = getf c_value ${ocaml_api.struct_name(cls)}.n in
@@ -59,13 +66,19 @@ end
       let fresh =
         allocate ${ocaml_api.c_type(cls.element_type)} (!@ (items +@ i))
       in
-      ${ocaml_api.wrap_value('!@ fresh', cls.element_type, "context")}
+      (* Do not dec_ref the item here since this is the responsability of
+         the array *)
+      ${ocaml_api.wrap_value('!@ fresh', cls.element_type, "context",
+                             dec_ref="false")}
       % else:
-      ${ocaml_api.wrap_value('!@ (items +@ i)', cls.element_type, "context")}
+      (* Do not dec_ref the item here since this is the responsability of
+         the array *)
+      ${ocaml_api.wrap_value('!@ (items +@ i)', cls.element_type, "context",
+                             dec_ref="false")}
       % endif
     in
     let result = List.init length f in
-    ${ocaml_api.struct_name(cls)}.dec_ref c_value_ptr;
+    if dec_ref then ${ocaml_api.struct_name(cls)}.dec_ref c_value_ptr;
     result
 
    % if cls.conversion_requires_context:

@@ -56,6 +56,10 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun token(t: Token): Token = t
+
+    @exported
+    fun shapes(): Array[Shape] =
+        [Shape(components=[FooNodeStruct(node=self)])]
 }
 
 class Example: FooNode {
@@ -90,6 +94,10 @@ class Var: FooNode {
 
 struct FooNodeStruct {
     node: Entity[FooNode]
+}
+
+struct Shape {
+    components: Array[FooNodeStruct]
 }
 
 struct SomeStruct {
