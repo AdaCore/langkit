@@ -6,6 +6,7 @@ import os.path as P
 import shutil
 import subprocess
 import sys
+import traceback
 from typing import List, Optional, Set
 
 import langkit
@@ -363,6 +364,11 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
 
         def create_context(self, args):
             return self._cached_context
+
+    # The call to build_and_run in test.py scripts should never be considered
+    # as being part of the DSL to create diagnostics.
+    for frame in traceback.extract_stack():
+        Diagnostics.blacklist_frame(frame)
 
     build_mode = 'dev'
 

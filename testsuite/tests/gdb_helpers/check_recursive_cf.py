@@ -61,6 +61,6 @@ check_in_root()
 run_fooout(
     "<Map at test.py:@NUMBER> evaluated to: Integer array of length 2 = {2, 1}"
     "\n"
-    "\nNow evaluating <Block at test.py:@NUMBER>"
+    "\nNow evaluating <Block at ???>"
 )
 check_in_root()
