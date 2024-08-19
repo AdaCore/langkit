@@ -128,13 +128,23 @@ begin
    ## If this is a lazy field, return it when it has already been evaluated
    ## once.
    % if property.lazy_field:
-      if Self.${property.lazy_present_field.name} then
-         Property_Result := Self.${property.lazy_storage_field.name};
-         % if property.type.is_refcounted:
-            Inc_Ref (Property_Result);
-         % endif
-         return Property_Result;
-      end if;
+      case Self.${property.lazy_state_field.name} is
+         when Uninitialized =>
+            null;
+
+         when Initialized =>
+            Property_Result := Self.${property.lazy_storage_field.name};
+            % if property.type.is_refcounted:
+               Inc_Ref (Property_Result);
+            % endif
+            return Property_Result;
+
+         when Error_Initialization_State =>
+            Reraise_Initialization_Error
+              (Self,
+               Self.${property.lazy_state_field.name},
+               "lazy field memoization");
+      end case;
    % endif
 
    % if has_logging:
@@ -279,6 +289,13 @@ begin
                % endfor
             % endif
 
+            ## If this is a lazy field initializer, memorize the exception
+            ## identity.
+            % if property.lazy_field:
+               Self.${property.lazy_state_field.name} :=
+                 Initialization_Error (Exc);
+            % endif
+
             ## If this property is memoized, take a note that it raises an
             ## exception for these arguments.
             % if memoized:
@@ -334,7 +351,7 @@ begin
    % elif property.lazy_field:
       ## If this property is the initializer for a lazy field, track its result
       ## in Self.
-      Self.${property.lazy_present_field.name} := True;
+      Self.${property.lazy_state_field.name} := Initialized;
       Self.${property.lazy_storage_field.name} := Property_Result;
       % if property.type.is_refcounted:
          Inc_Ref (Property_Result);

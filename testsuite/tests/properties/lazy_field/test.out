@@ -1,0 +1,35 @@
+main.adb: Running...
+== Lazy_Int ==
+On <Example main.txt:1:1-1:8>
+Attempt 1... [LANGKIT.PROPERTIES] Example.lazy_int (<Example main.txt:1:1-1:8>):
+   [LANGKIT.PROPERTIES] Result:  42
+ 42
+Attempt 2...  42
+
+On <NullNode main.txt:1:9-1:13>
+ 21
+
+== Lazy_Refcounted ==
+Attempt 1... [LANGKIT.PROPERTIES] Example.lazy_refcounted (<Example main.txt:1:1-1:8>):
+   [LANGKIT.PROPERTIES] Result: [ 1,  2]
+( 1 2)
+Attempt 2... ( 1 2)
+
+== Lazy_In_Abstract ==
+ 42
+
+== Lazy_Node ==
+E.P_Is_Flag_Enabled = FALSE
+E.F_Lazy_Node.P_Is_Flag_Enabled = FALSE
+
+EF.P_Is_Flag_Enabled = TRUE
+EF.F_Lazy_Node.P_Is_Flag_Enabled = TRUE
+
+== Lazy_Error ==
+Attempt 1... [LANGKIT.PROPERTIES] Example.lazy_error (<Example main.txt:1:1-1:8>):
+   [LANGKIT.PROPERTIES] Result: Properties_Error
+Property_Error: foo
+Attempt 2... Property_Error: main.txt:1:1-1:8: lazy field memoization
+
+main.adb: Done.
+Done

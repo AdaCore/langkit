@@ -4790,6 +4790,15 @@ def create_builtin_types():
     T.env_assoc
     T.inner_env_assoc
 
+    # Even though InitializationState really is an enum type in Ada, we do not
+    # want to expose it in public API, so better let Langkit treat this as an
+    # opaque type.
+    CompiledType(
+        name=names.Name("Initialization_State"),
+        is_ptr=False,
+        nullexpr="Uninitialized",
+    )
+
 
 class TypeRepo:
     """

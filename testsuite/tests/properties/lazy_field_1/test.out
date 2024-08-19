@@ -1,6 +1,0 @@
-main.adb: Running...
-<AddExpr main.txt:1:1-1:6> ->  42
-<IntLit main.txt:1:1-1:2> ->  42
-<IntLit main.txt:1:5-1:6> ->  42
-main.adb: Done.
-Done

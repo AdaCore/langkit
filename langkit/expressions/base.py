@@ -1742,6 +1742,42 @@ class LiteralExpr(ResolvedExpression):
         )
 
 
+class InitializationStateLiteral(AbstractExpression):
+    """
+    Abstract expression for ``InitializationState`` literals.
+
+    Note that this DSL construct is meant to be internal, to provide default
+    values for lazy field initialization state fields.
+    """
+
+    class Expr(LiteralExpr):
+        def __init__(
+            self,
+            value: str,
+            abstract_expr: AbstractExpression | None = None,
+        ):
+            """
+            :param value: Corresponding ``Initialization_State`` Ada literal.
+            """
+            self.value = value
+            super().__init__(
+                value, T.InitializationState, abstract_expr=abstract_expr
+            )
+
+        def render_private_ada_constant(self) -> str:
+            return self.value
+
+    def __init__(self, value: str):
+        """
+        :param value: Corresponding ``Initialization_State`` Ada literal.
+        """
+        self.value = value
+        super().__init__()
+
+    def construct(self) -> ResolvedExpression:
+        return self.Expr(self.value, abstract_expr=self)
+
+
 class BindableLiteralExpr(LiteralExpr):
     """
     Resolved expression for literals that can be expressed in all bindings.
@@ -4015,11 +4051,12 @@ class PropertyDef(AbstractNodeData):
         self.dump_ir = dump_ir
         self._lazy_field = lazy_field
 
-        self.lazy_present_field: Opt[UserField] = None
+        self.lazy_state_field: Opt[UserField] = None
         """
-        If ``self`` is a lazy field, this is a boolean field that tracks
-        whether ``self`` was evaluated, and thus whether ``lazy_storage_field``
-        is initialized.
+        If ``self`` is a lazy field, this is an enum field that tracks
+        whether ``self`` was successfully evaluated (or if its initialization
+        raised an exception), and thus whether ``lazy_storage_field`` is
+        initialized.
         """
 
         self.lazy_storage_field: Opt[UserField] = None
@@ -4561,14 +4598,14 @@ class PropertyDef(AbstractNodeData):
                     "_lf_{}_"
                     f"{self.original_name}"
                 )
-                self.lazy_present_field = self.struct.add_internal_user_field(
+                self.lazy_state_field = self.struct.add_internal_user_field(
                     name=names.Name.from_lower(
-                        field_name_template.format("present")
+                        field_name_template.format("state")
                     ),
-                    type=T.Bool,
-                    default_value=Literal(True),
-                    doc=f'Whether the {self.qualname} lazy field was'
-                        f' evaluated',
+                    type=T.InitializationState,
+                    default_value=InitializationStateLiteral("Uninitialized"),
+                    doc=f"Initialization state for the {self.qualname} lazy"
+                    " field.",
                 )
 
                 # Access to the storage field is guarded by the "present flag"
@@ -4582,7 +4619,7 @@ class PropertyDef(AbstractNodeData):
                     doc=f'Storage for the {self.qualname} lazy field',
                 )
             else:
-                self.lazy_present_field = self.base.lazy_present_field
+                self.lazy_state_field = self.base.lazy_state_field
                 self.lazy_storage_field = self.base.lazy_storage_field
 
         # Now that all dynamic variables are known for this property, extend

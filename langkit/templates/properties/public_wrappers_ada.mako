@@ -115,17 +115,22 @@ ${public_prototype(property)} is
          ${property.qual_impl_name}
             ${'({})'.format(', '.join(actuals)) if actuals else ''};
 
-      ## Return its result, after conversion to public types. Use a return
-      ## block to free resources if needed.
-      % if needs_refcounting:
-         return Result : constant ${property.public_type.api_name} :=
-            ${result_expr}
-         do
+      ## Return its result, after conversion to public types
+      return Result : ${property.public_type.api_name} := ${result_expr} do
+         ## For properties that return bare nodes, automatically propagate
+         ## the entity info from the node prefix.
+         % if property.type.is_ast_node:
+            Result.Internal.Info := Node.Internal.Info;
+         % endif
+
+         % if needs_refcounting:
             Free_Internal;
-         end return;
-      % else:
-         return ${result_expr};
-      % endif
+         % endif
+
+         % if not property.type.is_ast_node and not needs_refcounting:
+            null;
+         % endif
+      end return;
 
    ## Free resources when the property fails
    % if needs_refcounting:

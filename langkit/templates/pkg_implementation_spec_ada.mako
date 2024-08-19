@@ -1019,6 +1019,37 @@ private package ${ada_lib_name}.Implementation is
    -- Root AST node (internals) --
    -------------------------------
 
+   type Initialization_State is
+   ${ada_block_with_parens(
+      ["Uninitialized", "Initialized"]
+      + [f"Raised_{exc}" for exc in ctx.property_exceptions],
+      3,
+   )};
+   --  Initialization status:
+   --
+   --  * ``Uninitialized``: initialization still needed to get a value;
+   --  * ``Initialized``: initialization completed, value is available;
+   --  * ``Raise_X``: initialization raised exception ``X``, value will never
+   --    be available.
+
+   subtype Error_Initialization_State is
+     Initialization_State range
+       Raised_${ctx.property_exceptions[0]}
+       .. Raised_${ctx.property_exceptions[-1]};
+
+   function Initialization_Error
+     (Exc : Ada.Exceptions.Exception_Occurrence)
+      return Error_Initialization_State;
+   --  Assuming that ``Exc`` is an exception allowed to be raised in
+   --  properties, return the corresponding initialization state.
+
+   procedure Reraise_Initialization_Error
+     (Node    : ${T.root_node.name};
+      State   : Error_Initialization_State;
+      Message : String);
+   --  Raise the exception that ``State`` describes. ``Node`` and ``Message``
+   --  are used to add contextual information to the exception.
+
    type ${T.root_node.value_type_name} (Kind : ${T.node_kind}) is record
       Parent : ${T.root_node.name};
       --  Reference to the parent node, or null if this is the root one
