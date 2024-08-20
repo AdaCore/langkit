@@ -64,6 +64,8 @@ ${exts.with_clauses(with_clauses)}
 
 package ${ada_lib_name}.Analysis is
 
+   pragma Extensions_Allowed (On);
+
    use Support.Diagnostics, Support.Slocs, Support.Text;
 
    type Analysis_Context is tagged private;
