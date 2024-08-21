@@ -1,4 +1,4 @@
-== main.adb config.json example.txt ==
+== main.adb -c config.json example.txt ==
 var v1: Int = 2;
 null var v2: Int = 0;
 
@@ -25,7 +25,7 @@ def f2(a: Int, ): Int
     a + 1;
 }
 
-== main.adb config.json param_spec.txt -r param_spec ==
+== main.adb -c config.json param_spec.txt -r param_spec ==
 a: Int=2
 
 == invalid_config.adb ==
@@ -2201,7 +2201,7 @@ def f2(a:Int,):Int{a+1;}
 
 main.adb: done
 
-== main.adb config.json trivias/block_comments_only.txt ==
+== main.adb -c config.json trivias/block_comments_only.txt ==
 {
     # There are only comments
     # in this box
@@ -2212,17 +2212,17 @@ main.adb: done
     # But it should still be re-indented
 }
 
-== main.adb config.json trivias/block_empty.txt ==
+== main.adb -c config.json trivias/block_empty.txt ==
 {
 }
 
-== main.adb config.json trivias/block_first_empty_line.txt ==
+== main.adb -c config.json trivias/block_first_empty_line.txt ==
 {
 
     # Block comment after an empty line
 }
 
-== main.adb config.json trivias/block_mixed.txt ==
+== main.adb -c config.json trivias/block_mixed.txt ==
 # Comment before the block
 
 {
@@ -2242,12 +2242,12 @@ main.adb: done
 
 # Comment after the block
 
-== main.adb config.json trivias/block_trailing.txt ==
+== main.adb -c config.json trivias/block_trailing.txt ==
 {
     # Trailing comment
 }
 
-== main.adb config.json trivias/list_nested_reattach.txt ==
+== main.adb -c config.json trivias/list_nested_reattach.txt ==
 def f(): T
 {
     # First comment
@@ -2261,14 +2261,14 @@ def f(): T
     # Third comment
 }
 
-== main.adb config.json trivias/list_ghost_before_trailing.txt ==
+== main.adb -c config.json trivias/list_ghost_before_trailing.txt ==
 def f(): T
 {
 
     print();
 }
 
-== main.adb config.json trivias/list_separator.txt ==
+== main.adb -c config.json trivias/list_separator.txt ==
 var v: T = foo(
     # Comment for a
     a,
@@ -2277,13 +2277,13 @@ var v: T = foo(
     b
 );
 
-== main.adb config.json trivias/list_separator_trailing.txt ==
+== main.adb -c config.json trivias/list_separator_trailing.txt ==
 var v: T = foo(
     a, # Comment for a
     b  # Comment for b
 );
 
-== main.adb config.json trivias/unit_comments_only.txt ==
+== main.adb -c config.json trivias/unit_comments_only.txt ==
 # First...
 # A comment block
 
@@ -2293,10 +2293,10 @@ var v: T = foo(
 
 # Last comment
 
-== main.adb config.json trivias/unit_empty.txt ==
+== main.adb -c config.json trivias/unit_empty.txt ==
 
 
-== main.adb trivias/wrapped_list_item.json trivias/wrapped_list_item.txt ==
+== main.adb -c trivias/wrapped_list_item.json trivias/wrapped_list_item.txt ==
 # Comment 1
 foo var v1: T = 1;
 
@@ -2306,7 +2306,7 @@ var v2: T = 2;
 # Comment 3
 foo,bar var v3: T = 3;
 
-== main.adb trivias/var_group_config.json trivias/var_decls.txt ==
+== main.adb -c trivias/var_group_config.json trivias/var_decls.txt ==
 # Comment 1
 var v1: T = 1;
 
@@ -2316,46 +2316,46 @@ var v2: T = 2;
 # Comment 3
 var v3: T = 3;
 
-== main.adb trivias/var_group_config.json trivias/list_nested_reattach.txt -s 5:4^1 ==
+== main.adb -c trivias/var_group_config.json trivias/list_nested_reattach.txt -s 5:4^1 ==
 a,b=c();
 
-== main.adb trivias/var_group_config.json trivias/list_nested_reattach.txt -s 9:4^1 ==
+== main.adb -c trivias/var_group_config.json trivias/list_nested_reattach.txt -s 9:4^1 ==
 d,e=f();
 
-== main.adb list_extra_sep/default.json list_extra_sep/assign.txt ==
+== main.adb -c list_extra_sep/default.json list_extra_sep/assign.txt ==
 def f():T{
     c,d=1;
     ,a,b=1;
 }
 
-== main.adb list_extra_sep/default.json list_extra_sep/params.txt ==
+== main.adb -c list_extra_sep/default.json list_extra_sep/params.txt ==
 def f(a:T,b:T,):T{
 
 }def f(a:T,b:T):T{
 
 }
 
-== main.adb list_extra_sep/same_as_regular.json list_extra_sep/assign.txt ==
+== main.adb -c list_extra_sep/same_as_regular.json list_extra_sep/assign.txt ==
 def f():T{
     c, d=1;
     , a, b=1;
 }
 
-== main.adb list_extra_sep/same_as_regular.json list_extra_sep/params.txt ==
+== main.adb -c list_extra_sep/same_as_regular.json list_extra_sep/params.txt ==
 def f(a:T, b:T, ):T{
 
 }def f(a:T, b:T):T{
 
 }
 
-== main.adb list_extra_sep/override.json list_extra_sep/assign.txt ==
+== main.adb -c list_extra_sep/override.json list_extra_sep/assign.txt ==
 def f():T{
     c, d=1;
     ,
     a, b=1;
 }
 
-== main.adb list_extra_sep/override.json list_extra_sep/params.txt ==
+== main.adb -c list_extra_sep/override.json list_extra_sep/params.txt ==
 def f(a:T, b:T,
 ):T{
 
@@ -2363,7 +2363,7 @@ def f(a:T, b:T,
 
 }
 
-== main.adb max_empty_lines_none.json trivias/max_empty_lines.txt ==
+== main.adb -c max_empty_lines_none.json trivias/max_empty_lines.txt ==
 var v0:T=0;var v1:T=1;
 
 var v2:T=2;
@@ -2375,13 +2375,13 @@ var v3:T=3;
 
 var v4:T=4;
 
-== main.adb max_empty_lines_0.json trivias/max_empty_lines.txt ==
+== main.adb -c max_empty_lines_0.json trivias/max_empty_lines.txt ==
 var v0:T=0;var v1:T=1;
 var v2:T=2;
 var v3:T=3;
 var v4:T=4;
 
-== main.adb max_empty_lines_1.json trivias/max_empty_lines.txt ==
+== main.adb -c max_empty_lines_1.json trivias/max_empty_lines.txt ==
 var v0:T=0;var v1:T=1;
 
 var v2:T=2;
@@ -2390,7 +2390,7 @@ var v3:T=3;
 
 var v4:T=4;
 
-== main.adb max_empty_lines_2.json trivias/max_empty_lines.txt ==
+== main.adb -c max_empty_lines_2.json trivias/max_empty_lines.txt ==
 var v0:T=0;var v1:T=1;
 
 var v2:T=2;
@@ -2401,7 +2401,7 @@ var v3:T=3;
 
 var v4:T=4;
 
-== main.adb table_align/no_split.json table_align/var_decls.txt ==
+== main.adb -c table_align/no_split.json table_align/var_decls.txt ==
 null var v1 : Int = 1;
 var v22     : Int = 2;
 
@@ -2409,7 +2409,7 @@ var v333    : Bool = true;
 # Comment
 var v4444   : Int = 4;
 
-== main.adb table_align/split_all.json table_align/var_decls.txt ==
+== main.adb -c table_align/split_all.json table_align/var_decls.txt ==
 null var v1 : Int = 1;
 var v22     : Int = 2;
 
@@ -2417,7 +2417,7 @@ var v333 : Bool = true;
 # Comment
 var v4444 : Int = 4;
 
-== main.adb table_align/split_comments.json table_align/var_decls.txt ==
+== main.adb -c table_align/split_comments.json table_align/var_decls.txt ==
 null var v1 : Int = 1;
 var v22     : Int = 2;
 
@@ -2425,7 +2425,7 @@ var v333    : Bool = true;
 # Comment
 var v4444 : Int = 4;
 
-== main.adb table_align/split_empty_lines.json table_align/var_decls.txt ==
+== main.adb -c table_align/split_empty_lines.json table_align/var_decls.txt ==
 null var v1 : Int = 1;
 var v22     : Int = 2;
 
@@ -2433,7 +2433,7 @@ var v333  : Bool = true;
 # Comment
 var v4444 : Int = 4;
 
-== main.adb table_align/sep_before_missing.json table_align/fun_decls.txt ==
+== main.adb -c table_align/sep_before_missing.json table_align/fun_decls.txt ==
 def f(
     a1   : Int,
     a22  : Int
@@ -2445,7 +2445,7 @@ def f(
     a5555: Int
 ):T{}
 
-== main.adb table_align/sep_before_true.json table_align/fun_decls.txt ==
+== main.adb -c table_align/sep_before_true.json table_align/fun_decls.txt ==
 def f(
     a1   : Int,
     a22  : Int
@@ -2457,7 +2457,7 @@ def f(
     a5555: Int
 ):T{}
 
-== main.adb table_align/sep_before_false.json table_align/fun_decls.txt ==
+== main.adb -c table_align/sep_before_false.json table_align/fun_decls.txt ==
 def f(
     a1     : Int
     , a22  : Int
@@ -2469,14 +2469,14 @@ def f(
     a5555: Int
 ):T{}
 
-== main.adb table_align/table_sep_in_field.json table_align/calls.txt ==
+== main.adb -c table_align/table_sep_in_field.json table_align/calls.txt ==
 var v1:T=f(
     a  =A,
     bb =B,
     ccc=C
 );
 
-== main.adb table_align/inherit.json table_align/blocks.txt ==
+== main.adb -c table_align/inherit.json table_align/blocks.txt ==
 {
 var v0  : T = 0;
 var vv1 : T = 1;
@@ -2487,7 +2487,7 @@ var v0  : T = 0;
 var vv1 : T = 1;
 }
 
-== main.adb table_align/inherit_null.json table_align/blocks.txt ==
+== main.adb -c table_align/inherit_null.json table_align/blocks.txt ==
 {
 var v0  : T = 0;
 var vv1 : T = 1;
