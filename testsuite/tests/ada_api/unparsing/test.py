@@ -126,7 +126,7 @@ mains = []
 
 
 def add_main(config, srcfile, rule=None, sloc=None):
-    args = [config, srcfile]
+    args = ["-c", config, srcfile]
     if rule:
         args += ["-r", rule]
     if sloc:

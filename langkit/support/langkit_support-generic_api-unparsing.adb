@@ -4751,11 +4751,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                         & " looked up by sloc).",
          Default_Val => No_Sloc_Specifier);
 
-      package Config_Filename is new Parse_Positional_Arg
-        (Parser   => Parser,
-         Name     => "config-file",
-         Help     => "Name of the JSON pretty-printer configuration file",
-         Arg_Type => Unbounded_String);
+      package Config_Filename is new Parse_Option
+        (Parser      => Parser,
+         Short       => "-c",
+         Long        => "--config",
+         Arg_Type    => Unbounded_String,
+         Help        => "Name of the JSON pretty-printer configuration file",
+         Default_Val => Null_Unbounded_String);
 
       package Source_Filename is new Parse_Positional_Arg
         (Parser   => Parser,
@@ -4789,21 +4791,29 @@ package body Langkit_Support.Generic_API.Unparsing is
       end loop;
       GNATCOLL.Traces.For_Each_Handle (Process_Enable_Traces'Access);
 
-      --  Parse the configuration file and the source file to pretty-print.
-      --  Abort if there is a parsing failure.
+      --  Parse the configuration file if provided (and abort if there is an
+      --  error), use the default unparsing configuration otherwise.
 
       declare
          Diagnostics : Diagnostics_Vectors.Vector;
          Filename    : constant String := To_String (Config_Filename.Get);
       begin
-         Config := Load_Unparsing_Config (Language, Filename, Diagnostics);
-         if Config = No_Unparsing_Configuration then
-            Put_Line ("Error when loading the unparsing configuration:");
-            Print (Diagnostics);
-            Set_Exit_Status (Failure);
-            return;
+         if Filename = "" then
+            Config := Default_Unparsing_Configuration (Language);
+         else
+            Config := Load_Unparsing_Config (Language, Filename, Diagnostics);
+            if Config = No_Unparsing_Configuration then
+               Put_Line ("Error when loading the unparsing configuration:");
+               Print (Diagnostics);
+               Set_Exit_Status (Failure);
+               return;
+            end if;
          end if;
       end;
+
+      --  Parse the source file to pretty-print. Abort if there is a parsing
+      --  failure.
+
       Context := Create_Context (Language);
       Unit := Context.Get_From_File
         (Filename => To_String (Source_Filename.Get),

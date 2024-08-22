@@ -11,6 +11,9 @@ class LktUnparseDriver(BaseDriver):
     """
 
     def run(self):
+        # Even though we are using the default unparsing configuration, pass
+        # the JSON file explicitly so that one does not need to rebuild
+        # Liblktlang in order to test a change in that configuration.
         cfg = os.path.join(
             self.langkit_root_dir,
             "contrib",
@@ -19,6 +22,6 @@ class LktUnparseDriver(BaseDriver):
             "default_unparsing_config.json",
         )
         self.run_and_check(
-            ["lkt_unparse", cfg, "input.lkt"],
+            ["lkt_unparse", "-c", cfg, "input.lkt"],
             memcheck=self.memcheck_for_lkt,
         )
