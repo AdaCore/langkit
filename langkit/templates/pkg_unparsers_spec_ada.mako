@@ -172,6 +172,9 @@ private package ${ada_lib_name}.Unparsers is
       % endfor
    );
 
+   ## TODO (eng/toolchain/gnat#600): use the External_Initialization aspect
+   ## once it is generally available.
+
    Default_Config : aliased constant String :=
      ${bytes_repr(ctx.emitter.default_unparsing_config, " " * 5)};
 
