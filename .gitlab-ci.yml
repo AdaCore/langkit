@@ -2,17 +2,9 @@ include:
   - project: eng/libadalang/libadalang
     file: /utils/gitlab-ci-common.yml
 
-variables:
-  PACKAGE_BASENAME: langkit.tar.gz
-  PACKAGE_ABSOLUTE_NAME: $CI_PROJECT_DIR/$PACKAGE_BASENAME
-  PACKAGE_REPOSITORY_PROJECT: eng/libadalang/ci-packages
-  LIBADALANG_GIT: https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/eng/libadalang/libadalang
 
 stages:
-  - stage1  # langkit_build, continuous_builder
-  - stage2  # langkit_test,  libadalang_build_and_test
-  - stage3  # package, executed regardless of testing
-  - stage4  # CB, executed regardless of the rest
+  - single
 
 
 ###############
@@ -21,182 +13,61 @@ stages:
 
 check_issue:
   extends: .check_issue
-  stage: stage1
+  stage: single
 
-#########
-# BUILD #
-#########
 
-langkit_build:
+##########################
+# LANGKIT_BUILD_AND_TEST #
+##########################
+
+langkit_build_and_test:
   extends: .basic
   rules:
-    # Run this for merge requests, scheduled pipelines, and pipelines started
-    # from the Web interface (sometimes necessary to manually restart a
-    # scheduled pipeline).
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-
-    # Also run it after a "master" branch update so that the "package" step has
-    # its dependencies satisfied.
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
-  services:
-     - image:sandbox
-     - cpu:8
-     - mem:16
-  stage: stage1
-  script:
-    - !reference [.script_snippets, setup]
-
-    - cd /it/wave
-
-    # Build using anod
-    - anod vcs --add-repo langkit $CI_PROJECT_DIR
-    - anod build --minimal adasat
-    - anod build --minimal langkit_support
-    - anod build --minimal langkit
-
-    # Create the langkit package
-    - tar czf $PACKAGE_ABSOLUTE_NAME -C /
-        it/wave/x86_64-linux/langkit_support/install
-        it/wave/x86_64-linux/langkit/install
-
-  artifacts:
-    paths:
-      - $PACKAGE_BASENAME
-
-########
-# TEST #
-########
-
-langkit_test:
-  extends: .basic
-  services:
-     - image:sandbox
-     - cpu:8
-     - mem:16
-  stage: stage2
-  rules:
-    # We are not interested in running tests in CIs that just
-    # rebuild the artifact
-    - if: $CI_REBUILD_ARTIFACT
-      when: never
     # Run this for merge requests only
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: on_success
+  services:
+     - image:pe-base
+     - cpu:16
+     - mem:16
+  stage: single
   script:
-    - !reference [.script_snippets, setup]
-
-    # Unpack langkit
-    - tar zxf $PACKAGE_ABSOLUTE_NAME -C /
-    - rm $PACKAGE_ABSOLUTE_NAME
-
-    # Run the testsuite
-    - cd /it/wave
-    - mkdir -p fingerprints
-    - anod vcs --add-repo langkit $CI_PROJECT_DIR
-    - touch fingerprints/x86_64-linux.adasat.install.json.assume-unchanged
-    - touch fingerprints/x86_64-linux.langkit_support.install.json.assume-unchanged
-    - touch fingerprints/x86_64-linux.langkit.install.json.assume-unchanged
-    - anod test --minimal langkit
-
-    # Produce a XUnit report for GitLab
-    - e3-testsuite-report
-        --failure-exit-code 1
-        --xunit-output $CI_PROJECT_DIR/xunit_output.xml
-        --xunit-name Langkit
-        x86_64-linux/langkit_test/results/new/
-
+    - generic_anod_ci
+    - . /tmp/ci_env.sh
+    - anod test langkit $ACI_TRACK_QUALIFIER --smart-rebuild
+    - testsuite_reports
   artifacts:
-    when: always
-    paths:
-      - xunit_output.xml
     reports:
-      junit: xunit_output.xml
+      junit: xunit-*.xml
+
 
 #############################
-# LIBADALANG BUILD AND TEST #
+# LIBADALANG_BUILD_AND_TEST #
 #############################
 
 libadalang_build_and_test:
   extends: .basic
   services:
-     - image:sandbox
-     - cpu:8
+     - image:pe-base
+     - cpu:16
      - mem:16
-  stage: stage2
+  stage: single
   rules:
     # Run this for merge requests only
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
-    - !reference [.script_snippets, setup]
-
-    # Unpack langkit
-    - tar zxf $PACKAGE_ABSOLUTE_NAME -C /
-    - rm $PACKAGE_ABSOLUTE_NAME
-
-    # Get libadalang. Use this branch if it's a "/sync/" branch.
-    - cd /tmp
-    - LAL_BRANCH=master
-    - if [[ $CI_COMMIT_BRANCH =~ ^sync/ ]]; then
-         LAL_BRANCH=$CI_COMMIT_BRANCH;
-      elif [[ $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ ^sync/ ]]; then
-         LAL_BRANCH=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME;
-      fi
-    - git clone $LIBADALANG_GIT -b $LAL_BRANCH
-
-    # Build and test libadalang
-    - cd /it/wave
-    - mkdir -p fingerprints
-    - anod vcs --add-repo libadalang /tmp/libadalang
-    - touch fingerprints/x86_64-linux.langkit_support.install.json.assume-unchanged
-    - touch fingerprints/x86_64-linux.langkit.install.json.assume-unchanged
-    - anod build --minimal libadalang
-    - anod build --minimal laldoc
-    - anod build --minimal libadalang-doc
-    - anod build --minimal libadalang_for_customers
-    - anod test  --minimal libadalang
-
-    # Produce a XUnit report for GitLab
-    - e3-testsuite-report
-        --failure-exit-code 1
-        --xunit-output $CI_PROJECT_DIR/xunit_output.xml
-        --xunit-name Libadalang
-        x86_64-linux/libadalang_test/results/new/;
-
+    # We frequently push coupled changes to Libadalang and Langkit: when this
+    # happens, it is no longer possible to build Libadalang with Langkit's
+    # master branch and Libadalang's nightly sources.  To solve this problem,
+    # always pretend that we have Libadalang changes in the pipe (it would have
+    # been rebuilt anyway).
+    - generic_anod_ci --add-dep eng/libadalang/libadalang
+    - . /tmp/ci_env.sh
+    - anod test libadalang $ACI_TRACK_QUALIFIER --smart-rebuild
+    - testsuite_reports
   artifacts:
-    when: always
-    paths:
-      - xunit_output.xml
     reports:
-      junit: xunit_output.xml
+      junit: xunit-*.xml
 
-###########
-# PACKAGE #
-###########
-
-# This job uploads the package to the package registry.
-# This is launched only for CIs on the master branch.
-package:
-  services:
-     - image:e3
-  stage: stage3
-  needs: [langkit_build] # Do not wait for jobs in stage2 (i.e. tests)
-  rules:
-     # Store the artifact for "master" branch updates and scheduled pipelines
-     # only. Also do it to run for pipelines started from the Web interface
-     # (see related comment in the langkit_build job).
-    - if: '$CI_COMMIT_REF_NAME != "master"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-  script:
-    - export PATH=/it/e3/bin:$PATH
-    - unset GITLAB_TOKEN
-
-    # Upload the package
-    - upload_generic_package $PACKAGE_REPOSITORY_PROJECT $PACKAGE_ABSOLUTE_NAME
 
 ######
 # CB #
@@ -204,5 +75,4 @@ package:
 
 continuous_builder:
   extends: .cb
-  stage: stage4
-  needs: []
+  stage: single
