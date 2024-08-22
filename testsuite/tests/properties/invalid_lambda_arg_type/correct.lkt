@@ -5,7 +5,7 @@ class ExampleBlock: BaseExampleBlock {
         node.items.all((e: Example) => not e.is_null)
 
     @exported fun all_index(): Bool =
-        node.items.all((e: Example, i: Int) => not e.is_null or i == 0)
+        node.items.iall((e: Example, i: Int) => not e.is_null or i == 0)
 
     @exported fun filter_no_index(): Array[Entity[Example]] =
         node.items
@@ -13,7 +13,7 @@ class ExampleBlock: BaseExampleBlock {
         .map((e: Example) => e.as_bare_entity)
 
     @exported fun filter_index(): Array[Entity[Example]] =
-        node.items.filter((e: Example, i: Int) => not e.is_null or i == 0)
+        node.items.ifilter((e: Example, i: Int) => not e.is_null or i == 0)
         .map((e: Example) => e.as_bare_entity)
 
     @exported fun filtermap_no_index(): Array[Entity[Example]] =
@@ -23,7 +23,7 @@ class ExampleBlock: BaseExampleBlock {
         )
 
     @exported fun filtermap_index(): Array[Entity[Example]] =
-        node.items.filtermap(
+        node.items.ifiltermap(
             (e: Example, i: Int) => e.as_bare_entity,
             (e: Example, i: Int) => not e.is_null or i == 0
         )
@@ -35,19 +35,19 @@ class ExampleBlock: BaseExampleBlock {
         node.items.logic_any((_: Example) => %true).solve()
 
     @exported fun logic_any_index(): Bool =
-        node.items.logic_any((_: Example, _: Int) => %false).solve()
+        node.items.ilogic_any((_: Example, _: Int) => %false).solve()
 
     @exported fun map_no_index(): Array[Entity[Example]] =
         node.items.map((e: Example) => e.as_bare_entity)
 
     @exported fun map_index(): Array[IndexedItem] =
-        node.items.map((e: Example, i: Int) => IndexedItem(e=e, i=i))
+        node.items.imap((e: Example, i: Int) => IndexedItem(e=e, i=i))
 
     @exported fun mapcat_no_index(): Array[Entity[Example]] =
         node.items.mapcat((e: Example) => [e.as_bare_entity, e.as_bare_entity])
 
     @exported fun mapcat_index(): Array[IndexedItem] =
-        node.items.mapcat(
+        node.items.imapcat(
             (e: Example, i: Int) => [
                 IndexedItem(e=e, i=i), IndexedItem(e=e, i=i + 1)
             ]
@@ -59,7 +59,7 @@ class ExampleBlock: BaseExampleBlock {
         .map((e: Example) => e.as_bare_entity)
 
     @exported fun take_while_index(): Array[Entity[Example]] =
-        node.items.take_while((e: Example, i: Int) => not e.is_null or i == 0)
+        node.items.itake_while((e: Example, i: Int) => not e.is_null or i == 0)
         .map((e: Example) => e.as_bare_entity)
 
     @exported fun then_do(): FooNode = node.parent.do(

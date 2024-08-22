@@ -13,7 +13,7 @@ class ListNode: FooNode {
     @parse_field nb_list: ASTList[NumberNode]
 
     @exported
-    fun prop(): Bool = node.nb_list.map((_, i) => i).contains(1)
+    fun prop(): Bool = node.nb_list.imap((_, i) => i).contains(1)
 }
 
 class NumberNode: FooNode implements TokenNode {

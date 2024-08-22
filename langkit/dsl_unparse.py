@@ -973,15 +973,24 @@ def emit_expr_prio(expr, **ctx):
 
         walker.first_method_call(dispatch_table)
 
-        return emit_method_call(coll, op_name, args)
+        lkt_op = op_name
+        if expr.index_var is not None:
+            lkt_op = "i" + lkt_op
+
+        return emit_method_call(coll, lkt_op, args)
 
     elif isinstance(expr, Quantifier):
         vars = [expr.element_var]
         if expr.requires_index:
             vars.append(expr.index_var)
+
+        lkt_op = expr.kind
+        if expr.index_var is not None:
+            lkt_op = "i" + lkt_op
+
         return emit_method_call(
             ee_pexpr(P.highest, expr.collection),
-            expr.kind,
+            lkt_op,
             [emit_lambda(expr.expr, vars)],
         )
 

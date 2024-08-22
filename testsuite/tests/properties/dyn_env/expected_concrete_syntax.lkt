@@ -37,7 +37,7 @@ class CallExpr: FooNode {
     fun args_assocs_getter(): Array[InnerEnvAssoc] = {
         val decl = node.node_env().get_first(node.name).as[FunDecl];
 
-        decl.args.map(
+        decl.args.imap(
             (a, i) => InnerEnvAssoc(key=a.name.symbol, value=node.args?[i])
         )
     }
