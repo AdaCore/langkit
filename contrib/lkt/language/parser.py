@@ -2689,6 +2689,7 @@ class FieldDecl(ComponentDecl):
     syn_name = Field(type=T.DefId)
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
+
     decl_type_name = Property(S("field declaration"))
 
 

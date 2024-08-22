@@ -1,27 +1,16 @@
 val v1 = if cond1 then expr1 else expr2
 val v2 =
-    if
-        cond1
-    then
-        expr1
-    elif
-        cond2
-    then
-        expr2
-    else
-        expr3
+    if cond1 then expr1
+    elif cond2 then expr2
+    else expr3
 
 val v3 =
-    if
-        cond1 or cond2 or cond3 or cond4 or cond5 or cond6 or cond7 or cond8
-    then
-        expr1
-    else
-        expr2
+    if cond1 or cond2 or cond3 or cond4 or cond5 or cond6 or cond7 or cond8
+    then expr1
+    else expr2
 
 val v4 =
-    if
-        cond1
+    if cond1
     then
         expr1(
             aaaaaaaaaa,
@@ -31,14 +20,10 @@ val v4 =
             eeeeeeeeee,
             ffffffffff
         )
-    else
-        expr2
+    else expr2
 
 val v5 =
-    if
-        cond1
-    then
-        expr1
+    if cond1 then expr1
     else
         expr2(
             aaaaaaaaaa,
@@ -50,12 +35,8 @@ val v5 =
         )
 
 val v6 =
-    if
-        cond1
-    then
-        expr1
-    elif
-        cond2
+    if cond1 then expr1
+    elif cond2
     then
         expr2(
             aaaaaaaaaa,
@@ -65,18 +46,11 @@ val v6 =
             eeeeeeeeee,
             ffffffffff
         )
-    else
-        expr3
+    else expr3
 
 val v7 =
-    if
-        cond1
-    then
-        expr1
-    elif
-        cond2
-    then
-        expr2
+    if cond1 then expr1
+    elif cond2 then expr2
     else
         expr3(
             aaaaaaaaaa,
@@ -88,16 +62,12 @@ val v7 =
         )
 
 val v8 =
-    if
-        a + b
+    if a + b
     then
         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
         + cccccccccccc
 
-    elif
-        a + b
-    then
-        abc
 
-    else
-        def
+    elif a + b then abc
+
+    else def
