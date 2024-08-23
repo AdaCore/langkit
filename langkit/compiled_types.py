@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 from collections import OrderedDict
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
@@ -20,12 +21,7 @@ from langkit.diagnostics import (
     Location, WarningSet, check_source_language, diagnostic_context, error,
     extract_library_location
 )
-from langkit.utils import (
-    issubtype,
-    memoized,
-    not_implemented_error,
-    self_memoized,
-)
+from langkit.utils import issubtype, memoized, self_memoized
 from langkit.utils.text import (append_paragraph, first_line_indentation,
                                 indent)
 from langkit.utils.types import TypeSet
@@ -251,7 +247,7 @@ class CompiledTypeRepo:
         cls.dynamic_vars = []
 
 
-class AbstractNodeData:
+class AbstractNodeData(abc.ABC):
     """
     This class defines an abstract base class for fields and properties on
     AST nodes.
@@ -512,22 +508,19 @@ class AbstractNodeData:
         """
         return self.prefix == AbstractNodeData.PREFIX_INTERNAL
 
-    @property
+    @abc.abstractproperty
     def type(self) -> CompiledType:
         """
         Type of the abstract node field.
         """
-        raise not_implemented_error(self, type(self).type)
+        ...
 
-    @type.setter
-    def type(self, t: CompiledType) -> None:
-        raise not_implemented_error(self, type(self).type)
-
+    @abc.abstractmethod
     def resolve_types(self) -> None:
         """
         Turn type references into ``CompiledType`` instances in this field.
         """
-        raise not_implemented_error(self, type(self).resolve_types)
+        ...
 
     @property
     def public_type(self) -> CompiledType:
@@ -659,12 +652,12 @@ class AbstractNodeData:
             self.qualname
         )
 
-    @property
+    @abc.abstractproperty
     def doc(self) -> str:
         """
         Documentation for the abstract node field.
         """
-        raise not_implemented_error(self, type(self).doc)
+        ...
 
     @property
     def accessor_basename(self) -> names.Name:
@@ -1392,7 +1385,7 @@ class CompiledType:
         :rtype: str
         """
         if self._nullexpr is None:
-            raise not_implemented_error(self, type(self).nullexpr)
+            raise RuntimeError(f"{self.dsl_name} has no Ada null expression")
         else:
             return self._nullexpr
 
@@ -1407,7 +1400,9 @@ class CompiledType:
         :rtype: str
         """
         if self._py_nullexpr is None:
-            raise not_implemented_error(self, type(self).py_nullexpr)
+            raise RuntimeError(
+                f"{self.dsl_name} has no Python null expression"
+            )
         else:
             return self._py_nullexpr
 
@@ -1421,7 +1416,9 @@ class CompiledType:
         expression.
         """
         if self._java_nullexpr is None:
-            raise not_implemented_error(self, type(self).java_nullexpr)
+            raise RuntimeError(
+                f"{self.dsl_name} has no Java null expression"
+            )
         else:
             return self._java_nullexpr
 
@@ -1843,7 +1840,10 @@ class NoCompiledType(CompiledType):
     """
 
     def is_refcounted(self):
-        raise NotImplementedError()
+        raise RuntimeError(
+            "NoCompiledType is not supposed to be used in context where"
+            " whether it is refcounted must be known"
+        )
 
 
 no_compiled_type = NoCompiledType('NoCompiledType')
@@ -1888,8 +1888,9 @@ class LogicVarType(CompiledType):
         del node_expr
         return "{}'Unrestricted_Access".format(base_expr)
 
+    @abc.abstractmethod
     def convert_to_storage_expr(self, node_expr, base_expr):
-        raise not_implemented_error(self, type(self.convert_to_storage_expr))
+        ...
 
 
 class EnvRebindingsType(CompiledType):
@@ -2130,11 +2131,10 @@ class BaseField(AbstractNodeData):
         assert isinstance(self._type, CompiledType)
         return self._type
 
-    # TODO: RA22-015: Remove this, and make AbstractNodeData.type read-only,
-    # when transition to the DSL is done.
-    @type.setter
-    def type(self, typ: CompiledType):
-        self._type = typ
+    # TODO: RA22-015: Remove this so that AbstractNodeData.type is really
+    # read-only, when transition to the DSL is done.
+    def set_type(self, t: CompiledType) -> None:
+        self._type = t
 
     def __repr__(self) -> str:
         return '<ASTNode {} Field({})>'.format(self._serial, self.qualname)
@@ -3299,7 +3299,7 @@ class ASTNodeType(BaseStructType):
                                 )
                             )
                     else:
-                        field.type = inferred_type
+                        field.set_type(inferred_type)
 
     def compute_precise_fields_types(self):
         if self.is_list:
