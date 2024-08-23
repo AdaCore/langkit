@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 from collections import defaultdict
 from contextlib import AbstractContextManager
 import re
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
 # the state machine sources, which can be costly.
 
 
-class Matcher:
+class Matcher(abc.ABC):
     """
     Base class for a matcher. A matcher specificies in which case a given
     input will trigger a match.
@@ -34,25 +35,25 @@ class Matcher:
     def __init__(self, location: Optional[Location] = None):
         self.location = location or extract_library_location()
 
-    @property
+    @abc.abstractproperty
     def match_length(self) -> int:
         """
         Return the number of characters this pattern will accept, or raise
         ValueError if it is variable.
         """
-        raise NotImplementedError()
+        ...
 
-    @property
+    @abc.abstractproperty
     def regexp(self) -> str:
         """
         Return a regular expression (syntax for langkit.lexer.regexp) to
         implement this matcher.
         """
-        raise NotImplementedError()
+        ...
 
-    @property
+    @abc.abstractproperty
     def signature(self) -> tuple:
-        raise NotImplementedError()
+        ...
 
 
 class Pattern(Matcher):
@@ -121,7 +122,7 @@ class Pattern(Matcher):
         return ('Pattern', self.pattern)
 
 
-class Action:
+class Action(abc.ABC):
     """
     Base class for an action. An action specificies what to do with a given
     match.
@@ -144,9 +145,9 @@ class Action:
     def is_ignore(self) -> bool:
         return isinstance(self, Ignore)
 
-    @property
+    @abc.abstractproperty
     def signature(self) -> tuple:
-        raise NotImplementedError
+        ...
 
 
 class TokenAction(Action):

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 from collections import defaultdict
 from contextlib import contextmanager
 import itertools
@@ -100,9 +101,10 @@ class SequenceReader:
 
 class RegexpCollection:
 
-    class Parser:
+    class Parser(abc.ABC):
         """Base class for regexp components."""
 
+        @abc.abstractmethod
         def to_nfa(self,
                    regexps: RegexpCollection) -> Tuple[NFAState, NFAState]:
             """
@@ -111,7 +113,7 @@ class RegexpCollection:
             :param regexps: Collection of named patterns that `self` can
                 reference.
             """
-            raise NotImplementedError()
+            ...
 
     class Sequence(Parser):
         """Consume input that sub-parsers can consume sequentially."""
