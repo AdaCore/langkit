@@ -299,6 +299,10 @@ def not_implemented_error(
     Return a NotImplementedError instance to explain that `self or_cls` must
     override method `method`.
 
+    Use this instead of ``abc.abstractmethod``/``abc.abstractproperty`` to
+    implement methods/properties that are voluntarily left unimplemented, but
+    for which the owning type must be considered as concrete.
+
     :param or_cls: Class that does not implement `method`, or the instance of
         such a class.
     :param method: Method object for the method that should be overriden.
