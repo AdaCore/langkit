@@ -677,6 +677,29 @@ class BuiltinMethod(enum.Enum):
     update = enum.auto()
 
 
+@dataclass
+class FieldKinds:
+    """
+    Set of field kinds. Used to filter what kind of fields are legal depending
+    on the context.
+    """
+    properties: bool = False
+    parse_fields: bool = False
+    user_fields: bool = False
+    metadata_fields: bool = False
+
+    def has(self, cls: Type[AbstractNodeData]) -> bool:
+        """
+        Return whether this set of field kinds accepts ``cls``.
+        """
+        return (
+            (self.properties and issubclass(cls, PropertyDef))
+            or (self.parse_fields and issubclass(cls, Field))
+            or (self.user_fields and issubclass(cls, UserField))
+            or (self.metadata_fields and issubclass(cls, MetadataField))
+        )
+
+
 class AnnotationSpec:
     """
     Synthetic description of how a declaration annotation works.
@@ -3125,15 +3148,15 @@ class LktTypesLoader:
     def lower_base_field(
         self,
         full_decl: L.FullDecl,
-        allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        allowed_field_kinds: FieldKinds,
         user_field_public: bool,
         struct_name: str,
     ) -> AbstractNodeData:
         """
         Lower the field described in ``decl``.
 
-        :param allowed_field_types: Set of types allowed for the fields to
-            load.
+        :param allowed_field_kinds: Set of field kinds allowed for the fields
+            to load.
         :param user_field_public: Whether user fields should be made public.
         """
         decl = full_decl.f_decl
@@ -3242,7 +3265,7 @@ class LktTypesLoader:
             # If this field belongs to the metadata struct, use the appropriate
             # constructor. Reject @used_in_equality annotations otherwise, as
             # they are valid only for metadata fields.
-            if allowed_field_types == (MetadataField, ):
+            if allowed_field_kinds.metadata_fields:
                 cls = constructor = MetadataField
                 kwargs["use_in_equality"] = annotations.used_in_equality
             else:
@@ -3253,8 +3276,7 @@ class LktTypesLoader:
                 )
 
         check_source_language(
-            issubclass(cls, allowed_field_types),
-            'Invalid field type in this context'
+            allowed_field_kinds.has(cls), 'Invalid field type in this context'
         )
 
         result = constructor(**kwargs)
@@ -5114,7 +5136,7 @@ class LktTypesLoader:
     def _lower_fields(
         self,
         decls: L.DeclBlock,
-        allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        allowed_field_kinds: FieldKinds,
         user_field_public: bool,
         struct_name: str,
         allow_env_spec: bool = False,
@@ -5125,8 +5147,8 @@ class LktTypesLoader:
         Lower the fields described in the given DeclBlock node.
 
         :param decls: Declarations to process.
-        :param allowed_field_types: Set of types allowed for the fields to
-            load.
+        :param allowed_field_kinds: Set of field kinds allowed for the fields
+            to load.
         :param user_field_public: Whether user fields should be made public.
         :param allow_env_spec: Whether to allow the presence of env spec
             declarations.
@@ -5156,15 +5178,14 @@ class LktTypesLoader:
                 field: AbstractNodeData
                 if isinstance(decl, L.FunDecl):
                     check_source_language(
-                        any(issubclass(PropertyDef, cls)
-                            for cls in allowed_field_types),
+                        allowed_field_kinds.properties,
                         'Properties not allowed in this context'
                     )
                     field = self.lower_property(full_decl, struct_name)
                 else:
                     field = self.lower_base_field(
                         full_decl,
-                        allowed_field_types,
+                        allowed_field_kinds,
                         user_field_public,
                         struct_name,
                     )
@@ -5177,7 +5198,7 @@ class LktTypesLoader:
     def lower_fields_and_env_spec(
         self,
         decls: L.DeclBlock,
-        allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        allowed_field_kinds: FieldKinds,
         user_field_public: bool,
         struct_name: str,
     ) -> tuple[
@@ -5185,7 +5206,7 @@ class LktTypesLoader:
     ]:
         return self._lower_fields(
             decls,
-            allowed_field_types,
+            allowed_field_kinds,
             user_field_public,
             struct_name,
             allow_env_spec=True,
@@ -5194,12 +5215,12 @@ class LktTypesLoader:
     def lower_fields(
         self,
         decls: L.DeclBlock,
-        allowed_field_types: Tuple[Type[AbstractNodeData], ...],
+        allowed_field_kinds: FieldKinds,
         user_field_public: bool,
         struct_name: str,
     ) -> List[tuple[names.Name, AbstractNodeData]]:
         fields, _ = self._lower_fields(
-            decls, allowed_field_types, user_field_public, struct_name
+            decls, allowed_field_kinds, user_field_public, struct_name
         )
         return fields
 
@@ -5345,14 +5366,18 @@ class LktTypesLoader:
 
         # Lower fields. Regular nodes can hold all types of fields, but token
         # nodes and enum nodes can hold only user field and properties.
-        allowed_field_types = (
-            (UserField, PropertyDef)
+        allowed_field_kinds = (
+            FieldKinds(properties=True, user_fields=True)
             if is_token_node or is_enum_node
-            else (AbstractNodeData, )
+            else FieldKinds(
+                properties=True,
+                parse_fields=True,
+                user_fields=True,
+            )
         )
         fields, env_spec = self.lower_fields_and_env_spec(
             decl.f_decls,
-            allowed_field_types,
+            allowed_field_kinds,
             user_field_public=False,
             struct_name=decl.f_syn_name.text,
         )
@@ -5565,19 +5590,19 @@ class LktTypesLoader:
         """
         name = decl.f_syn_name.text
 
-        allowed_field_types: Tuple[Type[AbstractNodeData], ...]
+        allowed_field_kinds: FieldKinds
         if annotations.metadata:
-            allowed_field_types = (MetadataField, )
+            allowed_field_kinds = FieldKinds(metadata_fields=True)
             check_source_language(
                 CompiledTypeRepo.env_metadata is None,
                 "Only one struct can be the env metadata",
             )
         else:
-            allowed_field_types = (UserField, )
+            allowed_field_kinds = FieldKinds(user_fields=True)
 
         fields = self.lower_fields(
             decl.f_decls,
-            allowed_field_types,
+            allowed_field_kinds,
             user_field_public=True,
             struct_name=name,
         )
