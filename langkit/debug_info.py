@@ -5,6 +5,7 @@ properties DSL level.
 
 from __future__ import annotations
 
+import abc
 import inspect
 import shlex
 from typing import (Callable, Dict, Iterable, List, Optional, TYPE_CHECKING,
@@ -336,7 +337,7 @@ class LineRange:
         return '{}-{}'.format(self.first_line, self.last_line)
 
 
-class BaseEvent:
+class BaseEvent(abc.ABC):
     pass
 
 
@@ -444,12 +445,13 @@ class Event(BaseEvent):
         self.line_no = line_no
         self.entity = entity
 
+    @abc.abstractmethod
     def apply_on_state(self, scope_state: ScopeState) -> None:
         """
         Modify the input state according to the effect this event has. All
         subclasses must override this.
         """
-        raise NotImplementedError()
+        ...
 
     def __repr__(self) -> str:
         return '<Event line {}>'.format(self.line_no)
@@ -598,11 +600,12 @@ class Directive:
         return subcls.parse(line_no, args)
 
     @classmethod
+    @abc.abstractmethod
     def parse(cls, line_no: int, agrs: List[str]) -> Directive:
         """
         Subclasses must override this to parse the directive.
         """
-        raise NotImplementedError
+        ...
 
 
 class PropertyStart(Directive):
