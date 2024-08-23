@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import argparse
 from functools import reduce
 import glob
@@ -95,7 +96,7 @@ class DisableWarningAction(argparse.Action):
         namespace.enabled_warnings.disable(values)
 
 
-class ManageScript:
+class ManageScript(abc.ABC):
     build_modes: List[BuildMode]
     """
     Build modes to build.
@@ -612,6 +613,7 @@ class ManageScript:
                  ' "mvn".'
         )
 
+    @abc.abstractmethod
     def create_context(self, args: argparse.Namespace) -> 'CompileCtx':
         """
         Return a Langkit context (langkit.compile_context.CompileContext
@@ -622,7 +624,7 @@ class ManageScript:
         :param args: The arguments parsed from the command line invocation of
             manage.py.
         """
-        raise NotImplementedError()
+        ...
 
     @property
     def main_source_dirs(self) -> Set[str]:
