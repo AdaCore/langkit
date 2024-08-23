@@ -35,7 +35,7 @@ class Id(Name):
 
     @langkit_property()
     def resolve():
-        return Self.node_env.get_first(Self)
+        return Self.node_env.get_first(Self.symbol)
 
 
 class Prefix(Name):

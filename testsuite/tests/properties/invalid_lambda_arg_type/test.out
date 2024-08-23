@@ -1,7 +1,7 @@
 == all_index.lkt ==
-all_index.lkt:5:40: error: Int expected
-5 |         node.items.all((e: Example, i: Bool) => e.is_null or i == 0)
-  |                                        ^^^^
+all_index.lkt:5:41: error: Int expected
+5 |         node.items.iall((e: Example, i: Bool) => e.is_null or i == 0)
+  |                                         ^^^^
 
 
 == all_no_index.lkt ==
@@ -14,9 +14,9 @@ all_no_index.lkt:5:28: error: Example expected
 Code generation was successful
 
 == filter_index.lkt ==
-filter_index.lkt:6:33: error: Int expected
-6 |         .filter((e: Example, i: Bool) => not e.is_null or i == 0)
-  |                                 ^^^^
+filter_index.lkt:6:34: error: Int expected
+6 |         .ifilter((e: Example, i: Bool) => not e.is_null or i == 0)
+  |                                  ^^^^
 
 
 == filter_no_index.lkt ==
@@ -62,15 +62,15 @@ logic_any_index.lkt:5:34: error: Example expected
 
 
 == logic_any_no_index.lkt ==
-logic_any_no_index.lkt:5:46: error: Int expected
+logic_any_no_index.lkt:5:31: error: 1 arguments expected, got 2
 5 |         node.items.logic_any((_: Example, _: Bool) => %true).solve()
-  |                                              ^^^^
+  |                               ^^^^^^^^^^^^^^^^^^^
 
 
 == map_index.lkt ==
-map_index.lkt:5:40: error: Int expected
-5 |         node.items.map((e: Example, i: Bool) => IndexedItem(
-  |                                        ^^^^
+map_index.lkt:5:41: error: Int expected
+5 |         node.items.imap((e: Example, i: Bool) => IndexedItem(
+  |                                         ^^^^
 
 
 == map_no_index.lkt ==
@@ -92,9 +92,9 @@ mapcat_no_index.lkt:5:31: error: Example expected
 
 
 == take_while_index.lkt ==
-take_while_index.lkt:6:37: error: Int expected
-6 |         .take_while((e: Example, i: Bool) => not e.is_null or i == 0)
-  |                                     ^^^^
+take_while_index.lkt:6:38: error: Int expected
+6 |         .itake_while((e: Example, i: Bool) => not e.is_null or i == 0)
+  |                                      ^^^^
 
 
 == take_while_no_index.lkt ==

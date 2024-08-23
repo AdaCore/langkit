@@ -11,7 +11,7 @@ invalid_kwarg.lkt:6:47: error: unknown argument
 
 
 == lambda_no_arg.lkt ==
-lambda_no_arg.lkt:6:38: error: at least 1 arguments expected
+lambda_no_arg.lkt:6:38: error: 1 arguments expected, got 0
 6 |     fun prop(): Name = node.name.do(() => node)
 
 
@@ -28,7 +28,7 @@ too_many_args.lkt:6:47: error: at most 1 positional argument(s) expected, got 2
 
 
 == two_args.lkt ==
-two_args.lkt:6:38: error: at most 1 arguments expected
+two_args.lkt:6:38: error: 1 arguments expected, got 2
 6 |     fun prop(): Name = node.name.do((x, y) => x.foo(y))
   |                                      ^^^^
 

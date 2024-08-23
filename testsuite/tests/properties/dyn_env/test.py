@@ -80,7 +80,7 @@ class CallExpr(FooNode):
         For each argument, associate its name to the expression passed in this
         call.
         """
-        decl = Var(Self.node_env.get_first(Self.name).cast(T.FunDecl))
+        decl = Var(Self.node_env.get_first(Self.name.symbol).cast(T.FunDecl))
         return decl.args.map(lambda i, a: T.inner_env_assoc.new(
             key=a.name.symbol, value=Self.args.at(i)
         ))
@@ -90,7 +90,7 @@ class CallExpr(FooNode):
         """
         For each argument, associate its name to its default expression.
         """
-        decl = Var(Self.node_env.get_first(Self.name).cast(T.FunDecl))
+        decl = Var(Self.node_env.get_first(Self.name.symbol).cast(T.FunDecl))
         return decl.args.map(lambda a: T.inner_env_assoc.new(
             key=a.name.symbol, value=a.arg_expr.node
         ))

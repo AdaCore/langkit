@@ -37,7 +37,7 @@ class Id: FooNode implements TokenNode {
         node.resolve().as[Scope]?.children_env()
 
     @exported
-    fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
+    fun resolve(): Entity[FooNode] = node.node_env().get_first(node.symbol)
 }
 
 class Dep: Id implements TokenNode {

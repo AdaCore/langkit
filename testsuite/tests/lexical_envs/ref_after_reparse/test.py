@@ -22,11 +22,11 @@ class Name(FooNode):
 
     @langkit_property(dynamic_vars=[Env])
     def ambiant_entity():
-        return Env.get(Self).at(0)
+        return Env.get(Self.symbol).at(0)
 
     @langkit_property()
     def designated_env():
-        return Self.unit.root.node_env.get(Self).at(0).children_env
+        return Self.unit.root.node_env.get(Self.symbol).at(0).children_env
 
     @langkit_property(public=True)
     def entity():

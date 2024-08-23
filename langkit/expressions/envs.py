@@ -5,9 +5,9 @@ from langkit.compiled_types import T, get_context
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BindableLiteralExpr, CallExpr,
-    ComputingExpr, GetSymbol, Literal, No, NullCheckExpr, NullExpr,
-    PropertyDef, ResolvedExpression, Self, attr_call, auto_attr, construct,
-    dsl_document, resolve_property
+    ComputingExpr, Literal, No, NullCheckExpr, NullExpr, PropertyDef,
+    ResolvedExpression, Self, attr_call, auto_attr, construct, dsl_document,
+    resolve_property
 )
 from langkit.expressions.utils import assign_var
 
@@ -218,16 +218,6 @@ class EnvGet(AbstractExpression):
         env_expr = construct(self.env, T.LexicalEnv)
 
         sym_expr = construct(self.symbol)
-
-        if sym_expr.type.is_ast_node:
-            check_source_language(
-                sym_expr.type.is_token_node,
-                'AST node type for key (here: {}) must be a token node'.format(
-                    sym_expr.type.dsl_name
-                )
-            )
-            sym_expr = GetSymbol.construct_static(sym_expr)
-
         check_source_language(
             sym_expr.type == T.Symbol,
             'Invalid key type: {}'.format(sym_expr.type.dsl_name)

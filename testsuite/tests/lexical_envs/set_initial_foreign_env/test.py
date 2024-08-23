@@ -79,7 +79,9 @@ class ScopedId(Id):
 
     @langkit_property()
     def resolve(base_env=T.LexicalEnv):
-        return (Self.designated_scope(base_env).get_first(Self.name).node)
+        return (
+            Self.designated_scope(base_env).get_first(Self.name.symbol).node
+        )
 
 
 build_and_run(

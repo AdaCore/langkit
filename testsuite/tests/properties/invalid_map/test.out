@@ -14,9 +14,9 @@ default_value.lkt:6:27: error: default values are not allowed here
 
 
 == too_many_args.lkt ==
-too_many_args.lkt:6:27: error: at most 2 arguments expected
-6 |         self.nb_list.map((x, y, z) => x)
-  |                           ^^^^^^^
+too_many_args.lkt:6:28: error: 2 arguments expected, got 3
+6 |         self.nb_list.imap((x, y, z) => x)
+  |                            ^^^^^^^
 
 
 lkt_compile: Done

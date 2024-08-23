@@ -35,7 +35,9 @@ class Ref(FooNode):
 
     @langkit_property(public=True, return_type=Decl.entity)
     def decl():
-        return Self.children_env.get_first(Self.name).cast_or_raise(Decl)
+        return (
+            Self.children_env.get_first(Self.name.symbol).cast_or_raise(Decl)
+        )
 
 
 build_and_run(
