@@ -27,11 +27,13 @@ class Name(FooNode):
 
     @langkit_property()
     def designated_env():
-        return Self.node_env.get(Self, from_node=Self).at(0).children_env
+        return (
+            Self.node_env.get(Self.symbol, from_node=Self).at(0).children_env
+        )
 
     @langkit_property()
     def get_ref():
-        return Self.node_env.get(Self, from_node=Self).at(0)
+        return Self.node_env.get(Self.symbol, from_node=Self).at(0)
 
 
 class Package(Decl):

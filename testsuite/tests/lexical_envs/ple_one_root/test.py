@@ -32,7 +32,7 @@ class Id(FooNode):
 
     @langkit_property(public=True)
     def resolve():
-        return Self.node_env.get_first(Self)
+        return Self.node_env.get_first(Self.symbol)
 
 
 class Scope(FooNode):

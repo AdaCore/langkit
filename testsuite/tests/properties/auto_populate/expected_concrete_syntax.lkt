@@ -32,5 +32,5 @@ class Ref: FooNode {
 
     @exported
     fun decl(): Entity[Decl] =
-        node.children_env().get_first(node.name).as![Decl]
+        node.children_env().get_first(node.name.symbol).as![Decl]
 }

@@ -37,7 +37,7 @@ class ScopedId: Id {
         node.scope.resolve(base_env).children_env()
 
     fun resolve(base_env: LexicalEnv): FooNode =
-        node.designated_scope(base_env).get_first(node.name).node
+        node.designated_scope(base_env).get_first(node.name.symbol).node
 }
 
 class SimpleId: Id implements TokenNode {

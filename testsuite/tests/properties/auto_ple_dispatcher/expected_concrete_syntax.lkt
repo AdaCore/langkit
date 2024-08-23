@@ -48,7 +48,7 @@ class Name: FooNode {
 }
 
 class Id: Name implements TokenNode {
-    fun resolve(): Entity[FooNode] = node.node_env().get_first(node)
+    fun resolve(): Entity[FooNode] = node.node_env().get_first(node.symbol)
 }
 
 class Prefix: Name {

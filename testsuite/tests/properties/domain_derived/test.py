@@ -30,7 +30,7 @@ class Name(FooNode):
     @langkit_property(public=True)
     def resolve():
         candidates = Var(
-            Self.node_env.get(Self).map(lambda d: d.cast(T.Definition))
+            Self.node_env.get(Self.symbol).map(lambda d: d.cast(T.Definition))
         )
         return Self.ref_var.domain(candidates).solve
 
