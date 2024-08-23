@@ -4,6 +4,7 @@ Helpers to manage compilation passes.
 
 from __future__ import annotations
 
+import abc
 from typing import Callable, List, TYPE_CHECKING
 
 from langkit.compiled_types import ASTNodeType, CompiledTypeRepo
@@ -74,7 +75,7 @@ class PassManager:
                 p.run(context)
 
 
-class AbstractPass:
+class AbstractPass(abc.ABC):
     """
     Base class for all specialized compilation passes.
 
@@ -118,8 +119,9 @@ class AbstractPass:
         self.doc = format_text(doc, 4)
         return self
 
+    @abc.abstractmethod
     def run(self, context: CompileCtx) -> None:
-        raise NotImplementedError()
+        ...
 
 
 class MajorStepPass(AbstractPass):
