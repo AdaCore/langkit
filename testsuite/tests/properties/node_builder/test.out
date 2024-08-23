@@ -1,0 +1,57 @@
+main.adb: Running...
+
+== Copy_Non_Null ==
+<LiteralSequence main.txt:1:1-1:15>
+
+== Copy_Null ==
+None
+
+== User_Field ==
+<SynthUserField main.txt:0:0-0:0>
+Number: 42
+
+== Non_Nullable_Null ==
+Property_Error: main.txt:1:1-1:15: SynthNonNullable.items cannot be null in synthetic nodes; add a nullable annotation to this field to allow it
+
+== Non_Nullable_Not_Null ==
+<SynthNonNullable main.txt:0:0-0:0>
+
+== Nullable_Null ==
+<SynthNullable main.txt:0:0-0:0>
+
+== Nullable_Not_Null ==
+<SynthNullable main.txt:0:0-0:0>
+
+== Parent_Root ==
+R: <SynthParent main.txt:1:1-1:15>
+R.Parent: <LiteralSequence main.txt:1:1-1:15>
+
+R.F_F: <SynthChild1 main.txt:1:1-1:15>
+R.F_F.Parent: <SynthParent main.txt:1:1-1:15>
+
+R.F_F.F_F: <SynthChild2 main.txt:1:1-1:15>
+R.F_F.F_F.Parent: <SynthChild1 main.txt:1:1-1:15>
+
+R.F_F.F_F.F_F: <Literal main.txt:1:7-1:8>
+R.F_F.F_F.F_F.Parent: <LiteralList main.txt:1:7-1:14>
+
+== Parent_Self ==
+R: <SynthParent main.txt:1:7-1:8>
+R.Parent: <Literal main.txt:1:7-1:8>
+
+R.F_F: <SynthChild1 main.txt:1:7-1:8>
+R.F_F.Parent: <SynthParent main.txt:1:7-1:8>
+
+R.F_F.F_F: <LiteralSequence main.txt:1:1-1:15>
+R.F_F.F_F.Parent: None
+
+== Parent_Null ==
+R: <SynthParent main.txt:0:0-0:0>
+R.Parent: None
+R.F_F: None
+
+== Parent_Foreign ==
+Property_Error: main.txt:1:1-1:15: synthetic node parents must belong to the same unit as the nodes that trigger node synthetization
+
+main.adb: Done.
+Done

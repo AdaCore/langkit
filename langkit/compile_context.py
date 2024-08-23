@@ -40,7 +40,7 @@ from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
 if TYPE_CHECKING:
     from langkit.compiled_types import (
         ASTNodeType, ArrayType, CompiledType, EntityType, EnumType, Field,
-        IteratorType, StructType, UserField
+        IteratorType, NodeBuilderType, StructType, UserField
     )
     from langkit.emitter import Emitter
     from langkit.expressions import PropertyDef
@@ -632,6 +632,12 @@ class CompileCtx:
         self.exception_types: Dict[str, GeneratedException] = {}
         """
         Mapping of all exception types. Keys are lower-case exception names.
+        """
+
+        self.node_builder_types: list[NodeBuilderType]
+        """
+        List of needed node builder types. Computed during the
+        "compute_composite_types" pass.
         """
 
         self._array_types: Optional[List[ArrayType]] = None
@@ -2651,9 +2657,11 @@ class CompileCtx:
         # Collect existing types and make sure we don't create other ones later
         # by accident.
         struct_types = CompiledTypeRepo.struct_types
+        self.node_builder_types = CompiledTypeRepo.node_builder_types
         array_types = CompiledTypeRepo.array_types
         iterator_types = set(CompiledTypeRepo.iterator_types)
         CompiledTypeRepo.struct_types = None
+        CompiledTypeRepo.node_builder_types = None
         CompiledTypeRepo.array_types = None
         CompiledTypeRepo.iterator_types = None
 

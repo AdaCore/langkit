@@ -672,6 +672,7 @@ class BuiltinMethod(enum.Enum):
     solve_with_diagnostics = enum.auto()
     super = enum.auto()
     take_while = enum.auto()
+    to_builder = enum.auto()
     unique = enum.auto()
     update = enum.auto()
 
@@ -2344,6 +2345,7 @@ class LktTypesLoader:
         entity: Scope.Generic
         iterator: Scope.Generic
         node: Scope.Generic
+        node_builder: Scope.Generic
 
     @dataclass
     class Functions:
@@ -2509,6 +2511,7 @@ class LktTypesLoader:
             Scope.Generic("Entity"),
             Scope.Generic("Iterator"),
             Scope.Generic("Node"),
+            Scope.Generic("Node_Builder"),
         )
         self.node_builtin = Scope.BuiltinValue("node", E.Self)
         self.self_builtin = Scope.BuiltinValue("self", E.Entity)
@@ -3628,14 +3631,39 @@ class LktTypesLoader:
                 inner_expr, lambda_arg_infos, element_var, index_var
             )
 
+        def lower_node_builder(prefix: L.Expr) -> AbstractExpression:
+            """
+            Helper to lower the creation of a synthetizing node builder.
+
+            :param prefix: Prefix for the ".builder()" method, i.e. the
+                expected synthetic node type reference.
+            """
+            with self.ctx.lkt_context(prefix):
+                if not isinstance(prefix, (L.DotExpr, L.TypeRef, L.RefId)):
+                    error("Prefix for .builder expressions must be a node")
+
+            node_type = self.resolve_type_expr(prefix, env)
+
+            args, kwargs = self.lower_call_args(call_expr, lower)
+            with self.ctx.lkt_context(call_expr.f_args):
+                if len(args) != 0:
+                    error("Positional arguments not allowed for .builder")
+
+            return E.CreateSynthNodeBuilder(node_type, **kwargs)
+
         call_name = call_expr.f_name
         assert isinstance(call_name, L.BaseDotExpr)
+
+        method_name = call_name.f_suffix.text
+
+        # Handle node builder creation from node types
+        if method_name == "builder":
+            return lower_node_builder(call_name.f_prefix)
 
         # TODO (eng/libadalang/langkit#728): introduce a pre-lowering pass to
         # extract the list of types and their fields/methods so that we can
         # perform validation here.
         method_prefix = lower(call_name.f_prefix)
-        method_name = call_name.f_suffix.text
 
         # Add the right wrappers to handle null conditional constructs. Note
         # that anything going through "getattr" will take care of validating
@@ -4001,6 +4029,10 @@ class LktTypesLoader:
                 take_while_expr=clr.inner_expr,
             )
 
+        elif builtin == BuiltinMethod.to_builder:
+            empty_signature.match(self.ctx, call_expr)
+            result = E.CreateCopyNodeBuilder(method_prefix)
+
         elif builtin == BuiltinMethod.unique:
             empty_signature.match(self.ctx, call_expr)
             result = getattr_prefix.unique
@@ -4342,6 +4374,7 @@ class LktTypesLoader:
                         error("invalid call prefix")
 
                 abort_if_static_required(expr)
+
                 return self.lower_method_call(call_expr, env, local_vars)
 
             elif isinstance(expr, L.CastExpr):

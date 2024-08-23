@@ -1,0 +1,55 @@
+== bad_build_type.lkt ==
+bad_build_type.lkt:7:31: error: Expected type DerivedNode, got EmptyNode
+7 |     @lazy prop: DerivedNode = EmptyNode.builder().build()
+  |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== bad_kwarg_type.lkt ==
+bad_kwarg_type.lkt:9:9: error: Wrong type for field SynthNode.f1: expected Literal, got EmptyNode
+9 |         SynthNode.builder(
+  |         ^
+
+
+== bad_parent.lkt ==
+bad_parent.lkt:4:55: error: Invalid "parent" actual (#1) for NodeBuilder[EmptyNode].build: expected FooNode but got Int
+4 |     @lazy prop: EmptyNode = EmptyNode.builder().build(1)
+  |                                                       ^
+
+
+== missing_kwarg.lkt ==
+missing_kwarg.lkt:4:30: error: Values are missing for SynthNode fields: f2, number
+4 |     @lazy prop1: SynthNode = SynthNode.builder(f1=null[Literal]).build()
+  |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== not_lazy.lkt ==
+not_lazy.lkt:4:39: error: NodeBuilder.build can be called in lazy field initializers only
+4 |     @exported fun prop(): EmptyNode = EmptyNode.builder().build()
+  |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== not_synth.lkt ==
+not_synth.lkt:4:29: error: node builders can yield synthetic nodes only
+4 |     @lazy prop: EmptyNode = Literal.builder().build()
+  |                             ^^^^^^^^^^^^^^^^^
+
+
+== pos_arg.lkt ==
+pos_arg.lkt:4:47: error: Positional arguments not allowed for .builder
+4 |     @lazy prop: EmptyNode = EmptyNode.builder(1).build()
+  |                                               ^
+
+
+== spurious_kwarg.lkt ==
+spurious_kwarg.lkt:4:29: error: Extraneous fields for EmptyNode: foo
+4 |     @lazy prop: EmptyNode = EmptyNode.builder(foo=null[FooNode]).build()
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== to_builder_non_node.lkt ==
+to_builder_non_node.lkt:6:17: error: node expected, got Int
+6 |         val b = i.to_builder();
+  |                 ^^^^^^^^^^^^^^
+
+
+lkt_compile: Done

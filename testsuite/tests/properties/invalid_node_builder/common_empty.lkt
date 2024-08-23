@@ -1,0 +1,4 @@
+import common
+
+@synthetic class EmptyNode: FooNode {
+}

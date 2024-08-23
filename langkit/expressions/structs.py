@@ -8,7 +8,14 @@ import funcy
 
 from langkit import names
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, EntityType, Field, resolve_type
+    ASTNodeType,
+    AbstractNodeData,
+    BaseField,
+    BaseStructType,
+    EntityType,
+    Field,
+    NodeBuilderType,
+    resolve_type,
 )
 from langkit.diagnostics import (Severity, check_source_language,
                                  diagnostic_context, error)
@@ -263,9 +270,6 @@ class New(AbstractExpression):
             self.assocs = {field_or_lookup(field): expr
                            for field, expr in assocs.items()}
 
-            for f in self.assocs:
-                f.set_synthetized()
-
             super().__init__(
                 result_var_name or 'New_Struct',
                 abstract_expr=abstract_expr
@@ -368,6 +372,116 @@ class New(AbstractExpression):
             f' ({self.struct_type.dsl_name})'
         )
 
+    @staticmethod
+    def construct_fields(
+        struct_type: BaseStructType,
+        field_values: dict[str, AbstractExpression],
+        for_node_builder: bool = False,
+    ) -> dict[BaseField, ResolvedExpression]:
+        """
+        Helper to lower fields in a struct/node constructor.
+
+        :param struct_type: Struct/node type for which we construct fields.
+        :param field_values: Mapping from field DSL name to associated field
+            initialization expression.
+        :param for_node_builder: Whether we are in the context of node
+            builders: parse field values are allowed to be node builders, and
+            they are wrapped in node builders if we get node values for them.
+        :return: A mapping from fields to initialize to the corresponding
+            constructed initialization expression.
+        """
+        from langkit.expressions import CreateCopyNodeBuilder
+
+        # Create a dict of field names to fields in the struct type, and
+        # another dict for default values.
+        required_fields = struct_type.required_fields_in_exprs
+        default_valued_fields = {
+            n: f
+            for n, f in required_fields.items()
+            if f.default_value
+        }
+
+        # Make sure the provided set of fields matches the one the struct needs
+
+        def error_if_not_empty(name_set: set[str], message: str):
+            if name_set:
+                names_str = ", ".join(sorted(name_set))
+                error(f"{message}: {names_str}")
+
+        error_if_not_empty(
+            set(required_fields)
+            - set(field_values)
+            - set(default_valued_fields),
+            f"Values are missing for {struct_type.dsl_name} fields",
+        )
+        error_if_not_empty(
+            set(field_values.keys()) - set(required_fields),
+            f"Extraneous fields for {struct_type.dsl_name}",
+        )
+
+        # At this stage, we know that the user provided all required fields,
+        # and no spurious fields. Construct expressions for field values.
+        result = {
+            required_fields[name]: construct(expr)
+            for name, expr in field_values.items()
+        }
+
+        # Add default values for missing fields. Note that we construct their
+        # abstract expressions on purpose: even though a resolved expression is
+        # already present in field.default_value, reusing ResolvedExpression
+        # nodes in multiple expressions is forbidden. Constructing a new each
+        # time avoids this problem.
+        for name, field in default_valued_fields.items():
+            if field not in result:
+                result[field] = construct_compile_time_known(
+                    field.abstract_default_value
+                )
+
+        # Then check that the type of these expressions match field types
+        for field, expr in result.items():
+            etype = expr.type
+
+            # If 1) node builder types are allowed, 2) this initialization
+            # expression computes a node builder but 3) this field does not
+            # contain node builders, type check on the builder's node type.
+            if (
+                for_node_builder
+                and isinstance(field, Field)
+                and isinstance(etype, NodeBuilderType)
+            ):
+                etype = etype.node_type
+
+            check_source_language(
+                etype.matches(field.type),
+                f"Wrong type for field {field.qualname}:"
+                f" expected {field.type.dsl_name}, got {etype.dsl_name}"
+            )
+
+            # Annotate parsing/synthetic fields with precise type information
+            if isinstance(field, Field):
+                assert isinstance(etype, ASTNodeType)
+                field.types_from_synthesis.include(etype)
+
+            # When creating a node builder, make sure we compute node builders
+            # for parse fields. In other cases, make sure we downcast input
+            # values so that they fit in the fields.
+            if (
+                for_node_builder
+                and isinstance(field, Field)
+            ):
+                if isinstance(expr.type, ASTNodeType):
+                    result[field] = CreateCopyNodeBuilder.common_construct(
+                        expr
+                    )
+            elif field.type != expr.type:
+                result[field] = Cast.Expr(expr, field.type)
+
+            # Also mark parse fields as synthetized
+            if isinstance(field, Field):
+                field.set_synthetized()
+
+        return result
+
     def construct(self):
         """
         :rtype: StructExpr
@@ -384,66 +498,9 @@ class New(AbstractExpression):
                 ' properties or lazy fields'
             )
 
-        # Make sure the provided set of fields matches the one the struct
-        # needs.
-        def error_if_not_empty(name_set, message):
-            check_source_language(not name_set, ('{}: {}'.format(
-                message, ', '.join(name for name in name_set)
-            )))
-
-        # Create a dict of field names to fields in the struct type
-
-        required_fields = self.struct_type.required_fields_in_exprs
-        default_valued_fields = {n: f
-                                 for n, f in required_fields.items()
-                                 if f.default_value}
-
-        error_if_not_empty(
-            set(required_fields)
-            - set(self.field_values.keys())
-            - set(default_valued_fields),
-            'Values are missing for {} fields'.format(
-                self.struct_type.dsl_name
-            )
+        field_values = self.construct_fields(
+            self.struct_type, self.field_values
         )
-        error_if_not_empty(
-            set(self.field_values.keys()) - set(required_fields),
-            'Extraneous fields for {}'.format(self.struct_type.dsl_name)
-        )
-
-        # At this stage, we know that the user has only provided fields that
-        # are valid for the struct type. First, construct expression for field
-        # values.
-        field_values = {required_fields[name]: construct(expr)
-                        for name, expr in self.field_values.items()}
-
-        # Add default values for missing fields. Note that we construct their
-        # abstract expressions on purpose: even though a resolved expression is
-        # already present in field.default_value, reusing ResolvedExpression
-        # nodes in multiple expressions is forbidden. Constructing a new each
-        # time avoids this problem.
-        for name, field in default_valued_fields.items():
-            if field not in field_values:
-                field_values[field] = construct_compile_time_known(
-                    field.abstract_default_value
-                )
-
-        # Then check that the type of these expressions match field types
-        for field, expr in field_values.items():
-            check_source_language(
-                expr.type.matches(field.type),
-                f"Wrong type for field {field.qualname}:"
-                f" expected {field.type.dsl_name}, got {expr.type.dsl_name}"
-            )
-
-            # Annotate parsing/synthetic fields with precise type information
-            if isinstance(field, Field):
-                field.types_from_synthesis.include(expr.type)
-
-            # Make sure we downcast input values so that they fit in the
-            # fields.
-            if field.type != expr.type:
-                field_values[field] = Cast.Expr(expr, field.type)
 
         expr_cls = (New.NodeExpr
                     if self.struct_type.is_ast_node else
