@@ -1471,6 +1471,11 @@ class CompiledType:
 
         if self.is_entity_type and formal.is_entity_type:
             return self.element_type.matches(formal.element_type)
+        elif (
+            isinstance(self, NodeBuilderType)
+            and isinstance(formal, NodeBuilderType)
+        ):
+            return self.node_type.matches(formal.node_type)
 
         if formal.is_ast_node and self.is_ast_node:
             return formal in self.get_inheritance_chain()
@@ -5071,7 +5076,14 @@ class TypeRepo:
                     return enum_value.to_abstract_expr
 
                 if (
-                    name in ('array', 'list', 'iterator', 'entity', 'new')
+                    name in (
+                        'array',
+                        'builder_type',
+                        'entity',
+                        'iterator',
+                        'list',
+                        'new',
+                    )
                     or not isinstance(prefix, BaseStructType)
                 ):
                     return getattr(prefix, name)

@@ -385,13 +385,10 @@ class New(AbstractExpression):
         :param field_values: Mapping from field DSL name to associated field
             initialization expression.
         :param for_node_builder: Whether we are in the context of node
-            builders: parse field values are allowed to be node builders, and
-            they are wrapped in node builders if we get node values for them.
+            builders: parse field values are expected to be node builders.
         :return: A mapping from fields to initialize to the corresponding
             constructed initialization expression.
         """
-        from langkit.expressions import CreateCopyNodeBuilder
-
         # Create a dict of field names to fields in the struct type, and
         # another dict for default values.
         required_fields = struct_type.required_fields_in_exprs
@@ -439,42 +436,42 @@ class New(AbstractExpression):
 
         # Then check that the type of these expressions match field types
         for field, expr in result.items():
-            etype = expr.type
+            expected_type = field.type
+            actual_type = expr.type
+            actual_node_type: ASTNodeType
 
-            # If 1) node builder types are allowed, 2) this initialization
-            # expression computes a node builder but 3) this field does not
-            # contain node builders, type check on the builder's node type.
-            if (
-                for_node_builder
-                and isinstance(field, Field)
-                and isinstance(etype, NodeBuilderType)
-            ):
-                etype = etype.node_type
+            # If we are creating a node builder, expect node builders to
+            # initialize parse fields.
+            if for_node_builder and isinstance(field, Field):
+                assert isinstance(expected_type, ASTNodeType)
+                expected_type = expected_type.builder_type
 
             check_source_language(
-                etype.matches(field.type),
-                f"Wrong type for field {field.qualname}:"
-                f" expected {field.type.dsl_name}, got {etype.dsl_name}"
+                actual_type.matches(expected_type),
+                f"Wrong type for field {field.qualname}: expected"
+                f" {expected_type.dsl_name}, got {actual_type.dsl_name}"
             )
+
+            if for_node_builder and isinstance(field, Field):
+                assert isinstance(actual_type, NodeBuilderType)
+                actual_node_type = actual_type.node_type
+            elif isinstance(field, Field):
+                assert isinstance(actual_type, ASTNodeType)
+                actual_node_type = actual_type
 
             # Annotate parsing/synthetic fields with precise type information
             if isinstance(field, Field):
-                assert isinstance(etype, ASTNodeType)
-                field.types_from_synthesis.include(etype)
+                field.types_from_synthesis.include(actual_node_type)
 
-            # When creating a node builder, make sure we compute node builders
-            # for parse fields. In other cases, make sure we downcast input
-            # values so that they fit in the fields.
+            # Make sure we downcast input values so that they fit in the fields
             if (
-                for_node_builder
-                and isinstance(field, Field)
+                (
+                    isinstance(expected_type, ASTNodeType)
+                    or isinstance(expected_type, EntityType)
+                )
+                and actual_type != expected_type
             ):
-                if isinstance(expr.type, ASTNodeType):
-                    result[field] = CreateCopyNodeBuilder.common_construct(
-                        expr
-                    )
-            elif field.type != expr.type:
-                result[field] = Cast.Expr(expr, field.type)
+                result[field] = Cast.Expr(expr, expected_type)
 
             # Also mark parse fields as synthetized
             if isinstance(field, Field):
