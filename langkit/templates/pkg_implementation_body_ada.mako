@@ -4078,7 +4078,7 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Dec_Ref (Self : in out Node_Builder_Type) is
    begin
-      if Self.Ref_Count < 0 then
+      if Self = null or else Self.Ref_Count < 0 then
          return;
       elsif Self.Ref_Count = 1 then
          Self.Release;

@@ -1,0 +1,10 @@
+== default_value.lkt ==
+Code generation was successful
+
+== no_null_expr.lkt ==
+no_null_expr.lkt:4:5: error: MyEnum does not have a null value, so Example.u must have a default value
+4 |     u: MyEnum
+  |     ^^^^^^^^^
+
+
+lkt_compile: Done

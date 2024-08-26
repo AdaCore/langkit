@@ -97,6 +97,14 @@ class LiteralSequence: FooNode {
     @lazy
     lf_factored_node_builder: SynthNonNullable =
         node.create_node_builder().build()
+
+    @lazy
+    lf_node_builder: NodeBuilder[SynthNonNullable] =
+        SynthNonNullable.builder(items=node.items?[0].to_builder())
+
+    @exported
+    @lazy
+    lf_staged_node_builder: SynthNonNullable = node.lf_node_builder.build()
 }
 
 class Name: FooNode implements TokenNode {

@@ -31,7 +31,7 @@
 <%def name="init_user_fields(node_type, node_expr)">
    % for f in node_type.get_fields(predicate=lambda f: f.is_user_field, \
                                    include_inherited=False):
-      ${node_expr}.${f.name} := ${f.type.storage_nullexpr};
+      ${node_expr}.${f.name} := ${f.ada_default_value};
    % endfor
 </%def>
 

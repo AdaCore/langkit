@@ -372,8 +372,8 @@ class AbstractNodeData:
         self._has_self_entity = False
         self.optional_entity_info = False
         self._access_needs_incref = access_needs_incref
-        self.abstract_default_value: Opt[AbstractExpression] = None
-        self.default_value = None
+        self.abstract_default_value: AbstractExpression | None = None
+        self.default_value: ResolvedExpression | None = None
         self.access_constructor = access_constructor
 
         self._abstract = False
@@ -695,6 +695,18 @@ class AbstractNodeData:
         always False for node data whose type is not ref-counted.
         """
         return self.type.is_refcounted and self._access_needs_incref
+
+    @property
+    def ada_default_value(self) -> str:
+        """
+        Return the default value to use for the record component declaration
+        that implements this field in generated code.
+        """
+        return (
+            self.type.storage_nullexpr
+            if self.default_value is None else
+            self.default_value.render_expr()
+        )
 
 
 class CompiledType:
@@ -1357,6 +1369,18 @@ class CompiledType:
         :rtype: str
         """
         return base_expr
+
+    @property
+    def has_nullexpr(self) -> bool:
+        """
+        Return whether this type has a null expression.
+        """
+        try:
+            _ = self.nullexpr
+        except NotImplementedError:
+            return False
+        else:
+            return True
 
     @property
     def nullexpr(self):
@@ -2411,6 +2435,28 @@ class UserField(BaseField):
         # We cannot construct the default value yet, as not all types are
         # known. Do this in CompileCtx.compute_types instead.
         self.abstract_default_value = default_value
+
+    def construct_default_value(self) -> None:
+        """
+        Construct the default value for this user field.
+
+        For user fields that belong to nodes, this also checks that there is
+        either a null expression for the type or a default value for this
+        field.
+        """
+        from langkit.expressions import construct_compile_time_known
+
+        if self.abstract_default_value is not None:
+            self.default_value = construct_compile_time_known(
+                self.abstract_default_value
+            )
+        elif isinstance(self.struct, ASTNodeType):
+            with self.diagnostic_context:
+                check_source_language(
+                    self.type.has_nullexpr,
+                    f"{self.type.dsl_name} does not have a null value, so"
+                    f" {self.qualname} must have a default value",
+                )
 
 
 class MetadataField(UserField):
@@ -3973,9 +4019,9 @@ class NodeBuilderType(CompiledType):
         super().__init__(
             name=node_type.name + names.Name("Node_Builder"),
             exposed=False,
-            null_allowed=True,
+            null_allowed=False,
             is_refcounted=True,
-            nullexpr="No_Node_Builder",
+            nullexpr="null",
             dsl_name=f"NodeBuilder[{node_type.dsl_name}]",
         )
         self.node_type = node_type

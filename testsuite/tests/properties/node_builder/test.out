@@ -56,5 +56,8 @@ Property_Error: main.txt:1:1-1:15: synthetic node parents must belong to the sam
 == Factored_Node_Builder ==
 <SynthNonNullable main.txt:0:0-0:0>
 
+== Staged_Node_Builder ==
+<SynthNonNullable main.txt:0:0-0:0>
+
 main.adb: Done.
 Done

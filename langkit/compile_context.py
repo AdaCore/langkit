@@ -1175,10 +1175,9 @@ class CompileCtx:
         available for code generation.
         """
         from langkit.compiled_types import (
-            CompiledTypeRepo, EnumType, T, resolve_type,
+            CompiledTypeRepo, EnumType, T, UserField, resolve_type,
         )
         from langkit.dsl import _StructMetaclass
-        from langkit.expressions.base import construct_compile_time_known
 
         # Make sure the language spec tagged at most one metadata struct.
         # Register it, if there is one.
@@ -1266,12 +1265,10 @@ class CompileCtx:
             _ = resolve_type(t)
 
         # Now that all types are known, construct default values for fields
-        for st in CompiledTypeRepo.struct_types:
+        for st in CompiledTypeRepo.struct_types + self.astnode_types:
             for f in st.get_abstract_node_data():
-                if f.abstract_default_value is not None:
-                    f.default_value = construct_compile_time_known(
-                        f.abstract_default_value
-                    )
+                if isinstance(f, UserField):
+                    f.construct_default_value()
 
     def compute_field_nullability(self) -> None:
         """
