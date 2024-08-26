@@ -268,11 +268,14 @@ def diagnostic_context(location: Opt[Location]) -> Iterator[None]:
 
     :param location: The location for diagnostics.
     """
-    context_stack.append(location)
-    try:
+    if location is not None:
+        context_stack.append(location)
+        try:
+            yield
+        finally:
+            context_stack.pop()
+    else:
         yield
-    finally:
-        context_stack.pop()
 
 
 class DiagnosticError(Exception):
