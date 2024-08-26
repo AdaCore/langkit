@@ -4109,14 +4109,18 @@ package body ${ada_lib_name}.Implementation is
       % if t.synth_node_builder_needed:
          <%
             constructor_args = t.synth_constructor_args
-            refcount_needed = any(
-               f.type.is_refcounted for f, _ in constructor_args
-            )
 
             parse_fields = [
                f for f, _ in constructor_args if not f.is_user_field
             ]
             user_fields = [f for f, _ in constructor_args if f.is_user_field]
+
+            # Node builder stores one child node builder for each parse fields:
+            # since node builders are refcounted types, this means that
+            # refcounting is needed when there is at least one parse field.
+            refcount_needed = parse_fields or any(
+               f.type.is_refcounted for f, _ in constructor_args
+            )
          %>
 
          type ${t.record_type} is new Node_Builder_Record with
