@@ -4,10 +4,15 @@ bad_build_type.lkt:7:31: error: Expected type DerivedNode, got EmptyNode
   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-== bad_kwarg_type.lkt ==
-bad_kwarg_type.lkt:9:9: error: Wrong type for field SynthNode.f1: expected Literal, got EmptyNode
+== bad_kwarg_type_1.lkt ==
+bad_kwarg_type_1.lkt:9:9: error: Wrong type for field SynthNode.f1: expected NodeBuilder[Literal], got NodeBuilder[EmptyNode]
 9 |         SynthNode.builder(
   |         ^
+
+
+== bad_kwarg_type_2.lkt ==
+bad_kwarg_type_2.lkt:4:29: error: Wrong type for field SynthNode.f1: expected NodeBuilder[Literal], got Literal
+4 |     @lazy prop: SynthNode = SynthNode.builder(
 
 
 == bad_parent.lkt ==

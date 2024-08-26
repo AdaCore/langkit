@@ -31,42 +31,46 @@ class LiteralSequence: FooNode {
     @exported
     @lazy
     lf_user_field: SynthUserField =
-        SynthUserField.builder(name=node.name, number=42b).build()
+        SynthUserField.builder(name=node.name.to_builder(), number=42b).build()
 
     @exported
     @lazy
     lf_non_nullable_null: SynthNonNullable =
-        SynthNonNullable.builder(items=null[Literal]).build()
+        SynthNonNullable.builder(items=null[Literal].to_builder()).build()
 
     @exported
     @lazy
     lf_non_nullable_not_null: SynthNonNullable =
-        SynthNonNullable.builder(items=node.items?[0]).build()
+        SynthNonNullable.builder(items=node.items?[0].to_builder()).build()
 
     @exported
     @lazy
     lf_nullable_null: SynthNullable =
-        SynthNullable.builder(items=null[Literal]).build()
+        SynthNullable.builder(items=null[Literal].to_builder()).build()
 
     @exported
     @lazy
     lf_nullable_not_null: SynthNullable =
-        SynthNullable.builder(items=node.items?[0]).build()
+        SynthNullable.builder(items=node.items?[0].to_builder()).build()
 
     @exported
     @lazy
     lf_parent_root: SynthParent = SynthParent.builder(
-        f=SynthChild1.builder(f=SynthChild2.builder(f=node.items?[0]))
+        f=SynthChild1.builder(
+            f=SynthChild2.builder(f=node.items?[0].to_builder())
+        )
     ).build(node)
 
     @exported
     @lazy
-    lf_parent_child: SynthParent =
-        SynthParent.builder(f=SynthChild1.builder(f=node)).build(node.items?[0])
+    lf_parent_child: SynthParent = SynthParent.builder(
+        f=SynthChild1.builder(f=node.to_builder())
+    ).build(node.items?[0])
 
     @exported
     @lazy
-    lf_parent_null: SynthParent = SynthParent.builder(f=null[FooNode]).build()
+    lf_parent_null: SynthParent =
+        SynthParent.builder(f=null[FooNode].to_builder()).build()
 
     @external()
     fun get_foreign_node(): FooNode
@@ -74,7 +78,7 @@ class LiteralSequence: FooNode {
     @exported
     @lazy
     lf_parent_foreign: SynthParent =
-        SynthParent.builder(f=null[FooNode]).build(node.get_foreign_node())
+        SynthParent.builder(f=null[FooNode].to_builder()).build(node.get_foreign_node())
 
     @exported
     @lazy

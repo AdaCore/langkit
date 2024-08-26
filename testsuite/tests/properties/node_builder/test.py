@@ -109,7 +109,7 @@ class LiteralSequence(FooNode):
     def lf_user_field():
         return CreateSynthNodeBuilder(
             T.SynthUserField,
-            name=Self.name,
+            name=CreateCopyNodeBuilder(Self.name),
             number=BigIntLiteral(42),
         ).build()
 
@@ -119,25 +119,25 @@ class LiteralSequence(FooNode):
     @lazy_field(public=True, return_type=T.SynthNonNullable)
     def lf_non_nullable_null():
         return CreateSynthNodeBuilder(
-            T.SynthNonNullable, items=No(Literal)
+            T.SynthNonNullable, items=CreateCopyNodeBuilder(No(Literal))
         ).build()
 
     @lazy_field(public=True, return_type=T.SynthNonNullable)
     def lf_non_nullable_not_null():
         return CreateSynthNodeBuilder(
-            T.SynthNonNullable, items=Self.items.at(0)
+            T.SynthNonNullable, items=CreateCopyNodeBuilder(Self.items.at(0))
         ).build()
 
     @lazy_field(public=True, return_type=T.SynthNullable)
     def lf_nullable_null():
         return CreateSynthNodeBuilder(
-            T.SynthNullable, items=No(Literal)
+            T.SynthNullable, items=CreateCopyNodeBuilder(No(Literal))
         ).build()
 
     @lazy_field(public=True, return_type=T.SynthNullable)
     def lf_nullable_not_null():
         return CreateSynthNodeBuilder(
-            T.SynthNullable, items=Self.items.at(0)
+            T.SynthNullable, items=CreateCopyNodeBuilder(Self.items.at(0))
         ).build()
 
     # We need to make sure that synthetized nodes are assigned the right
@@ -152,7 +152,7 @@ class LiteralSequence(FooNode):
                 T.SynthChild1,
                 f=CreateSynthNodeBuilder(
                     T.SynthChild2,
-                    f=Self.items.at(0),
+                    f=CreateCopyNodeBuilder(Self.items.at(0)),
                 )
             ),
         ).build(Self)
@@ -163,14 +163,14 @@ class LiteralSequence(FooNode):
             T.SynthParent,
             f=CreateSynthNodeBuilder(
                 T.SynthChild1,
-                f=Self,
+                f=CreateCopyNodeBuilder(Self),
             ),
         ).build(Self.items.at(0))
 
     @lazy_field(public=True, return_type=T.SynthParent)
     def lf_parent_null():
         return CreateSynthNodeBuilder(
-            T.SynthParent, f=No(T.FooNode)
+            T.SynthParent, f=CreateCopyNodeBuilder(No(T.FooNode))
         ).build()
 
     # The parent node must not be foreign
@@ -187,7 +187,7 @@ class LiteralSequence(FooNode):
     @lazy_field(public=True, return_type=T.SynthParent)
     def lf_parent_foreign():
         return CreateSynthNodeBuilder(
-            T.SynthParent, f=No(T.FooNode)
+            T.SynthParent, f=CreateCopyNodeBuilder(No(T.FooNode))
         ).build(Self.get_foreign_node)
 
     # Regression test: code generation used to crash when processing the node

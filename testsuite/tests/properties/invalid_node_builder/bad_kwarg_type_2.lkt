@@ -1,0 +1,9 @@
+import common_nonempty
+
+class Example: BaseExample {
+    @lazy prop: SynthNode = SynthNode.builder(
+        number=1,
+        f1=null[Literal],
+        f2=null[Literal].to_builder()
+    ).build()
+}
