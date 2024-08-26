@@ -224,6 +224,18 @@ class LiteralSequence(FooNode):
     def lf_factored_node_builder():
         return Self.create_node_builder().build()
 
+    # Check that it is possible to store node builders in lazy fields
+
+    @lazy_field(return_type=T.SynthNonNullable.builder_type)
+    def lf_node_builder():
+        return CreateSynthNodeBuilder(
+            T.SynthNonNullable, items=CreateCopyNodeBuilder(Self.items.at(0))
+        )
+
+    @lazy_field(public=True, return_type=T.SynthNonNullable)
+    def lf_staged_node_builder():
+        return Self.lf_node_builder.build()
+
 
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",
