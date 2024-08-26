@@ -53,5 +53,8 @@ R.F_F: None
 == Parent_Foreign ==
 Property_Error: main.txt:1:1-1:15: synthetic node parents must belong to the same unit as the nodes that trigger node synthetization
 
+== Factored_Node_Builder ==
+<SynthNonNullable main.txt:0:0-0:0>
+
 main.adb: Done.
 Done

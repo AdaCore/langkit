@@ -210,6 +210,20 @@ class LiteralSequence(FooNode):
             f=CreateSynthNodeBuilder(T.SynthImplicitField3),
         ).build()
 
+    # Check that it is possible to have a regular property return a node
+    # builder (no need to be in a lazy field initializer to create node
+    # builders).
+
+    @langkit_property()
+    def create_node_builder():
+        return CreateSynthNodeBuilder(
+            T.SynthNonNullable, items=CreateCopyNodeBuilder(Self.items.at(0))
+        )
+
+    @lazy_field(public=True, return_type=T.SynthNonNullable)
+    def lf_factored_node_builder():
+        return Self.create_node_builder().build()
+
 
 build_and_run(
     lkt_file="expected_concrete_syntax.lkt",

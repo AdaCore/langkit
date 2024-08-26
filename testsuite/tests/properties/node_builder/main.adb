@@ -168,5 +168,17 @@ begin
    end;
    New_Line;
 
+   Put_Line ("== Factored_Node_Builder ==");
+   declare
+      R : Synth_Non_Nullable;
+   begin
+      R := N.F_Lf_Factored_Node_Builder;
+      Put_Line (R.Image);
+   exception
+      when Exc : Property_Error =>
+         Put_Line ("Property_Error: " & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line ("main.adb: Done.");
 end Main;

@@ -4,6 +4,18 @@ bad_build_type.lkt:7:31: error: Expected type DerivedNode, got EmptyNode
   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+== bad_generic_arity.lkt ==
+bad_generic_arity.lkt:4:14: error: NodeBuilder expects one type argument: the node type
+4 |     fun f(): NodeBuilder[FooNode, FooNode] = EmptyNode.builder()
+  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== bad_generic_type.lkt ==
+bad_generic_type.lkt:4:26: error: node expected
+4 |     fun f(): NodeBuilder[Int] = 0
+  |                          ^^^
+
+
 == bad_kwarg_type_1.lkt ==
 bad_kwarg_type_1.lkt:9:9: error: Wrong type for field SynthNode.f1: expected NodeBuilder[Literal], got NodeBuilder[EmptyNode]
 9 |         SynthNode.builder(

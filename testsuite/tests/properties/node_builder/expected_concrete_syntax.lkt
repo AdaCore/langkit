@@ -89,6 +89,14 @@ class LiteralSequence: FooNode {
     @lazy
     lf_implicit_field3: SynthImplicitFieldParent =
         SynthImplicitFieldParent.builder(f=SynthImplicitField3.builder()).build()
+
+    fun create_node_builder(): NodeBuilder[SynthNonNullable] =
+        SynthNonNullable.builder(items=node.items?[0].to_builder())
+
+    @exported
+    @lazy
+    lf_factored_node_builder: SynthNonNullable =
+        node.create_node_builder().build()
 }
 
 class Name: FooNode implements TokenNode {

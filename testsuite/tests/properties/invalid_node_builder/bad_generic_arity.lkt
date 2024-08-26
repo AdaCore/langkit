@@ -1,0 +1,5 @@
+import common_empty
+
+class Example: BaseExample {
+    fun f(): NodeBuilder[FooNode, FooNode] = EmptyNode.builder()
+}

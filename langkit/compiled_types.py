@@ -5076,7 +5076,14 @@ class TypeRepo:
                     return enum_value.to_abstract_expr
 
                 if (
-                    name in ('array', 'list', 'iterator', 'entity', 'new')
+                    name in (
+                        'array',
+                        'builder_type',
+                        'entity',
+                        'iterator',
+                        'list',
+                        'new',
+                    )
                     or not isinstance(prefix, BaseStructType)
                 ):
                     return getattr(prefix, name)

@@ -2511,7 +2511,7 @@ class LktTypesLoader:
             Scope.Generic("Entity"),
             Scope.Generic("Iterator"),
             Scope.Generic("Node"),
-            Scope.Generic("Node_Builder"),
+            Scope.Generic("NodeBuilder"),
         )
         self.node_builtin = Scope.BuiltinValue("node", E.Self)
         self.self_builtin = Scope.BuiltinValue("self", E.Entity)
@@ -2565,6 +2565,7 @@ class LktTypesLoader:
                 self.generics.entity,
                 self.generics.iterator,
                 self.generics.node,
+                self.generics.node_builder,
                 Scope.Trait("ErrorNode"),
                 Scope.Trait("TokenNode"),
                 self.builtin_functions.dynamic_lexical_env,
@@ -2828,6 +2829,15 @@ class LktTypesLoader:
                         " the 'implements' part of the root node type"
                         " declaration"
                     )
+
+                elif generic == self.generics.node_builder:
+                    if len(type_args) != 1:
+                        error(
+                            f"{generic.name} expects one type argument: the"
+                            " node type"
+                        )
+                    node_type, = type_args
+                    return self.resolve_node(node_type, scope).builder_type
 
                 else:
                     # User code cannot define new generics, so there cannot
