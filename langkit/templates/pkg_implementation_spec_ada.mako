@@ -1174,7 +1174,7 @@ private package ${ada_lib_name}.Implementation is
 
          % for f in fields:
             ${f.name} : aliased ${f.type.storage_type_name} :=
-               ${f.type.storage_nullexpr};
+               ${f.ada_default_value};
          % endfor
 
          ${exts.include_extension(ext)}
