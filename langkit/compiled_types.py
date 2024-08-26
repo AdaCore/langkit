@@ -4019,9 +4019,9 @@ class NodeBuilderType(CompiledType):
         super().__init__(
             name=node_type.name + names.Name("Node_Builder"),
             exposed=False,
-            null_allowed=True,
+            null_allowed=False,
             is_refcounted=True,
-            nullexpr="No_Node_Builder",
+            nullexpr="null",
             dsl_name=f"NodeBuilder[{node_type.dsl_name}]",
         )
         self.node_type = node_type
