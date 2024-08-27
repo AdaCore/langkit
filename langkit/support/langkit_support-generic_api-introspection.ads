@@ -395,6 +395,11 @@ package Langkit_Support.Generic_API.Introspection is
    function Is_List_Node (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates a list node
 
+   function List_Element_Type (Node : Type_Ref) return Type_Ref;
+   --  Assuming that ``Node`` designates a list node, return the type for its
+   --  elements. Raise a ``Precondition_Failure`` if ``Node`` does not
+   --  designates a list node.
+
    function Is_Concrete (Node : Type_Ref) return Boolean
    is (not Is_Abstract (Node));
 

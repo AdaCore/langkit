@@ -618,6 +618,7 @@ Foo_Node_Base_List ( 31)
 
 Expr_List ( 32)
   is a list node
+  element type = Expr ( 26)
   base = Foo_Node_Base_List ( 31)
   last derivation = Expr_List ( 32)
   derivations:
@@ -625,6 +626,7 @@ Expr_List ( 32)
 
 Foo_Node_List ( 33)
   is a list node
+  element type = Foo_Node ( 22)
   base = Foo_Node_Base_List ( 31)
   last derivation = Foo_Node_List ( 33)
   derivations:
@@ -632,6 +634,7 @@ Foo_Node_List ( 33)
 
 Name_List ( 34)
   is a list node
+  element type = Name ( 35)
   base = Foo_Node_Base_List ( 31)
   last derivation = Name_List ( 34)
   derivations:
@@ -696,6 +699,10 @@ Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid nod
 Invalid args for Last_Derived_Type:
 Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
 Non-node Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: invalid node type
+
+Invalid args for List_Element_Type:
+Null Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+Non-list Node argument: LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: list node expected
 
 Check Type_Ref constants
 Checking: FooNode type ref

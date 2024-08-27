@@ -235,8 +235,9 @@ package Langkit_Support.Internal.Introspection is
       --  token kind corresponding to this token node. ``No_Token_Kind_Index``
       --  otherwise.
 
-      Is_List_Node : Boolean;
-      --  Whether this is a list node
+      List_Element_Type : Any_Type_Index;
+      --  If this is a list node, reference to its element type.
+      --  ``No_Type_Index`` otherwise.
 
       Name : Text_Access;
       --  Name for this type in camel-with-underscores convention

@@ -1347,8 +1347,25 @@ package body Langkit_Support.Generic_API.Introspection is
    function Is_List_Node (Node : Type_Ref) return Boolean is
    begin
       Check_Node_Type (Node);
-      return Node.Id.Struct_Types.all (Node.Index).Is_List_Node;
+      return Node.Id.Struct_Types.all (Node.Index).List_Element_Type
+             /= No_Type_Index;
    end Is_List_Node;
+
+   -----------------------
+   -- List_Element_Type --
+   -----------------------
+
+   function List_Element_Type (Node : Type_Ref) return Type_Ref is
+   begin
+      Check_Node_Type (Node);
+      if not Is_List_Node (Node) then
+         raise Precondition_Failure with "list node expected";
+      end if;
+
+      return From_Index
+               (Node.Id,
+                Node.Id.Struct_Types.all (Node.Index).List_Element_Type);
+   end List_Element_Type;
 
    ---------------
    -- Base_Type --

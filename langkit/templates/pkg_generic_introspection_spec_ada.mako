@@ -528,7 +528,7 @@ private package ${ada_lib_name}.Generic_Introspection is
                if ctx.generate_unparser and token_node else
                "No_Token_Kind_Index"
             )
-            list_node = t.is_list_type
+            list_element_type = t.element_type if t.is_list_type else None
             subclasses = t.subclasses
          else:
             name = t.api_name
@@ -537,7 +537,7 @@ private package ${ada_lib_name}.Generic_Introspection is
             abstract = False
             token_node = False
             token_node_kind = "No_Token_Kind_Index"
-            list_node = False
+            list_element_type = None
             subclasses = []
          desc_const = f"Node_Desc_For_{name}"
          name_const = f"Node_Name_For_{name}"
@@ -591,7 +591,7 @@ private package ${ada_lib_name}.Generic_Introspection is
          Is_Abstract       => ${abstract},
          Is_Token_Node     => ${token_node},
          Token_Node_Kind   => ${token_node_kind},
-         Is_List_Node      => ${list_node},
+         List_Element_Type => ${G.type_index(list_element_type)},
          Name              => ${name_const}'Access,
          Repr_Name         => ${(
             "null" if repr_name is None else f"{repr_name_const}'Access"
