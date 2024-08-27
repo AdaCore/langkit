@@ -136,6 +136,7 @@ private package Langkit_Support.Prettier_Utils is
    type Document_Kind is
      (Align,
       Break_Parent,
+      Empty_Table_Separator,
       Expected_Line_Breaks,
       Expected_Whitespaces,
       Fill,
@@ -190,6 +191,9 @@ private package Langkit_Support.Prettier_Utils is
             Align_Contents : Document_Type;
 
          when Break_Parent =>
+            null;
+
+         when Empty_Table_Separator =>
             null;
 
          when Expected_Line_Breaks =>
@@ -341,6 +345,10 @@ private package Langkit_Support.Prettier_Utils is
    function Create_Break_Parent
      (Self : in out Document_Pool) return Document_Type;
    --  Return a ``Break_Parent`` node
+
+   function Create_Empty_Table_Separator
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return an ``Empty_Table_Separator`` node
 
    function Create_Expected_Line_Breaks
      (Self : in out Document_Pool; Count : Positive) return Document_Type;

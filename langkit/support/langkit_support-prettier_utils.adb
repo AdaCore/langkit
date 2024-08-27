@@ -198,6 +198,9 @@ package body Langkit_Support.Prettier_Utils is
             when Break_Parent =>
                Do_Break;
 
+            when Empty_Table_Separator =>
+               null;
+
             when Expected_Line_Breaks =>
                Extend_Spacing
                  (State.Expected,
@@ -598,6 +601,9 @@ package body Langkit_Support.Prettier_Utils is
             when Break_Parent =>
                return Break_Parent;
 
+            when Empty_Table_Separator =>
+               return Alignment_Table_Separator (Null_Unbounded_String);
+
             when Fill =>
                return Fill (Recurse (Document.Fill_Document));
 
@@ -786,6 +792,20 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_Break_Parent;
+
+   ----------------------------------
+   -- Create_Empty_Table_Separator --
+   ----------------------------------
+
+   function Create_Empty_Table_Separator
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Empty_Table_Separator)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Empty_Table_Separator;
 
    ---------------------------------
    -- Create_Expected_Line_Breaks --
@@ -1302,6 +1322,9 @@ package body Langkit_Support.Prettier_Utils is
                Write
                  (Prefix & "expectedLineBreaks:"
                   & Document.Expected_Line_Breaks_Count'Image);
+
+            when Empty_Table_Separator =>
+               Write (Prefix & "emptyTableSeparator");
 
             when Expected_Whitespaces =>
                Write

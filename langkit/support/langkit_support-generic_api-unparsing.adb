@@ -2961,6 +2961,16 @@ package body Langkit_Support.Generic_API.Unparsing is
                      --  initialize it with No_Token_Kind_Ref (an obviously
                      --  invalid position) to make it clear that this component
                      --  needs an update.
+                     --
+                     --  There is one special case: we allow empty table
+                     --  separators, so that they can be put in table join
+                     --  templates.
+
+                     if Kind = "tableSeparator"
+                        and then Length (Unbounded_String'(T.Get)) = 0
+                     then
+                        return Pool.Create_Empty_Table_Separator;
+                     end if;
 
                      declare
                         Item : Linear_Template_Item :=
@@ -3614,6 +3624,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when Break_Parent =>
             return Pool.Create_Break_Parent;
+
+         when Empty_Table_Separator =>
+            return Pool.Create_Empty_Table_Separator;
 
          when Fill =>
             return Pool.Create_Fill

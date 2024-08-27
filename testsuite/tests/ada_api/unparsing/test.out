@@ -363,6 +363,190 @@ Done.
   "kind": "command"
 }
 
+== cmd_emptytablesep.json ==
+
+{
+  "command": {
+    "breakParents": true,
+    "command": "alignmentTable",
+    "elements": [
+      [
+        {
+          "id": 2,
+          "kind": "list",
+          "list": [
+            {
+              "id": 3,
+              "kind": "text",
+              "text": "var"
+            },
+            {
+              "id": 4,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 5,
+              "kind": "text",
+              "text": "v1"
+            },
+            {
+              "id": 6,
+              "kind": "text",
+              "text": " "
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "list",
+          "list": [
+            {
+              "id": 8,
+              "kind": "text",
+              "text": ":"
+            },
+            {
+              "id": 9,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 10,
+              "kind": "text",
+              "text": "T"
+            },
+            {
+              "id": 11,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 12,
+              "kind": "text",
+              "text": "="
+            },
+            {
+              "id": 13,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 14,
+              "kind": "text",
+              "text": "0"
+            },
+            {
+              "id": 15,
+              "kind": "text",
+              "text": ";"
+            }
+          ]
+        }
+      ],
+      [
+        {
+          "id": 16,
+          "kind": "list",
+          "list": [
+            {
+              "id": 17,
+              "kind": "text",
+              "text": "var"
+            },
+            {
+              "id": 18,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 19,
+              "kind": "text",
+              "text": "v2"
+            },
+            {
+              "id": 20,
+              "kind": "text",
+              "text": " "
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "kind": "list",
+          "list": [
+            {
+              "id": 22,
+              "kind": "text",
+              "text": ":"
+            },
+            {
+              "id": 23,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 24,
+              "kind": "text",
+              "text": "T"
+            },
+            {
+              "id": 25,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 26,
+              "kind": "text",
+              "text": "="
+            },
+            {
+              "id": 27,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 28,
+              "kind": "text",
+              "text": "1"
+            },
+            {
+              "id": 29,
+              "kind": "text",
+              "text": ";"
+            }
+          ]
+        }
+      ]
+    ],
+    "mustBreak": true,
+    "separators": [
+      [
+        {
+          "command": {
+            "command": "alignmentTableSeparator",
+            "text": ""
+          },
+          "id": 30,
+          "kind": "command"
+        }
+      ],
+      [
+        {
+          "command": {
+            "command": "alignmentTableSeparator",
+            "text": ""
+          },
+          "id": 31,
+          "kind": "command"
+        }
+      ]
+    ]
+  },
+  "id": 1,
+  "kind": "command"
+}
+
 == cmd_fill.json ==
 
 {
