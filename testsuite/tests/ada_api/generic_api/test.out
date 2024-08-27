@@ -780,27 +780,28 @@ For Example
   F_Fld_1 (BaseExample.f_fld_1: 6)
   P_Prop (Example.p_prop: 31)
   P_Result (Example.p_result: 32)
-  P_Id_Int (Example.p_id_int: 33)
-  P_Id_Bigint (Example.p_id_bigint: 34)
-  P_Id_Char (Example.p_id_char: 35)
-  P_Id_Token (Example.p_id_token: 36)
-  P_Id_Sloc (Example.p_id_sloc: 37)
-  P_Id_Sym (Example.p_id_sym: 38)
-  P_Id_Unit (Example.p_id_unit: 39)
-  P_Id_Root_Node (Example.p_id_root_node: 40)
-  P_Id_Name (Example.p_id_name: 41)
-  P_Id_Unit_Kind (Example.p_id_unit_kind: 42)
-  P_Id_Node_Array (Example.p_id_node_array: 43)
-  P_Id_Expr_Array (Example.p_id_expr_array: 44)
-  P_Id_Bigint_Array (Example.p_id_bigint_array: 45)
-  P_Id_Unit_Array (Example.p_id_unit_array: 46)
-  P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 47)
-  P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 48)
-  P_Id_Dflt_Bool (Example.p_id_dflt_bool: 49)
-  P_Id_Dflt_Int (Example.p_id_dflt_int: 50)
-  P_Id_Dflt_Char (Example.p_id_dflt_char: 51)
-  P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 52)
-  P_With_Md (Example.p_with_md: 53)
+  P_May_Raise (Example.p_may_raise: 33)
+  P_Id_Int (Example.p_id_int: 34)
+  P_Id_Bigint (Example.p_id_bigint: 35)
+  P_Id_Char (Example.p_id_char: 36)
+  P_Id_Token (Example.p_id_token: 37)
+  P_Id_Sloc (Example.p_id_sloc: 38)
+  P_Id_Sym (Example.p_id_sym: 39)
+  P_Id_Unit (Example.p_id_unit: 40)
+  P_Id_Root_Node (Example.p_id_root_node: 41)
+  P_Id_Name (Example.p_id_name: 42)
+  P_Id_Unit_Kind (Example.p_id_unit_kind: 43)
+  P_Id_Node_Array (Example.p_id_node_array: 44)
+  P_Id_Expr_Array (Example.p_id_expr_array: 45)
+  P_Id_Bigint_Array (Example.p_id_bigint_array: 46)
+  P_Id_Unit_Array (Example.p_id_unit_array: 47)
+  P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 48)
+  P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 49)
+  P_Id_Dflt_Bool (Example.p_id_dflt_bool: 50)
+  P_Id_Dflt_Int (Example.p_id_dflt_int: 51)
+  P_Id_Dflt_Char (Example.p_id_dflt_char: 52)
+  P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 53)
+  P_With_Md (Example.p_with_md: 54)
 
 For Def
   Parent (FooNode.parent: 19)
@@ -965,7 +966,7 @@ For Null_Qual
   Unit (FooNode.unit: 27)
   Is_Ghost (FooNode.is_ghost: 28)
   Full_Sloc_Image (FooNode.full_sloc_image: 29)
-  P_As_Bool (NullQual.p_as_bool: 54)
+  P_As_Bool (NullQual.p_as_bool: 55)
 
 For Null_Qual_Absent
   Parent (FooNode.parent: 19)
@@ -979,7 +980,7 @@ For Null_Qual_Absent
   Unit (FooNode.unit: 27)
   Is_Ghost (FooNode.is_ghost: 28)
   Full_Sloc_Image (FooNode.full_sloc_image: 29)
-  P_As_Bool (NullQual.p_as_bool: 54)
+  P_As_Bool (NullQual.p_as_bool: 55)
 
 For Null_Qual_Present
   Parent (FooNode.parent: 19)
@@ -993,7 +994,7 @@ For Null_Qual_Present
   Unit (FooNode.unit: 27)
   Is_Ghost (FooNode.is_ghost: 28)
   Full_Sloc_Image (FooNode.full_sloc_image: 29)
-  P_As_Bool (NullQual.p_as_bool: 54)
+  P_As_Bool (NullQual.p_as_bool: 55)
 
 For Var_Decl
   Parent (FooNode.parent: 19)
@@ -1191,146 +1192,154 @@ P_Result (Example.p_result: 32)
   type: NodeResult
   no argument
 
-P_Id_Int (Example.p_id_int: 33)
+P_May_Raise (Example.p_may_raise: 33)
+  owner: Example
+  is a property
+  type: Int
+  arguments:
+    Value: Int
+    Do_Raise: Bool
+
+P_Id_Int (Example.p_id_int: 34)
   owner: Example
   is a property
   type: Int
   arguments:
     Id: Int
 
-P_Id_Bigint (Example.p_id_bigint: 34)
+P_Id_Bigint (Example.p_id_bigint: 35)
   owner: Example
   is a property
   type: BigInt
   arguments:
     Id: BigInt
 
-P_Id_Char (Example.p_id_char: 35)
+P_Id_Char (Example.p_id_char: 36)
   owner: Example
   is a property
   type: Character
   arguments:
     Id: Character
 
-P_Id_Token (Example.p_id_token: 36)
+P_Id_Token (Example.p_id_token: 37)
   owner: Example
   is a property
   type: Token
   arguments:
     Id: Token
 
-P_Id_Sloc (Example.p_id_sloc: 37)
+P_Id_Sloc (Example.p_id_sloc: 38)
   owner: Example
   is a property
   type: SourceLocation
   arguments:
     Id: SourceLocation
 
-P_Id_Sym (Example.p_id_sym: 38)
+P_Id_Sym (Example.p_id_sym: 39)
   owner: Example
   is a property
   type: Symbol
   arguments:
     Id: Symbol
 
-P_Id_Unit (Example.p_id_unit: 39)
+P_Id_Unit (Example.p_id_unit: 40)
   owner: Example
   is a property
   type: AnalysisUnit
   arguments:
     Id: AnalysisUnit
 
-P_Id_Root_Node (Example.p_id_root_node: 40)
+P_Id_Root_Node (Example.p_id_root_node: 41)
   owner: Example
   is a property
   type: FooNode
   arguments:
     Id: FooNode
 
-P_Id_Name (Example.p_id_name: 41)
+P_Id_Name (Example.p_id_name: 42)
   owner: Example
   is a property
   type: Name
   arguments:
     Id: Name
 
-P_Id_Unit_Kind (Example.p_id_unit_kind: 42)
+P_Id_Unit_Kind (Example.p_id_unit_kind: 43)
   owner: Example
   is a property
   type: AnalysisUnitKind
   arguments:
     Id: AnalysisUnitKind
 
-P_Id_Node_Array (Example.p_id_node_array: 43)
+P_Id_Node_Array (Example.p_id_node_array: 44)
   owner: Example
   is a property
   type: FooNode.array
   arguments:
     Id: FooNode.array
 
-P_Id_Expr_Array (Example.p_id_expr_array: 44)
+P_Id_Expr_Array (Example.p_id_expr_array: 45)
   owner: Example
   is a property
   type: Expr.array
   arguments:
     Id: Expr.array
 
-P_Id_Bigint_Array (Example.p_id_bigint_array: 45)
+P_Id_Bigint_Array (Example.p_id_bigint_array: 46)
   owner: Example
   is a property
   type: BigInt.array
   arguments:
     Id: BigInt.array
 
-P_Id_Unit_Array (Example.p_id_unit_array: 46)
+P_Id_Unit_Array (Example.p_id_unit_array: 47)
   owner: Example
   is a property
   type: AnalysisUnit.array
   arguments:
     Id: AnalysisUnit.array
 
-P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 47)
+P_Create_Bigint_Iterator (Example.p_create_bigint_iterator: 48)
   owner: Example
   is a property
   type: BigInt.iterator
   no argument
 
-P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 48)
+P_Id_Bigint_Iterator (Example.p_id_bigint_iterator: 49)
   owner: Example
   is a property
   type: BigInt.iterator
   arguments:
     Id: BigInt.iterator
 
-P_Id_Dflt_Bool (Example.p_id_dflt_bool: 49)
+P_Id_Dflt_Bool (Example.p_id_dflt_bool: 50)
   owner: Example
   is a property
   type: Bool
   arguments:
     Id: Bool := True
 
-P_Id_Dflt_Int (Example.p_id_dflt_int: 50)
+P_Id_Dflt_Int (Example.p_id_dflt_int: 51)
   owner: Example
   is a property
   type: Int
   arguments:
     Id: Int := 42
 
-P_Id_Dflt_Char (Example.p_id_dflt_char: 51)
+P_Id_Dflt_Char (Example.p_id_dflt_char: 52)
   owner: Example
   is a property
   type: Character
   arguments:
     Id: Character := '\x00'
 
-P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 52)
+P_Id_Dflt_Root_Node (Example.p_id_dflt_root_node: 53)
   owner: Example
   is a property
   type: FooNode
   arguments:
     Id: FooNode := <No node>
 
-P_With_Md (Example.p_with_md: 53)
+P_With_Md (Example.p_with_md: 54)
   owner: Example
   is a property
   type: Example
@@ -1338,7 +1347,7 @@ P_With_Md (Example.p_with_md: 53)
     Md1: Bool
     Md2: Bool
 
-P_As_Bool (NullQual.p_as_bool: 54)
+P_As_Bool (NullQual.p_as_bool: 55)
   owner: NullQual
   is a property
   type: Bool
@@ -1644,6 +1653,27 @@ None matches VarDecl? True
 Error cases:
 <No_Value_Ref> matches Int? LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null value reference
 <No node> matches <No_Type_Ref>? LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE: null type reference
+
+Managed errors
+==============
+
+Eval_Member/Success
+Inspect: 42
+  Type_Of: Int
+
+Eval_Node_Member/Success
+Inspect: 42
+  Type_Of: Int
+
+Eval_Member/Error
+Inspect:
+  Exception name: LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR
+  Exception message: from may_raise
+
+Eval_Node_Member/Error
+Inspect:
+  Exception name: LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR
+  Exception message: from may_raise
 
 
 == hash.adb ==

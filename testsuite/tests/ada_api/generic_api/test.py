@@ -18,8 +18,10 @@ from langkit.expressions import (
     BigIntLiteral,
     CharacterLiteral,
     Entity,
+    If,
     No,
     Property,
+    PropertyError,
     Self,
     String,
     langkit_property,
@@ -87,6 +89,10 @@ class Example(BaseExample):
     @langkit_property(public=True)
     def result():
         return T.NodeResult.new(n=Self, e=Entity)
+
+    @langkit_property(public=True)
+    def may_raise(value=T.Int, do_raise=T.Bool):
+        return If(do_raise, PropertyError(T.Int, "from may_raise"), value)
 
     # Test for primitive types
     id_bool = Property(lambda id=T.Bool: id, public=True)
