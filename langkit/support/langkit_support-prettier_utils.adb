@@ -1181,6 +1181,34 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Recurse_Flatten;
 
+   -------------------------
+   -- Create_Recurse_Left --
+   -------------------------
+
+   function Create_Recurse_Left
+     (Self : in out Document_Pool) return Document_Type
+   is begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Recurse_Left)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Recurse_Left;
+
+   --------------------------
+   -- Create_Recurse_Right --
+   --------------------------
+
+   function Create_Recurse_Right
+     (Self : in out Document_Pool) return Document_Type
+   is begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Recurse_Right)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Recurse_Right;
+
    ----------------------
    -- Create_Soft_Line --
    ----------------------
@@ -1491,6 +1519,12 @@ package body Langkit_Support.Prettier_Utils is
                      Write (Prefix & Simple_Indent & Debug_Name (T));
                   end;
                end loop;
+
+            when Recurse_Left =>
+               Write (Prefix & "recurse_left");
+
+            when Recurse_Right =>
+               Write (Prefix & "recurse_right");
 
             when Soft_Line =>
                Write (Prefix & "softline");

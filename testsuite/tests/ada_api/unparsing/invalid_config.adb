@@ -103,6 +103,11 @@ begin
    Check ("invalid_recurse_flatten.json");
    Check ("invalid_recurse_flatten2.json");
    Check ("invalid_recurse_flatten3.json");
+   Check ("invalid_table_join.json");
+   Check ("invalid_table_join2.json");
+   Check ("invalid_table_join3.json");
+   Check ("invalid_table_join4.json");
+   Check ("invalid_table_join5.json");
    New_Line;
 
    Put_Line ("== Invalid templates (too many/few ""recurse"") ==");

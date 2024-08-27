@@ -154,6 +154,8 @@ private package Langkit_Support.Prettier_Utils is
       Recurse,
       Recurse_Field,
       Recurse_Flatten,
+      Recurse_Left,
+      Recurse_Right,
       Soft_Line,
       Table,
       Table_Separator,
@@ -175,7 +177,9 @@ private package Langkit_Support.Prettier_Utils is
      | If_Kind
      | Recurse
      | Recurse_Field
-     | Recurse_Flatten;
+     | Recurse_Flatten
+     | Recurse_Left
+     | Recurse_Right;
 
    subtype Final_Document_Kind is Instantiated_Template_Document_Kind
    with Static_Predicate =>
@@ -265,6 +269,9 @@ private package Langkit_Support.Prettier_Utils is
          when Recurse_Flatten =>
             Recurse_Flatten_Types : Type_Vectors.Vector;
 
+         when Recurse_Left | Recurse_Right =>
+            null;
+
          when Soft_Line =>
             null;
 
@@ -310,9 +317,10 @@ private package Langkit_Support.Prettier_Utils is
      (No_Template_Kind,
       With_Recurse,
       With_Recurse_Field,
-      With_Text_Recurse);
-   subtype Some_Template_Kind is
-     Template_Kind range With_Recurse ..  With_Text_Recurse;
+      With_Text_Recurse,
+      Join_Template);
+   subtype Some_Template_Kind is Template_Kind
+     range Template_Kind'Succ (Template_Kind'First) ..  Template_Kind'Last;
    type Template_Type (Kind : Template_Kind := No_Template_Kind) is record
       case Kind is
          when No_Template_Kind =>
@@ -442,6 +450,14 @@ private package Langkit_Support.Prettier_Utils is
      (Self  : in out Document_Pool;
       Types : in out Type_Vectors.Vector) return Document_Type;
    --  Return a ``Recurse_Flatten`` node
+
+   function Create_Recurse_Left
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Recurse_Left`` node
+
+   function Create_Recurse_Right
+     (Self : in out Document_Pool) return Document_Type;
+   --  Return a ``Recurse_Right`` node
 
    function Create_Table
      (Self       : in out Document_Pool;

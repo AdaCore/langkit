@@ -358,6 +358,28 @@ package Langkit_Support.Generic_API.Unparsing is
    --    If false (the default), rows go on each line only when a break occurs
    --    in the table.
    --
+   --  * "join": Determine whether a list child must be put on the previous
+   --    table row, i.e. whether to join what would instead be two rows.
+   --
+   --    If present, this must be an object with a mandatory "predicate" entry,
+   --    that must be a reference to a predicate property  i.e. a property that
+   --    each list child has and that returns whether to join rows, as a
+   --    boolean.
+   --
+   --    The optional "template" entry must be a template that describes how to
+   --    join two rows: the first row is substituted to the "recurse_left"
+   --    template and the second row is substituted to the "recurse_right"
+   --    template. For example::
+   --
+   --      "join": {
+   --        "predicate": "p_my_predicate",
+   --        "sep": [
+   --          "recurse_left",
+   --          {"kind": "tableSeparator", "text": ""},
+   --          {"kind": "group", "document": ["line", "recurse_right"]}
+   --        ]
+   --      }
+   --
    --  The "leading_sep" and "trailing_sep" components are optional, and valid
    --  only for list nodes that accept respectively leading and trailing
    --  separators. If present, they contain document templates to unparse
@@ -374,11 +396,19 @@ package Langkit_Support.Generic_API.Unparsing is
    --  empty lines are preserved.
 
    function Unparse_To_Prettier
-     (Node   : Lk_Node;
-      Config : Unparsing_Configuration)
+     (Node          : Lk_Node;
+      Config        : Unparsing_Configuration;
+      Process_Error : access procedure
+                        (Node : Lk_Node; Message : String) := null)
       return Prettier_Ada.Documents.Document_Type;
    --  Unparse ``Node`` into a prettier document according to the given
    --  configuration.
+   --
+   --  ``Process_Error`` is called for each non-critical error (i.e. errors
+   --  that do not prevent the unparsing). For each error, ``Node`` is the node
+   --  that was processed when the error occured, and ``Message`` gives a short
+   --  description of the error. If ``Process_Error`` is null, errors are
+   --  printed on the standard output.
 
    procedure Pretty_Print_Main (Language : Language_Id);
    --  Implementation of the "*_unparse" test program for the given Language.

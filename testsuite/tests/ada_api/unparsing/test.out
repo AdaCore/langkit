@@ -199,6 +199,16 @@ a: Int=2
     template for VarDecl.f_name: invalid item in recurse_flatten if: JSON_NULL_TYPE
 # invalid_recurse_flatten3.json
     template for VarDecl.f_name: invalid node type in recurse_flatten if: NoSuchNode
+# invalid_table_join.json
+    FooNode has no p_no_such_predicate member
+# invalid_table_join2.json
+    parent must return a boolean
+# invalid_table_join3.json
+    p_table_join_bad_args must take no argument
+# invalid_table_join4.json
+    p_table_join_bad_rtype must return a boolean
+# invalid_table_join5.json
+    f_name is not a property for Decl
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -2892,4 +2902,29 @@ var vv1 : T = 1;
 +{
 var v0 : T = 0;var vv1 : T = 1;
 }
+
+== main.adb -c table_join/config.json table_join/big.txt ==
+var v0:T=0;
+var v1:T=1;
+var left:T=2;       var right:T=3;
+var left:T=4;
+var looooooooooooooong:T=5;
+var right:T=6;
+var left:TTTTTTT=2; var right:T=3;
+
+var looooooooooooooong:T=0;
+var left:T=1;   var right:T=2;
+var left:TTT=3; var right:T=4;
+
+var left:T=3;
+# Comment
+var right:T=4;
+
+== main.adb -c table_join/config.json table_join/error.txt ==
+error.txt:4:1: predicate FooNode.p_table_join_needed raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: predicate bug
+var v0:T=0;
+var v1:T=1;
+var left:T=2;
+foo,bar var right:T=3;
+var left:T=4;
 Done

@@ -54,6 +54,27 @@ grammar foo_grammar {
 
 @abstract
 class FooNode implements Node[FooNode] {
+    @exported
+    fun table_join_needed(): Bool = {
+        val this_decl = node.as[AnnotatedDecl]?.decl.as[VarDecl];
+        val prev_decl = node.as_bare_entity.previous_sibling().as[AnnotatedDecl]?.decl.as[VarDecl];
+
+        (
+            (
+                (
+                    not prev_decl.is_null and not this_decl.is_null
+                ) and (
+                    if node.as[AnnotatedDecl].annotation_names.empty() then true else raise[Bool] PropertyError("predicate bug")
+                )
+            ) and prev_decl.name.text() == "left"
+        ) and this_decl.name.text() == "right"
+    }
+
+    @exported
+    fun table_join_bad_args(i: Int): Bool = i == 0
+
+    @exported
+    fun table_join_bad_rtype(): Int = 0
 }
 
 class AnnotatedDecl: FooNode {

@@ -2,12 +2,45 @@
 
 from langkit.compiled_types import T
 from langkit.dsl import ASTNode, AbstractField, Field, abstract
+from langkit.expressions import (
+    If, Not, PropertyError, Self, String, Var, langkit_property
+)
 
 from utils import GPRMain, build_and_run
 
 
 class FooNode(ASTNode):
-    pass
+
+    @langkit_property(public=True, return_type=T.Bool)
+    def table_join_needed():
+        this_decl = Var(Self.cast(T.AnnotatedDecl)._.decl.cast(T.VarDecl))
+        prev_decl = Var(
+            Self
+            .as_bare_entity
+            .previous_sibling
+            .cast(T.AnnotatedDecl)
+            ._.decl
+            .cast(T.VarDecl)
+        )
+        return (
+            Not(prev_decl.is_null)
+            & Not(this_decl.is_null)
+            & If(
+                Self.cast(T.AnnotatedDecl).annotation_names.empty,
+                True,
+                PropertyError(T.Bool, "predicate bug"),
+            )
+            & (prev_decl.name.text == String("left"))
+            & (this_decl.name.text == String("right"))
+        )
+
+    @langkit_property(public=True, return_type=T.Bool)
+    def table_join_bad_args(i=T.Int):
+        return i == 0
+
+    @langkit_property(public=True, return_type=T.Int)
+    def table_join_bad_rtype():
+        return 0
 
 
 @abstract
@@ -265,6 +298,9 @@ for cfg in ["inherit", "inherit_null"]:
         "table_align/{}.json".format(cfg),
         "table_align/blocks.txt",
     )
+
+for src in ["big.txt", "error.txt"]:
+    add_main("table_join/config.json", "table_join/{}".format(src))
 
 
 build_and_run(
