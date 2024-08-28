@@ -1,0 +1,10 @@
+def f(): T
+{
+label0:
+a = f1();
+# Comment 1
+
+label1:
+a = f2();
+# Comment 2
+}

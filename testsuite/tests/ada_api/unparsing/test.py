@@ -55,7 +55,16 @@ class FunDecl(Decl):
     args = Field(type=T.ParamSpec.list)
     return_type = Field(type=T.Name)
     is_null = Field(type=T.NullQual)
-    body = Field(type=T.Stmt.list)
+    body = Field(type=T.FooNode)
+
+
+class LabeledStmts(FooNode):
+    label = Field(type=T.Name)
+    stmts = Field(type=T.Stmt.list)
+
+
+class Stmts(FooNode):
+    stmts = Field(type=T.Stmt.list)
 
 
 @abstract
@@ -150,6 +159,7 @@ for source in [
     "block_mixed.txt",
     "block_trailing.txt",
     "list_nested_reattach.txt",
+    "list_nested_reattach_2.txt",
     "list_ghost_before_trailing.txt",
     "list_separator.txt",
     "list_separator_trailing.txt",
