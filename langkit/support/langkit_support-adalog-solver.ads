@@ -3,6 +3,9 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+--  To facilitate use from a -gnatX project, since we don't use the [] syntax
+pragma Warnings (Off, "obsolescent");
+
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 

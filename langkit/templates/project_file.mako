@@ -141,6 +141,8 @@ library project ${lib_name} is
 
    package Compiler is
 
+      for Local_Configuration_Pragmas use "gnat.adc";
+
       For_All_Cargs := ("-fPIC");
 
       ----------------------
@@ -242,7 +244,8 @@ library project ${lib_name} is
             null;
       end case;
 
-      Common_Ada_Cargs := For_All_Cargs & Mode_Args & Ada_Mode_Args;
+      Common_Ada_Cargs :=
+        ("-gnatX") & For_All_Cargs & Mode_Args & Ada_Mode_Args;
       Common_C_Cargs := For_All_Cargs & Mode_Args & C_Mode_Args;
 
       for Default_Switches ("Ada") use Common_Ada_Cargs & Generated_Ada_Cargs;

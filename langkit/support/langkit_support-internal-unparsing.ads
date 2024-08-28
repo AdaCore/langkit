@@ -10,6 +10,9 @@
 --  information in Langkit-generated libraries. These tables are enough to turn
 --  a parse tree to synthetic source code.
 
+--  To facilitate use from a -gnatX project, since we don't use the [] syntax
+pragma Warnings (Off, "obsolescent");
+
 with Langkit_Support.Generic_API.Introspection;
 use Langkit_Support.Generic_API.Introspection;
 

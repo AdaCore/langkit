@@ -3508,7 +3508,7 @@ class ArrayLiteral(AbstractExpression):
             return CallExpr(
                 'Array_Lit', array_type.constructor_name, array_type,
                 [aggregate_expr(
-                    array_type.array_type_name.camel_with_underscores,
+                    array_type,
                     [(i, el) for i, el in enumerate(elements, 1)])],
                 abstract_expr=abstract_expr
             )
@@ -5411,9 +5411,9 @@ def aggregate_expr(type, assocs):
         type_name = type
         type = no_compiled_type
     else:
-        assert issubclass(type, no_compiled_type)
+        assert isinstance(type, CompiledType)
         meta_template = "{type}'({operands})"
-        type_name = type.name.camel
+        type_name = type.array_type_name.camel_with_underscores
 
     template = meta_template.format(
         type=type_name,

@@ -12,6 +12,9 @@ root_node_array = T.root_node.array
 root_node_iterator = T.root_node.iterator
 %>
 
+--  To facilitate use from a -gnatX project, since we don't use the [] syntax
+pragma Warnings (Off, "obsolescent");
+
 with Ada.Containers;              use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Hashed_Sets;
