@@ -17,9 +17,11 @@ grammar foo_grammar {
         name
         pick("("
         list*(param_spec, ",", allow_trailing)
-        ")") ":" type_ref null_qual "{" list*(stmt) "}"
+        ")") ":" type_ref null_qual "{" stmts "}"
     )
+    stmts <- or(list+(labeled_stmts) | Stmts(list*(stmt)))
     annot_fun_decl <- AnnotatedDecl(annotations fun_decl)
+    labeled_stmts <- LabeledStmts(name ":" list*(stmt))
     stmt <- or(
         | ExprStmt(expr ";")
         | AssignStmt(
@@ -86,7 +88,7 @@ class FunDecl: Decl {
     @parse_field args: ASTList[ParamSpec]
     @parse_field return_type: Name
     @parse_field is_null: NullQual
-    @parse_field body: ASTList[Stmt]
+    @parse_field body: FooNode
 }
 
 class VarDecl: Decl {
@@ -131,6 +133,11 @@ class PlusDecls: ASTList[Decl] {
 class AnnotationList: ASTList[Name] {
 }
 
+class LabeledStmts: FooNode {
+    @parse_field label: Name
+    @parse_field stmts: ASTList[Stmt]
+}
+
 class Name: FooNode implements TokenNode {
 }
 
@@ -155,4 +162,8 @@ class AssignStmt: Stmt {
 
 class ExprStmt: Stmt {
     @parse_field expr: Expr
+}
+
+class Stmts: FooNode {
+    @parse_field stmts: ASTList[Stmt]
 }

@@ -2261,6 +2261,18 @@ def f(): T
     # Third comment
 }
 
+== main.adb -c config.json trivias/list_nested_reattach_2.txt ==
+def f(): T
+{
+    label0:
+        a = f1();
+        # Comment 1
+
+    label1:
+        a = f2();
+        # Comment 2
+}
+
 == main.adb -c config.json trivias/list_ghost_before_trailing.txt ==
 def f(): T
 {

@@ -42,6 +42,18 @@
         }
       }
     },
+    "LabeledStmts": {
+      "fields": {
+        "f_stmts": {
+          "kind": "ifEmpty",
+          "then": ["recurse", "hardline"],
+          "else": {
+            "kind": "indent",
+            "contents": ["hardline", "recurse"]
+          }
+        }
+      }
+    },
     "VarDecl": {
       "fields": {
         "f_type_expr": ["whitespace", "recurse", "whitespace"],

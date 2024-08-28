@@ -974,8 +974,9 @@ package body Langkit_Support.Generic_API.Unparsing is
    is
       Trace : constant Boolean := Trivias_Trace.Is_Active;
 
-      function Process (Node : Lk_Node) return Visit_Status;
-      --  Callback for ``Langkit_Support.Analysis.Traverse``
+      procedure Process (Node : Lk_Node);
+      --  Reattach relevant trivias to ``Node``. This processes ``Node``'s
+      --  children recursively.
 
       procedure Reattach (T : Lk_Token; To : Lk_Node; What : String);
       --  Reattach ``T`` to the ``To`` node. ``What`` is used to qualify this
@@ -985,11 +986,12 @@ package body Langkit_Support.Generic_API.Unparsing is
       -- Process --
       -------------
 
-      function Process (Node : Lk_Node) return Visit_Status is
+      procedure Process (Node : Lk_Node) is
+         Is_List : constant Boolean := Node.Is_List_Node;
       begin
-         --  Register reattached trivias that come before/after list nodes
+         --  Register reattached trivias that come before list nodes
 
-         if Node.Is_List_Node then
+         if Is_List then
             declare
                First_Trivia : constant Lk_Token := First_Trivia_Before (Node);
             begin
@@ -998,19 +1000,21 @@ package body Langkit_Support.Generic_API.Unparsing is
                     (First_Trivia, Node, "leading trivias before list node");
                end if;
             end;
-
-            if Node.Children_Count > 0 then
-               declare
-                  T : constant Lk_Token := Node.Token_End.Next;
-               begin
-                  if T.Is_Trivia then
-                     Reattach (T, Node, "trailing trivias after list node");
-                  end if;
-               end;
-            end if;
          end if;
 
-         --  Also register reattached trivias that come after list children:
+         --  Reattach trivias to children
+
+         for C of Node.Children loop
+            if not C.Is_Null then
+               Process (C);
+            end if;
+         end loop;
+         --
+         --  Note that what follows is done after the recursion so that
+         --  reattaching to children has priority over reattaching to their
+         --  parents.
+
+         --  Register reattached trivias that come after list children:
          --  they must be processed during the unparsing of the parent list.
 
          if not Node.Parent.Is_Null and then Node.Parent.Is_List_Node then
@@ -1024,7 +1028,19 @@ package body Langkit_Support.Generic_API.Unparsing is
             end;
          end if;
 
-         return Into;
+         --  Register reattached trivias that come after list nodes
+
+         if Is_List then
+            if Node.Children_Count > 0 then
+               declare
+                  T : constant Lk_Token := Node.Token_End.Next;
+               begin
+                  if T.Is_Trivia then
+                     Reattach (T, Node, "trailing trivias after list node");
+                  end if;
+               end;
+            end if;
+         end if;
       end Process;
 
       --------------
@@ -1047,7 +1063,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Determine which tokens have reattached trivias
 
       Info.First_Reattached_Trivias.Clear;
-      Node.Traverse (Process'Access);
+      Process (Node);
 
       --  Scan all tokens and create the corresponding trivias
 
