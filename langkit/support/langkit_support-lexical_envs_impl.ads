@@ -204,10 +204,9 @@ package Langkit_Support.Lexical_Envs_Impl is
 
    type Env_Getter (Dynamic : Boolean := False) is record
       Env : Lexical_Env := Null_Lexical_Env;
-      --  If Dynamic, cache for the resolved lexical environment. To be used
-      --  only when No_Entity_Info is used for the resolution. We consider that
-      --  this cache contains a valid entry when Env is not Null_Lexical_Env
-      --  and that it is not stale.
+      --  If Dynamic, cache for the resolved lexical environment.
+      --  We consider that this cache contains a valid entry when Env is not
+      --  Null_Lexical_Env and that it is not stale.
       --
       --  Note that we process Empty_Env in a very specific way here: resolvers
       --  often return Empty_Env when they fail to compute the result, for
@@ -229,6 +228,8 @@ package Langkit_Support.Lexical_Envs_Impl is
             Resolver : Lexical_Env_Resolver;
             --  Data and callable to resolve this getter
 
+            Cached_Info : Entity_Info;
+            --  The entity info that was used to compute Env
          when False =>
             null;
       end case;
