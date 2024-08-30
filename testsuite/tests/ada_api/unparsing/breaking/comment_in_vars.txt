@@ -1,0 +1,4 @@
+var v1: Int = # comment 1
+   1;
+var v2: Int = # comment 2
+   2;

@@ -1202,52 +1202,27 @@ Done.
   "list": [
     {
       "command": {
-        "breakContents": {
-          "command": {
-            "command": "line",
-            "hard": false,
-            "literal": false,
-            "soft": false
-          },
-          "id": 3,
-          "kind": "command"
-        },
-        "command": "ifBreak",
-        "flatContents": {
-          "id": 4,
-          "kind": "list",
-          "list": [
-          ]
-        }
+        "command": "line",
+        "hard": false,
+        "literal": false,
+        "soft": false
       },
       "id": 2,
       "kind": "command"
     },
     {
-      "id": 5,
+      "id": 3,
       "kind": "text",
       "text": "var i:Int=0;"
     },
     {
       "command": {
-        "breakContents": {
-          "command": {
-            "command": "line",
-            "hard": false,
-            "literal": false,
-            "soft": false
-          },
-          "id": 7,
-          "kind": "command"
-        },
-        "command": "ifBreak",
-        "flatContents": {
-          "id": 8,
-          "kind": "text",
-          "text": " "
-        }
+        "command": "line",
+        "hard": false,
+        "literal": false,
+        "soft": false
       },
-      "id": 6,
+      "id": 4,
       "kind": "command"
     }
   ]
@@ -2596,6 +2571,231 @@ var v3:T=3;
 
 
 var v4:T=4;
+
+== main.adb -c breaking/fill.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | fill:
+[LANGKIT.UNPARSING.FINAL_DOC] |   list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Semicolon]: ;
+
+var v:Int=1;
+
+== main.adb -c breaking/group.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | group:
+[LANGKIT.UNPARSING.FINAL_DOC] |   shouldBreak: FALSE
+[LANGKIT.UNPARSING.FINAL_DOC] |   id: 0
+[LANGKIT.UNPARSING.FINAL_DOC] |   list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Semicolon]: ;
+
+var v:Int=1;
+
+== main.adb -c breaking/ifbreak.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | indent:
+[LANGKIT.UNPARSING.FINAL_DOC] |   list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | line
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Semicolon]: ;
+
+var v:Int=
+    1;
+
+== main.adb -c breaking/table.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | table:
+[LANGKIT.UNPARSING.FINAL_DOC] |   must_break: FALSE
+[LANGKIT.UNPARSING.FINAL_DOC] |   row:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Semicolon]: ;
+
+var
+ v:Int=1;
+
+== main.adb -c breaking/root.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] | softline
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Semicolon]: ;
+var
+v:Int=1;
+
+== main.adb -c breaking/table.json breaking/comment_in_vars.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | table:
+[LANGKIT.UNPARSING.FINAL_DOC] |   must_break: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC] |   row:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | | token[Comment]: # comment 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Semicolon]: ;
+[LANGKIT.UNPARSING.FINAL_DOC] |   row:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v2
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | | token[Comment]: # comment 2
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Number]: 2
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Semicolon]: ;
+
+var
+v1:Int= # comment 1
+1;
+var
+v2:Int= # comment 2
+2;
+
+== main.adb -c breaking/table_must_break.json breaking/comment_in_vars.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] group:
+[LANGKIT.UNPARSING.FINAL_DOC]   shouldBreak: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]   id: 0
+[LANGKIT.UNPARSING.FINAL_DOC]   table:
+[LANGKIT.UNPARSING.FINAL_DOC]     must_break: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]     row:
+[LANGKIT.UNPARSING.FINAL_DOC]     | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]     | | softline
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: v1
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | | token[Comment]: # comment 1
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | line
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Semicolon]: ;
+[LANGKIT.UNPARSING.FINAL_DOC]     row:
+[LANGKIT.UNPARSING.FINAL_DOC]     | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]     | | softline
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: v2
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | | token[Comment]: # comment 2
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | line
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Number]: 2
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Semicolon]: ;
+var
+v1:Int= # comment 1
+1;
+var
+v2:Int= # comment 2
+2;
+
+== main.adb -c breaking/table_must_break.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] group:
+[LANGKIT.UNPARSING.FINAL_DOC]   shouldBreak: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]   id: 0
+[LANGKIT.UNPARSING.FINAL_DOC]   table:
+[LANGKIT.UNPARSING.FINAL_DOC]     must_break: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]     row:
+[LANGKIT.UNPARSING.FINAL_DOC]     | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]     | | softline
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | line
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Semicolon]: ;
+var
+v:Int=
+1;
+
+== main.adb -c breaking/table_must_break_not_parent.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] group:
+[LANGKIT.UNPARSING.FINAL_DOC]   shouldBreak: FALSE
+[LANGKIT.UNPARSING.FINAL_DOC]   id: 0
+[LANGKIT.UNPARSING.FINAL_DOC]   list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | softline
+[LANGKIT.UNPARSING.FINAL_DOC]   | table:
+[LANGKIT.UNPARSING.FINAL_DOC]   |   must_break: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]   |   row:
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Semicolon]: ;
+var v:Int=1;
 
 == main.adb -c table_align/no_split.json table_align/var_decls.txt ==
 null var v1 : Int = 1;
