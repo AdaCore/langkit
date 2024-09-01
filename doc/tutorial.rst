@@ -246,7 +246,7 @@ right you have what should be done with it:
 Only exact input strings trigger ``Literal`` matchers while the input is
 matched against a regular expression with ``Pattern`` matchers. Note that the
 order of rules is meaningful: here, the input is matched first against keywords
-and then only if there is no match, identifers and number patterns are matched.
+and then only if there is no match, identifiers and number patterns are matched.
 If ``Literal`` rules appeared at the end, ``def`` would always be emitted
 as an identifier.
 
@@ -436,7 +436,7 @@ colon.
 
     extern_decl=ExternDecl('extern', G.prototype),
 
-This one is interesting: inside the parens, we matches the ``extern`` keyword
+This one is interesting: inside the parens, we match the ``extern`` keyword
 followed by what the ``prototype`` rule matches. Then, thanks to the
 ``ExternDecl`` call, we take the content we matched and create an
 ``ExternDecl`` AST node to hold the result.
