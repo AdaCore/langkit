@@ -1,0 +1,19 @@
+var v0: T = 0;
+var v1: T = 1;
+var left: T = 2;
+var right: T = 3;
+var left: T = 4;
+var looooooooooooooong: T = 5;
+var right: T = 6;
+var left: TTTTTTT = 2;
+var right: T = 3;
+
+var looooooooooooooong: T = 0;
+var left: T = 1;
+var right: T = 2;
+var left: TTT = 3;
+var right: T = 4;
+
+var left: T = 3;
+# Comment
+var right: T = 4;

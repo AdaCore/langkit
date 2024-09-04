@@ -441,6 +441,7 @@ begin
 
       if Is_List_Node (Node) then
          Put_Line ("  is a list node");
+         Put_Line ("  element type = " & Node_Repr (List_Element_Type (Node)));
       end if;
 
       Put ("  base = ");
@@ -609,6 +610,26 @@ begin
    Put ("Non-node Node argument: ");
    begin
       Dummy_Type_Index := Last_Derived_Type (Invalid_Node);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+   New_Line;
+
+   Put_Line ("Invalid args for List_Element_Type:");
+   Put ("Null Node argument: ");
+   begin
+      Put (Node_Repr (List_Element_Type (No_Type_Ref)));
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put ("Non-list Node argument: ");
+   begin
+      Put (Node_Repr (List_Element_Type (Nodes (Nodes'First))));
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>

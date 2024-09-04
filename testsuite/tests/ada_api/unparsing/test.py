@@ -2,12 +2,45 @@
 
 from langkit.compiled_types import T
 from langkit.dsl import ASTNode, AbstractField, Field, abstract
+from langkit.expressions import (
+    If, Not, PropertyError, Self, String, Var, langkit_property
+)
 
 from utils import GPRMain, build_and_run
 
 
 class FooNode(ASTNode):
-    pass
+
+    @langkit_property(public=True, return_type=T.Bool)
+    def table_join_needed():
+        this_decl = Var(Self.cast(T.AnnotatedDecl)._.decl.cast(T.VarDecl))
+        prev_decl = Var(
+            Self
+            .as_bare_entity
+            .previous_sibling
+            .cast(T.AnnotatedDecl)
+            ._.decl
+            .cast(T.VarDecl)
+        )
+        return (
+            Not(prev_decl.is_null)
+            & Not(this_decl.is_null)
+            & If(
+                Self.cast(T.AnnotatedDecl).annotation_names.empty,
+                True,
+                PropertyError(T.Bool, "predicate bug"),
+            )
+            & (prev_decl.name.text == String("left"))
+            & (this_decl.name.text == String("right"))
+        )
+
+    @langkit_property(public=True, return_type=T.Bool)
+    def table_join_bad_args(i=T.Int):
+        return i == 0
+
+    @langkit_property(public=True, return_type=T.Int)
+    def table_join_bad_rtype():
+        return 0
 
 
 @abstract
@@ -134,12 +167,14 @@ class AnnotatedDecl(FooNode):
 mains = []
 
 
-def add_main(config, srcfile, rule=None, sloc=None):
+def add_main(config, srcfile, rule=None, sloc=None, traces=[]):
     args = ["-c", config, srcfile]
     if rule:
         args += ["-r", rule]
     if sloc:
         args += ["-s", sloc]
+    for t in traces:
+        args += ["-t", t]
     mains.append(GPRMain("main.adb", args))
 
 
@@ -191,6 +226,56 @@ for i in ["none", 0, 1, 2]:
         "trivias/max_empty_lines.txt",
     )
 
+# Check that broken groups detection works as expected for
+# fill/group/ifBreak/table.
+for cfg, src in [
+    # Breaking their parent group is not supposed to break their contents.
+    #
+    # To verify this, run the unparsing on a source that contains a variable
+    # declaration and with a unparsing configuration that:
+    #
+    # 1) puts a "softline" document between the "var" keyword and the
+    #    declaration identifier (unparsing this requires a space between these
+    #    two keywords).
+    # 2) wraps both in a fill/group/ifBreak/table,
+    # 3) has a "hardline" outside of that wrapping node.
+    #
+    # The hardline is supposed to break the parent group, but the breaking
+    # behavior is not supposed to reach the nested "softline" document. As a
+    # result, the unparsing engine is supposed to add an extra whitespace
+    # before the declaration identifier.
+    ("fill", "one_var"),
+    ("group", "one_var"),
+    ("ifbreak", "one_var"),
+    ("table", "one_var"),
+
+    # The root document is processed as if it was wrapped in a broken group:
+    # "top level" softline documents are supposed to be expanded into line
+    # breaks, so in this case we expect the unparsing engine *not* to add a
+    # whitespace.
+    ("root", "one_var"),
+
+    # Tables must break if they contain more than one element
+    ("table", "comment_in_vars"),
+
+    # Documents in a "must_break" table must behave as if they were in a broken
+    # group (even if the table itself is not broken, because it has only one
+    # element), so "softline" documents must be considered as expanded to new
+    # lines (the engine must not add extra whitespaces before the declaration
+    # identifiers).
+    ("table_must_break", "comment_in_vars"),
+    ("table_must_break", "one_var"),
+
+    # A "must_break" table must *not* break its parent if it contains
+    # only one element and that element itself does not trigger a break.
+    ("table_must_break_not_parent", "one_var"),
+]:
+    add_main(
+        "breaking/{}.json".format(cfg),
+        "breaking/{}.txt".format(src),
+        traces=["final_doc"],
+    )
+
 for cfg in ["no_split", "split_all", "split_comments", "split_empty_lines"]:
     add_main(
         "table_align/{}.json".format(cfg),
@@ -213,6 +298,9 @@ for cfg in ["inherit", "inherit_null"]:
         "table_align/{}.json".format(cfg),
         "table_align/blocks.txt",
     )
+
+for src in ["big.txt", "error.txt"]:
+    add_main("table_join/config.json", "table_join/{}".format(src))
 
 
 build_and_run(

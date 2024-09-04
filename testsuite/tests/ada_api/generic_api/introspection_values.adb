@@ -26,6 +26,7 @@ procedure Introspection_Values is
    --  Print info about the given exception occurrence
 
    procedure Inspect (Value : Value_Ref);
+   procedure Inspect (Value : Value_Or_Error);
    procedure Check_Match (Value : Value_Ref; T : Type_Ref);
    procedure Check_Match (Node : Lk_Node; T : Type_Ref);
    --  Helpers to test value primitives
@@ -102,6 +103,17 @@ procedure Introspection_Values is
       end;
    end Inspect;
 
+   procedure Inspect (Value : Value_Or_Error) is
+   begin
+      if Value.Is_Error then
+         Put_Line ("Inspect:");
+         Put_Line ("  Exception name: " & Exception_Name (Value.Error));
+         Put_Line ("  Exception message: " & Exception_Message (Value.Error));
+      else
+         Inspect (Value.Value);
+      end if;
+   end Inspect;
+
    -----------------
    -- Check_Match --
    -----------------
@@ -136,9 +148,10 @@ procedure Introspection_Values is
          Put_Exc (Exc);
    end Check_Match;
 
-   Ctx : constant Lk_Context := Create_Context (Id);
-   U   : constant Lk_Unit := Ctx.Get_From_File ("example.txt");
-   N   : constant Lk_Node := U.Root;
+   Ctx          : constant Lk_Context := Create_Context (Id);
+   U            : constant Lk_Unit := Ctx.Get_From_File ("example.txt");
+   N            : constant Lk_Node := U.Root;
+   Example_Node : constant Lk_Node := N.Child (1);
 
    Enum     : Type_Ref := No_Type_Ref;
    Enum_Val : Enum_Value_Ref;
@@ -175,7 +188,7 @@ procedure Introspection_Values is
    False_Bool          : constant Value_Ref := From_Bool (Id, False);
    True_Bool           : constant Value_Ref := From_Bool (Id, True);
    Point_Struct_Value  : Value_Ref;
-   Example_Value       : constant Value_Ref := From_Node (Id, Child (N, 1));
+   Example_Value       : constant Value_Ref := From_Node (Id, Example_Node);
    Name_Value          : constant Value_Ref :=
      From_Node (Id, Child (Child (N, 2), 2));
    Bigint_Array_Value  : Value_Ref;
@@ -860,4 +873,34 @@ begin
    Check_Match (No_Value_Ref, Int_Type);
    Check_Match (Value, No_Type_Ref);
    New_Line;
+
+   Put_Title ("Managed errors");
+   for Do_Raise in Boolean'Range loop
+      declare
+         Label : constant String := (if Do_Raise then "Error" else "Success");
+         Args  : constant Value_Ref_Array :=
+           (1 => From_Int (Id, 42),
+            2 => From_Bool (Id, Do_Raise));
+      begin
+         Put_Line ("Eval_Member/" & Label);
+         declare
+            Result : constant Value_Or_Error :=
+              Eval_Member
+                (Example_Value, Member_Refs.Example_P_May_Raise, Args);
+         begin
+            Inspect (Result);
+         end;
+         New_Line;
+
+         Put_Line ("Eval_Node_Member/" & Label);
+         declare
+            Result : constant Value_Or_Error :=
+              Eval_Node_Member
+                (Example_Node, Member_Refs.Example_P_May_Raise, Args);
+         begin
+            Inspect (Result);
+         end;
+         New_Line;
+      end;
+   end loop;
 end Introspection_Values;

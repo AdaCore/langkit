@@ -1,0 +1,19 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "node": [
+        "hardline",
+        {
+          "kind": "ifBreak",
+          "breakContents": {"kind": "indent", "contents": "recurse"},
+          "flatContents": ["trim", "recurse"]
+        }
+      ]
+    },
+    "VarDecl": {
+      "fields": {
+        "f_value": ["line", "recurse"]
+      }
+    }
+  }
+}

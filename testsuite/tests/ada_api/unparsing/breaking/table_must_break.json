@@ -1,0 +1,24 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "node": {"kind": "group", "document": "recurse"},
+      "table": {"must_break": true}
+    },
+    "VarDecl": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_is_null"},
+        {"kind": "text", "text": "var"},
+        "softline",
+        {"kind": "recurse_field", "field": "f_name"},
+        {"kind": "text", "text": ":"},
+        {"kind": "recurse_field", "field": "f_type_expr"},
+        {"kind": "text", "text": "="},
+        {"kind": "recurse_field", "field": "f_value"},
+        {"kind": "text", "text": ";"}
+      ],
+      "fields": {
+        "f_value": ["line", "recurse"]
+      }
+    }
+  }
+}

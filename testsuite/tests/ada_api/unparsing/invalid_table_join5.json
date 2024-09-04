@@ -1,0 +1,11 @@
+{
+  "node_configs": {
+    "DeclList": {
+      "table": {
+        "join": {
+          "predicate": "f_name"
+        }
+      }
+    }
+  }
+}

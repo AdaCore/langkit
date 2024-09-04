@@ -65,7 +65,9 @@ package body Langkit_Support.Prettier_Utils is
    --  spacing information.
 
    Initial_Spacing_State : constant Spacing_State :=
-     (False, No_Spacing, No_Spacing, No_Token_Kind_Ref);
+     (True, No_Spacing, No_Spacing, No_Token_Kind_Ref);
+   --  Prettier considers that documents are implicitly wrapped in a broken
+   --  group.
 
    function Join (Left, Right : Spacing_State) return Spacing_State;
    --  Merge the ``Left`` and ``Right`` states: keep the strongest spacing
@@ -177,6 +179,18 @@ package body Langkit_Support.Prettier_Utils is
          procedure Do_Break;
          --  Helper to break the parent group
 
+         procedure Save_Break_State
+           (Saving : out Boolean; Inner_Is_Broken_Group : Boolean := False);
+         --  Helper to handle breaking in a group-like document. Save the
+         --  "broken group" state to ``Saving`` and set it to
+         --  ``Inner_Is_Broken_Group``.
+
+         procedure Restore_Break_State
+           (Saving : Boolean; Inner_Breaks : Boolean);
+         --  Helper to handle breaking in a group-like document. Restore the
+         --  "broken group" state to ``Saving``. If ``Inner_Breaks`` is true,
+         --  also break the current group.
+
          --------------
          -- Do_Break --
          --------------
@@ -186,6 +200,31 @@ package body Langkit_Support.Prettier_Utils is
             Breaks := True;
             State.In_Broken_Group := True;
          end Do_Break;
+
+         ----------------------
+         -- Save_Break_State --
+         ----------------------
+
+         procedure Save_Break_State
+           (Saving : out Boolean; Inner_Is_Broken_Group : Boolean := False) is
+         begin
+            Saving := State.In_Broken_Group;
+            State.In_Broken_Group := Inner_Is_Broken_Group;
+         end Save_Break_State;
+
+         -------------------------
+         -- Restore_Break_State --
+         -------------------------
+
+         procedure Restore_Break_State
+           (Saving : Boolean; Inner_Breaks : Boolean) is
+         begin
+            State.In_Broken_Group := Saving;
+            if Inner_Breaks then
+               Do_Break;
+            end if;
+         end Restore_Break_State;
+
       begin
          Breaks := False;
 
@@ -198,6 +237,9 @@ package body Langkit_Support.Prettier_Utils is
             when Break_Parent =>
                Do_Break;
 
+            when Empty_Table_Separator =>
+               null;
+
             when Expected_Line_Breaks =>
                Extend_Spacing
                  (State.Expected,
@@ -209,7 +251,13 @@ package body Langkit_Support.Prettier_Utils is
                   (Whitespaces, Self.Expected_Whitespaces_Count));
 
             when Fill =>
-               Process (Self.Fill_Document, State, Breaks);
+               declare
+                  Saving, Inner_Breaks : Boolean;
+               begin
+                  Save_Break_State (Saving);
+                  Process (Self.Fill_Document, State, Inner_Breaks);
+                  Restore_Break_State (Saving, Inner_Breaks);
+               end;
 
             when Flush_Line_Breaks =>
                declare
@@ -228,23 +276,12 @@ package body Langkit_Support.Prettier_Utils is
 
             when Group =>
                declare
-                  Parent_Broken : constant Boolean := State.In_Broken_Group;
-                  Inner_Breaks  : Boolean;
+                  Saving, Inner_Breaks : Boolean;
                begin
-                  --  The fact that the parent group is broken does not imply
-                  --  that this child group is broken: just pick the
-                  --  information we have about it currently.
-
-                  State.In_Broken_Group := Self.Group_Should_Break;
+                  Save_Break_State (Saving, Self.Group_Should_Break);
                   Process (Self.Group_Document, State, Inner_Breaks);
-
-                  --  Restore broken state for the parent group. In addition,
-                  --  the fact that the child group is broken does imply that
-                  --  the parent is broken.
-
-                  State.In_Broken_Group := Parent_Broken;
+                  Restore_Break_State (Saving, Inner_Breaks);
                   if Inner_Breaks then
-                     Do_Break;
                      Self.Group_Should_Break := True;
                   end if;
                end;
@@ -258,10 +295,15 @@ package body Langkit_Support.Prettier_Utils is
 
             when If_Break =>
                declare
-                  BS     : Spacing_State := State;
-                  FS     : Spacing_State := State;
+                  Saving : Boolean;
+                  BS     : Spacing_State;
+                  FS     : Spacing_State;
                   BB, FB : Boolean;
                begin
+                  Save_Break_State (Saving);
+                  BS := State;
+                  FS := State;
+
                   --  If this If_Break node is conditionned on its own
                   --  parent group, then the If_Break_Content part is known
                   --  to operate in a broken group.
@@ -274,9 +316,7 @@ package body Langkit_Support.Prettier_Utils is
                   Process (Self.If_Break_Flat_Contents, FS, FB);
 
                   State := Join (BS, FS);
-                  if BB and then FB then
-                     Do_Break;
-                  end if;
+                  Restore_Break_State (Saving, BB and then FB);
                end;
 
             when Indent =>
@@ -347,30 +387,45 @@ package body Langkit_Support.Prettier_Utils is
                end if;
 
             when Table =>
-               for I in 1 .. Self.Table_Rows.Last_Index loop
-                  declare
-                     Inner_Breaks : Boolean;
-                     Last         : constant Natural :=
-                       Self.Table_Rows.Last_Index;
-                     D            : Document_Type :=
-                       Self.Table_Rows.Element (I);
-                  begin
-                     Process (D, State, Inner_Breaks);
-                     Self.Table_Rows.Replace_Element (I, D);
-                     if Inner_Breaks then
-                        Do_Break;
-                        Self.Table_Must_Break := True;
-                     end if;
+               declare
+                  Saving       : Boolean;
+                  Inner_Breaks : Boolean := False;
+               begin
+                  Save_Break_State (Saving, Self.Table_Must_Break);
+                  for I in 1 .. Self.Table_Rows.Last_Index loop
+                     declare
+                        Row_Breaks   : Boolean;
+                        Last         : constant Natural :=
+                          Self.Table_Rows.Last_Index;
+                        D            : Document_Type :=
+                          Self.Table_Rows.Element (I);
+                     begin
+                        Process (D, State, Row_Breaks);
+                        Self.Table_Rows.Replace_Element (I, D);
 
-                     --  For breaking tables, all but the last row imply a
-                     --  hard line break.
+                        --  Any breaking row will make the table break *and*
+                        --  the table's parent.
 
-                     if Self.Table_Must_Break and then I < Last then
-                        Extend_Spacing (State.Actual, One_Line_Break_Spacing);
-                        Do_Break;
-                     end if;
-                  end;
-               end loop;
+                        if Row_Breaks then
+                           Self.Table_Must_Break := True;
+                           Inner_Breaks := True;
+                        end if;
+
+                        --  For breaking tables, all but the last row imply a
+                        --  hard line break.
+
+                        if Self.Table_Must_Break and then I < Last then
+                           Extend_Spacing
+                             (State.Actual, One_Line_Break_Spacing);
+                           Inner_Breaks := True;
+                        end if;
+                     end;
+                  end loop;
+                  Restore_Break_State (Saving, Inner_Breaks);
+                  if Inner_Breaks then
+                     Do_Break;
+                  end if;
+               end;
 
             when Table_Separator | Token =>
                declare
@@ -598,6 +653,9 @@ package body Langkit_Support.Prettier_Utils is
             when Break_Parent =>
                return Break_Parent;
 
+            when Empty_Table_Separator =>
+               return Alignment_Table_Separator (Null_Unbounded_String);
+
             when Fill =>
                return Fill (Recurse (Document.Fill_Document));
 
@@ -786,6 +844,20 @@ package body Langkit_Support.Prettier_Utils is
          Self.Register (Result);
       end return;
    end Create_Break_Parent;
+
+   ----------------------------------
+   -- Create_Empty_Table_Separator --
+   ----------------------------------
+
+   function Create_Empty_Table_Separator
+     (Self : in out Document_Pool) return Document_Type is
+   begin
+      return Result : constant Document_Type :=
+        new Document_Record (Kind => Empty_Table_Separator)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Empty_Table_Separator;
 
    ---------------------------------
    -- Create_Expected_Line_Breaks --
@@ -1109,6 +1181,34 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Create_Recurse_Flatten;
 
+   -------------------------
+   -- Create_Recurse_Left --
+   -------------------------
+
+   function Create_Recurse_Left
+     (Self : in out Document_Pool) return Document_Type
+   is begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Recurse_Left)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Recurse_Left;
+
+   --------------------------
+   -- Create_Recurse_Right --
+   --------------------------
+
+   function Create_Recurse_Right
+     (Self : in out Document_Pool) return Document_Type
+   is begin
+      return Result : constant Document_Type :=
+        new Document_Record'(Kind => Recurse_Right)
+      do
+         Self.Register (Result);
+      end return;
+   end Create_Recurse_Right;
+
    ----------------------
    -- Create_Soft_Line --
    ----------------------
@@ -1303,6 +1403,9 @@ package body Langkit_Support.Prettier_Utils is
                  (Prefix & "expectedLineBreaks:"
                   & Document.Expected_Line_Breaks_Count'Image);
 
+            when Empty_Table_Separator =>
+               Write (Prefix & "emptyTableSeparator");
+
             when Expected_Whitespaces =>
                Write
                  (Prefix & "expectedWhitespaces:"
@@ -1416,6 +1519,12 @@ package body Langkit_Support.Prettier_Utils is
                      Write (Prefix & Simple_Indent & Debug_Name (T));
                   end;
                end loop;
+
+            when Recurse_Left =>
+               Write (Prefix & "recurse_left");
+
+            when Recurse_Right =>
+               Write (Prefix & "recurse_right");
 
             when Soft_Line =>
                Write (Prefix & "softline");

@@ -3,6 +3,7 @@
 --  SPDX-License-Identifier: Apache-2.0
 --
 
+with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Unchecked_Conversion;
 
 with Langkit_Support.Diagnostics;       use Langkit_Support.Diagnostics;
@@ -135,6 +136,8 @@ package Langkit_Support.Internal.Descriptor is
      (Node      : Internal_Acc_Node;
       Member    : Struct_Member_Index;
       Arguments : Internal_Value_Array) return Internal_Value_Access;
+   type Is_Managed_Error_Type is access function
+     (Exc : Exception_Occurrence) return Boolean;
 
    type Language_Descriptor is limited record
       Language_Name : Text_Access;
@@ -233,6 +236,7 @@ package Langkit_Support.Internal.Descriptor is
       Create_Array     : Create_Array_Type;
       Create_Struct    : Create_Struct_Type;
       Eval_Node_Member : Eval_Node_Member_Type;
+      Is_Managed_Error : Is_Managed_Error_Type;
    end record;
 
    function "+" is new Ada.Unchecked_Conversion

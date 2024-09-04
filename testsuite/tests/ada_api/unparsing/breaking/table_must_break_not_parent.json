@@ -1,0 +1,8 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "node": {"kind": "group", "document": ["softline", "recurse"]},
+      "table": {"must_break": true}
+    }
+  }
+}

@@ -8,6 +8,8 @@ with Ada.Command_Line;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Hashed_Sets;
 with Ada.Containers.Vectors;
+with Ada.Directories;          use Ada.Directories;
+with Ada.Exceptions;           use Ada.Exceptions;
 with Ada.Strings.Unbounded;    use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
 with Ada.Text_IO;              use Ada.Text_IO;
@@ -413,9 +415,17 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  * lists of tokens (Token_Item) and recurse (Recurse_Item) items used to
    --    unparse a specific field in a concrete node.
    --
+   --  * lists of recurses for join templates (Recurse_Left, then
+   --    Recurse_Right).
+   --
    --  They are used to process templates that embed text.
 
-   type Linear_Template_Item_Kind is (Token_Item, Field_Item, Recurse_Item);
+   type Linear_Template_Item_Kind is
+     (Token_Item,
+      Field_Item,
+      Recurse_Item,
+      Recurse_Left,
+      Recurse_Right);
    type Linear_Template_Item
      (Kind : Linear_Template_Item_Kind := Linear_Template_Item_Kind'First)
    is record
@@ -430,7 +440,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             Field_Position : Positive;
             --  Same semantics as the corresponding Document_Type components
 
-         when Recurse_Item =>
+         when Recurse_Item | Recurse_Left | Recurse_Right =>
             null;
       end case;
    end record;
@@ -456,6 +466,10 @@ package body Langkit_Support.Generic_API.Unparsing is
       Field : Struct_Member_Ref) return Linear_Template_Vectors.Vector;
    --  Return the linear template that correspond to the ``Field`` member of
    --  ``Node``.
+
+   Linear_Template_For_Join : constant Linear_Template_Vectors.Vector :=
+     [(Kind => Recurse_Left), (Kind => Recurse_Right)];
+   --  Linear template for table row join templates
 
    function Hash (Self : Struct_Member_Index) return Ada.Containers.Hash_Type
    is (Ada.Containers.Hash_Type'Mod (Self));
@@ -503,6 +517,14 @@ package body Langkit_Support.Generic_API.Unparsing is
             Must_Break : Boolean;
             --  If we generate a table for this list node, whether its rows
             --  must break the current group.
+
+            Join_Predicate : Struct_Member_Ref;
+            --  If table row join behavior is enabled, reference to the
+            --  predicate that determines whether a list element must be joined
+            --  to the previous one. ``No_Struct_Member_Ref`` otherwise.
+
+            Join_Template : Template_Type;
+            --  Table row join template
       end case;
    end record;
 
@@ -619,6 +641,10 @@ package body Langkit_Support.Generic_API.Unparsing is
          when With_Recurse_Field =>
             Field_Docs : Template_Instantiation_Arg_Vectors.Vector;
             --  Documents to use in order to replace "recurse_field" templates
+
+         when Join_Template =>
+            Join_Left, Join_Right : Document_Type;
+            --  Documents for the rows to join in a table
       end case;
    end record;
 
@@ -1489,6 +1515,10 @@ package body Langkit_Support.Generic_API.Unparsing is
                                   (Member_Name (Item.Field_Ref), Lower));
          when Recurse_Item =>
             return "recurse";
+         when Recurse_Left =>
+            return "recurse_left";
+         when Recurse_Right =>
+            return "recurse_right";
       end case;
    end Image;
 
@@ -1514,7 +1544,7 @@ package body Langkit_Support.Generic_API.Unparsing is
             return Left.Token_Text = Right.Token_Text;
          when Field_Item =>
             return Left.Field_Ref = Right.Field_Ref;
-         when Recurse_Item =>
+         when Recurse_Item | Recurse_Left | Recurse_Right =>
             return True;
       end case;
    end Is_Equivalent;
@@ -1823,6 +1853,14 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Name for the given Node. Raise an Invalid_Input exception if there is
       --  no such field.
 
+      function To_Predicate_Ref
+        (Name : String; Node : Type_Ref) return Struct_Member_Ref;
+      --  Look for the member of ``Node`` that matches ``Name``.
+      --
+      --  Return it if it matches a predicate (property that takes no argument
+      --  and returns a boolean). Raise an ``Invalid_Input`` exception
+      --  otherwise.
+
       function Node_Type_Image (Node : Type_Ref) return String
       is (Image (Format_Name (Node_Type_Name (Node), Camel)));
       --  Return the expected name for the given Node
@@ -1834,7 +1872,10 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Return the expected name for the given Member in the given Node
 
       type Template_Parsing_State_Kind is
-        (Simple_Recurse, Recurse_Field, Recurse_In_Field);
+        (Simple_Recurse,
+         Recurse_Field,
+         Recurse_In_Field,
+         Recurse_In_Join);
       --  There are two kinds of templates we expect to find in unparsing
       --  configurations:
       --
@@ -1846,6 +1887,9 @@ package body Langkit_Support.Generic_API.Unparsing is
       --
       --  * Recurse_In_Field templates, whose linearization must yield the
       --    sequence of "text"/"recurse" that is expected for a node field.
+      --
+      --  * Recurse_In_Join templates, whose linearization must yield the
+      --    sequence: ["recurse_left", "recurse_right"].
 
       type Template_Parsing_State
         (Kind : Template_Parsing_State_Kind := Simple_Recurse)
@@ -1856,7 +1900,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  Whether template parsing has found the "recurse" node
                --  expected for the current branch.
 
-            when Recurse_Field | Recurse_In_Field =>
+            when Recurse_Field | Recurse_In_Field | Recurse_In_Join =>
                Linear_Template : Linear_Template_Vectors.Vector;
                --  Sequence of tokens/fields that the parsed template is
                --  supposed to yield once instantiated/formatted.
@@ -1868,7 +1912,7 @@ package body Langkit_Support.Generic_API.Unparsing is
       end record;
 
       type Template_Parsing_Context_Kind is
-        (Node_Template, Field_Template, Sep_Template);
+        (Node_Template, Field_Template, Sep_Template, Join_Template);
       --  Indicate which kind of template we are parsing:
       --
       --  ``Node_Template``: a "node" template.
@@ -1876,6 +1920,8 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  ``Field_Template``: a template in the "fields" mapping.
       --
       --  ``Sep_Template``: a "sep"/"leading_sep"/"trailing_sep" template.
+      --
+      --  ``Join_Template``: template for a table row join.
 
       type Template_Parsing_Context (Kind : Template_Parsing_Context_Kind) is
       record
@@ -1904,13 +1950,16 @@ package body Langkit_Support.Generic_API.Unparsing is
             when Node_Template =>
                null;
 
+            when Field_Template =>
+               Field : Struct_Member_Ref;
+               --  Field for which we parse this template
+
             when Sep_Template =>
                Sep_Kind : List_Sep_Template_Kind;
                --  Kind of separator for this template
 
-            when Field_Template =>
-               Field : Struct_Member_Ref;
-               --  Field for which we parse this template
+            when Join_Template =>
+               null;
          end case;
       end record;
 
@@ -2077,6 +2126,31 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
       end To_Struct_Member_Index;
 
+      ----------------------
+      -- To_Predicate_Ref --
+      ----------------------
+
+      function To_Predicate_Ref
+        (Name : String; Node : Type_Ref) return Struct_Member_Ref
+      is
+         M : constant Struct_Member_Ref :=
+           Map.Lookup_Struct_Member (Node, To_Symbol (Name));
+      begin
+         if M = No_Struct_Member_Ref then
+            Abort_Parsing
+              (Node_Type_Image (Node) & " has no " & Name & " member");
+         elsif not Is_Property (M) then
+            Abort_Parsing
+              (Name & " is not a property for " & Node_Type_Image (Node));
+         elsif Member_Type (M) /= Type_Of (From_Bool (Language, False)) then
+            Abort_Parsing (Name & " must return a boolean");
+         elsif Member_Last_Argument (M) /= 0 then
+            Abort_Parsing (Name & " must take no argument");
+         else
+            return M;
+         end if;
+      end To_Predicate_Ref;
+
       -------------------
       -- Template_Kind --
       -------------------
@@ -2144,6 +2218,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
                      when Sep_Template =>
                         null;
+
+                     when Join_Template =>
+                        null;
                   end case;
 
                   JSON.Map_JSON_Object (Process_Map_Item'Access);
@@ -2189,6 +2266,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                            (Template_Kind (Context.Kind, JSON))
          do
             case Result.Kind is
+               when Recurse_In_Join =>
+
+                  --  Knowing that we are processing a node template,
+                  --  Template_Kind is not supposed to return Recurse_In_Join.
+
+                  raise Program_Error;
+
                when Simple_Recurse =>
                   Result.Recurse_Found := False;
 
@@ -2237,10 +2321,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                when Simple_Recurse =>
                   Result.Recurse_Found := False;
 
-               when Recurse_Field =>
+               when Recurse_Field | Recurse_In_Join =>
 
                   --  Knowing that we are processing a field template,
-                  --  Template_Kind is not supposed to return Recurse_Field.
+                  --  Template_Kind is not supposed to return
+                  --  Recurse_Field/Recurse_In_Join.
 
                   raise Program_Error;
 
@@ -2334,7 +2419,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   Abort_Parsing (Context, "recursion is missing");
                end if;
 
-            when Recurse_Field | Recurse_In_Field =>
+            when Recurse_Field | Recurse_In_Field | Recurse_In_Join =>
 
                --  Make sure that the template covers all items in the linear
                --  template.
@@ -2361,6 +2446,11 @@ package body Langkit_Support.Generic_API.Unparsing is
                   when Recurse_In_Field =>
                      return
                        (Kind    => With_Text_Recurse,
+                        Root    => Root,
+                        Symbols => Result_Symbols);
+                  when Recurse_In_Join =>
+                     return
+                       (Kind    => Join_Template,
                         Root    => Root,
                         Symbols => Result_Symbols);
                end case;
@@ -2408,6 +2498,20 @@ package body Langkit_Support.Generic_API.Unparsing is
                elsif Value = "recurse" then
                   Process_Recurse (Context);
                   return Pool.Create_Recurse;
+               elsif Value = "recurse_left" then
+                  declare
+                     Item : Linear_Template_Item := (Kind => Recurse_Left);
+                  begin
+                     Process_Linear_Template_Item (Item, Context);
+                  end;
+                  return Pool.Create_Recurse_Left;
+               elsif Value = "recurse_right" then
+                  declare
+                     Item : Linear_Template_Item := (Kind => Recurse_Right);
+                  begin
+                     Process_Linear_Template_Item (Item, Context);
+                  end;
+                  return Pool.Create_Recurse_Right;
                elsif Value = "softline" then
                   return Pool.Create_Soft_Line;
                elsif Value = "trim" then
@@ -2961,6 +3065,16 @@ package body Langkit_Support.Generic_API.Unparsing is
                      --  initialize it with No_Token_Kind_Ref (an obviously
                      --  invalid position) to make it clear that this component
                      --  needs an update.
+                     --
+                     --  There is one special case: we allow empty table
+                     --  separators, so that they can be put in table join
+                     --  templates.
+
+                     if Kind = "tableSeparator"
+                        and then Length (Unbounded_String'(T.Get)) = 0
+                     then
+                        return Pool.Create_Empty_Table_Separator;
+                     end if;
 
                      declare
                         Item : Linear_Template_Item :=
@@ -2970,6 +3084,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                                            (From_UTF8 (T.Get)));
                      begin
                         Process_Linear_Template_Item (Item, Context);
+
                         if Kind = "text" then
                            return Pool.Create_Token
                                     (Item.Token_Kind, Item.Token_Text);
@@ -3033,6 +3148,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                begin
                   Process_Linear_Template_Item (Item, Context);
                end;
+
+            when Recurse_In_Join =>
+               Abort_Parsing
+                 (Context,
+                  "only ""recurse_left"" or ""recurse_right"" are valid in"
+                  & " table join templates");
          end case;
       end Process_Recurse;
 
@@ -3046,14 +3167,18 @@ package body Langkit_Support.Generic_API.Unparsing is
       is
          function What return String
          is (case Item.Kind is
-             when Token_Item   => "text",
-             when Field_Item   => "recurse_field",
-             when Recurse_Item => "recurse");
+             when Token_Item    => "text",
+             when Field_Item    => "recurse_field",
+             when Recurse_Item  => "recurse",
+             when Recurse_Left  => "recurse_left",
+             when Recurse_Right => "recurse_right");
       begin
          --  Ensure that it is valid to have a "recurse_field" node in this
          --  template.
 
-         if Context.State.Kind not in Recurse_Field | Recurse_In_Field then
+         if Context.State.Kind
+            not in Recurse_Field | Recurse_In_Field | Recurse_In_Join
+         then
             Abort_Parsing
               (Context, What & " cannot appear in a ""recurse"" template");
          end if;
@@ -3143,11 +3268,14 @@ package body Langkit_Support.Generic_API.Unparsing is
            (case Context.Kind is
             when Node_Template =>
               """node"" template for " & Node_Type_Image (Context.Node),
+            when Field_Template =>
+              "template for " & Field_Image (Context.Field, Context.Node),
             when Sep_Template =>
               """" & JSON_Key_For (Context.Sep_Kind) & """ template for "
               & Node_Type_Image (Context.Node),
-            when Field_Template =>
-              "template for " & Field_Image (Context.Field, Context.Node));
+            when Join_Template =>
+              """table""/""join""/""template"" template for "
+              & Node_Type_Image (Context.Node));
       begin
          Abort_Parsing (Prefix & ": " & Message);
       end Abort_Parsing;
@@ -3431,6 +3559,7 @@ package body Langkit_Support.Generic_API.Unparsing is
                   Sep_Before_JSON : JSON_Value;
                   Split_JSON      : JSON_Value;
                   Must_Break_JSON : JSON_Value;
+                  Join_JSON       : JSON_Value;
                begin
                   if Table_JSON.Kind = JSON_Null_Type then
                      Cfg := (Enabled => False);
@@ -3440,10 +3569,14 @@ package body Langkit_Support.Generic_API.Unparsing is
                         & ": object expected");
                   else
                      Cfg :=
-                       (Enabled    => True,
-                        Sep_Before => True,
-                        Split      => (others => False),
-                        Must_Break => False);
+                       (Enabled        => True,
+                        Sep_Before     => True,
+                        Split          => (others => False),
+                        Must_Break     => False,
+                        Join_Predicate => No_Struct_Member_Ref,
+                        Join_Template  => No_Template);
+
+                     --  Process the optional "sep_before" entry
 
                      if Table_JSON.Has_Field ("sep_before") then
                         Sep_Before_JSON := Table_JSON.Get ("sep_before");
@@ -3454,6 +3587,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                         end if;
                         Cfg.Sep_Before := Sep_Before_JSON.Get;
                      end if;
+
+                     --  Process the optional "split" entry
 
                      if Table_JSON.Has_Field ("split") then
                         Split_JSON := Table_JSON.Get ("split");
@@ -3487,6 +3622,8 @@ package body Langkit_Support.Generic_API.Unparsing is
                         end loop;
                      end if;
 
+                     --  Process the optional "must_break" entry
+
                      if Table_JSON.Has_Field ("must_break") then
                         Must_Break_JSON := Table_JSON.Get ("must_break");
                         if Must_Break_JSON.Kind /= JSON_Boolean_Type then
@@ -3495,6 +3632,67 @@ package body Langkit_Support.Generic_API.Unparsing is
                               & Debug_Name (Node) & ": boolean expected");
                         end if;
                         Cfg.Must_Break := Must_Break_JSON.Get;
+                     end if;
+
+                     --  Process the optional "join" entry
+
+                     if Table_JSON.Has_Field ("join") then
+                        Join_JSON := Table_JSON.Get ("join");
+                        if Join_JSON.Kind /= JSON_Object_Type then
+                           Abort_Parsing
+                             ("invalid ""table""/""join"" entry for "
+                              & Debug_Name (Node) & ": object expected");
+                        end if;
+
+                        --  Validate the mandatory "predicate" property
+                        --  reference.
+
+                        if not Join_JSON.Has_Field ("predicate")
+                           or else Join_JSON.Get ("predicate").Kind
+                                   /= JSON_String_Type
+                        then
+                           Abort_Parsing
+                             (Debug_Name (Node) & """table""/""join"" entries"
+                              & " must have a ""predicate"" string entry");
+                        end if;
+                        Cfg.Join_Predicate :=
+                          To_Predicate_Ref
+                            (Join_JSON.Get ("predicate"),
+                             List_Element_Type (Node));
+
+                        --  Parse the join template if present. Provide a
+                        --  default one that just concatenates the two rows
+                        --  otherwise.
+
+                        if Join_JSON.Has_Field ("template") then
+                           declare
+                              Context : Template_Parsing_Context :=
+                                (Kind     => Join_Template,
+                                 Node     => Node,
+                                 State    =>
+                                   (Kind            => Recurse_In_Join,
+                                    Linear_Template =>
+                                      Linear_Template_For_Join,
+                                    Linear_Position => 1),
+                                 Symbols  =>
+                                   Node_Config.Node_Template.Symbols);
+                           begin
+                              Cfg.Join_Template :=
+                                Parse_Template
+                                  (Join_JSON.Get ("template"), Context);
+                           end;
+                        else
+                           declare
+                              Items : Document_Vectors.Vector;
+                           begin
+                              Items.Append (Pool.Create_Recurse_Left);
+                              Items.Append (Pool.Create_Recurse_Right);
+                              Cfg.Join_Template :=
+                                (Kind    => Join_Template,
+                                 Root    => Pool.Create_List (Items),
+                                 Symbols => <>);
+                           end;
+                        end if;
                      end if;
                   end if;
                end;
@@ -3614,6 +3812,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          when Break_Parent =>
             return Pool.Create_Break_Parent;
+
+         when Empty_Table_Separator =>
+            return Pool.Create_Empty_Table_Separator;
 
          when Fill =>
             return Pool.Create_Fill
@@ -3809,6 +4010,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                end return;
             end;
 
+         when Recurse_Left =>
+            return State.Arguments.Join_Left;
+
+         when Recurse_Right =>
+            return State.Arguments.Join_Right;
+
          when Soft_Line =>
             return Pool.Create_Soft_Line;
 
@@ -3848,10 +4055,15 @@ package body Langkit_Support.Generic_API.Unparsing is
    -------------------------
 
    function Unparse_To_Prettier
-     (Node   : Lk_Node;
-      Config : Unparsing_Configuration)
+     (Node          : Lk_Node;
+      Config        : Unparsing_Configuration;
+      Process_Error : access procedure
+                        (Node : Lk_Node; Message : String) := null)
       return Prettier_Ada.Documents.Document_Type
    is
+      procedure Emit_Error (Node : Lk_Node; Message : String);
+      --  Call ``Process_Error`` if it is not null. Print the error otherwise.
+
       Trivias     : Trivias_Info;
       Pool        : Document_Pool;
       Next_Symbol : Some_Template_Symbol := 1;
@@ -3913,6 +4125,22 @@ package body Langkit_Support.Generic_API.Unparsing is
       --  Resulting items are appended to ``Items``. ``Node_Config`` must be
       --  the node unparsing configuration for ``Node``, and ``Unparser`` must
       --  be the unparser for this field. Update ``Current_Token`` accordingly.
+
+      ----------------
+      -- Emit_Error --
+      ----------------
+
+      procedure Emit_Error (Node : Lk_Node; Message : String) is
+      begin
+         if Process_Error = null then
+            Put_Line
+              (Simple_Name (Node.Unit.Filename)
+               & ":" & Image (Start_Sloc (Node.Sloc_Range))
+               & ": " & Message);
+         else
+            Process_Error.all (Node, Message);
+         end if;
+      end Emit_Error;
 
       -----------------
       -- Skip_Tokens --
@@ -4025,17 +4253,25 @@ package body Langkit_Support.Generic_API.Unparsing is
 
          --  Table management (for list nodes with this behavior enabled)
 
-         Is_List          : constant Boolean := N.Is_List_Node;
-         With_Table       : constant Boolean :=
+         Is_List              : constant Boolean := N.Is_List_Node;
+         With_Table           : constant Boolean :=
            Node_Config.List_Config.Table_Config.Enabled;
-         Table_Sep_Before : constant Boolean :=
+         Table_Sep_Before     : constant Boolean :=
            (if With_Table
             then Node_Config.List_Config.Table_Config.Sep_Before
             else False);
-         Table_Must_Break : constant Boolean :=
+         Table_Must_Break     : constant Boolean :=
            (if With_Table
             then Node_Config.List_Config.Table_Config.Must_Break
             else False);
+         Table_Join_Predicate : constant Struct_Member_Ref :=
+           (if With_Table
+            then Node_Config.List_Config.Table_Config.Join_Predicate
+            else No_Struct_Member_Ref);
+         Table_Join_Template  : constant Template_Type :=
+           (if With_Table
+            then Node_Config.List_Config.Table_Config.Join_Template
+            else No_Template);
          pragma Assert (not With_Table or else Is_List);
 
          Tables : Document_Vectors.Vector;
@@ -4279,6 +4515,61 @@ package body Langkit_Support.Generic_API.Unparsing is
                        (Table_Rows,
                         Items,
                         New_Row => Table_Sep_Before);
+
+                     --  If row join is enabled, query the join predicate and
+                     --  do the join if needed. Note that we consider that we
+                     --  must not join if the predicate crashes.
+
+                     if Table_Rows.Length >= 2
+                        and then Table_Join_Predicate /= No_Struct_Member_Ref
+                     then
+                        declare
+                           Left_Row   : Document_Type;
+                           Right_Row  : Document_Type;
+                           Joined_Row : Document_Type;
+                           Result     : constant Value_Or_Error :=
+                             Eval_Node_Member (F.Node, Table_Join_Predicate);
+                           Must_Join  : Boolean;
+                        begin
+                           if Result.Is_Error then
+                              Emit_Error
+                                (Node    => F.Node,
+                                 Message =>
+                                   "predicate "
+                                   & Debug_Name (Table_Join_Predicate)
+                                   & " raised " & Exception_Name (Result.Error)
+                                   & ": " & Exception_Message (Result.Error));
+                              Must_Join := False;
+                           else
+                              Must_Join := As_Bool (Result.Value);
+                           end if;
+
+                           if Must_Join then
+
+                              --  Pop the last two rows and instantiate the
+                              --  join template to be the new replacement row.
+
+                              Right_Row := Table_Rows.Last_Element;
+                              Table_Rows.Delete_Last;
+                              Left_Row := Table_Rows.Last_Element;
+                              Table_Rows.Delete_Last;
+
+                              Joined_Row :=
+                                Instantiate_Template
+                                  (Pool          => Pool,
+                                   Symbols       => Symbols,
+                                   Node          => N,
+                                   Current_Token => Current_Token,
+                                   Trivias       => Trivias,
+                                   Template      => Table_Join_Template,
+                                   Arguments     =>
+                                     (Kind       => Join_Template,
+                                      Join_Left  => Left_Row,
+                                      Join_Right => Right_Row));
+                              Table_Rows.Append (Joined_Row);
+                           end if;
+                        end;
+                     end if;
                   end if;
                   Last_Sep := No_Lk_Token;
             end case;
@@ -4294,6 +4585,13 @@ package body Langkit_Support.Generic_API.Unparsing is
          end if;
 
          case Some_Template_Kind (Template.Kind) is
+            when Join_Template =>
+
+               --  We are supposed to create these templates for table join
+               --  separators only, never for nodes.
+
+               raise Program_Error;
+
             when With_Recurse =>
 
                --  First gather documents for all the fragments in this node,

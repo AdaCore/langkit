@@ -1,0 +1,5 @@
+var v0: T = 0;
+var v1: T = 1;
+var left: T = 2;
+foo,bar var right: T = 3;
+var left: T = 4;

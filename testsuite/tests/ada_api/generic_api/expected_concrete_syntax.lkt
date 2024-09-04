@@ -47,6 +47,10 @@ class Example: BaseExample {
     @exported
     fun result(): NodeResult = NodeResult(n=node, e=self)
 
+    @exported
+    fun may_raise(value: Int, do_raise: Bool): Int =
+        if do_raise then raise[Int] PropertyError("from may_raise") else value
+
     fun id_bool(id: Bool): Bool = id
 
     @exported

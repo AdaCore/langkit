@@ -12,6 +12,7 @@
 pragma Warnings (Off, "obsolescent");
 
 private with Ada.Containers.Hashed_Maps;
+with Ada.Exceptions; use Ada.Exceptions;
 private with Ada.Finalization;
 private with Ada.Unchecked_Deallocation;
 
@@ -395,6 +396,11 @@ package Langkit_Support.Generic_API.Introspection is
    function Is_List_Node (Node : Type_Ref) return Boolean;
    --  Return whether ``Node`` designates a list node
 
+   function List_Element_Type (Node : Type_Ref) return Type_Ref;
+   --  Assuming that ``Node`` designates a list node, return the type for its
+   --  elements. Raise a ``Precondition_Failure`` if ``Node`` does not
+   --  designates a list node.
+
    function Is_Concrete (Node : Type_Ref) return Boolean
    is (not Is_Abstract (Node));
 
@@ -528,6 +534,16 @@ package Langkit_Support.Generic_API.Introspection is
    --  Return the index of ``Member``'s last argument according to the given
    --  language. If it has no argument, return ``No_Argument_Index``.
 
+   type Value_Or_Error (Is_Error : Boolean) is limited record
+      case Is_Error is
+         when False =>
+            Value : Value_Ref;
+
+         when True =>
+            Error : Exception_Occurrence;
+      end case;
+   end record;
+
    function Eval_Member
      (Value     : Value_Ref;
       Member    : Struct_Member_Ref;
@@ -542,12 +558,33 @@ package Langkit_Support.Generic_API.Introspection is
    --    or not a valid member for ``Value``;
    --  * ``Arguments`` does not match the arguments that ``Member`` expects.
 
+   function Eval_Member
+     (Value     : Value_Ref;
+      Member    : Struct_Member_Ref;
+      Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
+      return Value_Or_Error;
+   --  Likewise, but also return an exception occurrence if the evaluation
+   --  triggers a managed error.
+   --
+   --  Note that this function may still propagate an exception itself, but in
+   --  that case, it is because ``Eval_Member`` is incorrectly used: an error
+   --  is *returned* only if it is the evaluated member that raises an
+   --  exception.
+
    function Eval_Node_Member
      (Value     : Lk_Node;
       Member    : Struct_Member_Ref;
       Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
       return Value_Ref;
    --  Shortcut for ``Eval_Member``, working directly on a node
+
+   function Eval_Node_Member
+     (Value     : Lk_Node;
+      Member    : Struct_Member_Ref;
+      Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
+      return Value_Or_Error;
+   --  Shortcut for ``Eval_Member``, working directly on a node and returning
+   --  exception occurences.
 
    function Eval_Syntax_Field
      (Value : Lk_Node; Member : Struct_Member_Ref) return Lk_Node;

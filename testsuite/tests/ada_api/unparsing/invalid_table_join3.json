@@ -1,0 +1,11 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "table": {
+        "join": {
+          "predicate": "p_table_join_bad_args"
+        }
+      }
+    }
+  }
+}

@@ -1347,8 +1347,25 @@ package body Langkit_Support.Generic_API.Introspection is
    function Is_List_Node (Node : Type_Ref) return Boolean is
    begin
       Check_Node_Type (Node);
-      return Node.Id.Struct_Types.all (Node.Index).Is_List_Node;
+      return Node.Id.Struct_Types.all (Node.Index).List_Element_Type
+             /= No_Type_Index;
    end Is_List_Node;
+
+   -----------------------
+   -- List_Element_Type --
+   -----------------------
+
+   function List_Element_Type (Node : Type_Ref) return Type_Ref is
+   begin
+      Check_Node_Type (Node);
+      if not Is_List_Node (Node) then
+         raise Precondition_Failure with "list node expected";
+      end if;
+
+      return From_Index
+               (Node.Id,
+                Node.Id.Struct_Types.all (Node.Index).List_Element_Type);
+   end List_Element_Type;
 
    ---------------
    -- Base_Type --
@@ -1824,6 +1841,26 @@ package body Langkit_Support.Generic_API.Introspection is
       Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
       return Value_Ref
    is
+      Result : constant Value_Or_Error :=
+        Eval_Member (Value, Member, Arguments);
+   begin
+      if Result.Is_Error then
+         Reraise_Occurrence (Result.Error);
+      else
+         return Result.Value;
+      end if;
+   end Eval_Member;
+
+   -----------------
+   -- Eval_Member --
+   -----------------
+
+   function Eval_Member
+     (Value     : Value_Ref;
+      Member    : Struct_Member_Ref;
+      Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
+      return Value_Or_Error
+   is
       Id           : Language_Id;
       T            : Type_Ref;
       Args_Count   : Any_Argument_Index;
@@ -1869,11 +1906,17 @@ package body Langkit_Support.Generic_API.Introspection is
 
       if Value.Value.all in Base_Internal_Struct_Value'Class then
          pragma Assert (Arguments'Length = 0);
+
+         --  For structs, all we can evaluate is a field, so no managed error
+         --  can occur during evaluation.
+
          declare
             V : constant Base_Internal_Struct_Value_Access :=
               Base_Internal_Struct_Value_Access (Value.Value);
          begin
-            return Create_Value (Id, +V.Eval_Member (Member.Index));
+            return
+              (Is_Error => False,
+               Value    => Create_Value (Id, +V.Eval_Member (Member.Index)));
          end;
       else
          --  Unpack the arguments and evaluate the member
@@ -1882,12 +1925,29 @@ package body Langkit_Support.Generic_API.Introspection is
             V    : constant Internal_Acc_Node :=
               Internal_Acc_Node (Value.Value);
             Args : Internal_Value_Array (1 .. Natural (Args_Count));
+            R    : Internal.Introspection.Internal_Value_Access;
          begin
             for I in Args'Range loop
                Args (I) := +Arguments (Arguments'First + I - 1).Value;
             end loop;
-            return Create_Value
-              (Id, +Id.Eval_Node_Member (V, Member.Index, Args));
+
+            --  If the evaluation propagates a managed error, return it.
+            --  Propagates unmanaged exceptions.
+
+            begin
+               R := Id.Eval_Node_Member (V, Member.Index, Args);
+            exception
+               when Exc : others =>
+                  if Id.Is_Managed_Error (Exc) then
+                     return Result : Value_Or_Error (Is_Error => True) do
+                        Save_Occurrence (Result.Error, Exc);
+                     end return;
+                  else
+                     raise;
+                  end if;
+            end;
+
+            return (Is_Error => False, Value => Create_Value (Id, +R));
          end;
       end if;
    end Eval_Member;
@@ -1901,6 +1961,26 @@ package body Langkit_Support.Generic_API.Introspection is
       Member    : Struct_Member_Ref;
       Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
       return Value_Ref
+   is
+      Node : Value_Ref;
+   begin
+      if Value = No_Lk_Node then
+         raise Precondition_Failure with "the null node has no member";
+      end if;
+
+      Node := From_Node (Value.Language, Value);
+      return Eval_Member (Node, Member, Arguments);
+   end Eval_Node_Member;
+
+   ----------------------
+   -- Eval_Node_Member --
+   ----------------------
+
+   function Eval_Node_Member
+     (Value     : Lk_Node;
+      Member    : Struct_Member_Ref;
+      Arguments : Value_Ref_Array := (1 .. 0 => No_Value_Ref))
+      return Value_Or_Error
    is
       Node : Value_Ref;
    begin

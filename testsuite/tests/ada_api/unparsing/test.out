@@ -199,6 +199,16 @@ a: Int=2
     template for VarDecl.f_name: invalid item in recurse_flatten if: JSON_NULL_TYPE
 # invalid_recurse_flatten3.json
     template for VarDecl.f_name: invalid node type in recurse_flatten if: NoSuchNode
+# invalid_table_join.json
+    FooNode has no p_no_such_predicate member
+# invalid_table_join2.json
+    parent must return a boolean
+# invalid_table_join3.json
+    p_table_join_bad_args must take no argument
+# invalid_table_join4.json
+    p_table_join_bad_rtype must return a boolean
+# invalid_table_join5.json
+    f_name is not a property for Decl
 
 == Invalid templates (too many/few "recurse") ==
 
@@ -358,6 +368,190 @@ Done.
       "kind": "dedentToRoot"
     },
     "command": "align"
+  },
+  "id": 1,
+  "kind": "command"
+}
+
+== cmd_emptytablesep.json ==
+
+{
+  "command": {
+    "breakParents": true,
+    "command": "alignmentTable",
+    "elements": [
+      [
+        {
+          "id": 2,
+          "kind": "list",
+          "list": [
+            {
+              "id": 3,
+              "kind": "text",
+              "text": "var"
+            },
+            {
+              "id": 4,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 5,
+              "kind": "text",
+              "text": "v1"
+            },
+            {
+              "id": 6,
+              "kind": "text",
+              "text": " "
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "kind": "list",
+          "list": [
+            {
+              "id": 8,
+              "kind": "text",
+              "text": ":"
+            },
+            {
+              "id": 9,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 10,
+              "kind": "text",
+              "text": "T"
+            },
+            {
+              "id": 11,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 12,
+              "kind": "text",
+              "text": "="
+            },
+            {
+              "id": 13,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 14,
+              "kind": "text",
+              "text": "0"
+            },
+            {
+              "id": 15,
+              "kind": "text",
+              "text": ";"
+            }
+          ]
+        }
+      ],
+      [
+        {
+          "id": 16,
+          "kind": "list",
+          "list": [
+            {
+              "id": 17,
+              "kind": "text",
+              "text": "var"
+            },
+            {
+              "id": 18,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 19,
+              "kind": "text",
+              "text": "v2"
+            },
+            {
+              "id": 20,
+              "kind": "text",
+              "text": " "
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "kind": "list",
+          "list": [
+            {
+              "id": 22,
+              "kind": "text",
+              "text": ":"
+            },
+            {
+              "id": 23,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 24,
+              "kind": "text",
+              "text": "T"
+            },
+            {
+              "id": 25,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 26,
+              "kind": "text",
+              "text": "="
+            },
+            {
+              "id": 27,
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "id": 28,
+              "kind": "text",
+              "text": "1"
+            },
+            {
+              "id": 29,
+              "kind": "text",
+              "text": ";"
+            }
+          ]
+        }
+      ]
+    ],
+    "mustBreak": true,
+    "separators": [
+      [
+        {
+          "command": {
+            "command": "alignmentTableSeparator",
+            "text": ""
+          },
+          "id": 30,
+          "kind": "command"
+        }
+      ],
+      [
+        {
+          "command": {
+            "command": "alignmentTableSeparator",
+            "text": ""
+          },
+          "id": 31,
+          "kind": "command"
+        }
+      ]
+    ]
   },
   "id": 1,
   "kind": "command"
@@ -1018,52 +1212,27 @@ Done.
   "list": [
     {
       "command": {
-        "breakContents": {
-          "command": {
-            "command": "line",
-            "hard": false,
-            "literal": false,
-            "soft": false
-          },
-          "id": 3,
-          "kind": "command"
-        },
-        "command": "ifBreak",
-        "flatContents": {
-          "id": 4,
-          "kind": "list",
-          "list": [
-          ]
-        }
+        "command": "line",
+        "hard": false,
+        "literal": false,
+        "soft": false
       },
       "id": 2,
       "kind": "command"
     },
     {
-      "id": 5,
+      "id": 3,
       "kind": "text",
       "text": "var i:Int=0;"
     },
     {
       "command": {
-        "breakContents": {
-          "command": {
-            "command": "line",
-            "hard": false,
-            "literal": false,
-            "soft": false
-          },
-          "id": 7,
-          "kind": "command"
-        },
-        "command": "ifBreak",
-        "flatContents": {
-          "id": 8,
-          "kind": "text",
-          "text": " "
-        }
+        "command": "line",
+        "hard": false,
+        "literal": false,
+        "soft": false
       },
-      "id": 6,
+      "id": 4,
       "kind": "command"
     }
   ]
@@ -2413,6 +2582,231 @@ var v3:T=3;
 
 var v4:T=4;
 
+== main.adb -c breaking/fill.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | fill:
+[LANGKIT.UNPARSING.FINAL_DOC] |   list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Semicolon]: ;
+
+var v:Int=1;
+
+== main.adb -c breaking/group.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | group:
+[LANGKIT.UNPARSING.FINAL_DOC] |   shouldBreak: FALSE
+[LANGKIT.UNPARSING.FINAL_DOC] |   id: 0
+[LANGKIT.UNPARSING.FINAL_DOC] |   list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Semicolon]: ;
+
+var v:Int=1;
+
+== main.adb -c breaking/ifbreak.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | indent:
+[LANGKIT.UNPARSING.FINAL_DOC] |   list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | line
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | token[Semicolon]: ;
+
+var v:Int=
+    1;
+
+== main.adb -c breaking/table.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | table:
+[LANGKIT.UNPARSING.FINAL_DOC] |   must_break: FALSE
+[LANGKIT.UNPARSING.FINAL_DOC] |   row:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Semicolon]: ;
+
+var
+ v:Int=1;
+
+== main.adb -c breaking/root.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] | softline
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] | token[Semicolon]: ;
+var
+v:Int=1;
+
+== main.adb -c breaking/table.json breaking/comment_in_vars.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] list:
+[LANGKIT.UNPARSING.FINAL_DOC] | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] | table:
+[LANGKIT.UNPARSING.FINAL_DOC] |   must_break: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC] |   row:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | | token[Comment]: # comment 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Semicolon]: ;
+[LANGKIT.UNPARSING.FINAL_DOC] |   row:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | softline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: v2
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | | token[Comment]: # comment 2
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | hardline
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | | token[Number]: 2
+[LANGKIT.UNPARSING.FINAL_DOC] |   | | token[Semicolon]: ;
+
+var
+v1:Int= # comment 1
+1;
+var
+v2:Int= # comment 2
+2;
+
+== main.adb -c breaking/table_must_break.json breaking/comment_in_vars.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] group:
+[LANGKIT.UNPARSING.FINAL_DOC]   shouldBreak: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]   id: 0
+[LANGKIT.UNPARSING.FINAL_DOC]   table:
+[LANGKIT.UNPARSING.FINAL_DOC]     must_break: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]     row:
+[LANGKIT.UNPARSING.FINAL_DOC]     | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]     | | softline
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: v1
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | | token[Comment]: # comment 1
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | line
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Semicolon]: ;
+[LANGKIT.UNPARSING.FINAL_DOC]     row:
+[LANGKIT.UNPARSING.FINAL_DOC]     | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]     | | softline
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: v2
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | | token[Comment]: # comment 2
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | line
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Number]: 2
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Semicolon]: ;
+var
+v1:Int= # comment 1
+1;
+var
+v2:Int= # comment 2
+2;
+
+== main.adb -c breaking/table_must_break.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] group:
+[LANGKIT.UNPARSING.FINAL_DOC]   shouldBreak: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]   id: 0
+[LANGKIT.UNPARSING.FINAL_DOC]   table:
+[LANGKIT.UNPARSING.FINAL_DOC]     must_break: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]     row:
+[LANGKIT.UNPARSING.FINAL_DOC]     | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]     | | softline
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]     | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | line
+[LANGKIT.UNPARSING.FINAL_DOC]     | | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC]     | | token[Semicolon]: ;
+var
+v:Int=
+1;
+
+== main.adb -c breaking/table_must_break_not_parent.json breaking/one_var.txt -t final_doc ==
+[LANGKIT.UNPARSING.FINAL_DOC] group:
+[LANGKIT.UNPARSING.FINAL_DOC]   shouldBreak: FALSE
+[LANGKIT.UNPARSING.FINAL_DOC]   id: 0
+[LANGKIT.UNPARSING.FINAL_DOC]   list:
+[LANGKIT.UNPARSING.FINAL_DOC]   | softline
+[LANGKIT.UNPARSING.FINAL_DOC]   | table:
+[LANGKIT.UNPARSING.FINAL_DOC]   |   must_break: TRUE
+[LANGKIT.UNPARSING.FINAL_DOC]   |   row:
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Var]: var
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | list:
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | | whitespace( 1)
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | | token[Identifier]: v
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Colon]: :
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Identifier]: Int
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Equal]: =
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Number]: 1
+[LANGKIT.UNPARSING.FINAL_DOC]   |   | | token[Semicolon]: ;
+var v:Int=1;
+
 == main.adb -c table_align/no_split.json table_align/var_decls.txt ==
 null var v1 : Int = 1;
 var v22     : Int = 2;
@@ -2508,4 +2902,29 @@ var vv1 : T = 1;
 +{
 var v0 : T = 0;var vv1 : T = 1;
 }
+
+== main.adb -c table_join/config.json table_join/big.txt ==
+var v0:T=0;
+var v1:T=1;
+var left:T=2;       var right:T=3;
+var left:T=4;
+var looooooooooooooong:T=5;
+var right:T=6;
+var left:TTTTTTT=2; var right:T=3;
+
+var looooooooooooooong:T=0;
+var left:T=1;   var right:T=2;
+var left:TTT=3; var right:T=4;
+
+var left:T=3;
+# Comment
+var right:T=4;
+
+== main.adb -c table_join/config.json table_join/error.txt ==
+error.txt:4:1: predicate FooNode.p_table_join_needed raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR: predicate bug
+var v0:T=0;
+var v1:T=1;
+var left:T=2;
+foo,bar var right:T=3;
+var left:T=4;
 Done

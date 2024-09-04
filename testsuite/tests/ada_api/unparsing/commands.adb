@@ -152,6 +152,7 @@ begin
    Check ("cmd_breakparent.json");
    Check ("cmd_dedent.json");
    Check ("cmd_dedenttoroot.json");
+   Check ("cmd_emptytablesep.json", "var v1: T = 0; var v2: T = 1;");
    Check ("cmd_fill.json");
    Check
      ("cmd_no_flush_line_breaks.json",
