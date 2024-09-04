@@ -1042,11 +1042,6 @@ class WithLexerAnnotationSpec(AnnotationSpec):
             return decl
 
 
-token_cls_map = {'text': WithText,
-                 'trivia': WithTrivia,
-                 'symbol': WithSymbol}
-
-
 @dataclass
 class ParsedAnnotations:
     """
@@ -1655,15 +1650,6 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
     SrcRule = Union[RegularRule, L.LexerCaseRule]
 
-    def ignore_constructor(start_ignore_layout: bool,
-                           end_ignore_layout: bool) -> Action:
-        """
-        Adapter to build a Ignore instance with the same API as WithText
-        constructors.
-        """
-        del start_ignore_layout, end_ignore_layout
-        return Ignore()
-
     def process_family(f: L.LexerFamilyDecl, rules: list[SrcRule]) -> None:
         """
         Process a LexerFamilyDecl node. Register the token family, the token
@@ -1715,25 +1701,29 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
             # Gather token action info from the annotations. If absent,
             # fallback to WithText.
-            token_cons = None
-            cons_kwargs = {
-                "start_ignore_layout": False,
-                "end_ignore_layout": False,
-            }
+            token_kind: str | None = None
+            start_ignore_layout = False
+            end_ignore_layout = False
+            comment: bool = False
+            location = Location.from_lkt_node(r)
             if rule_annot.ignored:
-                token_cons = ignore_constructor
+                token_kind = "ignored"
             for name in ('text', 'trivia', 'symbol'):
                 annot = getattr(rule_annot, name)
                 if not annot:
                     continue
-                cons_kwargs.update(annot)
+                if token_kind is not None:
+                    error('At most one token action allowed')
 
-                check_source_language(token_cons is None,
-                                      'At most one token action allowed')
-                token_cons = token_cls_map[name]
+                token_kind = name
+                start_ignore_layout = annot["start_ignore_layout"]
+                end_ignore_layout = annot["end_ignore_layout"]
+                if "comment" in annot:
+                    comment = annot["comment"]
+
             is_pre = rule_annot.pre_rule
-            if token_cons is None:
-                token_cons = WithText
+            if token_kind is None:
+                token_kind = "text"
 
             # Create the token and register it where needed: the global token
             # mapping, its token family (if any) and the "newline_after" group
@@ -1752,7 +1742,25 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             check_source_language(token_name not in tokens,
                                   'Duplicate token name')
 
-            token = token_cons(**cons_kwargs)
+            # Create the token action
+            token: Action
+            if token_kind in "text":
+                token = WithText(
+                    start_ignore_layout, end_ignore_layout, location
+                )
+            elif token_kind == "trivia":
+                token = WithTrivia(
+                    start_ignore_layout, end_ignore_layout, comment, location
+                )
+            elif token_kind == "symbol":
+                token = WithSymbol(
+                    start_ignore_layout, end_ignore_layout, location
+                )
+            else:
+                assert token_kind == "ignored"
+                token = Ignore(location)
+
+            # Register it
             if token_name is not None:
                 tokens[token_name] = token
             if isinstance(token, TokenAction):
@@ -4921,6 +4929,7 @@ class LktTypesLoader:
         actions = []
 
         for syn_action in env_spec.f_actions:
+            location = Location.from_lkt_node(syn_action)
             assert isinstance(syn_action.f_name, L.RefId)
             action_kind = syn_action.f_name.text
             action: EnvAction
@@ -4946,6 +4955,7 @@ class LktTypesLoader:
                         args.get("names"),
                         T.Symbol.array,
                     ),
+                    location=location,
                 )
 
             elif action_kind == "add_to_env_kv":
@@ -4990,6 +5000,7 @@ class LktTypesLoader:
                         location=Location.from_lkt_node(syn_action),
                     ),
                     resolver=self.resolve_property(args.get("resolver")),
+                    location=location,
                 )
 
             elif action_kind == "add_to_env":
@@ -5003,22 +5014,24 @@ class LktTypesLoader:
                         rtype=None,
                     ),
                     resolver=self.resolve_property(args.get("resolver")),
+                    location=location,
                 )
 
             elif action_kind == "do":
                 args, _ = do_env_signature.match(self.ctx, syn_action)
                 action = Do(
-                    self.lower_expr_to_internal_property(
+                    expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_do",
                         expr=args["expr"],
                         rtype=None,
-                    )
+                    ),
+                    location=location,
                 )
 
             elif action_kind == "handle_children":
                 args, _ = empty_signature.match(self.ctx, syn_action)
-                action = HandleChildren()
+                action = HandleChildren(location=location)
 
             elif action_kind == "reference":
                 args, _ = reference_signature.match(self.ctx, syn_action)
@@ -5070,6 +5083,7 @@ class LktTypesLoader:
                     ),
                     category=category,
                     shed_rebindings=shed_rebindings,
+                    location=location,
                 )
 
             elif action_kind == "set_initial_env":
@@ -5077,12 +5091,13 @@ class LktTypesLoader:
                     self.ctx, syn_action
                 )
                 action = SetInitialEnv(
-                    self.lower_expr_to_internal_property(
+                    env_expr=self.lower_expr_to_internal_property(
                         node=node,
                         name="env_init",
                         expr=args["env"],
                         rtype=T.DesignatedEnv,
-                    )
+                    ),
+                    location=location,
                 )
 
             else:

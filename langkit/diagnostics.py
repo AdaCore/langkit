@@ -231,14 +231,34 @@ class Location:
             result = replace(result, line=result.line + 2)
         return result
 
+    @staticmethod
+    def resolve(location: Location | L.LktNode) -> Location:
+        """
+        If "location" is a node from liblktlang, turn it into a Location
+        instance. Note that this possible only if liblktlang is available, so
+        we know that we'll have a Location instance afterwards.
+        """
+        if liblktlang_available and isinstance(location, L.LktNode):
+            return Location.from_lkt_node(location)
+        else:
+            assert isinstance(location, Location)
+            return location
+
     builtin: ClassVar[Location]
     """
     Special location to designate the abstract source location where builtins
     are defined.
     """
 
+    nowhere: ClassVar[Location]
+    """
+    Special location to designate no location in particular. Useful for errors
+    that do not relate to a specific place in source code.
+    """
+
 
 Location.builtin = Location("<builtin>")
+Location.nowhere = Location("")
 
 
 def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
@@ -314,12 +334,13 @@ def get_structured_context() -> List[Location]:
     return list(l for l in reversed(context_stack) if l)
 
 
-def get_current_location() -> Opt[Location]:
+def get_current_location() -> Location:
     ctx = get_structured_context()
-    return ctx[0] if ctx else None
+    assert ctx
+    return ctx[0]
 
 
-def get_parsable_location() -> str:
+def get_parsable_location(location: Location | L.LktNode) -> str:
     """
     Returns an error location in the common tool parsable format::
 
@@ -401,10 +422,11 @@ def check_source_language(predicate: bool,
             message_lines[:1] + [indent + line for line in message_lines[1:]]
         )
 
+        location = get_current_location()
         if Diagnostics.style != DiagnosticStyle.default:
-            print('{}: {}'.format(get_parsable_location(), message))
+            print('{}: {}'.format(get_parsable_location(location), message))
         else:
-            print_error(message, get_current_location(), severity)
+            print_error(message, location, severity)
 
         if severity == Severity.error and do_raise:
             raise DiagnosticError()
@@ -712,7 +734,7 @@ def source_listing(
 
 
 def print_error(message: str,
-                location: Union[Location, L.LktNode, None],
+                location: Union[Location, L.LktNode],
                 severity: Severity = Severity.error) -> None:
     """
     Prints an error.
@@ -725,16 +747,11 @@ def print_error(message: str,
         color = Colors.RED
     error_marker = col("{}: ".format(name), color + Colors.BOLD)
 
-    if location is None:
+    location = Location.resolve(location)
+
+    if not location.file:
         print(error_marker + message)
         return
-
-    # If "location" is a node from liblktlang, turn it into a Location
-    # instance. Note that this possible only if liblktlang is available, so we
-    # know that we'll have a Location instance afterwards.
-    if liblktlang_available and isinstance(location, L.LktNode):
-        location = Location.from_lkt_node(location)
-    assert isinstance(location, Location)
 
     # Print the basic error (with colors if in tty)
     print(

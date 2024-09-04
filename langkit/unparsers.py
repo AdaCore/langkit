@@ -20,7 +20,9 @@ from langkit.compiled_types import (
     get_context,
     resolve_type,
 )
-from langkit.diagnostics import WarningSet, check_source_language, error
+from langkit.diagnostics import (
+    Location, WarningSet, check_source_language, diagnostic_context, error
+)
 from langkit.lexer import Ignore, LexerToken, Literal, TokenAction
 import langkit.names as names
 from langkit.parsers import (
@@ -306,16 +308,17 @@ class TokenSequenceUnparser(Unparser):
             the diagnostic label.
         :param other: Sequence to compare to ``self``.
         """
-        check_source_language(
-            len(self.tokens) == len(other.tokens) and
-            all(TokenUnparser.equivalent(tok1, tok2)
-                for tok1, tok2 in zip(self.tokens, other.tokens)),
+        with diagnostic_context(Location.nowhere):
+            check_source_language(
+                len(self.tokens) == len(other.tokens) and
+                all(TokenUnparser.equivalent(tok1, tok2)
+                    for tok1, tok2 in zip(self.tokens, other.tokens)),
 
-            'Inconsistent {}:'
-            '\n  {}'
-            '\nand:'
-            '\n  {}'.format(sequence_name, self.dumps(), other.dumps())
-        )
+                'Inconsistent {}:'
+                '\n  {}'
+                '\nand:'
+                '\n  {}'.format(sequence_name, self.dumps(), other.dumps())
+            )
 
     @property
     def var_name(self) -> names.Name:
@@ -941,19 +944,21 @@ class ListNodeUnparser(NodeUnparser):
 
     def _combine(self, other: Self) -> Self:
         assert self.node == other.node
-        check_source_language(
-            TokenUnparser.equivalent(self.separator, other.separator),
-            'Inconsistent separation token for {}: {} and {}'.format(
-                self.node.dsl_name,
-                TokenUnparser.dump_or_none(self.separator),
-                TokenUnparser.dump_or_none(other.separator)
+        with diagnostic_context(Location.nowhere):
+            check_source_language(
+                TokenUnparser.equivalent(self.separator, other.separator),
+                'Inconsistent separation token for {}: {} and {}'.format(
+                    self.node.dsl_name,
+                    TokenUnparser.dump_or_none(self.separator),
+                    TokenUnparser.dump_or_none(other.separator)
+                )
             )
-        )
-        check_source_language(
-            self.extra == other.extra,
-            f"Inconsistent extra separation token for {self.node.dsl_name}:"
-            f" {self.extra.name} and {other.extra.name}",
-        )
+            check_source_language(
+                self.extra == other.extra,
+                "Inconsistent extra separation token for"
+                f" {self.node.dsl_name}: {self.extra.name} and"
+                f" {other.extra.name}",
+            )
         return self
 
     def collect(self, unparsers: Unparsers) -> None:
@@ -1202,16 +1207,14 @@ class Unparsers:
         if not self.context.generate_unparser:
             return
 
-        ignore_tokens = []
         assert self.context.lexer
         for rule_assoc in self.context.lexer.rules:
             if isinstance(rule_assoc.action, Ignore):
-                ignore_tokens.append(rule_assoc.action)
-        check_source_language(
-            not ignore_tokens,
-            'Ignore() tokens are incompatible with unparsers.'
-            ' Consider using WithTrivia() instead.'
-        )
+                with diagnostic_context(rule_assoc.action.location):
+                    error(
+                        'Ignore() tokens are incompatible with unparsers.'
+                        ' Consider using WithTrivia() instead.'
+                    )
 
         # Combine all unparsers for each node, except synthetic/error/abstract
         # nodes. Check that they are consistent. Iterate on all nodes first to
@@ -1223,11 +1226,12 @@ class Unparsers:
             # Make sure we had at least one non-null unparser for every node
             unparsers = [u for u in self.unparsers[node]
                          if not isinstance(u, NullNodeUnparser)]
-            check_source_language(
-                bool(unparsers),
-                'No non-null unparser for non-synthetic node: {}'
-                .format(node.dsl_name)
-            )
+            with node.diagnostic_context:
+                check_source_language(
+                    bool(unparsers),
+                    'No non-null unparser for non-synthetic node: {}'
+                    .format(node.dsl_name)
+                )
 
             combined = unparsers.pop(0)
             for unparser in unparsers:
