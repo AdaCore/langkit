@@ -11,6 +11,7 @@ handle, have a look at the testsuite in the stylechecks.tests module.
 
 from __future__ import annotations
 
+import abc
 import argparse
 import ast
 import dataclasses
@@ -473,7 +474,7 @@ def check_generic(
         check_comment()
 
 
-class LanguageChecker:
+class LanguageChecker(abc.ABC):
     """Base class for language-specific checkers."""
 
     # String for single-line comments starters
@@ -482,6 +483,7 @@ class LanguageChecker:
     # Regular expression that matches package imports, if applicable
     with_re: Pattern | None
 
+    @abc.abstractmethod
     def check(
         self,
         report: Report,
@@ -498,7 +500,7 @@ class LanguageChecker:
         :param parse: Whether we expect "content" to be syntactically correct
             (i.e. if we can parse it without error).
         """
-        raise NotImplementedError()
+        ...
 
 
 class AdaLang(LanguageChecker):

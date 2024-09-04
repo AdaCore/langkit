@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 from contextlib import contextmanager
 import dataclasses
 from functools import partial
@@ -30,8 +31,7 @@ from langkit.diagnostics import (
 from langkit.documentation import RstCommentChecker
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
-    assert_type, dispatch_on_type, inherited_property, memoized, nested,
-    not_implemented_error
+    assert_type, dispatch_on_type, inherited_property, memoized, nested
 )
 
 
@@ -315,7 +315,7 @@ def construct_var(expr: AbstractVariable) -> VariableExpr:
     return result
 
 
-class Frozable:
+class Frozable(abc.ABC):
     """
     Trait class that defines:
 
@@ -672,13 +672,14 @@ class AbstractExpression(Frozable):
             assert isinstance(result, AbstractExpression)
             return result
 
+    @abc.abstractmethod
     def construct(self):
         """
         Returns a resolved tree of resolved expressions.
 
         :rtype: ResolvedExpression
         """
-        raise NotImplementedError()
+        ...
 
     @memoized
     def composed_attrs(self):
@@ -1264,6 +1265,7 @@ class ResolvedExpression:
         """
         return ''
 
+    @abc.abstractmethod
     def _render_expr(self) -> str:
         """
         Per-expression kind implementation for render_expr. To be overriden in
@@ -1272,7 +1274,7 @@ class ResolvedExpression:
         Note that the returned expression must be idempotent: each evaluation
         must return the exact same result for the exact same context.
         """
-        raise NotImplementedError()
+        ...
 
     def render(self) -> str:
         """
@@ -1654,13 +1656,13 @@ class BaseRaiseException(AbstractExpression):
         self.message = message
         super().__init__()
 
-    @property
+    @abc.abstractproperty
     def exc_name(self) -> names.Name:
         """
         Subclasses must override this to return the name of the exception to
         raise.
         """
-        raise NotImplementedError
+        ...
 
     def construct(self) -> ResolvedExpression:
         check_source_language(
@@ -1783,6 +1785,7 @@ class BindableLiteralExpr(LiteralExpr):
     Resolved expression for literals that can be expressed in all bindings.
     """
 
+    @abc.abstractmethod
     def render_private_ada_constant(self):
         """
         Assuming this expression is a valid constant, return Ada code to
@@ -1790,8 +1793,9 @@ class BindableLiteralExpr(LiteralExpr):
 
         :rtype: str
         """
-        raise not_implemented_error(self, self.render_private_ada_constant)
+        ...
 
+    @abc.abstractmethod
     def render_public_ada_constant(self):
         """
         Assuming this expression is a valid constant, return Ada code to
@@ -1799,8 +1803,9 @@ class BindableLiteralExpr(LiteralExpr):
 
         :rtype: str
         """
-        raise not_implemented_error(self, self.render_public_ada_constant)
+        ...
 
+    @abc.abstractmethod
     def render_python_constant(self):
         """
         Assuming this expression is a valid constant, return Python code to
@@ -1808,8 +1813,9 @@ class BindableLiteralExpr(LiteralExpr):
 
         :rtype: str
         """
-        raise not_implemented_error(self, self.render_python_constant)
+        ...
 
+    @abc.abstractmethod
     def render_java_constant(self):
         """
         Assuming this expression is a valid constant, return Java code to
@@ -1817,8 +1823,9 @@ class BindableLiteralExpr(LiteralExpr):
 
         :rtype: str
         """
-        raise not_implemented_error(self, self.render_java_constant)
+        ...
 
+    @abc.abstractmethod
     def render_introspection_constant(self):
         """
         Assuming this expression is a valid constant, return Ada code to
@@ -1826,8 +1833,9 @@ class BindableLiteralExpr(LiteralExpr):
 
         :rtype: str
         """
-        raise not_implemented_error(self, self.render_introspection_constant)
+        ...
 
+    @abc.abstractmethod
     def render_ocaml_constant(self):
         """
         Assuming this expression is a valid constant, return ocaml code to
@@ -1835,7 +1843,7 @@ class BindableLiteralExpr(LiteralExpr):
 
         :rtype: str
         """
-        raise not_implemented_error(self, self.render_ocaml_constant)
+        ...
 
 
 class BooleanLiteralExpr(BindableLiteralExpr):
@@ -2442,6 +2450,12 @@ class NullCond:
             assert not isinstance(expr, NullCond.Prefix)
             self._expr = expr
 
+        def construct(self):
+            raise RuntimeError(
+                "NullCond.Prefix is suppposed to be a temporary node, to be"
+                " expanded before the construct pass."
+            )
+
     class Check(AbstractExpression):
         """
         Wrapper that designates a checked prefix in an abstract expression
@@ -2464,6 +2478,12 @@ class NullCond:
                 check_source_language(
                     self._validated, "Invalid use of the '_' special attribute"
                 )
+
+        def construct(self):
+            raise RuntimeError(
+                "NullCond.Check is suppposed to be a temporary node, to be"
+                " expanded before the construct pass."
+            )
 
     @dataclasses.dataclass
     class CheckCouple:

@@ -22,6 +22,7 @@ not defined in the example, but relied on explicitly.
 
 from __future__ import annotations
 
+import abc
 from collections import OrderedDict
 from contextlib import AbstractContextManager, contextmanager
 import difflib
@@ -48,7 +49,9 @@ from langkit.diagnostics import (
 )
 from langkit.expressions import PropertyDef, resolve_property
 from langkit.lexer import Action, Literal, TokenAction, WithSymbol
-from langkit.utils import copy_with, issubtype, type_check_instance
+from langkit.utils import (
+    copy_with, issubtype, not_implemented_error, type_check_instance
+)
 from langkit.utils.types import TypeSet
 
 
@@ -503,7 +506,7 @@ class Grammar:
                     )
 
 
-class Parser:
+class Parser(abc.ABC):
     """
     Base class for parsers building blocks.
     """
@@ -811,13 +814,14 @@ class Parser:
         """Return whether this parser is left-recursive."""
         return self._is_left_recursive(self.name)
 
+    @abc.abstractmethod
     def _is_left_recursive(self, rule_name: str) -> bool:
         """
         Private function used only by is_left_recursive, will explore the
         parser tree to verify whether the named parser with name rule_name is
         left recursive or not.
         """
-        raise NotImplementedError()
+        ...
 
     @property
     def can_parse_token_node(self) -> bool:
@@ -829,7 +833,7 @@ class Parser:
         """
         return False
 
-    @property
+    @abc.abstractproperty
     def children(self) -> _List[Parser]:
         """
         Parsers are combined to create new and more complex parsers.  They make
@@ -837,7 +841,7 @@ class Parser:
 
         Subclasses must override this method.
         """
-        raise NotImplementedError()
+        ...
 
     def check_toplevel_rules(self) -> None:
         """
@@ -926,6 +930,7 @@ class Parser:
         self._type_computed = True
         self._type = typ
 
+    @abc.abstractmethod
     def _eval_type(self) -> Optional[CompiledType]:
         """
         Evaluate the type this parser creates.
@@ -934,7 +939,7 @@ class Parser:
         of our type inference, this may return None when the type is still
         unknown.
         """
-        raise NotImplementedError()
+        ...
 
     @property
     def precise_types(self) -> TypeSet:
@@ -953,7 +958,7 @@ class Parser:
         Implementation for precise_types. Relevant subclasses must override
         this.
         """
-        raise NotImplementedError()
+        raise not_implemented_error(self, type(self).type)
 
     @property
     def precise_element_types(self) -> TypeSet:
@@ -973,15 +978,16 @@ class Parser:
         Implementation for precise_element_types. Relevant subclasses must
         override this.
         """
-        raise NotImplementedError()
+        raise not_implemented_error(self, type(self).type)
 
+    @abc.abstractmethod
     def generate_code(self) -> str:
         """
         Return generated code for this parser into the global context.
 
         Subclasses must override this method.
         """
-        raise NotImplementedError()
+        ...
 
     def render(self, template_name: str, **kwargs: Any) -> str:
         """

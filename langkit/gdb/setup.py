@@ -46,7 +46,8 @@ def setup(lib_name: str,
         printers.RebindingsPrinter,
         printers.TokenReferencePrinter,
     ]:
-        langkit.gdb.gdb_printers.append(printer)
+        # mypy cannot infer that "printer" is always a concrete class here
+        langkit.gdb.gdb_printers.append(printer)  # type: ignore[type-abstract]
 
     for objfile in gdb.objfiles():
         handle_new_objfile(objfile, lib_name, reparse_debug_info=False)

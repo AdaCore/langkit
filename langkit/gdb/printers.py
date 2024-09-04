@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import os.path
 import re
 from typing import Dict, Iterator, Optional, TYPE_CHECKING, Tuple, Type, Union
@@ -69,7 +70,7 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
         return self.cls(value, self.context)
 
 
-class BasePrinter:
+class BasePrinter(abc.ABC):
     """
     Base class for pretty-printers.
 
@@ -89,11 +90,12 @@ class BasePrinter:
         self.value = value
 
     @classmethod
+    @abc.abstractmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
         """
         Return whether this pretty-printer matches `value`, a GDB value.
         """
-        raise NotImplementedError()
+        ...
 
     def display_hint(self) -> str | None:
         return None
@@ -101,8 +103,9 @@ class BasePrinter:
     def children(self) -> Iterator[Tuple[str, Union[str, gdb.Value]]]:
         return iter([])
 
+    @abc.abstractmethod
     def to_string(self) -> str:
-        raise NotImplementedError()
+        ...
 
 
 class AnalysisUnitPrinter(BasePrinter):
