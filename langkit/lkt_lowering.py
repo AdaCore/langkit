@@ -317,6 +317,18 @@ class Scope:
         def diagnostic_name(self) -> str:
             return f"the builtin value {self.value}"
 
+    @dataclass
+    class BuiltinDynVar(BuiltinEntity):
+        """
+        Dynamic variable created automatically by Lkt.
+        """
+
+        variable: E.DynamicVariable
+
+        @property
+        def diagnostic_name(self) -> str:
+            return f"the builtin dynamic variable {self.variable.dsl_name}"
+
     class Generic(BuiltinEntity):
         """
         Generic declaration, always created automatically by Lkt.
@@ -909,7 +921,9 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
         kwargs: Dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
-        result: list[tuple[Scope.DynVar, L.Expr | None]] = []
+        result: list[
+            tuple[Scope.BuiltinDynVar | Scope.DynVar, L.Expr | None]
+        ] = []
 
         def add(
             entity: Scope.Entity,
@@ -924,9 +938,9 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
             :param default_value: If this dynamic variable is optional, default
                 value for it.
             """
-            if not isinstance(entity, Scope.DynVar):
+            if not isinstance(entity, (Scope.BuiltinDynVar, Scope.DynVar)):
                 error(
-                    "dynamic variable expected, got {entity.diagnostic_name}"
+                    f"dynamic variable expected, got {entity.diagnostic_name}"
                 )
             if entity in result:
                 error("dynamic variables can appear at most once")
@@ -1515,7 +1529,6 @@ eq_signature = FunctionSignature(
     FunctionParamSpec("to"),
     FunctionParamSpec("from"),
     FunctionParamSpec("conv_prop", optional=True, keyword_only=True),
-    FunctionParamSpec("logic_ctx", optional=True, keyword_only=True),
 )
 """
 Signature for "%eq".
@@ -1556,7 +1569,6 @@ Signature for "%all" and for "%any".
 predicate_signature = FunctionSignature(
     FunctionParamSpec("pred_prop"),
     FunctionParamSpec("node"),
-    FunctionParamSpec("error_location", optional=True, keyword_only=True),
     positional_variadic=True,
 )
 """
@@ -1566,7 +1578,6 @@ Signature for "%predicate".
 propagate_signature = FunctionSignature(
     FunctionParamSpec("dest"),
     FunctionParamSpec("comb_prop"),
-    FunctionParamSpec("logic_ctx", optional=True, keyword_only=True),
     positional_variadic=True,
 )
 """
@@ -2547,6 +2558,14 @@ class LktTypesLoader:
         self.node_builtin = Scope.BuiltinValue("node", E.Self)
         self.self_builtin = Scope.BuiltinValue("self", E.Entity)
 
+        self.error_location_builtin = Scope.BuiltinDynVar(
+            "error_location",
+            E.DynamicVariable("error_location", T.defer_root_node),
+        )
+        self.logic_context_builtin = Scope.BuiltinDynVar(
+            "logic_context", E.DynamicVariable("logic_context", T.LogicContext)
+        )
+
         self.precondition_failure = Scope.Exception(
             "PreconditionFailure", E.PreconditionFailure
         )
@@ -2589,6 +2608,8 @@ class LktTypesLoader:
                 Scope.BuiltinValue("true", E.Literal(True)),
                 self.node_builtin,
                 self.self_builtin,
+                self.error_location_builtin,
+                self.logic_context_builtin,
                 self.precondition_failure,
                 self.property_error,
                 self.generics.ast_list,
@@ -4256,12 +4277,17 @@ class LktTypesLoader:
 
                     elif isinstance(v, L.VarBind):
                         # Look for the corresponding dynamic variable, either
-                        # unbound (DynVar, that we will bound) or already
-                        # bounded (BoundDynVar, that we will rebind in this
-                        # scope).
+                        # unbound (BuiltinDynVar or DynVar, that we will bound)
+                        # or already bounded (BoundDynVar, that we will rebind
+                        # in this scope).
                         entity = self.resolve_entity(v.f_name, sub_env)
                         if not isinstance(
-                            entity, (Scope.DynVar, Scope.BoundDynVar)
+                            entity,
+                            (
+                                Scope.BuiltinDynVar,
+                                Scope.DynVar,
+                                Scope.BoundDynVar,
+                            ),
                         ):
                             with self.ctx.lkt_context(v.f_name):
                                 error(
@@ -4570,33 +4596,25 @@ class LktTypesLoader:
 
                     elif call_name.text == "eq":
                         args, _ = eq_signature.match(self.ctx, expr)
-                        logic_ctx_expr = args.get("logic_ctx")
                         return E.Bind(
                             lower(args["to"]),
                             lower(args["from"]),
                             conv_prop=self.resolve_property(
                                 args.get("conv_prop")
                             ),
-                            logic_ctx=(
-                                None
-                                if logic_ctx_expr is None else
-                                lower(logic_ctx_expr)
-                            ),
+                            logic_ctx=self.logic_context_builtin.variable,
                         )
 
                     elif call_name.text == "predicate":
                         args, vargs = predicate_signature.match(self.ctx, expr)
                         pred_prop = self.resolve_property(args["pred_prop"])
                         node_expr = lower(args["node"])
-                        error_location_expr = args.get("error_location")
                         arg_exprs = [lower(arg) for arg in vargs]
                         return E.Predicate(
                             pred_prop,
                             node_expr,
                             error_location=(
-                                None
-                                if error_location_expr is None else
-                                lower(error_location_expr)
+                                self.error_location_builtin.variable
                             ),
                             *arg_exprs,
                         )
@@ -4605,16 +4623,11 @@ class LktTypesLoader:
                         args, vargs = propagate_signature.match(self.ctx, expr)
                         dest_var = lower(args["dest"])
                         comb_prop = self.resolve_property(args["comb_prop"])
-                        logic_ctx_expr = args.get("logic_ctx")
                         arg_vars = [lower(arg) for arg in vargs]
                         return E.NPropagate(
                             dest_var,
                             comb_prop,
-                            logic_ctx=(
-                                None
-                                if logic_ctx_expr is None else
-                                lower(logic_ctx_expr)
-                            ),
+                            logic_ctx=self.logic_context_builtin.variable,
                             *arg_vars,
                         )
 
@@ -4929,10 +4942,13 @@ class LktTypesLoader:
             dynvars = []
             for dynvar, init_expr in annotations.with_dynvars:
                 dynvars.append((dynvar.variable, init_expr))
+                diag_node = (
+                    dynvar.diagnostic_node
+                    if isinstance(dynvar, Scope.DynVar) else
+                    decl
+                )
                 scope.add(
-                    Scope.BoundDynVar(
-                        dynvar.name, dynvar.diagnostic_node, dynvar.variable
-                    )
+                    Scope.BoundDynVar(dynvar.name, diag_node, dynvar.variable)
                 )
 
         # Plan to lower its expressions later
@@ -5639,4 +5655,5 @@ def create_types(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> None:
     :param lkt_units: Non-empty list of analysis units where to look for type
         declarations.
     """
-    LktTypesLoader(ctx, lkt_units)
+    loader = LktTypesLoader(ctx, lkt_units)
+    ctx.lkt_types_loader = loader

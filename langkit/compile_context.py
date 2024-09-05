@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from langkit.expressions import PropertyDef
     from langkit.lexer import Lexer
     from langkit.lexer.regexp import NFAState
+    from langkit.lkt_lowering import LktTypesLoader
     from langkit.ocaml_api import OCamlAPISettings
     from langkit.passes import AbstractPass
     from langkit.parsers import GeneratedParser, Grammar, Parser, VarDef
@@ -847,6 +848,12 @@ class CompileCtx:
         self.unparsers: Unparsers = Unparsers(self)
         """
         :type: langkit.unparsers.Unparsers
+        """
+
+        self.lkt_types_loader: LktTypesLoader | None = None
+        """
+        LktTypesLoader singleton. Available only once types lowering from Lkt
+        has completed.
         """
 
         self.emitter: Optional[Emitter] = None
