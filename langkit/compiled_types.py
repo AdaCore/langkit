@@ -702,6 +702,14 @@ class AbstractNodeData(abc.ABC):
         )
 
 
+class NoNullexprError(Exception):
+    """
+    Exception raised by "nullexpr" properties when no null expression is
+    available.
+    """
+    pass
+
+
 class CompiledType:
     """
     Descriptor for a type in the generated code.
@@ -1370,7 +1378,7 @@ class CompiledType:
         """
         try:
             _ = self.nullexpr
-        except NotImplementedError:
+        except NoNullexprError:
             return False
         else:
             return True
@@ -1385,7 +1393,9 @@ class CompiledType:
         :rtype: str
         """
         if self._nullexpr is None:
-            raise RuntimeError(f"{self.dsl_name} has no Ada null expression")
+            raise NoNullexprError(
+                f"{self.dsl_name} has no Ada null expression"
+            )
         else:
             return self._nullexpr
 
@@ -1400,7 +1410,7 @@ class CompiledType:
         :rtype: str
         """
         if self._py_nullexpr is None:
-            raise RuntimeError(
+            raise NoNullexprError(
                 f"{self.dsl_name} has no Python null expression"
             )
         else:
@@ -1416,7 +1426,7 @@ class CompiledType:
         expression.
         """
         if self._java_nullexpr is None:
-            raise RuntimeError(
+            raise NoNullexprError(
                 f"{self.dsl_name} has no Java null expression"
             )
         else:
