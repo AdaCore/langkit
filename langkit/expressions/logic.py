@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from itertools import zip_longest
 from typing import Any as _Any, List, Optional, Tuple, Union
 
 import funcy
 
 from langkit import names
+from langkit.compile_context import get_context
 from langkit.compiled_types import ASTNodeType, Argument, T, no_compiled_type
 from langkit.diagnostics import check_multiple, check_source_language, error
 from langkit.expressions.base import (
@@ -32,6 +35,31 @@ def untyped_literal_expr(expr_str, operands=[]):
     :rtype: LiteralExpr
     """
     return LiteralExpr(expr_str, no_compiled_type, operands)
+
+
+def construct_logic_ctx(
+    expr: AbstractExpression | None
+) -> ResolvedExpression | None:
+    """
+    Common logic to construct a logic context expression for a logic atom
+    builder.
+    """
+    # Do not pass a logic context if...
+
+    # 1) No logic context parameter was passed (DSL)
+    if expr is None:
+        return None
+
+    # (DSL) or if 2) the logic context builtin variable was not bound (Lkt)
+    types_loader = get_context().lkt_types_loader
+    if (
+        types_loader is not None
+        and expr is types_loader.logic_context_builtin.variable
+        and not expr.is_bound
+    ):
+        return None
+
+    return construct(expr, T.LogicContext)
 
 
 class BindExpr(CallExpr):
@@ -466,13 +494,7 @@ class Bind(AbstractExpression):
         # node that is promoted to an entity).
         from_expr = construct(self.from_expr)
 
-        logic_ctx = None
-        if self.logic_ctx:
-            logic_ctx = construct(self.logic_ctx)
-            check_source_language(
-                logic_ctx.type.matches(T.LogicContext),
-                f"Expected LogicContext, got {logic_ctx.type.dsl_name}"
-            )
+        logic_ctx = construct_logic_ctx(self.logic_ctx)
 
         if from_expr.type.matches(T.LogicVar):
             # The second operand is a logic variable: this is a Propagate or a
@@ -583,13 +605,7 @@ class NPropagate(AbstractExpression):
         else:
             arg_vars = [Bind._construct_logic_var(v) for v in self.arg_vars]
 
-        logic_ctx = None
-        if self.logic_ctx:
-            logic_ctx = construct(self.logic_ctx)
-            check_source_language(
-                logic_ctx.type.matches(T.LogicContext),
-                f"Expected LogicContext, got {logic_ctx.type.dsl_name}"
-            )
+        logic_ctx = construct_logic_ctx(self.logic_ctx)
 
         return PropagateExpr.construct_propagate(
             dest_var, arg_vars, self.comb_prop, logic_ctx,
