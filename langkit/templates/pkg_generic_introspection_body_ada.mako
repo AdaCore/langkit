@@ -19,14 +19,31 @@ package body ${ada_lib_name}.Generic_Introspection is
    <%
       G = generic_api
 
-      def declare_block(decls, stmts):
+      def declare_block(decls, stmts, exc=None):
          """
          Code generation helper to create a declare block.
          """
-         if decls:
-            return ["declare"] + decls + ["begin"] + stmts + ["end;"]
-         else:
+         if not decls and not exc:
             return stmts
+
+         result = []
+
+         if decls:
+            result += ["declare"] + decls
+
+         result += ["begin"] + stmts
+
+         if exc:
+            result += [
+               "exception",
+               "when Exc : others =>",
+               "if Implementation.Properties_May_Raise (Exc) then",
+               *exc,
+               "end if;",
+               "raise;",
+            ]
+         result += ["end;"]
+         return result
 
       def value_to_public(var_name, expr, t, decls, stmts):
          """
@@ -556,11 +573,23 @@ package body ${ada_lib_name}.Generic_Introspection is
             call_args = f" ({', '.join(arg_vars)})" if arg_vars else ""
             call_expr = f"{node_expr}.{m.api_name}{call_args}"
             public_to_value("R", call_expr, m.type, eval_decls, eval_stmts)
-            eval_stmts.append("Result := Internal_Value_Access (R);")
+            r_conv_stmt = "Result := Internal_Value_Access (R);"
+            eval_stmts.append(r_conv_stmt)
 
             return declare_block(
-               args_decls,
-               args_stmts + declare_block(eval_decls, eval_stmts),
+               decls=args_decls,
+               stmts=args_stmts + declare_block(
+                  decls=eval_decls,
+                  stmts=eval_stmts,
+                  # If member evaluation raises an exception, do not forget to
+                  # deallocate the result before propagating the exception to
+                  # the caller.
+                  exc=[
+                     r_conv_stmt,
+                      "Result.Destroy;",
+                      "Free (Result);",
+                  ],
+               )
             )
 
          def get_actions(node_type, node_expr):
