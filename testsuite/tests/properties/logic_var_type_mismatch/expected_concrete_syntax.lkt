@@ -60,6 +60,26 @@ class Examples: FooNode {
     fun fail_nprop_varargs(): Bool = (
         %propagate(node.pe.lvar, PlusExample.ncomb_prop, [node.pe.lvar, node.re.lvar]) and node.domains()
     ).solve()
+
+    @exported
+    fun ok_pred(): Bool = (
+        %predicate(PlusExample.pred_prop, node.pe.lvar, node.re.lvar, node.pe.lvar) and node.domains()
+    ).solve()
+
+    @exported
+    fun fail_pred_1(): Bool = (
+        %predicate(PlusExample.pred_prop, node.re.lvar, node.re.lvar, node.pe.lvar) and node.domains()
+    ).solve()
+
+    @exported
+    fun fail_pred_2(): Bool = (
+        %predicate(PlusExample.pred_prop, node.pe.lvar, node.pe.lvar, node.pe.lvar) and node.domains()
+    ).solve()
+
+    @exported
+    fun fail_pred_3(): Bool = (
+        %predicate(PlusExample.pred_prop, node.pe.lvar, node.re.lvar, node.re.lvar) and node.domains()
+    ).solve()
 }
 
 class PlusExample: FooNode {
@@ -70,6 +90,9 @@ class PlusExample: FooNode {
 
     fun ncomb_prop(pe_list: Array[Entity[PlusExample]]): Entity[PlusExample] =
         pe_list?[0]
+
+    fun pred_prop(@ignored re: Entity[RegularExample], @ignored pe: Entity[PlusExample]): Bool =
+        true
 }
 
 class RegularExample: FooNode {

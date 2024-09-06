@@ -207,10 +207,12 @@
       type_name = f"{pred.id}_Predicate"
       package_name = f"{pred.id}_Pred"
       formal_node_types = prop.get_concrete_node_types(pred)
+      enumerated_arg_types = list(enumerate(formal_node_types[1:], 1))
       arity = len(formal_node_types)
       has_refcounted_args = any(
          pa.type.is_refcounted for pa in pred.partial_args
       )
+      has_multiple_concrete_nodes = len(T.root_node.concrete_subclasses) > 1
    %>
 
    <%def name="call_profile()">
@@ -313,11 +315,11 @@
          Entity : ${T.entity.name} := Entities (1);
       % endif
       <% node0_type = formal_node_types[0] %>
-      Node : constant ${node0_type.name} := Entity.Node;
+      Node : ${node0_type.name};
    begin
       ## Here, we'll raise a property error, but only for dispatching
-      ## properties. For non dispatching properties we'll allow the user to
-      ## handle null however he wants.
+      ## properties. For non dispatching properties we'll allow the user
+      ## property to handle null however it wants.
       % if prop.dispatching and not ctx.no_property_checks:
          if Node_0.Node = null then
             Raise_Property_Exception
@@ -327,6 +329,33 @@
         end if;
       % endif
 
+      ## Type check nodes that come from logic vars to avoid Assertion_Error or
+      ## Assertion_Error in case of mismatch.
+      % if not ctx.emitter.no_property_checks:
+         <%
+            typed_nodes = (
+               [("Entity.Node", prop.struct)]
+               + [
+                  (f"Entities ({i + 1}).Node", t.element_type)
+                  for i, t in enumerated_arg_types
+               ]
+            )
+         %>
+         % for node_expr, node_type in typed_nodes:
+            % if has_multiple_concrete_nodes and not node_type.is_root_node:
+               if ${node_expr} /= null
+                  and then ${node_expr}.Kind
+                           not in ${node_type.ada_kind_range_name}
+               then
+                  Raise_Property_Exception
+                    (Node, Property_Error'Identity, "mismatching node type");
+               end if;
+            % endif
+         % endfor
+      % endif
+
+      Node := Entity.Node;
+
       ## Pass the "prefix" node (the one that owns the property to call) using
       ## the conventional bare node/entity_info arguments. Pass the other node
       ## arguments as entities directly.
@@ -334,8 +363,10 @@
          args = ['Node'] + [
             f"(Node => Entities ({i + 1}).Node,"
             f" Info => Entities ({i + 1}).Info)"
-            for i, formal_type in enumerate(formal_node_types[1:], 1)
-      ] + [f"{pa.name} => Self.Field_{pa.index}" for pa in pred.partial_args]
+            for i, formal_type in enumerated_arg_types
+         ] + [
+            f"{pa.name} => Self.Field_{pa.index}" for pa in pred.partial_args
+         ]
          if prop.uses_entity_info:
             args.append(f"{prop.entity_info_name} => Entity.Info")
          args_fmt = '({})'.format(', '.join(args)) if args else ''

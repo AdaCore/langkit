@@ -23,5 +23,17 @@ Result: TRUE
 Calling Examples.p_fail_nprop_varargs...
 Got a Property_Error: main.txt:1:1-1:8: mismatching node type for comb_prop
 
+Calling Examples.p_ok_pred...
+Result: TRUE
+
+Calling Examples.p_fail_pred_1...
+Got a Property_Error: mismatching node type
+
+Calling Examples.p_fail_pred_2...
+Got a Property_Error: mismatching node type
+
+Calling Examples.p_fail_pred_3...
+Got a Property_Error: mismatching node type
+
 main.adb: Done.
 Done

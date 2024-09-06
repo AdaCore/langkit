@@ -8,6 +8,7 @@ from langkit.expressions import (
     Bind,
     Entity,
     NPropagate,
+    Predicate,
     Self,
     ignore,
     langkit_property,
@@ -33,7 +34,7 @@ class Examples(FooNode):
         return Self.re.lvar.domain([Self.re]) & Self.pe.lvar.domain([Self.pe])
 
     # PropertyError expected when PlusExample.conv_prop is called on a
-    # RegularExample.
+    # RegularExample node.
 
     @langkit_property(public=True)
     def fail_bind_conv_prop():
@@ -65,7 +66,7 @@ class Examples(FooNode):
         ).solve
 
     # PropertyError expected when PlusExample.comb_prop is called on a
-    # RegularExample.
+    # RegularExample node.
 
     @langkit_property(public=True)
     def fail_nprop_multi_1():
@@ -140,6 +141,65 @@ class Examples(FooNode):
             & Self.domains
         ).solve
 
+    # Successful example of a Predicate (as a sanity check)
+
+    @langkit_property(public=True)
+    def ok_pred():
+        return (
+            Predicate(
+                PlusExample.pred_prop,
+                Self.pe.lvar,
+                Self.re.lvar,
+                Self.pe.lvar,
+            )
+            & Self.domains
+        ).solve
+
+    # PropertyError expected when PlusExample.pred_prop is called on a
+    # RegularExample node.
+
+    @langkit_property(public=True)
+    def fail_pred_1():
+        return (
+            Predicate(
+                PlusExample.pred_prop,
+                Self.re.lvar,
+                Self.re.lvar,
+                Self.pe.lvar,
+            )
+            & Self.domains
+        ).solve
+
+    # PropertyError expected when PlusExample.pred_prop is called with a
+    # PlusExample for its "re" argument.
+
+    @langkit_property(public=True)
+    def fail_pred_2():
+        return (
+            Predicate(
+                PlusExample.pred_prop,
+                Self.pe.lvar,
+                Self.pe.lvar,
+                Self.pe.lvar,
+            )
+            & Self.domains
+        ).solve
+
+    # PropertyError expected when PlusExample.pred_prop is called with a
+    # RegularExample for its "pe" argument.
+
+    @langkit_property(public=True)
+    def fail_pred_3():
+        return (
+            Predicate(
+                PlusExample.pred_prop,
+                Self.pe.lvar,
+                Self.re.lvar,
+                Self.re.lvar,
+            )
+            & Self.domains
+        ).solve
+
 
 class RegularExample(FooNode):
     pass
@@ -159,6 +219,11 @@ class PlusExample(FooNode):
     @langkit_property()
     def ncomb_prop(pe_list=T.PlusExample.entity.array):
         return pe_list.at(0)
+
+    @langkit_property()
+    def pred_prop(re=T.RegularExample.entity, pe=T.PlusExample.entity):
+        ignore(re, pe)
+        return True
 
 
 build_and_run(
