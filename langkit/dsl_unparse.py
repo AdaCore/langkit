@@ -1524,7 +1524,7 @@ def emit_expr_prio(expr, **ctx):
 
     elif isinstance(expr, Bind):
         return prio, "%eq({})".format(", ".join(keep([
-            ee_prio(P.lowest, expr.from_expr), ee_prio(P.lowest, expr.to_expr),
+            ee_prio(P.lowest, expr.to_expr), ee_prio(P.lowest, expr.from_expr),
             "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else "",
             "logic_ctx={}".format(ee_prio(P.lowest, expr.logic_ctx)) if expr.logic_ctx else "",
         ])))
