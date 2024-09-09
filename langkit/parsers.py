@@ -318,52 +318,8 @@ class Grammar:
 
         :param kwargs: The rules to add to the grammar.
         """
-        import ast
-
-        _loc = extract_library_location()
-        assert _loc is not None
-        loc: Location = _loc
-
-        class GetTheCall(ast.NodeVisitor):
-            """
-            Helper visitor that will get the corresponding add_rule call in the
-            source, so that we're then able to extract the precise line where
-            each rule is added.
-            """
-            def __init__(self) -> None:
-                self.the_call: Optional[ast.Call] = None
-
-            def visit_Call(self, call: ast.Call) -> None:
-                if (
-                    isinstance(call.func, ast.Attribute)
-                    and call.func.attr == 'add_rules'
-                    # Traceback locations are very imprecise, and python's ast
-                    # doesn't have an end location for nodes, so we'll keep
-                    # taking add_rules call, and the last is necessarily the
-                    # good one.
-                    and call.lineno <= loc.line
-                ):
-                    self.the_call = call
-
-        # Rules added internally (DontSkip rules for example) might not have a
-        # location. So test loc first.
-        if loc:
-            the_call = GetTheCall()
-            with open(loc.file) as f:
-                file_ast = ast.parse(f.read(), f.name)
-                the_call.visit(file_ast)
-
-            assert the_call.the_call is not None
-
-            # We're gonna use the keyword arguments to find back the precise
-            # line where the rule was declared.
-            keywords = {kw.arg: kw.value for kw in the_call.the_call.keywords}
-
         for name, rule in kwargs.items():
-            rule = resolve(rule)
-            if loc and name in keywords:
-                rule.set_location(Location(loc.file, keywords[name].lineno))
-            self._add_rule(name, rule)
+            self._add_rule(name, resolve(rule))
 
     def get_rule(self, rule_name: str) -> Parser:
         """
@@ -768,15 +724,6 @@ class Parser(abc.ABC):
             alternatives.append(other_parser)
 
         return Or(*alternatives)
-
-    def set_location(self, location: Location) -> None:
-        """
-        Set the source location where this parser is defined. This is useful
-        for error reporting purposes.
-        """
-        self.location = location
-        for c in self.children:
-            c.set_location(self.location)
 
     @property
     def diagnostic_context(self) -> AbstractContextManager[None]:
