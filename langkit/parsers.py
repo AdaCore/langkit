@@ -528,9 +528,19 @@ class Parser(abc.ABC):
         generation.
         """
 
+    @property
+    def repr_label(self) -> str:
+        """
+        Return the "label" to use for this parser in __repr__.
+
+        By default, this just returns the name of this Parser's class.
+        Subclasses can override this to include more relevant information.
+        """
+        return type(self).__name__
+
     def __repr__(self) -> str:
         return "<{} at {}>".format(
-            type(self).__name__,
+            self.repr_label,
             self.location.gnu_style_repr() if self.location else "???"
         )
 
@@ -1037,6 +1047,11 @@ class _Token(Parser):
             "Tok matcher has match text, but val is not a WithSymbol instance,"
             " got {} instead".format(val)
         )
+
+    @property
+    def repr_label(self) -> str:
+        # Do not resolve_type, as we may be in the middle of its own resolution
+        return f"Token({self._val}, {self.match_text})"
 
     @property
     def can_parse_token_node(self) -> bool:
@@ -1987,6 +2002,11 @@ class _Transform(Parser):
         """
 
         self.cached_type: Optional[CompiledType] = None
+
+    @property
+    def repr_label(self) -> str:
+        # Do not resolve_type, as we may be in the middle of its own resolution
+        return f"Transform({self.typ})"
 
     @property
     def children(self) -> _List[Parser]:
