@@ -1,7 +1,5 @@
 ## vim: filetype=makoada
 
---  Start predicate_code
-
 ${parser.parser.generate_code()}
 
 if ${parser.parser.res_var} /= null
@@ -22,5 +20,3 @@ else
           Custom_Message => Generic_Parsing_Error_Message_Access);
     end if;
 end if;
-
---  End predicate_code

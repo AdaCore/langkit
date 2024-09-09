@@ -1,7 +1,5 @@
 ## vim: filetype=makoada
 
---  Start opt_code
-
 <%
 subparser = parser.parser
 
@@ -130,5 +128,3 @@ else
 % endif
 
 end if;
-
---  End opt_code

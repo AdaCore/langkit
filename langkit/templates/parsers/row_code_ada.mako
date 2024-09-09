@@ -1,7 +1,5 @@
 ## vim: filetype=makoada
 
---  Start row_code
-
 ${parser.pos_var} := ${parser.start_pos};
 
 ## This is the main body of the row, which is the concatenation of the code for
@@ -39,5 +37,3 @@ end if;
 pragma Warnings (Off, "referenced");
 <<${exit_label}_0>>
 pragma Warnings (On, "referenced");
-
---  End row_code

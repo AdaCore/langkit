@@ -937,6 +937,13 @@ class Parser(abc.ABC):
         """
         raise not_implemented_error(self, type(self).type)
 
+    def loc_comment(self, prefix: str) -> str:
+        """
+        Return an Ada comment including ``prefix`` to locate this parser in
+        generated code.
+        """
+        return f"\n--  {prefix} {self}\n"
+
     @abc.abstractmethod
     def generate_code(self) -> str:
         """
@@ -1086,7 +1093,11 @@ class _Token(Parser):
         return self._val
 
     def generate_code(self) -> str:
-        return self.render('tok_code_ada', token_kind=self.val.ada_name)
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('tok_code_ada', token_kind=self.val.ada_name)
+            + self.loc_comment("END")
+        )
 
     @property
     def matches_symbol(self) -> bool:
@@ -1181,7 +1192,11 @@ class Skip(Parser):
         return result
 
     def generate_code(self) -> str:
-        return self.render('skip_code_ada', exit_label=gen_name("exit_or"))
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('skip_code_ada', exit_label=gen_name("exit_or"))
+            + self.loc_comment("END")
+        )
 
     def _precise_types(self) -> TypeSet:
         return TypeSet([self.type])
@@ -1230,12 +1245,16 @@ class DontSkip(Parser):
 
     def generate_code(self) -> str:
         return """
+        {begin}
         PP.Dont_Skip.Append ({dontskip_parser_fn}'Access);
         {subparser_code}
         PP.Dont_Skip.Delete_Last;
+        {end}
         """.format(
+            begin=self.loc_comment("BEGIN"),
             subparser_code=self.subparser.generate_code(),
-            dontskip_parser_fn=self.dontskip_parser.gen_fn_name
+            dontskip_parser_fn=self.dontskip_parser.gen_fn_name,
+            end=self.loc_comment("END"),
         )
 
     def _precise_types(self) -> TypeSet:
@@ -1356,7 +1375,11 @@ class Or(Parser):
         self.init_vars()
 
     def generate_code(self) -> str:
-        return self.render('or_code_ada', exit_label=gen_name("exit_or"))
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('or_code_ada', exit_label=gen_name("exit_or"))
+            + self.loc_comment("END")
+        )
 
     def discard(self) -> bool:
         return all(p.discard() for p in self.parsers)
@@ -1502,7 +1525,11 @@ class _Row(Parser):
             self.progress_var = VarDef('row_progress', T.Int)
 
     def generate_code(self) -> str:
-        return self.render('row_code_ada', exit_label=gen_name("exit_row"))
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('row_code_ada', exit_label=gen_name("exit_row"))
+            + self.loc_comment("END")
+        )
 
 
 class ListSepExtra(enum.Enum):
@@ -1680,7 +1707,11 @@ class List(Parser):
         self.init_vars()
 
     def generate_code(self) -> str:
-        return self.render('list_code_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('list_code_ada')
+            + self.loc_comment("END")
+        )
 
 
 class Opt(Parser):
@@ -1798,7 +1829,11 @@ class Opt(Parser):
         )
 
     def generate_code(self) -> str:
-        return self.render('opt_code_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('opt_code_ada')
+            + self.loc_comment("END")
+        )
 
 
 class _Extract(Parser):
@@ -1849,7 +1884,11 @@ class _Extract(Parser):
         )
 
     def generate_code(self) -> str:
-        return self.parser.generate_code()
+        return (
+            self.loc_comment("BEGIN")
+            + self.parser.generate_code()
+            + self.loc_comment("END")
+        )
 
 
 class Discard(Parser):
@@ -1881,7 +1920,11 @@ class Discard(Parser):
         self.init_vars(self.parser.pos_var, self.parser.res_var)
 
     def generate_code(self) -> str:
-        return self.parser.generate_code()
+        return (
+            self.loc_comment("BEGIN")
+            + self.parser.generate_code()
+            + self.loc_comment("END")
+        )
 
 
 class Defer(Parser):
@@ -1945,7 +1988,11 @@ class Defer(Parser):
 
     def generate_code(self) -> str:
         # Generate a call to the function implementing the deferred parser
-        return self.render('fn_call_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('fn_call_ada')
+            + self.loc_comment("END")
+        )
 
 
 class _Transform(Parser):
@@ -2111,9 +2158,17 @@ class _Transform(Parser):
         assert self.parse_fields is not None
         assert len(self.parse_fields) == len(subparsers)
 
-        return self.render('transform_code_ada',
-                           args=[(f, p, v) for f, (p, v)
-                                 in zip(self.parse_fields, subparsers)])
+        return (
+            self.loc_comment("BEGIN")
+            + self.render(
+                'transform_code_ada',
+                args=[
+                    (f, p, v)
+                    for f, (p, v) in zip(self.parse_fields, subparsers)
+                ]
+            )
+            + self.loc_comment("END")
+        )
 
 
 class Null(Parser):
@@ -2154,7 +2209,11 @@ class Null(Parser):
         self.init_vars(start_pos)
 
     def generate_code(self) -> str:
-        return self.render('null_code_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('null_code_ada')
+            + self.loc_comment("END")
+        )
 
     def _eval_type(self) -> Optional[CompiledType]:
         if isinstance(self.type_or_parser, Parser):
@@ -2272,7 +2331,11 @@ class Predicate(Parser):
         )
 
     def generate_code(self) -> str:
-        return self.render('predicate_code_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('predicate_code_ada')
+            + self.loc_comment("END")
+        )
 
 
 class StopCut(Parser):
@@ -2340,6 +2403,7 @@ class StopCut(Parser):
 
     def generate_code(self) -> str:
         return f"""
+        {self.loc_comment("BEGIN")}
         declare
             Nb_Diags : constant Ada.Containers.Count_Type
               := Parser.Diagnostics.Length;
@@ -2360,6 +2424,7 @@ class StopCut(Parser):
                 {self.pos_var} := {self.parser.pos_var};
             end if;
         end;
+        {self.loc_comment("END")}
         """
 
 
@@ -2490,7 +2555,11 @@ class Cut(Parser):
         # Generated code only consists of setting the no_backtrack variable to
         # True, so that other parsers know that from now on they should not
         # backtrack.
-        return '{} := True;'.format(self.no_backtrack)
+        return (
+            self.loc_comment("BEGIN")
+            + '{} := True;'.format(self.no_backtrack)
+            + self.loc_comment("END")
+        )
 
     def _eval_type(self) -> Optional[CompiledType]:
         # A Cut parser never yields a concrete result itself

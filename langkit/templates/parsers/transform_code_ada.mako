@@ -1,7 +1,5 @@
 ## vim: filetype=makoada
 
---  Start transform_code
-
 ## Keep track of the number of diagnostics before running this parser
 ${parser.diagnostics_var} := Parser.Diagnostics.Length;
 
@@ -90,5 +88,3 @@ if ${parser.pos_var} /= No_Token_Index then
 elsif ${parser.pos_var} = No_Token_Index then
    Parser.Diagnostics.Set_Length (${parser.diagnostics_var});
 end if;
-
---  End transform_code
