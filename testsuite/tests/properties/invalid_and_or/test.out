@@ -1,0 +1,19 @@
+== bool_eq.lkt ==
+bool_eq.lkt:4:50: error: Left and right operands to binary logic operator should have the same type
+4 |     @ignored fun f(b: Bool, e: Equation): Bool = b and e
+  |                                                  ^^^^^^^
+
+
+== eq_bool.lkt ==
+eq_bool.lkt:4:50: error: Left and right operands to binary logic operator should have the same type
+4 |     @ignored fun f(b: Bool, e: Equation): Bool = e and b
+  |                                                  ^^^^^^^
+
+
+== int_bool.lkt ==
+int_bool.lkt:4:49: error: Operands of binary logic operator must be of boolean or equation type, got Int
+4 |     @ignored fun f(i: Int, e: Equation): Bool = i and e
+  |                                                 ^
+
+
+lkt_compile: Done

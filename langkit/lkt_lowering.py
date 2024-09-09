@@ -4741,7 +4741,7 @@ class LktTypesLoader:
                     return entity.value
                 elif isinstance(entity, Scope.UserValue):
                     abort_if_static_required(expr)
-                    return entity.variable
+                    return E.VariableRef(entity.variable)
                 else:
                     with self.ctx.lkt_context(expr):
                         if isinstance(entity, Scope.DynVar):
