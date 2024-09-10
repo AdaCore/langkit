@@ -7,7 +7,7 @@ call.lkt:10:21: error: cannot call a lazy field
 == entity_info_1.lkt ==
 entity_info_1.lkt:7:21: error: Cannot use entity info, as explicitly forbidden
 7 |     @lazy p: Bool = self.info.md.flag
-  |                     ^^^^^^^^^
+  |                     ^^^^
 
 
 == entity_info_2.lkt ==

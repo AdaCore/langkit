@@ -4738,10 +4738,10 @@ class LktTypesLoader:
                     if not isinstance(entity.value, E.Literal):
                         abort_if_static_required(expr)
 
-                    return entity.value
+                    result = E.Ref(entity.value)
                 elif isinstance(entity, Scope.UserValue):
                     abort_if_static_required(expr)
-                    return E.VariableRef(entity.variable)
+                    result = E.Ref(entity.variable)
                 else:
                     with self.ctx.lkt_context(expr):
                         if isinstance(entity, Scope.DynVar):
@@ -4754,6 +4754,7 @@ class LktTypesLoader:
                             error(
                                 f"value expected, got {entity.diagnostic_name}"
                             )
+                return result
 
             elif isinstance(expr, L.StringLit):
                 abort_if_static_required(expr)
