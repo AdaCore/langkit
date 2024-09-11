@@ -2708,6 +2708,20 @@ class AbstractVariable(AbstractExpression):
         )
 
 
+class VariableRef(AbstractExpression):
+    """
+    Wrapper around an ``AbstractVariable`` to materialize a reference to it in
+    the abstract expression tree: this allows to associate a source location
+    for the reference (as opposed to the variable declaration).
+    """
+    def __init__(self, var: AbstractVariable):
+        super().__init__()
+        self.var = var
+
+    def construct(self) -> ResolvedExpression:
+        return construct(self.var)
+
+
 class DynamicVariable(AbstractVariable):
     """
     Reference to a dynamic property variable.
