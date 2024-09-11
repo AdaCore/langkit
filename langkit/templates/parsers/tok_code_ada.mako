@@ -1,7 +1,5 @@
 ## vim: filetype=makoada
 
---  Start tok_code
-
 ## Get the current token
 ${parser.res_var} := ${parser.start_pos};
 
@@ -40,5 +38,3 @@ begin
       % endif
    end if;
 end;
-
---  End tok_code

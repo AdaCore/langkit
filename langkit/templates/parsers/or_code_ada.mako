@@ -1,7 +1,5 @@
 ## vim: filetype=makoada
 
---  Start or_code
-
 ${parser.pos_var} := No_Token_Index;
 ${parser.res_var} := ${parser.type.storage_nullexpr};
 % for subparser in parser.parsers:
@@ -13,5 +11,3 @@ ${parser.res_var} := ${parser.type.storage_nullexpr};
     end if;
 % endfor
 <<${exit_label}>>
-
---  End or_code

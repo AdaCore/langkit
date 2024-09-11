@@ -318,52 +318,8 @@ class Grammar:
 
         :param kwargs: The rules to add to the grammar.
         """
-        import ast
-
-        _loc = extract_library_location()
-        assert _loc is not None
-        loc: Location = _loc
-
-        class GetTheCall(ast.NodeVisitor):
-            """
-            Helper visitor that will get the corresponding add_rule call in the
-            source, so that we're then able to extract the precise line where
-            each rule is added.
-            """
-            def __init__(self) -> None:
-                self.the_call: Optional[ast.Call] = None
-
-            def visit_Call(self, call: ast.Call) -> None:
-                if (
-                    isinstance(call.func, ast.Attribute)
-                    and call.func.attr == 'add_rules'
-                    # Traceback locations are very imprecise, and python's ast
-                    # doesn't have an end location for nodes, so we'll keep
-                    # taking add_rules call, and the last is necessarily the
-                    # good one.
-                    and call.lineno <= loc.line
-                ):
-                    self.the_call = call
-
-        # Rules added internally (DontSkip rules for example) might not have a
-        # location. So test loc first.
-        if loc:
-            the_call = GetTheCall()
-            with open(loc.file) as f:
-                file_ast = ast.parse(f.read(), f.name)
-                the_call.visit(file_ast)
-
-            assert the_call.the_call is not None
-
-            # We're gonna use the keyword arguments to find back the precise
-            # line where the rule was declared.
-            keywords = {kw.arg: kw.value for kw in the_call.the_call.keywords}
-
         for name, rule in kwargs.items():
-            rule = resolve(rule)
-            if loc and name in keywords:
-                rule.set_location(Location(loc.file, keywords[name].lineno))
-            self._add_rule(name, rule)
+            self._add_rule(name, resolve(rule))
 
     def get_rule(self, rule_name: str) -> Parser:
         """
@@ -572,9 +528,19 @@ class Parser(abc.ABC):
         generation.
         """
 
+    @property
+    def repr_label(self) -> str:
+        """
+        Return the "label" to use for this parser in __repr__.
+
+        By default, this just returns the name of this Parser's class.
+        Subclasses can override this to include more relevant information.
+        """
+        return type(self).__name__
+
     def __repr__(self) -> str:
         return "<{} at {}>".format(
-            type(self).__name__,
+            self.repr_label,
             self.location.gnu_style_repr() if self.location else "???"
         )
 
@@ -768,15 +734,6 @@ class Parser(abc.ABC):
             alternatives.append(other_parser)
 
         return Or(*alternatives)
-
-    def set_location(self, location: Location) -> None:
-        """
-        Set the source location where this parser is defined. This is useful
-        for error reporting purposes.
-        """
-        self.location = location
-        for c in self.children:
-            c.set_location(self.location)
 
     @property
     def diagnostic_context(self) -> AbstractContextManager[None]:
@@ -980,6 +937,13 @@ class Parser(abc.ABC):
         """
         raise not_implemented_error(self, type(self).type)
 
+    def loc_comment(self, prefix: str) -> str:
+        """
+        Return an Ada comment including ``prefix`` to locate this parser in
+        generated code.
+        """
+        return f"\n--  {prefix} {self}\n"
+
     @abc.abstractmethod
     def generate_code(self) -> str:
         """
@@ -1092,6 +1056,11 @@ class _Token(Parser):
         )
 
     @property
+    def repr_label(self) -> str:
+        # Do not resolve_type, as we may be in the middle of its own resolution
+        return f"Token({self._val}, {self.match_text})"
+
+    @property
     def can_parse_token_node(self) -> bool:
         return True
 
@@ -1124,7 +1093,11 @@ class _Token(Parser):
         return self._val
 
     def generate_code(self) -> str:
-        return self.render('tok_code_ada', token_kind=self.val.ada_name)
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('tok_code_ada', token_kind=self.val.ada_name)
+            + self.loc_comment("END")
+        )
 
     @property
     def matches_symbol(self) -> bool:
@@ -1219,7 +1192,11 @@ class Skip(Parser):
         return result
 
     def generate_code(self) -> str:
-        return self.render('skip_code_ada', exit_label=gen_name("exit_or"))
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('skip_code_ada', exit_label=gen_name("exit_or"))
+            + self.loc_comment("END")
+        )
 
     def _precise_types(self) -> TypeSet:
         return TypeSet([self.type])
@@ -1268,12 +1245,16 @@ class DontSkip(Parser):
 
     def generate_code(self) -> str:
         return """
+        {begin}
         PP.Dont_Skip.Append ({dontskip_parser_fn}'Access);
         {subparser_code}
         PP.Dont_Skip.Delete_Last;
+        {end}
         """.format(
+            begin=self.loc_comment("BEGIN"),
             subparser_code=self.subparser.generate_code(),
-            dontskip_parser_fn=self.dontskip_parser.gen_fn_name
+            dontskip_parser_fn=self.dontskip_parser.gen_fn_name,
+            end=self.loc_comment("END"),
         )
 
     def _precise_types(self) -> TypeSet:
@@ -1394,7 +1375,11 @@ class Or(Parser):
         self.init_vars()
 
     def generate_code(self) -> str:
-        return self.render('or_code_ada', exit_label=gen_name("exit_or"))
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('or_code_ada', exit_label=gen_name("exit_or"))
+            + self.loc_comment("END")
+        )
 
     def discard(self) -> bool:
         return all(p.discard() for p in self.parsers)
@@ -1540,7 +1525,11 @@ class _Row(Parser):
             self.progress_var = VarDef('row_progress', T.Int)
 
     def generate_code(self) -> str:
-        return self.render('row_code_ada', exit_label=gen_name("exit_row"))
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('row_code_ada', exit_label=gen_name("exit_row"))
+            + self.loc_comment("END")
+        )
 
 
 class ListSepExtra(enum.Enum):
@@ -1718,7 +1707,11 @@ class List(Parser):
         self.init_vars()
 
     def generate_code(self) -> str:
-        return self.render('list_code_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('list_code_ada')
+            + self.loc_comment("END")
+        )
 
 
 class Opt(Parser):
@@ -1836,7 +1829,11 @@ class Opt(Parser):
         )
 
     def generate_code(self) -> str:
-        return self.render('opt_code_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('opt_code_ada')
+            + self.loc_comment("END")
+        )
 
 
 class _Extract(Parser):
@@ -1887,7 +1884,11 @@ class _Extract(Parser):
         )
 
     def generate_code(self) -> str:
-        return self.parser.generate_code()
+        return (
+            self.loc_comment("BEGIN")
+            + self.parser.generate_code()
+            + self.loc_comment("END")
+        )
 
 
 class Discard(Parser):
@@ -1919,7 +1920,11 @@ class Discard(Parser):
         self.init_vars(self.parser.pos_var, self.parser.res_var)
 
     def generate_code(self) -> str:
-        return self.parser.generate_code()
+        return (
+            self.loc_comment("BEGIN")
+            + self.parser.generate_code()
+            + self.loc_comment("END")
+        )
 
 
 class Defer(Parser):
@@ -1983,7 +1988,11 @@ class Defer(Parser):
 
     def generate_code(self) -> str:
         # Generate a call to the function implementing the deferred parser
-        return self.render('fn_call_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('fn_call_ada')
+            + self.loc_comment("END")
+        )
 
 
 class _Transform(Parser):
@@ -2040,6 +2049,11 @@ class _Transform(Parser):
         """
 
         self.cached_type: Optional[CompiledType] = None
+
+    @property
+    def repr_label(self) -> str:
+        # Do not resolve_type, as we may be in the middle of its own resolution
+        return f"Transform({self.typ})"
 
     @property
     def children(self) -> _List[Parser]:
@@ -2144,9 +2158,17 @@ class _Transform(Parser):
         assert self.parse_fields is not None
         assert len(self.parse_fields) == len(subparsers)
 
-        return self.render('transform_code_ada',
-                           args=[(f, p, v) for f, (p, v)
-                                 in zip(self.parse_fields, subparsers)])
+        return (
+            self.loc_comment("BEGIN")
+            + self.render(
+                'transform_code_ada',
+                args=[
+                    (f, p, v)
+                    for f, (p, v) in zip(self.parse_fields, subparsers)
+                ]
+            )
+            + self.loc_comment("END")
+        )
 
 
 class Null(Parser):
@@ -2187,7 +2209,11 @@ class Null(Parser):
         self.init_vars(start_pos)
 
     def generate_code(self) -> str:
-        return self.render('null_code_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('null_code_ada')
+            + self.loc_comment("END")
+        )
 
     def _eval_type(self) -> Optional[CompiledType]:
         if isinstance(self.type_or_parser, Parser):
@@ -2305,7 +2331,11 @@ class Predicate(Parser):
         )
 
     def generate_code(self) -> str:
-        return self.render('predicate_code_ada')
+        return (
+            self.loc_comment("BEGIN")
+            + self.render('predicate_code_ada')
+            + self.loc_comment("END")
+        )
 
 
 class StopCut(Parser):
@@ -2373,6 +2403,7 @@ class StopCut(Parser):
 
     def generate_code(self) -> str:
         return f"""
+        {self.loc_comment("BEGIN")}
         declare
             Nb_Diags : constant Ada.Containers.Count_Type
               := Parser.Diagnostics.Length;
@@ -2393,6 +2424,7 @@ class StopCut(Parser):
                 {self.pos_var} := {self.parser.pos_var};
             end if;
         end;
+        {self.loc_comment("END")}
         """
 
 
@@ -2523,7 +2555,11 @@ class Cut(Parser):
         # Generated code only consists of setting the no_backtrack variable to
         # True, so that other parsers know that from now on they should not
         # backtrack.
-        return '{} := True;'.format(self.no_backtrack)
+        return (
+            self.loc_comment("BEGIN")
+            + '{} := True;'.format(self.no_backtrack)
+            + self.loc_comment("END")
+        )
 
     def _eval_type(self) -> Optional[CompiledType]:
         # A Cut parser never yields a concrete result itself

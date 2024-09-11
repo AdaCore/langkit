@@ -1,7 +1,5 @@
 ## vim: filetype=makoada
 
---  Start list_code
-
 ## If we accept empty lists, then we never want to return No_Token_Index as a
 ## position.
 % if parser.empty_valid:
@@ -112,5 +110,3 @@ begin
 end;
 
 Release_Parse_List (Parser, ${parser.tmplist});
-
---  End list_code
