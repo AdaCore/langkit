@@ -101,10 +101,13 @@ def parents_access_constructor(
     # We expect exactly one argument: with_self. If not provided, use the
     # default value.
     assert len(args) == 1
-    with_self: ResolvedExpression = (
-        args[0]
-        or construct(node_data.natural_arguments[0].abstract_default_value)
-    )
+    if args[0] is None:
+        with_self_arg = node_data.natural_arguments[0]
+        with_self_default = with_self_arg.abstract_default_value
+        assert with_self_default is not None
+        with_self = construct(with_self_default)
+    else:
+        with_self = args[0]
 
     cons_args = [with_self]
 

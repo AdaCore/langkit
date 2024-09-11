@@ -393,9 +393,9 @@ class New(AbstractExpression):
         # another dict for default values.
         required_fields = struct_type.required_fields_in_exprs
         default_valued_fields = {
-            n: f
+            n: (f, f.abstract_default_value)
             for n, f in required_fields.items()
-            if f.default_value
+            if f.abstract_default_value is not None
         }
 
         # Make sure the provided set of fields matches the one the struct needs
@@ -428,11 +428,9 @@ class New(AbstractExpression):
         # already present in field.default_value, reusing ResolvedExpression
         # nodes in multiple expressions is forbidden. Constructing a new each
         # time avoids this problem.
-        for name, field in default_valued_fields.items():
+        for name, (field, default_value) in default_valued_fields.items():
             if field not in result:
-                result[field] = construct_compile_time_known(
-                    field.abstract_default_value
-                )
+                result[field] = construct_compile_time_known(default_value)
 
         # Then check that the type of these expressions match field types
         for field, expr in result.items():
@@ -527,7 +525,7 @@ class FieldAccess(AbstractExpression):
             self.kwargs = kwargs
 
         def associate(self, node_data: AbstractNodeData) -> List[
-            Tuple[str, Optional[AbstractExpression]]
+            Tuple[int | str, Optional[AbstractExpression]]
         ]:
             """
             Try to associate passed arguments with each natural argument in the
@@ -540,13 +538,13 @@ class FieldAccess(AbstractExpression):
             """
             args = list(enumerate(self.args, 1))
             kwargs = dict(self.kwargs)
-            result: List[Tuple[str, Optional[AbstractExpression]]] = []
+            result: List[Tuple[int | str, Optional[AbstractExpression]]] = []
             for arg_spec in node_data.natural_arguments:
                 actual: Optional[Optional[AbstractExpression]]
 
                 # Look for a keyword argument corresponding to `arg_spec`
                 arg_name = arg_spec.name.lower
-                key = arg_spec.name.lower
+                key: int | str = arg_spec.name.lower
                 try:
                     actual = kwargs.pop(arg_name)
                 except KeyError:
