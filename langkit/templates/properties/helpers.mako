@@ -360,11 +360,11 @@
          Create_Internal_Logic_Context_Array (Ctxs'Length);
 
       Diag : constant Internal_Solver_Diagnostic :=
-        (Template => Create_String ("${template}"),
-         Args     => Args,
-         Contexts => Contexts,
-         Location => Self.Error_Location,
-         Round    => Round);
+        (Message_Template => Create_String ("${template}"),
+         Args             => Args,
+         Contexts         => Contexts,
+         Location         => Self.Error_Location,
+         Round            => Round);
    begin
       % for i, arg in enumerate(args):
       Args.Items (${i + 1}) := ${arg};

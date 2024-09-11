@@ -4971,8 +4971,8 @@ def create_builtin_types():
             down the chain to filter/choose which diagnostics to show among
             a set of diagnostics produced for a single equation.
 
-            * ``Template`` is a string explaining the error, which may contain
-              holes reprsented by the ``{}`` characters.
+            * ``Message_Template`` is a string explaining the error, which may
+              contain holes represented by the ``{}`` characters.
 
             * ``Args`` is an array of nodes, which are to be plugged in the
               holes of the template in the same order (i.e. the first argument
@@ -4987,7 +4987,7 @@ def create_builtin_types():
               emitted.
         """,
         fields=[
-            ("template", UserField(type=T.String)),
+            ("message_template", UserField(type=T.String)),
             ("args", UserField(type=T.defer_root_node.entity.array)),
             ("location", UserField(type=T.defer_root_node)),
             ("contexts", UserField(type=logic_context.array)),
