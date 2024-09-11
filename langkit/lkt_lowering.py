@@ -3429,9 +3429,9 @@ class LktTypesLoader:
             )
         )
 
-    @staticmethod
     def extract_call_args(
-        expr: L.CallExpr
+        self,
+        expr: L.CallExpr,
     ) -> tuple[list[L.Expr], dict[str, L.Expr]]:
         """
         Extract positional and keyword arguments from a call expression.
@@ -3442,6 +3442,12 @@ class LktTypesLoader:
             value = arg.f_value
             if arg.f_name:
                 kwargs[arg.f_name.text] = value
+            elif kwargs:
+                with self.ctx.lkt_context(arg):
+                    error(
+                        "positional arguments are forbidden after the first"
+                        " keyword argument"
+                    )
             else:
                 args.append(value)
         return args, kwargs

@@ -13,6 +13,12 @@ field.lkt:6:42: error: cannot call a field
   |                                          ^^^^^^^^
 
 
+== kwargs_before_args.lkt ==
+kwargs_before_args.lkt:4:62: error: positional arguments are forbidden after the first keyword argument
+4 |     @exported fun bar_prop(): Int = node.many_args(a=1, b=2, 3)
+  |                                                              ^
+
+
 == no_such_prop.lkt ==
 no_such_prop.lkt:4:37: error: Type BarNode has no 'no_such_prop' field or property
 4 |     @exported fun bar_prop(): Int = node.no_such_prop(12)
