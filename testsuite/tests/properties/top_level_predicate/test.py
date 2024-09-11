@@ -23,5 +23,5 @@ class Example(FooNode):
         return Self.as_bare_entity
 
 
-build(lkt_file='expected_concrete_syntax.lkt')
+build(lkt_file='expected_concrete_syntax.lkt', types_from_lkt=True)
 print('Compilation was successful')

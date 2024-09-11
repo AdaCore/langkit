@@ -23,5 +23,5 @@ class Example(FooNode):
     pass
 
 
-build(lkt_file='expected_concrete_syntax.lkt')
+build(lkt_file='expected_concrete_syntax.lkt', types_from_lkt=True)
 print('Done')
