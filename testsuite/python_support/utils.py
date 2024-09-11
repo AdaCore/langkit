@@ -258,13 +258,23 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
         langkit.reset()
 
 
-def build(grammar=None, lexer=None, lkt_file=None,
-          warning_set=default_warning_set, mains=False):
+def build(
+    grammar=None,
+    lexer=None,
+    lkt_file=None,
+    types_from_lkt=False,
+    warning_set=default_warning_set,
+):
     """
     Shortcut for `build_and_run` to only build.
     """
-    build_and_run(grammar=grammar, lexer=lexer, lkt_file=lkt_file,
-                  warning_set=warning_set)
+    build_and_run(
+        grammar=grammar,
+        lexer=lexer,
+        lkt_file=lkt_file,
+        types_from_lkt=types_from_lkt,
+        warning_set=warning_set,
+    )
 
 
 def build_and_run(grammar=None, py_script=None, gpr_mains=None,
