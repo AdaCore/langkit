@@ -1,0 +1,29 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+dynvar neg: Int
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    fun f1(i: Int, neg: Int): Int = {
+        val base = -neg;
+
+        i + base
+    }
+
+    @exported
+    @with_dynvars(neg)
+    fun f2(i: Int): Int = {
+        val base = -neg;
+
+        i + base
+    }
+}

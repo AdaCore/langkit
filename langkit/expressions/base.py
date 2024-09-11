@@ -4341,7 +4341,7 @@ class PropertyDef(AbstractNodeData):
                 )
                 self.expr = fn_expr
                 for arg in fn_arguments:
-                    self.arguments.append(arg)
+                    self.append_argument(arg)
 
         elif not callable(self.expr):
             self.expr = unsugar(self.expr)
@@ -4677,13 +4677,23 @@ class PropertyDef(AbstractNodeData):
     def original_is_public(self):
         return self._original_is_public
 
+    def append_argument(self, a: Argument) -> None:
+        """
+        Append an argument to this property.
+        """
+        self.arguments.append(a)
+
+        # Register the argument name to avoid name clashes with local
+        # variables.
+        self.vars.names.add(a.name)
+
     def build_dynamic_var_arguments(self):
         """
         Append arguments for each dynamic variable in this property.
         """
         for dynvar, default in zip(self._dynamic_vars,
                                    self._dynamic_vars_default_values):
-            self.arguments.append(Argument(
+            self.append_argument(Argument(
                 dynvar.argument_name, dynvar.type,
                 is_artificial=True,
                 default_value=default,
@@ -5592,6 +5602,7 @@ class LocalVars:
     """
 
     def __init__(self) -> None:
+        self.names: set[names.Name] = set()
         self.local_vars: dict[names.Name, LocalVars.LocalVar] = {}
         self.root_scope = LocalVars.Scope(self, None)
         self.current_scope = self.root_scope
@@ -5798,11 +5809,12 @@ class LocalVars:
 
         i = 0
         orig_name = name.base_name
-        while name in self.local_vars:
+        while name in self.names:
             i += 1
             name = names.Name(f"{orig_name}_{i}")
         ret = LocalVars.LocalVar(self, name, type)
         self.local_vars[name] = ret
+        self.names.add(name)
         return ret
 
     def check_scopes(self) -> None:
