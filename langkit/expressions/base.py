@@ -4960,8 +4960,8 @@ class PropertyDef(AbstractNodeData):
         similar template but without named holes anymore, as well as a list
         of code snippet that indicate how to retrieve the argument for each
         hole. For example, this turns "Expected $expected got $Self" into:
-         - Template => "Expected {} got {}"
-         - Args     => ["Entities (2)", "Entities (1)"].
+         - Template_String => "Expected {} got {}"
+         - Args            => ["Entities (2)", "Entities (1)"].
 
         :param arity: the number of *logic variable* arguments that this
             predicate works on.

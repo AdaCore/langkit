@@ -4,7 +4,7 @@ import libfoolang
 
 
 def print_diagnostic(diag):
-    msg = diag.template
+    msg = diag.message_template
     for arg in diag.args:
         msg = msg.replace("{}", str(arg), 1)
     msg = str(diag.location.sloc_range) + ":" + msg
