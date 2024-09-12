@@ -1,0 +1,6 @@
+import common
+
+class Example: FooNode implements TokenNode {
+    @ignored
+    fun f(lhs: Bool, rhs: Bool): Bool = lhs %and lhs
+}

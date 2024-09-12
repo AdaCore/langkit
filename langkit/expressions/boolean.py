@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import abc
+import enum
 from functools import reduce
 import funcy
 import inspect
@@ -34,29 +36,137 @@ def or_else(lhs, rhs):
     return BinaryBooleanOperator('or', lhs, rhs)
 
 
-class BinaryBooleanOperator(AbstractExpression):
-    AND = 'and'
-    OR = 'or'
+class BinaryOpKind(enum.Enum):
+    AND = "and"
+    OR = "or"
 
-    def __init__(self, kind, lhs, rhs):
+
+class BaseBinaryOp(AbstractExpression):
+    """
+    Base class for boolean and logic binary operators.
+    """
+    def __init__(self, kind: BinaryOpKind, lhs, rhs):
         """
-        :param str kind: Kind for this binary boolean operator
-            (short-circuiting).
-        :param AbstractExpression lhs: Left operand.
-        :param AbstractExpression rhs: Right operand.
+        :param kind: Kind for this binary boolean operator.
+        :param lhs: Left operand.
+        :param rhs: Right operand.
         """
         super().__init__()
-        assert kind in (self.AND, self.OR)
         self.kind = kind
         self.lhs = lhs
         self.rhs = rhs
 
-    def construct(self):
-        """
-        Construct a resolved expression for this.
+    def __repr__(self):
+        return (
+            f"<{type(self).__name__} {self.kind.value.capitalize()}"
+            f" at {self.location_repr}>"
+        )
 
-        :rtype: IfExpr
+
+class AbstractBinaryOp(BaseBinaryOp):
+    """
+    Base class or binary operators that work exclusively on booleans or on
+    logic equations.
+    """
+    @staticmethod
+    @abc.abstractmethod
+    def operand_type() -> CompiledType:
         """
+        Static method that returns the operand/result type for this operator.
+        """
+        pass
+
+    def construct(self) -> ResolvedExpression:
+        t = self.operand_type()
+        lhs = construct(self.lhs, t)
+        rhs = construct(self.rhs, t)
+        return self.common_construct(self.kind, lhs, rhs, self)
+
+
+class BooleanBinaryOp(AbstractBinaryOp):
+    """
+    Boolean binary operator expression.
+    """
+    @staticmethod
+    def operand_type() -> CompiledType:
+        return T.Bool
+
+    @staticmethod
+    def common_construct(
+        kind: BinaryOpKind,
+        lhs: ResolvedExpression,
+        rhs: ResolvedExpression,
+        abstract_expr: AbstractExpression,
+    ) -> ResolvedExpression:
+        """
+        Common code to build a resolved expression for and/or expressions.
+        """
+        then: ResolvedExpression
+        else_then: ResolvedExpression
+        if kind == BinaryOpKind.AND:
+            then = rhs
+            else_then = LiteralExpr("False", T.Bool)
+        else:
+            then = LiteralExpr("True", T.Bool)
+            else_then = rhs
+        return If.Expr(lhs, then, else_then, abstract_expr=abstract_expr)
+
+
+class LogicBinaryOp(AbstractBinaryOp):
+    """
+    Logic binary operator expression.
+    """
+    @staticmethod
+    def operand_type() -> CompiledType:
+        return T.Equation
+
+    @staticmethod
+    def common_construct(
+        kind: BinaryOpKind,
+        lhs: ResolvedExpression,
+        rhs: ResolvedExpression,
+        abstract_expr: AbstractExpression,
+    ) -> ResolvedExpression:
+        """
+        Common code to build a resolved expression for %and/%or expressions.
+        """
+        kind_name = kind.value.capitalize()
+        return CallExpr(
+            f"{kind_name}_Pred",
+            f"Create_{kind_name}",
+            T.Equation,
+            [lhs, rhs, sloc_info_arg(abstract_expr.location)],
+            abstract_expr=abstract_expr,
+        )
+
+
+class BinaryBooleanOperator(BaseBinaryOp):
+    """
+    Binary operator expression that works equally on booleans and logic
+    equations. Note that this is specific to the Python DSL: this kind of
+    expression does not exist in Lkt: we will get rid of this class once we can
+    stop supporting the Python DSL.
+    """
+    def __init__(
+        self,
+        kind: BinaryOpKind,
+        lhs: AbstractExpression,
+        rhs: AbstractExpression,
+    ):
+        super().__init__(kind, lhs, rhs)
+        self._is_equation = None
+
+    @property
+    def is_equation(self) -> bool:
+        """
+        Whether this expression computes an equation.
+
+        Computed during the "construct" pass.
+        """
+        assert self._is_equation is not None
+        return self._is_equation
+
+    def construct(self):
         def construct_op(op):
             return construct(op, lambda t: t in (T.Bool, T.Equation),
                              "Operands of binary logic operator must be of "
@@ -71,25 +181,13 @@ class BinaryBooleanOperator(AbstractExpression):
 
         if lhs.type is T.Bool:
             # Boolean case
-            if self.kind == self.AND:
-                then = rhs
-                else_then = LiteralExpr('False', T.Bool)
-            else:
-                then = LiteralExpr('True', T.Bool)
-                else_then = rhs
-            return If.Expr(lhs, then, else_then)
+            self._is_equation = False
+            return BooleanBinaryOp.common_construct(self.kind, lhs, rhs, self)
 
         else:
             # Equation case
-            kind_name = self.kind.capitalize()
-            return CallExpr(
-                '{}_Pred'.format(kind_name), 'Create_{}'.format(kind_name),
-                T.Equation, [lhs, rhs, sloc_info_arg(self.location)],
-                abstract_expr=self
-            )
-
-    def __repr__(self):
-        return f"<{self.kind.capitalize()} at {self.location_repr}>"
+            self._is_equation = True
+            return LogicBinaryOp.common_construct(self.kind, lhs, rhs, self)
 
 
 # noinspection PyPep8Naming

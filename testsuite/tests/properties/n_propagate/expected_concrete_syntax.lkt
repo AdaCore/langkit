@@ -25,7 +25,7 @@ class Plus: FooNode {
     @exported
     fun resolve(lhs: Entity[FooNode], rhs: Entity[FooNode], use_dynamic_combiner: Bool): Entity[FooNode] = {
         val arr = [node.lhs.v, node.rhs.v];
-        val propagator = if use_dynamic_combiner then %propagate(node.v, Literal.dynamic_combiner, [node.lhs.v, node.rhs.v]) and (
+        val propagator = if use_dynamic_combiner then %propagate(node.v, Literal.dynamic_combiner, [node.lhs.v, node.rhs.v]) %and (
             # Check that array passed to the dynamic combiner need not be
             # an array literal.
             %propagate(node.v, Literal.dynamic_combiner, arr)

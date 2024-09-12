@@ -4191,14 +4191,16 @@ class LktTypesLoader:
                     return E.OrderingTest(operator, left, right)
 
                 elif isinstance(expr.f_op, L.OpAnd):
-                    return E.BinaryBooleanOperator(
-                        E.BinaryBooleanOperator.AND, left, right
-                    )
+                    return E.BooleanBinaryOp(E.BinaryOpKind.AND, left, right)
 
                 elif isinstance(expr.f_op, L.OpOr):
-                    return E.BinaryBooleanOperator(
-                        E.BinaryBooleanOperator.OR, left, right
-                    )
+                    return E.BooleanBinaryOp(E.BinaryOpKind.OR, left, right)
+
+                elif isinstance(expr.f_op, L.OpLogicAnd):
+                    return E.LogicBinaryOp(E.BinaryOpKind.AND, left, right)
+
+                elif isinstance(expr.f_op, L.OpLogicOr):
+                    return E.LogicBinaryOp(E.BinaryOpKind.OR, left, right)
 
                 elif isinstance(expr.f_op, L.OpOrInt):
                     return left._or(right)
