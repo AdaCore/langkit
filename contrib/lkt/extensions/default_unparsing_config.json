@@ -11,7 +11,8 @@
           "whitespace",
           {"kind": "text", "text": "in"},
           "whitespace",
-          {"kind": "recurse_field", "field": "f_values"}
+
+          {"kind": "indent", "contents": {"kind": "group", "document": {"kind": "recurse_field", "field": "f_values"}}}
         ]
       }
     },
@@ -20,7 +21,12 @@
         "f_exprs": {
           "kind": "group",
           "document": [
-            {"kind": "indent", "contents": ["softline", "recurse"]},
+            {
+              "kind": "indent", "contents": [
+                "softline",
+                {"kind": "group", "document": "recurse"}
+              ]
+            },
             "softline"
           ]
         },
@@ -61,7 +67,7 @@
       }
     },
     "BlockDeclList": {
-      "sep": ["recurse", "hardline"]
+      "sep": [{"kind": "group", "document": "recurse"}, "hardline"]
     },
     "BlockExpr": {
       "node": [
@@ -97,14 +103,18 @@
           }
         },
         "f_args": {
-          "kind": "group",
-          "document": [
-            {
-              "kind": "indent",
-              "contents": ["softline", "recurse"]
-            },
-            "softline"
-          ]
+          "kind": "ifEmpty",
+          "then": "recurse",
+          "else": {
+            "kind": "group",
+            "document": [
+              {
+                "kind": "indent",
+                "contents": ["softline", "recurse"]
+              },
+              "softline"
+            ]
+          }
         }
       }
     },
@@ -179,32 +189,40 @@
         "f_decl_type": ["whitespace", "recurse"]
       }
     },
-    "ElsifBranchList": {
-      "sep": ["hardline", "recurse"]
-    },
     "ElsifBranch": {
       "node": [
-        {"kind": "text", "text": "elif"},
-        {
-          "kind": "indent",
-          "contents": [
-            "line",
-            {
-              "kind": "group",
-              "document": {"kind": "recurse_field", "field": "f_cond_expr"}
-            }
-          ]
-        },
         "hardline",
-        {"kind": "text", "text": "then"},
+        {"kind": "text", "text": "elif"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_cond_expr"},
         {
-          "kind": "indent",
-          "contents": [
+          "kind": "group",
+          "document": [
             "line",
+            {"kind": "text", "text": "then"},
+            "whitespace",
             {"kind": "recurse_field", "field": "f_then_expr"}
           ]
         }
-      ]
+      ],
+      "fields": {
+        "f_cond_expr": {
+          "kind": "ifKind",
+          "matchers": [
+            {"kind": "ParenExpr", "document": "recurse"},
+            {"kind": "BlockExpr", "document": "recurse"}
+          ],
+          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+        },
+        "f_then_expr": {
+          "kind": "ifKind",
+          "matchers": [
+            {"kind": "ParenExpr", "document": "recurse"},
+            {"kind": "BlockExpr", "document": "recurse"}
+          ],
+          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+        }
+      }
     },
     "EnvSpecDecl": {
       "fields": {
@@ -596,43 +614,62 @@
       "node": {
         "kind": "group",
         "document": [
-          {"kind": "text", "text": "if"},
           {
-            "kind": "indent",
-            "contents": [
+            "kind": "group",
+            "document": [
+              {"kind": "text", "text": "if"},
+              "whitespace",
+              {"kind": "recurse_field", "field": "f_cond_expr"},
               "line",
-              {
-                "kind": "group",
-                "document": {"kind": "recurse_field", "field": "f_cond_expr"}
-              }
-            ]
-          },
-          "line",
-          {"kind": "text", "text": "then"},
-          {
-            "kind": "indent",
-            "contents": [
-              "line",
+              {"kind": "text", "text": "then"},
+              "whitespace",
               {"kind": "recurse_field", "field": "f_then_expr"}
             ]
           },
-          {"kind": "recurse_field", "field": "f_alternatives"},
-          "line",
-          {"kind": "text", "text": "else"},
+
           {
-            "kind": "indent",
-            "contents": [
-              "line",
+            "kind": "group",
+            "document": [
+              {"kind": "recurse_field", "field": "f_alternatives"}
+            ]
+          },
+
+          "line",
+          {
+            "kind": "group",
+            "document": [
+              {"kind": "text", "text": "else"},
+              "whitespace",
               {"kind": "recurse_field", "field": "f_else_expr"}
             ]
           }
         ]
       },
       "fields": {
-        "f_alternatives": [
-          {"kind": "ifEmpty", "then": [], "else": "hardline"},
-          "recurse"
-        ]
+        "f_cond_expr": {
+          "kind": "ifKind",
+          "matchers": [
+            {"kind": "ParenExpr", "document": "recurse"},
+            {"kind": "BlockExpr", "document": "recurse"}
+          ],
+          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+        },
+        "f_else_expr": {
+          "kind": "ifKind",
+          "matchers": [
+            {"kind": "ParenExpr", "document": "recurse"},
+            {"kind": "BlockExpr", "document": "recurse"}
+          ],
+          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+        },
+        "f_then_expr": {
+          "kind": "ifKind",
+          "matchers": [
+            {"kind": "ParenExpr", "document": "recurse"},
+            {"kind": "BlockExpr", "document": "recurse"}
+          ],
+          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+        }
       }
     },
     "IsaList": {
@@ -688,10 +725,14 @@
         "whitespace",
         {"kind": "text", "text": "=>"},
         {
-          "kind": "group",
-          "document": {
-            "kind": "indent",
-            "contents": [
+          "kind": "ifKind",
+          "field": "f_body",
+          "matchers": [
+            {"kind": "BlockExpr", "document": ["whitespace", {"kind": "recurse_field", "field": "f_body"}]}
+          ],
+          "default": {
+            "kind": "group",
+            "document": [
               "line",
               {"kind": "recurse_field", "field": "f_body"}
             ]
@@ -851,13 +892,7 @@
       "fields": {
         "f_expr": {
           "kind": "group",
-          "document": [
-            {
-              "kind": "indent",
-              "contents": ["whitespace", "recurse"]
-            },
-            "softline"
-          ]
+          "document": ["whitespace", "recurse"]
         }
       }
     },
@@ -865,14 +900,23 @@
       "sep": ["recurse", "line"]
     },
     "ParenExpr": {
-      "fields": {
-        "f_expr": {
-          "kind": "group",
-          "document": [
-            {"kind": "indent", "contents": ["softline", "recurse"]},
-            "softline"
-          ]
-        }
+      "node": {
+        "kind": "group",
+        "document": [
+          {
+              "kind": "indent",
+              "contents": [
+                  {"kind": "text", "text": "("},
+                  "softline",
+                  {
+                  "kind": "group",
+                  "document": {"kind": "recurse_field", "field": "f_expr"}
+                  }
+              ]
+          },
+          "softline",
+          {"kind": "text", "text": ")"}
+        ]
       }
     },
     "ParseNodeExpr": {
@@ -952,24 +996,21 @@
       }
     },
     "TryExpr": {
-      "node": {"kind": "group", "document": "recurse"},
-      "fields": {
-        "f_try_expr": {
-          "kind": "group",
-          "document": {
-            "kind": "indent",
-            "contents": ["line", "recurse"]
-          }
-        },
-        "f_or_expr": [
-          "line",
-          {"kind": "text", "text": "else"},
+      "node": {
+        "kind": "group",
+        "document": [
           {
             "kind": "group",
-            "document": {
-              "kind": "indent",
-              "contents": ["line", "recurse"]
-            }
+            "document": [
+               {"kind": "text", "text": "try"},
+               "whitespace",
+               {"kind": "recurse_field", "field": "f_try_expr"},
+               "line"
+            ]
+          },
+          {
+            "kind": "group",
+            "document": {"kind": "recurse_field", "field": "f_or_expr"}
           }
         ]
       }
@@ -978,43 +1019,27 @@
       "sep": ["recurse", "whitespace"]
     },
     "ValDecl": {
-      "node": [
-        {"kind": "text", "text": "val"},
-        {"kind": "recurse_field", "field": "f_syn_name"},
-        {"kind": "recurse_field", "field": "f_decl_type"},
-        "whitespace",
-        {"kind": "text", "text": "="},
-        {
-          "kind": "ifKind",
-          "field": "f_val",
-          "matchers": [
-             {
-               "kind": "BlockExpr",
-               "document": [
-                 "whitespace",
-                 {"kind": "recurse_field", "field": "f_val"}
-               ]
-             },
-             {
-               "kind": "MatchExpr",
-               "document": [
-                 "whitespace",
-                 {"kind": "recurse_field", "field": "f_val"}
-               ]
-             }
-          ],
-          "default": {
-            "kind": "group",
-            "document": {
-              "kind": "indent",
-              "contents": [
-                "line",
-                {"kind": "recurse_field", "field": "f_val"}
-              ]
-            }
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "text", "text": "val"},
+          {"kind": "recurse_field", "field": "f_syn_name"},
+          {"kind": "recurse_field", "field": "f_decl_type"},
+          "whitespace",
+          {"kind": "text", "text": "="},
+          {
+            "kind": "ifKind",
+            "field": "f_val",
+            "__TODO__": "All matchers below are wrapped in a group in order to workaround #838",
+            "matchers": [
+              {"kind": "ParenExpr", "document": ["whitespace", {"kind": "recurse_field", "field": "f_val"}]},
+              {"kind": "BlockExpr", "document": ["whitespace", {"kind": "recurse_field", "field": "f_val"}]},
+              {"kind": "MatchExpr", "document": ["whitespace", {"kind": "recurse_field", "field": "f_val"}]}
+            ],
+            "default": {"kind": "indent", "contents": ["line", {"kind": "recurse_field", "field": "f_val"}]}
           }
-        }
-      ],
+        ]
+      },
       "fields": {
          "f_decl_type": [
            {"kind": "text", "text": ":"},
@@ -1038,6 +1063,24 @@
               {"kind": "recurse_field", "field": "f_expr"}
             ]
           }
+        ]
+      }
+    },
+
+    "FieldDecl": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_syn_name"},
+        {"kind": "text", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_decl_type"},
+        {"kind": "recurse_field", "field": "f_default_val"}
+      ],
+      "fields": {
+        "f_default_val": [
+          "whitespace",
+          {"kind": "text", "text": "="},
+          "whitespace",
+          "recurse"
         ]
       }
     }

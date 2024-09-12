@@ -11,11 +11,10 @@ val not_expr_3 =
     not aaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbb.cccccccccccccccc.ddddddddddddd
 val not_expr_4 =
     not aaaaaaaaaaaaaaaaaa
-        .bbbbbbbbbbbbbbbbbb
-        .cccccccccccccccc
-        .ddddddddddddd
-        .eeeeeeeeeeeeee
-
+    .bbbbbbbbbbbbbbbbbb
+    .cccccccccccccccc
+    .ddddddddddddd
+    .eeeeeeeeeeeeee
 
 val plus_unop = +a
 val minus_unop = -a

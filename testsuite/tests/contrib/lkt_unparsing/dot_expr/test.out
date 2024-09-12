@@ -80,3 +80,18 @@ val in_broken =
         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
         bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
     )
+
+# For long call chains we want the users to parenthesize them
+val long_call_in_parens = (
+    aaaaaaaaaa.bbbbbbbbb(
+        1111111,
+        222222222,
+        3333333,
+        44444444,
+        555555555,
+        666666666,
+        77777777
+    )
+    .bbbbbbbbbb
+    .ccccccccc
+)
