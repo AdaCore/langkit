@@ -322,9 +322,9 @@ class DSLWalker:
 
         :type kind: str
         """
-        from langkit.expressions import BinaryBooleanOperator
+        from langkit.expressions import BinaryBooleanOperator, BinaryOpKind
 
-        if kind == BinaryBooleanOperator.AND:
+        if kind == BinaryOpKind.AND:
             call_name = 'And'
             expr_type = lpl.AndExpr
         else:
@@ -337,7 +337,7 @@ class DSLWalker:
                     return True
                 elif n.f_prefix.is_a(lpl.DottedName):
                     if n.f_prefix.f_suffix.text == 'any_of':
-                        return kind == BinaryBooleanOperator.OR
+                        return kind == BinaryOpKind.OR
             elif n.is_a(expr_type):
                 return True
             return False
@@ -757,7 +757,7 @@ def emit_expr_prio(expr, **ctx):
         Predicate, StructUpdate, BigIntLiteral, RefCategories, Bind, Try,
         Block, Contains, PropertyDef, DynamicLexicalEnv, Super, Join, String,
         NPropagate, Find, EmptyEnv, AnyOf, UnaryNeg, CreateCopyNodeBuilder,
-        CreateSynthNodeBuilder
+        CreateSynthNodeBuilder, BinaryOpKind
     )
 
     def is_a(*names):
@@ -1119,9 +1119,10 @@ def emit_expr_prio(expr, **ctx):
                 else:
                     lhs = emit_bool_op_rec(expr.lhs, depth - 1)
 
-                return "{} {} {}".format(
+                return "{} {}{} {}".format(
                     lhs,
-                    expr.kind,
+                    "%" if expr.is_equation else "",
+                    expr.kind.value,
                     emit_paren_expr(prio, expr.rhs, arg_expr=depth - 1, **ctx)
                 )
 

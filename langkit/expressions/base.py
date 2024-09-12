@@ -754,8 +754,11 @@ class AbstractExpression(Frozable):
         :type other: AbstractExpression
         :rtype: BinaryBooleanOperator
         """
-        from langkit.expressions.boolean import BinaryBooleanOperator
-        return BinaryBooleanOperator(BinaryBooleanOperator.OR, self, other)
+        from langkit.expressions.boolean import (
+            BinaryBooleanOperator,
+            BinaryOpKind,
+        )
+        return BinaryBooleanOperator(BinaryOpKind.OR, self, other)
 
     @Frozable.protect
     def __and__(self, other):
@@ -766,8 +769,11 @@ class AbstractExpression(Frozable):
         :type other: AbstractExpression
         :rtype: BinaryBooleanOperator
         """
-        from langkit.expressions.boolean import BinaryBooleanOperator
-        return BinaryBooleanOperator(BinaryBooleanOperator.AND, self, other)
+        from langkit.expressions.boolean import (
+            BinaryBooleanOperator,
+            BinaryOpKind,
+        )
+        return BinaryBooleanOperator(BinaryOpKind.AND, self, other)
 
     @Frozable.protect
     def __lt__(self, other):

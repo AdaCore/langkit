@@ -3763,8 +3763,10 @@ class Op(LktNode):
     """
     enum_node = True
 
-    alternatives = ["and", "or", "or_int", "plus", "minus", "eq", "ne", "mult",
-                    "div", "lt", "gt", "lte", "gte", "amp"]
+    alternatives = [
+        "and", "or", "or_int", "logic_and", "logic_or", "plus", "minus", "eq",
+        "ne", "mult", "div", "lt", "gt", "lte", "gte", "amp",
+    ]
 
 
 @abstract
@@ -4340,6 +4342,8 @@ lkt_grammar.add_rules(
                 Op.alt_or_int("or", "?"),
                 Op.alt_or("or"),
                 Op.alt_and("and"),
+                Op.alt_logic_and("%", "and"),
+                Op.alt_logic_or("%", "or"),
             ),
             G.rel,
         ),

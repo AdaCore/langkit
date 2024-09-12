@@ -15,6 +15,6 @@ class Example: FooNode {
 
     @exported
     fun test(): Bool = (
-        %domain(node.v, [node]) and %eq(node.v, node.v, conv_prop=Example.identity)
+        %domain(node.v, [node]) %and %eq(node.v, node.v, conv_prop=Example.identity)
     ).solve()
 }
