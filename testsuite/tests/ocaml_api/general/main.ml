@@ -493,7 +493,22 @@ let test_struct () =
     (FooNode.p_get_node root false_node_struct) ;
   Format.printf "@[<v>get_node(true_node_struct): %a@ @]" pp_image_opt
     (FooNode.p_get_node root true_node_struct) ;
-  Format.printf "@[<v>====================@ @]"
+  Format.printf "@[<v>====================@ @ @]"
+
+let test_array_of_array () =
+  Format.printf "@[<v>=======ARRAY OF ARRAY=======@ @]" ;
+  let ctx = AnalysisContext.create () in
+  let u = AnalysisContext.get_from_file ctx "foo.txt" in
+  print_exit_if_diags u ;
+  let root = root_exn u in
+  let shapes = FooNode.p_shapes root in
+  List.iter (fun x ->
+    List.iter (fun y ->
+      Format.printf "node: %a@."
+        pp_image_opt y.FooNodeStruct.node)
+    x.Shape.components)
+  shapes ;
+  Format.printf "@[<v>============================@ @]"
 
 let () =
   test_diagnostics () ;
@@ -511,6 +526,7 @@ let () =
   test_enum () ;
   test_big_int () ;
   test_struct () ;
+  test_array_of_array () ;
   (* Call to compact to force Gc to collect everything so we can test with
    valgrind *)
   Gc.compact ()

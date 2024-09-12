@@ -43,9 +43,13 @@ end
   ${ocaml_fields(cls)}
 
    % if ocaml_api.wrap_requires_context(cls):
-  val wrap : analysis_context -> ${ocaml_api.c_value_type(cls)} -> t
+  val wrap :
+       ?dec_ref:bool
+    -> analysis_context
+    -> ${ocaml_api.c_value_type(cls)}
+    -> t
    % else:
-  val wrap : ${ocaml_api.c_value_type(cls)} -> t
+  val wrap : ?dec_ref:bool -> ${ocaml_api.c_value_type(cls)} -> t
    % endif
 
    % if cls.conversion_requires_context:
@@ -62,15 +66,18 @@ end
    %>
    % if not ocaml_api.is_empty_type(cls):
       % if ocaml_api.wrap_requires_context(cls):
-  ${let} ${ocaml_api.wrap_function_name(cls, cls)} context c_value = {
+  ${let} ${ocaml_api.wrap_function_name(cls, cls)}
+    ?(dec_ref=true)
+    context
+    c_value = {
       % else:
-  ${let} ${ocaml_api.wrap_function_name(cls, cls)} c_value = {
+  ${let} ${ocaml_api.wrap_function_name(cls, cls)} ?(dec_ref=true) c_value = {
       % endif
       % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
     ${ocaml_api.field_name(f)} = ${ocaml_api.wrap_value(
       '(getf c_value {}.{})'.format(ocaml_api.struct_name(cls),
                                     ocaml_api.field_name(f)),
-      f.type, 'context', check_for_null=True)};
+      f.type, 'context', check_for_null=True, dec_ref= "dec_ref")};
       % endfor
   }
   % endif

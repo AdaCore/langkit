@@ -228,16 +228,16 @@ module StringType = struct
     foreign ~from:c_lib "${capi.get_name('string_from_utf8')}"
       (ptr char @-> size_t @-> ptr c_type @-> raisable void)
 
-  let dec_ref = foreign ~from:c_lib "${c_api.get_name('string_dec_ref')}"
+  let string_dec_ref = foreign ~from:c_lib "${c_api.get_name('string_dec_ref')}"
     (c_type @-> raisable void)
 
-  let wrap c_value_ptr =
+  let wrap ?(dec_ref=true) c_value_ptr =
     let bytes = allocate (ptr char) (from_voidp char null) in
     let length = allocate (size_t) (Unsigned.Size_t.of_int 0) in
     string_to_utf8 c_value_ptr bytes length ;
     let r = string_of_bytes bytes length in
     free (!@ bytes);
-    dec_ref c_value_ptr;
+    if dec_ref then string_dec_ref c_value_ptr;
     r
 
   let unwrap value =
@@ -262,10 +262,10 @@ module BigInteger = struct
   let decref = foreign ~from:c_lib "${capi.get_name('big_integer_decref')}"
     (c_type @-> raisable void)
 
-  let wrap (c_value : unit ptr) : t =
+  let wrap ?(dec_ref=true) (c_value : unit ptr) : t =
     let c_text_ptr = allocate_n Text.c_type ~count:1 in
     text c_value c_text_ptr;
-    decref c_value;
+    if dec_ref then decref c_value;
     Z.of_string (Text.wrap (!@ c_text_ptr))
 
   let unwrap (value : t) : unit ptr =

@@ -25,6 +25,10 @@ class FooNodeStruct(Struct):
     node = UserField(T.FooNode.entity)
 
 
+class Shape(Struct):
+    components = UserField(T.FooNodeStruct.array)
+
+
 class SomeStruct(Struct):
     examples = UserField(T.Example.entity.array)
 
@@ -79,6 +83,10 @@ class FooNode(ASTNode):
     @langkit_property(public=True)
     def token(t=Token):
         return t
+
+    @langkit_property(public=True, return_type=T.Shape.array)
+    def shapes():
+        return [Shape.new(components=[FooNodeStruct.new(node=Entity)])]
 
 
 class Sequence(FooNode.list):
