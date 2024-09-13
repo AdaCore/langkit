@@ -107,22 +107,23 @@ def expr_or_null(expr, default_expr, context_name, use_case_name):
     return expr.unify(default_expr, context_name)
 
 
-def construct_compile_time_known(expr, *args, **kwargs):
+def construct_compile_time_known(
+    expr: SugaredExpression,
+    expected_type_or_pred: CompiledType | TypePredicate | None = None,
+    custom_msg: str | None = None,
+    downcast: bool = True,
+) -> BindableLiteralExpr:
     """
     Construct a expression and check that it is a compile-time known constant.
     This takes the same parameters as ``construct``.
-
-    :type expr: AbstractExpression
-    :rtype: ResolvedExpression
     """
     expr = unsugar(expr)
     expr.prepare()
-    result = construct(expr, *args, **kwargs)
-    check_source_language(
-        isinstance(result, BindableLiteralExpr),
-        'Default value must be a compile-time known constant'
-        ' (got {})'.format(expr)
-    )
+    result = construct(expr, expected_type_or_pred, custom_msg, downcast)
+    if not isinstance(result, BindableLiteralExpr):
+        error(
+            f"Default value must be a compile-time known constant (got {expr})"
+        )
     return result
 
 

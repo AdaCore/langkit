@@ -33,7 +33,12 @@ if TYPE_CHECKING:
     from langkit.dsl import Annotations
     from langkit.envs import EnvSpec
     from langkit.expressions import (
-        AbstractExpression, DynamicVariable, PropertyDef, ResolvedExpression,
+        AbstractExpression,
+        AbstractVariable,
+        BindableLiteralExpr,
+        DynamicVariable,
+        PropertyDef,
+        ResolvedExpression,
     )
     from langkit.lexer import TokenAction
     from langkit.parsers import Parser, _Transform
@@ -1968,22 +1973,27 @@ class Argument:
     Holder for properties arguments.
     """
 
-    def __init__(self, name, type, is_artificial=False, default_value=None,
-                 abstract_var=None, source_name=None):
+    def __init__(
+        self,
+        name: names.Name,
+        type: TypeRepo.Defer | CompiledType,
+        is_artificial: bool = False,
+        default_value: AbstractExpression | None = None,
+        abstract_var: AbstractVariable | None = None,
+        source_name: str | None = None,
+    ):
         """
-        :param names.Name name: Argument name.
-        :param CompiledType type: Argument type.
-        :param bool is_artificial: Whether the argument was automatically
-            created by Langkit, i.e. the language specification did not mention
-            it.
-        :param AbstractExpression|None default_value: If None, there is no
-            default value associated to this argument. Otherwise, it must be a
-            compile-time known abstract expression to be used when generating
-            code for the corresponding property argument.
-        :param AbstractVariable|None abstract_var: For properties only. If
-            provided, use it as the abstract variable to reference this
-            argument. If not provided, an AbstractVariable instance is
-            automatically created.
+        :param name: Argument name.
+        :param type: Argument type.
+        :param is_artificial: Whether the argument was automatically created by
+            Langkit, i.e. the language specification did not mention it.
+        :param default_value: If None, there is no default value associated to
+            this argument. Otherwise, it must be a compile-time known abstract
+            expression to be used when generating code for the corresponding
+            property argument.
+        :param abstract_var: For properties only. If provided, use it as the
+            abstract variable to reference this argument. If not provided, an
+            AbstractVariable instance is automatically created.
         """
         from langkit.expressions.base import AbstractVariable
 
@@ -1992,10 +2002,9 @@ class Argument:
                     or AbstractVariable(name, type, source_name=source_name))
         self.is_artificial = is_artificial
 
-        if default_value is None:
-            self.abstract_default_value = None
-            self.default_value = None
-        else:
+        self.abstract_default_value: AbstractExpression | None = None
+        self.default_value: BindableLiteralExpr | None = None
+        if default_value is not None:
             self.set_default_value(default_value)
 
     def set_default_value(self, value: AbstractExpression) -> None:
