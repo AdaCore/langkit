@@ -1,19 +1,43 @@
-== val_var.lkt ==
-val_var.lkt:4:41: error: Expected type LogicVar, got Example.entity
-4 |     @exported fun resolve(): Bool = %eq(self, node.var1).solve()
-  |                                         ^^^^
+== assign_val_var.lkt ==
+assign_val_var.lkt:4:38: error: Expected type LogicVar, got Example.entity
+4 |     @exported fun resolve(): Bool = (self <- node.var1).solve()
+  |                                      ^^^^
 
 
-== var_bool.lkt ==
-var_bool.lkt:4:37: error: Right operand must be either a logic variable or an entity, got Bool
-4 |     @exported fun resolve(): Bool = %eq(node.var1, true).solve()
-  |                                     ^^^^^^^^^^^^^^^^^^^^
+== assign_var_bool.lkt ==
+assign_var_bool.lkt:4:38: error: Right operand must be either a logic variable or an entity, got Bool
+4 |     @exported fun resolve(): Bool = (node.var1 <- true).solve()
+  |                                      ^^^^^^^^^^^^^^^^^
 
 
-== var_val.lkt ==
+== assign_var_val.lkt ==
 Code generation was successful
 
-== var_var.lkt ==
+== assign_var_var.lkt ==
+assign_var_var.lkt:4:38: error: Assigning from a logic variable is forbidden: use unify instead
+4 |     @exported fun resolve(): Bool = (node.var1 <- node.var2).solve()
+  |                                      ^^^^^^^^^^^^^^^^^^^^^^
+
+
+== unify_val_var.lkt ==
+unify_val_var.lkt:4:38: error: Expected type LogicVar, got Example.entity
+4 |     @exported fun resolve(): Bool = (self <-> node.var1).solve()
+  |                                      ^^^^
+
+
+== unify_var_bool.lkt ==
+unify_var_bool.lkt:4:52: error: Expected type LogicVar, got Bool
+4 |     @exported fun resolve(): Bool = (node.var1 <-> true).solve()
+  |                                                    ^^^^
+
+
+== unify_var_val.lkt ==
+unify_var_val.lkt:4:52: error: Expected type LogicVar, got Example.entity
+4 |     @exported fun resolve(): Bool = (node.var1 <-> self).solve()
+  |                                                    ^^^^
+
+
+== unify_var_var.lkt ==
 Code generation was successful
 
 lkt_compile: Done

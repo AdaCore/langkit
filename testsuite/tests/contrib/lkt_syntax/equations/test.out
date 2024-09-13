@@ -1,0 +1,239 @@
+== assign.lkt ==
+
+v1:
+LogicAssign
+| f_dest_var:
+|   RefId: e1
+| f_value:
+|   RefId: e2
+
+v2:
+LogicAssign
+| f_dest_var:
+|   LogicExpr
+|   | f_expr:
+|   |   RefId: e1
+| f_value:
+|   RefId: e2
+
+v3:
+LogicAssign
+| f_dest_var:
+|   RefId: e1
+| f_value:
+|   LogicExpr
+|   | f_expr:
+|   |   RefId: e2
+
+v4:
+LogicAssign
+| f_dest_var:
+|   LogicExpr
+|   | f_expr:
+|   |   RefId: e1
+| f_value:
+|   LogicExpr
+|   | f_expr:
+|   |   RefId: e2
+
+v5:
+LogicAssign
+| f_dest_var:
+|   CallExpr
+|   | f_name:
+|   |   RefId: f1
+|   | f_args:
+|   |   ParamList
+|   |   |   Param
+|   |   |   | f_value:
+|   |   |   |   NumLit: 1
+| f_value:
+|   CallExpr
+|   | f_name:
+|   |   RefId: f2
+|   | f_args:
+|   |   ParamList
+|   |   |   Param
+|   |   |   | f_value:
+|   |   |   |   NumLit: 2
+
+v5:
+IfExpr
+| f_cond_expr:
+|   RefId: e1
+| f_then_expr:
+|   RefId: e2
+| f_alternatives:
+|   ElsifBranchList
+|   |   <empty>
+| f_else_expr:
+|   LogicAssign
+|   | f_dest_var:
+|   |   RefId: e3
+|   | f_value:
+|   |   RefId: e4
+
+v5:
+BinOp
+| f_left:
+|   BinOp
+|   | f_left:
+|   |   RefId: e1
+|   | f_op:
+|   |   OpLogicAnd
+|   | f_right:
+|   |   LogicAssign
+|   |   | f_dest_var:
+|   |   |   RefId: e2
+|   |   | f_value:
+|   |   |   RefId: e3
+| f_op:
+|   OpLogicOr
+| f_right:
+|   RefId: e4
+
+== basic.lkt ==
+
+v1:
+LogicExpr
+| f_expr:
+|   RefId: e1
+
+v2:
+LogicExpr
+| f_expr:
+|   CallExpr
+|   | f_name:
+|   |   RefId: f1
+|   | f_args:
+|   |   ParamList
+|   |   |   <empty>
+
+v3:
+LogicExpr
+| f_expr:
+|   CallExpr
+|   | f_name:
+|   |   RefId: f2
+|   | f_args:
+|   |   ParamList
+|   |   |   Param
+|   |   |   | f_value:
+|   |   |   |   NumLit: 1
+
+== predicate.lkt ==
+
+v1:
+LogicPredicate
+| f_name:
+|   RefId: e1
+| f_args:
+|   ParamList
+|   |   <empty>
+
+v2:
+CallExpr
+| f_name:
+|   DotExpr
+|   | f_prefix:
+|   |   LogicPredicate
+|   |   | f_name:
+|   |   |   RefId: e1
+|   |   | f_args:
+|   |   |   ParamList
+|   |   |   |   <empty>
+|   | f_suffix:
+|   |   RefId: solve
+| f_args:
+|   ParamList
+|   |   <empty>
+
+== propagate.lkt ==
+
+v1:
+LogicPropagate
+| f_dest_var:
+|   RefId: e1
+| f_name:
+|   RefId: e2
+| f_args:
+|   ParamList
+|   |   <empty>
+
+v2:
+LogicPropagate
+| f_dest_var:
+|   LogicExpr
+|   | f_expr:
+|   |   CallExpr
+|   |   | f_name:
+|   |   |   RefId: e1
+|   |   | f_args:
+|   |   |   ParamList
+|   |   |   |   <empty>
+| f_name:
+|   RefId: e2
+| f_args:
+|   ParamList
+|   |   <empty>
+
+== unify.lkt ==
+
+v1:
+LogicUnify
+| f_lhs:
+|   RefId: e1
+| f_rhs:
+|   RefId: e2
+
+v2:
+LogicUnify
+| f_lhs:
+|   LogicExpr
+|   | f_expr:
+|   |   RefId: e1
+| f_rhs:
+|   RefId: e2
+
+v3:
+LogicUnify
+| f_lhs:
+|   RefId: e1
+| f_rhs:
+|   LogicExpr
+|   | f_expr:
+|   |   RefId: e2
+
+v4:
+LogicUnify
+| f_lhs:
+|   LogicExpr
+|   | f_expr:
+|   |   RefId: e1
+| f_rhs:
+|   LogicExpr
+|   | f_expr:
+|   |   RefId: e2
+
+v5:
+LogicUnify
+| f_lhs:
+|   CallExpr
+|   | f_name:
+|   |   RefId: f1
+|   | f_args:
+|   |   ParamList
+|   |   |   Param
+|   |   |   | f_value:
+|   |   |   |   NumLit: 1
+| f_rhs:
+|   CallExpr
+|   | f_name:
+|   |   RefId: f2
+|   | f_args:
+|   |   ParamList
+|   |   |   Param
+|   |   |   | f_value:
+|   |   |   |   NumLit: 2
+
+Done

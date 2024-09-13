@@ -1534,10 +1534,12 @@ def emit_expr_prio(expr, **ctx):
         return prio, 'RefCategories({})'.format(', '.join(args))
 
     elif isinstance(expr, Predicate):
-        result = "%predicate({})".format(", ".join(keep([
+        result = "{}%({})".format(
             fqn(expr.pred_property),
-            ee_prio(P.lowest, expr.exprs[0]),
-        ] + [ee_prio(P.lowest, e) for e in expr.exprs[1:]])))
+            ", ".join(keep([
+                ee_prio(P.lowest, expr.exprs[0]),
+            ] + [ee_prio(P.lowest, e) for e in expr.exprs[1:]]))
+        )
 
         # Do not bind error_location if the predicate does not have the
         # predicate_error annotation: error_loc is ignored in that case and we
@@ -1560,29 +1562,30 @@ def emit_expr_prio(expr, **ctx):
         )
 
     elif isinstance(expr, Bind):
-        result = "%eq({})".format(", ".join(keep([
-            ee_prio(P.lowest, expr.to_expr),
-            ee_prio(P.lowest, expr.from_expr),
-            (
-                "conv_prop={}".format(fqn(expr.conv_prop))
-                if expr.conv_prop else ""
-            ),
-        ])))
+        dest_fmt = ee_prio(P.lowest, expr.to_expr)
+        src_fmt = ee_prio(P.lowest, expr.from_expr)
+        if expr.conv_prop:
+            fmt = "{} <- {}%({})".format(
+                dest_fmt, fqn(expr.conv_prop), src_fmt
+            )
+        elif expr.to_expr_is_logic_var:
+            fmt = "{} <-> {}".format(dest_fmt, src_fmt)
+        else:
+            fmt = "{} <- {}".format(dest_fmt, src_fmt)
 
         if expr.logic_ctx or is_dynvar_bound("logic_context"):
             return wrap_bind(
-                result,
+                fmt,
                 ("logic_context", expr.logic_ctx or f"null[{T.LogicContext.dsl_name}]"),
             )
-
-        return prio, result
+        return prio, fmt
 
     elif isinstance(expr, NPropagate):
-        result = "%propagate({})".format(", ".join(keep([
+        result = "{} <- {}%({})".format(
             ee_prio(P.lowest, expr.dest_var),
             fqn(expr.comb_prop),
-        ] + [ee_prio(P.lowest, v) for v in expr.arg_vars])))
-
+            ", ".join([ee_prio(P.lowest, v) for v in expr.arg_vars])
+        )
         if expr.logic_ctx or is_dynvar_bound("logic_context"):
             return wrap_bind(
                 result,

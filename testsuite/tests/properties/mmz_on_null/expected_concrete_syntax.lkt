@@ -15,8 +15,8 @@ class FooNode implements Node[FooNode] {
     @memoized
     fun pred2(): Bool = not node.parent.is_null
 
-    fun create_equation(with_pred1: Bool, n: Entity[FooNode]): Equation = %eq(node.v, n) %and (
-        if with_pred1 then %predicate(FooNode.pred1, node.v) else %predicate(FooNode.pred2, node.v)
+    fun create_equation(with_pred1: Bool, n: Entity[FooNode]): Equation = node.v <- n %and (
+        if with_pred1 then FooNode.pred1%(node.v) else FooNode.pred2%(node.v)
     )
 
     @exported

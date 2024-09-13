@@ -2,7 +2,7 @@ import common
 
 class Example: BaseExample {
     @exported fun prop(): Entity[FooNode] = {
-        val _ = %predicate(Example.pred2, node.var1, node.var2, true);
+        val _ = Example.pred2%(node.var1, node.var2, true);
         node.as_bare_entity
     }
 }

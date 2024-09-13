@@ -13,5 +13,5 @@ class Example: FooNode {
 
     fun pred(i: Int): Bool = i == 0
     @exported fun prop(i: Int): Bool =
-        %predicate(Example.pred, node.var, i).solve()
+        Example.pred%(node.var, i).solve()
 }
