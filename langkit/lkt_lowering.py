@@ -4563,6 +4563,16 @@ class LktTypesLoader:
                 ]
                 return E.IsA(subexpr, *nodes)
 
+            elif isinstance(expr, L.LogicAssign):
+                dest_var = lower(expr.f_dest_var)
+                value_expr = lower(expr.f_value)
+                return E.Bind(
+                    dest_var,
+                    value_expr,
+                    logic_ctx=self.logic_context_builtin.variable,
+                    kind=E.BindKind.assign,
+                )
+
             elif isinstance(expr, L.LogicExpr):
                 abort_if_static_required(expr)
 
@@ -4594,45 +4604,57 @@ class LktTypesLoader:
                         domain_expr = lower(args["domain"])
                         return logic_var.domain(domain_expr)
 
-                    elif call_name.text == "eq":
-                        args, _ = eq_signature.match(self.ctx, expr)
-                        return E.Bind(
-                            lower(args["to"]),
-                            lower(args["from"]),
-                            conv_prop=self.resolve_property(
-                                args.get("conv_prop")
-                            ),
-                            logic_ctx=self.logic_context_builtin.variable,
-                        )
-
-                    elif call_name.text == "predicate":
-                        args, vargs = predicate_signature.match(self.ctx, expr)
-                        pred_prop = self.resolve_property(args["pred_prop"])
-                        node_expr = lower(args["node"])
-                        arg_exprs = [lower(arg) for arg in vargs]
-                        return E.Predicate(
-                            pred_prop,
-                            node_expr,
-                            error_location=(
-                                self.error_location_builtin.variable
-                            ),
-                            *arg_exprs,
-                        )
-
-                    elif call_name.text == "propagate":
-                        args, vargs = propagate_signature.match(self.ctx, expr)
-                        dest_var = lower(args["dest"])
-                        comb_prop = self.resolve_property(args["comb_prop"])
-                        arg_vars = [lower(arg) for arg in vargs]
-                        return E.NPropagate(
-                            dest_var,
-                            comb_prop,
-                            logic_ctx=self.logic_context_builtin.variable,
-                            *arg_vars,
-                        )
-
                 with self.ctx.lkt_context(expr):
                     error("invalid logic expression")
+
+            elif isinstance(expr, L.LogicPredicate):
+                pred_prop = self.resolve_property(expr.f_name)
+                arg_exprs = [lower(arg.f_value) for arg in expr.f_args]
+                if len(arg_exprs) == 0:
+                    with self.ctx.lkt_context(expr.f_args):
+                        error("at least one argument expected")
+                node_expr = arg_exprs.pop(0)
+                for arg in expr.f_args:
+                    if arg.f_name is not None:
+                        with self.ctx.lkt_context(arg.f_name):
+                            error(
+                                "parameter names are not allowed in logic"
+                                " propagates"
+                            )
+                return E.Predicate(
+                    pred_prop,
+                    node_expr,
+                    *arg_exprs,
+                    error_location=self.error_location_builtin.variable,
+                )
+
+            elif isinstance(expr, L.LogicPropagate):
+                dest_var = lower(expr.f_dest_var)
+                comb_prop = self.resolve_property(expr.f_name)
+                arg_vars = [lower(arg.f_value) for arg in expr.f_args]
+                for arg in expr.f_args:
+                    if arg.f_name is not None:
+                        with self.ctx.lkt_context(arg.f_name):
+                            error(
+                                "parameter names are not allowed in logic"
+                                " propagates"
+                            )
+                return E.NPropagate(
+                    dest_var,
+                    comb_prop,
+                    *arg_vars,
+                    logic_ctx=self.logic_context_builtin.variable,
+                )
+
+            elif isinstance(expr, L.LogicUnify):
+                lhs_var = lower(expr.f_lhs)
+                rhs_var = lower(expr.f_rhs)
+                return E.Bind(
+                    lhs_var,
+                    rhs_var,
+                    logic_ctx=self.logic_context_builtin.variable,
+                    kind=E.BindKind.unify,
+                )
 
             elif isinstance(expr, L.KeepExpr):
                 abort_if_static_required(expr)

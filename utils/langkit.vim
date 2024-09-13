@@ -19,6 +19,7 @@ syn match   langkitToken   "@\s*\h\%(\w\|\.\)*" display
 syn match   langkitGrammarRule   "\%(\w\|_\)\+\s*\(<-\)\@=" display
 syn match   langkitLiteral "\d\+" display
 syn match   langkitComment "#.*$"
+syn match   langkitOperator "<->"
 syn match   langkitOperator "<-"
 syn match   langkitOperator "?"
 syn match   langkitOperator "list+"

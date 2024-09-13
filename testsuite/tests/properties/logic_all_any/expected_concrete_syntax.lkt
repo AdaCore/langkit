@@ -23,12 +23,12 @@ class NameSequence: FooNode {
     |" Return whether at least one name is "foo".
     @exported
     fun any_foo(): Bool = (
-        node.domains() %and node.names.logic_any((n) => %predicate(Name.predicate, n.var))
+        node.domains() %and node.names.logic_any((n) => Name.predicate%(n.var))
     ).solve()
 
     |" Return whether all names are "foo".
     @exported
     fun all_foo(): Bool = (
-        node.domains() %and node.names.logic_all((n) => %predicate(Name.predicate, n.var))
+        node.domains() %and node.names.logic_all((n) => Name.predicate%(n.var))
     ).solve()
 }
