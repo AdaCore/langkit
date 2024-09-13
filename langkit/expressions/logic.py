@@ -198,7 +198,6 @@ class PropagateExpr(BindExpr):
             # the support library and the other is generated), they have the
             # same structure, so we cast the given one to the expected type.
             assert len(arg_vars) == 1
-            constructor_name = "Solver.Create_N_Propagate"
             var_array_expr = SavedExpr("Logic_Vars", arg_vars[0])
             saved_exprs.append(var_array_expr)
             var_array = LiteralExpr(
@@ -208,20 +207,27 @@ class PropagateExpr(BindExpr):
             var_length = LiteralExpr(
                 "{}.N", None, [var_array_expr.result_var_expr]
             )
+            constructor_name = "Solver.Create_N_Propagate"
             constructor_args = [
+                # "To" argument
                 dest_var,
+                # "Comb" argument
                 cls.functor_expr(
                     f"Logic_Functor_{prop.uid}", prop, var_length
                 )
                 if prop else
                 "Solver_Ifc.No_Combiner",
+                # "Logic_Vars" argument
                 var_array,
             ]
         elif len(arg_vars) == 1:
             constructor_name = "Solver.Create_Propagate"
             constructor_args = [
-                dest_var,
+                # "From" argument
                 arg_vars[0],
+                # "To" argument
+                dest_var,
+                # "Conv" argument
                 cls.functor_expr(f"Logic_Functor_{prop.uid}", prop)
                 if prop else
                 "Solver_Ifc.No_Converter",
@@ -229,13 +235,16 @@ class PropagateExpr(BindExpr):
         else:
             constructor_name = "Solver.Create_N_Propagate"
             constructor_args = [
+                # "To" argument
                 dest_var,
+                # "Comb" argument
                 cls.functor_expr(
                     f"Logic_Functor_{prop.uid}", prop,
                     IntegerLiteralExpr(len(arg_vars))
                 )
                 if prop else
                 "Solver_Ifc.No_Combiner",
+                # "Logic_Vars" argument
                 aggregate_expr(
                     type=None,
                     assocs=[(str(i), v) for i, v in enumerate(arg_vars, 1)],
@@ -314,12 +323,12 @@ class Bind(AbstractExpression):
         Bind(A, B, conv_prop=T.TypeOfA.some_property)
     """
 
-    def __init__(self, from_expr, to_expr, conv_prop=None, logic_ctx=None):
+    def __init__(self, to_expr, from_expr, conv_prop=None, logic_ctx=None):
         """
-        :param AbstractExpression from_expr: An expression resolving to a
-            logical variable that is the source of the bind.
         :param AbstractExpression to_expr: An expression resolving to a
             logical variable that is the destination of the bind.
+        :param AbstractExpression from_expr: An expression resolving to a
+            logical variable that is the source of the bind.
         :param PropertyDef|None conv_prop: The property to apply on the
             value of from_expr that will yield the value to give to to_expr.
             For convenience, it can be a property on any subclass of the root
@@ -329,8 +338,8 @@ class Bind(AbstractExpression):
             LogicContext.
         """
         super().__init__()
-        self.from_expr = from_expr
         self.to_expr = to_expr
+        self.from_expr = from_expr
         self.conv_prop = conv_prop
         self.logic_ctx = logic_ctx
 
@@ -442,20 +451,20 @@ class Bind(AbstractExpression):
         """
         return ResetLogicVar(construct(var_expr, T.LogicVar))
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         # Resolve the converter property, make sure it has an acceptable
         # signature and generate a functor for it.
         self.conv_prop = self._resolve_property(
             "Bind's conv_prop", self.conv_prop, 1
         )
 
-        # Left operand must be a logic variable. Make sure the resulting
+        # The "to" operand must be a logic variable. Make sure the resulting
         # equation will work on a clean logic variable.
-        lhs = self._construct_logic_var(self.from_expr)
+        to_expr = self._construct_logic_var(self.to_expr)
 
-        # Second one can be either a logic variable or an entity (or an AST
+        # The "from" one can be either a logic variable or an entity (or a bare
         # node that is promoted to an entity).
-        rhs = construct(self.to_expr)
+        from_expr = construct(self.from_expr)
 
         logic_ctx = None
         if self.logic_ctx:
@@ -465,45 +474,54 @@ class Bind(AbstractExpression):
                 f"Expected LogicContext, got {logic_ctx.type.dsl_name}"
             )
 
-        if rhs.type.matches(T.LogicVar):
+        if from_expr.type.matches(T.LogicVar):
             # The second operand is a logic variable: this is a Propagate or a
             # Unify equation depending on whether we have a conversion
             # property.
 
             # For this operand too, make sure it will work on a clean logic
             # variable.
-            rhs = ResetLogicVar(rhs)
+            from_expr = ResetLogicVar(from_expr)
 
             return (
                 PropagateExpr.construct_propagate(
-                    lhs, [rhs], self.conv_prop, logic_ctx, abstract_expr=self
+                    to_expr,
+                    [from_expr],
+                    self.conv_prop,
+                    logic_ctx,
+                    abstract_expr=self,
                 )
                 if self.conv_prop else
-                UnifyExpr(lhs, rhs, logic_ctx, abstract_expr=self)
+                UnifyExpr(to_expr, from_expr, logic_ctx, abstract_expr=self)
             )
 
         else:
             # The second operand is a value: this is an Assign equation
 
-            if rhs.type.matches(T.root_node):
+            if from_expr.type.matches(T.root_node):
                 from langkit.expressions import make_as_entity
-                rhs = make_as_entity(rhs)
+                from_expr = make_as_entity(from_expr)
             else:
                 check_source_language(
-                    rhs.type.matches(T.root_node.entity)
-                    or rhs.type.matches(T.LogicVar),
+                    from_expr.type.matches(T.root_node.entity)
+                    or from_expr.type.matches(T.LogicVar),
                     "Right operand must be either a logic variable or an"
-                    f" entity, got {rhs.type.dsl_name}"
+                    f" entity, got {from_expr.type.dsl_name}"
                 )
 
             # Because of Ada OOP typing rules, for code generation to work
-            # properly, make sure the type of `rhs` is the root node entity.
-            if rhs.type is not T.root_node.entity:
+            # properly, make sure the type of `from_expr` is the root node
+            # entity.
+            if from_expr.type is not T.root_node.entity:
                 from langkit.expressions import Cast
-                rhs = Cast.Expr(rhs, T.root_node.entity)
+                from_expr = Cast.Expr(from_expr, T.root_node.entity)
 
             return AssignExpr(
-                lhs, rhs, self.conv_prop, logic_ctx, abstract_expr=self
+                to_expr,
+                from_expr,
+                self.conv_prop,
+                logic_ctx,
+                abstract_expr=self,
             )
 
 

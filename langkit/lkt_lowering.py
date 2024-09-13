@@ -1512,8 +1512,8 @@ Signature for ".env_group".
 """
 
 eq_signature = FunctionSignature(
-    FunctionParamSpec("from"),
     FunctionParamSpec("to"),
+    FunctionParamSpec("from"),
     FunctionParamSpec("conv_prop", optional=True, keyword_only=True),
     FunctionParamSpec("logic_ctx", optional=True, keyword_only=True),
 )
@@ -4570,8 +4570,8 @@ class LktTypesLoader:
                         args, _ = eq_signature.match(self.ctx, expr)
                         logic_ctx_expr = args.get("logic_ctx")
                         return E.Bind(
-                            lower(args["from"]),
                             lower(args["to"]),
+                            lower(args["from"]),
                             conv_prop=self.resolve_property(
                                 args.get("conv_prop")
                             ),
