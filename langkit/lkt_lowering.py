@@ -4849,7 +4849,7 @@ class LktTypesLoader:
                 )
             if annotations.ignored:
                 arg.var.tag_ignored()
-            prop.arguments.append(arg)
+            prop.append_argument(arg)
             scope.add(Scope.Argument(source_name, a, arg.var))
 
         return arguments, scope
