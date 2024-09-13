@@ -1,5 +1,8 @@
 == bad_arg_type.lkt ==
-<builtin>: error: Expected type Int, got Bool
+bad_arg_type.lkt:4:54: error: Expected type Int, got Bool
+4 |     @exported fun bar_prop(): Int = node.singleton()[true]
+  |                                                      ^^^^
+
 
 == correct.lkt ==
 Code generation was successful

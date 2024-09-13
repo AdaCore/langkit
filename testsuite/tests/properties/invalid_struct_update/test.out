@@ -13,7 +13,7 @@ invalid_type.lkt:4:57: error: Wrong type for field KV.key: expected String, got 
 == not_a_struct.lkt ==
 not_a_struct.lkt:4:43: error: Struct expected, got Example
 4 |     @exported fun increment(kv: KV): KV = node.update(value=kv)
-  |                                           ^^^^^^^^^^^^^^^^^^^^^
+  |                                           ^^^^
 
 
 lkt_compile: Done
