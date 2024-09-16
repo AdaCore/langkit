@@ -50,6 +50,10 @@ begin
    Check ("p_fail_nprop_multi_3", P_Fail_Nprop_Multi_3'Access);
    Check ("p_ok_nprop_varargs", P_Ok_Nprop_Varargs'Access);
    Check ("p_fail_nprop_varargs", P_Fail_Nprop_Varargs'Access);
+   Check ("p_ok_pred", P_Ok_Pred'Access);
+   Check ("p_fail_pred_1", P_Fail_Pred_1'Access);
+   Check ("p_fail_pred_2", P_Fail_Pred_2'Access);
+   Check ("p_fail_pred_3", P_Fail_Pred_3'Access);
 
    Put_Line ("main.adb: Done.");
 end Main;
