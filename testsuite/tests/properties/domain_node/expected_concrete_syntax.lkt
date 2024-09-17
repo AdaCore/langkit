@@ -1,0 +1,20 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    v: LogicVar
+}
+
+class Example: FooNode {
+    fun identity(): Entity[Example] = self
+
+    @exported
+    fun test(): Bool = (
+        %domain(node.v, [node]) and %eq(node.v, node.v, conv_prop=Example.identity)
+    ).solve()
+}
