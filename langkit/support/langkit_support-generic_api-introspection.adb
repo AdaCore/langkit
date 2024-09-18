@@ -1535,6 +1535,16 @@ package body Langkit_Support.Generic_API.Introspection is
       end;
    end Check_Struct_Member_Argument;
 
+   --------------
+   -- Language --
+   --------------
+
+   function Language (Member : Struct_Member_Ref) return Language_Id is
+   begin
+      Check_Struct_Member (Member);
+      return Member.Id;
+   end Language;
+
    ----------------
    -- Debug_Name --
    ----------------
