@@ -120,6 +120,11 @@ class Example: BaseExample {
             md=Metadata(md1=md1, md2=md2), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
         )
     )
+
+    @exported
+    @lazy
+    create_synth_node: SynthNode =
+        SynthNode.builder(foo=null[FooNode].to_builder()).build()
 }
 
 class Def: FooNode {
@@ -154,6 +159,11 @@ class Name: FooNode implements TokenNode {
 
 @qualifier
 enum class NullQual: FooNode {
+}
+
+@synthetic
+class SynthNode: FooNode {
+    @parse_field @nullable foo: FooNode
 }
 
 class VarDecl: FooNode {
