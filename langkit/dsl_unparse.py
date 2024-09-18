@@ -1091,18 +1091,12 @@ def emit_expr_prio(expr, **ctx):
         )
 
     elif isinstance(expr, All):
-        return prio, (
-            ee(expr.equation_array)
-            if expr._origin_composed_attr == "logic_all" else
-            "%all({})".format(ee(expr.equation_array))
-        )
+        assert expr._origin_composed_attr == "logic_all"
+        return prio, ee(expr.equation_array)
 
     elif isinstance(expr, Any):
-        return prio, (
-            ee(expr.equation_array)
-            if expr._origin_composed_attr == "logic_any" else
-            "%any({})".format(ee(expr.equation_array))
-        )
+        assert expr._origin_composed_attr == "logic_any"
+        return prio, ee(expr.equation_array)
 
     elif isinstance(expr, Match):
         with walker.method_call("match"):

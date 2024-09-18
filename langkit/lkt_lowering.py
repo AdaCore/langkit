@@ -52,11 +52,12 @@ import abc
 from collections import OrderedDict
 from dataclasses import dataclass
 import enum
+from functools import reduce
 import itertools
 import os.path
 from typing import (
-    Any, Callable, ClassVar, Dict, Generic, List, Optional, Set, Tuple, Type,
-    TypeVar, Union, cast, overload
+    Any, Callable, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar,
+    Union, cast, overload
 )
 
 import liblktlang as L
@@ -81,7 +82,6 @@ from langkit.expressions import (
     AbstractExpression, AbstractKind, AbstractProperty, AbstractVariable, Cast,
     Let, LocalVars, NullCond, Property, PropertyDef, create_lazy_field, unsugar
 )
-import langkit.expressions.logic as ELogic
 from langkit.lexer import (
     Action, Alt, Case, Ignore, Lexer, LexerToken, Literal, Matcher, NoCaseLit,
     Pattern, RuleAssoc, TokenAction, TokenFamily, WithSymbol, WithText,
@@ -1555,7 +1555,7 @@ join_signature = FunctionSignature(FunctionParamSpec("strings"))
 Signature for ".join".
 """
 
-logic_all_any_signature = FunctionSignature(FunctionParamSpec("equations"))
+logic_all_any_signature = FunctionSignature(positional_variadic=True)
 """
 Signature for "%all" and for "%any".
 """
@@ -4570,6 +4570,7 @@ class LktTypesLoader:
             elif isinstance(expr, L.LogicExpr):
                 abort_if_static_required(expr)
 
+                logic_expr = expr
                 expr = expr.f_expr
                 if isinstance(expr, L.RefId):
                     if expr.text == "true":
@@ -4584,12 +4585,23 @@ class LktTypesLoader:
                             error("invalid logic expression")
 
                     if call_name.text in ("all", "any"):
-                        args, _ = logic_all_any_signature.match(self.ctx, expr)
-                        eq_array_expr = lower(args["equations"])
-                        return (
-                            ELogic.All(eq_array_expr)
+                        _, vargs = logic_all_any_signature.match(
+                            self.ctx, expr
+                        )
+                        op_kind = (
+                            E.BinaryOpKind.AND
                             if call_name.text == "all" else
-                            ELogic.Any(eq_array_expr)
+                            E.BinaryOpKind.OR
+                        )
+                        with self.ctx.lkt_context(logic_expr):
+                            check_source_language(
+                                bool(vargs), "at least one equation expected"
+                            )
+                        return reduce(
+                            lambda lhs, rhs: E.LogicBinaryOp(
+                                op_kind, lhs, rhs
+                            ),
+                            [lower(a) for a in vargs]
                         )
 
                     elif call_name.text == "domain":

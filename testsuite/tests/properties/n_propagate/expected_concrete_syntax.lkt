@@ -30,7 +30,7 @@ class Plus: FooNode {
             # an array literal.
             node.v <- Literal.dynamic_combiner%(arr)
         ) else node.v <- Literal.static_combiner%(node.lhs.v, node.rhs.v);
-        val eq = %all([propagator, node.lhs.v <- lhs, node.rhs.v <- rhs]);
+        val eq = propagator %and node.lhs.v <- lhs %and node.rhs.v <- rhs;
 
         if eq.solve() then node.v.get_value() else raise[Entity[FooNode]] PropertyError("unreachable")
     }

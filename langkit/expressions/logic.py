@@ -1123,7 +1123,6 @@ class LogicBooleanOp(AbstractExpression):
         return f"<Logic{self.kind_name} at {self.location_repr}>"
 
 
-@dsl_document
 class Any(LogicBooleanOp):
     """
     Combine all equations in the `equations` array vie an OR logic operation.
@@ -1134,7 +1133,6 @@ class Any(LogicBooleanOp):
         super().__init__(equations, LogicBooleanOp.KIND_OR)
 
 
-@dsl_document
 class All(LogicBooleanOp):
     """
     Combine all equations in the `equations` array vie an AND logic operation.

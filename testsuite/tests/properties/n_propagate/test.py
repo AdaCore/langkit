@@ -4,7 +4,7 @@ Check that ``NPropagate`` expressions work as expected.
 
 from langkit.dsl import ASTNode, Field, T, UserField
 from langkit.expressions import (
-    All, ArrayLiteral, Bind, If, NPropagate, PropertyError, Self, Var,
+    And, ArrayLiteral, Bind, If, NPropagate, PropertyError, Self, Var,
     langkit_property
 )
 
@@ -46,11 +46,11 @@ class Plus(FooNode):
             NPropagate(Self.v, T.Literal.static_combiner,
                        Self.lhs.v, Self.rhs.v),
         ))
-        eq = Var(All([
+        eq = Var(And(
             propagator,
             Bind(Self.lhs.v, lhs),
             Bind(Self.rhs.v, rhs),
-        ]))
+        ))
         return If(
             eq.solve,
             Self.v.get_value,
