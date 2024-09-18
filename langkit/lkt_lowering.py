@@ -1321,20 +1321,14 @@ class FunctionParamSpec:
         self.keyword_only = keyword_only
 
 
-AnyFunctionParamSpec = TypeVar("AnyFunctionParamSpec", bound=FunctionParamSpec)
-
-
-class FunctionSignature(Generic[AnyFunctionParamSpec]):
+class FunctionSignature:
     """
     Specification of required/accepted parameters for a function.
-
-    ``AnyFunctionParamSpec`` designates whatever metadata is associated to each
-    function parameter.
     """
 
     def __init__(
         self,
-        *param_specs: AnyFunctionParamSpec,
+        *param_specs: FunctionParamSpec,
         positional_variadic: bool = False,
     ):
         """
@@ -1353,7 +1347,7 @@ class FunctionSignature(Generic[AnyFunctionParamSpec]):
         ]
         """Subset of parameters that can be passed as positional arguments."""
 
-        self.by_name: dict[str, AnyFunctionParamSpec] = {}
+        self.by_name: dict[str, FunctionParamSpec] = {}
         for spec in self.param_specs:
             assert spec.name not in self.by_name
             self.by_name[spec.name] = spec
@@ -1513,7 +1507,7 @@ dynamic_lexical_env_signature = FunctionSignature(
 Signature for the "dynamic_lexical_env" builtin function.
 """
 
-empty_signature: FunctionSignature[FunctionParamSpec] = FunctionSignature()
+empty_signature: FunctionSignature = FunctionSignature()
 """
 Signature for a function that takes no argument.
 """
