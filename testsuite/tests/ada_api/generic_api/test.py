@@ -10,13 +10,16 @@ from langkit.dsl import (
     T,
     UserField,
     abstract,
-    env_metadata
+    env_metadata,
+    synthetic,
 )
 from langkit.expressions import (
     AbstractKind,
     ArrayLiteral,
     BigIntLiteral,
     CharacterLiteral,
+    CreateCopyNodeBuilder,
+    CreateSynthNodeBuilder,
     Entity,
     If,
     No,
@@ -25,6 +28,7 @@ from langkit.expressions import (
     Self,
     String,
     langkit_property,
+    lazy_field,
 )
 
 from utils import build_and_run
@@ -140,6 +144,13 @@ class Example(BaseExample):
             from_rebound=Entity.info.from_rebound
         ))
 
+    @lazy_field(public=True)
+    def create_synth_node():
+        return CreateSynthNodeBuilder(
+            T.SynthNode,
+            foo=CreateCopyNodeBuilder(No(T.FooNode)),
+        ).build()
+
 
 class NullQual(FooNode):
     enum_node = True
@@ -183,6 +194,11 @@ class Number(Expr):
 
 class Ref(Expr):
     name = Field()
+
+
+@synthetic
+class SynthNode(FooNode):
+    foo = Field(type=T.FooNode, nullable=True)
 
 
 build_and_run(

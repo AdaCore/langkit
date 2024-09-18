@@ -1308,6 +1308,16 @@ package body Langkit_Support.Generic_API.Introspection is
       return Node.Id.Struct_Types.all (Node.Index).Is_Abstract;
    end Is_Abstract;
 
+   ------------------
+   -- Is_Synthetic --
+   ------------------
+
+   function Is_Synthetic (Node : Type_Ref) return Boolean is
+   begin
+      Check_Node_Type (Node);
+      return Node.Id.Struct_Types.all (Node.Index).Is_Synthetic;
+   end Is_Synthetic;
+
    -------------------
    -- Is_Token_Node --
    -------------------
