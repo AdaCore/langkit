@@ -748,6 +748,18 @@ begin
       New_Line;
    end loop;
 
+   Put ("Language: null Member argument: ");
+   begin
+      declare
+         Dummy : constant Language_Id := Language (No_Struct_Member_Ref);
+      begin
+         raise Program_Error;
+      end;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
    Put ("Is_Property: Null Member argument: ");
    begin
       Dummy_Bool := Is_Property (No_Struct_Member_Ref);
