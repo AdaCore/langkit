@@ -546,6 +546,21 @@ package body Langkit_Support.Generic_API.Analysis is
       end;
    end Filename;
 
+   -------------
+   -- Charset --
+   -------------
+
+   function Charset (Self : Lk_Unit) return String is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc : Language_Descriptor renames Self.Context.Desc.all;
+      begin
+         return Desc.Unit_Charset (Self.Internal);
+      end;
+   end Charset;
+
    ---------------------
    -- Has_Diagnostics --
    ---------------------

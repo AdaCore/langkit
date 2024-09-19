@@ -64,7 +64,8 @@ Use of null context:
 Got a Precondition_Failure exception: null context
 
 Use of null unit:
-Got a Precondition_Failure exception: null unit
+No_Lk_Unit.Root: Got a Precondition_Failure exception: null unit
+No_Lk_Unit.Charset: Got a Precondition_Failure exception: null unit
 
 Use of null node:
 Got a Precondition_Failure exception: null node
@@ -178,8 +179,10 @@ FooNode.list[1:1-1:13]
 
 Testing diagnostics-related primitives
 without_error.txt:
+  Charset: utf-8
   Has_Diagnostics? FALSE
 with_error.txt:
+  Charset: ascii
   Has_Diagnostics? TRUE
   with_error.txt:1:12: Expected ';', got Termination
 

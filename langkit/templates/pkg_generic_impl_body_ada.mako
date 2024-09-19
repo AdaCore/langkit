@@ -220,6 +220,16 @@ package body ${ada_lib_name}.Generic_Impl is
       return Implementation.Get_Filename (U);
    end Unit_Filename;
 
+   ------------------
+   -- Unit_Charset --
+   ------------------
+
+   function Unit_Charset (Unit : Internal_Unit) return String is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return Implementation.Get_Charset (U);
+   end Unit_Charset;
+
    ----------------------
    -- Unit_Diagnostics --
    ----------------------

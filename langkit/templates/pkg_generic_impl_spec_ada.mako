@@ -138,6 +138,7 @@ private package ${ada_lib_name}.Generic_Impl is
    procedure Unit_Reparse_From_Buffer
      (Unit : Internal_Unit; Buffer : String; Charset : String);
    function Unit_Filename (Unit : Internal_Unit) return String;
+   function Unit_Charset (Unit : Internal_Unit) return String;
    function Unit_Diagnostics (Unit : Internal_Unit) return Diagnostics_Access;
    function Unit_Format_GNU_Diagnostic
      (Unit : Internal_Unit; D : Diagnostic) return String;
@@ -252,6 +253,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Unit_Reparse_From_File     => Unit_Reparse_From_File'Access,
       Unit_Reparse_From_Buffer   => Unit_Reparse_From_Buffer'Access,
       Unit_Filename              => Unit_Filename'Access,
+      Unit_Charset               => Unit_Charset'Access,
       Unit_Diagnostics           => Unit_Diagnostics'Access,
       Unit_Format_GNU_Diagnostic => Unit_Format_GNU_Diagnostic'Access,
       Unit_Root                  => Unit_Root'Access,

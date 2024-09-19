@@ -172,6 +172,9 @@ package Langkit_Support.Generic_API.Analysis is
    function Filename (Self : Lk_Unit) return String;
    --  Return the filename this unit is associated to
 
+   function Charset (Self : Lk_Unit) return String;
+   --  Return the charset that was used to parse ``Self``
+
    function Has_Diagnostics (Self : Lk_Unit) return Boolean;
    --  Return whether this unit has associated diagnostics
 
