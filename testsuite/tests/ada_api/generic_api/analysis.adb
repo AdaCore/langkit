@@ -251,6 +251,34 @@ begin
    end;
    New_Line;
 
+   Put_Line ("Testing Reparse_From_File");
+   declare
+      U : Lk_Unit;
+   begin
+      Put_Line ("Base:");
+      U := Ctx.Get_From_Buffer ("example.txt", "var foo = 1;");
+      U.Root.Print;
+
+      Put_Line ("Reparsed:");
+      U.Reparse_From_File;
+      U.Root.Print;
+   end;
+   New_Line;
+
+   Put_Line ("Testing Reparse_From_Buffer");
+   declare
+      U : Lk_Unit;
+   begin
+      Put_Line ("Base:");
+      U := Ctx.Get_From_Buffer ("example.txt", "var foo = 1;");
+      U.Root.Print;
+
+      Put_Line ("Reparsed:");
+      U.Reparse_From_Buffer ("var bar = 2;");
+      U.Root.Print;
+   end;
+   New_Line;
+
    Put_Line ("Testing diagnostics-related primitives");
    declare
       Units : constant array (Positive range <>) of Lk_Unit :=
@@ -267,6 +295,8 @@ begin
    end;
    New_Line;
 
+   U.Reparse_From_File;
+   N := U.Root;
    Put_Line ("Testing various node operations:");
    Put_Line ("Root.Is_Null -> " & N.Is_Null'Image);
 

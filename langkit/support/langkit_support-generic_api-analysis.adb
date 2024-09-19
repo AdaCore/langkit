@@ -486,6 +486,30 @@ package body Langkit_Support.Generic_API.Analysis is
       return Hash (Self.Internal);
    end Hash;
 
+   -----------------------
+   -- Reparse_From_File --
+   -----------------------
+
+   procedure Reparse_From_File (Self : Lk_Unit; Charset : String := "") is
+   begin
+      Reject_Null_Unit (Self);
+      Self.Context.Desc.Unit_Reparse_From_File (Self.Internal, Charset);
+   end Reparse_From_File;
+
+   -------------------------
+   -- Reparse_From_Buffer --
+   -------------------------
+
+   procedure Reparse_From_Buffer
+     (Self    : Lk_Unit;
+      Buffer  : String;
+      Charset : String := "") is
+   begin
+      Reject_Null_Unit (Self);
+      Self.Context.Desc.Unit_Reparse_From_Buffer
+        (Self.Internal, Buffer, Charset);
+   end Reparse_From_Buffer;
+
    --------------
    -- Get_Line --
    --------------
