@@ -304,6 +304,26 @@ begin
    Put_Line ("Root.Next_Sibling.Image -> " & N.Image);
    Put_Line ("Root.Next_Sibling.Is_Null -> " & N.Is_Null'Image);
 
+   Put ("No_Lk_Node.Next_Sibling.Is_Null -> ");
+   begin
+      Put (No_Lk_Node.Next_Sibling.Is_Null'Image);
+      New_Line;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+
+   Put ("No_Lk_Node.Previous_Sibling.Is_Null -> ");
+   begin
+      Put (No_Lk_Node.Previous_Sibling.Is_Null'Image);
+      New_Line;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+
    N := U.Root.Child (2);
    Put_Line ("Root.Child (2).Image -> " & N.Image);
 

@@ -979,6 +979,8 @@ package body Langkit_Support.Generic_API.Analysis is
 
    function Previous_Sibling (Self : Lk_Node'Class) return Lk_Node is
    begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
       return Wrap_Node
         (Self.Desc.Node_Fetch_Sibling (Self.Internal.Node, -1), Self);
    end Previous_Sibling;
