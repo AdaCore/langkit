@@ -187,6 +187,8 @@ Testing various node operations:
 Root.Is_Null -> FALSE
 Root.Next_Sibling.Image -> None
 Root.Next_Sibling.Is_Null -> TRUE
+No_Lk_Node.Next_Sibling.Is_Null -> Got a Precondition_Failure exception: null node
+No_Lk_Node.Previous_Sibling.Is_Null -> Got a Precondition_Failure exception: null node
 Root.Child (2).Image -> <VarDecl example.txt:2:1-2:11>
 Root.Child (2).Previous_Sibling.Image -> <Example example.txt:1:1-1:12>
 [...].Previous_Sibling = [...] -> TRUE
