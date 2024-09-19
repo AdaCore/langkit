@@ -148,7 +148,34 @@ begin
    end;
    New_Line;
 
+   Put_Line ("Has_With_Trivia on null context:");
+   declare
+      Dummy : Boolean;
+   begin
+      Dummy := No_Lk_Context.Has_With_Trivia;
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Ctx := Create_Context (Id);
+   Put_Line
+     ("Create_Context (With_Trivia => <>): Has_With_Trivia = "
+      & Ctx.Has_With_Trivia'Image);
+
+   Ctx := Create_Context (Id, With_Trivia => False);
+   Put_Line
+     ("Create_Context (With_Trivia => False): Has_With_Trivia = "
+      & Ctx.Has_With_Trivia'Image);
+
+   Ctx := Create_Context (Id, With_Trivia => True);
+   Put_Line
+     ("Create_Context (With_Trivia => True): Has_With_Trivia = "
+      & Ctx.Has_With_Trivia'Image);
+   New_Line;
 
    Put_Line ("Parsing example.txt...");
    U := Ctx.Get_From_File ("example.txt");

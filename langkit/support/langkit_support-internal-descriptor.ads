@@ -45,6 +45,8 @@ package Langkit_Support.Internal.Descriptor is
      (Context : in out Internal_Context);
    type Context_Version_Type is access function
      (Context : Internal_Context) return Version_Number;
+   type Context_Has_With_Trivia_Type is access function
+     (Context : Internal_Context) return Boolean;
    type Context_Has_Unit_Type is access function
      (Context : Internal_Context; Unit_Filename : String) return Boolean;
    type Context_Get_From_File_Type is access function
@@ -190,9 +192,10 @@ package Langkit_Support.Internal.Descriptor is
       Context_Inc_Ref         : Context_Inc_Ref_Type;
       Context_Dec_Ref         : Context_Dec_Ref_Type;
       Context_Version         : Context_Version_Type;
+      Context_Has_With_Trivia : Context_Has_With_Trivia_Type;
+      Context_Has_Unit        : Context_Has_Unit_Type;
       Context_Get_From_File   : Context_Get_From_File_Type;
       Context_Get_From_Buffer : Context_Get_From_Buffer_Type;
-      Context_Has_Unit        : Context_Has_Unit_Type;
 
       Unit_Context               : Unit_Context_Type;
       Unit_Version               : Unit_Version_Type;

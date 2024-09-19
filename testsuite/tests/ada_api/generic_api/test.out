@@ -69,6 +69,13 @@ Got a Precondition_Failure exception: null unit
 Use of null node:
 Got a Precondition_Failure exception: null node
 
+Has_With_Trivia on null context:
+Got a Precondition_Failure exception: null context
+
+Create_Context (With_Trivia => <>): Has_With_Trivia = TRUE
+Create_Context (With_Trivia => False): Has_With_Trivia = FALSE
+Create_Context (With_Trivia => True): Has_With_Trivia = TRUE
+
 Parsing example.txt...
 Has example.txt? -> TRUE
 Has foo.txt? -> FALSE
