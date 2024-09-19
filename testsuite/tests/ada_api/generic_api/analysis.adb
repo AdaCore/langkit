@@ -289,14 +289,15 @@ begin
    end;
    New_Line;
 
-   Put_Line ("Testing diagnostics-related primitives");
    declare
       Units : constant array (Positive range <>) of Lk_Unit :=
         (Ctx.Get_From_Buffer
            ("without_error.txt", "var foo = 1;", Charset => "utf-8"),
          Ctx.Get_From_Buffer
-           ("with_error.txt", "var foo = 1", Charset => "ascii"));
+           ("with_error.txt", "var foo = 1", Charset => "ascii"),
+         Ctx.Get_From_File ("nosuchfile.txt"));
    begin
+      Put_Line ("Testing diagnostics-related primitives");
       for U of Units loop
          Put_Line (Ada.Directories.Simple_Name (U.Filename) & ":");
          Put_Line ("  Charset: " & U.Charset);
@@ -305,8 +306,15 @@ begin
             Put_Line ("  " & U.Format_GNU_Diagnostic (D));
          end loop;
       end loop;
+      New_Line;
+
+      Put_Line ("Testing Print debug helpers for units:");
+      for U of Units loop
+         Put_Line (Ada.Directories.Simple_Name (U.Filename) & ":");
+         U.Print;
+         New_Line;
+      end loop;
    end;
-   New_Line;
 
    U.Reparse_From_File;
    N := U.Root;

@@ -185,6 +185,29 @@ with_error.txt:
   Charset: ascii
   Has_Diagnostics? TRUE
   with_error.txt:1:12: Expected ';', got Termination
+nosuchfile.txt:
+  Charset: utf-8
+  Has_Diagnostics? TRUE
+  nosuchfile.txt: Cannot read nosuchfile.txt
+
+Testing Print debug helpers for units:
+without_error.txt:
+FooNode.list[1:1-1:13]
+|  VarDecl[1:1-1:13]
+|  |f_is_null:
+|  |  NullQual.Absent[1:1-1:1]
+|  |f_name:
+|  |  Name[1:5-1:8]: foo
+|  |f_value:
+|  |  Number[1:11-1:12]: 1
+
+with_error.txt:
+with_error.txt:1:12: Expected ';', got Termination
+FooNode.list[1:1-1:1]: <empty list>
+
+nosuchfile.txt:
+nosuchfile.txt: Cannot read nosuchfile.txt
+<no parse tree>
 
 Testing various node operations:
 Root.Is_Null -> FALSE
