@@ -356,17 +356,6 @@ package body ${ada_lib_name}.Analysis is
       return Has_Rewriting_Handle (Unwrap_Context (Context));
    end Has_Rewriting_Handle;
 
-   ----------------------
-   -- Get_Symbol_Table --
-   ----------------------
-
-   function Get_Symbol_Table
-     (Context : Analysis_Context'Class) return Symbol_Table
-   is
-   begin
-      return Context.Internal.Symbols;
-   end Get_Symbol_Table;
-
    -------------
    -- Context --
    -------------
