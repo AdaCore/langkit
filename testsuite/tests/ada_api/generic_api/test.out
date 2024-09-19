@@ -243,6 +243,10 @@ No_Lk_Node.Text -> Got a Precondition_Failure exception: null node
 Root.Sloc_Range -> 1:1-3:15
 No_Lk_Node.Sloc_Range -> Got a Precondition_Failure exception: null node
 
+First_Child.Compare ((1, 1)) -> INSIDE
+First_Child.Compare ((4, 1)) -> AFTER
+No_Lk_Node.Compare ((1, 1)) -> Got a Precondition_Failure exception: null node
+
 No_Lk_Node.Lookup (1, 1) -> None
 Root.Lookup (2, 7) -> <VarDecl example.txt:2:1-2:11>
 

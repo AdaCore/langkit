@@ -428,6 +428,19 @@ begin
    end;
    New_Line;
 
+   N := U.Root.Child (1);
+   Put_Line ("First_Child.Compare ((1, 1)) -> " & N.Compare ((1, 1))'Image);
+   Put_Line ("First_Child.Compare ((4, 1)) -> " & N.Compare ((4, 1))'Image);
+   Put ("No_Lk_Node.Compare ((1, 1)) -> ");
+   begin
+      Put (No_Lk_Node.Compare ((1, 1))'Image);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line
      ("No_Lk_Node.Lookup (1, 1) -> " & Image (No_Lk_Node.Lookup ((1, 1))));
    Put_Line ("Root.Lookup (2, 7) -> " & Image (U.Root.Lookup ((2, 7))));
