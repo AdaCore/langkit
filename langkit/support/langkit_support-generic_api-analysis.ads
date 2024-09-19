@@ -12,6 +12,7 @@
 --  referenced here (context, unit, node, token, trivia, ...).
 
 with Ada.Containers; use Ada.Containers;
+with Ada.Containers.Vectors;
 private with Ada.Finalization;
 
 with Langkit_Support.Diagnostics;  use Langkit_Support.Diagnostics;
@@ -377,6 +378,61 @@ package Langkit_Support.Generic_API.Analysis is
    --  Return whether this node is incomplete, i.e. whether its parsing
    --  partially failed.
 
+   type Node_Or_Token (Is_Node : Boolean := False) is record
+      case Is_Node is
+         when False => Token : Lk_Token;
+         when True  => Node  : Lk_Node;
+      end case;
+   end record;
+   --  Variant that holds either a parse node or a token
+
+   type Node_Or_Token_Sequence is private
+      with Iterable => (First       => First,
+                        Next        => Next,
+                        Has_Element => Has_Element,
+                        Element     => Element,
+                        Last        => Last,
+                        Previous    => Previous);
+   --  Iterable over a sequence of nodes and tokens.
+   --
+   --  Note that in principle, we would like to expose a vector of
+   --  ``Node_Or_Token`` here. However, Ada validy rules prevent us from
+   --  instantiating a generic with Lk_Node and Lk_Token, as they are private
+   --  types.
+
+   function First (Self : Node_Or_Token_Sequence) return Natural;
+   --  Return the first item in ``Self`` (helper for the ``Iterable`` aspect)
+
+   function Last (Self : Node_Or_Token_Sequence) return Natural;
+   --  Return the last item in ``Self`` (helper for the ``Iterable`` aspect)
+
+   function Next (Self : Node_Or_Token_Sequence; Pos : Natural) return Natural;
+   --  Return the next item in ``Self`` (helper for the ``Iterable`` aspect)
+
+   function Previous
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Natural;
+   --  Return the previous item in ``Self`` (helper for the ``Iterable``
+   --  aspect).
+
+   function Has_Element
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Boolean;
+   --  Return if ``Pos`` is in ``Self``'s iteration range (elper for the
+   --  ``Iterable`` aspect).
+
+   function Element
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Node_Or_Token;
+   --  Return the element at position ``Pos`` in ``Self`` (helper for the
+   --  ``Iterable`` aspect).
+
+   function Children_And_Trivia (Self : Lk_Node) return Node_Or_Token_Sequence;
+   --  Return the children of this node interleaved with Trivia token nodes, so
+   --  that:
+   --
+   --  * Every trivia contained between ``Node.Start_Token`` and
+   --    ``Node.End_Token.Previous`` will be part of the returned array.
+   --
+   --  * Nodes and trivias will be lexically ordered.
+
    ----------------------
    -- Token operations --
    ----------------------
@@ -518,5 +574,13 @@ private
 
    No_Lk_Token : constant Lk_Token :=
      (null, null, No_Token_Or_Trivia_Index, No_Token_Safety_Net);
+
+   package Node_Or_Token_Vectors is new Ada.Containers.Vectors
+     (Index_Type   => Positive,
+      Element_Type => Node_Or_Token);
+
+   type Node_Or_Token_Sequence is record
+      Elements : Node_Or_Token_Vectors.Vector;
+   end record;
 
 end Langkit_Support.Generic_API.Analysis;

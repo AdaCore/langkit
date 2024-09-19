@@ -540,6 +540,35 @@ package body ${ada_lib_name}.Generic_Impl is
       return N.Last_Attempted_Child;
    end Node_Last_Attempted_Child;
 
+   ------------------------------
+   -- Node_Children_And_Trivia --
+   ------------------------------
+
+   function Node_Children_And_Trivia
+     (Node : Internal_Node) return Node_Or_Token_Array_Access
+   is
+      N : Implementation.${T.root_node.name} := +Node;
+      R : constant Implementation.Bare_Children_Vector :=
+        N.Children_And_Trivia;
+   begin
+      return Result : constant Node_Or_Token_Array_Access :=
+        new Node_Or_Token_Array (1 .. R.Last_Index)
+      do
+         for I in Result.all'Range loop
+            declare
+               E : Implementation.Bare_Child_Record renames R (I);
+            begin
+               case E.Kind is
+                  when Common.Child =>
+                     Result (I) := (Is_Node => True, Node => +E.Node);
+                  when Common.Trivia =>
+                     Result (I) := (Is_Node => False, Token => +E.Trivia);
+               end case;
+            end;
+         end loop;
+      end return;
+   end Node_Children_And_Trivia;
+
    ------------------
    -- Entity_Image --
    ------------------
