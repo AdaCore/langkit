@@ -126,6 +126,8 @@ package Langkit_Support.Internal.Descriptor is
       Sloc : Source_Location) return Analysis.Internal_Node;
    type Node_Last_Attempted_Child_Type is access function
      (Node : Analysis.Internal_Node) return Integer;
+   type Node_Children_And_Trivia_Type is access function
+     (Node : Analysis.Internal_Node) return Node_Or_Token_Array_Access;
 
    type Entity_Image_Type is access function
      (Entity : Internal_Entity) return String;
@@ -241,6 +243,7 @@ package Langkit_Support.Internal.Descriptor is
       Node_Sloc_Range           : Node_Sloc_Range_Type;
       Node_Lookup               : Node_Lookup_Type;
       Node_Last_Attempted_Child : Node_Last_Attempted_Child_Type;
+      Node_Children_And_Trivia  : Node_Children_And_Trivia_Type;
 
       Entity_Image : Entity_Image_Type;
 

@@ -192,6 +192,8 @@ private package ${ada_lib_name}.Generic_Impl is
      (Node : Analysis.Internal_Node;
       Sloc : Source_Location) return Analysis.Internal_Node;
    function Node_Last_Attempted_Child (Node : Internal_Node) return Integer;
+   function Node_Children_And_Trivia
+     (Node : Internal_Node) return Node_Or_Token_Array_Access;
 
    function Entity_Image (Entity : Internal_Entity) return String;
 
@@ -285,6 +287,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Node_Sloc_Range           => Node_Sloc_Range'Access,
       Node_Lookup               => Node_Lookup'Access,
       Node_Last_Attempted_Child => Node_Last_Attempted_Child'Access,
+      Node_Children_And_Trivia  => Node_Children_And_Trivia'Access,
 
       Entity_Image => Entity_Image'Access,
 

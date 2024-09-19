@@ -1272,6 +1272,95 @@ package body Langkit_Support.Generic_API.Analysis is
       end if;
    end Is_Incomplete;
 
+   -----------
+   -- First --
+   -----------
+
+   function First (Self : Node_Or_Token_Sequence) return Natural is
+   begin
+      return Self.Elements.First_Index;
+   end First;
+
+   ----------
+   -- Last --
+   ----------
+
+   function Last (Self : Node_Or_Token_Sequence) return Natural is
+   begin
+      return Self.Elements.Last_Index;
+   end Last;
+
+   ----------
+   -- Next --
+   ----------
+
+   function Next (Self : Node_Or_Token_Sequence; Pos : Natural) return Natural
+   is
+      pragma Unreferenced (Self);
+   begin
+      return Pos + 1;
+   end Next;
+
+   --------------
+   -- Previous --
+   --------------
+
+   function Previous
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Natural
+   is
+      pragma Unreferenced (Self);
+   begin
+      return Pos - 1;
+   end Previous;
+
+   -----------------
+   -- Has_Element --
+   -----------------
+
+   function Has_Element
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Boolean is
+   begin
+      return Pos in 1 .. Self.Elements.Last_Index;
+   end Has_Element;
+
+   -------------
+   -- Element --
+   -------------
+
+   function Element
+     (Self : Node_Or_Token_Sequence; Pos : Natural) return Node_Or_Token is
+   begin
+      return Self.Elements (Pos);
+   end Element;
+
+   -------------------------
+   -- Children_And_Trivia --
+   -------------------------
+
+   function Children_And_Trivia (Self : Lk_Node) return Node_Or_Token_Sequence
+   is
+      Elements : Node_Or_Token_Array_Access;
+   begin
+      Check_Safety_Net (Self);
+      Reject_Null_Node (Self);
+      return Result : Node_Or_Token_Sequence do
+         Elements := Self.Desc.Node_Children_And_Trivia (Self.Internal.Node);
+         Result.Elements.Reserve_Capacity (Count_Type (Elements'Length));
+         for E of Elements.all loop
+            if E.Is_Node then
+               Result.Elements.Append
+                 (Node_Or_Token'
+                    (Is_Node => True, Node => Wrap_Node (E.Node, Self)));
+            else
+               Result.Elements.Append
+                 (Node_Or_Token'
+                    (Is_Node => False, Token => Wrap (E.Token, Self)));
+            end if;
+         end loop;
+         Free (Elements);
+      end return;
+   end Children_And_Trivia;
+
    --------------
    -- Language --
    --------------

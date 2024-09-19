@@ -413,6 +413,14 @@ N = N2 (same metadata): TRUE
 N = N2 (/= metadata, field not used in eq): TRUE
 N = N2 (/= metadata, field used in eq): FALSE
 
+Root.Children_And_Trivia:
+  Node: <Example example.txt:1:1-1:12>
+  Token: <Token Kind=Whitespace Text="\x0a">
+  Node: <VarDecl example.txt:2:1-2:11>
+  Token: <Token Kind=Whitespace Text="\x0a">
+  Node: <VarDecl example.txt:3:1-3:15>
+No_Lk_Node.Children_And_Trivia: Got a Precondition_Failure exception: null node
+
 == introspection_types.adb ==
 
 All types

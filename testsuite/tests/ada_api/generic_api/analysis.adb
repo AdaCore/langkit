@@ -895,5 +895,27 @@ begin
       Put_Line ("N = N2 (/= metadata, field used in eq): "
                 & Boolean'Image (N = N2));
    end;
+   New_Line;
+
+   Put_Line ("Root.Children_And_Trivia:");
+   for C of U.Root.Children_And_Trivia loop
+      if C.Is_Node then
+         Put_Line ("  Node: " & C.Node.Image);
+      else
+         Put_Line ("  Token: " & C.Token.Image);
+      end if;
+   end loop;
+
+   Put ("No_Lk_Node.Children_And_Trivia: ");
+   declare
+      Dummy : Node_Or_Token_Sequence;
+   begin
+      Dummy := No_Lk_Node.Children_And_Trivia;
+      raise Program_Error;
+   exception
+      when Exc : Langkit_Support.Errors.Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
 
 end Analysis;
