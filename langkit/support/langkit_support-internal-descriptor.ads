@@ -69,6 +69,8 @@ package Langkit_Support.Internal.Descriptor is
      (Unit : Internal_Unit; Buffer : String; Charset : String);
    type Unit_Filename_Type is access function
      (Unit : Internal_Unit) return String;
+   type Unit_Charset_Type is access function
+     (Unit : Internal_Unit) return String;
    type Unit_Diagnostics_Type is access function
      (Unit : Internal_Unit) return Diagnostics_Access;
    type Unit_Format_GNU_Diagnostic_Type is access function
@@ -206,6 +208,7 @@ package Langkit_Support.Internal.Descriptor is
       Unit_Reparse_From_File     : Unit_Reparse_From_File_Type;
       Unit_Reparse_From_Buffer   : Unit_Reparse_From_Buffer_Type;
       Unit_Filename              : Unit_Filename_Type;
+      Unit_Charset               : Unit_Charset_Type;
       Unit_Diagnostics           : Unit_Diagnostics_Type;
       Unit_Format_GNU_Diagnostic : Unit_Format_GNU_Diagnostic_Type;
       Unit_Root                  : Unit_Root_Type;

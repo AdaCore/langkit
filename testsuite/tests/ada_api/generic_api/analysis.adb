@@ -122,6 +122,7 @@ begin
    New_Line;
 
    Put_Line ("Use of null unit:");
+   Put ("No_Lk_Unit.Root: ");
    begin
       --  Disable warnings about reading U before it is initialized: we have
       --  special provision to handle that case in the API, and we want to
@@ -129,6 +130,15 @@ begin
       pragma Warnings (Off);
       N := U.Root;
       pragma Warnings (On);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   Put ("No_Lk_Unit.Charset: ");
+   begin
+      Put_Line (No_Lk_Unit.Charset);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -282,11 +292,14 @@ begin
    Put_Line ("Testing diagnostics-related primitives");
    declare
       Units : constant array (Positive range <>) of Lk_Unit :=
-        (Ctx.Get_From_Buffer ("without_error.txt", "var foo = 1;"),
-         Ctx.Get_From_Buffer ("with_error.txt", "var foo = 1"));
+        (Ctx.Get_From_Buffer
+           ("without_error.txt", "var foo = 1;", Charset => "utf-8"),
+         Ctx.Get_From_Buffer
+           ("with_error.txt", "var foo = 1", Charset => "ascii"));
    begin
       for U of Units loop
          Put_Line (Ada.Directories.Simple_Name (U.Filename) & ":");
+         Put_Line ("  Charset: " & U.Charset);
          Put_Line ("  Has_Diagnostics? " & U.Has_Diagnostics'Image);
          for D of U.Diagnostics loop
             Put_Line ("  " & U.Format_GNU_Diagnostic (D));
