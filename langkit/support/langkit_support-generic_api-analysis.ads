@@ -214,7 +214,12 @@ package Langkit_Support.Generic_API.Analysis is
    --  falls after the last token, return the last token. If there is no token
    --  in this unit, return ``No_Lk_Token``.
 
-   --  TODO??? Bind all other analysis unit primitives
+   procedure Print (Self : Lk_Unit; Show_Slocs : Boolean := True);
+   --  Debug helper: output this unit's parse tree and any diagnostics it has
+   --  on standard output.
+   --
+   --  If ``Show_Slocs`` is true, include the nodes source locations in the
+   --  output.
 
    -------------------------------
    -- Analysis nodes operations --

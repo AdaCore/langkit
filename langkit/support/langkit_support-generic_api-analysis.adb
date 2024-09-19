@@ -735,6 +735,27 @@ package body Langkit_Support.Generic_API.Analysis is
       end;
    end Lookup_Token;
 
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print (Self : Lk_Unit; Show_Slocs : Boolean := True) is
+   begin
+      Reject_Null_Unit (Self);
+
+      if Self.Has_Diagnostics then
+         for D of Self.Diagnostics loop
+            Put_Line (Self.Format_GNU_Diagnostic (D));
+         end loop;
+      end if;
+
+      if Self.Root.Is_Null then
+         Put_Line ("<no parse tree>");
+      else
+         Self.Root.Print (Show_Slocs);
+      end if;
+   end Print;
+
    --------------
    -- Language --
    --------------
