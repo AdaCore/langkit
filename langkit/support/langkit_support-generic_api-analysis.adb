@@ -1239,6 +1239,16 @@ package body Langkit_Support.Generic_API.Analysis is
       return Self.Desc.Node_Sloc_Range (Self.Internal.Node);
    end Sloc_Range;
 
+   -------------
+   -- Compare --
+   -------------
+
+   function Compare
+     (Node : Lk_Node; Sloc : Source_Location) return Relative_Position is
+   begin
+      return Compare (Node.Sloc_Range, Sloc);
+   end Compare;
+
    ------------
    -- Lookup --
    ------------
