@@ -147,6 +147,21 @@ package Langkit_Support.Generic_API.Analysis is
    function Hash (Self : Lk_Unit) return Hash_Type;
    --  Hash function to use ``Lk_Unit`` in hashed containers
 
+   procedure Reparse_From_File (Self : Lk_Unit; Charset : String := "");
+   --  Reparse ``Self`` from the associated file.
+   --
+   --   Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+   --   then use the context's default charset.
+
+   procedure Reparse_From_Buffer
+     (Self    : Lk_Unit;
+      Buffer  : String;
+      Charset : String := "");
+   --  Reparse ``Self`` from an in-memory buffer.
+   --
+   --   Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+   --   then use the context's default charset.
+
    overriding function Get_Line
      (Self : Lk_Unit; Line_Number : Positive) return Text_Type;
    --  Return the line of text at line number ``Line_Number``

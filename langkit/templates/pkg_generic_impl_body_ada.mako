@@ -188,6 +188,28 @@ package body ${ada_lib_name}.Generic_Impl is
       return U.Unit_Version;
    end Unit_Version;
 
+   ----------------------------
+   -- Unit_Reparse_From_File --
+   ----------------------------
+
+   procedure Unit_Reparse_From_File (Unit : Internal_Unit; Charset : String) is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      Implementation.Reparse (Unit => U, Charset => Charset);
+   end Unit_Reparse_From_File;
+
+   ------------------------------
+   -- Unit_Reparse_From_Buffer --
+   ------------------------------
+
+   procedure Unit_Reparse_From_Buffer
+     (Unit : Internal_Unit; Buffer : String; Charset : String)
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      Implementation.Reparse (Unit => U, Buffer => Buffer, Charset => Charset);
+   end Unit_Reparse_From_Buffer;
+
    -------------------
    -- Unit_Filename --
    -------------------

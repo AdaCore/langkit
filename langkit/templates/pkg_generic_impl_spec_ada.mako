@@ -134,6 +134,9 @@ private package ${ada_lib_name}.Generic_Impl is
 
    function Unit_Context (Unit : Internal_Unit) return Internal_Context;
    function Unit_Version (Unit : Internal_Unit) return Version_Number;
+   procedure Unit_Reparse_From_File (Unit : Internal_Unit; Charset : String);
+   procedure Unit_Reparse_From_Buffer
+     (Unit : Internal_Unit; Buffer : String; Charset : String);
    function Unit_Filename (Unit : Internal_Unit) return String;
    function Unit_Diagnostics (Unit : Internal_Unit) return Diagnostics_Access;
    function Unit_Format_GNU_Diagnostic
@@ -246,6 +249,8 @@ private package ${ada_lib_name}.Generic_Impl is
 
       Unit_Context               => Unit_Context'Access,
       Unit_Version               => Unit_Version'Access,
+      Unit_Reparse_From_File     => Unit_Reparse_From_File'Access,
+      Unit_Reparse_From_Buffer   => Unit_Reparse_From_Buffer'Access,
       Unit_Filename              => Unit_Filename'Access,
       Unit_Diagnostics           => Unit_Diagnostics'Access,
       Unit_Format_GNU_Diagnostic => Unit_Format_GNU_Diagnostic'Access,
