@@ -717,6 +717,24 @@ package body Langkit_Support.Generic_API.Analysis is
       return Text (Self.First_Token, Self.Last_Token);
    end Text;
 
+   ------------------
+   -- Lookup_Token --
+   ------------------
+
+   function Lookup_Token
+     (Self : Lk_Unit'Class; Sloc : Source_Location) return Lk_Token is
+   begin
+      Reject_Null_Unit (Self);
+
+      declare
+         Desc   : Language_Descriptor renames Self.Context.Desc.all;
+         Result : constant Internal_Token :=
+           Desc.Unit_Lookup_Token (Self.Internal, Sloc);
+      begin
+         return Wrap (Result, Self);
+      end;
+   end Lookup_Token;
+
    --------------
    -- Language --
    --------------
