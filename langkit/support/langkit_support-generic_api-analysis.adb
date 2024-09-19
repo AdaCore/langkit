@@ -388,6 +388,16 @@ package body Langkit_Support.Generic_API.Analysis is
       return Hash (Self.Internal);
    end Hash;
 
+   ---------------------
+   -- Has_With_Trivia --
+   ---------------------
+
+   function Has_With_Trivia (Self : Lk_Context) return Boolean is
+   begin
+      Reject_Null_Context (Self);
+      return Self.Desc.Context_Has_With_Trivia (Self.Internal);
+   end Has_With_Trivia;
+
    --------------
    -- Has_Unit --
    --------------

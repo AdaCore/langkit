@@ -113,6 +113,16 @@ package body ${ada_lib_name}.Generic_Impl is
       return Ctx.Serial_Number;
    end Context_Version;
 
+   -----------------------------
+   -- Context_Has_With_Trivia --
+   -----------------------------
+
+   function Context_Has_With_Trivia (Context : Internal_Context) return Boolean
+   is
+   begin
+      return Implementation.Has_With_Trivia (+Context);
+   end Context_Has_With_Trivia;
+
    ----------------------
    -- Context_Has_Unit --
    ----------------------

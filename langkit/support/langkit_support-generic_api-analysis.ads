@@ -84,6 +84,9 @@ package Langkit_Support.Generic_API.Analysis is
    function Hash (Self : Lk_Context) return Hash_Type;
    --  Hash function to use ``Lk_Context`` in hashed containers
 
+   function Has_With_Trivia (Self : Lk_Context) return Boolean;
+   --  Return whether ``Context`` keeps trivia when parsing units
+
    function Has_Unit
      (Self : Lk_Context; Unit_Filename : String) return Boolean;
    --  Return whether ``Context`` contains a unit corresponding to
@@ -133,8 +136,6 @@ package Langkit_Support.Generic_API.Analysis is
    --  diagnostics of the returned analysis unit.
    --
    --  Calling this is invalid if a rewriting context is active.
-
-   --  TODO??? Bind all other analysis context primitives
 
    ------------------------------
    -- Analysis unit operations --
