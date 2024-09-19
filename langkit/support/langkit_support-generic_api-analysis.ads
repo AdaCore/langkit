@@ -206,6 +206,14 @@ package Langkit_Support.Generic_API.Analysis is
    function Text (Self : Lk_Unit) return Text_Type;
    --  Return the source buffer associated to this unit
 
+   function Lookup_Token
+     (Self : Lk_Unit'Class; Sloc : Source_Location) return Lk_Token;
+   --  Look for a token in ``Self`` that contains the given source location.
+   --  If this falls before the first token, return the first token. If this
+   --  falls between two tokens, return the token that appears before. If this
+   --  falls after the last token, return the last token. If there is no token
+   --  in this unit, return ``No_Lk_Token``.
+
    --  TODO??? Bind all other analysis unit primitives
 
    -------------------------------

@@ -328,6 +328,10 @@ First_Token.Is_Comment -> FALSE
 Last_Token.Is_Comment -> FALSE
 Comment_Tok.Is_Comment -> TRUE
 
+Lookup_Token ((1, 1)).Image -> <Token Kind=Example Text="example">
+Lookup_Token ((2, 1)).Image -> <Token Kind=Var Text="var">
+No_Lk_Unit.Lookup_Token ((1, 1)) -> Got a Precondition_Failure exception: null unit
+
 Testing ordering predicate for various cases:
 First_Token < Last_Token: -> TRUE
 First_Token < No_Lk_Token: -> Got a Precondition_Failure exception: tokens from different units

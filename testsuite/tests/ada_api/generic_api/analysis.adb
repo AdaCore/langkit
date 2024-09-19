@@ -571,6 +571,20 @@ begin
    Put_Line ("Comment_Tok.Is_Comment -> " & Comment_Tok.Is_Comment'Image);
    New_Line;
 
+   Put_Line ("Lookup_Token ((1, 1)).Image -> "
+             & U.Lookup_Token ((1, 1)).Image);
+   Put_Line ("Lookup_Token ((2, 1)).Image -> "
+             & U.Lookup_Token ((2, 1)).Image);
+   Put ("No_Lk_Unit.Lookup_Token ((1, 1)) -> ");
+   begin
+      Put_Line (No_Lk_Unit.Lookup_Token ((1, 1)).Image);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Got a Precondition_Failure exception: "
+                   & Exception_Message (Exc));
+   end;
+   New_Line;
+
    Put_Line ("Testing ordering predicate for various cases:");
    declare
       FT : constant Lk_Token := U.First_Token;

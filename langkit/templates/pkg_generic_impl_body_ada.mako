@@ -283,6 +283,18 @@ package body ${ada_lib_name}.Generic_Impl is
       return +Implementation.Last_Token (U);
    end Unit_Last_Token;
 
+   -----------------------
+   -- Unit_Lookup_Token --
+   -----------------------
+
+   function Unit_Lookup_Token
+     (Unit : Internal_Unit; Sloc : Source_Location) return Internal_Token
+   is
+      U : constant Implementation.Internal_Unit := +Unit;
+   begin
+      return +Implementation.Lookup_Token (U, Sloc);
+   end Unit_Lookup_Token;
+
    ----------------------
    -- Unit_Token_Count --
    ----------------------

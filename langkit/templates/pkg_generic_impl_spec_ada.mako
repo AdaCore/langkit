@@ -145,6 +145,8 @@ private package ${ada_lib_name}.Generic_Impl is
    function Unit_Root (Unit : Internal_Unit) return Internal_Node;
    function Unit_First_Token (Unit : Internal_Unit) return Internal_Token;
    function Unit_Last_Token (Unit : Internal_Unit) return Internal_Token;
+   function Unit_Lookup_Token
+     (Unit : Internal_Unit; Sloc : Source_Location) return Internal_Token;
    function Unit_Token_Count (Unit : Internal_Unit) return Natural;
    function Unit_Trivia_Count (Unit : Internal_Unit) return Natural;
    function Unit_Get_Line
@@ -259,6 +261,7 @@ private package ${ada_lib_name}.Generic_Impl is
       Unit_Root                  => Unit_Root'Access,
       Unit_First_Token           => Unit_First_Token'Access,
       Unit_Last_Token            => Unit_Last_Token'Access,
+      Unit_Lookup_Token          => Unit_Lookup_Token'Access,
       Unit_Token_Count           => Unit_Token_Count'Access,
       Unit_Trivia_Count          => Unit_Trivia_Count'Access,
       Unit_Get_Line              => Unit_Get_Line'Access,

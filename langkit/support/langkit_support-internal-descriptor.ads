@@ -79,6 +79,9 @@ package Langkit_Support.Internal.Descriptor is
      (Unit : Internal_Unit) return Analysis.Internal_Node;
    type Unit_Token_Getter_Type is access function
      (Unit : Internal_Unit) return Analysis.Internal_Token;
+   type Unit_Lookup_Token_Type is access function
+     (Unit : Internal_Unit;
+      Sloc : Source_Location) return Analysis.Internal_Token;
    type Unit_Get_Line_Type is access function
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
    type Unit_Get_Natural_Type is access function
@@ -214,6 +217,7 @@ package Langkit_Support.Internal.Descriptor is
       Unit_Root                  : Unit_Root_Type;
       Unit_First_Token           : Unit_Token_Getter_Type;
       Unit_Last_Token            : Unit_Token_Getter_Type;
+      Unit_Lookup_Token          : Unit_Lookup_Token_Type;
       Unit_Token_Count           : Unit_Get_Natural_Type;
       Unit_Trivia_Count          : Unit_Get_Natural_Type;
       Unit_Get_Line              : Unit_Get_Line_Type;
