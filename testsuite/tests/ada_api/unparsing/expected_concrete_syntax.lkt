@@ -57,7 +57,7 @@ class FooNode implements Node[FooNode] {
     @exported
     fun table_join_needed(): Bool = {
         val this_decl = node.as[AnnotatedDecl]?.decl.as[VarDecl];
-        val prev_decl = node.as_bare_entity.previous_sibling().as[AnnotatedDecl]?.decl.as[VarDecl];
+        val prev_decl = node.as_bare_entity.previous_sibling.as[AnnotatedDecl]?.decl.as[VarDecl];
 
         (
             (
@@ -66,8 +66,8 @@ class FooNode implements Node[FooNode] {
                 ) and (
                     if node.as[AnnotatedDecl].annotation_names.empty() then true else raise[Bool] PropertyError("predicate bug")
                 )
-            ) and prev_decl.name.text() == "left"
-        ) and this_decl.name.text() == "right"
+            ) and prev_decl.name.text == "left"
+        ) and this_decl.name.text == "right"
     }
 
     @exported

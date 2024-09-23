@@ -52,8 +52,7 @@ class Ref: Atom {
     @parse_field name: Name
 
     @exported
-    fun resolve(): Entity[FooNode] =
-        node.node_env().get_first(node.name.symbol)
+    fun resolve(): Entity[FooNode] = node.node_env.get_first(node.name.symbol)
 
     @exported
     fun dummy(): Array[Entity[FooNode]] =
@@ -69,7 +68,7 @@ class MiddleRef: Ref {
 
 class DerivedRef: MiddleRef {
     fun referenced_env(): LexicalEnv =
-        node.unit().root.node_env().get_first(node.name.symbol).children_env()
+        node.unit.root.node_env.get_first(node.name.symbol).children_env
 }
 
 class Plus: Expr {

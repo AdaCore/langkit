@@ -12,8 +12,7 @@ class FooNode implements Node[FooNode] {
 
 class Example: FooNode implements TokenNode {
     @exported
-    fun get_all_foo(): Array[Entity[FooNode]] =
-        node.children_env().get(s"foo")
+    fun get_all_foo(): Array[Entity[FooNode]] = node.children_env.get(s"foo")
 
     env_spec {
         add_env()

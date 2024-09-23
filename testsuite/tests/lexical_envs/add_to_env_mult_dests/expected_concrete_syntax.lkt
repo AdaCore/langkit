@@ -15,7 +15,7 @@ class FooNode implements Node[FooNode] {
 class Id: FooNode implements TokenNode {
     @exported
     fun get_scope(): Entity[FooNode] =
-        node.children_env().get_first(s"Scope", lookup=LookupKind.minimal)
+        node.children_env.get_first(s"Scope", lookup=LookupKind.minimal)
 
     env_spec {
         add_env()
@@ -34,8 +34,8 @@ class Scope: FooNode {
                 (r) => EnvAssoc(
                     key=s"Scope", value=node, dest_env=DesignatedEnv(
                         kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=match r {
-                            case s: Scope => s.name.children_env()
-                            case _ => r.children_env()
+                            case s: Scope => s.name.children_env
+                            case _ => r.children_env
                         }
                     ), metadata=null[Metadata]
                 )

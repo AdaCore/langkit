@@ -13,9 +13,9 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     fun env_struct(): EnvStruct =
-        EnvStruct(env=node.children_env().env_orphan())
+        EnvStruct(env=node.children_env.env_orphan())
 
-    fun env_array(): Array[LexicalEnv] = [node.children_env().env_orphan()]
+    fun env_array(): Array[LexicalEnv] = [node.children_env.env_orphan()]
 }
 
 class Decl: FooNode {
@@ -25,7 +25,7 @@ class Decl: FooNode {
 
     @exported
     fun test_env(other: Entity[FooNode]): Bool =
-        node.children_env().env_orphan() == other.children_env().env_orphan()
+        node.children_env.env_orphan() == other.children_env.env_orphan()
 
     @exported
     fun test_struct(other: Entity[FooNode]): Bool =

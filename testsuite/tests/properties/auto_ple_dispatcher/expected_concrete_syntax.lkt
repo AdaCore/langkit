@@ -48,7 +48,7 @@ class Name: FooNode {
 }
 
 class Id: Name implements TokenNode {
-    fun resolve(): Entity[FooNode] = node.node_env().get_first(node.symbol)
+    fun resolve(): Entity[FooNode] = node.node_env.get_first(node.symbol)
 }
 
 class Prefix: Name {
@@ -56,5 +56,5 @@ class Prefix: Name {
     @parse_field suffix: Id
 
     fun resolve(): Entity[FooNode] =
-        node.prefix.resolve().children_env().get_first(node.suffix.symbol)
+        node.prefix.resolve().children_env.get_first(node.suffix.symbol)
 }

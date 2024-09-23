@@ -16,8 +16,7 @@ class FooNode implements Node[FooNode] {
 @abstract
 class BaseDecl: FooNode {
     @exported
-    fun lookup(n: Symbol): Entity[FooNode] =
-        node.env_lookup(node.node_env(), n)
+    fun lookup(n: Symbol): Entity[FooNode] = node.env_lookup(node.node_env, n)
 
     fun env_lookup(env: LexicalEnv, n: Symbol): Entity[FooNode] =
         env.get_first(n, lookup=LookupKind.flat)

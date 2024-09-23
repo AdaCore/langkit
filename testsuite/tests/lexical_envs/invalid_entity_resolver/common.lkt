@@ -28,5 +28,5 @@ class Ref: FooNode {
     }
 
     @exported fun resolve(): Entity[FooNode] =
-        node.node_env().get(node.name.symbol)?[0]
+        node.node_env.get(node.name.symbol)?[0]
 }

@@ -35,8 +35,8 @@ class ForeignDecl: FooNode {
         add_to_env_kv(
             node.id.simple_name().symbol, node.node_for_env(), dest_env=DesignatedEnv(
                 kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=match node.id {
-                    case simple: SimpleId => simple.node_env()
-                    case scoped: ScopedId => scoped.resolve(node.node_env()).children_env()
+                    case simple: SimpleId => simple.node_env
+                    case scoped: ScopedId => scoped.resolve(node.node_env).children_env
                 }
             )
         )
@@ -59,7 +59,7 @@ class ScopedId: Id {
     fun simple_name(): SimpleId = node.name
 
     fun resolve(base_env: LexicalEnv): Scope =
-        node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
+        node.scope.resolve(base_env).children_env.get_first(node.name.symbol).node.as[Scope]
 }
 
 class SimpleId: Id implements TokenNode {
@@ -85,8 +85,8 @@ class SelfDecl: FooNode {
 
     env_spec {
         add_to_env_kv(
-            node.id.simple_name().symbol, node.id.resolve(node.node_env()), metadata=Metadata(
-                node=node.md_node.do((n) => n.resolve(node.node_env()))
+            node.id.simple_name().symbol, node.id.resolve(node.node_env), metadata=Metadata(
+                node=node.md_node.do((n) => n.resolve(node.node_env))
             )
         )
     }

@@ -19,7 +19,7 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun lookup(n: Symbol): Array[Entity[FooNode]] =
-        node.node_env().get(n, from=node)
+        node.node_env.get(n, from=node)
 }
 
 class Def: FooNode {

@@ -13,7 +13,7 @@ class Example: FooNode implements TokenNode {
     env_spec {
         set_initial_env(
             DesignatedEnv(
-                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env().env_orphan()
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env.env_orphan()
             )
         )
     }

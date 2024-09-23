@@ -35,7 +35,7 @@ class CallExpr: FooNode {
     |" For each argument, associate its name to the expression passed in this
     |" call.
     fun args_assocs_getter(): Array[InnerEnvAssoc] = {
-        val decl = node.node_env().get_first(node.name.symbol).as[FunDecl];
+        val decl = node.node_env.get_first(node.name.symbol).as[FunDecl];
 
         decl.args.imap(
             (a, i) => InnerEnvAssoc(key=a.name.symbol, value=node.args?[i])
@@ -44,7 +44,7 @@ class CallExpr: FooNode {
 
     |" For each argument, associate its name to its default expression.
     fun arg_exprs_assocs_getter(): Array[InnerEnvAssoc] = {
-        val decl = node.node_env().get_first(node.name.symbol).as[FunDecl];
+        val decl = node.node_env.get_first(node.name.symbol).as[FunDecl];
 
         decl.args.map(
             (a) => InnerEnvAssoc(key=a.name.symbol, value=a.arg_expr.node)
@@ -79,7 +79,7 @@ class ConsDecl: FooNode {
 class Expr: FooNode {
     fun resolve(): Entity[Expr] = match self {
         case l: Literal => l
-        case r: Ref => self.node_env().get_first(r.name.symbol).as[ConsDecl].cons_expr.resolve()
+        case r: Ref => self.node_env.get_first(r.name.symbol).as[ConsDecl].cons_expr.resolve()
     }
 }
 
