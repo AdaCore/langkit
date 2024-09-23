@@ -3781,7 +3781,8 @@ class PropertyDef(AbstractNodeData):
                  ] = None,
                  local_vars: Opt[LocalVars] = None,
                  final: bool = False,
-                 predicate_error: Opt[str] = None):
+                 predicate_error: Opt[str] = None,
+                 has_property_syntax: bool = False):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -3903,6 +3904,9 @@ class PropertyDef(AbstractNodeData):
 
         :param final: If True, this property cannot be overriden. This is
             possible only for concrete properties.
+
+        :param has_property_syntax: Whether calls to this property are expected
+            to use the field access syntax (i.e. no argument list).
         """
 
         super().__init__(name=name,
@@ -4125,6 +4129,8 @@ class PropertyDef(AbstractNodeData):
         contain holes referring to (node) parameters of the property using
         the syntax "$parameter", where "$Self" is also supported.
         """
+
+        self.has_property_syntax = has_property_syntax
 
     @property
     def has_debug_info(self):
