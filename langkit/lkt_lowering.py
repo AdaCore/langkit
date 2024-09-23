@@ -1231,8 +1231,8 @@ class FunAnnotations(ParsedAnnotations):
         ExternalAnnotationSpec(),
         FlagAnnotationSpec('final'),
         FlagAnnotationSpec('ignored'),
-        StringLiteralAnnotationSpec('predicate_error'),
         FlagAnnotationSpec('memoized'),
+        StringLiteralAnnotationSpec('predicate_error'),
         FlagAnnotationSpec('traced'),
         WithDynvarsAnnotationSpec(),
     ]
