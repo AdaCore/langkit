@@ -27,7 +27,7 @@ class FooNode implements Node[FooNode] {
     fun deref_null_node(): Entity[Expression] = node.null_node().null_node()
 
     @exported
-    fun null_node_unit(): AnalysisUnit = node.null_node().unit()
+    fun null_node_unit(): AnalysisUnit = node.null_node().unit
 
     @exported
     fun cast_null_node(): Entity[Name] = node.null_node().as[Name]
@@ -49,7 +49,7 @@ class Literal: Expression implements TokenNode {
 
 class Name: Expression implements TokenNode {
     fun env_element(): Entity[FooNode] =
-        node.children_env().get(node.symbol)?[0]
+        node.children_env.get(node.symbol)?[0]
 
     @exported
     fun deref_env_element(): Entity[Expression] =

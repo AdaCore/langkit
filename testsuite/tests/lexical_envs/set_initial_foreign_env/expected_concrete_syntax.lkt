@@ -34,7 +34,7 @@ class ScopedId: Id {
     fun designated_symbol(): Symbol = node.name.symbol
 
     fun designated_scope(base_env: LexicalEnv): LexicalEnv =
-        node.scope.resolve(base_env).children_env()
+        node.scope.resolve(base_env).children_env
 
     fun resolve(base_env: LexicalEnv): FooNode =
         node.designated_scope(base_env).get_first(node.name.symbol).node
@@ -56,7 +56,7 @@ class Scope: FooNode {
     env_spec {
         set_initial_env(
             DesignatedEnv(
-                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.name.designated_scope(node.parent.children_env())
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.name.designated_scope(node.parent.children_env)
             )
         )
         add_to_env_kv(node.name.designated_symbol(), node)

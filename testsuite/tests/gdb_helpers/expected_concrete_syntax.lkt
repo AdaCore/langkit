@@ -44,7 +44,7 @@ class FooNode implements Node[FooNode] {
         val n1 = example_nodes?[if inverse then 1 else 2];
         val n2 = example_nodes?[if inverse then 2 else 1];
 
-        null[EnvRebindings].append_rebinding(n1.children_env(), n2.children_env())
+        null[EnvRebindings].append_rebinding(n1.children_env, n2.children_env)
     }
 
     @exported
@@ -61,7 +61,7 @@ class FooNode implements Node[FooNode] {
     @exported
     fun test_envs(): Int = {
         val null_var = null[LexicalEnv];
-        val primary = node.children_env();
+        val primary = node.children_env;
         val orphan = primary.env_orphan();
         val group = [primary, null_var].env_group();
         val rebound = primary.rebind_env(node.get_rebindings(false));
@@ -108,7 +108,7 @@ class FooNode implements Node[FooNode] {
     @exported
     fun test_tokens(): Int = {
         val null_var = null[Token];
-        val first = node.token_start();
+        val first = node.token_start;
         val arr = [null_var, first];
 
         arr.length()

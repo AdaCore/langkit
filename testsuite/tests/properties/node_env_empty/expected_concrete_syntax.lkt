@@ -16,7 +16,7 @@ class Decl: FooNode {
 
     @exported
     fun lookup(n: Entity[Name]): Entity[FooNode] =
-        self.node_env().get_first(n.symbol)
+        self.node_env.get_first(n.symbol)
 
     env_spec {
         do(raise[FooNode] PropertyError())

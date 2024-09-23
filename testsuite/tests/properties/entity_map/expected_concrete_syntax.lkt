@@ -44,7 +44,7 @@ class Ref: FooNode {
 
     @exported
     fun decl(): Entity[Decl] =
-        node.children_env().get(node.name.symbol)?[0].as![Decl]
+        node.children_env.get(node.name.symbol)?[0].as![Decl]
 }
 
 @metadata

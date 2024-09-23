@@ -22,7 +22,7 @@ class Example: FooNode {
     }
 
     @exported fun lookup(sym: Symbol): Entity[Example] =
-    node.children_env().get_first(sym).as[Example]
+    node.children_env.get_first(sym).as[Example]
 
     env_spec {
         add_env()

@@ -9,7 +9,7 @@ grammar foo_grammar {
 @abstract
 class FooNode implements Node[FooNode] {
     @exported
-    fun root_node(): Entity[FooNode] = node.unit().root.as_bare_entity
+    fun root_node(): Entity[FooNode] = node.unit.root.as_bare_entity
 }
 
 @abstract

@@ -13,7 +13,7 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun find_entity(l: Entity[ASTList[Example]]): Entity[Example] =
-        l.find((n) => n.text() == "example")
+        l.find((n) => n.text == "example")
 }
 
 class Example: FooNode implements TokenNode {

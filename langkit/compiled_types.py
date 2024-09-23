@@ -3720,6 +3720,7 @@ class ASTNodeType(BaseStructType):
                 expr=None, prefix=None, type=T.LexicalEnv, public=False,
                 external=True, uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
+                has_property_syntax=True,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'
@@ -3728,6 +3729,7 @@ class ASTNodeType(BaseStructType):
                 expr=None, prefix=None, type=T.LexicalEnv, public=False,
                 external=True, uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
+                has_property_syntax=True,
                 doc='For nodes that introduce a new environment, return it.'
                     ' Return the "inherited" environment otherwise.'
             )),
@@ -3735,7 +3737,7 @@ class ASTNodeType(BaseStructType):
             ('parent', PropertyDef(
                 expr=None, prefix=None, type=T.entity, public=True,
                 external=True, uses_entity_info=True, uses_envs=False,
-                warn_on_unused=False,
+                warn_on_unused=False, has_property_syntax=True,
                 doc='Return the syntactic parent for this node. Return null'
                     ' for the root node.'
             )),
@@ -3757,7 +3759,7 @@ class ASTNodeType(BaseStructType):
             ('children', PropertyDef(
                 expr=None, prefix=None, type=T.entity.array, public=True,
                 external=True, uses_entity_info=True, uses_envs=False,
-                warn_on_unused=False,
+                warn_on_unused=False, has_property_syntax=True,
                 doc="""
                 Return an array that contains the direct lexical
                 children.
@@ -3770,26 +3772,26 @@ class ASTNodeType(BaseStructType):
             ('token_start', PropertyDef(
                 expr=None, prefix=None, type=T.Token,
                 public=True, external=True, uses_entity_info=False,
-                uses_envs=False,
+                uses_envs=False, has_property_syntax=True,
                 doc='Return the first token used to parse this node.'
             )),
             ('token_end', PropertyDef(
                 expr=None, prefix=None, type=T.Token,
                 public=True, external=True, uses_entity_info=False,
-                uses_envs=False,
+                uses_envs=False, has_property_syntax=True,
                 doc='Return the last token used to parse this node.'
             )),
             ('child_index', PropertyDef(
                 expr=None, prefix=None, type=T.Int,
                 public=True, external=True, uses_entity_info=False,
-                uses_envs=False,
+                uses_envs=False, has_property_syntax=True,
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
             )),
             ('previous_sibling', PropertyDef(
                 expr=None, prefix=None, type=T.entity, public=True,
                 external=True, uses_entity_info=True, uses_envs=False,
-                warn_on_unused=False,
+                warn_on_unused=False, has_property_syntax=True,
                 doc="""
                 Return the node's previous sibling, or null if there is no such
                 sibling.
@@ -3798,7 +3800,7 @@ class ASTNodeType(BaseStructType):
             ('next_sibling', PropertyDef(
                 expr=None, prefix=None, type=T.entity, public=True,
                 external=True, uses_entity_info=True, uses_envs=False,
-                warn_on_unused=False,
+                warn_on_unused=False, has_property_syntax=True,
                 doc="""
                 Return the node's next sibling, or null if there is no such
                 sibling.
@@ -3807,13 +3809,13 @@ class ASTNodeType(BaseStructType):
             ('unit', PropertyDef(
                 expr=None, prefix=None, type=T.AnalysisUnit, public=True,
                 external=True, uses_entity_info=False, uses_envs=False,
-                warn_on_unused=False,
+                warn_on_unused=False, has_property_syntax=True,
                 doc='Return the analysis unit owning this node.'
             )),
             ('ple_root', PropertyDef(
                 expr=None, prefix=None, type=T.root_node, public=False,
                 external=True, uses_entity_info=False, uses_envs=False,
-                warn_on_unused=False,
+                warn_on_unused=False, has_property_syntax=True,
                 doc="""
                 Return the PLE root that owns this node, or the unit root node
                 if this unit has no PLE root.
@@ -3822,7 +3824,7 @@ class ASTNodeType(BaseStructType):
             ('is_ghost', PropertyDef(
                 expr=None, prefix=None, type=T.Bool, public=True,
                 external=True, uses_entity_info=False, uses_envs=False,
-                warn_on_unused=False,
+                warn_on_unused=False, has_property_syntax=True,
                 doc="""
                 Return whether the node is a ghost.
 
@@ -3835,9 +3837,10 @@ class ASTNodeType(BaseStructType):
 
             ('text', PropertyDef(
                 lambda: None,
-                prefix=None, type=T.String, public=False,
-                external=True, uses_entity_info=False,
-                uses_envs=True, warn_on_unused=False, doc="""
+                prefix=None, type=T.String, public=False, external=True,
+                uses_entity_info=False, uses_envs=True, warn_on_unused=False,
+                has_property_syntax=True,
+                doc="""
                 Return the text corresponding to this node. Private property
                 (for internal DSL use).
                 """
@@ -3845,9 +3848,10 @@ class ASTNodeType(BaseStructType):
 
             ('full_sloc_image', PropertyDef(
                 lambda: None,
-                prefix=None, type=T.String, public=True,
-                external=True, uses_entity_info=False,
-                uses_envs=True, warn_on_unused=False, doc="""
+                prefix=None, type=T.String, public=True, external=True,
+                uses_entity_info=False, uses_envs=True, warn_on_unused=False,
+                has_property_syntax=True,
+                doc="""
                 Return a string containing the filename + the sloc in GNU
                 conformant format. Useful to create diagnostics from a node.
                 """

@@ -12,7 +12,7 @@ grammar foo_grammar {
 class FooNode implements Node[FooNode] {
     @exported
     fun env_get_all(): Array[Entity[FooNode]] =
-        node.children_env().get(null[Symbol])
+        node.children_env.get(null[Symbol])
 }
 
 class Id: FooNode implements TokenNode {
