@@ -619,6 +619,16 @@ package body Langkit_Support.Prettier_Utils is
       end return;
    end Extract_Definitions;
 
+   -------------
+   -- Matches --
+   -------------
+
+   function Matches (Node : Lk_Node; Matcher : Matcher_Record) return Boolean
+   is
+   begin
+      return (for some T of Matcher.Matched_Types => Type_Matches (Node, T));
+   end Matches;
+
    --------------------------
    -- To_Prettier_Document --
    --------------------------
@@ -1479,19 +1489,28 @@ package body Langkit_Support.Prettier_Utils is
                     Prefix & Simple_Indent & Simple_Indent & Simple_Indent;
 
                begin
-                  for J in
+                  for Matcher_Index in
                     Document.If_Kind_Matchers.First_Index
                     .. Document.If_Kind_Matchers.Last_Index
                   loop
-                     Write
-                       (Matcher_Kind_Indent
-                        & Debug_Name
-                            (Document
-                               .If_Kind_Matchers
-                               .Element (J)
-                               .Matched_Type));
+                     declare
+                        Types     : constant Type_Ref_Vectors.Vector :=
+                          Document
+                            .If_Kind_Matchers (Matcher_Index)
+                            .Matched_Types;
+                        Types_Str : Unbounded_String;
+                     begin
+                        for Kind_Index in Types.First_Index .. Types.Last_Index
+                        loop
+                           if Kind_Index > Types.First_Index then
+                              Append (Types_Str, " | ");
+                           end if;
+                           Append (Types_Str, Debug_Name (Types (Kind_Index)));
+                        end loop;
+                        Write (Matcher_Kind_Indent & Types_Str);
+                     end;
                      Process
-                       (Document.If_Kind_Matchers.Element (J).Document,
+                       (Document.If_Kind_Matchers (Matcher_Index).Document,
                         Matcher_Document_Indent);
                   end loop;
                end;

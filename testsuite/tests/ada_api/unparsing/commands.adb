@@ -176,6 +176,7 @@ begin
    Check ("cmd_ifkind4.json", "var v:Int=f(1);");
    Check ("cmd_ifkind5.json", "var v:Int=f(1);");
    Check ("cmd_ifkind6.json", "null var v1:T=1; var v2:T=2;");
+   Check ("cmd_ifkind7.json", "var v1:T=1; var v2:T=1+2; var v3:T=a.b;");
    Check ("cmd_indent.json");
    Check ("cmd_line.json");
    Check ("cmd_list.json");
