@@ -12,7 +12,13 @@
           {"kind": "text", "text": "in"},
           "whitespace",
 
-          {"kind": "indent", "contents": {"kind": "group", "document": {"kind": "recurse_field", "field": "f_values"}}}
+          {
+            "kind": "indent",
+            "contents": {
+              "kind": "group",
+              "document": {"kind": "recurse_field", "field": "f_values"}
+            }
+          }
         ]
       }
     },
@@ -212,7 +218,10 @@
             {"kind": "ParenExpr", "document": "recurse"},
             {"kind": "BlockExpr", "document": "recurse"}
           ],
-          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+          "default": {
+            "kind": "group",
+            "document": {"kind": "indent", "contents": ["softline", "recurse"]}
+          }
         },
         "f_then_expr": {
           "kind": "ifKind",
@@ -220,7 +229,10 @@
             {"kind": "ParenExpr", "document": "recurse"},
             {"kind": "BlockExpr", "document": "recurse"}
           ],
-          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+          "default": {
+            "kind": "group",
+            "document": {"kind": "indent", "contents": ["softline", "recurse"]}
+          }
         }
       }
     },
@@ -652,7 +664,10 @@
             {"kind": "ParenExpr", "document": "recurse"},
             {"kind": "BlockExpr", "document": "recurse"}
           ],
-          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+          "default": {
+            "kind": "group",
+            "document": {"kind": "indent", "contents": ["softline", "recurse"]}
+          }
         },
         "f_else_expr": {
           "kind": "ifKind",
@@ -660,7 +675,10 @@
             {"kind": "ParenExpr", "document": "recurse"},
             {"kind": "BlockExpr", "document": "recurse"}
           ],
-          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+          "default": {
+            "kind": "group",
+            "document": {"kind": "indent", "contents": ["softline", "recurse"]}
+          }
         },
         "f_then_expr": {
           "kind": "ifKind",
@@ -668,7 +686,10 @@
             {"kind": "ParenExpr", "document": "recurse"},
             {"kind": "BlockExpr", "document": "recurse"}
           ],
-          "default": {"kind": "group", "document": {"kind": "indent", "contents": ["softline", "recurse"]}}
+          "default": {
+            "kind": "group",
+            "document": {"kind": "indent", "contents": ["softline", "recurse"]}
+          }
         }
       }
     },
@@ -728,7 +749,13 @@
           "kind": "ifKind",
           "field": "f_body",
           "matchers": [
-            {"kind": "BlockExpr", "document": ["whitespace", {"kind": "recurse_field", "field": "f_body"}]}
+            {
+              "kind": "BlockExpr",
+              "document": [
+                "whitespace",
+                {"kind": "recurse_field", "field": "f_body"}
+              ]
+            }
           ],
           "default": {
             "kind": "group",
@@ -1030,13 +1057,36 @@
           {
             "kind": "ifKind",
             "field": "f_val",
-            "__TODO__": "All matchers below are wrapped in a group in order to workaround #838",
-            "matchers": [
-              {"kind": "ParenExpr", "document": ["whitespace", {"kind": "recurse_field", "field": "f_val"}]},
-              {"kind": "BlockExpr", "document": ["whitespace", {"kind": "recurse_field", "field": "f_val"}]},
-              {"kind": "MatchExpr", "document": ["whitespace", {"kind": "recurse_field", "field": "f_val"}]}
+            "__TODO__": [
+              "All matchers below are wrapped in a group in order to",
+              "workaround #838"
             ],
-            "default": {"kind": "indent", "contents": ["line", {"kind": "recurse_field", "field": "f_val"}]}
+            "matchers": [
+              {
+                "kind": "ParenExpr",
+                "document": [
+                  "whitespace",
+                  {"kind": "recurse_field", "field": "f_val"}
+                 ]
+              },
+              {
+                "kind": "BlockExpr",
+                "document": [
+                  "whitespace",
+                  {"kind": "recurse_field", "field": "f_val"}
+                ]
+              },
+              {
+                "kind": "MatchExpr",
+                "document": [
+                  "whitespace", {"kind": "recurse_field", "field": "f_val"}
+                ]
+              }
+            ],
+            "default": {
+              "kind": "indent",
+              "contents": ["line", {"kind": "recurse_field", "field": "f_val"}]
+            }
           }
         ]
       },
