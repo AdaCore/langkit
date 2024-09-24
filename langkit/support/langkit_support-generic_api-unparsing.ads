@@ -325,7 +325,8 @@ package Langkit_Support.Generic_API.Unparsing is
    --      "fields": {<field-name>: <template>},
    --      "sep": <template>,
    --      "leading_sep": <template>,
-   --      "trailing_sep": <template>
+   --      "trailing_sep": <template>,
+   --      "flush_before_children": <boolean>
    --    }
    --
    --  The "node" component is optional. If present, it contains a document
@@ -384,6 +385,11 @@ package Langkit_Support.Generic_API.Unparsing is
    --  only for list nodes that accept respectively leading and trailing
    --  separators. If present, they contain document templates to unparse
    --  leading/trailing separators.
+   --
+   --  The "flush_before_children" component is optional, and valid for list
+   --  nodes only. It must be a boolean (true by default), that controls
+   --  whether line breaks recovered from the source to reformat are flushed
+   --  before each list element.
    --
    --  Standard node derivation rules apply to configurations: if node B
    --  derives from node A, and if node B does not specify a configuration for

@@ -1,0 +1,7 @@
+{
+  "node_configs": {
+    "DeclList": {
+      "flush_before_children": "foo"
+    }
+  }
+}

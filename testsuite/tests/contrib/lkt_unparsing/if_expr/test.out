@@ -67,7 +67,6 @@ val v8 =
         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
         + cccccccccccc
 
-
     elif a + b then abc
 
     else def
