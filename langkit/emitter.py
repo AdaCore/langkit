@@ -2,13 +2,15 @@
 Code emission for Langkit-generated libraries.
 """
 
+from __future__ import annotations
+
 from distutils.spawn import find_executable
 import glob
 import json
 import os
 from os import path
 import subprocess
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Optional
 
 from funcy import keep
 
@@ -24,7 +26,7 @@ from langkit.utils import Colors, printcol
 
 
 @CompileCtx.register_template_extensions
-def template_extensions(ctx: CompileCtx) -> Dict[str, Any]:
+def template_extensions(ctx: CompileCtx) -> dict[str, Any]:
     return {"generic_api": GenericAPI(ctx)}
 
 
@@ -39,9 +41,9 @@ class Emitter:
     def __init__(self,
                  context: CompileCtx,
                  lib_root: str,
-                 extensions_dir: Optional[str],
-                 main_source_dirs: Set[str] = set(),
-                 main_programs: Set[str] = set(),
+                 extensions_dir: str | None,
+                 main_source_dirs: set[str] = set(),
+                 main_programs: set[str] = set(),
                  no_property_checks: bool = False,
                  generate_gdb_hook: bool = True,
                  pretty_print: bool = False,
@@ -53,7 +55,7 @@ class Emitter:
                  post_process_java: PostProcessFn = None,
                  coverage: bool = False,
                  relative_project: bool = False,
-                 unparse_script: Optional[str] = None):
+                 unparse_script: str | None = None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -416,7 +418,7 @@ class Emitter:
         # We expect AdaSAT checkout to be at <langkit_root>/langkit/adasat
         # If it's not found there, we look for "adasat.gpr" in the
         # GPR_PROJECT_PATH environment variable.
-        adasat_dir: Optional[str]
+        adasat_dir: str | None
         if os.path.exists(default_adasat_dir):
             adasat_dir = default_adasat_dir
         else:
@@ -836,7 +838,7 @@ class Emitter:
     def write_ada_module(self,
                          out_dir: str,
                          template_base_name: str,
-                         qual_name: List[str],
+                         qual_name: list[str],
                          has_body: bool = True,
                          cached_body: bool = False,
                          in_library: bool = False,
@@ -947,7 +949,7 @@ class Emitter:
         # If pretty-printing failed (the generated code has invalid Python
         # syntax), write the original code anyway, and re-raise the
         # SyntaxError in order to ease debugging.
-        exc: Optional[Exception] = None
+        exc: Exception | None = None
 
         if self.pretty_print:
             try:
@@ -997,7 +999,7 @@ class Emitter:
     def ada_file_path(self,
                       out_dir: str,
                       source_kind: AdaSourceKind,
-                      qual_name: List[str]) -> str:
+                      qual_name: list[str]) -> str:
         """
         Return the name of the Ada file for the given unit name/kind.
 
@@ -1016,7 +1018,7 @@ class Emitter:
     def write_ada_file(self,
                        out_dir: str,
                        source_kind: AdaSourceKind,
-                       qual_name: List[str],
+                       qual_name: list[str],
                        content: str,
                        no_post_processing: bool = False) -> None:
         """

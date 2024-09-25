@@ -56,8 +56,7 @@ from functools import reduce
 import itertools
 import os.path
 from typing import (
-    Any, Callable, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar,
-    Union, cast, overload
+    Any, Callable, ClassVar, Type, TypeVar, Union, cast, overload
 )
 
 import liblktlang as L
@@ -212,7 +211,7 @@ def name_from_camel(ctx: CompileCtx, kind: str, id: L.Id) -> names.Name:
         return names.Name.from_camel(id.text)
 
 
-def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
+def load_lkt(lkt_file: str) -> list[L.AnalysisUnit]:
     """
     Load a Lktlang source file and return the closure of Lkt units referenced.
     Raise a DiagnosticError if there are parsing errors.
@@ -585,7 +584,7 @@ def create_root_scope(ctx: CompileCtx) -> Scope:
 
 
 def find_toplevel_decl(ctx: CompileCtx,
-                       lkt_units: List[L.AnalysisUnit],
+                       lkt_units: list[L.AnalysisUnit],
                        node_type: type,
                        label: str) -> L.FullDecl:
     """
@@ -735,8 +734,8 @@ class AnnotationSpec:
 
     def interpret(
         self, ctx: CompileCtx,
-        args: List[L.Expr],
-        kwargs: Dict[str, L.Expr],
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         """
@@ -755,7 +754,7 @@ class AnnotationSpec:
     def parse_single_annotation(
         self,
         ctx: CompileCtx,
-        result: Dict[str, Any],
+        result: dict[str, Any],
         annotation: L.DeclAnnotation,
         scope: Scope,
     ) -> None:
@@ -816,8 +815,8 @@ class FlagAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
-        args: List[L.Expr],
-        kwargs: Dict[str, L.Expr],
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         return True
@@ -835,8 +834,8 @@ class StringLiteralAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
-        args: List[L.Expr],
-        kwargs: Dict[str, L.Expr],
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         if (
@@ -867,8 +866,8 @@ class ExternalAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
-        args: List[L.Expr],
-        kwargs: Dict[str, L.Expr],
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         for arg in args:
@@ -896,8 +895,8 @@ class WithDefaultAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
-        args: List[L.Expr],
-        kwargs: Dict[str, L.Expr],
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         check_source_language(
@@ -917,8 +916,8 @@ class WithDynvarsAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
-        args: List[L.Expr],
-        kwargs: Dict[str, L.Expr],
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         result: list[
@@ -975,8 +974,8 @@ class SpacingAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
-        args: List[L.Expr],
-        kwargs: Dict[str, L.Expr],
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         check_source_language(not args, 'No positional argument allowed')
@@ -1005,8 +1004,8 @@ class TokenAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
-        args: List[L.Expr],
-        kwargs: Dict[str, L.Expr],
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         check_source_language(not args, 'No positional argument allowed')
@@ -1053,8 +1052,8 @@ class WithLexerAnnotationSpec(AnnotationSpec):
     def interpret(
         self,
         ctx: CompileCtx,
-        args: List[L.Expr],
-        kwargs: Dict[str, L.Expr],
+        args: list[L.Expr],
+        kwargs: dict[str, L.Expr],
         scope: Scope,
     ) -> Any:
         assert not kwargs
@@ -1085,7 +1084,7 @@ class ParsedAnnotations:
     Namespace object to hold annotation parsed values.
     """
 
-    annotations: ClassVar[List[AnnotationSpec]]
+    annotations: ClassVar[list[AnnotationSpec]]
 
 
 @dataclass
@@ -1104,9 +1103,9 @@ class GrammarRuleAnnotations(ParsedAnnotations):
 
 @dataclass
 class TokenAnnotations(ParsedAnnotations):
-    text: Tuple[bool, bool]
-    trivia: Tuple[bool, bool]
-    symbol: Tuple[bool, bool]
+    text: tuple[bool, bool]
+    trivia: tuple[bool, bool]
+    symbol: tuple[bool, bool]
     with_unparsing_newline: bool
     pre_rule: bool
     ignored: bool
@@ -1126,7 +1125,7 @@ class LexerAnnotations(ParsedAnnotations):
 
 @dataclass
 class TokenFamilyAnnotations(ParsedAnnotations):
-    unparsing_spacing: List[L.RefId]
+    unparsing_spacing: list[L.RefId]
     annotations = [SpacingAnnotationSpec()]
 
 
@@ -1271,7 +1270,7 @@ def parse_annotations(
         annotation's arguments.
     """
     # Build a mapping for all specs
-    specs_map: Dict[str, AnnotationSpec] = {}
+    specs_map: dict[str, AnnotationSpec] = {}
     for s in annotation_class.annotations:
         assert s.name not in specs_map
         specs_map[s.name] = s
@@ -1282,7 +1281,7 @@ def parse_annotations(
         if isinstance(full_decl, L.DeclAnnotationList) else
         full_decl.f_decl_annotations
     )
-    values: Dict[str, Any] = {}
+    values: dict[str, Any] = {}
     for a in annotations:
         name = a.f_name.text
         spec = specs_map.get(name)
@@ -1611,7 +1610,7 @@ Signature for ".shed_rebindings".
 """
 
 
-def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
+def create_lexer(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> Lexer:
     """
     Create and populate a lexer from a Lktlang unit.
 
@@ -1632,42 +1631,42 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             ctx, LexerAnnotations, full_lexer, root_scope
         )
 
-    patterns: Dict[names.Name, Tuple[str, Location]] = {}
+    patterns: dict[names.Name, tuple[str, Location]] = {}
     """
     Mapping from pattern names to the corresponding regular expression.
     """
 
-    token_family_sets: Dict[names.Name, Tuple[Set[TokenAction], Location]] = {}
+    token_family_sets: dict[names.Name, tuple[set[TokenAction], Location]] = {}
     """
     Mapping from token family names to the corresponding sets of tokens that
     belong to this family, and the location for the token family declaration.
     """
 
-    token_families: Dict[names.Name, TokenFamily] = {}
+    token_families: dict[names.Name, TokenFamily] = {}
     """
     Mapping from token family names to the corresponding token families.  We
     build this late, once we know all tokens and all families.
     """
 
-    spacings: List[Tuple[names.Name, L.RefId]] = []
+    spacings: list[tuple[names.Name, L.RefId]] = []
     """
     Couple of names for token family between which unparsing must insert
     spaces. The first name is known to be valid, but not the second one, so we
     keep it as a node to create a diagnostic context.
     """
 
-    tokens: Dict[names.Name, Action] = {}
+    tokens: dict[names.Name, Action] = {}
     """
     Mapping from token names to the corresponding tokens.
     """
 
-    rules: List[Union[RuleAssoc, Tuple[Matcher, Action]]] = []
-    pre_rules: List[Tuple[Matcher, Action]] = []
+    rules: list[RuleAssoc | tuple[Matcher, Action]] = []
+    pre_rules: list[tuple[Matcher, Action]] = []
     """
     Lists of regular and pre lexing rules for this lexer.
     """
 
-    newline_after: List[TokenAction] = []
+    newline_after: list[TokenAction] = []
     """
     List of tokens after which we must introduce a newline during unparsing.
     """
@@ -1712,7 +1711,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     def process_token_rule(
         r: L.FullDecl,
         rules: list[SrcRule],
-        token_set: Optional[Set[TokenAction]] = None,
+        token_set: set[TokenAction] | None = None,
     ) -> None:
         """
         Process the full declaration of a GrammarRuleDecl node: create the
@@ -1959,7 +1958,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             assert False, f"Unexpected lexer rule: {r}"
 
     # Create the LexerToken subclass to define all tokens and token families
-    items: Dict[str, Union[Action, TokenFamily]] = {}
+    items: dict[str, Action | TokenFamily] = {}
     for name, token in tokens.items():
         items[name.camel] = token
     for name, (token_set, loc) in token_family_sets.items():
@@ -1992,7 +1991,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
 
 def create_grammar(ctx: CompileCtx,
-                   lkt_units: List[L.AnalysisUnit]) -> Grammar:
+                   lkt_units: list[L.AnalysisUnit]) -> Grammar:
     """
     Create a grammar from a set of Lktlang units.
 
@@ -2020,7 +2019,7 @@ def create_grammar(ctx: CompileCtx,
     # annotations.
     all_rules = OrderedDict()
     main_rule_name = None
-    entry_points: Set[str] = set()
+    entry_points: set[str] = set()
     for full_rule in full_grammar.f_decl.f_rules:
         with ctx.lkt_context(full_rule):
             r = full_rule.f_decl
@@ -2095,8 +2094,8 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
     NodeRefTypes = Union[L.DotExpr, L.TypeRef, L.RefId]
 
     def resolve_node_ref_or_none(
-        node_ref: Optional[NodeRefTypes]
-    ) -> Optional[ASTNodeType]:
+        node_ref: NodeRefTypes | None
+    ) -> ASTNodeType | None:
         """
         Convenience wrapper around resolve_node_ref to handle None values.
         """
@@ -2162,16 +2161,14 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
         raise RuntimeError("unreachable code")
 
     def lower_or_none(
-        rule: Union[None, L.GrammarExpr, L.GrammarExprList]
-    ) -> Optional[Parser]:
+        rule: L.GrammarExpr | L.GrammarExprList | None
+    ) -> Parser | None:
         """
         Like ``lower``, but also accept null grammar expressions.
         """
         return None if rule is None else lower(rule)
 
-    def lower(
-        rule: Union[L.GrammarExpr, L.GrammarExprList]
-    ) -> Parser:
+    def lower(rule: L.GrammarExpr | L.GrammarExprList) -> Parser:
         """
         Helper to lower one parser.
 
@@ -2354,7 +2351,7 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
 
 # Mapping to associate declarations to the corresponding AbstractVariable
 # instances. This is useful when lowering expressions.
-LocalsEnv = Dict[L.BaseValDecl, AbstractVariable]
+LocalsEnv = dict[L.BaseValDecl, AbstractVariable]
 
 
 class LktTypesLoader:
@@ -2367,7 +2364,7 @@ class LktTypesLoader:
     # to None when the type declaration is currently being lowered. Keeping a
     # None entry in this case helps detecting illegal circular type
     # dependencies.
-    compiled_types: Dict[L.TypeDecl, Optional[CompiledType]]
+    compiled_types: dict[L.TypeDecl, CompiledType | None]
 
     ###################
     # Builtin helpers #
@@ -2502,7 +2499,7 @@ class LktTypesLoader:
         "declaration" is located inside a property ("VarBind" Lkt node).
         """
 
-    def __init__(self, ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]):
+    def __init__(self, ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]):
         """
         :param ctx: Context in which to create these types.
         :param lkt_units: Non-empty list of analysis units where to look for
@@ -3190,7 +3187,7 @@ class LktTypesLoader:
 
         cls: Type[AbstractNodeData]
         constructor: Callable[..., AbstractNodeData]
-        kwargs: Dict[str, Any] = {'type': field_type, 'doc': doc}
+        kwargs: dict[str, Any] = {'type': field_type, 'doc': doc}
 
         check_source_language(
             annotations.parse_field or not annotations.null_field,
@@ -3486,7 +3483,7 @@ class LktTypesLoader:
         self,
         call_expr: L.CallExpr,
         env: Scope,
-        local_vars: Optional[LocalVars],
+        local_vars: LocalVars | None,
     ) -> AbstractExpression:
         """
         Subroutine for "lower_expr": lower specifically a method call.
@@ -3538,7 +3535,7 @@ class LktTypesLoader:
             arg: L.LambdaArgDecl,
             infos: list[E.LambdaArgInfo],
             prefix: str,
-            type: Optional[CompiledType] = None,
+            type: CompiledType | None = None,
             create_local: bool = False,
         ) -> AbstractVariable:
             """
@@ -4116,7 +4113,7 @@ class LktTypesLoader:
     def lower_expr(self,
                    expr: L.Expr,
                    env: Scope,
-                   local_vars: Optional[LocalVars],
+                   local_vars: LocalVars | None,
                    static_required: bool = False) -> AbstractExpression:
         """
         Lower the given expression.
@@ -4759,7 +4756,7 @@ class LktTypesLoader:
 
                 # Get the exception message argument
                 args_nodes, kwargs_nodes = self.extract_call_args(cons_expr)
-                msg_expr: Optional[L.Expr] = None
+                msg_expr: L.Expr | None = None
                 if args_nodes:
                     msg_expr = args_nodes.pop()
                 elif kwargs_nodes:
@@ -4855,7 +4852,7 @@ class LktTypesLoader:
     def lower_property_arguments(
         self,
         prop: PropertyDef,
-        arg_decl_list: Optional[L.FunArgDeclList],
+        arg_decl_list: L.FunArgDeclList | None,
         label: str,
     ) -> tuple[list[L.FunArgDecl], Scope]:
         """
@@ -5202,7 +5199,7 @@ class LktTypesLoader:
         struct_name: str,
         allow_env_spec: bool = False,
     ) -> tuple[
-        List[tuple[names.Name, AbstractNodeData]], L.EnvSpecDecl | None
+        list[tuple[names.Name, AbstractNodeData]], L.EnvSpecDecl | None
     ]:
         """
         Lower the fields described in the given DeclBlock node.
@@ -5263,7 +5260,7 @@ class LktTypesLoader:
         user_field_public: bool,
         struct_name: str,
     ) -> tuple[
-        List[tuple[names.Name, AbstractNodeData]], L.EnvSpecDecl | None
+        list[tuple[names.Name, AbstractNodeData]], L.EnvSpecDecl | None
     ]:
         return self._lower_fields(
             decls,
@@ -5279,7 +5276,7 @@ class LktTypesLoader:
         allowed_field_kinds: FieldKinds,
         user_field_public: bool,
         struct_name: str,
-    ) -> List[tuple[names.Name, AbstractNodeData]]:
+    ) -> list[tuple[names.Name, AbstractNodeData]]:
         fields, _ = self._lower_fields(
             decls, allowed_field_kinds, user_field_public, struct_name
         )
@@ -5298,7 +5295,7 @@ class LktTypesLoader:
         loc = Location.from_lkt_node(decl)
 
         # Resolve the base node (if any)
-        base_type: Optional[ASTNodeType]
+        base_type: ASTNodeType | None
 
         # Check the set of traits that this node implements
         node_trait_ref: L.LktNode | None = None
@@ -5337,7 +5334,7 @@ class LktTypesLoader:
                     with self.ctx.lkt_context(trait_ref):
                         error("Nodes cannot implement this trait")
 
-        def check_trait(trait_ref: Optional[L.LktNode],
+        def check_trait(trait_ref: L.LktNode | None,
                         expected: bool,
                         message: str) -> None:
             """
@@ -5515,7 +5512,7 @@ class LktTypesLoader:
 
     def create_enum_node_alternatives(
         self,
-        alternatives: List[L.EnumClassAltDecl],
+        alternatives: list[L.EnumClassAltDecl],
         enum_node: ASTNodeType,
         qualifier: bool
     ) -> None:
@@ -5569,11 +5566,11 @@ class LktTypesLoader:
             ]
 
         # Now create the ASTNodeType instances themselves
-        alt_nodes: List[ASTNodeType] = []
+        alt_nodes: list[ASTNodeType] = []
         for i, alt in enumerate(alt_descriptions):
             # Override the abstract "as_bool" property that all qualifier enum
             # nodes define.
-            fields: List[Tuple[str, AbstractNodeData]] = []
+            fields: list[tuple[str, AbstractNodeData]] = []
             if qualifier:
                 is_present = i == 0
                 prop = Property(is_present)
@@ -5683,7 +5680,7 @@ class LktTypesLoader:
         return result
 
 
-def create_types(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> None:
+def create_types(ctx: CompileCtx, lkt_units: list[L.AnalysisUnit]) -> None:
     """
     Create types from Lktlang units.
 

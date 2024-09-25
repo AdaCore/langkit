@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import pathlib
-from typing import Union
 
 from langkit.parsers import (
     Defer, List, Opt, Or, Parser, _Extract, _Row, _Token, _Transform
@@ -19,7 +20,7 @@ def emit_railroad_diagram(parser: Parser) -> None:
 
     from langkit.compile_context import get_context
 
-    def recurse(p: Parser) -> Union[DiagramItem, str, None]:
+    def recurse(p: Parser) -> DiagramItem | str | None:
 
         # Transform parsers are just ignored
         if isinstance(p, _Transform):

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from langkit import names
 from langkit.diagnostics import check_source_language
@@ -23,7 +23,7 @@ class CAPIType:
 
     def __init__(self,
                  c_api_settings: CAPISettings,
-                 name: Union[str, names.Name],
+                 name: str | names.Name,
                  external: bool = False) -> None:
         """Create a stub for a C API type.
 
@@ -70,7 +70,7 @@ class CAPISettings(AbstractAPISettings):
 
     context: CompileCtx
     symbol_prefix: str
-    _lib_name: Optional[str]
+    _lib_name: str | None
 
     def __init__(self, ctx: CompileCtx, symbol_prefix: str = '') -> None:
         """
@@ -127,7 +127,7 @@ class CAPISettings(AbstractAPISettings):
     def header_guard_id(self) -> str:
         return self.lib_name.upper().replace('-', '_')
 
-    def get_name(self, name: Union[str, names.Name]) -> str:
+    def get_name(self, name: str | names.Name) -> str:
         """
         Wrap `name` as a top-level scope symbol.
         """

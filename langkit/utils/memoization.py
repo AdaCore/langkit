@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Optional, TYPE_CHECKING, TypeVar
+from typing import Callable, TYPE_CHECKING, TypeVar
 
 
 if TYPE_CHECKING:
@@ -12,7 +12,7 @@ _Self = TypeVar("_Self")
 
 def memoized(
     func: Callable[_P, _T],
-    pre_cache_miss: Optional[Callable[_P, _T]] = None,
+    pre_cache_miss: Callable[_P, _T] | None = None,
 ) -> Callable[_P, _T]:
     """
     Decorator to memoize a function.

@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import os.path
 import re
-from typing import Dict, Iterator, Optional, TYPE_CHECKING, Tuple, Type, Union
+from typing import Iterator, TYPE_CHECKING, Type
 
 import gdb
 import gdb.printing
@@ -42,7 +42,7 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
     def append(self, printer_cls: Type[BasePrinter]) -> None:
         self.subprinters.append(GDBSubprinter(printer_cls, self.context))
 
-    def __call__(self, value: gdb.Value) -> Optional[BasePrinter]:
+    def __call__(self, value: gdb.Value) -> BasePrinter | None:
         """
         If there is one enabled pretty-printer that matches `value`, return an
         instance of PrettyPrinter tied to this value. Return None otherwise.
@@ -100,7 +100,7 @@ class BasePrinter(abc.ABC):
     def display_hint(self) -> str | None:
         return None
 
-    def children(self) -> Iterator[Tuple[str, Union[str, gdb.Value]]]:
+    def children(self) -> Iterator[tuple[str, str | gdb.Value]]:
         return iter([])
 
     @abc.abstractmethod
@@ -215,7 +215,7 @@ class RecordAccessMatcher:
 
     def __init__(self,
                  record_type_name: str,
-                 access_type_name: Optional[str]) -> None:
+                 access_type_name: str | None) -> None:
         self.record_type_name = record_type_name
         self.access_type_name = access_type_name
 
@@ -358,7 +358,7 @@ class LexicalEnvPrinter(BasePrinter):
     def to_string(self) -> str:
         return self.env.to_string()
 
-    def children(self) -> Iterator[Tuple[str, Union[str, gdb.Value]]]:
+    def children(self) -> Iterator[tuple[str, str | gdb.Value]]:
         env = self.env
         if env.kind == 'orphaned':
             yield ('key', 'orphaned')
@@ -422,7 +422,7 @@ class EnvGetterPrinter(BasePrinter):
             return self.value['S']
 
     @property
-    def env(self) -> Optional[gdb.Value]:
+    def env(self) -> gdb.Value | None:
         """
         If this env getter is static, return the env it references. Otherwise,
         return None.
@@ -430,7 +430,7 @@ class EnvGetterPrinter(BasePrinter):
         return self._variant['env'] if not self.is_dynamic else None
 
     @property
-    def node(self) -> Optional[gdb.Value]:
+    def node(self) -> gdb.Value | None:
         """
         If this env getter is dynamic, return the node use to resolve the
         reference. Otherwise, return None.
@@ -438,7 +438,7 @@ class EnvGetterPrinter(BasePrinter):
         return self._variant['node'] if self.is_dynamic else None
 
     @property
-    def resolver(self) -> Optional[gdb.Value]:
+    def resolver(self) -> gdb.Value | None:
         """
         If this env getter is dynamic, return the corresponding resolver.
         Otherwise, return None.
@@ -446,7 +446,7 @@ class EnvGetterPrinter(BasePrinter):
         return self._variant['resolver'] if self.is_dynamic else None
 
     @property
-    def resolver_name(self) -> Optional[str]:
+    def resolver_name(self) -> str | None:
         """
         If we can determine the name of the property for this resolver, return
         it. Return None otherwise.
@@ -632,7 +632,7 @@ class ArrayPrettyPrinter(BasePrinter):
     @classmethod
     def element_typename(cls,
                          struct_typename: str,
-                         context: Context) -> Optional[str]:
+                         context: Context) -> str | None:
         """
         Given the name of the structure that implements this array, return the
         type name for the element that this array contains. Return None if this
@@ -652,7 +652,7 @@ class ArrayPrettyPrinter(BasePrinter):
         cls,
         value: gdb.Value,
         context: Context
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Like ``element_typename``, but working on an array value.
         """
@@ -687,7 +687,7 @@ class ArrayPrettyPrinter(BasePrinter):
             self.length
         )
 
-    def children(self) -> Iterator[Tuple[str, gdb.Value]]:
+    def children(self) -> Iterator[tuple[str, gdb.Value]]:
         if self.length <= 0:
             return
 
@@ -720,7 +720,7 @@ class LangkitVectorPrinter(BasePrinter):
 
     @property  # type: ignore
     @memoized
-    def fields(self) -> Dict[str, gdb.Value]:
+    def fields(self) -> dict[str, gdb.Value]:
         """
         Return a mapping: (field name -> field value) for all fields in this
         vector record.
@@ -772,7 +772,7 @@ class LangkitVectorPrinter(BasePrinter):
             self.length
         )
 
-    def children(self) -> Iterator[Tuple[str, gdb.Value]]:
+    def children(self) -> Iterator[tuple[str, gdb.Value]]:
         if self.length <= 0:
             return
 

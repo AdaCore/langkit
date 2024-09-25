@@ -8,8 +8,14 @@ import difflib
 from itertools import count, takewhile
 import pipes
 from typing import (
-    Any, Callable, ClassVar, Dict, Iterator, List, Optional as Opt, Sequence,
-    Set, TYPE_CHECKING, Tuple, Union, ValuesView
+    Any,
+    Callable,
+    ClassVar,
+    Iterator,
+    Sequence,
+    TYPE_CHECKING,
+    Union,
+    ValuesView,
 )
 
 from langkit import names
@@ -56,7 +62,7 @@ def gdb_helper(*args):
             if get_context().emitter.generate_gdb_hook else '')
 
 
-def type_ref_list_doc(types: List[CompiledType]) -> str:
+def type_ref_list_doc(types: list[CompiledType]) -> str:
     """
     Helper to format a list of type references for the Sphinx documentation.
     """
@@ -153,52 +159,52 @@ class CompiledTypeRepo:
     TypeRepo instance to refer to any compiled type.
     """
 
-    type_dict: Dict[str, CompiledType] = {}
+    type_dict: dict[str, CompiledType] = {}
     """
     Mapping: type name -> CompiledType instance. Used in TypeRepo for type
     lookup by name.
     """
 
-    enum_types: List[EnumType] = []
+    enum_types: list[EnumType] = []
     """
     List of EnumType instances. This list is updated every time a new instance
     is created.
     """
 
-    astnode_types: List[ASTNodeType] = []
+    astnode_types: list[ASTNodeType] = []
     """
     List of ASTNodeType instances. This list is updated every time a new
     instance is created.
     """
 
-    struct_types: List[StructType] = []
+    struct_types: list[StructType] = []
     """
     List of all StructType instances.
     """
 
-    pending_list_types: List[ASTNodeType] = []
+    pending_list_types: list[ASTNodeType] = []
     """
     Set of ASTNodeType instances for list types that are created while there
     is no context.
     """
 
-    node_builder_types: Set[NodeBuilderType] = set()
+    node_builder_types: set[NodeBuilderType] = set()
     """
     Set of ``NodeBuilder`` instances for all synthetic nodes for which we
     create builders.
     """
 
-    array_types: Set[ArrayType] = set()
+    array_types: set[ArrayType] = set()
     """
     Set of all created ArrayType instances.
     """
 
-    iterator_types: List[IteratorType] = []
+    iterator_types: list[IteratorType] = []
     """
     Set of all created IteratorType instances.
     """
 
-    root_grammar_class: Opt[ASTNodeType] = None
+    root_grammar_class: ASTNodeType | None = None
     """
     The ASTNodeType instances used as a root type. Every other ASTNodeType
     instances must derive directly or indirectly from that class.
@@ -292,22 +298,20 @@ class AbstractNodeData(abc.ABC):
     entity_info_name: ClassVar[names.Name] = names.Name('E_Info')
 
     def __init__(self,
-                 name: Opt[names.Name] = None,
+                 name: names.Name | None = None,
                  public: bool = True,
                  access_needs_incref: bool = False,
-                 internal_name: Opt[names.Name] = None,
-                 access_constructor: Opt[
-                     Callable[
-                         [
-                             ResolvedExpression,
-                             AbstractNodeData,
-                             List[Opt[ResolvedExpression]],
-                             Opt[AbstractExpression],
-                         ],
+                 internal_name: names.Name | None = None,
+                 access_constructor: Callable[
+                     [
                          ResolvedExpression,
-                     ]
-                 ] = None,
-                 prefix: Opt[names.Name] = None,
+                         AbstractNodeData,
+                         list[ResolvedExpression | None],
+                         AbstractExpression | None,
+                     ],
+                     ResolvedExpression,
+                 ] | None = None,
+                 prefix: names.Name | None = None,
                  final: bool = False):
         """
         :param name: Name for this field. Most of the time, this is initially
@@ -345,7 +349,7 @@ class AbstractNodeData(abc.ABC):
 
         self.location = extract_library_location()
 
-        self.prefix: Opt[names.Name] = prefix
+        self.prefix: names.Name | None = prefix
         self._name = name
         self._indexing_name = name.lower if name else None
         self._original_name = self._indexing_name
@@ -353,13 +357,13 @@ class AbstractNodeData(abc.ABC):
         assert internal_name is None or isinstance(internal_name, names.Name)
         self._internal_name = internal_name
 
-        self.struct: Opt[CompiledType] = None
+        self.struct: CompiledType | None = None
         """
         Type that owns this field. Initialized when creating that type: fields
         are created before their owning type.
         """
 
-        self.arguments: List[Argument] = []
+        self.arguments: list[Argument] = []
         """
         Code generation-wise, all node data can be considered as functions
         which take at least a mandatory Self argument and return the
@@ -379,8 +383,8 @@ class AbstractNodeData(abc.ABC):
 
         self._abstract = False
         self._inheritance_computed = False
-        self._base: Opt[_Self] = None
-        self._overridings: List[_Self] = []
+        self._base: _Self | None = None
+        self._overridings: list[_Self] = []
         self.final = final
 
     def __lt__(self, other: AbstractNodeData) -> bool:
@@ -395,7 +399,7 @@ class AbstractNodeData(abc.ABC):
         return self._abstract
 
     @property
-    def base(self) -> Opt[_Self]:
+    def base(self) -> _Self | None:
         """
         If this field overrides an inherited one in a base class, return the
         inherited one, otherwise return None.
@@ -567,7 +571,7 @@ class AbstractNodeData(abc.ABC):
         self._name = name
 
     @property
-    def internal_name(self) -> Opt[names.Name]:
+    def internal_name(self) -> names.Name | None:
         """
         Name of the field in the generated code.
         """
@@ -601,7 +605,7 @@ class AbstractNodeData(abc.ABC):
         return self._indexing_name
 
     @property
-    def qual_impl_name(self) -> Union[None, str, names.Name]:
+    def qual_impl_name(self) -> str | names.Name | None:
         """
         Fully qualified name for the implementation of this property.
 
@@ -675,7 +679,7 @@ class AbstractNodeData(abc.ABC):
         return self.struct.kwless_raw_name + self.api_name
 
     @property
-    def natural_arguments(self) -> List[Argument]:
+    def natural_arguments(self) -> list[Argument]:
         """
         Return the subset of "self.arguments" that are non-artificial
         arguments, that is to say the subset that users actually handle in
@@ -721,29 +725,29 @@ class CompiledType:
     """
 
     def __init__(self,
-                 name: Union[str, names.Name],
-                 location: Opt[Location] = None,
+                 name: str | names.Name,
+                 location: Location | None = None,
                  doc: str = '',
-                 base: Opt[_Self] = None,
+                 base: _Self | None = None,
                  is_ptr: bool = True,
                  has_special_storage: bool = False,
                  is_list_type: bool = False,
                  is_entity_type: bool = False,
                  exposed: bool = False,
-                 c_type_name: Opt[str] = None,
+                 c_type_name: str | None = None,
                  external: bool = False,
                  null_allowed: bool = False,
                  is_ada_record: bool = False,
                  is_refcounted: bool = False,
-                 nullexpr: Opt[str] = None,
-                 py_nullexpr: Opt[str] = None,
-                 java_nullexpr: Opt[str] = None,
-                 element_type: Opt[CompiledType] = None,
+                 nullexpr: str | None = None,
+                 py_nullexpr: str | None = None,
+                 java_nullexpr: str | None = None,
+                 element_type: CompiledType | None = None,
                  hashable: bool = False,
                  has_equivalent_function: bool = False,
-                 type_repo_name: Opt[str] = None,
-                 api_name: Union[str, names.Name, None] = None,
-                 dsl_name: Opt[str] = None,
+                 type_repo_name: str | None = None,
+                 api_name: str | names.Name | None = None,
+                 dsl_name: str | None = None,
                  conversion_requires_context: bool = False) -> None:
         """
         :param name: Type name. If a string, it must be camel-case.
@@ -872,20 +876,20 @@ class CompiledType:
         public API.
         """
 
-        self.derivations: Set[CompiledType] = set()
+        self.derivations: set[CompiledType] = set()
         """
         Set of types that derive from ``self``.
         """
 
-        self._abstract_node_data_dict_cache: Dict[
-            Tuple[bool, AbstractNodeData],
-            Tuple[str, BaseField]
+        self._abstract_node_data_dict_cache: dict[
+            tuple[bool, AbstractNodeData],
+            tuple[str, BaseField]
         ] = {}
         """
         Cache for the get_abstract_node_data_dict class method.
         """
 
-        self._fields: Dict[str, AbstractNodeData] = OrderedDict()
+        self._fields: dict[str, AbstractNodeData] = OrderedDict()
         """
         List of AbstractNodeData fields for this type.
         """
@@ -894,26 +898,26 @@ class CompiledType:
         if self._base is not None:
             self._base.derivations.add(self)
 
-        self._iterator: Opt[IteratorType] = None
+        self._iterator: IteratorType | None = None
         """
         Iterator for "self". Created on-demand (see the "create_iterator"
         method and "iterator" property).
         """
 
     @property
-    def base(self) -> Opt[_Self]:
+    def base(self) -> _Self | None:
         """
         Return the base of this type, or None if there is no derivation
         involved.
         """
         return self._base
 
-    def get_inheritance_chain(self) -> List[_Self]:
+    def get_inheritance_chain(self) -> list[_Self]:
         """
         Return the chain of types following the `base` link as a list.
         Root-most types come first.
         """
-        t: Opt[_Self] = self
+        t: _Self | None = self
         result = []
         while t is not None:
             result.append(t)
@@ -2067,10 +2071,10 @@ class BaseField(AbstractNodeData):
     def __init__(self,
                  repr: bool = True,
                  doc: str = '',
-                 type: Opt[CompiledTypeOrDefer] = None,
+                 type: CompiledTypeOrDefer | None = None,
                  access_needs_incref: bool = False,
-                 internal_name: Opt[names.Name] = None,
-                 prefix: Opt[names.Name] = AbstractNodeData.PREFIX_FIELD,
+                 internal_name: names.Name | None = None,
+                 prefix: names.Name | None = AbstractNodeData.PREFIX_FIELD,
                  null: bool = False,
                  nullable: bool | None = None):
         """
@@ -2189,7 +2193,7 @@ class BaseField(AbstractNodeData):
         Tag this field and its ancestors as being initialized by node
         synthetization in properties.
         """
-        field: Opt[BaseField] = self
+        field: BaseField | None = self
         while field is not None:
             field._synthetized = True
             field = field.base
@@ -2206,7 +2210,7 @@ class Field(BaseField):
     def __init__(self,
                  repr: bool = True,
                  doc: str = "",
-                 type: Opt[CompiledType] = None,
+                 type: CompiledType | None = None,
                  abstract: bool = False,
                  null: bool = False,
                  nullable: bool | None = None):
@@ -2216,7 +2220,7 @@ class Field(BaseField):
         self._abstract = abstract
         self._null = null
 
-        self.parsers_from_transform: List[Parser] = []
+        self.parsers_from_transform: list[Parser] = []
         """
         List of parsers that provide a value for this field. Such parsers are
         children of Transform parsers.
@@ -2237,7 +2241,7 @@ class Field(BaseField):
         Cache for the precise_element_types property.
         """
 
-        self._index: Opt[int] = None
+        self._index: int | None = None
         """
         0-based index for this parsing field in the owning AST node's children
         list. This is -1 for abstract or null fields.
@@ -2424,10 +2428,10 @@ class UserField(BaseField):
                  repr: bool = False,
                  doc: str = '',
                  public: bool = True,
-                 default_value: Opt[AbstractExpression] = None,
+                 default_value: AbstractExpression | None = None,
                  access_needs_incref: bool = True,
-                 internal_name: Opt[names.Name] = None,
-                 prefix: Opt[names.Name] = None):
+                 internal_name: names.Name | None = None,
+                 prefix: names.Name | None = None):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -2492,10 +2496,10 @@ class MetadataField(UserField):
         repr: bool = False,
         doc: str = '',
         public: bool = True,
-        default_value: Opt[AbstractExpression] = None,
+        default_value: AbstractExpression | None = None,
         access_needs_incref: bool = True,
-        internal_name: Opt[names.Name] = None,
-        prefix: Opt[names.Name] = None
+        internal_name: names.Name | None = None,
+        prefix: names.Name | None = None
     ):
         self.use_in_equality = use_in_equality
         super().__init__(
@@ -2515,10 +2519,10 @@ class BuiltinField(UserField):
                  repr: bool = False,
                  doc: str = '',
                  public: bool = True,
-                 default_value: Opt[AbstractExpression] = None,
+                 default_value: AbstractExpression | None = None,
                  access_needs_incref: bool = True,
-                 internal_name: Opt[names.Name] = None,
-                 prefix: Opt[names.Name] = None):
+                 internal_name: names.Name | None = None,
+                 prefix: names.Name | None = None):
         super().__init__(
             type=type,
             repr=repr,
@@ -2592,7 +2596,7 @@ class BaseStructType(CompiledType):
         self,
         name: names.Name,
         type: CompiledType,
-        default_value: Opt[AbstractExpression],
+        default_value: AbstractExpression | None,
         doc: str = "",
     ) -> UserField:
         """
@@ -2870,22 +2874,22 @@ class ASTNodeType(BaseStructType):
     kwless_raw_name: names.Name
 
     # If this is an enum onde, list of descriptions for its enum alternatives
-    _alternatives: List[ASTNodeType]
+    _alternatives: list[ASTNodeType]
 
     # If this is an enum node, mapping from alternative camel name to
     # ASTNodeType instance for the alternative.
-    _alternatives_map: Dict[str, ASTNodeType]
+    _alternatives_map: dict[str, ASTNodeType]
 
     def __init__(
         self,
         name: names.Name,
-        location: Opt[Location],
-        doc: Opt[str],
-        base: Opt[ASTNodeType],
-        fields: Sequence[Tuple[Union[str, names.Name], AbstractNodeData]],
-        env_spec: Opt[EnvSpec] = None,
-        element_type: Opt[ASTNodeType] = None,
-        annotations: Opt[Annotations] = None,
+        location: Location | None,
+        doc: str | None,
+        base: ASTNodeType | None,
+        fields: Sequence[tuple[str | names.Name, AbstractNodeData]],
+        env_spec: EnvSpec | None = None,
+        element_type: ASTNodeType | None = None,
+        annotations: Annotations | None = None,
         is_generic_list_type: bool = False,
         is_abstract: bool = False,
         is_synthetic: bool = False,
@@ -2894,7 +2898,7 @@ class ASTNodeType(BaseStructType):
         is_bool_node: bool = False,
         is_token_node: bool = False,
         is_error_node: bool = False,
-        dsl_name: Opt[str] = None
+        dsl_name: str | None = None
     ):
         """
         :param name: Name for this node.
@@ -3080,7 +3084,7 @@ class ASTNodeType(BaseStructType):
         if env_spec:
             env_spec.ast_node = self
 
-        self.env_spec: Opt[EnvSpec] = env_spec
+        self.env_spec: EnvSpec | None = env_spec
         """
         EnvSpec instance corresponding to this node.
         """
@@ -3104,7 +3108,7 @@ class ASTNodeType(BaseStructType):
 
         # Prepare the list of subclasses for this node type and, if applicable,
         # register it as a subclass of its base.
-        self.subclasses: List[ASTNodeType] = []
+        self.subclasses: list[ASTNodeType] = []
         """
         List of subclasses. Overriden in the root grammar class and its
         children. This list is completed as ASTNodeType instances are created,
@@ -3115,7 +3119,7 @@ class ASTNodeType(BaseStructType):
             base.subclasses.append(self)
 
         # If this is the root grammar type, create the generic list type name
-        self.generic_list_type: Opt[ASTNodeType] = None
+        self.generic_list_type: ASTNodeType | None = None
         """
         Root grammar class subclass. It is abstract, generated automatically
         when the root grammar class is known. All root list types subclass it.
@@ -3134,25 +3138,25 @@ class ASTNodeType(BaseStructType):
                 is_abstract=True
             )
 
-        self.transform_parsers: List[_Transform] = []
+        self.transform_parsers: list[_Transform] = []
         """
         List of Transform parsers that produce this node.
         """
 
-        self.list_element_parsers: Opt[List[Parser]] = [] if is_list else None
+        self.list_element_parsers: list[Parser] | None = (
+            [] if is_list else None
+        )
         """
         For list nodes, list of parsers that produce list elements. None for
         all other nodes.
-
-        :type: list[langkit.parsers.Parser]
         """
 
-        self.precise_list_element_types: Opt[TypeSet] = None
+        self.precise_list_element_types: TypeSet | None = None
         """
         For list nodes, precise set of types that this list can contain.
         """
 
-        self.unparser: Opt[NodeUnparser] = None
+        self.unparser: NodeUnparser | None = None
         """
         Unparser for this node. Computed during the NodesToParsers pass.
         """
@@ -3162,13 +3166,11 @@ class ASTNodeType(BaseStructType):
         self.is_token_node = is_token_node
         self.is_error_node = is_error_node
 
-        self.token_kind: Opt[TokenAction] = None
+        self.token_kind: TokenAction | None = None
         """
         If this is a token node and if unparser generation is enabled, this
         must reference the only token kind that this node can be associated to.
         Must be None otherwise.
-
-        :type: langkit.lexer.TokenAction|None
         """
 
         # Make sure we have one entity type for each AST node type
@@ -3376,7 +3378,7 @@ class ASTNodeType(BaseStructType):
         ))[-1][0]
 
     @property
-    def base(self) -> Opt[ASTNodeType]:
+    def base(self) -> ASTNodeType | None:
         result = super().base
         assert result is None or isinstance(result, ASTNodeType)
         return result
@@ -3392,7 +3394,7 @@ class ASTNodeType(BaseStructType):
         return [t for t in self.type_set if not t.abstract]
 
     @property
-    def type_set(self) -> List[ASTNodeType]:
+    def type_set(self) -> list[ASTNodeType]:
         """
         Return the list of all (direct or indirect) subclasses for ``self``,
         including ``self`` as well, sorted by hierarchical name.
@@ -3967,7 +3969,7 @@ class EnumNodeAlternative:
     Enum node that owns this alternative.
     """
 
-    alt_node: Opt[ASTNodeType]
+    alt_node: ASTNodeType | None
     """
     Node that implements this alternative.
 
@@ -3975,7 +3977,7 @@ class EnumNodeAlternative:
     corresponding ASTNodeType is instantiated only after that.
     """
 
-    location: Opt[Location]
+    location: Location | None
     """
     Location in the language spec where this alternative was created. This is
     the location of the enum node declaration itself for alternatives
@@ -4120,7 +4122,7 @@ class NodeBuilderType(CompiledType):
             for field in self.node_type.required_fields_in_exprs.values()
         ]
 
-    def builtin_properties(self) -> List[Tuple[str, PropertyDef]]:
+    def builtin_properties(self) -> list[tuple[str, PropertyDef]]:
         """
         Return properties available for all node builder types.
         """
@@ -4418,7 +4420,7 @@ class ArrayType(CompiledType):
         # early.
         return self.element_type == T.inner_env_assoc
 
-    def builtin_properties(self) -> List[Tuple[str, PropertyDef]]:
+    def builtin_properties(self) -> list[tuple[str, PropertyDef]]:
         """
         Return properties available for all array types.
         """
@@ -4544,7 +4546,7 @@ class IteratorType(CompiledType):
                 + names.Name('Iterator'))
 
     @property
-    def exposed_types(self) -> List[CompiledType]:
+    def exposed_types(self) -> list[CompiledType]:
         return [self.element_type]
 
     @property
@@ -4563,17 +4565,17 @@ class EnumType(CompiledType):
     """
 
     def __init__(self,
-                 name: Union[str, names.Name],
-                 location: Opt[Location],
+                 name: str | names.Name,
+                 location: Location | None,
                  doc: str,
-                 value_names: List[names.Name],
-                 default_val_name: Opt[names.Name] = None,
+                 value_names: list[names.Name],
+                 default_val_name: names.Name | None = None,
                  is_builtin_type: bool = False):
-        self.values: List[EnumValue] = [
+        self.values: list[EnumValue] = [
             EnumValue(self, vn, i) for i, vn in enumerate(value_names)
         ]
 
-        self.values_dict: Dict[names.Name, EnumValue] = {
+        self.values_dict: dict[names.Name, EnumValue] = {
             v.name: v for v in self.values
         }
         """

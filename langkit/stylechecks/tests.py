@@ -5,7 +5,6 @@ also a way to make it explicit how it is intended to work...
 
 import dataclasses
 import os
-from typing import List, Tuple
 
 import pytest
 
@@ -31,7 +30,7 @@ class Testcase:
     "reindent_content".
     """
 
-    records: List[Tuple[int, int, str]]
+    records: list[tuple[int, int, str]]
     """
     List of expected diagnostics from the style checker when working on
     ``content``.
