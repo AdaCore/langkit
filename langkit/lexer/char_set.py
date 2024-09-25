@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os.path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 import unicodedata
 
 
@@ -17,8 +17,8 @@ def format_char(char: int) -> str:
             chr(char))
 
 
-def format_char_ranges(ranges: List[Optional[Tuple[int, int]]]) -> str:
-    def format_interval(interval: Optional[Tuple[int, int]]) -> str:
+def format_char_ranges(ranges: list[tuple[int, int] | None]) -> str:
+    def format_interval(interval: tuple[int, int] | None) -> str:
         if interval is None:
             return '...'
         else:
@@ -40,8 +40,8 @@ class CharSet:
     Whether __repr__ should put an ellipsis for characters beyond ASCII.
     """
 
-    def __init__(self, *items: Union[str, Tuple[str, str]]):
-        self.ranges: List[Tuple[int, int]] = []
+    def __init__(self, *items: str | tuple[str, str]):
+        self.ranges: list[tuple[int, int]] = []
         """
         Sorted, disjoint and as merged as possible list of ranges for character
         ordinals in the set. Both bounds are included in the ranges.
@@ -61,14 +61,14 @@ class CharSet:
         return cls.from_int_ranges((item, item))
 
     @classmethod
-    def from_int_ranges(cls, *items: Tuple[int, int]) -> CharSet:
+    def from_int_ranges(cls, *items: tuple[int, int]) -> CharSet:
         result = cls()
         for l, h in items:
             result.add_int_range(l, h)
         return result
 
     def __repr__(self) -> str:
-        ranges: List[Optional[Tuple[int, int]]] = []
+        ranges: list[tuple[int, int] | None] = []
         for l, h in self.ranges:
             if not self._repr_ellipsis or (l <= 127 and h <= 127):
                 ranges.append((l, h))
@@ -166,7 +166,7 @@ class CharSet:
         return result
 
     @property
-    def split_ascii_subsets(self) -> Tuple[CharSet, CharSet]:
+    def split_ascii_subsets(self) -> tuple[CharSet, CharSet]:
         """
         Return two character sets: one for the ASCII subset in self, and the
         other for the non-ASCII subset.
@@ -194,7 +194,7 @@ class CharSet:
         """
         assert isinstance(other, CharSet)
 
-        def overlap(r1: Tuple[int, int], r2: Tuple[int, int]) -> bool:
+        def overlap(r1: tuple[int, int], r2: tuple[int, int]) -> bool:
             return r1[0] <= r2[1] and r1[1] >= r2[0]
 
         self_r = list(self.ranges)
@@ -211,7 +211,7 @@ class CharSet:
                 return True
         return False
 
-    def _lookup(self, char: int) -> Tuple[bool, int]:
+    def _lookup(self, char: int) -> tuple[bool, int]:
         """
         Look for the range that contains ``char``.
 
@@ -325,7 +325,7 @@ def compute_unicode_categories_char_sets() -> None:
     # represent strings. It's fine because this code runs only to precompute
     # data that will be cached in source code, not on every script using
     # Langkit.
-    sets: Dict[str, CharSet] = {}
+    sets: dict[str, CharSet] = {}
     for i in range(MAXUNICODE + 1):
         char = chr(i)
         cat = unicodedata.category(chr(i))

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Dict, List, Optional, TYPE_CHECKING, Union
+from typing import Callable, TYPE_CHECKING, Union
 
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
@@ -43,11 +43,11 @@ class OCamlAPISettings(AbstractAPISettings):
 
     context: CompileCtx
     c_api_settings: CAPISettings
-    type_graph: Dict[TypeOrPlaceholder, List[TypeOrPlaceholder]]
+    type_graph: dict[TypeOrPlaceholder, list[TypeOrPlaceholder]]
 
     def actual_c_type(
         self,
-        typ: Union[TypeOrPlaceholder, ct.TypeRepo.Defer]
+        typ: TypeOrPlaceholder | ct.TypeRepo.Defer,
     ) -> TypeOrPlaceholder:
         """
         Return the C type used to encode ``typ`` values.
@@ -147,7 +147,7 @@ class OCamlAPISettings(AbstractAPISettings):
         """
         return '{}_fields'.format(type.kwless_raw_name.lower)
 
-    def get_field_type(self, field: ct.Field) -> List[ct.CompiledType]:
+    def get_field_type(self, field: ct.Field) -> list[ct.CompiledType]:
         """
         Return a precice type for the given Field instance. The list contains
         the possible concrete types of the given field. If there is only
@@ -175,7 +175,7 @@ class OCamlAPISettings(AbstractAPISettings):
         # For determinism, sort the list of concrete precise types
         return sorted(concrete_precise_types, key=lambda t: t.dsl_name)
 
-    def get_field_minimal_type(self, field: ct.Field) -> List[ct.CompiledType]:
+    def get_field_minimal_type(self, field: ct.Field) -> list[ct.CompiledType]:
         """
         Return a precice type for the given Field instance. While
         get_field_type returns a concrete list of types, this function returns
@@ -190,7 +190,7 @@ class OCamlAPISettings(AbstractAPISettings):
         # For determinism, sort the list of types.
         return sorted(minimal_precise_types, key=lambda t: t.dsl_name)
 
-    def get_parse_fields(self, node: ct.ASTNodeType) -> List[ct.Field]:
+    def get_parse_fields(self, node: ct.ASTNodeType) -> list[ct.Field]:
         """
         Return all the parse fields to be exposed as a field in record of node.
 
@@ -200,7 +200,7 @@ class OCamlAPISettings(AbstractAPISettings):
             lambda x: not x.is_overriding and not x.abstract and not x.null
         )
 
-    def get_properties(self, node: ct.ASTNodeType) -> List[PropertyDef]:
+    def get_properties(self, node: ct.ASTNodeType) -> list[PropertyDef]:
         """
         Return the list of all properties that should be exposed to the user.
 
@@ -245,7 +245,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.BigInt, lambda t: self.module_name(t)),
         ])
 
-    def node_name(self, type: Union[ct.EntityType, ct.ASTNodeType]) -> str:
+    def node_name(self, type: ct.EntityType | ct.ASTNodeType) -> str:
         """
         Returns the OCaml name for an ASTNodeType or an EntityType.
 
@@ -347,7 +347,7 @@ class OCamlAPISettings(AbstractAPISettings):
         type: ct.CompiledType,
         convert: str,
         convert_ast_node: Callable[[ct.ASTNodeType], str],
-        from_module: Optional[ct.ASTNodeType] = None
+        from_module: ct.ASTNodeType | None = None
     ) -> str:
         """
         Return the wrap/unwrap function name used to wrap/unwrap the given
@@ -388,7 +388,7 @@ class OCamlAPISettings(AbstractAPISettings):
     def wrap_function_name(
         self,
         type: ct.CompiledType,
-        from_module: Optional[ct.ASTNodeType] = None
+        from_module: ct.ASTNodeType | None = None
     ) -> str:
         def convert_ast_node(type: ct.ASTNodeType) -> str:
             return "wrap_{}".format(type.kwless_raw_name.lower)
@@ -399,7 +399,7 @@ class OCamlAPISettings(AbstractAPISettings):
     def unwrap_function_name(
         self,
         type: ct.CompiledType,
-        from_module: Optional[ct.ASTNodeType] = None
+        from_module: ct.ASTNodeType | None = None
     ) -> str:
         def convert_ast_node(type: ct.ASTNodeType) -> str:
             # We need only one unwrap function for the entire hierarchy
@@ -411,7 +411,7 @@ class OCamlAPISettings(AbstractAPISettings):
     def wrap_value(self,
                    value: str,
                    type: ct.CompiledType,
-                   context: Optional[str],
+                   context: str | None,
                    check_for_null: bool = False,
                    dec_ref: str = "true") -> str:
         """
@@ -463,7 +463,7 @@ class OCamlAPISettings(AbstractAPISettings):
     def unwrap_value(self,
                      value: str,
                      type: ct.CompiledType,
-                     context: Optional[str],
+                     context: str | None,
                      check_for_none: bool = False) -> str:
         """
         Given an expression for a low-level value and the associated type,
@@ -502,7 +502,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def is_struct(self,
                   type: ct.CompiledType,
-                  from_module: Optional[ct.ASTNodeType] = None) -> bool:
+                  from_module: ct.ASTNodeType | None = None) -> bool:
         """
         Return true if the given type is defined as a ctypes structure without
         a view.
@@ -534,7 +534,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.EnvRebindings, lambda _: False),
         ])
 
-    def finalize_function(self, type: ct.CompiledType) -> Optional[str]:
+    def finalize_function(self, type: ct.CompiledType) -> str | None:
         """
         Return the name of the finalization function if a value of the given
         type must be finalized. A value needs a finalization if it is
@@ -547,7 +547,7 @@ class OCamlAPISettings(AbstractAPISettings):
             function name.
         """
 
-        def dec_ref(type: ct.CompiledType) -> Optional[str]:
+        def dec_ref(type: ct.CompiledType) -> str | None:
             if type.is_refcounted:
                 return '{}.dec_ref'.format(self.struct_name(type))
             else:
@@ -565,7 +565,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def c_type(self,
                type: ct.CompiledType,
-               from_module: Optional[ct.CompiledType] = None) -> str:
+               from_module: ct.CompiledType | None = None) -> str:
         """
         Return the name of the OCaml ctypes value defining the type to use in
         the C API for ``type``. For ctypes, types passed to the foreign
@@ -602,7 +602,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def c_value_type(self,
                      type: ct.CompiledType,
-                     from_module: Optional[ct.CompiledType] = None) -> str:
+                     from_module: ct.CompiledType | None = None) -> str:
         """
         Return the name of the type to use in the C API for ``type``. This
         is the type of a c value.
@@ -642,7 +642,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def type_public_name(self,
                          type: ct.CompiledType,
-                         from_module: Optional[ct.CompiledType] = None) -> str:
+                         from_module: ct.CompiledType | None = None) -> str:
         """
         Return the public API name for a given CompiledType instance.
 
@@ -702,15 +702,13 @@ class OCamlAPISettings(AbstractAPISettings):
         """
         self.add_dep(typ, typ.element_type)
 
-    def ordered_types(self) -> List[TypeOrPlaceholder]:
+    def ordered_types(self) -> list[TypeOrPlaceholder]:
         """
         Return all the types sorted so that if type T1 depends on type T2, T2
         appears before T1. Returns the topological order of the types.
-
-        :rtype: list[ct.CompiledType]
         """
         marks = {typ: 'white' for typ in self.type_graph}
-        topo: List[TypeOrPlaceholder] = []
+        topo: list[TypeOrPlaceholder] = []
 
         def dfs(vertex: TypeOrPlaceholder) -> None:
             if marks[vertex] == 'black':

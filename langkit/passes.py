@@ -5,7 +5,7 @@ Helpers to manage compilation passes.
 from __future__ import annotations
 
 import abc
-from typing import Callable, List, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 
 from langkit.compiled_types import ASTNodeType, CompiledTypeRepo
 from langkit.diagnostics import errors_checkpoint
@@ -32,7 +32,7 @@ class PassManager:
     If true, adding new passes is forbidden.
     """
 
-    passes: List[AbstractPass]
+    passes: list[AbstractPass]
     """
     List of passes to run.
     """

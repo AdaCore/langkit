@@ -1,4 +1,6 @@
-from typing import Any, Optional, cast
+from __future__ import annotations
+
+from typing import Any, cast
 
 from langkit import names
 from langkit.compiled_types import T, get_context
@@ -605,9 +607,9 @@ class DynamicLexicalEnv(AbstractExpression):
     class Expr(CallExpr):
         def __init__(self,
                      assocs_getter: PropertyDef,
-                     assoc_resolver: Optional[PropertyDef],
+                     assoc_resolver: PropertyDef | None,
                      transitive_parent: ResolvedExpression,
-                     abstract_expr: Optional[AbstractExpression] = None):
+                     abstract_expr: AbstractExpression | None = None):
             self.assocs_getter = assocs_getter
             self.assoc_resolver = assoc_resolver
             self.transitive_parent = transitive_parent

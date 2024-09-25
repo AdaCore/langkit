@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import inspect
 from itertools import count
 import types
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable
 
 from langkit import names
 from langkit.compiled_types import (
@@ -37,7 +37,7 @@ def collection_expr_none(x):  # type: ignore
     return None
 
 
-builtin_collection_functions: Tuple[
+builtin_collection_functions: tuple[
     Callable[[AbstractExpression], AbstractExpression],
     Callable[[AbstractExpression], None],
 ] = (collection_expr_identity, collection_expr_none)
@@ -46,7 +46,7 @@ builtin_collection_functions: Tuple[
 def canonicalize_list(
     coll_expr: ResolvedExpression,
     to_root_list: bool = False
-) -> Tuple[ResolvedExpression, CompiledType]:
+) -> tuple[ResolvedExpression, CompiledType]:
     """
     If `coll_expr` returns a bare node, return an expression that converts it
     to the generic list type (if to_root_list=False) or the root list type (if
@@ -71,7 +71,7 @@ class InitializedVar:
     Variable with an optional initializer.
     """
     var: VariableExpr
-    init_expr: Optional[ResolvedExpression] = None
+    init_expr: ResolvedExpression | None = None
 
 
 class CollectionExpression(AbstractExpression):
@@ -91,7 +91,7 @@ class CollectionExpression(AbstractExpression):
                      result_var_name: str,
                      result_type: CompiledType,
                      common: CollectionExpression.ConstructCommonResult,
-                     abstract_expr: Optional[AbstractExpression] = None):
+                     abstract_expr: AbstractExpression | None = None):
             self.static_type = result_type
 
             self.collection = common.collection_expr
@@ -115,7 +115,7 @@ class CollectionExpression(AbstractExpression):
                 'inner_expr': self.inner_expr,
             }
 
-        def _bindings(self) -> List[VariableExpr]:
+        def _bindings(self) -> list[VariableExpr]:
             return [v.var for v in self.iter_vars]
 
     class ConstructCommonResult:
@@ -127,8 +127,8 @@ class CollectionExpression(AbstractExpression):
                      collection_expr: ResolvedExpression,
                      codegen_element_var: VariableExpr,
                      user_element_var: VariableExpr,
-                     index_var: Optional[VariableExpr],
-                     iter_vars: List[InitializedVar],
+                     index_var: VariableExpr | None,
+                     iter_vars: list[InitializedVar],
                      inner_expr: ResolvedExpression,
                      inner_scope: LocalVars.Scope):
             self.collection_expr = collection_expr
@@ -192,9 +192,9 @@ class CollectionExpression(AbstractExpression):
         self.expr_fn = expr
         self.expr: AbstractExpression
         self.expr_initialized = False
-        self.element_var: Optional[AbstractVariable] = None
+        self.element_var: AbstractVariable | None = None
         self.requires_index: bool = False
-        self.index_var: Optional[AbstractVariable] = None
+        self.index_var: AbstractVariable | None = None
 
         self.lambda_arg_infos: list[LambdaArgInfo] = []
 
@@ -203,7 +203,7 @@ class CollectionExpression(AbstractExpression):
         expr: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
-        index_var: Optional[AbstractVariable] = None,
+        index_var: AbstractVariable | None = None,
     ) -> None:
         """
         Initialize this expression using already expanded sub-expressions.
@@ -220,10 +220,10 @@ class CollectionExpression(AbstractExpression):
 
     def create_iteration_var(
         self,
-        existing_var: Optional[AbstractVariable],
+        existing_var: AbstractVariable | None,
         name_prefix: str,
-        source_name: Optional[str] = None,
-        type: Optional[CompiledType] = None
+        source_name: str | None = None,
+        type: CompiledType | None = None
     ) -> AbstractVariable:
         """
         Create (when needed) an iteration variable and assign it (when
@@ -256,9 +256,12 @@ class CollectionExpression(AbstractExpression):
     def prepare_iter_function(
         self,
         what: str,
-        expr_fn: Union[Callable[[AbstractExpression], AbstractExpression],
-                       Callable[[AbstractExpression, AbstractExpression],
-                                AbstractExpression]]
+        expr_fn: (
+            Callable[[AbstractExpression], AbstractExpression]
+            | Callable[
+                [AbstractExpression, AbstractExpression], AbstractExpression
+            ]
+        ),
     ) -> AbstractExpression:
         """
         Validate an iteration function, whether it only takes the iteration
@@ -291,8 +294,8 @@ class CollectionExpression(AbstractExpression):
 
         # Get source names for the iteration variables
         index_required = False
-        index_varname: Optional[str] = None
-        element_varname: Optional[str] = None
+        index_varname: str | None = None
+        element_varname: str | None = None
         if len(argspec.args) == 2:
             index_required = True
             self.requires_index = True
@@ -367,7 +370,7 @@ class CollectionExpression(AbstractExpression):
                     ),
                 )
 
-        iter_vars: List[AbstractInitializedVar] = []
+        iter_vars: list[AbstractInitializedVar] = []
 
         current_scope = PropertyDef.get_scope()
 
@@ -592,10 +595,10 @@ class Map(CollectionExpression):
 
         def __init__(self,
                      common: CollectionExpression.ConstructCommonResult,
-                     filter: Optional[ResolvedExpression] = None,
+                     filter: ResolvedExpression | None = None,
                      do_concat: bool = False,
-                     take_while: Optional[ResolvedExpression] = None,
-                     abstract_expr: Optional[AbstractExpression] = None):
+                     take_while: ResolvedExpression | None = None,
+                     abstract_expr: AbstractExpression | None = None):
             element_type = (common.inner_expr.type.element_type
                             if do_concat
                             else common.inner_expr.type)
@@ -661,8 +664,8 @@ class Map(CollectionExpression):
 
         self.take_while_pred = take_while_pred
         self.do_concat = do_concat
-        self.filter_expr: Optional[AbstractExpression] = None
-        self.take_while_expr: Optional[AbstractExpression] = None
+        self.filter_expr: AbstractExpression | None = None
+        self.take_while_expr: AbstractExpression | None = None
 
     @classmethod
     def create_expanded(
@@ -671,9 +674,9 @@ class Map(CollectionExpression):
         expr: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
-        index_var: Optional[AbstractVariable] = None,
-        filter_expr: Optional[AbstractExpression] = None,
-        take_while_expr: Optional[AbstractExpression] = None,
+        index_var: AbstractVariable | None = None,
+        filter_expr: AbstractExpression | None = None,
+        take_while_expr: AbstractExpression | None = None,
         do_concat: bool = False,
     ) -> Map:
         result = cls(collection, None, do_concat=do_concat)
@@ -785,7 +788,7 @@ class Quantifier(CollectionExpression):
         def __init__(self,
                      kind: str,
                      common: CollectionExpression.ConstructCommonResult,
-                     abstract_expr: Optional[AbstractExpression] = None):
+                     abstract_expr: AbstractExpression | None = None):
             """
             :param kind: Kind for this quantifier expression. 'all' will check
                 that all items in "collection" fullfill "expr" while 'any' will
@@ -847,7 +850,7 @@ class Quantifier(CollectionExpression):
         predicate: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
-        index_var: Optional[AbstractVariable] = None,
+        index_var: AbstractVariable | None = None,
     ) -> Quantifier:
         result = cls(collection, None, kind)
         result.initialize(predicate, lambda_arg_infos, element_var, index_var)
@@ -996,7 +999,7 @@ class CollectionSingleton(AbstractExpression):
 
         def __init__(self,
                      expr: ResolvedExpression,
-                     abstract_expr: Optional[AbstractExpression] = None):
+                     abstract_expr: AbstractExpression | None = None):
             self.expr = expr
             self.static_type = self.expr.type.array
 
@@ -1120,8 +1123,8 @@ class Join(AbstractExpression):
 def make_to_iterator(
     prefix: ResolvedExpression,
     node_data: AbstractNodeData,
-    args: List[Optional[ResolvedExpression]],
-    abstract_expr: Optional[AbstractExpression] = None
+    args: list[ResolvedExpression | None],
+    abstract_expr: AbstractExpression | None = None
 ) -> ResolvedExpression:
     """
     Turn an array into an iterator.
@@ -1159,7 +1162,7 @@ class Find(CollectionExpression):
     class Expr(CollectionExpression.BaseExpr):
         def __init__(self,
                      common: CollectionExpression.ConstructCommonResult,
-                     abstract_expr: Optional[AbstractExpression] = None):
+                     abstract_expr: AbstractExpression | None = None):
             super().__init__(
                 "Find_Result",
                 common.user_element_var.type,
@@ -1185,7 +1188,7 @@ class Find(CollectionExpression):
         expr: AbstractExpression,
         lambda_arg_infos: list[LambdaArgInfo],
         element_var: AbstractVariable,
-        index_var: Optional[AbstractVariable] = None,
+        index_var: AbstractVariable | None = None,
     ) -> Find:
         result = cls(collection, None)
         result.initialize(expr, lambda_arg_infos, element_var, index_var)

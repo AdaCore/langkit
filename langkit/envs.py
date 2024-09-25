@@ -13,7 +13,7 @@ import dataclasses
 from enum import Enum
 from funcy import lsplit_by
 from itertools import count
-from typing import Dict, List, Optional, Type, cast, overload
+from typing import Type, cast, overload
 
 from langkit import names
 from langkit.compile_context import CompileCtx, get_context
@@ -34,7 +34,7 @@ from langkit.expressions import (AbstractExpression, FieldAccess, PropertyDef,
 
 def add_env(no_parent: bool = False,
             transitive_parent: bool = False,
-            names: Optional[AbstractExpression] = None) -> AddEnv:
+            names: AbstractExpression | None = None) -> AddEnv:
     """Create a new lexical environment.
 
     This action creates an environment related to this node. Using this action
@@ -77,9 +77,9 @@ class RefKind(Enum):
 def reference(nodes: AbstractExpression,
               through: PropertyDef,
               kind: RefKind = RefKind.normal,
-              dest_env: Optional[AbstractExpression] = None,
-              cond: Optional[AbstractExpression] = None,
-              category: Optional[str] = None,
+              dest_env: AbstractExpression | None = None,
+              cond: AbstractExpression | None = None,
+              category: str | None = None,
               shed_corresponding_rebindings: bool = False) -> RefEnvs:
     """
     Reference a group of lexical environments, that will be lazily yielded by
@@ -109,7 +109,7 @@ def reference(nodes: AbstractExpression,
 
 
 def add_to_env(mappings: AbstractExpression,
-               resolver: Optional[PropertyDef] = None) -> AddToEnv:
+               resolver: PropertyDef | None = None) -> AddToEnv:
     """
     Specify elements to add to the lexical environment.
 
@@ -129,9 +129,9 @@ def add_to_env(mappings: AbstractExpression,
 
 def add_to_env_kv(key: AbstractExpression,
                   value: AbstractExpression,
-                  dest_env: Optional[AbstractExpression] = None,
-                  metadata: Optional[AbstractExpression] = None,
-                  resolver: Optional[PropertyDef] = None) -> AddToEnv:
+                  dest_env: AbstractExpression | None = None,
+                  metadata: AbstractExpression | None = None,
+                  resolver: PropertyDef | None = None) -> AddToEnv:
     """
     Specify a single element to add to the lexical environment. See
     langkit.expressions.envs.new_env_assoc for more precision about the first
@@ -192,13 +192,13 @@ class EnvSpec:
         """
         self.location = extract_library_location()
 
-        self.ast_node: Optional[ASTNodeType] = None
+        self.ast_node: ASTNodeType | None = None
         """
         ASTNodeType subclass associated to this environment specification.
         Initialized when creating ASTNodeType subclasses.
         """
 
-        self.initial_env: Optional[SetInitialEnv] = None
+        self.initial_env: SetInitialEnv | None = None
         """
         The SetInitialEnv action associated to this EnvSpec, if any.
         Initialized during the parsing of actions.
@@ -221,14 +221,14 @@ class EnvSpec:
         types lowering: no need to do it in the "create_properties" method.
         """
 
-    def _parse_actions(self, actions: List[EnvAction]) -> None:
+    def _parse_actions(self, actions: list[EnvAction]) -> None:
         """
         Analyze the given list of actions and extract pre/post actions, i.e.
         actions executed before and after handling children.
         """
         def filter(
             cls: Type[EnvAction],
-            sequence: List[EnvAction],
+            sequence: list[EnvAction],
         ) -> list[EnvAction]:
             """
             Return the number of ``cls`` instances in ``sequence``.
@@ -290,22 +290,22 @@ class EnvSpec:
     def create_internal_property(self,
                                  name: str,
                                  expr: None,
-                                 type: Optional[CompiledType]) -> None: ...
+                                 type: CompiledType | None) -> None: ...
 
     @overload
     def create_internal_property(
         self,
         name: str,
         expr: AbstractExpression,
-        type: Optional[CompiledType]
+        type: CompiledType | None,
     ) -> PropertyDef: ...
 
     def create_internal_property(
         self,
         name: str,
-        expr: Optional[AbstractExpression],
-        type: Optional[CompiledType]
-    ) -> Optional[PropertyDef]:
+        expr: AbstractExpression | None,
+        type: CompiledType | None,
+    ) -> PropertyDef | None:
         """
         Create an internal property for this env spec.
 
@@ -439,7 +439,7 @@ class EnvAction:
         pass
 
     def rewrite_property_refs(self,
-                              mapping: Dict[PropertyDef, PropertyDef]) -> None:
+                              mapping: dict[PropertyDef, PropertyDef]) -> None:
         """
         Rewrite `PropertyDef` references according to `mapping`. See
         CompileCtx.lower_properties_dispatching.
@@ -489,9 +489,9 @@ class AddToEnv(EnvAction):
         """
         key: AbstractExpression
         value: AbstractExpression
-        dest_env: Optional[AbstractExpression]
-        metadata: Optional[AbstractExpression]
-        resolver: Optional[PropertyDef]
+        dest_env: AbstractExpression | None
+        metadata: AbstractExpression | None
+        resolver: PropertyDef | None
 
     def __init__(
         self,
@@ -514,7 +514,7 @@ class AddToEnv(EnvAction):
         )
 
     def rewrite_property_refs(self,
-                              mapping: Dict[PropertyDef, PropertyDef]) -> None:
+                              mapping: dict[PropertyDef, PropertyDef]) -> None:
         if self.resolver is not None:
             resolver = resolve_property(self.resolver)
             self.resolver = mapping.get(resolver, resolver)
@@ -663,7 +663,7 @@ class RefEnvs(EnvAction):
         )
 
     def rewrite_property_refs(self,
-                              mapping: Dict[PropertyDef, PropertyDef]) -> None:
+                              mapping: dict[PropertyDef, PropertyDef]) -> None:
         resolver = resolve_property(self.resolver)
         self.resolver = mapping.get(resolver, resolver)
 

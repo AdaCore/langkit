@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from enum import Enum
-from typing import List, Optional, TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from langkit.gdb.context import Context
 
 
-def analysis_line_no(context: Context, frame: gdb.Frame) -> Optional[int]:
+def analysis_line_no(context: Context, frame: gdb.Frame) -> int | None:
     """
     If the given frame is in the $-implementation.adb file, return its
     currently executed line number. Return None otherwise.
@@ -52,7 +52,7 @@ class State:
         The property currently running.
         """
 
-        self.scopes: List[ScopeState] = []
+        self.scopes: list[ScopeState] = []
         """
         The stack of scope states describing the current execution state. The
         first item is the scope for the property itself. The following items
@@ -60,7 +60,7 @@ class State:
         nested scope.
         """
 
-        self.started_expressions: List[ExpressionEvaluation] = []
+        self.started_expressions: list[ExpressionEvaluation] = []
         """
         Stack of expressions that are being evaluated.
         """
@@ -97,8 +97,8 @@ class State:
         """
         return self.scopes[-1]
 
-    def lookup_current_expr(self) -> Tuple[Optional[ScopeState],
-                                           Optional[ExpressionEvaluation]]:
+    def lookup_current_expr(self) -> tuple[ScopeState | None,
+                                           ExpressionEvaluation | None]:
         """
         Return the innermost currently evaluating expression and its scope
         state. Return (None, None) if there is no evaluating expression.
@@ -109,7 +109,7 @@ class State:
                     return scope_state, e
         return (None, None)
 
-    def lookup_expr(self, expr_id: str) -> Optional[ExpressionEvaluation]:
+    def lookup_expr(self, expr_id: str) -> ExpressionEvaluation | None:
         """
         Look for an expression evaluation matching the given ID.
         """
@@ -121,7 +121,7 @@ class State:
         return None
 
     @classmethod
-    def decode(cls, context: Context, frame: gdb.Frame) -> Optional[State]:
+    def decode(cls, context: Context, frame: gdb.Frame) -> State | None:
         """
         Decode the execution state from the given GDB frame. Return None if no
         property is running in this frame.
@@ -175,7 +175,7 @@ class ScopeState:
 
     def __init__(self,
                  state: State,
-                 parent: Optional[ScopeState],
+                 parent: ScopeState | None,
                  scope: Scope):
         self.state = state
         self.parent = parent
@@ -185,26 +185,24 @@ class ScopeState:
         The scope of interest.
         """
 
-        self.bindings: List[Binding] = []
+        self.bindings: list[Binding] = []
         """
         Bindings that are live in this state.
         """
 
-        self.expressions: OrderedDict[str, ExpressionEvaluation] = (
-            OrderedDict()
-        )
+        self.expressions: dict[str, ExpressionEvaluation] = OrderedDict()
         """
         Expressions that are currently being evaluated or that are evaluated in
         this state, indexed by unique ids.
         """
 
-        self.called_property: Optional[Property] = None
+        self.called_property: Property | None = None
         """
         Property that is currently being called, if any.
         """
 
-    def sorted_expressions(self) -> Tuple[List[ExpressionEvaluation],
-                                          Optional[ExpressionEvaluation]]:
+    def sorted_expressions(self) -> tuple[list[ExpressionEvaluation],
+                                          ExpressionEvaluation | None]:
         """
         Return a tuple, whose first element is the list of already evaluated
         expressions in this scope, sorted by line of done, and second element
@@ -273,11 +271,11 @@ class ExpressionEvaluation:
     def __init__(self, start_event: ExprStart):
         self.start_event = start_event
 
-        self.parent_expr: Optional[ExpressionEvaluation] = None
-        self.sub_exprs: List[ExpressionEvaluation] = []
+        self.parent_expr: ExpressionEvaluation | None = None
+        self.sub_exprs: list[ExpressionEvaluation] = []
 
         self.state: EvalState = EvalState.started
-        self.done_at_line: Optional[int] = None
+        self.done_at_line: int | None = None
 
     @property
     def expr_id(self) -> str:
@@ -292,7 +290,7 @@ class ExpressionEvaluation:
         return self.start_event.result_var
 
     @property
-    def dsl_sloc(self) -> Optional[DSLLocation]:
+    def dsl_sloc(self) -> DSLLocation | None:
         return self.start_event.dsl_sloc
 
     @property

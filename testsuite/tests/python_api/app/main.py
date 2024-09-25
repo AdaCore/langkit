@@ -3,7 +3,7 @@ import os
 import os.path
 import subprocess
 import sys
-from typing import List, Type
+from typing import Type
 
 import libfoolang
 
@@ -16,7 +16,7 @@ class Testcase:
     """
     label: str
     cls: Type[libfoolang.App]
-    args: List[str]
+    args: list[str]
 
 
 class BasicApp(libfoolang.App):

@@ -1,6 +1,5 @@
 import hashlib
 import json
-from typing import Dict
 
 
 class Cache:
@@ -11,7 +10,7 @@ class Cache:
     attempt to reduce the time to do this.
     """
 
-    db: Dict[str, str]
+    db: dict[str, str]
 
     def __init__(self, cache_file: str) -> None:
         """Load the cache from `cache_file`, or create a new cache if new.

@@ -1,4 +1,4 @@
-from typing import Dict, List
+from __future__ import annotations
 
 import gdb
 
@@ -19,8 +19,8 @@ def get_current_gdb_context() -> Context:
 
 
 def setup(lib_name: str,
-          astnode_names: List[str],
-          astnode_kinds: Dict[int, str],
+          astnode_names: list[str],
+          astnode_kinds: dict[int, str],
           prefix: str) -> None:
     """
     Register helpers in GDB internals. This should be run when the generated

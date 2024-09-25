@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import gdb
 
@@ -61,7 +61,7 @@ class BreakpointGroup:
     def __init__(
         self,
         context: Context,
-        line_nos: List[int],
+        line_nos: list[int],
         same_call: bool = False,
     ):
         """
