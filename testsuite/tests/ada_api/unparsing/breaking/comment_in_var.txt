@@ -1,0 +1,5 @@
+var v1: T = 1;
+def f(): T {}
+var v2:
+# Comment
+T = 2;

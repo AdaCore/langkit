@@ -1,0 +1,15 @@
+{
+  "node_configs": {
+    "FooNodeList": {
+      "node": {"kind": "fill", "document": "recurse"}
+    },
+    "FunDecl": {
+      "node": ["hardline", "recurse"]
+    },
+    "VarDecl": {
+      "fields": {
+        "f_type_expr": ["line", "recurse"]
+      }
+    }
+  }
+}
