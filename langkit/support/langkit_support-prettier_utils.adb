@@ -46,6 +46,9 @@ package body Langkit_Support.Prettier_Utils is
    --  one does not --  exist yet.
 
    type Spacing_State is record
+      In_Fill : Boolean;
+      --  Whether the closest parent group-like document is a Fill
+
       In_Broken_Group : Boolean;
       --  Whether the current group is known to be broken, i.e. whether Line
       --  and Soft_Line can be assumed to yield line breaks.
@@ -65,7 +68,7 @@ package body Langkit_Support.Prettier_Utils is
    --  spacing information.
 
    Initial_Spacing_State : constant Spacing_State :=
-     (True, No_Spacing, No_Spacing, No_Token_Kind_Ref);
+     (False, True, No_Spacing, No_Spacing, No_Token_Kind_Ref);
    --  Prettier considers that documents are implicitly wrapped in a broken
    --  group.
 
@@ -142,8 +145,11 @@ package body Langkit_Support.Prettier_Utils is
       if Left.Last_Token /= Right.Last_Token then
          raise Program_Error;
       end if;
+      pragma Assert (not Left.In_Fill);
+      pragma Assert (not Right.In_Fill);
       return
-        (In_Broken_Group => Left.In_Broken_Group
+        (In_Fill         => False,
+         In_Broken_Group => Left.In_Broken_Group
                             and then Right.In_Broken_Group,
          Expected        => Max_Spacing (Left.Expected, Right.Expected),
          Actual          => Min_Spacing (Left.Actual, Right.Actual),
@@ -180,7 +186,9 @@ package body Langkit_Support.Prettier_Utils is
          --  Helper to break the parent group
 
          procedure Save_Break_State
-           (Saving : out Boolean; Inner_Is_Broken_Group : Boolean := False);
+           (Saving                : out Boolean;
+            Inner_Is_Broken_Group : Boolean := False;
+            Inner_Is_Fill         : Boolean := False);
          --  Helper to handle breaking in a group-like document. Save the
          --  "broken group" state to ``Saving`` and set it to
          --  ``Inner_Is_Broken_Group``.
@@ -197,8 +205,10 @@ package body Langkit_Support.Prettier_Utils is
 
          procedure Do_Break is
          begin
-            Breaks := True;
-            State.In_Broken_Group := True;
+            if not State.In_Fill then
+               Breaks := True;
+               State.In_Broken_Group := True;
+            end if;
          end Do_Break;
 
          ----------------------
@@ -206,9 +216,12 @@ package body Langkit_Support.Prettier_Utils is
          ----------------------
 
          procedure Save_Break_State
-           (Saving : out Boolean; Inner_Is_Broken_Group : Boolean := False) is
+           (Saving                : out Boolean;
+            Inner_Is_Broken_Group : Boolean := False;
+            Inner_Is_Fill         : Boolean := False) is
          begin
             Saving := State.In_Broken_Group;
+            State.In_Fill := Inner_Is_Fill;
             State.In_Broken_Group := Inner_Is_Broken_Group;
          end Save_Break_State;
 
@@ -254,7 +267,7 @@ package body Langkit_Support.Prettier_Utils is
                declare
                   Saving, Inner_Breaks : Boolean;
                begin
-                  Save_Break_State (Saving);
+                  Save_Break_State (Saving, Inner_Is_Fill => True);
                   Process (Self.Fill_Document, State, Inner_Breaks);
                   Restore_Break_State (Saving, Inner_Breaks);
                end;
