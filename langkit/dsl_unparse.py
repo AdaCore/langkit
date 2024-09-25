@@ -498,7 +498,7 @@ def sf(strn):
     else:
         t = templates[strn]
 
-    return t.render(**dict(frame.f_locals, **frame.f_globals))
+    return t.render(**dict(frame.f_globals, **frame.f_locals))
 
 
 def root_list_name(node):
