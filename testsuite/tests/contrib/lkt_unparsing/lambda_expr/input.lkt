@@ -14,3 +14,16 @@ val v8 = n.map(
     (n) => aaaaaaaaaa or bbbbbbbbbbbbbb or cccccccccccccccccc or ddddddddddd or
     eeeeeeeeee
 )
+val v9 = n.map(
+    (n) =>
+    # Comment about what follows
+    n + 1
+)
+val v10 = n.map(
+    (n) =>
+    # Comment about what follows
+    {
+        val v = n + 1;
+        v + v
+    }
+)

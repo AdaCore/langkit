@@ -776,6 +776,7 @@
         {"kind": "recurse_field", "field": "f_return_type"},
         "whitespace",
         {"kind": "text", "text": "=>"},
+        {"kind": "group", "id": "comments", "document": "flushLineBreaks"},
         {
           "kind": "ifKind",
           "field": "f_body",
@@ -783,7 +784,12 @@
             {
               "kind": "BlockExpr",
               "document": [
-                "whitespace",
+                {
+                  "kind": "ifBreak",
+                  "groupId": "comments",
+                  "breakContents": [],
+                  "flatContents": "whitespace"
+                },
                 {"kind": "recurse_field", "field": "f_body"}
               ]
             }
@@ -791,7 +797,12 @@
           "default": {
             "kind": "group",
             "document": [
-              "line",
+              {
+                "kind": "ifBreak",
+                "groupId": "comments",
+                "breakContents": [],
+                "flatContents": "line"
+              },
               {"kind": "recurse_field", "field": "f_body"}
             ]
           }
