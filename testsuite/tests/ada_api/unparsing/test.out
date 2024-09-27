@@ -55,6 +55,10 @@ a: Int=2
     invalid "max_empty lines" entry: natural integer expected
 # invalid_max_empty_lines_2.json
     invalid "max_empty lines" entry: natural integer expected
+# invalid_flush_before_children_1.json
+    VarDecl is not a list node, invalid "flush_before_children" configuration
+# invalid_flush_before_children_2.json
+    invalid "flush_before_children" entry for Decl.list: boolean expected
 
 == Decoding errors in templates ==
 

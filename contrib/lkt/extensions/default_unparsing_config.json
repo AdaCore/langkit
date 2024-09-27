@@ -236,6 +236,9 @@
         }
       }
     },
+    "ElsifBranchList": {
+      "flush_before_children": false
+    },
     "EnvSpecDecl": {
       "fields": {
         "f_syn_name": ["recurse", "whitespace"],

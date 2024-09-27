@@ -534,6 +534,9 @@ package body Langkit_Support.Generic_API.Unparsing is
 
       Table_Config : Table_Config_Record;
       --  Table config for this list type
+
+      Flush_Before_Children : Boolean;
+      --  Whether to insert a Flush_Line_Breaks document before each list child
    end record;
 
    function Table_Needs_Split
@@ -559,8 +562,9 @@ package body Langkit_Support.Generic_API.Unparsing is
    --  ``Next_Child``.
 
    No_List_Config : constant List_Config_Record :=
-     (Seps         => (others => No_Template),
-      Table_Config => (Enabled => False));
+     (Seps                  => (others => No_Template),
+      Table_Config          => (Enabled => False),
+      Flush_Before_Children => True);
 
    type Node_Config_Record is limited record
       Node_Template : Template_Type;
@@ -3734,6 +3738,37 @@ package body Langkit_Support.Generic_API.Unparsing is
                      Node_Config.List_Config.Seps (Kind));
                end;
             end loop;
+
+            --  (5) the "flush_before_children" entry (if present). If not
+            --  present, inherit the setting from the base node.
+
+            if JSON.Kind = JSON_Object_Type
+               and then JSON.Has_Field ("flush_before_children")
+            then
+               if not Is_List_Node (Node) then
+                  Abort_Parsing
+                    (Debug_Name (Node) & " is not a list node, invalid"
+                     & " ""flush_before_children"" configuration");
+               end if;
+
+               declare
+                  Value : constant JSON_Value :=
+                    JSON.Get ("flush_before_children");
+               begin
+                  if Value.Kind /= JSON_Boolean_Type then
+                     Abort_Parsing
+                       ("invalid ""flush_before_children"" entry for "
+                        & Debug_Name (Node) & ": boolean expected");
+                  end if;
+
+                  Node_Config.List_Config.Flush_Before_Children := Value.Get;
+               end;
+            elsif Base_Config /= null then
+               Node_Config.List_Config.Flush_Before_Children :=
+                 Base_Config.List_Config.Flush_Before_Children;
+            else
+               Node_Config.List_Config.Flush_Before_Children := True;
+            end if;
          end;
       end loop;
 
@@ -4399,11 +4434,12 @@ package body Langkit_Support.Generic_API.Unparsing is
                               Items,
                               New_Row => not Table_Sep_Before);
 
-                        else
-                           --  Flush line breaks before unparsing the next list
-                           --  child, so that line breaks do not get inserted
-                           --  inside groups/indents/... that belong to the
-                           --  next child.
+                        elsif Node_Config.List_Config.Flush_Before_Children
+                        then
+                           --  If requested, flush line breaks before unparsing
+                           --  the next list child, so that line breaks do not
+                           --  get inserted inside groups/indents/... that
+                           --  belong to the next child.
                            --
                            --  Note that we avoid this when generating a table,
                            --  since the end of the table row may insert a new
@@ -4477,11 +4513,13 @@ package body Langkit_Support.Generic_API.Unparsing is
                      Pool,
                      Trivias);
 
-                  --  Flush line breaks before unparsing the list child, so
-                  --  that line breaks do not get inserted inside
+                  --  If requested, flush line breaks before unparsing the list
+                  --  child, so that line breaks do not get inserted inside
                   --  groups/indents/... that would belong to it.
 
-                  Items.Append (Pool.Create_Flush_Line_Breaks);
+                  if Node_Config.List_Config.Flush_Before_Children then
+                     Items.Append (Pool.Create_Flush_Line_Breaks);
+                  end if;
 
                   --  Unparse the list child itself
 
