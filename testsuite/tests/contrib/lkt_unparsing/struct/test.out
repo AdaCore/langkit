@@ -3,4 +3,28 @@ struct S1 {
 
 struct S2 {
     f: T
+
+    fffffffffffffffffffffffffff: Ttttttttttttttttttttttttttt =
+        vvvvvvvvvvvvvvvvvvvvv
+
+    fffffffffffffffffffffffffff: Ttttttttttttttttttttttttttt = {
+        val v = 0;
+        v
+    }
+
+    fffffffffffffffffffffffffff: Ttttttttttttttttttttttttttt =
+        gggggggggggg(
+            aaaaaaaaaaaaaaaaaaaa,
+            bbbbbbbbbbbbbbbbbb,
+            cccccccccccccccc,
+            dddddddddddddd
+        )
+
+    fffffffffffffffffffffffffff: Ttttttttttttttttttttttttttt =
+        gggggggggggggggggggg(
+            aaaaaaaaaaaaaaaaaaaa,
+            bbbbbbbbbbbbbbbbbb,
+            cccccccccccccccc,
+            dddddddddddddd
+        )
 }
