@@ -19,3 +19,6 @@ fun f8(@ignored a: T, @ignored b: T): T = 0
 fun f8(): T =
 # Comment about the sum
 a + b
+
+fun f9(aaaaaaaaaaaaaaaaaaaaaaaaaaa: Ttttttttttttttttttttttttttt =
+bbbbbbbbbbbbbbbbbbbbbbb): T = c

@@ -386,8 +386,10 @@
         "f_default_val": [
           "whitespace",
           {"kind": "text", "text": "="},
-          "whitespace",
-          "recurse"
+          {
+            "kind": "group",
+            "document": {"kind": "indent", "contents": ["line", "recurse"]}
+          }
         ]
       }
     },
