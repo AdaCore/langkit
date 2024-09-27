@@ -7,4 +7,7 @@ val t: Int = test(12, 15) # Correct call
 @invalid val v: Int = test(b=12) # Missing params in call with kwargs
 @invalid val x: Int = test(12, 15, 17) # Too many params
 @invalid val y: Int = test(a=1, b=12, c=15) # Too many params kwargs
-@invalid val z: Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check that there is an error message for the expr
+
+# Invalid kwarg with wrong value: check that there is an error message for the
+# expr.
+@invalid val z: Int = test(a=1, b=12, c=foo)

@@ -148,41 +148,41 @@ Expr <NumLit test.lkt:9:41-9:43>
 Expr <CallExpr test.lkt:9:23-9:44>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "Int" test.lkt:10:17-10:20>
+Id   <RefId "Int" test.lkt:13:17-13:20>
      references <StructDecl prelude: "Int">
 
-test.lkt:10:39: error: Unmatched actual in call to `test`
-10 | @invalid val z: Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check that there is an error message for the expr
+test.lkt:13:39: error: Unmatched actual in call to `test`
+13 | @invalid val z: Int = test(a=1, b=12, c=foo)
    |                                       ^^^^^
 
-Id   <RefId "test" test.lkt:10:23-10:27>
+Id   <RefId "test" test.lkt:13:23-13:27>
      references <FunDecl "test" test.lkt:3:1-3:38>
 
-Expr <RefId "test" test.lkt:10:23-10:27>
+Expr <RefId "test" test.lkt:13:23-13:27>
      has type <FunctionType prelude: "(Int, Int) -> Int">
 
-Id   <RefId "a" test.lkt:10:28-10:29>
+Id   <RefId "a" test.lkt:13:28-13:29>
      references <FunArgDecl "a" test.lkt:3:10-3:16>
 
-Expr <RefId "a" test.lkt:10:28-10:29>
+Expr <RefId "a" test.lkt:13:28-13:29>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:10:30-10:31>
+Expr <NumLit test.lkt:13:30-13:31>
      has type <StructDecl prelude: "Int">
 
-Id   <RefId "b" test.lkt:10:33-10:34>
+Id   <RefId "b" test.lkt:13:33-13:34>
      references <FunArgDecl "b" test.lkt:3:18-3:24>
 
-Expr <RefId "b" test.lkt:10:33-10:34>
+Expr <RefId "b" test.lkt:13:33-13:34>
      has type <StructDecl prelude: "Int">
 
-Expr <NumLit test.lkt:10:35-10:37>
+Expr <NumLit test.lkt:13:35-13:37>
      has type <StructDecl prelude: "Int">
 
-test.lkt:10:41: error: Cannot find entity `foo` in this scope
-10 | @invalid val z: Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check that there is an error message for the expr
+test.lkt:13:41: error: Cannot find entity `foo` in this scope
+13 | @invalid val z: Int = test(a=1, b=12, c=foo)
    |                                         ^^^
 
-Expr <CallExpr test.lkt:10:23-10:45>
+Expr <CallExpr test.lkt:13:23-13:45>
      has type <StructDecl prelude: "Int">
 

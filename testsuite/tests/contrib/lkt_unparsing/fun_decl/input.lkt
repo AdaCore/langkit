@@ -9,8 +9,8 @@ fun f4(a: Int, b: Int): T = a + b
 
 fun f5(a: Int = 0, b: Int): T = a + b
 
-fun f6(a: SomeLongType, b: SomeLongType = 0, c: SomeLongType, d: SomeLongType, e:
-SomeLongType): T = a + b + c + d + e
+fun f6(a: SomeLongType, b: SomeLongType = 0, c: SomeLongType, d: SomeLongType,
+e: SomeLongType): T = a + b + c + d + e
 
 fun f7(@ignored a: T): T = 0
 
