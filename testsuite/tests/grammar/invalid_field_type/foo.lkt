@@ -1,4 +1,4 @@
-# Test that invalid AST node parse fields are properly rejected.
+# Test that invalid AST node parse fields are properly rejected
 
 import lexer_example
 

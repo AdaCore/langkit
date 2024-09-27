@@ -1,2 +1,2 @@
-import lexer_example
 import common
+import lexer_example

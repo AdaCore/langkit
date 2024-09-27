@@ -1,4 +1,4 @@
-# Check that the unification of the return type of match expression is correct.
+# Check that the unification of the return type of match expression is correct
 
 import lexer_example
 

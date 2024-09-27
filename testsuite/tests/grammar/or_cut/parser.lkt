@@ -6,10 +6,10 @@ grammar foo_grammar {
 
     # In the following specific case:
     #
-    # * a parsing error in "basic_var" causes diagnostics to be emitted
-    #   after the cut parser (so "basic_var" returns a non-null node);
+    # * A parsing error in "basic_var" causes diagnostics to be emitted
+    #   after the cut parser (so "basic_var" returns a non-null node).
     #
-    # * then, another parsing error in "var" causes "var" to return a null
+    # * Then, another parsing error in "var" causes "var" to return a null
     #   node.
     #
     # Then after returning from the "var" parser to "stmt_rule", the next

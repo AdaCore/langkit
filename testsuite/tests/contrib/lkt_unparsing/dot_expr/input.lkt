@@ -23,7 +23,8 @@ aaaaaaaaaaaaaa.keep[T].bbbbbbbbbbbbbbbbb.cccccccccccccccc.ddddddddddddddd
 
 val nc_short = a?.b?.c
 val nc_long =
-aaaaaaaaaa?.bbbbbbbbbb?.ccccccccc?.ddddddddddddd?.eeeeeeeeeeee?.fffffffff?.gggggggg
+aaaaaaaaaa?.bbbbbbbbbb?.ccccccccc?.ddddddddddddd?.eeeeeeeeeeee?.fffffffff?
+.gggggggg
 
 val nc_long_with_calls =
 aaaaaaaaaa(1, 2)?.bbbbbbbbbb?.ccccccccc(3)?.ddddddddddddd(4)?.eeeeeeeeeeee
