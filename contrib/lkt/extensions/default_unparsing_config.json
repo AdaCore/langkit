@@ -356,6 +356,23 @@
     "ExprList": {
       "sep": ["recurse", "line"]
     },
+    "FieldDecl": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_syn_name"},
+        {"kind": "text", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_decl_type"},
+        {"kind": "recurse_field", "field": "f_default_val"}
+      ],
+      "fields": {
+        "f_default_val": [
+          "whitespace",
+          {"kind": "text", "text": "="},
+          "whitespace",
+          "recurse"
+        ]
+      }
+    },
     "FullDeclList": {
       "sep": ["recurse", "hardline"]
     },
@@ -1116,24 +1133,6 @@
               {"kind": "recurse_field", "field": "f_expr"}
             ]
           }
-        ]
-      }
-    },
-
-    "FieldDecl": {
-      "node": [
-        {"kind": "recurse_field", "field": "f_syn_name"},
-        {"kind": "text", "text": ":"},
-        "whitespace",
-        {"kind": "recurse_field", "field": "f_decl_type"},
-        {"kind": "recurse_field", "field": "f_default_val"}
-      ],
-      "fields": {
-        "f_default_val": [
-          "whitespace",
-          {"kind": "text", "text": "="},
-          "whitespace",
-          "recurse"
         ]
       }
     }
