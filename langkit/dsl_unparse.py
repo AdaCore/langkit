@@ -10,6 +10,7 @@ from typing import Dict, Union
 from funcy import keep, lmap
 
 from langkit.diagnostics import print_error, Location
+from langkit.expressions import DynamicVariable
 from langkit.passes import GlobalPass
 from langkit import names
 
@@ -322,9 +323,9 @@ class DSLWalker:
 
         :type kind: str
         """
-        from langkit.expressions import BinaryBooleanOperator
+        from langkit.expressions import BinaryBooleanOperator, BinaryOpKind
 
-        if kind == BinaryBooleanOperator.AND:
+        if kind == BinaryOpKind.AND:
             call_name = 'And'
             expr_type = lpl.AndExpr
         else:
@@ -337,7 +338,7 @@ class DSLWalker:
                     return True
                 elif n.f_prefix.is_a(lpl.DottedName):
                     if n.f_prefix.f_suffix.text == 'any_of':
-                        return kind == BinaryBooleanOperator.OR
+                        return kind == BinaryOpKind.OR
             elif n.is_a(expr_type):
                 return True
             return False
@@ -744,6 +745,23 @@ def emit_expr(outer_assoc_prio, expr, **ctx):
         result
     )
 
+
+bound_dynvars: list[DynamicVariable] = []
+
+def is_dynvar_bound(name):
+    return any(v.argument_name.lower == name for v in bound_dynvars)
+
+
+@contextmanager
+def bind_dynvar(v):
+    bound_dynvars.append(v)
+    try:
+        yield
+    finally:
+        popped = bound_dynvars.pop()
+        assert v == popped
+
+
 def emit_expr_prio(expr, **ctx):
     from langkit.compiled_types import T
     from langkit.dsl import LookupKind
@@ -757,7 +775,7 @@ def emit_expr_prio(expr, **ctx):
         Predicate, StructUpdate, BigIntLiteral, RefCategories, Bind, Try,
         Block, Contains, PropertyDef, DynamicLexicalEnv, Super, Join, String,
         NPropagate, Find, EmptyEnv, AnyOf, UnaryNeg, CreateCopyNodeBuilder,
-        CreateSynthNodeBuilder
+        CreateSynthNodeBuilder, BinaryOpKind
     )
 
     def is_a(*names):
@@ -821,6 +839,16 @@ def emit_expr_prio(expr, **ctx):
         full_ctx = dict(ctx, **extra_ctx)
         return emit_paren_expr(outer_assoc_prio, expr, **full_ctx)
 
+    def wrap_bind(expr, *assocs):
+        result = "{$i$hl"
+        for name, value in assocs:
+            value_str = (
+                value if isinstance(value, str) else ee_prio(P.lowest, value)
+            )
+            result += "bind {} = {};$hl".format(name, value_str)
+        result += "{}$hl$d}}".format(expr)
+        return prio, result
+
     expr = unsugar(expr)
 
     if isinstance(expr, Literal):
@@ -883,7 +911,8 @@ def emit_expr_prio(expr, **ctx):
             ee_prio(P.lowest, expr.expr_0),
             ee_prio(P.lowest, expr.expr_1),
         )
-        subexpr = ee_prio(P.lowest, expr.expr_2)
+        with bind_dynvar(expr.expr_0):
+            subexpr = ee_prio(P.lowest, expr.expr_2)
         return prio, "{{$i$hl{}$hl{}$hl$d}}".format(bind, subexpr)
 
     elif isinstance(expr, Let):
@@ -1062,18 +1091,12 @@ def emit_expr_prio(expr, **ctx):
         )
 
     elif isinstance(expr, All):
-        return prio, (
-            ee(expr.equation_array)
-            if expr._origin_composed_attr == "logic_all" else
-            "%all({})".format(ee(expr.equation_array))
-        )
+        assert expr._origin_composed_attr == "logic_all"
+        return prio, ee(expr.equation_array)
 
     elif isinstance(expr, Any):
-        return prio, (
-            ee(expr.equation_array)
-            if expr._origin_composed_attr == "logic_any" else
-            "%any({})".format(ee(expr.equation_array))
-        )
+        assert expr._origin_composed_attr == "logic_any"
+        return prio, ee(expr.equation_array)
 
     elif isinstance(expr, Match):
         with walker.method_call("match"):
@@ -1119,9 +1142,10 @@ def emit_expr_prio(expr, **ctx):
                 else:
                     lhs = emit_bool_op_rec(expr.lhs, depth - 1)
 
-                return "{} {} {}".format(
+                return "{} {}{} {}".format(
                     lhs,
-                    expr.kind,
+                    "%" if expr.is_equation else "",
+                    expr.kind.value,
                     emit_paren_expr(prio, expr.rhs, arg_expr=depth - 1, **ctx)
                 )
 
@@ -1504,17 +1528,26 @@ def emit_expr_prio(expr, **ctx):
         return prio, 'RefCategories({})'.format(', '.join(args))
 
     elif isinstance(expr, Predicate):
-        return prio, "%predicate({})".format(", ".join(keep([
+        result = "{}%({})".format(
             fqn(expr.pred_property),
-            ee_prio(P.lowest, expr.exprs[0]),
-            (
-                ""
-                if expr.pred_error_location is None else
-                "error_location={}".format(
-                    ee_prio(P.lowest, expr.pred_error_location)
-                )
-            ),
-        ] + [ee_prio(P.lowest, e) for e in expr.exprs[1:]])))
+            ", ".join(keep([
+                ee_prio(P.lowest, expr.exprs[0]),
+            ] + [ee_prio(P.lowest, e) for e in expr.exprs[1:]]))
+        )
+
+        # Do not bind error_location if the predicate does not have the
+        # predicate_error annotation: error_loc is ignored in that case and we
+        # get a "unused binding" warning.
+        if expr.pred_property.predicate_error is not None:
+            return wrap_bind(
+                result,
+                (
+                    "error_location",
+                    expr.pred_error_location or f"null[{T.root_node.dsl_name}]",
+                ),
+            )
+        else:
+            return prio, result
 
     elif is_a("domain"):
         return prio, "%domain({}, {})".format(
@@ -1523,19 +1556,36 @@ def emit_expr_prio(expr, **ctx):
         )
 
     elif isinstance(expr, Bind):
-        return prio, "%eq({})".format(", ".join(keep([
-            ee_prio(P.lowest, expr.to_expr), ee_prio(P.lowest, expr.from_expr),
-            "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else "",
-            "logic_ctx={}".format(ee_prio(P.lowest, expr.logic_ctx)) if expr.logic_ctx else "",
-        ])))
+        dest_fmt = ee_prio(P.lowest, expr.to_expr)
+        src_fmt = ee_prio(P.lowest, expr.from_expr)
+        if expr.conv_prop:
+            fmt = "{} <- {}%({})".format(
+                dest_fmt, fqn(expr.conv_prop), src_fmt
+            )
+        elif expr.to_expr_is_logic_var:
+            fmt = "{} <-> {}".format(dest_fmt, src_fmt)
+        else:
+            fmt = "{} <- {}".format(dest_fmt, src_fmt)
+
+        if expr.logic_ctx or is_dynvar_bound("logic_context"):
+            return wrap_bind(
+                fmt,
+                ("logic_context", expr.logic_ctx or f"null[{T.LogicContext.dsl_name}]"),
+            )
+        return prio, fmt
 
     elif isinstance(expr, NPropagate):
-        return prio, "%propagate({})".format(", ".join(keep([
+        result = "{} <- {}%({})".format(
             ee_prio(P.lowest, expr.dest_var),
             fqn(expr.comb_prop),
-            "logic_ctx={}".format(ee_prio(P.lowest, expr.logic_ctx))
-            if expr.logic_ctx else "",
-        ] + [ee_prio(P.lowest, v) for v in expr.arg_vars])))
+            ", ".join([ee_prio(P.lowest, v) for v in expr.arg_vars])
+        )
+        if expr.logic_ctx or is_dynvar_bound("logic_context"):
+            return wrap_bind(
+                result,
+                ("logic_context", expr.logic_ctx or f"null[{T.LogicContext.dsl_name}]"),
+            )
+        return prio, result
 
     elif isinstance(expr, DynamicLexicalEnv):
         return prio, "dynamic_lexical_env({})".format(", ".join(keep([
@@ -1633,6 +1683,7 @@ def emit_prop(prop, walker):
     if prop.activate_tracing:
         quals.append("@traced")
 
+    bound_dynvars[:] = []
     if prop.dynamic_vars:
         vars = []
         for dynvar in prop.dynamic_vars:
@@ -1643,6 +1694,7 @@ def emit_prop(prop, walker):
                 if val is None else
                 "{}={}".format(name, emit_expr(P.lowest, val))
             )
+            bound_dynvars.append(dynvar)
         quals.append("@with_dynvars({})".format(", ".join(vars)))
 
     if prop.predicate_error:

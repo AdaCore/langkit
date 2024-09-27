@@ -1,0 +1,2 @@
+val v1 = e1%()
+val v2 = e1%().solve()

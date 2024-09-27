@@ -1612,7 +1612,10 @@ package body ${ada_lib_name}.Implementation is
 
    function Allocate_Logic_Context
      (Ctx : Internal_Logic_Context) return Internal_Logic_Context_Access
-   is (new Internal_Logic_Context'(Ctx));
+   is ((if Ctx.Ref_Node = ${T.entity.nullexpr}
+           and then Ctx.Decl_Node = ${T.entity.nullexpr}
+        then null
+        else new Internal_Logic_Context'(Ctx)));
 
    -------------------------
    -- Trace_Logic_Context --

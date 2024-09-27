@@ -15,7 +15,7 @@ class Example: FooNode {
 
     @exported
     fun prop(): Entity[Example] = {
-        val _ = %predicate(FooNode.sophisticated_predicate, node.var1);
+        val _ = FooNode.sophisticated_predicate%(node.var1);
 
         node.as_bare_entity
     }

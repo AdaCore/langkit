@@ -19,6 +19,7 @@ class Token(LexerToken):
     Amp = WithText()
     Minus = WithText()
     Pipe = WithText()
+    TwoSidedArrow = WithText()
     LeftArrow = WithText()
     RightArrow = WithText()
     FatRightArrow = WithText()
@@ -152,6 +153,7 @@ lkt_lexer.add_rules(
     (Literal('&'),         Token.Amp),
     (Literal('-'),         Token.Minus),
     (Literal('|'),         Token.Pipe),
+    (Literal('<->'),       Token.TwoSidedArrow),
     (Literal('<-'),        Token.LeftArrow),
     (Literal('->'),        Token.RightArrow),
     (Literal('.'),         Token.Dot),

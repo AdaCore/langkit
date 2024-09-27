@@ -25,12 +25,12 @@ class Plus: FooNode {
     @exported
     fun resolve(lhs: Entity[FooNode], rhs: Entity[FooNode], use_dynamic_combiner: Bool): Entity[FooNode] = {
         val arr = [node.lhs.v, node.rhs.v];
-        val propagator = if use_dynamic_combiner then %propagate(node.v, Literal.dynamic_combiner, [node.lhs.v, node.rhs.v]) and (
+        val propagator = if use_dynamic_combiner then node.v <- Literal.dynamic_combiner%([node.lhs.v, node.rhs.v]) %and (
             # Check that array passed to the dynamic combiner need not be
             # an array literal.
-            %propagate(node.v, Literal.dynamic_combiner, arr)
-        ) else %propagate(node.v, Literal.static_combiner, node.lhs.v, node.rhs.v);
-        val eq = %all([propagator, %eq(node.lhs.v, lhs), %eq(node.rhs.v, rhs)]);
+            node.v <- Literal.dynamic_combiner%(arr)
+        ) else node.v <- Literal.static_combiner%(node.lhs.v, node.rhs.v);
+        val eq = propagator %and node.lhs.v <- lhs %and node.rhs.v <- rhs;
 
         if eq.solve() then node.v.get_value() else raise[Entity[FooNode]] PropertyError("unreachable")
     }

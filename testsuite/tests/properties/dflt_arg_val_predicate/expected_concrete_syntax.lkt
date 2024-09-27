@@ -20,7 +20,7 @@ class Example: FooNode {
 
     @exported
     fun prop1(): Bool = {
-        val eq = %predicate(Example.predicate1, node.var1, node.var2);
+        val eq = Example.predicate1%(node.var1, node.var2);
 
         eq.solve()
     }
@@ -34,7 +34,7 @@ class Example: FooNode {
         val eq = {
             bind my_var = 1;
 
-            %predicate(Example.predicate2, node.var1, node.var2)
+            Example.predicate2%(node.var1, node.var2)
         };
 
         eq.solve()
@@ -49,7 +49,7 @@ class Example: FooNode {
         val eq = {
             bind my_var = 1;
 
-            %predicate(Example.predicate3, node.var1, node.var2)
+            Example.predicate3%(node.var1, node.var2)
         };
 
         eq.solve()
