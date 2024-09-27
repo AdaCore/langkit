@@ -108,6 +108,10 @@ Var content = [<NullNode foo.txt:1:19-1:23>, <Example foo.txt:1:24-1:31>, <NullN
 Node equality = true
 Node hash equality = true
 Node 'p_all_items' member reference equality = true
+e1.equals(e2) = true
+e1.equals(e3) = false
+hash(e1) == hash(e2) = true
+hash(e1) == hash(e3) = false
 -------------
 
 --- Parent(s) ---
