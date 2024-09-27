@@ -19,6 +19,13 @@ enum Color {
 @with_abstract_list
 class FooNode implements Node[FooNode] {
     @exported
+    fun with_md(eq_used: Bool, eq_ignored: Bool): Entity[FooNode] = Entity[FooNode](
+        node=node, info=EntityInfo(
+            md=Metadata(eq_used=eq_used, eq_ignored=eq_ignored), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
+        )
+    )
+
+    @exported
     fun count(seq: Array[Entity[Example]]): Int = seq.length()
 
     @exported
@@ -111,6 +118,12 @@ struct BareNodeStruct {
     a_boolean: Bool
     bare_node: FooNode
     a_char: Char
+}
+
+@metadata
+struct Metadata {
+    @used_in_equality eq_used: Bool
+    eq_ignored: Bool
 }
 
 struct FooNodeStruct {
