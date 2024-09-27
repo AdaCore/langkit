@@ -14,8 +14,7 @@ class Decl: FooNode implements TokenNode {
     fun refd_env(): LexicalEnv = null[LexicalEnv]
 
     @exported
-    fun lookup(name: Symbol): Array[Entity[FooNode]] =
-        node.node_env().get(name)
+    fun lookup(name: Symbol): Array[Entity[FooNode]] = node.node_env.get(name)
 
     env_spec {
         add_to_env_kv(node.symbol, node)

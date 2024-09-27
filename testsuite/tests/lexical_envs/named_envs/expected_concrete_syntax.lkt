@@ -128,7 +128,7 @@ class FooNode implements Node[FooNode] {
         (name) => DesignatedEnv(
             kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv]
         ), default_val=DesignatedEnv(
-            kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
+            kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env
         )
     )
 
@@ -182,15 +182,15 @@ class IncompleteTypeDecl: FooNode {
 class Name: FooNode {
     |" Innermost suffix for this name.
     fun base_name(): String = match node {
-        case id: Identifier => id.text()
+        case id: Identifier => id.text
         case dn: DottedName => dn.suffix.base_name()
     }
 
     |" Absolute name of the scope that this name defines, assuming that
     |" ``prefix`` is the implicit prefix for that name.
     fun scope_name(): String = match node {
-        case id: Identifier => id.text()
-        case dn: DottedName => dn.prefix.scope_name() & "." & dn.suffix.text()
+        case id: Identifier => id.text
+        case dn: DottedName => dn.prefix.scope_name() & "." & dn.suffix.text
     }
 
     |" Absolute name of the scope that defines this name, assuming that
@@ -203,7 +203,7 @@ class Name: FooNode {
     |" Innermost scope for this name. The lookup starts from the given
     |" environment.
     fun scope(from_env: LexicalEnv): LexicalEnv =
-        node.resolve(from_env).children_env()
+        node.resolve(from_env).children_env
 
     |" Return the scope that contains the declaration that this name defines.
     fun parent_scope(from_env: LexicalEnv): LexicalEnv = match node {
@@ -236,18 +236,18 @@ class PackageBody: FooNode {
     fun body_decl_scope(): LexicalEnv = {
         val pkg_decl = node.lookup_decl_part();
 
-        if pkg_decl.private_part.is_null then pkg_decl.children_env() else pkg_decl.private_part.children_env()
+        if pkg_decl.private_part.is_null then pkg_decl.children_env else pkg_decl.private_part.children_env
     }
 
     |" Assuming this PackageBody is not in the top-level list, return the
     |" the corresponding package declaration.
     fun lookup_decl_part(): PackageDecl =
-        node.parent.children_env().get_first(node.name.base_name().to_symbol).as[PackageDecl].node
+        node.parent.children_env.get_first(node.name.base_name().to_symbol).as[PackageDecl].node
 
     |" Return the PackageDecl node corresponding to this PackageBody.
     @exported
     fun decl_part(): Entity[PackageDecl] = {
-        val env = node.parent.children_env();
+        val env = node.parent.children_env;
 
         node.name.resolve(env).as[PackageDecl]
     }
@@ -260,7 +260,7 @@ class PackageBody: FooNode {
             if node.is_toplevel() then DesignatedEnv(
                 kind=DesignatedEnvKind.named_env, env_name=node.suffixed_full_name("__privatepart").to_symbol, direct_env=null[LexicalEnv]
             ) else DesignatedEnv(
-                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
+                kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env
             )
         )
         add_to_env_kv(
@@ -299,7 +299,7 @@ class PackageDecl: FooNode {
     |" Return the PackageBody node corresponding to this PackageDecl.
     @exported
     fun body_part(): Entity[PackageBody] =
-        node.private_part.do((pp) => pp, default_val=node).children_env().get_first(s"__nextpart").as[PackageBody]
+        node.private_part.do((pp) => pp, default_val=node).children_env.get_first(s"__nextpart").as[PackageBody]
 
     env_spec {
         set_initial_env(
@@ -309,7 +309,7 @@ class PackageDecl: FooNode {
                 (name) => DesignatedEnv(
                     kind=DesignatedEnvKind.named_env, env_name=name, direct_env=null[LexicalEnv]
                 ), default_val=DesignatedEnv(
-                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env()
+                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.parent.children_env
                 )
             )
         )
@@ -322,7 +322,7 @@ class Ref: FooNode {
     @parse_field name: Name
 
     @exported
-    fun resolve(): Entity[FooNode] = node.name.resolve(node.node_env())
+    fun resolve(): Entity[FooNode] = node.name.resolve(node.node_env)
 }
 
 class SubpBody: FooNode {

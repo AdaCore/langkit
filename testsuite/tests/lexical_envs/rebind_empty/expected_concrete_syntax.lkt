@@ -14,7 +14,7 @@ class Example: FooNode implements TokenNode {
     fun rebind(from_node: Entity[FooNode], to_node: Entity[FooNode]): Array[Entity[FooNode]] = {
         # Build non-null rebindings
         val rbdng = null[EnvRebindings].append_rebinding(
-            from_node.children_env(), to_node.children_env()
+            from_node.children_env, to_node.children_env
         );
 
         # Call rebind_env on them (this is the important part, the rest is

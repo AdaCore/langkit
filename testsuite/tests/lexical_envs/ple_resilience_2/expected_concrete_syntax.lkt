@@ -17,7 +17,7 @@ class Def: FooNode {
         # reach yet, to make sure it is not null (i.e. initialized). If it is
         # null, this will raise a constaint error, and thus some failure will
         # be visible in the Python API.
-        do(node.example.children_env().env_node)
+        do(node.example.children_env.env_node)
     }
 }
 

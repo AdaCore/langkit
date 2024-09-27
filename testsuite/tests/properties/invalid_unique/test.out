@@ -6,8 +6,8 @@ not_array.lkt:4:34: error: Array expected but got Example instead
 
 == not_hashable.lkt ==
 not_hashable.lkt:4:34: error: Element type (here Token) must be hashable
-4 |     @exported fun test(): Bool = node.token_start().singleton().unique()
-  |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4 |     @exported fun test(): Bool = node.token_start.singleton().unique()
+  |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 lkt_compile: Done

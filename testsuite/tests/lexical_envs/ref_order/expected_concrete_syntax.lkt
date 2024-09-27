@@ -14,11 +14,11 @@ grammar foo_grammar {
 class FooNode implements Node[FooNode] {
     @exported
     fun lookup(sym: Symbol): Entity[FooNode] =
-        self.children_env().get_first(sym)
+        self.children_env.get_first(sym)
 
     @exported
     fun with_rebindings(): Entity[FooNode] = {
-        val rbs = self.info.rebindings.append_rebinding(node.children_env(), node.children_env());
+        val rbs = self.info.rebindings.append_rebinding(node.children_env, node.children_env);
         val e_info = EntityInfo(
             md=self.info.md, rebindings=rbs, from_rebound=self.info.from_rebound
         );
@@ -33,8 +33,7 @@ class Id: FooNode implements TokenNode {
 class RefClause: FooNode {
     @parse_field ref_id: Id
 
-    fun resolve(): LexicalEnv =
-        self.lookup(node.ref_id.symbol)?.children_env()
+    fun resolve(): LexicalEnv = self.lookup(node.ref_id.symbol)?.children_env
 
     env_spec {
         reference([node.as[FooNode]], RefClause.resolve)

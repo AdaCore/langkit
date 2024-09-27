@@ -29,7 +29,7 @@ class ScopedId: Id {
     @parse_field name: SimpleId
 
     fun resolve(base_env: LexicalEnv): FooNode =
-        node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node
+        node.scope.resolve(base_env).children_env.get_first(node.name.symbol).node
 }
 
 class SimpleId: Id implements TokenNode {
@@ -42,7 +42,7 @@ class RefClause: FooNode {
 
     env_spec {
         reference(
-            [node.ref_id.as[FooNode]], FooNode.children_env, dest_env=node.ref_id.resolve(node.parent.children_env()).children_env()
+            [node.ref_id.as[FooNode]], FooNode.children_env, dest_env=node.ref_id.resolve(node.parent.children_env).children_env
         )
     }
 }

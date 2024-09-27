@@ -1221,6 +1221,7 @@ class FunAnnotations(ParsedAnnotations):
     ignored: bool
     memoized: bool
     predicate_error: str | None
+    property: bool
     traced: bool
     with_dynvars: list[tuple[Scope.DynVar, L.Expr | None]] | None
     annotations = [
@@ -1231,8 +1232,9 @@ class FunAnnotations(ParsedAnnotations):
         ExternalAnnotationSpec(),
         FlagAnnotationSpec('final'),
         FlagAnnotationSpec('ignored'),
-        StringLiteralAnnotationSpec('predicate_error'),
         FlagAnnotationSpec('memoized'),
+        StringLiteralAnnotationSpec('predicate_error'),
+        FlagAnnotationSpec('property'),
         FlagAnnotationSpec('traced'),
         WithDynvarsAnnotationSpec(),
     ]
@@ -4954,6 +4956,7 @@ class LktTypesLoader:
             lazy_field=False,
             final=annotations.final,
             predicate_error=annotations.predicate_error,
+            has_property_syntax=annotations.property,
         )
         result._doc_location = Location.from_lkt_node_or_none(full_decl.f_doc)
 
@@ -4961,6 +4964,11 @@ class LktTypesLoader:
         arguments, scope = self.lower_property_arguments(
             result, decl.f_args, f"property {node_name}.{decl.f_syn_name.text}"
         )
+        if annotations.property and arguments:
+            error(
+                "the @property annotation is valid only for properties with no"
+                " argument"
+            )
 
         # Keep track of the requested set of dynamic variables
         dynvars: list[

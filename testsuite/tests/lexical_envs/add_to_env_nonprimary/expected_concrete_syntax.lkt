@@ -15,7 +15,7 @@ class Example: FooNode implements TokenNode {
         add_to_env(
             EnvAssoc(
                 key=s"foo", value=node, dest_env=DesignatedEnv(
-                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.children_env().env_orphan()
+                    kind=DesignatedEnvKind.direct_env, env_name=null[Symbol], direct_env=node.children_env.env_orphan()
                 ), metadata=null[Metadata]
             )
         )

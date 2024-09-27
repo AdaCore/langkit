@@ -49,10 +49,10 @@ class Def: FooNode {
 class Example: FooNode implements TokenNode {
     @exported
     fun lookup_all(name: Symbol): Array[Entity[FooNode]] =
-        node.children_env().get(name)
+        node.children_env.get(name)
 
     fun lookup_by_cat(name: Symbol, cats: RefCategories = RefCategories()): Array[Entity[FooNode]] =
-        node.children_env().get(name, categories=cats)
+        node.children_env.get(name, categories=cats)
 
     @exported
     fun lookup_none(name: Symbol): Array[Entity[FooNode]] =

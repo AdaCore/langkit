@@ -30,7 +30,7 @@ class Block: FooNode {
     @exported
     fun rebind(from_block: Entity[Block], to_block: Entity[Block]): Entity[Block] = self.create_entity(
         self.info.rebindings.append_rebinding(
-            from_block.children_env(), to_block.children_env()
+            from_block.children_env, to_block.children_env
         )
     )
 
@@ -41,7 +41,7 @@ class Block: FooNode {
 
     @exported
     fun shed_rebindings(from_block: Entity[Block]): Entity[Block] = self.create_entity(
-        from_block.children_env().shed_rebindings(self.info).rebindings
+        from_block.children_env.shed_rebindings(self.info).rebindings
     )
 
     @exported

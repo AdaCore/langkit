@@ -23,7 +23,7 @@ class Name: FooNode implements TokenNode {
 
     @exported
     fun resolve(): Bool = {
-        val candidates = node.node_env().get(node.symbol).map((d) => d.as[Definition]);
+        val candidates = node.node_env.get(node.symbol).map((d) => d.as[Definition]);
 
         %domain(node.ref_var, candidates).solve()
     }

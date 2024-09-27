@@ -61,7 +61,7 @@ class Expr: FooNode {
 
 class NumberLiteral: Expr implements TokenNode {
     fun xref_equation(): Equation =
-        node.type_var <- node.unit().root.number_type
+        node.type_var <- node.unit.root.number_type
 }
 
 @abstract
@@ -77,7 +77,7 @@ class Call: Resolvable {
     @parse_field second_arg: Expr
 
     fun resolve(): SolverResult = {
-        val eq = self.first_arg.xref_equation() %and self.second_arg.xref_equation() %and node.children_env().get(node.name.symbol).logic_any(
+        val eq = self.first_arg.xref_equation() %and self.second_arg.xref_equation() %and node.children_env.get(node.name.symbol).logic_any(
             (elem) => node.name.ref_var <- elem %and elem.as[ProcDecl].call_equation(
                 node.first_arg, node.second_arg, ctx=LogicContext(ref_node=self.name, decl_node=elem)
             )
@@ -102,15 +102,15 @@ class TypeAssert: Resolvable {
 }
 
 class StringLiteral: Expr implements TokenNode {
-    fun xref_equation(): Equation = node.type_var <- node.unit().root.str_type
+    fun xref_equation(): Equation = node.type_var <- node.unit.root.str_type
 }
 
 class Identifier: FooNode implements TokenNode {
     ref_var: LogicVar
 
     fun designated_type(): Entity[TypeDecl] =
-        if node.symbol == s"number" then node.unit().root.number_type.as_bare_entity
-        elif node.symbol == s"string" then node.unit().root.str_type.as_bare_entity
+        if node.symbol == s"number" then node.unit.root.number_type.as_bare_entity
+        elif node.symbol == s"string" then node.unit.root.str_type.as_bare_entity
         else null[Entity[TypeDecl]]
 
     fun xref_equation(ctx: LogicContext): Equation = {
