@@ -71,6 +71,10 @@ class FooNode implements Node[FooNode] {
 
     @exported
     fun iter_int(): Iterator[Int] = [1, 2, 3].to_iterator()
+
+    @exported
+    @external()
+    fun trigger_unit_requested(name: Symbol, found: Bool, error: Bool): Bool
 }
 
 class Example: FooNode {

@@ -207,5 +207,43 @@ root.pMyNode().bareNode = <Sequence foo.txt:1:1-1:50>
 aChar.equals(otherChar) = true
 --------------
 
+--- Event handlers ---
+=== Non null callbacks ===
+--- Unit parsed callback
+unit: <AnalysisUnit "example">
+reparsed: false
+
+--- Unit parsed callback
+unit: <AnalysisUnit "example">
+reparsed: true
+
+--- Unit requested callback
+name: foo_a
+from: <AnalysisUnit "example">
+found: false
+is_not_found_error: false
+
+--- Unit requested callback
+name: foo_b
+from: <AnalysisUnit "example">
+found: true
+is_not_found_error: false
+
+--- Unit requested callback
+name: foo_c
+from: <AnalysisUnit "example">
+found: true
+is_not_found_error: true
+
+--- Unit requested callback
+name: foo_d
+from: <AnalysisUnit "example">
+found: false
+is_not_found_error: true
+
+=== Null callbacks ===
+=== Unclosed event handler ===
+----------------------
+
 ===== End of the Java tests =====
 Done

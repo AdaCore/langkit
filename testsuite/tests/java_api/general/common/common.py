@@ -104,6 +104,16 @@ class FooNode(ASTNode):
     def iter_int():
         return ArrayLiteral([1, 2, 3]).to_iterator
 
+    @langkit_property(
+        return_type=T.Bool,
+        external=True,
+        uses_entity_info=False,
+        uses_envs=False,
+        public=True
+    )
+    def trigger_unit_requested(name=T.Symbol, found=T.Bool, error=T.Bool):
+        pass
+
 
 class Sequence(FooNode.list):
     all_items = Property(Entity.map(lambda i: i), public=True)
