@@ -877,6 +877,62 @@
     "LktNodeList": {
       "sep": ["recurse", "hardline"]
     },
+    "LogicAssign": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "recurse_field", "field": "f_dest_var"},
+          "line",
+          {"kind": "text", "text": "<-"},
+          "whitespace",
+          {"kind": "recurse_field", "field": "f_value"}
+        ]
+      }
+    },
+    "LogicPropagate": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "recurse_field", "field": "f_dest_var"},
+          "line",
+          {"kind": "text", "text": "<-"},
+          "whitespace",
+          {"kind": "recurse_field", "field": "f_name"},
+          {"kind": "text", "text": "%"},
+          {"kind": "text", "text": "("},
+          {"kind": "recurse_field", "field": "f_args"},
+          {"kind": "text", "text": ")"}
+        ]
+      },
+      "fields": {
+        "f_args": {
+          "kind": "ifEmpty",
+          "then": "recurse",
+          "else": {
+            "kind": "group",
+            "document": [
+              {
+                "kind": "indent",
+                "contents": ["softline", "recurse"]
+              },
+              "softline"
+            ]
+          }
+        }
+      }
+    },
+    "LogicUnify": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "recurse_field", "field": "f_lhs"},
+          "line",
+          {"kind": "text", "text": "<->"},
+          "whitespace",
+          {"kind": "recurse_field", "field": "f_rhs"}
+        ]
+      }
+    },
     "MatchBranch": {
       "node": [
         {"kind": "text", "text": "case"},
