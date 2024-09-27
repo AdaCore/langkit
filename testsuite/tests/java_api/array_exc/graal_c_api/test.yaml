@@ -1,6 +1,0 @@
-driver: python
-sync_trees:
-    - ../common
-control:
-    - [SKIP, "not has_java", "Java support required"]
-    - [SKIP, "not has_native_image", "Native-image tests disabled"]

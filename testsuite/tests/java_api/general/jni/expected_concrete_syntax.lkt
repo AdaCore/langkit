@@ -34,6 +34,10 @@ class FooNode implements Node[FooNode] {
     fun array_len(a: Array[Int]): Int = a.length()
 
     @exported
+    fun array_prop_error(): Array[Entity[FooNode]] =
+        raise[Array[Entity[FooNode]]] PropertyError("this is an eror")
+
+    @exported
     fun identity(c: Char): Char = c
 
     @exported

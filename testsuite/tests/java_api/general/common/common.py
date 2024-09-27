@@ -9,7 +9,7 @@ from langkit.dsl import (
 )
 from langkit.expressions import (
     ArrayLiteral, CharacterLiteral, Entity, If, New, No, Property,
-    langkit_property
+    PropertyError, langkit_property
 )
 
 
@@ -55,6 +55,10 @@ class FooNode(ASTNode):
     @langkit_property(public=True)
     def array_len(a=T.Int.array):
         return a.length
+
+    @langkit_property(public=True, return_type=T.FooNode.entity.array)
+    def array_prop_error():
+        return PropertyError(T.FooNode.entity.array, "this is an eror")
 
     @langkit_property(public=True)
     def identity(c=T.Character):
