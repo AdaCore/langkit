@@ -399,6 +399,17 @@ public final class BindingsTests {
             for (int i = 0; i < intArray.length; i++) {
                 System.out.println("  " + intArray[i]);
             }
+
+            // Test a property error raised by an array typed property
+            try {
+                FooNode[] invalid = root.pArrayPropError();
+                System.out.println("No exception raised by 'array_prop_error'");
+            } catch (LangkitException exc) {
+                System.out.println(
+                    "Expected exception: " + exc.kind + " - " + exc.getMessage()
+                );
+            }
+
         }
 
         // Display the footer
