@@ -1,5 +1,6 @@
 import java.io.File;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -621,6 +622,104 @@ public final class BindingsTests {
         footer("Struct");
     }
 
+    private static void testEventHandlers() {
+        header("Event handlers");
+
+        // Local function to test event handlers
+        BiConsumer<
+            EventHandler.UnitRequestedCallback,
+            EventHandler.UnitParsedCallback
+        > testHandler = (unitRequestedCallback, unitParsedCallback) -> {
+            // Create the context with the event handler and create units
+            try(
+                EventHandler eventHandler = EventHandler.create(
+                    unitRequestedCallback,
+                    unitParsedCallback
+                );
+                AnalysisContext context = AnalysisContext.create(
+                    null,
+                    null,
+                    null,
+                    eventHandler,
+                    true,
+                    8
+                );
+            ) {
+                // Parse the unit twice to test the "reparsed" callback param
+                AnalysisUnit unit = context.getUnitFromBuffer(
+                    "example",
+                    "example"
+                );
+                unit = context.getUnitFromBuffer("example", "example");
+
+                // Call the property to trigger "unit requested" callback
+                FooNode root = unit.getRoot();
+                root.pTriggerUnitRequested(
+                    Symbol.create("foo_a"),
+                    false,
+                    false
+                );
+                root.pTriggerUnitRequested(
+                    Symbol.create("foo_b"),
+                    true,
+                    false
+                );
+                root.pTriggerUnitRequested(
+                    Symbol.create("foo_c"),
+                    true,
+                    true
+                );
+                root.pTriggerUnitRequested(
+                    Symbol.create("foo_d"),
+                    false,
+                    true
+                );
+            }
+        };
+
+        // Create the callback functions
+        EventHandler.UnitRequestedCallback unitRequestedCallback = (
+            AnalysisContext context,
+            String name,
+            AnalysisUnit from,
+            boolean found,
+            boolean isNotFoundError
+        ) -> {
+            System.out.println("--- Unit requested callback");
+            System.out.println("name: " + name);
+            System.out.println("from: " + from);
+            System.out.println("found: " + found);
+            System.out.println("is_not_found_error: " + isNotFoundError);
+            System.out.println();
+        };
+        EventHandler.UnitParsedCallback unitParsedCallback = (
+            AnalysisContext context,
+            AnalysisUnit unit,
+            boolean reparsed
+        ) -> {
+            System.out.println("--- Unit parsed callback");
+            System.out.println("unit: " + unit);
+            System.out.println("reparsed: " + reparsed);
+            System.out.println();
+        };
+
+        System.out.println("=== Non null callbacks ===");
+        testHandler.accept(
+            unitRequestedCallback,
+            unitParsedCallback
+        );
+        System.out.println("=== Null callbacks ===");
+        testHandler.accept(null, null);
+
+        System.out.println("=== Unclosed event handler ===");
+        EventHandler dontClose = EventHandler.create(
+            unitRequestedCallback,
+            unitParsedCallback
+        );
+
+        footer("Event handlers");
+    }
+
     /**
      * Run the Java tests one by one
      *
@@ -642,6 +741,7 @@ public final class BindingsTests {
         testString();
         testBigInt();
         testStruct();
+        testEventHandlers();
         System.out.println("===== End of the Java tests =====");
     }
 
