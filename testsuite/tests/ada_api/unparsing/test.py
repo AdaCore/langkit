@@ -269,6 +269,13 @@ for cfg, src in [
     # A "must_break" table must *not* break its parent if it contains
     # only one element and that element itself does not trigger a break.
     ("table_must_break_not_parent", "one_var"),
+
+    # Items in "fill" documents must consider they live in a broken group even
+    # if there are breaking items in the same "fill" document. In the following
+    # testcase, "line" after VarDecl nodes will expand to spaces even though
+    # the "fill" document contains a "hardline", so the unparsing engine needs
+    # to add an extra line break after the comment.
+    ("fill_broken", "comment_in_var"),
 ]:
     add_main(
         "breaking/{}.json".format(cfg),
