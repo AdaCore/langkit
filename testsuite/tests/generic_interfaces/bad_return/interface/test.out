@@ -1,0 +1,3 @@
+test.py:XXX: error: BarNode.prop returns Bool, which does not match return type of Interface.method: Interface
+
+Done

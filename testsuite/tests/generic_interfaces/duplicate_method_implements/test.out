@@ -1,0 +1,3 @@
+test.py:XXX: error: Interface.method is implementend by multiple properties in class BarNode: BarNode.prop1, BarNode.prop2
+
+Done

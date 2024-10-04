@@ -46,6 +46,9 @@ if TYPE_CHECKING:
         PropertyDef,
         ResolvedExpression,
     )
+    from langkit.generic_interface import (
+        GenericInterface, InterfaceMethodProfile
+    )
     from langkit.lexer import TokenAction
     from langkit.parsers import Parser, _Transform
     from langkit.unparsers import NodeUnparser
@@ -312,7 +315,8 @@ class AbstractNodeData(abc.ABC):
                      ResolvedExpression,
                  ] | None = None,
                  prefix: names.Name | None = None,
-                 final: bool = False):
+                 final: bool = False,
+                 implements: str | None = None):
         """
         :param name: Name for this field. Most of the time, this is initially
             unknown at field creation, so it is filled only at struct creation
@@ -342,6 +346,9 @@ class AbstractNodeData(abc.ABC):
 
         :param final: If True, this field/property cannot be overriden. This is
             possible only for concrete fields/properties.
+
+        :param implements: Fully qualified name of the generic interface method
+            that this field implements.
         """
 
         self._serial = next(self._counter)
@@ -386,6 +393,7 @@ class AbstractNodeData(abc.ABC):
         self._base: _Self | None = None
         self._overridings: list[_Self] = []
         self.final = final
+        self._implements: str | None = implements
 
     def __lt__(self, other: AbstractNodeData) -> bool:
         return self._serial < other._serial
@@ -709,6 +717,19 @@ class AbstractNodeData(abc.ABC):
             if self.default_value is None else
             self.default_value.render_expr()
         )
+
+    @property
+    def implements(self) -> InterfaceMethodProfile | None:
+        """
+        Return the interface method implemented by this field, or None if this
+        field does not implement an interface method.
+        """
+        if self._implements is not None:
+            with diagnostic_context(self.location):
+                return get_context().resolve_interface_method_qualname(
+                    self._implements
+                )
+        return None
 
 
 class NoNullexprError(Exception):
@@ -2084,7 +2105,8 @@ class BaseField(AbstractNodeData):
                  internal_name: names.Name | None = None,
                  prefix: names.Name | None = AbstractNodeData.PREFIX_FIELD,
                  null: bool = False,
-                 nullable: bool | None = None):
+                 nullable: bool | None = None,
+                 implements: str | None = None):
         """
         Create an AST node field.
 
@@ -2097,6 +2119,8 @@ class BaseField(AbstractNodeData):
         :param nullable: None if the language spec does not defines whether
             this field can be null in the absence of parsing error (i.e. when
             it is inferred). True/False otherwise (whether it can be null).
+        :param implements: Fully qualified name of the generic interface method
+            that this field implements.
         """
 
         assert self.concrete, 'BaseField itself cannot be instantiated'
@@ -2106,6 +2130,7 @@ class BaseField(AbstractNodeData):
             access_needs_incref=access_needs_incref,
             internal_name=internal_name,
             prefix=prefix,
+            implements=implements
         )
 
         self.repr = repr
@@ -2221,8 +2246,16 @@ class Field(BaseField):
                  type: CompiledType | None = None,
                  abstract: bool = False,
                  null: bool = False,
-                 nullable: bool | None = None):
-        super().__init__(repr, doc, type, null=null, nullable=nullable)
+                 nullable: bool | None = None,
+                 implements: str | None = None):
+        super().__init__(
+            repr,
+            doc,
+            type,
+            null=null,
+            nullable=nullable,
+            implements=implements
+        )
 
         assert not abstract or not null
         self._abstract = abstract
@@ -2439,7 +2472,8 @@ class UserField(BaseField):
                  default_value: AbstractExpression | None = None,
                  access_needs_incref: bool = True,
                  internal_name: names.Name | None = None,
-                 prefix: names.Name | None = None):
+                 prefix: names.Name | None = None,
+                 implements: str | None = None):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -2451,6 +2485,8 @@ class UserField(BaseField):
         :param internal_name: See AbstractNodeData's constructor.
         :param default_value: Default value for this field, when omitted from
             New expressions.
+        :param implements: Fully qualified name of the generic interface method
+            that this field implements.
         """
         super().__init__(
             repr,
@@ -2460,6 +2496,7 @@ class UserField(BaseField):
             internal_name=internal_name,
             prefix=prefix,
             nullable=True,
+            implements=implements
         )
         self._is_public = public
 
@@ -2549,10 +2586,15 @@ class BaseStructType(CompiledType):
     Base class to share common behavior between StructType and ASTNodeType.
     """
 
-    def __init__(self, name, location, doc, **kwargs):
+    def __init__(self, name, location, doc, implements=None, **kwargs):
         """
-        See CompiledType.__init__ for a description of arguments.
+        :param implements: Name of the generic interface that this type
+            implements formatted in camel.
+
+        See CompiledType.__init__ for a description of other arguments.
         """
+        self._implements = implements or []
+
         kwargs.setdefault('type_repo_name', name.camel)
         if is_keyword(name):
             name = name + names.Name('Node')
@@ -2624,23 +2666,53 @@ class BaseStructType(CompiledType):
         self.add_field(result)
         return result
 
+    def implements(
+        self,
+        include_parents: bool = True
+    ) -> list[GenericInterface]:
+        """
+        Return the interfaces implemented by this node and its parents.
+        """
+        to_implement = []
+        node_type: BaseStructType | None = self
+        while node_type is not None:
+            to_implement += [
+                get_context().resolve_interface(i)
+                for i in node_type._implements
+            ]
+            node_type = node_type.base if include_parents else None
+
+        return to_implement
+
 
 class StructType(BaseStructType):
     """
     POD composite type.
     """
 
-    def __init__(self, name, location, doc, fields, **kwargs):
+    def __init__(
+        self,
+        name,
+        location,
+        doc,
+        fields,
+        implements=None,
+        **kwargs,
+    ):
         """
         :param name: See CompiledType.__init__.
 
         :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
             field) for this struct's fields. Inherited fields must not appear
             in this list.
+
+        :param implements: Name of the generic interface that this struct
+            implements formatted in camel.
         """
         internal_name = names.Name('Internal') + name
         super().__init__(
             internal_name, location, doc,
+            implements=implements,
             is_ptr=False,
             null_allowed=True,
             nullexpr=(names.Name('No') + name).camel_with_underscores,
@@ -2897,6 +2969,7 @@ class ASTNodeType(BaseStructType):
         is_abstract: bool = False,
         is_synthetic: bool = False,
         with_abstract_list: bool = False,
+        implements: list[GenericInterface] | None = None,
         is_enum_node: bool = False,
         is_bool_node: bool = False,
         is_token_node: bool = False,
@@ -2936,6 +3009,9 @@ class ASTNodeType(BaseStructType):
         :param with_abstract_list: Whether the root list type for this node
             must be abstract. Node that this can be changed later, until the
             list type is actually created.
+
+        :param implements: Name of the generic interface that this node
+            implements formatted in camel.
 
         :param is_enum_node: Whether this node comes from the expansion of an
             enum node.
@@ -2997,7 +3073,7 @@ class ASTNodeType(BaseStructType):
         super().__init__(
             name, location, doc,
             base=base, is_ptr=True, null_allowed=True, is_ada_record=False,
-            is_list_type=is_list,
+            is_list_type=is_list, implements=implements,
 
             # Even though bare node types are not exposed, we allow them in
             # public APIs and will (un)wrap them as entities automatically.

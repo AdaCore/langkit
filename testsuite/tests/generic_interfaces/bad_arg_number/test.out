@@ -1,0 +1,3 @@
+test.py:XXX: error: Interface and method implementation don't have the same number of arguments. Interface has 0, implemetation has 1
+
+Done

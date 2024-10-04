@@ -4,6 +4,7 @@ from contextlib import AbstractContextManager
 import itertools
 from typing import Any, TYPE_CHECKING, Type
 
+from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledTypeRepo, EnumType, Field as _Field,
     MetadataField as _MetadataField, StructType, T, UserField as _UserField,
@@ -842,6 +843,31 @@ def synthetic(cls):
     return cls
 
 
+def implements(*args):
+    """
+    Decorator to tag an ASTNode subclass as implementing interfaces from the
+    generic interface.
+    """
+
+    def decorator(cls):
+        with cls._type.diagnostic_context:
+            _check_decorator_use(implements, BaseStruct, cls)
+            check_source_language(
+                issubtype(cls, Struct) or not cls._type.is_error_node,
+                "Error nodes cannot implement an interface"
+            )
+            cls._type._implements += [*args]
+            return cls
+    return decorator
+
+
+def context_init_hook(func):
+    """
+    Register a callback to be called once the CompileCtx has been created.
+    """
+    CompileCtx.init_hooks.append(func)
+
+
 def has_abstract_list(cls):
     """
     Decorator to make the automatically generated list type for "cls" (the
@@ -899,7 +925,7 @@ class _EnumNodeAlternative:
         return self.enum_node_cls._create_parser(self.type_ref, *args)
 
 
-def Field(repr=True, doc='', type=None, nullable=None):
+def Field(repr=True, doc='', type=None, nullable=None, implements=None):
     """
     Create a field that is meant to store parsing results. Only AST nodes can
     hold such fields.
@@ -915,11 +941,14 @@ def Field(repr=True, doc='', type=None, nullable=None):
 
     :param bool|None nullable: Whether this field must be considered as
         nullable even in the absence of syntax error.
+
+    :param InterfaceMethodProfile|None implements: Fully qualified name of the
+        generic interface that this field implements.
     """
-    return _Field(repr, doc, type, nullable=nullable)
+    return _Field(repr, doc, type, nullable=nullable, implements=implements)
 
 
-def AbstractField(type, doc='', nullable=None):
+def AbstractField(type, doc='', nullable=None, implements=None):
     """
     Create an abstract field.
 
@@ -935,19 +964,31 @@ def AbstractField(type, doc='', nullable=None):
 
     :param bool|None nullable: Whether this field must be considered as
         nullable even in the absence of syntax error.
+
+    :param InterfaceMethodProfile|None implements: Fully qualified name of the
+        generic interface method that this field implements.
     """
-    return _Field(type=type, doc=doc, abstract=True, nullable=nullable)
+    return _Field(
+        type=type,
+        doc=doc,
+        abstract=True,
+        nullable=nullable,
+        implements=implements
+    )
 
 
-def NullField():
+def NullField(implements=None):
     """
     Create a null field.
 
     Null fields are valid only when they override an abstract field. They are a
     way to say that this field is absent on all concrete nodes that inherit
     this null field.
+
+    :param InterfaceMethodProfile|None implements: Fully qualified name of the
+        generic interface that this field implements.
     """
-    return _Field(null=True)
+    return _Field(null=True, implements=implements)
 
 
 def MetadataField(
@@ -987,7 +1028,8 @@ def UserField(
     repr: bool = False,
     doc: str = '',
     public: bool = True,
-    default_value: AbstractExpression | None = None
+    default_value: AbstractExpression | None = None,
+    implements: str | None = None,
 ):
     """
     Create a field that is not meant to store parsing results. Both AST nodes
@@ -1005,8 +1047,13 @@ def UserField(
 
     :param default_value: Default value for this field,
         when omitted from New expressions.
+
+    :param implements: Fully qualified name of the generic interface method
+        that this field implements.
     """
-    return _UserField(type, repr, doc, public, default_value)
+    return _UserField(
+        type, repr, doc, public, default_value, implements=implements
+    )
 
 
 class _EnumMetaclass(type):

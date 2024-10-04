@@ -3799,7 +3799,8 @@ class PropertyDef(AbstractNodeData):
                  local_vars: LocalVars | None = None,
                  final: bool = False,
                  predicate_error: str | None = None,
-                 has_property_syntax: bool = False):
+                 has_property_syntax: bool = False,
+                 implements: str | None = None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -3924,13 +3925,17 @@ class PropertyDef(AbstractNodeData):
 
         :param has_property_syntax: Whether calls to this property are expected
             to use the field access syntax (i.e. no argument list).
+
+        :param implements: Fully qualified name of the generic interface method
+            that this property implements.
         """
 
         super().__init__(name=name,
                          public=public,
                          access_constructor=access_constructor,
                          prefix=prefix,
-                         final=final)
+                         final=final,
+                         implements=implements)
 
         self._original_is_public = None
         """
@@ -5279,7 +5284,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 # noinspection PyPep8Naming
 def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
              memoized=False, warn_on_unused=None, uses_entity_info=None,
-             call_non_memoizable_because=None, final=False):
+             call_non_memoizable_because=None, final=False, implements=None):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -5301,7 +5306,7 @@ def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
         type=type, dynamic_vars=dynamic_vars, memoized=memoized,
         warn_on_unused=warn_on_unused, uses_entity_info=uses_entity_info,
         call_non_memoizable_because=call_non_memoizable_because,
-        lazy_field=False, final=False,
+        lazy_field=False, final=False, implements=implements
     )
 
 
@@ -5317,7 +5322,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      external=False, uses_entity_info=None, uses_envs=None,
                      warn_on_unused=None, call_non_memoizable_because=None,
                      activate_tracing=False, dump_ir=False, final=False,
-                     predicate_error=None):
+                     predicate_error=None, implements=None):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -5348,7 +5353,8 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             dump_ir=dump_ir,
             lazy_field=False,
             final=final,
-            predicate_error=predicate_error
+            predicate_error=predicate_error,
+            implements=implements
         )
     return decorator
 

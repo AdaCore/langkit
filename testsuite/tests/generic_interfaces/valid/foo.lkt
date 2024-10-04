@@ -1,0 +1,8 @@
+import lexer_example
+
+grammar foo_grammar {
+    @main_rule main_rule <- or(bar | nat | non_abstract)
+    bar <- BarNode("example")
+    nat <- NativeTypes(@Number)
+    non_abstract <- NonAbstract("null")
+}
