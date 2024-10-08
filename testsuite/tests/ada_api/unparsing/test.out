@@ -2867,7 +2867,7 @@ def f(
 def f(
     a1     : Int
     , a22  : Int
-    
+
     , a333 : Int
     , a4444: Int
     ,
