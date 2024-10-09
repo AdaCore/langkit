@@ -759,6 +759,28 @@ class PythonLang(LanguageChecker):
             last = name
 
 
+class LktLang(LanguageChecker):
+    comment_start = "#"
+    with_re = re.compile('^import (?P<name>[a-zA-Z0-9_]+)')
+
+    def check(
+        self,
+        report: Report,
+        filename: str,
+        content: str,
+        parse: bool,
+    ) -> None:
+        pcheck = PackageChecker(report)
+        for i, line in iter_lines(content):
+            report.set_context(filename, i)
+            if not line.strip():
+                pcheck.reset()
+
+            m = self.with_re.match(line)
+            if m:
+                pcheck.add(m.group('name'))
+
+
 class MakoLang(LanguageChecker):
     comment_start = '##'
 
@@ -794,6 +816,7 @@ class YAMLLang(LanguageChecker):
 
 ada_lang = AdaLang()
 java_lang = JavaLang()
+lkt_lang = LktLang()
 mako_lang = MakoLang()
 python_lang = PythonLang()
 yaml_lang = YAMLLang()
@@ -803,6 +826,7 @@ langs = {
     'adb': ada_lang,
     'ads': ada_lang,
     'java': java_lang,
+    'lkt': lkt_lang,
     'mako': mako_lang,
     'py':  python_lang,
     'yaml': yaml_lang,
@@ -913,6 +937,10 @@ def langkit_main(langkit_root: str, files: list[str] = []) -> None:
     """
     Run main() on Langkit sources.
     """
+
+    def test(*args: str) -> str:
+        return os.path.join("testsuite", "tests", *args)
+
     dirs = [os.path.join('contrib', 'python'),
             os.path.join('contrib', 'lkt'),
             os.path.join('langkit'),
@@ -921,17 +949,23 @@ def langkit_main(langkit_root: str, files: list[str] = []) -> None:
             os.path.join('setup.py'),
             os.path.join('testsuite'),
             os.path.join('utils')]
-    excludes = ['__pycache__',
-                os.path.join('contrib', 'python', 'build'),
-                os.path.join('contrib', 'lkt', 'build'),
-                os.path.join('langkit', 'adasat'),
-                os.path.join('langkit', 'support', 'obj'),
-                os.path.join('langkit', 'dsl_unparse.py'),
-                'out',
-                os.path.join('stylechecks', 'tests.py'),
-                os.path.join('testsuite', 'python_support', 'expect.py'),
-                os.path.join('testsuite', 'python_support', 'quotemeta.py'),
-                os.path.join('testsuite', 'out')]
+    excludes = [
+        '__pycache__',
+        'expected_concrete_syntax.lkt',
+        os.path.join('contrib', 'python', 'build'),
+        os.path.join('contrib', 'lkt', 'build'),
+        os.path.join('langkit', 'adasat'),
+        os.path.join('langkit', 'support', 'obj'),
+        os.path.join('langkit', 'dsl_unparse.py'),
+        'out',
+        os.path.join('stylechecks', 'tests.py'),
+        os.path.join('testsuite', 'python_support', 'expect.py'),
+        os.path.join('testsuite', 'python_support', 'quotemeta.py'),
+
+        # Intentional use of non-ASCII content in lexer rules
+        test("grammar", "case_rule", "lexer_parser.lkt"),
+
+        os.path.join('testsuite', 'out')]
     main(langkit_root, files, dirs, excludes)
 
 

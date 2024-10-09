@@ -15,5 +15,7 @@ class A {
     fun test(): Bool = self.pouet(12)
     fun test2(): Bool = MyCallable()(12)
     fun test3(): Bool = self.callable_array()(12)(12)
-    fun test4(): RecursiveCallable = RecursiveCallable()(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)
+    fun test4(): RecursiveCallable =
+        RecursiveCallable()(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)
+            (12)(12)
 }

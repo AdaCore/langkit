@@ -52,10 +52,10 @@ Id   <RefId "Bool" test.lkt:15:17-15:21>
      references <EnumTypeDecl prelude: "Bool">
 
 Id   <RefId "self" test.lkt:15:24-15:28>
-     references <SelfDecl "self" test.lkt:9:1-19:2>
+     references <SelfDecl "self" test.lkt:9:1-21:2>
 
 Expr <RefId "self" test.lkt:15:24-15:28>
-     has type <ClassDecl "A" test.lkt:9:1-19:2>
+     has type <ClassDecl "A" test.lkt:9:1-21:2>
 
 Id   <RefId "pouet" test.lkt:15:29-15:34>
      references <FunDecl "pouet" test.lkt:11:5-11:45>
@@ -91,10 +91,10 @@ Id   <RefId "Bool" test.lkt:17:18-17:22>
      references <EnumTypeDecl prelude: "Bool">
 
 Id   <RefId "self" test.lkt:17:25-17:29>
-     references <SelfDecl "self" test.lkt:9:1-19:2>
+     references <SelfDecl "self" test.lkt:9:1-21:2>
 
 Expr <RefId "self" test.lkt:17:25-17:29>
-     has type <ClassDecl "A" test.lkt:9:1-19:2>
+     has type <ClassDecl "A" test.lkt:9:1-21:2>
 
 Id   <RefId "callable_array" test.lkt:17:30-17:44>
      references <FunDecl "callable_array" test.lkt:13:5-13:49>
@@ -123,93 +123,93 @@ Expr <CallExpr test.lkt:17:25-17:54>
 Id   <RefId "RecursiveCallable" test.lkt:18:18-18:35>
      references <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Id   <RefId "RecursiveCallable" test.lkt:18:38-18:55>
+Id   <RefId "RecursiveCallable" test.lkt:19:9-19:26>
      references <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <CallExpr test.lkt:18:38-18:57>
+Expr <CallExpr test.lkt:19:9-19:28>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:58-18:60>
+Expr <NumLit test.lkt:19:29-19:31>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:61>
+Expr <CallExpr test.lkt:19:9-19:32>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:62-18:64>
+Expr <NumLit test.lkt:19:33-19:35>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:65>
+Expr <CallExpr test.lkt:19:9-19:36>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:66-18:68>
+Expr <NumLit test.lkt:19:37-19:39>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:69>
+Expr <CallExpr test.lkt:19:9-19:40>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:70-18:72>
+Expr <NumLit test.lkt:19:41-19:43>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:73>
+Expr <CallExpr test.lkt:19:9-19:44>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:74-18:76>
+Expr <NumLit test.lkt:19:45-19:47>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:77>
+Expr <CallExpr test.lkt:19:9-19:48>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:78-18:80>
+Expr <NumLit test.lkt:19:49-19:51>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:81>
+Expr <CallExpr test.lkt:19:9-19:52>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:82-18:84>
+Expr <NumLit test.lkt:19:53-19:55>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:85>
+Expr <CallExpr test.lkt:19:9-19:56>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:86-18:88>
+Expr <NumLit test.lkt:19:57-19:59>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:89>
+Expr <CallExpr test.lkt:19:9-19:60>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:90-18:92>
+Expr <NumLit test.lkt:19:61-19:63>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:93>
+Expr <CallExpr test.lkt:19:9-19:64>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:94-18:96>
+Expr <NumLit test.lkt:19:65-19:67>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:97>
+Expr <CallExpr test.lkt:19:9-19:68>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:98-18:100>
+Expr <NumLit test.lkt:19:69-19:71>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:101>
+Expr <CallExpr test.lkt:19:9-19:72>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:102-18:104>
+Expr <NumLit test.lkt:19:73-19:75>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:105>
+Expr <CallExpr test.lkt:19:9-19:76>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:106-18:108>
+Expr <NumLit test.lkt:20:14-20:16>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:109>
+Expr <CallExpr test.lkt:19:9-20:17>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 
-Expr <NumLit test.lkt:18:110-18:112>
+Expr <NumLit test.lkt:20:18-20:20>
      has type <StructDecl prelude: "Int">
 
-Expr <CallExpr test.lkt:18:38-18:113>
+Expr <CallExpr test.lkt:19:9-20:21>
      has type <ClassDecl "RecursiveCallable" test.lkt:5:1-7:2>
 

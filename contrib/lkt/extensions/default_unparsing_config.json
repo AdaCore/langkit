@@ -356,6 +356,32 @@
     "ExprList": {
       "sep": ["recurse", "line"]
     },
+    "FieldDecl": {
+      "node": [
+        {"kind": "recurse_field", "field": "f_syn_name"},
+        {"kind": "text", "text": ":"},
+        "whitespace",
+        {"kind": "recurse_field", "field": "f_decl_type"},
+        {"kind": "recurse_field", "field": "f_default_val"}
+      ],
+      "fields": {
+        "f_default_val": [
+          "whitespace",
+          {"kind": "text", "text": "="},
+          {
+            "kind": "ifKind",
+            "matchers": [
+              {"kind": "BlockExpr", "document": ["whitespace", "recurse"]},
+              {"kind": "ParenExpr", "document": ["whitespace", "recurse"]}
+            ],
+            "default": {
+              "kind": "group",
+              "document": {"kind": "indent", "contents": ["line", "recurse"]}
+            }
+          }
+        ]
+      }
+    },
     "FullDeclList": {
       "sep": ["recurse", "hardline"]
     },
@@ -372,8 +398,10 @@
         "f_default_val": [
           "whitespace",
           {"kind": "text", "text": "="},
-          "whitespace",
-          "recurse"
+          {
+            "kind": "group",
+            "document": {"kind": "indent", "contents": ["line", "recurse"]}
+          }
         ]
       }
     },
@@ -748,6 +776,7 @@
         {"kind": "recurse_field", "field": "f_return_type"},
         "whitespace",
         {"kind": "text", "text": "=>"},
+        {"kind": "group", "id": "comments", "document": "flushLineBreaks"},
         {
           "kind": "ifKind",
           "field": "f_body",
@@ -755,7 +784,12 @@
             {
               "kind": "BlockExpr",
               "document": [
-                "whitespace",
+                {
+                  "kind": "ifBreak",
+                  "groupId": "comments",
+                  "breakContents": [],
+                  "flatContents": "whitespace"
+                },
                 {"kind": "recurse_field", "field": "f_body"}
               ]
             }
@@ -763,7 +797,12 @@
           "default": {
             "kind": "group",
             "document": [
-              "line",
+              {
+                "kind": "ifBreak",
+                "groupId": "comments",
+                "breakContents": [],
+                "flatContents": "line"
+              },
               {"kind": "recurse_field", "field": "f_body"}
             ]
           }
@@ -862,6 +901,62 @@
     },
     "LktNodeList": {
       "sep": ["recurse", "hardline"]
+    },
+    "LogicAssign": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "recurse_field", "field": "f_dest_var"},
+          "line",
+          {"kind": "text", "text": "<-"},
+          "whitespace",
+          {"kind": "recurse_field", "field": "f_value"}
+        ]
+      }
+    },
+    "LogicPropagate": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "recurse_field", "field": "f_dest_var"},
+          "line",
+          {"kind": "text", "text": "<-"},
+          "whitespace",
+          {"kind": "recurse_field", "field": "f_name"},
+          {"kind": "text", "text": "%"},
+          {"kind": "text", "text": "("},
+          {"kind": "recurse_field", "field": "f_args"},
+          {"kind": "text", "text": ")"}
+        ]
+      },
+      "fields": {
+        "f_args": {
+          "kind": "ifEmpty",
+          "then": "recurse",
+          "else": {
+            "kind": "group",
+            "document": [
+              {
+                "kind": "indent",
+                "contents": ["softline", "recurse"]
+              },
+              "softline"
+            ]
+          }
+        }
+      }
+    },
+    "LogicUnify": {
+      "node": {
+        "kind": "group",
+        "document": [
+          {"kind": "recurse_field", "field": "f_lhs"},
+          "line",
+          {"kind": "text", "text": "<->"},
+          "whitespace",
+          {"kind": "recurse_field", "field": "f_rhs"}
+        ]
+      }
     },
     "MatchBranch": {
       "node": [
@@ -1116,24 +1211,6 @@
               {"kind": "recurse_field", "field": "f_expr"}
             ]
           }
-        ]
-      }
-    },
-
-    "FieldDecl": {
-      "node": [
-        {"kind": "recurse_field", "field": "f_syn_name"},
-        {"kind": "text", "text": ":"},
-        "whitespace",
-        {"kind": "recurse_field", "field": "f_decl_type"},
-        {"kind": "recurse_field", "field": "f_default_val"}
-      ],
-      "fields": {
-        "f_default_val": [
-          "whitespace",
-          {"kind": "text", "text": "="},
-          "whitespace",
-          "recurse"
         ]
       }
     }

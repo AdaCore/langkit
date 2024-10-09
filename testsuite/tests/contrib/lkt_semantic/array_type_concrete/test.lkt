@@ -30,6 +30,7 @@ val b10 = [[2], [1, 2, foo()]]
 # Nested arrays have different types
 @invalid val a11 = [[bar(), "2"], [1, 2]]
 
-# TODO: fix type resolution of generic CallExpr
-# generic [T] fun identity(self: T): T = self
-# val a12 = [i, identity(15)]
+# TODO: fix type resolution of generic CallExpr::
+#
+#   generic [T] fun identity(self: T): T = self
+#   val a12 = [i, identity(15)]

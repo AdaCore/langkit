@@ -53,7 +53,7 @@ class B : A {
 val a: Int = 12
 
 struct Foo {
-    # Test that you cannot access toplevel declarations from a nested scope.
+    # Test that you cannot access toplevel declarations from a nested scope
     @invalid fun test_identifier_leak_invalid(): Int = self.a
 }
 
