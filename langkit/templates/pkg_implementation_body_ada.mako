@@ -3479,14 +3479,27 @@ package body ${ada_lib_name}.Implementation is
       </%def>
       <%def name="default()">
          return "<" & To_Text (Kind_Name (Self))
-                & " "
-                & To_Text
-                  (Ada.Directories.Simple_Name
-                     (Get_Filename (Unit (Self))))
-                & ":" & To_Text (Image (Sloc_Range (Self))) & ">";
+                & " " & Node_Sloc_Image (Self) & ">";
       </%def>
       </%self:case_dispatch>
    end Short_Text_Image;
+
+   ----------------------
+   --- Node_Sloc_Image --
+   ----------------------
+
+   function Node_Sloc_Image (Self : ${T.root_node.name}) return Text_Type
+   is
+      <% ext = ctx.ext("analysis", "node_sloc_image") %>
+   begin
+      % if ext:
+         ${exts.include_extension(ext)}
+      % else:
+         return To_Text
+                  (Ada.Directories.Simple_Name (Get_Filename (Unit (Self))))
+                & ":" & To_Text (Image (Sloc_Range (Self)));
+      % endif
+   end Node_Sloc_Image;
 
    --------------------
    -- Snaps_At_Start --
