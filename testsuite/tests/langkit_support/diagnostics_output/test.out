@@ -12,4 +12,7 @@ Beginning of line no range message
 main.adb:1:1: error: Test message
 1 | A simple line
 
+No source location
+main.adb: error: Test message
+
 Done.

@@ -56,5 +56,12 @@ begin
         Message    => To_Unbounded_Text ("Test message")),
       B, "main.adb");
 
+   Put_Line ("No source location");
+   Output.Print_Diagnostic
+     (Diagnostic'
+       (Sloc_Range => No_Source_Location_Range,
+        Message    => To_Unbounded_Text ("Test message")),
+      B, "main.adb");
+
    Put_Line ("Done.");
 end Main;
