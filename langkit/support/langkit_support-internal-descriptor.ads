@@ -45,6 +45,8 @@ package Langkit_Support.Internal.Descriptor is
      (Context : in out Internal_Context);
    type Context_Version_Type is access function
      (Context : Internal_Context) return Version_Number;
+   type Context_Has_With_Trivia_Type is access function
+     (Context : Internal_Context) return Boolean;
    type Context_Has_Unit_Type is access function
      (Context : Internal_Context; Unit_Filename : String) return Boolean;
    type Context_Get_From_File_Type is access function
@@ -61,7 +63,13 @@ package Langkit_Support.Internal.Descriptor is
      (Unit : Internal_Unit) return Internal_Context;
    type Unit_Version_Type is access function
      (Unit : Internal_Unit) return Version_Number;
+   type Unit_Reparse_From_File_Type is access procedure
+     (Unit : Internal_Unit; Charset : String);
+   type Unit_Reparse_From_Buffer_Type is access procedure
+     (Unit : Internal_Unit; Buffer : String; Charset : String);
    type Unit_Filename_Type is access function
+     (Unit : Internal_Unit) return String;
+   type Unit_Charset_Type is access function
      (Unit : Internal_Unit) return String;
    type Unit_Diagnostics_Type is access function
      (Unit : Internal_Unit) return Diagnostics_Access;
@@ -71,6 +79,9 @@ package Langkit_Support.Internal.Descriptor is
      (Unit : Internal_Unit) return Analysis.Internal_Node;
    type Unit_Token_Getter_Type is access function
      (Unit : Internal_Unit) return Analysis.Internal_Token;
+   type Unit_Lookup_Token_Type is access function
+     (Unit : Internal_Unit;
+      Sloc : Source_Location) return Analysis.Internal_Token;
    type Unit_Get_Line_Type is access function
      (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
    type Unit_Get_Natural_Type is access function
@@ -115,6 +126,8 @@ package Langkit_Support.Internal.Descriptor is
       Sloc : Source_Location) return Analysis.Internal_Node;
    type Node_Last_Attempted_Child_Type is access function
      (Node : Analysis.Internal_Node) return Integer;
+   type Node_Children_And_Trivia_Type is access function
+     (Node : Analysis.Internal_Node) return Node_Or_Token_Array_Access;
 
    type Entity_Image_Type is access function
      (Entity : Internal_Entity) return String;
@@ -190,18 +203,23 @@ package Langkit_Support.Internal.Descriptor is
       Context_Inc_Ref         : Context_Inc_Ref_Type;
       Context_Dec_Ref         : Context_Dec_Ref_Type;
       Context_Version         : Context_Version_Type;
+      Context_Has_With_Trivia : Context_Has_With_Trivia_Type;
+      Context_Has_Unit        : Context_Has_Unit_Type;
       Context_Get_From_File   : Context_Get_From_File_Type;
       Context_Get_From_Buffer : Context_Get_From_Buffer_Type;
-      Context_Has_Unit        : Context_Has_Unit_Type;
 
       Unit_Context               : Unit_Context_Type;
       Unit_Version               : Unit_Version_Type;
+      Unit_Reparse_From_File     : Unit_Reparse_From_File_Type;
+      Unit_Reparse_From_Buffer   : Unit_Reparse_From_Buffer_Type;
       Unit_Filename              : Unit_Filename_Type;
+      Unit_Charset               : Unit_Charset_Type;
       Unit_Diagnostics           : Unit_Diagnostics_Type;
       Unit_Format_GNU_Diagnostic : Unit_Format_GNU_Diagnostic_Type;
       Unit_Root                  : Unit_Root_Type;
       Unit_First_Token           : Unit_Token_Getter_Type;
       Unit_Last_Token            : Unit_Token_Getter_Type;
+      Unit_Lookup_Token          : Unit_Lookup_Token_Type;
       Unit_Token_Count           : Unit_Get_Natural_Type;
       Unit_Trivia_Count          : Unit_Get_Natural_Type;
       Unit_Get_Line              : Unit_Get_Line_Type;
@@ -225,6 +243,7 @@ package Langkit_Support.Internal.Descriptor is
       Node_Sloc_Range           : Node_Sloc_Range_Type;
       Node_Lookup               : Node_Lookup_Type;
       Node_Last_Attempted_Child : Node_Last_Attempted_Child_Type;
+      Node_Children_And_Trivia  : Node_Children_And_Trivia_Type;
 
       Entity_Image : Entity_Image_Type;
 

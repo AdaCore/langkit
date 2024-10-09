@@ -432,6 +432,10 @@ begin
          Put_Line ("  is abstract");
       end if;
 
+      if Is_Synthetic (Node) then
+         Put_Line ("  is synthetic");
+      end if;
+
       if Is_Token_Node (Node) then
          Put_Line
            ("  is a token node ("
@@ -512,6 +516,16 @@ begin
    Put ("Null Node argument: ");
    begin
       Dummy_Bool := Is_Abstract (No_Type_Ref);
+      raise Program_Error;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
+
+   Put_Line ("Invalid args for Is_Synthetic:");
+   Put ("Null Node argument: ");
+   begin
+      Dummy_Bool := Is_Synthetic (No_Type_Ref);
       raise Program_Error;
    exception
       when Exc : Precondition_Failure =>
@@ -747,6 +761,18 @@ begin
       end if;
       New_Line;
    end loop;
+
+   Put ("Language: null Member argument: ");
+   begin
+      declare
+         Dummy : constant Language_Id := Language (No_Struct_Member_Ref);
+      begin
+         raise Program_Error;
+      end;
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Exc (Exc);
+   end;
 
    Put ("Is_Property: Null Member argument: ");
    begin

@@ -24,7 +24,6 @@ with GNATCOLL.Refcount;
 
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
-with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
@@ -358,15 +357,6 @@ package ${ada_lib_name}.Analysis is
    --  ``${ada_lib_name}.Rewriting``), i.e. whether it is in the process of
    --  rewriting. If true, this means that the set of currently loaded analysis
    --  units is frozen until the rewriting process is done.
-
-   function Get_Symbol_Table
-     (Context : Analysis_Context'Class) return Symbol_Table;
-   --  Return the symbol table attached to this context. Useful for users
-   --  needing their own symbolization and wanting to share it with their
-   --  language frontend.
-   --
-   --  WARNING: EXPERIMENTAL & UNSAFE - The Symbol_Table exposes an unsafe API,
-   --  that might be subject to some changes, use with caution.
 
    ------------------------------
    -- Analysis unit primitives --

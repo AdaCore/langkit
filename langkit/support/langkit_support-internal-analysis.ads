@@ -4,6 +4,7 @@
 --
 
 with Ada.Containers; use Ada.Containers;
+with Ada.Unchecked_Deallocation;
 with System;
 
 with Langkit_Support.Diagnostics;  use Langkit_Support.Diagnostics;
@@ -116,6 +117,19 @@ package Langkit_Support.Internal.Analysis is
 
    No_Token_Safety_Net : constant Token_Safety_Net :=
      (No_Internal_Context, 0, 0);
+
+   type Node_Or_Token (Is_Node : Boolean := False) is record
+      case Is_Node is
+         when False => Token : Internal_Token;
+         when True  => Node  : Internal_Node;
+      end case;
+   end record;
+
+   type Node_Or_Token_Array is array (Positive range <>) of Node_Or_Token;
+   type Node_Or_Token_Array_Access is access all Node_Or_Token_Array;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Node_Or_Token_Array, Node_Or_Token_Array_Access);
 
    --  Contexts, units and token data handlers are implementing with big
    --  records, at least 256 bytes long, so we can ignore the 8 least
