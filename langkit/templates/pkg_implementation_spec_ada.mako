@@ -165,6 +165,10 @@ private package ${ada_lib_name}.Implementation is
            );
    % endif
 
+   function Node_Sloc_Image (Self : ${T.root_node.name}) return Text_Type;
+   --  Return the image of the sloc for ``Self``, to be used in
+   --  ``Short_Text_Image``.
+
    function Short_Text_Image (Self : ${T.root_node.name}) return Text_Type;
    --  Return a short representation of the node, containing just the kind
    --  name and the sloc, or "None" if Self is null.

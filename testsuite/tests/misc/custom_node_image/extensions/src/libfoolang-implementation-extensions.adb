@@ -6,7 +6,7 @@ package body Libfoolang.Implementation.Extensions is
 
    function Name_Short_Image (Node : Bare_Name) return Text_Type is
    begin
-      return "<Name """ & Text (Node) & """>";
+      return "<Name """ & Text (Node) & """ [" & Node_Sloc_Image (Node) & "]>";
    end Name_Short_Image;
 
 end Libfoolang.Implementation.Extensions;
