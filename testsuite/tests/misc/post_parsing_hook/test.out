@@ -1,0 +1,9 @@
+Buffer: example
+No diagnostic
+
+Buffer: example # trigger
+Diagnostics:
+  main.txt: Some trivia found!
+
+main.adb: Done.
+Done
