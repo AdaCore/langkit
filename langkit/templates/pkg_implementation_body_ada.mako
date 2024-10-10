@@ -5651,6 +5651,8 @@ package body ${ada_lib_name}.Implementation is
             Main_Trace.Decrease_Indent;
          end if;
       end;
+
+      ${exts.include_extension(ctx.ext("analysis", "post_parsing"))}
    end Update_After_Reparse;
 
    -------------------------------
