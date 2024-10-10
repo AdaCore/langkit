@@ -1757,6 +1757,20 @@ Done.
   ]
 }
 
+== cmd_ifkind7.json ==
+
+{
+  "id": 1,
+  "kind": "list",
+  "list": [
+    {
+      "id": 2,
+      "kind": "text",
+      "text": "var v1:T= 1;var v2:T= 1+2;var v3:T=a.b;"
+    }
+  ]
+}
+
 == cmd_indent.json ==
 
 {

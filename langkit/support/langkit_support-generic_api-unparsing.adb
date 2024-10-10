@@ -2866,37 +2866,46 @@ package body Langkit_Support.Generic_API.Unparsing is
                         --  context confirming that it ends in the same state
                         --  as Context.
 
+                        function Parse_Type_Ref
+                          (JSON : JSON_Value) return Type_Ref;
+                        --  Return the type reference corresponding to JSON,
+                        --  expected to be a string. Abort parsing if this is
+                        --  not a valid type reference.
+
                         ---------------------
                         -- Process_Matcher --
                         ---------------------
 
                         procedure Process_Matcher (Matcher_JSON : JSON_Value)
                         is
-                           Kind          : constant JSON_Value :=
+                           Kind           : constant JSON_Value :=
                              Matcher_JSON.Get ("kind");
-                           Document_JSON : constant JSON_Value :=
+                           Document_JSON  : constant JSON_Value :=
                              Matcher_JSON.Get ("document");
-
+                           Types          : Type_Ref_Vectors.Vector;
                            Nested_Context : Template_Parsing_Context :=
                              Initial_Context;
-
                         begin
-                           if Kind.Kind /= JSON_String_Type then
+                           if Kind.Kind = JSON_String_Type then
+                              Types.Append (Parse_Type_Ref (Kind));
+                           elsif Kind.Kind = JSON_Array_Type then
+                              for K of JSON_Array'(Kind.Get) loop
+                                 Types.Append (Parse_Type_Ref (K));
+                              end loop;
+                           else
                               Abort_Parsing
                                 (Context,
                                  "invalid matcher ""kind"" field for "
                                  & """ifKind"" - found "
                                  & Kind.Kind'Image
-                                 & "; expected "
-                                 & JSON_String_Type'Image);
+                                 & "; expected a string or array of strings");
                            end if;
 
                            --  Parse the matcher and store it in the table
 
                            If_Kind_Matchers.Append
                              (Matcher_Record'
-                               (From_Index
-                                 (Language, To_Type_Index (Kind.Get)),
+                               (Types,
                                 Parse_Template_Helper
                                  (Document_JSON, Nested_Context)));
 
@@ -2910,6 +2919,26 @@ package body Langkit_Support.Generic_API.Unparsing is
                                  & "inconsistent recurse structure");
                            end if;
                         end Process_Matcher;
+
+                        --------------------
+                        -- Parse_Type_Ref --
+                        --------------------
+
+                        function Parse_Type_Ref
+                          (JSON : JSON_Value) return Type_Ref is
+                        begin
+                           if JSON.Kind /= JSON_String_Type then
+                              Abort_Parsing
+                                (Context,
+                                 "invalid matcher ""kind"" field for "
+                                 & """ifKind"" - found "
+                                 & JSON.Kind'Image
+                                 & "; expected "
+                                 & JSON_String_Type'Image);
+                           end if;
+                           return From_Index
+                             (Language, To_Type_Index (JSON.Get));
+                        end Parse_Type_Ref;
 
                      begin
                         If_Kind_Default :=
@@ -3929,19 +3958,15 @@ package body Langkit_Support.Generic_API.Unparsing is
                --  first matcher that accepts it.
 
                if not Field_Node.Is_Null then
-                  for J in
+                  for I in
                     Template.If_Kind_Matchers.First_Index
                     .. Template.If_Kind_Matchers.Last_Index
                   loop
-                     if Type_Matches
-                          (Field_Node,
-                           Template
-                             .If_Kind_Matchers
-                             .Reference (J)
-                             .Matched_Type)
+                     if Matches
+                          (Field_Node, Template.If_Kind_Matchers.Reference (I))
                      then
                         Matched_Template :=
-                          Template.If_Kind_Matchers (J).Document;
+                          Template.If_Kind_Matchers (I).Document;
                         exit;
                      end if;
                   end loop;

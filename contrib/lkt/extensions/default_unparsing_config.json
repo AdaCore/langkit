@@ -215,8 +215,7 @@
         "f_cond_expr": {
           "kind": "ifKind",
           "matchers": [
-            {"kind": "ParenExpr", "document": "recurse"},
-            {"kind": "BlockExpr", "document": "recurse"}
+            {"kind": ["BlockExpr", "ParenExpr"], "document": "recurse"}
           ],
           "default": {
             "kind": "group",
@@ -226,8 +225,7 @@
         "f_then_expr": {
           "kind": "ifKind",
           "matchers": [
-            {"kind": "ParenExpr", "document": "recurse"},
-            {"kind": "BlockExpr", "document": "recurse"}
+            {"kind": ["BlockExpr", "ParenExpr"], "document": "recurse"}
           ],
           "default": {
             "kind": "group",
@@ -439,15 +437,7 @@
            "kind": "ifKind",
            "matchers": [
              {
-               "kind": "BlockExpr",
-               "document": [
-                 {"kind": "text", "text": "="},
-                 "whitespace",
-                 "recurse"
-               ]
-             },
-             {
-               "kind": "MatchExpr",
+               "kind": ["BlockExpr", "MatchExpr"],
                "document": [
                  {"kind": "text", "text": "="},
                  "whitespace",
@@ -692,8 +682,7 @@
         "f_cond_expr": {
           "kind": "ifKind",
           "matchers": [
-            {"kind": "ParenExpr", "document": "recurse"},
-            {"kind": "BlockExpr", "document": "recurse"}
+            {"kind": ["BlockExpr", "ParenExpr"], "document": "recurse"}
           ],
           "default": {
             "kind": "group",
@@ -703,8 +692,7 @@
         "f_else_expr": {
           "kind": "ifKind",
           "matchers": [
-            {"kind": "ParenExpr", "document": "recurse"},
-            {"kind": "BlockExpr", "document": "recurse"}
+            {"kind": ["BlockExpr", "ParenExpr"], "document": "recurse"}
           ],
           "default": {
             "kind": "group",
@@ -714,8 +702,7 @@
         "f_then_expr": {
           "kind": "ifKind",
           "matchers": [
-            {"kind": "ParenExpr", "document": "recurse"},
-            {"kind": "BlockExpr", "document": "recurse"}
+            {"kind": ["BlockExpr", "ParenExpr"], "document": "recurse"}
           ],
           "default": {
             "kind": "group",
@@ -1161,24 +1148,11 @@
             ],
             "matchers": [
               {
-                "kind": "ParenExpr",
+                "kind": ["BlockExpr", "ParenExpr", "MatchExpr"],
                 "document": [
                   "whitespace",
                   {"kind": "recurse_field", "field": "f_val"}
                  ]
-              },
-              {
-                "kind": "BlockExpr",
-                "document": [
-                  "whitespace",
-                  {"kind": "recurse_field", "field": "f_val"}
-                ]
-              },
-              {
-                "kind": "MatchExpr",
-                "document": [
-                  "whitespace", {"kind": "recurse_field", "field": "f_val"}
-                ]
               }
             ],
             "default": {

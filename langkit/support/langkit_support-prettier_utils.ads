@@ -124,10 +124,16 @@ private package Langkit_Support.Prettier_Utils is
    package Document_Vectors is new Ada.Containers.Vectors
      (Positive, Document_Type);
 
+   package Type_Ref_Vectors is new Ada.Containers.Vectors (Positive, Type_Ref);
+
    type Matcher_Record is record
-      Matched_Type : Type_Ref;
-      Document     : Document_Type;
+      Matched_Types : Type_Ref_Vectors.Vector;
+      Document      : Document_Type;
    end record;
+
+   function Matches (Node : Lk_Node; Matcher : Matcher_Record) return Boolean;
+   --  Return if ``Node`` matches at least one type in
+   --  ``Matcher.Matched_Types``.
 
    package Matcher_Vectors is new Ada.Containers.Vectors
      (Index_Type   => Positive,
