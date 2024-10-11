@@ -5,7 +5,8 @@ grammar foo_grammar {
     @main_rule main_rule <- Example("example")
 }
 
-@abstract class FooNode implements Node[FooNode] {
+@abstract
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode {
@@ -17,12 +18,13 @@ class Example: FooNode {
                 kind=DesignatedEnvKind.current_env, env_name=null[Symbol], direct_env=null[LexicalEnv]
             ), metadata=null[Metadata]
         )] & (
-            if (count == 0) then null[Array[EnvAssoc]] else node.dummy_entries(count - 1, next_base)
+            if count == 0 then null[Array[EnvAssoc]] else node.dummy_entries(count - 1, next_base)
         )
     }
 
-    @exported fun lookup(sym: Symbol): Entity[Example] =
-    node.children_env.get_first(sym).as[Example]
+    @exported
+    fun lookup(sym: Symbol): Entity[Example] =
+        node.children_env.get_first(sym).as[Example]
 
     env_spec {
         add_env()
