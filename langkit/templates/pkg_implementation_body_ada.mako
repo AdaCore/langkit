@@ -5652,7 +5652,13 @@ package body ${ada_lib_name}.Implementation is
          end if;
       end;
 
+      --  Let extension potentially add new diagnostics
+
       ${exts.include_extension(ctx.ext("analysis", "post_parsing"))}
+
+      --  Make sure they are sorted afterwards for a better user experience
+
+      Sort (Unit.Diagnostics);
    end Update_After_Reparse;
 
    -------------------------------

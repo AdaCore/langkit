@@ -27,5 +27,9 @@ procedure Main is
 begin
    Check ("example");
    Check ("example # trigger");
+   Check
+     ("[ # trigger" & ASCII.LF
+      & "example # trigger" & ASCII.LF
+      & "] # trigger" & ASCII.LF);
    Put_Line ("main.adb: Done.");
 end Main;
