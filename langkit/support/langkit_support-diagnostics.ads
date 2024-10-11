@@ -52,6 +52,9 @@ package Langkit_Support.Diagnostics is
       Exc         : Ada.Exceptions.Exception_Occurrence);
    --  Shortcut to append an exception message to a vector
 
+   procedure Sort (Diagnostics : in out Diagnostics_Vectors.Vector);
+   --  Sort diagnostics by sloc range
+
    procedure Print
      (Diagnostics : Diagnostics_Vectors.Vector;
       Prefix      : String := "error: ";
