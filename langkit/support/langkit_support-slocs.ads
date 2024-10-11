@@ -87,6 +87,11 @@ package Langkit_Support.Slocs is
                   and then Sloc /= No_Source_Location);
    --  Tell where Sloc is with respect to Sloc_Range
 
+   function "<" (L, R : Source_Location_Range) return Boolean;
+   --  Ordering follows the start location first. If both start locations are
+   --  equal, then we use inverse ordering for end locations, so that nested
+   --  ranges come after encompassing ranges.
+
    ------------------------
    -- String conversions --
    ------------------------

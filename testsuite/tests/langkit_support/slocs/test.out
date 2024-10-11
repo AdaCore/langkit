@@ -1,3 +1,5 @@
+== Value/Image for Source_Location ==
+
 "0:0" -> 0:0
 "123:456" -> 123:456
 "" -> error: invalid source location
@@ -5,6 +7,9 @@
 ":1" -> error: invalid line number: ""
 "-1:2" -> error: invalid line number: "-1"
 "a:2" -> error: invalid line number: "a"
+
+== Value/Image for Source_Location_Range ==
+
 "1:2-3:4" -> 1:2-3:4
 "" -> error: invalid source location
 "1:2" -> error: invalid source location
@@ -14,3 +19,30 @@
 "1:2-:4" -> error: invalid line number: ""
 "1:2-3:" -> error: invalid column number: ""
 "1:2-3:-1" -> error: invalid column number: "-1"
+
+== Ordering for Source_Location_Range ==
+
+1:1-1:1 < 1:1-1:1 = False
+1:1-1:1 < 1:1-1:1 = False
+
+2:1-1:1 < 1:1-1:1 = False
+1:1-1:1 < 2:1-1:1 = True
+1:2-1:1 < 1:1-1:1 = False
+1:1-1:1 < 1:2-1:1 = True
+1:1-2:1 < 1:1-1:1 = True
+1:1-1:1 < 1:1-2:1 = False
+1:1-1:2 < 1:1-1:1 = True
+1:1-1:1 < 1:1-1:2 = False
+
+2:1-1:1 < 1:9-9:9 = False
+1:9-9:9 < 2:1-1:1 = True
+1:2-1:1 < 1:1-9:9 = False
+1:1-9:9 < 1:2-1:1 = True
+1:1-2:1 < 1:1-1:9 = True
+1:1-1:9 < 1:1-2:1 = False
+1:9-9:9 < 2:1-1:1 = True
+2:1-1:1 < 1:9-9:9 = False
+1:1-9:9 < 1:2-1:1 = True
+1:2-1:1 < 1:1-9:9 = False
+1:1-1:9 < 1:1-2:1 = False
+1:1-2:1 < 1:1-1:9 = True
