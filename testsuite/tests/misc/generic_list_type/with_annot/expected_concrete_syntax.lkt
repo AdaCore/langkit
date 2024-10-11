@@ -9,12 +9,21 @@ grammar foo_grammar {
     null_list <- list+(NullNode("null"))
 }
 
-class Decl: FooNode {
-    @parse_field items: ASTList[FooNode]
+@abstract
+@generic_list_type("FooList")
+class FooNode implements Node[FooNode] {
 }
 
 class Example: FooNode implements TokenNode {
 }
 
+class MixedList: FooNode {
+    @parse_field list_node: FooList
+}
+
 class NullNode: FooNode implements TokenNode {
+}
+
+class SingleList: FooNode {
+    @parse_field list_node: ASTList[Example]
 }

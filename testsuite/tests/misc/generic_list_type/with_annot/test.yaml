@@ -1,2 +1,4 @@
 driver: python
+sync_trees:
+    - ../common
 input_sources: []
