@@ -36,7 +36,7 @@ break_label = re.compile("# BREAK:([a-z_]+)$")
 
 dsl_break_map: dict[str, int] = {}
 """
-Mapping from breakpoint labels in "test.py" to the corresponding line numbers.
+Mapping from breakpoint labels in "test.lkt" to the corresponding line numbers.
 """
 
 thread_notif_pattern = r"@/(\[New Thread .*\])?/ @/(Thread \d+ hit )?/"
@@ -47,7 +47,7 @@ command has returned.
 
 
 # Fill ``dsl_break_map``
-with open("test.py") as f:
+with open("test.lkt") as f:
     for i, line in enumerate(f, 1):
         m = break_label.search(line)
         if m:
@@ -59,7 +59,7 @@ def break_dsl(label: str) -> None:
     Create a breakpoint in the DSL on the line that contains the break comment
     marker matching ``label``.
     """
-    run_foobreak(f"test.py:{dsl_break_map[label]}")
+    run_foobreak(f"test.lkt:{dsl_break_map[label]}")
 
 
 def check_var_state(var_name: str, expected: str) -> None:
