@@ -5,7 +5,7 @@ with Libfoolang.Common;   use Libfoolang.Common;
 
 with Support; use Support;
 
-procedure Without_Annot is
+procedure Main is
    U : constant Analysis_Unit := Create;
 begin
    for L of U.Root.Children loop
@@ -30,4 +30,4 @@ begin
             raise Program_Error;
       end case;
    end loop;
-end Without_Annot;
+end Main;

@@ -1,4 +1,0 @@
-import common
-
-@abstract class FooNode implements Node[FooNode] {
-}
