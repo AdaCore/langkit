@@ -7,6 +7,7 @@ procedure Main is
 
    procedure Check_Sloc (S : String);
    procedure Check_Sloc_Range (S : String);
+   procedure Check_Sloc_Range_Order (Left, Right : String);
 
    ----------------
    -- Check_Sloc --
@@ -38,7 +39,25 @@ procedure Main is
          Put_Line ("error: " & Exception_Message (Exc));
    end Check_Sloc_Range;
 
+   ----------------------------
+   -- Check_Sloc_Range_Order --
+   ----------------------------
+
+   procedure Check_Sloc_Range_Order (Left, Right : String) is
+      L : constant Source_Location_Range := Value (Left);
+      R : constant Source_Location_Range := Value (Right);
+   begin
+      Put_Line
+        (Left & " < " & Right & " = "
+         & (if L < R then "True" else "False"));
+      Put_Line
+        (Right & " < " & Left & " = "
+         & (if R < L then "True" else "False"));
+   end Check_Sloc_Range_Order;
+
 begin
+   Put_Line ("== Value/Image for Source_Location ==");
+   New_Line;
    Check_Sloc ("0:0");
    Check_Sloc ("123:456");
    Check_Sloc ("");
@@ -46,7 +65,10 @@ begin
    Check_Sloc (":1");
    Check_Sloc ("-1:2");
    Check_Sloc ("a:2");
+   New_Line;
 
+   Put_Line ("== Value/Image for Source_Location_Range ==");
+   New_Line;
    Check_Sloc_Range ("1:2-3:4");
    Check_Sloc_Range ("");
    Check_Sloc_Range ("1:2");
@@ -56,4 +78,24 @@ begin
    Check_Sloc_Range ("1:2-:4");
    Check_Sloc_Range ("1:2-3:");
    Check_Sloc_Range ("1:2-3:-1");
+   New_Line;
+
+   Put_Line ("== Ordering for Source_Location_Range ==");
+   New_Line;
+
+   Check_Sloc_Range_Order ("1:1-1:1", "1:1-1:1");
+   New_Line;
+
+   Check_Sloc_Range_Order ("2:1-1:1", "1:1-1:1");
+   Check_Sloc_Range_Order ("1:2-1:1", "1:1-1:1");
+   Check_Sloc_Range_Order ("1:1-2:1", "1:1-1:1");
+   Check_Sloc_Range_Order ("1:1-1:2", "1:1-1:1");
+   New_Line;
+
+   Check_Sloc_Range_Order ("2:1-1:1", "1:9-9:9");
+   Check_Sloc_Range_Order ("1:2-1:1", "1:1-9:9");
+   Check_Sloc_Range_Order ("1:1-2:1", "1:1-1:9");
+   Check_Sloc_Range_Order ("1:9-9:9", "2:1-1:1");
+   Check_Sloc_Range_Order ("1:1-9:9", "1:2-1:1");
+   Check_Sloc_Range_Order ("1:1-1:9", "1:1-2:1");
 end Main;
