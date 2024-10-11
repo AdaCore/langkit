@@ -1,0 +1,12 @@
+main.adb: Starting...
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 30
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 31
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 31
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 31
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 31
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 31
+main.adb: Reparsing...
+[LIBFOOLANG.CACHE_INVALIDATION] Attempting cache collection because number of entries reached 31
+   [LIBFOOLANG.CACHE_INVALIDATION] New collection threshold : 31
+main.adb: Done.
+Done
