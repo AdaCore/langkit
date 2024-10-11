@@ -17,7 +17,7 @@ class Name(FooNode):
 
 class Def(FooNode):
     name = Field()
-    defs = Field()
+    defs = Field(nullable=True)
     values = Field()
 
 

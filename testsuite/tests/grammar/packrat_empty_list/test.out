@@ -1,11 +1,11 @@
-<DefList 1:1-1:12>
-  <Def 1:1-1:12>
-    <Name 1:5-1:6>
-    <Def 1:7-1:12>
-      <Name 1:11-1:12>
-      <Values 1:12-1:12>
-        <NumberList 1:12-1:12>
-    <Values 1:12-1:12>
-      <NumberList 1:12-1:12>
+<DefList main.txt:1:1-1:12>
+  <Def main.txt:1:1-1:12>
+    <Name main.txt:1:5-1:6>
+    <Def main.txt:1:7-1:12>
+      <Name main.txt:1:11-1:12>
+      <Values main.txt:1:12-1:12>
+        <NumberList main.txt:1:12-1:12>
+    <Values main.txt:1:12-1:12>
+      <NumberList main.txt:1:12-1:12>
 main.adb: Done.
 Done
