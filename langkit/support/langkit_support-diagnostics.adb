@@ -72,6 +72,49 @@ package body Langkit_Support.Diagnostics is
       Append (Diagnostics, Sloc_Range, To_Text (Msg));
    end Append;
 
+   ----------
+   -- Sort --
+   ----------
+
+   procedure Sort (Diagnostics : in out Diagnostics_Vectors.Vector) is
+
+      --  Keep track of the original order for diagnostics so that we can
+      --  preserve order for diagnostics with the same sloc range.
+
+      type Ordered_Diag is record
+         Sloc_Range     : Source_Location_Range;
+         Original_Index : Positive;
+         Message        : Unbounded_Text_Type;
+      end record;
+
+      function "<" (Left, Right : Ordered_Diag) return Boolean
+      is (if Left.Sloc_Range = Right.Sloc_Range
+          then Left.Original_Index < Right.Original_Index
+          else Left.Sloc_Range < Right.Sloc_Range);
+
+      package Ordered_Diag_Vectors is new Ada.Containers.Vectors
+        (Positive, Ordered_Diag);
+
+      package Sorting is new Ordered_Diag_Vectors.Generic_Sorting;
+
+      OD : Ordered_Diag_Vectors.Vector;
+
+   begin
+      for I in 1 .. Diagnostics.Last_Index loop
+         declare
+            D : Diagnostic renames Diagnostics (I);
+         begin
+            OD.Append (Ordered_Diag'(D.Sloc_Range, I, D.Message));
+         end;
+      end loop;
+      Sorting.Sort (OD);
+
+      Diagnostics.Clear;
+      for D of OD loop
+         Diagnostics.Append (Diagnostic'(D.Sloc_Range, D.Message));
+      end loop;
+   end Sort;
+
    -----------
    -- Print --
    -----------

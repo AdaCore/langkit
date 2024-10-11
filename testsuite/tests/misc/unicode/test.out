@@ -31,8 +31,8 @@ Last token:  FOO_TERMINATION at 1:1-1:1
 == file | example-file | wrong-encoding | default ==
 
 Errors:
-  main-iso-8859-1.txt:1:3: Could not decode source as "utf-8"
   main-iso-8859-1.txt:1:1: Expected 'example', got Termination
+  main-iso-8859-1.txt:1:3: Could not decode source as "utf-8"
 
 Root node children: 0
 First token: FOO_TERMINATION at 1:1-1:1
@@ -41,8 +41,8 @@ Last token:  FOO_TERMINATION at 1:1-1:1
 == file | example-file | wrong-encoding | file-reader ==
 
 Errors:
-  main-iso-8859-1.txt:1:3: Could not decode source as "utf-8"
   main-iso-8859-1.txt:1:1: Expected 'example', got Termination
+  main-iso-8859-1.txt:1:3: Could not decode source as "utf-8"
 
 Root node children: 0
 First token: FOO_TERMINATION at 1:1-1:1
@@ -66,8 +66,8 @@ Last token:  FOO_TERMINATION at 1:1-1:1
 == buffer | example-file | wrong-encoding | default ==
 
 Errors:
-  main-iso-8859-1.txt:1:3: Could not decode source as "utf-8"
   main-iso-8859-1.txt:1:1: Expected 'example', got Termination
+  main-iso-8859-1.txt:1:3: Could not decode source as "utf-8"
 
 Root node children: 0
 First token: FOO_TERMINATION at 1:1-1:1
