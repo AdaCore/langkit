@@ -1,0 +1,18 @@
+# Check that add_env is forbidden in post-node PLE
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    env_spec {
+        handle_children()
+        add_env()
+    }
+}
