@@ -2656,7 +2656,8 @@ class LktTypesLoader:
         # There is little point going further if we have not found the root
         # node type.
         if root_node_decl is None:
-            error("no node type declaration found")
+            with diagnostic_context(Location.nowhere):
+                error("no node type declaration found")
 
         # Register the automatic generic list type
         full_decl = cast(L.FullDecl, root_node_decl.parent)
