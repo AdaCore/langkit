@@ -1,0 +1,5 @@
+import common
+
+struct MyStruct {
+    A: Bool
+}

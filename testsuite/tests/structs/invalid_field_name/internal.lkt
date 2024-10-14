@@ -1,0 +1,5 @@
+import common
+
+struct MyStruct {
+    _field: Bool
+}

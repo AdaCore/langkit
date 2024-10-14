@@ -1,7 +1,13 @@
-== test.lkt ==
-test.lkt:15:5: error: lower case expected for field names
-15 |     A: Bool
-   |     ^
+== internal.lkt ==
+internal.lkt:4:5: error: names must start with a letter: '_field'
+4 |     _field: Bool
+  |     ^^^^^^
+
+
+== upper.lkt ==
+upper.lkt:4:5: error: lower case expected for field names
+4 |     A: Bool
+  |     ^
 
 
 lkt_compile: Done
