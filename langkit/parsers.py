@@ -23,7 +23,6 @@ not defined in the example, but relied on explicitly.
 from __future__ import annotations
 
 import abc
-from collections import OrderedDict
 from contextlib import AbstractContextManager, contextmanager
 import difflib
 import enum
@@ -263,11 +262,9 @@ class Grammar:
             location or extract_library_location()
         )
 
-        self._all_lkt_rules: dict[str, tuple[L.Decl, L.GrammarExpr]] = (
-            OrderedDict()
-        )
+        self._all_lkt_rules: list[tuple[str, L.Decl, L.GrammarExpr]] = []
         """
-        If we loaded a Lkt unit, mapping of all grammar rules it contains.
+        If we loaded a Lkt unit, list of all grammar rules to lower.
         """
 
         self.uses_external_properties = False
