@@ -1,0 +1,30 @@
+# Test that assigning a default value to a dynamic variable:
+#
+# * allows bind-less calls in the property DSL;
+# * generates the expected public API.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ExampleNode("example")
+}
+
+dynvar bool_var: Bool
+
+@abstract
+class RootNode implements Node[RootNode] {
+    @exported
+    @abstract
+    @with_dynvars(bool_var=true)
+    fun prop(): Bool
+}
+
+class ExampleNode: RootNode {
+    # Check that inheritance works as expected
+    @with_dynvars(bool_var=true)
+    fun prop(): Bool = bool_var
+
+    @exported
+    fun prop2(): Bool = node.prop()
+}

@@ -1,0 +1,58 @@
+# Check that trivia are properly scanned when the lexer tracks indentation
+
+@indentation_tracking
+lexer foo_lexer {
+
+    @ignored _ <- p"[ \r\t]+"
+    Def <- "def"
+    Comma <- ","
+    LPar <- "("
+    RPar <- ")"
+    @symbol() Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    @trivia() Comment <- p"#.*"
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    newline <- Newline(@Newline)
+    expr <- or(call | identifier | indented)
+    identifier <- Identifier(@Identifier)
+    call <- Call(
+        identifier
+        "("
+        discard(list*(newline))
+        list*(call, ",") discard(list*(newline)) ")"
+    )
+    indented <- Indented(
+        discard(list*(newline))
+        @Indent
+        list+(pick(discard(list*(newline))
+        expr discard(list*(newline))), @Newline) @Dedent
+    )
+    def_node <- Def("def" identifier @Newline list+(indented))
+    @main_rule main_rule <- list+(pick(discard(list*(newline))
+    def_node discard(list*(newline))))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Call: FooNode {
+    @parse_field name: Identifier
+    @parse_field args: ASTList[Call]
+}
+
+class Def: FooNode {
+    @parse_field name: Identifier
+    @parse_field stmts: ASTList[Indented]
+}
+
+class Identifier: FooNode implements TokenNode {
+}
+
+class Indented: FooNode {
+    @parse_field inner: ASTList[FooNode]
+}
+
+class Newline: FooNode implements TokenNode {
+}

@@ -1,0 +1,18 @@
+# Test that ".symbol" raises a property error on null nodes or when symbol
+# canonicalization fails.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun prop(e: Example): Symbol = e.symbol
+}
+
+class Example: FooNode implements TokenNode {
+}

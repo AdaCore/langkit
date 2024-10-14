@@ -1,0 +1,74 @@
+# Check that code emission for lazy fields is correct
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(or(Example("example") | NullNode("null")))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class AbstractNode: FooNode {
+    # Regression test: we used to generate bad Ada code for the initializer of
+    # a class for which one of the ancestor has a lazy field.
+    @exported
+    @lazy
+    lazy_in_abstract: Int = 42
+}
+
+class Example: AbstractNode implements TokenNode {
+    # Simple test (lazy field is an integer)
+    @exported
+    @lazy
+    @traced
+    lazy_int: Int = 42
+
+    # More complex testcase (lazy field is a ref-counted resources)
+    @exported
+    @lazy
+    @traced
+    lazy_refcounted: Array[Int] = [1, 2]
+
+    # Helpers to check that entity info is propagated when retuning the value
+    # of a lazy field.
+
+    @exported
+    fun is_flag_enabled(): Bool = self.info.md.flag
+
+    @exported
+    fun with_flag(flag: Bool): Entity[Example] = Entity[Example](
+        node=node, info=EntityInfo(
+            md=Metadata(flag=flag),
+            rebindings=self.info.rebindings,
+            from_rebound=self.info.from_rebound
+        )
+    )
+
+    @exported
+    @lazy
+    lazy_node: Example = node
+
+    # Regression test: lazy fields that raise an exception used to be
+    # re-evaluated each time.
+    @exported
+    @lazy
+    @traced
+    lazy_error: Int = raise[Int] PropertyError("foo")
+}
+
+class NullNode: AbstractNode implements TokenNode {
+    # Regression test: we used to generate invalid Ada code when two lazy
+    # fields in different nodes had the same name.
+    @exported
+    @lazy
+    lazy_int: Int = 21
+}
+
+@metadata
+struct Metadata {
+    @used_in_equality flag: Bool
+}

@@ -33,7 +33,8 @@ gdb.test("foostate nosuchvar", "No binding called nosuchvar")
 # Check state at various points during the property execution
 run_foonext("Now evaluating <parent at test.lkt:@NUMBER:@NUMBER>")
 run_foonext("""\
-<parent at test.lkt:@NUMBER:@NUMBER> evaluated to: <FooNodeList main.txt:1:1-1:23>
+<parent at test.lkt:@NUMBER:@NUMBER> evaluated to: \
+<FooNodeList main.txt:1:1-1:23>
 
 Now evaluating <children at test.lkt:@NUMBER:@NUMBER>""")
 run_foonext("""\
@@ -42,7 +43,9 @@ run_foonext("""\
 
 Now evaluating <Let at test.lkt:@NUMBER:@NUMBER>""")
 run_foonext("Now evaluating <Map at test.lkt:@NUMBER:@NUMBER>")
-run_foonext("Now evaluating <FieldAccess for parents at test.lkt:@NUMBER:@NUMBER>")
+run_foonext(
+    "Now evaluating <FieldAccess for parents at test.lkt:@NUMBER:@NUMBER>"
+)
 gdb.test("foostate", """\
 Running FooNode.test_control_flow
 from @...test.lkt:@NUMBER
@@ -86,7 +89,8 @@ run_fooout("""\
 
 Now evaluating <children at test.lkt:@NUMBER:@NUMBER>""")
 run_fooout("""\
-<children at test.lkt:@NUMBER:@NUMBER> evaluated to: Bare_Foo_Node array of length 0
+<children at test.lkt:@NUMBER:@NUMBER> evaluated to: \
+Bare_Foo_Node array of length 0
 
 Now evaluating <Let at test.lkt:@NUMBER:@NUMBER>""")
 run_fooout("""\
@@ -98,7 +102,8 @@ run_fooout("""\
 
 Now evaluating <Map at test.lkt:@NUMBER:@NUMBER>""")
 run_fooout("""\
-<Map at test.lkt:@NUMBER:@NUMBER> evaluated to: Integer array of length 3 = {@...
+<Map at test.lkt:@NUMBER:@NUMBER> evaluated to: Integer array of length 3 = \
+{@...
 
 Now evaluating <Let at test.lkt:@NUMBER:@NUMBER>""")
 run_fooout("""\
@@ -116,7 +121,8 @@ gdb.test("fooout", "Not evaluating any expression currently")
 run_continue()
 run_foosi("Now evaluating <parent at test.lkt:@NUMBER:@NUMBER>")
 run_foosi("""\
-<parent at test.lkt:@NUMBER:@NUMBER> evaluated to: <FooNodeList main.txt:1:1-1:23>
+<parent at test.lkt:@NUMBER:@NUMBER> evaluated to: \
+<FooNodeList main.txt:1:1-1:23>
 
 Now evaluating <children at test.lkt:@NUMBER:@NUMBER>""")
 run_foosi("""\
@@ -125,7 +131,9 @@ run_foosi("""\
 
 Now evaluating <Let at test.lkt:@NUMBER:@NUMBER>""")
 run_foosi("Now evaluating <Map at test.lkt:@NUMBER:@NUMBER>")
-run_foosi("Now evaluating <FieldAccess for parents at test.lkt:@NUMBER:@NUMBER>")
+run_foosi(
+    "Now evaluating <FieldAccess for parents at test.lkt:@NUMBER:@NUMBER>"
+)
 run_foosi("""\
 <FieldAccess for parents at test.lkt:@NUMBER:@NUMBER> evaluated to:\
  Bare_Foo_Node array of length 2 = {@...
@@ -136,11 +144,13 @@ run_foosi("""\
 
 Now evaluating <children at test.lkt:@NUMBER:@NUMBER>""")
 run_foosi("""\
-<children at test.lkt:@NUMBER:@NUMBER> evaluated to: Bare_Foo_Node array of length 0
+<children at test.lkt:@NUMBER:@NUMBER> evaluated to: \
+Bare_Foo_Node array of length 0
 
 Now evaluating <Let at test.lkt:@NUMBER:@NUMBER>""")
 run_foosi(
-    "Now evaluating <FieldAccess for control_flow_helper at test.lkt:@NUMBER:@NUMBER>"
+    "Now evaluating <FieldAccess for control_flow_helper"
+    " at test.lkt:@NUMBER:@NUMBER>"
 )
 
 # This should get us into the call to the control_flow_helper property

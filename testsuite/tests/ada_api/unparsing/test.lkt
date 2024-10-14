@@ -1,0 +1,198 @@
+# Check that the Unparsing/Prettier API works as expect
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(or(annot_var_decl | annot_fun_decl | block))
+    name <- Name(@Identifier)
+    type_ref <- name
+    annotations <- AnnotationList*(name, ",")
+    null_qual <- NullQual("null")
+    var_decl <- VarDecl(
+        null_qual "var" name ":" type_ref "=" expr ";"
+    )
+    annot_var_decl <- AnnotatedDecl(annotations var_decl)
+    param_spec <- ParamSpec(name ":" type_ref ?pick("=" expr))
+    fun_decl <- FunDecl(
+        "def"
+        name
+        pick("("
+        list*(param_spec, ",", allow_trailing)
+        ")") ":" type_ref null_qual "{" stmts "}"
+    )
+    stmts <- or(list+(labeled_stmts) | Stmts(list*(stmt)))
+    annot_fun_decl <- AnnotatedDecl(annotations fun_decl)
+    labeled_stmts <- LabeledStmts(name ":" list*(stmt))
+    stmt <- or(
+        | ExprStmt(expr ";")
+        | AssignStmt(
+            list+(name, ",", allow_leading) "=" expr ";"
+        )
+    )
+    expr <- or(
+        | DottedName(expr "." name)
+        | Addition(expr "+" expr)
+        | call
+        | atom
+    )
+    atom <- or(number | ref)
+    number <- Number(@Number)
+    ref <- Ref(name)
+    call_arg <- CallArg(?pick(name "=") expr)
+    call <- or(
+        | Call(name "(" list*(call_arg, ",") ")")
+        | ExampleCall(
+            "example" null(Name) "(" list*(call_arg, ",") ")"
+        )
+    )
+    block <- or(
+        | Block("{" list*(or(var_decl | fun_decl)) "}")
+        | PlusBlock(
+            "+" "{" PlusDecls*(or(var_decl | fun_decl)) "}"
+        )
+    )
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun table_join_needed(): Bool = {
+        val this_decl = node.as[AnnotatedDecl]?.decl.as[VarDecl];
+        val prev_decl =
+            node
+            .as_bare_entity
+            .previous_sibling.
+            as[AnnotatedDecl]
+            ?.decl
+            .as[VarDecl];
+
+        not prev_decl.is_null
+        and not this_decl.is_null
+        and (
+            if node.as[AnnotatedDecl].annotation_names.empty()
+            then true
+            else raise[Bool] PropertyError("predicate bug")
+        )
+        and prev_decl.name.text == "left"
+        and this_decl.name.text == "right"
+    }
+
+    @exported
+    fun table_join_bad_args(i: Int): Bool = i == 0
+
+    @exported
+    fun table_join_bad_rtype(): Int = 0
+}
+
+class AnnotatedDecl: FooNode {
+    @parse_field annotation_names: AnnotationList
+    @parse_field decl: Decl
+}
+
+@abstract
+class BaseBlock: FooNode {
+}
+
+class Block: BaseBlock {
+    @parse_field items: ASTList[Decl]
+}
+
+class PlusBlock: BaseBlock {
+    @parse_field items: PlusDecls
+}
+
+class CallArg: FooNode {
+    @parse_field @nullable name: Name
+    @parse_field expr: Expr
+}
+
+@abstract
+class Decl: FooNode {
+    @abstract @parse_field name: Name
+}
+
+class FunDecl: Decl {
+    @parse_field name: Name
+    @parse_field args: ASTList[ParamSpec]
+    @parse_field return_type: Name
+    @parse_field is_null: NullQual
+    @parse_field body: FooNode
+}
+
+class VarDecl: Decl {
+    @parse_field is_null: NullQual
+    @parse_field name: Name
+    @parse_field type_expr: Name
+    @parse_field value: Expr
+}
+
+@abstract
+class Expr: FooNode {
+}
+
+class Addition: Expr {
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
+}
+
+class Call: Expr {
+    @parse_field @nullable callee: Name
+    @parse_field args: ASTList[CallArg]
+}
+
+class ExampleCall: Call {
+}
+
+class DottedName: Expr {
+    @parse_field prefix: Expr
+    @parse_field suffix: Name
+}
+
+class Number: Expr implements TokenNode {
+}
+
+class Ref: Expr {
+    @parse_field name: Name
+}
+
+class PlusDecls: ASTList[Decl] {
+}
+
+class AnnotationList: ASTList[Name] {
+}
+
+class LabeledStmts: FooNode {
+    @parse_field label: Name
+    @parse_field stmts: ASTList[Stmt]
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+@qualifier
+enum class NullQual: FooNode {
+}
+
+class ParamSpec: FooNode {
+    @parse_field name: Name
+    @parse_field type_expr: Name
+    @parse_field @nullable default_expr: Expr
+}
+
+@abstract
+class Stmt: FooNode {
+}
+
+class AssignStmt: Stmt {
+    @parse_field names: ASTList[Name]
+    @parse_field expr: Expr
+}
+
+class ExprStmt: Stmt {
+    @parse_field expr: Expr
+}
+
+class Stmts: FooNode {
+    @parse_field stmts: ASTList[Stmt]
+}

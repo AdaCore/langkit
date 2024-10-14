@@ -1,0 +1,215 @@
+# Check that the generic Ada API works as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    |" Parser main entry point
+    @main_rule main_rule <- list+(or(var_decl | def | Example(@Example name)))
+    null_qual <- NullQual("null")
+    var_decl <- VarDecl(null_qual "var" name "=" expr ";")
+    def <- Def(
+        "def"
+        name ?pick("(" list+(name, ",") ")") "=" expr ";"
+    )
+    |" Use this to parse
+    |" any kind of expression.
+    @entry_point expr <- or(Addition(expr "+" expr) | call | atom)
+    call <- Call(name "(" list*(expr, ",") ")")
+    atom <- or(number | ref)
+    number <- Number(@Number)
+    ref <- Ref(name)
+    name <- Name(@Identifier)
+}
+
+@metadata
+struct Metadata {
+    @used_in_equality md1: Bool
+    md2: Bool
+}
+
+struct Point {
+    label: String
+    x: BigInt
+    y: BigInt
+}
+
+struct NodeResult {
+    n: Example
+    e: Entity[Example]
+}
+
+# Create a struct that is not exposed just to check that it does not show up in
+# the public introspection API.
+
+struct PrivatePoint {
+    x: BigInt
+    y: BigInt
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class BaseExample: FooNode {
+    # Check for proper member inheritance handling: the introspection API
+    # should list "fld_1" first and "fld_2" for BaseExample, but in the
+    # opposite order for Example.
+    @abstract @parse_field fld_1: Name
+    @abstract @parse_field @nullable fld_2: FooNode
+
+    @exported
+    @abstract
+    fun id_bool(id: Bool): Bool
+}
+
+class Example: BaseExample {
+    @parse_field @null_field fld_2: FooNode
+    @parse_field fld_1: Name
+
+    fun to_public(p: PrivatePoint): Point =
+        Point(label="from private", x=p.x, y=p.y)
+
+    @exported
+    fun prop(p: Point): Point = node.to_public(PrivatePoint(x=p.x, y=p.y))
+
+    @exported
+    fun result(): NodeResult = NodeResult(n=node, e=self)
+
+    @exported
+    fun may_raise(value: Int, do_raise: Bool): Int =
+        if do_raise then raise[Int] PropertyError("from may_raise") else value
+
+    # Test for primitive types
+
+    fun id_bool(id: Bool): Bool = id
+
+    @exported
+    fun id_int(id: Int): Int = id
+
+    @exported
+    fun id_bigint(id: BigInt): BigInt = id
+
+    @exported
+    fun id_char(id: Char): Char = id
+
+    @exported
+    fun id_token(id: Token): Token = id
+
+    @exported
+    fun id_sloc(id: SourceLocation): SourceLocation = id
+
+    @exported
+    fun id_sym(id: Symbol): Symbol = id
+
+    @exported
+    fun id_unit(id: AnalysisUnit): AnalysisUnit = id
+
+    @exported
+    fun id_root_node(id: FooNode): FooNode = id
+
+    @exported
+    fun id_name(id: Name): Name = id
+
+    # Test for enums
+
+    @exported
+    fun id_unit_kind(id: AnalysisUnitKind): AnalysisUnitKind = id
+
+    # Test for arrays
+
+    @exported
+    fun id_node_array(id: Array[Entity[FooNode]]): Array[Entity[FooNode]] = id
+
+    @exported
+    fun id_expr_array(id: Array[Entity[Expr]]): Array[Entity[Expr]] = id
+
+    @exported
+    fun id_bigint_array(id: Array[BigInt]): Array[BigInt] = id
+
+    @exported
+    fun id_unit_array(id: Array[AnalysisUnit]): Array[AnalysisUnit] = id
+
+    # Test for iterators
+
+    @exported
+    fun create_bigint_iterator(): Iterator[BigInt] =
+        [1b, 2b, 3b].to_iterator()
+
+    @exported
+    fun id_bigint_iterator(id: Iterator[BigInt]): Iterator[BigInt] = id
+
+    # Test for default values
+
+    @exported
+    fun id_dflt_bool(id: Bool = true): Bool = id
+
+    @exported
+    fun id_dflt_int(id: Int = 42): Int = id
+
+    @exported
+    fun id_dflt_char(id: Char = '\x00'): Char = id
+
+    @exported
+    fun id_dflt_root_node(id: FooNode = null[FooNode]): FooNode = id
+
+    @exported
+    fun with_md(md1: Bool, md2: Bool): Entity[Example] = Entity[Example](
+        node=self.node, info=EntityInfo(
+            md=Metadata(md1=md1, md2=md2),
+            rebindings=self.info.rebindings,
+            from_rebound=self.info.from_rebound
+        )
+    )
+
+    @exported
+    @lazy
+    create_synth_node: SynthNode =
+        SynthNode.builder(foo=null[FooNode].to_builder()).build()
+}
+
+class Def: FooNode {
+    @parse_field name: Name
+    @parse_field args: ASTList[Name]
+    @parse_field expr: Expr
+}
+
+@abstract
+class Expr: FooNode {
+}
+
+class Addition: Expr {
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
+}
+
+class Call: Expr {
+    @parse_field name: Name
+    @parse_field args: ASTList[Expr]
+}
+
+class Number: Expr implements TokenNode {
+}
+
+class Ref: Expr {
+    @parse_field name: Name
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+@qualifier
+enum class NullQual: FooNode {
+}
+
+@synthetic
+class SynthNode: FooNode {
+    @parse_field @nullable foo: FooNode
+}
+
+class VarDecl: FooNode {
+    @parse_field is_null: NullQual
+    @parse_field name: Name
+    @parse_field value: Expr
+}

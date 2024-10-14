@@ -1,0 +1,27 @@
+# Test getting the analysis unit of a node in the properties DSL
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(Plus(atom "+" main_rule) | atom)
+    atom <- Literal(@Number)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun root_node(): Entity[FooNode] = node.unit.root.as_bare_entity
+}
+
+@abstract
+class Expression: FooNode {
+}
+
+class Literal: Expression implements TokenNode {
+}
+
+class Plus: Expression {
+    @parse_field left: Literal
+    @parse_field right: Expression
+}

@@ -2,42 +2,29 @@
 Check that version numbers are available from all APIs.
 """
 
-import langkit
 from langkit.diagnostics import DiagnosticError
-from langkit.dsl import ASTNode
 
-from utils import build_and_run
+from utils import prepare_context
 
 
-def run(label, **kwargs):
+def run(label, version=None, build_date=None):
     print("== {} ==".format(label))
 
-    class FooNode(ASTNode):
-        pass
-
-    class Example(FooNode):
-        token_node = True
-
+    ctx = prepare_context(
+        lkt_file="test.lkt",
+        version="1.version.number",
+        build_date="build.date.number",
+        types_from_lkt=True,
+    )
     try:
-        build_and_run(
-            lkt_file="expected_concrete_syntax.lkt",
-            version="1.version.number",
-            build_date="build.date.number",
-            types_from_lkt=True,
-            **kwargs
-        )
+        ctx.set_versions(version, build_date)
     except DiagnosticError:
-        print("DiagnosticError: skipping...")
-    langkit.reset()
+        pass
+    else:
+        raise RuntimeError("error expected")
     print("")
 
 
-run("Conflict on version",
-    additional_make_args=["--version=1.something"],
-    full_error_traces=False)
-run("Conflict on build date",
-    additional_make_args=["--build-date=something"],
-    full_error_traces=False)
-run("Build and run test programs", py_script="main.py", gpr_mains=["main.adb"])
-
-print("Done")
+print("")
+run("Conflict on version", version="1.something")
+run("Conflict on build date", build_date="something")

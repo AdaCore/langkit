@@ -1,0 +1,25 @@
+# Check that the ".find" DSL construct works as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example(@Example))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun find_above(values: Array[Int], threshold: Int): Int =
+        values.find((i) => i > threshold)
+
+    # Dummy "find" expression to exercize the special case of iterating on a
+    # list entity.
+
+    @exported
+    fun find_entity(l: Entity[ASTList[Example]]): Entity[Example] =
+        l.find((n) => n.text == "example")
+}
+
+class Example: FooNode implements TokenNode {
+}

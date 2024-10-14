@@ -1,1 +1,7 @@
-driver: python
+driver: lkt_build_and_run
+gpr_mains:
+  - analysis.adb
+  - introspection_types.adb
+  - introspection_values.adb
+  - hash.adb
+generate_unparser: True

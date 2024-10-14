@@ -1,4 +1,4 @@
-driver: python
+driver: lkt_build_and_run
 sync_trees:
     - ../common
-input_sources: []
+gpr_mains: [main.adb]

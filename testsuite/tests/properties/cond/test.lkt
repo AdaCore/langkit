@@ -1,0 +1,37 @@
+# Test the handling of analysis units in the properties DSL
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    fun identity(b: Bool): Bool = b
+
+    @exported
+    fun cond1(b: Bool): Int = if node.identity(b) then 1
+    else 2
+
+    @exported
+    fun cond2(b1: Bool, b2: Bool): Int = if node.identity(b1) then 1
+    elif node.identity(b2) then 2
+    else 3
+
+    @exported
+    fun cond3(b1: Bool, b2: Bool, b3: Bool): Int = if node.identity(b1) then 1
+    elif node.identity(b2) then 2
+    elif node.identity(b3) then 3
+    else 3
+
+    @exported
+    fun cond_node(b: Bool): Entity[FooNode] = (
+        if node.identity(b) then node
+        else null[FooNode]
+    ).as_bare_entity
+}

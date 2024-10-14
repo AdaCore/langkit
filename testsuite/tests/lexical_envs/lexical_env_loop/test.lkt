@@ -1,0 +1,82 @@
+# Test that the referenced envs link that cross analysis units stay valid after
+# reparsing.
+
+lexer foo_lexer {
+
+    @trivia() Whitespace <- p"[ \n\r\t]+"
+    @trivia() Comment <- p"#(.?)+"
+    Package <- "package"
+    Use <- "use"
+    Ref <- "ref"
+    LBrace <- "{"
+    RBrace <- "}"
+    Var <- "var"
+    LPar <- "("
+    RPar <- ")"
+    @symbol() Identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(decl)
+    name <- Name(@Identifier)
+    package <- Package("package" name "{" list*(decl) "}")
+    var <- Var("var" name)
+    decl <- or(var | package | use_clause | ref)
+    use_clause <- UseClause("use" name)
+    ref <- Ref("ref" name)
+}
+
+dynvar env: LexicalEnv
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class Decl: FooNode {
+}
+
+class Package: Decl {
+    @parse_field name: Name
+    @parse_field decls: ASTList[Decl]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
+}
+
+class Ref: Decl {
+    @parse_field name: Name
+
+    @exported
+    fun entity(): Entity[FooNode] = node.as_entity.name.get_ref()
+}
+
+class UseClause: Decl {
+    @parse_field name: Name
+
+    env_spec {
+        reference(
+            node.name.as[FooNode].do((v1) => [v1]),
+            Name.designated_env,
+            kind=transitive
+        )
+    }
+}
+
+class Var: Decl {
+    @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
+}
+
+class Name: FooNode implements TokenNode {
+    fun designated_env(): LexicalEnv =
+        node.node_env.get(node.symbol, from=node)?[0].children_env
+
+    fun get_ref(): Entity[FooNode] =
+        node.node_env.get(node.symbol, from=node)?[0]
+}

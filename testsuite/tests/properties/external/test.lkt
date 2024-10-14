@@ -1,0 +1,32 @@
+# Test that external properties build and run properly
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(Plus(atom "+" main_rule) | atom)
+    atom <- Literal(@Number)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class Expression: FooNode {
+    @exported
+    @abstract
+    fun result(): Int
+}
+
+class Literal: Expression implements TokenNode {
+    @external()
+    fun result(): Int
+}
+
+class Plus: Expression {
+    @parse_field left: Literal
+    @parse_field right: Expression
+
+    fun result(): Int = node.left.result() + node.right.result()
+}

@@ -1,0 +1,81 @@
+# Check that add_to_env actions that try to add an entry to a foreign
+# environment without the unsafe=True flag raise an error.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule
+    main_rule <- list+(or(scope | foreign_decl))
+    scope <- Scope(simple_identifier "{" list*(scope) "}")
+    identifier <- or(
+        | ScopedId(identifier "." simple_identifier)
+        | simple_identifier
+    )
+    simple_identifier <- SimpleId(@Identifier)
+    foreign_decl <- ForeignDecl("+" identifier "+" simple_identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class ForeignDecl: FooNode {
+    @parse_field
+    dest_scope: Id
+    @parse_field
+    decl_id: SimpleId
+
+    env_spec {
+        add_to_env_kv(
+            node.decl_id.symbol,
+            node,
+            dest_env=DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env,
+                env_name=null[Symbol],
+                direct_env=node.dest_scope.resolve(node.parent.children_env)
+                .children_env
+            )
+        )
+    }
+}
+
+@abstract
+class Id: FooNode {
+    @abstract
+    fun resolve(base_env: LexicalEnv): FooNode
+}
+
+class ScopedId: Id {
+    @parse_field
+    scope: Id
+    @parse_field
+    name: SimpleId
+
+    fun resolve(base_env: LexicalEnv): FooNode =
+        node.scope.resolve(base_env).children_env.get_first(node.name.symbol)
+        .node
+}
+
+class SimpleId: Id implements TokenNode {
+    fun resolve(base_env: LexicalEnv): FooNode =
+        base_env.get_first(node.symbol).node
+}
+
+class Scope: FooNode {
+    @parse_field
+    name: SimpleId
+    @parse_field
+    content: ASTList[Scope]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
+}
+
+@metadata
+struct Metadata {
+    @used_in_equality
+    node: FooNode
+}

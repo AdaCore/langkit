@@ -1,0 +1,19 @@
+# Check that big memoization tables are properly free'd. This used to yield a
+# stack overflow.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    @memoized
+    fun compute(i: Int): Int = i + 1
+}

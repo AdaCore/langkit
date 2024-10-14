@@ -1,0 +1,24 @@
+# Test that the String type works as expected in the property DSL and in the
+# generated APIs.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    fun identity(s: String): String = s
+
+    @exported
+    fun extend(s: String): String = s & "foo"
+
+    @exported
+    fun newline(): String = "hello\nworld"
+}

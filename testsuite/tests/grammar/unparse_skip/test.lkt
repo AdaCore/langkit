@@ -1,0 +1,32 @@
+# Test the generation of unparsers involving Or parsers that contain Skip
+# parsers as alternatives.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(or(
+        | DefNode("def" identifier "=" number ";")
+        | skip(ErrorDef)
+    ))
+    number <- Number(@Number)
+    identifier <- Identifier(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class DefNode: FooNode {
+    @parse_field name: Identifier
+    @parse_field value: Number
+}
+
+class ErrorDef: FooNode implements ErrorNode {
+}
+
+class Identifier: FooNode implements TokenNode {
+}
+
+class Number: FooNode implements TokenNode {
+}

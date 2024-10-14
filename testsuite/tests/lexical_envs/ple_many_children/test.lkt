@@ -1,0 +1,18 @@
+# Test PLE on a node which contains a very large number of children
+
+lexer foo_lexer {
+
+    Example <- "e"
+    @trivia() Whitespace <- " "
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example(@Example))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+}

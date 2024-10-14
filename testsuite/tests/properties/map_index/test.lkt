@@ -1,0 +1,86 @@
+# Check that the various forms of the "map" DSL construct correctly handle the
+# presence or absence of index.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- ListNode(list+(NumberNode(@Number)))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun create(index: Int, number: Entity[NumberNode]): IndexedNumber =
+        IndexedNumber(index=index, number=number)
+}
+
+class ListNode: FooNode {
+    @parse_field nb_list: ASTList[NumberNode]
+
+    fun nb_list_entities(): Array[Entity[NumberNode]] =
+        node.nb_list.map((n) => n.as_bare_entity)
+
+    @exported
+    fun map_no_idx(): Array[IndexedNumber] =
+        node.nb_list_entities().map((n) => node.create(0, n))
+
+    @exported
+    fun map_idx(): Array[IndexedNumber] =
+        node.nb_list_entities().imap((n, i) => node.create(i, n))
+
+    @exported
+    fun mapcat_no_idx(): Array[IndexedNumber] =
+        node.nb_list_entities().mapcat((n) => [node.create(0, n)])
+
+    @exported
+    fun mapcat_idx(): Array[IndexedNumber] =
+        node.nb_list_entities().imapcat((n, i) => [node.create(i, n)])
+
+    @exported
+    fun filter_no_idx(): Array[Entity[NumberNode]] =
+        node.nb_list_entities().filter((n) => n.text == "2")
+
+    @exported
+    fun filter_idx(): Array[Entity[NumberNode]] =
+        node.nb_list_entities().ifilter((n, i) => n.text == "2" or i == 0)
+
+    @exported
+    fun filtermap_no_idx(): Array[IndexedNumber] =
+        node.nb_list_entities().filtermap(
+            (n) => node.create(0, n), (n) => n.text == "2"
+        )
+
+    @exported
+    fun filtermap_elt_idx(): Array[IndexedNumber] =
+        node.nb_list_entities().ifiltermap(
+            (n, i) => node.create(i, n), (n, i) => n.text == "2"
+        )
+
+    @exported
+    fun filtermap_filter_idx(): Array[IndexedNumber] =
+        node.nb_list_entities().ifiltermap(
+            (n, i) => node.create(0, n), (n, i) => n.text == "2" or i == 0
+        )
+
+    @exported
+    fun filtermap_all_idx(): Array[IndexedNumber] =
+        node.nb_list_entities().ifiltermap(
+            (n, i) => node.create(i, n), (n, i) => n.text == "2" or i == 0
+        )
+
+    @exported
+    fun take_while_no_idx(): Array[Entity[NumberNode]] =
+        node.nb_list_entities().take_while((n) => n.text != "3")
+
+    @exported
+    fun take_while_idx(): Array[Entity[NumberNode]] =
+        node.nb_list_entities().itake_while((n, i) => n.text == "1" or i == 0)
+}
+
+class NumberNode: FooNode implements TokenNode {
+}
+
+struct IndexedNumber {
+    index: Int
+    number: Entity[NumberNode]
+}

@@ -1,0 +1,47 @@
+# Test that Bind works when binding entities, and using an equality property
+# that takes entities.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(
+        or(Literal(@Number) | Identifier(@Identifier))
+    )
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun foo_conv(): Entity[FooNode] = self
+}
+
+@abstract
+class RootNode: FooNode {
+    var: LogicVar
+
+    @abstract
+    fun xref_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Equation
+
+    @exported
+    fun solve_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Bool =
+        node.xref_eq(arg1, arg2).solve()
+}
+
+class Identifier: RootNode implements TokenNode {
+    fun xref_eq(
+        @ignored arg1: Entity[FooNode],
+        @ignored arg2: Entity[FooNode]
+    ): Equation = %domain(node.var, [node])
+}
+
+class Literal: RootNode implements TokenNode {
+    fun literal_conv(): Entity[Literal] = self
+
+    fun xref_eq(arg1: Entity[FooNode], arg2: Entity[FooNode]): Equation = (
+        %domain(node.var, [arg1]) %and node.var <- Literal.literal_conv%(arg2)
+    ) %and (
+        # Also check that you can use a property defined on the root
+        # node type.
+        node.var <- FooNode.foo_conv%(arg2)
+    )
+}

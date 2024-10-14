@@ -1,0 +1,20 @@
+# Test the safety mechanism of iterators: given an iterator created from a
+# context version X, iterating through it when the current context version is
+# any Y > X should raise an exception.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    fun entities_iterator(): Iterator[Entity[Example]] =
+        [self, self, self].to_iterator()
+}

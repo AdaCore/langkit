@@ -1,1 +1,126 @@
-driver: python
+driver: lkt_build_and_run
+generate_unparser: True
+default_unparsing_config: default_cfg.json
+gpr_mains:
+    - main.adb -c config.json example.txt
+    - main.adb -c config.json param_spec.txt -r param_spec
+
+    - invalid_config.adb
+    - commands.adb
+    - default_config.adb
+
+    - main.adb -c config.json trivias/block_comments_only.txt
+    - main.adb -c config.json trivias/block_empty.txt
+    - main.adb -c config.json trivias/block_first_empty_line.txt
+    - main.adb -c config.json trivias/block_mixed.txt
+    - main.adb -c config.json trivias/block_trailing.txt
+    - main.adb -c config.json trivias/list_nested_reattach.txt
+    - main.adb -c config.json trivias/list_nested_reattach_2.txt
+    - main.adb -c config.json trivias/list_ghost_before_trailing.txt
+    - main.adb -c config.json trivias/list_separator.txt
+    - main.adb -c config.json trivias/list_separator_trailing.txt
+    - main.adb -c config.json trivias/unit_comments_only.txt
+    - main.adb -c config.json trivias/unit_empty.txt
+    - main.adb -c trivias/wrapped_list_item.json trivias/wrapped_list_item.txt
+
+    - main.adb -c trivias/var_group_config.json trivias/var_decls.txt
+    - main.adb
+        -c trivias/var_group_config.json
+        trivias/list_nested_reattach.txt
+        -s 5:4^1
+    - main.adb
+      -c trivias/var_group_config.json
+      trivias/list_nested_reattach.txt
+      -s 9:4^1
+
+    - main.adb -c list_extra_sep/default.json list_extra_sep/assign.txt
+    - main.adb -c list_extra_sep/default.json list_extra_sep/params.txt
+    - main.adb -c list_extra_sep/same_as_regular.json list_extra_sep/assign.txt
+    - main.adb -c list_extra_sep/same_as_regular.json list_extra_sep/params.txt
+    - main.adb -c list_extra_sep/override.json list_extra_sep/assign.txt
+    - main.adb -c list_extra_sep/override.json list_extra_sep/params.txt
+
+    - main.adb -c max_empty_lines_none.json trivias/max_empty_lines.txt
+    - main.adb -c max_empty_lines_0.json trivias/max_empty_lines.txt
+    - main.adb -c max_empty_lines_1.json trivias/max_empty_lines.txt
+    - main.adb -c max_empty_lines_2.json trivias/max_empty_lines.txt
+
+    # Check that broken groups detection works as expected for
+    # fill/group/ifBreak/table.
+    #
+    # Breaking their parent group is not supposed to break their contents.
+    #
+    # To verify this, run the unparsing on a source that contains a variable
+    # declaration and with a unparsing configuration that:
+    #
+    # 1) puts a "softline" document between the "var" keyword and the
+    #    declaration identifier (unparsing this requires a space between these
+    #    two keywords).
+    # 2) wraps both in a fill/group/ifBreak/table,
+    # 3) has a "hardline" outside of that wrapping node.
+    #
+    # The hardline is supposed to break the parent group, but the breaking
+    # behavior is not supposed to reach the nested "softline" document. As a
+    # result, the unparsing engine is supposed to add an extra whitespace
+    # before the declaration identifier.
+    - main.adb -c breaking/fill.json breaking/one_var.txt -t final_doc
+    - main.adb -c breaking/group.json breaking/one_var.txt -t final_doc
+    - main.adb -c breaking/ifbreak.json breaking/one_var.txt -t final_doc
+    - main.adb -c breaking/table.json breaking/one_var.txt -t final_doc
+
+    # The root document is processed as if it was wrapped in a broken group:
+    # "top level" softline documents are supposed to be expanded into line
+    # breaks, so in this case we expect the unparsing engine *not* to add a
+    # whitespace.
+    - main.adb -c breaking/root.json breaking/one_var.txt -t final_doc
+
+    # Tables must break if they contain more than one element
+    - main.adb -c breaking/table.json breaking/comment_in_vars.txt -t final_doc
+
+    # Documents in a "must_break" table must behave as if they were in a broken
+    # group (even if the table itself is not broken, because it has only one
+    # element), so "softline" documents must be considered as expanded to new
+    # lines (the engine must not add extra whitespaces before the declaration
+    # identifiers).
+    - main.adb
+        -c breaking/table_must_break.json
+        breaking/comment_in_vars.txt
+        -t final_doc
+    - main.adb
+        -c breaking/table_must_break.json
+        breaking/one_var.txt
+        -t final_doc
+
+    # A "must_break" table must *not* break its parent if it contains
+    # only one element and that element itself does not trigger a break.
+    - main.adb
+        -c breaking/table_must_break_not_parent.json
+        breaking/one_var.txt
+        -t final_doc
+
+    # Items in "fill" documents must consider they live in a broken group even
+    # if there are breaking items in the same "fill" document. In the following
+    # testcase, "line" after VarDecl nodes will expand to spaces even though
+    # the "fill" document contains a "hardline", so the unparsing engine needs
+    # to add an extra line break after the comment.
+    - main.adb
+        -c breaking/fill_broken.json
+        breaking/comment_in_var.txt
+        -t final_doc
+
+    - main.adb -c table_align/no_split.json table_align/var_decls.txt
+    - main.adb -c table_align/split_all.json table_align/var_decls.txt
+    - main.adb -c table_align/split_comments.json table_align/var_decls.txt
+    - main.adb -c table_align/split_empty_lines.json table_align/var_decls.txt
+
+    - main.adb -c table_align/sep_before_missing.json table_align/fun_decls.txt
+    - main.adb -c table_align/sep_before_true.json table_align/fun_decls.txt
+    - main.adb -c table_align/sep_before_false.json table_align/fun_decls.txt
+
+    - main.adb -c table_align/table_sep_in_field.json table_align/calls.txt
+
+    - main.adb -c table_align/inherit.json table_align/blocks.txt
+    - main.adb -c table_align/inherit_null.json table_align/blocks.txt
+
+    - main.adb -c table_join/config.json table_join/big.txt
+    - main.adb -c table_join/config.json table_join/error.txt

@@ -1,0 +1,48 @@
+# Test that the introspection API works as expected for queries related to node
+# types.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(var_decl)
+    var_decl <- VarDecl("var" name "=" expr ";")
+    expr <- or(Addition(expr "+" expr) | atom)
+    atom <- or(number | ref)
+    number <- Number(@Number)
+    ref <- Ref(Null("null") name)
+    name <- Name(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class Expr: FooNode {
+}
+
+class Addition: Expr {
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
+}
+
+class Number: Expr implements TokenNode {
+}
+
+class Ref: Expr {
+    @parse_field null_qual: Null
+    @parse_field name: Name
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+@qualifier
+enum class Null: FooNode {
+}
+
+class VarDecl: FooNode {
+    @parse_field name: Name
+    @parse_field value: Expr
+}

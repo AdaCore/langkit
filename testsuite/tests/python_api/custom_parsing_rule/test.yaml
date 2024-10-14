@@ -1,1 +1,3 @@
-driver: python
+driver: lkt_build_and_run
+py_script: main.py
+generate_unparser: True

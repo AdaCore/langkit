@@ -1,0 +1,20 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(or(mixed | single))
+    mixed <- MixedList("{" or(example_list | null_list) "}")
+    single <- SingleList("(" example_list ")")
+    example_list <- list+(Example("example"))
+    null_list <- list+(NullNode("null"))
+}
+
+class Example: FooNode implements TokenNode {
+}
+
+class NullNode: FooNode implements TokenNode {
+}
+
+class SingleList: FooNode {
+    @parse_field list_node: ASTList[Example]
+}

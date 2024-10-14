@@ -1,1 +1,5 @@
-driver: python
+driver: lkt_build_and_run
+# The real test is the Python script, but we use the Ada program to check for
+# memory leaks in properties implementation.
+py_script: main.py
+gpr_mains: [main.adb]

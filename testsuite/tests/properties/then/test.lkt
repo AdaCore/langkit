@@ -1,0 +1,21 @@
+# Check that "then" expressions work as expected in properties
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    fun node_then(n: FooNode): FooNode = n.do((nn) => nn.parent)
+
+    @exported
+    fun node_then_with_default(n: FooNode): FooNode =
+        n.do((nn) => nn.parent, default_val=node)
+}

@@ -1,0 +1,40 @@
+# Check that memoized properties that raise an exception work as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    # Check with a property that has finalizers, because it handles refcounted
+    # objects.
+    @exported
+    @memoized
+    fun prop1(): Bool = {
+        val _ = [node];
+
+        raise[Bool] PropertyError("Explicit error 1")
+    }
+
+    # Also check with one that does not
+    @exported
+    @memoized
+    fun prop2(): Bool = raise[Bool] PropertyError("Explicit error 2")
+
+    # Check that non-Property_Error are also properly handled
+
+    @exported
+    @memoized
+    fun prop3(): Bool = node.raise_error(false)
+
+    fun raise_error(prop_error: Bool): Bool =
+        if prop_error
+        then raise[Bool] PropertyError("This is a Property_Error")
+        else raise[Bool] PreconditionFailure("This is a Precondition_Failure")
+}

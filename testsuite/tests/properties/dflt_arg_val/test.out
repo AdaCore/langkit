@@ -9,5 +9,4 @@ n.p_prop3() = None
 n.p_prop3(None) = None
 n.p_prop3(<Example main.txt:1:1-1:8>) = <Example main.txt:1:1-1:8>
 main.py: Done.
-
 Done

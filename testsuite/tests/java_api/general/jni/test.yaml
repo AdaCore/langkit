@@ -1,5 +1,8 @@
-driver: python
+driver: lkt_build_and_run
 sync_trees:
     - ../common
+default_unit_provider: Libfoolang.Helpers.Create_Unit_Provider
+symbol_canonicalizer: Pkg.Canonicalize
+java_main: BindingsTests.java
 control:
     - [SKIP, "not has_java", "Java support required"]

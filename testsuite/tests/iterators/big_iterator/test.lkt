@@ -1,0 +1,32 @@
+# Test iterating over a huge number of elements.
+#
+# This shows that an iterator should be used in place of an array when one wants
+# to return a huge number of elements.
+#
+# Indeed, calling ``get_as_iterator`` from public APIs with a huge array will
+# return a valid iterator on which user can iterate. On the other hand, calling
+# ``get_as_array`` with the same input array will cause a crash.
+
+lexer foo_lexer {
+
+    Example <- "e"
+    @trivia() Whitespace <- " "
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("e"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun get_as_array(): Array[Entity[FooNode]] =
+        node.children.map((n) => n.as_bare_entity)
+
+    @exported
+    fun get_as_iterator(): Iterator[Entity[FooNode]] =
+        node.get_as_array().to_iterator()
+}
+
+class Example: FooNode {
+}

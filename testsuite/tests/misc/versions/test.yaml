@@ -1,2 +1,13 @@
-driver: python
-input_sources: []
+# Check that version numbers are available from all APIs.
+#
+# We first run a regular build_and_run cycle to check that the APIs give
+# expected results at runtime, and then post scripts check error cases for code
+# generation.
+
+driver: lkt_build_and_run
+version: 1.version.number
+build_date: build.date.number
+py_script: main.py
+gpr_mains: [main.adb]
+
+post_scripts: [test.py]
