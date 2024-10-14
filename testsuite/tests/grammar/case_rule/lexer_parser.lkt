@@ -15,7 +15,7 @@ lexer foo_lexer {
     Access
     Char
     Dot <- "."
-    Id <- p"[a-zA-Zé🙂]+"
+    Id <- p"[a-zA-Z\xe9\U0001f642]+"
     Tick <- "'"
     @trivia() Whitespace <- p"[ \n]+"
 }
