@@ -1,3 +1,4 @@
+import langkit
 from langkit.dsl import ASTNode
 from langkit.expressions import Let, Literal, Property
 
@@ -21,6 +22,7 @@ def run(name, expr):
         prop = Property(expr, public=True)
 
     emit_and_print_errors(lkt_file='foo.lkt')
+    langkit.reset()
     print('')
 
 
