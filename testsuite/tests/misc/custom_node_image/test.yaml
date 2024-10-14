@@ -1,2 +1,2 @@
-driver: python
-input_sources: []
+driver: lkt_build_and_run
+gpr_mains: [main.adb]

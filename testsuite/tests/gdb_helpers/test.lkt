@@ -79,10 +79,18 @@ class FooNode implements Node[FooNode] {
         val ent_example = ent_root.as[Example];
         val rebound = Entity[FooNode](
             node=node, info=EntityInfo(
-                md=null[Metadata], rebindings=node.get_rebindings(false), from_rebound=false
+                md=null[Metadata],
+                rebindings=node.get_rebindings(false),
+                from_rebound=false
             )
         );
-        val arr = [null_root, null_example.as[FooNode], ent_root, ent_example.as[FooNode], rebound];
+        val arr = [
+            null_root,
+            null_example.as[FooNode],
+            ent_root,
+            ent_example.as[FooNode],
+            rebound
+        ];
 
         arr.length()  # BREAK:test_entities
     }
@@ -132,7 +140,9 @@ class FooNode implements Node[FooNode] {
     }
 
     fun int_array_sum(ints: Array[Int], i: Int): Int =
-        if i <= ints.length() then ints?[i] + node.int_array_sum(ints, i + 1) else 0
+        if i <= ints.length()
+        then ints?[i] + node.int_array_sum(ints, i + 1)
+        else 0
 
     @exported
     fun test_recursive_cf(): Int = {

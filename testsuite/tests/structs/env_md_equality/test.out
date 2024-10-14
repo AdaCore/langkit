@@ -3,5 +3,4 @@ e1 == e2: True
 e1 == e3: False
 hash(e1) == hash(e2): True
 hash(e1) == hash(e3): False
-
 Done

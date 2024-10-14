@@ -1,0 +1,53 @@
+# Check that one cannot rebind using an environment whose node isn't tagged as
+# rebindable.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(rebinder)
+    rebinder <- Rebinder("def" env_creator env_creator)
+    env_creator <- or(
+        | DefaultEnvCreator("example")
+        | RebindableEnvCreator("+" "example")
+    )
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class BaseEnvCreator: FooNode {
+    env_spec {
+        add_env()
+    }
+}
+
+class DefaultEnvCreator: BaseEnvCreator {
+}
+
+@rebindable
+class RebindableEnvCreator: BaseEnvCreator {
+}
+
+class Rebinder: FooNode {
+    @parse_field left: BaseEnvCreator
+    @parse_field right: BaseEnvCreator
+
+    @exported
+    fun rebind(): FooNode = {
+        val left_env = node.left.children_env;
+        val right_env = node.right.children_env;
+        # Depending on whether "left_env" is rebindable, the following will
+        # succeed or raise a PropertyError. The status of "right_env" does not
+        # matter.
+        val r = null[EnvRebindings].append_rebinding(left_env, right_env);
+
+        node.children_env.rebind_env(r).env_node
+    }
+
+    env_spec {
+        add_env()
+    }
+}

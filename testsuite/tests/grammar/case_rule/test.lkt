@@ -1,0 +1,62 @@
+# Check that the Case lexing rule works as expected
+
+lexer foo_lexer {
+
+    match p"'.'" {
+        if previous_token is Id then send(Tick, 1)
+        else send(Char, 3)
+    }
+
+    match "access" {
+        if previous_token is Tick then send(Id, 6)
+        else send(Access, 6)
+    }
+
+    Access
+    Char
+    Dot <- "."
+    Id <- p"[a-zA-Z\xe9\U0001f642]+"
+    Tick <- "'"
+    @trivia() Whitespace <- p"[ \n]+"
+}
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule expr <- or(
+        | DotExpr(expr "." name)
+        | AttrRef(expr "'" name)
+        | AccessType("access" name)
+        | char_lit
+        | name
+    )
+    char_lit <- CharLit(@Char)
+    name <- Name(@Id)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class Expr: FooNode {
+}
+
+class AccessType: Expr {
+    @parse_field name: Name
+}
+
+class AttrRef: Expr {
+    @parse_field prefix: Expr
+    @parse_field name: Name
+}
+
+class CharLit: Expr implements TokenNode {
+}
+
+class DotExpr: Expr {
+    @parse_field prefix: Expr
+    @parse_field suffix: Name
+}
+
+class Name: Expr implements TokenNode {
+}

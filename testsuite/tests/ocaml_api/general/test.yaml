@@ -1,4 +1,6 @@
-driver: python
+driver: lkt_build_and_run
 encoding: utf-8
+symbol_canonicalizer: Pkg.Canonicalize
+ocaml_main: main.ml
 control:
     - [SKIP, "not has_ocaml", "OCaml support required"]

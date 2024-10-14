@@ -233,27 +233,33 @@ class LibraryEntity:
     """
     Reference to an entity in the generated library.
     """
-    def __init__(self, unit_fqn, entity_name):
+    def __init__(self, unit_fqn: str, entity_name: str):
         """
         Create a reference to an entity in the generated library.
 
-        :param str unit_fqn: Fully qualified name for the unit that contains
-            the referenced entity. For instance: "Libfoolang.My_Unit".
-        :param str entity_name: Simple name for the entity that is referenced.
+        :param unit_fqn: Fully qualified name for the unit that contains the
+            referenced entity. For instance: "Libfoolang.My_Unit".
+        :param entity_name: Simple name for the entity that is referenced.
         """
         self.unit_fqn = unit_fqn
         self.entity_name = entity_name
 
     @property
-    def fqn(self):
+    def fqn(self) -> str:
         """
         Fully qualified name for the referenced entity.
 
         For instance: "Libfoolang.My_Unit.My_Entity".
-
-        :rtype: str
         """
         return '{}.{}'.format(self.unit_fqn, self.entity_name)
+
+    @classmethod
+    def from_fqn(cls, value: str) -> LibraryEntity:
+        """
+        Create a library entity from its fully qualified name.
+        """
+        unit, entity = value.rsplit(".", 1)
+        return cls(unit, entity)
 
 
 class GeneratedException:

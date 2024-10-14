@@ -1,0 +1,29 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+enum Color {
+    case red, green, blue
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    # Test default argument for a simple type: boolean
+    @exported
+    fun prop1(arg: Bool = true): Bool = arg
+
+    # Test default argument for a simple type: enum
+    @exported
+    fun prop2(arg: Color = Color.red): Color = arg
+
+    # Test default argument for public entities
+    @exported
+    fun prop3(arg: Entity[FooNode] = null[Entity[FooNode]]): Entity[FooNode] =
+        arg
+}

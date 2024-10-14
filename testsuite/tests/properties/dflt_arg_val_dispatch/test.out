@@ -6,5 +6,4 @@ FunDecl.p_prop() = False
 FunDecl.p_prop(True) = True
 FunDecl.p_prop(False) = False
 main.py: Done.
-
 Done

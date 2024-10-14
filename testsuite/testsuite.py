@@ -18,6 +18,7 @@ from e3.testsuite import Testsuite
 
 import drivers.adalog_driver
 import drivers.langkit_support_driver
+import drivers.lkt_build_and_run_driver
 import drivers.lkt_compile_driver
 import drivers.lkt_parse_driver
 import drivers.lkt_toolbox_driver
@@ -42,6 +43,9 @@ class LangkitTestsuite(Testsuite):
         'adalog': drivers.adalog_driver.AdalogDriver,
         'langkit_support': drivers.langkit_support_driver.LangkitSupportDriver,
         'lkt': drivers.lkt_toolbox_driver.LktToolboxDriver,
+        'lkt_build_and_run': (
+            drivers.lkt_build_and_run_driver.LktBuildAndRunDriver
+        ),
         'lkt_compile': drivers.lkt_compile_driver.LktCompileDriver,
         'lkt_parse': drivers.lkt_parse_driver.LktParseDriver,
         'lkt_unparse': drivers.lkt_unparse_driver.LktUnparseDriver,

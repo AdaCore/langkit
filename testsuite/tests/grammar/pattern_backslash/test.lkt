@@ -1,0 +1,20 @@
+# Check that escapes in lexer patterns are correctly handled
+
+lexer foo_lexer {
+
+    @trivia() EscapedNewline <- p"\\\\\n[ \t\r]*"
+    @trivia() Newline <- p"\n"
+    @trivia() Whitespace <- p"[ \t]+"
+    Id <- p"([a-zA-Z]|\\\\|\\\")+"
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule expr <- list*(Identifier(@Id))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Identifier: FooNode implements TokenNode {
+}

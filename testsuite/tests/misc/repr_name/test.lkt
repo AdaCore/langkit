@@ -1,0 +1,20 @@
+# Check that the "repr_name" node annotation works as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Decl("def" Name(@Identifier))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Decl: FooNode {
+    @parse_field name: Name
+}
+
+@repr_name("Id")
+class Name: FooNode implements TokenNode {
+}

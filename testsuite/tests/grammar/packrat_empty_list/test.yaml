@@ -1,3 +1,4 @@
-driver: python
+driver: lkt_build_and_run
+gpr_mains: [main.adb]
 control:
     - [XFAIL, "True", 'Pending resolution of RB20-049']

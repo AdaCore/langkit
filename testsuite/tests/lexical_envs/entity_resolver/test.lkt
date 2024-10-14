@@ -1,0 +1,44 @@
+# Test the handling of analysis units in the properties DSL
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(decl)
+    decl <- Decl(Name(@Identifier) "(" list*(ref) ")")
+    ref <- Ref(Name(@Identifier))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun resolve_ref(): Entity[FooNode] = match node {
+        case r: Ref => r.parent.parent.node_env.get(r.name.symbol)?[0]
+        case _ => null[Entity[FooNode]]
+    }
+}
+
+class Decl: FooNode {
+    @parse_field name: Name
+    @parse_field refs: ASTList[Ref]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Ref: FooNode {
+    @parse_field name: Name
+
+    @exported
+    fun resolve(): Entity[FooNode] = node.node_env.get(node.name.symbol)?[0]
+
+    env_spec {
+        add_to_env_kv(
+            node.name.symbol, node, resolver=FooNode.resolve_ref
+        )
+    }
+}

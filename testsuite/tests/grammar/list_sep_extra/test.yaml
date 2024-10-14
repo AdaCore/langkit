@@ -1,1 +1,2 @@
-driver: lkt_compile
+driver: lkt_build_and_run
+py_script: main.py

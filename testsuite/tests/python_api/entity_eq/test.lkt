@@ -1,0 +1,80 @@
+# Check that "==" and "!=" operators for Entity in the Python API behave as
+# expected.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(block)
+    name <- Name(@Identifier)
+    block <- Block(params name vars)
+    params <- pick("(" Params+(param) ")")
+    param <- Param(name)
+    vars <- pick("{" list+(var) "}")
+    var <- BlockVar(name)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class DefNode: FooNode {
+    @exported
+    @abstract
+    fun name(): Symbol
+
+    env_spec {
+        add_to_env_kv(node.name(), node)
+    }
+}
+
+class Block: DefNode {
+    @parse_field params: Params
+    @parse_field name_field: Name
+    @parse_field vars: ASTList[BlockVar]
+
+    fun name(): Symbol = node.name_field.symbol
+
+    @exported
+    fun rebind(
+        from_block: Entity[Block],
+        to_block: Entity[Block]
+    ): Entity[Block] = {
+        val rbdng = self.info.rebindings.append_rebinding(
+            from_block.params.children_env, to_block.children_env
+        );
+        val e_info = EntityInfo(
+            md=self.info.md, rebindings=rbdng, from_rebound=false
+        );
+
+        Entity[Block](node=node, info=e_info)
+    }
+
+    env_spec {
+        add_to_env_kv(node.name(), node)
+        add_env()
+    }
+}
+
+class BlockVar: DefNode {
+    @parse_field name_field: Name
+
+    fun name(): Symbol = node.name_field.symbol
+}
+
+@with_abstract_list
+class Param: DefNode {
+    @parse_field name_field: Name
+
+    fun name(): Symbol = node.name_field.symbol
+}
+
+class Params: ASTList[Param] {
+    env_spec {
+        add_env()
+    }
+}
+
+class Name: FooNode implements TokenNode {
+}

@@ -1,0 +1,37 @@
+# Test basic use of iterators in public APIs
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    fun int_array(): Array[Int] = [1, 2, 3]
+
+    @exported
+    fun int_iterator(): Iterator[Int] = node.int_array().to_iterator()
+
+    @exported
+    fun int_iterator_identity(it: Iterator[Int]): Iterator[Int] = it
+
+    @exported
+    fun bigint_array(): Array[BigInt] = [1b, 2b, 3b]
+
+    @exported
+    fun bigint_iterator(): Iterator[BigInt] =
+        node.bigint_array().to_iterator()
+
+    @exported
+    fun entities_array(): Array[Entity[Example]] = [self, self, self]
+
+    @exported
+    fun entities_iterator(): Iterator[Entity[Example]] =
+        self.entities_array().to_iterator()
+}

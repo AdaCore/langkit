@@ -1,0 +1,42 @@
+# Check that code generation produces valid Ada sources when a dynamic variable
+# has the same name as a local variable.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+dynvar neg: Int
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    # Code generation used to create a local variable called "Neg" in Ada to
+    # store the result of the unary operator, causing a name clash conflict
+    # with...
+
+    # ... the "Neg" formal for this property that comes from the "neg"
+    # argument.
+
+    @exported
+    fun f1(i: Int, neg: Int): Int = {
+        val base = -neg;
+
+        i + base
+    }
+
+    # ... the "Neg" formal for this property that comes from the "neg" dynamic
+    # variable.
+
+    @exported
+    @with_dynvars(neg)
+    fun f2(i: Int): Int = {
+        val base = -neg;
+
+        i + base
+    }
+}

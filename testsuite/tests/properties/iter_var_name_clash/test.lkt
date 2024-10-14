@@ -1,0 +1,34 @@
+# Regression test: the expansion of nested iterations (.map, .filter, ...) used
+# to generate abstract expressions with conflicting names for the iteration
+# variables, leading to invalid generated Ada code (compilation error: one
+# variable being an entity, another being a bare node, one masking the other,
+# and thus having an entity whene a bare node was expected).
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example(@Example))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun prop(): Array[MyStruct] = node.entity_array().mapcat(
+        (elt1) => elt1.node_array().filtermap(
+            (elt2) => MyStruct(n=elt2, e=elt1), (elt2) => true
+        )
+    )
+
+    fun entity_array(): Array[Entity[FooNode]] = [node.as_bare_entity]
+
+    fun node_array(): Array[FooNode] = [node]
+}
+
+class Example: FooNode implements TokenNode {
+}
+
+struct MyStruct {
+    n: FooNode
+    e: Entity[FooNode]
+}

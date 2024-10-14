@@ -1,0 +1,13 @@
+# Check that, if the "generic_list_type" is present, it gives generic list type
+# its name (here: FooList).
+
+import common
+
+@abstract
+@generic_list_type("FooList")
+class FooNode implements Node[FooNode] {
+}
+
+class MixedList: FooNode {
+    @parse_field list_node: FooList
+}

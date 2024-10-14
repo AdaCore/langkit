@@ -1,0 +1,34 @@
+# Test that Symbol bindings in the Python API are properly working
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Sequence+(node)
+    node <- or(example | null_node)
+    example <- Example("example")
+    null_node <- NullNode("null")
+}
+
+@abstract
+@with_abstract_list
+class FooNode implements Node[FooNode] {
+    @exported
+    fun count(seq: Array[Entity[Example]]): Int = seq.length()
+}
+
+class Example: FooNode {
+}
+
+class Sequence: ASTList[FooNode] {
+    @exported
+    fun all_items(): Array[Entity[FooNode]] = self.map((i) => i)
+
+    @exported
+    fun example_items(): Array[Entity[Example]] = self.filtermap(
+        (i) => i.as![Example], (i) => i is Example
+    )
+}
+
+class NullNode: FooNode {
+}

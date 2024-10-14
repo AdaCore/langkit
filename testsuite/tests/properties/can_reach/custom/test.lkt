@@ -1,0 +1,36 @@
+# Check that providing a custom "can_reach" has expected effects on env lookups
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(def)
+    def <- Def("def" name)
+    name <- Name(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun can_reach(@ignored origin: FooNode): Bool =
+        # "foo" defs can never be reached: "foo" Def nodes should never appear
+        # in the result of any lexical env lookups.
+        match node {
+            case d: Def => d.name.symbol != s"foo"
+            case _ => true
+        }
+
+    @exported
+    fun lookup(n: Symbol): Array[Entity[FooNode]] =
+        node.node_env.get(n, from=node)
+}
+
+class Def: FooNode {
+    @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
+}
+
+class Name: FooNode implements TokenNode {
+}

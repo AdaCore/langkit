@@ -1,0 +1,27 @@
+# Check that the case insenvitity feature works as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule expr <- list*(Decl(
+        "def" Identifier(@Identifier) "=" Number(@Number)
+    ))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Decl: FooNode {
+    @parse_field name: Identifier
+    @parse_field value: Number
+}
+
+class Identifier: FooNode implements TokenNode {
+    @exported
+    fun matches(s: Symbol): Bool = s == node.symbol
+}
+
+class Number: FooNode implements TokenNode {
+}

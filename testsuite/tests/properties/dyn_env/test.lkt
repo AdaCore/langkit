@@ -1,0 +1,132 @@
+# Check that the DynamicLexicalEnv expression works as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(stmt)
+    stmt <- or(cons_decl | fun_decl | call_expr)
+    cons_decl <- ConsDecl(id "=" expr)
+    fun_decl <- FunDecl("def" id "(" list*(argspec) ")")
+    argspec <- ArgSpec(id "=" expr)
+    call_expr <- CallExpr(id "(" list*(expr) ")")
+    expr <- or(Literal(@Number) | Ref(id))
+    id <- Identifier(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class ArgSpec: FooNode {
+    @parse_field name: Identifier
+    @parse_field arg_expr: Expr
+}
+
+class CallExpr: FooNode {
+    @parse_field name: Identifier
+    @parse_field args: ASTList[Expr]
+
+    # Properties that return dynamic lexical envs
+
+    @lazy
+    args_env: LexicalEnv = dynamic_lexical_env(CallExpr.args_assocs_getter)
+
+    @lazy
+    arg_exprs_env: LexicalEnv =
+        dynamic_lexical_env(
+            CallExpr.arg_exprs_assocs_getter,
+            assoc_resolver=Expr.resolve
+        )
+
+    # Getter of env associations for both dynamic lexical envs
+
+    |" For each argument, associate its name to the expression passed in this
+    |" call.
+    fun args_assocs_getter(): Array[InnerEnvAssoc] = {
+        val decl = node.node_env.get_first(node.name.symbol).as[FunDecl];
+
+        decl.args.imap(
+            (a, i) => InnerEnvAssoc(key=a.name.symbol, value=node.args?[i])
+        )
+    }
+
+    |" For each argument, associate its name to its default expression.
+    fun arg_exprs_assocs_getter(): Array[InnerEnvAssoc] = {
+        val decl = node.node_env.get_first(node.name.symbol).as[FunDecl];
+
+        decl.args.map(
+            (a) => InnerEnvAssoc(key=a.name.symbol, value=a.arg_expr.node)
+        )
+    }
+
+    # Entry points for the test program
+
+    @exported
+    fun get_arg(name: Symbol): Entity[Expr] =
+        node.args_env.get_first(name).as[Expr]
+
+    @exported
+    fun get_arg_expr(name: Symbol): Entity[Expr] =
+        node.arg_exprs_env.get_first(name).as[Expr]
+}
+
+class ConsDecl: FooNode {
+    @parse_field name: Identifier
+    @parse_field cons_expr: Expr
+
+    env_spec {
+        add_to_env(
+            EnvAssoc(
+                key=node.name.symbol, value=node, dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.current_env,
+                    env_name=null[Symbol],
+                    direct_env=null[LexicalEnv]
+                ),
+                metadata=null[Metadata]
+            )
+        )
+    }
+}
+
+@abstract
+class Expr: FooNode {
+    fun resolve(): Entity[Expr] = match self {
+        case l: Literal => l
+        case r: Ref =>
+            self
+            .node_env
+            .get_first(r.name.symbol)
+            .as[ConsDecl]
+            .cons_expr
+            .resolve()
+    }
+}
+
+class Literal: Expr implements TokenNode {
+}
+
+class Ref: Expr {
+    @parse_field name: Identifier
+}
+
+class FunDecl: FooNode {
+    @parse_field name: Identifier
+    @parse_field args: ASTList[ArgSpec]
+
+    env_spec {
+        add_to_env(
+            EnvAssoc(
+                key=node.name.symbol, value=node, dest_env=DesignatedEnv(
+                    kind=DesignatedEnvKind.current_env,
+                    env_name=null[Symbol],
+                    direct_env=null[LexicalEnv]
+                ),
+                metadata=null[Metadata]
+            )
+        )
+    }
+}
+
+class Identifier: FooNode implements TokenNode {
+}

@@ -1,0 +1,55 @@
+# Test that node_env works correctly for a subclass of a concrete node with an
+# add_env directive.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- RootNode(
+        list+(or(decl | subdecl | other_decl), ";")
+    )
+    decl <- Decl("def" name)
+    other_decl <- OtherDecl("def" "var" name)
+    subdecl <- SubDecl("var" name)
+    name <- Name(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class BaseDecl: FooNode {
+    @exported
+    fun lookup(n: Symbol): Entity[FooNode] = node.env_lookup(node.node_env, n)
+
+    fun env_lookup(env: LexicalEnv, n: Symbol): Entity[FooNode] =
+        env.get_first(n, lookup=LookupKind.flat)
+}
+
+class Decl: BaseDecl {
+    @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
+}
+
+class SubDecl: Decl {
+}
+
+class OtherDecl: BaseDecl {
+    @parse_field name: Name
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class RootNode: FooNode {
+    @parse_field decls: ASTList[BaseDecl]
+
+    env_spec {
+        add_env()
+    }
+}

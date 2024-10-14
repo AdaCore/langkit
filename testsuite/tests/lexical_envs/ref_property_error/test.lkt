@@ -1,0 +1,24 @@
+# Test that there is no memory leak when a reference resolved aborts with a
+# property error.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    fun resolve(): LexicalEnv = raise[LexicalEnv] PropertyError()
+
+    env_spec {
+        add_env()
+        reference(
+            [node.as[FooNode], node.as[FooNode]], Example.resolve
+        )
+    }
+}

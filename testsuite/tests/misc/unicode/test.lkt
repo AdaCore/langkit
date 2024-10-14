@@ -1,0 +1,20 @@
+# Check that the handling of Unicode for various parsing settings (get from
+# file/buffer, encoding, file reader, ...) works correctly.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example(@Example StrLit(@String)))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @parse_field f: StrLit
+}
+
+class StrLit: FooNode implements TokenNode {
+}

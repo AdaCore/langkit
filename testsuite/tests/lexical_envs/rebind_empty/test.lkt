@@ -1,0 +1,34 @@
+# Check that rebinding the empty environment works (it used to crash with a
+# Constraint_Error).
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    @exported
+    fun rebind(
+        from_node: Entity[FooNode],
+        to_node: Entity[FooNode]
+    ): Array[Entity[FooNode]] = {
+        # Build non-null rebindings
+        val rbdng = null[EnvRebindings].append_rebinding(
+            from_node.children_env, to_node.children_env
+        );
+
+        # Call rebind_env on them (this is the important part, the rest is
+        # cosmetic).
+        null[LexicalEnv].rebind_env(rbdng).get(s"foo")
+    }
+
+    env_spec {
+        add_env()
+    }
+}

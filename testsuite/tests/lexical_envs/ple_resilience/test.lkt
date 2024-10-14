@@ -1,0 +1,80 @@
+# Test that the populate lexical env pass is resilent to errors:
+#
+# * It must resume traversal on siblings when getting a Property_Error from
+#   some node.
+#
+# * It must initialize Self_Env fields for all nodes that are skipped because
+#   of a Property_Error.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- defs
+    defs <- list*(def_rule)
+    def_rule <- or(scope | var)
+    scope <- Scope(
+        HasError("error") Id(@Identifier) "{" defs "}"
+    )
+    var <- Var(Id(@Identifier) "=" name)
+    name <- or(
+        | Prefix(name "." Id(@Identifier))
+        | Id(@Identifier)
+    )
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class DefNode: FooNode {
+}
+
+class Scope: DefNode {
+    @parse_field error: HasError
+    @parse_field name: Id
+    @parse_field defs: ASTList[DefNode]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+        do(
+            if node.error.as_bool()
+            then raise[FooNode] PropertyError()
+            else null[FooNode]
+        )
+    }
+}
+
+class Var: DefNode {
+    @parse_field name: Id
+    @parse_field value: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
+}
+
+@qualifier
+enum class HasError: FooNode {
+}
+
+@abstract
+class Name: FooNode {
+    @exported
+    @abstract
+    fun resolve(): Entity[FooNode]
+}
+
+class Id: Name implements TokenNode {
+    fun resolve(): Entity[FooNode] = node.node_env.get_first(node.symbol)
+}
+
+class Prefix: Name {
+    @parse_field prefix: Name
+    @parse_field suffix: Id
+
+    fun resolve(): Entity[FooNode] =
+        node.prefix.resolve().children_env.get_first(node.suffix.symbol)
+}

@@ -1,0 +1,13 @@
+# Check that, if the "generic_list_type" is absent, the generic list type is
+# assigned a name that can be referred to in the declaration of parse fields
+# (here: FooNodeBaseList).
+
+import common
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class MixedList: FooNode {
+    @parse_field list_node: FooNodeBaseList
+}

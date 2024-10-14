@@ -1,0 +1,31 @@
+# Test that metadata identity and the Node.Equals Ada function are working as
+# expected.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(name)
+    name <- Name(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+    @exported
+    fun with_md(md1: Bool, md2: Bool): Entity[FooNode] = Entity[FooNode](
+        node=self.node, info=EntityInfo(
+            md=Metadata(md1=md1, md2=md2),
+            rebindings=self.info.rebindings,
+            from_rebound=self.info.from_rebound
+        )
+    )
+}
+
+@metadata
+struct Metadata {
+    @used_in_equality md1: Bool
+    md2: Bool
+}

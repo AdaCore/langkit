@@ -1,0 +1,18 @@
+# Check that the "can_reach" expression works as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun can_reach_wrapper(from_node: Entity[FooNode]): Bool =
+        node.can_reach(from_node.node)
+}
+
+class Example: FooNode {
+}

@@ -1,0 +1,17 @@
+# Test the handling of negative indexes in the Python binding of AST nodes
+# child getters.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(name)
+    name <- Name(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Name: FooNode implements TokenNode {
+}
