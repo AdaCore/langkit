@@ -1,2 +1,7 @@
-test.py:XXX: error: Field names must be lower-case
-Done
+== test.lkt ==
+test.lkt:15:5: error: lower case expected for field names
+15 |     A: Bool
+   |     ^
+
+
+lkt_compile: Done
