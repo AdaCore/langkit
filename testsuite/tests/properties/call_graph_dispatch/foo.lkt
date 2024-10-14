@@ -3,3 +3,19 @@ import lexer_example
 grammar foo_grammar {
     @main_rule main_rule <- or(Example("example") | NullExample("null"))
 }
+
+class FooNode implements Node[FooNode] {
+    @exported
+    fun foo(): Entity[FooNode] = node.bar().as_bare_entity
+
+    @abstract
+    fun bar(): FooNode
+}
+
+class Example: FooNode implements TokenNode {
+    fun bar(): FooNode = node
+}
+
+class NullExample: Example {
+    fun bar(): FooNode = node
+}

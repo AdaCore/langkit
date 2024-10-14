@@ -1,2 +1,7 @@
+== foo.lkt ==
 Code generation was successful
+
+== test.py ==
 Done
+
+lkt_compile: Done
