@@ -1,0 +1,16 @@
+# Test that garbage tokens left after the main parsing rule completes does not
+# crash. It used to!
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Literal(@Number)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Literal: FooNode implements TokenNode {
+}

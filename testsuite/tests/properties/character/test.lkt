@@ -1,0 +1,29 @@
+# Test that the Character type works as expected in generated APIs
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    fun get_a(c: Char = 'a'): Char = c
+
+    @exported
+    fun get_eacute(c: Char = '\xe9'): Char = c
+
+    @exported
+    fun identity(c: Char): Char = c
+
+    @exported
+    fun double(c: Char): Array[Char] = [c, c]
+
+    @exported
+    fun text_identity(s: String): String = s
+}

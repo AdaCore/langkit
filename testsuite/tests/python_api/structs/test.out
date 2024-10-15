@@ -2,5 +2,4 @@ main.py: Running...
 sum(<MyStruct a=10 b=32>): 42
 create(100, 200): <MyStruct a=100 b=200>
 main.py: Done.
-
 Done

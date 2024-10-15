@@ -1,0 +1,20 @@
+# Test that Symbol bindings in the C API are working properly
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    @exported
+    fun sym(): Symbol = node.symbol
+
+    @exported
+    fun sym_array(): Array[Symbol] = [s"a", s"b", s"c"]
+}

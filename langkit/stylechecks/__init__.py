@@ -961,10 +961,6 @@ def langkit_main(langkit_root: str, files: list[str] = []) -> None:
         os.path.join('stylechecks', 'tests.py'),
         os.path.join('testsuite', 'python_support', 'expect.py'),
         os.path.join('testsuite', 'python_support', 'quotemeta.py'),
-
-        # Intentional use of non-ASCII content in lexer rules
-        test("grammar", "case_rule", "lexer_parser.lkt"),
-
         os.path.join('testsuite', 'out')]
     main(langkit_root, files, dirs, excludes)
 

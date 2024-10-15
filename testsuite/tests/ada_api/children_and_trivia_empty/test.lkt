@@ -1,0 +1,21 @@
+# Check that the Iterable aspect on the Ada API's Children_And_Trivia type
+# correctly supports empty list of children.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Name(id)
+    id <- Identifier(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Identifier: FooNode implements TokenNode {
+}
+
+class Name: FooNode {
+    @parse_field id: Identifier
+}

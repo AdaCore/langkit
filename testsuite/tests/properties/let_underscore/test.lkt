@@ -1,0 +1,24 @@
+# Check that "underscode variables" (to be ignored) work as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- BarNode("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class BarNode: FooNode {
+    @external()
+    fun foo(i: Int): BigInt
+
+    @exported
+    fun prop(): BigInt = {
+        val _ = node.foo(1);
+
+        node.foo(2)
+    }
+}

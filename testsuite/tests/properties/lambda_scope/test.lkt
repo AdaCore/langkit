@@ -1,0 +1,21 @@
+# Check that scopes for lambda arguments are properly handled
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun prop(l: ASTList[Example]): Array[Int] =
+        # Nest two lambda expressions that define arguments with the same name
+        # (v).
+        l.map((v) => v.values().find((v) => v == 1))
+}
+
+class Example: FooNode {
+    fun values(): Array[Int] = [1]
+}

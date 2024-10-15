@@ -1,0 +1,10 @@
+# Check that setting up cache collection with a custom heuristic one works as
+# expected.
+
+driver: lkt_build_and_run
+sync_trees:
+    - ../common
+gpr_mains: [main.adb]
+cache_collection:
+    threshold_increment: 30
+    decision_heuristic: null

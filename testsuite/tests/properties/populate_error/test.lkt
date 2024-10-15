@@ -1,0 +1,22 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    env_spec {
+        set_initial_env(
+            DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env,
+                env_name=null[Symbol],
+                direct_env=node.parent.parent.children_env
+            )
+        )
+    }
+}

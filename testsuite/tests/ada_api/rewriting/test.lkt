@@ -1,0 +1,73 @@
+# Test that basic rewriting API usage behaves as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(or(def_rule | var_rule | skip(ErrorDecl)))
+    name <- Name(@Identifier)
+    def_rule <- Def(
+        "def" name ?pick("(" list+(name, ",") ")") "=" expr
+    )
+    var_rule <- Var("var" name "=" expr)
+    expr <- or(
+        | Plus(expr "+" expr)
+        | ParenExpr("(" expr ")")
+        | Ref(name)
+        | Literal(@Number)
+    )
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+@abstract
+class Decl: FooNode {
+    @abstract @parse_field @nullable name: Name
+    @abstract @parse_field @nullable args: ASTList[Name]
+    @abstract @parse_field @nullable expr: Expr
+}
+
+class Def: Decl {
+    @parse_field name: Name
+    @parse_field args: ASTList[Name]
+    @parse_field expr: Expr
+}
+
+class ErrorDecl: Decl implements ErrorNode {
+    @parse_field @null_field name: Name
+    @parse_field @null_field args: ASTList[Name]
+    @parse_field @null_field expr: Expr
+}
+
+class Var: Decl {
+    @parse_field name: Name
+    @parse_field @null_field args: ASTList[Name]
+    @parse_field expr: Expr
+}
+
+@abstract
+class Expr: FooNode {
+}
+
+@custom_short_image
+class Literal: Expr implements TokenNode {
+}
+
+class ParenExpr: Expr {
+    @parse_field expr: Expr
+}
+
+class Plus: Expr {
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
+}
+
+class Ref: Expr {
+    @parse_field name: Name
+}
+
+@custom_short_image
+class Name: FooNode implements TokenNode {
+}

@@ -1,0 +1,27 @@
+# Check that the synthetization of a node that involves a lazy field works as
+# expected.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@Example)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @lazy
+    new_node: SynthNode = SynthNode()
+
+    @exported
+    fun prop(): Int = node.new_node.lf
+}
+
+@synthetic
+class SynthNode: FooNode {
+    @lazy
+    lf: Int = 42
+}

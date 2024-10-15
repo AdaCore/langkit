@@ -1,0 +1,25 @@
+# Check that set_initial_env trying to set a non-primary environment raises a
+# Property_Error.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example(@Example))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    env_spec {
+        set_initial_env(
+            DesignatedEnv(
+                kind=DesignatedEnvKind.direct_env,
+                env_name=null[Symbol],
+                direct_env=node.parent.children_env.env_orphan()
+            )
+        )
+    }
+}

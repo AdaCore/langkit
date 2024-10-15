@@ -1,0 +1,29 @@
+# Check that memoized properties that have arguments of array types work as
+# advertised.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode {
+    @exported
+    @memoized
+    fun get_array(): Array[Int] = [1, 2]
+
+    @exported
+    @memoized
+    fun test_prop(numbers: Array[Int], c: String): Int =
+        if c == "one" then numbers?[0] else numbers?[1]
+
+    @exported
+    @memoized
+    fun test_prop2(numbers: Array[Entity[FooNode]]): Bool =
+        numbers.length() == 0
+}

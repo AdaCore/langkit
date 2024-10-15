@@ -1,0 +1,20 @@
+# Check that the generated code for empty structs works as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@Example)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+    @exported
+    fun identity(s: MyStruct): MyStruct = s
+}
+
+struct MyStruct {
+}

@@ -1,0 +1,18 @@
+# Regression test for a code generation bug: we used to have compilation errors
+# in the generated library if dealing with an "index" precomputed symbol.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun prop(): Symbol = s"index"
+}
+
+class Example: FooNode implements TokenNode {
+}

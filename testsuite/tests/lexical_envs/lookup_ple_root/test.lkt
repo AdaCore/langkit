@@ -1,0 +1,35 @@
+# Check that looking for the PLE root of a node works as expected
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- or(
+        | pick(var @Termination)
+        | pick(scope @Termination)
+        | pick(list+(scope) @Termination)
+    )
+    var <- Var(id "=" id)
+    scope <- Scope("{" items "}")
+    items <- list*(id)
+    id <- Identifier(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @exported
+    fun get_ple_root(): Entity[FooNode] = node.ple_root.as_bare_entity
+}
+
+class Identifier: FooNode implements TokenNode {
+}
+
+@ple_unit_root
+class Scope: FooNode {
+    @parse_field items: ASTList[Identifier]
+}
+
+class Var: FooNode {
+    @parse_field name: Identifier
+    @parse_field value: Identifier
+}

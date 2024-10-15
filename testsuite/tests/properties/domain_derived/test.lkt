@@ -1,0 +1,38 @@
+# Check that creating domains with arrays of non-root entity types generates
+# valid and correctly running code.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    name <- Name(@Identifier)
+    @main_rule main_rule <- list+(or(Definition("def" name) | name), ",")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Definition: FooNode {
+    @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
+}
+
+class Name: FooNode implements TokenNode {
+    ref_var: LogicVar
+
+    @exported
+    fun resolve(): Bool = {
+        val candidates =
+            node.node_env.get(node.symbol).map((d) => d.as[Definition]);
+
+        %domain(node.ref_var, candidates).solve()
+    }
+
+    @exported
+    fun definition(): Entity[Definition] =
+        node.ref_var.get_value().as[Definition]
+}

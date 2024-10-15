@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import os
 import os.path as P
+import shlex
 import shutil
 import subprocess
 import sys
@@ -12,7 +13,7 @@ from typing import List, Optional, Set
 import langkit
 import langkit.compile_context
 from langkit.compile_context import (
-    CacheCollectionConf, CompileCtx, UnparseScript
+    CacheCollectionConf, CompileCtx, LibraryEntity, UnparseScript
 )
 from langkit.diagnostics import DiagnosticError, Diagnostics, WarningSet
 from langkit.libmanage import ManageScript
@@ -60,7 +61,7 @@ end Gen;
 
 
 @dataclasses.dataclass
-class GPRMain:
+class Main:
     source_file: str
     """
     Basename of the main source file.
@@ -78,6 +79,21 @@ class GPRMain:
         test baselines.
         """
         return " ".join([self.source_file] + self.args)
+
+    @property
+    def unit_name(self) -> str:
+        """
+        Return the name of the main source file without extension.
+        """
+        return os.path.splitext(self.source_file)[0]
+
+    @classmethod
+    def parse(cls, value: str) -> Main:
+        """
+        Create a Main instance from a shell-encoded list of arguments.
+        """
+        argv = shlex.split(value)
+        return cls(argv[0], argv[1:])
 
 
 valgrind_enabled = bool(os.environ.get('VALGRIND_ENABLED'))
@@ -258,114 +274,63 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
         langkit.reset()
 
 
-def build(
-    grammar=None,
-    lexer=None,
-    lkt_file=None,
-    types_from_lkt=False,
-    warning_set=default_warning_set,
-):
-    """
-    Shortcut for `build_and_run` to only build.
-    """
-    build_and_run(
-        grammar=grammar,
-        lexer=lexer,
-        lkt_file=lkt_file,
-        types_from_lkt=types_from_lkt,
-        warning_set=warning_set,
-    )
-
-
-def build_and_run(grammar=None, py_script=None, gpr_mains=None,
-                  lexer=None, lkt_file=None, types_from_lkt=False,
-                  lkt_semantic_checks=False, ocaml_main=None, java_main=None,
-                  ni_main=None, warning_set=default_warning_set,
-                  generate_unparser=False, default_unparsing_config=None,
-                  default_unit_provider=None, symbol_canonicalizer=None,
-                  show_property_logging=False,
-                  unparse_script=unparse_script,
-                  case_insensitive: bool = False,
-                  version: str | None = None,
-                  build_date: str | None = None,
-                  standalone: bool = False,
-                  full_error_traces: bool = True,
-                  additional_make_args: List[str] = [],
-                  python_args: Optional[List[str]] = None,
-                  property_exceptions: Set[str] = set(),
-                  cache_collection_conf: Optional[CacheCollectionConf] = None):
+def build_and_run(
+    lkt_file: str,
+    generate_unparser: bool = False,
+    default_unparsing_config: str | None = None,
+    default_unit_provider: LibraryEntity | None = None,
+    symbol_canonicalizer: LibraryEntity | None = None,
+    show_property_logging: bool = False,
+    case_insensitive: bool = False,
+    version: str | None = None,
+    build_date: str | None = None,
+    property_exceptions: Set[str] = set(),
+    cache_collection_conf: Optional[CacheCollectionConf] = None,
+    py_script: str | None = None,
+    py_args: list[str] | None = None,
+    gpr_mains: list[Main] | None = None,
+    ocaml_main: Main | None = None,
+    java_main: Main | None = None,
+    ni_main: Main | None = None,
+) -> None:
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
 
     An exception is raised if any step fails (the script must return code 0).
 
-    :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
-        See emit_and_print_errors.
-
-    :param str|None lkt_file: If provided, file from which to read the Lkt
-        language spec.
-
-    :param bool types_from_lkt: If true (valid only when `lkt_file` is not
-        None), first unparse the DSL and then do the build based on node
-        definitions from the unparsing result. False by default.
-
-    :param None|str py_script: If not None, name of the Python script to run
-        with the built library available.
-
-    :param None|list[str|GPRMain] gpr_mains: If not None, list of name of mains
-        (Ada and/or C) for the generated GPR file, to build and run with the
-        generated library. Each main can be either a GPRMain instance or a
-        string (for the main source file basename, the main is run without
-        arguments).
-
-    :param None|str ocaml_main: If not None, name of the OCaml source file to
-        build and run with the built library available.
-
-    :param None|str java_main: If not None, name of the Java main class to
-        build and run with the Langkit Java lib.
-
-    :param WarningSet warning_set: Set of warnings to emit.
-
-    :param bool generate_unparser: Whether to generate unparser.
-
+    :param lkt_file: If provided, file from which to read the Lkt language
+        spec.
+    :param generate_unparser: Whether to generate unparser.
     :param default_unparsing_config: See the homonym CompileCtx constructor
         argument.
-
-    :param langkit.compile_context.LibraryEntity|None default_unit_provider:
-        Default unit provider to use for this context, if any.
-
-    :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
-        Symbol canonicalizer to use for this context, if any.
-
-    :param bool show_property_logging: If true, any property that has been
-        marked with tracing activated will be traced on stdout by default,
-        without need for any config file.
-
-    :param None|str unparse_script: Script to unparse the language spec.
-
+    :param default_unit_provider: Default unit provider to use for this
+        context, if any.
+    :param symbol_canonicalizer: Symbol canonicalizer to use for this context,
+        if any.
+    :param show_property_logging: If true, any property that has been marked
+        with tracing activated will be traced on stdout by default, without
+        need for any config file.
     :param case_insensitive: See CompileCtx's constructor.
-
     :param version: See CompileCtx's constructor.
-
     :param build_date: See CompileCtx's constructor.
-
-    :param standalone: See CompileCtx's constructor.
-
-    :param full_error_traces: Whether to pass a --full-error-traces argument to
-        "manage.py make".
-
-    :param additional_make_args: Additional command-line arguments to pass to
-        "manage.py make".
-
+    :param property_exceptions: See CompileCtx's constructor.
+    :param cache_collection_conf: See CompileCtx's constructor.
+    :param py_script: If not None, name of the Python script to run with the
+        built library available.
     :param python_args: Arguments to pass to the Python interpreter when
         running a Python script.
-
-    :param property_exceptions: See CompileCtx's constructor.
-
-    :param cache_collection_conf: See CompileCtx's constructor.
+    :param gpr_mains: If not None, list of name of mains (Ada and/or C) for the
+        generated GPR file, to build and run with the generated library. Each
+        main can be either a Main instance or a string (for the main source
+        file basename, the main is run without arguments).
+    :param ocaml_main: If not None, name of the OCaml source file to build and
+        run with the built library available.
+    :param java_main: If not None, name of the Java main sourec file to build
+        and run with the Langkit Java lib through JNI.
+    :param ni_main: If not None, name of the Java main sourec file to build
+        and run with the Langkit Java lib through Native Image.
     """
-    assert not types_from_lkt or lkt_file is not None
 
     class Manage(ManageScript):
         def __init__(self, ctx):
@@ -385,87 +350,68 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
     maven_exec = os.environ.get('MAVEN_EXECUTABLE')
     maven_repo = os.environ.get('MAVEN_LOCAL_REPO')
 
-    def manage_run(types_from_lkt, additional_args):
-        ctx = prepare_context(
-            grammar, lexer, lkt_file, warning_set,
-            default_unit_provider=default_unit_provider,
-            symbol_canonicalizer=symbol_canonicalizer,
-            show_property_logging=show_property_logging,
-            types_from_lkt=types_from_lkt,
-            lkt_semantic_checks=lkt_semantic_checks,
-            case_insensitive=case_insensitive,
-            version=version,
-            build_date=build_date,
-            standalone=standalone,
-            property_exceptions=property_exceptions,
-            generate_unparser=generate_unparser,
-            default_unparsing_config=default_unparsing_config,
-            cache_coll_conf=cache_collection_conf,
+    ctx = prepare_context(
+        grammar=None,
+        lexer=None,
+        lkt_file=lkt_file,
+        types_from_lkt=True,
+        generate_unparser=generate_unparser,
+        default_unparsing_config=default_unparsing_config,
+        default_unit_provider=default_unit_provider,
+        symbol_canonicalizer=symbol_canonicalizer,
+        show_property_logging=show_property_logging,
+        case_insensitive=case_insensitive,
+        version=version,
+        build_date=build_date,
+        property_exceptions=property_exceptions,
+        cache_coll_conf=cache_collection_conf,
+    )
+    m = Manage(ctx)
+
+    extensions_dir = P.abspath('extensions')
+    if P.isdir(extensions_dir):
+        ctx.extensions_dir = extensions_dir
+
+    # First build the library. Forward all test.py's arguments to the libmanage
+    # call so that manual testcase runs can pass "-g", for instance.
+    argv = (
+        ['make']
+        + sys.argv[1:]
+        + ['-vnone', f'-j{jobs}', "--full-error-traces"]
+    )
+
+    # If there is a Java main, enable the Java bindings building
+    if java_main is not None or ni_main is not None:
+        argv.append('--enable-java')
+        if maven_exec:
+            argv.append('--maven-executable')
+            argv.append(maven_exec)
+        if maven_repo:
+            argv.append('--maven-local-repo')
+            argv.append(maven_repo)
+        if ni_main is not None and os.name == 'nt':
+            argv.append('--generate-msvc-lib')
+
+    argv.append('--build-mode={}'.format(build_mode))
+    for w in WarningSet.available_warnings:
+        argv.append(
+            '-{}{}'.format('W' if w in ctx.warnings else 'w', w.name)
         )
+    if not pretty_print:
+        argv.append('--no-pretty-print')
 
-        m = Manage(ctx)
+    # No testcase uses the generated mains, so save time: never build them
+    argv.append('--disable-all-mains')
 
-        extensions_dir = P.abspath('extensions')
-        if P.isdir(extensions_dir):
-            ctx.extensions_dir = extensions_dir
+    return_code = m.run_no_exit(argv)
 
-        # First build the library. Forward all test.py's arguments to the
-        # libmanage call so that manual testcase runs can pass "-g", for
-        # instance.
-        argv = ['make'] + sys.argv[1:] + ['-vnone', f'-j{jobs}']
-        if full_error_traces:
-            argv.append("--full-error-traces")
+    # Flush stdout and stderr, so that diagnostics appear deterministically
+    # before the script/program output.
+    sys.stdout.flush()
+    sys.stderr.flush()
 
-        # If there is a Java main, enable the Java bindings building
-        if java_main is not None or ni_main is not None:
-            argv.append('--enable-java')
-            if maven_exec:
-                argv.append('--maven-executable')
-                argv.append(maven_exec)
-            if maven_repo:
-                argv.append('--maven-local-repo')
-                argv.append(maven_repo)
-            if ni_main is not None and os.name == 'nt':
-                argv.append('--generate-msvc-lib')
-
-        argv.append('--build-mode={}'.format(build_mode))
-        for w in WarningSet.available_warnings:
-            argv.append(
-                '-{}{}'.format('W' if w in warning_set else 'w', w.name)
-            )
-        if not pretty_print:
-            argv.append('--no-pretty-print')
-
-        # No testcase uses the generated mains, so save time: never build them
-        argv.append('--disable-all-mains')
-
-        argv.extend(additional_args)
-        argv.extend(additional_make_args)
-        return_code = m.run_no_exit(argv)
-
-        # Flush stdout and stderr, so that diagnostics appear deterministically
-        # before the script/program output.
-        sys.stdout.flush()
-        sys.stderr.flush()
-
-        if return_code != 0:
-            raise DiagnosticError()
-
-        return ctx, m
-
-    unparse_args = (['--unparse-script', unparse_script]
-                    if unparse_script else [])
-
-    if unparse_script and types_from_lkt:
-        # RA22-015: Unparse the language to concrete syntax, then use the
-        # result to do a full build. Note that we don't unparse the DSL during
-        # the second run, as dsl_unparse requires Python sources, which the
-        # second run does not have access to.
-        manage_run(types_from_lkt=False, additional_args=unparse_args)
-        langkit.reset()
-        ctx, m = manage_run(types_from_lkt=True, additional_args=[])
-    else:
-        ctx, m = manage_run(types_from_lkt=False, additional_args=unparse_args)
+    if return_code != 0:
+        raise DiagnosticError()
 
     # Write a "setenv" script to make developper investigation convenient
     with open('setenv.sh', 'w') as f:
@@ -491,8 +437,8 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
         # special Python interpreter the testsuite provides us. See the
         # corresponding code in testsuite/drivers/python_driver.py.
         args = [os.environ['PYTHON_INTERPRETER']]
-        if python_args:
-            args.extend(python_args)
+        if py_args:
+            args.extend(py_args)
 
         # Also note that since Python 3.8, we need special PATH processing for
         # DLLs: see the path_wrapper.py script.
@@ -502,10 +448,9 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
         run(*args)
 
     if gpr_mains:
-        # Canonicalize mains to GPRMain instances
+        # Canonicalize mains to Main instances
         gpr_mains = [
-            (GPRMain(m) if isinstance(m, str) else m)
-            for m in gpr_mains
+            (Main(m) if isinstance(m, str) else m) for m in gpr_mains
         ]
 
         source_dirs = [".", c_support_dir]
@@ -543,7 +488,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                 print(f"== {main.label} ==")
             sys.stdout.flush()
             run(
-                P.join("obj", os.path.splitext(main.source_file)[0]),
+                P.join("obj", main.unit_name),
                 *main.args,
                 valgrind=True,
                 valgrind_suppressions=["gnat"],
@@ -557,16 +502,17 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                   (name {})
                   (flags (-w -9))
                   (libraries {}))
-            """.format(ocaml_main, ctx.c_api_settings.lib_name))
+            """.format(ocaml_main.unit_name, ctx.c_api_settings.lib_name))
         with open('dune-project', 'w') as f:
             f.write('(lang dune 1.6)')
 
         # Build the ocaml executable
         run('dune', 'build', '--display', 'quiet', '--root', '.',
-            './{}.exe'.format(ocaml_main))
+            './{}.exe'.format(ocaml_main.unit_name))
 
         # Run the ocaml executable
-        run('./_build/default/{}.exe'.format(ocaml_main),
+        run('./_build/default/{}.exe'.format(ocaml_main.unit_name),
+            *ocaml_main.args,
             valgrind=True,
             valgrind_suppressions=['ocaml'])
 
@@ -586,9 +532,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
                 '--add-opens=org.graalvm.truffle/com.oracle.truffle.api.'
                 'strings=ALL-UNNAMED'
             ))
-        cmd += [
-            f'{java_main}.java',
-        ]
+        cmd += [java_main.source_file] + java_main.args
         run(*cmd)
 
     if ni_main is not None:
@@ -598,11 +542,7 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
             'bin',
             'javac'
         ))
-        run(
-            javac_exec,
-            '-encoding', 'utf8',
-            f'{ni_main}.java',
-        )
+        run(javac_exec, '-encoding', 'utf8', ni_main.source_file)
 
         # Run native-image to compile the tests.  Building Java bindings does
         # not go through GPRbuild, so we must explicitly give access to the
@@ -625,13 +565,13 @@ def build_and_run(grammar=None, py_script=None, gpr_mains=None,
             '-H:NumberOfThreads=1',
             '-H:+BuildOutputSilent',
             '-H:+ReportExceptionStackTraces',
-            f'{ni_main}',
+            os.path.splitext(ni_main.source_file)[0],
             'main',
             env=java_env,
         )
 
         # Run the newly created main
-        run(P.realpath('main'))
+        run(P.realpath('main'), *ni_main.args)
 
 
 def indent(text: str, prefix: str = "  ") -> str:

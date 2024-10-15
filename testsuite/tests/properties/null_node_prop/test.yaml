@@ -1,1 +1,1 @@
-driver: python
+driver: lkt_build_and_run

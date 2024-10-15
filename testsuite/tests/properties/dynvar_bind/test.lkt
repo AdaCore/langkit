@@ -1,0 +1,43 @@
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@Example)
+}
+
+dynvar dyn_var: Int
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Example: FooNode implements TokenNode {
+
+    # Regular usage
+
+    @with_dynvars(dyn_var)
+    fun add(value: Int): Int = value + dyn_var
+
+    @exported
+    fun next(value: Int): Int = {
+        bind dyn_var = 1;
+
+        node.add(value)
+    }
+
+    # Try to bind dyn_var in an area where it is already bound
+
+    @with_dynvars(dyn_var)
+    fun add_two(): Int = {
+        bind dyn_var = dyn_var + 1;
+
+        node.add(1)
+    }
+
+    @exported
+    fun next_next(value: Int): Int = {
+        bind dyn_var = value;
+
+        node.add_two()
+    }
+}

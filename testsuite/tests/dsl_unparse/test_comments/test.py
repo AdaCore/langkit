@@ -4,7 +4,7 @@ from langkit.expressions import (
     And, Cond, If, Let, Or, Property, Self, Var, langkit_property
 )
 
-from utils import build_and_run, default_warning_set
+from utils import default_warning_set, emit_and_print_errors, unparse_script
 
 
 @abstract
@@ -151,10 +151,10 @@ warning_set = default_warning_set.clone()
 warning_set.disable(WarningSet.unused_node_type)
 warning_set.disable(WarningSet.unused_bindings)
 
-build_and_run(
-    lkt_file='expected_concrete_syntax.lkt',
-    py_script='main.py',
+emit_and_print_errors(
+    lkt_file="expected_concrete_syntax.lkt",
     warning_set=warning_set,
-    types_from_lkt=True,
+    unparse_script=unparse_script,
+    types_from_lkt=False,
 )
 print('Done')

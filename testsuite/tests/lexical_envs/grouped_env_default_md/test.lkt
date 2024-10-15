@@ -1,0 +1,59 @@
+# Test that nested grouped envs with non-null default metadata behave as
+# expected.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(decl)
+    decl <- Decl(Name(@Identifier) "(" list*(ref) ")")
+    ref <- Ref(Name(@Identifier))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    @memoized
+    fun env_with_md(n1: FooNode, n2: FooNode): LexicalEnv = {
+        val md1 = Metadata(n1=n1, n2=null[FooNode]);
+        val md2 = Metadata(n1=null[FooNode], n2=n2);
+
+        [[node.node_env].env_group(with_md=md1)].env_group(with_md=md2)
+    }
+
+    @exported
+    fun get_with_md(name: Symbol, n1: FooNode, n2: FooNode): Entity[FooNode] =
+        self.env_with_md(n1, n2).get_first(name)
+
+    @exported
+    fun get_foo_metadata(): FooNode = self.info.md.n1
+
+    @exported
+    fun get_bar_metadata(): FooNode = self.info.md.n2
+}
+
+class Decl: FooNode {
+    @parse_field name: Name
+    @parse_field refs: ASTList[Ref]
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+        add_env()
+    }
+}
+
+class Name: FooNode implements TokenNode {
+}
+
+class Ref: FooNode {
+    @parse_field name: Name
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
+}
+
+@metadata
+struct Metadata {
+    @used_in_equality n1: FooNode
+    @used_in_equality n2: FooNode
+}

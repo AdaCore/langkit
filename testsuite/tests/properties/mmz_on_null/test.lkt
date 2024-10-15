@@ -1,0 +1,47 @@
+# Test that calling a memoized property on a null node works as expected:
+# memoization is inactive (no access to the memoization table), but the property
+# execution runs as if the property was not memoized (i.e. possibly no
+# PropertyError).
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+
+    # Create two predicates: one that can work when called on a null node
+    # (pred1) and one that will crash (pred2).
+
+    @memoized
+    fun pred1(): Bool = not node.is_null
+
+    @memoized
+    fun pred2(): Bool = not node.parent.is_null
+
+    # Property calls on null nodes are rejected both in public property
+    # wrappers, and in generated code for field accesses. The only supported
+    # way to get them called with null nodes is through logic predicates.
+
+    v: LogicVar
+
+    fun create_equation(with_pred1: Bool, n: Entity[FooNode]): Equation =
+        node.v <- n
+        %and (
+            if with_pred1
+            then FooNode.pred1%(node.v)
+            else FooNode.pred2%(node.v)
+        )
+
+    @exported
+    fun p1(n: Entity[FooNode]): Bool = node.create_equation(true, n).solve()
+
+    @exported
+    fun p2(n: Entity[FooNode]): Bool = node.create_equation(false, n).solve()
+}
+
+class Example: FooNode {
+}

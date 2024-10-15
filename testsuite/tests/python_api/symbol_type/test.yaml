@@ -1,1 +1,3 @@
-driver: python
+driver: lkt_build_and_run
+symbol_canonicalizer: Pkg.Canonicalize
+py_script: main.py

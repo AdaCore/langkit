@@ -1,0 +1,24 @@
+# Test that we create Predicate on properties of the root AST node
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun sophisticated_predicate(): Bool = true
+}
+
+class Example: FooNode {
+    var1: LogicVar
+
+    @exported
+    fun prop(): Entity[Example] = {
+        val _ = FooNode.sophisticated_predicate%(node.var1);
+
+        node.as_bare_entity
+    }
+}

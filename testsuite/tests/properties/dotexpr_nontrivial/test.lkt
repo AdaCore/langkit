@@ -1,0 +1,19 @@
+# Check that the lowering of non-trivial DotExpr expression in Lkt works as
+# expected.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example(@Example))
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+    fun identity(): FooNode = node
+}
+
+class Example: FooNode {
+    @exported
+    fun foo(): FooNode = node.identity().parent.identity()
+}

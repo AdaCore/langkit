@@ -41,9 +41,10 @@ def check_in_root():
 
 setup("recursive_inner_loop")
 run_foonext(
-    "<FieldAccess for test_recursive_cf at test.py:@NUMBER> evaluated to: 2"
+    "<FieldAccess for test_recursive_cf at test.lkt:@NUMBER:@NUMBER> evaluated"
+    " to: 2"
     "\n"
-    "\nNow evaluating <Map at test.py:@NUMBER>"
+    "\nNow evaluating <Map at test.lkt:@NUMBER:@NUMBER>"
 )
 check_in_root()
 
@@ -53,14 +54,16 @@ check_in_root()
 
 setup("recursive_inner_loop")
 run_fooout(
-    "<FieldAccess for test_recursive_cf at test.py:@NUMBER> evaluated to: 2"
+    "<FieldAccess for test_recursive_cf at test.lkt:@NUMBER:@NUMBER> evaluated"
+    " to: 2"
     "\n"
-    "\nNow evaluating <Map at test.py:@NUMBER>"
+    "\nNow evaluating <Map at test.lkt:@NUMBER:@NUMBER>"
 )
 check_in_root()
 run_fooout(
-    "<Map at test.py:@NUMBER> evaluated to: Integer array of length 2 = {2, 1}"
+    "<Map at test.lkt:@NUMBER:@NUMBER> evaluated to:"
+    " Integer array of length 2 = {2, 1}"
     "\n"
-    "\nNow evaluating <Block at ???>"
+    "\nNow evaluating <Let at test.lkt:@NUMBER:@NUMBER>"
 )
 check_in_root()

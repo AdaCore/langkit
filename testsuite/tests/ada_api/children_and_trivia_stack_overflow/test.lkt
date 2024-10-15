@@ -1,0 +1,21 @@
+# Check that the Children_And_Trivia function works as expected.
+#
+# A call to Children_And_Trivia can raises a STORAGE_ERROR (stack overflow) if
+# the nodes are stored on the stack. This test ensure that no stack overflow is
+# raised now that Children_And_Trivia stores nodes in dedicated allocated memory
+# (the current implementation uses an Ada vector to store the nodes).
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(id)
+    id <- Identifier(@Identifier)
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Identifier: FooNode implements TokenNode {
+}

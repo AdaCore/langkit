@@ -1,0 +1,4 @@
+driver: lkt_build_and_run
+sync_trees:
+    - ../common
+gpr_mains: [main.adb]

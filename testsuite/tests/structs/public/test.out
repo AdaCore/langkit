@@ -2,7 +2,7 @@ main.py: Running...
 First struct:
 s.entity_field = <Example main.txt:1:1-1:8>
 s.array_field = [<Example main.txt:1:1-1:8>, <ExampleList main.txt:1:1-1:8>]
-s.bigint_field = 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+s.bigint_field = 100000000000000000000000000000000000000000000000000000000
 
 Second struct:
 s.entity_field = <Example main.txt:1:1-1:8>
@@ -16,12 +16,11 @@ Entity_Field = <Example main.txt:1:1-1:8>
 Array_Field:
   <Example main.txt:1:1-1:8>
   <ExampleList main.txt:1:1-1:8>
-Bigint_Field = 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Bigint_Field = 100000000000000000000000000000000000000000000000000000000
 
 Second struct::
 Entity_Field = <ExampleList main.txt:1:1-1:8>
 Array_Field:
 Bigint_Field = 2
-
 
 Done

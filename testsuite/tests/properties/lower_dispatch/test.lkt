@@ -1,0 +1,97 @@
+# Test that the lowering pass for properties dispatching works properly on all
+# kinds of root properties:
+#
+# * concrete, abstract and runtime-checked abstract;
+# * using Entity and using Self.
+
+import lexer_example
+
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    name <- Name(@Identifier)
+    @main_rule main_rule <- list+(or(Def("def" name expr) | expr))
+    expr <- or(atom | plus)
+    atom <- or(lit | ref)
+    lit <- Lit(@Number)
+    ref <- Ref(name)
+    plus <- pick("(" Plus(expr "+" expr) ")")
+}
+
+@abstract
+class FooNode implements Node[FooNode] {
+}
+
+class Def: FooNode {
+    @parse_field name: Name
+    @parse_field expr: Expr
+
+    env_spec {
+        add_to_env_kv(node.name.symbol, node)
+    }
+}
+
+@abstract
+class Expr: FooNode {
+    @exported
+    @abstract
+    fun evaluate_abstract(): Int
+
+    @exported
+    @abstract
+    fun evaluate_entity(): Int
+
+    @exported
+    fun evaluate_rtcheck(): Int =
+        raise[Int] PropertyError(
+            "Property Expr.evaluate_rtcheck not implemented"
+        )
+
+    @exported
+    fun evaluate_concrete(): Int = 1
+}
+
+@abstract
+class Atom: Expr {
+}
+
+class Lit: Atom implements TokenNode {
+    fun evaluate_abstract(): Int = 1
+
+    fun evaluate_rtcheck(): Int = 1
+
+    fun evaluate_entity(): Int = 1
+}
+
+class Ref: Atom {
+    @parse_field name: Name
+
+    @exported
+    fun resolve(): Entity[Def] =
+        node.node_env.get_first(node.name.symbol).as![Def]
+
+    fun evaluate_abstract(): Int = node.resolve().expr.evaluate_abstract()
+
+    fun evaluate_concrete(): Int = node.resolve().expr.evaluate_concrete()
+
+    fun evaluate_entity(): Int = self.resolve().expr.evaluate_entity()
+}
+
+class Plus: Expr {
+    @parse_field lhs: Expr
+    @parse_field rhs: Expr
+
+    fun evaluate_abstract(): Int =
+        node.lhs.evaluate_abstract() + node.rhs.evaluate_abstract()
+
+    fun evaluate_rtcheck(): Int =
+        node.lhs.evaluate_rtcheck() + node.rhs.evaluate_rtcheck()
+
+    fun evaluate_concrete(): Int =
+        node.lhs.evaluate_concrete() + node.rhs.evaluate_concrete()
+
+    fun evaluate_entity(): Int =
+        self.lhs.evaluate_entity() + self.rhs.evaluate_entity()
+}
+
+class Name: FooNode implements TokenNode {
+}
