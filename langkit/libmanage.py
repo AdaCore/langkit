@@ -1493,13 +1493,13 @@ class ManageScript(abc.ABC):
             add_path("LIB", path.dirname(lib_file))
             add_path("INCLUDE", P("src"))
 
-        # If the Java bindings have been build, set the necessary environment
-        # variables.
-        bindings_jar = P('java', 'target', f'{self.lib_name.lower()}.jar')
-        if path.isfile(bindings_jar):
-            add_path("CLASSPATH", bindings_jar)
-            add_path("LD_LIBRARY_PATH", P('java', 'jni'))
-            add_path("PATH", P('java', 'jni'))
+        # Set required environment variables for Java bindings
+        add_path(
+            "CLASSPATH",
+            P('java', 'target', f'{self.lib_name.lower()}.jar')
+        )
+        add_path("LD_LIBRARY_PATH", P('java', 'jni'))
+        add_path("PATH", P('java', 'jni'))
 
     def derived_env(self, direct_c_header: bool = False) -> Dict[str, str]:
         """
